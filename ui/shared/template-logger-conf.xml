@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration>
+
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <param name="target" value="System.out"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="LOG-FILE-APPENDER" class="org.apache.log4j.FileAppender">
+    <param name="file" value="app.log"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"/>
+    </layout>
+  </appender>
+  
+   <appender name="TEXTAREA-APPENDER" class="ru.prolib.aquila.ui.TextAreaAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"/>
+    </layout>
+  </appender>
+
+  <logger name="ru.prolib.aquila.core.StarterQueue">
+    <level value="warn" />
+  </logger>
+
+  <logger name="ru.prolib.aquila.core.EventQueueImpl">
+    <level value="warn" />
+  </logger>
+
+  <root>
+    <priority value="ALL"/>
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="TEXTAREA-APPENDER"/>
+    <appender-ref ref="LOG-FILE-APPENDER"/>
+  </root>
+
+</log4j:configuration>
