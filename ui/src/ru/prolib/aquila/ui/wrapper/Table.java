@@ -1,26 +1,38 @@
 package ru.prolib.aquila.ui.wrapper;
-/**
- * $Id: Table.java 575 2013-03-13 23:40:00Z huan.kaktus $
- */
-public class Table {
 
-	/*
-	 * как то так употреблять
-	 * 
-	public void createUI(Orders orders) {
-    
-        TableDataSource source = new TableDataSource(new OrderRowGetter(), orders);
-        orders.OnOrderAvailable().addListener(source.getOnAvailableListener());
-        orders.OnOrderChanged().addListener(source.getOnChangedListener());
-        
-        TableModel tb = new TableModel(source);
-        tb.addColumn(new TableColumn("ORDER_ID", new GOrderId()));
-        tb.addColumn(new TableColumn("ORDER_PRICE", new GOrderPrice()));
-        tb.addColumn(new TableColumn("ORDER_SECURITY", new GOrderSecurity(), 200));
-        
-        Table table = new Table(tb);
-        table.start();
-        add(table.getUnderlayed()(;
-    }
+import java.util.List;
+
+import javax.swing.JTable;
+
+import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.Starter;
+import ru.prolib.aquila.core.data.row.RowAdapter;
+
+/**
+ * $Id$
+ */
+public interface Table extends Starter {
+	/**
+	 * Возвращает объект типа JTable
+	 * @return JTable
 	 */
+	public JTable getUnderlayed();
+	
+	/**
+	 * Возвращает количесво выделенных строк
+	 * @return Integer
+	 */
+	public int getSelectedRowCount();
+	
+	/**
+	 * Возвращает тип события выбора строк
+	 * @return EventType
+	 */
+	public EventType OnRowSelected();
+	/**
+	 * Возвращает список выбранных строк, завернутых в RowAdapter
+	 * 
+	 * @return List<RowAdapter>
+	 */
+	public List<RowAdapter> getSelectedRows();
 }
