@@ -1,0 +1,108 @@
+<project name="aquila-rxltdde" default="dist" basedir=".">
+	<property name="package" value="ru.prolib.aquila.rxltdde" />
+    <property name="src" location="src" />
+    <property name="bin" location="bin" />
+	<property name="build" location="../build" />
+	<property name="contrib" location="../contrib" />
+	<property name="build.jddesvr" location="../../WQuik/build" />
+	<property name="tmpdir" location="${java.io.tmpdir}/aquila-rxltdde-service" />
+	
+	<!-- Библиотеки, необходимые для любой сборки -->
+	<fileset id="contrib-jars" dir="${contrib}">
+        <include name="slf4j-api-1.6.4.jar"/>
+        <include name="slf4j-log4j12-1.6.4.jar"/>
+        <include name="log4j-1.2.16.jar"/>
+	</fileset>
+	
+	<!-- Библиотеки jddesvr, необходимые для сборки по максимуму -->
+	<fileset id="jddesvr-jars" dir="${contrib}" >
+		<include name="jddesvr.jar"/>
+	</fileset>
+
+	<!-- classpath для минималистичной сборки -->
+	<path id="classpath-mini">
+		<fileset refid="contrib-jars"/>
+	</path>
+	
+	<!-- classpath для базовой сборки -->
+	<path id="classpath-base">
+        <fileset refid="contrib-jars"/>
+        <fileset refid="jddesvr-jars"/>
+	</path>
+	
+	<target name="clean">
+	    <delete dir="bin" />
+		<delete dir="${tmpdir}" />
+	</target>
+	
+    <target name="init">
+        <tstamp />
+        <mkdir dir="${bin}" />
+    </target>
+    
+    <target name="compile-mini" depends="clean,init">
+    	<javac srcdir="${src}" destdir="${bin}">
+    		<exclude name="**/Transmitter.java" />
+            <classpath refid="classpath-mini"/>
+        </javac>
+    </target>
+	
+	<target name="compile" depends="clean,init">
+		<javac srcdir="${src}" destdir="${bin}" encoding="UTF-8">
+			<classpath refid="classpath-base"/>
+		</javac>
+	</target>
+	
+	<target name="jar-mini" depends="compile-mini">
+		<jar destfile="${build}/aquila-rxltdde-mini.jar" basedir="bin">
+			<exclude name="**/*Test.class" />
+			<exclude name="**/Transmitter.class" />
+			<exclude name="**/Transmitter$*.class" />
+		    <manifest>
+		        <attribute name="Main-Class" value="${package}.Receiver.ReceiverService" />
+            </manifest>
+		</jar>
+	</target>
+	
+    <target name="jar" depends="compile">
+        <jar destfile="${build}/aquila-rxltdde.jar" basedir="bin">
+        	<exclude name="**/*Test.class" />
+        </jar>
+    </target>
+	
+	<target name="jar-service" depends="compile">
+		<jar destfile="${build}/aquila-rxltdde-service.jar" basedir="bin">
+			<exclude name="**/*Test.class" />
+			<restrict>
+				<name name="**/*.class" />
+				<archives>
+					<zips>
+						<fileset refid="contrib-jars" />
+						<fileset refid="jddesvr-jars" />
+					</zips>
+				</archives>
+			</restrict>
+            <manifest>
+                <attribute name="Main-Class" value="${package}.Transmitter" />
+            </manifest>
+		</jar>
+	</target>
+	
+	<target name="zip-service" depends="jar-service" >
+		<mkdir dir="${tmpdir}"/>
+		<mkdir dir="${tmpdir}/logs"/>
+		<mkdir dir="${tmpdir}/lib"/>
+		<copy todir="${tmpdir}">
+			<fileset dir="shared" />
+		</copy>
+		<copy file="${contrib}/bin/jddesvr.dll" todir="${tmpdir}/lib"/>
+		<copy file="${build}/aquila-rxltdde-service.jar" todir="${tmpdir}"/>
+		<zip destfile="${build}/aquila-rxltdde-service.zip" >
+			<zipfileset dir="${tmpdir}" prefix="aquila-rxltdde-service"/>
+		</zip>
+		<delete dir="${tmpdir}" />
+	</target>
+	
+    <target name="dist" depends="jar,jar-mini,jar-service,zip-service" />
+
+</project>
