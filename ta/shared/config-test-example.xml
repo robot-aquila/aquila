@@ -1,0 +1,31 @@
+<!-- Example -->
+<Config>
+    <Database>
+        <driverClass>com.mysql.jdbc.Driver</driverClass>
+        <url>jdbc:mysql://192.168.1.5/quik_export</url>
+        <user>root</user>
+        <password>root</password>
+    </Database>
+    
+    <MarketData type="jdbc" table="rts_1m" column="period_time"
+        prepareLimit="500" updateLimit="1" startTime="2011-12-01 00:00:00"
+        timeframe="15" />
+    
+    <Assets type="local" code="RIH2" class="SPBFUT" step="5" scale="0"
+        initialMarginFactor="0.2" priceStepMoney="3.19263" />
+
+    <Properties>
+        <EndTime>2011-12-04 23:45:00</EndTime>
+    	<Account>SPBFUT00eqe</Account>
+    	<Asset>RIH2</Asset>
+    
+        <StrategyClass>ru.prolib.aquila.experiment.CT0</StrategyClass>
+        <!--StrategyClass>ru.prolib.aquila.ChaosTheory.ChaosTheoryImpl</StrategyClass-->
+        <RiskManager.MaxPos>8</RiskManager.MaxPos>
+        <!--RiskManager.Multiplier>1</RiskManager.Multiplier-->
+        <EmergTimeout>12000</EmergTimeout>
+        <UpdateSignal>rts_05m</UpdateSignal>
+    </Properties>
+    
+    <Portfolio type="test" initialMoney="500000.00" />
+</Config>

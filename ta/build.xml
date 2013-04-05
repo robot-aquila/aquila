@@ -1,0 +1,79 @@
+<project name="aquila-ta" default="dist" basedir=".">
+	<property name="package" value="ru.prolib.aquila.ChaosTheory" />
+    <property name="src" location="src" />
+    <property name="bin" location="bin" />
+    <property name="build" location="../build" />
+    <property name="contrib" location="../contrib" />
+
+	<!-- Сторонние библиотеки НЕ встраиваемые в конечный jar -->
+	<fileset id="contrib-offline-jars" dir="${contrib}">
+	<!--
+		Хрен знает почему, вылетает при попытке DbAccessor создать коннект
+		java.lang.NoClassDefFoundError: Could not initialize class com.mysql.jdbc.Util
+		Пока не вкомпиливаем. Надо разбираться.
+	-->
+		<!-- include name="mysql-connector-java-5.1.18-bin.jar"/ -->
+	</fileset>
+	
+	<!-- Сторонние библиотеки встраиваемые в конечный jar -->
+    <fileset id="contrib-inline-jars" dir="${contrib}">
+        <include name="slf4j-api-1.6.4.jar"/>
+        <include name="slf4j-log4j12-1.6.4.jar"/>
+        <include name="log4j-1.2.16.jar"/>
+        <include name="javacsv.jar"/>
+        <include name="xstream-1.4.1.jar"/>
+        <include name="commons-lang3-3.1.jar" />
+    </fileset>
+	
+	<!-- Библиотеки проекта, необходимые для работы -->
+    <fileset id="aquila-jars" dir="${build}">
+        <include name="aquila-ipc.jar"/>
+        <include name="aquila-rxltdde-mini.jar"/>
+    </fileset>
+	
+    <path id="classpath-build">
+    	<fileset refid="contrib-offline-jars" />
+        <fileset refid="contrib-inline-jars" />
+    	<fileset refid="aquila-jars" />
+    </path>
+	
+    <target name="clean">
+	    <delete includeEmptyDirs="true">
+	    	<fileset dir="${bin}" includes="**/*" />
+	    </delete>
+    </target>
+    
+    <target name="init">
+        <tstamp />
+        <mkdir dir="${bin}" />
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${bin}">
+            <classpath refid="classpath-build"/>
+        </javac>
+    </target>
+
+	<!-- Собрать в один jar все, необходимое для работы в боевом режиме -->
+    <target name="jar-combat" depends="compile">
+        <delete file="${build}/aquila-ta-combat.jar" quiet="yes" />
+        <jar destfile="${build}/aquila-ta-combat.jar" basedir="bin">
+        	<exclude name="**/*Test.class" />
+        	<restrict>
+        	    <name name="**/*.class" />
+        	    <archives>
+        	    	<zips>
+        	    		<fileset refid="contrib-inline-jars" />
+        	    		<fileset refid="aquila-jars" />
+        	    	</zips>
+        	    </archives>
+        	</restrict>
+        	<manifest>
+                <attribute name="Main-Class" value="${package}.RunCombatMode" />
+        	</manifest>
+        </jar>
+    </target>
+
+    <target name="dist" depends="jar-combat" />
+
+</project>

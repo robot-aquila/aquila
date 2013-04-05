@@ -1,0 +1,16 @@
+<!-- Example -->
+<Config>
+    <Database>
+        <driverClass>com.mysql.jdbc.Driver</driverClass>
+        <url>jdbc:mysql://192.168.1.5/quik_export</url>
+        <user>root</user>
+        <password>root</password>
+    </Database>
+    <MarketData type="csv" file="data/rts-test.txt" />
+    <Assets type="local" code="RTS" class="SPBFUT" step="5" scale="0" />
+    <Export topic="[export]allDeals">
+        <Asset code="RTS">
+            <Writer period="1" table="rts_test"/>
+        </Asset>
+    </Export>
+</Config>
