@@ -1,0 +1,25 @@
+<project name="aquila-ipc" default="dist" basedir=".">
+    <property name="src" location="src" />
+    <property name="bin" location="bin" />
+    
+	<target name="clean">
+	    <delete dir="bin" />
+	</target>
+	
+    <target name="init">
+        <tstamp />
+        <mkdir dir="${bin}" />
+    </target>
+    
+    <target name="compile" depends="clean,init">
+        <javac srcdir="${src}" destdir="${bin}" />
+    </target>
+	
+    <target name="jar" depends="compile">
+        <jar destfile="../build/aquila-ipc.jar" basedir="bin" excludes="**/*Test.class" />
+    </target>
+    
+    <target name="dist" depends="jar" >
+    </target>
+
+</project>
