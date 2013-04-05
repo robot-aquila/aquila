@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="aquila-core" default="dist" basedir=".">
+	<property name="package" value="ru.prolib.aquila.core" />
+    <property name="src" location="src" />
+    <property name="bin" location="bin" />
+    <property name="build" location="../build" />
+    <property name="docs" location="javadoc" />
+    <property name="contrib" location="../contrib" />
+	<property name="filename" value="aquila-core" />
+		
+    <!-- Библиотеки, необходимые для компиляции -->
+    <fileset id="compile-jars" dir="${contrib}">
+        <include name="slf4j-api-1.6.4.jar"/>
+        <include name="slf4j-log4j12-1.6.4.jar"/>
+        <include name="log4j-1.2.16.jar"/>
+        <include name="commons-lang3-3.1.jar" />
+    	<include name="javacsv.jar" />
+    </fileset>
+	
+	<fileset id="source-files" dir="${src}" includes="**/*.java" />
+    
+    <!-- classpath для компиляции -->
+    <path id="classpath-build">
+    	<fileset refid="compile-jars" />
+    </path>
+	
+	<target name="isCompileReq">
+		<uptodate targetfile="${build}/${filename}.jar"
+			property="compile.notReq" >
+			<srcresources>
+	    		<fileset refid="compile-jars" />
+	    		<fileset refid="source-files" />
+			</srcresources>
+		</uptodate>
+	</target>
+
+	<!-- Проверка необходимости сборки документации -->
+	<target name="isJavadocReq">
+		<uptodate targetfile="${build}/${filename}-javadoc.jar"
+			property="javadoc.notReq" >
+			<srcresources>
+				<fileset dir="${src}" includes="**/*.java" />
+				<fileset dir="${docs}" includes="*" />
+			</srcresources>
+		</uptodate>
+	</target>
+	
+    <!-- Создание структуры папок для компиляции -->
+    <target name="init">
+        <tstamp />
+        <mkdir dir="${bin}" />
+        <mkdir dir="${docs}" />
+    </target>
+    
+    <!-- Уборка -->
+    <target name="clean">
+	    <delete includeEmptyDirs="true">
+	    	<fileset dir="${bin}" includes="**/*" />
+	    	<fileset dir="${docs}" includes="**/*" />
+	    </delete>
+    </target>
+
+	<!-- Компиляция исходников -->
+    <target name="compile" depends="init,isCompileReq"
+    	unless="${compile.notReq}">
+	    <delete includeEmptyDirs="true" >
+	    	<fileset dir="${bin}" includes="**/*.class" />
+		</delete>
+        <javac srcdir="${src}" destdir="${bin}" encoding="UTF-8">
+            <classpath refid="classpath-build"/>
+        </javac>
+        <delete file="${build}/${filename}.jar" quiet="yes" />
+        <jar destfile="${build}/${filename}.jar" basedir="${bin}">
+        	<exclude name="**/*Test.class" />
+        </jar>
+    </target>
+    
+    <!-- Компиляция документации -->
+    <target name="javadoc" depends="init,isJavadocReq"
+    	unless="${javadoc.notReq}">
+	    <delete includeEmptyDirs="true" >
+	    	<fileset dir="${docs}" includes="**/*" />
+	    </delete>
+    	<javadoc sourcepath="${src}" destdir="${docs}"
+    		charset="UTF-8" Encoding="UTF-8">
+    		<classpath refid="classpath-build"/>
+    	</javadoc>
+      	<delete file="${build}/${filename}-javadoc.jar" quiet="yes" />
+       	<jar destfile="${build}/${filename}-javadoc.jar" basedir="${docs}" />
+    </target>
+
+    <target name="dist" depends="compile,javadoc" />
+
+</project>

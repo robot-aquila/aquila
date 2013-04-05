@@ -1,0 +1,151 @@
+package ru.prolib.aquila.core.BusinessEntities;
+
+import java.util.Date;
+
+/**
+ * Интерфейс модифицируемой заявки.
+ * <p>
+ * 2012-09-22<br>
+ * $Id: EditableOrder.java 542 2013-02-23 04:15:34Z whirlwind $
+ */
+public interface EditableOrder extends Order, Editable {
+	
+	/**
+	 * Установить идентификатор заявки.
+	 * <p>
+	 * @param id идентификатор заявки
+	 */
+	public void setId(Long id);
+	
+	/**
+	 * Установить направление заявки.
+	 * <p>
+	 * @param dir направление заявки
+	 */
+	public void setDirection(OrderDirection dir);
+	
+	/**
+	 * Установить тип заявки.
+	 * <p>
+	 * @param type тип заявки
+	 */
+	public void setType(OrderType type);
+	
+	/**
+	 * Установить торговый счет.
+	 * <p>
+	 * @param account торговый счет
+	 */
+	public void setAccount(Account account);
+	
+	/**
+	 * Установить дескриптор торгуемого инструмента.
+	 * <p>
+	 * @param descr дескриптор инструмена
+	 */
+	public void setSecurityDescriptor(SecurityDescriptor descr);
+	
+	/**
+	 * Установить количество заявки.
+	 * <p>
+	 * @param qty количество заявки
+	 */
+	public void setQty(Long qty);
+	
+	/**
+	 * Установить статус заявки.
+	 * <p>
+	 * @param status новый статус заявки
+	 */
+	public void setStatus(OrderStatus status);
+	
+	/**
+	 * Установить неисполненный остаток заявки.
+	 * <p>
+	 * @param qty неисполненный остаток
+	 */
+	public void setQtyRest(Long qty);
+	
+	/**
+	 * Установить цену заявки.
+	 * <p>
+	 * @param price цена
+	 */
+	public void setPrice(Double price);
+	
+	/**
+	 * Установить идентификатор транзакции.
+	 * <p>
+	 * @param id идентификатор транзакции
+	 */
+	public void setTransactionId(Long id);
+	
+	/**
+	 * Установить номер связанной заявки.
+	 * <p>
+	 * @param id идентификатор заявки
+	 */
+	public void setLinkedOrderId(Long id);
+	
+	/**
+	 * Установить стоп-лимит цену.
+	 * <p>
+	 * @param price цена
+	 */
+	public void setStopLimitPrice(Double price);
+	
+	/**
+	 * Установить тэйк-профит цену.
+	 * <p>
+	 * @param price цена
+	 */
+	public void setTakeProfitPrice(Double price);
+	
+	/**
+	 * Установить величину смещения от пика для тэйк-профита.
+	 * <p>
+	 * @param value смещение
+	 */
+	public void setOffset(Price value);
+	
+	/**
+	 * Установить величину защитного спреда для тэйк-профита.
+	 * <p>
+	 * @param value спрэд
+	 */
+	public void setSpread(Price value);
+	
+	/**
+	 * Установить стоимость исполненной части заявки.
+	 * <p>
+	 * см. {@link Order#getExecutedVolume()}.
+	 * <p>
+	 * @param value стоимость
+	 */
+	public void setExecutedVolume(Double value);
+	
+	/**
+	 * Получить предыдущий статус заявки.
+	 * <p>
+	 * @return статус, актуальный на момент до смены статусы на текущий 
+	 */
+	public OrderStatus getPreviousStatus();
+	
+	/**
+	 * Установить время выставления заявки.
+	 * <p>
+	 * @param time время выставления заявки
+	 */
+	public void setTime(Date time);
+	
+	/**
+	 * Установить время последнего изменения заявки.
+	 * <p>
+	 * Подразумевается время фиксации финального статуса заявки: снятие,
+	 * сведение, частичное сведение.
+	 * <p>
+	 * @param time время последнего изменения
+	 */
+	public void setLastChangeTime(Date time);
+
+}
