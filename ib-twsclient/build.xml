@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ib-twsclient" default="dist" basedir=".">
+    <property name="src" location="src" />
+    <property name="bin" location="bin" />
+    <property name="docs" location="javadoc" />
+	<property name="build" location="../build" />
+    <property name="contrib" location="../contrib" />
+	<property name="docs" location="javadoc" />
+	<property name="twsapi-file" value="twsapi_unixmac_968.jar" />
+	<property name="twsapi-path" value="http://www.interactivebrokers.com/download" />
+	<property name="filename" value="ib-twsclient" />
+	
+    <target name="clean">
+	    <delete includeEmptyDirs="true" >
+	    	<fileset dir="${bin}" includes="**/*" />
+	    	<fileset dir="${docs}" includes="**/*" />
+	    	<delete file="${twsapi-file}" />
+   			<delete dir="${src}/com" includeEmptyDirs="true" />
+	    </delete>
+    </target>
+    
+    <!-- Создание структуры папок для компиляции -->
+    <target name="init">
+        <tstamp />
+        <mkdir dir="${bin}" />
+        <mkdir dir="${docs}" />
+    </target>
+	
+	<!-- Скачивание архива TWS API -->
+	<target name="download" >
+		<get src="${twsapi-path}/${twsapi-file}" dest="${twsapi-file}"
+			usetimestamp="true" verbose="true" /> 
+	</target>
+	
+	<target name="isCompileReq">
+		<uptodate targetfile="${build}/${filename}.jar"
+			property="compile.notReq" srcfile="${twsapi-file}">
+		</uptodate>
+	</target>
+	
+    <target name="compile" depends="init,download,isCompileReq"
+    	unless="${compile.notReq}">
+		<unzip src="${twsapi-file}" dest="${src}" >
+			<patternset>
+				<include name="IBJts/java/com/ib/client/**" />
+			</patternset>
+			<regexpmapper from="^IBJts/java/(com/ib/client/.*)" to="\1" />
+		</unzip>
+        <javac srcdir="${src}" destdir="${bin}" encoding="UTF-8" />
+    	<javadoc sourcepath="${src}" destdir="${docs}"
+    		charset="UTF-8" Encoding="UTF-8">
+    	</javadoc>
+        <delete file="${build}/${filename}.jar" quiet="yes" />
+        <jar destfile="${build}/${filename}.jar" basedir="${bin}" />
+    	<delete file="${build}/${filename}-javadoc.jar" quiet="yes" />
+    	<jar destfile="${build}/${filename}-javadoc.jar" basedir="${docs}" />
+    </target>
+	
+	<target name="dist" depends="compile" />
+	
+</project>
