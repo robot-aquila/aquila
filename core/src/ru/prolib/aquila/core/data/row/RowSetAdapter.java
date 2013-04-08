@@ -48,13 +48,13 @@ public class RowSetAdapter extends RowAdapter implements RowSet {
 	}
 
 	@Override
-	public synchronized boolean next() {
+	public synchronized boolean next() throws RowSetException {
 		resetCache();
 		return rows.next();
 	}
 
 	@Override
-	public synchronized void reset() {
+	public synchronized void reset() throws RowSetException {
 		resetCache();
 		rows.reset();
 	}

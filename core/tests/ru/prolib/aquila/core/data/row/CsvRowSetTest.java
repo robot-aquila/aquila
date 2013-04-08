@@ -105,12 +105,12 @@ public class CsvRowSetTest {
 		new CsvRowSet(file);
 	}
 
-	@Test
-	public void testNext_FalseIfFileOpenException() throws Exception {
+	@Test (expected=RowSetException.class)
+	public void testNext_ThrowsIfFileNotExists() throws Exception {
 		file = File.createTempFile("csvtest", null);
 		rs = new CsvRowSet(file);
 		file.delete();
-		assertFalse(rs.next());
+		rs.next();
 	}
 	
 	@Test

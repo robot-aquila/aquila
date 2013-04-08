@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 
 import ru.prolib.aquila.core.data.row.CsvRowSet;
 import ru.prolib.aquila.core.data.row.RowSet;
+import ru.prolib.aquila.core.data.row.RowSetException;
 
 /**
  * Загрузчик данных формата ФИНАМ.
@@ -31,9 +32,10 @@ public class Finam {
 	 * @param candles целевой набор свечей
 	 * @throws FileNotFoundException
 	 * @throws ParseException  
+	 * @throws RowSetException
 	 */
 	public void loadCandles(File csvfile, EditableSeries<Candle> candles)
-			throws FileNotFoundException, ParseException
+			throws FileNotFoundException, ParseException, RowSetException
 	{
 		SimpleDateFormat df = new SimpleDateFormat(TIMEFORMAT);
 		RowSet rs = new CsvRowSet(csvfile);
