@@ -66,9 +66,9 @@ public class EventImplTest {
 	}
 	
 	@Test
-	public void testEquals_TrueDerivedClass() throws Exception {
+	public void testEquals_FalseDerivedClass() throws Exception {
 		DerivedEventImpl event2 = new DerivedEventImpl(type);
-		assertTrue(event.equals(event2));
+		assertFalse(event.equals(event2));
 	}
 	
 	@Test
