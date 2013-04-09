@@ -1,8 +1,7 @@
 package ru.prolib.aquila.quik.subsys.order;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrders;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.quik.api.ApiService;
 import ru.prolib.aquila.quik.api.TransEvent;
@@ -31,22 +30,35 @@ public class PlaceOrderHandler implements EventListener {
 	@Override
 	public void onEvent(Event event) {
 		if ( event.isType(api.OnTransactionReply(transId)) ) {
-			TransEvent e = (TransEvent) event;
-			T2QTransStatus status = e.getStatus();
-			
-			if ( status == T2QTransStatus.DONE ) {
-				
-				
-			} else if ( status == T2QTransStatus.SENT
-					 || status == T2QTransStatus.RECV )
-			{
-				// Эти статусы не являются ошибкой и никак не обрабатываются 
-				
-			} else {
-				// Любой другой статус рассматривается как отклонение транзакции
-				
-			}
+			// TODO:
+			//onTransactionReply((TransEvent) event);
 		}
+	}
+	
+	private void onTransactionReply(TransEvent event) throws OrderException {
+		T2QTransStatus transStatus = event.getStatus();
+		long transId = event.getTransId();
+		if ( transStatus == T2QTransStatus.SENT
+		  || transStatus == T2QTransStatus.RECV )
+		{
+			// Эти статусы не являются ошибкой и никак не обрабатываются
+			return;
+		}
+		OrderStatus orderStatus;
+		long orderId;
+		if ( transStatus == T2QTransStatus.DONE ) {
+			orderStatus = OrderStatus.ACTIVE;
+			orderId = event.getOrderId();
+		} else {
+			orderStatus = OrderStatus.FAILED;
+			orderId = failedOrderId.incrementAndGet();
+		}
+		EditableOrder order =
+			orders.makePendingOrderAsRegisteredIfExists(transId, orderId);
+		order.setAvailable(true);
+		order.setStatus(orderStatus);
+		order.resetChanges();
+		orders.fireOrderAvailableEvent(order);
 	}
 
 }

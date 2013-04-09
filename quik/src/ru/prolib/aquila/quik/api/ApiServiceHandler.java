@@ -55,8 +55,13 @@ public class ApiServiceHandler implements T2QHandler {
 	public void OnTransReply(T2QTransStatus status,
 			long transId, Long orderId, String msg)
 	{
-		dispatcher.dispatch(new TransEvent(onTransReplyMap.get(transId),
+		EventType type = onTransReplyMap.get(transId);
+		dispatcher.dispatchForCurrentList(new TransEvent(type,
 				status, transId, orderId, msg));
+		if ( status != T2QTransStatus.SENT && status != T2QTransStatus.RECV ) {
+			onTransReplyMap.remove(transId);
+			dispatcher.removeListeners(type);
+		}
 	}
 	
 	@Override
