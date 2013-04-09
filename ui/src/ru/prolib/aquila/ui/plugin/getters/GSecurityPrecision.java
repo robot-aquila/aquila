@@ -8,7 +8,9 @@ import ru.prolib.aquila.core.data.GInteger;
  */
 public class GSecurityPrecision extends GInteger {
 
-	public Integer get(Security obj) {
-		return super.get(obj.getPrecision());
+	@Override
+	public Integer get(Object obj) {
+		Security o = (Security) obj;
+		return super.get(o.getPrecision());
 	}
 }

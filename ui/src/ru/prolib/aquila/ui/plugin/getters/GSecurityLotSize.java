@@ -8,7 +8,9 @@ import ru.prolib.aquila.core.data.GInteger;
  */
 public class GSecurityLotSize extends GInteger {
 
-	public Integer get(Security obj) {
-		return super.get(obj.getLotSize());
+	@Override
+	public Integer get(Object obj) {
+		Security o = (Security) obj;
+		return super.get(o.getLotSize());
 	}
 }

@@ -32,9 +32,14 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 	private SecuritiesTableCols cols = new SecuritiesTableCols();
 	private TableModel model = new TableModelImpl(new GSecurity());
 	private Table tb;
+	private JPanel panel = new JPanel(new BorderLayout());
 	
 	public UISecuritiesPlugin() {
 		super();		
+	}
+	
+	public JPanel getPanel() {
+		return panel;
 	}
 	
 	public SecuritiesTableCols getTableCols() {
@@ -77,7 +82,7 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 		
 		tb = new TableImpl(model, dispatcher, ev.createGenericType(dispatcher));		
 		tb.start();
-		JPanel panel = new JPanel(new BorderLayout());
+		
 		facade.addTab(text.get(TITLE), panel);
         panel.add(new JScrollPane(tb.getUnderlayed()));
 		
@@ -86,7 +91,6 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 	
 	@Override
 	public void start() throws StarterException {
-		//tb.start();
 		((Securities) terminal).OnSecurityAvailable().addListener(
 				model.getOnRowAvailableListener());
 		((Securities) terminal).OnSecurityChanged().addListener(
@@ -99,7 +103,6 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 				model.getOnRowAvailableListener());
 		((Securities) terminal).OnSecurityChanged().removeListener(
 				model.getOnRowChangedListener());
-		//tb.stop();
 	}
 
 }

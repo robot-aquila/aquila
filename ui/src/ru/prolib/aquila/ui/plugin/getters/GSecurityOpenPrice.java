@@ -8,7 +8,9 @@ import ru.prolib.aquila.core.data.GDouble;
  */
 public class GSecurityOpenPrice extends GDouble {
 
-	public Double get(Security obj) {
-		return super.get(obj.getOpenPrice());
+	@Override
+	public Double get(Object obj) {
+		Security o = (Security) obj;
+		return super.get(o.getOpenPrice());
 	}
 }
