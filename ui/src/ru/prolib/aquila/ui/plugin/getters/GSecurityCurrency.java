@@ -8,7 +8,9 @@ import ru.prolib.aquila.core.data.GString;
  */
 public class GSecurityCurrency extends GString {
 
-	public String get(Security obj) {
-		return super.get(obj.getDescriptor().getCurrency());
+	@Override
+	public String get(Object obj) {
+		Security o = (Security) obj;
+		return super.get(o.getDescriptor().getCurrency());
 	}
 }

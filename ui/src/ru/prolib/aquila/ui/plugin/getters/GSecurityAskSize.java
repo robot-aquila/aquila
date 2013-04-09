@@ -8,7 +8,9 @@ import ru.prolib.aquila.core.data.GLong;
  */
 public class GSecurityAskSize extends GLong {
 
-	public Long get(Security obj) {
-		return super.get(obj.getAskSize());
+	@Override
+	public Long get(Object obj) {
+		Security o = (Security) obj;
+		return super.get(o.getAskSize());
 	}
 }

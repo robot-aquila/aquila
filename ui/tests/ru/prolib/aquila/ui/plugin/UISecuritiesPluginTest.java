@@ -4,11 +4,13 @@ import static org.easymock.EasyMock.createStrictControl;
 import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.ui.SecuritiesTableCols;
 import ru.prolib.aquila.ui.ServiceLocator;
 import ru.prolib.aquila.ui.UiTexts;
 
@@ -46,7 +48,7 @@ public class UISecuritiesPluginTest {
 	
 	@Test
 	public void testConstructor() {
-		
+		IsInstanceOf.instanceOf(SecuritiesTableCols.class).matches(plugin.getTableCols());
 	}
 
 	/**

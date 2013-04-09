@@ -7,6 +7,9 @@ import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.data.G;
@@ -19,6 +22,7 @@ public class TableModelImpl extends AbstractTableModel
 {
 	
 	private static final long serialVersionUID = 5073295254324372206L;
+	private static Logger logger = LoggerFactory.getLogger(TableModelImpl.class);
 	/*
 	 * Индекс названий колонок
 	 */
@@ -175,6 +179,7 @@ public class TableModelImpl extends AbstractTableModel
 			RowAdapter row = rows.get(r);
 			return row.get(index.get(c));
 		} catch (ArrayIndexOutOfBoundsException e) {
+			logger.debug("Out of bound exception");
 			return null;
 		}		
 	}

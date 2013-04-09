@@ -8,7 +8,9 @@ import ru.prolib.aquila.core.data.GString;
  */
 public class GSecurityName extends GString {
 
-	public String get(Security obj) {
-		return super.get(obj.getDisplayName());
+	@Override
+	public String get(Object obj) {
+		Security o = (Security) obj;
+		return super.get(o.getDisplayName());
 	}
 }

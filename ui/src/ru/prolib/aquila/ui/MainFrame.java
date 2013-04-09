@@ -61,10 +61,10 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 		
 		EventDispatcher dispatcher = es.createEventDispatcher(); 
 		currPortfolio = new CurrentPortfolioImpl(
-				es.createGenericType(dispatcher), dispatcher);
+				(Portfolios) terminal, es.createGenericType(dispatcher), dispatcher);
 		
 		PortfolioDataPanel portfolioBox = new PortfolioDataPanel(
-				terminal, currPortfolio, uiLabels);
+				currPortfolio, uiLabels);
 
         setSize(800, 600);
         
