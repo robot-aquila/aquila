@@ -68,11 +68,11 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 
         setSize(800, 600);
         
-        getContentPane().add(portfolioBox, BorderLayout.NORTH);
+        //getContentPane().add(portfolioBox, BorderLayout.NORTH);
         
         getContentPane().add(tabPanel, BorderLayout.CENTER);
         
-        status = new StatusBar(terminal, uiLabels);        
+        status = new StatusBar(portfolioBox, terminal, uiLabels);        
         getContentPane().add(status, BorderLayout.SOUTH);
         terminal.OnStarted().addListener(this);
         terminal.OnStopped().addListener(this);
