@@ -3,6 +3,9 @@ package ru.prolib.aquila.ui;
 import java.awt.FlowLayout;
 import javax.swing.JPanel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.Starter;
@@ -16,6 +19,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	 * $Id: PortfolioDataPanel.java 544 2013-02-25 14:31:32Z huan.kaktus $
 	 */
 	private static final long serialVersionUID = -5773959478808068827L;
+	private static Logger logger = LoggerFactory.getLogger(PortfolioDataPanel.class);
 	private LabeledTextValue cashVal;
 	private LabeledTextValue balanceVal;
 	private LabeledTextValue varMargin;
@@ -65,6 +69,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	 */
 	@Override
 	public void onEvent(Event event) {
+		logger.info("Event occured");
 		if(event.isType(currPortfolio.OnCurrentPortfolioChanged())) {
 			PortfolioEvent e = (PortfolioEvent) event;
 			updateDisplayData(e.getPortfolio());

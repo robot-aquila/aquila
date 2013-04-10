@@ -23,7 +23,6 @@ import ru.prolib.aquila.core.data.GDouble;
 import ru.prolib.aquila.core.data.GInteger;
 import ru.prolib.aquila.core.data.GLong;
 import ru.prolib.aquila.core.data.GString;
-import ru.prolib.aquila.core.EventType;
 
 /**
  * $Id$
@@ -32,7 +31,7 @@ public class SecurityGettersTest {
 
 	private static IMocksControl control;
 	private SecurityDescriptor descr;
-	private SecurityImpl security;
+	private Object security;
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -44,25 +43,26 @@ public class SecurityGettersTest {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
 		
 		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
-		security = new SecurityImpl(terminal, descr, dispatcher,
+		SecurityImpl sc = new SecurityImpl(terminal, descr, dispatcher,
 				control.createMock(EventType.class), control.createMock(EventType.class));
-		security.setPrecision(3);
-		security.setMinPrice(90.00d);
-		security.setMaxPrice(130.00d);
-		security.setLotSize(1);
-		security.setMinStepPrice(0.1d);
-		security.setMinStepSize(1.00d);
-		security.setLastPrice(20.44d);
-		security.setDisplayName("zulu4");
-		security.setAskPrice(12.34d);
-		security.setAskSize(1000l);
-		security.setBidPrice(34.56d);
-		security.setBidSize(2000l);
-		security.setOpenPrice(13.45d);
-		security.setClosePrice(98.15d);
-		security.setLowPrice(24.56d);
-		security.setHighPrice(18.44d);
-		security.setStatus(SecurityStatus.TRADING);
+		sc.setPrecision(3);
+		sc.setMinPrice(90.00d);
+		sc.setMaxPrice(130.00d);
+		sc.setLotSize(1);
+		sc.setMinStepPrice(0.1d);
+		sc.setMinStepSize(1.00d);
+		sc.setLastPrice(20.44d);
+		sc.setDisplayName("zulu4");
+		sc.setAskPrice(12.34d);
+		sc.setAskSize(1000l);
+		sc.setBidPrice(34.56d);
+		sc.setBidSize(2000l);
+		sc.setOpenPrice(13.45d);
+		sc.setClosePrice(98.15d);
+		sc.setLowPrice(24.56d);
+		sc.setHighPrice(18.44d);
+		sc.setStatus(SecurityStatus.TRADING);
+		security = (Object) sc;
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class SecurityGettersTest {
 		GSecurity g = new GSecurity();
 		IsInstanceOf.instanceOf(G.class).matches(g);		
 		SecurityEvent e = new SecurityEvent(
-				control.createMock(EventType.class), security);
+				control.createMock(EventType.class), (Security) security);
 		assertEquals(security, g.get(e));
 	}
 	

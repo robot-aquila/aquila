@@ -37,13 +37,15 @@ public class StatusBar extends JPanel implements EventListener, Starter {
 	
 	private Terminal terminal;
 	private ClassLabels uiLabels;
+	private PortfolioDataPanel prtPanel;
 	
-	public StatusBar(Terminal terminal, UiTexts texts) {
+	public StatusBar(PortfolioDataPanel prtPanel, Terminal terminal, UiTexts texts) {
 		super(new FlowLayout(FlowLayout.LEFT));
 		uiLabels = texts.get("StatusBar");
 		
 		setBorder(new EmptyBorder(1, 5, 1, 5));
-		this.terminal = terminal;	
+		this.terminal = terminal;
+		this.prtPanel = prtPanel;
 		/*
 		tStart.addMouseListener(new MouseListener() {
 
@@ -80,6 +82,7 @@ public class StatusBar extends JPanel implements EventListener, Starter {
 		*/
 		add(tStart);
 		add(tConn);
+		add(prtPanel);
 		setDisconnected();
 		setStopped();
 	}
@@ -155,6 +158,7 @@ public class StatusBar extends JPanel implements EventListener, Starter {
 
 	@Override
 	public void start() throws StarterException {
+		prtPanel.start();
 		terminal.OnConnected().addListener(this);
         terminal.OnDisconnected().addListener(this);
         terminal.OnStarted().addListener(this);
@@ -167,6 +171,7 @@ public class StatusBar extends JPanel implements EventListener, Starter {
         terminal.OnDisconnected().removeListener(this);
         terminal.OnStarted().removeListener(this);
         terminal.OnStopped().removeListener(this);
+        prtPanel.stop();
 		
 	}
 
