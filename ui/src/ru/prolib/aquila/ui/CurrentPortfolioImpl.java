@@ -2,15 +2,13 @@ package ru.prolib.aquila.ui;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioEvent;
 import ru.prolib.aquila.core.BusinessEntities.Portfolios;
 
-public class CurrentPortfolioImpl implements CurrentPortfolio, Starter, EventListener {
+public class CurrentPortfolioImpl implements CurrentPortfolio {
 	/**
 	 * $Id: CurrentPortfolioImpl.java 525 2013-02-12 19:51:39Z huan.kaktus $
 	 */
@@ -53,7 +51,6 @@ public class CurrentPortfolioImpl implements CurrentPortfolio, Starter, EventLis
 	@Override
 	public void start() throws StarterException {
 		portfolios.OnPortfolioAvailable().addListener(this);
-		
 	}
 
 	/* (non-Javadoc)

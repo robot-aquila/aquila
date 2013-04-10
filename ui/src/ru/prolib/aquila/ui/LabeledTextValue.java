@@ -36,4 +36,12 @@ public class LabeledTextValue extends JPanel {
 	public void setLabelFont(Font font) {
 		label.setFont(font);
 	}
+	
+	public String getLabel() {
+		return label.getText();
+	}
+	
+	public String getValue() {
+		return value.getText();
+	}
 }

@@ -65,10 +65,8 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 		
 		PortfolioDataPanel portfolioBox = new PortfolioDataPanel(
 				currPortfolio, uiLabels);
-
+		
         setSize(800, 600);
-        
-        //getContentPane().add(portfolioBox, BorderLayout.NORTH);
         
         getContentPane().add(tabPanel, BorderLayout.CENTER);
         

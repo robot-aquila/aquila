@@ -24,6 +24,7 @@ public class StatusBarTest {
 	
 	private UiTexts uiText = new UiTexts();
 	private Terminal terminal;
+	private PortfolioDataPanel prtPanel;
 	
 	private EventType onConn, onDisconn, onStarted, onStopped; 
 	
@@ -41,7 +42,8 @@ public class StatusBarTest {
 		uiText.setClassLabels("StatusBar",new ClassLabels("Status", labels));
 		
 		terminal = control.createMock(Terminal.class);
-		bar = new StatusBar(terminal, uiText);
+		prtPanel = control.createMock(PortfolioDataPanel.class);
+		bar = new StatusBar(prtPanel, terminal, uiText);
 		
 		onConn = control.createMock(EventType.class);
 		onDisconn = control.createMock(EventType.class);

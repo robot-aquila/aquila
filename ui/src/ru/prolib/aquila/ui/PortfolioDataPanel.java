@@ -3,9 +3,6 @@ package ru.prolib.aquila.ui;
 import java.awt.FlowLayout;
 import javax.swing.JPanel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.Starter;
@@ -19,7 +16,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	 * $Id: PortfolioDataPanel.java 544 2013-02-25 14:31:32Z huan.kaktus $
 	 */
 	private static final long serialVersionUID = -5773959478808068827L;
-	private static Logger logger = LoggerFactory.getLogger(PortfolioDataPanel.class);
+	public static final String TEXT_SECT = "PortfolioDataPanel";
 	private LabeledTextValue cashVal;
 	private LabeledTextValue balanceVal;
 	private LabeledTextValue varMargin;
@@ -30,9 +27,9 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	public PortfolioDataPanel(CurrentPortfolio currPrt, UiTexts uiTexts) {
 		super();
 		currPortfolio = currPrt;
-		cashVal = new LabeledTextValue(uiTexts.get("PortfolioDataPanel").get("LB_CASH"));
-		balanceVal = new LabeledTextValue(uiTexts.get("PortfolioDataPanel").get("LB_BALANCE"));
-		varMargin = new LabeledTextValue(uiTexts.get("PortfolioDataPanel").get("LB_VAR_MARGIN"));
+		cashVal = new LabeledTextValue(uiTexts.get(TEXT_SECT).get("LB_CASH"));
+		balanceVal = new LabeledTextValue(uiTexts.get(TEXT_SECT).get("LB_BALANCE"));
+		varMargin = new LabeledTextValue(uiTexts.get(TEXT_SECT).get("LB_VAR_MARGIN"));
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		add(cashVal);
 		add(balanceVal);
@@ -45,6 +42,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	@Override
 	public void start() throws StarterException {
 		currPortfolio.OnCurrentPortfolioChanged().addListener(this);
+		currPortfolio.start();
 	}
 	
 	/* (non-Javadoc)
@@ -52,6 +50,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	 */
 	@Override
 	public void stop() throws StarterException {
+		currPortfolio.stop();
 		currPortfolio.OnCurrentPortfolioChanged().removeListener(this);
 	}
 	
@@ -61,7 +60,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 		balanceVal.setValue(
 				String.format("%.2f", portfolio.getBalance()));
 		varMargin.setValue(
-				String.format("%s",portfolio.getVariationMargin()));
+				String.format("%.2f",portfolio.getVariationMargin()));
 	}
 
 	/* (non-Javadoc)
@@ -69,7 +68,6 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	 */
 	@Override
 	public void onEvent(Event event) {
-		logger.info("Event occured");
 		if(event.isType(currPortfolio.OnCurrentPortfolioChanged())) {
 			PortfolioEvent e = (PortfolioEvent) event;
 			updateDisplayData(e.getPortfolio());
