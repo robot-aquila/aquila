@@ -68,6 +68,7 @@ public class SetupPositionImplTest {
 	public void testDefaults() throws Exception {
 		assertEquals(new Price(PriceUnit.PERCENT, 0d), setup.getQuota());
 		assertEquals(PositionType.CLOSE, setup.getType());
+		assertEquals(PositionType.BOTH, setup.getAllowedType());
 	}
 	
 	@Test
@@ -106,6 +107,23 @@ public class SetupPositionImplTest {
 	}
 	
 	@Test
+	public void testSetAllowedType() throws Exception {
+		getter = new G<PositionType>() {
+			@Override
+			public PositionType get(Object source) {
+				return ((SetupPosition) source).getAllowedType();
+			}
+		};
+		setter = new S<SetupPosition>() {
+			@Override
+			public void set(SetupPosition object, Object value) {
+				object.setAllowedType((PositionType) value);
+			}
+		};
+		testGetterSetter(PositionType.BOTH, PositionType.CLOSE);
+	}
+	
+	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(setup.equals(setup));
 		assertFalse(setup.equals(this));
@@ -117,6 +135,7 @@ public class SetupPositionImplTest {
 		// Начальное состояние
 		setup.setQuota(new Price(PriceUnit.MONEY, 200.00d));
 		setup.setType(PositionType.LONG);
+		setup.setAllowedType(PositionType.CLOSE);
 		
 		Variant<SecurityDescriptor> vSec = new Variant<SecurityDescriptor>()
 			.add(descr)
@@ -130,13 +149,17 @@ public class SetupPositionImplTest {
 		Variant<PositionType> vType = new Variant<PositionType>(vVal)
 			.add(PositionType.LONG)
 			.add(PositionType.CLOSE);
-		Variant<?> iterator = vType;;
+		Variant<PositionType> vAlwd = new Variant<PositionType>(vType)
+			.add(PositionType.CLOSE)
+			.add(PositionType.BOTH);
+		Variant<?> iterator = vAlwd;
 		int foundCnt = 0;
 		SetupPositionImpl x = null, found = null;
 		do {
 			x = new SetupPositionImpl(vSec.get());
 			x.setQuota(new Price(vUnit.get(), vVal.get()));
 			x.setType(vType.get());
+			x.setAllowedType(vAlwd.get());
 			if ( setup.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -146,16 +169,19 @@ public class SetupPositionImplTest {
 		assertSame(descr, found.getSecurityDescriptor());
 		assertEquals(new Price(PriceUnit.MONEY, 200.00d), found.getQuota());
 		assertEquals(PositionType.LONG, found.getType());
+		assertEquals(PositionType.CLOSE, found.getAllowedType());
 	}
 	
 	@Test
 	public void testHashCode() throws Exception {
 		setup.setQuota(new Price(PriceUnit.POINT, 50d));
 		setup.setType(PositionType.LONG);
+		setup.setAllowedType(PositionType.SHORT);
 		assertEquals(new HashCodeBuilder(20121231, 165329)
 			.append(descr)
 			.append(new Price(PriceUnit.POINT, 50d))
 			.append(PositionType.LONG)
+			.append(PositionType.SHORT) // allowed type
 			.toHashCode(), setup.hashCode());
 	}
 	
@@ -163,6 +189,7 @@ public class SetupPositionImplTest {
 	public void testClone() throws Exception {
 		setup.setQuota(new Price(PriceUnit.POINT, 50d));
 		setup.setType(PositionType.LONG);
+		setup.setAllowedType(PositionType.SHORT);
 		
 		SetupPosition clone = setup.clone();
 		assertNotNull(clone);
@@ -170,6 +197,7 @@ public class SetupPositionImplTest {
 		assertEquals(setup, clone);
 		assertEquals(new Price(PriceUnit.POINT, 50d), clone.getQuota());
 		assertEquals(PositionType.LONG, clone.getType());
+		assertEquals(PositionType.SHORT, clone.getAllowedType());
 	}
 	
 	@Test
@@ -196,10 +224,120 @@ public class SetupPositionImplTest {
 	public void testConstruct1Copy() throws Exception {
 		setup.setQuota(new Price(PriceUnit.POINT, 50d));
 		setup.setType(PositionType.CLOSE);
+		setup.setAllowedType(PositionType.CLOSE);
 
 		SetupPosition setup2 = new SetupPositionImpl(setup);
 		assertEquals(setup, setup2);
 		assertNotSame(setup, setup2);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testSetType_ThrowsForBoth() throws Exception {
+		setup.setType(PositionType.BOTH);
+	}
+	
+	@Test
+	public void testIsOpenAllowed() throws Exception {
+		Object fix[][] = {
+				// allowed, target, result?
+				{ PositionType.BOTH, PositionType.LONG, true },
+				{ PositionType.BOTH, PositionType.SHORT, true },
+				{ PositionType.BOTH, PositionType.CLOSE, false },
+				{ PositionType.BOTH, PositionType.BOTH, false },
+				{ PositionType.LONG, PositionType.LONG, true },
+				{ PositionType.LONG, PositionType.SHORT, false },
+				{ PositionType.LONG, PositionType.CLOSE, false },
+				{ PositionType.LONG, PositionType.BOTH, false },
+				{ PositionType.SHORT, PositionType.LONG, false },
+				{ PositionType.SHORT, PositionType.SHORT, true },
+				{ PositionType.SHORT, PositionType.CLOSE, false },
+				{ PositionType.SHORT, PositionType.BOTH, false },
+				{ PositionType.CLOSE, PositionType.LONG, false },
+				{ PositionType.CLOSE, PositionType.SHORT, false },
+				{ PositionType.CLOSE, PositionType.CLOSE, false },
+				{ PositionType.CLOSE, PositionType.BOTH, false },
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			setup.setAllowedType((PositionType) fix[i][0]);
+			assertEquals(msg, fix[i][2],
+					setup.isOpenAllowed((PositionType) fix[i][1]));
+		}
+	}
+	
+	@Test
+	public void testIsShouldClose_ForClosed() throws Exception {
+		// Для закрытой позиции результат проверки всегда негативный
+		Variant<PositionType> vAlwd = new Variant<PositionType>()
+			.add(PositionType.BOTH)
+			.add(PositionType.LONG)
+			.add(PositionType.SHORT)
+			.add(PositionType.CLOSE);
+		Variant<PositionType> vTgt = new Variant<PositionType>(vAlwd)
+			.add(PositionType.LONG)
+			.add(PositionType.SHORT)
+			.add(PositionType.CLOSE);
+		Variant<?> iterator = vTgt;
+		do {
+			setup.setAllowedType(vAlwd.get());
+			setup.setType(vTgt.get());
+			assertFalse(setup.isShouldClose(PositionType.CLOSE));
+		} while ( iterator.next() );
+	}
+	
+	@Test
+	public void testIsShouldClose_ForBoth() throws Exception {
+		assertFalse(setup.isShouldClose(PositionType.BOTH));
+	}
+	
+	@Test
+	public void testIsShouldClose_ForLong() throws Exception {
+		Object fix[][] = {
+			// allowed, target, close?
+			{ PositionType.BOTH, PositionType.CLOSE, true },
+			{ PositionType.BOTH, PositionType.LONG, false },
+			{ PositionType.BOTH, PositionType.SHORT, false }, // разворот
+			{ PositionType.CLOSE, PositionType.CLOSE, true },
+			{ PositionType.CLOSE, PositionType.LONG, false },
+			{ PositionType.CLOSE, PositionType.SHORT, true },
+			{ PositionType.LONG, PositionType.CLOSE, true },
+			{ PositionType.LONG, PositionType.LONG, false },
+			{ PositionType.LONG, PositionType.SHORT, true },
+			{ PositionType.SHORT, PositionType.CLOSE, true },
+			{ PositionType.SHORT, PositionType.LONG, false },
+			{ PositionType.SHORT, PositionType.SHORT, false }, // разворот
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			setup.setAllowedType((PositionType) fix[i][0]);
+			setup.setType((PositionType) fix[i][1]);
+			assertEquals(msg,fix[i][2],setup.isShouldClose(PositionType.LONG));
+		}
+	}
+	
+	@Test
+	public void testIsShouldClose_ForShort() throws Exception {
+		Object fix[][] = {
+			// allowed, target, close?
+			{ PositionType.BOTH, PositionType.CLOSE, true },
+			{ PositionType.BOTH, PositionType.LONG, false }, // разворот
+			{ PositionType.BOTH, PositionType.SHORT, false },
+			{ PositionType.CLOSE, PositionType.CLOSE, true },
+			{ PositionType.CLOSE, PositionType.LONG, true },
+			{ PositionType.CLOSE, PositionType.SHORT, false },
+			{ PositionType.LONG, PositionType.CLOSE, true },
+			{ PositionType.LONG, PositionType.LONG, false }, // д.б. разворот
+			{ PositionType.LONG, PositionType.SHORT, false },
+			{ PositionType.SHORT, PositionType.CLOSE, true },
+			{ PositionType.SHORT, PositionType.LONG, true },
+			{ PositionType.SHORT, PositionType.SHORT, false },
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			setup.setAllowedType((PositionType) fix[i][0]);
+			setup.setType((PositionType) fix[i][1]);
+			assertEquals(msg,fix[i][2],setup.isShouldClose(PositionType.SHORT));
+		}
 	}
 
 }

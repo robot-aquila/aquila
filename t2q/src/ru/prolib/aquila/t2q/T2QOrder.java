@@ -306,7 +306,8 @@ public class T2QOrder {
 		if ( status == 1 ) strStatus = "ACTIVE";
 		else if ( status == 2 ) strStatus = "KILLED";
 		else strStatus = "FILLED";
-		return getClass().getSimpleName() + "["
+		return getClass().getSimpleName() + "[trn=" + transId + ", "
+			+ "id=" + orderId + ", "
 			+ (isSell ? "Sell" : "Buy")
 			+ ", sec=" + secCode + "@" + classCode + ", "
 			+ "price=" + price + ", "

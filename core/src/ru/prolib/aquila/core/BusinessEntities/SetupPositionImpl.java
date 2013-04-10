@@ -14,6 +14,7 @@ public class SetupPositionImpl implements SetupPosition {
 	private final SecurityDescriptor descr;
 	private Price quota; 
 	private PositionType type;
+	private PositionType allowed = PositionType.BOTH;
 	
 	public SetupPositionImpl(SecurityDescriptor descr,
 			Price quota, PositionType type)
@@ -38,6 +39,7 @@ public class SetupPositionImpl implements SetupPosition {
 			descr = setup.getSecurityDescriptor();
 			quota = setup.getQuota();
 			type = setup.getType();
+			allowed = setup.getAllowedType();
 		}
 	}
 	
@@ -63,6 +65,9 @@ public class SetupPositionImpl implements SetupPosition {
 
 	@Override
 	public synchronized void setType(PositionType value) {
+		if ( value == PositionType.BOTH ) {
+			throw new IllegalArgumentException(value.toString());
+		}
 		type = value;
 	}
 	
@@ -78,6 +83,7 @@ public class SetupPositionImpl implements SetupPosition {
 			.append(descr, o.descr)
 			.append(quota, o.quota)
 			.append(type, o.type)
+			.append(allowed, o.allowed)
 			.isEquals();
 	}
 	
@@ -87,15 +93,57 @@ public class SetupPositionImpl implements SetupPosition {
 			.append(descr)
 			.append(quota)
 			.append(type)
+			.append(allowed)
 			.toHashCode();
 	}
 	
 	@Override
 	public synchronized SetupPositionImpl clone() {
-		SetupPositionImpl copy = new SetupPositionImpl(descr);
-		copy.setQuota(quota);
-		copy.setType(type);
-		return copy;
+		return new SetupPositionImpl(this);
+	}
+
+	@Override
+	public synchronized void setAllowedType(PositionType value) {
+		allowed = value;
+	}
+
+	@Override
+	public synchronized PositionType getAllowedType() {
+		return allowed;
+	}
+
+	@Override
+	public synchronized boolean isOpenAllowed(PositionType type) {
+		if ( type == PositionType.LONG ) {
+			return allowed == PositionType.LONG || allowed == PositionType.BOTH;
+		} else if ( type == PositionType.SHORT ) {
+			return allowed == PositionType.SHORT || allowed== PositionType.BOTH;
+		}
+		return false;
+	}
+
+	@Override
+	public synchronized boolean isShouldClose(PositionType current) {
+		if ( current == PositionType.SHORT ) {
+			if ( type == PositionType.CLOSE ) {
+				return true;
+			}
+			if ( type == PositionType.LONG && ( allowed == PositionType.SHORT
+					|| allowed == PositionType.CLOSE ) )
+			{
+				return true;
+			}
+		} else if ( current == PositionType.LONG ) {
+			if ( type == PositionType.CLOSE ) {
+				return true;
+			}
+			if ( type == PositionType.SHORT && ( allowed == PositionType.LONG
+					|| allowed == PositionType.CLOSE ) )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

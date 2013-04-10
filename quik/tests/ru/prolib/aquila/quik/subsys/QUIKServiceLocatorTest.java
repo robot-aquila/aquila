@@ -15,11 +15,10 @@ import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.SimpleCounter;
 import ru.prolib.aquila.quik.QUIKConfig;
 import ru.prolib.aquila.quik.QUIKConfigImpl;
+import ru.prolib.aquila.quik.api.ApiService;
 import ru.prolib.aquila.quik.subsys.order.QUIKOrderProcessor;
 import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
 import ru.prolib.aquila.quik.subsys.security.*;
-import ru.prolib.aquila.t2q.T2QService;
-
 
 /**
  * 2013-01-19<br>
@@ -80,18 +79,6 @@ public class QUIKServiceLocatorTest {
 		assertEquals(expected, actual);
 		assertSame(actual, locator.getFailedOrderNumerator());
 	}
-
-	@Test
-	public void testGetTransactionService() throws Exception {
-		T2QService ts = control.createMock(T2QService.class);
-		locator.setTransactionService(ts);
-		assertSame(ts, locator.getTransactionService());
-	}
-	
-	@Test (expected=QUIKServiceNotAvailableException.class)
-	public void testGetTransactionService_ThrowsIfNoService() throws Exception {
-		locator.getTransactionService();
-	}
 	
 	@Test
 	public void testGetTransactionNumerator() throws Exception {
@@ -139,6 +126,18 @@ public class QUIKServiceLocatorTest {
 		assertNotNull(accounts);
 		assertSame(accounts, locator.getAccounts());
 		assertSame(terminal, accounts.getFirePanicEvent());
+	}
+	
+	@Test
+	public void testGetApi() throws Exception {
+		ApiService api = control.createMock(ApiService.class);
+		locator.setApi(api);
+		assertSame(api, locator.getApi());
+	}
+	
+	@Test (expected=QUIKServiceNotAvailableException.class)
+	public void testGetApi_Unavailable() throws Exception {
+		locator.getApi();
 	}
 
 }

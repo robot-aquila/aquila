@@ -19,6 +19,11 @@ public class PositionType {
 	 * Короткая позиция.
 	 */
 	public static final PositionType SHORT = new PositionType("Short");
+	/**
+	 * Конфигурационный тип, определяющий возможность открытия как длиных,
+	 * так и коротких позиций. Используется для настройки стратегий работы.
+	 */
+	public static final PositionType BOTH = new PositionType("Long & Short");
 	
 	private final String code;
 	

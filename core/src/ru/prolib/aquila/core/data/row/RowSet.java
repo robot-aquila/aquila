@@ -12,16 +12,18 @@ public interface RowSet extends Row {
 	 * Перейти к следующему ряду.
 	 * <p>
 	 * @return true в случае успеха, false при достижении конца набора
+	 * @throws RowSetException
 	 */
-	public boolean next();
+	public boolean next() throws RowSetException;
 	
 	/**
 	 * Сбросить указатель на начало набора.
 	 * <p>
 	 * Фактически вызов данного метода приводит объект в первоначальное
 	 * состояние, соответствующее состоянию до первого вызова {@link #next()}.
+	 * @throws RowSetException
 	 */
-	public void reset();
+	public void reset() throws RowSetException;
 	
 	/**
 	 * Завершить работу с набором.

@@ -6,12 +6,11 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Counter;
+import ru.prolib.aquila.quik.api.ApiService;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
-import ru.prolib.aquila.t2q.T2QConnStatus;
-import ru.prolib.aquila.t2q.T2QService;
-import ru.prolib.aquila.t2q.T2QTransStatus;
 
 /**
  * 2013-01-24<br>
@@ -21,11 +20,12 @@ public class QUIKOrderProcessorTest {
 	private static SecurityDescriptor secDescr;
 	private IMocksControl control;
 	private QUIKServiceLocator locator;
-	private Counter failedOrderId;
 	private EditableTerminal terminal;
 	private QUIKOrderProcessor processor;
 	private EditableOrder order;
-	private T2QService transService;
+	private EditableOrders orders, stopOrders;
+	private EventType type;
+	private ApiService api;
 	private Counter transId;
 	private Security security;
 
@@ -38,12 +38,14 @@ public class QUIKOrderProcessorTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		locator = control.createMock(QUIKServiceLocator.class);
-		failedOrderId = control.createMock(Counter.class);
 		terminal = control.createMock(EditableTerminal.class);
 		order = control.createMock(EditableOrder.class);
-		transService = control.createMock(T2QService.class);
+		api = control.createMock(ApiService.class);
 		transId = control.createMock(Counter.class);
 		security = control.createMock(Security.class);
+		type = control.createMock(EventType.class);
+		orders = control.createMock(EditableOrders.class);
+		stopOrders = control.createMock(EditableOrders.class);
 		processor = new QUIKOrderProcessor(locator);
 		setCommonExpectations();
 	}
@@ -52,10 +54,12 @@ public class QUIKOrderProcessorTest {
 	 * Установить типовые ожидания, связанные с сервис-локатором.
 	 */
 	private void setCommonExpectations() {
-		expect(locator.getFailedOrderNumerator()).andStubReturn(failedOrderId);
 		expect(locator.getTransactionNumerator()).andStubReturn(transId);
 		expect(locator.getTerminal()).andStubReturn(terminal);
-		expect(locator.getTransactionService()).andStubReturn(transService);
+		expect(locator.getApi()).andStubReturn(api);
+		expect(type.asString()).andStubReturn("test");
+		expect(terminal.getOrdersInstance()).andStubReturn(orders);
+		expect(terminal.getStopOrdersInstance()).andStubReturn(stopOrders);
 	}
 	
 	@Test
@@ -79,7 +83,7 @@ public class QUIKOrderProcessorTest {
 		expect(security.getClassCode()).andReturn("SECTION");
 		expect(order.getId()).andReturn(8273l);
 		expect(order.getType()).andStubReturn(type);
-		transService.send("TRANS_ID=137; CLASSCODE=SECTION; ACTION=KILL_ORDER; "
+		api.send("TRANS_ID=137; CLASSCODE=SECTION; ACTION=KILL_ORDER; "
 				+ "ORDER_KEY=8273");
 		control.replay();
 		processor.cancelOrder(order);
@@ -100,7 +104,7 @@ public class QUIKOrderProcessorTest {
 		expect(security.getClassCode()).andReturn("SECTION");
 		expect(order.getId()).andReturn(8273l);
 		expect(order.getType()).andStubReturn(type);
-		transService.send("TRANS_ID=137; CLASSCODE=SECTION; "
+		api.send("TRANS_ID=137; CLASSCODE=SECTION; "
 				+ "ACTION=KILL_STOP_ORDER; STOP_ORDER_KEY=8273");
 		control.replay();
 		processor.cancelOrder(order);
@@ -157,7 +161,9 @@ public class QUIKOrderProcessorTest {
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.BUY);
 		expect(order.getQty()).andStubReturn(1050l);
-		transService.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
+		expect(api.OnTransReply(926l)).andReturn(type);
+		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
+		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
 				+ "OPERATION=B; ACTION=NEW_ORDER; TYPE=M; PRICE=0; "
 				+ "QUANTITY=1050"));
@@ -175,7 +181,9 @@ public class QUIKOrderProcessorTest {
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.SELL);
 		expect(order.getQty()).andStubReturn(1l);
-		transService.send(eq("TRANS_ID=712; CLIENT_CODE=K-86; "
+		expect(api.OnTransReply(712l)).andReturn(type);
+		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
+		api.send(eq("TRANS_ID=712; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
 				+ "OPERATION=S; ACTION=NEW_ORDER; TYPE=M; PRICE=0; "
 				+ "QUANTITY=1"));
@@ -196,7 +204,9 @@ public class QUIKOrderProcessorTest {
 		expect(order.getPrice()).andStubReturn(123.456d);
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(123.456)).andStubReturn("12.45");
-		transService.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
+		expect(api.OnTransReply(926l)).andReturn(type);
+		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
+		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
 				+ "OPERATION=B; ACTION=NEW_ORDER; TYPE=L; PRICE=12.45; "
 				+ "QUANTITY=1050"));
@@ -219,7 +229,9 @@ public class QUIKOrderProcessorTest {
 		expect(order.getPrice()).andStubReturn(123.456d);
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(123.456)).andStubReturn("12.45");
-		transService.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
+		expect(api.OnTransReply(926l)).andReturn(type);
+		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
+		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
 				+ "OPERATION=S; ACTION=NEW_ORDER; TYPE=L; PRICE=12.45; "
 				+ "QUANTITY=1050"));
@@ -244,7 +256,9 @@ public class QUIKOrderProcessorTest {
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(120d)).andReturn("12.00");
 		expect(security.shrinkPrice(12.456)).andReturn("12.45");
-		transService.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
+		expect(api.OnTransReply(926l)).andReturn(type);
+		type.addListener(eq(new PlaceOrderHandler(locator, stopOrders)));
+		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
 				+ "OPERATION=B; ACTION=NEW_STOP_ORDER; STOPPRICE=12.00; "
 				+ "PRICE=12.45; QUANTITY=1050"));
@@ -269,7 +283,9 @@ public class QUIKOrderProcessorTest {
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(120d)).andReturn("12.00");
 		expect(security.shrinkPrice(12.456)).andReturn("12.45");
-		transService.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
+		expect(api.OnTransReply(926l)).andReturn(type);
+		type.addListener(eq(new PlaceOrderHandler(locator, stopOrders)));
+		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
 				+ "OPERATION=S; ACTION=NEW_STOP_ORDER; STOPPRICE=12.00; "
 				+ "PRICE=12.45; QUANTITY=1050"));
@@ -281,101 +297,6 @@ public class QUIKOrderProcessorTest {
 	}
 	
 	@Test
-	public void testOnConnStatus_SkipsQuikConn() throws Exception {
-		control.replay();
-		processor.OnConnStatus(T2QConnStatus.QUIK_CONN);
-		control.verify();
-	}
-	
-	@Test
-	public void testOnConnStatus_SkipsQuikDisc() throws Exception {
-		control.replay();
-		processor.OnConnStatus(T2QConnStatus.QUIK_DISC);
-		control.verify();
-	}
-	
-	@Test
-	public void testOnConnStatus_DllConn() throws Exception {
-		terminal.fireTerminalConnectedEvent();
-		control.replay();
-		processor.OnConnStatus(T2QConnStatus.DLL_CONN);
-		control.verify();
-	}
-	
-	@Test
-	public void testOnConnStatus_DllDisc() throws Exception {
-		terminal.fireTerminalDisconnectedEvent();
-		control.replay();
-		processor.OnConnStatus(T2QConnStatus.DLL_DISC);
-		control.verify();
-	}
-	
-	@Test
-	public void testOnTransReply_SkipSent() throws Exception {
-		control.replay();
-		processor.OnTransReply(T2QTransStatus.SENT, 125, null, "Sent");
-		control.verify();
-	}
-	
-	@Test
-	public void testOnTransReply_SkipRecv() throws Exception {
-		control.replay();
-		processor.OnTransReply(T2QTransStatus.RECV, 276, null, "Recv");
-		control.verify();
-	}
-	
-	@Test
-	public void testOnTransReply_SkipDone() throws Exception {
-		control.replay();
-		processor.OnTransReply(T2QTransStatus.DONE, 122, null, "Done");
-		control.verify();
-	}
-	
-	@Test
-	public void testOnTransReply_NonOrderError() throws Exception {
-		expect(failedOrderId.decrementAndGet()).andReturn(-1);
-		expect(terminal.makePendingOrderAsRegisteredIfExists(824l, -1l))
-			.andReturn(null);
-		expect(terminal.makePendingStopOrderAsRegisteredIfExists(824l, -1l))
-			.andReturn(null);
-		control.replay();
-		processor.OnTransReply(T2QTransStatus.ERR_REJ, 824, null, "Test error");
-		control.verify();
-	}
-	
-	@Test
-	public void testOnTransReply_OrderError() throws Exception {
-		expect(failedOrderId.decrementAndGet()).andReturn(-1);
-		expect(terminal.makePendingOrderAsRegisteredIfExists(824l, -1l))
-			.andReturn(order);
-		order.setStatus(OrderStatus.FAILED);
-		order.setAvailable(true);
-		terminal.fireOrderAvailableEvent(order);
-		order.fireChangedEvent();
-		order.resetChanges();
-		control.replay();
-		processor.OnTransReply(T2QTransStatus.ERR_AUTH, 824, null, "Test error");
-		control.verify();
-	}
-
-	@Test
-	public void testOnTransReply_StopOrderError() throws Exception {
-		expect(failedOrderId.decrementAndGet()).andReturn(-15);
-		expect(terminal.makePendingOrderAsRegisteredIfExists(112l, -15l))
-			.andReturn(null);
-		expect(terminal.makePendingStopOrderAsRegisteredIfExists(112l, -15l))
-			.andReturn(order);
-		order.setStatus(OrderStatus.FAILED);
-		order.setAvailable(true);
-		terminal.fireStopOrderAvailableEvent(order);
-		order.fireChangedEvent();
-		order.resetChanges();
-		control.replay();
-		processor.OnTransReply(T2QTransStatus.ERR_LIMIT, 112, null, "Test error");
-		control.verify();
-	}
-	
-	@Test
 	public void testEquals() throws Exception {
 		QUIKServiceLocator loc2 = control.createMock(QUIKServiceLocator.class);
 		assertTrue(processor.equals(processor));
@@ -383,11 +304,6 @@ public class QUIKOrderProcessorTest {
 		assertFalse(processor.equals(new QUIKOrderProcessor(loc2)));
 		assertFalse(processor.equals(null));
 		assertFalse(processor.equals(this));
-	}
-	
-	@Test
-	public void test_() throws Exception {
-		fail("TODO: incomplete");
 	}
 	
 }

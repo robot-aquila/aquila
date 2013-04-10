@@ -55,23 +55,22 @@ public class CsvRowSet implements RowSet {
 	}
 
 	@Override
-	public synchronized boolean next() {
+	public synchronized boolean next() throws RowSetException {
 		if ( reader == null ) {
 			try {
 				reader = new CsvReader(file.getAbsolutePath());
 				reader.readHeaders();
 			} catch ( IOException e ) {
-				logger.error("Error open CSV: ", e);
-				return false;
+				reset();
+				throw new RowSetException("Error opening file", e);
 			}
 
 		}
 		try {
 			return reader.readRecord();
 		} catch ( IOException e ) {
-			logger.error("Error reading CSV (close stream): ", e);
-			reader = null;
-			return false;
+			reset();
+			throw new RowSetException("Error reading record", e);
 		}
 	}
 

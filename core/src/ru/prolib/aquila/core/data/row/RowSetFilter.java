@@ -40,7 +40,7 @@ public class RowSetFilter implements RowSet {
 	}
 
 	@Override
-	public boolean next() {
+	public boolean next() throws RowSetException {
 		while ( rs.next() ) {
 			if ( validator.validate(rs) ) {
 				return true;
@@ -50,7 +50,7 @@ public class RowSetFilter implements RowSet {
 	}
 
 	@Override
-	public void reset() {
+	public void reset() throws RowSetException {
 		rs.reset();
 	}
 	

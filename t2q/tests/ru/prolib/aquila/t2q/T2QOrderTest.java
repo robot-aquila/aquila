@@ -150,7 +150,8 @@ public class T2QOrderTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		String expected = "T2QOrder[Sell, sec=RIH3@SPBFUT, price=156190.0, "
+		String expected = "T2QOrder[trn=1000, id=256, Sell, sec=RIH3@SPBFUT, "
+			+ "price=156190.0, "
 			+ "balance=10/100, value=1561900.0, status=FILLED, "
 			+ "date/time=20130313/82153, "
 			+ "atime=12345, wtime=6789, expiry=4567, ...]";

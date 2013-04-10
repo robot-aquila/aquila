@@ -17,6 +17,8 @@ public class PositionTypeTest {
 		assertEquals("Long", PositionType.LONG.toString());
 		assertEquals("Short", PositionType.SHORT.getCode());
 		assertEquals("Short", PositionType.SHORT.toString());
+		assertEquals("Long & Short", PositionType.BOTH.getCode());
+		assertEquals("Long & Short", PositionType.BOTH.toString());
 	}
 
 }

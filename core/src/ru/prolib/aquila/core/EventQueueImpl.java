@@ -96,9 +96,7 @@ public class EventQueueImpl implements EventQueue {
 			if ( ! started() ) {
 				return;
 			}
-			logger.debug("queue.offer(EXIT) for {} ....", name);
 			queue.offer(EXIT);
-			logger.debug("queue.offer(EXIT) for {} done", name);
 		}
 	}
 
@@ -159,7 +157,6 @@ public class EventQueueImpl implements EventQueue {
 		if ( listeners == null ) {
 			throw new NullPointerException("The listeners cannot be null");
 		}
-		logger.debug("ENQU-List[{}] {}", new Object[] { name, event} );
 		if ( ! queue.offer(new QueueEntry(event, listeners)) ) {
 			logger.error("Last event has been be rejected by queue (1)");
 		}
@@ -176,7 +173,6 @@ public class EventQueueImpl implements EventQueue {
 		if ( dispatcher == null ) {
 			throw new NullPointerException("The dispatcher cannot be null");
 		}
-		logger.debug("ENQU-Disp[{}] {}", new Object[] { name, event } );
 		if ( ! queue.offer(new QueueEntry(event, dispatcher)) ) {
 			logger.error("Last event has been be rejected by queue (2)");
 		}
@@ -206,13 +202,11 @@ public class EventQueueImpl implements EventQueue {
 		@Override
 		public void run() {
 			started.countDown();
-			logger.debug("Start worker thread");
 			try {
 				QueueEntry e;
 				List<EventListener> list;
 				while ( (e = queue.take()) != null ) {
 					if ( e == EXIT ) {
-						logger.debug("Pulled exit message");
 						break;
 					}
 					// TODO: 
@@ -224,7 +218,6 @@ public class EventQueueImpl implements EventQueue {
 					} else {
 						list = new Vector<EventListener>();
 					}
-					logger.debug("BEG DISP {}", e.event);
 					for ( EventListener listener : list ) {
 						try {
 							listener.onEvent(e.event);
@@ -232,12 +225,10 @@ public class EventQueueImpl implements EventQueue {
 							logger.error("Unhandled exception: ", ex);
 						}
 					}
-					logger.debug("END DISP {}", e.event);
 				}
 			} catch ( InterruptedException e ) {
 				Thread.currentThread().interrupt();
 			}
-			logger.debug("Exit worker thread");
 		}
 		
 	}

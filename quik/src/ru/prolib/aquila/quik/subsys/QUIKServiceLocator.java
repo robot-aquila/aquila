@@ -8,11 +8,11 @@ import ru.prolib.aquila.core.BusinessEntities.utils.BMFactoryImpl;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.SimpleCounter;
 import ru.prolib.aquila.quik.QUIKConfig;
+import ru.prolib.aquila.quik.api.ApiService;
 import ru.prolib.aquila.quik.subsys.order.QUIKOrderProcessor;
 import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
 import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptors;
 import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptorsImpl;
-import ru.prolib.aquila.t2q.T2QService;
 
 /**
  * Сервис-локатор терминала QUIK.
@@ -28,7 +28,7 @@ public class QUIKServiceLocator {
 	private final Counter failedOrderId = new SimpleCounter();
 	private final Counter transId = new SimpleCounter();
 	private QUIKCompFactory fcomp;
-	private T2QService transactionService;
+	private ApiService api;
 	private QUIKOrderProcessor orderProcessor;
 	private Timer timer;
 	private QUIKConfig config;
@@ -92,28 +92,6 @@ public class QUIKServiceLocator {
 	 */
 	public synchronized Counter getFailedOrderNumerator() {
 		return failedOrderId;
-	}
-	
-	/**
-	 * Получить сервис транзакций QUIK.
-	 * <p>
-	 * @return сервис транзакций QUIK
-	 * @throws QUIKServiceNotAvailableException
-	 */
-	public synchronized T2QService getTransactionService() {
-		if ( transactionService == null ) {
-			throw new QUIKServiceNotAvailableException("TRANS2QUIK");
-		}
-		return transactionService;
-	}
-	
-	/**
-	 * Установить сервис транзакций QUIK.
-	 * <p>
-	 * @param service сервис транзакций QUIK
-	 */
-	public synchronized void setTransactionService(T2QService service) {
-		transactionService = service;
 	}
 	
 	/**
@@ -183,6 +161,27 @@ public class QUIKServiceLocator {
 	 */
 	public QUIKAccounts getAccounts() {
 		return accounts;
+	}
+	
+	/**
+	 * Получить сервис QUIK API.
+	 * <p>
+	 * @return сервис
+	 */
+	public synchronized ApiService getApi() {
+		if ( api == null ) {
+			throw new QUIKServiceNotAvailableException("API");
+		}
+		return api;
+	}
+	
+	/**
+	 * Установить сервис QUIK API.
+	 * <p>
+	 * @param service сервис
+	 */
+	public synchronized void setApi(ApiService service) {
+		api = service;
 	}
 
 }
