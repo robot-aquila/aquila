@@ -72,15 +72,41 @@ public class ApiServiceHandlerTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(dispatcher, found.dispatcher);
-		assertSame(onTransReplyMap, found.onTransReplyMap);
-		assertSame(onConnStatus, found.onConnStatus);
-		assertSame(onOrderStatus, found.onOrderStatus);
-		assertSame(onTradeStatus, found.onTradeStatus);
+		assertSame(dispatcher, found.getEventDispatcher());
+		assertSame(onTransReplyMap, found.getEventTypeMap());
+		assertSame(onConnStatus, found.OnConnStatus());
+		assertSame(onOrderStatus, found.OnOrderStatus());
+		assertSame(onTradeStatus, found.OnTradeStatus());
 	}
 	
 	@Test
-	public void testOnConnStatus() throws Exception {
+	public void testOnTransReply1() throws Exception {
+		EventType type = new EventTypeImpl(dispatcher);
+		expect(onTransReplyMap.get(123L)).andReturn(type);
+		control.replay();
+		
+		assertSame(type, handler.OnTransReply(123L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnConnStatus0() throws Exception {
+		assertSame(onConnStatus, handler.OnConnStatus());
+	}
+	
+	@Test
+	public void testOnOrderStatus0() throws Exception {
+		assertSame(onOrderStatus, handler.OnOrderStatus());
+	}
+	
+	@Test
+	public void testOnTradeStatus0() throws Exception {
+		assertSame(onTradeStatus, handler.OnTradeStatus());
+	}
+	
+	@Test
+	public void testOnConnStatus1() throws Exception {
 		ConnEvent expected = new ConnEvent(onConnStatus,T2QConnStatus.DLL_CONN);
 		dispatcher.dispatch(eq(expected));
 		control.replay();
@@ -91,7 +117,7 @@ public class ApiServiceHandlerTest {
 	}
 	
 	@Test
-	public void testOnOrderStatus() throws Exception {
+	public void testOnOrderStatus1() throws Exception {
 		T2QOrder order = control.createMock(T2QOrder.class);
 		OrderEvent expected = new OrderEvent(onOrderStatus, order);
 		dispatcher.dispatch(eq(expected));
@@ -103,7 +129,7 @@ public class ApiServiceHandlerTest {
 	}
 	
 	@Test
-	public void testOnTradeStatus() throws Exception {
+	public void testOnTradeStatus1() throws Exception {
 		T2QTrade trade = control.createMock(T2QTrade.class);
 		TradeEvent expected = new TradeEvent(onTradeStatus, trade);
 		dispatcher.dispatch(eq(expected));
@@ -115,7 +141,7 @@ public class ApiServiceHandlerTest {
 	}
 	
 	@Test
-	public void testOnTransReply() throws Exception {
+	public void testOnTransReply4() throws Exception {
 		Object fix[][] = {
 				// status, finish?
 				{ T2QTransStatus.DONE, true },

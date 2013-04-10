@@ -13,21 +13,18 @@ import ru.prolib.aquila.t2q.*;
 public class ApiServiceTest {
 	private IMocksControl control;
 	private T2QService service;
-	private EventTypeMap<Long> onTransReplyMap;
-	private EventType onConnStatus, onOrderStatus, onTradeStatus;
+	private ApiServiceHandler handler;
+	private EventType type;
 	private ApiService api;
 
-	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		service = control.createMock(T2QService.class);
-		onTransReplyMap = control.createMock(EventTypeMap.class);
-		onConnStatus = control.createMock(EventType.class);
-		onOrderStatus = control.createMock(EventType.class);
-		onTradeStatus = control.createMock(EventType.class);
-		api = new ApiService(service, onTransReplyMap, onConnStatus,
-				onOrderStatus, onTradeStatus);
+		handler = control.createMock(ApiServiceHandler.class);
+		type = control.createMock(EventType.class);
+		api = new ApiService(service, handler);
+		expect(type.asString()).andStubReturn("test");
 	}
 	
 	@Test
@@ -37,51 +34,65 @@ public class ApiServiceTest {
 		assertFalse(api.equals(this));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
-		Variant<T2QService> vT2q = new Variant<T2QService>()
+		Variant<T2QService> vSrv = new Variant<T2QService>()
 			.add(service)
 			.add(control.createMock(T2QService.class));
-		Variant<EventTypeMap<Long>> vTypeRpl =
-				new Variant<EventTypeMap<Long>>(vT2q)
-			.add(onTransReplyMap)
-			.add(control.createMock(EventTypeMap.class));
-		Variant<EventType> vTypeCon = new Variant<EventType>(vTypeRpl)
-			.add(onConnStatus)
-			.add(control.createMock(EventType.class));
-		Variant<EventType> vTypeOrd = new Variant<EventType>(vTypeCon)
-			.add(onOrderStatus)
-			.add(control.createMock(EventType.class));
-		Variant<EventType> vTypeTrd = new Variant<EventType>(vTypeOrd)
-			.add(onTradeStatus)
-			.add(control.createMock(EventType.class));
-		Variant<?> iterator = vTypeTrd;
+		Variant<ApiServiceHandler> vHdr = new Variant<ApiServiceHandler>(vSrv)
+			.add(handler)
+			.add(control.createMock(ApiServiceHandler.class));
+		Variant<?> iterator = vHdr;
 		int foundCnt = 0;
 		ApiService x = null, found = null;
 		do {
-			x = new ApiService(vT2q.get(), vTypeRpl.get(), vTypeCon.get(),
-					vTypeOrd.get(), vTypeTrd.get());
+			x = new ApiService(vSrv.get(), vHdr.get());
 			if ( api.equals(x) ) {
 				found = x;
 				foundCnt ++;
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(service, found.service);
-		assertSame(onTransReplyMap, found.onTransReplyMap);
-		assertSame(onConnStatus, found.OnConnectionStatus());
-		assertSame(onOrderStatus, found.OnOrderStatus());
-		assertSame(onTradeStatus, found.OnTradeStatus());
+		assertSame(service, found.getService());
+		assertSame(handler, found.getHandler());
 	}
 	
 	@Test
-	public void testOnTransactionReply() throws Exception {
-		EventType type = control.createMock(EventType.class);
-		expect(onTransReplyMap.get(893L)).andReturn(type);
+	public void testOnTransReply() throws Exception {
+		expect(handler.OnTransReply(893L)).andReturn(type);
 		control.replay();
 		
-		assertSame(type, api.OnTransactionReply(893L));
+		assertSame(type, api.OnTransReply(893L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnConnStatus() throws Exception {
+		expect(handler.OnConnStatus()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, api.OnConnStatus());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnOrderStatus() throws Exception {
+		expect(handler.OnOrderStatus()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, api.OnOrderStatus());
+		
+		control.verify();
+	}
+
+	@Test
+	public void testOnTradeStatus() throws Exception {
+		expect(handler.OnTradeStatus()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, api.OnTradeStatus());
 		
 		control.verify();
 	}

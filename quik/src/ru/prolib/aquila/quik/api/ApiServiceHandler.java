@@ -11,9 +11,9 @@ import ru.prolib.aquila.t2q.*;
  * Транслирует вызовы методов обработчика в события.
  */
 public class ApiServiceHandler implements T2QHandler {
-	protected final EventDispatcher dispatcher;
-	protected final EventTypeMap<Long> onTransReplyMap;
-	protected final EventType onConnStatus, onOrderStatus, onTradeStatus;
+	private final EventDispatcher dispatcher;
+	private final EventTypeMap<Long> onTransReplyMap;
+	private final EventType onConnStatus, onOrderStatus, onTradeStatus;
 	
 	/**
 	 * Конструктор.
@@ -34,6 +34,61 @@ public class ApiServiceHandler implements T2QHandler {
 		this.onConnStatus = onConnStatus;
 		this.onOrderStatus = onOrderStatus;
 		this.onTradeStatus = onTradeStatus;
+	}
+	
+	/**
+	 * Получить диспетчер событий.
+	 * <p>
+	 * @return диспетчер событий
+	 */
+	public EventDispatcher getEventDispatcher() {
+		return dispatcher;
+	}
+	
+	/**
+	 * Получить ассоциативную карту типов событий для транзакций.
+	 * <p>
+	 * @return карта типов событий
+	 */
+	public EventTypeMap<Long> getEventTypeMap() {
+		return onTransReplyMap;
+	}
+	
+	/**
+	 * Получить тип события: при смене статуса подключения к терминалу.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnConnStatus() {
+		return onConnStatus;
+	}
+	
+	/**
+	 * Получить тип события: при получении информации о заявке.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderStatus() {
+		return onOrderStatus;
+	}
+	
+	/**
+	 * Получить тип события: при получении информации о сделке.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnTradeStatus() {
+		return onTradeStatus;
+	}
+	
+	/**
+	 * Получить тип события: ответ на транзакцию.
+	 * <p>
+	 * @param transId номер транзакции
+	 * @return тип события
+	 */
+	public EventType OnTransReply(long transId) {
+		return onTransReplyMap.get(transId);
 	}
 
 	@Override

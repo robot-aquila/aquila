@@ -1,10 +1,11 @@
 package ru.prolib.aquila.quik.subsys.order;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.utils.Counter;
-import ru.prolib.aquila.quik.api.ApiService;
 import ru.prolib.aquila.quik.api.TransEvent;
+import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 import ru.prolib.aquila.t2q.T2QTransStatus;
 
 /**
@@ -15,35 +16,36 @@ import ru.prolib.aquila.t2q.T2QTransStatus;
  */
 public class PlaceOrderHandler implements EventListener {
 	protected final EditableOrders orders;
-	protected final ApiService api;
-	protected final Counter failedOrderId;
-	protected final long transId;
+	protected final QUIKServiceLocator locator;
 	
-	public PlaceOrderHandler(EditableOrders orders) {
+	public PlaceOrderHandler(QUIKServiceLocator locator,EditableOrders orders) {
 		super();
 		this.orders = orders;
-		this.api = null;//api;
-		this.failedOrderId = null;//failedOrderId;
-		this.transId = 0;//transId;
+		this.locator = locator;
 	}
 
 	@Override
 	public void onEvent(Event event) {
-		if ( event.isType(api.OnTransactionReply(transId)) ) {
-			// TODO:
-			//onTransactionReply((TransEvent) event);
+		try {
+			onTransactionReply((TransEvent) event);
+		} catch ( OrderException e ) {
+			throw new RuntimeException("Unexpected exception", e);
 		}
 	}
 	
 	private void onTransactionReply(TransEvent event) throws OrderException {
 		T2QTransStatus transStatus = event.getStatus();
-		long transId = event.getTransId();
 		if ( transStatus == T2QTransStatus.SENT
 		  || transStatus == T2QTransStatus.RECV )
 		{
 			// Эти статусы не являются ошибкой и никак не обрабатываются
 			return;
 		}
+
+		// Независимо от результата, заявка становится доступной для обработки.
+		// Это необходимо, что бы обеспечить возможность отработать обработчикам
+		// событий регистрации и провала регистрации.
+		EditableOrder order;
 		OrderStatus orderStatus;
 		long orderId;
 		if ( transStatus == T2QTransStatus.DONE ) {
@@ -51,14 +53,33 @@ public class PlaceOrderHandler implements EventListener {
 			orderId = event.getOrderId();
 		} else {
 			orderStatus = OrderStatus.FAILED;
-			orderId = failedOrderId.incrementAndGet();
+			orderId = locator.getFailedOrderNumerator().decrementAndGet();
 		}
-		EditableOrder order =
-			orders.makePendingOrderAsRegisteredIfExists(transId, orderId);
+		// Когда заявка становится доступной, она еще остается ожидающей.
+		long transId = event.getTransId();
+		order = orders.makePendingOrderAsRegisteredIfExists(transId, orderId);
 		order.setAvailable(true);
-		order.setStatus(orderStatus);
-		order.resetChanges();
 		orders.fireOrderAvailableEvent(order);
+		// А теперь генерируется событие о смене статуса заявки.
+		order.setStatus(orderStatus);
+		order.fireChangedEvent();
+		order.resetChanges();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == PlaceOrderHandler.class ) {
+			PlaceOrderHandler o = (PlaceOrderHandler) other;
+			return new EqualsBuilder()
+				.append(locator, o.locator)
+				.append(orders, o.orders)
+				.isEquals();
+		} else {
+			return false;
+		}
 	}
 
 }

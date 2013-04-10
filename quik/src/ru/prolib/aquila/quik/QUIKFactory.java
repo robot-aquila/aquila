@@ -1,21 +1,18 @@
 package ru.prolib.aquila.quik;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
-import ru.prolib.aquila.core.utils.DependencyRule;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.*;
-import ru.prolib.aquila.dde.utils.table.*;
+import ru.prolib.aquila.quik.api.*;
 import ru.prolib.aquila.quik.subsys.*;
-import ru.prolib.aquila.quik.subsys.order.QUIKOrderProcessor;
 import ru.prolib.aquila.quik.subsys.row.RowAdapters;
 import ru.prolib.aquila.t2q.*;
 
@@ -168,18 +165,18 @@ public class QUIKFactory implements TerminalFactory {
 		TerminalDecorator decorator = new TerminalDecorator();
 		QUIKServiceLocator locator = new QUIKServiceLocator(decorator);
 		locator.setConfig(config);
-		QUIKOrderProcessor orderProcessor = locator.getOrderProcessor();
-		T2QService ts = tsf.createService(orderProcessor);
-		locator.setTransactionService(ts);
+		
 		EventSystem es = locator.getEventSystem();
 		DDEObservableServiceImpl service = DDEObservableServiceImpl
 			.createService(config.getServiceName(), es);
 		
 		QUIKCompFactory fc = locator.getCompFactory();
-		EventDispatcher dispatcher = es.createEventDispatcher("QUIKTerminal");
+		
 		
 		StarterQueue starter = new StarterQueue();
 		starter.add(new EventQueueStarter(es.getEventQueue(), 10000));
+		
+		// DDE
 		starter.add(new QUIKTableListenerStarter(locator, service));
 		if ( startServer ) {
 			logger.debug("Add DDE server to start queue");
@@ -188,17 +185,15 @@ public class QUIKFactory implements TerminalFactory {
 			logger.debug("DDE server not added to start queue");
 		}
 		starter.add(new DDEServiceStarter(server, service));
-		if ( ! config.skipTRANS2QUIK() ) {
-			starter.add(new QUIKConnectionKeeper(locator,
-				new T2QServiceStarter(ts, config.getQUIKPath())));
-		}
-
+		
+		// Make terminal instance
+		EventDispatcher dispatcher = es.createEventDispatcher("QUIKTerminal");
 		final EditableTerminal terminal = new TerminalImpl(starter,
 				fc.createSecurities(RowAdapters.SEC_DEFAULT_CURRENCY,
 						SecurityType.STK),
 				fc.createPortfolios(), fc.createOrders(), fc.createOrders(),
 				fc.createOrderBuilder(),
-				orderProcessor,
+				locator.getOrderProcessor(),
 				dispatcher,
 				es.createGenericType(dispatcher, "OnConnected"),
 				es.createGenericType(dispatcher, "OnDisconnected"),
@@ -206,26 +201,19 @@ public class QUIKFactory implements TerminalFactory {
 				es.createGenericType(dispatcher, "OnStopped"),
 				es.createGenericType(dispatcher, "OnPanic"));
 		decorator.setTerminal(terminal);
+		
+		// QUIK API
+		if ( ! config.skipTRANS2QUIK() ) {
+			ApiServiceHandler apiHandler = createApiHandler(es);
+			T2QService quikApiService = tsf.createService(apiHandler);
+			ApiService api = new ApiService(quikApiService, apiHandler);
+			api.OnConnStatus()
+				.addListener(new ConnectionStatusHandler(terminal));
+			locator.setApi(api);
+			starter.add(new QUIKConnectionKeeper(locator,
+				new T2QServiceStarter(quikApiService, config.getQUIKPath())));
+		}
 
-		/*
-		QUIKListenerFactory lf = new QUIKListenerFactoryImpl(locator); 
-		
-		Map<String,DependencyRule> rules = new HashMap<String,DependencyRule>();
-		rules.put(config.getAllDeals(), DependencyRule.DROP);
-		DDETableOrder t = new DDETableOrder(es.createEventDispatcher(),
-				lf.createDependencies(), rules);
-		service.OnTable().addListener(t);
- 
-		t.addListener(lf.listenSecurities());
-		t.addListener(lf.listenAllDeals());
-		t.addListener(lf.listenPortfoliosSTK());
-		t.addListener(lf.listenPositionsSTK());
-		t.addListener(lf.listenPortfoliosFUT());
-		t.addListener(lf.listenPositionsFUT());
-		t.addListener(lf.listenOrders());
-		t.addListener(lf.listenStopOrders());
-		*/
-		
 		if ( config.skipTRANS2QUIK() ) {
 			terminal.OnStarted().addListener(new EventListener() {
 				@Override
@@ -237,5 +225,15 @@ public class QUIKFactory implements TerminalFactory {
 		
 		return decorator;
 	}
+	
+	private ApiServiceHandler createApiHandler(EventSystem es) {
+		EventDispatcher dispatcher = es.createEventDispatcher("Api");
+		return new ApiServiceHandler(dispatcher,
+				new EventTypeMap<Long>(es, dispatcher),
+				es.createGenericType(dispatcher, "connect"),
+				es.createGenericType(dispatcher, "order"),
+				es.createGenericType(dispatcher, "trade"));
+	}
+
 
 }

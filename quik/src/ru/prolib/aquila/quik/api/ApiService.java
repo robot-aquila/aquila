@@ -13,29 +13,37 @@ import ru.prolib.aquila.t2q.*;
  * и обеспечивает доступ наблюдателей к соответствующим событиям.
  */
 public class ApiService {
-	protected final T2QService service;
-	protected final EventTypeMap<Long> onTransReplyMap;
-	private final EventType onConnStatus, onOrderStatus, onTradeStatus;
+	private final T2QService service;
+	private final ApiServiceHandler handler;
 	
 	/**
 	 * Конструктор.
 	 * <p>
 	 * @param service реализация сервиса транзакций
-	 * @param onTransReplyMap карта типов событий для отслеживания транзакций
-	 * @param onConnStatus тип события смены статуса подключения
-	 * @param onOrderStatus тип события смены статуса заявки
-	 * @param onTradeStatus тип события информация о сделке
+	 * @param handler транслятор событий QUIK API
 	 */
-	public ApiService(T2QService service,
-			EventTypeMap<Long> onTransReplyMap, EventType onConnStatus,
-			EventType onOrderStatus, EventType onTradeStatus)
-	{
+	public ApiService(T2QService service, ApiServiceHandler handler) {
 		super();
 		this.service = service;
-		this.onTransReplyMap = onTransReplyMap;
-		this.onConnStatus = onConnStatus;
-		this.onOrderStatus = onOrderStatus;
-		this.onTradeStatus = onTradeStatus;
+		this.handler = handler;
+	}
+	
+	/**
+	 * Получить реализацию сервиса QUIK API.
+	 * <p>
+	 * @return сервис
+	 */
+	public T2QService getService() {
+		return service;
+	}
+	
+	/**
+	 * Получить транслятор событий QUIK API.
+	 * <p>
+	 * @return транслятор событий
+	 */
+	public ApiServiceHandler getHandler() {
+		return handler;
 	}
 	
 	/**
@@ -48,8 +56,8 @@ public class ApiService {
 	 * @param transId номер транзакции
 	 * @return тип события
 	 */
-	public EventType OnTransactionReply(long transId) {
-		return onTransReplyMap.get(transId);
+	public EventType OnTransReply(long transId) {
+		return handler.OnTransReply(transId);
 	}
 
 	/**
@@ -59,8 +67,8 @@ public class ApiService {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnConnectionStatus() {
-		return onConnStatus;
+	public EventType OnConnStatus() {
+		return handler.OnConnStatus();
 	}
 	
 	/**
@@ -71,7 +79,7 @@ public class ApiService {
 	 * @return тип события
 	 */
 	public EventType OnOrderStatus() {
-		return onOrderStatus;
+		return handler.OnOrderStatus();
 	}
 	
 	/**
@@ -82,7 +90,7 @@ public class ApiService {
 	 * @return тип события
 	 */
 	public EventType OnTradeStatus() {
-		return onTradeStatus;
+		return handler.OnTradeStatus();
 	}
 
 	/**
@@ -129,10 +137,7 @@ public class ApiService {
 			ApiService o = (ApiService) other;
 			return new EqualsBuilder()
 				.append(service, o.service)
-				.append(onTransReplyMap, o.onTransReplyMap)
-				.append(onConnStatus, o.onConnStatus)
-				.append(onOrderStatus, o.onOrderStatus)
-				.append(onTradeStatus, o.onTradeStatus)
+				.append(handler, o.handler)
 				.isEquals();
 		} else {
 			return false;

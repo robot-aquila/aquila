@@ -1,13 +1,11 @@
 package ru.prolib.aquila.quik.subsys.order;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
+import ru.prolib.aquila.quik.api.ApiServiceException;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
-import ru.prolib.aquila.t2q.*;
 
 /**
  * Обработчик заявок.
@@ -21,19 +19,11 @@ import ru.prolib.aquila.t2q.*;
  * последовательность отрицательных целочисленных значений, для получения
  * которых используется дополнительный нумератор.
  * <p>
- * Кроме обработки транзакций так же трансляцию статуса соединения в
- * соответствующие события терминала.
- * <p>
  * 2013-01-24<br>
  * $Id: QUIKOrderProcessor.java 576 2013-03-14 12:07:25Z whirlwind $
  */
-public class QUIKOrderProcessor implements OrderProcessor, T2QHandler {
-	private static final Logger logger;
+public class QUIKOrderProcessor implements OrderProcessor {
 	private final QUIKServiceLocator locator;
-	
-	static {
-		logger = LoggerFactory.getLogger(QUIKOrderProcessor.class);
-	}
 	
 	/**
 	 * Конструктор.
@@ -84,26 +74,37 @@ public class QUIKOrderProcessor implements OrderProcessor, T2QHandler {
 		}
 		OrderType type = order.getType();
 		Long qty = order.getQty();
+		EditableTerminal terminal = locator.getTerminal();
+		EditableOrders orders;
+		String str;
 		if ( type == OrderType.MARKET ) {
-			send(newOrderTrPrefix(order)
+			orders = terminal.getOrdersInstance();
+			str = newOrderTrPrefix(order)
 				+ "ACTION=NEW_ORDER; "
-				+ "TYPE=M; PRICE=0; QUANTITY=" + qty);
+				+ "TYPE=M; PRICE=0; QUANTITY=" + qty;
+
 		} else if ( type == OrderType.LIMIT ) {
-			send(newOrderTrPrefix(order)
+			orders = terminal.getOrdersInstance();
+			str = newOrderTrPrefix(order)
 				+ "ACTION=NEW_ORDER; "
 				+ "TYPE=L; "
 				+ "PRICE=" + formatPrice(order, order.getPrice()) + "; "
-				+ "QUANTITY=" + qty);
+				+ "QUANTITY=" + qty;
+			
 		} else if ( type == OrderType.STOP_LIMIT ) {
-			send(newOrderTrPrefix(order)
+			orders = terminal.getStopOrdersInstance();
+			str = newOrderTrPrefix(order)
 				+ "ACTION=NEW_STOP_ORDER; "
 				+ "STOPPRICE=" +
 					formatPrice(order, order.getStopLimitPrice()) + "; "
 				+ "PRICE=" + formatPrice(order, order.getPrice()) + "; "
-				+ "QUANTITY=" + qty);
+				+ "QUANTITY=" + qty;
 		} else {
 			throw new QUIKOrderTypeUnsupportedException(type);
 		}
+		locator.getApi().OnTransReply(order.getTransactionId())
+			.addListener(new PlaceOrderHandler(locator, orders));
+		send(str);
 	}
 	
 	/**
@@ -152,8 +153,8 @@ public class QUIKOrderProcessor implements OrderProcessor, T2QHandler {
 	 */
 	private void send(String spec) throws OrderException {
 		try {
-			locator.getTransactionService().send(spec);
-		} catch ( T2QException e ) {
+			locator.getApi().send(spec);
+		} catch ( ApiServiceException e ) {
 			// А это рядовая ошибка. Скорее всего связана с отсутствием
 			// подключения к QUIK терминалу. Проверять надо, прежде чем
 			// транзакции отправлять.
@@ -161,69 +162,6 @@ public class QUIKOrderProcessor implements OrderProcessor, T2QHandler {
 		}
 	}
 
-	@Override
-	public void OnConnStatus(T2QConnStatus status) {
-		logger.debug("OnConnStatus: {}", status);
-		if ( status == T2QConnStatus.DLL_CONN ) {
-			locator.getTerminal().fireTerminalConnectedEvent();
-		} else if ( status == T2QConnStatus.DLL_DISC ) {
-			locator.getTerminal().fireTerminalDisconnectedEvent();
-		}
-	}
-
-	@Override
-	public void OnTransReply(T2QTransStatus status, long transId,
-			Long orderId, String msg)
-	{
-		logger.debug("OnTransReply: status={}, transId={}, orderId={}, msg={}",
-				new Object[] { status, transId, orderId, msg });
-		
-		if ( status == T2QTransStatus.SENT || status == T2QTransStatus.RECV ||
-			 status == T2QTransStatus.DONE )
-		{
-			// Если мы здесь, значит успешная транзакция. Транзакции не
-			// связанные с заявками нас не интересуют. А успешные транзакции
-			// в связи с заявками и стоп-заявками автоматически будут обработаны
-			// через получение данных от основного поставщика.
-			return;
-		}
-		// Если мы здесь, значит транзакция отклонена. Причина ошибки не важна.
-		// Важно связать неудачу с существующей заявкой, если такая существует.
-		EditableTerminal terminal = locator.getTerminal();
-		orderId = (long) locator.getFailedOrderNumerator().decrementAndGet();
-		try {
-			EditableOrder order = terminal
-				.makePendingOrderAsRegisteredIfExists(transId, orderId);
-			if ( order != null ) {
-				// Найдена заявка. Она была переведена в список
-				// зарегистрированных. Нужно установить статус и сгенерировать
-				// событие о новой заявке.
-				order.setStatus(OrderStatus.FAILED);
-				order.setAvailable(true);
-				terminal.fireOrderAvailableEvent(order);
-				order.fireChangedEvent();
-				order.resetChanges();
-			} else {
-				order = terminal
-					.makePendingStopOrderAsRegisteredIfExists(transId, orderId);
-				if ( order != null ) {
-					// Найдена стоп-заявка. Она была переведена в список
-					// зарегистрированных. Нужно установить статус и
-					// сгенерировать событие о новой стоп-заявке.
-					order.setStatus(OrderStatus.FAILED);
-					order.setAvailable(true);
-					terminal.fireStopOrderAvailableEvent(order);
-					order.fireChangedEvent();
-					order.resetChanges();
-				}
-			}
-		} catch ( OrderException e ) {
-			logger.error("Error processing order: ", e);
-			locator.getTerminal()
-				.firePanicEvent(1, "QUIKOrderProcessor#OnTransReply");
-		}
-	}
-	
 	@Override
 	public boolean equals(Object other) {
 		return other != null && other.getClass() == QUIKOrderProcessor.class
@@ -235,16 +173,6 @@ public class QUIKOrderProcessor implements OrderProcessor, T2QHandler {
 		return new EqualsBuilder()
 			.append(locator, o.locator)
 			.isEquals();
-	}
-
-	@Override
-	public void OnOrderStatus(T2QOrder order) {
-		logger.debug("OnOrderStatus: {}", order);
-	}
-
-	@Override
-	public void OnTradeStatus(T2QTrade trade) {
-		logger.debug("OnTradeStatus: {}", trade);
 	}
 
 }
