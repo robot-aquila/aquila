@@ -74,7 +74,11 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	public void onEvent(Event event) {
 		if(event.isType(currPortfolio.OnCurrentPortfolioChanged())) {
 			PortfolioEvent e = (PortfolioEvent) event;
-			updateDisplayData(e.getPortfolio());
+			Portfolio portfolio = e.getPortfolio();
+			updateDisplayData(portfolio);
+			portfolio.OnChanged().addListener(this);
+		}else if (event.isType(currPortfolio.getCurrentPortfolio().OnChanged())) {
+			updateDisplayData(currPortfolio.getCurrentPortfolio());
 		}
 		
 	}
