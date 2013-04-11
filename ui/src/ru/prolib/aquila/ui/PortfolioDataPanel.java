@@ -63,8 +63,10 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 				String.format("%.2f", portfolio.getCash()));
 		balanceVal.setValue(
 				String.format("%.2f", portfolio.getBalance()));
+		Double varMarg = portfolio.getVariationMargin();
 		varMargin.setValue(
-				String.format("%.2f",portfolio.getVariationMargin()));
+				String.format("%.2f",
+						(varMarg == null? 0.00 : varMarg)));
 	}
 
 	/* (non-Javadoc)
