@@ -82,9 +82,13 @@ public class StatusBar extends JPanel implements EventListener, Starter {
 		*/
 		add(tStart);
 		add(tConn);
-		add(prtPanel);
+		add(this.prtPanel);
 		setDisconnected();
 		setStopped();
+	}
+	
+	public PortfolioDataPanel getPortfolioPanel() {
+		return prtPanel;
 	}
 	
 	ImageIcon getRedIcon() {

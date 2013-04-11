@@ -122,6 +122,7 @@ public class StatusBarTest {
 		onDisconn.removeListener(same(bar));
 		onStarted.removeListener(same(bar));
 		onStopped.removeListener(same(bar));
+		prtPanel.stop();
 		
 		control.replay();
 		bar.stop();
@@ -135,6 +136,7 @@ public class StatusBarTest {
 		expect(terminal.OnStarted()).andStubReturn(onStarted);
 		expect(terminal.OnStopped()).andStubReturn(onStopped);
 		
+		prtPanel.start();
 		onConn.addListener(same(bar));
 		onDisconn.addListener(same(bar));
 		onStarted.addListener(same(bar));

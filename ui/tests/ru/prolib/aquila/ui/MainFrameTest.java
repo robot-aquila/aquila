@@ -79,11 +79,11 @@ public class MainFrameTest {
 			matches(main.getCurrPortfolio());
 		IsInstanceOf.instanceOf(PortfolioDataPanel.class).
 			matches(main.getContentPane().getComponent(0));
-		IsInstanceOf.instanceOf(PortfolioDataPanel.class).
-			matches(main.getContentPane().getComponent(0));
-		assertEquals(main.getTabPanel(), main.getContentPane().getComponent(1));
+		assertEquals(main.getTabPanel(), main.getContentPane().getComponent(0));		
+		assertEquals(main.getStatus(), main.getContentPane().getComponent(1));
 		IsInstanceOf.instanceOf(StatusBar.class).matches(main.getStatus());
-		assertEquals(main.getStatus(), main.getContentPane().getComponent(2));
+		IsInstanceOf.instanceOf(PortfolioDataPanel.class).
+			matches(main.getStatus().getPortfolioPanel());
 		
 		MenuBar menu = main.getMainMenu();
 		assertEquals(menu.getUnderlyingObject(), main.getJMenuBar());

@@ -17,6 +17,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.Starter;
+import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioEvent;
 
@@ -40,6 +41,7 @@ public class PortfolioDataPanelTest {
 		control = createStrictControl();
 		currPortfolio = control.createMock(CurrentPortfolio.class);
 		Properties l = new Properties();
+		l.setProperty("LB_ACCOUNT" , "LB_ACCOUNT");
 		l.setProperty("LB_CASH" , "LB_CASH");
 		l.setProperty("LB_BALANCE", "LB_BALANCE");
 		l.setProperty("LB_VAR_MARGIN", "LB_VAR_MARGIN");
@@ -65,17 +67,22 @@ public class PortfolioDataPanelTest {
 		LabeledTextValue val = panel.getBalanceVal();
 		assertEquals("LB_BALANCE", val.getLabel());
 		assertEquals("", val.getValue());
-		assertEquals(val, panel.getComponent(1));
+		assertEquals(val, panel.getComponent(2));
 		
 		val = panel.getCashVal();
 		assertEquals("LB_CASH", val.getLabel());
 		assertEquals("", val.getValue());
-		assertEquals(val, panel.getComponent(0));
+		assertEquals(val, panel.getComponent(1));
 		
 		val = panel.getVarMargin();
 		assertEquals("LB_VAR_MARGIN", val.getLabel());
 		assertEquals("", val.getValue());
-		assertEquals(val, panel.getComponent(2));
+		assertEquals(val, panel.getComponent(3));
+		
+		val = panel.getAccount();
+		assertEquals("LB_ACCOUNT", val.getLabel());
+		assertEquals("", val.getValue());
+		assertEquals(val, panel.getComponent(0));
 	}
 	
 	@Test
@@ -83,8 +90,12 @@ public class PortfolioDataPanelTest {
 		EventType onPrtChanged = control.createMock(EventType.class);
 		Portfolio prt = control.createMock(Portfolio.class);
 		PortfolioEvent evt = new PortfolioEvent(onPrtChanged, prt);
+		Account acc = control.createMock(Account.class);
 		
 		expect(currPortfolio.OnCurrentPortfolioChanged()).andStubReturn(onPrtChanged);
+		
+		expect(prt.getAccount()).andStubReturn(acc);
+		expect(acc.getCode()).andReturn("ACC_CODE");
 		expect(prt.getCash()).andReturn(98.6453);
 		expect(prt.getBalance()).andReturn(361.842);
 		expect(prt.getVariationMargin()).andReturn(23.671);
@@ -93,6 +104,7 @@ public class PortfolioDataPanelTest {
 		panel.onEvent(evt);
 		control.verify();
 		
+		assertEquals("ACC_CODE", panel.getAccount().getValue());
 		assertEquals("361,84", panel.getBalanceVal().getValue());
 		assertEquals("98,65",  panel.getCashVal().getValue());
 		assertEquals("23,67", panel.getVarMargin().getValue());
