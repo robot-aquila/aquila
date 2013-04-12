@@ -20,6 +20,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	private LabeledTextValue cashVal;
 	private LabeledTextValue balanceVal;
 	private LabeledTextValue varMargin;
+	private LabeledTextValue accountVal;
 	
 	private final CurrentPortfolio currPortfolio;
 	
@@ -27,10 +28,12 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	public PortfolioDataPanel(CurrentPortfolio currPrt, UiTexts uiTexts) {
 		super();
 		currPortfolio = currPrt;
+		accountVal = new LabeledTextValue(uiTexts.get(TEXT_SECT).get("LB_ACCOUNT"));
 		cashVal = new LabeledTextValue(uiTexts.get(TEXT_SECT).get("LB_CASH"));
 		balanceVal = new LabeledTextValue(uiTexts.get(TEXT_SECT).get("LB_BALANCE"));
 		varMargin = new LabeledTextValue(uiTexts.get(TEXT_SECT).get("LB_VAR_MARGIN"));
 		setLayout(new FlowLayout(FlowLayout.LEFT));
+		add(accountVal);
 		add(cashVal);
 		add(balanceVal);
 		add(varMargin);
@@ -55,6 +58,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	}
 	
 	private void updateDisplayData(Portfolio portfolio) {
+		accountVal.setValue(portfolio.getAccount().getCode());
 		cashVal.setValue(
 				String.format("%.2f", portfolio.getCash()));
 		balanceVal.setValue(
@@ -70,9 +74,17 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	public void onEvent(Event event) {
 		if(event.isType(currPortfolio.OnCurrentPortfolioChanged())) {
 			PortfolioEvent e = (PortfolioEvent) event;
-			updateDisplayData(e.getPortfolio());
+			Portfolio portfolio = e.getPortfolio();
+			updateDisplayData(portfolio);
+			portfolio.OnChanged().addListener(this);
+		}else if (event.isType(currPortfolio.getCurrentPortfolio().OnChanged())) {
+			updateDisplayData(currPortfolio.getCurrentPortfolio());
 		}
 		
+	}
+	
+	public LabeledTextValue getAccount() {
+		return accountVal;
 	}
 	
 	public LabeledTextValue getVarMargin() {

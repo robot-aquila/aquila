@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**

@@ -81,7 +81,7 @@ public class CurrentPortfolioImplTest {
 	public void testStart() throws Exception {
 		EventType onAvailable = control.createMock(EventType.class);
 		expect(portfolios.OnPortfolioAvailable()).andStubReturn(onAvailable);
-		onAvailable.addListener(prt);
+		onAvailable.addListener((EventListener) prt);
 		control.replay();
 		prt.start();
 		control.verify();
