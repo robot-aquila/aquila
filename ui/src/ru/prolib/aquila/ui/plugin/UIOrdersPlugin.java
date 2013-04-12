@@ -27,7 +27,7 @@ import ru.prolib.aquila.ui.wrapper.MenuItem;
  * $Id: UIOrdersPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
 public class UIOrdersPlugin implements AquilaPlugin, EventListener {
-	public static final String TEXT_SECT = "MainFrame";
+	public static final String TEXT_SECT = "UIOrdersPlugin";
 	public static final String TITLE = "TAB_ORDERS";
 	public static final String TITLE_STOP = "TAB_STOP_ORDERS";
 	public static final String MENU_ORDER = "MENU_ORDER";
@@ -83,7 +83,7 @@ public class UIOrdersPlugin implements AquilaPlugin, EventListener {
 				new JScrollPane(ordersTable), panel);
 		split.setOneTouchExpandable(true);
 		split.setDividerLocation(250);
-		facade.addTab(TITLE, split);
+		facade.addTab(text.get(TITLE), split);
 		
 		Menu menu = facade.getMainMenu()
 			.addMenu(MENU_ORDER, text.get(MENU_ORDER));

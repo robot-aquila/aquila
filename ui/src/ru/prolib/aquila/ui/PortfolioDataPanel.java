@@ -58,14 +58,15 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 	}
 	
 	private void updateDisplayData(Portfolio portfolio) {
-		accountVal.setValue(portfolio.getAccount().getCode());
+		accountVal.setValue(
+				String.format("%-40s",portfolio.getAccount().toString()));
 		cashVal.setValue(
-				String.format("%.2f", portfolio.getCash()));
+				String.format("%20.2f", portfolio.getCash()));
 		balanceVal.setValue(
-				String.format("%.2f", portfolio.getBalance()));
+				String.format("%20.2f", portfolio.getBalance()));
 		Double varMarg = portfolio.getVariationMargin();
 		varMargin.setValue(
-				String.format("%.2f",
+				String.format("%5.2f",
 						(varMarg == null? 0.00 : varMarg)));
 	}
 

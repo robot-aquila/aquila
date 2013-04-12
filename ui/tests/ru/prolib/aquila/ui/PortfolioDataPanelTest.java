@@ -97,7 +97,6 @@ public class PortfolioDataPanelTest {
 		expect(currPortfolio.OnCurrentPortfolioChanged()).andStubReturn(onCurrPrtChanged);
 		
 		expect(prt.getAccount()).andStubReturn(acc);
-		expect(acc.getCode()).andReturn("ACC_CODE");
 		expect(prt.getCash()).andReturn(98.6453);
 		expect(prt.getBalance()).andReturn(361.842);
 		expect(prt.getVariationMargin()).andReturn(23.671);
@@ -109,10 +108,10 @@ public class PortfolioDataPanelTest {
 		panel.onEvent(evt);
 		control.verify();
 		
-		assertEquals("ACC_CODE", panel.getAccount().getValue());
-		assertEquals("361,84", panel.getBalanceVal().getValue());
-		assertEquals("98,65",  panel.getCashVal().getValue());
-		assertEquals("23,67", panel.getVarMargin().getValue());
+		assertEquals(String.format("%-40s",acc.toString()), panel.getAccount().getValue());
+		assertEquals(String.format("%20.2f", 361.842), panel.getBalanceVal().getValue());
+		assertEquals(String.format("%20.2f", 98.6453),  panel.getCashVal().getValue());
+		assertEquals(String.format("%5.2f", 23.671), panel.getVarMargin().getValue());
 	}
 	
 	@Test
@@ -127,7 +126,6 @@ public class PortfolioDataPanelTest {
 		expect(prt.OnChanged()).andReturn(onPrtChanged);
 		expect(currPortfolio.getCurrentPortfolio()).andStubReturn(prt);
 		expect(prt.getAccount()).andStubReturn(acc);
-		expect(acc.getCode()).andReturn("ACC_CODE");
 		expect(prt.getCash()).andReturn(98.6453);
 		expect(prt.getBalance()).andReturn(361.842);
 		expect(prt.getVariationMargin()).andReturn(null);
@@ -136,10 +134,10 @@ public class PortfolioDataPanelTest {
 		panel.onEvent(new EventImpl(onPrtChanged));
 		control.verify();
 		
-		assertEquals("ACC_CODE", panel.getAccount().getValue());
-		assertEquals("361,84", panel.getBalanceVal().getValue());
-		assertEquals("98,65",  panel.getCashVal().getValue());
-		assertEquals("0,00", panel.getVarMargin().getValue());
+		assertEquals(String.format("%-40s",acc.toString()), panel.getAccount().getValue());
+		assertEquals(String.format("%20.2f", 361.842), panel.getBalanceVal().getValue());
+		assertEquals(String.format("%20.2f", 98.6453),  panel.getCashVal().getValue());
+		assertEquals(String.format("%5.2f", 0.00), panel.getVarMargin().getValue());
 	}
 	
 	@Test

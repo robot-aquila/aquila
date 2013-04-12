@@ -20,7 +20,7 @@ public class UiTexts {
 	
 	private static Logger logger = LoggerFactory.getLogger(UiTexts.class);
 	private String defLng = "en_US";
-	private final String[] localesPath = {"shared", "lang"};
+	private String[] localesPath = {"shared", "lang"};
 	private String dirSeparator = System.getProperty("file.separator");
 	private Map<String, ClassLabels> labels = new HashMap<String, ClassLabels>();
 	private String lang;
@@ -31,7 +31,9 @@ public class UiTexts {
 	
 	public UiTexts(String lang) {
 		super();
-		this.lang = lang;
+		if(lang != defLng) {
+			this.lang = lang;
+		}
 	}
 	
 	public void load() {
@@ -70,7 +72,7 @@ public class UiTexts {
 		labels.put(className, lbs);
 	}
 	
-	private void loadClassLabels(String className, Options opt) {
+	private void loadClassLabels(String className, Options opt) {		
 		Properties props = get(className).getLabels();
 		for(String key: opt.keySet()) {
 			props.setProperty(key, opt.get(key));
@@ -79,5 +81,25 @@ public class UiTexts {
 	
 	private ClassLabels createClassLabel(String name) {
 		return new ClassLabels(name);
+	}
+	
+	public void setLocalesPath(String[] path) {
+		localesPath = path;
+	}
+	
+	public String[] getLocalesPath() {
+		return localesPath;
+	}
+	
+	public String getLang() {
+		return lang;
+	}
+	
+	public String getDefLang() {
+		return defLng;
+	}
+	
+	public Map<String, ClassLabels> getLabels() {
+		return labels;
 	}
 }

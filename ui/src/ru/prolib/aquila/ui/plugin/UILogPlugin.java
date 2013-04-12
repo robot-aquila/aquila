@@ -15,6 +15,7 @@ import ru.prolib.aquila.ui.ServiceLocator;
  */
 public class UILogPlugin implements AquilaPlugin {
 	public static final String TITLE = "TAB_LOG";
+	public static final String TEXT_SEC = "UILogPlugin";
 	private LogTab panel;
 	
 	public UILogPlugin() {
@@ -39,7 +40,7 @@ public class UILogPlugin implements AquilaPlugin {
 	@Override
 	public void createUI(AquilaUI facade) throws Exception {
 		panel = new LogTab();
-		facade.addTab(TITLE, panel);
+		facade.addTab(facade.getTexts().get(TEXT_SEC).get(TITLE), panel);
 	}
 
 }

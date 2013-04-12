@@ -17,7 +17,7 @@ import ru.prolib.aquila.ui.*;
  * $Id: UIPositionsPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
 public class UIPositionsPlugin implements AquilaPlugin {
-	public static final String TEXT_SECTION = "MainFrame";
+	public static final String TEXT_SECTION = "PositionsTableModel";
 	public static final String TITLE = "TAB_POSITIONS";
 	
 	private Terminal terminal;
