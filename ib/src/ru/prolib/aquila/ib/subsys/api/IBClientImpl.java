@@ -103,7 +103,7 @@ public class IBClientImpl implements IBClient, EventListener {
 		if ( ! socket.isConnected() ) {
 			throw new IBException("Not connected, TODO: pop last error");
 		}
-		dispatcher.dispatch(new EventImpl(onConnectionOpened));
+		dispatcher.dispatch(new IBEvent(onConnectionOpened));
 	}
 
 	@Override

@@ -39,6 +39,9 @@ public class IBClientImplTest {
 		dispatcher = control.createMock(EventDispatcher.class);
 		client = new IBClientImpl(socket, wrapper, dispatcher,
 				onConnectionOpened, onConnectionClosed);
+		
+		expect(dispatcher.asString()).andStubReturn("disp");
+		expect(onConnectionOpened.asString()).andStubReturn("opened");
 	}
 
 	@Before

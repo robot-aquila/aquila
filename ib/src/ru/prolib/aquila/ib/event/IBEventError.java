@@ -58,10 +58,14 @@ public class IBEventError extends IBEventRequest {
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof IBEventError ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == IBEventError.class ) {
 			IBEventError o = (IBEventError) other;
 			return new EqualsBuilder()
-				.appendSuper(super.equals(other))
+				.append(getType(), o.getType())
+				.append(getReqId(), o.getReqId())
 				.append(code, o.code)
 				.append(msg, o.msg)
 				.isEquals();

@@ -83,7 +83,10 @@ public class IBEventUpdateAccount extends IBEvent {
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof IBEventUpdateAccount ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == IBEventUpdateAccount.class ) {
 			IBEventUpdateAccount o = (IBEventUpdateAccount) other;
 			return new EqualsBuilder()
 				.append(getType(), o.getType())

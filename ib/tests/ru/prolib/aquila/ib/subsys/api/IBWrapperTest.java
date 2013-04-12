@@ -188,7 +188,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testAccountDownloadEnd() throws Exception {
-		logger.debug("accountDownloadEnd not implemented");
+		//logger.debug("accountDownloadEnd not implemented");
 		control.replay();
 		wrapper.accountDownloadEnd("test");
 		control.verify();
@@ -233,7 +233,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testCommissionReport() throws Exception {
-		logger.debug("commissionReport not implemented");
+		//logger.debug("commissionReport not implemented");
 		control.replay();
 		wrapper.commissionReport(new CommissionReport());
 		control.verify();
@@ -241,7 +241,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testCurrentTime() throws Exception {
-		logger.debug("currentTime not implemented");
+		//logger.debug("currentTime not implemented");
 		control.replay();
 		wrapper.currentTime(100500L);
 		control.verify();
@@ -249,7 +249,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testDeltaNeutralValidation() throws Exception {
-		logger.debug("deltaNeutralValidation not implemented");
+		//logger.debug("deltaNeutralValidation not implemented");
 		control.replay();
 		wrapper.deltaNeutralValidation(100, new UnderComp());
 		control.verify();
@@ -257,7 +257,7 @@ public class IBWrapperTest {
 
 	@Test
 	public void testExecDetails() throws Exception {
-		logger.debug("execDetails not implemented");
+		//logger.debug("execDetails not implemented");
 		control.replay();
 		wrapper.execDetails(100, new Contract(), new Execution());
 		control.verify();
@@ -265,7 +265,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testExecDetailsEnd() throws Exception {
-		logger.debug("execDetailsEnd not implemented");
+		//logger.debug("execDetailsEnd not implemented");
 		control.replay();
 		wrapper.execDetailsEnd(100);
 		control.verify();
@@ -273,7 +273,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testFundamentalData() throws Exception {
-		logger.debug("fundamentalData not implemented");
+		//logger.debug("fundamentalData not implemented");
 		control.replay();
 		wrapper.fundamentalData(100, "test");
 		control.verify();
@@ -281,7 +281,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testHistoricalData() throws Exception {
-		logger.debug("historicalData not implemented");
+		//logger.debug("historicalData not implemented");
 		control.replay();
 		wrapper.historicalData(100, "test", 1, 2, 1, 1, 20, 1, 5, false);
 		control.verify();
@@ -299,7 +299,7 @@ public class IBWrapperTest {
 
 	@Test
 	public void testMarketDataType() throws Exception {
-		logger.debug("marketDataType not implemented");
+		//logger.debug("marketDataType not implemented");
 		control.replay();
 		wrapper.marketDataType(100, 500);
 		control.verify();
@@ -330,7 +330,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testOpenOrderEnd() throws Exception {
-		logger.debug("openOrderEnd not implemented");
+		//logger.debug("openOrderEnd not implemented");
 		control.replay();
 		wrapper.openOrderEnd();
 		control.verify();
@@ -349,7 +349,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testRealtimeBar() throws Exception {
-		logger.debug("realtimeBar not implemented");
+		//logger.debug("realtimeBar not implemented");
 		control.replay();
 		wrapper.realtimeBar(1, 2, 3, 4, 5, 6, 7, 8, 9);
 		control.verify();
@@ -357,7 +357,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testReceiveFA() throws Exception {
-		logger.debug("receiveFA not implemented");
+		//logger.debug("receiveFA not implemented");
 		control.replay();
 		wrapper.receiveFA(1, "xml");
 		control.verify();
@@ -365,7 +365,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testScannerData() throws Exception {
-		logger.debug("scannerData not implemented");
+		//logger.debug("scannerData not implemented");
 		control.replay();
 		wrapper.scannerData(1, 2, new ContractDetails(), "a", "b", "c", "d");
 		control.verify();
@@ -373,7 +373,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testScannerDataEnd() throws Exception {
-		logger.debug("scannerDataEnd not implemented");
+		//logger.debug("scannerDataEnd not implemented");
 		control.replay();
 		wrapper.scannerDataEnd(1);
 		control.verify();
@@ -381,7 +381,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testScannerParameters() throws Exception {
-		logger.debug("scannerParameters not implemented");
+		//logger.debug("scannerParameters not implemented");
 		control.replay();
 		wrapper.scannerParameters("xml");
 		control.verify();
@@ -389,7 +389,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testTickEFP() throws Exception {
-		logger.debug("tickEFP not implemented");
+		//logger.debug("tickEFP not implemented");
 		control.replay();
 		wrapper.tickEFP(1, 2, 3, "4", 5, 6, "7", 8, 9);
 		control.verify();
@@ -407,7 +407,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testTickOptionComputation() throws Exception {
-		logger.debug("tickOptionComputation not implemented");
+		//logger.debug("tickOptionComputation not implemented");
 		control.replay();
 		wrapper.tickOptionComputation(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		control.verify();
@@ -435,7 +435,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testTickSnapshotEnd() throws Exception {
-		logger.debug("tickSnapshotEnd not implemented");
+		//logger.debug("tickSnapshotEnd not implemented");
 		control.replay();
 		wrapper.tickSnapshotEnd(1);
 		control.verify();
@@ -443,7 +443,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testTickString() throws Exception {
-		logger.debug("tickString not implemented");
+		//logger.debug("tickString not implemented");
 		control.replay();
 		wrapper.tickString(1, 2, "3");
 		control.verify();
@@ -451,7 +451,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testUpdateAccountTime() throws Exception {
-		logger.debug("updateAccountTime not implemented");
+		//logger.debug("updateAccountTime not implemented");
 		control.replay();
 		wrapper.updateAccountTime("test");
 		control.verify();
@@ -470,7 +470,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testUpdateMktDepth() throws Exception {
-		logger.debug("updateMktDepth not implemented");
+		//logger.debug("updateMktDepth not implemented");
 		control.replay();
 		wrapper.updateMktDepth(1, 2, 3, 4, 5, 6);
 		control.verify();
@@ -478,7 +478,7 @@ public class IBWrapperTest {
 
 	@Test
 	public void testUpdateMktDepthL2() throws Exception {
-		logger.debug("updateMktDepthL2 not implemented");
+		//logger.debug("updateMktDepthL2 not implemented");
 		control.replay();
 		wrapper.updateMktDepthL2(1, 2, "3", 4, 5, 6, 7);
 		control.verify();
@@ -486,7 +486,7 @@ public class IBWrapperTest {
 	
 	@Test
 	public void testUpdateNewsBulletin() throws Exception {
-		logger.debug("updateNewsBulletin not implemented");
+		//logger.debug("updateNewsBulletin not implemented");
 		control.replay();
 		wrapper.updateNewsBulletin(1, 2, "message", "origExchange");
 		control.verify();

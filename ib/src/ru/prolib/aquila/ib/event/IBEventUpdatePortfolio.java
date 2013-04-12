@@ -151,7 +151,10 @@ public class IBEventUpdatePortfolio extends IBEvent {
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof IBEventUpdatePortfolio ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass()==IBEventUpdatePortfolio.class ) {
 			IBEventUpdatePortfolio o = (IBEventUpdatePortfolio) other;
 			return new EqualsBuilder()
 				.append(getType(), o.getType())

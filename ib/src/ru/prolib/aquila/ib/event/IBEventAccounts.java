@@ -35,7 +35,10 @@ public class IBEventAccounts extends IBEvent {
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof IBEventAccounts ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == IBEventAccounts.class ) {
 			IBEventAccounts o = (IBEventAccounts) other;
 			return new EqualsBuilder()
 				.append(accounts, o.accounts)

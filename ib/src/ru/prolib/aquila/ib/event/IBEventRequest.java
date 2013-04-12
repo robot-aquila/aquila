@@ -35,10 +35,13 @@ public class IBEventRequest extends IBEvent {
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof IBEventRequest ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == IBEventRequest.class ) {
 			IBEventRequest o = (IBEventRequest) other;
 			return new EqualsBuilder()
-				.appendSuper(super.equals(other))
+				.append(getType(), o.getType())
 				.append(reqId, o.reqId)
 				.isEquals();
 		} else {

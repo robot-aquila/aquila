@@ -66,10 +66,14 @@ public class IBEventContract extends IBEventRequest {
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof IBEventContract ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == IBEventContract.class ) {
 			IBEventContract o = (IBEventContract) other;
 			return new EqualsBuilder()
-				.appendSuper(super.equals(other))
+				.append(getType(), o.getType())
+				.append(getReqId(), o.getReqId())
 				.append(subType, o.subType)
 				.append(details, o.details)
 				.isEquals();
