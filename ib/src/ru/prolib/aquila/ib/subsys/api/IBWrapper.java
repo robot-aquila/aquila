@@ -125,12 +125,12 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 	 * Вывести в лог информацию о нереализованном методе.
 	 */
 	private void notimplemented() {
-		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-		if ( stack.length > 2 ) {
-			logger.debug(stack[2].getMethodName() + " not implemented");
-		} else {
-			logger.error("direct call of debug method");
-		}
+		//StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+		//if ( stack.length > 2 ) {
+		//	logger.debug(stack[2].getMethodName() + " not implemented");
+		//} else {
+		//	logger.error("direct call of debug method");
+		//}
 	}
 
 	@Override
