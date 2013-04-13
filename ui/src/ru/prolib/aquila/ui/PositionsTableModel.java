@@ -28,7 +28,7 @@ public class PositionsTableModel extends AbstractTableModel implements
 	private static final String COL_MARKET = "COL_MARKET";
 	private static final String COL_LOCK_VAL = "COL_LOCK_VAL";
 	private static final String COL_VAR_MARG = "COL_VAR_MARG";
-	private static final String COL_OPEN_VAL = "COL_OPEN_VAL.";
+	private static final String COL_OPEN_VAL = "COL_OPEN_VAL";
 	private static final String COL_BALANCE = "COL_BALANCE";
 	
 	private static final String[] header = {

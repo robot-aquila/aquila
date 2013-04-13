@@ -24,7 +24,7 @@ import ru.prolib.aquila.ui.wrapper.TableModelImpl;
  * $Id: UISecuritiesPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
 public class UISecuritiesPlugin implements AquilaPlugin {
-	public static final String TEXT_SECT = "SecuritiesTableModel";
+	public static final String TEXT_SECT = "UISecuritiesPlugin";
 	public static final String TITLE = "TAB_SECURITIES";
 	public static final String MENU_SECURITY = "MENU_SEC";
 	

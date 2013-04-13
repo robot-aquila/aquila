@@ -11,12 +11,17 @@ import org.slf4j.LoggerFactory;
  */
 public class ClassLabels {
 	private static Logger logger = LoggerFactory.getLogger(ClassLabels.class);
-	private final Properties labels;
+	private Properties labels;
 	private final String name;
 	
 	public ClassLabels(String name, Properties labels) {
 		this.name = name;
 		this.labels = labels;
+	}
+	
+	public ClassLabels(String name) {
+		this.name = name;
+		labels = new Properties();
 	}
 	
 	public String get(String label) {
@@ -25,6 +30,14 @@ public class ClassLabels {
 			return label;
 		}
 		return labels.getProperty(label);
+	}
+	
+	public Properties getLabels() {
+		return labels;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 }

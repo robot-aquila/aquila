@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.EventImpl;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.Starter;
@@ -86,28 +87,57 @@ public class PortfolioDataPanelTest {
 	}
 	
 	@Test
-	public void testOnEvent() {
+	public void testOnEvent_CurrPortfolioChanged() {
+		EventType onCurrPrtChanged = control.createMock(EventType.class);
 		EventType onPrtChanged = control.createMock(EventType.class);
 		Portfolio prt = control.createMock(Portfolio.class);
-		PortfolioEvent evt = new PortfolioEvent(onPrtChanged, prt);
+		PortfolioEvent evt = new PortfolioEvent(onCurrPrtChanged, prt);
 		Account acc = control.createMock(Account.class);
 		
-		expect(currPortfolio.OnCurrentPortfolioChanged()).andStubReturn(onPrtChanged);
+		expect(currPortfolio.OnCurrentPortfolioChanged()).andStubReturn(onCurrPrtChanged);
 		
 		expect(prt.getAccount()).andStubReturn(acc);
-		expect(acc.getCode()).andReturn("ACC_CODE");
 		expect(prt.getCash()).andReturn(98.6453);
 		expect(prt.getBalance()).andReturn(361.842);
 		expect(prt.getVariationMargin()).andReturn(23.671);
+		
+		expect(prt.OnChanged()).andStubReturn(onPrtChanged);
+		onPrtChanged.addListener(panel);
 		
 		control.replay();
 		panel.onEvent(evt);
 		control.verify();
 		
-		assertEquals("ACC_CODE", panel.getAccount().getValue());
-		assertEquals("361,84", panel.getBalanceVal().getValue());
-		assertEquals("98,65",  panel.getCashVal().getValue());
-		assertEquals("23,67", panel.getVarMargin().getValue());
+		assertEquals(String.format("%-40s",acc.toString()), panel.getAccount().getValue());
+		assertEquals(String.format("%20.2f", 361.842), panel.getBalanceVal().getValue());
+		assertEquals(String.format("%20.2f", 98.6453),  panel.getCashVal().getValue());
+		assertEquals(String.format("%5.2f", 23.671), panel.getVarMargin().getValue());
+	}
+	
+	@Test
+	public void testOnEvent_PortfolioChangedMarginIsNull() {
+		EventType onCurrPrtChanged = control.createMock(EventType.class);
+		EventType onPrtChanged = control.createMock(EventType.class);
+		Portfolio prt = control.createMock(Portfolio.class);
+		Account acc = control.createMock(Account.class);
+		
+		expect(currPortfolio.OnCurrentPortfolioChanged()).andStubReturn(onCurrPrtChanged);
+		expect(currPortfolio.getCurrentPortfolio()).andStubReturn(prt);
+		expect(prt.OnChanged()).andReturn(onPrtChanged);
+		expect(currPortfolio.getCurrentPortfolio()).andStubReturn(prt);
+		expect(prt.getAccount()).andStubReturn(acc);
+		expect(prt.getCash()).andReturn(98.6453);
+		expect(prt.getBalance()).andReturn(361.842);
+		expect(prt.getVariationMargin()).andReturn(null);
+		
+		control.replay();
+		panel.onEvent(new EventImpl(onPrtChanged));
+		control.verify();
+		
+		assertEquals(String.format("%-40s",acc.toString()), panel.getAccount().getValue());
+		assertEquals(String.format("%20.2f", 361.842), panel.getBalanceVal().getValue());
+		assertEquals(String.format("%20.2f", 98.6453),  panel.getCashVal().getValue());
+		assertEquals(String.format("%5.2f", 0.00), panel.getVarMargin().getValue());
 	}
 	
 	@Test
