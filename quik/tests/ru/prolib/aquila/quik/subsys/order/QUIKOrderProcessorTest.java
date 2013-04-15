@@ -75,16 +75,18 @@ public class QUIKOrderProcessorTest {
 		control.verify();
 	}
 	
-	private void checkCancelOrder(OrderType type) throws Exception {
+	private void checkCancelOrder(OrderType orderType) throws Exception {
 		setUp();
-		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		expect(order.getStatus()).andStubReturn(OrderStatus.ACTIVE);
+		expect(order.getSecurity()).andStubReturn(security);
+		expect(security.getClassCode()).andStubReturn("SECTION");
+		expect(order.getId()).andStubReturn(835L);
+		expect(order.getType()).andStubReturn(orderType);
 		expect(transId.incrementAndGet()).andReturn(137);
-		expect(order.getSecurity()).andReturn(security);
-		expect(security.getClassCode()).andReturn("SECTION");
-		expect(order.getId()).andReturn(8273l);
-		expect(order.getType()).andStubReturn(type);
+		expect(api.OnTransReply(137)).andReturn(type);
+		type.addListener(eq(new CancelOrderHandler(locator, orders, 835L)));
 		api.send("TRANS_ID=137; CLASSCODE=SECTION; ACTION=KILL_ORDER; "
-				+ "ORDER_KEY=8273");
+				+ "ORDER_KEY=835");
 		control.replay();
 		processor.cancelOrder(order);
 		control.verify();
@@ -96,16 +98,18 @@ public class QUIKOrderProcessorTest {
 		checkCancelOrder(OrderType.MARKET);
 	}
 	
-	private void checkCancelStopOrder(OrderType type) throws Exception {
+	private void checkCancelStopOrder(OrderType orderType) throws Exception {
 		setUp();
-		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
-		expect(transId.incrementAndGet()).andReturn(137);
-		expect(order.getSecurity()).andReturn(security);
-		expect(security.getClassCode()).andReturn("SECTION");
-		expect(order.getId()).andReturn(8273l);
-		expect(order.getType()).andStubReturn(type);
-		api.send("TRANS_ID=137; CLASSCODE=SECTION; "
-				+ "ACTION=KILL_STOP_ORDER; STOP_ORDER_KEY=8273");
+		expect(order.getStatus()).andStubReturn(OrderStatus.ACTIVE);
+		expect(order.getSecurity()).andStubReturn(security);
+		expect(security.getClassCode()).andStubReturn("BUZZ");
+		expect(order.getId()).andStubReturn(823L);
+		expect(order.getType()).andStubReturn(orderType);
+		expect(transId.incrementAndGet()).andReturn(120);
+		expect(api.OnTransReply(120)).andReturn(type);
+		type.addListener(eq(new CancelOrderHandler(locator, stopOrders, 823L)));
+		api.send("TRANS_ID=120; CLASSCODE=BUZZ; "
+				+ "ACTION=KILL_STOP_ORDER; STOP_ORDER_KEY=823");
 		control.replay();
 		processor.cancelOrder(order);
 		control.verify();

@@ -49,19 +49,28 @@ public class QUIKOrderProcessor implements OrderProcessor {
 		if ( order.getStatus() != OrderStatus.ACTIVE ) {
 			return;
 		}
-		boolean isStop = false;
 		OrderType type = order.getType();
-		if ( type == OrderType.STOP_LIMIT || type == OrderType.TAKE_PROFIT
+		long orderId = order.getId();
+		EditableTerminal terminal = locator.getTerminal();
+		EditableOrders orders = null;
+		String trspec = null;
+		if ( type == OrderType.STOP_LIMIT
+			|| type == OrderType.TAKE_PROFIT
 			|| type == OrderType.TAKE_PROFIT_AND_STOP_LIMIT )
 		{
-			isStop = true;
+			orders = terminal.getStopOrdersInstance();
+			trspec = "ACTION=KILL_STOP_ORDER; STOP_ORDER_KEY=" + orderId;
+		} else {
+			orders = terminal.getOrdersInstance();
+			trspec = "ACTION=KILL_ORDER; ORDER_KEY=" + orderId;
 		}
+		long transId = locator.getTransactionNumerator().incrementAndGet();
+		locator.getApi().OnTransReply(transId)
+			.addListener(new CancelOrderHandler(locator, orders, orderId));
 		try {
-			send("TRANS_ID="
-				+ locator.getTransactionNumerator().incrementAndGet() + "; "
+			send("TRANS_ID=" + transId + "; "
 				+ "CLASSCODE=" + order.getSecurity().getClassCode() + "; "
-				+ "ACTION=" + (isStop ? "KILL_STOP_ORDER" : "KILL_ORDER") + "; "
-				+ (isStop ? "STOP_" : "") + "ORDER_KEY=" + order.getId());
+				+ trspec);
 		} catch ( SecurityException e ) {
 			throw new OrderException(e);
 		}
