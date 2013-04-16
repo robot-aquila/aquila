@@ -182,6 +182,9 @@ public class MainFrameTest {
 		assertTrue(m.getItem("MENU_TERM_START").OnCommand().isListener(main));
 		assertTrue(m.isItemExists("MENU_TERM_STOP"));
 		assertTrue(m.getItem("MENU_TERM_STOP").OnCommand().isListener(main));
+		
+		m = menu.getMenu("MENU_VIEW");
+		assertTrue(m.isItemExists("MENU_VIEW_PORTFOLIO_STATUS"));
 	}
 
 }

@@ -28,6 +28,8 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	public static final String MENU_SECT = "MenuBar";
 	public static final String MENU_FILE = "MENU_FILE";
 	public static final String MENU_TERM = "MENU_TERM";
+	public static final String MENU_VIEW = "MENU_VIEW";
+	public static final String MENU_VIEW_PORTFOLIO_STATUS = "MENU_VIEW_PORTFOLIO_STATUS";
 	public static final String MENU_FILE_EXIT = "MENU_FILE_EXIT";
 	public static final String MENU_TERM_START = "MENU_TERM_START";
 	public static final String MENU_TERM_STOP = "MENU_TERM_STOP";
@@ -61,7 +63,8 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 		
 		EventDispatcher dispatcher = es.createEventDispatcher(); 
 		currPortfolio = new CurrentPortfolioImpl(
-				(Portfolios) terminal, es.createGenericType(dispatcher), dispatcher);
+				(Portfolios) terminal, es.createGenericType(dispatcher), dispatcher,
+				mainMenu.getMenu(MENU_VIEW).getSubMenu(MENU_VIEW_PORTFOLIO_STATUS));
 		
 		PortfolioDataPanel portfolioBox = new PortfolioDataPanel(
 				currPortfolio, uiLabels);
@@ -143,6 +146,9 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 		cmdStart.OnCommand().addListener(this);
 		cmdStop = menu.addItem(MENU_TERM_STOP, text.get(MENU_TERM_STOP));
 		cmdStop.OnCommand().addListener(this);
+		
+		menu = mainMenu.addMenu(MENU_VIEW, text.get(MENU_VIEW));
+		menu.addSubMenu(MENU_VIEW_PORTFOLIO_STATUS, text.get(MENU_VIEW_PORTFOLIO_STATUS));
 	}
 	
 	private void exit() {
