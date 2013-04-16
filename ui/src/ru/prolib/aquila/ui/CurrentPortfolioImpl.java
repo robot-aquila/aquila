@@ -3,6 +3,9 @@ package ru.prolib.aquila.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +29,9 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	private final EventDispatcher dispatcher;
 	private Portfolios portfolios;
 	private Portfolio portfolio;
+	private ButtonGroup buttons = new ButtonGroup();
 	private Menu menu;
+	private ImageIcon selectedIcon = new ImageIcon("shared/images/ch.png");
 	
 	private Map<EventType, Portfolio> prtList = new HashMap<EventType, Portfolio>();
 	
@@ -48,14 +53,12 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	@Override
 	public void setCurrentPortfolio(Portfolio portfolio) {
 		this.portfolio = portfolio;
-		/*
 		try {
-		menu.getItem(portfolio.getAccount().toString())
-			.getUnderlyingObject().setSelected(true);
+			menu.getItem(portfolio.getAccount().toString())
+				.getUnderlyingObject().setSelected(true);
 		} catch (MenuException e) {
 			logger.error("MenuItem ERROR: {}", e.getMessage());
 		}
-		*/
 		fireCurrentPortfolioChangedEvent();
 	}
 
@@ -110,7 +113,8 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	
 	private void addMenuItem(Portfolio prt) throws MenuException {
 		String id = prt.getAccount().toString();
-		MenuItem m = menu.addItem(id, id);
+		MenuItem m = menu.addItem(id, id, "JRadioButtonMenuItem");
+		buttons.add( m.getUnderlyingObject());
 		EventType evt = m.OnCommand();
 		evt.addListener(this);
 		prtList.put(evt, prt);
@@ -133,6 +137,14 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	
 	public Map<EventType, Portfolio> getPrtList() {
 		return prtList;
+	}
+	
+	public void setButtons(ButtonGroup buttons) {
+		this.buttons = buttons;
+	}
+	
+	public ButtonGroup getButtons() {
+		return buttons;
 	}
 
 }

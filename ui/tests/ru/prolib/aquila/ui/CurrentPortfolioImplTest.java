@@ -9,9 +9,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JMenu;
+import javax.swing.JRadioButtonMenuItem;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -41,6 +43,7 @@ public class CurrentPortfolioImplTest {
 	private static EventSystem eventSystem;
 	private static EventQueue queue;
 	
+	private Account acc;
 	private Portfolios portfolios;
 	private EventDispatcher dispatcher;
 	private EventType portfolioChanged;
@@ -70,6 +73,7 @@ public class CurrentPortfolioImplTest {
 		dispatcher = eventSystem.createEventDispatcher();
 		portfolios = control.createMock(Portfolios.class);
 		portfolioChanged = eventSystem.createGenericType(dispatcher);
+		acc = new Account("Foo", "Bar", "Trulala");
 		
 		menu = new Menu(new JMenu(), eventSystem);
 		prt = new CurrentPortfolioImpl(portfolios, portfolioChanged, dispatcher, menu);
@@ -109,11 +113,12 @@ public class CurrentPortfolioImplTest {
 	public void testOnEvent_HandledCurrPortfolioNotSet() throws Exception {
 		EventType onPortfolioAvailable = eventSystem.createGenericType(dispatcher);
 		final Portfolio portfolio = control.createMock(Portfolio.class);
-		final Account acc = control.createMock(Account.class);
+		
 		final CountDownLatch finished = new CountDownLatch(1);
 		
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
-		expect(portfolio.getAccount()).andStubReturn(acc);
+		expect(portfolio.getAccount()).andReturn(acc);
+		expectLastCall().times(2);
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
 
 			@Override
@@ -134,21 +139,22 @@ public class CurrentPortfolioImplTest {
 		
 		assertTrue(prt.getMenu().isItemExists(acc.toString()));
 		MenuItem menuItem = prt.getMenu().getItem(acc.toString());
+		IsInstanceOf.instanceOf(JRadioButtonMenuItem.class).matches(menuItem.getUnderlyingObject());
 		
 		Map<EventType, Portfolio> prtList = prt.getPrtList();
 		assertTrue(prtList.containsKey(menuItem.OnCommand()));
 		assertEquals(portfolio, prtList.get(menuItem.OnCommand()));
 		assertTrue(menuItem.OnCommand().isListener(prt));
+		assertEquals(1, prt.getButtons().getButtonCount());
 	}
 	
 	@Test
 	public void testOnEvent_HandledCurrPortfolioSet() throws Exception {
 		EventType onPortfolioAvailable = eventSystem.createGenericType(dispatcher);
 		final Portfolio portfolio = control.createMock(Portfolio.class);
-		final Account acc = control.createMock(Account.class);
 		
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
-		expect(portfolio.getAccount()).andStubReturn(acc);
+		expect(portfolio.getAccount()).andReturn(acc);
 		
 		prt.setPortfolio(portfolio);
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
@@ -167,11 +173,13 @@ public class CurrentPortfolioImplTest {
 		
 		assertTrue(prt.getMenu().isItemExists(acc.toString()));
 		MenuItem menuItem = prt.getMenu().getItem(acc.toString());
+		IsInstanceOf.instanceOf(JRadioButtonMenuItem.class).matches(menuItem.getUnderlyingObject());
 		
 		Map<EventType, Portfolio> prtList = prt.getPrtList();
 		assertTrue(prtList.containsKey(menuItem.OnCommand()));
 		assertEquals(portfolio, prtList.get(menuItem.OnCommand()));
 		assertTrue(menuItem.OnCommand().isListener(prt));
+		assertEquals(1, prt.getButtons().getButtonCount());
 	}
 	
 	@Test
@@ -199,7 +207,7 @@ public class CurrentPortfolioImplTest {
 		final Portfolio portfolio = control.createMock(Portfolio.class);		
 		final CountDownLatch finished = new CountDownLatch(1);
 		final PortfolioEvent expected = new PortfolioEvent(portfolioChanged, portfolio);
-		
+		expect(portfolio.getAccount()).andReturn(acc);
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
 
 			@Override
@@ -208,7 +216,10 @@ public class CurrentPortfolioImplTest {
 				finished.countDown();
 			}			
 		});
+		
+		control.replay();
 		prt.setCurrentPortfolio(portfolio);
+		control.verify();
 		assertEquals(portfolio, prt.getCurrentPortfolio());
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 	}
