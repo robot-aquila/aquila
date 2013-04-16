@@ -4,8 +4,11 @@ import static org.easymock.EasyMock.createStrictControl;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JMenu;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
@@ -22,9 +25,12 @@ import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.EventSystemImpl;
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioEvent;
 import ru.prolib.aquila.core.BusinessEntities.Portfolios;
+import ru.prolib.aquila.ui.wrapper.Menu;
+import ru.prolib.aquila.ui.wrapper.MenuItem;
 
 /**
  * $Id$
@@ -38,6 +44,7 @@ public class CurrentPortfolioImplTest {
 	private Portfolios portfolios;
 	private EventDispatcher dispatcher;
 	private EventType portfolioChanged;
+	private Menu menu;
 	
 	private CurrentPortfolioImpl prt;
 	
@@ -64,7 +71,8 @@ public class CurrentPortfolioImplTest {
 		portfolios = control.createMock(Portfolios.class);
 		portfolioChanged = eventSystem.createGenericType(dispatcher);
 		
-		prt = new CurrentPortfolioImpl(portfolios, portfolioChanged, dispatcher);
+		menu = new Menu(new JMenu(), eventSystem);
+		prt = new CurrentPortfolioImpl(portfolios, portfolioChanged, dispatcher, menu);
 		queue.start();
 	}
 
@@ -101,10 +109,11 @@ public class CurrentPortfolioImplTest {
 	public void testOnEvent_HandledCurrPortfolioNotSet() throws Exception {
 		EventType onPortfolioAvailable = eventSystem.createGenericType(dispatcher);
 		final Portfolio portfolio = control.createMock(Portfolio.class);
+		final Account acc = control.createMock(Account.class);
 		final CountDownLatch finished = new CountDownLatch(1);
 		
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
-		
+		expect(portfolio.getAccount()).andStubReturn(acc);
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
 
 			@Override
@@ -122,13 +131,25 @@ public class CurrentPortfolioImplTest {
 		control.verify();
 		assertEquals(portfolio, prt.getCurrentPortfolio());
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
+		
+		assertTrue(prt.getMenu().isItemExists(acc.toString()));
+		MenuItem menuItem = prt.getMenu().getItem(acc.toString());
+		
+		Map<EventType, Portfolio> prtList = prt.getPrtList();
+		assertTrue(prtList.containsKey(menuItem.OnCommand()));
+		assertEquals(portfolio, prtList.get(menuItem.OnCommand()));
+		assertTrue(menuItem.OnCommand().isListener(prt));
 	}
 	
 	@Test
-	public void testOnEvent_HandledCurrPortfolioSet() {
+	public void testOnEvent_HandledCurrPortfolioSet() throws Exception {
 		EventType onPortfolioAvailable = eventSystem.createGenericType(dispatcher);
 		final Portfolio portfolio = control.createMock(Portfolio.class);
+		final Account acc = control.createMock(Account.class);
+		
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
+		expect(portfolio.getAccount()).andStubReturn(acc);
+		
 		prt.setPortfolio(portfolio);
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
 
@@ -143,6 +164,14 @@ public class CurrentPortfolioImplTest {
 		prt.onEvent(new PortfolioEvent(onPortfolioAvailable, portfolio));
 		
 		control.verify();
+		
+		assertTrue(prt.getMenu().isItemExists(acc.toString()));
+		MenuItem menuItem = prt.getMenu().getItem(acc.toString());
+		
+		Map<EventType, Portfolio> prtList = prt.getPrtList();
+		assertTrue(prtList.containsKey(menuItem.OnCommand()));
+		assertEquals(portfolio, prtList.get(menuItem.OnCommand()));
+		assertTrue(menuItem.OnCommand().isListener(prt));
 	}
 	
 	@Test
@@ -189,6 +218,7 @@ public class CurrentPortfolioImplTest {
 		assertEquals(portfolios, prt.getPortfolios());
 		assertEquals(dispatcher, prt.getDispatcher());
 		assertEquals(portfolioChanged, prt.OnCurrentPortfolioChanged());
+		assertEquals(menu, prt.getMenu());
 	}
 
 }
