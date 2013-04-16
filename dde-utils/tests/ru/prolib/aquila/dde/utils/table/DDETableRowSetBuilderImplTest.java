@@ -146,7 +146,7 @@ public class DDETableRowSetBuilderImplTest {
 		expect(validator.validate(notNull())).andStubReturn(true);
 		control.replay();
 		handler.createRowSet(createTable(new Object[][]
-		        {{ "#", "name", "price" }}, "R1C1:any"));
+		        {{ "#", "name", "price" }}, "R1C1:R10C10"));
 		
 		DDETable table = createTable(new Object[][] {
 				{ "SBER", 97.156d },
@@ -172,7 +172,7 @@ public class DDETableRowSetBuilderImplTest {
 		expect(validator.validate(notNull())).andStubReturn(true);
 		control.replay();
 		handler.createRowSet(createTable(new Object[][]
-   		        {{ "#", "name", "price" }}, "R1C1:any"));
+   		        {{ "#", "name", "price" }}, "R1C1:R1C3"));
 		
 		DDETable table = createTable(new Object[][] {
 				{ "price", "name" },
@@ -185,8 +185,8 @@ public class DDETableRowSetBuilderImplTest {
 		expected.add("name");
 		expected.add("price");
 		assertEquals(expected, handler.getHeaders());
-		assertRowSet(new String[] { "price", "name" },
-				new Object[][] {{ 18.34d, "GAZP" }}, rs);
+		assertRowSet(new String[] { "#", "price", "name" },
+				new Object[][] {{ null, 18.34d, "GAZP" }}, rs);
 	}
 	
 	@Test
@@ -195,7 +195,7 @@ public class DDETableRowSetBuilderImplTest {
 		expect(validator.validate(notNull())).andStubReturn(true);
 		control.replay();
 		handler.createRowSet(createTable(new Object[][]
-   		        {{ "#", "name", "price" }}, "R1C1:any"));
+   		        {{ "#", "name", "price" }}, "R1C1:R1C3"));
 		
 		DDETable table = createTable(new Object[][] {
 				{ "price", "update" },
@@ -314,8 +314,8 @@ public class DDETableRowSetBuilderImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		DDETable t1 = createTable(new Object[][]{{ "#", "name", }}, "R1C1:any");
-		DDETable t2 = createTable(new Object[][]{{ "one", "two" }}, "R1C1:any");
+		DDETable t1 = createTable(new Object[][]{{ "#", "name", }},"R1C1:R1C1");
+		DDETable t2 = createTable(new Object[][]{{ "one", "two" }},"R1C1:R1C1");
 		Validator validator2 = control.createMock(Validator.class);
 		expect(validator.validate(notNull())).andStubReturn(true);
 		expect(validator2.validate(notNull())).andStubReturn(true);
@@ -357,8 +357,7 @@ public class DDETableRowSetBuilderImplTest {
 	
 	@Test
 	public void testHashCode() throws Exception {
-		
-		DDETable t1 = createTable(new Object[][]{{ "#", "name", }}, "R20C10:?");
+		DDETable t1 = createTable(new Object[][]{{ "#","name"}},"R20C10:R2C1");
 		Map<String, Integer> header = new HashMap<String, Integer>();
 		header.put("#", 0);
 		header.put("name", 1);

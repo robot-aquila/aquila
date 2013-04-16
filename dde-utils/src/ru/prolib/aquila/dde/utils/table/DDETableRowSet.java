@@ -19,12 +19,20 @@ public class DDETableRowSet implements RowSet {
 	private static int AFTER_LAST = -2;
 	private final Map<String, Integer> header;
 	private final DDETable table;
+	private final int firstRowOffset;
 	private int current = BEFORE_FIRST;
 	
 	public DDETableRowSet(DDETable table, Map<String, Integer> header) {
+		this(table, header, 0);
+	}
+	
+	public DDETableRowSet(DDETable table, Map<String, Integer> header,
+			int firstRowOffset)
+	{
 		super();
 		this.table = table;
 		this.header = header;
+		this.firstRowOffset = firstRowOffset;
 	}
 	
 	/**
@@ -44,13 +52,26 @@ public class DDETableRowSet implements RowSet {
 	public Map<String, Integer> getHeaders() {
 		return header;
 	}
+	
+	/**
+	 * Получить смещение первого ряда (сколько рядов с начала пропустить).
+	 * <p>
+	 * @return смещение первого ряда
+	 */
+	public int getFirstRowOffset() {
+		return firstRowOffset;
+	}
 
 	@Override
 	public synchronized boolean next() {
 		if ( current == AFTER_LAST ) {
 			return false;
 		}
-		current ++;
+		if ( current == BEFORE_FIRST ) {
+			current = firstRowOffset;
+		} else {
+			current ++;
+		}
 		if ( current >= table.getRows() ) {
 			current = AFTER_LAST;
 			return false;
@@ -74,12 +95,16 @@ public class DDETableRowSet implements RowSet {
 	
 	@Override
 	public synchronized boolean equals(Object other) {
-		if ( other instanceof DDETableRowSet ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == DDETableRowSet.class ) {
 			DDETableRowSet o = (DDETableRowSet) other;
 			return new EqualsBuilder()
 				.append(table, o.table)
 				.append(header, o.header)
 				.append(current, o.current)
+				.append(firstRowOffset, o.firstRowOffset)
 				.isEquals();
 		} else {
 			return false;
@@ -92,6 +117,7 @@ public class DDETableRowSet implements RowSet {
 			.append(table)
 			.append(header)
 			.append(current)
+			.append(firstRowOffset)
 			.toHashCode();
 	}
 

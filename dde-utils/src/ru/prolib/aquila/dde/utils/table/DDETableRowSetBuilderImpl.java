@@ -1,10 +1,9 @@
 package ru.prolib.aquila.dde.utils.table;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -50,14 +49,16 @@ import ru.prolib.aquila.dde.DDETableImpl;
  */
 public class DDETableRowSetBuilderImpl implements DDETableRowSetBuilder {
 	private static final Logger logger;
-	private static final Pattern ptrnItem = Pattern.compile("^R(\\d+)C(\\d+):");
+	public static final RowSet EMPTY_SET;
+	private final DDEUtils utils;
 	private final int firstCol;
 	private final int firstRow;
 	private final Validator validator;
-	private final Map<String, Integer> header;
+	private Map<String, Integer> header;
 	
 	static {
 		logger = LoggerFactory.getLogger(DDETableRowSetBuilderImpl.class);
+		EMPTY_SET = new DDETableRowSet(new DDETableImpl(), null);
 	}
 	
 	/**
@@ -73,6 +74,7 @@ public class DDETableRowSetBuilderImpl implements DDETableRowSetBuilder {
 			Validator hdrValidator)
 	{
 		super();
+		utils = new DDEUtils();
 		if ( firstRow < 0 || firstCol < 0 ) {
 			throw new IllegalArgumentException();
 		}
@@ -135,31 +137,27 @@ public class DDETableRowSetBuilderImpl implements DDETableRowSetBuilder {
 
 	@Override
 	public synchronized RowSet createRowSet(DDETable table) {
-		Matcher m = ptrnItem.matcher(table.getItem());
-		if ( ! m.find() || m.groupCount() != 2 ) {
-			logger.warn("SKIP: Unknown item format [{}] for topic [{}]",
-					new Object[] { table.getItem(), table.getTopic() });
-			return new DDETableRowSet(new DDETableImpl(), header);
+		DDETableRange range = null;
+		try {
+			range = utils.parseXltRange(table.getItem());
+		} catch ( ParseException e ) {
+			logger.error("Incorrect table item", e);
+			return EMPTY_SET;
 		}
-		int row = Integer.parseInt(m.group(1)) - firstRow;
-		int col = Integer.parseInt(m.group(2)) - firstCol;
-		int cols = table.getCols();
+		int row = range.getFirstRow() - firstRow;
+		int col = range.getFirstCol() - firstCol;
 		if ( row == 0 ) {
 			header.clear();
-			for ( int x = 0; x < cols; x ++ ) {
-				header.put(table.getCell(0, x).toString(), col + x);
-			}
-			if ( validator.validate(header.keySet()) ) {
-				table = new DDETableShift(table, 0, -1);
-			} else {
+			header = utils.makeHeadersMap(table, col);
+			if ( ! validator.validate(header.keySet()) ) {
 				header.clear();
-				return new DDETableRowSet(new DDETableImpl(), header);
+				return EMPTY_SET;
 			}
 		}
 		if ( col != 0 ) {
 			table = new DDETableShift(table, col, 0);
 		}
-		return new DDETableRowSet(table, header);
+		return new DDETableRowSet(table, header, row == 0 ? 1 : 0);
 	}
 	
 	@Override

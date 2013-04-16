@@ -24,34 +24,49 @@ public class DDETableRowSetTest {
 	@Before
 	public void setUp() throws Exception {
 		hdr = new HashMap<String, Integer>();
-		hdr.put("age", 5);
-		hdr.put("art", 4);
-		hdr.put("name", 3);
-		hdr.put("code", 2);
-		hdr.put("unk2", 1);
-		hdr.put("unk1", 0);
+		hdr.put("age",	3);
+		hdr.put("art",	2);
+		hdr.put("name",	1);
+		hdr.put("code",	0);
 		
-		DDETable source = new DDETableImpl(new Object[] {
+		table = new DDETableImpl(new Object[] {
 				"one",	"two",		"three", // headers
 				"001",	"vasya",	123,
 				"007",	"bond",		777,
 				"911",	"twins",	911,
 				"999",	"gold",		987
 			}, "foo", "bar", 3); 
-		table = new DDETableShift(source, 2, -1);
-		rs = new DDETableRowSet(table, hdr);
+		rs = new DDETableRowSet(table, hdr, 1);
 	}
 	
 	@Test
 	public void testIterate() throws Exception {
-		String header[] = { "unk1", "unk2", "code", "name", "art", "age" };
+		String header[] = { "code", "name", "art", "age" };
 		Object expected[][] = {
-				{ null, null, "001", "vasya", 123 },
-				{ null, null, "007", "bond",  777 },
-				{ null, null, "911", "twins", 911 },
-				{ null, null, "999", "gold",  987 }
+				{ "001", "vasya", 123 },
+				{ "007", "bond",  777 },
+				{ "911", "twins", 911 },
+				{ "999", "gold",  987 }
 		};
 		
+		assertRowSet(header, expected);
+		assertFalse(rs.next());
+		assertFalse(rs.next());
+		rs.reset();
+		assertRowSet(header, expected);
+	}
+	
+	@Test
+	public void testIterate_WithoutRowOffset() throws Exception {
+		String header[] = { "code", "name", "art", "age" };
+		Object expected[][] = {
+				{ "one", "two",		"three" },
+				{ "001", "vasya",	123 },
+				{ "007", "bond",	777 },
+				{ "911", "twins",	911 },
+				{ "999", "gold",	987 },
+		};
+		rs = new DDETableRowSet(table, hdr);
 		assertRowSet(header, expected);
 		assertFalse(rs.next());
 		assertFalse(rs.next());
@@ -86,18 +101,23 @@ public class DDETableRowSetTest {
 			.add(null)
 			.add(new DDETableImpl(new Object[] {"one","two"}, "cho", "ppa", 2))
 			.add(table);
+		Variant<Integer> vOff = new Variant<Integer>(vTab)
+			.add(1)
+			.add(5);
+		Variant<?> iterator = vOff;
 		int foundCnt = 0;
 		DDETableRowSet found = null, x = null;
 		do {
-			x = new DDETableRowSet(vTab.get(), vHdr.get());
+			x = new DDETableRowSet(vTab.get(), vHdr.get(), vOff.get());
 			if ( rs.equals(x) ) {
 				found = x;
 				foundCnt ++;
 			}
-		} while ( vTab.next() );
+		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(table, found.getTable());
 		assertSame(hdr, found.getHeaders());
+		assertEquals(1, found.getFirstRowOffset());
 	}
 	
 	@Test
@@ -105,7 +125,11 @@ public class DDETableRowSetTest {
 		assertTrue(rs.equals(rs));
 		assertFalse(rs.equals(null));
 		assertFalse(rs.equals(this));
-		DDETableRowSet rs2 = new DDETableRowSet(table, hdr);
+	}
+	
+	@Test
+	public void testEquals_CurrentPosConsidered() throws Exception {
+		DDETableRowSet rs2 = new DDETableRowSet(table, hdr, 1);
 		assertTrue(rs.equals(rs2));
 		rs2.next(); // при несовпадении указателей - объекты несоответствующие
 		assertFalse(rs.equals(rs2));
@@ -116,7 +140,8 @@ public class DDETableRowSetTest {
 		int expectedHashCode = new HashCodeBuilder(20121107, 144411)
 			.append(table)
 			.append(hdr)
-			.append(2) // значение указателя
+			.append(3) // значение указателя
+			.append(1) // first row offset
 			.toHashCode();
 		int initialHashCode = rs.hashCode();
 		rs.next(); rs.next(); rs.next();
