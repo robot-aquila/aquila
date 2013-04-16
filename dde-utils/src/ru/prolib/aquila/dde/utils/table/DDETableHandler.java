@@ -1,5 +1,6 @@
 package ru.prolib.aquila.dde.utils.table;
 
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 
 /**
@@ -15,6 +16,6 @@ public interface DDETableHandler {
 	 * <p>
 	 * @param table таблица
 	 */
-	public void handle(DDETable table);
+	public void handle(DDETable table) throws DDEException;
 
 }

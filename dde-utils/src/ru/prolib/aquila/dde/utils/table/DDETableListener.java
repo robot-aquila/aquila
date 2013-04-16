@@ -2,9 +2,12 @@ package ru.prolib.aquila.dde.utils.table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 import ru.prolib.aquila.dde.utils.DDETableEvent;
 
@@ -15,8 +18,13 @@ import ru.prolib.aquila.dde.utils.DDETableEvent;
  * $Id: DDETableListener.java 304 2012-11-06 09:17:07Z whirlwind $
  */
 public class DDETableListener implements EventListener {
+	private static final Logger logger;
 	private final String topic;
 	private final DDETableHandler handler;
+	
+	static {
+		logger = LoggerFactory.getLogger(DDETableListener.class);
+	}
 	
 	/**
 	 * Создать наблюдателя.
@@ -59,7 +67,11 @@ public class DDETableListener implements EventListener {
 		if ( event != null && event.getClass() == DDETableEvent.class ) {
 			DDETable table = ((DDETableEvent) event).getTable();
 			if ( table.getTopic().equals(topic) ) {
-				handler.handle(table);
+				try {
+					handler.handle(table);
+				} catch ( DDEException e ) {
+					logger.error("Unexpected exception for " + topic, e);
+				}
 			}
 		}
 	}

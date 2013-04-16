@@ -4,11 +4,13 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 import ru.prolib.aquila.dde.utils.DDETableEvent;
 import ru.prolib.aquila.dde.utils.DDETopicEvent;
@@ -24,6 +26,12 @@ public class DDETableListenerTest {
 	private EventType type;
 	private DDETableEvent event;
 	private DDETableListener listener;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -94,6 +102,19 @@ public class DDETableListenerTest {
 	@Test
 	public void testOnEvent_SkipIfDifferentTopic() throws Exception {
 		expect(table.getTopic()).andReturn("another topic");
+		control.replay();
+		
+		listener.onEvent(event);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnEvent_IfExceptionOnHandling() throws Exception {
+		DDEException expected = new DDEException("test exception");
+		expect(table.getTopic()).andReturn("hello");
+		handler.handle(same(table));
+		expectLastCall().andThrow(expected);
 		control.replay();
 		
 		listener.onEvent(event);

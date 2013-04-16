@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.data.row.*;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 
 /**
@@ -55,10 +56,14 @@ public class DDETableHandlerImpl implements DDETableHandler {
 	}
 
 	@Override
-	public void handle(DDETable table) {
+	public void handle(DDETable table) throws DDEException {
 		RowSet rs = sb.createRowSet(table);
-		while ( rs.next() ) {
-			rh.handle(rs);
+		try {
+			while ( rs.next() ) {
+				rh.handle(rs);
+			}
+		} catch ( RowSetException e ) {
+			throw new DDEException(e);
 		}
 	}
 	

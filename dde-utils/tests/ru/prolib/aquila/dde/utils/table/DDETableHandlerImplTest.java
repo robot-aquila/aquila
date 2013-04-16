@@ -9,6 +9,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 
 /**
@@ -19,6 +20,8 @@ public class DDETableHandlerImplTest {
 	private IMocksControl control;
 	private DDETableRowSetBuilder setBuilder;
 	private RowHandler rowHandler;
+	private RowSet rs;
+	private DDETable table;
 	private DDETableHandlerImpl handler;
 
 	@Before
@@ -26,6 +29,8 @@ public class DDETableHandlerImplTest {
 		control = createStrictControl();
 		setBuilder = control.createMock(DDETableRowSetBuilder.class);
 		rowHandler = control.createMock(RowHandler.class);
+		rs = control.createMock(RowSet.class);
+		table = control.createMock(DDETable.class);
 		handler = new DDETableHandlerImpl(setBuilder, rowHandler);
 	}
 	
@@ -58,8 +63,6 @@ public class DDETableHandlerImplTest {
 	
 	@Test
 	public void testHandle() throws Exception {
-		DDETable table = control.createMock(DDETable.class);
-		RowSet rs = control.createMock(RowSet.class);
 		expect(setBuilder.createRowSet(same(table))).andReturn(rs);
 		for ( int i = 0; i < 5; i ++ ) {
 			expect(rs.next()).andReturn(true);
@@ -69,6 +72,23 @@ public class DDETableHandlerImplTest {
 		control.replay();
 		
 		handler.handle(table);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testHandle_ThrowsIfRowSetThrows() throws Exception {
+		RowSetException expected = new RowSetException("test exception");
+		expect(setBuilder.createRowSet(same(table))).andReturn(rs);
+		expect(rs.next()).andThrow(expected);
+		control.replay();
+		
+		try {
+			handler.handle(table);
+			fail("Expected exception: " + DDEException.class.getSimpleName());
+		} catch ( DDEException e ) {
+			assertSame(expected, e.getCause());
+		}
 		
 		control.verify();
 	}

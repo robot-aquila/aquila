@@ -292,7 +292,7 @@ public class DDETableRowSetBuilderImplTest {
 	 */
 	private void assertRowSet(String header[],
 							  Object expected[][],
-							  RowSet rs)
+							  RowSet rs) throws Exception
 	{
 		for ( int row = 0; row < expected.length; row ++ ) {
 			String msg = "At R" + row;
