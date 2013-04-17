@@ -28,18 +28,9 @@ public class OrderTableRowTest {
 
 	@Before
 	public void setUp() throws Exception {
-		row = new OrderTableRow();
-		row.setAccount(acc1);
-		row.setDirection(OrderDirection.BUY);
-		row.setId(125L);
-		row.setPrice(18.24D);
-		row.setQty(10L);
-		row.setQtyRest(0L);
-		row.setSecurityDescriptor(descr1);
-		row.setStatus(OrderStatus.FILLED);
-		row.setTime(timeFormat.parse("1999-01-01 20:15:30"));
-		row.setTransId(1024L);
-		row.setType(OrderType.LIMIT);
+		row = new OrderTableRow(125L, 1024L, acc1,
+				timeFormat.parse("1999-01-01 20:15:30"), OrderDirection.BUY,
+				descr1, 10L, 18.24D, 0L, OrderStatus.FILLED, OrderType.LIMIT);
 	}
 	
 	@Test
@@ -88,18 +79,9 @@ public class OrderTableRowTest {
 		OrderTableRow x = null, found = null;
 		int foundCnt = 0;
 		do {
-			x = new OrderTableRow();
-			x.setAccount(vAcc.get());
-			x.setDirection(vDir.get());
-			x.setId(vId.get());
-			x.setPrice(vPrice.get());
-			x.setQty(vQty.get());
-			x.setQtyRest(vRst.get());
-			x.setSecurityDescriptor(vDsc.get());
-			x.setStatus(vStat.get());
-			x.setTime(vTime.get());
-			x.setTransId(vTrnId.get());
-			x.setType(vType.get());
+			x = new OrderTableRow(vId.get(), vTrnId.get(), vAcc.get(),
+					vTime.get(), vDir.get(), vDsc.get(), vQty.get(),
+					vPrice.get(), vRst.get(), vStat.get(), vType.get());
 			if ( row.equals(x) ) {
 				found = x;
 				foundCnt ++;

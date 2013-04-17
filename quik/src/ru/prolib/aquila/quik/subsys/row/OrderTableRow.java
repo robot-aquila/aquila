@@ -10,108 +10,94 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * Строка таблицы заявок.
  */
 public class OrderTableRow {
-	private Account account;
-	private OrderDirection dir;
-	private Long id;
-	private Double price;
-	private Long qty;
-	private Long rest;
-	private SecurityDescriptor descr;
-	private OrderStatus status;
-	private Date time;
-	private Long transId;
-	private OrderType type;
+	private final Account account;
+	private final OrderDirection dir;
+	private final Long id;
+	private final Double price;
+	private final Long qty;
+	private final Long rest;
+	private final SecurityDescriptor descr;
+	private final OrderStatus status;
+	private final Date time;
+	private final Long transId;
+	private final OrderType type;
 	
-	public OrderTableRow() {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id номер заявки
+	 * @param transId номер транзакции
+	 * @param account торговый счет
+	 * @param time время заявки
+	 * @param dir направление
+	 * @param descr дескриптор инструмента
+	 * @param qty количество
+	 * @param price цена
+	 * @param qtyRest неисполненный остаток заявки
+	 * @param status статус
+	 * @param type тип заявки
+	 */
+	public OrderTableRow(Long id, Long transId, Account account,
+			Date time,  OrderDirection dir, SecurityDescriptor descr,
+			Long qty, Double price, Long qtyRest,
+			OrderStatus status, OrderType type)
+	{
 		super();
+		this.id = id;
+		this.transId = transId;
+		this.account = account;
+		this.time = time;
+		this.dir = dir;
+		this.descr = descr;
+		this.qty = qty;
+		this.price = price;
+		this.rest = qtyRest;
+		this.status = status;
+		this.type = type;
 	}
 	
-	public synchronized Long getId() {
+	public Long getId() {
 		return id;
 	}
 	
-	public synchronized void setId(Long id) {
-		this.id = id;
-	}
-	
-	public synchronized Long getTransId() {
+	public Long getTransId() {
 		return transId;
 	}
 	
-	public synchronized void setTransId(Long transId) {
-		this.transId = transId;
-	}
-	
-	public synchronized OrderStatus getStatus() {
+	public OrderStatus getStatus() {
 		return status;
 	}
 	
-	public synchronized void setStatus(OrderStatus status) {
-		this.status = status;
-	}
-	
-	public synchronized SecurityDescriptor getSecurityDescriptor() {
+	public SecurityDescriptor getSecurityDescriptor() {
 		return descr;
 	}
 	
-	public synchronized void setSecurityDescriptor(SecurityDescriptor descr) {
-		this.descr = descr;
-	}
-	
-	public synchronized Account getAccount() {
+	public Account getAccount() {
 		return account;
 	}
 	
-	public synchronized void setAccount(Account account) {
-		this.account = account;
-	}
-	
-	public synchronized OrderDirection getDirection() {
+	public OrderDirection getDirection() {
 		return dir;
 	}
 	
-	public synchronized void setDirection(OrderDirection dir) {
-		this.dir = dir;
-	}
-	
-	public synchronized Long getQty() {
+	public Long getQty() {
 		return qty;
 	}
 	
-	public synchronized void setQty(Long qty) {
-		this.qty = qty;
-	}
-	
-	public synchronized Long getQtyRest() {
+	public Long getQtyRest() {
 		return rest;
 	}
 	
-	public synchronized void setQtyRest(Long qty) {
-		this.rest = qty;
-	}
-	
-	public synchronized Double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 	
-	public synchronized void setPrice(Double price) {
-		this.price = price;
-	}
-	
-	public synchronized Date getTime() {
+	public Date getTime() {
 		return time;
 	}
 	
-	public synchronized void setTime(Date time) {
-		this.time = time;
-	}
-	
-	public synchronized OrderType getType() {
+	public OrderType getType() {
 		return type;
-	}
-	
-	public synchronized void setType(OrderType type) {
-		this.type = type;
 	}
 	
 	@Override
