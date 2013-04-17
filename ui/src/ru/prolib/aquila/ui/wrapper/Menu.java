@@ -56,7 +56,27 @@ public class Menu {
 	public synchronized MenuItem addItem(String id, String title)
 		throws MenuException
 	{
-		MenuItem item = createItem(id, title);
+		MenuItem item = createItem(id, title, "JMenuItem");
+		underlying.insert(item.getUnderlyingObject(), getNormalPosition());
+		return item;
+	}
+	
+	/**
+	 * Добавить элемент меню.
+	 * <p>
+	 * Данный метод добавляет элемент меню в конец нормальной последовательности
+	 * элементов перед первым элементом, приклеенным к низу меню.
+	 * <p>
+	 * @param id идентификатор элемента
+	 * @param title заголовок
+	 * @param type тип элемента меню
+	 * @return элемент меню
+	 * @throws MenuItemAlreadyExsistException идентификатор не уникален
+	 */
+	public synchronized MenuItem addItem(String id, String title, String type)
+		throws MenuException
+	{
+		MenuItem item = createItem(id, title, type);
 		underlying.insert(item.getUnderlyingObject(), getNormalPosition());
 		return item;
 	}
@@ -109,11 +129,38 @@ public class Menu {
 	public synchronized MenuItem addBottomItem(String id, String title)
 		throws MenuException
 	{
-		MenuItem item = createItem(id, title);
+		//MenuItem item = createItem(id, title, JMenuItem.class);
+		MenuItem item = createItem(id, title, "JMenuItem");
 		underlying.add(item.getUnderlyingObject());
 		bottomElements ++;
 		return item;
 	}
+
+	/**
+	 * Добавить элемент меню в конец меню с привязкой.
+	 * <p>
+	 * Данный метод добавляет элемент с привязкой к низу меню. Элемент будет
+	 * вставлен в самый конец меню и будет находиться на этой позиции до тех
+	 * пор, пока добавление нового элемента в конец нормальной
+	 * последовательности с помощью одного из методов
+	 * {@link #addItem(String, String)}, {@link #addSubMenu(String, String)}
+	 * или {@link #addSeparator()} не сместит его на позицию ниже. 
+	 * <p>
+	 * @param id идентификатор элемента
+	 * @param title заголовок
+	 * @param type тип элемента меню
+	 * @return элемент меню
+	 * @throws MenuException
+	 */
+	public synchronized MenuItem addBottomItem(String id, String title, String type)
+			throws MenuException
+	{
+		MenuItem item = createItem(id, title, type);
+		underlying.add(item.getUnderlyingObject());
+		bottomElements ++;
+		return item;
+	}
+
 	
 	/**
 	 * Добавить субменю в конец меню с привязкой.
@@ -205,12 +252,20 @@ public class Menu {
 	 * @return экземпляр элемента
 	 * @throws MenuItemAlreadyExistsException 
 	 */
-	private MenuItem createItem(String id, String title) throws MenuException {
+	private MenuItem createItem(String id, String title, String type) throws MenuException {
 		if ( isItemExists(id) ) {
 			throw new MenuItemAlreadyExistsException(id);
 		}
 		final EventType eventType = es.createGenericType(dispatcher, id);
-		MenuItem item = new MenuItem(new JMenuItem(title), eventType); 
+		JMenuItem udr;
+		if(type == "JCheckBoxMenuItem") {			
+			udr = new JCheckBoxMenuItem(title);
+		}else if(type == "JRadioButtonMenuItem") {
+			udr = new JRadioButtonMenuItem(title);
+		}else {
+			udr = new JMenuItem(title);
+		}
+		MenuItem item = new MenuItem(udr, eventType); 
 		item.getUnderlyingObject().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

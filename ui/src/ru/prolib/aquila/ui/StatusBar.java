@@ -1,7 +1,13 @@
 package ru.prolib.aquila.ui;
 
-import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -40,7 +46,7 @@ public class StatusBar extends JPanel implements EventListener, Starter {
 	private PortfolioDataPanel prtPanel;
 	
 	public StatusBar(PortfolioDataPanel prtPanel, Terminal terminal, UiTexts texts) {
-		super(new FlowLayout(FlowLayout.LEFT));
+		super(new GridBagLayout());
 		uiLabels = texts.get("StatusBar");
 		
 		setBorder(new EmptyBorder(1, 5, 1, 5));
@@ -80,9 +86,15 @@ public class StatusBar extends JPanel implements EventListener, Starter {
 			
 		});
 		*/
-		add(tStart);
-		add(tConn);
-		add(this.prtPanel);
+		GridBagConstraints c = new GridBagConstraints();
+		c.insets = new Insets(1, 5, 1, 0);
+		c.anchor = GridBagConstraints.WEST;
+		add(tStart, c);
+		add(tConn, c);
+		c = new GridBagConstraints();
+		c.weightx = 1.0f;
+		c.anchor = GridBagConstraints.EAST;
+		add(this.prtPanel, c);
 		setDisconnected();
 		setStopped();
 	}
