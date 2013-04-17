@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
+import javax.swing.JRadioButtonMenuItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,6 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	private Portfolio portfolio;
 	private ButtonGroup buttons = new ButtonGroup();
 	private Menu menu;
-	private ImageIcon selectedIcon = new ImageIcon("shared/images/ch.png");
 	
 	private Map<EventType, Portfolio> prtList = new HashMap<EventType, Portfolio>();
 	
@@ -109,16 +108,17 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 				setCurrentPortfolio(prtList.get(type));
 			}
 		}
-	}	
+	}
 	
 	private void addMenuItem(Portfolio prt) throws MenuException {
 		String id = prt.getAccount().toString();
-		MenuItem m = menu.addItem(id, id, "JRadioButtonMenuItem");
+		MenuItem m = menu.addItem(id, id, new JRadioButtonMenuItem());
 		buttons.add( m.getUnderlyingObject());
 		EventType evt = m.OnCommand();
 		evt.addListener(this);
 		prtList.put(evt, prt);
 	}
+	
 	public Portfolios getPortfolios() {
 		return portfolios;
 	}
