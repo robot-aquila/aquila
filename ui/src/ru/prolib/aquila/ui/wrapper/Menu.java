@@ -50,13 +50,12 @@ public class Menu {
 	 * <p>
 	 * @param id идентификатор элемента
 	 * @param title заголовок
-	 * @return элемент меню
+	 * @return элемент меню 
 	 * @throws MenuItemAlreadyExsistException идентификатор не уникален
 	 */
-	public synchronized MenuItem addItem(String id, String title)
-		throws MenuException
+	public synchronized MenuItem addItem(String id, String title) throws MenuException
 	{
-		MenuItem item = createItem(id, title, "JMenuItem");
+		MenuItem item = createItem(id, title, new JMenuItem());
 		underlying.insert(item.getUnderlyingObject(), getNormalPosition());
 		return item;
 	}
@@ -73,7 +72,7 @@ public class Menu {
 	 * @return элемент меню
 	 * @throws MenuItemAlreadyExsistException идентификатор не уникален
 	 */
-	public synchronized MenuItem addItem(String id, String title, String type)
+	public synchronized MenuItem addItem(String id, String title, JMenuItem type)
 		throws MenuException
 	{
 		MenuItem item = createItem(id, title, type);
@@ -126,11 +125,9 @@ public class Menu {
 	 * @return элемент меню
 	 * @throws MenuItemAlreadyExsistException идентификатор не уникален
 	 */
-	public synchronized MenuItem addBottomItem(String id, String title)
-		throws MenuException
+	public synchronized MenuItem addBottomItem(String id, String title) throws MenuException
 	{
-		//MenuItem item = createItem(id, title, JMenuItem.class);
-		MenuItem item = createItem(id, title, "JMenuItem");
+		MenuItem item = createItem(id, title, new JMenuItem());
 		underlying.add(item.getUnderlyingObject());
 		bottomElements ++;
 		return item;
@@ -152,7 +149,7 @@ public class Menu {
 	 * @return элемент меню
 	 * @throws MenuException
 	 */
-	public synchronized MenuItem addBottomItem(String id, String title, String type)
+	public synchronized MenuItem addBottomItem(String id, String title, JMenuItem type)
 			throws MenuException
 	{
 		MenuItem item = createItem(id, title, type);
@@ -249,23 +246,17 @@ public class Menu {
 	 * <p>
 	 * @param id идентификатор
 	 * @param title текст элемента
+	 * @param тип элемента
 	 * @return экземпляр элемента
 	 * @throws MenuItemAlreadyExistsException 
 	 */
-	private MenuItem createItem(String id, String title, String type) throws MenuException {
+	private MenuItem createItem(String id, String title, JMenuItem type) throws MenuException {
 		if ( isItemExists(id) ) {
 			throw new MenuItemAlreadyExistsException(id);
 		}
-		final EventType eventType = es.createGenericType(dispatcher, id);
-		JMenuItem udr;
-		if(type == "JCheckBoxMenuItem") {			
-			udr = new JCheckBoxMenuItem(title);
-		}else if(type == "JRadioButtonMenuItem") {
-			udr = new JRadioButtonMenuItem(title);
-		}else {
-			udr = new JMenuItem(title);
-		}
-		MenuItem item = new MenuItem(udr, eventType); 
+		final EventType eventType = es.createGenericType(dispatcher, id);		
+		type.setText(title);
+		MenuItem item = new MenuItem(type, eventType); 
 		item.getUnderlyingObject().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
