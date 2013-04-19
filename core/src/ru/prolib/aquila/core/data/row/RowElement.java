@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.data.row;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер элемента ряда.
@@ -62,11 +63,15 @@ public class RowElement implements G {
 	 * @return элемент ряда или null
 	 */
 	@Override
-	public Object get(Object source) {
-		if ( source instanceof Row ) {
-			Object object = ((Row) source).get(elementId);
-			return object != null && object.getClass() == elementClass
-				? object : null;
+	public Object get(Object source) throws ValueException {
+		try {
+			if ( source instanceof Row ) {
+				Object object = ((Row) source).get(elementId);
+				return object != null && object.getClass() == elementClass
+					? object : null;
+			}
+		} catch ( RowException e ) {
+			throw new RowValueException(e);
 		}
 		return null;
 	}

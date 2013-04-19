@@ -1,10 +1,12 @@
 package ru.prolib.aquila.core.data.row;
 
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Адаптер ряда.
@@ -53,9 +55,13 @@ public class RowAdapter implements Row {
 	}
 
 	@Override
-	public Object get(String name) {
-		G<?> adapter = adapters.get(name);
-		return adapter == null ? null : adapter.get(source);
+	public Object get(String name) throws RowException {
+		try {
+			G<?> adapter = adapters.get(name);
+			return adapter == null ? null : adapter.get(source);
+		} catch ( ValueException e ) {
+			throw new RowException(e);
+		}
 	}
 	
 	@Override
@@ -71,6 +77,19 @@ public class RowAdapter implements Row {
 				.isEquals();
 		} else {
 			return false;
+		}
+	}
+
+	@Override
+	public Row getRowCopy() throws RowException {
+		try {
+			Map<String, Object> map = new Hashtable<String, Object>();
+			for ( String header : adapters.keySet() ) {
+				map.put(header, adapters.get(header).get(source));
+			}
+			return new SimpleRow(map);
+		} catch ( ValueException e ) {
+			throw new RowException(e);
 		}
 	}
 

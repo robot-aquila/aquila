@@ -4,6 +4,7 @@ import java.util.Date;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер времени последнего изменения заявки.
@@ -18,7 +19,7 @@ public class OrderSetLastChangeTime implements S<EditableOrder> {
 	}
 
 	@Override
-	public void set(EditableOrder object, Object value) {
+	public void set(EditableOrder object, Object value) throws ValueException {
 		if ( value != null && value.getClass() == Date.class ) {
 			object.setLastChangeTime((Date) value);
 		}

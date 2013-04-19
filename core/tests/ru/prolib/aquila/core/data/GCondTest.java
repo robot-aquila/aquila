@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.data.GCond;
 import ru.prolib.aquila.core.data.GConst;
 import ru.prolib.aquila.core.data.row.Row;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -56,6 +57,21 @@ public class GCondTest {
 		control.replay();
 		assertEquals("second", getter.get(row));
 		control.verify();
+	}
+	
+	@Test
+	public void testGet_ThrowsIfValidatorThrows() throws Exception {
+		ValidatorException expected = new ValidatorException("test");
+		expect(validator.validate(row)).andThrow(expected);
+		control.replay();
+		
+		try {
+			getter.get(row);
+			fail("Expected: " + ValueException.class.getSimpleName());
+		} catch ( ValueException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@Test

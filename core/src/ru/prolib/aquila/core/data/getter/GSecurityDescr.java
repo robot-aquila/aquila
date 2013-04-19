@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер дескриптора инструмента.
@@ -77,7 +78,7 @@ public class GSecurityDescr implements G<SecurityDescriptor> {
 	}
 
 	@Override
-	public SecurityDescriptor get(Object source) {
+	public SecurityDescriptor get(Object source) throws ValueException {
 		SecurityDescriptor descr = new SecurityDescriptor(gCode.get(source),
 				gClass.get(source), gCurr.get(source), gType.get(source));
 		return descr.isValid() ? descr : null;

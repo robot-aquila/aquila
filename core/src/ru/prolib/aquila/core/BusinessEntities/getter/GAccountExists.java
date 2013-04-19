@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер-валидатор наличия счета.
@@ -65,7 +66,7 @@ public class GAccountExists implements G<Account> {
 	}
 
 	@Override
-	public Account get(Object source) {
+	public Account get(Object source) throws ValueException {
 		Account account = gAccount.get(source);
 		if ( account == null ) {
 			return null;

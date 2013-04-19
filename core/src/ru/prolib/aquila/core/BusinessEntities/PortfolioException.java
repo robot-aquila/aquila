@@ -6,7 +6,7 @@ package ru.prolib.aquila.core.BusinessEntities;
  * 2012-05-30<br>
  * $Id: PortfolioException.java 490 2013-02-05 19:42:02Z whirlwind $
  */
-public class PortfolioException extends Exception {
+public class PortfolioException extends EditableObjectException {
 	private static final long serialVersionUID = 1L;
 	
 	public PortfolioException() {

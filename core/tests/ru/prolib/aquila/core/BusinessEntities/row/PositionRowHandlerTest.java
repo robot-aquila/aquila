@@ -10,6 +10,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -118,6 +119,27 @@ public class PositionRowHandlerTest {
 		rowHandler.handle(row);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testHandle_ThrowsIfModifierThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		expect(row.get("POS_ACC")).andReturn(acc);
+		expect(row.get("POS_SECDESCR")).andReturn(descr);
+		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(portfolio);
+		expect(portfolio.getEditablePosition(eq(descr))).andReturn(position);
+		position.setAccount(same(acc));
+		mod.set(same(position), same(row));
+		expectLastCall().andThrow(expected);
+		control.replay();
+		
+		try {
+			rowHandler.handle(row);
+			fail("Expected: " + RowException.class.getSimpleName());
+		} catch ( RowException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

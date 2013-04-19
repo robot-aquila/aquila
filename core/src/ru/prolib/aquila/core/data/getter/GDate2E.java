@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Конвертер даты из двух строк в объект класса {@link java.util.Date Date}.
@@ -139,7 +140,7 @@ public class GDate2E implements G<Date> {
 	}
 
 	@Override
-	public Date get(Object source) {
+	public Date get(Object source) throws ValueException {
 		String dateString = gDate.get(source);
 		String timeString = gTime.get(source);
 		if ( dateString == null || dateString.length() == 0

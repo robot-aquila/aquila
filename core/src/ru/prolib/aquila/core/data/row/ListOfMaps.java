@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data.row;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class ListOfMaps implements RowSet {
 	}
 
 	@Override
-	public synchronized Object get(String name) {
+	public synchronized Object get(String name) throws RowException {
 		if ( current == AFTER_LAST || current == BEFORE_FIRST ) {
 			return null;
 		}
@@ -72,6 +73,14 @@ public class ListOfMaps implements RowSet {
 	@Override
 	public void close() {
 		reset();
+	}
+
+	@Override
+	public synchronized Row getRowCopy() throws RowException {
+		if ( current == AFTER_LAST || current == BEFORE_FIRST ) {
+			throw new RowSetException("Not positioned");
+		}
+		return new SimpleRow(new Hashtable<String, Object>(data.get(current)));
 	}
 
 }

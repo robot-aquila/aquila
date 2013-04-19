@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class CandleDataSeriesTest {
 	private Series<Candle> candles;
-	private G<Double> getter;
+	private GCandlePart<Double> getter;
 	private CandleDataSeries series;
 
 	@Before
@@ -45,7 +45,8 @@ public class CandleDataSeriesTest {
 		Variant<Series<Candle>> vCandles =  new Variant<Series<Candle>>(vId)
 			.add(candles)
 			.add(candles2);
-		Variant<G<Double>> vGtr = new Variant<G<Double>>(vCandles)
+		Variant<GCandlePart<Double>> vGtr =
+				new Variant<GCandlePart<Double>>(vCandles)
 			.add(getter)
 			.add(new GCandleClose());
 		Variant<?> iterator = vGtr;

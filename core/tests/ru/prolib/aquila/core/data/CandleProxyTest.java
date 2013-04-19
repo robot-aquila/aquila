@@ -17,7 +17,7 @@ public class CandleProxyTest {
 	private IMocksControl control;
 	private EditableSeries<Candle> candles;
 	private CandleProxy<Double> proxy;
-	private G<Double> getter;
+	private GCandlePart<Double> getter;
 
 	@Before
 	public void setUp() throws Exception {
@@ -60,7 +60,6 @@ public class CandleProxyTest {
 		assertFalse(proxy.equals(this));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
 		Variant<String> vId = new Variant<String>()
@@ -69,9 +68,10 @@ public class CandleProxyTest {
 		Variant<Series<Candle>> vSrc = new Variant<Series<Candle>>(vId)
 			.add(candles)
 			.add(new SeriesImpl<Candle>());
-		Variant<G<Double>> vGtr = new Variant<G<Double>>(vSrc)
+		Variant<GCandlePart<Double>> vGtr =
+				new Variant<GCandlePart<Double>>(vSrc)
 			.add(getter)
-			.add(control.createMock(G.class));
+			.add(new GCandleClose());
 		Variant<?> iterator = vGtr;
 		int foundCnt = 0;
 		CandleProxy<Double> found = null, x = null;

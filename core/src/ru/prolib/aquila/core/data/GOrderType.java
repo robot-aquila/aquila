@@ -52,7 +52,7 @@ public class GOrderType implements G<OrderType> {
 	}
 
 	@Override
-	public OrderType get(Object object) {
+	public OrderType get(Object object) throws ValueException {
 		Security security = gSecurity.get(object);
 		Double price = gPrice.get(object);
 		if ( security != null && price != null ) {

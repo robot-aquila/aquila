@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер статуса заявки.
@@ -23,7 +24,7 @@ public class OrderSetStatus implements S<EditableOrder> {
 	 * Установить статус заявки.
 	 */
 	@Override
-	public void set(EditableOrder object, Object value) {
+	public void set(EditableOrder object, Object value) throws ValueException {
 		if ( value != null && value.getClass() == OrderStatus.class ) {
 			object.setStatus((OrderStatus) value);
 		}

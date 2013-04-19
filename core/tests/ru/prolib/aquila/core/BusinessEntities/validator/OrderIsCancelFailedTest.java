@@ -44,7 +44,7 @@ public class OrderIsCancelFailedTest {
 	}
 	
 	@Test
-	public void testValidate() {
+	public void testValidate() throws Exception {
 		Variant<OrderStatus> vCurrStat = new Variant<OrderStatus>()
 			.add(OrderStatus.PENDING)
 			.add(OrderStatus.FILLED)

@@ -44,7 +44,7 @@ public class GMapTG<R> implements G<R> {
 	}
 
 	@Override
-	public R get(Object source) {
+	public R get(Object source) throws ValueException {
 		return getter.get(source);
 	}
 	

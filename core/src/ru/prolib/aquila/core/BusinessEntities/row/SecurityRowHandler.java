@@ -12,11 +12,15 @@ import ru.prolib.aquila.core.data.row.*;
  * <p>
  * Обработчик запрашивает у ряда дескриптор инструмента под идентификатором
  * {@link ru.prolib.aquila.core.BusinessEntities.row.Spec#SEC_DESCR
- * Spec#SEC_DESCR}. Использует терминал для определения экземпляра инструмента.   
+ * Spec#SEC_DESCR}. Использует терминал для определения экземпляра инструмента.
+ * <p>
+ * TODO: удалить после того, как в связанных проектах использование будет
+ * заменено на самостоятельную реализацию.
  * <p>
  * 2012-08-13<br>
  * $Id: SecurityRowHandler.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class SecurityRowHandler implements RowHandler {
 	private final EditableTerminal terminal;
 	private final S<EditableSecurity> modifier;
@@ -60,7 +64,7 @@ public class SecurityRowHandler implements RowHandler {
 	}
 
 	@Override
-	public void handle(Row row) {
+	public void handle(Row row) throws RowException {
 		String msg = "Cannot handle security: ";
 		SecurityDescriptor descr = (SecurityDescriptor) row.get(Spec.SEC_DESCR);
 		if ( descr == null ) {
@@ -69,13 +73,20 @@ public class SecurityRowHandler implements RowHandler {
 		}
 		EditableSecurity security = terminal.getEditableSecurity(descr);
 		synchronized ( security ) {
-			modifier.set(security, row);
+			try {
+				modifier.set(security, row);
+			} catch ( ValueException e ) {
+				throw new RowException(e);
+			}
 		}
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof SecurityRowHandler ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == SecurityRowHandler.class ) {
 			SecurityRowHandler o = (SecurityRowHandler) other;
 			return new EqualsBuilder()
 				.append(terminal, o.terminal)

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Сеттер-свитч.
@@ -63,9 +64,16 @@ public class SSwitch<T> implements S<T> {
 	}
 
 	@Override
-	public void set(T object, Object value) {
-		(validator.validate(new SetterArgs(object, value)) ? ifTrue : ifFalse)
-			.set(object, value);
+	public void set(T object, Object value) throws ValueException {
+		try {
+			if ( validator.validate(new SetterArgs(object, value)) ) {
+				ifTrue.set(object, value);
+			} else {
+				ifFalse.set(object, value);
+			}
+		} catch ( ValidatorException e ) {
+			throw new ValueException(e);
+		}
 	}
 	
 	@Override

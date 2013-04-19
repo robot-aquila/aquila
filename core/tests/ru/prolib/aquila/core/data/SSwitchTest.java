@@ -8,6 +8,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -104,6 +105,22 @@ public class SSwitchTest {
 		control.replay();
 		sw.set(this, "gamma");
 		control.verify();
+	}
+	
+	@Test
+	public void testSet_ThrowsIfValidatorThrows() throws Exception {
+		ValidatorException expected = new ValidatorException("test");
+		expect(validator.validate(eq(new SetterArgs(this, "gamma"))))
+			.andThrow(expected);
+		control.replay();
+		
+		try {
+			sw.set(this, "gamma");
+			fail("Expected: " + ValueException.class.getSimpleName());
+		} catch ( ValueException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 
 }

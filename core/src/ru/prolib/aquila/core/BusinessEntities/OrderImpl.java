@@ -300,7 +300,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized void fireChangedEvent() {
+	public synchronized void fireChangedEvent() throws EditableObjectException {
 		for ( int i = 0; i < eventHandlers.size(); i ++ ) {
 			eventHandlers.get(i).handle(this);
 		}

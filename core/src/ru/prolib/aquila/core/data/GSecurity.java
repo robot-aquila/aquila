@@ -47,7 +47,7 @@ public class GSecurity implements G<Security> {
 	}
 
 	@Override
-	public Security get(Object object) {
+	public Security get(Object object) throws ValueException {
 		SecurityDescriptor descr = (SecurityDescriptor) gDescr.get(object);
 		if ( descr != null && securities.isSecurityExists(descr) ) {
 			try {

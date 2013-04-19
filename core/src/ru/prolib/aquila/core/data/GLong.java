@@ -24,7 +24,7 @@ public class GLong implements G<Long> {
 	}
 
 	@Override
-	public Long get(Object value) {
+	public Long get(Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Integer.class ) {

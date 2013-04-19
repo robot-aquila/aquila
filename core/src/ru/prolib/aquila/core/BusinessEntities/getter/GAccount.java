@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер торгового счета.
@@ -77,7 +78,7 @@ public class GAccount implements G<Account> {
 	 * @return счет
 	 */
 	@Override
-	public Account get(Object source) {
+	public Account get(Object source) throws ValueException {
 		String code = gCode.get(source);
 		String subCode = null, subCode2 = null;
 		if ( gSubCode != null ) subCode = gSubCode.get(source);

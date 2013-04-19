@@ -33,7 +33,7 @@ public class ValidatorEq implements Validator {
 	}
 
 	@Override
-	public boolean validate(Object object) {
+	public boolean validate(Object object) throws ValidatorException {
 		if ( etalon == null ) {
 			return object == null ? true : false;
 		} else {

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер дескриптора инструмента сделки.
@@ -22,7 +23,7 @@ public class TradeSetSecurityDescriptor implements S<Trade> {
 	}
 
 	@Override
-	public void set(Trade object, Object value) {
+	public void set(Trade object, Object value) throws ValueException {
 		if ( value instanceof SecurityDescriptor ) {
 			object.setSecurityDescriptor((SecurityDescriptor) value);
 		}

@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Базовый сеттер long-атрибута позиции.
@@ -26,7 +27,7 @@ public abstract class PositionSetLong implements S<EditablePosition> {
 	 * вещественного выполняется приведение к типу long с потерей точности.
 	 */
 	@Override
-	public void set(EditablePosition position, Object value) {
+	public void set(EditablePosition position, Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Long.class ) {

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер текущей стоимости позиции.
@@ -21,7 +22,7 @@ public class PositionSetMarketValue implements S<EditablePosition> {
 	}
 
 	@Override
-	public void set(EditablePosition object, Object value) {
+	public void set(EditablePosition object, Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Double.class ) {

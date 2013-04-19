@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Условный геттер по значению элемента ряда.
@@ -66,11 +67,15 @@ public class GCond<R> implements G<R> {
 	}
 
 	@Override
-	public R get(Object object) {
-		if ( validator.validate(object) ) {
-			return first.get(object);
-		} else {
-			return second.get(object);
+	public R get(Object object) throws ValueException {
+		try {
+			if ( validator.validate(object) ) {
+				return first.get(object);
+			} else {
+				return second.get(object);
+			}
+		} catch ( ValidatorException e ) {
+			throw new ValueException(e);
 		}
 	}
 	

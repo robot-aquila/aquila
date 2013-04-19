@@ -114,15 +114,15 @@ public class MListImplTest {
 	public void testToString() throws Exception {
 		modifier = new MListImpl<MListImplTest>();
 		modifier.add(new S<MListImplTest>() {
-			public void set(MListImplTest object, Object value) { }
+			public void set(MListImplTest object, Object value) throws ValueException { }
 			public String toString() { return "one"; }
 		});
 		modifier.add(new S<MListImplTest>() {
-			public void set(MListImplTest object, Object value) { }
+			public void set(MListImplTest object, Object value) throws ValueException { }
 			public String toString() { return "two"; }
 		});
 		modifier.add(new S<MListImplTest>() {
-			public void set(MListImplTest object, Object value) { }
+			public void set(MListImplTest object, Object value) throws ValueException { }
 			public String toString() { return "three"; }
 		});
 		

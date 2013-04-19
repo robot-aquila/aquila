@@ -50,7 +50,7 @@ public class GChain<R> implements G<R> {
 	}
 
 	@Override
-	public R get(Object source) {
+	public R get(Object source) throws ValueException {
 		return second.get(first.get(source));
 	}
 	

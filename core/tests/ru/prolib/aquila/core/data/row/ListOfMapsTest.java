@@ -89,4 +89,33 @@ public class ListOfMapsTest {
 		assertFalse(set1.equals(set2));
 	}
 	
+	@Test (expected=RowSetException.class)
+	public void testGetRowCopy_ThrowsIfNotPositioned() throws Exception {
+		set1.getRowCopy();
+	}
+	
+	@Test
+	public void testGetRowCopy() throws Exception {
+		set1.next();
+		set1.next();
+		set1.next();
+		
+		Row row = set1.getRowCopy();
+		assertNotNull(row);
+		assertEquals(210, row.get("foo"));
+		assertEquals(212, row.get("bar"));
+	}
+	
+	@Test
+	public void testGetRowCopy_TrueCopy() throws Exception {
+		set1.next();
+		Row row = set1.getRowCopy();
+		
+		map1.get(0).put("foo", 589);
+		map1.get(0).put("bar", 572);
+		
+		assertEquals(345, row.get("foo"));
+		assertEquals(890, row.get("bar"));
+	}
+	
 }

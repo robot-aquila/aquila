@@ -33,7 +33,7 @@ public class GConst<R> implements G<R> {
 	 * @return значение, заданное при создании объекта 
 	 */
 	@Override
-	public R get(Object object) {
+	public R get(Object object) throws ValueException {
 		return retval;
 	}
 	

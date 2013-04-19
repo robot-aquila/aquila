@@ -84,7 +84,7 @@ public class GDate2E implements G<Date> {
 	}
 
 	@Override
-	public Date get(Object object) {
+	public Date get(Object object) throws ValueException {
 		String datePart = gDate.get(object);
 		String timePart = gTime.get(object);
 		if ( datePart == null || timePart == null ) {

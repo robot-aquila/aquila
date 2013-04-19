@@ -11,6 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.row.SecurityRowHandler;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -82,6 +83,24 @@ public class SecurityRowHandlerTest {
 		handler.handle(row);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testHandle_ThrowsIfModifierThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		expect(row.get("SEC_DESCR")).andReturn(descr);
+		expect(terminal.getEditableSecurity(same(descr))).andReturn(sec);
+		mod.set(same(sec), same(row));
+		expectLastCall().andThrow(expected);
+		control.replay();
+		
+		try {
+			handler.handle(row);
+			fail("Expected: " + RowException.class.getSimpleName());
+		} catch ( RowException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 
 	@SuppressWarnings("unchecked")

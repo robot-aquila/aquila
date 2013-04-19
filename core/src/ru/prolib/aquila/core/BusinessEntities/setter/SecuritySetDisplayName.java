@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер наименования инструмента.
@@ -27,7 +28,7 @@ public class SecuritySetDisplayName implements S<EditableSecurity> {
 	 * Значения других типов игнорируются.
 	 */
 	@Override
-	public void set(EditableSecurity object, Object value) {
+	public void set(EditableSecurity object, Object value) throws ValueException {
 		if ( value != null && value.getClass() == String.class ) {
 			object.setDisplayName((String) value);
 		}

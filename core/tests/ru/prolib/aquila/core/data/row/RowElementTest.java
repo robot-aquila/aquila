@@ -72,6 +72,23 @@ public class RowElementTest {
 	}
 	
 	@Test
+	public void testGet_ThrowsIfRowException() throws Exception {
+		RowException expected = new RowException("test");
+		expect(row.get("foobar")).andThrow(expected);
+		control.replay();
+		
+		try {
+			getter.get(row);
+			fail("Expected exception: "
+					+ RowValueException.class.getSimpleName());
+		} catch ( RowValueException e ) {
+			assertSame(expected, e.getCause());
+		}
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(getter.equals(getter));
 		assertFalse(getter.equals(this));

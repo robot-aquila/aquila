@@ -7,6 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -117,6 +118,33 @@ public class RowSetFilterTest {
 		control.replay();
 		
 		assertTrue(filter.next());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testNext_ThrowsIfValidatorThrows() throws Exception {
+		ValidatorException expected = new ValidatorException("test");
+		expect(rs.next()).andReturn(true);
+		expect(validator.validate(same(rs))).andThrow(expected);
+		control.replay();
+		
+		try {
+			filter.next();
+			fail("Expected: " + RowSetException.class.getSimpleName());
+		} catch ( RowSetException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
+	}
+	
+	@Test
+	public void testGetRowCopy() throws Exception {
+		Row row = control.createMock(Row.class);
+		expect(rs.getRowCopy()).andReturn(row);
+		control.replay();
+		
+		assertSame(row, filter.getRowCopy());
 		
 		control.verify();
 	}

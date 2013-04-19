@@ -1,13 +1,17 @@
 package ru.prolib.aquila.core.data.row;
 
-
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.apache.log4j.BasicConfigurator;
+import org.easymock.IMocksControl;
 import org.junit.*;
+
+import com.csvreader.CsvReader;
 
 /**
  * 2013-03-03<br>
@@ -34,8 +38,11 @@ public class CsvRowSetTest {
 				"152130.0000000","152190.0000000"},
 	};
 	
+	private IMocksControl control;
 	private File file;
 	private CsvRowSet rs;
+	private CsvReader reader;
+	private IOException exception;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -45,8 +52,11 @@ public class CsvRowSetTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		control = createStrictControl();
 		file = new File("fixture/SPFB.RTS.txt");
 		rs = new CsvRowSet(file);
+		reader = control.createMock(CsvReader.class);
+		exception = new IOException("test");
 	}
 	
 	/**
@@ -55,7 +65,7 @@ public class CsvRowSetTest {
 	 * @param row ряд
 	 * @param index индекс ряда фикстуры
 	 */
-	private void assertRow(Row row, int index) {
+	private void assertRow(Row row, int index) throws Exception {
 		assertEquals("SPFB.RTS", row.get(TICKER));
 		assertEquals("5", row.get(PER));
 		assertEquals(fixture[index][0], row.get(DATE));
@@ -94,9 +104,24 @@ public class CsvRowSetTest {
 		assertFalse(rs.next());
 	}
 	
-	@Test (expected=IllegalStateException.class)
+	@Test (expected=RowException.class)
 	public void testGet_ThrowsIfNotPositioned() throws Exception {
 		rs.get(TICKER);
+	}
+	
+	@Test
+	public void testGet_ThrowsIfReaderGetThrows() throws Exception {
+		expect(reader.get(eq(TICKER))).andThrow(exception);
+		control.replay();
+		rs.setCsvReader(reader);
+		
+		try {
+			rs.get(TICKER);
+			fail("Expected: " + RowSetException.class.getSimpleName());
+		} catch ( RowException e ) {
+			control.verify();
+			assertSame(exception, e.getCause());
+		}
 	}
 	
 	@Test (expected=FileNotFoundException.class)
@@ -114,8 +139,74 @@ public class CsvRowSetTest {
 	}
 	
 	@Test
+	public void testNext_ThrowsIfReadRecordThrows() throws Exception {
+		expect(reader.readRecord()).andThrow(exception);
+		reader.close();
+		control.replay();
+		rs.setCsvReader(reader);
+		
+		try {
+			rs.next();
+			fail("Expected: " + RowSetException.class.getSimpleName());
+		} catch ( RowException e ) {
+			control.verify();
+			assertSame(exception, e.getCause());
+		}
+	}
+	
+	@Test
 	public void testReset_IgnoredIfNotOpened() throws Exception {
+		control.replay();
+		
 		rs.reset();
+		
+		control.verify();
+	}
+	
+	@Test (expected=RowSetException.class)
+	public void testGetRowCopy_ThrowsIfNoReader() throws Exception {
+		rs.getRowCopy();
+	}
+	
+	@Test
+	public void testGetRowCopy_ThrowsIfGetHeadersThrows() throws Exception {
+		expect(reader.getHeaders()).andThrow(exception);
+		reader.close();
+		control.replay();
+		rs.setCsvReader(reader);
+		
+		try {
+			rs.getRowCopy();
+			fail("Expected: " + RowSetException.class.getSimpleName());
+		} catch ( RowSetException e ) {
+			control.verify();
+			assertSame(exception, e.getCause());
+		}
+	}
+	
+	@Test
+	public void testGetRowCopy_ThrowsIfGetValuesThrows() throws Exception {
+		expect(reader.getHeaders()).andReturn(new String[] { "foo", "bar" });
+		expect(reader.getValues()).andThrow(exception);
+		reader.close();
+		control.replay();
+		rs.setCsvReader(reader);
+		
+		try {
+			rs.getRowCopy();
+			fail("Expected: " + RowSetException.class.getSimpleName());
+		} catch ( RowSetException e ) {
+			control.verify();
+			assertSame(exception, e.getCause());
+		}
+	}
+	
+	@Test
+	public void testGetRowCopy() throws Exception {
+		assertTrue(rs.next());
+		Row copy = rs.getRowCopy();
+		assertRow(rs, 0);
+		assertRow(copy, 0);
 	}
 
 }

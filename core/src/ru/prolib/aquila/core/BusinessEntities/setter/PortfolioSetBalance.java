@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер баланса портфеля.
@@ -25,7 +26,7 @@ public class PortfolioSetBalance implements S<EditablePortfolio> {
 	 * Значения иных типов игнорируются.
 	 */
 	@Override
-	public void set(EditablePortfolio portfolio, Object value) {
+	public void set(EditablePortfolio portfolio, Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass(); 
 			if ( valueClass == Double.class ) {

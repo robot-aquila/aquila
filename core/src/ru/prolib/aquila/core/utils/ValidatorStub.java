@@ -34,7 +34,7 @@ public class ValidatorStub implements Validator {
 	}
 
 	@Override
-	public boolean validate(Object object) {
+	public boolean validate(Object object) throws ValidatorException {
 		return result;
 	}
 	

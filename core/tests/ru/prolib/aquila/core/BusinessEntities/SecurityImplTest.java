@@ -13,6 +13,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -65,7 +66,9 @@ public class SecurityImplTest {
 	 * @param firstValue первое значение атрибута
 	 * @param secondValue второе значение атрибута
 	 */
-	private void testGetterSetter(Object firstValue, Object secondValue) {
+	private void testGetterSetter(Object firstValue, Object secondValue)
+			throws Exception
+	{
 		Object fixture[][] = {
 				// initial value, new value, changed?
 				{ null, 	  null,			false },
@@ -466,13 +469,13 @@ public class SecurityImplTest {
 	public void testSetOpenPrice() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Security) source).getOpenPrice();
 			}
 		};
 		setter = new S<SecurityImpl>() {
 			@Override
-			public void set(SecurityImpl object, Object value) {
+			public void set(SecurityImpl object, Object value) throws ValueException {
 				object.setOpenPrice((Double) value);
 			}
 		};
@@ -483,13 +486,13 @@ public class SecurityImplTest {
 	public void testSetClosePrice() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Security) source).getClosePrice();
 			}
 		};
 		setter = new S<SecurityImpl>() {
 			@Override
-			public void set(SecurityImpl object, Object value) {
+			public void set(SecurityImpl object, Object value) throws ValueException {
 				object.setClosePrice((Double) value);
 			}
 		};
@@ -500,13 +503,13 @@ public class SecurityImplTest {
 	public void testSetLowPrice() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Security) source).getLowPrice();
 			}
 		};
 		setter = new S<SecurityImpl>() {
 			@Override
-			public void set(SecurityImpl object, Object value) {
+			public void set(SecurityImpl object, Object value) throws ValueException {
 				object.setLowPrice((Double) value);
 			}
 		};
@@ -517,13 +520,13 @@ public class SecurityImplTest {
 	public void testSetHighPrice() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Security) source).getHighPrice();
 			}
 		};
 		setter = new S<SecurityImpl>() {
 			@Override
-			public void set(SecurityImpl object, Object value) {
+			public void set(SecurityImpl object, Object value) throws ValueException {
 				object.setHighPrice((Double) value);
 			}
 		};
@@ -534,13 +537,13 @@ public class SecurityImplTest {
 	public void testSetStatus() throws Exception {
 		getter = new G<SecurityStatus>() {
 			@Override
-			public SecurityStatus get(Object source) {
+			public SecurityStatus get(Object source) throws ValueException {
 				return ((Security) source).getStatus();
 			}
 		};
 		setter = new S<SecurityImpl>() {
 			@Override
-			public void set(SecurityImpl object, Object value) {
+			public void set(SecurityImpl object, Object value) throws ValueException {
 				object.setStatus((SecurityStatus) value);
 			}
 		};

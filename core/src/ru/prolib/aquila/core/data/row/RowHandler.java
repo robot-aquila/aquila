@@ -14,7 +14,8 @@ public interface RowHandler {
 	 * Обработать ряд.
 	 * <p>
 	 * @param row ряд
+	 * @throws RowException ошибка обработки ряда
 	 */
-	public void handle(Row row);
+	public void handle(Row row) throws RowException;
 
 }

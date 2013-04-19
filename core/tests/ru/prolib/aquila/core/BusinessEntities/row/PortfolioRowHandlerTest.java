@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.row.PortfolioRowHandler;
 import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -19,6 +20,7 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id$
  */
 public class PortfolioRowHandlerTest {
+	private static final Account acc = new Account("LX01");
 	private IMocksControl control;
 	private EditableTerminal terminal;
 	private EditablePortfolio portfolio;
@@ -82,7 +84,6 @@ public class PortfolioRowHandlerTest {
 	
 	@Test
 	public void testHandle_IfNew() throws Exception {
-		Account acc = new Account("LX01");
 		expect(row.get(Spec.PORT_ACCOUNT)).andReturn(acc);
 		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(false);
 		expect(factory.createPortfolio(eq(acc))).andReturn(portfolio);
@@ -97,7 +98,6 @@ public class PortfolioRowHandlerTest {
 	
 	@Test
 	public void testHandle_IfExisting() throws Exception {
-		Account acc = new Account("LX01");
 		expect(row.get(Spec.PORT_ACCOUNT)).andReturn(acc);
 		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(true);
 		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(portfolio);
@@ -107,6 +107,25 @@ public class PortfolioRowHandlerTest {
 		rowHandler.handle(row);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testHandle_ThrowsIfModifierThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		expect(row.get(Spec.PORT_ACCOUNT)).andReturn(acc);
+		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(true);
+		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(portfolio);
+		mod.set(same(portfolio), same(row));
+		expectLastCall().andThrow(expected);
+		control.replay();
+		
+		try {
+			rowHandler.handle(row);
+			fail("Expected: " + RowException.class.getSimpleName());
+		} catch ( RowException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

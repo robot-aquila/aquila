@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
 import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Конвертер направления заявки или сделки.
@@ -89,7 +90,7 @@ public class GOrderDir implements G<OrderDirection> {
 	}
 
 	@Override
-	public OrderDirection get(Object source) {
+	public OrderDirection get(Object source) throws ValueException {
 		String value = gString.get(source);
 		if ( buyEquiv.equals(value) ) {
 			return OrderDirection.BUY;

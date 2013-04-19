@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер точности цены торгового инструмента.
@@ -27,7 +28,7 @@ public class SecuritySetPrecision implements S<EditableSecurity> {
 	 * {@link java.lang.Integer}. Значения иных типов игнорируются.
 	 */
 	@Override
-	public void set(EditableSecurity security, Object value) {
+	public void set(EditableSecurity security, Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Integer.class ) {

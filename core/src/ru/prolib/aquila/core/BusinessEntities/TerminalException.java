@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 /**
  * Общее исключение терминала.
  */
-public class TerminalException extends Exception {
+public class TerminalException extends EditableObjectException {
 	private static final long serialVersionUID = 1L;
 	
 	public TerminalException() {

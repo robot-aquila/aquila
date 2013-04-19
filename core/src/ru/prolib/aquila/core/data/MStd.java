@@ -46,7 +46,7 @@ public class MStd<T> implements S<T> {
 	}
 
 	@Override
-	public void set(T subject, Object source) {
+	public void set(T subject, Object source) throws ValueException {
 		setter.set(subject, getter.get(source));
 	}
 	

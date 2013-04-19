@@ -20,6 +20,7 @@ import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderHandler;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * 2012-09-22<br>
@@ -139,7 +140,7 @@ public class OrderImplTest {
 	 * @param changeId идентификатор изменения для проверки (null - пропустить)
 	 */
 	private void testSetterGetterF(Object firstValue,
-			Object secondValue, Integer changeId)
+			Object secondValue, Integer changeId) throws Exception
 	{
 		Object fixture[][] = {
 				{ null, 		null,			false },
@@ -171,7 +172,9 @@ public class OrderImplTest {
 	 * @param firstValue начальное значение
 	 * @param secondValue конечное значение
 	 */
-	private void testSetterGetter(Object firstValue, Object secondValue) {
+	private void testSetterGetter(Object firstValue, Object secondValue)
+			throws Exception
+	{
 		testSetterGetterF(firstValue, secondValue, null);
 	}
 	
@@ -179,13 +182,13 @@ public class OrderImplTest {
 	public void testSetAccount() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setAccount((Account) value);
 			}
 		};
 		getter = new G<Account>() {
 			@Override
-			public Account get(Object object) {
+			public Account get(Object object) throws ValueException {
 				return ((OrderImpl) object).getAccount();
 			}
 		};
@@ -196,13 +199,13 @@ public class OrderImplTest {
 	public void testSetDirection() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setDirection((OrderDirection) value);
 			}
 		};
 		getter = new G<OrderDirection>() {
 			@Override
-			public OrderDirection get(Object object) {
+			public OrderDirection get(Object object) throws ValueException {
 				return ((OrderImpl) object).getDirection();
 			}
 		};
@@ -213,13 +216,13 @@ public class OrderImplTest {
 	public void testSetId() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setId((Long) value);
 			}
 		};
 		getter = new G<Long>() {
 			@Override
-			public Long get(Object object) {
+			public Long get(Object object) throws ValueException {
 				return ((OrderImpl) object).getId();
 			}
 		};
@@ -230,13 +233,13 @@ public class OrderImplTest {
 	public void testSetLinkedOrderId() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setLinkedOrderId((Long) value);
 			}
 		};
 		getter = new G<Long>() {
 			@Override
-			public Long get(Object object) {
+			public Long get(Object object) throws ValueException {
 				return ((OrderImpl) object).getLinkedOrderId();
 			}
 		};
@@ -257,13 +260,13 @@ public class OrderImplTest {
 	public void testSetPrice() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setPrice((Double) value);
 			}
 		};
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object object) {
+			public Double get(Object object) throws ValueException {
 				return ((OrderImpl) object).getPrice();
 			}
 		};
@@ -274,13 +277,13 @@ public class OrderImplTest {
 	public void testSetStopLimitPrice() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setStopLimitPrice((Double) value);
 			}
 		};
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object object) {
+			public Double get(Object object) throws ValueException {
 				return ((OrderImpl) object).getStopLimitPrice();
 			}
 		};
@@ -291,13 +294,13 @@ public class OrderImplTest {
 	public void testSetTakeProfitPrice() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setTakeProfitPrice((Double) value);
 			}
 		};
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object object) {
+			public Double get(Object object) throws ValueException {
 				return ((OrderImpl) object).getTakeProfitPrice();
 			}
 		};
@@ -309,13 +312,13 @@ public class OrderImplTest {
 	public void testSetQty() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setQty((Long) value);
 			}
 		};
 		getter = new G<Long>() {
 			@Override
-			public Long get(Object object) {
+			public Long get(Object object) throws ValueException {
 				return ((OrderImpl) object).getQty();
 			}
 		};
@@ -326,13 +329,13 @@ public class OrderImplTest {
 	public void testSetQtyRest() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setQtyRest((Long) value);
 			}
 		};
 		getter = new G<Long>() {
 			@Override
-			public Long get(Object object) {
+			public Long get(Object object) throws ValueException {
 				return ((OrderImpl) object).getQtyRest();
 			}
 		};
@@ -353,13 +356,13 @@ public class OrderImplTest {
 	public void testSetSecurityDescriptor() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setSecurityDescriptor((SecurityDescriptor) value);
 			}
 		};
 		getter = new G<SecurityDescriptor>() {
 			@Override
-			public SecurityDescriptor get(Object object) {
+			public SecurityDescriptor get(Object object) throws ValueException {
 				return ((OrderImpl) object).getSecurityDescriptor();
 			}
 		};
@@ -371,13 +374,13 @@ public class OrderImplTest {
 	public void testSetOffset() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setOffset((Price) value);
 			}
 		};
 		getter = new G<Price>() {
 			@Override
-			public Price get(Object object) {
+			public Price get(Object object) throws ValueException {
 				return ((OrderImpl) object).getOffset();
 			}
 		};
@@ -389,13 +392,13 @@ public class OrderImplTest {
 	public void testSetSpread() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setSpread((Price) value);
 			}
 		};
 		getter = new G<Price>() {
 			@Override
-			public Price get(Object object) {
+			public Price get(Object object) throws ValueException {
 				return ((OrderImpl) object).getSpread();
 			}
 		};
@@ -407,13 +410,13 @@ public class OrderImplTest {
 	public void testSetTransactionId() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setTransactionId((Long) value);
 			}
 		};
 		getter = new G<Long>() {
 			@Override
-			public Long get(Object object) {
+			public Long get(Object object) throws ValueException {
 				return ((OrderImpl) object).getTransactionId();
 			}
 		};
@@ -424,13 +427,13 @@ public class OrderImplTest {
 	public void testSetType() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setType((OrderType) value);
 			}
 		};
 		getter = new G<OrderType>() {
 			@Override
-			public OrderType get(Object object) {
+			public OrderType get(Object object) throws ValueException {
 				return ((OrderImpl) object).getType();
 			}
 		};
@@ -441,13 +444,13 @@ public class OrderImplTest {
 	public void testSetStatus() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setStatus((OrderStatus) value);
 			}
 		};
 		getter = new G<OrderStatus>() {
 			@Override
-			public OrderStatus get(Object object) {
+			public OrderStatus get(Object object) throws ValueException {
 				return ((OrderImpl) object).getStatus();
 			}
 		};
@@ -476,13 +479,13 @@ public class OrderImplTest {
 	public void testSetExecutedVolume() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setExecutedVolume((Double) value);
 			}
 		};
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object object) {
+			public Double get(Object object) throws ValueException {
 				return ((OrderImpl) object).getExecutedVolume();
 			}
 		};
@@ -505,13 +508,13 @@ public class OrderImplTest {
 	public void testSetTime() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setTime((Date) value);
 			}
 		};
 		getter = new G<Date>() {
 			@Override
-			public Date get(Object object) {
+			public Date get(Object object) throws ValueException {
 				return ((OrderImpl) object).getTime();
 			}
 		};
@@ -524,13 +527,13 @@ public class OrderImplTest {
 	public void testSetLastChangeTime() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) {
+			public void set(OrderImpl object, Object value) throws ValueException {
 				object.setLastChangeTime((Date) value);
 			}
 		};
 		getter = new G<Date>() {
 			@Override
-			public Date get(Object object) {
+			public Date get(Object object) throws ValueException {
 				return ((OrderImpl) object).getLastChangeTime();
 			}
 		};

@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 /**
  * Общее исключение торгового инструмента.
  */
-public class SecurityException extends Exception {
+public class SecurityException extends EditableObjectException {
 	private static final long serialVersionUID = 1L;
 	
 	public SecurityException() {

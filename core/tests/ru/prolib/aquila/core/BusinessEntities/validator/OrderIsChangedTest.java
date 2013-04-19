@@ -41,7 +41,7 @@ public class OrderIsChangedTest {
 	}
 	
 	@Test
-	public void testValidate() {
+	public void testValidate() throws Exception {
 		Object fixture[][] = {
 			// changed, valid?
 			{ false,   false },

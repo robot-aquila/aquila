@@ -1,5 +1,8 @@
 package ru.prolib.aquila.core.data;
 
+/**
+ * Базовое исключение в связи со значением или его получением.
+ */
 public class ValueException extends Exception {
 	private static final long serialVersionUID = 1L;
 	

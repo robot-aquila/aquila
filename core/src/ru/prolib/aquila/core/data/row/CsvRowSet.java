@@ -3,10 +3,6 @@ package ru.prolib.aquila.core.data.row;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.csvreader.CsvReader;
 
 /**
@@ -16,13 +12,8 @@ import com.csvreader.CsvReader;
  * $Id: CsvRowSet.java 563 2013-03-08 20:02:34Z whirlwind $
  */
 public class CsvRowSet implements RowSet {
-	private static final Logger logger;
 	private final File file;
 	private CsvReader reader;
-	
-	static {
-		logger = LoggerFactory.getLogger(CsvRowSet.class);
-	}
 	
 	public CsvRowSet(File file) throws FileNotFoundException {
 		super();
@@ -40,17 +31,27 @@ public class CsvRowSet implements RowSet {
 	public File getFile() {
 		return file;
 	}
+	
+	/**
+	 * Установить устройство чтения записей.
+	 * <p>
+	 * Только для тестов.
+	 * <p>
+	 * @param reader устройство чтения записей
+	 */
+	protected synchronized void setCsvReader(CsvReader reader) {
+		this.reader = reader;
+	}
 
 	@Override
-	public synchronized Object get(String name) {
+	public synchronized Object get(String name) throws RowException {
 		if ( reader == null ) {
-			throw new IllegalStateException("Not positioned: " + file);
+			throw new RowSetException("Not positioned: " + file);
 		}
 		try {
 			return reader.get(name);
 		} catch ( IOException e ) {
-			logger.error("Error reading CSV: ", e);
-			return null;
+			throw new RowSetException("Error reading CSV: ", e);
 		}
 	}
 
@@ -85,6 +86,19 @@ public class CsvRowSet implements RowSet {
 	@Override
 	public synchronized void close() {
 		reset();
+	}
+
+	@Override
+	public synchronized Row getRowCopy() throws RowException {
+		if ( reader == null ) {
+			throw new RowSetException("Not positioned: " + file);
+		}
+		try {
+			return new SimpleRow(reader.getHeaders(), reader.getValues());
+		} catch ( IOException e ) {
+			reset();
+			throw new RowSetException(e);
+		}
 	}
 
 }

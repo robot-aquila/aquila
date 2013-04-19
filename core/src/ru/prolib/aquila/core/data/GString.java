@@ -22,7 +22,7 @@ public class GString implements G<String> {
 	}
 
 	@Override
-	public String get(Object value) {
+	public String get(Object value) throws ValueException {
 		return (String) (value instanceof String ? value : null);
 	}
 	

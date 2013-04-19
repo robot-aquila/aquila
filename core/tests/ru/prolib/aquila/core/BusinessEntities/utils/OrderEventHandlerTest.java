@@ -10,8 +10,10 @@ import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderEvent;
+import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderEventHandler;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * 2012-09-25<br>
@@ -63,6 +65,21 @@ public class OrderEventHandlerTest {
 		control.replay();
 		handler.handle(order);
 		control.verify();
+	}
+	
+	@Test
+	public void testHandle_ThrowsIfValidatorThrows() throws Exception {
+		ValidatorException expected = new ValidatorException("test");
+		expect(validator.validate(same(order))).andThrow(expected);
+		control.replay();
+		
+		try {
+			handler.handle(order);
+			fail("Expected: " + OrderException.class.getSimpleName());
+		} catch ( OrderException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 
 }

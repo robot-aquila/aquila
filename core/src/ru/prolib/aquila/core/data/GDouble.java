@@ -22,7 +22,7 @@ public class GDouble implements G<Double> {
 	}
 
 	@Override
-	public Double get(Object value) {
+	public Double get(Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Double.class ) {

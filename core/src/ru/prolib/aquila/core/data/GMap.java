@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Геттер на основе карты сопоставлений.
@@ -34,13 +35,17 @@ public class GMap<R> implements G<R> {
 	}
 	
 	@Override
-	public R get(Object source) {
+	public R get(Object source) throws ValueException {
 		Iterator<Entry<Validator, G<R>>> it = map.entrySet().iterator();
-		while ( it.hasNext() ) {
-			Entry<Validator, G<R>> e = it.next();
-			if ( e.getKey().validate(source) ) {
-				return e.getValue().get(source);
+		try {
+			while ( it.hasNext() ) {
+				Entry<Validator, G<R>> e = it.next();
+				if ( e.getKey().validate(source) ) {
+					return e.getValue().get(source);
+				}
 			}
+		} catch ( ValidatorException e ) {
+			throw new ValueException(e);
 		}
 		return null;
 	}

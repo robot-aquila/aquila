@@ -14,6 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -47,7 +48,9 @@ public class SetupPositionImplTest {
 	 * @param firstValue первое значение атрибута
 	 * @param secondValue второе значение атрибута
 	 */
-	private void testGetterSetter(Object firstValue, Object secondValue) {
+	private void testGetterSetter(Object firstValue, Object secondValue)
+			throws Exception
+	{
 		Object fixture[][] = {
 				// initial value, new value
 				{ null, 	  null			},
@@ -75,13 +78,13 @@ public class SetupPositionImplTest {
 	public void testSetQuota() throws Exception {
 		getter = new G<Price>() {
 			@Override
-			public Price get(Object source) {
+			public Price get(Object source) throws ValueException {
 				return ((SetupPosition) source).getQuota();
 			}
 		};
 		setter = new S<SetupPosition>() {
 			@Override
-			public void set(SetupPosition object, Object value) {
+			public void set(SetupPosition object, Object value) throws ValueException {
 				object.setQuota((Price) value);
 			}
 		};
@@ -93,13 +96,13 @@ public class SetupPositionImplTest {
 	public void testSetType() throws Exception {
 		getter = new G<PositionType>() {
 			@Override
-			public PositionType get(Object source) {
+			public PositionType get(Object source) throws ValueException {
 				return ((SetupPosition) source).getType();
 			}
 		};
 		setter = new S<SetupPosition>() {
 			@Override
-			public void set(SetupPosition object, Object value) {
+			public void set(SetupPosition object, Object value) throws ValueException {
 				object.setType((PositionType) value);
 			}
 		};
@@ -110,13 +113,13 @@ public class SetupPositionImplTest {
 	public void testSetAllowedType() throws Exception {
 		getter = new G<PositionType>() {
 			@Override
-			public PositionType get(Object source) {
+			public PositionType get(Object source) throws ValueException {
 				return ((SetupPosition) source).getAllowedType();
 			}
 		};
 		setter = new S<SetupPosition>() {
 			@Override
-			public void set(SetupPosition object, Object value) {
+			public void set(SetupPosition object, Object value) throws ValueException {
 				object.setAllowedType((PositionType) value);
 			}
 		};

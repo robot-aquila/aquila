@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер атрибута инструмента типа {@link java.lang.Double}.
@@ -19,7 +20,7 @@ public abstract class SecuritySetDouble implements S<EditableSecurity> {
 	}
 
 	@Override
-	public void set(EditableSecurity object, Object value) {
+	public void set(EditableSecurity object, Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Long.class ) {

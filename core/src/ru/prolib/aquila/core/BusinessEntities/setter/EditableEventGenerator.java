@@ -4,9 +4,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Editable;
+import ru.prolib.aquila.core.BusinessEntities.EditableObjectException;
 import ru.prolib.aquila.core.BusinessEntities.FireEditableEvent;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.ValidatorStub;
 
 /**
@@ -43,7 +46,9 @@ public class EditableEventGenerator<T extends Editable> implements S<T> {
 	 * @param availability валидатор доступности
 	 * @param available генератор события о доступности
 	 */
-	public EditableEventGenerator(Validator availability, FireEditableEvent available) {
+	public EditableEventGenerator(Validator availability,
+			FireEditableEvent available)
+	{
 		super();
 		this.availability = availability;
 		this.available = available;
@@ -77,15 +82,21 @@ public class EditableEventGenerator<T extends Editable> implements S<T> {
 	}
 
 	@Override
-	public void set(T object, Object value) {
-		if ( object.hasChanged() ) {
-			if ( object.isAvailable() ) {
-				object.fireChangedEvent();
-			} else if ( availability.validate(object) ) {
-				available.fireEvent(object);
-				object.setAvailable(true);
+	public void set(T object, Object value) throws ValueException {
+		try {
+			if ( object.hasChanged() ) {
+				if ( object.isAvailable() ) {
+					object.fireChangedEvent();
+				} else if ( availability.validate(object) ) {
+					available.fireEvent(object);
+					object.setAvailable(true);
+				}
+				object.resetChanges();
 			}
-			object.resetChanges();
+		} catch ( ValidatorException e ) {
+			throw new ValueException(e);
+		} catch ( EditableObjectException e ) {
+			throw new ValueException(e);
 		}
 	}
 	

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер на основе карты сопоставления строк значениям произвольного типа.
@@ -115,7 +116,7 @@ public class GStringMap<R> implements G<R> {
 	}
 
 	@Override
-	public R get(Object source) {
+	public R get(Object source) throws ValueException {
 		String key = gKey.get(source);
 		R value = map.get(key);
 		if ( value == null ) {

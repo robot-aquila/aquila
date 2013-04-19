@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер последней цены инструмента.
@@ -21,7 +22,7 @@ public class SecuritySetLastPrice implements S<EditableSecurity> {
 	}
 
 	@Override
-	public void set(EditableSecurity object, Object value) {
+	public void set(EditableSecurity object, Object value) throws ValueException {
 		if ( value == null || value.getClass() == Double.class ) {
 			object.setLastPrice((Double) value);
 		}

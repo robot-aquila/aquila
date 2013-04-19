@@ -45,7 +45,7 @@ public class MListImpl<T> implements MList<T> {
 	}
 
 	@Override
-	public synchronized void set(T subject, Object source) {
+	public synchronized void set(T subject, Object source) throws ValueException {
 		for ( S<T> mutator : modifiers ) {
 			mutator.set(subject, source);
 		}

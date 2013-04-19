@@ -18,7 +18,7 @@ public class CandleDataSeries extends CandleProxy<Double>
 	 * @param getter геттер значения атрибута свечи
 	 */
 	public CandleDataSeries(String valueId, Series<Candle> candles,
-			G<Double> getter)
+			GCandlePart<Double> getter)
 	{
 		super(valueId, candles, getter);
 	}

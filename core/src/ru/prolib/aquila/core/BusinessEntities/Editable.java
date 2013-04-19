@@ -45,7 +45,7 @@ public interface Editable {
 	public void setAvailable(boolean flag);
 
 	/**
-	 * Проверить признак доступности позиции.
+	 * Проверить признак доступности объекта.
 	 * <p>
 	 * См. описание метода {@link #setAvailable(boolean)}.
 	 * <p>
@@ -56,8 +56,9 @@ public interface Editable {
 	/**
 	 * Генерировать событие об изменении атрибутов.
 	 * <p>
+	 * @throws EditableObjectException ошибка генерации события
 	 */
-	public void fireChangedEvent();
+	public void fireChangedEvent() throws EditableObjectException;
 	
 	/**
 	 * Установить признак изменения объекта.

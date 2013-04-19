@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.data.row;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Фильтр набора записей.
@@ -35,18 +36,22 @@ public class RowSetFilter implements RowSet {
 	}
 
 	@Override
-	public Object get(String name) {
+	public Object get(String name) throws RowException {
 		return rs.get(name);
 	}
 
 	@Override
 	public boolean next() throws RowSetException {
-		while ( rs.next() ) {
-			if ( validator.validate(rs) ) {
-				return true;
+		try {
+			while ( rs.next() ) {
+				if ( validator.validate(rs) ) {
+					return true;
+				}
 			}
+			return false;
+		} catch ( ValidatorException e ) {
+			throw new RowSetException(e);
 		}
-		return false;
 	}
 
 	@Override
@@ -73,6 +78,11 @@ public class RowSetFilter implements RowSet {
 	@Override
 	public void close() {
 		rs.close();
+	}
+
+	@Override
+	public Row getRowCopy() throws RowException {
+		return rs.getRowCopy();
 	}
 
 }

@@ -12,6 +12,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -39,12 +40,12 @@ public class RowSetAdapterTest {
 		data.get(2).put("bar", 413);
 		source = new ListOfMaps(data);
 		adapter1 = new G<Object>() {
-			@Override public Object get(Object source) {
+			@Override public Object get(Object source) throws ValueException {
 				return ((RowSet) source).get("bar");
 			}
 		};
 		adapter2 = new G<Object>() {
-			@Override public Object get(Object source) {
+			@Override public Object get(Object source) throws ValueException {
 				return ((RowSet) source).get("foo");
 			}
 		};

@@ -4,6 +4,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Валидатор определения неудачи процесса регистрации заявки.
@@ -23,7 +24,7 @@ public class OrderIsRegisterFailed implements Validator {
 	}
 
 	@Override
-	public boolean validate(Object object) {
+	public boolean validate(Object object) throws ValidatorException {
 		if ( object instanceof EditableOrder ) {
 			EditableOrder order = (EditableOrder) object;
 			return order.hasChanged(OrderImpl.STATUS_CHANGED) &&

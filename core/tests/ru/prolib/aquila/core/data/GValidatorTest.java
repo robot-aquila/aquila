@@ -8,6 +8,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -44,6 +45,21 @@ public class GValidatorTest {
 		assertTrue(validator.validate(this));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testGet_ThrowsIfGetterThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		expect(getter.get(same(this))).andThrow(expected);
+		control.replay();
+		
+		try {
+			validator.validate(this);
+			fail("Expected: " + ValidatorException.class.getSimpleName());
+		} catch ( ValidatorException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

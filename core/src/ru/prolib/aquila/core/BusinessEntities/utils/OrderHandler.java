@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
+import ru.prolib.aquila.core.BusinessEntities.OrderException;
 
 /**
  * Интерфейс абстрактного обработчика заявки.
@@ -14,7 +15,8 @@ public interface OrderHandler {
 	 * Обработать заявку.
 	 * <p>
 	 * @param order заявка
+	 * @throws OrderException ошибка обработки заявки
 	 */
-	public void handle(EditableOrder order);
+	public void handle(EditableOrder order) throws OrderException;
 
 }

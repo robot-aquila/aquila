@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер-конвертер вещественного значения.
@@ -88,7 +89,7 @@ abstract public class GDouble2X<R> implements G<R> {
 	}
 
 	@Override
-	public R get(Object source) {
+	public R get(Object source) throws ValueException {
 		Double value = gDouble.get(source);
 		if ( value == null ) {
 			if ( strict ) {

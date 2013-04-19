@@ -55,7 +55,7 @@ public class GRowObj<T> implements G<T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public T get(Object object) {
+	public T get(Object object) throws ValueException {
 		if ( object instanceof Row ) {
 			Object value = ((Row) object).get(name);
 			return adapter == null ? (T) value : adapter.get(value);

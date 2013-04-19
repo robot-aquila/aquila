@@ -10,6 +10,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -55,6 +56,21 @@ public class RowAdapterTest {
 	}
 	
 	@Test
+	public void testGet_ThrowsIfGetterThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		expect(adapter1.get(same(source))).andThrow(expected);
+		control.replay();
+		
+		try {
+			adapter.get("foo");
+			fail("Expected: " + RowException.class.getSimpleName());
+		} catch ( RowException e ) {
+			control.verify();
+			assertSame(expected, e.getCause());
+		}
+	}
+	
+	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(adapter.equals(adapter));
 		assertFalse(adapter.equals(null));
@@ -84,6 +100,35 @@ public class RowAdapterTest {
 		assertEquals(1, foundCnt);
 		assertEquals(source, found.getSource());
 		assertEquals(adapters, found.getAdapters());
+	}
+
+	@Test
+	public void testGetRowCopy_ThrowsIfOneOfAdaptersThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		expect(adapter1.get(same(source))).andThrow(expected);
+		expect(adapter2.get(same(source))).andStubReturn(152);
+		control.replay();
+		
+		try {
+			adapter.getRowCopy();
+			fail("Expected: " + RowException.class.getSimpleName());
+		} catch ( RowException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
+	}
+	
+	@Test
+	public void testGetRowCopy() throws Exception {
+		expect(adapter1.get(same(source))).andReturn("zulu4");
+		expect(adapter2.get(same(source))).andReturn(152);
+		control.replay();
+		
+		Row expected = new SimpleRow(new String[] { "foo", "bar" },
+				new Object[] { "zulu4", 152 });
+		assertEquals(expected, adapter.getRowCopy());
+		
+		control.verify();
 	}
 
 }

@@ -2,8 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Валидатор на основе геттера.
@@ -44,8 +44,12 @@ public class GValidator implements Validator {
 	}
 
 	@Override
-	public boolean validate(Object object) {
-		return validator.validate(getter.get(object));
+	public boolean validate(Object object) throws ValidatorException {
+		try {
+			return validator.validate(getter.get(object));
+		} catch ( ValueException e ) {
+			throw new ValidatorException(e);
+		}
 	}
 	
 	@Override

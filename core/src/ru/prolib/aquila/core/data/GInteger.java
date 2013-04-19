@@ -24,7 +24,7 @@ public class GInteger implements G<Integer> {
 	}
 
 	@Override
-	public Integer get(Object value) {
+	public Integer get(Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Double.class ) {

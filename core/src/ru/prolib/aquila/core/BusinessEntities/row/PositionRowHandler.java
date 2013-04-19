@@ -17,11 +17,15 @@ import ru.prolib.aquila.core.data.row.*;
  * {@link ru.prolib.aquila.core.BusinessEntities.row.Spec#POS_SECDESCR
  * Spec#POS_SECDESCR}.
  * Использует терминал для определения экземпляра портфеля и доступа к
- * набору позиции соответствующего портфеля.  
+ * набору позиции соответствующего портфеля.
+ * <p>
+ * TODO: удалить после того, как в связанных проектах использование будет
+ * заменено на самостоятельную реализацию.
  * <p>
  * 2012-09-17<br>
  * $Id: PositionRowHandler.java 527 2013-02-14 15:14:09Z whirlwind $
  */
+@Deprecated
 public class PositionRowHandler implements RowHandler {
 	private final EditableTerminal terminal;
 	private final S<EditablePosition> modifier;
@@ -65,7 +69,7 @@ public class PositionRowHandler implements RowHandler {
 	}
 
 	@Override
-	public void handle(Row row) {
+	public void handle(Row row) throws RowException {
 		EditablePosition position = null;
 		Account account = (Account) row.get(Spec.POS_ACCOUNT);
 		SecurityDescriptor descr =
@@ -87,13 +91,20 @@ public class PositionRowHandler implements RowHandler {
 			throw new RuntimeException(e);
 		}
 		synchronized ( position ) {
-			modifier.set(position, row);
+			try {
+				modifier.set(position, row);
+			} catch ( ValueException e ) {
+				throw new RowException(e);
+			}
 		}
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof PositionRowHandler ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == PositionRowHandler.class ) {
 			PositionRowHandler o = (PositionRowHandler) other;
 			return new EqualsBuilder()
 				.append(terminal, o.terminal)

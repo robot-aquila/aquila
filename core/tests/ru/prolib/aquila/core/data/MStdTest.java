@@ -25,7 +25,7 @@ public class MStdTest implements S<MStdTest> {
 	}
 	
 	@Override
-	public void set(MStdTest object, Object value) {
+	public void set(MStdTest object, Object value) throws ValueException {
 		object.attribute = (Integer) value;
 	}
 	
@@ -47,7 +47,7 @@ public class MStdTest implements S<MStdTest> {
 	public void testEquals() throws Exception {
 		G<Integer> getter2 = new GConst<Integer>(12345);
 		S<MStdTest> setter2 = new S<MStdTest>() { @Override
-				public void set(MStdTest object, Object value) { }};
+				public void set(MStdTest object, Object value) throws ValueException { }};
 		
 		assertTrue(modifier.equals(new MStd<MStdTest>(getter, this)));
 		assertFalse(modifier.equals(new MStd<MStdTest>(getter, setter2)));
@@ -75,11 +75,11 @@ public class MStdTest implements S<MStdTest> {
 	public void testToString() throws Exception {
 		modifier = new MStd<MStdTest>(
 			new G<Integer>() {
-				@Override public Integer get(Object source) { return null; }
+				@Override public Integer get(Object source) throws ValueException { return null; }
 				@Override public String toString() { return "getter"; } 
 			},
 			new S<MStdTest>() {
-				@Override public void set(MStdTest object, Object value) { }
+				@Override public void set(MStdTest object, Object value) throws ValueException { }
 				@Override public String toString() { return "setter"; } 
 			});
 		assertEquals("MStd[getter => setter]", modifier.toString());

@@ -11,9 +11,13 @@ import ru.prolib.aquila.core.data.row.*;
 /**
  * Обработчик ряда с данными заявки.
  * <p>
+ * TODO: удалить после того, как в связанных проектах использование будет
+ * заменено на самостоятельную реализацию. 
+ * <p>
  * 2012-10-16<br>
  * $Id: OrderRowHandler.java 542 2013-02-23 04:15:34Z whirlwind $
  */
+@Deprecated
 public class OrderRowHandler implements RowHandler {
 	private final FirePanicEvent firePanic;
 	private final OrderResolver resolver;
@@ -41,7 +45,7 @@ public class OrderRowHandler implements RowHandler {
 	}
 
 	@Override
-	public void handle(Row row) {
+	public void handle(Row row) throws RowException {
 		Long id = (Long) row.get(Spec.ORD_ID);
 		Long transId = (Long) row.get(Spec.ORD_TRANSID);
 		if ( id == null ) {
@@ -49,14 +53,21 @@ public class OrderRowHandler implements RowHandler {
 		} else {
 			EditableOrder order = resolver.resolveOrder(id, transId);
 			synchronized ( order ) {
-				modifier.set(order, row);
-			}			
+				try {
+					modifier.set(order, row);
+				} catch ( ValueException e ) {
+					throw new RowException(e);
+				}
+			}
 		}
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof OrderRowHandler ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == OrderRowHandler.class ) {
 			OrderRowHandler o = (OrderRowHandler) other;
 			return new EqualsBuilder()
 				.append(firePanic, o.firePanic)

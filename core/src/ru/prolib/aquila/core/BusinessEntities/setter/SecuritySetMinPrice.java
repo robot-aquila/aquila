@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер нижнего лимита цены.
@@ -24,7 +25,7 @@ public class SecuritySetMinPrice implements S<EditableSecurity> {
 	 * Допустимые типы значений {@link java.lang.Double} или null.
 	 */
 	@Override
-	public void set(EditableSecurity security, Object value) {
+	public void set(EditableSecurity security, Object value) throws ValueException {
 		if ( value == null || value.getClass() == Double.class ) {
 			security.setMinPrice((Double) value);
 		}

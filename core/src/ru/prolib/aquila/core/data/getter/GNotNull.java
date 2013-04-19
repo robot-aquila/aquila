@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Ограничение возвращаемого результата ненулевым значением. 
@@ -65,7 +66,7 @@ public class GNotNull<R> implements G<R> {
 	}
 
 	@Override
-	public R get(Object source) {
+	public R get(Object source) throws ValueException {
 		R value = gValue.get(source);
 		if ( value == null ) {
 			String msg = msgPrefix + "NULL values not allowed for: {}";

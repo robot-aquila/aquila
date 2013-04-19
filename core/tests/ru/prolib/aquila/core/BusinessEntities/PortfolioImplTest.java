@@ -60,7 +60,9 @@ public class PortfolioImplTest {
 	 * @param firstValue начальное значение
 	 * @param secondValue конечное значение
 	 */
-	private void testGetterSetter(Object firstValue, Object secondValue) {
+	private void testGetterSetter(Object firstValue, Object secondValue)
+			throws Exception
+	{
 		Object fixture[][] = {
 				{ null, 		null,			false },
 				{ null, 		secondValue,	true  },
@@ -137,13 +139,13 @@ public class PortfolioImplTest {
 	public void testSetCash() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Portfolio) source).getCash();
 			}
 		};
 		setter = new S<PortfolioImpl>() {
 			@Override
-			public void set(PortfolioImpl object, Object value) {
+			public void set(PortfolioImpl object, Object value) throws ValueException {
 				object.setCash((Double) value);
 			}
 		};
@@ -154,13 +156,13 @@ public class PortfolioImplTest {
 	public void testSetVariationMargin() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Portfolio) source).getVariationMargin();
 			}
 		};
 		setter = new S<PortfolioImpl>() {
 			@Override
-			public void set(PortfolioImpl object, Object value) {
+			public void set(PortfolioImpl object, Object value) throws ValueException {
 				object.setVariationMargin((Double) value);
 			}
 		};
@@ -171,12 +173,12 @@ public class PortfolioImplTest {
 	public void testSetBalance() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Portfolio)source).getBalance();
 			}};
 		setter = new S<PortfolioImpl>() {
 			@Override
-			public void set(PortfolioImpl object, Object value) {
+			public void set(PortfolioImpl object, Object value) throws ValueException {
 				object.setBalance((Double) value);
 			}
 		};

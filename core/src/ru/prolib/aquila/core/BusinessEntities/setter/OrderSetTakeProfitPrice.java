@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер тэйк-профит цены заявки.
@@ -23,7 +24,7 @@ public class OrderSetTakeProfitPrice implements S<EditableOrder> {
 	 * <p>
 	 */
 	@Override
-	public void set(EditableOrder object, Object value) {
+	public void set(EditableOrder object, Object value) throws ValueException {
 		if ( value != null && value.getClass() == Double.class ) {
 			object.setTakeProfitPrice((Double) value);
 		}

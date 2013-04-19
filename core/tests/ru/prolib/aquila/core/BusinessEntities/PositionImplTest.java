@@ -13,6 +13,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 
 
@@ -72,7 +73,9 @@ public class PositionImplTest {
 	 * @param firstValue начальное значение
 	 * @param secondValue конечное значение
 	 */
-	private void testGetterSetter(Object firstValue, Object secondValue) {
+	private void testGetterSetter(Object firstValue, Object secondValue)
+			throws Exception
+	{
 		Object fixture[][] = {
 				{ null, 		null,			false },
 				{ null, 		secondValue,	true  },
@@ -215,13 +218,13 @@ public class PositionImplTest {
 	public void testSetMarketValue() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Position) source).getMarketValue();
 			}
 		};
 		setter = new S<PositionImpl>() {
 			@Override
-			public void set(PositionImpl object, Object value) {
+			public void set(PositionImpl object, Object value) throws ValueException {
 				object.setMarketValue((Double) value);
 			}
 		};
@@ -232,13 +235,13 @@ public class PositionImplTest {
 	public void testSetBookValue() throws Exception {
 		getter = new G<Double>() {
 			@Override
-			public Double get(Object source) {
+			public Double get(Object source) throws ValueException {
 				return ((Position) source).getBookValue();
 			}
 		};
 		setter = new S<PositionImpl>() {
 			@Override
-			public void set(PositionImpl object, Object value) {
+			public void set(PositionImpl object, Object value) throws ValueException {
 				object.setBookValue((Double) value);
 			}
 		};
@@ -249,13 +252,13 @@ public class PositionImplTest {
 	public void testSetAccount() throws Exception {
 		getter = new G<Account>() {
 			@Override
-			public Account get(Object source) {
+			public Account get(Object source) throws ValueException {
 				return ((Position) source).getAccount();
 			}
 		};
 		setter = new S<PositionImpl>() {
 			@Override
-			public void set(PositionImpl object, Object value) {
+			public void set(PositionImpl object, Object value) throws ValueException {
 				object.setAccount((Account) value);
 			}
 		};

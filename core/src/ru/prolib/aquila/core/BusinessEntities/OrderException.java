@@ -6,7 +6,7 @@ package ru.prolib.aquila.core.BusinessEntities;
  * 2012-10-16<br>
  * $Id: OrderException.java 490 2013-02-05 19:42:02Z whirlwind $
  */
-public class OrderException extends Exception {
+public class OrderException extends EditableObjectException {
 	private static final long serialVersionUID = 1L;
 	
 	public OrderException() {

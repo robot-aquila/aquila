@@ -24,7 +24,7 @@ public class GDate implements G<Date> {
 	}
 
 	@Override
-	public Date get(Object source) {
+	public Date get(Object source) throws ValueException {
 		if ( source != null && source.getClass() == Date.class ) {
 			return (Date) source;
 		} else {

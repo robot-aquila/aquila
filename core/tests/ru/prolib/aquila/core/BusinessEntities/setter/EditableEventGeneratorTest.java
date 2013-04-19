@@ -7,9 +7,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.Editable;
+import ru.prolib.aquila.core.BusinessEntities.EditableObjectException;
 import ru.prolib.aquila.core.BusinessEntities.FireEditableEvent;
 import ru.prolib.aquila.core.BusinessEntities.setter.EditableEventGenerator;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.ValidatorStub;
 
 /**
@@ -21,8 +24,7 @@ public class EditableEventGeneratorTest {
 	private static Editable object;
 	private static Validator avail;
 	private static FireEditableEvent fire;
-	@SuppressWarnings("rawtypes")
-	private static EditableEventGenerator generator;
+	private static EditableEventGenerator<Editable> generator;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -32,14 +34,12 @@ public class EditableEventGeneratorTest {
 		object = control.createMock(Editable.class);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		control.resetToStrict();
-		generator = new EditableEventGenerator(avail, fire);
+		generator = new EditableEventGenerator<Editable>(avail, fire);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSet_IfNotChanged() throws Exception {
 		expect(object.hasChanged()).andReturn(false);
@@ -48,7 +48,6 @@ public class EditableEventGeneratorTest {
 		control.verify();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSet_IfChanged() throws Exception {
 		expect(object.hasChanged()).andReturn(true);
@@ -60,7 +59,6 @@ public class EditableEventGeneratorTest {
 		control.verify();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSet_IfNotAvailable() throws Exception {
 		expect(object.hasChanged()).andReturn(true);
@@ -72,7 +70,6 @@ public class EditableEventGeneratorTest {
 		control.verify();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSet_IfAvailable() throws Exception {
 		expect(object.hasChanged()).andReturn(true);
@@ -84,6 +81,41 @@ public class EditableEventGeneratorTest {
 		control.replay();
 		generator.set(object, null);
 		control.verify();
+	}
+	
+	@Test
+	public void testSet_ThrowsIfValidatorThrows() throws Exception {
+		ValidatorException expected = new ValidatorException("test");
+		expect(object.hasChanged()).andReturn(true);
+		expect(object.isAvailable()).andReturn(false);
+		expect(avail.validate(object)).andThrow(expected);
+		control.replay();
+		
+		try {
+			generator.set(object, null);
+			fail("Expected: " + ValueException.class.getSimpleName());
+		} catch ( ValueException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
+	}
+	
+	@Test
+	public void testSet_ThrowsIfFireChangedEventThrows() throws Exception {
+		EditableObjectException expected = new EditableObjectException("test");
+		expect(object.hasChanged()).andReturn(true);
+		expect(object.isAvailable()).andReturn(true);
+		object.fireChangedEvent();
+		expectLastCall().andThrow(expected);
+		control.replay();
+		
+		try {
+			generator.set(object, null);
+			fail("Expected: " + ValueException.class.getSimpleName());
+		} catch ( ValueException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -117,10 +149,9 @@ public class EditableEventGeneratorTest {
 		assertSame(fire, generator.getFireAvailableEvent());
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void testConstruct1() throws Exception {
-		generator = new EditableEventGenerator(fire);
+		generator = new EditableEventGenerator<Editable>(fire);
 		assertSame(fire, generator.getFireAvailableEvent());
 		assertEquals(new ValidatorStub(true),
 					 generator.getAvailabilityValidator());

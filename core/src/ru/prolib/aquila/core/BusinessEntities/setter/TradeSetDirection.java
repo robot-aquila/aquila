@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер направления сделки.
@@ -21,7 +22,7 @@ public class TradeSetDirection implements S<Trade> {
 	}
 
 	@Override
-	public void set(Trade object, Object value) {
+	public void set(Trade object, Object value) throws ValueException {
 		if ( value instanceof OrderDirection ) {
 			object.setDirection((OrderDirection) value);
 		}

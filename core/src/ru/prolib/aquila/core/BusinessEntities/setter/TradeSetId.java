@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер идентификатора сделки.
@@ -21,7 +22,7 @@ public class TradeSetId implements S<Trade> {
 	}
 
 	@Override
-	public void set(Trade object, Object value) {
+	public void set(Trade object, Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
 			if ( valueClass == Long.class ) {

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер на основе карты сопоставления строк геттерам произвольного типа.
@@ -68,7 +69,7 @@ public class GStringMap2G<R> implements G<R> {
 	}
 
 	@Override
-	public R get(Object source) {
+	public R get(Object source) throws ValueException {
 		G<R> getter = map.get(gKey.get(source));
 		if ( getter != null ) {
 			return getter.get(source);

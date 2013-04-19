@@ -23,7 +23,7 @@ import ru.prolib.aquila.core.SimpleEventQueue;
  * $Id: CandleProxy.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class CandleProxy<T> implements Series<T>, EventListener {
-	private final G<T> getter;
+	private final GCandlePart<T> getter;
 	private final Series<Candle> candles;
 	private final String id;
 	private final EventDispatcher dispatcher;
@@ -36,7 +36,9 @@ public class CandleProxy<T> implements Series<T>, EventListener {
 	 * @param candles источник свечей
 	 * @param getter геттер атрибута свечи
 	 */
-	public CandleProxy(String valueId,  Series<Candle> candles, G<T> getter) {
+	public CandleProxy(String valueId,  Series<Candle> candles,
+			GCandlePart<T> getter)
+	{
 		super();
 		this.id = valueId;
 		this.candles = candles;
@@ -62,7 +64,7 @@ public class CandleProxy<T> implements Series<T>, EventListener {
 	 * <p>
 	 * @return геттер
 	 */
-	public G<T> getGetter() {
+	public GCandlePart<T> getGetter() {
 		return getter;
 	}
 	

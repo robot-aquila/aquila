@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import ru.prolib.aquila.core.BusinessEntities.Price;
 import ru.prolib.aquila.core.BusinessEntities.PriceUnit;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер цены.
@@ -52,7 +53,7 @@ public class GPrice implements G<Price> {
 	}
 
 	@Override
-	public Price get(Object object) {
+	public Price get(Object object) throws ValueException {
 		Double value = (Double) gValue.get(object);
 		PriceUnit unit = (PriceUnit) gUnit.get(object);
 		if ( value != null && unit != null ) {

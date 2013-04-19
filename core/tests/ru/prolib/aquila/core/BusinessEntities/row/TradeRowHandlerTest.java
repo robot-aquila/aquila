@@ -11,7 +11,9 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.row.TradeRowHandler;
 import ru.prolib.aquila.core.BusinessEntities.utils.TradeFactory;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -59,7 +61,7 @@ public class TradeRowHandlerTest {
 		expect(factory.createTrade()).andReturn(trade);
 		modifier.set(same(trade), same(row));
 		expectLastCall().andDelegateTo(new S<Trade>() {
-			@Override public void set(Trade object, Object value) {
+			@Override public void set(Trade object, Object value) throws ValueException {
 				object.setSecurityDescriptor(descr);				
 			}
 		});
@@ -69,6 +71,25 @@ public class TradeRowHandlerTest {
 		handler.handle(row);
 		control.verify();
 	}
+	
+	@Test
+	public void testHandle_ThrowsIfModifierThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		Trade trade = new Trade(terminal);
+		expect(factory.createTrade()).andReturn(trade);
+		modifier.set(same(trade), same(row));
+		expectLastCall().andThrow(expected);
+		control.replay();
+		
+		try {
+			handler.handle(row);
+			fail("Expected: " + RowException.class.getSimpleName());
+		} catch ( RowException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
+	}
+
 	
 	@Test
 	public void testHandle_PanicIfSecurityDescrIsNull() throws Exception {

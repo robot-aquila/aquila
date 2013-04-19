@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.*;
 
 /**
@@ -17,9 +18,13 @@ import ru.prolib.aquila.core.data.row.*;
  * события о паническом состоянии. Если портфель, соответствующий указанному
  * счету еще не создан, для инстанцирования экземпляра используется фабрика. 
  * <p>
+ * TODO: удалить после того, как в связанных проектах использование будет
+ * заменено на самостоятельную реализацию. 
+ * <p>
  * 2012-09-07<br>
  * $Id$
  */
+@Deprecated
 public class PortfolioRowHandler implements RowHandler {
 	private final EditableTerminal terminal;
 	private final PortfolioFactory factory;
@@ -78,7 +83,7 @@ public class PortfolioRowHandler implements RowHandler {
 	}
 
 	@Override
-	public void handle(Row row) {
+	public void handle(Row row) throws RowException {
 		EditablePortfolio portfolio = null; 
 		Account account = (Account) row.get(Spec.PORT_ACCOUNT);
 		if ( account == null ) {
@@ -96,13 +101,20 @@ public class PortfolioRowHandler implements RowHandler {
 			throw new RuntimeException(e);
 		}
 		synchronized ( portfolio ) {
-			modifier.set(portfolio, row);
+			try {
+				modifier.set(portfolio, row);
+			} catch ( ValueException e ) {
+				throw new RowException(e);
+			}
 		}
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof PortfolioRowHandler ) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other != null && other.getClass() == PortfolioRowHandler.class ) {
 			PortfolioRowHandler o = (PortfolioRowHandler) other;
 			return new EqualsBuilder()
 				.append(terminal, o.terminal)

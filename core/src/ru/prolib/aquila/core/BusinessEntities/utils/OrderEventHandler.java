@@ -4,7 +4,9 @@ import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderEvent;
+import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Генератор события заявки.
@@ -62,9 +64,13 @@ public class OrderEventHandler implements OrderHandler {
 	}
 
 	@Override
-	public void handle(EditableOrder order) {
-		if ( validator.validate(order) ) {
-			dispatcher.dispatch(new OrderEvent(type, order));
+	public void handle(EditableOrder order) throws OrderException {
+		try {
+			if ( validator.validate(order) ) {
+				dispatcher.dispatch(new OrderEvent(type, order));
+			}
+		} catch ( ValidatorException e ) {
+			throw new OrderException(e);
 		}
 	}
 

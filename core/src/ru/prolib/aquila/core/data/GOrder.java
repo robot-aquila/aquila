@@ -60,7 +60,7 @@ public class GOrder implements G<EditableOrder> {
 	}
 	
 	@Override
-	public EditableOrder get(Object row) {
+	public EditableOrder get(Object row) throws ValueException {
 		Long id = (Long) gId.get(row);
 		Long transId = (Long) gTransId.get(row);
 		if ( id == null ) {

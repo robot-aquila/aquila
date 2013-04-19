@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.data.row;
 /**
  * Базовое исключение набора рядов.
  */
-public class RowSetException extends Exception {
+public class RowSetException extends RowException {
 	private static final long serialVersionUID = 5039954962148774549L;
 	
 	public RowSetException() {

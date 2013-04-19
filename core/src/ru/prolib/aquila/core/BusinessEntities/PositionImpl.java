@@ -96,7 +96,7 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	}
 
 	@Override
-	public void fireChangedEvent() {
+	public void fireChangedEvent() throws EditableObjectException {
 		dispatcher.dispatch(new PositionEvent(etChanged, this));
 	}
 

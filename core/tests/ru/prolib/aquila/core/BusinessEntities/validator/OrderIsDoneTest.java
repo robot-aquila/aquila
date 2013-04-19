@@ -44,7 +44,7 @@ public class OrderIsDoneTest {
 	}
 	
 	@Test
-	public void testValidate() {
+	public void testValidate() throws Exception {
 		Variant<OrderStatus> vStatus = new Variant<OrderStatus>()
 			.add(OrderStatus.PENDING)
 			.add(OrderStatus.FILLED)

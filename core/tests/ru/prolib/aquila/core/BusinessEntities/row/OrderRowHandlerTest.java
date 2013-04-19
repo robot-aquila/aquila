@@ -13,6 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.row.OrderRowHandler;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderResolver;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -90,6 +91,25 @@ public class OrderRowHandlerTest {
 		handler.handle(row);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testHandle_ThrowsIfModifierThrows() throws Exception {
+		ValueException expected = new ValueException("test");
+		expect(row.get("ORD_ID")).andStubReturn(456L);
+		expect(row.get("ORD_TRANSID")).andStubReturn(123L);
+		expect(resolver.resolveOrder(456L, 123L)).andReturn(order);
+		modifier.set(order, row);
+		expectLastCall().andThrow(expected);
+		control.replay();
+		
+		try {
+			handler.handle(row);
+			fail("Expected: " + RowException.class.getSimpleName());
+		} catch ( RowException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

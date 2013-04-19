@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер счета заявки.
@@ -23,7 +24,7 @@ public class OrderSetAccount implements S<EditableOrder> {
 	 * Установить счет заявки.
 	 */
 	@Override
-	public void set(EditableOrder object, Object value) {
+	public void set(EditableOrder object, Object value) throws ValueException {
 		if ( value != null && value.getClass() == Account.class ) {
 			object.setAccount((Account) value);
 		}

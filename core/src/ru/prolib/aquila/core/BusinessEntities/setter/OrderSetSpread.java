@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities.setter;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.Price;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сеттер защитного спрэда тэйк-профита.
@@ -23,7 +24,7 @@ public class OrderSetSpread implements S<EditableOrder> {
 	 * Установить защитный спрэд тэйк-профита.
 	 */
 	@Override
-	public void set(EditableOrder object, Object value) {
+	public void set(EditableOrder object, Object value) throws ValueException {
 		if ( value != null && value.getClass() == Price.class ) {
 			object.setSpread((Price) value);
 		}

@@ -36,7 +36,7 @@ public class RowSetAdapter extends RowAdapter implements RowSet {
 	}
 
 	@Override
-	public synchronized Object get(String name) {
+	public synchronized Object get(String name) throws RowException {
 		Object value = cache.get(name);
 		if ( value == null ) {
 			value = super.get(name);

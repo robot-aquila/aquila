@@ -49,7 +49,7 @@ public class GPortfolio implements G<Portfolio> {
 	}
 
 	@Override
-	public Portfolio get(Object object) {
+	public Portfolio get(Object object) throws ValueException {
 		Account account = gAcc.get(object);
 		if ( account != null && portfolios.isPortfolioAvailable(account) ) {
 			try {
