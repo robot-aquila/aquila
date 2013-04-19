@@ -1,6 +1,7 @@
 package ru.prolib.aquila.dde.utils.table;
 
 import ru.prolib.aquila.core.data.row.RowSet;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 
 /**
@@ -18,7 +19,8 @@ public interface DDETableRowSetBuilder {
 	 * <p>
 	 * @param table таблица
 	 * @return набор рядов
+	 * @throws DDEException ошибка создания конструктора рядов
 	 */
-	public RowSet createRowSet(DDETable table);
+	public RowSet createRowSet(DDETable table) throws DDEException;
 
 }

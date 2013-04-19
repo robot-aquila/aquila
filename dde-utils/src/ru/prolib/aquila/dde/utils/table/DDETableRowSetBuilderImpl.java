@@ -1,20 +1,11 @@
 package ru.prolib.aquila.dde.utils.table;
 
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.*;
+import org.apache.commons.lang3.builder.*;
 import ru.prolib.aquila.core.data.row.RowSet;
-import ru.prolib.aquila.core.utils.Validator;
-import ru.prolib.aquila.core.utils.ValidatorStub;
-import ru.prolib.aquila.dde.DDETable;
-import ru.prolib.aquila.dde.DDETableImpl;
+import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.dde.*;
 
 /**
  * Конструктор набора рядов на базе таблицы с формальными заголовками.
@@ -48,7 +39,6 @@ import ru.prolib.aquila.dde.DDETableImpl;
  * $Id: DDETableRowSetBuilderImpl.java 527 2013-02-14 15:14:09Z whirlwind $
  */
 public class DDETableRowSetBuilderImpl implements DDETableRowSetBuilder {
-	private static final Logger logger;
 	public static final RowSet EMPTY_SET;
 	private final DDEUtils utils;
 	private final int firstCol;
@@ -57,7 +47,6 @@ public class DDETableRowSetBuilderImpl implements DDETableRowSetBuilder {
 	private Map<String, Integer> header;
 	
 	static {
-		logger = LoggerFactory.getLogger(DDETableRowSetBuilderImpl.class);
 		EMPTY_SET = new DDETableRowSet(new DDETableImpl(), null);
 	}
 	
@@ -136,23 +125,28 @@ public class DDETableRowSetBuilderImpl implements DDETableRowSetBuilder {
 	}
 
 	@Override
-	public synchronized RowSet createRowSet(DDETable table) {
+	public synchronized RowSet createRowSet(DDETable table)
+			throws DDEException
+	{
 		DDETableRange range = null;
 		try {
 			range = utils.parseXltRange(table.getItem());
 		} catch ( ParseException e ) {
-			logger.error("Incorrect table item", e);
-			return EMPTY_SET;
+			throw new DDEException("Incorrect table item", e);
 		}
 		int row = range.getFirstRow() - firstRow;
 		int col = range.getFirstCol() - firstCol;
 		if ( row == 0 ) {
 			header.clear();
-			header = utils.makeHeadersMap(table, col);
-			if ( ! validator.validate(header.keySet()) ) {
-				header.clear();
-				return EMPTY_SET;
+			Map<String, Integer> currHeader = utils.makeHeadersMap(table, col);
+			try {
+				if ( ! validator.validate(currHeader.keySet()) ) {
+					return EMPTY_SET;
+				}
+			} catch ( ValidatorException e ) {
+				throw new DDEException(e);
 			}
+			header = currHeader;
 		}
 		if ( col != 0 ) {
 			table = new DDETableShift(table, col, 0);

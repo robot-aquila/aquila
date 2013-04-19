@@ -1,11 +1,8 @@
 package ru.prolib.aquila.dde.utils.table;
 
-import java.util.Map;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import ru.prolib.aquila.core.data.row.RowSet;
+import java.util.*;
+import org.apache.commons.lang3.builder.*;
+import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.dde.DDETable;
 
 /**
@@ -85,12 +82,15 @@ public class DDETableRowSet implements RowSet {
 	}
 
 	@Override
-	public synchronized Object get(String column) {
+	public synchronized Object get(String column) throws RowException {
 		if ( current == AFTER_LAST || current == BEFORE_FIRST ) {
-			return null;
+			throw new RowSetException("Not positioned");
 		}
 		Integer index = header.get(column);
-		return index == null ? null : table.getCell(current, index);
+		if ( index == null || index >= table.getCols() ) {
+			return null;
+		}
+		return table.getCell(current, index);
 	}
 	
 	@Override
@@ -122,8 +122,23 @@ public class DDETableRowSet implements RowSet {
 	}
 
 	@Override
-	public void close() {
+	public synchronized void close() {
 		reset();
+	}
+
+	@Override
+	public synchronized Row getRowCopy() throws RowException {
+		if ( current == AFTER_LAST || current == BEFORE_FIRST ) {
+			throw new RowSetException("Not positioned");
+		}
+		Map<String, Object> map = new Hashtable<String, Object>();
+		for ( String hdr : header.keySet() ) {
+			Object value = get(hdr);
+			if ( value != null ) {
+				map.put(hdr, value);
+			}
+		}
+		return new SimpleRow(map);
 	}
 
 }

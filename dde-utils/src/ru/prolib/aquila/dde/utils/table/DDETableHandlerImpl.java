@@ -62,7 +62,7 @@ public class DDETableHandlerImpl implements DDETableHandler {
 			while ( rs.next() ) {
 				rh.handle(rs);
 			}
-		} catch ( RowSetException e ) {
+		} catch ( RowException e ) {
 			throw new DDEException(e);
 		}
 	}

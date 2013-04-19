@@ -3,6 +3,7 @@ package ru.prolib.aquila.dde.utils.table;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,8 +16,10 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.data.row.RowSet;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.ValidatorStub;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 import ru.prolib.aquila.dde.DDETableImpl;
 
@@ -134,10 +137,30 @@ public class DDETableRowSetBuilderImplTest {
 		});
 		control.replay();
 		
-		/*RowSet rs = */handler.createRowSet(table);
+		RowSet rs = handler.createRowSet(table);
+		assertSame(DDETableRowSetBuilderImpl.EMPTY_SET, rs);
+		assertEquals(new HashSet<String>(), handler.getHeaders());
 		
 		control.verify();
 		assertEquals(new HashSet<String>(), handler.getHeaders());
+	}
+	
+	@Test
+	public void testCreateRowSet_ThrowsIfValidatorThrows() throws Exception {
+		ValidatorException expected = new ValidatorException("test");
+		DDETable table = createTable(new Object[][] {
+				{ "#", "name", "price" }, }, "R1C1:R1C3");
+		expect(validator.validate(notNull())).andThrow(expected);
+		control.replay();
+		
+		try {
+			handler.createRowSet(table);
+			fail("Expected: " + DDEException.class.getSimpleName());
+		} catch ( DDEException e ) {
+			assertSame(expected, e.getCause());
+			assertEquals(new HashSet<String>(), handler.getHeaders());
+			control.verify();
+		}
 	}
 
 	@Test
@@ -232,7 +255,7 @@ public class DDETableRowSetBuilderImplTest {
 		expect(validator.validate(notNull())).andStubReturn(true);
 		control.replay();
 		handler.createRowSet(createTable(new Object[][]
-   		        {{ "#", "name", "price" }}, "R1C1:any"));
+   		        {{ "#", "name", "price" }}, "R1C1:R2C2"));
 		
 		DDETable table = createTable(new Object[][] {
 				{ "price", "update" },
@@ -259,10 +282,16 @@ public class DDETableRowSetBuilderImplTest {
 	}
 
 	@Test
-	public void testCreateRowSet_UnknownItemFormat() throws Exception {
-		RowSet rs = handler.createRowSet(createTable(new Object[][]
+	public void testCreateRowSet_ThrowsIfUnknownItemFormat() throws Exception {
+		try {
+			handler.createRowSet(createTable(new Object[][]
    		        {{ "#", "name", "price" }}, "foobar:any"));
-		assertFalse(rs.next());
+			fail("Expected: " + DDEException.class.getSimpleName());
+		} catch ( DDEException e ) {
+			assertEquals("Incorrect table item", e.getMessage());
+			ParseException err = (ParseException) e.getCause();
+			assertEquals("Couldn't parse string: foobar:any", err.getMessage());
+		}
 	}
 	
 	/**

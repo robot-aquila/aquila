@@ -8,6 +8,9 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.*;
 
+import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowSetException;
+import ru.prolib.aquila.core.data.row.SimpleRow;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.dde.DDETable;
 import ru.prolib.aquila.dde.DDETableImpl;
@@ -37,6 +40,23 @@ public class DDETableRowSetTest {
 				"999",	"gold",		987
 			}, "foo", "bar", 3); 
 		rs = new DDETableRowSet(table, hdr, 1);
+	}
+	
+	@Test (expected=RowSetException.class)
+	public void testGet_ThrowsIfBeforeFirst() throws Exception {
+		rs.get("one");
+	}
+	
+	@Test (expected=RowSetException.class)
+	public void testGet_ThrowsIfAfterLast() throws Exception {
+		for ( int i = 0; i < 5; i ++ ) { rs.next(); }
+		rs.get("one");
+	}
+	
+	@Test
+	public void testGet_NullIfOutOfRange() throws Exception {
+		rs.next();
+		assertNull(rs.get("age"));
 	}
 	
 	@Test
@@ -80,7 +100,9 @@ public class DDETableRowSetTest {
 	 * @param header имя колонки -> индекс в наборе
 	 * @param expected ожидаемые значения (индекс в строке -> имя колонки) 
 	 */
-	private void assertRowSet(String header[], Object expected[][]) {
+	private void assertRowSet(String header[], Object expected[][])
+			throws Exception
+	{
 		for ( int row = 0; row < expected.length; row ++ ) {
 			String msg = "At R" + row;
 			assertTrue(msg, rs.next());
@@ -147,6 +169,33 @@ public class DDETableRowSetTest {
 		rs.next(); rs.next(); rs.next();
 		assertEquals(expectedHashCode, rs.hashCode());
 		assertFalse(initialHashCode == rs.hashCode());
+	}
+	
+	@Test (expected=RowSetException.class)
+	public void testGetRowCopy_ThrowsIfBeforeFirst() throws Exception {
+		rs.getRowCopy();
+	}
+	
+	@Test (expected=RowSetException.class)
+	public void testGetRowCopy_ThrowsIfAfterLast() throws Exception {
+		for ( int i = 0; i < 5; i ++ ) { rs.next(); }
+		rs.getRowCopy();
+	}
+	
+	@Test
+	public void testGetRowCopy() throws Exception {
+		rs.next();
+		rs.next();
+		/*
+		 * 		hdr.put("age",	3);
+		hdr.put("art",	2);
+		hdr.put("name",	1);
+		hdr.put("code",	0);
+
+		 */
+		Row expected = new SimpleRow(new String[] { "code", "name", "art" },
+				new Object[] { "007", "bond", 777 });
+		assertEquals(expected, rs.getRowCopy());
 	}
 
 }
