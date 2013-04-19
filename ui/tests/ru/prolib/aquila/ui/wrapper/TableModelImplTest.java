@@ -21,6 +21,7 @@ import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.GInteger;
 import ru.prolib.aquila.core.data.GString;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.RowAdapter;
 /**
  * $Id: TableModelTest.java 578 2013-03-14 23:37:31Z huan.kaktus $
@@ -51,7 +52,7 @@ public class TableModelImplTest {
 	}
 	
 	@Test
-	public void testOnEvent_RowInserted() {
+	public void testOnEvent_RowInserted() throws Exception {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
 		EventType evtType = control.createMock(EventType.class);
 
@@ -88,7 +89,7 @@ public class TableModelImplTest {
 	}
 	
 	@Test
-	public void testOnEvent_RowUpdated() {
+	public void testOnEvent_RowUpdated() throws Exception {
 		TestRow row = new TestRow(1, "foo");
 		tm.insertRow(row);
 		
@@ -139,7 +140,7 @@ public class TableModelImplTest {
 		GInteger idGetter = new GInteger() {
 			
 			@Override
-			public Integer get(Object row) {
+			public Integer get(Object row) throws ValueException {
 				TestRow r = (TestRow) row;
 				return super.get(r.getId());
 			}
@@ -147,7 +148,7 @@ public class TableModelImplTest {
 		GString nameGetter = new GString() {
 			
 			@Override
-			public String get(Object row) {
+			public String get(Object row) throws ValueException {
 				TestRow r = (TestRow) row;
 				return super.get(r.getName());
 			}

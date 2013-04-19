@@ -13,7 +13,9 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.RowAdapter;
+import ru.prolib.aquila.core.data.row.RowException;
 /**
  * $Id: TableModel.java 578 2013-03-14 23:37:31Z huan.kaktus $
  */
@@ -181,6 +183,9 @@ public class TableModelImpl extends AbstractTableModel
 		} catch (ArrayIndexOutOfBoundsException e) {
 			logger.debug("Out of bound exception");
 			return null;
+		} catch (RowException e) {
+			logger.debug("Row Exception: {}", e);
+			return null;
 		}		
 	}
 
@@ -189,20 +194,24 @@ public class TableModelImpl extends AbstractTableModel
 	 */
 	@Override
 	public void onEvent(Event event) {
-		if(event.getType() == onRowAvailableListener.OnEventOccur()) {
-			EventTranslatorEvent e = (EventTranslatorEvent) event;
-			Object r = rowReader.get(e.getSource());
-			RowAdapter row = new RowAdapter(r, getters);
-			int index = rowIndex.size();
-			rowIndex.add(r);
-			rows.add(row);
-			fireTableRowsInserted(index, index);
-			
-		} else if (event.getType() == onRowChangedListener.OnEventOccur()) {
-			EventTranslatorEvent e = (EventTranslatorEvent) event;
-			Object r = rowReader.get(e.getSource());
-			int index = rowIndex.indexOf(r);
-			fireTableRowsUpdated(index, index);
+		try {
+			if(event.getType() == onRowAvailableListener.OnEventOccur()) {
+				EventTranslatorEvent e = (EventTranslatorEvent) event;			
+				Object r = rowReader.get(e.getSource());
+				RowAdapter row = new RowAdapter(r, getters);
+				int index = rowIndex.size();
+				rowIndex.add(r);
+				rows.add(row);
+				fireTableRowsInserted(index, index);
+				
+			} else if (event.getType() == onRowChangedListener.OnEventOccur()) {
+				EventTranslatorEvent e = (EventTranslatorEvent) event;
+				Object r = rowReader.get(e.getSource());
+				int index = rowIndex.indexOf(r);
+				fireTableRowsUpdated(index, index);
+			}
+		} catch (ValueException e) {
+			logger.debug("ValueException: {}", e);
 		}
 		
 	}

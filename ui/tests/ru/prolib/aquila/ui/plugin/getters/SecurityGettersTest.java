@@ -82,14 +82,14 @@ public class SecurityGettersTest {
 	}
 	
 	@Test
-	public void testType() {
+	public void testType() throws Exception {
 		GSecurityType g = new GSecurityType();
 		IsInstanceOf.instanceOf(GString.class).matches(g);
 		assertEquals("Stock", g.get(security));
 	}
 	
 	@Test
-	public void testSymbol() {
+	public void testSymbol() throws Exception {
 		GSecuritySymbol g = new GSecuritySymbol();
 		IsInstanceOf.instanceOf(GString.class).matches(g);
 		assertEquals("GAZP", g.get(security));
@@ -103,105 +103,105 @@ public class SecurityGettersTest {
 	}
 	
 	@Test
-	public void testPrecision() {
+	public void testPrecision() throws Exception {
 		GSecurityPrecision g = new GSecurityPrecision();
 		IsInstanceOf.instanceOf(GInteger.class).matches(g);
 		assertEquals((Integer) 3, g.get(security));	
 	}
 	
 	@Test
-	public void testOpenPrice() {
+	public void testOpenPrice() throws Exception {
 		GSecurityOpenPrice g = new GSecurityOpenPrice();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(13.45d, g.get(security), 0.0001d);	
 	}
 	
 	@Test
-	public void testName() {
+	public void testName() throws Exception {
 		GSecurityName g = new GSecurityName();
 		IsInstanceOf.instanceOf(GString.class).matches(g);
 		assertEquals("zulu4", g.get(security));
 	}
 	
 	@Test
-	public void testMinStep() {
+	public void testMinStep() throws Exception {
 		GSecurityMinStep g = new GSecurityMinStep();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(1.00d, g.get(security), 0.0001d);	
 	}
 	
 	@Test
-	public void testLowPrice() {
+	public void testLowPrice() throws Exception {
 		GSecurityLowPrice g = new GSecurityLowPrice();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(24.56d, g.get(security), 0.0001d);	
 	}
 	
 	@Test
-	public void testLotSize() {
+	public void testLotSize() throws Exception {
 		GSecurityLotSize g = new GSecurityLotSize();
 		IsInstanceOf.instanceOf(GInteger.class).matches(g);
 		assertEquals((Integer) 1, g.get(security));	
 	}
 	
 	@Test
-	public void testLastPrice() {
+	public void testLastPrice() throws Exception {
 		GSecurityLastPrice g = new GSecurityLastPrice();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(20.44d, g.get(security), 0.0001d);	
 	}
 	
 	@Test
-	public void testHighPrice() {
+	public void testHighPrice() throws Exception {
 		GSecurityHighPrice g = new GSecurityHighPrice();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(18.44d, g.get(security), 0.0001d);	
 	}
 	
 	@Test
-	public void testCurrency() {
+	public void testCurrency() throws Exception {
 		GSecurityCurrency g = new GSecurityCurrency();
 		IsInstanceOf.instanceOf(GString.class).matches(g);
 		assertEquals("RUR", g.get(security));
 	}
 	
 	@Test
-	public void testClosePrice() {
+	public void testClosePrice() throws Exception {
 		GSecurityClosePrice g = new GSecurityClosePrice();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(98.15d, g.get(security), 0.0001d);		
 	}
 	
 	@Test
-	public void testClass() {
+	public void testClass() throws Exception {
 		GSecurityClass g = new GSecurityClass();
 		IsInstanceOf.instanceOf(GString.class).matches(g);
 		assertEquals("EQBR", g.get(security));
 	}
 	
 	@Test
-	public void testBidSize() {
+	public void testBidSize() throws Exception {
 		GSecurityBidSize g = new GSecurityBidSize();
 		IsInstanceOf.instanceOf(GLong.class).matches(g);
 		assertEquals((Long) 2000l, g.get(security));
 	}
 	
 	@Test
-	public void testBidPrice() {
+	public void testBidPrice() throws Exception {
 		GSecurityBidPrice g = new GSecurityBidPrice();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(34.56d, g.get(security), 0.0001d);	
 	}
 	
 	@Test
-	public void testAskSize() {
+	public void testAskSize() throws Exception {
 		GSecurityAskSize g = new GSecurityAskSize();
 		IsInstanceOf.instanceOf(GLong.class).matches(g);
 		assertEquals((Long) 1000l, g.get(security));
 	}
 
 	@Test
-	public void testAskPrice() {
+	public void testAskPrice() throws Exception {
 		GSecurityAskPrice g = new GSecurityAskPrice();
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(12.34d, g.get(security), 0.0001d);		
