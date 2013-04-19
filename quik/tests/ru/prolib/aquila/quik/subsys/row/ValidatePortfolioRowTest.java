@@ -4,16 +4,15 @@ import static org.easymock.EasyMock.createStrictControl;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.same;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.data.row.RowSet;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
@@ -64,6 +63,21 @@ public class ValidatePortfolioRowTest {
 		assertTrue(validator.validate(rs));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testValidate_ThrowsIfRowGetThrows() throws Exception {
+		RowException expected = new RowException("test");
+		expect(rs.get(eq("PORT_ACC"))).andThrow(expected);
+		control.replay();
+		
+		try {
+			validator.validate(rs);
+			fail("Expected: " + ValidatorException.class.getSimpleName());
+		} catch ( ValidatorException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@Test

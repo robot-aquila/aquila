@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 /**
@@ -57,7 +58,7 @@ public class QUIKGetOrderAccount implements G<Account> {
 	}
 
 	@Override
-	public Account get(Object source) {
+	public Account get(Object source) throws ValueException {
 		return locator.getAccounts()
 				.getAccount(gSubCode.get(source), gSubCode2.get(source));
 	}

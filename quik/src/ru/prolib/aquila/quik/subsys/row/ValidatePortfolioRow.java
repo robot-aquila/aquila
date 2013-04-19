@@ -4,8 +4,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.row.Spec;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.data.row.RowSet;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 /**
@@ -43,13 +45,17 @@ public class ValidatePortfolioRow implements Validator {
 	}
 
 	@Override
-	public boolean validate(Object object) {
-		RowSet rs = (RowSet) object;
-		Account account = (Account) rs.get(Spec.PORT_ACCOUNT);
-		if ( account != null ) {
-			locator.getAccounts().register(account);
+	public boolean validate(Object object) throws ValidatorException {
+		try {
+			RowSet rs = (RowSet) object;
+			Account account = (Account) rs.get(Spec.PORT_ACCOUNT);
+			if ( account != null ) {
+				locator.getAccounts().register(account);
+			}
+			return true;
+		} catch ( RowException e ) {
+			throw new ValidatorException(e);
 		}
-		return true;
 	}
 	
 	@Override

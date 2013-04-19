@@ -2,6 +2,7 @@ package ru.prolib.aquila.quik.subsys.row;
 
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * Валидатор ряда таблицы портфелей по деривативам. 
@@ -21,9 +22,13 @@ public class ValidateLimitType implements Validator {
 	}
 
 	@Override
-	public boolean validate(Object object) {
-		return RowAdapters.PORTF_TYPE_MONEY
-			.equals(((Row) object).get(RowAdapters.PORTF_TYPE));
+	public boolean validate(Object object) throws ValidatorException {
+		try {
+			return RowAdapters.PORTF_TYPE_MONEY
+				.equals(((Row) object).get(RowAdapters.PORTF_TYPE));
+		} catch ( RowException e ) {
+			throw new ValidatorException(e);
+		}
 	}
 	
 	@Override

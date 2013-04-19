@@ -7,7 +7,9 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.data.row.RowSet;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptors;
@@ -50,6 +52,37 @@ public class ValidateSecurityRowTest {
 		assertTrue(validator.validate(rs));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testValidate_ThrowsIfRowGetDescrThrows() throws Exception {
+		RowException expected = new RowException("test");
+		expect(rs.get(eq("SEC_DESCR"))).andThrow(expected);
+		control.replay();
+		
+		try {
+			validator.validate(rs);
+			fail("Expected: " + ValidatorException.class.getSimpleName());
+		} catch ( ValidatorException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
+	}
+	
+	@Test
+	public void testValidate_ThrowsIfRowGetNameThrows() throws Exception {
+		RowException expected = new RowException("test");
+		expect(rs.get(eq("SEC_DESCR"))).andReturn(descr);
+		expect(rs.get(eq("SEC_SHORTNAME"))).andThrow(expected);
+		control.replay();
+		
+		try {
+			validator.validate(rs);
+			fail("Expected: " + ValidatorException.class.getSimpleName());
+		} catch ( ValidatorException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@Test

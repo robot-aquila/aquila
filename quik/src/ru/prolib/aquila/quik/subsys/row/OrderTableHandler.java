@@ -11,6 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.row.Spec;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.table.*;
 
@@ -100,7 +101,9 @@ public class OrderTableHandler implements DDETableHandler {
 			handleTable(ddeTable);
 		} catch ( ParseException e ) {
 			throw new DDEException(e);
-		} catch ( RowSetException e ) {
+		} catch ( RowException e ) {
+			throw new DDEException(e);
+		} catch ( ValidatorException e ) {
 			throw new DDEException(e);
 		}
 	}
@@ -113,7 +116,7 @@ public class OrderTableHandler implements DDETableHandler {
 	 * @throws RowSetException ошибка позицирования ряда
 	 */
 	private void handleTable(DDETable ddeTable)
-			throws ParseException, RowSetException
+			throws ParseException, RowException, ValidatorException
 	{
 		DDETableRange range = ddeUtils.parseXltRange(ddeTable.getItem());
 		if ( range.getFirstRow() == 1 ) {

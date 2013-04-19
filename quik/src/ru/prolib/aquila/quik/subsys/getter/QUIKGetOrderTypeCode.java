@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik.subsys.getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер кода типа заявки.
@@ -27,7 +28,7 @@ public class QUIKGetOrderTypeCode implements G<String> {
 	}
 
 	@Override
-	public String get(Object source) {
+	public String get(Object source) throws ValueException {
 		String mode = gMode.get(source);
 		if ( mode != null && mode.length() >= 1 ) {
 			return mode.substring(0, 1);

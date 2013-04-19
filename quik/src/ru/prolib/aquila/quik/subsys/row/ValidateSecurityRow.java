@@ -4,8 +4,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.row.Spec;
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.data.row.RowSet;
 import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.utils.ValidatorException;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 /**
@@ -41,12 +43,16 @@ public class ValidateSecurityRow implements Validator {
 	}
 
 	@Override
-	public boolean validate(Object object) {
-		RowSet rs = (RowSet) object;
-		locator.getDescriptors()
-			.register((SecurityDescriptor) rs.get(Spec.SEC_DESCR),
-					(String) rs.get(Spec.SEC_SHORTNAME)); 
-		return true;
+	public boolean validate(Object object) throws ValidatorException {
+		try {
+			RowSet rs = (RowSet) object;
+			locator.getDescriptors()
+				.register((SecurityDescriptor) rs.get(Spec.SEC_DESCR),
+						(String) rs.get(Spec.SEC_SHORTNAME)); 
+			return true;
+		} catch ( RowException e ) {
+			throw new ValidatorException(e);
+		}
 	}
 
 	@Override

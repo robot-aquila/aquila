@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 /**
@@ -61,7 +62,7 @@ public class QUIKGetSecurityDescriptor2 implements G<SecurityDescriptor> {
 	}
 	
 	@Override
-	public SecurityDescriptor get(Object arg0) {
+	public SecurityDescriptor get(Object arg0) throws ValueException {
 		String secCode = gCode.get(arg0);
 		String secClass = gClass.get(arg0);
 		return secCode == null || secClass == null ? null

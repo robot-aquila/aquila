@@ -6,7 +6,9 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.core.data.row.RowSet;
+import ru.prolib.aquila.core.utils.ValidatorException;
 
 /**
  * 2013-02-18<br>
@@ -34,6 +36,21 @@ public class ValidateLimitTypeTest {
 		assertFalse(validator.validate(rs));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testValidate_ThrowsIfRowGetThrows() throws Exception {
+		RowException expected = new RowException("test");
+		expect(rs.get("LIMIT_TYPE")).andThrow(expected);
+		control.replay();
+		
+		try {
+			validator.validate(rs);
+			fail("Expected: " + ValidatorException.class.getSimpleName());
+		} catch ( ValidatorException e ) {
+			assertSame(expected, e.getCause());
+			control.verify();
+		}
 	}
 	
 	@Test

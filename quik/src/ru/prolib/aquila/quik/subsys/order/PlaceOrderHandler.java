@@ -28,12 +28,12 @@ public class PlaceOrderHandler implements EventListener {
 	public void onEvent(Event event) {
 		try {
 			onTransactionReply((TransEvent) event);
-		} catch ( OrderException e ) {
+		} catch ( Exception e ) {
 			throw new RuntimeException("Unexpected exception", e);
 		}
 	}
 	
-	private void onTransactionReply(TransEvent event) throws OrderException {
+	private void onTransactionReply(TransEvent event) throws Exception {
 		T2QTransStatus transStatus = event.getStatus();
 		if ( transStatus == T2QTransStatus.SENT
 		  || transStatus == T2QTransStatus.RECV )

@@ -3,10 +3,7 @@ package ru.prolib.aquila.quik.subsys.order;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrders;
-import ru.prolib.aquila.core.BusinessEntities.OrderException;
-import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.quik.api.TransEvent;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 import ru.prolib.aquila.t2q.T2QTransStatus;
@@ -43,12 +40,12 @@ public class CancelOrderHandler implements EventListener {
 	public void onEvent(Event event) {
 		try {
 			onTransactionReply((TransEvent) event);
-		} catch ( OrderException e ) {
+		} catch ( Exception e ) {
 			throw new RuntimeException("Unexpected exception", e);
 		}
 	}
 	
-	private void onTransactionReply(TransEvent event) throws OrderException {
+	private void onTransactionReply(TransEvent event) throws Exception {
 		T2QTransStatus transStatus = event.getStatus();
 		if ( transStatus == T2QTransStatus.SENT
 		  || transStatus == T2QTransStatus.RECV )

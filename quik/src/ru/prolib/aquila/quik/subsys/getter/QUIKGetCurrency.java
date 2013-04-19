@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik.subsys.getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Геттер кода валюты из таблицы инструментов.
@@ -45,7 +46,7 @@ public class QUIKGetCurrency implements G<String> {
 	}
 
 	@Override
-	public String get(Object source) {
+	public String get(Object source) throws ValueException {
 		String code = gCode.get(source);
 		if ( code == null || code.length() == 0 ) {
 			return defaultCurrencyCode;
