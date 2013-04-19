@@ -388,7 +388,7 @@ public class ElementAdapters {
 	 * <p>
 	 * @param elementId идентификатор элемента ряда
 	 * @param elementClass ожидаемый класс элемента
-	 * @return
+	 * @return адаптер
 	 */
 	public G<?> createElement(String elementId, Class<?> elementClass) {
 		return re(elementId, elementClass);

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.row.RowSet;
 import ru.prolib.aquila.core.data.row.RowSetAdapter;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.dde.DDETable;
 import ru.prolib.aquila.dde.utils.table.DDETableRowSetBuilder;
 
@@ -53,7 +54,7 @@ public class RowSetBuilder implements DDETableRowSetBuilder {
 	}
 
 	@Override
-	public RowSet createRowSet(DDETable table) {
+	public RowSet createRowSet(DDETable table) throws DDEException {
 		return new RowSetAdapter(builder.createRowSet(table), adapters);
 	}
 	
