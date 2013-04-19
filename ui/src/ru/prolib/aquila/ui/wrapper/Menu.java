@@ -68,14 +68,14 @@ public class Menu {
 	 * <p>
 	 * @param id идентификатор элемента
 	 * @param title заголовок
-	 * @param type тип элемента меню
+	 * @param underlyed оборачиваемый элемент меню
 	 * @return элемент меню
 	 * @throws MenuItemAlreadyExsistException идентификатор не уникален
 	 */
-	public synchronized MenuItem addItem(String id, String title, JMenuItem type)
+	public synchronized MenuItem addItem(String id, String title, JMenuItem underlyed)
 		throws MenuException
 	{
-		MenuItem item = createItem(id, title, type);
+		MenuItem item = createItem(id, title, underlyed);
 		underlying.insert(item.getUnderlyingObject(), getNormalPosition());
 		return item;
 	}
@@ -145,14 +145,14 @@ public class Menu {
 	 * <p>
 	 * @param id идентификатор элемента
 	 * @param title заголовок
-	 * @param type тип элемента меню
+	 * @param underlyed оборачиваемый элемент меню
 	 * @return элемент меню
 	 * @throws MenuException
 	 */
-	public synchronized MenuItem addBottomItem(String id, String title, JMenuItem type)
+	public synchronized MenuItem addBottomItem(String id, String title, JMenuItem underlyed)
 			throws MenuException
 	{
-		MenuItem item = createItem(id, title, type);
+		MenuItem item = createItem(id, title, underlyed);
 		underlying.add(item.getUnderlyingObject());
 		bottomElements ++;
 		return item;
@@ -246,17 +246,17 @@ public class Menu {
 	 * <p>
 	 * @param id идентификатор
 	 * @param title текст элемента
-	 * @param тип элемента
+	 * @param underlyed оборачиваемый элемент меню
 	 * @return экземпляр элемента
 	 * @throws MenuItemAlreadyExistsException 
 	 */
-	private MenuItem createItem(String id, String title, JMenuItem type) throws MenuException {
+	private MenuItem createItem(String id, String title, JMenuItem underlyed) throws MenuException {
 		if ( isItemExists(id) ) {
 			throw new MenuItemAlreadyExistsException(id);
 		}
 		final EventType eventType = es.createGenericType(dispatcher, id);		
-		type.setText(title);
-		MenuItem item = new MenuItem(type, eventType); 
+		underlyed.setText(title);
+		MenuItem item = new MenuItem(underlyed, eventType); 
 		item.getUnderlyingObject().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
