@@ -19,6 +19,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.ib.event.*;
 import ru.prolib.aquila.ib.subsys.IBServiceLocator;
 import ru.prolib.aquila.ib.subsys.api.*;
@@ -318,8 +319,46 @@ public class IBSecurityHandlerTest {
 	}
 	
 	@Test
+	public void testOnEvent_OnResponse_Norm_HandlingModifierException()
+			throws Exception
+	{
+		ValueException expected = new ValueException("test");
+		ContractDetails details = new ContractDetails();
+		expect(term.getEditableSecurity(eq(descr))).andReturn(security);
+		modifier.set(same(security), same(details));
+		expectLastCall().andThrow(expected);
+		term.firePanicEvent(eq(1), eq("Cannot handle security: {}"),
+				aryEq(new Object[] { expected }));
+		control.replay();
+		
+		handler.onEvent(new IBEventContract(onContrResponse, 0,
+				IBEventContract.SUBTYPE_NORM, details));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testOnEvent_OnResponse_OkBond() throws Exception {
 		testOnEvent_OnResponse(IBEventContract.SUBTYPE_BOND);
+	}
+	
+	@Test
+	public void testOnEvent_OnResponse_Bond_HandlingModifierException()
+			throws Exception
+	{
+		ValueException expected = new ValueException("test");
+		ContractDetails details = new ContractDetails();
+		expect(term.getEditableSecurity(eq(descr))).andReturn(security);
+		modifier.set(same(security), same(details));
+		expectLastCall().andThrow(expected);
+		term.firePanicEvent(eq(1), eq("Cannot handle security: {}"),
+				aryEq(new Object[] { expected }));
+		control.replay();
+		
+		handler.onEvent(new IBEventContract(onContrResponse, 0,
+				IBEventContract.SUBTYPE_BOND, details));
+		
+		control.verify();
 	}
 	
 	@Test
@@ -344,6 +383,24 @@ public class IBSecurityHandlerTest {
 		modifier.set(same(security), same(event));
 		control.replay();
 		handler.onEvent(event);
+		control.verify();
+	}
+	
+	@Test
+	public void testOnEvent_OnMktTick_HandlingModifierException()
+			throws Exception
+	{
+		ValueException expected = new ValueException("test");
+		IBEventTick event = new IBEventTick(onMktTick, 0, TickType.ASK, 10.0d);
+		expect(term.getEditableSecurity(same(descr))).andReturn(security);
+		modifier.set(same(security), same(event));
+		expectLastCall().andThrow(expected);
+		term.firePanicEvent(eq(1), eq("Cannot handle security: {}"),
+				aryEq(new Object[] { expected }));
+		control.replay();
+		
+		handler.onEvent(event);
+		
 		control.verify();
 	}
 	

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.ib.event.IBEventUpdateAccount;
 
 /**
@@ -93,12 +94,13 @@ public class IBRunnableUpdateAccount implements Runnable {
 				portfolio = fport.createPortfolio(account);
 				terminal.registerPortfolio(portfolio);
 			}
+			modifier.set(portfolio, event);
 		} catch ( PortfolioException e ) {
 			logger.error("Unexpected exception: ", e);
 			terminal.firePanicEvent(1, "IBRunnableUpdateAccount#run");
-			return;
+		} catch ( ValueException e ) {
+			logger.error("Modify portfolio failed: ", e);
 		}
-		modifier.set(portfolio, event);
 	}
 	
 	@Override

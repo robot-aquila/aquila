@@ -2,10 +2,13 @@ package ru.prolib.aquila.ib.subsys.run;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.ib.event.IBEventOrder;
 
 /**
@@ -15,9 +18,14 @@ import ru.prolib.aquila.ib.event.IBEventOrder;
  * $Id: IBRunnableUpdateOrder.java 527 2013-02-14 15:14:09Z whirlwind $
  */
 public class IBRunnableUpdateOrder implements Runnable {
+	private static final Logger logger;
 	private final OrderResolver resolver;
 	private final S<EditableOrder> modifier;
 	private final IBEventOrder event;
+	
+	static {
+		logger = LoggerFactory.getLogger(IBRunnableUpdateOrder.class);
+	}
 	
 	/**
 	 * Конструктор.
@@ -64,8 +72,12 @@ public class IBRunnableUpdateOrder implements Runnable {
 
 	@Override
 	public void run() {
-		long id = event.getOrderId();
-		modifier.set(resolver.resolveOrder(id, id), event);
+		try {
+			long id = event.getOrderId();
+			modifier.set(resolver.resolveOrder(id, id), event);
+		} catch ( ValueException e ) {
+			logger.error("Unexpected exception: ", e);
+		}
 	}
 	
 	@Override

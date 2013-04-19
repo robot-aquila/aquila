@@ -8,6 +8,7 @@ import com.ib.client.Contract;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.ib.IBException;
 import ru.prolib.aquila.ib.getter.IBGetSecurityDescriptorContract;
@@ -108,6 +109,8 @@ public class IBOrderProcessor implements OrderProcessor {
 				client.placeOrder(order.getTransactionId().intValue(),
 					gSecDescr2Contract.get(security.getDescriptor()), ibOrder);
 			} catch ( IBException e ) {
+				throw new OrderException(e);
+			} catch ( ValueException e ) {
 				throw new OrderException(e);
 			}
 		} else {

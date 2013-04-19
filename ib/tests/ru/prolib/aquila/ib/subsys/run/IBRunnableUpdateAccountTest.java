@@ -10,6 +10,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.event.IBEventUpdateAccount;
 import ru.prolib.aquila.ib.subsys.run.IBRunnableUpdateAccount;
@@ -26,6 +27,7 @@ public class IBRunnableUpdateAccountTest {
 	private static IBEventUpdateAccount event;
 	private static IBRunnableUpdateAccount runnable;
 	private static final Account acc = new Account("TEST");
+	private EditablePortfolio port;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -41,6 +43,7 @@ public class IBRunnableUpdateAccountTest {
 		fport = control.createMock(PortfolioFactory.class);
 		modifier = control.createMock(S.class);
 		event = control.createMock(IBEventUpdateAccount.class);
+		port = control.createMock(EditablePortfolio.class);
 		runnable = new IBRunnableUpdateAccount(terminal,
 				fport, modifier, event);
 		expect(event.getAccount()).andStubReturn("TEST");
@@ -109,7 +112,6 @@ public class IBRunnableUpdateAccountTest {
 	
 	@Test
 	public void testRun_PortfolioExists() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
 		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(true);
 		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(port);
 		modifier.set(same(port), same(event));
@@ -120,7 +122,6 @@ public class IBRunnableUpdateAccountTest {
 	
 	@Test
 	public void testRun_NewPortfolio() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
 		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(false);
 		expect(fport.createPortfolio(eq(acc))).andReturn(port);
 		terminal.registerPortfolio(same(port));
@@ -151,6 +152,19 @@ public class IBRunnableUpdateAccountTest {
 		terminal.firePanicEvent(1, "IBRunnableUpdateAccount#run");
 		control.replay();
 		runnable.run();
+		control.verify();
+	}
+	
+	@Test
+	public void testRun_HandlingModifierException() throws Exception {
+		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(true);
+		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(port);
+		modifier.set(same(port), same(event));
+		expectLastCall().andThrow(new ValueException("test"));
+		control.replay();
+		
+		runnable.run();
+		
 		control.verify();
 	}
 

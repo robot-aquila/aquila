@@ -9,6 +9,7 @@ import com.ib.client.Contract;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.ib.IBException;
 import ru.prolib.aquila.ib.event.IBEventUpdatePortfolio;
 import ru.prolib.aquila.ib.subsys.contract.IBContracts;
@@ -98,6 +99,8 @@ public class IBRunnableUpdatePosition implements Runnable {
 		} catch ( PortfolioException e ) {
 			panic(e);
 		} catch ( IBException e ) {
+			panic(e);
+		} catch ( ValueException e ) {
 			panic(e);
 		}
 	}

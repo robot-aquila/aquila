@@ -4,6 +4,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.ib.event.IBEventContract;
 import ru.prolib.aquila.ib.event.IBEventError;
 import ru.prolib.aquila.ib.subsys.IBServiceLocator;
@@ -180,14 +181,22 @@ public class IBSecurityHandler implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		if ( event.isType(reqContract.OnError()) ) {
-			onRequestContractError((IBEventError) event);
-		} else if ( event.isType(reqContract.OnResponse()) ) {
-			onContractResponse((IBEventContract) event);
-		} else if ( event.isType(reqMktData.OnTick()) ) {
-			modifier.set(getSecurity(), event);
-		} else if ( event.isType(locator.getApiClient().OnConnectionOpened())) {
-			onConnectionOpened();
+		try {
+			if ( event.isType(reqContract.OnError()) ) {
+				onRequestContractError((IBEventError) event);
+			} else if ( event.isType(reqContract.OnResponse()) ) {
+				onContractResponse((IBEventContract) event);
+			} else if ( event.isType(reqMktData.OnTick()) ) {
+				modifier.set(getSecurity(), event);
+			} else if ( event.isType(locator.getApiClient()
+					.OnConnectionOpened()))
+			{
+				onConnectionOpened();
+			}
+		} catch ( ValueException e ) {
+			Object args[] = { e };
+			locator.getTerminal()
+				.firePanicEvent(1, "Cannot handle security: {}", args);
 		}
 	}
 	
@@ -210,7 +219,9 @@ public class IBSecurityHandler implements EventListener {
 	 * <p>
 	 * @param event событие
 	 */
-	private void onContractResponse(IBEventContract event) {
+	private void onContractResponse(IBEventContract event)
+			throws ValueException
+	{
 		if ( event.getSubType() == IBEventContract.SUBTYPE_END ) {
 			// Данный маркер используется для опционов. В настоящее время
 			// работа с опционами через IB не реализована.

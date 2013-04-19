@@ -16,7 +16,7 @@ import ru.prolib.aquila.ib.subsys.*;
 public class IBSecurityHandlerFactoryImpl implements IBSecurityHandlerFactory {
 	private final IBServiceLocator locator;
 	private final long timeout;
-	private final G<Contract> gSecDescr2Contr;
+	private final IBGetSecurityDescriptorContract gSecDescr2Contr;
 
 	/**
 	 * Создать фабрику.

@@ -13,6 +13,7 @@ import com.ib.client.Contract;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.IBException;
 import ru.prolib.aquila.ib.event.IBEventUpdatePortfolio;
@@ -24,18 +25,20 @@ import ru.prolib.aquila.ib.subsys.run.IBRunnableUpdatePosition;
  * $Id: IBRunnableUpdatePositionTest.java 528 2013-02-14 15:27:34Z whirlwind $
  */
 public class IBRunnableUpdatePositionTest {
-	private static IMocksControl control;
-	private static EditableTerminal terminal;
-	private static IBContracts contracts;
-	private static S<EditablePosition> modifier;
-	private static Contract contract;
-	private static IBEventUpdatePortfolio event;
-	private static IBRunnableUpdatePosition runnable;
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		BasicConfigurator.resetConfiguration();
-		BasicConfigurator.configure();
+	private static final SecurityDescriptor descr;
+	private static final Contract contract;
+	private IMocksControl control;
+	private EditableTerminal terminal;
+	private IBContracts contracts;
+	private S<EditablePosition> modifier;
+	private EditablePortfolio portfolio;
+	private EditablePosition position;
+	private EventType eventType;
+	private IBEventUpdatePortfolio event;
+	private IBRunnableUpdatePosition runnable;
+	
+	static {
+		descr = new SecurityDescriptor("AAPL","SMART","USD",SecurityType.STK);
 		contract = new Contract();
 		contract.m_conId = 1172;
 		contract.m_symbol = "AAPL";
@@ -45,6 +48,12 @@ public class IBRunnableUpdatePositionTest {
 		contract.m_primaryExch = "NASDAQ";
 	}
 
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
@@ -52,10 +61,15 @@ public class IBRunnableUpdatePositionTest {
 		terminal = control.createMock(EditableTerminal.class);
 		contracts = control.createMock(IBContracts.class);
 		modifier = control.createMock(S.class);
-		event = new IBEventUpdatePortfolio(control.createMock(EventType.class),
+		portfolio = control.createMock(EditablePortfolio.class);
+		position = control.createMock(EditablePosition.class);
+		eventType = control.createMock(EventType.class);
+		event = new IBEventUpdatePortfolio(eventType,
 				contract, -100, 500.0d, 50000.0d, 498.0d, 0.1d, 0.2d, "TEST");
 		runnable = new IBRunnableUpdatePosition(terminal, contracts,
 				modifier, event);
+		
+		expect(eventType.asString()).andStubReturn("event");
 	}
 	
 	@Test
@@ -126,10 +140,6 @@ public class IBRunnableUpdatePositionTest {
 	
 	@Test
 	public void testRun_Ok() throws Exception {
-		EditablePortfolio portfolio=control.createMock(EditablePortfolio.class);
-		EditablePosition position = control.createMock(EditablePosition.class);
-		SecurityDescriptor descr =
-			new SecurityDescriptor("AAPL", "SMART", "USD", SecurityType.STK);
 		expect(terminal.getEditablePortfolio(eq(new Account("TEST"))))
 				.andReturn(portfolio);
 		expect(contracts.getAppropriateSecurityDescriptor(eq(1172)))
@@ -157,11 +167,27 @@ public class IBRunnableUpdatePositionTest {
 	
 	@Test
 	public void testRun_Exception2() throws Exception {
-		EditablePortfolio portfolio=control.createMock(EditablePortfolio.class);
 		expect(terminal.getEditablePortfolio(eq(new Account("TEST"))))
 			.andReturn(portfolio);
 		expect(contracts.getAppropriateSecurityDescriptor(eq(1172)))
 			.andThrow(new IBException("Test exception"));
+		terminal.firePanicEvent(1, "IBRunnableUpdatePosition#run");
+		control.replay();
+		
+		runnable.run();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testRun_HandlingModifierException() throws Exception {
+		expect(terminal.getEditablePortfolio(eq(new Account("TEST"))))
+				.andReturn(portfolio);
+		expect(contracts.getAppropriateSecurityDescriptor(eq(1172)))
+				.andReturn(descr);
+		expect(portfolio.getEditablePosition(eq(descr))).andReturn(position);
+		modifier.set(same(position), same(event));
+		expectLastCall().andThrow(new ValueException("test"));
 		terminal.firePanicEvent(1, "IBRunnableUpdatePosition#run");
 		control.replay();
 		

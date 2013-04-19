@@ -4,12 +4,14 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.event.IBEventOrder;
 import ru.prolib.aquila.ib.subsys.run.IBRunnableUpdateOrder;
@@ -24,14 +26,19 @@ public class IBRunnableUpdateOrderTest {
 	private static S<EditableOrder> modifier;
 	private static IBEventOrder event;
 	private static IBRunnableUpdateOrder runnable;
+	private static EditableOrder order;
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+		
 		control = createStrictControl();
 		resolver = control.createMock(OrderResolver.class);
 		modifier = control.createMock(S.class);
 		event = control.createMock(IBEventOrder.class);
+		order = control.createMock(EditableOrder.class);
 		runnable = new IBRunnableUpdateOrder(resolver, modifier, event);
 	}
 
@@ -93,12 +100,24 @@ public class IBRunnableUpdateOrderTest {
 	
 	@Test
 	public void testRun() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
 		expect(event.getOrderId()).andReturn(156);
 		expect(resolver.resolveOrder(eq(156l), eq(156l))).andReturn(order);
 		modifier.set(same(order), same(event));
 		control.replay();
 		runnable.run();
+		control.verify();
+	}
+	
+	@Test
+	public void testRun_HandlingModifierException() throws Exception {
+		expect(event.getOrderId()).andReturn(156);
+		expect(resolver.resolveOrder(eq(156l), eq(156l))).andReturn(order);
+		modifier.set(same(order), same(event));
+		expectLastCall().andThrow(new ValueException("test"));
+		control.replay();
+		
+		runnable.run();
+		
 		control.verify();
 	}
 	
