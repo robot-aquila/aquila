@@ -1,7 +1,8 @@
 package ru.prolib.aquila.dde.utils.table;
 
-import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,16 +24,21 @@ public class DDEUtils {
 	}
 
 	/**
-	 * Разобрать строку информации о регионе таблицы формата XLT.
+	 * Получить представленный регион таблицы.
 	 * <p>
-	 * @param item строка описывающая регион таблицы (например R1C1:R10C5)
+	 * Разбирает строку item таблицы, которая должна представлять дескриптор
+	 * региона в формате XLT (например R1C1:R10C5).
+	 * <p>
+	 * @param table таблица
 	 * @return дескриптор региона таблицы
-	 * @throws ParseException некорректный формат строки
+	 * @throws XltItemFormatException некорректный формат строки item
 	 */
-	public DDETableRange parseXltRange(String item) throws ParseException {
-		Matcher m = pXltRange.matcher(item);
+	public DDETableRange parseXltRange(DDETable table)
+			throws XltItemFormatException
+	{
+		Matcher m = pXltRange.matcher(table.getItem());
 		if ( ! m.find() || m.groupCount() != 4 ) {
-			throw new ParseException("Couldn't parse string: " + item, 0);
+			throw new XltItemFormatException(table.getTopic(), table.getItem());
 		}
 		return new DDETableRange(Integer.parseInt(m.group(1)),
 				Integer.parseInt(m.group(2)),
@@ -57,6 +63,7 @@ public class DDEUtils {
 	 * исходной таблицы).    
 	 * @return хэш-индекс
 	 */
+	@Deprecated
 	public Map<String, Integer> makeHeadersMap(DDETable table, int colOffset) {
 		Map<String, Integer> map = new Hashtable<String, Integer>();
 		int cols = table.getCols();
@@ -75,8 +82,43 @@ public class DDEUtils {
 	 * @param table таблица
 	 * @return хэш-индекс
 	 */
+	@Deprecated
 	public Map<String, Integer> makeHeadersMap(DDETable table) {
 		return makeHeadersMap(table, 0);
+	}
+	
+	/**
+	 * Создать хэш-индекс заголовков на основе первого ряда таблицы.
+	 * <p>
+	 * Создает карту заголовков аналогично методу
+	 * {@link #makeHeadersMap(DDETable, int)} с тем отличием, то в карту
+	 * попадают только требуемые заголовки. Если в таблице отсутствует требуемый
+	 * заголовок, то выбрасывает исключение.
+	 * <p>
+	 * @param table таблица
+	 * @param requiredFields список требуемых заголовков
+	 * @return хэш-индекс
+	 * @throws NotAllRequiredFieldsException не все необходимые заголовки
+	 */
+	public Map<String, Integer>
+			makeHeadersMap(DDETable table, String[] requiredFields)
+					throws NotAllRequiredFieldsException
+	{
+		Map<String, Integer> map = new Hashtable<String, Integer>();
+		List<String> required = Arrays.asList(requiredFields);
+		int cols = table.getCols();
+		for ( int i = 0; i < cols; i ++ ) {
+			String hdr = table.getCell(0, i).toString();
+			if ( required.contains(hdr) ) {
+				map.put(hdr, i);
+			}
+		}
+		for ( String hdr : required ) {
+			if ( ! map.containsKey(hdr) ) {
+				throw new NotAllRequiredFieldsException(table.getTopic(), hdr);
+			}
+		}
+		return map;
 	}
 	
 }
