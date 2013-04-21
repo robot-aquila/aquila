@@ -1,6 +1,5 @@
 package ru.prolib.aquila.dde.utils.table;
 
-import java.text.ParseException;
 import java.util.*;
 import org.apache.commons.lang3.builder.*;
 import ru.prolib.aquila.core.data.row.RowSet;
@@ -128,12 +127,7 @@ public class DDETableRowSetBuilderImpl implements DDETableRowSetBuilder {
 	public synchronized RowSet createRowSet(DDETable table)
 			throws DDEException
 	{
-		DDETableRange range = null;
-		try {
-			range = utils.parseXltRange(table.getItem());
-		} catch ( ParseException e ) {
-			throw new DDEException("Incorrect table item", e);
-		}
+		DDETableRange range = utils.parseXltRange(table);
 		int row = range.getFirstRow() - firstRow;
 		int col = range.getFirstCol() - firstCol;
 		if ( row == 0 ) {

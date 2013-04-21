@@ -3,7 +3,6 @@ package ru.prolib.aquila.dde.utils.table;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -281,17 +280,10 @@ public class DDETableRowSetBuilderImplTest {
 		assertEquals(new HashSet<String>(), handler.getHeaders());
 	}
 
-	@Test
+	@Test (expected=XltItemFormatException.class)
 	public void testCreateRowSet_ThrowsIfUnknownItemFormat() throws Exception {
-		try {
-			handler.createRowSet(createTable(new Object[][]
+		handler.createRowSet(createTable(new Object[][]
    		        {{ "#", "name", "price" }}, "foobar:any"));
-			fail("Expected: " + DDEException.class.getSimpleName());
-		} catch ( DDEException e ) {
-			assertEquals("Incorrect table item", e.getMessage());
-			ParseException err = (ParseException) e.getCause();
-			assertEquals("Couldn't parse string: foobar:any", err.getMessage());
-		}
 	}
 	
 	/**
