@@ -163,6 +163,12 @@ public class IBGetterFactoryImplTest {
 	}
 	
 	@Test
+	public void testOrderStatusAvgExecutedPrice() throws Exception {
+		assertEquals(new IBGetOrderAvgExecPrice(),
+				factory.orderStatusAvgExecutedPrice());
+	}
+	
+	@Test
 	public void testPortBalance() throws Exception {
 		assertEquals(
 				new IBGetAccountDouble("NetLiquidationByCurrency", "BASE"),

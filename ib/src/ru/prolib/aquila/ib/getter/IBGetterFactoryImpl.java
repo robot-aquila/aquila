@@ -179,4 +179,9 @@ public class IBGetterFactoryImpl implements IBGetterFactory {
 		return new IBGetPositionVarMargin();
 	}
 
+	@Override
+	public G<Double> orderStatusAvgExecutedPrice() {
+		return new IBGetOrderAvgExecPrice();
+	}
+
 }

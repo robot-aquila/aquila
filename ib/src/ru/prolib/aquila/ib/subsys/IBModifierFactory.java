@@ -86,6 +86,14 @@ public interface IBModifierFactory {
 	 * @return модификатор
 	 */
 	public S<EditableOrder> orderOsExecutedVolume();
+	
+	/**
+	 * Модификатор средней цены исполненной части заявки на основе события
+	 * {@link IBEventOrderStatus}.
+	 * <p>
+	 * @return модификатор
+	 */
+	public S<EditableOrder> orderOsAvgExecutedPrice();
 
 	/**
 	 * Модификатор инструмента на основании контракта.

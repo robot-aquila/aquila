@@ -225,4 +225,10 @@ public class IBModifierFactoryImpl implements IBModifierFactory {
 				sfactory.positionSetVarMargin());
 	}
 
+	@Override
+	public S<EditableOrder> orderOsAvgExecutedPrice() {
+		return new MStd<EditableOrder>(gfactory.orderStatusAvgExecutedPrice(),
+				sfactory.orderSetAvgExecutedPrice());
+	}
+
 }

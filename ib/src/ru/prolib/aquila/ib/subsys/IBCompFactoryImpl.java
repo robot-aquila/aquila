@@ -216,6 +216,7 @@ public class IBCompFactoryImpl implements IBCompFactory {
 			.add(mfactory.orderOsStatus())
 			.add(mfactory.orderOsQtyRest())
 			.add(mfactory.orderOsExecutedVolume())
+			.add(mfactory.orderOsAvgExecutedPrice())
 			.add(bfactory.createOrderEG());
 	}
 	

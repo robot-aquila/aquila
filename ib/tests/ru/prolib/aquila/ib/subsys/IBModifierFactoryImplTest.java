@@ -294,6 +294,19 @@ public class IBModifierFactoryImplTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
+	public void testOrderOsAvgExevutedPrice() throws Exception {
+		G<Double> getter = control.createMock(G.class);
+		S<EditableOrder> setter = control.createMock(S.class);
+		expect(gfactory.orderStatusAvgExecutedPrice()).andReturn(getter);
+		expect(sfactory.orderSetAvgExecutedPrice()).andReturn(setter);
+		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
+		control.replay();
+		assertEquals(expected, factory.orderOsAvgExecutedPrice());
+		control.verify();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
 	public void testPosVarMargin() throws Exception {
 		G<Double> getter = control.createMock(G.class);
 		S<EditablePosition> setter = control.createMock(S.class);

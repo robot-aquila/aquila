@@ -295,7 +295,7 @@ public class IBCompFactoryImplTest {
 	@SuppressWarnings("unchecked")
 	public S<EditableOrder> getMOrderStatus() throws Exception {
 		MList<EditableOrder> expected = new MListImpl<EditableOrder>();
-		S<EditableOrder> modifier[] = new S[4];
+		S<EditableOrder> modifier[] = new S[5];
 		for ( int i = 0; i < modifier.length; i ++ ) {
 			modifier[i] = control.createMock(S.class);
 			expected.add(modifier[i]);
@@ -303,7 +303,8 @@ public class IBCompFactoryImplTest {
 		expect(mfactory.orderOsStatus()).andReturn(modifier[0]);
 		expect(mfactory.orderOsQtyRest()).andReturn(modifier[1]);
 		expect(mfactory.orderOsExecutedVolume()).andReturn(modifier[2]);
-		expect(bfactory.createOrderEG()).andReturn(modifier[3]);
+		expect(mfactory.orderOsAvgExecutedPrice()).andReturn(modifier[3]);
+		expect(bfactory.createOrderEG()).andReturn(modifier[4]);
 		return expected;
 	}
 	

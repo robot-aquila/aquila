@@ -79,7 +79,15 @@ public interface IBGetterFactory {
 	 * @return геттер
 	 */
 	public G<Double> orderStatusExecutedVolume();
-	
+
+	/**
+	 * Создать геттер средней цены исполненной части заявки из события
+	 * {@link IBEventOrderStatus}.
+	 * <p> 
+	 * @return геттер
+	 */
+	public G<Double> orderStatusAvgExecutedPrice();
+
 	/**
 	 * Создать геттер доступных средств портфеля из события
 	 * {@link IBEventUpdateAccount}.
