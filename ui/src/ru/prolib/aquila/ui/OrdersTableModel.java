@@ -35,6 +35,7 @@ public class OrdersTableModel extends AbstractTableModel implements
 	private static final String COL_TRN = "COL_TRN";
 	private static final String COL_PRICE = "COL_PRICE";
 	private static final String COL_EXEC_VOL = "COL_EXEC_VOL";
+	private static final String COL_AVG_EXEC_PRICE = "COL_AVG_EXEC_PRICE";
 	private static final String[] header = {
 		COL_ID,
 		COL_TRN,
@@ -47,7 +48,8 @@ public class OrdersTableModel extends AbstractTableModel implements
 		COL_PRICE,
 		COL_QTY,
 		COL_QTY_REST,
-		COL_EXEC_VOL
+		COL_EXEC_VOL,
+		COL_AVG_EXEC_PRICE,
 	};
 	private ClassLabels uiLabels;
 	private final Orders orders;
@@ -106,6 +108,8 @@ public class OrdersTableModel extends AbstractTableModel implements
 				return order.getAccount();
 			} else if ( header[col] == COL_TIME) {
 				return order.getTime();
+			} else if ( header[col] == COL_AVG_EXEC_PRICE ) {
+				return order.getAvgExecutedPrice();
 			} else {
 				return null;
 			}
