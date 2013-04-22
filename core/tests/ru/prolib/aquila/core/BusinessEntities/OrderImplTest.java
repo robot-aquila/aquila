@@ -111,6 +111,7 @@ public class OrderImplTest {
 		assertNull(order.getOffset());
 		assertNull(order.getSpread());
 		assertEquals(0.0d, order.getExecutedVolume(), 0.01d);
+		assertEquals(0.0d, order.getAvgExecutedPrice(), 0.01d);
 		assertNull(order.getTime());
 		assertNull(order.getLastChangeTime());
 	}
@@ -493,6 +494,23 @@ public class OrderImplTest {
 	}
 	
 	@Test
+	public void testSetAvgExecutedPrice() throws Exception {
+		setter = new S<OrderImpl>() {
+			@Override
+			public void set(OrderImpl object, Object value) {
+				object.setAvgExecutedPrice((Double) value);
+			}
+		};
+		getter = new G<Double>() {
+			@Override
+			public Double get(Object object) throws ValueException {
+				return ((OrderImpl) object).getAvgExecutedPrice();
+			}
+		};
+		testSetterGetter(152.14d, 534.56d);
+	}
+	
+	@Test
 	public void testSetStatus_ChangesPreviousStatus() throws Exception {
 		assertSame(OrderStatus.PENDING, order.getStatus());
 		assertNull(order.getPreviousStatus());
@@ -508,7 +526,7 @@ public class OrderImplTest {
 	public void testSetTime() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setTime((Date) value);
 			}
 		};

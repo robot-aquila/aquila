@@ -40,7 +40,8 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private Long linkedOrderId;
 	private Double stopLimitPrice,takeProfitPrice;
 	private Price offset,spread;
-	private Double execVolume = 0.0d; 
+	private Double execVolume = 0.0d;
+	private Double avgExecPrice = 0.0d;
 	private final List<OrderHandler> eventHandlers;
 	private final Terminal terminal;
 	private Date time,lastChangeTime;
@@ -384,11 +385,24 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	public synchronized Double getExecutedVolume() {
 		return execVolume;
 	}
+	
+	@Override
+	public synchronized Double getAvgExecutedPrice() {
+		return avgExecPrice;
+	}
 
 	@Override
-	public void setExecutedVolume(Double value) {
+	public synchronized void setExecutedVolume(Double value) {
 		if ( value == null ? execVolume != null : ! value.equals(execVolume) ) {
 			execVolume = value;
+			setChanged();
+		}
+	}
+	
+	@Override
+	public synchronized void setAvgExecutedPrice(Double value) {
+		if (value == null ? avgExecPrice != null :!value.equals(avgExecPrice)) {
+			avgExecPrice = value;
 			setChanged();
 		}
 	}

@@ -125,6 +125,15 @@ public interface EditableOrder extends Order, Editable {
 	public void setExecutedVolume(Double value);
 	
 	/**
+	 * Установить среднюю цену исполненной части заявки.
+	 * <p>
+	 * см. {@link Order#getAvgExecutedPrice()}.
+	 * <p>
+	 * @param value средняя цена
+	 */
+	public void setAvgExecutedPrice(Double value);
+	
+	/**
 	 * Получить предыдущий статус заявки.
 	 * <p>
 	 * @return статус, актуальный на момент до смены статусы на текущий 
