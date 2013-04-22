@@ -168,6 +168,12 @@ public class SetterFactoryImplTest {
 		assertEquals(new OrderSetExecutedVolume(),
 				factory.orderSetExecutedVolume());
 	}
+	
+	@Test
+	public void testOrderSetAvgExecutedPrice() throws Exception {
+		assertEquals(new OrderSetAvgExecutedPrice(),
+				factory.orderSetAvgExecutedPrice());
+	}
 
 	@Test
 	public void testPositionSetCurrQty() throws Exception {

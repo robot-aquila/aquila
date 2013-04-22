@@ -47,6 +47,8 @@ public interface SetterFactory {
 	
 	public S<EditableOrder> orderSetExecutedVolume();
 	
+	public S<EditableOrder> orderSetAvgExecutedPrice();
+	
 	public S<EditableOrder> orderSetTime();
 	
 	public S<EditableOrder> orderSetLastChangeTime();

@@ -289,4 +289,9 @@ public class SetterFactoryImpl implements SetterFactory {
 		return new OrderSetLastChangeTime();
 	}
 
+	@Override
+	public S<EditableOrder> orderSetAvgExecutedPrice() {
+		return new OrderSetAvgExecutedPrice();
+	}
+
 }
