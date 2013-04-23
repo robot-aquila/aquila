@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik.api;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -20,6 +21,12 @@ public class ApiServiceHandlerTest {
 	private EventType onConnStatus, onOrderStatus, onTradeStatus;
 	private ApiServiceHandler handler;
 
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
@@ -119,6 +126,10 @@ public class ApiServiceHandlerTest {
 	@Test
 	public void testOnOrderStatus1() throws Exception {
 		T2QOrder order = control.createMock(T2QOrder.class);
+		// for the logging
+		expect(order.getMode()).andStubReturn(1);
+		expect(order.getOrderId()).andStubReturn(245L);
+		expect(order.getStatus()).andStubReturn(2);
 		OrderEvent expected = new OrderEvent(onOrderStatus, order);
 		dispatcher.dispatch(eq(expected));
 		control.replay();
@@ -131,6 +142,9 @@ public class ApiServiceHandlerTest {
 	@Test
 	public void testOnTradeStatus1() throws Exception {
 		T2QTrade trade = control.createMock(T2QTrade.class);
+		// for the logging
+		expect(trade.getMode()).andStubReturn(0L);
+		expect(trade.getId()).andStubReturn(1025L);
 		TradeEvent expected = new TradeEvent(onTradeStatus, trade);
 		dispatcher.dispatch(eq(expected));
 		control.replay();
