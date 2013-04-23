@@ -1,5 +1,7 @@
 package ru.prolib.aquila.quik;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -107,8 +109,10 @@ public class QUIKFactory implements TerminalFactory {
 		config.stopOrders = props.getProperty("stop-orders", "stop-orders");
 		config.serviceName = props.getProperty("dde-name");
 		config.quikPath = props.getProperty("quik-path");
-		config.dateFormat = props.getProperty("date-format");
-		config.timeFormat = props.getProperty("time-format");
+		config.dateFormat = props.getProperty("date-format",
+				((SimpleDateFormat) DateFormat.getDateInstance()).toPattern());
+		config.timeFormat = props.getProperty("time-format",
+				((SimpleDateFormat) DateFormat.getTimeInstance()).toPattern());
 		config.skipTRANS2QUIK = props.getProperty("skip-trans2quik") != null;
 		return createTerminal(config);
 	}
