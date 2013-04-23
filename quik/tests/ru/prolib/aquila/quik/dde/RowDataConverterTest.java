@@ -41,7 +41,7 @@ public class RowDataConverterTest {
 	}
 	
 	@Test
-	public void testGetTime_PermNull() throws Exception {
+	public void testGetTime_PermitNull() throws Exception {
 		Variant<Object> vDate = new Variant<Object>()
 			.add("")
 			.add("2013-06-01")
@@ -70,7 +70,7 @@ public class RowDataConverterTest {
 		}
 		
 	@Test
-	public void testGetTime_RestNull() throws Exception {
+	public void testGetTime_RestrictNull() throws Exception {
 		Variant<Object> vDate = new Variant<Object>()
 			.add("")
 			.add("2013-06-01")
@@ -84,17 +84,85 @@ public class RowDataConverterTest {
 			.add(null)
 			.add(new Double(32.48d));
 		Variant<?> iterator = vTime;
-		Set<Date> found = new HashSet<Date>();
+		int foundCnt = 0;
+		Date found = null;
 		do {
 			data.put("date", vDate.get());
 			data.put("time", vTime.get());
 			try {
 				Date x = converter.getTime(row, "date", "time", false);
-				found.add(x);
+				found = x;
+				foundCnt ++;
 			} catch ( Exception e ) { }
 		} while ( iterator.next() );
-		assertEquals(1, found.size());
-		assertTrue(found.contains(format.parse("2013-06-01 23:45:30")));
+		assertEquals(1, foundCnt);
+		assertEquals(format.parse("2013-06-01 23:45:30"), found);
+	}
+
+	@Test
+	public void testGetDouble() throws Exception {
+		data.put("Number", 12.34d);
+		assertEquals(12.34d, converter.getDouble(row, "Number"), 0.01d);
+	}
+	
+	@Test (expected=RowNullValueException.class)
+	public void testGetDouble_ThrowsIfNull() throws Exception {
+		data.put("NullNumber", null);
+		converter.getDouble(row, "NullNumber");
+	}
+	
+	@Test (expected=RowDataTypeMismatchException.class)
+	public void testGetDouble_ThrowsIfTypeMismatch() throws Exception {
+		data.put("BadNumber", "zulu4");
+		converter.getDouble(row, "BadNumber");
+	}
+
+	@Test
+	public void testGetLong() throws Exception {
+		data.put("Number", 15.0d);
+		assertEquals(new Long(15L), converter.getLong(row, "Number"));
+	}
+	
+	@Test (expected=RowNullValueException.class)
+	public void testGetLong_ThrowsIfNull() throws Exception {
+		data.put("NullNumber", null);
+		converter.getLong(row, "NullNumber");
+	}
+
+	@Test (expected=RowDataTypeMismatchException.class)
+	public void testGetLong_ThrowsIfTypeMismatch() throws Exception {
+		data.put("BadNumber", this);
+		converter.getLong(row, "BadNumber");
+	}
+	
+	@Test
+	public void testGetStringMappedTo() throws Exception {
+		data.put("bakhta", "yes");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("yes", 15);
+		map.put("no", 24);
+		assertEquals(15, converter.getStringMappedTo(row, "bakhta", map));
+	}
+	
+	@Test (expected=RowNullValueException.class)
+	public void testGetStringMappedTo_ThrowsIfNullValue() throws Exception {
+		data.put("bakhta", null);
+		converter.getStringMappedTo(row,"bakhta",new HashMap<String, Object>());
+	}
+	
+	@Test (expected=RowDataTypeMismatchException.class)
+	public void testGetStringMappedTo_ThrowsIfTypeMismatch() throws Exception {
+		data.put("bakhta", new Integer(12));
+		converter.getStringMappedTo(row,"bakhta",new HashMap<String, Object>());
+	}
+	
+	@Test
+	public void testGetStringMappedTo_PermitMappingToNull() throws Exception {
+		data.put("bakhta", "yes");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("yes", null);
+		map.put("no", 24);
+		assertNull(converter.getStringMappedTo(row, "bakhta", map));
 	}
 
 }

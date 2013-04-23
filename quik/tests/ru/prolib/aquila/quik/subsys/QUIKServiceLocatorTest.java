@@ -16,6 +16,8 @@ import ru.prolib.aquila.core.utils.SimpleCounter;
 import ru.prolib.aquila.quik.QUIKConfig;
 import ru.prolib.aquila.quik.QUIKConfigImpl;
 import ru.prolib.aquila.quik.api.ApiService;
+import ru.prolib.aquila.quik.dde.Cache;
+import ru.prolib.aquila.quik.dde.OrdersCache;
 import ru.prolib.aquila.quik.subsys.order.QUIKOrderProcessor;
 import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
 import ru.prolib.aquila.quik.subsys.security.*;
@@ -28,17 +30,16 @@ public class QUIKServiceLocatorTest {
 	private static IMocksControl control;
 	private static EditableTerminal terminal;
 	private static QUIKServiceLocator locator;
-	
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		control = createStrictControl();
-		terminal = control.createMock(EditableTerminal.class);
+
 	}
 	
 	@Before
 	public void setUp() throws Exception {
-		control.resetToStrict();
+		control = createStrictControl();
+		terminal = control.createMock(EditableTerminal.class);
 		locator = new QUIKServiceLocator(terminal);
 	}
 	
@@ -51,6 +52,14 @@ public class QUIKServiceLocatorTest {
 	@Test
 	public void testGetEventSystem() throws Exception {
 		EventSystemImpl es = (EventSystemImpl) locator.getEventSystem();
+		assertSame(es, locator.getEventSystem());
+	}
+	
+	@Test
+	public void testSetEventSystem() throws Exception {
+		EventSystem es = control.createMock(EventSystem.class);
+		locator.setEventSystem(es);
+		assertSame(es, locator.getEventSystem());
 		assertSame(es, locator.getEventSystem());
 	}
 	
@@ -138,6 +147,32 @@ public class QUIKServiceLocatorTest {
 	@Test (expected=QUIKServiceNotAvailableException.class)
 	public void testGetApi_Unavailable() throws Exception {
 		locator.getApi();
+	}
+	
+	@Test
+	public void testGetDdeCache() throws Exception {
+		EventSystem es = control.createMock(EventSystem.class);
+		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
+		EventType onOrdersUpdate = control.createMock(EventType.class);
+		expect(es.createEventDispatcher(eq("Cache"))).andReturn(dispatcher);
+		expect(es.createGenericType(same(dispatcher), eq("Orders")))
+			.andReturn(onOrdersUpdate);
+		locator.setEventSystem(es);
+		control.replay();
+		
+		Cache expected = new Cache(new OrdersCache(dispatcher, onOrdersUpdate));
+		Cache actual = locator.getDdeCache();
+		
+		control.verify();
+		assertEquals(expected, actual);
+		assertSame(actual, locator.getDdeCache());
+	}
+	
+	@Test
+	public void testSetDdeCache() throws Exception {
+		Cache cache = control.createMock(Cache.class);
+		locator.setDdeCache(cache);
+		assertSame(cache, locator.getDdeCache());
 	}
 
 }

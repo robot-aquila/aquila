@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.SimpleCounter;
 import ru.prolib.aquila.quik.QUIKConfig;
 import ru.prolib.aquila.quik.api.ApiService;
+import ru.prolib.aquila.quik.dde.Cache;
 import ru.prolib.aquila.quik.subsys.order.QUIKOrderProcessor;
 import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
 import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptors;
@@ -22,7 +23,7 @@ import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptorsImpl;
  */
 public class QUIKServiceLocator {
 	private final EditableTerminal terminal;
-	private final EventSystem es;
+	private EventSystem es;
 	private final QUIKSecurityDescriptors descrs;
 	private final QUIKAccounts accounts;
 	private final Counter failedOrderId = new SimpleCounter();
@@ -32,6 +33,7 @@ public class QUIKServiceLocator {
 	private QUIKOrderProcessor orderProcessor;
 	private Timer timer;
 	private QUIKConfig config;
+	private Cache ddeCache;
 	
 	/**
 	 * Конструктор.
@@ -60,8 +62,17 @@ public class QUIKServiceLocator {
 	 * <p>
 	 * @return система событий
 	 */
-	public EventSystem getEventSystem() {
+	public synchronized EventSystem getEventSystem() {
 		return es;
+	}
+	
+	/**
+	 * Установить фасад системы событий.
+	 * <p>
+	 * @param es система событий
+	 */
+	public synchronized void setEventSystem(EventSystem es) {
+		this.es = es;
 	}
 	
 	/**
@@ -182,6 +193,27 @@ public class QUIKServiceLocator {
 	 */
 	public synchronized void setApi(ApiService service) {
 		api = service;
+	}
+	
+	/**
+	 * Получить фасад кэша DDE.
+	 * <p>
+	 * @return кэш DDE
+	 */
+	public synchronized Cache getDdeCache() {
+		if ( ddeCache == null ) {
+			ddeCache = Cache.createCache(getEventSystem());
+		}
+		return ddeCache;
+	}
+	
+	/**
+	 * Установить фасад кэша DDE.
+	 * <p>
+	 * @param cache кэш DDE
+	 */
+	public synchronized void setDdeCache(Cache cache) {
+		ddeCache = cache;
 	}
 
 }

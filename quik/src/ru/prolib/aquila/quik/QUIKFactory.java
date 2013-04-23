@@ -184,6 +184,7 @@ public class QUIKFactory implements TerminalFactory {
 		} else {
 			logger.debug("DDE server not added to start queue");
 		}
+		
 		starter.add(new DDEServiceStarter(server, service));
 		
 		// Make terminal instance

@@ -52,8 +52,8 @@ public class MirrorTableHandler implements DDETableHandler {
 	public synchronized void handle(DDETable ddeTable) throws DDEException {
 		try {
 			handleTable(ddeTable);
-		} catch ( RowException e ) {
-			throw new DDEException(e);
+		} catch ( Exception e ) {
+			throw new DDETableImportException(ddeTable.getTopic(), e);
 		}
 	}
 	

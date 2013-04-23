@@ -27,7 +27,7 @@ public class OrderCache {
 	 * Конструктор.
 	 * <p>
 	 * @param id номер заявки
-	 * @param transId номер транзакции
+	 * @param transId номер транзакции (может быть null)
 	 * @param status статус
 	 * @param secCode код инструмента
 	 * @param secClassCode код класса инструмента
@@ -36,7 +36,7 @@ public class OrderCache {
 	 * @param dir направление
 	 * @param qty количество заявки
 	 * @param qtyRest неисполненный остаток заявки
-	 * @param price цена
+	 * @param price цена (может быть null)
 	 * @param time время заявки
 	 * @param withdrawTime время отмены заявки (может быть null)
 	 * @param type тип заявки

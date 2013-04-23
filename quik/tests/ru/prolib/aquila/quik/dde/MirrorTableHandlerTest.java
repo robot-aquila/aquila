@@ -47,9 +47,11 @@ public class MirrorTableHandlerTest {
 		try {
 			handler.handle(ddeTable);
 			fail("Expected: " +
-					NotAllRequiredFieldsException.class.getSimpleName());
-		} catch ( NotAllRequiredFieldsException e ) {
-			assertEquals(new NotAllRequiredFieldsException("orders", "bar"), e);
+					DDETableImportException.class.getSimpleName());
+		} catch ( DDETableImportException e ) {
+			assertEquals(
+				"Table [orders]: Field [bar] is required for table [orders]",
+				e.getMessage());
 		}
 	}
 
@@ -68,9 +70,11 @@ public class MirrorTableHandlerTest {
 		try {
 			handler.handle(new DDETableImpl(cells2, "orders", "R1C1:R1C2", 2));
 			fail("Expected: " +
-					NotAllRequiredFieldsException.class.getSimpleName());
-		} catch ( NotAllRequiredFieldsException e ) {
-			assertEquals(new NotAllRequiredFieldsException("orders", "bar"), e);
+					DDETableImportException.class.getSimpleName());
+		} catch ( DDETableImportException e ) {
+			assertEquals(
+				"Table [orders]: Field [bar] is required for table [orders]",
+				e.getMessage());
 			assertEquals(MirrorTableHandler.EMPTY_MAP,
 					handler.getCurrentHeadersMap());
 		}
