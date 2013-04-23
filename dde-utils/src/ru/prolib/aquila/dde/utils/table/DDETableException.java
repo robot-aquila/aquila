@@ -20,6 +20,11 @@ public class DDETableException extends DDEException {
 		this.table = table;
 	}
 	
+	public DDETableException(String msg, String table, Throwable t) {
+		super(msg, t);
+		this.table = table;
+	}
+	
 	/**
 	 * Получить имя таблицы в связи с исключением.
 	 * <p>
