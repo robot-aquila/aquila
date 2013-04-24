@@ -8,27 +8,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.quik.*;
-import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.ui.ClassLabels;
 
 /**
  * Окно просмотра DDE-кэша.
  */
-public class DDECacheWindow {
+public class CacheWindow {
 	private static final long serialVersionUID = 5687784287521612167L;
 	private static final Logger logger;
 	
 	public static final String TEXT_WIN_CACHE_TITLE = "WIN_CACHE_TITLE";
 	
 	static {
-		logger = LoggerFactory.getLogger(DDECacheWindow.class);
+		logger = LoggerFactory.getLogger(CacheWindow.class);
 	}
 	
 	private final JDialog window;
 	private final QUIKTerminal terminal;
 	private final ClassLabels labels;
+	private Table ordersCacheTable;
 	
-	public DDECacheWindow(JFrame owner, QUIKTerminal terminal,
+	public CacheWindow(JFrame owner, QUIKTerminal terminal,
 			ClassLabels labels)
 	{
 		super();
@@ -42,10 +42,13 @@ public class DDECacheWindow {
 			public void windowClosing(WindowEvent e) { onHide(); }
 		});
 		
-		JLabel label = new JLabel("Hello, world!", SwingConstants.CENTER);
-		label.setPreferredSize(new Dimension(200, 40));
-		window.add(label);
+		TableBuilder builder = new TableBuilder(labels, terminal.getDdeCache());
+		ordersCacheTable = builder.createOrdersCacheTable();
+		ordersCacheTable.setFillsViewportHeight(true);
+		JScrollPane scrollPane = new JScrollPane(ordersCacheTable);
+		window.add(scrollPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));
+		window.setPreferredSize(new Dimension(800, 600));
 		window.pack();
 	}
 	
@@ -57,11 +60,13 @@ public class DDECacheWindow {
 	}
 	
 	protected void onHide() {
+		ordersCacheTable.stop();
 		logger.debug("Hide DDE cache window");
 	}
 	
 	protected void onShow() {
 		logger.debug("Show DDE cache window");
+		ordersCacheTable.start();
 	}
 
 }

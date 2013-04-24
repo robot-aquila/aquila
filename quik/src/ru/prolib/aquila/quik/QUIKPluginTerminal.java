@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.quik.ui.DDECacheWindow;
+import ru.prolib.aquila.quik.ui.CacheWindow;
 import ru.prolib.aquila.ui.*;
 import ru.prolib.aquila.ui.wrapper.MenuException;
 
@@ -26,7 +26,7 @@ public class QUIKPluginTerminal implements AquilaPluginTerminal, EventListener {
 	private ClassLabels labels;
 	private AquilaUI facade;
 	private EventType onShowDdeCache;
-	private DDECacheWindow winDdeCache;
+	private CacheWindow winDdeCache;
 	
 	public QUIKPluginTerminal() {
 		super();
@@ -45,7 +45,7 @@ public class QUIKPluginTerminal implements AquilaPluginTerminal, EventListener {
 		} catch ( MenuException e ) {
 			logger.error("Error creating menu: ", e);
 		}
-		winDdeCache = new DDECacheWindow(facade.getMainFrame(),terminal,labels);
+		winDdeCache = new CacheWindow(facade.getMainFrame(),terminal,labels);
 		winDdeCache.init();
 	}
 	

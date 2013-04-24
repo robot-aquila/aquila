@@ -35,7 +35,7 @@ public class OrdersCache extends MirrorCache {
 	/**
 	 * Получить все кэш-записи.
 	 * <p>
-	 * @return 
+	 * @return список всех записей
 	 */
 	public synchronized List<OrderCache> getAll() {
 		return new LinkedList<OrderCache>(cache.values());
