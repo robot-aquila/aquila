@@ -1,30 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import java.util.List;
-
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.Starter;
-import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrders;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolios;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurities;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
-import ru.prolib.aquila.core.BusinessEntities.Order;
-import ru.prolib.aquila.core.BusinessEntities.OrderBuilder;
-import ru.prolib.aquila.core.BusinessEntities.OrderException;
-import ru.prolib.aquila.core.BusinessEntities.OrderProcessor;
-import ru.prolib.aquila.core.BusinessEntities.Portfolio;
-import ru.prolib.aquila.core.BusinessEntities.PortfolioException;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.TerminalState;
 
 /**
  * Декоратор терминала.
@@ -47,7 +26,7 @@ public class TerminalDecorator implements EditableTerminal {
 	 * <p>
 	 * @param terminal
 	 */
-	public  void setTerminal(EditableTerminal terminal) {
+	public final void setTerminal(EditableTerminal terminal) {
 		this.terminal = terminal;
 	}
 	
@@ -56,53 +35,53 @@ public class TerminalDecorator implements EditableTerminal {
 	 * <p>
 	 * @return терминал или null, если терминал не задан
 	 */
-	public FirePanicEvent getTerminal() {
+	public final EditableTerminal getTerminal() {
 		return terminal;
 	}
 
 	@Override
-	public  List<Security> getSecurities() {
+	public  final List<Security> getSecurities() {
 		return terminal.getSecurities();
 	}
 
 	@Override
-	public  Security getSecurity(String code, String classCode)
+	public final Security getSecurity(String code, String classCode)
 		throws SecurityException
 	{
 		return terminal.getSecurity(code, classCode);
 	}
 
 	@Override
-	public  Security getSecurity(SecurityDescriptor descr)
+	public final Security getSecurity(SecurityDescriptor descr)
 		throws SecurityException
 	{
 		return terminal.getSecurity(descr);
 	}
 
 	@Override
-	public  Security getSecurity(String code)
+	public final Security getSecurity(String code)
 		throws SecurityException
 	{
 		return terminal.getSecurity(code);
 	}
 
 	@Override
-	public boolean isSecurityExists(String code, String classCode) {
+	public final boolean isSecurityExists(String code, String classCode) {
 		return terminal.isSecurityExists(code, classCode);
 	}
 
 	@Override
-	public  boolean isSecurityExists(String code) {
+	public final boolean isSecurityExists(String code) {
 		return terminal.isSecurityExists(code);
 	}
 
 	@Override
-	public  boolean isSecurityExists(SecurityDescriptor descr) {
+	public final boolean isSecurityExists(SecurityDescriptor descr) {
 		return terminal.isSecurityExists(descr);
 	}
 
 	@Override
-	public  boolean isSecurityAmbiguous(String code) {
+	public final boolean isSecurityAmbiguous(String code) {
 		return terminal.isSecurityAmbiguous(code);
 	}
 
@@ -112,7 +91,7 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public  boolean isPortfolioAvailable(Account account) {
+	public final boolean isPortfolioAvailable(Account account) {
 		return terminal.isPortfolioAvailable(account);
 	}
 
@@ -122,368 +101,374 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public  List<Portfolio> getPortfolios() {
+	public final List<Portfolio> getPortfolios() {
 		return terminal.getPortfolios();
 	}
 
 	@Override
-	public  Portfolio getPortfolio(Account account) throws PortfolioException {
+	public final Portfolio getPortfolio(Account account)
+			throws PortfolioException
+	{
 		return terminal.getPortfolio(account);
 	}
 
 	@Override
-	public void start() throws StarterException {
+	public final void start() throws StarterException {
 		terminal.start();
 	}
 
 	@Override
-	public  boolean started() {
+	public final boolean started() {
 		return terminal.started();
 	}
 
 	@Override
-	public  void stop() throws StarterException {
+	public final void stop() throws StarterException {
 		terminal.stop();
 	}
 
 	@Override
-	public  Portfolio getDefaultPortfolio() throws PortfolioException {
+	public final Portfolio getDefaultPortfolio() throws PortfolioException {
 		return terminal.getDefaultPortfolio();
 	}
 
 	@Override
-	public  boolean isOrderExists(long id) {
+	public final boolean isOrderExists(long id) {
 		return terminal.isOrderExists(id);
 	}
 
 	@Override
-	public  List<Order> getOrders() {
+	public final List<Order> getOrders() {
 		return terminal.getOrders();
 	}
 
 	@Override
-	public  Order getOrder(long id) throws OrderException {
+	public final Order getOrder(long id) throws OrderException {
 		return terminal.getOrder(id);
 	}
 
 	@Override
-	public  EventType OnOrderAvailable() {
+	public final EventType OnOrderAvailable() {
 		return terminal.OnOrderAvailable();
 	}
 
 	@Override
-	public  boolean isStopOrderExists(long id) {
+	public final boolean isStopOrderExists(long id) {
 		return terminal.isStopOrderExists(id);
 	}
 
 	@Override
-	public  List<Order> getStopOrders() {
+	public final List<Order> getStopOrders() {
 		return terminal.getStopOrders();
 	}
 
 	@Override
-	public  Order getStopOrder(long id) throws OrderException {
+	public final Order getStopOrder(long id) throws OrderException {
 		return terminal.getStopOrder(id);
 	}
 
 	@Override
-	public  EventType OnStopOrderAvailable() {
+	public final EventType OnStopOrderAvailable() {
 		return terminal.OnStopOrderAvailable();
 	}
 
 	@Override
-	public Order createMarketOrderB(Account account, Security sec, long qty)
-		throws OrderException
+	public final Order
+		createMarketOrderB(Account account, Security sec, long qty)
+			throws OrderException
 	{
 		return terminal.createMarketOrderB(account, sec, qty);
 	}
 
 	@Override
-	public Order createMarketOrderS(Account account, Security sec, long qty)
-		throws OrderException
+	public final Order
+		createMarketOrderS(Account account, Security sec, long qty)
+			throws OrderException
 	{
 		return terminal.createMarketOrderS(account, sec, qty);
 	}
 
 	@Override
-	public void placeOrder(Order order) throws OrderException {
+	public final void placeOrder(Order order) throws OrderException {
 		terminal.placeOrder(order);
 	}
 
 	@Override
-	public void cancelOrder(Order order) throws OrderException {
+	public final void cancelOrder(Order order) throws OrderException {
 		terminal.cancelOrder(order);
 	}
 
 	@Override
-	public String getDefaultCurrency() {
+	public final String getDefaultCurrency() {
 		return terminal.getDefaultCurrency();
 	}
 
 	@Override
-	public SecurityType getDefaultType() {
+	public final SecurityType getDefaultType() {
 		return terminal.getDefaultType();
 	}
 
 	@Override
-	public int getOrdersCount() {
+	public final int getOrdersCount() {
 		return terminal.getOrdersCount();
 	}
 
 	@Override
-	public EventType OnOrderCancelFailed() {
+	public final EventType OnOrderCancelFailed() {
 		return terminal.OnOrderCancelFailed();
 	}
 
 	@Override
-	public EventType OnOrderCancelled() {
+	public final EventType OnOrderCancelled() {
 		return terminal.OnOrderCancelled();
 	}
 
 	@Override
-	public EventType OnOrderChanged() {
+	public final EventType OnOrderChanged() {
 		return terminal.OnOrderChanged();
 	}
 
 	@Override
-	public EventType OnOrderDone() {
+	public final EventType OnOrderDone() {
 		return terminal.OnOrderDone();
 	}
 
 	@Override
-	public EventType OnOrderFailed() {
+	public final EventType OnOrderFailed() {
 		return terminal.OnOrderFailed();
 	}
 
 	@Override
-	public EventType OnOrderFilled() {
+	public final EventType OnOrderFilled() {
 		return terminal.OnOrderFilled();
 	}
 
 	@Override
-	public EventType OnOrderPartiallyFilled() {
+	public final EventType OnOrderPartiallyFilled() {
 		return terminal.OnOrderPartiallyFilled();
 	}
 
 	@Override
-	public EventType OnOrderRegistered() {
+	public final EventType OnOrderRegistered() {
 		return terminal.OnOrderRegistered();
 	}
 
 	@Override
-	public EventType OnOrderRegisterFailed() {
+	public final EventType OnOrderRegisterFailed() {
 		return terminal.OnOrderRegisterFailed();
 	}
 
 	@Override
-	public EventType OnSecurityChanged() {
+	public final EventType OnSecurityChanged() {
 		return terminal.OnSecurityChanged();
 	}
 
 	@Override
-	public EventType OnSecurityTrade() {
+	public final EventType OnSecurityTrade() {
 		return terminal.OnSecurityTrade();
 	}
 
 	@Override
-	public EventType OnPortfolioChanged() {
+	public final EventType OnPortfolioChanged() {
 		return terminal.OnPortfolioChanged();
 	}
 
 	@Override
-	public EventType OnPositionAvailable() {
+	public final EventType OnPositionAvailable() {
 		return terminal.OnPositionAvailable();
 	}
 
 	@Override
-	public EventType OnPositionChanged() {
+	public final EventType OnPositionChanged() {
 		return terminal.OnPositionChanged();
 	}
 
 	@Override
-	public int getSecuritiesCount() {
+	public final int getSecuritiesCount() {
 		return terminal.getSecuritiesCount();
 	}
 
 	@Override
-	public int getPortfoliosCount() {
+	public final int getPortfoliosCount() {
 		return terminal.getPortfoliosCount();
 	}
 
 	@Override
-	public int getStopOrdersCount() {
+	public final int getStopOrdersCount() {
 		return terminal.getStopOrdersCount();
 	}
 
 	@Override
-	public EventType OnStopOrderChanged() {
+	public final EventType OnStopOrderChanged() {
 		return terminal.OnStopOrderChanged();
 	}
 
 	@Override
-	public EventType OnStopOrderCancelFailed() {
+	public final EventType OnStopOrderCancelFailed() {
 		return terminal.OnStopOrderCancelFailed();
 	}
 
 	@Override
-	public EventType OnStopOrderCancelled() {
+	public final EventType OnStopOrderCancelled() {
 		return terminal.OnStopOrderCancelled();
 	}
 
 	@Override
-	public EventType OnStopOrderDone() {
+	public final EventType OnStopOrderDone() {
 		return terminal.OnStopOrderDone();
 	}
 
 	@Override
-	public EventType OnStopOrderFailed() {
+	public final EventType OnStopOrderFailed() {
 		return terminal.OnStopOrderFailed();
 	}
 
 	@Override
-	public EventType OnStopOrderRegistered() {
+	public final EventType OnStopOrderRegistered() {
 		return terminal.OnStopOrderRegistered();
 	}
 
 	@Override
-	public EventType OnStopOrderRegisterFailed() {
+	public final EventType OnStopOrderRegisterFailed() {
 		return terminal.OnStopOrderRegisterFailed();
 	}
 
 	@Override
-	public void fireOrderAvailableEvent(Order order) {
+	public final void fireOrderAvailableEvent(Order order) {
 		terminal.fireOrderAvailableEvent(order);
 	}
 
 	@Override
-	public EditableOrder getEditableOrder(long id) throws OrderException {
+	public final EditableOrder getEditableOrder(long id) throws OrderException {
 		return terminal.getEditableOrder(id);
 	}
 
 	@Override
-	public void registerOrder(EditableOrder order) throws OrderException {
+	public final void registerOrder(EditableOrder order) throws OrderException {
 		terminal.registerOrder(order);
 	}
 
 	@Override
-	public void purgeOrder(EditableOrder order) {
+	public final void purgeOrder(EditableOrder order) {
 		terminal.purgeOrder(order);
 	}
 
 	@Override
-	public void purgeOrder(long id) {
+	public final void purgeOrder(long id) {
 		terminal.purgeOrder(id);
 	}
 
 	@Override
-	public boolean isPendingOrder(long transId) {
+	public final boolean isPendingOrder(long transId) {
 		return terminal.isPendingOrder(transId);
 	}
 
 	@Override
-	public void registerPendingOrder(EditableOrder order)
+	public final void registerPendingOrder(EditableOrder order)
 		throws OrderException
 	{
 		terminal.registerPendingOrder(order);
 	}
 
 	@Override
-	public void purgePendingOrder(EditableOrder order) {
+	public final void purgePendingOrder(EditableOrder order) {
 		terminal.purgePendingOrder(order);
 	}
 
 	@Override
-	public void purgePendingOrder(long transId) {
+	public final void purgePendingOrder(long transId) {
 		terminal.purgePendingOrder(transId);
 	}
 
 	@Override
-	public EditableOrder getPendingOrder(long transId) {
+	public final EditableOrder getPendingOrder(long transId) {
 		return terminal.getPendingOrder(transId);
 	}
 
 	@Override
-	public void fireStopOrderAvailableEvent(Order order) {
+	public final void fireStopOrderAvailableEvent(Order order) {
 		terminal.fireStopOrderAvailableEvent(order);
 	}
 
 	@Override
-	public EditableOrder getEditableStopOrder(long id)
+	public final EditableOrder getEditableStopOrder(long id)
 		throws OrderException
 	{
 		return terminal.getEditableStopOrder(id);
 	}
 
 	@Override
-	public void registerStopOrder(EditableOrder order)
+	public final void registerStopOrder(EditableOrder order)
 		throws OrderException
 	{
 		terminal.registerStopOrder(order);
 	}
 
 	@Override
-	public void purgeStopOrder(EditableOrder order) {
+	public final void purgeStopOrder(EditableOrder order) {
 		terminal.purgeStopOrder(order);
 	}
 
 	@Override
-	public void purgeStopOrder(long id) {
+	public final void purgeStopOrder(long id) {
 		terminal.purgeStopOrder(id);
 	}
 
 	@Override
-	public boolean isPendingStopOrder(long transId) {
+	public final boolean isPendingStopOrder(long transId) {
 		return terminal.isPendingStopOrder(transId);
 	}
 
 	@Override
-	public void registerPendingStopOrder(EditableOrder order)
+	public final void registerPendingStopOrder(EditableOrder order)
 		throws OrderException
 	{
 		terminal.registerPendingStopOrder(order);
 	}
 
 	@Override
-	public void purgePendingStopOrder(EditableOrder order) {
+	public final void purgePendingStopOrder(EditableOrder order) {
 		terminal.purgePendingStopOrder(order);
 	}
 
 	@Override
-	public void purgePendingStopOrder(long transId) {
+	public final void purgePendingStopOrder(long transId) {
 		terminal.purgePendingStopOrder(transId);
 	}
 
 	@Override
-	public EditableOrder getPendingStopOrder(long transId) {
+	public final EditableOrder getPendingStopOrder(long transId) {
 		return terminal.getPendingStopOrder(transId);
 	}
 
 	@Override
-	public void firePortfolioAvailableEvent(Portfolio portfolio) {
+	public final void firePortfolioAvailableEvent(Portfolio portfolio) {
 		terminal.firePortfolioAvailableEvent(portfolio);
 	}
 
 	@Override
-	public EditablePortfolio getEditablePortfolio(Account account)
+	public final EditablePortfolio getEditablePortfolio(Account account)
 		throws PortfolioException
 	{
 		return terminal.getEditablePortfolio(account);
 	}
 
 	@Override
-	public void registerPortfolio(EditablePortfolio portfolio)
+	public final void registerPortfolio(EditablePortfolio portfolio)
 		throws PortfolioException
 	{
 		terminal.registerPortfolio(portfolio);
 	}
 
 	@Override
-	public void setDefaultPortfolio(EditablePortfolio portfolio) {
+	public final void setDefaultPortfolio(EditablePortfolio portfolio) {
 		terminal.setDefaultPortfolio(portfolio);
 	}
 
 	@Override
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) {
+	public final EditableSecurity
+		getEditableSecurity(SecurityDescriptor descr)
+	{
 		return terminal.getEditableSecurity(descr);
 	}
 
@@ -493,27 +478,27 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public EventType OnConnected() {
+	public final EventType OnConnected() {
 		return terminal.OnConnected();
 	}
 
 	@Override
-	public EventType OnDisconnected() {
+	public final EventType OnDisconnected() {
 		return terminal.OnDisconnected();
 	}
 
 	@Override
-	public void fireTerminalConnectedEvent() {
+	public final void fireTerminalConnectedEvent() {
 		terminal.fireTerminalConnectedEvent();
 	}
 
 	@Override
-	public void fireTerminalDisconnectedEvent() {
+	public final void fireTerminalDisconnectedEvent() {
 		terminal.fireTerminalDisconnectedEvent();
 	}
 
 	@Override
-	public EditableOrder
+	public final EditableOrder
 		makePendingOrderAsRegisteredIfExists(long transId, long orderId)
 			throws OrderException
 	{
@@ -521,7 +506,7 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public EditableOrder
+	public final EditableOrder
 		makePendingStopOrderAsRegisteredIfExists(long transId, long orderId)
 			throws OrderException
 	{
@@ -530,124 +515,124 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public EventType OnStarted() {
+	public final EventType OnStarted() {
 		return terminal.OnStarted();
 	}
 
 	@Override
-	public EventType OnStopped() {
+	public final EventType OnStopped() {
 		return terminal.OnStopped();
 	}
 
 	@Override
-	public EventType OnPanic() {
+	public final EventType OnPanic() {
 		return terminal.OnPanic();
 	}
 
 	@Override
-	public void firePanicEvent(int code, String msgId) {
+	public final void firePanicEvent(int code, String msgId) {
 		terminal.firePanicEvent(code, msgId);
 	}
 
 	@Override
-	public void firePanicEvent(int code, String msgId, Object[] args) {
+	public final void firePanicEvent(int code, String msgId, Object[] args) {
 		terminal.firePanicEvent(code, msgId, args);
 	}
 
 	@Override
-	public OrderProcessor getOrderProcessorInstance() {
+	public final OrderProcessor getOrderProcessorInstance() {
 		return terminal.getOrderProcessorInstance();
 	}
 
 	@Override
-	public OrderBuilder getOrderBuilderInstance() {
+	public final OrderBuilder getOrderBuilderInstance() {
 		return terminal.getOrderBuilderInstance();
 	}
 
 	@Override
-	public EditableSecurities getSecuritiesInstance() {
+	public final EditableSecurities getSecuritiesInstance() {
 		return terminal.getSecuritiesInstance();
 	}
 
 	@Override
-	public EditablePortfolios getPortfoliosInstance() {
+	public final EditablePortfolios getPortfoliosInstance() {
 		return terminal.getPortfoliosInstance();
 	}
 
 	@Override
-	public EditableOrders getOrdersInstance() {
+	public final EditableOrders getOrdersInstance() {
 		return terminal.getOrdersInstance();
 	}
 
 	@Override
-	public EditableOrders getStopOrdersInstance() {
+	public final EditableOrders getStopOrdersInstance() {
 		return terminal.getStopOrdersInstance();
 	}
 
 	@Override
-	public boolean stopped() {
+	public final boolean stopped() {
 		return terminal.stopped();
 	}
 
 	@Override
-	public boolean connected() {
+	public final boolean connected() {
 		return terminal.connected();
 	}
 
 	@Override
-	public TerminalState getTerminalState() {
+	public final TerminalState getTerminalState() {
 		return terminal.getTerminalState();
 	}
 
 	@Override
-	public Starter getStarter() {
+	public final Starter getStarter() {
 		return terminal.getStarter();
 	}
 
 	@Override
-	public void fireTerminalStartedEvent() {
+	public final void fireTerminalStartedEvent() {
 		terminal.fireTerminalStartedEvent();
 	}
 
 	@Override
-	public void fireTerminalStoppedEvent() {
+	public final void fireTerminalStoppedEvent() {
 		terminal.fireTerminalStoppedEvent();
 	}
 
 	@Override
-	public void setTerminalState(TerminalState state) {
+	public final void setTerminalState(TerminalState state) {
 		terminal.setTerminalState(state);
 	}
 
 	@Override
-	public EventType OnStopOrderFilled() {
+	public final EventType OnStopOrderFilled() {
 		return terminal.OnStopOrderFilled();
 	}
 
 	@Override
-	public Order createLimitOrderB(Account account, Security sec, long qty,
-			double price) throws OrderException
+	public final Order createLimitOrderB(Account account, Security sec,
+			long qty, double price) throws OrderException
 	{
 		return terminal.createLimitOrderB(account, sec, qty, price);
 	}
 
 	@Override
-	public Order createLimitOrderS(Account account, Security sec, long qty,
-			double price) throws OrderException
+	public final Order createLimitOrderS(Account account, Security sec,
+			long qty, double price) throws OrderException
 	{
 		return terminal.createLimitOrderS(account, sec, qty, price);
 	}
 
 	@Override
-	public Order createStopLimitB(Account account, Security sec, long qty,
-			double stopPrice, double price) throws OrderException
+	public final Order createStopLimitB(Account account, Security sec,
+			long qty, double stopPrice, double price) throws OrderException
 	{
 		return terminal.createStopLimitB(account, sec, qty, stopPrice, price);
 	}
 
 	@Override
-	public Order createStopLimitS(Account account, Security sec, long qty,
-			double stopPrice, double price) throws OrderException
+	public final Order createStopLimitS(Account account, Security sec,
+			long qty, double stopPrice, double price) throws OrderException
 	{
 		return terminal.createStopLimitS(account, sec, qty, stopPrice, price);
 	}
