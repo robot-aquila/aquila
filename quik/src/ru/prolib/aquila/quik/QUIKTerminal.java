@@ -9,7 +9,7 @@ import ru.prolib.aquila.quik.dde.Cache;
  * Определяет дополнительные методы доступа к специфическим механизмам
  * реализации.
  */
-interface QUIKTerminal extends Terminal {
+public interface QUIKTerminal extends Terminal {
 	
 	/**
 	 * Получить кэш DDE.

@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik.dde;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -69,6 +70,21 @@ public class OrdersCacheTest {
 		assertSame(order2, cache.get(102L));
 		cache.put(order4);
 		assertSame(order4, cache.get(102L));
+	}
+	
+	@Test
+	public void testGetAll() throws Exception {
+		control.replay();
+		cache.put(order1);
+		cache.put(order3);
+		
+		List<OrderCache> expected = new LinkedList<OrderCache>();
+		expected.add(order1);
+		expected.add(order3);
+		
+		List<OrderCache> actual = cache.getAll();
+		control.verify();
+		assertEquals(expected, actual);
 	}
 	
 	@Test

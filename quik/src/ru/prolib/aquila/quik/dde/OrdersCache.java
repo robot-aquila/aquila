@@ -1,7 +1,6 @@
 package ru.prolib.aquila.quik.dde;
 
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.*;
 
@@ -13,13 +12,13 @@ public class OrdersCache extends MirrorCache {
 	
 	public OrdersCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super(dispatcher, onUpdate);
-		cache = new Hashtable<Long, OrderCache>();
+		cache = new LinkedHashMap<Long, OrderCache>();
 	}
 	
 	/**
 	 * Очистить кэш.
 	 */
-	public void clear() {
+	public synchronized void clear() {
 		cache.clear();
 	}
 	
@@ -29,8 +28,17 @@ public class OrdersCache extends MirrorCache {
 	 * @param orderId номер заявки
 	 * @return кэш-запись или null, если заявки с таким номером нет в кэше
 	 */
-	public OrderCache get(Long orderId) {
+	public synchronized OrderCache get(Long orderId) {
 		return cache.get(orderId);
+	}
+	
+	/**
+	 * Получить все кэш-записи.
+	 * <p>
+	 * @return 
+	 */
+	public synchronized List<OrderCache> getAll() {
+		return new LinkedList<OrderCache>(cache.values());
 	}
 	
 	/**
@@ -38,7 +46,7 @@ public class OrdersCache extends MirrorCache {
 	 * <p>
 	 * @param order кэш-запись
 	 */
-	public void put(OrderCache order) {
+	public synchronized void put(OrderCache order) {
 		cache.put(order.getId(), order);
 	}
 	
