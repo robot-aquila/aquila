@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.*;
 import ru.prolib.aquila.quik.api.*;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.*;
 import ru.prolib.aquila.quik.subsys.row.RowAdapters;
 import ru.prolib.aquila.t2q.*;
@@ -28,6 +28,7 @@ public class QUIKFactory implements TerminalFactory {
 	public static final String DEFAULT_DDE_SERVER;
 	public static final String DEFAULT_T2Q_FACTORY;
 	
+	@SuppressWarnings("unused")
 	private static final Logger logger;
 	
 	static {
@@ -97,7 +98,8 @@ public class QUIKFactory implements TerminalFactory {
 	 * @return терминал
 	 * @throws Exception ошибка инстанцирования
 	 */
-	public Terminal createTerminal(Properties props) throws Exception {
+	@Override
+	public QUIKTerminal createTerminal(Properties props) throws Exception {
 		QUIKConfigImpl config = new QUIKConfigImpl();
 		config.allDeals = props.getProperty("deals", "deals");
 		config.orders = props.getProperty("orders", "orders");
@@ -127,7 +129,7 @@ public class QUIKFactory implements TerminalFactory {
 	 * @return терминал
 	 * @throws Exception ошибка инстанцирования
 	 */
-	public Terminal createTerminal(QUIKConfig config) throws Exception {
+	public QUIKTerminal createTerminal(QUIKConfig config) throws Exception {
 		return createTerminal(config, createDefaultDDEServer(), true,
 				createDefaultT2QServiceFactory());
 	}
@@ -144,7 +146,7 @@ public class QUIKFactory implements TerminalFactory {
 	 * @param tsf фабрика сервиса транзакций
 	 * @return терминал
 	 */
-	public Terminal createTerminal(QUIKConfig config, DDEServer server,
+	public QUIKTerminal createTerminal(QUIKConfig config, DDEServer server,
 			T2QServiceFactory tsf)
 	{
 		return createTerminal(config, server, false, tsf);
@@ -162,33 +164,25 @@ public class QUIKFactory implements TerminalFactory {
 	 * @param tsf фабрика сервиса транзакций
 	 * @return терминал
 	 */
-	public Terminal createTerminal(QUIKConfig config,
+	public QUIKTerminal createTerminal(QUIKConfig config,
 			final DDEServer server, boolean startServer,
 			T2QServiceFactory tsf)
 	{
-		TerminalDecorator decorator = new TerminalDecorator();
+		QUIKTerminalImpl decorator = new QUIKTerminalImpl();
 		QUIKServiceLocator locator = new QUIKServiceLocator(decorator);
+		decorator.setServiceLocator(locator);
 		locator.setConfig(config);
-		
 		EventSystem es = locator.getEventSystem();
-		DDEObservableServiceImpl service = DDEObservableServiceImpl
-			.createService(config.getServiceName(), es);
-		
 		QUIKCompFactory fc = locator.getCompFactory();
-		
-		
 		StarterQueue starter = new StarterQueue();
 		starter.add(new EventQueueStarter(es.getEventQueue(), 10000));
 		
-		// DDE
-		starter.add(new QUIKTableListenerStarter(locator, service));
-		if ( startServer ) {
-			logger.debug("Add DDE server to start queue");
-			starter.add(new DDEServerStarter(server));
-		} else {
-			logger.debug("DDE server not added to start queue");
-		}
 		
+		// Old DDE table listeners starts before all
+		DDEService service = createDdeService(locator, starter);
+		// DDE server starts after listeners
+		if ( startServer ) starter.add(new DDEServerStarter(server));
+		// DDE service starts after server started
 		starter.add(new DDEServiceStarter(server, service));
 		
 		// Make terminal instance
@@ -229,6 +223,36 @@ public class QUIKFactory implements TerminalFactory {
 		}
 		
 		return decorator;
+	}
+	
+	/**
+	 * Создать DDE-сервис обработки импорта данных.
+	 * <p>
+	 * @param locator сервис-локатор
+	 * @param starter необходим для запуска старого сервиса, убрать после
+	 * перехода на кэш
+	 * @return сервис DDE
+	 */
+	private DDEService
+		createDdeService(QUIKServiceLocator locator, StarterQueue starter)
+	{
+		QUIKConfig config = locator.getConfig();
+		// Current implementation still in use
+		DDEObservableServiceImpl observService = DDEObservableServiceImpl
+			.createService(config.getServiceName(),
+					locator.getEventSystem());
+		starter.add(new QUIKTableListenerStarter(locator, observService));
+		
+		// Start prototype of DDE cache
+		CacheService service = new CacheService(config.getServiceName(),
+				locator.getTerminal(), observService);
+		RowDataConverter conv = new RowDataConverter(config.getDateFormat(),
+				config.getTimeFormat());
+		Cache cache = locator.getDdeCache();
+		service.setHandler(config.getOrders(),
+			new MirrorTableHandler(
+				new OrdersGateway(cache.getOrdersCache(), conv)));
+		return service;
 	}
 	
 	private ApiServiceHandler createApiHandler(EventSystem es) {
