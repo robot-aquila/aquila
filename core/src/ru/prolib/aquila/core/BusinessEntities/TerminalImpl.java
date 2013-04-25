@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -827,6 +828,11 @@ public class TerminalImpl implements EditableTerminal {
 			long qty, double stopPrice, double price) throws OrderException
 	{
 		return orderBuilder.createStopLimitS(account,sec,qty,stopPrice,price);
+	}
+
+	@Override
+	public Date getCurrentTime() {
+		return new Date();
 	}
 
 }

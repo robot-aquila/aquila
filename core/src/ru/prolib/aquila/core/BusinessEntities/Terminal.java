@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.Date;
+
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.Starter;
 
@@ -144,5 +146,12 @@ public interface Terminal extends Securities, Portfolios, Starter, Orders,
 	 * @return тип события
 	 */
 	public EventType OnPanic();
+	
+	/**
+	 * Получить текущее время.
+	 * <p>
+	 * @return время актуальности состояния терминала
+	 */
+	public Date getCurrentTime();
 
 }

@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -1166,6 +1167,17 @@ public class TerminalDecoratorTest {
 		
 		assertSame(order,
 				decorator.createStopLimitS(account, sec, 10, 129.86d, 128.0d));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetCurrentTime() throws Exception {
+		Date time = new Date();
+		expect(terminal.getCurrentTime()).andReturn(time);
+		control.replay();
+		
+		assertSame(time, decorator.getCurrentTime());
 		
 		control.verify();
 	}

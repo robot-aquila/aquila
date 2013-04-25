@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
+import java.util.Date;
 import java.util.List;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -635,6 +636,11 @@ public class TerminalDecorator implements EditableTerminal {
 			long qty, double stopPrice, double price) throws OrderException
 	{
 		return terminal.createStopLimitS(account, sec, qty, stopPrice, price);
+	}
+
+	@Override
+	public final Date getCurrentTime() {
+		return terminal.getCurrentTime();
 	}
 
 }

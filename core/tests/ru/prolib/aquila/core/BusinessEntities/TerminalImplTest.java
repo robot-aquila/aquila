@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -1338,6 +1339,11 @@ public class TerminalImplTest {
 				terminal.createStopLimitS(account, sec, 10, 230.05d, 215.d));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testGetCurrentTime() throws Exception {
+		assertEquals(new Date(), terminal.getCurrentTime());
 	}
 	
 }
