@@ -23,8 +23,8 @@ public class ActiveTrades {
 	private final EventType onReportClosed;
 	private final EventType onReportChanged;
 	
-	public ActiveTrades(EventDispatcher dispatcher, EventType onOpened, EventType onClosed, 
-			EventType onChanged) 
+	public ActiveTrades(EventDispatcher dispatcher, EventType onOpened, 
+			EventType onClosed, EventType onChanged) 
 	{
 		this.dispatcher = dispatcher;
 		onReportOpened = onOpened;
@@ -52,42 +52,31 @@ public class ActiveTrades {
 		TradeReport report = trades.get(trade.getSecurityDescriptor());
 		if(report == null) {
 			report = openTradeReport(trade);
+		} else {
+			if(report.canAppendToReport(trade)) {
+				report.addTrade(trade);
+				if(report.isOpen()) {
+					fireReportChanged(report);
+				}else {
+					closeTradeReport(report);
+				}
+			}else {
+				Trade trade1 = copyTrade(trade);
+				Trade trade2 = copyTrade(trade);
+				
+				trade1.setQty(report.getQty());
+				trade1.setVolume(trade.getVolume()/trade.getQty()*trade1.getQty());
+				
+				trade2.setQty(trade.getQty()-report.getQty());
+				trade2.setVolume(trade.getVolume()/trade.getQty()*trade2.getQty());
+				
+				report.addTrade(trade1);
+				closeTradeReport(report);
+				
+				report = openTradeReport(trade2);
+			}
 		}
-		if(report.canAppendToReport(trade)) {
-			report.addTrade(trade);
-		}else {
-			Trade trade1 = new Trade(trade.getTerminal());
-			Trade trade2 = new Trade(trade.getTerminal());
-			trade1.setDirection(trade.getDirection());
-			trade2.setDirection(trade.getDirection());
-			trade1.setSecurityDescriptor(trade.getSecurityDescriptor());
-			trade2.setSecurityDescriptor(trade.getSecurityDescriptor());
-			trade1.setTime(trade.getTime());
-			trade2.setTime(trade.getTime());
-			trade1.setPrice(trade.getPrice());
-			trade2.setPrice(trade.getPrice());
-			
-			trade1.setQty(report.getQty());
-			trade1.setVolume(trade.getVolume()/trade.getQty()*trade1.getQty());
-			
-			trade2.setQty(trade.getQty()-report.getQty());
-			trade2.setVolume(trade.getVolume()/trade.getQty()*trade2.getQty());
-			
-			report.addTrade(trade1);
-			closeTradeReport(report);
-			
-			report = openTradeReport(trade2);
-			report.addTrade(trade2);
-		}
-		if(! trades.containsValue(report)) {
-			trades.put(report.getSecurity(), report);
-			fireReportOpened(report);
-		}
-		if(report.isOpen()) {
-			fireReportChanged(report);
-		}else {
-			closeTradeReport(report);
-		}
+		
 	}
 	
 	public TradeReport getReport(SecurityDescriptor descr) {
@@ -114,14 +103,27 @@ public class ActiveTrades {
 		dispatcher.dispatch(new TradeReportEvent(onReportChanged, report));
 	}
 	
-	private TradeReport openTradeReport(Trade trade) {
+	private TradeReport openTradeReport(Trade trade) throws TradeReportException {
 		PositionType type = trade.getDirection() == OrderDirection.BUY? 
 				PositionType.LONG : PositionType.SHORT;
-		return new TradeReport(type, trade.getSecurityDescriptor());		
+		TradeReport report = new TradeReport(type, trade.getSecurityDescriptor());
+		trades.put(report.getSecurity(), report);
+		fireReportOpened(report);
+		report.addTrade(trade);
+		return report;
 	}
 	
 	private void closeTradeReport(TradeReport report) {
 		trades.remove(report.getSecurity());
 		fireReportClosed(report);
+	}
+	
+	private Trade copyTrade(Trade trade) {
+		Trade trade1 = new Trade(trade.getTerminal());
+		trade1.setDirection(trade.getDirection());
+		trade1.setSecurityDescriptor(trade.getSecurityDescriptor());
+		trade1.setTime(trade.getTime());
+		trade1.setPrice(trade.getPrice());
+		return trade1;
 	}
 }

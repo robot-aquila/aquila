@@ -91,21 +91,41 @@ public class ActiveTradesTest {
 	public void testGetReport_NotFound() {
 		assertNull(trades.getReport(descr));
 	}
-	/*
-	 * Что то тут не понятно, как оттестировать, 
-	 * что действительно оба собития случились
-	 */
+	
+	@Test
+	public void testAddTrade_CloseReport() throws Exception {
+		final CountDownLatch finished = new CountDownLatch(1);
+		
+		trades.OnReportClosed().addListener(new EventListener() {
+
+			@Override
+			public void onEvent(Event event) {
+				finished.countDown();				
+			}			
+		});
+		Trade trade = createTrade(descr, OrderDirection.SELL, new Date(), 100L, 35.00d, 200.00d);
+		trades.addTrade(trade);
+		
+		assertEquals(1, trades.getReports().size());
+		
+		trade = createTrade(descr, OrderDirection.BUY, new Date(), 100L, 35.00d, 200.00d);
+		trades.addTrade(trade);
+		
+		assertEquals(0, trades.getReports().size());
+		assertNull(trades.getReport(descr));
+		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
+	}
+
 	@Test
 	public void testAddTrade_ReverseType() throws Exception {
-		final CountDownLatch finished = new CountDownLatch(2);
+		final CountDownLatch finished = new CountDownLatch(3);
 		trades.OnReportClosed().addListener(new EventListener() {
 
 			@Override
 			public void onEvent(Event event) {
 				TradeReportEvent e = (TradeReportEvent) event;
-				TradeReport report = e.getTradeReport();
+				final TradeReport report = e.getTradeReport();
 				assertFalse(report.isOpen());
-				assertNull(trades.getReport(descr));
 				finished.countDown();
 			}			
 		});
@@ -114,32 +134,20 @@ public class ActiveTradesTest {
 			@Override
 			public void onEvent(Event event) {
 				TradeReportEvent e = (TradeReportEvent) event;
-				TradeReport report = e.getTradeReport();
-				assertEquals(report, trades.getReport(descr));				
-				finished.countDown();				
+				final TradeReport report = e.getTradeReport();
+				assertEquals(report, trades.getReport(descr));
+				finished.countDown();
 			}
 			
 		});
-		Trade trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.BUY);
-		trade.setPrice(35.00d);
-		trade.setQty(100L);
-		trade.setVolume(200.00d);		
+		Trade trade = createTrade(descr, OrderDirection.BUY, new Date(), 100L, 35.00d, 200.00d);
 		
 		trades.addTrade(trade);
 		
 		TradeReport report = trades.getReport(descr);
 		assertEquals(PositionType.LONG, report.getType());
 		
-		trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.SELL);
-		trade.setPrice(35.00d);
-		trade.setQty(200L);
-		trade.setVolume(400.00d);
+		trade = createTrade(descr, OrderDirection.SELL, new Date(), 200L, 35.00d, 400.00d);
 		
 		trades.addTrade(trade);
 		
@@ -148,7 +156,7 @@ public class ActiveTradesTest {
 		assertEquals((Double) 35.00d, report.getAverageOpenPrice());
 		assertEquals((Long) 100L, report.getQty());
 		assertEquals((Double) 200.00d, report.getOpenVolume());
-		
+
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 	}
 	
@@ -168,23 +176,10 @@ public class ActiveTradesTest {
 			
 		});
 		
-		Trade trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.BUY);
-		trade.setPrice(35.00d);
-		trade.setQty(102L);
-		trade.setVolume(350.00d);
-		
+		Trade trade = createTrade(descr, OrderDirection.BUY, new Date(), 102L, 35.00d, 350.00d);
 		trades.addTrade(trade);
 		
-		trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.BUY);
-		trade.setPrice(35.00d);
-		trade.setQty(44L);
-		trade.setVolume(150.00d);
+		trade = createTrade(descr, OrderDirection.BUY, new Date(), 44L, 35.00d, 150.00d);
 		
 		trades.addTrade(trade);
 		
@@ -197,25 +192,13 @@ public class ActiveTradesTest {
 	}
 	
 	@Test
-	public void testGetReports() throws Exception {
-		Trade trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.BUY);
-		trade.setPrice(35.00d);
-		trade.setQty(102L);
-		trade.setVolume(350.00d);
+	public void testGetReports_TwoDescriptors() throws Exception {
+		Trade trade = createTrade(descr, OrderDirection.BUY, new Date(), 102L, 35.00d, 350.00d);
 		
 		trades.addTrade(trade);
 		
-		trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(
-				new SecurityDescriptor("Bar", "BarClass", "Foo", SecurityType.UNK));
-		trade.setDirection(OrderDirection.SELL);
-		trade.setPrice(85.00d);
-		trade.setQty(44L);
-		trade.setVolume(500.00d);
+		trade = createTrade(new SecurityDescriptor("Bar", "BarClass", "Foo", SecurityType.UNK),
+				OrderDirection.SELL, new Date(), 44L, 85.00d, 500.00d);
 		
 		trades.addTrade(trade);
 		
@@ -225,13 +208,7 @@ public class ActiveTradesTest {
 	
 	@Test
 	public void testAddTrade_NewReport() throws Exception {
-		Trade trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.BUY);
-		trade.setPrice(35.00d);
-		trade.setQty(102L);
-		trade.setVolume(350.00d);
+		Trade trade = createTrade(descr, OrderDirection.BUY, new Date(), 102L, 35.00d, 350.00d);
 		
 		final CountDownLatch finished = new CountDownLatch(1);
 		
@@ -262,5 +239,17 @@ public class ActiveTradesTest {
 		assertEquals(onClosed, trades.OnReportClosed());
 		assertEquals(onChanged, trades.OnReportChanged());
 	}
-
+	
+	private Trade createTrade(SecurityDescriptor descr, OrderDirection dir,Date date, 
+			Long qty, Double price, Double volume)
+	{
+		Trade trade = new Trade(terminal);
+		trade.setTime(date);
+		trade.setSecurityDescriptor(descr);
+		trade.setDirection(dir);
+		trade.setPrice(price);
+		trade.setQty(qty);
+		trade.setVolume(volume);
+		return trade;
+	}
 }

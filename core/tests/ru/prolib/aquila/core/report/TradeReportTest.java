@@ -42,20 +42,28 @@ public class TradeReportTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-	}	
+	}
+	
+	@Test
+	public void testGetUncoveredQty() throws Exception {
+		TradeReport report = new TradeReport(PositionType.LONG, descr);
+		Trade trade = createTrade(
+				descr, OrderDirection.BUY, new Date(), 120L, 3.00d, 350.00d);
+		report.addTrade(trade);
+		
+		trade = createTrade(
+				descr, OrderDirection.SELL, new Date(), 70L, 3.00d, 350.00d);
+		report.addTrade(trade);
+		assertEquals((Long) 50L, report.getUncoveredQty());
+	}
 	
 	
 	@Test(expected=TradeReportException.class)
 	public void testAddTrade_ThrowsIfInvalidSecurity() throws TradeReportException {
 		Date date = new Date();
-		Trade trade = new Trade(terminal);
-		trade.setTime(date);
-		trade.setSecurityDescriptor(
-				new SecurityDescriptor("Bar", "BarClass", "Foo", SecurityType.UNK));
-		trade.setDirection(OrderDirection.BUY);
-		trade.setPrice(35.00d);
-		trade.setQty(102L);
-		trade.setVolume(350.00d);
+		Trade trade = createTrade(
+				new SecurityDescriptor("Bar", "BarClass", "Foo", SecurityType.UNK),
+				OrderDirection.BUY, date, 102L, 35.00d, 350.00d);
 		
 		TradeReport report = new TradeReport(PositionType.LONG, descr);
 		report.addTrade(trade);		
@@ -64,24 +72,12 @@ public class TradeReportTest {
 	@Test(expected=TradeReportException.class)
 	public void testAddTrade_LongThrowsIfQtyTooBig() throws TradeReportException {
 		Date date = new Date();
-		Trade trade = new Trade(terminal);
-		trade.setTime(date);
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.BUY);
-		trade.setPrice(35.00d);
-		trade.setQty(102L);
-		trade.setVolume(350.00d);
+		Trade trade = createTrade(descr, OrderDirection.BUY, date, 102L, 35.00d, 350.00d);
 		
 		TradeReport report = new TradeReport(PositionType.LONG, descr);
 		report.addTrade(trade);		
 		
-		trade = new Trade(terminal);
-		trade.setTime(date);
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.SELL);
-		trade.setPrice(38.00d);
-		trade.setQty(103L);
-		trade.setVolume(200.00d);
+		trade = createTrade(descr, OrderDirection.SELL, date, 103L, 38.00d, 200.00d);
 		
 		report.addTrade(trade);
 	}
@@ -124,13 +120,7 @@ public class TradeReportTest {
 				OrderDirection.BUY : OrderDirection.SELL;
 		
 		Date date = new Date();
-		Trade trade = new Trade(terminal);
-		trade.setTime(date);
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(dir);
-		trade.setPrice(35.12d);
-		trade.setQty(102L);
-		trade.setVolume(350.00d);
+		Trade trade = createTrade(descr, dir, date, 102L, 35.12d, 350.00d);
 		
 		TradeReport report = new TradeReport(type, descr);		
 		report.addTrade(trade);
@@ -144,13 +134,7 @@ public class TradeReportTest {
 		assertEquals((Double) 0.00d, report.getCloseVolume());
 		assertTrue(report.isOpen());
 		
-		trade = new Trade(terminal);
-		trade.setTime(new Date());
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(dir);
-		trade.setPrice(30.12d);
-		trade.setQty(102L);
-		trade.setVolume(340.00d);
+		trade = createTrade(descr, dir, new Date(), 102L, 30.12d, 340.00d);
 		
 		report.addTrade(trade);
 		
@@ -172,48 +156,42 @@ public class TradeReportTest {
 				OrderDirection.SELL : OrderDirection.BUY;
 		
 		Date date = new Date();
-		Trade trade = new Trade(terminal);
-		trade.setTime(date);
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(openDir);
-		trade.setPrice(35.00d);
-		trade.setQty(102L);
-		trade.setVolume(350.00d);
+		
+		Trade trade = createTrade(descr, openDir, date, 102L, 35.00d, 130.00d);
 		
 		TradeReport report = new TradeReport(type, descr);
 		report.addTrade(trade);		
 		
-		trade = new Trade(terminal);
-		trade.setTime(date);
-		trade.setSecurityDescriptor(descr);
-		trade.setDirection(closeDir);
-		trade.setPrice(38.00d);
-		trade.setQty(51L);
-		trade.setVolume(200.00d);
-		
+		trade = createTrade(descr, closeDir, date, 51L, 38.00d, 200.00d);
 		report.addTrade(trade);
 		
 		assertNull(report.getCloseTime());
-		assertEquals((Long) 51L, report.getQty());
+		assertEquals((Long) 102L, report.getQty());
 		assertEquals((Double) 38.00d, report.getAverageClosePrice());
 		assertEquals((Double) 200.00d, report.getCloseVolume());
 		
 		Date date2 = new Date();
-		trade = new Trade(terminal);
-		trade.setDirection(closeDir);
-		trade.setSecurityDescriptor(descr);
-		trade.setTime(date2);
-		trade.setQty(51L);
-		trade.setPrice(39.00d);
-		trade.setVolume(150.00d);
-		
+		trade = createTrade(descr, closeDir, date2, 51L, 39.00d, 150.00d);
 		report.addTrade(trade);
 		
 		assertFalse(report.isOpen());
 		assertEquals(date2, report.getCloseTime());
-		assertEquals((Long) 0L, report.getQty());
+		assertEquals((Long) 102L, report.getQty());
 		assertEquals((Double) 350.00d, report.getCloseVolume());
 		assertEquals((Double) 38.50d, report.getAverageClosePrice());
+	}
+	
+	private Trade createTrade(SecurityDescriptor descr, OrderDirection dir,Date date, 
+			Long qty, Double price, Double volume)
+	{
+		Trade trade = new Trade(terminal);
+		trade.setTime(date);
+		trade.setSecurityDescriptor(descr);
+		trade.setDirection(dir);
+		trade.setPrice(price);
+		trade.setQty(qty);
+		trade.setVolume(volume);
+		return trade;
 	}
 
 }

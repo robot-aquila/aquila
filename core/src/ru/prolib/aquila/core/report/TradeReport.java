@@ -49,6 +49,10 @@ public class TradeReport {
 	}
 	
 	public Long getQty() {
+		return openQty;
+	}
+	
+	public Long getUncoveredQty() {
 		return openQty - closeQty;
 	}
 	
@@ -94,11 +98,11 @@ public class TradeReport {
 		boolean valid = true;		
 		if(type == PositionType.LONG) {
 			if(trade.getDirection() == OrderDirection.SELL) {
-				valid = (trade.getQty() <= getQty());
+				valid = (trade.getQty() <= getUncoveredQty());
 			}
 		} else {
 			if(trade.getDirection() == OrderDirection.BUY) {
-				valid = (trade.getQty() <= getQty());
+				valid = (trade.getQty() <= getUncoveredQty());
 			}
 		}
 		return valid;
