@@ -14,21 +14,21 @@ import java.util.Vector;
  * $Id: SetupPositionsImpl.java 406 2013-01-11 10:08:56Z whirlwind $
  */
 public class SetupPositionsImpl implements SetupPositions {
-	private final Map<SecurityDescriptor, SetupPositionImpl> map;
+	private final Map<SecurityDescriptor, SetupPosition> map;
 	
 	/**
 	 * Конструктор.
 	 */
 	public SetupPositionsImpl() {
 		super();
-		map = new LinkedHashMap<SecurityDescriptor, SetupPositionImpl>();
+		map = new LinkedHashMap<SecurityDescriptor, SetupPosition>();
 	}
 
 	@Override
 	public synchronized SetupPosition getPosition(SecurityDescriptor descr) {
-		SetupPositionImpl setup = map.get(descr);
+		SetupPosition setup = map.get(descr);
 		if ( setup == null ) {
-			setup = new SetupPositionImpl(descr);
+			setup = new SetupPosition(descr);
 			map.put(descr, setup);
 		}
 		return setup;
@@ -59,8 +59,8 @@ public class SetupPositionsImpl implements SetupPositions {
 	@Override
 	public synchronized SetupPositionsImpl clone() {
 		SetupPositionsImpl copy = new SetupPositionsImpl();
-		Iterator<Map.Entry<SecurityDescriptor, SetupPositionImpl>> iterator;
-		Map.Entry<SecurityDescriptor, SetupPositionImpl> entry;
+		Iterator<Map.Entry<SecurityDescriptor, SetupPosition>> iterator;
+		Map.Entry<SecurityDescriptor, SetupPosition> entry;
 		iterator = map.entrySet().iterator();
 		while ( iterator.hasNext() ) {
 			entry = iterator.next();

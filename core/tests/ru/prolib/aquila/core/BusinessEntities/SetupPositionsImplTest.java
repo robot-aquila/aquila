@@ -36,8 +36,8 @@ public class SetupPositionsImplTest {
 	public void testGetPosition() throws Exception {
 		SetupPosition	sp1 = setup.getPosition(descr1),
 						sp2 = setup.getPosition(descr2);
-		assertEquals(new SetupPositionImpl(descr1), sp1);
-		assertEquals(new SetupPositionImpl(descr2), sp2);
+		assertEquals(new SetupPosition(descr1), sp1);
+		assertEquals(new SetupPosition(descr2), sp2);
 		assertNotSame(sp1, sp2);
 		assertSame(sp1, setup.getPosition(descr1));
 		assertSame(sp2, setup.getPosition(descr2));
@@ -47,9 +47,9 @@ public class SetupPositionsImplTest {
 	public void testRemovePosition() throws Exception {
 		SetupPosition sp1 = setup.getPosition(descr1);
 		sp1.setQuota(new Price(PriceUnit.PERCENT, 120.0d));
-		sp1.setType(PositionType.SHORT);
+		sp1.setTarget(PositionType.SHORT);
 		setup.removePosition(descr1);
-		assertEquals(new SetupPositionImpl(descr1), setup.getPosition(descr1));
+		assertEquals(new SetupPosition(descr1), setup.getPosition(descr1));
 	}
 	
 	@Test
@@ -101,7 +101,7 @@ public class SetupPositionsImplTest {
 	@Test
 	public void testClone() throws Exception {
 		setup.getPosition(descr1).setQuota(new Price(PriceUnit.PERCENT, 10.0d));
-		setup.getPosition(descr2).setType(PositionType.SHORT);
+		setup.getPosition(descr2).setTarget(PositionType.SHORT);
 		
 		SetupPositions clone = setup.clone();
 		assertEquals(setup, clone);

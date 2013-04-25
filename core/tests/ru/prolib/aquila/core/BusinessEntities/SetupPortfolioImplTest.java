@@ -80,9 +80,9 @@ public class SetupPortfolioImplTest {
 	@Test
 	public void testHashChanged() throws Exception {
 		assertFalse(setup.hasChanged());
-		initial.getPosition(descr1).setType(PositionType.CLOSE);
+		initial.getPosition(descr1).setTarget(PositionType.CLOSE);
 		assertTrue(setup.hasChanged());
-		setup.getPosition(descr1).setType(PositionType.CLOSE);
+		setup.getPosition(descr1).setTarget(PositionType.CLOSE);
 		assertFalse(setup.hasChanged());
 		setup.removePosition(descr1);
 		assertTrue(setup.hasChanged());
