@@ -17,5 +17,9 @@ public class TradeReportEvent extends EventImpl {
 		super(type);
 		this.report = report;
 	}
+	
+	public TradeReport getTradeReport() {
+		return report;
+	}
 
 }
