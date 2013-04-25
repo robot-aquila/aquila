@@ -26,7 +26,7 @@ public class TradeReport {
 	public TradeReport(PositionType type, SecurityDescriptor descr) {
 		this.type = type;		
 		this.descr = descr;
-	}	
+	}
 	
 	public PositionType getType() {
 		return type;
@@ -66,7 +66,10 @@ public class TradeReport {
 	
 	public void addTrade(Trade trade) throws TradeReportException {
 		if(!canAppendToReport(trade)) {
-			throw new TradeReportException("Trade Qty is too big!");
+			throw new TradeReportException("Can't append trade to report!");
+		}
+		if(trade.getSecurityDescriptor() != descr) {
+			throw new TradeReportException("Invalid SecurityDescriptor!");
 		}
 		if(type == PositionType.LONG) {
 			if(trade.getDirection() == OrderDirection.BUY) {
@@ -88,24 +91,23 @@ public class TradeReport {
 	}
 	
 	public boolean canAppendToReport(Trade trade) {
-		boolean valid = true;
+		boolean valid = true;		
 		if(type == PositionType.LONG) {
 			if(trade.getDirection() == OrderDirection.SELL) {
-				valid = (trade.getQty() < getUncoveredQty());
+				valid = (trade.getQty() <= getQty());
 			}
 		} else {
 			if(trade.getDirection() == OrderDirection.BUY) {
-				valid = (trade.getQty() < getUncoveredQty());
+				valid = (trade.getQty() <= getQty());
 			}
 		}
 		return valid;
 	}
 	
-	public Long getUncoveredQty() {
-		return openQty - closeQty;
-	}
-	
 	private void addToOpen(Trade trade) {
+		if(openTime == null) {
+			openTime = trade.getTime();
+		}
 		openQty += trade.getQty();
 		openPrice += trade.getPrice() * trade.getQty();
 		openVolume += trade.getVolume();
@@ -115,5 +117,8 @@ public class TradeReport {
 		closeQty += trade.getQty();
 		closePrice += trade.getPrice() * trade.getQty();
 		closeVolume += trade.getVolume();
+		if(! isOpen()) {
+			closeTime = trade.getTime();
+		}
 	}
 }
