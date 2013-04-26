@@ -24,12 +24,12 @@ public class PortfolioSetup {
 	}
 	
 	/**
-	 * Получить спецификацию позиции по инструменту.
+	 * Получить спецификацию позиции.
 	 * <p>
 	 * Если это новый инструмент, то создается настройка нейтральной позиции по
 	 * инструменту.
 	 * <p>
-	 * @param security дескриптор инструмента
+	 * @param descr дескриптор инструмента
 	 * @return спецификация позиции
 	 */
 	public synchronized PositionSetup getPosition(SecurityDescriptor descr) {
@@ -41,10 +41,20 @@ public class PortfolioSetup {
 		return setup;
 	}
 
+	/**
+	 * Удалить спецификацию позиции из портфеля.
+	 * <p>
+	 * @param descr дескриптор инструмента
+	 */
 	public synchronized void removePosition(SecurityDescriptor descr) {
 		map.remove(descr);
 	}
 
+	/**
+	 * Получить список спецификаций позиций.
+	 * <p>
+	 * @return список спецификаций
+	 */
 	public synchronized List<PositionSetup> getPositions() {
 		return new Vector<PositionSetup>(map.values());
 	}
