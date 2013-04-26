@@ -176,8 +176,4 @@ public class TradeReport {
 			closeTime = trade.getTime();
 		}
 	}
-	
-	private Long getCloseQty() {
-		return closeQty;
-	}
 }
