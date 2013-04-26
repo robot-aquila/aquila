@@ -4,8 +4,10 @@ import static org.easymock.EasyMock.createStrictControl;
 import static org.junit.Assert.*;
 
 import java.util.Date;
+import java.util.Vector;
 
 import org.easymock.IMocksControl;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +26,17 @@ public class TradeReportTest {
 
 	private static IMocksControl control;
 	
+	private static PositionType LONG = PositionType.LONG;
+	private static PositionType SHORT = PositionType.SHORT;
+	private static OrderDirection BUY = OrderDirection.BUY;
+	private static OrderDirection SELL = OrderDirection.SELL;
+	
+	private static SecurityDescriptor descr1 = new SecurityDescriptor(
+			"Foo", "FooClass", "Bar", SecurityType.UNK);
+	private static SecurityDescriptor descr2 = new SecurityDescriptor(
+			"Bar", "BarClass", "Foo", SecurityType.UNK);
+	
 	private Terminal terminal;
-	private SecurityDescriptor descr;
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -34,7 +45,6 @@ public class TradeReportTest {
 		control = createStrictControl();
 		
 		terminal = control.createMock(Terminal.class);
-		descr = new SecurityDescriptor("Foo", "FooClass", "Bar", SecurityType.UNK);
 	}
 
 	/**
@@ -45,69 +55,11 @@ public class TradeReportTest {
 	}
 	
 	@Test
-	public void testGetUncoveredQty() throws Exception {
-		TradeReport report = new TradeReport(PositionType.LONG, descr);
-		Trade trade = createTrade(
-				descr, OrderDirection.BUY, new Date(), 120L, 3.00d, 350.00d);
-		report.addTrade(trade);
-		
-		trade = createTrade(
-				descr, OrderDirection.SELL, new Date(), 70L, 3.00d, 350.00d);
-		report.addTrade(trade);
-		assertEquals((Long) 50L, report.getUncoveredQty());
-	}
-	
-	
-	@Test(expected=TradeReportException.class)
-	public void testAddTrade_ThrowsIfInvalidSecurity() throws TradeReportException {
-		Date date = new Date();
-		Trade trade = createTrade(
-				new SecurityDescriptor("Bar", "BarClass", "Foo", SecurityType.UNK),
-				OrderDirection.BUY, date, 102L, 35.00d, 350.00d);
-		
-		TradeReport report = new TradeReport(PositionType.LONG, descr);
-		report.addTrade(trade);		
-	}
-	
-	@Test(expected=TradeReportException.class)
-	public void testAddTrade_LongThrowsIfQtyTooBig() throws TradeReportException {
-		Date date = new Date();
-		Trade trade = createTrade(descr, OrderDirection.BUY, date, 102L, 35.00d, 350.00d);
-		
-		TradeReport report = new TradeReport(PositionType.LONG, descr);
-		report.addTrade(trade);		
-		
-		trade = createTrade(descr, OrderDirection.SELL, date, 103L, 38.00d, 200.00d);
-		
-		report.addTrade(trade);
-	}
-	
-	@Test
-	public void testAddTrade_CloseShortTrade() throws TradeReportException {
-		testCloseTrade(PositionType.SHORT);
-	}
-	
-	@Test
-	public void testAddTrade_CloseLongTrade() throws TradeReportException {
-		testCloseTrade(PositionType.LONG);
-	}
-	
-	@Test
-	public void testAddTrade_OpenLongTrade() throws TradeReportException {
-		testOpenTrade(PositionType.LONG);
-	}
-	
-	@Test
-	public void testAddTrade_OpenShortTrade() throws TradeReportException {
-		testOpenTrade(PositionType.SHORT);
-	}
-
-	@Test
 	public void testConstructor() {
-		TradeReport report = new TradeReport(PositionType.LONG, descr);
+		TradeReport report = new TradeReport(LONG, descr1);
 		assertFalse(report.isOpen());
-		assertEquals(PositionType.LONG, report.getType());
-		assertEquals(descr, report.getSecurity());
+		assertEquals(LONG, report.getType());
+		assertEquals(descr1, report.getSecurity());
 		assertEquals((Long) 0L, report.getQty());
 		assertEquals((Double) 0.0d, report.getAverageClosePrice());
 		assertEquals((Double) 0.0d, report.getAverageOpenPrice());
@@ -115,70 +67,210 @@ public class TradeReportTest {
 		assertEquals((Double) 0.0d, report.getCloseVolume());
 	}
 	
-	private void testOpenTrade(PositionType type) throws TradeReportException {
-		OrderDirection dir = (type == PositionType.LONG) ?
-				OrderDirection.BUY : OrderDirection.SELL;
-		
-		Date date = new Date();
-		Trade trade = createTrade(descr, dir, date, 102L, 35.12d, 350.00d);
-		
-		TradeReport report = new TradeReport(type, descr);		
-		report.addTrade(trade);
-		
-		assertEquals(date, report.getOpenTime());
-		assertNull(report.getCloseTime());
-		assertEquals((Long) 102L, report.getQty());
-		assertEquals((Double) 35.12d, report.getAverageOpenPrice());
-		assertEquals((Double) 0.00d, report.getAverageClosePrice());
-		assertEquals((Double) 350.00d, report.getOpenVolume());
-		assertEquals((Double) 0.00d, report.getCloseVolume());
-		assertTrue(report.isOpen());
-		
-		trade = createTrade(descr, dir, new Date(), 102L, 30.12d, 340.00d);
-		
-		report.addTrade(trade);
-		
-		assertEquals(date, report.getOpenTime());
-		assertNull(report.getCloseTime());
-		assertEquals((Long) 204L, report.getQty());
-		assertEquals((Double) 32.62d, report.getAverageOpenPrice());
-		assertEquals((Double) 0.00d, report.getAverageClosePrice());
-		assertEquals((Double) 690.00d, report.getOpenVolume());
-		assertEquals((Double) 0.00d, report.getCloseVolume());
-		assertTrue(report.isOpen());
+	@Test
+	public void testGetUncoveredQty() {
+		TradeReport r = new TradeReport(SHORT, descr1, new Date(), new Date(), 
+				100L, 54L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertEquals((Long) 46L, r.getUncoveredQty());
 	}
 	
-	private void testCloseTrade(PositionType type) throws TradeReportException {
+	@Test
+	public void testIsOpen() {
+		TradeReport r = new TradeReport(SHORT, descr1, new Date(), new Date(), 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertTrue(r.isOpen());
 		
-		OrderDirection openDir = (type == PositionType.LONG) ?
-				OrderDirection.BUY : OrderDirection.SELL;
-		OrderDirection closeDir = (type == PositionType.LONG) ?
-				OrderDirection.SELL : OrderDirection.BUY;
+		r = new TradeReport(SHORT, descr1, new Date(), new Date(), 
+				100L, 100L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(r.isOpen());
+	}
+	
+	@Test
+	public void testEquals() {
+		Date openDate = new Date();
+		Date closeDate = new Date();
 		
-		Date date = new Date();
+		TradeReport eta = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		TradeReport test = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertTrue(eta.equals(test));		
 		
-		Trade trade = createTrade(descr, openDir, date, 102L, 35.00d, 130.00d);
+		test = new TradeReport(LONG, descr1, openDate, closeDate, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
 		
-		TradeReport report = new TradeReport(type, descr);
-		report.addTrade(trade);		
+		test = new TradeReport(SHORT, descr2, openDate, closeDate, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
 		
-		trade = createTrade(descr, closeDir, date, 51L, 38.00d, 200.00d);
+		test = new TradeReport(SHORT, descr1, new Date(), closeDate, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
+		
+		test = new TradeReport(SHORT, descr1, openDate, new Date(), 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
+		
+		test = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				110L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
+		
+		test = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 52L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
+		
+		test = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 50L, 102.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
+		
+		test = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 50L, 100.00d, 75.01d, 100.00d, 75.00d);
+		assertFalse(eta.equals(test));
+		
+		test = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 50L, 100.00d, 75.00d, 100.01d, 75.00d);
+		assertFalse(eta.equals(test));
+		
+		test = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.01d);
+		assertFalse(eta.equals(test));
+		
+		assertFalse(eta.equals(new Date()));
+	}
+	
+	@Test
+	public void testAddTrade_ShortAddBuy() throws Exception {
+		Date openDate = new Date();
+		Date closeDate = new Date();
+		
+		TradeReport expected = new TradeReport(SHORT, descr1, openDate, null, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		
+		TradeReport report = new TradeReport(SHORT, descr1, openDate, null, 
+				100L, 0L, 100.00d, 0.00d, 100.00d, 0.00d);
+		Trade trade = createTrade(descr1, BUY, closeDate, 50L, 1.50d, 75.00d);
 		report.addTrade(trade);
+		assertEquals(expected, report);
 		
-		assertNull(report.getCloseTime());
-		assertEquals((Long) 102L, report.getQty());
-		assertEquals((Double) 38.00d, report.getAverageClosePrice());
-		assertEquals((Double) 200.00d, report.getCloseVolume());
-		
-		Date date2 = new Date();
-		trade = createTrade(descr, closeDir, date2, 51L, 39.00d, 150.00d);
+		expected = new TradeReport(SHORT, descr1, openDate, closeDate, 
+				100L, 100L, 100.00d, 150.00d, 100.00d, 150.00d);
 		report.addTrade(trade);
-		
+		assertEquals(expected, report);
 		assertFalse(report.isOpen());
-		assertEquals(date2, report.getCloseTime());
-		assertEquals((Long) 102L, report.getQty());
-		assertEquals((Double) 350.00d, report.getCloseVolume());
-		assertEquals((Double) 38.50d, report.getAverageClosePrice());
+	}
+	
+	@Test
+	public void testAddTrade_ShortAddSell() throws Exception {
+		Date openDate = new Date();
+		TradeReport expected = new TradeReport(SHORT, descr1, openDate, null, 
+				100L, 0L, 100.00d, 0.00d, 120.00d, 0.00d);
+		TradeReport report = new TradeReport(SHORT, descr1);
+		
+		Trade trade = createTrade(descr1, SELL, openDate, 100L, 1.00d, 120.00d);
+		report.addTrade(trade);
+		assertEquals(expected, report);
+		
+		expected = new TradeReport(SHORT, descr1, openDate, null, 
+				150L, 0L, 150.00d, 0.00d, 180.00d, 0.00d);
+		
+		trade = createTrade(descr1, SELL, openDate, 50L, 1.00d, 60.00d);
+		report.addTrade(trade);
+		assertEquals(expected, report);
+	}
+	
+	@Test
+	public void testAddTrade_LongAddBuy() throws Exception {
+		Date openDate = new Date();
+		
+		TradeReport expected = new TradeReport(LONG, descr1, openDate, null, 
+				100L, 0L, 100.00d, 0.00d, 120.00d, 0.00d);
+		TradeReport report = new TradeReport(LONG, descr1);
+		
+		Trade trade = createTrade(descr1, BUY, openDate, 100L, 1.00d, 120.00d);
+		report.addTrade(trade);
+		assertEquals(expected, report);
+		
+		expected = new TradeReport(LONG, descr1, openDate, null, 
+				150L, 0L, 150.00d, 0.00d, 180.00d, 0.00d);
+		
+		trade = createTrade(descr1, BUY, openDate, 50L, 1.00d, 60.00d);
+		report.addTrade(trade);
+		assertEquals(expected, report);
+	}
+	
+	@Test
+	public void testAddTrade_LongAddSell() throws Exception {
+		Date openDate = new Date();
+		Date closeDate = new Date();
+		
+		TradeReport expected = new TradeReport(LONG, descr1, openDate, null, 
+				100L, 50L, 100.00d, 75.00d, 100.00d, 75.00d);
+		
+		TradeReport report = new TradeReport(LONG, descr1, openDate, null, 
+				100L, 0L, 100.00d, 0.00d, 100.00d, 0.00d);
+		Trade trade = createTrade(descr1, SELL, closeDate, 50L, 1.50d, 75.00d);
+		report.addTrade(trade);
+		assertEquals(expected, report);
+		
+		expected = new TradeReport(LONG, descr1, openDate, closeDate, 
+				100L, 100L, 100.00d, 150.00d, 100.00d, 150.00d);
+		report.addTrade(trade);
+		assertEquals(expected, report);
+		assertFalse(report.isOpen());
+	}
+	
+	@Test
+	public void testAddTrade_ThrowsIfCanAppendFalse() {
+		Vector<TradeReport> reports = new Vector<TradeReport>();
+		reports.add(new TradeReport(LONG, descr1, new Date(), new Date(),
+						100L, 50L, 1.00d, 1.00d, 100.00d, 50.00d));
+		reports.add(new TradeReport(SHORT, descr1, new Date(), new Date(),
+						100L, 50L, 1.00d, 1.00d, 100.00d, 50.00d));
+		reports.add(new TradeReport(LONG, descr1, new Date(), new Date(),
+						100L, 50L, 1.00d, 1.00d, 100.00d, 50.00d));
+		reports.add(new TradeReport(SHORT, descr1, new Date(), new Date(),
+						100L, 50L, 1.00d, 1.00d, 100.00d, 50.00d));
+		reports.add(new TradeReport(LONG, descr1));
+		reports.add(new TradeReport(SHORT, descr1));
+		
+		Vector<Trade> trades = new Vector<Trade>();
+		trades.add(createTrade(descr1, SELL, new Date(), 60L, 1.00d, 60.00d));
+		trades.add(createTrade(descr1, BUY, new Date(), 60L, 1.00d, 60.00d));
+		trades.add(createTrade(descr1, SELL, new Date(), 50L, 1.00d, 60.00d));
+		trades.add(createTrade(descr1, BUY, new Date(), 50L, 1.00d, 60.00d));
+		trades.add(createTrade(descr1, BUY, new Date(), 50L, 1.00d, 60.00d));
+		trades.add(createTrade(descr1, SELL, new Date(), 50L, 1.00d, 60.00d));
+		
+		Vector<Boolean> except = new Vector<Boolean>();
+		except.add(true);
+		except.add(true);
+		except.add(false);
+		except.add(false);
+		except.add(false);
+		except.add(false);
+		
+		for(int i = 0; i < reports.size(); i++) {
+			try {
+				reports.get(i).addTrade(trades.get(i));
+				if(except.get(i)) {
+					fail("testAddTrade_ThrowsIfCanAppendFalse failed. No exception thrown.");
+				}
+			}catch (Exception e) {
+				if(!except.get(i)) {
+					fail("testAddTrade_ThrowsIfCanAppendFalse failed. Unexpected exception.");
+				}
+				IsInstanceOf.instanceOf(TradeReportException.class).matches(e);
+			}
+		}		
+	}
+
+	@Test(expected=TradeReportException.class)
+	public void testAddTrade_ThrowsIfInvalidDescriptor() throws Exception {
+		TradeReport report = new TradeReport(LONG, descr1);
+		Trade trade = new Trade(terminal);
+		trade.setSecurityDescriptor(descr2);
+		report.addTrade(trade);
 	}
 	
 	private Trade createTrade(SecurityDescriptor descr, OrderDirection dir,Date date, 

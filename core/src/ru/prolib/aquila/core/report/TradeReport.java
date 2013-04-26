@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.report;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
 import ru.prolib.aquila.core.BusinessEntities.PositionType;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
@@ -26,6 +28,23 @@ public class TradeReport {
 	public TradeReport(PositionType type, SecurityDescriptor descr) {
 		this.type = type;		
 		this.descr = descr;
+	}
+	
+	protected TradeReport(PositionType type, SecurityDescriptor descr, 
+			Date openTime, Date closeTime, Long openQty, Long closeQty,
+			Double openPrice, Double closePrice, 
+			Double openVolume, Double closeVolume)
+	{
+		this.type = type;
+		this.descr = descr;
+		this.openTime = openTime;
+		this.closeTime = closeTime;
+		this.openPrice = openPrice;
+		this.closePrice = closePrice;
+		this.openQty = openQty;
+		this.closeQty = closeQty;
+		this.openVolume = openVolume;
+		this.closeVolume = closeVolume;
 	}
 	
 	public PositionType getType() {
@@ -95,17 +114,49 @@ public class TradeReport {
 	}
 	
 	public boolean canAppendToReport(Trade trade) {
-		boolean valid = true;		
+		boolean valid = false;		
 		if(type == PositionType.LONG) {
 			if(trade.getDirection() == OrderDirection.SELL) {
-				valid = (trade.getQty() <= getUncoveredQty());
+				if(trade.getQty() <= getUncoveredQty()) {
+					valid = true;
+				}
+			}else {
+				valid = true;
 			}
 		} else {
 			if(trade.getDirection() == OrderDirection.BUY) {
-				valid = (trade.getQty() <= getUncoveredQty());
+				if(trade.getQty() <= getUncoveredQty()) {
+					valid = true;
+				}
+			}else {
+				valid = true;
 			}
 		}
 		return valid;
+	}
+	
+	public boolean equals(Object other) {			
+		if(other instanceof TradeReport) {
+			TradeReport o = (TradeReport) other;
+			if(descr != o.descr) return false;
+			if(type != o.type) return false;
+			if(openTime != o.openTime) return false;
+			if(closeTime != o.closeTime) return false;
+			if(!openQty.equals(o.openQty)) return false;
+			if(! closeQty.equals(o.closeQty)) return false;
+			if(Double.compare(openPrice, o.openPrice) != 0) return false;
+			if(Double.compare(closePrice, o.closePrice) != 0) return false;
+			if(Double.compare(openVolume, o.openVolume) != 0) return false;
+			if(Double.compare(closeVolume, o.closeVolume) != 0) return false;
+		}else {
+			return false;
+		}
+		return true;
+	}
+	
+	public int hashCode() {
+		return new HashCodeBuilder(23748293, 574037)
+			.toHashCode();
 	}
 	
 	private void addToOpen(Trade trade) {
@@ -124,5 +175,9 @@ public class TradeReport {
 		if(! isOpen()) {
 			closeTime = trade.getTime();
 		}
+	}
+	
+	private Long getCloseQty() {
+		return closeQty;
 	}
 }

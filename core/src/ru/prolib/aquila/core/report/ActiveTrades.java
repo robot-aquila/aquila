@@ -108,8 +108,8 @@ public class ActiveTrades {
 				PositionType.LONG : PositionType.SHORT;
 		TradeReport report = new TradeReport(type, trade.getSecurityDescriptor());
 		trades.put(report.getSecurity(), report);
-		fireReportOpened(report);
 		report.addTrade(trade);
+		fireReportOpened(report);		
 		return report;
 	}
 	
