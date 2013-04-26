@@ -83,6 +83,10 @@ public class TradeReportTest {
 		r = new TradeReport(SHORT, descr1, new Date(), new Date(), 
 				100L, 100L, 100.00d, 75.00d, 100.00d, 75.00d);
 		assertFalse(r.isOpen());
+		
+		r = new TradeReport(SHORT, descr1, new Date(), new Date(),
+				100L, 200L, 100.00d, 75.00d, 100.00d, 75.00d);
+		assertFalse(r.isOpen());
 	}
 	
 	@Test
