@@ -6,17 +6,19 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Спецификация позиции.
- * <p>
- * 2012-12-26<br>
- * $Id: SetupPositionImpl.java 406 2013-01-11 10:08:56Z whirlwind $
  */
-public class SetupPosition {
+public class PositionSetup {
+	private static final PositionType CLOSE = PositionType.CLOSE;
+	private static final PositionType BOTH = PositionType.BOTH;
+	private static final PositionType LONG = PositionType.LONG;
+	private static final PositionType SHORT = PositionType.SHORT;
+	
 	private final SecurityDescriptor descr;
 	private Price quota; 
 	private PositionType target;
 	private PositionType allowed = PositionType.BOTH;
 	
-	public SetupPosition(SecurityDescriptor descr,
+	public PositionSetup(SecurityDescriptor descr,
 			Price quota, PositionType target)
 	{
 		super();
@@ -25,15 +27,15 @@ public class SetupPosition {
 		this.target = target;
 	}
 	
-	public SetupPosition(SecurityDescriptor descr, Price quota) {
+	public PositionSetup(SecurityDescriptor descr, Price quota) {
 		this(descr, quota, PositionType.CLOSE);
 	}
 	
-	public SetupPosition(SecurityDescriptor descr) {
+	public PositionSetup(SecurityDescriptor descr) {
 		this(descr, new Price(PriceUnit.PERCENT, 0.0d));
 	}
 	
-	public SetupPosition(SetupPosition setup) {
+	public PositionSetup(PositionSetup setup) {
 		super();
 		synchronized ( setup ) {
 			descr = setup.getSecurityDescriptor();
@@ -94,12 +96,12 @@ public class SetupPosition {
 	
 	@Override
 	public synchronized boolean equals(Object other) {
-		return other != null && other.getClass() == SetupPosition.class ?
+		return other != null && other.getClass() == PositionSetup.class ?
 			fieldsEquals(other) : false;
 	}
 	
 	protected boolean fieldsEquals(Object other) {
-		SetupPosition o = (SetupPosition) other;
+		PositionSetup o = (PositionSetup) other;
 		return new EqualsBuilder()
 			.append(descr, o.descr)
 			.append(quota, o.quota)
@@ -119,8 +121,8 @@ public class SetupPosition {
 	}
 	
 	@Override
-	public synchronized SetupPosition clone() {
-		return new SetupPosition(this);
+	public synchronized PositionSetup clone() {
+		return new PositionSetup(this);
 	}
 
 	/**
@@ -141,7 +143,7 @@ public class SetupPosition {
 	/**
 	 * Получить разрешенный тип позиции.
 	 * <p>
-	 * см. {@link SetupPosition#setAllowedType(PositionType)}.
+	 * см. {@link PositionSetup#setAllowedType(PositionType)}.
 	 * <p>
 	 * @return разрешенный тип позиции
 	 */
@@ -152,55 +154,29 @@ public class SetupPosition {
 	/**
 	 * Проверить разрешение цели.
 	 * <p>
-	 * Для проверки используется настройка разрешенного типа позиции. В случае
-	 * передачи {@link PositionType#BOTH} возвращается true только если
-	 * разрешенный тип так же {@link PositionType#BOTH}.
+	 * Для проверки используется настройка разрешенного типа позиции.
 	 * <p>
 	 * @param target целевой тип для проверки
 	 * @return true - разрешено открыть позицию данного типа, false - запрещено
 	 */
 	public synchronized boolean isTargetAllowed(PositionType target) {
-		if ( target == PositionType.BOTH ) {
-			return allowed == PositionType.BOTH; 
-		}
-		if ( target == PositionType.LONG ) {
-			return allowed == PositionType.LONG || allowed == PositionType.BOTH;
-		} else if ( target == PositionType.SHORT ) {
-			return allowed == PositionType.SHORT || allowed== PositionType.BOTH;
-		}
-		return true;
+		return (target == CLOSE )
+			|| (target == LONG && (allowed == LONG || allowed == BOTH))
+			|| (target == SHORT && (allowed == SHORT || allowed == BOTH));
 	}
 
 	/**
 	 * Проверить необходимость закрытия текущей позиции.
 	 * <p>
-	 * Проверяет нужно-ли закрыть текущую позицию в соответствии с настройками.
-	 * Учитывается целевой тип позиции и установленный разрешенный тип.
+	 * Проверяет нужно-ли закрыть позицию в соответствии с текущим и
+	 * целевым типами позиции.
 	 * <p>
 	 * @param current тип текущей позиции
 	 * @return true - следует закрыть позицию, false - ничего делать не нужно
 	 */
 	public synchronized boolean shouldClose(PositionType current) {
-		if ( current == PositionType.SHORT ) {
-			if ( target == PositionType.CLOSE ) {
-				return true;
-			}
-			if ( target == PositionType.LONG && ( allowed == PositionType.SHORT
-					|| allowed == PositionType.CLOSE ) )
-			{
-				return true;
-			}
-		} else if ( current == PositionType.LONG ) {
-			if ( target == PositionType.CLOSE ) {
-				return true;
-			}
-			if ( target == PositionType.SHORT && ( allowed == PositionType.LONG
-					|| allowed == PositionType.CLOSE ) )
-			{
-				return true;
-			}
-		}
-		return false;
+		return current != target && (current == LONG || current == SHORT) &&
+			(target == CLOSE || ! isTargetAllowed(target));
 	}
 	
 	/**
@@ -214,7 +190,9 @@ public class SetupPosition {
 	 * @return true - следует открыть позицию, false - ничего делать не нужно
 	 */
 	public synchronized boolean shouldOpen(PositionType current) {
-		return false;
+		return current == CLOSE && quota.getValue() > 0
+			&& isTargetAllowed(target)
+			&& (target == LONG || target == SHORT);
 	}
 	
 	/**
@@ -229,27 +207,29 @@ public class SetupPosition {
 	 * @return true - следует развернуть позицию, false - ничего делать не нужно
 	 */
 	public synchronized boolean shouldSwap(PositionType current) {
-		return false;
+		return quota.getValue() > 0 && isTargetAllowed(target)
+			&& ((current == LONG && target == SHORT)
+			 || (current == SHORT && target == LONG));
 	}
 	
 	/**
 	 * Проверить соответствие целей.
 	 * <p>
-	 * @param other объект для сравнения
+	 * @param other сетап для сравнения
 	 * @return true - цели совпадают, false - не совпадают
 	 */
-	public synchronized boolean isDifferentTarget(SetupPosition other) {
-		return false;
+	public synchronized boolean isDifferentTarget(PositionSetup other) {
+		return target != other.target;
 	}
 	
 	/**
 	 * Проверить соответствие долей.
 	 * <p>
-	 * @param other объект для сравнения
+	 * @param other сетап для сравнения
 	 * @return true - доли совпадают, false - не совпадают 
 	 */
-	public synchronized boolean isDifferentQuota(SetupPosition other) {
-		return false;
+	public synchronized boolean isDifferentQuota(PositionSetup other) {
+		return ! quota.equals(other.quota);
 	}
 
 }

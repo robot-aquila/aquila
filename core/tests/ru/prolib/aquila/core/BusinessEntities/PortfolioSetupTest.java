@@ -12,32 +12,28 @@ import ru.prolib.aquila.core.BusinessEntities.PriceUnit;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 
-/**
- * 2013-01-11<br>
- * $Id: SetupPositionsImplTest.java 406 2013-01-11 10:08:56Z whirlwind $
- */
-public class SetupPositionsImplTest {
+public class PortfolioSetupTest {
 	private static SecurityDescriptor descr1,descr2,descr3;
-	private SetupPositionsImpl setup;
+	private PortfolioSetup setup;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr1 = new SecurityDescriptor("SBER","EQBR","RUB",SecurityType.STK);
-		descr2 = new SecurityDescriptor("AAPL","ARCA","USD",SecurityType.STK);
-		descr3 = new SecurityDescriptor("RIM2","SPBFUT","USD",SecurityType.FUT);
+		descr1 = new SecurityDescriptor("SBER", "EQBR", "RUB",SecurityType.STK);
+		descr2 = new SecurityDescriptor("AAPL", "ARCA", "USD",SecurityType.STK);
+		descr3 = new SecurityDescriptor("RIM2", "SPB", "USD",SecurityType.FUT);
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		setup = new SetupPositionsImpl();
+		setup = new PortfolioSetup();
 	}
 	
 	@Test
 	public void testGetPosition() throws Exception {
-		SetupPosition	sp1 = setup.getPosition(descr1),
+		PositionSetup	sp1 = setup.getPosition(descr1),
 						sp2 = setup.getPosition(descr2);
-		assertEquals(new SetupPosition(descr1), sp1);
-		assertEquals(new SetupPosition(descr2), sp2);
+		assertEquals(new PositionSetup(descr1), sp1);
+		assertEquals(new PositionSetup(descr2), sp2);
 		assertNotSame(sp1, sp2);
 		assertSame(sp1, setup.getPosition(descr1));
 		assertSame(sp2, setup.getPosition(descr2));
@@ -45,19 +41,19 @@ public class SetupPositionsImplTest {
 	
 	@Test
 	public void testRemovePosition() throws Exception {
-		SetupPosition sp1 = setup.getPosition(descr1);
+		PositionSetup sp1 = setup.getPosition(descr1);
 		sp1.setQuota(new Price(PriceUnit.PERCENT, 120.0d));
 		sp1.setTarget(PositionType.SHORT);
 		setup.removePosition(descr1);
-		assertEquals(new SetupPosition(descr1), setup.getPosition(descr1));
+		assertEquals(new PositionSetup(descr1), setup.getPosition(descr1));
 	}
 	
 	@Test
 	public void testGetPositions() throws Exception {
-		SetupPosition	sp1 = setup.getPosition(descr1),
+		PositionSetup	sp1 = setup.getPosition(descr1),
 						sp2 = setup.getPosition(descr2),
 						sp3 = setup.getPosition(descr3);
-		Vector<SetupPosition> expected = new Vector<SetupPosition>();
+		Vector<PositionSetup> expected = new Vector<PositionSetup>();
 		expected.add(sp1);
 		expected.add(sp2);
 		expected.add(sp3);
@@ -76,20 +72,20 @@ public class SetupPositionsImplTest {
 		setup.getPosition(descr1);
 		setup.getPosition(descr2);
 		
-		SetupPositions setup2 = new SetupPositionsImpl();
+		PortfolioSetup setup2 = new PortfolioSetup();
 		setup2.getPosition(descr1);
 		setup2.getPosition(descr2);
 		
-		SetupPositions setup3 = new SetupPositionsImpl();
+		PortfolioSetup setup3 = new PortfolioSetup();
 		setup3.getPosition(descr1);
 		setup3.getPosition(descr2);
 		setup3.getPosition(descr3);
 
-		SetupPositions setup4 = new SetupPositionsImpl();
+		PortfolioSetup setup4 = new PortfolioSetup();
 		setup4.getPosition(descr2);
 		setup4.getPosition(descr3);
 		
-		SetupPositions setup5 = new SetupPositionsImpl();
+		PortfolioSetup setup5 = new PortfolioSetup();
 		setup5.getPosition(descr1);
 
 		assertTrue(setup.equals(setup2));
@@ -103,12 +99,12 @@ public class SetupPositionsImplTest {
 		setup.getPosition(descr1).setQuota(new Price(PriceUnit.PERCENT, 10.0d));
 		setup.getPosition(descr2).setTarget(PositionType.SHORT);
 		
-		SetupPositions clone = setup.clone();
+		PortfolioSetup clone = setup.clone();
 		assertEquals(setup, clone);
-		List<SetupPosition> list = clone.getPositions();
+		List<PositionSetup> list = clone.getPositions();
 		for ( int i = 0; i < list.size(); i ++ ) {
-			SetupPosition c = list.get(i);
-			SetupPosition o = setup.getPosition(c.getSecurityDescriptor());
+			PositionSetup c = list.get(i);
+			PositionSetup o = setup.getPosition(c.getSecurityDescriptor());
 			assertEquals(o, c);
 			assertNotSame(o, c); 
 		}
