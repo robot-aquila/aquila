@@ -29,7 +29,19 @@ public class TradeReport {
 		this.type = type;		
 		this.descr = descr;
 	}
-	
+	/**
+	 * Для тестов
+	 * @param type
+	 * @param descr
+	 * @param openTime
+	 * @param closeTime
+	 * @param openQty
+	 * @param closeQty
+	 * @param openPrice
+	 * @param closePrice
+	 * @param openVolume
+	 * @param closeVolume
+	 */
 	protected TradeReport(PositionType type, SecurityDescriptor descr, 
 			Date openTime, Date closeTime, Long openQty, Long closeQty,
 			Double openPrice, Double closePrice, 
