@@ -121,4 +121,15 @@ public class DDEUtils {
 		return map;
 	}
 	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null ) {
+			return false;
+		}
+		return other.getClass() == DDEUtils.class;
+	}
+	
 }

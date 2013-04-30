@@ -86,5 +86,13 @@ public class DDEUtilsTest {
 			assertEquals(new NotAllRequiredFieldsException("foobar","five"), e);
 		}
 	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(utils.equals(utils));
+		assertFalse(utils.equals(null));
+		assertFalse(utils.equals(this));
+		assertTrue(utils.equals(new DDEUtils()));
+	}
 
 }
