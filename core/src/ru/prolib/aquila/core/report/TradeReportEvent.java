@@ -21,5 +21,15 @@ public class TradeReportEvent extends EventImpl {
 	public TradeReport getTradeReport() {
 		return report;
 	}
+	
+	public boolean equals(Object other) {
+		if(other instanceof TradeReportEvent && 
+				((TradeReportEvent) other).isType(getType())) {
+			TradeReportEvent o = (TradeReportEvent) other;
+			return report.equals(o.getTradeReport())? true : false;
+			
+		}
+		return false;
+	}
 
 }
