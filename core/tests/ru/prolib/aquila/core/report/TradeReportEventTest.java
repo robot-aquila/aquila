@@ -11,12 +11,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.PositionType;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * $Id$
@@ -26,8 +26,10 @@ public class TradeReportEventTest {
 	private static IMocksControl control;
 	
 	private EventType onEvent;
+	private EventType onEvent2;
 	private SecurityDescriptor descr;
-	private TradeReport report; 
+	private TradeReport report;
+	private TradeReport report2;
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -38,7 +40,10 @@ public class TradeReportEventTest {
 		descr = new SecurityDescriptor(
 				"Foo", "FooClass", "Bar", SecurityType.UNK);
 		onEvent = control.createMock(EventType.class);
+		onEvent2 = control.createMock(EventType.class);
 		report = new TradeReport(PositionType.LONG, descr, new Date(), null,
+				100L, 0L, 100.00d, 0.00d, 2.00d, 0.00d);
+		report2 = new TradeReport(PositionType.SHORT, descr, new Date(), null,
 				100L, 0L, 100.00d, 0.00d, 2.00d, 0.00d);
 	}
 
@@ -49,24 +54,32 @@ public class TradeReportEventTest {
 	public void tearDown() throws Exception {
 	}
 	
-	public void testEquals_True() {
-		TradeReportEvent evt1 = new TradeReportEvent(onEvent, report);
-		TradeReportEvent evt2 = new TradeReportEvent(onEvent, report);
-		assertTrue(evt1.equals(evt2));
-	}
-	
-	public void testEquals_False() {
-		TradeReportEvent evt1 = new TradeReportEvent(onEvent, report);
-		TradeReportEvent evt2 = new TradeReportEvent(
-				control.createMock(EventType.class), report);
-		assertFalse(evt1.equals(evt2));
+	@Test
+	public void testEquals() {
+		TradeReportEvent et = new TradeReportEvent(onEvent, report);
 		
-		evt2 = new TradeReportEvent(
-				onEvent,control.createMock(TradeReport.class)); 
-		assertFalse(evt1.equals(evt2));
-		
-		Event evt3 = control.createMock(Event.class);
-		assertFalse(evt1.equals(evt3));
+		Variant<EventType> types = new Variant<EventType>()
+				.add(onEvent)
+				.add(onEvent2);
+		Variant<TradeReport> reports = new Variant<TradeReport>(types)
+				.add(report)
+				.add(report2);
+		Variant<?> iterator = reports;
+		int foundCnt = 0;
+		EventType foundType = null, x; TradeReport foundRep = null, y;
+		do {
+			x = types.get();
+			y = reports.get();
+			TradeReportEvent event = new TradeReportEvent(x, y);
+			if(et.equals(event)) {
+				foundCnt++;
+				foundType = x;
+				foundRep = y;
+			}
+		}while(iterator.next());
+		assertEquals(1, foundCnt);
+		assertEquals(onEvent, foundType);
+		assertEquals(report, foundRep);
 	}
 
 	@Test
