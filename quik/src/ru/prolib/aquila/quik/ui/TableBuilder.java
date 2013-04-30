@@ -26,6 +26,31 @@ public class TableBuilder {
 
 	public Table createOrdersCacheTable() {
 		Columns columns = new Columns();
+		columns.add(new Column("COL_CACHE_ORDER_ID", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((OrderCache) obj).getId();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_ORDER_TRANS_ID", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((OrderCache) obj).getTransId();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_ORDER_STATUS", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((OrderCache) obj).getStatus();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_ORDER_SEC_CODE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((OrderCache) obj).getSecurityCode();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_ORDER_SEC_CLASS_CODE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((OrderCache) obj).getSecurityClassCode();
+			}
+		}, Column.MIDDLE));
 		columns.add(new Column("COL_CACHE_ORDER_ACCOUNT", new G<String>() {
 			@Override public String get(Object obj) {
 				return ((OrderCache) obj).getAccountCode();
@@ -40,35 +65,20 @@ public class TableBuilder {
 			@Override public Object get(Object obj) {
 				return ((OrderCache) obj).getDirection();
 			}
-		}, Column.SHORT));
-		columns.add(new Column("COL_CACHE_ORDER_ID", new G<Object>() {
-			@Override public Object get(Object obj) {
-				return ((OrderCache) obj).getId();
-			}
-		}, Column.MIDDLE));
-		columns.add(new Column("COL_CACHE_ORDER_PRICE", new G<Object>() {
-			@Override public Object get(Object obj) {
-				return ((OrderCache) obj).getPrice();
-			}
 		}, Column.MIDDLE));
 		columns.add(new Column("COL_CACHE_ORDER_QTY", new G<Object>() {
 			@Override public Object get(Object obj) {
 				return ((OrderCache) obj).getQty();
 			}
-		}, Column.SHORT));
+		}, Column.MIDDLE));
 		columns.add(new Column("COL_CACHE_ORDER_QTY_REST", new G<Object>() {
 			@Override public Object get(Object obj) {
 				return ((OrderCache) obj).getQtyRest();
 			}
-		}, Column.SHORT));
-		columns.add(new Column("COL_CACHE_ORDER_SEC_CLASS_CODE", new G<Object>() {
+		}, Column.MIDDLE));		
+		columns.add(new Column("COL_CACHE_ORDER_PRICE", new G<Object>() {
 			@Override public Object get(Object obj) {
-				return ((OrderCache) obj).getSecurityClassCode();
-			}
-		}, Column.MIDDLE));
-		columns.add(new Column("COL_CACHE_ORDER_SEC_CODE", new G<Object>() {
-			@Override public Object get(Object obj) {
-				return ((OrderCache) obj).getSecurityCode();
+				return ((OrderCache) obj).getPrice();
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column("COL_CACHE_ORDER_TIME", new G<Object>() {
@@ -76,23 +86,17 @@ public class TableBuilder {
 				return dateFormat.format(((OrderCache) obj).getTime());
 			}
 		}, Column.lONG));
-		columns.add(new Column("COL_CACHE_ORDER_TRANS_ID", new G<Object>() {
-			@Override public Object get(Object obj) {
-				return ((OrderCache) obj).getTransId();
-			}
-		}, Column.MIDDLE));
-		columns.add(new Column("COL_CACHE_ORDER_TYPE", new G<Object>() {
-			@Override public Object get(Object obj) {
-				return ((OrderCache) obj).getType();
-			}
-		}, Column.SHORT));
 		columns.add(new Column("COL_CACHE_ORDER_WITHDRAW_TIME", new G<Object>() {
 			@Override public Object get(Object obj) {
 				Date time = ((OrderCache) obj).getWithdrawTime();
 				return time == null ? null : dateFormat.format(time);
 			}
 		}, Column.lONG));
-		
+		columns.add(new Column("COL_CACHE_ORDER_TYPE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((OrderCache) obj).getType();
+			}
+		}, Column.SHORT));
 		return new Table(new OrdersCacheTableModel(labels,
 				columns, cache.getOrdersCache()));
 	}

@@ -172,6 +172,7 @@ public class MirrorTableHelper {
 			}
 			rowNumber ++;
 		}
+		rs.reset();
 	}
 	
 	/**

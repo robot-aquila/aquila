@@ -132,6 +132,7 @@ public class MirrorTableHelperTest {
 		expect(rs.next()).andReturn(true);
 		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(18210));
 		expect(rs.next()).andReturn(false); // end of set
+		rs.reset();
 		control.replay();
 		
 		helper.checkRowSetChanged(meta, rs);
@@ -151,6 +152,7 @@ public class MirrorTableHelperTest {
 		// following row with different keyObject
 		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(0));
 		gateway.clearCache();
+		rs.reset();
 		control.replay();
 		
 		helper.checkRowSetChanged(meta, rs);
