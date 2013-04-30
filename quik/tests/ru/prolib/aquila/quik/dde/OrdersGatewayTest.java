@@ -13,6 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.OrderType;
 import ru.prolib.aquila.core.data.row.*;
+import ru.prolib.aquila.dde.DDEException;
 
 public class OrdersGatewayTest {
 	private static SimpleDateFormat format;
@@ -180,6 +181,22 @@ public class OrdersGatewayTest {
 		gateway.toCache(row);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testGetKeyValue() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("ORDERNUM", 1008.0d);
+		Row row = new SimpleRow(map);
+		
+		assertEquals(new Long(1008), gateway.getKeyValue(row));
+	}
+	
+	@Test (expected=DDEException.class)
+	public void testGetKeyValue_ThrowsIfNullKey() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Row row = new SimpleRow(map);
+		gateway.getKeyValue(row);
 	}
 
 }

@@ -1,9 +1,6 @@
 package ru.prolib.aquila.quik.dde;
 
-import java.util.*;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.table.*;
@@ -12,40 +9,15 @@ import ru.prolib.aquila.dde.utils.table.*;
  * Базовый обработчик кэширования таблицы типа зеркало.
  */
 public class MirrorTableHandler implements DDETableHandler {
-	public static final Map<String, Integer> EMPTY_MAP;
-	private Map<String, Integer> headers;
-	private final CacheGateway gateway;
-	private final DDEUtils ddeUtils;
+	private final MirrorTableHelper helper;
 	
-	static {
-		EMPTY_MAP = new Hashtable<String, Integer>();
+	public MirrorTableHandler(MirrorTableHelper helper) {
+		super();
+		this.helper = helper;
 	}
 	
 	public MirrorTableHandler(CacheGateway gateway) {
-		super();
-		ddeUtils = new DDEUtils();
-		headers = EMPTY_MAP;
-		this.gateway = gateway;
-	}
-	
-	/**
-	 * Получить текущую карту заголовков.
-	 * <p>
-	 * Только для тестов.
-	 * <p>
-	 * @return карта заголовков
-	 */
-	protected Map<String, Integer> getCurrentHeadersMap() {
-		return headers; 
-	}
-	
-	/**
-	 * Получить шлюз кэша.
-	 * <p>
-	 * @return шлюз
-	 */
-	public CacheGateway getCacheGateway() {
-		return gateway;
+		this(new MirrorTableHelper(gateway));
 	}
 
 	@Override
@@ -67,20 +39,15 @@ public class MirrorTableHandler implements DDETableHandler {
 	private void handleTable(DDETable ddeTable)
 			throws DDEException, RowSetException
 	{
-		DDETableRange range = ddeUtils.parseXltRange(ddeTable);
-		int firstRow = 0;
-		if ( range.getFirstRow() == 1 ) {
-			firstRow = 1;
-			gateway.clearCache();
-			headers.clear();
-			headers = ddeUtils.makeHeadersMap(ddeTable,
-					gateway.getRequiredHeaders());
+		TableMeta meta = helper.createTableMeta(ddeTable);
+		if ( meta.hasHeaderRow() ) {
+			helper.updateHeaders(ddeTable);
+			helper.getCacheGateway().clearCache();
 		}
-		RowSet rs = new DDETableRowSet(ddeTable, headers, firstRow);
-		while ( rs.next() ) {
-			gateway.toCache(rs);
-		}
-		gateway.fireUpdateCache();
+		RowSet rs = helper.createRowSet(meta, ddeTable);
+		helper.checkRowSetChanged(meta, rs);
+		helper.cacheRowSet(meta, rs);
+		helper.getCacheGateway().fireUpdateCache();
 	}
 	
 	@Override
@@ -94,8 +61,7 @@ public class MirrorTableHandler implements DDETableHandler {
 		if ( other.getClass() == MirrorTableHandler.class ) {
 			MirrorTableHandler o = (MirrorTableHandler) other;
 			return new EqualsBuilder()
-				.append(gateway, o.gateway)
-				.append(headers, o.headers)
+				.append(helper, o.helper)
 				.isEquals();
 		} else {
 			return false;

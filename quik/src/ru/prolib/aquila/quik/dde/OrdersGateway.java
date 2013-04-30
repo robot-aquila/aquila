@@ -101,6 +101,15 @@ public class OrdersGateway implements CacheGateway {
 		}
 	}
 	
+	@Override
+	public Object getKeyValue(Row row) throws DDEException {
+		try {
+			return converter.getLong(row, ID);
+		} catch ( ValueException e ) {
+			throw new DDEException(e.getMessage());
+		}
+	}
+	
 	private OrderStatus getStatus(Row row) throws ValueException {
 		return (OrderStatus) converter.getStringMappedTo(row,STATUS,STATUS_MAP);
 	}
