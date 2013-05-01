@@ -19,6 +19,7 @@ public class QUIKConfigImplTest {
 	public void setUp() throws Exception {
 		config = new QUIKConfigImpl();
 		config.allDeals = "all-deals";
+		config.trades = "trades";
 		config.orders = "orders";
 		config.portfoliosFUT = "portfolio.fut";
 		config.portfoliosSTK = "portfolio.stk";
@@ -37,6 +38,7 @@ public class QUIKConfigImplTest {
 	public void testDefaults() throws Exception {
 		config = new QUIKConfigImpl();
 		assertNull(config.allDeals);
+		assertNull(config.trades);
 		assertNull(config.orders);
 		assertNull(config.portfoliosFUT);
 		assertNull(config.portfoliosSTK);
@@ -54,6 +56,7 @@ public class QUIKConfigImplTest {
 	@Test
 	public void testGetters() throws Exception {
 		assertEquals("all-deals", config.getAllDeals());
+		assertEquals("trades", config.getTrades());
 		assertEquals("orders", config.getOrders());
 		assertEquals("portfolio.fut", config.getPortfoliosFUT());
 		assertEquals("portfolio.stk", config.getPortfoliosSTK());
@@ -117,7 +120,10 @@ public class QUIKConfigImplTest {
 		Variant<Boolean> vSkpT2Q = new Variant<Boolean>(vTimeFmt)
 			.add(true)
 			.add(false);
-		Variant<?> iterator = vSkpT2Q;
+		Variant<String> vTrds = new Variant<String>(vSkpT2Q)
+			.add("trades")
+			.add("zubba");
+		Variant<?> iterator = vTrds;
 		int foundCnt = 0;
 		QUIKConfigImpl found = null, x = null;
 		do {
@@ -135,6 +141,7 @@ public class QUIKConfigImplTest {
 			x.dateFormat = vDateFmt.get();
 			x.timeFormat = vTimeFmt.get();
 			x.skipTRANS2QUIK = vSkpT2Q.get();
+			x.trades = vTrds.get();
 			if ( config.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -154,6 +161,7 @@ public class QUIKConfigImplTest {
 		assertEquals("y-M-d", found.getDateFormat());
 		assertEquals("H:mm", found.getTimeFormat());
 		assertTrue(found.skipTRANS2QUIK());
+		assertEquals("trades", found.getTrades());
 	}
 	
 	@Test
@@ -179,6 +187,7 @@ public class QUIKConfigImplTest {
 			.append("y-M-d")
 			.append("H:mm")
 			.append(true)
+			.append("trades")
 			.toHashCode();
 		assertEquals(hashCode, config.hashCode());
 	}

@@ -73,6 +73,7 @@ public class QUIKFactory implements TerminalFactory {
 	 * quik-path - полный путь к каталогу программы QUIK, с которой будет
 	 * устанавливаться соединение (обязательный);<br>
 	 * deals - имя таблицы всех сделок. Значение по-умолчанию deals;<br>
+	 * trades - имя таблицы собственных сделок. По-умолчанию trades;<br>
 	 * orders - имя таблицы заявок. Значение по-умолчанию orders;<br>
 	 * stop-orders - имя таблицы стоп-заявок. Значение по-умолчанию
 	 * stop-orders;<br>
@@ -116,6 +117,7 @@ public class QUIKFactory implements TerminalFactory {
 		config.timeFormat = props.getProperty("time-format",
 				((SimpleDateFormat) DateFormat.getTimeInstance()).toPattern());
 		config.skipTRANS2QUIK = props.getProperty("skip-trans2quik") != null;
+		config.trades = props.getProperty("trades", "trades");
 		return createTerminal(config);
 	}
 	
@@ -228,9 +230,11 @@ public class QUIKFactory implements TerminalFactory {
 	/**
 	 * Создать DDE-сервис обработки импорта данных.
 	 * <p>
+	 * Стартер необходим для запуска старого сервиса.
+	 * Убрать после перехода на кэш.
+	 * <p>
 	 * @param locator сервис-локатор
-	 * @param starter необходим для запуска старого сервиса, убрать после
-	 * перехода на кэш
+	 * @param starter стартер
 	 * @return сервис DDE
 	 */
 	private DDEService
@@ -252,6 +256,9 @@ public class QUIKFactory implements TerminalFactory {
 		service.setHandler(config.getOrders(),
 			new MirrorTableHandler(
 				new OrdersGateway(cache.getOrdersCache(), conv)));
+		service.setHandler(config.getTrades(),
+			new MirrorTableHandler(
+				new TradesGateway(cache.getTradesCache(), conv)));
 		return service;
 	}
 	

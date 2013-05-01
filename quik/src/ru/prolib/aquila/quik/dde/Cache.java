@@ -10,10 +10,12 @@ import ru.prolib.aquila.core.EventSystem;
  */
 public class Cache {
 	private final OrdersCache orders;
+	private final TradesCache trades;
 	
-	public Cache(OrdersCache orders) {
+	public Cache(OrdersCache orders, TradesCache trades) {
 		super();
 		this.orders = orders;
+		this.trades = trades;
 	}
 	
 	/**
@@ -24,8 +26,11 @@ public class Cache {
 	 */
 	public static Cache createCache(EventSystem es) {
 		EventDispatcher dispatcher = es.createEventDispatcher("Cache");
-		return new Cache(new OrdersCache(dispatcher,
-				es.createGenericType(dispatcher, "Orders")));
+		return new Cache(
+				new OrdersCache(dispatcher,
+						es.createGenericType(dispatcher, "Orders")),
+				new TradesCache(dispatcher,
+						es.createGenericType(dispatcher, "MyTrades")));
 	}
 	
 	/**
@@ -33,8 +38,17 @@ public class Cache {
 	 * <p>
 	 * @return кэш
 	 */
-	public OrdersCache getOrdersCache() {
+	public synchronized OrdersCache getOrdersCache() {
 		return orders;
+	}
+	
+	/**
+	 * Получить кэш таблицы собственных сделок.
+	 * <p>
+	 * @return кэш
+	 */
+	public synchronized TradesCache getTradesCache() {
+		return trades;
 	}
 	
 	@Override
@@ -51,6 +65,7 @@ public class Cache {
 		Cache o = (Cache) other;
 		return new EqualsBuilder()
 			.append(orders, o.orders)
+			.append(trades, o.trades)
 			.isEquals();
 	}
 

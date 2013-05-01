@@ -23,6 +23,13 @@ public interface QUIKConfig {
 	public String getAllDeals();
 	
 	/**
+	 * Имя таблицы собственных сделок.
+	 * <p>
+	 * @return имя таблицы
+	 */
+	public String getTrades();
+	
+	/**
 	 * Имя таблицы портфелей по бумагам.
 	 * <p>
 	 * @return имя таблицы

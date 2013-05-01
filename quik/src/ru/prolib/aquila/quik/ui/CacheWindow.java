@@ -18,6 +18,8 @@ public class CacheWindow {
 	private static final Logger logger;
 	
 	public static final String TEXT_WIN_CACHE_TITLE = "WIN_CACHE_TITLE";
+	public static final String TEXT_TAB_CACHE_ORDERS = "TAB_CACHE_ORDERS";
+	public static final String TEXT_TAB_CACHE_TRADES = "TAB_CACHE_TRADES";
 	
 	static {
 		logger = LoggerFactory.getLogger(CacheWindow.class);
@@ -26,7 +28,9 @@ public class CacheWindow {
 	private final JDialog window;
 	private final QUIKTerminal terminal;
 	private final ClassLabels labels;
+	private final JTabbedPane tabbedPane = new JTabbedPane();
 	private Table ordersCacheTable;
+	private Table tradesCacheTable;
 	
 	public CacheWindow(JFrame owner, QUIKTerminal terminal,
 			ClassLabels labels)
@@ -44,12 +48,22 @@ public class CacheWindow {
 		
 		TableBuilder builder = new TableBuilder(labels, terminal.getDdeCache());
 		ordersCacheTable = builder.createOrdersCacheTable();
-		ordersCacheTable.setFillsViewportHeight(true);
-		JScrollPane scrollPane = new JScrollPane(ordersCacheTable);
-		window.add(scrollPane);
+		tradesCacheTable = builder.createTradesCacheTable();
+		addTab(ordersCacheTable, TEXT_TAB_CACHE_ORDERS);
+		addTab(tradesCacheTable, TEXT_TAB_CACHE_TRADES);
+		//ordersCacheTable.setFillsViewportHeight(true);
+		//JScrollPane scrollPane = new JScrollPane(ordersCacheTable);
+		//window.add(scrollPane);
+		window.add(tabbedPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));
 		window.setPreferredSize(new Dimension(800, 600));
 		window.pack();
+	}
+	
+	private void addTab(Table table, String titleId) {
+		table.setFillsViewportHeight(true);
+		JScrollPane scrollPane = new JScrollPane(table);
+		tabbedPane.add(labels.get(titleId), scrollPane);
 	}
 	
 	public void showWindow() {
@@ -61,11 +75,13 @@ public class CacheWindow {
 	
 	protected void onHide() {
 		ordersCacheTable.stop();
+		tradesCacheTable.stop();
 		logger.debug("Hide DDE cache window");
 	}
 	
 	protected void onShow() {
 		logger.debug("Show DDE cache window");
+		tradesCacheTable.start();
 		ordersCacheTable.start();
 	}
 

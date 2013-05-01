@@ -6,6 +6,7 @@ import java.util.Date;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.quik.dde.Cache;
 import ru.prolib.aquila.quik.dde.OrderCache;
+import ru.prolib.aquila.quik.dde.TradeCache;
 import ru.prolib.aquila.ui.ClassLabels;
 
 public class TableBuilder {
@@ -99,6 +100,42 @@ public class TableBuilder {
 		}, Column.SHORT));
 		return new Table(new OrdersCacheTableModel(labels,
 				columns, cache.getOrdersCache()));
+	}
+	
+	public Table createTradesCacheTable() {
+		Columns columns = new Columns();
+		columns.add(new Column("COL_CACHE_TRADE_ID", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((TradeCache) obj).getId();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_TRADE_TIME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return dateFormat.format(((TradeCache) obj).getTime());
+			}
+		}, Column.lONG));
+		columns.add(new Column("COL_CACHE_TRADE_ORDER_ID", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((TradeCache) obj).getOrderId();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_TRADE_PRICE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((TradeCache) obj).getPrice();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_TRADE_QTY", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((TradeCache) obj).getQty();
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_TRADE_VOLUME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return ((TradeCache) obj).getVolume();
+			}
+		}, Column.MIDDLE));
+		return new Table(new TradesCacheTableModel(labels,
+				columns, cache.getTradesCache()));
 	}
 
 }

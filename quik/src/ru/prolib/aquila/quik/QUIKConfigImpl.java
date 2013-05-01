@@ -14,6 +14,7 @@ public class QUIKConfigImpl implements QUIKConfig {
 	public String serviceName;
 	public String securities;
 	public String allDeals;
+	public String trades;
 	public String portfoliosSTK;
 	public String portfoliosFUT;
 	public String positionsSTK;
@@ -98,6 +99,7 @@ public class QUIKConfigImpl implements QUIKConfig {
 				.append(dateFormat, o.dateFormat)
 				.append(timeFormat, o.timeFormat)
 				.append(skipTRANS2QUIK, o.skipTRANS2QUIK)
+				.append(trades, o.trades)
 				.isEquals();
 		} else {
 			return false;
@@ -120,6 +122,7 @@ public class QUIKConfigImpl implements QUIKConfig {
 			.append(dateFormat)
 			.append(timeFormat)
 			.append(skipTRANS2QUIK)
+			.append(trades)
 			.toHashCode();
 	}
 
@@ -136,6 +139,11 @@ public class QUIKConfigImpl implements QUIKConfig {
 	@Override
 	public boolean skipTRANS2QUIK() {
 		return skipTRANS2QUIK;
+	}
+
+	@Override
+	public String getTrades() {
+		return trades;
 	}
 
 }

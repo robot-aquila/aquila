@@ -15,6 +15,7 @@ public class CacheTest {
 	private IMocksControl control;
 	private EventSystem es;
 	private OrdersCache orders;
+	private TradesCache trades;
 	private Cache cache;
 
 	@Before
@@ -22,23 +23,28 @@ public class CacheTest {
 		control = createStrictControl();
 		es = control.createMock(EventSystem.class);
 		orders = control.createMock(OrdersCache.class);
-		cache = new Cache(orders);
+		trades = control.createMock(TradesCache.class);
+		cache = new Cache(orders, trades);
 	}
 	
 	@Test
 	public void testCreateCache() throws Exception {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
 		EventType onOrdersUpdate = control.createMock(EventType.class);
+		EventType onTradesUpdate = control.createMock(EventType.class);
 		expect(es.createEventDispatcher("Cache")).andReturn(dispatcher);
 		expect(es.createGenericType(dispatcher, "Orders"))
 			.andReturn(onOrdersUpdate);
+		expect(es.createGenericType(dispatcher, "MyTrades"))
+			.andReturn(onTradesUpdate);
 		control.replay();
 		
 		cache = Cache.createCache(es);
 		
 		control.verify();
 		assertNotNull(cache);
-		Cache expected = new Cache(new OrdersCache(dispatcher, onOrdersUpdate));
+		Cache expected = new Cache(new OrdersCache(dispatcher, onOrdersUpdate),
+				new TradesCache(dispatcher, onTradesUpdate));
 		assertEquals(expected, cache);
 	}
 	
@@ -54,11 +60,14 @@ public class CacheTest {
 		Variant<OrdersCache> vOrders = new Variant<OrdersCache>()
 			.add(orders)
 			.add(control.createMock(OrdersCache.class));
-		Variant<?> iterator = vOrders;
+		Variant<TradesCache> vTrades = new Variant<TradesCache>(vOrders)
+			.add(trades)
+			.add(control.createMock(TradesCache.class));
+		Variant<?> iterator = vTrades;
 		int foundCnt = 0;
 		Cache x = null, found = null;
 		do {
-			x = new Cache(vOrders.get());
+			x = new Cache(vOrders.get(), vTrades.get());
 			if ( cache.equals(x) ) {
 				found = x;
 				foundCnt ++;
@@ -66,6 +75,7 @@ public class CacheTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(orders, found.getOrdersCache());
+		assertSame(trades, found.getTradesCache());
 	}
 
 }
