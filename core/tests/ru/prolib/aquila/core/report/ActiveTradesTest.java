@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -150,8 +149,7 @@ public class ActiveTradesTest {
 		final TradeReportEvent et = new TradeReportEvent(
 				onChanged, createAddToExistsReportEtalon());
 		trades.addTrade(createTrade(descr1, BUY, date1, 100L));
-		
-		trades.OnReportChanged().addListener(new EventListener() {
+		EventListener listener = (new EventListener() {
 
 			@Override
 			public void onEvent(Event event) {
@@ -159,23 +157,11 @@ public class ActiveTradesTest {
 				finished.countDown();
 				
 			}			
-		});
-		trades.OnReportClosed().addListener(new EventListener() {
-
-			@Override
-			public void onEvent(Event event) {
-				fail("OnTradeReportClosed event fired");
-				
-			}			
-		});
-		trades.OnReportOpened().addListener(new EventListener() {
-
-			@Override
-			public void onEvent(Event event) {
-				fail("OnTradeReportOpened event fired");
-				
-			}			
-		});
+		});		
+		trades.OnReportChanged().addListener(listener);
+		trades.OnReportClosed().addListener(listener);
+		trades.OnReportOpened().addListener(listener);
+		
 		trades.addTrade(createTrade(descr1, BUY, date1, 100L));
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 	}
@@ -187,30 +173,18 @@ public class ActiveTradesTest {
 				onClosed, createCloseReportEtalon());
 		trades.addTrade(createTrade(descr1, BUY, date1, 100L));
 		
-		trades.OnReportClosed().addListener(new EventListener() {
+		EventListener listener = (new EventListener() {
 
 			@Override
 			public void onEvent(Event event) {
 				assertEquals(et, event);
 				finished.countDown();
 			}			
-		});
-		trades.OnReportChanged().addListener(new EventListener() {
-
-			@Override
-			public void onEvent(Event event) {
-				fail("OnTradeReportChanged event fired");
-				
-			}			
-		});
-		trades.OnReportOpened().addListener(new EventListener() {
-
-			@Override
-			public void onEvent(Event event) {
-				fail("OnTradeReportOpened event fired");
-				
-			}			
-		});
+		});		
+		trades.OnReportClosed().addListener(listener);
+		trades.OnReportChanged().addListener(listener);
+		trades.OnReportOpened().addListener(listener);
+		
 		trades.addTrade(createTrade(descr1, SELL, date2, 100L));
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 	}
@@ -221,7 +195,7 @@ public class ActiveTradesTest {
 		
 		final TradeReportEvent et = new TradeReportEvent(
 				onOpened, createOpenTradeTestEtalon(descr1));
-		trades.OnReportOpened().addListener(new EventListener() {
+		EventListener listener = (new EventListener() {
 
 			@Override
 			public void onEvent(Event event) {
@@ -229,22 +203,10 @@ public class ActiveTradesTest {
 				finished.countDown();
 			}			
 		});
-		trades.OnReportChanged().addListener(new EventListener() {
-
-			@Override
-			public void onEvent(Event event) {
-				fail("OnTradeReportChanged event fired");
-				
-			}			
-		});
-		trades.OnReportClosed().addListener(new EventListener() {
-
-			@Override
-			public void onEvent(Event event) {
-				fail("OnTradeReportClosed event fired");
-				
-			}			
-		});
+		trades.OnReportOpened().addListener(listener);
+		trades.OnReportChanged().addListener(listener);
+		trades.OnReportClosed().addListener(listener);
+		
 		trades.addTrade(createTrade(descr1, BUY, date1, 100L));
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		
