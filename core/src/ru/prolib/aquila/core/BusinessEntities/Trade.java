@@ -27,6 +27,7 @@ public class Trade {
 	private Double price;
 	private Long qty;
 	private Double volume;
+	private Long orderId;
 	
 	/**
 	 * Создать экземпляр сделки.
@@ -126,6 +127,24 @@ public class Trade {
 	}
 	
 	/**
+	 * Получить номер заявки, которой принадлежит сделка.
+	 * <p>
+	 * @return номер заявки или null для анонимной сделки
+	 */
+	public synchronized Long getOrderId() {
+		return orderId;
+	}
+	
+	/**
+	 * Установить номер заявки, которой принадлежит сделка.
+	 * <p>
+	 * @param orderId номер заявки
+	 */
+	public synchronized void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+	
+	/**
 	 * Получить инструмент, по которому совершена сделка
 	 * <p>
 	 * @return инструмент
@@ -162,6 +181,7 @@ public class Trade {
 				.append(price, o.price)
 				.append(qty, o.qty)
 				.append(volume, o.volume)
+				.append(orderId, o.orderId)
 				.isEquals();
 		} else {
 			return false;
@@ -178,7 +198,7 @@ public class Trade {
 	}
 	
 	@Override
-	public int hashCode() {
+	public synchronized int hashCode() {
 		return new HashCodeBuilder(20121031, 120517)
 			.append(id)
 			.append(descr)
@@ -187,6 +207,7 @@ public class Trade {
 			.append(price)
 			.append(qty)
 			.append(volume)
+			.append(orderId)
 			.toHashCode();
 	}
 

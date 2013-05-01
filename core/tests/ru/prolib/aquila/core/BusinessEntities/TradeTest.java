@@ -44,6 +44,7 @@ public class TradeTest {
 		trade.setPrice(100.00d);
 		trade.setQty(1L);
 		trade.setVolume(200.00d);
+		trade.setOrderId(1024L);
 	}
 	
 	@Test
@@ -56,6 +57,7 @@ public class TradeTest {
 		assertEquals(100.00d, trade.getPrice(), 0.001d);
 		assertEquals((Long) 1L, trade.getQty());
 		assertEquals(200.00d, trade.getVolume(), 0.001d);
+		assertEquals((Long) 1024L, trade.getOrderId());
 	}
 	
 	@Test
@@ -97,6 +99,11 @@ public class TradeTest {
 			.add(null)
 			.add(200.00d)
 			.add(400.00d);
+		Variant<Long> vOrdId = new Variant<Long>(vVol)
+			.add(null)
+			.add(1024L)
+			.add(256L);
+		Variant<?> iterator = vOrdId;
 		int foundCnt = 0;
 		Trade found = null;
 		do {
@@ -108,12 +115,13 @@ public class TradeTest {
 			actual.setPrice(vPrice.get());
 			actual.setQty(vQty.get());
 			actual.setVolume(vVol.get());
+			actual.setOrderId(vOrdId.get());
 			if ( trade.equals(actual) ) {
 				foundCnt ++;
 				found = actual;
 			}
 			
-		} while ( vVol.next() );
+		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertEquals((Long) 105L, found.getId());
 		assertSame(descr, found.getSecurityDescriptor());
@@ -122,6 +130,7 @@ public class TradeTest {
 		assertEquals(100.00d, found.getPrice(), 0.001d);
 		assertEquals((Long) 1L, found.getQty());
 		assertEquals(200.00d, found.getVolume(), 0.001d);
+		assertEquals((Long) 1024L, found.getOrderId());
 	}
 	
 	@Test
@@ -141,6 +150,7 @@ public class TradeTest {
 			.append(100.00d)
 			.append(1L)
 			.append(200.00d)
+			.append(1024L)
 			.toHashCode();
 		assertEquals(hashCode, trade.hashCode());
 	}
