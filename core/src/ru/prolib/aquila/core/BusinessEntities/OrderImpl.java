@@ -1,8 +1,10 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventType;
@@ -27,6 +29,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private final EventType onChanged;
 	private final EventType onDone;
 	private final EventType onFailed;
+	private final EventType onTrade;
 	private Account account;
 	private SecurityDescriptor descr;
 	private OrderDirection direction;
@@ -45,6 +48,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private final List<OrderHandler> eventHandlers;
 	private final Terminal terminal;
 	private Date time,lastChangeTime;
+	private final List<Trade> trades = new Vector<Trade>();
 	
 	/**
 	 * Конструктор.
@@ -59,6 +63,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	 * @param onChanged тип события
 	 * @param onDone тип события
 	 * @param onFailed тип события
+	 * @param onTrade тип события
 	 * @param eventHandlers набор генераторов событий 
 	 * @param terminal терминал заявки
 	 */
@@ -72,6 +77,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 					 EventType onChanged,
 					 EventType onDone,
 					 EventType onFailed,
+					 EventType onTrade,
 					 List<OrderHandler> eventHandlers,
 					 Terminal terminal)
 	{
@@ -86,6 +92,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 		this.onChanged = onChanged;
 		this.onDone = onDone;
 		this.onFailed = onFailed;
+		this.onTrade = onTrade;
 		this.eventHandlers = eventHandlers;
 		this.terminal = terminal;
 	}
@@ -438,6 +445,32 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 			lastChangeTime = value;
 			setChanged();
 		}
+	}
+
+	@Override
+	public EventType OnTrade() {
+		return onTrade;
+	}
+
+	@Override
+	public synchronized List<Trade> getTrades() {
+		return trades;
+	}
+
+	@Override
+	public synchronized void addTrade(Trade trade) {
+		trades.add(trade);
+		Collections.sort(trades);
+	}
+
+	@Override
+	public void fireTradeEvent(Trade trade) {
+		dispatcher.dispatch(new OrderTradeEvent(onTrade, this, trade));
+	}
+
+	@Override
+	public void clearAllEventListeners() {
+		dispatcher.close();
 	}
 
 }

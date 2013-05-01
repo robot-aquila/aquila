@@ -83,6 +83,7 @@ public class OrdersImplTest {
 				eventSystem.createGenericType(edisp),
 				eventSystem.createGenericType(edisp),
 				eventSystem.createGenericType(edisp),
+				eventSystem.createGenericType(edisp),
 				new LinkedList<OrderHandler>(),
 				terminal);
 	}

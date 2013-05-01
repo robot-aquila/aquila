@@ -37,7 +37,7 @@ public class OrderFactoryImplTest {
 							 onCancelled, onCancelFailed,
 							 onFilled, onPartiallyFilled,
 							 onChanged, onDone,
-							 onFailed;
+							 onFailed, onTrade;
 	private static Terminal terminal;
 	private static OrderFactoryImpl factory;
 	
@@ -55,6 +55,7 @@ public class OrderFactoryImplTest {
 		onChanged = control.createMock(EventType.class);
 		onDone = control.createMock(EventType.class);
 		onFailed = control.createMock(EventType.class);
+		onTrade = control.createMock(EventType.class);
 		terminal = control.createMock(Terminal.class);
 		factory = new OrderFactoryImpl(es, terminal);
 	}
@@ -87,6 +88,8 @@ public class OrderFactoryImplTest {
 			.andReturn(onDone);
 		expect(es.createGenericType(dispatcher, "OnFailed"))
 			.andReturn(onFailed);
+		expect(es.createGenericType(dispatcher, "OnTrade"))
+			.andReturn(onTrade);
 		control.replay();
 		
 		OrderImpl order = (OrderImpl) factory.createOrder();
@@ -104,6 +107,7 @@ public class OrderFactoryImplTest {
 		assertSame(onChanged, order.OnChanged());
 		assertSame(onDone, order.OnDone());
 		assertSame(onFailed, order.OnFailed());
+		assertSame(onTrade, order.OnTrade());
 		assertSame(terminal, order.getTerminal());
 		
 		List<OrderHandler> list = order.getEventHandlers();

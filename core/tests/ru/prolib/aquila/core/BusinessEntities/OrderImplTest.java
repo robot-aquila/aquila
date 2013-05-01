@@ -7,12 +7,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.EventSystemImpl;
@@ -43,6 +48,7 @@ public class OrderImplTest {
 	private EventType onChanged;
 	private EventType onDone;
 	private EventType onFailed;
+	private EventType onTrade;
 	private OrderImpl order;
 	private S<OrderImpl> setter;
 	private G<?> getter;
@@ -70,12 +76,13 @@ public class OrderImplTest {
 		onChanged = eventSystem.createGenericType(dispatcher);
 		onDone = eventSystem.createGenericType(dispatcher);
 		onFailed = eventSystem.createGenericType(dispatcher);
+		onTrade = eventSystem.createGenericType(dispatcher);
 		eventHandlers = new LinkedList<OrderHandler>();
 		terminal = control.createMock(Terminal.class); 
 
 		order = new OrderImpl(dispatcher, onRegister, onRegisterFailed,
 				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
-				onChanged, onDone, onFailed, eventHandlers, terminal);
+				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
 		queue.start();
 		setter = null;
 		getter = null;
@@ -85,6 +92,32 @@ public class OrderImplTest {
 	public void tearDown() throws Exception {
 		queue.stop();
 		assertTrue(queue.join(1000));
+	}
+	
+	/**
+	 * Создать сделку.
+	 * <p>
+	 * Так же устанавливает объем, равный qty * price.
+	 * <p>
+	 * @param id номер сделки
+	 * @param time время сделки в формате yyyy-MM-dd HH:mm:ss
+	 * @param price цена
+	 * @param qty количество
+	 * @return сделка
+	 * @throws Exception TODO
+	 */
+	private Trade createTrade(Long id, String time, Double price, Long qty)
+			throws Exception
+	{
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Trade trade = new Trade(terminal);
+		trade.setId(id);
+		trade.setPrice(price);
+		trade.setQty(qty);
+		trade.setSecurityDescriptor(secDescr);
+		trade.setTime(format.parse(time));
+		trade.setVolume(price * qty);
+		return trade;
 	}
 	
 	@Test
@@ -128,6 +161,7 @@ public class OrderImplTest {
 		assertSame(onChanged, order.OnChanged());
 		assertSame(onDone, order.OnDone());
 		assertSame(onFailed, order.OnFailed());
+		assertSame(onTrade, order.OnTrade());
 	}
 	
 	/**
@@ -560,4 +594,71 @@ public class OrderImplTest {
 						 df.parse("2032-02-21 06:58:00"));
 	}
 	
+	@Test
+	public void testAddGetTrades() throws Exception {
+		List<Trade> expected = new Vector<Trade>();
+		expected.add(createTrade(1L, "2013-05-01 00:00:01", 12.30d,  1L));
+		expected.add(createTrade(2L, "2013-05-01 00:00:05", 12.80d, 10L));
+		expected.add(createTrade(5L, "2013-05-01 00:00:02", 13.01d,  5L));
+		expected.add(createTrade(8L, "2013-05-01 00:00:02", 12.80d,  7L));
+		
+		// при добавлении сделки сортируются
+		order.addTrade(createTrade(2L, "2013-05-01 00:00:05", 12.80d, 10L));
+		order.addTrade(createTrade(1L, "2013-05-01 00:00:01", 12.30d,  1L));
+		order.addTrade(createTrade(8L, "2013-05-01 00:00:02", 12.80d,  7L));
+		order.addTrade(createTrade(5L, "2013-05-01 00:00:02", 13.01d,  5L));
+		assertEquals(expected, order.getTrades());
+	}
+	
+	@Test
+	public void testFireTradeEvent() throws Exception {
+		Trade t0 = createTrade(100L, "2013-05-01 00:00:00", 25.19d, 10L);
+		final Event expected = new OrderTradeEvent(onTrade, order, t0);
+		final CountDownLatch finished = new CountDownLatch(1);
+		order.OnTrade().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				assertEquals(expected, event);
+				finished.countDown();
+			}
+		});
+		
+		order.fireTradeEvent(t0);
+		assertTrue(finished.await(1000, TimeUnit.MILLISECONDS));
+	}
+	
+	@Test
+	public void testClearAllEventListsners() throws Exception {
+		dispatcher = control.createMock(EventDispatcher.class);
+		onRegister = control.createMock(EventType.class);
+		onRegisterFailed = control.createMock(EventType.class);
+		onCancelled = control.createMock(EventType.class);
+		onCancelFailed = control.createMock(EventType.class);
+		onFilled = control.createMock(EventType.class);
+		onPartiallyFilled = control.createMock(EventType.class);
+		onChanged = control.createMock(EventType.class);
+		onDone = control.createMock(EventType.class);
+		onFailed = control.createMock(EventType.class);
+		onTrade = control.createMock(EventType.class);
+		expect(dispatcher.asString()).andStubReturn("order");
+		expect(onRegister.asString()).andStubReturn("reg");
+		expect(onRegisterFailed.asString()).andStubReturn("reg-fail");
+		expect(onCancelled.asString()).andStubReturn("cancel");
+		expect(onCancelFailed.asString()).andStubReturn("cancel-fail");
+		expect(onFilled.asString()).andStubReturn("fill");
+		expect(onPartiallyFilled.asString()).andStubReturn("part-fill");
+		expect(onChanged.asString()).andStubReturn("chng");
+		expect(onDone.asString()).andStubReturn("done");
+		expect(onFailed.asString()).andStubReturn("fail");
+		expect(onTrade.asString()).andStubReturn("trade");
+		dispatcher.close();
+		order = new OrderImpl(dispatcher, onRegister, onRegisterFailed,
+				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
+				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
+		control.replay();
+		
+		order.clearAllEventListeners();
+		
+		control.verify();
+	}
+
 }

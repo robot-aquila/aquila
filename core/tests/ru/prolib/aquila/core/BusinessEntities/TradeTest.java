@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -45,6 +46,22 @@ public class TradeTest {
 		trade.setQty(1L);
 		trade.setVolume(200.00d);
 		trade.setOrderId(1024L);
+	}
+	
+	/**
+	 * Создать сделку.
+	 * <p>
+	 * @param id номер сделки
+	 * @param time время в формате yyyy-MM-dd HH:mm:ss
+	 * @return сделка
+	 * @throws Exception
+	 */
+	private Trade createTrade(Long id, String time) throws Exception {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Trade trade = new Trade(terminal);
+		trade.setId(id);
+		trade.setTime(format.parse(time));
+		return trade;
 	}
 	
 	@Test
@@ -162,6 +179,17 @@ public class TradeTest {
 		control.replay();
 		assertSame(security, trade.getSecurity());
 		control.verify();
+	}
+	
+	@Test
+	public void testCompareTo() throws Exception {
+		Trade t0 = createTrade(100L, "2013-05-01 20:00:00");
+		assertEquals( 1,t0.compareTo(null));
+		assertEquals( 0,t0.compareTo(createTrade(100L, "2013-05-01 20:00:00")));
+		assertEquals( 1,t0.compareTo(createTrade( 99L, "2013-05-01 20:00:00")));
+		assertEquals(-1,t0.compareTo(createTrade(101L, "2013-05-01 20:00:00")));
+		assertEquals(-1,t0.compareTo(createTrade(100L, "2013-05-01 20:00:01")));
+		assertEquals( 1,t0.compareTo(createTrade(100L, "2013-05-01 19:00:59")));
 	}
 
 }

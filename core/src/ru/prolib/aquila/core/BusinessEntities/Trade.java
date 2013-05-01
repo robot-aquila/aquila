@@ -12,7 +12,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * 2012-06-01<br>
  * $Id: Trade.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public class Trade {
+public class Trade implements Comparable<Trade> {
 	private final static SimpleDateFormat df;
 	
 	static {
@@ -209,6 +209,17 @@ public class Trade {
 			.append(volume)
 			.append(orderId)
 			.toHashCode();
+	}
+
+	@Override
+	public synchronized int compareTo(Trade o) {
+		if ( o == null ) {
+			return 1;
+		}
+		int res = id.compareTo(o.id);
+		if ( res != 0 ) return res;
+		res = time.compareTo(o.time);
+		return res;
 	}
 
 }

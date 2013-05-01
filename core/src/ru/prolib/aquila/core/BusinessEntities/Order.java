@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.Date;
+import java.util.List;
 
 import ru.prolib.aquila.core.EventType;
 
@@ -85,6 +86,16 @@ public interface Order {
 	 * @return тип события
 	 */
 	public EventType OnDone();
+	
+	/**
+	 * Получить тип события: новая сделка по заявке.
+	 * <p>
+	 * Генерируется событие класса {@link OrderTradeEvent}.
+	 * Актуально только для рыночных и лимитных заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnTrade();
 
 	/**
 	 * Получить биржевой идентификатор заявки.
@@ -251,5 +262,14 @@ public interface Order {
 	 * статусе
 	 */
 	public Date getLastChangeTime();
+	
+	/**
+	 * Получить список сделок заявки.
+	 * <p>
+	 * Только для лимитных и рыночных заявок. Сделки отсортированы по номерам.
+	 * <p>
+	 * @return список сделок
+	 */
+	public List<Trade> getTrades();
 	
 }
