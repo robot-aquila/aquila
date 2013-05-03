@@ -108,7 +108,9 @@ public class EventTypeMap<T> implements Map<T, EventType> {
 
 	@Override
 	public EventType remove(Object key) {
-		return storage.remove(key);
+		EventType type = storage.remove(key);
+		dispatcher.removeListeners(type);
+		return type;
 	}
 
 	@Override

@@ -152,6 +152,7 @@ public class EventTypeMapTest {
 	@Test
 	public void testRemove() throws Exception {
 		expect(storage.remove(eq(876))).andReturn(type2);
+		dispatcher.removeListeners(same(type2));
 		control.replay();
 		
 		assertSame(type2, map.remove(876));
