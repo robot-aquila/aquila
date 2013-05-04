@@ -104,10 +104,27 @@ public class OrderImplTest {
 	 * @param price цена
 	 * @param qty количество
 	 * @return сделка
-	 * @throws Exception TODO
+	 * @throws Exception
 	 */
 	private Trade createTrade(Long id, String time, Double price, Long qty)
 			throws Exception
+	{
+		return createTrade(id, time, price, qty, price * qty);
+	}
+	
+	/**
+	 * Создать сделку.
+	 * <p>
+	 * @param id номер сделки
+	 * @param time время сделки в формате yyyy-MM-dd HH:mm:ss
+	 * @param price цена
+	 * @param qty количество
+	 * @param vol объем сделки
+	 * @return сделка
+	 * @throws Exception
+	 */
+	private Trade createTrade(Long id, String time, Double price, Long qty,
+			Double vol) throws Exception
 	{
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Trade trade = new Trade(terminal);
@@ -116,8 +133,8 @@ public class OrderImplTest {
 		trade.setQty(qty);
 		trade.setSecurityDescriptor(secDescr);
 		trade.setTime(format.parse(time));
-		trade.setVolume(price * qty);
-		return trade;
+		trade.setVolume(vol);
+		return trade;		
 	}
 	
 	@Test
@@ -596,22 +613,28 @@ public class OrderImplTest {
 	
 	@Test
 	public void testAddGetTrades() throws Exception {
+		order.setQty(25L);
 		List<Trade> expected = new Vector<Trade>();
-		expected.add(createTrade(1L, "2013-05-01 00:00:01", 12.30d,  1L));
-		expected.add(createTrade(2L, "2013-05-01 00:00:05", 12.80d, 10L));
-		expected.add(createTrade(5L, "2013-05-01 00:00:02", 13.01d,  5L));
-		expected.add(createTrade(8L, "2013-05-01 00:00:02", 12.80d,  7L));
+		expected.add(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
+		expected.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
+		expected.add(createTrade(5L,"2013-05-01 00:00:02",13.01d, 5L,130.1d));
+		expected.add(createTrade(8L,"2013-05-01 00:00:02",12.80d, 7L,179.2d));
 		
 		// при добавлении сделки сортируются
-		order.addTrade(createTrade(2L, "2013-05-01 00:00:05", 12.80d, 10L));
-		order.addTrade(createTrade(1L, "2013-05-01 00:00:01", 12.30d,  1L));
-		order.addTrade(createTrade(8L, "2013-05-01 00:00:02", 12.80d,  7L));
-		order.addTrade(createTrade(5L, "2013-05-01 00:00:02", 13.01d,  5L));
+		order.addTrade(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
+		order.addTrade(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
+		order.addTrade(createTrade(8L,"2013-05-01 00:00:02",12.80d, 7L,179.2d));
+		order.addTrade(createTrade(5L,"2013-05-01 00:00:02",13.01d, 5L,130.1d));
 		assertEquals(expected, order.getTrades());
+		// при добавлении перерасчитываются qty.rest, avg.exec.price, exec.vol
+		assertEquals(new Long(2), order.getQtyRest());
+		assertEquals(12.8239d, order.getAvgExecutedPrice(), 0.0001d);
+		assertEquals(589.9d, order.getExecutedVolume(), 0.0001d);
 	}
 	
 	@Test
 	public void testHasTrade() throws Exception {
+		order.setQty(20L);
 		assertFalse(order.hasTrade(2L));
 		assertFalse(order.hasTrade(8L));
 		order.addTrade(createTrade(2L, "2013-05-01 00:00:05", 12.80d, 10L));

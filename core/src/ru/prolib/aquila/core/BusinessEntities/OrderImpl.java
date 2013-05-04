@@ -458,9 +458,22 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized void addTrade(Trade trade) {
-		trades.add(trade);
+	public synchronized void addTrade(Trade newTrade) {
+		trades.add(newTrade);
 		Collections.sort(trades);
+		int execQty = 0;
+		double sumByPrice = 0.0d;
+		double sumByVolume = 0.0d;
+		for ( Trade trade : trades ) {
+			synchronized ( trade ) {
+				execQty += trade.getQty();
+				sumByPrice += trade.getPrice() * trade.getQty();
+				sumByVolume += trade.getVolume();
+			}
+		}
+		setQtyRest(qty - execQty);
+		setAvgExecutedPrice(sumByPrice / execQty);
+		setExecutedVolume(sumByVolume);
 	}
 
 	@Override
