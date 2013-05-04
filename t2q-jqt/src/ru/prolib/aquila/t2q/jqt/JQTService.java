@@ -91,6 +91,7 @@ public class JQTService implements T2QService {
 	@Override
 	public void send(String spec) throws T2QException {
 		try {
+			logger.debug("send: {}", spec);
 			server.send(spec);
 		} catch ( Exception e ) {
 			throw new T2QException(e);
