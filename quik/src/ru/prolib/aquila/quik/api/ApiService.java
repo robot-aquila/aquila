@@ -144,5 +144,14 @@ public class ApiService {
 			return false;
 		}
 	}
+	
+	/**
+	 * Делегат к {@link ApiServiceHandler#getPendingTransactionCount()}.
+	 * <p>
+	 * @return количество ожидающих транзакций
+	 */
+	public int getPendingTransactionCount() {
+		return handler.getPendingTransactionCount();
+	}
 
 }

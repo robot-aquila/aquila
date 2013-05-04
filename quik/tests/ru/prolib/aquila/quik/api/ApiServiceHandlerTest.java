@@ -194,5 +194,15 @@ public class ApiServiceHandlerTest {
 			control.verify();
 		}
 	}
+	
+	@Test
+	public void testGetPendingTransactionCount() throws Exception {
+		expect(onTransReplyMap.size()).andReturn(200);
+		control.replay();
+		
+		assertEquals(200, handler.getPendingTransactionCount());
+		
+		control.verify();
+	}
 
 }

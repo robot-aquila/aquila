@@ -160,5 +160,14 @@ public class ApiServiceHandler implements T2QHandler {
 			return false;
 		}
 	}
+	
+	/**
+	 * Получить количество отправленных транзакций, ожидающих ответа.
+	 * <p>
+	 * @return количество транзакций
+	 */
+	public int getPendingTransactionCount() {
+		return onTransReplyMap.size();
+	}
 
 }

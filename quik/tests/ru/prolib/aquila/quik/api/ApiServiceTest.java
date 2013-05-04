@@ -144,5 +144,15 @@ public class ApiServiceTest {
 		
 		api.send("trans string");
 	}
+	
+	@Test
+	public void testGetPendingTransactionCount() throws Exception {
+		expect(handler.getPendingTransactionCount()).andReturn(124);
+		control.replay();
+		
+		assertEquals(124, api.getPendingTransactionCount());
+		
+		control.verify();
+	}
 
 }
