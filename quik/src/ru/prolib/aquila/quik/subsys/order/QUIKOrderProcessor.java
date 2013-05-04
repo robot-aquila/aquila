@@ -1,23 +1,24 @@
 package ru.prolib.aquila.quik.subsys.order;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.quik.api.ApiServiceException;
+import ru.prolib.aquila.quik.dde.OrderCache;
+import ru.prolib.aquila.quik.dde.TradeCache;
+import ru.prolib.aquila.quik.dde.TradesCache;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 /**
  * Обработчик заявок.
  * <p>
  * Генерирует строки транзакций в соответствии с протоколом обмена данными
- * TRANS2QUIK. Отслеживает транзакции, связанные с заявками и стоп-заявками.
- * При возникновении ошибок в связи с вышеназванными транзакциями, выставляет
- * для заявки или стоп-заявки (при условии, что этим транзакциям соответствуют
- * ожидающие заявки) статус <b>ошибка регистрации</b> и переводит ее в список
- * зарегистрированных заявок. При этом, в качестве номера заявки используется
- * последовательность отрицательных целочисленных значений, для получения
- * которых используется дополнительный нумератор.
+ * TRANS2QUIK. Выставляет транзакции, связанные с заявками и стоп-заявками.
  * <p>
  * 2013-01-24<br>
  * $Id: QUIKOrderProcessor.java 576 2013-03-14 12:07:25Z whirlwind $
@@ -183,5 +184,71 @@ public class QUIKOrderProcessor implements OrderProcessor {
 			.append(locator, o.locator)
 			.isEquals();
 	}
+	
+	/*
+	public void adjustOrders() {
+		EditableOrders orders = locator.getTerminal().getOrdersInstance();
+		for ( Order o : orders.getOrders() ) {
+			EditableOrder order = (EditableOrder) o;
+			if ( order.getStatus() != OrderStatus.ACTIVE ) {
+				continue;
+			}
+			OrderCache orderCache = locator.getDdeCache()
+				.getOrdersCache()
+				.get(order.getId());
+			for ( Trade trade : getUnaccountedTrades(order) ) {
+				order.addTrade(trade);
+				order.fireChangedEvent();
+				order.resetChanges();
+				order.fireTradeEvent(trade);
+			}
+			if ( order.getQtyRest() <= 0 ) {
+				order.setStatus(OrderStatus.FILLED);
+				order.fireChangedEvent();
+				order.resetChanges();
+			} else if ( orderCache.getStatus() == OrderStatus.CANCELLED
+					&& order.getQtyRest() == orderCache.getQtyRest() )
+			{
+				// Проверить совпадение исполненного кол-ва по сделкам
+				// (то есть теперь по заявке) со значением в кэше заявки.
+				// Есоли совпадают, значит учтены все сделки. Если нет, значит
+				// какие то сделки по заявке еще не закешированы и нужно ждать
+				// следующих обновлений.
+				order.setStatus(OrderStatus.CANCELLED);
+				order.fireChangedEvent();
+				order.resetChanges();
+			}
+		}
+		for ( OrderCache o : locator.getDdeCache().getOrdersCache().getAll() ) {
+			if ( orders.isOrderExists(o.getId()) ) {
+				continue;
+			}
+			
+			
+		}
+	}
+	
+	private List<Trade> getUnaccountedTrades(Order order) {
+		List<Trade> newTrades = new Vector<Trade>();
+		for ( TradeCache cache : locator.getDdeCache().getTradesCache()
+				.getAllByOrderId(order.getId()) )
+		{
+			if ( ! order.hasTrade(cache.getId()) ) {
+				Trade trade = new Trade(order.getTerminal());
+				trade.setDirection(order.getDirection());
+				trade.setId(cache.getId());
+				trade.setOrderId(cache.getOrderId());
+				trade.setPrice(cache.getPrice());
+				trade.setQty(cache.getQty());
+				trade.setSecurityDescriptor(order.getSecurityDescriptor());
+				trade.setTime(cache.getTime());
+				trade.setVolume(cache.getVolume());
+				newTrades.add(trade);
+			}
+		}
+		Collections.sort(newTrades);
+		return newTrades;
+	}
+	*/
 
 }

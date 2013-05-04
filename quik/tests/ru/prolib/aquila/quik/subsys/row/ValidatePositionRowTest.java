@@ -6,13 +6,11 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.data.row.RowException;
-import ru.prolib.aquila.core.data.row.RowSet;
-import ru.prolib.aquila.core.utils.ValidatorException;
-import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.row.*;
+import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
-import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
 
 /**
  * 2013-02-20<br>
@@ -22,7 +20,7 @@ public class ValidatePositionRowTest {
 	private IMocksControl control;
 	private RowSet rs;
 	private QUIKServiceLocator locator;
-	private QUIKAccounts accounts;
+	private PartiallyKnownObjects partiallyKnown;
 	private ValidatePositionRow validator;
 
 	@Before
@@ -30,9 +28,9 @@ public class ValidatePositionRowTest {
 		control = createStrictControl();
 		rs = control.createMock(RowSet.class);
 		locator = control.createMock(QUIKServiceLocator.class);
-		accounts = control.createMock(QUIKAccounts.class);
+		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
 		validator = new ValidatePositionRow(locator);
-		expect(locator.getAccounts()).andStubReturn(accounts);
+		expect(locator.getPartiallyKnownObjects()).andStubReturn(partiallyKnown);
 	}
 	
 	@Test
@@ -54,7 +52,7 @@ public class ValidatePositionRowTest {
 	public void testValidate_IfAccountIsNotNull() throws Exception {
 		Account account = new Account("foo", "bar");
 		expect(rs.get(eq("POS_ACC"))).andReturn(account);
-		accounts.register(same(account));
+		partiallyKnown.registerAccount(same(account));
 		control.replay();
 		
 		assertTrue(validator.validate(rs));

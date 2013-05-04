@@ -53,7 +53,8 @@ public class QUIKGetSecurityDescriptor1 implements G<SecurityDescriptor> {
 	@Override
 	public SecurityDescriptor get(Object source) throws ValueException {
 		String name = gName.get(source);
-		return name == null ? null : locator.getDescriptors().getByName(name);
+		return name == null ? null : locator.getPartiallyKnownObjects()
+				.getSecurityDescriptorByName(name);
 	}
 	
 	@Override

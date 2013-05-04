@@ -7,12 +7,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
-import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptors;
 
 /**
  * 2013-01-23<br>
@@ -22,7 +21,7 @@ public class QUIKGetSecurityDescriptor2Test {
 	private static IMocksControl control;
 	private static QUIKServiceLocator locator;
 	private static G<String> gCode, gClass;
-	private static QUIKSecurityDescriptors descrs;
+	private static PartiallyKnownObjects partiallyKnown;
 	private static SecurityDescriptor descr;
 	private static QUIKGetSecurityDescriptor2 getter;
 
@@ -34,14 +33,14 @@ public class QUIKGetSecurityDescriptor2Test {
 		locator = control.createMock(QUIKServiceLocator.class);
 		gCode = control.createMock(G.class);
 		gClass = control.createMock(G.class);
-		descrs = control.createMock(QUIKSecurityDescriptors.class);
+		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
 		getter = new QUIKGetSecurityDescriptor2(locator, gCode, gClass);
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		control.resetToStrict();
-		expect(locator.getDescriptors()).andStubReturn(descrs);
+		expect(locator.getPartiallyKnownObjects()).andStubReturn(partiallyKnown);
 	}
 	
 	@Test
@@ -72,7 +71,8 @@ public class QUIKGetSecurityDescriptor2Test {
 	public void testGet() throws Exception {
 		expect(gCode.get(this)).andReturn("RIZ2");
 		expect(gClass.get(this)).andReturn("SPBFUT");
-		expect(descrs.getByCodeAndClass("RIZ2", "SPBFUT")).andReturn(descr);
+		expect(partiallyKnown.getSecurityDescriptorByCodeAndClass("RIZ2", "SPBFUT"))
+			.andReturn(descr);
 		control.replay();
 		assertSame(descr, getter.get(this));
 		control.verify();

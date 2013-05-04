@@ -7,12 +7,10 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.row.RowException;
-import ru.prolib.aquila.core.data.row.RowSet;
-import ru.prolib.aquila.core.utils.ValidatorException;
-import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.core.data.row.*;
+import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
-import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptors;
 
 /**
  * 2013-02-20<br>
@@ -23,7 +21,7 @@ public class ValidateSecurityRowTest {
 	private IMocksControl control;
 	private RowSet rs;
 	private QUIKServiceLocator locator;
-	private QUIKSecurityDescriptors descrs;
+	private PartiallyKnownObjects descrs;
 	private ValidateSecurityRow validator;
 
 	@Before
@@ -32,9 +30,9 @@ public class ValidateSecurityRowTest {
 		control = createStrictControl();
 		rs = control.createMock(RowSet.class);
 		locator = control.createMock(QUIKServiceLocator.class);
-		descrs = control.createMock(QUIKSecurityDescriptors.class);
+		descrs = control.createMock(PartiallyKnownObjects.class);
 		validator = new ValidateSecurityRow(locator);
-		expect(locator.getDescriptors()).andStubReturn(descrs);
+		expect(locator.getPartiallyKnownObjects()).andStubReturn(descrs);
 	}
 	
 	@Test
@@ -46,7 +44,7 @@ public class ValidateSecurityRowTest {
 	public void testValidate() throws Exception {
 		expect(rs.get(eq("SEC_DESCR"))).andReturn(descr);
 		expect(rs.get(eq("SEC_SHORTNAME"))).andReturn("Сбербанк");
-		descrs.register(same(descr), eq("Сбербанк"));
+		descrs.registerSecurityDescriptor(same(descr), eq("Сбербанк"));
 		control.replay();
 		
 		assertTrue(validator.validate(rs));

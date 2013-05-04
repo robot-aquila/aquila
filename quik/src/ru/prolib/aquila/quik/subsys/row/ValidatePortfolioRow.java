@@ -50,7 +50,7 @@ public class ValidatePortfolioRow implements Validator {
 			RowSet rs = (RowSet) object;
 			Account account = (Account) rs.get(Spec.PORT_ACCOUNT);
 			if ( account != null ) {
-				locator.getAccounts().register(account);
+				locator.getPartiallyKnownObjects().registerAccount(account);
 			}
 			return true;
 		} catch ( RowException e ) {

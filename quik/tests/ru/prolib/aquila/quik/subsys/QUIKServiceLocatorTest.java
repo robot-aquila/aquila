@@ -16,12 +16,8 @@ import ru.prolib.aquila.core.utils.SimpleCounter;
 import ru.prolib.aquila.quik.QUIKConfig;
 import ru.prolib.aquila.quik.QUIKConfigImpl;
 import ru.prolib.aquila.quik.api.ApiService;
-import ru.prolib.aquila.quik.dde.Cache;
-import ru.prolib.aquila.quik.dde.OrdersCache;
-import ru.prolib.aquila.quik.dde.TradesCache;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.order.QUIKOrderProcessor;
-import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
-import ru.prolib.aquila.quik.subsys.security.*;
 
 /**
  * 2013-01-19<br>
@@ -65,11 +61,10 @@ public class QUIKServiceLocatorTest {
 	}
 	
 	@Test
-	public void testGetDescriptors() throws Exception {
-		QUIKSecurityDescriptorsImpl descrs =
-			(QUIKSecurityDescriptorsImpl) locator.getDescriptors();
-		assertSame(descrs, locator.getDescriptors());
-		assertSame(locator, descrs.getServiceLocator());
+	public void testGetPartiallyKnownObjects() throws Exception {
+		PartiallyKnownObjects objects = locator.getPartiallyKnownObjects();
+		assertSame(objects, locator.getPartiallyKnownObjects());
+		assertEquals(new PartiallyKnownObjects(terminal), objects);
 	}
 	
 	@Test
@@ -128,14 +123,6 @@ public class QUIKServiceLocatorTest {
 		locator.setConfig(config);
 		assertSame(config, locator.getConfig());
 		assertSame(config, locator.getConfig());
-	}
-	
-	@Test
-	public void getAccounts() throws Exception {
-		QUIKAccounts accounts = locator.getAccounts();
-		assertNotNull(accounts);
-		assertSame(accounts, locator.getAccounts());
-		assertSame(terminal, accounts.getFirePanicEvent());
 	}
 	
 	@Test

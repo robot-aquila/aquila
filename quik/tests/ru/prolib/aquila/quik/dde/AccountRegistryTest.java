@@ -1,4 +1,4 @@
-package ru.prolib.aquila.quik.subsys.portfolio;
+package ru.prolib.aquila.quik.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -10,16 +10,17 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.dde.AccountRegistry;
 
 /**
  * 2013-02-20<br>
  * $Id$
  */
-public class QUIKAccountsTest {
+public class AccountRegistryTest {
 	private static Account acc1, acc2, acc3, acc4;
 	private IMocksControl control;
 	private FirePanicEvent firePanic;
-	private QUIKAccounts accounts;
+	private AccountRegistry accounts;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -35,7 +36,7 @@ public class QUIKAccountsTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		firePanic = control.createMock(FirePanicEvent.class);
-		accounts = new QUIKAccounts(firePanic);
+		accounts = new AccountRegistry(firePanic);
 	}
 	
 	@Test
@@ -44,7 +45,7 @@ public class QUIKAccountsTest {
 	}
 	
 	@Test
-	public void testGetAccount_NoAccount() throws Exception {
+	public void testGetAccount2_NoAccount() throws Exception {
 		firePanic.firePanicEvent(eq(1),
 				eq("Accounts: NULL account for clientId & code: {}"),
 				aryEq(new Object[] { "FOO@BAR" } ));
@@ -56,15 +57,50 @@ public class QUIKAccountsTest {
 	}
 	
 	@Test
-	public void testGetAccount_Ok() throws Exception {
-		accounts.register(acc1);
-		accounts.register(acc4);
+	public void testGetAccount1_NoAccount() throws Exception {
+		accounts.registerAccount(acc4);
+		firePanic.firePanicEvent(eq(1),
+				eq("Accounts: NULL account for clientId & code: {}"),
+				aryEq(new Object[] { "LX002@LX002" } ));
+		control.replay();
+		
+		assertNull(accounts.getAccount("LX002"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetAccount() throws Exception {
+		accounts.registerAccount(acc1);
+		accounts.registerAccount(acc4);
 		control.replay();
 		
 		assertSame(acc1, accounts.getAccount("001eqe", "001eqe"));
+		assertSame(acc1, accounts.getAccount("001eqe"));
 		assertSame(acc4, accounts.getAccount("R5555", "LX002"));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testIsAccountRegistered2() throws Exception {
+		accounts.registerAccount(acc1);
+		accounts.registerAccount(acc4);
+		
+		assertTrue(accounts.isAccountRegistered("R5555", "LX002"));
+		assertFalse(accounts.isAccountRegistered("R2345", "LX001"));
+		assertTrue(accounts.isAccountRegistered("001eqe", "001eqe"));
+		assertFalse(accounts.isAccountRegistered("001jmk", "001jmk"));
+	}
+	
+	@Test
+	public void testIsAccountRegistered1() throws Exception {
+		accounts.registerAccount(acc1);
+		accounts.registerAccount(acc4);
+		
+		assertFalse(accounts.isAccountRegistered("LX002"));
+		assertTrue(accounts.isAccountRegistered("001eqe"));
+		assertFalse(accounts.isAccountRegistered("001jmk"));
 	}
 	
 	@Test
@@ -76,9 +112,9 @@ public class QUIKAccountsTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		accounts.register(acc1);
-		accounts.register(acc2);
-		accounts.register(acc3);
+		accounts.registerAccount(acc1);
+		accounts.registerAccount(acc2);
+		accounts.registerAccount(acc3);
 		Account actualAccSet[] = { acc1, acc2, acc3 };
 		Account otherAccSet[] = { acc1, acc4 };
 		Variant<FirePanicEvent> vFire = new Variant<FirePanicEvent>()
@@ -89,12 +125,12 @@ public class QUIKAccountsTest {
 			.add(otherAccSet);
 		Variant<?> iterator = vAccs;
 		int foundCnt = 0;
-		QUIKAccounts x = null, found = null;
+		AccountRegistry x = null, found = null;
 		do {
-			x = new QUIKAccounts(vFire.get());
+			x = new AccountRegistry(vFire.get());
 			Account accs[] = vAccs.get();
 			for ( int i = 0; i < accs.length; i ++ ) {
-				x.register(accs[i]);
+				x.registerAccount(accs[i]);
 			}
 			if ( accounts.equals(x) ) {
 				foundCnt ++;

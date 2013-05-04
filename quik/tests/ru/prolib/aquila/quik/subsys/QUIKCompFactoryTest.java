@@ -3,9 +3,6 @@ package ru.prolib.aquila.quik.subsys;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -20,7 +17,6 @@ import ru.prolib.aquila.core.data.row.RowHandler;
 import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.dde.utils.table.*;
 import ru.prolib.aquila.quik.subsys.portfolio.QUIKPortfolios;
-import ru.prolib.aquila.quik.subsys.security.*;
 
 /**
  * 2012-10-19<br>

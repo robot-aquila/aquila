@@ -46,9 +46,9 @@ public class ValidateSecurityRow implements Validator {
 	public boolean validate(Object object) throws ValidatorException {
 		try {
 			RowSet rs = (RowSet) object;
-			locator.getDescriptors()
-				.register((SecurityDescriptor) rs.get(Spec.SEC_DESCR),
-						(String) rs.get(Spec.SEC_SHORTNAME)); 
+			locator.getPartiallyKnownObjects().registerSecurityDescriptor(
+					(SecurityDescriptor) rs.get(Spec.SEC_DESCR),
+					(String) rs.get(Spec.SEC_SHORTNAME)); 
 			return true;
 		} catch ( RowException e ) {
 			throw new ValidatorException(e);

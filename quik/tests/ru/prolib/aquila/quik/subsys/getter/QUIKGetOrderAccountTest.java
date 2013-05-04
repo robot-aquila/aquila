@@ -9,8 +9,8 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
-import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
 
 /**
  * 2013-02-21<br>
@@ -19,7 +19,7 @@ import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
 public class QUIKGetOrderAccountTest {
 	private IMocksControl control;
 	private QUIKServiceLocator locator;
-	private QUIKAccounts accounts;
+	private PartiallyKnownObjects partiallyKnown;
 	private G<String> gSubCode, gSubCode2;
 	private QUIKGetOrderAccount getter;
 
@@ -28,11 +28,11 @@ public class QUIKGetOrderAccountTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		locator = control.createMock(QUIKServiceLocator.class);
-		accounts = control.createMock(QUIKAccounts.class);
+		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
 		gSubCode = control.createMock(G.class);
 		gSubCode2 = control.createMock(G.class);
 		getter = new QUIKGetOrderAccount(locator, gSubCode, gSubCode2);
-		expect(locator.getAccounts()).andReturn(accounts);
+		expect(locator.getPartiallyKnownObjects()).andReturn(partiallyKnown);
 	}
 	
 	@Test
@@ -47,7 +47,7 @@ public class QUIKGetOrderAccountTest {
 		expect(gSubCode.get(same(this))).andReturn("foo");
 		expect(gSubCode2.get(same(this))).andReturn("bar");
 		Account account = new Account("FIRM", "foo", "bar");
-		expect(accounts.getAccount(eq("foo"), eq("bar"))).andReturn(account);
+		expect(partiallyKnown.getAccount(eq("foo"), eq("bar"))).andReturn(account);
 		control.replay();
 		
 		assertSame(account, getter.get(this));

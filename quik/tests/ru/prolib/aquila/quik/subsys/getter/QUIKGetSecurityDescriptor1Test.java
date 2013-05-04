@@ -7,12 +7,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
-import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptors;
 
 /**
  * 2013-01-23<br>
@@ -22,7 +21,7 @@ public class QUIKGetSecurityDescriptor1Test {
 	private static IMocksControl control;
 	private static QUIKServiceLocator locator;
 	private static G<String> gName;
-	private static QUIKSecurityDescriptors descrs;
+	private static PartiallyKnownObjects partiallyKnown;
 	private static SecurityDescriptor descr;
 	private static QUIKGetSecurityDescriptor1 getter;
 
@@ -33,14 +32,14 @@ public class QUIKGetSecurityDescriptor1Test {
 		control = createStrictControl();
 		locator = control.createMock(QUIKServiceLocator.class);
 		gName = control.createMock(G.class);
-		descrs = control.createMock(QUIKSecurityDescriptors.class);
+		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
 		getter = new QUIKGetSecurityDescriptor1(locator, gName);
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		control.resetToStrict();
-		expect(locator.getDescriptors()).andStubReturn(descrs);
+		expect(locator.getPartiallyKnownObjects()).andStubReturn(partiallyKnown);
 	}
 	
 	@Test
@@ -62,7 +61,8 @@ public class QUIKGetSecurityDescriptor1Test {
 	@Test
 	public void testGet() throws Exception {
 		expect(gName.get(same(this))).andReturn("Сбербанк-АО");
-		expect(descrs.getByName(eq("Сбербанк-АО"))).andReturn(descr);
+		expect(partiallyKnown.getSecurityDescriptorByName(eq("Сбербанк-АО")))
+			.andReturn(descr);
 		control.replay();
 		
 		assertSame(descr, getter.get(this));

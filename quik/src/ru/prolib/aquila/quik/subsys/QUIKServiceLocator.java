@@ -9,11 +9,8 @@ import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.SimpleCounter;
 import ru.prolib.aquila.quik.QUIKConfig;
 import ru.prolib.aquila.quik.api.ApiService;
-import ru.prolib.aquila.quik.dde.Cache;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.order.QUIKOrderProcessor;
-import ru.prolib.aquila.quik.subsys.portfolio.QUIKAccounts;
-import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptors;
-import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptorsImpl;
 
 /**
  * Сервис-локатор терминала QUIK.
@@ -24,8 +21,6 @@ import ru.prolib.aquila.quik.subsys.security.QUIKSecurityDescriptorsImpl;
 public class QUIKServiceLocator {
 	private final EditableTerminal terminal;
 	private EventSystem es;
-	private final QUIKSecurityDescriptors descrs;
-	private final QUIKAccounts accounts;
 	private final Counter failedOrderId = new SimpleCounter();
 	private final Counter transId = new SimpleCounter();
 	private QUIKCompFactory fcomp;
@@ -34,6 +29,7 @@ public class QUIKServiceLocator {
 	private Timer timer;
 	private QUIKConfig config;
 	private Cache ddeCache;
+	private final PartiallyKnownObjects partiallyKnown;
 	
 	/**
 	 * Конструктор.
@@ -43,8 +39,7 @@ public class QUIKServiceLocator {
 	public QUIKServiceLocator(EditableTerminal terminal) {
 		super();
 		this.terminal = terminal;
-		descrs = new QUIKSecurityDescriptorsImpl(this);
-		accounts = new QUIKAccounts(terminal);
+		partiallyKnown = new PartiallyKnownObjects(terminal);
 		es = new EventSystemImpl(new EventQueueImpl("QUIK"));
 	}
 	
@@ -76,12 +71,12 @@ public class QUIKServiceLocator {
 	}
 	
 	/**
-	 * Получить хранилище дескрипторов инструментов.
+	 * Получить фасад доступа к объектам по неполному набору атрибутов.
 	 * <p>
-	 * @return хранилище дескрипторов
+	 * @return фасад доступа к объектам
 	 */
-	public QUIKSecurityDescriptors getDescriptors() {
-		return descrs;
+	public PartiallyKnownObjects getPartiallyKnownObjects() {
+		return partiallyKnown;
 	}
 	
 	/**
@@ -163,15 +158,6 @@ public class QUIKServiceLocator {
 	 */
 	public synchronized QUIKConfig getConfig() {
 		return config;
-	}
-	
-	/**
-	 * Получить хранилище счетов.
-	 * <p>
-	 * @return хранилище счетов
-	 */
-	public QUIKAccounts getAccounts() {
-		return accounts;
 	}
 	
 	/**
