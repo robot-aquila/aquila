@@ -272,4 +272,12 @@ public interface Order {
 	 */
 	public List<Trade> getTrades();
 	
+	/**
+	 * Проверить наличие сделки с указанным номером.
+	 * <p>
+	 * @param tradeId номер сделки
+	 * @return true - указанная сделка есть в списке сделок заявки, false - нет
+	 */
+	public boolean hasTrade(long tradeId);
+	
 }

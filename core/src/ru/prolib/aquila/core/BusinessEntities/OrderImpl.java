@@ -473,4 +473,14 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 		dispatcher.close();
 	}
 
+	@Override
+	public synchronized boolean hasTrade(long tradeId) {
+		for ( Trade trade : trades ) {
+			if ( tradeId == trade.getId() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

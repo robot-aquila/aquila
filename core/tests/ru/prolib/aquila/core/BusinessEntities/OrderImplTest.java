@@ -611,6 +611,17 @@ public class OrderImplTest {
 	}
 	
 	@Test
+	public void testHasTrade() throws Exception {
+		assertFalse(order.hasTrade(2L));
+		assertFalse(order.hasTrade(8L));
+		order.addTrade(createTrade(2L, "2013-05-01 00:00:05", 12.80d, 10L));
+		order.addTrade(createTrade(8L, "2013-05-01 00:00:02", 12.80d,  7L));
+		assertTrue(order.hasTrade(2L));
+		assertTrue(order.hasTrade(8L));
+		assertFalse(order.hasTrade(5L));
+	}
+	
+	@Test
 	public void testFireTradeEvent() throws Exception {
 		Trade t0 = createTrade(100L, "2013-05-01 00:00:00", 25.19d, 10L);
 		final Event expected = new OrderTradeEvent(onTrade, order, t0);
