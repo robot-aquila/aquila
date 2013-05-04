@@ -58,6 +58,10 @@ public class OrderIsPartiallyFilledTest {
 		Variant<Boolean> vChanged = new Variant<Boolean>(vQtyRest)
 			.add(true)
 			.add(false);
+		Variant<Long> vQty = new Variant<Long>(vChanged)
+			.add(5L)
+			.add(10L);
+		Variant<?> iterator = vQty;
 		int found = 0;
 		int index = 0;
 		do {
@@ -65,11 +69,13 @@ public class OrderIsPartiallyFilledTest {
 			control.resetToStrict();
 			expect(order.getStatus()).andStubReturn(vStatus.get());
 			expect(order.getQtyRest()).andStubReturn(vQtyRest.get());
+			expect(order.getQty()).andStubReturn(vQty.get());
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			control.replay();
 			if ( vStatus.get()==OrderStatus.CANCELLED && vChanged.get()==true
-					&& vQtyRest.get() != null && vQtyRest.get() > 0 )
+					&& vQtyRest.get() != null && vQtyRest.get() > 0
+					&& vQtyRest.get() < vQty.get() )
 			{
 				found ++;
 				assertTrue(msg, validator.validate(order));
@@ -81,7 +87,7 @@ public class OrderIsPartiallyFilledTest {
 			}
 			control.verify();
 			index ++;
-		} while ( vChanged.next() );
+		} while ( iterator.next() );
 		assertEquals(1, found);
 	}
 
