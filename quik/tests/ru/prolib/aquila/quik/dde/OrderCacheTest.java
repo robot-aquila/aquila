@@ -39,6 +39,11 @@ public class OrderCacheTest {
 	}
 	
 	@Test
+	public void testConstruct() throws Exception {
+		assertEquals(new Date(), row.getEntryTime());
+	}
+	
+	@Test
 	public void testEquals() throws Exception {
 		Variant<Long> vId = new Variant<Long>()
 			.add(125L)

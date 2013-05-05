@@ -3,17 +3,17 @@ package ru.prolib.aquila.quik.ui;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ru.prolib.aquila.core.data.G;
-import ru.prolib.aquila.quik.dde.Cache;
-import ru.prolib.aquila.quik.dde.OrderCache;
-import ru.prolib.aquila.quik.dde.TradeCache;
+import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.ui.ClassLabels;
 
 public class TableBuilder {
 	private static final SimpleDateFormat dateFormat;
+	private static final SimpleDateFormat dateFormatMs;
 	
 	static {
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		dateFormatMs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 	
 	private final ClassLabels labels;
@@ -86,18 +86,23 @@ public class TableBuilder {
 			@Override public Object get(Object obj) {
 				return dateFormat.format(((OrderCache) obj).getTime());
 			}
-		}, Column.lONG));
+		}, Column.LONG));
 		columns.add(new Column("COL_CACHE_ORDER_WITHDRAW_TIME", new G<Object>() {
 			@Override public Object get(Object obj) {
 				Date time = ((OrderCache) obj).getWithdrawTime();
 				return time == null ? null : dateFormat.format(time);
 			}
-		}, Column.lONG));
+		}, Column.LONG));
 		columns.add(new Column("COL_CACHE_ORDER_TYPE", new G<Object>() {
 			@Override public Object get(Object obj) {
 				return ((OrderCache) obj).getType();
 			}
 		}, Column.SHORT));
+		columns.add(new Column("COL_CACHE_ORDER_ENTRY_TIME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return dateFormatMs.format(((OrderCache) obj).getEntryTime());
+			}
+		}, Column.LONG));
 		return new Table(new OrdersCacheTableModel(labels,
 				columns, cache.getOrdersCache()));
 	}
@@ -113,7 +118,7 @@ public class TableBuilder {
 			@Override public Object get(Object obj) {
 				return dateFormat.format(((TradeCache) obj).getTime());
 			}
-		}, Column.lONG));
+		}, Column.LONG));
 		columns.add(new Column("COL_CACHE_TRADE_ORDER_ID", new G<Object>() {
 			@Override public Object get(Object obj) {
 				return ((TradeCache) obj).getOrderId();
@@ -134,8 +139,99 @@ public class TableBuilder {
 				return ((TradeCache) obj).getVolume();
 			}
 		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_TRADE_ENTRY_TIME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return dateFormatMs.format(((TradeCache) obj).getEntryTime());
+			}
+		}, Column.LONG));
 		return new Table(new TradesCacheTableModel(labels,
 				columns, cache.getTradesCache()));
+	}
+	
+	public Table createSecuritiesCacheTable() {
+		Columns columns = new Columns();
+		columns.add(new Column("COL_CACHE_SECURITY_DESCR", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getDescriptor());
+			}
+		}, Column.LONG));
+		columns.add(new Column("COL_CACHE_SECURITY_MINPRICE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getMinPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_MAXPRICE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getMaxPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_STEPSIZE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getMinStepPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_STEPPRICE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getMinStepPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_PRECISION", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getPrecision());
+			}
+		}, Column.SHORT));
+		columns.add(new Column("COL_CACHE_SECURITY_LAST", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getLastPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_OPEN", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getOpenPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_HIGH", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getHighPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_LOW", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getLowPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_CLOSE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getClosePrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_ASK", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getAskPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_BID", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getBidPrice());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_DISPNAME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getDisplayName());
+			}
+		}, Column.LONG));
+		columns.add(new Column("COL_CACHE_SECURITY_SHORTNAME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((SecurityCache) obj).getShortName());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_SECURITY_ENTRY_TIME",new G<Object>() {
+			@Override public Object get(Object obj) {
+				return dateFormatMs.format(((SecurityCache)obj).getEntryTime());
+			}
+		}, Column.LONG));
+		return new Table(new SecuritiesCacheTableModel(labels,
+				columns, cache.getSecuritiesCache()));
 	}
 
 }

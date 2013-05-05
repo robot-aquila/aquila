@@ -69,6 +69,7 @@ public class TradesCacheTest {
 		assertNull(cache.get(100L));
 		assertNull(cache.get(102L));
 		assertNull(cache.get(105L));
+		assertEquals(new Vector<TradeCache>(), cache.getAll());
 	}
 	
 	@Test

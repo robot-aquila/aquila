@@ -11,11 +11,15 @@ import ru.prolib.aquila.core.EventSystem;
 public class Cache {
 	private final OrdersCache orders;
 	private final TradesCache trades;
+	private final SecuritiesCache securities;
 	
-	public Cache(OrdersCache orders, TradesCache trades) {
+	public Cache(OrdersCache orders, TradesCache trades,
+			SecuritiesCache securities)
+	{
 		super();
 		this.orders = orders;
 		this.trades = trades;
+		this.securities = securities;
 	}
 	
 	/**
@@ -30,7 +34,9 @@ public class Cache {
 				new OrdersCache(dispatcher,
 						es.createGenericType(dispatcher, "Orders")),
 				new TradesCache(dispatcher,
-						es.createGenericType(dispatcher, "MyTrades")));
+						es.createGenericType(dispatcher, "MyTrades")),
+				new SecuritiesCache(dispatcher,
+						es.createGenericType(dispatcher, "Securities")));
 	}
 	
 	/**
@@ -51,6 +57,15 @@ public class Cache {
 		return trades;
 	}
 	
+	/**
+	 * Получить кэш таблицы инструментов.
+	 * <p>
+	 * @return кэш
+	 */
+	public synchronized SecuritiesCache getSecuritiesCache() {
+		return securities;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == null ) {
@@ -66,6 +81,7 @@ public class Cache {
 		return new EqualsBuilder()
 			.append(orders, o.orders)
 			.append(trades, o.trades)
+			.append(securities, o.securities)
 			.isEquals();
 	}
 

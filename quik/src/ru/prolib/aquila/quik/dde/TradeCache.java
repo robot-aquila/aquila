@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 /**
  * Кэш строки таблицы собственных сделок.
  */
-public class TradeCache {
+public class TradeCache extends CacheEntry {
 	private final Long id;
 	private final Date time;
 	private final Long orderId;

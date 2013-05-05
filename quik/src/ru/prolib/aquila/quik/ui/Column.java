@@ -11,7 +11,7 @@ public class Column {
 	private final int width;
 	public static final int SHORT = 10;
 	public static final int MIDDLE = 20;
-	public static final int lONG = 40;
+	public static final int LONG = 60;
 	
 	public Column(String id, G<?> getter, int width) {
 		super();

@@ -107,6 +107,36 @@ public class RowDataConverter {
 	}
 	
 	/**
+	 * Получить вещественное значение ряда или null.
+	 * <p>
+	 * Метод для извлечения вещественных значений из "сомнительных" полей,
+	 * которые могут содержать несоответствующий тип данных (например строку).
+	 * Данный метод так же рассматривает нулевые значения как неопределенные,
+	 * то есть null. Если соответствующее поле вообще не существует, то так
+	 * же возвращается null. 
+	 * <p>
+	 * @param row ряд
+	 * @param elementId идентификатор элемента
+	 * @return вещественное или null, если значение ряда не соответствует
+	 * @throws ValueException ошибка обращения к элементу ряда
+	 */
+	public Double getDoubleOrNull(Row row, String elementId)
+			throws ValueException
+	{
+		try {
+			Double value = getDouble(row, elementId);
+			if ( value == 0.0d ) {
+				return null;
+			}
+			return value;
+		} catch ( RowNullValueException e ) {
+			return null;
+		} catch ( RowDataTypeMismatchException e ) {
+			return null;
+		}
+	}
+	
+	/**
 	 * Получить определенное длиное целое значение ряда.
 	 * <p> 
 	 * @param row ряд
@@ -118,6 +148,20 @@ public class RowDataConverter {
 	 */
 	public Long getLong(Row row, String elementId) throws ValueException {
 		return getDouble(row, elementId).longValue();
+	}
+	
+	/**
+	 * Получить определенное целое значение ряда.
+	 * <p>
+	 * @param row ряд
+	 * @param elementId идентификатор элемента
+	 * @return целое
+	 * @throws ValueException ошибка обращения к элементу ряда
+	 * @throws RowNullValueException нулевое значение элемента ряда
+	 * @throws RowDataTypeMismatchException неожиданный тип данных
+	 */
+	public Integer getInteger(Row row, String elementId) throws ValueException {
+		return getDouble(row, elementId).intValue();
 	}
 	
 	/**

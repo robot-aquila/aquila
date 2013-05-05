@@ -16,6 +16,7 @@ public class CacheTest {
 	private EventSystem es;
 	private OrdersCache orders;
 	private TradesCache trades;
+	private SecuritiesCache securities;
 	private Cache cache;
 
 	@Before
@@ -24,7 +25,8 @@ public class CacheTest {
 		es = control.createMock(EventSystem.class);
 		orders = control.createMock(OrdersCache.class);
 		trades = control.createMock(TradesCache.class);
-		cache = new Cache(orders, trades);
+		securities = control.createMock(SecuritiesCache.class);
+		cache = new Cache(orders, trades, securities);
 	}
 	
 	@Test
@@ -32,11 +34,14 @@ public class CacheTest {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
 		EventType onOrdersUpdate = control.createMock(EventType.class);
 		EventType onTradesUpdate = control.createMock(EventType.class);
+		EventType onSecuritiesUpdate = control.createMock(EventType.class);
 		expect(es.createEventDispatcher("Cache")).andReturn(dispatcher);
 		expect(es.createGenericType(dispatcher, "Orders"))
 			.andReturn(onOrdersUpdate);
 		expect(es.createGenericType(dispatcher, "MyTrades"))
 			.andReturn(onTradesUpdate);
+		expect(es.createGenericType(dispatcher, "Securities"))
+			.andReturn(onSecuritiesUpdate);
 		control.replay();
 		
 		cache = Cache.createCache(es);
@@ -44,7 +49,8 @@ public class CacheTest {
 		control.verify();
 		assertNotNull(cache);
 		Cache expected = new Cache(new OrdersCache(dispatcher, onOrdersUpdate),
-				new TradesCache(dispatcher, onTradesUpdate));
+				new TradesCache(dispatcher, onTradesUpdate),
+				new SecuritiesCache(dispatcher, onSecuritiesUpdate));
 		assertEquals(expected, cache);
 	}
 	
@@ -63,11 +69,14 @@ public class CacheTest {
 		Variant<TradesCache> vTrades = new Variant<TradesCache>(vOrders)
 			.add(trades)
 			.add(control.createMock(TradesCache.class));
-		Variant<?> iterator = vTrades;
+		Variant<SecuritiesCache> vSecs = new Variant<SecuritiesCache>(vTrades)
+			.add(securities)
+			.add(control.createMock(SecuritiesCache.class));
+		Variant<?> iterator = vSecs;
 		int foundCnt = 0;
 		Cache x = null, found = null;
 		do {
-			x = new Cache(vOrders.get(), vTrades.get());
+			x = new Cache(vOrders.get(), vTrades.get(), vSecs.get());
 			if ( cache.equals(x) ) {
 				found = x;
 				foundCnt ++;
@@ -76,6 +85,7 @@ public class CacheTest {
 		assertEquals(1, foundCnt);
 		assertSame(orders, found.getOrdersCache());
 		assertSame(trades, found.getTradesCache());
+		assertSame(securities, found.getSecuritiesCache());
 	}
 
 }

@@ -116,6 +116,35 @@ public class RowDataConverterTest {
 		data.put("BadNumber", "zulu4");
 		converter.getDouble(row, "BadNumber");
 	}
+	
+	@Test
+	public void testGetDoubleOrNull_Normal() throws Exception {
+		data.put("Number", 12.34d);
+		assertEquals(12.34d, converter.getDoubleOrNull(row, "Number"), 0.01d);
+	}
+	
+	@Test
+	public void testGetDoubleOrNull_NullIfNotExists() throws Exception {
+		assertNull(converter.getDoubleOrNull(row, "Number"));
+	}
+	
+	@Test
+	public void testGetDoubleOrNull_NullIfNull() throws Exception {
+		data.put("NullNumber", null);
+		assertNull(converter.getDoubleOrNull(row, "NullNumber"));
+	}
+	
+	@Test
+	public void testGetDoubleOrNull_NullIfTypeMismatch() throws Exception {
+		data.put("BadNumber", "foobar");
+		assertNull(converter.getDoubleOrNull(row, "BadNumber"));
+	}
+	
+	@Test
+	public void testGetDoubleOrNull_NullIfZero() throws Exception {
+		data.put("ZeroNumber", 0.0d);
+		assertNull(converter.getDoubleOrNull(row, "ZeroNumber"));
+	}
 
 	@Test
 	public void testGetLong() throws Exception {
@@ -133,6 +162,24 @@ public class RowDataConverterTest {
 	public void testGetLong_ThrowsIfTypeMismatch() throws Exception {
 		data.put("BadNumber", this);
 		converter.getLong(row, "BadNumber");
+	}
+	
+	@Test
+	public void testGetInteger() throws Exception {
+		data.put("Number",19.0d);
+		assertEquals(new Integer(19), converter.getInteger(row, "Number"));
+	}
+	
+	@Test (expected=RowNullValueException.class)
+	public void testGetInteger_ThrowsIfNull() throws Exception {
+		data.put("NullNumber", null);
+		converter.getInteger(row, "NullNumber");
+	}
+	
+	@Test (expected=RowDataTypeMismatchException.class)
+	public void testGetInteger_ThrowsIfTypeMismatch() throws Exception {
+		data.put("BadNumber", "zekakka");
+		converter.getInteger(row, "BadNumber");
 	}
 	
 	@Test

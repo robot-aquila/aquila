@@ -52,7 +52,7 @@ public class TradesCache extends MirrorCache {
 	 * <p>
 	 * @return список всех записей
 	 */
-	public List<TradeCache> getAll() {
+	public synchronized List<TradeCache> getAll() {
 		return new Vector<TradeCache>(cache.values());
 	}
 	
@@ -64,7 +64,7 @@ public class TradesCache extends MirrorCache {
 	 * @param orderId номер заявки
 	 * @return список кэш-записей заявки или пустой список, если нет кэш-записей
 	 */
-	public List<TradeCache> getAllByOrderId(Long orderId) {
+	public synchronized List<TradeCache> getAllByOrderId(Long orderId) {
 		List<TradeCache> entries = new Vector<TradeCache>();
 		for ( TradeCache entry : cache.values() ) {
 			if ( orderId.equals(entry.getOrderId()) ) {
@@ -75,7 +75,7 @@ public class TradesCache extends MirrorCache {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
+	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}

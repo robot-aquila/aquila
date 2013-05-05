@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 /**
  * Кеш строки таблицы заявок.
  */
-public class OrderCache {
+public class OrderCache extends CacheEntry {
 	private final Long id;
 	private final Long transId;
 	private final OrderStatus status;

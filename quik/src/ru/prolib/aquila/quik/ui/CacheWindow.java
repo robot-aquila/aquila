@@ -17,12 +17,17 @@ public class CacheWindow {
 	private static final long serialVersionUID = 5687784287521612167L;
 	private static final Logger logger;
 	
-	public static final String TEXT_WIN_CACHE_TITLE = "WIN_CACHE_TITLE";
-	public static final String TEXT_TAB_CACHE_ORDERS = "TAB_CACHE_ORDERS";
-	public static final String TEXT_TAB_CACHE_TRADES = "TAB_CACHE_TRADES";
+	public static final String TEXT_WIN_CACHE_TITLE;
+	public static final String TEXT_TAB_CACHE_ORDERS;
+	public static final String TEXT_TAB_CACHE_TRADES;
+	public static final String TEXT_TAB_CACHE_SECURITIES;
 	
 	static {
 		logger = LoggerFactory.getLogger(CacheWindow.class);
+		TEXT_WIN_CACHE_TITLE = "WIN_CACHE_TITLE";
+		TEXT_TAB_CACHE_ORDERS = "TAB_CACHE_ORDERS";
+		TEXT_TAB_CACHE_TRADES = "TAB_CACHE_TRADES";
+		TEXT_TAB_CACHE_SECURITIES = "TAB_CACHE_SECURITIES";
 	}
 	
 	private final JDialog window;
@@ -31,6 +36,7 @@ public class CacheWindow {
 	private final JTabbedPane tabbedPane = new JTabbedPane();
 	private Table ordersCacheTable;
 	private Table tradesCacheTable;
+	private Table securitiesCacheTable;
 	
 	public CacheWindow(JFrame owner, QUIKTerminal terminal,
 			ClassLabels labels)
@@ -49,14 +55,14 @@ public class CacheWindow {
 		TableBuilder builder = new TableBuilder(labels, terminal.getDdeCache());
 		ordersCacheTable = builder.createOrdersCacheTable();
 		tradesCacheTable = builder.createTradesCacheTable();
+		securitiesCacheTable = builder.createSecuritiesCacheTable();
 		addTab(ordersCacheTable, TEXT_TAB_CACHE_ORDERS);
 		addTab(tradesCacheTable, TEXT_TAB_CACHE_TRADES);
-		//ordersCacheTable.setFillsViewportHeight(true);
-		//JScrollPane scrollPane = new JScrollPane(ordersCacheTable);
-		//window.add(scrollPane);
+		addTab(securitiesCacheTable, TEXT_TAB_CACHE_SECURITIES);
+
 		window.add(tabbedPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));
-		window.setPreferredSize(new Dimension(800, 600));
+		window.setPreferredSize(new Dimension(1100, 600));
 		window.pack();
 	}
 	
@@ -76,11 +82,13 @@ public class CacheWindow {
 	protected void onHide() {
 		ordersCacheTable.stop();
 		tradesCacheTable.stop();
+		securitiesCacheTable.start();
 		logger.debug("Hide DDE cache window");
 	}
 	
 	protected void onShow() {
 		logger.debug("Show DDE cache window");
+		securitiesCacheTable.stop();
 		tradesCacheTable.start();
 		ordersCacheTable.start();
 	}
