@@ -21,6 +21,7 @@ public class OrdersGatewayTest {
 	private OrdersCache cache;
 	private RowDataConverter converter;
 	private OrdersGateway gateway;
+	private Map<String, Object> map;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -33,6 +34,7 @@ public class OrdersGatewayTest {
 		cache = control.createMock(OrdersCache.class);
 		converter = new RowDataConverter("yyyy-MM-dd", "HH:mm:ss");
 		gateway = new OrdersGateway(cache, converter);
+		map = new HashMap<String, Object>();
 	}
 	
 	@Test
@@ -81,7 +83,6 @@ public class OrdersGatewayTest {
 	@Test
 	public void testToCache1() throws Exception {
 		// лимитная, частично исполненная, на покупку, без номера транзы
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("ORDERNUM", 1001.0d);
 		map.put("TRANSID", 0.0d);
 		map.put("STATUS", "KILLED");
@@ -116,7 +117,6 @@ public class OrdersGatewayTest {
 	@Test
 	public void testToCache2() throws Exception {
 		// рыночная, активна, на продажу, с номером транзы
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("ORDERNUM", 1002.0d);
 		map.put("TRANSID", 508.0d);
 		map.put("STATUS", "ACTIVE");
@@ -151,7 +151,6 @@ public class OrdersGatewayTest {
 	@Test
 	public void testToCache3() throws Exception {
 		// иной тип, исполнена, на покупку, без номера транзы
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("ORDERNUM", 1008.0d);
 		map.put("TRANSID", 0.0);
 		map.put("STATUS", "FILLED");
@@ -185,7 +184,6 @@ public class OrdersGatewayTest {
 	
 	@Test
 	public void testGetKeyValue() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("ORDERNUM", 1008.0d);
 		Row row = new SimpleRow(map);
 		
@@ -194,9 +192,14 @@ public class OrdersGatewayTest {
 	
 	@Test (expected=DDEException.class)
 	public void testGetKeyValue_ThrowsIfNullKey() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
 		Row row = new SimpleRow(map);
 		gateway.getKeyValue(row);
+	}
+	
+	@Test
+	public void testShouldCache() throws Exception {
+		Row row = new SimpleRow(map);
+		assertTrue(gateway.shouldCache(row));
 	}
 
 }

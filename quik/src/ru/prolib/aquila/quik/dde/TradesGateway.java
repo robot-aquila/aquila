@@ -72,5 +72,10 @@ public class TradesGateway implements CacheGateway {
 	public void clearCache() {
 		cache.clear();
 	}
+
+	@Override
+	public boolean shouldCache(Row row) throws DDEException {
+		return true;
+	}
 	
 }

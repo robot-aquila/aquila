@@ -18,6 +18,7 @@ public class TradesGatewayTest {
 	private TradesCache cache;
 	private RowDataConverter converter;
 	private TradesGateway gateway;
+	private Map<String, Object> map;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -30,6 +31,7 @@ public class TradesGatewayTest {
 		cache = control.createMock(TradesCache.class);
 		converter = new RowDataConverter("yyyy-MM-dd", "HH:mm:ss");
 		gateway = new TradesGateway(cache, converter);
+		map = new HashMap<String, Object>();
 	}
 	
 	@Test
@@ -68,7 +70,6 @@ public class TradesGatewayTest {
 	
 	@Test
 	public void testToCache1() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("TRADENUM", 812.0d);
 		map.put("SESSION_DATE", "2013-04-23");
 		map.put("TRADETIME", "18:19:34");
@@ -91,7 +92,6 @@ public class TradesGatewayTest {
 	
 	@Test
 	public void testGetKeyValue() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("TRADENUM", 762.0d);
 		Row row = new SimpleRow(map);
 		
@@ -100,9 +100,14 @@ public class TradesGatewayTest {
 	
 	@Test (expected=DDEException.class)
 	public void testGetKeyValue_ThrowsIfNullKey() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
 		Row row = new SimpleRow(map);
 		gateway.getKeyValue(row);
+	}
+	
+	@Test
+	public void testShouldCache() throws Exception {
+		Row row = new SimpleRow(map);
+		assertTrue(gateway.shouldCache(row));
 	}
 	
 }

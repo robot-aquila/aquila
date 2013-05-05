@@ -1,8 +1,6 @@
 package ru.prolib.aquila.quik.dde;
 
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * Базовый кэш таблицы полного отражения.

@@ -79,5 +79,14 @@ public interface CacheGateway {
 	 * Очистить кэш.
 	 */
 	public void clearCache();
+	
+	/**
+	 * Проверить необходимость кэширования ряда.
+	 * <p>
+	 * @param row ряд
+	 * @return true - ряд должен быть кэширован, false - не нужно кэшировать
+	 * @throws DDEException ошибка доступа к элементу ряда
+	 */
+	public boolean shouldCache(Row row) throws DDEException;
 
 }

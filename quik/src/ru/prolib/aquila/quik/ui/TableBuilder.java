@@ -167,7 +167,7 @@ public class TableBuilder {
 		}, Column.MIDDLE));
 		columns.add(new Column("COL_CACHE_SECURITY_STEPSIZE", new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((SecurityCache) obj).getMinStepPrice());
+				return (((SecurityCache) obj).getMinStepSize());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column("COL_CACHE_SECURITY_STEPPRICE", new G<Object>() {
@@ -234,4 +234,40 @@ public class TableBuilder {
 				columns, cache.getSecuritiesCache()));
 	}
 
+	public Table createPortfoliosFortsCacheTable() {
+		Columns columns = new Columns();
+		columns.add(new Column("COL_CACHE_PORT_F_ACCOUNT", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PortfolioFCache) obj).getAccountCode());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_PORT_F_FIRMID", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PortfolioFCache) obj).getFirmId());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_PORT_F_BALANCE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PortfolioFCache) obj).getBalance());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_PORT_F_CASH", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PortfolioFCache) obj).getCash());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_PORT_F_VARMARGIN", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PortfolioFCache) obj).getVarMargin());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_PORT_F_ENTRY_TIME",new G<Object>() {
+			@Override public Object get(Object obj) {
+				return dateFormatMs.format(((PortfolioFCache)obj)
+						.getEntryTime());
+			}
+		}, Column.LONG));
+		return new Table(new PortfoliosFCacheTableModel(labels,
+				columns, cache.getPortfoliosFCache()));
+	}
 }

@@ -162,12 +162,14 @@ public class MirrorTableHelper {
 		}
 		int rowNumber = meta.getDataFirstRowNumber();
 		while ( rs.next() ) {
-			if ( keyValues.containsKey(rowNumber) ) {
-				Object keyValue = gateway.getKeyValue(rs);
-				if ( ! keyValue.equals(keyValues.get(rowNumber)) ) {
-					gateway.clearCache();
-					keyValues.clear();
-					break;
+			if ( gateway.shouldCache(rs) ) {
+				if ( keyValues.containsKey(rowNumber) ) {
+					Object keyValue = gateway.getKeyValue(rs);
+					if ( ! keyValue.equals(keyValues.get(rowNumber)) ) {
+						gateway.clearCache();
+						keyValues.clear();
+						break;
+					}
 				}
 			}
 			rowNumber ++;
@@ -191,8 +193,10 @@ public class MirrorTableHelper {
 		}
 		int rowNumber = meta.getDataFirstRowNumber();
 		while ( rs.next() ) {
-			gateway.toCache(rs);
-			keyValues.put(rowNumber, gateway.getKeyValue(rs));
+			if ( gateway.shouldCache(rs) ) {
+				gateway.toCache(rs);
+				keyValues.put(rowNumber, gateway.getKeyValue(rs));
+			}
 			rowNumber ++;
 		}
 	}

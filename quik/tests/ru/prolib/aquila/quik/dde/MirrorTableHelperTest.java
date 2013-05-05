@@ -126,10 +126,13 @@ public class MirrorTableHelperTest {
 		helper.setKeyValues(new Hashtable<Integer, Object>(keyValues));
 		RowSet rs = control.createMock(RowSet.class);
 		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
 		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(12345));
 		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
 		// no keyValue previously registered for row#3
 		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
 		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(18210));
 		expect(rs.next()).andReturn(false); // end of set
 		rs.reset();
@@ -148,7 +151,9 @@ public class MirrorTableHelperTest {
 		helper.setKeyValues(new Hashtable<Integer, Object>(keyValues));
 		RowSet rs = control.createMock(RowSet.class);
 		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
 		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
 		// following row with different keyObject
 		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(0));
 		gateway.clearCache();
@@ -160,6 +165,23 @@ public class MirrorTableHelperTest {
 		control.verify();
 		// keyValues map now clean
 		assertEquals(new Hashtable<Integer, Object>(), helper.getKeyValues());
+	}
+	
+	@Test
+	public void testCheckRowSetChanged_SkipIfShouldntCache() throws Exception {
+		TableMeta meta = new TableMeta(new DDETableRange(3, 1, 4, 10));
+		RowSet rs = control.createMock(RowSet.class);
+		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(false);
+		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(false);
+		expect(rs.next()).andReturn(false);
+		rs.reset();
+		control.replay();
+		
+		helper.checkRowSetChanged(meta, rs);
+		
+		control.verify();
 	}
 	
 	@Test
@@ -178,9 +200,11 @@ public class MirrorTableHelperTest {
 		TableMeta meta = new TableMeta(new DDETableRange(1, 1, 4, 10));
 		RowSet rs = control.createMock(RowSet.class);
 		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
 		gateway.toCache(same(rs));
 		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(861));
 		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
 		gateway.toCache(same(rs));
 		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(182));
 		expect(rs.next()).andReturn(false);
@@ -193,6 +217,26 @@ public class MirrorTableHelperTest {
 		keyValues.put(2, new Integer(861));
 		keyValues.put(3, new Integer(182));
 		assertEquals(keyValues, helper.getKeyValues());
+	}
+	
+	@Test
+	public void testCacheRowSet_SkipIfShouldntCache() throws Exception {
+		TableMeta meta = new TableMeta(new DDETableRange(1, 1, 4, 10));
+		RowSet rs = control.createMock(RowSet.class);
+		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(false);
+		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(true);
+		gateway.toCache(same(rs));
+		expect(gateway.getKeyValue(same(rs))).andReturn(new Integer(182));
+		expect(rs.next()).andReturn(true);
+		expect(gateway.shouldCache(same(rs))).andReturn(false);
+		expect(rs.next()).andReturn(false);
+		control.replay();
+		
+		helper.cacheRowSet(meta, rs);
+		
+		control.verify();
 	}
 	
 	@Test

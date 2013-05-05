@@ -138,5 +138,10 @@ public class OrdersGateway implements CacheGateway {
 	public void clearCache() {
 		cache.clear();
 	}
+	
+	@Override
+	public boolean shouldCache(Row row) {
+		return true;
+	}
 
 }

@@ -156,4 +156,9 @@ public class SecuritiesGateway implements CacheGateway {
 		cache.clear();
 	}
 
+	@Override
+	public boolean shouldCache(Row row) throws DDEException {
+		return true;
+	}
+
 }

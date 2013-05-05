@@ -18,6 +18,7 @@ public class SecuritiesGatewayTest {
 	private SecuritiesCache cache;
 	private RowDataConverter converter;
 	private SecuritiesGateway gateway;
+	private Map<String, Object> map;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -25,6 +26,7 @@ public class SecuritiesGatewayTest {
 		cache = control.createMock(SecuritiesCache.class);
 		converter = new RowDataConverter("yyyy-MM-dd", "HH:mm:ss");
 		gateway = new SecuritiesGateway(cache, converter);
+		map = new HashMap<String, Object>();
 	}
 	
 	@Test
@@ -77,7 +79,6 @@ public class SecuritiesGatewayTest {
 	public void testToCache1() throws Exception {
 		// фьючерс с указанной валютой
 		// open, close, high, low, bid, ask - пустые строки (д.б. null)
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("lotsize", 1.0d);
 		map.put("pricemax", 145600.0d);
 		map.put("pricemin", 135060.0d);
@@ -116,7 +117,6 @@ public class SecuritiesGatewayTest {
 		// акция (тип пустая строка), валюта шага пустая строка
 		// макс/мин цена - пустая строка (д.б. null)
 		// bid/ask/last - нулевые значения (д.б. null)
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("lotsize", 10.0d);
 		map.put("pricemax", "");
 		map.put("pricemin", "");
@@ -152,7 +152,6 @@ public class SecuritiesGatewayTest {
 	
 	@Test
 	public void testGetKeyValue() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("CODE", "GAZP");
 		map.put("CLASS_CODE", "EQBR");
 		map.put("curstepprice", "");
@@ -162,6 +161,12 @@ public class SecuritiesGatewayTest {
 		assertEquals(
 				new SecurityDescriptor("GAZP", "EQBR", "SUR", SecurityType.STK),
 				gateway.getKeyValue(row));
+	}
+	
+	@Test
+	public void testShouldCache() throws Exception {
+		Row row = new SimpleRow(map);
+		assertTrue(gateway.shouldCache(row));
 	}
 
 }

@@ -21,6 +21,7 @@ public class CacheWindow {
 	public static final String TEXT_TAB_CACHE_ORDERS;
 	public static final String TEXT_TAB_CACHE_TRADES;
 	public static final String TEXT_TAB_CACHE_SECURITIES;
+	public static final String TEXT_TAB_CACHE_PORTS_F;
 	
 	static {
 		logger = LoggerFactory.getLogger(CacheWindow.class);
@@ -28,6 +29,7 @@ public class CacheWindow {
 		TEXT_TAB_CACHE_ORDERS = "TAB_CACHE_ORDERS";
 		TEXT_TAB_CACHE_TRADES = "TAB_CACHE_TRADES";
 		TEXT_TAB_CACHE_SECURITIES = "TAB_CACHE_SECURITIES";
+		TEXT_TAB_CACHE_PORTS_F = "TAB_CACHE_PORTS_F";
 	}
 	
 	private final JDialog window;
@@ -37,6 +39,7 @@ public class CacheWindow {
 	private Table ordersCacheTable;
 	private Table tradesCacheTable;
 	private Table securitiesCacheTable;
+	private Table portsFortsCacheTable;
 	
 	public CacheWindow(JFrame owner, QUIKTerminal terminal,
 			ClassLabels labels)
@@ -56,9 +59,11 @@ public class CacheWindow {
 		ordersCacheTable = builder.createOrdersCacheTable();
 		tradesCacheTable = builder.createTradesCacheTable();
 		securitiesCacheTable = builder.createSecuritiesCacheTable();
+		portsFortsCacheTable = builder.createPortfoliosFortsCacheTable();
 		addTab(ordersCacheTable, TEXT_TAB_CACHE_ORDERS);
 		addTab(tradesCacheTable, TEXT_TAB_CACHE_TRADES);
 		addTab(securitiesCacheTable, TEXT_TAB_CACHE_SECURITIES);
+		addTab(portsFortsCacheTable, TEXT_TAB_CACHE_PORTS_F);
 
 		window.add(tabbedPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));
@@ -82,13 +87,15 @@ public class CacheWindow {
 	protected void onHide() {
 		ordersCacheTable.stop();
 		tradesCacheTable.stop();
-		securitiesCacheTable.start();
+		securitiesCacheTable.stop();
+		portsFortsCacheTable.stop();
 		logger.debug("Hide DDE cache window");
 	}
 	
 	protected void onShow() {
 		logger.debug("Show DDE cache window");
-		securitiesCacheTable.stop();
+		portsFortsCacheTable.start();
+		securitiesCacheTable.start();
 		tradesCacheTable.start();
 		ordersCacheTable.start();
 	}
