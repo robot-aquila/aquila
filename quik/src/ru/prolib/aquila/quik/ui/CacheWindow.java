@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik.ui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.LinkedList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ public class CacheWindow {
 	public static final String TEXT_TAB_CACHE_TRADES;
 	public static final String TEXT_TAB_CACHE_SECURITIES;
 	public static final String TEXT_TAB_CACHE_PORTS_F;
+	public static final String TEXT_TAB_CACHE_POSS_F;
 	
 	static {
 		logger = LoggerFactory.getLogger(CacheWindow.class);
@@ -30,16 +32,14 @@ public class CacheWindow {
 		TEXT_TAB_CACHE_TRADES = "TAB_CACHE_TRADES";
 		TEXT_TAB_CACHE_SECURITIES = "TAB_CACHE_SECURITIES";
 		TEXT_TAB_CACHE_PORTS_F = "TAB_CACHE_PORTS_F";
+		TEXT_TAB_CACHE_POSS_F = "TAB_CACHE_POSS_F";
 	}
 	
 	private final JDialog window;
 	private final QUIKTerminal terminal;
 	private final ClassLabels labels;
 	private final JTabbedPane tabbedPane = new JTabbedPane();
-	private Table ordersCacheTable;
-	private Table tradesCacheTable;
-	private Table securitiesCacheTable;
-	private Table portsFortsCacheTable;
+	private final LinkedList<Table> tables = new LinkedList<Table>();
 	
 	public CacheWindow(JFrame owner, QUIKTerminal terminal,
 			ClassLabels labels)
@@ -54,16 +54,12 @@ public class CacheWindow {
 		window.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) { onHide(); }
 		});
-		
 		TableBuilder builder = new TableBuilder(labels, terminal.getDdeCache());
-		ordersCacheTable = builder.createOrdersCacheTable();
-		tradesCacheTable = builder.createTradesCacheTable();
-		securitiesCacheTable = builder.createSecuritiesCacheTable();
-		portsFortsCacheTable = builder.createPortfoliosFortsCacheTable();
-		addTab(ordersCacheTable, TEXT_TAB_CACHE_ORDERS);
-		addTab(tradesCacheTable, TEXT_TAB_CACHE_TRADES);
-		addTab(securitiesCacheTable, TEXT_TAB_CACHE_SECURITIES);
-		addTab(portsFortsCacheTable, TEXT_TAB_CACHE_PORTS_F);
+		addTab(builder.createOrdersCacheTable(), TEXT_TAB_CACHE_ORDERS);
+		addTab(builder.createTradesCacheTable(), TEXT_TAB_CACHE_TRADES);
+		addTab(builder.createSecuritiesCacheTable(), TEXT_TAB_CACHE_SECURITIES);
+		addTab(builder.createPortfoliosFortsCacheTable(), TEXT_TAB_CACHE_PORTS_F);
+		addTab(builder.createPositionsFortsCacheTable(), TEXT_TAB_CACHE_POSS_F);
 
 		window.add(tabbedPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));
@@ -72,6 +68,7 @@ public class CacheWindow {
 	}
 	
 	private void addTab(Table table, String titleId) {
+		tables.add(table);
 		table.setFillsViewportHeight(true);
 		JScrollPane scrollPane = new JScrollPane(table);
 		tabbedPane.add(labels.get(titleId), scrollPane);
@@ -85,19 +82,17 @@ public class CacheWindow {
 	}
 	
 	protected void onHide() {
-		ordersCacheTable.stop();
-		tradesCacheTable.stop();
-		securitiesCacheTable.stop();
-		portsFortsCacheTable.stop();
+		for ( Table table : tables ) {
+			table.stop();
+		}
 		logger.debug("Hide DDE cache window");
 	}
 	
 	protected void onShow() {
 		logger.debug("Show DDE cache window");
-		portsFortsCacheTable.start();
-		securitiesCacheTable.start();
-		tradesCacheTable.start();
-		ordersCacheTable.start();
+		for ( Table table : tables ) {
+			table.start();
+		}
 	}
 
 }

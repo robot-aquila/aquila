@@ -2,6 +2,8 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
+
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -21,6 +23,11 @@ public class SecurityCacheTest {
 		row = new SecurityCache(20, 180.13d, 160.24d, 0.01d, 0.02d, 2,
 				150.82d, 153.14d, 153.12d, "test security", "test",
 				150.84d, 150.90d, /*151.12d*/null, 149.82d, descr1);
+	}
+	
+	@Test
+	public void testGetEntryTime() throws Exception {
+		assertEquals(new Date(), row.getEntryTime());
 	}
 	
 	@Test

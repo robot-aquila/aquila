@@ -1,9 +1,6 @@
 package ru.prolib.aquila.quik.dde;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.table.*;
@@ -12,12 +9,7 @@ import ru.prolib.aquila.dde.utils.table.*;
  * Базовый обработчик кэширования таблицы типа зеркало.
  */
 public class MirrorTableHandler implements DDETableHandler {
-	private static final Logger logger;
 	private final MirrorTableHelper helper;
-	
-	static {
-		logger = LoggerFactory.getLogger(MirrorTableHandler.class);
-	}
 	
 	public MirrorTableHandler(MirrorTableHelper helper) {
 		super();
@@ -47,7 +39,6 @@ public class MirrorTableHandler implements DDETableHandler {
 	private void handleTable(DDETable ddeTable)
 			throws DDEException, RowSetException
 	{
-		logger.debug("handle table: {}", ddeTable.getTopic());
 		TableMeta meta = helper.createTableMeta(ddeTable);
 		if ( meta.hasHeaderRow() ) {
 			helper.updateHeaders(ddeTable);

@@ -3,6 +3,8 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Variant;
@@ -20,6 +22,11 @@ public class PortfolioFCacheTest {
 		assertTrue(row.equals(row));
 		assertFalse(row.equals(null));
 		assertFalse(row.equals(this));
+	}
+	
+	@Test
+	public void testGetEntryTime() throws Exception {
+		assertEquals(new Date(), row.getEntryTime());
 	}
 	
 	@Test

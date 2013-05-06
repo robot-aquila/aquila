@@ -270,4 +270,46 @@ public class TableBuilder {
 		return new Table(new PortfoliosFCacheTableModel(labels,
 				columns, cache.getPortfoliosFCache()));
 	}
+	
+	public Table createPositionsFortsCacheTable() {
+		Columns columns = new Columns();
+		columns.add(new Column("COL_CACHE_POS_F_ACCOUNT", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PositionFCache) obj).getAccountCode());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_POS_F_FIRMID", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PositionFCache) obj).getFirmId());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_POS_F_SEC_SNAME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PositionFCache) obj).getSecurityShortName());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_POS_F_OPEN", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PositionFCache) obj).getOpenQty());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_POS_F_CURR", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PositionFCache) obj).getCurrentQty());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_POS_F_VARMARGIN", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((PositionFCache) obj).getVarMargin());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_POS_F_ENTRY_TIME",new G<Object>() {
+			@Override public Object get(Object obj) {
+				return dateFormatMs.format(((PositionFCache)obj)
+						.getEntryTime());
+			}
+		}, Column.LONG));
+		return new Table(new PositionsFCacheTableModel(labels,
+				columns, cache.getPositionsFCache()));
+	}
 }

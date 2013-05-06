@@ -18,6 +18,7 @@ public class CacheTest {
 	private TradesCache trades;
 	private SecuritiesCache securities;
 	private PortfoliosFCache ports_F;
+	private PositionsFCache poss_F;
 	private Cache cache;
 
 	@Before
@@ -28,7 +29,8 @@ public class CacheTest {
 		trades = control.createMock(TradesCache.class);
 		securities = control.createMock(SecuritiesCache.class);
 		ports_F = control.createMock(PortfoliosFCache.class);
-		cache = new Cache(orders, trades, securities, ports_F);
+		poss_F = control.createMock(PositionsFCache.class);
+		cache = new Cache(orders, trades, securities, ports_F, poss_F);
 	}
 	
 	@Test
@@ -38,6 +40,7 @@ public class CacheTest {
 		EventType onTradesUpdate = control.createMock(EventType.class);
 		EventType onSecuritiesUpdate = control.createMock(EventType.class);
 		EventType onPortsFUpdate = control.createMock(EventType.class);
+		EventType onPossFUpdate = control.createMock(EventType.class);
 		expect(es.createEventDispatcher("Cache")).andReturn(dispatcher);
 		expect(es.createGenericType(dispatcher, "Orders"))
 			.andReturn(onOrdersUpdate);
@@ -47,6 +50,8 @@ public class CacheTest {
 			.andReturn(onSecuritiesUpdate);
 		expect(es.createGenericType(dispatcher, "PortfoliosFORTS"))
 			.andReturn(onPortsFUpdate);
+		expect(es.createGenericType(dispatcher, "PositionsFORTS"))
+			.andReturn(onPossFUpdate);
 		control.replay();
 		
 		cache = Cache.createCache(es);
@@ -56,7 +61,8 @@ public class CacheTest {
 		Cache expected = new Cache(new OrdersCache(dispatcher, onOrdersUpdate),
 				new TradesCache(dispatcher, onTradesUpdate),
 				new SecuritiesCache(dispatcher, onSecuritiesUpdate),
-				new PortfoliosFCache(dispatcher, onPortsFUpdate));
+				new PortfoliosFCache(dispatcher, onPortsFUpdate),
+				new PositionsFCache(dispatcher, onPossFUpdate));
 		assertEquals(expected, cache);
 	}
 	
@@ -81,12 +87,15 @@ public class CacheTest {
 		Variant<PortfoliosFCache> vPrtF = new Variant<PortfoliosFCache>(vSecs)
 			.add(ports_F)
 			.add(control.createMock(PortfoliosFCache.class));
-		Variant<?> iterator = vPrtF;
+		Variant<PositionsFCache> vPosF = new Variant<PositionsFCache>(vPrtF)
+			.add(poss_F)
+			.add(control.createMock(PositionsFCache.class));
+		Variant<?> iterator = vPosF;
 		int foundCnt = 0;
 		Cache x = null, found = null;
 		do {
 			x = new Cache(vOrders.get(), vTrades.get(), vSecs.get(),
-					vPrtF.get());
+					vPrtF.get(), vPosF.get());
 			if ( cache.equals(x) ) {
 				found = x;
 				foundCnt ++;
@@ -97,6 +106,7 @@ public class CacheTest {
 		assertSame(trades, found.getTradesCache());
 		assertSame(securities, found.getSecuritiesCache());
 		assertSame(ports_F, found.getPortfoliosFCache());
+		assertSame(poss_F, found.getPositionsFCache());
 	}
 
 }

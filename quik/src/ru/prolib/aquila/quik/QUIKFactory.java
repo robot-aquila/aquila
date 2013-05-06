@@ -265,6 +265,9 @@ public class QUIKFactory implements TerminalFactory {
 		service.setHandler(config.getPortfoliosFUT(),
 			new MirrorTableHandler(
 				new PortfoliosFGateway(cache.getPortfoliosFCache(), conv)));
+		service.setHandler(config.getPositionsFUT(),
+			new MirrorTableHandler(
+				new PositionsFGateway(cache.getPositionsFCache(), conv)));
 		return service;
 	}
 	

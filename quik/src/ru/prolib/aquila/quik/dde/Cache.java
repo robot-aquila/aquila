@@ -13,16 +13,19 @@ public class Cache {
 	private final TradesCache trades;
 	private final SecuritiesCache securities;
 	private final PortfoliosFCache portfolios_F;
+	private final PositionsFCache positions_F;
 	
 	public Cache(OrdersCache orders, TradesCache trades,
 			SecuritiesCache securities,
-			PortfoliosFCache portfolios_F)
+			PortfoliosFCache portfolios_F,
+			PositionsFCache positions_F)
 	{
 		super();
 		this.orders = orders;
 		this.trades = trades;
 		this.securities = securities;
 		this.portfolios_F = portfolios_F;
+		this.positions_F = positions_F;
 	}
 	
 	/**
@@ -41,7 +44,9 @@ public class Cache {
 				new SecuritiesCache(dispatcher,
 						es.createGenericType(dispatcher, "Securities")),
 				new PortfoliosFCache(dispatcher,
-						es.createGenericType(dispatcher, "PortfoliosFORTS")));
+						es.createGenericType(dispatcher, "PortfoliosFORTS")),
+				new PositionsFCache(dispatcher,
+						es.createGenericType(dispatcher, "PositionsFORTS")));
 	}
 	
 	/**
@@ -80,6 +85,15 @@ public class Cache {
 		return portfolios_F;
 	}
 	
+	/**
+	 * Получить кэш таблицы позиций по деривативам.
+	 * <p>
+	 * @return кэш
+	 */
+	public synchronized PositionsFCache getPositionsFCache() {
+		return positions_F;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == null ) {
@@ -97,6 +111,7 @@ public class Cache {
 			.append(trades, o.trades)
 			.append(securities, o.securities)
 			.append(portfolios_F, o.portfolios_F)
+			.append(positions_F, o.positions_F)
 			.isEquals();
 	}
 

@@ -53,12 +53,12 @@ public class PortfoliosFCache extends MirrorCache {
 	 * <p>
 	 * @return список всех записей
 	 */
-	public List<PortfolioFCache> getAll() {
+	public synchronized List<PortfolioFCache> getAll() {
 		return new Vector<PortfolioFCache>(cache.values());
 	}
 	
 	@Override
-	public boolean equals(Object other) {
+	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
