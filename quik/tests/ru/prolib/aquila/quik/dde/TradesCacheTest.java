@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -155,6 +156,16 @@ public class TradesCacheTest {
 		assertSame(type1, found.OnCacheUpdate());
 		assertSame(trade1, found.get(100L));
 		assertSame(trade2, found.get(102L));
+	}
+	
+	@Test
+	public void testFireUpdateCache() throws Exception {
+		dispatcher1.dispatch(eq(new EventImpl(type1)));
+		control.replay();
+		
+		cache.fireUpdateCache();
+		
+		control.verify();
 	}
 
 }

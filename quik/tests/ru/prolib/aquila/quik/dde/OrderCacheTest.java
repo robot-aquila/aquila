@@ -39,7 +39,7 @@ public class OrderCacheTest {
 	}
 	
 	@Test
-	public void testConstruct() throws Exception {
+	public void testGetEntryTime() throws Exception {
 		assertEquals(new Date(), row.getEntryTime());
 	}
 	

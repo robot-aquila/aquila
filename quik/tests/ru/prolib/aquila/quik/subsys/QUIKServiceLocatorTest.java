@@ -146,6 +146,7 @@ public class QUIKServiceLocatorTest {
 		EventType onSecuritiesUpdate = control.createMock(EventType.class);
 		EventType onPortsFUpdate = control.createMock(EventType.class);
 		EventType onPossFUpdate = control.createMock(EventType.class);
+		EventType onStopOrdersUpdate = control.createMock(EventType.class);
 		expect(es.createEventDispatcher(eq("Cache"))).andReturn(dispatcher);
 		expect(es.createGenericType(same(dispatcher), eq("Orders")))
 			.andReturn(onOrdersUpdate);
@@ -157,6 +158,8 @@ public class QUIKServiceLocatorTest {
 			.andReturn(onPortsFUpdate);
 		expect(es.createGenericType(same(dispatcher), eq("PositionsFORTS")))
 			.andReturn(onPossFUpdate);
+		expect(es.createGenericType(same(dispatcher), eq("StopOrders")))
+			.andReturn(onStopOrdersUpdate);
 		locator.setEventSystem(es);
 		control.replay();
 		
@@ -164,7 +167,8 @@ public class QUIKServiceLocatorTest {
 				new TradesCache(dispatcher, onTradesUpdate),
 				new SecuritiesCache(dispatcher, onSecuritiesUpdate),
 				new PortfoliosFCache(dispatcher, onPortsFUpdate),
-				new PositionsFCache(dispatcher, onPossFUpdate));
+				new PositionsFCache(dispatcher, onPossFUpdate),
+				new StopOrdersCache(dispatcher, onStopOrdersUpdate));
 		Cache actual = locator.getDdeCache();
 		
 		control.verify();

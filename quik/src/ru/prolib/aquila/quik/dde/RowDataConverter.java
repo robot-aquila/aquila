@@ -177,7 +177,7 @@ public class RowDataConverter {
 	 * @throws RowUnmappedValueException нет соответствия в карте
 	 */
 	public Object getStringMappedTo(Row row, String elementId,
-			Map<String, Object> map) throws ValueException
+			Map<String, ? extends Object> map) throws ValueException
 	{
 		String key = getString(row, elementId);
 		if ( map.containsKey(key) ) {

@@ -14,11 +14,13 @@ public class Cache {
 	private final SecuritiesCache securities;
 	private final PortfoliosFCache portfolios_F;
 	private final PositionsFCache positions_F;
+	private final StopOrdersCache stopOrders;
 	
 	public Cache(OrdersCache orders, TradesCache trades,
 			SecuritiesCache securities,
 			PortfoliosFCache portfolios_F,
-			PositionsFCache positions_F)
+			PositionsFCache positions_F,
+			StopOrdersCache stopOrders)
 	{
 		super();
 		this.orders = orders;
@@ -26,6 +28,7 @@ public class Cache {
 		this.securities = securities;
 		this.portfolios_F = portfolios_F;
 		this.positions_F = positions_F;
+		this.stopOrders = stopOrders;
 	}
 	
 	/**
@@ -37,16 +40,18 @@ public class Cache {
 	public static Cache createCache(EventSystem es) {
 		EventDispatcher dispatcher = es.createEventDispatcher("Cache");
 		return new Cache(
-				new OrdersCache(dispatcher,
-						es.createGenericType(dispatcher, "Orders")),
-				new TradesCache(dispatcher,
-						es.createGenericType(dispatcher, "MyTrades")),
-				new SecuritiesCache(dispatcher,
-						es.createGenericType(dispatcher, "Securities")),
-				new PortfoliosFCache(dispatcher,
-						es.createGenericType(dispatcher, "PortfoliosFORTS")),
-				new PositionsFCache(dispatcher,
-						es.createGenericType(dispatcher, "PositionsFORTS")));
+			new OrdersCache(dispatcher,
+				es.createGenericType(dispatcher, "Orders")),
+			new TradesCache(dispatcher,
+				es.createGenericType(dispatcher, "MyTrades")),
+			new SecuritiesCache(dispatcher,
+				es.createGenericType(dispatcher, "Securities")),
+			new PortfoliosFCache(dispatcher,
+				es.createGenericType(dispatcher, "PortfoliosFORTS")),
+			new PositionsFCache(dispatcher,
+				es.createGenericType(dispatcher, "PositionsFORTS")),
+			new StopOrdersCache(dispatcher,
+				es.createGenericType(dispatcher, "StopOrders")));
 	}
 	
 	/**
@@ -94,6 +99,15 @@ public class Cache {
 		return positions_F;
 	}
 	
+	/**
+	 * Получить кэш таблицы стоп-заявок.
+	 * <p>
+	 * @return кэш
+	 */
+	public synchronized StopOrdersCache getStopOrdersCache() {
+		return stopOrders;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == null ) {
@@ -112,6 +126,7 @@ public class Cache {
 			.append(securities, o.securities)
 			.append(portfolios_F, o.portfolios_F)
 			.append(positions_F, o.positions_F)
+			.append(stopOrders, o.stopOrders)
 			.isEquals();
 	}
 

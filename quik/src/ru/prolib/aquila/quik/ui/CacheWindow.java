@@ -24,6 +24,7 @@ public class CacheWindow {
 	public static final String TEXT_TAB_CACHE_SECURITIES;
 	public static final String TEXT_TAB_CACHE_PORTS_F;
 	public static final String TEXT_TAB_CACHE_POSS_F;
+	public static final String TEXT_TAB_CACHE_STOP_ORDERS;
 	
 	static {
 		logger = LoggerFactory.getLogger(CacheWindow.class);
@@ -33,6 +34,7 @@ public class CacheWindow {
 		TEXT_TAB_CACHE_SECURITIES = "TAB_CACHE_SECURITIES";
 		TEXT_TAB_CACHE_PORTS_F = "TAB_CACHE_PORTS_F";
 		TEXT_TAB_CACHE_POSS_F = "TAB_CACHE_POSS_F";
+		TEXT_TAB_CACHE_STOP_ORDERS = "TAB_CACHE_STOP_ORDERS";
 	}
 	
 	private final JDialog window;
@@ -58,8 +60,9 @@ public class CacheWindow {
 		addTab(builder.createOrdersCacheTable(), TEXT_TAB_CACHE_ORDERS);
 		addTab(builder.createTradesCacheTable(), TEXT_TAB_CACHE_TRADES);
 		addTab(builder.createSecuritiesCacheTable(), TEXT_TAB_CACHE_SECURITIES);
-		addTab(builder.createPortfoliosFortsCacheTable(), TEXT_TAB_CACHE_PORTS_F);
+		addTab(builder.createPortfoliosFortsCacheTable(),TEXT_TAB_CACHE_PORTS_F);
 		addTab(builder.createPositionsFortsCacheTable(), TEXT_TAB_CACHE_POSS_F);
+		addTab(builder.createStopOrdersCacheTable(),TEXT_TAB_CACHE_STOP_ORDERS);
 
 		window.add(tabbedPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));

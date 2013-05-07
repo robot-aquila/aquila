@@ -268,6 +268,9 @@ public class QUIKFactory implements TerminalFactory {
 		service.setHandler(config.getPositionsFUT(),
 			new MirrorTableHandler(
 				new PositionsFGateway(cache.getPositionsFCache(), conv)));
+		service.setHandler(config.getStopOrders(),
+			new MirrorTableHandler(
+				new StopOrdersGateway(cache.getStopOrdersCache(), conv)));
 		return service;
 	}
 	

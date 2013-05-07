@@ -156,5 +156,15 @@ public class SecuritiesCacheTest {
 		assertSame(type1, found.OnCacheUpdate());
 		assertEquals(rows1, found.getAll());
 	}
+	
+	@Test
+	public void testFireUpdateCache() throws Exception {
+		dispatcher1.dispatch(eq(new EventImpl(type1)));
+		control.replay();
+		
+		cache.fireUpdateCache();
+		
+		control.verify();
+	}
 
 }
