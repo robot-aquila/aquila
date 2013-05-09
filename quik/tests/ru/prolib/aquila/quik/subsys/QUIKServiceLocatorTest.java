@@ -60,11 +60,9 @@ public class QUIKServiceLocatorTest {
 		assertSame(es, locator.getEventSystem());
 	}
 	
-	@Test
-	public void testGetPartiallyKnownObjects() throws Exception {
-		PartiallyKnownObjects objects = locator.getPartiallyKnownObjects();
-		assertSame(objects, locator.getPartiallyKnownObjects());
-		assertEquals(new PartiallyKnownObjects(terminal), objects);
+	@Test (expected=NoSuchMethodException.class)
+	public void testGetPartiallyKnownObjects_Removed() throws Exception {
+		QUIKServiceLocator.class.getMethod("getPartiallyKnownObjects");
 	}
 	
 	@Test
@@ -163,7 +161,8 @@ public class QUIKServiceLocatorTest {
 		locator.setEventSystem(es);
 		control.replay();
 		
-		Cache expected = new Cache(new OrdersCache(dispatcher, onOrdersUpdate),
+		Cache expected = new Cache(new PartiallyKnownObjects(terminal),
+				new OrdersCache(dispatcher, onOrdersUpdate),
 				new TradesCache(dispatcher, onTradesUpdate),
 				new SecuritiesCache(dispatcher, onSecuritiesUpdate),
 				new PortfoliosFCache(dispatcher, onPortsFUpdate),

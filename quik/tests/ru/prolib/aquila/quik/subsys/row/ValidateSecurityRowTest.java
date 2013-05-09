@@ -21,7 +21,7 @@ public class ValidateSecurityRowTest {
 	private IMocksControl control;
 	private RowSet rs;
 	private QUIKServiceLocator locator;
-	private PartiallyKnownObjects descrs;
+	private Cache ddeCache;
 	private ValidateSecurityRow validator;
 
 	@Before
@@ -30,9 +30,9 @@ public class ValidateSecurityRowTest {
 		control = createStrictControl();
 		rs = control.createMock(RowSet.class);
 		locator = control.createMock(QUIKServiceLocator.class);
-		descrs = control.createMock(PartiallyKnownObjects.class);
+		ddeCache = control.createMock(Cache.class);
 		validator = new ValidateSecurityRow(locator);
-		expect(locator.getPartiallyKnownObjects()).andStubReturn(descrs);
+		expect(locator.getDdeCache()).andStubReturn(ddeCache);
 	}
 	
 	@Test
@@ -44,7 +44,7 @@ public class ValidateSecurityRowTest {
 	public void testValidate() throws Exception {
 		expect(rs.get(eq("SEC_DESCR"))).andReturn(descr);
 		expect(rs.get(eq("SEC_SHORTNAME"))).andReturn("Сбербанк");
-		descrs.registerSecurityDescriptor(same(descr), eq("Сбербанк"));
+		ddeCache.registerSecurityDescriptor(same(descr), eq("Сбербанк"));
 		control.replay();
 		
 		assertTrue(validator.validate(rs));

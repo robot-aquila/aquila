@@ -20,7 +20,7 @@ public class ValidatePortfolioRowTest {
 	private IMocksControl control;
 	private RowSet rs;
 	private QUIKServiceLocator locator;
-	private PartiallyKnownObjects partiallyKnown;
+	private Cache ddeCache;
 	private ValidatePortfolioRow validator;
 
 	@Before
@@ -28,9 +28,9 @@ public class ValidatePortfolioRowTest {
 		control = createStrictControl();
 		rs = control.createMock(RowSet.class);
 		locator = control.createMock(QUIKServiceLocator.class);
-		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
+		ddeCache = control.createMock(Cache.class);
 		validator = new ValidatePortfolioRow(locator);
-		expect(locator.getPartiallyKnownObjects()).andStubReturn(partiallyKnown);
+		expect(locator.getDdeCache()).andStubReturn(ddeCache);
 	}
 	
 	@Test
@@ -52,7 +52,7 @@ public class ValidatePortfolioRowTest {
 	public void testValidate_IfAccountIsNotNull() throws Exception {
 		Account account = new Account("foo", "bar");
 		expect(rs.get(eq("PORT_ACC"))).andReturn(account);
-		partiallyKnown.registerAccount(same(account));
+		ddeCache.registerAccount(same(account));
 		control.replay();
 		
 		assertTrue(validator.validate(rs));

@@ -59,7 +59,7 @@ public class QUIKGetOrderAccount implements G<Account> {
 
 	@Override
 	public Account get(Object source) throws ValueException {
-		return locator.getPartiallyKnownObjects()
+		return locator.getDdeCache()
 				.getAccount(gSubCode.get(source), gSubCode2.get(source));
 	}
 	

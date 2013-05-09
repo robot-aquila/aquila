@@ -29,7 +29,6 @@ public class QUIKServiceLocator {
 	private Timer timer;
 	private QUIKConfig config;
 	private Cache ddeCache;
-	private final PartiallyKnownObjects partiallyKnown;
 	
 	/**
 	 * Конструктор.
@@ -39,7 +38,6 @@ public class QUIKServiceLocator {
 	public QUIKServiceLocator(EditableTerminal terminal) {
 		super();
 		this.terminal = terminal;
-		partiallyKnown = new PartiallyKnownObjects(terminal);
 		es = new EventSystemImpl(new EventQueueImpl("QUIK"));
 	}
 	
@@ -68,15 +66,6 @@ public class QUIKServiceLocator {
 	 */
 	public synchronized void setEventSystem(EventSystem es) {
 		this.es = es;
-	}
-	
-	/**
-	 * Получить фасад доступа к объектам по неполному набору атрибутов.
-	 * <p>
-	 * @return фасад доступа к объектам
-	 */
-	public PartiallyKnownObjects getPartiallyKnownObjects() {
-		return partiallyKnown;
 	}
 	
 	/**
@@ -188,7 +177,7 @@ public class QUIKServiceLocator {
 	 */
 	public synchronized Cache getDdeCache() {
 		if ( ddeCache == null ) {
-			ddeCache = Cache.createCache(getEventSystem());
+			ddeCache = Cache.createCache(getEventSystem(), terminal);
 		}
 		return ddeCache;
 	}

@@ -66,7 +66,7 @@ public class QUIKGetSecurityDescriptor2 implements G<SecurityDescriptor> {
 		String secCode = gCode.get(arg0);
 		String secClass = gClass.get(arg0);
 		return secCode == null || secClass == null ? null
-			: locator.getPartiallyKnownObjects()
+			: locator.getDdeCache()
 				.getSecurityDescriptorByCodeAndClass(secCode, secClass);
 	}
 	

@@ -21,7 +21,7 @@ public class QUIKGetSecurityDescriptor2Test {
 	private static IMocksControl control;
 	private static QUIKServiceLocator locator;
 	private static G<String> gCode, gClass;
-	private static PartiallyKnownObjects partiallyKnown;
+	private static Cache ddeCache;
 	private static SecurityDescriptor descr;
 	private static QUIKGetSecurityDescriptor2 getter;
 
@@ -33,14 +33,14 @@ public class QUIKGetSecurityDescriptor2Test {
 		locator = control.createMock(QUIKServiceLocator.class);
 		gCode = control.createMock(G.class);
 		gClass = control.createMock(G.class);
-		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
+		ddeCache = control.createMock(Cache.class);
 		getter = new QUIKGetSecurityDescriptor2(locator, gCode, gClass);
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		control.resetToStrict();
-		expect(locator.getPartiallyKnownObjects()).andStubReturn(partiallyKnown);
+		expect(locator.getDdeCache()).andStubReturn(ddeCache);
 	}
 	
 	@Test
@@ -71,7 +71,7 @@ public class QUIKGetSecurityDescriptor2Test {
 	public void testGet() throws Exception {
 		expect(gCode.get(this)).andReturn("RIZ2");
 		expect(gClass.get(this)).andReturn("SPBFUT");
-		expect(partiallyKnown.getSecurityDescriptorByCodeAndClass("RIZ2", "SPBFUT"))
+		expect(ddeCache.getSecurityDescriptorByCodeAndClass("RIZ2", "SPBFUT"))
 			.andReturn(descr);
 		control.replay();
 		assertSame(descr, getter.get(this));

@@ -19,7 +19,7 @@ import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 public class QUIKGetOrderAccountTest {
 	private IMocksControl control;
 	private QUIKServiceLocator locator;
-	private PartiallyKnownObjects partiallyKnown;
+	private Cache ddeCache;
 	private G<String> gSubCode, gSubCode2;
 	private QUIKGetOrderAccount getter;
 
@@ -28,11 +28,11 @@ public class QUIKGetOrderAccountTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		locator = control.createMock(QUIKServiceLocator.class);
-		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
+		ddeCache = control.createMock(Cache.class);
 		gSubCode = control.createMock(G.class);
 		gSubCode2 = control.createMock(G.class);
 		getter = new QUIKGetOrderAccount(locator, gSubCode, gSubCode2);
-		expect(locator.getPartiallyKnownObjects()).andReturn(partiallyKnown);
+		expect(locator.getDdeCache()).andReturn(ddeCache);
 	}
 	
 	@Test
@@ -47,7 +47,7 @@ public class QUIKGetOrderAccountTest {
 		expect(gSubCode.get(same(this))).andReturn("foo");
 		expect(gSubCode2.get(same(this))).andReturn("bar");
 		Account account = new Account("FIRM", "foo", "bar");
-		expect(partiallyKnown.getAccount(eq("foo"), eq("bar"))).andReturn(account);
+		expect(ddeCache.getAccount(eq("foo"), eq("bar"))).andReturn(account);
 		control.replay();
 		
 		assertSame(account, getter.get(this));
