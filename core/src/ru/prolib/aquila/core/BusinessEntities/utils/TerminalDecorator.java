@@ -643,4 +643,9 @@ public class TerminalDecorator implements EditableTerminal {
 		return terminal.getCurrentTime();
 	}
 
+	@Override
+	public final EventSystem getEventSystem() {
+		return terminal.getEventSystem();
+	}
+
 }

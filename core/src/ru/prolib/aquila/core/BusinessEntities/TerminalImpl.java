@@ -39,6 +39,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
  */
 public class TerminalImpl implements EditableTerminal {
 	private static final Logger logger;
+	private final EventSystem es;
 	private final EditableSecurities securities;
 	private final EditablePortfolios portfolios;
 	private final Starter starter;
@@ -59,6 +60,7 @@ public class TerminalImpl implements EditableTerminal {
 	/**
 	 * Создать объект.
 	 * <p>
+	 * @param eventSystem фасад подсистемы событий
 	 * @param starter пускач
 	 * @param securities набор инструментов
 	 * @param portfolios набор портфелей
@@ -73,7 +75,8 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param onStopped тип события при останове терминала
 	 * @param onPanic тип события при паническом состоянии терминала
 	 */
-	public TerminalImpl(Starter starter,
+	public TerminalImpl(EventSystem eventSystem,
+						Starter starter,
 						EditableSecurities securities,
 						EditablePortfolios portfolios,
 						EditableOrders orders,
@@ -84,10 +87,9 @@ public class TerminalImpl implements EditableTerminal {
 						EventType onConnected,
 						EventType onDisconnected,
 						EventType onStarted,
-						EventType onStopped,
-						EventType onPanic)
+						EventType onStopped, EventType onPanic)
 	{
-		this(starter, securities, portfolios, orders, stopOrders,
+		this(eventSystem, starter, securities, portfolios, orders, stopOrders,
 				orderBuilder, orderProcessor, new TerminalController(),
 				dispatcher, onConnected, onDisconnected,
 				onStarted, onStopped, onPanic);
@@ -96,6 +98,7 @@ public class TerminalImpl implements EditableTerminal {
 	/**
 	 * Создать объект.
 	 * <p>
+	 * @param eventSystem фасад подсистемы событий
 	 * @param starter пускач
 	 * @param securities набор инструментов
 	 * @param portfolios набор портфелей
@@ -111,7 +114,8 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param onStopped тип события при останове терминала
 	 * @param onPanic тип события при паническом состоянии терминала
 	 */
-	public TerminalImpl(Starter starter,
+	public TerminalImpl(EventSystem eventSystem,
+						Starter starter,
 						EditableSecurities securities,
 						EditablePortfolios portfolios,
 						EditableOrders orders,
@@ -127,6 +131,10 @@ public class TerminalImpl implements EditableTerminal {
 						EventType onPanic)
 	{
 		super();
+		if ( eventSystem == null ) {
+			throw new NullPointerException("Event system cannot be null");
+		}
+		this.es = eventSystem;
 		if ( starter == null ) {
 			throw new NullPointerException("Starter cannot be null");
 		}
@@ -833,6 +841,11 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	public Date getCurrentTime() {
 		return new Date();
+	}
+
+	@Override
+	public EventSystem getEventSystem() {
+		return es;
 	}
 
 }

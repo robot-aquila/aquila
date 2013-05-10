@@ -13,6 +13,13 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 {
 	
 	/**
+	 * Получить фасад событийной системы.
+	 * <p>
+	 * @return фасад системы событий
+	 */
+	public EventSystem getEventSystem();
+	
+	/**
 	 * Генерировать событие о подключении терминала.
 	 */
 	public void fireTerminalConnectedEvent();

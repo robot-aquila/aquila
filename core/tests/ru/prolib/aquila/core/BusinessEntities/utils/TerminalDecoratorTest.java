@@ -10,24 +10,8 @@ import java.util.List;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.Starter;
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrders;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolios;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurities;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.Order;
-import ru.prolib.aquila.core.BusinessEntities.OrderBuilder;
-import ru.prolib.aquila.core.BusinessEntities.OrderProcessor;
-import ru.prolib.aquila.core.BusinessEntities.Portfolio;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.TerminalState;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
 
 /**
@@ -45,6 +29,17 @@ public class TerminalDecoratorTest {
 		terminal = control.createMock(EditableTerminal.class);
 		decorator = new TerminalDecorator();
 		decorator.setTerminal(terminal);
+	}
+	
+	@Test
+	public void testGetEventSystem() throws Exception {
+		EventSystem es = control.createMock(EventSystem.class);
+		expect(terminal.getEventSystem()).andReturn(es);
+		control.replay();
+		
+		assertSame(es, decorator.getEventSystem());
+		
+		control.verify();
 	}
 	
 	@Test

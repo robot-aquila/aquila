@@ -22,6 +22,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class TerminalImplTest {
 	private IMocksControl control;
+	private EventSystem es;
 	private Starter starter;
 	private EditableSecurities securities;
 	private EditablePortfolios portfolios;
@@ -43,6 +44,7 @@ public class TerminalImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
+		es = control.createMock(EventSystem.class);
 		controller = control.createMock(TerminalController.class);
 		starter = control.createMock(Starter.class);
 		securities = control.createMock(EditableSecurities.class);
@@ -57,7 +59,7 @@ public class TerminalImplTest {
 		onStarted = control.createMock(EventType.class);
 		onStopped = control.createMock(EventType.class);
 		onPanic = control.createMock(EventType.class);
-		terminal = new TerminalImpl(starter, securities, portfolios,
+		terminal = new TerminalImpl(es, starter, securities, portfolios,
 									orders, stopOrders, orderBuilder,
 									orderProcessor, controller, dispatcher, 
 									onConn, onDisc, onStarted, onStopped,
@@ -70,7 +72,10 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testConstruct14_Ok() throws Exception {
-		Variant<Starter> vStarter = new Variant<Starter>()
+		Variant<EventSystem> vEs = new Variant<EventSystem>()
+			.add(es)
+			.add(null);
+		Variant<Starter> vStarter = new Variant<Starter>(vEs)
 			.add(starter).add(null);
 		Variant<EditableSecurities> vSecurities =
 				new Variant<EditableSecurities>(vStarter)
@@ -117,7 +122,7 @@ public class TerminalImplTest {
 		TerminalImpl found = null;
 		do {
 			try {
-				TerminalImpl t = new TerminalImpl(vStarter.get(),
+				TerminalImpl t = new TerminalImpl(vEs.get(), vStarter.get(),
 						vSecurities.get(), vPortfolios.get(),
 						vOrders.get(), vStopOrds.get(), vOrdBldr.get(),
 						vOrdProc.get(), vCtrl.get(), vDisp.get(),
@@ -133,6 +138,7 @@ public class TerminalImplTest {
 		assertEquals(1, foundCount);
 		assertEquals(iterator.count() - 1, exceptionCount);
 		
+		assertSame(es, found.getEventSystem());
 		assertSame(starter, found.getStarter());
 		assertSame(securities, found.getSecuritiesInstance());
 		assertSame(portfolios, found.getPortfoliosInstance());
@@ -151,7 +157,10 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testConstruct13_Ok() throws Exception {
-		Variant<Starter> vStarter = new Variant<Starter>()
+		Variant<EventSystem> vEs = new Variant<EventSystem>()
+			.add(es)
+			.add(null);
+		Variant<Starter> vStarter = new Variant<Starter>(vEs)
 			.add(starter).add(null);
 		Variant<EditableSecurities> vSecurities =
 				new Variant<EditableSecurities>(vStarter)
@@ -194,13 +203,13 @@ public class TerminalImplTest {
 		TerminalImpl found = null;
 		do {
 			try {
-				TerminalImpl t = new TerminalImpl(vStarter.get(),
-						vSecurities.get(), vPortfolios.get(),
-						vOrders.get(), vStopOrds.get(), vOrdBldr.get(),
-						vOrdProc.get(), vDisp.get(),
-						vOnConn.get(), vOnDisc.get(),
-						vOnStart.get(), vOnStop.get(),
-						vOnPanic.get());
+				TerminalImpl t = new TerminalImpl(vEs.get(),
+						vStarter.get(), vSecurities.get(),
+						vPortfolios.get(), vOrders.get(), vStopOrds.get(),
+						vOrdBldr.get(), vOrdProc.get(),
+						vDisp.get(), vOnConn.get(),
+						vOnDisc.get(), vOnStart.get(),
+						vOnStop.get(), vOnPanic.get());
 				found = t;
 				foundCount ++;
 			} catch ( NullPointerException e ) {
@@ -210,6 +219,7 @@ public class TerminalImplTest {
 		assertEquals(1, foundCount);
 		assertEquals(iterator.count() - 1, exceptionCount);
 		
+		assertSame(es, found.getEventSystem());
 		assertSame(starter, found.getStarter());
 		assertSame(securities, found.getSecuritiesInstance());
 		assertSame(portfolios, found.getPortfoliosInstance());
