@@ -66,7 +66,7 @@ public class IBFactory implements TerminalFactory {
 					.getEventQueue(), 1000));
 		EventSystem es = locator.getEventSystem();
 		EventDispatcher dispatcher = es.createEventDispatcher("IB");
-		EditableTerminal terminal = new TerminalImpl(starter, securities,
+		EditableTerminal terminal = new TerminalImpl(es, starter, securities,
 				portfolios, orders, stopOrders,
 				orderBuilder,
 				orderProcessor,
