@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
  * 2012-08-03<br>
  * $Id: PositionFactory.java 365 2012-12-24 06:58:03Z whirlwind $
  */
+@Deprecated
 public interface PositionFactory {
 	
 	/**

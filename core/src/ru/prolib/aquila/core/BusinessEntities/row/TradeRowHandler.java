@@ -92,7 +92,11 @@ public class TradeRowHandler implements RowHandler {
 					"Handle trade failed: security descriptor is NULL: {}",
 					new Object[] { trade });
 		} else {
-			terminal.getEditableSecurity(descr).fireTradeEvent(trade);
+			try {
+				terminal.getEditableSecurity(descr).fireTradeEvent(trade);
+			} catch ( SecurityNotExistsException e ) {
+				throw new RowException("Security not exists: " + descr);
+			}
 		}
 	}
 	

@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
  * Интерфейс фабрики инструментов биржевой торговли.
@@ -12,14 +11,17 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
  * 2012-07-05<br>
  * $Id: SecurityFactory.java 254 2012-08-14 08:14:35Z whirlwind $
  */
+@Deprecated
 public interface SecurityFactory {
 	
 	/**
 	 * Создать редактируемый экземпляр инструмента биржевой торговли.
 	 * <p>
+	 * @param termina экземпляр терминала
 	 * @param descr дескриптор инструмента
 	 * @return экземпляр инструмента
 	 */
-	public EditableSecurity createSecurity(SecurityDescriptor descr);
+	public EditableSecurity createSecurity(EditableTerminal terminal,
+			SecurityDescriptor descr);
 
 }

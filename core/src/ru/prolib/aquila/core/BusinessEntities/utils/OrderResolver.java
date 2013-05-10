@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
  * 2012-12-14<br>
  * $Id: OrderResolver.java 338 2012-12-15 10:20:43Z whirlwind $
  */
+@Deprecated
 public interface OrderResolver {
 	
 	/**

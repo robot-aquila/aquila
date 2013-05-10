@@ -55,18 +55,7 @@ public class TerminalDecoratorTest {
 	}
 	
 	@Test
-	public void testGetSecurity2() throws Exception {
-		Security s = control.createMock(Security.class);
-		expect(terminal.getSecurity(eq("foo"), eq("bar"))).andReturn(s);
-		control.replay();
-		
-		assertSame(s, decorator.getSecurity("foo", "bar"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetSecurity1Descr() throws Exception {
+	public void testGetSecurity() throws Exception {
 		Security s = control.createMock(Security.class);
 		SecurityDescriptor descr =
 			new SecurityDescriptor("one", "two", "USD", SecurityType.FUT);
@@ -79,43 +68,7 @@ public class TerminalDecoratorTest {
 	}
 	
 	@Test
-	public void testGetSecurity1Code() throws Exception {
-		Security s = control.createMock(Security.class);
-		expect(terminal.getSecurity(eq("foobar"))).andReturn(s);
-		control.replay();
-		
-		assertSame(s, decorator.getSecurity("foobar"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists2() throws Exception {
-		expect(terminal.isSecurityExists(eq("aaa"), eq("bbb"))).andReturn(true);
-		expect(terminal.isSecurityExists(eq("aaa"), eq("bbb")))
-			.andReturn(false);
-		control.replay();
-		
-		assertTrue(decorator.isSecurityExists("aaa", "bbb"));
-		assertFalse(decorator.isSecurityExists("aaa", "bbb"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists1Code() throws Exception {
-		expect(terminal.isSecurityExists(eq("foobar"))).andReturn(true);
-		expect(terminal.isSecurityExists(eq("foobar"))).andReturn(false);
-		control.replay();
-		
-		assertTrue(decorator.isSecurityExists("foobar"));
-		assertFalse(decorator.isSecurityExists("foobar"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists1Descr() throws Exception {
+	public void testIsSecurityExists() throws Exception {
 		SecurityDescriptor descr =
 			new SecurityDescriptor("one", "two", "EUR", SecurityType.STK);
 		expect(terminal.isSecurityExists(eq(descr))).andReturn(true);
@@ -128,18 +81,6 @@ public class TerminalDecoratorTest {
 		control.verify();
 	}
 	
-	@Test
-	public void testIsSecurityAmbiguous() throws Exception {
-		expect(terminal.isSecurityAmbiguous(eq("foobar"))).andReturn(true);
-		expect(terminal.isSecurityAmbiguous(eq("foobar"))).andReturn(false);
-		control.replay();
-		
-		assertTrue(decorator.isSecurityAmbiguous("foobar"));
-		assertFalse(decorator.isSecurityAmbiguous("foobar"));
-		
-		control.verify();
-	}
-
 	@Test
 	public void testOnSecurityAvailable() throws Exception {
 		EventType type = control.createMock(EventType.class);
@@ -369,22 +310,6 @@ public class TerminalDecoratorTest {
 		terminal.cancelOrder(same(order));
 		control.replay();
 		decorator.cancelOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testGetDefaultCurrency() throws Exception {
-		expect(terminal.getDefaultCurrency()).andReturn("EUR");
-		control.replay();
-		assertEquals("EUR", decorator.getDefaultCurrency());
-		control.verify();
-	}
-	
-	@Test
-	public void testGetDefaultType() throws Exception {
-		expect(terminal.getDefaultType()).andReturn(SecurityType.FUT);
-		control.replay();
-		assertEquals(SecurityType.FUT, decorator.getDefaultType());
 		control.verify();
 	}
 	
@@ -1173,6 +1098,35 @@ public class TerminalDecoratorTest {
 		control.replay();
 		
 		assertSame(time, decorator.getCurrentTime());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateSecurity1() throws Exception {
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		SecurityDescriptor descr
+			= new SecurityDescriptor("FOO", "BAR", "SUR", SecurityType.STK);
+		expect(terminal.createSecurity(same(decorator), same(descr)))
+			.andReturn(security);
+		control.replay();
+		
+		assertSame(security, decorator.createSecurity(descr));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateSecurity2() throws Exception {
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		EditableTerminal terminal = control.createMock(EditableTerminal.class);
+		SecurityDescriptor descr
+			= new SecurityDescriptor("FOO", "BAR", "SUR", SecurityType.STK);
+		expect(terminal.createSecurity(same(terminal), same(descr)))
+			.andReturn(security);
+		control.replay();
+		
+		assertSame(security, decorator.createSecurity(terminal, descr));
 		
 		control.verify();
 	}

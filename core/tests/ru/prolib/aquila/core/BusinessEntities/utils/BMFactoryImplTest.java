@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.Vector;
+
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -86,21 +88,15 @@ public class BMFactoryImplTest {
 				.andReturn(onTrade);
 		control.replay();
 		
-		SecuritiesImpl secs = (SecuritiesImpl)
-				factory.createSecurities("USD", SecurityType.STK);
-		assertNotNull(secs);
-		assertEquals("USD", secs.getDefaultCurrency());
-		assertSame(SecurityType.STK, secs.getDefaultType());
-		assertSame(dispatcher, secs.getEventDispatcher());
-		assertSame(onAvail, secs.OnSecurityAvailable());
-		assertSame(onChanged, secs.OnSecurityChanged());
-		assertSame(onTrade, secs.OnSecurityTrade());
-		SecurityFactoryImpl sf = (SecurityFactoryImpl)secs.getSecurityFactory();
-		assertNotNull(sf);
-		assertSame(eventSystem, sf.getEventSystem());
-		assertSame(term, sf.getTerminal());
+		SecuritiesImpl actual = (SecuritiesImpl) factory.createSecurities();
 		
 		control.verify();
+		assertSame(dispatcher, actual.getEventDispatcher());
+		assertSame(onAvail, actual.OnSecurityAvailable());
+		assertSame(onChanged, actual.OnSecurityChanged());
+		assertSame(onTrade, actual.OnSecurityTrade());
+		assertEquals(0, actual.getSecuritiesCount());
+		assertEquals(new Vector<Security>(), actual.getSecurities());
 	}
 	
 	@Test
@@ -208,12 +204,6 @@ public class BMFactoryImplTest {
 		assertEquals(
 				new PositionFactoryImpl(eventSystem, new Account("ZULU"), term),
 				factory.createPositionFactory(new Account("ZULU")));
-	}
-
-	@Test
-	public void testCreateSecurityFactory() throws Exception {
-		SecurityFactory expected = new SecurityFactoryImpl(eventSystem, term);
-		assertEquals(expected, factory.createSecurityFactory());
 	}
 
 	@Test

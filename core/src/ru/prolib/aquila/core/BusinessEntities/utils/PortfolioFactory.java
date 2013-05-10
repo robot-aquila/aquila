@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
  * 2012-09-07<br>
  * $Id$
  */
+@Deprecated
 public interface PortfolioFactory {
 
 	/**

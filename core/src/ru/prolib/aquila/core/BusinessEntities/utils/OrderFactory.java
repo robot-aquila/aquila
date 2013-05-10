@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
  * 2012-10-17<br>
  * $Id: OrderFactory.java 334 2012-12-11 03:45:38Z whirlwind $
  */
+@Deprecated
 public interface OrderFactory {
 	
 	/**

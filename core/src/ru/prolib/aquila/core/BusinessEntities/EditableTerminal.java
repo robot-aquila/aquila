@@ -94,5 +94,15 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	 * @param state новое состояние
 	 */
 	public void setTerminalState(TerminalState state);
+	
+	/**
+	 * Создать и зарегистрировать новый инструмент терминала.
+	 * <p>
+	 * @param descr дескриптор нового инструмента
+	 * @return новый инструмент
+	 * @throws SecurityAlreadyExistsException инструмент уже существует
+	 */
+	public EditableSecurity createSecurity(SecurityDescriptor descr)
+		throws SecurityAlreadyExistsException;
 
 }

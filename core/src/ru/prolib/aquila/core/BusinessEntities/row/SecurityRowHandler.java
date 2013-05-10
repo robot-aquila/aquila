@@ -71,13 +71,15 @@ public class SecurityRowHandler implements RowHandler {
 			terminal.firePanicEvent(1, msg + "descriptor is NULL");
 			return;
 		}
-		EditableSecurity security = terminal.getEditableSecurity(descr);
-		synchronized ( security ) {
-			try {
+		try {
+			EditableSecurity security = terminal.getEditableSecurity(descr);
+			synchronized ( security ) {
 				modifier.set(security, row);
-			} catch ( ValueException e ) {
-				throw new RowException(e);
 			}
+		} catch ( SecurityNotExistsException e ) {
+			throw new RowException("Security not exists: " + descr);
+		} catch ( ValueException e ) {
+			throw new RowException(e);
 		}
 	}
 	

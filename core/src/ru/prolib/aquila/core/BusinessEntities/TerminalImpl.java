@@ -242,13 +242,6 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public Security getSecurity(String code, String classCode)
-			throws SecurityException
-	{
-		return securities.getSecurity(code, classCode);
-	}
-
-	@Override
 	final public Security getSecurity(SecurityDescriptor descr)
 			throws SecurityException
 	{
@@ -256,28 +249,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public Security getSecurity(String code) throws SecurityException {
-		return securities.getSecurity(code);
-	}
-
-	@Override
-	final public boolean isSecurityExists(String code, String classCode) {
-		return securities.isSecurityExists(code, classCode);
-	}
-
-	@Override
-	final public boolean isSecurityExists(String code) {
-		return securities.isSecurityExists(code);
-	}
-
-	@Override
 	final public boolean isSecurityExists(SecurityDescriptor descr) {
 		return securities.isSecurityExists(descr);
-	}
-
-	@Override
-	final public boolean isSecurityAmbiguous(String code) {
-		return securities.isSecurityAmbiguous(code);
 	}
 
 	@Override
@@ -404,16 +377,6 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	public void cancelOrder(Order order) throws OrderException {
 		orderProcessor.cancelOrder(order);
-	}
-
-	@Override
-	public String getDefaultCurrency() {
-		return securities.getDefaultCurrency();
-	}
-
-	@Override
-	public SecurityType getDefaultType() {
-		return securities.getDefaultType();
 	}
 
 	@Override
@@ -674,7 +637,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) {
+	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) throws SecurityNotExistsException {
 		return securities.getEditableSecurity(descr);
 	}
 
@@ -846,6 +809,21 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	public EventSystem getEventSystem() {
 		return es;
+	}
+
+	@Override
+	public EditableSecurity
+		createSecurity(EditableTerminal terminal, SecurityDescriptor descr)
+			throws SecurityAlreadyExistsException
+	{
+		return securities.createSecurity(terminal, descr);
+	}
+
+	@Override
+	public EditableSecurity createSecurity(SecurityDescriptor descr)
+			throws SecurityAlreadyExistsException
+	{
+		return securities.createSecurity(this, descr);
 	}
 
 }

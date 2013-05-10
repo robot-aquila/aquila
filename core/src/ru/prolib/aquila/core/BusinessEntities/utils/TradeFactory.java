@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.Trade;
  * 2012-11-04<br>
  * $Id: TradeFactory.java 301 2012-11-04 01:37:17Z whirlwind $
  */
+@Deprecated
 public interface TradeFactory {
 	
 	/**

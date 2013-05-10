@@ -251,18 +251,7 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testGetSecurity2() throws Exception {
-		Security s = control.createMock(Security.class);
-		expect(securities.getSecurity(eq("a"), eq("b"))).andReturn(s);
-		control.replay();
-		
-		assertSame(s, terminal.getSecurity("a", "b"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetSecurity1Descr() throws Exception {
+	public void testGetSecurity() throws Exception {
 		Security s = control.createMock(Security.class);
 		SecurityDescriptor descr =
 			new SecurityDescriptor("foo", "bar", "JPY", SecurityType.UNK);
@@ -275,54 +264,13 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testGetSecurity1Code() throws Exception {
-		Security s = control.createMock(Security.class);
-		expect(securities.getSecurity("foo")).andReturn(s);
-		control.replay();
-		
-		assertSame(s, terminal.getSecurity("foo"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists2() throws Exception {
-		expect(securities.isSecurityExists("a", "b")).andReturn(true);
-		control.replay();
-		
-		assertTrue(terminal.isSecurityExists("a", "b"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists1Code() throws Exception {
-		expect(securities.isSecurityExists("charlie")).andReturn(true);
-		control.replay();
-		
-		assertTrue(terminal.isSecurityExists("charlie"));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists1Descr() throws Exception {
+	public void testIsSecurityExists() throws Exception {
 		SecurityDescriptor descr =
 			new SecurityDescriptor("foo", "bar", "EUR", SecurityType.OPT);
 		expect(securities.isSecurityExists(eq(descr))).andReturn(true);
 		control.replay();
 		
 		assertTrue(terminal.isSecurityExists(descr));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityAmbiguous() throws Exception {
-		expect(securities.isSecurityAmbiguous("gamma")).andReturn(true);
-		control.replay();
-		
-		assertTrue(terminal.isSecurityAmbiguous("gamma"));
 		
 		control.verify();
 	}
@@ -362,7 +310,7 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testGetPortfolio0() throws Exception {
+	public void testGetDefaultPortfolio() throws Exception {
 		Portfolio p = control.createMock(Portfolio.class);
 		expect(portfolios.getDefaultPortfolio()).andReturn(p);
 		control.replay();
@@ -587,22 +535,6 @@ public class TerminalImplTest {
 		orderProcessor.cancelOrder(same(order));
 		control.replay();
 		terminal.cancelOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testGetDefaultCurrency() throws Exception {
-		expect(securities.getDefaultCurrency()).andReturn("EUR");
-		control.replay();
-		assertEquals("EUR", terminal.getDefaultCurrency());
-		control.verify();
-	}
-	
-	@Test
-	public void testGetDefaultType() throws Exception {
-		expect(securities.getDefaultType()).andReturn(SecurityType.FUT);
-		control.replay();
-		assertEquals(SecurityType.FUT, terminal.getDefaultType());
 		control.verify();
 	}
 	
@@ -1354,6 +1286,34 @@ public class TerminalImplTest {
 	@Test
 	public void testGetCurrentTime() throws Exception {
 		assertEquals(new Date(), terminal.getCurrentTime());
+	}
+	
+	@Test
+	public void testCreateSecurity2() throws Exception {
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		SecurityDescriptor descr =
+			new SecurityDescriptor("AAPL", "SMART", "USD", SecurityType.STK);
+		expect(securities.createSecurity(same(terminal), eq(descr)))
+			.andReturn(security);
+		control.replay();
+		
+		assertSame(security, terminal.createSecurity(terminal, descr));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateSecurity1() throws Exception {
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		SecurityDescriptor descr =
+			new SecurityDescriptor("AAPL", "SMART", "USD", SecurityType.STK);
+		expect(securities.createSecurity(same(terminal), eq(descr)))
+			.andReturn(security);
+		control.replay();
+		
+		assertSame(security, terminal.createSecurity(descr));
+		
+		control.verify();
 	}
 	
 }

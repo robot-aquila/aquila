@@ -62,7 +62,7 @@ public class TerminalController {
 		helper.createThread(helper.createStartSequence(terminal, sig)).start();
 		try {
 			if ( ! sig.await(1000, TimeUnit.MILLISECONDS) ) {
-				logger.warn("runStartSequence: Timeout during start sequence");
+				logger.warn("start: Timeout during start sequence");
 			}
 		} catch ( InterruptedException e ) {
 			throw new RuntimeException(e);
@@ -79,7 +79,7 @@ public class TerminalController {
 		helper.createThread(helper.createStopSequence(terminal, sig)).start();
 		try {
 			if ( ! sig.await(1000, TimeUnit.MILLISECONDS) ) {
-				logger.warn("runStopSequence: Timeout during start sequence");
+				logger.warn("stop: Timeout during start sequence");
 			}
 		} catch ( InterruptedException e ) {
 			throw new RuntimeException(e);

@@ -6,23 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrders;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolios;
-import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurities;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
-import ru.prolib.aquila.core.BusinessEntities.OrderBuilder;
-import ru.prolib.aquila.core.BusinessEntities.OrderBuilderImpl;
-import ru.prolib.aquila.core.BusinessEntities.OrdersImpl;
-import ru.prolib.aquila.core.BusinessEntities.PortfoliosImpl;
-import ru.prolib.aquila.core.BusinessEntities.SecuritiesImpl;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.setter.EditableEventGenerator;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.setter.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.*;
 
@@ -80,18 +65,13 @@ public class BMFactoryImpl implements BMFactory {
 	}
 
 	@Override
-	public EditableSecurities createSecurities(String defaultCurrency,
-			SecurityType defaultType)
-	{
+	public EditableSecurities createSecurities() {
 		EventDispatcher dispatcher =
 			eventSystem.createEventDispatcher("Securities");
-		return new SecuritiesImpl(
-				new SecurityFactoryImpl(eventSystem, terminal),
-				dispatcher,
+		return new SecuritiesImpl(dispatcher,
 				eventSystem.createGenericType(dispatcher, "OnAvailable"),
 				eventSystem.createGenericType(dispatcher, "OnChanged"),
-				eventSystem.createGenericType(dispatcher, "OnTrade"),
-				defaultCurrency, defaultType);
+				eventSystem.createGenericType(dispatcher, "OnTrade"));
 	}
 
 	@Override
@@ -135,11 +115,6 @@ public class BMFactoryImpl implements BMFactory {
 	@Override
 	public PositionFactory createPositionFactory(Account account) {
 		return new PositionFactoryImpl(eventSystem, account, terminal);
-	}
-
-	@Override
-	public SecurityFactory createSecurityFactory() {
-		return new SecurityFactoryImpl(eventSystem, terminal);
 	}
 
 	@Override

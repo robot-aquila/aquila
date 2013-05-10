@@ -1,14 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityImpl;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
  * Фабрика инструментов биржевой торговли.
@@ -17,73 +10,35 @@ import ru.prolib.aquila.core.BusinessEntities.Terminal;
  * $Id: SecurityFactoryImpl.java 522 2013-02-12 12:07:35Z whirlwind $
  */
 public class SecurityFactoryImpl implements SecurityFactory {
-	private final EventSystem eventSystem;
-	private final Terminal terminal;
 	
 	/**
-	 * Создать фабрику инструментов.
-	 * <p>
-	 * @param eventSystem фасад событийной системы
-	 * @param terminal терминал
+	 * Конструктор.
 	 */
-	public SecurityFactoryImpl(EventSystem eventSystem, Terminal terminal) {
+	public SecurityFactoryImpl() {
 		super();
-		if ( eventSystem == null ) {
-			throw new NullPointerException("Event system cannot be null");
-		}
-		if ( terminal == null ) {
-			throw new NullPointerException("Terminal cannot be null");
-		}
-		this.eventSystem = eventSystem;
-		this.terminal = terminal;
 	}
 
 	@Override
-	public EditableSecurity createSecurity(SecurityDescriptor descr) {
+	public EditableSecurity
+		createSecurity(EditableTerminal terminal, SecurityDescriptor descr)
+	{
+		EventSystem es = terminal.getEventSystem();
 		EventDispatcher dispatcher =
-			eventSystem.createEventDispatcher("Security[" + descr + "]");
+			es.createEventDispatcher("Security[" + descr + "]");
 		return new SecurityImpl(terminal, descr, dispatcher,
-				eventSystem.createGenericType(dispatcher, "OnChanged"),
-				eventSystem.createGenericType(dispatcher, "OnTrade"));
-	}
-	
-	/**
-	 * Получить фасад событийной системы.
-	 * <p>
-	 * @return фасад событийной системы
-	 */
-	public EventSystem getEventSystem() {
-		return eventSystem;
-	}
-	
-	/**
-	 * Получить терминал.
-	 * <p>
-	 * @return терминал
-	 */
-	public Terminal getTerminal() {
-		return terminal;
-	}
-	
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(20121109, 124513)
-			.append(eventSystem)
-			.append(terminal)
-			.toHashCode();
+				es.createGenericType(dispatcher, "OnChanged"),
+				es.createGenericType(dispatcher, "OnTrade"));
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other instanceof SecurityFactoryImpl ) {
-			SecurityFactoryImpl o = (SecurityFactoryImpl) other;
-			return new EqualsBuilder()
-				.append(eventSystem, o.eventSystem)
-				.append(terminal, o.terminal)
-				.isEquals();
-		} else {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != SecurityFactoryImpl.class ) {
 			return false;
 		}
+		return true;
 	}
 
 }

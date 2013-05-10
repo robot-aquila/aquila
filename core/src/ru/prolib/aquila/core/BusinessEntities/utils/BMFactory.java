@@ -1,18 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrders;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolios;
-import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurities;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.OrderBuilder;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.data.S;
-import ru.prolib.aquila.core.utils.Counter;
-import ru.prolib.aquila.core.utils.Validator;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.utils.*;
 
 /**
  * Интерфейс фабрики элементов бизнес-модели.
@@ -25,12 +15,9 @@ public interface BMFactory {
 	/**
 	 * Создать редактируемый набор редактируемых инструментов.
 	 * <p>
-	 * @param defaultCurrency валюта по-кмолчанию
-	 * @param defaultType тип по-умолчанию
 	 * @return набор инструментов
 	 */
-	public EditableSecurities createSecurities(String defaultCurrency,
-			SecurityType defaultType);
+	public EditableSecurities createSecurities();
 	
 	/**
 	 * Создать редактируемый набор редактируемых портфелей.
@@ -67,13 +54,6 @@ public interface BMFactory {
 	 * @return фабрика позиций
 	 */
 	public PositionFactory createPositionFactory(Account account);
-	
-	/**
-	 * Создать фабрику экземпляров инструментов.
-	 * <p>
-	 * @return фабрика инструментов
-	 */
-	public SecurityFactory createSecurityFactory();
 	
 	/**
 	 * Создать фабрику сделок.
