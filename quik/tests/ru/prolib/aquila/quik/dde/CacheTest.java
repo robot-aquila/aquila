@@ -2,11 +2,12 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.core.utils.*;
 
 public class CacheTest {
 	private static Account acc;
@@ -248,6 +249,28 @@ public class CacheTest {
 		
 		assertTrue(cache.isSecurityDescriptorRegistered("GAZP", "EQBR"));
 		assertFalse(cache.isSecurityDescriptorRegistered("GAZP", "EQBR"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetAllSecurities() throws Exception {
+		List<SecurityCache> list = new Vector<SecurityCache>();
+		expect(securities.getAll()).andReturn(list);
+		control.replay();
+		
+		assertSame(list, cache.getAllSecurities());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnSecuritiesCacheUpdate() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(securities.OnCacheUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnSecuritiesCacheUpdate());
 		
 		control.verify();
 	}

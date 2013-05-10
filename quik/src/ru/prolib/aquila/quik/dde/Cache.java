@@ -1,5 +1,7 @@
 package ru.prolib.aquila.quik.dde;
 
+import java.util.List;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -263,6 +265,24 @@ public class Cache {
 		isSecurityDescriptorRegistered(String code, String classCode)
 	{
 		return partiallyKnown.isSecurityDescriptorRegistered(code, classCode);
+	}
+	
+	/**
+	 * Делегат к {@link SecuritiesCache#getAll()}.
+	 * <p>
+	 * @return список кэш-записей
+	 */
+	public synchronized List<SecurityCache> getAllSecurities() {
+		return securities.getAll();
+	}
+	
+	/**
+	 * Делегат к {@link SecuritiesCache#OnCacheUpdate()}.
+	 * <p>
+	 * @return тип события
+	 */
+	public synchronized EventType OnSecuritiesCacheUpdate() {
+		return securities.OnCacheUpdate();
 	}
 
 }
