@@ -37,7 +37,8 @@ public class SecurityAssemblerTest {
 	
 	@Test
 	public void testAdjustByCache_New() throws Exception {
-		expect(terminal.getEditableSecurity(same(descr))).andReturn(security);
+		expect(terminal.isSecurityExists(same(descr))).andReturn(false);
+		expect(terminal.createSecurity(same(descr))).andReturn(security);
 		security.setAskPrice(eq(143800.0d));
 		security.setBidPrice(eq(143900.0d));
 		security.setClosePrice(eq(150900.0d));
@@ -66,6 +67,7 @@ public class SecurityAssemblerTest {
 	
 	@Test
 	public void testAdjustByCache_UpdateExisting() throws Exception {
+		expect(terminal.isSecurityExists(same(descr))).andReturn(true);
 		expect(terminal.getEditableSecurity(same(descr))).andReturn(security);
 		security.setAskPrice(eq(143800.0d));
 		security.setBidPrice(eq(143900.0d));

@@ -130,23 +130,12 @@ public class QUIKCompFactoryTest {
 	@Test
 	public void testCreateSecurities() throws Exception {
 		EditableSecurities base = control.createMock(EditableSecurities.class);
-		expect(bfactory.createSecurities(eq("RUB"), eq(SecurityType.STK)))
-			.andReturn(base);
+		expect(bfactory.createSecurities()).andReturn(base);
 		control.replay();
 		
-		assertSame(base, factory.createSecurities("RUB", SecurityType.STK));
+		assertSame(base, factory.createSecurities());
 		
 		control.verify();
-	}
-
-	@Test
-	public void testCreateSecurityFactory() throws Exception {
-		SecurityFactory exp = control.createMock(SecurityFactory.class);
-		expect(bfactory.createSecurityFactory()).andReturn(exp);
-		control.replay();
-		SecurityFactory actual = factory.createSecurityFactory();
-		control.verify();
-		assertSame(exp, actual);
 	}
 
 	@Test

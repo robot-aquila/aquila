@@ -1,21 +1,14 @@
 package ru.prolib.aquila.quik.assembler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
  * Сборщик инструмента.
  */
 public class SecurityAssembler {
-	private static final Logger logger;
-	
-	static {
-		logger = LoggerFactory.getLogger(SecurityAssembler.class);
-	}
-	
 	private final EditableTerminal terminal;
 	private final Cache cache;
 	
@@ -54,9 +47,16 @@ public class SecurityAssembler {
 	 * <p>
 	 * @param entry кэш запись
 	 */
-	public void adjustByCache(SecurityCache entry) {
+	public void adjustByCache(SecurityCache entry)
+			throws SecurityException, EditableObjectException
+	{
 		SecurityDescriptor descr = entry.getDescriptor();
-		EditableSecurity security = terminal.getEditableSecurity(descr);
+		EditableSecurity security = null;
+		if ( terminal.isSecurityExists(descr) ) {
+			security = terminal.getEditableSecurity(descr);
+		} else {
+			security = terminal.createSecurity(descr);
+		}
 		security.setAskPrice(entry.getAskPrice());
 		security.setBidPrice(entry.getBidPrice());
 		security.setClosePrice(entry.getClosePrice());
@@ -72,11 +72,7 @@ public class SecurityAssembler {
 		security.setOpenPrice(entry.getOpenPrice());
 		security.setPrecision(entry.getPrecision());
 		if ( security.isAvailable() ) {
-			try {
-				security.fireChangedEvent();
-			} catch ( EditableObjectException e ) {
-				logger.error("Unexpected exception: ", e);
-			}
+			security.fireChangedEvent();
 		} else {
 			cache.registerSecurityDescriptor(descr, entry.getShortName());
 			terminal.fireSecurityAvailableEvent(security);

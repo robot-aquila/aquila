@@ -190,8 +190,7 @@ public class QUIKFactory implements TerminalFactory {
 		// Make terminal instance
 		EventDispatcher dispatcher = es.createEventDispatcher("QUIKTerminal");
 		final EditableTerminal terminal = new TerminalImpl(es, starter,
-				fc.createSecurities(RowAdapters.SEC_DEFAULT_CURRENCY,
-						SecurityType.STK),
+				fc.createSecurities(),
 				fc.createPortfolios(), fc.createOrders(), fc.createOrders(),
 				fc.createOrderBuilder(),
 				locator.getOrderProcessor(),

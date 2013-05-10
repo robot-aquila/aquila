@@ -121,15 +121,8 @@ public class QUIKCompFactory implements BMFactory {
 	}
 
 	@Override
-	public EditableSecurities createSecurities(String defaultCurrency,
-			SecurityType defaultType)
-	{
-		return bfactory.createSecurities(defaultCurrency, defaultType);
-	}
-
-	@Override
-	public SecurityFactory createSecurityFactory() {
-		return bfactory.createSecurityFactory();
+	public EditableSecurities createSecurities() {
+		return bfactory.createSecurities();
 	}
 
 	@Override

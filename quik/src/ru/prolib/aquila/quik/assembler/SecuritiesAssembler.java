@@ -1,14 +1,22 @@
 package ru.prolib.aquila.quik.assembler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.EditableObjectException;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
  * Сборщик инструментов.
  */
 public class SecuritiesAssembler implements EventListener, Starter {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(SecuritiesAssembler.class);
+	}
+	
 	private final Cache cache;
 	private final SecurityAssembler assembler;
 	
@@ -29,7 +37,13 @@ public class SecuritiesAssembler implements EventListener, Starter {
 	@Override
 	public void onEvent(Event event) {
 		for ( SecurityCache entry : cache.getAllSecurities() ) {
-			assembler.adjustByCache(entry);
+			try {
+				assembler.adjustByCache(entry);
+			} catch ( SecurityException e ) {
+				logger.error("Unexpected exception: ", e);
+			} catch ( EditableObjectException e ) {
+				logger.error("Unexpected exception: ", e);
+			}
 		}
 	}
 
