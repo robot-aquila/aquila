@@ -46,8 +46,7 @@ public class IBFactory implements TerminalFactory {
 		IBClient client = locator.getApiClient();
 		IBHandler handler = new IBHandler(locator);
 
-		EditableSecurities secStorage =
-			fcomp.createSecurities("USD", SecurityType.STK);
+		EditableSecurities secStorage = fcomp.createSecurities();
 		IBSecurities securities = new IBSecurities(secStorage,
 			new IBSecurityHandlerFactoryImpl(locator, TIMEOUT));
 

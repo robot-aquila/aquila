@@ -87,36 +87,6 @@ public class IBSecurities implements EditableSecurities {
 	}
 
 	@Override
-	public Security getSecurity(String code) throws SecurityException {
-		return getSecurity(new SecurityDescriptor(code, DEFAULT_SECCLASS,
-				storage.getDefaultCurrency(), storage.getDefaultType()));
-	}
-
-	@Override
-	public Security getSecurity(String code, String classCode)
-			throws SecurityException
-	{
-		return getSecurity(new SecurityDescriptor(code, classCode,
-				storage.getDefaultCurrency(), storage.getDefaultType()));
-	}
-
-	/**
-	 * Для инструментов идентифицируемых только по коду инструмента код
-	 * класса всегда равен {@link #DEFAULT_SECCLASS}. По этому никакой
-	 * неоднозначности быть не может. Этот метод всегда возвращает false.
-	 */
-	@Override
-	public boolean isSecurityAmbiguous(String code) {
-		return false;
-	}
-
-	@Override
-	public boolean isSecurityExists(String code) {
-		return isSecurityExists(new SecurityDescriptor(code, DEFAULT_SECCLASS,
-				storage.getDefaultCurrency(), storage.getDefaultType()));
-	}
-
-	@Override
 	public boolean isSecurityExists(SecurityDescriptor descr) {
 		try {
 			return getSecurityStatus(descr) == IBSecurityStatus.DONE;
@@ -127,18 +97,14 @@ public class IBSecurities implements EditableSecurities {
 	}
 
 	@Override
-	public boolean isSecurityExists(String code, String classCode) {
-		return isSecurityExists(new SecurityDescriptor(code, classCode,
-				storage.getDefaultCurrency(), storage.getDefaultType()));
-	}
-
-	@Override
 	public void fireSecurityAvailableEvent(Security security) {
 		storage.fireSecurityAvailableEvent(security);
 	}
 
 	@Override
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) {
+	public EditableSecurity getEditableSecurity(SecurityDescriptor descr)
+			throws SecurityNotExistsException
+	{
 		return storage.getEditableSecurity(descr);
 	}
 	
@@ -166,16 +132,6 @@ public class IBSecurities implements EditableSecurities {
 	}
 
 	@Override
-	public String getDefaultCurrency() {
-		return storage.getDefaultCurrency();
-	}
-
-	@Override
-	public SecurityType getDefaultType() {
-		return storage.getDefaultType();
-	}
-
-	@Override
 	public EventType OnSecurityChanged() {
 		return storage.OnSecurityChanged();
 	}
@@ -188,6 +144,14 @@ public class IBSecurities implements EditableSecurities {
 	@Override
 	public int getSecuritiesCount() {
 		return storage.getSecuritiesCount();
+	}
+
+	@Override
+	public EditableSecurity
+		createSecurity(EditableTerminal terminal, SecurityDescriptor descr)
+			throws SecurityAlreadyExistsException
+	{
+		return storage.createSecurity(terminal, descr);
 	}
 
 }

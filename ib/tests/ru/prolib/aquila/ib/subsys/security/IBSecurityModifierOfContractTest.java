@@ -1,12 +1,12 @@
 package ru.prolib.aquila.ib.subsys.security;
 
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.easymock.IMocksControl;
 import org.junit.*;
 import com.ib.client.ContractDetails;
-import ru.prolib.aquila.core.EventSystemImpl;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.ib.subsys.security.IBSecurityModifierOfContract;
 
@@ -16,6 +16,7 @@ import ru.prolib.aquila.ib.subsys.security.IBSecurityModifierOfContract;
  */
 public class IBSecurityModifierOfContractTest {
 	private static IBSecurityModifierOfContract modifier;
+	private IMocksControl control;
 	private EditableSecurity security;
 	private ContractDetails details;
 
@@ -26,9 +27,8 @@ public class IBSecurityModifierOfContractTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		security = new SecurityFactoryImpl(new EventSystemImpl(),
-				new TerminalDecorator()).createSecurity(
-			new SecurityDescriptor("SBER", "EQBR", "EUR", SecurityType.FUT));
+		control = createStrictControl();
+		security = control.createMock(EditableSecurity.class);
 		details = new ContractDetails();
 		details.m_summary.m_localSymbol = "Name";
 	}
@@ -50,15 +50,18 @@ public class IBSecurityModifierOfContractTest {
 				{ 0.01d,		2 },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
+			setUp();
 			Double minTick = (Double) fix[i][0];
+			int prec = (Integer) fix[i][1];
 			details.m_minTick = minTick;
+			security.setMinStepPrice(eq(minTick));
+			security.setMinStepSize(eq((double) minTick));
+			security.setLotSize(eq(1));
+			security.setPrecision(eq(prec));
+			security.setDisplayName(eq("Name"));
+			control.replay();
 			modifier.set(security, details);
-			assertEquals(msg, minTick, security.getMinStepPrice(), 0.0000001d);
-			assertEquals(msg, minTick, security.getMinStepSize(), 0.0000001d);
-			assertEquals(msg, 1, security.getLotSize());
-			assertEquals(msg, fix[i][1], security.getPrecision());
-			assertEquals(msg, "Name", security.getDisplayName());
+			control.verify();
 		}
 	}
 	

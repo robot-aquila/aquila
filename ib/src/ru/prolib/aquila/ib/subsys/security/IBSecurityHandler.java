@@ -1,5 +1,8 @@
 package ru.prolib.aquila.ib.subsys.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
@@ -24,6 +27,12 @@ import ru.prolib.aquila.ib.subsys.api.IBRequestMarketData;
  * $Id: IBSecurityHandler.java 499 2013-02-07 10:43:25Z whirlwind $
  */
 public class IBSecurityHandler implements EventListener {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(IBSecurityHandler.class);
+	}
+	
 	private final IBServiceLocator locator;
 	private final SecurityDescriptor descr;
 	private final IBRequestContract reqContract;
@@ -194,10 +203,21 @@ public class IBSecurityHandler implements EventListener {
 				onConnectionOpened();
 			}
 		} catch ( ValueException e ) {
-			Object args[] = { e };
-			locator.getTerminal()
-				.firePanicEvent(1, "Cannot handle security: {}", args);
+			panic(e);
+		} catch ( SecurityException e ) {
+			panic(e);
 		}
+	}
+	
+	/**
+	 * Обработать исключение.
+	 * <p>
+	 * @param e исключение
+	 */
+	private void panic(Exception e) {
+		Object args[] = { e };
+		locator.getTerminal()
+			.firePanicEvent(1, "Cannot handle security: {}", args);		
 	}
 	
 	/**
@@ -220,7 +240,7 @@ public class IBSecurityHandler implements EventListener {
 	 * @param event событие
 	 */
 	private void onContractResponse(IBEventContract event)
-			throws ValueException
+			throws ValueException, SecurityException
 	{
 		if ( event.getSubType() == IBEventContract.SUBTYPE_END ) {
 			// Данный маркер используется для опционов. В настоящее время
@@ -268,9 +288,15 @@ public class IBSecurityHandler implements EventListener {
 	 * Получить связанный с обработчиком инструмент.
 	 * <p>
 	 * @return инструмент
+	 * @throws SecurityException
 	 */
-	private EditableSecurity getSecurity() {
-		return locator.getTerminal().getEditableSecurity(descr);
+	private EditableSecurity getSecurity() throws SecurityException {
+		EditableTerminal terminal = locator.getTerminal();
+		if ( terminal.isSecurityExists(descr) ) {
+			return terminal.getEditableSecurity(descr);
+		} else {
+			return terminal.createSecurity(descr);
+		}
 	}
 
 }

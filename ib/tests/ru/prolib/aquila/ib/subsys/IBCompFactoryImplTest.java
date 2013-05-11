@@ -101,19 +101,9 @@ public class IBCompFactoryImplTest {
 	@Test
 	public void testCreateSecurities() throws Exception {
 		EditableSecurities o = control.createMock(EditableSecurities.class);
-		expect(bfactory.createSecurities(eq("EUR"), same(SecurityType.CASH)))
-			.andReturn(o);
+		expect(bfactory.createSecurities()).andReturn(o);
 		control.replay();
-		assertSame(o, factory.createSecurities("EUR", SecurityType.CASH));
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateSecurityFactory() throws Exception {
-		SecurityFactory o = control.createMock(SecurityFactory.class);
-		expect(bfactory.createSecurityFactory()).andReturn(o);
-		control.replay();
-		assertSame(o, factory.createSecurityFactory());
+		assertSame(o, factory.createSecurities());
 		control.verify();
 	}
 	

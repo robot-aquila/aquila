@@ -52,11 +52,12 @@ public class IBOrderProcessorTest {
 	@Before
 	public void setUp() throws Exception {
 		control.resetToStrict();
-		security = bf.createSecurityFactory().createSecurity(descr);
+		security = control.createMock(EditableSecurity.class);
 		order = bf.createOrderFactory().createOrder();
 		order.setSecurityDescriptor(descr);
 		expect(client.OnNextValidId()).andStubReturn(onNextValidId);
 		expect(terminal.getSecurity(eq(descr))).andStubReturn(security);
+		expect(security.getDescriptor()).andStubReturn(descr);
 	}
 	
 	@Test

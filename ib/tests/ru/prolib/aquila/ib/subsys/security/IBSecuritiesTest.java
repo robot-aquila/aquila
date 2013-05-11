@@ -12,6 +12,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurities;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
+import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
@@ -48,8 +49,6 @@ public class IBSecuritiesTest {
 	public void setUp() throws Exception {
 		securities = new IBSecurities(storage, factory);
 		control.resetToStrict();
-		expect(storage.getDefaultCurrency()).andStubReturn("USD");
-		expect(storage.getDefaultType()).andStubReturn(SecurityType.STK);
 	}
 	
 	/**
@@ -278,7 +277,7 @@ public class IBSecuritiesTest {
 	}
 	
 	@Test
-	public void testGetSecurity_BySecurityDescriptor() throws Exception {
+	public void testGetSecurity() throws Exception {
 		GetSecurityAction action = new GetSecurityAction() {
 			@Override public Security execute() throws Exception {
 				return securities.getSecurity(descr); } };
@@ -290,65 +289,10 @@ public class IBSecuritiesTest {
 	}
 	
 	@Test
-	public void testGetSecurity_ByCode() throws Exception {
-		GetSecurityAction action = new GetSecurityAction() {
-			@Override public Security execute() throws Exception {
-				return securities.getSecurity("AAPL"); } };
-
-		setUp(); testGetSecurity_NewHandler_Done(action);
-		setUp(); testGetSecurity_HasHandler_Done(action);
-		setUp(); testGetSecurity_NewHandler_Nfnd(action);
-		setUp(); testGetSecurity_HasHandler_Nfnd(action);
-	}
-
-	@Test
-	public void testGetSecurity_ByCodeAndClassCode() throws Exception {
-		GetSecurityAction action = new GetSecurityAction() {
-			@Override public Security execute() throws Exception {
-				return securities.getSecurity("AAPL", "SMART"); } };
-
-		setUp(); testGetSecurity_NewHandler_Done(action);
-		setUp(); testGetSecurity_HasHandler_Done(action);
-		setUp(); testGetSecurity_NewHandler_Nfnd(action);
-		setUp(); testGetSecurity_HasHandler_Nfnd(action);
-	}
-	
-	@Test
-	public void testIsSecurityAmbiguous() throws Exception {
-		assertFalse(securities.isSecurityAmbiguous("AAPL"));
-		assertFalse(securities.isSecurityAmbiguous("BBPL"));
-		assertFalse(securities.isSecurityAmbiguous("TEST"));
-	}
-	
-	@Test
-	public void testIsSecurityExists_ByCode() throws Exception {
-		IsSecurityExistsAction action = new IsSecurityExistsAction() {
-			@Override public boolean execute() {
-				return securities.isSecurityExists("AAPL"); } };
-
-		setUp(); testIsSecurityExists_NewHandler_Done(action);
-		setUp(); testIsSecurityExists_NewHandler_Nfnd(action);
-		setUp(); testIsSecurityExists_HasHandler_Done(action);
-		setUp(); testIsSecurityExists_HasHandler_Nfnd(action);
-	}
-	
-	@Test
-	public void testIsSecurityExists_BySecurityDescriptor() throws Exception {
+	public void testIsSecurityExists() throws Exception {
 		IsSecurityExistsAction action = new IsSecurityExistsAction() {
 			@Override public boolean execute() {
 				return securities.isSecurityExists(descr); } };
-
-		setUp(); testIsSecurityExists_NewHandler_Done(action);
-		setUp(); testIsSecurityExists_NewHandler_Nfnd(action);
-		setUp(); testIsSecurityExists_HasHandler_Done(action);
-		setUp(); testIsSecurityExists_HasHandler_Nfnd(action);
-	}
-
-	@Test
-	public void testIsSecurityExists_ByCodeAndClassCode() throws Exception {
-		IsSecurityExistsAction action = new IsSecurityExistsAction() {
-			@Override public boolean execute() {
-				return securities.isSecurityExists("AAPL", "SMART"); } };
 
 		setUp(); testIsSecurityExists_NewHandler_Done(action);
 		setUp(); testIsSecurityExists_NewHandler_Nfnd(action);
@@ -369,22 +313,6 @@ public class IBSecuritiesTest {
 		expect(storage.getEditableSecurity(same(descr))).andReturn(security);
 		control.replay();
 		assertSame(security, securities.getEditableSecurity(descr));
-		control.verify();
-	}
-	
-	@Test
-	public void testGetDefaultCurrency() throws Exception {
-		expect(storage.getDefaultCurrency()).andReturn("EUR");
-		control.replay();
-		assertEquals("EUR", securities.getDefaultCurrency());
-		control.verify();
-	}
-	
-	@Test
-	public void testGetDefaultType() throws Exception {
-		expect(storage.getDefaultType()).andReturn(SecurityType.FUT);
-		control.replay();
-		assertEquals(SecurityType.FUT, securities.getDefaultType());
 		control.verify();
 	}
 	
@@ -411,6 +339,18 @@ public class IBSecuritiesTest {
 		expect(storage.getSecuritiesCount()).andReturn(345);
 		control.replay();
 		assertEquals(345, securities.getSecuritiesCount());
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateSecurity() throws Exception {
+		EditableTerminal terminal = control.createMock(EditableTerminal.class);
+		expect(storage.createSecurity(same(terminal), same(descr)))
+			.andReturn(security);
+		control.replay();
+		
+		assertSame(security, securities.createSecurity(terminal, descr));
+		
 		control.verify();
 	}
 

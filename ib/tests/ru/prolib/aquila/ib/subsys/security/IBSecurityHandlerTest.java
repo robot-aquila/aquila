@@ -305,6 +305,7 @@ public class IBSecurityHandlerTest {
 				}).start();
 			}
 		});
+		expect(term.isSecurityExists(same(descr))).andReturn(true);
 		expect(term.getEditableSecurity(same(descr))).andReturn(security);
 		modifier.set(same(security), same(details));
 		reqMktData.start();
@@ -324,6 +325,7 @@ public class IBSecurityHandlerTest {
 	{
 		ValueException expected = new ValueException("test");
 		ContractDetails details = new ContractDetails();
+		expect(term.isSecurityExists(same(descr))).andReturn(true);
 		expect(term.getEditableSecurity(eq(descr))).andReturn(security);
 		modifier.set(same(security), same(details));
 		expectLastCall().andThrow(expected);
@@ -348,6 +350,7 @@ public class IBSecurityHandlerTest {
 	{
 		ValueException expected = new ValueException("test");
 		ContractDetails details = new ContractDetails();
+		expect(term.isSecurityExists(same(descr))).andReturn(true);
 		expect(term.getEditableSecurity(eq(descr))).andReturn(security);
 		modifier.set(same(security), same(details));
 		expectLastCall().andThrow(expected);
@@ -379,6 +382,7 @@ public class IBSecurityHandlerTest {
 	@Test
 	public void testOnEvent_OnMktTick() throws Exception {
 		IBEventTick event = new IBEventTick(onMktTick, 0, TickType.ASK, 10.0d);
+		expect(term.isSecurityExists(descr)).andReturn(true);
 		expect(term.getEditableSecurity(same(descr))).andReturn(security);
 		modifier.set(same(security), same(event));
 		control.replay();
@@ -392,6 +396,7 @@ public class IBSecurityHandlerTest {
 	{
 		ValueException expected = new ValueException("test");
 		IBEventTick event = new IBEventTick(onMktTick, 0, TickType.ASK, 10.0d);
+		expect(term.isSecurityExists(descr)).andReturn(true);
 		expect(term.getEditableSecurity(same(descr))).andReturn(security);
 		modifier.set(same(security), same(event));
 		expectLastCall().andThrow(expected);
