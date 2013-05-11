@@ -1131,4 +1131,15 @@ public class TerminalDecoratorTest {
 		control.verify();
 	}
 	
+	@Test
+	public void testSetOrderProcessor() throws Exception {
+		OrderProcessor processor = control.createMock(OrderProcessor.class);
+		terminal.setOrderProcessorInstance(same(processor));
+		control.replay();
+		
+		decorator.setOrderProcessorInstance(processor);
+		
+		control.verify();
+	}
+	
 }

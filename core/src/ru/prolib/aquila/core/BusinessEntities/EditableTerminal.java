@@ -37,6 +37,13 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	public OrderProcessor getOrderProcessorInstance();
 	
 	/**
+	 * Установить экземпляр процессора заявок.
+	 * <p>
+	 * @param processor процессор заявок
+	 */
+	public void setOrderProcessorInstance(OrderProcessor processor);
+	
+	/**
 	 * Получить экземпляр конструктора заявок.
 	 * <p>
 	 * @return конструктор заявок

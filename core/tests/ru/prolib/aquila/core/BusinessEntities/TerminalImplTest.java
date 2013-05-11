@@ -61,7 +61,7 @@ public class TerminalImplTest {
 		onPanic = control.createMock(EventType.class);
 		terminal = new TerminalImpl(es, starter, securities, portfolios,
 									orders, stopOrders, orderBuilder,
-									orderProcessor, controller, dispatcher, 
+									controller, dispatcher, 
 									onConn, onDisc, onStarted, onStopped,
 									onPanic);
 		expect(dispatcher.asString()).andStubReturn("TestDispatcher");
@@ -92,11 +92,8 @@ public class TerminalImplTest {
 		Variant<OrderBuilder> vOrdBldr = new Variant<OrderBuilder>(vStopOrds)
 			.add(null)
 			.add(orderBuilder);
-		Variant<OrderProcessor> vOrdProc = new Variant<OrderProcessor>(vOrdBldr)
-			.add(null)
-			.add(orderProcessor);
 		Variant<TerminalController> vCtrl =
-				new Variant<TerminalController>(vOrdProc)
+				new Variant<TerminalController>(vOrdBldr)
 			.add(null)
 			.add(controller);
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vCtrl)
@@ -125,7 +122,7 @@ public class TerminalImplTest {
 				TerminalImpl t = new TerminalImpl(vEs.get(), vStarter.get(),
 						vSecurities.get(), vPortfolios.get(),
 						vOrders.get(), vStopOrds.get(), vOrdBldr.get(),
-						vOrdProc.get(), vCtrl.get(), vDisp.get(),
+						vCtrl.get(), vDisp.get(),
 						vOnConn.get(), vOnDisc.get(),
 						vOnStart.get(), vOnStop.get(),
 						vOnPanic.get());
@@ -145,7 +142,6 @@ public class TerminalImplTest {
 		assertSame(orders, found.getOrdersInstance());
 		assertSame(stopOrders, found.getStopOrdersInstance());
 		assertSame(orderBuilder, found.getOrderBuilderInstance());
-		assertSame(orderProcessor, found.getOrderProcessorInstance());
 		assertSame(controller, found.getTerminalController());
 		assertSame(dispatcher, found.getEventDispatcher());
 		assertSame(onConn, found.OnConnected());
@@ -177,10 +173,7 @@ public class TerminalImplTest {
 		Variant<OrderBuilder> vOrdBldr = new Variant<OrderBuilder>(vStopOrds)
 			.add(null)
 			.add(orderBuilder);
-		Variant<OrderProcessor> vOrdProc = new Variant<OrderProcessor>(vOrdBldr)
-			.add(null)
-			.add(orderProcessor);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vOrdProc)
+		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vOrdBldr)
 			.add(null)
 			.add(dispatcher);
 		Variant<EventType> vOnConn = new Variant<EventType>(vDisp)
@@ -206,7 +199,7 @@ public class TerminalImplTest {
 				TerminalImpl t = new TerminalImpl(vEs.get(),
 						vStarter.get(), vSecurities.get(),
 						vPortfolios.get(), vOrders.get(), vStopOrds.get(),
-						vOrdBldr.get(), vOrdProc.get(),
+						vOrdBldr.get(), 
 						vDisp.get(), vOnConn.get(),
 						vOnDisc.get(), vOnStart.get(),
 						vOnStop.get(), vOnPanic.get());
@@ -226,7 +219,6 @@ public class TerminalImplTest {
 		assertSame(orders, found.getOrdersInstance());
 		assertSame(stopOrders, found.getStopOrdersInstance());
 		assertSame(orderBuilder, found.getOrderBuilderInstance());
-		assertSame(orderProcessor, found.getOrderProcessorInstance());
 		assertSame(TerminalController.class,
 				found.getTerminalController().getClass());
 		assertSame(dispatcher, found.getEventDispatcher());
@@ -525,7 +517,10 @@ public class TerminalImplTest {
 		Order order = control.createMock(Order.class);
 		orderProcessor.placeOrder(same(order));
 		control.replay();
+		terminal.setOrderProcessorInstance(orderProcessor);
+		
 		terminal.placeOrder(order);
+		
 		control.verify();
 	}
 	
@@ -534,7 +529,10 @@ public class TerminalImplTest {
 		Order order = control.createMock(Order.class);
 		orderProcessor.cancelOrder(same(order));
 		control.replay();
+		terminal.setOrderProcessorInstance(orderProcessor);
+		
 		terminal.cancelOrder(order);
+		
 		control.verify();
 	}
 	
@@ -1314,6 +1312,14 @@ public class TerminalImplTest {
 		assertSame(security, terminal.createSecurity(descr));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testSetGetOrderProcessor() throws Exception {
+		assertNull(terminal.getOrderProcessorInstance());
+		terminal.setOrderProcessorInstance(orderProcessor);
+		assertSame(orderProcessor, terminal.getOrderProcessorInstance());
+		assertSame(orderProcessor, terminal.getOrderProcessorInstance());
 	}
 	
 }

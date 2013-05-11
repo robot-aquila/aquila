@@ -46,12 +46,12 @@ public class TerminalImpl implements EditableTerminal {
 	private final EditableOrders orders;
 	private final EditableOrders stopOrders;
 	private final OrderBuilder orderBuilder;
-	private final OrderProcessor orderProcessor;
 	private final EventDispatcher dispatcher;
 	private final EventType onConnected,onDisconnected,onStarted,
 		onStopped,onPanic;
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private final TerminalController controller;
+	private OrderProcessor orderProcessor;
 	
 	static {
 		logger = LoggerFactory.getLogger(TerminalImpl.class);
@@ -67,7 +67,6 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param orders набор заявок
 	 * @param stopOrders набор стоп-заявок
 	 * @param orderBuilder конструктор заявок
-	 * @param orderProcessor обработчик заявок
 	 * @param dispatcher диспетчер событий
 	 * @param onConnected тип события при подключении
 	 * @param onDisconnected тип события при отключении
@@ -82,7 +81,6 @@ public class TerminalImpl implements EditableTerminal {
 						EditableOrders orders,
 						EditableOrders stopOrders,
 						OrderBuilder orderBuilder,
-						OrderProcessor orderProcessor,
 						EventDispatcher dispatcher,
 						EventType onConnected,
 						EventType onDisconnected,
@@ -90,7 +88,7 @@ public class TerminalImpl implements EditableTerminal {
 						EventType onStopped, EventType onPanic)
 	{
 		this(eventSystem, starter, securities, portfolios, orders, stopOrders,
-				orderBuilder, orderProcessor, new TerminalController(),
+				orderBuilder, new TerminalController(),
 				dispatcher, onConnected, onDisconnected,
 				onStarted, onStopped, onPanic);
 	}
@@ -105,7 +103,6 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param orders набор заявок
 	 * @param stopOrders набор стоп-заявок
 	 * @param orderBuilder конструктор заявок
-	 * @param orderProcessor обработчик заявок
 	 * @param controller контроллер терминала
 	 * @param dispatcher диспетчер событий
 	 * @param onConnected тип события при подключении
@@ -121,7 +118,6 @@ public class TerminalImpl implements EditableTerminal {
 						EditableOrders orders,
 						EditableOrders stopOrders,
 						OrderBuilder orderBuilder,
-						OrderProcessor orderProcessor,
 						TerminalController controller,
 						EventDispatcher dispatcher,
 						EventType onConnected,
@@ -159,10 +155,6 @@ public class TerminalImpl implements EditableTerminal {
 			throw new NullPointerException("Order builder cannot be null");
 		}
 		this.orderBuilder = orderBuilder;
-		if ( orderProcessor == null ) {
-			throw new NullPointerException("Order processor cannot be null");
-		}
-		this.orderProcessor = orderProcessor;
 		if ( controller == null ) {
 			throw new NullPointerException("Controller cannot be null");
 		}
@@ -202,8 +194,15 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	public OrderProcessor getOrderProcessorInstance() {
+	public synchronized OrderProcessor getOrderProcessorInstance() {
 		return orderProcessor;
+	}
+	
+	@Override
+	public synchronized
+		void setOrderProcessorInstance(OrderProcessor processor)
+	{
+		this.orderProcessor = processor;
 	}
 	
 	@Override

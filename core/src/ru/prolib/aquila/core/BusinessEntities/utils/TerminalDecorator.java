@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityException;
  * 2012-08-17<br>
  * $Id: TerminalDecorator.java 513 2013-02-11 01:17:18Z whirlwind $
  */
+@Deprecated
 public class TerminalDecorator implements EditableTerminal {
 	private EditableTerminal terminal;
 
@@ -622,6 +623,11 @@ public class TerminalDecorator implements EditableTerminal {
 			throws SecurityAlreadyExistsException
 	{
 		return terminal.createSecurity(this, descr);
+	}
+
+	@Override
+	public final void setOrderProcessorInstance(OrderProcessor processor) {
+		terminal.setOrderProcessorInstance(processor);
 	}
 
 }
