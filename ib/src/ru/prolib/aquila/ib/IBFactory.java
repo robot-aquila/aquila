@@ -54,7 +54,6 @@ public class IBFactory implements TerminalFactory {
 		OrderFactory orderFactory = fcomp.createOrderFactory();
 		OrderBuilder orderBuilder =
 			fcomp.createOrderBuilder(transId, orderFactory); 
-		IBOrderProcessor orderProcessor = new IBOrderProcessor(client, transId);
 		handler.start();
 		StarterQueue starter = new StarterQueue()
 			.add(new IBConnectionKeeper(locator,
@@ -68,13 +67,13 @@ public class IBFactory implements TerminalFactory {
 		EditableTerminal terminal = new TerminalImpl(es, starter, securities,
 				portfolios, orders, stopOrders,
 				orderBuilder,
-				orderProcessor,
 				dispatcher,
 				es.createGenericType(dispatcher, "OnConnected"),
 				es.createGenericType(dispatcher, "OnDisconnected"),
 				es.createGenericType(dispatcher, "OnStarted"),
 				es.createGenericType(dispatcher, "OnStopped"),
 				es.createGenericType(dispatcher, "OnPanic"));
+		terminal.setOrderProcessorInstance(new IBOrderProcessor(client, transId));
 		termDecorator.setTerminal(terminal);
 		return termDecorator;
 	}

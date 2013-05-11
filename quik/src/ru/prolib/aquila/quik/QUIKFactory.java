@@ -193,13 +193,13 @@ public class QUIKFactory implements TerminalFactory {
 				fc.createSecurities(),
 				fc.createPortfolios(), fc.createOrders(), fc.createOrders(),
 				fc.createOrderBuilder(),
-				locator.getOrderProcessor(),
 				dispatcher,
 				es.createGenericType(dispatcher, "OnConnected"),
 				es.createGenericType(dispatcher, "OnDisconnected"),
 				es.createGenericType(dispatcher, "OnStarted"),
 				es.createGenericType(dispatcher, "OnStopped"),
 				es.createGenericType(dispatcher, "OnPanic"));
+		terminal.setOrderProcessorInstance(locator.getOrderProcessor());
 		decorator.setTerminal(terminal);
 		
 		// QUIK API
