@@ -52,12 +52,5 @@ public interface EditablePosition extends Position, Editable {
 	 * @param value балансовая стоимость позиции
 	 */
 	public void setBookValue(Double value);
-	
-	/**
-	 * Установить объект счета.
-	 * <p>
-	 * @param account объект счета
-	 */
-	public void setAccount(Account account);
 
 }

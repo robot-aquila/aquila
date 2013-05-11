@@ -9,11 +9,10 @@ import ru.prolib.aquila.core.*;
  * $Id: PositionImpl.java 529 2013-02-19 08:49:04Z whirlwind $
  */
 public class PositionImpl extends EditableImpl implements EditablePosition {
-	private Account account;
+	private final Portfolio portfolio;
+	private final Security security;
 	private final EventDispatcher dispatcher;
-	private final EventType etChanged;
-	private final SecurityDescriptor descr;
-	private final EditableTerminal terminal;
+	private final EventType onChanged;
 	private long open;
 	private long lock;
 	private long curr;
@@ -24,46 +23,24 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	/**
 	 * Создать объект позиции.
 	 * <p>
-	 * @param account счет позиции
-	 * @param terminal терминал
-	 * @param descr дескриптор инструмента
+	 * @param Portfolio портфель, которому принадлежит позиция
+	 * @param Security инструмент, по которому открыта позиция
 	 * @param dispatcher диспетчер событий
 	 * @param onChanged тип события
 	 */
-	public PositionImpl(Account account, EditableTerminal terminal,
-			SecurityDescriptor descr, EventDispatcher dispatcher,
-			EventType onChanged)
+	public PositionImpl(Portfolio portfolio, Security security,
+			EventDispatcher dispatcher, EventType onChanged)
 	{
 		super();
-		if ( account == null ) {
-			throw new NullPointerException("Account cannot be null");
-		}
-		if ( descr == null ) {
-			throw new NullPointerException("Descriptor cannot be null");
-		}
-		if ( terminal == null ) {
-			throw new NullPointerException("Terminal cannot be null");
-		}
-		if ( dispatcher == null ) {
-			throw new NullPointerException("Event dispatcher cannot be null");
-		}
-		if ( onChanged == null ) {
-			throw new NullPointerException("OnChanged type cannot be null");
-		}
-		this.account = account;
-		this.terminal = terminal;
-		this.descr = descr;
+		this.portfolio = portfolio;
+		this.security = security;
 		this.dispatcher = dispatcher;
-		this.etChanged = onChanged;
+		this.onChanged = onChanged;
 	}
 	
-	/**
-	 * Получить терминал.
-	 * <p>
-	 * @return терминал
-	 */
-	public FirePanicEvent getTerminal() {
-		return terminal;
+	@Override
+	public Terminal getTerminal() {
+		return portfolio.getTerminal();
 	}
 	
 	/**
@@ -76,28 +53,33 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	}
 
 	@Override
-	public Portfolio getPortfolio() throws PortfolioException {
-		return terminal.getPortfolio(account);
+	public Portfolio getPortfolio() {
+		return portfolio;
 	}
 
 	@Override
 	public SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+		return security.getDescriptor();
 	}
 	
 	@Override
-	public Security getSecurity() throws SecurityException {
-		return terminal.getSecurity(descr);
+	public Security getSecurity() {
+		return security;
+	}
+	
+	@Override
+	public Account getAccount() {
+		return portfolio.getAccount();
 	}
 
 	@Override
 	public EventType OnChanged() {
-		return etChanged;
+		return onChanged;
 	}
 
 	@Override
 	public void fireChangedEvent() throws EditableObjectException {
-		dispatcher.dispatch(new PositionEvent(etChanged, this));
+		dispatcher.dispatch(new PositionEvent(onChanged, this));
 	}
 
 	@Override
@@ -186,21 +168,6 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	public synchronized void setBookValue(Double value) {
 		if ( value== null ? bookValue != null : !value.equals(bookValue) ) {
 			bookValue = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized Account getAccount() {
-		return account;
-	}
-
-	@Override
-	public synchronized void setAccount(Account account) {
-		if ( account == null ? this.account != null
-				: ! account.equals(this.account) )
-		{
-			this.account = account;
 			setChanged();
 		}
 	}

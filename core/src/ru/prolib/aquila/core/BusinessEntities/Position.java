@@ -22,7 +22,7 @@ public interface Position {
 	 * <p>
 	 * @return портфель
 	 */
-	public Portfolio getPortfolio() throws PortfolioException;
+	public Portfolio getPortfolio();
 	
 	/**
 	 * Получить дескриптор инструмента.
@@ -36,7 +36,14 @@ public interface Position {
 	 * <p>
 	 * @return инструмент
 	 */
-	public Security getSecurity() throws SecurityException;
+	public Security getSecurity();
+	
+	/**
+	 * Получить терминал.
+	 * <p>
+	 * @return терминал
+	 */
+	public Terminal getTerminal();
 	
 	/**
 	 * Получить тип события: при изменении позиции.
