@@ -13,6 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.*;
 import ru.prolib.aquila.quik.api.*;
+import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.*;
 import ru.prolib.aquila.quik.subsys.row.RowAdapters;
@@ -179,7 +180,8 @@ public class QUIKFactory implements TerminalFactory {
 		StarterQueue starter = new StarterQueue();
 		starter.add(new EventQueueStarter(es.getEventQueue(), 10000));
 		
-		
+		// First, start new assember service
+		starter.add(new Assembler(decorator, locator.getDdeCache()));
 		// Old DDE table listeners starts before all
 		DDEService service = createDdeService(locator, starter);
 		// DDE server starts after listeners

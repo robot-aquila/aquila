@@ -16,6 +16,7 @@ public interface QUIKListenerFactory {
 	 * <p>
 	 * @return обозреватель таблицы
 	 */
+	@Deprecated
 	public DDETableListener listenSecurities();
 	
 	/**

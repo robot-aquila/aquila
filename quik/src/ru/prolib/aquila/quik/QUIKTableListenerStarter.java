@@ -44,7 +44,7 @@ public class QUIKTableListenerStarter implements Starter {
 				lf.createDependencies(), rules);
 		service.OnTable().addListener(order);
 		
-		orderListeners.add(lf.listenSecurities());
+		//orderListeners.add(lf.listenSecurities());
 		orderListeners.add(lf.listenAllDeals());
 		orderListeners.add(lf.listenPortfoliosSTK());
 		orderListeners.add(lf.listenPositionsSTK());
