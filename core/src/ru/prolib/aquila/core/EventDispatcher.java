@@ -106,5 +106,20 @@ public interface EventDispatcher {
 	 * @return полный идентификатор
 	 */
 	public String asString();
+	
+	/**
+	 * Создать тип события, связанный с диспетчером.
+	 * <p>
+	 * @return тип события с идентификатором по-умолчанию
+	 */
+	public EventType createType();
+	
+	/**
+	 * Создать тип события, связанный с диспетчером.
+	 * <p>
+	 * @param typeId идентификатор типа события
+	 * @return тип события
+	 */
+	public EventType createType(String typeId);
 
 }

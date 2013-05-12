@@ -1,11 +1,7 @@
 package ru.prolib.aquila.core;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Vector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * Диспетчер событий. 
@@ -17,18 +13,11 @@ import org.slf4j.LoggerFactory;
  * $Id: EventDispatcherImpl.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventDispatcherImpl implements EventDispatcher {
-	@SuppressWarnings("unused")
-	private static final Logger logger;
 	public static final String AUTO_ID_PREFIX = "EvtDisp";
-	
-	private static int autoId = 1;
-	
-	static {
-		logger = LoggerFactory.getLogger(EventDispatcherImpl.class);
-	}
+	private static volatile int autoId = 1;
 	
 	private final EventQueue queue;
-	private final HashMap<EventType, Vector<EventListener>> listeners;
+	private final Map<EventType, Vector<EventListener>> listeners;
 	private final String id;
 	
 	/**
@@ -65,7 +54,8 @@ public class EventDispatcherImpl implements EventDispatcher {
 		}
 		this.queue = queue;
 		this.id = id;
-		listeners = new HashMap<EventType, Vector<EventListener>>();
+		// ВАЖНО! Именно этот класс, иначе сравнение структур не будет работать!
+		listeners = new LinkedHashMap<EventType, Vector<EventListener>>();
 	}
 	
 	@Override
@@ -163,6 +153,52 @@ public class EventDispatcherImpl implements EventDispatcher {
 		if ( list.size() > 0 ) {
 			queue.enqueue(event, list);
 		}
+	}
+
+	@Override
+	public EventType createType() {
+		return new EventTypeImpl(this);
+	}
+
+	@Override
+	public EventType createType(String typeId) {
+		return new EventTypeImpl(this, typeId);
+	}
+	
+	/**
+	 * Сравнить составов диспетчеров.
+	 * <p>
+	 * Два разных экземпляра диспетчера всегда представляют разные стеки типов. 
+	 * Метод сравнения сравнивает только структуру диспетчеров, которая включает
+	 * в себя идентификатор диспетчера и набор типов событий вместе с их
+	 * наборами обозревателей. Так как просто сравнить карты тип->наблюдатели
+	 * нельзя (каждый экземпляр типа событий всегда представляет уникальный
+	 * ключ), единственный способ сравнения - это сравнить структуру типов в
+	 * порядке добавления типов в структуру диспетчера. Для сравнения стеков
+	 * типов событий, из карты тип->наблюдатели каждого диспетчера извлекается
+	 * список ключей, которые в последствии и сравнивается (в дополнение к
+	 * идентификатору диспетчера). 
+	 * <p>
+	 * Данный метод предназначен исключительно для использования в тестах.
+	 * Он значительно сокращает код теста и позволяет избежать моков для
+	 * воспроизведения типа. Сравнение данным методом никогда не должно
+	 * использоваться в рабочих процессах.
+	 * <p> 
+	 */
+	@Override
+	public final synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != EventDispatcherImpl.class ) {
+			return false;
+		}
+		EventDispatcherImpl o = (EventDispatcherImpl) other;
+		return new EqualsBuilder()
+			.append(id, o.id)
+			.append(new Vector<EventType>(listeners.keySet()),
+					new Vector<EventType>(o.listeners.keySet()))
+			.isEquals();
 	}
 
 }

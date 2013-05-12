@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 /**
  * Базовый тип события.
  * <p>
@@ -63,17 +65,11 @@ public class EventTypeImpl implements EventType {
 		return dispatcher.asString() + "." + id;
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.core.EventType#addListener(ru.prolib.aquila.core.EventListener)
-	 */
 	@Override
 	public void addListener(EventListener listener) {
 		dispatcher.addListener(this, listener);
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.core.EventType#removeListener(ru.prolib.aquila.core.EventListener)
-	 */
 	@Override
 	public void removeListener(EventListener listener) {
 		dispatcher.removeListener(this, listener);
@@ -88,11 +84,34 @@ public class EventTypeImpl implements EventType {
 	}
 	
 	/**
-	 * Закрыт для перегрузки, так как влияет на диспетчеризацию.
+	 * Сравнить структуру типов.
+	 * <p>
+	 * Два разных экземпляра типа всегда представляют разные типы событий.
+	 * По этому, для проверки на конкретный тип необходимо сравнивать значение
+	 * с конкретным экземпляром. Метод сравнения сравнивает только структуру
+	 * типа события. Структуры двух типов событий считаются одинаковыми, когда
+	 * совпадают идентификаторы и списки наблюдателей. Проверка соответствия
+	 * диспетчеров не выполняется.
+	 * <p>
+	 * Данный метод предназначен исключительно для использования в тестах.
+	 * Он значительно сокращает код теста и позволяет избежать моков для
+	 * воспроизведения типа. Сравнение данным методом никогда не должно
+	 * использоваться в рабочих процессах.
+	 * <p> 
 	 */
 	@Override
-	public final boolean equals(Object other) {
-		return super.equals(other);
+	public final synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != EventTypeImpl.class ) {
+			return false;
+		}
+		EventTypeImpl o = (EventTypeImpl) other;
+		return new EqualsBuilder()
+			.append(id, o.id)
+			.append(dispatcher.getListeners(this), o.dispatcher.getListeners(o))
+			.isEquals();
 	}
 	
 	/**
