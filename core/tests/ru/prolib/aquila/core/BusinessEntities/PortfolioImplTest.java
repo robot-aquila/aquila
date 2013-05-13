@@ -4,51 +4,47 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.util.*;
-import java.util.concurrent.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2012-09-06<br>
  * $Id$
  */
 public class PortfolioImplTest {
+	private static Account account;
 	private IMocksControl control;
-	private EventSystem eventSystem;
-	private EventQueue queue;
-	private EventDispatcher dispatcher;
+	private EventSystem es;
+	private EventDispatcher dispatcher, dispatcherMock;
 	private EventType onChanged;
 	private EditablePositions positions;
 	private Terminal terminal;
-	private Account account;
 	private PortfolioImpl portfolio;
 	private G<?> getter;
 	private S<PortfolioImpl> setter;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		account = new Account("LX01", "865");
+	}
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		positions = control.createMock(EditablePositions.class);
 		terminal = control.createMock(Terminal.class);
-		eventSystem = new EventSystemImpl();
-		queue = eventSystem.getEventQueue();
-		dispatcher = eventSystem.createEventDispatcher();
-		onChanged = eventSystem.createGenericType(dispatcher);
-		account = new Account("LX01", "865");
-		portfolio = new PortfolioImpl(terminal, account, positions,
-									  dispatcher, onChanged);
-		queue.start();
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		es = new EventSystemImpl();
+		dispatcher = es.createEventDispatcher("Portfolio");
+		onChanged = dispatcher.createType("OnChanged");
+		
+		portfolio = new PortfolioImpl(terminal, account, dispatcher, onChanged);
+		portfolio.setPositionsInstance(positions);
 		getter = null;
 		setter = null;
-	}
-	
-	@After
-	public void tearDown() throws Exception {
-		queue.stop();
 	}
 	
 	/**
@@ -82,57 +78,28 @@ public class PortfolioImplTest {
 	}
 	
 	@Test
-	public void testConstruct() throws Exception {
-		Variant<Terminal> vTerminal = new Variant<Terminal>()
-			.add(terminal).add(null);
-		Variant<Account> vAcc = new Variant<Account>(vTerminal)
-			.add(new Account("LX01", "865")).add(null);
-		Variant<EditablePositions> vPoss = new Variant<EditablePositions>(vAcc)
-			.add(positions).add(null);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vPoss)
-			.add(dispatcher).add(null);
-		Variant<EventType> vChanged = new Variant<EventType>(vDisp)
-			.add(onChanged).add(null);
-		int exceptions = 0;
-		int index = 0;
-		do {
-			String msg = "At #" + index;
-			try {
-				portfolio = new PortfolioImpl(vTerminal.get(), vAcc.get(),
-						vPoss.get(), vDisp.get(), vChanged.get());
-				assertSame(msg, terminal, portfolio.getTerminal());
-				assertEquals(msg, account, portfolio.getAccount());
-				assertSame(msg, positions, portfolio.getPositionsInstance());
-				assertSame(msg, dispatcher, portfolio.getEventDispatcher());
-				assertSame(msg, onChanged, portfolio.OnChanged());
-			} catch ( NullPointerException e ) {
-				exceptions ++;
-			}
-			index ++;
-		} while( vChanged.next() );
-		assertEquals(vChanged.count() - 1, exceptions);
+	public void testVersion() throws Exception {
+		assertEquals(3, PortfolioImpl.VERSION);
 	}
 	
 	@Test
-	public void testDefaultsValues() throws Exception {
+	public void testDefaults() throws Exception {
 		assertNull(portfolio.getVariationMargin());
 		assertNull(portfolio.getCash());
 		assertNull(portfolio.getBalance());
+		assertFalse(portfolio.isAvailable());
 	}
 	
 	@Test
 	public void testFireChangedEvent() throws Exception {
-		final CountDownLatch finished = new CountDownLatch(1);
-		final PortfolioEvent expected = new PortfolioEvent(onChanged,portfolio);
-		portfolio.OnChanged().addListener(new EventListener() {
-			@Override
-			public void onEvent(Event event) {
-				assertEquals(expected, event);
-				finished.countDown();
-			}
-		});
+		portfolio = new PortfolioImpl(terminal, account, dispatcherMock,
+				onChanged);
+		dispatcherMock.dispatch(new PortfolioEvent(onChanged, portfolio));
+		control.replay();
+		
 		portfolio.fireChangedEvent();
-		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
+		
+		control.verify();
 	}
 	
 	@Test
@@ -198,25 +165,14 @@ public class PortfolioImplTest {
 	}
 	
 	@Test
-	public void testGetPosition_ByDescr() throws Exception {
-		Position p = control.createMock(Position.class);
-		SecurityDescriptor descr =
-				new SecurityDescriptor("A","B","C",SecurityType.CASH);
-		expect(positions.getPosition(eq(descr))).andReturn(p);
-		control.replay();
-		
-		assertSame(p, portfolio.getPosition(descr));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetPosition_BySec() throws Exception {
+	public void testGetPosition() throws Exception {
 		Security sec = control.createMock(Security.class);
 		Position p = control.createMock(Position.class);
 		expect(positions.getPosition(sec)).andReturn(p);
 		control.replay();
+		
 		assertSame(p, portfolio.getPosition(sec));
+		
 		control.verify();
 	}
 	
@@ -245,12 +201,11 @@ public class PortfolioImplTest {
 	@Test
 	public void testGetEditablePosition() throws Exception {
 		EditablePosition p = control.createMock(EditablePosition.class);
-		SecurityDescriptor descr =
-				new SecurityDescriptor("B","C","D",SecurityType.BOND);
-		expect(positions.getEditablePosition(eq(descr))).andReturn(p);
+		Security sec = control.createMock(Security.class);
+		expect(positions.getEditablePosition(same(sec))).andReturn(p);
 		control.replay();
 		
-		assertSame(p, portfolio.getEditablePosition(descr));
+		assertSame(p, portfolio.getEditablePosition(sec));
 		
 		control.verify();
 	}
@@ -260,7 +215,9 @@ public class PortfolioImplTest {
 		EventType type = control.createMock(EventType.class);
 		expect(positions.OnPositionChanged()).andReturn(type);
 		control.replay();
+		
 		assertSame(type, portfolio.OnPositionChanged());
+		
 		control.verify();
 	}
 	
@@ -268,8 +225,82 @@ public class PortfolioImplTest {
 	public void testGetPositionsCount() throws Exception {
 		expect(positions.getPositionsCount()).andReturn(200);
 		control.replay();
+		
 		assertEquals(200, portfolio.getPositionsCount());
+		
 		control.verify();
 	}
 	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(portfolio.equals(portfolio));
+		assertFalse(portfolio.equals(null));
+		assertFalse(portfolio.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		portfolio.setAvailable(true);
+		portfolio.setBalance(180.00d);
+		portfolio.setCash(20.00d);
+		portfolio.setVariationMargin(-30.00d);
+		
+		Variant<Terminal> vTerm = new Variant<Terminal>()
+			.add(terminal)
+			.add(control.createMock(Terminal.class));
+		Variant<Account> vAcc = new Variant<Account>(vTerm)
+			.add(new Account("ZX80"))
+			.add(account);
+		Variant<EditablePositions> vPos = new Variant<EditablePositions>(vAcc)
+			.add(positions)
+			.add(control.createMock(EditablePositions.class));
+		Variant<String> vDispId = new Variant<String>(vPos)
+			.add("Portfolio")
+			.add("Another");
+		Variant<String> vChngId = new Variant<String>(vDispId)
+			.add("OnChanged")
+			.add("OnSomething");
+		Variant<Boolean> vAvl = new Variant<Boolean>(vChngId)
+			.add(true)
+			.add(false);
+		Variant<Double> vBal = new Variant<Double>(vAvl)
+			.add(180.00d)
+			.add(100.00d);
+		Variant<Double> vCash = new Variant<Double>(vBal)
+			.add(20.00d)
+			.add(10.00d);
+		Variant<Double> vVarMgn = new Variant<Double>(vCash)
+			.add(-30.00d)
+			.add( 30.00d);
+		Variant<?> iterator = vVarMgn;
+		int foundCnt = 0;
+		PortfolioImpl x = null, found = null;
+		do {
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new PortfolioImpl(vTerm.get(), vAcc.get(),
+					d, d.createType(vChngId.get()));
+			x.setPositionsInstance(vPos.get());
+			x.setAvailable(vAvl.get());
+			x.setBalance(vBal.get());
+			x.setCash(vCash.get());
+			x.setVariationMargin(vVarMgn.get());
+			if ( portfolio.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertSame(terminal, found.getTerminal());
+		assertSame(account, found.getAccount());
+		assertSame(positions, found.getPositionsInstance());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertNotSame(dispatcher, found.getEventDispatcher());
+		assertEquals(onChanged, found.OnChanged());
+		assertNotSame(onChanged, found.OnChanged());
+		assertTrue(found.isAvailable());
+		assertEquals(180.00d, found.getBalance(), 0.001d);
+		assertEquals(20.00d, found.getCash(), 0.001d);
+		assertEquals(-30.00d, found.getVariationMargin(), 0.001d);
+	}
+		
 }

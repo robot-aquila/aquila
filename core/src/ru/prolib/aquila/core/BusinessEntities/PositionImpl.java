@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 
 /**
@@ -26,7 +28,7 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	 * @param Portfolio портфель, которому принадлежит позиция
 	 * @param Security инструмент, по которому открыта позиция
 	 * @param dispatcher диспетчер событий
-	 * @param onChanged тип события
+	 * @param onChanged тип события: при изменении позиции
 	 */
 	public PositionImpl(Portfolio portfolio, Security security,
 			EventDispatcher dispatcher, EventType onChanged)
@@ -78,7 +80,7 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	}
 
 	@Override
-	public void fireChangedEvent() throws EditableObjectException {
+	public void fireChangedEvent() {
 		dispatcher.dispatch(new PositionEvent(onChanged, this));
 	}
 
@@ -170,6 +172,30 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 			bookValue = value;
 			setChanged();
 		}
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != PositionImpl.class ) {
+			return false;
+		}
+		PositionImpl o = (PositionImpl) other;
+		return new EqualsBuilder()
+			.append(o.curr, curr)
+			.append(o.lock, lock)
+			.append(o.open, open)
+			.append(o.variationMargin, variationMargin)
+			.append(o.bookValue, bookValue)
+			.append(o.dispatcher, dispatcher)
+			.append(o.marketValue, marketValue)
+			.append(o.onChanged, onChanged)
+			.append(o.portfolio, portfolio)
+			.append(o.security, security)
+			.append(o.isAvailable(), isAvailable())
+			.isEquals();
 	}
 
 }

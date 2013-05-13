@@ -5,11 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.BusinessEntities.utils.PositionFactory;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
+import ru.prolib.aquila.core.*;
 
 /**
  * Набор торговых позиций.
@@ -17,49 +15,40 @@ import ru.prolib.aquila.core.BusinessEntities.utils.PositionFactory;
  * 2012-08-03<br>
  * $Id: PositionsImpl.java 527 2013-02-14 15:14:09Z whirlwind $
  */
-public class PositionsImpl implements EditablePositions,EventListener {
+class PositionsImpl implements EditablePositions, EventListener {
 	private final Map<SecurityDescriptor, EditablePosition> map;
-	private final PositionFactory factory;
+	private final Portfolio portfolio;
 	private final EventDispatcher dispatcher;
 	private final EventType onAvailable,onChanged;
 	
 	/**
 	 * Создать набор позиций.
 	 * <p>
-	 * @param factory фабрика позиций
+	 * @param portfolio портфель, к которому относится набор позиций
 	 * @param dispatcher диспетчер событий
 	 * @param onAvailable тип события при инициализации позиции
 	 * @param onChanged тип события при инициализации позиции
 	 */
-	public PositionsImpl(PositionFactory factory,
+	public PositionsImpl(Portfolio portfolio,
 						 EventDispatcher dispatcher,
 						 EventType onAvailable,
 						 EventType onChanged)
 	{
 		super();
-		if ( factory == null ) {
-			throw new NullPointerException("Factory cannot be null");
-		}
-		this.factory = factory;
-		if ( dispatcher == null ) {
-			throw new NullPointerException("Event dispatcher cannot be null");
-		}
+		this.portfolio = portfolio;
 		this.dispatcher = dispatcher;
-		if ( onAvailable == null || onChanged == null ) {
-			throw new NullPointerException("Event type cannot be null");
-		}
 		this.onAvailable = onAvailable;
 		this.onChanged = onChanged;
 		map = new LinkedHashMap<SecurityDescriptor, EditablePosition>();
 	}
 	
 	/**
-	 * Получить используемую фабрику позиций.
+	 * Получить портфель.
 	 * <p>
-	 * @return фабрика позиций
+	 * @return портфель
 	 */
-	public PositionFactory getPositionFactory() {
-		return factory;
+	public Portfolio getPortfolio() {
+		return portfolio;
 	}
 	
 	/**
@@ -77,11 +66,6 @@ public class PositionsImpl implements EditablePositions,EventListener {
 	}
 
 	@Override
-	public synchronized Position getPosition(SecurityDescriptor descr) {
-		return getEditablePosition(descr);
-	}
-
-	@Override
 	public EventType OnPositionAvailable() {
 		return onAvailable;
 	}
@@ -93,18 +77,12 @@ public class PositionsImpl implements EditablePositions,EventListener {
 
 	@Override
 	public synchronized
-		EditablePosition getEditablePosition(SecurityDescriptor descr)
+		EditablePosition getEditablePosition(Security security)
 	{
+		SecurityDescriptor descr = security.getDescriptor();
 		EditablePosition pos = map.get(descr);
 		if ( pos == null ) {
-			// TODO: по аналогии с инструментами, может возникнуть необходимость
-			// инстанцировать различные классы для различных источников. Это
-			// не важно для потребителей сервиса, но может быть важно для
-			// поставщиков. Так что, следует подумать, что бы перенести это в
-			// обработчик ряда. А может и не возникнет... Плюс такого подхода в
-			// том, что работу с позициями можно начинать до того, как поступят
-			// первые данные по позиции.
-			pos = factory.createPosition(descr);
+			pos = createPosition(security);
 			map.put(descr, pos);
 			pos.OnChanged().addListener(this);
 		}
@@ -136,10 +114,65 @@ public class PositionsImpl implements EditablePositions,EventListener {
 			}
 		}
 	}
+	
+	/**
+	 * Создать экземпляр позиции.
+	 * <p>
+	 * @param security инструмент
+	 * @return экземпляр позиции
+	 */
+	private EditablePosition createPosition(Security security) {
+		EventSystem es = ((EditableTerminal) portfolio.getTerminal())
+			.getEventSystem(); 
+		EventDispatcher dispatcher = es.createEventDispatcher("Position["
+				+ portfolio.getAccount() + ":"
+				+ security.getDescriptor() + "]"); 
+		return new PositionImpl(portfolio, security, dispatcher,
+				es.createGenericType(dispatcher, "OnChanged"));
+	}
 
 	@Override
 	public synchronized Position getPosition(Security security) {
-		return getPosition(security.getDescriptor());
+		return getEditablePosition(security);
+	}
+	
+	/**
+	 * Установить экземпляр позиции.
+	 * <p>
+	 * Только для тестирования.
+	 * <p>
+	 * @param descr дескриптор инструмента
+	 * @param p экземпляр позиции
+	 */
+	protected synchronized
+			void setPosition(SecurityDescriptor descr, EditablePosition p)
+	{
+		map.put(descr, p);
+	}
+	
+	/**
+	 * Сравнить два набора.
+	 * <p>
+	 * При сравнении двух наборов, портфели не сравниваются. Так как портфели
+	 * в свою очередь сравнивают собственные наборы позиций, возникает
+	 * бесконечная рекурсия.
+	 */
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != PositionsImpl.class ) {
+			return false;
+		}
+		PositionsImpl o = (PositionsImpl) other;
+		return new EqualsBuilder()
+			.append(o.dispatcher, dispatcher)
+			.append(o.map, map)
+			.append(o.onAvailable, onAvailable)
+			.append(o.onChanged, onChanged)
+			//.append(o.portfolio, portfolio)
+			.isEquals();
 	}
 
 }

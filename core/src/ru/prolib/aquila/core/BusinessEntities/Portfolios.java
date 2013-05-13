@@ -41,7 +41,8 @@ public interface Portfolios {
 	 * @return экземпляр портфеля
 	 * @throws PortfolioNotExistsException
 	 */
-	public Portfolio getPortfolio(Account account) throws PortfolioException;
+	public Portfolio getPortfolio(Account account)
+		throws PortfolioException;
 	
 	/**
 	 * Получить портфель по-умолчанию.

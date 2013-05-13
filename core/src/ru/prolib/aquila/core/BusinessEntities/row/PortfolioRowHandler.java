@@ -2,11 +2,8 @@ package ru.prolib.aquila.core.BusinessEntities.row;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
-import ru.prolib.aquila.core.data.S;
-import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.*;
 
 /**
@@ -27,31 +24,25 @@ import ru.prolib.aquila.core.data.row.*;
 @Deprecated
 public class PortfolioRowHandler implements RowHandler {
 	private final EditableTerminal terminal;
-	private final PortfolioFactory factory;
 	private final S<EditablePortfolio> modifier;
 	
 	/**
 	 * Создать обработчик.
 	 * <p>
 	 * @param terminal терминал
-	 * @param factory фабрика экземпляров портфелей
 	 * @param modifier мутатор портфеля
 	 */
 	public PortfolioRowHandler(EditableTerminal terminal,
-			PortfolioFactory factory, S<EditablePortfolio> modifier)
+			S<EditablePortfolio> modifier)
 	{
 		super();
 		if ( terminal == null ) {
 			throw new NullPointerException("Terminal cannot be null");
 		}
-		if ( factory == null ) {
-			throw new NullPointerException("Factory cannot be null");
-		}
 		if ( modifier == null ) {
 			throw new NullPointerException("Mutator cannot be null");
 		}
 		this.terminal = terminal;
-		this.factory = factory;
 		this.modifier = modifier;
 	}
 	
@@ -62,15 +53,6 @@ public class PortfolioRowHandler implements RowHandler {
 	 */
 	public EditableTerminal getTerminal() {
 		return terminal;
-	}
-	
-	/**
-	 * Получить фабрику экземпляров портфелей.
-	 * <p>
-	 * @return фабрика портфелей
-	 */
-	public PortfolioFactory getPortfolioFactory() {
-		return factory;
 	}
 	
 	/**
@@ -94,8 +76,7 @@ public class PortfolioRowHandler implements RowHandler {
 			if ( terminal.isPortfolioAvailable(account) ) {
 				portfolio = terminal.getEditablePortfolio(account);
 			} else {
-				portfolio = factory.createPortfolio(account);
-				terminal.registerPortfolio(portfolio);
+				portfolio = terminal.createPortfolio(account);
 			}
 		} catch ( PortfolioException e ) {
 			throw new RuntimeException(e);
@@ -118,7 +99,6 @@ public class PortfolioRowHandler implements RowHandler {
 			PortfolioRowHandler o = (PortfolioRowHandler) other;
 			return new EqualsBuilder()
 				.append(terminal, o.terminal)
-				.append(factory, o.factory)
 				.append(modifier, o.modifier)
 				.isEquals();
 		} else {
@@ -130,7 +110,6 @@ public class PortfolioRowHandler implements RowHandler {
 	public int hashCode() {
 		return new HashCodeBuilder(20121109, 150349)
 			.append(terminal)
-			.append(factory)
 			.append(modifier)
 			.toHashCode();
 	}

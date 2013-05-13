@@ -955,13 +955,32 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testRegisterPortfolio() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
-		portfolios.registerPortfolio(same(port));
+	public void testRegisterPortfolio1() throws Exception {
+		Account account = new Account("TEST");
+		EditablePortfolio p = control.createMock(EditablePortfolio.class);
+		expect(portfolios.createPortfolio(same(terminal), eq(account)))
+			.andStubReturn(p);
 		control.replay();
-		terminal.registerPortfolio(port);
+		
+		assertSame(p, terminal.createPortfolio(account));
+		
 		control.verify();
 	}
+
+	@Test
+	public void testRegisterPortfolio2() throws Exception {
+		Account account = new Account("TEST");
+		EditableTerminal t2 = control.createMock(EditableTerminal.class);
+		EditablePortfolio p = control.createMock(EditablePortfolio.class);
+		expect(portfolios.createPortfolio(same(t2), eq(account)))
+			.andStubReturn(p);
+		control.replay();
+		
+		assertSame(p, terminal.createPortfolio(t2, account));
+		
+		control.verify();
+	}
+
 	
 	@Test
 	public void testSetDefaultPortfolio() throws Exception {

@@ -7,6 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.utils.Variant;
 
 
 /**
@@ -234,6 +235,93 @@ public class PositionImplTest {
 		position.setCurrQty(-1);
 		assertEquals(-1, position.getCurrQty());
 		assertEquals(PositionType.SHORT, position.getType());
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(position.equals(position));
+		assertFalse(position.equals(null));
+		assertFalse(position.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		EventQueue queue = new SimpleEventQueue();
+		dispatcher = new EventDispatcherImpl(queue,"Position");
+		position = new PositionImpl(portfolio, security, dispatcher,
+				dispatcher.createType("OnChanged"));
+		position.setAvailable(true);
+		position.setOpenQty(20L);
+		position.setLockQty(5L);
+		position.setCurrQty(8L);
+		position.setVarMargin(200.00d);
+		position.setMarketValue(800.00d);
+		position.setBookValue(780.00d);
+		
+		Variant<Portfolio> vPort = new Variant<Portfolio>()
+			.add(portfolio)
+			.add(control.createMock(Portfolio.class));
+		Variant<Security> vSec = new Variant<Security>(vPort)
+			.add(security)
+			.add(control.createMock(Security.class));
+		Variant<String> vDispId = new Variant<String>(vSec)
+			.add("Position")
+			.add("AnotherDispatcher");
+		Variant<String> vChngId = new Variant<String>(vDispId)
+			.add("OnChanged")
+			.add("AnotherType");
+		Variant<Boolean> vAvl = new Variant<Boolean>(vChngId)
+			.add(true)
+			.add(false);
+		Variant<Long> vOpen = new Variant<Long>(vAvl)
+			.add(20L)
+			.add(10L);
+		Variant<Long> vLock = new Variant<Long>(vOpen)
+			.add(5L)
+			.add(1L);
+		Variant<Long> vCurr = new Variant<Long>(vLock)
+			.add(8L)
+			.add(12L);
+		Variant<Double> vVarMgn = new Variant<Double>(vCurr)
+			.add(200.00d)
+			.add(180.00d);
+		Variant<Double> vMktVal = new Variant<Double>(vVarMgn)
+			.add(800.00d)
+			.add(120.00d);
+		Variant<Double> vBookVal = new Variant<Double>(vMktVal)
+			.add(780.00d)
+			.add(634.01d);
+		Variant<?> iterator = vBookVal;
+		int foundCnt = 0;
+		PositionImpl x = null, found = null;
+		do {
+			EventDispatcher d2 = new EventDispatcherImpl(queue, vDispId.get());
+			x = new PositionImpl(vPort.get(), vSec.get(), d2,
+					d2.createType(vChngId.get()));
+			x.setAvailable(vAvl.get());
+			x.setOpenQty(vOpen.get());
+			x.setLockQty(vLock.get());
+			x.setCurrQty(vCurr.get());
+			x.setVarMargin(vVarMgn.get());
+			x.setMarketValue(vMktVal.get());
+			x.setBookValue(vBookVal.get());
+			if ( position.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertSame(portfolio, found.getPortfolio());
+		assertSame(security, found.getSecurity());
+		assertEquals(position.OnChanged(), found.OnChanged());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertTrue(found.isAvailable());
+		assertEquals(20L, found.getOpenQty());
+		assertEquals(5L, found.getLockQty());
+		assertEquals(8L, found.getCurrQty());
+		assertEquals(200.00d, found.getVarMargin(), 0.001d);
+		assertEquals(800.00d, found.getMarketValue(), 0.001d);
+		assertEquals(780.00d, found.getBookValue(), 0.001d);
 	}
 
 }

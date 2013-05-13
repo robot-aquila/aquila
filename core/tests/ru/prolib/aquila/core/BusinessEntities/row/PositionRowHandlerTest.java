@@ -25,6 +25,7 @@ public class PositionRowHandlerTest {
 	private EditableTerminal terminal;
 	private EditablePortfolio portfolio;
 	private EditablePosition position;
+	private Security security;
 	private S<EditablePosition> mod;
 	private PositionRowHandler rowHandler;
 	private Row row;
@@ -37,6 +38,7 @@ public class PositionRowHandlerTest {
 		portfolio = control.createMock(EditablePortfolio.class);
 		position = control.createMock(EditablePosition.class);
 		mod = control.createMock(S.class);
+		security = control.createMock(Security.class);
 		rowHandler = new PositionRowHandler(terminal, mod);
 		row = control.createMock(Row.class);
 	}
@@ -93,12 +95,43 @@ public class PositionRowHandlerTest {
 		control.verify();
 	}
 	
+	@Test
+	public void testHandle_PanicIfSecurityNotExists() throws Exception {
+		expect(row.get("POS_ACC")).andReturn(acc);
+		expect(row.get("POS_SECDESCR")).andReturn(descr);
+		expect(terminal.isSecurityExists(descr)).andReturn(false);
+		terminal.firePanicEvent(eq(1),
+				eq("Cannot handle position: security not exists: "),
+				aryEq(new Object[] { descr }));
+		control.replay();
+		
+		rowHandler.handle(row);
+		
+		control.verify();
+	}
+	
 	@Test (expected=RuntimeException.class)
 	public void testHandle_ThrowsIfPortfolioNotExists() throws Exception {
 		expect(row.get("POS_ACC")).andReturn(acc);
 		expect(row.get("POS_SECDESCR")).andReturn(descr);
+		expect(terminal.isSecurityExists(descr)).andReturn(true);
 		expect(terminal.getEditablePortfolio(eq(acc)))
 			.andThrow(new PortfolioNotExistsException());
+		control.replay();
+		
+		rowHandler.handle(row);
+		
+		control.verify();
+	}
+	
+	@Test (expected=RuntimeException.class)
+	public void testHandle_ThrowsIfSecurityNotExists() throws Exception {
+		expect(row.get("POS_ACC")).andReturn(acc);
+		expect(row.get("POS_SECDESCR")).andReturn(descr);
+		expect(terminal.isSecurityExists(descr)).andReturn(true);
+		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(portfolio);
+		expect(terminal.getSecurity(descr))
+			.andThrow(new SecurityNotExistsException(descr));
 		control.replay();
 		
 		rowHandler.handle(row);
@@ -110,9 +143,10 @@ public class PositionRowHandlerTest {
 	public void testHandle_Ok() throws Exception {
 		expect(row.get("POS_ACC")).andReturn(acc);
 		expect(row.get("POS_SECDESCR")).andReturn(descr);
+		expect(terminal.isSecurityExists(descr)).andReturn(true);
 		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(portfolio);
-		expect(portfolio.getEditablePosition(eq(descr))).andReturn(position);
-		position.setAccount(same(acc));
+		expect(terminal.getSecurity(descr)).andReturn(security);
+		expect(portfolio.getEditablePosition(security)).andReturn(position);
 		mod.set(same(position), same(row));
 		control.replay();
 		
@@ -126,9 +160,10 @@ public class PositionRowHandlerTest {
 		ValueException expected = new ValueException("test");
 		expect(row.get("POS_ACC")).andReturn(acc);
 		expect(row.get("POS_SECDESCR")).andReturn(descr);
+		expect(terminal.isSecurityExists(descr)).andReturn(true);
 		expect(terminal.getEditablePortfolio(eq(acc))).andReturn(portfolio);
-		expect(portfolio.getEditablePosition(eq(descr))).andReturn(position);
-		position.setAccount(same(acc));
+		expect(terminal.getSecurity(descr)).andReturn(security);
+		expect(portfolio.getEditablePosition(security)).andReturn(position);
 		mod.set(same(position), same(row));
 		expectLastCall().andThrow(expected);
 		control.replay();

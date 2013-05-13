@@ -194,19 +194,6 @@ public class BMFactoryImplTest {
 	}
 
 	@Test
-	public void testCreatePortfolioFactory() throws Exception {
-		assertEquals(new PortfolioFactoryImpl(eventSystem, term),
-					 factory.createPortfolioFactory());
-	}
-
-	@Test
-	public void testCreatePositionFactory() throws Exception {
-		assertEquals(
-				new PositionFactoryImpl(eventSystem, new Account("ZULU"), term),
-				factory.createPositionFactory(new Account("ZULU")));
-	}
-
-	@Test
 	public void testCreateTradeFactory() throws Exception {
 		TradeFactory expected = new TradeFactoryImpl(term);
 		assertEquals(expected, factory.createTradeFactory());

@@ -732,13 +732,32 @@ public class TerminalDecoratorTest {
 	}
 	
 	@Test
-	public void testRegisterPortfolio() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
-		terminal.registerPortfolio(same(port));
+	public void testCreatePortfolio1() throws Exception {
+		Account account = new Account("TEST");
+		EditablePortfolio p = control.createMock(EditablePortfolio.class);
+		expect(terminal.createPortfolio(same(decorator), eq(account)))
+			.andStubReturn(p);
 		control.replay();
-		decorator.registerPortfolio(port);
+		
+		assertSame(p, decorator.createPortfolio(account));
+		
 		control.verify();
 	}
+	
+	@Test
+	public void testCreatePortfolio2() throws Exception {
+		Account account = new Account("TEST");
+		EditableTerminal t2 = control.createMock(EditableTerminal.class);
+		EditablePortfolio p = control.createMock(EditablePortfolio.class);
+		expect(terminal.createPortfolio(same(t2), eq(account)))
+			.andStubReturn(p);
+		control.replay();
+		
+		assertSame(p, decorator.createPortfolio(t2, account));
+		
+		control.verify();
+	}
+
 	
 	@Test
 	public void testSetDefaultPortfolio() throws Exception {

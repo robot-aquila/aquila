@@ -102,7 +102,6 @@ public class Handlers {
 	 */
 	public RowHandler createPortfolioHandler() {
 		return new PortfolioRowHandler(terminal,
-				new PortfolioFactoryImpl(es, terminal),
 				modifiers.createPortfolioModifier());
 	}
 	
@@ -116,7 +115,6 @@ public class Handlers {
 	 */
 	public RowHandler createPortfolioHandler(Validator isAvailable) {
 		return new PortfolioRowHandler(terminal,
-				new PortfolioFactoryImpl(es, terminal),
 				modifiers.createPortfolioModifier(isAvailable));
 	}
 	

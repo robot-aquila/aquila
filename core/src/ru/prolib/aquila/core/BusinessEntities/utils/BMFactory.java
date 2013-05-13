@@ -41,21 +41,6 @@ public interface BMFactory {
 	public OrderFactory createOrderFactory();
 	
 	/**
-	 * Создать фабрику экземпляров портфелей.
-	 * <p>
-	 * @return фабрика портфелей
-	 */
-	public PortfolioFactory createPortfolioFactory();
-	
-	/**
-	 * Создать фабрику экземпляров позиций для торгового счета.
-	 * <p>
-	 * @param account торговый счет
-	 * @return фабрика позиций
-	 */
-	public PositionFactory createPositionFactory(Account account);
-	
-	/**
 	 * Создать фабрику сделок.
 	 * <p>
 	 * @return фабрика сделок

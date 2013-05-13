@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 
 /**
@@ -10,58 +13,58 @@ import ru.prolib.aquila.core.*;
  * $Id$
  */
 public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
-	public static final int VERSION = 0x02;
+	public static final int VERSION = 0x03;
 	private final Terminal terminal;
 	private final Account account;
-	private final EditablePositions positions;
+	private EditablePositions positions;
 	private final EventDispatcher dispatcher;
 	private final EventType onChanged;
-	private Double variationMargin,cash,balance;
+	private Double variationMargin, cash, balance;
 
 	/**
 	 * Создать объект портфеля.
 	 * <p>
 	 * @param terminal терминал
 	 * @param account идентификатор портфеля
-	 * @param positions набор позиций
 	 * @param dispatcher диспетчер событий
 	 * @param onChanged тип события
 	 */
 	public PortfolioImpl(Terminal terminal, Account account,
-						 EditablePositions positions,
 						 EventDispatcher dispatcher,
 						 EventType onChanged)
 	{
 		super();
-		if ( terminal == null ) {
-			throw new NullPointerException("Terminal cannot be null");
-		}
-		if ( account == null ) {
-			throw new NullPointerException("Account cannot be null");
-		}
-		if ( positions == null ) {
-			throw new NullPointerException("Positions cannot be null");
-		}
-		if ( dispatcher == null ) {
-			throw new NullPointerException("Dispatcher cannot be null");
-		}
-		if ( onChanged == null ) {
-			throw new NullPointerException("Event type cannot be null");
-		}
 		this.terminal = terminal;
 		this.account = account;
-		this.positions = positions;
 		this.dispatcher = dispatcher;
 		this.onChanged = onChanged;
 	}
+	
+	/**
+	 * Установить набор позиций.
+	 * <p>
+	 * Между набором позиций и портфелем есть двунаправленная зависимость связь.
+	 * Для инстанцирования набора позиций требуется экземпляр портфеля. Какой-то
+	 * из этих двух объектов должен быть создан не зависимо. В данной реализации
+	 * под таким объектом подразумевается портфель, который создается без
+	 * определенного набора позиций. То есть, портфель не требует передачи
+	 * набора позиций в конструктор. Вместо этого, набор позиций должен быть
+	 * установлен в любое время после инстанцирования портфеля через вызов
+	 * данного метода. 
+	 * <p>
+	 * @param positions набор позциий
+	 */
+	public synchronized void setPositionsInstance(EditablePositions positions) {
+		this.positions = positions;
+	}
 
 	@Override
-	public Terminal getTerminal() {
+	public synchronized Terminal getTerminal() {
 		return terminal;
 	}
 
 	@Override
-	public Account getAccount() {
+	public synchronized Account getAccount() {
 		return account;
 	}
 	
@@ -70,7 +73,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	 * <p>
 	 * @return набор позиций
 	 */
-	public EditablePositions getPositionsInstance() {
+	public synchronized EditablePositions getPositionsInstance() {
 		return positions;
 	}
 	
@@ -79,7 +82,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public synchronized EventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -94,22 +97,12 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public List<Position> getPositions() {
+	public synchronized List<Position> getPositions() {
 		return positions.getPositions();
 	}
 
 	@Override
-	public Position getPosition(SecurityDescriptor descr) {
-		return positions.getPosition(descr);
-	}
-
-	@Override
-	public EventType OnPositionAvailable() {
-		return positions.OnPositionAvailable();
-	}
-
-	@Override
-	public void fireChangedEvent() throws EditableObjectException {
+	public synchronized void fireChangedEvent() throws EditableObjectException {
 		dispatcher.dispatch(new PortfolioEvent(onChanged, this));
 	}
 
@@ -130,32 +123,32 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public EventType OnChanged() {
+	public synchronized EventType OnChanged() {
 		return onChanged;
+	}
+	
+	@Override
+	public synchronized EventType OnPositionAvailable() {
+		return positions.OnPositionAvailable();
 	}
 
 	@Override
-	public void firePositionAvailableEvent(Position position) {
+	public synchronized void firePositionAvailableEvent(Position position) {
 		positions.firePositionAvailableEvent(position);
 	}
 
 	@Override
-	public EditablePosition getEditablePosition(SecurityDescriptor descr) {
-		return positions.getEditablePosition(descr);
-	}
-
-	@Override
-	public EventType OnPositionChanged() {
+	public synchronized EventType OnPositionChanged() {
 		return positions.OnPositionChanged();
 	}
 
 	@Override
-	public int getPositionsCount() {
+	public synchronized int getPositionsCount() {
 		return positions.getPositionsCount();
 	}
 
 	@Override
-	public Position getPosition(Security security) {
+	public synchronized Position getPosition(Security security) {
 		return positions.getPosition(security);
 	}
 
@@ -170,6 +163,35 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 			setChanged();
 			balance = value;
 		}
+	}
+
+	@Override
+	public synchronized
+			EditablePosition getEditablePosition(Security security)
+	{
+		return positions.getEditablePosition(security);
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != PortfolioImpl.class ) {
+			return false;
+		}
+		PortfolioImpl o = (PortfolioImpl) other;
+		return new EqualsBuilder()
+			.append(o.isAvailable(), isAvailable())
+			.append(o.account, account)
+			.append(o.balance, balance)
+			.append(o.cash, cash)
+			.append(o.dispatcher, dispatcher)
+			.append(o.onChanged, onChanged)
+			.append(o.positions, positions)
+			.append(o.terminal, terminal)
+			.append(o.variationMargin, variationMargin)
+			.isEquals();
 	}
 
 }

@@ -11,16 +11,16 @@ public interface EditablePositions extends Positions {
 	/**
 	 * Генерировать событие о появлении информации о новой позиции.
 	 * <p>
-	 * @param position инициализированная позиция
+	 * @param position позиция
 	 */
 	public void firePositionAvailableEvent(Position position);
 	
 	/**
 	 * Получить экземпляр редактируемой позиции.
 	 * <p>
-	 * @param descr идентификатор инструмента
+	 * @param security инструмент
 	 * @return позиция
 	 */
-	public EditablePosition getEditablePosition(SecurityDescriptor descr);
+	public EditablePosition getEditablePosition(Security security);
 
 }

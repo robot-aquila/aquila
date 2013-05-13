@@ -13,6 +13,10 @@ public class PortfolioNotExistsException extends PortfolioException {
 		super("Portfolio not exists: " + code);
 	}
 	
+	public PortfolioNotExistsException(Account account) {
+		super("Portfolio not exists: " + account);
+	}
+	
 	public PortfolioNotExistsException() {
 		super();
 	}

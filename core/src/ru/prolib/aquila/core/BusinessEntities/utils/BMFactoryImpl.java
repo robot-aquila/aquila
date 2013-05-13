@@ -108,16 +108,6 @@ public class BMFactoryImpl implements BMFactory {
 	}
 
 	@Override
-	public PortfolioFactory createPortfolioFactory() {
-		return new PortfolioFactoryImpl(eventSystem, terminal);
-	}
-
-	@Override
-	public PositionFactory createPositionFactory(Account account) {
-		return new PositionFactoryImpl(eventSystem, account, terminal);
-	}
-
-	@Override
 	public TradeFactory createTradeFactory() {
 		return new TradeFactoryImpl(terminal);
 	}

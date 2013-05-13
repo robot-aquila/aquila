@@ -111,5 +111,15 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	 */
 	public EditableSecurity createSecurity(SecurityDescriptor descr)
 		throws SecurityAlreadyExistsException;
+	
+	/**
+	 * Создать и зарегистрировать новый портфель.
+	 * <p>
+	 * @param account счет
+	 * @return новый портфель
+	 * @throws PortfolioAlreadyExistsException портфель уже существует
+	 */
+	public EditablePortfolio createPortfolio(Account account)
+		throws PortfolioException;
 
 }

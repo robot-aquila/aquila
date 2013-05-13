@@ -417,10 +417,18 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public final void registerPortfolio(EditablePortfolio portfolio)
+	public final EditablePortfolio createPortfolio(Account account)
 		throws PortfolioException
 	{
-		terminal.registerPortfolio(portfolio);
+		return terminal.createPortfolio(this, account);
+	}
+	
+	@Override
+	public final EditablePortfolio
+		createPortfolio(EditableTerminal terminal, Account account)
+			throws PortfolioException
+	{
+		return this.terminal.createPortfolio(terminal, account);
 	}
 
 	@Override

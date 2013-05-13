@@ -20,16 +20,20 @@ public interface EditablePortfolios extends Portfolios {
 	 * <p>
 	 * @param account идентификатор счета
 	 * @return портфель
+	 * @throws PortfolioNotExistsException
 	 */
 	public EditablePortfolio getEditablePortfolio(Account account)
 			throws PortfolioException;
 	
 	/**
-	 * Зарегистрировать новый портфель.
+	 * Создать и зарегистрировать новый портфель.
 	 * <p>
-	 * @param portfolio экземпляр портфеля
+	 * @param terminal терминал
+	 * @param account торговый счет портфеля
+	 * @throws PortfolioAlreadyExistsException
 	 */
-	public void registerPortfolio(EditablePortfolio portfolio)
+	public EditablePortfolio
+		createPortfolio(EditableTerminal terminal, Account account)
 			throws PortfolioException;
 	
 	/**

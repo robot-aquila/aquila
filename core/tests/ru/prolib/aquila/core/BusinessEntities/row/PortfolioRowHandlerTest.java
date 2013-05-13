@@ -9,7 +9,6 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.row.PortfolioRowHandler;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.Row;
 import ru.prolib.aquila.core.data.row.RowException;
@@ -24,7 +23,6 @@ public class PortfolioRowHandlerTest {
 	private IMocksControl control;
 	private EditableTerminal terminal;
 	private EditablePortfolio portfolio;
-	private PortfolioFactory factory;
 	private S<EditablePortfolio> mod;
 	private PortfolioRowHandler rowHandler;
 	private Row row;
@@ -35,9 +33,8 @@ public class PortfolioRowHandlerTest {
 		control = createStrictControl();
 		terminal = control.createMock(EditableTerminal.class);
 		portfolio = control.createMock(EditablePortfolio.class);
-		factory = control.createMock(PortfolioFactory.class);
 		mod = control.createMock(S.class);
-		rowHandler = new PortfolioRowHandler(terminal, factory, mod);
+		rowHandler = new PortfolioRowHandler(terminal, mod);
 		row = control.createMock(Row.class);
 	}
 	
@@ -46,12 +43,8 @@ public class PortfolioRowHandlerTest {
 		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
 			.add(null)
 			.add(terminal);
-		Variant<PortfolioFactory> vFact =
-				new Variant<PortfolioFactory>(vTerm)
-			.add(factory)
-			.add(null);
 		Variant<S<EditablePortfolio>> vMod =
-				new Variant<S<EditablePortfolio>>(vFact)
+				new Variant<S<EditablePortfolio>>(vTerm)
 			.add(mod)
 			.add(null);
 		Variant<?> iterator = vMod;
@@ -59,15 +52,13 @@ public class PortfolioRowHandlerTest {
 		PortfolioRowHandler found = null;
 		do {
 			try {
-				found = new PortfolioRowHandler(vTerm.get(),
-						vFact.get(), vMod.get());
+				found = new PortfolioRowHandler(vTerm.get(), vMod.get());
 			} catch ( NullPointerException e ) {
 				exceptions ++;
 			}
 		} while ( iterator.next() );
 		assertEquals(iterator.count() - 1, exceptions);
 		assertSame(terminal, found.getTerminal());
-		assertSame(factory, found.getPortfolioFactory());
 		assertSame(mod, found.getPortfolioModifier());
 	}
 	
@@ -86,8 +77,7 @@ public class PortfolioRowHandlerTest {
 	public void testHandle_IfNew() throws Exception {
 		expect(row.get(Spec.PORT_ACCOUNT)).andReturn(acc);
 		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(false);
-		expect(factory.createPortfolio(eq(acc))).andReturn(portfolio);
-		terminal.registerPortfolio(same(portfolio));
+		expect(terminal.createPortfolio(eq(acc))).andReturn(portfolio);
 		mod.set(same(portfolio), same(row));
 		control.replay();
 		
@@ -134,18 +124,15 @@ public class PortfolioRowHandlerTest {
 		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
 			.add(terminal)
 			.add(control.createMock(EditableTerminal.class));
-		Variant<PortfolioFactory> vFact = new Variant<PortfolioFactory>(vTerm)
-			.add(factory)
-			.add(control.createMock(PortfolioFactory.class));
 		Variant<S<EditablePortfolio>> vMod =
-				new Variant<S<EditablePortfolio>>(vFact)
+				new Variant<S<EditablePortfolio>>(vTerm)
 			.add(mod)
 			.add(control.createMock(S.class));
 		Variant<?> iterator = vMod;
 		int foundCnt = 0;
 		PortfolioRowHandler found = null, x = null;
 		do {
-			x = new PortfolioRowHandler(vTerm.get(), vFact.get(), vMod.get());
+			x = new PortfolioRowHandler(vTerm.get(), vMod.get());
 			if ( rowHandler.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -153,7 +140,6 @@ public class PortfolioRowHandlerTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(terminal, found.getTerminal());
-		assertSame(factory, found.getPortfolioFactory());
 		assertSame(mod, found.getPortfolioModifier());
 	}
 	
@@ -168,7 +154,6 @@ public class PortfolioRowHandlerTest {
 	public void testHashCode() throws Exception {
 		int hashCode = new HashCodeBuilder(20121109, 150349)
 			.append(terminal)
-			.append(factory)
 			.append(mod)
 			.toHashCode();
 		assertEquals(hashCode, rowHandler.hashCode());

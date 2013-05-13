@@ -13,7 +13,6 @@ import ru.prolib.aquila.core.BusinessEntities.row.Handlers;
 import ru.prolib.aquila.core.BusinessEntities.row.TradeRowHandler;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderFactoryImpl;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderResolverStd;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactoryImpl;
 import ru.prolib.aquila.core.BusinessEntities.utils.TradeFactoryImpl;
 import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.data.row.RowHandler;
@@ -100,8 +99,7 @@ public class HandlersTest {
 	public void testCreatePortfolioHandler() throws Exception {
 		S<EditablePortfolio> mod = control.createMock(S.class);
 		expect(modifiers.createPortfolioModifier()).andReturn(mod);
-		RowHandler expected = new PortfolioRowHandler(terminal,
-				new PortfolioFactoryImpl(es, terminal), mod);
+		RowHandler expected = new PortfolioRowHandler(terminal, mod);
 		control.replay();
 		
 		assertEquals(expected, builder.createPortfolioHandler());
@@ -115,8 +113,7 @@ public class HandlersTest {
 		Validator isAvailable = control.createMock(Validator.class);
 		S<EditablePortfolio> mod = control.createMock(S.class);
 		expect(modifiers.createPortfolioModifier(isAvailable)).andReturn(mod);
-		RowHandler expected = new PortfolioRowHandler(terminal,
-				new PortfolioFactoryImpl(es, terminal), mod);
+		RowHandler expected = new PortfolioRowHandler(terminal, mod);
 		control.replay();
 		
 		assertEquals(expected, builder.createPortfolioHandler(isAvailable));

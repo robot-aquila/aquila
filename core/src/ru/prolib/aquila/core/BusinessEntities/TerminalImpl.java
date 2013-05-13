@@ -624,10 +624,18 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public void registerPortfolio(EditablePortfolio portfolio)
+	public EditablePortfolio
+		createPortfolio(EditableTerminal terminal, Account account)
+			throws PortfolioException
+	{
+		return portfolios.createPortfolio(terminal, account);
+	}
+	
+	@Override
+	public EditablePortfolio createPortfolio(Account account)
 		throws PortfolioException
 	{
-		portfolios.registerPortfolio(portfolio);
+		return portfolios.createPortfolio(this, account);
 	}
 
 	@Override

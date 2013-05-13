@@ -2,8 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
@@ -14,16 +13,11 @@ import ru.prolib.aquila.core.EventListener;
  * 2012-08-04<br>
  * $Id: PortfoliosImpl.java 490 2013-02-05 19:42:02Z whirlwind $
  */
-public class PortfoliosImpl implements EditablePortfolios,EventListener {
-	private static final Logger logger;
+public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	private final EventDispatcher dispatcher;
 	private final EventType onAvailable,onChanged,onPosAvailable,onPosChanged;
 	private final Map<Account, EditablePortfolio> map;
 	private Portfolio defaultPortfolio;
-	
-	static {
-		logger = LoggerFactory.getLogger(PortfoliosImpl.class);
-	}
 
 	/**
 	 * Конструктор набора.
@@ -107,26 +101,35 @@ public class PortfoliosImpl implements EditablePortfolios,EventListener {
 	{
 		EditablePortfolio port = map.get(acc);
 		if ( port == null ) {
-			throw new PortfolioNotExistsException(acc.toString());
+			throw new PortfolioNotExistsException(acc);
 		}
 		return port;
 	}
 
 	@Override
-	public synchronized void registerPortfolio(EditablePortfolio portfolio)
+	public synchronized EditablePortfolio
+		createPortfolio(EditableTerminal terminal, Account account)
 			throws PortfolioException
 	{
-		Account account = portfolio.getAccount();
 		if ( map.containsKey(account) ) {
-			throw new PortfolioException("Portfolio already exists: "+account);
+			throw new PortfolioAlreadyExistsException(account);
 		}
-		map.put(account, portfolio);
-		if ( map.size() == 1 ) {
-			defaultPortfolio = portfolio;
+		EventSystem es = terminal.getEventSystem();
+		EventDispatcher d = es.createEventDispatcher("Portfolio["+account+"]");
+		PortfolioImpl p = new PortfolioImpl(terminal, account, d,
+				d.createType("OnChanged"));
+		EventDispatcher pd = es.createEventDispatcher("Portfolio["+account+"]");
+		p.setPositionsInstance(new PositionsImpl(p, pd,
+				pd.createType("OnPosAvailable"),
+				pd.createType("OnPosChanged")));
+		map.put(account, p);
+		p.OnChanged().addListener(this);
+		p.OnPositionAvailable().addListener(this);
+		p.OnPositionChanged().addListener(this);
+		if ( defaultPortfolio == null ) {
+			defaultPortfolio = p;
 		}
-		portfolio.OnChanged().addListener(this);
-		portfolio.OnPositionAvailable().addListener(this);
-		portfolio.OnPositionChanged().addListener(this);
+		return p;
 	}
 
 	@Override
@@ -174,14 +177,7 @@ public class PortfoliosImpl implements EditablePortfolios,EventListener {
 	 */
 	private void translatePositionEvent(PositionEvent event) {
 		Position pos = ((PositionEvent) event).getPosition();
-		Portfolio port = null;
-		try {
-			port = pos.getPortfolio();
-		} catch ( PortfolioException e ) {
-			logger.error("Couldn't translate position event: ", e);
-			// TODO: This is PANIC state
-			return;
-		}
+		Portfolio port = pos.getPortfolio();
 		EventType map[][] = {
 				{ port.OnPositionAvailable(), onPosAvailable },
 				{ port.OnPositionChanged(), onPosChanged },
@@ -197,6 +193,40 @@ public class PortfoliosImpl implements EditablePortfolios,EventListener {
 	@Override
 	public synchronized int getPortfoliosCount() {
 		return map.size();
+	}
+	
+	/**
+	 * Установить экземпляр портфеля.
+	 * <p>
+	 * Только для тестирования.
+	 * <p>
+	 * @param account торговый счет
+	 * @param p экземпляр портфеля
+	 */
+	protected synchronized void
+		setPortfolio(Account account, EditablePortfolio p)
+	{
+		map.put(account, p);
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != PortfoliosImpl.class ) {
+			return false;
+		}
+		PortfoliosImpl o = (PortfoliosImpl) other;
+		return new EqualsBuilder()
+			.append(o.defaultPortfolio, defaultPortfolio)
+			.append(o.dispatcher, dispatcher)
+			.append(o.map, map)
+			.append(o.onAvailable, onAvailable)
+			.append(o.onChanged, onChanged)
+			.append(o.onPosAvailable, onPosAvailable)
+			.append(o.onPosChanged, onPosChanged)
+			.isEquals();
 	}
 
 }

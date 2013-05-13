@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.*;
 
@@ -83,11 +84,18 @@ public class PositionRowHandler implements RowHandler {
 			terminal.firePanicEvent(1, msg + "security descriptor is NULL");
 			return;
 		}
+		if ( ! terminal.isSecurityExists(descr) ) {
+			Object args[] = { descr };
+			terminal.firePanicEvent(1, msg + "security not exists: ", args);
+			return;
+		}
+		
 		try {
 			position = terminal.getEditablePortfolio(account)
-				.getEditablePosition(descr);
-			position.setAccount(account);
+				.getEditablePosition(terminal.getSecurity(descr));
 		} catch ( PortfolioException e ) {
+			throw new RuntimeException(e);
+		} catch ( SecurityException e ) {
 			throw new RuntimeException(e);
 		}
 		synchronized ( position ) {
