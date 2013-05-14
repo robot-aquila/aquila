@@ -25,8 +25,8 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	/**
 	 * Создать объект позиции.
 	 * <p>
-	 * @param Portfolio портфель, которому принадлежит позиция
-	 * @param Security инструмент, по которому открыта позиция
+	 * @param portfolio портфель, которому принадлежит позиция
+	 * @param security инструмент, по которому открыта позиция
 	 * @param dispatcher диспетчер событий
 	 * @param onChanged тип события: при изменении позиции
 	 */

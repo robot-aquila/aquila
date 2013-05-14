@@ -4,22 +4,20 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventType;
 
 /**
- * Реализация модифицируемого торгового инструмента.
- * <p>
- * 2012-05-30<br>
- * $Id: SecurityImpl.java 552 2013-03-01 13:35:35Z whirlwind $
+ * Инструмент торговли.
  */
 public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	private final Terminal terminal;
 	private final SecurityDescriptor descr;
 	private final EventDispatcher dispatcher;
-	private final EventType etChanged;
-	private final EventType etNewTrade;
+	private final EventType onChanged;
+	private final EventType onTrade;
 	private Double minPrice;
 	private Double maxPrice;
 	private Double stepPrice;
@@ -36,42 +34,25 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	private DecimalFormat priceFormat;
 	
 	/**
-	 * Создать объект инструмента.
+	 * Конструктор.
 	 * <p>
-	 * @param terminal
-	 * @param descr
-	 * @param eventDispatcher
-	 * @param eventTypeChanged
-	 * @param eventTypeNewTrade
-	 * @throws NullPointerException
+	 * @param terminal терминал
+	 * @param descr дескриптор инструмента
+	 * @param dispatcher диспетчер событий
+	 * @param onChanged тип события: при изменении атрибутов инструмента
+	 * @param onTrade тип события: новая (анонимная) сделка по инструменту
 	 */
 	public SecurityImpl(Terminal terminal, SecurityDescriptor descr,
-					    EventDispatcher eventDispatcher,
-					    EventType eventTypeChanged,
-					    EventType eventTypeNewTrade)
+					    EventDispatcher dispatcher,
+					    EventType onChanged,
+					    EventType onTrade)
 	{
 		super();
-		if ( terminal == null ) {
-			throw new NullPointerException("Terminal cannot be null");
-		}
 		this.terminal = terminal;
-		if ( ! descr.isValid() ) {
-			throw new IllegalArgumentException("Invalid security descriptor: "
-					+ descr);
-		}
 		this.descr = descr;
-		if ( eventDispatcher == null ) {
-			throw new NullPointerException("Event dispatcher cannot be null");
-		}
-		this.dispatcher = eventDispatcher;
-		if ( eventTypeChanged == null ) {
-			throw new NullPointerException("OnChanged type cannot be null");
-		}
-		this.etChanged = eventTypeChanged;
-		if ( eventTypeNewTrade == null ) {
-			throw new NullPointerException("OnNewTrade type cannot be null");
-		}
-		this.etNewTrade = eventTypeNewTrade;
+		this.dispatcher = dispatcher;
+		this.onChanged = onChanged;
+		this.onTrade = onTrade;
 		changePriceFormat();
 	}
 	
@@ -186,12 +167,12 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 
 	@Override
 	public synchronized EventType OnChanged() {
-		return etChanged;
+		return onChanged;
 	}
 
 	@Override
 	public synchronized EventType OnTrade() {
-		return etNewTrade;
+		return onTrade;
 	}
 
 	@Override
@@ -211,12 +192,12 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 		synchronized ( this ) {
 			lastTrade = trade;
 		}
-		dispatcher.dispatch(new SecurityTradeEvent(etNewTrade, this, trade));
+		dispatcher.dispatch(new SecurityTradeEvent(onTrade, this, trade));
 	}
 	
 	@Override
 	public void fireChangedEvent() throws EditableObjectException {
-		dispatcher.dispatch(new SecurityEvent(etChanged, this));
+		dispatcher.dispatch(new SecurityEvent(onChanged, this));
 	}
 
 	@Override
@@ -394,6 +375,43 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			format = "0";
 		}
 		priceFormat = new DecimalFormat(format, symbols);
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != SecurityImpl.class ) {
+			return false;
+		}
+		SecurityImpl o = (SecurityImpl) other;
+		return new EqualsBuilder()
+			.append(o.decimals, decimals)
+			.append(o.lotSize, lotSize)
+			.append(o.stepSize, stepSize)
+			.append(o.askPrice, askPrice)
+			.append(o.askSize, askSize)
+			.append(o.bidPrice, bidPrice)
+			.append(o.bidSize, bidSize)
+			.append(o.close, close)
+			.append(o.descr, descr)
+			.append(o.dispatcher, dispatcher)
+			.append(o.displayName, displayName)
+			.append(o.high, high)
+			.append(o.lastPrice, lastPrice)
+			.append(o.lastTrade, lastTrade)
+			.append(o.low, low)
+			.append(o.maxPrice, maxPrice)
+			.append(o.minPrice, minPrice)
+			.append(o.onChanged, onChanged)
+			.append(o.onTrade, onTrade)
+			.append(o.open, open)
+			.append(o.status, status)
+			.append(o.stepPrice, stepPrice)
+			.append(o.terminal, terminal)
+			.append(o.isAvailable(), isAvailable())
+			.isEquals();
 	}
 
 }

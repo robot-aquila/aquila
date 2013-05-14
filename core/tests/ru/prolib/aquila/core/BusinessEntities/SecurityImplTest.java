@@ -2,18 +2,11 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.data.G;
-import ru.prolib.aquila.core.data.S;
-import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -21,43 +14,37 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: SecurityImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
  */
 public class SecurityImplTest {
-	private SecurityDescriptor descr;
-	private EventSystem eventSystem;
-	private EventQueueImpl eventQueue;
+	private static SecurityDescriptor descr1, descr2;
+	private EventSystem es;
 	private IMocksControl control;
 	private Terminal terminal;
 	private SecurityImpl security;
-	private EventType etChanged;
-	private EventType etNewTrade;
-	private EventDispatcher dispatcher;
+	private EventType onChanged;
+	private EventType onTrade;
+	private EventDispatcher dispatcher, dispatcherMock;
 	private G<?> getter;
 	private S<SecurityImpl> setter;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		BasicConfigurator.resetConfiguration();
-		BasicConfigurator.configure();
+		descr1 = new SecurityDescriptor("GAZP", "EQBR", "RUR",SecurityType.STK);
+		descr2 = new SecurityDescriptor("RIM3", "SPFT", "USD",SecurityType.FUT);
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		eventSystem = new EventSystemImpl();
-		eventQueue = (EventQueueImpl) eventSystem.getEventQueue();
-		dispatcher = eventSystem.createEventDispatcher();
-		etChanged = eventSystem.createGenericType(dispatcher);
-		etNewTrade = eventSystem.createGenericType(dispatcher);
+		es = new EventSystemImpl();
+		dispatcher = es.createEventDispatcher("Security");
+		onChanged = dispatcher.createType("OnChanged");
+		onTrade = dispatcher.createType("OnTrade");
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK); 
-		security = new SecurityImpl(terminal, descr, dispatcher,
-									etChanged, etNewTrade);
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		 
+		security = new SecurityImpl(terminal, descr1, dispatcher,
+									onChanged, onTrade);
 		setter = null;
 		getter = null;
-	}
-	
-	@After
-	public void tearDown() throws Exception {
-		eventQueue.stop();
 	}
 	
 	/**
@@ -85,43 +72,6 @@ public class SecurityImplTest {
 			assertEquals(msg, (Boolean)fixture[i][2], security.hasChanged());
 			assertEquals(msg, fixture[i][1], getter.get(security));
 		}
-	}
-	
-	@Test
-	public void testConstruct() throws Exception {
-		Variant<Terminal> vTerm = new Variant<Terminal>()
-			.add(terminal)
-			.add(null);
-		Variant<SecurityDescriptor> vDesc =
-				new Variant<SecurityDescriptor>(vTerm)
-			.add(descr)
-			.add(new SecurityDescriptor("FOO", "BAR", null, null));
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vDesc)
-			.add(dispatcher)
-			.add(null);
-		Variant<EventType> vEtChanged = new Variant<EventType>(vDisp)
-			.add(etChanged)
-			.add(null);
-		Variant<EventType> vEtNewTrd = new Variant<EventType>(vEtChanged)
-			.add(etNewTrade)
-			.add(null);
-		Variant<?> iterator = vEtNewTrd;
-		int exceptionCnt = 0;
-		SecurityImpl found = null;
-		do {
-			try {
-				found = new SecurityImpl(vTerm.get(), vDesc.get(),
-						vDisp.get(), vEtChanged.get(), vEtNewTrd.get());
-			} catch ( Exception e ) {
-				exceptionCnt ++;				
-			}
-		} while ( iterator.next() );
-		assertEquals(exceptionCnt, iterator.count() - 1);
-		assertSame(terminal, found.getTerminal());
-		assertSame(descr, found.getDescriptor());
-		assertSame(dispatcher, found.getEventDispatcher());
-		assertSame(etChanged, found.OnChanged());
-		assertSame(etNewTrade, found.OnTrade());
 	}
 	
 	@Test
@@ -218,39 +168,29 @@ public class SecurityImplTest {
 
 	@Test
 	public void testFireTradeEvent() throws Exception {
-		Trade trade = new Trade(terminal);
-		final CountDownLatch finished = new CountDownLatch(1);
-		final SecurityTradeEvent expected =
-			new SecurityTradeEvent(security.OnTrade(), security, trade);
-		eventQueue.start();
-		security.OnTrade().addListener(new EventListener() {
-			@Override
-			public void onEvent(Event event) {
-				assertEquals(expected, event);
-				finished.countDown();
-			}
-		});
+		Trade t = new Trade(terminal);
+		security = new SecurityImpl(terminal, descr1, dispatcherMock,
+				onChanged, onTrade);
+		dispatcherMock.dispatch(new SecurityTradeEvent(onTrade, security, t));
+		control.replay();
+		
 		assertNull(security.getLastTrade());
-		security.fireTradeEvent(trade);
-		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
-		assertSame(trade, security.getLastTrade());
+		security.fireTradeEvent(t);
+		assertSame(t, security.getLastTrade());
+		
+		control.verify();
 	}
 	
 	@Test
 	public void testFireChangedEvent() throws Exception {
-		final CountDownLatch finished = new CountDownLatch(1);
-		final SecurityEvent expected =
-			new SecurityEvent(security.OnChanged(), security);
-		eventQueue.start();
-		security.OnChanged().addListener(new EventListener() {
-			@Override
-			public void onEvent(Event event) {
-				assertEquals(expected, event);
-				finished.countDown();
-			}
-		});
+		security = new SecurityImpl(terminal, descr1, dispatcherMock,
+				onChanged, onTrade);
+		dispatcherMock.dispatch(new SecurityEvent(onChanged, security));
+		control.replay();
+		
 		security.fireChangedEvent();
-		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
+		
+		control.verify();
 	}
 	
 	@Test
@@ -548,6 +488,171 @@ public class SecurityImplTest {
 			}
 		};
 		testGetterSetter(SecurityStatus.TRADING, SecurityStatus.STOPPED);
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(security.equals(security));
+		assertFalse(security.equals(null));
+		assertFalse(security.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Trade trade = new Trade(terminal);
+		security.setAskPrice(200.00d);
+		security.setAskSize(80L);
+		security.setAvailable(true);
+		security.setBidPrice(180.00d);
+		security.setBidSize(100L);
+		security.setClosePrice(800.00d);
+		security.setDisplayName("Yuppy");
+		security.setHighPrice(650.00d);
+		security.setLastPrice(124.00d);
+		security.setLotSize(10);
+		security.setLowPrice(754.00d);
+		security.setMaxPrice(100.05d);
+		security.setMinPrice(512.00d);
+		security.setMinStepPrice(1.0d);
+		security.setMinStepSize(0.01d);
+		security.setOpenPrice(852.00d);
+		security.setPrecision(2);
+		security.setStatus(SecurityStatus.TRADING);
+		security.fireTradeEvent(trade);
+
+		Variant<Terminal> vTerm = new Variant<Terminal>()
+			.add(terminal)
+			.add(control.createMock(Terminal.class));
+		Variant<SecurityDescriptor> vDescr =
+				new Variant<SecurityDescriptor>(vTerm)
+			.add(descr1)
+			.add(descr2);
+		Variant<String> vDispId = new Variant<String>(vDescr)
+			.add("Security")
+			.add("Another");
+		Variant<String> vChngId = new Variant<String>(vDispId)
+			.add("OnChanged")
+			.add("OnUnknown");
+		Variant<String> vTrdId = new Variant<String>(vChngId)
+			.add("OnTrade")
+			.add("OnAmazimg");
+		Variant<Double> vAsk = new Variant<Double>(vTrdId)
+			.add(200.00d)
+			.add(115.00d);
+		Variant<Long> vAskSz = new Variant<Long>(vAsk)
+			.add(80L)
+			.add(12L);
+		Variant<Boolean> vAvl = new Variant<Boolean>(vAskSz)
+			.add(true)
+			.add(false);
+		Variant<Double> vBid = new Variant<Double>(vAvl)
+			.add(180.00d)
+			.add(815.00d);
+		Variant<Long> vBidSz = new Variant<Long>(vBid)
+			.add(100L)
+			.add(256L);
+		Variant<Double> vClose = new Variant<Double>(vBidSz)
+			.add(800.00d)
+			.add(1800.00d);
+		Variant<String> vDispNm = new Variant<String>(vClose)
+			.add("Yuppy")
+			.add("Juppy");
+		Variant<Double> vHigh = new Variant<Double>(vDispNm)
+			.add(650.00d)
+			.add(734.00d);
+		Variant<Double> vLast = new Variant<Double>(vHigh)
+			.add(124.00d)
+			.add(321.00d);
+		Variant<Integer> vLot = new Variant<Integer>(vLast)
+			.add(10)
+			.add(100);
+		Variant<Double> vLow = new Variant<Double>(vLot)
+			.add(754.00d)
+			.add(828.00d);
+		Variant<Double> vMax = new Variant<Double>(vLow)
+			.add(100.05d)
+			.add(215.00d);
+		Variant<Double> vMin = new Variant<Double>(vMax)
+			.add(512.00d)
+			.add(1024.00d);
+		Variant<Double> vStpPr = new Variant<Double>(vMin)
+			.add(1.0d)
+			.add(2.0d);
+		Variant<Double> vStpSz = new Variant<Double>(vStpPr)
+			.add(0.01d)
+			.add(0.02d);
+		Variant<Double> vOpen = new Variant<Double>(vStpSz)
+			.add(852.00d)
+			.add(634.00d);
+		Variant<Integer> vPrec = new Variant<Integer>(vOpen)
+			.add(2)
+			.add(5);
+		Variant<SecurityStatus> vStat = new Variant<SecurityStatus>(vPrec)
+			.add(SecurityStatus.TRADING)
+			.add(SecurityStatus.STOPPED);
+		Variant<Trade> vLastTrd = new Variant<Trade>(vStat)
+			.add(trade)
+			.add(null);
+		Variant<?> iterator = vLastTrd;
+		int foundCnt = 0;
+		SecurityImpl x = null, found = null;
+		do {
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new SecurityImpl(vTerm.get(), vDescr.get(), d,
+					d.createType(vChngId.get()), d.createType(vTrdId.get()));
+			x.setAskPrice(vAsk.get());
+			x.setAskSize(vAskSz.get());
+			x.setAvailable(vAvl.get());
+			x.setBidPrice(vBid.get());
+			x.setBidSize(vBidSz.get());
+			x.setClosePrice(vClose.get());
+			x.setDisplayName(vDispNm.get());
+			x.setHighPrice(vHigh.get());
+			x.setLastPrice(vLast.get());
+			x.setLotSize(vLot.get());
+			x.setLowPrice(vLow.get());
+			x.setMaxPrice(vMax.get());
+			x.setMinPrice(vMin.get());
+			x.setMinStepPrice(vStpPr.get());
+			x.setMinStepSize(vStpSz.get());
+			x.setOpenPrice(vOpen.get());
+			x.setPrecision(vPrec.get());
+			x.setStatus(vStat.get());
+			if ( vLastTrd.get() != null ) {
+				x.fireTradeEvent(vLastTrd.get());
+			}
+			if ( security.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertSame(terminal, found.getTerminal());
+		assertEquals(descr1, found.getDescriptor());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onChanged, found.OnChanged());
+		assertNotSame(onChanged, found.OnChanged());
+		assertEquals(onTrade, found.OnTrade());
+		assertNotSame(onTrade, found.OnTrade());
+		assertEquals(200.00d, found.getAskPrice(), 0.01d);
+		assertEquals(new Long(80L), found.getAskSize());
+		assertTrue(found.isAvailable());
+		assertEquals(180.00d, found.getBidPrice(), 0.01d);
+		assertEquals(new Long(100L), found.getBidSize());
+		assertEquals(800.00d, found.getClosePrice(), 0.01d);
+		assertEquals("Yuppy", found.getDisplayName());
+		assertEquals(650.00d, found.getHighPrice(), 0.01d);
+		assertEquals(124.00d, found.getLastPrice(), 0.01d);
+		assertEquals(10, found.getLotSize());
+		assertEquals(754.00d, found.getLowPrice(), 0.01d);
+		assertEquals(100.05d, found.getMaxPrice(), 0.01d);
+		assertEquals(512.00d, found.getMinPrice(), 0.01d);
+		assertEquals(1.0d, found.getMinStepPrice(), 0.01d);
+		assertEquals(0.01d, found.getMinStepSize(), 0.01d);
+		assertEquals(852.00d, found.getOpenPrice(), 0.01d);
+		assertEquals(2, found.getPrecision());
+		assertEquals(SecurityStatus.TRADING, found.getStatus());
+		assertSame(trade, found.getLastTrade());
 	}
 
 }

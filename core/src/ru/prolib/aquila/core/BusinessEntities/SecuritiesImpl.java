@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
 
@@ -17,7 +20,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	 * Карта определения инструмента по дескриптору.
 	 * Содержит записи для каждого инструмента.
 	 */
-	private final Map<SecurityDescriptor, EditableSecurity> descrMap;
+	private final Map<SecurityDescriptor, EditableSecurity> map;
 	
 	/**
 	 * Конструктор
@@ -37,12 +40,12 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		this.onAvailable = onAvailable;
 		this.onChanged = onChanged;
 		this.onTrade = onTrade;
-		descrMap = new LinkedHashMap<SecurityDescriptor, EditableSecurity>();
+		map = new LinkedHashMap<SecurityDescriptor, EditableSecurity>();
 	}
 
 	@Override
 	public synchronized List<Security> getSecurities() {
-		return new LinkedList<Security>(descrMap.values());
+		return new Vector<Security>(map.values());
 	}
 	
 	/**
@@ -58,7 +61,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	public synchronized Security getSecurity(SecurityDescriptor descr)
 			throws SecurityException
 	{
-		Security security = descrMap.get(descr);
+		Security security = map.get(descr);
 		if ( security == null ) {
 			throw new SecurityNotExistsException(descr);
 		}
@@ -67,7 +70,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	
 	@Override
 	public synchronized boolean isSecurityExists(SecurityDescriptor descr) {
-		return descrMap.containsKey(descr);
+		return map.containsKey(descr);
 	}
 
 	@Override
@@ -80,7 +83,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		EditableSecurity getEditableSecurity(SecurityDescriptor descr)
 			throws SecurityNotExistsException
 	{
-		EditableSecurity security = descrMap.get(descr);
+		EditableSecurity security = map.get(descr);
 		if ( security == null ) {
 			throw new SecurityNotExistsException(descr);
 		}
@@ -117,7 +120,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 
 	@Override
 	public synchronized int getSecuritiesCount() {
-		return descrMap.size();
+		return map.size();
 	}
 
 	@Override
@@ -125,7 +128,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		createSecurity(EditableTerminal terminal, SecurityDescriptor descr)
 			throws SecurityAlreadyExistsException
 	{
-		if ( descrMap.containsKey(descr) ) {
+		if ( map.containsKey(descr) ) {
 			throw new SecurityAlreadyExistsException(descr);
 		}
 		EventSystem es = terminal.getEventSystem();
@@ -134,13 +137,42 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		EditableSecurity s = new SecurityImpl(terminal, descr, dispatcher,
 				es.createGenericType(dispatcher, "OnChanged"),
 				es.createGenericType(dispatcher, "OnTrade"));
-		descrMap.put(descr, s);
+		s.OnChanged().addListener(this);
+		s.OnTrade().addListener(this);
+		map.put(descr, s);
 		return s;
+	}
+	
+	/**
+	 * Установить экземпляр инструмента.
+	 * <p>
+	 * Только для тестирования.
+	 * <p>
+	 * @param descr дескриптор инструмента
+	 * @param security экземпляр инструмента
+	 */
+	protected synchronized void
+		setSecurity(SecurityDescriptor descr, EditableSecurity security)
+	{
+		map.put(descr, security);
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		return other == this;
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != SecuritiesImpl.class ) {
+			return false;
+		}
+		SecuritiesImpl o = (SecuritiesImpl) other;
+		return new EqualsBuilder()
+			.append(o.dispatcher, dispatcher)
+			.append(o.map, map)
+			.append(o.onAvailable, onAvailable)
+			.append(o.onChanged, onChanged)
+			.append(o.onTrade, onTrade)
+			.isEquals();
 	}
 
 }
