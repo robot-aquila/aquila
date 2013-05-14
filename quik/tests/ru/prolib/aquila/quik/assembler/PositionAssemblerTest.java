@@ -30,7 +30,7 @@ public class PositionAssemblerTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		account = new Account("TEST", "eqe01");
+		account = new Account("TEST", "eqe01", "eqe01");
 		descr = new SecurityDescriptor("RIM3", "SPBF", "USD", SecurityType.FUT);
 	}
 

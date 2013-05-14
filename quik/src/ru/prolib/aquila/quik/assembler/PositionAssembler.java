@@ -52,7 +52,8 @@ public class PositionAssembler {
 	public void adjustByCache(PositionFCache entry)
 		throws EditableObjectException
 	{
-		Account account = new Account(entry.getFirmId(),entry.getAccountCode());
+		Account account = new Account(entry.getFirmId(),
+				entry.getAccountCode(), entry.getAccountCode());
 		if ( ! terminal.isPortfolioAvailable(account) ) {
 			logger.debug("Still wait for portfolio: {}", account);
 			return;

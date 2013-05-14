@@ -52,7 +52,8 @@ public class PortfolioAssembler {
 	public void adjustByCache(PortfolioFCache entry)
 		throws EditableObjectException
 	{
-		Account account = new Account(entry.getFirmId(),entry.getAccountCode());
+		Account account = new Account(entry.getFirmId(),
+				entry.getAccountCode(), entry.getAccountCode());
 		EditablePortfolio portfolio = null;
 		if ( terminal.isPortfolioAvailable(account) ) {
 			portfolio = terminal.getEditablePortfolio(account);

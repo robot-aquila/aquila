@@ -24,7 +24,7 @@ public class PortfolioAssemblerTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		account = new Account("SPBFUT", "eqe01");
+		account = new Account("SPBFUT", "eqe01", "eqe01");
 	}
 
 	@Before

@@ -1,18 +1,12 @@
 package ru.prolib.aquila.quik.assembler;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Vector;
-
+import static org.junit.Assert.*;
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.dde.*;
 
@@ -21,13 +15,16 @@ public class PositionsAssemblerTest {
 	private Cache cache;
 	private PositionAssembler positionAssembler;
 	private PositionsAssembler assembler;
+	private EditableTerminal terminal;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		cache = control.createMock(Cache.class);
 		positionAssembler = control.createMock(PositionAssembler.class);
+		terminal = control.createMock(EditableTerminal.class);
 		assembler = new PositionsAssembler(cache, positionAssembler);
+		expect(positionAssembler.getTerminal()).andStubReturn(terminal);
 	}
 	
 	@Test
@@ -52,9 +49,12 @@ public class PositionsAssemblerTest {
 
 	@Test
 	public void testStart() throws Exception {
-		EventType type = control.createMock(EventType.class);
-		expect(cache.OnPositionsFCacheUpdate()).andReturn(type);
-		type.addListener(same(assembler));
+		EventType type1 = control.createMock(EventType.class);
+		EventType type2 = control.createMock(EventType.class);
+		expect(cache.OnPositionsFCacheUpdate()).andStubReturn(type1);
+		expect(terminal.OnSecurityAvailable()).andStubReturn(type2);
+		type1.addListener(same(assembler));
+		type2.addListener(same(assembler));
 		control.replay();
 		
 		assembler.start();
@@ -64,9 +64,12 @@ public class PositionsAssemblerTest {
 	
 	@Test
 	public void testStop() throws Exception {
-		EventType type = control.createMock(EventType.class);
-		expect(cache.OnPositionsFCacheUpdate()).andReturn(type);
-		type.removeListener(same(assembler));
+		EventType type1 = control.createMock(EventType.class);
+		EventType type2 = control.createMock(EventType.class);
+		expect(cache.OnPositionsFCacheUpdate()).andStubReturn(type1);
+		expect(terminal.OnSecurityAvailable()).andStubReturn(type2);
+		type2.removeListener(same(assembler));
+		type1.removeListener(same(assembler));
 		control.replay();
 		
 		assembler.stop();

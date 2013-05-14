@@ -38,10 +38,12 @@ public class PositionsAssembler implements EventListener, Starter {
 	@Override
 	public void start() throws StarterException {
 		cache.OnPositionsFCacheUpdate().addListener(this);
+		assembler.getTerminal().OnSecurityAvailable().addListener(this);
 	}
 
 	@Override
 	public void stop() throws StarterException {
+		assembler.getTerminal().OnSecurityAvailable().removeListener(this);
 		cache.OnPositionsFCacheUpdate().removeListener(this);
 	}
 
