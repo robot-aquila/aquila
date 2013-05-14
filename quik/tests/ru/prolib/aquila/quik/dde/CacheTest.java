@@ -274,5 +274,49 @@ public class CacheTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testGetAllPortfoliosF() throws Exception {
+		List<PortfolioFCache> list = new Vector<PortfolioFCache>();
+		expect(ports_F.getAll()).andReturn(list);
+		control.replay();
+		
+		assertSame(list, cache.getAllPortfoliosF());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnPortfoliosFCacheUpdate() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(ports_F.OnCacheUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnPortfoliosFCacheUpdate());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetAllPositionsF() throws Exception {
+		List<PositionFCache> list = new Vector<PositionFCache>();
+		expect(poss_F.getAll()).andReturn(list);
+		control.replay();
+		
+		assertSame(list, cache.getAllPositionsF());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnPositionsFCacheUpdate() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(poss_F.OnCacheUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnPositionsFCacheUpdate());
+		
+		control.verify();
+	}
 
 }

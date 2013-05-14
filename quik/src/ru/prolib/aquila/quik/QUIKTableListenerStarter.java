@@ -46,10 +46,10 @@ public class QUIKTableListenerStarter implements Starter {
 		
 		//orderListeners.add(lf.listenSecurities());
 		orderListeners.add(lf.listenAllDeals());
-		orderListeners.add(lf.listenPortfoliosSTK());
-		orderListeners.add(lf.listenPositionsSTK());
-		orderListeners.add(lf.listenPortfoliosFUT());
-		orderListeners.add(lf.listenPositionsFUT());
+		//orderListeners.add(lf.listenPortfoliosSTK());
+		//orderListeners.add(lf.listenPositionsSTK());
+		//orderListeners.add(lf.listenPortfoliosFUT());
+		//orderListeners.add(lf.listenPositionsFUT());
 		orderListeners.add(lf.listenOrders());
 		orderListeners.add(lf.listenStopOrders());
  

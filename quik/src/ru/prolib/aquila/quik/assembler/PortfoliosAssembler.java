@@ -4,23 +4,23 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.EditableObjectException;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
- * Сборщик инструментов.
+ * Сборщик портфелей.
  */
-public class SecuritiesAssembler implements EventListener, Starter {
+public class PortfoliosAssembler implements EventListener, Starter {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SecuritiesAssembler.class);
+		logger = LoggerFactory.getLogger(PortfoliosAssembler.class);
 	}
 	
 	private final Cache cache;
-	private final SecurityAssembler assembler;
+	private final PortfolioAssembler assembler;
 	
-	public SecuritiesAssembler(Cache cache, SecurityAssembler assembler) {
+	public PortfoliosAssembler(Cache cache, PortfolioAssembler assembler) {
 		super();
 		this.cache = cache;
 		this.assembler = assembler;
@@ -30,13 +30,23 @@ public class SecuritiesAssembler implements EventListener, Starter {
 		return cache;
 	}
 	
-	public SecurityAssembler getSecurityAssembler() {
+	public PortfolioAssembler getPortfolioAssembler() {
 		return assembler;
 	}
 
 	@Override
+	public void start() throws StarterException {
+		cache.OnPortfoliosFCacheUpdate().addListener(this);
+	}
+
+	@Override
+	public void stop() throws StarterException {
+		cache.OnPortfoliosFCacheUpdate().removeListener(this);
+	}
+
+	@Override
 	public void onEvent(Event event) {
-		for ( SecurityCache entry : cache.getAllSecurities() ) {
+		for ( PortfolioFCache entry : cache.getAllPortfoliosF() ) {
 			try {
 				assembler.adjustByCache(entry);
 			} catch ( EditableObjectException e ) {
@@ -44,30 +54,20 @@ public class SecuritiesAssembler implements EventListener, Starter {
 			}
 		}
 	}
-
-	@Override
-	public void start() throws StarterException {
-		cache.OnSecuritiesCacheUpdate().addListener(this);
-	}
-
-	@Override
-	public void stop() throws StarterException {
-		cache.OnSecuritiesCacheUpdate().removeListener(this);
-	}
 	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != SecuritiesAssembler.class ) {
+		if ( other == null || other.getClass() != PortfoliosAssembler.class ) {
 			return false;
 		}
-		SecuritiesAssembler o = (SecuritiesAssembler) other;
+		PortfoliosAssembler o = (PortfoliosAssembler) other;
 		return new EqualsBuilder()
 			.append(cache, o.cache)
 			.append(assembler, o.assembler)
 			.isEquals();
 	}
-	
+
 }

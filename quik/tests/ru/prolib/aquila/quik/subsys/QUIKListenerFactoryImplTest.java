@@ -218,15 +218,16 @@ public class QUIKListenerFactoryImplTest {
 		Dependencies<String> expected = new Deps<String>()
 			.setDependency("deals", "securities")
 			.setDependency("pos-fut", "securities")
-			.setDependency("pos-stk", "securities")
+			//.setDependency("pos-stk", "securities")
 			.setDependency("pos-fut", "port-fut")
-			.setDependency("pos-stk", "port-stk")
+			//.setDependency("pos-stk", "port-stk")
 			.setDependency("orders", "securities")
 			.setDependency("orders", "pos-fut")
-			.setDependency("orders", "pos-stk")
+			//.setDependency("orders", "pos-stk")
 			.setDependency("stop-orders", "securities")
 			.setDependency("stop-orders", "pos-fut")
-			.setDependency("stop-orders", "pos-stk");
+			//.setDependency("stop-orders", "pos-stk")
+			;
 		assertEquals(expected, factory.createDependencies());
 	}
 	

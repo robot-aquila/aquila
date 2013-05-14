@@ -284,5 +284,41 @@ public class Cache {
 	public synchronized EventType OnSecuritiesCacheUpdate() {
 		return securities.OnCacheUpdate();
 	}
+	
+	/**
+	 * Делегат к {@link PortfoliosFCache#getAll()}.
+	 * <p>
+	 * @return список кэш-записей
+	 */
+	public synchronized List<PortfolioFCache> getAllPortfoliosF() {
+		return portfolios_F.getAll();
+	}
+	
+	/**
+	 * Делегат к {@link PortfoliosFCache#OnCacheUpdate()}.
+	 * <p>
+	 * @return тип события
+	 */
+	public synchronized EventType OnPortfoliosFCacheUpdate() {
+		return portfolios_F.OnCacheUpdate();
+	}
+	
+	/**
+	 * Делегат к {@link PositionsFCache#getAll()}.
+	 * <p>
+	 * @return список кэш-записей
+	 */
+	public synchronized List<PositionFCache> getAllPositionsF() {
+		return positions_F.getAll();
+	}
+	
+	/**
+	 * Делегат к {@link PositionsFCache#OnCacheUpdate()}.
+	 * <p>
+	 * @return тип события
+	 */
+	public synchronized EventType OnPositionsFCacheUpdate() {
+		return positions_F.OnCacheUpdate();
+	}
 
 }

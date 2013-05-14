@@ -16,7 +16,6 @@ import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.RowHandler;
 import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.dde.utils.table.*;
-import ru.prolib.aquila.quik.subsys.portfolio.QUIKPortfolios;
 
 /**
  * 2012-10-19<br>
@@ -96,35 +95,15 @@ public class QUIKCompFactoryTest {
 	}
 	
 	@Test
-	public void testCreatePortfolioFactory() throws Exception {
-		PortfolioFactory expected = control.createMock(PortfolioFactory.class);
-		expect(bfactory.createPortfolioFactory()).andReturn(expected);
-		control.replay();
-		PortfolioFactory actual = factory.createPortfolioFactory();
-		control.verify();
-		assertSame(expected, actual);
-	}
-	
-	@Test
 	public void testCreatePortfolios() throws Exception {
 		EditablePortfolios base = control.createMock(EditablePortfolios.class);
 		expect(bfactory.createPortfolios()).andReturn(base);
-		QUIKPortfolios expected = new QUIKPortfolios(base); 
 		control.replay();
+		
 		EditablePortfolios actual = factory.createPortfolios();
+		
 		control.verify();
-		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testCreatePositionFactory() throws Exception {
-		PositionFactory expected = control.createMock(PositionFactory.class);
-		Account account = new Account("FOO");
-		expect(bfactory.createPositionFactory(account)).andReturn(expected);
-		control.replay();
-		PositionFactory actual = factory.createPositionFactory(account);
-		control.verify();
-		assertSame(expected, actual);
+		assertEquals(base, actual);
 	}
 	
 	@Test

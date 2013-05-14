@@ -128,15 +128,16 @@ public class QUIKListenerFactoryImpl implements QUIKListenerFactory {
 		return new Deps<String>()
 			.setDependency(config.getAllDeals(), config.getSecurities())
 			.setDependency(config.getPositionsFUT(), config.getSecurities())
-			.setDependency(config.getPositionsSTK(), config.getSecurities())
+			//.setDependency(config.getPositionsSTK(), config.getSecurities())
 			.setDependency(config.getPositionsFUT(), config.getPortfoliosFUT())
-			.setDependency(config.getPositionsSTK(), config.getPortfoliosSTK())
+			//.setDependency(config.getPositionsSTK(), config.getPortfoliosSTK())
 			.setDependency(config.getOrders(), config.getSecurities())
 			.setDependency(config.getOrders(), config.getPositionsFUT())
-			.setDependency(config.getOrders(), config.getPositionsSTK())
+			//.setDependency(config.getOrders(), config.getPositionsSTK())
 			.setDependency(config.getStopOrders(), config.getSecurities())
 			.setDependency(config.getStopOrders(), config.getPositionsFUT())
-			.setDependency(config.getStopOrders(), config.getPositionsSTK());
+			//.setDependency(config.getStopOrders(), config.getPositionsSTK())
+			;
 	}
 	
 	@Override

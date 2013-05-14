@@ -9,12 +9,8 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.*;
-import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.*;
-import ru.prolib.aquila.dde.utils.table.DDETableHandlerImpl;
-import ru.prolib.aquila.dde.utils.table.DDETableListener;
-import ru.prolib.aquila.dde.utils.table.DDETableRowSetBuilderImpl;
-import ru.prolib.aquila.quik.subsys.portfolio.QUIKPortfolios;
+import ru.prolib.aquila.dde.utils.table.*;
 
 /**
  * Фабрика компонентов конвертации данных.
@@ -103,21 +99,6 @@ public class QUIKCompFactory implements BMFactory {
 	@Override
 	public EditableOrders createOrders() {
 		return bfactory.createOrders();
-	}
-
-	@Override
-	public PortfolioFactory createPortfolioFactory() {
-		return bfactory.createPortfolioFactory();
-	}
-
-	@Override
-	public EditablePortfolios createPortfolios() {
-		return new QUIKPortfolios(bfactory.createPortfolios());
-	}
-
-	@Override
-	public PositionFactory createPositionFactory(Account account) {
-		return bfactory.createPositionFactory(account);
 	}
 
 	@Override
@@ -217,6 +198,11 @@ public class QUIKCompFactory implements BMFactory {
 	@Override
 	public S<EditableOrder> createStopOrderEG(Validator isAvailable) {
 		return bfactory.createStopOrderEG(isAvailable);
+	}
+
+	@Override
+	public EditablePortfolios createPortfolios() {
+		return bfactory.createPortfolios();
 	}
 
 }

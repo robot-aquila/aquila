@@ -46,9 +46,11 @@ public class SecurityAssembler {
 	 * Собрать инструмент на основе данных кэш-записи.
 	 * <p>
 	 * @param entry кэш запись
+	 * @throws SecurityException
+	 * @throws EditableObjectException
 	 */
 	public void adjustByCache(SecurityCache entry)
-			throws SecurityException, EditableObjectException
+		throws EditableObjectException
 	{
 		SecurityDescriptor descr = entry.getDescriptor();
 		EditableSecurity security = null;
