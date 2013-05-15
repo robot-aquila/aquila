@@ -2,23 +2,17 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.quik.dde.OrderCache;
-import ru.prolib.aquila.quik.dde.OrdersCache;
 
 public class OrdersCacheTest {
+	private EventSystem es;
 	private IMocksControl control;
-	private EventDispatcher dispatcher1, dispatcher2;
-	private EventType type1, type2;
+	private EventDispatcher dispatcher, dispatcherMock;
+	private EventType onUpdate;
 	private OrderCache order1, order2, order3, order4;
 	private OrdersCache cache;
 	
@@ -30,18 +24,16 @@ public class OrdersCacheTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		dispatcher1 = control.createMock(EventDispatcher.class);
-		dispatcher2 = control.createMock(EventDispatcher.class);
-		type1 = new EventTypeImpl(dispatcher1);
-		type2 = new EventTypeImpl(dispatcher2);
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		es = new EventSystemImpl();
+		dispatcher = es.createEventDispatcher("Cache");
+		onUpdate = dispatcher.createType("OnUpdate");
 		order1 = control.createMock(OrderCache.class);
 		order2 = control.createMock(OrderCache.class);
 		order3 = control.createMock(OrderCache.class);
 		order4 = control.createMock(OrderCache.class);
-		cache = new OrdersCache(dispatcher1, type1);
+		cache = new OrdersCache(dispatcher, onUpdate);
 		
-		expect(dispatcher1.asString()).andStubReturn("test");
-		expect(dispatcher2.asString()).andStubReturn("foobar");
 		expect(order1.getId()).andStubReturn(100L);
 		expect(order2.getId()).andStubReturn(102L);
 		expect(order3.getId()).andStubReturn(105L);
@@ -107,17 +99,18 @@ public class OrdersCacheTest {
 		Variant<List<OrderCache>> vRows = new Variant<List<OrderCache>>()
 			.add(rows1)
 			.add(rows2);
-		Variant<EventType> vType = new Variant<EventType>(vRows)
-			.add(type1)
-			.add(type2);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vType)
-			.add(dispatcher1)
-			.add(dispatcher2);
-		Variant<?> iterator = vDisp;
+		Variant<String> vUpdId = new Variant<String>(vRows)
+			.add("OnUpdate")
+			.add("OnAnother");
+		Variant<String> vDispId = new Variant<String>(vUpdId)
+			.add("Cache")
+			.add("Unknown");
+		Variant<?> iterator = vDispId;
 		int foundCnt = 0;
 		OrdersCache x = null, found = null;
 		do {
-			x = new OrdersCache(vDisp.get(), vType.get());
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new OrdersCache(d, d.createType(vUpdId.get()));
 			for ( OrderCache order : vRows.get() ) {
 				x.put(order);
 			}
@@ -129,13 +122,14 @@ public class OrdersCacheTest {
 		assertEquals(1, foundCnt);
 		assertEquals(order1, found.get(100L));
 		assertEquals(order2, found.get(102L));
-		assertSame(type1, found.OnCacheUpdate());
-		assertSame(dispatcher1, found.getEventDispatcher());
+		assertEquals(onUpdate, found.OnCacheUpdate());
+		assertEquals(dispatcher, found.getEventDispatcher());
 	}
 	
 	@Test
 	public void testFireUpdateCache() throws Exception {
-		dispatcher1.dispatch(eq(new EventImpl(type1)));
+		cache = new OrdersCache(dispatcherMock, onUpdate);
+		dispatcherMock.dispatch(eq(new EventImpl(onUpdate)));
 		control.replay();
 		
 		cache.fireUpdateCache();

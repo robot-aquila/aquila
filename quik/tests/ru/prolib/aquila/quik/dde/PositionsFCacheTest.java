@@ -2,37 +2,34 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class PositionsFCacheTest {
+	private EventSystem es;
 	private IMocksControl control;
-	private EventDispatcher dispatcher1, dispatcher2;
-	private EventType type1, type2;
+	private EventDispatcher dispatcher, dispatcherMock;
+	private EventType onUpdate;
 	private PositionFCache pos1, pos2, pos3, pos4;
 	private PositionsFCache cache;
 	
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
 		control = createStrictControl();
-		dispatcher1 = control.createMock(EventDispatcher.class);
-		dispatcher2 = control.createMock(EventDispatcher.class);
-		type1 = new EventTypeImpl(dispatcher1);
-		type2 = new EventTypeImpl(dispatcher2);
+		dispatcher = es.createEventDispatcher("Cache");
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		onUpdate = dispatcher.createType("OnUpdate");
 		pos1 = new PositionFCache("eqe01", "SPBFUT", "RIM3", 1L, 5L, 200.0d);
 		pos2 = new PositionFCache("jmk01", "BUZZZZ", "GAZP", 0L, 1L, -18.0d);
 		pos3 = new PositionFCache("tbs01", "SPBFUT", "SBER", 8L, 8L, 12.0d);
 		pos4 = new PositionFCache("eqe01", "SPBFUT", "RIM3", 2L, 1L, 10.0d);
-		cache = new PositionsFCache(dispatcher1, type1);
+		cache = new PositionsFCache(dispatcher, onUpdate);
 		
-		expect(dispatcher1.asString()).andStubReturn("test");
-		expect(dispatcher2.asString()).andStubReturn("foobar");
+		expect(dispatcherMock.asString()).andStubReturn("foobar");
 	}
 	
 	@Test
@@ -97,17 +94,18 @@ public class PositionsFCacheTest {
 				new Variant<List<PositionFCache>>()
 			.add(rows1)
 			.add(rows2);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vRows)
-			.add(dispatcher1)
-			.add(dispatcher2);
-		Variant<EventType> vType = new Variant<EventType>(vDisp)
-			.add(type1)
-			.add(type2);
-		Variant<?> iterator = vType;
+		Variant<String> vDispId = new Variant<String>(vRows)
+			.add("Cache")
+			.add("Unknown");
+		Variant<String> vUpdId = new Variant<String>(vDispId)
+			.add("OnUpdate")
+			.add("Someone");
+		Variant<?> iterator = vUpdId;
 		int foundCnt = 0;
 		PositionsFCache x = null, found = null;
 		do {
-			x = new PositionsFCache(vDisp.get(), vType.get());
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new PositionsFCache(d, d.createType(vUpdId.get()));
 			for ( PositionFCache entry : vRows.get() ) {
 				x.put(entry);
 			}
@@ -117,14 +115,15 @@ public class PositionsFCacheTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(dispatcher1, found.getEventDispatcher());
-		assertSame(type1, found.OnCacheUpdate());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onUpdate, found.OnCacheUpdate());
 		assertEquals(rows1, found.getAll());
 	}
 	
 	@Test
 	public void testFireUpdateCache() throws Exception {
-		dispatcher1.dispatch(eq(new EventImpl(type1)));
+		cache = new PositionsFCache(dispatcherMock, onUpdate);
+		dispatcherMock.dispatch(eq(new EventImpl(onUpdate)));
 		control.replay();
 		
 		cache.fireUpdateCache();

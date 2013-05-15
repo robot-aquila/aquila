@@ -2,21 +2,18 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Vector;
-
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class TradesCacheTest {
+	private EventSystem es;
 	private IMocksControl control;
-	private EventDispatcher dispatcher1, dispatcher2;
-	private EventType type1, type2;
+	private EventDispatcher dispatcher, dispatcherMock;
+	private EventType onUpdate;
 	private TradeCache trade1, trade2, trade3, trade4;
 	private TradesCache cache;
 	
@@ -45,19 +42,19 @@ public class TradesCacheTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
 		control = createStrictControl();
-		dispatcher1 = control.createMock(EventDispatcher.class);
-		dispatcher2 = control.createMock(EventDispatcher.class);
-		type1 = new EventTypeImpl(dispatcher1);
-		type2 = new EventTypeImpl(dispatcher2);
+		
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		dispatcher = es.createEventDispatcher("Cache");
+		onUpdate = dispatcher.createType("OnUpdate");
 		trade1 = createEntry(100L, "2013-01-01 00:00:00", 421L);
 		trade2 = createEntry(102L, "2013-01-01 00:00:01", 421L);
 		trade3 = createEntry(105L, "2013-01-01 00:00:02", 420L);
 		trade4 = createEntry(102L, "2013-01-01 00:00:01", 421L); // to replace
-		cache = new TradesCache(dispatcher1, type1);
+		cache = new TradesCache(dispatcher, onUpdate);
 		
-		expect(dispatcher1.asString()).andStubReturn("test");
-		expect(dispatcher2.asString()).andStubReturn("foobar");
+		expect(dispatcherMock.asString()).andStubReturn("foobar");
 	}
 
 	@Test
@@ -132,17 +129,18 @@ public class TradesCacheTest {
 		Variant<List<TradeCache>> vRows = new Variant<List<TradeCache>>()
 			.add(rows1)
 			.add(rows2);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vRows)
-			.add(dispatcher1)
-			.add(dispatcher2);
-		Variant<EventType> vType = new Variant<EventType>(vDisp)
-			.add(type1)
-			.add(type2);
-		Variant<?> iterator = vType;
+		Variant<String> vDispId = new Variant<String>(vRows)
+			.add("Cache")
+			.add("Another");
+		Variant<String> vUpdId = new Variant<String>(vDispId)
+			.add("OnUpdate")
+			.add("OnUnknown");
+		Variant<?> iterator = vUpdId;
 		int foundCnt = 0;
 		TradesCache x = null, found = null;
 		do {
-			x = new TradesCache(vDisp.get(), vType.get());
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new TradesCache(d, d.createType(vUpdId.get()));
 			for ( TradeCache entry : vRows.get() ) {
 				x.put(entry);
 			}
@@ -152,15 +150,16 @@ public class TradesCacheTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(dispatcher1, found.getEventDispatcher());
-		assertSame(type1, found.OnCacheUpdate());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onUpdate, found.OnCacheUpdate());
 		assertSame(trade1, found.get(100L));
 		assertSame(trade2, found.get(102L));
 	}
 	
 	@Test
 	public void testFireUpdateCache() throws Exception {
-		dispatcher1.dispatch(eq(new EventImpl(type1)));
+		cache = new TradesCache(dispatcherMock, onUpdate);
+		dispatcherMock.dispatch(eq(new EventImpl(onUpdate)));
 		control.replay();
 		
 		cache.fireUpdateCache();

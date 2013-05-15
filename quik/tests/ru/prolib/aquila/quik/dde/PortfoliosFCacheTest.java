@@ -1,40 +1,35 @@
 package ru.prolib.aquila.quik.dde;
 
-
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.List;
-import java.util.Vector;
-
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class PortfoliosFCacheTest {
+	private EventSystem es;
 	private IMocksControl control;
-	private EventDispatcher dispatcher1, dispatcher2;
-	private EventType type1, type2;
+	private EventDispatcher dispatcher, dispatcherMock;
+	private EventType onUpdate;
 	private PortfolioFCache port1, port2, port3, port4;
 	private PortfoliosFCache cache;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		dispatcher1 = control.createMock(EventDispatcher.class);
-		dispatcher2 = control.createMock(EventDispatcher.class);
-		type1 = new EventTypeImpl(dispatcher1);
-		type2 = new EventTypeImpl(dispatcher2);
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		es = new EventSystemImpl();
+		dispatcher = es.createEventDispatcher("Cache");
+		onUpdate = dispatcher.createType("OnUpdate");
 		port1 = new PortfolioFCache("eqe01", "SPBFUT", 10000.0, 8000.0, 200.0d);
 		port2 = new PortfolioFCache("jmk01", "BUZZZZ", 14000.0, 5000.0, 100.0d);
 		port3 = new PortfolioFCache("tbs01", "SPBFUT", 11000.0, 1000.0, 800.0d);
 		port4 = new PortfolioFCache("eqe01", "SPBFUT", 11500.0, 7000.0, 120.0d);
-		cache = new PortfoliosFCache(dispatcher1, type1);
+		cache = new PortfoliosFCache(dispatcher, onUpdate);
 		
-		expect(dispatcher1.asString()).andStubReturn("test");
-		expect(dispatcher2.asString()).andStubReturn("foobar");
+		expect(dispatcherMock.asString()).andStubReturn("foobar");
 	}
 	
 	@Test
@@ -98,17 +93,18 @@ public class PortfoliosFCacheTest {
 				new Variant<List<PortfolioFCache>>()
 			.add(rows1)
 			.add(rows2);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vRows)
-			.add(dispatcher1)
-			.add(dispatcher2);
-		Variant<EventType> vType = new Variant<EventType>(vDisp)
-			.add(type1)
-			.add(type2);
-		Variant<?> iterator = vType;
+		Variant<String> vDispId = new Variant<String>(vRows)
+			.add("Cache")
+			.add("Unknown");
+		Variant<String> vUpdId = new Variant<String>(vDispId)
+			.add("OnUpdate")
+			.add("OnUnknown");
+		Variant<?> iterator = vUpdId;
 		int foundCnt = 0;
 		PortfoliosFCache x = null, found = null;
 		do {
-			x = new PortfoliosFCache(vDisp.get(), vType.get());
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new PortfoliosFCache(d, d.createType(vUpdId.get()));
 			for ( PortfolioFCache entry : vRows.get() ) {
 				x.put(entry);
 			}
@@ -118,14 +114,15 @@ public class PortfoliosFCacheTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(dispatcher1, found.getEventDispatcher());
-		assertSame(type1, found.OnCacheUpdate());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onUpdate, found.OnCacheUpdate());
 		assertEquals(rows1, found.getAll());
 	}
 	
 	@Test
 	public void testFireUpdateCache() throws Exception {
-		dispatcher1.dispatch(eq(new EventImpl(type1)));
+		cache = new PortfoliosFCache(dispatcherMock, onUpdate);
+		dispatcherMock.dispatch(eq(new EventImpl(onUpdate)));
 		control.replay();
 		
 		cache.fireUpdateCache();

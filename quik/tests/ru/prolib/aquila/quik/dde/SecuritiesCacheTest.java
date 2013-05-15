@@ -2,13 +2,9 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.List;
-import java.util.Vector;
-
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -16,9 +12,10 @@ import ru.prolib.aquila.core.utils.Variant;
 public class SecuritiesCacheTest {
 	private static SecurityDescriptor desc1, desc2, desc3;
 	private static SecurityCache sec1, sec2, sec3, sec4;
+	private EventSystem es;
 	private IMocksControl control;
-	private EventDispatcher dispatcher1, dispatcher2;
-	private EventType type1, type2;
+	private EventDispatcher dispatcher, dispatcherMock;
+	private EventType onUpdate;
 	private SecuritiesCache cache;
 	
 	@BeforeClass
@@ -26,26 +23,6 @@ public class SecuritiesCacheTest {
 		desc1 = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
 		desc2 = new SecurityDescriptor("RTS", "SPBFT", "USD", SecurityType.FUT);
 		desc3 = new SecurityDescriptor("USD", "JPY", "JPY", SecurityType.CASH);
-		/**
-		 * Конструктор.
-		 * <p>
-		 * @param lotSize размер лота
-		 * @param maxPrice максимально-возможная цена (null - не определена)
-		 * @param minPrice минимально-возможная цена (null - не определена)
-		 * @param minStepPrice цена минимального шага в валюте инструмента
-		 * @param minStepSize минимальный шаг цены
-		 * @param precision точность цены в десятичных знаках
-		 * @param lastPrice цена последней сделки
-		 * @param openPrice цена открытия последней сессии
-		 * @param closePrice цена закрытия предыдущей сессии
-		 * @param displayName полное наименование
-		 * @param shortName краткое наименование
-		 * @param askPrice цена предложения
-		 * @param bidPrice цена спроса
-		 * @param highPrice максимальная цена за сессию
-		 * @param lowPrice минимальная цена за сессию
-		 * @param descriptor дескриптор инструмента
-		 */
 		sec1 = new SecurityCache(10, 200.00d, 180.00d, 0.5d, 0.5d, 1,
 				199.00d, 185.00d, 184.00d, "Сбербанк АО", "Сбер",
 				187.00d, 187.50d, 198.95d, 183.00d, desc1);
@@ -63,15 +40,14 @@ public class SecuritiesCacheTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
 		control = createStrictControl();
-		dispatcher1 = control.createMock(EventDispatcher.class);
-		dispatcher2 = control.createMock(EventDispatcher.class);
-		type1 = new EventTypeImpl(dispatcher1);
-		type2 = new EventTypeImpl(dispatcher2);
-		cache = new SecuritiesCache(dispatcher1, type1);
+		dispatcher = es.createEventDispatcher("Cache");
+		onUpdate = dispatcher.createType("OnUpdate");
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		cache = new SecuritiesCache(dispatcher, onUpdate);
 		
-		expect(dispatcher1.asString()).andStubReturn("foo");
-		expect(dispatcher2.asString()).andStubReturn("bar");
+		expect(dispatcherMock.asString()).andStubReturn("bar");
 	}
 	
 	@Test
@@ -132,17 +108,18 @@ public class SecuritiesCacheTest {
 		Variant<List<SecurityCache>> vRows = new Variant<List<SecurityCache>>()
 			.add(rows1)
 			.add(rows2);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vRows)
-			.add(dispatcher1)
-			.add(dispatcher2);
-		Variant<EventType> vType = new Variant<EventType>(vDisp)
-			.add(type1)
-			.add(type2);
-		Variant<?> iterator = vType;
+		Variant<String> vDispId = new Variant<String>(vRows)
+			.add("Cache")
+			.add("Unknown");
+		Variant<String> vUpdId = new Variant<String>(vDispId)
+			.add("OnUpdate")
+			.add("OnSome");
+		Variant<?> iterator = vUpdId;
 		int foundCnt = 0;
 		SecuritiesCache x = null, found = null;
 		do {
-			x = new SecuritiesCache(vDisp.get(), vType.get());
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new SecuritiesCache(d, d.createType(vUpdId.get()));
 			for ( SecurityCache row : vRows.get() ) {
 				x.put(row);
 			}
@@ -152,14 +129,15 @@ public class SecuritiesCacheTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(dispatcher1, found.getEventDispatcher());
-		assertSame(type1, found.OnCacheUpdate());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onUpdate, found.OnCacheUpdate());
 		assertEquals(rows1, found.getAll());
 	}
 	
 	@Test
 	public void testFireUpdateCache() throws Exception {
-		dispatcher1.dispatch(eq(new EventImpl(type1)));
+		cache = new SecuritiesCache(dispatcherMock, onUpdate);
+		dispatcherMock.dispatch(eq(new EventImpl(onUpdate)));
 		control.replay();
 		
 		cache.fireUpdateCache();
