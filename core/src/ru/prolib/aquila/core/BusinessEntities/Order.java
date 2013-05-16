@@ -280,4 +280,18 @@ public interface Order {
 	 */
 	public boolean hasTrade(long tradeId);
 	
+	/**
+	 * Получить последнюю сделку.
+	 * <p>
+	 * @return последняя сделка или null, если нет сделок
+	 */
+	public Trade getLastTrade();
+	
+	/**
+	 * Получить время последней сделки.
+	 * <p>
+	 * @return время последней сделки или null, если нет сделок
+	 */
+	public Date getLastTradeTime();
+	
 }

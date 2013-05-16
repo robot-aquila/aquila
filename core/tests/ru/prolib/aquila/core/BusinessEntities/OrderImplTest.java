@@ -4,41 +4,27 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.EventSystemImpl;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderHandler;
-import ru.prolib.aquila.core.data.G;
-import ru.prolib.aquila.core.data.S;
-import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2012-09-22<br>
  * $Id: OrderImplTest.java 542 2013-02-23 04:15:34Z whirlwind $
  */
 public class OrderImplTest {
-	private final Account account = new Account("LX01");
-	private final SecurityDescriptor secDescr =
-			new SecurityDescriptor("AAPL", "SMART", "USD", SecurityType.STK);
+	private static SimpleDateFormat format;
+	private static Account account;
+	private static SecurityDescriptor descr;
 	private IMocksControl control;
-	private EventSystem eventSystem;
-	private EventQueue queue;
-	private EventDispatcher dispatcher;
+	private EventSystem es;
+	private EventDispatcher dispatcher, dispatcherMock;
 	private EventType onRegister;
 	private EventType onRegisterFailed;
 	private EventType onCancelled;
@@ -59,39 +45,35 @@ public class OrderImplTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
+		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		account = new Account("LX01");
+		descr = new SecurityDescriptor("AAPL", "SMART", "USD",SecurityType.STK);
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		eventSystem = new EventSystemImpl();
-		queue = eventSystem.getEventQueue();
-		dispatcher = eventSystem.createEventDispatcher();
-		onRegister = eventSystem.createGenericType(dispatcher);
-		onRegisterFailed = eventSystem.createGenericType(dispatcher);
-		onCancelled = eventSystem.createGenericType(dispatcher);
-		onCancelFailed = eventSystem.createGenericType(dispatcher);
-		onFilled = eventSystem.createGenericType(dispatcher);
-		onPartiallyFilled = eventSystem.createGenericType(dispatcher);
-		onChanged = eventSystem.createGenericType(dispatcher);
-		onDone = eventSystem.createGenericType(dispatcher);
-		onFailed = eventSystem.createGenericType(dispatcher);
-		onTrade = eventSystem.createGenericType(dispatcher);
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		es = new EventSystemImpl();
+		dispatcher = es.createEventDispatcher("Order");
+		onRegister = dispatcher.createType("OnRegister");
+		onRegisterFailed = dispatcher.createType("OnRegisterFailed");
+		onCancelled = dispatcher.createType("OnCancelled");
+		onCancelFailed = dispatcher.createType("OnCancelFailed");
+		onFilled = dispatcher.createType("OnFilled");
+		onPartiallyFilled = dispatcher.createType("OnPartiallyFilled");
+		onChanged = dispatcher.createType("OnChanged");
+		onDone = dispatcher.createType("OnDone");
+		onFailed = dispatcher.createType("OnFailed");
+		onTrade = dispatcher.createType("OnTrade");
 		eventHandlers = new LinkedList<OrderHandler>();
 		terminal = control.createMock(Terminal.class); 
 
 		order = new OrderImpl(dispatcher, onRegister, onRegisterFailed,
 				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
 				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
-		queue.start();
 		setter = null;
 		getter = null;
-	}
-	
-	@After
-	public void tearDown() throws Exception {
-		queue.stop();
-		assertTrue(queue.join(1000));
 	}
 	
 	/**
@@ -126,12 +108,11 @@ public class OrderImplTest {
 	private Trade createTrade(Long id, String time, Double price, Long qty,
 			Double vol) throws Exception
 	{
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Trade trade = new Trade(terminal);
 		trade.setId(id);
 		trade.setPrice(price);
 		trade.setQty(qty);
-		trade.setSecurityDescriptor(secDescr);
+		trade.setSecurityDescriptor(descr);
 		trade.setTime(format.parse(time));
 		trade.setVolume(vol);
 		return trade;		
@@ -396,9 +377,9 @@ public class OrderImplTest {
 	
 	@Test
 	public void testGetSecurity() throws Exception {
-		order.setSecurityDescriptor(secDescr);
+		order.setSecurityDescriptor(descr);
 		Security security = control.createMock(Security.class);
-		expect(terminal.getSecurity(eq(secDescr))).andReturn(security);
+		expect(terminal.getSecurity(eq(descr))).andReturn(security);
 		control.replay();
 		assertSame(security, order.getSecurity());
 		control.verify();
@@ -418,7 +399,7 @@ public class OrderImplTest {
 				return ((OrderImpl) object).getSecurityDescriptor();
 			}
 		};
-		testSetterGetter(secDescr,
+		testSetterGetter(descr,
 			new SecurityDescriptor("USD","IDEALPRO","JPY",SecurityType.CASH));
 	}
 	
@@ -646,23 +627,20 @@ public class OrderImplTest {
 	
 	@Test
 	public void testFireTradeEvent() throws Exception {
+		order = new OrderImpl(dispatcherMock, onRegister, onRegisterFailed,
+				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
+				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
 		Trade t0 = createTrade(100L, "2013-05-01 00:00:00", 25.19d, 10L);
-		final Event expected = new OrderTradeEvent(onTrade, order, t0);
-		final CountDownLatch finished = new CountDownLatch(1);
-		order.OnTrade().addListener(new EventListener() {
-			@Override public void onEvent(Event event) {
-				assertEquals(expected, event);
-				finished.countDown();
-			}
-		});
+		dispatcherMock.dispatch(new OrderTradeEvent(onTrade, order, t0));
+		control.replay();
 		
 		order.fireTradeEvent(t0);
-		assertTrue(finished.await(1000, TimeUnit.MILLISECONDS));
+	
+		control.verify();
 	}
 	
 	@Test
 	public void testClearAllEventListsners() throws Exception {
-		dispatcher = control.createMock(EventDispatcher.class);
 		onRegister = control.createMock(EventType.class);
 		onRegisterFailed = control.createMock(EventType.class);
 		onCancelled = control.createMock(EventType.class);
@@ -673,7 +651,7 @@ public class OrderImplTest {
 		onDone = control.createMock(EventType.class);
 		onFailed = control.createMock(EventType.class);
 		onTrade = control.createMock(EventType.class);
-		expect(dispatcher.asString()).andStubReturn("order");
+		expect(dispatcherMock.asString()).andStubReturn("order");
 		expect(onRegister.asString()).andStubReturn("reg");
 		expect(onRegisterFailed.asString()).andStubReturn("reg-fail");
 		expect(onCancelled.asString()).andStubReturn("cancel");
@@ -684,8 +662,8 @@ public class OrderImplTest {
 		expect(onDone.asString()).andStubReturn("done");
 		expect(onFailed.asString()).andStubReturn("fail");
 		expect(onTrade.asString()).andStubReturn("trade");
-		dispatcher.close();
-		order = new OrderImpl(dispatcher, onRegister, onRegisterFailed,
+		dispatcherMock.close();
+		order = new OrderImpl(dispatcherMock, onRegister, onRegisterFailed,
 				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
 				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
 		control.replay();
@@ -693,6 +671,277 @@ public class OrderImplTest {
 		order.clearAllEventListeners();
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testGetLastTrade() throws Exception {
+		order.setQty(20L);
+		assertNull(order.getLastTrade());
+		Trade t1 = createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d);
+		order.addTrade(t1);
+		assertSame(t1, order.getLastTrade());
+		Trade t2 = createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d);
+		order.addTrade(t2);
+		assertEquals(t2, order.getLastTrade());
+	}
+	
+	@Test
+	public void testGetLastTradeTime() throws Exception {
+		order.setQty(20L);
+		assertNull(order.getLastTradeTime());
+		order.addTrade(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
+		assertEquals(format.parse("2013-05-01 00:00:01"),
+				order.getLastTradeTime());
+		order.addTrade(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
+		assertEquals(format.parse("2013-05-01 00:00:05"),
+				order.getLastTradeTime());
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(order.equals(order));
+		assertFalse(order.equals(null));
+		assertFalse(order.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		List<Trade> trds1 = new Vector<Trade>();
+		trds1.add(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
+		trds1.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
+		List<Trade> trds2 = new Vector<Trade>();
+		trds2.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
+		
+		List<OrderHandler> hndl1 = new Vector<OrderHandler>();
+		hndl1.add(control.createMock(OrderHandler.class));
+		hndl1.add(control.createMock(OrderHandler.class));
+		List<OrderHandler> hndl2 = new Vector<OrderHandler>();
+		hndl2.add(control.createMock(OrderHandler.class));
+
+		order.setAccount(account);
+		order.setSecurityDescriptor(descr);
+		order.setDirection(OrderDirection.SELL);
+		order.setId(1000L);
+		order.setPrice(135.67d);
+		order.setQty(200L);
+		order.setStatus(OrderStatus.CANCELLED);
+		order.setTransactionId(100500L);
+		order.setType(OrderType.LIMIT);
+		order.setLinkedOrderId(null);
+		order.setStopLimitPrice(200.14d);
+		order.setTakeProfitPrice(400.00d);
+		order.setOffset(new Price(PriceUnit.MONEY, 1.0d));
+		order.setSpread(new Price(PriceUnit.PERCENT, 0.5d));
+		for ( OrderHandler handler : hndl1 ) {
+			eventHandlers.add(handler);
+		}
+		order.setTime(format.parse("2013-05-15 08:32:00"));
+		order.setLastChangeTime(format.parse("1998-01-01 01:02:03"));
+		for ( Trade trade : trds1 ) {
+			order.addTrade(trade);
+		}
+		order.setAvailable(true);
+		order.setQtyRest(190L);
+		order.setExecutedVolume(249400.00d);
+		order.setAvgExecutedPrice(182.34d);
+		
+		double aprob = 0.4; // Probability of additional variant
+		Random rnd = new Random();
+		Variant<String> vDispId = new Variant<String>()
+			.add("Order");
+		if ( rnd.nextDouble() > aprob ) vDispId.add("Another");
+		Variant<String> vRegId = new Variant<String>(vDispId)
+			.add("OnRegister");
+		if ( rnd.nextDouble() > aprob ) vRegId.add("OnRegisterX");
+		Variant<String> vRegFailId = new Variant<String>(vRegId)
+			.add("OnRegisterFailed");
+		if ( rnd.nextDouble() > aprob ) vRegFailId.add("OnRegisterFailedX");
+		Variant<String> vCnclId = new Variant<String>(vRegFailId)
+			.add("OnCancelled");
+		if ( rnd.nextDouble() > aprob ) vCnclId.add("OnCancelledX");
+		Variant<String> vCnclFailId = new Variant<String>(vCnclId)
+			.add("OnCancelFailed");
+		if ( rnd.nextDouble() > aprob ) vCnclFailId.add("OnCancelFailedX");
+		Variant<String> vFillId = new Variant<String>(vCnclFailId)
+			.add("OnFilled");
+		if ( rnd.nextDouble() > aprob ) vFillId.add("OnFilledX");
+		Variant<String> vPartFillId = new Variant<String>(vFillId)
+			.add("OnPartiallyFilled");
+		if ( rnd.nextDouble() > aprob ) vPartFillId.add("OnPartiallyFilledX");
+		Variant<String> vChngId = new Variant<String>(vPartFillId)
+			.add("OnChanged");
+		if ( rnd.nextDouble() > aprob ) vChngId.add("OnChangedX");
+		Variant<String> vDoneId = new Variant<String>(vChngId)
+			.add("OnDone");
+		if ( rnd.nextDouble() > aprob ) vDoneId.add("OnDoneX");
+		Variant<String> vFailId = new Variant<String>(vDoneId)
+			.add("OnFailed");
+		if ( rnd.nextDouble() > aprob ) vFailId.add("OnFailedX");
+		Variant<String> vTrdId = new Variant<String>(vFailId)
+			.add("OnTrade");
+		if ( rnd.nextDouble() > aprob ) vTrdId.add("OnTradeX");
+		Variant<Account> vAcnt = new Variant<Account>(vTrdId)
+			.add(account);
+		if ( rnd.nextDouble() > aprob ) vAcnt.add(new Account("foobar"));
+		Variant<SecurityDescriptor> vDescr =
+				new Variant<SecurityDescriptor>(vAcnt)
+			.add(descr);
+		if ( rnd.nextDouble() > aprob ) {
+			vDescr.add(new SecurityDescriptor("A","B","C",SecurityType.UNK));
+		}
+		Variant<OrderDirection> vDir = new Variant<OrderDirection>(vDescr)
+			.add(OrderDirection.SELL);
+		if ( rnd.nextDouble() > aprob ) vDir.add(OrderDirection.BUY);
+		Variant<Long> vId = new Variant<Long>(vDir)
+			.add(1000L);
+		if ( rnd.nextDouble() > aprob ) vId.add(2220L);
+		Variant<Double> vPrice = new Variant<Double>(vId)
+			.add(135.67d);
+		if ( rnd.nextDouble() > aprob ) vPrice.add(null);
+		Variant<Long> vQty = new Variant<Long>(vPrice)
+			.add(200L);
+		if ( rnd.nextDouble() > aprob ) vQty.add(400L);
+		Variant<OrderStatus> vStat = new Variant<OrderStatus>(vQty)
+			.add(OrderStatus.CANCELLED);
+		if ( rnd.nextDouble() > aprob ) vStat.add(OrderStatus.FILLED);
+		Variant<Long> vTrnId = new Variant<Long>(vStat)
+			.add(100500L);
+		if ( rnd.nextDouble() > aprob ) vTrnId.add(null);
+		Variant<OrderType> vType = new Variant<OrderType>(vTrnId)
+			.add(OrderType.LIMIT);
+		if ( rnd.nextDouble() > aprob ) vType.add(OrderType.MARKET);
+		Variant<Long> vLnkId = new Variant<Long>(vType)
+			.add(null);
+		if ( rnd.nextDouble() > aprob ) vLnkId.add(500L);
+		Variant<Double> vSlp = new Variant<Double>(vLnkId)
+			.add(200.14d);
+		if ( rnd.nextDouble() > aprob ) vSlp.add(180.92d);
+		Variant<Double> vTpp = new Variant<Double>(vSlp)
+			.add(400.00d);
+		if ( rnd.nextDouble() > aprob ) vTpp.add(13.44d);
+		Variant<Price> vOff = new Variant<Price>(vTpp)
+			.add(new Price(PriceUnit.MONEY, 1.0d));
+		if ( rnd.nextDouble() > aprob ) vOff.add(null);
+		Variant<Price> vSprd = new Variant<Price>(vOff)
+			.add(new Price(PriceUnit.PERCENT, 0.5d));
+		if ( rnd.nextDouble() > aprob ) {
+			vSprd.add(null);
+		}
+		Variant<List<OrderHandler>> vHndl =
+				new Variant<List<OrderHandler>>(vSprd)
+			.add(hndl1);
+		if ( rnd.nextDouble() > aprob ) vHndl.add(hndl2);
+		Variant<Terminal> vTerm = new Variant<Terminal>(vHndl)
+			.add(terminal);
+		if ( rnd.nextDouble() > aprob ) {
+			vTerm.add(control.createMock(Terminal.class));
+		}
+		Variant<Date> vTime = new Variant<Date>(vTerm)
+			.add(format.parse("2013-05-15 08:32:00"));
+		if ( rnd.nextDouble() > aprob ) {
+			vTime.add(format.parse("2013-01-01 00:00:00"));
+		}
+		Variant<Date> vLastTime = new Variant<Date>(vTime)
+			.add(format.parse("1998-01-01 01:02:03"));
+		if ( rnd.nextDouble() > aprob ) {
+			vLastTime.add(null);
+		}
+		Variant<List<Trade>> vTrds = new Variant<List<Trade>>(vLastTime)
+			.add(trds1);
+		if ( rnd.nextDouble() > aprob ) vTrds.add(trds2);
+		Variant<Boolean> vAvl = new Variant<Boolean>(vTrds)
+			.add(true);
+		if ( rnd.nextDouble() > aprob ) vAvl.add(false);
+		Variant<Long> vQtyRst = new Variant<Long>(vAvl)
+			.add(190L)
+			.add(450L);
+		Variant<Double> vExecVol = new Variant<Double>(vQtyRst)
+			.add(249400.00d)
+			.add(180230.00d);
+		Variant<Double> vAvgPr = new Variant<Double>(vExecVol)
+			.add(182.34d)
+			.add(202.15d);
+		Variant<?> iterator = vAvgPr;
+		int foundCnt = 0;
+		OrderImpl x = null, found = null;
+		do {
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new OrderImpl(d, d.createType(vRegId.get()),
+					d.createType(vRegFailId.get()),
+					d.createType(vCnclId.get()),
+					d.createType(vCnclFailId.get()),
+					d.createType(vFillId.get()),
+					d.createType(vPartFillId.get()),
+					d.createType(vChngId.get()),
+					d.createType(vDoneId.get()),
+					d.createType(vFailId.get()),
+					d.createType(vTrdId.get()),
+					vHndl.get(), vTerm.get());
+			x.setAccount(vAcnt.get());
+			x.setSecurityDescriptor(vDescr.get());
+			x.setDirection(vDir.get());
+			x.setId(vId.get());
+			x.setPrice(vPrice.get());
+			x.setQty(vQty.get());
+			x.setStatus(vStat.get());
+			x.setTransactionId(vTrnId.get());
+			x.setType(vType.get());
+			x.setLinkedOrderId(vLnkId.get());
+			x.setStopLimitPrice(vSlp.get());
+			x.setTakeProfitPrice(vTpp.get());
+			x.setOffset(vOff.get());
+			x.setSpread(vSprd.get());
+			x.setTime(vTime.get());
+			x.setLastChangeTime(vLastTime.get());
+			for ( Trade trade : vTrds.get() ) {
+				x.addTrade(trade);
+			}
+			x.setAvailable(vAvl.get());
+			x.setQtyRest(vQtyRst.get());
+			x.setAvgExecutedPrice(vAvgPr.get());
+			x.setExecutedVolume(vExecVol.get());
+			if ( order.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onRegister, found.OnRegistered());
+		assertEquals(onRegisterFailed, found.OnRegisterFailed());
+		assertEquals(onCancelled, found.OnCancelled());
+		assertEquals(onCancelFailed, found.OnCancelFailed());
+		assertEquals(onFilled, found.OnFilled());
+		assertEquals(onPartiallyFilled, found.OnPartiallyFilled());
+		assertEquals(onChanged, found.OnChanged());
+		assertEquals(onDone, found.OnDone());
+		assertEquals(onFailed, found.OnFailed());
+		assertEquals(onTrade, found.OnTrade());
+		assertEquals(hndl1, found.getEventHandlers());
+		assertEquals(terminal, found.getTerminal());
+		assertEquals(account, found.getAccount());
+		assertEquals(descr, found.getSecurityDescriptor());
+		assertEquals(OrderDirection.SELL, found.getDirection());
+		assertEquals(new Long(1000L), found.getId());
+		assertEquals(135.67d, found.getPrice(), 0.01d);
+		assertEquals(new Long(200L), found.getQty());
+		assertEquals(OrderStatus.CANCELLED, found.getStatus());
+		assertEquals(new Long(100500L), found.getTransactionId());
+		assertEquals(OrderType.LIMIT, found.getType());
+		assertNull(order.getLinkedOrderId());
+		assertEquals(200.14d, found.getStopLimitPrice(), 0.01d);
+		assertEquals(400.00d, found.getTakeProfitPrice(), 0.01d);
+		assertEquals(new Price(PriceUnit.MONEY, 1.0d), found.getOffset());
+		assertEquals(new Price(PriceUnit.PERCENT, 0.5d), found.getSpread());
+		assertEquals(format.parse("2013-05-15 08:32:00"), found.getTime());
+		assertEquals(format.parse("1998-01-01 01:02:03"),
+				found.getLastChangeTime());
+		assertEquals(trds1, found.getTrades());
+		assertTrue(found.isAvailable());
+		assertEquals(new Long(190L), found.getQtyRest());
+		assertEquals(249400.00d, found.getExecutedVolume(), 0.01d);
+		assertEquals(182.34d, found.getAvgExecutedPrice(), 0.01d);
 	}
 
 }

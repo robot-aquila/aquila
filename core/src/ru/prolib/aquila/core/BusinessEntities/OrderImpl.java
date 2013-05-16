@@ -1,14 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrderHandler;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
 /**
  * Заявка.
@@ -48,7 +45,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private final List<OrderHandler> eventHandlers;
 	private final Terminal terminal;
 	private Date time,lastChangeTime;
-	private final List<Trade> trades = new Vector<Trade>();
+	private final LinkedList<Trade> trades = new LinkedList<Trade>();
 	
 	/**
 	 * Конструктор.
@@ -494,6 +491,63 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public synchronized Date getLastTradeTime() {
+		return trades.size() == 0 ? null : trades.getLast().getTime();
+	}
+
+	@Override
+	public synchronized Trade getLastTrade() {
+		return trades.size() == 0 ? null : trades.getLast();
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != OrderImpl.class ) {
+			return false;
+		}
+		OrderImpl o = (OrderImpl) other;
+		return new EqualsBuilder()
+			.append(o.account, account)
+			.append(o.descr, descr)
+			.append(o.direction, direction)
+			.append(o.dispatcher, dispatcher)
+			.append(o.eventHandlers, eventHandlers)
+			.append(o.id, id)
+			.append(o.lastChangeTime, lastChangeTime)
+			.append(o.linkedOrderId, linkedOrderId)
+			.append(o.offset, offset)
+			.append(o.onCancelFailed, onCancelFailed)
+			.append(o.onCancelled, onCancelled)
+			.append(o.onChanged, onChanged)
+			.append(o.onDone, onDone)
+			.append(o.onFailed, onFailed)
+			.append(o.onFilled, onFilled)
+			.append(o.onPartiallyFilled, onPartiallyFilled)
+			.append(o.onRegister, onRegister)
+			.append(o.onRegisterFailed, onRegisterFailed)
+			.append(o.onTrade, onTrade)
+			.append(o.price, price)
+			.append(o.qty, qty)
+			.append(o.spread, spread)
+			.append(o.status, status)
+			.append(o.stopLimitPrice, stopLimitPrice)
+			.append(o.takeProfitPrice, takeProfitPrice)
+			.append(o.terminal, terminal)
+			.append(o.time, time)
+			.append(o.trades, trades)
+			.append(o.transId, transId)
+			.append(o.type, type)
+			.append(o.isAvailable(), isAvailable())
+			.append(o.avgExecPrice, avgExecPrice)
+			.append(o.execVolume, execVolume)
+			.append(o.qtyRest, qtyRest)
+			.isEquals();
 	}
 
 }
