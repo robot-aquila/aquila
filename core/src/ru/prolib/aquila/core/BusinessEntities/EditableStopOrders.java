@@ -18,32 +18,27 @@ public interface EditableStopOrders extends StopOrders {
 	/**
 	 * Получить экземпляр редактируемой стоп-заявки.
 	 * <p>
-	 * @param id идентификатор стоп-заявки
-	 * @return редактируемая заявка или null, если нет заявки с таким id
+	 * @param id номер стоп-заявки
+	 * @return экземпляр заявки
+	 * @throws OrderNotExistsException
 	 */
 	public EditableOrder getEditableStopOrder(long id)
-			throws OrderException;
+			throws OrderNotExistsException;
 	
 	/**
 	 * Зарегистрировать новую стоп-заявку.
 	 * <p>
-	 * @param order новая заявка
+	 * @param id номер стоп-заявки (будет установлен для экземпляра)
+	 * @param order экземпляр заявки
 	 * @throws OrderAlreadyExistsException
 	 */
-	public void registerStopOrder(EditableOrder order)
-			throws OrderException;
+	public void registerStopOrder(long id, EditableOrder order)
+		throws OrderAlreadyExistsException;
 	
 	/**
 	 * Удалить стоп-заявку из набора.
 	 * <p>
-	 * @param order стоп-заявка
-	 */
-	public void purgeStopOrder(EditableOrder order);
-	
-	/**
-	 * Удалить стоп-заявку из набора.
-	 * <p>
-	 * @param id идентификатор стоп-заявки
+	 * @param id номер стоп заявки
 	 */
 	public void purgeStopOrder(long id);
 	
@@ -56,20 +51,21 @@ public interface EditableStopOrders extends StopOrders {
 	public boolean isPendingStopOrder(long transId);
 	
 	/**
+	 * Проверить наличие ожидающих стоп-заявок.
+	 * <p>
+	 * @return true - существуют ожидающие стоп-заявки
+	 */
+	public boolean hasPendingStopOrders();
+	
+	/**
 	 * Зарегистрировать ожидающую стоп-заявку.
 	 * <p>
+	 * @param transId номер транзакции ожидающей стоп-заявки
 	 * @param order заявка
 	 * @throws OrderAlreadyExistsException
 	 */
-	public void registerPendingStopOrder(EditableOrder order)
-			throws OrderException;
-	
-	/**
-	 * Удалить стоп-заявку из очереди ожидания.
-	 * <p>
-	 * @param order стоп-заявка
-	 */
-	public void purgePendingStopOrder(EditableOrder order);
+	public void registerPendingStopOrder(long transId, EditableOrder order)
+			throws OrderAlreadyExistsException;
 	
 	/**
 	 * Удалить стоп-заявку из очереди ожидания.
@@ -82,9 +78,11 @@ public interface EditableStopOrders extends StopOrders {
 	 * Получить экземпляр ожидающей стоп-заявки.
 	 * <p>
 	 * @param transId идентификатор транзакции
-	 * @return заявка или null, если нет заявки с указанным номером транзакции
+	 * @return стоп-заявка 
+	 * @throws OrderNotExistsException
 	 */
-	public EditableOrder getPendingStopOrder(long transId);
+	public EditableOrder getPendingStopOrder(long transId)
+		throws OrderNotExistsException;
 	
 	/**
 	 * Перевести стоп-заявку из списка ожидаемых в список зарегистрированных.
@@ -98,12 +96,19 @@ public interface EditableStopOrders extends StopOrders {
 	 * @param transId номер транзакции ожидающей стоп-заявки
 	 * @param orderId номер стоп-заявки, который следует использовать для
 	 * регистрации
-	 * @return перемещенная стоп-заявка или null, если стоп-заявки с указанным
-	 * номером транзакции нет в списке ожидания
+	 * @return перемещенная стоп-заявка
+	 * @throws OrderNotExistsException
+	 * @throws OrderAlreadyExistsException
 	 */
-	public EditableOrder
-		makePendingStopOrderAsRegisteredIfExists(long transId, long orderId)
+	public EditableOrder movePendingStopOrder(long transId, long orderId)
 			throws OrderException;
 
+	/**
+	 * Создать экземпляр стоп-заявки.
+	 * <p>
+	 * @param terminal терминал
+	 * @return экземпляр стоп-заявки
+	 */
+	public EditableOrder createStopOrder(EditableTerminal terminal);
 
 }

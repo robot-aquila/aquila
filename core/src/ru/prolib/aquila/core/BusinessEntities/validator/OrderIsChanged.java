@@ -27,5 +27,10 @@ public class OrderIsChanged implements Validator {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other != null && other.getClass() == OrderIsChanged.class;
+	}
 
 }

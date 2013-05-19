@@ -30,5 +30,10 @@ public class OrderIsRegistered implements Validator {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other != null && other.getClass() == OrderIsRegistered.class;
+	}
 
 }

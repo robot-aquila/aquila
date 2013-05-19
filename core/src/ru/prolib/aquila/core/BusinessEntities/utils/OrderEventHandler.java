@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
@@ -72,6 +74,22 @@ public class OrderEventHandler implements OrderHandler {
 		} catch ( ValidatorException e ) {
 			throw new OrderException(e);
 		}
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != OrderEventHandler.class ) {
+			return false;
+		}
+		OrderEventHandler o = (OrderEventHandler) other;
+		return new EqualsBuilder()
+			.append(o.dispatcher, dispatcher)
+			.append(o.type, type)
+			.append(o.validator, validator)
+			.isEquals();
 	}
 
 }

@@ -238,29 +238,6 @@ public class BMFactoryImplTest {
 	}
 	
 	@Test
-	public void testCreateOrderBuilder0() throws Exception {
-		OrderBuilder expected = new OrderBuilderImpl(
-				new OrderFactoryImpl(eventSystem, term), term);
-		assertEquals(expected, factory.createOrderBuilder());
-	}
-	
-	@Test
-	public void testCreateOrderBuilder1() throws Exception {
-		Counter transId = control.createMock(Counter.class);
-		OrderBuilder expected = new OrderBuilderImpl(
-				new OrderFactoryImpl(eventSystem, term), term, transId);
-		assertEquals(expected, factory.createOrderBuilder(transId));
-	}
-	
-	@Test
-	public void testCreateOrderBuilder2() throws Exception {
-		Counter transId = control.createMock(Counter.class);
-		OrderFactory ofactory = control.createMock(OrderFactory.class);
-		OrderBuilder expected = new OrderBuilderImpl(ofactory, term, transId);
-		assertEquals(expected, factory.createOrderBuilder(transId, ofactory));
-	}
-	
-	@Test
 	public void testCreateOrderEG0() throws Exception {
 		EditableOrders orders = control.createMock(EditableOrders.class);
 		expect(term.getOrdersInstance()).andReturn(orders);

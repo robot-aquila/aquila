@@ -116,7 +116,7 @@ public class OrderFactoryImpl implements OrderFactory {
 				handlers.get(IDX_DONE).getEventType(),
 				handlers.get(IDX_FAILED).getEventType(),
 				es.createGenericType(dispatcher, "OnTrade"),
-				handlers2,
+				handlers,
 				terminal);
 	}
 	

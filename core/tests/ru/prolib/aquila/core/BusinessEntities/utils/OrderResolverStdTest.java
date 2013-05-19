@@ -40,12 +40,11 @@ public class OrderResolverStdTest {
 	@Test
 	public void testResolveOrder_PendingOrder() throws Exception {
 		expect(orders.isPendingOrder(100L)).andReturn(true);
-		expect(orders.getPendingOrder(100L)).andReturn(order);
-		orders.purgePendingOrder(same(order));
-		order.setId(200L);
-		orders.registerOrder(same(order));
+		expect(orders.movePendingOrder(100L, 200L)).andReturn(order);
 		control.replay();
+		
 		assertSame(order, resolver.resolveOrder(200L, 100L));
+		
 		control.verify();
 	}
 	
@@ -54,10 +53,11 @@ public class OrderResolverStdTest {
 		expect(orders.isPendingOrder(100L)).andReturn(false);
 		expect(orders.isOrderExists(200L)).andReturn(false);
 		expect(factory.createOrder()).andReturn(order);
-		order.setId(eq(200L));
-		orders.registerOrder(same(order));
+		orders.registerOrder(eq(200L), same(order));
 		control.replay();
+		
 		assertSame(order, resolver.resolveOrder(200L, 100L));
+		
 		control.verify();
 	}
 
@@ -67,7 +67,9 @@ public class OrderResolverStdTest {
 		expect(orders.isOrderExists(200L)).andReturn(true);
 		expect(orders.getEditableOrder(200L)).andReturn(order);
 		control.replay();
+		
 		assertSame(order, resolver.resolveOrder(200L, 100L));
+		
 		control.verify();
 	}
 	
@@ -75,10 +77,11 @@ public class OrderResolverStdTest {
 	public void testResolveOrder_NullTransIdAndNewOrder() throws Exception {
 		expect(orders.isOrderExists(200L)).andReturn(false);
 		expect(factory.createOrder()).andReturn(order);
-		order.setId(eq(200L));
-		orders.registerOrder(same(order));
+		orders.registerOrder(eq(200L), same(order));
 		control.replay();
+		
 		assertEquals(order, resolver.resolveOrder(200L, null));
+		
 		control.verify();
 	}
 

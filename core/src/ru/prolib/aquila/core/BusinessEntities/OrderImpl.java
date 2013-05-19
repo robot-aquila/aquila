@@ -42,7 +42,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private Price offset,spread;
 	private Double execVolume = 0.0d;
 	private Double avgExecPrice = 0.0d;
-	private final List<OrderHandler> eventHandlers;
+	private final List<? extends OrderHandler> eventHandlers;
 	private final Terminal terminal;
 	private Date time,lastChangeTime;
 	private final LinkedList<Trade> trades = new LinkedList<Trade>();
@@ -75,7 +75,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 					 EventType onDone,
 					 EventType onFailed,
 					 EventType onTrade,
-					 List<OrderHandler> eventHandlers,
+					 List<? extends OrderHandler> eventHandlers,
 					 Terminal terminal)
 	{
 		super();

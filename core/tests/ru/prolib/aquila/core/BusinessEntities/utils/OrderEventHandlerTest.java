@@ -14,6 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderEventHandler;
 import ru.prolib.aquila.core.utils.Validator;
 import ru.prolib.aquila.core.utils.ValidatorException;
+import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2012-09-25<br>
@@ -80,6 +81,40 @@ public class OrderEventHandlerTest {
 			assertSame(expected, e.getCause());
 			control.verify();
 		}
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(handler.equals(handler));
+		assertFalse(handler.equals(null));
+		assertFalse(handler.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>()
+			.add(dispatcher)
+			.add(control.createMock(EventDispatcher.class));
+		Variant<Validator> vVldr = new Variant<Validator>(vDisp)
+			.add(validator)
+			.add(control.createMock(Validator.class));
+		Variant<EventType> vType = new Variant<EventType>(vVldr)
+			.add(type)
+			.add(control.createMock(EventType.class));
+		Variant<?> iterator = vType;
+		int foundCnt = 0;
+		OrderEventHandler x = null, found = null;
+		do {
+			x = new OrderEventHandler(vDisp.get(), vVldr.get(), vType.get());
+			if ( handler.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertSame(dispatcher, found.getEventDispatcher());
+		assertSame(validator, found.getValidator());
+		assertSame(type, found.getEventType());
 	}
 
 }

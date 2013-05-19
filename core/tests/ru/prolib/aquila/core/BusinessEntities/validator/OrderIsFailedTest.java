@@ -78,5 +78,13 @@ public class OrderIsFailedTest {
 		} while ( iterator.next() );
 		assertEquals(1, found);
 	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(validator.equals(validator));
+		assertFalse(validator.equals(null));
+		assertFalse(validator.equals(this));
+		assertTrue(validator.equals(new OrderIsFailed()));
+	}
 
 }

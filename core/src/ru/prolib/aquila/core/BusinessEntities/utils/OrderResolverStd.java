@@ -62,14 +62,10 @@ public class OrderResolverStd implements OrderResolver {
 		try {
 			EditableOrder order = null;
 			if ( transId != null && orders.isPendingOrder(transId) ) {
-				order = orders.getPendingOrder(transId);
-				orders.purgePendingOrder(order);
-				order.setId(orderId);
-				orders.registerOrder(order);
+				order = orders.movePendingOrder(transId, orderId);
 			} else if ( ! orders.isOrderExists(orderId) ) {
 				order = factory.createOrder();
-				order.setId(orderId);
-				orders.registerOrder(order);
+				orders.registerOrder(orderId, order);
 			} else {
 				order = orders.getEditableOrder(orderId);
 			}

@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.utils.Variant;
+
 /**
  * 2012-04-20<br>
  * $Id: EventQueueImplTest.java 513 2013-02-11 01:17:18Z whirlwind $
@@ -331,6 +333,32 @@ public class EventQueueImplTest {
 		started.countDown();
 		queue.join();
 		assertFalse(queue.started());
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(queue.equals(queue));
+		assertFalse(queue.equals(null));
+		assertFalse(queue.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Variant<String> vId = new Variant<String>()
+			.add("EVNT")
+			.add("Another");
+		Variant<?> iterator = vId;
+		int foundCnt = 0;
+		EventQueueImpl x = null, found = null;
+		do {
+			x = new EventQueueImpl(vId.get());
+			if ( queue.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals("EVNT", found.getId());
 	}
 	
 }

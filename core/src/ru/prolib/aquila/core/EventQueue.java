@@ -61,5 +61,12 @@ public interface EventQueue extends Starter {
 	 * потока очереди, то осуществляет немедленный возврат. 
 	 */
 	public void join() throws InterruptedException;
+	
+	/**
+	 * Получить идентификатор очереди.
+	 * <p>
+	 * @return идентификатор очереди
+	 */
+	public String getId();
 
 }

@@ -13,6 +13,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalControllerHelper;
+import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2013-02-10<br>
@@ -141,6 +142,33 @@ public class TerminalControllerTest {
 		control.replay();
 		
 		controller.runStopSequence(terminal);
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(controller.equals(controller));
+		assertFalse(controller.equals(null));
+		assertFalse(controller.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Variant<TerminalControllerHelper> vHlpr =
+				new Variant<TerminalControllerHelper>()
+			.add(helper)
+			.add(control.createMock(TerminalControllerHelper.class));
+		Variant<?> iterator = vHlpr;
+		int foundCnt = 0;
+		TerminalController x = null, found = null;
+		do {
+			x = new TerminalController(vHlpr.get());
+			if ( controller.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertSame(helper, found.getHelper());
 	}
 
 }

@@ -19,27 +19,26 @@ public interface EditableOrders extends Orders {
 	 * Получить экземпляр редактируемой заявки.
 	 * <p>
 	 * @param id идентификатор заявки
-	 * @return редактируемая заявка или null, если нет заявки с таким id
+	 * @return заявка
+	 * @throws OrderNotExistsException
 	 */
-	public EditableOrder getEditableOrder(long id) throws OrderException;
+	public EditableOrder getEditableOrder(long id)
+		throws OrderNotExistsException;
 	
 	/**
 	 * Зарегистрировать новую заявку.
 	 * <p>
-	 * @param order новая заявка
+	 * @param id номер заявки (будет установлен для экземпляра)
+	 * @param order заявка
 	 * @throws OrderAlreadyExistsException
 	 */
-	public void registerOrder(EditableOrder order) throws OrderException;
+	public void registerOrder(long id, EditableOrder order)
+		throws OrderAlreadyExistsException;
 	
 	/**
 	 * Удалить заявку из набора.
 	 * <p>
-	 * @param order заявка
-	 */
-	public void purgeOrder(EditableOrder order);
-	
-	/**
-	 * Удалить заявку из набора.
+	 * Если заявки с указанным номером нет в реестре, то ничего не происходит.
 	 * <p>
 	 * @param id идентификатор заявки
 	 */
@@ -49,27 +48,33 @@ public interface EditableOrders extends Orders {
 	 * Проверить ожидающую заявку.
 	 * <p>
 	 * @param transId идентификатор транзакции
-	 * @return true - если существует ожидающая заявка
+	 * @return true - если заявка с указанным номером транзакции в ожидании,
+	 * false - если нет соответствующей заявки
 	 */
 	public boolean isPendingOrder(long transId);
 	
 	/**
+	 * Проверить наличие ожидающих заявок.
+	 * <p>
+	 * @return true - если есть ожидающие заявки, false - нет ожидающих заявок
+	 */
+	public boolean hasPendingOrders();
+	
+	/**
 	 * Зарегистрировать ожидающую заявку.
 	 * <p>
+	 * @param transId номер транзакции
 	 * @param order заявка
 	 * @throws OrderAlreadyExistsException
 	 */
-	public void registerPendingOrder(EditableOrder order) throws OrderException;
+	public void registerPendingOrder(long transId, EditableOrder order)
+		throws OrderAlreadyExistsException;
 	
 	/**
 	 * Удалить заявку из очереди ожидания.
 	 * <p>
-	 * @param order заявка
-	 */
-	public void purgePendingOrder(EditableOrder order);
-	
-	/**
-	 * Удалить заявку из очереди ожидания.
+	 * Если заявки с указанным номером транзакции нет в реестре, то ничего
+	 * не происходит.
 	 * <p>
 	 * @param transId идентификатор транзакции
 	 */
@@ -79,9 +84,11 @@ public interface EditableOrders extends Orders {
 	 * Получить экземпляр ожидающей заявки.
 	 * <p>
 	 * @param transId идентификатор транзакции
-	 * @return заявка или null, если нет заявки с указанным номером транзакции
+	 * @return заявка
+	 * @throws OrderNotExistsException
 	 */
-	public EditableOrder getPendingOrder(long transId);
+	public EditableOrder getPendingOrder(long transId)
+		throws OrderNotExistsException;
 	
 	/**
 	 * Перевести заявку из списка ожидаемых в список зарегистрированных.
@@ -93,11 +100,19 @@ public interface EditableOrders extends Orders {
 	 * <p>
 	 * @param transId номер транзакции ожидающей заявки
 	 * @param orderId номер заявки, который следует использовать для регистрации
-	 * @return перемещенная заявка или null, если заявки с указанным номером
-	 * транзакции нет в списке ожидания
+	 * @return перемещенная заявка
+	 * @throws OrderNotExistsException
+	 * @throws OrderAlreadyExistsException
 	 */
-	public EditableOrder
-			makePendingOrderAsRegisteredIfExists(long transId, long orderId)
-	 				throws OrderException;
+	public EditableOrder movePendingOrder(long transId, long orderId)
+	 	throws OrderException;
+	
+	/**
+	 * Создать экземпляр заявки.
+	 * <p>
+	 * @param terminal терминал
+	 * @return экземпляр заявки
+	 */
+	public EditableOrder createOrder(EditableTerminal terminal);
 
 }

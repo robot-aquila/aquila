@@ -134,23 +134,6 @@ public class BMFactoryImpl implements BMFactory {
 	}
 
 	@Override
-	public OrderBuilder createOrderBuilder() {
-		return new OrderBuilderImpl(createOrderFactory(), terminal);
-	}
-
-	@Override
-	public OrderBuilder createOrderBuilder(Counter transId) {
-		return new OrderBuilderImpl(createOrderFactory(), terminal, transId);
-	}
-
-	@Override
-	public OrderBuilder createOrderBuilder(Counter transId,
-			OrderFactory factory)
-	{
-		return new OrderBuilderImpl(factory, terminal, transId);
-	}
-
-	@Override
 	public S<EditableOrder> createOrderEG() {
 		return new EditableEventGenerator<EditableOrder>(
 			new FireOrderAvailable(terminal.getOrdersInstance()));

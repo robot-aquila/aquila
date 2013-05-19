@@ -555,23 +555,14 @@ public class TerminalDecoratorTest {
 	@Test
 	public void testRegisterOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.registerOrder(same(order));
+		terminal.registerOrder(eq(800L), same(order));
 		control.replay();
-		decorator.registerOrder(order);
+		decorator.registerOrder(800L, order);
 		control.verify();
 	}
 	
 	@Test
-	public void testPurgeOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.purgeOrder(same(order));
-		control.replay();
-		decorator.purgeOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgeOrder_ById() throws Exception {
+	public void testPurgeOrder() throws Exception {
 		terminal.purgeOrder(eq(192l));
 		control.replay();
 		decorator.purgeOrder(192l);
@@ -591,18 +582,9 @@ public class TerminalDecoratorTest {
 	@Test
 	public void testRegisterPendingOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.registerPendingOrder(same(order));
+		terminal.registerPendingOrder(eq(215L), same(order));
 		control.replay();
-		decorator.registerPendingOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgePendingOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.purgePendingOrder(same(order));
-		control.replay();
-		decorator.purgePendingOrder(order);
+		decorator.registerPendingOrder(215L, order);
 		control.verify();
 	}
 	
@@ -644,23 +626,14 @@ public class TerminalDecoratorTest {
 	@Test
 	public void testRegisterStopOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.registerStopOrder(same(order));
+		terminal.registerStopOrder(eq(450L), same(order));
 		control.replay();
-		decorator.registerStopOrder(order);
+		decorator.registerStopOrder(450L, order);
 		control.verify();
 	}
 
 	@Test
-	public void testPurgeStopOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.purgeStopOrder(same(order));
-		control.replay();
-		decorator.purgeStopOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgeStopOrder_ById() throws Exception {
+	public void testPurgeStopOrder() throws Exception {
 		terminal.purgeStopOrder(eq(754l));
 		control.replay();
 		decorator.purgeStopOrder(754l);
@@ -680,18 +653,9 @@ public class TerminalDecoratorTest {
 	@Test
 	public void testRegisterPendingStopOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.registerPendingStopOrder(same(order));
+		terminal.registerPendingStopOrder(eq(232L), same(order));
 		control.replay();
-		decorator.registerPendingStopOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgePendingStopOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		terminal.purgePendingStopOrder(same(order));
-		control.replay();
-		decorator.purgePendingStopOrder(order);
+		decorator.registerPendingStopOrder(232L, order);
 		control.verify();
 	}
 	
@@ -823,26 +787,20 @@ public class TerminalDecoratorTest {
 	}
 	
 	@Test
-	public void testMakePendingOrderAsRegisteredIfExists() throws Exception {
+	public void testMovePendingOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(terminal.makePendingOrderAsRegisteredIfExists(127l, 19l))
-			.andReturn(order);
+		expect(terminal.movePendingOrder(127l, 19l)).andReturn(order);
 		control.replay();
-		assertSame(order,
-				decorator.makePendingOrderAsRegisteredIfExists(127l, 19l));
+		assertSame(order, decorator.movePendingOrder(127l, 19l));
 		control.verify();
 	}
 	
 	@Test
-	public void testMakePendingStopOrderAsRegisteredIfExists()
-			throws Exception
-	{
+	public void testMovePendingStopOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(terminal.makePendingStopOrderAsRegisteredIfExists(12l, 82l))
-			.andReturn(order);
+		expect(terminal.movePendingStopOrder(12l, 82l)).andReturn(order);
 		control.replay();
-		assertSame(order,
-				decorator.makePendingStopOrderAsRegisteredIfExists(12l, 82l));
+		assertSame(order, decorator.movePendingStopOrder(12l, 82l));
 		control.verify();
 	}
 	
@@ -907,17 +865,6 @@ public class TerminalDecoratorTest {
 		control.replay();
 		
 		assertSame(processor, decorator.getOrderProcessorInstance());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetOrderBuilderInstance() throws Exception {
-		OrderBuilder builder = control.createMock(OrderBuilder.class);
-		expect(terminal.getOrderBuilderInstance()).andReturn(builder);
-		control.replay();
-		
-		assertSame(builder, decorator.getOrderBuilderInstance());
 		
 		control.verify();
 	}
@@ -1161,4 +1108,72 @@ public class TerminalDecoratorTest {
 		control.verify();
 	}
 	
+	@Test
+	public void testHasPendingOrders() throws Exception {
+		expect(terminal.hasPendingOrders()).andReturn(true).andReturn(false);
+		control.replay();
+		
+		assertTrue(decorator.hasPendingOrders());
+		assertFalse(decorator.hasPendingOrders());
+		
+		control.verify();
+	}
+
+	@Test
+	public void testCreateOrder1() throws Exception {
+		EditableTerminal t2 = control.createMock(EditableTerminal.class);
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(terminal.createOrder(same(t2))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, decorator.createOrder(t2));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testHasPendingStopOrders() throws Exception {
+		expect(terminal.hasPendingStopOrders()).andReturn(false).andReturn(true);
+		control.replay();
+		
+		assertFalse(decorator.hasPendingStopOrders());
+		assertTrue(decorator.hasPendingStopOrders());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateStopOrder1() throws Exception {
+		EditableTerminal t2 = control.createMock(EditableTerminal.class);
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(terminal.createStopOrder(same(t2))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, decorator.createStopOrder(t2));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateOrder0() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(terminal.createOrder(same(decorator))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, decorator.createOrder());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateStopOrder0() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(terminal.createStopOrder(same(decorator))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, decorator.createStopOrder());
+		
+		control.verify();
+	}
+
 }

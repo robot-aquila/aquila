@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +85,20 @@ public class TerminalController {
 		} catch ( InterruptedException e ) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != TerminalController.class ) {
+			return false;
+		}
+		TerminalController o = (TerminalController) other;
+		return new EqualsBuilder()
+			.append(o.helper, helper)
+			.isEquals();
 	}
 
 }

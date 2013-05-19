@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,11 @@ public class EventQueueImpl implements EventQueue {
 	@Override
 	public synchronized boolean started() {
 		return thread != null && thread.isAlive();
+	}
+	
+	@Override
+	public String getId() {
+		return name;
 	}
 
 	/**
@@ -288,9 +294,23 @@ public class EventQueueImpl implements EventQueue {
 		
 	}
 	
+	/**
+	 * Сравнивает только идентификаторы очередей.
+	 * <p>
+	 * Только для тестов.
+	 */
 	@Override
 	public final boolean equals(Object other) {
-		return super.equals(other);
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != EventQueueImpl.class ) {
+			return false;
+		}
+		EventQueueImpl o = (EventQueueImpl) other;
+		return new EqualsBuilder()
+			.append(o.name, name)
+			.isEquals();
 	}
 	
 	@Override

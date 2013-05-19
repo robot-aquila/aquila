@@ -302,18 +302,17 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public final EditableOrder getEditableOrder(long id) throws OrderException {
+	public final EditableOrder getEditableOrder(long id)
+		throws OrderNotExistsException
+	{
 		return terminal.getEditableOrder(id);
 	}
 
 	@Override
-	public final void registerOrder(EditableOrder order) throws OrderException {
-		terminal.registerOrder(order);
-	}
-
-	@Override
-	public final void purgeOrder(EditableOrder order) {
-		terminal.purgeOrder(order);
+	public final void registerOrder(long orderId, EditableOrder order)
+		throws OrderAlreadyExistsException
+	{
+		terminal.registerOrder(orderId, order);
 	}
 
 	@Override
@@ -327,15 +326,10 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public final void registerPendingOrder(EditableOrder order)
-		throws OrderException
+	public final void registerPendingOrder(long orderId, EditableOrder order)
+		throws OrderAlreadyExistsException
 	{
-		terminal.registerPendingOrder(order);
-	}
-
-	@Override
-	public final void purgePendingOrder(EditableOrder order) {
-		terminal.purgePendingOrder(order);
+		terminal.registerPendingOrder(orderId, order);
 	}
 
 	@Override
@@ -344,7 +338,9 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public final EditableOrder getPendingOrder(long transId) {
+	public final EditableOrder getPendingOrder(long transId)
+		throws OrderNotExistsException
+	{
 		return terminal.getPendingOrder(transId);
 	}
 
@@ -355,21 +351,16 @@ public class TerminalDecorator implements EditableTerminal {
 
 	@Override
 	public final EditableOrder getEditableStopOrder(long id)
-		throws OrderException
+		throws OrderNotExistsException
 	{
 		return terminal.getEditableStopOrder(id);
 	}
 
 	@Override
-	public final void registerStopOrder(EditableOrder order)
-		throws OrderException
+	public final void registerStopOrder(long orderId, EditableOrder order)
+		throws OrderAlreadyExistsException
 	{
-		terminal.registerStopOrder(order);
-	}
-
-	@Override
-	public final void purgeStopOrder(EditableOrder order) {
-		terminal.purgeStopOrder(order);
+		terminal.registerStopOrder(orderId, order);
 	}
 
 	@Override
@@ -383,15 +374,10 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public final void registerPendingStopOrder(EditableOrder order)
-		throws OrderException
+	public final void registerPendingStopOrder(long transId, EditableOrder order)
+		throws OrderAlreadyExistsException
 	{
-		terminal.registerPendingStopOrder(order);
-	}
-
-	@Override
-	public final void purgePendingStopOrder(EditableOrder order) {
-		terminal.purgePendingStopOrder(order);
+		terminal.registerPendingStopOrder(transId, order);
 	}
 
 	@Override
@@ -400,7 +386,9 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public final EditableOrder getPendingStopOrder(long transId) {
+	public final EditableOrder getPendingStopOrder(long transId)
+		throws OrderNotExistsException
+	{
 		return terminal.getPendingStopOrder(transId);
 	}
 
@@ -469,20 +457,17 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public final EditableOrder
-		makePendingOrderAsRegisteredIfExists(long transId, long orderId)
+	public final EditableOrder movePendingOrder(long transId, long orderId)
 			throws OrderException
 	{
-		return terminal.makePendingOrderAsRegisteredIfExists(transId, orderId);
+		return terminal.movePendingOrder(transId, orderId);
 	}
 
 	@Override
-	public final EditableOrder
-		makePendingStopOrderAsRegisteredIfExists(long transId, long orderId)
+	public final EditableOrder movePendingStopOrder(long transId, long orderId)
 			throws OrderException
 	{
-		return terminal
-			.makePendingStopOrderAsRegisteredIfExists(transId, orderId);
+		return terminal.movePendingStopOrder(transId, orderId);
 	}
 
 	@Override
@@ -513,11 +498,6 @@ public class TerminalDecorator implements EditableTerminal {
 	@Override
 	public final OrderProcessor getOrderProcessorInstance() {
 		return terminal.getOrderProcessorInstance();
-	}
-
-	@Override
-	public final OrderBuilder getOrderBuilderInstance() {
-		return terminal.getOrderBuilderInstance();
 	}
 
 	@Override
@@ -636,6 +616,36 @@ public class TerminalDecorator implements EditableTerminal {
 	@Override
 	public final void setOrderProcessorInstance(OrderProcessor processor) {
 		terminal.setOrderProcessorInstance(processor);
+	}
+
+	@Override
+	public final boolean hasPendingOrders() {
+		return terminal.hasPendingOrders();
+	}
+
+	@Override
+	public final EditableOrder createOrder(EditableTerminal terminal) {
+		return this.terminal.createOrder(terminal);
+	}
+
+	@Override
+	public final boolean hasPendingStopOrders() {
+		return terminal.hasPendingStopOrders();
+	}
+
+	@Override
+	public final EditableOrder createStopOrder(EditableTerminal terminal) {
+		return this.terminal.createStopOrder(terminal);
+	}
+
+	@Override
+	public final EditableOrder createOrder() {
+		return terminal.createOrder(this);
+	}
+
+	@Override
+	public final EditableOrder createStopOrder() {
+		return terminal.createStopOrder(this);
 	}
 
 }

@@ -1,14 +1,13 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.BusinessEntities.validator.*;
 
 /**
  * Реализация набора заявок.
@@ -52,7 +51,16 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	 * Создать хранилище заявок.
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onAvailable тип события
+	 * @param onAvailable тип события: доступна новая заявка
+	 * @param onCancelFailed тип события: при провале отмены заявки
+	 * @param onCancelled тип события: при отмене заявки
+	 * @param onChanged тип события: при изменении атрибутов заявки
+	 * @param onDone тип события: при сведении или отмене заявки
+	 * @param onFailed тип события: при провале операции в связи с заявкой
+	 * @param onFilled тип события: при сведении заявки
+	 * @param onPartiallyFilled тип события: при частичном сведении заявки
+	 * @param onRegistered тип события: при регистрации заявки
+	 * @param onRegisterFailed тип события: при ошибке регистрации заявки
 	 */
 	public OrdersImpl(EventDispatcher dispatcher, EventType onAvailable,
 			EventType onCancelFailed, EventType onCancelled,
@@ -97,11 +105,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 
 	@Override
 	public synchronized Order getOrder(long id) throws OrderException {
-		Order order = getEditableOrder(id);
-		if ( order == null ) {
-			throw new OrderNotExistsException(id);
-		}
-		return order;
+		return getEditableOrder(id);
 	}
 
 	@Override
@@ -115,38 +119,16 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized EditableOrder getEditableOrder(long id) {
-		return orders.get(id);
-	}
-
-	@Override
-	public synchronized void registerOrder(EditableOrder order)
-			throws OrderException
+	public synchronized EditableOrder getEditableOrder(long id)
+		throws OrderNotExistsException
 	{
-		Long id = order.getId();
-		if ( id == null ) {
-			throw new OrderException("Order id was not specified");
+		EditableOrder order = orders.get(id);
+		if ( order == null ) {
+			throw new OrderNotExistsException(id);
 		}
-		if ( orders.containsKey(id) ) {
-			throw new OrderAlreadyExistsException(id);
-		}
-		orders.put(id, order);
-		order.OnCancelFailed().addListener(this);
-		order.OnCancelled().addListener(this);
-		order.OnChanged().addListener(this);
-		order.OnDone().addListener(this);
-		order.OnFailed().addListener(this);
-		order.OnFilled().addListener(this);
-		order.OnPartiallyFilled().addListener(this);
-		order.OnRegistered().addListener(this);
-		order.OnRegisterFailed().addListener(this);
+		return order;
 	}
-
-	@Override
-	public synchronized void purgeOrder(EditableOrder order) {
-		purgeOrder(order.getId());
-	}
-
+	
 	@Override
 	public synchronized void purgeOrder(long id) {
 		EditableOrder order = orders.get(id);
@@ -170,32 +152,19 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized void registerPendingOrder(EditableOrder order)
-			throws OrderException
-	{
-		Long id = order.getTransactionId();
-		if ( id == null ) {
-			throw new OrderException("Order transaction id was not specified");
-		}
-		if ( pending.containsKey(id) ) {
-			throw new OrderAlreadyExistsException(id);
-		}
-		pending.put(id, order);
-	}
-
-	@Override
-	public synchronized void purgePendingOrder(EditableOrder order) {
-		pending.remove(order.getTransactionId());
-	}
-
-	@Override
 	public synchronized void purgePendingOrder(long transId) {
 		pending.remove(transId);
 	}
 
 	@Override
-	public synchronized EditableOrder getPendingOrder(long transId) {
-		return pending.get(transId);
+	public synchronized EditableOrder getPendingOrder(long transId)
+		throws OrderNotExistsException
+	{
+		EditableOrder order = pending.get(transId);
+		if ( order == null ) {
+			throw new OrderNotExistsException(transId);
+		}
+		return order;
 	}
 
 	@Override
@@ -273,18 +242,139 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized EditableOrder
-		makePendingOrderAsRegisteredIfExists(long transId, long orderId)
-	 		throws OrderException
+	public synchronized void registerOrder(long id, EditableOrder order)
+			throws OrderAlreadyExistsException
 	{
-		EditableOrder order = null;
-		if ( isPendingOrder(transId) ) {
-			order = getPendingOrder(transId);
-			order.setId(orderId);
-			registerOrder(order);
-			purgePendingOrder(transId);
+		if ( orders.containsKey(id) ) {
+			throw new OrderAlreadyExistsException(id);
 		}
+		order.setId(id);
+		orders.put(id, order);
+		order.OnCancelFailed().addListener(this);
+		order.OnCancelled().addListener(this);
+		order.OnChanged().addListener(this);
+		order.OnDone().addListener(this);
+		order.OnFailed().addListener(this);
+		order.OnFilled().addListener(this);
+		order.OnPartiallyFilled().addListener(this);
+		order.OnRegistered().addListener(this);
+		order.OnRegisterFailed().addListener(this);
+	}
+
+	@Override
+	public synchronized boolean hasPendingOrders() {
+		return pending.size() > 0;
+	}
+
+	@Override
+	public synchronized void
+		registerPendingOrder(long transId, EditableOrder order)
+			throws OrderAlreadyExistsException
+	{
+		if ( pending.containsKey(transId) ) {
+			throw new OrderAlreadyExistsException(transId);
+		}
+		order.setTransactionId(transId);
+		pending.put(transId, order);
+	}
+
+	@Override
+	public synchronized EditableOrder
+		movePendingOrder(long transId, long orderId) throws OrderException
+	{
+		if ( isOrderExists(orderId) ) {
+			throw new OrderAlreadyExistsException(orderId);
+		}
+		if ( ! isPendingOrder(transId) ) {
+			throw new OrderNotExistsException(transId);
+		}
+		EditableOrder order = getPendingOrder(transId);
+		registerOrder(orderId, order);
+		purgePendingOrder(transId);
 		return order;
+	}
+
+	@Override
+	public synchronized EditableOrder createOrder(EditableTerminal terminal) {
+		EventDispatcher d = terminal.getEventSystem()
+			.createEventDispatcher("Order");
+		List<OrderEventHandler> h = new Vector<OrderEventHandler>();
+		h.add(new OrderEventHandler(d, new OrderIsRegistered(),
+				d.createType("OnRegister")));
+		h.add(new OrderEventHandler(d, new OrderIsRegisterFailed(),
+				d.createType("OnRegisterFailed")));
+		h.add(new OrderEventHandler(d, new OrderIsCancelled(),
+				d.createType("OnCancelled")));
+		h.add(new OrderEventHandler(d, new OrderIsCancelFailed(),
+				d.createType("OnCancelFailed")));
+		h.add(new OrderEventHandler(d, new OrderIsFilled(),
+				d.createType("OnFilled")));
+		h.add(new OrderEventHandler(d, new OrderIsPartiallyFilled(),
+				d.createType("OnPartiallyFilled")));
+		h.add(new OrderEventHandler(d, new OrderIsChanged(),
+				d.createType("OnChanged")));
+		h.add(new OrderEventHandler(d, new OrderIsDone(),
+				d.createType("OnDone")));
+		h.add(new OrderEventHandler(d, new OrderIsFailed(),
+				d.createType("OnFailed")));
+		return new OrderImpl(d, h.get(0).getEventType(), 
+				h.get(1).getEventType(), h.get(2).getEventType(),
+				h.get(3).getEventType(), h.get(4).getEventType(),
+				h.get(5).getEventType(), h.get(6).getEventType(),
+				h.get(7).getEventType(), h.get(8).getEventType(),
+				d.createType("OnTrade"), h, terminal);
+	}
+	
+	/**
+	 * Установить экземпляр зарегистрированной заявки.
+	 * <p>
+	 * Только для тестирования.
+	 * <p>
+	 * @param id номер заявки
+	 * @param order экземпляр заявки
+	 */
+	protected synchronized void setOrder(long id, EditableOrder order) {
+		orders.put(id, order);
+	}
+	
+	/**
+	 * Установить экземпляр ожидающей заявки.
+	 * <p>
+	 * Только для тестирования.
+	 * <p>
+	 * @param transId номер транзакции
+	 * @param order экземпляр заявки
+	 */
+	protected synchronized
+		void setPendingOrder(long transId, EditableOrder order)
+	{
+		pending.put(transId, order);
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != OrdersImpl.class ) {
+			return false;
+		}
+		OrdersImpl o = (OrdersImpl) other;
+		return new EqualsBuilder()
+			.append(o.dispatcher, dispatcher)
+			.append(o.onAvailable, onAvailable)
+			.append(o.onCancelFailed, onCancelFailed)
+			.append(o.onCancelled, onCancelled)
+			.append(o.onChanged, onChanged)
+			.append(o.onDone, onDone)
+			.append(o.onFailed, onFailed)
+			.append(o.onFilled, onFilled)
+			.append(o.onPartiallyFilled, onPartiallyFilled)
+			.append(o.onRegistered, onRegistered)
+			.append(o.onRegisterFailed, onRegisterFailed)
+			.append(o.orders, orders)
+			.append(o.pending, pending)
+			.isEquals();
 	}
 
 }

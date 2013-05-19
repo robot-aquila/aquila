@@ -21,6 +21,8 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: TerminalImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
  */
 public class TerminalImplTest {
+	private static Account account;
+	private static SecurityDescriptor descr;
 	private IMocksControl control;
 	private EventSystem es;
 	private Starter starter;
@@ -28,46 +30,48 @@ public class TerminalImplTest {
 	private EditablePortfolios portfolios;
 	private EditableOrders orders;
 	private EditableOrders stopOrders;
-	private OrderBuilder orderBuilder;
 	private OrderProcessor orderProcessor;
-	private EventDispatcher dispatcher;
+	private EventDispatcher dispatcher, dispatcherMock;
 	private EventType onConn,onDisc,onStarted,onStopped,onPanic;
 	private TerminalController controller;
 	private TerminalImpl terminal;
+	private EditableOrder order;
+	private Security security;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
+		account = new Account("test");
+		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		es = control.createMock(EventSystem.class);
 		controller = control.createMock(TerminalController.class);
 		starter = control.createMock(Starter.class);
 		securities = control.createMock(EditableSecurities.class);
 		portfolios = control.createMock(EditablePortfolios.class);
 		orders = control.createMock(EditableOrders.class);
 		stopOrders = control.createMock(EditableOrders.class);
-		orderBuilder = control.createMock(OrderBuilder.class);
 		orderProcessor = control.createMock(OrderProcessor.class);
-		dispatcher = control.createMock(EventDispatcher.class);
-		onConn = control.createMock(EventType.class);
-		onDisc = control.createMock(EventType.class);
-		onStarted = control.createMock(EventType.class);
-		onStopped = control.createMock(EventType.class);
-		onPanic = control.createMock(EventType.class);
+		dispatcherMock = control.createMock(EventDispatcher.class);
+		security = control.createMock(Security.class);
+		order = control.createMock(EditableOrder.class);
+		es = new EventSystemImpl();
+		dispatcher = es.createEventDispatcher("Terminal");
+		onConn = dispatcher.createType("OnConnected");
+		onDisc = dispatcher.createType("OnDisconnected");
+		onStarted = dispatcher.createType("OnStarted");
+		onStopped = dispatcher.createType("OnStopped");
+		onPanic = dispatcher.createType("OnPanic");
 		terminal = new TerminalImpl(es, starter, securities, portfolios,
-									orders, stopOrders, orderBuilder,
+									orders, stopOrders, 
 									controller, dispatcher, 
 									onConn, onDisc, onStarted, onStopped,
 									onPanic);
-		expect(dispatcher.asString()).andStubReturn("TestDispatcher");
-		expect(onPanic.asString()).andStubReturn("OnPanic");
-		expect(onDisc.asString()).andStubReturn("OnDisconnected");
-		expect(onStopped.asString()).andStubReturn("OnStopped");
+		expect(security.getDescriptor()).andStubReturn(descr);
 	}
 	
 	@Test
@@ -89,11 +93,8 @@ public class TerminalImplTest {
 		Variant<EditableOrders> vStopOrds =
 				new Variant<EditableOrders>(vOrders)
 			.add(stopOrders).add(null);
-		Variant<OrderBuilder> vOrdBldr = new Variant<OrderBuilder>(vStopOrds)
-			.add(null)
-			.add(orderBuilder);
 		Variant<TerminalController> vCtrl =
-				new Variant<TerminalController>(vOrdBldr)
+				new Variant<TerminalController>(vStopOrds)
 			.add(null)
 			.add(controller);
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vCtrl)
@@ -121,7 +122,7 @@ public class TerminalImplTest {
 			try {
 				TerminalImpl t = new TerminalImpl(vEs.get(), vStarter.get(),
 						vSecurities.get(), vPortfolios.get(),
-						vOrders.get(), vStopOrds.get(), vOrdBldr.get(),
+						vOrders.get(), vStopOrds.get(), 
 						vCtrl.get(), vDisp.get(),
 						vOnConn.get(), vOnDisc.get(),
 						vOnStart.get(), vOnStop.get(),
@@ -141,7 +142,6 @@ public class TerminalImplTest {
 		assertSame(portfolios, found.getPortfoliosInstance());
 		assertSame(orders, found.getOrdersInstance());
 		assertSame(stopOrders, found.getStopOrdersInstance());
-		assertSame(orderBuilder, found.getOrderBuilderInstance());
 		assertSame(controller, found.getTerminalController());
 		assertSame(dispatcher, found.getEventDispatcher());
 		assertSame(onConn, found.OnConnected());
@@ -170,10 +170,7 @@ public class TerminalImplTest {
 		Variant<EditableOrders> vStopOrds =
 				new Variant<EditableOrders>(vOrders)
 			.add(stopOrders).add(null);
-		Variant<OrderBuilder> vOrdBldr = new Variant<OrderBuilder>(vStopOrds)
-			.add(null)
-			.add(orderBuilder);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vOrdBldr)
+		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vStopOrds)
 			.add(null)
 			.add(dispatcher);
 		Variant<EventType> vOnConn = new Variant<EventType>(vDisp)
@@ -199,7 +196,6 @@ public class TerminalImplTest {
 				TerminalImpl t = new TerminalImpl(vEs.get(),
 						vStarter.get(), vSecurities.get(),
 						vPortfolios.get(), vOrders.get(), vStopOrds.get(),
-						vOrdBldr.get(), 
 						vDisp.get(), vOnConn.get(),
 						vOnDisc.get(), vOnStart.get(),
 						vOnStop.get(), vOnPanic.get());
@@ -218,7 +214,6 @@ public class TerminalImplTest {
 		assertSame(portfolios, found.getPortfoliosInstance());
 		assertSame(orders, found.getOrdersInstance());
 		assertSame(stopOrders, found.getStopOrdersInstance());
-		assertSame(orderBuilder, found.getOrderBuilderInstance());
 		assertSame(TerminalController.class,
 				found.getTerminalController().getClass());
 		assertSame(dispatcher, found.getEventDispatcher());
@@ -483,32 +478,6 @@ public class TerminalImplTest {
 		
 		assertSame(type, terminal.OnStopOrderAvailable());
 		
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateMarketOrderB() throws Exception {
-		Order order = control.createMock(Order.class);
-		Account account = new Account("test");
-		Security security = control.createMock(Security.class);
-		expect(orderBuilder.createMarketOrderB(same(account),
-				same(security), eq(100L)))
-			.andReturn(order);
-		control.replay();
-		assertSame(order, terminal.createMarketOrderB(account, security, 100L));
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateMarketOrderS() throws Exception {
-		Order order = control.createMock(Order.class);
-		Account account = new Account("test");
-		Security security = control.createMock(Security.class);
-		expect(orderBuilder.createMarketOrderS(same(account),
-				same(security), eq(500L)))
-			.andReturn(order);
-		control.replay();
-		assertSame(order, terminal.createMarketOrderS(account, security, 500L));
 		control.verify();
 	}
 	
@@ -778,23 +747,14 @@ public class TerminalImplTest {
 	@Test
 	public void testRegisterOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		orders.registerOrder(same(order));
+		orders.registerOrder(eq(123L), same(order));
 		control.replay();
-		terminal.registerOrder(order);
+		terminal.registerOrder(123L, order);
 		control.verify();
 	}
 	
 	@Test
-	public void testPurgeOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		orders.purgeOrder(same(order));
-		control.replay();
-		terminal.purgeOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgeOrder_ById() throws Exception {
+	public void testPurgeOrder() throws Exception {
 		orders.purgeOrder(eq(192l));
 		control.replay();
 		terminal.purgeOrder(192l);
@@ -814,23 +774,14 @@ public class TerminalImplTest {
 	@Test
 	public void testRegisterPendingOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		orders.registerPendingOrder(same(order));
+		orders.registerPendingOrder(eq(897L), same(order));
 		control.replay();
-		terminal.registerPendingOrder(order);
+		terminal.registerPendingOrder(897L, order);
 		control.verify();
 	}
 	
 	@Test
-	public void testPurgePendingOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		orders.purgePendingOrder(same(order));
-		control.replay();
-		terminal.purgePendingOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgePendingOrder_ById() throws Exception {
+	public void testPurgePendingOrder() throws Exception {
 		orders.purgePendingOrder(eq(761l));
 		control.replay();
 		terminal.purgePendingOrder(761l);
@@ -867,23 +818,14 @@ public class TerminalImplTest {
 	@Test
 	public void testRegisterStopOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		stopOrders.registerOrder(same(order));
+		stopOrders.registerOrder(eq(819L), same(order));
 		control.replay();
-		terminal.registerStopOrder(order);
+		terminal.registerStopOrder(819L, order);
 		control.verify();
 	}
 
 	@Test
-	public void testPurgeStopOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		stopOrders.purgeOrder(same(order));
-		control.replay();
-		terminal.purgeStopOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgeStopOrder_ById() throws Exception {
+	public void testPurgeStopOrder() throws Exception {
 		stopOrders.purgeOrder(eq(754l));
 		control.replay();
 		terminal.purgeStopOrder(754l);
@@ -903,23 +845,14 @@ public class TerminalImplTest {
 	@Test
 	public void testRegisterPendingStopOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		stopOrders.registerPendingOrder(same(order));
+		stopOrders.registerPendingOrder(eq(394L), same(order));
 		control.replay();
-		terminal.registerPendingStopOrder(order);
+		terminal.registerPendingStopOrder(394L, order);
 		control.verify();
 	}
 	
 	@Test
-	public void testPurgePendingStopOrder_ByOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		stopOrders.purgePendingOrder(same(order));
-		control.replay();
-		terminal.purgePendingStopOrder(order);
-		control.verify();
-	}
-	
-	@Test
-	public void testPurgePendingStopOrder_ById() throws Exception {
+	public void testPurgePendingStopOrder() throws Exception {
 		stopOrders.purgePendingOrder(eq(245l));
 		control.replay();
 		terminal.purgePendingStopOrder(245l);
@@ -1082,26 +1015,20 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testMakePendingOrderAsRegisteredIfExists() throws Exception {
+	public void testMovePendingOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(orders.makePendingOrderAsRegisteredIfExists(127l, 19l))
-			.andReturn(order);
+		expect(orders.movePendingOrder(127l, 19l)).andReturn(order);
 		control.replay();
-		assertSame(order,
-				terminal.makePendingOrderAsRegisteredIfExists(127l, 19l));
+		assertSame(order, terminal.movePendingOrder(127l, 19l));
 		control.verify();
 	}
 	
 	@Test
-	public void testMakePendingStopOrderAsRegisteredIfExists()
-			throws Exception
-	{
+	public void testMovePendingStopOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(stopOrders.makePendingOrderAsRegisteredIfExists(12l, 82l))
-			.andReturn(order);
+		expect(stopOrders.movePendingOrder(12l, 82l)).andReturn(order);
 		control.replay();
-		assertSame(order,
-				terminal.makePendingStopOrderAsRegisteredIfExists(12l, 82l));
+		assertSame(order, terminal.movePendingStopOrder(12l, 82l));
 		control.verify();
 	}
 	
@@ -1110,7 +1037,8 @@ public class TerminalImplTest {
 		final Object[] args = new Object[] { };
 		helpFireTerminalPanicEvent(new Runnable() {
 			@Override public void run() {
-				dispatcher.dispatch(eq(new PanicEvent(onPanic,200,"ABC",args)));		
+				Event e = new PanicEvent(onPanic,200,"ABC",args);
+				dispatcherMock.dispatch(eq(e));		
 			}
 		}, new Runnable() {
 			@Override public void run() {
@@ -1124,7 +1052,8 @@ public class TerminalImplTest {
 		final Object[] args = new Object[] { 500, "A", 800 };
 		helpFireTerminalPanicEvent(new Runnable() {
 			@Override public void run() {
-				dispatcher.dispatch(eq(new PanicEvent(onPanic,200,"ABC",args)));		
+				Event e = new PanicEvent(onPanic,200,"ABC",args);
+				dispatcherMock.dispatch(eq(e));
 			}
 		}, new Runnable() {
 			@Override public void run() {
@@ -1157,6 +1086,11 @@ public class TerminalImplTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
+			terminal = new TerminalImpl(es, starter, securities, portfolios,
+					orders, stopOrders, 
+					controller, dispatcherMock, 
+					onConn, onDisc, onStarted, onStopped,
+					onPanic);
 			String msg = "At #" + i;
 			boolean flag = (Boolean) fix[i][1];
 			TerminalState state = (TerminalState) fix[i][0];
@@ -1243,64 +1177,6 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCreateLimitOrderB() throws Exception {
-		Account account = new Account("FOO");
-		Security sec = control.createMock(Security.class);
-		Order order = control.createMock(Order.class);
-		expect(orderBuilder.createLimitOrderB(account, sec, 10, 230.05d))
-			.andReturn(order);
-		control.replay();
-		
-		assertSame(order,terminal.createLimitOrderB(account, sec, 10, 230.05d));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateLimitOrderS() throws Exception {
-		Account account = new Account("FOO");
-		Security sec = control.createMock(Security.class);
-		Order order = control.createMock(Order.class);
-		expect(orderBuilder.createLimitOrderS(account, sec, 10, 230.05d))
-			.andReturn(order);
-		control.replay();
-		
-		assertSame(order,terminal.createLimitOrderS(account, sec, 10, 230.05d));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateStopLimitB() throws Exception {
-		Account account = new Account("FOO");
-		Security sec = control.createMock(Security.class);
-		Order order = control.createMock(Order.class);
-		expect(orderBuilder.createStopLimitB(account, sec, 10, 230.05d, 235.d))
-			.andReturn(order);
-		control.replay();
-		
-		assertSame(order,
-				terminal.createStopLimitB(account, sec, 10, 230.05d, 235.d));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateStopLimitS() throws Exception {
-		Account account = new Account("FOO");
-		Security sec = control.createMock(Security.class);
-		Order order = control.createMock(Order.class);
-		expect(orderBuilder.createStopLimitS(account, sec, 10, 230.05d, 215.d))
-			.andReturn(order);
-		control.replay();
-		
-		assertSame(order,
-				terminal.createStopLimitS(account, sec, 10, 230.05d, 215.d));
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testGetCurrentTime() throws Exception {
 		assertEquals(new Date(), terminal.getCurrentTime());
 	}
@@ -1341,4 +1217,274 @@ public class TerminalImplTest {
 		assertSame(orderProcessor, terminal.getOrderProcessorInstance());
 	}
 	
+	@Test
+	public void testHasPendingOrders() throws Exception {
+		expect(orders.hasPendingOrders()).andReturn(true);
+		expect(orders.hasPendingOrders()).andReturn(false);
+		control.replay();
+		
+		assertTrue(terminal.hasPendingOrders());
+		assertFalse(terminal.hasPendingOrders());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateOrder1() throws Exception {
+		EditableTerminal t2 = control.createMock(EditableTerminal.class);
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(orders.createOrder(same(t2))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, terminal.createOrder(t2));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testHasPendingStopOrders() throws Exception {
+		expect(stopOrders.hasPendingOrders()).andReturn(false).andReturn(true);
+		control.replay();
+		
+		assertFalse(terminal.hasPendingStopOrders());
+		assertTrue(terminal.hasPendingStopOrders());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateStopOrder1() throws Exception {
+		EditableTerminal t2 = control.createMock(EditableTerminal.class);
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(stopOrders.createOrder(same(t2))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, terminal.createStopOrder(t2));
+		
+		control.verify();
+	}
+
+	@Test
+	public void testCreateOrder0() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(orders.createOrder(same(terminal))).andReturn(order);
+		control.replay();
+		
+		terminal.createOrder();
+		
+		control.verify();
+	}
+
+	@Test
+	public void testCreateStopOrder0() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(stopOrders.createOrder(same(terminal))).andReturn(order);
+		control.replay();
+		
+		terminal.createStopOrder();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(terminal.equals(terminal));
+		assertFalse(terminal.equals(null));
+		assertFalse(terminal.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Variant<EventSystem> vEs = new Variant<EventSystem>()
+			.add(es)
+			.add(control.createMock(EventSystem.class));
+		Variant<Starter> vSta = new Variant<Starter>(vEs)
+			.add(starter)
+			.add(control.createMock(Starter.class));
+		Variant<EditableSecurities> vScs = new Variant<EditableSecurities>(vSta)
+			.add(securities)
+			.add(control.createMock(EditableSecurities.class));
+		Variant<EditablePortfolios> vPts = new Variant<EditablePortfolios>(vScs)
+			.add(portfolios)
+			.add(control.createMock(EditablePortfolios.class));
+		Variant<EditableOrders> vOrds = new Variant<EditableOrders>(vPts)
+			.add(orders)
+			.add(control.createMock(EditableOrders.class));
+		Variant<EditableOrders> vStOrds = new Variant<EditableOrders>(vOrds)
+			.add(stopOrders)
+			.add(control.createMock(EditableOrders.class));
+		Variant<TerminalController> vCtrl =
+				new Variant<TerminalController>(vStOrds)
+			.add(controller)
+			.add(control.createMock(TerminalController.class));
+		Variant<String> vDispId = new Variant<String>(vCtrl)
+			.add("Terminal")
+			.add("TerminalX");
+		Variant<String> vConnId = new Variant<String>(vDispId)
+			.add("OnConnected")
+			.add("OnConnectedX");
+		Variant<String> vDiscId = new Variant<String>(vConnId)
+			.add("OnDisconnected")
+			.add("OnDisconnectedX");
+		Variant<String> vStartId = new Variant<String>(vDiscId)
+			.add("OnStarted")
+			.add("OnStartedX");
+		Variant<String> vStopId = new Variant<String>(vStartId)
+			.add("OnStopped")
+			.add("OnStoppedX");
+		Variant<String> vPanicId = new Variant<String>(vStopId)
+			.add("OnPanic")
+			.add("OnPanicX");
+		Variant<TerminalState> vStat = new Variant<TerminalState>(vPanicId)
+			.add(TerminalState.STOPPED)
+			.add(TerminalState.STARTING);
+		Variant<OrderProcessor> vOrdProc = new Variant<OrderProcessor>(vStat)
+			.add(orderProcessor)
+			.add(control.createMock(OrderProcessor.class));
+		Variant<?> iterator = vOrdProc;
+		terminal.setTerminalState(TerminalState.STOPPED);
+		terminal.setOrderProcessorInstance(orderProcessor);
+		int foundCnt = 0;
+		TerminalImpl x = null, found = null;
+		do {
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new TerminalImpl(vEs.get(), vSta.get(), vScs.get(),
+					vPts.get(), vOrds.get(), vStOrds.get(), vCtrl.get(),
+					d, d.createType(vConnId.get()), d.createType(vDiscId.get()),
+					d.createType(vStartId.get()), d.createType(vStopId.get()),
+					d.createType(vPanicId.get()));
+			x.setTerminalState(vStat.get());
+			x.setOrderProcessorInstance(vOrdProc.get());
+			if ( terminal.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertSame(es, found.getEventSystem());
+		assertSame(securities, found.getSecuritiesInstance());
+		assertSame(portfolios, found.getPortfoliosInstance());
+		assertSame(orders, found.getOrdersInstance());
+		assertSame(stopOrders, found.getStopOrdersInstance());
+		assertSame(starter, found.getStarter());
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onConn, found.OnConnected());
+		assertEquals(onDisc, found.OnDisconnected());
+		assertEquals(onStarted, found.OnStarted());
+		assertEquals(onStopped, found.OnStopped());
+		assertEquals(onPanic, found.OnPanic());
+		assertSame(TerminalState.STOPPED, found.getTerminalState());
+		assertSame(orderProcessor, found.getOrderProcessorInstance());
+	}
+	
+	@Test
+	public void testCreateMarketOrderB() throws Exception {
+		expect(orders.createOrder(same(terminal))).andReturn(order);
+		order.setDirection(OrderDirection.BUY);
+		order.setAccount(account);
+		order.setQty(10L);
+		order.setSecurityDescriptor(descr);
+		order.setStatus(OrderStatus.PENDING);
+		order.setType(OrderType.MARKET);
+		order.setQtyRest(10L);
+		control.replay();
+		
+		assertSame(order, terminal.createMarketOrderB(account, security, 10));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateMarketOrderS() throws Exception {
+		expect(orders.createOrder(same(terminal))).andReturn(order);
+		order.setDirection(OrderDirection.SELL);
+		order.setAccount(account);
+		order.setQty(5L);
+		order.setSecurityDescriptor(descr);
+		order.setStatus(OrderStatus.PENDING);
+		order.setType(OrderType.MARKET);
+		order.setQtyRest(5L);
+		control.replay();
+		
+		assertSame(order, terminal.createMarketOrderS(account, security, 5));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateLimitOrderB() throws Exception {
+		expect(orders.createOrder(same(terminal))).andReturn(order);
+		order.setDirection(OrderDirection.BUY);
+		order.setAccount(account);
+		order.setQty(50L);
+		order.setSecurityDescriptor(descr);
+		order.setStatus(OrderStatus.PENDING);
+		order.setType(OrderType.LIMIT);
+		order.setQtyRest(50L);
+		order.setPrice(23.5d);
+		control.replay();
+		
+		assertSame(order,
+				terminal.createLimitOrderB(account, security, 50, 23.5d));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateLimitOrderS() throws Exception {
+		expect(orders.createOrder(same(terminal))).andReturn(order);
+		order.setDirection(OrderDirection.SELL);
+		order.setAccount(account);
+		order.setQty(10L);
+		order.setSecurityDescriptor(descr);
+		order.setStatus(OrderStatus.PENDING);
+		order.setType(OrderType.LIMIT);
+		order.setQtyRest(10L);
+		order.setPrice(83.5d);
+		control.replay();
+		
+		assertSame(order,
+				terminal.createLimitOrderS(account, security, 10, 83.5d));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateStopLimitB() throws Exception {
+		expect(stopOrders.createOrder(same(terminal))).andReturn(order);
+		order.setDirection(OrderDirection.BUY);
+		order.setAccount(account);
+		order.setQty(50L);
+		order.setSecurityDescriptor(descr);
+		order.setStatus(OrderStatus.PENDING);
+		order.setType(OrderType.STOP_LIMIT);
+		order.setPrice(24.0d);
+		order.setStopLimitPrice(23.5d);
+		control.replay();
+		
+		assertSame(order,
+				terminal.createStopLimitB(account, security, 50, 23.5d, 24.0d));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateStopLimitS() throws Exception {
+		expect(stopOrders.createOrder(same(terminal))).andReturn(order);
+		order.setDirection(OrderDirection.SELL);
+		order.setAccount(account);
+		order.setQty(80L);
+		order.setSecurityDescriptor(descr);
+		order.setStatus(OrderStatus.PENDING);
+		order.setType(OrderType.STOP_LIMIT);
+		order.setPrice(22.0d);
+		order.setStopLimitPrice(23.5d);
+		control.replay();
+		
+		assertSame(order,
+				terminal.createStopLimitS(account, security, 80, 23.5d, 22.0d));
+		
+		control.verify();
+	}
+
 }

@@ -31,5 +31,10 @@ public class OrderIsDone implements Validator {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other != null && other.getClass() == OrderIsDone.class;
+	}
 
 }

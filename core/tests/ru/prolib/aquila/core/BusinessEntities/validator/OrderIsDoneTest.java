@@ -80,5 +80,13 @@ public class OrderIsDoneTest {
 		} while ( vChanged.next() );
 		assertEquals(2, found);
 	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(validator.equals(validator));
+		assertFalse(validator.equals(null));
+		assertFalse(validator.equals(this));
+		assertTrue(validator.equals(new OrderIsDone()));
+	}
 
 }

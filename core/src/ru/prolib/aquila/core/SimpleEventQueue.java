@@ -2,6 +2,8 @@ package ru.prolib.aquila.core;
 
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 /**
  * Простая очередь событий.
  * <p>
@@ -12,9 +14,15 @@ import java.util.List;
  * $Id: SimpleEventQueue.java 565 2013-03-10 19:32:12Z whirlwind $
  */
 public class SimpleEventQueue implements EventQueue {
+	private final String id;
+	
+	public SimpleEventQueue(String id) {
+		super();
+		this.id = id;
+	}
 	
 	public SimpleEventQueue() {
-		super();
+		this("default");
 	}
 
 	@Override
@@ -59,17 +67,33 @@ public class SimpleEventQueue implements EventQueue {
 
 	}
 	
+	/**
+	 * Сравнивает только идентификаторы очередей одного класса.
+	 * <p>
+	 * Только для тестов.
+	 */
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
-		return other != null && other.getClass() == SimpleEventQueue.class;
+		if ( other == null || other.getClass() != SimpleEventQueue.class ) {
+			return false;
+		}
+		SimpleEventQueue o = (SimpleEventQueue) other;
+		return new EqualsBuilder()
+			.append(o.id, id)
+			.isEquals();
 	}
 	
 	@Override
 	public final int hashCode() {
 		return super.hashCode();
+	}
+
+	@Override
+	public String getId() {
+		return id;
 	}
 
 }

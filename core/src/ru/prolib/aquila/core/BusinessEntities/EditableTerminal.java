@@ -44,13 +44,6 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	public void setOrderProcessorInstance(OrderProcessor processor);
 	
 	/**
-	 * Получить экземпляр конструктора заявок.
-	 * <p>
-	 * @return конструктор заявок
-	 */
-	public OrderBuilder getOrderBuilderInstance();
-	
-	/**
 	 * Получить экземпляр хранилища заявок.
 	 * <p>
 	 * @return хранилище заявок
@@ -121,5 +114,19 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	 */
 	public EditablePortfolio createPortfolio(Account account)
 		throws PortfolioException;
+	
+	/**
+	 * Создать заявку.
+	 * <p>
+	 * @return новая заявка
+	 */
+	public EditableOrder createOrder();
+	
+	/**
+	 * Создать стоп-заявку.
+	 * <p>
+	 * @return новая заявка
+	 */
+	public EditableOrder createStopOrder();
 
 }

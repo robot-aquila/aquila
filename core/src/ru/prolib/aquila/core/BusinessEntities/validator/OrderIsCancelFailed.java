@@ -33,5 +33,10 @@ public class OrderIsCancelFailed implements Validator {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other != null && other.getClass() == OrderIsCancelFailed.class;
+	}
 
 }

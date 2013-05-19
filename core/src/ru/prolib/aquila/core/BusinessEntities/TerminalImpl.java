@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,6 @@ public class TerminalImpl implements EditableTerminal {
 	private final Starter starter;
 	private final EditableOrders orders;
 	private final EditableOrders stopOrders;
-	private final OrderBuilder orderBuilder;
 	private final EventDispatcher dispatcher;
 	private final EventType onConnected,onDisconnected,onStarted,
 		onStopped,onPanic;
@@ -66,7 +66,6 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
 	 * @param stopOrders набор стоп-заявок
-	 * @param orderBuilder конструктор заявок
 	 * @param dispatcher диспетчер событий
 	 * @param onConnected тип события при подключении
 	 * @param onDisconnected тип события при отключении
@@ -80,7 +79,6 @@ public class TerminalImpl implements EditableTerminal {
 						EditablePortfolios portfolios,
 						EditableOrders orders,
 						EditableOrders stopOrders,
-						OrderBuilder orderBuilder,
 						EventDispatcher dispatcher,
 						EventType onConnected,
 						EventType onDisconnected,
@@ -88,7 +86,7 @@ public class TerminalImpl implements EditableTerminal {
 						EventType onStopped, EventType onPanic)
 	{
 		this(eventSystem, starter, securities, portfolios, orders, stopOrders,
-				orderBuilder, new TerminalController(),
+				new TerminalController(),
 				dispatcher, onConnected, onDisconnected,
 				onStarted, onStopped, onPanic);
 	}
@@ -102,7 +100,6 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
 	 * @param stopOrders набор стоп-заявок
-	 * @param orderBuilder конструктор заявок
 	 * @param controller контроллер терминала
 	 * @param dispatcher диспетчер событий
 	 * @param onConnected тип события при подключении
@@ -117,7 +114,6 @@ public class TerminalImpl implements EditableTerminal {
 						EditablePortfolios portfolios,
 						EditableOrders orders,
 						EditableOrders stopOrders,
-						OrderBuilder orderBuilder,
 						TerminalController controller,
 						EventDispatcher dispatcher,
 						EventType onConnected,
@@ -151,10 +147,6 @@ public class TerminalImpl implements EditableTerminal {
 			throw new NullPointerException("Stop orders cannot be null");
 		}
 		this.stopOrders = stopOrders;
-		if ( orderBuilder == null ) {
-			throw new NullPointerException("Order builder cannot be null");
-		}
-		this.orderBuilder = orderBuilder;
 		if ( controller == null ) {
 			throw new NullPointerException("Controller cannot be null");
 		}
@@ -203,11 +195,6 @@ public class TerminalImpl implements EditableTerminal {
 		void setOrderProcessorInstance(OrderProcessor processor)
 	{
 		this.orderProcessor = processor;
-	}
-	
-	@Override
-	public OrderBuilder getOrderBuilderInstance() {
-		return orderBuilder;
 	}
 	
 	@Override
@@ -355,20 +342,6 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Order createMarketOrderB(Account account, Security sec, long qty)
-		throws OrderException
-	{
-		return orderBuilder.createMarketOrderB(account, sec, qty);
-	}
-
-	@Override
-	public Order createMarketOrderS(Account account, Security sec, long qty)
-		throws OrderException
-	{
-		return orderBuilder.createMarketOrderS(account, sec, qty);
-	}
-
-	@Override
 	public void placeOrder(Order order) throws OrderException {
 		orderProcessor.placeOrder(order);
 	}
@@ -509,18 +482,17 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EditableOrder getEditableOrder(long id) throws OrderException {
+	public EditableOrder getEditableOrder(long id)
+		throws OrderNotExistsException
+	{
 		return orders.getEditableOrder(id);
 	}
 
 	@Override
-	public void registerOrder(EditableOrder order) throws OrderException {
-		orders.registerOrder(order);
-	}
-
-	@Override
-	public void purgeOrder(EditableOrder order) {
-		orders.purgeOrder(order);
+	public void registerOrder(long id, EditableOrder order)
+		throws OrderAlreadyExistsException
+	{
+		orders.registerOrder(id, order);
 	}
 
 	@Override
@@ -534,15 +506,10 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public void registerPendingOrder(EditableOrder order)
-		throws OrderException
+	public void registerPendingOrder(long transId, EditableOrder order)
+		throws OrderAlreadyExistsException
 	{
-		orders.registerPendingOrder(order);
-	}
-
-	@Override
-	public void purgePendingOrder(EditableOrder order) {
-		orders.purgePendingOrder(order);
+		orders.registerPendingOrder(transId, order);
 	}
 
 	@Override
@@ -551,7 +518,9 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EditableOrder getPendingOrder(long transId) {
+	public EditableOrder getPendingOrder(long transId)
+		throws OrderNotExistsException
+	{
 		return orders.getPendingOrder(transId);
 	}
 
@@ -562,21 +531,16 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	public EditableOrder getEditableStopOrder(long id)
-		throws OrderException
+		throws OrderNotExistsException
 	{
 		return stopOrders.getEditableOrder(id);
 	}
 
 	@Override
-	public void registerStopOrder(EditableOrder order)
-		throws OrderException
+	public void registerStopOrder(long id, EditableOrder order)
+		throws OrderAlreadyExistsException
 	{
-		stopOrders.registerOrder(order);
-	}
-
-	@Override
-	public void purgeStopOrder(EditableOrder order) {
-		stopOrders.purgeOrder(order);
+		stopOrders.registerOrder(id, order);
 	}
 
 	@Override
@@ -590,15 +554,10 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public void registerPendingStopOrder(EditableOrder order)
-		throws OrderException
+	public void registerPendingStopOrder(long transId, EditableOrder order)
+		throws OrderAlreadyExistsException
 	{
-		stopOrders.registerPendingOrder(order);
-	}
-
-	@Override
-	public void purgePendingStopOrder(EditableOrder order) {
-		stopOrders.purgePendingOrder(order);
+		stopOrders.registerPendingOrder(transId, order);
 	}
 
 	@Override
@@ -607,7 +566,9 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EditableOrder getPendingStopOrder(long transId) {
+	public EditableOrder getPendingStopOrder(long transId)
+		throws OrderNotExistsException
+	{
 		return stopOrders.getPendingOrder(transId);
 	}
 
@@ -700,19 +661,17 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EditableOrder
-		makePendingOrderAsRegisteredIfExists(long transId, long orderId)
+	public EditableOrder movePendingOrder(long transId, long orderId)
 			throws OrderException
 	{
-		return orders.makePendingOrderAsRegisteredIfExists(transId, orderId);
+		return orders.movePendingOrder(transId, orderId);
 	}
 
 	@Override
-	public EditableOrder
-		makePendingStopOrderAsRegisteredIfExists(long transId, long orderId)
+	public EditableOrder movePendingStopOrder(long transId, long orderId)
 			throws OrderException
 	{
-		return stopOrders.makePendingOrderAsRegisteredIfExists(transId,orderId);
+		return stopOrders.movePendingOrder(transId,orderId);
 	}
 
 	@Override
@@ -781,34 +740,6 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Order createLimitOrderB(Account account, Security sec,
-			long qty, double price) throws OrderException
-	{
-		return orderBuilder.createLimitOrderB(account, sec, qty, price);
-	}
-
-	@Override
-	public Order createLimitOrderS(Account account, Security sec,
-			long qty, double price) throws OrderException
-	{
-		return orderBuilder.createLimitOrderS(account, sec, qty, price);
-	}
-
-	@Override
-	public Order createStopLimitB(Account account, Security sec,
-			long qty, double stopPrice, double price) throws OrderException
-	{
-		return orderBuilder.createStopLimitB(account,sec,qty,stopPrice,price);
-	}
-
-	@Override
-	public Order createStopLimitS(Account account, Security sec,
-			long qty, double stopPrice, double price) throws OrderException
-	{
-		return orderBuilder.createStopLimitS(account,sec,qty,stopPrice,price);
-	}
-
-	@Override
 	public Date getCurrentTime() {
 		return new Date();
 	}
@@ -831,6 +762,160 @@ public class TerminalImpl implements EditableTerminal {
 			throws SecurityAlreadyExistsException
 	{
 		return securities.createSecurity(this, descr);
+	}
+
+	@Override
+	public boolean hasPendingOrders() {
+		return orders.hasPendingOrders();
+	}
+
+	@Override
+	public EditableOrder createOrder(EditableTerminal terminal) {
+		return orders.createOrder(terminal);
+	}
+
+	@Override
+	public boolean hasPendingStopOrders() {
+		return stopOrders.hasPendingOrders();
+	}
+
+	@Override
+	public EditableOrder createStopOrder(EditableTerminal terminal) {
+		return stopOrders.createOrder(terminal);
+	}
+
+	@Override
+	public EditableOrder createOrder() {
+		return orders.createOrder(this);
+	}
+
+	@Override
+	public EditableOrder createStopOrder() {
+		return stopOrders.createOrder(this);
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != TerminalImpl.class ) {
+			return false;
+		}
+		TerminalImpl o = (TerminalImpl) other;
+		return new EqualsBuilder()
+			.append(o.controller, controller)
+			.append(o.dispatcher, dispatcher)
+			.append(o.es, es)
+			.append(o.onConnected, onConnected)
+			.append(o.onDisconnected, onDisconnected)
+			.append(o.onPanic, onPanic)
+			.append(o.onStarted, onStarted)
+			.append(o.onStopped, onStopped)
+			.append(o.orderProcessor, orderProcessor)
+			.append(o.orders, orders)
+			.append(o.portfolios, portfolios)
+			.append(o.securities, securities)
+			.append(o.starter, starter)
+			.append(o.state, state)
+			.append(o.stopOrders, stopOrders)
+			.isEquals();
+	}
+	
+	@Override
+	public Order createMarketOrderB(Account account, Security sec, long qty)
+		throws OrderException
+	{
+		EditableOrder order = orders.createOrder(this);
+		order.setDirection(OrderDirection.BUY);
+		fillMarketOrder(order, account, sec, qty);
+		return order;
+	}
+
+	@Override
+	public Order createMarketOrderS(Account account, Security sec, long qty)
+		throws OrderException
+	{
+		EditableOrder order = orders.createOrder(this);
+		order.setDirection(OrderDirection.SELL);
+		fillMarketOrder(order, account, sec, qty);
+		return order;
+	}
+	
+	@Override
+	public Order createLimitOrderB(Account account, Security sec,
+			long qty, double price) throws OrderException
+	{
+		EditableOrder order = orders.createOrder(this);
+		order.setDirection(OrderDirection.BUY);
+		fillLimitOrder(order, account, sec, price, qty);
+		return order;
+	}
+
+	@Override
+	public Order createLimitOrderS(Account account, Security sec,
+			long qty, double price) throws OrderException
+	{
+		EditableOrder order = orders.createOrder(this);
+		order.setDirection(OrderDirection.SELL);
+		fillLimitOrder(order, account, sec, price, qty);
+		return order;
+	}
+
+	@Override
+	public Order createStopLimitB(Account account, Security sec,
+			long qty, double stopPrice, double price) throws OrderException
+	{
+		EditableOrder order = stopOrders.createOrder(this);
+		order.setDirection(OrderDirection.BUY);
+		fillStopLimit(order, account, sec, stopPrice, price, qty);
+		return order;
+	}
+
+	@Override
+	public Order createStopLimitS(Account account, Security sec,
+			long qty, double stopPrice, double price) throws OrderException
+	{
+		EditableOrder order = stopOrders.createOrder(this);
+		order.setDirection(OrderDirection.SELL);
+		fillStopLimit(order, account, sec, stopPrice, price, qty);
+		return order;
+	}
+	
+	private void fillStopLimit(EditableOrder order, Account account,
+			Security sec, double stopPrice, double price, long qty)
+		throws OrderException
+	{
+		fillCommonOrder(order, account, sec, qty);
+		order.setType(OrderType.STOP_LIMIT);
+		order.setPrice(price);
+		order.setStopLimitPrice(stopPrice);
+	}
+	
+	private void fillLimitOrder(EditableOrder order, Account account,
+			Security sec, double price, long qty) throws OrderException
+	{
+		fillCommonOrder(order, account, sec, qty);
+		order.setType(OrderType.LIMIT);
+		order.setQtyRest(qty);
+		order.setPrice(price);
+	}
+	
+	private void fillMarketOrder(EditableOrder order, Account account,
+			Security sec, long qty) throws OrderException
+	{
+		fillCommonOrder(order, account, sec, qty);
+		order.setType(OrderType.MARKET);
+		order.setQtyRest(qty);
+	}
+	
+	private void fillCommonOrder(EditableOrder order, Account account,
+			Security sec, long qty) throws OrderException
+	{
+		order.setAccount(account);
+		order.setQty(qty);
+		order.setSecurityDescriptor(sec.getDescriptor());
+		order.setStatus(OrderStatus.PENDING);
 	}
 
 }

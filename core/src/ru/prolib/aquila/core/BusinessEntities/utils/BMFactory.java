@@ -10,6 +10,7 @@ import ru.prolib.aquila.core.utils.*;
  * 2012-08-17<br>
  * $Id: BMFactory.java 503 2013-02-07 20:06:40Z whirlwind $
  */
+@Deprecated
 public interface BMFactory {
 	
 	/**
@@ -46,31 +47,6 @@ public interface BMFactory {
 	 * @return фабрика сделок
 	 */
 	public TradeFactory createTradeFactory();
-	
-	/**
-	 * Создать конструктор заявок.
-	 * <p>
-	 * @return конструктор заявок
-	 */
-	public OrderBuilder createOrderBuilder();
-	
-	/**
-	 * Создать конструктор заявок.
-	 * <p>
-	 * @param transId нумератор транзакций
-	 * @return конструктор заявок
-	 */
-	public OrderBuilder createOrderBuilder(Counter transId);
-	
-	/**
-	 * Создать конструктор заявок.
-	 * <p>
-	 * @param transId нумератор транзакций
-	 * @param factory фабрика заявок
-	 * @return конструктор заявок
-	 */
-	public OrderBuilder
-			createOrderBuilder(Counter transId, OrderFactory factory);
 	
 	/**
 	 * Создать сеттер, генерирующий стандартные события заявки.
