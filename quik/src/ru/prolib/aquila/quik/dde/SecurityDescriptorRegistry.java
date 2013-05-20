@@ -140,20 +140,31 @@ public class SecurityDescriptorRegistry {
 		return codeClass2descr.containsKey(code + "@" + classCode);
 	}
 	
+	/**
+	 * Сравнить два реестра.
+	 * <p>
+	 * Два реестра считаются эквивалентными, если они используют один и тот же
+	 * экземпляр генератора критического события и содержат эквивалентные карты
+	 * дескрипторов инструментов. Такой способ сравнения выбран с целью
+	 * подавления бесконечной рекурсии при сравнении, когда генератор прямо или
+	 * косвенно ссылается на экземпляр реестра дескрипторов. Например генератор
+	 * - это терминал, который содержит стартер кэша, который в свою очередь
+	 * содержит реестр дескрипторов, ссылающийся на терминал, как на генератор
+	 * критических событий.
+	 */
 	@Override
 	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null ) {
-			return false;
-		}
-		if ( other.getClass() != SecurityDescriptorRegistry.class ) {
+		if ( other == null
+		  || other.getClass() != SecurityDescriptorRegistry.class )
+		{
 			return false;
 		}
 		SecurityDescriptorRegistry o = (SecurityDescriptorRegistry) other;
 		return new EqualsBuilder()
-			.append(firePanic, o.firePanic)
+			.appendSuper(firePanic == o.firePanic)
 			.append(name2descr, o.name2descr)
 			.append(codeClass2descr, o.codeClass2descr)
 			.isEquals();

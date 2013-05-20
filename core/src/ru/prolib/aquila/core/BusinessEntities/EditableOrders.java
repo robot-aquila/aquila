@@ -63,7 +63,7 @@ public interface EditableOrders extends Orders {
 	/**
 	 * Зарегистрировать ожидающую заявку.
 	 * <p>
-	 * @param transId номер транзакции
+	 * @param transId номер транзакции (будет установлен для экземпляра)
 	 * @param order заявка
 	 * @throws OrderAlreadyExistsException
 	 */

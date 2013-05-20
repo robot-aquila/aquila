@@ -136,21 +136,6 @@ public class QUIKCompFactory implements BMFactory {
 	}
 
 	@Override
-	public OrderBuilder createOrderBuilder() {
-		return bfactory.createOrderBuilder(locator.getTransactionNumerator());
-	}
-
-	@Override
-	public OrderBuilder createOrderBuilder(Counter arg0) {
-		return bfactory.createOrderBuilder(arg0);
-	}
-
-	@Override
-	public OrderBuilder createOrderBuilder(Counter arg0, OrderFactory arg1) {
-		return bfactory.createOrderBuilder(arg0, arg1);
-	}
-
-	@Override
 	public S<EditableOrder> createOrderEG() {
 		return bfactory.createOrderEG();
 	}

@@ -161,7 +161,18 @@ public class AccountRegistry {
 	public synchronized boolean isAccountRegistered(String accountCode) {
 		return isAccountRegistered(accountCode, accountCode);
 	}
-	
+
+	/**
+	 * Сравнить два реестра.
+	 * <p>
+	 * Два реестра считаются эквивалентными, если они используют один и тот же
+	 * экземпляр генератора критического события и содержат одинаковый список
+	 * торговых счетов. Такой способ сравнения выбран с целью подавления
+	 * бесконечной рекурсии при сравнении, когда генератор прямо или
+	 * косвенно ссылается на экземпляр реестра счетов. Например генератор - это
+	 * терминал, который содержит стартер кэша, который в свою очередь содержит
+	 * реестр счетов, ссылающийся на терминал.
+	 */
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {
@@ -170,7 +181,7 @@ public class AccountRegistry {
 		if ( other != null && other.getClass() == AccountRegistry.class ) {
 			AccountRegistry o = (AccountRegistry) other;
 			return new EqualsBuilder()
-				.append(firePanic, o.firePanic)
+				.appendSuper(firePanic == o.firePanic)
 				.append(cache, o.cache)
 				.isEquals();
 		} else {

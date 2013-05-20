@@ -1,6 +1,8 @@
 package ru.prolib.aquila.quik.assembler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.quik.dde.*;
@@ -8,55 +10,59 @@ import ru.prolib.aquila.quik.dde.*;
 /**
  * Фасад подсистемы сборки и согласования объектов бизнес-модели.
  */
-public class Assembler implements Starter {
-	private final SecuritiesAssembler securitiesAssembler;
-	private final PortfoliosAssembler portfoliosAssembler;
-	private final PositionsAssembler positionsAssembler;
+public class Assembler implements Starter, EventListener {
+	private static final Logger logger;
 	
-	public Assembler(SecuritiesAssembler securitiesAssembler,
-			PortfoliosAssembler portfoliosAssembler,
-			PositionsAssembler positionsAssembler)
+	static {
+		logger = LoggerFactory.getLogger(Assembler.class);
+	}
+	
+	private final EditableTerminal terminal;
+	private final Cache cache;
+	private final AssemblerHighLvl high;
+	
+	public Assembler(EditableTerminal terminal, Cache cache,
+			AssemblerHighLvl high)
 	{
 		super();
-		this.securitiesAssembler = securitiesAssembler;
-		this.portfoliosAssembler = portfoliosAssembler;
-		this.positionsAssembler = positionsAssembler;
+		this.terminal = terminal;
+		this.cache = cache;
+		this.high = high;
 	}
 	
-	public Assembler(EditableTerminal terminal, Cache cache) {
-		this(new SecuritiesAssembler(cache,
-				new SecurityAssembler(terminal, cache)),
-			new PortfoliosAssembler(cache,
-				new PortfolioAssembler(terminal, cache)),
-			new PositionsAssembler(cache,
-				new PositionAssembler(terminal, cache))
-		);
+	
+	public EditableTerminal getTerminal() {
+		return terminal;
 	}
 	
-	public SecuritiesAssembler getSecuritiesAssembler() {
-		return securitiesAssembler;
+	public Cache getCache() {
+		return cache;
 	}
-	
-	public PortfoliosAssembler getPortfoliosAssembler() {
-		return portfoliosAssembler;
-	}
-	
-	public PositionsAssembler getPositionsAssembler() {
-		return positionsAssembler;
+
+	public AssemblerHighLvl getAssemblerHighLevel() {
+		return high;
 	}
 
 	@Override
 	public void start() throws StarterException {
-		securitiesAssembler.start();
-		portfoliosAssembler.start();
-		positionsAssembler.start();
+		terminal.OnPortfolioAvailable().addListener(this);
+		terminal.OnSecurityAvailable().addListener(this);
+		cache.OnPortfoliosFCacheUpdate().addListener(this);
+		cache.OnPositionsFCacheUpdate().addListener(this);
+		cache.OnSecuritiesCacheUpdate().addListener(this);
+		cache.OnOrdersCacheUpdate().addListener(this);
+		cache.OnTradesCacheUpdate().addListener(this);
 	}
 
 	@Override
 	public void stop() throws StarterException {
-		positionsAssembler.stop();
-		portfoliosAssembler.stop();
-		securitiesAssembler.stop();
+		cache.OnTradesCacheUpdate().removeListener(this);
+		cache.OnOrdersCacheUpdate().removeListener(this);
+		cache.OnSecuritiesCacheUpdate().removeListener(this);
+		cache.OnPositionsFCacheUpdate().removeListener(this);
+		cache.OnPortfoliosFCacheUpdate().removeListener(this);		
+		terminal.OnSecurityAvailable().removeListener(this);
+		terminal.OnPortfolioAvailable().removeListener(this);
 	}
 	
 	@Override
@@ -69,10 +75,30 @@ public class Assembler implements Starter {
 		}
 		Assembler o = (Assembler) other;
 		return new EqualsBuilder()
-			.append(securitiesAssembler, o.securitiesAssembler)
-			.append(portfoliosAssembler, o.portfoliosAssembler)
-			.append(positionsAssembler, o.positionsAssembler)
+			.append(o.cache, cache)
+			.append(o.high, high)
+			.appendSuper(o.terminal == terminal)
 			.isEquals();
+	}
+
+	@Override
+	public void onEvent(Event event) {
+		logger.debug("Initiated by: {}", event);
+		if ( event.isType(cache.OnTradesCacheUpdate())
+		  || event.isType(terminal.OnSecurityAvailable())
+		  || event.isType(terminal.OnPortfolioAvailable()) )
+		{
+			high.adjustOrders();
+			high.adjustPositions();
+		} else if ( event.isType(cache.OnOrdersCacheUpdate()) ) {
+			high.adjustOrders();
+		} else if ( event.isType(cache.OnPositionsFCacheUpdate()) ) {
+			high.adjustPositions();
+		} else if ( event.isType(cache.OnSecuritiesCacheUpdate()) ) {
+			high.adjustSecurities();
+		} else if ( event.isType(cache.OnPortfoliosFCacheUpdate()) ) {
+			high.adjustPortfolios();
+		}
 	}
 
 }

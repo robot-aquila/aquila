@@ -22,6 +22,25 @@ public class AccountRegistryTest {
 	private FirePanicEvent firePanic;
 	private AccountRegistry accounts;
 	
+	/**
+	 * Вспомогательный класс для тестирования сравнения реестров.
+	 */
+	static class TestFirePanicEvent implements FirePanicEvent {
+		@Override
+		public void firePanicEvent(int code, String msgId) { }
+		@Override
+		public void firePanicEvent(int code, String msgId, Object[] args) { }
+		/**
+		 * Сравнение с другим экземпляров всегда будет давать true.
+		 * Но это не должно влиять на сравнение реестра, которое рассматривает
+		 * конкретные экземпляры генераторов, а не их эквивалентность.
+		 */
+		@Override
+		public boolean equals(Object other) {
+			return other != null && other.getClass()==TestFirePanicEvent.class;
+		}
+	}
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
@@ -112,14 +131,17 @@ public class AccountRegistryTest {
 	
 	@Test
 	public void testEquals() throws Exception {
+		firePanic = new TestFirePanicEvent();
+		accounts = new AccountRegistry(firePanic);
 		accounts.registerAccount(acc1);
 		accounts.registerAccount(acc2);
 		accounts.registerAccount(acc3);
+		
 		Account actualAccSet[] = { acc1, acc2, acc3 };
 		Account otherAccSet[] = { acc1, acc4 };
 		Variant<FirePanicEvent> vFire = new Variant<FirePanicEvent>()
 			.add(firePanic)
-			.add(control.createMock(FirePanicEvent.class));
+			.add(new TestFirePanicEvent());
 		Variant<Account[]> vAccs = new Variant<Account[]>(vFire)
 			.add(actualAccSet)
 			.add(otherAccSet);

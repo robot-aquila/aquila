@@ -137,37 +137,11 @@ public class QUIKServiceLocatorTest {
 	
 	@Test
 	public void testGetDdeCache() throws Exception {
-		EventSystem es = control.createMock(EventSystem.class);
-		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
-		EventType onOrdersUpdate = control.createMock(EventType.class);
-		EventType onTradesUpdate = control.createMock(EventType.class);
-		EventType onSecuritiesUpdate = control.createMock(EventType.class);
-		EventType onPortsFUpdate = control.createMock(EventType.class);
-		EventType onPossFUpdate = control.createMock(EventType.class);
-		EventType onStopOrdersUpdate = control.createMock(EventType.class);
-		expect(es.createEventDispatcher(eq("Cache"))).andReturn(dispatcher);
-		expect(es.createGenericType(same(dispatcher), eq("Orders")))
-			.andReturn(onOrdersUpdate);
-		expect(es.createGenericType(same(dispatcher), eq("MyTrades")))
-			.andReturn(onTradesUpdate);
-		expect(es.createGenericType(same(dispatcher), eq("Securities")))
-			.andReturn(onSecuritiesUpdate);
-		expect(es.createGenericType(same(dispatcher), eq("PortfoliosFORTS")))
-			.andReturn(onPortsFUpdate);
-		expect(es.createGenericType(same(dispatcher), eq("PositionsFORTS")))
-			.andReturn(onPossFUpdate);
-		expect(es.createGenericType(same(dispatcher), eq("StopOrders")))
-			.andReturn(onStopOrdersUpdate);
-		locator.setEventSystem(es);
+		EventSystem es = new EventSystemImpl();
+		expect(terminal.getEventSystem()).andStubReturn(es);
 		control.replay();
 		
-		Cache expected = new Cache(new PartiallyKnownObjects(terminal),
-				new OrdersCache(dispatcher, onOrdersUpdate),
-				new TradesCache(dispatcher, onTradesUpdate),
-				new SecuritiesCache(dispatcher, onSecuritiesUpdate),
-				new PortfoliosFCache(dispatcher, onPortsFUpdate),
-				new PositionsFCache(dispatcher, onPossFUpdate),
-				new StopOrdersCache(dispatcher, onStopOrdersUpdate));
+		Cache expected = new CacheBuilder().createCache(terminal);
 		Cache actual = locator.getDdeCache();
 		
 		control.verify();

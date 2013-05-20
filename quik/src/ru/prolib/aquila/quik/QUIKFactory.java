@@ -14,6 +14,7 @@ import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.*;
 import ru.prolib.aquila.quik.api.*;
 import ru.prolib.aquila.quik.assembler.Assembler;
+import ru.prolib.aquila.quik.assembler.AssemblerBuilder;
 import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.*;
 import ru.prolib.aquila.quik.subsys.row.RowAdapters;
@@ -180,21 +181,11 @@ public class QUIKFactory implements TerminalFactory {
 		StarterQueue starter = new StarterQueue();
 		starter.add(new EventQueueStarter(es.getEventQueue(), 10000));
 		
-		// First, start new assember service
-		starter.add(new Assembler(decorator, locator.getDdeCache()));
-		// Old DDE table listeners starts before all
-		DDEService service = createDdeService(locator, starter);
-		// DDE server starts after listeners
-		if ( startServer ) starter.add(new DDEServerStarter(server));
-		// DDE service starts after server started
-		starter.add(new DDEServiceStarter(server, service));
-		
 		// Make terminal instance
 		EventDispatcher dispatcher = es.createEventDispatcher("QUIKTerminal");
 		final EditableTerminal terminal = new TerminalImpl(es, starter,
 				fc.createSecurities(),
 				fc.createPortfolios(), fc.createOrders(), fc.createOrders(),
-				fc.createOrderBuilder(),
 				dispatcher,
 				es.createGenericType(dispatcher, "OnConnected"),
 				es.createGenericType(dispatcher, "OnDisconnected"),
@@ -203,6 +194,16 @@ public class QUIKFactory implements TerminalFactory {
 				es.createGenericType(dispatcher, "OnPanic"));
 		terminal.setOrderProcessorInstance(locator.getOrderProcessor());
 		decorator.setTerminal(terminal);
+		
+		// First, start new assember service
+		starter.add(new AssemblerBuilder()
+			.createAssembler(terminal, locator.getDdeCache()));
+		// Old DDE table listeners starts before all
+		DDEService service = createDdeService(locator, starter);
+		// DDE server starts after listeners
+		if ( startServer ) starter.add(new DDEServerStarter(server));
+		// DDE service starts after server started
+		starter.add(new DDEServiceStarter(server, service));
 		
 		// QUIK API
 		if ( ! config.skipTRANS2QUIK() ) {

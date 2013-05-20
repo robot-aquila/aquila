@@ -67,8 +67,7 @@ public class PlaceOrderHandlerTest {
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
 			expect(failedOrderNumerator.decrementAndGet()).andReturn(-123);
-			expect(orders.makePendingOrderAsRegisteredIfExists(100L, -123L))
-				.andReturn(order);
+			expect(orders.movePendingOrder(100L, -123L)).andReturn(order);
 			order.setAvailable(eq(true));
 			orders.fireOrderAvailableEvent(same(order));
 			order.setStatus(OrderStatus.FAILED);
@@ -84,8 +83,7 @@ public class PlaceOrderHandlerTest {
 
 	@Test
 	public void testOnEvent_Ok() throws Exception {
-		expect(orders.makePendingOrderAsRegisteredIfExists(1L, 2L))
-			.andReturn(order);
+		expect(orders.movePendingOrder(1L, 2L)).andReturn(order);
 		order.setAvailable(eq(true));
 		orders.fireOrderAvailableEvent(same(order));
 		order.setStatus(OrderStatus.ACTIVE);

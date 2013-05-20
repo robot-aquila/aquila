@@ -159,12 +159,13 @@ public class QUIKOrderProcessorTest {
 	@Test
 	public void testPlaceOrder_MarketOrderBuy() throws Exception {
 		expect(order.getStatus()).andStubReturn(OrderStatus.PENDING);
+		expect(transId.incrementAndGet()).andReturn(926);
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
-		expect(order.getTransactionId()).andStubReturn(926l);
 		expect(order.getAccount()).andStubReturn(new Account("F","K-86","LX1"));
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.BUY);
 		expect(order.getQty()).andStubReturn(1050l);
+		orders.registerPendingOrder(926L, order);
 		expect(api.OnTransReply(926l)).andReturn(type);
 		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
 		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
@@ -179,12 +180,13 @@ public class QUIKOrderProcessorTest {
 	@Test
 	public void testPlaceOrder_MarketOrderSell() throws Exception {
 		expect(order.getStatus()).andStubReturn(OrderStatus.PENDING);
+		expect(transId.incrementAndGet()).andReturn(712);
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
-		expect(order.getTransactionId()).andStubReturn(712l);
 		expect(order.getAccount()).andStubReturn(new Account("F","K-86","LX1"));
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.SELL);
 		expect(order.getQty()).andStubReturn(1l);
+		orders.registerPendingOrder(712L, order);
 		expect(api.OnTransReply(712l)).andReturn(type);
 		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
 		api.send(eq("TRANS_ID=712; CLIENT_CODE=K-86; "
@@ -199,8 +201,8 @@ public class QUIKOrderProcessorTest {
 	@Test
 	public void testPlaceOrder_LimitOrderBuy() throws Exception {
 		expect(order.getStatus()).andStubReturn(OrderStatus.PENDING);
+		expect(transId.incrementAndGet()).andReturn(926);
 		expect(order.getType()).andStubReturn(OrderType.LIMIT);
-		expect(order.getTransactionId()).andStubReturn(926l);
 		expect(order.getAccount()).andStubReturn(new Account("F","K-86","LX1"));
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.BUY);
@@ -208,6 +210,7 @@ public class QUIKOrderProcessorTest {
 		expect(order.getPrice()).andStubReturn(123.456d);
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(123.456)).andStubReturn("12.45");
+		orders.registerPendingOrder(926L, order);
 		expect(api.OnTransReply(926l)).andReturn(type);
 		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
 		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
@@ -224,8 +227,8 @@ public class QUIKOrderProcessorTest {
 	@Test
 	public void testPlaceOrder_LimitOrderSell() throws Exception {
 		expect(order.getStatus()).andStubReturn(OrderStatus.PENDING);
+		expect(transId.incrementAndGet()).andReturn(926);
 		expect(order.getType()).andStubReturn(OrderType.LIMIT);
-		expect(order.getTransactionId()).andStubReturn(926l);
 		expect(order.getAccount()).andStubReturn(new Account("F","K-86","LX1"));
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.SELL);
@@ -233,6 +236,7 @@ public class QUIKOrderProcessorTest {
 		expect(order.getPrice()).andStubReturn(123.456d);
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(123.456)).andStubReturn("12.45");
+		orders.registerPendingOrder(926L, order);
 		expect(api.OnTransReply(926l)).andReturn(type);
 		type.addListener(eq(new PlaceOrderHandler(locator, orders)));
 		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
@@ -249,8 +253,8 @@ public class QUIKOrderProcessorTest {
 	@Test
 	public void testPlaceOrder_StopLimitBuy() throws Exception {
 		expect(order.getStatus()).andStubReturn(OrderStatus.PENDING);
+		expect(transId.incrementAndGet()).andReturn(926);
 		expect(order.getType()).andStubReturn(OrderType.STOP_LIMIT);
-		expect(order.getTransactionId()).andStubReturn(926l);
 		expect(order.getAccount()).andStubReturn(new Account("F","K-86","LX1"));
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.BUY);
@@ -260,6 +264,7 @@ public class QUIKOrderProcessorTest {
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(120d)).andReturn("12.00");
 		expect(security.shrinkPrice(12.456)).andReturn("12.45");
+		stopOrders.registerPendingOrder(926L, order);
 		expect(api.OnTransReply(926l)).andReturn(type);
 		type.addListener(eq(new PlaceOrderHandler(locator, stopOrders)));
 		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
@@ -276,8 +281,8 @@ public class QUIKOrderProcessorTest {
 	@Test
 	public void testPlaceOrder_StopLimitSell() throws Exception {
 		expect(order.getStatus()).andStubReturn(OrderStatus.PENDING);
+		expect(transId.incrementAndGet()).andReturn(926);
 		expect(order.getType()).andStubReturn(OrderType.STOP_LIMIT);
-		expect(order.getTransactionId()).andStubReturn(926l);
 		expect(order.getAccount()).andStubReturn(new Account("F","K-86","LX1"));
 		expect(order.getSecurityDescriptor()).andStubReturn(secDescr);
 		expect(order.getDirection()).andStubReturn(OrderDirection.SELL);
@@ -287,6 +292,7 @@ public class QUIKOrderProcessorTest {
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(security.shrinkPrice(120d)).andReturn("12.00");
 		expect(security.shrinkPrice(12.456)).andReturn("12.45");
+		stopOrders.registerPendingOrder(926L, order);
 		expect(api.OnTransReply(926l)).andReturn(type);
 		type.addListener(eq(new PlaceOrderHandler(locator, stopOrders)));
 		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "

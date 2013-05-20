@@ -37,31 +37,6 @@ public class Cache {
 	}
 	
 	/**
-	 * Создать экземпляр кэша DDE.
-	 * <p>
-	 * @param es фасад событийной системы
-	 * @param firePanic генератор критического события
-	 * @return кэш DDE
-	 */
-	public static Cache createCache(EventSystem es, FirePanicEvent firePanic) {
-		EventDispatcher dispatcher = es.createEventDispatcher("Cache");
-		return new Cache(
-			new PartiallyKnownObjects(firePanic),
-			new OrdersCache(dispatcher,
-				es.createGenericType(dispatcher, "Orders")),
-			new TradesCache(dispatcher,
-				es.createGenericType(dispatcher, "MyTrades")),
-			new SecuritiesCache(dispatcher,
-				es.createGenericType(dispatcher, "Securities")),
-			new PortfoliosFCache(dispatcher,
-				es.createGenericType(dispatcher, "PortfoliosFORTS")),
-			new PositionsFCache(dispatcher,
-				es.createGenericType(dispatcher, "PositionsFORTS")),
-			new StopOrdersCache(dispatcher,
-				es.createGenericType(dispatcher, "StopOrders")));
-	}
-	
-	/**
 	 * Получить кэш таблицы заявок.
 	 * <p>
 	 * @return кэш
@@ -125,7 +100,7 @@ public class Cache {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
+	public synchronized boolean equals(Object other) {
 		if ( other == null ) {
 			return false;
 		}
@@ -319,6 +294,53 @@ public class Cache {
 	 */
 	public synchronized EventType OnPositionsFCacheUpdate() {
 		return positions_F.OnCacheUpdate();
+	}
+	
+	/**
+	 * Делегат к {@link OrdersCache#get(Long)}.
+	 * <p>
+	 * @param orderId номер заявки
+	 * @return кэш-запись заявки или null, если нет соответствующей записи
+	 */
+	public synchronized OrderCache getOrderCache(long orderId) {
+		return orders.get(orderId);
+	}
+	
+	/**
+	 * Делегат к {@link TradesCache#getAllByOrderId(Long)}.
+	 * <p>
+	 * @param orderId номер заявки
+	 * @return список кэш-записей о сделках заявки
+	 */
+	public synchronized List<TradeCache> getAllTradesByOrderId(long orderId) {
+		return trades.getAllByOrderId(orderId);
+	}
+	
+	/**
+	 * Делегат к {@link OrdersCache#getAll()}.
+	 * <p>
+	 * @return список кэш-записей
+	 */
+	public synchronized List<OrderCache> getAllOrders() {
+		return orders.getAll();
+	}
+	
+	/**
+	 * Делегат к {@link TradesCache#OnCacheUpdate()}.
+	 * <p>
+	 * @return тип события
+	 */
+	public synchronized EventType OnTradesCacheUpdate() {
+		return trades.OnCacheUpdate();
+	}
+	
+	/**
+	 * Делегат к {@link OrdersCache#OnCacheUpdate()}.
+	 * <p>
+	 * @return тип события
+	 */
+	public synchronized EventType OnOrdersCacheUpdate() {
+		return orders.OnCacheUpdate();
 	}
 
 }

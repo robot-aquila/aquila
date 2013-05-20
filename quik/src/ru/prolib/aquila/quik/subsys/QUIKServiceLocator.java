@@ -177,7 +177,7 @@ public class QUIKServiceLocator {
 	 */
 	public synchronized Cache getDdeCache() {
 		if ( ddeCache == null ) {
-			ddeCache = Cache.createCache(getEventSystem(), terminal);
+			ddeCache = new CacheBuilder().createCache(terminal);
 		}
 		return ddeCache;
 	}

@@ -57,7 +57,7 @@ public class PlaceOrderHandler implements EventListener {
 		}
 		// Когда заявка становится доступной, она еще остается ожидающей.
 		long transId = event.getTransId();
-		order = orders.makePendingOrderAsRegisteredIfExists(transId, orderId);
+		order = orders.movePendingOrder(transId, orderId);
 		order.setAvailable(true);
 		orders.fireOrderAvailableEvent(order);
 		// А теперь генерируется событие о смене статуса заявки.

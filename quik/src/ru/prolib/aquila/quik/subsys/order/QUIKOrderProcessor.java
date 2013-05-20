@@ -1,17 +1,9 @@
 package ru.prolib.aquila.quik.subsys.order;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Vector;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.quik.api.ApiServiceException;
-import ru.prolib.aquila.quik.dde.OrderCache;
-import ru.prolib.aquila.quik.dde.TradeCache;
-import ru.prolib.aquila.quik.dde.TradesCache;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 /**
@@ -65,7 +57,7 @@ public class QUIKOrderProcessor implements OrderProcessor {
 			orders = terminal.getOrdersInstance();
 			trspec = "ACTION=KILL_ORDER; ORDER_KEY=" + orderId;
 		}
-		long transId = locator.getTransactionNumerator().incrementAndGet();
+		long transId = getNextTransId();
 		locator.getApi().OnTransReply(transId)
 			.addListener(new CancelOrderHandler(locator, orders, orderId));
 		try {
@@ -82,6 +74,7 @@ public class QUIKOrderProcessor implements OrderProcessor {
 		if ( order.getStatus() != OrderStatus.PENDING ) {
 			throw new OrderException("Order not pending: " + order.getStatus());
 		}
+		long transId = getNextTransId();
 		OrderType type = order.getType();
 		Long qty = order.getQty();
 		EditableTerminal terminal = locator.getTerminal();
@@ -89,13 +82,13 @@ public class QUIKOrderProcessor implements OrderProcessor {
 		String str;
 		if ( type == OrderType.MARKET ) {
 			orders = terminal.getOrdersInstance();
-			str = newOrderTrPrefix(order)
+			str = newOrderTrPrefix(order, transId)
 				+ "ACTION=NEW_ORDER; "
 				+ "TYPE=M; PRICE=0; QUANTITY=" + qty;
 
 		} else if ( type == OrderType.LIMIT ) {
 			orders = terminal.getOrdersInstance();
-			str = newOrderTrPrefix(order)
+			str = newOrderTrPrefix(order, transId)
 				+ "ACTION=NEW_ORDER; "
 				+ "TYPE=L; "
 				+ "PRICE=" + formatPrice(order, order.getPrice()) + "; "
@@ -103,7 +96,7 @@ public class QUIKOrderProcessor implements OrderProcessor {
 			
 		} else if ( type == OrderType.STOP_LIMIT ) {
 			orders = terminal.getStopOrdersInstance();
-			str = newOrderTrPrefix(order)
+			str = newOrderTrPrefix(order, transId)
 				+ "ACTION=NEW_STOP_ORDER; "
 				+ "STOPPRICE=" +
 					formatPrice(order, order.getStopLimitPrice()) + "; "
@@ -112,7 +105,8 @@ public class QUIKOrderProcessor implements OrderProcessor {
 		} else {
 			throw new QUIKOrderTypeUnsupportedException(type);
 		}
-		locator.getApi().OnTransReply(order.getTransactionId())
+		orders.registerPendingOrder(transId, (EditableOrder) order);
+		locator.getApi().OnTransReply(transId)
 			.addListener(new PlaceOrderHandler(locator, orders));
 		send(str);
 	}
@@ -139,20 +133,21 @@ public class QUIKOrderProcessor implements OrderProcessor {
 	 * Префикс содержит общие для всех заявок атрибуты транзакции.
 	 * <p>
 	 * @param order заявка
+	 * @param transId номер транзакции
 	 * @return префикс транзакции
 	 */
-	private String newOrderTrPrefix(Order order) {
+	private String newOrderTrPrefix(Order order, long transId) {
 		Account account = order.getAccount();
 		SecurityDescriptor secDescr = order.getSecurityDescriptor();
-		return "TRANS_ID=" + order.getTransactionId() + "; "
+		return "TRANS_ID=" + transId + "; "
 			//+ "FIRM_ID=" + account.getCode() + "; "
 			+ "CLIENT_CODE=" + account.getSubCode() + "; "
 			+ "ACCOUNT=" + (account.getSubCode2() == null
 				? account.getSubCode() : account.getSubCode2()) + "; "
 			+ "CLASSCODE=" + secDescr.getClassCode() + "; "
 			+ "SECCODE=" + secDescr.getCode() + "; "
-			+ "OPERATION=" + (order.getDirection() == OrderDirection.BUY
-					? "B" : "S") + "; ";
+			+ "OPERATION=" +
+				(order.getDirection() == OrderDirection.BUY ? "B" : "S") + "; ";
 	}
 	
 	/**
@@ -185,70 +180,8 @@ public class QUIKOrderProcessor implements OrderProcessor {
 			.isEquals();
 	}
 	
-	/*
-	public void adjustOrders() {
-		EditableOrders orders = locator.getTerminal().getOrdersInstance();
-		for ( Order o : orders.getOrders() ) {
-			EditableOrder order = (EditableOrder) o;
-			if ( order.getStatus() != OrderStatus.ACTIVE ) {
-				continue;
-			}
-			OrderCache orderCache = locator.getDdeCache()
-				.getOrdersCache()
-				.get(order.getId());
-			for ( Trade trade : getUnaccountedTrades(order) ) {
-				order.addTrade(trade);
-				order.fireChangedEvent();
-				order.resetChanges();
-				order.fireTradeEvent(trade);
-			}
-			if ( order.getQtyRest() <= 0 ) {
-				order.setStatus(OrderStatus.FILLED);
-				order.fireChangedEvent();
-				order.resetChanges();
-			} else if ( orderCache.getStatus() == OrderStatus.CANCELLED
-					&& order.getQtyRest() == orderCache.getQtyRest() )
-			{
-				// Проверить совпадение исполненного кол-ва по сделкам
-				// (то есть теперь по заявке) со значением в кэше заявки.
-				// Есоли совпадают, значит учтены все сделки. Если нет, значит
-				// какие то сделки по заявке еще не закешированы и нужно ждать
-				// следующих обновлений.
-				order.setStatus(OrderStatus.CANCELLED);
-				order.fireChangedEvent();
-				order.resetChanges();
-			}
-		}
-		for ( OrderCache o : locator.getDdeCache().getOrdersCache().getAll() ) {
-			if ( orders.isOrderExists(o.getId()) ) {
-				continue;
-			}
-			
-			
-		}
+	private long getNextTransId() {
+		return locator.getTransactionNumerator().incrementAndGet();
 	}
-	
-	private List<Trade> getUnaccountedTrades(Order order) {
-		List<Trade> newTrades = new Vector<Trade>();
-		for ( TradeCache cache : locator.getDdeCache().getTradesCache()
-				.getAllByOrderId(order.getId()) )
-		{
-			if ( ! order.hasTrade(cache.getId()) ) {
-				Trade trade = new Trade(order.getTerminal());
-				trade.setDirection(order.getDirection());
-				trade.setId(cache.getId());
-				trade.setOrderId(cache.getOrderId());
-				trade.setPrice(cache.getPrice());
-				trade.setQty(cache.getQty());
-				trade.setSecurityDescriptor(order.getSecurityDescriptor());
-				trade.setTime(cache.getTime());
-				trade.setVolume(cache.getVolume());
-				newTrades.add(trade);
-			}
-		}
-		Collections.sort(newTrades);
-		return newTrades;
-	}
-	*/
 
 }

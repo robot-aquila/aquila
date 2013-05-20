@@ -13,7 +13,6 @@ public class CacheTest {
 	private static Account acc;
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
-	private EventSystem es;
 	private PartiallyKnownObjects partiallyKnown;
 	private OrdersCache orders;
 	private TradesCache trades;
@@ -32,7 +31,6 @@ public class CacheTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		es = control.createMock(EventSystem.class);
 		partiallyKnown = control.createMock(PartiallyKnownObjects.class);
 		orders = control.createMock(OrdersCache.class);
 		trades = control.createMock(TradesCache.class);
@@ -42,45 +40,6 @@ public class CacheTest {
 		stopOrders = control.createMock(StopOrdersCache.class);
 		cache = new Cache(partiallyKnown, orders, trades, securities, ports_F,
 				poss_F, stopOrders);
-	}
-	
-	@Test
-	public void testCreateCache() throws Exception {
-		FirePanicEvent firePanic = control.createMock(FirePanicEvent.class);
-		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
-		EventType onOrdersUpdate = control.createMock(EventType.class);
-		EventType onTradesUpdate = control.createMock(EventType.class);
-		EventType onSecuritiesUpdate = control.createMock(EventType.class);
-		EventType onPortsFUpdate = control.createMock(EventType.class);
-		EventType onPossFUpdate = control.createMock(EventType.class);
-		EventType onStopOrdersUpdate = control.createMock(EventType.class);
-		expect(es.createEventDispatcher("Cache")).andReturn(dispatcher);
-		expect(es.createGenericType(dispatcher, "Orders"))
-			.andReturn(onOrdersUpdate);
-		expect(es.createGenericType(dispatcher, "MyTrades"))
-			.andReturn(onTradesUpdate);
-		expect(es.createGenericType(dispatcher, "Securities"))
-			.andReturn(onSecuritiesUpdate);
-		expect(es.createGenericType(dispatcher, "PortfoliosFORTS"))
-			.andReturn(onPortsFUpdate);
-		expect(es.createGenericType(dispatcher, "PositionsFORTS"))
-			.andReturn(onPossFUpdate);
-		expect(es.createGenericType(dispatcher, "StopOrders"))
-			.andReturn(onStopOrdersUpdate);
-		control.replay();
-		
-		cache = Cache.createCache(es, firePanic);
-		
-		control.verify();
-		assertNotNull(cache);
-		Cache expected = new Cache(new PartiallyKnownObjects(firePanic),
-				new OrdersCache(dispatcher, onOrdersUpdate),
-				new TradesCache(dispatcher, onTradesUpdate),
-				new SecuritiesCache(dispatcher, onSecuritiesUpdate),
-				new PortfoliosFCache(dispatcher, onPortsFUpdate),
-				new PositionsFCache(dispatcher, onPossFUpdate),
-				new StopOrdersCache(dispatcher, onStopOrdersUpdate));
-		assertEquals(expected, cache);
 	}
 	
 	@Test
@@ -315,6 +274,61 @@ public class CacheTest {
 		control.replay();
 		
 		assertSame(type, cache.OnPositionsFCacheUpdate());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetOrderCache() throws Exception {
+		OrderCache entry = control.createMock(OrderCache.class);
+		expect(orders.get(eq(147L))).andReturn(entry);
+		control.replay();
+		
+		assertSame(entry, cache.getOrderCache(147L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetAllTradesByOrderId() throws Exception {
+		List<TradeCache> entries = new Vector<TradeCache>();
+		expect(trades.getAllByOrderId(eq(894L))).andReturn(entries);
+		control.replay();
+		
+		assertSame(entries, cache.getAllTradesByOrderId(894L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetAllOrders() throws Exception {
+		List<OrderCache> entries = new Vector<OrderCache>();
+		expect(orders.getAll()).andReturn(entries);
+		control.replay();
+		
+		assertSame(entries, cache.getAllOrders());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnTradesCacheUpdate() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(trades.OnCacheUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnTradesCacheUpdate());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnOrdersCacheUpdate() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(orders.OnCacheUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnOrdersCacheUpdate());
 		
 		control.verify();
 	}

@@ -166,40 +166,6 @@ public class QUIKCompFactoryTest {
 		assertEquals(hashCode, factory.hashCode());
 	}
 	
-	@Test
-	public void testCreateOrderBuilder0() throws Exception {
-		Counter transId = control.createMock(Counter.class);
-		OrderBuilder expected = control.createMock(OrderBuilder.class);
-		expect(locator.getTransactionNumerator()).andReturn(transId);
-		expect(bfactory.createOrderBuilder(same(transId))).andReturn(expected);
-		control.replay();
-		assertSame(expected, factory.createOrderBuilder());
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateOrderBuilder1() throws Exception {
-		Counter counter = control.createMock(Counter.class);
-		OrderBuilder expected = control.createMock(OrderBuilder.class);
-		expect(bfactory.createOrderBuilder(same(counter)))
-			.andReturn(expected);
-		control.replay();
-		assertSame(expected, factory.createOrderBuilder(counter));
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateOrderBuilder2() throws Exception {
-		Counter counter = control.createMock(Counter.class);
-		OrderFactory ofactory = control.createMock(OrderFactory.class);
-		OrderBuilder expected = control.createMock(OrderBuilder.class);
-		expect(bfactory.createOrderBuilder(same(counter), same(ofactory)))
-			.andReturn(expected);
-		control.replay();
-		assertSame(expected, factory.createOrderBuilder(counter, ofactory));
-		control.verify();
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCreateOrderEG0() throws Exception {

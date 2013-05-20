@@ -2,17 +2,12 @@ package ru.prolib.aquila.quik.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.List;
-import java.util.Vector;
-
+import java.util.*;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.quik.dde.SecurityDescriptorRegistry;
 
 /**
  * 2013-01-23<br>
@@ -23,6 +18,41 @@ public class SecurityDescriptorRegistryTest {
 	private IMocksControl control;
 	private FirePanicEvent firePanic;
 	private SecurityDescriptorRegistry registry;
+	
+	/**
+	 * Вспомогательный класс для тестирования сравнения реестров.
+	 */
+	private static class TestFirePanicEvent implements FirePanicEvent {
+		@Override
+		public void firePanicEvent(int code, String msgId) { }
+		@Override
+		public void firePanicEvent(int code, String msgId, Object[] args) { }
+		/**
+		 * Сравнение с другим экземпляров всегда будет давать true.
+		 * Но это не должно влиять на сравнение реестра, которое рассматривает
+		 * конкретные экземпляры генераторов, а не их эквивалентность.
+		 */
+		@Override
+		public boolean equals(Object other) {
+			return other != null && other.getClass()==TestFirePanicEvent.class;
+		}
+	}
+	
+	/**
+	 * Вспомогательный класс для представления записи кэша.
+	 */
+	private static class FR {
+		private final SecurityDescriptor descr;
+		private final String name;
+		
+		private FR(SecurityDescriptor descr, String name) {
+			super();
+			this.descr = descr;
+			this.name = name;
+		}
+		
+	}
+
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -118,20 +148,14 @@ public class SecurityDescriptorRegistryTest {
 		assertFalse(registry.equals(this));
 	}
 	
-	private static class FR {
-		private final SecurityDescriptor descr;
-		private final String name;
-		
-		private FR(SecurityDescriptor descr, String name) {
-			super();
-			this.descr = descr;
-			this.name = name;
-		}
-		
-	}
-	
 	@Test
 	public void testEquals() throws Exception {
+		firePanic = new TestFirePanicEvent();
+		registry = new SecurityDescriptorRegistry(firePanic);
+		registry.registerSecurityDescriptor(descr1, "LKOH");
+		registry.registerSecurityDescriptor(descr2, "ЛУКОЙЛ");
+		registry.registerSecurityDescriptor(descr3, "RIM2");
+		
 		List<FR> rows1 = new Vector<FR>();
 		rows1.add(new FR(descr1, "LKOH"));
 		rows1.add(new FR(descr2, "ЛУКОЙЛ"));
@@ -140,7 +164,7 @@ public class SecurityDescriptorRegistryTest {
 		rows2.add(new FR(descr3, "RIM2"));
 		Variant<FirePanicEvent> vFire = new Variant<FirePanicEvent>()
 			.add(firePanic)
-			.add(control.createMock(FirePanicEvent.class));
+			.add(new TestFirePanicEvent());
 		Variant<List<FR>> vRows = new Variant<List<FR>>(vFire)
 			.add(rows1)
 			.add(rows2);

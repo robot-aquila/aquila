@@ -50,7 +50,7 @@ public class QUIKTableListenerStarter implements Starter {
 		//orderListeners.add(lf.listenPositionsSTK());
 		//orderListeners.add(lf.listenPortfoliosFUT());
 		//orderListeners.add(lf.listenPositionsFUT());
-		orderListeners.add(lf.listenOrders());
+		//orderListeners.add(lf.listenOrders());
 		orderListeners.add(lf.listenStopOrders());
  
 		for ( DDETableListener listener : orderListeners ) {
