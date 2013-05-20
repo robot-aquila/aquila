@@ -11,6 +11,7 @@ import ru.prolib.aquila.quik.dde.*;
  * Фасад подсистемы сборки и согласования объектов бизнес-модели.
  */
 public class Assembler implements Starter, EventListener {
+	@SuppressWarnings("unused")
 	private static final Logger logger;
 	
 	static {
@@ -83,7 +84,7 @@ public class Assembler implements Starter, EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		logger.debug("Initiated by: {}", event);
+		//logger.debug("Initiated by: {}", event);
 		if ( event.isType(cache.OnTradesCacheUpdate())
 		  || event.isType(terminal.OnSecurityAvailable())
 		  || event.isType(terminal.OnPortfolioAvailable()) )

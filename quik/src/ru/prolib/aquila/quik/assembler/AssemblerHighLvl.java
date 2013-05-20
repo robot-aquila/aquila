@@ -52,7 +52,7 @@ class AssemblerHighLvl {
 	 * Согласовать заявки.
 	 */
 	public void adjustOrders() {
-		logger.debug("Adjust orders");
+		//logger.debug("Adjust orders");
 		for ( Order o : terminal.getOrders() ) {
 			middle.checkIfOrderRemoved((EditableOrder) o);
 		}
@@ -71,7 +71,7 @@ class AssemblerHighLvl {
 	 * Согласовать инструменты.
 	 */
 	public void adjustSecurities() {
-		logger.debug("Adjust securities");
+		//logger.debug("Adjust securities");
 		for ( SecurityCache entry : cache.getAllSecurities() ) {
 			middle.updateSecurity(entry);
 		}
@@ -81,7 +81,7 @@ class AssemblerHighLvl {
 	 * Согласовать портфели.
 	 */
 	public void adjustPortfolios() {
-		logger.debug("Adjust portfolios");
+		//logger.debug("Adjust portfolios");
 		for ( PortfolioFCache entry : cache.getAllPortfoliosF() ) {
 			middle.updatePortfolioFORTS(entry);
 		}
@@ -91,7 +91,7 @@ class AssemblerHighLvl {
 	 * Согласовать позиции.
 	 */
 	public void adjustPositions() {
-		logger.debug("Adjust positions");
+		//logger.debug("Adjust positions");
 		for ( PositionFCache entry : cache.getAllPositionsF() ) {
 			middle.updatePositionFORTS(entry);
 		}
