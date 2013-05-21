@@ -31,6 +31,7 @@ public class StopOrdersGateway implements CacheGateway {
 	private static final String SPREAD_UNITS = "SPREAD_UNITS";
 	private static final String DATE = "STOP_ORDERDATE";
 	private static final String TIME = "STOP_ORDERTIME";
+	private static final String WITHDRAW_TIME = "STOP_ORDERWITHDRAWTIME";
 	private static final String[] REQUIRED_HEADERS = {
 		ID,
 		TRANS_ID,
@@ -52,6 +53,7 @@ public class StopOrdersGateway implements CacheGateway {
 		SPREAD_UNITS,
 		DATE,
 		TIME,
+		WITHDRAW_TIME,
 	};
 	
 	private static final Map<String, OrderType> TYPE_MAP;
@@ -132,7 +134,7 @@ public class StopOrdersGateway implements CacheGateway {
 					getSpread(row),
 					(linkedOrderId == 0 ? null : linkedOrderId),
 					converter.getTime(row, DATE, TIME, false),
-					null,
+					converter.getTime(row, DATE, WITHDRAW_TIME, true),
 					getType(row)));
 		} catch ( ValueException e ) {
 			throw new DDEException(e.getMessage());

@@ -41,6 +41,16 @@ public class RowDataConverterTest {
 	}
 	
 	@Test
+	public void testGetTime_PermitNullAndUnsynched() throws Exception {
+		data.put("date", ""); data.put("time", "");
+		assertNull(converter.getTime(row, "date", "time", true));
+		data.put("date", "2013-06-01"); data.put("time", "");
+		assertNull(converter.getTime(row, "date", "time", true));
+		data.put("date", ""); data.put("time", "15:00:00");
+		assertNull(converter.getTime(row, "date", "time", true));
+	}
+	
+	@Test
 	public void testGetTime_PermitNull() throws Exception {
 		Variant<Object> vDate = new Variant<Object>()
 			.add("")
@@ -48,26 +58,26 @@ public class RowDataConverterTest {
 			.add("01.06.2013")
 			.add(null)
 			.add(new Double(18.92d));
-			Variant<Object> vTime = new Variant<Object>(vDate)
-				.add("")
-				.add("23:45:30")
-				.add("23 hrs. 45 mins.")
-				.add(null)
-				.add(new Double(32.48d));
-			Variant<?> iterator = vTime;
-			Set<Date> found = new HashSet<Date>();
-			do {
-				data.put("date", vDate.get());
-				data.put("time", vTime.get());
-				try {
-					Date x = converter.getTime(row, "date", "time", true);
-					found.add(x);
-				} catch ( Exception e ) { }
-			} while ( iterator.next() );
-			assertEquals(2, found.size());
-			assertTrue(found.contains(null));
-			assertTrue(found.contains(format.parse("2013-06-01 23:45:30")));
-		}
+		Variant<Object> vTime = new Variant<Object>(vDate)
+			.add("")
+			.add("23:45:30")
+			.add("23 hrs. 45 mins.")
+			.add(null)
+			.add(new Double(32.48d));
+		Variant<?> iterator = vTime;
+		Set<Date> found = new HashSet<Date>();
+		do {
+			data.put("date", vDate.get());
+			data.put("time", vTime.get());
+			try {
+				Date x = converter.getTime(row, "date", "time", true);
+				found.add(x);
+			} catch ( Exception e ) { }
+		} while ( iterator.next() );
+		assertEquals(2, found.size());
+		assertTrue(found.contains(null));
+		assertTrue(found.contains(format.parse("2013-06-01 23:45:30")));
+	}
 		
 	@Test
 	public void testGetTime_RestrictNull() throws Exception {

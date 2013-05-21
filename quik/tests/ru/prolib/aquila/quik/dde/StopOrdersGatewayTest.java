@@ -61,6 +61,7 @@ public class StopOrdersGatewayTest {
 				"SPREAD_UNITS",
 				"STOP_ORDERDATE",
 				"STOP_ORDERTIME",
+				"STOP_ORDERWITHDRAWTIME",
 		};
 		assertArrayEquals(expected, gateway.getRequiredHeaders());
 	}
@@ -88,6 +89,7 @@ public class StopOrdersGatewayTest {
 		map.put("SPREAD_UNITS", "");
 		map.put("STOP_ORDERDATE", "2013-02-22");
 		map.put("STOP_ORDERTIME", "19:03:00");
+		map.put("STOP_ORDERWITHDRAWTIME", "");
 		Row row = new SimpleRow(map);
 		StopOrderCache expected = new StopOrderCache(150L, 200L,
 				OrderStatus.ACTIVE, "RIM3", "SPBFUT", "eqe01", "3466",
@@ -127,6 +129,7 @@ public class StopOrdersGatewayTest {
 		map.put("SPREAD_UNITS", "Д");
 		map.put("STOP_ORDERDATE", "2010-01-01");
 		map.put("STOP_ORDERTIME", "12:00:00");
+		map.put("STOP_ORDERWITHDRAWTIME", "15:00:00");
 		Row row = new SimpleRow(map);
 		StopOrderCache expected = new StopOrderCache(153L, null,
 				OrderStatus.CANCELLED, "GAZP", "EQBR", "LX01", "88s2",
@@ -135,7 +138,7 @@ public class StopOrdersGatewayTest {
 				new Price(PriceUnit.MONEY, 20.0d),
 				null,
 				timeFormat.parse("2010-01-01 12:00:00"),
-				null,
+				timeFormat.parse("2010-01-01 15:00:00"),
 				OrderType.TAKE_PROFIT);
 		cache.put(eq(expected));
 		control.replay();
@@ -168,6 +171,7 @@ public class StopOrdersGatewayTest {
 		map.put("SPREAD_UNITS", "%");
 		map.put("STOP_ORDERDATE", "2011-01-01");
 		map.put("STOP_ORDERTIME", "12:10:00");
+		map.put("STOP_ORDERWITHDRAWTIME", "");
 		Row row = new SimpleRow(map);
 		StopOrderCache expected = new StopOrderCache(1024L, 889L,
 				OrderStatus.FILLED, "SBER", "EQBR", "LX01", "88s2",
