@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.Starter;
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public interface Terminal extends Securities, Portfolios, Starter, Orders,
-	StopOrders, OrderProcessor
+	StopOrders, OrderProcessor, Timer
 {
 	
 	/**
@@ -146,13 +146,6 @@ public interface Terminal extends Securities, Portfolios, Starter, Orders,
 	 * @return тип события
 	 */
 	public EventType OnPanic();
-	
-	/**
-	 * Получить текущее время.
-	 * <p>
-	 * @return время актуальности состояния терминала
-	 */
-	public Date getCurrentTime();
 	
 	/**
 	 * Создать экземпляр рыночной заявки на покупку.

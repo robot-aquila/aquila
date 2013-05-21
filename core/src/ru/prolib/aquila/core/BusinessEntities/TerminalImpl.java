@@ -52,6 +52,7 @@ public class TerminalImpl implements EditableTerminal {
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private final TerminalController controller;
 	private OrderProcessor orderProcessor;
+	private final Timer timer;
 	
 	static {
 		logger = LoggerFactory.getLogger(TerminalImpl.class);
@@ -85,7 +86,8 @@ public class TerminalImpl implements EditableTerminal {
 						EventType onStarted,
 						EventType onStopped, EventType onPanic)
 	{
-		this(eventSystem, starter, securities, portfolios, orders, stopOrders,
+		this(eventSystem, new TimerLocal(), starter,
+				securities, portfolios, orders, stopOrders,
 				new TerminalController(),
 				dispatcher, onConnected, onDisconnected,
 				onStarted, onStopped, onPanic);
@@ -95,6 +97,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * Создать объект.
 	 * <p>
 	 * @param eventSystem фасад подсистемы событий
+	 * @param timer таймер
 	 * @param starter пускач
 	 * @param securities набор инструментов
 	 * @param portfolios набор портфелей
@@ -109,6 +112,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param onPanic тип события при паническом состоянии терминала
 	 */
 	public TerminalImpl(EventSystem eventSystem,
+						Timer timer,
 						Starter starter,
 						EditableSecurities securities,
 						EditablePortfolios portfolios,
@@ -165,6 +169,19 @@ public class TerminalImpl implements EditableTerminal {
 		this.onStarted = onStarted;
 		this.onStopped = onStopped;
 		this.onPanic = onPanic;
+		if ( timer == null ) {
+			throw new NullPointerException("Timer cannot be null");
+		}
+		this.timer = timer;
+	}
+	
+	/**
+	 * Получить экземпляр таймера.
+	 * <p>
+	 * @return таймер
+	 */
+	public Timer getTimer() {
+		return timer;
 	}
 	
 	/**
@@ -740,8 +757,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Date getCurrentTime() {
-		return new Date();
+	public synchronized Date getCurrentTime() {
+		return timer.getCurrentTime();
 	}
 
 	@Override
@@ -819,6 +836,7 @@ public class TerminalImpl implements EditableTerminal {
 			.append(o.starter, starter)
 			.append(o.state, state)
 			.append(o.stopOrders, stopOrders)
+			.append(o.timer, timer)
 			.isEquals();
 	}
 	
@@ -912,6 +930,7 @@ public class TerminalImpl implements EditableTerminal {
 	private void fillCommonOrder(EditableOrder order, Account account,
 			Security sec, long qty) throws OrderException
 	{
+		order.setTime(getCurrentTime());
 		order.setAccount(account);
 		order.setQty(qty);
 		order.setSecurityDescriptor(sec.getDescriptor());

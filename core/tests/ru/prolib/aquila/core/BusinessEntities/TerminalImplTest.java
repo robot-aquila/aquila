@@ -37,6 +37,7 @@ public class TerminalImplTest {
 	private TerminalImpl terminal;
 	private EditableOrder order;
 	private Security security;
+	private Timer timer;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -59,6 +60,7 @@ public class TerminalImplTest {
 		dispatcherMock = control.createMock(EventDispatcher.class);
 		security = control.createMock(Security.class);
 		order = control.createMock(EditableOrder.class);
+		timer = control.createMock(Timer.class);
 		es = new EventSystemImpl();
 		dispatcher = es.createEventDispatcher("Terminal");
 		onConn = dispatcher.createType("OnConnected");
@@ -66,7 +68,7 @@ public class TerminalImplTest {
 		onStarted = dispatcher.createType("OnStarted");
 		onStopped = dispatcher.createType("OnStopped");
 		onPanic = dispatcher.createType("OnPanic");
-		terminal = new TerminalImpl(es, starter, securities, portfolios,
+		terminal = new TerminalImpl(es, timer, starter, securities, portfolios,
 									orders, stopOrders, 
 									controller, dispatcher, 
 									onConn, onDisc, onStarted, onStopped,
@@ -79,7 +81,10 @@ public class TerminalImplTest {
 		Variant<EventSystem> vEs = new Variant<EventSystem>()
 			.add(es)
 			.add(null);
-		Variant<Starter> vStarter = new Variant<Starter>(vEs)
+		Variant<Timer> vTimer = new Variant<Timer>(vEs)
+			.add(timer)
+			.add(null);
+		Variant<Starter> vStarter = new Variant<Starter>(vTimer)
 			.add(starter).add(null);
 		Variant<EditableSecurities> vSecurities =
 				new Variant<EditableSecurities>(vStarter)
@@ -120,8 +125,8 @@ public class TerminalImplTest {
 		TerminalImpl found = null;
 		do {
 			try {
-				TerminalImpl t = new TerminalImpl(vEs.get(), vStarter.get(),
-						vSecurities.get(), vPortfolios.get(),
+				TerminalImpl t = new TerminalImpl(vEs.get(), vTimer.get(),
+						vStarter.get(), vSecurities.get(), vPortfolios.get(),
 						vOrders.get(), vStopOrds.get(), 
 						vCtrl.get(), vDisp.get(),
 						vOnConn.get(), vOnDisc.get(),
@@ -149,6 +154,7 @@ public class TerminalImplTest {
 		assertSame(onStarted, found.OnStarted());
 		assertSame(onStopped, found.OnStopped());
 		assertSame(onPanic, found.OnPanic());
+		assertSame(timer, found.getTimer());
 	}
 	
 	@Test
@@ -214,14 +220,14 @@ public class TerminalImplTest {
 		assertSame(portfolios, found.getPortfoliosInstance());
 		assertSame(orders, found.getOrdersInstance());
 		assertSame(stopOrders, found.getStopOrdersInstance());
-		assertSame(TerminalController.class,
-				found.getTerminalController().getClass());
+		assertEquals(new TerminalController(), found.getTerminalController());
 		assertSame(dispatcher, found.getEventDispatcher());
 		assertSame(onConn, found.OnConnected());
 		assertSame(onDisc, found.OnDisconnected());
 		assertSame(onStarted, found.OnStarted());
 		assertSame(onStopped, found.OnStopped());
 		assertSame(onPanic, found.OnPanic());
+		assertEquals(new TimerLocal(), found.getTimer());
 	}
 	
 	@Test
@@ -1086,8 +1092,8 @@ public class TerminalImplTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
-			terminal = new TerminalImpl(es, starter, securities, portfolios,
-					orders, stopOrders, 
+			terminal = new TerminalImpl(es, timer, starter,
+					securities, portfolios, orders, stopOrders, 
 					controller, dispatcherMock, 
 					onConn, onDisc, onStarted, onStopped,
 					onPanic);
@@ -1178,7 +1184,13 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testGetCurrentTime() throws Exception {
-		assertEquals(new Date(), terminal.getCurrentTime());
+		Date time = new Date();
+		expect(timer.getCurrentTime()).andReturn(time);
+		control.replay();
+		
+		assertSame(time, terminal.getCurrentTime());
+		
+		control.verify();
 	}
 	
 	@Test
@@ -1298,7 +1310,10 @@ public class TerminalImplTest {
 		Variant<EventSystem> vEs = new Variant<EventSystem>()
 			.add(es)
 			.add(control.createMock(EventSystem.class));
-		Variant<Starter> vSta = new Variant<Starter>(vEs)
+		Variant<Timer> vTmr = new Variant<Timer>(vEs)
+			.add(timer)
+			.add(control.createMock(Timer.class));
+		Variant<Starter> vSta = new Variant<Starter>(vTmr)
 			.add(starter)
 			.add(control.createMock(Starter.class));
 		Variant<EditableSecurities> vScs = new Variant<EditableSecurities>(vSta)
@@ -1348,7 +1363,7 @@ public class TerminalImplTest {
 		TerminalImpl x = null, found = null;
 		do {
 			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new TerminalImpl(vEs.get(), vSta.get(), vScs.get(),
+			x = new TerminalImpl(vEs.get(), vTmr.get(), vSta.get(), vScs.get(),
 					vPts.get(), vOrds.get(), vStOrds.get(), vCtrl.get(),
 					d, d.createType(vConnId.get()), d.createType(vDiscId.get()),
 					d.createType(vStartId.get()), d.createType(vStopId.get()),
@@ -1375,12 +1390,16 @@ public class TerminalImplTest {
 		assertEquals(onPanic, found.OnPanic());
 		assertSame(TerminalState.STOPPED, found.getTerminalState());
 		assertSame(orderProcessor, found.getOrderProcessorInstance());
+		assertSame(timer, found.getTimer());
 	}
 	
 	@Test
 	public void testCreateMarketOrderB() throws Exception {
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		order.setDirection(OrderDirection.BUY);
+		Date time = new Date();
+		expect(timer.getCurrentTime()).andReturn(time);
+		order.setTime(time);
 		order.setAccount(account);
 		order.setQty(10L);
 		order.setSecurityDescriptor(descr);
@@ -1398,6 +1417,9 @@ public class TerminalImplTest {
 	public void testCreateMarketOrderS() throws Exception {
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		order.setDirection(OrderDirection.SELL);
+		Date time = new Date();
+		expect(timer.getCurrentTime()).andReturn(time);
+		order.setTime(time);
 		order.setAccount(account);
 		order.setQty(5L);
 		order.setSecurityDescriptor(descr);
@@ -1415,6 +1437,9 @@ public class TerminalImplTest {
 	public void testCreateLimitOrderB() throws Exception {
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		order.setDirection(OrderDirection.BUY);
+		Date time = new Date();
+		expect(timer.getCurrentTime()).andReturn(time);
+		order.setTime(time);
 		order.setAccount(account);
 		order.setQty(50L);
 		order.setSecurityDescriptor(descr);
@@ -1434,6 +1459,9 @@ public class TerminalImplTest {
 	public void testCreateLimitOrderS() throws Exception {
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		order.setDirection(OrderDirection.SELL);
+		Date time = new Date();
+		expect(timer.getCurrentTime()).andReturn(time);
+		order.setTime(time);
 		order.setAccount(account);
 		order.setQty(10L);
 		order.setSecurityDescriptor(descr);
@@ -1453,6 +1481,9 @@ public class TerminalImplTest {
 	public void testCreateStopLimitB() throws Exception {
 		expect(stopOrders.createOrder(same(terminal))).andReturn(order);
 		order.setDirection(OrderDirection.BUY);
+		Date time = new Date();
+		expect(timer.getCurrentTime()).andReturn(time);
+		order.setTime(time);
 		order.setAccount(account);
 		order.setQty(50L);
 		order.setSecurityDescriptor(descr);
@@ -1472,6 +1503,9 @@ public class TerminalImplTest {
 	public void testCreateStopLimitS() throws Exception {
 		expect(stopOrders.createOrder(same(terminal))).andReturn(order);
 		order.setDirection(OrderDirection.SELL);
+		Date time = new Date();
+		expect(timer.getCurrentTime()).andReturn(time);
+		order.setTime(time);
 		order.setAccount(account);
 		order.setQty(80L);
 		order.setSecurityDescriptor(descr);
