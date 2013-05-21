@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.ib.client.Contract;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.ib.IBException;
@@ -91,16 +92,20 @@ public class IBRunnableUpdatePosition implements Runnable {
 		Account account = new Account(event.getAccount());
 		EditablePortfolio portfolio = null;
 		EditablePosition pos = null;
+		Security security = null;
 		try {
-			portfolio = terminal.getEditablePortfolio(account); 
-			pos = portfolio.getEditablePosition(contracts
+			portfolio = terminal.getEditablePortfolio(account);
+			security = terminal.getSecurity(contracts
 					.getAppropriateSecurityDescriptor(event.getContractId()));
+			pos = portfolio.getEditablePosition(security);
 			modifier.set(pos, event);
 		} catch ( PortfolioException e ) {
 			panic(e);
 		} catch ( IBException e ) {
 			panic(e);
 		} catch ( ValueException e ) {
+			panic(e);
+		} catch ( SecurityException e ) {
 			panic(e);
 		}
 	}

@@ -23,103 +23,109 @@ import ru.prolib.aquila.ib.subsys.api.IBClient;
  * $Id: IBOrderProcessorTest.java 527 2013-02-14 15:14:09Z whirlwind $
  */
 public class IBOrderProcessorTest {
-	private static IMocksControl control;
-	private static IBClient client;
-	private static Counter transId;
-	private static IBOrderProcessor processor;
-	private static BMFactory bf;
-	private static EventType onNextValidId;
-	private static G<Contract> gSec2Contr;
 	private static SecurityDescriptor descr;
-	private static EditableTerminal terminal;
+	private IMocksControl control;
+	private IBClient client;
+	private Counter transNumerator;
+	private IBOrderProcessor processor;
+	private EventType onNextValidId;
+	private G<Contract> gSec2Contr;
+	private EditableTerminal terminal;
 	private EditableSecurity security;
 	private EditableOrder order;
-
-	@SuppressWarnings("unchecked")
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		control = createStrictControl();
-		client = control.createMock(IBClient.class);
-		transId = control.createMock(Counter.class);
-		gSec2Contr = control.createMock(G.class);
-		processor = new IBOrderProcessor(client, transId, gSec2Contr);
-		onNextValidId = control.createMock(EventType.class);
-		terminal = control.createMock(EditableTerminal.class);
-		bf = new BMFactoryImpl(new EventSystemImpl(), terminal);
 		descr = new SecurityDescriptor("AAPL","SMART","USD",SecurityType.STK);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
-		control.resetToStrict();
+		control = createStrictControl();
+		client = control.createMock(IBClient.class);
+		transNumerator = control.createMock(Counter.class);
+		gSec2Contr = control.createMock(G.class);
 		security = control.createMock(EditableSecurity.class);
-		order = bf.createOrderFactory().createOrder();
-		order.setSecurityDescriptor(descr);
+		onNextValidId = control.createMock(EventType.class);
+		terminal = control.createMock(EditableTerminal.class);		
+		order = control.createMock(EditableOrder.class);
+		processor = new IBOrderProcessor(terminal, client, transNumerator,
+				gSec2Contr);
+		
 		expect(client.OnNextValidId()).andStubReturn(onNextValidId);
-		expect(terminal.getSecurity(eq(descr))).andStubReturn(security);
 		expect(security.getDescriptor()).andStubReturn(descr);
+		expect(order.getSecurity()).andStubReturn(security);
 	}
 	
 	@Test
 	public void testCancelOrder() throws Exception {
-		order.setId(200L);
+		expect(order.getId()).andStubReturn(200L);
 		client.cancelOrder(200);
 		control.replay();
+		
 		processor.cancelOrder(order);
+		
 		control.verify();
 	}
 	
 	@Test
 	public void testPlaceOrder_MarketBuy() throws Exception {
-		order.setQty(10L);
-		order.setDirection(OrderDirection.BUY);
-		order.setType(OrderType.MARKET);
-		order.setTransactionId(150L);
+		expect(order.getQty()).andStubReturn(10L);
+		expect(order.getDirection()).andStubReturn(OrderDirection.BUY);
+		expect(order.getType()).andStubReturn(OrderType.MARKET);
 		
-		Contract contract = new Contract();
-		expect(gSec2Contr.get(same(descr))).andReturn(contract);
-
 		com.ib.client.Order ibo = new com.ib.client.Order();
 		ibo.m_action = "BUY";
 		ibo.m_totalQuantity = 10;
 		ibo.m_orderType = "MKT";
+		expect(transNumerator.incrementAndGet()).andReturn(150);
+		terminal.registerPendingOrder(eq(150L), same(order));
+		Contract contract = new Contract();
+		expect(gSec2Contr.get(same(descr))).andReturn(contract);
 		client.placeOrder(eq(150), same(contract), eq(ibo));
 		control.replay();
+		
 		processor.placeOrder(order);
+		
 		control.verify();
 	}
 	
 	@Test
 	public void testPlaceOrder_MarketSell() throws Exception {
-		order.setQty(100L);
-		order.setDirection(OrderDirection.SELL);
-		order.setType(OrderType.MARKET);
-		order.setTransactionId(50L);
+		expect(order.getQty()).andStubReturn(100L);
+		expect(order.getDirection()).andStubReturn(OrderDirection.SELL);
+		expect(order.getType()).andStubReturn(OrderType.MARKET);
 		
-		Contract contract = new Contract();
-		expect(gSec2Contr.get(same(descr))).andReturn(contract);
-
 		com.ib.client.Order ibo = new com.ib.client.Order();
 		ibo.m_action = "SELL";
 		ibo.m_totalQuantity = 50;
 		ibo.m_orderType = "MKT";
+		expect(transNumerator.incrementAndGet()).andReturn(50);
+		terminal.registerPendingOrder(eq(50L), same(order));
+		Contract contract = new Contract();
+		expect(gSec2Contr.get(same(descr))).andReturn(contract);
 		client.placeOrder(eq(50), same(contract), eq(ibo));
 		control.replay();
+		
 		processor.placeOrder(order);
+		
 		control.verify();
 	}
 
 	@Test (expected=OrderException.class)
 	public void testPlaceOrder_LimitUnsupported() throws Exception {
-		order.setType(OrderType.LIMIT);
+		expect(order.getType()).andStubReturn(OrderType.LIMIT);
 		control.replay();
+		
 		processor.placeOrder(order);
 	}
 
 	@Test (expected=OrderException.class)
 	public void testPlaceOrder_StopLimitUnsupported() throws Exception {
-		order.setType(OrderType.STOP_LIMIT);
+		expect(order.getType()).andStubReturn(OrderType.STOP_LIMIT);
 		control.replay();
+		
 		processor.placeOrder(order);
 	}
 	
@@ -127,26 +133,35 @@ public class IBOrderProcessorTest {
 	public void testPlaceOrder_TakeProfitAndStopLimitUnsupported()
 		throws Exception
 	{
-		order.setType(OrderType.TAKE_PROFIT_AND_STOP_LIMIT);
+		expect(order.getType()).andStubReturn(OrderType.TPSL);
 		control.replay();
+		
 		processor.placeOrder(order);
 	}
 	
 	@Test (expected=OrderException.class)
 	public void testPlaceOrder_TakeProfitUnsupported() throws Exception {
-		order.setType(OrderType.TAKE_PROFIT);
+		expect(order.getType()).andStubReturn(OrderType.TAKE_PROFIT);
 		control.replay();
+		
 		processor.placeOrder(order);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
-		Variant<IBClient> vClient = new Variant<IBClient>()
+		TerminalBuilder tb = new TerminalBuilder();
+		EditableTerminal t1 = tb.createTerminal("foo"),
+			t2 = tb.createTerminal("foo");
+		processor = new IBOrderProcessor(t1, client, transNumerator, gSec2Contr);
+		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
+			.add(t1)
+			.add(t2);
+		Variant<IBClient> vClient = new Variant<IBClient>(vTerm)
 			.add(client)
 			.add(control.createMock(IBClient.class));
 		Variant<Counter> vTransId = new Variant<Counter>(vClient)
-			.add(transId)
+			.add(transNumerator)
 			.add(control.createMock(Counter.class));
 		Variant<G<Contract>> vS2C = new Variant<G<Contract>>(vTransId)
 			.add(gSec2Contr)
@@ -155,7 +170,8 @@ public class IBOrderProcessorTest {
 		int foundCnt = 0;
 		IBOrderProcessor x = null, found = null;
 		do {
-			x = new IBOrderProcessor(vClient.get(), vTransId.get(), vS2C.get());
+			x = new IBOrderProcessor(vTerm.get(), vClient.get(),
+					vTransId.get(), vS2C.get());
 			if ( processor.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -163,8 +179,9 @@ public class IBOrderProcessorTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(client, found.getClient());
-		assertSame(transId, found.getTransIdCounter());
+		assertSame(transNumerator, found.getTransNumerator());
 		assertSame(gSec2Contr, found.getSecDescr2ContractConverter());
+		assertSame(t1, found.getTerminal());
 	}
 	
 	@Test
@@ -178,17 +195,19 @@ public class IBOrderProcessorTest {
 	public void testHashCode() throws Exception {
 		int hashCode = new HashCodeBuilder(20121215, 164921)
 			.append(client)
-			.append(transId)
+			.append(transNumerator)
 			.append(gSec2Contr)
+			.append(terminal)
 			.toHashCode();
 		assertEquals(hashCode, processor.hashCode());
 	}
 	
 	@Test
 	public void testConstruct2() throws Exception {
-		IBOrderProcessor expected = new IBOrderProcessor(client, transId,
-				new IBGetSecurityDescriptorContract());
-		assertEquals(expected, new IBOrderProcessor(client, transId));
+		IBOrderProcessor expected = new IBOrderProcessor(terminal, client,
+				transNumerator, new IBGetSecurityDescriptorContract());
+		assertEquals(expected,
+				new IBOrderProcessor(terminal, client, transNumerator));
 	}
 
 }

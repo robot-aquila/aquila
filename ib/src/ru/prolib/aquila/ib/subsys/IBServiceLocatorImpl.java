@@ -86,7 +86,7 @@ public class IBServiceLocatorImpl implements IBServiceLocator {
 		if ( frun == null ) {
 			IBCompFactory fc = getCompFactory();
 			frun = new IBRunnableFactoryImpl(getTerminal(),
-				fc.createPortfolioFactory(), getContracts(),
+				getContracts(),
 				new OrderResolverStd(getTerminal(),fc.createOrderFactory()),
 				fc.mPortfolio(), fc.mOrder(), fc.mPosition());
 		}

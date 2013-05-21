@@ -99,18 +99,8 @@ public class IBCompFactoryImpl implements IBCompFactory {
 	}
 
 	@Override
-	public PortfolioFactory createPortfolioFactory() {
-		return bfactory.createPortfolioFactory();
-	}
-
-	@Override
 	public EditablePortfolios createPortfolios() {
 		return bfactory.createPortfolios();
-	}
-
-	@Override
-	public PositionFactory createPositionFactory(Account account) {
-		return bfactory.createPositionFactory(account);
 	}
 
 	@Override
@@ -174,23 +164,6 @@ public class IBCompFactoryImpl implements IBCompFactory {
 			.append(bfactory)
 			.append(mfactory)
 			.toHashCode();
-	}
-
-	@Override
-	public OrderBuilder createOrderBuilder() {
-		return bfactory.createOrderBuilder();
-	}
-
-	@Override
-	public OrderBuilder createOrderBuilder(Counter transId) {
-		return bfactory.createOrderBuilder(transId);
-	}
-
-	@Override
-	public OrderBuilder
-			createOrderBuilder(Counter transId, OrderFactory factory)
-	{
-		return bfactory.createOrderBuilder(transId, factory);
 	}
 
 	private S<EditableOrder> mOpenOrder() {

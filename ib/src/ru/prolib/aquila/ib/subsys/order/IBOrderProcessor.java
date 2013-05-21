@@ -21,36 +21,47 @@ import ru.prolib.aquila.ib.subsys.api.IBClient;
  * $Id: IBOrderProcessor.java 490 2013-02-05 19:42:02Z whirlwind $
  */
 public class IBOrderProcessor implements OrderProcessor {
+	private final EditableTerminal terminal;
 	private final IBClient client;
-	private final Counter transId;
+	private final Counter transNumerator;
 	private final G<Contract> gSecDescr2Contract;
 	
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param terminal терминал
 	 * @param client экземпляр клиента IB API
-	 * @param transId нумератор транзакций
+	 * @param transNumerator нумератор транзакций
 	 * @param gSecDescr2Contract геттер контракта на основе дескр. инструмента
 	 */
-	public IBOrderProcessor(IBClient client, Counter transId,
-			G<Contract> gSecDescr2Contract)
+	public IBOrderProcessor(EditableTerminal terminal, IBClient client,
+			Counter transNumerator, G<Contract> gSecDescr2Contract)
 	{
 		super();
+		this.terminal = terminal;
 		this.client = client;
-		this.transId = transId;
+		this.transNumerator = transNumerator;
 		this.gSecDescr2Contract = gSecDescr2Contract;
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
-	 * Конструктор создает геттер контракта типа {@link IBGetSecurityDescriptorContract}. 
+	 * Конструктор создает геттер контракта типа
+	 * {@link IBGetSecurityDescriptorContract}. 
 	 * <p>
+	 * @param terminal терминал
 	 * @param client экземпляр клиента IB API
 	 * @param transId нумератор транзакций
 	 */
-	public IBOrderProcessor(IBClient client, Counter transId) {
-		this(client, transId, new IBGetSecurityDescriptorContract());
+	public IBOrderProcessor(EditableTerminal terminal, IBClient client,
+			Counter transId)
+	{
+		this(terminal, client, transId, new IBGetSecurityDescriptorContract());
+	}
+	
+	public EditableTerminal getTerminal() {
+		return terminal;
 	}
 
 	/**
@@ -67,8 +78,8 @@ public class IBOrderProcessor implements OrderProcessor {
 	 * <p>
 	 * @return нумератор транзакций
 	 */
-	public Counter getTransIdCounter() {
-		return transId;
+	public Counter getTransNumerator() {
+		return transNumerator;
 	}
 	
 	/**
@@ -105,9 +116,11 @@ public class IBOrderProcessor implements OrderProcessor {
 			ibOrder.m_orderType = "MKT";
 			// TODO: разместить заявку только по номеру контракта нельзя.
 			// Обязательно требуется указывать целевую биржу.
+			int transId = transNumerator.incrementAndGet();
 			try {
-				client.placeOrder(order.getTransactionId().intValue(),
-					gSecDescr2Contract.get(security.getDescriptor()), ibOrder);
+				terminal.registerPendingOrder(transId, (EditableOrder) order);
+				client.placeOrder(transId, gSecDescr2Contract
+						.get(security.getDescriptor()), ibOrder);
 			} catch ( IBException e ) {
 				throw new OrderException(e);
 			} catch ( ValueException e ) {
@@ -122,8 +135,9 @@ public class IBOrderProcessor implements OrderProcessor {
 	public int hashCode() {
 		return new HashCodeBuilder(20121215, 164921)
 			.append(client)
-			.append(transId)
+			.append(transNumerator)
 			.append(gSecDescr2Contract)
+			.append(terminal)
 			.toHashCode();
 	}
 	
@@ -137,8 +151,9 @@ public class IBOrderProcessor implements OrderProcessor {
 		IBOrderProcessor o = (IBOrderProcessor) other;
 		return new EqualsBuilder()
 			.append(client, o.client)
-			.append(transId, o.transId)
+			.append(transNumerator, o.transNumerator)
 			.append(gSecDescr2Contract, o.gSecDescr2Contract)
+			.appendSuper(terminal == o.terminal)
 			.isEquals();
 	}
 

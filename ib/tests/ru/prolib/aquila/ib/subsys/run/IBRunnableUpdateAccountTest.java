@@ -22,7 +22,6 @@ import ru.prolib.aquila.ib.subsys.run.IBRunnableUpdateAccount;
 public class IBRunnableUpdateAccountTest {
 	private static IMocksControl control;
 	private static EditableTerminal terminal;
-	private static PortfolioFactory fport;
 	private static S<EditablePortfolio> modifier;
 	private static IBEventUpdateAccount event;
 	private static IBRunnableUpdateAccount runnable;
@@ -40,19 +39,16 @@ public class IBRunnableUpdateAccountTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = control.createMock(EditableTerminal.class);
-		fport = control.createMock(PortfolioFactory.class);
 		modifier = control.createMock(S.class);
 		event = control.createMock(IBEventUpdateAccount.class);
 		port = control.createMock(EditablePortfolio.class);
-		runnable = new IBRunnableUpdateAccount(terminal,
-				fport, modifier, event);
+		runnable = new IBRunnableUpdateAccount(terminal, modifier, event);
 		expect(event.getAccount()).andStubReturn("TEST");
 	}
 	
 	@Test
 	public void testConstruct() throws Exception {
 		assertSame(terminal, runnable.getTerminal());
-		assertSame(fport, runnable.getPortfolioFactory());
 		assertSame(modifier, runnable.getPortfolioModifier());
 		assertSame(event, runnable.getEvent());
 	}
@@ -67,14 +63,15 @@ public class IBRunnableUpdateAccountTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
+		TerminalBuilder tb = new TerminalBuilder();
+		EditableTerminal t1 = tb.createTerminal("foo"),
+			t2 = tb.createTerminal("foo");
+		runnable = new IBRunnableUpdateAccount(t1, modifier, event);
 		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
-			.add(control.createMock(EditableTerminal.class))
-			.add(terminal);
-		Variant<PortfolioFactory> vFact = new Variant<PortfolioFactory>(vTerm)
-			.add(control.createMock(PortfolioFactory.class))
-			.add(fport);
+			.add(t1)
+			.add(t2);
 		Variant<S<EditablePortfolio>> vMod =
-				new Variant<S<EditablePortfolio>>(vFact)
+				new Variant<S<EditablePortfolio>>(vTerm)
 			.add(control.createMock(S.class))
 			.add(modifier);
 		Variant<IBEventUpdateAccount> vEvt =
@@ -85,16 +82,14 @@ public class IBRunnableUpdateAccountTest {
 		int foundCnt = 0;
 		IBRunnableUpdateAccount x = null, found = null;
 		do {
-			x = new IBRunnableUpdateAccount(vTerm.get(),
-					vFact.get(), vMod.get(), vEvt.get());
+			x = new IBRunnableUpdateAccount(vTerm.get(),vMod.get(), vEvt.get());
 			if ( runnable.equals(x) ) {
 				foundCnt ++;
 				found = x;
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(terminal, found.getTerminal());
-		assertSame(fport, found.getPortfolioFactory());
+		assertSame(t1, found.getTerminal());
 		assertSame(modifier, found.getPortfolioModifier());
 		assertSame(event, found.getEvent());
 	}
@@ -103,7 +98,6 @@ public class IBRunnableUpdateAccountTest {
 	public void testHashCode() throws Exception {
 		assertEquals(new HashCodeBuilder(20130109, 14255)
 			.append(terminal)
-			.append(fport)
 			.append(modifier)
 			.append(event)
 			.toHashCode(), runnable.hashCode());
@@ -123,11 +117,12 @@ public class IBRunnableUpdateAccountTest {
 	@Test
 	public void testRun_NewPortfolio() throws Exception {
 		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(false);
-		expect(fport.createPortfolio(eq(acc))).andReturn(port);
-		terminal.registerPortfolio(same(port));
+		expect(terminal.createPortfolio(eq(acc))).andReturn(port);
 		modifier.set(same(port), same(event));
 		control.replay();
+		
 		runnable.run();
+		
 		control.verify();
 	}
 	
@@ -138,20 +133,22 @@ public class IBRunnableUpdateAccountTest {
 			.andThrow(new PortfolioException("Test exception"));
 		terminal.firePanicEvent(1, "IBRunnableUpdateAccount#run");
 		control.replay();
+		
 		runnable.run();
+		
 		control.verify();
 	}
 	
 	@Test
 	public void testRun_Exception2() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
 		expect(terminal.isPortfolioAvailable(eq(acc))).andReturn(false);
-		expect(fport.createPortfolio(eq(acc))).andReturn(port);
-		terminal.registerPortfolio(same(port));
-		expectLastCall().andThrow(new PortfolioException("Test exception"));
+		expect(terminal.createPortfolio(eq(acc)))
+			.andThrow(new PortfolioException("Test exception"));
 		terminal.firePanicEvent(1, "IBRunnableUpdateAccount#run");
 		control.replay();
+		
 		runnable.run();
+		
 		control.verify();
 	}
 	

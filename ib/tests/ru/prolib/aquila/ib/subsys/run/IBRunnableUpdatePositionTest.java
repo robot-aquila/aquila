@@ -33,6 +33,7 @@ public class IBRunnableUpdatePositionTest {
 	private S<EditablePosition> modifier;
 	private EditablePortfolio portfolio;
 	private EditablePosition position;
+	private Security security;
 	private EventType eventType;
 	private IBEventUpdatePortfolio event;
 	private IBRunnableUpdatePosition runnable;
@@ -63,6 +64,7 @@ public class IBRunnableUpdatePositionTest {
 		modifier = control.createMock(S.class);
 		portfolio = control.createMock(EditablePortfolio.class);
 		position = control.createMock(EditablePosition.class);
+		security = control.createMock(Security.class);
 		eventType = control.createMock(EventType.class);
 		event = new IBEventUpdatePortfolio(eventType,
 				contract, -100, 500.0d, 50000.0d, 498.0d, 0.1d, 0.2d, "TEST");
@@ -70,6 +72,7 @@ public class IBRunnableUpdatePositionTest {
 				modifier, event);
 		
 		expect(eventType.asString()).andStubReturn("event");
+		expect(terminal.getSecurity(eq(descr))).andStubReturn(security);
 	}
 	
 	@Test
@@ -144,7 +147,7 @@ public class IBRunnableUpdatePositionTest {
 				.andReturn(portfolio);
 		expect(contracts.getAppropriateSecurityDescriptor(eq(1172)))
 				.andReturn(descr);
-		expect(portfolio.getEditablePosition(eq(descr))).andReturn(position);
+		expect(portfolio.getEditablePosition(security)).andReturn(position);
 		modifier.set(same(position), same(event));
 		control.replay();
 		
@@ -185,7 +188,7 @@ public class IBRunnableUpdatePositionTest {
 				.andReturn(portfolio);
 		expect(contracts.getAppropriateSecurityDescriptor(eq(1172)))
 				.andReturn(descr);
-		expect(portfolio.getEditablePosition(eq(descr))).andReturn(position);
+		expect(portfolio.getEditablePosition(security)).andReturn(position);
 		modifier.set(same(position), same(event));
 		expectLastCall().andThrow(new ValueException("test"));
 		terminal.firePanicEvent(1, "IBRunnableUpdatePosition#run");

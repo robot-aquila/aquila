@@ -71,30 +71,11 @@ public class IBCompFactoryImplTest {
 	}
 	
 	@Test
-	public void testCreatePortfolioFactory() throws Exception {
-		PortfolioFactory o = control.createMock(PortfolioFactory.class);
-		expect(bfactory.createPortfolioFactory()).andReturn(o);
-		control.replay();
-		assertSame(o, factory.createPortfolioFactory());
-		control.verify();
-	}
-	
-	@Test
 	public void testCreatePortfolios() throws Exception {
 		EditablePortfolios o = control.createMock(EditablePortfolios.class);
 		expect(bfactory.createPortfolios()).andReturn(o);
 		control.replay();
 		assertSame(o, factory.createPortfolios());
-		control.verify();
-	}
-	
-	@Test
-	public void testCreatePositionFactory() throws Exception {
-		Account account = new Account("ASX1");
-		PositionFactory o = control.createMock(PositionFactory.class);
-		expect(bfactory.createPositionFactory(account)).andReturn(o);
-		control.replay();
-		assertSame(o, factory.createPositionFactory(account));
 		control.verify();
 	}
 	
@@ -229,38 +210,6 @@ public class IBCompFactoryImplTest {
 				new IBModifierFactoryImpl(locator));
 		
 		assertEquals(expected, new IBCompFactoryImpl(locator));
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateOrderBuilder0() throws Exception {
-		OrderBuilder builder = control.createMock(OrderBuilder.class);
-		expect(bfactory.createOrderBuilder())
-			.andReturn(builder);
-		control.replay();
-		assertSame(builder, factory.createOrderBuilder());
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateOrderBuilder1() throws Exception {
-		OrderBuilder builder = control.createMock(OrderBuilder.class);
-		Counter transId = control.createMock(Counter.class);
-		expect(bfactory.createOrderBuilder(transId)).andReturn(builder);
-		control.replay();
-		assertSame(builder, factory.createOrderBuilder(transId));
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateOrderBuilder2() throws Exception {
-		OrderBuilder builder = control.createMock(OrderBuilder.class);
-		Counter transId = control.createMock(Counter.class);
-		OrderFactory ofactory = control.createMock(OrderFactory.class);
-		expect(bfactory.createOrderBuilder(transId, ofactory))
-			.andReturn(builder);
-		control.replay();
-		assertSame(builder, factory.createOrderBuilder(transId, ofactory));
 		control.verify();
 	}
 	

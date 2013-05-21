@@ -21,7 +21,6 @@ import ru.prolib.aquila.ib.subsys.contract.IBContracts;
  */
 public class IBRunnableFactoryImpl implements IBRunnableFactory {
 	private final EditableTerminal terminal;
-	private final PortfolioFactory fport;
 	private final IBContracts contracts;
 	private final OrderResolver resolver;
 	private final S<EditableOrder> mOrder;
@@ -29,13 +28,12 @@ public class IBRunnableFactoryImpl implements IBRunnableFactory {
 	private final S<EditablePortfolio> mPortfolio;
 	
 	public IBRunnableFactoryImpl(EditableTerminal terminal,
-			PortfolioFactory fport, IBContracts contracts,
+			IBContracts contracts,
 			OrderResolver resolver, S<EditablePortfolio> mPortfolio,
 			S<EditableOrder> mOrder, S<EditablePosition> mPosition)
 	{
 		super();
 		this.terminal = terminal;
-		this.fport = fport;
 		this.contracts = contracts;
 		this.resolver = resolver;
 		this.mPortfolio = mPortfolio;
@@ -89,15 +87,6 @@ public class IBRunnableFactoryImpl implements IBRunnableFactory {
 	}
 	
 	/**
-	 * Получить фабрику портфелей.
-	 * <p>
-	 * @return фабрика портфелей
-	 */
-	public PortfolioFactory getPortfolioFactory() {
-		return fport;
-	}
-	
-	/**
 	 * Получить модификатор портфеля.
 	 * <p>
 	 * @return модификатор
@@ -124,7 +113,7 @@ public class IBRunnableFactoryImpl implements IBRunnableFactory {
 	
 	@Override
 	public Runnable createUpdateAccount(IBEventUpdateAccount event) {
-		return new IBRunnableUpdateAccount(terminal, fport, mPortfolio, event);
+		return new IBRunnableUpdateAccount(terminal, mPortfolio, event);
 	}
 
 	/**
@@ -160,7 +149,6 @@ public class IBRunnableFactoryImpl implements IBRunnableFactory {
 		IBRunnableFactoryImpl o = (IBRunnableFactoryImpl) other;
 		return new EqualsBuilder()
 			.append(terminal, o.terminal)
-			.append(fport, o.fport)
 			.append(contracts, o.contracts)
 			.append(resolver, o.resolver)
 			.append(mPortfolio, o.mPortfolio)
@@ -173,7 +161,6 @@ public class IBRunnableFactoryImpl implements IBRunnableFactory {
 	public int hashCode() {
 		return new HashCodeBuilder(20130107, 82347)
 			.append(terminal)
-			.append(fport)
 			.append(contracts)
 			.append(resolver)
 			.append(mPortfolio)

@@ -6,9 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
-import ru.prolib.aquila.core.data.S;
-import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.ib.event.IBEventUpdateAccount;
 
 /**
@@ -20,7 +18,6 @@ import ru.prolib.aquila.ib.event.IBEventUpdateAccount;
 public class IBRunnableUpdateAccount implements Runnable {
 	private static final Logger logger;
 	private final EditableTerminal terminal;
-	private final PortfolioFactory fport;
 	private final S<EditablePortfolio> modifier;
 	private final IBEventUpdateAccount event;
 	
@@ -32,17 +29,14 @@ public class IBRunnableUpdateAccount implements Runnable {
 	 * Конструктор.
 	 * <p>
 	 * @param terminal терминал
-	 * @param fport фабрика экземпляров портфелей
 	 * @param modifier модификатор портфеля
 	 * @param event событие-основание
 	 */
 	public IBRunnableUpdateAccount(EditableTerminal terminal,
-			PortfolioFactory fport, S<EditablePortfolio> modifier,
-			IBEventUpdateAccount event)
+			S<EditablePortfolio> modifier, IBEventUpdateAccount event)
 	{
 		super();
 		this.terminal = terminal;
-		this.fport = fport;
 		this.modifier = modifier;
 		this.event = event;
 	}
@@ -54,15 +48,6 @@ public class IBRunnableUpdateAccount implements Runnable {
 	 */
 	public EditableTerminal getTerminal() {
 		return terminal;
-	}
-	
-	/**
-	 * Фабрика портфелей.
-	 * <p>
-	 * @return фабрика портфелей
-	 */
-	public PortfolioFactory getPortfolioFactory() {
-		return fport;
 	}
 	
 	/**
@@ -91,8 +76,7 @@ public class IBRunnableUpdateAccount implements Runnable {
 			if ( terminal.isPortfolioAvailable(account) ) {
 				portfolio = terminal.getEditablePortfolio(account);
 			} else {
-				portfolio = fport.createPortfolio(account);
-				terminal.registerPortfolio(portfolio);
+				portfolio = terminal.createPortfolio(account);
 			}
 			modifier.set(portfolio, event);
 		} catch ( PortfolioException e ) {
@@ -113,8 +97,7 @@ public class IBRunnableUpdateAccount implements Runnable {
 	protected boolean fieldsEquals(Object other) {
 		IBRunnableUpdateAccount o = (IBRunnableUpdateAccount) other;
 		return new EqualsBuilder()
-			.append(terminal, o.terminal)
-			.append(fport, o.fport)
+			.appendSuper(terminal == o.terminal)
 			.append(modifier, o.modifier)
 			.append(event, o.event)
 			.isEquals();
@@ -124,7 +107,6 @@ public class IBRunnableUpdateAccount implements Runnable {
 	public int hashCode() {
 		return new HashCodeBuilder(20130109, 14255)
 			.append(terminal)
-			.append(fport)
 			.append(modifier)
 			.append(event)
 			.toHashCode();

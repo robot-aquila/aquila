@@ -31,7 +31,6 @@ import ru.prolib.aquila.ib.subsys.run.IBRunnableUpdatePosition;
 public class IBRunnableFactoryImplTest {
 	private static IMocksControl control;
 	private static EditableTerminal terminal;
-	private static PortfolioFactory fport;
 	private static IBContracts contracts;
 	private static OrderResolver resolver;
 	private static S<EditablePortfolio> mPortfolio;
@@ -44,20 +43,18 @@ public class IBRunnableFactoryImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = control.createMock(EditableTerminal.class);
-		fport = control.createMock(PortfolioFactory.class);
 		contracts = control.createMock(IBContracts.class);
 		resolver = control.createMock(OrderResolver.class);
 		mPortfolio = control.createMock(S.class);
 		mOrder = control.createMock(S.class);
 		mPosition = control.createMock(S.class);
-		factory = new IBRunnableFactoryImpl(terminal, fport, contracts,
+		factory = new IBRunnableFactoryImpl(terminal, contracts,
 				resolver, mPortfolio, mOrder, mPosition);
 	}
 	
 	@Test
 	public void testConstruct() throws Exception {
 		assertSame(terminal, factory.getTerminal());
-		assertSame(fport, factory.getPortfolioFactory());
 		assertSame(contracts, factory.getContracts());
 		assertSame(resolver, factory.getOrderResolver());
 		assertSame(mPortfolio, factory.getPortfolioModifier());
@@ -134,7 +131,7 @@ public class IBRunnableFactoryImplTest {
 		IBEventUpdateAccount event =
 				control.createMock(IBEventUpdateAccount.class);
 		control.replay();
-		assertEquals(new IBRunnableUpdateAccount(terminal, fport,
+		assertEquals(new IBRunnableUpdateAccount(terminal,
 				mPortfolio, event), factory.createUpdateAccount(event));
 		control.verify();
 	}
@@ -152,10 +149,7 @@ public class IBRunnableFactoryImplTest {
 		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
 			.add(control.createMock(EditableTerminal.class))
 			.add(terminal);
-		Variant<PortfolioFactory> vFport = new Variant<PortfolioFactory>(vTerm)
-			.add(control.createMock(PortfolioFactory.class))
-			.add(fport);
-		Variant<IBContracts> vCont = new Variant<IBContracts>(vFport)
+		Variant<IBContracts> vCont = new Variant<IBContracts>(vTerm)
 			.add(control.createMock(IBContracts.class))
 			.add(contracts);
 		Variant<OrderResolver> vRes = new Variant<OrderResolver>(vCont)
@@ -176,7 +170,7 @@ public class IBRunnableFactoryImplTest {
 		int foundCnt = 0;
 		IBRunnableFactoryImpl x = null, found = null;
 		do {
-			x = new IBRunnableFactoryImpl(vTerm.get(), vFport.get(),
+			x = new IBRunnableFactoryImpl(vTerm.get(), 
 					vCont.get(), vRes.get(), vmPort.get(), vmOrd.get(),
 					vmPos.get());
 			if ( factory.equals(x) ) {
@@ -186,7 +180,6 @@ public class IBRunnableFactoryImplTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(terminal, found.getTerminal());
-		assertSame(fport, found.getPortfolioFactory());
 		assertSame(contracts, found.getContracts());
 		assertSame(resolver, found.getOrderResolver());
 		assertSame(mPortfolio, found.getPortfolioModifier());
@@ -198,7 +191,6 @@ public class IBRunnableFactoryImplTest {
 	public void testHashCode() throws Exception {
 		assertEquals(new HashCodeBuilder(20130107, 82347)
 			.append(terminal)
-			.append(fport)
 			.append(contracts)
 			.append(resolver)
 			.append(mPortfolio)

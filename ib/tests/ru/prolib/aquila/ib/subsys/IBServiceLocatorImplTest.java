@@ -103,7 +103,6 @@ public class IBServiceLocatorImplTest {
 	public void testGetRunnableFactory() throws Exception {
 		control.replay();
 		IBRunnableFactory expected = new IBRunnableFactoryImpl(terminal,
-				locator.getCompFactory().createPortfolioFactory(),
 				locator.getContracts(),
 				new OrderResolverStd(terminal,
 						locator.getCompFactory().createOrderFactory()),
