@@ -12,9 +12,12 @@ import ru.prolib.aquila.quik.subsys.row.*;
 /**
  * Реализация фабрики обозревателей таблиц QUIK.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2012-09-08<br>
  * $Id$
  */
+@Deprecated
 public class QUIKListenerFactoryImpl implements QUIKListenerFactory {
 	public static final int VERSION = 0x04;
 	private final QUIKServiceLocator locator;

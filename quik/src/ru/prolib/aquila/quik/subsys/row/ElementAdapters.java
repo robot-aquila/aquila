@@ -19,9 +19,12 @@ import ru.prolib.aquila.quik.subsys.getter.*;
 /**
  * Конструктор адаптеров элементов ряда.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-16<br>
  * $Id$
  */
+@Deprecated
 public class ElementAdapters {
 	private final QUIKServiceLocator locator;
 	private final String msgPrefix;

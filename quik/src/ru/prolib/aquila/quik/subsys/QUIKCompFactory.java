@@ -15,9 +15,12 @@ import ru.prolib.aquila.dde.utils.table.*;
 /**
  * Фабрика компонентов конвертации данных.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2012-10-19<br>
  * $Id: QUIKCompFactory.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class QUIKCompFactory implements BMFactory {
 	private final BMFactory bfactory;
 	private final QUIKServiceLocator locator;

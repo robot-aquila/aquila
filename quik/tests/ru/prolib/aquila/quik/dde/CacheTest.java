@@ -332,5 +332,38 @@ public class CacheTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testGetStopOrderCache() throws Exception {
+		StopOrderCache entry = control.createMock(StopOrderCache.class);
+		expect(stopOrders.get(893L)).andReturn(entry);
+		control.replay();
+		
+		assertSame(entry, cache.getStopOrderCache(893L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetAllStopOrders() throws Exception {
+		List<StopOrderCache> entries = new Vector<StopOrderCache>();
+		expect(stopOrders.getAll()).andReturn(entries);
+		control.replay();
+		
+		assertSame(entries, cache.getAllStopOrders());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnStopOrdersCacheUpdate() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(stopOrders.OnCacheUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnStopOrdersCacheUpdate());
+		
+		control.verify();
+	}
 
 }

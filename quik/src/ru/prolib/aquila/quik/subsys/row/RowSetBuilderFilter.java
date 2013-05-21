@@ -17,9 +17,12 @@ import ru.prolib.aquila.dde.utils.table.DDETableRowSetBuilder;
  * ru.prolib.aquila.core.data.row.RowSetFilter RowSetFilter} с указанным
  * валидатором ряда. 
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-18<br>
  * $Id$
  */
+@Deprecated
 public class RowSetBuilderFilter implements DDETableRowSetBuilder {
 	private final DDETableRowSetBuilder builder;
 	private final Validator validator;

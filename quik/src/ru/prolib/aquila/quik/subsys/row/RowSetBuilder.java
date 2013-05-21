@@ -14,9 +14,12 @@ import ru.prolib.aquila.dde.utils.table.DDETableRowSetBuilder;
 /**
  * Конструктор адаптируемого набора рядов для таблиц DDE.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-16<br>
  * $Id$
  */
+@Deprecated
 public class RowSetBuilder implements DDETableRowSetBuilder {
 	private final DDETableRowSetBuilder builder;
 	private final Map<String, G<?>> adapters;

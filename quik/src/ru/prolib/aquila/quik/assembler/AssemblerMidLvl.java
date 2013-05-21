@@ -70,21 +70,53 @@ public class AssemblerMidLvl {
 	 * @return true - если заявка была отменена, false - заявка не изменилась
 	 */
 	public boolean checkIfOrderRemoved(EditableOrder order) {
-		try {
-			if ( order.getStatus() == OrderStatus.ACTIVE
-				&& cache.getOrderCache(order.getId()) == null )
-			{
-				order.setStatus(OrderStatus.CANCELLED);
-				order.setLastChangeTime(terminal.getCurrentTime());
-				order.fireChangedEvent();
-				order.resetChanges();
-				return true;
-			} else {
+		synchronized ( order ) {
+			try {
+				if ( order.getStatus() == OrderStatus.ACTIVE
+					&& cache.getOrderCache(order.getId()) == null )
+				{
+					order.setStatus(OrderStatus.CANCELLED);
+					order.setLastChangeTime(terminal.getCurrentTime());
+					order.fireChangedEvent();
+					order.resetChanges();
+					return true;
+				} else {
+					return false;
+				}
+			} catch ( EditableObjectException e ) {
+				error(e);
 				return false;
 			}
-		} catch ( EditableObjectException e ) {
-			error(e);
-			return false;
+		}
+	}
+	
+	/**
+	 * Проверить и обработать ситуацию удаления стоп-заявки из кэша.
+	 * <p>
+	 * Работает аналогично методу {@link #checkIfOrderRemoved(EditableOrder)}
+	 * только для стоп-заявок.
+	 * <p>
+	 * @param order экземпляр стоп-заявки для проверки
+	 * @return true - если стоп-заявка была отменена, false - нет изменений
+	 */
+	public boolean checkIfStopOrderRemoved(EditableOrder order) {
+		synchronized ( order ) {
+			try {
+				if ( order.getStatus() == OrderStatus.ACTIVE
+				  && cache.getStopOrderCache(order.getId()) == null )
+				{
+					order.setStatus(OrderStatus.CANCELLED);
+					order.setLastChangeTime(terminal.getCurrentTime());
+					order.fireChangedEvent();
+					order.resetChanges();
+					return true;
+				} else {
+					return false;			
+				}
+			} catch ( EditableObjectException e ) {
+				error(e);
+				return false;
+			}
 		}
 	}
 	
@@ -128,7 +160,45 @@ public class AssemblerMidLvl {
 	}
 	
 	/**
-	 * Согласовать сделки существующей заявки.
+	 * Создать и зарегистрировать новую стоп-заявку на основе кэш-записи.
+	 * <p>
+	 * @param entry кэш-запись стоп-заявки
+	 * @return true - была создана новая заявка, false - заявка не создана 
+	 */
+	public boolean createNewStopOrder(StopOrderCache entry) {
+		try {
+			Account account = low.getAccountByStopOrderCache(entry);
+			SecurityDescriptor descr =
+				low.getSecurityDescriptorByStopOrderCache(entry);
+			if ( account == null || descr == null ) {
+				return false;
+			}
+			EditableOrder order = terminal.createStopOrder();
+			order.setAccount(account);
+			order.setDirection(entry.getDirection());
+			order.setOffset(entry.getOffset());
+			order.setPrice(entry.getPrice());
+			order.setQty(entry.getQty());
+			order.setSecurityDescriptor(descr);
+			order.setSpread(entry.getSpread());
+			order.setStopLimitPrice(entry.getStopLimitPrice());
+			order.setTakeProfitPrice(entry.getTakeProfitPrice());
+			order.setTime(entry.getTime());
+			order.setTransactionId(entry.getTransId());
+			order.setType(entry.getType());
+			low.adjustStopOrderStatus(entry, order);
+			terminal.registerStopOrder(entry.getId(), order);
+			order.setAvailable(true);
+			terminal.fireStopOrderAvailableEvent(order);
+			return true;
+		} catch ( EditableObjectException e ) {
+			error(e);
+			return false;
+		}
+	}
+	
+	/**
+	 * Согласовать состояние существующей заявки.
 	 * <p>
 	 * @param entry кэш-запись заявки
 	 * @return true - заявка была обновлена, false - заявка не обновлена
@@ -136,18 +206,55 @@ public class AssemblerMidLvl {
 	public boolean updateExistingOrder(OrderCache entry) {
 		try {
 			EditableOrder order = terminal.getEditableOrder(entry.getId());
-			// Неактивные заявки игнорируются.
-			if ( order.getStatus() != OrderStatus.ACTIVE ) {
-				return false;
+			synchronized ( order ) {
+				// Неактивные заявки игнорируются.
+				if ( order.getStatus() != OrderStatus.ACTIVE ) {
+					return false;
+				}
+				for (TradeCache t:cache.getAllTradesByOrderId(entry.getId())) {
+					low.adjustOrderTrade(t, order);
+				}
+				low.adjustOrderStatus(entry, order);
+				order.fireChangedEvent();
+				boolean changed = order.hasChanged();
+				order.resetChanges();
+				return changed;
 			}
-			for ( TradeCache t : cache.getAllTradesByOrderId(entry.getId()) ) {
-				low.adjustOrderTrade(t, order);
+		} catch ( EditableObjectException e ) {
+			error(e);
+			return false;
+		}
+	}
+	
+	/**
+	 * Согласовать состояние существующей стоп-заявки.
+	 * <p>
+	 * @param entry кэш-запись стоп-заявки
+	 * @return стоп-заявка была обновлена, false - без изменений
+	 */
+	public boolean updateExistingStopOrder(StopOrderCache entry) {
+		try {
+			EditableOrder order = terminal.getEditableStopOrder(entry.getId());
+			synchronized ( order ) {
+				// Неактивные заявки игнорируются.
+				if ( order.getStatus() != OrderStatus.ACTIVE ) {
+					return false;
+				}
+				// Непонятно что происходит с параметрами сложного тейк-профита.
+				// Надо проверять, но лениво - ситуация редкая...
+				// В этой связи обновляем эти атрибуты при каждом согласовании.
+				OrderType type = order.getType();
+				if ( type == OrderType.TAKE_PROFIT || type == OrderType.TPSL ) {
+					order.setTakeProfitPrice(entry.getTakeProfitPrice());
+					order.setStopLimitPrice(entry.getStopLimitPrice());
+					order.setPrice(entry.getPrice());
+				}
+				low.adjustStopOrderStatus(entry, order);
+				order.fireChangedEvent();
+				boolean changed = order.hasChanged();
+				order.resetChanges();
+				return changed;
 			}
-			low.adjustOrderStatus(entry, order);
-			order.fireChangedEvent();
-			boolean changed = order.hasChanged();
-			order.resetChanges();
-			return changed;
 		} catch ( EditableObjectException e ) {
 			error(e);
 			return false;
@@ -169,17 +276,19 @@ public class AssemblerMidLvl {
 			} else {
 				portfolio = terminal.createPortfolio(account);
 			}
-			portfolio.setBalance(entry.getBalance());
-			portfolio.setCash(entry.getCash());
-			portfolio.setVariationMargin(entry.getVarMargin());
-			if ( portfolio.isAvailable() ) {
-				portfolio.fireChangedEvent();
-			} else {
-				cache.registerAccount(account);
-				terminal.firePortfolioAvailableEvent(portfolio);
-				portfolio.setAvailable(true);
+			synchronized ( portfolio ) {
+				portfolio.setBalance(entry.getBalance());
+				portfolio.setCash(entry.getCash());
+				portfolio.setVariationMargin(entry.getVarMargin());
+				if ( portfolio.isAvailable() ) {
+					portfolio.fireChangedEvent();
+				} else {
+					cache.registerAccount(account);
+					terminal.firePortfolioAvailableEvent(portfolio);
+					portfolio.setAvailable(true);
+				}
+				portfolio.resetChanges();
 			}
-			portfolio.resetChanges();
 		} catch ( EditableObjectException e ) {
 			error(e);
 		}
@@ -199,28 +308,31 @@ public class AssemblerMidLvl {
 			} else {
 				security = terminal.createSecurity(descr);
 			}
-			security.setAskPrice(entry.getAskPrice());
-			security.setBidPrice(entry.getBidPrice());
-			security.setClosePrice(entry.getClosePrice());
-			security.setDisplayName(entry.getDisplayName());
-			security.setHighPrice(entry.getHighPrice());
-			security.setLastPrice(entry.getLastPrice());
-			security.setLotSize(entry.getLotSize());
-			security.setLowPrice(entry.getLowPrice());
-			security.setMaxPrice(entry.getMaxPrice());
-			security.setMinPrice(entry.getMinPrice());
-			security.setMinStepPrice(entry.getMinStepPrice());
-			security.setMinStepSize(entry.getMinStepSize());
-			security.setOpenPrice(entry.getOpenPrice());
-			security.setPrecision(entry.getPrecision());
-			if ( security.isAvailable() ) {
-				security.fireChangedEvent();
-			} else {
-				cache.registerSecurityDescriptor(descr, entry.getShortName());
-				terminal.fireSecurityAvailableEvent(security);
-				security.setAvailable(true);
+			synchronized ( security ) {
+				security.setAskPrice(entry.getAskPrice());
+				security.setBidPrice(entry.getBidPrice());
+				security.setClosePrice(entry.getClosePrice());
+				security.setDisplayName(entry.getDisplayName());
+				security.setHighPrice(entry.getHighPrice());
+				security.setLastPrice(entry.getLastPrice());
+				security.setLotSize(entry.getLotSize());
+				security.setLowPrice(entry.getLowPrice());
+				security.setMaxPrice(entry.getMaxPrice());
+				security.setMinPrice(entry.getMinPrice());
+				security.setMinStepPrice(entry.getMinStepPrice());
+				security.setMinStepSize(entry.getMinStepSize());
+				security.setOpenPrice(entry.getOpenPrice());
+				security.setPrecision(entry.getPrecision());
+				if ( security.isAvailable() ) {
+					security.fireChangedEvent();
+				} else {
+					cache.registerSecurityDescriptor(descr,
+							entry.getShortName());
+					terminal.fireSecurityAvailableEvent(security);
+					security.setAvailable(true);
+				}
+				security.resetChanges();
 			}
-			security.resetChanges();
 		} catch ( EditableObjectException e ) {
 			error(e);
 		}
@@ -241,11 +353,13 @@ public class AssemblerMidLvl {
 			}
 			String secName = entry.getSecurityShortName();
 			if ( ! cache.isSecurityDescriptorRegistered(secName) ) {
-				logger.debug("Still wait for security by short name: {}", secName);
+				logger.debug("Still wait for security by short name: {}",
+						secName);
 				return;
 				
 			}
-			SecurityDescriptor descr = cache.getSecurityDescriptorByName(secName);
+			SecurityDescriptor descr =
+				cache.getSecurityDescriptorByName(secName);
 			if ( ! terminal.isSecurityExists(descr) ) {
 				logger.debug("Still wait for security: {}", descr);
 				return;
@@ -253,16 +367,18 @@ public class AssemblerMidLvl {
 			EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
 			EditablePosition position = portfolio
 				.getEditablePosition(terminal.getSecurity(descr));
-			position.setCurrQty(entry.getCurrentQty());
-			position.setOpenQty(entry.getOpenQty());
-			position.setVarMargin(entry.getVarMargin());
-			if ( position.isAvailable() ) {
-				position.fireChangedEvent();
-			} else {
-				portfolio.firePositionAvailableEvent(position);
-				position.setAvailable(true);
+			synchronized ( position ) {
+				position.setCurrQty(entry.getCurrentQty());
+				position.setOpenQty(entry.getOpenQty());
+				position.setVarMargin(entry.getVarMargin());
+				if ( position.isAvailable() ) {
+					position.fireChangedEvent();
+				} else {
+					portfolio.firePositionAvailableEvent(position);
+					position.setAvailable(true);
+				}
+				position.resetChanges();
 			}
-			position.resetChanges();
 		} catch ( EditableObjectException e ) {
 			error(e);
 		}

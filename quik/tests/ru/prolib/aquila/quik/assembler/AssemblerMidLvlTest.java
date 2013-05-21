@@ -21,6 +21,7 @@ public class AssemblerMidLvlTest {
 	private AssemblerLowLvl low;
 	private EditableOrder order;
 	private OrderCache entryOrder;
+	private StopOrderCache entryStopOrder;
 	private EditablePortfolio portfolio;
 	private PortfolioFCache entryPortF;
 	private EditableSecurity security;
@@ -46,6 +47,7 @@ public class AssemblerMidLvlTest {
 		low = control.createMock(AssemblerLowLvl.class);
 		order = control.createMock(EditableOrder.class);
 		entryOrder = control.createMock(OrderCache.class);
+		entryStopOrder = control.createMock(StopOrderCache.class);
 		portfolio = control.createMock(EditablePortfolio.class);
 		security = control.createMock(EditableSecurity.class);
 		position = control.createMock(EditablePosition.class);
@@ -67,7 +69,6 @@ public class AssemblerMidLvlTest {
 		
 		control.verify();
 	}
-
 	
 	@Test
 	public void testCheckIfOrderRemoved_Removed() throws Exception {
@@ -95,6 +96,46 @@ public class AssemblerMidLvlTest {
 		control.replay();
 		
 		assertFalse(middle.checkIfOrderRemoved(order));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCheckIfStopOrderRemoved_NotActive() throws Exception {
+		expect(order.getStatus()).andReturn(OrderStatus.FILLED);
+		control.replay();
+		
+		assertFalse(middle.checkIfStopOrderRemoved(order));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCheckIfStopOrderRemoved_Removed() throws Exception {
+		expect(order.getId()).andStubReturn(792L);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		expect(cache.getStopOrderCache(792L)).andReturn(null);
+		order.setStatus(OrderStatus.CANCELLED);
+		Date time = new Date();
+		expect(terminal.getCurrentTime()).andReturn(time);
+		order.setLastChangeTime(time);
+		order.fireChangedEvent();
+		order.resetChanges();
+		control.replay();
+		
+		assertTrue(middle.checkIfStopOrderRemoved(order));
+		
+		control.verify();
+	}
+
+	@Test
+	public void testCheckIfStopOrderRemoved_NotRemoved() throws Exception {
+		expect(order.getId()).andStubReturn(792L);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		expect(cache.getStopOrderCache(792L)).andReturn(entryStopOrder);
+		control.replay();
+		
+		assertFalse(middle.checkIfStopOrderRemoved(order));
 		
 		control.verify();
 	}
@@ -398,6 +439,147 @@ public class AssemblerMidLvlTest {
 		assertSame(t1, found.getTerminal());
 		assertSame(c1, found.getCache());
 		assertSame(low, found.getAssemblerLowLevel());
+	}
+	
+	@Test
+	public void testUpdateExistingStopOrder_SkipNotActive() throws Exception {
+		OrderStatus skip[] = {
+				OrderStatus.CANCELLED,
+				OrderStatus.FAILED,
+				OrderStatus.FILLED,
+				OrderStatus.PENDING,
+		};
+		for ( int i = 0; i < skip.length; i ++ ) {
+			setUp();
+			expect(entryStopOrder.getId()).andReturn(231L);
+			expect(terminal.getEditableStopOrder(231L)).andReturn(order);
+			expect(order.getStatus()).andReturn(skip[i]);
+			control.replay();
+			
+			middle.updateExistingStopOrder(entryStopOrder);
+			
+			control.verify();
+		}
+	}
+
+	@Test
+	public void testUpdateExistingStopOrder_StopLimit() throws Exception {
+		expect(entryStopOrder.getId()).andReturn(427L);
+		expect(terminal.getEditableStopOrder(427L)).andReturn(order);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		expect(order.getType()).andReturn(OrderType.STOP_LIMIT);
+		low.adjustStopOrderStatus(entryStopOrder, order);
+		order.fireChangedEvent();
+		expect(order.hasChanged()).andReturn(true);
+		order.resetChanges();
+		control.replay();
+		
+		middle.updateExistingStopOrder(entryStopOrder);
+
+		control.verify();
+	}
+
+	@Test
+	public void testUpdateExistingStopOrder_TpAndTpsl() throws Exception {
+		OrderType proc[] = { OrderType.TAKE_PROFIT, OrderType.TPSL };
+		for ( int i = 0; i < proc.length; i ++ ) {
+			setUp();
+			expect(entryStopOrder.getId()).andReturn(812L);
+			expect(terminal.getEditableStopOrder(812L)).andReturn(order);
+			expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+			expect(order.getType()).andReturn(proc[i]);
+			expect(entryStopOrder.getTakeProfitPrice()).andStubReturn(12.34d);
+			expect(entryStopOrder.getStopLimitPrice()).andStubReturn(18.24d);
+			expect(entryStopOrder.getPrice()).andStubReturn(18.15d);
+			order.setTakeProfitPrice(12.34d);
+			order.setStopLimitPrice(18.24d);
+			order.setPrice(18.15d);
+			low.adjustStopOrderStatus(entryStopOrder, order);
+			order.fireChangedEvent();
+			expect(order.hasChanged()).andReturn(true);
+			order.resetChanges();
+			control.replay();
+			
+			middle.updateExistingStopOrder(entryStopOrder);
+
+			control.verify();
+		}
+	}
+	
+	@Test
+	public void testCreateNewStopOrder_NoAccount() throws Exception {
+		Date time = new Date();
+		entryStopOrder = new StopOrderCache(120L, 872L, OrderStatus.CANCELLED,
+				"SBER", "EQBR", "LX01", "3644", OrderDirection.SELL,
+				200L, 200.0d, 198.0d, 210.0d,
+				new Price(PriceUnit.MONEY, 1.0d),
+				new Price(PriceUnit.PERCENT, 0.5d),
+				219L, time, null, OrderType.STOP_LIMIT);
+		expect(low.getAccountByStopOrderCache(entryStopOrder)).andReturn(null);
+		expect(low.getSecurityDescriptorByStopOrderCache(entryStopOrder))
+			.andReturn(descr);
+		control.replay();
+		
+		assertFalse(middle.createNewStopOrder(entryStopOrder));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateNewStopOrder_NoSecurity() throws Exception {
+		Date time = new Date();
+		entryStopOrder = new StopOrderCache(120L, 872L, OrderStatus.CANCELLED,
+				"SBER", "EQBR", "LX01", "3644", OrderDirection.SELL,
+				200L, 200.0d, 198.0d, 210.0d,
+				new Price(PriceUnit.MONEY, 1.0d),
+				new Price(PriceUnit.PERCENT, 0.5d),
+				219L, time, null, OrderType.STOP_LIMIT);
+		expect(low.getAccountByStopOrderCache(entryStopOrder))
+			.andReturn(account);
+		expect(low.getSecurityDescriptorByStopOrderCache(entryStopOrder))
+			.andReturn(null);
+		control.replay();
+		
+		assertFalse(middle.createNewStopOrder(entryStopOrder));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateNewStopOrder() throws Exception {
+		Date time = new Date();
+		entryStopOrder = new StopOrderCache(120L, 872L, OrderStatus.CANCELLED,
+				"SBER", "EQBR", "LX01", "3644", OrderDirection.SELL,
+				2000L, 200.0d, 198.0d, 210.0d,
+				new Price(PriceUnit.MONEY, 1.0d),
+				new Price(PriceUnit.PERCENT, 0.5d),
+				219L, time, null, OrderType.TPSL);
+		expect(low.getAccountByStopOrderCache(entryStopOrder))
+			.andReturn(account);
+		expect(low.getSecurityDescriptorByStopOrderCache(entryStopOrder))
+			.andReturn(descr);
+		expect(terminal.createStopOrder()).andReturn(order);
+		order.setAccount(account);
+		order.setDirection(OrderDirection.SELL);
+		order.setOffset(new Price(PriceUnit.MONEY, 1.0d));
+		order.setPrice(200.0d);
+		order.setQty(2000L);
+		order.setSecurityDescriptor(descr);
+		order.setSpread(new Price(PriceUnit.PERCENT, 0.5d));
+		order.setStopLimitPrice(198.0d);
+		order.setTakeProfitPrice(210.0d);
+		order.setTime(time);
+		order.setTransactionId(872L);
+		order.setType(OrderType.TPSL);
+		low.adjustStopOrderStatus(entryStopOrder, order);
+		terminal.registerStopOrder(120L, order);
+		order.setAvailable(true);
+		terminal.fireStopOrderAvailableEvent(order);		
+		control.replay();
+		
+		assertTrue(middle.createNewStopOrder(entryStopOrder));
+		
+		control.verify();
 	}
 
 }

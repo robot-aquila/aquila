@@ -10,9 +10,12 @@ import ru.prolib.aquila.quik.subsys.TableHeadersValidator;
 /**
  * Фабрика конструкторов наборов рядов.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-17<br>
  * $Id$
  */
+@Deprecated
 public class RowSetBuilderFactory {
 	private final QUIKServiceLocator locator;
 	private final RowAdapters adapters;

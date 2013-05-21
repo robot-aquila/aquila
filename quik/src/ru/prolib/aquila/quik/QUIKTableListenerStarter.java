@@ -14,9 +14,12 @@ import ru.prolib.aquila.quik.subsys.*;
 /**
  * Пускач обозревателя таблиц DDE.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-27<br>
  * $Id: QUIKTableListenerStarter.java 548 2013-02-27 03:01:50Z whirlwind $
  */
+@Deprecated
 public class QUIKTableListenerStarter implements Starter {
 	private final QUIKServiceLocator locator;
 	private final DDEObservableService service;
@@ -51,7 +54,7 @@ public class QUIKTableListenerStarter implements Starter {
 		//orderListeners.add(lf.listenPortfoliosFUT());
 		//orderListeners.add(lf.listenPositionsFUT());
 		//orderListeners.add(lf.listenOrders());
-		orderListeners.add(lf.listenStopOrders());
+		//orderListeners.add(lf.listenStopOrders());
  
 		for ( DDETableListener listener : orderListeners ) {
 			order.addListener(listener);

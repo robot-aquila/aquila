@@ -342,5 +342,33 @@ public class Cache {
 	public synchronized EventType OnOrdersCacheUpdate() {
 		return orders.OnCacheUpdate();
 	}
+	
+	/**
+	 * Делегат к {@link StopOrdersCache#get(Long)}.
+	 * <p>
+	 * @param orderId номер заявки
+	 * @return кэш-запись
+	 */
+	public synchronized StopOrderCache getStopOrderCache(long orderId) {
+		return stopOrders.get(orderId);
+	}
+	
+	/**
+	 * Делегат к {@link StopOrdersCache#getAll()}.
+	 * <p>
+	 * @return список кэш-записей
+	 */
+	public synchronized List<StopOrderCache> getAllStopOrders() {
+		return stopOrders.getAll();
+	}
+	
+	/**
+	 * Делегат к {@link StopOrdersCache#OnCacheUpdate()}.
+	 * <p>
+	 * @return тип события
+	 */
+	public synchronized EventType OnStopOrdersCacheUpdate() {
+		return stopOrders.OnCacheUpdate();
+	}
 
 }

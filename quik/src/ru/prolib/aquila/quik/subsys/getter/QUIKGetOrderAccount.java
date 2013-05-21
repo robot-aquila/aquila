@@ -13,9 +13,12 @@ import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
  * Используется для восстановления объекта счета для таблиц заявок и
  * стоп-заявок.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-21<br>
  * $Id: QUIKGetOrderAccount.java 542 2013-02-23 04:15:34Z whirlwind $
  */
+@Deprecated
 public class QUIKGetOrderAccount implements G<Account> {
 	private final QUIKServiceLocator locator;
 	private final G<String> gSubCode;

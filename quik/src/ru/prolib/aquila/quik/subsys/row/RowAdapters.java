@@ -18,9 +18,12 @@ import ru.prolib.aquila.quik.subsys.*;
 /**
  * Конструктор адаптеров таблиц.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-15<br>
  * $Id$
  */
+@Deprecated
 public class RowAdapters {
 	public static final String DEAL_NUM = "TRADENUM";
 	public static final String DEAL_DATE = "TRADEDATE";

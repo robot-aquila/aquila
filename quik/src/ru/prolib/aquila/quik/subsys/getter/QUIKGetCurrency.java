@@ -8,9 +8,12 @@ import ru.prolib.aquila.core.data.ValueException;
 /**
  * Геттер кода валюты из таблицы инструментов.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-25<br>
  * $Id: QUIKGetCurrency.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class QUIKGetCurrency implements G<String> {
 	private final G<String> gCode;
 	private final String defaultCurrencyCode;

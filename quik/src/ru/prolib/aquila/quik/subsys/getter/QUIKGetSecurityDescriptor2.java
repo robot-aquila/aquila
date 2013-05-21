@@ -11,9 +11,12 @@ import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 /**
  * Геттер дескриптора инструмента на основе кода и класса инструмента.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-01-23<br>
  * $Id: QUIKGetSecurityDescriptor2.java 520 2013-02-12 10:12:53Z whirlwind $
  */
+@Deprecated
 public class QUIKGetSecurityDescriptor2 implements G<SecurityDescriptor> {
 	private final QUIKServiceLocator locator;
 	private final G<String> gCode, gClass;

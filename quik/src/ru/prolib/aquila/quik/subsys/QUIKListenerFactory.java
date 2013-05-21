@@ -6,9 +6,12 @@ import ru.prolib.aquila.dde.utils.table.DDETableListener;
 /**
  * Интерфейс фабрики обозревателей таблиц QUIK.
  * <p> 
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2012-09-08<br>
  * $Id$
  */
+@Deprecated
 public interface QUIKListenerFactory {
 	
 	/**

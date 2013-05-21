@@ -58,6 +58,7 @@ public class AssemblerHighLvlTest {
 			.andReturn(true);
 		expect(middle.checkIfOrderRemoved((EditableOrder) same(orders.get(2))))
 			.andReturn(false);
+		
 		expect(cache.getAllOrders()).andReturn(entries);
 		// Для существующих заявок всегда выполняется обновление
 		expect(terminal.isOrderExists(eq(125L))).andReturn(true);
@@ -74,6 +75,43 @@ public class AssemblerHighLvlTest {
 		control.replay();
 		
 		assembler.adjustOrders();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testAdjustStopOrders() throws Exception {
+		List<Order> orders = new Vector<Order>();
+		orders.add(control.createMock(EditableOrder.class));
+		orders.add(control.createMock(EditableOrder.class));
+		
+		List<StopOrderCache> entries = new Vector<StopOrderCache>();
+		entries.add(control.createMock(StopOrderCache.class));
+		expect(entries.get(0).getId()).andStubReturn(415L);
+		entries.add(control.createMock(StopOrderCache.class));
+		expect(entries.get(1).getId()).andStubReturn(118L);
+		entries.add(control.createMock(StopOrderCache.class));
+		expect(entries.get(2).getId()).andStubReturn(314L);
+		
+		expect(terminal.getStopOrders()).andReturn(orders);
+		expect(middle.checkIfStopOrderRemoved((EditableOrder)
+				same(orders.get(0)))).andReturn(false);
+		expect(middle.checkIfStopOrderRemoved((EditableOrder)
+				same(orders.get(1)))).andReturn(true);
+		
+		expect(cache.getAllStopOrders()).andReturn(entries);
+		expect(terminal.isStopOrderExists(415L)).andReturn(false);
+		expect(terminal.hasPendingStopOrders()).andReturn(false);
+		expect(middle.createNewStopOrder(entries.get(0))).andReturn(true);
+		
+		expect(terminal.isStopOrderExists(118L)).andReturn(false);
+		expect(terminal.hasPendingStopOrders()).andReturn(true);
+		
+		expect(terminal.isStopOrderExists(314L)).andReturn(true);
+		expect(middle.updateExistingStopOrder(entries.get(2))).andReturn(true);
+		control.replay();
+		
+		assembler.adjustStopOrders();
 		
 		control.verify();
 	}

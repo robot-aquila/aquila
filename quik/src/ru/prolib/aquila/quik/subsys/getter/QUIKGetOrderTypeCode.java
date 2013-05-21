@@ -12,9 +12,12 @@ import ru.prolib.aquila.core.data.ValueException;
  * непосредственно о типе заявки. Данный геттер извлекает первый символ
  * строки, полученной посредством подчиненного геттера.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-22<br>
  * $Id: QUIKGetOrderTypeCode.java 542 2013-02-23 04:15:34Z whirlwind $
  */
+@Deprecated
 public class QUIKGetOrderTypeCode implements G<String> {
 	private final G<String> gMode;
 	

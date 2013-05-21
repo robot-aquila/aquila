@@ -19,9 +19,12 @@ import ru.prolib.aquila.core.utils.Validator;
  * указанному набору помимо возврата соответствующего результата инициирует
  * генерацию события панического состояния терминала.
  * <p>
+ * TODO: ОСТОРОЖНО выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-09<br>
  * $Id$
  */
+@Deprecated
 public class TableHeadersValidator implements Validator {
 	private static final Logger logger;
 	private final FirePanicEvent firePanic;

@@ -12,9 +12,12 @@ import ru.prolib.aquila.core.utils.ValidatorException;
  * используется совместно с фильтром {@link
  * ru.prolib.aquila.core.data.row.RowSetFilter RowSetFilter}.
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-18<br>
  * $Id$
  */
+@Deprecated
 public class ValidateLimitType implements Validator {
 	
 	public ValidateLimitType() {

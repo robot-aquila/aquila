@@ -56,19 +56,41 @@ public class AssemblerLowLvl {
 	 * @return торговый счет или null, если не удалось определить счет
 	 */
 	public Account getAccountByOrderCache(OrderCache entry) {
-		if ( ! cache.isAccountRegistered(entry.getClientCode(),
-				entry.getAccountCode()))
-		{
+		return getAccount(entry.getClientCode(), entry.getAccountCode(),
+				entry.getId());
+	}
+	
+	/**
+	 * Проверить доступность портфеля и получить счет.
+	 * <p>
+	 * @param entry кэш-запись стоп-заявки
+	 * @return торговый счет или null, если не удалось определить счет
+	 */
+	public Account getAccountByStopOrderCache(StopOrderCache entry) {
+		return getAccount(entry.getClientCode(), entry.getAccountCode(),
+				entry.getId());
+	}
+	
+	/**
+	 * Проверить доступность портфеля и получить счет.
+	 * <p>
+	 * @param clientCode код клиента
+	 * @param accountCode код торгового счета
+	 * @param orderId номер заявки
+	 * @return торговый счет или null, если не удалось определить счет
+	 */
+	private Account
+		getAccount(String clientCode, String accountCode, Long orderId)
+	{
+		if ( ! cache.isAccountRegistered(clientCode, accountCode)) {
 			logger.debug("Order {} still wait for account by clnt&acnt: {}@{}",
-					new Object[] { entry.getId(), entry.getClientCode(),
-					entry.getAccountCode() });
+				new Object[] { orderId, clientCode, accountCode });
 			return null;
 		}
-		Account account = cache.getAccount(entry.getClientCode(),
-				entry.getAccountCode());
+		Account account = cache.getAccount(clientCode, accountCode);
 		if ( ! terminal.isPortfolioAvailable(account) ) {
 			logger.debug("Order {} still wait for portfolio: {}",
-					new Object[] { entry.getId(), account });
+				new Object[] { orderId, account });
 			return null;
 		}
 		return account;
@@ -83,20 +105,46 @@ public class AssemblerLowLvl {
 	public SecurityDescriptor
 		getSecurityDescriptorByOrderCache(OrderCache entry)
 	{
-		if ( ! cache.isSecurityDescriptorRegistered(entry.getSecurityCode(),
-				entry.getSecurityClassCode()))
-		{
+		return getSecurityDescriptor(entry.getSecurityCode(),
+				entry.getSecurityClassCode(), entry.getId());
+	}
+	
+	/**
+	 * Проверить доступность инструмента и получить дескриптор.
+	 * <p>
+	 * @param entry кэш-запись стоп-заявки
+	 * @return дескриптор инструмента или null, если не удалось определить
+	 */
+	public SecurityDescriptor
+		getSecurityDescriptorByStopOrderCache(StopOrderCache entry)
+	{
+		return getSecurityDescriptor(entry.getSecurityCode(),
+				entry.getSecurityClassCode(), entry.getId());
+	}
+	
+	/**
+	/**
+	 * Проверить доступность инструмента и получить дескриптор.
+	 * <p>
+	 * @param code код инструмента
+	 * @param classCode код класса инструмента
+	 * @param orderId номер заявки
+	 * @return дескриптор инструмента или null, если не удалось определить
+	 */
+	private SecurityDescriptor
+		getSecurityDescriptor(String code, String classCode, Long orderId)
+	{
+		if ( ! cache.isSecurityDescriptorRegistered(code, classCode)) {
 			logger.debug("Order {} still wait for descr by code&class: {}@{}",
-					new Object[] { entry.getId(), entry.getSecurityCode(),
-					entry.getSecurityClassCode() });
+				new Object[] { orderId, code, classCode });
 			return null;
 		}
 
-		SecurityDescriptor descr = cache.getSecurityDescriptorByCodeAndClass(
-				entry.getSecurityCode(), entry.getSecurityClassCode());
+		SecurityDescriptor descr =
+			cache.getSecurityDescriptorByCodeAndClass(code, classCode);
 		if ( ! terminal.isSecurityExists(descr) ) {
 			logger.debug("Order {} still wait for security: {}",
-					new Object[] { entry.getId(), descr });
+				new Object[] { orderId, descr });
 			return null;
 		}
 		return descr;
@@ -109,16 +157,75 @@ public class AssemblerLowLvl {
 	 * @param order экземпляр заявки
 	 */
 	public void adjustOrderStatus(OrderCache entry, EditableOrder order) {
-		if ( order.getQtyRest() == 0L ) {
-			order.setStatus(OrderStatus.FILLED);
-			order.setLastChangeTime(order.getLastTradeTime());
-		} else if ( entry.getStatus() == OrderStatus.CANCELLED ) {
-			if ( entry.getQtyRest() == order.getQtyRest() ) {
+		OrderStatus orderStatus = order.getStatus();
+		if ( orderStatus != OrderStatus.ACTIVE
+		  && orderStatus != OrderStatus.PENDING )
+		{
+			// Все заявки в статусе отличном от ACTIVE и PENDING игнорируются
+			return;
+		}
+		
+		OrderStatus entryStatus = entry.getStatus();
+		if ( entryStatus == OrderStatus.FILLED ) {
+			// Статус заявки не проверяем, так как в случае создания нового
+			// экземпляра заявки, новая заявка будет в статусе PENDING
+			// и нигде в программе смена этого статуса выполнена не будет,
+			// так как перевод PENDING -> ACTIVE выполняется только для заявок,
+			// созданных локально. Просто проверяем согласованность по сделкам,
+			// добавление которых должно выставить корректный неисполненный
+			// остаток.
+			Long rest = order.getQtyRest();
+			if ( rest != null && rest == 0L ) {
+				order.setStatus(OrderStatus.FILLED);
+				order.setLastChangeTime(order.getLastTradeTime());
+			}
+			
+		} else if ( entryStatus == OrderStatus.CANCELLED ) {
+			// Неисполненный остаток отмененной заявки должен быть согласован
+			// по сделкам. Только когда неисполненный остаток локальной заявки
+			// и кэш записи совпадает, только тогда заявку можно считать
+			// согласованной. В этом случае выполняется смена статуса заявки.
+			Long rest = order.getQtyRest();
+			if ( rest != null && rest == entry.getQtyRest() ) {
 				order.setStatus(OrderStatus.CANCELLED);
 				order.setLastChangeTime(entry.getWithdrawTime());
 			}
-		} else {
+			
+		} else if ( orderStatus == OrderStatus.PENDING ) {
+			// Здесь мы будем только в случае, когда локальная заявка -
+			// это недавно созданный экземпляр, а в ТС активная заявка. 
 			order.setStatus(OrderStatus.ACTIVE);
+			
+		}
+	}
+	
+	/**
+	 * Согласовать статус стоп-заявки.
+	 * <p>
+	 * Помимо статуса так же выставляет время последнего изменения и номер
+	 * связанной заявки (в случае исполнения).
+	 * <p>
+	 * @param entry кэш-запись стоп-заявки
+	 * @param order экземпляр заявки
+	 */
+	public
+		void adjustStopOrderStatus(StopOrderCache entry, EditableOrder order)
+	{
+		OrderStatus entryStatus = entry.getStatus();
+		if ( entryStatus == OrderStatus.ACTIVE ) {
+			if ( order.getStatus() == OrderStatus.PENDING ) {
+				order.setStatus(OrderStatus.ACTIVE);
+			}
+		} else if ( entryStatus == OrderStatus.CANCELLED ) {
+			order.setStatus(entryStatus);
+			order.setLastChangeTime(entry.getWithdrawTime());
+		} else if ( entryStatus == OrderStatus.FILLED ) {
+			Long linkId = entry.getLinkedOrderId();
+			if ( terminal.isOrderExists(linkId) ) {
+				order.setStatus(entryStatus);
+				order.setLinkedOrderId(linkId);
+				order.setLastChangeTime(terminal.getCurrentTime());
+			}
 		}
 	}
 	

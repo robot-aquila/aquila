@@ -22,9 +22,12 @@ import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
  * декораторов ряда и специфического конструктора ряда и использовать вместо
  * этого стандартный фильтр рядов. 
  * <p>
+ * TODO: выпилить, после полного перехода на DDE-кэш
+ * <p>
  * 2013-02-20<br>
  * $Id: ValidateSecurityRow.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class ValidateSecurityRow implements Validator {
 	private final QUIKServiceLocator locator;
 	
