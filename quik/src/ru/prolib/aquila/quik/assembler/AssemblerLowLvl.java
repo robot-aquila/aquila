@@ -211,12 +211,15 @@ public class AssemblerLowLvl {
 	public
 		void adjustStopOrderStatus(StopOrderCache entry, EditableOrder order)
 	{
+		Long orderId = entry.getId();
 		OrderStatus entryStatus = entry.getStatus();
 		if ( entryStatus == OrderStatus.ACTIVE ) {
 			if ( order.getStatus() == OrderStatus.PENDING ) {
+				logger.debug("Stop-order {} set activated", orderId);
 				order.setStatus(OrderStatus.ACTIVE);
 			}
 		} else if ( entryStatus == OrderStatus.CANCELLED ) {
+			logger.debug("Stop-Order {} set cancelled by entry", orderId);
 			order.setStatus(entryStatus);
 			order.setLastChangeTime(entry.getWithdrawTime());
 		} else if ( entryStatus == OrderStatus.FILLED ) {
@@ -225,6 +228,10 @@ public class AssemblerLowLvl {
 				order.setStatus(entryStatus);
 				order.setLinkedOrderId(linkId);
 				order.setLastChangeTime(terminal.getCurrentTime());
+				logger.debug("Stop-Order {} set filled with linked order {}",
+					new Object[] { orderId, linkId });
+			} else {
+				logger.debug("Stop-Order {} wait for linked order", orderId);
 			}
 		}
 	}

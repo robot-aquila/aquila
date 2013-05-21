@@ -16,6 +16,16 @@ import ru.prolib.aquila.quik.dde.*;
  * принимается вызывающим кодом.
  */
 public class AssemblerMidLvl {
+	/**
+	 * Минимальное время жизни заявки в миллисекундах.
+	 * <p>
+	 * Данный параметр используется в процедуре отмены заявок по удалению
+	 * кэш-записи из соответствующего кэша. Так как данные могут приходить
+	 * с задержкой (например, сначала ответ на транзакцию, а затем обновление
+	 * кэша), безусловная отмена может привести к тому, что заявка будет
+	 * локально отменена до того, как поступят данные таблицы.
+	 */
+	private static final long MIN_ORDER_LIFETIME = 3600000;
 	private static final Logger logger;
 	
 	static {
@@ -73,6 +83,8 @@ public class AssemblerMidLvl {
 		synchronized ( order ) {
 			try {
 				if ( order.getStatus() == OrderStatus.ACTIVE
+					&& terminal.getCurrentTime().getTime()
+						- order.getTime().getTime() > MIN_ORDER_LIFETIME
 					&& cache.getOrderCache(order.getId()) == null )
 				{
 					order.setStatus(OrderStatus.CANCELLED);
@@ -103,7 +115,9 @@ public class AssemblerMidLvl {
 		synchronized ( order ) {
 			try {
 				if ( order.getStatus() == OrderStatus.ACTIVE
-				  && cache.getStopOrderCache(order.getId()) == null )
+					&& terminal.getCurrentTime().getTime()
+						- order.getTime().getTime() > MIN_ORDER_LIFETIME
+					&& cache.getStopOrderCache(order.getId()) == null )
 				{
 					order.setStatus(OrderStatus.CANCELLED);
 					order.setLastChangeTime(terminal.getCurrentTime());

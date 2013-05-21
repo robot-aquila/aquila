@@ -48,6 +48,7 @@ public class Assembler implements Starter, EventListener {
 		terminal.OnPortfolioAvailable().addListener(this);
 		terminal.OnSecurityAvailable().addListener(this);
 		terminal.OnOrderAvailable().addListener(this);
+		terminal.OnStopOrderAvailable().addListener(this);
 		cache.OnPortfoliosFCacheUpdate().addListener(this);
 		cache.OnPositionsFCacheUpdate().addListener(this);
 		cache.OnSecuritiesCacheUpdate().addListener(this);
@@ -64,6 +65,7 @@ public class Assembler implements Starter, EventListener {
 		cache.OnSecuritiesCacheUpdate().removeListener(this);
 		cache.OnPositionsFCacheUpdate().removeListener(this);
 		cache.OnPortfoliosFCacheUpdate().removeListener(this);
+		terminal.OnStopOrderAvailable().removeListener(this);
 		terminal.OnOrderAvailable().removeListener(this);
 		terminal.OnSecurityAvailable().removeListener(this);
 		terminal.OnPortfolioAvailable().removeListener(this);
@@ -114,9 +116,12 @@ public class Assembler implements Starter, EventListener {
 			high.adjustSecurities();
 		} else if ( event.isType(cache.OnPortfoliosFCacheUpdate()) ) {
 			high.adjustPortfolios();
-		} else if ( event.isType(cache.OnStopOrdersCacheUpdate())
-		  || event.isType(terminal.OnOrderAvailable()) )
-		{
+		} else if ( event.isType(cache.OnStopOrdersCacheUpdate()) ) {
+			high.adjustStopOrders();
+		} else if ( event.isType(terminal.OnOrderAvailable()) ) {
+			high.adjustOrders();
+			high.adjustStopOrders();
+		} else if ( event.isType(terminal.OnStopOrderAvailable()) ) {
 			high.adjustStopOrders();
 		}
 	}

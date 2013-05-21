@@ -42,6 +42,7 @@ public class AssemblerTest {
 		assertTrue(terminal.OnSecurityAvailable().isListener(assembler));
 		assertTrue(terminal.OnPortfolioAvailable().isListener(assembler));
 		assertTrue(terminal.OnOrderAvailable().isListener(assembler));
+		assertTrue(terminal.OnStopOrderAvailable().isListener(assembler));
 		assertTrue(cache.OnOrdersCacheUpdate().isListener(assembler));
 		assertTrue(cache.OnPortfoliosFCacheUpdate().isListener(assembler));
 		assertTrue(cache.OnPositionsFCacheUpdate().isListener(assembler));
@@ -58,6 +59,7 @@ public class AssemblerTest {
 		assertFalse(terminal.OnSecurityAvailable().isListener(assembler));
 		assertFalse(terminal.OnPortfolioAvailable().isListener(assembler));
 		assertFalse(terminal.OnOrderAvailable().isListener(assembler));
+		assertFalse(terminal.OnStopOrderAvailable().isListener(assembler));
 		assertFalse(cache.OnOrdersCacheUpdate().isListener(assembler));
 		assertFalse(cache.OnPortfoliosFCacheUpdate().isListener(assembler));
 		assertFalse(cache.OnPositionsFCacheUpdate().isListener(assembler));
@@ -92,10 +94,21 @@ public class AssemblerTest {
 	
 	@Test
 	public void testOnEvent_OnOrderAvailable() throws Exception {
+		high.adjustOrders();
 		high.adjustStopOrders();
 		control.replay();
 		
 		assembler.onEvent(new EventImpl(terminal.OnOrderAvailable()));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnEvent_OnStopOrderAvailable() throws Exception {
+		high.adjustStopOrders();
+		control.replay();
+		
+		assembler.onEvent(new EventImpl(terminal.OnStopOrderAvailable()));
 		
 		control.verify();
 	}

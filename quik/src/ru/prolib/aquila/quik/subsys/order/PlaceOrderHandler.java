@@ -1,6 +1,8 @@
 package ru.prolib.aquila.quik.subsys.order;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -15,6 +17,12 @@ import ru.prolib.aquila.t2q.T2QTransStatus;
  * транзакции регистрации заявки.
  */
 public class PlaceOrderHandler implements EventListener {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(PlaceOrderHandler.class);
+	}
+	
 	protected final EditableOrders orders;
 	protected final QUIKServiceLocator locator;
 	
@@ -64,6 +72,8 @@ public class PlaceOrderHandler implements EventListener {
 		order.setStatus(orderStatus);
 		order.fireChangedEvent();
 		order.resetChanges();
+		logger.debug("Trans {} order {} response status {}",
+				new Object[] { transId, orderId, orderStatus });
 	}
 	
 	@Override

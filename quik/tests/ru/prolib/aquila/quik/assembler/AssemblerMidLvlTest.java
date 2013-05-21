@@ -2,6 +2,8 @@ package ru.prolib.aquila.quik.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.text.SimpleDateFormat;
 import java.util.*;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
@@ -13,6 +15,7 @@ import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.dde.*;
 
 public class AssemblerMidLvlTest {
+	private static SimpleDateFormat format;
 	private static Account account, account2;
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
@@ -34,6 +37,7 @@ public class AssemblerMidLvlTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
+		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		account = new Account("FIRM", "3644", "LX01");
 		account2 = new Account("SPBFUT", "eqe01", "eqe01");
 		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
@@ -71,7 +75,25 @@ public class AssemblerMidLvlTest {
 	}
 	
 	@Test
+	public void testCheckIfOrderRemoved_TooYoungOrder() throws Exception {
+		Date currTime = format.parse("2013-05-21 20:00:00");
+		Date orderTime = format.parse("2013-05-21 19:00:00");
+		expect(terminal.getCurrentTime()).andStubReturn(currTime);
+		expect(order.getTime()).andStubReturn(orderTime);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		control.replay();
+
+		assertFalse(middle.checkIfOrderRemoved(order));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testCheckIfOrderRemoved_Removed() throws Exception {
+		Date currTime = format.parse("2013-05-21 20:00:01");
+		Date orderTime = format.parse("2013-05-21 19:00:00");
+		expect(terminal.getCurrentTime()).andStubReturn(currTime);
+		expect(order.getTime()).andStubReturn(orderTime);
 		expect(order.getId()).andStubReturn(829L);
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		expect(cache.getOrderCache(829L)).andReturn(null);
@@ -90,6 +112,10 @@ public class AssemblerMidLvlTest {
 	
 	@Test
 	public void testCheckIfOrderRemoved_NotRemoved() throws Exception {
+		Date currTime = format.parse("2013-05-21 20:00:01");
+		Date orderTime = format.parse("2013-05-21 19:00:00");
+		expect(terminal.getCurrentTime()).andStubReturn(currTime);
+		expect(order.getTime()).andStubReturn(orderTime);
 		expect(order.getId()).andStubReturn(829L);
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		expect(cache.getOrderCache(829L)).andReturn(entryOrder);
@@ -111,7 +137,25 @@ public class AssemblerMidLvlTest {
 	}
 	
 	@Test
+	public void testCheckIfStopOrderRemoved_TooYoungOrder() throws Exception {
+		Date currTime = format.parse("2013-05-21 20:00:00");
+		Date orderTime = format.parse("2013-05-21 19:00:00");
+		expect(terminal.getCurrentTime()).andStubReturn(currTime);
+		expect(order.getTime()).andStubReturn(orderTime);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		control.replay();
+
+		assertFalse(middle.checkIfStopOrderRemoved(order));
+		
+		control.verify();
+	}
+
+	@Test
 	public void testCheckIfStopOrderRemoved_Removed() throws Exception {
+		Date currTime = format.parse("2013-05-21 20:00:01");
+		Date orderTime = format.parse("2013-05-21 19:00:00");
+		expect(terminal.getCurrentTime()).andStubReturn(currTime);
+		expect(order.getTime()).andStubReturn(orderTime);
 		expect(order.getId()).andStubReturn(792L);
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		expect(cache.getStopOrderCache(792L)).andReturn(null);
@@ -130,6 +174,10 @@ public class AssemblerMidLvlTest {
 
 	@Test
 	public void testCheckIfStopOrderRemoved_NotRemoved() throws Exception {
+		Date currTime = format.parse("2013-05-21 20:00:01");
+		Date orderTime = format.parse("2013-05-21 19:00:00");
+		expect(terminal.getCurrentTime()).andStubReturn(currTime);
+		expect(order.getTime()).andStubReturn(orderTime);
 		expect(order.getId()).andStubReturn(792L);
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		expect(cache.getStopOrderCache(792L)).andReturn(entryStopOrder);
