@@ -66,10 +66,13 @@ public class UIOrdersPlugin implements AquilaPlugin, EventListener {
 		// каждый раз при изменении состава колонок или смене порядка?
 		// Неужели трудно догадаться, что нужно сделать класс таблицы,
 		// который позволит делать это по идентификатору колонки например?
-		stopOrdersTable.getColumnModel().getColumn(5).setPreferredWidth(200);
+		//
+		// Ну бляха-муха, ну сто лет назад написал - исправь. Вот ситуация -
+		// приходится искать где это дерьмо устанавливается.
+		//stopOrdersTable.getColumnModel().getColumn(5).setPreferredWidth(200);
 		
 		ordersTable = new JTable(ordersModel);
-		ordersTable.getColumnModel().getColumn(5).setPreferredWidth(200);
+		//ordersTable.getColumnModel().getColumn(5).setPreferredWidth(200);
 		ordersTable.getSelectionModel()
 			.addListSelectionListener(new ListSelectionListener() {
 				@Override public void valueChanged(ListSelectionEvent e) {

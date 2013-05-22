@@ -206,5 +206,16 @@ public class SecurityGettersTest {
 		IsInstanceOf.instanceOf(GDouble.class).matches(g);
 		assertEquals(12.34d, g.get(security), 0.0001d);		
 	}
-
+	
+	@Test
+	public void testMinPrice() throws Exception {
+		GDouble g = new GSecurityMinPrice();
+		assertEquals(90.0d, g.get(security), 0.01d);
+	}
+	
+	@Test
+	public void testMaxPrice() throws Exception {
+		GDouble g = new GSecurityMaxPrice();
+		assertEquals(130.0d, g.get(security), 0.01d);
+	}
 }
