@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -61,7 +63,6 @@ public class CancelOrderHandlerTest {
 			T2QTransStatus.ERR_TSYS,
 			T2QTransStatus.ERR_UNK,
 			T2QTransStatus.ERR_UNSUPPORTED,
-			T2QTransStatus.DONE,
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
@@ -91,9 +92,14 @@ public class CancelOrderHandlerTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
+			Terminal terminal = control.createMock(Terminal.class);
+			Date time = new Date();
+			expect(order.getTerminal()).andStubReturn(terminal);
+			expect(terminal.getCurrentTime()).andStubReturn(time);
 			expect(orders.getEditableOrder(eq(1524L))).andReturn(order);
 			expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 			order.setStatus(OrderStatus.FAILED);
+			order.setLastChangeTime(time);
 			order.fireChangedEvent();
 			order.resetChanges();
 			control.replay();
@@ -106,11 +112,6 @@ public class CancelOrderHandlerTest {
 
 	@Test
 	public void testOnEvent_Ok() throws Exception {
-		expect(orders.getEditableOrder(eq(1524L))).andReturn(order);
-		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
-		order.setStatus(OrderStatus.CANCELLED);
-		order.fireChangedEvent();
-		order.resetChanges();
 		control.replay();
 		
 		handler.onEvent(new TransEvent(type, T2QTransStatus.DONE, 1L, 2L, "?"));

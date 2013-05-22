@@ -53,15 +53,17 @@ public class CancelOrderHandler implements EventListener {
 			// Эти статусы не являются ошибкой и никак не обрабатываются
 			return;
 		}
+		if ( transStatus == T2QTransStatus.DONE ) {
+			// Ничего не делает.
+			// Обработка отмены выполняется в рамках ассемблера.
+			return;
+		}
 		EditableOrder order = orders.getEditableOrder(orderId);
 		if ( order.getStatus() != OrderStatus.ACTIVE ) {
 			return;
 		}
-		if ( transStatus == T2QTransStatus.DONE ) {
-			order.setStatus(OrderStatus.CANCELLED);
-		} else {
-			order.setStatus(OrderStatus.FAILED);
-		}
+		order.setStatus(OrderStatus.FAILED);
+		order.setLastChangeTime(order.getTerminal().getCurrentTime());
 		order.fireChangedEvent();
 		order.resetChanges();
 	}
