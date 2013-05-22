@@ -38,4 +38,12 @@ public class IBHistoricalRow {
 		};
 		return row;
 	}
+	
+	public String getDate() {
+		return date;
+	}
+	
+	public boolean isLast() {
+		return (volume == -1);
+	}
 }

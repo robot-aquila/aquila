@@ -1,10 +1,11 @@
 package ru.prolib.aquila.ib.utils;
 
-import java.io.IOException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.JFrame;
 
 import org.apache.log4j.BasicConfigurator;
 
-import com.csvreader.CsvWriter;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
@@ -23,12 +24,17 @@ import ru.prolib.aquila.ib.subsys.api.IBConfig;
 /**
  * $Id$
  */
-public class Main implements Runnable, EventListener {
+public class Main extends JFrame implements Runnable, EventListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6270812093791237441L;
 	private final StarterQueue starter = new StarterQueue();
 	private EventSystem es = new EventSystemImpl(new EventQueueImpl("IB-IMPORTER"));
 	private IBClientStarter clientStarter;
 	private IBUtilsWrapper wrapper;
+	private EventDispatcher dispatcher;
 	
 	static {
 		BasicConfigurator.configure();
@@ -39,17 +45,22 @@ public class Main implements Runnable, EventListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		try {
-			String[] params = {"DGAZ", "20130230 16:00:00", "G:/javawork/temp/Tests/DGAZ.csv"};
-			new Main().run(params);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
+		new Main().run();
 	}
 	
-	public void run(String[] args) throws IOException {
-		EventDispatcher dispatcher = es.createEventDispatcher();
+	public void run() {
+		addWindowListener(new WindowAdapter() {
+			@Override 
+			public void windowClosing(WindowEvent e) { 
+				try {
+					exit();
+				} catch (StarterException e1) {					
+					e1.printStackTrace();
+					System.exit(ERROR);
+				} 
+			}
+		});
+		dispatcher = es.createEventDispatcher();
 		starter.add(es.getEventQueue());
 		
 		wrapper = new IBUtilsWrapper(dispatcher, es.createGenericType(dispatcher),
@@ -58,31 +69,40 @@ public class Main implements Runnable, EventListener {
 				 es.createGenericType(dispatcher), es.createGenericType(dispatcher),
 				 es.createGenericType(dispatcher), es.createGenericType(dispatcher),
 				 es.createGenericType(dispatcher), es.createGenericType(dispatcher));
+		
 		IBClient client = new IBClientHistoricalRq(new EClientSocket(wrapper), wrapper, dispatcher,
 				es.createGenericType(dispatcher), es.createGenericType(dispatcher));
 		clientStarter = new IBClientStarter(client, new IBConfig());
 		
-		starter.add(clientStarter);
+		starter.add(clientStarter);		
 		try {
-			starter.start();			
+			starter.start();
 		} catch (StarterException e) {
 			e.printStackTrace();
-			run();
+			System.exit(ERROR);
 		}
+		MainDlg main = new MainDlg(this);
+		main.createUI();
+		add(main);
+		setSize(300, 500);
+		setVisible(true);
+		
 	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
-	@Override
-	public void run() {
-		try {
-			starter.stop();
-		} catch (StarterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+	public void exit() throws StarterException {
+		starter.stop();
 		System.exit(0);
+	}
+	
+	public void doImport(Contract contract, String date, String duration, 
+			String barSize, String whatToShow, String useRTH, String destFile)
+	{
+		RespHandler handler = new RespHandler(destFile, dispatcher, es.createGenericType(dispatcher));
+		wrapper.OnHistoricalData().addListener(handler);
+
+		IBClientHistoricalRq c = (IBClientHistoricalRq) clientStarter.getClient();
+		c.reqHistoricalData(
+			222, contract, date, duration, barSize, whatToShow, Integer.parseInt(useRTH), 1);
 	}
 
 	/* (non-Javadoc)
@@ -90,18 +110,12 @@ public class Main implements Runnable, EventListener {
 	 */
 	@Override
 	public void onEvent(Event event) {
-		if(event.isType(clientStarter.getClient().OnConnectionOpened())) {
-			RespHandler handler;
-			handler = new RespHandler(new CsvWriter(
-					"G:/javawork/temp/Tests/DGAZ.csv"));
-			wrapper.OnHistoricalData().addListener(handler);
-			
-			Contract contract = new Contract();
-			contract.m_exchange = "SMART";
-			contract.m_symbol = "DGAZ";
-			
-			IBClientHistoricalRq c = (IBClientHistoricalRq) clientStarter.getClient();
-			c.reqHistoricalData(222, contract, "20130230 16:00:00", "2 D", "1 min", "TRADES", 1, 1);			
+		if(event instanceof IBRespHandledEvent) {
+			/*
+			 * TODO: реализовать запуск скачивания следующей порции	
+			 * В хандлере запоминаем последнюю дату очередной порции. Запрашиваем всегда за 10 дней, 
+			 * и в запросе прибавляем 10 дней к последней дате. Потом в хандлере отбрасываем излишек информации.
+			 */
 		}
 		
 	}
