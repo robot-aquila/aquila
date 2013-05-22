@@ -224,7 +224,9 @@ public class AssemblerLowLvl {
 			order.setLastChangeTime(entry.getWithdrawTime());
 		} else if ( entryStatus == OrderStatus.FILLED ) {
 			Long linkId = entry.getLinkedOrderId();
-			if ( terminal.isOrderExists(linkId) ) {
+			if ( linkId == null ) {
+				logger.debug("Stop-order {} still wait for linked ID", orderId);
+			} else if ( terminal.isOrderExists(linkId) ) {
 				order.setStatus(entryStatus);
 				order.setLinkedOrderId(linkId);
 				order.setLastChangeTime(terminal.getCurrentTime());

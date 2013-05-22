@@ -45,16 +45,13 @@ public class Assembler implements Starter, EventListener {
 
 	@Override
 	public void start() throws StarterException {
-		terminal.OnPortfolioAvailable().addListener(this);
-		terminal.OnSecurityAvailable().addListener(this);
-		terminal.OnOrderAvailable().addListener(this);
-		terminal.OnStopOrderAvailable().addListener(this);
 		cache.OnPortfoliosFCacheUpdate().addListener(this);
 		cache.OnPositionsFCacheUpdate().addListener(this);
 		cache.OnSecuritiesCacheUpdate().addListener(this);
 		cache.OnOrdersCacheUpdate().addListener(this);
 		cache.OnTradesCacheUpdate().addListener(this);
 		cache.OnStopOrdersCacheUpdate().addListener(this);
+		logger.debug("Assembler started");
 	}
 
 	@Override
@@ -65,10 +62,7 @@ public class Assembler implements Starter, EventListener {
 		cache.OnSecuritiesCacheUpdate().removeListener(this);
 		cache.OnPositionsFCacheUpdate().removeListener(this);
 		cache.OnPortfoliosFCacheUpdate().removeListener(this);
-		terminal.OnStopOrderAvailable().removeListener(this);
-		terminal.OnOrderAvailable().removeListener(this);
-		terminal.OnSecurityAvailable().removeListener(this);
-		terminal.OnPortfolioAvailable().removeListener(this);
+		logger.debug("Assembler stopped");
 	}
 	
 	@Override
@@ -89,41 +83,23 @@ public class Assembler implements Starter, EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		logger.debug("Initiated by: {}", event);
+		//logger.debug("Assembling initiated by: {}", event);
 		// TODO: Насчет синхронизации тут надо думать.
 		synchronized ( terminal ) {
 			synchronized ( cache ) {
 				processEvent(event);
 			}
 		}
+		//logger.debug("Assembling finished");
 	}
 	
 	private void processEvent(Event event) {
-		if ( event.isType(cache.OnTradesCacheUpdate()) ) {
-			high.adjustOrders();
-			high.adjustPositions();
-		} else if ( event.isType(terminal.OnSecurityAvailable())
-		  || event.isType(terminal.OnPortfolioAvailable()) )
-		{
-			high.adjustOrders();
-			high.adjustStopOrders();
-			high.adjustPositions();
-		} else if ( event.isType(cache.OnOrdersCacheUpdate()) ) {
-			high.adjustOrders();
-		} else if ( event.isType(cache.OnPositionsFCacheUpdate()) ) {
-			high.adjustPositions();
-		} else if ( event.isType(cache.OnSecuritiesCacheUpdate()) ) {
-			high.adjustSecurities();
-		} else if ( event.isType(cache.OnPortfoliosFCacheUpdate()) ) {
-			high.adjustPortfolios();
-		} else if ( event.isType(cache.OnStopOrdersCacheUpdate()) ) {
-			high.adjustStopOrders();
-		} else if ( event.isType(terminal.OnOrderAvailable()) ) {
-			high.adjustOrders();
-			high.adjustStopOrders();
-		} else if ( event.isType(terminal.OnStopOrderAvailable()) ) {
-			high.adjustStopOrders();
-		}
+		// Если будет тормозить, то можно разбить этапы по типам событий.
+		high.adjustSecurities();
+		high.adjustPortfolios();
+		high.adjustOrders();
+		high.adjustStopOrders();
+		high.adjustPositions();
 	}
 
 }
