@@ -145,6 +145,7 @@ public class BMFactoryImplTest {
 		EventType onPartiallyFilled = control.createMock(EventType.class);
 		EventType onRegistered = control.createMock(EventType.class);
 		EventType onRegisterFailed = control.createMock(EventType.class);
+		EventType onTrade = control.createMock(EventType.class);
 		
 		expect(eventSystem.createEventDispatcher("Orders"))
 			.andReturn(dispatcher);
@@ -168,6 +169,8 @@ public class BMFactoryImplTest {
 				.andReturn(onRegistered);
 		expect(eventSystem.createGenericType(dispatcher, "OnRegisterFailed"))
 				.andReturn(onRegisterFailed);
+		expect(eventSystem.createGenericType(dispatcher, "OnTrade"))
+			.andReturn(onTrade);
 		control.replay();
 		
 		OrdersImpl orders = (OrdersImpl) factory.createOrders();
@@ -185,6 +188,7 @@ public class BMFactoryImplTest {
 		assertSame(onPartiallyFilled, orders.OnOrderPartiallyFilled());
 		assertSame(onRegistered, orders.OnOrderRegistered());
 		assertSame(onRegisterFailed, orders.OnOrderRegisterFailed());
+		assertSame(onTrade, orders.OnOrderTrade());
 	}
 	
 	@Test

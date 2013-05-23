@@ -21,7 +21,7 @@ public class OrdersImplTest {
 	private EventDispatcher dispatcher, dispatcherMock;
 	private EventType onAvailable,onCancelFailed,onCancelled,onChanged,
 		onDone,onFailed,onFilled,onPartiallyFilled,onRegistered,
-		onRegisterFailed;
+		onRegisterFailed, onTrade;
 	private EditableTerminal terminal;
 	private EditableOrder o1,o2,o3;
 	/**
@@ -52,6 +52,7 @@ public class OrdersImplTest {
 		onPartiallyFilled = dispatcher.createType("OnPartiallyFilled");
 		onRegistered = dispatcher.createType("OnRegistered");
 		onRegisterFailed = dispatcher.createType("OnRegisterFailed");
+		onTrade = dispatcher.createType("OnTrade");
 		dispatcherMock = control.createMock(EventDispatcher.class);
 		terminal = control.createMock(EditableTerminal.class);
 		expect(terminal.getEventSystem()).andStubReturn(es);
@@ -61,10 +62,12 @@ public class OrdersImplTest {
 		o3 = control.createMock(EditableOrder.class);
 		orders = new OrdersImpl(dispatcher, onAvailable, onCancelFailed,
 				onCancelled, onChanged, onDone, onFailed, onFilled,
-				onPartiallyFilled, onRegistered, onRegisterFailed);
+				onPartiallyFilled, onRegistered, onRegisterFailed,
+				onTrade);
 		orders2 = new OrdersImpl(dispatcherMock, onAvailable, onCancelFailed,
 				onCancelled, onChanged, onDone, onFailed, onFilled,
-				onPartiallyFilled, onRegistered, onRegisterFailed);
+				onPartiallyFilled, onRegistered, onRegisterFailed,
+				onTrade);
 		
 		EventDispatcher d = es.createEventDispatcher("Order");
 		owt = new OrderImpl(d, d.createType(), d.createType(),
@@ -86,6 +89,7 @@ public class OrdersImplTest {
 		assertSame(onPartiallyFilled, orders.OnOrderPartiallyFilled());
 		assertSame(onRegistered, orders.OnOrderRegistered());
 		assertSame(onRegisterFailed, orders.OnOrderRegisterFailed());
+		assertSame(onTrade, orders.OnOrderTrade());
 	}
 	
 	@Test
@@ -158,6 +162,7 @@ public class OrdersImplTest {
 		owt.OnPartiallyFilled().addListener(orders);
 		owt.OnRegistered().addListener(orders);
 		owt.OnRegisterFailed().addListener(orders);
+		owt.OnTrade().addListener(orders);
 		orders.setOrder(8L, owt);
 		
 		orders.purgeOrder(8L);
@@ -172,6 +177,7 @@ public class OrdersImplTest {
 		assertFalse(owt.OnPartiallyFilled().isListener(orders));
 		assertFalse(owt.OnRegistered().isListener(orders));
 		assertFalse(owt.OnRegisterFailed().isListener(orders));
+		assertFalse(owt.OnTrade().isListener(orders));
 	}
 	
 	@Test
@@ -302,6 +308,17 @@ public class OrdersImplTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testOnEvent_OnTrade() throws Exception {
+		Trade t = new Trade(terminal);
+		dispatcherMock.dispatch(new OrderTradeEvent(onTrade, owt, t));
+		control.replay();
+		
+		orders2.onEvent(new OrderTradeEvent(owt.OnTrade(), owt, t));
+		
+		control.verify();
+	}
 
 	@Test
 	public void testGetOrdersCount() throws Exception {
@@ -330,6 +347,7 @@ public class OrdersImplTest {
 		assertTrue(owt.OnPartiallyFilled().isListener(orders));
 		assertTrue(owt.OnRegistered().isListener(orders));
 		assertTrue(owt.OnRegisterFailed().isListener(orders));
+		assertTrue(owt.OnTrade().isListener(orders));
 	}
 	
 	@Test (expected=OrderAlreadyExistsException.class)
@@ -397,6 +415,7 @@ public class OrdersImplTest {
 		assertTrue(owt.OnPartiallyFilled().isListener(orders));
 		assertTrue(owt.OnRegistered().isListener(orders));
 		assertTrue(owt.OnRegisterFailed().isListener(orders));
+		assertTrue(owt.OnTrade().isListener(orders));
 	}
 	
 	@Test
@@ -489,8 +508,11 @@ public class OrdersImplTest {
 		Variant<String> vRegFailId = new Variant<String>(vRegId)
 			.add("OnRegisterFailed")
 			.add("OnRegisterFailedX");
+		Variant<String> vTrdId = new Variant<String>(vRegFailId)
+			.add("OnTrade")
+			.add("OnTradeX");
 		Variant<List<EditableOrder>> vList =
-				new Variant<List<EditableOrder>>(vRegFailId)
+				new Variant<List<EditableOrder>>(vTrdId)
 			.add(list1)
 			.add(list2);
 		Variant<List<EditableOrder>> vPendList =
@@ -519,7 +541,8 @@ public class OrdersImplTest {
 					d.createType(vFillId.get()),
 					d.createType(vPartFillId.get()),
 					d.createType(vRegId.get()),
-					d.createType(vRegFailId.get()));
+					d.createType(vRegFailId.get()),
+					d.createType(vTrdId.get()));
 			for ( EditableOrder order : vList.get() ) {
 				x.setOrder(order.getId(), order);
 			}
@@ -543,6 +566,7 @@ public class OrdersImplTest {
 		assertEquals(onPartiallyFilled, found.OnOrderPartiallyFilled());
 		assertEquals(onRegistered, found.OnOrderRegistered());
 		assertEquals(onRegisterFailed, found.OnOrderRegisterFailed());
+		assertEquals(onTrade, found.OnOrderTrade());
 		assertEquals(list1, found.getOrders());
 		for ( EditableOrder order : pendList1 ) {
 			// это некорректно, только для тестов

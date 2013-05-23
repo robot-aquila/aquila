@@ -1520,5 +1520,16 @@ public class TerminalImplTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testOnOrderTrade() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(orders.OnOrderTrade()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, terminal.OnOrderTrade());
+		
+		control.verify();
+	}
 
 }

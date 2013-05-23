@@ -46,6 +46,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	private final EventType onPartiallyFilled;
 	private final EventType onRegistered;
 	private final EventType onRegisterFailed;
+	private final EventType onTrade;
 	
 	/**
 	 * Создать хранилище заявок.
@@ -61,12 +62,14 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	 * @param onPartiallyFilled тип события: при частичном сведении заявки
 	 * @param onRegistered тип события: при регистрации заявки
 	 * @param onRegisterFailed тип события: при ошибке регистрации заявки
+	 * @param onTrade тип события: при сделке по заявке
 	 */
 	public OrdersImpl(EventDispatcher dispatcher, EventType onAvailable,
 			EventType onCancelFailed, EventType onCancelled,
 			EventType onChanged, EventType onDone, EventType onFailed,
 			EventType onFilled, EventType onPartiallyFilled,
-			EventType onRegistered, EventType onRegisterFailed)
+			EventType onRegistered, EventType onRegisterFailed,
+			EventType onTrade)
 	{
 		super();
 		pending = new LinkedHashMap<Long, EditableOrder>();
@@ -82,6 +85,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 		this.onPartiallyFilled = onPartiallyFilled;
 		this.onRegistered = onRegistered;
 		this.onRegisterFailed = onRegisterFailed;
+		this.onTrade = onTrade;
 	}
 	
 	/**
@@ -142,6 +146,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			order.OnPartiallyFilled().removeListener(this);
 			order.OnRegistered().removeListener(this);
 			order.OnRegisterFailed().removeListener(this);
+			order.OnTrade().removeListener(this);
 		}
 		orders.remove(id);
 	}
@@ -214,7 +219,11 @@ public class OrdersImpl implements EditableOrders, EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		if ( event instanceof OrderEvent ) {
+		if ( event instanceof OrderTradeEvent ) {
+			OrderTradeEvent e = (OrderTradeEvent) event;
+			dispatcher.dispatch(new OrderTradeEvent(onTrade, e.getOrder(),
+					e.getTrade()));
+		} else if ( event instanceof OrderEvent ) {
 			Order order = ((OrderEvent) event).getOrder();
 			EventType map[][] = {
 					{ order.OnCancelFailed(), onCancelFailed },
@@ -259,6 +268,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 		order.OnPartiallyFilled().addListener(this);
 		order.OnRegistered().addListener(this);
 		order.OnRegisterFailed().addListener(this);
+		order.OnTrade().addListener(this);
 	}
 
 	@Override
@@ -374,7 +384,13 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			.append(o.onRegisterFailed, onRegisterFailed)
 			.append(o.orders, orders)
 			.append(o.pending, pending)
+			.append(o.onTrade, onTrade)
 			.isEquals();
+	}
+
+	@Override
+	public EventType OnOrderTrade() {
+		return onTrade;
 	}
 
 }
