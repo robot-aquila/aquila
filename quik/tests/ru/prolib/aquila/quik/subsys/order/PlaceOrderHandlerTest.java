@@ -3,6 +3,9 @@ package ru.prolib.aquila.quik.subsys.order;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.Date;
+
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -22,6 +25,12 @@ public class PlaceOrderHandlerTest {
 	private Counter failedOrderNumerator;
 	private EventType type;
 	private PlaceOrderHandler handler;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -66,11 +75,16 @@ public class PlaceOrderHandlerTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
+			Date time = new Date();
+			Terminal terminal = control.createMock(Terminal.class);
+			expect(order.getTerminal()).andStubReturn(terminal);
+			expect(terminal.getCurrentTime()).andStubReturn(time);
 			expect(failedOrderNumerator.decrementAndGet()).andReturn(-123);
 			expect(orders.movePendingOrder(100L, -123L)).andReturn(order);
 			order.setAvailable(eq(true));
 			orders.fireOrderAvailableEvent(same(order));
 			order.setStatus(OrderStatus.FAILED);
+			order.setLastChangeTime(time);
 			order.fireChangedEvent();
 			order.resetChanges();
 			control.replay();

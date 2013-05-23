@@ -70,6 +70,9 @@ public class PlaceOrderHandler implements EventListener {
 		orders.fireOrderAvailableEvent(order);
 		// А теперь генерируется событие о смене статуса заявки.
 		order.setStatus(orderStatus);
+		if ( orderStatus == OrderStatus.FAILED ) {
+			order.setLastChangeTime(order.getTerminal().getCurrentTime());
+		}
 		order.fireChangedEvent();
 		order.resetChanges();
 		logger.debug("Trans {} order {} response status {}",
