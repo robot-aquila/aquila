@@ -2,9 +2,10 @@ package ru.prolib.aquila.ib.utils;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Vector;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,6 @@ import com.csvreader.CsvWriter;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventImpl;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventType;
 
@@ -27,6 +27,8 @@ public class RespHandler implements EventListener {
 	private String destFile;
 	private EventDispatcher dispatcher;
 	private EventType onHandled;
+	private SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+	private long lastRecordDate = 0;
 	
 	static {
 		logger = LoggerFactory.getLogger(RespHandler.class);
@@ -48,21 +50,28 @@ public class RespHandler implements EventListener {
 	@Override
 	public void onEvent(Event evt) {
 		if(evt instanceof IBEventHistoricalData) {
-			IBEventHistoricalData e = (IBEventHistoricalData) evt;
-			IBHistoricalRow row = e.getRow();
-			if(row.isLast()) {
-				try {
-					writeToFile();
-				} catch (IOException e1) {					
-					logger.error(e1.getMessage());
+			try {
+				IBEventHistoricalData e = (IBEventHistoricalData) evt;
+				IBHistoricalRow row = e.getRow();
+				if(row.isLast()) {					
+						writeToFile();
+					
+				}else {
+					if(lastRecordDate == 0 || 
+							lastRecordDate <= (format.parse(row.getDate()).getTime()/1000)) 
+					{
+						rows.add(row);
+					}
 				}
-			}else {
-				rows.add(row);
+			} catch (IOException e1) {					
+				logger.error(e1.getMessage());
+			} catch (ParseException e1) {
+				logger.error(e1.getMessage());
 			}
 		}		
 	}
 	
-	private void writeToFile() throws IOException {
+	private void writeToFile() throws IOException, ParseException {
 		logger.debug("Records recieved: {}", rows.size());
 		CsvWriter writer = new CsvWriter(new FileWriter(destFile, true), ',');
 		String lastDate = rows.get(rows.size()-1).getDate();
@@ -71,6 +80,7 @@ public class RespHandler implements EventListener {
 		}
 		writer.close();
 		rows = new Vector<IBHistoricalRow>();
+		lastRecordDate = (long) format.parse(lastDate).getTime()/1000;
 		fireOnHandled(lastDate);
 	}
 	
