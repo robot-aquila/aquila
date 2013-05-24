@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -112,8 +111,9 @@ public class MainDlg extends JPanel {
 		String destFile = saveDir.getText() + 
 				System.getProperty("file.separator") +
 				this.symbol.getText() + ".csv";
-		owner.doImport(contract, endDateTime.getText(), duration.getText(), 
-				barSize.getText(), whatToShow.getText(), 
-				useRTH.getText(), destFile);
+		
+		owner.doImport(new IBHistoricalRequestParams(contract, endDateTime.getText(), 
+				duration.getText(), barSize.getText(), whatToShow.getText(), 
+				useRTH.getText()), destFile);
 	}
 }

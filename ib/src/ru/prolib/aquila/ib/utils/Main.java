@@ -2,16 +2,17 @@ package ru.prolib.aquila.ib.utils;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.ParseException;
+
 import javax.swing.JFrame;
 
 import org.apache.log4j.BasicConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
-import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.EventSystemImpl;
@@ -24,12 +25,14 @@ import ru.prolib.aquila.ib.subsys.api.IBConfig;
 /**
  * $Id$
  */
-public class Main extends JFrame implements Runnable, EventListener {
+public class Main extends JFrame implements Runnable {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6270812093791237441L;
+	private static final Logger logger = LoggerFactory.getLogger(Main.class);
+	
 	private final StarterQueue starter = new StarterQueue();
 	private EventSystem es = new EventSystemImpl(new EventQueueImpl("IB-IMPORTER"));
 	private IBClientStarter clientStarter;
@@ -94,29 +97,19 @@ public class Main extends JFrame implements Runnable, EventListener {
 		System.exit(0);
 	}
 	
-	public void doImport(Contract contract, String date, String duration, 
-			String barSize, String whatToShow, String useRTH, String destFile)
+	public void doImport(IBHistoricalRequestParams params, String destFile)
 	{
-		RespHandler handler = new RespHandler(destFile, dispatcher, es.createGenericType(dispatcher));
-		wrapper.OnHistoricalData().addListener(handler);
-
-		IBClientHistoricalRq c = (IBClientHistoricalRq) clientStarter.getClient();
-		c.reqHistoricalData(
-			222, contract, date, duration, barSize, whatToShow, Integer.parseInt(useRTH), 1);
-	}
-
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.core.EventListener#onEvent(ru.prolib.aquila.core.Event)
-	 */
-	@Override
-	public void onEvent(Event event) {
-		if(event instanceof IBRespHandledEvent) {
-			/*
-			 * TODO: реализовать запуск скачивания следующей порции	
-			 * В хандлере запоминаем последнюю дату очередной порции. Запрашиваем всегда за 10 дней, 
-			 * и в запросе прибавляем 10 дней к последней дате. Потом в хандлере отбрасываем излишек информации.
-			 */
-		}
+		try {
+			IBClientHistoricalRq c = (IBClientHistoricalRq) clientStarter.getClient();		
+			IBHistoricalRequest request = new IBHistoricalRequest(c, params);
+			RespHandler handler = new RespHandler(destFile, dispatcher, 
+					es.createGenericType(dispatcher));
+			wrapper.OnHistoricalData().addListener(handler);
 		
+			handler.OnHandled().addListener(request);
+			request.execute();
+		} catch(ParseException e) {
+			logger.error(e.getMessage());
+		}
 	}
 }
