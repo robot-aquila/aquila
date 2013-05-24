@@ -1,5 +1,7 @@
 package ru.prolib.aquila.ui;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
@@ -17,11 +19,9 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.StopOrders;
 
 public class StopOrdersTableModel extends AbstractTableModel implements
-		EventListener, Starter {
-
-	/**
-	 * $Id: StopOrdersTableModel.java 545 2013-02-25 19:04:16Z huan.kaktus $
-	 */
+		EventListener, Starter
+{
+	private static final SimpleDateFormat format;
 	private static final long serialVersionUID = -2214955310406288648L;
 	private static Logger logger = LoggerFactory.getLogger(StopOrdersTableModel.class);
 	private static final String COL_ID = "COL_ID";
@@ -39,10 +39,12 @@ public class StopOrdersTableModel extends AbstractTableModel implements
 	private static final String COL_TAKE_PRICE = "COL_TAKE_PRICE";
 	private static final String COL_OFFS = "COL_OFFS";
 	private static final String COL_SPREAD = "COL_SPREAD";
+	private static final String COL_CHNG_TIME = "COL_CHNG_TIME";
 	private static final String[] header = {
 		COL_ID,
 		COL_TRN,
 		COL_TIME,
+		COL_CHNG_TIME,
 		COL_ACCOUNT,
 		COL_DIR,
 		COL_SEC,
@@ -59,6 +61,10 @@ public class StopOrdersTableModel extends AbstractTableModel implements
 	private ClassLabels uiLabels;
 	private final StopOrders orders;
 	private final List<Order> list;
+	
+	static {
+		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	}
 
 	public StopOrdersTableModel(StopOrders orders, UiTexts uiTexts) {
 		super();
@@ -116,7 +122,9 @@ public class StopOrdersTableModel extends AbstractTableModel implements
 			} else if ( header[col] == COL_ACCOUNT) {
 				return order.getAccount();
 			} else if ( header[col] == COL_TIME) {
-				return order.getTime();
+				return formatTime(order.getTime());
+			} else if ( header[col] == COL_CHNG_TIME ) {
+				return formatTime(order.getLastChangeTime());
 			} else {
 				return null;
 			}
@@ -124,6 +132,16 @@ public class StopOrdersTableModel extends AbstractTableModel implements
 			logger.error("SecurityException: ", e);
 			return null;
 		}
+	}
+	
+	/**
+	 * Форматировать время.
+	 * <p>
+	 * @param time время
+	 * @return строка времени или null, если время не определено
+	 */
+	private String formatTime(Date time) {
+		return time == null ? null : format.format(time);
 	}
 
 	@Override

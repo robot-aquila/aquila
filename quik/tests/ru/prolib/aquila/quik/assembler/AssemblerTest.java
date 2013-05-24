@@ -2,12 +2,9 @@ package ru.prolib.aquila.quik.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
-import ru.prolib.aquila.core.EventImpl;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
@@ -39,10 +36,6 @@ public class AssemblerTest {
 	public void testStart() throws Exception {
 		assembler.start();
 		
-		assertTrue(terminal.OnSecurityAvailable().isListener(assembler));
-		assertTrue(terminal.OnPortfolioAvailable().isListener(assembler));
-		assertTrue(terminal.OnOrderAvailable().isListener(assembler));
-		assertTrue(terminal.OnStopOrderAvailable().isListener(assembler));
 		assertTrue(cache.OnOrdersCacheUpdate().isListener(assembler));
 		assertTrue(cache.OnPortfoliosFCacheUpdate().isListener(assembler));
 		assertTrue(cache.OnPositionsFCacheUpdate().isListener(assembler));
@@ -56,10 +49,6 @@ public class AssemblerTest {
 		assembler.start();
 		assembler.stop();
 		
-		assertFalse(terminal.OnSecurityAvailable().isListener(assembler));
-		assertFalse(terminal.OnPortfolioAvailable().isListener(assembler));
-		assertFalse(terminal.OnOrderAvailable().isListener(assembler));
-		assertFalse(terminal.OnStopOrderAvailable().isListener(assembler));
 		assertFalse(cache.OnOrdersCacheUpdate().isListener(assembler));
 		assertFalse(cache.OnPortfoliosFCacheUpdate().isListener(assembler));
 		assertFalse(cache.OnPositionsFCacheUpdate().isListener(assembler));
@@ -69,107 +58,15 @@ public class AssemblerTest {
 	}
 	
 	@Test
-	public void testOnEvent_OnSecurityAvailable() throws Exception {
-		high.adjustOrders();
-		high.adjustStopOrders();
-		high.adjustPositions();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(terminal.OnSecurityAvailable()));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnPortfolioAvailable() throws Exception {
-		high.adjustOrders();
-		high.adjustStopOrders();
-		high.adjustPositions();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(terminal.OnPortfolioAvailable()));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnOrderAvailable() throws Exception {
-		high.adjustOrders();
-		high.adjustStopOrders();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(terminal.OnOrderAvailable()));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnStopOrderAvailable() throws Exception {
-		high.adjustStopOrders();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(terminal.OnStopOrderAvailable()));
-		
-		control.verify();
-	}
-
-	@Test
-	public void testOnEvent_OnOrdersCacheUpdate() throws Exception {
-		high.adjustOrders();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(cache.OnOrdersCacheUpdate()));
-		
-		control.verify();
-	}
-
-	@Test
-	public void testOnEvent_OnPortfoliosFCacheUpdate() throws Exception {
-		high.adjustPortfolios();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(cache.OnPortfoliosFCacheUpdate()));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnPositionsFCacheUpdate() throws Exception {
-		high.adjustPositions();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(cache.OnPositionsFCacheUpdate()));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnSecuritiesCacheUpdate() throws Exception {
+	public void testOnEvent() throws Exception {
 		high.adjustSecurities();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(cache.OnSecuritiesCacheUpdate()));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnTradesCacheUpdate() throws Exception {
+		high.adjustPortfolios();
 		high.adjustOrders();
+		high.adjustStopOrders();
 		high.adjustPositions();
 		control.replay();
 		
-		assembler.onEvent(new EventImpl(cache.OnTradesCacheUpdate()));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnStopOrdersCacheUpdate() throws Exception {
-		high.adjustStopOrders();
-		control.replay();
-		
-		assembler.onEvent(new EventImpl(cache.OnStopOrdersCacheUpdate()));
+		assembler.onEvent(null);
 		
 		control.verify();
 	}

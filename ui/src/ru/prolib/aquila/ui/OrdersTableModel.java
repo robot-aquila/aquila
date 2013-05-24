@@ -1,5 +1,7 @@
 package ru.prolib.aquila.ui;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
@@ -16,16 +18,15 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 
 public class OrdersTableModel extends AbstractTableModel implements
-		EventListener, Starter {
-
-	/**
-	 * $Id: OrdersTableModel.java 545 2013-02-25 19:04:16Z huan.kaktus $
-	 */
+		EventListener, Starter
+{
+	private static final SimpleDateFormat format;
 	private static final long serialVersionUID = 2523179020342012340L;
 	private static Logger logger = LoggerFactory.getLogger(OrdersTableModel.class);
 	private static final String COL_ID = "COL_ID";
 	private static final String COL_DIR = "COL_DIR";
 	private static final String COL_TIME = "COL_TIME";
+	private static final String COL_CHNG_TIME = "COL_CHNG_TIME";
 	private static final String COL_ACCOUNT = "COL_ACCOUNT";
 	private static final String COL_TYPE = "COL_TYPE";
 	private static final String COL_SEC = "COL_SEC";
@@ -40,6 +41,7 @@ public class OrdersTableModel extends AbstractTableModel implements
 		COL_ID,
 		COL_TRN,
 		COL_TIME,
+		COL_CHNG_TIME,
 		COL_ACCOUNT,
 		COL_DIR,
 		COL_SEC,
@@ -54,6 +56,10 @@ public class OrdersTableModel extends AbstractTableModel implements
 	private ClassLabels uiLabels;
 	private final Orders orders;
 	private final List<Order> list;
+	
+	static {
+		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	}
 	
 	public OrdersTableModel(Orders orders, UiTexts uiTexts) {
 		super();
@@ -107,7 +113,9 @@ public class OrdersTableModel extends AbstractTableModel implements
 			} else if ( header[col] == COL_ACCOUNT) {
 				return order.getAccount();
 			} else if ( header[col] == COL_TIME) {
-				return order.getTime();
+				return formatTime(order.getTime());
+			} else if ( header[col] == COL_CHNG_TIME ) {
+				return formatTime(order.getLastChangeTime());
 			} else if ( header[col] == COL_AVG_EXEC_PRICE ) {
 				return order.getAvgExecutedPrice();
 			} else {
@@ -117,6 +125,16 @@ public class OrdersTableModel extends AbstractTableModel implements
 			logger.error("SecurityException: ", e);
 			return null;
 		}
+	}
+	
+	/**
+	 * Форматировать время.
+	 * <p>
+	 * @param time время
+	 * @return строка времени или null, если время не определено
+	 */
+	private String formatTime(Date time) {
+		return time == null ? null : format.format(time);
 	}
 
 	@Override
