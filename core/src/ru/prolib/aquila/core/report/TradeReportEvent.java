@@ -1,35 +1,41 @@
 package ru.prolib.aquila.core.report;
 
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import ru.prolib.aquila.core.*;
 
 /**
- * $Id$
+ * События в связи с отчетом по трейду.
  */
 public class TradeReportEvent extends EventImpl {
+	private final TradeReport report;
 
-	private TradeReport report;
-	/**
-	 * @param type
-	 * @param report
-	 */
 	public TradeReportEvent(EventType type, TradeReport report) {
 		super(type);
 		this.report = report;
 	}
-	
-	public TradeReport getTradeReport() {
+
+	/**
+	 * Получить отчет.
+	 * <p>
+	 * @return отчет
+	 */
+	public TradeReport getReport() {
 		return report;
 	}
 	
+	@Override
 	public boolean equals(Object other) {
-		if(other instanceof TradeReportEvent && 
-				((TradeReportEvent) other).isType(getType())) {
-			TradeReportEvent o = (TradeReportEvent) other;
-			return report.equals(o.getTradeReport())? true : false;
-			
+		if ( other == this ) {
+			return true;
 		}
-		return false;
+		if ( other == null || other.getClass() != TradeReportEvent.class ) {
+			return false;
+		}
+		TradeReportEvent o = (TradeReportEvent) other;
+		return new EqualsBuilder()
+			.append(o.report, report)
+			.append(o.getType(), getType())
+			.isEquals();
 	}
 
 }

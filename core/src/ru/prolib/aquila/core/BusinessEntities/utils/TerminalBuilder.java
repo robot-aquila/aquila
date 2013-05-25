@@ -76,7 +76,8 @@ public class TerminalBuilder {
 				d.createType("OnFilled"),
 				d.createType("OnPartiallyFilled"),
 				d.createType("OnRegistered"),
-				d.createType("OnRegisterFailed"));
+				d.createType("OnRegisterFailed"),
+				d.createType("OnTrade"));
 	}
 
 }

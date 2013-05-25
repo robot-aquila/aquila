@@ -1175,5 +1175,16 @@ public class TerminalDecoratorTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testOnOrderTrade() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(terminal.OnOrderTrade()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, decorator.OnOrderTrade());
+		
+		control.verify();
+	}
 
 }

@@ -937,4 +937,9 @@ public class TerminalImpl implements EditableTerminal {
 		order.setStatus(OrderStatus.PENDING);
 	}
 
+	@Override
+	public EventType OnOrderTrade() {
+		return orders.OnOrderTrade();
+	}
+
 }

@@ -99,7 +99,8 @@ public class BMFactoryImpl implements BMFactory {
 			eventSystem.createGenericType(dispatcher, "OnFilled"),
 			eventSystem.createGenericType(dispatcher, "OnPartiallyFilled"),
 			eventSystem.createGenericType(dispatcher, "OnRegistered"),
-			eventSystem.createGenericType(dispatcher, "OnRegisterFailed"));
+			eventSystem.createGenericType(dispatcher, "OnRegisterFailed"),
+			eventSystem.createGenericType(dispatcher, "OnTrade"));
 	}
 
 	@Override

@@ -648,4 +648,9 @@ public class TerminalDecorator implements EditableTerminal {
 		return terminal.createStopOrder(this);
 	}
 
+	@Override
+	public final EventType OnOrderTrade() {
+		return terminal.OnOrderTrade();
+	}
+
 }

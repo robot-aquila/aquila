@@ -113,4 +113,11 @@ public interface Orders {
 	 */
 	public EventType OnOrderRegisterFailed();
 	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderTrade();
+	
 }
