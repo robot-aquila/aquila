@@ -9,15 +9,18 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
  * Отчет по активным трейдам.
+ * <p>
+ * Данный отчет оперирует только открытыми на текущий момент трейдами и не
+ * сохраняет никакой истории.
  */
-public class ActiveTradeReports {
+public class ActiveTrades {
 	private Map<SecurityDescriptor, EditableTradeReport> reports;
 	private final EventDispatcher dispatcher;
 	private final EventType onEnter;
 	private final EventType onExit;
 	private final EventType onChanged;
 	
-	public ActiveTradeReports(EventDispatcher dispatcher, EventType onEnter, 
+	public ActiveTrades(EventDispatcher dispatcher, EventType onEnter, 
 			EventType onExit, EventType onChanged) 
 	{
 		this.dispatcher = dispatcher;
@@ -126,10 +129,10 @@ public class ActiveTradeReports {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != ActiveTradeReports.class ) {
+		if ( other == null || other.getClass() != ActiveTrades.class ) {
 			return false;
 		}
-		ActiveTradeReports o = (ActiveTradeReports) other;
+		ActiveTrades o = (ActiveTrades) other;
 		return new EqualsBuilder()
 			.append(o.dispatcher, dispatcher)
 			.append(o.onChanged, onChanged)
@@ -137,6 +140,16 @@ public class ActiveTradeReports {
 			.append(o.onExit, onExit)
 			.append(o.reports, reports)
 			.isEquals();
+	}
+	
+	/**
+	 * Удалить информацию о текущих трейдах.
+	 * <p>
+	 * Удаляет информацию о текущих открытых трейдах.
+	 * Никакие события не генерируются.
+	 */
+	public synchronized void clear() {
+		reports.clear();
 	}
 
 }

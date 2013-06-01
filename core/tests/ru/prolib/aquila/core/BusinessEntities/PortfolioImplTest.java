@@ -7,6 +7,7 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -240,14 +241,20 @@ public class PortfolioImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
+		TerminalBuilder tb = new TerminalBuilder();
+		Terminal t1 = tb.createTerminal("foo");
+		Terminal t2 = tb.createTerminal("foo");
+		
+		portfolio = new PortfolioImpl(t1, account, dispatcher, onChanged);
 		portfolio.setAvailable(true);
 		portfolio.setBalance(180.00d);
 		portfolio.setCash(20.00d);
 		portfolio.setVariationMargin(-30.00d);
+		portfolio.setPositionsInstance(positions);
 		
 		Variant<Terminal> vTerm = new Variant<Terminal>()
-			.add(terminal)
-			.add(control.createMock(Terminal.class));
+			.add(t1)
+			.add(t2);
 		Variant<Account> vAcc = new Variant<Account>(vTerm)
 			.add(new Account("ZX80"))
 			.add(account);
@@ -290,7 +297,7 @@ public class PortfolioImplTest {
 			}
 		} while( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(terminal, found.getTerminal());
+		assertSame(t1, found.getTerminal());
 		assertSame(account, found.getAccount());
 		assertSame(positions, found.getPositionsInstance());
 		assertEquals(dispatcher, found.getEventDispatcher());

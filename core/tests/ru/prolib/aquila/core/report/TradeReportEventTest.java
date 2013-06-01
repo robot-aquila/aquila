@@ -20,7 +20,7 @@ public class TradeReportEventTest {
 		type2 = control.createMock(EventType.class);
 		report1 = control.createMock(TradeReportImpl.class);
 		report2 = control.createMock(TradeReportImpl.class);
-		event = new TradeReportEvent(type1, report1);
+		event = new TradeReportEvent(type1, report1, 8);
 	}
 	
 	@Test
@@ -33,16 +33,19 @@ public class TradeReportEventTest {
 	@Test
 	public void testEquals() throws Exception {
 		Variant<EventType> vType = new Variant<EventType>()
-				.add(type1)
-				.add(type2);
+			.add(type1)
+			.add(type2);
 		Variant<TradeReportImpl> vRep = new Variant<TradeReportImpl>(vType)
-				.add(report1)
-				.add(report2);
-		Variant<?> iterator = vRep;
+			.add(report1)
+			.add(report2);
+		Variant<Integer> vIdx = new Variant<Integer>(vRep)
+			.add(8)
+			.add(null);
+		Variant<?> iterator = vIdx;
 		int foundCnt = 0;
 		TradeReportEvent x = null, found = null;
 		do {
-			x = new TradeReportEvent(vType.get(), vRep.get());
+			x = new TradeReportEvent(vType.get(), vRep.get(), vIdx.get());
 			if ( event.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -51,6 +54,13 @@ public class TradeReportEventTest {
 		assertEquals(1, foundCnt);
 		assertSame(type1, found.getType());
 		assertSame(report1, found.getReport());
+		assertEquals(new Integer(8), found.getIndex());
+	}
+	
+	@Test
+	public void testConstruct2() throws Exception {
+		Event expected = new TradeReportEvent(type1, report1, null);
+		assertEquals(expected, new TradeReportEvent(type1, report1));
 	}
 
 }

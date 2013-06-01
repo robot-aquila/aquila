@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * информации о последовательности сделок от открытия до закрытия позиции.
  * Интерфейс предназначен для публичного использования потребителями сервиса.
  */
-public interface TradeReport extends Comparable<TradeReport> {
+public interface TradeReport extends Comparable<TradeReport>, Cloneable {
 	
 	/**
 	 * Получить тип позиции.
@@ -89,5 +89,12 @@ public interface TradeReport extends Comparable<TradeReport> {
 	 * @return true - трейд открыт, false - закрыт
 	 */
 	public boolean isOpen();
+	
+	/**
+	 * Создать копию объекта.
+	 * <p>
+	 * @return копия объекта
+	 */
+	public TradeReport clone();
 
 }

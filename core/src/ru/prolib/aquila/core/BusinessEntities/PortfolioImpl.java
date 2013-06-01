@@ -189,7 +189,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 			.append(o.dispatcher, dispatcher)
 			.append(o.onChanged, onChanged)
 			.append(o.positions, positions)
-			.append(o.terminal, terminal)
+			.appendSuper(o.terminal == terminal)
 			.append(o.variationMargin, variationMargin)
 			.isEquals();
 	}

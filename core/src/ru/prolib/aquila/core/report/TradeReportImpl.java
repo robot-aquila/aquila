@@ -142,39 +142,6 @@ public class TradeReportImpl implements EditableTradeReport {
 		return exitQty != null ? enterQty > exitQty : true;
 	}
 	
-	/**
-	 * Проверить возможность добавления сделки к трейду.
-	 * <p>
-	 * @param trade сделка
-	 * @return true - можно добавить эту сделку, false - нельзя добавить
-	 */
-	/*
-	public synchronized boolean canAppendToReport(Trade trade) {
-		if ( ! descr.equals(trade.getSecurityDescriptor()) ) {
-			return false;
-		}
-		boolean valid = false;		
-		if ( type == PositionType.LONG ) {
-			if ( trade.getDirection() == OrderDirection.SELL ) {
-				if ( trade.getQty() <= getUncoveredQty() ) {
-					return true;
-				}
-			} else {
-				valid = true;
-			}
-		} else {
-			if ( trade.getDirection() == OrderDirection.BUY ) {
-				if ( trade.getQty() <= getUncoveredQty() ) {
-					valid = true;
-				}
-			} else {
-				valid = true;
-			}
-		}
-		return valid;
-	}
-	*/
-	
 	@Override
 	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
@@ -281,6 +248,13 @@ public class TradeReportImpl implements EditableTradeReport {
 			return 0;
 		}
 		return enterTime.after(o.getEnterTime()) ? 1 : -1;
+	}
+	
+	@Override
+	public TradeReport clone() {
+		return new TradeReportImpl(descr, type, enterTime, exitTime,
+				enterQty, exitQty, sumByEnterPrice, sumByExitPrice,
+				enterVol, exitVol);
 	}
 
 }

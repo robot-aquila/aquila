@@ -8,10 +8,16 @@ import ru.prolib.aquila.core.*;
  */
 public class TradeReportEvent extends EventImpl {
 	private final TradeReport report;
+	private final Integer index;
 
-	public TradeReportEvent(EventType type, TradeReport report) {
+	public TradeReportEvent(EventType type, TradeReport report, Integer index) {
 		super(type);
 		this.report = report;
+		this.index = index;
+	}
+	
+	public TradeReportEvent(EventType type, TradeReport report) {
+		this(type, report, null);
 	}
 
 	/**
@@ -21,6 +27,15 @@ public class TradeReportEvent extends EventImpl {
 	 */
 	public TradeReport getReport() {
 		return report;
+	}
+	
+	/**
+	 * Получить индекс отчета в последовательности.
+	 * <p>
+	 * @return индекс
+	 */
+	public Integer getIndex() {
+		return index;
 	}
 	
 	@Override
@@ -35,6 +50,7 @@ public class TradeReportEvent extends EventImpl {
 		return new EqualsBuilder()
 			.append(o.report, report)
 			.append(o.getType(), getType())
+			.append(o.index, index)
 			.isEquals();
 	}
 

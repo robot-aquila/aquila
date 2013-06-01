@@ -12,9 +12,10 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
 
-public class ActiveTradeReportsTest {
+public class ActiveTradesTest {
 	private static SimpleDateFormat format;
 	private static OrderDirection BUY = OrderDirection.BUY;
+	@SuppressWarnings("unused")
 	private static OrderDirection SELL = OrderDirection.SELL;
 	private static SecurityDescriptor descr1, descr2;
 	private Trade trade;
@@ -23,7 +24,7 @@ public class ActiveTradeReportsTest {
 	private EventType onChanged, onEnter, onExit;
 	private EditableTradeReport report1, report2; 
 	private Terminal terminal;
-	private ActiveTradeReports reports;
+	private ActiveTrades reports;
 	
 	@BeforeClass
 	public static void setUpBeforeCLass() throws Exception {
@@ -44,7 +45,7 @@ public class ActiveTradeReportsTest {
 		report1 = control.createMock(EditableTradeReport.class);
 		report2 = control.createMock(EditableTradeReport.class);
 		terminal = control.createMock(Terminal.class);
-		reports = new ActiveTradeReports(dispatcher, onEnter, onExit, onChanged);
+		reports = new ActiveTrades(dispatcher, onEnter, onExit, onChanged);
 		trade = createTrade(descr1, "1999-01-01 00:00:00", BUY, 1L, 1d, 10d);
 		expect(report1.getSecurityDescriptor()).andStubReturn(descr1);
 		expect(report2.getSecurityDescriptor()).andStubReturn(descr2);
@@ -149,20 +150,6 @@ public class ActiveTradeReportsTest {
 	
 	@Test
 	public void testGetReports() throws Exception {
-		report1 = new TradeReportImpl(trade);
-		/**
-		 * Создать сделку.
-		 * <p>
-		 * @param descr дескриптор инструмента
-		 * @param time строка yyyy-MM-dd HH:mm:ss время сделки
-		 * @param dir направление
-		 * @param qty количество
-		 * @param price цена
-		 * @param volume объем
-		 * @return сделка
-		 */
-		report2 = new TradeReportImpl(createTrade(descr2, "1998-01-01 00:00:00",
-				SELL, 1L, 1d, 1d));
 		reports.setReport(descr1, report1);
 		reports.setReport(descr2, report2);
 		List<TradeReport> expected = new Vector<TradeReport>();
@@ -208,9 +195,9 @@ public class ActiveTradeReportsTest {
 			reports.setReport(r.getSecurityDescriptor(), r);
 		}
 		int foundCnt = 0;
-		ActiveTradeReports x = null, found = null;
+		ActiveTrades x = null, found = null;
 		do {
-			x = new ActiveTradeReports(vDisp.get(), vEnt.get(), vExt.get(),
+			x = new ActiveTrades(vDisp.get(), vEnt.get(), vExt.get(),
 					vChng.get());
 			for ( EditableTradeReport r : vRows.get() ) {
 				x.setReport(r.getSecurityDescriptor(), r);
@@ -227,6 +214,16 @@ public class ActiveTradeReportsTest {
 		assertSame(onChanged, found.OnChanged());
 		assertSame(report1, found.getReport(descr1));
 		assertSame(report2, found.getReport(descr2));
+	}
+	
+	@Test
+	public void testClear() throws Exception {
+		reports.setReport(descr1, report1);
+		reports.setReport(descr2, report2);
+		List<TradeReport> expected = new Vector<TradeReport>();
+		reports.clear();
+		
+		assertEquals(expected, reports.getReports());
 	}
 	
 }

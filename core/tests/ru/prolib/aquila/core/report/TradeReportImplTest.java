@@ -343,5 +343,16 @@ public class TradeReportImplTest {
 		assertEquals(-1, report1.compareTo(report2));
 		assertEquals(1, report2.compareTo(report1));
 	}
+	
+	@Test
+	public void testClone() throws Exception {
+		TradeReportImpl report = new TradeReportImpl(descr2, LONG, time1, null,
+				200L, null, 800.0d, null, 1024.0d, null);
+		TradeReport copy = report.clone();
+		assertEquals(report, copy);
+		assertNotSame(report, copy);
+		report.addTrade(createTrade(descr2, time2, SELL, 5L, 4d, 12d));
+		assertFalse(report.equals(copy));
+	}
 
 }
