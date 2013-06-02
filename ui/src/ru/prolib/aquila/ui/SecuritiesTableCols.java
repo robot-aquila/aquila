@@ -32,6 +32,7 @@ public class SecuritiesTableCols {
 		"COL_BID_SIZE",
 		"COL_LOT",
 		"COL_TICK",
+		"COL_STEP_PRICE",
 		"COL_PREC",
 		"COL_MIN",
 		"COL_MAX",
@@ -59,6 +60,7 @@ public class SecuritiesTableCols {
 		getters.put("COL_BID_SIZE", new GSecurityBidSize());
 		getters.put("COL_LOT", new GSecurityLotSize());
 		getters.put("COL_TICK", new GSecurityMinStep());
+		getters.put("COL_STEP_PRICE", new GSecurityMinStepPrice());
 		getters.put("COL_PREC", new GSecurityPrecision());
 		getters.put("COL_MIN", new GSecurityMinPrice());
 		getters.put("COL_MAX", new GSecurityMaxPrice());

@@ -62,6 +62,7 @@ public class SecurityGettersTest {
 		sc.setLowPrice(24.56d);
 		sc.setHighPrice(18.44d);
 		sc.setStatus(SecurityStatus.TRADING);
+		sc.setMinStepPrice(290.34d);
 		security = (Object) sc;
 	}
 
@@ -218,4 +219,11 @@ public class SecurityGettersTest {
 		GDouble g = new GSecurityMaxPrice();
 		assertEquals(130.0d, g.get(security), 0.01d);
 	}
+	
+	@Test
+	public void testMinStepPrice() throws Exception {
+		GDouble g = new GSecurityMinStepPrice();
+		assertEquals(290.34d, g.get(security), 0.01d);
+	}
+	
 }
