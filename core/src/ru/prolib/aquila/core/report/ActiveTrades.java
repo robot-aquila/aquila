@@ -20,7 +20,32 @@ public class ActiveTrades {
 	private final EventType onExit;
 	private final EventType onChanged;
 	
-	public ActiveTrades(EventDispatcher dispatcher, EventType onEnter, 
+	/**
+	 * Публичный конструктор.
+	 */
+	public ActiveTrades() {
+		this(new EventDispatcherImpl(new SimpleEventQueue(), "ActiveTrades"));
+	}
+	
+	/**
+	 * Вспомогательный служебный конструктор.
+	 * <p>
+	 * @param dispatcher диспетчер событий
+	 */
+	private ActiveTrades(EventDispatcher dispatcher) {
+		this(dispatcher, dispatcher.createType("Enter"),
+			dispatcher.createType("Exit"), dispatcher.createType("Changed"));
+	}
+	
+	/**
+	 * Конструктор (для тестов).
+	 * <p>
+	 * @param dispatcher диспетчер событий
+	 * @param onEnter тип события: при входе в трейд
+	 * @param onExit тип события: при выходе из трейда
+	 * @param onChanged тип события: при изменении трейда
+	 */
+	ActiveTrades(EventDispatcher dispatcher, EventType onEnter, 
 			EventType onExit, EventType onChanged) 
 	{
 		this.dispatcher = dispatcher;
@@ -30,6 +55,11 @@ public class ActiveTrades {
 		reports = new HashMap<SecurityDescriptor, EditableTradeReport>();
 	}
 	
+	/**
+	 * Получить диспетчер событий.
+	 * <p>
+	 * @return диспетчер событий
+	 */
 	public EventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}

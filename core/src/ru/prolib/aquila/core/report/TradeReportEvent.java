@@ -53,5 +53,11 @@ public class TradeReportEvent extends EventImpl {
 			.append(o.index, index)
 			.isEquals();
 	}
+	
+	@Override
+	public String toString() {
+		return getType().asString() + "." + getClass().getSimpleName()
+			+ "[#" + index + ", report=" + report + "]";
+	}
 
 }

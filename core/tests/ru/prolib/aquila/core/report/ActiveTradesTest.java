@@ -226,4 +226,15 @@ public class ActiveTradesTest {
 		assertEquals(expected, reports.getReports());
 	}
 	
+	@Test
+	public void testConstruct_Min() throws Exception {
+		reports = new ActiveTrades();
+		EventDispatcher d = reports.getEventDispatcher();
+		assertEquals(new EventDispatcherImpl(new SimpleEventQueue(),
+				"ActiveTrades"), d);
+		assertEquals(d.createType("Enter"), reports.OnEnter());
+		assertEquals(d.createType("Exit"), reports.OnExit());
+		assertEquals(d.createType("Changed"), reports.OnChanged());
+	}
+	
 }

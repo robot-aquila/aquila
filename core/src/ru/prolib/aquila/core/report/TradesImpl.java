@@ -5,6 +5,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
@@ -21,11 +24,11 @@ public class TradesImpl implements EditableTrades, EventListener {
 	private final EventDispatcher dispatcher;
 	private EventType onEnter, onExit, onChanged;
 	
-	public TradesImpl(ActiveTrades activeReports, EventDispatcher dispatcher,
-			EventType onEnter, EventType onExit, EventType onChanged)
+	public TradesImpl(EventDispatcher dispatcher, EventType onEnter,
+			EventType onExit, EventType onChanged)
 	{
 		super();
-		this.activeTrades = activeReports;
+		activeTrades = new ActiveTrades();
 		this.dispatcher = dispatcher;
 		this.onEnter = onEnter;
 		this.onExit = onExit;
@@ -63,36 +66,40 @@ public class TradesImpl implements EditableTrades, EventListener {
 			TradeReportEvent e = (TradeReportEvent) event;
 			TradeReport report = e.getReport();
 			Integer index = trades.size();
-			trades.add(report);
 			indices.put(report, index);
-			dispatcher.dispatch(new TradeReportEvent(onEnter, report, index));
-			
-			System.err.println("enter trade report: " + report);
-			System.err.println("enter report index: " + index);
-			System.err.println(".");
+			report = report.clone();
+			trades.add(report);
+			postEvent(onEnter, report, index);
 			
 		} else if ( event.isType(activeTrades.OnExit()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
 			TradeReport report = e.getReport();
 			Integer index = indices.get(report);
-			dispatcher.dispatch(new TradeReportEvent(onExit, report, index));
+			report = report.clone();
+			trades.set(index, report);
 			indices.remove(index);
-			
-			System.err.println("exit trade report: " + report);
-			System.err.println("exit report index: " + index);
-			System.err.println(".");
+			postEvent(onExit, report, index);
 			
 		} else if ( event.isType(activeTrades.OnChanged()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
 			TradeReport report = e.getReport();
 			Integer index = indices.get(report);
-			dispatcher.dispatch(new TradeReportEvent(onChanged, report, index));
-			
-			System.err.println("change trade report: " + report);
-			System.err.println("change report index: " + index);
-			System.err.println(".");
+			report = report.clone();
+			trades.set(index, report);
+			postEvent(onChanged, report, index);
 			
 		}
+	}
+	
+	/**
+	 * Генерировать событие указанного типа.
+	 * <p>
+	 * @param type тип события
+	 * @param report отчет (при отправке используется копия)
+	 * @param index индекс отчета
+	 */
+	private void postEvent(EventType type, TradeReport report, Integer index) {
+		dispatcher.dispatch(new TradeReportEvent(type, report, index));
 	}
 	
 	@Override
@@ -139,10 +146,27 @@ public class TradesImpl implements EditableTrades, EventListener {
 
 	@Override
 	public synchronized void addTrade(Trade trade) {
-		System.err.println("add trade: " + trade);
-		System.err.println(".");
-		
 		activeTrades.addTrade(trade);
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != TradesImpl.class ) {
+			return false;
+		}
+		TradesImpl o = (TradesImpl) other;
+		return new EqualsBuilder()
+			//.append(o.activeTrades, activeTrades) // don't cmp -> recursion 
+			.append(o.dispatcher, dispatcher)
+			//.append(o.indices, indices) // never equals by keys
+			.append(o.onChanged, onChanged)
+			.append(o.onEnter, onEnter)
+			.append(o.onExit, onExit)
+			.append(o.trades, trades)
+			.isEquals();
 	}
 
 }

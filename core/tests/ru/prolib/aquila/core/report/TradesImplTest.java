@@ -1,21 +1,18 @@
 package ru.prolib.aquila.core.report;
 
 import static org.junit.Assert.*;
-
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
 import org.apache.log4j.BasicConfigurator;
 import org.junit.*;
-
 import com.csvreader.CsvReader;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.utils.Variant;
 
 public class TradesImplTest {
 	private static final String TIME = "TIME";
@@ -43,7 +40,6 @@ public class TradesImplTest {
 	
 	private EditableTerminal terminal;
 	private EventSystem es;
-	private ActiveTrades activeTrades;
 	private EventDispatcher dispatcher;
 	private EventType onEnter, onExit, onChanged;
 	private TradesImpl trades;
@@ -59,15 +55,11 @@ public class TradesImplTest {
 	public void setUp() throws Exception {
 		terminal = new TerminalBuilder().createTerminal("test");
 		es = terminal.getEventSystem();
-		EventDispatcher ad = new EventDispatcherImpl(new SimpleEventQueue());
-		activeTrades = new ActiveTrades(ad, ad.createType("Enter"),
-				ad.createType("Exit"), ad.createType("Changed"));
 		dispatcher = es.createEventDispatcher("Trades");
 		onEnter = dispatcher.createType("Enter");
 		onExit = dispatcher.createType("Exit");
 		onChanged = dispatcher.createType("Changed");
-		trades = new TradesImpl(activeTrades, dispatcher,
-				onEnter, onExit, onChanged);
+		trades = new TradesImpl(dispatcher, onEnter, onExit, onChanged);
 		es.getEventQueue().start();
 	}
 	
@@ -211,6 +203,7 @@ public class TradesImplTest {
 	public void testStart() throws Exception {
 		trades.start();
 		
+		ActiveTrades activeTrades = trades.getActiveTrades();
 		assertTrue(activeTrades.OnEnter().isListener(trades));
 		assertTrue(activeTrades.OnExit().isListener(trades));
 		assertTrue(activeTrades.OnChanged().isListener(trades));
@@ -223,6 +216,7 @@ public class TradesImplTest {
 		stopQueue();
 		
 		trades.stop();
+		ActiveTrades activeTrades = trades.getActiveTrades();
 		assertFalse(activeTrades.OnEnter().isListener(trades));
 		assertFalse(activeTrades.OnExit().isListener(trades));
 		assertFalse(activeTrades.OnChanged().isListener(trades));
@@ -265,7 +259,6 @@ public class TradesImplTest {
 		final List<Event> actual = new Vector<Event>();
 		final EventListener listener = new EventListener() {
 			@Override public void onEvent(Event event) {
-				System.err.println("ABC");
 				actual.add(event);
 			}
 		};
@@ -274,9 +267,7 @@ public class TradesImplTest {
 		trades.OnEnter().addListener(listener);
 		trades.OnExit().addListener(listener);
 		loadTrades(trades, "trades1.csv");
-		System.err.println(es.getEventQueue().started());
 		stopQueue();
-		//Thread.sleep(2000);
 		
 		List<TradeReportEvent> expected =
 			loadTradeReportEvents("trade-reports1-evts.csv");
@@ -292,12 +283,44 @@ public class TradesImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		fail("TODO: incomplete");
-	}
-	
-	@Test
-	public void test_() throws Exception {
-		fail("TODO: incomplete");
+		Variant<String> vDispId = new Variant<String>()
+			.add("Trades")
+			.add("TradesX");
+		Variant<String> vEntId = new Variant<String>(vDispId)
+			.add("Enter")
+			.add("EnterX");
+		Variant<String> vExtId = new Variant<String>(vEntId)
+			.add("Exit")
+			.add("ExitX");
+		Variant<String> vChngId = new Variant<String>(vExtId)
+			.add("Changed")
+			.add("ChangedX");
+		Variant<String> vTrdFile = new Variant<String>(vChngId)
+			.add("trades1.csv")
+			.add("trades2.csv");
+		Variant<?> iterator = vTrdFile;
+		trades.start();
+		loadTrades(trades, "trades1.csv");
+		int foundCnt = 0;
+		TradesImpl x = null, found = null;
+		do {
+			EventDispatcher d = es.createEventDispatcher(vDispId.get());
+			x = new TradesImpl(d, d.createType(vEntId.get()),
+					d.createType(vExtId.get()), d.createType(vChngId.get()));
+			x.start();
+			loadTrades(x, vTrdFile.get());
+			if ( trades.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals(dispatcher, found.getEventDispatcher());
+		assertEquals(onEnter, found.OnEnter());
+		assertEquals(onExit, found.OnExit());
+		assertEquals(onChanged, found.OnChanged());
+		assertEquals(loadTradeReports("trade-reports1.csv"),
+				found.getTradeReports());
 	}
 
 }
