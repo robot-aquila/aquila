@@ -414,4 +414,36 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			.isEquals();
 	}
 
+	@Override
+	public synchronized Double getMostAccuratePrice() {
+		if ( lastPrice != null ) {
+			return lastPrice;
+		}
+		if ( bidPrice != null && askPrice != null ) {
+			return (bidPrice + askPrice) / 2;
+		}
+		if ( open != null ) {
+			return open;
+		}
+		if ( close != null ) {
+			return close;
+		}
+		if ( high != null && low != null ) {
+			return (high + low) / 2;
+		}
+		if ( maxPrice != null && minPrice != null ) {
+			return (maxPrice + minPrice) / 2;
+		}
+		return null;
+	}
+
+	@Override
+	public synchronized Double getMostAccurateVolume(Double price, Long qty) {
+		if ( stepPrice != null ) {
+			return price * stepPrice / stepSize * (double) qty;
+		} else {
+			return price * (double) qty;
+		}
+	}
+
 }

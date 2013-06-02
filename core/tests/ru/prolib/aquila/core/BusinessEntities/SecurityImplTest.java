@@ -654,5 +654,68 @@ public class SecurityImplTest {
 		assertEquals(SecurityStatus.TRADING, found.getStatus());
 		assertSame(trade, found.getLastTrade());
 	}
+	
+	@Test
+	public void testGetMostAccuratePrice() throws Exception {
+		Double fix[][] = {
+			//last, bid,  ask,  open, close, high, low, max, min, expected
+			{ 10.1, 11.2, 12.4,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0, 10.1  },
+			{ null, 11.2, 12.4,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0, 11.8  },
+			{ null, null, 12.4,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0,  9.8  },
+			{ null, 11.2, null,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0,  9.8  },
+			{ null, null, null,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0,  9.8  },
+			{ null, null, null, null,  8.9, 12.5,  9.6, 13.0,  9.0,  8.9  },
+			{ null, null, null, null, null, 12.5,  9.6, 13.0,  9.0, 11.05 },
+			{ null, null, null, null, null, null,  9.6, 13.0,  9.0, 11.0  },
+			{ null, null, null, null, null, 12.5, null, 13.0,  9.0, 11.0  },
+			{ null, null, null, null, null, null, null, 13.0,  9.0, 11.0  },
+			{ null, null, null, null, null, null, null, null,  9.0, null  },
+			{ null, null, null, null, null, null, null, 13.0, null, null  },
+			{ null, null, null, null, null, null, null, null, null, null  },
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			security.setLastPrice(fix[i][0]);
+			security.setBidPrice(fix[i][1]);
+			security.setAskPrice(fix[i][2]);
+			security.setOpenPrice(fix[i][3]);
+			security.setClosePrice(fix[i][4]);
+			security.setHighPrice(fix[i][5]);
+			security.setLowPrice(fix[i][6]);
+			security.setMaxPrice(fix[i][7]);
+			security.setMinPrice(fix[i][8]);
+			if ( fix[i][9] == null ) {
+				assertNull(msg, security.getMostAccuratePrice());
+			} else {
+				assertEquals(msg, fix[i][9], security.getMostAccuratePrice(),
+						0.01d);
+			}
+		}
+	}
+
+	@Test
+	public void testGetMostAccurateVolume() throws Exception {
+		// Для первой строки:
+		// 6.38818 / 10 = X / 130430 -> X = 130430 * 6.38818 / 10
+		//	-> X = price * tick price / tick 
+		Double fix[][] = {
+			// tick, tick price, price, qty, expected
+			{ 10.0, 6.38818, 130430.0, 1.0, 83321.03174 },
+			{ 10.0, 6.38818, 130430.0, 2.0, 166642.06348 },
+			{ 10.0, null,    130430.0, 1.0, 130430.0 },
+			{ 10.0, null,    130430.0, 2.0, 260860.0 },
+			{  1.0, 1.0,     32044.0,  5.0, 160220.0 },
+			{ 0.01, 3.19409, 100.3,    1.0, 32036.7227 },
+			{ 0.01, null,    100.3,    5.0, 501.5 },
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			security.setMinStepSize(fix[i][0]);
+			security.setMinStepPrice(fix[i][1]);
+			assertEquals(msg, fix[i][4], security
+					.getMostAccurateVolume(fix[i][2], fix[i][3].longValue()),
+					0.000001d);
+		}
+	}
 
 }
