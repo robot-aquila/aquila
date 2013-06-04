@@ -73,7 +73,8 @@
 	    <delete includeEmptyDirs="true" >
 	    	<fileset dir="${bin}" includes="**/*" />
 		</delete>
-        <javac srcdir="${src}" destdir="${bin}" encoding="UTF-8">
+        <javac srcdir="${src}" destdir="${bin}" encoding="UTF-8"
+        	debug="on" debuglevel="lines,vars,source" >
             <classpath refid="classpath-build"/>
         </javac>
         <delete file="${build}/${filename}.jar" quiet="yes" />

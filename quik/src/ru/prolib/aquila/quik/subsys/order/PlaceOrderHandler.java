@@ -65,16 +65,22 @@ public class PlaceOrderHandler implements EventListener {
 		}
 		// Когда заявка становится доступной, она еще остается ожидающей.
 		long transId = event.getTransId();
-		order = orders.movePendingOrder(transId, orderId);
-		order.setAvailable(true);
-		orders.fireOrderAvailableEvent(order);
-		// А теперь генерируется событие о смене статуса заявки.
-		order.setStatus(orderStatus);
-		if ( orderStatus == OrderStatus.FAILED ) {
-			order.setLastChangeTime(order.getTerminal().getCurrentTime());
+		synchronized ( orders ) {
+			order = orders.getPendingOrder(transId);
+			synchronized ( order ) {
+				order = orders.movePendingOrder(transId, orderId);
+				order.setAvailable(true);
+				orders.fireOrderAvailableEvent(order);
+				// А теперь генерируется событие о смене статуса заявки.
+				order.setStatus(orderStatus);
+				if ( orderStatus == OrderStatus.FAILED ) {
+					order.setLastChangeTime(order.getTerminal()
+							.getCurrentTime());
+				}
+				order.fireChangedEvent();
+				order.resetChanges();
+			}
 		}
-		order.fireChangedEvent();
-		order.resetChanges();
 		logger.debug("Trans {} order {} response status {}",
 				new Object[] { transId, orderId, orderStatus });
 	}

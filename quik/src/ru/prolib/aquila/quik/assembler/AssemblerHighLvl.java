@@ -3,6 +3,9 @@ package ru.prolib.aquila.quik.assembler;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ru.prolib.aquila.core.Starter;
+import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.quik.dde.*;
 
@@ -16,7 +19,7 @@ import ru.prolib.aquila.quik.dde.*;
  * согласования в соответствии с алгоритмом, детали которого находятся
  * вне зоны ответственности механизма согласования. 
  */
-class AssemblerHighLvl {
+class AssemblerHighLvl implements Starter {
 	private static final Logger logger;
 	
 	static {
@@ -131,6 +134,16 @@ class AssemblerHighLvl {
 			.append(o.middle, middle)
 			.appendSuper(o.terminal == terminal)
 			.isEquals();
+	}
+
+	@Override
+	public void start() throws StarterException {
+		middle.start();
+	}
+
+	@Override
+	public void stop() throws StarterException {
+		middle.stop();
 	}
 
 }

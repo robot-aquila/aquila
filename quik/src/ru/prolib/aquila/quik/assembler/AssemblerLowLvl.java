@@ -1,19 +1,23 @@
 package ru.prolib.aquila.quik.assembler;
 
+import java.util.Date;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
  * Низкоуровневые функции согласования объектов.
  */
-public class AssemblerLowLvl {
+public class AssemblerLowLvl implements Starter {
 	private static final Logger logger;
 	private final EditableTerminal terminal;
 	private final Cache cache;
+	private Date startTime;
 	
 	static {
 		logger = LoggerFactory.getLogger(AssemblerLowLvl.class);
@@ -244,7 +248,7 @@ public class AssemblerLowLvl {
 	 * Проверяет необходимость согласования указанной сделки заявки по
 	 * кэш-записи сделки. Если кэш-запись сделки указывает на несогласованную
 	 * сделку, то создает экземпляр сделки и добавляет его в заявку. Если
-	 * заявка доступна, то так же генерирует событие о новой сделке. Заявка
+	 * сделна не ранняя, то так же генерирует событие о новой сделке. Заявка
 	 * должна содержать корректные значения первичных атрибутов.
 	 * <p>
 	 * @param entry кэш-запись сделки
@@ -265,9 +269,13 @@ public class AssemblerLowLvl {
 		trade.setTime(entry.getTime());
 		trade.setVolume(entry.getVolume());
 		order.addTrade(trade);
-		if ( order.isAvailable() ) {
+		if ( ! startTime.after(trade.getTime()) ) {
 			order.fireTradeEvent(trade);
+			logger.debug("Trade event fired: {}", trade);
+		} else {
+			logger.debug("Trade event skipped: {}", trade);
 		}
+		
 		return true;
 	}
 	
@@ -293,7 +301,87 @@ public class AssemblerLowLvl {
 		return new EqualsBuilder()
 			.append(o.cache, cache)
 			.appendSuper(o.terminal == terminal)
+			.append(o.startTime, startTime)
 			.isEquals();
+	}
+	
+	/**
+	 * Первый этап создания новой заявки.
+	 * <p>
+	 * Выполняет первичное заполнение атрибутов и регистрацию заявки,
+	 * после чего генерирует событие о появлении новой заявки.
+	 * <p>
+	 * @param entry кэш-запись заявки
+	 * @param order экземпляр новой заявки
+	 * @throws OrderAlreadyExistsException 
+	 */
+	public void initNewOrder(OrderCache entry, EditableOrder order)
+		throws OrderAlreadyExistsException
+	{
+		order.setDirection(entry.getDirection());
+		order.setPrice(entry.getPrice());
+		order.setQty(entry.getQty());
+		order.setQtyRest(entry.getQty());
+		order.setTime(entry.getTime());
+		order.setTransactionId(entry.getTransId());
+		order.setType(entry.getType());
+		order.setAvailable(true);
+		order.resetChanges();
+		terminal.registerOrder(entry.getId(), order);
+		terminal.fireOrderAvailableEvent(order);
+	}
+	
+	/**
+	 * Генерировать события об изменении заявки.
+	 * <p>
+	 * Выполняется генерация событий об изменении заявки, если время заявки не
+	 * раньше времени запуска сборщика. Подразумевается, что первичные атрибуты
+	 * заявки уже установлены. После обработки сбрасывает признак изменения
+	 * заявки.
+	 * <p>
+	 * @param order экземпляр заявки
+	 * @throws EditableObjectException
+	 */
+	public void fireOrderChanges(EditableOrder order)
+		throws EditableObjectException
+	{
+		if ( ! startTime.after(order.getTime()) ) {
+			order.fireChangedEvent();
+		}
+		order.resetChanges();		
+	}
+
+	@Override
+	public void start() throws StarterException {
+		logger.warn("TODO: stop-orders assembling not such detailed as orders");
+		startTime = terminal.getCurrentTime();
+	}
+
+	@Override
+	public void stop() throws StarterException {
+		startTime = null;
+	}
+	
+	/**
+	 * Установить время запуска сборщика.
+	 * <p>
+	 * Служебный метод только для тестов.
+	 * <p>
+	 * @param time время
+	 */
+	protected void setStartTime(Date time) {
+		startTime = time;
+	}
+	
+	/**
+	 * Получить время запуска сборщика.
+	 * <p>
+	 * Служебный метод только для тестов.
+	 * <p>
+	 * @return время запуска
+	 */
+	protected Date getStartTime() {
+		return startTime;
 	}
 
 }

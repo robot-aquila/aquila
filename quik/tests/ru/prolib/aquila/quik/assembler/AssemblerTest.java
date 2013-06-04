@@ -34,8 +34,12 @@ public class AssemblerTest {
 	
 	@Test
 	public void testStart() throws Exception {
+		high.start();
+		control.replay();
+		
 		assembler.start();
 		
+		control.verify();
 		assertTrue(cache.OnOrdersCacheUpdate().isListener(assembler));
 		assertTrue(cache.OnPortfoliosFCacheUpdate().isListener(assembler));
 		assertTrue(cache.OnPositionsFCacheUpdate().isListener(assembler));
@@ -46,9 +50,14 @@ public class AssemblerTest {
 	
 	@Test
 	public void testStop() throws Exception {
+		high.start();
+		high.stop();
+		control.replay();
+
 		assembler.start();
 		assembler.stop();
 		
+		control.verify();
 		assertFalse(cache.OnOrdersCacheUpdate().isListener(assembler));
 		assertFalse(cache.OnPortfoliosFCacheUpdate().isListener(assembler));
 		assertFalse(cache.OnPositionsFCacheUpdate().isListener(assembler));

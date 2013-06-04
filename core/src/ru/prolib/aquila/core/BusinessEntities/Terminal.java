@@ -1,7 +1,5 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.Date;
-
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.Starter;
 

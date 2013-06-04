@@ -59,13 +59,15 @@ public class CancelOrderHandler implements EventListener {
 			return;
 		}
 		EditableOrder order = orders.getEditableOrder(orderId);
-		if ( order.getStatus() != OrderStatus.ACTIVE ) {
-			return;
+		synchronized ( order ) {
+			if ( order.getStatus() != OrderStatus.ACTIVE ) {
+				return;
+			}
+			order.setStatus(OrderStatus.FAILED);
+			order.setLastChangeTime(order.getTerminal().getCurrentTime());
+			order.fireChangedEvent();
+			order.resetChanges();
 		}
-		order.setStatus(OrderStatus.FAILED);
-		order.setLastChangeTime(order.getTerminal().getCurrentTime());
-		order.fireChangedEvent();
-		order.resetChanges();
 	}
 	
 	@Override

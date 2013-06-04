@@ -250,7 +250,7 @@ public class EventQueueImplTest {
 		});
 		queue.start();
 		queue.enqueue(event, listeners);
-		assertTrue(exit.await(10, TimeUnit.MILLISECONDS));
+		assertTrue(exit.await(100, TimeUnit.MILLISECONDS));
 		queue.stop();
 	}
 	

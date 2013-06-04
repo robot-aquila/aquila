@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik.assembler;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.log4j.BasicConfigurator;
@@ -16,6 +17,7 @@ import ru.prolib.aquila.quik.dde.*;
 public class AssemblerLowLvlTest {
 	private static Account account;
 	private static SecurityDescriptor descr;
+	private static SimpleDateFormat timeFormat;
 	private IMocksControl control;
 	private EditableTerminal terminal;
 	private Cache cache;
@@ -31,6 +33,7 @@ public class AssemblerLowLvlTest {
 		BasicConfigurator.configure();
 		account = new Account("FIRM", "3644", "LX01");
 		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
+		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	}
 
 	@Before
@@ -434,15 +437,16 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderTrade_NewTradeForAvailableOrder()
+	public void testAdjustOrderTrade_SkipEventIfEarlyTrade()
 		throws Exception
 	{
+		low.setStartTime(timeFormat.parse("2013-06-05 01:00:16"));
 		expect(order.hasTrade(eq(815L))).andStubReturn(false);
 		expect(order.getDirection()).andStubReturn(OrderDirection.SELL);
 		expect(order.getSecurityDescriptor()).andStubReturn(descr);
 		expect(tradeEntry.getPrice()).andStubReturn(12.34d);
 		expect(tradeEntry.getQty()).andStubReturn(200L);
-		Date time = new Date();
+		Date time = timeFormat.parse("2013-06-05 01:00:15");
 		expect(tradeEntry.getTime()).andStubReturn(time);
 		expect(tradeEntry.getVolume()).andStubReturn(240.25d);
 		Trade expected = new Trade(terminal);
@@ -455,8 +459,6 @@ public class AssemblerLowLvlTest {
 		expected.setTime(time);
 		expected.setVolume(240.25d);
 		order.addTrade(eq(expected));
-		expect(order.isAvailable()).andReturn(true);
-		order.fireTradeEvent(eq(expected));
 		control.replay();
 
 		assertTrue(low.adjustOrderTrade(tradeEntry, order));
@@ -465,13 +467,14 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderTrade_NewTradeForNewOrder() throws Exception {
+	public void testAdjustOrderTrade_FireTradeEvent() throws Exception {
+		low.setStartTime(timeFormat.parse("2013-06-05 01:00:16"));
 		expect(order.hasTrade(eq(815L))).andStubReturn(false);
 		expect(order.getDirection()).andStubReturn(OrderDirection.SELL);
 		expect(order.getSecurityDescriptor()).andStubReturn(descr);
 		expect(tradeEntry.getPrice()).andStubReturn(12.34d);
 		expect(tradeEntry.getQty()).andStubReturn(200L);
-		Date time = new Date();
+		Date time = timeFormat.parse("2013-06-05 01:00:16");
 		expect(tradeEntry.getTime()).andStubReturn(time);
 		expect(tradeEntry.getVolume()).andStubReturn(240.25d);
 		Trade expected = new Trade(terminal);
@@ -484,7 +487,7 @@ public class AssemblerLowLvlTest {
 		expected.setTime(time);
 		expected.setVolume(240.25d);
 		order.addTrade(eq(expected));
-		expect(order.isAvailable()).andReturn(false);
+		order.fireTradeEvent(eq(expected));
 		control.replay();
 
 		assertTrue(low.adjustOrderTrade(tradeEntry, order));
@@ -507,17 +510,22 @@ public class AssemblerLowLvlTest {
 			t2 = tb.createTerminal("foo");
 		Cache c1 = cb.createCache(t1), c2 = cb.createCache(t2);
 		low = new AssemblerLowLvl(t1, c1);
+		low.setStartTime(timeFormat.parse("2013-01-01 00:00:00"));
 		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
 			.add(t1)
 			.add(t2);
 		Variant<Cache> vCache = new Variant<Cache>(vTerm)
 			.add(c1)
 			.add(c2);
-		Variant<?> iterator = vCache;
+		Variant<Date> vTime = new Variant<Date>(vCache)
+			.add(timeFormat.parse("2013-01-01 00:00:00"))
+			.add(timeFormat.parse("2013-06-05 00:57:00"));
+		Variant<?> iterator = vTime;
 		int foundCnt = 0;
 		AssemblerLowLvl x = null, found = null;
 		do {
 			x = new AssemblerLowLvl(vTerm.get(), vCache.get());
+			x.setStartTime(vTime.get());
 			if ( low.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -526,6 +534,86 @@ public class AssemblerLowLvlTest {
 		assertEquals(1, foundCnt);
 		assertSame(t1, found.getTerminal());
 		assertSame(c1, found.getCache());
+		assertEquals(timeFormat.parse("2013-01-01 00:00:00"),
+				found.getStartTime());
+	}
+	
+	@Test
+	public void testInitNewOrder() throws Exception {
+		Date time = new Date();
+		OrderCache entryOrder = new OrderCache(360L, 800L, OrderStatus.ACTIVE,
+				"SBER", "EQBR", "LX01", "3644", OrderDirection.BUY,
+				250L, 100L, 148.12d, time, null, OrderType.LIMIT);
+		
+		order.setDirection(eq(OrderDirection.BUY));
+		order.setPrice(eq(148.12d));
+		order.setQty(eq(250L));
+		order.setQtyRest(eq(250L));
+		order.setTime(same(time));
+		order.setTransactionId(eq(800L));
+		order.setType(eq(OrderType.LIMIT));
+		order.setAvailable(eq(true));
+		order.resetChanges();
+		terminal.registerOrder(eq(360L), same(order));
+		terminal.fireOrderAvailableEvent(same(order));
+		control.replay();
+		
+		low.initNewOrder(entryOrder, order);
+
+		control.verify();
+	}
+	
+	@Test
+	public void testFireOrderChanges_SkipEventIfEarlyOrder() throws Exception {
+		Date startTime = timeFormat.parse("2013-06-05 00:53:31");
+		Date orderTime = timeFormat.parse("2013-06-05 00:53:30");
+		low.setStartTime(startTime);
+		expect(order.getTime()).andReturn(orderTime);
+		order.resetChanges();
+		control.replay();
+		
+		low.fireOrderChanges(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testFireOrderChanges_FireChanged() throws Exception {
+		Date startTime = timeFormat.parse("2013-06-05 00:53:31");
+		Date orderTime = timeFormat.parse("2013-06-05 00:53:31");
+		low.setStartTime(startTime);
+		expect(order.getTime()).andReturn(orderTime);
+		order.fireChangedEvent();
+		order.resetChanges();
+		control.replay();
+		
+		low.fireOrderChanges(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testStart() throws Exception {
+		Date time = new Date();
+		expect(terminal.getCurrentTime()).andReturn(time);
+		control.replay();
+		
+		low.start();
+		
+		control.verify();
+		assertSame(time, low.getStartTime());
+	}
+	
+	@Test
+	public void testStop() throws Exception {
+		Date time = new Date();
+		low.setStartTime(time);
+		control.replay();
+		
+		low.stop();
+		
+		control.verify();
+		assertNull(low.getStartTime());
 	}
 
 }

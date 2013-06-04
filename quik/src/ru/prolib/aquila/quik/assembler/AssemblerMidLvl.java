@@ -4,6 +4,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.Starter;
+import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.quik.dde.*;
 
@@ -15,7 +17,7 @@ import ru.prolib.aquila.quik.dde.*;
  * соответствующих ситуаций, а решение о применении того или иного макроса
  * принимается вызывающим кодом.
  */
-public class AssemblerMidLvl {
+public class AssemblerMidLvl implements Starter {
 	/**
 	 * Минимальное время жизни заявки в миллисекундах.
 	 * <p>
@@ -138,38 +140,39 @@ public class AssemblerMidLvl {
 	 * Создать и зарегистрировать новую заявку на основе кэш-записи.
 	 * <p>
 	 * @param entry кэш-запись заявки
-	 * @return true - была создана новая заявка, false - заявка не создана
 	 */
-	public boolean createNewOrder(OrderCache entry) {
-		try {
-			Account account = low.getAccountByOrderCache(entry);
-			SecurityDescriptor descr =
-					low.getSecurityDescriptorByOrderCache(entry);
-			if ( account == null || descr == null ) {
-				return false;
+	public void createNewOrder(OrderCache entry) {
+		Account account = low.getAccountByOrderCache(entry);
+		SecurityDescriptor descr = low.getSecurityDescriptorByOrderCache(entry);
+		if ( account == null || descr == null ) return;
+		EditableOrder order = terminal.createOrder();
+		synchronized ( order ) {
+			try {
+				// stage 1: первичное заполнение и регистрация
+				order.setAccount(account);
+				order.setSecurityDescriptor(descr);
+				low.initNewOrder(entry, order);
+				
+				// stage 2: активация, если не ранняя заявка
+				order.setStatus(OrderStatus.ACTIVE);
+				low.fireOrderChanges(order);
+			
+				// stage 3: сведение по сделкам
+				for ( TradeCache t :
+					cache.getAllTradesByOrderId(entry.getId()) )
+				{
+					low.adjustOrderTrade(t, order);
+				}
+			
+				// stage 4: согласование статуса
+				low.adjustOrderStatus(entry, order);
+			
+				// stage 5: генерация событий, если не ранняя заявка
+				low.fireOrderChanges(order);
+			} catch ( EditableObjectException e ) {
+				error(e);
+				return;
 			}
-			EditableOrder order = terminal.createOrder();
-			order.setDirection(entry.getDirection());
-			order.setPrice(entry.getPrice());
-			order.setQty(entry.getQty());
-			order.setQtyRest(entry.getQty());
-			order.setTime(entry.getTime());
-			order.setTransactionId(entry.getTransId());
-			order.setType(entry.getType());
-			order.setAccount(account);
-			order.setSecurityDescriptor(descr);
-			for ( TradeCache t : cache.getAllTradesByOrderId(entry.getId()) ) {
-				low.adjustOrderTrade(t, order);
-			}
-			low.adjustOrderStatus(entry, order);
-			terminal.registerOrder(entry.getId(), order);
-			order.setAvailable(true);
-			order.resetChanges();
-			terminal.fireOrderAvailableEvent(order);
-			return true;
-		} catch ( EditableObjectException e ) {
-			error(e);
-			return false;
 		}
 	}
 	
@@ -188,22 +191,24 @@ public class AssemblerMidLvl {
 				return false;
 			}
 			EditableOrder order = terminal.createStopOrder();
-			order.setAccount(account);
-			order.setDirection(entry.getDirection());
-			order.setOffset(entry.getOffset());
-			order.setPrice(entry.getPrice());
-			order.setQty(entry.getQty());
-			order.setSecurityDescriptor(descr);
-			order.setSpread(entry.getSpread());
-			order.setStopLimitPrice(entry.getStopLimitPrice());
-			order.setTakeProfitPrice(entry.getTakeProfitPrice());
-			order.setTime(entry.getTime());
-			order.setTransactionId(entry.getTransId());
-			order.setType(entry.getType());
-			low.adjustStopOrderStatus(entry, order);
-			terminal.registerStopOrder(entry.getId(), order);
-			order.setAvailable(true);
-			terminal.fireStopOrderAvailableEvent(order);
+			synchronized ( order ) {
+				order.setAccount(account);
+				order.setDirection(entry.getDirection());
+				order.setOffset(entry.getOffset());
+				order.setPrice(entry.getPrice());
+				order.setQty(entry.getQty());
+				order.setSecurityDescriptor(descr);
+				order.setSpread(entry.getSpread());
+				order.setStopLimitPrice(entry.getStopLimitPrice());
+				order.setTakeProfitPrice(entry.getTakeProfitPrice());
+				order.setTime(entry.getTime());
+				order.setTransactionId(entry.getTransId());
+				order.setType(entry.getType());
+				low.adjustStopOrderStatus(entry, order);
+				terminal.registerStopOrder(entry.getId(), order);
+				order.setAvailable(true);
+				terminal.fireStopOrderAvailableEvent(order);
+			}
 			return true;
 		} catch ( EditableObjectException e ) {
 			error(e);
@@ -215,28 +220,25 @@ public class AssemblerMidLvl {
 	 * Согласовать состояние существующей заявки.
 	 * <p>
 	 * @param entry кэш-запись заявки
-	 * @return true - заявка была обновлена, false - заявка не обновлена
 	 */
-	public boolean updateExistingOrder(OrderCache entry) {
+	public void updateExistingOrder(OrderCache entry) {
 		try {
 			EditableOrder order = terminal.getEditableOrder(entry.getId());
 			synchronized ( order ) {
 				// Неактивные заявки игнорируются.
 				if ( order.getStatus() != OrderStatus.ACTIVE ) {
-					return false;
+					return;
 				}
 				for (TradeCache t:cache.getAllTradesByOrderId(entry.getId())) {
 					low.adjustOrderTrade(t, order);
 				}
 				low.adjustOrderStatus(entry, order);
-				order.fireChangedEvent();
-				boolean changed = order.hasChanged();
-				order.resetChanges();
-				return changed;
+				
+				// stage 5: генерация событий, если не ранняя заявка
+				low.fireOrderChanges(order);
 			}
 		} catch ( EditableObjectException e ) {
 			error(e);
-			return false;
 		}
 	}
 	
@@ -412,6 +414,16 @@ public class AssemblerMidLvl {
 			.append(o.low, low)
 			.appendSuper(o.terminal == terminal)
 			.isEquals();
+	}
+
+	@Override
+	public void start() throws StarterException {
+		low.start();
+	}
+
+	@Override
+	public void stop() throws StarterException {
+		low.stop();
 	}
 
 }

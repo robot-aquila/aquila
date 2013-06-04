@@ -62,7 +62,7 @@ public class AssemblerHighLvlTest {
 		expect(cache.getAllOrders()).andReturn(entries);
 		// Для существующих заявок всегда выполняется обновление
 		expect(terminal.isOrderExists(eq(125L))).andReturn(true);
-		expect(middle.updateExistingOrder(same(entries.get(0)))).andReturn(true);
+		middle.updateExistingOrder(same(entries.get(0)));
 		// Для новых заявок создание возможно только есть нет ожидающих
 		expect(terminal.isOrderExists(eq(824L))).andReturn(false);
 		expect(terminal.hasPendingOrders()).andReturn(true);
@@ -71,7 +71,7 @@ public class AssemblerHighLvlTest {
 		// Здесь такое допущение исключительно в целях тестирования.
 		expect(terminal.isOrderExists(eq(576L))).andReturn(false);
 		expect(terminal.hasPendingOrders()).andReturn(false);
-		expect(middle.createNewOrder(same(entries.get(2)))).andReturn(true);
+		middle.createNewOrder(same(entries.get(2)));
 		control.replay();
 		
 		assembler.adjustOrders();
@@ -214,6 +214,26 @@ public class AssemblerHighLvlTest {
 		assertSame(t1, found.getTerminal());
 		assertSame(c1, found.getCache());
 		assertSame(middle, found.getAssemblerMidLevel());
+	}
+	
+	@Test
+	public void testStart() throws Exception {
+		middle.start();
+		control.replay();
+		
+		assembler.start();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testStop() throws Exception {
+		middle.stop();
+		control.replay();
+		
+		assembler.stop();
+		
+		control.verify();
 	}
 
 }

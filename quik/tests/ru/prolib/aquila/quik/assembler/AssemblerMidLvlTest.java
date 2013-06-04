@@ -195,7 +195,7 @@ public class AssemblerMidLvlTest {
 			.andReturn(descr);
 		control.replay();
 		
-		assertFalse(middle.createNewOrder(entryOrder));
+		middle.createNewOrder(entryOrder);
 		
 		control.verify();
 	}
@@ -207,7 +207,7 @@ public class AssemblerMidLvlTest {
 			.andReturn(null);
 		control.replay();
 		
-		assertFalse(middle.createNewOrder(entryOrder));
+		middle.createNewOrder(entryOrder);
 		
 		control.verify();
 	}
@@ -222,29 +222,27 @@ public class AssemblerMidLvlTest {
 		expect(low.getSecurityDescriptorByOrderCache(entryOrder))
 			.andReturn(descr);
 		expect(terminal.createOrder()).andReturn(order);
-		order.setDirection(OrderDirection.BUY);
-		order.setPrice(148.12d);
-		order.setQty(250L);
-		order.setQtyRest(250L);
-		order.setTime(time);
-		order.setTransactionId(800L);
-		order.setType(OrderType.LIMIT);
+		// stage 1:
 		order.setAccount(account);
 		order.setSecurityDescriptor(descr);
+		low.initNewOrder(same(entryOrder), same(order));
+		// stage 2:
+		order.setStatus(eq(OrderStatus.ACTIVE));
+		low.fireOrderChanges(same(order));
+		// stage 3:		
 		List<TradeCache> trades = new Vector<TradeCache>();
 		trades.add(control.createMock(TradeCache.class));
 		trades.add(control.createMock(TradeCache.class));
 		expect(cache.getAllTradesByOrderId(eq(360L))).andReturn(trades);
 		expect(low.adjustOrderTrade(trades.get(0), order)).andReturn(true);
 		expect(low.adjustOrderTrade(trades.get(1), order)).andReturn(true);
+		// stage 4:		
 		low.adjustOrderStatus(entryOrder, order);
-		terminal.registerOrder(360L, order);
-		order.setAvailable(true);
-		order.resetChanges();
-		terminal.fireOrderAvailableEvent(order);
+		// stage 5:
+		low.fireOrderChanges(same(order));
 		control.replay();
 		
-		assertTrue(middle.createNewOrder(entryOrder));
+		middle.createNewOrder(entryOrder);
 		
 		control.verify();
 	}
@@ -256,7 +254,7 @@ public class AssemblerMidLvlTest {
 		expect(order.getStatus()).andReturn(OrderStatus.FILLED);
 		control.replay();
 		
-		assertFalse(middle.updateExistingOrder(entryOrder));
+		middle.updateExistingOrder(entryOrder);
 		
 		control.verify();
 	}
@@ -273,12 +271,10 @@ public class AssemblerMidLvlTest {
 		expect(low.adjustOrderTrade(trades.get(0), order)).andReturn(false);
 		expect(low.adjustOrderTrade(trades.get(1), order)).andReturn(true);
 		low.adjustOrderStatus(entryOrder, order);
-		order.fireChangedEvent();
-		expect(order.hasChanged()).andReturn(true);
-		order.resetChanges();
+		low.fireOrderChanges(same(order));
 		control.replay();
 		
-		assertTrue(middle.updateExistingOrder(entryOrder));
+		middle.updateExistingOrder(entryOrder);
 		
 		control.verify();
 	}
@@ -626,6 +622,26 @@ public class AssemblerMidLvlTest {
 		control.replay();
 		
 		assertTrue(middle.createNewStopOrder(entryStopOrder));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testStart() throws Exception {
+		low.start();
+		control.replay();
+		
+		middle.start();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testStop() throws Exception {
+		low.stop();
+		control.replay();
+		
+		middle.stop();
 		
 		control.verify();
 	}

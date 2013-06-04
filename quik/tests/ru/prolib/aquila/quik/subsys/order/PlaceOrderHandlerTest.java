@@ -80,6 +80,7 @@ public class PlaceOrderHandlerTest {
 			expect(order.getTerminal()).andStubReturn(terminal);
 			expect(terminal.getCurrentTime()).andStubReturn(time);
 			expect(failedOrderNumerator.decrementAndGet()).andReturn(-123);
+			expect(orders.getPendingOrder(100L)).andReturn(order);
 			expect(orders.movePendingOrder(100L, -123L)).andReturn(order);
 			order.setAvailable(eq(true));
 			orders.fireOrderAvailableEvent(same(order));
@@ -97,6 +98,7 @@ public class PlaceOrderHandlerTest {
 
 	@Test
 	public void testOnEvent_Ok() throws Exception {
+		expect(orders.getPendingOrder(100L)).andReturn(order);
 		expect(orders.movePendingOrder(1L, 2L)).andReturn(order);
 		order.setAvailable(eq(true));
 		orders.fireOrderAvailableEvent(same(order));

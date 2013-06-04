@@ -9,6 +9,8 @@ import ru.prolib.aquila.quik.dde.*;
 
 /**
  * Фасад подсистемы сборки и согласования объектов бизнес-модели.
+ * <p>
+ * Примечания по событиям связанными с заявами, стоп-заявками и сделками.
  */
 public class Assembler implements Starter, EventListener {
 	private static final Logger logger;
@@ -45,6 +47,7 @@ public class Assembler implements Starter, EventListener {
 
 	@Override
 	public void start() throws StarterException {
+		high.start();
 		cache.OnPortfoliosFCacheUpdate().addListener(this);
 		cache.OnPositionsFCacheUpdate().addListener(this);
 		cache.OnSecuritiesCacheUpdate().addListener(this);
@@ -62,6 +65,7 @@ public class Assembler implements Starter, EventListener {
 		cache.OnSecuritiesCacheUpdate().removeListener(this);
 		cache.OnPositionsFCacheUpdate().removeListener(this);
 		cache.OnPortfoliosFCacheUpdate().removeListener(this);
+		high.stop();
 		logger.debug("Assembler stopped");
 	}
 	
