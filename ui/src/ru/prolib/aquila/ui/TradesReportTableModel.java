@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.PositionType;
 import ru.prolib.aquila.core.report.*;
 
 /**
@@ -99,16 +100,28 @@ public class TradesReportTableModel extends AbstractTableModel
 		} else if ( hdr == COL_EXIT_VOL ) {
 			return report.getExitVolume();
 		} else if ( hdr == COL_PROF_LOSS ) {
-			if ( report.getExitVolume() != null ) {
-				return report.getExitVolume() - report.getEnterVolume();
-			}
+			return getProfit(report);
 		} else if ( hdr == COL_PROF_LOSS_PERC ) {
-			if ( report.getExitVolume() != null ) {
-				return (report.getExitVolume() - report.getEnterVolume())
-					/ report.getEnterVolume() * 100;
+			Double profit = getProfit(report);
+			if ( profit != null ) {
+				return profit / report.getEnterVolume() * 100; 
+			} else {
+				return null;
 			}
 		}
 		return null;
+	}
+	
+	private Double getProfit(TradeReport report) {
+		Double exVal = report.getExitVolume();
+		if ( exVal == null ) {
+			return null;
+		}
+		Double profit = exVal - report.getEnterVolume();
+		if ( report.getType() == PositionType.SHORT ) {
+			profit *= -1;
+		}
+		return profit;
 	}
 	
 	private String formatTime(Date time) {
