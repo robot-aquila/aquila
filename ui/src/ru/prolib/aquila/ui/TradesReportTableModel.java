@@ -120,12 +120,13 @@ public class TradesReportTableModel extends AbstractTableModel
 		trades.OnEnter().addListener(this);
 		trades.OnExit().addListener(this);
 		trades.OnChanged().addListener(this);
-		trades.start();
+		// ВНИМАНИЕ: Стартовать отчет здесь не стоит!
+		// Наблюдателей отчета может быть несколько и если каждый будет
+		// его стартовать, то получится каша с начальными трейдами.
 	}
 
 	@Override
 	public void stop() throws StarterException {
-		trades.stop();
 		trades.OnEnter().removeListener(this);
 		trades.OnExit().removeListener(this);
 		trades.OnChanged().removeListener(this);
