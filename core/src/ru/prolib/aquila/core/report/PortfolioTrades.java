@@ -58,18 +58,20 @@ public class PortfolioTrades implements Trades, EventListener {
 
 	@Override
 	public synchronized void start() throws StarterException {
-		getTerminal().OnOrderTrade().addListener(this);
+		trades.start();
 		for ( Position position : portfolio.getPositions() ) {
 			Trade trade = helper.createInitialTrade(position);
 			if ( trade != null ) {
 				trades.addTrade(trade);
 			}
 		}
+		getTerminal().OnOrderTrade().addListener(this);
 	}
 
 	@Override
 	public synchronized void stop() throws StarterException {
 		getTerminal().OnOrderTrade().removeListener(this);
+		trades.stop();
 	}
 
 	@Override

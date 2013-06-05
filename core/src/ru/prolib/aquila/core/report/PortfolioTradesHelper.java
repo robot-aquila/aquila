@@ -27,7 +27,9 @@ class PortfolioTradesHelper {
 		if ( price == null ) {
 			price = 0.0d;
 		}
-		Trade t = new Trade(position.getTerminal());
+		Terminal terminal = position.getTerminal();
+		Trade t = new Trade(terminal);
+		t.setTime(terminal.getCurrentTime());
 		t.setSecurityDescriptor(security.getDescriptor());
 		t.setPrice(price);
 		if ( qty > 0 ) {

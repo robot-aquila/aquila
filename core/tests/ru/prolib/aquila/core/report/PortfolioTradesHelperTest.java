@@ -2,11 +2,15 @@ package ru.prolib.aquila.core.report;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.util.Date;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class PortfolioTradesHelperTest {
+	private static Date time = new Date();
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
 	private Security security;
@@ -48,10 +52,12 @@ public class PortfolioTradesHelperTest {
 	{
 		expect(position.getCurrQty()).andReturn(1L);
 		expect(security.getMostAccuratePrice()).andReturn(null);
+		expect(terminal.getCurrentTime()).andReturn(time);
 		expect(security.getMostAccurateVolume(0.0d, 1L)).andReturn(0.0d);
 		control.replay();
 		
 		Trade expected = new Trade(terminal);
+		expected.setTime(time);
 		expected.setDirection(OrderDirection.BUY);
 		expected.setPrice(0.0d);
 		expected.setQty(1L);
@@ -67,10 +73,12 @@ public class PortfolioTradesHelperTest {
 	public void testCreateInitialTrade_Long() throws Exception {
 		expect(position.getCurrQty()).andReturn(10L);
 		expect(security.getMostAccuratePrice()).andReturn(20.0d);
+		expect(terminal.getCurrentTime()).andReturn(time);
 		expect(security.getMostAccurateVolume(20.0d, 10L)).andReturn(200.0d);
 		control.replay();
 		
 		Trade expected = new Trade(terminal);
+		expected.setTime(time);
 		expected.setDirection(OrderDirection.BUY);
 		expected.setPrice(20.0d);
 		expected.setQty(10L);
@@ -86,10 +94,12 @@ public class PortfolioTradesHelperTest {
 	public void testCreateInitialTrade_Short() throws Exception {
 		expect(position.getCurrQty()).andReturn(-5L);
 		expect(security.getMostAccuratePrice()).andReturn(10.0d);
+		expect(terminal.getCurrentTime()).andReturn(time);
 		expect(security.getMostAccurateVolume(10.0d, 5L)).andReturn(50.0d);
 		control.replay();
 		
 		Trade expected = new Trade(terminal);
+		expected.setTime(time);
 		expected.setDirection(OrderDirection.SELL);
 		expected.setPrice(10.0d);
 		expected.setQty(5L);

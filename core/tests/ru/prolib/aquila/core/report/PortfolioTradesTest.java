@@ -54,6 +54,7 @@ public class PortfolioTradesTest {
 		Trade t1 = control.createMock(Trade.class),
 			t3 = control.createMock(Trade.class);
 		
+		subTrades.start();
 		expect(helper.createInitialTrade(same(p1))).andReturn(t1);
 		subTrades.addTrade(same(t1));
 		expect(helper.createInitialTrade(same(p2))).andReturn(null);
@@ -69,9 +70,14 @@ public class PortfolioTradesTest {
 	
 	@Test
 	public void testStop() throws Exception {
+		subTrades.start();
+		subTrades.stop();
+		control.replay();
+		
 		trades.start();
 		trades.stop();
 		
+		control.verify();
 		assertFalse(terminal.OnOrderTrade().isListener(trades));
 	}
 	
