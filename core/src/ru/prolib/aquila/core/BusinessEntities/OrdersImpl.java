@@ -255,7 +255,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			throws OrderAlreadyExistsException
 	{
 		if ( orders.containsKey(id) ) {
-			throw new OrderAlreadyExistsException(id);
+			throw new OrderAlreadyExistsException(order);
 		}
 		order.setId(id);
 		orders.put(id, order);
@@ -282,7 +282,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			throws OrderAlreadyExistsException
 	{
 		if ( pending.containsKey(transId) ) {
-			throw new OrderAlreadyExistsException(transId);
+			throw new OrderAlreadyExistsException(order);
 		}
 		order.setTransactionId(transId);
 		pending.put(transId, order);
@@ -292,13 +292,13 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	public synchronized EditableOrder
 		movePendingOrder(long transId, long orderId) throws OrderException
 	{
-		if ( isOrderExists(orderId) ) {
-			throw new OrderAlreadyExistsException(orderId);
-		}
 		if ( ! isPendingOrder(transId) ) {
 			throw new OrderNotExistsException(transId);
 		}
 		EditableOrder order = getPendingOrder(transId);
+		if ( isOrderExists(orderId) ) {
+			throw new OrderAlreadyExistsException(order);
+		}
 		registerOrder(orderId, order);
 		purgePendingOrder(transId);
 		return order;

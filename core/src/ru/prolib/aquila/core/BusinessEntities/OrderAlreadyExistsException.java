@@ -1,17 +1,42 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 /**
- * Исключение, выбрасываемое в случае, если заявка с таким идентификатором уже
- * существует.
+ * Заявка уже существует.
  * <p>
- * 2012-10-17<br>
- * $Id: OrderAlreadyExistsException.java 562 2013-03-06 15:22:54Z whirlwind $
+ * Исключение выбрасывается при регистрации заявки в случае, если заявка с
+ * таким идентификатором (номером транзакции или номером заявки) уже существует.
  */
 public class OrderAlreadyExistsException extends OrderException {
 	private static final long serialVersionUID = 1L;
+	private final EditableOrder order;
 
-	public OrderAlreadyExistsException(long orderId) {
-		super("Order id# " + orderId);
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param rejectedOrder заявка, в регистрации которой отказано
+	 */
+	public OrderAlreadyExistsException(EditableOrder rejectedOrder) {
+		super();
+		order = rejectedOrder;
+	}
+	
+	/**
+	 * Получить экземпляр отклоненной заявки.
+	 * <p>
+	 * @return экземпляр заявки
+	 */
+	public EditableOrder getRejectedOrder() {
+		return order;
+	}
+	
+	@Override
+	public String getMessage() {
+		String pfx = "Order already exists: ";
+		if ( order == null ) {
+			return pfx + "unspecified order instance";
+		}
+		return pfx + "orderId#" + order.getId() + " "
+				   + "transId#" + order.getTransactionId();
 	}
 
 }
