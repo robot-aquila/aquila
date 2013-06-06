@@ -102,7 +102,7 @@ public class AssemblerHighLvlTest {
 		expect(cache.getAllStopOrders()).andReturn(entries);
 		expect(terminal.isStopOrderExists(415L)).andReturn(false);
 		expect(terminal.hasPendingStopOrders()).andReturn(false);
-		expect(middle.createNewStopOrder(entries.get(0))).andReturn(true);
+		middle.createNewStopOrder(entries.get(0));
 		
 		expect(terminal.isStopOrderExists(118L)).andReturn(false);
 		expect(terminal.hasPendingStopOrders()).andReturn(true);

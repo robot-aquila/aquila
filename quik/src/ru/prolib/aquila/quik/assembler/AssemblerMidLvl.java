@@ -18,6 +18,7 @@ import ru.prolib.aquila.quik.dde.*;
  * принимается вызывающим кодом.
  */
 public class AssemblerMidLvl implements Starter {
+	
 	/**
 	 * Минимальное время жизни заявки в миллисекундах.
 	 * <p>
@@ -137,42 +138,40 @@ public class AssemblerMidLvl implements Starter {
 	}
 	
 	/**
-	 * Создать и зарегистрировать новую заявку на основе кэш-записи.
+	 * Создать и зарегистрировать новую заявку на основании кэш-записи.
 	 * <p>
 	 * @param entry кэш-запись заявки
+	 * @throws OrderAlreadyExistsException фатальная ошибка регистрации заявки
 	 */
-	public void createNewOrder(OrderCache entry) {
-		Account account = low.getAccountByOrderCache(entry);
-		SecurityDescriptor descr = low.getSecurityDescriptorByOrderCache(entry);
+	public void createNewOrder(OrderCache entry)
+		throws OrderAlreadyExistsException
+	{
+		Account account = low.getAccount(entry);
+		SecurityDescriptor descr = low.getSecurityDescriptor(entry);
 		if ( account == null || descr == null ) return;
 		EditableOrder order = terminal.createOrder();
 		synchronized ( order ) {
-			try {
-				// stage 1: первичное заполнение и регистрация
-				order.setAccount(account);
-				order.setSecurityDescriptor(descr);
-				low.initNewOrder(entry, order);
+			// stage 1: первичное заполнение и регистрация
+			order.setAccount(account);
+			order.setSecurityDescriptor(descr);
+			low.initNewOrder(entry, order);
 				
-				// stage 2: активация, если не ранняя заявка
-				order.setStatus(OrderStatus.ACTIVE);
-				low.fireOrderChanges(order);
-			
-				// stage 3: сведение по сделкам
-				for ( TradeCache t :
-					cache.getAllTradesByOrderId(entry.getId()) )
-				{
-					low.adjustOrderTrade(t, order);
-				}
-			
-				// stage 4: согласование статуса
-				low.adjustOrderStatus(entry, order);
-			
-				// stage 5: генерация событий, если не ранняя заявка
-				low.fireOrderChanges(order);
-			} catch ( EditableObjectException e ) {
-				error(e);
-				return;
+			// stage 2: активация, если не ранняя заявка
+			order.setStatus(OrderStatus.ACTIVE);
+			low.fireOrderChanges(order);
+		
+			// stage 3: сведение по сделкам
+			for ( TradeCache t :
+				cache.getAllTradesByOrderId(entry.getId()) )
+			{
+				low.adjustOrderTrade(t, order);
 			}
+		
+			// stage 4: согласование статуса
+			low.adjustOrderStatus(entry, order);
+		
+			// stage 5: генерация событий, если не ранняя заявка
+			low.fireOrderChanges(order);
 		}
 	}
 	
@@ -180,39 +179,30 @@ public class AssemblerMidLvl implements Starter {
 	 * Создать и зарегистрировать новую стоп-заявку на основе кэш-записи.
 	 * <p>
 	 * @param entry кэш-запись стоп-заявки
-	 * @return true - была создана новая заявка, false - заявка не создана 
+	 * @throws OrderAlreadyExistsException фатальная ошибка регистрации заявки
 	 */
-	public boolean createNewStopOrder(StopOrderCache entry) {
-		try {
-			Account account = low.getAccountByStopOrderCache(entry);
-			SecurityDescriptor descr =
-				low.getSecurityDescriptorByStopOrderCache(entry);
-			if ( account == null || descr == null ) {
-				return false;
-			}
-			EditableOrder order = terminal.createStopOrder();
-			synchronized ( order ) {
-				order.setAccount(account);
-				order.setDirection(entry.getDirection());
-				order.setOffset(entry.getOffset());
-				order.setPrice(entry.getPrice());
-				order.setQty(entry.getQty());
-				order.setSecurityDescriptor(descr);
-				order.setSpread(entry.getSpread());
-				order.setStopLimitPrice(entry.getStopLimitPrice());
-				order.setTakeProfitPrice(entry.getTakeProfitPrice());
-				order.setTime(entry.getTime());
-				order.setTransactionId(entry.getTransId());
-				order.setType(entry.getType());
-				low.adjustStopOrderStatus(entry, order);
-				terminal.registerStopOrder(entry.getId(), order);
-				order.setAvailable(true);
-				terminal.fireStopOrderAvailableEvent(order);
-			}
-			return true;
-		} catch ( EditableObjectException e ) {
-			error(e);
-			return false;
+	public void createNewStopOrder(StopOrderCache entry)
+		throws OrderAlreadyExistsException
+	{
+		Account account = low.getAccount(entry);
+		SecurityDescriptor descr = low.getSecurityDescriptor(entry);
+		if ( account == null || descr == null ) return;
+		EditableOrder order = terminal.createStopOrder();
+		synchronized ( order ) {
+			order.setAccount(account);
+			order.setSecurityDescriptor(descr);
+			// stage 1: первичное заполнение и регистрация
+			low.initNewOrder(entry, order);
+			
+			// stage 2: активация, если не ранняя заявка
+			order.setStatus(OrderStatus.ACTIVE);
+			low.fireOrderChanges(order);
+			
+			// stage 3: согласование статуса
+			low.adjustOrderStatus(entry, order);
+				
+			// stage 5: генерация событий, если не ранняя стоп-заявка
+			low.fireOrderChanges(order);
 		}
 	}
 	
@@ -265,7 +255,7 @@ public class AssemblerMidLvl implements Starter {
 					order.setStopLimitPrice(entry.getStopLimitPrice());
 					order.setPrice(entry.getPrice());
 				}
-				low.adjustStopOrderStatus(entry, order);
+				low.adjustOrderStatus(entry, order);
 				order.fireChangedEvent();
 				boolean changed = order.hasChanged();
 				order.resetChanges();

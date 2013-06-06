@@ -59,7 +59,7 @@ public class AssemblerLowLvl implements Starter {
 	 * @param entry кэш-запись заявки
 	 * @return торговый счет или null, если не удалось определить счет
 	 */
-	public Account getAccountByOrderCache(OrderCache entry) {
+	public Account getAccount(OrderCache entry) {
 		return getAccount(entry.getClientCode(), entry.getAccountCode(),
 				entry.getId());
 	}
@@ -70,7 +70,7 @@ public class AssemblerLowLvl implements Starter {
 	 * @param entry кэш-запись стоп-заявки
 	 * @return торговый счет или null, если не удалось определить счет
 	 */
-	public Account getAccountByStopOrderCache(StopOrderCache entry) {
+	public Account getAccount(StopOrderCache entry) {
 		return getAccount(entry.getClientCode(), entry.getAccountCode(),
 				entry.getId());
 	}
@@ -106,9 +106,7 @@ public class AssemblerLowLvl implements Starter {
 	 * @param entry кэш-запись заявки
 	 * @return дескриптор инструмента или null, если не удалось определить
 	 */
-	public SecurityDescriptor
-		getSecurityDescriptorByOrderCache(OrderCache entry)
-	{
+	public SecurityDescriptor getSecurityDescriptor(OrderCache entry) {
 		return getSecurityDescriptor(entry.getSecurityCode(),
 				entry.getSecurityClassCode(), entry.getId());
 	}
@@ -119,9 +117,7 @@ public class AssemblerLowLvl implements Starter {
 	 * @param entry кэш-запись стоп-заявки
 	 * @return дескриптор инструмента или null, если не удалось определить
 	 */
-	public SecurityDescriptor
-		getSecurityDescriptorByStopOrderCache(StopOrderCache entry)
-	{
+	public SecurityDescriptor getSecurityDescriptor(StopOrderCache entry) {
 		return getSecurityDescriptor(entry.getSecurityCode(),
 				entry.getSecurityClassCode(), entry.getId());
 	}
@@ -212,17 +208,10 @@ public class AssemblerLowLvl implements Starter {
 	 * @param entry кэш-запись стоп-заявки
 	 * @param order экземпляр заявки
 	 */
-	public
-		void adjustStopOrderStatus(StopOrderCache entry, EditableOrder order)
-	{
+	public void adjustOrderStatus(StopOrderCache entry, EditableOrder order) {
 		Long orderId = entry.getId();
 		OrderStatus entryStatus = entry.getStatus();
-		if ( entryStatus == OrderStatus.ACTIVE ) {
-			if ( order.getStatus() == OrderStatus.PENDING ) {
-				logger.debug("Stop-order {} set activated", orderId);
-				order.setStatus(OrderStatus.ACTIVE);
-			}
-		} else if ( entryStatus == OrderStatus.CANCELLED ) {
+		if ( entryStatus == OrderStatus.CANCELLED ) {
 			logger.debug("Stop-Order {} set cancelled by entry", orderId);
 			order.setStatus(entryStatus);
 			order.setLastChangeTime(entry.getWithdrawTime());
@@ -313,7 +302,7 @@ public class AssemblerLowLvl implements Starter {
 	 * <p>
 	 * @param entry кэш-запись заявки
 	 * @param order экземпляр новой заявки
-	 * @throws OrderAlreadyExistsException 
+	 * @throws OrderAlreadyExistsException ошибка регистрации заявки
 	 */
 	public void initNewOrder(OrderCache entry, EditableOrder order)
 		throws OrderAlreadyExistsException
@@ -334,26 +323,27 @@ public class AssemblerLowLvl implements Starter {
 	/**
 	 * Генерировать события об изменении заявки.
 	 * <p>
-	 * Выполняется генерация событий об изменении заявки, если время заявки не
-	 * раньше времени запуска сборщика. Подразумевается, что первичные атрибуты
-	 * заявки уже установлены. После обработки сбрасывает признак изменения
-	 * заявки.
+	 * Работает одинаково для заявок и стоп-заявок. Выполняется генерация
+	 * событий об изменении заявки, если время заявки не раньше времени запуска
+	 * сборщика. Подразумевается, что время заявки уже установлено. После
+	 * обработки сбрасывает признак изменения заявки
 	 * <p>
 	 * @param order экземпляр заявки
-	 * @throws EditableObjectException
 	 */
-	public void fireOrderChanges(EditableOrder order)
-		throws EditableObjectException
-	{
+	public void fireOrderChanges(EditableOrder order) {
 		if ( ! startTime.after(order.getTime()) ) {
-			order.fireChangedEvent();
+			try {
+				order.fireChangedEvent();
+			} catch ( EditableObjectException e ) {
+				// Очень маловероятная ситуация, по этому обрабатываем здесь.
+				logger.error("Order changed event suppressed: ", e);
+			}
 		}
 		order.resetChanges();		
 	}
 
 	@Override
 	public void start() throws StarterException {
-		logger.warn("TODO: stop-orders assembling not such detailed as orders");
 		startTime = terminal.getCurrentTime();
 	}
 
@@ -382,6 +372,35 @@ public class AssemblerLowLvl implements Starter {
 	 */
 	protected Date getStartTime() {
 		return startTime;
+	}
+	
+	/**
+	 * Первый этап создания новой стоп-заявки.
+	 * <p>
+	 * Выполняет первичное заполнение атрибутов и регистрацию стоп-заявки,
+	 * после чего генерирует событие о появлении новой стоп-заявки.
+	 * <p>
+	 * @param entry кэш-запись стоп-заявки
+	 * @param order экземпляр новой стоп-заявки
+	 * @throws OrderAlreadyExistsException ошибка регистрации заявки
+	 */
+	public void initNewOrder(StopOrderCache entry, EditableOrder order)
+		throws OrderAlreadyExistsException
+	{
+		order.setDirection(entry.getDirection());
+		order.setOffset(entry.getOffset());
+		order.setPrice(entry.getPrice());
+		order.setQty(entry.getQty());
+		order.setSpread(entry.getSpread());
+		order.setStopLimitPrice(entry.getStopLimitPrice());
+		order.setTakeProfitPrice(entry.getTakeProfitPrice());
+		order.setTime(entry.getTime());
+		order.setTransactionId(entry.getTransId());
+		order.setType(entry.getType());
+		order.setAvailable(true);
+		order.resetChanges();
+		terminal.registerStopOrder(entry.getId(), order);
+		terminal.fireStopOrderAvailableEvent(order);
 	}
 
 }

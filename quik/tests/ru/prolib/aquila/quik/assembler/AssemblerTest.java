@@ -81,6 +81,39 @@ public class AssemblerTest {
 	}
 	
 	@Test
+	public void testOnEvent_IfAdjustOrderThrows() throws Exception {
+		terminal = control.createMock(EditableTerminal.class);
+		assembler = new Assembler(terminal, cache, high);
+		high.adjustSecurities();
+		high.adjustPortfolios();
+		high.adjustOrders();
+		expectLastCall().andThrow(new OrderAlreadyExistsException(null));
+		terminal.firePanicEvent(eq(2), eq("Multithreading related issue."));
+		control.replay();
+		
+		assembler.onEvent(null);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testOnEvent_IfAdjustStopOrderThrows() throws Exception {
+		terminal = control.createMock(EditableTerminal.class);
+		assembler = new Assembler(terminal, cache, high);
+		high.adjustSecurities();
+		high.adjustPortfolios();
+		high.adjustOrders();
+		high.adjustStopOrders();
+		expectLastCall().andThrow(new OrderAlreadyExistsException(null));
+		terminal.firePanicEvent(eq(2), eq("Multithreading related issue."));
+		control.replay();
+		
+		assembler.onEvent(null);
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(assembler.equals(assembler));
 		assertFalse(assembler.equals(null));
@@ -119,5 +152,5 @@ public class AssemblerTest {
 		assertSame(c1, found.getCache());
 		assertSame(high, found.getAssemblerHighLevel());
 	}
-
+	
 }

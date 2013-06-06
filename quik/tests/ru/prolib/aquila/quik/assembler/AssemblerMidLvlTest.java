@@ -190,8 +190,8 @@ public class AssemblerMidLvlTest {
 	
 	@Test
 	public void testCreateNewOrder_NoAccount() throws Exception {
-		expect(low.getAccountByOrderCache(entryOrder)).andReturn(null);
-		expect(low.getSecurityDescriptorByOrderCache(entryOrder))
+		expect(low.getAccount(entryOrder)).andReturn(null);
+		expect(low.getSecurityDescriptor(entryOrder))
 			.andReturn(descr);
 		control.replay();
 		
@@ -202,8 +202,8 @@ public class AssemblerMidLvlTest {
 	
 	@Test
 	public void testCreateNewOrder_NoSecurity() throws Exception {
-		expect(low.getAccountByOrderCache(entryOrder)).andReturn(account);
-		expect(low.getSecurityDescriptorByOrderCache(entryOrder))
+		expect(low.getAccount(entryOrder)).andReturn(account);
+		expect(low.getSecurityDescriptor(entryOrder))
 			.andReturn(null);
 		control.replay();
 		
@@ -211,16 +211,15 @@ public class AssemblerMidLvlTest {
 		
 		control.verify();
 	}
-
+	
 	@Test
 	public void testCreateNewOrder() throws Exception {
 		Date time = new Date();
 		entryOrder = new OrderCache(360L, 800L, OrderStatus.ACTIVE,
 				"SBER", "EQBR", "LX01", "3644", OrderDirection.BUY,
 				250L, 100L, 148.12d, time, null, OrderType.LIMIT);
-		expect(low.getAccountByOrderCache(entryOrder)).andReturn(account);
-		expect(low.getSecurityDescriptorByOrderCache(entryOrder))
-			.andReturn(descr);
+		expect(low.getAccount(entryOrder)).andReturn(account);
+		expect(low.getSecurityDescriptor(entryOrder)).andReturn(descr);
 		expect(terminal.createOrder()).andReturn(order);
 		// stage 1:
 		order.setAccount(account);
@@ -512,7 +511,7 @@ public class AssemblerMidLvlTest {
 		expect(terminal.getEditableStopOrder(427L)).andReturn(order);
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		expect(order.getType()).andReturn(OrderType.STOP_LIMIT);
-		low.adjustStopOrderStatus(entryStopOrder, order);
+		low.adjustOrderStatus(entryStopOrder, order);
 		order.fireChangedEvent();
 		expect(order.hasChanged()).andReturn(true);
 		order.resetChanges();
@@ -538,7 +537,7 @@ public class AssemblerMidLvlTest {
 			order.setTakeProfitPrice(12.34d);
 			order.setStopLimitPrice(18.24d);
 			order.setPrice(18.15d);
-			low.adjustStopOrderStatus(entryStopOrder, order);
+			low.adjustOrderStatus(entryStopOrder, order);
 			order.fireChangedEvent();
 			expect(order.hasChanged()).andReturn(true);
 			order.resetChanges();
@@ -559,12 +558,12 @@ public class AssemblerMidLvlTest {
 				new Price(PriceUnit.MONEY, 1.0d),
 				new Price(PriceUnit.PERCENT, 0.5d),
 				219L, time, null, OrderType.STOP_LIMIT);
-		expect(low.getAccountByStopOrderCache(entryStopOrder)).andReturn(null);
-		expect(low.getSecurityDescriptorByStopOrderCache(entryStopOrder))
+		expect(low.getAccount(entryStopOrder)).andReturn(null);
+		expect(low.getSecurityDescriptor(entryStopOrder))
 			.andReturn(descr);
 		control.replay();
 		
-		assertFalse(middle.createNewStopOrder(entryStopOrder));
+		middle.createNewStopOrder(entryStopOrder);
 		
 		control.verify();
 	}
@@ -578,13 +577,11 @@ public class AssemblerMidLvlTest {
 				new Price(PriceUnit.MONEY, 1.0d),
 				new Price(PriceUnit.PERCENT, 0.5d),
 				219L, time, null, OrderType.STOP_LIMIT);
-		expect(low.getAccountByStopOrderCache(entryStopOrder))
-			.andReturn(account);
-		expect(low.getSecurityDescriptorByStopOrderCache(entryStopOrder))
-			.andReturn(null);
+		expect(low.getAccount(entryStopOrder)).andReturn(account);
+		expect(low.getSecurityDescriptor(entryStopOrder)).andReturn(null);
 		control.replay();
 		
-		assertFalse(middle.createNewStopOrder(entryStopOrder));
+		middle.createNewStopOrder(entryStopOrder);
 		
 		control.verify();
 	}
@@ -598,30 +595,19 @@ public class AssemblerMidLvlTest {
 				new Price(PriceUnit.MONEY, 1.0d),
 				new Price(PriceUnit.PERCENT, 0.5d),
 				219L, time, null, OrderType.TPSL);
-		expect(low.getAccountByStopOrderCache(entryStopOrder))
-			.andReturn(account);
-		expect(low.getSecurityDescriptorByStopOrderCache(entryStopOrder))
-			.andReturn(descr);
+		expect(low.getAccount(entryStopOrder)).andReturn(account);
+		expect(low.getSecurityDescriptor(entryStopOrder)).andReturn(descr);
 		expect(terminal.createStopOrder()).andReturn(order);
 		order.setAccount(account);
-		order.setDirection(OrderDirection.SELL);
-		order.setOffset(new Price(PriceUnit.MONEY, 1.0d));
-		order.setPrice(200.0d);
-		order.setQty(2000L);
 		order.setSecurityDescriptor(descr);
-		order.setSpread(new Price(PriceUnit.PERCENT, 0.5d));
-		order.setStopLimitPrice(198.0d);
-		order.setTakeProfitPrice(210.0d);
-		order.setTime(time);
-		order.setTransactionId(872L);
-		order.setType(OrderType.TPSL);
-		low.adjustStopOrderStatus(entryStopOrder, order);
-		terminal.registerStopOrder(120L, order);
-		order.setAvailable(true);
-		terminal.fireStopOrderAvailableEvent(order);		
+		low.initNewOrder(same(entryStopOrder), same(order));
+		order.setStatus(OrderStatus.ACTIVE);
+		low.fireOrderChanges(order);
+		low.adjustOrderStatus(entryStopOrder, order);
+		low.fireOrderChanges(order);
 		control.replay();
 		
-		assertTrue(middle.createNewStopOrder(entryStopOrder));
+		middle.createNewStopOrder(entryStopOrder);
 		
 		control.verify();
 	}

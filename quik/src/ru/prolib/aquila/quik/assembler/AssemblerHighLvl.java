@@ -53,8 +53,14 @@ class AssemblerHighLvl implements Starter {
 	
 	/**
 	 * Согласовать заявки.
+	 * <p>
+	 * @throws OrderAlreadyExistsException ошибка регистрации заявки.
+	 * В данном случае это исключение свидетельствует о том, что в промежуток
+	 * времени после определения необходимости создать экземпляр новой
+	 * заявки, создания заявки и попыткой ее регистрации кто-то параллельно
+	 * проделал аналогичную работу по заявке с аналогичным ключевым признаком.
 	 */
-	public void adjustOrders() {
+	public void adjustOrders() throws OrderAlreadyExistsException {
 		logger.debug("Adjust orders");
 		for ( Order o : terminal.getOrders() ) {
 			middle.checkIfOrderRemoved((EditableOrder) o);
@@ -72,8 +78,15 @@ class AssemblerHighLvl implements Starter {
 	
 	/**
 	 * Согласовать стоп-заявки.
+	 * <p>
+	 * @throws OrderAlreadyExistsException ошибка регистрации стоп-заявки.
+	 * В данном случае это исключение свидетельствует о том, что в промежуток
+	 * времени после определения необходимости создать экземпляр новой
+	 * стоп-заявки, создания стоп-заявки и попыткой ее регистрации кто-то
+	 * параллельно проделал аналогичную работу по стоп-заявке с аналогичным
+	 * ключевым признаком.
 	 */
-	public void adjustStopOrders() {
+	public void adjustStopOrders() throws OrderAlreadyExistsException {
 		logger.debug("Adjust stop-orders");
 		for ( Order o : terminal.getStopOrders() ) {
 			middle.checkIfStopOrderRemoved((EditableOrder) o);

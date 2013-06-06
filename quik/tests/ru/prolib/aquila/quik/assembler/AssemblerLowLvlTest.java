@@ -62,94 +62,94 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void getAccountByOrderCache_NotRegistered() throws Exception {
+	public void getAccount_ByOrdCache_NotRegistered() throws Exception {
 		expect(cache.isAccountRegistered(eq("3644"), eq("LX01")))
 			.andReturn(false);
 		control.replay();
 		
-		assertNull(low.getAccountByOrderCache(orderEntry));
+		assertNull(low.getAccount(orderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void getAccountByOrderCache_PortfolioNA() throws Exception {
+	public void getAccount_ByOrdCache_PortfolioNA() throws Exception {
 		expect(cache.isAccountRegistered(eq("3644"), eq("LX01")))
 			.andReturn(true);
 		expect(cache.getAccount(eq("3644"), eq("LX01"))).andReturn(account);
 		expect(terminal.isPortfolioAvailable(eq(account))).andReturn(false);
 		control.replay();
 		
-		assertNull(low.getAccountByOrderCache(orderEntry));
+		assertNull(low.getAccount(orderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void getAccountByOrderCache() throws Exception {
+	public void getAccount_ByOrdCache_Exists() throws Exception {
 		expect(cache.isAccountRegistered(eq("3644"), eq("LX01")))
 			.andReturn(true);
 		expect(cache.getAccount(eq("3644"), eq("LX01"))).andReturn(account);
 		expect(terminal.isPortfolioAvailable(eq(account))).andReturn(true);
 		control.replay();
 		
-		assertSame(account, low.getAccountByOrderCache(orderEntry));
+		assertSame(account, low.getAccount(orderEntry));
 		
 		control.verify();
 	}
 
 	@Test
-	public void getAccountByStopOrderCache_NotRegistered() throws Exception {
+	public void getAccount_ByStopOrderCache_NotRegistered() throws Exception {
 		expect(cache.isAccountRegistered(eq("3644"), eq("LX01")))
 			.andReturn(false);
 		control.replay();
 		
-		assertNull(low.getAccountByStopOrderCache(stopOrderEntry));
+		assertNull(low.getAccount(stopOrderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void getAccountByStopOrderCache_PortfolioNA() throws Exception {
+	public void getAccount_ByStopOrderCache_PortfolioNA() throws Exception {
 		expect(cache.isAccountRegistered(eq("3644"), eq("LX01")))
 			.andReturn(true);
 		expect(cache.getAccount(eq("3644"), eq("LX01"))).andReturn(account);
 		expect(terminal.isPortfolioAvailable(eq(account))).andReturn(false);
 		control.replay();
 		
-		assertNull(low.getAccountByStopOrderCache(stopOrderEntry));
+		assertNull(low.getAccount(stopOrderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void getAccountByStopOrderCache() throws Exception {
+	public void getAccount_ByStopOrderCache_Exists() throws Exception {
 		expect(cache.isAccountRegistered(eq("3644"), eq("LX01")))
 			.andReturn(true);
 		expect(cache.getAccount(eq("3644"), eq("LX01"))).andReturn(account);
 		expect(terminal.isPortfolioAvailable(eq(account))).andReturn(true);
 		control.replay();
 		
-		assertSame(account, low.getAccountByStopOrderCache(stopOrderEntry));
+		assertSame(account, low.getAccount(stopOrderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetSecurityDescriptorByOrderCache_NotRegistered()
+	public void testGetSecurityDescriptor_ByOrdCache_NotRegistered()
 		throws Exception
 	{
 		expect(cache.isSecurityDescriptorRegistered(eq("SBER"), eq("EQBR")))
 			.andReturn(false);
 		control.replay();
 		
-		assertNull(low.getSecurityDescriptorByOrderCache(orderEntry));
+		assertNull(low.getSecurityDescriptor(orderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetSecurityDescriptorByOrderCache_SecurityNA()
+	public void testGetSecurityDescriptor_ByOrdCache_SecurityNA()
 		throws Exception
 	{
 		expect(cache.isSecurityDescriptorRegistered(eq("SBER"), eq("EQBR")))
@@ -159,13 +159,15 @@ public class AssemblerLowLvlTest {
 		expect(terminal.isSecurityExists(eq(descr))).andReturn(false);
 		control.replay();
 		
-		assertNull(low.getSecurityDescriptorByOrderCache(orderEntry));
+		assertNull(low.getSecurityDescriptor(orderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetSecurityDescriptorByOrderCache() throws Exception {
+	public void testGetSecurityDescriptor_ByOrdCache_Exists()
+		throws Exception
+	{
 		expect(cache.isSecurityDescriptorRegistered(eq("SBER"), eq("EQBR")))
 			.andReturn(true);
 		expect(cache.getSecurityDescriptorByCodeAndClass(eq("SBER"),eq("EQBR")))
@@ -173,26 +175,26 @@ public class AssemblerLowLvlTest {
 		expect(terminal.isSecurityExists(eq(descr))).andReturn(true);
 		control.replay();
 		
-		assertSame(descr, low.getSecurityDescriptorByOrderCache(orderEntry));
+		assertSame(descr, low.getSecurityDescriptor(orderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetSecurityDescriptorByStopOrderCache_NotRegistered()
+	public void testGetSecurityDescriptor_ByStopOrderCache_NotRegistered()
 		throws Exception
 	{
 		expect(cache.isSecurityDescriptorRegistered(eq("SBER"), eq("EQBR")))
 			.andReturn(false);
 		control.replay();
 		
-		assertNull(low.getSecurityDescriptorByStopOrderCache(stopOrderEntry));
+		assertNull(low.getSecurityDescriptor(stopOrderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetSecurityDescriptorByStopOrderCache_SecurityNA()
+	public void testGetSecurityDescriptor_ByStopOrderCache_SecurityNA()
 		throws Exception
 	{
 		expect(cache.isSecurityDescriptorRegistered(eq("SBER"), eq("EQBR")))
@@ -202,13 +204,15 @@ public class AssemblerLowLvlTest {
 		expect(terminal.isSecurityExists(eq(descr))).andReturn(false);
 		control.replay();
 		
-		assertNull(low.getSecurityDescriptorByStopOrderCache(stopOrderEntry));
+		assertNull(low.getSecurityDescriptor(stopOrderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetSecurityDescriptorByStopOrderCache() throws Exception {
+	public void testGetSecurityDescriptor_ByStopOrderCache_Exists()
+		throws Exception
+	{
 		expect(cache.isSecurityDescriptorRegistered(eq("SBER"), eq("EQBR")))
 			.andReturn(true);
 		expect(cache.getSecurityDescriptorByCodeAndClass(eq("SBER"),eq("EQBR")))
@@ -217,13 +221,15 @@ public class AssemblerLowLvlTest {
 		control.replay();
 		
 		assertSame(descr,
-				low.getSecurityDescriptorByStopOrderCache(stopOrderEntry));
+				low.getSecurityDescriptor(stopOrderEntry));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_SkipFinalOrderStatus() throws Exception {
+	public void testAdjustOrderStatus_ByOrdCache_SkipFinalOrderStatus()
+		throws Exception
+	{
 		OrderStatus skip[] = {
 				OrderStatus.CANCELLED,
 				OrderStatus.FAILED,
@@ -241,7 +247,7 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_EntryFilledAndRestAdjusted()
+	public void testAdjustOrderStatus_ByOrdCache_EntryFilledAndRestAdjusted()
 		throws Exception
 	{
 		OrderStatus proc[] = {
@@ -266,7 +272,7 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_EntryFilledAndRestUnadjusted()
+	public void testAdjustOrderStatus_ByOrdCache_EntryFilledAndRestUnadjusted()
 		throws Exception
 	{
 		OrderStatus proc[] = {
@@ -287,7 +293,7 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_CancelledAndRestAdjusted()
+	public void testAdjustOrderStatus_ByOrdCache_CancelledAndRestAdjusted()
 		throws Exception
 	{
 		OrderStatus proc[] = {
@@ -313,7 +319,7 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_CancelledAndRestUnadjusted()
+	public void testAdjustOrderStatus_ByOrdCache_CancelledAndRestUnadjusted()
 		throws Exception
 	{
 		OrderStatus proc[] = {
@@ -335,7 +341,9 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_ActivatePending() throws Exception {
+	public void testAdjustOrderStatus_ByOrdCache_ActivatePending()
+		throws Exception
+	{
 		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
 		expect(orderEntry.getStatus()).andReturn(OrderStatus.ACTIVE);
 		order.setStatus(OrderStatus.ACTIVE);
@@ -347,7 +355,9 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_SkipActive() throws Exception {
+	public void testAdjustOrderStatus_ByOrdCache_SkipActive()
+		throws Exception
+	{
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		expect(orderEntry.getStatus()).andReturn(OrderStatus.ACTIVE);
 		control.replay();
@@ -359,32 +369,33 @@ public class AssemblerLowLvlTest {
 	
 	
 	@Test
-	public void testAdjustStopOrderStatus_SkipAll() throws Exception {
-		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.ACTIVE);
-		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
-		control.replay();
-		
-		low.adjustStopOrderStatus(stopOrderEntry, order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustStopOrderStatus_SetActiveForPending()
+	public void testAdjustOrderStatus_ByStopOrdCache_SkipActive()
 		throws Exception
 	{
 		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.ACTIVE);
-		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
-		order.setStatus(OrderStatus.ACTIVE);
 		control.replay();
 		
-		low.adjustStopOrderStatus(stopOrderEntry, order);
+		low.adjustOrderStatus(stopOrderEntry, order);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testAdjustStopOrderStatus_Cancelled() throws Exception {
+	public void testAdjustOrderStatus_ByStopOrdCache_SkipPending()
+		throws Exception
+	{
+		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.ACTIVE);
+		control.replay();
+		
+		low.adjustOrderStatus(stopOrderEntry, order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testAdjustOrderStatus_ByStopOrdCache_Cancelled()
+		throws Exception
+	{
 		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.CANCELLED);
 		order.setStatus(OrderStatus.CANCELLED);
 		Date time = new Date();
@@ -392,25 +403,29 @@ public class AssemblerLowLvlTest {
 		order.setLastChangeTime(time);
 		control.replay();
 		
-		low.adjustStopOrderStatus(stopOrderEntry, order);
+		low.adjustOrderStatus(stopOrderEntry, order);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testAdjustStopOrderStatus_FilledNotAdjusted() throws Exception {
+	public void testAdjustOrderStatus_ByStopOrdCache_FilledNotAdjusted()
+		throws Exception
+	{
 		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.FILLED);
 		expect(stopOrderEntry.getLinkedOrderId()).andReturn(215L);
 		expect(terminal.isOrderExists(215L)).andReturn(false);
 		control.replay();
 		
-		low.adjustStopOrderStatus(stopOrderEntry, order);
+		low.adjustOrderStatus(stopOrderEntry, order);
 		
 		control.verify();
 	}
 
 	@Test
-	public void testAdjustStopOrderStatus_Filled() throws Exception {
+	public void testAdjustOrderStatus_ByStopOrdCache_Filled()
+		throws Exception
+	{
 		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.FILLED);
 		expect(stopOrderEntry.getLinkedOrderId()).andReturn(215L);
 		expect(terminal.isOrderExists(215L)).andReturn(true);
@@ -421,7 +436,7 @@ public class AssemblerLowLvlTest {
 		order.setLastChangeTime(time);
 		control.replay();
 		
-		low.adjustStopOrderStatus(stopOrderEntry, order);
+		low.adjustOrderStatus(stopOrderEntry, order);
 		
 		control.verify();
 	}
@@ -539,7 +554,7 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testInitNewOrder() throws Exception {
+	public void testInitNewOrder_ByOrdCache() throws Exception {
 		Date time = new Date();
 		OrderCache entryOrder = new OrderCache(360L, 800L, OrderStatus.ACTIVE,
 				"SBER", "EQBR", "LX01", "3644", OrderDirection.BUY,
@@ -614,6 +629,36 @@ public class AssemblerLowLvlTest {
 		
 		control.verify();
 		assertNull(low.getStartTime());
+	}
+	
+	@Test
+	public void testInitNewOrder_ByStopOrdCache() throws Exception {
+		Date time = new Date();
+		stopOrderEntry = new StopOrderCache(120L, 872L, OrderStatus.CANCELLED,
+				"SBER", "EQBR", "LX01", "3644", OrderDirection.SELL,
+				2000L, 200.0d, 198.0d, 210.0d,
+				new Price(PriceUnit.MONEY, 1.0d),
+				new Price(PriceUnit.PERCENT, 0.5d),
+				219L, time, null, OrderType.TPSL);
+		order.setDirection(eq(OrderDirection.SELL));
+		order.setOffset(eq(new Price(PriceUnit.MONEY, 1.0d)));
+		order.setPrice(eq(200.0d));
+		order.setQty(eq(2000L));
+		order.setSpread(eq(new Price(PriceUnit.PERCENT, 0.5d)));
+		order.setStopLimitPrice(eq(198.0d));
+		order.setTakeProfitPrice(eq(210.0d));
+		order.setTime(same(time));
+		order.setTransactionId(eq(872L));
+		order.setType(eq(OrderType.TPSL));
+		order.setAvailable(eq(true));
+		order.resetChanges();
+		terminal.registerStopOrder(eq(120L), same(order));
+		terminal.fireStopOrderAvailableEvent(same(order));
+		control.replay();
+		
+		low.initNewOrder(stopOrderEntry, order);
+
+		control.verify();;
 	}
 
 }

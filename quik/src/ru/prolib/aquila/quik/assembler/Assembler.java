@@ -87,23 +87,50 @@ public class Assembler implements Starter, EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		//logger.debug("Assembling initiated by: {}", event);
 		// TODO: Насчет синхронизации тут надо думать.
+		// Блокировка кэша в данной реализации особых результатов не дает,
+		// так как обновление кэша выполняется с блокировкой соответствующего
+		// типу объектов суб-кэша.
 		synchronized ( terminal ) {
 			synchronized ( cache ) {
 				processEvent(event);
 			}
 		}
-		//logger.debug("Assembling finished");
 	}
 	
 	private void processEvent(Event event) {
 		// Если будет тормозить, то можно разбить этапы по типам событий.
-		high.adjustSecurities();
-		high.adjustPortfolios();
-		high.adjustOrders();
-		high.adjustStopOrders();
-		high.adjustPositions();
+		try {
+			high.adjustSecurities();
+			high.adjustPortfolios();
+			high.adjustOrders();
+			high.adjustStopOrders();
+			high.adjustPositions();
+		} catch ( OrderAlreadyExistsException e ) {
+			// Здесь это исключение свидетельствует о том, что блокировка по
+			// терминалу не работает должным образом или не дает эффекта
+			// блокировки хранилища заявок и стоп-заявок от внесения изменений.
+			// В промежуток времени между определением необходимости создать
+			// новую заявку (выполнена уровнем ниже) и непосредственно
+			// попыткой регистрации заявки в соответствующем хранилище, другой
+			// участок кода выполнил регистрацию заявки с точно таким же
+			// ключевым идентификатором, то есть выиграл конкурентную борьбу за
+			// доступ к соответствующему хранилищу заявок. Это критическая
+			// ситуация, которая показывает серьезный изъян в архитектуре
+			// терминала. Работать дальше не имеет смысла.
+			error_RegOrderIntermedChanges(e);
+			terminal.firePanicEvent(2, "Multithreading related issue.");
+		}
+	}
+	
+	private void error_RegOrderIntermedChanges(OrderAlreadyExistsException e) {
+		err("Serious synchronization error. Terminal locking may be broken.");
+		err("Someone made changes to orders during assembling new order.");
+		logger.error("Error register order.", e);
+	}
+	
+	private void err(String msg) {
+		logger.error(msg);
 	}
 
 }

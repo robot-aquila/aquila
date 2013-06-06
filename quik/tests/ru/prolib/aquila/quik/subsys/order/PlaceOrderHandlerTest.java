@@ -98,7 +98,7 @@ public class PlaceOrderHandlerTest {
 
 	@Test
 	public void testOnEvent_Ok() throws Exception {
-		expect(orders.getPendingOrder(100L)).andReturn(order);
+		expect(orders.getPendingOrder(1L)).andReturn(order);
 		expect(orders.movePendingOrder(1L, 2L)).andReturn(order);
 		order.setAvailable(eq(true));
 		orders.fireOrderAvailableEvent(same(order));
