@@ -354,5 +354,33 @@ public class TradeReportImplTest {
 		report.addTrade(createTrade(descr2, time2, SELL, 5L, 4d, 12d));
 		assertFalse(report.equals(copy));
 	}
+	
+	@Test
+	public void testGetProfit() throws Exception {
+		Object fix[][] = {
+			// type, 			  entr.vol, exit vol,  profit, profit perc.
+			{ PositionType.LONG,  83128.15d,      null,     null,	  null },
+			{ PositionType.LONG,  83128.15d, 82942.05d, -186.10d, -0.2239d },
+			{ PositionType.SHORT, 82284.60d,      null,	   null,	  null },
+			{ PositionType.SHORT, 82284.60d, 82419.42d, -134.82d, -0.1638d },
+			{ PositionType.SHORT, 82090.59d, 81922.95d,  167.64d,  0.2042d },
+			{ PositionType.LONG,  82335.60d, 82942.05d,  606.45d,  0.7366d },
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			TradeReport report = new TradeReportImpl(descr1,
+					(PositionType) fix[i][0], time1, null,
+					1L, null, 0d, null, (Double) fix[i][1], (Double) fix[i][2]);
+			if ( fix[i][3] == null ) {
+				assertNull(msg, report.getProfit());
+				assertNull(msg, report.getProfitPerc());
+			} else {
+				double p = (Double) fix[i][3];
+				double pp = (Double) fix[i][4];
+				assertEquals(msg, p, report.getProfit(), 0.01d);
+				assertEquals(msg, pp, report.getProfitPerc(), 0.00001d);
+			}
+		}
+	}
 
 }

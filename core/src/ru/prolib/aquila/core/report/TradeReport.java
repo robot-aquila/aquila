@@ -96,5 +96,21 @@ public interface TradeReport extends Comparable<TradeReport>, Cloneable {
 	 * @return копия объекта
 	 */
 	public TradeReport clone();
+	
+	/**
+	 * Получить прибыль или убыток в денежном выражении.
+	 * <p>
+	 * @return положительное - доход, отрицательное - убыток в денежном
+	 * выражении или null, если трейд не закрыт
+	 */
+	public Double getProfit();
+	
+	/**
+	 * Получить прибыль или убыток в процентном выражении.
+	 * <p>
+	 * @return положительное - доход, отрицательное - убыток в процентном
+	 * выражении или null, если трейд не закрыт
+	 */
+	public Double getProfitPerc();
 
 }

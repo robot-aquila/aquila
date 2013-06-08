@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.report;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.commons.lang3.builder.*;
@@ -240,7 +242,7 @@ public class TradeReportImpl implements EditableTradeReport {
 	}
 
 	@Override
-	public int compareTo(TradeReport o) {
+	public synchronized int compareTo(TradeReport o) {
 		if ( o == null ) {
 			return 1;
 		}
@@ -251,10 +253,39 @@ public class TradeReportImpl implements EditableTradeReport {
 	}
 	
 	@Override
-	public TradeReport clone() {
+	public synchronized TradeReport clone() {
 		return new TradeReportImpl(descr, type, enterTime, exitTime,
 				enterQty, exitQty, sumByEnterPrice, sumByExitPrice,
 				enterVol, exitVol);
+	}
+
+	@Override
+	public synchronized Double getProfit() {
+		if ( exitVol == null ) {
+			return null;
+		} else {
+			Double profit = round4(exitVol - enterVol);
+			return type == PositionType.SHORT ? -profit : profit;
+		}
+	}
+
+	@Override
+	public synchronized Double getProfitPerc() {
+		if ( exitVol == null ) {
+			return null;
+		} else {
+			return round4(getProfit() / enterVol * 100d);
+		}
+	}
+	
+	private Double round4(Double value) {
+		if ( value == null ) {
+			return null;
+		} else {
+			return new BigDecimal(value)
+				.setScale(4, RoundingMode.HALF_UP)
+				.doubleValue();
+		}
 	}
 
 }
