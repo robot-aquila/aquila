@@ -180,7 +180,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * <p>
 	 * @return таймер
 	 */
-	public Timer getTimer() {
+	final public synchronized Timer getTimer() {
 		return timer;
 	}
 	
@@ -189,7 +189,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * <p>
 	 * @return контроллер терминала
 	 */
-	public TerminalController getTerminalController() {
+	final public synchronized TerminalController getTerminalController() {
 		return controller;
 	}
 	
@@ -198,93 +198,95 @@ public class TerminalImpl implements EditableTerminal {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	final public synchronized EventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 	
 	@Override
-	public synchronized OrderProcessor getOrderProcessorInstance() {
+	final public synchronized OrderProcessor getOrderProcessorInstance() {
 		return orderProcessor;
 	}
 	
 	@Override
-	public synchronized
+	final public synchronized
 		void setOrderProcessorInstance(OrderProcessor processor)
 	{
 		this.orderProcessor = processor;
 	}
 	
 	@Override
-	public EditableSecurities getSecuritiesInstance() {
+	final public synchronized EditableSecurities getSecuritiesInstance() {
 		return securities;
 	}
 	
 	@Override
-	public EditablePortfolios getPortfoliosInstance() {
+	final public synchronized EditablePortfolios getPortfoliosInstance() {
 		return portfolios;
 	}
 	
 	@Override
-	public Starter getStarter() {
+	final public synchronized Starter getStarter() {
 		return starter;
 	}
 	
 	@Override
-	public EditableOrders getOrdersInstance() {
+	final public synchronized EditableOrders getOrdersInstance() {
 		return orders;
 	}
 	
 	@Override
-	public EditableOrders getStopOrdersInstance() {
+	final public synchronized EditableOrders getStopOrdersInstance() {
 		return stopOrders;
 	}
 
 	@Override
-	final public List<Security> getSecurities() {
+	final public synchronized List<Security> getSecurities() {
 		return securities.getSecurities();
 	}
 
 	@Override
-	final public Security getSecurity(SecurityDescriptor descr)
+	final public synchronized Security getSecurity(SecurityDescriptor descr)
 			throws SecurityException
 	{
 		return securities.getSecurity(descr);
 	}
 
 	@Override
-	final public boolean isSecurityExists(SecurityDescriptor descr) {
+	final public synchronized
+		boolean isSecurityExists(SecurityDescriptor descr)
+	{
 		return securities.isSecurityExists(descr);
 	}
 
 	@Override
-	final public EventType OnSecurityAvailable() {
+	final public synchronized EventType OnSecurityAvailable() {
 		return securities.OnSecurityAvailable();
 	}
 
 	@Override
-	final public List<Portfolio> getPortfolios() {
+	final public synchronized List<Portfolio> getPortfolios() {
 		return portfolios.getPortfolios();
 	}
 
 	@Override
-	final public Portfolio getPortfolio(Account account)
+	final public synchronized Portfolio getPortfolio(Account account)
 			throws PortfolioException
 	{
 		return portfolios.getPortfolio(account);
 	}
 
 	@Override
-	public boolean isPortfolioAvailable(Account account) {
+	final public synchronized boolean isPortfolioAvailable(Account account) {
 		return portfolios.isPortfolioAvailable(account);
 	}
 
 	@Override
-	public EventType OnPortfolioAvailable() {
+	final public synchronized EventType OnPortfolioAvailable() {
 		return portfolios.OnPortfolioAvailable();
 	}
 
 	@Override
-	public synchronized void start() throws StarterException {
+	final public synchronized void start() throws StarterException {
 		if ( state == TerminalState.STOPPED ) {
 			setTerminalState(TerminalState.STARTING);
 			logger.debug("Run start sequence");
@@ -299,7 +301,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public synchronized void stop() throws StarterException {
+	final public synchronized void stop() throws StarterException {
 		if (state == TerminalState.STARTED||state == TerminalState.CONNECTED) {
 			setTerminalState(TerminalState.STOPPING);
 			logger.debug("Run stop sequence");
@@ -314,295 +316,309 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Portfolio getDefaultPortfolio() throws PortfolioException {
+	final public synchronized Portfolio getDefaultPortfolio()
+		throws PortfolioException
+	{
 		return portfolios.getDefaultPortfolio();
 	}
 
 	@Override
-	public boolean isOrderExists(long id) {
+	final public synchronized boolean isOrderExists(long id) {
 		return orders.isOrderExists(id);
 	}
 
 	@Override
-	public List<Order> getOrders() {
+	final public synchronized List<Order> getOrders() {
 		return orders.getOrders();
 	}
 
 	@Override
-	public Order getOrder(long id) throws OrderException {
+	final public synchronized Order getOrder(long id) throws OrderException {
 		return orders.getOrder(id);
 	}
 
 	@Override
-	public EventType OnOrderAvailable() {
+	final public synchronized EventType OnOrderAvailable() {
 		return orders.OnOrderAvailable();
 	}
 
 	@Override
-	public boolean isStopOrderExists(long id) {
+	final public synchronized boolean isStopOrderExists(long id) {
 		return stopOrders.isOrderExists(id);
 	}
 
 	@Override
-	public List<Order> getStopOrders() {
+	final public synchronized List<Order> getStopOrders() {
 		return stopOrders.getOrders();
 	}
 
 	@Override
-	public Order getStopOrder(long id) throws OrderException {
+	final public synchronized Order getStopOrder(long id)
+		throws OrderException
+	{
 		return stopOrders.getOrder(id);
 	}
 
 	@Override
-	public EventType OnStopOrderAvailable() {
+	final public synchronized EventType OnStopOrderAvailable() {
 		return stopOrders.OnOrderAvailable();
 	}
 
 	@Override
-	public void placeOrder(Order order) throws OrderException {
+	final public synchronized void placeOrder(Order order)
+		throws OrderException
+	{
 		orderProcessor.placeOrder(order);
 	}
 
 	@Override
-	public void cancelOrder(Order order) throws OrderException {
+	final public synchronized void cancelOrder(Order order)
+		throws OrderException
+	{
 		orderProcessor.cancelOrder(order);
 	}
 
 	@Override
-	public int getOrdersCount() {
+	final public synchronized int getOrdersCount() {
 		return orders.getOrdersCount();
 	}
 
 	@Override
-	public EventType OnOrderCancelFailed() {
+	final public synchronized EventType OnOrderCancelFailed() {
 		return orders.OnOrderCancelFailed();
 	}
 
 	@Override
-	public EventType OnOrderCancelled() {
+	final public synchronized EventType OnOrderCancelled() {
 		return orders.OnOrderCancelled();
 	}
 
 	@Override
-	public EventType OnOrderChanged() {
+	final public synchronized EventType OnOrderChanged() {
 		return orders.OnOrderChanged();
 	}
 
 	@Override
-	public EventType OnOrderDone() {
+	final public synchronized EventType OnOrderDone() {
 		return orders.OnOrderDone();
 	}
 
 	@Override
-	public EventType OnOrderFailed() {
+	final public synchronized EventType OnOrderFailed() {
 		return orders.OnOrderFailed();
 	}
 
 	@Override
-	public EventType OnOrderFilled() {
+	final public synchronized EventType OnOrderFilled() {
 		return orders.OnOrderFilled();
 	}
 
 	@Override
-	public EventType OnOrderPartiallyFilled() {
+	final public synchronized EventType OnOrderPartiallyFilled() {
 		return orders.OnOrderPartiallyFilled();
 	}
 
 	@Override
-	public EventType OnOrderRegistered() {
+	final public synchronized EventType OnOrderRegistered() {
 		return orders.OnOrderRegistered();
 	}
 
 	@Override
-	public EventType OnOrderRegisterFailed() {
+	final public synchronized EventType OnOrderRegisterFailed() {
 		return orders.OnOrderRegisterFailed();
 	}
 
 	@Override
-	public EventType OnSecurityChanged() {
+	final public synchronized EventType OnSecurityChanged() {
 		return securities.OnSecurityChanged();
 	}
 
 	@Override
-	public EventType OnSecurityTrade() {
+	final public synchronized EventType OnSecurityTrade() {
 		return securities.OnSecurityTrade();
 	}
 
 	@Override
-	public EventType OnPortfolioChanged() {
+	final public synchronized EventType OnPortfolioChanged() {
 		return portfolios.OnPortfolioChanged();
 	}
 
 	@Override
-	public EventType OnPositionAvailable() {
+	final public synchronized EventType OnPositionAvailable() {
 		return portfolios.OnPositionAvailable();
 	}
 
 	@Override
-	public EventType OnPositionChanged() {
+	final public synchronized EventType OnPositionChanged() {
 		return portfolios.OnPositionChanged();
 	}
 
 	@Override
-	public int getSecuritiesCount() {
+	final public synchronized int getSecuritiesCount() {
 		return securities.getSecuritiesCount();
 	}
 
 	@Override
-	public int getPortfoliosCount() {
+	final public synchronized int getPortfoliosCount() {
 		return portfolios.getPortfoliosCount();
 	}
 
 	@Override
-	public int getStopOrdersCount() {
+	final public synchronized int getStopOrdersCount() {
 		return stopOrders.getOrdersCount();
 	}
 
 	@Override
-	public EventType OnStopOrderChanged() {
+	final public synchronized EventType OnStopOrderChanged() {
 		return stopOrders.OnOrderChanged();
 	}
 
 	@Override
-	public EventType OnStopOrderCancelFailed() {
+	final public synchronized EventType OnStopOrderCancelFailed() {
 		return stopOrders.OnOrderCancelFailed();
 	}
 
 	@Override
-	public EventType OnStopOrderCancelled() {
+	final public synchronized EventType OnStopOrderCancelled() {
 		return stopOrders.OnOrderCancelled();
 	}
 
 	@Override
-	public EventType OnStopOrderDone() {
+	final public synchronized EventType OnStopOrderDone() {
 		return stopOrders.OnOrderDone();
 	}
 
 	@Override
-	public EventType OnStopOrderFailed() {
+	final public synchronized EventType OnStopOrderFailed() {
 		return stopOrders.OnOrderFailed();
 	}
 
 	@Override
-	public EventType OnStopOrderRegistered() {
+	final public synchronized EventType OnStopOrderRegistered() {
 		return stopOrders.OnOrderRegistered();
 	}
 
 	@Override
-	public EventType OnStopOrderRegisterFailed() {
+	final public synchronized EventType OnStopOrderRegisterFailed() {
 		return stopOrders.OnOrderRegisterFailed();
 	}
 
 	@Override
-	public void fireOrderAvailableEvent(Order order) {
+	final public synchronized void fireOrderAvailableEvent(Order order) {
 		orders.fireOrderAvailableEvent(order);
 	}
 
 	@Override
-	public EditableOrder getEditableOrder(long id)
+	final public synchronized EditableOrder getEditableOrder(long id)
 		throws OrderNotExistsException
 	{
 		return orders.getEditableOrder(id);
 	}
 
 	@Override
-	public void registerOrder(long id, EditableOrder order)
+	final public synchronized void registerOrder(long id, EditableOrder order)
 		throws OrderAlreadyExistsException
 	{
 		orders.registerOrder(id, order);
 	}
 
 	@Override
-	public void purgeOrder(long id) {
+	final public synchronized void purgeOrder(long id) {
 		orders.purgeOrder(id);
 	}
 
 	@Override
-	public boolean isPendingOrder(long transId) {
+	final public synchronized boolean isPendingOrder(long transId) {
 		return orders.isPendingOrder(transId);
 	}
 
 	@Override
-	public void registerPendingOrder(long transId, EditableOrder order)
-		throws OrderAlreadyExistsException
+	final public synchronized
+		void registerPendingOrder(long transId, EditableOrder order)
+			throws OrderAlreadyExistsException
 	{
 		orders.registerPendingOrder(transId, order);
 	}
 
 	@Override
-	public void purgePendingOrder(long transId) {
+	final public synchronized void purgePendingOrder(long transId) {
 		orders.purgePendingOrder(transId);
 	}
 
 	@Override
-	public EditableOrder getPendingOrder(long transId)
+	final public synchronized EditableOrder getPendingOrder(long transId)
 		throws OrderNotExistsException
 	{
 		return orders.getPendingOrder(transId);
 	}
 
 	@Override
-	public void fireStopOrderAvailableEvent(Order order) {
+	final public synchronized void fireStopOrderAvailableEvent(Order order) {
 		stopOrders.fireOrderAvailableEvent(order);
 	}
 
 	@Override
-	public EditableOrder getEditableStopOrder(long id)
+	final public synchronized EditableOrder getEditableStopOrder(long id)
 		throws OrderNotExistsException
 	{
 		return stopOrders.getEditableOrder(id);
 	}
 
 	@Override
-	public void registerStopOrder(long id, EditableOrder order)
-		throws OrderAlreadyExistsException
+	final public synchronized
+		void registerStopOrder(long id, EditableOrder order)
+			throws OrderAlreadyExistsException
 	{
 		stopOrders.registerOrder(id, order);
 	}
 
 	@Override
-	public void purgeStopOrder(long id) {
+	final public synchronized void purgeStopOrder(long id) {
 		stopOrders.purgeOrder(id);
 	}
 
 	@Override
-	public boolean isPendingStopOrder(long transId) {
+	final public synchronized boolean isPendingStopOrder(long transId) {
 		return stopOrders.isPendingOrder(transId);
 	}
 
 	@Override
-	public void registerPendingStopOrder(long transId, EditableOrder order)
-		throws OrderAlreadyExistsException
+	final public synchronized
+		void registerPendingStopOrder(long transId, EditableOrder order)
+			throws OrderAlreadyExistsException
 	{
 		stopOrders.registerPendingOrder(transId, order);
 	}
 
 	@Override
-	public void purgePendingStopOrder(long transId) {
+	final public synchronized void purgePendingStopOrder(long transId) {
 		stopOrders.purgePendingOrder(transId);
 	}
 
 	@Override
-	public EditableOrder getPendingStopOrder(long transId)
+	final public synchronized EditableOrder getPendingStopOrder(long transId)
 		throws OrderNotExistsException
 	{
 		return stopOrders.getPendingOrder(transId);
 	}
 
 	@Override
-	public void firePortfolioAvailableEvent(Portfolio portfolio) {
+	final public synchronized
+		void firePortfolioAvailableEvent(Portfolio portfolio)
+	{
 		portfolios.firePortfolioAvailableEvent(portfolio);
 	}
 
 	@Override
-	public EditablePortfolio getEditablePortfolio(Account account)
-		throws PortfolioException
+	final public synchronized
+		EditablePortfolio getEditablePortfolio(Account account)
+			throws PortfolioException
 	{
 		return portfolios.getEditablePortfolio(account);
 	}
 
 	@Override
-	public EditablePortfolio
+	final public synchronized EditablePortfolio
 		createPortfolio(EditableTerminal terminal, Account account)
 			throws PortfolioException
 	{
@@ -610,39 +626,45 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	public EditablePortfolio createPortfolio(Account account)
+	final public synchronized EditablePortfolio createPortfolio(Account account)
 		throws PortfolioException
 	{
 		return portfolios.createPortfolio(this, account);
 	}
 
 	@Override
-	public void setDefaultPortfolio(EditablePortfolio portfolio) {
+	final public synchronized
+		void setDefaultPortfolio(EditablePortfolio portfolio)
+	{
 		portfolios.setDefaultPortfolio(portfolio);
 	}
 
 	@Override
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) throws SecurityNotExistsException {
+	final public synchronized
+		EditableSecurity getEditableSecurity(SecurityDescriptor descr)
+			throws SecurityNotExistsException {
 		return securities.getEditableSecurity(descr);
 	}
 
 	@Override
-	public void fireSecurityAvailableEvent(Security security) {
+	final public synchronized
+		void fireSecurityAvailableEvent(Security security)
+	{
 		securities.fireSecurityAvailableEvent(security);
 	}
 
 	@Override
-	public EventType OnConnected() {
+	final public synchronized EventType OnConnected() {
 		return onConnected;
 	}
 
 	@Override
-	public EventType OnDisconnected() {
+	final public synchronized EventType OnDisconnected() {
 		return onDisconnected;
 	}
 
 	@Override
-	public synchronized void fireTerminalConnectedEvent() {
+	final public synchronized void fireTerminalConnectedEvent() {
 		if ( state == TerminalState.STARTED ) {
 			state = TerminalState.CONNECTED;
 			dispatcher.dispatch(new EventImpl(onConnected));
@@ -653,7 +675,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public synchronized void fireTerminalDisconnectedEvent() {
+	final public synchronized void fireTerminalDisconnectedEvent() {
 		if ( state == TerminalState.CONNECTED
 		  || state == TerminalState.STOPPING )
 		{
@@ -668,51 +690,55 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	public void fireTerminalStartedEvent() {
+	final public synchronized void fireTerminalStartedEvent() {
 		dispatcher.dispatch(new EventImpl(onStarted));
 	}
 	
 	@Override
-	public void fireTerminalStoppedEvent() {
+	final public synchronized void fireTerminalStoppedEvent() {
 		dispatcher.dispatch(new EventImpl(onStopped));
 	}
 
 	@Override
-	public EditableOrder movePendingOrder(long transId, long orderId)
+	final public synchronized
+		EditableOrder movePendingOrder(long transId, long orderId)
 			throws OrderException
 	{
 		return orders.movePendingOrder(transId, orderId);
 	}
 
 	@Override
-	public EditableOrder movePendingStopOrder(long transId, long orderId)
+	final public synchronized
+		EditableOrder movePendingStopOrder(long transId, long orderId)
 			throws OrderException
 	{
 		return stopOrders.movePendingOrder(transId,orderId);
 	}
 
 	@Override
-	public EventType OnStarted() {
+	final public synchronized EventType OnStarted() {
 		return onStarted;
 	}
 
 	@Override
-	public EventType OnStopped() {
+	final public synchronized EventType OnStopped() {
 		return onStopped;
 	}
 
 	@Override
-	public EventType OnPanic() {
+	final public synchronized EventType OnPanic() {
 		return onPanic;
 	}
 
 	@Override
-	public void firePanicEvent(int code, String msgId) {
+	final public synchronized void firePanicEvent(int code, String msgId) {
 		firePanicEvent(code, msgId, new Object[] { });
 	}
 
 	@Override
-	public void firePanicEvent(int code, String msgId, Object[] args) {
+	final public synchronized
+		void firePanicEvent(int code, String msgId, Object[] args)
+	{
 		if ( started() ) {
 			logger.error("PANIC[" + code + "]: " + msgId, args);
 			dispatcher.dispatch(new PanicEvent(onPanic, code, msgId, args));
@@ -725,49 +751,49 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public synchronized boolean stopped() {
+	final public synchronized boolean stopped() {
 		return state == TerminalState.STOPPED;
 	}
 
 	@Override
-	public synchronized boolean connected() {
+	final public synchronized boolean connected() {
 		return state == TerminalState.CONNECTED;
 	}
 	
 	@Override
-	public synchronized boolean started() {
+	final public synchronized boolean started() {
 		return state == TerminalState.CONNECTED
 			|| state == TerminalState.STARTED;
 	}
 
 	@Override
-	public synchronized TerminalState getTerminalState() {
+	final public synchronized TerminalState getTerminalState() {
 		return state;
 	}
 
 	@Override
-	public synchronized void setTerminalState(TerminalState state) {
+	final public synchronized void setTerminalState(TerminalState state) {
 		logger.debug("Change terminal state to {}", state);
 		this.state = state;
 	}
 
 	@Override
-	public EventType OnStopOrderFilled() {
+	final public synchronized EventType OnStopOrderFilled() {
 		return stopOrders.OnOrderFilled();
 	}
 
 	@Override
-	public synchronized Date getCurrentTime() {
+	final public synchronized Date getCurrentTime() {
 		return timer.getCurrentTime();
 	}
 
 	@Override
-	public EventSystem getEventSystem() {
+	final public synchronized EventSystem getEventSystem() {
 		return es;
 	}
 
 	@Override
-	public EditableSecurity
+	final public synchronized EditableSecurity
 		createSecurity(EditableTerminal terminal, SecurityDescriptor descr)
 			throws SecurityAlreadyExistsException
 	{
@@ -775,44 +801,49 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EditableSecurity createSecurity(SecurityDescriptor descr)
+	final public synchronized
+		EditableSecurity createSecurity(SecurityDescriptor descr)
 			throws SecurityAlreadyExistsException
 	{
 		return securities.createSecurity(this, descr);
 	}
 
 	@Override
-	public boolean hasPendingOrders() {
+	final public synchronized boolean hasPendingOrders() {
 		return orders.hasPendingOrders();
 	}
 
 	@Override
-	public EditableOrder createOrder(EditableTerminal terminal) {
+	final public synchronized
+		EditableOrder createOrder(EditableTerminal terminal)
+	{
 		return orders.createOrder(terminal);
 	}
 
 	@Override
-	public boolean hasPendingStopOrders() {
+	final public synchronized boolean hasPendingStopOrders() {
 		return stopOrders.hasPendingOrders();
 	}
 
 	@Override
-	public EditableOrder createStopOrder(EditableTerminal terminal) {
+	final public synchronized
+		EditableOrder createStopOrder(EditableTerminal terminal)
+	{
 		return stopOrders.createOrder(terminal);
 	}
 
 	@Override
-	public EditableOrder createOrder() {
+	final public synchronized EditableOrder createOrder() {
 		return orders.createOrder(this);
 	}
 
 	@Override
-	public EditableOrder createStopOrder() {
+	final public synchronized EditableOrder createStopOrder() {
 		return stopOrders.createOrder(this);
 	}
 	
 	@Override
-	public synchronized boolean equals(Object other) {
+	final public synchronized boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
@@ -841,8 +872,9 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	public Order createMarketOrderB(Account account, Security sec, long qty)
-		throws OrderException
+	final public synchronized
+		Order createMarketOrderB(Account account, Security sec, long qty)
+			throws OrderException
 	{
 		EditableOrder order = orders.createOrder(this);
 		order.setDirection(OrderDirection.BUY);
@@ -851,8 +883,9 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Order createMarketOrderS(Account account, Security sec, long qty)
-		throws OrderException
+	final public synchronized
+		Order createMarketOrderS(Account account, Security sec, long qty)
+			throws OrderException
 	{
 		EditableOrder order = orders.createOrder(this);
 		order.setDirection(OrderDirection.SELL);
@@ -861,7 +894,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	public Order createLimitOrderB(Account account, Security sec,
+	final public synchronized
+		Order createLimitOrderB(Account account, Security sec,
 			long qty, double price) throws OrderException
 	{
 		EditableOrder order = orders.createOrder(this);
@@ -871,7 +905,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Order createLimitOrderS(Account account, Security sec,
+	final public synchronized
+		Order createLimitOrderS(Account account, Security sec,
 			long qty, double price) throws OrderException
 	{
 		EditableOrder order = orders.createOrder(this);
@@ -881,7 +916,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Order createStopLimitB(Account account, Security sec,
+	final public synchronized
+		Order createStopLimitB(Account account, Security sec,
 			long qty, double stopPrice, double price) throws OrderException
 	{
 		EditableOrder order = stopOrders.createOrder(this);
@@ -891,7 +927,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Order createStopLimitS(Account account, Security sec,
+	final public synchronized
+		Order createStopLimitS(Account account, Security sec,
 			long qty, double stopPrice, double price) throws OrderException
 	{
 		EditableOrder order = stopOrders.createOrder(this);
@@ -938,7 +975,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EventType OnOrderTrade() {
+	final public synchronized EventType OnOrderTrade() {
 		return orders.OnOrderTrade();
 	}
 

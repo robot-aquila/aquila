@@ -13,6 +13,7 @@ public class TerminalBuilder {
 	
 	/**
 	 * Конструктор.
+	 * <p>
 	 */
 	public TerminalBuilder() {
 		super();
@@ -27,7 +28,7 @@ public class TerminalBuilder {
 	 * экземпляр класса {@link ru.prolib.aquila.core.StarterQueue StarterQueue},
 	 * в начало которого добавляет ранее созданную очередь событий. 
 	 * Все созданные объекты доступны через служебный интерфейс терминала.
-	 * <b>Внимание</b>: созданный терминал не содержик определенного процессора
+	 * <b>Внимание</b>: созданный терминал не содержит определенного процессора
 	 * заявок. Специфический процессор заявок должен быть установлен явно.
 	 * <p>
 	 * @param queueId идентификатор очереди событий
@@ -38,16 +39,15 @@ public class TerminalBuilder {
 		StarterQueue starter = new StarterQueue();
 		starter.add(es.getEventQueue());
 		EventDispatcher d = es.createEventDispatcher("Terminal");
-		EditableTerminal terminal = new TerminalImpl(es, starter,
+		return createTerminalInstance(es, starter,
 				createSecurities(es), createPortfolios(es),
 				createOrders(es, "Orders"), createOrders(es, "StopOrders"),
 				d, d.createType("OnConnected"), d.createType("OnDisconnected"),
 				d.createType("OnStarted"), d.createType("OnStopped"),
 				d.createType("OnPanic"));
-		return terminal;
 	}
 	
-	private EditableSecurities createSecurities(EventSystem es) {
+	protected EditableSecurities createSecurities(EventSystem es) {
 		EventDispatcher d = es.createEventDispatcher("Securities");
 		return new SecuritiesImpl(d,
 				d.createType("OnAvailable"),
@@ -55,7 +55,7 @@ public class TerminalBuilder {
 				d.createType("OnTrade"));
 	}
 	
-	private EditablePortfolios createPortfolios(EventSystem es) {
+	protected EditablePortfolios createPortfolios(EventSystem es) {
 		EventDispatcher d = es.createEventDispatcher("Portfolios");
 		return new PortfoliosImpl(d,
 				d.createType("OnAvailable"),
@@ -64,7 +64,7 @@ public class TerminalBuilder {
 				d.createType("OnPositionChanged"));
 	}
 	
-	private EditableOrders createOrders(EventSystem es, String dispatcherId) {
+	protected EditableOrders createOrders(EventSystem es, String dispatcherId) {
 		EventDispatcher d = es.createEventDispatcher(dispatcherId);
 		return new OrdersImpl(d,
 				d.createType("OnAvailable"),
@@ -78,6 +78,38 @@ public class TerminalBuilder {
 				d.createType("OnRegistered"),
 				d.createType("OnRegisterFailed"),
 				d.createType("OnTrade"));
+	}
+	
+	/**
+	 * Создать экземпляр терминала.
+	 * <p>
+	 * Метод предназначен для переопределения в наследниках. Сигнатура метода
+	 * повторяет сигнатуру конструктора базового терминала {@link TerminalImpl}.
+	 * <p>
+	 * @param es фасад событийной системы
+	 * @param starter последовательность процедур запуска 
+	 * @param securities набор инструментов
+	 * @param portfolios набор портфелей
+	 * @param orders набор заявок
+	 * @param stopOrders набор стоп-заявок
+	 * @param dispatcher диспетчер событий
+	 * @param onConnected тип события: при подключении терминала
+	 * @param onDisconnected тип события: при отключении терминала
+	 * @param onStarted тип события: при запуске терминала
+	 * @param onStopped тип события: при останове терминала
+	 * @param onPanic тип события: критическое состояние
+	 * @return экземпляр терминала
+	 */
+	protected EditableTerminal createTerminalInstance(EventSystem es,
+			StarterQueue starter, EditableSecurities securities,
+			EditablePortfolios portfolios, EditableOrders orders,
+			EditableOrders stopOrders, EventDispatcher dispatcher,
+			EventType onConnected, EventType onDisconnected,
+			EventType onStarted, EventType onStopped, EventType onPanic)
+	{
+		return new TerminalImpl(es, starter, securities, portfolios,
+				orders, stopOrders, dispatcher, onConnected, onDisconnected,
+				onStarted, onStopped, onPanic);
 	}
 
 }
