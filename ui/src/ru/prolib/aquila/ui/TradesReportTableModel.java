@@ -100,14 +100,9 @@ public class TradesReportTableModel extends AbstractTableModel
 		} else if ( hdr == COL_EXIT_VOL ) {
 			return report.getExitVolume();
 		} else if ( hdr == COL_PROF_LOSS ) {
-			return getProfit(report);
+			return report.getProfit();
 		} else if ( hdr == COL_PROF_LOSS_PERC ) {
-			Double profit = getProfit(report);
-			if ( profit != null ) {
-				return profit / report.getEnterVolume() * 100; 
-			} else {
-				return null;
-			}
+			return report.getProfitPerc();
 		}
 		return null;
 	}
