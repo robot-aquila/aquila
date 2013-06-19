@@ -28,9 +28,12 @@ import com.ib.client.*;
  * Такой подход позволяет полностью абстрагироваться от библиотеки IB API в
  * части механизма обработки ответов на запросы.    
  * <p>
+ * 2013-06-15 перенесено в {@link ru.prolib.aquila.ib.assembler.IBHandler}.
+ * <p>
  * 2012-11-14<br>
  * $Id: IBWrapper.java 433 2013-01-14 22:37:52Z whirlwind $
  */
+@Deprecated
 public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 	private static final int VERSION = 2;
 	protected static volatile Logger logger;
@@ -135,6 +138,7 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 
 	@Override
 	public void connectionClosed() {
+		logger.debug("Connection closed");
 		dispatcher.dispatch(new IBEvent(onConnectionClosed));
 	}
 
@@ -159,6 +163,7 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 
 	@Override
 	public void accountDownloadEnd(String accountName) {
+		//logger.debug("accountDownloadEnd: " + accountName);
 		notimplemented();
 	}
 
@@ -171,6 +176,8 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 	public void contractDetails(int reqId, ContractDetails details) {
 		dispatcher.dispatch(new IBEventContract(onContractDetails, reqId,
 				IBEventContract.SUBTYPE_NORM, details));
+		logger.debug("contract details: {}",
+				EWrapperMsgGenerator.contractDetails(reqId, details));
 	}
 	
 	@Override
@@ -183,6 +190,7 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 	public void contractDetailsEnd(int reqId) {
 		dispatcher.dispatch(new IBEventContract(onContractDetails, reqId,
 				IBEventContract.SUBTYPE_END, null));
+		logger.debug("contract details end: {}", reqId);
 	}
 
 	@Override
@@ -340,6 +348,7 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 	public void updateAccountValue(String key, String value, String currency,
 			String accountName)
 	{
+		//logger.debug("account value: {}", accountName);
 		dispatcher.dispatch(new IBEventUpdateAccount(onUpdateAccount,
 				key, value, currency, accountName));
 	}
@@ -370,6 +379,8 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
+		logger.debug("Position change: {}",
+				EWrapperMsgGenerator.contractMsg(contract));
 		dispatcher.dispatch(new IBEventUpdatePortfolio(onUpdatePortfolio,
 				contract, position, marketPrice, marketValue, averageCost,
 				unrealizedPNL, realizedPNL, accountName));

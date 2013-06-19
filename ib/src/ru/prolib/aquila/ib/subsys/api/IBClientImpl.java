@@ -3,16 +3,13 @@ package ru.prolib.aquila.ib.subsys.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.ib.IBException;
 import ru.prolib.aquila.ib.event.IBEvent;
 
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
+import com.ib.client.EWrapperMsgGenerator;
 import com.ib.client.Order;
 
 /**
@@ -22,7 +19,6 @@ import com.ib.client.Order;
  * $Id: IBClientImpl.java 490 2013-02-05 19:42:02Z whirlwind $
  */
 public class IBClientImpl implements IBClient, EventListener {
-	@SuppressWarnings("unused")
 	private static final Logger logger;
 	private final EClientSocket socket;
 	private final IBApiEventDispatcher wrapper;
@@ -116,6 +112,8 @@ public class IBClientImpl implements IBClient, EventListener {
 			throws IBException
 	{
 		checkConnected();
+		Object args[] = { reqId, EWrapperMsgGenerator.contractMsg(contract) };
+		logger.debug("#{} Request contract details: {}", args);
 		socket.reqContractDetails(reqId, contract);
 	}
 	

@@ -17,9 +17,12 @@ import ru.prolib.aquila.core.data.S;
 /**
  * Модификатор инструмента на основании деталей контракта.
  * <p>
+ * Вынесено в методы кэш-записи.
+ * <p>
  * 2012-11-22<br>
  * $Id: IBSecurityModifierOfContract.java 433 2013-01-14 22:37:52Z whirlwind $
  */
+@Deprecated
 public class IBSecurityModifierOfContract implements S<EditableSecurity> {
 	private static final Logger logger;
 	private static final int DIGITS = 8;

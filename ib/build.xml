@@ -17,6 +17,7 @@
         <include name="slf4j-log4j12-1.6.4.jar"/>
         <include name="log4j-1.2.16.jar"/>
         <include name="commons-lang3-3.1.jar" />
+    	<include name="javacsv.jar" />
     </fileset>
 	
 	<!-- Проектные библиотеки, необходимые для компиляции -->
@@ -81,7 +82,8 @@
     	<delete includeEmptyDirs="true">
     		<fileset dir="${bin}" includes="**/*" />
     	</delete>
-        <javac srcdir="${src}" destdir="${bin}" encoding="UTF-8">
+        <javac srcdir="${src}" destdir="${bin}" encoding="UTF-8"
+        	debug="on" debuglevel="lines,vars,source" >
             <classpath refid="classpath-build"/>
         </javac>
         <delete file="${build}/${filename}.jar" quiet="yes" />
