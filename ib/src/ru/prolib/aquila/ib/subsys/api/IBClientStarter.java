@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.ib.IBException;
+import ru.prolib.aquila.ib.api.IBConfig;
 
 /**
  * Стартер подключения к IB API.

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.ib.subsys.api;
+package ru.prolib.aquila.ib.api;
 
 /**
  * Параметры подключения к API.

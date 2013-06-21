@@ -6,6 +6,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.utils.Counter;
+import ru.prolib.aquila.ib.api.IBConfig;
 import ru.prolib.aquila.ib.subsys.*;
 import ru.prolib.aquila.ib.subsys.api.*;
 import ru.prolib.aquila.ib.subsys.order.IBOrderProcessor;

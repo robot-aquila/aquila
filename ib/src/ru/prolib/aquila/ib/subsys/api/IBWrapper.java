@@ -28,7 +28,7 @@ import com.ib.client.*;
  * Такой подход позволяет полностью абстрагироваться от библиотеки IB API в
  * части механизма обработки ответов на запросы.    
  * <p>
- * 2013-06-15 перенесено в {@link ru.prolib.aquila.ib.assembler.IBHandler}.
+ * 2013-06-15 перенесено в api.IBHandler
  * <p>
  * 2012-11-14<br>
  * $Id: IBWrapper.java 433 2013-01-14 22:37:52Z whirlwind $

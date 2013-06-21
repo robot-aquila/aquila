@@ -20,7 +20,7 @@ import ru.prolib.aquila.ib.subsys.run.IBRunnableFactory;
  * - Обновление нумератора транзакций
  * - Контракты (запускает через локатор)
  * <p>
- * 2013-06-15 перенесено в {@link ru.prolib.aquila.ib.assembler.IBHandler}.
+ * 2013-06-15 перенесено в api.IBHandler
  * <p>
  * 2013-01-08<br>
  * $Id: IBHandler.java 499 2013-02-07 10:43:25Z whirlwind $

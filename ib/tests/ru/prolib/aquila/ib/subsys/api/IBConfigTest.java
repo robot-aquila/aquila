@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import ru.prolib.aquila.ib.subsys.api.IBConfig;
+import ru.prolib.aquila.ib.api.IBConfig;
 
 /**
  * 2012-11-25<br>

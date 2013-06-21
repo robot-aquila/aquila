@@ -6,9 +6,9 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.ib.api.IBConfig;
 import ru.prolib.aquila.ib.subsys.api.IBClient;
 import ru.prolib.aquila.ib.subsys.api.IBClientStarter;
-import ru.prolib.aquila.ib.subsys.api.IBConfig;
 
 /**
  * 2012-11-25<br>

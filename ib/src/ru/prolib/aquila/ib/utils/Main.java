@@ -18,9 +18,9 @@ import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.EventSystemImpl;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.StarterQueue;
+import ru.prolib.aquila.ib.api.IBConfig;
 import ru.prolib.aquila.ib.subsys.api.IBClient;
 import ru.prolib.aquila.ib.subsys.api.IBClientStarter;
-import ru.prolib.aquila.ib.subsys.api.IBConfig;
 
 /**
  * $Id$
