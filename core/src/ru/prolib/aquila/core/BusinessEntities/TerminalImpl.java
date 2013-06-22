@@ -850,6 +850,16 @@ public class TerminalImpl implements EditableTerminal {
 		if ( other == null || other.getClass() != TerminalImpl.class ) {
 			return false;
 		}
+		return fieldsEquals(other);
+	}
+	
+	/**
+	 * Служебный метод сравнения полей экземпляра.
+	 * <p>
+	 * @param other объект для сравнения
+	 * @return результат сравнения
+	 */
+	protected boolean fieldsEquals(Object other) {
 		TerminalImpl o = (TerminalImpl) other;
 		return new EqualsBuilder()
 			.append(o.controller, controller)
