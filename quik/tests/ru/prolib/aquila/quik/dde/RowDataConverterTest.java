@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import org.apache.log4j.BasicConfigurator;
 import org.junit.*;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -13,6 +15,12 @@ public class RowDataConverterTest {
 	private Row row;
 	private Map<String, Object> data;
 	private RowDataConverter converter;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 	
 	@Before
 	public void setUp() throws Exception {
@@ -125,6 +133,18 @@ public class RowDataConverterTest {
 	public void testGetDouble_ThrowsIfTypeMismatch() throws Exception {
 		data.put("BadNumber", "zulu4");
 		converter.getDouble(row, "BadNumber");
+	}
+	
+	@Test
+	public void testGetDouble_OkFromString() throws Exception {
+		data.put("Number", "1");
+		assertEquals(1d, converter.getDouble(row, "Number"), 0.1d);
+	}
+	
+	@Test (expected=RowNullValueException.class)
+	public void testGetDouble_ThrowsNullForEmptyString() throws Exception {
+		data.put("NullNumber", "");
+		converter.getDouble(row, "NullNumber");
 	}
 	
 	@Test

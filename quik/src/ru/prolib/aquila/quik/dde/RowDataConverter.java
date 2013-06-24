@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.Row;
 
@@ -15,6 +18,12 @@ import ru.prolib.aquila.core.data.row.Row;
  * пригодную для использования в локальной среде исполнения.
  */
 public class RowDataConverter {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(RowDataConverter.class);
+	}
+	
 	private final SimpleDateFormat fullTimeFormat;
 	private final String dateFormat, timeFormat;
 	
@@ -80,6 +89,8 @@ public class RowDataConverter {
 			}
 			return value;
 		} catch ( ClassCastException e ) {
+			Object args[] = { elementId, e.getMessage() };
+			logger.error("For element {}: {}", args);
 			throw new RowDataTypeMismatchException(elementId, "string");
 		}
 	}
@@ -95,15 +106,26 @@ public class RowDataConverter {
 	 * @throws RowDataTypeMismatchException неожиданный тип данных
 	 */
 	public Double getDouble(Row row, String elementId) throws ValueException {
-		try {
-			Double value = (Double) row.get(elementId);
-			if ( value == null ) {
+		Object value = row.get(elementId);
+		if ( value == null ) {
+			throw new RowNullValueException(elementId);
+		}
+		if ( value instanceof Double ) {
+			return (Double) row.get(elementId);
+		} else if ( value instanceof String ) {
+			String str = (String) value;
+			if ( str.length() == 0 ) {
 				throw new RowNullValueException(elementId);
 			}
-			return value;
-		} catch ( ClassCastException e ) {
-			throw new RowDataTypeMismatchException(elementId, "double");
+			try {
+				return Double.parseDouble(str);
+			} catch ( NumberFormatException e ) {
+				Object args[] = { elementId, str };
+				logger.error("Cannot parse to double: {}={}", args);
+				
+			}
 		}
+		throw new RowDataTypeMismatchException(elementId, "double");
 	}
 	
 	/**
