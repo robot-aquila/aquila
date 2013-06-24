@@ -1,5 +1,7 @@
 package ru.prolib.aquila.ib.api;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 /**
  * Параметры подключения к API.
  * <p>
@@ -40,6 +42,22 @@ public class IBConfig {
 	
 	public int getClientId() {
 		return clientId;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != IBConfig.class ) {
+			return false;
+		}
+		IBConfig o = (IBConfig) other;
+		return new EqualsBuilder()
+			.append(o.clientId, clientId)
+			.append(o.port, port)
+			.append(o.host, host)
+			.isEquals();
 	}
 
 }

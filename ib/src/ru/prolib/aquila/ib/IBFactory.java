@@ -4,13 +4,10 @@ import java.util.Properties;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
-import ru.prolib.aquila.core.utils.Counter;
+import ru.prolib.aquila.ib.api.IBClient;
 import ru.prolib.aquila.ib.api.IBConfig;
-import ru.prolib.aquila.ib.subsys.*;
-import ru.prolib.aquila.ib.subsys.api.*;
-import ru.prolib.aquila.ib.subsys.order.IBOrderProcessor;
-import ru.prolib.aquila.ib.subsys.security.*;
+import ru.prolib.aquila.ib.assembler.Assembler;
+import ru.prolib.aquila.ib.assembler.IBMainHandler;
 
 /**
  * Фабрика IB-терминала.
@@ -19,7 +16,6 @@ import ru.prolib.aquila.ib.subsys.security.*;
  * $Id: IBFactory.java 527 2013-02-14 15:14:09Z whirlwind $
  */
 public class IBFactory implements TerminalFactory {
-	public static long TIMEOUT = 3000;
 
 	public IBFactory() {
 		super();
@@ -34,47 +30,20 @@ public class IBFactory implements TerminalFactory {
 	}
 	
 	public Terminal createTerminal(IBConfig config) {
-		TerminalDecorator termDecorator = new TerminalDecorator();
-		IBServiceLocator locator = new IBServiceLocatorImpl(termDecorator);
+		IBEditableTerminal term = (IBEditableTerminal)new IBTerminalBuilder()
+			.createTerminal("IB");
+		StarterQueue starter = (StarterQueue) term.getStarter();
+		starter.add(new ConnectionHandler(term, config));
 		
-		IBCompFactory fcomp = locator.getCompFactory();
+		IBClient client = term.getClient();
+		client.setMainHandler(new IBMainHandler(term, client,
+				client.getRequestNumerator(), new Assembler()));
 		
-
-		EditablePortfolios portfolios = fcomp.createPortfolios();
-		EditableOrders orders = fcomp.createOrders();
-		EditableOrders stopOrders = fcomp.createOrders();
+		// TODO: инстанцирование перенести в конструктор терминала
+		//terminal.setOrderProcessorInstance(new IBOrderProcessor(terminal,
+		//		client, transId));
 		
-		IBClient client = locator.getApiClient();
-		IBHandler handler = new IBHandler(locator);
-
-		EditableSecurities secStorage = fcomp.createSecurities();
-		IBSecurities securities = new IBSecurities(secStorage,
-			new IBSecurityHandlerFactoryImpl(locator, TIMEOUT));
-
-		Counter transId = locator.getTransactionNumerator();
-		OrderFactory orderFactory = fcomp.createOrderFactory();
-		handler.start();
-		StarterQueue starter = new StarterQueue()
-			.add(new IBConnectionKeeper(locator,
-					new IBClientStarter(client, config)))
-			.add(new EventQueueStarter(locator.getEventSystem()
-					.getEventQueue(), 1000))
-			.add(new EventQueueStarter(locator.getApiEventSystem()
-					.getEventQueue(), 1000));
-		EventSystem es = locator.getEventSystem();
-		EventDispatcher dispatcher = es.createEventDispatcher("IB");
-		EditableTerminal terminal = new TerminalImpl(es, starter, securities,
-				portfolios, orders, stopOrders,
-				dispatcher,
-				es.createGenericType(dispatcher, "OnConnected"),
-				es.createGenericType(dispatcher, "OnDisconnected"),
-				es.createGenericType(dispatcher, "OnStarted"),
-				es.createGenericType(dispatcher, "OnStopped"),
-				es.createGenericType(dispatcher, "OnPanic"));
-		terminal.setOrderProcessorInstance(new IBOrderProcessor(terminal,
-				client, transId));
-		termDecorator.setTerminal(terminal);
-		return termDecorator;
+		return term;
 	}
 	
 	private IBConfig createConfig(Properties cfg) {

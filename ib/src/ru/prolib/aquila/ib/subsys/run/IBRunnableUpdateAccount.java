@@ -15,6 +15,7 @@ import ru.prolib.aquila.ib.event.IBEventUpdateAccount;
  * 2013-01-09<br>
  * $Id: IBRunnableUpdateAccount.java 528 2013-02-14 15:27:34Z whirlwind $
  */
+@Deprecated
 public class IBRunnableUpdateAccount implements Runnable {
 	private static final Logger logger;
 	private final EditableTerminal terminal;

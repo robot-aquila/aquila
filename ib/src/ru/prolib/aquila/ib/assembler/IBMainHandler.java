@@ -1,132 +1,175 @@
 package ru.prolib.aquila.ib.assembler;
 
+import java.util.Hashtable;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.ib.client.*;
 
-import com.ib.client.CommissionReport;
-import com.ib.client.Contract;
-import com.ib.client.ContractDetails;
-import com.ib.client.ExecutionFilter;
-import com.ib.client.Order;
-import com.ib.client.OrderState;
+import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
+import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetBalance;
+import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetCash;
+import ru.prolib.aquila.core.data.S;
+import ru.prolib.aquila.core.utils.Counter;
+import ru.prolib.aquila.ib.api.*;
+import ru.prolib.aquila.ib.assembler.cache.*;
 
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.ib.api.MainHandler;
-import ru.prolib.aquila.ib.assembler.cache.ContractEntry;
-
+/**
+ * Базовый обработчик данных IB.
+ * <p>
+ * Реализует выполнение процедуры установки/разрыва соединения с IB API.
+ * Направляет входящие данные соответствующим методам сборщика объектов. 
+ */
 public class IBMainHandler implements MainHandler {
 	private static final Logger logger;
+	private static final String CUR = "BASE";
+	private static final String CASH = "TotalCashBalance";
+	private static final String BALANCE = "NetLiquidationByCurrency";
+	private static final Map<String, S<EditablePortfolio>> portfolioSetterMap;
 	
 	static {
 		logger = LoggerFactory.getLogger(IBMainHandler.class);
+		portfolioSetterMap = new Hashtable<String, S<EditablePortfolio>>();
+		portfolioSetterMap.put(CUR + "." +  CASH, new PortfolioSetCash());
+		portfolioSetterMap.put(CUR + "." +  BALANCE, new PortfolioSetBalance());
+	}
+	
+	private final EditableTerminal terminal;
+	private final IBClient client;
+	private final Counter requestId;
+	private final Assembler assembler;
+	
+	public IBMainHandler(EditableTerminal terminal, IBClient client,
+			Counter requestId, Assembler assembler)
+	{
+		super();
+		this.terminal = terminal;
+		this.client = client;
+		this.requestId = requestId;
+		this.assembler = assembler;
+	}
+	
+	public EditableTerminal getTerminal() {
+		return terminal;
+	}
+	
+	public IBClient getClient() {
+		return client;
+	}
+	
+	public Counter getRequestNumerator() {
+		return requestId;
+	}
+	
+	public Assembler getAssembler() {
+		return assembler;
 	}
 
 	@Override
 	public void error(int reqId, int errorCode, String errorMsg) {
-
+		Object args[] = { reqId, errorCode, errorMsg };
+		logger.error("req#{}: [{}] {}", args);
 	}
 
 	@Override
 	public void connectionOpened() {
-		/*
 		client.reqAutoOpenOrders(true);
-		client.reqOpenOrders();
-		client.reqExecutions(nextReqId(), new ExecutionFilter());
-		for ( ContractEntry entry : cache.getContractEntries() ) {
-			startMarketData(entry);
-		}
-		dispatcher.dispatch(new EventImpl(onConnected));
-		*/
+		client.reqAllOpenOrders();
+		terminal.fireTerminalConnectedEvent();
 	}
 
 	@Override
 	public void connectionClosed() {
-		//dispatcher.dispatch(new EventImpl(onDisconnected));
+		terminal.fireTerminalDisconnectedEvent();
 	}
 
 	@Override
 	public void accountDownloadEnd(String accountName) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void commissionReport(CommissionReport report) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void currentTime(long time) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void managedAccounts(String accounts) {
-		/*
 		String account[] = StringUtils.split(accounts, ',');
 		for ( int i = 0; i < account.length; i ++ ) {
 			client.reqAccountUpdates(true, account[i]);
+			logger.debug("Start listening account: {}", account[i]);
 		}
-		*/
 	}
 
 	@Override
-	public void nextValidId(int orderId) {
-		/*
-		synchronized ( reqNumerator ) {
-			int currId = reqNumerator.get();
+	public void nextValidId(int nextId) {
+		synchronized ( requestId ) {
+			int currId = requestId.get();
 			if ( currId < nextId ) {
-				reqNumerator.set(nextId);
+				requestId.set(nextId);
+				logger.debug("Request ID updated to: {}", nextId);
 			}
 		}
-		*/
 	}
 
 	@Override
 	public void updateAccount(String key, String value, String currency,
-			String accountName) {
-		// TODO Auto-generated method stub
-
+			String accountName)
+	{
+		S<EditablePortfolio> s = portfolioSetterMap.get(currency + "." + key);
+		if ( s != null ) {
+			try {
+				assembler.updatePortfolio(new Account(accountName), s,
+						Double.parseDouble(value));
+			} catch ( NumberFormatException e ) {
+				Object args[] = { key, value };
+				logger.error("Unexpected {} value: {}", args);
+			}
+		}
 	}
 
 	@Override
 	public void updatePortfolio(Contract contract, int position,
 			double marketPrice, double marketValue, double averageCost,
-			double unrealizedPNL, double realizedPNL, String accountName) {
-		// TODO Auto-generated method stub
-
+			double unrealizedPNL, double realizedPNL, String accountName)
+	{
+		assembler.update(new PositionEntry(contract, position, marketValue,
+				averageCost, realizedPNL, accountName));
 	}
 
 	@Override
 	public void contractDetails(int reqId, ContractDetails details) {
-		// TODO Auto-generated method stub
-		
+		assembler.update(new ContractEntry(details));
 	}
 
 	@Override
 	public void bondContractDetails(int reqId, ContractDetails details) {
-		// TODO Auto-generated method stub
-		
+		contractDetails(reqId, details);
 	}
 
 	@Override
 	public void contractDetailsEnd(int reqId) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void tickPrice(int reqId, int tickType, double value) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void tickSize(int reqId, int tickType, int size) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -134,8 +177,7 @@ public class IBMainHandler implements MainHandler {
 	public void openOrder(int orderId, Contract contract, Order order,
 			OrderState orderState)
 	{
-		// TODO Auto-generated method stub
-		
+		assembler.update(new OrderEntry(orderId, contract, order, orderState));
 	}
 
 	@Override
@@ -143,8 +185,24 @@ public class IBMainHandler implements MainHandler {
 			int remaining, double avgFillPrice, int permId, int parentId,
 			double lastFillPrice, int clientId, String whyHeld)
 	{
-		// TODO Auto-generated method stub
-		
+		assembler.update(new OrderStatusEntry(orderId, status, remaining,
+				avgFillPrice));
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != IBMainHandler.class ) {
+			return false;
+		}
+		IBMainHandler o = (IBMainHandler) other;
+		return new EqualsBuilder()
+			.append(o.assembler, assembler)
+			.append(o.requestId, requestId)
+			.appendSuper(o.terminal == terminal)
+			.isEquals();
 	}
 
 }

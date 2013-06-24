@@ -4,19 +4,10 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityException;
-import ru.prolib.aquila.core.BusinessEntities.SecurityNotExistsException;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.ib.IBFactory;
-import ru.prolib.aquila.ui.AquilaPluginTerminal;
-import ru.prolib.aquila.ui.AquilaUI;
-import ru.prolib.aquila.ui.ServiceLocator;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.ib.*;
+import ru.prolib.aquila.ui.*;
 import ru.prolib.aquila.ui.plugin.UISecuritiesPlugin;
 
 /**
@@ -29,7 +20,7 @@ public class IBPluginTerminal implements AquilaPluginTerminal, EventListener {
 	private static final Logger logger;
 	public static final String MENU_SECURITY_REQUEST = "MENU_SECURITY_REQUEST";
 	
-	private Terminal terminal;
+	private IBTerminal terminal;
 	private EventType onSecurityRequest;
 	private AquilaUI facade;
 	
@@ -54,16 +45,16 @@ public class IBPluginTerminal implements AquilaPluginTerminal, EventListener {
 
 	@Override
 	public void initialize(ServiceLocator locator, Terminal terminal) {
-		this.terminal = terminal;
+		this.terminal = (IBTerminal) terminal;
 	}
 
 	@Override
-	public void start() throws StarterException {
+	public void start() {
 		
 	}
 
 	@Override
-	public void stop() throws StarterException {
+	public void stop() {
 		
 	}
 
@@ -75,17 +66,10 @@ public class IBPluginTerminal implements AquilaPluginTerminal, EventListener {
 	@Override
 	public void onEvent(Event event) {
 		if ( event.isType(onSecurityRequest) ) {
-			DlgRequestSecurity dlg =
-				new DlgRequestSecurity(facade.getMainFrame());
-			SecurityDescriptor descr = dlg.getDescriptor();
-			if ( descr != null && ! terminal.isSecurityExists(descr) ) {
-				try {
-					terminal.getSecurity(descr);
-				} catch ( SecurityNotExistsException e ) {
-					logger.error("Security not found: {}", descr);
-				} catch ( SecurityException e ) {
-					logger.error("Unhandled exception: ", e);
-				}
+			SecurityDescriptor descr =
+				new DlgRequestSecurity(facade.getMainFrame()).getDescriptor();
+			if ( descr != null ) {
+				terminal.requestSecurity(descr);
 			}
 		}
 	}

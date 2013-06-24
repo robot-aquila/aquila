@@ -1,10 +1,18 @@
 package ru.prolib.aquila.ib.api;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.Vector;
+
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
+
+import ru.prolib.aquila.core.utils.Variant;
+
 import com.ib.client.*;
 
 public class IBWrapperTest {
@@ -35,6 +43,35 @@ public class IBWrapperTest {
 	}
 	
 	/**
+	 * Фикстурный дескриптор обработчика контракта.
+	 */
+	static class ContFR {
+		private final int reqId;
+		private final ContractHandler handler;
+		
+		ContFR(int reqId, ContractHandler handler) {
+			super();
+			this.reqId = reqId;
+			this.handler = handler;
+		}
+		
+	}
+	
+	/**
+	 * Фикстурный дескриптор обработчика заявки.
+	 */
+	static class OrderFR {
+		private final int reqId;
+		private final OrderHandler handler;
+		
+		OrderFR(int reqId, OrderHandler handler) {
+			super();
+			this.reqId = reqId;
+			this.handler = handler;
+		}
+	}
+	
+	/**
 	 * Создать дескриптор деталей контракта.
 	 * <p>
 	 * @param id идентификатор контракта
@@ -61,6 +98,11 @@ public class IBWrapperTest {
 		con.setAccessible(true);
 		con.newInstance();
 		return con.newInstance();		
+	}
+	
+	@Test
+	public void testGetMainHandler() throws Exception {
+		assertSame(hMain, wrapper.getMainHandler());
 	}
 	
 	@Test
@@ -606,6 +648,69 @@ public class IBWrapperTest {
 		wrapper.updateNewsBulletin(1, 2, "message", "IDEALPRO");
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(wrapper.equals(wrapper));
+		assertFalse(wrapper.equals(null));
+		assertFalse(wrapper.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		List<ContFR> conts1 = new Vector<ContFR>();
+		conts1.add(new ContFR(1, hContr1));
+		conts1.add(new ContFR(2, hContr2));
+		List<ContFR> conts2 = new Vector<ContFR>();
+		conts2.add(new ContFR(1, hContr2));
+		conts2.add(new ContFR(2, hContr3));
+		for ( ContFR fr : conts1 ) {
+			wrapper.setContractHandler(fr.reqId, fr.handler);
+		}
+		
+		List<OrderFR> ords1 = new Vector<OrderFR>();
+		ords1.add(new OrderFR(10, hOrder2));
+		List<OrderFR> ords2 = new Vector<OrderFR>();
+		ords2.add(new OrderFR(10, hOrder2));
+		ords2.add(new OrderFR(11, hOrder3));
+		for ( OrderFR fr : ords1 ) {
+			wrapper.setOrderHandler(fr.reqId, fr.handler);
+		}
+		
+		Variant<MainHandler> vMain = new Variant<MainHandler>()
+			.add(hMain)
+			.add(control.createMock(MainHandler.class));
+		Variant<List<ContFR>> vConts = new Variant<List<ContFR>>(vMain)
+			.add(conts1)
+			.add(conts2);
+		Variant<List<OrderFR>> vOrds = new Variant<List<OrderFR>>(vConts)
+			.add(ords1)
+			.add(ords2);
+		Variant<?> iterator = vOrds;
+		int foundCnt = 0;
+		IBWrapper x = null, found = null;
+		do {
+			x = new IBWrapper();
+			x.setMainHandler(vMain.get());
+			for ( ContFR fr : vConts.get() ) {
+				x.setContractHandler(fr.reqId, fr.handler);
+			}
+			for ( OrderFR fr : vOrds.get() ) {
+				x.setOrderHandler(fr.reqId, fr.handler);
+			}
+			if ( wrapper.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		for ( ContFR fr : conts1 ) {
+			assertTrue(found.hasContractHandler(fr.reqId));
+		}
+		for ( OrderFR fr : ords1 ) {
+			assertTrue(found.hasOrderHandler(fr.reqId));
+		}
 	}
 
 }

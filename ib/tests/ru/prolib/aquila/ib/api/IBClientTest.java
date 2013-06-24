@@ -6,6 +6,9 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.utils.Counter;
+import ru.prolib.aquila.core.utils.Variant;
+
+import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
 public class IBClientTest {
@@ -31,6 +34,17 @@ public class IBClientTest {
 		control.replay();
 		
 		client.setMainHandler(handler);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetMainHandler() throws Exception {
+		MainHandler handler = control.createMock(MainHandler.class);
+		expect(wrapper.getMainHandler()).andReturn(handler);
+		control.replay();
+		
+		assertSame(handler, client.getMainHandler());
 		
 		control.verify();
 	}
@@ -188,6 +202,57 @@ public class IBClientTest {
 		
 		client.reqAccountUpdates(true, "TEST");
 		client.reqAccountUpdates(false, "BEST");
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testConstruct1() throws Exception {
+		client = new IBClient(requestId);
+		assertNotNull(client.getSocket());
+		assertEquals(new IBWrapper(), client.getSocket().wrapper());
+		assertSame(requestId, client.getRequestNumerator());
+		assertEquals(new IBWrapper(), client.getWrapper());
+		assertSame(client.getSocket().wrapper(), client.getWrapper());
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(client.equals(client));
+		assertFalse(client.equals(null));
+		assertFalse(client.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Variant<IBWrapper> vWrp = new Variant<IBWrapper>()
+			.add(wrapper)
+			.add(control.createMock(IBWrapper.class));
+		Variant<Counter> vReqId = new Variant<Counter>(vWrp)
+			.add(requestId)
+			.add(control.createMock(Counter.class));
+		Variant<?> iterator = vReqId;
+		int foundCnt = 0;
+		IBClient x = null, found = null;
+		do {
+			x = new IBClient(socket, vWrp.get(), vReqId.get());
+			if ( client.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertSame(wrapper, found.getWrapper());
+		assertSame(requestId, found.getRequestNumerator());
+	}
+	
+	@Test
+	public void testReqContractDetails() throws Exception {
+		Contract contract = new Contract();
+		socket.reqContractDetails(eq(824), same(contract));
+		control.replay();
+		
+		client.reqContractDetails(824, contract);
 		
 		control.verify();
 	}

@@ -2,6 +2,8 @@ package ru.prolib.aquila.ib.api;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ib.client.*;
@@ -33,9 +35,9 @@ public class IBWrapper implements EWrapper {
 	}
 	
 	/**
-	 * Установить обработчик базовых данных.
+	 * Установить базовый обработчик данных.
 	 * <p>
-	 * Обработчик базовых данных получает вызов
+	 * Базовый обработчик данных получает вызов
 	 * {@link ResponseHandler#connectionOpened()} в первую очередь перед
 	 * аналогичными вызовами для всех других зарегистрированных обработчиков.
 	 * Метод {@link ResponseHandler#connectionClosed()} вызывается для базового
@@ -48,6 +50,18 @@ public class IBWrapper implements EWrapper {
 	 */
 	public synchronized void setMainHandler(MainHandler handler) {
 		hMain = handler;
+	}
+	
+	/**
+	 * Получить базовый обработчик данных.
+	 * <p>
+	 * Возвращает обработчик, установленный посредством вызова метода
+	 * {@link #setMainHandler(MainHandler)}.
+	 * <p>
+	 * @return текущий базовый обработчик
+	 */
+	public synchronized MainHandler getMainHandler() {
+		return hMain;
 	}
 	
 	/**
@@ -410,6 +424,22 @@ public class IBWrapper implements EWrapper {
 	private ContractHandler getContractHandler(int reqId) {
 		ContractHandler handler = hContracts.get(reqId);
 		return handler == null ? hMain : handler;	
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != IBWrapper.class ) {
+			return false;
+		}
+		IBWrapper o = (IBWrapper) other;
+		return new EqualsBuilder()
+			.append(o.hContracts, hContracts)
+			.append(o.hMain, hMain)
+			.append(o.hOrders, hOrders)
+			.isEquals();
 	}
 
 }

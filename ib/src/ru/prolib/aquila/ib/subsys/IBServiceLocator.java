@@ -16,6 +16,7 @@ import ru.prolib.aquila.ib.subsys.run.IBRunnableFactory;
  * 2013-01-08<br>
  * $Id: IBServiceLocator.java 499 2013-02-07 10:43:25Z whirlwind $
  */
+@Deprecated
 public interface IBServiceLocator {
 	
 	public EventSystem getEventSystem();

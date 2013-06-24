@@ -17,6 +17,7 @@ import ru.prolib.aquila.ib.subsys.security.IBSecurityModifierOfTick;
  * 2012-12-20<br>
  * $Id: IBModifierFactoryImpl.java 553 2013-03-01 13:37:31Z whirlwind $
  */
+@Deprecated
 public class IBModifierFactoryImpl implements IBModifierFactory {
 	private final IBGetterFactory gfactory;
 	private final SetterFactory sfactory;

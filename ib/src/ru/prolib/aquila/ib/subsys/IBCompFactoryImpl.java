@@ -29,6 +29,7 @@ import ru.prolib.aquila.ib.subsys.order.IBIsEventOpenOrder;
  * 2012-11-19<br>
  * $Id: IBCompFactoryImpl.java 553 2013-03-01 13:37:31Z whirlwind $
  */
+@Deprecated
 public class IBCompFactoryImpl implements IBCompFactory {
 	private final IBServiceLocator locator;
 	private final BMFactory bfactory;

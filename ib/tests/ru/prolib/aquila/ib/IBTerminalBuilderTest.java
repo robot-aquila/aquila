@@ -1,16 +1,20 @@
-package ru.prolib.aquila.core.BusinessEntities.utils;
+package ru.prolib.aquila.ib;
+
 
 import static org.junit.Assert.*;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.ib.api.IBClient;
+import ru.prolib.aquila.ib.assembler.cache.Cache;
 
-public class TerminalBuilderTest {
-	private TerminalBuilder builder;
+public class IBTerminalBuilderTest {
+	private IBTerminalBuilder builder;
 
 	@Before
 	public void setUp() throws Exception {
-		builder = new TerminalBuilder();
+		builder = new IBTerminalBuilder();
 	}
 	
 	@Test
@@ -23,7 +27,14 @@ public class TerminalBuilderTest {
 		EventDispatcher ordDisp = es.createEventDispatcher("Orders");
 		EventDispatcher stopOrdDisp = es.createEventDispatcher("StopOrders");
 		EventDispatcher termDisp = es.createEventDispatcher("Terminal");
-		EditableTerminal expected = new TerminalImpl(es, starter,
+		EventDispatcher cacheDisp = es.createEventDispatcher("Cache");
+		Cache cache = new Cache(cacheDisp, cacheDisp.createType("Contract"),
+				cacheDisp.createType("Order"),
+				cacheDisp.createType("OrderStatus"),
+				cacheDisp.createType("Position"), cacheDisp.createType("Exec"));
+		Counter requestId = new SimpleCounter();
+		IBClient client = new IBClient(requestId);
+		IBEditableTerminal expected = new IBTerminalImpl(es, starter,
 				new SecuritiesImpl(secDisp,
 						secDisp.createType("OnAvailable"),
 						secDisp.createType("OnChanged"),
@@ -62,7 +73,9 @@ public class TerminalBuilderTest {
 				termDisp.createType("OnDisconnected"),
 				termDisp.createType("OnStarted"),
 				termDisp.createType("OnStopped"),
-				termDisp.createType("OnPanic"));
+				termDisp.createType("OnPanic"),
+				termDisp.createType("SecurityRequestError"),
+				cache, client);
 
 		assertEquals(expected, builder.createTerminal("foobar"));
 	}

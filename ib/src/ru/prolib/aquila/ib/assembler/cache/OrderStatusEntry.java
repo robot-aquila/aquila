@@ -16,6 +16,14 @@ public class OrderStatusEntry extends CacheEntry {
 	private final double avgFillPrice;
 	private final OrderStatus status;
 	
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id номер заявки
+	 * @param status статус
+	 * @param remaining неисполненный остаток
+	 * @param avgFillPrice средняя цена исполненной части
+	 */
 	public OrderStatusEntry(int id, String status, int remaining,
 			double avgFillPrice)
 	{

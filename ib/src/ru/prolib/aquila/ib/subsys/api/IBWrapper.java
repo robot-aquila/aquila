@@ -138,7 +138,6 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 
 	@Override
 	public void connectionClosed() {
-		logger.debug("Connection closed");
 		dispatcher.dispatch(new IBEvent(onConnectionClosed));
 	}
 
@@ -176,8 +175,8 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 	public void contractDetails(int reqId, ContractDetails details) {
 		dispatcher.dispatch(new IBEventContract(onContractDetails, reqId,
 				IBEventContract.SUBTYPE_NORM, details));
-		logger.debug("contract details: {}",
-				EWrapperMsgGenerator.contractDetails(reqId, details));
+		//logger.debug("contract details: {}",
+		//		EWrapperMsgGenerator.contractDetails(reqId, details));
 	}
 	
 	@Override
@@ -190,7 +189,7 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 	public void contractDetailsEnd(int reqId) {
 		dispatcher.dispatch(new IBEventContract(onContractDetails, reqId,
 				IBEventContract.SUBTYPE_END, null));
-		logger.debug("contract details end: {}", reqId);
+		//logger.debug("contract details end: {}", reqId);
 	}
 
 	@Override
@@ -379,8 +378,8 @@ public class IBWrapper implements EWrapper,IBApiEventDispatcher {
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL, String accountName)
 	{
-		logger.debug("Position change: {}",
-				EWrapperMsgGenerator.contractMsg(contract));
+		//logger.debug("Position change: {}",
+		//		EWrapperMsgGenerator.contractMsg(contract));
 		dispatcher.dispatch(new IBEventUpdatePortfolio(onUpdatePortfolio,
 				contract, position, marketPrice, marketValue, averageCost,
 				unrealizedPNL, realizedPNL, accountName));

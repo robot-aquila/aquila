@@ -19,6 +19,7 @@ import ru.prolib.aquila.ib.subsys.run.IBRunnableFactoryImpl;
  * 2013-01-08<br>
  * $Id: IBServiceLocatorImpl.java 527 2013-02-14 15:14:09Z whirlwind $
  */
+@Deprecated
 public class IBServiceLocatorImpl implements IBServiceLocator {
 	private final EditableTerminal terminal;
 	private final Counter transId = new SimpleCounter();

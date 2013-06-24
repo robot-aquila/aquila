@@ -15,6 +15,7 @@ import ru.prolib.aquila.ib.subsys.contract.IBContracts;
  * 2012-11-23<br>
  * $Id: IBCompFactory.java 527 2013-02-14 15:14:09Z whirlwind $
  */
+@Deprecated
 public interface IBCompFactory extends BMFactory {
 	
 	/**

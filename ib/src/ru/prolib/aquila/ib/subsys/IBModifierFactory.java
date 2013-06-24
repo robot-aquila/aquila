@@ -13,6 +13,7 @@ import ru.prolib.aquila.ib.event.IBEventUpdatePortfolio;
  * 2012-12-20<br>
  * $Id: IBModifierFactory.java 553 2013-03-01 13:37:31Z whirlwind $
  */
+@Deprecated
 public interface IBModifierFactory {
 
 	/**

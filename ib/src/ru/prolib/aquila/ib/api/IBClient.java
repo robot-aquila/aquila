@@ -1,8 +1,11 @@
 package ru.prolib.aquila.ib.api;
 
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.utils.Counter;
 
+import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 
 /**
@@ -28,12 +31,52 @@ public class IBClient {
 	}
 	
 	/**
+	 * Служебный конструктор.
+	 * <p>
+	 * @param wrapper обработчик
+	 * @param requestId нумератор запросов
+	 */
+	private IBClient(IBWrapper wrapper, Counter requestId) {
+		this(new EClientSocket(wrapper), wrapper, requestId);
+	}
+	
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param requestId нумератор запросов
+	 */
+	public IBClient(Counter requestId) {
+		this(new IBWrapper(), requestId);
+	}
+	
+	public Counter getRequestNumerator() {
+		return requestId;
+	}
+	
+	public IBWrapper getWrapper() {
+		return wrapper;
+	}
+	
+	public EClientSocket getSocket() {
+		return socket;
+	}
+	
+	/**
 	 * Установить базовый обработчик данных.
 	 * <p>
 	 * @param handler обработчик данных
 	 */
 	public void setMainHandler(MainHandler handler) {
 		wrapper.setMainHandler(handler);
+	}
+	
+	/**
+	 * Получить базовый обработчик данных.
+	 * <p>
+	 * @return текущий экземпляр обработчика
+	 */
+	public MainHandler getMainHandler() {
+		return wrapper.getMainHandler();
 	}
 	
 	/**
@@ -128,6 +171,25 @@ public class IBClient {
 	
 	public void reqAccountUpdates(boolean subscribe, String accountName) {
 		socket.reqAccountUpdates(subscribe, accountName);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != IBClient.class ) {
+			return false;
+		}
+		IBClient o = (IBClient) other;
+		return new EqualsBuilder()
+			.append(o.requestId, requestId)
+			.append(o.wrapper, wrapper)
+			.isEquals();
+	}
+	
+	public void reqContractDetails(int reqId, Contract contract) {
+		socket.reqContractDetails(reqId, contract);
 	}
 
 }

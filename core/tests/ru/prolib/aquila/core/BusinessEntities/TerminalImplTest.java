@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -43,6 +45,7 @@ public class TerminalImplTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
+		Logger.getRootLogger().setLevel(Level.ERROR);
 		account = new Account("test");
 		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
 	}
@@ -158,7 +161,7 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testConstruct13_Ok() throws Exception {
+	public void testConstruct12_Ok() throws Exception {
 		Variant<EventSystem> vEs = new Variant<EventSystem>()
 			.add(es)
 			.add(null);

@@ -843,7 +843,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	final public synchronized boolean equals(Object other) {
+	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
