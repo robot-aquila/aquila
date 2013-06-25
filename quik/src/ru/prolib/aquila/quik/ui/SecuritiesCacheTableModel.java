@@ -4,6 +4,8 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.quik.dde.SecuritiesCache;
 import ru.prolib.aquila.ui.ClassLabels;
+import ru.prolib.aquila.ui.table.Columns;
+import ru.prolib.aquila.ui.table.TableModel;
 
 /**
  * Модель таблицы для отображения кэша инструментов.

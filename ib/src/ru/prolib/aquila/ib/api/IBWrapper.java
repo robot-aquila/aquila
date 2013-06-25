@@ -248,10 +248,6 @@ public class IBWrapper implements EWrapper {
 
 	@Override
 	public synchronized void error(int reqId, int errorCode, String errorMsg) {
-		if ( logger.isDebugEnabled() ) {
-			Object args[] = { reqId, errorCode, errorMsg };
-			logger.debug("error: reqid={}, code={}, msg={}", args);
-		}
 		if ( hContracts.containsKey(reqId) ) {
 			getContractHandler(reqId).error(reqId, errorCode, errorMsg);
 		} else {

@@ -1,6 +1,7 @@
-package ru.prolib.aquila.quik.ui;
+package ru.prolib.aquila.ui.table;
 
 import java.util.*;
+
 
 /**
  * Набор колонок.

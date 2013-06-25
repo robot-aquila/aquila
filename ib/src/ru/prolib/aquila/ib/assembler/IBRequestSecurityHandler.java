@@ -99,14 +99,14 @@ public class IBRequestSecurityHandler implements ContractHandler {
 	@Override
 	public void contractDetails(int reqId, ContractDetails details) {
 		Object args[] = { descr, details.m_summary.m_conId };
-		logger.debug("Contract response for {} request: {}", args);
+		logger.debug("Response for {} contract request: {}", args);
 		getMainHandler().contractDetails(reqId, details);
 	}
 
 	@Override
 	public void bondContractDetails(int reqId, ContractDetails details) {
 		Object args[] = { descr, details.m_summary.m_conId };
-		logger.debug("Contract response for {} request: {}", args);
+		logger.debug("Response for {} contract request: {}", args);
 		getMainHandler().bondContractDetails(reqId, details);
 	}
 

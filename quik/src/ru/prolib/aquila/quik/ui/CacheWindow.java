@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.ui.ClassLabels;
+import ru.prolib.aquila.ui.table.Table;
 
 /**
  * Окно просмотра DDE-кэша.

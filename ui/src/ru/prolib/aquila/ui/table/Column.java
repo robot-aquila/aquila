@@ -1,4 +1,4 @@
-package ru.prolib.aquila.quik.ui;
+package ru.prolib.aquila.ui.table;
 
 import ru.prolib.aquila.core.data.G;
 

@@ -3,6 +3,8 @@ package ru.prolib.aquila.quik.ui;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.ui.ClassLabels;
+import ru.prolib.aquila.ui.table.Columns;
+import ru.prolib.aquila.ui.table.TableModel;
 
 /**
  * Модель таблицы для отображения кэша позиций по деривативам.
