@@ -36,7 +36,7 @@ public class OrderEntry extends CacheEntry {
 		//statuses.put("PreSubmitted", OrderStatus.PENDING);
 		statuses.put("Submitted", OrderStatus.ACTIVE);
 		statuses.put("Cancelled", OrderStatus.CANCELLED);
-		statuses.put("Filled", OrderStatus.CANCELLED);
+		statuses.put("Filled", OrderStatus.FILLED);
 		//statuses.put("Inactive", OrderStatus.PENDING);
 	}
 	

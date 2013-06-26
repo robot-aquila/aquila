@@ -10,7 +10,6 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 import com.ib.client.*;
 
-import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetBalance;
@@ -167,13 +166,12 @@ public class IBMainHandlerTest {
 			{ cash, "foo", "BASE", null, null },
 			{ bal, "bar", "BASE", null, null },
 		};
-		Account acc = new Account("TEST");
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
 			S<EditablePortfolio> s = (S<EditablePortfolio>) fix[i][3];
 			Double value = (Double) fix[i][4];
 			if ( s != null ) {
-				assembler.updatePortfolio(eq(acc), eq(s), eq(value));
+				assembler.updatePortfolio(eq("TEST"), eq(s), eq(value));
 			}
 			control.replay();
 			handler.updateAccount((String)fix[i][0], (String)fix[i][1],

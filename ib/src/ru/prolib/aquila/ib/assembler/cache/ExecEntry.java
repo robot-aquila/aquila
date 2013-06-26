@@ -118,6 +118,15 @@ public class ExecEntry extends CacheEntry {
 	public Long getId() {
 		return idCache.getId(execution.m_execId);
 	}
+	
+	/**
+	 * Получить оригинальный идентификатор сделки.
+	 * <p>
+	 * @return идентификатор
+	 */
+	public String getNativeId() {
+		return execution.m_execId;
+	}
 
 	/**
 	 * Получить цену.
@@ -164,6 +173,15 @@ public class ExecEntry extends CacheEntry {
 			.append(o.contract, contract)
 			.append(o.execution, execution)
 			.isEquals();
+	}
+	
+	/**
+	 * Получить идентификатор контракта.
+	 * <p>
+	 * @return идентификатор контракта
+	 */
+	public int getContractId() {
+		return contract.m_conId;
 	}
 	
 }

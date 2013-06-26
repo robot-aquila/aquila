@@ -101,6 +101,11 @@ public class ExecEntryTest {
 	}
 	
 	@Test
+	public void testGetNativeId() throws Exception {
+		assertEquals("213belka", entry.getNativeId());
+	}
+	
+	@Test
 	public void testGetPrice() throws Exception {
 		execution.m_price = 34.19d;
 		assertEquals(34.19d, entry.getPrice(), 0.001d);
@@ -149,6 +154,11 @@ public class ExecEntryTest {
 		assertEquals(1, foundCnt);
 		assertSame(contract, found.getContract());
 		assertSame(execution, found.getExecution());
+	}
+	
+	@Test
+	public void testGetContractId() throws Exception {
+		assertEquals(654, entry.getContractId());
 	}
 
 }

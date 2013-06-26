@@ -37,7 +37,7 @@ public class IBFactory implements TerminalFactory {
 		
 		IBClient client = term.getClient();
 		client.setMainHandler(new IBMainHandler(term, client,
-				client.getRequestNumerator(), new Assembler()));
+				client.getRequestNumerator(), new Assembler(term)));
 		
 		// TODO: инстанцирование перенести в конструктор терминала
 		//terminal.setOrderProcessorInstance(new IBOrderProcessor(terminal,

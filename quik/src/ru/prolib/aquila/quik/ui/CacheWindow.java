@@ -16,7 +16,6 @@ import ru.prolib.aquila.ui.table.Table;
  * Окно просмотра DDE-кэша.
  */
 public class CacheWindow {
-	private static final long serialVersionUID = 5687784287521612167L;
 	private static final Logger logger;
 	
 	public static final String TEXT_WIN_CACHE_TITLE;

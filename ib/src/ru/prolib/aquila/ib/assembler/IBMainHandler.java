@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ib.client.*;
 
-import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetBalance;
@@ -130,7 +129,7 @@ public class IBMainHandler implements MainHandler {
 		S<EditablePortfolio> s = portfolioSetterMap.get(currency + "." + key);
 		if ( s != null ) {
 			try {
-				assembler.updatePortfolio(new Account(accountName), s,
+				assembler.updatePortfolio(accountName, s,
 						Double.parseDouble(value));
 			} catch ( NumberFormatException e ) {
 				Object args[] = { key, value };

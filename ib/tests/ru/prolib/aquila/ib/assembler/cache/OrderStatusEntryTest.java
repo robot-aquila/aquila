@@ -38,7 +38,7 @@ public class OrderStatusEntryTest {
 				{ "PreSubmitted", null },
 				{ "Submitted", OrderStatus.ACTIVE },
 				{ "Cancelled", OrderStatus.CANCELLED },
-				{ "Filled", OrderStatus.CANCELLED },
+				{ "Filled", OrderStatus.FILLED },
 				{ "Inactive", null },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
