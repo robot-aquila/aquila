@@ -17,6 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.api.IBClient;
+import ru.prolib.aquila.ib.assembler.IBRequestContractHandler;
 import ru.prolib.aquila.ib.assembler.IBRequestSecurityHandler;
 import ru.prolib.aquila.ib.assembler.cache.Cache;
 
@@ -218,6 +219,21 @@ public class IBTerminalImplTest {
 		
 		terminal.fireSecurityRequestError(new SecurityDescriptor("SPXS",
 				"SMART", "USD", SecurityType.STK), 80, "test error");
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testRequestContract() throws Exception {
+		expect(client.nextReqId()).andReturn(812);
+		client.setContractHandler(eq(812),
+				eq(new IBRequestContractHandler(terminal, 812, 559)));
+		Contract expected = new Contract();
+		expected.m_conId = 559;
+		client.reqContractDetails(eq(812), eq(expected));
+		control.replay();
+		
+		terminal.requestContract(559);
 		
 		control.verify();
 	}

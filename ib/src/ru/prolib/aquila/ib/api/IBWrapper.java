@@ -148,6 +148,7 @@ public class IBWrapper implements EWrapper {
 	 * обработчиков через единую точку доступа. 
 	 */
 	public synchronized void connectionOpened() {
+		logger.debug("Connection opened");
 		hMain.connectionOpened();
 		for ( ContractHandler handler : hContracts.values() ) {
 			handler.connectionOpened();
@@ -159,6 +160,7 @@ public class IBWrapper implements EWrapper {
 	
 	@Override
 	public synchronized void connectionClosed() {
+		logger.debug("Connection closed");
 		for ( ContractHandler handler : hContracts.values() ) {
 			handler.connectionClosed();
 		}

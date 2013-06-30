@@ -1,10 +1,6 @@
 package ru.prolib.aquila.ib.assembler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.*;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.ib.IBEditableTerminal;
 import ru.prolib.aquila.ib.assembler.cache.*;
 
@@ -12,69 +8,114 @@ import ru.prolib.aquila.ib.assembler.cache.*;
  * Фасад сборщика.
  */
 public class Assembler {
-	private static final Logger logger;
-	
-	static {
-		logger = LoggerFactory.getLogger(Assembler.class);
-	}
-	
 	private final IBEditableTerminal terminal;
 	private final AssemblerHighLvl high;
 	
+	/**
+	 * Служебный конструктор.
+	 * <p>
+	 * @param terminal терминал
+	 * @param high высокоуровневые функции сборки
+	 */
 	Assembler(IBEditableTerminal terminal, AssemblerHighLvl high) {
 		super();
 		this.terminal = terminal;
 		this.high = high;
 	}
 	
-	public IBEditableTerminal getTerminal() {
-		return terminal;
-	}
-	
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param terminal терминал
+	 */
 	public Assembler(IBEditableTerminal terminal) {
 		this(terminal, new AssemblerHighLvl(terminal));
 	}
 	
-	public void update(ContractEntry entry) {
-		terminal.getCache().update(entry);
-	}
-	
-	public void update(OrderEntry entry) {
-		terminal.getCache().update(entry);
-	}
-	
-	public void update(OrderStatusEntry entry) {
-		terminal.getCache().update(entry);
-	}
-	
-	public void update(PositionEntry entry) {
-		terminal.getCache().update(entry);
-	}
-	
-	public void update(ExecEntry entry) {
-		terminal.getCache().update(entry);
+	/**
+	 * Получить терминал.
+	 * <p>
+	 * <b>Прим.</b> Служебный метод.
+	 * <p>
+	 * @return терминал
+	 */
+	IBEditableTerminal getTerminal() {
+		return terminal;
 	}
 	
 	/**
-	 * Обновить атрибут портфеля.
+	 * Получить высокоуровневые функции сборки.
 	 * <p>
-	 * @param accountName код торгового счета
-	 * @param setter сеттер атрибута
-	 * @param value значение
+	 * <b>Прим.</b> Служебный метод.
+	 * <p>
+	 * @return набор методов
 	 */
-	public void updatePortfolio(String accountName,
-			S<EditablePortfolio> setter, Double value)
-	{
-		try {
-			EditablePortfolio portfolio = high.getPortfolio(accountName);
-			setter.set(portfolio, value);
-			if ( portfolio.getCash() != null
-					&& portfolio.getBalance() != null )
-			{
-				high.fireEvents(portfolio);
+	AssemblerHighLvl getHighLevelAssembler() {
+		return high;
+	}
+	
+	/**
+	 * Обновить данные на основании деталей контракта.
+	 * <p>
+	 * @param entry кэш-запись контракта
+	 */
+	public void update(ContractEntry entry) {
+		synchronized ( terminal ) {
+			getCache().update(entry);
+			high.update(entry);
+			high.assembleOrders();
+			high.assemblePositions();
+		}
+	}
+	
+	/**
+	 * Обновить данные на основании деталей заявки.
+	 * <p>
+	 * @param entry кэш-запись заявки
+	 */
+	public void update(OrderEntry entry) {
+		synchronized ( terminal ) {
+			getCache().update(entry);
+			if ( getCache().getContract(entry.getContractId()) == null ) {
+				terminal.requestContract(entry.getContractId());
+			} else {
+				high.assembleOrder(entry);
 			}
-		} catch ( Exception e ) {
-			logger.error("Error update portfolio: ", e);
+		}
+	}
+	
+	public void update(OrderStatusEntry entry) {
+		synchronized ( terminal ) {
+			terminal.getCache().update(entry);
+			high.assembleOrder(entry);
+		}
+	}
+	
+	public void update(PositionEntry entry) {
+		synchronized ( terminal ) {
+			getCache().update(entry);
+			if ( getCache().getContract(entry.getContractId()) == null ) {
+				terminal.requestContract(entry.getContractId());
+			} else {
+				high.assemblePosition(entry);
+			}
+		}
+	}
+	
+	public void update(ExecEntry entry) {
+		synchronized ( terminal ) {
+			getCache().update(entry);
+		}
+	}
+	
+	/**
+	 * Обновить портфель.
+	 * <p>
+	 * @param entry кэш-запись атрибута портфеля 
+	 */
+	public void update(PortfolioValueEntry entry) {
+		synchronized ( terminal ) {
+			high.update(entry);
 		}
 	}
 	
@@ -87,7 +128,19 @@ public class Assembler {
 			return false;
 		}
 		Assembler o = (Assembler) other;
-		return o.terminal == terminal;
+		return new EqualsBuilder()
+			.append(high, o.high)
+			.appendSuper(terminal == o.terminal)
+			.isEquals();
+	}
+	
+	/**
+	 * Получить фасад кэша данных.
+	 * <p>
+	 * @return кэш данных
+	 */
+	private Cache getCache() {
+		return terminal.getCache();
 	}
 
 }

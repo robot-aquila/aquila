@@ -1,19 +1,11 @@
 package ru.prolib.aquila.ib.assembler;
 
-import java.util.Hashtable;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ib.client.*;
-
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetBalance;
-import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetCash;
-import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.ib.api.*;
 import ru.prolib.aquila.ib.assembler.cache.*;
@@ -26,16 +18,10 @@ import ru.prolib.aquila.ib.assembler.cache.*;
  */
 public class IBMainHandler implements MainHandler {
 	private static final Logger logger;
-	private static final String CUR = "BASE";
-	private static final String CASH = "TotalCashBalance";
-	private static final String BALANCE = "NetLiquidationByCurrency";
-	private static final Map<String, S<EditablePortfolio>> portfolioSetterMap;
+
 	
 	static {
 		logger = LoggerFactory.getLogger(IBMainHandler.class);
-		portfolioSetterMap = new Hashtable<String, S<EditablePortfolio>>();
-		portfolioSetterMap.put(CUR + "." +  CASH, new PortfolioSetCash());
-		portfolioSetterMap.put(CUR + "." +  BALANCE, new PortfolioSetBalance());
 	}
 	
 	private final EditableTerminal terminal;
@@ -123,19 +109,10 @@ public class IBMainHandler implements MainHandler {
 	}
 
 	@Override
-	public void updateAccount(String key, String value, String currency,
-			String accountName)
+	public void updateAccount(String key, String value, String cur,
+			String account)
 	{
-		S<EditablePortfolio> s = portfolioSetterMap.get(currency + "." + key);
-		if ( s != null ) {
-			try {
-				assembler.updatePortfolio(accountName, s,
-						Double.parseDouble(value));
-			} catch ( NumberFormatException e ) {
-				Object args[] = { key, value };
-				logger.error("Unexpected {} value: {}", args);
-			}
-		}
+		assembler.update(new PortfolioValueEntry(account, key, cur, value));
 	}
 
 	@Override

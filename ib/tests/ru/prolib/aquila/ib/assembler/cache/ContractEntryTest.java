@@ -143,7 +143,7 @@ public class ContractEntryTest {
 	
 	@Test
 	public void testGetDisplayName() throws Exception {
-		contract.m_localSymbol = "Apple Inc.";
+		details.m_longName = "Apple Inc.";
 		assertEquals("Apple Inc.", entry.getDisplayName());
 	}
 	
@@ -171,6 +171,28 @@ public class ContractEntryTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(details, found.getContractDetails());
+	}
+	
+	@Test
+	public void testGetDefaultExchange_ForSmart() throws Exception {
+		details.m_validExchanges = "BART,DART,SMART";
+		ContractEntry entry = new ContractEntry(details);
+		assertEquals("SMART", entry.getDefaultExchange());
+	}
+	
+	@Test
+	public void testGetDefaultExchange_NotSmartPrimaExch() throws Exception {
+		details.m_validExchanges = "BART,DART";
+		details.m_summary.m_primaryExch = "DART";
+		ContractEntry entry = new ContractEntry(details);
+		assertEquals("DART", entry.getDefaultExchange());
+	}
+	
+	@Test
+	public void testGetDefaultExchange_NotSmartNoPrimaExch() throws Exception {
+		details.m_validExchanges = "BART,DART";
+		ContractEntry entry = new ContractEntry(details);
+		assertEquals("BART", entry.getDefaultExchange());
 	}
 	
 }

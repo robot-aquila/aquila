@@ -61,7 +61,7 @@ public class IBCacheTableBuilder {
 			public Object get(Object source) throws ValueException {
 				return ((ContractEntry) source).getDisplayName();
 			}
-		}, Column.MIDDLE));
+		}, Column.LONG));
 		columns.add(new Column("CACHE_CONTR_COL_TYPE", new G<Object>() {
 			@Override
 			public Object get(Object source) throws ValueException {
@@ -93,6 +93,12 @@ public class IBCacheTableBuilder {
 				return d == null ? d : d.m_validExchanges;
 			}
 		}, Column.LONG));
+		columns.add(new Column("CACHE_CONTR_COL_DEFEXCH", new G<Object>() {
+			@Override
+			public Object get(Object source) throws ValueException {
+				return ((ContractEntry) source).getDefaultExchange();
+			}
+		}, Column.MIDDLE));
 		columns.add(new Column("CACHE_CONTR_COL_ISSMART", new G<Object>() {
 			@Override
 			public Object get(Object source) throws ValueException {

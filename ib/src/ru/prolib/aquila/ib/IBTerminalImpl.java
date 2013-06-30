@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
 import ru.prolib.aquila.ib.api.ContractHandler;
 import ru.prolib.aquila.ib.api.IBClient;
+import ru.prolib.aquila.ib.assembler.IBRequestContractHandler;
 import ru.prolib.aquila.ib.assembler.IBRequestSecurityHandler;
 import ru.prolib.aquila.ib.assembler.cache.Cache;
 
@@ -106,7 +107,7 @@ public class IBTerminalImpl extends TerminalImpl implements IBEditableTerminal {
 	}
 
 	@Override
-	public void requestSecurity(SecurityDescriptor descr) {
+	public synchronized void requestSecurity(SecurityDescriptor descr) {
 		int id = client.nextReqId();
 		ContractHandler handler = new IBRequestSecurityHandler(this, id, descr);
 		client.setContractHandler(id, handler);
@@ -151,11 +152,19 @@ public class IBTerminalImpl extends TerminalImpl implements IBEditableTerminal {
 	}
 
 	@Override
-	public void fireSecurityRequestError(SecurityDescriptor descr,
+	public synchronized void fireSecurityRequestError(SecurityDescriptor descr,
 			int errorCode, String errorMsg)
 	{
 		Object args[] = { descr, errorCode, errorMsg };
 		logger.error("TODO: fire request {} error: [{}] {}", args);
+	}
+
+	@Override
+	public synchronized void requestContract(int conId) {
+		int id = client.nextReqId();
+		ContractHandler handler = new IBRequestContractHandler(this, id, conId);
+		client.setContractHandler(id, handler);
+		handler.connectionOpened();
 	}
 
 }

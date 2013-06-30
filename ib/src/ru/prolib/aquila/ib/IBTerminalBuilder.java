@@ -17,6 +17,11 @@ public class IBTerminalBuilder extends TerminalBuilder {
 	}
 	
 	@Override
+	public IBEditableTerminal createTerminal(String queueId) {
+		return (IBEditableTerminal) super.createTerminal(queueId);
+	}
+	
+	@Override
 	protected EditableTerminal createTerminalInstance(EventSystem es,
 			StarterQueue starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,

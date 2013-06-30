@@ -2,12 +2,8 @@ package ru.prolib.aquila.ib.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
 import org.easymock.IMocksControl;
 import org.junit.*;
-
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
-import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.*;
 import ru.prolib.aquila.ib.assembler.cache.*;
@@ -33,6 +29,9 @@ public class AssemblerTest {
 	public void testUpdate_Contract() throws Exception {
 		ContractEntry entry = control.createMock(ContractEntry.class);
 		cache.update(same(entry));
+		high.update(same(entry));
+		high.assembleOrders();
+		high.assemblePositions();
 		control.replay();
 		
 		asm.update(entry);
@@ -41,9 +40,27 @@ public class AssemblerTest {
 	}
 	
 	@Test
-	public void testUpdate_Order() throws Exception {
+	public void testUpdate_Order_ContractNotExists() throws Exception {
 		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getContractId()).andStubReturn(215);
 		cache.update(same(entry));
+		expect(cache.getContract(215)).andReturn(null);
+		terminal.requestContract(215);
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Order_ContractExists() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		ContractEntry contract = control.createMock(ContractEntry.class);
+		expect(entry.getContractId()).andStubReturn(215);
+		cache.update(entry);
+		expect(cache.getContract(215)).andReturn(contract);
+		high.assembleOrder(same(entry));
 		control.replay();
 		
 		asm.update(entry);
@@ -55,6 +72,7 @@ public class AssemblerTest {
 	public void testUpdate_OrderStatus() throws Exception {
 		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
 		cache.update(same(entry));
+		high.assembleOrder(same(entry));
 		control.replay();
 		
 		asm.update(entry);
@@ -63,9 +81,27 @@ public class AssemblerTest {
 	}
 	
 	@Test
-	public void testUpdate_Position() throws Exception {
+	public void testUpdate_Position_ContractNotExists() throws Exception {
 		PositionEntry entry = control.createMock(PositionEntry.class);
+		expect(entry.getContractId()).andStubReturn(814);
 		cache.update(same(entry));
+		expect(cache.getContract(eq(814))).andReturn(null);
+		terminal.requestContract(eq(814));
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Position_ContractExists() throws Exception {
+		PositionEntry entry = control.createMock(PositionEntry.class);
+		ContractEntry contract = control.createMock(ContractEntry.class);
+		expect(entry.getContractId()).andStubReturn(814);
+		cache.update(same(entry));
+		expect(cache.getContract(eq(814))).andReturn(contract);
+		high.assemblePosition(same(entry));
 		control.replay();
 		
 		asm.update(entry);
@@ -84,54 +120,17 @@ public class AssemblerTest {
 		control.verify();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
-	public void testUpdatePortfolio_NullCash() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
-		S<EditablePortfolio> setter = control.createMock(S.class);
-		expect(high.getPortfolio(eq("BEST"))).andReturn(port);
-		setter.set(same(port), eq(24.12d));
-		expect(port.getCash()).andReturn(null);
+	public void testUpdate_Portfolio() throws Exception {
+		PortfolioValueEntry e = control.createMock(PortfolioValueEntry.class);
+		high.update(same(e));
 		control.replay();
 		
-		asm.updatePortfolio("BEST", setter, 24.12d);
+		asm.update(e);
 		
 		control.verify();
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testUpdatePortfolio_NullBalance() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
-		S<EditablePortfolio> setter = control.createMock(S.class);
-		expect(high.getPortfolio(eq("BEST"))).andReturn(port);
-		setter.set(same(port), eq(24.12d));
-		expect(port.getCash()).andReturn(81.21d);
-		expect(port.getBalance()).andReturn(null);
-		control.replay();
-		
-		asm.updatePortfolio("BEST", setter, 24.12d);
-		
-		control.verify();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testUpdatePortfolio() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
-		S<EditablePortfolio> setter = control.createMock(S.class);
-		expect(high.getPortfolio(eq("BEST"))).andReturn(port);
-		setter.set(same(port), eq(24.12d));
-		expect(port.getCash()).andReturn(81.21d);
-		expect(port.getBalance()).andReturn(15.43d);
-		high.fireEvents(same(port));
-		control.replay();
-		
-		asm.updatePortfolio("BEST", setter, 24.12d);
-		
-		control.verify();
-	}
-
 	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(asm.equals(asm));
@@ -144,15 +143,18 @@ public class AssemblerTest {
 		IBTerminalBuilder tb = new IBTerminalBuilder();
 		IBEditableTerminal t1 = (IBEditableTerminal) tb.createTerminal("foo"),
 						   t2 = (IBEditableTerminal) tb.createTerminal("foo");
-		asm = new Assembler(t1);
+		asm = new Assembler(t1, high);
 		Variant<IBEditableTerminal> vTerm = new Variant<IBEditableTerminal>()
 			.add(t1)
 			.add(t2);
-		Variant<?> iterator = vTerm;
+		Variant<AssemblerHighLvl> vHigh = new Variant<AssemblerHighLvl>(vTerm)
+			.add(high)
+			.add(control.createMock(AssemblerHighLvl.class));
+		Variant<?> iterator = vHigh;
 		int foundCnt = 0;
 		Assembler x, found = null;
 		do {
-			x = new Assembler(vTerm.get());
+			x = new Assembler(vTerm.get(), vHigh.get());
 			if ( asm.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -160,6 +162,13 @@ public class AssemblerTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(t1, found.getTerminal());
+		assertSame(high, found.getHighLevelAssembler());
+	}
+	
+	@Test
+	public void testConstruct1() throws Exception {
+		Assembler exp = new Assembler(terminal, new AssemblerHighLvl(terminal));
+		assertEquals(exp, new Assembler(terminal));
 	}
 
 }

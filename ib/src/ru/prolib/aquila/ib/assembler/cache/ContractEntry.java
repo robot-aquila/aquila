@@ -121,7 +121,7 @@ public class ContractEntry extends CacheEntry {
 	}
 	
 	public String getDisplayName() {
-		return getContract().m_localSymbol;
+		return details.m_longName;
 	}
 	
 	/**
@@ -168,5 +168,27 @@ public class ContractEntry extends CacheEntry {
 			.append(details, o.details)
 			.isEquals();
 	}
-
+	
+	/**
+	 * Получить код биржи по-умолчанию.
+	 * <p>
+	 * Для контрактов, поддерживающих SMART-роутинг, возвращается SMART. Для
+	 * других, которые не поддерживают SMART, но в которых указана первичная
+	 * биржа, возвращается код первичной биржи. Для всех остальных возвращается
+	 * первая биржа из списка доступных бирж. Если список бирж пуст, то
+	 * возвращается null.
+	 * <p>
+	 * @return код биржи
+	 */
+	public String getDefaultExchange() {
+		if ( isSmart() ) {
+			return "SMART";
+		}
+		if ( details.m_summary.m_primaryExch != null ) {
+			return details.m_summary.m_primaryExch;
+		}
+		List<String> list = getValidExchanges();
+		return list.size() > 0 ? list.get(0) : null;
+	}
+	
 }

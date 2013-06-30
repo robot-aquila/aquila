@@ -256,5 +256,16 @@ public class IBClientTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testReqMktData() throws Exception {
+		Contract contract = new Contract();
+		socket.reqMktData(eq(814), same(contract), eq("ABC"), eq(false));
+		control.replay();
+		
+		client.reqMktData(814, contract, "ABC", false);
+		
+		control.verify();
+	}
 
 }

@@ -10,12 +10,8 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 import com.ib.client.*;
 
-import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetBalance;
-import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetCash;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
-import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.api.IBClient;
@@ -151,33 +147,15 @@ public class IBMainHandlerTest {
 		control.verify();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testUpdateAccount() throws Exception {
-		String bal = "NetLiquidationByCurrency", cash = "TotalCashBalance";
-		Object fix[][] = {
-			// key, val, curr, acc, expected setter, expected value
-			{ cash, "24.15", "BASE", new PortfolioSetCash(), 24.15d },
-			{ bal, "0.15", "BASE", new PortfolioSetBalance(), 0.15d },
-			{ "foo", "24.15", "BASE", null, null },
-			{ "bar", "0.15", "BASE", null, null },
-			{ cash, "24.15", "USD", null, null },
-			{ bal, "0.15", "USD", null, null },
-			{ cash, "foo", "BASE", null, null },
-			{ bal, "bar", "BASE", null, null },
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			setUp();
-			S<EditablePortfolio> s = (S<EditablePortfolio>) fix[i][3];
-			Double value = (Double) fix[i][4];
-			if ( s != null ) {
-				assembler.updatePortfolio(eq("TEST"), eq(s), eq(value));
-			}
-			control.replay();
-			handler.updateAccount((String)fix[i][0], (String)fix[i][1],
-					(String)fix[i][2], "TEST");
-			control.verify();
-		}
+		assembler.update(eq(new PortfolioValueEntry("TEST",
+				"Cash", "USD", "24.15")));
+		control.replay();
+		
+		handler.updateAccount("Cash", "24.15", "USD", "TEST");
+		
+		control.verify();
 	}
 	
 	@Test

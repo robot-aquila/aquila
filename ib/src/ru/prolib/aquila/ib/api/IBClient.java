@@ -191,5 +191,11 @@ public class IBClient {
 	public void reqContractDetails(int reqId, Contract contract) {
 		socket.reqContractDetails(reqId, contract);
 	}
+	
+	public void reqMktData(int reqId, Contract contract,
+			String genericTickList, boolean snapshot)
+	{
+		socket.reqMktData(reqId, contract, genericTickList, snapshot);
+	}
 
 }
