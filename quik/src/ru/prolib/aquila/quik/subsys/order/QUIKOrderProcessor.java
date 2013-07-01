@@ -98,6 +98,7 @@ public class QUIKOrderProcessor implements OrderProcessor {
 			orders = terminal.getStopOrdersInstance();
 			str = newOrderTrPrefix(order, transId)
 				+ "ACTION=NEW_STOP_ORDER; "
+				+ "EXPIRY_DATE=GTC; "
 				+ "STOPPRICE=" +
 					formatPrice(order, order.getStopLimitPrice()) + "; "
 				+ "PRICE=" + formatPrice(order, order.getPrice()) + "; "

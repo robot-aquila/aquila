@@ -269,8 +269,8 @@ public class QUIKOrderProcessorTest {
 		type.addListener(eq(new PlaceOrderHandler(locator, stopOrders)));
 		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
-				+ "OPERATION=B; ACTION=NEW_STOP_ORDER; STOPPRICE=12.00; "
-				+ "PRICE=12.45; QUANTITY=1050"));
+				+ "OPERATION=B; ACTION=NEW_STOP_ORDER; EXPIRY_DATE=GTC; "
+				+ "STOPPRICE=12.00; PRICE=12.45; QUANTITY=1050"));
 		control.replay();
 		
 		processor.placeOrder(order);
@@ -297,8 +297,8 @@ public class QUIKOrderProcessorTest {
 		type.addListener(eq(new PlaceOrderHandler(locator, stopOrders)));
 		api.send(eq("TRANS_ID=926; CLIENT_CODE=K-86; "
 				+ "ACCOUNT=LX1; CLASSCODE=SPBFUT; SECCODE=RIH3; "
-				+ "OPERATION=S; ACTION=NEW_STOP_ORDER; STOPPRICE=12.00; "
-				+ "PRICE=12.45; QUANTITY=1050"));
+				+ "OPERATION=S; ACTION=NEW_STOP_ORDER; EXPIRY_DATE=GTC; "
+				+ "STOPPRICE=12.00; PRICE=12.45; QUANTITY=1050"));
 		control.replay();
 		
 		processor.placeOrder(order);
