@@ -2,6 +2,10 @@ package ru.prolib.aquila.ib.assembler;
 
 import java.util.Hashtable;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.setter.*;
@@ -15,6 +19,7 @@ import ru.prolib.aquila.ib.assembler.cache.*;
  * Низкоуровневые функции сборки.
  */
 public class AssemblerLowLvl {
+	private static final Logger logger;
 	private static final String SEP = ".";
 	private static final String CUR = "BASE";
 	private static final String CASH = "TotalCashBalance";
@@ -22,6 +27,7 @@ public class AssemblerLowLvl {
 	private static final Map<String, S<EditablePortfolio>> portfolioSetterMap;
 	
 	static {
+		logger = LoggerFactory.getLogger(AssemblerLowLvl.class);
 		portfolioSetterMap = new Hashtable<String, S<EditablePortfolio>>();
 		portfolioSetterMap.put(CUR + SEP + CASH, new PortfolioSetCash());
 		portfolioSetterMap.put(CUR + SEP + BALANCE, new PortfolioSetBalance());
@@ -265,6 +271,183 @@ public class AssemblerLowLvl {
 			}
 			position.resetChanges();
 		}
+	}
+	
+	/**
+	 * Генерировать события стоп-заявки.
+	 * <p>
+	 * Событие доступности стоп-заявки генерируется всегда, если заявка на
+	 * момент вызова недоступна. События изменения генерируются только в случае
+	 * наличия изменений. При этом признак изменений сбрасывается.
+	 * <p>
+	 * @param order экземпляр стоп-заявки
+	 * @throws EditableObjectException
+	 */
+	public void fireStopOrderEvents(EditableOrder order)
+		throws EditableObjectException
+	{
+		if ( ! order.isAvailable() ) {
+			order.setAvailable(true);
+			terminal.fireStopOrderAvailableEvent(order);
+		}
+		if ( order.hasChanged() ) {
+			order.fireChangedEvent();
+			order.resetChanges();
+		}
+	}
+	
+	/**
+	 * Первичное заполнение атрибутов стоп-заявки.
+	 * <p>
+	 * Устанавливает атрибуты стоп-заявки на основании кэш-записи.
+	 * <p>
+	 * @param order экземпляр стоп-заявки
+	 * @param entry кэш-запись заявки
+	 */
+	public void updateStopOrder(EditableOrder order, OrderEntry entry) {
+		order.setAccount(entry.getAccount());
+		order.setDirection(entry.getDirection());
+		order.setPrice(entry.getPrice());
+		order.setQty(entry.getQty());
+		order.setSecurityDescriptor(getCache()
+				.getContract(entry.getContractId()).getSecurityDescriptor());
+		order.setStopLimitPrice(entry.getStopLimitPrice());
+		order.setType(entry.getType());
+		order.setTime(terminal.getCurrentTime());
+	}
+	
+	/**
+	 * Согласовать статус стоп-заявки.
+	 * <p>
+	 * Запрашивает в кэше данных информацию о статусе заявки и выполняет
+	 * согласование. Стоп-заявки считается исполненной при соответствующем
+	 * статусе и наличии в кэше информации о заявке, которая ссылается на данную
+	 * заявку. 
+	 * <p>
+	 * @param order экземпляр стоп-заявки
+	 */
+	public void adjustStopOrderStatus(EditableOrder order) {
+		Long id = order.getId();
+		OrderStatusEntry entry = getCache().getOrderStatus(id);
+		if ( entry == null ) {
+			return;
+		}
+		OrderStatus status = entry.getStatus();
+		if ( status == null ) {
+			return;
+		}
+		if ( status == OrderStatus.FILLED ) {
+			order.setLastChangeTime(terminal.getCurrentTime());
+			order.setStatus(OrderStatus.FILLED);
+			logger.warn("TODO: find and assign linked order ID");
+		} else if ( status == OrderStatus.CANCELLED ) {
+			order.setLastChangeTime(terminal.getCurrentTime());
+			order.setStatus(OrderStatus.CANCELLED);
+		}
+	}
+	
+	/**
+	 * Генерировать события заявки.
+	 * <p>
+	 * Событие доступности стоп-заявки генерируется всегда, если заявка на
+	 * момент вызова недоступна. События изменения генерируются только в случае
+	 * наличия изменений. При этом признак изменений сбрасывается.
+	 * <p>
+	 * @param order экземпляр заявки
+	 * @throws EditableObjectException
+	 */
+	public void fireOrderEvents(EditableOrder order)
+		throws EditableObjectException
+	{
+		if ( ! order.isAvailable() ) {
+			order.setAvailable(true);
+			terminal.fireOrderAvailableEvent(order);
+		}
+		if ( order.hasChanged() ) {
+			order.fireChangedEvent();
+			order.resetChanges();
+		}
+	}
+	
+	/**
+	 * Первичное заполнение атрибутов заявки.
+	 * <p>
+	 * @param order экземпляр заявки
+	 * @param entry кэш-запись заявки
+	 */
+	public void updateOrder(EditableOrder order, OrderEntry entry) {
+		order.setAccount(entry.getAccount());
+		order.setDirection(entry.getDirection());
+		if ( entry.getType() != OrderType.MARKET ) {
+			order.setPrice(entry.getPrice());
+		}
+		order.setQty(entry.getQty());
+		order.setQtyRest(entry.getQty());
+		order.setSecurityDescriptor(getCache()
+				.getContract(entry.getContractId()).getSecurityDescriptor());
+		order.setType(entry.getType());
+		order.setTime(terminal.getCurrentTime());
+	}
+	
+	/**
+	 * Согласовать сделки заявки.
+	 * <p>
+	 * @param order экземпляр заявки
+	 */
+	public void adjustOrderTrades(EditableOrder order) {
+		logger.warn("TODO: adjust order by trades");
+	}
+	
+	/**
+	 * Согласовать статус заявки.
+	 * <p>
+	 * @param order экземпляр заявки
+	 */
+	public void adjustOrderStatus(EditableOrder order) {
+		Long id = order.getId();
+		OrderStatusEntry entry = getCache().getOrderStatus(id);
+		if ( entry == null ) {
+			return;
+		}
+		OrderStatus status = entry.getStatus();
+		if ( status == null ) {
+			return;
+		} else {
+			adjustExecuted(order, entry);
+			order.setStatus(status);
+			if ( status == OrderStatus.FILLED
+					|| status == OrderStatus.CANCELLED )
+			{
+				order.setLastChangeTime(terminal.getCurrentTime());
+			}
+		}
+	}
+	
+	/**
+	 * Скорректировать параметры исполненной части заявки.
+	 * <p>
+	 * Служебный метод.
+	 * <p>
+	 * @param order экземпляр заявки
+	 * @param entry кэш-запись статуса заявки
+	 */
+	private void adjustExecuted(EditableOrder order, OrderStatusEntry entry) {
+		order.setQtyRest(entry.getQtyRest());
+		order.setAvgExecutedPrice(entry.getAvgExecutedPrice());
+		order.setExecutedVolume(entry.getAvgExecutedPrice()
+				* (double) (order.getQty() - entry.getQtyRest()));
+	}
+	
+	/**
+	 * Проверить доступность инструмента заявки.
+	 * <p>
+	 * @param entry кэш-запись заявки
+	 * @return true - соответствующий инструмент доступен, false - недоступен
+	 */
+	public boolean isSecurityExists(OrderEntry entry) {
+		ContractEntry conEntry = getCache().getContract(entry.getContractId());
+		return conEntry != null
+			&& terminal.isSecurityExists(conEntry.getSecurityDescriptor());
 	}
 
 }

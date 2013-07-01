@@ -72,7 +72,7 @@ public class AssemblerHighLvl {
 	 */
 	public void assembleOrders() {
 		for ( OrderEntry entry : getCache().getOrderEntries() ) {
-			middle.update(entry);
+			assembleOrder(entry);
 		}
 	}
 	
@@ -81,7 +81,7 @@ public class AssemblerHighLvl {
 	 */
 	public void assemblePositions() {
 		for ( PositionEntry entry : getCache().getPositionEntries() ) {
-			middle.update(entry);
+			assemblePosition(entry);
 		}
 	}
 	
@@ -111,7 +111,7 @@ public class AssemblerHighLvl {
 	public void assembleOrder(OrderStatusEntry entry) {
 		OrderEntry orderEntry = getCache().getOrder(entry.getId());
 		if ( orderEntry != null ) {
-			middle.update(orderEntry);
+			assembleOrder(orderEntry);
 		}
 	}
 	

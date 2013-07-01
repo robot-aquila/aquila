@@ -137,9 +137,9 @@ public class OrderEntryTest {
 	public void testGetStatus() throws Exception {
 		Object fix[][] = {
 				// IB status, local status
-				{ "PendingSubmit", null },
+				{ "PendingSubmit", OrderStatus.ACTIVE },
 				{ "PendingCancel", null },
-				{ "PreSubmitted", null },
+				{ "PreSubmitted", OrderStatus.ACTIVE },
 				{ "Submitted", OrderStatus.ACTIVE },
 				{ "Cancelled", OrderStatus.CANCELLED },
 				{ "Filled", OrderStatus.FILLED },
@@ -195,6 +195,22 @@ public class OrderEntryTest {
 		assertSame(contract, found.getContract());
 		assertSame(order, found.getOrder());
 		assertSame(state, found.getOrderState());
+	}
+	
+	@Test
+	public void testIsStopOrder() throws Exception {
+		Object fix[][] = {
+				// IB type, expected result
+				{ "STP LMT", true },
+				{ "MKT", false },
+				{ "LMT", false },
+				{ "UNK", false },
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			order.m_orderType = (String) fix[i][0];
+			assertEquals(msg, fix[i][1], entry.isStopOrder());
+		}
 	}
 
 }

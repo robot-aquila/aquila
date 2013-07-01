@@ -33,9 +33,9 @@ public class OrderStatusEntryTest {
 	public void testGetStatus() throws Exception {
 		Object fix[][] = {
 				// IB status, local status
-				{ "PendingSubmit", null },
+				{ "PendingSubmit", OrderStatus.ACTIVE },
 				{ "PendingCancel", null },
-				{ "PreSubmitted", null },
+				{ "PreSubmitted", OrderStatus.ACTIVE },
 				{ "Submitted", OrderStatus.ACTIVE },
 				{ "Cancelled", OrderStatus.CANCELLED },
 				{ "Filled", OrderStatus.FILLED },

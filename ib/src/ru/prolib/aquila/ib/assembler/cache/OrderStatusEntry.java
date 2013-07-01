@@ -47,7 +47,7 @@ public class OrderStatusEntry extends CacheEntry {
 	/**
 	 * Получить статус заявки.
 	 * <p>
-	 * @return статус заявки
+	 * @return статус заявки или null, если нет соответствующего статуса
 	 */
 	public OrderStatus getStatus() {
 		return status;

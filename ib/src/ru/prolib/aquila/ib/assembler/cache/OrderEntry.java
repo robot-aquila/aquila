@@ -31,9 +31,9 @@ public class OrderEntry extends CacheEntry {
 		types.put("MKT", OrderType.MARKET);
 		types.put("LMT", OrderType.LIMIT);
 		statuses = new Hashtable<String, OrderStatus>();
-		//statuses.put("PendingSubmit", OrderStatus.PENDING);
+		statuses.put("PendingSubmit", OrderStatus.ACTIVE);
 		//statuses.put("PendingCancel", OrderStatus.ACTIVE);
-		//statuses.put("PreSubmitted", OrderStatus.PENDING);
+		statuses.put("PreSubmitted", OrderStatus.ACTIVE);
 		statuses.put("Submitted", OrderStatus.ACTIVE);
 		statuses.put("Cancelled", OrderStatus.CANCELLED);
 		statuses.put("Filled", OrderStatus.FILLED);
@@ -187,6 +187,18 @@ public class OrderEntry extends CacheEntry {
 			.append(o.order, order)
 			.append(o.state, state)
 			.isEquals();
+	}
+	
+	/**
+	 * Проверить отношение кэш-записи к стоп-заявке.
+	 * <p>
+	 * @return true - стоп-заявка, false - обычная заявка
+	 */
+	public boolean isStopOrder() {
+		OrderType type = getType();
+		return type == OrderType.STOP_LIMIT
+			|| type == OrderType.TAKE_PROFIT
+			|| type == OrderType.TAKE_PROFIT_AND_STOP_LIMIT;
 	}
 
 }

@@ -16,6 +16,7 @@ public class AssemblerMidLvlTest {
 	private EditablePortfolio port;
 	private EditableSecurity security;
 	private EditablePosition position;
+	private EditableOrder order;
 	private IBEditableTerminal term;
 	private AssemblerMidLvl asm;
 
@@ -26,6 +27,7 @@ public class AssemblerMidLvlTest {
 		port = control.createMock(EditablePortfolio.class);
 		security = control.createMock(EditableSecurity.class);
 		position = control.createMock(EditablePosition.class);
+		order = control.createMock(EditableOrder.class);
 		term = control.createMock(IBEditableTerminal.class);
 		asm = new AssemblerMidLvl(low);
 		expect(low.getTerminal()).andStubReturn(term);
@@ -171,8 +173,171 @@ public class AssemblerMidLvlTest {
 	}
 	
 	@Test
-	public void testUpdate_Order() throws Exception {
-		fail("TODO: incomplete");
+	public void testUpdate_Order_SkipNoSecurity() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(low.isSecurityExists(same(entry))).andReturn(false);
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Order_StpPending() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(824L);
+		expect(entry.isStopOrder()).andStubReturn(true);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingStopOrder(eq(824L))).andReturn(true);
+		expect(term.movePendingStopOrder(eq(824L), eq(824L))).andReturn(order);
+		order.setStatus(eq(OrderStatus.ACTIVE));
+		low.fireStopOrderEvents(same(order));
+		low.adjustStopOrderStatus(same(order));
+		low.fireStopOrderEvents(same(order));
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Order_StpExistingFinished() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(915L);
+		expect(entry.isStopOrder()).andStubReturn(true);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingStopOrder(eq(915L))).andReturn(false);
+		expect(term.isStopOrderExists(eq(915L))).andReturn(true);
+		expect(term.getEditableStopOrder(eq(915L))).andReturn(order);
+		expect(order.getStatus()).andReturn(OrderStatus.FILLED);
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Order_StpExistingActive() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(310L);
+		expect(entry.isStopOrder()).andStubReturn(true);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingStopOrder(eq(310L))).andReturn(false);
+		expect(term.isStopOrderExists(eq(310L))).andReturn(true);
+		expect(term.getEditableStopOrder(eq(310L))).andReturn(order);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		low.adjustStopOrderStatus(same(order));
+		low.fireStopOrderEvents(same(order));
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testUpdate_Order_StpNew() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(725L);
+		expect(entry.isStopOrder()).andStubReturn(true);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingStopOrder(eq(725L))).andReturn(false);
+		expect(term.isStopOrderExists(eq(725L))).andReturn(false);
+		expect(term.createStopOrder()).andReturn(order);
+		term.registerStopOrder(eq(725L), same(order));
+		low.updateStopOrder(same(order), same(entry));
+		order.setStatus(eq(OrderStatus.ACTIVE));
+		low.fireStopOrderEvents(same(order));
+		low.adjustStopOrderStatus(same(order));
+		low.fireStopOrderEvents(same(order));
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Order_Pending() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(512L);
+		expect(entry.isStopOrder()).andStubReturn(false);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingOrder(eq(512L))).andReturn(true);
+		expect(term.movePendingOrder(eq(512L), eq(512L))).andReturn(order);
+		order.setStatus(eq(OrderStatus.ACTIVE));
+		low.fireOrderEvents(same(order));
+		low.adjustOrderTrades(same(order));
+		low.adjustOrderStatus(same(order));
+		low.fireOrderEvents(same(order));
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testUpdate_Order_ExistingFinished() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(310L);
+		expect(entry.isStopOrder()).andStubReturn(false);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingOrder(eq(310L))).andReturn(false);
+		expect(term.isOrderExists(eq(310L))).andReturn(true);
+		expect(term.getEditableOrder(eq(310L))).andReturn(order);
+		expect(order.getStatus()).andReturn(OrderStatus.CANCELLED);
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Order_ExistingActive() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(119L);
+		expect(entry.isStopOrder()).andStubReturn(false);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingOrder(eq(119L))).andReturn(false);
+		expect(term.isOrderExists(eq(119L))).andReturn(true);
+		expect(term.getEditableOrder(eq(119L))).andReturn(order);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
+		low.adjustOrderTrades(same(order));
+		low.adjustOrderStatus(same(order));
+		low.fireOrderEvents(same(order));
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testUpdate_Order_New() throws Exception {
+		OrderEntry entry = control.createMock(OrderEntry.class);
+		expect(entry.getId()).andStubReturn(784L);
+		expect(entry.isStopOrder()).andStubReturn(false);
+		expect(low.isSecurityExists(same(entry))).andReturn(true);
+		expect(term.isPendingOrder(eq(784L))).andReturn(false);
+		expect(term.isOrderExists(eq(784L))).andReturn(false);
+		expect(term.createOrder()).andReturn(order);
+		term.registerOrder(eq(784L), same(order));
+		low.updateOrder(same(order), same(entry));
+		order.setStatus(eq(OrderStatus.ACTIVE));
+		low.fireOrderEvents(same(order));
+		low.adjustOrderTrades(same(order));
+		low.adjustOrderStatus(same(order));
+		low.fireOrderEvents(same(order));
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
 	}
 
 }
