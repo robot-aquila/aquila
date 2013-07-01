@@ -4,7 +4,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ib.client.Contract;
 import com.ib.client.ContractDetails;
 import com.ib.client.TickType;
 
@@ -73,10 +72,7 @@ public class IBRequestMarketDataHandler implements ContractHandler {
 
 	@Override
 	public void connectionOpened() {
-		Contract contract = new Contract();
-		contract.m_conId = entry.getContractId();
-		contract.m_exchange = entry.getDefaultExchange();
-		getClient().reqMktData(reqId, contract, null, false);
+		getClient().reqMktData(reqId, entry.getDefaultContract(), null, false);
 	}
 
 	@Override

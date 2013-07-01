@@ -1,5 +1,6 @@
 package ru.prolib.aquila.ib.assembler.cache;
 
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 
 /**
  * Фасад кэша данных IB API.
@@ -25,6 +27,7 @@ public class Cache {
 	private final Map<Long, OrderStatusEntry> orderStatuses;
 	private final Map<Long, Map<Long, ExecEntry>> execs;
 	private final Map<String, PositionEntry> positions;
+	private final Map<SecurityDescriptor, ContractEntry> descr2contr;
 	
 	public Cache(EventDispatcher dispatcher, EventType onContractUpdated,
 			EventType onOrderUpdated, EventType onOrderStatusUpdated,
@@ -42,6 +45,7 @@ public class Cache {
 		orderStatuses = new LinkedHashMap<Long, OrderStatusEntry>();
 		execs = new LinkedHashMap<Long, Map<Long, ExecEntry>>();
 		positions = new LinkedHashMap<String, PositionEntry>();
+		descr2contr = new Hashtable<SecurityDescriptor, ContractEntry>();
 	}
 	
 	/**
@@ -230,6 +234,7 @@ public class Cache {
 	 */
 	public synchronized void update(ContractEntry entry) {
 		contracts.put(entry.getContractId(), entry);
+		descr2contr.put(entry.getSecurityDescriptor(), entry);
 		dispatcher.dispatch(new EventImpl(onContractUpdated));
 	}
 	
@@ -313,6 +318,16 @@ public class Cache {
 			.append(o.orderStatuses, orderStatuses)
 			.append(o.positions, positions)
 			.isEquals();
+	}
+	
+	/**
+	 * Получить кэш-запись контракта по дескриптору инструмента.
+	 * <p>
+	 * @param descr идентификатор контракта
+	 * @return кэш-запись или null, если нет соответствующей записи
+	 */
+	public synchronized ContractEntry getContract(SecurityDescriptor descr) {
+		return descr2contr.get(descr);
 	}
 
 }

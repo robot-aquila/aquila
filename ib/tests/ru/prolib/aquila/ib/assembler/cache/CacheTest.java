@@ -18,6 +18,8 @@ import com.ib.client.OrderState;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.assembler.cache.Cache;
 import ru.prolib.aquila.ib.assembler.cache.ContractEntry;
@@ -70,12 +72,21 @@ public class CacheTest {
 	 * Создать тестовую кэш-запись контракта.
 	 * <p>
 	 * @param id идентификатор контракта
+	 * @param symbol тикер
+	 * @param exchange биржа
+	 * @param currency валюта
+	 * @param type тип инструмента
 	 * @return кэш-запись контракта
 	 */
-	private ContractEntry createContractEntry(int id) {
+	private ContractEntry createContractEntry(int id, String symbol,
+			String exchange, String currency, String type)
+	{
 		ContractDetails details1 = new ContractDetails();
-		details1.m_summary = new Contract();
 		details1.m_summary.m_conId = id;
+		details1.m_summary.m_symbol = symbol;
+		details1.m_summary.m_exchange = exchange;
+		details1.m_summary.m_currency = currency;
+		details1.m_summary.m_secType = type;
 		return new ContractEntry(details1);
 	}
 	
@@ -148,9 +159,10 @@ public class CacheTest {
 	public void testUpdate_Contract() throws Exception {
 		mockDispatcher.dispatch(eq(new EventImpl(onContractUpdated)));
 		expectLastCall().times(3);
-		ContractEntry entry1 = createContractEntry(15);
-		ContractEntry entry2 = createContractEntry(11);
-		ContractEntry entry3 = createContractEntry(18);
+		ContractEntry
+			entry1 = createContractEntry(15, "SBH", "ARCA", "USD", "FUT"),
+			entry2 = createContractEntry(11, "ZZT", "LSE", "EUR", "OPT"),
+			entry3 = createContractEntry(18, "BBQ", "EQBR", "SUR", "STK");
 		control.replay();
 		
 		cache.update(entry1);
@@ -167,6 +179,7 @@ public class CacheTest {
 		expected.add(entry3);
 		assertEquals(expected, cache.getContractEntries());
 	}
+	
 	
 	@Test
 	public void testUpdate_Order() throws Exception {
@@ -293,13 +306,13 @@ public class CacheTest {
 	@Test
 	public void testEquals() throws Exception {
 		List<ContractEntry> conts1 = new Vector<ContractEntry>();
-		conts1.add(createContractEntry(80));
-		conts1.add(createContractEntry(15));
-		conts1.add(createContractEntry(11));
+		conts1.add(createContractEntry(80, "QQQ", "TST", "USD", "STK"));
+		conts1.add(createContractEntry(15, "AAA", "GGG", "JPY", "FUT"));
+		conts1.add(createContractEntry(11, "GAZP", "EQBR", "SUR", "STK"));
 		List<ContractEntry> conts2 = new Vector<ContractEntry>();
 		conts2.add(conts1.get(0));
 		conts2.add(conts1.get(2));
-		conts2.add(createContractEntry(42));
+		conts2.add(createContractEntry(42, "IBKR", "ARCA", "USD", "STK"));
 		
 		List<OrderEntry> ords1 = new Vector<OrderEntry>();
 		ords1.add(createOrderEntry(112));
@@ -401,6 +414,31 @@ public class CacheTest {
 		assertEquals(stats1, found.getOrderStatusEntries());
 		assertEquals(posits1, found.getPositionEntries());
 		assertEquals(execs1, found.getExecEntries());
+	}
+	
+	@Test
+	public void testGetContract_ByDescr() throws Exception {
+		mockDispatcher.dispatch(eq(new EventImpl(onContractUpdated)));
+		expectLastCall().anyTimes();
+		
+		ContractEntry
+			entry1 = createContractEntry(15, "AAPL", "NASDAQ", "USD", "STK"),
+			entry2 = createContractEntry(11, "SPXS", "ARCA", "USD", "STK"),
+			entry3 = createContractEntry(18, "SBER", "LSE", "EUR", "OPT");
+		control.replay();
+		
+		cache.update(entry1);
+		cache.update(entry2);
+		cache.update(entry3);
+		
+		control.verify();
+		SecurityDescriptor d1,d2,d3;
+		d1 = new SecurityDescriptor("AAPL", "NASDAQ", "USD", SecurityType.STK);
+		d2 = new SecurityDescriptor("SPXS", "ARCA", "USD", SecurityType.STK);
+		d3 = new SecurityDescriptor("SBER", "LSE", "EUR", SecurityType.OPT);
+		assertSame(entry1, cache.getContract(d1));
+		assertSame(entry2, cache.getContract(d2));
+		assertSame(entry3, cache.getContract(d3));
 	}
 
 }

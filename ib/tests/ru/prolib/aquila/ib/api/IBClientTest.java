@@ -10,6 +10,7 @@ import ru.prolib.aquila.core.utils.Variant;
 
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
+import com.ib.client.Order;
 
 public class IBClientTest {
 	private IMocksControl control;
@@ -264,6 +265,28 @@ public class IBClientTest {
 		control.replay();
 		
 		client.reqMktData(814, contract, "ABC", false);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPlaceOrder() throws Exception {
+		Contract contract = new Contract();
+		Order order = new Order();
+		socket.placeOrder(eq(8812), same(contract), same(order));
+		control.replay();
+		
+		client.placeOrder(8812, contract, order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCancelOrder() throws Exception {
+		socket.cancelOrder(eq(921));
+		control.replay();
+		
+		client.cancelOrder(921);
 		
 		control.verify();
 	}

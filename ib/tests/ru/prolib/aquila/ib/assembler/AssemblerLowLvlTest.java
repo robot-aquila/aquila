@@ -329,15 +329,12 @@ public class AssemblerLowLvlTest {
 	@Test
 	public void testStartMktData() throws Exception {
 		ContractEntry entry = control.createMock(ContractEntry.class);
-		expect(entry.getContractId()).andStubReturn(82413);
-		expect(entry.getDefaultExchange()).andStubReturn("foobar");
+		Contract expected = new Contract();
+		expect(entry.getDefaultContract()).andStubReturn(expected);
 		expect(client.nextReqId()).andReturn(180);
 		client.setContractHandler(eq(180),
 			eq(new IBRequestMarketDataHandler(terminal, security, 180, entry)));
-		Contract expected = new Contract();
-		expected.m_conId = 82413;
-		expected.m_exchange = "foobar";
-		client.reqMktData(eq(180), eq(expected), (String) isNull(), eq(false));
+		client.reqMktData(eq(180), same(expected), (String)isNull(), eq(false));
 		control.replay();
 		
 		asm.startMktData(security, entry);

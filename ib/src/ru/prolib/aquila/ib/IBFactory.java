@@ -8,6 +8,7 @@ import ru.prolib.aquila.ib.api.IBClient;
 import ru.prolib.aquila.ib.api.IBConfig;
 import ru.prolib.aquila.ib.assembler.Assembler;
 import ru.prolib.aquila.ib.assembler.IBMainHandler;
+import ru.prolib.aquila.ib.assembler.IBOrderProcessor;
 
 /**
  * Фабрика IB-терминала.
@@ -39,9 +40,7 @@ public class IBFactory implements TerminalFactory {
 		client.setMainHandler(new IBMainHandler(term, client,
 				client.getRequestNumerator(), new Assembler(term)));
 		
-		// TODO: инстанцирование перенести в конструктор терминала
-		//terminal.setOrderProcessorInstance(new IBOrderProcessor(terminal,
-		//		client, transId));
+		term.setOrderProcessorInstance(new IBOrderProcessor(term));
 		
 		return term;
 	}

@@ -191,4 +191,19 @@ public class ContractEntry extends CacheEntry {
 		return list.size() > 0 ? list.get(0) : null;
 	}
 	
+	/**
+	 * Получить контракт по-умолчанию.
+	 * <p>
+	 * Формирует экземпляр контракта, подходящий для выполнения запроса
+	 * рыночных данных и выставления заявок.
+	 * <p>
+	 * @return контракт
+	 */
+	public Contract getDefaultContract() {
+		Contract contract = new Contract();
+		contract.m_conId = getContractId();
+		contract.m_exchange = getDefaultExchange();
+		return contract;
+	}
+	
 }

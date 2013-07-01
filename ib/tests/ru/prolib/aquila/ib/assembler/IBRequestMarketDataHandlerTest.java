@@ -59,12 +59,9 @@ public class IBRequestMarketDataHandlerTest {
 	
 	@Test
 	public void testConnectionOpened() throws Exception {
-		expect(entry.getContractId()).andReturn(34);
-		expect(entry.getDefaultExchange()).andReturn("merlin");
 		Contract expected = new Contract();
-		expected.m_conId = 34;
-		expected.m_exchange = "merlin";
-		client.reqMktData(eq(815), eq(expected), (String) isNull(), eq(false));
+		expect(entry.getDefaultContract()).andReturn(expected);
+		client.reqMktData(eq(815), same(expected), (String)isNull(), eq(false));
 		control.replay();
 		
 		handler.connectionOpened();

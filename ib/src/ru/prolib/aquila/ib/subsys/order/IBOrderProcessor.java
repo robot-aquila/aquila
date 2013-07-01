@@ -20,6 +20,7 @@ import ru.prolib.aquila.ib.subsys.api.IBClient;
  * 2012-12-11<br>
  * $Id: IBOrderProcessor.java 490 2013-02-05 19:42:02Z whirlwind $
  */
+@Deprecated
 public class IBOrderProcessor implements OrderProcessor {
 	private final EditableTerminal terminal;
 	private final IBClient client;

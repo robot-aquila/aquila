@@ -195,4 +195,38 @@ public class ContractEntryTest {
 		assertEquals("BART", entry.getDefaultExchange());
 	}
 	
+	@Test
+	public void testGetDefaultContract_ForSmart() throws Exception {
+		details.m_summary.m_conId = 824;
+		details.m_validExchanges = "BART,ZART,SMART";
+		
+		Contract expected = new Contract();
+		expected.m_conId = 824;
+		expected.m_exchange = "SMART";
+		assertEquals(expected, entry.getDefaultContract());
+	}
+	
+	@Test
+	public void testGetDefaultContract_NotSmartPrimaExch() throws Exception {
+		details.m_summary.m_conId = 1024;
+		details.m_validExchanges = "BARD,DARTH";
+		details.m_summary.m_primaryExch = "GUARD";
+		
+		Contract expected = new Contract();
+		expected.m_conId = 1024;
+		expected.m_exchange = "GUARD";
+		assertEquals(expected, entry.getDefaultContract());
+	}
+	
+	@Test
+	public void testGetDefaultContract_NotSmartNoPrimaExch() throws Exception {
+		details.m_summary.m_conId = 843;
+		details.m_validExchanges = "BARD,DARTH";
+		
+		Contract expected = new Contract();
+		expected.m_conId = 843;
+		expected.m_exchange = "BARD";
+		assertEquals(expected, entry.getDefaultContract());
+	}
+	
 }

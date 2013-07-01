@@ -7,6 +7,7 @@ import ru.prolib.aquila.core.utils.Counter;
 
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
+import com.ib.client.Order;
 
 /**
  * Облегченный клиент IB API.
@@ -196,6 +197,14 @@ public class IBClient {
 			String genericTickList, boolean snapshot)
 	{
 		socket.reqMktData(reqId, contract, genericTickList, snapshot);
+	}
+	
+	public void placeOrder(int reqId, Contract contract, Order order) {
+		socket.placeOrder(reqId, contract, order);
+	}
+	
+	public void cancelOrder(int reqId) {
+		socket.cancelOrder(reqId);
 	}
 
 }
