@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.junit.*;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2013-03-12<br>
@@ -51,6 +52,36 @@ public class TRTest {
 			assertEquals(msg, fixture[i][3], tr.get(), 0.01d);
 			assertEquals(msg, fixture[i][3], tr.get(i),0.01d);
 		}
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(tr.equals(tr));
+		assertFalse(tr.equals(null));
+		assertFalse(tr.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Variant<String> vId = new Variant<String>()
+			.add("foo")
+			.add("bar");
+		Variant<CandleSeries> vSrc = new Variant<CandleSeries>(vId)
+			.add(new CandleSeriesImpl())
+			.add(new CandleSeriesImpl("zulu46"));
+		Variant<?> iterator = vSrc;
+		int foundCnt = 0;
+		TR x, found = null;
+		do {
+			x = new TR(vId.get(), vSrc.get());
+			if ( tr.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals("foo", found.getId());
+		assertEquals(source, found.getSource());
 	}
 
 }

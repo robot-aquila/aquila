@@ -28,5 +28,16 @@ public class TR extends _FLY<Candle> {
 	protected Double calculate(int index) throws ValueException {
 		return math.tr(source, index);
 	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != TR.class ) {
+			return false;
+		}
+		return fieldsEquals((_FLY<?>) other);
+	}
 
 }

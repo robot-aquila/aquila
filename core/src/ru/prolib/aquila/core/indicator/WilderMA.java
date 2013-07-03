@@ -50,5 +50,16 @@ public class WilderMA extends _MA {
 		}
 		return (MAp * (period - 1) + value) / period;
 	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != WilderMA.class ) {
+			return false;
+		}
+		return fieldsEquals((_MA) other);
+	}
 
 }

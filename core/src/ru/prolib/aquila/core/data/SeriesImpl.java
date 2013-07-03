@@ -109,7 +109,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	}
 	
 	@Override
-	public void add(T value) {
+	public synchronized void add(T value) {
 		Event event = null;
 		synchronized ( this ) {
 			event = new ValueEvent<T>(onAdd, value, history.size());
@@ -196,7 +196,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
+	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}

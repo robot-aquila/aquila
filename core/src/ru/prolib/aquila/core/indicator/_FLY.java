@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.indicator;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,5 +127,19 @@ abstract public class _FLY<T> implements DataSeries {
 	 * @throws ValueException 
 	 */
 	abstract protected Double calculate(int index) throws ValueException;
+	
+	
+	/**
+	 * Сравнить базовые атрибуты.
+	 * <p>
+	 * @param other экземпляр для сравнения
+	 * @return результат сравнения
+	 */
+	protected synchronized boolean fieldsEquals(_FLY<?> other) {
+		return new EqualsBuilder()
+			.append(other.id, id)
+			.append(other.source, source)
+			.isEquals();
+	}
 
 }

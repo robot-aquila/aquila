@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -12,12 +12,12 @@ import org.junit.Test;
  * 2013-03-02<br>
  * $Id: AlignDateMinuteTest.java 556 2013-03-04 17:18:03Z whirlwind $
  */
-public class AlignDateMinuteTest {
-	AlignDateMinute aligner;
+public class AlignMinuteTest {
+	AlignMinute aligner;
 	
 	@Before
 	public void setUp() throws Exception {
-		aligner = new AlignDateMinute(10);
+		aligner = new AlignMinute(10);
 	}
 	
 	@Test
@@ -41,6 +41,19 @@ public class AlignDateMinuteTest {
 		c.set(Calendar.MINUTE, 49);
 		c.set(Calendar.SECOND, 59);
 		assertEquals(expected, aligner.align(c.getTime()));
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(aligner.equals(aligner));
+		assertFalse(aligner.equals(null));
+		assertFalse(aligner.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(aligner.equals(new AlignMinute(10)));
+		assertFalse(aligner.equals(new AlignMinute(11)));
 	}
 
 }

@@ -1,8 +1,13 @@
 package ru.prolib.aquila.core.indicator;
 
 import static org.junit.Assert.*;
+
+import java.util.List;
+import java.util.Vector;
+
 import org.junit.*;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2013-03-12<br>
@@ -95,4 +100,56 @@ public class WilderMATest {
 			}
 		}
 	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(ma.equals(ma));
+		assertFalse(ma.equals(this));
+		assertFalse(ma.equals(null));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		List<Double> src1 = new Vector<Double>();
+		src1.add(80d);
+		src1.add(912d);
+		src1.add(15d);
+		List<Double> src2 = new Vector<Double>();
+		src2.add(1d);
+		for ( int i = 0; i < src1.size(); i ++ ) {
+			source.add(src1.get(i));
+		}
+		Variant<String> vId = new Variant<String>()
+			.add("foo")
+			.add("bar");
+		Variant<List<Double>> vSrc = new Variant<List<Double>>(vId)
+			.add(src1)
+			.add(src2);
+		Variant<Integer> vPer = new Variant<Integer>(vSrc)
+			.add(3)
+			.add(15);
+		Variant<Integer> vLen = new Variant<Integer>(vPer)
+			.add(128)
+			.add(16);
+		Variant<?> iterator = vLen;
+		int foundCnt = 0;
+		WilderMA x, found = null;
+		do {
+			DataSeriesImpl ds = new DataSeriesImpl();
+			x = new WilderMA(vId.get(), ds, vPer.get(), vLen.get());
+			for ( int i = 0; i < vSrc.get().size(); i ++ ) {
+				ds.add(vSrc.get().get(i));
+			}
+			if ( ma.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals("foo", found.getId());
+		assertEquals(ma.getSource(), found.getSource());
+		assertEquals(3, found.getPeriod());
+		assertEquals(128, found.getStorageLimit());
+	}
+	
 }

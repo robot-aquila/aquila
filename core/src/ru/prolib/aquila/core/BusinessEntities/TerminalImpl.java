@@ -35,8 +35,8 @@ import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
  * которые будут использовать данные события как сигналы разрешающие или
  * запрещающие работу с терминалом. 
  * <p>
- * 2012-06-02<br>
- * $Id: TerminalImpl.java 552 2013-03-01 13:35:35Z whirlwind $
+ * TODO: Не надо делать все методы синхронизированными. Вместо этого, в
+ * сервисном слое надо брать соответствующее хранилище и лочить его, если нужно.
  */
 public class TerminalImpl implements EditableTerminal {
 	private static final Logger logger;
@@ -180,7 +180,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * <p>
 	 * @return таймер
 	 */
-	final public synchronized Timer getTimer() {
+	final public Timer getTimer() {
 		return timer;
 	}
 	
@@ -189,7 +189,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * <p>
 	 * @return контроллер терминала
 	 */
-	final public synchronized TerminalController getTerminalController() {
+	final public TerminalController getTerminalController() {
 		return controller;
 	}
 	
@@ -198,7 +198,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	final public synchronized EventDispatcher getEventDispatcher() {
+	final public EventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 	
@@ -215,27 +215,27 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	final public synchronized EditableSecurities getSecuritiesInstance() {
+	final public EditableSecurities getSecuritiesInstance() {
 		return securities;
 	}
 	
 	@Override
-	final public synchronized EditablePortfolios getPortfoliosInstance() {
+	final public EditablePortfolios getPortfoliosInstance() {
 		return portfolios;
 	}
 	
 	@Override
-	final public synchronized Starter getStarter() {
+	final public Starter getStarter() {
 		return starter;
 	}
 	
 	@Override
-	final public synchronized EditableOrders getOrdersInstance() {
+	final public EditableOrders getOrdersInstance() {
 		return orders;
 	}
 	
 	@Override
-	final public synchronized EditableOrders getStopOrdersInstance() {
+	final public EditableOrders getStopOrdersInstance() {
 		return stopOrders;
 	}
 
@@ -778,17 +778,18 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public synchronized EventType OnStopOrderFilled() {
+	final public EventType OnStopOrderFilled() {
 		return stopOrders.OnOrderFilled();
 	}
 
 	@Override
-	final public synchronized Date getCurrentTime() {
+	final public Date getCurrentTime() {
+		// Ни в коем случае не делать синхронизированным!
 		return timer.getCurrentTime();
 	}
 
 	@Override
-	final public synchronized EventSystem getEventSystem() {
+	final public EventSystem getEventSystem() {
 		return es;
 	}
 

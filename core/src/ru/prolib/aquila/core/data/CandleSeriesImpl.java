@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data;
 
+
 /**
  * Реализация ряда свечей.
  * <p>

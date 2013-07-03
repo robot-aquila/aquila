@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
@@ -10,6 +11,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * $Id: Candle.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class Candle {
+	private static final SimpleDateFormat df;
+	
+	static {
+		df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	}
+	
 	/**
 	 * Экземпляр свечи, использующийся для индикации конца последовательности.
 	 * Содержимое этой свечи не должно использоваться в качестве данных.
@@ -243,12 +250,13 @@ public class Candle {
 	
 	@Override
 	public String toString() {
-		return time.toString() +
-			" O:" + open +
-			" H:" + high +
-			" L:" + low +
-			" C:" + close +
-			" V:" + volume;
+		return getClass().getSimpleName() +
+			"[T=" + df.format(time) + "," +
+			" O=" + open + "," +
+			" H=" + high + "," +
+			" L=" + low + "," +
+			" C=" + close + "," +
+			" V=" + volume + "]";
 	}
 	
 }

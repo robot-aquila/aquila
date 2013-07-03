@@ -12,11 +12,11 @@ import java.util.Date;
  * 2013-03-02<br>
  * $Id: AlignDateMinute.java 556 2013-03-04 17:18:03Z whirlwind $
  */
-public class AlignDateMinute implements Align<Date> {
+public class AlignMinute implements AlignTime {
 	private final Calendar calendar;
 	private final int period;
 	
-	public AlignDateMinute(int periodMinutes) {
+	public AlignMinute(int periodMinutes) {
 		super();
 		period = periodMinutes;
 		calendar = Calendar.getInstance(); 
@@ -36,6 +36,18 @@ public class AlignDateMinute implements Align<Date> {
 		calendar.set(Calendar.MINUTE, minutes % 60);
 		calendar.set(Calendar.HOUR_OF_DAY, minutes / 60);
 		return calendar.getTime();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != AlignMinute.class ) {
+			return false;
+		}
+		AlignMinute o = (AlignMinute) other;
+		return o.period == period;
 	}
 
 }
