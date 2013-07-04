@@ -3,18 +3,35 @@ package ru.prolib.aquila.quik.dde;
 import java.util.*;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 
 /**
  * Кэш таблицы стоп-заявок.
  */
 public class StopOrdersCache extends MirrorCache {
 	private final Map<Long, StopOrderCache> cache;
+	private final Map<Long, StopOrderCache> unadjusted;
 
 	public StopOrdersCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super(dispatcher, onUpdate);
 		cache = new LinkedHashMap<Long, StopOrderCache>();
+		unadjusted = new Hashtable<Long, StopOrderCache>();
+	}
+	
+	/**
+	 * Проверить наличие несогласованных записей.
+	 * <p>
+	 * Проверяется наличие записей стоп-заявок в статусе FILLED но без
+	 * номера связанной заявки. При наличии таких записей согласование
+	 * заявок выполнять нельзя, так как может привести к ситуации временного
+	 * отсутствия связи между заявками, что критично для обработчиков событий.
+	 * <p>
+	 * @return true - имеются несогласованные записи, false - несогласованных
+	 * записей нет
+	 */
+	public synchronized boolean hasFilledWithoutLinkedId() {
+		return unadjusted.size() > 0;
 	}
 
 	/**
@@ -40,7 +57,15 @@ public class StopOrdersCache extends MirrorCache {
 	 * @param order кэш-запись
 	 */
 	public synchronized void put(StopOrderCache order) {
-		cache.put(order.getId(), order);
+		Long id = order.getId();
+		cache.put(id, order);
+		if ( order.getStatus() == OrderStatus.FILLED ) {
+			if ( order.getLinkedOrderId() == null ) {
+				unadjusted.put(id, order);
+			} else {
+				unadjusted.remove(id);
+			}
+		}
 	}
 	
 	/**
@@ -53,7 +78,7 @@ public class StopOrdersCache extends MirrorCache {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
+	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}

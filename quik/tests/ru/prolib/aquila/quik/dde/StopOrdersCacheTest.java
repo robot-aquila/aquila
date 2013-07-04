@@ -6,6 +6,7 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class StopOrdersCacheTest {
@@ -33,6 +34,11 @@ public class StopOrdersCacheTest {
 		expect(order2.getId()).andStubReturn(102L);
 		expect(order3.getId()).andStubReturn(105L);
 		expect(order4.getId()).andStubReturn(102L); // to replace
+		
+		expect(order1.getStatus()).andStubReturn(OrderStatus.ACTIVE);
+		expect(order2.getStatus()).andStubReturn(OrderStatus.ACTIVE);
+		expect(order3.getStatus()).andStubReturn(OrderStatus.ACTIVE);
+		expect(order4.getStatus()).andStubReturn(OrderStatus.ACTIVE);
 	}
 	
 	@Test
@@ -132,6 +138,31 @@ public class StopOrdersCacheTest {
 		
 		control.verify();
 	}
-
+	
+	@Test
+	public void testHashFilledWithoutLinkedId() throws Exception {
+		order1 = control.createMock(StopOrderCache.class);
+		expect(order1.getId()).andStubReturn(8712L);
+		
+		expect(order1.getStatus()).andReturn(OrderStatus.ACTIVE);
+		
+		expect(order1.getStatus()).andReturn(OrderStatus.FILLED);
+		expect(order1.getLinkedOrderId()).andReturn(null);
+		
+		expect(order1.getStatus()).andReturn(OrderStatus.FILLED);
+		expect(order1.getLinkedOrderId()).andReturn(77612L);
+		control.replay();
+		
+		cache.put(order1);
+		assertFalse(cache.hasFilledWithoutLinkedId());
+		
+		cache.put(order1);
+		assertTrue(cache.hasFilledWithoutLinkedId());
+		
+		cache.put(order1);
+		assertFalse(cache.hasFilledWithoutLinkedId());
+			
+		control.verify();
+	}
 
 }

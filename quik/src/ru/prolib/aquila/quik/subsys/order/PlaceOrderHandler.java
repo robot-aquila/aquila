@@ -79,6 +79,9 @@ public class PlaceOrderHandler implements EventListener {
 				}
 				order.fireChangedEvent();
 				order.resetChanges();
+				// TODO: в идеале здесь нужно вызывать процедуру согласования,
+				// но на практике ни разу не было замечено более раннее
+				// поступление данных по каналу DDE.
 			}
 		}
 		logger.debug("Trans {} order {} response status {}",

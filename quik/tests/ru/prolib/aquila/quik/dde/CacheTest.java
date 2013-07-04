@@ -365,5 +365,15 @@ public class CacheTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testHasFilledWithoutLinkedId() {
+		expect(stopOrders.hasFilledWithoutLinkedId()).andReturn(true);
+		control.replay();
+		
+		assertTrue(cache.hasFilledWithoutLinkedId());
+		
+		control.verify();
+	}
 
 }

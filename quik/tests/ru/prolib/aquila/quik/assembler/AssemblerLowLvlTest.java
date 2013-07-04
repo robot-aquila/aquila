@@ -247,17 +247,16 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_ByOrdCache_EntryFilledAndRestAdjusted()
+	public void testAdjustOrderStatus_ByOrdCache_RestAdjusted()
 		throws Exception
 	{
 		OrderStatus proc[] = {
 				OrderStatus.ACTIVE,
-				OrderStatus.PENDING,
 		};
 		for ( int i = 0; i < proc.length; i ++ ) {
 			setUp();
+			expect(orderEntry.getStatus()).andStubReturn(OrderStatus.ACTIVE);
 			expect(order.getStatus()).andReturn(proc[i]);
-			expect(orderEntry.getStatus()).andReturn(OrderStatus.FILLED);
 			expect(order.getQtyRest()).andReturn(0L);
 			order.setStatus(OrderStatus.FILLED);
 			Date time = new Date();
@@ -272,17 +271,16 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_ByOrdCache_EntryFilledAndRestUnadjusted()
+	public void testAdjustOrderStatus_ByOrdCache_RestUnadjusted()
 		throws Exception
 	{
 		OrderStatus proc[] = {
 				OrderStatus.ACTIVE,
-				OrderStatus.PENDING,
 		};
 		for ( int i = 0; i < proc.length; i ++ ) {
 			setUp();
+			expect(orderEntry.getStatus()).andStubReturn(OrderStatus.FILLED);
 			expect(order.getStatus()).andReturn(proc[i]);
-			expect(orderEntry.getStatus()).andReturn(OrderStatus.FILLED);
 			expect(order.getQtyRest()).andReturn(1L);
 			control.replay();
 			
@@ -298,7 +296,6 @@ public class AssemblerLowLvlTest {
 	{
 		OrderStatus proc[] = {
 				OrderStatus.ACTIVE,
-				OrderStatus.PENDING,
 		};
 		for ( int i = 0; i < proc.length; i ++ ) {
 			setUp();
@@ -324,7 +321,6 @@ public class AssemblerLowLvlTest {
 	{
 		OrderStatus proc[] = {
 				OrderStatus.ACTIVE,
-				OrderStatus.PENDING,
 		};
 		for ( int i = 0; i < proc.length; i ++ ) {
 			setUp();
@@ -341,32 +337,16 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_ByOrdCache_ActivatePending()
+	public void testAdjustOrderStatus_ByOrdCache_SkipPending()
 		throws Exception
 	{
 		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
-		expect(orderEntry.getStatus()).andReturn(OrderStatus.ACTIVE);
-		order.setStatus(OrderStatus.ACTIVE);
 		control.replay();
 		
 		low.adjustOrderStatus(orderEntry, order);
 		
 		control.verify();
 	}
-	
-	@Test
-	public void testAdjustOrderStatus_ByOrdCache_SkipActive()
-		throws Exception
-	{
-		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
-		expect(orderEntry.getStatus()).andReturn(OrderStatus.ACTIVE);
-		control.replay();
-		
-		low.adjustOrderStatus(orderEntry, order);
-		
-		control.verify();
-	}
-	
 	
 	@Test
 	public void testAdjustOrderStatus_ByStopOrdCache_SkipActive()
@@ -409,12 +389,12 @@ public class AssemblerLowLvlTest {
 	}
 	
 	@Test
-	public void testAdjustOrderStatus_ByStopOrdCache_FilledNotAdjusted()
+	public void testAdjustOrderStatus_ByStopOrdCache_FilledButNoLinkedOrder()
 		throws Exception
 	{
 		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.FILLED);
 		expect(stopOrderEntry.getLinkedOrderId()).andReturn(215L);
-		expect(terminal.isOrderExists(215L)).andReturn(false);
+		expect(cache.getOrderCache(eq(215L))).andReturn(null);
 		control.replay();
 		
 		low.adjustOrderStatus(stopOrderEntry, order);
@@ -428,7 +408,7 @@ public class AssemblerLowLvlTest {
 	{
 		expect(stopOrderEntry.getStatus()).andReturn(OrderStatus.FILLED);
 		expect(stopOrderEntry.getLinkedOrderId()).andReturn(215L);
-		expect(terminal.isOrderExists(215L)).andReturn(true);
+		expect(cache.getOrderCache(eq(215L))).andReturn(orderEntry);
 		order.setStatus(OrderStatus.FILLED);
 		order.setLinkedOrderId(215L);
 		Date time = new Date();

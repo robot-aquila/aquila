@@ -370,5 +370,14 @@ public class Cache {
 	public synchronized EventType OnStopOrdersCacheUpdate() {
 		return stopOrders.OnCacheUpdate();
 	}
+	
+	/**
+	 * Делегат к {@link StopOrdersCache#hasFilledWithoutLinkedId()}.
+	 * <p>
+	 * @return наличие несогласованных кэш-записей
+	 */
+	public boolean hasFilledWithoutLinkedId() {
+		return stopOrders.hasFilledWithoutLinkedId();
+	}
 
 }

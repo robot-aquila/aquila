@@ -3,6 +3,8 @@ package ru.prolib.aquila.quik.dde;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import java.util.*;
+
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
@@ -18,7 +20,8 @@ public class OrdersCacheTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
 	}
 
 	@Before
@@ -38,6 +41,11 @@ public class OrdersCacheTest {
 		expect(order2.getId()).andStubReturn(102L);
 		expect(order3.getId()).andStubReturn(105L);
 		expect(order4.getId()).andStubReturn(102L); // to replace
+		
+		expect(order1.getTransId()).andStubReturn(null);
+		expect(order2.getTransId()).andStubReturn(824L);
+		expect(order3.getTransId()).andStubReturn(0L);
+		expect(order4.getTransId()).andStubReturn(112L);
 	}
 	
 	@Test

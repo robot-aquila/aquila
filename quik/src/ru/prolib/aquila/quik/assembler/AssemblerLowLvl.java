@@ -158,29 +158,13 @@ public class AssemblerLowLvl implements Starter {
 	 */
 	public void adjustOrderStatus(OrderCache entry, EditableOrder order) {
 		OrderStatus orderStatus = order.getStatus();
-		if ( orderStatus != OrderStatus.ACTIVE
-		  && orderStatus != OrderStatus.PENDING )
-		{
-			// Все заявки в статусе отличном от ACTIVE и PENDING игнорируются
+		if ( orderStatus != OrderStatus.ACTIVE ) {
+			// Все заявки в статусе отличном от ACTIVE игнорируются
 			return;
 		}
 		
 		OrderStatus entryStatus = entry.getStatus();
-		if ( entryStatus == OrderStatus.FILLED ) {
-			// Статус заявки не проверяем, так как в случае создания нового
-			// экземпляра заявки, новая заявка будет в статусе PENDING
-			// и нигде в программе смена этого статуса выполнена не будет,
-			// так как перевод PENDING -> ACTIVE выполняется только для заявок,
-			// созданных локально. Просто проверяем согласованность по сделкам,
-			// добавление которых должно выставить корректный неисполненный
-			// остаток.
-			Long rest = order.getQtyRest();
-			if ( rest != null && rest == 0L ) {
-				order.setStatus(OrderStatus.FILLED);
-				order.setLastChangeTime(order.getLastTradeTime());
-			}
-			
-		} else if ( entryStatus == OrderStatus.CANCELLED ) {
+		if ( entryStatus == OrderStatus.CANCELLED ) {
 			// Неисполненный остаток отмененной заявки должен быть согласован
 			// по сделкам. Только когда неисполненный остаток локальной заявки
 			// и кэш записи совпадает, только тогда заявку можно считать
@@ -191,11 +175,13 @@ public class AssemblerLowLvl implements Starter {
 				order.setLastChangeTime(entry.getWithdrawTime());
 			}
 			
-		} else if ( orderStatus == OrderStatus.PENDING ) {
-			// Здесь мы будем только в случае, когда локальная заявка -
-			// это недавно созданный экземпляр, а в ТС активная заявка. 
-			order.setStatus(OrderStatus.ACTIVE);
-			
+		} else if ( order.getQtyRest() == 0L ) {
+			// Здесь мы будем только если заявка активна а статус по кэшу
+			// либо активная, либо исполненная. Проверяем согласованность по
+			// сделкам, предварительная обработка которых приводит к выставлению
+			// корректного неисполненного остатка.
+			order.setStatus(OrderStatus.FILLED);
+			order.setLastChangeTime(order.getLastTradeTime());			
 		}
 	}
 	
@@ -219,7 +205,7 @@ public class AssemblerLowLvl implements Starter {
 			Long linkId = entry.getLinkedOrderId();
 			if ( linkId == null ) {
 				logger.debug("Stop-order {} still wait for linked ID", orderId);
-			} else if ( terminal.isOrderExists(linkId) ) {
+			} else if ( cache.getOrderCache(linkId) != null ) {
 				order.setStatus(entryStatus);
 				order.setLinkedOrderId(linkId);
 				order.setLastChangeTime(terminal.getCurrentTime());

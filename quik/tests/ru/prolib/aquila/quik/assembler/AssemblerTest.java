@@ -13,9 +13,9 @@ import ru.prolib.aquila.quik.dde.*;
 public class AssemblerTest {
 	private IMocksControl control;
 	private EditableTerminal terminal;
-	private Cache cache;
+	private Cache cache, cacheMock;
 	private AssemblerHighLvl high;
-	private Assembler assembler;
+	private Assembler assembler, assembler2;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -29,7 +29,9 @@ public class AssemblerTest {
 		high = control.createMock(AssemblerHighLvl.class);
 		terminal = new TerminalBuilder().createTerminal("foo");
 		cache = new CacheBuilder().createCache(terminal);
+		cacheMock = control.createMock(Cache.class);
 		assembler = new Assembler(terminal, cache, high);
+		assembler2 = new Assembler(terminal, cacheMock, high);
 	}
 	
 	@Test
@@ -70,12 +72,27 @@ public class AssemblerTest {
 	public void testOnEvent() throws Exception {
 		high.adjustSecurities();
 		high.adjustPortfolios();
-		high.adjustOrders();
 		high.adjustStopOrders();
+		expect(cacheMock.hasFilledWithoutLinkedId()).andReturn(false);
+		high.adjustOrders();
 		high.adjustPositions();
 		control.replay();
 		
-		assembler.onEvent(null);
+		assembler2.onEvent(null);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnEvent_UnadjustedStops() throws Exception {
+		high.adjustSecurities();
+		high.adjustPortfolios();
+		high.adjustStopOrders();
+		expect(cacheMock.hasFilledWithoutLinkedId()).andReturn(true);
+		high.adjustPositions();
+		control.replay();
+		
+		assembler2.onEvent(null);
 		
 		control.verify();
 	}
@@ -86,6 +103,7 @@ public class AssemblerTest {
 		assembler = new Assembler(terminal, cache, high);
 		high.adjustSecurities();
 		high.adjustPortfolios();
+		high.adjustStopOrders();
 		high.adjustOrders();
 		expectLastCall().andThrow(new OrderAlreadyExistsException(null));
 		terminal.firePanicEvent(eq(2), eq("Multithreading related issue."));
@@ -102,7 +120,6 @@ public class AssemblerTest {
 		assembler = new Assembler(terminal, cache, high);
 		high.adjustSecurities();
 		high.adjustPortfolios();
-		high.adjustOrders();
 		high.adjustStopOrders();
 		expectLastCall().andThrow(new OrderAlreadyExistsException(null));
 		terminal.firePanicEvent(eq(2), eq("Multithreading related issue."));

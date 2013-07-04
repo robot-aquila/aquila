@@ -13,10 +13,12 @@ import ru.prolib.aquila.quik.dde.*;
  * Примечания по событиям связанными с заявами, стоп-заявками и сделками.
  */
 public class Assembler implements Starter, EventListener {
+	private static final String MSG_UNADJ_STOPS;
 	private static final Logger logger;
 	
 	static {
 		logger = LoggerFactory.getLogger(Assembler.class);
+		MSG_UNADJ_STOPS = "Adjust order skipped cuz has unadjusted stop-orders";
 	}
 	
 	private final EditableTerminal terminal;
@@ -91,6 +93,9 @@ public class Assembler implements Starter, EventListener {
 		// Блокировка кэша в данной реализации особых результатов не дает,
 		// так как обновление кэша выполняется с блокировкой соответствующего
 		// типу объектов суб-кэша.
+		//
+		// А блокировка терминала так же ненужна будет, если в
+		// соответствующих местах сборки лочить соответствующие хранилища.
 		synchronized ( terminal ) {
 			synchronized ( cache ) {
 				processEvent(event);
@@ -103,8 +108,12 @@ public class Assembler implements Starter, EventListener {
 		try {
 			high.adjustSecurities();
 			high.adjustPortfolios();
-			high.adjustOrders();
 			high.adjustStopOrders();
+			if ( ! cache.hasFilledWithoutLinkedId() ) {
+				high.adjustOrders();
+			} else {
+				logger.debug(MSG_UNADJ_STOPS);
+			}
 			high.adjustPositions();
 		} catch ( OrderAlreadyExistsException e ) {
 			// Здесь это исключение свидетельствует о том, что блокировка по

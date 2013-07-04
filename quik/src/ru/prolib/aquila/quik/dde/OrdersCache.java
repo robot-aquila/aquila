@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.*;
  * Кэш таблицы заявок.
  */
 public class OrdersCache extends MirrorCache {
+	
 	private final Map<Long, OrderCache> cache;
 	
 	public OrdersCache(EventDispatcher dispatcher, EventType onUpdate) {
