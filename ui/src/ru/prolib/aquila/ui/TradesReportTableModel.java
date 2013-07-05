@@ -50,7 +50,7 @@ public class TradesReportTableModel extends AbstractTableModel
 	
 	private final TradeReport trades;
 	private final ClassLabels labels;
-	private final List<RTrade> list;
+	private List<RTrade> list;
 	
 	public TradesReportTableModel(TradeReport trades, UiTexts texts) {
 		super();
@@ -129,6 +129,9 @@ public class TradesReportTableModel extends AbstractTableModel
 
 	@Override
 	public void onEvent(Event event) {
+		synchronized ( list ) {
+			list = trades.getRecords();
+		}
 		if ( event.isType(trades.OnEnter()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
 			fireTableRowsInserted(e.getIndex(), e.getIndex());

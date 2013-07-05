@@ -153,6 +153,7 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 					uncoveredPos = target.getFilePointer();
 				}
 			}
+			channel.force(true);
 		} finally {
 			try {
 				lock.release();
