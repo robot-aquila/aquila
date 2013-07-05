@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.PositionType;
 import ru.prolib.aquila.core.report.*;
 
 /**
@@ -49,15 +48,15 @@ public class TradesReportTableModel extends AbstractTableModel
 		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	}
 	
-	private final Trades trades;
+	private final TradeReport trades;
 	private final ClassLabels labels;
-	private final List<TradeReport> list;
+	private final List<RTrade> list;
 	
-	public TradesReportTableModel(Trades trades, UiTexts texts) {
+	public TradesReportTableModel(TradeReport trades, UiTexts texts) {
 		super();
 		this.trades = trades;
 		this.labels = texts.get(TEXT_SEC);
-		list = trades.getTradeReports();
+		list = trades.getRecords();
 	}
 
 	@Override
@@ -77,7 +76,7 @@ public class TradesReportTableModel extends AbstractTableModel
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		TradeReport report = list.get(row);
+		RTrade report = list.get(row);
 		String hdr = header[col];
 		if ( hdr == COL_TYPE ) {
 			return report.getType();
@@ -105,18 +104,6 @@ public class TradesReportTableModel extends AbstractTableModel
 			return report.getProfitPerc();
 		}
 		return null;
-	}
-	
-	private Double getProfit(TradeReport report) {
-		Double exVal = report.getExitVolume();
-		if ( exVal == null ) {
-			return null;
-		}
-		Double profit = exVal - report.getEnterVolume();
-		if ( report.getType() == PositionType.SHORT ) {
-			profit *= -1;
-		}
-		return profit;
 	}
 	
 	private String formatTime(Date time) {
