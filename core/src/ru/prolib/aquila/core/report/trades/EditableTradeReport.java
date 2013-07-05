@@ -1,11 +1,12 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.TradeReport;
 
 /**
  * Служебный интерфейс набора отчетов по трейдам.
  */
-public interface EditableTrades extends Trades {
+public interface EditableTradeReport extends TradeReport {
 	
 	/**
 	 * Добавить сделку.

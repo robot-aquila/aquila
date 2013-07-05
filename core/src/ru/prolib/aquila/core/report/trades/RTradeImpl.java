@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -6,11 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.commons.lang3.builder.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.RTrade;
 
 /**
  * Отчет по трейду.
  */
-public class TradeReportImpl implements EditableTradeReport {
+public class RTradeImpl implements ERTrade {
 	private static final SimpleDateFormat format;
 	private final SecurityDescriptor descr;
 	private final PositionType type;
@@ -41,7 +42,7 @@ public class TradeReportImpl implements EditableTradeReport {
 	 * @param enterVol суммарный объем входа
 	 * @param exitVol суммарный объем выхода
 	 */
-	TradeReportImpl(SecurityDescriptor descr, PositionType type,
+	public RTradeImpl(SecurityDescriptor descr, PositionType type,
 			Date enterTime, Date exitTime, Long enterQty, Long exitQty,
 			Double sumByEnterPrice, Double sumByExitPrice,
 			Double enterVol, Double exitVol)
@@ -64,7 +65,7 @@ public class TradeReportImpl implements EditableTradeReport {
 	 * <p>
 	 * @param trade открывающая сделка
 	 */
-	public TradeReportImpl(Trade trade) {
+	public RTradeImpl(Trade trade) {
 		super();
 		descr = trade.getSecurityDescriptor();
 		type = trade.getDirection() == OrderDirection.BUY ?
@@ -127,7 +128,7 @@ public class TradeReportImpl implements EditableTradeReport {
 	}
 	
 	@Override
-	public synchronized EditableTradeReport addTrade(Trade trade) {
+	public synchronized ERTrade addTrade(Trade trade) {
 		OrderDirection dir = trade.getDirection(); 
 		if ( (type == PositionType.LONG && dir == OrderDirection.SELL)
 		  || (type == PositionType.SHORT && dir == OrderDirection.BUY) )
@@ -149,10 +150,10 @@ public class TradeReportImpl implements EditableTradeReport {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != TradeReportImpl.class ) {
+		if ( other == null || other.getClass() != RTradeImpl.class ) {
 			return false;
 		}
-		TradeReportImpl o = (TradeReportImpl) other;
+		RTradeImpl o = (RTradeImpl) other;
 		return new EqualsBuilder()
 			.append(o.exitQty, exitQty)
 			.append(o.exitTime, exitTime)
@@ -184,15 +185,15 @@ public class TradeReportImpl implements EditableTradeReport {
 	 * @param trade сделка
 	 * @return новый отчет, если сделка привела к развороту, иначе null
 	 */
-	private EditableTradeReport appendToExit(Trade trade) {
-		EditableTradeReport next = null;
+	private ERTrade appendToExit(Trade trade) {
+		ERTrade next = null;
 		Long currQty = trade.getQty();
 		Double volPerUnit = trade.getVolume() / currQty;
 		Long uncoveredQty = getUncoveredQty();
 		if ( currQty > uncoveredQty ) {
 			// Необходимо разбить сделку
 			Long nextQty = currQty - uncoveredQty;
-			next = new TradeReportImpl(descr,
+			next = new RTradeImpl(descr,
 				type == PositionType.LONG ?
 						PositionType.SHORT : PositionType.LONG,
 				trade.getTime(), null,
@@ -242,7 +243,7 @@ public class TradeReportImpl implements EditableTradeReport {
 	}
 
 	@Override
-	public synchronized int compareTo(TradeReport o) {
+	public synchronized int compareTo(RTrade o) {
 		if ( o == null ) {
 			return 1;
 		}
@@ -253,8 +254,8 @@ public class TradeReportImpl implements EditableTradeReport {
 	}
 	
 	@Override
-	public synchronized TradeReport clone() {
-		return new TradeReportImpl(descr, type, enterTime, exitTime,
+	public synchronized RTrade clone() {
+		return new RTradeImpl(descr, type, enterTime, exitTime,
 				enterQty, exitQty, sumByEnterPrice, sumByExitPrice,
 				enterVol, exitVol);
 	}

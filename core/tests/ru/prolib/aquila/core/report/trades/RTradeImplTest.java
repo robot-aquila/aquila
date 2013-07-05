@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -7,9 +7,12 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.RTrade;
+import ru.prolib.aquila.core.report.trades.ERTrade;
+import ru.prolib.aquila.core.report.trades.RTradeImpl;
 import ru.prolib.aquila.core.utils.Variant;
 
-public class TradeReportImplTest {
+public class RTradeImplTest {
 	private static SimpleDateFormat format;
 	private static PositionType LONG = PositionType.LONG;
 	private static PositionType SHORT = PositionType.SHORT;
@@ -88,13 +91,13 @@ public class TradeReportImplTest {
 		/**
 		 * Ожидаемое состояние на момент добавления последней сделки.
 		 */
-		private final EditableTradeReport expected;
+		private final ERTrade expected;
 		/**
 		 * Ожидаемый результат возврата на добавление последней сделки.
 		 */
-		private final EditableTradeReport result;
+		private final ERTrade result;
 		
-		private FR(EditableTradeReport expected, EditableTradeReport result) {
+		private FR(ERTrade expected, ERTrade result) {
 			super();
 			this.expected = expected;
 			this.result = result;
@@ -106,7 +109,7 @@ public class TradeReportImplTest {
 	@Test
 	public void testConstructor1() throws Exception {
 		Trade trade = createTrade(descr1, time1, BUY, 50L, 10.0d, 1000.0d);
-		TradeReportImpl report = new TradeReportImpl(trade);
+		RTradeImpl report = new RTradeImpl(trade);
 		assertNull(report.getExitPrice());
 		assertEquals(10.0d, report.getEnterPrice(), 0.01d);
 		assertNull(report.getExitTime());
@@ -121,7 +124,7 @@ public class TradeReportImplTest {
 	
 	@Test
 	public void testConstruct10() throws Exception {
-		TradeReportImpl report = new TradeReportImpl(descr2, LONG, time1, time2,
+		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, time2,
 				10L, 5L, 120.35d, 60.15d, 200.0d, 100.0d);
 		assertEquals(12.03d, report.getExitPrice(), 0.001d);
 		assertEquals(12.035d, report.getEnterPrice(), 0.001d);
@@ -137,8 +140,8 @@ public class TradeReportImplTest {
 	
 	@Test
 	public void testIsOpen() throws Exception {
-		TradeReportImpl report =
-			new TradeReportImpl(createTrade(descr1, time1, SELL, 50L, 0d, 0d));
+		RTradeImpl report =
+			new RTradeImpl(createTrade(descr1, time1, SELL, 50L, 0d, 0d));
 		assertTrue(report.isOpen());
 		report.addTrade(createTrade(descr1, time1, BUY, 25L, 0d, 0d));
 		assertTrue(report.isOpen());
@@ -148,7 +151,7 @@ public class TradeReportImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		TradeReportImpl report = new TradeReportImpl(descr2, LONG, time1, time2,
+		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, time2,
 				200L, 125L, 800.0d, 224.0d, 1024.0d, 650.0d);
 
 		Variant<SecurityDescriptor> vDescr = new Variant<SecurityDescriptor>()
@@ -187,9 +190,9 @@ public class TradeReportImplTest {
 			.add(null);
 		Variant<?> iterator = vClsVol;
 		int foundCnt = 0;
-		TradeReportImpl x = null, found = null;
+		RTradeImpl x = null, found = null;
 		do {
-			x = new TradeReportImpl(vDescr.get(), vType.get(),
+			x = new RTradeImpl(vDescr.get(), vType.get(),
 					vOpnTime.get(), vClsTime.get(),
 					vOpnQty.get(), vClsQty.get(),
 					vOpnPrice.get(), vClsPrice.get(),
@@ -214,7 +217,7 @@ public class TradeReportImplTest {
 	
 	@Test
 	public void testEquals_SpecialCases() throws Exception {
-		TradeReportImpl report = new TradeReportImpl(descr2, LONG, time1, time2,
+		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, time2,
 				200L, 125L, 800.0d, 224.0d, 1024.0d, 650.0d);
 		
 		assertTrue(report.equals(report));
@@ -226,7 +229,7 @@ public class TradeReportImplTest {
 	public void testAddTrade() throws Exception {
 		List<FR> fix = new Vector<FR>();
 		// #0, Короткая, закрытая
-		FR row = new FR(new TradeReportImpl(descr1, SHORT,
+		FR row = new FR(new RTradeImpl(descr1, SHORT,
 				format.parse("1998-08-01 20:35:00"),
 				format.parse("1998-08-02 00:00:00"),
 				200L, 200L,
@@ -245,7 +248,7 @@ public class TradeReportImplTest {
 		fix.add(row);
 		
 		// #1, Длинная, не закрытая
-		row = new FR(new TradeReportImpl(descr2, LONG,
+		row = new FR(new RTradeImpl(descr2, LONG,
 				format.parse("2001-01-01 00:00:00"),
 				null,
 				200L, null,
@@ -258,7 +261,7 @@ public class TradeReportImplTest {
 		fix.add(row);
 		
 		// #2, Длинная, частично-закрытая
-		row = new FR(new TradeReportImpl(descr1, LONG,
+		row = new FR(new RTradeImpl(descr1, LONG,
 				format.parse("1998-01-01 00:00:00"),
 				null,
 				200L, 50L,
@@ -271,13 +274,13 @@ public class TradeReportImplTest {
 		fix.add(row);
 		
 		// #3, Длинная, закрытая, с разворотом одной сделкой
-		row = new FR(new TradeReportImpl(descr1, LONG,
+		row = new FR(new RTradeImpl(descr1, LONG,
 				format.parse("1996-06-01 00:00:00"),
 				format.parse("1996-06-02 00:00:00"),
 				1L, 1L,
 				138770d, 138380d,
 				86951.89d, 86726.32d),
-			new TradeReportImpl(descr1, SHORT,
+			new RTradeImpl(descr1, SHORT,
 				format.parse("1996-06-02 00:00:00"),
 				null,
 				1L, null,
@@ -290,13 +293,13 @@ public class TradeReportImplTest {
 		fix.add(row);
 		
 		// #4, Короткая, закрытая, с сокращением и разворотом
-		row = new FR(new TradeReportImpl(descr2, SHORT,
+		row = new FR(new RTradeImpl(descr2, SHORT,
 				format.parse("2018-01-15 03:00:01"),
 				format.parse("2018-01-15 03:00:10"),
 				10L, 10L,
 				50d,  40d,
 				100d, 80d),
-			new TradeReportImpl(descr2, LONG,
+			new RTradeImpl(descr2, LONG,
 				format.parse("2018-01-15 03:00:10"),
 				null,
 				5L, null,
@@ -315,8 +318,8 @@ public class TradeReportImplTest {
 		for ( int i = 0; i < fix.size(); i ++ ) {
 			String msg = "At #" + i;
 			row = fix.get(i);
-			TradeReportImpl report = new TradeReportImpl(row.trades.get(0));
-			EditableTradeReport last = null;
+			RTradeImpl report = new RTradeImpl(row.trades.get(0));
+			ERTrade last = null;
 			for ( int j = 1; j < row.trades.size(); j ++ ) {
 				last = report.addTrade(row.trades.get(j));
 			}
@@ -331,11 +334,11 @@ public class TradeReportImplTest {
 
 	@Test
 	public void testCompareTo() throws Exception {
-		TradeReportImpl report1 = new TradeReportImpl(descr2, SHORT, time1, null,
+		RTradeImpl report1 = new RTradeImpl(descr2, SHORT, time1, null,
 				1L, null, 0d, null, 0d, null),
-			report2 = new TradeReportImpl(descr1, LONG, time2, null,
+			report2 = new RTradeImpl(descr1, LONG, time2, null,
 				1L, null, 0d, null, 0d, null),
-			report3 = new TradeReportImpl(descr1, LONG, time2, null,
+			report3 = new RTradeImpl(descr1, LONG, time2, null,
 				1L, null, 0d, null, 0d, null);
 		// сравнивается только время открытия
 		assertEquals(1, report1.compareTo(null));
@@ -346,9 +349,9 @@ public class TradeReportImplTest {
 	
 	@Test
 	public void testClone() throws Exception {
-		TradeReportImpl report = new TradeReportImpl(descr2, LONG, time1, null,
+		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, null,
 				200L, null, 800.0d, null, 1024.0d, null);
-		TradeReport copy = report.clone();
+		RTrade copy = report.clone();
 		assertEquals(report, copy);
 		assertNotSame(report, copy);
 		report.addTrade(createTrade(descr2, time2, SELL, 5L, 4d, 12d));
@@ -368,7 +371,7 @@ public class TradeReportImplTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			TradeReport report = new TradeReportImpl(descr1,
+			RTrade report = new RTradeImpl(descr1,
 					(PositionType) fix[i][0], time1, null,
 					1L, null, 0d, null, (Double) fix[i][1], (Double) fix[i][2]);
 			if ( fix[i][3] == null ) {

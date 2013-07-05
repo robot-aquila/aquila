@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -10,6 +10,10 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.RTrade;
+import ru.prolib.aquila.core.report.TradeReportEvent;
+import ru.prolib.aquila.core.report.trades.ActiveTrades;
+import ru.prolib.aquila.core.report.trades.ERTrade;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class ActiveTradesTest {
@@ -22,7 +26,7 @@ public class ActiveTradesTest {
 	private IMocksControl control;
 	private EventDispatcher dispatcher;
 	private EventType onChanged, onEnter, onExit;
-	private EditableTradeReport report1, report2; 
+	private ERTrade report1, report2; 
 	private Terminal terminal;
 	private ActiveTrades reports;
 	
@@ -42,8 +46,8 @@ public class ActiveTradesTest {
 		onChanged = control.createMock(EventType.class);
 		onEnter = control.createMock(EventType.class);
 		onExit = control.createMock(EventType.class);
-		report1 = control.createMock(EditableTradeReport.class);
-		report2 = control.createMock(EditableTradeReport.class);
+		report1 = control.createMock(ERTrade.class);
+		report2 = control.createMock(ERTrade.class);
 		terminal = control.createMock(Terminal.class);
 		reports = new ActiveTrades(dispatcher, onEnter, onExit, onChanged);
 		trade = createTrade(descr1, "1999-01-01 00:00:00", BUY, 1L, 1d, 10d);
@@ -95,7 +99,7 @@ public class ActiveTradesTest {
 	
 	@Test
 	public void testAddTrade_NewReport() throws Exception {
-		TradeReport expected = new TradeReportImpl(trade);
+		RTrade expected = new RTradeImpl(trade);
 		dispatcher.dispatch(new TradeReportEvent(onEnter, expected));
 		control.replay();
 		
@@ -152,7 +156,7 @@ public class ActiveTradesTest {
 	public void testGetReports() throws Exception {
 		reports.setReport(descr1, report1);
 		reports.setReport(descr2, report2);
-		List<TradeReport> expected = new Vector<TradeReport>();
+		List<RTrade> expected = new Vector<RTrade>();
 		expected.add(report2);
 		expected.add(report1);
 		
@@ -168,10 +172,10 @@ public class ActiveTradesTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		List<EditableTradeReport> rows1 = new Vector<EditableTradeReport>();
+		List<ERTrade> rows1 = new Vector<ERTrade>();
 		rows1.add(report1);
 		rows1.add(report2);
-		List<EditableTradeReport> rows2 = new Vector<EditableTradeReport>();
+		List<ERTrade> rows2 = new Vector<ERTrade>();
 		rows2.add(report1);
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>()
 			.add(dispatcher)
@@ -185,13 +189,13 @@ public class ActiveTradesTest {
 		Variant<EventType> vChng = new Variant<EventType>(vExt)
 			.add(onChanged)
 			.add(control.createMock(EventType.class));
-		Variant<List<EditableTradeReport>> vRows =
-				new Variant<List<EditableTradeReport>>(vChng)
+		Variant<List<ERTrade>> vRows =
+				new Variant<List<ERTrade>>(vChng)
 			.add(rows1)
 			.add(rows2);
 		Variant<?> iterator = vRows;
 		control.replay();
-		for ( EditableTradeReport r : rows1 ) {
+		for ( ERTrade r : rows1 ) {
 			reports.setReport(r.getSecurityDescriptor(), r);
 		}
 		int foundCnt = 0;
@@ -199,7 +203,7 @@ public class ActiveTradesTest {
 		do {
 			x = new ActiveTrades(vDisp.get(), vEnt.get(), vExt.get(),
 					vChng.get());
-			for ( EditableTradeReport r : vRows.get() ) {
+			for ( ERTrade r : vRows.get() ) {
 				x.setReport(r.getSecurityDescriptor(), r);
 			}
 			if ( reports.equals(x) ) {
@@ -220,7 +224,7 @@ public class ActiveTradesTest {
 	public void testClear() throws Exception {
 		reports.setReport(descr1, report1);
 		reports.setReport(descr2, report2);
-		List<TradeReport> expected = new Vector<TradeReport>();
+		List<RTrade> expected = new Vector<RTrade>();
 		reports.clear();
 		
 		assertEquals(expected, reports.getReports());
@@ -228,13 +232,12 @@ public class ActiveTradesTest {
 	
 	@Test
 	public void testConstruct_Min() throws Exception {
-		reports = new ActiveTrades();
-		EventDispatcher d = reports.getEventDispatcher();
-		assertEquals(new EventDispatcherImpl(new SimpleEventQueue(),
-				"ActiveTrades"), d);
-		assertEquals(d.createType("Enter"), reports.OnEnter());
-		assertEquals(d.createType("Exit"), reports.OnExit());
-		assertEquals(d.createType("Changed"), reports.OnChanged());
+		EventDispatcher d =
+			new EventDispatcherImpl(new SimpleEventQueue(), "ActiveTrades");
+		ActiveTrades expected = new ActiveTrades(d, d.createType("Enter"),
+				d.createType("Exit"), d.createType("Changed"));
+		
+		assertEquals(expected, new ActiveTrades());
 	}
 	
 }

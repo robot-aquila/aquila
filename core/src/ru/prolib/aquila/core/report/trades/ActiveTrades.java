@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
 import java.util.*;
 
@@ -6,6 +6,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.RTrade;
+import ru.prolib.aquila.core.report.TradeReportEvent;
 
 /**
  * Отчет по активным трейдам.
@@ -14,7 +16,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * сохраняет никакой истории.
  */
 public class ActiveTrades {
-	private Map<SecurityDescriptor, EditableTradeReport> reports;
+	private Map<SecurityDescriptor, ERTrade> reports;
 	private final EventDispatcher dispatcher;
 	private final EventType onEnter;
 	private final EventType onExit;
@@ -52,7 +54,7 @@ public class ActiveTrades {
 		this.onEnter = onEnter;
 		this.onExit = onExit;
 		this.onChanged = onChanged;
-		reports = new HashMap<SecurityDescriptor, EditableTradeReport>();
+		reports = new HashMap<SecurityDescriptor, ERTrade>();
 	}
 	
 	/**
@@ -98,13 +100,13 @@ public class ActiveTrades {
 	 */
 	public synchronized void addTrade(Trade trade) {
 		SecurityDescriptor descr = trade.getSecurityDescriptor();
-		EditableTradeReport report = reports.get(descr);
+		ERTrade report = reports.get(descr);
 		if ( report == null ) {
-			report = new TradeReportImpl(trade);
+			report = new RTradeImpl(trade);
 			reports.put(descr, report);
 			dispatcher.dispatch(new TradeReportEvent(onEnter, report));
 		} else {
-			EditableTradeReport next = report.addTrade(trade);
+			ERTrade next = report.addTrade(trade);
 			if ( ! report.isOpen() ) {
 				dispatcher.dispatch(new TradeReportEvent(onExit, report));
 				if ( next != null ) {
@@ -125,7 +127,7 @@ public class ActiveTrades {
 	 * @param descr дескриптор инструмента
 	 * @return трейд или null, если трейд по инструменту не открыт
 	 */
-	public synchronized TradeReport getReport(SecurityDescriptor descr) {
+	public synchronized RTrade getReport(SecurityDescriptor descr) {
 		return reports.get(descr);
 	}
 	
@@ -134,8 +136,8 @@ public class ActiveTrades {
 	 * <p>
 	 * @return список трейдов отсортированных в порядке открытия
 	 */
-	public synchronized List<TradeReport> getReports() {
-		List<TradeReport> list = new Vector<TradeReport>(reports.values());
+	public synchronized List<RTrade> getReports() {
+		List<RTrade> list = new Vector<RTrade>(reports.values());
 		Collections.sort(list);
 		return list;
 	}
@@ -149,7 +151,7 @@ public class ActiveTrades {
 	 * @param report отчет
 	 */
 	protected synchronized
-		void setReport(SecurityDescriptor descr, EditableTradeReport report)
+		void setReport(SecurityDescriptor descr, ERTrade report)
 	{
 		reports.put(descr, report);
 	}

@@ -1,7 +1,8 @@
 package ru.prolib.aquila.core.report;
 
-import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.trades.*;
 
 /**
  * Конструктор отчетов.
@@ -13,19 +14,46 @@ public class ReportBuilder {
 	}
 	
 	/**
-	 * Создать отчет по трейдам портфеля.
+	 * Создать отчет по трейдам счета.
 	 * <p>
-	 * Примечание: Портфель должен быть связан с экземпляром терминала,
-	 * реализующим интерфейс {@link EditableTerminal}. 
-	 * <p>
-	 * @param portfolio портфель
+	 * @param terminal терминал
+	 * @param account торговый счет
 	 * @return отчет
 	 */
-	public Trades createPortfolioTrades(Portfolio portfolio) {
-		EventDispatcher d = ((EditableTerminal) portfolio.getTerminal())
-			.getEventSystem().createEventDispatcher("Trades");
-		return new PortfolioTrades(new TradesImpl(d, d.createType("Enter"),
-				d.createType("Exit"), d.createType("Changed")), portfolio);
+	public TradeReport
+		createAccountTradeReport(Terminal terminal, Account account)
+	{
+		return createTerminalTradeReport(terminal,
+				new AccountTradeSelector(account));
+	}
+	
+	/**
+	 * Создать базовый трейд-отчет.
+	 * <p> 
+	 * @param es фасад системы событий
+	 * @return отчет
+	 */
+	public EditableTradeReport createTradeReport(EventSystem es) {
+		EventDispatcher d = es.createEventDispatcher("Trades");
+		return new CommonTradeReport(d, d.createType("Enter"),
+				d.createType("Exit"), d.createType("Changed"));
+	}
+	
+	/**
+	 * Создать отчет по трейдам терминала.
+	 * <p>
+	 * @param terminal терминал
+	 * @return отчет
+	 */
+	public TradeReport createTerminalTradeReport(Terminal terminal) {
+		return createTerminalTradeReport(terminal, new StubTradeSelector());
+	}
+	
+	private TradeReport
+		createTerminalTradeReport(Terminal terminal, TradeSelector selector)
+	{
+		return new TerminalTradeReport(terminal, selector,
+			createTradeReport(((EditableTerminal) terminal).getEventSystem()));
 	}
 	
 	@Override

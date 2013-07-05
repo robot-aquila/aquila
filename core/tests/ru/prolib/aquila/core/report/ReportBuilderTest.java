@@ -8,6 +8,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.report.trades.*;
 
 public class ReportBuilderTest {
 	private EditableTerminal terminal;
@@ -20,15 +21,33 @@ public class ReportBuilderTest {
 	}
 	
 	@Test
-	public void testCreatePortfolioTrades() throws Exception {
-		Portfolio portfolio = terminal.createPortfolio(new Account("TEST"));
+	public void testCreateTradeReport() throws Exception {
 		EventDispatcher d = terminal.getEventSystem()
-			.createEventDispatcher("Trades");
-		Trades expected = new PortfolioTrades(new TradesImpl(d,
-				d.createType("Enter"), d.createType("Exit"),
-				d.createType("Changed")), portfolio);
+		.createEventDispatcher("Trades");
+		TradeReport expected = new CommonTradeReport(d, d.createType("Enter"),
+				d.createType("Exit"), d.createType("Changed"));
 		
-		assertEquals(expected, builder.createPortfolioTrades(portfolio));
+		assertEquals(expected,
+				builder.createTradeReport(terminal.getEventSystem()));
+	}
+	
+	@Test
+	public void testCreateTerminalTradeReport() throws Exception {
+		TradeReport expected = new TerminalTradeReport(terminal,
+				new StubTradeSelector(),
+				builder.createTradeReport(terminal.getEventSystem()));
+		
+		assertEquals(expected, builder.createTerminalTradeReport(terminal));
+	}
+	
+	@Test
+	public void testCreateAccountTradeReport() throws Exception {
+		TradeReport expected = new TerminalTradeReport(terminal,
+				new AccountTradeSelector(new Account("TEST")),
+				builder.createTradeReport(terminal.getEventSystem()));
+		
+		assertEquals(expected,
+			builder.createAccountTradeReport(terminal, new Account("TEST")));
 	}
 	
 	@Test

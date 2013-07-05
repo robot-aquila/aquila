@@ -1,15 +1,18 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.RTrade;
+import ru.prolib.aquila.core.report.TradeReportEvent;
 
 /**
  * Базовый отчет по трейдам.
@@ -17,14 +20,20 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * Данный класс предназначен для отслеживания трейдов - последовательностей
  * сделок, приводящих к открытию и последующему закрытию позиции.
  */
-public class TradesImpl implements EditableTrades, EventListener {
-	private final List<TradeReport> trades;
-	private final Map<TradeReport, Integer> indices;
+public class CommonTradeReport implements EditableTradeReport, EventListener {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(CommonTradeReport.class);
+	}
+	
+	private final List<RTrade> trades;
+	private final Map<RTrade, Integer> indices;
 	private final ActiveTrades activeTrades;
 	private final EventDispatcher dispatcher;
 	private EventType onEnter, onExit, onChanged;
 	
-	public TradesImpl(EventDispatcher dispatcher, EventType onEnter,
+	public CommonTradeReport(EventDispatcher dispatcher, EventType onEnter,
 			EventType onExit, EventType onChanged)
 	{
 		super();
@@ -33,8 +42,8 @@ public class TradesImpl implements EditableTrades, EventListener {
 		this.onEnter = onEnter;
 		this.onExit = onExit;
 		this.onChanged = onChanged;
-		this.trades = new Vector<TradeReport>();
-		this.indices = new Hashtable<TradeReport, Integer>();
+		this.trades = new Vector<RTrade>();
+		this.indices = new Hashtable<RTrade, Integer>();
 	}
 	
 	/**
@@ -56,15 +65,15 @@ public class TradesImpl implements EditableTrades, EventListener {
 	}
 	
 	@Override
-	public synchronized List<TradeReport> getTradeReports() {
-		return Collections.unmodifiableList(trades);
+	public synchronized List<RTrade> getRecords() {
+		return new Vector<RTrade>(trades);
 	}
 
 	@Override
 	public synchronized void onEvent(Event event) {
 		if ( event.isType(activeTrades.OnEnter()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
-			TradeReport report = e.getReport();
+			RTrade report = e.getReport();
 			Integer index = trades.size();
 			indices.put(report, index);
 			report = report.clone();
@@ -73,7 +82,7 @@ public class TradesImpl implements EditableTrades, EventListener {
 			
 		} else if ( event.isType(activeTrades.OnExit()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
-			TradeReport report = e.getReport();
+			RTrade report = e.getReport();
 			Integer index = indices.get(report);
 			report = report.clone();
 			trades.set(index, report);
@@ -82,7 +91,7 @@ public class TradesImpl implements EditableTrades, EventListener {
 			
 		} else if ( event.isType(activeTrades.OnChanged()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
-			TradeReport report = e.getReport();
+			RTrade report = e.getReport();
 			Integer index = indices.get(report);
 			report = report.clone();
 			trades.set(index, report);
@@ -98,7 +107,7 @@ public class TradesImpl implements EditableTrades, EventListener {
 	 * @param report отчет (при отправке используется копия)
 	 * @param index индекс отчета
 	 */
-	private void postEvent(EventType type, TradeReport report, Integer index) {
+	private void postEvent(EventType type, RTrade report, Integer index) {
 		dispatcher.dispatch(new TradeReportEvent(type, report, index));
 	}
 	
@@ -120,12 +129,12 @@ public class TradesImpl implements EditableTrades, EventListener {
 	}
 
 	@Override
-	public synchronized int getTradeReportCount() {
+	public synchronized int size() {
 		return trades.size();
 	}
 
 	@Override
-	public synchronized TradeReport getTradeReport(int index) {
+	public synchronized RTrade getRecord(int index) {
 		return trades.get(index);
 	}
 
@@ -146,7 +155,11 @@ public class TradesImpl implements EditableTrades, EventListener {
 
 	@Override
 	public synchronized void addTrade(Trade trade) {
-		activeTrades.addTrade(trade);
+		if ( ! activeTrades.OnEnter().isListener(this) ) {
+			logger.error("Cannot process trade cuz not started");
+		} else {
+			activeTrades.addTrade(trade);
+		}
 	}
 	
 	@Override
@@ -154,10 +167,10 @@ public class TradesImpl implements EditableTrades, EventListener {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != TradesImpl.class ) {
+		if ( other == null || other.getClass() != CommonTradeReport.class ) {
 			return false;
 		}
-		TradesImpl o = (TradesImpl) other;
+		CommonTradeReport o = (CommonTradeReport) other;
 		return new EqualsBuilder()
 			//.append(o.activeTrades, activeTrades) // don't cmp -> recursion 
 			.append(o.dispatcher, dispatcher)

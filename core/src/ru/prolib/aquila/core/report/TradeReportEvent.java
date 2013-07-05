@@ -7,16 +7,16 @@ import ru.prolib.aquila.core.*;
  * События в связи с отчетом по трейду.
  */
 public class TradeReportEvent extends EventImpl {
-	private final TradeReport report;
+	private final RTrade report;
 	private final Integer index;
 
-	public TradeReportEvent(EventType type, TradeReport report, Integer index) {
+	public TradeReportEvent(EventType type, RTrade report, Integer index) {
 		super(type);
 		this.report = report;
 		this.index = index;
 	}
 	
-	public TradeReportEvent(EventType type, TradeReport report) {
+	public TradeReportEvent(EventType type, RTrade report) {
 		this(type, report, null);
 	}
 
@@ -25,7 +25,7 @@ public class TradeReportEvent extends EventImpl {
 	 * <p>
 	 * @return отчет
 	 */
-	public TradeReport getReport() {
+	public RTrade getReport() {
 		return report;
 	}
 	

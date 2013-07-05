@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
 import static org.junit.Assert.*;
 import java.text.SimpleDateFormat;
@@ -12,9 +12,14 @@ import com.csvreader.CsvReader;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.report.RTrade;
+import ru.prolib.aquila.core.report.TradeReportEvent;
+import ru.prolib.aquila.core.report.trades.ActiveTrades;
+import ru.prolib.aquila.core.report.trades.CommonTradeReport;
+import ru.prolib.aquila.core.report.trades.RTradeImpl;
 import ru.prolib.aquila.core.utils.Variant;
 
-public class TradesImplTest {
+public class CommonTradeReportTest {
 	private static final String TIME = "TIME";
 	private static final String SEC_CODE = "SEC_CODE";
 	private static final String DIR = "DIR";
@@ -42,7 +47,7 @@ public class TradesImplTest {
 	private EventSystem es;
 	private EventDispatcher dispatcher;
 	private EventType onEnter, onExit, onChanged;
-	private TradesImpl trades;
+	private CommonTradeReport trades;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -59,7 +64,7 @@ public class TradesImplTest {
 		onEnter = dispatcher.createType("Enter");
 		onExit = dispatcher.createType("Exit");
 		onChanged = dispatcher.createType("Changed");
-		trades = new TradesImpl(dispatcher, onEnter, onExit, onChanged);
+		trades = new CommonTradeReport(dispatcher, onEnter, onExit, onChanged);
 		es.getEventQueue().start();
 	}
 	
@@ -81,7 +86,7 @@ public class TradesImplTest {
 	 * @param dest целевой экземпляр набора трейдов
 	 * @param filename имя файла с описанием сделок
 	 */
-	private void loadTrades(TradesImpl dest, String filename) throws Exception {
+	private void loadTrades(CommonTradeReport dest, String filename) throws Exception {
 		for ( Trade trade : loadTrades(filename) ) {
 			dest.addTrade(trade);
 		}
@@ -120,11 +125,11 @@ public class TradesImplTest {
 	 * @param filename имя файла с описанием трейдов
 	 * @return список загруженных отчетов
 	 */
-	private List<TradeReport> loadTradeReports(String filename)
+	private List<RTrade> loadTradeReports(String filename)
 		throws Exception
 	{
 		CsvReader reader = new CsvReader(getFullPath(filename));
-		List<TradeReport> list = new Vector<TradeReport>();
+		List<RTrade> list = new Vector<RTrade>();
 		reader.readHeaders();
 		while ( reader.readRecord() ) {
 			list.add(loadTradeReport(reader));
@@ -158,12 +163,12 @@ public class TradesImplTest {
 	 * @param reader источник данных
 	 * @return отчет по трейдам
 	 */
-	private TradeReport loadTradeReport(CsvReader reader) throws Exception {
+	private RTrade loadTradeReport(CsvReader reader) throws Exception {
 		String exTime = reader.get(EXIT_TIME);
 		String exQty = reader.get(EXIT_QTY);
 		String exPrice = reader.get(EXIT_PRICE);
 		String exVol = reader.get(EXIT_VOL);
-		TradeReport report = new TradeReportImpl(getSecDescr(reader),
+		RTrade report = new RTradeImpl(getSecDescr(reader),
 			(LONG.equals(reader.get(TYPE))
 				? PositionType.LONG : PositionType.SHORT),
 			timeFormat.parse(reader.get(ENTER_TIME)),
@@ -220,38 +225,38 @@ public class TradesImplTest {
 		assertFalse(activeTrades.OnEnter().isListener(trades));
 		assertFalse(activeTrades.OnExit().isListener(trades));
 		assertFalse(activeTrades.OnChanged().isListener(trades));
-		assertEquals(new Vector<TradeReport>(), activeTrades.getReports());
-		assertEquals(new Vector<TradeReport>(), trades.getTradeReports());
+		assertEquals(new Vector<RTrade>(), activeTrades.getReports());
+		assertEquals(new Vector<RTrade>(), trades.getRecords());
 	}
 	
 	@Test
-	public void testGetTradeReportCount() throws Exception {
+	public void testSize() throws Exception {
 		trades.start();
 		loadTrades(trades, "trades1.csv");
 		stopQueue();
 		
-		assertEquals(5, trades.getTradeReportCount());
+		assertEquals(5, trades.size());
 	}
 	
 	@Test
-	public void testGetTradeReports() throws Exception {
+	public void testGetRecords() throws Exception {
 		trades.start();
 		loadTrades(trades, "trades1.csv");
 		stopQueue();
 		
-		List<TradeReport> expected = loadTradeReports("trade-reports1.csv");
-		assertEquals(expected, trades.getTradeReports());
+		List<RTrade> expected = loadTradeReports("trade-reports1.csv");
+		assertEquals(expected, trades.getRecords());
 	}
 	
 	@Test
-	public void testGetTradeReport() throws Exception {
+	public void testGetRecord() throws Exception {
 		trades.start();
 		loadTrades(trades, "trades1.csv");
 		stopQueue();
 		
-		List<TradeReport> expected = loadTradeReports("trade-reports1.csv");
-		assertEquals(expected.get(1), trades.getTradeReport(1));
-		assertEquals(expected.get(4), trades.getTradeReport(4));
+		List<RTrade> expected = loadTradeReports("trade-reports1.csv");
+		assertEquals(expected.get(1), trades.getRecord(1));
+		assertEquals(expected.get(4), trades.getRecord(4));
 	}
 	
 	@Test
@@ -302,10 +307,10 @@ public class TradesImplTest {
 		trades.start();
 		loadTrades(trades, "trades1.csv");
 		int foundCnt = 0;
-		TradesImpl x = null, found = null;
+		CommonTradeReport x = null, found = null;
 		do {
 			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new TradesImpl(d, d.createType(vEntId.get()),
+			x = new CommonTradeReport(d, d.createType(vEntId.get()),
 					d.createType(vExtId.get()), d.createType(vChngId.get()));
 			x.start();
 			loadTrades(x, vTrdFile.get());
@@ -319,8 +324,7 @@ public class TradesImplTest {
 		assertEquals(onEnter, found.OnEnter());
 		assertEquals(onExit, found.OnExit());
 		assertEquals(onChanged, found.OnChanged());
-		assertEquals(loadTradeReports("trade-reports1.csv"),
-				found.getTradeReports());
+		assertEquals(loadTradeReports("trade-reports1.csv"),found.getRecords());
 	}
 
 }

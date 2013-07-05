@@ -5,12 +5,13 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.report.trades.RTradeImpl;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class TradeReportEventTest {
 	private IMocksControl control;
 	private EventType type1, type2;
-	private TradeReportImpl report1, report2;
+	private RTradeImpl report1, report2;
 	private TradeReportEvent event;
 	
 	@Before
@@ -18,8 +19,8 @@ public class TradeReportEventTest {
 		control = createStrictControl();
 		type1 = control.createMock(EventType.class);
 		type2 = control.createMock(EventType.class);
-		report1 = control.createMock(TradeReportImpl.class);
-		report2 = control.createMock(TradeReportImpl.class);
+		report1 = control.createMock(RTradeImpl.class);
+		report2 = control.createMock(RTradeImpl.class);
 		event = new TradeReportEvent(type1, report1, 8);
 	}
 	
@@ -35,7 +36,7 @@ public class TradeReportEventTest {
 		Variant<EventType> vType = new Variant<EventType>()
 			.add(type1)
 			.add(type2);
-		Variant<TradeReportImpl> vRep = new Variant<TradeReportImpl>(vType)
+		Variant<RTradeImpl> vRep = new Variant<RTradeImpl>(vType)
 			.add(report1)
 			.add(report2);
 		Variant<Integer> vIdx = new Variant<Integer>(vRep)

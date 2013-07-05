@@ -1,13 +1,14 @@
-package ru.prolib.aquila.core.report;
+package ru.prolib.aquila.core.report.trades;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.report.RTrade;
 
 /**
- * Сервисный интерфейс трейд-отчета.
+ * Сервисный интерфейс записи трейд-отчета.
  * <p>
  * Интерфейс предназначен для использования поставщиком данных.
  */
-public interface EditableTradeReport extends TradeReport {
+public interface ERTrade extends RTrade {
 	
 	/**
 	 * Добавить сделку в отчет.
@@ -15,6 +16,6 @@ public interface EditableTradeReport extends TradeReport {
 	 * @param trade сделка
 	 * @return null или новый отчет, если текущий был закрыт в результате сделки
 	 */
-	public EditableTradeReport addTrade(Trade trade);
+	public ERTrade addTrade(Trade trade);
 
 }
