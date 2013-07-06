@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventType;
@@ -14,6 +16,12 @@ import ru.prolib.aquila.core.EventType;
  * Кэш таблицы собственных сделок.
  */
 public class TradesCache extends MirrorCache {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(TradesCache.class);
+	}
+	
 	private final Map<Long, TradeCache> cache;
 
 	public TradesCache(EventDispatcher dispatcher, EventType onUpdate) {
@@ -44,7 +52,12 @@ public class TradesCache extends MirrorCache {
 	 * @param trade кэш-запись
 	 */
 	public synchronized void put(TradeCache trade) {
-		cache.put(trade.getId(), trade);
+		Long id = trade.getId();
+		if ( ! cache.containsKey(id) ) {
+			Object args[] = { id, trade.getOrderId() };
+			logger.debug("First time trade cache id={}, orderId={}", args);
+		}
+		cache.put(id, trade);
 	}
 	
 	/**

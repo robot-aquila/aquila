@@ -110,8 +110,9 @@ public class ApiServiceHandler implements T2QHandler {
 	@Override
 	public void OnOrderStatus(T2QOrder o) {
 		if ( logger.isDebugEnabled() ) {
-			Object args[] = { o.getMode(), o.getOrderId(), o.getStatus() };
-			logger.debug("Mode {} order #{} status {}", args);
+			Object args[] = { o.getMode(), o.getOrderId(), o.getStatus(),
+					o.getTransId() };
+			logger.debug("Mode {} order={} transId={} status={}", args);
 		}
 		dispatcher.dispatch(new OrderEvent(onOrderStatus, o));
 	}
@@ -119,8 +120,9 @@ public class ApiServiceHandler implements T2QHandler {
 	@Override
 	public void OnTradeStatus(T2QTrade trade) {
 		if ( logger.isDebugEnabled() ) {
-			Object args[] = { trade.getMode(), trade.getId() };
-			logger.debug("Mode {} trade #{}", args);
+			Object args[] = { trade.getMode(), trade.getId(),
+					trade.getOrderId() };
+			logger.debug("Mode {} trade={} order={}", args);
 		}
 		dispatcher.dispatch(new TradeEvent(onTradeStatus, trade));
 	}

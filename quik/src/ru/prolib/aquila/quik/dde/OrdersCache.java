@@ -2,12 +2,20 @@ package ru.prolib.aquila.quik.dde;
 
 import java.util.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.*;
 
 /**
  * Кэш таблицы заявок.
  */
 public class OrdersCache extends MirrorCache {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(OrderCache.class);
+	}
 	
 	private final Map<Long, OrderCache> cache;
 	
@@ -48,7 +56,12 @@ public class OrdersCache extends MirrorCache {
 	 * @param order кэш-запись
 	 */
 	public synchronized void put(OrderCache order) {
-		cache.put(order.getId(), order);
+		Long id = order.getId();
+		if ( ! cache.containsKey(id) ) {
+			Object args[] = { id, order.getTransId() };
+			logger.debug("First time order cache id={}, transId={}", args);
+		}
+		cache.put(id, order);
 	}
 	
 	@Override
