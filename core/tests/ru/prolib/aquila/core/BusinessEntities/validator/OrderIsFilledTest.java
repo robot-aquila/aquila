@@ -3,6 +3,9 @@ package ru.prolib.aquila.core.BusinessEntities.validator;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -17,19 +20,14 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: OrderIsFilledTest.java 287 2012-10-15 03:30:51Z whirlwind $
  */
 public class OrderIsFilledTest {
-	private static IMocksControl control;
-	private static OrderIsFilled validator;
+	private IMocksControl control;
+	private OrderIsFilled validator;
 	private EditableOrder order;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		control = createStrictControl();
-		validator = new OrderIsFilled();
-	}
-	
 	@Before
 	public void setUp() throws Exception {
-		control.resetToStrict();
+		control = createStrictControl();
+		validator = new OrderIsFilled();
 		order = control.createMock(EditableOrder.class);
 	}
 	
@@ -45,36 +43,45 @@ public class OrderIsFilledTest {
 	
 	@Test
 	public void testValidate() throws Exception {
+		Set<OrderStatus> expected = new HashSet<OrderStatus>();
+		expected.add(OrderStatus.FILLED);
+		
 		Variant<OrderStatus> vStatus = new Variant<OrderStatus>()
-			.add(OrderStatus.PENDING)
-			.add(OrderStatus.FILLED)
-			.add(OrderStatus.CANCELLED)
 			.add(OrderStatus.ACTIVE)
-			.add(null);
+			.add(OrderStatus.CANCEL_FAILED)
+			.add(OrderStatus.CANCEL_SENT)
+			.add(OrderStatus.CANCELLED)
+			.add(OrderStatus.CONDITION)
+			.add(OrderStatus.FILLED)
+			.add(OrderStatus.PENDING)
+			.add(OrderStatus.REJECTED)
+			.add(OrderStatus.SENT);
 		Variant<Boolean> vChanged = new Variant<Boolean>(vStatus)
 			.add(true)
 			.add(false);
+		Variant<?> iterator = vChanged;
+		Set<OrderStatus> actual = new HashSet<OrderStatus>();
 		int found = 0;
 		int index = 0;
 		do {
+			setUp();
 			String msg = "At #" + index;
-			control.resetToStrict();
 			expect(order.getStatus()).andStubReturn(vStatus.get());
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			control.replay();
-			if ( vChanged.get()==true && vStatus.get()==OrderStatus.FILLED ) {
+			if ( vChanged.get() == true && expected.contains(vStatus.get()) ) {
 				found ++;
 				assertTrue(msg, validator.validate(order));
 				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
-				assertEquals(msg, OrderStatus.FILLED, order.getStatus());
+				actual.add(vStatus.get());
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}
 			control.verify();
 			index ++;
-		} while ( vChanged.next() );
-		assertEquals(1, found);
+		} while ( iterator.next() );
+		assertEquals(expected, actual);
 	}
 
 	@Test

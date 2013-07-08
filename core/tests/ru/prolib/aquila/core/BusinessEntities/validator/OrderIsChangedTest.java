@@ -14,19 +14,14 @@ import ru.prolib.aquila.core.BusinessEntities.validator.OrderIsChanged;
  * $Id: OrderIsChangedTest.java 287 2012-10-15 03:30:51Z whirlwind $
  */
 public class OrderIsChangedTest {
-	private static IMocksControl control;
-	private static OrderIsChanged validator;
+	private IMocksControl control;
+	private OrderIsChanged validator;
 	private EditableOrder order;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		control = createStrictControl();
-		validator = new OrderIsChanged();
-	}
-	
 	@Before
 	public void setUp() throws Exception {
-		control.resetToStrict();
+		control = createStrictControl();
+		validator = new OrderIsChanged();
 		order = control.createMock(EditableOrder.class);
 	}
 	
@@ -42,15 +37,15 @@ public class OrderIsChangedTest {
 	
 	@Test
 	public void testValidate() throws Exception {
-		Object fixture[][] = {
-			// changed, valid?
+		boolean fixture[][] = {
+			// changed, expected valid?
 			{ false,   false },
 			{ true,    true  },
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
+			setUp();
 			String msg = "At #" + i;
-			control.resetToStrict();
-			expect(order.hasChanged()).andStubReturn((Boolean) fixture[i][0]);
+			expect(order.hasChanged()).andReturn(fixture[i][0]);
 			control.replay();
 			assertEquals(msg, fixture[i][1], validator.validate(order));
 			control.verify();

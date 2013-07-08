@@ -9,8 +9,6 @@ import ru.prolib.aquila.core.utils.ValidatorException;
 /**
  * Валидатор определения неудачи процесса отмены заявки.
  * <p>
- * В настоящий момент не используется.
- * <p>
  * 2012-09-23<br>
  * $Id: OrderIsCancelFailed.java 287 2012-10-15 03:30:51Z whirlwind $
  */
@@ -28,8 +26,7 @@ public class OrderIsCancelFailed implements Validator {
 		if ( object instanceof EditableOrder ) {
 			EditableOrder order = (EditableOrder) object;
 			return order.hasChanged(OrderImpl.STATUS_CHANGED)
-				&& order.getPreviousStatus() == OrderStatus.ACTIVE
-				&& order.getStatus() == OrderStatus.REJECTED;
+				&& order.getStatus() == OrderStatus.CANCEL_FAILED;
 		}
 		return false;
 	}

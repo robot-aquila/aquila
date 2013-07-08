@@ -17,19 +17,14 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: OrderIsCancelledTest.java 287 2012-10-15 03:30:51Z whirlwind $
  */
 public class OrderIsCancelledTest {
-	private static IMocksControl control;
-	private static OrderIsCancelled validator;
+	private IMocksControl control;
+	private OrderIsCancelled validator;
 	private EditableOrder order;
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		control = createStrictControl();
-		validator = new OrderIsCancelled();
-	}
 	
 	@Before
 	public void setUp() throws Exception {
-		control.resetToStrict();
+		control = createStrictControl();
+		validator = new OrderIsCancelled();
 		order = control.createMock(EditableOrder.class);
 	}
 	
@@ -45,20 +40,25 @@ public class OrderIsCancelledTest {
 	
 	@Test
 	public void testValidate_Ok() throws Exception {
-		Variant<Boolean> vChanged = new Variant<Boolean>()
+		Variant<OrderStatus> vStatus = new Variant<OrderStatus>()
+			.add(OrderStatus.ACTIVE)
+			.add(OrderStatus.CANCEL_FAILED)
+			.add(OrderStatus.CANCEL_SENT)
+			.add(OrderStatus.CANCELLED)
+			.add(OrderStatus.CONDITION)
+			.add(OrderStatus.FILLED)
+			.add(OrderStatus.PENDING)
+			.add(OrderStatus.REJECTED)
+			.add(OrderStatus.SENT);
+		Variant<Boolean> vChanged = new Variant<Boolean>(vStatus)
 			.add(true)
 			.add(false);
-		Variant<OrderStatus> vStatus = new Variant<OrderStatus>(vChanged)
-			.add(OrderStatus.PENDING)
-			.add(OrderStatus.ACTIVE)
-			.add(OrderStatus.FILLED)
-			.add(OrderStatus.CANCELLED)
-			.add(null);
+		Variant<?> iterator = vChanged;
 		int found = 0;
 		int index = 0;
 		do {
+			setUp();
 			String msg = "At #" + index;
-			control.resetToStrict();
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			expect(order.getStatus()).andStubReturn(vStatus.get());
@@ -67,13 +67,12 @@ public class OrderIsCancelledTest {
 				found ++;
 				assertTrue(msg, validator.validate(order));
 				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
-				assertEquals(msg, OrderStatus.CANCELLED, order.getStatus());
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}
 			control.verify();
 			index ++;
-		} while ( vStatus.next() );
+		} while ( iterator.next() );
 		assertEquals(1, found);
 	}
 	

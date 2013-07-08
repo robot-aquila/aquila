@@ -3,6 +3,9 @@ package ru.prolib.aquila.core.BusinessEntities.validator;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -17,19 +20,14 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: OrderIsPartiallyFilledTest.java 287 2012-10-15 03:30:51Z whirlwind $
  */
 public class OrderIsPartiallyFilledTest {
-	private static IMocksControl control;
-	private static OrderIsPartiallyFilled validator;
+	private IMocksControl control;
+	private OrderIsPartiallyFilled validator;
 	private EditableOrder order;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		control = createStrictControl();
-		validator = new OrderIsPartiallyFilled();
-	}
-	
 	@Before
 	public void setUp() throws Exception {
-		control.resetToStrict();
+		control = createStrictControl();
+		validator = new OrderIsPartiallyFilled();
 		order = control.createMock(EditableOrder.class);
 	}
 	
@@ -45,43 +43,43 @@ public class OrderIsPartiallyFilledTest {
 
 	@Test
 	public void testValidate() throws Exception {
+		Set<OrderStatus> expected = new HashSet<OrderStatus>();
+		expected.add(OrderStatus.CANCELLED);
+		
 		Variant<OrderStatus> vStatus = new Variant<OrderStatus>()
-			.add(OrderStatus.PENDING)
-			.add(OrderStatus.FILLED)
-			.add(OrderStatus.CANCELLED)
 			.add(OrderStatus.ACTIVE)
-			.add(null);
-		Variant<Long> vQtyRest = new Variant<Long>(vStatus)
-			.add(0L)
-			.add(5L)
-			.add(null);
-		Variant<Boolean> vChanged = new Variant<Boolean>(vQtyRest)
+			.add(OrderStatus.CANCEL_FAILED)
+			.add(OrderStatus.CANCEL_SENT)
+			.add(OrderStatus.CANCELLED)
+			.add(OrderStatus.CONDITION)
+			.add(OrderStatus.FILLED)
+			.add(OrderStatus.PENDING)
+			.add(OrderStatus.REJECTED)
+			.add(OrderStatus.SENT);
+		Variant<Boolean> vChanged = new Variant<Boolean>(vStatus)
 			.add(true)
 			.add(false);
-		Variant<Long> vQty = new Variant<Long>(vChanged)
-			.add(5L)
-			.add(10L);
-		Variant<?> iterator = vQty;
+		Variant<Long> vQtyRest = new Variant<Long>(vChanged)
+			.add(0L)
+			.add(5L);
+		Variant<?> iterator = vQtyRest;
 		int found = 0;
 		int index = 0;
 		do {
+			setUp();
 			String msg = "At #" + index;
-			control.resetToStrict();
 			expect(order.getStatus()).andStubReturn(vStatus.get());
 			expect(order.getQtyRest()).andStubReturn(vQtyRest.get());
-			expect(order.getQty()).andStubReturn(vQty.get());
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			control.replay();
-			if ( vStatus.get()==OrderStatus.CANCELLED && vChanged.get()==true
-					&& vQtyRest.get() != null && vQtyRest.get() > 0
-					&& vQtyRest.get() < vQty.get() )
+			if ( vChanged.get() == true
+					&& vStatus.get()==OrderStatus.CANCELLED 
+					&& vQtyRest.get() > 0 )
 			{
 				found ++;
 				assertTrue(msg, validator.validate(order));
 				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
-				assertEquals(msg, OrderStatus.CANCELLED, order.getStatus());
-				assertEquals(msg, new Long(5L), order.getQtyRest());
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}

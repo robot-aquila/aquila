@@ -1,10 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.validator;
 
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
-import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
-import ru.prolib.aquila.core.utils.Validator;
-import ru.prolib.aquila.core.utils.ValidatorException;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.*;
 
 /**
  * Валидатор определения момента завершения заявки.
@@ -26,8 +23,7 @@ public class OrderIsDone implements Validator {
 		if ( object instanceof  EditableOrder ) {
 			EditableOrder order = (EditableOrder) object;
 			return order.hasChanged(OrderImpl.STATUS_CHANGED) &&
-				(order.getStatus() == OrderStatus.CANCELLED
-			  || order.getStatus() == OrderStatus.FILLED);
+				order.getStatus().isFinal();
 		}
 		return false;
 	}

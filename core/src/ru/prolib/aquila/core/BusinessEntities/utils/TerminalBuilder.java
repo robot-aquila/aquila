@@ -91,7 +91,6 @@ public class TerminalBuilder {
 	 * @param securities набор инструментов
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
-	 * @param stopOrders набор стоп-заявок
 	 * @param dispatcher диспетчер событий
 	 * @param onConnected тип события: при подключении терминала
 	 * @param onDisconnected тип события: при отключении терминала

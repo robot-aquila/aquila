@@ -17,19 +17,14 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: OrderIsCancelFailedTest.java 282 2012-09-25 02:27:46Z whirlwind $
  */
 public class OrderIsCancelFailedTest {
-	private static IMocksControl control;
-	private static OrderIsCancelFailed validator;
+	private IMocksControl control;
+	private OrderIsCancelFailed validator;
 	private EditableOrder order;
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		control = createStrictControl();
-		validator = new OrderIsCancelFailed();
-	}
 	
 	@Before
 	public void setUp() throws Exception {
-		control.resetToStrict();
+		control = createStrictControl();
+		validator = new OrderIsCancelFailed();
 		order = control.createMock(EditableOrder.class);
 	}
 	
@@ -45,21 +40,17 @@ public class OrderIsCancelFailedTest {
 	
 	@Test
 	public void testValidate() throws Exception {
-		Variant<OrderStatus> vCurrStat = new Variant<OrderStatus>()
-			.add(OrderStatus.PENDING)
-			.add(OrderStatus.FILLED)
-			.add(OrderStatus.CANCELLED)
+		Variant<OrderStatus> vStatus = new Variant<OrderStatus>()
 			.add(OrderStatus.ACTIVE)
-			.add(null)
-			.add(OrderStatus.REJECTED);
-		Variant<OrderStatus> vPrevStat = new Variant<OrderStatus>(vCurrStat)
-			.add(OrderStatus.PENDING)
-			.add(OrderStatus.FILLED)
+			.add(OrderStatus.CANCEL_FAILED)
+			.add(OrderStatus.CANCEL_SENT)
 			.add(OrderStatus.CANCELLED)
-			.add(OrderStatus.ACTIVE)
-			.add(null)
-			.add(OrderStatus.REJECTED);
-		Variant<Boolean> vChanged = new Variant<Boolean>(vPrevStat)
+			.add(OrderStatus.CONDITION)
+			.add(OrderStatus.FILLED)
+			.add(OrderStatus.PENDING)
+			.add(OrderStatus.REJECTED)
+			.add(OrderStatus.SENT);
+		Variant<Boolean> vChanged = new Variant<Boolean>(vStatus)
 			.add(true)
 			.add(false);
 		Variant<?> iterator = vChanged;
@@ -67,21 +58,17 @@ public class OrderIsCancelFailedTest {
 		int index = 0;
 		do {
 			String msg = "At #" + index;
-			control.resetToStrict();
-			expect(order.getStatus()).andStubReturn(vCurrStat.get());
-			expect(order.getPreviousStatus()).andStubReturn(vPrevStat.get());
+			setUp();
+			expect(order.getStatus()).andStubReturn(vStatus.get());
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			control.replay();
-			if ( vChanged.get() == true &&
-				 vCurrStat.get() == OrderStatus.REJECTED &&
-				 vPrevStat.get() == OrderStatus.ACTIVE )
+			if ( vChanged.get() == true
+					&& vStatus.get() == OrderStatus.CANCEL_FAILED )
 			{
 				found ++;
 				assertTrue(msg, validator.validate(order));
 				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
-				assertEquals(msg,OrderStatus.REJECTED, order.getStatus());
-				assertEquals(msg,OrderStatus.ACTIVE,order.getPreviousStatus());
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}

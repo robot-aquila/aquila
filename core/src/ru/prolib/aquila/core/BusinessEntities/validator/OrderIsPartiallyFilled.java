@@ -30,9 +30,8 @@ public class OrderIsPartiallyFilled implements Validator {
 		if ( object instanceof EditableOrder ) {
 			EditableOrder order = (EditableOrder) object;
 			return order.hasChanged(OrderImpl.STATUS_CHANGED)
-				&& order.getQtyRest() != null && order.getQtyRest() > 0
-				&& order.getQtyRest() < order.getQty()
-				&& order.getStatus() == OrderStatus.CANCELLED;
+				&& order.getStatus() == OrderStatus.CANCELLED
+				&& order.getQtyRest() > 0;
 		}
 		return false;
 	}
