@@ -15,31 +15,6 @@ public class OrderType {
 	 * Рыночная.
 	 */
 	public static final OrderType MARKET = new OrderType("Market");
-	/**
-	 * Стоп-лимит.
-	 * @deprecated Директива 20130706
-	 */
-	public static final OrderType STOP_LIMIT = new OrderType("StopLimit");
-	/**
-	 * Тэйк-профит.
-	 * @deprecated Директива 20130706
-	 */
-	public static final OrderType TAKE_PROFIT = new OrderType("TakeProfit");
-	/**
-	 * Тэйк-профит и стоп-лимит.
-	 * @deprecated Директива 20130706
-	 */
-	public static final OrderType TPSL = new OrderType("TakeProfit&StopLimit");
-	/**
-	 * Тэйк-профит и стоп-лимит.
-	 * @deprecated Директива 20130706
-	 */
-	public static final OrderType TAKE_PROFIT_AND_STOP_LIMIT = TPSL;
-	/**
-	 * Заявка иного (явно не поддерживаемого) типа.
-	 * @deprecated Директива 20130706
-	 */
-	public static final OrderType OTHER = new OrderType("Other");
 	
 	private final String code;
 	

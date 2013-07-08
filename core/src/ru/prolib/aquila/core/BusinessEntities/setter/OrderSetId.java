@@ -31,14 +31,14 @@ public class OrderSetId implements S<EditableOrder> {
 	public void set(EditableOrder object, Object value) throws ValueException {
 		if ( value != null ) {
 			Class<?> valueClass = value.getClass();
-			if ( valueClass == Long.class ) {
-				object.setId((Long) value);
-			} else if ( valueClass == Integer.class ) {
-				object.setId(((Integer) value).longValue());
+			if ( valueClass == Integer.class ) {
+				object.setId((Integer) value);
+			} else if ( valueClass == Long.class ) {
+				object.setId(((Long) value).intValue());
 			} else if ( valueClass == Double.class ) {
-				object.setId(((Double) value).longValue());
+				object.setId(((Double) value).intValue());
 			} else if ( valueClass == Float.class ) {
-				object.setId(((Float) value).longValue());
+				object.setId(((Float) value).intValue());
 			}
 		}
 	}

@@ -18,7 +18,7 @@ public interface Orders {
 	 * @param id идентификатор заявки
 	 * @return true - есть заявка с таким идентификатором
 	 */
-	public boolean isOrderExists(long id);
+	public boolean isOrderExists(int id);
 	
 	/**
 	 * Получить список заявок.
@@ -41,7 +41,7 @@ public interface Orders {
 	 * @return заявка
 	 * @throws OrderNotExistsException
 	 */
-	public Order getOrder(long id) throws OrderException;
+	public Order getOrder(int id) throws OrderException;
 	
 	/**
 	 * Получить тип события: при поступлении информации о новой заявке.

@@ -286,7 +286,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public boolean isOrderExists(long id) {
+	final public boolean isOrderExists(int id) {
 		return orders.isOrderExists(id);
 	}
 
@@ -296,7 +296,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public Order getOrder(long id) throws OrderException {
+	final public Order getOrder(int id) throws OrderException {
 		return orders.getOrder(id);
 	}
 
@@ -406,21 +406,21 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public EditableOrder getEditableOrder(long id)
+	final public EditableOrder getEditableOrder(int id)
 		throws OrderNotExistsException
 	{
 		return orders.getEditableOrder(id);
 	}
 
 	@Override
-	final public void registerOrder(long id, EditableOrder order)
+	final public void registerOrder(int id, EditableOrder order)
 		throws OrderAlreadyExistsException
 	{
 		orders.registerOrder(id, order);
 	}
 
 	@Override
-	final public void purgeOrder(long id) {
+	final public void purgeOrder(int id) {
 		orders.purgeOrder(id);
 	}
 

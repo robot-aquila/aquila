@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.BusinessEntities.validator.*;
  * потребителями сервиса заявок.
  */
 public class OrdersImpl implements EditableOrders, EventListener {
-	private final Map<Long, EditableOrder> orders;
+	private final Map<Integer, EditableOrder> orders;
 	private final EventDispatcher dispatcher;
 	private final EventType onAvailable;
 	private final EventType onCancelFailed;
@@ -56,7 +56,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			EventType onTrade)
 	{
 		super();
-		orders = new LinkedHashMap<Long, EditableOrder>();
+		orders = new LinkedHashMap<Integer, EditableOrder>();
 		this.dispatcher = dispatcher;
 		this.onAvailable = onAvailable;
 		this.onCancelFailed = onCancelFailed;
@@ -81,7 +81,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized boolean isOrderExists(long id) {
+	public synchronized boolean isOrderExists(int id) {
 		return orders.containsKey(id);
 	}
 
@@ -91,7 +91,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized Order getOrder(long id) throws OrderException {
+	public synchronized Order getOrder(int id) throws OrderException {
 		return getEditableOrder(id);
 	}
 
@@ -106,7 +106,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized EditableOrder getEditableOrder(long id)
+	public synchronized EditableOrder getEditableOrder(int id)
 		throws OrderNotExistsException
 	{
 		EditableOrder order = orders.get(id);
@@ -117,7 +117,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 	
 	@Override
-	public synchronized void purgeOrder(long id) {
+	public synchronized void purgeOrder(int id) {
 		EditableOrder order = orders.get(id);
 		if ( order != null ) {
 			order.OnCancelFailed().removeListener(this);
@@ -213,7 +213,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized void registerOrder(long id, EditableOrder order)
+	public synchronized void registerOrder(int id, EditableOrder order)
 			throws OrderAlreadyExistsException
 	{
 		if ( orders.containsKey(id) ) {
@@ -272,7 +272,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	 * @param id номер заявки
 	 * @param order экземпляр заявки
 	 */
-	protected synchronized void setOrder(long id, EditableOrder order) {
+	protected synchronized void setOrder(int id, EditableOrder order) {
 		orders.put(id, order);
 	}
 	

@@ -15,11 +15,6 @@ public class OrderTypeTest {
 	public void testConstants() throws Exception {
 		assertEquals("Limit", OrderType.LIMIT.toString());
 		assertEquals("Market", OrderType.MARKET.toString());
-		assertEquals("StopLimit", OrderType.STOP_LIMIT.toString());
-		assertEquals("TakeProfit", OrderType.TAKE_PROFIT.toString());
-		assertEquals("TakeProfit&StopLimit", OrderType.TPSL.toString());
-		assertSame(OrderType.TPSL, OrderType.TAKE_PROFIT_AND_STOP_LIMIT);
-		assertEquals("Other", OrderType.OTHER.toString());
 	}
 
 }

@@ -16,7 +16,7 @@ public interface EditableOrder extends Order, Editable {
 	 * <p>
 	 * @param id идентификатор заявки
 	 */
-	public void setId(Long id);
+	public void setId(Integer id);
 	
 	/**
 	 * Установить направление заявки.

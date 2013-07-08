@@ -102,7 +102,7 @@ public interface Order {
 	 * <p>
 	 * @return биржевой идентификатор заявки или null, если не определен 
 	 */
-	public Long getId();
+	public Integer getId();
 	
 	/**
 	 * Получить направление заявки.

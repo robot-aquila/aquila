@@ -34,18 +34,18 @@ public class OrderSetIdTest {
 	public void testSet() throws Exception {
 		Object fixture[][] = {
 				// value, expected value, set?
-				{ 100500L,				100500L, true  },
-				{ new Integer(10),		10L,	 true  },
-				{ new Double(201.1D),	201L,	 true  },
+				{ 100500L,				100500, true  },
+				{ new Integer(10),		10,	 	true  },
+				{ new Double(201.1D),	201,	 true  },
 				{ null,					null,	 false },
 				{ new Boolean(false),	null,	 false },
 				{ this,					null,	 false },
-				{ new Float(123.456),	123L,	 true  },
+				{ new Float(123.456),	123,	 true  },
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			control.resetToStrict();
 			if ( (Boolean) fixture[i][2] ) {
-				order.setId((Long) fixture[i][1]);
+				order.setId((Integer) fixture[i][1]);
 			}
 			control.replay();
 			setter.set(order, fixture[i][0]);

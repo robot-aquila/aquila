@@ -22,7 +22,7 @@ public interface EditableOrders extends Orders {
 	 * @return заявка
 	 * @throws OrderNotExistsException
 	 */
-	public EditableOrder getEditableOrder(long id)
+	public EditableOrder getEditableOrder(int id)
 		throws OrderNotExistsException;
 	
 	/**
@@ -32,7 +32,7 @@ public interface EditableOrders extends Orders {
 	 * @param order заявка
 	 * @throws OrderAlreadyExistsException
 	 */
-	public void registerOrder(long id, EditableOrder order)
+	public void registerOrder(int id, EditableOrder order)
 		throws OrderAlreadyExistsException;
 	
 	/**
@@ -42,7 +42,7 @@ public interface EditableOrders extends Orders {
 	 * <p>
 	 * @param id идентификатор заявки
 	 */
-	public void purgeOrder(long id);
+	public void purgeOrder(int id);
 	
 	/**
 	 * Создать экземпляр заявки.

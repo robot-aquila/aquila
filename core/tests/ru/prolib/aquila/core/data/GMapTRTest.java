@@ -22,7 +22,7 @@ public class GMapTRTest {
 	public static void setUpBeforeClass() throws Exception {
 		key = new GString();
 		map = new HashMap<String, OrderType>();
-		map.put("StopLoss", OrderType.STOP_LIMIT);
+		map.put("Limit", OrderType.LIMIT);
 		map.put("Market", OrderType.MARKET);
 		getter = new GMapTR<OrderType>(key, map);
 	}
@@ -30,7 +30,7 @@ public class GMapTRTest {
 	@Test
 	public void testGet() throws Exception {
 		assertSame(OrderType.MARKET, getter.get("Market"));
-		assertSame(OrderType.STOP_LIMIT, getter.get("StopLoss"));
+		assertSame(OrderType.LIMIT, getter.get("Limit"));
 		assertNull(getter.get(null));
 		assertNull(getter.get(this));
 	}
@@ -46,10 +46,10 @@ public class GMapTRTest {
 	public void testEquals() throws Exception {
 		Map<String, OrderType> map2 = new HashMap<String, OrderType>();
 		map2.put("Market", OrderType.MARKET);
-		map2.put("StopLoss", OrderType.STOP_LIMIT);
+		map2.put("Limit", OrderType.LIMIT);
 		G<String> key2 = new GString();
 		Map<String, OrderType> map3 = new HashMap<String, OrderType>();
-		map3.put("StopLoss", OrderType.STOP_LIMIT);
+		map3.put("Limit", OrderType.LIMIT);
 		G<String> key3 = new GConst<String>("foobar");
 		
 		assertTrue(getter.equals(new GMapTR<OrderType>(key2, map2)));

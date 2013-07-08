@@ -298,12 +298,12 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testIsOrderExists() throws Exception {
-		expect(orders.isOrderExists(123L)).andReturn(true);
-		expect(orders.isOrderExists(321L)).andReturn(false);
+		expect(orders.isOrderExists(123)).andReturn(true);
+		expect(orders.isOrderExists(321)).andReturn(false);
 		control.replay();
 		
-		assertTrue(terminal.isOrderExists(123L));
-		assertFalse(terminal.isOrderExists(321L));
+		assertTrue(terminal.isOrderExists(123));
+		assertFalse(terminal.isOrderExists(321));
 		
 		control.verify();
 	}
@@ -322,10 +322,10 @@ public class TerminalImplTest {
 	@Test
 	public void testGetOrder() throws Exception {
 		Order order = control.createMock(Order.class);
-		expect(orders.getOrder(345L)).andReturn(order);
+		expect(orders.getOrder(345)).andReturn(order);
 		control.replay();
 		
-		assertSame(order, terminal.getOrder(345L));
+		assertSame(order, terminal.getOrder(345));
 		
 		control.verify();
 	}
@@ -527,26 +527,26 @@ public class TerminalImplTest {
 	@Test
 	public void testGetEditableOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(orders.getEditableOrder(158l)).andReturn(order);
+		expect(orders.getEditableOrder(158)).andReturn(order);
 		control.replay();
-		assertSame(order, terminal.getEditableOrder(158l));
+		assertSame(order, terminal.getEditableOrder(158));
 		control.verify();
 	}
 	
 	@Test
 	public void testRegisterOrder() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		orders.registerOrder(eq(123L), same(order));
+		orders.registerOrder(eq(123), same(order));
 		control.replay();
-		terminal.registerOrder(123L, order);
+		terminal.registerOrder(123, order);
 		control.verify();
 	}
 	
 	@Test
 	public void testPurgeOrder() throws Exception {
-		orders.purgeOrder(eq(192l));
+		orders.purgeOrder(eq(192));
 		control.replay();
-		terminal.purgeOrder(192l);
+		terminal.purgeOrder(192);
 		control.verify();
 	}
 	
@@ -1059,7 +1059,7 @@ public class TerminalImplTest {
 		order.setPrice(eq(15d));
 		order.setAvailable(eq(true));
 		order.resetChanges();
-		orders.registerOrder(eq(217L), same(order));
+		orders.registerOrder(eq(217), same(order));
 		orders.fireOrderAvailableEvent(same(order));
 		control.replay();
 		
@@ -1084,7 +1084,7 @@ public class TerminalImplTest {
 		order.setQtyRest(eq(10L));
 		order.setAvailable(eq(true));
 		order.resetChanges();
-		orders.registerOrder(eq(555L), same(order));
+		orders.registerOrder(eq(555), same(order));
 		orders.fireOrderAvailableEvent(same(order));
 		control.replay();
 		

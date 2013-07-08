@@ -30,7 +30,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private Account account;
 	private SecurityDescriptor descr;
 	private Direction direction;
-	private Long id;
+	private Integer id;
 	private Double price;
 	private Long qty;
 	private Long qtyRest;
@@ -164,7 +164,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized Long getId() {
+	public synchronized Integer getId() {
 		return id;
 	}
 
@@ -231,7 +231,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized void setId(Long id) {
+	public synchronized void setId(Integer id) {
 		if ( id == null ? this.id != null : ! id.equals(this.id) ) {
 			this.id = id;
 			setChanged();

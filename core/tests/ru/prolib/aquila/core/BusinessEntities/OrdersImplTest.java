@@ -94,16 +94,16 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testIsOrderExists() throws Exception {
-		orders.setOrder(12345L, o1);
-		assertTrue(orders.isOrderExists(12345L));
-		assertFalse(orders.isOrderExists(87654L));
+		orders.setOrder(12345, o1);
+		assertTrue(orders.isOrderExists(12345));
+		assertFalse(orders.isOrderExists(87654));
 	}
 	
 	@Test
 	public void testGetOrders() throws Exception {
-		orders.setOrder(8L, o1);
-		orders.setOrder(9L, o2);
-		orders.setOrder(5L, o3);
+		orders.setOrder(8, o1);
+		orders.setOrder(9, o2);
+		orders.setOrder(5, o3);
 		List<Order> expected = new Vector<Order>();
 		expected.add(o1);
 		expected.add(o2);
@@ -116,13 +116,13 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testGetOrder_Ok() throws Exception {
-		orders.setOrder(8L, o1);
-		assertSame(o1, orders.getOrder(8L));
+		orders.setOrder(8, o1);
+		assertSame(o1, orders.getOrder(8));
 	}
 	
 	@Test (expected=OrderNotExistsException.class)
 	public void testGetOrder_ThrowsIfOrderNotExists() throws Exception {
-		orders.getOrder(8L);
+		orders.getOrder(8);
 	}
 	
 	@Test
@@ -137,18 +137,18 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testGetEditableOrder_Ok() throws Exception {
-		orders.setOrder(8L, o1);
-		orders.setOrder(9L, o2);
+		orders.setOrder(8, o1);
+		orders.setOrder(9, o2);
 		
-		assertSame(o1, orders.getEditableOrder(8L));
-		assertSame(o2, orders.getEditableOrder(9L));
+		assertSame(o1, orders.getEditableOrder(8));
+		assertSame(o2, orders.getEditableOrder(9));
 	}
 	
 	@Test (expected=OrderNotExistsException.class)
 	public void testGetEditableOrder_ThrowsIfOrderNotExists()
 		throws Exception
 	{
-		orders.getEditableOrder(8L);
+		orders.getEditableOrder(8);
 	}
 	
 	@Test
@@ -163,11 +163,11 @@ public class OrdersImplTest {
 		owt.OnRegistered().addListener(orders);
 		owt.OnRegisterFailed().addListener(orders);
 		owt.OnTrade().addListener(orders);
-		orders.setOrder(8L, owt);
+		orders.setOrder(8, owt);
 		
-		orders.purgeOrder(8L);
+		orders.purgeOrder(8);
 		
-		assertFalse(orders.isOrderExists(8L));
+		assertFalse(orders.isOrderExists(8));
 		assertFalse(owt.OnCancelFailed().isListener(orders));
 		assertFalse(owt.OnCancelled().isListener(orders));
 		assertFalse(owt.OnChanged().isListener(orders));
@@ -182,7 +182,7 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testPurgeOrder_ForNonExisting() throws Exception {
-		orders.purgeOrder(8L);
+		orders.purgeOrder(8);
 	}
 
 	@Test
@@ -289,21 +289,21 @@ public class OrdersImplTest {
 	@Test
 	public void testGetOrdersCount() throws Exception {
 		assertEquals(0, orders.getOrdersCount());
-		orders.setOrder(1L, o1);
+		orders.setOrder(1, o1);
 		assertEquals(1, orders.getOrdersCount());
-		orders.setOrder(2L, o2);
+		orders.setOrder(2, o2);
 		assertEquals(2, orders.getOrdersCount());
-		orders.setOrder(40L, o3);
+		orders.setOrder(40, o3);
 		assertEquals(3, orders.getOrdersCount());
 	}
 	
 	@Test
 	public void testRegisterOrder() throws Exception {
-		orders.registerOrder(200L, owt);
+		orders.registerOrder(200, owt);
 		
-		assertTrue(orders.isOrderExists(200L));
-		assertSame(owt, orders.getOrder(200L));
-		assertEquals(new Long(200L), owt.getId());
+		assertTrue(orders.isOrderExists(200));
+		assertSame(owt, orders.getOrder(200));
+		assertEquals(new Integer(200), owt.getId());
 		assertTrue(owt.OnCancelFailed().isListener(orders));
 		assertTrue(owt.OnCancelled().isListener(orders));
 		assertTrue(owt.OnChanged().isListener(orders));
@@ -318,8 +318,8 @@ public class OrdersImplTest {
 	
 	@Test (expected=OrderAlreadyExistsException.class)
 	public void testRegisterOrder_ThrowsIfOrderExists() throws Exception {
-		orders.setOrder(123L, o1);
-		orders.registerOrder(123L, owt);
+		orders.setOrder(123, o1);
+		orders.registerOrder(123, owt);
 	}
 	
 	@Test
@@ -366,9 +366,9 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		expect(o1.getId()).andStubReturn(1L);
-		expect(o2.getId()).andStubReturn(2L);
-		expect(o3.getId()).andStubReturn(3L);
+		expect(o1.getId()).andStubReturn(1);
+		expect(o2.getId()).andStubReturn(2);
+		expect(o3.getId()).andStubReturn(3);
 		List<EditableOrder> list1 = new Vector<EditableOrder>();
 		list1.add(o1);
 		List<EditableOrder> list2 = new Vector<EditableOrder>();

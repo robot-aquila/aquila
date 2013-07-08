@@ -246,16 +246,16 @@ public class OrderImplTest {
 		setter = new S<OrderImpl>() {
 			@Override
 			public void set(OrderImpl object, Object value) {
-				object.setId((Long) value);
+				object.setId((Integer) value);
 			}
 		};
-		getter = new G<Long>() {
+		getter = new G<Integer>() {
 			@Override
-			public Long get(Object object) throws ValueException {
+			public Integer get(Object object) throws ValueException {
 				return ((OrderImpl) object).getId();
 			}
 		};
-		testSetterGetter(100L, 200L);
+		testSetterGetter(100, 200);
 	}
 	
 	@Test
@@ -612,7 +612,7 @@ public class OrderImplTest {
 		order.setAccount(account);
 		order.setSecurityDescriptor(descr);
 		order.setDirection(Direction.SELL);
-		order.setId(1000L);
+		order.setId(1000);
 		order.setPrice(135.67d);
 		order.setQty(200L);
 		order.setStatus(OrderStatus.CANCELLED);
@@ -678,9 +678,9 @@ public class OrderImplTest {
 		Variant<Direction> vDir = new Variant<Direction>(vDescr)
 			.add(Direction.SELL);
 		if ( rnd.nextDouble() > aprob ) vDir.add(Direction.BUY);
-		Variant<Long> vId = new Variant<Long>(vDir)
-			.add(1000L);
-		if ( rnd.nextDouble() > aprob ) vId.add(2220L);
+		Variant<Integer> vId = new Variant<Integer>(vDir)
+			.add(1000);
+		if ( rnd.nextDouble() > aprob ) vId.add(2220);
 		Variant<Double> vPrice = new Variant<Double>(vId)
 			.add(135.67d);
 		if ( rnd.nextDouble() > aprob ) vPrice.add(null);
@@ -787,7 +787,7 @@ public class OrderImplTest {
 		assertEquals(account, found.getAccount());
 		assertEquals(descr, found.getSecurityDescriptor());
 		assertEquals(Direction.SELL, found.getDirection());
-		assertEquals(new Long(1000L), found.getId());
+		assertEquals(new Integer(1000), found.getId());
 		assertEquals(135.67d, found.getPrice(), 0.01d);
 		assertEquals(new Long(200L), found.getQty());
 		assertEquals(OrderStatus.CANCELLED, found.getStatus());
