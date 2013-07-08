@@ -77,14 +77,14 @@ public class TransactionTest {
 	@Test
 	public void testIsStarted() throws Exception {
 		assertFalse(trans.isStarted());
-		trans.setRequest(request);
+		trans.setRequestTime(requestTime);
 		assertTrue(trans.isStarted());
 	}
 	
 	@Test
 	public void testIsExecuted() throws Exception {
 		assertFalse(trans.isExecuted());
-		trans.setResponse(response);
+		trans.setResponseTime(responseTime);
 		assertTrue(trans.isExecuted());
 	}
 	
