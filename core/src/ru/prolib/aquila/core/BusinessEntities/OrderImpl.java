@@ -38,7 +38,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private OrderType type;
 	private Double execVolume = 0.0d;
 	private Double avgExecPrice = null;
-	private final List<? extends OrderHandler> eventHandlers;
+	private final List<OrderStateHandler> stateHandlers;
 	private final Terminal terminal;
 	private Date time,lastChangeTime;
 	private final LinkedList<Trade> trades = new LinkedList<Trade>();
@@ -58,7 +58,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	 * @param onDone тип события
 	 * @param onFailed тип события
 	 * @param onTrade тип события
-	 * @param eventHandlers набор генераторов событий 
+	 * @param stateHandlers набор генераторов событий 
 	 * @param terminal терминал заявки
 	 */
 	public OrderImpl(EventDispatcher dispatcher,
@@ -72,7 +72,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 					 EventType onDone,
 					 EventType onFailed,
 					 EventType onTrade,
-					 List<? extends OrderHandler> eventHandlers,
+					 List<OrderStateHandler> stateHandlers,
 					 Terminal terminal)
 	{
 		super();
@@ -87,7 +87,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 		this.onDone = onDone;
 		this.onFailed = onFailed;
 		this.onTrade = onTrade;
-		this.eventHandlers = eventHandlers;
+		this.stateHandlers = stateHandlers;
 		this.terminal = terminal;
 	}
 	
@@ -105,8 +105,8 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	 * <p>
 	 * @return список генераторов событий
 	 */
-	public List<OrderHandler> getEventHandlers() {
-		return new LinkedList<OrderHandler>(eventHandlers);
+	public List<OrderStateHandler> getStateHandlers() {
+		return new LinkedList<OrderStateHandler>(stateHandlers);
 	}
 	
 	/**
@@ -289,9 +289,9 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized void fireChangedEvent() throws EditableObjectException {
-		for ( int i = 0; i < eventHandlers.size(); i ++ ) {
-			eventHandlers.get(i).handle(this);
+	public synchronized void fireChangedEvent() {
+		for ( int i = 0; i < stateHandlers.size(); i ++ ) {
+			stateHandlers.get(i).handle(this);
 		}
 	}
 
@@ -432,7 +432,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 			.append(o.descr, descr)
 			.append(o.direction, direction)
 			.append(o.dispatcher, dispatcher)
-			.append(o.eventHandlers, eventHandlers)
+			.append(o.stateHandlers, stateHandlers)
 			.append(o.id, id)
 			.append(o.lastChangeTime, lastChangeTime)
 			.append(o.onCancelFailed, onCancelFailed)

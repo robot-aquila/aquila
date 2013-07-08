@@ -2,23 +2,15 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.OrderEvent;
-import ru.prolib.aquila.core.BusinessEntities.OrderException;
-import ru.prolib.aquila.core.utils.Validator;
-import ru.prolib.aquila.core.utils.ValidatorException;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
  * Генератор события заявки.
- * <p>
- * 2012-09-25<br>
- * $Id: OrderEventHandler.java 287 2012-10-15 03:30:51Z whirlwind $
  */
-public class OrderEventHandler implements OrderHandler {
+public class OrderStateHandler {
 	private final EventDispatcher dispatcher;
-	private final Validator validator;
+	private final OrderStateValidator validator;
 	private final EventType type;
 	
 	/**
@@ -28,8 +20,8 @@ public class OrderEventHandler implements OrderHandler {
 	 * @param validator валидатор условия генерации события
 	 * @param type тип генерируемого события 
 	 */
-	public OrderEventHandler(EventDispatcher dispatcher,
-							 Validator validator,
+	public OrderStateHandler(EventDispatcher dispatcher,
+							 OrderStateValidator validator,
 							 EventType type)
 	{
 		super();
@@ -52,7 +44,7 @@ public class OrderEventHandler implements OrderHandler {
 	 * <p>
 	 * @return валидатор условия
 	 */
-	public Validator getValidator() {
+	public OrderStateValidator getValidator() {
 		return validator;
 	}
 	
@@ -65,14 +57,18 @@ public class OrderEventHandler implements OrderHandler {
 		return type;
 	}
 
-	@Override
-	public void handle(EditableOrder order) throws OrderException {
-		try {
-			if ( validator.validate(order) ) {
-				dispatcher.dispatch(new OrderEvent(type, order));
-			}
-		} catch ( ValidatorException e ) {
-			throw new OrderException(e);
+	/**
+	 * Обработать состояние заявки.
+	 * <p>
+	 * Данный метод выполняет проверку текущего состояния объекта и, если
+	 * состояние удовлетворяет определенным условиям, генерирует соответствующее
+	 * событие заявки.
+	 * <p>
+	 * @param order
+	 */
+	public void handle(EditableOrder order) {
+		if ( validator.validate(order) ) {
+			dispatcher.dispatch(new OrderEvent(type, order));
 		}
 	}
 	
@@ -81,10 +77,10 @@ public class OrderEventHandler implements OrderHandler {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != OrderEventHandler.class ) {
+		if ( other == null || other.getClass() != OrderStateHandler.class ) {
 			return false;
 		}
-		OrderEventHandler o = (OrderEventHandler) other;
+		OrderStateHandler o = (OrderStateHandler) other;
 		return new EqualsBuilder()
 			.append(o.dispatcher, dispatcher)
 			.append(o.type, type)

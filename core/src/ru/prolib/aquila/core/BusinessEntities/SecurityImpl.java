@@ -196,7 +196,7 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	}
 	
 	@Override
-	public void fireChangedEvent() throws EditableObjectException {
+	public void fireChangedEvent() {
 		dispatcher.dispatch(new SecurityEvent(onChanged, this));
 	}
 

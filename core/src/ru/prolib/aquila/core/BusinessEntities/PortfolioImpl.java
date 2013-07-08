@@ -102,7 +102,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public synchronized void fireChangedEvent() throws EditableObjectException {
+	public synchronized void fireChangedEvent() {
 		dispatcher.dispatch(new PortfolioEvent(onChanged, this));
 	}
 

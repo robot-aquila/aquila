@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.BusinessEntities.validator;
+package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -12,39 +12,25 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
-import ru.prolib.aquila.core.BusinessEntities.validator.OrderIsPartiallyFilled;
 import ru.prolib.aquila.core.utils.Variant;
 
-/**
- * 2012-09-24<br>
- * $Id: OrderIsPartiallyFilledTest.java 287 2012-10-15 03:30:51Z whirlwind $
- */
-public class OrderIsPartiallyFilledTest {
+public class OrderIsFailedTest {
 	private IMocksControl control;
-	private OrderIsPartiallyFilled validator;
+	private OrderIsFailed validator;
 	private EditableOrder order;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		validator = new OrderIsPartiallyFilled();
+		validator = new OrderIsFailed();
 		order = control.createMock(EditableOrder.class);
 	}
 	
 	@Test
-	public void testValidate_Null() throws Exception {
-		assertFalse(validator.validate(null));
-	}
-	
-	@Test
-	public void testValidate_OtherClassInstance() throws Exception {
-		assertFalse(validator.validate(this));
-	}
-
-	@Test
 	public void testValidate() throws Exception {
 		Set<OrderStatus> expected = new HashSet<OrderStatus>();
-		expected.add(OrderStatus.CANCELLED);
+		expected.add(OrderStatus.CANCEL_FAILED);
+		expected.add(OrderStatus.REJECTED);
 		
 		Variant<OrderStatus> vStatus = new Variant<OrderStatus>()
 			.add(OrderStatus.ACTIVE)
@@ -59,34 +45,29 @@ public class OrderIsPartiallyFilledTest {
 		Variant<Boolean> vChanged = new Variant<Boolean>(vStatus)
 			.add(true)
 			.add(false);
-		Variant<Long> vQtyRest = new Variant<Long>(vChanged)
-			.add(0L)
-			.add(5L);
-		Variant<?> iterator = vQtyRest;
+		Variant<?> iterator = vChanged;
+		Set<OrderStatus> actual = new HashSet<OrderStatus>();
 		int found = 0;
 		int index = 0;
 		do {
 			setUp();
 			String msg = "At #" + index;
 			expect(order.getStatus()).andStubReturn(vStatus.get());
-			expect(order.getQtyRest()).andStubReturn(vQtyRest.get());
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			control.replay();
-			if ( vChanged.get() == true
-					&& vStatus.get()==OrderStatus.CANCELLED 
-					&& vQtyRest.get() > 0 )
-			{
+			if ( vChanged.get() == true && expected.contains(vStatus.get()) ) {
 				found ++;
 				assertTrue(msg, validator.validate(order));
 				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
+				actual.add(vStatus.get());
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}
 			control.verify();
 			index ++;
 		} while ( iterator.next() );
-		assertEquals(1, found);
+		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -94,7 +75,7 @@ public class OrderIsPartiallyFilledTest {
 		assertTrue(validator.equals(validator));
 		assertFalse(validator.equals(null));
 		assertFalse(validator.equals(this));
-		assertTrue(validator.equals(new OrderIsPartiallyFilled()));
+		assertTrue(validator.equals(new OrderIsFailed()));
 	}
 
 }

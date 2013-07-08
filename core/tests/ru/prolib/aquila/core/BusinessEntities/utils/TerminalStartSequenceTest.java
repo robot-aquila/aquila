@@ -15,10 +15,6 @@ import ru.prolib.aquila.core.BusinessEntities.TerminalState;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalStartSequence;
 import ru.prolib.aquila.core.utils.Variant;
 
-/**
- * 2013-02-11<br>
- * $Id$
- */
 public class TerminalStartSequenceTest {
 	private IMocksControl control;
 	private EditableTerminal terminal;

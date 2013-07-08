@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.BusinessEntities.validator;
+package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -12,13 +12,8 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
-import ru.prolib.aquila.core.BusinessEntities.validator.OrderIsRegisterFailed;
 import ru.prolib.aquila.core.utils.Variant;
 
-/**
- * 2012-09-23<br>
- * $Id: OrderIsRegisterFailedTest.java 459 2013-01-29 17:11:57Z whirlwind $
- */
 public class OrderIsRegisterFailedTest {
 	private IMocksControl control;
 	private OrderIsRegisterFailed validator;
@@ -29,16 +24,6 @@ public class OrderIsRegisterFailedTest {
 		control = createStrictControl();
 		validator = new OrderIsRegisterFailed();
 		order = control.createMock(EditableOrder.class);
-	}
-	
-	@Test
-	public void testValidate_Null() throws Exception {
-		assertFalse(validator.validate(null));
-	}
-	
-	@Test
-	public void testValidate_OtherClassInstance() throws Exception {
-		assertFalse(validator.validate(this));
 	}
 	
 	@Test

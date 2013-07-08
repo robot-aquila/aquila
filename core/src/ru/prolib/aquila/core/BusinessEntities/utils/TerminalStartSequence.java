@@ -12,9 +12,6 @@ import ru.prolib.aquila.core.BusinessEntities.TerminalState;
 
 /**
  * Процедура запуска терминала.
- * <p>
- * 2013-02-11<br>
- * $Id$
  */
 public class TerminalStartSequence implements Runnable {
 	private static final Logger logger;

@@ -55,10 +55,8 @@ public interface Editable {
 	
 	/**
 	 * Генерировать событие об изменении атрибутов.
-	 * <p>
-	 * @throws EditableObjectException ошибка генерации события
 	 */
-	public void fireChangedEvent() throws EditableObjectException;
+	public void fireChangedEvent();
 	
 	/**
 	 * Установить признак изменения объекта.

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.BusinessEntities.validator;
+package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -7,12 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.validator.OrderIsChanged;
 
-/**
- * 2012-09-24<br>
- * $Id: OrderIsChangedTest.java 287 2012-10-15 03:30:51Z whirlwind $
- */
 public class OrderIsChangedTest {
 	private IMocksControl control;
 	private OrderIsChanged validator;
@@ -23,16 +18,6 @@ public class OrderIsChangedTest {
 		control = createStrictControl();
 		validator = new OrderIsChanged();
 		order = control.createMock(EditableOrder.class);
-	}
-	
-	@Test
-	public void testValidate_Null() throws Exception {
-		assertFalse(validator.validate(null));
-	}
-	
-	@Test
-	public void testValidate_OtherClassInstance() throws Exception {
-		assertFalse(validator.validate(this));
 	}
 	
 	@Test

@@ -7,7 +7,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
-import ru.prolib.aquila.core.BusinessEntities.validator.*;
 
 /**
  * Хранилище заявок.
@@ -237,24 +236,24 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	public synchronized EditableOrder createOrder(EditableTerminal terminal) {
 		EventDispatcher d = terminal.getEventSystem()
 			.createEventDispatcher("Order");
-		List<OrderEventHandler> h = new Vector<OrderEventHandler>();
-		h.add(new OrderEventHandler(d, new OrderIsRegistered(),
+		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
+		h.add(new OrderStateHandler(d, new OrderIsRegistered(),
 				d.createType("OnRegister")));
-		h.add(new OrderEventHandler(d, new OrderIsRegisterFailed(),
+		h.add(new OrderStateHandler(d, new OrderIsRegisterFailed(),
 				d.createType("OnRegisterFailed")));
-		h.add(new OrderEventHandler(d, new OrderIsCancelled(),
+		h.add(new OrderStateHandler(d, new OrderIsCancelled(),
 				d.createType("OnCancelled")));
-		h.add(new OrderEventHandler(d, new OrderIsCancelFailed(),
+		h.add(new OrderStateHandler(d, new OrderIsCancelFailed(),
 				d.createType("OnCancelFailed")));
-		h.add(new OrderEventHandler(d, new OrderIsFilled(),
+		h.add(new OrderStateHandler(d, new OrderIsFilled(),
 				d.createType("OnFilled")));
-		h.add(new OrderEventHandler(d, new OrderIsPartiallyFilled(),
+		h.add(new OrderStateHandler(d, new OrderIsPartiallyFilled(),
 				d.createType("OnPartiallyFilled")));
-		h.add(new OrderEventHandler(d, new OrderIsChanged(),
+		h.add(new OrderStateHandler(d, new OrderIsChanged(),
 				d.createType("OnChanged")));
-		h.add(new OrderEventHandler(d, new OrderIsDone(),
+		h.add(new OrderStateHandler(d, new OrderIsDone(),
 				d.createType("OnDone")));
-		h.add(new OrderEventHandler(d, new OrderIsFailed(),
+		h.add(new OrderStateHandler(d, new OrderIsFailed(),
 				d.createType("OnFailed")));
 		return new OrderImpl(d, h.get(0).getEventType(), 
 				h.get(1).getEventType(), h.get(2).getEventType(),

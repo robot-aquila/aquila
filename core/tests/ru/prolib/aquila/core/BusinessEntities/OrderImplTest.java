@@ -10,7 +10,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrderHandler;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -38,7 +38,7 @@ public class OrderImplTest {
 	private OrderImpl order;
 	private S<OrderImpl> setter;
 	private G<?> getter;
-	private List<OrderHandler> eventHandlers;
+	private List<OrderStateHandler> stateHandlers;
 	private Terminal terminal;
 	
 	@BeforeClass
@@ -66,12 +66,12 @@ public class OrderImplTest {
 		onDone = dispatcher.createType("OnDone");
 		onFailed = dispatcher.createType("OnFailed");
 		onTrade = dispatcher.createType("OnTrade");
-		eventHandlers = new LinkedList<OrderHandler>();
+		stateHandlers = new LinkedList<OrderStateHandler>();
 		terminal = control.createMock(Terminal.class); 
 
 		order = new OrderImpl(dispatcher, onRegister, onRegisterFailed,
 				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
-				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
+				onChanged, onDone, onFailed, onTrade, stateHandlers, terminal);
 		setter = null;
 		getter = null;
 	}
@@ -384,13 +384,13 @@ public class OrderImplTest {
 	
 	@Test
 	public void testFireChangedEvent() throws Exception {
-		OrderHandler h1,h2,h3;
-		h1 = control.createMock(OrderHandler.class);
-		h2 = control.createMock(OrderHandler.class);
-		h3 = control.createMock(OrderHandler.class);
-		eventHandlers.add(h1);
-		eventHandlers.add(h2);
-		eventHandlers.add(h3);
+		OrderStateHandler h1,h2,h3;
+		h1 = control.createMock(OrderStateHandler.class);
+		h2 = control.createMock(OrderStateHandler.class);
+		h3 = control.createMock(OrderStateHandler.class);
+		stateHandlers.add(h1);
+		stateHandlers.add(h2);
+		stateHandlers.add(h3);
 		h1.handle(order);
 		h2.handle(order);
 		h3.handle(order);
@@ -520,7 +520,7 @@ public class OrderImplTest {
 	public void testFireTradeEvent() throws Exception {
 		order = new OrderImpl(dispatcherMock, onRegister, onRegisterFailed,
 				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
-				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
+				onChanged, onDone, onFailed, onTrade, stateHandlers, terminal);
 		Trade t0 = createTrade(100L, "2013-05-01 00:00:00", 25.19d, 10L);
 		dispatcherMock.dispatch(new OrderTradeEvent(onTrade, order, t0));
 		control.replay();
@@ -556,7 +556,7 @@ public class OrderImplTest {
 		dispatcherMock.close();
 		order = new OrderImpl(dispatcherMock, onRegister, onRegisterFailed,
 				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
-				onChanged, onDone, onFailed, onTrade, eventHandlers, terminal);
+				onChanged, onDone, onFailed, onTrade, stateHandlers, terminal);
 		control.replay();
 		
 		order.clearAllEventListeners();
@@ -603,11 +603,11 @@ public class OrderImplTest {
 		List<Trade> trds2 = new Vector<Trade>();
 		trds2.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
 		
-		List<OrderHandler> hndl1 = new Vector<OrderHandler>();
-		hndl1.add(control.createMock(OrderHandler.class));
-		hndl1.add(control.createMock(OrderHandler.class));
-		List<OrderHandler> hndl2 = new Vector<OrderHandler>();
-		hndl2.add(control.createMock(OrderHandler.class));
+		List<OrderStateHandler> hndl1 = new Vector<OrderStateHandler>();
+		hndl1.add(control.createMock(OrderStateHandler.class));
+		hndl1.add(control.createMock(OrderStateHandler.class));
+		List<OrderStateHandler> hndl2 = new Vector<OrderStateHandler>();
+		hndl2.add(control.createMock(OrderStateHandler.class));
 
 		order.setAccount(account);
 		order.setSecurityDescriptor(descr);
@@ -617,8 +617,8 @@ public class OrderImplTest {
 		order.setQty(200L);
 		order.setStatus(OrderStatus.CANCELLED);
 		order.setType(OrderType.LIMIT);
-		for ( OrderHandler handler : hndl1 ) {
-			eventHandlers.add(handler);
+		for ( OrderStateHandler handler : hndl1 ) {
+			stateHandlers.add(handler);
 		}
 		order.setTime(format.parse("2013-05-15 08:32:00"));
 		order.setLastChangeTime(format.parse("1998-01-01 01:02:03"));
@@ -693,8 +693,8 @@ public class OrderImplTest {
 		Variant<OrderType> vType = new Variant<OrderType>(vStat)
 			.add(OrderType.LIMIT);
 		if ( rnd.nextDouble() > aprob ) vType.add(OrderType.MARKET);
-		Variant<List<OrderHandler>> vHndl =
-				new Variant<List<OrderHandler>>(vType)
+		Variant<List<OrderStateHandler>> vHndl =
+				new Variant<List<OrderStateHandler>>(vType)
 			.add(hndl1);
 		if ( rnd.nextDouble() > aprob ) vHndl.add(hndl2);
 		Variant<Terminal> vTerm = new Variant<Terminal>(vHndl)
@@ -782,7 +782,7 @@ public class OrderImplTest {
 		assertEquals(onDone, found.OnDone());
 		assertEquals(onFailed, found.OnFailed());
 		assertEquals(onTrade, found.OnTrade());
-		assertEquals(hndl1, found.getEventHandlers());
+		assertEquals(hndl1, found.getStateHandlers());
 		assertEquals(terminal, found.getTerminal());
 		assertEquals(account, found.getAccount());
 		assertEquals(descr, found.getSecurityDescriptor());

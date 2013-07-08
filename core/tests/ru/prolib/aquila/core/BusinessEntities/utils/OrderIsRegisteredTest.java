@@ -1,7 +1,10 @@
-package ru.prolib.aquila.core.BusinessEntities.validator;
+package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -9,37 +12,25 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
-import ru.prolib.aquila.core.BusinessEntities.validator.OrderIsCancelled;
 import ru.prolib.aquila.core.utils.Variant;
 
-/**
- * 2012-09-24<br>
- * $Id: OrderIsCancelledTest.java 287 2012-10-15 03:30:51Z whirlwind $
- */
-public class OrderIsCancelledTest {
+public class OrderIsRegisteredTest {
 	private IMocksControl control;
-	private OrderIsCancelled validator;
+	private OrderIsRegistered validator;
 	private EditableOrder order;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		validator = new OrderIsCancelled();
+		validator = new OrderIsRegistered();
 		order = control.createMock(EditableOrder.class);
 	}
-	
+
 	@Test
-	public void testValidate_Null() throws Exception {
-		assertFalse(validator.validate(null));
-	}
-	
-	@Test
-	public void testValidate_OtherClassInstance() throws Exception {
-		assertFalse(validator.validate(this));
-	}
-	
-	@Test
-	public void testValidate_Ok() throws Exception {
+	public void testValidate() throws Exception {
+		Set<OrderStatus> expected = new HashSet<OrderStatus>();
+		expected.add(OrderStatus.ACTIVE);
+		
 		Variant<OrderStatus> vStatus = new Variant<OrderStatus>()
 			.add(OrderStatus.ACTIVE)
 			.add(OrderStatus.CANCEL_FAILED)
@@ -54,34 +45,36 @@ public class OrderIsCancelledTest {
 			.add(true)
 			.add(false);
 		Variant<?> iterator = vChanged;
+		Set<OrderStatus> actual = new HashSet<OrderStatus>();
 		int found = 0;
 		int index = 0;
 		do {
 			setUp();
 			String msg = "At #" + index;
+			expect(order.getStatus()).andStubReturn(vStatus.get());
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
-			expect(order.getStatus()).andStubReturn(vStatus.get());
 			control.replay();
-			if ( vChanged.get() && vStatus.get() == OrderStatus.CANCELLED ) {
+			if ( vChanged.get() == true && expected.contains(vStatus.get()) ) {
 				found ++;
 				assertTrue(msg, validator.validate(order));
 				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
+				actual.add(vStatus.get());
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}
 			control.verify();
 			index ++;
 		} while ( iterator.next() );
-		assertEquals(1, found);
+		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testEquals() throws Exception {
 		assertTrue(validator.equals(validator));
 		assertFalse(validator.equals(null));
 		assertFalse(validator.equals(this));
-		assertTrue(validator.equals(new OrderIsCancelled()));
+		assertTrue(validator.equals(new OrderIsRegistered()));
 	}
 
 }

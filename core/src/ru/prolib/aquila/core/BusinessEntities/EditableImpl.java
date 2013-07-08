@@ -70,7 +70,7 @@ public class EditableImpl implements Editable {
 	}
 
 	@Override
-	public void fireChangedEvent() throws EditableObjectException {
+	public void fireChangedEvent() {
 		
 	}
 

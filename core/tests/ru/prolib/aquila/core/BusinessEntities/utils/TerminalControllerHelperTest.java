@@ -14,10 +14,6 @@ import ru.prolib.aquila.core.BusinessEntities.utils.TerminalControllerHelper;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalStartSequence;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalStopSequence;
 
-/**
- * 2013-02-11<br>
- * $Id$
- */
 public class TerminalControllerHelperTest {
 	private static TerminalControllerHelper helper;
 	private IMocksControl control;
