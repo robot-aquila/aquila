@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities.getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
+import ru.prolib.aquila.core.BusinessEntities.Direction;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -12,14 +12,14 @@ import ru.prolib.aquila.core.data.ValueException;
  * <p>
  * Конвертирует значение типа {@link java.lang.String String}, полученное
  * с помощтю геттера, в значение типа {@link
- * ru.prolib.aquila.core.BusinessEntities.OrderDirection OrderDirection}. При
+ * ru.prolib.aquila.core.BusinessEntities.Direction OrderDirection}. При
  * невозможности осуществить конвертацию генерирует событие о паническом
  * состоянии.
  * <p>
  * 2013-02-14<br>
  * $Id$
  */
-public class GOrderDir implements G<OrderDirection> {
+public class GOrderDir implements G<Direction> {
 	private final FirePanicEvent firePanic;
 	private final G<String> gString;
 	private final String msgPrefix, buyEquiv, sellEquiv;
@@ -90,12 +90,12 @@ public class GOrderDir implements G<OrderDirection> {
 	}
 
 	@Override
-	public OrderDirection get(Object source) throws ValueException {
+	public Direction get(Object source) throws ValueException {
 		String value = gString.get(source);
 		if ( buyEquiv.equals(value) ) {
-			return OrderDirection.BUY;
+			return Direction.BUY;
 		} else if ( sellEquiv.equals(value) ) {
-			return OrderDirection.SELL;
+			return Direction.SELL;
 		} else if ( value == null ) {
 			String msg = msgPrefix + "NULL values not allowed for: {}";
 			firePanic.firePanicEvent(1, msg, new Object[] { gString });

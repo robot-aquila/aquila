@@ -113,7 +113,7 @@ public class MFactoryImplTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testRowOrdDir() throws Exception {
-		G<OrderDirection> getter = control.createMock(G.class);
+		G<Direction> getter = control.createMock(G.class);
 		S<EditableOrder> setter = control.createMock(S.class);
 		expect(gfactory.rowOrderDir("dir", "BUY")).andReturn(getter);
 		expect(sfactory.orderSetDirection()).andReturn(setter);
@@ -204,19 +204,6 @@ public class MFactoryImplTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testRowOrdTransId() throws Exception {
-		G<Long> getter = control.createMock(G.class);
-		S<EditableOrder> setter = control.createMock(S.class);
-		expect(gfactory.rowLong("TRANS_ID")).andReturn(getter);
-		expect(sfactory.orderSetTransactionId()).andReturn(setter);
-		control.replay();
-		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
-		assertEquals(expected, factory.rowOrdTransId("TRANS_ID"));
-		control.verify();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
 	public void testRowOrdType2TR() throws Exception {
 		Map<?, OrderType> map = new HashMap<String, OrderType>();
 		G<Object> objGetter = control.createMock(G.class);
@@ -255,81 +242,6 @@ public class MFactoryImplTest {
 		control.replay();
 		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
 		assertEquals(expected, factory.rowOrdType(gS, "PRICE"));
-		control.verify();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRowOrdOffset() throws Exception {
-		Map<Object, PriceUnit> map = new HashMap<Object, PriceUnit>();
-		map.put("Д", PriceUnit.MONEY);
-		map.put("%", PriceUnit.PERCENT);
-		G<Price> getter = control.createMock(G.class);
-		S<EditableOrder> setter = control.createMock(S.class);
-		expect(gfactory.rowPrice("P", "P_UNITS", map)).andReturn(getter);
-		expect(sfactory.orderSetOffset()).andReturn(setter);
-		control.replay();
-		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
-		assertEquals(expected, factory.rowOrdOffset("P", "P_UNITS", "Д", "%"));
-		control.verify();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRowOrdSpread() throws Exception {
-		Map<Object, PriceUnit> map = new HashMap<Object, PriceUnit>();
-		map.put("$", PriceUnit.MONEY);
-		map.put("%", PriceUnit.PERCENT);
-		G<Price> getter = control.createMock(G.class);
-		S<EditableOrder> setter = control.createMock(S.class);
-		expect(gfactory.rowPrice("S", "S_UNITS", map)).andReturn(getter);
-		expect(sfactory.orderSetSpread()).andReturn(setter);
-		control.replay();
-		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
-		assertEquals(expected, factory.rowOrdSpread("S", "S_UNITS", "$", "%"));
-		control.verify();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRowOrdSLP() throws Exception {
-		Map<?, G<Double>> map = new HashMap<String, G<Double>>();
-		G<Object> objGetter = control.createMock(G.class);
-		G<Double> getter = new GMapTG<Double>(objGetter, map);
-		S<EditableOrder> setter = control.createMock(S.class);
-		expect(gfactory.rowObject("charlie")).andReturn(objGetter);
-		expect(sfactory.orderSetStopLimitPrice()).andReturn(setter);
-		control.replay();
-		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
-		assertEquals(expected, factory.rowOrdSLP("charlie", map));
-		control.verify();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRowOrdTPP() throws Exception {
-		Map<?, G<Double>> map = new HashMap<String, G<Double>>();
-		G<Object> objGetter = control.createMock(G.class);
-		G<Double> getter = new GMapTG<Double>(objGetter, map);
-		S<EditableOrder> setter = control.createMock(S.class);
-		expect(gfactory.rowObject("bonny")).andReturn(objGetter);
-		expect(sfactory.orderSetTakeProfitPrice()).andReturn(setter);
-		control.replay();
-		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
-		assertEquals(expected, factory.rowOrdTPP("bonny", map));
-		control.verify();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRowOrdLinkedOrderId() throws Exception {
-		G<Long> getter = control.createMock(G.class);
-		S<EditableOrder> setter = control.createMock(S.class);
-		expect(gfactory.rowLong("ID")).andReturn(getter);
-		expect(sfactory.orderSetLinkedOrderId()).andReturn(setter);
-		control.replay();
-		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
-		assertEquals(expected, factory.rowOrdLinkedOrderId("ID"));
 		control.verify();
 	}
 	
@@ -521,7 +433,7 @@ public class MFactoryImplTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testRowTrdDir() throws Exception {
-		G<OrderDirection> getter = control.createMock(G.class);
+		G<Direction> getter = control.createMock(G.class);
 		S<Trade> setter = control.createMock(S.class);
 		expect(gfactory.rowOrderDir("dir", "BUY")).andReturn(getter);
 		expect(sfactory.tradeSetDirection()).andReturn(setter);

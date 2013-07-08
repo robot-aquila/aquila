@@ -21,10 +21,6 @@ public interface SetterFactory {
 	
 	public S<EditableOrder> orderSetId();
 	
-	public S<EditableOrder> orderSetLinkedOrderId();
-	
-	public S<EditableOrder> orderSetOffset();
-	
 	public S<EditableOrder> orderSetPrice();
 	
 	public S<EditableOrder> orderSetQty();
@@ -33,15 +29,7 @@ public interface SetterFactory {
 	
 	public S<EditableOrder> orderSetSecurityDescriptor();
 	
-	public S<EditableOrder> orderSetSpread();
-	
 	public S<EditableOrder> orderSetStatus();
-	
-	public S<EditableOrder> orderSetStopLimitPrice();
-	
-	public S<EditableOrder> orderSetTakeProfitPrice();
-	
-	public S<EditableOrder> orderSetTransactionId();
 	
 	public S<EditableOrder> orderSetType();
 	

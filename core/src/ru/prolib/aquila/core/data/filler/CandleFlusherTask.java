@@ -4,16 +4,16 @@ import java.util.TimerTask;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.Timer;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 
 /**
  * Служебный класс: задача закрытия свечи агрегатора по времени.
  */
 class CandleFlusherTask extends TimerTask {
 	private final CandleAggregator aggregator;
-	private final Timer timer;
+	private final Scheduler timer;
 	
-	CandleFlusherTask(CandleAggregator aggregator, Timer timer) {
+	CandleFlusherTask(CandleAggregator aggregator, Scheduler timer) {
 		super();
 		this.aggregator = aggregator;
 		this.timer = timer;
@@ -23,7 +23,7 @@ class CandleFlusherTask extends TimerTask {
 		return aggregator;
 	}
 	
-	Timer getTimer() {
+	Scheduler getTimer() {
 		return timer;
 	}
 

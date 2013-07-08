@@ -5,14 +5,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetSecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
 
 /**
  * 2012-11-05<br>
  * $Id: TradeSetSecurityDescriptorTest.java 442 2013-01-24 03:22:10Z whirlwind $
  */
 public class TradeSetSecurityDescriptorTest {
-	private static Terminal terminal = new TerminalDecorator();
 	private SecurityDescriptor descr;
 	private Trade trade;
 	private TradeSetSecurityDescriptor setter;
@@ -34,7 +32,7 @@ public class TradeSetSecurityDescriptorTest {
 				{ descr,	descr,	true  },
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
-			trade = new Trade(terminal);
+			trade = new Trade(null);
 			setter.set(trade, fixture[i][0]);
 			if ( (Boolean) fixture[i][2] ) {
 				assertSame(fixture[i][1], trade.getSecurityDescriptor());

@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.setter;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
+import ru.prolib.aquila.core.BusinessEntities.Direction;
 import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -25,8 +25,8 @@ public class OrderSetDirection implements S<EditableOrder> {
 	 */
 	@Override
 	public void set(EditableOrder object, Object value) throws ValueException {
-		if ( value != null && value.getClass() == OrderDirection.class ) {
-			object.setDirection((OrderDirection) value);
+		if ( value != null && value.getClass() == Direction.class ) {
+			object.setDirection((Direction) value);
 		}
 	}
 	

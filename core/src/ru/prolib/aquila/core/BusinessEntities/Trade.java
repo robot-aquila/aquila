@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+
 /**
  * Модель сделки.
  * <p>
@@ -22,7 +23,7 @@ public class Trade implements Comparable<Trade> {
 	private final Terminal terminal;
 	private Long id;
 	private SecurityDescriptor descr;
-	private OrderDirection direction;
+	private Direction direction;
 	private Date time;
 	private Double price;
 	private Long qty;
@@ -79,11 +80,11 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return направление сделки
 	 */
-	public synchronized OrderDirection getDirection() {
+	public synchronized Direction getDirection() {
 		return direction;
 	}
 	
-	public synchronized void setDirection(OrderDirection dir) {
+	public synchronized void setDirection(Direction dir) {
 		this.direction = dir;
 	}
 	

@@ -7,7 +7,7 @@ import java.util.TimerTask;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.Timer;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.utils.AlignTime;
 
 /**
@@ -16,15 +16,15 @@ import ru.prolib.aquila.core.utils.AlignTime;
 class CandleFlusher implements Starter {
 	private final CandleAggregator aggregator;
 	private final java.util.Timer scheduler;
-	private final Timer source;
+	private final Scheduler source;
 	private TimerTask task;
 	
-	public CandleFlusher(CandleAggregator aggregator, Timer source) {
+	public CandleFlusher(CandleAggregator aggregator, Scheduler source) {
 		this(aggregator, source, new java.util.Timer(true));
 	}
 	
 	public CandleFlusher(CandleAggregator aggregator,
-			Timer source, java.util.Timer scheduler)
+			Scheduler source, java.util.Timer scheduler)
 	{
 		super();
 		this.aggregator = aggregator;
@@ -40,7 +40,7 @@ class CandleFlusher implements Starter {
 		return scheduler;
 	}
 	
-	Timer getTimeSource() {
+	Scheduler getTimeSource() {
 		return source;
 	}
 	

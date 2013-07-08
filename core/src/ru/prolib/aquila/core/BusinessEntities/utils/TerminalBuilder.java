@@ -40,11 +40,11 @@ public class TerminalBuilder {
 		starter.add(es.getEventQueue());
 		EventDispatcher d = es.createEventDispatcher("Terminal");
 		return createTerminalInstance(es, starter,
-				createSecurities(es), createPortfolios(es),
-				createOrders(es, "Orders"), createOrders(es, "StopOrders"),
+				createSecurities(es), createPortfolios(es), createOrders(es), 
 				d, d.createType("OnConnected"), d.createType("OnDisconnected"),
 				d.createType("OnStarted"), d.createType("OnStopped"),
-				d.createType("OnPanic"));
+				d.createType("OnPanic"),
+				d.createType("OnRequestSecurityError"));
 	}
 	
 	protected EditableSecurities createSecurities(EventSystem es) {
@@ -64,8 +64,8 @@ public class TerminalBuilder {
 				d.createType("OnPositionChanged"));
 	}
 	
-	protected EditableOrders createOrders(EventSystem es, String dispatcherId) {
-		EventDispatcher d = es.createEventDispatcher(dispatcherId);
+	protected EditableOrders createOrders(EventSystem es) {
+		EventDispatcher d = es.createEventDispatcher("Orders");
 		return new OrdersImpl(d,
 				d.createType("OnAvailable"),
 				d.createType("OnCancelFailed"),
@@ -98,18 +98,20 @@ public class TerminalBuilder {
 	 * @param onStarted тип события: при запуске терминала
 	 * @param onStopped тип события: при останове терминала
 	 * @param onPanic тип события: критическое состояние
+	 * @param onReqSecurityError тип события: на запрос инструмента
 	 * @return экземпляр терминала
 	 */
 	protected EditableTerminal createTerminalInstance(EventSystem es,
 			StarterQueue starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
-			EditableOrders stopOrders, EventDispatcher dispatcher,
+			EventDispatcher dispatcher,
 			EventType onConnected, EventType onDisconnected,
-			EventType onStarted, EventType onStopped, EventType onPanic)
+			EventType onStarted, EventType onStopped, EventType onPanic,
+			EventType onReqSecurityError)
 	{
 		return new TerminalImpl(es, starter, securities, portfolios,
-				orders, stopOrders, dispatcher, onConnected, onDisconnected,
-				onStarted, onStopped, onPanic);
+				orders, dispatcher, onConnected, onDisconnected,
+				onStarted, onStopped, onPanic, onReqSecurityError);
 	}
 
 }

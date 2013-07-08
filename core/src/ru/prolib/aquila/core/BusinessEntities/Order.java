@@ -109,7 +109,7 @@ public interface Order {
 	 * <p>
 	 * @return направление заявки
 	 */
-	public OrderDirection getDirection();
+	public Direction getDirection();
 	
 	/**
 	 * Получить тип заявки.
@@ -173,48 +173,6 @@ public interface Order {
 	 * @return цена заявки или null, если цена не предусмотрена
 	 */
 	public Double getPrice();
-	
-	/**
-	 * Получить номер транзакции.
-	 * <p>
-	 * @return номер транзакции или null, если номер транзакции неопределен
-	 */
-	public Long getTransactionId();
-	
-	/**
-	 * Получить номер связаной заявки.
-	 * <p> 
-	 * @return номер связаной заявки или null, если нет связаной заявки
-	 */
-	public Long getLinkedOrderId();
-	
-	/**
-	 * Получить стоп-лимит цену.
-	 * <p>
-	 * @return цена или null, если заявка не стоп-лимит.
-	 */
-	public Double getStopLimitPrice();
-	
-	/**
-	 * Получить тэйк-профит цену.
-	 * <p>
-	 * @return цена или null, если заявка не тэйк-профит.
-	 */
-	public Double getTakeProfitPrice();
-	
-	/**
-	 * Получить отступ от пиковой цены для тэйк-профита.
-	 * <p>
-	 * @return отступ
-	 */
-	public Price getOffset();
-	
-	/**
-	 * Получить величину защитного спрэда для тэйк-профита.
-	 * <p>
-	 * @return спрэд
-	 */
-	public Price getSpread();
 	
 	/**
 	 * Получить фактическую стоимость исполненной части заявки.
@@ -293,5 +251,12 @@ public interface Order {
 	 * @return время последней сделки или null, если нет сделок
 	 */
 	public Date getLastTradeTime();
+	
+	/**
+	 * Получить служебную информацию заявки.
+	 * <p>
+	 * @return служебная информация
+	 */
+	public OrderSystemInfo getSystemInfo();
 	
 }

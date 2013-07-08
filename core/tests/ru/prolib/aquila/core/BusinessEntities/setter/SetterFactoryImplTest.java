@@ -6,57 +6,6 @@ import static org.junit.Assert.*;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetAccount;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetDirection;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetExecutedVolume;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetId;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetLinkedOrderId;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetOffset;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetQty;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetQtyRest;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetSecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetSpread;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetStatus;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetStopLimitPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetTakeProfitPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetTransactionId;
-import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetType;
-import ru.prolib.aquila.core.BusinessEntities.setter.PositionSetBookValue;
-import ru.prolib.aquila.core.BusinessEntities.setter.PositionSetCurrQty;
-import ru.prolib.aquila.core.BusinessEntities.setter.PositionSetLockQty;
-import ru.prolib.aquila.core.BusinessEntities.setter.PositionSetMarketValue;
-import ru.prolib.aquila.core.BusinessEntities.setter.PositionSetOpenQty;
-import ru.prolib.aquila.core.BusinessEntities.setter.PositionSetVarMargin;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetLastPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetBalance;
-import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetCash;
-import ru.prolib.aquila.core.BusinessEntities.setter.PortfolioSetVariationMargin;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetAskPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetAskSize;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetBidPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetBidSize;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetClosePrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetDisplayName;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetHighPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetLotSize;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetLowPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetMaxPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetMinPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetMinStepPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetMinStepSize;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetOpenPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetPrecision;
-import ru.prolib.aquila.core.BusinessEntities.setter.SecuritySetStatus;
-import ru.prolib.aquila.core.BusinessEntities.setter.SetterFactoryImpl;
-import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetDirection;
-import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetId;
-import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetPrice;
-import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetQty;
-import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetSecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetTime;
-import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetVolume;
-
 /**
  * 2012-10-28<br>
  * $Id: SetterFactoryImplTest.java 442 2013-01-24 03:22:10Z whirlwind $
@@ -99,17 +48,6 @@ public class SetterFactoryImplTest {
 	}
 	
 	@Test
-	public void testOrderSetLinkedOrderId() throws Exception {
-		assertEquals(new OrderSetLinkedOrderId(),
-				factory.orderSetLinkedOrderId());
-	}
-	
-	@Test
-	public void testOrderSetOffset() throws Exception {
-		assertEquals(new OrderSetOffset(), factory.orderSetOffset());
-	}
-	
-	@Test
 	public void testOrderSetPrice() throws Exception {
 		assertEquals(new OrderSetPrice(), factory.orderSetPrice());
 	}
@@ -131,31 +69,8 @@ public class SetterFactoryImplTest {
 	}
 
 	@Test
-	public void testOrderSetSpread() throws Exception {
-		assertEquals(new OrderSetSpread(), factory.orderSetSpread());
-	}
-
-	@Test
 	public void testOrderSetStatus() throws Exception {
 		assertEquals(new OrderSetStatus(), factory.orderSetStatus());
-	}
-
-	@Test
-	public void testOrderSetStopLimitPrice() throws Exception {
-		assertEquals(new OrderSetStopLimitPrice(),
-				factory.orderSetStopLimitPrice());
-	}
-
-	@Test
-	public void testOrderSetTakeProfitPrice() throws Exception {
-		assertEquals(new OrderSetTakeProfitPrice(),
-				factory.orderSetTakeProfitPrice());
-	}
-
-	@Test
-	public void testOrderSetTransactionId() throws Exception {
-		assertEquals(new OrderSetTransactionId(),
-				factory.orderSetTransactionId());
 	}
 
 	@Test

@@ -101,7 +101,7 @@ public class TradesCsvFileWriterTest {
 		while ( reader.readRecord() ) {
 			Trade trade = new Trade(null);
 			trade.setDirection(DIR_BUY.equals(reader.get(DIR))
-					? OrderDirection.BUY : OrderDirection.SELL);
+					? Direction.BUY : Direction.SELL);
 			trade.setId(Long.parseLong(reader.get(ID)));
 			trade.setOrderId(Long.parseLong(reader.get(ORD_ID)));
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));

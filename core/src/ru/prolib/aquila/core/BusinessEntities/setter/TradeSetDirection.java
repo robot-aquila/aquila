@@ -23,8 +23,8 @@ public class TradeSetDirection implements S<Trade> {
 
 	@Override
 	public void set(Trade object, Object value) throws ValueException {
-		if ( value instanceof OrderDirection ) {
-			object.setDirection((OrderDirection) value);
+		if ( value instanceof Direction ) {
+			object.setDirection((Direction) value);
 		}
 	}
 	

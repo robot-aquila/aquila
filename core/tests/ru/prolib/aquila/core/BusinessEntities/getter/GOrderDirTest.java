@@ -7,7 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
+import ru.prolib.aquila.core.BusinessEntities.Direction;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -45,8 +45,8 @@ public class GOrderDirTest {
 		expect(gString.get(this)).andReturn("SELL");
 		control.replay();
 		
-		assertEquals(OrderDirection.BUY, getter.get(this));
-		assertEquals(OrderDirection.SELL, getter.get(this));
+		assertEquals(Direction.BUY, getter.get(this));
+		assertEquals(Direction.SELL, getter.get(this));
 		
 		control.verify();
 	}

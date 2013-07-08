@@ -17,7 +17,7 @@ public class CandleFlusherTest {
 	private IMocksControl control;
 	private CandleAggregator aggregator;
 	private java.util.Timer scheduler;
-	private Timer timer;
+	private Scheduler timer;
 	private CandleFlusher flusher;
 	
 	@BeforeClass
@@ -30,7 +30,7 @@ public class CandleFlusherTest {
 		control = createStrictControl();
 		aggregator = new CandleAggregator(5);
 		scheduler = control.createMock(java.util.Timer.class);
-		timer = control.createMock(Timer.class);
+		timer = control.createMock(Scheduler.class);
 		flusher = new CandleFlusher(aggregator, timer, scheduler);
 		expect(timer.getCurrentTime())
 			.andStubReturn(df.parse("2008-12-08 00:01:12"));
@@ -95,9 +95,9 @@ public class CandleFlusherTest {
 		Variant<CandleAggregator> vAggr = new Variant<CandleAggregator>()
 			.add(aggregator)
 			.add(new CandleAggregator(7));
-		Variant<Timer> vTmr = new Variant<Timer>(vAggr)
+		Variant<Scheduler> vTmr = new Variant<Scheduler>(vAggr)
 			.add(timer)
-			.add(new TimerLocal());
+			.add(new SchedulerLocal());
 		Variant<?> iterator = vTmr;
 		int foundCnt = 0;
 		CandleFlusher x, found = null;

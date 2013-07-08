@@ -3,11 +3,11 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.util.Date;
 
 /**
- * Таймер, основанный на локальном времени.
+ * Стандартный планировщик задач.
  */
-public class TimerLocal implements Timer {
+public class SchedulerLocal implements Scheduler {
 	
-	public TimerLocal() {
+	public SchedulerLocal() {
 		super();
 	}
 
@@ -21,7 +21,7 @@ public class TimerLocal implements Timer {
 		if ( other == this ) {
 			return true;
 		}
-		return other != null && other.getClass() == TimerLocal.class;
+		return other != null && other.getClass() == SchedulerLocal.class;
 	}
 
 }

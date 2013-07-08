@@ -40,7 +40,7 @@ public class TradeTest {
 		trade = new Trade(terminal);
 		trade.setId(105L);
 		trade.setSecurityDescriptor(descr);
-		trade.setDirection(OrderDirection.BUY);
+		trade.setDirection(Direction.BUY);
 		trade.setTime(cal.getTime());
 		trade.setPrice(100.00d);
 		trade.setQty(1L);
@@ -69,7 +69,7 @@ public class TradeTest {
 		assertEquals((Long) 105L, trade.getId());
 		assertSame(terminal, trade.getTerminal());
 		assertEquals(descr, trade.getSecurityDescriptor());
-		assertSame(OrderDirection.BUY, trade.getDirection());
+		assertSame(Direction.BUY, trade.getDirection());
 		assertEquals(cal.getTime(), trade.getTime());
 		assertEquals(100.00d, trade.getPrice(), 0.001d);
 		assertEquals((Long) 1L, trade.getQty());
@@ -96,10 +96,10 @@ public class TradeTest {
 			.add(null)
 			.add(descr)
 			.add(control.createMock(SecurityDescriptor.class));
-		Variant<OrderDirection> vDir = new Variant<OrderDirection>(vSecDescr)
+		Variant<Direction> vDir = new Variant<Direction>(vSecDescr)
 			.add(null)
-			.add(OrderDirection.BUY)
-			.add(OrderDirection.SELL);
+			.add(Direction.BUY)
+			.add(Direction.SELL);
 		Variant<Date> vTime = new Variant<Date>(vDir)
 			.add(null)
 			.add(cal.getTime())
@@ -142,7 +142,7 @@ public class TradeTest {
 		assertEquals(1, foundCnt);
 		assertEquals((Long) 105L, found.getId());
 		assertSame(descr, found.getSecurityDescriptor());
-		assertSame(OrderDirection.BUY, found.getDirection());
+		assertSame(Direction.BUY, found.getDirection());
 		assertEquals(trade.getTime(), found.getTime());
 		assertEquals(100.00d, found.getPrice(), 0.001d);
 		assertEquals((Long) 1L, found.getQty());
@@ -162,7 +162,7 @@ public class TradeTest {
 		int hashCode = new HashCodeBuilder(20121031, 120517)
 			.append(105L)
 			.append(descr)
-			.append(OrderDirection.BUY)
+			.append(Direction.BUY)
 			.append(cal.getTime())
 			.append(100.00d)
 			.append(1L)

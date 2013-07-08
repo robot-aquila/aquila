@@ -50,16 +50,6 @@ public class SetterFactoryImpl implements SetterFactory {
 	}
 
 	@Override
-	public S<EditableOrder> orderSetLinkedOrderId() {
-		return new OrderSetLinkedOrderId();
-	}
-
-	@Override
-	public S<EditableOrder> orderSetOffset() {
-		return new OrderSetOffset();
-	}
-
-	@Override
 	public S<EditableOrder> orderSetPrice() {
 		return new OrderSetPrice();
 	}
@@ -80,28 +70,8 @@ public class SetterFactoryImpl implements SetterFactory {
 	}
 
 	@Override
-	public S<EditableOrder> orderSetSpread() {
-		return new OrderSetSpread();
-	}
-
-	@Override
 	public S<EditableOrder> orderSetStatus() {
 		return new OrderSetStatus();
-	}
-
-	@Override
-	public S<EditableOrder> orderSetStopLimitPrice() {
-		return new OrderSetStopLimitPrice();
-	}
-
-	@Override
-	public S<EditableOrder> orderSetTakeProfitPrice() {
-		return new OrderSetTakeProfitPrice();
-	}
-
-	@Override
-	public S<EditableOrder> orderSetTransactionId() {
-		return new OrderSetTransactionId();
 	}
 
 	@Override

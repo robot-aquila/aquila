@@ -152,14 +152,6 @@ public class IBTerminalImpl extends TerminalImpl implements IBEditableTerminal {
 	}
 
 	@Override
-	public synchronized void fireSecurityRequestError(SecurityDescriptor descr,
-			int errorCode, String errorMsg)
-	{
-		Object args[] = { descr, errorCode, errorMsg };
-		logger.error("TODO: fire request {} error: [{}] {}", args);
-	}
-
-	@Override
 	public synchronized void requestContract(int conId) {
 		int id = client.nextReqId();
 		ContractHandler handler = new IBRequestContractHandler(this, id, conId);

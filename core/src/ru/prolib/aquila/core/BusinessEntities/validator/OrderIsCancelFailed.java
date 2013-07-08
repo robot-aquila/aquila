@@ -29,7 +29,7 @@ public class OrderIsCancelFailed implements Validator {
 			EditableOrder order = (EditableOrder) object;
 			return order.hasChanged(OrderImpl.STATUS_CHANGED)
 				&& order.getPreviousStatus() == OrderStatus.ACTIVE
-				&& order.getStatus() == OrderStatus.FAILED;
+				&& order.getStatus() == OrderStatus.REJECTED;
 		}
 		return false;
 	}

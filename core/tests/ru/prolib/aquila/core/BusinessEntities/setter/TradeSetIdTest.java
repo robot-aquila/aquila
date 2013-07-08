@@ -6,7 +6,6 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetId;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
 
 /**
  * 2012-11-05<br>
@@ -33,7 +32,7 @@ public class TradeSetIdTest {
 				{ 128L,		128L,	true  },
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
-			trade = new Trade(new TerminalDecorator());
+			trade = new Trade(null);
 			setter.set(trade, fixture[i][0]);
 			if ( (Boolean) fixture[i][2] ) {
 				assertEquals(fixture[i][1], trade.getId());

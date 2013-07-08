@@ -1,24 +1,21 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 /**
- * Направление заявки.
+ * Направление операции.
  * <p>
  * Класс определяет константы, использующиеся для спецификации направления
  * заявки или сделки: на покупку или продажу.
- * <p>
- * 2012-05-30<br>
- * $Id: OrderDirection.java 223 2012-07-04 12:26:58Z whirlwind $
  */
-public class OrderDirection {
+public class Direction {
 	/**
 	 * Заявка на покупку.
 	 */
-	public static final OrderDirection BUY = new OrderDirection("Buy");
+	public static final Direction BUY = new Direction("Buy");
 	
 	/**
 	 * Заявка на продажу.
 	 */
-	public static final OrderDirection SELL = new OrderDirection("Sell");
+	public static final Direction SELL = new Direction("Sell");
 	
 	private final String dir;
 	
@@ -27,7 +24,7 @@ public class OrderDirection {
 	 * <p>
 	 * @param dir строковый код направления
 	 */
-	private OrderDirection(String dir) {
+	private Direction(String dir) {
 		super();
 		this.dir = dir;
 	}

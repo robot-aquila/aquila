@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.Map;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrderFactory;
 import ru.prolib.aquila.core.utils.Validator;
 
 /**
@@ -173,7 +172,7 @@ public interface GetterFactory {
 	 * @param buyEquiv значение элемента, соответствующее покупке
 	 * @return геттер направления
 	 */
-	public G<OrderDirection> rowOrderDir(String column, Object buyEquiv);
+	public G<Direction> rowOrderDir(String column, Object buyEquiv);
 	
 	/**
 	 * Создать геттер константной строки.
@@ -262,17 +261,5 @@ public interface GetterFactory {
 	 */
 	public G<Price>
 			rowPrice(String price, String unit, Map<?, PriceUnit> map);
-	
-	/**
-	 * Создать геттер заявки.
-	 * <p>
-	 * @param orders хранилище заявок
-	 * @param factory фабрика заявок
-	 * @param transId идентификатор элемента ряда номера транзакции
-	 * @param id идентификатор элемента ряда номера заявки
-	 * @return геттер заявки
-	 */
-	public G<EditableOrder> rowOrder(EditableOrders orders,
-			OrderFactory factory, String transId, String id);
 
 }

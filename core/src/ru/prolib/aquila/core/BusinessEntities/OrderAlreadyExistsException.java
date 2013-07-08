@@ -35,8 +35,7 @@ public class OrderAlreadyExistsException extends OrderException {
 		if ( order == null ) {
 			return pfx + "unspecified order instance";
 		}
-		return pfx + "orderId#" + order.getId() + " "
-				   + "transId#" + order.getTransactionId();
+		return pfx + "orderId#" + order.getId();
 	}
 
 }

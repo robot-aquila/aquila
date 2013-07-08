@@ -12,8 +12,6 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.getter.GAccount;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrderFactory;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrderResolverStd;
 import ru.prolib.aquila.core.data.getter.GPrice;
 import ru.prolib.aquila.core.data.getter.GSecurityDescr;
 import ru.prolib.aquila.core.utils.ValidatorEq;
@@ -139,26 +137,14 @@ public class GetterFactoryImplTest {
 		G<Object> expected = new GRowObj<Object>("zulu24");
 		assertEquals(expected, factory.rowObject("zulu24"));
 	}
-
-	@Test
-	public void testRowOrder() throws Exception {
-		EditableOrders orders = control.createMock(EditableOrders.class);
-		OrderFactory ofactory = control.createMock(OrderFactory.class);
-		G<EditableOrder> expected = new GOrder(
-				new OrderResolverStd(orders, ofactory),
-				new GRowObj<Long>("transId", new GLong()),
-				new GRowObj<Long>("id", new GLong()));
-		assertEquals(expected,
-					 factory.rowOrder(orders, ofactory, "transId", "id"));
-	}
 	
 	@Test
 	public void testRowOrderDir() throws Exception {
 		@SuppressWarnings("rawtypes")
-		G<OrderDirection> expected = new GCond<OrderDirection>(
+		G<Direction> expected = new GCond<Direction>(
 				new GValidator(new GRowObj("dir"), new ValidatorEq("BUY")),
-				new GConst<OrderDirection>(OrderDirection.BUY),
-				new GConst<OrderDirection>(OrderDirection.SELL));
+				new GConst<Direction>(Direction.BUY),
+				new GConst<Direction>(Direction.SELL));
 		assertEquals(expected, factory.rowOrderDir("dir", "BUY"));
 	}
 	

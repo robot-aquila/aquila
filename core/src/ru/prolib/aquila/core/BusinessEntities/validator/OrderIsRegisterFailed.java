@@ -28,7 +28,7 @@ public class OrderIsRegisterFailed implements Validator {
 		if ( object instanceof EditableOrder ) {
 			EditableOrder order = (EditableOrder) object;
 			return order.hasChanged(OrderImpl.STATUS_CHANGED) &&
-				order.getStatus() == OrderStatus.FAILED &&
+				order.getStatus() == OrderStatus.REJECTED &&
 				order.getPreviousStatus() == OrderStatus.PENDING;
 		}
 		return false;

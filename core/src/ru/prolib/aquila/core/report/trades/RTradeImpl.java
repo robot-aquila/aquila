@@ -68,7 +68,7 @@ public class RTradeImpl implements ERTrade {
 	public RTradeImpl(Trade trade) {
 		super();
 		descr = trade.getSecurityDescriptor();
-		type = trade.getDirection() == OrderDirection.BUY ?
+		type = trade.getDirection() == Direction.BUY ?
 				PositionType.LONG : PositionType.SHORT;
 		enterTime = trade.getTime();
 		enterQty = trade.getQty();
@@ -129,9 +129,9 @@ public class RTradeImpl implements ERTrade {
 	
 	@Override
 	public synchronized ERTrade addTrade(Trade trade) {
-		OrderDirection dir = trade.getDirection(); 
-		if ( (type == PositionType.LONG && dir == OrderDirection.SELL)
-		  || (type == PositionType.SHORT && dir == OrderDirection.BUY) )
+		Direction dir = trade.getDirection(); 
+		if ( (type == PositionType.LONG && dir == Direction.SELL)
+		  || (type == PositionType.SHORT && dir == Direction.BUY) )
 		{
 			return appendToExit(trade);
 		} else {

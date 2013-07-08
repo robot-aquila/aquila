@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
+
 /**
  * 2012-10-14<br>
  * $Id: OrderTypeTest.java 542 2013-02-23 04:15:34Z whirlwind $

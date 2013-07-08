@@ -16,8 +16,8 @@ public class RTradeImplTest {
 	private static SimpleDateFormat format;
 	private static PositionType LONG = PositionType.LONG;
 	private static PositionType SHORT = PositionType.SHORT;
-	private static OrderDirection BUY = OrderDirection.BUY;
-	private static OrderDirection SELL = OrderDirection.SELL;
+	private static Direction BUY = Direction.BUY;
+	private static Direction SELL = Direction.SELL;
 	private static SecurityDescriptor descr1, descr2;
 	private static Date time1, time2;
 	private IMocksControl control;
@@ -50,7 +50,7 @@ public class RTradeImplTest {
 	 * @return сделка
 	 */
 	private Trade createTrade(SecurityDescriptor descr, String time,
-			OrderDirection dir, Long qty, Double price, Double volume)
+			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
 		return createTrade(descr, format.parse(time), dir, qty, price, volume);
@@ -68,7 +68,7 @@ public class RTradeImplTest {
 	 * @return сделка
 	 */
 	private Trade createTrade(SecurityDescriptor descr, Date time,
-			OrderDirection dir, Long qty, Double price, Double volume)
+			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);
 		trade.setDirection(dir);

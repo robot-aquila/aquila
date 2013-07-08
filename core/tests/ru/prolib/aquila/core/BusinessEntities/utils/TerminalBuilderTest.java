@@ -21,7 +21,6 @@ public class TerminalBuilderTest {
 		EventDispatcher secDisp = es.createEventDispatcher("Securities");
 		EventDispatcher portDisp = es.createEventDispatcher("Portfolios");
 		EventDispatcher ordDisp = es.createEventDispatcher("Orders");
-		EventDispatcher stopOrdDisp = es.createEventDispatcher("StopOrders");
 		EventDispatcher termDisp = es.createEventDispatcher("Terminal");
 		EditableTerminal expected = new TerminalImpl(es, starter,
 				new SecuritiesImpl(secDisp,
@@ -45,24 +44,13 @@ public class TerminalBuilderTest {
 						ordDisp.createType("OnRegistered"),
 						ordDisp.createType("OnRegisterFailed"),
 						ordDisp.createType("OnTrade")),
-				new OrdersImpl(stopOrdDisp,
-						stopOrdDisp.createType("OnAvailable"),
-						stopOrdDisp.createType("OnCancelFailed"),
-						stopOrdDisp.createType("OnCancelled"),
-						stopOrdDisp.createType("OnChanged"),
-						stopOrdDisp.createType("OnDone"),
-						stopOrdDisp.createType("OnFailed"),
-						stopOrdDisp.createType("OnFilled"),
-						stopOrdDisp.createType("OnPartiallyFilled"),
-						stopOrdDisp.createType("OnRegistered"),
-						stopOrdDisp.createType("OnRegisterFailed"),
-						stopOrdDisp.createType("OnTrade")),
 				termDisp,
 				termDisp.createType("OnConnected"),
 				termDisp.createType("OnDisconnected"),
 				termDisp.createType("OnStarted"),
 				termDisp.createType("OnStopped"),
-				termDisp.createType("OnPanic"));
+				termDisp.createType("OnPanic"),
+				termDisp.createType("OnRequestSecurityError"));
 
 		assertEquals(expected, builder.createTerminal("foobar"));
 	}

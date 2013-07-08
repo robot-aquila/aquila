@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
  * $Id: OrderImpl.java 542 2013-02-23 04:15:34Z whirlwind $
  */
 public class OrderImpl extends EditableImpl implements EditableOrder {
-	public static final int VERSION = 0x03;
+	public static final int VERSION = 0x05;
 	public static final Integer STATUS_CHANGED = 0x01;
 	private final EventDispatcher dispatcher;
 	private final EventType onRegister;
@@ -29,23 +29,20 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private final EventType onTrade;
 	private Account account;
 	private SecurityDescriptor descr;
-	private OrderDirection direction;
+	private Direction direction;
 	private Long id;
 	private Double price;
 	private Long qty;
 	private Long qtyRest;
 	private OrderStatus status = OrderStatus.PENDING, prevStatus;
-	private Long transId;
 	private OrderType type;
-	private Long linkedOrderId;
-	private Double stopLimitPrice,takeProfitPrice;
-	private Price offset,spread;
 	private Double execVolume = 0.0d;
-	private Double avgExecPrice = 0.0d;
+	private Double avgExecPrice = null;
 	private final List<? extends OrderHandler> eventHandlers;
 	private final Terminal terminal;
 	private Date time,lastChangeTime;
 	private final LinkedList<Trade> trades = new LinkedList<Trade>();
+	private final OrderSystemInfo systemInfo = new OrderSystemInfo();
 	
 	/**
 	 * Конструктор.
@@ -172,7 +169,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized OrderDirection getDirection() {
+	public synchronized Direction getDirection() {
 		return direction;
 	}
 
@@ -242,7 +239,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized void setDirection(OrderDirection dir) {
+	public synchronized void setDirection(Direction dir) {
 		if ( dir != this.direction ) {
 			this.direction = dir;
 			setChanged();
@@ -292,91 +289,9 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized Long getTransactionId() {
-		return transId;
-	}
-
-	@Override
-	public synchronized void setTransactionId(Long id) {
-		if ( id == null ? this.transId != null : ! id.equals(this.transId) ) {
-			this.transId = id;
-			setChanged();
-		}
-	}
-
-	@Override
 	public synchronized void fireChangedEvent() throws EditableObjectException {
 		for ( int i = 0; i < eventHandlers.size(); i ++ ) {
 			eventHandlers.get(i).handle(this);
-		}
-	}
-
-	@Override
-	public synchronized Long getLinkedOrderId() {
-		return linkedOrderId;
-	}
-
-	@Override
-	public synchronized Double getStopLimitPrice() {
-		return stopLimitPrice;
-	}
-
-	@Override
-	public synchronized void setLinkedOrderId(Long id) {
-		if ( id == null ? linkedOrderId != null : ! id.equals(linkedOrderId) ) {
-			linkedOrderId = id;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setStopLimitPrice(Double price) {
-		if ( price == null ? stopLimitPrice != null
-						   : ! price.equals(stopLimitPrice) )
-		{
-			stopLimitPrice = price;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized Double getTakeProfitPrice() {
-		return takeProfitPrice;
-	}
-
-	@Override
-	public synchronized Price getOffset() {
-		return offset;
-	}
-
-	@Override
-	public synchronized Price getSpread() {
-		return spread;
-	}
-
-	@Override
-	public synchronized void setTakeProfitPrice(Double price) {
-		if ( price == null ? takeProfitPrice != null
-						   : ! price.equals(takeProfitPrice) )
-		{
-			takeProfitPrice = price;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setOffset(Price value) {
-		if ( value == null ? offset != null : ! value.equals(offset) ) {
-			offset = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setSpread(Price value) {
-		if ( value == null ? spread != null : ! value.equals(spread) ) {
-			spread = value;
-			setChanged();
 		}
 	}
 
@@ -520,8 +435,6 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 			.append(o.eventHandlers, eventHandlers)
 			.append(o.id, id)
 			.append(o.lastChangeTime, lastChangeTime)
-			.append(o.linkedOrderId, linkedOrderId)
-			.append(o.offset, offset)
 			.append(o.onCancelFailed, onCancelFailed)
 			.append(o.onCancelled, onCancelled)
 			.append(o.onChanged, onChanged)
@@ -534,20 +447,22 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 			.append(o.onTrade, onTrade)
 			.append(o.price, price)
 			.append(o.qty, qty)
-			.append(o.spread, spread)
 			.append(o.status, status)
-			.append(o.stopLimitPrice, stopLimitPrice)
-			.append(o.takeProfitPrice, takeProfitPrice)
 			.append(o.terminal, terminal)
 			.append(o.time, time)
 			.append(o.trades, trades)
-			.append(o.transId, transId)
 			.append(o.type, type)
 			.append(o.isAvailable(), isAvailable())
 			.append(o.avgExecPrice, avgExecPrice)
 			.append(o.execVolume, execVolume)
 			.append(o.qtyRest, qtyRest)
+			.append(o.systemInfo, systemInfo)
 			.isEquals();
+	}
+	
+	@Override
+	public OrderSystemInfo getSystemInfo() {
+		return systemInfo;
 	}
 
 }

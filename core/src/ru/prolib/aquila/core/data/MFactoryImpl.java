@@ -127,12 +127,6 @@ public class MFactoryImpl implements MFactory {
 	}
 
 	@Override
-	public S<EditableOrder> rowOrdTransId(String name) {
-		return new MStd<EditableOrder>(gfactory.rowLong(name),
-				sfactory.orderSetTransactionId());
-	}
-
-	@Override
 	public S<EditableOrder> rowOrdType(String name, Map<?, OrderType> map) {
 		return new MStd<EditableOrder>(
 				new GMapTR<OrderType>(gfactory.rowObject(name), map),
@@ -150,58 +144,6 @@ public class MFactoryImpl implements MFactory {
 		return new MStd<EditableOrder>(
 				new GOrderType(gSec, gfactory.rowDouble(price)),
 				sfactory.orderSetType());
-	}
-
-	@Override
-	public S<EditableOrder> rowOrdOffset(String price, String unit,
-			Object eqMoney, Object eqPerc)
-	{
-		return new MStd<EditableOrder>(
-				gfactory.rowPrice(price, unit, getPriceUnitMap(eqMoney,eqPerc)),
-				sfactory.orderSetOffset());
-	}
-	
-	/**
-	 * Создать карту типа цены.
-	 * <p>
-	 * @param eqMoney эквивалент типа {@link PriceUnit#MONEY}
-	 * @param eqPerc эквивалент типа {@link PriceUnit#PERCENT}
-	 * @return карта преобразования типа цены
-	 */
-	private Map<?, PriceUnit> getPriceUnitMap(Object eqMoney, Object eqPerc) {
-		Map<Object, PriceUnit> map = new HashMap<Object, PriceUnit>();
-		map.put(eqMoney, PriceUnit.MONEY);
-		map.put(eqPerc, PriceUnit.PERCENT);
-		return map;
-	}
-
-	@Override
-	public S<EditableOrder> rowOrdSpread(String price, String unit,
-			Object eqMoney, Object eqPerc)
-	{
-		return new MStd<EditableOrder>(
-				gfactory.rowPrice(price, unit, getPriceUnitMap(eqMoney,eqPerc)),
-				sfactory.orderSetSpread());
-	}
-
-	@Override
-	public S<EditableOrder> rowOrdSLP(String name, Map<?, G<Double>> map) {
-		return new MStd<EditableOrder>(
-				new GMapTG<Double>(gfactory.rowObject(name), map),
-				sfactory.orderSetStopLimitPrice());
-	}
-
-	@Override
-	public S<EditableOrder> rowOrdTPP(String name, Map<?, G<Double>> map) {
-		return new MStd<EditableOrder>(
-				new GMapTG<Double>(gfactory.rowObject(name), map),
-				sfactory.orderSetTakeProfitPrice());
-	}
-
-	@Override
-	public S<EditableOrder> rowOrdLinkedOrderId(String name) {
-		return new MStd<EditableOrder>(gfactory.rowLong(name),
-				sfactory.orderSetLinkedOrderId());
 	}
 
 	@Override

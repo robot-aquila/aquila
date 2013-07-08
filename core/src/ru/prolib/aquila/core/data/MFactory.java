@@ -36,10 +36,10 @@ public interface MFactory {
 	 * Создает модификатор, который преобразует значения ряда в одно из двух
 	 * возможных направлений заявки. Если значение ряда соответствует
 	 * объекту-эквиваленту, то устанавливается направление
-	 * {@link ru.prolib.aquila.core.BusinessEntities.OrderDirection#BUY
+	 * {@link ru.prolib.aquila.core.BusinessEntities.Direction#BUY
 	 * OrderDirection#BUY}.
 	 * При прочих значениях устанавливается направление
-	 * {@link ru.prolib.aquila.core.BusinessEntities.OrderDirection#SELL
+	 * {@link ru.prolib.aquila.core.BusinessEntities.Direction#SELL
 	 * OrderDirection#SELL}.
 	 * <p>
 	 * @param name идентификатор элемента ряда 
@@ -99,14 +99,6 @@ public interface MFactory {
 	public S<EditableOrder> rowOrdStatus(String name, Map<?, OrderStatus> map);
 
 	/**
-	 * Создать модификатор идентификатора транзакции заявки.
-	 * <p>
-	 * @param name идентификатор элемента ряда
-	 * @return модификатор
-	 */
-	public S<EditableOrder> rowOrdTransId(String name);
-
-	/**
 	 * Создать модификатор типа заявки.
 	 * <p>
 	 * Создает модификатор типа заявки, основанный на простом сопоставлении
@@ -140,57 +132,6 @@ public interface MFactory {
 	 * @return модификатор
 	 */
 	public S<EditableOrder> rowOrdType(G<Security> gSec, String price);
-
-	/**
-	 * Создать модификатор смещения цены тэйк-профита.
-	 * <p>
-	 * @param price колонка цены
-	 * @param unit колонка единицы
-	 * @param eqMoney значение единицы эквивалент денег
-	 * @param eqPercent значение единицы эквивалент процента
-	 * @return модификатор
-	 */
-	public S<EditableOrder> rowOrdOffset(String price, String unit,
-			Object eqMoney, Object eqPercent);
-	
-	/**
-	 * Создать модификатор защитного спрэда тэйк-профита.
-	 * <p>
-	 * @param price колонка цены
-	 * @param unit колонка единицы
-	 * @param eqMoney значение единицы эквивалент денег
-	 * @param eqPercent значение единицы эквивалент процента
-	 * @return модификатор
-	 */
-	public S<EditableOrder> rowOrdSpread(String price, String unit,
-			Object eqMoney, Object eqPercent);
-	/**
-	 * Создать модификатор стоп-лимит цены.
-	 * <p>
-	 * @param name имя колонки значения ключа (обычно тип заявки)
-	 * @param map карта сопоставления значения ключа геттеру
-	 * @return модификатор
-	 */
-	public S<EditableOrder> rowOrdSLP(String name, Map<?, G<Double>> map);
-
-	/**
-	 * Создать модификатор тэйк-профит цены.
-	 * <p>
-	 * @param name имя колонки значения ключа (тип заявки)
-	 * @param map карта сопоставления значения ключа геттеру
-	 * @return модификатор
-	 */
-	public S<EditableOrder> rowOrdTPP(String name, Map<?, G<Double>> map);
-	
-	/**
-	 * Создать модификатор номера связаной заявки.
-	 * <p>
-	 * @param name идентификатор элемента ряда с номером типа
-	 * {@link java.lang.Long Long}.
-	 * @return модификатор
-	 */
-	public S<EditableOrder> rowOrdLinkedOrderId(String name);
-
 	
 	/**
 	 * Создать модификатор размера лота.

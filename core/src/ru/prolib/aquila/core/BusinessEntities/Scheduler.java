@@ -3,9 +3,9 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.util.Date;
 
 /**
- * Интерфейс таймера.
+ * Интерфейс планировщика задач.
  */
-public interface Timer {
+public interface Scheduler {
 	
 	/**
 	 * Получить текущее время.

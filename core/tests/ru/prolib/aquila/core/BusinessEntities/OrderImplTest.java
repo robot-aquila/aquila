@@ -125,7 +125,7 @@ public class OrderImplTest {
 	
 	@Test
 	public void testDefaults() throws Exception {
-		assertEquals(0x03, OrderImpl.VERSION);
+		assertEquals(0x05, OrderImpl.VERSION);
 		assertNull(order.getAccount());
 		assertNull(order.getSecurityDescriptor());
 		assertNull(order.getId());
@@ -136,15 +136,11 @@ public class OrderImplTest {
 		assertNull(order.getQty());
 		assertNull(order.getQtyRest());
 		assertNull(order.getPrice());
-		assertNull(order.getLinkedOrderId());
-		assertNull(order.getStopLimitPrice());
-		assertNull(order.getTakeProfitPrice());
-		assertNull(order.getOffset());
-		assertNull(order.getSpread());
 		assertEquals(0.0d, order.getExecutedVolume(), 0.01d);
-		assertEquals(0.0d, order.getAvgExecutedPrice(), 0.01d);
+		assertNull(order.getAvgExecutedPrice());
 		assertNull(order.getTime());
 		assertNull(order.getLastChangeTime());
+		assertEquals(new OrderSystemInfo(), order.getSystemInfo());
 	}
 	
 	@Test
@@ -215,7 +211,7 @@ public class OrderImplTest {
 	public void testSetAccount() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setAccount((Account) value);
 			}
 		};
@@ -232,24 +228,24 @@ public class OrderImplTest {
 	public void testSetDirection() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
-				object.setDirection((OrderDirection) value);
+			public void set(OrderImpl object, Object value) {
+				object.setDirection((Direction) value);
 			}
 		};
-		getter = new G<OrderDirection>() {
+		getter = new G<Direction>() {
 			@Override
-			public OrderDirection get(Object object) throws ValueException {
+			public Direction get(Object object) throws ValueException {
 				return ((OrderImpl) object).getDirection();
 			}
 		};
-		testSetterGetter(OrderDirection.BUY, OrderDirection.SELL);
+		testSetterGetter(Direction.BUY, Direction.SELL);
 	}
 	
 	@Test
 	public void testSetId() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setId((Long) value);
 			}
 		};
@@ -260,23 +256,6 @@ public class OrderImplTest {
 			}
 		};
 		testSetterGetter(100L, 200L);
-	}
-	
-	@Test
-	public void testSetLinkedOrderId() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
-				object.setLinkedOrderId((Long) value);
-			}
-		};
-		getter = new G<Long>() {
-			@Override
-			public Long get(Object object) throws ValueException {
-				return ((OrderImpl) object).getLinkedOrderId();
-			}
-		};
-		testSetterGetter(108L, 208L);
 	}
 	
 	@Test
@@ -293,7 +272,7 @@ public class OrderImplTest {
 	public void testSetPrice() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setPrice((Double) value);
 			}
 		};
@@ -307,45 +286,10 @@ public class OrderImplTest {
 	}
 
 	@Test
-	public void testSetStopLimitPrice() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
-				object.setStopLimitPrice((Double) value);
-			}
-		};
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object object) throws ValueException {
-				return ((OrderImpl) object).getStopLimitPrice();
-			}
-		};
-		testSetterGetter(1202.5D, 1301.0D);
-	}
-	
-	@Test
-	public void testSetTakeProfitPrice() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
-				object.setTakeProfitPrice((Double) value);
-			}
-		};
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object object) throws ValueException {
-				return ((OrderImpl) object).getTakeProfitPrice();
-			}
-		};
-		testSetterGetter(4202.5D, 4301.0D);
-	}
-
-
-	@Test
 	public void testSetQty() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setQty((Long) value);
 			}
 		};
@@ -362,7 +306,7 @@ public class OrderImplTest {
 	public void testSetQtyRest() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setQtyRest((Long) value);
 			}
 		};
@@ -389,7 +333,7 @@ public class OrderImplTest {
 	public void testSetSecurityDescriptor() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setSecurityDescriptor((SecurityDescriptor) value);
 			}
 		};
@@ -404,63 +348,10 @@ public class OrderImplTest {
 	}
 	
 	@Test
-	public void testSetOffset() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
-				object.setOffset((Price) value);
-			}
-		};
-		getter = new G<Price>() {
-			@Override
-			public Price get(Object object) throws ValueException {
-				return ((OrderImpl) object).getOffset();
-			}
-		};
-		testSetterGetter(new Price(PriceUnit.PERCENT,	10.00d),
-						 new Price(PriceUnit.MONEY,		20.00d));
-	}
-	
-	@Test
-	public void testSetSpread() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
-				object.setSpread((Price) value);
-			}
-		};
-		getter = new G<Price>() {
-			@Override
-			public Price get(Object object) throws ValueException {
-				return ((OrderImpl) object).getSpread();
-			}
-		};
-		testSetterGetter(new Price(PriceUnit.MONEY,		22.00d),
-						 new Price(PriceUnit.PERCENT,	12.00d));
-	}
-	
-	@Test
-	public void testSetTransactionId() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
-				object.setTransactionId((Long) value);
-			}
-		};
-		getter = new G<Long>() {
-			@Override
-			public Long get(Object object) throws ValueException {
-				return ((OrderImpl) object).getTransactionId();
-			}
-		};
-		testSetterGetter(100L, 500L);
-	}
-
-	@Test
 	public void testSetType() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setType((OrderType) value);
 			}
 		};
@@ -477,7 +368,7 @@ public class OrderImplTest {
 	public void testSetStatus() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setStatus((OrderStatus) value);
 			}
 		};
@@ -512,7 +403,7 @@ public class OrderImplTest {
 	public void testSetExecutedVolume() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setExecutedVolume((Double) value);
 			}
 		};
@@ -577,7 +468,7 @@ public class OrderImplTest {
 	public void testSetLastChangeTime() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
-			public void set(OrderImpl object, Object value) throws ValueException {
+			public void set(OrderImpl object, Object value) {
 				object.setLastChangeTime((Date) value);
 			}
 		};
@@ -720,18 +611,12 @@ public class OrderImplTest {
 
 		order.setAccount(account);
 		order.setSecurityDescriptor(descr);
-		order.setDirection(OrderDirection.SELL);
+		order.setDirection(Direction.SELL);
 		order.setId(1000L);
 		order.setPrice(135.67d);
 		order.setQty(200L);
 		order.setStatus(OrderStatus.CANCELLED);
-		order.setTransactionId(100500L);
 		order.setType(OrderType.LIMIT);
-		order.setLinkedOrderId(null);
-		order.setStopLimitPrice(200.14d);
-		order.setTakeProfitPrice(400.00d);
-		order.setOffset(new Price(PriceUnit.MONEY, 1.0d));
-		order.setSpread(new Price(PriceUnit.PERCENT, 0.5d));
 		for ( OrderHandler handler : hndl1 ) {
 			eventHandlers.add(handler);
 		}
@@ -744,6 +629,7 @@ public class OrderImplTest {
 		order.setQtyRest(190L);
 		order.setExecutedVolume(249400.00d);
 		order.setAvgExecutedPrice(182.34d);
+		order.getSystemInfo().getRegisteration().setRequest(new Object());
 		
 		double aprob = 0.4; // Probability of additional variant
 		Random rnd = new Random();
@@ -789,9 +675,9 @@ public class OrderImplTest {
 		if ( rnd.nextDouble() > aprob ) {
 			vDescr.add(new SecurityDescriptor("A","B","C",SecurityType.UNK));
 		}
-		Variant<OrderDirection> vDir = new Variant<OrderDirection>(vDescr)
-			.add(OrderDirection.SELL);
-		if ( rnd.nextDouble() > aprob ) vDir.add(OrderDirection.BUY);
+		Variant<Direction> vDir = new Variant<Direction>(vDescr)
+			.add(Direction.SELL);
+		if ( rnd.nextDouble() > aprob ) vDir.add(Direction.BUY);
 		Variant<Long> vId = new Variant<Long>(vDir)
 			.add(1000L);
 		if ( rnd.nextDouble() > aprob ) vId.add(2220L);
@@ -804,31 +690,11 @@ public class OrderImplTest {
 		Variant<OrderStatus> vStat = new Variant<OrderStatus>(vQty)
 			.add(OrderStatus.CANCELLED);
 		if ( rnd.nextDouble() > aprob ) vStat.add(OrderStatus.FILLED);
-		Variant<Long> vTrnId = new Variant<Long>(vStat)
-			.add(100500L);
-		if ( rnd.nextDouble() > aprob ) vTrnId.add(null);
-		Variant<OrderType> vType = new Variant<OrderType>(vTrnId)
+		Variant<OrderType> vType = new Variant<OrderType>(vStat)
 			.add(OrderType.LIMIT);
 		if ( rnd.nextDouble() > aprob ) vType.add(OrderType.MARKET);
-		Variant<Long> vLnkId = new Variant<Long>(vType)
-			.add(null);
-		if ( rnd.nextDouble() > aprob ) vLnkId.add(500L);
-		Variant<Double> vSlp = new Variant<Double>(vLnkId)
-			.add(200.14d);
-		if ( rnd.nextDouble() > aprob ) vSlp.add(180.92d);
-		Variant<Double> vTpp = new Variant<Double>(vSlp)
-			.add(400.00d);
-		if ( rnd.nextDouble() > aprob ) vTpp.add(13.44d);
-		Variant<Price> vOff = new Variant<Price>(vTpp)
-			.add(new Price(PriceUnit.MONEY, 1.0d));
-		if ( rnd.nextDouble() > aprob ) vOff.add(null);
-		Variant<Price> vSprd = new Variant<Price>(vOff)
-			.add(new Price(PriceUnit.PERCENT, 0.5d));
-		if ( rnd.nextDouble() > aprob ) {
-			vSprd.add(null);
-		}
 		Variant<List<OrderHandler>> vHndl =
-				new Variant<List<OrderHandler>>(vSprd)
+				new Variant<List<OrderHandler>>(vType)
 			.add(hndl1);
 		if ( rnd.nextDouble() > aprob ) vHndl.add(hndl2);
 		Variant<Terminal> vTerm = new Variant<Terminal>(vHndl)
@@ -861,7 +727,10 @@ public class OrderImplTest {
 		Variant<Double> vAvgPr = new Variant<Double>(vExecVol)
 			.add(182.34d)
 			.add(202.15d);
-		Variant<?> iterator = vAvgPr;
+		Variant<Object> vRegReq = new Variant<Object>(vAvgPr)
+			.add(order.getSystemInfo().getRegisteration().getRequest())
+			.add(new Object());
+		Variant<?> iterator = vRegReq;
 		int foundCnt = 0;
 		OrderImpl x = null, found = null;
 		do {
@@ -884,13 +753,7 @@ public class OrderImplTest {
 			x.setPrice(vPrice.get());
 			x.setQty(vQty.get());
 			x.setStatus(vStat.get());
-			x.setTransactionId(vTrnId.get());
 			x.setType(vType.get());
-			x.setLinkedOrderId(vLnkId.get());
-			x.setStopLimitPrice(vSlp.get());
-			x.setTakeProfitPrice(vTpp.get());
-			x.setOffset(vOff.get());
-			x.setSpread(vSprd.get());
 			x.setTime(vTime.get());
 			x.setLastChangeTime(vLastTime.get());
 			for ( Trade trade : vTrds.get() ) {
@@ -900,6 +763,7 @@ public class OrderImplTest {
 			x.setQtyRest(vQtyRst.get());
 			x.setAvgExecutedPrice(vAvgPr.get());
 			x.setExecutedVolume(vExecVol.get());
+			x.getSystemInfo().getRegisteration().setRequest(vRegReq.get());
 			if ( order.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -922,18 +786,12 @@ public class OrderImplTest {
 		assertEquals(terminal, found.getTerminal());
 		assertEquals(account, found.getAccount());
 		assertEquals(descr, found.getSecurityDescriptor());
-		assertEquals(OrderDirection.SELL, found.getDirection());
+		assertEquals(Direction.SELL, found.getDirection());
 		assertEquals(new Long(1000L), found.getId());
 		assertEquals(135.67d, found.getPrice(), 0.01d);
 		assertEquals(new Long(200L), found.getQty());
 		assertEquals(OrderStatus.CANCELLED, found.getStatus());
-		assertEquals(new Long(100500L), found.getTransactionId());
 		assertEquals(OrderType.LIMIT, found.getType());
-		assertNull(order.getLinkedOrderId());
-		assertEquals(200.14d, found.getStopLimitPrice(), 0.01d);
-		assertEquals(400.00d, found.getTakeProfitPrice(), 0.01d);
-		assertEquals(new Price(PriceUnit.MONEY, 1.0d), found.getOffset());
-		assertEquals(new Price(PriceUnit.PERCENT, 0.5d), found.getSpread());
 		assertEquals(format.parse("2013-05-15 08:32:00"), found.getTime());
 		assertEquals(format.parse("1998-01-01 01:02:03"),
 				found.getLastChangeTime());
@@ -942,6 +800,7 @@ public class OrderImplTest {
 		assertEquals(new Long(190L), found.getQtyRest());
 		assertEquals(249400.00d, found.getExecutedVolume(), 0.01d);
 		assertEquals(182.34d, found.getAvgExecutedPrice(), 0.01d);
+		assertEquals(order.getSystemInfo(), found.getSystemInfo());
 	}
 
 }

@@ -10,30 +10,14 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.BusinessEntities.validator.*;
 
 /**
- * Реализация набора заявок.
+ * Хранилище заявок.
  * <p>
  * Данный класс представляет собой хранилище заявок, предназначенное для
- * использования поставщиками сервиса заявок. Реализуемый в рамках хранилища
+ * использования поставщиками данных. Реализуемый в рамках хранилища
  * интерфейс {@link Orders} позволяет так же использовать данный класс
  * потребителями сервиса заявок.
- * <p>
- * Фактически, хранилище оперирует двумя наборами заявок: заявками в очереди
- * ожидания поступления данных и собственно заявками, данные о которых уже
- * поступили. Идентификация ожидающих заявок выполняется по номеру транзакции.
- * Подразумевается, что номер транзакции назначается поставщиком сервиса заявок
- * при программном создании заявки. Идентификация подтвержденных заявок
- * выполняется по номеру заявки.
- * <p>
- * Данный класс не выполняет какого-либо контроля за состоянием заявок и
- * своевременным переводом заявки из ожидающих в подтвержденные, а служит
- * исключительно хранилищем. Алгоритм управления заявками должна быть
- * реализована в рамках поставщика сервиса заявок.
- * <p>
- * 2012-10-17<br>
- * $Id: OrdersImpl.java 562 2013-03-06 15:22:54Z whirlwind $
  */
 public class OrdersImpl implements EditableOrders, EventListener {
-	private final Map<Long, EditableOrder> pending;
 	private final Map<Long, EditableOrder> orders;
 	private final EventDispatcher dispatcher;
 	private final EventType onAvailable;
@@ -72,7 +56,6 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			EventType onTrade)
 	{
 		super();
-		pending = new LinkedHashMap<Long, EditableOrder>();
 		orders = new LinkedHashMap<Long, EditableOrder>();
 		this.dispatcher = dispatcher;
 		this.onAvailable = onAvailable;
@@ -149,27 +132,6 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			order.OnTrade().removeListener(this);
 		}
 		orders.remove(id);
-	}
-
-	@Override
-	public synchronized boolean isPendingOrder(long transId) {
-		return pending.containsKey(transId);
-	}
-
-	@Override
-	public synchronized void purgePendingOrder(long transId) {
-		pending.remove(transId);
-	}
-
-	@Override
-	public synchronized EditableOrder getPendingOrder(long transId)
-		throws OrderNotExistsException
-	{
-		EditableOrder order = pending.get(transId);
-		if ( order == null ) {
-			throw new OrderNotExistsException(transId);
-		}
-		return order;
 	}
 
 	@Override
@@ -272,39 +234,6 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public synchronized boolean hasPendingOrders() {
-		return pending.size() > 0;
-	}
-
-	@Override
-	public synchronized void
-		registerPendingOrder(long transId, EditableOrder order)
-			throws OrderAlreadyExistsException
-	{
-		if ( pending.containsKey(transId) ) {
-			throw new OrderAlreadyExistsException(order);
-		}
-		order.setTransactionId(transId);
-		pending.put(transId, order);
-	}
-
-	@Override
-	public synchronized EditableOrder
-		movePendingOrder(long transId, long orderId) throws OrderException
-	{
-		if ( ! isPendingOrder(transId) ) {
-			throw new OrderNotExistsException(transId);
-		}
-		EditableOrder order = getPendingOrder(transId);
-		if ( isOrderExists(orderId) ) {
-			throw new OrderAlreadyExistsException(order);
-		}
-		registerOrder(orderId, order);
-		purgePendingOrder(transId);
-		return order;
-	}
-
-	@Override
 	public synchronized EditableOrder createOrder(EditableTerminal terminal) {
 		EventDispatcher d = terminal.getEventSystem()
 			.createEventDispatcher("Order");
@@ -347,20 +276,6 @@ public class OrdersImpl implements EditableOrders, EventListener {
 		orders.put(id, order);
 	}
 	
-	/**
-	 * Установить экземпляр ожидающей заявки.
-	 * <p>
-	 * Только для тестирования.
-	 * <p>
-	 * @param transId номер транзакции
-	 * @param order экземпляр заявки
-	 */
-	protected synchronized
-		void setPendingOrder(long transId, EditableOrder order)
-	{
-		pending.put(transId, order);
-	}
-	
 	@Override
 	public synchronized boolean equals(Object other) {
 		if ( other == this ) {
@@ -383,7 +298,6 @@ public class OrdersImpl implements EditableOrders, EventListener {
 			.append(o.onRegistered, onRegistered)
 			.append(o.onRegisterFailed, onRegisterFailed)
 			.append(o.orders, orders)
-			.append(o.pending, pending)
 			.append(o.onTrade, onTrade)
 			.isEquals();
 	}

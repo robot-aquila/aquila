@@ -7,7 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
+import ru.prolib.aquila.core.BusinessEntities.Direction;
 import ru.prolib.aquila.core.BusinessEntities.setter.OrderSetDirection;
 
 /**
@@ -36,17 +36,17 @@ public class OrderSetDirectionTest {
 		Object fixture[][] = {
 				// value, expected value, set?
 				{ 100500L,				null,					false },
-				{ OrderDirection.SELL,  OrderDirection.SELL,	true  },
+				{ Direction.SELL,  Direction.SELL,	true  },
 				{ new Double(201.1D),	null,					false },
 				{ null,					null,					false },
-				{ OrderDirection.BUY,	OrderDirection.BUY,		true  },
+				{ Direction.BUY,	Direction.BUY,		true  },
 				{ this,					null,					false },
 				{ new Float(123.456),	null,					false },
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			control.resetToStrict();
 			if ( (Boolean) fixture[i][2] ) {
-				order.setDirection((OrderDirection) fixture[i][1]);
+				order.setDirection((Direction) fixture[i][1]);
 			}
 			control.replay();
 			setter.set(order, fixture[i][0]);

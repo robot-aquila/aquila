@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.Date;
 
+
 /**
  * Интерфейс модифицируемой заявки.
  * <p>
@@ -22,7 +23,7 @@ public interface EditableOrder extends Order, Editable {
 	 * <p>
 	 * @param dir направление заявки
 	 */
-	public void setDirection(OrderDirection dir);
+	public void setDirection(Direction dir);
 	
 	/**
 	 * Установить тип заявки.
@@ -72,48 +73,6 @@ public interface EditableOrder extends Order, Editable {
 	 * @param price цена
 	 */
 	public void setPrice(Double price);
-	
-	/**
-	 * Установить идентификатор транзакции.
-	 * <p>
-	 * @param id идентификатор транзакции
-	 */
-	public void setTransactionId(Long id);
-	
-	/**
-	 * Установить номер связанной заявки.
-	 * <p>
-	 * @param id идентификатор заявки
-	 */
-	public void setLinkedOrderId(Long id);
-	
-	/**
-	 * Установить стоп-лимит цену.
-	 * <p>
-	 * @param price цена
-	 */
-	public void setStopLimitPrice(Double price);
-	
-	/**
-	 * Установить тэйк-профит цену.
-	 * <p>
-	 * @param price цена
-	 */
-	public void setTakeProfitPrice(Double price);
-	
-	/**
-	 * Установить величину смещения от пика для тэйк-профита.
-	 * <p>
-	 * @param value смещение
-	 */
-	public void setOffset(Price value);
-	
-	/**
-	 * Установить величину защитного спреда для тэйк-профита.
-	 * <p>
-	 * @param value спрэд
-	 */
-	public void setSpread(Price value);
 	
 	/**
 	 * Установить стоимость исполненной части заявки.

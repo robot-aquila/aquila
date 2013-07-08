@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.utils.Counter;
 
 /**
  * Интерфейс модифицируемого терминала.
@@ -9,7 +10,7 @@ import ru.prolib.aquila.core.*;
  * $Id: EditableTerminal.java 527 2013-02-14 15:14:09Z whirlwind $
  */
 public interface EditableTerminal extends Terminal, EditableOrders,
-	EditableStopOrders, EditablePortfolios, EditableSecurities, FirePanicEvent
+	EditablePortfolios, EditableSecurities, FirePanicEvent
 {
 	
 	/**
@@ -65,13 +66,6 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	public EditableOrders getOrdersInstance();
 	
 	/**
-	 * Получить экземпляр хранилища стоп-заявок.
-	 * <p>
-	 * @return хранилище стоп-заявок
-	 */
-	public EditableOrders getStopOrdersInstance();
-	
-	/**
 	 * Получить стартер терминала.
 	 * <p>
 	 * @return стартер
@@ -123,10 +117,46 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	public EditableOrder createOrder();
 	
 	/**
-	 * Создать стоп-заявку.
+	 * Получить нумератор заявок.
 	 * <p>
-	 * @return новая заявка
+	 * Номер заявки - это суррогатный ключ, однозначно идентифицирующий
+	 * экземпляр заявки в рамках экземпляра терминала. При создании заявки
+	 * с помощью {@link #createLimitOrderB(Account, Security, long, double)},
+	 * {@link #createLimitOrderS(Account, Security, long, double)} или других
+	 * аналогичных методов ей автоматически присваивается очередной номер.
+	 * Номер заявке <b>НЕ НАЗНАЧАЕТСЯ</b> при создании экземпляра через вызовы
+	 * {@link #createOrder()} или {@link #createOrder(EditableTerminal)}.
+ 	 * <p>
+	 * Непрерывность номеров заявок не имеет никакого практического значения для
+	 * терминала. По этому данный нумератор может быть использован конкретной
+	 * реализацией терминала для решения своих специфических задач. Например,
+	 * для сквозной нумерации всех запросов в удаленную систему. Единственное
+	 * требование - это увеличение значение счетчика в процессе работы, что бы
+	 * избежать возникновения дублирования номеров.
+	 * <p>
+	 * В любой момент времени этот счетчик указывает на последний использованный
+	 * номер. Что бы получить следующий номер необходимо выполнить атомарный
+	 * инкремент с возвратом через {@link Counter#incrementAndGet()}. Для
+	 * установки последнего использованного значения можно использовать
+	 * {@link Counter#set(int)}. В целях избежания дублирующих номеров важно
+	 * гарантировать, что устанавливаемое значение больше текущего.
+	 * <p>
+	 * @return нумератор заявок
 	 */
-	public EditableOrder createStopOrder();
+	public Counter getOrderNumerator();
+	
+	/**
+	 * Генерировать событие о недоступности инструмента.
+	 * <p>
+	 * Служебный метод, генерирующий событие об отрицательном результате
+	 * на запрос инструмента, который был выполнен посредством вызова метода
+	 * {@link #requestSecurity(SecurityDescriptor)}.
+	 * <p>
+	 * @param descr дескриптор инструмента
+	 * @param errorCode код ошибки
+	 * @param errorMsg текст ошибки
+	 */
+	public void fireSecurityRequestError(SecurityDescriptor descr,
+			int errorCode, String errorMsg);
 
 }

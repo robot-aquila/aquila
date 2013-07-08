@@ -4,12 +4,12 @@ import static org.junit.Assert.*;
 import java.util.Date;
 import org.junit.*;
 
-public class TimerLocalTest {
-	private TimerLocal timer;
+public class SchedulerLocalTest {
+	private SchedulerLocal timer;
 
 	@Before
 	public void setUp() throws Exception {
-		timer = new TimerLocal();
+		timer = new SchedulerLocal();
 	}
 	
 	@Test
@@ -20,7 +20,7 @@ public class TimerLocalTest {
 	@Test
 	public void testEquals() throws Exception {
 		assertTrue(timer.equals(timer));
-		assertTrue(timer.equals(new TimerLocal()));
+		assertTrue(timer.equals(new SchedulerLocal()));
 		assertFalse(timer.equals(null));
 		assertFalse(timer.equals(this));
 	}

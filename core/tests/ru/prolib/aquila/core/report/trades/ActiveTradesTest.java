@@ -18,9 +18,9 @@ import ru.prolib.aquila.core.utils.Variant;
 
 public class ActiveTradesTest {
 	private static SimpleDateFormat format;
-	private static OrderDirection BUY = OrderDirection.BUY;
+	private static Direction BUY = Direction.BUY;
 	@SuppressWarnings("unused")
-	private static OrderDirection SELL = OrderDirection.SELL;
+	private static Direction SELL = Direction.SELL;
 	private static SecurityDescriptor descr1, descr2;
 	private Trade trade;
 	private IMocksControl control;
@@ -67,7 +67,7 @@ public class ActiveTradesTest {
 	 * @return сделка
 	 */
 	private Trade createTrade(SecurityDescriptor descr, String time,
-			OrderDirection dir, Long qty, Double price, Double volume)
+			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
 		return createTrade(descr, format.parse(time), dir, qty, price, volume);
@@ -85,7 +85,7 @@ public class ActiveTradesTest {
 	 * @return сделка
 	 */
 	private Trade createTrade(SecurityDescriptor descr, Date time,
-			OrderDirection dir, Long qty, Double price, Double volume)
+			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);
 		trade.setDirection(dir);

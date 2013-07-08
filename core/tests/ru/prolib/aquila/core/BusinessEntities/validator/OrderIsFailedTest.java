@@ -51,7 +51,7 @@ public class OrderIsFailedTest {
 			.add(OrderStatus.CANCELLED)
 			.add(OrderStatus.ACTIVE)
 			.add(null)
-			.add(OrderStatus.FAILED);
+			.add(OrderStatus.REJECTED);
 		Variant<Boolean> vChanged = new Variant<Boolean>(vStatus)
 			.add(true)
 			.add(false);
@@ -65,11 +65,11 @@ public class OrderIsFailedTest {
 			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			control.replay();
-			if ( vChanged.get()==true && vStatus.get()==OrderStatus.FAILED ) {
+			if ( vChanged.get()==true && vStatus.get()==OrderStatus.REJECTED ) {
 				found ++;
 				assertTrue(msg, validator.validate(order));
 				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
-				assertEquals(msg, OrderStatus.FAILED, order.getStatus());
+				assertEquals(msg, OrderStatus.REJECTED, order.getStatus());
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}

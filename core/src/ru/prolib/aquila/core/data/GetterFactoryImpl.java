@@ -5,8 +5,6 @@ import java.util.Map;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.getter.GAccount;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrderFactory;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrderResolverStd;
 import ru.prolib.aquila.core.data.getter.GPrice;
 import ru.prolib.aquila.core.data.getter.GSecurityDescr;
 import ru.prolib.aquila.core.utils.Validator;
@@ -73,14 +71,14 @@ public class GetterFactoryImpl implements GetterFactory {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public G<OrderDirection>
+	public G<Direction>
 			rowOrderDir(String column, Object buyEquivalent)
 	{
-		return new GCond<OrderDirection>(
+		return new GCond<Direction>(
 				new GValidator(new GRowObj(column),
 							   new ValidatorEq(buyEquivalent)),
-				new GConst<OrderDirection>(OrderDirection.BUY),
-				new GConst<OrderDirection>(OrderDirection.SELL)
+				new GConst<Direction>(Direction.BUY),
+				new GConst<Direction>(Direction.SELL)
 		);
 	}
 
@@ -169,14 +167,6 @@ public class GetterFactoryImpl implements GetterFactory {
 		return condInteger(new GValidator(new GRowObj(column),
 										  new ValidatorEq(expected)),
 				onEquals, onNotEquals);
-	}
-
-	@Override
-	public G<EditableOrder> rowOrder(EditableOrders orders,
-			OrderFactory factory, String transId, String id)
-	{
-		return new GOrder(new OrderResolverStd(orders, factory),
-				rowLong(transId), rowLong(id));
 	}
 
 	@Override

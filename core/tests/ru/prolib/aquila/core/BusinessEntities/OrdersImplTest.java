@@ -186,40 +186,6 @@ public class OrdersImplTest {
 	}
 
 	@Test
-	public void testIsPendingOrder() throws Exception {
-		orders.setPendingOrder(125L, o1);
-		orders.setOrder(321L, o2);
-		
-		assertTrue(orders.isPendingOrder(125L));
-		assertFalse(orders.isPendingOrder(321L));
-		assertFalse(orders.isPendingOrder(824L));
-	}
-	
-	@Test
-	public void testPurgePendingOrder() throws Exception {
-		orders.setPendingOrder(123L, o2);
-		assertTrue(orders.isPendingOrder(123L));
-		orders.purgePendingOrder(123L);
-		assertFalse(orders.isPendingOrder(123L));
-	}
-
-	@Test
-	public void testPurgeOrder_SkipIfNoOrder() throws Exception {
-		orders.purgeOrder(8L);
-	}
-
-	@Test
-	public void testGetPendingOrder() throws Exception {
-		orders.setPendingOrder(123L, o1);
-		assertSame(o1, orders.getPendingOrder(123L));
-	}
-	
-	@Test (expected=OrderNotExistsException.class)
-	public void testGetPendingOrder_ThrowsIfNotExists() throws Exception {
-		orders.getPendingOrder(321L);
-	}
-
-	@Test
 	public void testOnEvent_OnCancellFailed() throws Exception {
 		dispatcherMock.dispatch(new OrderEvent(onCancelFailed, owt));
 		control.replay();
@@ -357,68 +323,6 @@ public class OrdersImplTest {
 	}
 	
 	@Test
-	public void testHasPendingOrders() throws Exception {
-		assertFalse(orders.hasPendingOrders());
-		orders.setPendingOrder(1L, o1);
-		assertTrue(orders.hasPendingOrders());
-	}
-	
-	@Test
-	public void testRegisterPendingOrder() throws Exception {
-		o1.setTransactionId(678L);
-		control.replay();
-		
-		orders.registerPendingOrder(678L, o1);
-		
-		control.verify();
-		assertTrue(orders.isPendingOrder(678L));
-		assertSame(o1, orders.getPendingOrder(678L));
-	}
-	
-	@Test (expected=OrderAlreadyExistsException.class)
-	public void testRegisterPendingOrder_ThrowsIfExists() throws Exception {
-		orders.setPendingOrder(1L, o1);
-		orders.registerPendingOrder(1L, o2);
-	}
-	
-	@Test (expected=OrderAlreadyExistsException.class)
-	public void testMovePendingOrder_ThrowsIfOrderAlreadyExists()
-		throws Exception
-	{
-		orders.setOrder(150L, o1);
-		orders.setPendingOrder(425L, o2);
-		
-		orders.movePendingOrder(425L, 150L);
-	}
-	
-	@Test (expected=OrderNotExistsException.class)
-	public void testMovePendingOrder_ThrowsIfPendingOrderNotExists()
-		throws Exception
-	{
-		orders.movePendingOrder(425L, 150L);
-	}
-
-	@Test
-	public void testMovePendingOrder() throws Exception {
-		orders.setPendingOrder(425L, owt);
-		orders.movePendingOrder(425L, 150L);
-		
-		assertTrue(orders.isOrderExists(150L));
-		assertSame(owt, orders.getOrder(150L));
-		assertEquals(new Long(150L), owt.getId());
-		assertTrue(owt.OnCancelFailed().isListener(orders));
-		assertTrue(owt.OnCancelled().isListener(orders));
-		assertTrue(owt.OnChanged().isListener(orders));
-		assertTrue(owt.OnDone().isListener(orders));
-		assertTrue(owt.OnFailed().isListener(orders));
-		assertTrue(owt.OnFilled().isListener(orders));
-		assertTrue(owt.OnPartiallyFilled().isListener(orders));
-		assertTrue(owt.OnRegistered().isListener(orders));
-		assertTrue(owt.OnRegisterFailed().isListener(orders));
-		assertTrue(owt.OnTrade().isListener(orders));
-	}
-	
-	@Test
 	public void testCreateOrder() throws Exception {
 		EventDispatcher d = es.createEventDispatcher("Order");
 		List<OrderEventHandler> h = new Vector<OrderEventHandler>();
@@ -470,10 +374,6 @@ public class OrdersImplTest {
 		List<EditableOrder> list2 = new Vector<EditableOrder>();
 		list2.add(o2);
 		list2.add(o3);
-		List<EditableOrder> pendList1 = new Vector<EditableOrder>();
-		pendList1.add(o1);
-		List<EditableOrder> pendList2 = new Vector<EditableOrder>();
-		pendList2.add(o3);
 		
 		Variant<String> vDispId = new Variant<String>()
 			.add("Orders")
@@ -515,18 +415,10 @@ public class OrdersImplTest {
 				new Variant<List<EditableOrder>>(vTrdId)
 			.add(list1)
 			.add(list2);
-		Variant<List<EditableOrder>> vPendList =
-				new Variant<List<EditableOrder>>(vList)
-			.add(pendList1)
-			.add(pendList2);
-		Variant<?> iterator = vPendList;
+		Variant<?> iterator = vList;
 		control.replay();
 		for ( EditableOrder order : list1 ) {
 			orders.setOrder(order.getId(), order);
-		}
-		for ( EditableOrder order : pendList1 ) {
-			// это некорректно, только для тестов
-			orders.setPendingOrder(order.getId(), order);
 		}
 		int foundCnt = 0;
 		OrdersImpl x = null, found = null;
@@ -545,9 +437,6 @@ public class OrdersImplTest {
 					d.createType(vTrdId.get()));
 			for ( EditableOrder order : vList.get() ) {
 				x.setOrder(order.getId(), order);
-			}
-			for ( EditableOrder order : vPendList.get() ) {
-				x.setPendingOrder(order.getId(), order);
 			}
 			if ( orders.equals(x) ) {
 				foundCnt ++;
@@ -568,10 +457,6 @@ public class OrdersImplTest {
 		assertEquals(onRegisterFailed, found.OnOrderRegisterFailed());
 		assertEquals(onTrade, found.OnOrderTrade());
 		assertEquals(list1, found.getOrders());
-		for ( EditableOrder order : pendList1 ) {
-			// это некорректно, только для тестов
-			assertTrue(orders.isPendingOrder(order.getId()));
-		}
 	}
 
 }

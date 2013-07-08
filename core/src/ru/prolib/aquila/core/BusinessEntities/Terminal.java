@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.Starter;
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public interface Terminal extends Securities, Portfolios, Starter, Orders,
-	StopOrders, OrderProcessor, Timer
+	OrderProcessor, Scheduler
 {
 	
 	/**
@@ -144,82 +144,74 @@ public interface Terminal extends Securities, Portfolios, Starter, Orders,
 	 * @return тип события
 	 */
 	public EventType OnPanic();
-	
+
 	/**
-	 * Создать экземпляр рыночной заявки на покупку.
+	 * Создать лимитную заявку.
+	 * <p>
+	 * Данный метод создает лимитную заявку. Новой заявке автоматически
+	 * назначается очередной номер, по которому можно обращаться к заявке
+	 * через терминал. В завершении генерируется событие о доступности новой
+	 * заявки. Для подачи заявки в торговую систему следует использовать
+	 * метод {@link #placeOrder(Order)}.
 	 * <p>
 	 * @param account торговый счет
-	 * @param sec инструмент
+	 * @param dir операция (направление заявки)
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @return экземпляр заявки
+	 */
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty, double price);
+
+	/**
+	 * Создать рыночную заявку.
+	 * <p>
+ 	 * Данный метод создает рыночную заявку. Новой заявке автоматически
+	 * назначается очередной номер, по которому можно обращаться к заявке
+	 * через терминал. В завершении генерируется событие о доступности новой
+	 * заявки. Для подачи заявки в торговую систему следует использовать
+	 * метод {@link #placeOrder(Order)}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param dir операция (направление заявки)
+	 * @param security инструмент
 	 * @param qty количество
 	 * @return экземпляр заявки
 	 */
-	public Order createMarketOrderB(Account account, Security sec, long qty)
-			throws OrderException;
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty);
 	
 	/**
-	 * Создать экземпляр рыночной заявки на продажу.
+	 * Инициировать использование инструмента.
 	 * <p>
-	 * @param account торговый счет
-	 * @param sec инструмент
-	 * @param qty количество
-	 * @return экземпляр заявки
+	 * Данный метод должен использоваться торговыми стратегиями для декларации
+	 * инструментов, необходимых для работы.
+	 * <p>
+	 * Разные терминалы по-разному предоставляют данные об инструментах. В
+	 * некоторых терминалах для того, что бы существующий в торговой системе
+	 * инструмент получил отражение в локальном терминале, необходимо 
+	 * предварительно отправить в удаленную систему запрос. В других
+	 * реализациях, где набор доступных инструментов определяется удаленной
+	 * стороной, этот метод может реализовывать проверку доступности инструмента
+	 * по истечении определенного времени, которого должно быть достаточно для
+	 * получения от удаленной системы полного списка инструментов.
+	 * <p>
+	 * В базовой реализации представляет собой метод-заглушку.
+	 * <p>
+	 * @param descr дескриптор инструмента
 	 */
-	public Order createMarketOrderS(Account account, Security sec, long qty)
-			throws OrderException;
+	public void requestSecurity(SecurityDescriptor descr);
 	
 	/**
-	 * Создать экземпляр лимитной заявки на покупку.
+	 * Тип события: Ошибка загрузки инструмента.
 	 * <p>
-	 * @param account торговый счет
-	 * @param sec инструмент
-	 * @param qty количество
-	 * @param price цена (округляется в соответствии с параметрами инструмента)
-	 * @return заявка
+	 * Данный тип события позволяет реагировать на возможные отклонения
+	 * запросов, выполненных посредством вызова метода
+	 * {@link #requestSecurity(SecurityDescriptor)}.
+	 * <p>
+	 * @return тип события
 	 */
-	public Order createLimitOrderB(Account account, Security sec,
-			long qty, double price) throws OrderException;
+	public EventType OnRequestSecurityError();
 	
-	/**
-	 * Создать экземпляр лимитной заявки на продажу.
-	 * <p>
-	 * @param account торговый счет
-	 * @param sec инструмент
-	 * @param qty количество
-	 * @param price цена (округляется в соответствии с параметрами инструмента)
-	 * @return заявка
-	 */
-	public Order createLimitOrderS(Account account, Security sec,
-			long qty, double price) throws OrderException;;
-	
-	/**
-	 * Создать экземпляр стоп-заявки заявки на покупку.
-	 * <p>
-	 * Цены округляются в соответствии с параметрами инструмента.
-	 * <p>
-	 * @param account торговый счет
-	 * @param sec инструмент
-	 * @param qty количество
-	 * @param stopPrice стоп-цена
-	 * @param price цена
-	 * @return заявка
-	 */
-	public Order createStopLimitB(Account account, Security sec,
-			long qty, double stopPrice, double price) throws OrderException;
-	
-	/**
-	 * Создать экземпляр стоп-заявки заявки на продажу.
-	 * <p>
-	 * Цены округляются в соответствии с параметрами инструмента.
-	 * <p>
-	 * @param account торговый счет
-	 * @param sec инструмент
-	 * @param qty количество
-	 * @param stopPrice стоп-цена
-	 * @param price цена
-	 * @return заявка
-	 */
-	public Order createStopLimitS(Account account, Security sec,
-			long qty, double stopPrice, double price) throws OrderException;
-
-
 }

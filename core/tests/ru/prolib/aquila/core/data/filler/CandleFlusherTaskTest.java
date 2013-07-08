@@ -8,20 +8,20 @@ import java.util.Date;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.Timer;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleFlusherTaskTest {
 	private IMocksControl control;
 	private CandleAggregator aggregator;
-	private Timer timer;
+	private Scheduler timer;
 	private CandleFlusherTask task;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		aggregator = control.createMock(CandleAggregator.class);
-		timer = control.createMock(Timer.class);
+		timer = control.createMock(Scheduler.class);
 		task = new CandleFlusherTask(aggregator, timer);
 	}
 	
@@ -49,9 +49,9 @@ public class CandleFlusherTaskTest {
 		Variant<CandleAggregator> vAggr = new Variant<CandleAggregator>()
 			.add(aggregator)
 			.add(control.createMock(CandleAggregator.class));
-		Variant<Timer> vTmr = new Variant<Timer>(vAggr)
+		Variant<Scheduler> vTmr = new Variant<Scheduler>(vAggr)
 			.add(timer)
-			.add(control.createMock(Timer.class));
+			.add(control.createMock(Scheduler.class));
 		Variant<?> iterator = vTmr;
 		int foundCnt = 0;
 		CandleFlusherTask x, found = null;
