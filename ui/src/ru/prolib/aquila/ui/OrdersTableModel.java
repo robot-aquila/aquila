@@ -104,8 +104,6 @@ public class OrdersTableModel extends AbstractTableModel implements
 				return order.getStatus();
 			} else if (header[col] == COL_QTY_REST) {
 				return order.getQtyRest();
-			} else if (header[col] == COL_TRN) {
-				return order.getTransactionId();
 			} else if (header[col] == COL_PRICE) {
 				return order.getPrice() == null? 0.0 : order.getPrice();
 			} else if ( header[col] == COL_EXEC_VOL ) {
