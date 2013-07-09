@@ -109,6 +109,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickPrice_Ask() throws Exception {
 		security.setAskPrice(eq(824.15d));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickPrice(815, TickType.ASK, 824.15d);
@@ -120,6 +121,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickPrice_Bid() throws Exception {
 		security.setBidPrice(eq(827.24d));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickPrice(815, TickType.BID, 827.24d);
@@ -131,6 +133,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickPrice_Last() throws Exception {
 		security.setLastPrice(eq(912.84d));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickPrice(815, TickType.LAST, 912.84d);
@@ -142,6 +145,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickPrice_Open() throws Exception {
 		security.setOpenPrice(eq(112.82d));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickPrice(815, TickType.OPEN, 112.82);
@@ -153,6 +157,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickPrice_High() throws Exception {
 		security.setHighPrice(eq(519.33d));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickPrice(815, TickType.HIGH, 519.33d);
@@ -164,6 +169,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickPrice_Low() throws Exception {
 		security.setLowPrice(eq(1824.15d));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickPrice(815, TickType.LOW, 1824.15d);
@@ -175,6 +181,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickPrice_Close() throws Exception {
 		security.setClosePrice(eq(4.15d));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickPrice(815, TickType.CLOSE, 4.15d);
@@ -186,6 +193,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickSize_AskSize() throws Exception {
 		security.setAskSize(eq(new Long(1000L)));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickSize(815, TickType.ASK_SIZE, 1000);
@@ -197,6 +205,7 @@ public class IBRequestMarketDataHandlerTest {
 	public void testTickSize_BidSize() throws Exception {
 		security.setBidSize(eq(new Long(2000L)));
 		security.fireChangedEvent();
+		security.resetChanges();
 		control.replay();
 		
 		handler.tickSize(815, TickType.BID_SIZE, 2000);

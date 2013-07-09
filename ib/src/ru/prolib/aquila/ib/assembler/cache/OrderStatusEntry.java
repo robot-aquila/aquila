@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
  * Инкапсулирует данные, полученные через метод orderStatus.
  */
 public class OrderStatusEntry extends CacheEntry {
-	private final Long id;
+	private final int id;
 	private final String nativeStatus;
 	private final Long rest;
 	private final double avgFillPrice;
@@ -28,7 +28,7 @@ public class OrderStatusEntry extends CacheEntry {
 			double avgFillPrice)
 	{
 		super();
-		this.id = new Long(id);
+		this.id = id;
 		this.nativeStatus = status;
 		this.rest = new Long(remaining);
 		this.avgFillPrice = avgFillPrice;
@@ -40,7 +40,7 @@ public class OrderStatusEntry extends CacheEntry {
 	 * <p>
 	 * @return номер заявки
 	 */
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 	

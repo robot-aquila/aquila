@@ -105,60 +105,6 @@ public class AssemblerHighLvlTest {
 		
 		control.verify();
 	}
-	
-	@Test
-	public void testAssembleOrders() throws Exception {
-		List<OrderEntry> list = new Vector<OrderEntry>();
-		list.add(control.createMock(OrderEntry.class));
-		list.add(control.createMock(OrderEntry.class));
-		list.add(control.createMock(OrderEntry.class));
-		expect(cache.getOrderEntries()).andReturn(list);
-		for ( int i = 0; i < list.size(); i ++ ) {
-			middle.update(same(list.get(i)));
-		}
-		control.replay();
-		
-		asm.assembleOrders();
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAssembleOrder_Order() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		middle.update(same(entry));
-		control.replay();
-		
-		asm.assembleOrder(entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAssembleOrder_OrderStatus_OrderFound() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(entry.getId()).andReturn(254L);
-		OrderEntry order = control.createMock(OrderEntry.class);
-		expect(cache.getOrder(eq(254L))).andReturn(order);
-		middle.update(same(order));
-		control.replay();
-		
-		asm.assembleOrder(entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAssembleOrder_OrderStatus_OrderNotFound() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(entry.getId()).andReturn(254L);
-		expect(cache.getOrder(eq(254L))).andReturn(null);
-		control.replay();
-		
-		asm.assembleOrder(entry);
-		
-		control.verify();
-	}
 
 	@Test
 	public void testAssemblePositions() throws Exception {

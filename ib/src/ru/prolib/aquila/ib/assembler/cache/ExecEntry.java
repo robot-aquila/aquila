@@ -8,8 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
+import ru.prolib.aquila.core.BusinessEntities.*;
 
 import com.ib.client.*;
 
@@ -78,9 +77,8 @@ public class ExecEntry extends CacheEntry {
 	 * <p>
 	 * @return направление
 	 */
-	public OrderDirection getDirection() {
-		return execution.m_side.equals("BOT")
-			? OrderDirection.BUY : OrderDirection.SELL;
+	public Direction getDirection() {
+		return execution.m_side.equals("BOT") ? Direction.BUY : Direction.SELL;
 	}
 	
 	/**
@@ -97,8 +95,8 @@ public class ExecEntry extends CacheEntry {
 	 * <p>
 	 * @return номер заявки
 	 */
-	public Long getOrderId() {
-		return new Long(execution.m_orderId);
+	public int getOrderId() {
+		return execution.m_orderId;
 	}
 	
 	/**

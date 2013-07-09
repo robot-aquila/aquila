@@ -23,9 +23,9 @@ public class Cache {
 	private final EventType onPositionUpdated;
 	private final EventType onExecUpdated;
 	private final Map<Integer, ContractEntry> contracts;
-	private final Map<Long, OrderEntry> orders;
-	private final Map<Long, OrderStatusEntry> orderStatuses;
-	private final Map<Long, Map<Long, ExecEntry>> execs;
+	private final Map<Integer, OrderEntry> orders;
+	private final Map<Integer, OrderStatusEntry> orderStatuses;
+	private final Map<Integer, Map<Long, ExecEntry>> execs;
 	private final Map<String, PositionEntry> positions;
 	private final Map<SecurityDescriptor, ContractEntry> descr2contr;
 	
@@ -41,9 +41,9 @@ public class Cache {
 		this.onPositionUpdated = onPositionUpdated;
 		this.onExecUpdated = onExecUpdated;
 		contracts = new LinkedHashMap<Integer, ContractEntry>();
-		orders = new LinkedHashMap<Long, OrderEntry>();
-		orderStatuses = new LinkedHashMap<Long, OrderStatusEntry>();
-		execs = new LinkedHashMap<Long, Map<Long, ExecEntry>>();
+		orders = new LinkedHashMap<Integer, OrderEntry>();
+		orderStatuses = new LinkedHashMap<Integer, OrderStatusEntry>();
+		execs = new LinkedHashMap<Integer, Map<Long, ExecEntry>>();
 		positions = new LinkedHashMap<String, PositionEntry>();
 		descr2contr = new Hashtable<SecurityDescriptor, ContractEntry>();
 	}
@@ -118,7 +118,7 @@ public class Cache {
 	 * @param id номер заявки
 	 * @return кэш-запись заявки или null, если нет соответствующей записи
 	 */
-	public synchronized OrderEntry getOrder(Long id) {
+	public synchronized OrderEntry getOrder(int id) {
 		return orders.get(id);
 	}
 	
@@ -128,7 +128,7 @@ public class Cache {
 	 * @param id номер заявки
 	 * @return кэш-запись статуса заявки или null, если нет записи
 	 */
-	public synchronized OrderStatusEntry getOrderStatus(Long id) {
+	public synchronized OrderStatusEntry getOrderStatus(int id) {
 		return orderStatuses.get(id);
 	}
 	
@@ -172,7 +172,7 @@ public class Cache {
 	 * @param id номер заявки
 	 * @return кэш-запись или null, если нет соответствующей записи
 	 */
-	public synchronized List<ExecEntry> getOrderExecutions(Long id) {
+	public synchronized List<ExecEntry> getOrderExecutions(int id) {
 		Map<Long, ExecEntry> map = execs.get(id);
 		return map == null ? new Vector<ExecEntry>() :
 			new Vector<ExecEntry>(map.values());
@@ -274,7 +274,7 @@ public class Cache {
 	 * @param entry кэш-запись сделки
 	 */
 	public synchronized void update(ExecEntry entry) {
-		Long orderId = entry.getOrderId();
+		int orderId = entry.getOrderId();
 		Map<Long, ExecEntry> orderExecs = execs.get(orderId);
 		if ( orderExecs == null ) {
 			orderExecs = new LinkedHashMap<Long, ExecEntry>();
@@ -292,7 +292,7 @@ public class Cache {
 	 * <p>
 	 * @param id номер заявки
 	 */
-	public synchronized void purgeOrder(Long id) {
+	public synchronized void purgeOrder(int id) {
 		orders.remove(id);
 	}
 	

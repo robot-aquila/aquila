@@ -5,7 +5,7 @@ import java.lang.reflect.Constructor;
 import java.util.Date;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
+import ru.prolib.aquila.core.BusinessEntities.Direction;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.OrderType;
 import ru.prolib.aquila.core.utils.Variant;
@@ -76,7 +76,7 @@ public class OrderEntryTest {
 	
 	@Test
 	public void testGetId() throws Exception {
-		assertEquals(new Long(125), entry.getId());
+		assertEquals(125, entry.getId());
 	}
 	
 	@Test
@@ -88,9 +88,9 @@ public class OrderEntryTest {
 	@Test
 	public void testGetDirection() throws Exception {
 		order.m_action = "BUY";
-		assertEquals(OrderDirection.BUY, entry.getDirection());
+		assertEquals(Direction.BUY, entry.getDirection());
 		order.m_action = "SELL";
-		assertEquals(OrderDirection.SELL, entry.getDirection());
+		assertEquals(Direction.SELL, entry.getDirection());
 		order.m_action = "unsupported";
 		assertNull(entry.getDirection());
 	}
@@ -123,8 +123,8 @@ public class OrderEntryTest {
 				// IB type, local type
 				{ "LMT", OrderType.LIMIT },
 				{ "MKT", OrderType.MARKET },
-				{ "STP LMT", OrderType.STOP_LIMIT },
-				{ "unknown", OrderType.OTHER },
+				{ "STP LMT", null },
+				{ "unknown", null },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -137,13 +137,13 @@ public class OrderEntryTest {
 	public void testGetStatus() throws Exception {
 		Object fix[][] = {
 				// IB status, local status
-				{ "PendingSubmit", OrderStatus.ACTIVE },
-				{ "PendingCancel", null },
+				{ "PendingSubmit", OrderStatus.SENT },
+				{ "PendingCancel", OrderStatus.CANCEL_SENT },
 				{ "PreSubmitted", OrderStatus.ACTIVE },
 				{ "Submitted", OrderStatus.ACTIVE },
 				{ "Cancelled", OrderStatus.CANCELLED },
 				{ "Filled", OrderStatus.FILLED },
-				{ "Inactive", null },
+				{ "Inactive", OrderStatus.ACTIVE },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -191,25 +191,25 @@ public class OrderEntryTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(new Long(125), found.getId());
+		assertEquals(125, found.getId());
 		assertSame(contract, found.getContract());
 		assertSame(order, found.getOrder());
 		assertSame(state, found.getOrderState());
 	}
 	
 	@Test
-	public void testIsStopOrder() throws Exception {
+	public void testIsKnownType() throws Exception {
 		Object fix[][] = {
 				// IB type, expected result
-				{ "STP LMT", true },
-				{ "MKT", false },
-				{ "LMT", false },
+				{ "STP LMT", false },
+				{ "MKT", true },
+				{ "LMT", true },
 				{ "UNK", false },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
 			order.m_orderType = (String) fix[i][0];
-			assertEquals(msg, fix[i][1], entry.isStopOrder());
+			assertEquals(msg, fix[i][1], entry.isKnownType());
 		}
 	}
 

@@ -83,6 +83,16 @@ public class IBWrapper implements EWrapper {
 	}
 	
 	/**
+	 * Получить обработчик данных контракта.
+	 * <p>
+	 * @param reqId номер запроса
+	 * @return обработчик или null, если обработчик не задан
+	 */
+	public synchronized ContractHandler getContractHandler(int reqId) {
+		return hContracts.get(reqId);
+	}
+	
+	/**
 	 * Установить обработчик запроса данных заявки.
 	 * <p>
 	 * Обработчик заявки получает вызовы
@@ -99,6 +109,17 @@ public class IBWrapper implements EWrapper {
 	{
 		hOrders.put(reqId, handler);
 	}
+	
+	/**
+	 * Получить обработчик данных заявки.
+	 * <p>
+	 * @param reqId номер запроса
+	 * @return обработчик или null, если обработчик не задан
+	 */
+	public synchronized OrderHandler getOrderHandler(int reqId) {
+		return hOrders.get(reqId);
+	}
+
 	
 	/**
 	 * Удалить обработчик данных.
@@ -193,7 +214,8 @@ public class IBWrapper implements EWrapper {
 	public synchronized void openOrder(int reqId, Contract contract,
 			Order order, OrderState orderState)
 	{
-		getOrderHandler(reqId).openOrder(reqId, contract, order, orderState);
+		getSuitableOrderHandler(reqId)
+			.openOrder(reqId, contract, order, orderState);
 	}
 
 	@Override
@@ -201,25 +223,26 @@ public class IBWrapper implements EWrapper {
 			int remaining, double avgFillPrice, int permId, int parentId,
 			double lastFillPrice, int clientId, String whyHeld)
 	{
-		getOrderHandler(reqId).orderStatus(reqId, status, filled, remaining,
-			avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
+		getSuitableOrderHandler(reqId)
+			.orderStatus(reqId, status, filled, remaining, avgFillPrice,
+					permId, parentId, lastFillPrice, clientId, whyHeld);
 	}
 	
 	@Override
 	public synchronized void tickGeneric(int reqId, int field, double price) {
-		getContractHandler(reqId).tickPrice(reqId, field, price);
+		getSuitableContractHandler(reqId).tickPrice(reqId, field, price);
 	}
 	
 	@Override
 	public synchronized void tickPrice(int reqId, int field, double price,
 			int unused)
 	{
-		getContractHandler(reqId).tickPrice(reqId, field, price);
+		getSuitableContractHandler(reqId).tickPrice(reqId, field, price);
 	}
 
 	@Override
 	public synchronized void tickSize(int reqId, int field, int size) {
-		getContractHandler(reqId).tickSize(reqId, field, size);
+		getSuitableContractHandler(reqId).tickSize(reqId, field, size);
 	}
 	
 	@Override
@@ -251,9 +274,9 @@ public class IBWrapper implements EWrapper {
 	@Override
 	public synchronized void error(int reqId, int errorCode, String errorMsg) {
 		if ( hContracts.containsKey(reqId) ) {
-			getContractHandler(reqId).error(reqId, errorCode, errorMsg);
+			getSuitableContractHandler(reqId).error(reqId, errorCode, errorMsg);
 		} else {
-			getOrderHandler(reqId).error(reqId, errorCode, errorMsg);
+			getSuitableOrderHandler(reqId).error(reqId, errorCode, errorMsg);
 		}
 	}
 
@@ -266,7 +289,7 @@ public class IBWrapper implements EWrapper {
 	public synchronized
 		void bondContractDetails(int reqId, ContractDetails details)
 	{
-		getContractHandler(reqId).bondContractDetails(reqId, details);
+		getSuitableContractHandler(reqId).bondContractDetails(reqId, details);
 	}
 
 	@Override
@@ -276,7 +299,7 @@ public class IBWrapper implements EWrapper {
 
 	@Override
 	public synchronized void contractDetailsEnd(int reqId) {
-		getContractHandler(reqId).contractDetailsEnd(reqId);
+		getSuitableContractHandler(reqId).contractDetailsEnd(reqId);
 	}
 
 	@Override
@@ -408,7 +431,7 @@ public class IBWrapper implements EWrapper {
 	 * @param reqId номер заявки
 	 * @return обработчик
 	 */
-	private OrderHandler getOrderHandler(int reqId) {
+	private OrderHandler getSuitableOrderHandler(int reqId) {
 		OrderHandler handler = hOrders.get(reqId);
 		return handler == null ? hMain : handler;
 	}
@@ -419,7 +442,7 @@ public class IBWrapper implements EWrapper {
 	 * @param reqId номер запроса
 	 * @return обработчик
 	 */
-	private ContractHandler getContractHandler(int reqId) {
+	private ContractHandler getSuitableContractHandler(int reqId) {
 		ContractHandler handler = hContracts.get(reqId);
 		return handler == null ? hMain : handler;	
 	}

@@ -10,7 +10,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
+import ru.prolib.aquila.core.BusinessEntities.Direction;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.assembler.cache.ExecEntry;
 import ru.prolib.aquila.ib.assembler.cache.ExecIdCache;
@@ -67,9 +67,9 @@ public class ExecEntryTest {
 	@Test
 	public void testGetDirection() throws Exception {
 		execution.m_side = "BOT";
-		assertEquals(OrderDirection.BUY, entry.getDirection());
+		assertEquals(Direction.BUY, entry.getDirection());
 		execution.m_side = "SLD";
-		assertEquals(OrderDirection.SELL, entry.getDirection());
+		assertEquals(Direction.SELL, entry.getDirection());
 	}
 	
 	@Test
@@ -81,7 +81,7 @@ public class ExecEntryTest {
 	@Test
 	public void testGetOrderId() throws Exception {
 		execution.m_orderId = 248;
-		assertEquals(new Long(248), entry.getOrderId());
+		assertEquals(248, entry.getOrderId());
 	}
 	
 	@Test

@@ -5,12 +5,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
-import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
-import ru.prolib.aquila.core.BusinessEntities.OrderType;
-
+import ru.prolib.aquila.core.BusinessEntities.*;
 import com.ib.client.*;
+import com.ib.client.Order;
 
 /**
  * Кэш-запись основной части заявки.
@@ -18,36 +15,36 @@ import com.ib.client.*;
  * Инкапсулирует данные, полученные через метод openOrder. 
  */
 public class OrderEntry extends CacheEntry {
-	private static final Map<String, OrderDirection> dirs;
+	private static final Map<String, Direction> dirs;
 	private static final Map<String, OrderType> types;
 	private static final Map<String, OrderStatus> statuses;
 	
 	static {
-		dirs = new Hashtable<String, OrderDirection>();
-		dirs.put("BUY", OrderDirection.BUY);
-		dirs.put("SELL", OrderDirection.SELL);
+		dirs = new Hashtable<String, Direction>();
+		dirs.put("BUY", Direction.BUY);
+		dirs.put("SELL", Direction.SELL);
 		types = new Hashtable<String, OrderType>();
-		types.put("STP LMT", OrderType.STOP_LIMIT);
 		types.put("MKT", OrderType.MARKET);
 		types.put("LMT", OrderType.LIMIT);
 		statuses = new Hashtable<String, OrderStatus>();
-		statuses.put("PendingSubmit", OrderStatus.ACTIVE);
-		//statuses.put("PendingCancel", OrderStatus.ACTIVE);
+		// All the documented IB statuses
+		statuses.put("PendingSubmit", OrderStatus.SENT);
+		statuses.put("PendingCancel", OrderStatus.CANCEL_SENT);
 		statuses.put("PreSubmitted", OrderStatus.ACTIVE);
 		statuses.put("Submitted", OrderStatus.ACTIVE);
 		statuses.put("Cancelled", OrderStatus.CANCELLED);
 		statuses.put("Filled", OrderStatus.FILLED);
-		//statuses.put("Inactive", OrderStatus.PENDING);
+		statuses.put("Inactive", OrderStatus.ACTIVE);
 	}
 	
-	private final Long id;
+	private final int id;
 	private final Contract contract;
 	private final Order order;
 	private final OrderState state;
 	
 	public OrderEntry(int id, Contract contr, Order order, OrderState state) {
 		super();
-		this.id = new Long(id);
+		this.id = id;
 		this.contract = contr;
 		this.order = order;
 		this.state = state;
@@ -94,7 +91,7 @@ public class OrderEntry extends CacheEntry {
 	 * <p>
 	 * @return номер заявки
 	 */
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 	
@@ -112,7 +109,7 @@ public class OrderEntry extends CacheEntry {
 	 * <p>
 	 * @return направление заявки
 	 */
-	public OrderDirection getDirection() {
+	public Direction getDirection() {
 		return dirs.get(order.m_action);
 	}
 	
@@ -149,8 +146,7 @@ public class OrderEntry extends CacheEntry {
 	 * @return тип заявки
 	 */
 	public OrderType getType() {
-		OrderType type = types.get(order.m_orderType);
-		return type == null ? OrderType.OTHER : type;
+		return types.get(order.m_orderType);
 	}
 	
 	/**
@@ -194,11 +190,8 @@ public class OrderEntry extends CacheEntry {
 	 * <p>
 	 * @return true - стоп-заявка, false - обычная заявка
 	 */
-	public boolean isStopOrder() {
-		OrderType type = getType();
-		return type == OrderType.STOP_LIMIT
-			|| type == OrderType.TAKE_PROFIT
-			|| type == OrderType.TAKE_PROFIT_AND_STOP_LIMIT;
+	public boolean isKnownType() {
+		return getType() != null;
 	}
 
 }

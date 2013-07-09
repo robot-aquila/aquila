@@ -5,8 +5,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ib.client.*;
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.utils.Counter;
+import ru.prolib.aquila.ib.IBEditableTerminal;
 import ru.prolib.aquila.ib.api.*;
 import ru.prolib.aquila.ib.assembler.cache.*;
 
@@ -24,31 +24,17 @@ public class IBMainHandler implements MainHandler {
 		logger = LoggerFactory.getLogger(IBMainHandler.class);
 	}
 	
-	private final EditableTerminal terminal;
-	private final IBClient client;
-	private final Counter requestId;
+	private final IBEditableTerminal terminal;
 	private final Assembler assembler;
 	
-	public IBMainHandler(EditableTerminal terminal, IBClient client,
-			Counter requestId, Assembler assembler)
-	{
+	public IBMainHandler(IBEditableTerminal terminal, Assembler assembler) {
 		super();
 		this.terminal = terminal;
-		this.client = client;
-		this.requestId = requestId;
 		this.assembler = assembler;
 	}
 	
-	public EditableTerminal getTerminal() {
+	public IBEditableTerminal getTerminal() {
 		return terminal;
-	}
-	
-	public IBClient getClient() {
-		return client;
-	}
-	
-	public Counter getRequestNumerator() {
-		return requestId;
 	}
 	
 	public Assembler getAssembler() {
@@ -63,8 +49,6 @@ public class IBMainHandler implements MainHandler {
 
 	@Override
 	public void connectionOpened() {
-		client.reqAutoOpenOrders(true);
-		client.reqAllOpenOrders();
 		terminal.fireTerminalConnectedEvent();
 	}
 
@@ -91,6 +75,7 @@ public class IBMainHandler implements MainHandler {
 	@Override
 	public void managedAccounts(String accounts) {
 		String account[] = StringUtils.split(accounts, ',');
+		IBClient client = terminal.getClient();
 		for ( int i = 0; i < account.length; i ++ ) {
 			client.reqAccountUpdates(true, account[i]);
 			logger.debug("Start listening account: {}", account[i]);
@@ -99,6 +84,7 @@ public class IBMainHandler implements MainHandler {
 
 	@Override
 	public void nextValidId(int nextId) {
+		Counter requestId = terminal.getOrderNumerator();
 		synchronized ( requestId ) {
 			int currId = requestId.get();
 			if ( currId < nextId ) {
@@ -153,7 +139,7 @@ public class IBMainHandler implements MainHandler {
 	public void openOrder(int orderId, Contract contract, Order order,
 			OrderState orderState)
 	{
-		assembler.update(new OrderEntry(orderId, contract, order, orderState));
+		logger.warn("No handler for order #{}", orderId);
 	}
 
 	@Override
@@ -161,8 +147,7 @@ public class IBMainHandler implements MainHandler {
 			int remaining, double avgFillPrice, int permId, int parentId,
 			double lastFillPrice, int clientId, String whyHeld)
 	{
-		assembler.update(new OrderStatusEntry(orderId, status, remaining,
-				avgFillPrice));
+		
 	}
 	
 	@Override
@@ -176,7 +161,6 @@ public class IBMainHandler implements MainHandler {
 		IBMainHandler o = (IBMainHandler) other;
 		return new EqualsBuilder()
 			.append(o.assembler, assembler)
-			.append(o.requestId, requestId)
 			.appendSuper(o.terminal == terminal)
 			.isEquals();
 	}

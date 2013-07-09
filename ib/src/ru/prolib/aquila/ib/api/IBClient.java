@@ -1,10 +1,6 @@
 package ru.prolib.aquila.ib.api;
 
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
-import ru.prolib.aquila.core.utils.Counter;
-
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.Order;
@@ -15,30 +11,26 @@ import com.ib.client.Order;
 public class IBClient {
 	private final EClientSocket socket;
 	private final IBWrapper wrapper;
-	private final Counter requestId;
 	
 	/**
 	 * Служебный конструктор.
 	 * <p>
 	 * @param socket сокет
 	 * @param wrapper обработчик
-	 * @param requestId нумератор запросов
 	 */
-	IBClient(EClientSocket socket, IBWrapper wrapper, Counter requestId) {
+	IBClient(EClientSocket socket, IBWrapper wrapper) {
 		super();
 		this.socket = socket;
 		this.wrapper = wrapper;
-		this.requestId = requestId;
 	}
 	
 	/**
-	 * Служебный конструктор.
+	 * Служебный Конструктор.
 	 * <p>
 	 * @param wrapper обработчик
-	 * @param requestId нумератор запросов
 	 */
-	private IBClient(IBWrapper wrapper, Counter requestId) {
-		this(new EClientSocket(wrapper), wrapper, requestId);
+	private IBClient(IBWrapper wrapper) {
+		this(new EClientSocket(wrapper), wrapper);
 	}
 	
 	/**
@@ -46,12 +38,8 @@ public class IBClient {
 	 * <p>
 	 * @param requestId нумератор запросов
 	 */
-	public IBClient(Counter requestId) {
-		this(new IBWrapper(), requestId);
-	}
-	
-	public Counter getRequestNumerator() {
-		return requestId;
+	public IBClient() {
+		this(new IBWrapper());
 	}
 	
 	public IBWrapper getWrapper() {
@@ -147,17 +135,6 @@ public class IBClient {
 		return socket.isConnected();
 	}
 	
-	/**
-	 * Получить очередной номер запроса.
-	 * <p>
-	 * Каждый вызов приводит к инкременту нумератора запросов.
-	 * <p>
-	 * @return номер запроса
-	 */
-	public int nextReqId() {
-		return requestId.getAndIncrement();
-	}
-	
 	public void reqAutoOpenOrders(boolean autoBind) {
 		socket.reqAutoOpenOrders(autoBind);
 	}
@@ -184,7 +161,6 @@ public class IBClient {
 		}
 		IBClient o = (IBClient) other;
 		return new EqualsBuilder()
-			.append(o.requestId, requestId)
 			.append(o.wrapper, wrapper)
 			.isEquals();
 	}
@@ -205,6 +181,14 @@ public class IBClient {
 	
 	public void cancelOrder(int reqId) {
 		socket.cancelOrder(reqId);
+	}
+	
+	public ContractHandler getContractHandler(int reqId) {
+		return wrapper.getContractHandler(reqId);
+	}
+	
+	public OrderHandler getOrderHandler(int reqId) {
+		return wrapper.getOrderHandler(reqId);
 	}
 
 }

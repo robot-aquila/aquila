@@ -4,7 +4,6 @@ import java.util.Properties;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.ib.api.IBClient;
 import ru.prolib.aquila.ib.api.IBConfig;
 import ru.prolib.aquila.ib.assembler.Assembler;
 import ru.prolib.aquila.ib.assembler.IBMainHandler;
@@ -36,9 +35,8 @@ public class IBFactory implements TerminalFactory {
 		StarterQueue starter = (StarterQueue) term.getStarter();
 		starter.add(new ConnectionHandler(term, config));
 		
-		IBClient client = term.getClient();
-		client.setMainHandler(new IBMainHandler(term, client,
-				client.getRequestNumerator(), new Assembler(term)));
+		term.getClient()
+			.setMainHandler(new IBMainHandler(term, new Assembler(term)));
 		
 		term.setOrderProcessorInstance(new IBOrderProcessor(term));
 		

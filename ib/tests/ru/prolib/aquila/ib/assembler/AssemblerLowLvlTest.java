@@ -2,9 +2,6 @@ package ru.prolib.aquila.ib.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.Date;
-
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -13,6 +10,7 @@ import com.ib.client.Contract;
 import com.ib.client.ContractDetails;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.IBEditableTerminal;
 import ru.prolib.aquila.ib.IBTerminalBuilder;
@@ -28,8 +26,8 @@ public class AssemblerLowLvlTest {
 	private EditablePortfolio port;
 	private EditableSecurity security;
 	private EditablePosition position;
-	private EditableOrder order;
 	private AssemblerLowLvl asm;
+	private Counter numerator;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -47,11 +45,12 @@ public class AssemblerLowLvlTest {
 		port = control.createMock(EditablePortfolio.class);
 		security = control.createMock(EditableSecurity.class);
 		position = control.createMock(EditablePosition.class);
-		order = control.createMock(EditableOrder.class);
+		numerator = control.createMock(Counter.class);
 		asm = new AssemblerLowLvl(terminal);
 		
 		expect(terminal.getCache()).andStubReturn(cache);
 		expect(terminal.getClient()).andStubReturn(client);
+		expect(terminal.getOrderNumerator()).andStubReturn(numerator);
 	}
 	
 	@Test
@@ -331,7 +330,7 @@ public class AssemblerLowLvlTest {
 		ContractEntry entry = control.createMock(ContractEntry.class);
 		Contract expected = new Contract();
 		expect(entry.getDefaultContract()).andStubReturn(expected);
-		expect(client.nextReqId()).andReturn(180);
+		expect(numerator.incrementAndGet()).andReturn(180);
 		client.setContractHandler(eq(180),
 			eq(new IBRequestMarketDataHandler(terminal, security, 180, entry)));
 		client.reqMktData(eq(180), same(expected), (String)isNull(), eq(false));
@@ -401,419 +400,6 @@ public class AssemblerLowLvlTest {
 		control.replay();
 		
 		asm.fireEvents(position);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testFireStopOrderEvents_AvailNotChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(true);
-		expect(order.hasChanged()).andReturn(false);
-		control.replay();
-		
-		asm.fireStopOrderEvents(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testFireStopOrderEvents_AvailChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(true);
-		expect(order.hasChanged()).andReturn(true);
-		order.fireChangedEvent();
-		order.resetChanges();
-		control.replay();
-		
-		asm.fireStopOrderEvents(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testFireStopOrderEvents_NotAvailNotChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(false);
-		order.setAvailable(eq(true));
-		terminal.fireStopOrderAvailableEvent(same(order));
-		expect(order.hasChanged()).andReturn(false);
-		control.replay();
-		
-		asm.fireStopOrderEvents(order);
-		
-		control.verify();
-	}
-
-	@Test
-	public void testFireStopOrderEvents_NotAvailChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(false);
-		order.setAvailable(eq(true));
-		terminal.fireStopOrderAvailableEvent(same(order));
-		expect(order.hasChanged()).andReturn(true);
-		order.fireChangedEvent();
-		order.resetChanges();
-		control.replay();
-		
-		asm.fireStopOrderEvents(order);
-		
-		control.verify();
-	}
-
-	
-	@Test
-	public void testUpdateStopOrder() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		expect(entry.getAccount()).andStubReturn(new Account("TEST"));
-		expect(entry.getContractId()).andStubReturn(11534);
-		expect(entry.getDirection()).andStubReturn(OrderDirection.SELL);
-		expect(entry.getPrice()).andStubReturn(815.05d);
-		expect(entry.getQty()).andStubReturn(1000L);
-		expect(entry.getStopLimitPrice()).andStubReturn(820.01d);
-		expect(entry.getType()).andStubReturn(OrderType.STOP_LIMIT);
-		
-		ContractEntry contrEntry = control.createMock(ContractEntry.class);
-		expect(contrEntry.getSecurityDescriptor()).andStubReturn(descr);
-		expect(cache.getContract(11534)).andStubReturn(contrEntry);
-		
-		order.setAccount(eq(new Account("TEST")));
-		order.setDirection(eq(OrderDirection.SELL));
-		order.setPrice(eq(815.05d));
-		order.setQty(eq(1000L));
-		order.setSecurityDescriptor(eq(descr));
-		order.setStopLimitPrice(eq(820.01d));
-		order.setType(eq(OrderType.STOP_LIMIT));
-		Date time = new Date();
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setTime(same(time));
-		control.replay();
-		
-		asm.updateStopOrder(order, entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustStopOrderStatus_SkipNoStatusEntry() throws Exception {
-		expect(order.getId()).andStubReturn(815L);
-		expect(cache.getOrderStatus(eq(815L))).andReturn(null);
-		control.replay();
-		
-		asm.adjustStopOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustStopOrderStatus_SkipNullStatus() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(order.getId()).andStubReturn(5815L);
-		expect(cache.getOrderStatus(eq(5815L))).andReturn(entry);
-		expect(entry.getStatus()).andReturn(null);
-		control.replay();
-		
-		asm.adjustStopOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustStopOrderStatus_SkipActive() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(order.getId()).andStubReturn(1815L);
-		expect(cache.getOrderStatus(eq(1815L))).andReturn(entry);
-		expect(entry.getStatus()).andReturn(OrderStatus.ACTIVE);
-		control.replay();
-		
-		asm.adjustStopOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustStopOrderStatus_Filled() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(order.getId()).andStubReturn(8115L);
-		expect(cache.getOrderStatus(eq(8115L))).andReturn(entry);
-		expect(entry.getStatus()).andReturn(OrderStatus.FILLED);
-		Date time = new Date();
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setLastChangeTime(same(time));
-		order.setStatus(eq(OrderStatus.FILLED));
-		control.replay();
-		
-		asm.adjustStopOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustStopOrderStatus_Cancelled() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(order.getId()).andStubReturn(7216L);
-		expect(cache.getOrderStatus(eq(7216L))).andReturn(entry);
-		expect(entry.getStatus()).andReturn(OrderStatus.CANCELLED);
-		Date time = new Date();
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setLastChangeTime(same(time));
-		order.setStatus(eq(OrderStatus.CANCELLED));
-		control.replay();
-		
-		asm.adjustStopOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testFireOrderEvents_AvailNotChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(true);
-		expect(order.hasChanged()).andReturn(false);
-		control.replay();
-		
-		asm.fireOrderEvents(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testFireOrderEvents_AvailChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(true);
-		expect(order.hasChanged()).andReturn(true);
-		order.fireChangedEvent();
-		order.resetChanges();
-		control.replay();
-		
-		asm.fireOrderEvents(order);
-		
-		control.verify();
-	}
-
-	@Test
-	public void testFireOrderEvents_NotAvailNotChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(false);
-		order.setAvailable(eq(true));
-		terminal.fireOrderAvailableEvent(same(order));
-		expect(order.hasChanged()).andReturn(false);
-		control.replay();
-		
-		asm.fireOrderEvents(order);
-		
-		control.verify();
-	}
-
-	@Test
-	public void testFireOrderEvents_NotAvailChanged() throws Exception {
-		expect(order.isAvailable()).andReturn(false);
-		order.setAvailable(eq(true));
-		terminal.fireOrderAvailableEvent(same(order));
-		expect(order.hasChanged()).andReturn(true);
-		order.fireChangedEvent();
-		order.resetChanges();
-		control.replay();
-		
-		asm.fireOrderEvents(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testUpdateOrder_() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		expect(entry.getAccount()).andStubReturn(new Account("BEST"));
-		expect(entry.getContractId()).andStubReturn(445);
-		expect(entry.getDirection()).andStubReturn(OrderDirection.BUY);
-		expect(entry.getPrice()).andStubReturn(212.15d);
-		expect(entry.getQty()).andStubReturn(100L);
-		expect(entry.getType()).andStubReturn(OrderType.LIMIT);
-		
-		ContractEntry contrEntry = control.createMock(ContractEntry.class);
-		expect(contrEntry.getSecurityDescriptor()).andStubReturn(descr);
-		expect(cache.getContract(445)).andStubReturn(contrEntry);
-		
-		order.setAccount(eq(new Account("BEST")));
-		order.setDirection(eq(OrderDirection.BUY));
-		order.setPrice(eq(212.15d));
-		order.setQty(eq(100L));
-		order.setQtyRest(eq(100L));
-		order.setSecurityDescriptor(eq(descr));
-		order.setType(eq(OrderType.LIMIT));
-		Date time = new Date();
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setTime(same(time));
-		control.replay();
-		
-		asm.updateOrder(order, entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testUpdateOrder_SkipPriceForMarket() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		expect(entry.getAccount()).andStubReturn(new Account("BEST"));
-		expect(entry.getContractId()).andStubReturn(445);
-		expect(entry.getDirection()).andStubReturn(OrderDirection.BUY);
-		expect(entry.getPrice()).andStubReturn(212.15d);
-		expect(entry.getQty()).andStubReturn(100L);
-		expect(entry.getType()).andStubReturn(OrderType.MARKET);
-		
-		ContractEntry contrEntry = control.createMock(ContractEntry.class);
-		expect(contrEntry.getSecurityDescriptor()).andStubReturn(descr);
-		expect(cache.getContract(445)).andStubReturn(contrEntry);
-		
-		order.setAccount(eq(new Account("BEST")));
-		order.setDirection(eq(OrderDirection.BUY));
-		order.setQty(eq(100L));
-		order.setQtyRest(eq(100L));
-		order.setSecurityDescriptor(eq(descr));
-		order.setType(eq(OrderType.MARKET));
-		Date time = new Date();
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setTime(same(time));
-		control.replay();
-		
-		asm.updateOrder(order, entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustOrderTrades() throws Exception {
-		control.replay();
-		
-		asm.adjustOrderTrades(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustOrderStatus_SkipNoStatusEntry() throws Exception {
-		expect(order.getId()).andStubReturn(824L);
-		expect(cache.getOrderStatus(eq(824L))).andReturn(null);
-		control.replay();
-		
-		asm.adjustOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustOrderStatus_SkipNullStatus() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(entry.getStatus()).andStubReturn(null);
-		expect(order.getId()).andStubReturn(8224L);
-		expect(cache.getOrderStatus(eq(8224L))).andReturn(entry);
-		control.replay();
-		
-		asm.adjustOrderStatus(order);
-		
-		control.verify();
-	}
-
-	@Test
-	public void testAdjustOrderStatus_Active() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(entry.getStatus()).andStubReturn(OrderStatus.ACTIVE);
-		expect(entry.getAvgExecutedPrice()).andStubReturn(10.05d);
-		expect(entry.getQtyRest()).andStubReturn(2L);
-		expect(order.getId()).andStubReturn(1824L);
-		expect(order.getQty()).andStubReturn(10L);
-		expect(cache.getOrderStatus(eq(1824L))).andReturn(entry);
-		
-		order.setQtyRest(eq(2L));
-		order.setAvgExecutedPrice(eq(10.05d));
-		order.setExecutedVolume(eq(10.05d * 8));
-		order.setStatus(eq(OrderStatus.ACTIVE));
-		control.replay();
-		
-		asm.adjustOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustOrderStatus_Filled() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(entry.getStatus()).andStubReturn(OrderStatus.FILLED);
-		expect(entry.getAvgExecutedPrice()).andStubReturn(15.25d);
-		expect(entry.getQtyRest()).andStubReturn(4L);
-		expect(order.getId()).andStubReturn(881L);
-		expect(order.getQty()).andStubReturn(8L);
-		expect(cache.getOrderStatus(eq(881L))).andReturn(entry);
-		
-		order.setQtyRest(eq(4L));
-		order.setAvgExecutedPrice(eq(15.25d));
-		order.setExecutedVolume(eq(15.25d * 4));
-		order.setStatus(eq(OrderStatus.FILLED));
-		Date time = new Date();
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setLastChangeTime(same(time));
-		control.replay();
-		
-		asm.adjustOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testAdjustOrderStatus_Cancelled() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		expect(entry.getStatus()).andStubReturn(OrderStatus.CANCELLED);
-		expect(entry.getAvgExecutedPrice()).andStubReturn(115.25d);
-		expect(entry.getQtyRest()).andStubReturn(2L);
-		expect(order.getId()).andStubReturn(2881L);
-		expect(order.getQty()).andStubReturn(4L);
-		expect(cache.getOrderStatus(eq(2881L))).andReturn(entry);
-		
-		order.setQtyRest(eq(2L));
-		order.setAvgExecutedPrice(eq(115.25d));
-		order.setExecutedVolume(eq(115.25d * 2));
-		order.setStatus(eq(OrderStatus.CANCELLED));
-		Date time = new Date();
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setLastChangeTime(same(time));
-		control.replay();
-		
-		asm.adjustOrderStatus(order);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists_NoContract() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		expect(entry.getContractId()).andStubReturn(9912);
-		expect(cache.getContract(eq(9912))).andReturn(null);
-		control.replay();
-		
-		assertFalse(asm.isSecurityExists(entry));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists_NoSecurity() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		expect(entry.getContractId()).andStubReturn(19912);
-		ContractEntry conEntry = control.createMock(ContractEntry.class);
-		expect(cache.getContract(eq(19912))).andReturn(conEntry);
-		expect(conEntry.getSecurityDescriptor()).andReturn(descr);
-		expect(terminal.isSecurityExists(eq(descr))).andReturn(false);
-		control.replay();
-		
-		assertFalse(asm.isSecurityExists(entry));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testIsSecurityExists_Ok() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		expect(entry.getContractId()).andStubReturn(99121);
-		ContractEntry conEntry = control.createMock(ContractEntry.class);
-		expect(cache.getContract(eq(99121))).andReturn(conEntry);
-		expect(conEntry.getSecurityDescriptor()).andReturn(descr);
-		expect(terminal.isSecurityExists(eq(descr))).andReturn(false);
-		control.replay();
-		
-		assertFalse(asm.isSecurityExists(entry));
 		
 		control.verify();
 	}

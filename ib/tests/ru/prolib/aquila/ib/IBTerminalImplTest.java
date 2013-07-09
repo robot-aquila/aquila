@@ -28,12 +28,12 @@ public class IBTerminalImplTest {
 	private EditableSecurities securities;
 	private EditablePortfolios portfolios;
 	private EditableOrders orders;
-	private EditableOrders stopOrders;
 	private OrderProcessor orderProcessor;
 	private EventDispatcher dispatcher;
-	private EventType onConn,onDisc,onStarted,onStopped,onPanic,onSecReqErr;
+	private EventType onConn, onDisc, onStarted, onStopped, onPanic,
+		onReqSecurityError;
 	private TerminalController controller;
-	private Timer timer;
+	private Scheduler scheduler;
 	private Cache cache;
 	private IBClient client;
 	private IBTerminalImpl terminal;
@@ -53,9 +53,8 @@ public class IBTerminalImplTest {
 		securities = control.createMock(EditableSecurities.class);
 		portfolios = control.createMock(EditablePortfolios.class);
 		orders = control.createMock(EditableOrders.class);
-		stopOrders = control.createMock(EditableOrders.class);
 		orderProcessor = control.createMock(OrderProcessor.class);
-		timer = control.createMock(Timer.class);
+		scheduler = control.createMock(Scheduler.class);
 		cache = control.createMock(Cache.class);
 		client = control.createMock(IBClient.class);
 		es = new EventSystemImpl();
@@ -65,11 +64,11 @@ public class IBTerminalImplTest {
 		onStarted = dispatcher.createType("OnStarted");
 		onStopped = dispatcher.createType("OnStopped");
 		onPanic = dispatcher.createType("OnPanic");
-		onSecReqErr = dispatcher.createType("OnSecurityRequestError");
-		terminal = new IBTerminalImpl(es, timer, starter, securities,
-				portfolios, orders, stopOrders,  controller, dispatcher, 
+		onReqSecurityError = dispatcher.createType("OnRequestSecurityError");
+		terminal = new IBTerminalImpl(es, scheduler, starter, securities,
+				portfolios, orders, controller, dispatcher, 
 				onConn, onDisc, onStarted, onStopped, onPanic,
-				onSecReqErr, cache, client);
+				onReqSecurityError, cache, client);
 	}
 	
 	@Test
@@ -84,10 +83,10 @@ public class IBTerminalImplTest {
 		Variant<EventSystem> vEs = new Variant<EventSystem>()
 			.add(es)
 			.add(control.createMock(EventSystem.class));
-		Variant<Timer> vTmr = new Variant<Timer>(vEs)
-			.add(timer)
-			.add(control.createMock(Timer.class));
-		Variant<Starter> vSta = new Variant<Starter>(vTmr)
+		Variant<Scheduler> vSched = new Variant<Scheduler>(vEs)
+			.add(scheduler)
+			.add(control.createMock(Scheduler.class));
+		Variant<Starter> vSta = new Variant<Starter>(vSched)
 			.add(starter)
 			.add(control.createMock(Starter.class));
 		Variant<EditableSecurities> vScs = new Variant<EditableSecurities>(vSta)
@@ -99,11 +98,8 @@ public class IBTerminalImplTest {
 		Variant<EditableOrders> vOrds = new Variant<EditableOrders>(vPts)
 			.add(orders)
 			.add(control.createMock(EditableOrders.class));
-		Variant<EditableOrders> vStOrds = new Variant<EditableOrders>(vOrds)
-			.add(stopOrders)
-			.add(control.createMock(EditableOrders.class));
 		Variant<TerminalController> vCtrl =
-				new Variant<TerminalController>(vStOrds)
+				new Variant<TerminalController>(vOrds)
 			.add(controller)
 			.add(control.createMock(TerminalController.class));
 		Variant<String> vDispId = new Variant<String>(vCtrl)
@@ -124,10 +120,10 @@ public class IBTerminalImplTest {
 		Variant<String> vPanicId = new Variant<String>(vStopId)
 			.add("OnPanic")
 			.add("OnPanicX");
-		Variant<String> vSecReqErrId = new Variant<String>(vPanicId)
-			.add("OnSecurityRequestError")
-			.add("OnSecurityRequestErrorX");
-		Variant<Cache> vCache = new Variant<Cache>(vSecReqErrId)
+		Variant<String> vReqSecId = new Variant<String>(vPanicId)
+			.add("OnRequestSecurityError")
+			.add("OnRequestSecurityErrorX");
+		Variant<Cache> vCache = new Variant<Cache>(vReqSecId)
 			.add(cache)
 			.add(control.createMock(Cache.class));
 		Variant<IBClient> vClnt = new Variant<IBClient>(vCache)
@@ -146,12 +142,12 @@ public class IBTerminalImplTest {
 		IBTerminalImpl x = null, found = null;
 		do {
 			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new IBTerminalImpl(vEs.get(), vTmr.get(), vSta.get(),
-					vScs.get(), vPts.get(), vOrds.get(), vStOrds.get(),
+			x = new IBTerminalImpl(vEs.get(), vSched.get(), vSta.get(),
+					vScs.get(), vPts.get(), vOrds.get(), 
 					vCtrl.get(), d, d.createType(vConnId.get()),
 					d.createType(vDiscId.get()), d.createType(vStartId.get()),
 					d.createType(vStopId.get()), d.createType(vPanicId.get()),
-					d.createType(vSecReqErrId.get()), vCache.get(),
+					d.createType(vReqSecId.get()), vCache.get(),
 					vClnt.get());
 			x.setTerminalState(vStat.get());
 			x.setOrderProcessorInstance(vOrdProc.get());
@@ -165,7 +161,6 @@ public class IBTerminalImplTest {
 		assertSame(securities, found.getSecuritiesInstance());
 		assertSame(portfolios, found.getPortfoliosInstance());
 		assertSame(orders, found.getOrdersInstance());
-		assertSame(stopOrders, found.getStopOrdersInstance());
 		assertSame(starter, found.getStarter());
 		assertEquals(dispatcher, found.getEventDispatcher());
 		assertEquals(onConn, found.OnConnected());
@@ -175,37 +170,38 @@ public class IBTerminalImplTest {
 		assertEquals(onPanic, found.OnPanic());
 		assertSame(TerminalState.STOPPED, found.getTerminalState());
 		assertSame(orderProcessor, found.getOrderProcessorInstance());
-		assertSame(timer, found.getTimer());
-		assertEquals(onSecReqErr, found.OnSecurityRequestError());
+		assertSame(scheduler, found.getScheduler());
+		assertEquals(onReqSecurityError, found.OnRequestSecurityError());
 		assertSame(cache, found.getCache());
 		assertSame(client, found.getClient());
 	}
 	
 	@Test
-	public void testConstruct15() throws Exception {
+	public void testConstruct_Short() throws Exception {
 		terminal = new IBTerminalImpl(es, starter, securities, portfolios,
-				orders, stopOrders,	dispatcher, onConn, onDisc, onStarted,
-				onStopped, onPanic, onSecReqErr, cache, client);
-		Terminal expected = new IBTerminalImpl(es, new TimerLocal(), starter,
-				securities, portfolios, orders, stopOrders,
+				orders, dispatcher, onConn, onDisc, onStarted,
+				onStopped, onPanic, onReqSecurityError, cache, client);
+		Terminal expected = new IBTerminalImpl(es, new SchedulerLocal(),
+				starter, securities, portfolios, orders, 
 				new TerminalController(), dispatcher, onConn, onDisc,
-				onStarted, onStopped, onPanic, onSecReqErr, cache, client);
+				onStarted, onStopped, onPanic,
+				onReqSecurityError, cache, client);
 		assertEquals(expected, terminal);
 	}
 	
 	@Test
 	public void testRequestSecurity() throws Exception {
+		terminal.getOrderNumerator().set(824);
 		SecurityDescriptor descr =
 			new SecurityDescriptor("SPXS", "SMART", "USD", SecurityType.STK);
-		expect(client.nextReqId()).andReturn(344);
-		client.setContractHandler(eq(344),
-				eq(new IBRequestSecurityHandler(terminal, 344, descr)));
+		client.setContractHandler(eq(825),
+				eq(new IBRequestSecurityHandler(terminal, 825, descr)));
 		Contract expected = new Contract();
 		expected.m_symbol = "SPXS";
 		expected.m_exchange = "SMART";
 		expected.m_currency = "USD";
 		expected.m_secType = "STK";
-		client.reqContractDetails(eq(344), eq(expected));
+		client.reqContractDetails(eq(825), eq(expected));
 		control.replay();
 		
 		terminal.requestSecurity(descr);
@@ -214,18 +210,8 @@ public class IBTerminalImplTest {
 	}
 	
 	@Test
-	public void testFireSecurityRequestError() throws Exception {
-		control.replay();
-		
-		terminal.fireSecurityRequestError(new SecurityDescriptor("SPXS",
-				"SMART", "USD", SecurityType.STK), 80, "test error");
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testRequestContract() throws Exception {
-		expect(client.nextReqId()).andReturn(812);
+		terminal.getOrderNumerator().set(811);
 		client.setContractHandler(eq(812),
 				eq(new IBRequestContractHandler(terminal, 812, 559)));
 		Contract expected = new Contract();

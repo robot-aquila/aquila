@@ -10,16 +10,15 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 import com.ib.client.*;
 
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.ib.*;
 import ru.prolib.aquila.ib.api.IBClient;
 import ru.prolib.aquila.ib.assembler.cache.*;
 
 public class IBMainHandlerTest {
 	private IMocksControl control;
-	private EditableTerminal terminal;
+	private IBEditableTerminal terminal;
 	private IBClient client;
 	private Counter requestId;
 	private Assembler assembler;
@@ -34,11 +33,14 @@ public class IBMainHandlerTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(EditableTerminal.class);
+		terminal = control.createMock(IBEditableTerminal.class);
 		client = control.createMock(IBClient.class);
 		requestId = control.createMock(Counter.class);
 		assembler = control.createMock(Assembler.class);
-		handler = new IBMainHandler(terminal, client, requestId, assembler);
+		handler = new IBMainHandler(terminal, assembler);
+		
+		expect(terminal.getClient()).andStubReturn(client);
+		expect(terminal.getOrderNumerator()).andStubReturn(requestId);
 	}
 	
 	/**
@@ -68,8 +70,6 @@ public class IBMainHandlerTest {
 	
 	@Test
 	public void testConnectionOpened() throws Exception {
-		client.reqAutoOpenOrders(eq(true));
-		client.reqAllOpenOrders();
 		terminal.fireTerminalConnectedEvent();
 		control.replay();
 		
@@ -229,7 +229,6 @@ public class IBMainHandlerTest {
 		contract.m_conId = 7612;
 		Order order = new Order();
 		OrderState state = createOrderState();
-		assembler.update(eq(new OrderEntry(81, contract, order, state)));
 		control.replay();
 		
 		handler.openOrder(81, contract, order, state);
@@ -239,7 +238,6 @@ public class IBMainHandlerTest {
 	
 	@Test
 	public void testOrderStatus() throws Exception {
-		assembler.update(eq(new OrderStatusEntry(928, "foobar", 10, 1d)));
 		control.replay();
 		
 		handler.orderStatus(928, "foobar", 20, 10, 1d, 0, 5, 2d, 1, "why");
@@ -256,25 +254,21 @@ public class IBMainHandlerTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		TerminalBuilder tb = new TerminalBuilder();
-		EditableTerminal t1 = tb.createTerminal("foo");
-		EditableTerminal t2 = tb.createTerminal("foo");
-		handler = new IBMainHandler(t1, client, requestId, assembler);
-		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
+		IBTerminalBuilder tb = new IBTerminalBuilder();
+		IBEditableTerminal t1 = tb.createTerminal("foo");
+		IBEditableTerminal t2 = tb.createTerminal("foo");
+		handler = new IBMainHandler(t1, assembler);
+		Variant<IBEditableTerminal> vTerm = new Variant<IBEditableTerminal>()
 			.add(t1)
 			.add(t2);
-		Variant<Counter> vCntr = new Variant<Counter>(vTerm)
-			.add(requestId)
-			.add(control.createMock(Counter.class));
-		Variant<Assembler> vAsm = new Variant<Assembler>(vCntr)
+		Variant<Assembler> vAsm = new Variant<Assembler>(vTerm)
 			.add(assembler)
 			.add(control.createMock(Assembler.class));
 		Variant<?> iterator = vAsm;
 		int foundCnt = 0;
 		IBMainHandler x = null, found = null;
 		do {
-			x = new IBMainHandler(vTerm.get(), /*client*/null, vCntr.get(),
-					vAsm.get());
+			x = new IBMainHandler(vTerm.get(), vAsm.get());
 			if ( handler.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -282,7 +276,6 @@ public class IBMainHandlerTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(t1, found.getTerminal());
-		assertSame(requestId, found.getRequestNumerator());
 		assertSame(assembler, found.getAssembler());
 	}
 

@@ -106,6 +106,20 @@ public class IBWrapperTest {
 	}
 	
 	@Test
+	public void testGetContractHandler() throws Exception {
+		assertNull(wrapper.getContractHandler(412));
+		wrapper.setContractHandler(412, hContr1);
+		assertSame(hContr1, wrapper.getContractHandler(412));
+	}
+	
+	@Test
+	public void testGetOrderHandler() throws Exception {
+		assertNull(wrapper.getOrderHandler(891));
+		wrapper.setOrderHandler(891, hOrder1);
+		assertSame(hOrder1, wrapper.getOrderHandler(891));
+	}
+	
+	@Test
 	public void testManagedAccounts() throws Exception {
 		hMain.managedAccounts(eq("one,two"));
 		control.replay();

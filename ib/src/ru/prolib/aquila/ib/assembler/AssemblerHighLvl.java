@@ -68,15 +68,6 @@ public class AssemblerHighLvl {
 	}
 	
 	/**
-	 * Согласовать заявки.
-	 */
-	public void assembleOrders() {
-		for ( OrderEntry entry : getCache().getOrderEntries() ) {
-			assembleOrder(entry);
-		}
-	}
-	
-	/**
 	 * Согласовать позиции.
 	 */
 	public void assemblePositions() {
@@ -92,27 +83,6 @@ public class AssemblerHighLvl {
 	 */
 	public void assemblePosition(PositionEntry entry) {
 		middle.update(entry);
-	}
-	
-	/**
-	 * Согласовать заявку.
-	 * <p>
-	 * @param entry кэш-запись заявки
-	 */
-	public void assembleOrder(OrderEntry entry) {
-		middle.update(entry);
-	}
-	
-	/**
-	 * Согласовать заявку по кэш-записи статуса.
-	 * <p>
-	 * @param entry кэш-запись статуса заявки
-	 */
-	public void assembleOrder(OrderStatusEntry entry) {
-		OrderEntry orderEntry = getCache().getOrder(entry.getId());
-		if ( orderEntry != null ) {
-			assembleOrder(orderEntry);
-		}
 	}
 	
 	@Override

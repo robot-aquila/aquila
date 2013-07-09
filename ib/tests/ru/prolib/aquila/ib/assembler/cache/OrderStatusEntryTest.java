@@ -26,20 +26,20 @@ public class OrderStatusEntryTest {
 	
 	@Test
 	public void testGetId() throws Exception {
-		assertEquals(new Long(25), entry.getId());
+		assertEquals(25, entry.getId());
 	}
 	
 	@Test
 	public void testGetStatus() throws Exception {
 		Object fix[][] = {
 				// IB status, local status
-				{ "PendingSubmit", OrderStatus.ACTIVE },
-				{ "PendingCancel", null },
+				{ "PendingSubmit", OrderStatus.SENT },
+				{ "PendingCancel", OrderStatus.CANCEL_SENT },
 				{ "PreSubmitted", OrderStatus.ACTIVE },
 				{ "Submitted", OrderStatus.ACTIVE },
 				{ "Cancelled", OrderStatus.CANCELLED },
 				{ "Filled", OrderStatus.FILLED },
-				{ "Inactive", null },
+				{ "Inactive", OrderStatus.ACTIVE },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -96,7 +96,7 @@ public class OrderStatusEntryTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(new Long(25), found.getId());
+		assertEquals(25, found.getId());
 		assertEquals("Submitted", found.getNativeStatus());
 		assertEquals(new Long(5), found.getQtyRest());
 		assertEquals(24.93d, found.getAvgExecutedPrice(), 0.01d);

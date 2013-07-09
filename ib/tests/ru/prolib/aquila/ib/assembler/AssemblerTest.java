@@ -30,49 +30,7 @@ public class AssemblerTest {
 		ContractEntry entry = control.createMock(ContractEntry.class);
 		cache.update(same(entry));
 		high.update(same(entry));
-		high.assembleOrders();
 		high.assemblePositions();
-		control.replay();
-		
-		asm.update(entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testUpdate_Order_ContractNotExists() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		expect(entry.getContractId()).andStubReturn(215);
-		cache.update(same(entry));
-		expect(cache.getContract(215)).andReturn(null);
-		terminal.requestContract(215);
-		control.replay();
-		
-		asm.update(entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testUpdate_Order_ContractExists() throws Exception {
-		OrderEntry entry = control.createMock(OrderEntry.class);
-		ContractEntry contract = control.createMock(ContractEntry.class);
-		expect(entry.getContractId()).andStubReturn(215);
-		cache.update(entry);
-		expect(cache.getContract(215)).andReturn(contract);
-		high.assembleOrder(same(entry));
-		control.replay();
-		
-		asm.update(entry);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testUpdate_OrderStatus() throws Exception {
-		OrderStatusEntry entry = control.createMock(OrderStatusEntry.class);
-		cache.update(same(entry));
-		high.assembleOrder(same(entry));
 		control.replay();
 		
 		asm.update(entry);

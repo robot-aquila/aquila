@@ -193,8 +193,8 @@ public class CacheTest {
 		cache.update(entry2);
 		
 		control.verify();
-		assertSame(entry1, cache.getOrder(125L));
-		assertSame(entry2, cache.getOrder(84L));
+		assertSame(entry1, cache.getOrder(125));
+		assertSame(entry2, cache.getOrder(84));
 		List<OrderEntry> expected = new Vector<OrderEntry>();
 		expected.add(entry1);
 		expected.add(entry2);
@@ -215,9 +215,9 @@ public class CacheTest {
 		cache.update(entry3);
 		
 		control.verify();
-		assertSame(entry1, cache.getOrderStatus(824L));
-		assertSame(entry2, cache.getOrderStatus(127L));
-		assertSame(entry3, cache.getOrderStatus(512L));
+		assertSame(entry1, cache.getOrderStatus(824));
+		assertSame(entry2, cache.getOrderStatus(127));
+		assertSame(entry3, cache.getOrderStatus(512));
 		List<OrderStatusEntry> expected = new Vector<OrderStatusEntry>();
 		expected.add(entry1);
 		expected.add(entry2);
@@ -268,12 +268,12 @@ public class CacheTest {
 		List<ExecEntry> expected = new Vector<ExecEntry>();
 		expected.add(entry1);
 		expected.add(entry4);
-		assertEquals(expected, cache.getOrderExecutions(8L));
+		assertEquals(expected, cache.getOrderExecutions(8));
 		
 		expected.clear();
 		expected.add(entry2);
 		expected.add(entry3);
-		assertEquals(expected, cache.getOrderExecutions(11L));
+		assertEquals(expected, cache.getOrderExecutions(11));
 		
 		expected.clear();
 		expected.add(entry1);
@@ -291,9 +291,9 @@ public class CacheTest {
 		cache.update(entry1);
 		control.verify();
 		
-		cache.purgeOrder(84L);
+		cache.purgeOrder(84);
 		
-		assertNull(cache.getOrder(84L));
+		assertNull(cache.getOrder(84));
 	}
 	
 	@Test

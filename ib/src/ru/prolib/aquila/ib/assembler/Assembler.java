@@ -63,31 +63,7 @@ public class Assembler {
 		synchronized ( terminal ) {
 			getCache().update(entry);
 			high.update(entry);
-			high.assembleOrders();
 			high.assemblePositions();
-		}
-	}
-	
-	/**
-	 * Обновить данные на основании деталей заявки.
-	 * <p>
-	 * @param entry кэш-запись заявки
-	 */
-	public void update(OrderEntry entry) {
-		synchronized ( terminal ) {
-			getCache().update(entry);
-			if ( getCache().getContract(entry.getContractId()) == null ) {
-				terminal.requestContract(entry.getContractId());
-			} else {
-				high.assembleOrder(entry);
-			}
-		}
-	}
-	
-	public void update(OrderStatusEntry entry) {
-		synchronized ( terminal ) {
-			terminal.getCache().update(entry);
-			high.assembleOrder(entry);
 		}
 	}
 	

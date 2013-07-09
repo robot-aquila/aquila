@@ -1,13 +1,8 @@
 package ru.prolib.aquila.ib.assembler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ib.client.ContractDetails;
 import com.ib.client.TickType;
-
-import ru.prolib.aquila.core.BusinessEntities.EditableObjectException;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.ib.IBEditableTerminal;
 import ru.prolib.aquila.ib.api.ContractHandler;
@@ -19,12 +14,6 @@ import ru.prolib.aquila.ib.assembler.cache.ContractEntry;
  * Обработчик запроса котировок инструмента.
    */
 public class IBRequestMarketDataHandler implements ContractHandler {
-	private static final Logger logger;
-	
-	static {
-		logger = LoggerFactory.getLogger(IBRequestMarketDataHandler.class);
-	}
-	
 	private final IBEditableTerminal terminal;
 	private final EditableSecurity security;
 	private final int reqId;
@@ -120,11 +109,8 @@ public class IBRequestMarketDataHandler implements ContractHandler {
 				security.setClosePrice(value);
 				break;
 		}
-		try {
-			security.fireChangedEvent();
-		} catch ( EditableObjectException e ) {
-			logger.error("Error update security: ", e);
-		}
+		security.fireChangedEvent();
+		security.resetChanges();
 	}
 
 	@Override
@@ -137,11 +123,8 @@ public class IBRequestMarketDataHandler implements ContractHandler {
 				security.setBidSize(new Long(size));
 				break;
 		}
-		try {
-			security.fireChangedEvent();
-		} catch ( EditableObjectException e ) {
-			logger.error("Error update security: ", e);
-		}
+		security.fireChangedEvent();
+		security.resetChanges();
 	}
 	
 	/**

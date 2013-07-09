@@ -6,28 +6,24 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.Order;
-import ru.prolib.aquila.core.BusinessEntities.OrderDirection;
-import ru.prolib.aquila.core.BusinessEntities.OrderException;
-import ru.prolib.aquila.core.BusinessEntities.OrderProcessor;
-import ru.prolib.aquila.core.BusinessEntities.OrderType;
+import com.ib.client.Contract;
+
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.ib.IBEditableTerminal;
 import ru.prolib.aquila.ib.api.IBClient;
-import ru.prolib.aquila.ib.assembler.cache.Cache;
 
 /**
  * Драйвер выставления заявок через IB API.
  */
 public class IBOrderProcessor implements OrderProcessor {
 	private static final Logger logger;
-	private static final Map<OrderDirection, String> dirs;
+	private static final Map<Direction, String> dirs;
 	
 	static {
 		logger = LoggerFactory.getLogger(IBOrderProcessor.class);
-		dirs = new Hashtable<OrderDirection, String>();
-		dirs.put(OrderDirection.BUY, "BUY");
-		dirs.put(OrderDirection.SELL, "SELL");
+		dirs = new Hashtable<Direction, String>();
+		dirs.put(Direction.BUY, "BUY");
+		dirs.put(Direction.SELL, "SELL");
 	}
 	
 	private final IBEditableTerminal terminal;
@@ -43,28 +39,51 @@ public class IBOrderProcessor implements OrderProcessor {
 
 	@Override
 	public void cancelOrder(Order order) throws OrderException {
-		getClient().cancelOrder(order.getId().intValue());
-		logger.debug("Cancel order: {}", order.getId());
+		synchronized ( order ) {
+			OrderStatus status = order.getStatus();
+			if ( status.isFinal() || status == OrderStatus.CANCEL_SENT ) {
+				return;
+			} else if ( status != OrderStatus.ACTIVE ) {
+				throw new OrderException("Rejected by status: " + status);
+			}
+			((IBOrderHandler) getClient().getOrderHandler(order.getId())) 
+				.cancelOrder();
+		}
 	}
 
 	@Override
 	public void placeOrder(Order order) throws OrderException {
-		OrderType type = order.getType();
-		IBClient client = getClient();
-		if ( type == OrderType.MARKET ) {
-			com.ib.client.Order o = new com.ib.client.Order();
-			o.m_action = dirs.get(order.getDirection());
-			o.m_totalQuantity = order.getQty().intValue();
-			o.m_orderType = "MKT";
-			int reqId = client.nextReqId();
-			terminal.registerPendingOrder(reqId, (EditableOrder) order);
-			client.placeOrder(reqId, getCache()
-					.getContract(order.getSecurityDescriptor())
-					.getDefaultContract(), o);
-			logger.debug("Place order: {}", reqId);
+		synchronized ( order ) {
+			OrderStatus status = order.getStatus();
+			if ( status != OrderStatus.PENDING
+				&& status != OrderStatus.CONDITION )
+			{
+				throw new OrderException("Rejected by status: " + status);
+			}
 			
-		} else {
-			throw new OrderException("Type unsupported: " + order.getType());
+			int id = order.getId();
+			PlaceOrderRequest req = new PlaceOrderRequest(getContract(order));
+			req.getOrder().m_orderId = id;
+			req.getOrder().m_action = dirs.get(order.getDirection());
+			req.getOrder().m_totalQuantity = order.getQty().intValue();
+		
+			OrderType type = order.getType();
+			if ( type == OrderType.MARKET ) {
+				req.getOrder().m_orderType = "MKT";
+			
+			} else if ( type == OrderType.LIMIT ) {
+				req.getOrder().m_orderType = "LMT";
+				req.getOrder().m_lmtPrice = order.getPrice(); 
+			
+			} else {
+				throw new OrderException("Unsupported order type: " + type);
+				
+			}
+			
+			IBOrderHandler handler = new IBOrderHandler(order, req);
+			getClient().setOrderHandler(id, handler);
+			handler.placeOrder();
+			logger.debug("Place order initiated: {}", id);
 		}
 	}
 	
@@ -78,12 +97,16 @@ public class IBOrderProcessor implements OrderProcessor {
 	}
 	
 	/**
-	 * Получить фасад кэша данных.
+	 * Получить дескриптор контракта.
 	 * <p>
-	 * @return кэш данных
+	 * Возвращает дескриптор контракта IB, соответствующий инструменту заявки.
+	 * <p>
+	 * @return дескриптор контракта
 	 */
-	private Cache getCache() {
-		return terminal.getCache();
+	private Contract getContract(Order order) {
+		return terminal.getCache()
+			.getContract(order.getSecurityDescriptor())
+			.getDefaultContract();
 	}
 	
 	@Override

@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
-import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.Variant;
 
 import com.ib.client.Contract;
@@ -15,7 +14,6 @@ import com.ib.client.Order;
 public class IBClientTest {
 	private IMocksControl control;
 	private EClientSocket socket;
-	private Counter requestId;
 	private IBWrapper wrapper;
 	private IBClient client;
 
@@ -23,9 +21,8 @@ public class IBClientTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		socket = control.createMock(EClientSocket.class);
-		requestId = control.createMock(Counter.class);
 		wrapper = control.createMock(IBWrapper.class);
-		client = new IBClient(socket, wrapper, requestId);
+		client = new IBClient(socket, wrapper);
 	}
 	
 	@Test
@@ -154,16 +151,6 @@ public class IBClientTest {
 	}
 	
 	@Test
-	public void testNextReqId() throws Exception {
-		expect(requestId.getAndIncrement()).andReturn(829);
-		control.replay();
-		
-		assertEquals(829, client.nextReqId());
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testReqAutoOpenOrders() throws Exception {
 		socket.reqAutoOpenOrders(eq(true));
 		socket.reqAutoOpenOrders(eq(false));
@@ -209,10 +196,9 @@ public class IBClientTest {
 	
 	@Test
 	public void testConstruct1() throws Exception {
-		client = new IBClient(requestId);
+		client = new IBClient();
 		assertNotNull(client.getSocket());
 		assertEquals(new IBWrapper(), client.getSocket().wrapper());
-		assertSame(requestId, client.getRequestNumerator());
 		assertEquals(new IBWrapper(), client.getWrapper());
 		assertSame(client.getSocket().wrapper(), client.getWrapper());
 	}
@@ -229,14 +215,11 @@ public class IBClientTest {
 		Variant<IBWrapper> vWrp = new Variant<IBWrapper>()
 			.add(wrapper)
 			.add(control.createMock(IBWrapper.class));
-		Variant<Counter> vReqId = new Variant<Counter>(vWrp)
-			.add(requestId)
-			.add(control.createMock(Counter.class));
-		Variant<?> iterator = vReqId;
+		Variant<?> iterator = vWrp;
 		int foundCnt = 0;
 		IBClient x = null, found = null;
 		do {
-			x = new IBClient(socket, vWrp.get(), vReqId.get());
+			x = new IBClient(socket, vWrp.get());
 			if ( client.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -244,7 +227,6 @@ public class IBClientTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(wrapper, found.getWrapper());
-		assertSame(requestId, found.getRequestNumerator());
 	}
 	
 	@Test
@@ -287,6 +269,28 @@ public class IBClientTest {
 		control.replay();
 		
 		client.cancelOrder(921);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetContractHandler() throws Exception {
+		ContractHandler handler = control.createMock(ContractHandler.class);
+		expect(wrapper.getContractHandler(eq(582))).andReturn(handler);
+		control.replay();
+		
+		assertSame(handler, client.getContractHandler(582));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetOrderHandler() throws Exception {
+		OrderHandler handler = control.createMock(OrderHandler.class);
+		expect(wrapper.getOrderHandler(eq(5821))).andReturn(handler);
+		control.replay();
+		
+		assertSame(handler, client.getOrderHandler(5821));
 		
 		control.verify();
 	}
