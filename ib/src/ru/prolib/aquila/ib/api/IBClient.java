@@ -35,8 +35,6 @@ public class IBClient {
 	
 	/**
 	 * Конструктор.
-	 * <p>
-	 * @param requestId нумератор запросов
 	 */
 	public IBClient() {
 		this(new IBWrapper());

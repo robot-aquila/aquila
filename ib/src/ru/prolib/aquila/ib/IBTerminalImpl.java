@@ -27,7 +27,6 @@ public class IBTerminalImpl extends TerminalImpl implements IBEditableTerminal {
 	 * @param securities набор инструментов
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
-	 * @param stopOrders набор стоп-заявок
 	 * @param controller контроллер запуска/останова терминала
 	 * @param dispatcher диспетчер событий
 	 * @param onConnected тип события: при подключении
