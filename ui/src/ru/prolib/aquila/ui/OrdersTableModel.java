@@ -33,13 +33,11 @@ public class OrdersTableModel extends AbstractTableModel implements
 	private static final String COL_QTY = "COL_QTY";
 	private static final String COL_STATUS = "COL_STATUS";
 	private static final String COL_QTY_REST = "COL_QTY_REST";
-	private static final String COL_TRN = "COL_TRN";
 	private static final String COL_PRICE = "COL_PRICE";
 	private static final String COL_EXEC_VOL = "COL_EXEC_VOL";
 	private static final String COL_AVG_EXEC_PRICE = "COL_AVG_EXEC_PRICE";
 	private static final String[] header = {
 		COL_ID,
-		COL_TRN,
 		COL_TIME,
 		COL_CHNG_TIME,
 		COL_ACCOUNT,
