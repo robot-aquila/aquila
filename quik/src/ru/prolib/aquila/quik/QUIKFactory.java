@@ -15,6 +15,13 @@ import ru.prolib.aquila.dde.utils.*;
 import ru.prolib.aquila.quik.api.*;
 import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.AssemblerBuilder;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
+import ru.prolib.aquila.quik.assembler.cache.dde.FortsPortfoliosGateway;
+import ru.prolib.aquila.quik.assembler.cache.dde.FortsPositionsGateway;
+import ru.prolib.aquila.quik.assembler.cache.dde.QUIKDDEService;
+import ru.prolib.aquila.quik.assembler.cache.dde.RowDataConverter;
+import ru.prolib.aquila.quik.assembler.cache.dde.SecuritiesGateway;
+import ru.prolib.aquila.quik.assembler.cache.dde.TableHandler;
 import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.*;
 import ru.prolib.aquila.quik.subsys.row.RowAdapters;
@@ -199,7 +206,7 @@ public class QUIKFactory implements TerminalFactory {
 		starter.add(new AssemblerBuilder()
 			.createAssembler(terminal, locator.getDdeCache()));
 		// Old DDE table listeners starts before all
-		DDEService service = createDdeService(locator, starter);
+		QUIKDDEService service = createDdeService(locator, starter);
 		// DDE server starts after listeners
 		if ( startServer ) starter.add(new DDEServerStarter(server));
 		// DDE service starts after server started
@@ -239,7 +246,7 @@ public class QUIKFactory implements TerminalFactory {
 	 * @param starter стартер
 	 * @return сервис DDE
 	 */
-	private DDEService
+	private QUIKDDEService
 		createDdeService(QUIKServiceLocator locator, StarterQueue starter)
 	{
 		QUIKConfig config = locator.getConfig();
@@ -250,28 +257,28 @@ public class QUIKFactory implements TerminalFactory {
 		starter.add(new QUIKTableListenerStarter(locator, observService));
 		
 		// Start prototype of DDE cache
-		CacheService service = new CacheService(config.getServiceName(),
+		QUIKDDEService service = new QUIKDDEService(config.getServiceName(),
 				locator.getTerminal(), observService);
 		RowDataConverter conv = new RowDataConverter(config.getDateFormat(),
 				config.getTimeFormat());
 		Cache cache = locator.getDdeCache();
 		service.setHandler(config.getOrders(),
-			new MirrorTableHandler(
+			new TableHandler(
 				new OrdersGateway(cache.getOrdersCache(), conv)));
 		service.setHandler(config.getTrades(),
-			new MirrorTableHandler(
+			new TableHandler(
 				new TradesGateway(cache.getTradesCache(), conv)));
 		service.setHandler(config.getSecurities(),
-			new MirrorTableHandler(
+			new TableHandler(
 				new SecuritiesGateway(cache.getSecuritiesCache(), conv)));
 		service.setHandler(config.getPortfoliosFUT(),
-			new MirrorTableHandler(
-				new PortfoliosFGateway(cache.getPortfoliosFCache(), conv)));
+			new TableHandler(
+				new FortsPortfoliosGateway(cache.getPortfoliosFCache(), conv)));
 		service.setHandler(config.getPositionsFUT(),
-			new MirrorTableHandler(
-				new PositionsFGateway(cache.getPositionsFCache(), conv)));
+			new TableHandler(
+				new FortsPositionsGateway(cache.getPositionsFCache(), conv)));
 		service.setHandler(config.getStopOrders(),
-			new MirrorTableHandler(
+			new TableHandler(
 				new StopOrdersGateway(cache.getStopOrdersCache(), conv)));
 		return service;
 	}

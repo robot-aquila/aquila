@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
+import ru.prolib.aquila.quik.assembler.cache.PortfolioEntry;
+import ru.prolib.aquila.quik.assembler.cache.PositionEntry;
+import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
@@ -272,7 +276,7 @@ public class AssemblerMidLvl implements Starter {
 	 * <p>
 	 * @param entry кэш-запись
 	 */
-	public void updatePortfolioFORTS(PortfolioFCache entry) {
+	public void updatePortfolioFORTS(PortfolioEntry entry) {
 		try {
 			Account account = new Account(entry.getFirmId(),
 					entry.getAccountCode(), entry.getAccountCode());
@@ -305,7 +309,7 @@ public class AssemblerMidLvl implements Starter {
 	 * <p>
 	 * @param entry кэш-запись
 	 */
-	public void updateSecurity(SecurityCache entry) {
+	public void updateSecurity(SecurityEntry entry) {
 		try {
 			SecurityDescriptor descr = entry.getDescriptor();
 			EditableSecurity security = null;
@@ -349,7 +353,7 @@ public class AssemblerMidLvl implements Starter {
 	 * <p>
 	 * @param entry кэш-запись
 	 */
-	public void updatePositionFORTS(PositionFCache entry) {
+	public void updatePositionFORTS(PositionEntry entry) {
 		try {
 			Account account = new Account(entry.getFirmId(),
 					entry.getAccountCode(), entry.getAccountCode());

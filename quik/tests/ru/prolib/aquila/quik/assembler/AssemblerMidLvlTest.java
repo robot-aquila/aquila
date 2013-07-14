@@ -12,6 +12,11 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
+import ru.prolib.aquila.quik.assembler.cache.CacheBuilder;
+import ru.prolib.aquila.quik.assembler.cache.PortfolioEntry;
+import ru.prolib.aquila.quik.assembler.cache.PositionEntry;
+import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
 import ru.prolib.aquila.quik.dde.*;
 
 public class AssemblerMidLvlTest {
@@ -26,11 +31,11 @@ public class AssemblerMidLvlTest {
 	private OrderCache entryOrder;
 	private StopOrderCache entryStopOrder;
 	private EditablePortfolio portfolio;
-	private PortfolioFCache entryPortF;
+	private PortfolioEntry entryPortF;
 	private EditableSecurity security;
-	private SecurityCache entrySec;
+	private SecurityEntry entrySec;
 	private EditablePosition position;
-	private PositionFCache entryPosF;
+	private PositionEntry entryPosF;
 	private AssemblerMidLvl middle;
 
 	@BeforeClass
@@ -55,12 +60,12 @@ public class AssemblerMidLvlTest {
 		portfolio = control.createMock(EditablePortfolio.class);
 		security = control.createMock(EditableSecurity.class);
 		position = control.createMock(EditablePosition.class);
-		entryPortF = new PortfolioFCache("eqe01","SPBFUT",100.0d,80.0d,-10.0d);
-		entrySec = new SecurityCache(10, 150000.0d, 140000.0d,
+		entryPortF = new PortfolioEntry("eqe01","SPBFUT",100.0d,80.0d,-10.0d);
+		entrySec = new SecurityEntry(10, 150000.0d, 140000.0d,
 				6.2188d, 10.0d, 0, 143870.0d, 151000.0d, // open
 				150900.0d, "RTS-6.13", "RIM3", 143800.0d, 143900.0, // bid
 				151500.0d, 143810.0d, descr);
-		entryPosF = new PositionFCache("eqe01","SPBFUT","RIM3", 10L, 0L, 10.0d);
+		entryPosF = new PositionEntry("eqe01","SPBFUT","RIM3", 10L, 0L, 10.0d);
 		middle = new AssemblerMidLvl(terminal, cache, low);
 	}
 	

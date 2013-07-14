@@ -5,6 +5,8 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
+import ru.prolib.aquila.quik.assembler.cache.CacheBuilder;
 import ru.prolib.aquila.quik.dde.*;
 
 public class AssemblerBuilderTest {

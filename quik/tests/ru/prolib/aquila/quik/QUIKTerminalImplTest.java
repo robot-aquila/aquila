@@ -7,7 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
-import ru.prolib.aquila.quik.dde.Cache;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 public class QUIKTerminalImplTest {
@@ -34,7 +34,7 @@ public class QUIKTerminalImplTest {
 		expect(locator.getDdeCache()).andReturn(cache);
 		control.replay();
 		
-		assertSame(cache, decorator.getDdeCache());
+		assertSame(cache, decorator.getDataCache());
 		
 		control.verify();
 	}

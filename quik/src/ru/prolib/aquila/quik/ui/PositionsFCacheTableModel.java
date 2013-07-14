@@ -1,6 +1,7 @@
 package ru.prolib.aquila.quik.ui;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.quik.assembler.cache.FortsPositionsCache;
 import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.ui.ClassLabels;
 import ru.prolib.aquila.ui.table.Columns;
@@ -13,10 +14,10 @@ public class PositionsFCacheTableModel extends TableModel
 	implements EventListener
 {
 	private static final long serialVersionUID = 3346874631502525141L;
-	private final PositionsFCache cache;
+	private final FortsPositionsCache cache;
 
 	public PositionsFCacheTableModel(ClassLabels labels, Columns columns,
-			PositionsFCache cache)
+			FortsPositionsCache cache)
 	{
 		super(labels, columns);
 		this.cache = cache;

@@ -1,7 +1,7 @@
 package ru.prolib.aquila.quik;
 
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.quik.dde.Cache;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
 
 /**
  * Публичный интерфейс терминала QUIK.
@@ -12,10 +12,10 @@ import ru.prolib.aquila.quik.dde.Cache;
 public interface QUIKTerminal extends Terminal {
 	
 	/**
-	 * Получить кэш DDE.
+	 * Получить фасад кэша данных.
 	 * <p>
-	 * @return кэш DDE
+	 * @return кэш данных
 	 */
-	public Cache getDdeCache();
+	public Cache getDataCache();
 
 }

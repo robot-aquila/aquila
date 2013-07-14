@@ -12,6 +12,11 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
+import ru.prolib.aquila.quik.assembler.cache.CacheBuilder;
+import ru.prolib.aquila.quik.assembler.cache.PortfolioEntry;
+import ru.prolib.aquila.quik.assembler.cache.PositionEntry;
+import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
 import ru.prolib.aquila.quik.dde.*;
 
 public class AssemblerHighLvlTest {
@@ -118,10 +123,10 @@ public class AssemblerHighLvlTest {
 	
 	@Test
 	public void testAdjustSecurities() throws Exception {
-		SecurityCache c1 = control.createMock(SecurityCache.class),
-			c2 = control.createMock(SecurityCache.class),
-			c3 = control.createMock(SecurityCache.class);
-		List<SecurityCache> list = new Vector<SecurityCache>();
+		SecurityEntry c1 = control.createMock(SecurityEntry.class),
+			c2 = control.createMock(SecurityEntry.class),
+			c3 = control.createMock(SecurityEntry.class);
+		List<SecurityEntry> list = new Vector<SecurityEntry>();
 		list.add(c1);
 		list.add(c2);
 		list.add(c3);
@@ -138,10 +143,10 @@ public class AssemblerHighLvlTest {
 	
 	@Test
 	public void testAdjustPortfolios() throws Exception {
-		PortfolioFCache c1 = control.createMock(PortfolioFCache.class),
-			c2 = control.createMock(PortfolioFCache.class),
-			c3 = control.createMock(PortfolioFCache.class);
-		List<PortfolioFCache> list = new Vector<PortfolioFCache>();
+		PortfolioEntry c1 = control.createMock(PortfolioEntry.class),
+			c2 = control.createMock(PortfolioEntry.class),
+			c3 = control.createMock(PortfolioEntry.class);
+		List<PortfolioEntry> list = new Vector<PortfolioEntry>();
 		list.add(c1);
 		list.add(c2);
 		list.add(c3);
@@ -158,10 +163,10 @@ public class AssemblerHighLvlTest {
 	
 	@Test
 	public void testAdjustPositions() throws Exception {
-		PositionFCache c1 = control.createMock(PositionFCache.class),
-			c2 = control.createMock(PositionFCache.class),
-			c3 = control.createMock(PositionFCache.class);
-		List<PositionFCache> list = new Vector<PositionFCache>();
+		PositionEntry c1 = control.createMock(PositionEntry.class),
+			c2 = control.createMock(PositionEntry.class),
+			c3 = control.createMock(PositionEntry.class);
+		List<PositionEntry> list = new Vector<PositionEntry>();
 		list.add(c1);
 		list.add(c2);
 		list.add(c3);

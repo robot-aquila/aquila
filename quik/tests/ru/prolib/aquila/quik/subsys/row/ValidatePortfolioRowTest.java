@@ -9,6 +9,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
 import ru.prolib.aquila.quik.dde.*;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 

@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
+import ru.prolib.aquila.quik.assembler.cache.PortfolioEntry;
+import ru.prolib.aquila.quik.assembler.cache.PositionEntry;
+import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
@@ -108,7 +112,7 @@ class AssemblerHighLvl implements Starter {
 	 */
 	public void adjustSecurities() {
 		logger.debug("Adjust securities");
-		for ( SecurityCache entry : cache.getAllSecurities() ) {
+		for ( SecurityEntry entry : cache.getAllSecurities() ) {
 			middle.updateSecurity(entry);
 		}
 	}
@@ -118,7 +122,7 @@ class AssemblerHighLvl implements Starter {
 	 */
 	public void adjustPortfolios() {
 		logger.debug("Adjust portfolios");
-		for ( PortfolioFCache entry : cache.getAllPortfoliosF() ) {
+		for ( PortfolioEntry entry : cache.getAllPortfoliosF() ) {
 			middle.updatePortfolioFORTS(entry);
 		}
 	}
@@ -128,7 +132,7 @@ class AssemblerHighLvl implements Starter {
 	 */
 	public void adjustPositions() {
 		logger.debug("Adjust positions");
-		for ( PositionFCache entry : cache.getAllPositionsF() ) {
+		for ( PositionEntry entry : cache.getAllPositionsF() ) {
 			middle.updatePositionFORTS(entry);
 		}
 	}

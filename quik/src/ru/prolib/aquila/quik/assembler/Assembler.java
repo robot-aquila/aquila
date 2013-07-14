@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.quik.assembler.cache.*;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
@@ -140,6 +141,18 @@ public class Assembler implements Starter, EventListener {
 	
 	private void err(String msg) {
 		logger.error(msg);
+	}
+	
+	public void assemble(PortfolioEntry entry) {
+		
+	}
+	
+	public void assemble(PositionEntry entry) {
+		
+	}
+	
+	public void assemble(SecurityEntry entry) {
+		
 	}
 
 }

@@ -1,7 +1,7 @@
 package ru.prolib.aquila.quik;
 
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
-import ru.prolib.aquila.quik.dde.Cache;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
 import ru.prolib.aquila.quik.subsys.QUIKServiceLocator;
 
 /**
@@ -29,7 +29,7 @@ public class QUIKTerminalImpl extends TerminalDecorator
 	}
 
 	@Override
-	public synchronized Cache getDdeCache() {
+	public synchronized Cache getDataCache() {
 		return locator.getDdeCache();
 	}
 

@@ -56,13 +56,12 @@ public class CacheWindow {
 		window.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) { onHide(); }
 		});
-		TableBuilder builder = new TableBuilder(labels, terminal.getDdeCache());
+		TableBuilder builder = new TableBuilder(labels, terminal.getDataCache());
 		addTab(builder.createOrdersCacheTable(), TEXT_TAB_CACHE_ORDERS);
 		addTab(builder.createTradesCacheTable(), TEXT_TAB_CACHE_TRADES);
 		addTab(builder.createSecuritiesCacheTable(), TEXT_TAB_CACHE_SECURITIES);
 		addTab(builder.createPortfoliosFortsCacheTable(),TEXT_TAB_CACHE_PORTS_F);
 		addTab(builder.createPositionsFortsCacheTable(), TEXT_TAB_CACHE_POSS_F);
-		addTab(builder.createStopOrdersCacheTable(),TEXT_TAB_CACHE_STOP_ORDERS);
 
 		window.add(tabbedPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));

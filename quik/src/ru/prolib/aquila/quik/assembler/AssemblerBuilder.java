@@ -1,6 +1,7 @@
 package ru.prolib.aquila.quik.assembler;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.quik.assembler.cache.Cache;
 import ru.prolib.aquila.quik.dde.*;
 
 /**
