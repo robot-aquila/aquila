@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.Date;
 import java.util.List;
+import java.util.TimerTask;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
@@ -658,12 +659,12 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Counter getOrderNumerator() {
+	final public Counter getOrderNumerator() {
 		return orderNumerator;
 	}
 
 	@Override
-	public Order createOrder(Account account, Direction dir,
+	final public Order createOrder(Account account, Direction dir,
 			Security security, long qty, double price)
 	{
 		EditableOrder order = createOrder();
@@ -687,7 +688,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public Order createOrder(Account account, Direction dir,
+	final public Order createOrder(Account account, Direction dir,
 			Security security, long qty)
 	{
 		EditableOrder order = createOrder();
@@ -715,7 +716,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EventType OnRequestSecurityError() {
+	final public EventType OnRequestSecurityError() {
 		return onReqSecurityError;
 	}
 
@@ -725,6 +726,40 @@ public class TerminalImpl implements EditableTerminal {
 	{
 		Object args[] = { descr, errorCode, errorMsg };
 		logger.error("TODO: fire request {} error: [{}] {}", args);
+	}
+
+	@Override
+	final public void schedule(TimerTask task, Date time) {
+		scheduler.schedule(task, time);
+	}
+
+	@Override
+	final public void schedule(TimerTask task, Date firstTime, long period) {
+		scheduler.schedule(task, firstTime, period);
+	}
+
+	@Override
+	final public void schedule(TimerTask task, long delay) {
+		scheduler.schedule(task, delay);
+	}
+
+	@Override
+	final public void schedule(TimerTask task, long delay, long period) {
+		scheduler.schedule(task, delay, period);
+	}
+
+	@Override
+	final public
+		void scheduleAtFixedRate(TimerTask task, Date firstTime, long period)
+	{
+		scheduler.scheduleAtFixedRate(task, firstTime, period);		
+	}
+
+	@Override
+	final public
+		void scheduleAtFixedRate(TimerTask task, long delay, long period)
+	{
+		scheduler.scheduleAtFixedRate(task, delay, period);
 	}
 
 }

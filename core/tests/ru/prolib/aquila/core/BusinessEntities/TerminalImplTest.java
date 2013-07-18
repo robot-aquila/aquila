@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimerTask;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -41,6 +42,8 @@ public class TerminalImplTest {
 	private EditableOrder order;
 	private Security security;
 	private Scheduler scheduler;
+	private TimerTask task;
+	private Date time = new Date();
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -54,6 +57,7 @@ public class TerminalImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
+		task = control.createMock(TimerTask.class);
 		controller = control.createMock(TerminalController.class);
 		starter = control.createMock(Starter.class);
 		securities = control.createMock(EditableSecurities.class);
@@ -1090,6 +1094,66 @@ public class TerminalImplTest {
 		
 		assertSame(order,
 			terminal.createOrder(account, Direction.SELL, security, 10L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSchedule_TD() throws Exception {
+		scheduler.schedule(task, time);
+		control.replay();
+		
+		terminal.schedule(task, time);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSchedule_TDL() throws Exception {
+		scheduler.schedule(task, time, 215L);
+		control.replay();
+		
+		terminal.schedule(task, time, 215L);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSchedule_TL() throws Exception {
+		scheduler.schedule(task, 220L);
+		control.replay();
+		
+		terminal.schedule(task, 220L);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSchedule_TLL() throws Exception {
+		scheduler.schedule(task, 118L, 215L);
+		control.replay();
+		
+		terminal.schedule(task, 118L, 215L);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testScheduleAtFixedRate_TDL() throws Exception {
+		scheduler.scheduleAtFixedRate(task, time, 302L);
+		control.replay();
+		
+		terminal.scheduleAtFixedRate(task, time, 302L);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testScheduleAtFixedRate_TLL() throws Exception {
+		scheduler.scheduleAtFixedRate(task, 80L, 94L);
+		control.replay();
+		
+		terminal.scheduleAtFixedRate(task, 80L, 94L);
 		
 		control.verify();
 	}
