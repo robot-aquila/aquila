@@ -1158,4 +1158,14 @@ public class TerminalImplTest {
 		control.verify();
 	}
 	
+	@Test
+	public void testCancel() throws Exception {
+		expect(scheduler.cancel(task)).andReturn(true);
+		control.replay();
+		
+		assertTrue(terminal.cancel(task));
+		
+		control.verify();
+	}
+	
 }

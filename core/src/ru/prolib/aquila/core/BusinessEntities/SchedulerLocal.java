@@ -70,4 +70,9 @@ public class SchedulerLocal implements Scheduler {
 		timer.scheduleAtFixedRate(task, delay, period);
 	}
 
+	@Override
+	public boolean cancel(TimerTask task) {
+		return task.cancel();
+	}
+
 }

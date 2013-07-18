@@ -762,4 +762,9 @@ public class TerminalImpl implements EditableTerminal {
 		scheduler.scheduleAtFixedRate(task, delay, period);
 	}
 
+	@Override
+	final public boolean cancel(TimerTask task) {
+		return scheduler.cancel(task);
+	}
+
 }

@@ -102,5 +102,15 @@ public class SchedulerLocalTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testCancel() throws Exception {
+		expect(task.cancel()).andReturn(true);
+		control.replay();
+		
+		assertTrue(scheduler.cancel(task));
+		
+		control.verify();
+	}
 
 }
