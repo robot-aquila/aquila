@@ -41,7 +41,7 @@ public class OrderSystemInfoTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Transaction trans = info.getRegisteration();
+		Transaction trans = info.getRegistration();
 		synchronized ( trans ) {
 			trans.setRequest(regReq);
 			trans.setRequestTime(regReqTime);
@@ -92,7 +92,7 @@ public class OrderSystemInfoTest {
 		OrderSystemInfo x, found = null;
 		do {
 			x = new OrderSystemInfo();
-			trans = x.getRegisteration();
+			trans = x.getRegistration();
 			trans.setRequest(vRegReq.get());
 			trans.setRequestTime(vRegReqTime.get());
 			trans.setResponse(vRegResp.get());
@@ -113,7 +113,7 @@ public class OrderSystemInfoTest {
 		trans.setRequestTime(regReqTime);
 		trans.setResponse(regResp);
 		trans.setResponseTime(regRespTime);
-		assertEquals(trans, found.getRegisteration());
+		assertEquals(trans, found.getRegistration());
 		trans = new Transaction();
 		trans.setRequest(killReq);
 		trans.setRequestTime(killReqTime);

@@ -629,7 +629,7 @@ public class OrderImplTest {
 		order.setQtyRest(190L);
 		order.setExecutedVolume(249400.00d);
 		order.setAvgExecutedPrice(182.34d);
-		order.getSystemInfo().getRegisteration().setRequest(new Object());
+		order.getSystemInfo().getRegistration().setRequest(new Object());
 		
 		double aprob = 0.4; // Probability of additional variant
 		Random rnd = new Random();
@@ -728,7 +728,7 @@ public class OrderImplTest {
 			.add(182.34d)
 			.add(202.15d);
 		Variant<Object> vRegReq = new Variant<Object>(vAvgPr)
-			.add(order.getSystemInfo().getRegisteration().getRequest())
+			.add(order.getSystemInfo().getRegistration().getRequest())
 			.add(new Object());
 		Variant<?> iterator = vRegReq;
 		int foundCnt = 0;
@@ -763,7 +763,7 @@ public class OrderImplTest {
 			x.setQtyRest(vQtyRst.get());
 			x.setAvgExecutedPrice(vAvgPr.get());
 			x.setExecutedVolume(vExecVol.get());
-			x.getSystemInfo().getRegisteration().setRequest(vRegReq.get());
+			x.getSystemInfo().getRegistration().setRequest(vRegReq.get());
 			if ( order.equals(x) ) {
 				foundCnt ++;
 				found = x;

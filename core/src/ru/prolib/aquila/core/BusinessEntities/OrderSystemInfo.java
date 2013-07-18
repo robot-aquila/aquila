@@ -19,7 +19,7 @@ public class OrderSystemInfo {
 	 * <p>
 	 * @return транзакция
 	 */
-	public Transaction getRegisteration() {
+	public Transaction getRegistration() {
 		return registration;
 	}
 	
