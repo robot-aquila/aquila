@@ -1,10 +1,9 @@
 package ru.prolib.aquila.quik.assembler.cache;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
- * Конструктор кэша.
+ * Конструктор кэша данных.
  */
 public class CacheBuilder {
 	
@@ -13,14 +12,13 @@ public class CacheBuilder {
 	}
 	
 	/**
-	 * Создать DDE-кэш для терминала.
+	 * Создать DDE-кэш.
 	 * <p>
-	 * @param terminal терминал
+	 * @param es фасад событийной системы
 	 * @return кэш
 	 */
-	public Cache createCache(EditableTerminal terminal) {
-		EventDispatcher d = terminal.getEventSystem()
-			.createEventDispatcher("Cache");
+	public Cache createCache(EventSystem es) {
+		EventDispatcher d = es.createEventDispatcher("Cache");
 		return new Cache(
 				new DescriptorsCache(d, d.createType("Descriptors")),
 				new PositionsCache(d, d.createType("Positions")),

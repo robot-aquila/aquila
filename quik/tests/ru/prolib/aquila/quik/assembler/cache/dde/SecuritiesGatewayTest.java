@@ -2,10 +2,12 @@ package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.easymock.IMocksControl;
 import org.junit.*;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -162,6 +164,11 @@ public class SecuritiesGatewayTest {
 		assertEquals(1, foundCnt);
 		assertSame(converter, found.getRowDataConverter());
 		assertSame(asm, found.getAssembler());
+	}
+	
+	@Test
+	public void testShouldProcessRowByRow() throws Exception {
+		assertTrue(gateway.shouldProcessRowByRow(null, null));
 	}
 
 }

@@ -63,5 +63,17 @@ public class TableMetaTest {
 		assertTrue(meta.equals(new TableMeta(new DDETableRange(1, 1, 20, 10))));
 		assertFalse(meta.equals(new TableMeta(new DDETableRange(1, 1, 1, 10))));
 	}
+	
+	@Test
+	public void testGetDataRowCount() throws Exception {
+		meta = new TableMeta(new DDETableRange(1, 1, 20, 10));
+		assertEquals(19, meta.getDataRowCount());
+		meta = new TableMeta(new DDETableRange(1, 1, 1, 10));
+		assertEquals(0, meta.getDataRowCount());
+		meta = new TableMeta(new DDETableRange(2, 1, 2, 10));
+		assertEquals(1, meta.getDataRowCount());
+		meta = new TableMeta(new DDETableRange(20, 1, 20, 10));
+		assertEquals(1, meta.getDataRowCount());
+	}
 
 }

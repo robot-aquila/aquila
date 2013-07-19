@@ -111,10 +111,23 @@ public class TableHelperTest {
 	}
 	
 	@Test
-	public void testProcess() throws Exception {
+	public void testProcess_WholeRowSet() throws Exception {
+		TableMeta meta = new TableMeta(new DDETableRange(1, 1, 4, 10));
+		RowSet rs = control.createMock(RowSet.class);
+		expect(gateway.shouldProcessRowByRow(meta, rs)).andReturn(false);
+		control.replay();
+		
+		helper.process(meta, rs);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testProcess_RowByRow() throws Exception {
 		TableMeta meta = new TableMeta(new DDETableRange(1, 1, 4, 10));
 		RowSet rs = control.createMock(RowSet.class);
 		boolean fix[] = { true, false, true, true, true, false, false, true };
+		expect(gateway.shouldProcessRowByRow(meta, rs)).andReturn(true);
 		for ( int i = 0; i < fix.length; i ++ ) {
 			expect(rs.next()).andReturn(true);
 			expect(gateway.shouldProcess(same(rs))).andReturn(fix[i]);

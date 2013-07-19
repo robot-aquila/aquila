@@ -8,9 +8,7 @@ import ru.prolib.aquila.dde.utils.table.*;
 /**
  * Типовой обработчик таблицы.
  * <p>
- * Применяется для тех таблиц, построчная обработка которых выполняется
- * непосредственно в момент получения данных: инструменты, портфели, позиции
- * и т.п.
+ * Обозначает структуру процесса обработки таблицы.
  */
 public class TableHandler implements DDETableHandler {
 	private final TableHelper helper;
@@ -18,7 +16,7 @@ public class TableHandler implements DDETableHandler {
 	/**
 	 * Служебный конструктор.
 	 * <p>
-	 * Только для тестирования.
+	 * Только для тестов.
 	 * <p>
 	 * @param helper помощник обработчика таблицы
 	 */

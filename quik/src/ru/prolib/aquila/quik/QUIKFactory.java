@@ -4,28 +4,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.dde.*;
-import ru.prolib.aquila.dde.utils.*;
-import ru.prolib.aquila.quik.api.*;
-import ru.prolib.aquila.quik.assembler.Assembler;
-import ru.prolib.aquila.quik.assembler.AssemblerBuilder;
-import ru.prolib.aquila.quik.assembler.cache.Cache;
-import ru.prolib.aquila.quik.assembler.cache.dde.FortsPortfoliosGateway;
-import ru.prolib.aquila.quik.assembler.cache.dde.FortsPositionsGateway;
-import ru.prolib.aquila.quik.assembler.cache.dde.QUIKDDEService;
-import ru.prolib.aquila.quik.assembler.cache.dde.RowDataConverter;
-import ru.prolib.aquila.quik.assembler.cache.dde.SecuritiesGateway;
-import ru.prolib.aquila.quik.assembler.cache.dde.TableHandler;
-import ru.prolib.aquila.quik.dde.*;
-import ru.prolib.aquila.quik.subsys.*;
-import ru.prolib.aquila.quik.subsys.row.RowAdapters;
-import ru.prolib.aquila.t2q.*;
+import ru.prolib.aquila.quik.assembler.*;
+import ru.prolib.aquila.quik.assembler.cache.dde.*;
 
 /**
  * Фабрика QUIK-терминала.
@@ -34,16 +18,17 @@ import ru.prolib.aquila.t2q.*;
  * $Id: QUIKFactory.java 548 2013-02-27 03:01:50Z whirlwind $
  */
 public class QUIKFactory implements TerminalFactory {
-	public static final String DEFAULT_DDE_SERVER;
-	public static final String DEFAULT_T2Q_FACTORY;
-	
-	@SuppressWarnings("unused")
-	private static final Logger logger;
+	private static final String DEFAULT_DDE_SERVER;
+	/**
+	 * Нумератор экземпляров.
+	 * <p>
+	 * Номер экземпляра добавляется в конец идентификатора очереди.
+	 */
+	private static final Counter id = new SimpleCounter();
+	private static DDEServer server;
 	
 	static {
 		DEFAULT_DDE_SERVER = "ru.prolib.aquila.dde.jddesvr.JddesvrServer";
-		DEFAULT_T2Q_FACTORY = "ru.prolib.aquila.t2q.jqt.JQTServiceFactory";
-		logger = LoggerFactory.getLogger(QUIKFactory.class);
 	}
 	
 	public QUIKFactory() {
@@ -51,27 +36,34 @@ public class QUIKFactory implements TerminalFactory {
 	}
 	
 	/**
-	 * Создать экземпляр DDE-сервера по-умолчанию.
+	 * Получить экземпляр DDE-сервера.
+	 * <p>
+	 * Создает, если еще не создан, и возвращает дефолтную реализацию DDE
+	 * сервера. В случае инстанцирования, выполняется попытка запуска сервера.
+	 * После запуска сервер будет выполнять работу до завершения работы
+	 * программы. Это так же означает, что из-за особенностей WinAPI DDE вы не
+	 * сможете запустить никакую иную реализацию DDE сервера. 
 	 * <p>
 	 * @return DDE-сервер
 	 * @throws Exception ошибка инстанцирования DDE-сервера
 	 */
-	public DDEServer createDefaultDDEServer() throws Exception {
-		return (DDEServer) Class.forName(DEFAULT_DDE_SERVER)
-			.getMethod("getInstance", new Class[] { })
-			.invoke(null, new Object[] { });
+	public static synchronized DDEServer getDDEServer() throws Exception {
+		if ( server == null ) {
+			server = (DDEServer) Class.forName(DEFAULT_DDE_SERVER)
+				.getMethod("getInstance", new Class[] { })
+				.invoke(null, new Object[] { });
+			server.start();
+		}
+		return server; 
 	}
 	
 	/**
-	 * Создать фабрику сервиса транзакций по-умолчанию.
+	 * Получить идентификатор для следующего экземпляра терминала.
 	 * <p>
-	 * @return фабрика сервиса транзакций
-	 * @throws Exception ошибка инстанцирования
+	 * @return идентификатор терминала
 	 */
-	public T2QServiceFactory createDefaultT2QServiceFactory() throws Exception {
-		return (T2QServiceFactory)Class.forName(DEFAULT_T2Q_FACTORY)
-			.getConstructor(new Class[] { })
-			.newInstance(new Object[] { });
+	private static final String getNextId() {
+		return "QUIK" + id.incrementAndGet();
 	}
 	
 	/**
@@ -109,7 +101,7 @@ public class QUIKFactory implements TerminalFactory {
 	 * @throws Exception ошибка инстанцирования
 	 */
 	@Override
-	public QUIKTerminal createTerminal(Properties props) throws Exception {
+	public Terminal createTerminal(Properties props) throws Exception {
 		QUIKConfigImpl config = new QUIKConfigImpl();
 		config.allDeals = props.getProperty("deals", "deals");
 		config.orders = props.getProperty("orders", "orders");
@@ -133,164 +125,37 @@ public class QUIKFactory implements TerminalFactory {
 	/**
 	 * Создать терминал.
 	 * <p>
-	 * Создает терминал с DDE-сервером и фабрикой сервиса транзакций
-	 * по-умолчанию.
+	 * Создает терминал с DDE-сервером по-умолчанию.
 	 * <p>
 	 * @param config конфигурация терминала
 	 * @return терминал
 	 * @throws Exception ошибка инстанцирования
 	 */
-	public QUIKTerminal createTerminal(QUIKConfig config) throws Exception {
-		return createTerminal(config, createDefaultDDEServer(), true,
-				createDefaultT2QServiceFactory());
+	public Terminal createTerminal(QUIKConfig config) throws Exception {
+		return createTerminal(config, getDDEServer());
 	}
 	
 	/**
 	 * Создать терминал.
 	 * <p>
-	 * Данный метод подразумевает, что DDE-сервер управляется извне терминала
-	 * (внешним кодом). Указанный сервер не добавляется в цепочку запуска
-	 * терминала. 
+	 * Данный метод подразумевает, что DDE-сервер управляется
+	 * извне терминала (внешним кодом).
 	 * <p>
 	 * @param config конфигурация терминала
 	 * @param server DDE-сервер
-	 * @param tsf фабрика сервиса транзакций
 	 * @return терминал
 	 */
-	public QUIKTerminal createTerminal(QUIKConfig config, DDEServer server,
-			T2QServiceFactory tsf)
-	{
-		return createTerminal(config, server, false, tsf);
+	public Terminal createTerminal(QUIKConfig config, final DDEServer server) {
+		QUIKEditableTerminal terminal;
+		terminal = new QUIKTerminalBuilder().createTerminal(getNextId());
+		StarterQueue starter = (StarterQueue) terminal.getStarter();
+		Assembler asm = new Assembler(terminal);
+		terminal.getClient().setMainHandler(new MainHandler(terminal, asm));
+		terminal.setOrderProcessorInstance(new QUIKOrderProcessor(terminal));
+		starter.add(asm);
+		starter.add(new QUIKDDEStarter(config, asm, server));
+		starter.add(new ConnectionHandler(terminal, config));
+		return terminal;
 	}
-	
-	/**
-	 * Создать терминал.
-	 * <p>
-	 * Данный метод позволяет явно указывать, следует ли выполнять запуск
-	 * указанного сервера при запуске терминала.
-	 * <p>
-	 * @param config конфигурация терминала
-	 * @param server DDE-сервер
-	 * @param startServer true - запускать, false - не запускать сервер
-	 * @param tsf фабрика сервиса транзакций
-	 * @return терминал
-	 */
-	public QUIKTerminal createTerminal(QUIKConfig config,
-			final DDEServer server, boolean startServer,
-			T2QServiceFactory tsf)
-	{
-		QUIKTerminalImpl decorator = new QUIKTerminalImpl();
-		QUIKServiceLocator locator = new QUIKServiceLocator(decorator);
-		decorator.setServiceLocator(locator);
-		locator.setConfig(config);
-		EventSystem es = locator.getEventSystem();
-		QUIKCompFactory fc = locator.getCompFactory();
-		StarterQueue starter = new StarterQueue();
-		starter.add(new EventQueueStarter(es.getEventQueue(), 10000));
-		
-		// Make terminal instance
-		EventDispatcher dispatcher = es.createEventDispatcher("QUIKTerminal");
-		final EditableTerminal terminal = new TerminalImpl(es, starter,
-				fc.createSecurities(),
-				fc.createPortfolios(), fc.createOrders(), fc.createOrders(),
-				dispatcher,
-				es.createGenericType(dispatcher, "OnConnected"),
-				es.createGenericType(dispatcher, "OnDisconnected"),
-				es.createGenericType(dispatcher, "OnStarted"),
-				es.createGenericType(dispatcher, "OnStopped"),
-				es.createGenericType(dispatcher, "OnPanic"));
-		terminal.setOrderProcessorInstance(locator.getOrderProcessor());
-		decorator.setTerminal(terminal);
-		
-		// First, start new assember service
-		starter.add(new AssemblerBuilder()
-			.createAssembler(terminal, locator.getDdeCache()));
-		// Old DDE table listeners starts before all
-		QUIKDDEService service = createDdeService(locator, starter);
-		// DDE server starts after listeners
-		if ( startServer ) starter.add(new DDEServerStarter(server));
-		// DDE service starts after server started
-		starter.add(new DDEServiceStarter(server, service));
-		
-		// QUIK API
-		if ( ! config.skipTRANS2QUIK() ) {
-			ApiServiceHandler apiHandler = createApiHandler(es);
-			T2QService quikApiService = tsf.createService(apiHandler);
-			ApiService api = new ApiService(quikApiService, apiHandler);
-			api.OnConnStatus()
-				.addListener(new ConnectionStatusHandler(terminal));
-			locator.setApi(api);
-			starter.add(new QUIKConnectionKeeper(locator,
-				new T2QServiceStarter(quikApiService, config.getQUIKPath())));
-		}
-
-		if ( config.skipTRANS2QUIK() ) {
-			terminal.OnStarted().addListener(new EventListener() {
-				@Override
-				public void onEvent(Event event) {
-					terminal.fireTerminalConnectedEvent();
-				}
-			});
-		}
-		
-		return decorator;
-	}
-	
-	/**
-	 * Создать DDE-сервис обработки импорта данных.
-	 * <p>
-	 * Стартер необходим для запуска старого сервиса.
-	 * Убрать после перехода на кэш.
-	 * <p>
-	 * @param locator сервис-локатор
-	 * @param starter стартер
-	 * @return сервис DDE
-	 */
-	private QUIKDDEService
-		createDdeService(QUIKServiceLocator locator, StarterQueue starter)
-	{
-		QUIKConfig config = locator.getConfig();
-		// Current implementation still in use
-		DDEObservableServiceImpl observService = DDEObservableServiceImpl
-			.createService(config.getServiceName(),
-					locator.getEventSystem());
-		starter.add(new QUIKTableListenerStarter(locator, observService));
-		
-		// Start prototype of DDE cache
-		QUIKDDEService service = new QUIKDDEService(config.getServiceName(),
-				locator.getTerminal(), observService);
-		RowDataConverter conv = new RowDataConverter(config.getDateFormat(),
-				config.getTimeFormat());
-		Cache cache = locator.getDdeCache();
-		service.setHandler(config.getOrders(),
-			new TableHandler(
-				new OrdersGateway(cache.getOrdersCache(), conv)));
-		service.setHandler(config.getTrades(),
-			new TableHandler(
-				new TradesGateway(cache.getTradesCache(), conv)));
-		service.setHandler(config.getSecurities(),
-			new TableHandler(
-				new SecuritiesGateway(cache.getSecuritiesCache(), conv)));
-		service.setHandler(config.getPortfoliosFUT(),
-			new TableHandler(
-				new FortsPortfoliosGateway(cache.getPortfoliosFCache(), conv)));
-		service.setHandler(config.getPositionsFUT(),
-			new TableHandler(
-				new FortsPositionsGateway(cache.getPositionsFCache(), conv)));
-		service.setHandler(config.getStopOrders(),
-			new TableHandler(
-				new StopOrdersGateway(cache.getStopOrdersCache(), conv)));
-		return service;
-	}
-	
-	private ApiServiceHandler createApiHandler(EventSystem es) {
-		EventDispatcher dispatcher = es.createEventDispatcher("Api");
-		return new ApiServiceHandler(dispatcher,
-				new EventTypeMap<Long>(es, dispatcher),
-				es.createGenericType(dispatcher, "connect"),
-				es.createGenericType(dispatcher, "order"),
-				es.createGenericType(dispatcher, "trade"));
-	}
-
 
 }

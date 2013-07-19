@@ -244,5 +244,35 @@ public class RowDataConverterTest {
 		map.put("no", 24);
 		assertNull(converter.getStringMappedTo(row, "bakhta", map));
 	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(converter.equals(converter));
+		assertFalse(converter.equals(null));
+		assertFalse(converter.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		Variant<String> vDate = new Variant<String>()
+			.add("yyyy-MM-dd")
+			.add("dd.MM.yyyy");
+		Variant<String> vTime = new Variant<String>(vDate)
+			.add("HH:mm:ss")
+			.add("HHmmss");
+		Variant<?> iterator = vTime;
+		int foundCnt = 0;
+		RowDataConverter x, found = null;
+		do {
+			x = new RowDataConverter(vDate.get(), vTime.get());
+			if ( converter.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals("yyyy-MM-dd", found.getDateFormat());
+		assertEquals("HH:mm:ss", found.getTimeFormat());
+	}
 
 }

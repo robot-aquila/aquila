@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowSet;
 import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.cache.PositionEntry;
@@ -83,6 +84,11 @@ public class FortsPositionsGateway implements TableGateway {
 			.append(o.asm, asm)
 			.append(o.converter, converter)
 			.isEquals();
+	}
+
+	@Override
+	public boolean shouldProcessRowByRow(TableMeta meta, RowSet rs) throws DDEException {
+		return true;
 	}
 
 }

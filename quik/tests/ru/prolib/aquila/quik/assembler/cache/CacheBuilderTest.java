@@ -24,7 +24,7 @@ public class CacheBuilderTest {
 				new DescriptorsCache(d, d.createType("Descriptors")),
 				new PositionsCache(d, d.createType("Positions")),
 				new OrdersCache(d, d.createType("Orders")));
-		assertEquals(expected, builder.createCache(t1));
+		assertEquals(expected, builder.createCache(t1.getEventSystem()));
 	}
 
 }

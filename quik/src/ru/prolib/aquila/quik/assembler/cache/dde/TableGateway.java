@@ -1,6 +1,7 @@
 package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import ru.prolib.aquila.core.data.row.Row;
+import ru.prolib.aquila.core.data.row.RowSet;
 import ru.prolib.aquila.dde.DDEException;
 
 /**
@@ -39,5 +40,26 @@ public interface TableGateway {
 	 * @throws DDEException ошибка обработки ряда
 	 */
 	public void process(Row row) throws DDEException;
+	
+	/**
+	 * Проверить необходимость рядной обработки.
+	 * <p>
+	 * Данный метод позволяет в рамках шлюза определить необходимость обработки
+	 * данных таблицы ряз-за-рядом. Если на этапе приема данных необходимо
+	 * рассматривать входящие данные целиком, то это может сделано в данном
+	 * методе. Если подразумевается построчная обработка, то это должно быть
+	 * реализовано в методе {@link #process(Row)}, а данный вызов должен
+	 * завершиться положительным ответом. Если используюся оба способа, то при
+	 * выходе из метода необходимо гарантировать, что курсор набора установлен
+	 * на начало. Перед перебором рядов курсор не сбрасывается. 
+	 * <p>
+	 * @param meta дескриптор соответствующей области таблицы
+	 * @param rs набор рядов
+	 * @return true - должна быть выполнена рядная обработка, false - работа
+	 * с набором рядов завершена
+	 * @throws DDEException ошибка обработки ряда
+	 */
+	public boolean shouldProcessRowByRow(TableMeta meta, RowSet rs)
+		throws DDEException;
 
 }

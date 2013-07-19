@@ -17,13 +17,13 @@ import ru.prolib.aquila.dde.utils.table.*;
  */
 public class QUIKDDEService implements DDEService {
 	private final String name;
-	private final FirePanicEvent panic;
+	private final EditableTerminal terminal;
 	private final Map<String, DDETableHandler> handlers;
 	
-	public QUIKDDEService(String name, FirePanicEvent panic) {
+	public QUIKDDEService(String name, EditableTerminal terminal) {
 		super();
 		this.name = name;
-		this.panic = panic;
+		this.terminal = terminal;
 		handlers = new Hashtable<String, DDETableHandler>();
 	}
 
@@ -44,14 +44,14 @@ public class QUIKDDEService implements DDEService {
 	}
 	
 	/**
-	 * Получить обработчик критического состояния.
+	 * Получить терминал.
 	 * <p> 
 	 * Только для тестов.
 	 * <p>
-	 * @return обработчик критического состояния
+	 * @return терминал
 	 */
-	FirePanicEvent getFirePanicEvent() {
-		return panic;
+	EditableTerminal getTerminal() {
+		return terminal;
 	}
 	
 	/**
@@ -61,14 +61,16 @@ public class QUIKDDEService implements DDEService {
 	 * @param handler обработчик таблицы
 	 * @return ссылка на самого себя
 	 */
-	public QUIKDDEService setHandler(String table, DDETableHandler handler) {
+	public synchronized
+		QUIKDDEService setHandler(String table, DDETableHandler handler)
+	{
 		handlers.put(table, handler);
 		return this;
 	}
 
 	@Override
 	public boolean onConnect(String topic) {
-		return handlers.containsKey(topic);
+		return getHandler(topic) != null;
 	}
 
 	@Override
@@ -93,12 +95,12 @@ public class QUIKDDEService implements DDEService {
 
 	@Override
 	public void onTable(DDETable table) {
-		DDETableHandler handler = handlers.get(table.getTopic());
+		DDETableHandler handler = getHandler(table.getTopic());
 		if ( handler != null ) {
 			try {
 				handler.handle(table);
 			} catch ( DDEException e ) {
-				panic.firePanicEvent(1, e.getMessage());
+				terminal.firePanicEvent(1, e.getMessage());
 				return;
 			}
 		}
@@ -119,10 +121,21 @@ public class QUIKDDEService implements DDEService {
 		}
 		QUIKDDEService o = (QUIKDDEService) other;
 		return new EqualsBuilder()
+			.appendSuper(terminal == o.terminal)
 			.append(name, o.name)
-			.append(panic, o.panic)
 			.append(handlers, o.handlers)
 			.isEquals();
+	}
+	
+	/**
+	 * Удалить все обработчики.
+	 */
+	public synchronized void clearHandlers() {
+		handlers.clear();
+	}
+	
+	synchronized DDETableHandler getHandler(String name) {
+		return handlers.get(name);
 	}
 
 }

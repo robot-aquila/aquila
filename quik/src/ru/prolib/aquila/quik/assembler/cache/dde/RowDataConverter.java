@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,14 @@ public class RowDataConverter {
 		this.dateFormat = dateFormat;
 		this.timeFormat = timeFormat;
 		fullTimeFormat = new SimpleDateFormat(dateFormat + " " + timeFormat);
+	}
+	
+	String getTimeFormat() {
+		return timeFormat;
+	}
+	
+	String getDateFormat() {
+		return dateFormat;
 	}
 	
 	/**
@@ -206,6 +215,21 @@ public class RowDataConverter {
 			return map.get(key);
 		}
 		throw new RowUnmappedValueException(elementId, key, map.keySet());
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != RowDataConverter.class ) {
+			return false;
+		}
+		RowDataConverter o = (RowDataConverter) other;
+		return new EqualsBuilder()
+			.append(o.dateFormat, dateFormat)
+			.append(o.timeFormat, timeFormat)
+			.isEquals();
 	}
 
 }

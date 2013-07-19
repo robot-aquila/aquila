@@ -18,6 +18,13 @@ import ru.prolib.aquila.dde.utils.table.XltItemFormatException;
  * Помощник обработчика таблицы.
  * <p>
  * Служебный класс, содержащий реализацию процедур обработки таблицы.
+ * Универсальная реализация, позволяющая организовать любую схему обработки
+ * набора рядов чере реализацию специфического шлюза. Может быть применен
+ * как для тех таблиц, построчная обработка которых выполняется
+ * непосредственно в момент получения данных (инструменты, портфели, позиции
+ * и т.п), так и для объемных таблиц (все сделки), которые доолжны быть
+ * помещены в очередь на обработку. В случае необходимости позволяет
+ * использовать смешанный подход.
  */
 class TableHelper {
 	private final TableGateway gateway;
@@ -144,12 +151,12 @@ class TableHelper {
 		if ( ! meta.hasDataRows() ) {
 			return;
 		}
-		int rowNumber = meta.getDataFirstRowNumber();
-		while ( rs.next() ) {
-			if ( gateway.shouldProcess(rs) ) {
-				gateway.process(rs);
-			}
-			rowNumber ++;
+		if ( gateway.shouldProcessRowByRow(meta, rs) ) {
+			while ( rs.next() ) {
+				if ( gateway.shouldProcess(rs) ) {
+					gateway.process(rs);
+				}
+			}			
 		}
 	}
 	

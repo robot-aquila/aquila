@@ -9,8 +9,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.data.row.Row;
-import ru.prolib.aquila.core.data.row.SimpleRow;
+import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.cache.PositionEntry;
@@ -100,6 +99,11 @@ public class FortsPositionsGatewayTest {
 		assertEquals(1, foundCnt);
 		assertSame(converter, found.getRowDataConverter());
 		assertSame(asm, found.getAssembler());
+	}
+	
+	@Test
+	public void testShouldProcessRowByRow() throws Exception {
+		assertTrue(gateway.shouldProcessRowByRow(null, null));
 	}
 
 }

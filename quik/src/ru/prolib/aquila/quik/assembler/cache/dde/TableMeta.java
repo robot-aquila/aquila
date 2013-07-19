@@ -73,5 +73,15 @@ public class TableMeta {
 			.append(range, o.range)
 			.isEquals();
 	}
+	
+	/**
+	 * Получить количество строк данных.
+	 * <p>
+	 * @return количество строк
+	 */
+	public int getDataRowCount() {
+		return hasDataRows() ?
+				range.getLastRow() - getDataFirstRowNumber() + 1 : 0;
+	}
 
 }

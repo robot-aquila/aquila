@@ -2,15 +2,12 @@ package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.table.*;
@@ -19,7 +16,7 @@ import ru.prolib.aquila.quik.assembler.cache.dde.QUIKDDEService;
 public class QUIKDDEServiceTest {
 	private IMocksControl control;
 	private DDETableHandler handler1, handler2;
-	private FirePanicEvent panic;
+	private EditableTerminal terminal;
 	private DDETable table1, table2;
 	private QUIKDDEService service;
 
@@ -28,8 +25,8 @@ public class QUIKDDEServiceTest {
 		control = createStrictControl();
 		handler1 = control.createMock(DDETableHandler.class);
 		handler2 = control.createMock(DDETableHandler.class);
-		panic = control.createMock(FirePanicEvent.class);
-		service = new QUIKDDEService("foobar", panic);
+		terminal = control.createMock(EditableTerminal.class);
+		service = new QUIKDDEService("foobar", terminal);
 		service.setHandler("first", handler1);
 		service.setHandler("second", handler2);
 		table1 = new DDETableImpl(new Object[] { 1, 2 }, "second", "item", 2);
@@ -116,7 +113,7 @@ public class QUIKDDEServiceTest {
 	public void testOnTable_IfHandlerExistsAndThrows() throws Exception {
 		handler2.handle(same(table1));
 		expectLastCall().andThrow(new DDEException("Test error"));
-		panic.firePanicEvent(1, "Test error");
+		terminal.firePanicEvent(1, "Test error");
 		control.replay();
 		
 		service.onTable(table1);
@@ -131,34 +128,47 @@ public class QUIKDDEServiceTest {
 		assertFalse(service.equals(this));
 	}
 	
+	static class FR {
+		private final String name;
+		private final DDETableHandler handler;
+		FR(String name, DDETableHandler handler) {
+			this.name = name;
+			this.handler = handler;
+		}
+	}
+	
 	@Test
 	public void testEquals() throws Exception {
+		TerminalBuilder tb = new TerminalBuilder();
+		EditableTerminal t1 = tb.createTerminal("foo"),
+						 t2 = tb.createTerminal("foo");
+		List<FR> rows1 = new Vector<FR>();
+		rows1.add(new FR("first", handler1));
+		rows1.add(new FR("second", handler2));
+		List<FR> rows2 = new Vector<FR>();
+		rows2.add(new FR("test", handler2));
+		
+		service = new QUIKDDEService("foobar", t1);
+		for ( FR row : rows1 ) {
+			service.setHandler(row.name, row.handler);
+		}
+		
 		Variant<String> vName = new Variant<String>()
 			.add("foobar")
 			.add("zulu4");
-		Variant<FirePanicEvent> vPanic = new Variant<FirePanicEvent>(vName)
-			.add(panic)
-			.add(control.createMock(FirePanicEvent.class));
-		Map<String,DDETableHandler> map1=new HashMap<String,DDETableHandler>();
-		map1.put("first", handler1);
-		map1.put("second", handler2);
-		Map<String,DDETableHandler> map2=new HashMap<String,DDETableHandler>();
-		map2.put("test", handler2);
-		Variant<Map<String, DDETableHandler>> vHandlers =
-				new Variant<Map<String, DDETableHandler>>(vPanic)
-			.add(map1)
-			.add(map2);
-		Variant<?> iterator = vHandlers;
+		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>(vName)
+			.add(t1)
+			.add(t2);
+		Variant<List<FR>> vRows = new Variant<List<FR>>(vTerm)
+			.add(rows1)
+			.add(rows2);
+		Variant<?> iterator = vRows;
 		int foundCnt = 0;
-		QUIKDDEService x = null, found = null;
-		Iterator<Map.Entry<String, DDETableHandler>> it;
-		Map.Entry<String, DDETableHandler> entry;
+		QUIKDDEService x, found = null;
 		do {
-			x = new QUIKDDEService(vName.get(), vPanic.get());
-			it = vHandlers.get().entrySet().iterator();
-			while ( it.hasNext() ) {
-				entry = it.next();
-				x.setHandler(entry.getKey(), entry.getValue());
+			x = new QUIKDDEService(vName.get(), vTerm.get());
+			for ( FR row : vRows.get() ) {
+				x.setHandler(row.name, row.handler);
 			}
 			if ( service.equals(x) ) {
 				foundCnt ++;
@@ -167,8 +177,18 @@ public class QUIKDDEServiceTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertEquals("foobar", found.getName());
-		assertSame(panic, found.getFirePanicEvent());
-		assertEquals(map1, found.getHandlers());
+		assertSame(t1, found.getTerminal());
+		Map<String, DDETableHandler> expected
+			= new Hashtable<String, DDETableHandler>();
+		expected.put("first", handler1);
+		expected.put("second", handler2);
+		assertEquals(expected, found.getHandlers());
+	}
+	
+	@Test
+	public void testClearHandlers() throws Exception {
+		service.clearHandlers();
+		assertEquals(0, service.getHandlers().size());
 	}
 	
 }

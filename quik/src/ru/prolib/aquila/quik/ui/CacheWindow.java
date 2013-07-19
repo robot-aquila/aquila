@@ -38,12 +38,12 @@ public class CacheWindow {
 	}
 	
 	private final JDialog window;
-	private final QUIKTerminal terminal;
+	private final QUIKEditableTerminal terminal;
 	private final ClassLabels labels;
 	private final JTabbedPane tabbedPane = new JTabbedPane();
 	private final LinkedList<Table> tables = new LinkedList<Table>();
 	
-	public CacheWindow(JFrame owner, QUIKTerminal terminal,
+	public CacheWindow(JFrame owner, QUIKEditableTerminal terminal,
 			ClassLabels labels)
 	{
 		super();
