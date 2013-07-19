@@ -81,8 +81,8 @@ public class IBOrderHandlerTest {
 		handler.placeOrder();
 		
 		control.verify();
-		assertTrue(sysInfo.getRegisteration().isStarted());
-		assertSame(request, sysInfo.getRegisteration().getRequest());
+		assertTrue(sysInfo.getRegistration().isStarted());
+		assertSame(request, sysInfo.getRegistration().getRequest());
 	}
 	
 	@Test
@@ -122,8 +122,8 @@ public class IBOrderHandlerTest {
 		handler.error(824, 400, "test error");
 		
 		control.verify();
-		assertTrue(sysInfo.getRegisteration().isExecuted());
-		assertEquals("test error", sysInfo.getRegisteration().getResponse());
+		assertTrue(sysInfo.getRegistration().isExecuted());
+		assertEquals("test error", sysInfo.getRegistration().getResponse());
 	}
 
 	@Test
@@ -157,8 +157,8 @@ public class IBOrderHandlerTest {
 				entry.getOrderState());
 		
 		control.verify();
-		assertTrue(sysInfo.getRegisteration().isExecuted());
-		assertEquals(entry, sysInfo.getRegisteration().getResponse());
+		assertTrue(sysInfo.getRegistration().isExecuted());
+		assertEquals(entry, sysInfo.getRegistration().getResponse());
 	}
 	
 	@Test

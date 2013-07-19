@@ -165,8 +165,8 @@ public class IBOrderProcessorTest {
 		processor.placeOrder(order);
 		
 		control.verify();
-		assertTrue(sysInfo.getRegisteration().isStarted());
-		assertEquals(request, sysInfo.getRegisteration().getRequest());
+		assertTrue(sysInfo.getRegistration().isStarted());
+		assertEquals(request, sysInfo.getRegistration().getRequest());
 	}
 	
 	@Test
@@ -202,8 +202,8 @@ public class IBOrderProcessorTest {
 		processor.placeOrder(order);
 		
 		control.verify();
-		assertTrue(sysInfo.getRegisteration().isStarted());
-		assertEquals(request, sysInfo.getRegisteration().getRequest());
+		assertTrue(sysInfo.getRegistration().isStarted());
+		assertEquals(request, sysInfo.getRegistration().getRequest());
 	}
 	
 	@Test

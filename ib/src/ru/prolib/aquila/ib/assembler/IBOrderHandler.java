@@ -56,8 +56,8 @@ public class IBOrderHandler implements OrderHandler {
 	public void placeOrder() {
 		synchronized ( order ) {
 			applyStatus(OrderStatus.SENT);
-			order.getSystemInfo().getRegisteration().setRequestTime();
-			order.getSystemInfo().getRegisteration().setRequest(request);
+			order.getSystemInfo().getRegistration().setRequestTime();
+			order.getSystemInfo().getRegistration().setRequest(request);
 			getClient().placeOrder(request.getOrderId(), request.getContract(),
 					request.getOrder());
 			logger.debug("Place order initiated: {}", order.getId());
@@ -98,7 +98,7 @@ public class IBOrderHandler implements OrderHandler {
 				return;
 				
 			} else if ( status == OrderStatus.SENT ) {
-				trans = order.getSystemInfo().getRegisteration();
+				trans = order.getSystemInfo().getRegistration();
 				trans.setResponseTime();
 				trans.setResponse(errorMsg);
 				applyStatus(OrderStatus.REJECTED);
@@ -134,7 +134,7 @@ public class IBOrderHandler implements OrderHandler {
 			// Так как этот метод вызывается в первую очередь, здесь нас
 			// интересует только подтверждение регистрации заявки.
 			if ( order.getStatus() == OrderStatus.SENT ) {
-				Transaction trans = order.getSystemInfo().getRegisteration();
+				Transaction trans = order.getSystemInfo().getRegistration();
 				trans.setResponseTime();
 				trans.setResponse(entry);
 				applyStatus(OrderStatus.ACTIVE);
