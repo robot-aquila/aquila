@@ -23,7 +23,9 @@ public class CacheBuilderTest {
 		Cache expected = new Cache(
 				new DescriptorsCache(d, d.createType("Descriptors")),
 				new PositionsCache(d, d.createType("Positions")),
-				new OrdersCache(d, d.createType("Orders")));
+				new OrdersCache(d, d.createType("Orders")),
+				new OwnTradesCache(d, d.createType("OwnTrades")),
+				new TradesCache(d, d.createType("Trades")));
 		assertEquals(expected, builder.createCache(t1.getEventSystem()));
 	}
 

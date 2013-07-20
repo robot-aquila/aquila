@@ -5,7 +5,7 @@ import java.util.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.t2q.T2QOrder;
+import ru.prolib.aquila.t2q.*;
 
 /**
  * Кэш данных QUIK.
@@ -17,14 +17,18 @@ public class Cache {
 	private final DescriptorsCache descrs;
 	private final PositionsCache positions;
 	private final OrdersCache orders;
+	private final OwnTradesCache ownTrades;
+	private final TradesCache trades;
 
 	public Cache(DescriptorsCache descr, PositionsCache positions,
-			OrdersCache orders)
+			OrdersCache orders, OwnTradesCache ownTrades, TradesCache trades)
 	{
 		super();
 		this.descrs = descr;
 		this.positions = positions;
 		this.orders = orders;
+		this.ownTrades = ownTrades;
+		this.trades = trades;
 	}
 	
 	/**
@@ -238,7 +242,126 @@ public class Cache {
 			.append(o.descrs, descrs)
 			.append(o.orders, orders)
 			.append(o.positions, positions)
+			.append(o.ownTrades, ownTrades)
+			.append(o.trades, trades)
 			.isEquals();
+	}
+	
+	/**
+	 * Получить кэш собственных сделок.
+	 * <p>
+	 * @return кэш собственных сделок
+	 */
+	public OwnTradesCache getOwnTradesCache() {
+		return ownTrades;
+	}
+	
+	/**
+	 * Получить список собственных сделок.
+	 * <p>
+	 * @return список сделок
+	 */
+	public List<T2QTrade> getOwnTrades() {
+		return ownTrades.get();
+	}
+
+	/**
+	 * Получить список собственных сделок по номеру заявки.
+	 * <p>
+	 * @param systemOrderId номер заявки в торговой системе
+	 * @return список сделок
+	 */
+	public List<T2QTrade> getOwnTradesByOrder(long systemOrderId) {
+		return ownTrades.getByOrder(systemOrderId);
+	}
+	
+	/**
+	 * Получить собственную сделку по номеру.
+	 * <p>
+	 * @param systemTradeId номер сделки в торговой системе
+	 * @return сделка или null, если нет сделки с таким номером
+	 */
+	public T2QTrade getOwnTrade(long systemTradeId) {
+		return ownTrades.get(systemTradeId);
+	}
+	
+	/**
+	 * Получить тип события: при изменении кэша собственных сделок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOwnTradesUpdate() {
+		return ownTrades.OnUpdate();
+	}
+	
+	/**
+	 * Кэшировать информацию о собственной сделке.
+	 * <p>
+	 * @param entry кэш-запись
+	 */
+	public void put(T2QTrade entry) {
+		ownTrades.put(entry);
+	}
+	
+	/**
+	 * Удалить из кэша собственные сделки по заявке.
+	 * <p>
+	 * @param systemOrderId номер заявки в торговой системе
+	 */
+	public void purgeOwnTrades(long systemOrderId) {
+		ownTrades.purge(systemOrderId);
+	}
+	
+	/**
+	 * Получить кэш сделок.
+	 * <p>
+	 * @return кэш сделок
+	 */
+	public TradesCache getTradesCache() {
+		return trades;
+	}
+	
+	/**
+	 * Получить кэш-запись с начала очереди.
+	 * <p>
+	 * @return первая кэш-запись
+	 */
+	public TradesEntry getFirstTrades() {
+		return trades.getFirst();
+	}
+	
+	/**
+	 * Удалить кэш-запись с начала очереди.
+	 */
+	public void purgeFirstTrades() {
+		trades.purgeFirst();
+	}
+	
+	/**
+	 * Получить все кэш-записи о сделках.
+	 * <p> 
+	 * @return список кэш-записей
+	 */
+	public List<TradesEntry> getTrades() {
+		return trades.get();
+	}
+	
+	/**
+	 * Получить тип события: при изменении кэша сделок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnTradesUpdate() {
+		return trades.OnUpdate();
+	}
+	
+	/**
+	 * Добавить кэш-запись в конец очереди.
+	 * <p>
+	 * @param entry кэш-запись
+	 */
+	public void add(TradesEntry entry) {
+		trades.add(entry);
 	}
 
 }

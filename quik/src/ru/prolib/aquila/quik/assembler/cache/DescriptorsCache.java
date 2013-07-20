@@ -94,7 +94,7 @@ public class DescriptorsCache {
 	 * Позволяет получить дескриптор инструмента по неполным идентификационным
 	 * данным: краткому наименованию инструмента.
 	 * <p>
-	 * @param name краткое наименование инструмента
+	 * @param shortName краткое наименование инструмента
 	 * @return дескриптор инструмента или null, если нет такого инструмента
 	 */
 	public synchronized SecurityDescriptor get(String shortName) {

@@ -110,7 +110,7 @@ public class SecuritiesGateway implements TableGateway {
 					converter.getDoubleOrNull(row, BID),
 					converter.getDoubleOrNull(row, HIGH),
 					converter.getDoubleOrNull(row, LOW),
-					(SecurityDescriptor) getDescriptor(row)));
+					getDescriptor(row)));
 		} catch ( ValueException e ) {
 			throw new DDEException(e.getMessage());
 		}

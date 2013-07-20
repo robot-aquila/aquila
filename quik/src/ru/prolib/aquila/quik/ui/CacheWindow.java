@@ -19,22 +19,20 @@ public class CacheWindow {
 	private static final Logger logger;
 	
 	public static final String TEXT_WIN_CACHE_TITLE;
-	public static final String TEXT_TAB_CACHE_ORDERS;
+	public static final String TEXT_TAB_CACHE_DESCRS;
 	public static final String TEXT_TAB_CACHE_TRADES;
-	public static final String TEXT_TAB_CACHE_SECURITIES;
-	public static final String TEXT_TAB_CACHE_PORTS_F;
-	public static final String TEXT_TAB_CACHE_POSS_F;
-	public static final String TEXT_TAB_CACHE_STOP_ORDERS;
+	public static final String TEXT_TAB_CACHE_POSITIONS;
+	public static final String TEXT_TAB_CACHE_ORDERS;
+	public static final String TEXT_TAB_CACHE_OWNTRADES;
 	
 	static {
 		logger = LoggerFactory.getLogger(CacheWindow.class);
 		TEXT_WIN_CACHE_TITLE = "WIN_CACHE_TITLE";
 		TEXT_TAB_CACHE_ORDERS = "TAB_CACHE_ORDERS";
 		TEXT_TAB_CACHE_TRADES = "TAB_CACHE_TRADES";
-		TEXT_TAB_CACHE_SECURITIES = "TAB_CACHE_SECURITIES";
-		TEXT_TAB_CACHE_PORTS_F = "TAB_CACHE_PORTS_F";
-		TEXT_TAB_CACHE_POSS_F = "TAB_CACHE_POSS_F";
-		TEXT_TAB_CACHE_STOP_ORDERS = "TAB_CACHE_STOP_ORDERS";
+		TEXT_TAB_CACHE_DESCRS = "TAB_CACHE_DESCRS";
+		TEXT_TAB_CACHE_POSITIONS = "TAB_CACHE_POSITIONS";
+		TEXT_TAB_CACHE_OWNTRADES = "TAB_CACHE_OWNTRDS";
 	}
 	
 	private final JDialog window;
@@ -57,11 +55,11 @@ public class CacheWindow {
 			public void windowClosing(WindowEvent e) { onHide(); }
 		});
 		TableBuilder builder = new TableBuilder(labels, terminal.getDataCache());
-		addTab(builder.createOrdersCacheTable(), TEXT_TAB_CACHE_ORDERS);
-		addTab(builder.createTradesCacheTable(), TEXT_TAB_CACHE_TRADES);
-		addTab(builder.createSecuritiesCacheTable(), TEXT_TAB_CACHE_SECURITIES);
-		addTab(builder.createPortfoliosFortsCacheTable(),TEXT_TAB_CACHE_PORTS_F);
-		addTab(builder.createPositionsFortsCacheTable(), TEXT_TAB_CACHE_POSS_F);
+		addTab(builder.createDescriptorsTable(), TEXT_TAB_CACHE_DESCRS);
+		addTab(builder.createTradesTable(), TEXT_TAB_CACHE_TRADES);
+		addTab(builder.createPositionsCacheTable(), TEXT_TAB_CACHE_POSITIONS);
+		addTab(builder.createOrdersTable(), TEXT_TAB_CACHE_ORDERS);
+		addTab(builder.createOwnTradesTable(), TEXT_TAB_CACHE_OWNTRADES);
 
 		window.add(tabbedPane);
 		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));

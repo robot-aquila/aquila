@@ -42,7 +42,7 @@ public class QUIKDDEStarterTest {
 		RowDataConverter conv = new RowDataConverter("yyyy-MM-dd", "HH:mm:ss");
 		QUIKDDEService expected = new QUIKDDEService("AQUILA", terminal);
 		expected.setHandler("securities",
-				new TableHandler(new SecuritiesGateway(conv, null)));
+				new TableHandler(new SecuritiesGateway(conv, asm)));
 		expected.setHandler("trades",
 				new TableHandler(new TradesGateway(conv, asm)));
 		expected.setHandler("portfolios",

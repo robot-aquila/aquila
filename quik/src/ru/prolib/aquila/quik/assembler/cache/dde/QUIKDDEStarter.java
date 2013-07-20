@@ -46,7 +46,7 @@ public class QUIKDDEStarter implements Starter {
 			conv = new RowDataConverter(config.getDateFormat(),
 					config.getTimeFormat());
 			service.setHandler(config.getSecurities(),
-				new TableHandler(new SecuritiesGateway(conv, null)));
+				new TableHandler(new SecuritiesGateway(conv, asm)));
 			service.setHandler(config.getAllDeals(),
 				new TableHandler(new TradesGateway(conv, asm)));
 			service.setHandler(config.getPortfoliosFUT(),

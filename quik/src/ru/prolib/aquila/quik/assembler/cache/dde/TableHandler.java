@@ -1,6 +1,9 @@
 package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.table.*;
@@ -11,6 +14,12 @@ import ru.prolib.aquila.dde.utils.table.*;
  * Обозначает структуру процесса обработки таблицы.
  */
 public class TableHandler implements DDETableHandler {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(TableHandler.class);
+	}
+	
 	private final TableHelper helper;
 	
 	/**
@@ -39,6 +48,8 @@ public class TableHandler implements DDETableHandler {
 		try {
 			handleTable(ddeTable);
 		} catch ( Exception e ) {
+			Object args[] = {ddeTable.getTopic(), e };
+			logger.error("Error processing {}: ", args);
 			throw new DDETableImportException(ddeTable.getTopic(), e);
 		}
 	}

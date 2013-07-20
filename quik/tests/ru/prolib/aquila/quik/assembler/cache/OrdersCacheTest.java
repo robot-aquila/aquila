@@ -88,6 +88,7 @@ public class OrdersCacheTest {
 		cache.put(order1);
 		
 		control.verify();
+		assertSame(order1, cache.get(10L));
 	}
 	
 	@Test

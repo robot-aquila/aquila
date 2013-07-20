@@ -8,7 +8,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.*;
-import ru.prolib.aquila.t2q.T2QOrder;
+import ru.prolib.aquila.t2q.*;
 
 public class CacheTest {
 	private static Account account;
@@ -17,6 +17,8 @@ public class CacheTest {
 	private DescriptorsCache descrs;
 	private PositionsCache positions;
 	private OrdersCache orders;
+	private OwnTradesCache ownTrades;
+	private TradesCache trades;
 	private EventType type;
 	private Cache cache;
 	
@@ -32,8 +34,10 @@ public class CacheTest {
 		descrs = control.createMock(DescriptorsCache.class);
 		positions = control.createMock(PositionsCache.class);
 		orders = control.createMock(OrdersCache.class);
+		ownTrades = control.createMock(OwnTradesCache.class);
+		trades = control.createMock(TradesCache.class);
 		type = control.createMock(EventType.class);
-		cache = new Cache(descrs, positions, orders);
+		cache = new Cache(descrs, positions, orders, ownTrades, trades);
 	}
 	
 	@Test
@@ -235,11 +239,18 @@ public class CacheTest {
 		Variant<OrdersCache> vOrd = new Variant<OrdersCache>(vPos)
 			.add(orders)
 			.add(control.createMock(OrdersCache.class));
-		Variant<?> iterator = vOrd;
+		Variant<OwnTradesCache> vOwn = new Variant<OwnTradesCache>(vOrd)
+			.add(ownTrades)
+			.add(control.createMock(OwnTradesCache.class));
+		Variant<TradesCache> vTrd = new Variant<TradesCache>(vOwn)
+			.add(trades)
+			.add(control.createMock(TradesCache.class));
+		Variant<?> iterator = vTrd;
 		int foundCnt = 0;
 		Cache x, found = null;
 		do {
-			x = new Cache(vDsc.get(), vPos.get(), vOrd.get());
+			x = new Cache(vDsc.get(), vPos.get(), vOrd.get(), vOwn.get(),
+					vTrd.get());
 			if ( cache.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -249,6 +260,130 @@ public class CacheTest {
 		assertSame(descrs, found.getDescriptorsCache());
 		assertSame(positions, found.getPositionsCache());
 		assertSame(orders, found.getOrdersCache());
+		assertSame(ownTrades, found.getOwnTradesCache());
+		assertSame(trades, found.getTradesCache());
+	}
+	
+	@Test
+	public void testGetOwnTrades() throws Exception {
+		List<T2QTrade> expected = new Vector<T2QTrade>();
+		expect(ownTrades.get()).andReturn(expected);
+		control.replay();
+		
+		assertSame(expected, cache.getOwnTrades());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetOwnTradesByOrder() throws Exception {
+		List<T2QTrade> expected = new Vector<T2QTrade>();
+		expect(ownTrades.getByOrder(eq(824L))).andReturn(expected);
+		control.replay();
+		
+		assertSame(expected, cache.getOwnTradesByOrder(824L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetOwnTrade() throws Exception {
+		T2QTrade expected = control.createMock(T2QTrade.class);
+		expect(ownTrades.get(eq(7261L))).andReturn(expected);
+		control.replay();
+		
+		assertSame(expected, cache.getOwnTrade(7261L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnOwnTradesUpdate() throws Exception {
+		expect(ownTrades.OnUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnOwnTradesUpdate());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPut_OwnTrade() throws Exception {
+		T2QTrade entry = control.createMock(T2QTrade.class);
+		ownTrades.put(same(entry));
+		control.replay();
+		
+		cache.put(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPurgeOwnTrades() throws Exception {
+		ownTrades.purge(eq(4412L));
+		control.replay();
+		
+		cache.purgeOwnTrades(4412L);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetTradesCache() throws Exception {
+		assertSame(trades, cache.getTradesCache());
+	}
+	
+	@Test
+	public void testGetFirstTrades() throws Exception {
+		TradesEntry entry = control.createMock(TradesEntry.class);
+		expect(trades.getFirst()).andReturn(entry);
+		control.replay();
+		
+		assertSame(entry, cache.getFirstTrades());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPurgeFirstTrades() throws Exception {
+		trades.purgeFirst();
+		control.replay();
+		
+		cache.purgeFirstTrades();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetTrades() throws Exception {
+		List<TradesEntry> expected = new Vector<TradesEntry>();
+		expect(trades.get()).andReturn(expected);
+		control.replay();
+		
+		assertSame(expected, cache.getTrades());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnTradesUpdate() throws Exception {
+		expect(trades.OnUpdate()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, cache.OnTradesUpdate());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testAdd() throws Exception {
+		TradesEntry entry = control.createMock(TradesEntry.class);
+		trades.add(same(entry));
+		control.replay();
+		
+		cache.add(entry);
+		
+		control.verify();
 	}
 
 }
