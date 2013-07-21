@@ -2,15 +2,19 @@ package ru.prolib.aquila.ib.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.IBEditableTerminal;
 import ru.prolib.aquila.ib.assembler.cache.*;
 
 public class AssemblerMidLvlTest {
+	private static SecurityDescriptor descr;
 	private IMocksControl control;
 	private AssemblerLowLvl low;
 	private EditablePortfolio port;
@@ -18,6 +22,14 @@ public class AssemblerMidLvlTest {
 	private EditablePosition position;
 	private IBEditableTerminal term;
 	private AssemblerMidLvl asm;
+	private Cache cache;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -27,8 +39,10 @@ public class AssemblerMidLvlTest {
 		security = control.createMock(EditableSecurity.class);
 		position = control.createMock(EditablePosition.class);
 		term = control.createMock(IBEditableTerminal.class);
+		cache = control.createMock(Cache.class);
 		asm = new AssemblerMidLvl(low);
 		expect(low.getTerminal()).andStubReturn(term);
+		expect(low.getCache()).andStubReturn(cache);
 	}
 	
 	@Test
@@ -44,7 +58,6 @@ public class AssemblerMidLvlTest {
 	
 	@Test
 	public void testGetCache() throws Exception {
-		Cache cache = control.createMock(Cache.class);
 		expect(low.getCache()).andReturn(cache);
 		control.replay();
 		
@@ -54,12 +67,13 @@ public class AssemblerMidLvlTest {
 	}
 	
 	@Test
-	public void testUpdate_Contract_IfAvailable() throws Exception {
+	public void testUpdate_Contract_ExistingSecurity() throws Exception {
 		ContractEntry entry = control.createMock(ContractEntry.class);
-		expect(low.getSecurity(entry)).andReturn(security);
+		expect(entry.getSecurityDescriptor()).andReturn(descr);		
+		expect(term.getEditableSecurity(descr)).andReturn(security);
 		low.update(same(security), same(entry));
 		expect(security.isAvailable()).andReturn(true);
-		low.fireEvents(same(security));
+		term.fireEvents(same(security));
 		control.replay();
 		
 		asm.update(entry);
@@ -68,13 +82,14 @@ public class AssemblerMidLvlTest {
 	}
 	
 	@Test
-	public void testUpdate_Contract_IfNotAvailable() throws Exception {
+	public void testUpdate_Contract_NewSecurity() throws Exception {
 		ContractEntry entry = control.createMock(ContractEntry.class);
-		expect(low.getSecurity(entry)).andReturn(security);
+		expect(entry.getSecurityDescriptor()).andReturn(descr);		
+		expect(term.getEditableSecurity(descr)).andReturn(security);
 		low.update(same(security), same(entry));
 		expect(security.isAvailable()).andReturn(false);
 		low.startMktData(same(security), same(entry));
-		low.fireEvents(same(security));
+		term.fireEvents(same(security));
 		control.replay();
 		
 		asm.update(entry);
@@ -85,10 +100,11 @@ public class AssemblerMidLvlTest {
 	@Test
 	public void testUpdate_Portfolio_IfAvailable() throws Exception {
 		PortfolioValueEntry e = new PortfolioValueEntry("TEST", "k", "c", "v");
-		expect(low.getPortfolio(eq(new Account("TEST")))).andReturn(port);
+		Account a = new Account("TEST");
+		expect(term.getEditablePortfolio(eq(a))).andReturn(port);
 		low.update(same(port), same(e));
 		expect(low.isAvailable(same(port))).andReturn(true);
-		low.fireEvents(same(port));
+		term.fireEvents(same(port));
 		control.replay();
 		
 		asm.update(e);
@@ -99,7 +115,8 @@ public class AssemblerMidLvlTest {
 	@Test
 	public void testUpdate_Portfolio_IfNotAvailable() throws Exception {
 		PortfolioValueEntry e = new PortfolioValueEntry("TEST", "k", "c", "v");
-		expect(low.getPortfolio(eq(new Account("TEST")))).andReturn(port);
+		Account a = new Account("TEST");
+		expect(term.getEditablePortfolio(eq(a))).andReturn(port);
 		low.update(same(port), same(e));
 		expect(low.isAvailable(same(port))).andReturn(false);
 		control.replay();
@@ -142,10 +159,25 @@ public class AssemblerMidLvlTest {
 	}
 	
 	@Test
-	public void testUpdate_Position_NoSecurity() throws Exception {
+	public void testUpdate_Position_NoContractEntry() throws Exception {
 		PositionEntry entry = control.createMock(PositionEntry.class);
 		expect(entry.getContractId()).andReturn(91215);
-		expect(low.getSecurity(91215)).andReturn(null);
+		expect(cache.getContract(eq(91215))).andReturn(null);
+		control.replay();
+		
+		asm.update(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdate_Position_NoSecurity() throws Exception {
+		PositionEntry entry = control.createMock(PositionEntry.class);
+		ContractEntry eCont = control.createMock(ContractEntry.class);
+		expect(entry.getContractId()).andReturn(91215);
+		expect(cache.getContract(eq(91215))).andReturn(eCont);
+		expect(eCont.getSecurityDescriptor()).andReturn(descr);
+		expect(term.getSecurity(descr)).andThrow(new SecurityException("test"));
 		control.replay();
 		
 		asm.update(entry);
@@ -155,14 +187,20 @@ public class AssemblerMidLvlTest {
 	
 	@Test
 	public void testUpdate_Position() throws Exception {
+		Account a = new Account("foo");
 		PositionEntry entry = control.createMock(PositionEntry.class);
-		expect(entry.getContractId()).andReturn(91215);
-		expect(low.getSecurity(91215)).andReturn(security);
-		expect(entry.getAccount()).andReturn(new Account("TEST"));
-		expect(low.getPortfolio(eq(new Account("TEST")))).andReturn(port);
-		expect(port.getEditablePosition(same(security))).andReturn(position);
-		low.update(same(position), same(entry));
-		low.fireEvents(same(position));
+		expect(entry.getContractId()).andStubReturn(91215);
+		expect(entry.getAccount()).andStubReturn(a);
+		
+		ContractEntry eCont = control.createMock(ContractEntry.class);
+		expect(eCont.getSecurityDescriptor()).andStubReturn(descr);
+		
+		expect(cache.getContract(eq(91215))).andReturn(eCont);
+		expect(term.getSecurity(descr)).andReturn(security);
+		expect(term.getEditablePortfolio(eq(a))).andReturn(port);
+		expect(port.getEditablePosition(security)).andReturn(position);
+		low.update(position, entry);
+		port.fireEvents(position);
 		control.replay();
 		
 		asm.update(entry);

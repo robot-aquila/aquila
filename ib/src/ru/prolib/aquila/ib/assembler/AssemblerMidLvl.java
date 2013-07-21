@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.ib.IBEditableTerminal;
 import ru.prolib.aquila.ib.assembler.cache.*;
 
@@ -76,15 +77,15 @@ public class AssemblerMidLvl {
 	 * @param entry кэш-запись деталей контракта
 	 */
 	public void update(ContractEntry entry) {
-		try {
-			EditableSecurity security = low.getSecurity(entry);
+		EditableTerminal terminal = getTerminal();
+		EditableSecurity security =
+			terminal.getEditableSecurity(entry.getSecurityDescriptor());
+		synchronized ( security ) {
 			low.update(security, entry);
 			if ( ! security.isAvailable() ) {
 				low.startMktData(security, entry);
 			}
-			low.fireEvents(security);
-		} catch ( Exception e ) {
-			logger.error("Error update security: ", e);
+			terminal.fireEvents(security);
 		}
 	}
 	
@@ -94,14 +95,14 @@ public class AssemblerMidLvl {
 	 * @param entry кэш-запись значения атрибута портфеля
 	 */
 	public void update(PortfolioValueEntry entry) {
-		try {
-			EditablePortfolio portfolio = low.getPortfolio(entry.getAccount());
+		EditableTerminal terminal = getTerminal();
+		EditablePortfolio portfolio =
+			terminal.getEditablePortfolio(entry.getAccount());
+		synchronized ( portfolio ) {
 			low.update(portfolio, entry);
 			if ( low.isAvailable(portfolio) ) {
-				low.fireEvents(portfolio);
+				terminal.fireEvents(portfolio);
 			}
-		} catch ( Exception e ) {
-			logger.error("Error update portfolio: ", e);
 		}
 	}
 	
@@ -125,17 +126,24 @@ public class AssemblerMidLvl {
 	 * @param entry кэш-запись позиции
 	 */
 	public void update(PositionEntry entry) {
+		EditableTerminal terminal = getTerminal(); 
+		ContractEntry eCont = getCache().getContract(entry.getContractId());
+		if ( eCont == null ) {
+			return;
+		}
+		SecurityDescriptor descr = eCont.getSecurityDescriptor();
+		Security security;
 		try {
-			Security security = low.getSecurity(entry.getContractId());
-			if ( security == null ) {
-				return;
-			}
-			EditablePortfolio portfolio = low.getPortfolio(entry.getAccount());
-			EditablePosition position = portfolio.getEditablePosition(security);
-			low.update(position, entry);
-			low.fireEvents(position);
-		} catch ( Exception e ) {
-			logger.error("Error update position: ", e);
+			security = terminal.getSecurity(descr);
+		} catch ( SecurityException e ) {
+			logger.error("Unexpected exception: ", e);
+			return;
+		}
+		EditablePortfolio p = terminal.getEditablePortfolio(entry.getAccount());
+		EditablePosition pos = p.getEditablePosition(security);
+		synchronized ( pos ) {
+			low.update(pos, entry);
+			p.fireEvents(pos);
 		}
 	}
 	

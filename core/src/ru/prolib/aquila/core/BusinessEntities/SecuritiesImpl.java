@@ -51,7 +51,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	/**
 	 * Конструктор
 	 * <p>
-	 * @param eventDispatcher диспетчер событий
+	 * @param dispatcher диспетчер событий
 	 * @param onAvailable тип события: доступен инструмент
 	 * @param onChanged тип события: изменение инструмента
 	 * @param onTrade тип события: новая сделка по инструменту
