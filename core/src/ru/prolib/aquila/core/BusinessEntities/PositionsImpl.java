@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.*;
  * 2012-08-03<br>
  * $Id: PositionsImpl.java 527 2013-02-14 15:14:09Z whirlwind $
  */
-class PositionsImpl implements EditablePositions, EventListener {
+public class PositionsImpl implements EditablePositions, EventListener {
 	private final Map<SecurityDescriptor, EditablePosition> map;
 	private final Portfolio portfolio;
 	private final EventDispatcher dispatcher;
@@ -71,8 +71,16 @@ class PositionsImpl implements EditablePositions, EventListener {
 	}
 
 	@Override
-	public void firePositionAvailableEvent(Position position) {
-		dispatcher.dispatch(new PositionEvent(onAvailable, position));
+	public void fireEvents(EditablePosition position) {
+		synchronized ( position ) {
+			if ( position.isAvailable() ) {
+				position.fireChangedEvent();
+			} else {
+				position.setAvailable(true);
+				dispatcher.dispatch(new PositionEvent(onAvailable, position));
+			}
+			position.resetChanges();
+		}
 	}
 
 	@Override

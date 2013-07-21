@@ -10,10 +10,6 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.utils.Variant;
 
-/**
- * 2012-10-17<br>
- * $Id: OrdersImplTest.java 527 2013-02-14 15:14:09Z whirlwind $
- */
 public class OrdersImplTest {
 	private IMocksControl control;
 	private EventSystem es;
@@ -125,11 +121,26 @@ public class OrdersImplTest {
 	}
 	
 	@Test
-	public void testFireOrderAvailableEvent() throws Exception {
+	public void testFireEvents_Available() throws Exception {
+		expect(o1.isAvailable()).andReturn(false);
+		o1.setAvailable(true);
 		dispatcherMock.dispatch(new OrderEvent(onAvailable, o1));
+		o1.resetChanges();
 		control.replay();
 		
-		orders2.fireOrderAvailableEvent(o1);
+		orders2.fireEvents(o1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testFireEvents_Changed() throws Exception {
+		expect(o1.isAvailable()).andReturn(true);
+		o1.fireChangedEvent();
+		o1.resetChanges();
+		control.replay();
+		
+		orders2.fireEvents(o1);
 		
 		control.verify();
 	}

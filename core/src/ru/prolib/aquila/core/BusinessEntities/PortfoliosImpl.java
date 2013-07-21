@@ -6,18 +6,17 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
 
 /**
- * Реализация набора портфелей.
- * <p>
- * 2012-08-04<br>
- * $Id: PortfoliosImpl.java 490 2013-02-05 19:42:02Z whirlwind $
+ * Хранилище портфелей.
  */
 public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	private final EventDispatcher dispatcher;
 	private final EventType onAvailable,onChanged,onPosAvailable,onPosChanged;
 	private final Map<Account, EditablePortfolio> map;
 	private Portfolio defaultPortfolio;
+	private final PortfolioFactory factory;
 
 	/**
 	 * Конструктор набора.
@@ -27,10 +26,11 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	 * @param onChanged тип события при изменении портфеля
 	 * @param onPosAvailable тип события при появлении новой позиции
 	 * @param onPosChanged тип события при изменении позиции
+	 * @param factory фабрика портфелей
 	 */
 	public PortfoliosImpl(EventDispatcher dispatcher, EventType onAvailable,
 			EventType onChanged, EventType onPosAvailable,
-			EventType onPosChanged)
+			EventType onPosChanged, PortfolioFactory factory)
 	{
 		super();
 		if ( dispatcher == null ) {
@@ -47,6 +47,27 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 		this.onPosAvailable = onPosAvailable;
 		this.onPosChanged = onPosChanged;
 		map = new LinkedHashMap<Account, EditablePortfolio>();
+		this.factory = factory;
+	}
+	
+	/**
+	 * Конструктор набора.
+	 * <p>
+	 * @param dispatcher диспетчер событий
+	 * @param onAvailable тип события при появлении нового портфеля
+	 * @param onChanged тип события при изменении портфеля
+	 * @param onPosAvailable тип события при появлении новой позиции
+	 * @param onPosChanged тип события при изменении позиции
+	 */
+	public PortfoliosImpl(EventDispatcher dispatcher, EventType onAvailable,
+		EventType onChanged, EventType onPosAvailable, EventType onPosChanged)
+	{
+		this(dispatcher, onAvailable, onChanged, onPosAvailable, onPosChanged,
+				new PortfolioFactory());
+	}
+	
+	public PortfolioFactory getFactory() {
+		return factory;
 	}
 	
 	/**
@@ -77,7 +98,11 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	public synchronized Portfolio getPortfolio(Account account)
 			throws PortfolioException
 	{
-		return getEditablePortfolio(account);
+		Portfolio portfolio = map.get(account);
+		if ( portfolio == null ) {
+			throw new PortfolioNotExistsException(account);
+		}
+		return portfolio;
 	}
 
 	@Override
@@ -91,45 +116,34 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	}
 
 	@Override
-	public void firePortfolioAvailableEvent(Portfolio portfolio) {
-		dispatcher.dispatch(new PortfolioEvent(onAvailable, portfolio));
-	}
-
-	@Override
-	public synchronized EditablePortfolio getEditablePortfolio(Account acc)
-			throws PortfolioException
-	{
-		EditablePortfolio port = map.get(acc);
-		if ( port == null ) {
-			throw new PortfolioNotExistsException(acc);
+	public void fireEvents(EditablePortfolio portfolio) {
+		synchronized ( portfolio ) {
+			if ( portfolio.isAvailable() ) {
+				portfolio.fireChangedEvent();
+			} else {
+				portfolio.setAvailable(true);
+				dispatcher.dispatch(new PortfolioEvent(onAvailable, portfolio));
+			}
+			portfolio.resetChanges();
 		}
-		return port;
 	}
 
 	@Override
 	public synchronized EditablePortfolio
-		createPortfolio(EditableTerminal terminal, Account account)
-			throws PortfolioException
+		getEditablePortfolio(EditableTerminal terminal, Account account)
 	{
-		if ( map.containsKey(account) ) {
-			throw new PortfolioAlreadyExistsException(account);
+		EditablePortfolio port = map.get(account);
+		if ( port == null ) {
+			port = factory.createInstance(terminal, account);
+			map.put(account, port);
+			port.OnChanged().addListener(this);
+			port.OnPositionAvailable().addListener(this);
+			port.OnPositionChanged().addListener(this);
+			if ( defaultPortfolio == null ) {
+				defaultPortfolio = port;
+			}
 		}
-		EventSystem es = terminal.getEventSystem();
-		EventDispatcher d = es.createEventDispatcher("Portfolio["+account+"]");
-		PortfolioImpl p = new PortfolioImpl(terminal, account, d,
-				d.createType("OnChanged"));
-		EventDispatcher pd = es.createEventDispatcher("Portfolio["+account+"]");
-		p.setPositionsInstance(new PositionsImpl(p, pd,
-				pd.createType("OnPosAvailable"),
-				pd.createType("OnPosChanged")));
-		map.put(account, p);
-		p.OnChanged().addListener(this);
-		p.OnPositionAvailable().addListener(this);
-		p.OnPositionChanged().addListener(this);
-		if ( defaultPortfolio == null ) {
-			defaultPortfolio = p;
-		}
-		return p;
+		return port;
 	}
 
 	@Override
@@ -171,7 +185,7 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	}
 	
 	/**
-	 * Перенаправить событие позициию
+	 * Перенаправить событие позициии
 	 * <p>
 	 * @param event исходное событие
 	 */
@@ -226,6 +240,7 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 			.append(o.onChanged, onChanged)
 			.append(o.onPosAvailable, onPosAvailable)
 			.append(o.onPosChanged, onPosChanged)
+			.append(o.factory, factory)
 			.isEquals();
 	}
 

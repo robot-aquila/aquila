@@ -189,12 +189,12 @@ public class PortfolioImplTest {
 	}
 	
 	@Test
-	public void testFirePositionAvailableEvent() throws Exception {
+	public void testFireEvents() throws Exception {
 		EditablePosition p = control.createMock(EditablePosition.class);
-		positions.firePositionAvailableEvent(same(p));
+		positions.fireEvents(same(p));
 		control.replay();
 		
-		portfolio.firePositionAvailableEvent(p);
+		portfolio.fireEvents(p);
 		
 		control.verify();
 	}

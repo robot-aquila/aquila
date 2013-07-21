@@ -520,11 +520,13 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testFireOrderAvailableEvent() throws Exception {
-		Order order = control.createMock(Order.class);
-		orders.fireOrderAvailableEvent(same(order));
+	public void testFireEvents() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		orders.fireEvents(same(order));
 		control.replay();
-		terminal.fireOrderAvailableEvent(order);
+		
+		terminal.fireEvents(order);
+		
 		control.verify();
 	}
 	
@@ -555,51 +557,41 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testFirePortfolioAvailableEvent() throws Exception {
-		Portfolio portfolio = control.createMock(Portfolio.class);
-		portfolios.firePortfolioAvailableEvent(same(portfolio));
+	public void testFireEvents_Portfolio() throws Exception {
+		EditablePortfolio p = control.createMock(EditablePortfolio.class);
+		portfolios.fireEvents(same(p));
 		control.replay();
-		terminal.firePortfolioAvailableEvent(portfolio);
+		
+		terminal.fireEvents(p);
+		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetEditablePortfolio() throws Exception {
-		EditablePortfolio port = control.createMock(EditablePortfolio.class);
-		expect(portfolios.getEditablePortfolio(eq(new Account("TST1"))))
-			.andReturn(port);
+	public void testGetEditablePortfolio1() throws Exception {
+		Account a = new Account("TST1");
+		EditablePortfolio p = control.createMock(EditablePortfolio.class);
+		expect(portfolios.getEditablePortfolio(same(terminal), eq(a)))
+			.andReturn(p);
 		control.replay();
-		assertSame(port, terminal.getEditablePortfolio(new Account("TST1")));
+		
+		assertSame(p, terminal.getEditablePortfolio(new Account("TST1")));
+		
 		control.verify();
 	}
 	
 	@Test
-	public void testRegisterPortfolio1() throws Exception {
-		Account account = new Account("TEST");
+	public void testGetEditablePortfolio2() throws Exception {
+		Account a = new Account("BUZZ");
 		EditablePortfolio p = control.createMock(EditablePortfolio.class);
-		expect(portfolios.createPortfolio(same(terminal), eq(account)))
-			.andStubReturn(p);
+		EditableTerminal t = control.createMock(EditableTerminal.class);
+		expect(portfolios.getEditablePortfolio(same(t), eq(a))).andReturn(p);
 		control.replay();
 		
-		assertSame(p, terminal.createPortfolio(account));
+		assertSame(p, terminal.getEditablePortfolio(t, a));
 		
 		control.verify();
 	}
-
-	@Test
-	public void testRegisterPortfolio2() throws Exception {
-		Account account = new Account("TEST");
-		EditableTerminal t2 = control.createMock(EditableTerminal.class);
-		EditablePortfolio p = control.createMock(EditablePortfolio.class);
-		expect(portfolios.createPortfolio(same(t2), eq(account)))
-			.andStubReturn(p);
-		control.replay();
-		
-		assertSame(p, terminal.createPortfolio(t2, account));
-		
-		control.verify();
-	}
-
 	
 	@Test
 	public void testSetDefaultPortfolio() throws Exception {
@@ -611,22 +603,41 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testGetEditableSecurity() throws Exception {
+	public void testGetEditableSecurity1() throws Exception {
 		EditableSecurity security = control.createMock(EditableSecurity.class);
-		SecurityDescriptor descr =
-			new SecurityDescriptor("AAPL", "SMART", "USD", SecurityType.STK);
-		expect(securities.getEditableSecurity(eq(descr))).andReturn(security);
+		SecurityDescriptor descr = control.createMock(SecurityDescriptor.class);
+		expect(securities.getEditableSecurity(same(terminal), eq(descr)))
+			.andReturn(security);
 		control.replay();
+		
 		assertSame(security, terminal.getEditableSecurity(descr));
+		
 		control.verify();
 	}
 	
 	@Test
-	public void testFireSecurityAvailableEvent() throws Exception {
-		Security security = control.createMock(Security.class);
-		securities.fireSecurityAvailableEvent(same(security));
+	public void testGetEditableSecurity2() throws Exception {
+		EditableTerminal t = control.createMock(EditableTerminal.class);
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		SecurityDescriptor descr = control.createMock(SecurityDescriptor.class);
+		expect(securities.getEditableSecurity(same(t), eq(descr)))
+			.andReturn(security);
 		control.replay();
-		terminal.fireSecurityAvailableEvent(security);
+		
+		assertSame(security, terminal.getEditableSecurity(t, descr));
+		
+		control.verify();
+	}
+
+	
+	@Test
+	public void testFireEvents_Security() throws Exception {
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		securities.fireEvents(same(security));
+		control.replay();
+		
+		terminal.fireEvents(security);
+		
 		control.verify();
 	}
 	
@@ -851,34 +862,6 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCreateSecurity2() throws Exception {
-		EditableSecurity security = control.createMock(EditableSecurity.class);
-		SecurityDescriptor descr =
-			new SecurityDescriptor("AAPL", "SMART", "USD", SecurityType.STK);
-		expect(securities.createSecurity(same(terminal), eq(descr)))
-			.andReturn(security);
-		control.replay();
-		
-		assertSame(security, terminal.createSecurity(terminal, descr));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateSecurity1() throws Exception {
-		EditableSecurity security = control.createMock(EditableSecurity.class);
-		SecurityDescriptor descr =
-			new SecurityDescriptor("AAPL", "SMART", "USD", SecurityType.STK);
-		expect(securities.createSecurity(same(terminal), eq(descr)))
-			.andReturn(security);
-		control.replay();
-		
-		assertSame(security, terminal.createSecurity(descr));
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testSetGetOrderProcessor() throws Exception {
 		assertNull(terminal.getOrderProcessorInstance());
 		terminal.setOrderProcessorInstance(orderProcessor);
@@ -1064,7 +1047,7 @@ public class TerminalImplTest {
 		order.setAvailable(eq(true));
 		order.resetChanges();
 		orders.registerOrder(eq(217), same(order));
-		orders.fireOrderAvailableEvent(same(order));
+		orders.fireEvents(same(order));
 		control.replay();
 		
 		assertSame(order,
@@ -1089,7 +1072,7 @@ public class TerminalImplTest {
 		order.setAvailable(eq(true));
 		order.resetChanges();
 		orders.registerOrder(eq(555), same(order));
-		orders.fireOrderAvailableEvent(same(order));
+		orders.fireEvents(same(order));
 		control.replay();
 		
 		assertSame(order,

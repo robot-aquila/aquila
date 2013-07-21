@@ -9,11 +9,11 @@ package ru.prolib.aquila.core.BusinessEntities;
 public interface EditableOrders extends Orders {
 	
 	/**
-	 * Генерировать событие о появлении информации о новой заявке.
+	 * Генерировать события заявки.
 	 * <p>
 	 * @param order заявка
 	 */
-	public void fireOrderAvailableEvent(Order order);
+	public void fireEvents(EditableOrder order);
 	
 	/**
 	 * Получить экземпляр редактируемой заявки.

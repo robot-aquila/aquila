@@ -1,40 +1,28 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 /**
- * Интерфейс редактируемого набора портфелей.
- * <p>
- * 2012-08-17<br>
- * $Id: EditablePortfolios.java 490 2013-02-05 19:42:02Z whirlwind $
+ * Интерфейс хранилища портфелей.
  */
 public interface EditablePortfolios extends Portfolios {
 	
 	/**
-	 * Генерировать событие о появлении информации о новом портфеле.
+	 * Генерировать события портфеля.
 	 * <p>
 	 * @param portfolio портфель
 	 */
-	public void firePortfolioAvailableEvent(Portfolio portfolio);
+	public void fireEvents(EditablePortfolio portfolio);
 	
 	/**
 	 * Получить экземпляр редактируемого портфеля.
 	 * <p>
-	 * @param account идентификатор счета
-	 * @return портфель
-	 * @throws PortfolioNotExistsException
-	 */
-	public EditablePortfolio getEditablePortfolio(Account account)
-			throws PortfolioException;
-	
-	/**
-	 * Создать и зарегистрировать новый портфель.
+	 * Если портфель не существует, то он будет создан.
 	 * <p>
 	 * @param terminal терминал
-	 * @param account торговый счет портфеля
-	 * @throws PortfolioAlreadyExistsException
+	 * @param account идентификатор счета
+	 * @return портфель
 	 */
 	public EditablePortfolio
-		createPortfolio(EditableTerminal terminal, Account account)
-			throws PortfolioException;
+		getEditablePortfolio(EditableTerminal terminal, Account account);
 	
 	/**
 	 * Установить портфель по-умолчанию.

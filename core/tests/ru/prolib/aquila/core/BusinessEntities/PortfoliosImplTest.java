@@ -7,6 +7,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -18,10 +19,11 @@ public class PortfoliosImplTest {
 	private static EventSystem es;
 	private IMocksControl control;
 	private EditableTerminal terminal;
-	private EventDispatcher dispatcher, dispatcherMock;
+	private EventDispatcher dispatcher;
 	private EventType onAvailable, onChanged, onPosAvailable, onPosChanged;
 	private PortfoliosImpl portfolios;
 	private EditablePortfolio p1, p2, p3;
+	private PortfolioFactory factory;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -37,18 +39,18 @@ public class PortfoliosImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = control.createMock(EditableTerminal.class);
-		dispatcherMock = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(EventDispatcher.class);
 		p1 = control.createMock(EditablePortfolio.class);
 		p2 = control.createMock(EditablePortfolio.class);
 		p3 = control.createMock(EditablePortfolio.class);
+		factory = control.createMock(PortfolioFactory.class);
 		
-		dispatcher = es.createEventDispatcher("Portfolios");
-		onAvailable = dispatcher.createType("OnAvailable");
-		onChanged = dispatcher.createType("OnChanged");
-		onPosAvailable = dispatcher.createType("OnPosAvailable");
-		onPosChanged = dispatcher.createType("OnPosChanged");
+		onAvailable = control.createMock(EventType.class);
+		onChanged = control.createMock(EventType.class);
+		onPosAvailable = control.createMock(EventType.class);
+		onPosChanged = control.createMock(EventType.class);
 		portfolios = new PortfoliosImpl(dispatcher, onAvailable, onChanged,
-				onPosAvailable, onPosChanged);
+				onPosAvailable, onPosChanged, factory);
 		expect(terminal.getEventSystem()).andStubReturn(es);
 		expect(p1.getAccount()).andStubReturn(account1);
 		expect(p2.getAccount()).andStubReturn(account2);
@@ -71,12 +73,13 @@ public class PortfoliosImplTest {
 	
 	@Test
 	public void testGetPortfolios() throws Exception {
-		List<Portfolio> expected = new Vector<Portfolio>();
-		assertEquals(expected, portfolios.getPortfolios());
-		expected.add(p1);
-		expected.add(p2);
 		portfolios.setPortfolio(account1, p1);
 		portfolios.setPortfolio(account2, p2);
+		
+		List<Portfolio> expected = new Vector<Portfolio>();
+		expected.add(p1);
+		expected.add(p2);
+		
 		assertEquals(expected, portfolios.getPortfolios());
 	}
 	
@@ -104,56 +107,83 @@ public class PortfoliosImplTest {
 	}
 	
 	@Test
-	public void testFirePortfolioAvailableEvent() throws Exception {
-		portfolios = new PortfoliosImpl(dispatcherMock, onAvailable, onChanged,
-				onPosAvailable, onPosChanged);
-		dispatcherMock.dispatch(new PortfolioEvent(onAvailable, p2));
+	public void testFireEvents_Available() throws Exception {
+		expect(p1.isAvailable()).andReturn(false);
+		p1.setAvailable(eq(true));
+		dispatcher.dispatch(eq(new PortfolioEvent(onAvailable, p1)));
+		p1.resetChanges();
 		control.replay();
 		
-		portfolios.firePortfolioAvailableEvent(p2);
+		portfolios.fireEvents(p1);
 		
 		control.verify();
 	}
-
-	@Test (expected=PortfolioNotExistsException.class)
-	public void testGetEditablePortfolio_ThrowsIfNotExists() throws Exception {
-		portfolios.getEditablePortfolio(account1);
+	
+	@Test
+	public void testFireEvents_Changed() throws Exception {
+		expect(p2.isAvailable()).andReturn(true);
+		p2.fireChangedEvent();
+		p2.resetChanges();
+		control.replay();
+		
+		portfolios.fireEvents(p2);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetEditablePortfolio_CreateIfNotExists() throws Exception {
+		portfolios.setDefaultPortfolio(p2);
+		EventType onChng = control.createMock(EventType.class),
+			onPosAvl = control.createMock(EventType.class),
+			onPosChng = control.createMock(EventType.class);
+		expect(p1.OnChanged()).andStubReturn(onChng);
+		expect(p1.OnPositionAvailable()).andStubReturn(onPosAvl);
+		expect(p1.OnPositionChanged()).andStubReturn(onPosChng);
+		
+		expect(factory.createInstance(terminal, account1)).andReturn(p1);
+		onChng.addListener(portfolios);
+		onPosAvl.addListener(portfolios);
+		onPosChng.addListener(portfolios);
+		control.replay();
+		
+		EditablePortfolio actual =
+			portfolios.getEditablePortfolio(terminal, account1);
+		
+		control.verify();
+		assertSame(p1, actual);
+		assertSame(p1, portfolios.getPortfolio(account1));
+		assertSame(p2, portfolios.getDefaultPortfolio());
+	}
+	
+	@Test
+	public void testGetEditablePortfolio_SetDefault() throws Exception {
+		EventType onChng = control.createMock(EventType.class),
+			onPosAvl = control.createMock(EventType.class),
+			onPosChng = control.createMock(EventType.class);
+		expect(p1.OnChanged()).andStubReturn(onChng);
+		expect(p1.OnPositionAvailable()).andStubReturn(onPosAvl);
+		expect(p1.OnPositionChanged()).andStubReturn(onPosChng);
+		
+		expect(factory.createInstance(terminal, account1)).andReturn(p1);
+		onChng.addListener(portfolios);
+		onPosAvl.addListener(portfolios);
+		onPosChng.addListener(portfolios);
+		control.replay();
+		
+		EditablePortfolio actual =
+			portfolios.getEditablePortfolio(terminal, account1);
+		
+		control.verify();
+		assertSame(p1, actual);
+		assertSame(p1, portfolios.getPortfolio(account1));
+		assertSame(p1, portfolios.getDefaultPortfolio());
 	}
 	
 	@Test
 	public void testGetEditablePortfolio() throws Exception {
 		portfolios.setPortfolio(account2, p2);
-		assertSame(p2, portfolios.getEditablePortfolio(account2));
-	}
-	
-	@Test (expected=PortfolioAlreadyExistsException.class)
-	public void testCreatePortfolio_ThrowsIfAlreadyExists() throws Exception {
-		portfolios.setPortfolio(account1, p1);
-		portfolios.createPortfolio(terminal, account1);
-	}
-
-	@Test
-	public void testCreatePortfolio() throws Exception {
-		EventDispatcher d = es.createEventDispatcher("Portfolio[LX-001]");
-		PortfolioImpl expected = new PortfolioImpl(terminal, account1, d,
-				d.createType("OnChanged"));
-		EventDispatcher pd = es.createEventDispatcher("Portfolio[LX-001]");
-		expected.setPositionsInstance(new PositionsImpl(expected, pd,
-				pd.createType("OnPosAvailable"),
-				pd.createType("OnPosChanged")));
-		expected.OnChanged().addListener(portfolios);
-		expected.OnPositionAvailable().addListener(portfolios);
-		expected.OnPositionChanged().addListener(portfolios);
-		control.replay();
-		
-		Portfolio actual = portfolios.createPortfolio(terminal, account1);
-		
-		control.verify();
-		assertNotNull(actual);
-		assertEquals(expected, actual);
-		assertSame(actual, portfolios.getEditablePortfolio(account1));
-		assertSame(actual, portfolios.getPortfolio(account1));
-		assertSame(actual, portfolios.getDefaultPortfolio());
+		assertSame(p2, portfolios.getEditablePortfolio(terminal, account2));
 	}
 	
 	@Test
@@ -242,29 +272,32 @@ public class PortfoliosImplTest {
 		list2.add(p1);
 		list2.add(p2);
 		list2.add(p3);
-		Variant<String> vDispId = new Variant<String>()
-			.add("Portfolios")
-			.add("AnotherId");
-		Variant<String> vAvlId = new Variant<String>(vDispId)
-			.add("OnAvailable")
-			.add("OnUnknown");
-		Variant<String> vChngId = new Variant<String>(vAvlId)
-			.add("OnChanged")
-			.add("OnSomething");
-		Variant<String> vPosAvlId = new Variant<String>(vChngId)
-			.add("OnPosAvailable")
-			.add("OnPosUnknown");
-		Variant<String> vPosChngId = new Variant<String>(vPosAvlId)
-			.add("OnPosChanged")
-			.add("OnPosSomething");
+		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>()
+			.add(dispatcher)
+			.add(control.createMock(EventDispatcher.class));
+		Variant<EventType> vAvl = new Variant<EventType>(vDisp)
+			.add(onAvailable)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vChng = new Variant<EventType>(vAvl)
+			.add(onChanged)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vPosAvl = new Variant<EventType>(vChng)
+			.add(onPosAvailable)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vPosChng = new Variant<EventType>(vPosAvl)
+			.add(onPosChanged)
+			.add(control.createMock(EventType.class));
 		Variant<List<EditablePortfolio>> vList =
-				new Variant<List<EditablePortfolio>>(vPosChngId)
+				new Variant<List<EditablePortfolio>>(vPosChng)
 			.add(list1)
 			.add(list2);
 		Variant<EditablePortfolio> vDef = new Variant<EditablePortfolio>(vList)
 			.add(p1)
 			.add(null);
-		Variant<?> iterator = vDef;
+		Variant<PortfolioFactory> vFact = new Variant<PortfolioFactory>(vDef)
+			.add(factory)
+			.add(control.createMock(PortfolioFactory.class));
+		Variant<?> iterator = vFact;
 		int foundCnt = 0;
 		PortfoliosImpl x = null, found = null;
 		control.replay();
@@ -273,11 +306,8 @@ public class PortfoliosImplTest {
 		}
 		portfolios.setDefaultPortfolio(p1);
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new PortfoliosImpl(d, d.createType(vAvlId.get()),
-					d.createType(vChngId.get()),
-					d.createType(vPosAvlId.get()),
-					d.createType(vPosChngId.get()));
+			x = new PortfoliosImpl(vDisp.get(), vAvl.get(), vChng.get(),
+					vPosAvl.get(), vPosChng.get(), vFact.get());
 			for ( EditablePortfolio p : vList.get() ) {
 				x.setPortfolio(p.getAccount(), p);
 			}
@@ -297,6 +327,15 @@ public class PortfoliosImplTest {
 		assertEquals(onPosChanged, found.OnPositionChanged());
 		assertEquals(list1, found.getPortfolios());
 		assertSame(p1, found.getDefaultPortfolio());
+		assertSame(factory, found.getFactory());
+	}
+	
+	@Test
+	public void testConstruct_DefaultFactory() throws Exception {
+		PortfoliosImpl expected = new PortfoliosImpl(dispatcher, onAvailable,
+			onChanged, onPosAvailable, onPosChanged, new PortfolioFactory());
+		assertEquals(expected, new PortfoliosImpl(dispatcher, onAvailable,
+			onChanged, onPosAvailable, onPosChanged));
 	}
 
 }

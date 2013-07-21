@@ -100,8 +100,16 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	}
 
 	@Override
-	public void fireOrderAvailableEvent(Order order) {
-		dispatcher.dispatch(new OrderEvent(onAvailable, order));
+	public void fireEvents(EditableOrder order) {
+		synchronized ( order ) {
+			if ( order.isAvailable() ) {
+				order.fireChangedEvent();
+			} else {
+				order.setAvailable(true);
+				dispatcher.dispatch(new OrderEvent(onAvailable, order));
+			}
+			order.resetChanges();
+		}
 	}
 
 	@Override

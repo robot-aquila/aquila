@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.BusinessEntities.utils.SecurityFactory;
 
 /**
  * Набор инструментов торговли.
@@ -15,6 +16,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	private final EventType onAvailable;
 	private final EventType onChanged;
 	private final EventType onTrade;
+	private final SecurityFactory factory;
 	
 	/**
 	 * Карта определения инструмента по дескриптору.
@@ -29,11 +31,13 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	 * @param onAvailable тип события: доступен инструмент
 	 * @param onChanged тип события: изменение инструмента
 	 * @param onTrade тип события: новая сделка по инструменту
+	 * @param factory фабрика инструментов
 	 */
 	public SecuritiesImpl(EventDispatcher eventDispatcher,
 						  EventType onAvailable,
 						  EventType onChanged,
-						  EventType onTrade)
+						  EventType onTrade,
+						  SecurityFactory factory)
 	{
 		super();
 		this.dispatcher = eventDispatcher;
@@ -41,6 +45,27 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		this.onChanged = onChanged;
 		this.onTrade = onTrade;
 		map = new LinkedHashMap<SecurityDescriptor, EditableSecurity>();
+		this.factory = factory;
+	}
+	
+	/**
+	 * Конструктор
+	 * <p>
+	 * @param eventDispatcher диспетчер событий
+	 * @param onAvailable тип события: доступен инструмент
+	 * @param onChanged тип события: изменение инструмента
+	 * @param onTrade тип события: новая сделка по инструменту
+	 */
+	public SecuritiesImpl(EventDispatcher dispatcher,
+						  EventType onAvailable,
+						  EventType onChanged,
+						  EventType onTrade)
+	{
+		this(dispatcher, onAvailable, onChanged, onTrade, new SecurityFactory());
+	}
+	
+	SecurityFactory getFactory() {
+		return factory;
 	}
 
 	@Override
@@ -79,20 +104,30 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	}
 
 	@Override
-	public synchronized
-		EditableSecurity getEditableSecurity(SecurityDescriptor descr)
-			throws SecurityNotExistsException
+	public synchronized EditableSecurity
+		getEditableSecurity(EditableTerminal terminal, SecurityDescriptor descr)
 	{
 		EditableSecurity security = map.get(descr);
 		if ( security == null ) {
-			throw new SecurityNotExistsException(descr);
+			security = factory.createInstance(terminal, descr);
+			map.put(descr, security);
+			security.OnChanged().addListener(this);
+			security.OnTrade().addListener(this);
 		}
 		return security;
 	}
 
 	@Override
-	public void fireSecurityAvailableEvent(Security security) {
-		dispatcher.dispatch(new SecurityEvent(OnSecurityAvailable(), security));
+	public void fireEvents(EditableSecurity security) {
+		synchronized ( security ) {
+			if ( security.isAvailable() ) {
+				security.fireChangedEvent();
+			} else {
+				security.setAvailable(true);
+				dispatcher.dispatch(new SecurityEvent(onAvailable, security));
+			}
+			security.resetChanges();
+		}
 	}
 
 	@Override
@@ -123,26 +158,6 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		return map.size();
 	}
 
-	@Override
-	public synchronized EditableSecurity
-		createSecurity(EditableTerminal terminal, SecurityDescriptor descr)
-			throws SecurityAlreadyExistsException
-	{
-		if ( map.containsKey(descr) ) {
-			throw new SecurityAlreadyExistsException(descr);
-		}
-		EventSystem es = terminal.getEventSystem();
-		EventDispatcher dispatcher =
-			es.createEventDispatcher("Security[" + descr + "]");
-		EditableSecurity s = new SecurityImpl(terminal, descr, dispatcher,
-				es.createGenericType(dispatcher, "OnChanged"),
-				es.createGenericType(dispatcher, "OnTrade"));
-		s.OnChanged().addListener(this);
-		s.OnTrade().addListener(this);
-		map.put(descr, s);
-		return s;
-	}
-	
 	/**
 	 * Установить экземпляр инструмента.
 	 * <p>
@@ -172,6 +187,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 			.append(o.onAvailable, onAvailable)
 			.append(o.onChanged, onChanged)
 			.append(o.onTrade, onTrade)
+			.append(o.factory, factory)
 			.isEquals();
 	}
 

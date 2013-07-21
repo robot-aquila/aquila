@@ -22,7 +22,7 @@ public class PositionsImplTest {
 	private Portfolio portfolio;
 	private EditablePosition position1, position2;
 	private Security security1, security2;
-	private EventDispatcher dispatcher, dispatcherMock;
+	private EventDispatcher dispatcher;
 	private EventType onAvailable, onChanged;
 	private PositionsImpl positions;
 	
@@ -36,7 +36,7 @@ public class PositionsImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		dispatcherMock = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(EventDispatcher.class);
 		terminal = control.createMock(EditableTerminal.class);
 		portfolio = control.createMock(Portfolio.class);
 		security1 = control.createMock(Security.class);
@@ -45,9 +45,8 @@ public class PositionsImplTest {
 		position2 = control.createMock(EditablePosition.class);
 		
 		es = new EventSystemImpl(queue);
-		dispatcher = es.createEventDispatcher("Test");
-		onAvailable = dispatcher.createType("OnAvailable");
-		onChanged = dispatcher.createType("OnChanged");
+		onAvailable = control.createMock(EventType.class);
+		onChanged = control.createMock(EventType.class);
 		positions = new PositionsImpl(portfolio, dispatcher,
 				onAvailable, onChanged);
 		
@@ -61,13 +60,26 @@ public class PositionsImplTest {
 	}
 	
 	@Test
-	public void testFirePositionAvailableEvent() throws Exception {
-		positions = new PositionsImpl(portfolio, dispatcherMock,
-				onAvailable, onChanged);
-		dispatcherMock.dispatch(eq(new PositionEvent(onAvailable, position1)));
+	public void testFireEvents_Available() throws Exception {
+		expect(position1.isAvailable()).andReturn(false);
+		position1.setAvailable(true);
+		dispatcher.dispatch(eq(new PositionEvent(onAvailable, position1)));
+		position1.resetChanges();
 		control.replay();
 		
-		positions.firePositionAvailableEvent(position1);
+		positions.fireEvents(position1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testFireEvents_Changed() throws Exception {
+		expect(position1.isAvailable()).andReturn(true);
+		position1.fireChangedEvent();
+		position1.resetChanges();
+		control.replay();
+		
+		positions.fireEvents(position1);
 		
 		control.verify();
 	}
@@ -181,16 +193,16 @@ public class PositionsImplTest {
 		list2.add(position2);
 		list2.add(position1);
 		Variant<Portfolio> vPort = new Variant<Portfolio>().add(portfolio);
-		Variant<String> vDispId = new Variant<String>(vPort)
-			.add("Test")
-			.add("Best");
-		Variant<String> vAvlId = new Variant<String>(vDispId)
-			.add("OnAvailable")
-			.add("OnBalabable");
-		Variant<String> vChngId = new Variant<String>(vAvlId)
-			.add("OnChanged")
-			.add("OnGranged");
-		Variant<List<Position>> vList = new Variant<List<Position>>(vChngId)
+		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vPort)
+			.add(dispatcher)
+			.add(control.createMock(EventDispatcher.class));
+		Variant<EventType> vAvl = new Variant<EventType>(vDisp)
+			.add(onAvailable)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vChng = new Variant<EventType>(vAvl)
+			.add(onChanged)
+			.add(control.createMock(EventType.class));
+		Variant<List<Position>> vList = new Variant<List<Position>>(vChng)
 			.add(list1)
 			.add(list2);
 		Variant<?> iterator = vList;
@@ -198,9 +210,8 @@ public class PositionsImplTest {
 		PositionsImpl x = null, found = null;
 		control.replay();
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new PositionsImpl(vPort.get(), d,
-					d.createType(vAvlId.get()), d.createType(vChngId.get()));
+			x = new PositionsImpl(vPort.get(), vDisp.get(),
+					vAvl.get(), vChng.get());
 			for ( Position p : vList.get() ) {
 				x.setPosition(p.getSecurityDescriptor(), (EditablePosition) p);
 			}

@@ -133,8 +133,8 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public synchronized void firePositionAvailableEvent(Position position) {
-		positions.firePositionAvailableEvent(position);
+	public synchronized void fireEvents(EditablePosition position) {
+		positions.fireEvents(position);
 	}
 
 	@Override

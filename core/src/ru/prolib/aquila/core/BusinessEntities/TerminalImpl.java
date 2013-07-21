@@ -402,8 +402,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public void fireOrderAvailableEvent(Order order) {
-		orders.fireOrderAvailableEvent(order);
+	final public void fireEvents(EditableOrder order) {
+		orders.fireEvents(order);
 	}
 
 	@Override
@@ -426,30 +426,13 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public void firePortfolioAvailableEvent(Portfolio portfolio) {
-		portfolios.firePortfolioAvailableEvent(portfolio);
+	final public void fireEvents(EditablePortfolio portfolio) {
+		portfolios.fireEvents(portfolio);
 	}
 
 	@Override
-	final public EditablePortfolio getEditablePortfolio(Account account)
-			throws PortfolioException
-	{
-		return portfolios.getEditablePortfolio(account);
-	}
-
-	@Override
-	final public EditablePortfolio
-		createPortfolio(EditableTerminal terminal, Account account)
-			throws PortfolioException
-	{
-		return portfolios.createPortfolio(terminal, account);
-	}
-	
-	@Override
-	final public EditablePortfolio createPortfolio(Account account)
-		throws PortfolioException
-	{
-		return portfolios.createPortfolio(this, account);
+	final public EditablePortfolio getEditablePortfolio(Account account) {
+		return portfolios.getEditablePortfolio(this, account);
 	}
 
 	@Override
@@ -458,16 +441,14 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public EditableSecurity
-		getEditableSecurity(SecurityDescriptor descr)
-			throws SecurityNotExistsException
+	final public EditableSecurity getEditableSecurity(SecurityDescriptor descr)
 	{
-		return securities.getEditableSecurity(descr);
+		return securities.getEditableSecurity(this, descr);
 	}
 
 	@Override
-	final public void fireSecurityAvailableEvent(Security security) {
-		securities.fireSecurityAvailableEvent(security);
+	final public void fireEvents(EditableSecurity security) {
+		securities.fireEvents(security);
 	}
 
 	@Override
@@ -589,22 +570,6 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public EditableSecurity
-		createSecurity(EditableTerminal terminal, SecurityDescriptor descr)
-			throws SecurityAlreadyExistsException
-	{
-		return securities.createSecurity(terminal, descr);
-	}
-
-	@Override
-	final public EditableSecurity
-		createSecurity(SecurityDescriptor descr)
-			throws SecurityAlreadyExistsException
-	{
-		return securities.createSecurity(this, descr);
-	}
-
-	@Override
 	final public EditableOrder createOrder(EditableTerminal terminal) {
 		return orders.createOrder(terminal);
 	}
@@ -683,7 +648,7 @@ public class TerminalImpl implements EditableTerminal {
 		} catch ( OrderException e ) {
 			throw new IllegalStateException("Corrupted internal state: ", e);
 		}
-		orders.fireOrderAvailableEvent(order);
+		orders.fireEvents(order);
 		return order;
 	}
 
@@ -706,7 +671,7 @@ public class TerminalImpl implements EditableTerminal {
 		} catch ( OrderException e ) {
 			throw new IllegalStateException("Corrupted internal state: ", e);
 		}
-		orders.fireOrderAvailableEvent(order);
+		orders.fireEvents(order);
 		return order;
 	}
 
@@ -765,6 +730,20 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	final public boolean cancel(TimerTask task) {
 		return scheduler.cancel(task);
+	}
+
+	@Override
+	public EditablePortfolio
+		getEditablePortfolio(EditableTerminal terminal, Account account)
+	{
+		return portfolios.getEditablePortfolio(terminal, account);
+	}
+
+	@Override
+	public EditableSecurity
+		getEditableSecurity(EditableTerminal terminal, SecurityDescriptor descr)
+	{
+		return securities.getEditableSecurity(terminal, descr);
 	}
 
 }

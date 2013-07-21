@@ -9,11 +9,11 @@ package ru.prolib.aquila.core.BusinessEntities;
 public interface EditablePositions extends Positions {
 	
 	/**
-	 * Генерировать событие о появлении информации о новой позиции.
+	 * Генерировать события позиции.
 	 * <p>
 	 * @param position позиция
 	 */
-	public void firePositionAvailableEvent(Position position);
+	public void fireEvents(EditablePosition position);
 	
 	/**
 	 * Получить экземпляр редактируемой позиции.

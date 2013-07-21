@@ -9,34 +9,23 @@ package ru.prolib.aquila.core.BusinessEntities;
 public interface EditableSecurities extends Securities {
 	
 	/**
-	 * Получить модифицируемый экземпляр инструмента.
+	 * Получить экземпляр инструмента.
 	 * <p>
-	 * @param descr дескриптор инструмента
-	 * @return инструмент
-	 * @throws SecurityNotExistsException указанный инструмент не существует
-	 */
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr)
-			throws SecurityNotExistsException;
-	
-	/**
-	 * Генерировать событие о добавлении нового инструмента.
-	 * <p>
-	 * @param security новый инструмент
-	 */
-	public void fireSecurityAvailableEvent(Security security);
-	
-	/**
-	 * Создать инструмент.
-	 * <p>
-	 * Создает инструмент и добавляет его в текущий набор.
-	 * В результате вызова никаких событий не генерируется.
+	 * Если инструмент не существует, создает инструмент и добавляет его в
+	 * набор. В результате вызова никаких событий не генерируется.
 	 * <p>
 	 * @param terminal терминал
 	 * @param descr дескриптор инструмента
-	 * @return экземпляр созданного инструмента
-	 * @throws SecurityAlreadyExistsException такой инструмент уже есть в наборе
+	 * @return инструмент
 	 */
-	public EditableSecurity createSecurity(EditableTerminal terminal,
-			SecurityDescriptor descr) throws SecurityAlreadyExistsException;
+	public EditableSecurity getEditableSecurity(EditableTerminal terminal,
+			SecurityDescriptor descr);
+	
+	/**
+	 * Генерировать события инструмента.
+	 * <p>
+	 * @param security инструмент
+	 */
+	public void fireEvents(EditableSecurity security);
 
 }

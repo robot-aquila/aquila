@@ -90,24 +90,24 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	public void setTerminalState(TerminalState state);
 	
 	/**
-	 * Создать и зарегистрировать новый инструмент терминала.
+	 * Получить инструмент.
+	 * <p>
+	 * Если инструмент не существует, то он будет создан.
 	 * <p>
 	 * @param descr дескриптор нового инструмента
-	 * @return новый инструмент
-	 * @throws SecurityAlreadyExistsException инструмент уже существует
+	 * @return инструмент
 	 */
-	public EditableSecurity createSecurity(SecurityDescriptor descr)
-		throws SecurityAlreadyExistsException;
+	public EditableSecurity getEditableSecurity(SecurityDescriptor descr);
 	
 	/**
-	 * Создать и зарегистрировать новый портфель.
+	 * Получить портфель.
+	 * <p>
+	 * Если портфель не существует, то он будет создан.
 	 * <p>
 	 * @param account счет
-	 * @return новый портфель
-	 * @throws PortfolioAlreadyExistsException портфель уже существует
+	 * @return портфель
 	 */
-	public EditablePortfolio createPortfolio(Account account)
-		throws PortfolioException;
+	public EditablePortfolio getEditablePortfolio(Account account);
 	
 	/**
 	 * Создать заявку.
