@@ -44,7 +44,7 @@ public class TradesCache {
 	public synchronized void purgeFirst() {
 		if ( data.size() > 0 ) {
 			data.removeFirst();
-			dispatcher.dispatch(new EventImpl(onUpdate));
+			dispatcher.dispatch(new CacheEvent(onUpdate, false));
 		}
 	}
 	
@@ -73,7 +73,7 @@ public class TradesCache {
 	 */
 	public synchronized void add(TradesEntry entry) {
 		addEntry(entry);
-		dispatcher.dispatch(new EventImpl(onUpdate));
+		dispatcher.dispatch(new CacheEvent(onUpdate, true));
 	}
 	
 	/**

@@ -46,7 +46,7 @@ public class TradesCacheTest {
 	
 	@Test
 	public void testPurgeFirst() throws Exception {
-		dispatcher.dispatch(eq(new EventImpl(type)));
+		dispatcher.dispatch(eq(new CacheEvent(type, false)));
 		control.replay();
 		cache.addEntry(entry1);
 		cache.addEntry(entry2);
@@ -95,7 +95,7 @@ public class TradesCacheTest {
 	
 	@Test
 	public void testAdd() throws Exception {
-		dispatcher.dispatch(eq(new EventImpl(type)));
+		dispatcher.dispatch(eq(new CacheEvent(type, true)));
 		control.replay();
 		
 		cache.add(entry1);

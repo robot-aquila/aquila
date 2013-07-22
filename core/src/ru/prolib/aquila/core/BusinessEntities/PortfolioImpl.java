@@ -59,12 +59,12 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public synchronized Terminal getTerminal() {
+	public Terminal getTerminal() {
 		return terminal;
 	}
 
 	@Override
-	public synchronized Account getAccount() {
+	public Account getAccount() {
 		return account;
 	}
 	
@@ -82,7 +82,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public synchronized EventDispatcher getEventDispatcher() {
+	public EventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -102,7 +102,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public synchronized void fireChangedEvent() {
+	public void fireChangedEvent() {
 		dispatcher.dispatch(new PortfolioEvent(onChanged, this));
 	}
 
@@ -123,22 +123,22 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public synchronized EventType OnChanged() {
+	public EventType OnChanged() {
 		return onChanged;
 	}
 	
 	@Override
-	public synchronized EventType OnPositionAvailable() {
+	public EventType OnPositionAvailable() {
 		return positions.OnPositionAvailable();
 	}
 
 	@Override
-	public synchronized void fireEvents(EditablePosition position) {
+	public void fireEvents(EditablePosition position) {
 		positions.fireEvents(position);
 	}
 
 	@Override
-	public synchronized EventType OnPositionChanged() {
+	public EventType OnPositionChanged() {
 		return positions.OnPositionChanged();
 	}
 
@@ -148,7 +148,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	}
 
 	@Override
-	public synchronized Position getPosition(Security security) {
+	public Position getPosition(Security security) {
 		return positions.getPosition(security);
 	}
 
