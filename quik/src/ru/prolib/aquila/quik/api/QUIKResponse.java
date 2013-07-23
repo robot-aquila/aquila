@@ -104,5 +104,13 @@ public class QUIKResponse {
 			.append(o.status, status)
 			.isEquals();
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "["
+			+ "id=" + id + ", status=" + status + ", "
+			+ (orderId == null ? "" : "order=" + orderId + ", ")
+			+ "msg=" + msg + "]";
+	}
 
 }
