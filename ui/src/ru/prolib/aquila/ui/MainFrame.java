@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.ui.StatusBar;
+import ru.prolib.aquila.ui.FastOrder.FastOrderPanel;
 import ru.prolib.aquila.ui.wrapper.Menu;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
 import ru.prolib.aquila.ui.wrapper.MenuException;
@@ -39,6 +40,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	private MenuBar mainMenu;
 	private EventType onExit;
 	private MenuItem cmdStart, cmdStop;
+	private FastOrderPanel fastOrder;
 	
 	private StatusBar status;
 	private CurrentPortfolio currPortfolio;
@@ -71,6 +73,8 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 		
         setSize(800, 600);
         
+        fastOrder = new FastOrderPanel(terminal);
+        getContentPane().add(fastOrder, BorderLayout.NORTH);
         getContentPane().add(tabPanel, BorderLayout.CENTER);
         
         status = new StatusBar(portfolioBox, terminal, uiLabels);        
@@ -163,6 +167,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	@Override
 	public void start() throws StarterException {
 		setVisible(true);
+		fastOrder.start();
 		status.start();
 		startTerminal();
 	}
@@ -171,6 +176,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	public void stop() throws StarterException {
 		stopTerminal();
 		status.stop();
+		fastOrder.stop();
 		dispose();
 	}
 	
