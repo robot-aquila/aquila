@@ -1044,7 +1044,6 @@ public class TerminalImplTest {
 		order.setQty(eq(1L));
 		order.setQtyRest(eq(1L));
 		order.setPrice(eq(15d));
-		order.setAvailable(eq(true));
 		order.resetChanges();
 		orders.registerOrder(eq(217), same(order));
 		orders.fireEvents(same(order));
@@ -1069,7 +1068,6 @@ public class TerminalImplTest {
 		order.setSecurityDescriptor(eq(descr));
 		order.setQty(eq(10L));
 		order.setQtyRest(eq(10L));
-		order.setAvailable(eq(true));
 		order.resetChanges();
 		orders.registerOrder(eq(555), same(order));
 		orders.fireEvents(same(order));

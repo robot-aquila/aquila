@@ -641,7 +641,6 @@ public class TerminalImpl implements EditableTerminal {
 		order.setQty(qty);
 		order.setQtyRest(qty);
 		order.setPrice(price);
-		order.setAvailable(true);
 		order.resetChanges();
 		try {
 			orders.registerOrder(orderNumerator.incrementAndGet(), order);
@@ -664,7 +663,6 @@ public class TerminalImpl implements EditableTerminal {
 		order.setSecurityDescriptor(security.getDescriptor());
 		order.setQty(qty);
 		order.setQtyRest(qty);
-		order.setAvailable(true);
 		order.resetChanges();
 		try {
 			orders.registerOrder(orderNumerator.incrementAndGet(), order);
