@@ -221,7 +221,7 @@ public class AssemblerL2Test {
 	@Test
 	public void testTryGetOrder_LocalOrderNotExists() throws Exception {
 		T2QOrder entry = control.createMock(T2QOrder.class);
-		expect(entry.getOrderId()).andReturn(123L);
+		expect(entry.getTransId()).andReturn(123L);
 		expect(terminal.isOrderExists(eq(123))).andReturn(false);
 		control.replay();
 		
@@ -233,7 +233,7 @@ public class AssemblerL2Test {
 	@Test
 	public void testTryGetOrder_GetOrderException() throws Exception {
 		T2QOrder entry = control.createMock(T2QOrder.class);
-		expect(entry.getOrderId()).andReturn(123L);
+		expect(entry.getTransId()).andReturn(123L);
 		expect(terminal.isOrderExists(eq(123))).andReturn(true);
 		terminal.getEditableOrder(eq(123));
 		expectLastCall().andThrow(new OrderNotExistsException(123L));
@@ -248,7 +248,7 @@ public class AssemblerL2Test {
 	public void testTryGetOrder_FinalStatus() throws Exception {
 		T2QOrder entry = control.createMock(T2QOrder.class);
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(entry.getOrderId()).andReturn(123L);
+		expect(entry.getTransId()).andReturn(123L);
 		expect(terminal.isOrderExists(eq(123))).andReturn(true);
 		expect(terminal.getEditableOrder(eq(123))).andReturn(order);
 		expect(order.getStatus()).andReturn(OrderStatus.CANCELLED);
@@ -263,7 +263,7 @@ public class AssemblerL2Test {
 	public void testTryGetOrder_Ok() throws Exception {
 		T2QOrder entry = control.createMock(T2QOrder.class);
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(entry.getOrderId()).andReturn(123L);
+		expect(entry.getTransId()).andReturn(123L);
 		expect(terminal.isOrderExists(eq(123))).andReturn(true);
 		expect(terminal.getEditableOrder(eq(123))).andReturn(order);
 		expect(order.getStatus()).andReturn(OrderStatus.SENT);

@@ -174,7 +174,7 @@ public class AssemblerL2 {
 	 */
 	public EditableOrder tryGetOrder(T2QOrder entry) {
 		EditableOrder order;
-		int id = (int) entry.getOrderId();
+		int id = (int) entry.getTransId();
 		if ( ! terminal.isOrderExists(id) ) {
 			return null;
 		}
