@@ -1,7 +1,9 @@
 package ru.prolib.aquila.ui.FastOrder;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Dimension2D;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -49,11 +51,13 @@ public class FastOrderPanel extends JPanel implements Starter {
 		qtyField = new JFormattedTextField();
 		qtyField.setValue(new Integer(1));
 		qtyField.setColumns(8);
+		qtyField.setMinimumSize(new Dimension(50, 10));
 		NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
 		format.setMinimumFractionDigits(4);
 		slippageField = new JFormattedTextField(format);
-		slippageField.setValue(new Double(0.01d));
+		slippageField.setValue(new Double(0.0d));
 		slippageField.setColumns(8);
+		slippageField.setMinimumSize(new Dimension(50, 10));
 		
 		addLabel("  Account: ");
 		add(accountCombo);
