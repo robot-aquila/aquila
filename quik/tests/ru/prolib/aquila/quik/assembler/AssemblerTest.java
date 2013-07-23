@@ -134,7 +134,9 @@ public class AssemblerTest {
 	@Test
 	public void testAssemble_Order() throws Exception {
 		T2QOrder entry = control.createMock(T2QOrder.class);
+		l1.correctOrderNumerator(same(entry));
 		cache.put(same(entry));
+		l1.tryAssemble(same(entry));
 		control.replay();
 		
 		assembler.assemble(entry);
@@ -143,9 +145,26 @@ public class AssemblerTest {
 	}
 	
 	@Test
-	public void testAssemble_OwnTrade() throws Exception {
+	public void testAssemble_OwnTrade_OrderNotExists() throws Exception {
 		T2QTrade entry = control.createMock(T2QTrade.class);
 		cache.put(same(entry));
+		expect(entry.getOrderId()).andReturn(2481L);
+		expect(cache.getOrder(eq(2481L))).andReturn(null);
+		control.replay();
+		
+		assembler.assemble(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testAssemble_OwnTrade_OrderExists() throws Exception {
+		T2QTrade entry = control.createMock(T2QTrade.class);
+		T2QOrder order = control.createMock(T2QOrder.class);
+		cache.put(same(entry));
+		expect(entry.getOrderId()).andReturn(2481L);
+		expect(cache.getOrder(eq(2481L))).andReturn(order);
+		l1.tryAssemble(same(order));
 		control.replay();
 		
 		assembler.assemble(entry);

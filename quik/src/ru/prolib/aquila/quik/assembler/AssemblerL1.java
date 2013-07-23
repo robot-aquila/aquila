@@ -1,9 +1,12 @@
 package ru.prolib.aquila.quik.assembler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
 import ru.prolib.aquila.quik.assembler.cache.*;
+import ru.prolib.aquila.t2q.T2QOrder;
+import ru.prolib.aquila.t2q.T2QTrade;
 
 /**
  * Функции сборки объектов модели.
@@ -101,6 +104,49 @@ public class AssemblerL1 {
 				break;
 			}
 			cache.purgeFirst();
+		}
+	}
+	
+	/**
+	 * Выполнить попытку согласования заявки.
+	 * <p>
+	 * @param entry кэш-запись заявки
+	 */
+	public void tryAssemble(T2QOrder entry) {
+		EditableOrder order = l2.tryGetOrder(entry);
+		if ( order == null ) {
+			return;
+		}
+		synchronized ( order ) {
+			l2.tryActivate(order);
+			for ( T2QTrade trade : terminal.getDataCache()
+					.getOwnTradesByOrder(entry.getOrderId()) )
+			{
+				l2.tryAssemble(order, trade);
+			}
+			l2.tryFinalize(order, entry);
+		}
+	}
+	
+	/**
+	 * Откорректировать значение нумератора заявок.
+	 * <p>
+	 * Данный метод использует номер транзакции, соответствующий заявке,
+	 * для корректировки текущего значения нумератора заявок. Это необходимо
+	 * для того, что бы исключить некорректное сопоставление данных кэша
+	 * и соответствующих заявок для тех заявок, которые были созданы в процессе
+	 * предыдущего запуска программы. Если номер транзакции не превышает
+	 * текущее значение нумератора, то никаких изменений не выполняется.
+	 * <p>
+	 * @param entry кэш-запись заявки
+	 */
+	public void correctOrderNumerator(T2QOrder entry) {
+		int id = (int) entry.getTransId();
+		Counter numerator = terminal.getOrderNumerator();
+		synchronized ( numerator ) {
+			if ( numerator.get() < id ) {
+				numerator.set(id);
+			}
 		}
 	}
 	

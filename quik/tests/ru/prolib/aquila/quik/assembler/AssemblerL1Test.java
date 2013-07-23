@@ -6,9 +6,11 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
 import ru.prolib.aquila.quik.assembler.cache.*;
+import ru.prolib.aquila.t2q.*;
 
 public class AssemblerL1Test {
 	private IMocksControl control;
@@ -157,6 +159,69 @@ public class AssemblerL1Test {
 	public void testConstruct_Short() throws Exception {
 		asm = new AssemblerL1(terminal, new AssemblerL2(terminal));
 		assertEquals(asm, new AssemblerL1(terminal));
+	}
+	
+	@Test
+	public void testCorrectOrderNumerator_FixIfGreater() throws Exception {
+		Counter numerator = control.createMock(Counter.class);
+		T2QOrder order = control.createMock(T2QOrder.class);
+		expect(order.getTransId()).andReturn(101L);
+		expect(terminal.getOrderNumerator()).andReturn(numerator);
+		expect(numerator.get()).andReturn(100);
+		numerator.set(eq(101));
+		control.replay();
+		
+		asm.correctOrderNumerator(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCorrectOrderNumerator_SkipIfLessOrEq() throws Exception {
+		Counter numerator = control.createMock(Counter.class);
+		T2QOrder order = control.createMock(T2QOrder.class);
+		expect(order.getTransId()).andReturn(80L);
+		expect(terminal.getOrderNumerator()).andReturn(numerator);
+		expect(numerator.get()).andReturn(100);
+		control.replay();
+		
+		asm.correctOrderNumerator(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryAssemble_Order_NoOrder() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		expect(l2.tryGetOrder(same(entry))).andReturn(null);
+		control.replay();
+		
+		asm.tryAssemble(entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryAssemble_Order() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		expect(entry.getOrderId()).andStubReturn(827L);
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(l2.tryGetOrder(same(entry))).andReturn(order);
+		l2.tryActivate(same(order));
+		List<T2QTrade> list = new Vector<T2QTrade>();
+		list.add(control.createMock(T2QTrade.class));
+		list.add(control.createMock(T2QTrade.class));
+		list.add(control.createMock(T2QTrade.class));
+		expect(cache.getOwnTradesByOrder(eq(827L))).andReturn(list);
+		l2.tryAssemble(same(order), same(list.get(0)));
+		l2.tryAssemble(same(order), same(list.get(1)));
+		l2.tryAssemble(same(order), same(list.get(2)));
+		expect(l2.tryFinalize(same(order), same(entry))).andReturn(true);
+		control.replay();
+		
+		asm.tryAssemble(entry);
+		
+		control.verify();
 	}
 
 }

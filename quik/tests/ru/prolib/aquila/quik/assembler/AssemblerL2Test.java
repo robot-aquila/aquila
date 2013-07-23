@@ -3,6 +3,9 @@ package ru.prolib.aquila.quik.assembler;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -12,10 +15,12 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
 import ru.prolib.aquila.quik.assembler.cache.*;
+import ru.prolib.aquila.t2q.*;
 
 public class AssemblerL2Test {
 	private static Account account;
 	private static SecurityDescriptor descr;
+	private static SimpleDateFormat df;
 	private IMocksControl control;
 	private QUIKEditableTerminal terminal;
 	private EditableSecurities securities;
@@ -29,6 +34,7 @@ public class AssemblerL2Test {
 		BasicConfigurator.configure();
 		account = new Account("TEST", "1", "2");
 		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
+		df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	}
 
 	@Before
@@ -208,6 +214,214 @@ public class AssemblerL2Test {
 		control.replay();
 		
 		assertTrue(asm.tryAssemble(entry));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryGetOrder_LocalOrderNotExists() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		expect(entry.getOrderId()).andReturn(123L);
+		expect(terminal.isOrderExists(eq(123))).andReturn(false);
+		control.replay();
+		
+		assertNull(asm.tryGetOrder(entry));
+		
+		control.verify();
+	}
+
+	@Test
+	public void testTryGetOrder_GetOrderException() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		expect(entry.getOrderId()).andReturn(123L);
+		expect(terminal.isOrderExists(eq(123))).andReturn(true);
+		terminal.getEditableOrder(eq(123));
+		expectLastCall().andThrow(new OrderNotExistsException(123L));
+		control.replay();
+		
+		assertNull(asm.tryGetOrder(entry));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryGetOrder_FinalStatus() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(entry.getOrderId()).andReturn(123L);
+		expect(terminal.isOrderExists(eq(123))).andReturn(true);
+		expect(terminal.getEditableOrder(eq(123))).andReturn(order);
+		expect(order.getStatus()).andReturn(OrderStatus.CANCELLED);
+		control.replay();
+		
+		assertNull(asm.tryGetOrder(entry));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryGetOrder_Ok() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(entry.getOrderId()).andReturn(123L);
+		expect(terminal.isOrderExists(eq(123))).andReturn(true);
+		expect(terminal.getEditableOrder(eq(123))).andReturn(order);
+		expect(order.getStatus()).andReturn(OrderStatus.SENT);
+		control.replay();
+		
+		assertSame(order, asm.tryGetOrder(entry));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryAssemble_Trade_SkipExisting() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		T2QTrade entry = control.createMock(T2QTrade.class);
+		expect(entry.getId()).andStubReturn(814L);
+		expect(order.hasTrade(eq(814L))).andReturn(true);
+		control.replay();
+		
+		asm.tryAssemble(order, entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryAssemble_Trade_Ok() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(order.getDirection()).andStubReturn(Direction.SELL);
+		expect(order.getId()).andStubReturn(832);
+		expect(order.getSecurityDescriptor()).andStubReturn(descr);
+		
+		T2QTrade entry = control.createMock(T2QTrade.class);
+		expect(entry.getId()).andStubReturn(814L);
+		expect(entry.getPrice()).andStubReturn(12.34d);
+		expect(entry.getQty()).andStubReturn(1000L);
+		expect(entry.getDate()).andStubReturn(20130722L);
+		expect(entry.getTime()).andStubReturn(93317L);
+		expect(entry.getValue()).andStubReturn(123400d);
+		
+		Trade expected = new Trade(terminal);
+		expected.setDirection(Direction.SELL);
+		expected.setId(814L);
+		expected.setOrderId(832L);
+		expected.setPrice(12.34d);
+		expected.setQty(1000L);
+		expected.setSecurityDescriptor(descr);
+		expected.setTime(df.parse("2013-07-22 09:33:17"));
+		expected.setVolume(123400d);
+
+		expect(order.hasTrade(eq(814L))).andReturn(false);
+		order.addTrade(eq(expected));
+		order.fireTradeEvent(eq(expected));
+		control.replay();
+		
+		asm.tryAssemble(order, entry);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryActivate_NotRequired() throws Exception {
+		OrderStatus expected[] = {
+				OrderStatus.ACTIVE,
+				OrderStatus.CANCEL_FAILED,
+				OrderStatus.CANCEL_SENT,
+				OrderStatus.CANCELLED,
+				OrderStatus.CONDITION,
+				OrderStatus.FILLED,
+				OrderStatus.PENDING,
+				OrderStatus.REJECTED,
+		};
+		for ( int i = 0; i < expected.length; i ++ ) {
+			setUp();
+			EditableOrder order = control.createMock(EditableOrder.class);
+			expect(order.getStatus()).andReturn(expected[i]);
+			control.replay();
+			
+			asm.tryActivate(order);
+			
+			control.verify();
+		}
+	}
+	
+	@Test
+	public void testTryActivate_Activate() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(order.getStatus()).andReturn(OrderStatus.SENT);
+		order.setStatus(eq(OrderStatus.ACTIVE));
+		terminal.fireEvents(same(order));
+		control.replay();
+		
+		asm.tryActivate(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryFinalize_FilledOk() throws Exception {
+		EditableOrder order = control.createMock(EditableOrder.class);
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		Date time = new Date();
+		expect(order.getQtyRest()).andReturn(0L);
+		order.setStatus(eq(OrderStatus.FILLED));
+		expect(terminal.getCurrentTime()).andReturn(time);
+		order.setLastChangeTime(same(time));
+		terminal.fireEvents(same(order));
+		control.replay();
+		
+		assertTrue(asm.tryFinalize(order, entry));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryFinalize_KilledOk() throws Exception {
+		Date time = new Date();
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		expect(entry.getBalance()).andStubReturn(5L);
+		expect(entry.getStatus()).andStubReturn(2);
+
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(order.getQtyRest()).andReturn(5L);
+		order.setStatus(eq(OrderStatus.CANCELLED));
+		expect(terminal.getCurrentTime()).andReturn(time);
+		order.setLastChangeTime(same(time));
+		terminal.fireEvents(same(order));
+		control.replay();
+		
+		assertTrue(asm.tryFinalize(order, entry));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryFinalize_SkipKilledButNotAdjusted() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		expect(entry.getBalance()).andStubReturn(5L);
+		expect(entry.getStatus()).andStubReturn(2);
+
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(order.getQtyRest()).andReturn(6L);
+		control.replay();
+		
+		assertFalse(asm.tryFinalize(order, entry));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTryFinalize_SkipActive() throws Exception {
+		T2QOrder entry = control.createMock(T2QOrder.class);
+		expect(entry.getBalance()).andStubReturn(5L);
+		expect(entry.getStatus()).andStubReturn(1);
+
+		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(order.getQtyRest()).andReturn(5L);
+		control.replay();
+		
+		assertFalse(asm.tryFinalize(order, entry));
 		
 		control.verify();
 	}

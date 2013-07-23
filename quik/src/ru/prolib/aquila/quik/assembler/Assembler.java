@@ -142,9 +142,9 @@ public class Assembler implements Starter, EventListener {
 	 * @param entry кэш-запись заявки
 	 */
 	public void assemble(T2QOrder entry) {
-		// TODO: здесь нужно подвинуть нумератор заявок, если номер транзы
-		// полученной заявки больше чем текущий в нумераторе.
+		l1.correctOrderNumerator(entry);
 		terminal.getDataCache().put(entry);
+		l1.tryAssemble(entry);
 	}
 	
 	/**
@@ -153,7 +153,12 @@ public class Assembler implements Starter, EventListener {
 	 * @param entry кэш-запись сделки
 	 */
 	public void assemble(T2QTrade entry) {
-		terminal.getDataCache().put(entry);
+		Cache cache = terminal.getDataCache(); 
+		cache.put(entry);
+		T2QOrder order = cache.getOrder(entry.getOrderId());
+		if ( order != null ) {
+			l1.tryAssemble(order);			
+		}
 	}
 	
 	/**

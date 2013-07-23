@@ -1,5 +1,8 @@
 package ru.prolib.aquila.quik.assembler;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.row.RowException;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
 import ru.prolib.aquila.quik.assembler.cache.*;
+import ru.prolib.aquila.t2q.*;
 
 /**
  * Функции сборки объектов модели.
@@ -159,6 +163,122 @@ public class AssemblerL2 {
 			logger.error("Error trade access. {} trades was lost", args);
 		}
 		return true;
+	}
+	
+	/**
+	 * Попытка получить локальный экземпляр заявки.
+	 * <p>
+	 * @param entry кэш-запись заявки
+	 * @return локальная заявка или null, если нет соответствующей заявки или
+	 * заявка в финальном статуса
+	 */
+	public EditableOrder tryGetOrder(T2QOrder entry) {
+		EditableOrder order;
+		int id = (int) entry.getOrderId();
+		if ( ! terminal.isOrderExists(id) ) {
+			return null;
+		}
+		try {
+			order = terminal.getEditableOrder(id);
+		} catch ( OrderException e ) {
+			Object args[] = { id, e };
+			logger.error("Error get order #{}: ", args);
+			return null;
+		}
+		if ( order.getStatus().isFinal() ) {
+			return null;
+		}
+		return order;
+	}
+	
+	/**
+	 * Согласовать сделку заявки.
+	 * <p>
+	 * @param order заявка
+	 * @param entry кэш-запись сделки
+	 */
+	public void tryAssemble(EditableOrder order, T2QTrade entry) {
+		if ( order.hasTrade(entry.getId()) ) {
+			return;
+		}
+		Trade trade = new Trade(terminal);
+		trade.setDirection(order.getDirection());
+		trade.setId(entry.getId());
+		trade.setOrderId((long) order.getId());
+		trade.setPrice(entry.getPrice());
+		trade.setQty(entry.getQty());
+		trade.setSecurityDescriptor(order.getSecurityDescriptor());
+		trade.setTime(getTime(entry));
+		trade.setVolume(entry.getValue());
+		order.addTrade(trade);
+		order.fireTradeEvent(trade);
+	}
+	
+	private Date getTime(T2QTrade trade) {
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.MILLISECOND, 0);
+		
+		int part = (int) trade.getDate();
+		c.set(Calendar.DAY_OF_MONTH, part % 100);
+		part /= 100;
+		c.set(Calendar.MONTH, (part % 100) - 1);
+		c.set(Calendar.YEAR, part / 100);
+		
+		part = (int) trade.getTime();
+		c.set(Calendar.SECOND, part % 100);
+		part /= 100;
+		c.set(Calendar.MINUTE, part % 100);
+		c.set(Calendar.HOUR_OF_DAY, part / 100);
+		
+		return c.getTime();
+	}
+
+	/**
+	 * Активировать заявку.
+	 * <p>
+	 * Выполняет активацию заявки, если она в промежуточном статусе.
+	 * <p>
+	 * @param order заявка
+	 */
+	public void tryActivate(EditableOrder order) {
+		if ( order.getStatus() == OrderStatus.SENT ) {
+			order.setStatus(OrderStatus.ACTIVE);
+			terminal.fireEvents(order);
+		}
+	}
+	
+	/**
+	 * Выполнить попытку финализации заявки.
+	 * <p>
+	 * Финализация заявки должна выполняться после согласования состояния
+	 * заявки по сделкам, в результате которого расчитывается значение
+	 * неисполненного остатка. Заявка переводится в статус
+	 * {@link OrderStatus#FILLED} в случае, если неисполненный остаток заявки
+	 * равен нулю. Если кэш-запись заявки указывает на отмененную заявку,
+	 * то выполняется сравнение неисполненного остатка по локальной заявке
+	 * и баланса кэш-записи. Если эти значения совпадают, то заявка переводится
+	 * в статус {@link OrderStatus#CANCELLED}. 
+	 * <p>
+	 * @param order заявка
+	 * @param entry кэш-запись заявки
+	 * @return true - заявка финализирована, false - заявка не финализирована
+	 */
+	public boolean tryFinalize(EditableOrder order, T2QOrder entry) {
+		long rest = order.getQtyRest();
+		OrderStatus newStatus = null;
+		if ( rest == 0L ) {
+			newStatus = OrderStatus.FILLED;
+		} else if ( entry.getStatus() == 2 && rest == entry.getBalance() ) {
+			newStatus = OrderStatus.CANCELLED;
+		}
+		if ( newStatus != null ) {
+			order.setStatus(newStatus);
+			order.setLastChangeTime(terminal.getCurrentTime());
+			terminal.fireEvents(order);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
