@@ -44,7 +44,7 @@ public class CandleSeriesFiller implements Starter {
 	public CandleSeriesFiller(Security security, int periodMinutes,
 			boolean candleAutoFlush)
 	{
-		this(security, new CandleAggregator(periodMinutes), true);
+		this(security, new CandleAggregator(periodMinutes), candleAutoFlush);
 	}
 	
 	/**

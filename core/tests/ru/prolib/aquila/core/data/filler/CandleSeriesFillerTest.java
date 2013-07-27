@@ -7,6 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.Starter;
+import ru.prolib.aquila.core.StarterStub;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.CandleSeries;
@@ -98,6 +99,23 @@ public class CandleSeriesFillerTest {
 		control.replay();
 		
 		assertEquals(expected, new CandleSeriesFiller(security, 15, true));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testConstruct3_SecurityPeriodNoAutoflush() throws Exception {
+		Security security = control.createMock(Security.class);
+		Terminal terminal = control.createMock(Terminal.class);
+		expect(security.getTerminal()).andStubReturn(terminal);
+		CandleAggregator aggregator = new CandleAggregator(15);
+		CandleSeriesFiller expected = new CandleSeriesFiller(
+				new CandleSeriesImpl(),
+				new CandleByTrades(security, aggregator),
+				new StarterStub());
+		control.replay();
+		
+		assertEquals(expected, new CandleSeriesFiller(security, 15, false));
 		
 		control.verify();
 	}

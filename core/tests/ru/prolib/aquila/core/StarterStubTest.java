@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core;
 
+import static org.junit.Assert.*;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.StarterStub;
@@ -20,6 +22,14 @@ public class StarterStubTest {
 	public void testStarter() throws Exception {
 		starter.start();
 		starter.stop();
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(starter.equals(starter));
+		assertTrue(starter.equals(new StarterStub()));
+		assertFalse(starter.equals(null));
+		assertFalse(starter.equals(this));
 	}
 
 }

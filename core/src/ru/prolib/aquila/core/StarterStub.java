@@ -25,5 +25,13 @@ public class StarterStub implements Starter {
 	public void stop() {
 
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		return other != null && other.getClass() == StarterStub.class;
+	}
 
 }
