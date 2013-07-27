@@ -62,7 +62,9 @@ public class QUIKPluginTerminal implements AquilaPluginTerminal, EventListener {
 	}
 
 	@Override
-	public void initialize(ServiceLocator locator, Terminal terminal) {
+	public void
+		initialize(ServiceLocator locator, Terminal terminal, String arg)
+	{
 		if ( terminal instanceof QUIKEditableTerminal ) {
 			this.terminal = (QUIKEditableTerminal) terminal;
 		} else {
