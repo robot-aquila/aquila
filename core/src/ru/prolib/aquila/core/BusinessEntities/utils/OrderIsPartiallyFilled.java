@@ -16,7 +16,7 @@ public class OrderIsPartiallyFilled implements OrderStateValidator {
 
 	@Override
 	public boolean validate(EditableOrder order) {
-		return order.hasChanged(OrderImpl.STATUS_CHANGED)
+		return order.hasChanged(EditableOrder.STATUS_CHANGED)
 			&& order.getStatus() == OrderStatus.CANCELLED
 			&& order.getQtyRest() > 0;
 	}

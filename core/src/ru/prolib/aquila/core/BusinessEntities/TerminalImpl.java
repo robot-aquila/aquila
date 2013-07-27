@@ -308,12 +308,26 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	final public void placeOrder(Order order) throws OrderException {
-		orderProcessor.placeOrder(order);
+		synchronized ( order ) {
+			if ( order.getStatus() == OrderStatus.CONDITION ) {
+				order.getActivator().stop();
+			}
+			orderProcessor.placeOrder(order);
+		}
 	}
 
 	@Override
 	final public void cancelOrder(Order order) throws OrderException {
-		orderProcessor.cancelOrder(order);
+		synchronized ( order ) {
+			if ( order.getStatus() == OrderStatus.CONDITION ) {
+				EditableOrder o = (EditableOrder) order;
+				o.getActivator().stop();
+				o.setStatus(OrderStatus.CANCELLED);
+				orders.fireEvents(o);
+			} else {
+				orderProcessor.cancelOrder(order);
+			}
+		}
 	}
 
 	@Override
@@ -742,6 +756,22 @@ public class TerminalImpl implements EditableTerminal {
 		getEditableSecurity(EditableTerminal terminal, SecurityDescriptor descr)
 	{
 		return securities.getEditableSecurity(terminal, descr);
+	}
+
+	@Override
+	public void placeOrder(Order order, OrderActivator activator)
+			throws OrderException
+	{
+		synchronized ( order ) {
+			EditableOrder o = (EditableOrder) order;
+			OrderStatus status = o.getStatus();
+			if ( status != OrderStatus.PENDING ) {
+				throw new OrderException("Recjected by status: " + status);
+			}
+			activator.start(o);
+			o.setStatus(OrderStatus.CONDITION);
+			orders.fireEvents(o);
+		}
 	}
 
 }

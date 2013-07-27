@@ -259,4 +259,11 @@ public interface Order {
 	 */
 	public OrderSystemInfo getSystemInfo();
 	
+	/**
+	 * Получить контроллер активации заявки.
+	 * <p>
+	 * @return контроллер
+	 */
+	public OrderActivator getActivator();
+	
 }

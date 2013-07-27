@@ -10,7 +10,6 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -52,13 +51,13 @@ public class OrderIsRegisteredTest {
 			setUp();
 			String msg = "At #" + index;
 			expect(order.getStatus()).andStubReturn(vStatus.get());
-			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
+			expect(order.hasChanged(EditableOrder.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			control.replay();
 			if ( vChanged.get() == true && expected.contains(vStatus.get()) ) {
 				found ++;
 				assertTrue(msg, validator.validate(order));
-				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
+				assertTrue(msg, order.hasChanged(EditableOrder.STATUS_CHANGED));
 				actual.add(vStatus.get());
 			} else {
 				assertFalse(msg, validator.validate(order));

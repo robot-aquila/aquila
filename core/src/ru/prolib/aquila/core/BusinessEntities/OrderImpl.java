@@ -9,13 +9,9 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
 /**
  * Заявка.
- * <p>
- * 2012-09-22<br>
- * $Id: OrderImpl.java 542 2013-02-23 04:15:34Z whirlwind $
  */
 public class OrderImpl extends EditableImpl implements EditableOrder {
 	public static final int VERSION = 0x05;
-	public static final Integer STATUS_CHANGED = 0x01;
 	private final EventDispatcher dispatcher;
 	private final EventType onRegister;
 	private final EventType onRegisterFailed;
@@ -43,6 +39,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private Date time,lastChangeTime;
 	private final LinkedList<Trade> trades = new LinkedList<Trade>();
 	private final OrderSystemInfo systemInfo = new OrderSystemInfo();
+	private OrderActivator activator;
 	
 	/**
 	 * Конструктор.
@@ -218,7 +215,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 		if ( status != this.status ) {
 			this.prevStatus = this.status;
 			this.status = status;
-			setChanged(STATUS_CHANGED);
+			setChanged(EditableOrder.STATUS_CHANGED);
 		}
 	}
 
@@ -457,12 +454,26 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 			.append(o.execVolume, execVolume)
 			.append(o.qtyRest, qtyRest)
 			.append(o.systemInfo, systemInfo)
+			.append(o.activator, activator)
 			.isEquals();
 	}
 	
 	@Override
 	public OrderSystemInfo getSystemInfo() {
 		return systemInfo;
+	}
+
+	@Override
+	public synchronized OrderActivator getActivator() {
+		return activator;
+	}
+
+	@Override
+	public synchronized void setActivator(OrderActivator value) {
+		if ( value == null ? activator != null : ! value.equals(activator) ) {
+			this.activator = value;
+			setChanged();
+		}
 	}
 
 }

@@ -66,5 +66,17 @@ public interface Editable {
 	 * сброшен вызовом метода {@link #resetChanges()}.
 	 */
 	public void setChanged();
+	
+	/**
+	 * Установить признак изменения объекта.
+	 * <p>
+	 * Вызов этого метода устанавливает признак модификации для всего объекта и
+	 * для модификатора с указанным кодом. После вызова метода, метод
+	 * {@link #hasChanged()} и метод {@link #hasChanged(Integer)} с кодом
+	 * модификатора возвращает true.
+	 * <p>
+	 * @param markerId код модификатора
+	 */
+	public void setChanged(Integer markerId);
 
 }

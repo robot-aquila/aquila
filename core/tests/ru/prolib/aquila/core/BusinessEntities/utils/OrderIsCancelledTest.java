@@ -7,7 +7,6 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
-import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -44,14 +43,14 @@ public class OrderIsCancelledTest {
 		do {
 			setUp();
 			String msg = "At #" + index;
-			expect(order.hasChanged(OrderImpl.STATUS_CHANGED))
+			expect(order.hasChanged(EditableOrder.STATUS_CHANGED))
 				.andStubReturn(vChanged.get());
 			expect(order.getStatus()).andStubReturn(vStatus.get());
 			control.replay();
 			if ( vChanged.get() && vStatus.get() == OrderStatus.CANCELLED ) {
 				found ++;
 				assertTrue(msg, validator.validate(order));
-				assertTrue(msg, order.hasChanged(OrderImpl.STATUS_CHANGED));
+				assertTrue(msg, order.hasChanged(EditableOrder.STATUS_CHANGED));
 			} else {
 				assertFalse(msg, validator.validate(order));
 			}

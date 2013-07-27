@@ -346,8 +346,9 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testPlaceOrder() throws Exception {
+	public void testPlaceOrder1() throws Exception {
 		Order order = control.createMock(Order.class);
+		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
 		orderProcessor.placeOrder(same(order));
 		control.replay();
 		terminal.setOrderProcessorInstance(orderProcessor);
@@ -358,11 +359,84 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testPlaceOrder1_StopActivator() throws Exception {
+		OrderActivator activator = control.createMock(OrderActivator.class);
+		Order order = control.createMock(Order.class);
+		expect(order.getStatus()).andReturn(OrderStatus.CONDITION);
+		expect(order.getActivator()).andReturn(activator);
+		activator.stop();
+		orderProcessor.placeOrder(same(order));
+		control.replay();
+		terminal.setOrderProcessorInstance(orderProcessor);
+		
+		terminal.placeOrder(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPlaceOrder2() throws Exception {
+		OrderActivator activator = control.createMock(OrderActivator.class);
+		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
+		activator.start(same(order));
+		order.setStatus(eq(OrderStatus.CONDITION));
+		orders.fireEvents(same(order));
+		control.replay();
+		
+		terminal.placeOrder(order, activator);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPlaceOrder2_RejectByStatus() throws Exception {
+		OrderStatus expected[] = {
+				OrderStatus.ACTIVE,
+				OrderStatus.CANCEL_FAILED,
+				OrderStatus.CANCEL_SENT,
+				OrderStatus.CANCELLED,
+				OrderStatus.CONDITION,
+				OrderStatus.FILLED,
+				OrderStatus.REJECTED,
+				OrderStatus.SENT,
+		};
+		OrderActivator activator = control.createMock(OrderActivator.class);
+		for ( int i = 0; i < expected.length; i ++ ) {
+			setUp();
+			expect(order.getStatus()).andReturn(expected[i]);
+			control.replay();
+			
+			try {
+				terminal.placeOrder(order, activator);
+				fail("Expected: " + OrderException.class);
+			} catch ( OrderException e ) {
+				control.verify();
+			}
+		}
+	}
+	
+	@Test
 	public void testCancelOrder() throws Exception {
 		Order order = control.createMock(Order.class);
+		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		orderProcessor.cancelOrder(same(order));
 		control.replay();
 		terminal.setOrderProcessorInstance(orderProcessor);
+		
+		terminal.cancelOrder(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCancelOrder_StopActivator() throws Exception {
+		OrderActivator activator = control.createMock(OrderActivator.class);
+		expect(order.getStatus()).andReturn(OrderStatus.CONDITION);
+		expect(order.getActivator()).andReturn(activator);
+		activator.stop();
+		order.setStatus(OrderStatus.CANCELLED);
+		orders.fireEvents(same(order));
+		control.replay();
 		
 		terminal.cancelOrder(order);
 		

@@ -44,18 +44,9 @@ public class EditableImpl implements Editable {
 		changed = true;
 	}
 	
-	/**
-	 * Установить признак изменения объекта.
-	 * <p>
-	 * Вызов этого метода устанавливает признак модификации для всего объекта и
-	 * для модификатора с указанным кодом. После вызова метода, метод
-	 * {@link #hasChanged()} и метод {@link #hasChanged(Integer)} с кодом
-	 * модификатора возвращает true.
-	 * <p>
-	 * @param changeId код модификатора
-	 */
-	protected synchronized void setChanged(Integer changeId) {
-		changes.put(changeId, true);
+	@Override
+	public synchronized void setChanged(Integer markerId) {
+		changes.put(markerId, true);
 		changed = true;
 	}
 

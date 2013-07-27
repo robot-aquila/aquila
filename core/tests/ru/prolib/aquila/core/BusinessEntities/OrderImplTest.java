@@ -40,6 +40,7 @@ public class OrderImplTest {
 	private G<?> getter;
 	private List<OrderStateHandler> stateHandlers;
 	private Terminal terminal;
+	private OrderActivator activator;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -55,6 +56,7 @@ public class OrderImplTest {
 		control = createStrictControl();
 		dispatcherMock = control.createMock(EventDispatcher.class);
 		es = new EventSystemImpl();
+		activator = control.createMock(OrderActivator.class);
 		dispatcher = es.createEventDispatcher("Order");
 		onRegister = dispatcher.createType("OnRegister");
 		onRegisterFailed = dispatcher.createType("OnRegisterFailed");
@@ -379,7 +381,7 @@ public class OrderImplTest {
 			}
 		};
 		testSetterGetterF(OrderStatus.ACTIVE, OrderStatus.FILLED,
-				OrderImpl.STATUS_CHANGED);
+				EditableOrder.STATUS_CHANGED);
 	}
 	
 	@Test
@@ -481,6 +483,25 @@ public class OrderImplTest {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		testSetterGetter(df.parse("1991-07-01 13:00:00"),
 						 df.parse("2032-02-21 06:58:00"));
+	}
+	
+	@Test
+	public void testSetActivator() throws Exception {
+		setter = new S<OrderImpl>() {
+			@Override
+			public void set(OrderImpl object, Object value) {
+				object.setActivator((OrderActivator) value);
+			}
+		};
+		getter = new G<OrderActivator>() {
+			@Override
+			public OrderActivator get(Object object) {
+				return ((OrderImpl) object).getActivator();
+			}
+		};
+		OrderActivator a1 = control.createMock(OrderActivator.class),
+			a2 = control.createMock(OrderActivator.class);
+		testSetterGetter(a1, a2);
 	}
 	
 	@Test
@@ -630,8 +651,9 @@ public class OrderImplTest {
 		order.setExecutedVolume(249400.00d);
 		order.setAvgExecutedPrice(182.34d);
 		order.getSystemInfo().getRegistration().setRequest(new Object());
+		order.setActivator(activator);
 		
-		double aprob = 0.4; // Probability of additional variant
+		double aprob = 0.3; // Probability of additional variant
 		Random rnd = new Random();
 		Variant<String> vDispId = new Variant<String>()
 			.add("Order");
@@ -730,7 +752,12 @@ public class OrderImplTest {
 		Variant<Object> vRegReq = new Variant<Object>(vAvgPr)
 			.add(order.getSystemInfo().getRegistration().getRequest())
 			.add(new Object());
-		Variant<?> iterator = vRegReq;
+		Variant<OrderActivator> vAct = new Variant<OrderActivator>(vRegReq)
+			.add(activator);
+		if ( rnd.nextDouble() > aprob ) {
+			vAct.add(control.createMock(OrderActivator.class));
+		}
+		Variant<?> iterator = vAct;
 		int foundCnt = 0;
 		OrderImpl x = null, found = null;
 		do {
@@ -764,6 +791,7 @@ public class OrderImplTest {
 			x.setAvgExecutedPrice(vAvgPr.get());
 			x.setExecutedVolume(vExecVol.get());
 			x.getSystemInfo().getRegistration().setRequest(vRegReq.get());
+			x.setActivator(vAct.get());
 			if ( order.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -801,6 +829,7 @@ public class OrderImplTest {
 		assertEquals(249400.00d, found.getExecutedVolume(), 0.01d);
 		assertEquals(182.34d, found.getAvgExecutedPrice(), 0.01d);
 		assertEquals(order.getSystemInfo(), found.getSystemInfo());
+		assertEquals(activator, found.getActivator());
 	}
-
+	
 }

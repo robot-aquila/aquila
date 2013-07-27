@@ -4,13 +4,18 @@ import java.util.Date;
 
 
 /**
- * Интерфейс модифицируемой заявки.
- * <p>
- * 2012-09-22<br>
- * $Id: EditableOrder.java 542 2013-02-23 04:15:34Z whirlwind $
+ * Служебный интерфейс заявки.
  */
 public interface EditableOrder extends Order, Editable {
-	
+	/**
+	 * Маркер изменения статуса заявки. 
+	 */
+	public static final Integer STATUS_CHANGED = 0x01;
+	/**
+	 * Маркер изменения состояния активатора заявки.
+	 */
+	public static final Integer ACTIVATOR_CHANGED = 0x02;
+
 	/**
 	 * Установить идентификатор заявки.
 	 * <p>
@@ -140,5 +145,12 @@ public interface EditableOrder extends Order, Editable {
 	 * мусора уничтожить объект, если в нем больше нет необходимости.
 	 */
 	public void clearAllEventListeners();
+	
+	/**
+	 * Установить контроллер активации заявки.
+	 * <p>
+	 * @param activator контроллер акцивации
+	 */
+	public void setActivator(OrderActivator activator);
 
 }

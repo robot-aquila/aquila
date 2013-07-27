@@ -214,4 +214,14 @@ public interface Terminal extends Securities, Portfolios, Starter, Orders,
 	 */
 	public EventType OnRequestSecurityError();
 	
+	/**
+	 * Разместить заявку с условной активацией.
+	 * <p>
+	 * @param order заявка
+	 * @param activator активатор заявки
+	 * @throws OrderException
+	 */
+	public void placeOrder(Order order, OrderActivator activator)
+		throws OrderException;
+	
 }
