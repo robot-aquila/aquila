@@ -155,7 +155,7 @@ public class MainFrameTest {
 	@Test
 	public void testInitialize() {
 		ServiceLocator locator = control.createMock(ServiceLocator.class);
-		main.initialize(locator, terminal);
+		main.initialize(locator, terminal, null);
 		assertEquals(terminal, main.getTerminal());
 	}
 

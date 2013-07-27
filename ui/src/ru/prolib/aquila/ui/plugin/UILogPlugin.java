@@ -33,7 +33,9 @@ public class UILogPlugin implements AquilaPlugin {
 	}
 
 	@Override
-	public void initialize(ServiceLocator locator, Terminal terminal) {
+	public void
+		initialize(ServiceLocator locator, Terminal terminal, String arg)
+	{
 
 	}
 

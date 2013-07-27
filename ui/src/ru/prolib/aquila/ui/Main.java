@@ -7,6 +7,7 @@ import java.util.*;
 
 import javax.swing.UIManager;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.ini4j.Profile.Section;
 import org.ini4j.Wini;
@@ -28,12 +29,38 @@ public class Main implements Runnable {
 	public static final String DRIVERS = "drivers";
 	public static final String PLUGINS = "plugins";
 	
-	private final List<AquilaPlugin> plugins = new Vector<AquilaPlugin>();
+	private final List<PluginInfo> plugins = new Vector<PluginInfo>();
 	private final StarterQueue starter = new StarterQueue();
 	private final ServiceLocator locator;
 	
 	static {
 		logger = LoggerFactory.getLogger(Main.class);
+	}
+	
+	/**
+	 * Информация о плагине.
+	 */
+	static class PluginInfo {
+		private final AquilaPlugin instance;
+		private final String arg;
+		
+		PluginInfo(AquilaPlugin instance, String arg) {
+			this.instance = instance;
+			this.arg = arg;
+		}
+		
+		PluginInfo(AquilaPlugin instance) {
+			this(instance, null);
+		}
+		
+		@Override
+		public String toString() {
+			String result = instance.getClass().toString();
+			if ( arg != null ) {
+				result += " (arg=" + arg + ")";
+			}
+			return result;
+		}
 	}
 	
 	public Main() {
@@ -94,12 +121,12 @@ public class Main implements Runnable {
 		loadPlugins(ini.get(MAIN_SEC, PLUGINS));
 		addLastPlugins();
 		
-		for ( AquilaPlugin plugin : plugins ) {
-			logger.debug("Initialize plugin: " + plugin.getClass());
-			plugin.initialize(locator, terminal);
+		for ( PluginInfo p : plugins ) {
+			logger.debug("Initialize plugin: " + p);
+			p.instance.initialize(locator, terminal, p.arg);
 			if ( isUiMode ) {
-				logger.debug("Create UI plugin: " + plugin.getClass());
-				plugin.createUI(locator);
+				logger.debug("Create UI plugin: " + p);
+				p.instance.createUI(locator);
 			}
 		}
 		logger.debug("Run start sequence");
@@ -118,7 +145,13 @@ public class Main implements Runnable {
 			if ( className.startsWith(";") ) {
 				continue;
 			}
-			addPlugin((AquilaPlugin) Class.forName(className).newInstance());
+			String chunks[] = StringUtils.split(className, " ", 2);
+			String arg = null;
+			if ( chunks.length == 2 ) {
+				className = chunks[0];
+				arg = chunks[1];
+			}
+			addPlugin((AquilaPlugin)Class.forName(className).newInstance(),arg);
 		}
 		reader.close();
 	}
@@ -133,10 +166,15 @@ public class Main implements Runnable {
 		addPlugin(new ru.prolib.aquila.ui.plugin.UILogPlugin());
 	}
 	
-	private void addPlugin(AquilaPlugin plugin) {
-		plugins.add(plugin);
+	private void addPlugin(AquilaPlugin plugin, String arg) {
+		PluginInfo p = new PluginInfo(plugin, arg);
+		plugins.add(p);
 		starter.add(plugin);
-		logger.debug("Register plugin: " + plugin.getClass());
+		logger.debug("Register plugin: " + p);		
+	}
+	
+	private void addPlugin(AquilaPlugin plugin) {
+		addPlugin(plugin, null);
 	}
 	
 	private Properties section2Props(Section section) {

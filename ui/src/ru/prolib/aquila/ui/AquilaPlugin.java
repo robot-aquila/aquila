@@ -16,14 +16,18 @@ public interface AquilaPlugin extends Starter {
 	 * <p>
 	 * Данный метод вызывается для каждого плагина один раз сразу после
 	 * создания. Этот метод вызывается ДО вызова метода
-	 * {@link #createUI(AquilaUI)} (если программа запускается в режиме UI). 
+	 * {@link #createUI(AquilaUI)} (если программа запускается в режиме UI).
 	 * <p>
 	 * @param locator сервис-локатор
 	 * @param terminal рабочий терминал
+	 * @param arg строка-аргумент запуска, которая может быть указана через
+	 * пробел после класса в списке загружаемых плагинов. Если после имени
+	 * класса нет строки-аргумента, то в качестве значения этого аргумента
+	 * передается null
 	 * @throws Exception
 	 */
-	public void initialize(ServiceLocator locator, Terminal terminal)
-			throws Exception;
+	public void initialize(ServiceLocator locator, Terminal terminal,
+			String arg) throws Exception;
 
 	/**
 	 * Создать UI элементы плагина.
@@ -34,7 +38,7 @@ public interface AquilaPlugin extends Starter {
 	 * случае режима работы без UI это обязательно приведет к ошибкам. Связь
 	 * должна быть односторонней: от элементов UI к объектам бизнес-процесса
 	 * плагина. Этот метод вызывается ПОСЛЕ вызова метода
-	 * {@link #initialize(ServiceLocator, Terminal)}.
+	 * {@link #initialize(ServiceLocator, Terminal, String)}.
 	 * <p>
 	 * @param facade фасад UI
 	 * @throws Exception

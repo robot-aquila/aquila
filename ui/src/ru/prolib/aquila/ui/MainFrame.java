@@ -160,7 +160,9 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	}
 	
 	@Override
-	public void initialize(ServiceLocator locator, Terminal terminal) {
+	public void
+		initialize(ServiceLocator locator, Terminal terminal, String arg)
+	{
 		this.terminal = terminal;
 	}
 

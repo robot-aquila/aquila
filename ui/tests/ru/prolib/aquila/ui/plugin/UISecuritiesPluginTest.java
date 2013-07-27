@@ -56,7 +56,7 @@ public class UISecuritiesPluginTest {
 	 */
 	@Test
 	public void testInitialize() {
-		plugin.initialize(locator, terminal);
+		plugin.initialize(locator, terminal, null);
 		assertEquals(terminal, plugin.getTerminal());
 	}
 
