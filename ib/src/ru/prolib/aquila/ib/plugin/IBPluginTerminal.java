@@ -65,7 +65,9 @@ public class IBPluginTerminal implements AquilaPluginTerminal, EventListener {
 	}
 
 	@Override
-	public void initialize(ServiceLocator locator, Terminal terminal) {
+	public void
+		initialize(ServiceLocator locator, Terminal terminal, String arg)
+	{
 		if ( terminal instanceof IBEditableTerminal ) {
 			this.terminal = (IBEditableTerminal) terminal;
 		} else {
