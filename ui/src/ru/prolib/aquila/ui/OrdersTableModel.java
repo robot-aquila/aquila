@@ -36,6 +36,7 @@ public class OrdersTableModel extends AbstractTableModel implements
 	private static final String COL_PRICE = "COL_PRICE";
 	private static final String COL_EXEC_VOL = "COL_EXEC_VOL";
 	private static final String COL_AVG_EXEC_PRICE = "COL_AVG_EXEC_PRICE";
+	private static final String COL_ACTIVATOR = "COL_ACTIVATOR";
 	private static final String[] header = {
 		COL_ID,
 		COL_TIME,
@@ -50,6 +51,7 @@ public class OrdersTableModel extends AbstractTableModel implements
 		COL_QTY_REST,
 		COL_EXEC_VOL,
 		COL_AVG_EXEC_PRICE,
+		COL_ACTIVATOR,
 	};
 	private ClassLabels uiLabels;
 	private final Orders orders;
@@ -93,8 +95,7 @@ public class OrdersTableModel extends AbstractTableModel implements
 			} else if (header[col] == COL_TYPE) {
 				return order.getType();
 			} else if (header[col] == COL_SEC) {
-				//return order.getSecurityDescriptor();
-				// Что бы формировать загрузку инструмента 
+
 				return sec.getDescriptor();
 			} else if (header[col] == COL_QTY) {
 				return order.getQty();
@@ -114,6 +115,8 @@ public class OrdersTableModel extends AbstractTableModel implements
 				return formatTime(order.getLastChangeTime());
 			} else if ( header[col] == COL_AVG_EXEC_PRICE ) {
 				return order.getAvgExecutedPrice();
+			} else if ( header[col] == COL_ACTIVATOR ) {
+				return order.getActivator();
 			} else {
 				return null;
 			}
