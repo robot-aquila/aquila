@@ -475,5 +475,15 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 			setChanged();
 		}
 	}
+	
+	/**
+	 * Каждая заявка уникальна и ситуации когда у двух разных заявок может
+	 * быть одинаковый хэш-код возникать не должны. В противном случае,
+	 * алгоритмы оперирующие наборами заявок не будут работать корректно.
+	 */
+	@Override
+	public final int hashCode() {
+		return super.hashCode();
+	}
 
 }
