@@ -309,23 +309,41 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	final public void placeOrder(Order order) throws OrderException {
 		synchronized ( order ) {
-			if ( order.getStatus() == OrderStatus.CONDITION ) {
+			OrderStatus status = order.getStatus();
+			EditableOrder o = (EditableOrder) order;
+			if ( status == OrderStatus.PENDING ) {
+				OrderActivator activator = o.getActivator();
+				if ( activator != null ) {
+					activator.start(o);
+					o.setStatus(OrderStatus.CONDITION);
+					orders.fireEvents(o);
+					return;
+				}
+			} else if ( status == OrderStatus.CONDITION ) {
 				order.getActivator().stop();
 			}
-			orderProcessor.placeOrder(order);
+			synchronized ( this ) {
+				orderProcessor.placeOrder(order);
+			}
 		}
 	}
 
 	@Override
 	final public void cancelOrder(Order order) throws OrderException {
 		synchronized ( order ) {
-			if ( order.getStatus() == OrderStatus.CONDITION ) {
-				EditableOrder o = (EditableOrder) order;
+			EditableOrder o = (EditableOrder) order;
+			OrderStatus status = o.getStatus();
+			if ( status == OrderStatus.PENDING ) {
+				o.setStatus(OrderStatus.CANCELLED);
+				orders.fireEvents(o);
+			} else if ( status == OrderStatus.CONDITION ) {
 				o.getActivator().stop();
 				o.setStatus(OrderStatus.CANCELLED);
 				orders.fireEvents(o);
 			} else {
-				orderProcessor.cancelOrder(order);
+				synchronized ( this ) {
+					orderProcessor.cancelOrder(order);
+				}
 			}
 		}
 	}
@@ -646,6 +664,20 @@ public class TerminalImpl implements EditableTerminal {
 	final public Order createOrder(Account account, Direction dir,
 			Security security, long qty, double price)
 	{
+		return createOrder(account, dir, security, qty, price, null);
+	}
+
+	@Override
+	final public Order createOrder(Account account, Direction dir,
+			Security security, long qty)
+	{
+		return createOrder(account, dir, security, qty, null);
+	}
+	
+	@Override
+	final public Order createOrder(Account account, Direction dir,
+		Security security, long qty, double price, OrderActivator activator)
+	{
 		EditableOrder order = createOrder();
 		order.setTime(getCurrentTime());
 		order.setType(OrderType.LIMIT);
@@ -655,6 +687,9 @@ public class TerminalImpl implements EditableTerminal {
 		order.setQty(qty);
 		order.setQtyRest(qty);
 		order.setPrice(price);
+		if ( activator != null ) {
+			order.setActivator(activator);
+		}
 		order.resetChanges();
 		try {
 			orders.registerOrder(orderNumerator.incrementAndGet(), order);
@@ -667,7 +702,7 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	final public Order createOrder(Account account, Direction dir,
-			Security security, long qty)
+		Security security, long qty, OrderActivator activator)
 	{
 		EditableOrder order = createOrder();
 		order.setTime(getCurrentTime());
@@ -677,6 +712,9 @@ public class TerminalImpl implements EditableTerminal {
 		order.setSecurityDescriptor(security.getDescriptor());
 		order.setQty(qty);
 		order.setQtyRest(qty);
+		if ( activator != null ) {
+			order.setActivator(activator);
+		}
 		order.resetChanges();
 		try {
 			orders.registerOrder(orderNumerator.incrementAndGet(), order);
@@ -756,22 +794,6 @@ public class TerminalImpl implements EditableTerminal {
 		getEditableSecurity(EditableTerminal terminal, SecurityDescriptor descr)
 	{
 		return securities.getEditableSecurity(terminal, descr);
-	}
-
-	@Override
-	public void placeOrder(Order order, OrderActivator activator)
-			throws OrderException
-	{
-		synchronized ( order ) {
-			EditableOrder o = (EditableOrder) order;
-			OrderStatus status = o.getStatus();
-			if ( status != OrderStatus.PENDING ) {
-				throw new OrderException("Recjected by status: " + status);
-			}
-			activator.start(o);
-			o.setStatus(OrderStatus.CONDITION);
-			orders.fireEvents(o);
-		}
 	}
 
 }

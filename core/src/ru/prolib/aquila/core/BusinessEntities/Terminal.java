@@ -183,6 +183,45 @@ public interface Terminal extends Securities, Portfolios, Starter, Orders,
 			long qty);
 	
 	/**
+	 * Создать лимитную заявку с условной активацией.
+ 	 * <p>
+	 * Данный метод создает лимитную заявку с условной активацией. Новой заявке
+	 * автоматически назначается очередной номер, по которому можно обращаться к
+	 * заявке через терминал. В завершении генерируется событие о доступности
+	 * новой заявки. Для начала отслеживания условия активации следует
+	 * использовать метод {@link #placeOrder(Order)}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param dir операция (направление заявки)
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param activator активатор заявки
+	 * @return экземпляр заявки
+	 */
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty, double price, OrderActivator activator);
+	
+	/**
+	 * Создать рыночную заявку с условной активацией.
+ 	 * <p>
+	 * Данный метод создает рыночную заявку с условной активацией. Новой заявке
+	 * автоматически назначается очередной номер, по которому можно обращаться к
+	 * заявке через терминал. В завершении генерируется событие о доступности
+	 * новой заявки. Для начала отслеживания условия активации следует
+	 * использовать метод {@link #placeOrder(Order)}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param dir операция (направление заявки)
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param activator активатор заявки
+	 * @return экземпляр заявки
+	 */
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty, OrderActivator activator);
+	
+	/**
 	 * Инициировать использование инструмента.
 	 * <p>
 	 * Данный метод должен использоваться торговыми стратегиями для декларации
@@ -213,15 +252,5 @@ public interface Terminal extends Securities, Portfolios, Starter, Orders,
 	 * @return тип события
 	 */
 	public EventType OnRequestSecurityError();
-	
-	/**
-	 * Разместить заявку с условной активацией.
-	 * <p>
-	 * @param order заявка
-	 * @param activator активатор заявки
-	 * @throws OrderException
-	 */
-	public void placeOrder(Order order, OrderActivator activator)
-		throws OrderException;
 	
 }

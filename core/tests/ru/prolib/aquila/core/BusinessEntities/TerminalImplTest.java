@@ -347,8 +347,8 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testPlaceOrder1() throws Exception {
-		Order order = control.createMock(Order.class);
 		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
+		expect(order.getActivator()).andReturn(null);
 		orderProcessor.placeOrder(same(order));
 		control.replay();
 		terminal.setOrderProcessorInstance(orderProcessor);
@@ -359,9 +359,23 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testPlaceOrder1_StopActivator() throws Exception {
+	public void testPlaceOrder1_Pending_WithActivator() throws Exception {
 		OrderActivator activator = control.createMock(OrderActivator.class);
-		Order order = control.createMock(Order.class);
+		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
+		expect(order.getActivator()).andReturn(activator);
+		activator.start(same(order));
+		order.setStatus(eq(OrderStatus.CONDITION));
+		orders.fireEvents(same(order));
+		control.replay();
+		
+		terminal.placeOrder(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPlaceOrder1_Condition_StopActivator() throws Exception {
+		OrderActivator activator = control.createMock(OrderActivator.class);
 		expect(order.getStatus()).andReturn(OrderStatus.CONDITION);
 		expect(order.getActivator()).andReturn(activator);
 		activator.stop();
@@ -375,49 +389,7 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testPlaceOrder2() throws Exception {
-		OrderActivator activator = control.createMock(OrderActivator.class);
-		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
-		activator.start(same(order));
-		order.setStatus(eq(OrderStatus.CONDITION));
-		orders.fireEvents(same(order));
-		control.replay();
-		
-		terminal.placeOrder(order, activator);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testPlaceOrder2_RejectByStatus() throws Exception {
-		OrderStatus expected[] = {
-				OrderStatus.ACTIVE,
-				OrderStatus.CANCEL_FAILED,
-				OrderStatus.CANCEL_SENT,
-				OrderStatus.CANCELLED,
-				OrderStatus.CONDITION,
-				OrderStatus.FILLED,
-				OrderStatus.REJECTED,
-				OrderStatus.SENT,
-		};
-		OrderActivator activator = control.createMock(OrderActivator.class);
-		for ( int i = 0; i < expected.length; i ++ ) {
-			setUp();
-			expect(order.getStatus()).andReturn(expected[i]);
-			control.replay();
-			
-			try {
-				terminal.placeOrder(order, activator);
-				fail("Expected: " + OrderException.class);
-			} catch ( OrderException e ) {
-				control.verify();
-			}
-		}
-	}
-	
-	@Test
-	public void testCancelOrder() throws Exception {
-		Order order = control.createMock(Order.class);
+	public void testCancelOrder_Active() throws Exception {
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		orderProcessor.cancelOrder(same(order));
 		control.replay();
@@ -429,7 +401,19 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCancelOrder_StopActivator() throws Exception {
+	public void testCancelOrder_Pending() throws Exception {
+		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
+		order.setStatus(OrderStatus.CANCELLED);
+		orders.fireEvents(same(order));
+		control.replay();
+		
+		terminal.cancelOrder(order);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCancelOrder_Condition_StopActivator() throws Exception {
 		OrderActivator activator = control.createMock(OrderActivator.class);
 		expect(order.getStatus()).andReturn(OrderStatus.CONDITION);
 		expect(order.getActivator()).andReturn(activator);
@@ -1130,6 +1114,33 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testCreateOrder5_WithActivator() throws Exception {
+		OrderActivator activator = control.createMock(OrderActivator.class); 
+		Date time = new Date();
+		terminal.getOrderNumerator().set(216);
+		expect(orders.createOrder(same(terminal))).andReturn(order);
+		expect(scheduler.getCurrentTime()).andReturn(time);
+		order.setTime(same(time));
+		order.setType(eq(OrderType.LIMIT));
+		order.setAccount(eq(account));
+		order.setDirection(eq(Direction.BUY));
+		order.setSecurityDescriptor(eq(descr));
+		order.setQty(eq(1L));
+		order.setQtyRest(eq(1L));
+		order.setPrice(eq(15d));
+		order.setActivator(same(activator));
+		order.resetChanges();
+		orders.registerOrder(eq(217), same(order));
+		orders.fireEvents(same(order));
+		control.replay();
+		
+		assertSame(order, terminal.createOrder(account, Direction.BUY, security,
+				1L, 15d, activator));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testCreateOrder4() throws Exception {
 		Date time = new Date();
 		terminal.getOrderNumerator().set(554);
@@ -1149,6 +1160,32 @@ public class TerminalImplTest {
 		
 		assertSame(order,
 			terminal.createOrder(account, Direction.SELL, security, 10L));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testCreateOrder4_WithActivator() throws Exception {
+		OrderActivator activator = control.createMock(OrderActivator.class);
+		Date time = new Date();
+		terminal.getOrderNumerator().set(554);
+		expect(orders.createOrder(same(terminal))).andReturn(order);
+		expect(scheduler.getCurrentTime()).andReturn(time);
+		order.setTime(same(time));
+		order.setType(eq(OrderType.MARKET));
+		order.setAccount(eq(account));
+		order.setDirection(eq(Direction.SELL));
+		order.setSecurityDescriptor(eq(descr));
+		order.setQty(eq(10L));
+		order.setQtyRest(eq(10L));
+		order.setActivator(same(activator));
+		order.resetChanges();
+		orders.registerOrder(eq(555), same(order));
+		orders.fireEvents(same(order));
+		control.replay();
+		
+		assertSame(order, terminal.createOrder(account, Direction.SELL,
+				security, 10L, activator));
 		
 		control.verify();
 	}
