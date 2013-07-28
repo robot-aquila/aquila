@@ -48,7 +48,7 @@ public class TradesCsvFileWriterTest {
 		es = new EventSystemImpl();
 		queue = es.getEventQueue();
 		queue.start();
-		report = new ReportBuilder().createTradeReport(es);
+		report = new ReportBuilder().createReport(es);
 		report.start();
 		target = File.createTempFile("csv-writer-test", ".csv");
 		target.deleteOnExit();

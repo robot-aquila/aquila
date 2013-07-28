@@ -20,10 +20,8 @@ public class ReportBuilder {
 	 * @param account торговый счет
 	 * @return отчет
 	 */
-	public TradeReport
-		createAccountTradeReport(Terminal terminal, Account account)
-	{
-		return createTerminalTradeReport(terminal,
+	public TradeReport createReport(Terminal terminal, Account account) {
+		return createReport(terminal,
 				new AccountTradeSelector(account));
 	}
 	
@@ -33,7 +31,7 @@ public class ReportBuilder {
 	 * @param es фасад системы событий
 	 * @return отчет
 	 */
-	public EditableTradeReport createTradeReport(EventSystem es) {
+	public EditableTradeReport createReport(EventSystem es) {
 		EventDispatcher d = es.createEventDispatcher("Trades");
 		return new CommonTradeReport(d, d.createType("Enter"),
 				d.createType("Exit"), d.createType("Changed"));
@@ -45,15 +43,25 @@ public class ReportBuilder {
 	 * @param terminal терминал
 	 * @return отчет
 	 */
-	public TradeReport createTerminalTradeReport(Terminal terminal) {
-		return createTerminalTradeReport(terminal, new StubTradeSelector());
+	public TradeReport createReport(Terminal terminal) {
+		return createReport(terminal, new StubTradeSelector());
 	}
 	
-	private TradeReport
-		createTerminalTradeReport(Terminal terminal, TradeSelector selector)
+	/**
+	 * Создать отчет по трейдам пула заявок.
+	 * <p>
+	 * @param orders пул заявок
+	 * @return отчет
+	 */
+	public TradeReport createReport(OrderPool orders) {
+		return createReport(orders.getTerminal(),
+				new OrderPoolTradeSelector(orders));
+	}
+	
+	private TradeReport createReport(Terminal terminal, TradeSelector selector)
 	{
 		return new TerminalTradeReport(terminal, selector,
-			createTradeReport(((EditableTerminal) terminal).getEventSystem()));
+			createReport(((EditableTerminal) terminal).getEventSystem()));
 	}
 	
 	@Override
