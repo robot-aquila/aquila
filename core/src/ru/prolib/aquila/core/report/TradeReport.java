@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.report;
 
 import java.util.List;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
  * Интерфейс отчета по трейдам.
@@ -29,6 +30,47 @@ public interface TradeReport extends Starter {
 	 * @return трейд
 	 */
 	public RTrade getRecord(int index);
+	
+	/**
+	 * Получить текущий трейд по инструменту.
+	 * <p> 
+	 * @param descr дескриптор инструмента
+	 * @return трейд или null, если трейд не открыт
+	 */
+	public RTrade getCurrent(SecurityDescriptor descr);
+	
+	/**
+	 * Получить текущий трейд по инструменту.
+	 * <p>
+	 * @param security инструмент
+	 * @return трейд или null, если трейд не открыт
+	 */
+	public RTrade getCurrent(Security security);
+	
+	/**
+	 * Получить текущую позицию по инструменту.
+	 * <p>
+	 * Подразумевается позиция, образованная последовательностью сделок,
+	 * вошедших в отчет. Текущая позиция определяется следующим образом.
+	 * Если трейд по инструменту не открыт, то позиция закрыта. Если открыт
+	 * короткий трейд, то возвращается отрицательное значение непокрытого
+	 * количества (uncovered qty). Для длинного трейда возвращается непокрытое
+	 * количество "как есть".
+	 * <p>
+	 * @param descr дескриптор инструмента
+	 * @return текущая позиция
+	 */
+	public long getPosition(SecurityDescriptor descr);
+	
+	/**
+	 * Получить текущую позицию по инструменту.
+	 * <p>
+	 * Метод работает аналогично {@link #getPosition(SecurityDescriptor)}.
+	 * <p>
+	 * @param security инструмент
+	 * @return текущая позиция
+	 */
+	public long getPosition(Security security);
 	
 	/**
 	 * Получить тип события: при открытии нового трейда.

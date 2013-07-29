@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.report.trades;
 
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
@@ -7,16 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import org.apache.log4j.BasicConfigurator;
+import org.easymock.IMocksControl;
 import org.junit.*;
 import com.csvreader.CsvReader;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
-import ru.prolib.aquila.core.report.RTrade;
-import ru.prolib.aquila.core.report.TradeReportEvent;
-import ru.prolib.aquila.core.report.trades.ActiveTrades;
-import ru.prolib.aquila.core.report.trades.CommonTradeReport;
-import ru.prolib.aquila.core.report.trades.RTradeImpl;
+import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CommonTradeReportTest {
@@ -42,22 +40,32 @@ public class CommonTradeReportTest {
 	private static final String DIR_BUY = "B";
 	private static final String LONG = "LONG";
 	private static SimpleDateFormat timeFormat;
+	private static SecurityDescriptor descr;
 	
+	private IMocksControl control;
 	private EditableTerminal terminal;
 	private EventSystem es;
 	private EventDispatcher dispatcher;
 	private EventType onEnter, onExit, onChanged;
 	private CommonTradeReport trades;
+	private ActiveTrades activeTrades;
+	private RTrade record;
+	private Security security;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		descr = new SecurityDescriptor("RI", "SPFB", "USD", SecurityType.FUT);
 	}
 
 	@Before
 	public void setUp() throws Exception {
+		control = createStrictControl();
+		activeTrades = control.createMock(ActiveTrades.class);
+		record = control.createMock(RTrade.class);
+		security = control.createMock(Security.class);
 		terminal = new TerminalBuilder().createTerminal("test");
 		es = terminal.getEventSystem();
 		dispatcher = es.createEventDispatcher("Trades");
@@ -71,6 +79,16 @@ public class CommonTradeReportTest {
 	@After
 	public void tearDown() throws Exception {
 		stopQueue();
+	}
+	
+	/**
+	 * Создать тестируемый отчет с моком активных трейдов.
+	 * <p>
+	 * Использует экземпляр {@link #activeTrades} в качестве связанного объекта.
+	 */
+	final private void setTradesWithMock() {
+		trades = new CommonTradeReport(dispatcher, onEnter, onExit, onChanged, 
+				activeTrades);
 	}
 	
 	private void stopQueue() throws Exception {
@@ -325,6 +343,106 @@ public class CommonTradeReportTest {
 		assertEquals(onExit, found.OnExit());
 		assertEquals(onChanged, found.OnChanged());
 		assertEquals(loadTradeReports("trade-reports1.csv"),found.getRecords());
+	}
+	
+	@Test
+	public void testGetCurrent_SD() throws Exception {
+		setTradesWithMock();
+		expect(activeTrades.getReport(descr)).andReturn(record);
+		control.replay();
+		
+		assertSame(record, trades.getCurrent(descr));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetCurrent_S() throws Exception {
+		setTradesWithMock();
+		expect(security.getDescriptor()).andReturn(descr);
+		expect(activeTrades.getReport(descr)).andReturn(record);
+		control.replay();
+		
+		assertSame(record, trades.getCurrent(security));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetPosition_SD_Zero() throws Exception {
+		setTradesWithMock();
+		expect(activeTrades.getReport(descr)).andReturn(null);
+		control.replay();
+		
+		assertEquals(0L, trades.getPosition(descr));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetPosition_SD_Long() throws Exception {
+		setTradesWithMock();
+		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(record.getType()).andReturn(PositionType.LONG);
+		expect(record.getUncoveredQty()).andReturn(10L);
+		control.replay();
+		
+		assertEquals(10L, trades.getPosition(descr));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetPosition_SD_Short() throws Exception {
+		setTradesWithMock();
+		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(record.getType()).andReturn(PositionType.SHORT);
+		expect(record.getUncoveredQty()).andReturn(5L);
+		control.replay();
+		
+		assertEquals(-5L, trades.getPosition(descr));
+		
+		control.verify();
+	}
+
+	@Test
+	public void testGetPosition_S_Zero() throws Exception {
+		setTradesWithMock();
+		expect(security.getDescriptor()).andReturn(descr);
+		expect(activeTrades.getReport(descr)).andReturn(null);
+		control.replay();
+		
+		assertEquals(0L, trades.getPosition(security));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetPosition_S_Long() throws Exception {
+		setTradesWithMock();
+		expect(security.getDescriptor()).andReturn(descr);
+		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(record.getType()).andReturn(PositionType.LONG);
+		expect(record.getUncoveredQty()).andReturn(10L);
+		control.replay();
+		
+		assertEquals(10L, trades.getPosition(security));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetPosition_S_Short() throws Exception {
+		setTradesWithMock();
+		expect(security.getDescriptor()).andReturn(descr);
+		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(record.getType()).andReturn(PositionType.SHORT);
+		expect(record.getUncoveredQty()).andReturn(5L);
+		control.replay();
+		
+		assertEquals(-5L, trades.getPosition(security));
+		
+		control.verify();
 	}
 
 }

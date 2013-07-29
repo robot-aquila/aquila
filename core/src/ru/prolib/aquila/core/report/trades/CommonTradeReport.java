@@ -33,17 +33,32 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 	private final EventDispatcher dispatcher;
 	private EventType onEnter, onExit, onChanged;
 	
-	public CommonTradeReport(EventDispatcher dispatcher, EventType onEnter,
-			EventType onExit, EventType onChanged)
+	/**
+	 * Служебный конструктор.
+	 * <p>
+	 * @param dispatcher диспетчер событий
+	 * @param onEnter тип события: при входе в трейд
+	 * @param onExit тип события: при выходе из трейда
+	 * @param onChanged тип события: изменение трейда
+	 * @param activeTrades активные трейды
+	 */
+	CommonTradeReport(EventDispatcher dispatcher, EventType onEnter,
+			EventType onExit, EventType onChanged, ActiveTrades activeTrades)
 	{
 		super();
-		activeTrades = new ActiveTrades();
+		this.activeTrades = activeTrades;
 		this.dispatcher = dispatcher;
 		this.onEnter = onEnter;
 		this.onExit = onExit;
 		this.onChanged = onChanged;
 		this.trades = new Vector<RTrade>();
 		this.indices = new Hashtable<RTrade, Integer>();
+	}
+
+	public CommonTradeReport(EventDispatcher dispatcher, EventType onEnter,
+			EventType onExit, EventType onChanged)
+	{
+		this(dispatcher, onEnter, onExit, onChanged, new ActiveTrades());
 	}
 	
 	/**
@@ -180,6 +195,32 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 			.append(o.onExit, onExit)
 			.append(o.trades, trades)
 			.isEquals();
+	}
+
+	@Override
+	public RTrade getCurrent(SecurityDescriptor descr) {
+		return activeTrades.getReport(descr);
+	}
+
+	@Override
+	public RTrade getCurrent(Security security) {
+		return getCurrent(security.getDescriptor());
+	}
+
+	@Override
+	public long getPosition(SecurityDescriptor descr) {
+		RTrade record = getCurrent(descr);
+		if ( record == null ) return 0;
+		if ( record.getType() == PositionType.LONG ) {
+			return record.getUncoveredQty();
+		} else {
+			return - record.getUncoveredQty();
+		}
+	}
+
+	@Override
+	public long getPosition(Security security) {
+		return getPosition(security.getDescriptor());
 	}
 
 }

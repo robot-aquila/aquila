@@ -109,4 +109,24 @@ public class TerminalTradeReport implements TradeReport, EventListener {
 		
 	}
 
+	@Override
+	public RTrade getCurrent(SecurityDescriptor descr) {
+		return report.getCurrent(descr);
+	}
+
+	@Override
+	public RTrade getCurrent(Security security) {
+		return report.getCurrent(security);
+	}
+
+	@Override
+	public long getPosition(SecurityDescriptor descr) {
+		return report.getPosition(descr);
+	}
+
+	@Override
+	public long getPosition(Security security) {
+		return report.getPosition(security);
+	}
+
 }

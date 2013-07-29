@@ -16,6 +16,7 @@ import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class TerminalTradeReportTest {
+	private static SecurityDescriptor descr;
 	private IMocksControl control;
 	private EventType onEvent;
 	private Terminal terminal;
@@ -23,11 +24,20 @@ public class TerminalTradeReportTest {
 	private Order order;
 	private Trade trade;
 	private TradeSelector selector;
+	private RTrade record;
+	private Security security;
 	private TerminalTradeReport report;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		descr = new SecurityDescriptor("RI", "SPFB", "USD", SecurityType.FUT);
+	}
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
+		record = control.createMock(RTrade.class);
+		security = control.createMock(Security.class);
 		onEvent = control.createMock(EventType.class);
 		terminal = control.createMock(Terminal.class);
 		underlying = control.createMock(EditableTradeReport.class);
@@ -183,6 +193,46 @@ public class TerminalTradeReportTest {
 		assertSame(t1, found.getTerminal());
 		assertSame(selector, found.getTradeSelector());
 		assertSame(underlying, found.getUnderlyingReport());
+	}
+	
+	@Test
+	public void testGetCurrent_SD() throws Exception {
+		expect(underlying.getCurrent(descr)).andReturn(record);
+		control.replay();
+		
+		assertSame(record, report.getCurrent(descr));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetCurrent_S() throws Exception {
+		expect(underlying.getCurrent(security)).andReturn(record);
+		control.replay();
+		
+		assertSame(record, report.getCurrent(security));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetPosition_SD() throws Exception {
+		expect(underlying.getPosition(descr)).andReturn(5L);
+		control.replay();
+		
+		assertEquals(5L, report.getPosition(descr));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetPosition_S() throws Exception {
+		expect(underlying.getPosition(security)).andReturn(-1L);
+		control.replay();
+		
+		assertEquals(-1L, report.getPosition(security));
+		
+		control.verify();
 	}
 
 }
