@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderActivatorLink;
 
@@ -61,7 +60,7 @@ public class StopOrderActivator extends OrderActivator
 	}
 
 	@Override
-	protected void begin() throws OrderException {
+	protected synchronized void begin() throws OrderException {
 		try {
 			security = getOrder().getSecurity();
 		} catch ( SecurityException e ) {
@@ -72,14 +71,18 @@ public class StopOrderActivator extends OrderActivator
 	}
 
 	@Override
-	protected void finish() {
+	protected synchronized void finish() {
 		security.OnTrade().removeListener(this);
 		security.OnChanged().removeListener(this);
 		security = null;
 	}
 
 	@Override
-	public void onEvent(Event event) {
+	public synchronized void onEvent(Event event) {
+		if ( security == null ) {
+			return;
+		}
+		
 		if ( event.isType(security.OnChanged()) ) {
 			control(security.getLastPrice());
 		} else if ( event.isType(security.OnTrade()) ) {
@@ -125,7 +128,7 @@ public class StopOrderActivator extends OrderActivator
 	 * <p>
 	 * @return инструмент
 	 */
-	Security getSecurity() {
+	synchronized Security getSecurity() {
 		return security;
 	}
 	

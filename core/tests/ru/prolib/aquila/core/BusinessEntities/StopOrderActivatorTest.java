@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -17,6 +18,12 @@ public class StopOrderActivatorTest {
 	private Security security;
 	private EventType onChanged, onTrade;
 	private StopOrderActivator activator;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -30,6 +37,7 @@ public class StopOrderActivatorTest {
 		
 		expect(link.getOrder()).andStubReturn(order);
 		expect(order.getSecurity()).andStubReturn(security);
+		expect(order.getId()).andStubReturn(245);
 		expect(security.OnChanged()).andStubReturn(onChanged);
 		expect(security.OnTrade()).andStubReturn(onTrade);
 	}
