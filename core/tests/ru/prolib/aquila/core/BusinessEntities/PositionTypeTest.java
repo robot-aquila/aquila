@@ -13,12 +13,23 @@ public class PositionTypeTest {
 	public void testConstant() throws Exception {
 		assertEquals("Close", PositionType.CLOSE.getCode());
 		assertEquals("Close", PositionType.CLOSE.toString());
+		assertFalse(PositionType.CLOSE.isLong());
+		assertFalse(PositionType.CLOSE.isShort());
+		
 		assertEquals("Long", PositionType.LONG.getCode());
 		assertEquals("Long", PositionType.LONG.toString());
+		assertTrue(PositionType.LONG.isLong());
+		assertFalse(PositionType.LONG.isShort());
+		
 		assertEquals("Short", PositionType.SHORT.getCode());
 		assertEquals("Short", PositionType.SHORT.toString());
+		assertFalse(PositionType.SHORT.isLong());
+		assertTrue(PositionType.SHORT.isShort());
+		
 		assertEquals("Long & Short", PositionType.BOTH.getCode());
 		assertEquals("Long & Short", PositionType.BOTH.toString());
+		assertTrue(PositionType.BOTH.isLong());
+		assertTrue(PositionType.BOTH.isShort());
 	}
 
 }
