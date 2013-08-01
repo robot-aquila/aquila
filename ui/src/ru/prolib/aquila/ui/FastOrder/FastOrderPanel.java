@@ -85,7 +85,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 			}
 		});
 		addLabel(" order");
-		Box.createHorizontalGlue();
+		add(Box.createHorizontalGlue());
 	}
 	
 	private void addLabel(String textId, int horizontalPosition) {
