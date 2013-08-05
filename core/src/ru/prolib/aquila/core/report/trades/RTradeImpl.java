@@ -262,20 +262,20 @@ public class RTradeImpl implements ERTrade {
 
 	@Override
 	public synchronized Double getProfit() {
-		if ( exitVol == null ) {
+		if ( getUncoveredQty() != 0L ) {
 			return null;
 		} else {
-			Double profit = round4(exitVol - enterVol);
+			Double profit = round4(sumByExitPrice - sumByEnterPrice);
 			return type == PositionType.SHORT ? -profit : profit;
 		}
 	}
 
 	@Override
 	public synchronized Double getProfitPerc() {
-		if ( exitVol == null ) {
+		if ( getUncoveredQty() != 0L ) {
 			return null;
 		} else {
-			return round4(getProfit() / enterVol * 100d);
+			return round4(getProfit() / sumByEnterPrice * 100d);
 		}
 	}
 	
