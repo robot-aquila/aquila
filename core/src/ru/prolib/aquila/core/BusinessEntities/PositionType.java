@@ -6,37 +6,29 @@ package ru.prolib.aquila.core.BusinessEntities;
  * 2012-12-26<br>
  * $Id: PositionType.java 383 2012-12-26 12:21:37Z whirlwind $
  */
-public class PositionType {
+public enum PositionType {
 	/**
 	 * Длинная позиция.
 	 */
-	public static final PositionType LONG;
+	LONG ("Long", true, false),
 	/**
 	 * Нейтральная позиция (вне рынка).
 	 */
-	public static final PositionType CLOSE;
+	CLOSE ("Close", false, false),
 	/**
 	 * Короткая позиция.
 	 */
-	public static final PositionType SHORT;
+	SHORT ("Short", false, true),
 	/**
 	 * Конфигурационный тип, определяющий возможность открытия как длиных,
 	 * так и коротких позиций. Используется для указания цели.
 	 */
-	public static final PositionType BOTH;
-	
-	static {
-		LONG = new PositionType("Long", true, false);
-		CLOSE = new PositionType("Close", false, false);
-		SHORT = new PositionType("Short", false, true);
-		BOTH = new PositionType("Long & Short", true, true);
-	}
+	BOTH ("Long & Short", true, true);
 	
 	private final String code;
 	private final boolean isLong, isShort;
 	
-	private PositionType(String code, boolean isLong, boolean isShort) {
-		super();
+	PositionType(String code, boolean isLong, boolean isShort) {
 		this.code = code;
 		this.isLong = isLong;
 		this.isShort = isShort;
