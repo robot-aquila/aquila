@@ -1,18 +1,23 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import com.thoughtworks.xstream.annotations.*;
 
 
 /**
- * Спецификация портфеля.
+ * Настройки позиций в рамках портфеля.
+ * <p>
+ * Данный класс инкапсулирует настройки позиций по инструментам, которые
+ * включены в портфель и общие для всех позиций параметры в рамках портфеля. 
  */
+@XStreamAlias("PortfolioSetup")
 public class PortfolioSetup {
+	@XStreamAlias("entries")
 	private final Map<SecurityDescriptor, PositionSetup> map;
 	
 	/**
@@ -35,7 +40,7 @@ public class PortfolioSetup {
 	public synchronized PositionSetup getPosition(SecurityDescriptor descr) {
 		PositionSetup setup = map.get(descr);
 		if ( setup == null ) {
-			setup = new PositionSetup(descr);
+			setup = createPositionSetup();
 			map.put(descr, setup);
 		}
 		return setup;
@@ -51,12 +56,21 @@ public class PortfolioSetup {
 	}
 
 	/**
-	 * Получить список спецификаций позиций.
+	 * Получить карту спецификаций позиций.
 	 * <p>
-	 * @return список спецификаций
+	 * @return карта спецификаций
 	 */
-	public synchronized List<PositionSetup> getPositions() {
-		return new Vector<PositionSetup>(map.values());
+	public synchronized Map<SecurityDescriptor, PositionSetup> getPositions() {
+		return new LinkedHashMap<SecurityDescriptor, PositionSetup>(map);
+	}
+	
+	/**
+	 * Получить список инструментов.
+	 * <p>
+	 * @return список инструментов, включенных в сетап
+	 */
+	public synchronized List<SecurityDescriptor> getSecurities() {
+		return new Vector<SecurityDescriptor>(map.keySet());
 	}
 	
 	@Override
@@ -67,23 +81,30 @@ public class PortfolioSetup {
 		if ( other == null || other.getClass() != PortfolioSetup.class ) {
 			return false;
 		}
+		return fieldsEquals(other);
+	}
+	
+	protected boolean fieldsEquals(Object other) {
 		PortfolioSetup o = (PortfolioSetup) other;
 		return new EqualsBuilder()
 			.append(map, o.map)
-			.isEquals();
+			.isEquals();		
 	}
 	
-	@Override
-	public synchronized PortfolioSetup clone() {
-		PortfolioSetup copy = new PortfolioSetup();
-		Iterator<Map.Entry<SecurityDescriptor, PositionSetup>> iterator;
-		Map.Entry<SecurityDescriptor, PositionSetup> entry;
-		iterator = map.entrySet().iterator();
-		while ( iterator.hasNext() ) {
-			entry = iterator.next();
-			copy.map.put(entry.getKey(), entry.getValue().clone());
-		}
-		return copy;
+	/**
+	 * Удалить настройки позиций.
+	 */
+	public synchronized void removeAll() {
+		map.clear();
+	}
+	
+	/**
+	 * Создать экземпляр спецификатора позиции.
+	 * <p>
+	 * @return спецификатор позиции
+	 */
+	protected PositionSetup createPositionSetup() {
+		return new PositionSetup();
 	}
 
 }

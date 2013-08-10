@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.BusinessEntities;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.thoughtworks.xstream.annotations.*;
+
 /**
  * Дескриптор инструмента.
  * <p>
@@ -11,9 +13,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * 2012-06-01<br>
  * $Id: SecurityDescriptor.java 341 2012-12-18 17:16:30Z whirlwind $
  */
+@XStreamAlias("SecurityDescriptor")
 public class SecurityDescriptor {
 	private final String code;
 	private final String classCode;
+	@XStreamAlias("currencyCode")
 	private final String curCode;
 	private final SecurityType type;
 	

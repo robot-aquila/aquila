@@ -157,8 +157,8 @@ public class ActiveTradesTest {
 		reports.setReport(descr1, report1);
 		reports.setReport(descr2, report2);
 		List<RTrade> expected = new Vector<RTrade>();
-		expected.add(report2);
 		expected.add(report1);
+		expected.add(report2);
 		
 		assertEquals(expected, reports.getReports());
 	}

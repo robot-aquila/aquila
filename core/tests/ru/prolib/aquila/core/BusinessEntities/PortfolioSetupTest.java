@@ -1,16 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
-
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 import org.junit.*;
-
-import ru.prolib.aquila.core.BusinessEntities.PositionType;
-import ru.prolib.aquila.core.BusinessEntities.Price;
-import ru.prolib.aquila.core.BusinessEntities.PriceUnit;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 
 public class PortfolioSetupTest {
 	private static SecurityDescriptor descr1,descr2,descr3;
@@ -32,20 +24,33 @@ public class PortfolioSetupTest {
 	public void testGetPosition() throws Exception {
 		PositionSetup	sp1 = setup.getPosition(descr1),
 						sp2 = setup.getPosition(descr2);
-		assertEquals(new PositionSetup(descr1), sp1);
-		assertEquals(new PositionSetup(descr2), sp2);
+		assertEquals(new PositionSetup(), sp1);
+		assertEquals(new PositionSetup(), sp2);
 		assertNotSame(sp1, sp2);
 		assertSame(sp1, setup.getPosition(descr1));
 		assertSame(sp2, setup.getPosition(descr2));
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testRemovePosition() throws Exception {
 		PositionSetup sp1 = setup.getPosition(descr1);
 		sp1.setQuota(new Price(PriceUnit.PERCENT, 120.0d));
 		sp1.setTarget(PositionType.SHORT);
 		setup.removePosition(descr1);
-		assertEquals(new PositionSetup(descr1), setup.getPosition(descr1));
+		
+		assertEquals(new LinkedHashMap(), setup.getPositions());
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testRemoveAll() throws Exception {
+		setup.getPosition(descr1);
+		setup.getPosition(descr2);
+		setup.getPosition(descr3);
+		setup.removeAll();
+		
+		assertEquals(new LinkedHashMap(), setup.getPositions());
 	}
 	
 	@Test
@@ -53,10 +58,11 @@ public class PortfolioSetupTest {
 		PositionSetup	sp1 = setup.getPosition(descr1),
 						sp2 = setup.getPosition(descr2),
 						sp3 = setup.getPosition(descr3);
-		Vector<PositionSetup> expected = new Vector<PositionSetup>();
-		expected.add(sp1);
-		expected.add(sp2);
-		expected.add(sp3);
+		Map<SecurityDescriptor, PositionSetup> expected =
+			new LinkedHashMap<SecurityDescriptor, PositionSetup>();
+		expected.put(descr1, sp1);
+		expected.put(descr2, sp2);
+		expected.put(descr3, sp3);
 		assertEquals(expected, setup.getPositions());
 	}
 	
@@ -93,21 +99,19 @@ public class PortfolioSetupTest {
 		assertFalse(setup.equals(setup4));
 		assertFalse(setup.equals(setup5));
 	}
-
+	
 	@Test
-	public void testClone() throws Exception {
-		setup.getPosition(descr1).setQuota(new Price(PriceUnit.PERCENT, 10.0d));
-		setup.getPosition(descr2).setTarget(PositionType.SHORT);
+	public void testGetSecurities() throws Exception {
+		setup.getPosition(descr2);
+		setup.getPosition(descr1);
+		setup.getPosition(descr3);
 		
-		PortfolioSetup clone = setup.clone();
-		assertEquals(setup, clone);
-		List<PositionSetup> list = clone.getPositions();
-		for ( int i = 0; i < list.size(); i ++ ) {
-			PositionSetup c = list.get(i);
-			PositionSetup o = setup.getPosition(c.getSecurityDescriptor());
-			assertEquals(o, c);
-			assertNotSame(o, c); 
-		}
+		List<SecurityDescriptor> expected = new Vector<SecurityDescriptor>();
+		expected.add(descr2);
+		expected.add(descr1);
+		expected.add(descr3);
+		
+		assertEquals(expected, setup.getSecurities());
 	}
 
 }

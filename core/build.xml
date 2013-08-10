@@ -15,6 +15,7 @@
         <include name="log4j-1.2.16.jar"/>
         <include name="commons-lang3-3.1.jar" />
     	<include name="javacsv.jar" />
+    	<include name="xstream-1.4.1.jar" />
     </fileset>
 	
 	<fileset id="source-files" dir="${src}" includes="**/*.java" />

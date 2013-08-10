@@ -1,57 +1,39 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.*;
+import com.thoughtworks.xstream.annotations.*;
 
 
 /**
- * Спецификация позиции.
+ * Спецификатор позиции.
+ * <p>
+ * Данный класс инкапсулирует базовые настройки позиции: разрешенный тип позиции
+ * (направления открытия позиции), долю (например в портфеле) и текущий целевой
+ * тип позиции.
  */
+@XStreamAlias("PositionSetup")
 public class PositionSetup {
 	private static final PositionType CLOSE = PositionType.CLOSE;
 	private static final PositionType BOTH = PositionType.BOTH;
 	private static final PositionType LONG = PositionType.LONG;
 	private static final PositionType SHORT = PositionType.SHORT;
 	
-	private final SecurityDescriptor descr;
 	private Price quota; 
 	private PositionType target;
 	private PositionType allowed = PositionType.BOTH;
 	
-	public PositionSetup(SecurityDescriptor descr,
-			Price quota, PositionType target)
-	{
+	public PositionSetup(Price quota, PositionType target) {
 		super();
-		this.descr = descr;
 		this.quota = quota;
 		this.target = target;
 	}
 	
-	public PositionSetup(SecurityDescriptor descr, Price quota) {
-		this(descr, quota, PositionType.CLOSE);
+	public PositionSetup(Price quota) {
+		this(quota, PositionType.CLOSE);
 	}
 	
-	public PositionSetup(SecurityDescriptor descr) {
-		this(descr, new Price(PriceUnit.PERCENT, 0.0d));
-	}
-	
-	public PositionSetup(PositionSetup setup) {
-		super();
-		synchronized ( setup ) {
-			descr = setup.getSecurityDescriptor();
-			quota = setup.getQuota();
-			target = setup.getTarget();
-			allowed = setup.getAllowedType();
-		}
-	}
-	
-	/**
-	 * Получить дескриптор инструмента.
-	 * <p>
-	 * @return дескриптор инструмента
-	 */
-	public SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+	public PositionSetup() {
+		this(new Price(PriceUnit.PERCENT, 0.0d));
 	}
 
 	/**
@@ -88,7 +70,7 @@ public class PositionSetup {
 	 * @throws IllegalArgumentException указан тип {@link PositionType#BOTH}
 	 */
 	public synchronized void setTarget(PositionType value) {
-		if ( value == PositionType.BOTH ) {
+		if ( value == BOTH ) {
 			throw new IllegalArgumentException(value.toString());
 		}
 		target = value;
@@ -103,7 +85,6 @@ public class PositionSetup {
 	protected boolean fieldsEquals(Object other) {
 		PositionSetup o = (PositionSetup) other;
 		return new EqualsBuilder()
-			.append(descr, o.descr)
 			.append(quota, o.quota)
 			.append(target, o.target)
 			.append(allowed, o.allowed)
@@ -113,18 +94,12 @@ public class PositionSetup {
 	@Override
 	public synchronized int hashCode() {
 		return new HashCodeBuilder(20121231, 165329)
-			.append(descr)
 			.append(quota)
 			.append(target)
 			.append(allowed)
 			.toHashCode();
 	}
 	
-	@Override
-	public synchronized PositionSetup clone() {
-		return new PositionSetup(this);
-	}
-
 	/**
 	 * Установить разрешенный тип позиции.
 	 * <p>
@@ -210,26 +185,6 @@ public class PositionSetup {
 		return quota.getValue() > 0 && isTargetAllowed(target)
 			&& ((current == LONG && target == SHORT)
 			 || (current == SHORT && target == LONG));
-	}
-	
-	/**
-	 * Проверить соответствие целей.
-	 * <p>
-	 * @param other сетап для сравнения
-	 * @return true - цели совпадают, false - не совпадают
-	 */
-	public synchronized boolean isDifferentTarget(PositionSetup other) {
-		return target != other.target;
-	}
-	
-	/**
-	 * Проверить соответствие долей.
-	 * <p>
-	 * @param other сетап для сравнения
-	 * @return true - доли совпадают, false - не совпадают 
-	 */
-	public synchronized boolean isDifferentQuota(PositionSetup other) {
-		return ! quota.equals(other.quota);
 	}
 
 }

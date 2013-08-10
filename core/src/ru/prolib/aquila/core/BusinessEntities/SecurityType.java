@@ -1,20 +1,18 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * Тип инструмента.
  * <p>
  * 2012-12-18<br>
  * $Id: SecurityType.java 341 2012-12-18 17:16:30Z whirlwind $
  */
-public class SecurityType {
-	public static final SecurityType UNK  = new SecurityType("UNK", "Unknown");
-	public static final SecurityType STK  = new SecurityType("STK", "Stock");
-	public static final SecurityType OPT  = new SecurityType("OPT", "Option");
-	public static final SecurityType FUT  = new SecurityType("FUT", "Futures");
-	public static final SecurityType BOND = new SecurityType("BOND", "Bond");
-	public static final SecurityType CASH = new SecurityType("CASH", "Cash");
+public enum SecurityType {
+	UNK ("UNK", "Unknown"),
+	STK ("STK", "Stock"),
+	OPT ("OPT", "Option"),
+	FUT ("FUT", "Futures"),
+	BOND ("BOND", "Bond"),
+	CASH ("CASH", "Cash");
 	
 	private final String code;
 	private final String name;
@@ -26,7 +24,6 @@ public class SecurityType {
 	 * @param name наименование типа
 	 */
 	private SecurityType(String code, String name) {
-		super();
 		this.code = code;
 		this.name = name;
 	}
@@ -52,14 +49,6 @@ public class SecurityType {
 	 */
 	public String getCode() {
 		return code;
-	}
-	
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(20121219, 142011)
-			.append(code)
-			.append(name)
-			.toHashCode();
 	}
 
 }

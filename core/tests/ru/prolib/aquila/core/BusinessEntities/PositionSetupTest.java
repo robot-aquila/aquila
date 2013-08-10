@@ -19,13 +19,10 @@ public class PositionSetupTest {
 	private static PositionType LONG = PositionType.LONG;
 	private static PositionType SHORT = PositionType.SHORT;
 	private static PositionType CLOSE = PositionType.CLOSE;
-	private static SecurityDescriptor descr1, descr2;
 	private static Variant<PositionType> vAlw, vTgt, vCur, iterator;
 	private PositionSetup setup;
 	
 	static {
-		descr1 = new SecurityDescriptor("GAZP", "AST", "RUB", SecurityType.STK);
-		descr2 = new SecurityDescriptor("RIM3", "FUT", "USD", SecurityType.FUT);
 		vAlw = new Variant<PositionType>()
 			.add(BOTH)
 			.add(CLOSE)
@@ -43,7 +40,7 @@ public class PositionSetupTest {
 
 	@Before
 	public void setUp() throws Exception {
-		setup = new PositionSetup(descr1);
+		setup = new PositionSetup();
 		iterator = vCur;
 		iterator.rewind();
 	}
@@ -155,10 +152,7 @@ public class PositionSetupTest {
 		setup.setTarget(LONG);
 		setup.setAllowedType(CLOSE);
 		
-		Variant<SecurityDescriptor> vSec = new Variant<SecurityDescriptor>()
-			.add(descr1)
-			.add(descr2);
-		Variant<PriceUnit> vUnit = new Variant<PriceUnit>(vSec)
+		Variant<PriceUnit> vUnit = new Variant<PriceUnit>()
 			.add(PriceUnit.MONEY)
 			.add(PriceUnit.POINT);
 		Variant<Double> vVal = new Variant<Double>(vUnit)
@@ -174,7 +168,7 @@ public class PositionSetupTest {
 		int foundCnt = 0;
 		PositionSetup x = null, found = null;
 		do {
-			x = new PositionSetup(vSec.get());
+			x = new PositionSetup();
 			x.setQuota(new Price(vUnit.get(), vVal.get()));
 			x.setTarget(vType.get());
 			x.setAllowedType(vAlwd.get());
@@ -184,7 +178,6 @@ public class PositionSetupTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(descr1, found.getSecurityDescriptor());
 		assertEquals(new Price(PriceUnit.MONEY, 200.00d), found.getQuota());
 		assertEquals(LONG, found.getTarget());
 		assertEquals(CLOSE, found.getAllowedType());
@@ -196,7 +189,6 @@ public class PositionSetupTest {
 		setup.setTarget(LONG);
 		setup.setAllowedType(SHORT);
 		assertEquals(new HashCodeBuilder(20121231, 165329)
-			.append(descr1)
 			.append(new Price(PriceUnit.POINT, 50d))
 			.append(LONG)
 			.append(SHORT) // allowed type
@@ -204,50 +196,23 @@ public class PositionSetupTest {
 	}
 	
 	@Test
-	public void testClone() throws Exception {
-		// initial state
-		setup.setQuota(new Price(PriceUnit.POINT, 50d));
-		setup.setTarget(LONG);
-		setup.setAllowedType(SHORT);
-		
-		PositionSetup clone = setup.clone();
-		assertNotNull(clone);
-		assertNotSame(clone, setup);
-		assertEquals(setup, clone);
-		assertEquals(new Price(PriceUnit.POINT, 50d), clone.getQuota());
-		assertEquals(LONG, clone.getTarget());
-		assertEquals(SHORT, clone.getAllowedType());
-	}
-	
-	@Test
-	public void testConstruct3() throws Exception {
-		setup.setQuota(new Price(PriceUnit.POINT, 50d));
-		setup.setTarget(LONG);
-
-		PositionSetup setup2 = new PositionSetup(descr1,
-				new Price(PriceUnit.POINT, 50d), LONG);
-		assertEquals(setup, setup2);
-	}
-	
-	@Test
 	public void testConstruct2() throws Exception {
 		setup.setQuota(new Price(PriceUnit.POINT, 50d));
-		setup.setTarget(CLOSE);
+		setup.setTarget(LONG);
 
-		PositionSetup setup2 = new PositionSetup(descr1,
-				new Price(PriceUnit.POINT, 50d));
+		PositionSetup setup2 =
+			new PositionSetup(new Price(PriceUnit.POINT, 50d), LONG);
 		assertEquals(setup, setup2);
 	}
 	
 	@Test
-	public void testConstruct1Copy() throws Exception {
+	public void testConstruct1() throws Exception {
 		setup.setQuota(new Price(PriceUnit.POINT, 50d));
 		setup.setTarget(CLOSE);
-		setup.setAllowedType(CLOSE);
 
-		PositionSetup setup2 = new PositionSetup(setup);
+		PositionSetup setup2 =
+			new PositionSetup(new Price(PriceUnit.POINT, 50d));
 		assertEquals(setup, setup2);
-		assertNotSame(setup, setup2);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -368,34 +333,6 @@ public class PositionSetupTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testIsDifferentTarget() throws Exception {
-		// initial target
-		setup.setTarget(LONG);
-		
-		do {
-			Combo combo = getCurrentCombo();
-			String msg = combo.toString();
-			PositionSetup other = new PositionSetup(descr2);
-			other.setTarget(combo.target);
-			if ( combo.target == LONG ) {
-				assertFalse(msg, setup.isDifferentTarget(other));
-			} else {
-				assertTrue(msg, setup.isDifferentTarget(other));
-			}
-		} while ( iterator.next() );
-	}
-	
-	@Test
-	public void testIsDifferentQuota() throws Exception {
-		setup.setQuota(new Price(PriceUnit.PERCENT, 80d));
-		PositionSetup other = new PositionSetup(descr2);
-		
-		assertTrue(setup.isDifferentQuota(other));
-		other.setQuota(new Price(PriceUnit.PERCENT, 80d));
-		assertFalse(setup.isDifferentQuota(other));
 	}
 
 }
