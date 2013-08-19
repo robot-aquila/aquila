@@ -94,5 +94,33 @@ public class DOWPeriod implements DatePeriod {
 		}
 		return to.align(time).withTimeAtStartOfDay();
 	}
+	
+	/**
+	 * Проверить вхождение в период.
+	 * <p>
+	 * @param span день недели
+	 * @return true, если день внутри диапазона
+	 */
+	public boolean contains(DOWSpan span) {
+		int n = span.getDayOfWeek().getNumber();
+		return n >= from.getDayOfWeek().getNumber()
+			&& n <= to.getDayOfWeek().getNumber();
+	}
+	
+	/**
+	 * Проверить наличие перекрытия с другим периодом.
+	 * <p>
+	 * @param o другой период
+	 * @return true - периоды имеют общую область (перекрываются)
+	 */
+	public boolean overlap(DOWPeriod o) {
+		return contains(o.from) || contains(o.to)
+			|| o.contains(from) || o.contains(to);
+	}
+	
+	@Override
+	public String toString() {
+		return from.toString() + (to.equals(from) ? "" : "-" + to.toString());
+	}
 
 }

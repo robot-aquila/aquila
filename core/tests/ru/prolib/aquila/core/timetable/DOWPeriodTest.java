@@ -20,7 +20,7 @@ public class DOWPeriodTest {
 	}
 	
 	@Test
-	public void testContains() throws Exception {
+	public void testContains_DateTime() throws Exception {
 		FR fix[] = {
 				new FR(new DateTime(2013, 8, 11, 18, 41, 54,   0), false),
 				new FR(new DateTime(2013, 8, 12,  0,  0,  0,   0), false),
@@ -39,6 +39,17 @@ public class DOWPeriodTest {
 			FR fr = fix[i];
 			assertEquals(msg, fr.expected, period.contains(fr.time));
 		}
+	}
+	
+	@Test
+	public void testContains_DOWSpan() throws Exception {
+		assertFalse(period.contains(new DOWSpan(DOW.MONDAY)));
+		assertTrue(period.contains(new DOWSpan(DOW.TUESDAY)));
+		assertTrue(period.contains(new DOWSpan(DOW.WEDNESDAY)));
+		assertTrue(period.contains(new DOWSpan(DOW.THURSDAY)));
+		assertTrue(period.contains(new DOWSpan(DOW.FRIDAY)));
+		assertFalse(period.contains(new DOWSpan(DOW.SATURDAY)));
+		assertFalse(period.contains(new DOWSpan(DOW.SUNDAY)));
 	}
 	
 	@Test
@@ -152,6 +163,24 @@ public class DOWPeriodTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testConstruct_ThrowsFromLessThanTo() throws Exception {
 		new DOWPeriod(DOW.SUNDAY, DOW.FRIDAY);
+	}
+	
+	@Test
+	public void testOverlap() throws Exception {
+		assertTrue(period.overlap(new DOWPeriod(DOW.MONDAY, DOW.SATURDAY)));
+		assertTrue(period.overlap(new DOWPeriod(DOW.MONDAY, DOW.THURSDAY)));
+		assertTrue(period.overlap(new DOWPeriod(DOW.THURSDAY, DOW.SATURDAY)));
+		assertTrue(period.overlap(new DOWPeriod(DOW.WEDNESDAY, DOW.THURSDAY)));
+		assertTrue(period.overlap(new DOWPeriod(DOW.TUESDAY, DOW.SUNDAY)));
+		assertTrue(period.overlap(new DOWPeriod(DOW.WEDNESDAY, DOW.FRIDAY)));
+		assertFalse(period.overlap(new DOWPeriod(DOW.MONDAY, DOW.MONDAY)));
+		assertFalse(period.overlap(new DOWPeriod(DOW.SATURDAY, DOW.SATURDAY)));
+	}
+	
+	@Test
+	public void testToString() throws Exception {
+		assertEquals("TUESDAY-FRIDAY", period.toString());
+		assertEquals("MONDAY", new DOWPeriod(DOW.MONDAY, DOW.MONDAY).toString());
 	}
 
 }

@@ -166,7 +166,23 @@ public class HMCompositePeriodTest {
 	public void testMarshalling() throws Exception {
 		XStream xstream = new XStream(new DomDriver());
 		xstream.autodetectAnnotations(true);
-		//xstream.toXML(period, System.out);
+		
+		String expected = "<HourMinuteComposite>\n" +
+		"  <period>\n" +
+		"    <from hour=\"10\" minute=\"0\"/>\n" +
+		"    <to hour=\"14\" minute=\"0\"/>\n" +
+		"  </period>\n" +
+		"  <period>\n" +
+		"    <from hour=\"14\" minute=\"10\"/>\n" +
+		"    <to hour=\"18\" minute=\"45\"/>\n" +
+		"  </period>\n" +
+		"  <period>\n" +
+		"    <from hour=\"19\" minute=\"0\"/>\n" +
+		"    <to hour=\"23\" minute=\"50\"/>\n" +
+		"  </period>\n" +
+		"</HourMinuteComposite>";
+		
+		assertEquals(expected, xstream.toXML(period));
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
