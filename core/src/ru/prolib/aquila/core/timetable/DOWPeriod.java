@@ -1,16 +1,36 @@
 package ru.prolib.aquila.core.timetable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.*;
 
 /**
  * Внутринедельный период.
  */
 @XStreamAlias("DayOfWeekPeriod")
+@XStreamConverter(PeriodConverter.class)
 public class DOWPeriod implements DatePeriod {
 	private final DOWSpan from, to;
+	
+	/**
+	 * Разобрать строку периода.
+	 * <p>
+	 * @param s строка периода в формате A-B, где A и B строковое представление
+	 * констант {@link DOW}.
+	 * @return период
+	 */
+	static DOWPeriod parse(String s) {
+		String chunks[] = StringUtils.split(s, "-", 2);
+		if ( chunks.length == 2 ) {
+			return new DOWPeriod(DOW.valueOf(chunks[0]),DOW.valueOf(chunks[1]));
+		} else if ( chunks.length == 1 ) {
+			DOW dow = DOW.valueOf(chunks[0]);
+			return new DOWPeriod(dow, dow);
+		}
+		throw new IllegalArgumentException("Bad period specification: " + s);
+	}
 	
 	public DOWPeriod(DOWSpan from, DOWSpan to) {
 		super();

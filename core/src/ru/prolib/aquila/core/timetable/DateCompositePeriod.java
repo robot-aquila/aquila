@@ -9,22 +9,23 @@ import org.joda.time.DateTime;
 import com.thoughtworks.xstream.annotations.*;
 
 /**
- * Составной внутринедельный период дат.
+ * Составной период дат.
  * <p>
  */
-@XStreamAlias("DayOfWeekComposite")
-public class DOWCompositePeriod implements DatePeriod {
+@XStreamAlias("DateComposite")
+public class DateCompositePeriod implements DatePeriod {
 	@XStreamImplicit(itemFieldName="period")
-	private final List<DOWPeriod> periods;
+	@XStreamConverter(PeriodConverter.class)
+	private final List<DatePeriod> periods;
 
-	public DOWCompositePeriod() {
+	public DateCompositePeriod() {
 		super();
-		periods = new Vector<DOWPeriod>();
+		periods = new Vector<DatePeriod>();
 	}
 
 	@Override
 	public synchronized boolean contains(DateTime time) {
-		for ( DOWPeriod p : periods ) {
+		for ( DatePeriod p : periods ) {
 			if ( p.contains(time) ) {
 				return true;
 			}
@@ -35,7 +36,7 @@ public class DOWCompositePeriod implements DatePeriod {
 	@Override
 	public synchronized DateTime nextDate(DateTime time) {
 		List<DateTime> list = new Vector<DateTime>();
-		for ( DOWPeriod p : periods ) {
+		for ( DatePeriod p : periods ) {
 			DateTime next = p.nextDate(time);
 			if ( next != null ) {
 				list.add(next);
@@ -50,7 +51,7 @@ public class DOWCompositePeriod implements DatePeriod {
 
 	@Override
 	public synchronized boolean isEndDate(DateTime time) {
-		for ( DOWPeriod p : periods ) {
+		for ( DatePeriod p : periods ) {
 			if ( p.isEndDate(time) ) {
 				return true;
 			}
@@ -61,7 +62,7 @@ public class DOWCompositePeriod implements DatePeriod {
 	@Override
 	public synchronized DateTime nextEndDate(DateTime time) {
 		List<DateTime> list = new Vector<DateTime>();
-		for ( DOWPeriod p : periods ) {
+		for ( DatePeriod p : periods ) {
 			DateTime next = p.nextEndDate(time);
 			if ( next != null ) {
 				list.add(next);
@@ -79,8 +80,8 @@ public class DOWCompositePeriod implements DatePeriod {
 	 * <p>
 	 * @return список периодов
 	 */
-	public synchronized List<DOWPeriod> getPeriods() {
-		return new Vector<DOWPeriod>(periods);
+	public synchronized List<DatePeriod> getPeriods() {
+		return new Vector<DatePeriod>(periods);
 	}
 	
 	/**
@@ -88,13 +89,7 @@ public class DOWCompositePeriod implements DatePeriod {
 	 * <p>
 	 * @param period период
 	 */
-	public synchronized void add(DOWPeriod period) {
-		for ( DOWPeriod p : periods ) {
-			if ( p.overlap(period) ) {
-				throw new IllegalArgumentException("Period " + period
-						+ " overlaps with " + p);
-			}
-		}
+	public synchronized void add(DatePeriod period) {
 		periods.add(period);
 	}
 	
@@ -103,10 +98,10 @@ public class DOWCompositePeriod implements DatePeriod {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != DOWCompositePeriod.class ) {
+		if ( other == null || other.getClass() != DateCompositePeriod.class ) {
 			return false;
 		}
-		DOWCompositePeriod o = (DOWCompositePeriod) other;
+		DateCompositePeriod o = (DateCompositePeriod) other;
 		return new EqualsBuilder()
 			.append(o.periods, periods)
 			.isEquals();

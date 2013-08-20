@@ -9,19 +9,20 @@ import com.thoughtworks.xstream.annotations.*;
 /**
  * Составной внутридневной период. 
  */
-@XStreamAlias("HourMinuteComposite")
-public class HMCompositePeriod implements TimePeriod {
+@XStreamAlias("TimeComposite")
+public class TimeCompositePeriod implements TimePeriod {
 	@XStreamImplicit(itemFieldName="period")
-	private final List<HMPeriod> periods;
+	@XStreamConverter(PeriodConverter.class)
+	private final List<TimePeriod> periods;
 	
-	public HMCompositePeriod() {
+	public TimeCompositePeriod() {
 		super();
-		periods = new Vector<HMPeriod>();
+		periods = new Vector<TimePeriod>();
 	}
 
 	@Override
 	public synchronized boolean contains(DateTime time) {
-		for ( HMPeriod p : periods ) {
+		for ( TimePeriod p : periods ) {
 			if ( p.contains(time) ) {
 				return true;
 			}
@@ -31,7 +32,7 @@ public class HMCompositePeriod implements TimePeriod {
 
 	@Override
 	public synchronized DateTime nextStartTime(DateTime time) {
-		for ( HMPeriod p : periods ) {
+		for ( TimePeriod p : periods ) {
 			DateTime next = p.nextStartTime(time);
 			if ( next != null && time.compareTo(next) <= 0 ) {
 				return next;
@@ -43,7 +44,7 @@ public class HMCompositePeriod implements TimePeriod {
 	@Override
 	public synchronized DateTime nextEndTime(DateTime time) {
 		List<DateTime> list = new Vector<DateTime>();
-		for ( HMPeriod p : periods ) {
+		for ( TimePeriod p : periods ) {
 			DateTime end = p.nextEndTime(time);
 			if ( end != null ) {
 				list.add(end);
@@ -62,12 +63,6 @@ public class HMCompositePeriod implements TimePeriod {
 	 * @param period период
 	 */
 	public synchronized void add(HMPeriod period) {
-		for ( HMPeriod p : periods ) {
-			if ( p.overlap(period) ) {
-				throw new IllegalArgumentException("Period " + period
-						+ " overlaps with " + p);
-			}
-		}
 		periods.add(period);
 	}
 	
@@ -76,8 +71,8 @@ public class HMCompositePeriod implements TimePeriod {
 	 * <p>
 	 * @return список периодов
 	 */
-	public synchronized List<HMPeriod> getPeriods() {
-		return new Vector<HMPeriod>(periods);
+	public synchronized List<TimePeriod> getPeriods() {
+		return new Vector<TimePeriod>(periods);
 	}
 	
 	@Override
@@ -85,10 +80,10 @@ public class HMCompositePeriod implements TimePeriod {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != HMCompositePeriod.class ) {
+		if ( other == null || other.getClass() != TimeCompositePeriod.class ) {
 			return false;
 		}
-		HMCompositePeriod o = (HMCompositePeriod) other;
+		TimeCompositePeriod o = (TimeCompositePeriod) other;
 		return new EqualsBuilder()
 			.append(o.periods, periods)
 			.isEquals();

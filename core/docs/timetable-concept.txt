@@ -39,3 +39,18 @@
 и время его окончания.
 
 
+<timetable-example>
+  <days>
+    <period type="DaysOfWeek" from="MONDAY" to="FRIDAY" />
+  </days>
+  <sessionTime>
+    <period type="HourMinute" from="09:30" to="16:00" />
+  </sessionTime>
+  <allowOpenPosition>
+    <period type="HourMinute" from="09:33" to="13:00" />
+  </allowOpenPosition>
+  <forceClosePosition>
+    <period type="HourMinute" from="15:55" to="16:00" />
+  </forceClosePosition>
+</timetable-example>
+

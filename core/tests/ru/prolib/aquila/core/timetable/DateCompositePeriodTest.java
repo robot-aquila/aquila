@@ -14,12 +14,12 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import ru.prolib.aquila.core.utils.Variant;
 
-public class DOWCompositePeriodTest {
-	private DOWCompositePeriod period;
+public class DateCompositePeriodTest {
+	private DateCompositePeriod period;
 
 	@Before
 	public void setUp() throws Exception {
-		period = new DOWCompositePeriod();
+		period = new DateCompositePeriod();
 		period.add(new DOWPeriod(DOW.TUESDAY, DOW.TUESDAY));
 		period.add(new DOWPeriod(DOW.THURSDAY, DOW.FRIDAY));
 	}
@@ -133,9 +133,9 @@ public class DOWCompositePeriodTest {
 			.add(rows2);
 		Variant<?> iterator = vRows;
 		int foundCnt = 0;
-		DOWCompositePeriod x, found = null;
+		DateCompositePeriod x, found = null;
 		do {
-			x = new DOWCompositePeriod();
+			x = new DateCompositePeriod();
 			for ( DOWPeriod p : vRows.get() ) { x.add(p); }
 			if ( period.equals(x) ) {
 				foundCnt ++;
@@ -151,23 +151,12 @@ public class DOWCompositePeriodTest {
 		XStream stream = new XStream(new DomDriver());
 		stream.autodetectAnnotations(true);
 		
-		String expected = "<DayOfWeekComposite>\n" +
-		"  <period>\n" +
-		"    <from day=\"TUESDAY\"/>\n" +
-		"    <to day=\"TUESDAY\"/>\n" +
-		"  </period>\n" +
-		"  <period>\n" +
-		"    <from day=\"THURSDAY\"/>\n" +
-		"    <to day=\"FRIDAY\"/>\n" +
-		"  </period>\n" +
-		"</DayOfWeekComposite>";
+		String expected = "<DateComposite>\n" +
+		"  <period class=\"DayOfWeekPeriod\" value=\"TUESDAY\"/>\n" +
+		"  <period class=\"DayOfWeekPeriod\" value=\"THURSDAY-FRIDAY\"/>\n" +
+		"</DateComposite>";
 
 		assertEquals(expected, stream.toXML(period));
-	}
-	
-	@Test (expected=IllegalArgumentException.class)
-	public void testAdd_ThrowsIfOverlapped() throws Exception {
-		period.add(new DOWPeriod(DOW.MONDAY, DOW.THURSDAY));
 	}
 
 }

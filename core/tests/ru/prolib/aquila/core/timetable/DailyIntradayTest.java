@@ -201,9 +201,25 @@ public class DailyIntradayTest {
 	
 	@Test
 	public void testMarshalling() throws Exception {
+		DateCompositePeriod date = new DateCompositePeriod();
+		date.add(new DOWPeriod(DOW.MONDAY, DOW.MONDAY));
+		date.add(new DOWPeriod(DOW.THURSDAY, DOW.FRIDAY));
+		period = new DailyIntraday(date, time);
+		
 		XStream stream = new XStream(new DomDriver());
 		stream.autodetectAnnotations(true);
+		
+		String expected = "<DailyIntraday>\n" +
+		"  <datePeriod class=\"DateComposite\">\n" +
+		"    <period class=\"DayOfWeekPeriod\" value=\"MONDAY\"/>\n" +
+		"    <period class=\"DayOfWeekPeriod\" value=\"THURSDAY-FRIDAY\"/>\n" +
+		"  </datePeriod>\n" +
+		"  <timePeriod class=\"HourMinutePeriod\" value=\"10:00-18:45\"/>\n" +
+		"</DailyIntraday>";
 		//stream.toXML(period, System.out);
+		
+		assertEquals(expected, stream.toXML(period));
+		assertEquals(period, stream.fromXML(expected));
 	}
 
 }

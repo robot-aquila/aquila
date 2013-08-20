@@ -175,5 +175,10 @@ public class HMPeriodTest {
 	public void testToString() throws Exception {
 		assertEquals("10:30-14:00", period.toString());
 	}
+	
+	@Test
+	public void testParse() throws Exception {
+		assertEquals(period, HMPeriod.parse("10:30-14:00"));
+	}
 
 }

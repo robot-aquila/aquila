@@ -1,15 +1,21 @@
 package ru.prolib.aquila.core.timetable;
 
+import java.text.DecimalFormat;
+import java.text.ParseException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.*;
 
 /**
- * Внутридневной период по границе минуты часа.
+ * Внутридневной период по границам минуты часа.
  */
 @XStreamAlias("HourMinutePeriod")
+@XStreamConverter(PeriodConverter.class)
 public class HMPeriod implements TimePeriod {
+	private static final DecimalFormat f = new DecimalFormat("##");
 	private final HMSpan from, to;
 	
 	public HMPeriod(HMSpan from, HMSpan to) {
@@ -99,6 +105,31 @@ public class HMPeriod implements TimePeriod {
 	@Override
 	public String toString() {
 		return from.toString() + "-" + to.toString();
+	}
+	
+	/**
+	 * Разобрать строку периода.
+	 * <p>
+	 * @param s строка периода в формате HH:MM-HH:MM
+	 * @return период
+	 */
+	public static HMPeriod parse(String s) {
+		String spans[] = StringUtils.split(s, "-", 2);
+		try {
+			return new HMPeriod(parseSpan(spans[0]), parseSpan(spans[1]));
+		} catch ( Exception e ) {
+			throw new IllegalArgumentException("Bad period specification: "
+					+ s, e);
+		}
+	}
+	
+	private static HMSpan parseSpan(String s) throws ParseException {
+		String chunks[] = StringUtils.split(s, ":", 2);
+		if ( chunks.length == 2 ) {
+			return new HMSpan(f.parse(chunks[0]).intValue(),
+					f.parse(chunks[1]).intValue());
+		}
+		throw new IllegalArgumentException("Bad span spec: " + s);
 	}
 
 }

@@ -160,6 +160,13 @@ public class DOWPeriodTest {
 		assertEquals(expected, period);
 	}
 	
+	@Test
+	public void testParse() throws Exception {
+		assertEquals(period, DOWPeriod.parse("TUESDAY-FRIDAY"));
+		assertEquals(new DOWPeriod(DOW.FRIDAY, DOW.FRIDAY),
+				DOWPeriod.parse("FRIDAY"));
+	}
+	
 	@Test (expected=IllegalArgumentException.class)
 	public void testConstruct_ThrowsFromLessThanTo() throws Exception {
 		new DOWPeriod(DOW.SUNDAY, DOW.FRIDAY);

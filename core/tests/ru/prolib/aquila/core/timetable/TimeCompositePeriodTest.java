@@ -13,12 +13,12 @@ import ru.prolib.aquila.core.utils.Variant;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-public class HMCompositePeriodTest {
-	private HMCompositePeriod period;
+public class TimeCompositePeriodTest {
+	private TimeCompositePeriod period;
 
 	@Before
 	public void setUp() throws Exception {
-		period = new HMCompositePeriod();
+		period = new TimeCompositePeriod();
 		period.add(new HMPeriod(new HMSpan(10, 0), new HMSpan(14, 0)));
 		period.add(new HMPeriod(new HMSpan(14, 10), new HMSpan(18, 45)));
 		period.add(new HMPeriod(new HMSpan(19, 0), new HMSpan(23, 50)));
@@ -149,9 +149,9 @@ public class HMCompositePeriodTest {
 			.add(rows2);
 		Variant<?> iterator = vRows;
 		int foundCnt = 0;
-		HMCompositePeriod x, found = null;
+		TimeCompositePeriod x, found = null;
 		do {
-			x = new HMCompositePeriod();
+			x = new TimeCompositePeriod();
 			for ( HMPeriod p : vRows.get() ) { x.add(p); }
 			if ( period.equals(x) ) {
 				foundCnt ++;
@@ -167,27 +167,13 @@ public class HMCompositePeriodTest {
 		XStream xstream = new XStream(new DomDriver());
 		xstream.autodetectAnnotations(true);
 		
-		String expected = "<HourMinuteComposite>\n" +
-		"  <period>\n" +
-		"    <from hour=\"10\" minute=\"0\"/>\n" +
-		"    <to hour=\"14\" minute=\"0\"/>\n" +
-		"  </period>\n" +
-		"  <period>\n" +
-		"    <from hour=\"14\" minute=\"10\"/>\n" +
-		"    <to hour=\"18\" minute=\"45\"/>\n" +
-		"  </period>\n" +
-		"  <period>\n" +
-		"    <from hour=\"19\" minute=\"0\"/>\n" +
-		"    <to hour=\"23\" minute=\"50\"/>\n" +
-		"  </period>\n" +
-		"</HourMinuteComposite>";
+		String expected = "<TimeComposite>\n" +
+		"  <period class=\"HourMinutePeriod\" value=\"10:00-14:00\"/>\n" +
+		"  <period class=\"HourMinutePeriod\" value=\"14:10-18:45\"/>\n" +
+		"  <period class=\"HourMinutePeriod\" value=\"19:00-23:50\"/>\n" +
+		"</TimeComposite>";
 		
 		assertEquals(expected, xstream.toXML(period));
-	}
-	
-	@Test (expected=IllegalArgumentException.class)
-	public void testAdd_ThrowsIfOverlapped() throws Exception {
-		period.add(new HMPeriod(new HMSpan(11, 15), new HMSpan(13,  0)));
 	}
 
 }
