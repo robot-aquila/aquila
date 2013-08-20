@@ -17,6 +17,7 @@
         <include name="commons-lang3-3.1.jar" />
     	<include name="ini4j-0.5.2.jar" />
     	<include name="javacsv.jar" />
+    	<include name="xstream-1.4.1.jar" />
     </fileset>
 	
 	<fileset id="compile-build-jars" dir="${build}">
