@@ -50,17 +50,10 @@ public class CancelHandler implements QUIKTransactionHandler {
 	@Override
 	public void handle(QUIKResponse response) {
 		if ( ! response.isFinal() ) return;
-		QUIKEditableTerminal term = (QUIKEditableTerminal) order.getTerminal();
 		synchronized ( order ) {
 			Transaction t = order.getSystemInfo().getCancellation();
 			t.setResponse(response);
 			t.setResponseTime();
-			if ( response.isError() &&
-					order.getStatus() == OrderStatus.CANCEL_SENT )
-			{
-				order.setLastChangeTime(term.getCurrentTime());
-				changeStatus(OrderStatus.CANCEL_FAILED);
-			}
 			Object args[] = { response, t.getLatency() };
 			logger.debug("{}, latency={}", args);
 		}

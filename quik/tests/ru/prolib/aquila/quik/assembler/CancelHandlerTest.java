@@ -2,19 +2,14 @@ package ru.prolib.aquila.quik.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.Date;
-
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
 import ru.prolib.aquila.quik.api.*;
-import ru.prolib.aquila.t2q.T2QException;
-import ru.prolib.aquila.t2q.T2QTransStatus;
+import ru.prolib.aquila.t2q.*;
 
 public class CancelHandlerTest {
 	private static SecurityDescriptor descr;
@@ -72,30 +67,9 @@ public class CancelHandlerTest {
 	}
 	
 	@Test
-	public void testHandle_ErrorAndOrderStatusCancelSent() throws Exception {
+	public void testHandle_IgnoreErrors() throws Exception {
 		response = new QUIKResponse(T2QTransStatus.ERR_LIMIT, 215, null, "ERR");
-		Date time = new Date();
-		expect(order.getStatus()).andReturn(OrderStatus.CANCEL_SENT);
-		expect(terminal.getCurrentTime()).andReturn(time);
-		order.setLastChangeTime(time);
-		order.setStatus(OrderStatus.CANCEL_FAILED);
-		order.fireChangedEvent();
-		order.resetChanges();
 		client.removeHandler(215);
-		control.replay();
-		
-		handler.handle(response);
-		
-		control.verify();
-		assertSame(response, info.getCancellation().getResponse());
-		assertNotNull(info.getCancellation().getResponseTime());
-	}
-
-	@Test
-	public void testHandle_Error() throws Exception {
-		response = new QUIKResponse(T2QTransStatus.ERR_AUTH, 215, null, "test");
-		expect(order.getStatus()).andReturn(OrderStatus.FILLED);
-		client.removeHandler(eq(215));
 		control.replay();
 		
 		handler.handle(response);
