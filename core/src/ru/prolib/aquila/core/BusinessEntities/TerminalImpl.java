@@ -335,10 +335,12 @@ public class TerminalImpl implements EditableTerminal {
 			OrderStatus status = o.getStatus();
 			if ( status == OrderStatus.PENDING ) {
 				o.setStatus(OrderStatus.CANCELLED);
+				o.setLastChangeTime(getCurrentTime());
 				orders.fireEvents(o);
 			} else if ( status == OrderStatus.CONDITION ) {
 				o.getActivator().stop();
 				o.setStatus(OrderStatus.CANCELLED);
+				o.setLastChangeTime(getCurrentTime());
 				orders.fireEvents(o);
 			} else {
 				synchronized ( this ) {

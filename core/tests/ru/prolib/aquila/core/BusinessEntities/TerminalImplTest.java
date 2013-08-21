@@ -404,6 +404,8 @@ public class TerminalImplTest {
 	public void testCancelOrder_Pending() throws Exception {
 		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
 		order.setStatus(OrderStatus.CANCELLED);
+		expect(scheduler.getCurrentTime()).andReturn(time);
+		order.setLastChangeTime(time);
 		orders.fireEvents(same(order));
 		control.replay();
 		
@@ -419,6 +421,8 @@ public class TerminalImplTest {
 		expect(order.getActivator()).andReturn(activator);
 		activator.stop();
 		order.setStatus(OrderStatus.CANCELLED);
+		expect(scheduler.getCurrentTime()).andReturn(time);
+		order.setLastChangeTime(time);
 		orders.fireEvents(same(order));
 		control.replay();
 		
