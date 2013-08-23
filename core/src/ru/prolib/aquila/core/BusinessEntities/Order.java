@@ -267,4 +267,11 @@ public interface Order {
 	 */
 	public OrderActivator getActivator();
 	
+	/**
+	 * Получить комментарий заявки.
+	 * <p>
+	 * @return комментарий
+	 */
+	public String getComment();
+	
 }

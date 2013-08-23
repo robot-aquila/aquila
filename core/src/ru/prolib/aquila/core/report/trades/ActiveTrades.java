@@ -54,7 +54,7 @@ public class ActiveTrades {
 		this.onEnter = onEnter;
 		this.onExit = onExit;
 		this.onChanged = onChanged;
-		reports = new HashMap<SecurityDescriptor, ERTrade>();
+		reports = new LinkedHashMap<SecurityDescriptor, ERTrade>();
 	}
 	
 	/**

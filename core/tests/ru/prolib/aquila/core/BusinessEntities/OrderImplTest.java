@@ -505,6 +505,23 @@ public class OrderImplTest {
 	}
 	
 	@Test
+	public void testSetComment() throws Exception {
+		setter = new S<OrderImpl>() {
+			@Override
+			public void set(OrderImpl object, Object value) {
+				object.setComment((String) value);
+			}
+		};
+		getter = new G<String>() {
+			@Override
+			public String get(Object object) {
+				return ((OrderImpl) object).getComment();
+			}
+		};
+		testSetterGetter("foo", "bar");
+	}
+	
+	@Test
 	public void testAddGetTrades() throws Exception {
 		order.setQty(25L);
 		List<Trade> expected = new Vector<Trade>();

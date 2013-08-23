@@ -152,5 +152,12 @@ public interface EditableOrder extends Order, Editable {
 	 * @param activator контроллер акцивации
 	 */
 	public void setActivator(OrderActivator activator);
+	
+	/**
+	 * Установить комментарий заявки.
+	 * <p>
+	 * @param comment комментарий
+	 */
+	public void setComment(String comment);
 
 }

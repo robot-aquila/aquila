@@ -390,5 +390,249 @@ public class OrderPoolImplTest {
 		OrderPool expected = new OrderPoolImpl(terminal, new OrderPoolBase());
 		assertEquals(expected, new OrderPoolImpl(terminal));
 	}
+	
+	@Test
+	public void testBuy_LC() throws Exception {
+		expect(terminal.createOrder(account, Direction.BUY, security, 8L))
+			.andReturn(order);
+		order.setComment(eq("zulu4"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(8L, "zulu4"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_LC() throws Exception {
+		expect(terminal.createOrder(account, Direction.SELL, security, 1L))
+			.andReturn(order);
+		order.setComment(eq("foobar"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(1L, "foobar"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testBuy_LDC() throws Exception {
+		expect(terminal.createOrder(account, Direction.BUY, security, 5L, 2d))
+			.andReturn(order);
+		order.setComment(eq("bizon"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(5L, 2d, "bizon"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_LDC() throws Exception {
+		expect(terminal.createOrder(account, Direction.SELL, security, 2L, 5d))
+			.andReturn(order);
+		order.setComment(eq("bazooka"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(2L, 5d, "bazooka"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testBuy_LDDC() throws Exception {
+		expect(terminal.createOrder(eq(account), eq(Direction.BUY),
+				eq(security), eq(10L), eq(8d), eq(new StopOrderActivator(9d))))
+			.andReturn(order);
+		order.setComment(eq("altair"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(10L, 8d, 9d, "altair"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_LDDC() throws Exception {
+		expect(terminal.createOrder(eq(account), eq(Direction.SELL),
+				eq(security), eq(15L), eq(9d), eq(new StopOrderActivator(11d))))
+			.andReturn(order);
+		order.setComment(eq("vector"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(15L, 9d, 11d, "vector"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testBuy_SLC() throws Exception {
+		expect(terminal.createOrder(account, Direction.BUY, security2, 7L))
+			.andReturn(order);
+		order.setComment(eq("kappa"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(security2, 7L, "kappa"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_SLC() throws Exception {
+		expect(terminal.createOrder(account, Direction.SELL, security2, 4L))
+			.andReturn(order);
+		order.setComment(eq("zippo"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(security2, 4L, "zippo"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testBuy_ASLC() throws Exception {
+		expect(terminal.createOrder(account2, Direction.BUY, security2, 1L))
+			.andReturn(order);
+		order.setComment(eq("value"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(account2, security2, 1L, "value"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_ASLC() throws Exception {
+		expect(terminal.createOrder(account2, Direction.SELL, security2, 2L))
+			.andReturn(order);
+		order.setComment(eq("zebra"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(account2, security2, 2L, "zebra"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testBuy_SLDC() throws Exception {
+		expect(terminal.createOrder(account, Direction.BUY, security2, 9L, 1d))
+			.andReturn(order);
+		order.setComment(eq("gizmo"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(security2, 9L, 1d, "gizmo"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_SLDC() throws Exception {
+		expect(terminal.createOrder(account, Direction.SELL, security2, 3L, 4d))
+			.andReturn(order);
+		order.setComment(eq("vacuum"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(security2, 3L, 4d, "vacuum"));
+		
+		control.verify();
+	}
 
+	@Test
+	public void testBuy_SLDDC() throws Exception {
+		expect(terminal.createOrder(eq(account), eq(Direction.BUY),
+				eq(security2), eq(18L), eq(24d),
+				eq(new StopOrderActivator(25d))))
+			.andReturn(order);
+		order.setComment(eq("bitebox"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(security2, 18L, 24d, 25d, "bitebox"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_SLDDC() throws Exception {
+		expect(terminal.createOrder(eq(account), eq(Direction.SELL),
+				eq(security2), eq(12L), eq(18d),
+				eq(new StopOrderActivator(13d))))
+			.andReturn(order);
+		order.setComment(eq("zimbabwe"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(security2, 12L, 18d, 13d, "zimbabwe"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testBuy_ASLDC() throws Exception {
+		expect(terminal.createOrder(account2, Direction.BUY, security2, 6L, 1d))
+			.andReturn(order);
+		order.setComment(eq("hacker"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(account2, security2, 6L, 1d, "hacker"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_ASLDC() throws Exception {
+		expect(terminal.createOrder(account2, Direction.SELL, security2, 1L,5d))
+			.andReturn(order);
+		order.setComment(eq("foobar"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(account2, security2, 1L, 5d, "foobar"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testBuy_ASLDDC() throws Exception {
+		expect(terminal.createOrder(eq(account2), eq(Direction.BUY),
+				eq(security2), eq(25L), eq(80d),
+				eq(new StopOrderActivator(82d))))
+			.andReturn(order);
+		order.setComment(eq("toth"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.buy(account2, security2, 25L, 80d, 82d, "toth"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSell_ASLDDC() throws Exception {
+		expect(terminal.createOrder(eq(account2), eq(Direction.SELL),
+				eq(security2), eq(15L), eq(8d),
+				eq(new StopOrderActivator(9d))))
+			.andReturn(order);
+		order.setComment(eq("zoo"));
+		expect(base.add(same(order))).andReturn(order);
+		control.replay();
+		
+		assertSame(order, pool.sell(account2, security2, 15L, 8d, 9d, "zoo"));
+		
+		control.verify();
+	}
+	
 }

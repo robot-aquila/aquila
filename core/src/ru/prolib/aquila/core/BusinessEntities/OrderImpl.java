@@ -40,6 +40,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private final LinkedList<Trade> trades = new LinkedList<Trade>();
 	private final OrderSystemInfo systemInfo = new OrderSystemInfo();
 	private OrderActivator activator;
+	private String comment = "";
 	
 	/**
 	 * Конструктор.
@@ -484,6 +485,19 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	@Override
 	public final int hashCode() {
 		return super.hashCode();
+	}
+	
+	@Override
+	public synchronized void setComment(String value) {
+		if ( value == null ? comment != null : ! value.equals(comment) ) {
+			comment = value;
+			setChanged();
+		}
+	}
+	
+	@Override
+	public synchronized String getComment() {
+		return comment;
 	}
 
 }

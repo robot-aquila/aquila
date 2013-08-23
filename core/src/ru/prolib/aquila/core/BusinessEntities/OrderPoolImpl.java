@@ -269,4 +269,188 @@ public class OrderPoolImpl implements OrderPool {
 			.isEquals();
 	}
 
+	@Override
+	public Order buy(long qty, String comment) {
+		testDefaultAccount();
+		testDefaultSecurity();
+		EditableOrder o = (EditableOrder)
+			terminal.createOrder(account, Direction.BUY, security, qty);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(long qty, String comment) {
+		testDefaultAccount();
+		testDefaultSecurity();
+		EditableOrder o = (EditableOrder)
+			terminal.createOrder(account, Direction.SELL, security, qty);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(long qty, double price, String comment) {
+		testDefaultAccount();
+		testDefaultSecurity();
+		EditableOrder o = (EditableOrder)
+			terminal.createOrder(account, Direction.BUY, security, qty, price);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(long qty, double price, String comment) {
+		testDefaultAccount();
+		testDefaultSecurity();
+		EditableOrder o = (EditableOrder)
+			terminal.createOrder(account, Direction.SELL, security, qty, price);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(long qty, double price, double stop, String comment) {
+		testDefaultAccount();
+		testDefaultSecurity();
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.BUY, security, qty, price,
+				new StopOrderActivator(stop));
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(long qty, double price, double stop, String comment) {
+		testDefaultAccount();
+		testDefaultSecurity();
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.SELL, security, qty, price,
+				new StopOrderActivator(stop));
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(Security security, long qty, String comment) {
+		testDefaultAccount();
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.BUY, security, qty);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(Security security, long qty, String comment) {
+		testDefaultAccount();
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.SELL, security, qty);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(Account account, Security security, long qty,
+			String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.BUY, security, qty);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(Account account, Security security, long qty,
+			String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.SELL, security, qty);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(Security security, long qty, double price,
+			String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.BUY, security, qty, price);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(Security security, long qty, double price,
+			String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.SELL, security, qty, price);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(Security security, long qty, double price, double stop,
+			String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.BUY, security, qty, price,
+				new StopOrderActivator(stop));
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(Security security, long qty, double price, double stop,
+			String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.SELL, security, qty, price,
+				new StopOrderActivator(stop));
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(Account account, Security security, long qty,
+			double price, String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.BUY, security, qty, price);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(Account account, Security security, long qty,
+			double price, String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.SELL, security, qty, price);
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order buy(Account account, Security security, long qty,
+			double price, double stop, String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.BUY, security, qty, price,
+				new StopOrderActivator(stop));
+		o.setComment(comment);
+		return base.add(o);
+	}
+
+	@Override
+	public Order sell(Account account, Security security, long qty,
+			double price, double stop, String comment)
+	{
+		EditableOrder o = (EditableOrder) terminal.createOrder(account,
+				Direction.SELL, security, qty, price,
+				new StopOrderActivator(stop));
+		o.setComment(comment);
+		return base.add(o);
+	}
+
 }

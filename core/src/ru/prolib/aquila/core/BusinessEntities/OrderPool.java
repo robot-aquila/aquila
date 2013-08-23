@@ -110,6 +110,23 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order buy(long qty);
+	
+	/**
+	 * Добавить рыночную заявку на покупку.
+	 * <p>
+	 * Создается экземпляр рыночной заявки на покупку инструмента по-умолчанию
+	 * и счету по-умолчанию. Если счет либо инструмент не задан, то будет
+	 * брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param qty количество
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(long qty, String comment);
 
 	/**
 	 * Добавить рыночную заявку на продажу.
@@ -126,6 +143,23 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order sell(long qty);
+	
+	/**
+	 * Добавить рыночную заявку на продажу.
+	 * <p>
+	 * Создается экземпляр рыночной заявки на продажу инструмента по-умолчанию
+	 * и счету по-умолчанию. Если счет либо инструмент не задан, то будет
+	 * брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param qty количество
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(long qty, String comment);
 
 	/**
 	 * Добавить лимитную заявку на покупку.
@@ -143,6 +177,24 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order buy(long qty, double price);
+	
+	/**
+	 * Добавить лимитную заявку на покупку.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на покупку инструмента по-умолчанию
+	 * и счету по-умолчанию. Если счет либо инструмент не задан, то будет
+	 * брошено исключение {@link IllegalStateException}.
+ 	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param qty количество
+	 * @param price цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(long qty, double price, String comment);
 
 	/**
 	 * Добавить лимитную заявку на продажу.
@@ -162,6 +214,24 @@ public interface OrderPool {
 	public Order sell(long qty, double price);
 
 	/**
+	 * Добавить лимитную заявку на продажу.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на продажу инструмента по-умолчанию
+	 * и счету по-умолчанию. Если счет либо инструмент не задан, то будет
+	 * брошено исключение {@link IllegalStateException}.
+ 	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param qty количество
+	 * @param price цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(long qty, double price, String comment);
+
+	/**
 	 * Добавить стоп-лимит на покупку.
 	 * <p>
 	 * Создается экземпляр лимитной заявки на покупку инструмента по-умолчанию
@@ -179,6 +249,27 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order buy(long qty, double price, double stop);
+	
+	/**
+	 * Добавить стоп-лимит на покупку.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на покупку инструмента по-умолчанию
+	 * и счету по-умолчанию с акцивацией по условию достижения стоп-цены. Если
+	 * счет или инструмент не задан, то будет брошено исключение
+	 * {@link IllegalStateException}.
+ 	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param qty количество
+	 * @param price цена
+	 * @param stop стоп-цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(long qty, double price, double stop, String comment);
+
 
 	/**
 	 * Добавить стоп-лимит на продажу.
@@ -198,6 +289,27 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order sell(long qty, double price, double stop);
+	
+	/**
+	 * Добавить стоп-лимит на продажу.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на продажу инструмента по-умолчанию
+	 * и счету по-умолчанию с акцивацией по условию достижения стоп-цены. Если
+	 * счет или инструмент не задан, то будет брошено исключение
+	 * {@link IllegalStateException}.
+ 	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param qty количество
+	 * @param price цена
+	 * @param stop стоп-цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(long qty, double price, double stop, String comment);
+
 
 	/**
 	 * Добавить рыночную заявку на покупку.
@@ -215,6 +327,24 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order buy(Security security, long qty);
+	
+	/**
+	 * Добавить рыночную заявку на покупку.
+	 * <p>
+	 * Создается экземпляр рыночной заявки на покупку указанного инструмента
+	 * с использованием счета по-умолчанию. Если счет по-умолчанию не задан, то
+	 * будет брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(Security security, long qty, String comment);
 
 	/**
 	 * Добавить рыночную заявку на продажу.
@@ -234,6 +364,24 @@ public interface OrderPool {
 	public Order sell(Security security, long qty);
 	
 	/**
+	 * Добавить рыночную заявку на продажу.
+	 * <p>
+	 * Создается экземпляр рыночной заявки на продажу указанного инструмента
+	 * с использованием счета по-умолчанию. Если счет по-умолчанию не задан, то
+	 * будет брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(Security security, long qty, String comment);
+
+	/**
 	 * Добавить рыночную заявку на покупку.
 	 * <p>
 	 * Создается экземпляр рыночной заявки на покупку указанного инструмента
@@ -251,6 +399,25 @@ public interface OrderPool {
 	public Order buy(Account account, Security security, long qty);
 	
 	/**
+	 * Добавить рыночную заявку на покупку.
+	 * <p>
+	 * Создается экземпляр рыночной заявки на покупку указанного инструмента
+	 * с использованием указанного счета.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(Account account, Security security, long qty,
+			String comment);
+
+	/**
 	 * Добавить рыночную заявку на продажу.
 	 * <p>
 	 * Создается экземпляр рыночной заявки на продажу указанного инструмента
@@ -266,6 +433,25 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order sell(Account account, Security security, long qty);
+	
+	/**
+	 * Добавить рыночную заявку на продажу.
+	 * <p>
+	 * Создается экземпляр рыночной заявки на продажу указанного инструмента
+	 * с использованием указанного счета.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(Account account, Security security, long qty,
+			String comment);
 
 	/**
 	 * Добавить лимитную заявку на покупку.
@@ -284,6 +470,25 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order buy(Security security, long qty, double price);
+	
+	/**
+	 * Добавить лимитную заявку на покупку.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на покупку указанного инструмента
+	 * с использованием счета-по умолчанию. Если счет по-умолчанию не задан, то
+	 * будет брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(Security security, long qty, double price, String comment);
 
 	/**
 	 * Добавить лимитную заявку на продажу.
@@ -302,6 +507,26 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order sell(Security security, long qty, double price);
+	
+	/**
+	 * Добавить лимитную заявку на продажу.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на продажу указанного инструмента
+	 * с использованием счета-по умолчанию. Если счет по-умолчанию не задан, то
+	 * будет брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(Security security, long qty, double price,
+			String comment);
 
 	/**
 	 * Добавить стоп-лимит на покупку.
@@ -322,6 +547,28 @@ public interface OrderPool {
 	 * @return заявка
 	 */
 	public Order buy(Security security, long qty, double price, double stop);
+	
+	/**
+	 * Добавить стоп-лимит на покупку.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на покупку указанного инструмента
+	 * с использованием счета по-умолчанию и активацией по условию достижения
+	 * стоп-цены. Если счет по-умолчанию не задан, то
+	 * будет брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param stop стоп-цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(Security security, long qty, double price, double stop,
+			String comment);
 
 	/**
 	 * Добавить стоп-лимит на продажу.
@@ -344,6 +591,28 @@ public interface OrderPool {
 	public Order sell(Security security, long qty, double price, double stop);
 
 	/**
+	 * Добавить стоп-лимит на продажу.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на продажу указанного инструмента
+	 * с использованием счета по-умолчанию и активацией по условию достижения
+	 * стоп-цены. Если счет по-умолчанию не задан, то
+	 * будет брошено исключение {@link IllegalStateException}.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param stop стоп-цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(Security security, long qty, double price, double stop,
+			String comment);
+	
+	/**
 	 * Добавить лимитную заявку на покупку.
 	 * <p>
 	 * Создается экземпляр лимитной заявки на покупку указанного инструмента
@@ -361,6 +630,26 @@ public interface OrderPool {
 	 */
 	public Order buy(Account account, Security security, long qty,
 			double price);
+	
+	/**
+	 * Добавить лимитную заявку на покупку.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на покупку указанного инструмента
+	 * с использованием указанного счета.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(Account account, Security security, long qty,
+			double price, String comment);
 
 	/**
 	 * Добавить лимитную заявку на продажу.
@@ -382,6 +671,26 @@ public interface OrderPool {
 			double price);
 
 	/**
+	 * Добавить лимитную заявку на продажу.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на продажу указанного инструмента
+	 * с использованием указанного счета.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(Account account, Security security, long qty,
+			double price, String comment);
+
+	/**
 	 * Добавить стоп-заявку на покупку.
 	 * <p>
 	 * Создается экземпляр лимитной заявки на покупку указанного инструмента
@@ -401,6 +710,28 @@ public interface OrderPool {
 	 */
 	public Order buy(Account account, Security security, long qty,
 			double price, double stop);
+	
+	/**
+	 * Добавить стоп-заявку на покупку.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на покупку указанного инструмента
+	 * с использованием указанного счета и активацией заявки по условию
+	 * достижения стоп-цены.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param stop стоп-цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order buy(Account account, Security security, long qty,
+			double price, double stop, String comment);
 
 	/**
 	 * Добавить стоп-заявку на продажу.
@@ -422,6 +753,28 @@ public interface OrderPool {
 	 */
 	public Order sell(Account account, Security security, long qty,
 			double price, double stop);
+
+	/**
+	 * Добавить стоп-заявку на продажу.
+	 * <p>
+	 * Создается экземпляр лимитной заявки на продажу указанного инструмента
+	 * с использованием указанного счета и активацией заявки по условию
+	 * достижения стоп-цены.
+	 * <p>
+	 * Созданная заявка относится к категории новых и должна быть размещена или
+	 * отменена последующим вызовом соответственно {@link #placeOrders()} или
+	 * {@link #cancelOrders()}.
+	 * <p>
+	 * @param account торговый счет
+	 * @param security инструмент
+	 * @param qty количество
+	 * @param price цена
+	 * @param stop стоп-цена
+	 * @param comment комментарий
+	 * @return заявка
+	 */
+	public Order sell(Account account, Security security, long qty,
+			double price, double stop, String comment);
 
 	/**
 	 * Добавить заявку.
