@@ -1,6 +1,8 @@
 package ru.prolib.aquila.quik.assembler;
 
 import java.util.*;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -66,7 +68,9 @@ public class PlaceHandler implements QUIKTransactionHandler {
 				+ "; CLASSCODE=" + descr.getClassCode()
 				+ "; SECCODE=" + descr.getCode()
 				+ "; OPERATION=" + dir.get(order.getDirection())
-				+ "; QUANTITY=" + order.getQty();
+				+ "; QUANTITY=" + order.getQty()
+				+ "; COMMENT=" +
+					StringUtils.replace(order.getComment(), ";", "_");
 			OrderType type = order.getType();
 			if ( type == OrderType.MARKET ) {
 				trspec += "; TYPE=M; PRICE=0";

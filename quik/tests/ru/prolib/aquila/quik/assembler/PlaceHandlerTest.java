@@ -117,10 +117,10 @@ public class PlaceHandlerTest {
 	public void testPlaceOrder_Market() throws Exception {
 		expect(order.getDirection()).andStubReturn(Direction.BUY);
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
-		
+		expect(order.getComment()).andStubReturn("Zulu24");
 		String expected = "TRANS_ID=214; ACTION=NEW_ORDER; "
 			+ "CLIENT_CODE=18210; ACCOUNT=LX01; CLASSCODE=EQBR; SECCODE=SBER; "
-			+ "OPERATION=B; QUANTITY=1000; TYPE=M; PRICE=0";
+			+ "OPERATION=B; QUANTITY=1000; COMMENT=Zulu24; TYPE=M; PRICE=0";
 		client.send(expected);
 		order.setStatus(OrderStatus.SENT);
 		order.fireChangedEvent();
@@ -139,11 +139,13 @@ public class PlaceHandlerTest {
 		expect(order.getDirection()).andStubReturn(Direction.SELL);
 		expect(order.getType()).andStubReturn(OrderType.LIMIT);
 		expect(order.getPrice()).andStubReturn(14.95d);
+		expect(order.getComment()).andStubReturn("one;two;three");
 		expect(security.shrinkPrice(eq(14.95d))).andReturn("14.5");
 		
 		String expected = "TRANS_ID=214; ACTION=NEW_ORDER; "
 			+ "CLIENT_CODE=18210; ACCOUNT=LX01; CLASSCODE=EQBR; SECCODE=SBER; "
-			+ "OPERATION=S; QUANTITY=1000; TYPE=L; PRICE=14.5";
+			+ "OPERATION=S; QUANTITY=1000; COMMENT=one_two_three; TYPE=L; "
+			+ "PRICE=14.5";
 		client.send(expected);
 		order.setStatus(OrderStatus.SENT);
 		order.fireChangedEvent();
@@ -163,6 +165,7 @@ public class PlaceHandlerTest {
 		expect(order.getDirection()).andStubReturn(Direction.SELL);
 		expect(order.getType()).andStubReturn(OrderType.LIMIT);
 		expect(order.getPrice()).andStubReturn(14.95d);
+		expect(order.getComment()).andStubReturn("");
 		expect(order.getSecurity()).andThrow(expected);
 		order.setStatus(OrderStatus.REJECTED);
 		order.fireChangedEvent();
@@ -184,6 +187,7 @@ public class PlaceHandlerTest {
 		T2QException expected = new T2QException("test"); 
 		expect(order.getDirection()).andStubReturn(Direction.BUY);
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
+		expect(order.getComment()).andStubReturn("");
 		client.send((String) anyObject());
 		expectLastCall().andThrow(expected);
 		order.setStatus(OrderStatus.REJECTED);
