@@ -117,10 +117,10 @@ public class PlaceHandlerTest {
 	public void testPlaceOrder_Market() throws Exception {
 		expect(order.getDirection()).andStubReturn(Direction.BUY);
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
-		expect(order.getComment()).andStubReturn("Zulu24");
+		expect(order.getComment()).andStubReturn("");
 		String expected = "TRANS_ID=214; ACTION=NEW_ORDER; "
-			+ "CLIENT_CODE=18210; ACCOUNT=LX01; CLASSCODE=EQBR; SECCODE=SBER; "
-			+ "OPERATION=B; QUANTITY=1000; COMMENT=Zulu24; TYPE=M; PRICE=0";
+			+ "CLIENT_CODE=18210; ACCOUNT=LX01; CLASSCODE=EQBR; "
+			+ "SECCODE=SBER; OPERATION=B; QUANTITY=1000; TYPE=M; PRICE=0";
 		client.send(expected);
 		order.setStatus(OrderStatus.SENT);
 		order.fireChangedEvent();
@@ -139,13 +139,14 @@ public class PlaceHandlerTest {
 		expect(order.getDirection()).andStubReturn(Direction.SELL);
 		expect(order.getType()).andStubReturn(OrderType.LIMIT);
 		expect(order.getPrice()).andStubReturn(14.95d);
-		expect(order.getComment()).andStubReturn("one;two;three");
+		// will be cut to 20 chars
+		expect(order.getComment()).andStubReturn("one;two;three;four;five");
 		expect(security.shrinkPrice(eq(14.95d))).andReturn("14.5");
 		
 		String expected = "TRANS_ID=214; ACTION=NEW_ORDER; "
-			+ "CLIENT_CODE=18210; ACCOUNT=LX01; CLASSCODE=EQBR; SECCODE=SBER; "
-			+ "OPERATION=S; QUANTITY=1000; COMMENT=one_two_three; TYPE=L; "
-			+ "PRICE=14.5";
+			+ "CLIENT_CODE=18210/one_two_three_four_f; ACCOUNT=LX01; "
+			+ "CLASSCODE=EQBR; SECCODE=SBER; OPERATION=S; QUANTITY=1000; "
+			+ "TYPE=L; PRICE=14.5";
 		client.send(expected);
 		order.setStatus(OrderStatus.SENT);
 		order.fireChangedEvent();

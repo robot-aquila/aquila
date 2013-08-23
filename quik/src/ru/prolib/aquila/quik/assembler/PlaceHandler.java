@@ -63,14 +63,13 @@ public class PlaceHandler implements QUIKTransactionHandler {
 			Account account = order.getAccount();
 			SecurityDescriptor descr = order.getSecurityDescriptor();
 			String trspec = "TRANS_ID=" + order.getId()
-				+ "; ACTION=NEW_ORDER; CLIENT_CODE=" + account.getSubCode()
+				+ "; ACTION=NEW_ORDER; CLIENT_CODE=" +
+					getClientCode(account)
 				+ "; ACCOUNT=" + account.getSubCode2()
 				+ "; CLASSCODE=" + descr.getClassCode()
 				+ "; SECCODE=" + descr.getCode()
 				+ "; OPERATION=" + dir.get(order.getDirection())
-				+ "; QUANTITY=" + order.getQty()
-				+ "; COMMENT=" +
-					StringUtils.replace(order.getComment(), ";", "_");
+				+ "; QUANTITY=" + order.getQty();
 			OrderType type = order.getType();
 			if ( type == OrderType.MARKET ) {
 				trspec += "; TYPE=M; PRICE=0";
@@ -93,6 +92,19 @@ public class PlaceHandler implements QUIKTransactionHandler {
 			removeHandler();
 			throw e;
 		}
+	}
+	
+	/**
+	 * Сформировать код клиента с комментарием.
+	 * <p>
+	 * @param account торговый счет
+	 * @return строка кода клиента с комментарием заявки
+	 */
+	private String getClientCode(Account account) {
+		String code = account.getSubCode();
+		String comment = StringUtils.substring(
+				StringUtils.replace(order.getComment(), ";", "_"), 0, 20);
+		return code + (comment.length() > 0 ? "/" + comment : "");
 	}
 	
 	/**
