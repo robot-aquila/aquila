@@ -126,5 +126,12 @@ public class EventTypeImpl implements EventType {
 	public boolean isListener(EventListener listener) {
 		return dispatcher.isTypeListener(this, listener);
 	}
+	
+	@Override
+	public EventListener once(EventListener listener) {
+		ListenOnce once = new ListenOnce(this, listener);
+		once.start();
+		return once;
+	}
 
 }

@@ -131,5 +131,19 @@ public class EventTypeImplTest {
 		assertEquals("MyType", found.getId());
 		assertEquals(list1, foundList);
 	}
+	
+	@Test
+	public void testOnce() throws Exception {
+		EventListener lstn = control.createMock(EventListener.class),
+			expected = new ListenOnce(type, lstn), actual;
+		dispatcher.addListener(same(type), eq(expected));
+		control.replay();
+		
+		actual = type.once(lstn);
+		
+		control.verify();
+		assertNotNull(actual);
+		assertEquals(expected, actual);
+	}
 
 }
