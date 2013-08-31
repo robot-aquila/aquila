@@ -15,15 +15,11 @@ public class PortfolioFactory {
 	public EditablePortfolio
 		createInstance(EditableTerminal terminal, Account account)
 	{
-		String id = "Portfolio[" + account + "]";
 		EventSystem es = terminal.getEventSystem();
-		EventDispatcher d = es.createEventDispatcher(id);
-		PortfolioImpl p = new PortfolioImpl(terminal, account, d,
-				d.createType("OnChanged"));
-		EventDispatcher pd = es.createEventDispatcher(id);
-		p.setPositionsInstance(new PositionsImpl(p, pd,
-				pd.createType("OnPosAvailable"),
-				pd.createType("OnPosChanged")));
+		PortfolioImpl p = new PortfolioImpl(terminal, account,
+				new PortfolioEventDispatcher(es, account));
+		p.setPositionsInstance(new PositionsImpl(p,
+				new PositionsEventDispatcher(es, account)));
 		return p;
 	}
 	

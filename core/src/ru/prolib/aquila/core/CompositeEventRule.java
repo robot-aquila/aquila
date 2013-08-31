@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
  * 2012-04-21<br>
  * $Id: CompositeEventRule.java 219 2012-05-20 12:16:45Z whirlwind $
  */
+@Deprecated
 public interface CompositeEventRule {
 
 	/**

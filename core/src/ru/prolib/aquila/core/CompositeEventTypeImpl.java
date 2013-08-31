@@ -16,6 +16,7 @@ import java.util.Map;
  * 2012-04-21<br>
  * $Id: CompositeEventTypeImpl.java 219 2012-05-20 12:16:45Z whirlwind $
  */
+@Deprecated
 public class CompositeEventTypeImpl extends EventTypeImpl
 								 implements EventListener, CompositeEventType
 {
@@ -133,10 +134,8 @@ public class CompositeEventTypeImpl extends EventTypeImpl
 	
 	@Override
 	public synchronized void addListener(EventListener listener) {
-		if ( getEventDispatcher().countListeners(this) == 0 ) {
-			for ( EventType type : cache.keySet() ) {
-				type.addListener(this);
-			}
+		for ( EventType type : cache.keySet() ) {
+			type.addListener(this);
 		}
 		super.addListener(listener);
 	}
@@ -144,10 +143,8 @@ public class CompositeEventTypeImpl extends EventTypeImpl
 	@Override
 	public synchronized void removeListener(EventListener listener) {
 		super.removeListener(listener);
-		if ( getEventDispatcher().countListeners(this) == 0 ) {
-			for ( EventType type : cache.keySet() ) {
-				type.removeListener(this);
-			}
+		for ( EventType type : cache.keySet() ) {
+			type.removeListener(this);
 		}
 	}
 

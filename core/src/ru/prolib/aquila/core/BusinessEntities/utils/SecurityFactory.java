@@ -1,7 +1,5 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
@@ -16,13 +14,8 @@ public class SecurityFactory {
 	public EditableSecurity
 		createInstance(EditableTerminal terminal, SecurityDescriptor descr)
 	{
-		EventSystem es = terminal.getEventSystem();
-		EventDispatcher dispatcher =
-			es.createEventDispatcher("Security[" + descr + "]");
-		EditableSecurity s = new SecurityImpl(terminal, descr, dispatcher,
-				es.createGenericType(dispatcher, "OnChanged"),
-				es.createGenericType(dispatcher, "OnTrade"));
-		return s;
+		return new SecurityImpl(terminal, descr,
+				new SecurityEventDispatcher(terminal.getEventSystem(), descr));
 	}
 	
 	@Override

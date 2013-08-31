@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * Генератор события заявки.
  */
 public class OrderStateHandler {
-	private final EventDispatcher dispatcher;
+	private final OrderEventDispatcher dispatcher;
 	private final OrderStateValidator validator;
 	private final EventType type;
 	
@@ -20,7 +20,7 @@ public class OrderStateHandler {
 	 * @param validator валидатор условия генерации события
 	 * @param type тип генерируемого события 
 	 */
-	public OrderStateHandler(EventDispatcher dispatcher,
+	public OrderStateHandler(OrderEventDispatcher dispatcher,
 							 OrderStateValidator validator,
 							 EventType type)
 	{
@@ -35,7 +35,7 @@ public class OrderStateHandler {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public OrderEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 	

@@ -6,6 +6,7 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.SecuritiesEventDispatcher;
 import ru.prolib.aquila.core.BusinessEntities.utils.SecurityFactory;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -15,8 +16,7 @@ public class SecuritiesImplTest {
 	private EditableTerminal terminal;
 	private EditableSecurity security1, security2, security3;
 	private SecuritiesImpl securities;
-	private EventDispatcher dispatcher;
-	private EventType onAvailable,onChanged,onTrade;
+	private SecuritiesEventDispatcher dispatcher;
 	private SecurityFactory factory;
 	
 	@BeforeClass
@@ -30,20 +30,27 @@ public class SecuritiesImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = control.createMock(EditableTerminal.class);
-		dispatcher = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(SecuritiesEventDispatcher.class);
 		security1 = control.createMock(EditableSecurity.class);
 		security2 = control.createMock(EditableSecurity.class);
 		security3 = control.createMock(EditableSecurity.class);
 		factory = control.createMock(SecurityFactory.class);
-		onAvailable = control.createMock(EventType.class);
-		onChanged = control.createMock(EventType.class);
-		onTrade = control.createMock(EventType.class);
-		securities = new SecuritiesImpl(dispatcher, onAvailable, onChanged,
-				onTrade, factory);
+		securities = new SecuritiesImpl(dispatcher, factory);
 		
 		expect(security1.getDescriptor()).andStubReturn(descr1);
 		expect(security2.getDescriptor()).andStubReturn(descr2);
 		expect(security3.getDescriptor()).andStubReturn(descr3);
+	}
+	
+	@Test
+	public void testEventTypes() throws Exception {
+		SecuritiesEventDispatcher d =
+			new SecuritiesEventDispatcher(new EventSystemImpl());
+		securities = new SecuritiesImpl(d);
+		
+		assertSame(d.OnAvailable(), securities.OnSecurityAvailable());
+		assertSame(d.OnChanged(), securities.OnSecurityChanged());
+		assertSame(d.OnTrade(), securities.OnSecurityTrade());
 	}
 	
 	@Test
@@ -95,14 +102,8 @@ public class SecuritiesImplTest {
 	
 	@Test 
 	public void testGetEditableSecurity_CreateIfNotExists() throws Exception {
-		EventType onChng = control.createMock(EventType.class),
-			onTrd = control.createMock(EventType.class);
-		expect(security1.OnChanged()).andStubReturn(onChng);
-		expect(security1.OnTrade()).andStubReturn(onTrd);
-		
 		expect(factory.createInstance(terminal, descr1)).andReturn(security1);
-		onChng.addListener(securities);
-		onTrd.addListener(securities);
+		dispatcher.startRelayFor(same(security1));
 		control.replay();
 		
 		EditableSecurity actual =
@@ -117,7 +118,7 @@ public class SecuritiesImplTest {
 	public void testFireEvents_Available() throws Exception {
 		expect(security1.isAvailable()).andReturn(false);
 		security1.setAvailable(true);
-		dispatcher.dispatch(eq(new SecurityEvent(onAvailable, security1)));
+		dispatcher.fireAvailable(same(security1));
 		security1.resetChanges();
 		control.replay();
 		
@@ -134,35 +135,6 @@ public class SecuritiesImplTest {
 		control.replay();
 		
 		securities.fireEvents(security1);
-		
-		control.verify();
-	}
-
-	@Test
-	public void testOnEvent_DispatchSecurityChangedEvent() throws Exception {
-		EventType type1 = control.createMock(EventType.class);
-		EventType type2 = control.createMock(EventType.class);
-		expect(security1.OnChanged()).andStubReturn(type1);
-		expect(security1.OnTrade()).andStubReturn(type2);
-		dispatcher.dispatch(eq(new SecurityEvent(onChanged, security1)));
-		control.replay();
-		
-		securities.onEvent(new SecurityEvent(type1, security1));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_DispatchSecurityTradeEvent() throws Exception {
-		EventType type1 = control.createMock(EventType.class);
-		EventType type2 = control.createMock(EventType.class);
-		expect(security1.OnTrade()).andStubReturn(type1);
-		expect(security1.OnChanged()).andStubReturn(type2);
-		Trade t = new Trade(terminal);
-		dispatcher.dispatch(new SecurityTradeEvent(onTrade, security1, t));
-		control.replay();
-		
-		securities.onEvent(new SecurityTradeEvent(type1, security1, t));
 		
 		control.verify();
 	}
@@ -195,20 +167,8 @@ public class SecuritiesImplTest {
 		list2.add(security2);
 		list2.add(security1);
 		
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>()
-			.add(dispatcher)
-			.add(control.createMock(EventDispatcher.class));
-		Variant<EventType> vAvl = new Variant<EventType>(vDisp)
-			.add(onAvailable)
-			.add(control.createMock(EventType.class));
-		Variant<EventType> vChng = new Variant<EventType>(vAvl)
-			.add(onChanged)
-			.add(control.createMock(EventType.class));
-		Variant<EventType> vTrd = new Variant<EventType>(vChng)
-			.add(onTrade)
-			.add(control.createMock(EventType.class));
 		Variant<List<EditableSecurity>> vList =
-				new Variant<List<EditableSecurity>>(vTrd)
+				new Variant<List<EditableSecurity>>()
 			.add(list1)
 			.add(list2);
 		Variant<SecurityFactory> vFact = new Variant<SecurityFactory>(vList)
@@ -222,8 +182,7 @@ public class SecuritiesImplTest {
 			securities.setSecurity(security.getDescriptor(), security);
 		}
 		do {
-			x = new SecuritiesImpl(vDisp.get(), vAvl.get(),
-					vChng.get(), vTrd.get(), vFact.get());
+			x = new SecuritiesImpl(dispatcher, vFact.get());
 			for ( EditableSecurity security : vList.get() ) {
 				x.setSecurity(security.getDescriptor(), security);
 			}
@@ -233,20 +192,15 @@ public class SecuritiesImplTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onAvailable, found.OnSecurityAvailable());
-		assertEquals(onChanged, found.OnSecurityChanged());
-		assertEquals(onTrade, found.OnSecurityTrade());
 		assertEquals(list1, found.getSecurities());
 		assertSame(factory, found.getFactory());
 	}
 	
 	@Test
 	public void testConstruct_DefaultFactory() throws Exception {
-		SecuritiesImpl expected = new SecuritiesImpl(dispatcher, onAvailable,
-				onChanged, onTrade, new SecurityFactory());
-		assertEquals(expected, new SecuritiesImpl(dispatcher, onAvailable,
-				onChanged, onTrade));
+		SecuritiesImpl expected =
+			new SecuritiesImpl(dispatcher, new SecurityFactory());
+		assertEquals(expected, new SecuritiesImpl(dispatcher));
 	}
 
 }

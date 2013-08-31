@@ -6,8 +6,8 @@ import java.text.DecimalFormatSymbols;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.SecurityEventDispatcher;
 
 /**
  * Инструмент торговли.
@@ -15,9 +15,7 @@ import ru.prolib.aquila.core.EventType;
 public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	private final Terminal terminal;
 	private final SecurityDescriptor descr;
-	private final EventDispatcher dispatcher;
-	private final EventType onChanged;
-	private final EventType onTrade;
+	private final SecurityEventDispatcher dispatcher;
 	private Double minPrice;
 	private Double maxPrice;
 	private Double stepPrice;
@@ -39,20 +37,14 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	 * @param terminal терминал
 	 * @param descr дескриптор инструмента
 	 * @param dispatcher диспетчер событий
-	 * @param onChanged тип события: при изменении атрибутов инструмента
-	 * @param onTrade тип события: новая (анонимная) сделка по инструменту
 	 */
 	public SecurityImpl(Terminal terminal, SecurityDescriptor descr,
-					    EventDispatcher dispatcher,
-					    EventType onChanged,
-					    EventType onTrade)
+					    SecurityEventDispatcher dispatcher)
 	{
 		super();
 		this.terminal = terminal;
 		this.descr = descr;
 		this.dispatcher = dispatcher;
-		this.onChanged = onChanged;
-		this.onTrade = onTrade;
 		changePriceFormat();
 	}
 	
@@ -61,7 +53,7 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public SecurityEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -167,12 +159,12 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 
 	@Override
 	public synchronized EventType OnChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 
 	@Override
 	public synchronized EventType OnTrade() {
-		return onTrade;
+		return dispatcher.OnTrade();
 	}
 
 	@Override
@@ -192,12 +184,12 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 		synchronized ( this ) {
 			lastTrade = trade;
 		}
-		dispatcher.dispatch(new SecurityTradeEvent(onTrade, this, trade));
+		dispatcher.fireTrade(this, trade);
 	}
 	
 	@Override
 	public void fireChangedEvent() {
-		dispatcher.dispatch(new SecurityEvent(onChanged, this));
+		dispatcher.fireChanged(this);
 	}
 
 	@Override
@@ -396,7 +388,6 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			.append(o.bidSize, bidSize)
 			.append(o.close, close)
 			.append(o.descr, descr)
-			.append(o.dispatcher, dispatcher)
 			.append(o.displayName, displayName)
 			.append(o.high, high)
 			.append(o.lastPrice, lastPrice)
@@ -404,8 +395,6 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			.append(o.low, low)
 			.append(o.maxPrice, maxPrice)
 			.append(o.minPrice, minPrice)
-			.append(o.onChanged, onChanged)
-			.append(o.onTrade, onTrade)
 			.append(o.open, open)
 			.append(o.status, status)
 			.append(o.stepPrice, stepPrice)

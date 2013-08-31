@@ -6,6 +6,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.SecurityEventDispatcher;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -15,13 +16,10 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class SecurityImplTest {
 	private static SecurityDescriptor descr1, descr2;
-	private EventSystem es;
 	private IMocksControl control;
 	private Terminal terminal;
+	private SecurityEventDispatcher dispatcher;
 	private SecurityImpl security;
-	private EventType onChanged;
-	private EventType onTrade;
-	private EventDispatcher dispatcher, dispatcherMock;
 	private G<?> getter;
 	private S<SecurityImpl> setter;
 	
@@ -33,16 +31,11 @@ public class SecurityImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		es = new EventSystemImpl();
-		dispatcher = es.createEventDispatcher("Security");
-		onChanged = dispatcher.createType("OnChanged");
-		onTrade = dispatcher.createType("OnTrade");
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
-		dispatcherMock = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(SecurityEventDispatcher.class);
 		 
-		security = new SecurityImpl(terminal, descr1, dispatcher,
-									onChanged, onTrade);
+		security = new SecurityImpl(terminal, descr1, dispatcher);
 		setter = null;
 		getter = null;
 	}
@@ -168,24 +161,20 @@ public class SecurityImplTest {
 
 	@Test
 	public void testFireTradeEvent() throws Exception {
-		Trade t = new Trade(terminal);
-		security = new SecurityImpl(terminal, descr1, dispatcherMock,
-				onChanged, onTrade);
-		dispatcherMock.dispatch(new SecurityTradeEvent(onTrade, security, t));
+		Trade trade = new Trade(terminal);
+		dispatcher.fireTrade(same(security), same(trade));
 		control.replay();
 		
 		assertNull(security.getLastTrade());
-		security.fireTradeEvent(t);
-		assertSame(t, security.getLastTrade());
+		security.fireTradeEvent(trade);
+		assertSame(trade, security.getLastTrade());
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testFireChangedEvent() throws Exception {
-		security = new SecurityImpl(terminal, descr1, dispatcherMock,
-				onChanged, onTrade);
-		dispatcherMock.dispatch(new SecurityEvent(onChanged, security));
+		dispatcher.fireChanged(same(security));
 		control.replay();
 		
 		security.fireChangedEvent();
@@ -527,16 +516,7 @@ public class SecurityImplTest {
 				new Variant<SecurityDescriptor>(vTerm)
 			.add(descr1)
 			.add(descr2);
-		Variant<String> vDispId = new Variant<String>(vDescr)
-			.add("Security")
-			.add("Another");
-		Variant<String> vChngId = new Variant<String>(vDispId)
-			.add("OnChanged")
-			.add("OnUnknown");
-		Variant<String> vTrdId = new Variant<String>(vChngId)
-			.add("OnTrade")
-			.add("OnAmazimg");
-		Variant<Double> vAsk = new Variant<Double>(vTrdId)
+		Variant<Double> vAsk = new Variant<Double>(vDescr)
 			.add(200.00d)
 			.add(115.00d);
 		Variant<Long> vAskSz = new Variant<Long>(vAsk)
@@ -597,9 +577,7 @@ public class SecurityImplTest {
 		int foundCnt = 0;
 		SecurityImpl x = null, found = null;
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new SecurityImpl(vTerm.get(), vDescr.get(), d,
-					d.createType(vChngId.get()), d.createType(vTrdId.get()));
+			x = new SecurityImpl(vTerm.get(), vDescr.get(), dispatcher);
 			x.setAskPrice(vAsk.get());
 			x.setAskSize(vAskSz.get());
 			x.setAvailable(vAvl.get());
@@ -630,10 +608,6 @@ public class SecurityImplTest {
 		assertSame(terminal, found.getTerminal());
 		assertEquals(descr1, found.getDescriptor());
 		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onChanged, found.OnChanged());
-		assertNotSame(onChanged, found.OnChanged());
-		assertEquals(onTrade, found.OnTrade());
-		assertNotSame(onTrade, found.OnTrade());
 		assertEquals(200.00d, found.getAskPrice(), 0.01d);
 		assertEquals(new Long(80L), found.getAskSize());
 		assertTrue(found.isAvailable());
@@ -716,6 +690,28 @@ public class SecurityImplTest {
 					.getMostAccurateVolume(fix[i][2], fix[i][3].longValue()),
 					0.000001d);
 		}
+	}
+	
+	@Test
+	public void testOnChanged() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnChanged()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, security.OnChanged());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnTrade() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnTrade()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, security.OnTrade());
+		
+		control.verify();
 	}
 
 }

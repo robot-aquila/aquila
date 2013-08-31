@@ -44,7 +44,7 @@ public class SimpleEventQueue implements EventQueue {
 
 	@Override
 	public void enqueue(Event event, EventDispatcher dispatcher) {
-		enqueue(event, dispatcher.getListeners(event.getType()));
+		enqueue(event, event.getType().getListeners());
 	}
 
 	@Override

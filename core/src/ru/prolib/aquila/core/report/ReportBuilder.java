@@ -32,9 +32,7 @@ public class ReportBuilder {
 	 * @return отчет
 	 */
 	public EditableTradeReport createReport(EventSystem es) {
-		EventDispatcher d = es.createEventDispatcher("Trades");
-		return new CommonTradeReport(d, d.createType("Enter"),
-				d.createType("Exit"), d.createType("Changed"));
+		return new CommonTR(new CommonTREventDispatcher(es));
 	}
 	
 	/**

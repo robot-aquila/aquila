@@ -6,6 +6,8 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.PositionEventDispatcher;
+import ru.prolib.aquila.core.BusinessEntities.utils.PositionsEventDispatcher;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -22,8 +24,7 @@ public class PositionsImplTest {
 	private Portfolio portfolio;
 	private EditablePosition position1, position2;
 	private Security security1, security2;
-	private EventDispatcher dispatcher;
-	private EventType onAvailable, onChanged;
+	private PositionsEventDispatcher dispatcher;
 	private PositionsImpl positions;
 	
 	@BeforeClass
@@ -36,7 +37,7 @@ public class PositionsImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		dispatcher = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(PositionsEventDispatcher.class);
 		terminal = control.createMock(EditableTerminal.class);
 		portfolio = control.createMock(Portfolio.class);
 		security1 = control.createMock(Security.class);
@@ -45,10 +46,7 @@ public class PositionsImplTest {
 		position2 = control.createMock(EditablePosition.class);
 		
 		es = new EventSystemImpl(queue);
-		onAvailable = control.createMock(EventType.class);
-		onChanged = control.createMock(EventType.class);
-		positions = new PositionsImpl(portfolio, dispatcher,
-				onAvailable, onChanged);
+		positions = new PositionsImpl(portfolio, dispatcher);
 		
 		expect(terminal.getEventSystem()).andStubReturn(es);
 		expect(portfolio.getAccount()).andStubReturn(account);
@@ -63,7 +61,7 @@ public class PositionsImplTest {
 	public void testFireEvents_Available() throws Exception {
 		expect(position1.isAvailable()).andReturn(false);
 		position1.setAvailable(true);
-		dispatcher.dispatch(eq(new PositionEvent(onAvailable, position1)));
+		dispatcher.fireAvailable(same(position1));
 		position1.resetChanges();
 		control.replay();
 		
@@ -86,11 +84,8 @@ public class PositionsImplTest {
 	
 	@Test
 	public void testGetEditablePosition_New() throws Exception {
-		String id = "Position[T01:GAZP@TWO(FUT/USD)]";
-		EventDispatcher d = new EventDispatcherImpl(queue, id);
 		Position expected = new PositionImpl(portfolio, security2,
-				d, d.createType("OnChanged"));
-		expected.OnChanged().addListener(positions);
+				new PositionEventDispatcher(es, account, descr1));
 		control.replay();
 
 		Position actual = positions.getEditablePosition(security2);
@@ -99,6 +94,7 @@ public class PositionsImplTest {
 		assertNotNull(actual);
 		assertEquals(expected, actual);
 		assertNotSame(expected, actual);
+		assertTrue(actual.OnChanged().isListener(dispatcher));
 		assertSame(actual, positions.getEditablePosition(security2));
 	}
 	
@@ -116,11 +112,8 @@ public class PositionsImplTest {
 	
 	@Test
 	public void testGetPosition_New() throws Exception {
-		String id = "Position[T01:SBER@ONE(STK/RUR)]";
-		EventDispatcher d = new EventDispatcherImpl(queue, id);
 		Position expected = new PositionImpl(portfolio, security1,
-				d, d.createType("OnChanged"));
-		expected.OnChanged().addListener(positions);
+				new PositionEventDispatcher(es, account, descr1));
 		control.replay();
 		
 		Position actual = positions.getPosition(security1);
@@ -129,6 +122,7 @@ public class PositionsImplTest {
 		assertNotNull(actual);
 		assertEquals(expected, actual);
 		assertNotSame(expected, actual);
+		assertTrue(actual.OnChanged().isListener(dispatcher));
 		assertSame(actual, positions.getPosition(security1));
 	}
 	
@@ -166,18 +160,6 @@ public class PositionsImplTest {
 	}
 	
 	@Test
-	public void testOnEvent_DispatchPositionChangedEvent() throws Exception {
-		EventType onPosChanged = control.createMock(EventType.class);
-		expect(position1.OnChanged()).andStubReturn(onPosChanged);
-		dispatcher.dispatch(new PositionEvent(onChanged, position1));
-		control.replay();
-		
-		positions.onEvent(new PositionEvent(onPosChanged, position1));
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(positions.equals(positions));
 		assertFalse(positions.equals(null));
@@ -192,17 +174,7 @@ public class PositionsImplTest {
 		List<Position> list2 = new Vector<Position>();
 		list2.add(position2);
 		list2.add(position1);
-		Variant<Portfolio> vPort = new Variant<Portfolio>().add(portfolio);
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vPort)
-			.add(dispatcher)
-			.add(control.createMock(EventDispatcher.class));
-		Variant<EventType> vAvl = new Variant<EventType>(vDisp)
-			.add(onAvailable)
-			.add(control.createMock(EventType.class));
-		Variant<EventType> vChng = new Variant<EventType>(vAvl)
-			.add(onChanged)
-			.add(control.createMock(EventType.class));
-		Variant<List<Position>> vList = new Variant<List<Position>>(vChng)
+		Variant<List<Position>> vList = new Variant<List<Position>>()
 			.add(list1)
 			.add(list2);
 		Variant<?> iterator = vList;
@@ -210,8 +182,7 @@ public class PositionsImplTest {
 		PositionsImpl x = null, found = null;
 		control.replay();
 		do {
-			x = new PositionsImpl(vPort.get(), vDisp.get(),
-					vAvl.get(), vChng.get());
+			x = new PositionsImpl(portfolio, dispatcher);
 			for ( Position p : vList.get() ) {
 				x.setPosition(p.getSecurityDescriptor(), (EditablePosition) p);
 			}
@@ -221,11 +192,29 @@ public class PositionsImplTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(portfolio, found.getPortfolio());
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onAvailable, found.OnPositionAvailable());
-		assertEquals(onChanged, found.OnPositionChanged());
 		assertEquals(list1, found.getPositions());
+	}
+	
+	@Test
+	public void testOnPositionAvailable() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnAvailable()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, positions.OnPositionAvailable());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnPositionChanged() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnChanged()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, positions.OnPositionChanged());
+		
+		control.verify();
 	}
 
 }

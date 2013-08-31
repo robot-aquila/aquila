@@ -29,12 +29,6 @@ public class IBTerminalImpl extends TerminalImpl implements IBEditableTerminal {
 	 * @param orders набор заявок
 	 * @param controller контроллер запуска/останова терминала
 	 * @param dispatcher диспетчер событий
-	 * @param onConnected тип события: при подключении
-	 * @param onDisconnected тип события: при отключении
-	 * @param onStarted тип события: при старте терминала
-	 * @param onStopped тип события: при останове терминала
-	 * @param onPanic тип критического события
-	 * @param onReqSecurityError тип события: ошибка запроса инструмента
 	 * @param cache кэш данных IB
 	 * @param client экземпляр подключения к IB API
 	 */
@@ -42,14 +36,10 @@ public class IBTerminalImpl extends TerminalImpl implements IBEditableTerminal {
 			Starter starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
 			TerminalController controller,
-			EventDispatcher dispatcher, EventType onConnected,
-			EventType onDisconnected, EventType onStarted, EventType onStopped,
-			EventType onPanic, EventType onReqSecurityError, Cache cache,
-			IBClient client)
+			TerminalEventDispatcher dispatcher, Cache cache, IBClient client)
 	{
 		super(eventSystem, scheduler, starter, securities, portfolios, orders,
-				controller, dispatcher, onConnected, onDisconnected,
-				onStarted, onStopped, onPanic, onReqSecurityError);
+				controller, dispatcher);
 		this.cache = cache;
 		this.client = client;
 	}
@@ -67,26 +57,15 @@ public class IBTerminalImpl extends TerminalImpl implements IBEditableTerminal {
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
 	 * @param dispatcher диспетчер событий
-	 * @param onConnected тип события: при подключении
-	 * @param onDisconnected тип события: при отключении
-	 * @param onStarted тип события: при старте терминала
-	 * @param onStopped тип события: при останове терминала
-	 * @param onPanic тип критического события
-	 * @param onReqSecurityError тип события: ошибка запроса инструмента
 	 * @param cache кэш данных IB
 	 * @param client экземпляр подключения к IB API
 	 */
 	public IBTerminalImpl(EventSystem eventSystem, Starter starter,
 		EditableSecurities securities, EditablePortfolios portfolios,
 		EditableOrders orders, 
-		EventDispatcher dispatcher, EventType onConnected,
-		EventType onDisconnected, EventType onStarted,
-		EventType onStopped, EventType onPanic,
-		EventType onReqSecurityError, Cache cache, IBClient client)
+		TerminalEventDispatcher dispatcher, Cache cache, IBClient client)
 	{
-		super(eventSystem, starter, securities, portfolios, orders, 
-				dispatcher, onConnected, onDisconnected, onStarted, onStopped,
-				onPanic, onReqSecurityError);
+		super(eventSystem, starter, securities, portfolios, orders, dispatcher);
 		this.cache = cache;
 		this.client = client;
 	}

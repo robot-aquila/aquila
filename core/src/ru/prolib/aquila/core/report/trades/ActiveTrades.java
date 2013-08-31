@@ -1,13 +1,10 @@
 package ru.prolib.aquila.core.report.trades;
 
 import java.util.*;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.report.RTrade;
-import ru.prolib.aquila.core.report.TradeReportEvent;
+import ru.prolib.aquila.core.report.*;
 
 /**
  * Отчет по активным трейдам.
@@ -17,43 +14,22 @@ import ru.prolib.aquila.core.report.TradeReportEvent;
  */
 public class ActiveTrades {
 	private Map<SecurityDescriptor, ERTrade> reports;
-	private final EventDispatcher dispatcher;
-	private final EventType onEnter;
-	private final EventType onExit;
-	private final EventType onChanged;
+	private final ActiveTradesEventDispatcher dispatcher;
 	
 	/**
 	 * Публичный конструктор.
 	 */
 	public ActiveTrades() {
-		this(new EventDispatcherImpl(new SimpleEventQueue(), "ActiveTrades"));
-	}
-	
-	/**
-	 * Вспомогательный служебный конструктор.
-	 * <p>
-	 * @param dispatcher диспетчер событий
-	 */
-	private ActiveTrades(EventDispatcher dispatcher) {
-		this(dispatcher, dispatcher.createType("Enter"),
-			dispatcher.createType("Exit"), dispatcher.createType("Changed"));
+		this(new ActiveTradesEventDispatcher());
 	}
 	
 	/**
 	 * Конструктор (для тестов).
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onEnter тип события: при входе в трейд
-	 * @param onExit тип события: при выходе из трейда
-	 * @param onChanged тип события: при изменении трейда
 	 */
-	ActiveTrades(EventDispatcher dispatcher, EventType onEnter, 
-			EventType onExit, EventType onChanged) 
-	{
+	ActiveTrades(ActiveTradesEventDispatcher dispatcher) {
 		this.dispatcher = dispatcher;
-		this.onEnter = onEnter;
-		this.onExit = onExit;
-		this.onChanged = onChanged;
 		reports = new LinkedHashMap<SecurityDescriptor, ERTrade>();
 	}
 	
@@ -62,7 +38,7 @@ public class ActiveTrades {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public ActiveTradesEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 	
@@ -72,7 +48,7 @@ public class ActiveTrades {
 	 * @return тип события
 	 */
 	public EventType OnEnter() {
-		return onEnter;
+		return dispatcher.OnEnter();
 	}
 	
 	/**
@@ -81,7 +57,7 @@ public class ActiveTrades {
 	 * @return тип события
 	 */
 	public EventType OnExit() {
-		return onExit;
+		return dispatcher.OnExit();
 	}
 	
 	/**
@@ -90,7 +66,7 @@ public class ActiveTrades {
 	 * @return тип события
 	 */
 	public EventType OnChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 	
 	/**
@@ -104,19 +80,19 @@ public class ActiveTrades {
 		if ( report == null ) {
 			report = new RTradeImpl(trade);
 			reports.put(descr, report);
-			dispatcher.dispatch(new TradeReportEvent(onEnter, report));
+			dispatcher.fireEnter(report);
 		} else {
 			ERTrade next = report.addTrade(trade);
 			if ( ! report.isOpen() ) {
-				dispatcher.dispatch(new TradeReportEvent(onExit, report));
+				dispatcher.fireExit(report);
 				if ( next != null ) {
-					dispatcher.dispatch(new TradeReportEvent(onEnter, next));
+					dispatcher.fireEnter(next);
 					reports.put(descr, next);
 				} else {				
 					reports.remove(descr);
 				}
 			} else {
-				dispatcher.dispatch(new TradeReportEvent(onChanged, report));
+				dispatcher.fireChanged(report);
 			}
 		}
 	}
@@ -166,10 +142,6 @@ public class ActiveTrades {
 		}
 		ActiveTrades o = (ActiveTrades) other;
 		return new EqualsBuilder()
-			.append(o.dispatcher, dispatcher)
-			.append(o.onChanged, onChanged)
-			.append(o.onEnter, onEnter)
-			.append(o.onExit, onExit)
 			.append(o.reports, reports)
 			.isEquals();
 	}

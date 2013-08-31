@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
-public class CommonTradeReportTest {
+public class CommonTRTest {
 	private static final String TIME = "TIME";
 	private static final String SEC_CODE = "SEC_CODE";
 	private static final String DIR = "DIR";
@@ -45,9 +45,8 @@ public class CommonTradeReportTest {
 	private IMocksControl control;
 	private EditableTerminal terminal;
 	private EventSystem es;
-	private EventDispatcher dispatcher;
-	private EventType onEnter, onExit, onChanged;
-	private CommonTradeReport trades;
+	private CommonTREventDispatcher dispatcher;
+	private CommonTR trades;
 	private ActiveTrades activeTrades;
 	private RTrade record;
 	private Security security;
@@ -68,27 +67,14 @@ public class CommonTradeReportTest {
 		security = control.createMock(Security.class);
 		terminal = new TerminalBuilder().createTerminal("test");
 		es = terminal.getEventSystem();
-		dispatcher = es.createEventDispatcher("Trades");
-		onEnter = dispatcher.createType("Enter");
-		onExit = dispatcher.createType("Exit");
-		onChanged = dispatcher.createType("Changed");
-		trades = new CommonTradeReport(dispatcher, onEnter, onExit, onChanged);
+		dispatcher = new CommonTREventDispatcher(es);
+		trades = new CommonTR(dispatcher);
 		es.getEventQueue().start();
 	}
 	
 	@After
 	public void tearDown() throws Exception {
 		stopQueue();
-	}
-	
-	/**
-	 * Создать тестируемый отчет с моком активных трейдов.
-	 * <p>
-	 * Использует экземпляр {@link #activeTrades} в качестве связанного объекта.
-	 */
-	final private void setTradesWithMock() {
-		trades = new CommonTradeReport(dispatcher, onEnter, onExit, onChanged, 
-				activeTrades);
 	}
 	
 	private void stopQueue() throws Exception {
@@ -104,7 +90,7 @@ public class CommonTradeReportTest {
 	 * @param dest целевой экземпляр набора трейдов
 	 * @param filename имя файла с описанием сделок
 	 */
-	private void loadTrades(CommonTradeReport dest, String filename) throws Exception {
+	private void loadTrades(CommonTR dest, String filename) throws Exception {
 		for ( Trade trade : loadTrades(filename) ) {
 			dest.addTrade(trade);
 		}
@@ -161,9 +147,9 @@ public class CommonTradeReportTest {
 	{
 		CsvReader reader = new CsvReader(getFullPath(filename));
 		Map<String, EventType> evtMap = new Hashtable<String, EventType>();
-		evtMap.put("ENTER", onEnter);
-		evtMap.put("CHANGE", onChanged);
-		evtMap.put("EXIT", onExit);
+		evtMap.put("ENTER", dispatcher.OnEnter());
+		evtMap.put("CHANGE", dispatcher.OnChanged());
+		evtMap.put("EXIT", dispatcher.OnExit());
 		List<TradeReportEvent> list = new Vector<TradeReportEvent>();
 		reader.readHeaders();
 		while ( reader.readRecord() ) {
@@ -306,30 +292,18 @@ public class CommonTradeReportTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<String> vDispId = new Variant<String>()
-			.add("Trades")
-			.add("TradesX");
-		Variant<String> vEntId = new Variant<String>(vDispId)
-			.add("Enter")
-			.add("EnterX");
-		Variant<String> vExtId = new Variant<String>(vEntId)
-			.add("Exit")
-			.add("ExitX");
-		Variant<String> vChngId = new Variant<String>(vExtId)
-			.add("Changed")
-			.add("ChangedX");
-		Variant<String> vTrdFile = new Variant<String>(vChngId)
+		trades = new CommonTR(dispatcher);
+		
+		Variant<String> vTrdFile = new Variant<String>()
 			.add("trades1.csv")
 			.add("trades2.csv");
 		Variant<?> iterator = vTrdFile;
 		trades.start();
 		loadTrades(trades, "trades1.csv");
 		int foundCnt = 0;
-		CommonTradeReport x = null, found = null;
+		CommonTR x = null, found = null;
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new CommonTradeReport(d, d.createType(vEntId.get()),
-					d.createType(vExtId.get()), d.createType(vChngId.get()));
+			x = new CommonTR(dispatcher);
 			x.start();
 			loadTrades(x, vTrdFile.get());
 			if ( trades.equals(x) ) {
@@ -338,16 +312,14 @@ public class CommonTradeReportTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onEnter, found.OnEnter());
-		assertEquals(onExit, found.OnExit());
-		assertEquals(onChanged, found.OnChanged());
+		assertEquals(trades.getActiveTrades(), found.getActiveTrades());
 		assertEquals(loadTradeReports("trade-reports1.csv"),found.getRecords());
 	}
 	
 	@Test
 	public void testGetCurrent_SD() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(activeTrades.getReport(descr)).andReturn(record);
 		control.replay();
 		
@@ -358,7 +330,8 @@ public class CommonTradeReportTest {
 	
 	@Test
 	public void testGetCurrent_S() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(security.getDescriptor()).andReturn(descr);
 		expect(activeTrades.getReport(descr)).andReturn(record);
 		control.replay();
@@ -370,7 +343,8 @@ public class CommonTradeReportTest {
 	
 	@Test
 	public void testGetPosition_SD_Zero() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(activeTrades.getReport(descr)).andReturn(null);
 		control.replay();
 		
@@ -381,7 +355,8 @@ public class CommonTradeReportTest {
 	
 	@Test
 	public void testGetPosition_SD_Long() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(activeTrades.getReport(descr)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.LONG);
 		expect(record.getUncoveredQty()).andReturn(10L);
@@ -394,7 +369,8 @@ public class CommonTradeReportTest {
 	
 	@Test
 	public void testGetPosition_SD_Short() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(activeTrades.getReport(descr)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.SHORT);
 		expect(record.getUncoveredQty()).andReturn(5L);
@@ -407,7 +383,8 @@ public class CommonTradeReportTest {
 
 	@Test
 	public void testGetPosition_S_Zero() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(security.getDescriptor()).andReturn(descr);
 		expect(activeTrades.getReport(descr)).andReturn(null);
 		control.replay();
@@ -419,7 +396,8 @@ public class CommonTradeReportTest {
 	
 	@Test
 	public void testGetPosition_S_Long() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(security.getDescriptor()).andReturn(descr);
 		expect(activeTrades.getReport(descr)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.LONG);
@@ -433,7 +411,8 @@ public class CommonTradeReportTest {
 	
 	@Test
 	public void testGetPosition_S_Short() throws Exception {
-		setTradesWithMock();
+		dispatcher = control.createMock(CommonTREventDispatcher.class);
+		trades = new CommonTR(dispatcher, activeTrades);
 		expect(security.getDescriptor()).andReturn(descr);
 		expect(activeTrades.getReport(descr)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.SHORT);

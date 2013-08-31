@@ -17,40 +17,12 @@ public class TerminalBuilderTest {
 	public void testCreateTerminal() throws Exception {
 		EventSystem es = new EventSystemImpl(new EventQueueImpl("foobar"));
 		StarterQueue starter = new StarterQueue();
-		starter.add(es.getEventQueue());
-		EventDispatcher secDisp = es.createEventDispatcher("Securities");
-		EventDispatcher portDisp = es.createEventDispatcher("Portfolios");
-		EventDispatcher ordDisp = es.createEventDispatcher("Orders");
-		EventDispatcher termDisp = es.createEventDispatcher("Terminal");
+		starter.add(new EventQueueStarter(es.getEventQueue(), 30000));
 		EditableTerminal expected = new TerminalImpl(es, starter,
-				new SecuritiesImpl(secDisp,
-						secDisp.createType("OnAvailable"),
-						secDisp.createType("OnChanged"),
-						secDisp.createType("OnTrade")),
-				new PortfoliosImpl(portDisp,
-						portDisp.createType("OnAvailable"),
-						portDisp.createType("OnChanged"),
-						portDisp.createType("OnPositionAvailable"),
-						portDisp.createType("OnPositionChanged")),
-				new OrdersImpl(ordDisp,
-						ordDisp.createType("OnAvailable"),
-						ordDisp.createType("OnCancelFailed"),
-						ordDisp.createType("OnCancelled"),
-						ordDisp.createType("OnChanged"),
-						ordDisp.createType("OnDone"),
-						ordDisp.createType("OnFailed"),
-						ordDisp.createType("OnFilled"),
-						ordDisp.createType("OnPartiallyFilled"),
-						ordDisp.createType("OnRegistered"),
-						ordDisp.createType("OnRegisterFailed"),
-						ordDisp.createType("OnTrade")),
-				termDisp,
-				termDisp.createType("OnConnected"),
-				termDisp.createType("OnDisconnected"),
-				termDisp.createType("OnStarted"),
-				termDisp.createType("OnStopped"),
-				termDisp.createType("OnPanic"),
-				termDisp.createType("OnRequestSecurityError"));
+				new SecuritiesImpl(new SecuritiesEventDispatcher(es)),
+				new PortfoliosImpl(new PortfoliosEventDispatcher(es)),
+				new OrdersImpl(new OrdersEventDispatcher(es)),
+				new TerminalEventDispatcher(es));
 
 		assertEquals(expected, builder.createTerminal("foobar"));
 	}

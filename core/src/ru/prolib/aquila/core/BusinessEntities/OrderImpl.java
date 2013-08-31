@@ -11,18 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
  * Заявка.
  */
 public class OrderImpl extends EditableImpl implements EditableOrder {
-	public static final int VERSION = 0x05;
-	private final EventDispatcher dispatcher;
-	private final EventType onRegister;
-	private final EventType onRegisterFailed;
-	private final EventType onCancelled;
-	private final EventType onCancelFailed;
-	private final EventType onFilled;
-	private final EventType onPartiallyFilled;
-	private final EventType onChanged;
-	private final EventType onDone;
-	private final EventType onFailed;
-	private final EventType onTrade;
+	public static final int VERSION = 0x06;
 	private Account account;
 	private SecurityDescriptor descr;
 	private Direction direction;
@@ -41,50 +30,20 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private final OrderSystemInfo systemInfo = new OrderSystemInfo();
 	private OrderActivator activator;
 	private String comment = "";
+	private final OrderEventDispatcher dispatcher;
 	
 	/**
 	 * Конструктор.
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onRegister тип события
-	 * @param onRegisterFailed тип события
-	 * @param onCancelled тип события
-	 * @param onCancelFailed тип события
-	 * @param onFilled тип события
-	 * @param onPartiallyFilled тип события
-	 * @param onChanged тип события
-	 * @param onDone тип события
-	 * @param onFailed тип события
-	 * @param onTrade тип события
 	 * @param stateHandlers набор генераторов событий 
 	 * @param terminal терминал заявки
 	 */
-	public OrderImpl(EventDispatcher dispatcher,
-					 EventType onRegister,
-					 EventType onRegisterFailed,
-					 EventType onCancelled,
-					 EventType onCancelFailed,
-					 EventType onFilled,
-					 EventType onPartiallyFilled,
-					 EventType onChanged,
-					 EventType onDone,
-					 EventType onFailed,
-					 EventType onTrade,
-					 List<OrderStateHandler> stateHandlers,
-					 Terminal terminal)
+	public OrderImpl(OrderEventDispatcher dispatcher,
+			List<OrderStateHandler> stateHandlers, Terminal terminal)
 	{
 		super();
 		this.dispatcher = dispatcher;
-		this.onRegister = onRegister;
-		this.onRegisterFailed = onRegisterFailed;
-		this.onCancelled = onCancelled;
-		this.onCancelFailed = onCancelFailed;
-		this.onFilled = onFilled;
-		this.onPartiallyFilled = onPartiallyFilled;
-		this.onChanged = onChanged;
-		this.onDone = onDone;
-		this.onFailed = onFailed;
-		this.onTrade = onTrade;
 		this.stateHandlers = stateHandlers;
 		this.terminal = terminal;
 	}
@@ -112,53 +71,53 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public OrderEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
 	@Override
 	public EventType OnRegistered() {
-		return onRegister;
+		return dispatcher.OnRegistered();
 	}
 
 	@Override
 	public EventType OnRegisterFailed() {
-		return onRegisterFailed;
+		return dispatcher.OnRegisterFailed();
 	}
 
 	@Override
 	public EventType OnCancelled() {
-		return onCancelled;
+		return dispatcher.OnCancelled();
 	}
 
 	@Override
 	public EventType OnCancelFailed() {
-		return onCancelFailed;
+		return dispatcher.OnCancelFailed();
 	}
 
 	@Override
 	public EventType OnFilled() {
-		return onFilled;
+		return dispatcher.OnFilled();
 	}
 
 	@Override
 	public EventType OnPartiallyFilled() {
-		return onPartiallyFilled;
+		return dispatcher.OnPartiallyFilled();
 	}
 
 	@Override
 	public EventType OnChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 
 	@Override
 	public EventType OnDone() {
-		return onDone;
+		return dispatcher.OnDone();
 	}
 	
 	@Override
 	public EventType OnFailed() {
-		return onFailed;
+		return dispatcher.OnFailed();
 	}
 
 	@Override
@@ -359,7 +318,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 
 	@Override
 	public EventType OnTrade() {
-		return onTrade;
+		return dispatcher.OnTrade();
 	}
 
 	@Override
@@ -388,12 +347,12 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 
 	@Override
 	public void fireTradeEvent(Trade trade) {
-		dispatcher.dispatch(new OrderTradeEvent(onTrade, this, trade));
+		dispatcher.fireTrade(this, trade);
 	}
 
 	@Override
 	public void clearAllEventListeners() {
-		dispatcher.close();
+		dispatcher.removeListeners();
 	}
 
 	@Override
@@ -426,27 +385,15 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 		}
 		OrderImpl o = (OrderImpl) other;
 		return new EqualsBuilder()
+			.appendSuper(o.terminal == terminal)
 			.append(o.account, account)
 			.append(o.descr, descr)
 			.append(o.direction, direction)
-			.append(o.dispatcher, dispatcher)
-			.append(o.stateHandlers, stateHandlers)
 			.append(o.id, id)
 			.append(o.lastChangeTime, lastChangeTime)
-			.append(o.onCancelFailed, onCancelFailed)
-			.append(o.onCancelled, onCancelled)
-			.append(o.onChanged, onChanged)
-			.append(o.onDone, onDone)
-			.append(o.onFailed, onFailed)
-			.append(o.onFilled, onFilled)
-			.append(o.onPartiallyFilled, onPartiallyFilled)
-			.append(o.onRegister, onRegister)
-			.append(o.onRegisterFailed, onRegisterFailed)
-			.append(o.onTrade, onTrade)
 			.append(o.price, price)
 			.append(o.qty, qty)
 			.append(o.status, status)
-			.append(o.terminal, terminal)
 			.append(o.time, time)
 			.append(o.trades, trades)
 			.append(o.type, type)

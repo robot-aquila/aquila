@@ -1,11 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
 /**
@@ -16,58 +13,19 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
  * интерфейс {@link Orders} позволяет так же использовать данный класс
  * потребителями сервиса заявок.
  */
-public class OrdersImpl implements EditableOrders, EventListener {
+public class OrdersImpl implements EditableOrders {
 	private final Map<Integer, EditableOrder> orders;
-	private final EventDispatcher dispatcher;
-	private final EventType onAvailable;
-	private final EventType onCancelFailed;
-	private final EventType onCancelled;
-	private final EventType onChanged;
-	private final EventType onDone;
-	private final EventType onFailed;
-	private final EventType onFilled;
-	private final EventType onPartiallyFilled;
-	private final EventType onRegistered;
-	private final EventType onRegisterFailed;
-	private final EventType onTrade;
+	private final OrdersEventDispatcher dispatcher;
 	
 	/**
 	 * Создать хранилище заявок.
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onAvailable тип события: доступна новая заявка
-	 * @param onCancelFailed тип события: при провале отмены заявки
-	 * @param onCancelled тип события: при отмене заявки
-	 * @param onChanged тип события: при изменении атрибутов заявки
-	 * @param onDone тип события: при сведении или отмене заявки
-	 * @param onFailed тип события: при провале операции в связи с заявкой
-	 * @param onFilled тип события: при сведении заявки
-	 * @param onPartiallyFilled тип события: при частичном сведении заявки
-	 * @param onRegistered тип события: при регистрации заявки
-	 * @param onRegisterFailed тип события: при ошибке регистрации заявки
-	 * @param onTrade тип события: при сделке по заявке
 	 */
-	public OrdersImpl(EventDispatcher dispatcher, EventType onAvailable,
-			EventType onCancelFailed, EventType onCancelled,
-			EventType onChanged, EventType onDone, EventType onFailed,
-			EventType onFilled, EventType onPartiallyFilled,
-			EventType onRegistered, EventType onRegisterFailed,
-			EventType onTrade)
-	{
+	public OrdersImpl(OrdersEventDispatcher dispatcher) {
 		super();
 		orders = new LinkedHashMap<Integer, EditableOrder>();
 		this.dispatcher = dispatcher;
-		this.onAvailable = onAvailable;
-		this.onCancelFailed = onCancelFailed;
-		this.onCancelled = onCancelled;
-		this.onChanged = onChanged;
-		this.onDone = onDone;
-		this.onFailed = onFailed;
-		this.onFilled = onFilled;
-		this.onPartiallyFilled = onPartiallyFilled;
-		this.onRegistered = onRegistered;
-		this.onRegisterFailed = onRegisterFailed;
-		this.onTrade = onTrade;
 	}
 	
 	/**
@@ -75,7 +33,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public OrdersEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -96,7 +54,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 
 	@Override
 	public EventType OnOrderAvailable() {
-		return onAvailable;
+		return dispatcher.OnAvailable();
 	}
 
 	@Override
@@ -106,7 +64,7 @@ public class OrdersImpl implements EditableOrders, EventListener {
 				order.fireChangedEvent();
 			} else {
 				order.setAvailable(true);
-				dispatcher.dispatch(new OrderEvent(onAvailable, order));
+				dispatcher.fireAvailable(order);
 			}
 			order.resetChanges();
 		}
@@ -127,91 +85,54 @@ public class OrdersImpl implements EditableOrders, EventListener {
 	public synchronized void purgeOrder(int id) {
 		EditableOrder order = orders.get(id);
 		if ( order != null ) {
-			order.OnCancelFailed().removeListener(this);
-			order.OnCancelled().removeListener(this);
-			order.OnChanged().removeListener(this);
-			order.OnDone().removeListener(this);
-			order.OnFailed().removeListener(this);
-			order.OnFilled().removeListener(this);
-			order.OnPartiallyFilled().removeListener(this);
-			order.OnRegistered().removeListener(this);
-			order.OnRegisterFailed().removeListener(this);
-			order.OnTrade().removeListener(this);
+			dispatcher.stopRelayFor(order);
 		}
 		orders.remove(id);
 	}
 
 	@Override
 	public EventType OnOrderCancelFailed() {
-		return onCancelFailed;
+		return dispatcher.OnCancelFailed();
 	}
 
 	@Override
 	public EventType OnOrderCancelled() {
-		return onCancelled;
+		return dispatcher.OnCancelled();
 	}
 
 	@Override
 	public EventType OnOrderChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 
 	@Override
 	public EventType OnOrderDone() {
-		return onDone;
+		return dispatcher.OnDone();
 	}
 
 	@Override
 	public EventType OnOrderFailed() {
-		return onFailed;
+		return dispatcher.OnFailed();
 	}
 
 	@Override
 	public EventType OnOrderFilled() {
-		return onFilled;
+		return dispatcher.OnFilled();
 	}
 
 	@Override
 	public EventType OnOrderPartiallyFilled() {
-		return onPartiallyFilled;
+		return dispatcher.OnPartiallyFilled();
 	}
 
 	@Override
 	public EventType OnOrderRegistered() {
-		return onRegistered;
+		return dispatcher.OnRegistered();
 	}
 
 	@Override
 	public EventType OnOrderRegisterFailed() {
-		return onRegisterFailed;
-	}
-
-	@Override
-	public void onEvent(Event event) {
-		if ( event instanceof OrderTradeEvent ) {
-			OrderTradeEvent e = (OrderTradeEvent) event;
-			dispatcher.dispatch(new OrderTradeEvent(onTrade, e.getOrder(),
-					e.getTrade()));
-		} else if ( event instanceof OrderEvent ) {
-			Order order = ((OrderEvent) event).getOrder();
-			EventType map[][] = {
-					{ order.OnCancelFailed(), onCancelFailed },
-					{ order.OnCancelled(), onCancelled },
-					{ order.OnChanged(), onChanged },
-					{ order.OnDone(), onDone },
-					{ order.OnFailed(), onFailed },
-					{ order.OnFilled(), onFilled },
-					{ order.OnPartiallyFilled(), onPartiallyFilled },
-					{ order.OnRegistered(), onRegistered },
-					{ order.OnRegisterFailed(), onRegisterFailed },
-			};
-			for ( int i = 0; i < map.length; i ++ ) {
-				if ( event.isType(map[i][0]) ) {
-					dispatcher.dispatch(new OrderEvent(map[i][1], order));
-					break;
-				}
-			}
-		}
+		return dispatcher.OnRegisterFailed();
 	}
 
 	@Override
@@ -228,47 +149,32 @@ public class OrdersImpl implements EditableOrders, EventListener {
 		}
 		order.setId(id);
 		orders.put(id, order);
-		order.OnCancelFailed().addListener(this);
-		order.OnCancelled().addListener(this);
-		order.OnChanged().addListener(this);
-		order.OnDone().addListener(this);
-		order.OnFailed().addListener(this);
-		order.OnFilled().addListener(this);
-		order.OnPartiallyFilled().addListener(this);
-		order.OnRegistered().addListener(this);
-		order.OnRegisterFailed().addListener(this);
-		order.OnTrade().addListener(this);
+		dispatcher.startRelayFor(order);
 	}
 
 	@Override
 	public synchronized EditableOrder createOrder(EditableTerminal terminal) {
-		EventDispatcher d = terminal.getEventSystem()
-			.createEventDispatcher("Order");
+		OrderEventDispatcher d =
+			new OrderEventDispatcher(terminal.getEventSystem()); 
+
 		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
-		h.add(new OrderStateHandler(d, new OrderIsRegistered(),
-				d.createType("OnRegister")));
-		h.add(new OrderStateHandler(d, new OrderIsRegisterFailed(),
-				d.createType("OnRegisterFailed")));
-		h.add(new OrderStateHandler(d, new OrderIsCancelled(),
-				d.createType("OnCancelled")));
-		h.add(new OrderStateHandler(d, new OrderIsCancelFailed(),
-				d.createType("OnCancelFailed")));
-		h.add(new OrderStateHandler(d, new OrderIsFilled(),
-				d.createType("OnFilled")));
-		h.add(new OrderStateHandler(d, new OrderIsPartiallyFilled(),
-				d.createType("OnPartiallyFilled")));
-		h.add(new OrderStateHandler(d, new OrderIsChanged(),
-				d.createType("OnChanged")));
-		h.add(new OrderStateHandler(d, new OrderIsDone(),
-				d.createType("OnDone")));
-		h.add(new OrderStateHandler(d, new OrderIsFailed(),
-				d.createType("OnFailed")));
-		return new OrderImpl(d, h.get(0).getEventType(), 
-				h.get(1).getEventType(), h.get(2).getEventType(),
-				h.get(3).getEventType(), h.get(4).getEventType(),
-				h.get(5).getEventType(), h.get(6).getEventType(),
-				h.get(7).getEventType(), h.get(8).getEventType(),
-				d.createType("OnTrade"), h, terminal);
+		add(h, d, new OrderIsRegistered(), d.OnRegistered());
+		add(h, d, new OrderIsRegisterFailed(), d.OnRegisterFailed());
+		add(h, d, new OrderIsCancelled(), d.OnCancelled());
+		add(h, d, new OrderIsCancelFailed(), d.OnCancelFailed());
+		add(h, d, new OrderIsFilled(), d.OnFilled());
+		add(h, d, new OrderIsPartiallyFilled(), d.OnPartiallyFilled());
+		add(h, d, new OrderIsChanged(), d.OnChanged());
+		add(h, d, new OrderIsDone(), d.OnDone());
+		add(h, d, new OrderIsFailed(), d.OnFailed());
+		return new OrderImpl(d, h, terminal);
+	}
+	
+	private final void add(List<OrderStateHandler> list,
+			OrderEventDispatcher dispatcher, OrderStateValidator validator,
+			EventType targetType)
+	{
+		list.add(new OrderStateHandler(dispatcher, validator, targetType));
 	}
 	
 	/**
@@ -293,25 +199,13 @@ public class OrdersImpl implements EditableOrders, EventListener {
 		}
 		OrdersImpl o = (OrdersImpl) other;
 		return new EqualsBuilder()
-			.append(o.dispatcher, dispatcher)
-			.append(o.onAvailable, onAvailable)
-			.append(o.onCancelFailed, onCancelFailed)
-			.append(o.onCancelled, onCancelled)
-			.append(o.onChanged, onChanged)
-			.append(o.onDone, onDone)
-			.append(o.onFailed, onFailed)
-			.append(o.onFilled, onFilled)
-			.append(o.onPartiallyFilled, onPartiallyFilled)
-			.append(o.onRegistered, onRegistered)
-			.append(o.onRegisterFailed, onRegisterFailed)
 			.append(o.orders, orders)
-			.append(o.onTrade, onTrade)
 			.isEquals();
 	}
 
 	@Override
 	public EventType OnOrderTrade() {
-		return onTrade;
+		return dispatcher.OnTrade();
 	}
 
 }

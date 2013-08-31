@@ -33,13 +33,11 @@ public class PortfolioFactoryTest {
 	@Test
 	public void testCreateInstance() throws Exception {
 		control.replay();
-		EventDispatcher d = es.createEventDispatcher("Portfolio[TEST#1@2]");
-		EventDispatcher pd = es.createEventDispatcher("Portfolio[TEST#1@2]");
-		PortfolioImpl expected =
-			new PortfolioImpl(terminal, account, d, d.createType("OnChanged"));
-		expected.setPositionsInstance(new PositionsImpl(expected, pd,
-				pd.createType("OnPosAvailable"),
-				pd.createType("OnPosChanged")));
+		
+		PortfolioImpl expected = new PortfolioImpl(terminal, account,
+					new PortfolioEventDispatcher(es, account));
+		expected.setPositionsInstance(new PositionsImpl(expected,
+				new PositionsEventDispatcher(es, account)));
 		
 		assertEquals(expected, factory.createInstance(terminal, account));
 	}

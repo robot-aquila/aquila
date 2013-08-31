@@ -3,9 +3,10 @@ package ru.prolib.aquila.core.BusinessEntities;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.PositionEventDispatcher;
 
 /**
- * Редактируемая торговая позиция.
+ * Торговая позиция.
  * <p>
  * 2012-08-03<br>
  * $Id: PositionImpl.java 529 2013-02-19 08:49:04Z whirlwind $
@@ -13,8 +14,7 @@ import ru.prolib.aquila.core.*;
 public class PositionImpl extends EditableImpl implements EditablePosition {
 	private final Portfolio portfolio;
 	private final Security security;
-	private final EventDispatcher dispatcher;
-	private final EventType onChanged;
+	private final PositionEventDispatcher dispatcher;
 	private long open;
 	private long lock;
 	private long curr;
@@ -28,16 +28,14 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	 * @param portfolio портфель, которому принадлежит позиция
 	 * @param security инструмент, по которому открыта позиция
 	 * @param dispatcher диспетчер событий
-	 * @param onChanged тип события: при изменении позиции
 	 */
 	public PositionImpl(Portfolio portfolio, Security security,
-			EventDispatcher dispatcher, EventType onChanged)
+			PositionEventDispatcher dispatcher)
 	{
 		super();
 		this.portfolio = portfolio;
 		this.security = security;
 		this.dispatcher = dispatcher;
-		this.onChanged = onChanged;
 	}
 	
 	@Override
@@ -46,11 +44,11 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	}
 	
 	/**
-	 * Получить используемый диспетчер событий.
+	 * Получить диспетчер событий.
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public PositionEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -76,12 +74,12 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 
 	@Override
 	public EventType OnChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 
 	@Override
 	public void fireChangedEvent() {
-		dispatcher.dispatch(new PositionEvent(onChanged, this));
+		dispatcher.fireChanged(this);
 	}
 
 	@Override
@@ -189,11 +187,9 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 			.append(o.open, open)
 			.append(o.variationMargin, variationMargin)
 			.append(o.bookValue, bookValue)
-			.append(o.dispatcher, dispatcher)
 			.append(o.marketValue, marketValue)
-			.append(o.onChanged, onChanged)
-			.append(o.portfolio, portfolio)
-			.append(o.security, security)
+			.appendSuper(o.portfolio == portfolio)
+			.appendSuper(o.security == security)
 			.append(o.isAvailable(), isAvailable())
 			.isEquals();
 	}

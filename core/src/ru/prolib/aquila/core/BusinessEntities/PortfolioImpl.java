@@ -5,6 +5,7 @@ import java.util.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioEventDispatcher;
 
 /**
  * Редактируемый портфель.
@@ -17,8 +18,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	private final Terminal terminal;
 	private final Account account;
 	private EditablePositions positions;
-	private final EventDispatcher dispatcher;
-	private final EventType onChanged;
+	private final PortfolioEventDispatcher dispatcher;
 	private Double variationMargin, cash, balance;
 
 	/**
@@ -27,17 +27,14 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	 * @param terminal терминал
 	 * @param account идентификатор портфеля
 	 * @param dispatcher диспетчер событий
-	 * @param onChanged тип события
 	 */
 	public PortfolioImpl(Terminal terminal, Account account,
-						 EventDispatcher dispatcher,
-						 EventType onChanged)
+						 PortfolioEventDispatcher dispatcher)
 	{
 		super();
 		this.terminal = terminal;
 		this.account = account;
 		this.dispatcher = dispatcher;
-		this.onChanged = onChanged;
 	}
 	
 	/**
@@ -82,7 +79,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public PortfolioEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -103,7 +100,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 
 	@Override
 	public void fireChangedEvent() {
-		dispatcher.dispatch(new PortfolioEvent(onChanged, this));
+		dispatcher.fireChanged(this);
 	}
 
 	@Override
@@ -124,7 +121,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 
 	@Override
 	public EventType OnChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 	
 	@Override
@@ -186,8 +183,6 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 			.append(o.account, account)
 			.append(o.balance, balance)
 			.append(o.cash, cash)
-			.append(o.dispatcher, dispatcher)
-			.append(o.onChanged, onChanged)
 			.append(o.positions, positions)
 			.appendSuper(o.terminal == terminal)
 			.append(o.variationMargin, variationMargin)

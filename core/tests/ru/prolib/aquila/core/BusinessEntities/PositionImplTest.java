@@ -6,6 +6,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.PositionEventDispatcher;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -21,8 +22,7 @@ public class PositionImplTest {
 	private Terminal terminal;
 	private Portfolio portfolio;
 	private Security security;
-	private EventType onChanged;
-	private EventDispatcher dispatcher;
+	private PositionEventDispatcher dispatcher;
 	private PositionImpl position;
 	private G<?> getter;
 	private S<PositionImpl> setter;
@@ -41,9 +41,8 @@ public class PositionImplTest {
 		terminal = control.createMock(Terminal.class);
 		portfolio = control.createMock(Portfolio.class);
 		security = control.createMock(Security.class);
-		dispatcher = control.createMock(EventDispatcher.class);
-		onChanged = control.createMock(EventType.class);
-		position = new PositionImpl(portfolio, security, dispatcher, onChanged);
+		dispatcher = control.createMock(PositionEventDispatcher.class);
+		position = new PositionImpl(portfolio, security, dispatcher);
 		expect(portfolio.getTerminal()).andStubReturn(terminal);
 		expect(portfolio.getAccount()).andStubReturn(account);
 		expect(security.getDescriptor()).andStubReturn(descr);
@@ -97,7 +96,7 @@ public class PositionImplTest {
 	
 	@Test
 	public void testFireChangedEvent() throws Exception {
-		dispatcher.dispatch(new PositionEvent(onChanged, position));
+		dispatcher.fireChanged(same(position));
 		control.replay();
 		
 		position.fireChangedEvent();
@@ -246,10 +245,6 @@ public class PositionImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		EventQueue queue = new SimpleEventQueue();
-		dispatcher = new EventDispatcherImpl(queue,"Position");
-		position = new PositionImpl(portfolio, security, dispatcher,
-				dispatcher.createType("OnChanged"));
 		position.setAvailable(true);
 		position.setOpenQty(20L);
 		position.setLockQty(5L);
@@ -264,13 +259,7 @@ public class PositionImplTest {
 		Variant<Security> vSec = new Variant<Security>(vPort)
 			.add(security)
 			.add(control.createMock(Security.class));
-		Variant<String> vDispId = new Variant<String>(vSec)
-			.add("Position")
-			.add("AnotherDispatcher");
-		Variant<String> vChngId = new Variant<String>(vDispId)
-			.add("OnChanged")
-			.add("AnotherType");
-		Variant<Boolean> vAvl = new Variant<Boolean>(vChngId)
+		Variant<Boolean> vAvl = new Variant<Boolean>(vSec)
 			.add(true)
 			.add(false);
 		Variant<Long> vOpen = new Variant<Long>(vAvl)
@@ -295,9 +284,7 @@ public class PositionImplTest {
 		int foundCnt = 0;
 		PositionImpl x = null, found = null;
 		do {
-			EventDispatcher d2 = new EventDispatcherImpl(queue, vDispId.get());
-			x = new PositionImpl(vPort.get(), vSec.get(), d2,
-					d2.createType(vChngId.get()));
+			x = new PositionImpl(vPort.get(), vSec.get(), dispatcher);
 			x.setAvailable(vAvl.get());
 			x.setOpenQty(vOpen.get());
 			x.setLockQty(vLock.get());
@@ -313,8 +300,6 @@ public class PositionImplTest {
 		assertEquals(1, foundCnt);
 		assertSame(portfolio, found.getPortfolio());
 		assertSame(security, found.getSecurity());
-		assertEquals(position.OnChanged(), found.OnChanged());
-		assertEquals(dispatcher, found.getEventDispatcher());
 		assertTrue(found.isAvailable());
 		assertEquals(20L, found.getOpenQty());
 		assertEquals(5L, found.getLockQty());
@@ -322,6 +307,17 @@ public class PositionImplTest {
 		assertEquals(200.00d, found.getVarMargin(), 0.001d);
 		assertEquals(800.00d, found.getMarketValue(), 0.001d);
 		assertEquals(780.00d, found.getBookValue(), 0.001d);
+	}
+	
+	@Test
+	public void testOnChanged() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnChanged()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, position.OnChanged());
+		
+		control.verify();
 	}
 
 }

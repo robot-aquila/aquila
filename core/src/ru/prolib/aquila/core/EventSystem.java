@@ -70,6 +70,7 @@ public interface EventSystem {
 	 * @param types типы событий, составляющие композицию
 	 * @return тип события
 	 */
+	@Deprecated
 	public CompositeEventType
 		createTypeEachEventOneTime(EventDispatcher dispatcher,
 								   EventType[] types);
@@ -85,6 +86,7 @@ public interface EventSystem {
 	 * @param types типы событий, составляющие композицию
 	 * @return тип события
 	 */
+	@Deprecated
 	public CompositeEventType
 		createTypeEachEventOneTime(EventType[] types);
 	
@@ -102,6 +104,7 @@ public interface EventSystem {
 	 * @param eventGenerator генератор события
 	 * @return тип события
 	 */
+	@Deprecated
 	public CompositeEventType
 		createTypeEachEventOneTime(EventDispatcher dispatcher,
 								   EventType[] types,

@@ -1,18 +1,21 @@
 package ru.prolib.aquila.core;
 
+import java.util.List;
+import java.util.Vector;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * Базовый тип события.
  * <p>
  * 2012-04-09<br>
- * $Id: EventTypeImpl.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventTypeImpl implements EventType {
 	public static final String AUTO_ID_PREFIX = "EvtType";
 	private static int autoId = 1;
 	private final EventDispatcher dispatcher;
 	private final String id;
+	private final List<EventListener> listeners;
 	
 	/**
 	 * Создать тип события.
@@ -39,6 +42,7 @@ public class EventTypeImpl implements EventType {
 		}
 		this.dispatcher = dispatcher;
 		this.id = id;
+		listeners = new Vector<EventListener>();
 	}
 	
 	/**
@@ -66,13 +70,15 @@ public class EventTypeImpl implements EventType {
 	}
 	
 	@Override
-	public void addListener(EventListener listener) {
-		dispatcher.addListener(this, listener);
+	public synchronized void addListener(EventListener listener) {
+		if ( ! isListener(listener) ) {
+			listeners.add(listener);
+		}
 	}
 	
 	@Override
-	public void removeListener(EventListener listener) {
-		dispatcher.removeListener(this, listener);
+	public synchronized void removeListener(EventListener listener) {
+		listeners.remove(listener);
 	}
 
 	/**
@@ -82,25 +88,36 @@ public class EventTypeImpl implements EventType {
 	public EventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
-	
-	/**
-	 * Сравнить структуру типов.
-	 * <p>
-	 * Два разных экземпляра типа всегда представляют разные типы событий.
-	 * По этому, для проверки на конкретный тип необходимо сравнивать значение
-	 * с конкретным экземпляром. Метод сравнения сравнивает только структуру
-	 * типа события. Структуры двух типов событий считаются одинаковыми, когда
-	 * совпадают идентификаторы и списки наблюдателей. Проверка соответствия
-	 * диспетчеров не выполняется.
-	 * <p>
-	 * Данный метод предназначен исключительно для использования в тестах.
-	 * Он значительно сокращает код теста и позволяет избежать моков для
-	 * воспроизведения типа. Сравнение данным методом никогда не должно
-	 * использоваться в рабочих процессах.
-	 * <p> 
-	 */
+
 	@Override
-	public final synchronized boolean equals(Object other) {
+	public synchronized boolean isListener(EventListener listener) {
+		return listeners.contains(listener);
+	}
+	
+	@Override
+	public EventListener once(EventListener listener) {
+		ListenOnce once = new ListenOnce(this, listener);
+		once.start();
+		return once;
+	}
+
+	@Override
+	public synchronized void removeListeners() {
+		listeners.clear();
+	}
+
+	@Override
+	public synchronized int countListeners() {
+		return listeners.size();
+	}
+
+	@Override
+	public synchronized List<EventListener> getListeners() {
+		return new Vector<EventListener>(listeners);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
@@ -109,29 +126,25 @@ public class EventTypeImpl implements EventType {
 		}
 		EventTypeImpl o = (EventTypeImpl) other;
 		return new EqualsBuilder()
+			.append(dispatcher, o.dispatcher)
 			.append(id, o.id)
-			.append(dispatcher.getListeners(this), o.dispatcher.getListeners(o))
 			.isEquals();
-	}
-	
-	/**
-	 * Закрыт для перегрузки, так как влияет на диспетчеризацию.
-	 */
-	@Override
-	public final int hashCode() {
-		return super.hashCode();
 	}
 
 	@Override
-	public boolean isListener(EventListener listener) {
-		return dispatcher.isTypeListener(this, listener);
-	}
-	
-	@Override
-	public EventListener once(EventListener listener) {
-		ListenOnce once = new ListenOnce(this, listener);
-		once.start();
-		return once;
+	public synchronized boolean compareListeners(EventType other) {
+		synchronized ( other ) {
+			List<EventListener> otherListeners = other.getListeners();
+			if ( listeners.size() != otherListeners.size() ) {
+				return false;
+			}
+			for ( int i = 0; i < listeners.size(); i ++ ) {
+				if ( listeners.get(i) != otherListeners.get(i) ) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 
 }

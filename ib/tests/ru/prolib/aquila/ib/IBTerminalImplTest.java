@@ -14,11 +14,10 @@ import com.ib.client.Contract;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.ib.api.IBClient;
-import ru.prolib.aquila.ib.assembler.IBRequestContractHandler;
-import ru.prolib.aquila.ib.assembler.IBRequestSecurityHandler;
+import ru.prolib.aquila.ib.assembler.*;
 import ru.prolib.aquila.ib.assembler.cache.Cache;
 
 public class IBTerminalImplTest {
@@ -29,9 +28,7 @@ public class IBTerminalImplTest {
 	private EditablePortfolios portfolios;
 	private EditableOrders orders;
 	private OrderProcessor orderProcessor;
-	private EventDispatcher dispatcher;
-	private EventType onConn, onDisc, onStarted, onStopped, onPanic,
-		onReqSecurityError;
+	private TerminalEventDispatcher dispatcher;
 	private TerminalController controller;
 	private Scheduler scheduler;
 	private Cache cache;
@@ -58,17 +55,9 @@ public class IBTerminalImplTest {
 		cache = control.createMock(Cache.class);
 		client = control.createMock(IBClient.class);
 		es = new EventSystemImpl();
-		dispatcher = es.createEventDispatcher("Terminal");
-		onConn = dispatcher.createType("OnConnected");
-		onDisc = dispatcher.createType("OnDisconnected");
-		onStarted = dispatcher.createType("OnStarted");
-		onStopped = dispatcher.createType("OnStopped");
-		onPanic = dispatcher.createType("OnPanic");
-		onReqSecurityError = dispatcher.createType("OnRequestSecurityError");
+		dispatcher = control.createMock(TerminalEventDispatcher.class);
 		terminal = new IBTerminalImpl(es, scheduler, starter, securities,
-				portfolios, orders, controller, dispatcher, 
-				onConn, onDisc, onStarted, onStopped, onPanic,
-				onReqSecurityError, cache, client);
+				portfolios, orders, controller, dispatcher, cache, client);
 	}
 	
 	@Test
@@ -102,28 +91,7 @@ public class IBTerminalImplTest {
 				new Variant<TerminalController>(vOrds)
 			.add(controller)
 			.add(control.createMock(TerminalController.class));
-		Variant<String> vDispId = new Variant<String>(vCtrl)
-			.add("Terminal")
-			.add("TerminalX");
-		Variant<String> vConnId = new Variant<String>(vDispId)
-			.add("OnConnected")
-			.add("OnConnectedX");
-		Variant<String> vDiscId = new Variant<String>(vConnId)
-			.add("OnDisconnected")
-			.add("OnDisconnectedX");
-		Variant<String> vStartId = new Variant<String>(vDiscId)
-			.add("OnStarted")
-			.add("OnStartedX");
-		Variant<String> vStopId = new Variant<String>(vStartId)
-			.add("OnStopped")
-			.add("OnStoppedX");
-		Variant<String> vPanicId = new Variant<String>(vStopId)
-			.add("OnPanic")
-			.add("OnPanicX");
-		Variant<String> vReqSecId = new Variant<String>(vPanicId)
-			.add("OnRequestSecurityError")
-			.add("OnRequestSecurityErrorX");
-		Variant<Cache> vCache = new Variant<Cache>(vReqSecId)
+		Variant<Cache> vCache = new Variant<Cache>(vCtrl)
 			.add(cache)
 			.add(control.createMock(Cache.class));
 		Variant<IBClient> vClnt = new Variant<IBClient>(vCache)
@@ -141,14 +109,9 @@ public class IBTerminalImplTest {
 		int foundCnt = 0;
 		IBTerminalImpl x = null, found = null;
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
 			x = new IBTerminalImpl(vEs.get(), vSched.get(), vSta.get(),
 					vScs.get(), vPts.get(), vOrds.get(), 
-					vCtrl.get(), d, d.createType(vConnId.get()),
-					d.createType(vDiscId.get()), d.createType(vStartId.get()),
-					d.createType(vStopId.get()), d.createType(vPanicId.get()),
-					d.createType(vReqSecId.get()), vCache.get(),
-					vClnt.get());
+					vCtrl.get(), dispatcher, vCache.get(), vClnt.get());
 			x.setTerminalState(vStat.get());
 			x.setOrderProcessorInstance(vOrdProc.get());
 			if ( terminal.equals(x) ) {
@@ -162,16 +125,9 @@ public class IBTerminalImplTest {
 		assertSame(portfolios, found.getPortfoliosInstance());
 		assertSame(orders, found.getOrdersInstance());
 		assertSame(starter, found.getStarter());
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onConn, found.OnConnected());
-		assertEquals(onDisc, found.OnDisconnected());
-		assertEquals(onStarted, found.OnStarted());
-		assertEquals(onStopped, found.OnStopped());
-		assertEquals(onPanic, found.OnPanic());
 		assertSame(TerminalState.STOPPED, found.getTerminalState());
 		assertSame(orderProcessor, found.getOrderProcessorInstance());
 		assertSame(scheduler, found.getScheduler());
-		assertEquals(onReqSecurityError, found.OnRequestSecurityError());
 		assertSame(cache, found.getCache());
 		assertSame(client, found.getClient());
 	}
@@ -179,13 +135,10 @@ public class IBTerminalImplTest {
 	@Test
 	public void testConstruct_Short() throws Exception {
 		terminal = new IBTerminalImpl(es, starter, securities, portfolios,
-				orders, dispatcher, onConn, onDisc, onStarted,
-				onStopped, onPanic, onReqSecurityError, cache, client);
+				orders, dispatcher, cache, client);
 		Terminal expected = new IBTerminalImpl(es, new SchedulerLocal(),
 				starter, securities, portfolios, orders, 
-				new TerminalController(), dispatcher, onConn, onDisc,
-				onStarted, onStopped, onPanic,
-				onReqSecurityError, cache, client);
+				new TerminalController(), dispatcher, cache, client);
 		assertEquals(expected, terminal);
 	}
 	

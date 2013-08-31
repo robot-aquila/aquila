@@ -63,7 +63,7 @@ public class ListenOnce implements EventListener {
 		ListenOnce o = (ListenOnce) other;
 		return new EqualsBuilder()
 			.append(o.listener, listener)
-			.append(o.type, type)
+			.appendSuper(o.type == type)
 			.isEquals();
 	}
 

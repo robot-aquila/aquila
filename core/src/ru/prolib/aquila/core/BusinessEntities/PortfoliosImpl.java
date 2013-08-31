@@ -1,19 +1,15 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioFactory;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
 /**
  * Хранилище портфелей.
  */
-public class PortfoliosImpl implements EditablePortfolios, EventListener {
-	private final EventDispatcher dispatcher;
-	private final EventType onAvailable,onChanged,onPosAvailable,onPosChanged;
+public class PortfoliosImpl implements EditablePortfolios {
+	private final PortfoliosEventDispatcher dispatcher;
 	private final Map<Account, EditablePortfolio> map;
 	private Portfolio defaultPortfolio;
 	private final PortfolioFactory factory;
@@ -22,48 +18,24 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	 * Конструктор набора.
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onAvailable тип события при появлении нового портфеля
-	 * @param onChanged тип события при изменении портфеля
-	 * @param onPosAvailable тип события при появлении новой позиции
-	 * @param onPosChanged тип события при изменении позиции
 	 * @param factory фабрика портфелей
 	 */
-	public PortfoliosImpl(EventDispatcher dispatcher, EventType onAvailable,
-			EventType onChanged, EventType onPosAvailable,
-			EventType onPosChanged, PortfolioFactory factory)
+	public PortfoliosImpl(PortfoliosEventDispatcher dispatcher,
+			PortfolioFactory factory)
 	{
 		super();
-		if ( dispatcher == null ) {
-			throw new NullPointerException("Dispatcher cannot be null");
-		}
-		if ( onAvailable == null || onChanged == null
-				|| onPosAvailable == null || onPosChanged == null )
-		{
-			throw new NullPointerException("Event type cannot be null");
-		}
 		this.dispatcher = dispatcher;
-		this.onAvailable = onAvailable;
-		this.onChanged = onChanged;
-		this.onPosAvailable = onPosAvailable;
-		this.onPosChanged = onPosChanged;
-		map = new LinkedHashMap<Account, EditablePortfolio>();
 		this.factory = factory;
+		map = new LinkedHashMap<Account, EditablePortfolio>();
 	}
 	
 	/**
 	 * Конструктор набора.
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onAvailable тип события при появлении нового портфеля
-	 * @param onChanged тип события при изменении портфеля
-	 * @param onPosAvailable тип события при появлении новой позиции
-	 * @param onPosChanged тип события при изменении позиции
 	 */
-	public PortfoliosImpl(EventDispatcher dispatcher, EventType onAvailable,
-		EventType onChanged, EventType onPosAvailable, EventType onPosChanged)
-	{
-		this(dispatcher, onAvailable, onChanged, onPosAvailable, onPosChanged,
-				new PortfolioFactory());
+	public PortfoliosImpl(PortfoliosEventDispatcher dispatcher) {
+		this(dispatcher, new PortfolioFactory());
 	}
 	
 	public PortfolioFactory getFactory() {
@@ -75,7 +47,7 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	 * <p>
 	 * @return диспетчер
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public PortfoliosEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -86,7 +58,7 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 
 	@Override
 	public EventType OnPortfolioAvailable() {
-		return onAvailable;
+		return dispatcher.OnPortfolioAvailable();
 	}
 
 	@Override
@@ -122,7 +94,7 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 				portfolio.fireChangedEvent();
 			} else {
 				portfolio.setAvailable(true);
-				dispatcher.dispatch(new PortfolioEvent(onAvailable, portfolio));
+				dispatcher.fireAvailable(portfolio);
 			}
 			portfolio.resetChanges();
 		}
@@ -132,18 +104,16 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 	public synchronized EditablePortfolio
 		getEditablePortfolio(EditableTerminal terminal, Account account)
 	{
-		EditablePortfolio port = map.get(account);
-		if ( port == null ) {
-			port = factory.createInstance(terminal, account);
-			map.put(account, port);
-			port.OnChanged().addListener(this);
-			port.OnPositionAvailable().addListener(this);
-			port.OnPositionChanged().addListener(this);
+		EditablePortfolio portfolio = map.get(account);
+		if ( portfolio == null ) {
+			portfolio = factory.createInstance(terminal, account);
+			map.put(account, portfolio);
+			dispatcher.startRelayFor(portfolio);
 			if ( defaultPortfolio == null ) {
-				defaultPortfolio = port;
+				defaultPortfolio = portfolio;
 			}
 		}
-		return port;
+		return portfolio;
 	}
 
 	@Override
@@ -153,55 +123,17 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 
 	@Override
 	public EventType OnPortfolioChanged() {
-		return onChanged;
+		return dispatcher.OnPortfolioChanged();
 	}
 
 	@Override
 	public EventType OnPositionAvailable() {
-		return onPosAvailable;
+		return dispatcher.OnPositionAvailable();
 	}
 
 	@Override
 	public EventType OnPositionChanged() {
-		return onPosChanged;
-	}
-
-	@Override
-	public void onEvent(Event event) {
-		if ( event instanceof PortfolioEvent ) {
-			Portfolio port = ((PortfolioEvent) event).getPortfolio();
-			EventType map[][] = {
-					{ port.OnChanged(), onChanged },
-			};
-			for ( int i = 0; i < map.length; i ++ ) {
-				if ( event.isType(map[i][0]) ) {
-					dispatcher.dispatch(new PortfolioEvent(map[i][1], port));
-					break;
-				}
-			}
-		} else if ( event instanceof PositionEvent ) {
-			translatePositionEvent((PositionEvent) event);
-		}
-	}
-	
-	/**
-	 * Перенаправить событие позициии
-	 * <p>
-	 * @param event исходное событие
-	 */
-	private void translatePositionEvent(PositionEvent event) {
-		Position pos = ((PositionEvent) event).getPosition();
-		Portfolio port = pos.getPortfolio();
-		EventType map[][] = {
-				{ port.OnPositionAvailable(), onPosAvailable },
-				{ port.OnPositionChanged(), onPosChanged },
-		};
-		for ( int i = 0; i < map.length; i ++ ) {
-			if ( event.isType(map[i][0]) ) {
-				dispatcher.dispatch(new PositionEvent(map[i][1], pos));
-				break;
-			}
-		}
+		return dispatcher.OnPositionChanged();
 	}
 
 	@Override
@@ -233,14 +165,8 @@ public class PortfoliosImpl implements EditablePortfolios, EventListener {
 		}
 		PortfoliosImpl o = (PortfoliosImpl) other;
 		return new EqualsBuilder()
-			.append(o.defaultPortfolio, defaultPortfolio)
-			.append(o.dispatcher, dispatcher)
+			.appendSuper(o.defaultPortfolio == defaultPortfolio)
 			.append(o.map, map)
-			.append(o.onAvailable, onAvailable)
-			.append(o.onChanged, onChanged)
-			.append(o.onPosAvailable, onPosAvailable)
-			.append(o.onPosChanged, onPosChanged)
-			.append(o.factory, factory)
 			.isEquals();
 	}
 

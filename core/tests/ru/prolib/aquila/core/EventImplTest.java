@@ -7,7 +7,6 @@ import org.junit.*;
 
 /**
  * 2012-04-09
- * $Id: EventImplTest.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventImplTest {
 	private IMocksControl control;

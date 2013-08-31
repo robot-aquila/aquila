@@ -4,15 +4,12 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.report.RTrade;
-import ru.prolib.aquila.core.report.TradeReportEvent;
+import ru.prolib.aquila.core.report.*;
 
 /**
  * Базовый отчет по трейдам.
@@ -20,45 +17,34 @@ import ru.prolib.aquila.core.report.TradeReportEvent;
  * Данный класс предназначен для отслеживания трейдов - последовательностей
  * сделок, приводящих к открытию и последующему закрытию позиции.
  */
-public class CommonTradeReport implements EditableTradeReport, EventListener {
+public class CommonTR implements EditableTradeReport, EventListener {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(CommonTradeReport.class);
+		logger = LoggerFactory.getLogger(CommonTR.class);
 	}
 	
 	private final List<RTrade> trades;
 	private final Map<RTrade, Integer> indices;
 	private final ActiveTrades activeTrades;
-	private final EventDispatcher dispatcher;
-	private EventType onEnter, onExit, onChanged;
+	private final CommonTREventDispatcher dispatcher;
 	
 	/**
 	 * Служебный конструктор.
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onEnter тип события: при входе в трейд
-	 * @param onExit тип события: при выходе из трейда
-	 * @param onChanged тип события: изменение трейда
-	 * @param activeTrades активные трейды
+	 * @param activeTrades набор активный трейдов
 	 */
-	CommonTradeReport(EventDispatcher dispatcher, EventType onEnter,
-			EventType onExit, EventType onChanged, ActiveTrades activeTrades)
-	{
+	CommonTR(CommonTREventDispatcher dispatcher, ActiveTrades activeTrades) {
 		super();
 		this.activeTrades = activeTrades;
 		this.dispatcher = dispatcher;
-		this.onEnter = onEnter;
-		this.onExit = onExit;
-		this.onChanged = onChanged;
 		this.trades = new Vector<RTrade>();
 		this.indices = new Hashtable<RTrade, Integer>();
 	}
 
-	public CommonTradeReport(EventDispatcher dispatcher, EventType onEnter,
-			EventType onExit, EventType onChanged)
-	{
-		this(dispatcher, onEnter, onExit, onChanged, new ActiveTrades());
+	public CommonTR(CommonTREventDispatcher dispatcher) {
+		this(dispatcher, new ActiveTrades());
 	}
 	
 	/**
@@ -75,7 +61,7 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public CommonTREventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 	
@@ -93,7 +79,7 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 			indices.put(report, index);
 			report = report.clone();
 			trades.add(report);
-			postEvent(onEnter, report, index);
+			dispatcher.fireEnter(report, index);
 			
 		} else if ( event.isType(activeTrades.OnExit()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
@@ -102,7 +88,7 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 			report = report.clone();
 			trades.set(index, report);
 			indices.remove(index);
-			postEvent(onExit, report, index);
+			dispatcher.fireExit(report, index);
 			
 		} else if ( event.isType(activeTrades.OnChanged()) ) {
 			TradeReportEvent e = (TradeReportEvent) event;
@@ -110,20 +96,9 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 			Integer index = indices.get(report);
 			report = report.clone();
 			trades.set(index, report);
-			postEvent(onChanged, report, index);
+			dispatcher.fireChanged(report, index);
 			
 		}
-	}
-	
-	/**
-	 * Генерировать событие указанного типа.
-	 * <p>
-	 * @param type тип события
-	 * @param report отчет (при отправке используется копия)
-	 * @param index индекс отчета
-	 */
-	private void postEvent(EventType type, RTrade report, Integer index) {
-		dispatcher.dispatch(new TradeReportEvent(type, report, index));
 	}
 	
 	@Override
@@ -155,17 +130,17 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 
 	@Override
 	public EventType OnEnter() {
-		return onEnter;
+		return dispatcher.OnEnter();
 	}
 
 	@Override
 	public EventType OnExit() {
-		return onExit;
+		return dispatcher.OnExit();
 	}
 
 	@Override
 	public EventType OnChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 
 	@Override
@@ -182,17 +157,12 @@ public class CommonTradeReport implements EditableTradeReport, EventListener {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != CommonTradeReport.class ) {
+		if ( other == null || other.getClass() != CommonTR.class ) {
 			return false;
 		}
-		CommonTradeReport o = (CommonTradeReport) other;
+		CommonTR o = (CommonTR) other;
 		return new EqualsBuilder()
-			//.append(o.activeTrades, activeTrades) // don't cmp -> recursion 
-			.append(o.dispatcher, dispatcher)
-			//.append(o.indices, indices) // never equals by keys
-			.append(o.onChanged, onChanged)
-			.append(o.onEnter, onEnter)
-			.append(o.onExit, onExit)
+			.append(o.activeTrades, activeTrades) 
 			.append(o.trades, trades)
 			.isEquals();
 	}

@@ -13,17 +13,10 @@ import ru.prolib.aquila.core.utils.Variant;
 public class OrdersImplTest {
 	private IMocksControl control;
 	private EventSystem es;
-	private EventDispatcher dispatcher, dispatcherMock;
-	private EventType onAvailable,onCancelFailed,onCancelled,onChanged,
-		onDone,onFailed,onFilled,onPartiallyFilled,onRegistered,
-		onRegisterFailed, onTrade;
+	private OrdersEventDispatcher dispatcher;
 	private EditableTerminal terminal;
 	private EditableOrder o1,o2,o3;
-	/**
-	 * Order with event types (not a mock)
-	 */
-	private EditableOrder owt;
-	private OrdersImpl orders, orders2;
+	private OrdersImpl orders;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -36,55 +29,35 @@ public class OrdersImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		es = new EventSystemImpl();
-		dispatcher = es.createEventDispatcher("Orders");
-		onAvailable = dispatcher.createType("OnAvailable");
-		onCancelFailed = dispatcher.createType("OnCancelFailed");
-		onCancelled = dispatcher.createType("OnCancelled");
-		onChanged = dispatcher.createType("OnChanged");
-		onDone = dispatcher.createType("OnDone");
-		onFailed = dispatcher.createType("OnFailed");
-		onFilled = dispatcher.createType("OnFilled");
-		onPartiallyFilled = dispatcher.createType("OnPartiallyFilled");
-		onRegistered = dispatcher.createType("OnRegistered");
-		onRegisterFailed = dispatcher.createType("OnRegisterFailed");
-		onTrade = dispatcher.createType("OnTrade");
-		dispatcherMock = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(OrdersEventDispatcher.class);
 		terminal = control.createMock(EditableTerminal.class);
 		expect(terminal.getEventSystem()).andStubReturn(es);
 		
-		o1 = control.createMock(EditableOrder.class);
-		o2 = control.createMock(EditableOrder.class);
-		o3 = control.createMock(EditableOrder.class);
-		orders = new OrdersImpl(dispatcher, onAvailable, onCancelFailed,
-				onCancelled, onChanged, onDone, onFailed, onFilled,
-				onPartiallyFilled, onRegistered, onRegisterFailed,
-				onTrade);
-		orders2 = new OrdersImpl(dispatcherMock, onAvailable, onCancelFailed,
-				onCancelled, onChanged, onDone, onFailed, onFilled,
-				onPartiallyFilled, onRegistered, onRegisterFailed,
-				onTrade);
-		
-		EventDispatcher d = es.createEventDispatcher("Order");
-		owt = new OrderImpl(d, d.createType(), d.createType(),
-				d.createType(), d.createType(), d.createType(), d.createType(),
-				d.createType(), d.createType(), d.createType(), d.createType(),
-				new Vector<OrderStateHandler>(), terminal);
+		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
+		o1 = new OrderImpl(new OrderEventDispatcher(es), h, terminal);
+		o2 = new OrderImpl(new OrderEventDispatcher(es), h, terminal);
+		o3 = new OrderImpl(new OrderEventDispatcher(es), h, terminal);
+		orders = new OrdersImpl(dispatcher);
 	}
 	
 	@Test
-	public void testConstruct() throws Exception {
+	public void testEventTypes() throws Exception {
+		dispatcher = new OrdersEventDispatcher(es);
+		orders = new OrdersImpl(dispatcher);
 		assertSame(dispatcher, orders.getEventDispatcher());
-		assertSame(onAvailable, orders.OnOrderAvailable());
-		assertSame(onCancelFailed, orders.OnOrderCancelFailed());
-		assertSame(onCancelled, orders.OnOrderCancelled());
-		assertSame(onChanged, orders.OnOrderChanged());
-		assertSame(onDone, orders.OnOrderDone());
-		assertSame(onFailed, orders.OnOrderFailed());
-		assertSame(onFilled, orders.OnOrderFilled());
-		assertSame(onPartiallyFilled, orders.OnOrderPartiallyFilled());
-		assertSame(onRegistered, orders.OnOrderRegistered());
-		assertSame(onRegisterFailed, orders.OnOrderRegisterFailed());
-		assertSame(onTrade, orders.OnOrderTrade());
+		assertSame(dispatcher.OnAvailable(), orders.OnOrderAvailable());
+		assertSame(dispatcher.OnCancelFailed(), orders.OnOrderCancelFailed());
+		assertSame(dispatcher.OnCancelled(), orders.OnOrderCancelled());
+		assertSame(dispatcher.OnChanged(), orders.OnOrderChanged());
+		assertSame(dispatcher.OnDone(), orders.OnOrderDone());
+		assertSame(dispatcher.OnFailed(), orders.OnOrderFailed());
+		assertSame(dispatcher.OnFilled(), orders.OnOrderFilled());
+		assertSame(dispatcher.OnPartiallyFilled(),
+				orders.OnOrderPartiallyFilled());
+		assertSame(dispatcher.OnRegistered(), orders.OnOrderRegistered());
+		assertSame(dispatcher.OnRegisterFailed(),
+				orders.OnOrderRegisterFailed());
+		assertSame(dispatcher.OnTrade(), orders.OnOrderTrade());
 	}
 	
 	@Test
@@ -122,25 +95,27 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testFireEvents_Available() throws Exception {
+		o1 = control.createMock(EditableOrder.class);
 		expect(o1.isAvailable()).andReturn(false);
 		o1.setAvailable(true);
-		dispatcherMock.dispatch(new OrderEvent(onAvailable, o1));
+		dispatcher.fireAvailable(same(o1));
 		o1.resetChanges();
 		control.replay();
 		
-		orders2.fireEvents(o1);
+		orders.fireEvents(o1);
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testFireEvents_Changed() throws Exception {
+		o1 = control.createMock(EditableOrder.class);
 		expect(o1.isAvailable()).andReturn(true);
 		o1.fireChangedEvent();
 		o1.resetChanges();
 		control.replay();
 		
-		orders2.fireEvents(o1);
+		orders.fireEvents(o1);
 		
 		control.verify();
 	}
@@ -163,135 +138,20 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testPurgeOrder_ForExisting() throws Exception {
-		owt.OnCancelFailed().addListener(orders);
-		owt.OnCancelled().addListener(orders);
-		owt.OnChanged().addListener(orders);
-		owt.OnDone().addListener(orders);
-		owt.OnFailed().addListener(orders);
-		owt.OnFilled().addListener(orders);
-		owt.OnPartiallyFilled().addListener(orders);
-		owt.OnRegistered().addListener(orders);
-		owt.OnRegisterFailed().addListener(orders);
-		owt.OnTrade().addListener(orders);
-		orders.setOrder(8, owt);
+		orders.setOrder(8, o1);
+		dispatcher.stopRelayFor(same(o1));
+		control.replay();
 		
 		orders.purgeOrder(8);
 		
-		assertFalse(orders.isOrderExists(8));
-		assertFalse(owt.OnCancelFailed().isListener(orders));
-		assertFalse(owt.OnCancelled().isListener(orders));
-		assertFalse(owt.OnChanged().isListener(orders));
-		assertFalse(owt.OnDone().isListener(orders));
-		assertFalse(owt.OnFailed().isListener(orders));
-		assertFalse(owt.OnFilled().isListener(orders));
-		assertFalse(owt.OnPartiallyFilled().isListener(orders));
-		assertFalse(owt.OnRegistered().isListener(orders));
-		assertFalse(owt.OnRegisterFailed().isListener(orders));
-		assertFalse(owt.OnTrade().isListener(orders));
+		control.verify();
 	}
 	
 	@Test
 	public void testPurgeOrder_ForNonExisting() throws Exception {
+		control.replay();
+		
 		orders.purgeOrder(8);
-	}
-
-	@Test
-	public void testOnEvent_OnCancellFailed() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onCancelFailed, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnCancelFailed(), owt));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnCancelled() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onCancelled, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnCancelled(), owt));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnChanged() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onChanged, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnChanged(), owt));
-		
-		control.verify();
-	}
-
-	@Test
-	public void testOnEvent_OnDone() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onDone, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnDone(), owt));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnFailed() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onFailed, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnFailed(), owt));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnFilled() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onFilled, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnFilled(), owt));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnPartiallyFilled() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onPartiallyFilled, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnPartiallyFilled(), owt));
-		
-		control.verify();
-	}
-
-	@Test
-	public void testOnEvent_OnRegistered() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onRegistered, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnRegistered(), owt));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnRegisterFailed() throws Exception {
-		dispatcherMock.dispatch(new OrderEvent(onRegisterFailed, owt));
-		control.replay();
-		
-		orders2.onEvent(new OrderEvent(owt.OnRegisterFailed(), owt));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnEvent_OnTrade() throws Exception {
-		Trade t = new Trade(terminal);
-		dispatcherMock.dispatch(new OrderTradeEvent(onTrade, owt, t));
-		control.replay();
-		
-		orders2.onEvent(new OrderTradeEvent(owt.OnTrade(), owt, t));
 		
 		control.verify();
 	}
@@ -309,62 +169,51 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testRegisterOrder() throws Exception {
-		orders.registerOrder(200, owt);
+		dispatcher.startRelayFor(same(o1));
+		control.replay();
+		
+		orders.registerOrder(200, o1);
+		
+		control.verify();
 		
 		assertTrue(orders.isOrderExists(200));
-		assertSame(owt, orders.getOrder(200));
-		assertEquals(new Integer(200), owt.getId());
-		assertTrue(owt.OnCancelFailed().isListener(orders));
-		assertTrue(owt.OnCancelled().isListener(orders));
-		assertTrue(owt.OnChanged().isListener(orders));
-		assertTrue(owt.OnDone().isListener(orders));
-		assertTrue(owt.OnFailed().isListener(orders));
-		assertTrue(owt.OnFilled().isListener(orders));
-		assertTrue(owt.OnPartiallyFilled().isListener(orders));
-		assertTrue(owt.OnRegistered().isListener(orders));
-		assertTrue(owt.OnRegisterFailed().isListener(orders));
-		assertTrue(owt.OnTrade().isListener(orders));
+		assertSame(o1, orders.getOrder(200));
+		assertEquals(new Integer(200), o1.getId());
 	}
 	
 	@Test (expected=OrderAlreadyExistsException.class)
 	public void testRegisterOrder_ThrowsIfOrderExists() throws Exception {
-		orders.setOrder(123, o1);
-		orders.registerOrder(123, owt);
+		o2.setId(123);
+		orders.setOrder(123, o2);
+		
+		orders.registerOrder(123, o1);
 	}
 	
 	@Test
 	public void testCreateOrder() throws Exception {
-		EventDispatcher d = es.createEventDispatcher("Order");
-		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
-		h.add(new OrderStateHandler(d, new OrderIsRegistered(),
-				d.createType("OnRegister")));
-		h.add(new OrderStateHandler(d, new OrderIsRegisterFailed(),
-				d.createType("OnRegisterFailed")));
-		h.add(new OrderStateHandler(d, new OrderIsCancelled(),
-				d.createType("OnCancelled")));
-		h.add(new OrderStateHandler(d, new OrderIsCancelFailed(),
-				d.createType("OnCancelFailed")));
-		h.add(new OrderStateHandler(d, new OrderIsFilled(),
-				d.createType("OnFilled")));
-		h.add(new OrderStateHandler(d, new OrderIsPartiallyFilled(),
-				d.createType("OnPartiallyFilled")));
-		h.add(new OrderStateHandler(d, new OrderIsChanged(),
-				d.createType("OnChanged")));
-		h.add(new OrderStateHandler(d, new OrderIsDone(),
-				d.createType("OnDone")));
-		h.add(new OrderStateHandler(d, new OrderIsFailed(),
-				d.createType("OnFailed")));
-		OrderImpl expected = new OrderImpl(d, h.get(0).getEventType(),
-				h.get(1).getEventType(), h.get(2).getEventType(),
-				h.get(3).getEventType(), h.get(4).getEventType(),
-				h.get(5).getEventType(), h.get(6).getEventType(),
-				h.get(7).getEventType(), h.get(8).getEventType(),
-				d.createType("OnTrade"), h, terminal);
+		OrderImpl expected = new OrderImpl(new OrderEventDispatcher(es),
+				new Vector<OrderStateHandler>(), terminal);
 		control.replay();
 		
 		OrderImpl actual = (OrderImpl) orders.createOrder(terminal);
+		
+		control.verify();
 		assertNotNull(actual);
 		assertEquals(expected, actual);
+		
+		OrderEventDispatcher d = actual.getEventDispatcher();
+		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
+		h.add(new OrderStateHandler(d, new OrderIsRegistered(), d.OnRegistered()));
+		h.add(new OrderStateHandler(d, new OrderIsRegisterFailed(), d.OnRegisterFailed()));
+		h.add(new OrderStateHandler(d, new OrderIsCancelled(), d.OnCancelled()));
+		h.add(new OrderStateHandler(d, new OrderIsCancelFailed(), d.OnCancelFailed()));
+		h.add(new OrderStateHandler(d, new OrderIsFilled(), d.OnFilled()));
+		h.add(new OrderStateHandler(d, new OrderIsPartiallyFilled(), d.OnPartiallyFilled()));
+		h.add(new OrderStateHandler(d, new OrderIsChanged(), d.OnChanged()));
+		h.add(new OrderStateHandler(d, new OrderIsDone(), d.OnDone()));
+		h.add(new OrderStateHandler(d, new OrderIsFailed(), d.OnFailed()));
+		
+		assertEquals(h, actual.getStateHandlers());
 	}
 	
 	@Test
@@ -376,53 +225,16 @@ public class OrdersImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		expect(o1.getId()).andStubReturn(1);
-		expect(o2.getId()).andStubReturn(2);
-		expect(o3.getId()).andStubReturn(3);
+		o1.setId(1);
+		o2.setId(2);
+		o3.setId(3);
 		List<EditableOrder> list1 = new Vector<EditableOrder>();
 		list1.add(o1);
 		List<EditableOrder> list2 = new Vector<EditableOrder>();
 		list2.add(o2);
 		list2.add(o3);
 		
-		Variant<String> vDispId = new Variant<String>()
-			.add("Orders")
-			.add("Another");
-		Variant<String> vAvlId = new Variant<String>(vDispId)
-			.add("OnAvailable")
-			.add("OnAvailableX");
-		Variant<String> vCnclFailId = new Variant<String>(vAvlId)
-			.add("OnCancelFailed")
-			.add("OnCancelFailedX");
-		Variant<String> vCnclId = new Variant<String>(vCnclFailId)
-			.add("OnCancelled")
-			.add("OnCancelledX");
-		Variant<String> vChngId = new Variant<String>(vCnclId)
-			.add("OnChanged")
-			.add("OnChangedX");
-		Variant<String> vDoneId = new Variant<String>(vChngId)
-			.add("OnDone")
-			.add("OnDoneX");
-		Variant<String> vFailId = new Variant<String>(vDoneId)
-			.add("OnFailed")
-			.add("OnFailedX");
-		Variant<String> vFillId = new Variant<String>(vFailId)
-			.add("OnFilled")
-			.add("OnFilledX");
-		Variant<String> vPartFillId = new Variant<String>(vFillId)
-			.add("OnPartiallyFilled")
-			.add("OnPartiallyFilledX");
-		Variant<String> vRegId = new Variant<String>(vPartFillId)
-			.add("OnRegistered")
-			.add("OnRegisteredX");
-		Variant<String> vRegFailId = new Variant<String>(vRegId)
-			.add("OnRegisterFailed")
-			.add("OnRegisterFailedX");
-		Variant<String> vTrdId = new Variant<String>(vRegFailId)
-			.add("OnTrade")
-			.add("OnTradeX");
-		Variant<List<EditableOrder>> vList =
-				new Variant<List<EditableOrder>>(vTrdId)
+		Variant<List<EditableOrder>> vList = new Variant<List<EditableOrder>>()
 			.add(list1)
 			.add(list2);
 		Variant<?> iterator = vList;
@@ -433,18 +245,7 @@ public class OrdersImplTest {
 		int foundCnt = 0;
 		OrdersImpl x = null, found = null;
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new OrdersImpl(d, d.createType(vAvlId.get()),
-					d.createType(vCnclFailId.get()),
-					d.createType(vCnclId.get()),
-					d.createType(vChngId.get()),
-					d.createType(vDoneId.get()),
-					d.createType(vFailId.get()),
-					d.createType(vFillId.get()),
-					d.createType(vPartFillId.get()),
-					d.createType(vRegId.get()),
-					d.createType(vRegFailId.get()),
-					d.createType(vTrdId.get()));
+			x = new OrdersImpl(dispatcher);
 			for ( EditableOrder order : vList.get() ) {
 				x.setOrder(order.getId(), order);
 			}
@@ -454,18 +255,6 @@ public class OrdersImplTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onAvailable, found.OnOrderAvailable());
-		assertEquals(onCancelFailed, found.OnOrderCancelFailed());
-		assertEquals(onCancelled, found.OnOrderCancelled());
-		assertEquals(onChanged, found.OnOrderChanged());
-		assertEquals(onDone, found.OnOrderDone());
-		assertEquals(onFailed, found.OnOrderFailed());
-		assertEquals(onFilled, found.OnOrderFilled());
-		assertEquals(onPartiallyFilled, found.OnOrderPartiallyFilled());
-		assertEquals(onRegistered, found.OnOrderRegistered());
-		assertEquals(onRegisterFailed, found.OnOrderRegisterFailed());
-		assertEquals(onTrade, found.OnOrderTrade());
 		assertEquals(list1, found.getOrders());
 	}
 

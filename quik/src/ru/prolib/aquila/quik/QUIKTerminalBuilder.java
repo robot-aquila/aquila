@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
 import ru.prolib.aquila.quik.api.QUIKClient;
 import ru.prolib.aquila.quik.assembler.cache.*;
 
@@ -24,15 +25,10 @@ public class QUIKTerminalBuilder extends TerminalBuilder {
 	protected EditableTerminal createTerminalInstance(EventSystem es,
 			StarterQueue starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
-			EventDispatcher dispatcher,
-			EventType onConnected, EventType onDisconnected,
-			EventType onStarted, EventType onStopped, EventType onPanic,
-			EventType onReqSecurityError)
+			TerminalEventDispatcher dispatcher)
 	{
 		return new QUIKTerminalImpl(es, starter,
 				securities, portfolios, orders, dispatcher,
-				onConnected, onDisconnected, onStarted, onStopped, onPanic,
-				onReqSecurityError,
 				new CacheBuilder().createCache(es), new QUIKClient());
 	}
 

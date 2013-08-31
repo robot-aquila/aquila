@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core;
 
+import java.util.List;
+
 /**
  * Интерфейс типа события.
  * <p> 
@@ -21,6 +23,12 @@ public interface EventType {
 	 * @param listener получатель
 	 */
 	public void removeListener(EventListener listener);
+	
+	/**
+	 * Очистить список наблюдателей.
+	 * <p>
+	 */
+	public void removeListeners();
 	
 	/**
 	 * Проверить наличие указанного наблюдателя.
@@ -62,5 +70,31 @@ public interface EventType {
 	 * @return промежуточный обозреватель
 	 */
 	public EventListener once(EventListener listener);
+	
+	/**
+	 * Получить количество наблюдателей.
+	 * <p>
+	 * @return количество наблюдателей
+	 */
+	public int countListeners();
+	
+	/**
+	 * Получить список наблюдателей.
+	 * <p>
+	 * @return копия текущего списка получателей
+	 */
+	public List<EventListener> getListeners();
+	
+	/**
+	 * Сравнить списки наблюдателей.
+	 * <p>
+	 * Наблюдатели из разных списков считаются равными, если указывают на один
+	 * и тот же экземпляр. Количество и порядок следования наблюдателей в
+	 * списках так же учитывается.  
+	 * <p>
+	 * @param other другой тип события
+	 * @return true, если списки наблюдателей совпадают, иначе false
+	 */
+	public boolean compareListeners(EventType other);
 
 }

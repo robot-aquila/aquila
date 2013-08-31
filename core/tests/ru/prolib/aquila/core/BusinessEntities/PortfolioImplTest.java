@@ -7,20 +7,18 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioEventDispatcher;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
- * 2012-09-06<br>
- * $Id$
+ * 2012-09-06
  */
 public class PortfolioImplTest {
 	private static Account account;
 	private IMocksControl control;
-	private EventSystem es;
-	private EventDispatcher dispatcher, dispatcherMock;
-	private EventType onChanged;
+	private PortfolioEventDispatcher dispatcher;
 	private EditablePositions positions;
 	private Terminal terminal;
 	private PortfolioImpl portfolio;
@@ -37,12 +35,9 @@ public class PortfolioImplTest {
 		control = createStrictControl();
 		positions = control.createMock(EditablePositions.class);
 		terminal = control.createMock(Terminal.class);
-		dispatcherMock = control.createMock(EventDispatcher.class);
-		es = new EventSystemImpl();
-		dispatcher = es.createEventDispatcher("Portfolio");
-		onChanged = dispatcher.createType("OnChanged");
+		dispatcher = control.createMock(PortfolioEventDispatcher.class);
 		
-		portfolio = new PortfolioImpl(terminal, account, dispatcher, onChanged);
+		portfolio = new PortfolioImpl(terminal, account, dispatcher);
 		portfolio.setPositionsInstance(positions);
 		getter = null;
 		setter = null;
@@ -93,9 +88,7 @@ public class PortfolioImplTest {
 	
 	@Test
 	public void testFireChangedEvent() throws Exception {
-		portfolio = new PortfolioImpl(terminal, account, dispatcherMock,
-				onChanged);
-		dispatcherMock.dispatch(new PortfolioEvent(onChanged, portfolio));
+		dispatcher.fireChanged(same(portfolio));
 		control.replay();
 		
 		portfolio.fireChangedEvent();
@@ -245,7 +238,7 @@ public class PortfolioImplTest {
 		Terminal t1 = tb.createTerminal("foo");
 		Terminal t2 = tb.createTerminal("foo");
 		
-		portfolio = new PortfolioImpl(t1, account, dispatcher, onChanged);
+		portfolio = new PortfolioImpl(t1, account, dispatcher);
 		portfolio.setAvailable(true);
 		portfolio.setBalance(180.00d);
 		portfolio.setCash(20.00d);
@@ -261,13 +254,7 @@ public class PortfolioImplTest {
 		Variant<EditablePositions> vPos = new Variant<EditablePositions>(vAcc)
 			.add(positions)
 			.add(control.createMock(EditablePositions.class));
-		Variant<String> vDispId = new Variant<String>(vPos)
-			.add("Portfolio")
-			.add("Another");
-		Variant<String> vChngId = new Variant<String>(vDispId)
-			.add("OnChanged")
-			.add("OnSomething");
-		Variant<Boolean> vAvl = new Variant<Boolean>(vChngId)
+		Variant<Boolean> vAvl = new Variant<Boolean>(vPos)
 			.add(true)
 			.add(false);
 		Variant<Double> vBal = new Variant<Double>(vAvl)
@@ -283,9 +270,7 @@ public class PortfolioImplTest {
 		int foundCnt = 0;
 		PortfolioImpl x = null, found = null;
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new PortfolioImpl(vTerm.get(), vAcc.get(),
-					d, d.createType(vChngId.get()));
+			x = new PortfolioImpl(vTerm.get(), vAcc.get(), dispatcher);
 			x.setPositionsInstance(vPos.get());
 			x.setAvailable(vAvl.get());
 			x.setBalance(vBal.get());
@@ -300,14 +285,21 @@ public class PortfolioImplTest {
 		assertSame(t1, found.getTerminal());
 		assertSame(account, found.getAccount());
 		assertSame(positions, found.getPositionsInstance());
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertNotSame(dispatcher, found.getEventDispatcher());
-		assertEquals(onChanged, found.OnChanged());
-		assertNotSame(onChanged, found.OnChanged());
 		assertTrue(found.isAvailable());
 		assertEquals(180.00d, found.getBalance(), 0.001d);
 		assertEquals(20.00d, found.getCash(), 0.001d);
 		assertEquals(-30.00d, found.getVariationMargin(), 0.001d);
+	}
+	
+	@Test
+	public void testOnChanged() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnChanged()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, portfolio.OnChanged());
+		
+		control.verify();
 	}
 		
 }

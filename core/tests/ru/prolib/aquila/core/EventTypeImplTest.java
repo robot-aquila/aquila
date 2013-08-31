@@ -16,11 +16,15 @@ public class EventTypeImplTest {
 	private IMocksControl control;
 	private EventDispatcher dispatcher;
 	private EventTypeImpl type;
+	private EventListener listener1, listener2, listener3;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		dispatcher = control.createMock(EventDispatcherImpl.class);
+		listener1 = control.createMock(EventListener.class);
+		listener2 = control.createMock(EventListener.class);
+		listener3 = control.createMock(EventListener.class);
 		type = new EventTypeImpl(dispatcher, "MyType");
 	}
 	
@@ -62,88 +66,121 @@ public class EventTypeImplTest {
 	
 	@Test
 	public void testAddListener() throws Exception {
-		EventListener listener = control.createMock(EventListener.class);
-		dispatcher.addListener(same(type), same(listener));
-		control.replay();
-		type.addListener(listener);
-		control.verify();
+		List<EventListener> expected = new Vector<EventListener>();
+		expected.add(listener1);
+		expected.add(listener2);
+		expected.add(listener3);
+		
+		type.addListener(listener1);
+		type.addListener(listener2);
+		type.addListener(listener3);
+		assertEquals(expected, type.getListeners());
 	}
 	
 	@Test
 	public void testRemoveListener() throws Exception {
-		EventListener listener = control.createMock(EventListener.class);
-		dispatcher.removeListener(same(type), same(listener));
-		control.replay();
-		type.removeListener(listener);
-		control.verify();
+		type.addListener(listener1);
+		type.addListener(listener2);
+		type.addListener(listener3);
+		List<EventListener> expected = new Vector<EventListener>();
+		expected.add(listener3);
+		
+		type.removeListener(listener1);
+		type.removeListener(listener2);
+		
+		assertEquals(expected, type.getListeners());
 	}
 	
 	@Test
 	public void testIsListener() throws Exception {
-		EventListener listener = control.createMock(EventListener.class);
-		expect(dispatcher.isTypeListener(same(type), same(listener)))
-			.andReturn(true);
-		control.replay();
-		assertTrue(type.isListener(listener));
-		control.verify();
+		type.addListener(listener2);
+		type.addListener(listener3);
+		type.removeListener(listener3);
+		
+		assertFalse(type.isListener(listener1));
+		assertTrue(type.isListener(listener2));
+		assertFalse(type.isListener(listener3));
 	}
 	
 	@Test
-	public void testEquals_SpecialCases() throws Exception {
+	public void testEquals() throws Exception {
 		assertTrue(type.equals(type));
+		assertTrue(type.equals(new EventTypeImpl(dispatcher, "MyType")));
 		assertFalse(type.equals(null));
 		assertFalse(type.equals(this));
 	}
 	
 	@Test
-	public void testEquals() throws Exception {
-		List<EventListener> list1 = new Vector<EventListener>();
-		list1.add(control.createMock(EventListener.class));
-		list1.add(control.createMock(EventListener.class));
-		expect(dispatcher.getListeners(same(type))).andStubReturn(list1);
-		control.replay();
-		List<EventListener> list2 = new Vector<EventListener>();
-		list2.add(list1.get(0));
-		
-		Variant<String> vId = new Variant<String>()
-			.add("MyType")
-			.add("AnotherType");
-		Variant<List<EventListener>> vLs = new Variant<List<EventListener>>(vId)
-			.add(list1)
-			.add(list2);
-		Variant<?> iterator = vLs;
-		int foundCnt = 0;
-		EventTypeImpl x = null, found = null;
-		List<EventListener> foundList = null;
-		do {
-			IMocksControl control2 = createStrictControl();
-			EventDispatcher disp = control2.createMock(EventDispatcher.class);
-			x = new EventTypeImpl(disp, vId.get());
-			expect(disp.getListeners(same(x))).andStubReturn(vLs.get());
-			control2.replay();
-			if ( type.equals(x) ) {
-				foundCnt ++;
-				found = x;
-				foundList = vLs.get();
-			}
-		} while ( iterator.next() );
-		assertEquals(1, foundCnt);
-		assertEquals("MyType", found.getId());
-		assertEquals(list1, foundList);
+	public void testOnce() throws Exception {
+		ListenOnce actual = (ListenOnce) type.once(listener1);
+		assertTrue(type.isListener(actual));
+		assertSame(listener1, actual.getListener());
+		assertSame(type, actual.getEventType());
 	}
 	
 	@Test
-	public void testOnce() throws Exception {
-		EventListener lstn = control.createMock(EventListener.class),
-			expected = new ListenOnce(type, lstn), actual;
-		dispatcher.addListener(same(type), eq(expected));
-		control.replay();
+	public void testRemoveListeners() throws Exception {
+		type.addListener(listener1);
+		type.addListener(listener2);
+		type.addListener(listener3);
+		List<EventListener> expected = new Vector<EventListener>();
 		
-		actual = type.once(lstn);
+		type.removeListeners();
 		
-		control.verify();
-		assertNotNull(actual);
-		assertEquals(expected, actual);
+		assertEquals(expected, type.getListeners());
+	}
+	
+	@Test
+	public void testCountListeners() throws Exception {
+		type.addListener(listener1);
+		assertEquals(1, type.countListeners());
+		type.addListener(listener2);
+		assertEquals(2, type.countListeners());
+		type.addListener(listener3);
+		assertEquals(3, type.countListeners());
+	}
+
+	@Test
+	public void testGetListeners() throws Exception {
+		type.addListener(listener1);
+		type.addListener(listener2);
+		List<EventListener> expected = new Vector<EventListener>();
+		expected.add(listener1);
+		expected.add(listener2);
+		
+		assertEquals(expected, type.getListeners());
+	}
+	
+	@Test
+	public void testCompareListeners() throws Exception {
+		List<EventListener> rows1 = new Vector<EventListener>();
+		rows1.add(listener1);
+		rows1.add(listener3);
+		List<EventListener> rows2 = new Vector<EventListener>();
+		rows2.add(listener3);
+		List<EventListener> rows3 = new Vector<EventListener>();
+		rows3.add(listener3);
+		rows3.add(listener1);
+		
+		for ( EventListener l : rows1 ) { type.addListener(l); }
+		
+		Variant<List<EventListener>> vRows = new Variant<List<EventListener>>()
+			.add(rows1)
+			.add(rows2)
+			.add(rows3);
+		Variant<?> iterator = vRows;
+		int foundCnt = 0;
+		EventTypeImpl x, found = null;
+		do {
+			x = new EventTypeImpl(dispatcher);
+			for ( EventListener l : vRows.get() ) { x.addListener(l); }
+			if ( type.compareListeners(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals(rows1, found.getListeners());
 	}
 
 }

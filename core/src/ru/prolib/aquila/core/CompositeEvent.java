@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
  * 2012-04-22<br>
  * $Id: CompositeEvent.java 219 2012-05-20 12:16:45Z whirlwind $
  */
+@Deprecated
 public class CompositeEvent extends EventImpl {
 	private final LinkedHashMap<EventType, Event> state;
 

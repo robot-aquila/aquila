@@ -1,21 +1,15 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.utils.SecurityFactory;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
 /**
  * Набор инструментов торговли.
  */
-public class SecuritiesImpl implements EditableSecurities, EventListener {
-	private final EventDispatcher dispatcher;
-	private final EventType onAvailable;
-	private final EventType onChanged;
-	private final EventType onTrade;
+public class SecuritiesImpl implements EditableSecurities {
+	private final SecuritiesEventDispatcher dispatcher;
 	private final SecurityFactory factory;
 	
 	/**
@@ -27,23 +21,14 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	/**
 	 * Конструктор
 	 * <p>
-	 * @param eventDispatcher диспетчер событий
-	 * @param onAvailable тип события: доступен инструмент
-	 * @param onChanged тип события: изменение инструмента
-	 * @param onTrade тип события: новая сделка по инструменту
+	 * @param dispatcher диспетчер событий
 	 * @param factory фабрика инструментов
 	 */
-	public SecuritiesImpl(EventDispatcher eventDispatcher,
-						  EventType onAvailable,
-						  EventType onChanged,
-						  EventType onTrade,
+	public SecuritiesImpl(SecuritiesEventDispatcher dispatcher,
 						  SecurityFactory factory)
 	{
 		super();
-		this.dispatcher = eventDispatcher;
-		this.onAvailable = onAvailable;
-		this.onChanged = onChanged;
-		this.onTrade = onTrade;
+		this.dispatcher = dispatcher;
 		map = new LinkedHashMap<SecurityDescriptor, EditableSecurity>();
 		this.factory = factory;
 	}
@@ -52,16 +37,9 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	 * Конструктор
 	 * <p>
 	 * @param dispatcher диспетчер событий
-	 * @param onAvailable тип события: доступен инструмент
-	 * @param onChanged тип события: изменение инструмента
-	 * @param onTrade тип события: новая сделка по инструменту
 	 */
-	public SecuritiesImpl(EventDispatcher dispatcher,
-						  EventType onAvailable,
-						  EventType onChanged,
-						  EventType onTrade)
-	{
-		this(dispatcher, onAvailable, onChanged, onTrade, new SecurityFactory());
+	public SecuritiesImpl(SecuritiesEventDispatcher dispatcher) {
+		this(dispatcher, new SecurityFactory());
 	}
 	
 	SecurityFactory getFactory() {
@@ -78,7 +56,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public SecuritiesEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 	
@@ -100,7 +78,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 
 	@Override
 	public EventType OnSecurityAvailable() {
-		return onAvailable;
+		return dispatcher.OnAvailable();
 	}
 
 	@Override
@@ -111,8 +89,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		if ( security == null ) {
 			security = factory.createInstance(terminal, descr);
 			map.put(descr, security);
-			security.OnChanged().addListener(this);
-			security.OnTrade().addListener(this);
+			dispatcher.startRelayFor(security);
 		}
 		return security;
 	}
@@ -124,7 +101,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 				security.fireChangedEvent();
 			} else {
 				security.setAvailable(true);
-				dispatcher.dispatch(new SecurityEvent(onAvailable, security));
+				dispatcher.fireAvailable(security);
 			}
 			security.resetChanges();
 		}
@@ -132,25 +109,12 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 
 	@Override
 	public EventType OnSecurityChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 
 	@Override
 	public EventType OnSecurityTrade() {
-		return onTrade;
-	}
-
-	@Override
-	public void onEvent(Event event) {
-		if ( event instanceof SecurityEvent ) {
-			Security security = ((SecurityEvent) event).getSecurity();
-			if ( event.isType(security.OnChanged()) ) {
-				dispatcher.dispatch(new SecurityEvent(onChanged, security));
-			} else if ( event.isType(security.OnTrade()) ) {
-				dispatcher.dispatch(new SecurityTradeEvent(onTrade, security,
-					((SecurityTradeEvent) event).getTrade()));
-			}
-		}
+		return dispatcher.OnTrade();
 	}
 
 	@Override
@@ -182,11 +146,7 @@ public class SecuritiesImpl implements EditableSecurities, EventListener {
 		}
 		SecuritiesImpl o = (SecuritiesImpl) other;
 		return new EqualsBuilder()
-			.append(o.dispatcher, dispatcher)
 			.append(o.map, map)
-			.append(o.onAvailable, onAvailable)
-			.append(o.onChanged, onChanged)
-			.append(o.onTrade, onTrade)
 			.append(o.factory, factory)
 			.isEquals();
 	}

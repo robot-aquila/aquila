@@ -55,6 +55,7 @@ public class EventSystemImpl implements EventSystem {
 	}
 
 	@Override
+	@Deprecated
 	public CompositeEventType
 		createTypeEachEventOneTime(EventDispatcher dispatcher,
 								   EventType[] types)
@@ -74,12 +75,14 @@ public class EventSystemImpl implements EventSystem {
 	}
 
 	@Override
+	@Deprecated
 	public CompositeEventType createTypeEachEventOneTime(EventType[] types) {
 		return new CompositeEventTypeImpl(createEventDispatcher(), types,
 				new EachEventOneTime(), new CompositeEventGeneratorImpl());
 	}
 
 	@Override
+	@Deprecated
 	public CompositeEventType createTypeEachEventOneTime(
 			EventDispatcher dispatcher, EventType[] types,
 			CompositeEventGenerator eventGenerator)

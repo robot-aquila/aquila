@@ -238,5 +238,5 @@ public interface Security {
 	 * @return объем или null, если не удалось расчитать
 	 */
 	public Double getMostAccurateVolume(Double price, Long qty);
-
+	
 }

@@ -1,10 +1,10 @@
 package ru.prolib.aquila.ib;
 
-
 import static org.junit.Assert.*;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.ib.api.IBClient;
 import ru.prolib.aquila.ib.assembler.cache.Cache;
 
@@ -20,11 +20,7 @@ public class IBTerminalBuilderTest {
 	public void testCreateTerminal() throws Exception {
 		EventSystem es = new EventSystemImpl(new EventQueueImpl("foobar"));
 		StarterQueue starter = new StarterQueue();
-		starter.add(es.getEventQueue());
-		EventDispatcher secDisp = es.createEventDispatcher("Securities");
-		EventDispatcher portDisp = es.createEventDispatcher("Portfolios");
-		EventDispatcher ordDisp = es.createEventDispatcher("Orders");
-		EventDispatcher termDisp = es.createEventDispatcher("Terminal");
+		starter.add(new EventQueueStarter(es.getEventQueue(), 30000));
 		EventDispatcher cacheDisp = es.createEventDispatcher("Cache");
 		Cache cache = new Cache(cacheDisp, cacheDisp.createType("Contract"),
 				cacheDisp.createType("Order"),
@@ -33,34 +29,10 @@ public class IBTerminalBuilderTest {
 				cacheDisp.createType("Exec"));
 		IBClient client = new IBClient();
 		IBEditableTerminal expected = new IBTerminalImpl(es, starter,
-				new SecuritiesImpl(secDisp,
-						secDisp.createType("OnAvailable"),
-						secDisp.createType("OnChanged"),
-						secDisp.createType("OnTrade")),
-				new PortfoliosImpl(portDisp,
-						portDisp.createType("OnAvailable"),
-						portDisp.createType("OnChanged"),
-						portDisp.createType("OnPositionAvailable"),
-						portDisp.createType("OnPositionChanged")),
-				new OrdersImpl(ordDisp,
-						ordDisp.createType("OnAvailable"),
-						ordDisp.createType("OnCancelFailed"),
-						ordDisp.createType("OnCancelled"),
-						ordDisp.createType("OnChanged"),
-						ordDisp.createType("OnDone"),
-						ordDisp.createType("OnFailed"),
-						ordDisp.createType("OnFilled"),
-						ordDisp.createType("OnPartiallyFilled"),
-						ordDisp.createType("OnRegistered"),
-						ordDisp.createType("OnRegisterFailed"),
-						ordDisp.createType("OnTrade")),
-				termDisp,
-				termDisp.createType("OnConnected"),
-				termDisp.createType("OnDisconnected"),
-				termDisp.createType("OnStarted"),
-				termDisp.createType("OnStopped"),
-				termDisp.createType("OnPanic"),
-				termDisp.createType("OnRequestSecurityError"),
+				new SecuritiesImpl(new SecuritiesEventDispatcher(es)),
+				new PortfoliosImpl(new PortfoliosEventDispatcher(es)),
+				new OrdersImpl(new OrdersEventDispatcher(es)),
+				new TerminalEventDispatcher(es),
 				cache, client);
 
 		assertEquals(expected, builder.createTerminal("foobar"));

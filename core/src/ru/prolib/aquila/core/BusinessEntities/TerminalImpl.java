@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.SimpleCounter;
 
@@ -45,9 +46,7 @@ public class TerminalImpl implements EditableTerminal {
 	private final EditablePortfolios portfolios;
 	private final Starter starter;
 	private final EditableOrders orders;
-	private final EventDispatcher dispatcher;
-	private final EventType onConnected,onDisconnected,onStarted,
-		onStopped,onPanic,onReqSecurityError;
+	private final TerminalEventDispatcher dispatcher;
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private final TerminalController controller;
 	private OrderProcessor orderProcessor;
@@ -70,29 +69,16 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
 	 * @param dispatcher диспетчер событий
-	 * @param onConnected тип события при подключении
-	 * @param onDisconnected тип события при отключении
-	 * @param onStarted тип события при старте терминала
-	 * @param onStopped тип события при останове терминала
-	 * @param onPanic тип события при паническом состоянии терминала
-	 * @param onReqSecurityError тип события по запросу инструмента
 	 */
 	public TerminalImpl(EventSystem eventSystem,
 						Starter starter,
 						EditableSecurities securities,
 						EditablePortfolios portfolios,
 						EditableOrders orders,
-						EventDispatcher dispatcher,
-						EventType onConnected,
-						EventType onDisconnected,
-						EventType onStarted,
-						EventType onStopped, EventType onPanic,
-						EventType onReqSecurityError)
+						TerminalEventDispatcher dispatcher)
 	{
-		this(eventSystem, new SchedulerLocal(), starter,
-				securities, portfolios, orders, new TerminalController(),
-				dispatcher, onConnected, onDisconnected,
-				onStarted, onStopped, onPanic, onReqSecurityError);
+		this(eventSystem, new SchedulerLocal(), starter, securities, portfolios,
+				orders, new TerminalController(), dispatcher);
 	}
 	
 	/**
@@ -106,12 +92,6 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param orders набор заявок
 	 * @param controller контроллер терминала
 	 * @param dispatcher диспетчер событий
-	 * @param onConnected тип события при подключении
-	 * @param onDisconnected тип события при отключении
-	 * @param onStarted тип события при старте терминала
-	 * @param onStopped тип события при останове терминала
-	 * @param onPanic тип события при паническом состоянии терминала
-	 * @param onReqSecurityError тип события по запросу инструмента
 	 */
 	public TerminalImpl(EventSystem eventSystem,
 						Scheduler scheduler,
@@ -120,13 +100,7 @@ public class TerminalImpl implements EditableTerminal {
 						EditablePortfolios portfolios,
 						EditableOrders orders,
 						TerminalController controller,
-						EventDispatcher dispatcher,
-						EventType onConnected,
-						EventType onDisconnected,
-						EventType onStarted,
-						EventType onStopped,
-						EventType onPanic,
-						EventType onReqSecurityError)
+						TerminalEventDispatcher dispatcher)
 	{
 		super();
 		this.es = eventSystem;
@@ -136,12 +110,6 @@ public class TerminalImpl implements EditableTerminal {
 		this.orders = orders;
 		this.controller = controller;
 		this.dispatcher = dispatcher;
-		this.onConnected = onConnected;
-		this.onDisconnected = onDisconnected;
-		this.onStarted = onStarted;
-		this.onStopped = onStopped;
-		this.onPanic = onPanic;
-		this.onReqSecurityError = onReqSecurityError;
 		this.scheduler = scheduler;
 		orderNumerator = new SimpleCounter();
 	}
@@ -169,7 +137,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	final public EventDispatcher getEventDispatcher() {
+	final public TerminalEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 	
@@ -487,19 +455,19 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	final public EventType OnConnected() {
-		return onConnected;
+		return dispatcher.OnConnected();
 	}
 
 	@Override
 	final public EventType OnDisconnected() {
-		return onDisconnected;
+		return dispatcher.OnDisconnected();
 	}
 
 	@Override
 	final public synchronized void fireTerminalConnectedEvent() {
 		if ( state == TerminalState.STARTED ) {
 			state = TerminalState.CONNECTED;
-			dispatcher.dispatch(new EventImpl(onConnected));
+			dispatcher.fireConnected();
 			logger.info("Terminal connected");
 		} else {
 			logger.debug("Skip connected event request cuz {}", state);
@@ -514,7 +482,7 @@ public class TerminalImpl implements EditableTerminal {
 			if ( state == TerminalState.CONNECTED ) {
 				setTerminalState(TerminalState.STARTED);
 			}
-			dispatcher.dispatch(new EventImpl(onDisconnected));
+			dispatcher.fireDisconnected();
 			logger.info("Terminal disconnected");
 		} else {
 			logger.debug("Skip disconnected event request cuz {}", state);
@@ -523,27 +491,27 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	final public void fireTerminalStartedEvent() {
-		dispatcher.dispatch(new EventImpl(onStarted));
+		dispatcher.fireStarted();
 	}
 	
 	@Override
 	final public void fireTerminalStoppedEvent() {
-		dispatcher.dispatch(new EventImpl(onStopped));
+		dispatcher.fireStopped();
 	}
 
 	@Override
 	final public EventType OnStarted() {
-		return onStarted;
+		return dispatcher.OnStarted();
 	}
 
 	@Override
 	final public EventType OnStopped() {
-		return onStopped;
+		return dispatcher.OnStopped();
 	}
 
 	@Override
 	final public EventType OnPanic() {
-		return onPanic;
+		return dispatcher.OnPanic();
 	}
 
 	@Override
@@ -557,7 +525,7 @@ public class TerminalImpl implements EditableTerminal {
 	{
 		if ( started() ) {
 			logger.error("PANIC[" + code + "]: " + msgId, args);
-			dispatcher.dispatch(new PanicEvent(onPanic, code, msgId, args));
+			dispatcher.firePanic(code, msgId, args);
 			try {
 				stop();
 			} catch ( StarterException e ) {
@@ -634,13 +602,7 @@ public class TerminalImpl implements EditableTerminal {
 		TerminalImpl o = (TerminalImpl) other;
 		return new EqualsBuilder()
 			.append(o.controller, controller)
-			.append(o.dispatcher, dispatcher)
 			.append(o.es, es)
-			.append(o.onConnected, onConnected)
-			.append(o.onDisconnected, onDisconnected)
-			.append(o.onPanic, onPanic)
-			.append(o.onStarted, onStarted)
-			.append(o.onStopped, onStopped)
 			.append(o.orderProcessor, orderProcessor)
 			.append(o.orders, orders)
 			.append(o.portfolios, portfolios)
@@ -648,7 +610,6 @@ public class TerminalImpl implements EditableTerminal {
 			.append(o.starter, starter)
 			.append(o.state, state)
 			.append(o.scheduler, scheduler)
-			.append(o.onReqSecurityError, onReqSecurityError)
 			.isEquals();
 	}
 
@@ -734,7 +695,7 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	final public EventType OnRequestSecurityError() {
-		return onReqSecurityError;
+		return dispatcher.OnRequestSecurityError();
 	}
 
 	@Override
@@ -743,6 +704,7 @@ public class TerminalImpl implements EditableTerminal {
 	{
 		Object args[] = { descr, errorCode, errorMsg };
 		logger.error("TODO: fire request {} error: [{}] {}", args);
+		dispatcher.fireSecurityRequestError(descr, errorCode, errorMsg);
 	}
 
 	@Override

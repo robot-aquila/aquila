@@ -23,18 +23,8 @@ public class OrderImplTest {
 	private static Account account;
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
-	private EventSystem es;
-	private EventDispatcher dispatcher, dispatcherMock;
-	private EventType onRegister;
-	private EventType onRegisterFailed;
-	private EventType onCancelled;
-	private EventType onCancelFailed;
-	private EventType onFilled;
-	private EventType onPartiallyFilled;
-	private EventType onChanged;
-	private EventType onDone;
-	private EventType onFailed;
-	private EventType onTrade;
+	private OrderEventDispatcher dispatcher;
+	private EventType type;
 	private OrderImpl order;
 	private S<OrderImpl> setter;
 	private G<?> getter;
@@ -54,26 +44,13 @@ public class OrderImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		dispatcherMock = control.createMock(EventDispatcher.class);
-		es = new EventSystemImpl();
+		dispatcher = control.createMock(OrderEventDispatcher.class);
 		activator = control.createMock(OrderActivator.class);
-		dispatcher = es.createEventDispatcher("Order");
-		onRegister = dispatcher.createType("OnRegister");
-		onRegisterFailed = dispatcher.createType("OnRegisterFailed");
-		onCancelled = dispatcher.createType("OnCancelled");
-		onCancelFailed = dispatcher.createType("OnCancelFailed");
-		onFilled = dispatcher.createType("OnFilled");
-		onPartiallyFilled = dispatcher.createType("OnPartiallyFilled");
-		onChanged = dispatcher.createType("OnChanged");
-		onDone = dispatcher.createType("OnDone");
-		onFailed = dispatcher.createType("OnFailed");
-		onTrade = dispatcher.createType("OnTrade");
+		type = control.createMock(EventType.class);
 		stateHandlers = new LinkedList<OrderStateHandler>();
 		terminal = control.createMock(Terminal.class); 
 
-		order = new OrderImpl(dispatcher, onRegister, onRegisterFailed,
-				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
-				onChanged, onDone, onFailed, onTrade, stateHandlers, terminal);
+		order = new OrderImpl(dispatcher, stateHandlers, terminal);
 		setter = null;
 		getter = null;
 	}
@@ -127,7 +104,7 @@ public class OrderImplTest {
 	
 	@Test
 	public void testDefaults() throws Exception {
-		assertEquals(0x05, OrderImpl.VERSION);
+		assertEquals(0x06, OrderImpl.VERSION);
 		assertNull(order.getAccount());
 		assertNull(order.getSecurityDescriptor());
 		assertNull(order.getId());
@@ -146,18 +123,103 @@ public class OrderImplTest {
 	}
 	
 	@Test
-	public void testEventTypes() throws Exception {
-		assertSame(dispatcher, order.getEventDispatcher());
-		assertSame(onRegister, order.OnRegistered());
-		assertSame(onRegisterFailed, order.OnRegisterFailed());
-		assertSame(onCancelled, order.OnCancelled());
-		assertSame(onCancelFailed, order.OnCancelFailed());
-		assertSame(onFilled, order.OnFilled());
-		assertSame(onPartiallyFilled, order.OnPartiallyFilled());
-		assertSame(onChanged, order.OnChanged());
-		assertSame(onDone, order.OnDone());
-		assertSame(onFailed, order.OnFailed());
-		assertSame(onTrade, order.OnTrade());
+	public void testOnRegister() throws Exception {
+		expect(dispatcher.OnRegistered()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnRegistered());
+		
+		control.verify();
+	}
+
+	@Test
+	public void testOnRegisterFailed() throws Exception {
+		expect(dispatcher.OnRegisterFailed()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnRegisterFailed());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnCancelled() throws Exception {
+		expect(dispatcher.OnCancelled()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnCancelled());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnCancelFailed() throws Exception {
+		expect(dispatcher.OnCancelFailed()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnCancelFailed());
+		
+		control.verify();
+	}
+
+	@Test
+	public void testOnFilled() throws Exception {
+		expect(dispatcher.OnFilled()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnFilled());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnPartiallyFilled() throws Exception {
+		expect(dispatcher.OnPartiallyFilled()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnPartiallyFilled());
+		
+		control.verify();
+	}
+
+	@Test
+	public void testOnChanged() throws Exception {
+		expect(dispatcher.OnChanged()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnChanged());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnDone() throws Exception {
+		expect(dispatcher.OnDone()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnDone());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnFailed() throws Exception {
+		expect(dispatcher.OnFailed()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnFailed());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnTrade() throws Exception {
+		expect(dispatcher.OnTrade()).andReturn(type);
+		control.replay();
+		
+		assertSame(type, order.OnTrade());
+		
+		control.verify();
 	}
 	
 	/**
@@ -397,7 +459,9 @@ public class OrderImplTest {
 		h2.handle(order);
 		h3.handle(order);
 		control.replay();
+		
 		order.fireChangedEvent();
+		
 		control.verify();
 	}
 	
@@ -556,11 +620,8 @@ public class OrderImplTest {
 	
 	@Test
 	public void testFireTradeEvent() throws Exception {
-		order = new OrderImpl(dispatcherMock, onRegister, onRegisterFailed,
-				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
-				onChanged, onDone, onFailed, onTrade, stateHandlers, terminal);
 		Trade t0 = createTrade(100L, "2013-05-01 00:00:00", 25.19d, 10L);
-		dispatcherMock.dispatch(new OrderTradeEvent(onTrade, order, t0));
+		dispatcher.fireTrade(same(order), same(t0));
 		control.replay();
 		
 		order.fireTradeEvent(t0);
@@ -570,31 +631,7 @@ public class OrderImplTest {
 	
 	@Test
 	public void testClearAllEventListsners() throws Exception {
-		onRegister = control.createMock(EventType.class);
-		onRegisterFailed = control.createMock(EventType.class);
-		onCancelled = control.createMock(EventType.class);
-		onCancelFailed = control.createMock(EventType.class);
-		onFilled = control.createMock(EventType.class);
-		onPartiallyFilled = control.createMock(EventType.class);
-		onChanged = control.createMock(EventType.class);
-		onDone = control.createMock(EventType.class);
-		onFailed = control.createMock(EventType.class);
-		onTrade = control.createMock(EventType.class);
-		expect(dispatcherMock.asString()).andStubReturn("order");
-		expect(onRegister.asString()).andStubReturn("reg");
-		expect(onRegisterFailed.asString()).andStubReturn("reg-fail");
-		expect(onCancelled.asString()).andStubReturn("cancel");
-		expect(onCancelFailed.asString()).andStubReturn("cancel-fail");
-		expect(onFilled.asString()).andStubReturn("fill");
-		expect(onPartiallyFilled.asString()).andStubReturn("part-fill");
-		expect(onChanged.asString()).andStubReturn("chng");
-		expect(onDone.asString()).andStubReturn("done");
-		expect(onFailed.asString()).andStubReturn("fail");
-		expect(onTrade.asString()).andStubReturn("trade");
-		dispatcherMock.close();
-		order = new OrderImpl(dispatcherMock, onRegister, onRegisterFailed,
-				onCancelled, onCancelFailed, onFilled, onPartiallyFilled,
-				onChanged, onDone, onFailed, onTrade, stateHandlers, terminal);
+		dispatcher.removeListeners();
 		control.replay();
 		
 		order.clearAllEventListeners();
@@ -640,12 +677,6 @@ public class OrderImplTest {
 		trds1.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
 		List<Trade> trds2 = new Vector<Trade>();
 		trds2.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-		
-		List<OrderStateHandler> hndl1 = new Vector<OrderStateHandler>();
-		hndl1.add(control.createMock(OrderStateHandler.class));
-		hndl1.add(control.createMock(OrderStateHandler.class));
-		List<OrderStateHandler> hndl2 = new Vector<OrderStateHandler>();
-		hndl2.add(control.createMock(OrderStateHandler.class));
 
 		order.setAccount(account);
 		order.setSecurityDescriptor(descr);
@@ -655,9 +686,6 @@ public class OrderImplTest {
 		order.setQty(200L);
 		order.setStatus(OrderStatus.CANCELLED);
 		order.setType(OrderType.LIMIT);
-		for ( OrderStateHandler handler : hndl1 ) {
-			stateHandlers.add(handler);
-		}
 		order.setTime(format.parse("2013-05-15 08:32:00"));
 		order.setLastChangeTime(format.parse("1998-01-01 01:02:03"));
 		for ( Trade trade : trds1 ) {
@@ -672,40 +700,7 @@ public class OrderImplTest {
 		
 		double aprob = 0.3; // Probability of additional variant
 		Random rnd = new Random();
-		Variant<String> vDispId = new Variant<String>()
-			.add("Order");
-		if ( rnd.nextDouble() > aprob ) vDispId.add("Another");
-		Variant<String> vRegId = new Variant<String>(vDispId)
-			.add("OnRegister");
-		if ( rnd.nextDouble() > aprob ) vRegId.add("OnRegisterX");
-		Variant<String> vRegFailId = new Variant<String>(vRegId)
-			.add("OnRegisterFailed");
-		if ( rnd.nextDouble() > aprob ) vRegFailId.add("OnRegisterFailedX");
-		Variant<String> vCnclId = new Variant<String>(vRegFailId)
-			.add("OnCancelled");
-		if ( rnd.nextDouble() > aprob ) vCnclId.add("OnCancelledX");
-		Variant<String> vCnclFailId = new Variant<String>(vCnclId)
-			.add("OnCancelFailed");
-		if ( rnd.nextDouble() > aprob ) vCnclFailId.add("OnCancelFailedX");
-		Variant<String> vFillId = new Variant<String>(vCnclFailId)
-			.add("OnFilled");
-		if ( rnd.nextDouble() > aprob ) vFillId.add("OnFilledX");
-		Variant<String> vPartFillId = new Variant<String>(vFillId)
-			.add("OnPartiallyFilled");
-		if ( rnd.nextDouble() > aprob ) vPartFillId.add("OnPartiallyFilledX");
-		Variant<String> vChngId = new Variant<String>(vPartFillId)
-			.add("OnChanged");
-		if ( rnd.nextDouble() > aprob ) vChngId.add("OnChangedX");
-		Variant<String> vDoneId = new Variant<String>(vChngId)
-			.add("OnDone");
-		if ( rnd.nextDouble() > aprob ) vDoneId.add("OnDoneX");
-		Variant<String> vFailId = new Variant<String>(vDoneId)
-			.add("OnFailed");
-		if ( rnd.nextDouble() > aprob ) vFailId.add("OnFailedX");
-		Variant<String> vTrdId = new Variant<String>(vFailId)
-			.add("OnTrade");
-		if ( rnd.nextDouble() > aprob ) vTrdId.add("OnTradeX");
-		Variant<Account> vAcnt = new Variant<Account>(vTrdId)
+		Variant<Account> vAcnt = new Variant<Account>()
 			.add(account);
 		if ( rnd.nextDouble() > aprob ) vAcnt.add(new Account("foobar"));
 		Variant<SecurityDescriptor> vDescr =
@@ -732,11 +727,7 @@ public class OrderImplTest {
 		Variant<OrderType> vType = new Variant<OrderType>(vStat)
 			.add(OrderType.LIMIT);
 		if ( rnd.nextDouble() > aprob ) vType.add(OrderType.MARKET);
-		Variant<List<OrderStateHandler>> vHndl =
-				new Variant<List<OrderStateHandler>>(vType)
-			.add(hndl1);
-		if ( rnd.nextDouble() > aprob ) vHndl.add(hndl2);
-		Variant<Terminal> vTerm = new Variant<Terminal>(vHndl)
+		Variant<Terminal> vTerm = new Variant<Terminal>(vType)
 			.add(terminal);
 		if ( rnd.nextDouble() > aprob ) {
 			vTerm.add(control.createMock(Terminal.class));
@@ -778,18 +769,7 @@ public class OrderImplTest {
 		int foundCnt = 0;
 		OrderImpl x = null, found = null;
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
-			x = new OrderImpl(d, d.createType(vRegId.get()),
-					d.createType(vRegFailId.get()),
-					d.createType(vCnclId.get()),
-					d.createType(vCnclFailId.get()),
-					d.createType(vFillId.get()),
-					d.createType(vPartFillId.get()),
-					d.createType(vChngId.get()),
-					d.createType(vDoneId.get()),
-					d.createType(vFailId.get()),
-					d.createType(vTrdId.get()),
-					vHndl.get(), vTerm.get());
+			x = new OrderImpl(dispatcher, stateHandlers, vTerm.get());
 			x.setAccount(vAcnt.get());
 			x.setSecurityDescriptor(vDescr.get());
 			x.setDirection(vDir.get());
@@ -816,18 +796,6 @@ public class OrderImplTest {
 
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onRegister, found.OnRegistered());
-		assertEquals(onRegisterFailed, found.OnRegisterFailed());
-		assertEquals(onCancelled, found.OnCancelled());
-		assertEquals(onCancelFailed, found.OnCancelFailed());
-		assertEquals(onFilled, found.OnFilled());
-		assertEquals(onPartiallyFilled, found.OnPartiallyFilled());
-		assertEquals(onChanged, found.OnChanged());
-		assertEquals(onDone, found.OnDone());
-		assertEquals(onFailed, found.OnFailed());
-		assertEquals(onTrade, found.OnTrade());
-		assertEquals(hndl1, found.getStateHandlers());
 		assertEquals(terminal, found.getTerminal());
 		assertEquals(account, found.getAccount());
 		assertEquals(descr, found.getSecurityDescriptor());

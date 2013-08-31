@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
 import ru.prolib.aquila.quik.api.QUIKClient;
 import ru.prolib.aquila.quik.assembler.cache.Cache;
 
@@ -30,26 +31,17 @@ public class QUIKTerminalImpl extends TerminalImpl
 	 * @param orders набор заявок
 	 * @param controller контроллер запуска/останова терминала
 	 * @param dispatcher диспетчер событий
-	 * @param onConnected тип события: при подключении
-	 * @param onDisconnected тип события: при отключении
-	 * @param onStarted тип события: при старте терминала
-	 * @param onStopped тип события: при останове терминала
-	 * @param onPanic тип критического события
-	 * @param onReqSecurityError тип события: ошибка запроса инструмента
 	 * @param cache кэш данных
 	 * @param client подключение к API
 	 */
 	public QUIKTerminalImpl(EventSystem eventSystem, Scheduler scheduler,
 			Starter starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
-			TerminalController controller, EventDispatcher dispatcher,
-			EventType onConnected, EventType onDisconnected,
-			EventType onStarted, EventType onStopped, EventType onPanic,
-			EventType onReqSecurityError, Cache cache, QUIKClient client)
+			TerminalController controller, TerminalEventDispatcher dispatcher,
+			Cache cache, QUIKClient client)
 	{
 		super(eventSystem, scheduler, starter, securities, portfolios, orders,
-				controller, dispatcher, onConnected, onDisconnected, onStarted,
-				onStopped, onPanic, onReqSecurityError);
+				controller, dispatcher);
 		this.cache = cache;
 		this.client = client;
 	}
@@ -67,26 +59,15 @@ public class QUIKTerminalImpl extends TerminalImpl
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
 	 * @param dispatcher диспетчер событий
-	 * @param onConnected тип события: при подключении
-	 * @param onDisconnected тип события: при отключении
-	 * @param onStarted тип события: при старте терминала
-	 * @param onStopped тип события: при останове терминала
-	 * @param onPanic тип критического события
-	 * @param onReqSecurityError тип события: ошибка запроса инструмента
 	 * @param cache кэш данных
 	 * @param client подключение к API
 	 */
 	public QUIKTerminalImpl(EventSystem eventSystem,
 			Starter starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
-			EventDispatcher dispatcher,
-			EventType onConnected, EventType onDisconnected,
-			EventType onStarted, EventType onStopped, EventType onPanic,
-			EventType onReqSecurityError, Cache cache, QUIKClient client)
+			TerminalEventDispatcher dispatcher, Cache cache, QUIKClient client)
 	{
-		super(eventSystem, starter, securities, portfolios, orders,
-				dispatcher, onConnected, onDisconnected, onStarted,
-				onStopped, onPanic, onReqSecurityError);
+		super(eventSystem, starter, securities, portfolios, orders, dispatcher);
 		this.cache = cache;
 		this.client = client;
 	}

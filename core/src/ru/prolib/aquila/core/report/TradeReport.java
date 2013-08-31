@@ -104,5 +104,5 @@ public interface TradeReport extends Starter {
 	 * @return тип события
 	 */
 	public EventType OnChanged();
-
+	
 }

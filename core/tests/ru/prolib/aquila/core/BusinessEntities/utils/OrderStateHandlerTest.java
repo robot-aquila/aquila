@@ -11,9 +11,9 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.OrderStateHandler;
 import ru.prolib.aquila.core.utils.Variant;
 
-public class OrderEventHandlerTest {
+public class OrderStateHandlerTest {
 	private static IMocksControl control;
-	private static EventDispatcher dispatcher;
+	private static OrderEventDispatcher dispatcher;
 	private static OrderStateValidator validator;
 	private static EventType type;
 	private static EditableOrder order;
@@ -22,7 +22,7 @@ public class OrderEventHandlerTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		control = createStrictControl();
-		dispatcher = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(OrderEventDispatcher.class);
 		validator = control.createMock(OrderStateValidator.class);
 		type = control.createMock(EventType.class);
 		order = control.createMock(EditableOrder.class);
@@ -68,9 +68,10 @@ public class OrderEventHandlerTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>()
+		Variant<OrderEventDispatcher> vDisp =
+				new Variant<OrderEventDispatcher>()
 			.add(dispatcher)
-			.add(control.createMock(EventDispatcher.class));
+			.add(control.createMock(OrderEventDispatcher.class));
 		Variant<OrderStateValidator> vVldr =
 				new Variant<OrderStateValidator>(vDisp)
 			.add(validator)

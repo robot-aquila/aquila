@@ -12,12 +12,14 @@ import org.apache.log4j.Logger;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.utils.Variant;
+
 public class EventDispatcherImplTest {
 	private IMocksControl control;
-	private EventType type1,type2;
+	private EventType type1;
 	private EventQueue queue;
 	private EventDispatcherImpl dispatcher;
-	private EventListener l1,l2,l3,l4;
+	private EventListener l1,l2,l4;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() {
@@ -31,11 +33,9 @@ public class EventDispatcherImplTest {
 		control = createStrictControl();
 		queue = control.createMock(EventQueue.class);
 		dispatcher = new EventDispatcherImpl(queue, "TD");
-		type1 = new EventTypeImpl(dispatcher);
-		type2 = new EventTypeImpl(dispatcher);
+		type1 = control.createMock(EventType.class);
 		l1 = control.createMock(EventListener.class);
 		l2 = control.createMock(EventListener.class);
-		l3 = control.createMock(EventListener.class);
 		l4 = control.createMock(EventListener.class);
 	}
 
@@ -66,68 +66,42 @@ public class EventDispatcherImplTest {
 	}
 	
 	@Test
-	public void testDispatch_DoNothingIfNoListeners() throws Exception {
+	public void testAddListener() throws Exception {
+		type1.addListener(same(l1));
 		control.replay();
 		
-		Event event = new EventImpl(type1);
-		dispatcher.dispatch(event);
+		dispatcher.addListener(type1, l1);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testDispatch_EnqueuesIfHasListeners() throws Exception {
-		Event event = new EventImpl(type1);
-		queue.enqueue(same(event), same(dispatcher));
+	public void testRemoveListener() throws Exception {
+		type1.removeListener(same(l1));
 		control.replay();
 		
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l2);
-		dispatcher.addListener(type1, l3);
-		dispatcher.addListener(type2, l4);
-		
-		dispatcher.dispatch(event);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testDispatch_EachListenerAddOnce() throws Exception {
-		Event event = new EventImpl(type1);
-		queue.enqueue(same(event), same(dispatcher));
-		control.replay();
-		
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l1);
-		
-		dispatcher.dispatch(event);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testDispatch_SkipsAfterRemoveListener() throws Exception {
-		Event event = new EventImpl(type1);
-		queue.enqueue(same(event), same(dispatcher));
-		control.replay();
-		
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l2);
 		dispatcher.removeListener(type1, l1);
 		
-		dispatcher.dispatch(event);
-		
 		control.verify();
 	}
 	
 	@Test
-	public void testDispatch_SkipsAfterLastListenerRemoved() throws Exception {
+	public void testDispatch_SkipIfNoListeners() throws Exception {
+		expect(type1.countListeners()).andReturn(0);
+		control.replay();
+		
 		Event event = new EventImpl(type1);
-		control.replay();
+		dispatcher.dispatch(event);
 		
-		dispatcher.addListener(type1, l1);
-		dispatcher.removeListener(type1, l1);
+		control.verify();
+	}
+	
+	@Test
+	public void testDispatch() throws Exception {
+		Event event = new EventImpl(type1);
+		expect(type1.countListeners()).andReturn(1);
+		queue.enqueue(same(event), same(dispatcher));
+		control.replay();
 		
 		dispatcher.dispatch(event);
 		
@@ -135,52 +109,103 @@ public class EventDispatcherImplTest {
 	}
 	
 	@Test
-	public void testDispatch_SkipsAllAfterClose() throws Exception {
-		Event event1 = new EventImpl(type1);
-		Event event2 = new EventImpl(type2);
+	public void testClose() throws Exception {
 		control.replay();
 		
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l2);
-		dispatcher.addListener(type1, l3);
-		dispatcher.addListener(type2, l4);
 		dispatcher.close();
 		
-		dispatcher.dispatch(event1);
-		dispatcher.dispatch(event2);
+		control.verify();
+	}
+	
+	@Test
+	public void testCountListeners() throws Exception {
+		expect(type1.countListeners()).andReturn(81);
+		control.replay();
+		
+		assertEquals(81, dispatcher.countListeners(type1));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testRemoveListener_SkipIfNoListeners() throws Exception {
+	public void testGetListeners() throws Exception {
+		List<EventListener> expected = new Vector<EventListener>();
+		expected.add(l1);
+		expected.add(l4);
+		expect(type1.getListeners()).andReturn(expected);
 		control.replay();
 		
-		dispatcher.removeListener(type1, l1);
+		assertSame(expected, dispatcher.getListeners(type1));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testCountListeners_Ok() throws Exception {
+	public void testIsTypeListener() throws Exception {
+		expect(type1.isListener(l1)).andReturn(true);
+		expect(type1.isListener(l2)).andReturn(false);
 		control.replay();
 		
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l2);
-		dispatcher.addListener(type2, l2);
-		assertEquals(2, dispatcher.countListeners(type1));
-		assertEquals(1, dispatcher.countListeners(type2));
+		assertTrue(dispatcher.isTypeListener(type1, l1));
+		assertFalse(dispatcher.isTypeListener(type1, l2));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testCountListeners_ZeroIfUnknownType() throws Exception {
+	public void testRemoveListeners() throws Exception {
+		type1.removeListeners();
 		control.replay();
 		
-		assertEquals(0, dispatcher.countListeners(type2));
+		dispatcher.removeListeners(type1);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testDispatchForCurrentList() throws Exception {
+		Vector<EventListener> expected = new Vector<EventListener>();
+		expected.add(l1);
+		expected.add(l2);
+		Event event = new EventImpl(type1);
+		expect(type1.countListeners()).andReturn(2);
+		expect(type1.getListeners()).andReturn(expected);
+		queue.enqueue(same(event), eq(expected));
+		control.replay();
+		
+		dispatcher.dispatchForCurrentList(event);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testDispatchForCurrentList_SkipIfNoListeners()
+		throws Exception
+	{
+		Event event = new EventImpl(type1);
+		expect(type1.countListeners()).andReturn(0);
+		control.replay();
+		
+		dispatcher.dispatchForCurrentList(event);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testCreateType0() throws Exception {
+		String expectedId = "EvtType" + EventTypeImpl.getAutoId();
+		EventTypeImpl actual = (EventTypeImpl) dispatcher.createType();
+		assertNotNull(actual);
+		assertEquals(expectedId, actual.getId());
+		assertSame(dispatcher, actual.getEventDispatcher());
+	}
+	
+	@Test
+	public void testCreateType1() throws Exception {
+		EventTypeImpl actual = (EventTypeImpl) dispatcher.createType("foobar");
+		assertNotNull(actual);
+		assertEquals("foobar", actual.getId());
+		assertSame(dispatcher, actual.getEventDispatcher());
 	}
 	
 	@Test
@@ -188,6 +213,7 @@ public class EventDispatcherImplTest {
 		EventSystem eventSystem = new EventSystemImpl();
 		queue = eventSystem.getEventQueue();
 		dispatcher = new EventDispatcherImpl(queue);
+		type1 = new EventTypeImpl(dispatcher);
 		
 		final Event event1 = new EventImpl(type1);
 		EventListener listener = new EventListener() {
@@ -202,7 +228,7 @@ public class EventDispatcherImplTest {
 				}
 			}
 		};
-		dispatcher.addListener(type1, listener);
+		type1.addListener(listener);
 		queue.start();
 		for ( int i = 0; i < 10; i ++ ) {
 			dispatcher.dispatch(new EventImpl(type1));
@@ -211,217 +237,38 @@ public class EventDispatcherImplTest {
 		dispatcher.dispatch(event1);
 		queue.join(1000);
 	}
-
-	@Test
-	public void testGetListeners_EmtyListIfTypeNotExists() throws Exception {
-		Vector<EventListener> empty = new Vector<EventListener>();
-		assertEquals(empty, dispatcher.getListeners(type1));
-		assertEquals(empty, dispatcher.getListeners(type2));
-	}
 	
 	@Test
-	public void testGetListeners_Ok() throws Exception {
-		dispatcher.addListener(type1, l2);
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type2, l4);
-		dispatcher.addListener(type1, l3);
-
-		Vector<EventListener> expected1 = new Vector<EventListener>();
-		expected1.add(l2);
-		expected1.add(l1);
-		expected1.add(l3);
-		Vector<EventListener> expected2 = new Vector<EventListener>();
-		expected2.add(l4);
-		assertEquals(expected1, dispatcher.getListeners(type1));
-		assertEquals(expected2, dispatcher.getListeners(type2));
-	}
-	
-	@Test
-	public void testIsTypeListener() throws Exception {
-		dispatcher.addListener(type1, l2);
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type2, l4);
-		dispatcher.addListener(type1, l4);
-		
-		assertTrue(dispatcher.isTypeListener(type1, l2));
-		assertFalse(dispatcher.isTypeListener(type2, l2));
-		
-		assertTrue(dispatcher.isTypeListener(type2, l4));
-		assertTrue(dispatcher.isTypeListener(type1, l4));
-		
-		assertFalse(dispatcher.isTypeListener(type1, l3));
-		assertFalse(dispatcher.isTypeListener(type2, l3));
-	}
-	
-	@Test
-	public void testRemoveListeners1() throws Exception {
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l2);
-		dispatcher.addListener(type2, l2);
-		
-		dispatcher.removeListeners(type1);
-		
-		assertEquals(0, dispatcher.countListeners(type1));
-		assertEquals(1, dispatcher.countListeners(type2));
-	}
-	
-	@Test
-	public void testDispatchForCurrentList_HasListeners() throws Exception {
-		dispatcher.addListener(type1, l1);
-		dispatcher.addListener(type1, l2);
-		dispatcher.addListener(type2, l3);
-		Vector<EventListener> expected = new Vector<EventListener>();
-		expected.add(l1);
-		expected.add(l2);
-		Event event = new EventImpl(type1);
-		queue.enqueue(same(event), eq(expected));
-		control.replay();
-		
-		dispatcher.dispatchForCurrentList(event);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testDispatchForCurrentList_NoListeners() throws Exception {
-		Event event = new EventImpl(type1);
-		control.replay();
-		
-		dispatcher.dispatchForCurrentList(event);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testCreateType0() throws Exception {
-		EventType actual = dispatcher.createType();
-		assertNotNull(actual);
-		EventType expected = new EventTypeImpl(dispatcher, actual.getId());
-		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testCreateType1() throws Exception {
-		EventType actual = dispatcher.createType("foobar");
-		assertNotNull(actual);
-		EventType expected = new EventTypeImpl(dispatcher, "foobar");
-		assertEquals(expected, actual);
+	public void testEquals() throws Exception {
+		dispatcher = new EventDispatcherImpl(new SimpleEventQueue("foo"), "ad");
+		Variant<EventQueue> vQue = new Variant<EventQueue>()
+			.add(new SimpleEventQueue("foo"))
+			.add(new SimpleEventQueue("bar"));
+		Variant<String> vId = new Variant<String>(vQue)
+			.add("ad")
+			.add("bad");
+		Variant<?> iterator = vId;
+		int foundCnt = 0;
+		EventDispatcherImpl x, found = null;
+		do {
+			x = new EventDispatcherImpl(vQue.get(), vId.get());
+			if ( dispatcher.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals(new SimpleEventQueue("foo"), found.getEventQueue());
+		assertEquals("ad", found.getId());
 	}
 	
 	@Test
 	public void testEquals_SpecialCases() throws Exception {
+		dispatcher = new EventDispatcherImpl(new SimpleEventQueue("foo"), "ad");
 		assertTrue(dispatcher.equals(dispatcher));
+		assertFalse(dispatcher.equals(control.createMock(EventDispatcher.class)));
 		assertFalse(dispatcher.equals(null));
 		assertFalse(dispatcher.equals(this));
 	}
-	
-	@Test
-	public void testEquals_TestById() throws Exception {
-		assertFalse(dispatcher.equals(new EventDispatcherImpl(queue, "Jubba")));
-	}
-	
-	@Test
-	public void testEquals_QueueNotConsidered() throws Exception {
-		EventQueue q2 = control.createMock(EventQueue.class);
-		assertTrue(dispatcher.equals(new EventDispatcherImpl(q2, "TD")));
-	}
-	
-	@Test
-	public void testEquals_FalseForDifferentSequence() throws Exception {
-		EventType d1t1 = dispatcher.createType("one");
-		EventType d1t2 = dispatcher.createType("two");
-		dispatcher.addListener(d1t1, l1);
-		dispatcher.addListener(d1t2, l2);
-		
-		EventDispatcher d2 = new EventDispatcherImpl(queue, "TD");
-		EventType d2t1 = dispatcher.createType("one");
-		EventType d2t2 = dispatcher.createType("two");
-		d2.addListener(d2t2, l2);
-		d2.addListener(d2t1, l1);
-		
-		assertFalse(dispatcher.equals(d2));
-	}
-	
-	@Test
-	public void testEquals_FalseIfTypesCountMismatch() throws Exception {
-		EventType d1t1 = dispatcher.createType("one");
-		EventType d1t2 = dispatcher.createType("two");
-		EventType d1t3 = dispatcher.createType("two");
-		dispatcher.addListener(d1t1, l1);
-		dispatcher.addListener(d1t1, l2);
-		dispatcher.addListener(d1t2, l2);
-		dispatcher.addListener(d1t3, l3);
-		
-		EventDispatcher d2 = new EventDispatcherImpl(queue, "TD");
-		EventType d2t1 = d2.createType("one");
-		EventType d2t2 = d2.createType("two");
-		EventType d2t3 = d2.createType("two");
-		EventType d2t4 = d2.createType("three");
-		d2.addListener(d2t1, l1);
-		d2.addListener(d2t1, l2);
-		d2.addListener(d2t2, l2);
-		d2.addListener(d2t3, l3);
-		d2.addListener(d2t4, l1);
-		
-		assertFalse(dispatcher.equals(d2));
-	}
-	
-	@Test
-	public void testEquals_TrueIfStructEquals() throws Exception {
-		EventType d1t1 = dispatcher.createType("one");
-		EventType d1t2 = dispatcher.createType("two");
-		EventType d1t3 = dispatcher.createType("two");
-		dispatcher.addListener(d1t1, l1);
-		dispatcher.addListener(d1t1, l2);
-		dispatcher.addListener(d1t2, l2);
-		dispatcher.addListener(d1t3, l3);
-		
-		EventDispatcher d2 = new EventDispatcherImpl(queue, "TD");
-		EventType d2t1 = d2.createType("one");
-		EventType d2t2 = d2.createType("two");
-		EventType d2t3 = d2.createType("two");
-		d2.addListener(d2t1, l1);
-		d2.addListener(d2t1, l2);
-		d2.addListener(d2t2, l2);
-		d2.addListener(d2t3, l3);
-		
-		assertTrue(d1t1.equals(d2t1));
-		assertTrue(d1t2.equals(d2t2));
-		assertTrue(d1t3.equals(d2t3));
-		
-		assertTrue(dispatcher.equals(d2));
-	}
-	
-	@Test
-	public void testAdditional_TypesWithSameIdAllowed() throws Exception {
-		EventListener l1 = control.createMock(EventListener.class);
-		EventListener l2 = control.createMock(EventListener.class);
-		EventListener l3 = control.createMock(EventListener.class);
-		EventType t1 = dispatcher.createType("foo");
-		EventType t2 = dispatcher.createType("foo");
-		assertNotSame(t1, t2);
-		assertEquals(t1, t2);
-		dispatcher.addListener(t1, l1);
-		dispatcher.addListener(t1, l2);
-		dispatcher.addListener(t2, l3);
-		List<EventListener> list1 = new Vector<EventListener>();
-		list1.add(l1);
-		list1.add(l2);
-		List<EventListener> list2 = new Vector<EventListener>();
-		list2.add(l3);
-		
-		assertEquals(list1, dispatcher.getListeners(t1));
-		assertEquals(list2, dispatcher.getListeners(t2));
-		
-		dispatcher.removeListener(t1, l1);
-		list1.remove(l1);
-		assertEquals(list1, dispatcher.getListeners(t1));
-		assertEquals(list2, dispatcher.getListeners(t2));
 
-		dispatcher.removeListeners(t2);
-		list2.clear();
-		assertEquals(list1, dispatcher.getListeners(t1));
-		assertEquals(list2, dispatcher.getListeners(t2));
-	}
-	
 }

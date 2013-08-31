@@ -16,6 +16,7 @@ public interface EventDispatcher {
 	 * @param type тип события
 	 * @param listener получатель
 	 */
+	@Deprecated
 	public void addListener(EventType type, EventListener listener);
 	
 	/**
@@ -24,6 +25,7 @@ public interface EventDispatcher {
 	 * @param type тип события
 	 * @param listener получатель
 	 */
+	@Deprecated
 	public void removeListener(EventType type, EventListener listener);
 	
 	/**
@@ -31,6 +33,7 @@ public interface EventDispatcher {
 	 * <p>
 	 * @param type тип события
 	 */
+	@Deprecated
 	public void removeListeners(EventType type);
 	
 	/**
@@ -64,6 +67,7 @@ public interface EventDispatcher {
 	 * @param type тип события
 	 * @return количество наблюдателей
 	 */
+	@Deprecated
 	public int countListeners(EventType type);
 	
 	/**
@@ -72,6 +76,7 @@ public interface EventDispatcher {
 	 * @param type тип события
 	 * @return копия текущего списка получателей
 	 */
+	@Deprecated
 	public List<EventListener> getListeners(EventType type);
 	
 	/**
@@ -85,6 +90,7 @@ public interface EventDispatcher {
 	 * @return результат проверки: true - указанный получатель является
 	 * наблюдателем события данного типа, false - не является наблюдателем
 	 */
+	@Deprecated
 	public boolean isTypeListener(EventType type, EventListener listener);
 	
 	/**

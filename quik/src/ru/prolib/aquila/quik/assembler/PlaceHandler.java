@@ -2,7 +2,6 @@ package ru.prolib.aquila.quik.assembler;
 
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -101,10 +100,13 @@ public class PlaceHandler implements QUIKTransactionHandler {
 	 * @return строка кода клиента с комментарием заявки
 	 */
 	private String getClientCode(Account account) {
+		return account.getSubCode();
+		/**
 		String code = account.getSubCode();
 		String comment = StringUtils.substring(
 				StringUtils.replace(order.getComment(), ";", "_"), 0, 20);
 		return code + (comment.length() > 0 ? "/" + comment : "");
+		*/
 	}
 	
 	/**

@@ -8,6 +8,7 @@ import java.util.Map;
  * 2012-04-28
  * $Id: CompositeEventType.java 219 2012-05-20 12:16:45Z whirlwind $
  */
+@Deprecated
 public interface CompositeEventType extends EventType {
 
 	/**

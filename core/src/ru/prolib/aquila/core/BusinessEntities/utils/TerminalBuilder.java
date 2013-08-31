@@ -37,47 +37,22 @@ public class TerminalBuilder {
 	public EditableTerminal createTerminal(String queueId) {
 		EventSystem es = new EventSystemImpl(new EventQueueImpl(queueId));
 		StarterQueue starter = new StarterQueue();
-		starter.add(es.getEventQueue());
-		EventDispatcher d = es.createEventDispatcher("Terminal");
+		starter.add(new EventQueueStarter(es.getEventQueue(), 30000));
 		return createTerminalInstance(es, starter,
 				createSecurities(es), createPortfolios(es), createOrders(es), 
-				d, d.createType("OnConnected"), d.createType("OnDisconnected"),
-				d.createType("OnStarted"), d.createType("OnStopped"),
-				d.createType("OnPanic"),
-				d.createType("OnRequestSecurityError"));
+				new TerminalEventDispatcher(es));
 	}
 	
 	protected EditableSecurities createSecurities(EventSystem es) {
-		EventDispatcher d = es.createEventDispatcher("Securities");
-		return new SecuritiesImpl(d,
-				d.createType("OnAvailable"),
-				d.createType("OnChanged"),
-				d.createType("OnTrade"));
+		return new SecuritiesImpl(new SecuritiesEventDispatcher(es));
 	}
 	
 	protected EditablePortfolios createPortfolios(EventSystem es) {
-		EventDispatcher d = es.createEventDispatcher("Portfolios");
-		return new PortfoliosImpl(d,
-				d.createType("OnAvailable"),
-				d.createType("OnChanged"),
-				d.createType("OnPositionAvailable"),
-				d.createType("OnPositionChanged"));
+		return new PortfoliosImpl(new PortfoliosEventDispatcher(es));
 	}
 	
 	protected EditableOrders createOrders(EventSystem es) {
-		EventDispatcher d = es.createEventDispatcher("Orders");
-		return new OrdersImpl(d,
-				d.createType("OnAvailable"),
-				d.createType("OnCancelFailed"),
-				d.createType("OnCancelled"),
-				d.createType("OnChanged"),
-				d.createType("OnDone"),
-				d.createType("OnFailed"),
-				d.createType("OnFilled"),
-				d.createType("OnPartiallyFilled"),
-				d.createType("OnRegistered"),
-				d.createType("OnRegisterFailed"),
-				d.createType("OnTrade"));
+		return new OrdersImpl(new OrdersEventDispatcher(es));
 	}
 	
 	/**
@@ -92,25 +67,15 @@ public class TerminalBuilder {
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
 	 * @param dispatcher диспетчер событий
-	 * @param onConnected тип события: при подключении терминала
-	 * @param onDisconnected тип события: при отключении терминала
-	 * @param onStarted тип события: при запуске терминала
-	 * @param onStopped тип события: при останове терминала
-	 * @param onPanic тип события: критическое состояние
-	 * @param onReqSecurityError тип события: на запрос инструмента
 	 * @return экземпляр терминала
 	 */
 	protected EditableTerminal createTerminalInstance(EventSystem es,
 			StarterQueue starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
-			EventDispatcher dispatcher,
-			EventType onConnected, EventType onDisconnected,
-			EventType onStarted, EventType onStopped, EventType onPanic,
-			EventType onReqSecurityError)
+			TerminalEventDispatcher dispatcher)
 	{
 		return new TerminalImpl(es, starter, securities, portfolios,
-				orders, dispatcher, onConnected, onDisconnected,
-				onStarted, onStopped, onPanic, onReqSecurityError);
+				orders, dispatcher);
 	}
 
 }

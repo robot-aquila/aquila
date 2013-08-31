@@ -21,7 +21,7 @@ public class EventQueueImpl implements EventQueue {
 	static private final QueueEntry EXIT = new QueueEntry();
 	private final BlockingQueue<QueueEntry> queue;
 	private final String name;
-	private Thread thread = null;
+	private volatile Thread thread = null;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -75,7 +75,7 @@ public class EventQueueImpl implements EventQueue {
 				logger.warn("start(): queue.size() > 0 for {}", name);
 			}
 			queue.clear();
-			thread = new Thread(new QueueWorker(queue, started), name);
+			thread = new Thread(new QueueWorker(queue, started, name), name);
 			thread.start();
 		}
 		try {
@@ -100,8 +100,10 @@ public class EventQueueImpl implements EventQueue {
 	public void stop() {
 		synchronized ( this ) {
 			if ( ! started() ) {
+				logger.debug("Ignore stop request cuz not started: {}", name);
 				return;
 			}
+			logger.debug("Offered exit request: {}", name);
 			queue.offer(EXIT);
 		}
 	}
@@ -155,7 +157,7 @@ public class EventQueueImpl implements EventQueue {
 		void enqueue(Event event, List<EventListener> listeners)
 	{
 		if ( ! started() ) {
-			throw new IllegalStateException("Queue not started");
+			throw new IllegalStateException("Queue not started: " + name);
 		}
 		if ( event == null ) {
 			throw new NullPointerException("The event cannot be null");
@@ -171,7 +173,7 @@ public class EventQueueImpl implements EventQueue {
 	@Override
 	public synchronized void enqueue(Event event, EventDispatcher dispatcher) {
 		if ( ! started() ) {
-			throw new IllegalStateException("Queue not started");
+			throw new IllegalStateException("Queue not started: " + name);
 		}
 		if ( event == null ) {
 			throw new NullPointerException("The event cannot be null");
@@ -190,24 +192,28 @@ public class EventQueueImpl implements EventQueue {
 	static private class QueueWorker implements Runnable {
 		private final BlockingQueue<QueueEntry> queue;
 		private final CountDownLatch started;
+		private final String name;
 		
 		/**
 		 * Конструктор
 		 * <p>
 		 * @param queue очередь событий
 		 * @param started сигнал успешного запуска
+		 * @param name имя потока
 		 */
 		public QueueWorker(BlockingQueue<QueueEntry> queue,
-						   CountDownLatch started)
+						   CountDownLatch started, String name)
 		{
 			super();
 			this.queue = queue;
 			this.started = started;
+			this.name = name;
 		}
 
 		@Override
 		public void run() {
 			started.countDown();
+			logger.debug("Queue thread started: {}", name);
 			try {
 				QueueEntry e;
 				List<EventListener> list;
@@ -218,7 +224,7 @@ public class EventQueueImpl implements EventQueue {
 					// TODO: 
 					// http://kobresia.acunote.com/projects/15260/tasks/1033
 					if ( e.dispatcher != null ) {
-						list = e.dispatcher.getListeners(e.event.getType()); 
+						list = e.event.getType().getListeners(); 
 					} else if ( e.listeners != null ) {
 						list = e.listeners;
 					} else {
@@ -233,8 +239,14 @@ public class EventQueueImpl implements EventQueue {
 					}
 				}
 			} catch ( InterruptedException e ) {
+				Object args[] = { name, e };
+				logger.error("Queue thread interrupted: {}", args);
 				Thread.currentThread().interrupt();
+			} catch ( Throwable e ) {
+				Object args[] = { name, e };
+				logger.error("Queue thread exception: {}", args);
 			}
+			logger.debug("Exit queue thread: {}", name);
 		}
 		
 	}
@@ -296,8 +308,6 @@ public class EventQueueImpl implements EventQueue {
 	
 	/**
 	 * Сравнивает только идентификаторы очередей.
-	 * <p>
-	 * Только для тестов.
 	 */
 	@Override
 	public final boolean equals(Object other) {

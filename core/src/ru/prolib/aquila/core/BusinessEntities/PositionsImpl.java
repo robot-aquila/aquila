@@ -8,6 +8,8 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.PositionEventDispatcher;
+import ru.prolib.aquila.core.BusinessEntities.utils.PositionsEventDispatcher;
 
 /**
  * Набор торговых позиций.
@@ -15,30 +17,23 @@ import ru.prolib.aquila.core.*;
  * 2012-08-03<br>
  * $Id: PositionsImpl.java 527 2013-02-14 15:14:09Z whirlwind $
  */
-public class PositionsImpl implements EditablePositions, EventListener {
+public class PositionsImpl implements EditablePositions {
 	private final Map<SecurityDescriptor, EditablePosition> map;
 	private final Portfolio portfolio;
-	private final EventDispatcher dispatcher;
-	private final EventType onAvailable,onChanged;
+	private final PositionsEventDispatcher dispatcher;
 	
 	/**
 	 * Создать набор позиций.
 	 * <p>
 	 * @param portfolio портфель, к которому относится набор позиций
 	 * @param dispatcher диспетчер событий
-	 * @param onAvailable тип события при инициализации позиции
-	 * @param onChanged тип события при инициализации позиции
 	 */
 	public PositionsImpl(Portfolio portfolio,
-						 EventDispatcher dispatcher,
-						 EventType onAvailable,
-						 EventType onChanged)
+			PositionsEventDispatcher dispatcher)
 	{
 		super();
 		this.portfolio = portfolio;
 		this.dispatcher = dispatcher;
-		this.onAvailable = onAvailable;
-		this.onChanged = onChanged;
 		map = new LinkedHashMap<SecurityDescriptor, EditablePosition>();
 	}
 	
@@ -52,11 +47,11 @@ public class PositionsImpl implements EditablePositions, EventListener {
 	}
 	
 	/**
-	 * Получить используемый диспетчер событий.
+	 * Получить диспетчер событий.
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public EventDispatcher getEventDispatcher() {
+	public PositionsEventDispatcher getEventDispatcher() {
 		return dispatcher;
 	}
 
@@ -67,7 +62,7 @@ public class PositionsImpl implements EditablePositions, EventListener {
 
 	@Override
 	public EventType OnPositionAvailable() {
-		return onAvailable;
+		return dispatcher.OnAvailable();
 	}
 
 	@Override
@@ -77,7 +72,7 @@ public class PositionsImpl implements EditablePositions, EventListener {
 				position.fireChangedEvent();
 			} else {
 				position.setAvailable(true);
-				dispatcher.dispatch(new PositionEvent(onAvailable, position));
+				dispatcher.fireAvailable(position);
 			}
 			position.resetChanges();
 		}
@@ -92,35 +87,19 @@ public class PositionsImpl implements EditablePositions, EventListener {
 		if ( pos == null ) {
 			pos = createPosition(security);
 			map.put(descr, pos);
-			pos.OnChanged().addListener(this);
+			pos.OnChanged().addListener(dispatcher);
 		}
 		return pos;
 	}
 
 	@Override
 	public EventType OnPositionChanged() {
-		return onChanged;
+		return dispatcher.OnChanged();
 	}
 
 	@Override
 	public synchronized int getPositionsCount() {
 		return map.size();
-	}
-	
-	@Override
-	public void onEvent(Event event) {
-		if ( event instanceof PositionEvent ) {
-			Position pos = ((PositionEvent) event).getPosition();
-			EventType map[][] = {
-					{ pos.OnChanged(), onChanged },
-			};
-			for ( int i = 0; i < map.length; i ++ ) {
-				if ( event.isType(map[i][0]) ) {
-					dispatcher.dispatch(new PositionEvent(map[i][1], pos));
-					break;
-				}
-			}
-		}
 	}
 	
 	/**
@@ -130,13 +109,11 @@ public class PositionsImpl implements EditablePositions, EventListener {
 	 * @return экземпляр позиции
 	 */
 	private EditablePosition createPosition(Security security) {
-		EventSystem es = ((EditableTerminal) portfolio.getTerminal())
-			.getEventSystem(); 
-		EventDispatcher dispatcher = es.createEventDispatcher("Position["
-				+ portfolio.getAccount() + ":"
-				+ security.getDescriptor() + "]"); 
-		return new PositionImpl(portfolio, security, dispatcher,
-				es.createGenericType(dispatcher, "OnChanged"));
+		return new PositionImpl(portfolio, security,
+			new PositionEventDispatcher(((EditableTerminal)
+				portfolio.getTerminal()).getEventSystem(),
+					portfolio.getAccount(),
+					security.getDescriptor()));
 	}
 
 	@Override
@@ -175,11 +152,8 @@ public class PositionsImpl implements EditablePositions, EventListener {
 		}
 		PositionsImpl o = (PositionsImpl) other;
 		return new EqualsBuilder()
-			.append(o.dispatcher, dispatcher)
+			// Портфель не сравниваем - рекурсия
 			.append(o.map, map)
-			.append(o.onAvailable, onAvailable)
-			.append(o.onChanged, onChanged)
-			//.append(o.portfolio, portfolio)
 			.isEquals();
 	}
 

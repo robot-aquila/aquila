@@ -63,7 +63,7 @@ public class SimpleEventQueueTest {
 		Event event = new EventImpl(type);
 		List<EventListener> list = new Vector<EventListener>();
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
-		expect(dispatcher.getListeners(same(type))).andReturn(list);
+		expect(type.getListeners()).andReturn(list);
 		list.add(control.createMock(EventListener.class));
 		list.get(0).onEvent(same(event));
 		list.add(control.createMock(EventListener.class));

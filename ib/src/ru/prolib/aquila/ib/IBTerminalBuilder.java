@@ -3,6 +3,7 @@ package ru.prolib.aquila.ib;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
 import ru.prolib.aquila.ib.api.IBClient;
 import ru.prolib.aquila.ib.assembler.cache.Cache;
 
@@ -24,10 +25,7 @@ public class IBTerminalBuilder extends TerminalBuilder {
 	protected EditableTerminal createTerminalInstance(EventSystem es,
 			StarterQueue starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
-			EventDispatcher dispatcher,
-			EventType onConnected, EventType onDisconnected,
-			EventType onStarted, EventType onStopped, EventType onPanic,
-			EventType onReqSecurityError)
+			TerminalEventDispatcher dispatcher)
 	{
 		EventDispatcher cacheDisp = es.createEventDispatcher("Cache");
 		Cache cache = new Cache(cacheDisp, cacheDisp.createType("Contract"),
@@ -35,9 +33,7 @@ public class IBTerminalBuilder extends TerminalBuilder {
 			cacheDisp.createType("Position"), cacheDisp.createType("Exec"));
 		IBClient client = new IBClient();
 		IBEditableTerminal terminal = new IBTerminalImpl(es, starter,
-				securities, portfolios, orders, dispatcher,
-				onConnected, onDisconnected, onStarted, onStopped, onPanic,
-				onReqSecurityError, cache, client);
+				securities, portfolios, orders, dispatcher, cache, client);
 		return terminal;
 	}
 

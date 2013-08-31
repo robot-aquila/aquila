@@ -1,11 +1,7 @@
 package ru.prolib.aquila.core.report;
 
-
 import static org.junit.Assert.*;
-
 import org.junit.*;
-
-import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.report.trades.*;
@@ -22,13 +18,11 @@ public class ReportBuilderTest {
 	
 	@Test
 	public void testCreateReport_EventSystem() throws Exception {
-		EventDispatcher d = terminal.getEventSystem()
-		.createEventDispatcher("Trades");
-		TradeReport expected = new CommonTradeReport(d, d.createType("Enter"),
-				d.createType("Exit"), d.createType("Changed"));
+		TradeReport expected =
+			new CommonTR(new CommonTREventDispatcher(terminal.getEventSystem()));
 		
-		assertEquals(expected,
-				builder.createReport(terminal.getEventSystem()));
+		TradeReport actual = builder.createReport(terminal.getEventSystem());
+		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -37,7 +31,8 @@ public class ReportBuilderTest {
 				new StubTradeSelector(),
 				builder.createReport(terminal.getEventSystem()));
 		
-		assertEquals(expected, builder.createReport(terminal));
+		TradeReport actual = builder.createReport(terminal);
+		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -46,8 +41,8 @@ public class ReportBuilderTest {
 				new AccountTradeSelector(new Account("TEST")),
 				builder.createReport(terminal.getEventSystem()));
 		
-		assertEquals(expected,
-			builder.createReport(terminal, new Account("TEST")));
+		TradeReport actual = builder.createReport(terminal, new Account("TEST")); 
+		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -65,7 +60,8 @@ public class ReportBuilderTest {
 				new OrderPoolTradeSelector(orders),
 				builder.createReport(terminal.getEventSystem()));
 		
-		assertEquals(expected, builder.createReport(orders));
+		TradeReport actual = builder.createReport(orders);
+		assertEquals(expected, actual);
 	}
 
 }

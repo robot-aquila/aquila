@@ -1,12 +1,12 @@
 package ru.prolib.aquila.core;
 
 import java.util.*;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * Диспетчер событий. 
  * <p>
- * Ведет списки наблюдателей для каждого типа события. 
  * Передает событие на обработку очереди событий.
  * <p>
  * 2013-02-10<br>
@@ -17,7 +17,6 @@ public class EventDispatcherImpl implements EventDispatcher {
 	private static volatile int autoId = 1;
 	
 	private final EventQueue queue;
-	private final Map<EventType, Vector<EventListener>> listeners;
 	private final String id;
 	
 	/**
@@ -54,8 +53,6 @@ public class EventDispatcherImpl implements EventDispatcher {
 		}
 		this.queue = queue;
 		this.id = id;
-		// ВАЖНО! Именно этот класс, иначе сравнение структур не будет работать!
-		listeners = new LinkedHashMap<EventType, Vector<EventListener>>();
 	}
 	
 	@Override
@@ -83,30 +80,13 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public synchronized
-		void addListener(EventType type, EventListener listener)
-	{
-		Vector<EventListener> list = listeners.get(type);
-		if ( list == null ) {
-			list = new Vector<EventListener>();
-			listeners.put(type, list);
-		}
-		if ( ! list.contains(listener) ) {
-			list.add(listener);
-		}
+	public void addListener(EventType type, EventListener listener) {
+		type.addListener(listener);
 	}
 
 	@Override
-	public synchronized
-		void removeListener(EventType type, EventListener listener)
-	{
-		Vector<EventListener> list = listeners.get(type);
-		if ( list != null ) {
-			list.remove(listener);
-			if ( list.size() == 0 ) {
-				listeners.remove(type);
-			}
-		}
+	public void removeListener(EventType type, EventListener listener) {
+		type.removeListener(listener);
 	}
 
 	@Override
@@ -117,41 +97,35 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public synchronized void close() {
-		listeners.clear();
+	public void close() {
+		
 	}
 
 	@Override
-	public synchronized int countListeners(EventType type) {
-		Vector<EventListener> list = listeners.get(type);
-		return list == null ? 0 : list.size();
+	public int countListeners(EventType type) {
+		return type.countListeners();
 	}
 
 	@Override
-	public synchronized List<EventListener> getListeners(EventType type) {
-		Vector<EventListener> list = listeners.get(type);
-		return list == null ?
-				new Vector<EventListener>() : new Vector<EventListener>(list);
+	public List<EventListener> getListeners(EventType type) {
+		return type.getListeners();
 	}
 
 	@Override
-	public synchronized
-		boolean isTypeListener(EventType type, EventListener listener)
-	{
-		Vector<EventListener> list = listeners.get(type);
-		return list == null || ! list.contains(listener) ? false : true;
+	public boolean isTypeListener(EventType type, EventListener listener) {
+		return type.isListener(listener);
 	}
 
 	@Override
-	public synchronized void removeListeners(EventType type) {
-		listeners.remove(type);
+	public void removeListeners(EventType type) {
+		type.removeListeners();
 	}
 
 	@Override
-	public synchronized void dispatchForCurrentList(Event event) {
-		List<EventListener> list = getListeners(event.getType());
-		if ( list.size() > 0 ) {
-			queue.enqueue(event, list);
+	public void dispatchForCurrentList(Event event) {
+		EventType type = event.getType();
+		if ( type.countListeners() > 0 ) {
+			queue.enqueue(event, type.getListeners());
 		}
 	}
 
@@ -166,27 +140,10 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 	
 	/**
-	 * Сравнить составов диспетчеров.
-	 * <p>
-	 * Два разных экземпляра диспетчера всегда представляют разные стеки типов. 
-	 * Метод сравнения сравнивает только структуру диспетчеров, которая включает
-	 * в себя идентификатор диспетчера и набор типов событий вместе с их
-	 * наборами обозревателей. Так как просто сравнить карты тип->наблюдатели
-	 * нельзя (каждый экземпляр типа событий всегда представляет уникальный
-	 * ключ), единственный способ сравнения - это сравнить структуру типов в
-	 * порядке добавления типов в структуру диспетчера. Для сравнения стеков
-	 * типов событий, из карты тип->наблюдатели каждого диспетчера извлекается
-	 * список ключей, которые в последствии и сравнивается (в дополнение к
-	 * идентификатору диспетчера). 
-	 * <p>
-	 * Данный метод предназначен исключительно для использования в тестах.
-	 * Он значительно сокращает код теста и позволяет избежать моков для
-	 * воспроизведения типа. Сравнение данным методом никогда не должно
-	 * использоваться в рабочих процессах.
-	 * <p> 
+	 * Сравнивает иерархию идентификаторов.
 	 */
 	@Override
-	public final synchronized boolean equals(Object other) {
+	public boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
@@ -195,9 +152,8 @@ public class EventDispatcherImpl implements EventDispatcher {
 		}
 		EventDispatcherImpl o = (EventDispatcherImpl) other;
 		return new EqualsBuilder()
-			.append(id, o.id)
-			.append(new Vector<EventType>(listeners.keySet()),
-					new Vector<EventType>(o.listeners.keySet()))
+			.append(o.queue, queue)
+			.append(o.id, id)
 			.isEquals();
 	}
 

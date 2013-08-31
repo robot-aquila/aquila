@@ -123,45 +123,26 @@ public class CompositeEventTypeImplTest {
 
 	@Test
 	public void testAddListener() throws Exception {
-		// for first time
 		EventListener listener = control.createMock(EventListener.class);
-		expect(dispatcher.countListeners(same(type))).andReturn(0);
 		type1.addListener(same(type));
 		type2.addListener(same(type));
 		type3.addListener(same(type));
-		dispatcher.addListener(same(type), same(listener));
-		
-		// for next time
-		EventListener listener2 = control.createMock(EventListener.class);
-		expect(dispatcher.countListeners(same(type))).andReturn(1);
-		dispatcher.addListener(same(type), same(listener2));
-		
 		control.replay();
 		
-		type.addListener(listener); // first time
-		type.addListener(listener2); // next time
+		type.addListener(listener);
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testRemoveListener() throws Exception {
-		// for not last
-		EventListener listener = control.createMock(EventListener.class);
-		dispatcher.removeListener(same(type), same(listener));
-		expect(dispatcher.countListeners(same(type))).andReturn(123);
-		
-		// for last
 		EventListener listener2 = control.createMock(EventListener.class);
-		dispatcher.removeListener(same(type), same(listener2));
-		expect(dispatcher.countListeners(same(type))).andReturn(0);
 		type1.removeListener(same(type));
 		type2.removeListener(same(type));
 		type3.removeListener(same(type));
 		
 		control.replay();
 		
-		type.removeListener(listener);
 		type.removeListener(listener2);
 		
 		control.verify();

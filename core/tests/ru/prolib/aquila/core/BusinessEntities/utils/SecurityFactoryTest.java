@@ -33,12 +33,13 @@ public class SecurityFactoryTest {
 	@Test
 	public void testCreateInstance() throws Exception {
 		control.replay();
-		String id = "Security[SBER@EQBR(STK/SUR)]";
-		EventDispatcher d = es.createEventDispatcher(id);
-		Security expected = new SecurityImpl(terminal, descr, d,
-				d.createType("OnChanged"), d.createType("OnTrade"));
+		SecurityEventDispatcher d = new SecurityEventDispatcher(es, descr);
+		Security expected = new SecurityImpl(terminal, descr, d);
 		
-		assertEquals(expected, factory.createInstance(terminal, descr));
+		SecurityImpl actual = (SecurityImpl)
+			factory.createInstance(terminal, descr);
+		assertEquals(expected, actual);
+		assertNotNull(actual.getEventDispatcher());
 	}
 	
 	@Test

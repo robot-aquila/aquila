@@ -16,6 +16,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.SimpleCounter;
 import ru.prolib.aquila.core.utils.Variant;
@@ -35,8 +36,7 @@ public class TerminalImplTest {
 	private EditablePortfolios portfolios;
 	private EditableOrders orders;
 	private OrderProcessor orderProcessor;
-	private EventDispatcher dispatcher, dispatcherMock;
-	private EventType onConn,onDisc,onStarted,onStopped,onPanic,onReqSecErr;
+	private TerminalEventDispatcher dispatcher;
 	private TerminalController controller;
 	private TerminalImpl terminal;
 	private EditableOrder order;
@@ -64,33 +64,14 @@ public class TerminalImplTest {
 		portfolios = control.createMock(EditablePortfolios.class);
 		orders = control.createMock(EditableOrders.class);
 		orderProcessor = control.createMock(OrderProcessor.class);
-		dispatcherMock = control.createMock(EventDispatcher.class);
+		dispatcher = control.createMock(TerminalEventDispatcher.class);
 		security = control.createMock(Security.class);
 		order = control.createMock(EditableOrder.class);
 		scheduler = control.createMock(Scheduler.class);
 		es = new EventSystemImpl();
-		dispatcher = es.createEventDispatcher("Terminal");
-		onConn = dispatcher.createType("OnConnected");
-		onDisc = dispatcher.createType("OnDisconnected");
-		onStarted = dispatcher.createType("OnStarted");
-		onStopped = dispatcher.createType("OnStopped");
-		onPanic = dispatcher.createType("OnPanic");
-		onReqSecErr = dispatcher.createType("OnRequestSecurityError");
 		terminal = new TerminalImpl(es, scheduler, starter, securities,
-				portfolios, orders, controller, dispatcher, 
-				onConn, onDisc, onStarted, onStopped, onPanic, onReqSecErr);
+				portfolios, orders, controller, dispatcher);
 		expect(security.getDescriptor()).andStubReturn(descr);
-	}
-	
-	/**
-	 * Установить терминал с диспетчером {@link #dispatcherMock}.
-	 */
-	private void setTerminalWithDispatcherMock() {
-		terminal = new TerminalImpl(es, scheduler, starter,
-				securities, portfolios, orders,  
-				controller, dispatcherMock, 
-				onConn, onDisc, onStarted, onStopped,
-				onPanic, onReqSecErr);
 	}
 	
 	@Test
@@ -102,20 +83,13 @@ public class TerminalImplTest {
 		assertSame(orders, terminal.getOrdersInstance());
 		assertSame(controller, terminal.getTerminalController());
 		assertSame(dispatcher, terminal.getEventDispatcher());
-		assertSame(onConn, terminal.OnConnected());
-		assertSame(onDisc, terminal.OnDisconnected());
-		assertSame(onStarted, terminal.OnStarted());
-		assertSame(onStopped, terminal.OnStopped());
-		assertSame(onPanic, terminal.OnPanic());
 		assertSame(scheduler, terminal.getScheduler());
-		assertSame(onReqSecErr, terminal.OnRequestSecurityError());
 	}
 	
 	@Test
 	public void testConstruct_Short() throws Exception {
 		terminal = new TerminalImpl(es, starter, securities,
-			portfolios, orders, dispatcher, onConn,
-			onDisc, onStarted, onStopped, onPanic, onReqSecErr);
+			portfolios, orders, dispatcher);
 		
 		assertSame(es, terminal.getEventSystem());
 		assertSame(starter, terminal.getStarter());
@@ -124,13 +98,7 @@ public class TerminalImplTest {
 		assertSame(orders, terminal.getOrdersInstance());
 		assertEquals(new TerminalController(),terminal.getTerminalController());
 		assertSame(dispatcher, terminal.getEventDispatcher());
-		assertSame(onConn, terminal.OnConnected());
-		assertSame(onDisc, terminal.OnDisconnected());
-		assertSame(onStarted, terminal.OnStarted());
-		assertSame(onStopped, terminal.OnStopped());
-		assertSame(onPanic, terminal.OnPanic());
 		assertEquals(new SchedulerLocal(), terminal.getScheduler());
-		assertSame(onReqSecErr, terminal.OnRequestSecurityError());
 	}
 	
 	@Test
@@ -715,13 +683,12 @@ public class TerminalImplTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
-			setTerminalWithDispatcherMock();
 			String msg = "At #" + i;
 			boolean flag = (Boolean) fix[i][1];
 			TerminalState state = (TerminalState) fix[i][0];
 			terminal.setTerminalState(state);
 			if ( flag ) {
-				dispatcherMock.dispatch(new EventImpl(onConn));
+				dispatcher.fireConnected();
 			}
 			control.replay();
 			
@@ -746,12 +713,11 @@ public class TerminalImplTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
-			setTerminalWithDispatcherMock();
 			String msg = "At #" + i;
 			boolean flag = (Boolean) fix[i][1];
 			terminal.setTerminalState((TerminalState) fix[i][0]);
 			if ( flag ) {
-				dispatcherMock.dispatch(new EventImpl(onDisc));
+				dispatcher.fireDisconnected();
 			}
 			control.replay();
 			
@@ -765,7 +731,7 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testFireTerminalStartedEvent() throws Exception {
-		dispatcher.dispatch(new EventImpl(onStarted));
+		dispatcher.fireStarted();
 		control.replay();
 		
 		terminal.fireTerminalStartedEvent();
@@ -775,21 +741,20 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testFireTerminalStoppedEvent() throws Exception {
-		dispatcher.dispatch(new EventImpl(onStarted));
+		dispatcher.fireStopped();
 		control.replay();
 		
-		terminal.fireTerminalStartedEvent();
+		terminal.fireTerminalStoppedEvent();
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testFireTerminalPanicEvent2() throws Exception {
-		final Object[] args = new Object[] { };
+		final Object[] args = { };
 		helpFireTerminalPanicEvent(new Runnable() {
 			@Override public void run() {
-				Event e = new PanicEvent(onPanic,200,"ABC",args);
-				dispatcherMock.dispatch(eq(e));		
+				dispatcher.firePanic(eq(200), eq("ABC"), aryEq(args));		
 			}
 		}, new Runnable() {
 			@Override public void run() {
@@ -800,11 +765,10 @@ public class TerminalImplTest {
 
 	@Test
 	public void testFireTerminalPanicEvent3() throws Exception {
-		final Object[] args = new Object[] { 500, "A", 800 };
+		final Object[] args = { 500, "A", 800 };
 		helpFireTerminalPanicEvent(new Runnable() {
 			@Override public void run() {
-				Event e = new PanicEvent(onPanic,200,"ABC",args);
-				dispatcherMock.dispatch(eq(e));
+				dispatcher.firePanic(eq(200), eq("ABC"), aryEq(args));
 			}
 		}, new Runnable() {
 			@Override public void run() {
@@ -837,7 +801,6 @@ public class TerminalImplTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			setUp();
-			setTerminalWithDispatcherMock();
 			String msg = "At #" + i;
 			boolean flag = (Boolean) fix[i][1];
 			TerminalState state = (TerminalState) fix[i][0];
@@ -985,28 +948,7 @@ public class TerminalImplTest {
 				new Variant<TerminalController>(vOrds)
 			.add(controller)
 			.add(control.createMock(TerminalController.class));
-		Variant<String> vDispId = new Variant<String>(vCtrl)
-			.add("Terminal")
-			.add("TerminalX");
-		Variant<String> vConnId = new Variant<String>(vDispId)
-			.add("OnConnected")
-			.add("OnConnectedX");
-		Variant<String> vDiscId = new Variant<String>(vConnId)
-			.add("OnDisconnected")
-			.add("OnDisconnectedX");
-		Variant<String> vStartId = new Variant<String>(vDiscId)
-			.add("OnStarted")
-			.add("OnStartedX");
-		Variant<String> vStopId = new Variant<String>(vStartId)
-			.add("OnStopped")
-			.add("OnStoppedX");
-		Variant<String> vPanicId = new Variant<String>(vStopId)
-			.add("OnPanic")
-			.add("OnPanicX");
-		Variant<String> vReqSecId = new Variant<String>(vPanicId)
-			.add("OnRequestSecurityError")
-			.add("OnRequestSecurityErrorX");
-		Variant<TerminalState> vStat = new Variant<TerminalState>(vReqSecId)
+		Variant<TerminalState> vStat = new Variant<TerminalState>(vCtrl)
 			.add(TerminalState.STOPPED)
 			.add(TerminalState.STARTING);
 		Variant<OrderProcessor> vOrdProc = new Variant<OrderProcessor>(vStat)
@@ -1018,13 +960,9 @@ public class TerminalImplTest {
 		int foundCnt = 0;
 		TerminalImpl x = null, found = null;
 		do {
-			EventDispatcher d = es.createEventDispatcher(vDispId.get());
 			x = new TerminalImpl(vEs.get(), vSched.get(), vSta.get(),
 					vScs.get(), vPts.get(), vOrds.get(), 
-					vCtrl.get(), d, d.createType(vConnId.get()),
-					d.createType(vDiscId.get()), d.createType(vStartId.get()),
-					d.createType(vStopId.get()), d.createType(vPanicId.get()),
-					d.createType(vReqSecId.get()));
+					vCtrl.get(), dispatcher);
 			x.setTerminalState(vStat.get());
 			x.setOrderProcessorInstance(vOrdProc.get());
 			if ( terminal.equals(x) ) {
@@ -1038,13 +976,6 @@ public class TerminalImplTest {
 		assertSame(portfolios, found.getPortfoliosInstance());
 		assertSame(orders, found.getOrdersInstance());
 		assertSame(starter, found.getStarter());
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(onConn, found.OnConnected());
-		assertEquals(onDisc, found.OnDisconnected());
-		assertEquals(onStarted, found.OnStarted());
-		assertEquals(onStopped, found.OnStopped());
-		assertEquals(onPanic, found.OnPanic());
-		assertEquals(onReqSecErr, found.OnRequestSecurityError());
 		assertSame(TerminalState.STOPPED, found.getTerminalState());
 		assertSame(orderProcessor, found.getOrderProcessorInstance());
 		assertSame(scheduler, found.getScheduler());
@@ -1079,15 +1010,25 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testOnRequestSecurityError() throws Exception {
-		assertSame(onReqSecErr, terminal.OnRequestSecurityError());
+	public void testEventTypes() throws Exception {
+		dispatcher = new TerminalEventDispatcher(es);
+		terminal = new TerminalImpl(es, scheduler, starter, securities,
+				portfolios, orders, controller, dispatcher);
+		assertSame(dispatcher, terminal.getEventDispatcher());
+		assertSame(dispatcher.OnConnected(), terminal.OnConnected());
+		assertSame(dispatcher.OnDisconnected(), terminal.OnDisconnected());
+		assertSame(dispatcher.OnPanic(), terminal.OnPanic());
+		assertSame(dispatcher.OnRequestSecurityError(), terminal.OnRequestSecurityError());
+		assertSame(dispatcher.OnStarted(), terminal.OnStarted());
+		assertSame(dispatcher.OnStopped(), terminal.OnStopped());
 	}
 	
 	@Test
 	public void testFireRequestSecurityError() throws Exception {
+		dispatcher.fireSecurityRequestError(eq(descr), eq(1), eq("test msg"));
 		control.replay();
 		
-		terminal.fireSecurityRequestError(descr, 1, "test message");
+		terminal.fireSecurityRequestError(descr, 1, "test msg");
 		
 		control.verify();
 	}
