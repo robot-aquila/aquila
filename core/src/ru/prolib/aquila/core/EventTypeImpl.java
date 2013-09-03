@@ -1,8 +1,6 @@
 package ru.prolib.aquila.core;
 
-import java.util.List;
-import java.util.Vector;
-
+import java.util.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
@@ -42,7 +40,7 @@ public class EventTypeImpl implements EventType {
 		}
 		this.dispatcher = dispatcher;
 		this.id = id;
-		listeners = new Vector<EventListener>();
+		listeners = new ArrayList<EventListener>();
 	}
 	
 	/**
@@ -91,7 +89,12 @@ public class EventTypeImpl implements EventType {
 
 	@Override
 	public synchronized boolean isListener(EventListener listener) {
-		return listeners.contains(listener);
+		for ( EventListener l : listeners ) {
+			if ( listener == l ) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override

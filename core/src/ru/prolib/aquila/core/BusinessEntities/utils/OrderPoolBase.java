@@ -201,11 +201,25 @@ public class OrderPoolBase implements EventListener {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
+	public final boolean equals(Object other) {
+		return super.equals(other);
+	}
+	
+	/**
+	 * Сравнить заявки двух пулов.
+	 * <p>
+	 * Сравнивать два пула в рамках {@link Object#equals(Object)} нельзя, так
+	 * как класс пула является подписчиком и это приведет. Для сравнения
+	 * содержимого двух пулов следует использовать данный метод.
+	 * <p>
+	 * @param other пул для сравнения
+	 * @return true - заявки двух пулов совпадают, false - не совпадают
+	 */
+	public boolean compareOrders(OrderPoolBase other) {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != OrderPoolBase.class ) {
+		if ( other == null ) {
 			return false;
 		}
 		OrderPoolBase o = (OrderPoolBase) other;

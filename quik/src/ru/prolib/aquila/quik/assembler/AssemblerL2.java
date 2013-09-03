@@ -212,6 +212,8 @@ public class AssemblerL2 {
 		trade.setVolume(entry.getValue());
 		order.addTrade(trade);
 		order.fireTradeEvent(trade);
+		logger.debug("Trade event fired: {}", trade);
+		
 	}
 	
 	private Date getTime(T2QTrade trade) {
@@ -244,6 +246,7 @@ public class AssemblerL2 {
 		if ( order.getStatus() == OrderStatus.SENT ) {
 			order.setStatus(OrderStatus.ACTIVE);
 			terminal.fireEvents(order);
+			logger.debug("Order activated: {}", order.getId());
 		}
 	}
 	
@@ -268,8 +271,10 @@ public class AssemblerL2 {
 		OrderStatus newStatus = null;
 		if ( rest == 0L ) {
 			newStatus = OrderStatus.FILLED;
+			logger.debug("Set order filled: {}", order.getId());
 		} else if ( entry.getStatus() == 2 && rest == entry.getBalance() ) {
 			newStatus = OrderStatus.CANCELLED;
+			logger.debug("Set order cancelled: {}", order.getId());
 		}
 		if ( newStatus != null ) {
 			order.setStatus(newStatus);

@@ -349,6 +349,7 @@ public class AssemblerL2Test {
 	@Test
 	public void testTryActivate_Activate() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(order.getId()).andStubReturn(512);
 		expect(order.getStatus()).andReturn(OrderStatus.SENT);
 		order.setStatus(eq(OrderStatus.ACTIVE));
 		terminal.fireEvents(same(order));
@@ -364,6 +365,7 @@ public class AssemblerL2Test {
 		EditableOrder order = control.createMock(EditableOrder.class);
 		T2QOrder entry = control.createMock(T2QOrder.class);
 		Date time = new Date();
+		expect(order.getId()).andStubReturn(829);
 		expect(order.getQtyRest()).andReturn(0L);
 		order.setStatus(eq(OrderStatus.FILLED));
 		expect(terminal.getCurrentTime()).andReturn(time);
@@ -384,6 +386,7 @@ public class AssemblerL2Test {
 		expect(entry.getStatus()).andStubReturn(2);
 
 		EditableOrder order = control.createMock(EditableOrder.class);
+		expect(order.getId()).andStubReturn(394);
 		expect(order.getQtyRest()).andReturn(5L);
 		order.setStatus(eq(OrderStatus.CANCELLED));
 		expect(terminal.getCurrentTime()).andReturn(time);

@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.data.row.CsvRowSet;
 import ru.prolib.aquila.core.data.row.*;
 
 /**
- * Загрузчик данных формата ФИНАМ.
+ * Загрузчик последовательности свечей формата ФИНАМ.
  * <p>
  * 2013-03-07<br>
  * $Id: Finam.java 565 2013-03-10 19:32:12Z whirlwind $

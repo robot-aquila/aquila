@@ -182,5 +182,70 @@ public class EventTypeImplTest {
 		assertEquals(1, foundCnt);
 		assertEquals(rows1, found.getListeners());
 	}
+	
+	/**
+	 * Класс тестового наблюдателя, который при сравнении всегда дает
+	 * положительный результат.
+	 */
+	private static class TestListener implements EventListener {
 
+		@Override
+		public void onEvent(Event event) {
+			
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			return true;
+		}
+		
+	}
+
+	@Test
+	public void testListeners_SpecialCases() throws Exception {
+		// Данный тест утверждает, что тип события работает с наблюдателями
+		// в рамках экземпляров и не использует equals для проверки вхождения
+		// в список.
+		listener1 = new TestListener();
+		listener2 = new TestListener();
+		listener3 = new TestListener();
+		
+		type.addListener(listener1);
+		assertTrue(type.isListener(listener1));
+		assertFalse(type.isListener(listener2));
+		assertFalse(type.isListener(listener3));
+		List<EventListener> list = type.getListeners();
+		assertEquals(1, list.size());
+		assertSame(listener1, list.get(0));
+		
+		type.addListener(listener2);
+		assertTrue(type.isListener(listener1));
+		assertTrue(type.isListener(listener2));
+		assertFalse(type.isListener(listener3));
+		list = type.getListeners();
+		assertEquals(2, list.size());
+		assertSame(listener1, list.get(0));
+		assertSame(listener2, list.get(1));
+
+		type.addListener(listener3);
+		assertTrue(type.isListener(listener1));
+		assertTrue(type.isListener(listener2));
+		assertTrue(type.isListener(listener3));
+		list = type.getListeners();
+		assertEquals(3, list.size());
+		assertSame(listener1, list.get(0));
+		assertSame(listener2, list.get(1));
+		assertSame(listener3, list.get(2));
+		
+		type.removeListener(listener1);
+		assertFalse(type.isListener(listener1));
+		assertTrue(type.isListener(listener2));
+		assertTrue(type.isListener(listener3));
+		list = type.getListeners();
+		assertEquals(2, list.size());
+		assertSame(listener2, list.get(0));
+		assertSame(listener3, list.get(1));
+		
+		
+	}
 }

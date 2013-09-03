@@ -354,12 +354,17 @@ public class OrderPoolImplTest {
 	
 	@Test
 	public void testEquals() throws Exception {
+		base = new OrderPoolBase();
+		pool = new OrderPoolImpl(terminal, base);
+		pool.setAccount(account);
+		pool.setSecurity(security);
+		
 		Variant<Terminal> vTerm = new Variant<Terminal>()
 			.add(terminal)
 			.add(control.createMock(Terminal.class));
 		Variant<OrderPoolBase> vBase = new Variant<OrderPoolBase>(vTerm)
 			.add(base)
-			.add(control.createMock(OrderPoolBase.class));
+			.add(new OrderPoolBase());
 		Variant<Account> vAcc = new Variant<Account>(vBase)
 			.add(account)
 			.add(account2);
@@ -387,8 +392,8 @@ public class OrderPoolImplTest {
 	
 	@Test
 	public void testConstruct1() throws Exception {
-		OrderPool expected = new OrderPoolImpl(terminal, new OrderPoolBase());
-		assertEquals(expected, new OrderPoolImpl(terminal));
+		pool = new OrderPoolImpl(terminal);
+		assertNotNull(pool.getPoolBase());
 	}
 	
 	@Test

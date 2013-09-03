@@ -263,8 +263,8 @@ public class OrderPoolImpl implements OrderPool {
 		OrderPoolImpl o = (OrderPoolImpl) other;
 		return new EqualsBuilder()
 			.appendSuper(o.terminal == terminal)
+			.appendSuper(o.base == base)
 			.append(o.account, account)
-			.append(o.base, base)
 			.append(o.security, security)
 			.isEquals();
 	}

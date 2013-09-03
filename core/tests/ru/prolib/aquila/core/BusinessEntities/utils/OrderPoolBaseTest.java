@@ -4,12 +4,13 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -257,10 +258,11 @@ public class OrderPoolBaseTest {
 		assertTrue(base.equals(base));
 		assertFalse(base.equals(null));
 		assertFalse(base.equals(this));
+		assertFalse(base.equals(new OrderPoolBase()));
 	}
 	
 	@Test
-	public void testEquals() throws Exception {
+	public void testCompareOrders() throws Exception {
 		pending.add(order1);
 		active.add(order2);
 		active.add(order3);
@@ -297,7 +299,7 @@ public class OrderPoolBaseTest {
 		OrderPoolBase x, found = null;
 		do {
 			x = new OrderPoolBase(vPend.get(), vAct.get(), vDone.get());
-			if ( base.equals(x) ) {
+			if ( base.compareOrders(x) ) {
 				foundCnt ++;
 				found = x;
 			}
@@ -309,10 +311,32 @@ public class OrderPoolBaseTest {
 	}
 	
 	@Test
+	public void testCompareOrders_SpecialCases() throws Exception {
+		assertTrue(base.compareOrders(base));
+		assertFalse(base.compareOrders(null));
+	}
+	
+	@Test
 	public void testConstruct0() throws Exception {
 		OrderPoolBase expected = new OrderPoolBase(new LinkedHashSet<Order>(),
 				new LinkedHashSet<Order>(), new LinkedHashSet<Order>());
-		assertEquals(expected, new OrderPoolBase());
+		assertTrue(expected.compareOrders(new OrderPoolBase()));
+	}
+	
+	@Test
+	public void testListenerSpecialCase() throws Exception {
+		// Тест проверяет, что разные экземпляры пула с одинаковым содержимым
+		// являются отличными друг от друга наблюдателями.
+		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
+		EventType type = new EventTypeImpl(dispatcher);
+		OrderPoolBase pool1 = new OrderPoolBase(), pool2 = new OrderPoolBase();
+		type.addListener(pool1);
+		type.addListener(pool2);
+		
+		List<EventListener> actual = type.getListeners();
+		assertEquals(2, actual.size());
+		assertSame(pool1, actual.get(0));
+		assertSame(pool2, actual.get(1));
 	}
 	
 }
