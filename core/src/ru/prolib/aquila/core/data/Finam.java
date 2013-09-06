@@ -56,5 +56,21 @@ public class Finam {
 		}
 		rs.close();
 	}
+	
+	/**
+	 * Создать сервис сохранения котировок в csv-файл.
+	 * <p>
+	 * Создает сервис сохранения котировок в csv-файл в формате FINAM с полями
+	 * DATE (формат yyyyMMdd), TIME (HHmmss), OPEN, HIGH, LOW, CLOSE, VOL.
+	 * <p>
+	 * @param csvfile целевой файл
+	 * @param candles набор свечей
+	 * @return сервис сохранения
+	 */
+	public CandlesWriter
+		createWriter(File csvfile, EditableCandleSeries candles)
+	{
+		return new FinamCandlesCsvFileWriter(candles, csvfile);
+	}
 
 }

@@ -67,5 +67,14 @@ public class FinamTest {
 		
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testCreateWriter() throws Exception {
+		File file = File.createTempFile("finam-", ".csv");
+		EditableCandleSeries candles = new CandleSeriesImpl();
+		
+		CandlesWriter expected = new FinamCandlesCsvFileWriter(candles, file);
+		assertEquals(expected, finam.createWriter(file, candles));
+	}
 
 }
