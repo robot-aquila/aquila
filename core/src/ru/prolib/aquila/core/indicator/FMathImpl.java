@@ -97,18 +97,21 @@ public class FMathImpl implements FMath {
 	}
 	
 	@Override
-	public Double dpo(DataSeries close, int index, int period)
+	public Double vv_dpo(DataSeries close, int index, int period)
 			throws ValueException
 	{
 		if ( close.getLength() == 0 ) {
 			return null;
 		}
-		index = makeIndexPositive(close, index);
-		if ( index < 0 ) {
+		
+		int usePeriod = (int) Math.round(period / 2d + 1d);
+		Double price = close.get(index);
+		int useIndex = index - usePeriod;
+		if ( useIndex < 0 ) {
 			return null;
 		}
-		Double price = close.get(index);
-		Double sma = sma(close, index, period / 2 + 1);
+		
+		Double sma = sma(close, useIndex, period);
 		if ( price != null && sma != null ) {
 			return price - sma;
 		} else {
@@ -190,8 +193,8 @@ public class FMathImpl implements FMath {
 	}
 
 	@Override
-	public Double dpo(DataSeries close, int period) throws ValueException {
-		return dpo(close, getLastIndex(close), period);
+	public Double vv_dpo(DataSeries close, int period) throws ValueException {
+		return vv_dpo(close, getLastIndex(close), period);
 	}
 
 	@Override

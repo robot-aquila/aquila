@@ -196,24 +196,28 @@ public interface FMath {
 	public Double tr(Series<Candle> candles) throws ValueException;
 	
 	/**
-	 * Detrended Price Oscillator (DPO).
+	 * VectorVest Detrended Price Oscillator (DPO).
+	 * <p>
+	 * Формула DPO из платформы VectorVest.
 	 * <p>
 	 * @param close ряд данных
 	 * @param index индекс элемента для расчета DPO
 	 * @param period количество элементов базы расчета
 	 * @return значение DPO или null, если расчитать не удалось
 	 */
-	public Double dpo(DataSeries close, int index, int period)
+	public Double vv_dpo(DataSeries close, int index, int period)
 			throws ValueException;
 	
 	/**
-	 * Detrended Price Oscillator (DPO).
+	 * VectorVest Detrended Price Oscillator (DPO).
+	 * <p>
+ 	 * Формула DPO из платформы VectorVest.
 	 * <p>
 	 * @param close ряд данных
 	 * @param period количество элементов базы расчета
 	 * @return значение DPO или null, если расчитать не удалось
 	 */
-	public Double dpo(DataSeries close, int period)  throws ValueException;
+	public Double vv_dpo(DataSeries close, int period)  throws ValueException;
 	
 	/**
 	 * Пересечение нуля сверху-вниз.

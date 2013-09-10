@@ -398,7 +398,7 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			.append(o.open, open)
 			.append(o.status, status)
 			.append(o.stepPrice, stepPrice)
-			.append(o.terminal, terminal)
+			.appendSuper(o.terminal == terminal)
 			.append(o.isAvailable(), isAvailable())
 			.isEquals();
 	}

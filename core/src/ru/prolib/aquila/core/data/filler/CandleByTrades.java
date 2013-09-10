@@ -8,6 +8,9 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
 
 /**
  * Сервис формирования свечей на основании сделок инструмента.
+ * <p>
+ * Подписывается на получение сделок по инструменту и перенаправляет сделки
+ * в агрегатор свечей.
  */
 class CandleByTrades implements Starter, EventListener {
 	private final Security security;
