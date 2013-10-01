@@ -713,5 +713,52 @@ public class SecurityImplTest {
 		
 		control.verify();
 	}
+	
+	/**
+	 * Запись фикстуры для тестирования сравнения цен.
+	 */
+	static class FR {
+		final int precision;
+		final Double price1, price2;
+		final boolean expected;
+		FR(int precision, Double price1, Double price2, boolean expected) {
+			this.precision = precision;
+			this.price1 = price1;
+			this.price2 = price2;
+			this.expected = expected;
+		}
+	}
+	
+	@Test
+	public void testIsPricesEquals() throws Exception {
+		FR fix[] = {
+			new FR( 0, 142030.0000d, 142030.0000d, true),
+			new FR( 0, 142030.0000d, 142030.0001d, true),
+			new FR( 0, 142030.0000d, 142030.0010d, true),
+			new FR( 0, 142030.0000d, 142030.0100d, true),
+			new FR( 0, 142030.0000d, 142030.0999d, true),
+			new FR( 0, 142030.0000d, 142030.1000d, false),
+			new FR( 0, 142030.0000d, 142030.1001d, false),
+			new FR( 0, null, 		 142030.0000d, false),
+			new FR( 0, 142030.0000d, null,		   false),
+			new FR( 0, null,		 null,		   false),
+			new FR( 0, 142030.0000d, 142030.1534d, false),
+			new FR( 0, 142030.0000d, 142030.5102d, false),
+			new FR( 0, 142030.0000d, 142031.0000d, false),
+			new FR( 4, 1.3554d, 	1.3554d,	   true),
+			new FR( 4, 1.3554d,     1.355409d,	   true),
+			new FR( 4, 1.3554d,     1.3555d,	   false),
+			new FR( 4, -1.3554d,    1.3554d,	   false),
+			new FR( 4, 1.3554d,    -1.3554d,	   false),
+			
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			FR fr = fix[i];
+			security.setPrecision(fr.precision);
+			assertEquals(msg, fr.expected,
+					security.isPricesEquals(fr.price1, fr.price2));
+		}
+	}
 
 }

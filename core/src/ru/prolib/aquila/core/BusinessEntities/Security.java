@@ -239,4 +239,20 @@ public interface Security {
 	 */
 	public Double getMostAccurateVolume(Double price, Long qty);
 	
+	/**
+	 * Сравнить два значения цены.
+	 * <p>
+	 * Сравнивает два значения в соответствии с точностью, установленной для
+	 * инструмента. Если одно из значений цены равно null, то результатом
+	 * сравнения будет false.
+	 * <p>
+	 * см. {@link #getPrecision()}.
+	 * <p>
+	 * @param price1 первое значение цены
+	 * @param price2 второе значение цены
+	 * @return true, если значения эквивалентны в соответствии с точностью
+	 * значения цены, установленной для инструмента
+	 */
+	public boolean isPricesEquals(Double price1, Double price2);
+	
 }

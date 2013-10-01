@@ -435,4 +435,14 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 		}
 	}
 
+	@Override
+	public synchronized boolean isPricesEquals(Double price1, Double price2) {
+		if ( price1 == null || price2 == null ) {
+			return false;
+		}
+		double epsilon = Math.pow(10, -(decimals + 1));
+		double delta = Math.abs(price1 - price2);
+		return delta <= epsilon;
+	}
+
 }

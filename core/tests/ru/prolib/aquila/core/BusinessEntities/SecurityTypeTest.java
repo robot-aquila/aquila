@@ -28,5 +28,15 @@ public class SecurityTypeTest {
 			assertEquals(entry.getValue(), entry.getKey().toString());
 		}
 	}
+	
+	@Test
+	public void testOrdinal() throws Exception {
+		assertEquals(0, SecurityType.UNK.ordinal());
+		assertEquals(1, SecurityType.STK.ordinal());
+		assertEquals(2, SecurityType.OPT.ordinal());
+		assertEquals(3, SecurityType.FUT.ordinal());
+		assertEquals(4, SecurityType.BOND.ordinal());
+		assertEquals(5, SecurityType.CASH.ordinal());
+	}
 
 }
