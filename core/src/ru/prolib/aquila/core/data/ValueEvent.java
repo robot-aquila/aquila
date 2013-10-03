@@ -94,7 +94,7 @@ public class ValueEvent<T> extends EventImpl {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName()
-			+ "[type=" + getType().asString() + ", "
+			+ "[type=" + getType().toString() + ", "
 			+ oldValue + "=>" + newValue + " at " + index + "]";
 	}
 

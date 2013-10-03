@@ -1,9 +1,6 @@
 package ru.prolib.aquila.core;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import ru.prolib.aquila.core.rule.EachEventOneTime;
+import org.apache.commons.lang3.builder.*;
 
 /**
  * Фабрика системы событий.
@@ -45,26 +42,6 @@ public class EventSystemImpl implements EventSystem {
 	}
 
 	@Override
-	public EventType createGenericType(EventDispatcher dispatcher) {
-		return new EventTypeImpl(dispatcher);
-	}
-	
-	@Override
-	public EventType createGenericType(EventDispatcher dispatcher, String id) {
-		return new EventTypeImpl(dispatcher, id);
-	}
-
-	@Override
-	@Deprecated
-	public CompositeEventType
-		createTypeEachEventOneTime(EventDispatcher dispatcher,
-								   EventType[] types)
-	{
-		return new CompositeEventTypeImpl(dispatcher, types,
-				new EachEventOneTime(), new CompositeEventGeneratorImpl());
-	}
-
-	@Override
 	public EventDispatcher createEventDispatcher() {
 		return new EventDispatcherImpl(queue);
 	}
@@ -72,23 +49,6 @@ public class EventSystemImpl implements EventSystem {
 	@Override
 	public EventDispatcher createEventDispatcher(String id) {
 		return new EventDispatcherImpl(queue, id);
-	}
-
-	@Override
-	@Deprecated
-	public CompositeEventType createTypeEachEventOneTime(EventType[] types) {
-		return new CompositeEventTypeImpl(createEventDispatcher(), types,
-				new EachEventOneTime(), new CompositeEventGeneratorImpl());
-	}
-
-	@Override
-	@Deprecated
-	public CompositeEventType createTypeEachEventOneTime(
-			EventDispatcher dispatcher, EventType[] types,
-			CompositeEventGenerator eventGenerator)
-	{
-		return new CompositeEventTypeImpl(dispatcher, types,
-				new EachEventOneTime(), eventGenerator);
 	}
 	
 	@Override

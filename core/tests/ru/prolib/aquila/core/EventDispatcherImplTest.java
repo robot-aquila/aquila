@@ -193,19 +193,15 @@ public class EventDispatcherImplTest {
 
 	@Test
 	public void testCreateType0() throws Exception {
-		String expectedId = "EvtType" + EventTypeImpl.getAutoId();
-		EventTypeImpl actual = (EventTypeImpl) dispatcher.createType();
-		assertNotNull(actual);
-		assertEquals(expectedId, actual.getId());
-		assertSame(dispatcher, actual.getEventDispatcher());
+		String expectedId = "TD.EvtType" + EventTypeImpl.getAutoId();
+		EventType expected = new EventTypeImpl(expectedId);
+		assertEquals(expected, dispatcher.createType());
 	}
 	
 	@Test
 	public void testCreateType1() throws Exception {
-		EventTypeImpl actual = (EventTypeImpl) dispatcher.createType("foobar");
-		assertNotNull(actual);
-		assertEquals("foobar", actual.getId());
-		assertSame(dispatcher, actual.getEventDispatcher());
+		EventType expected = new EventTypeImpl("TD.foobar");
+		assertEquals(expected, dispatcher.createType("foobar"));
 	}
 	
 	@Test
@@ -213,7 +209,7 @@ public class EventDispatcherImplTest {
 		EventSystem eventSystem = new EventSystemImpl();
 		queue = eventSystem.getEventQueue();
 		dispatcher = new EventDispatcherImpl(queue);
-		type1 = new EventTypeImpl(dispatcher);
+		type1 = new EventTypeImpl();
 		
 		final Event event1 = new EventImpl(type1);
 		EventListener listener = new EventListener() {

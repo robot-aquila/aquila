@@ -101,7 +101,7 @@ public class PanicEvent extends EventImpl {
 	
 	@Override
 	public String toString() {
-		return getType().asString() + ".PanicEvent[" + code + "] " + msgId; 
+		return getType().toString() + ".PanicEvent[" + code + "] " + msgId; 
 	}
 
 }

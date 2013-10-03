@@ -327,8 +327,7 @@ public class OrderPoolBaseTest {
 	public void testListenerSpecialCase() throws Exception {
 		// Тест проверяет, что разные экземпляры пула с одинаковым содержимым
 		// являются отличными друг от друга наблюдателями.
-		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
-		EventType type = new EventTypeImpl(dispatcher);
+		EventType type = new EventTypeImpl("foo");
 		OrderPoolBase pool1 = new OrderPoolBase(), pool2 = new OrderPoolBase();
 		type.addListener(pool1);
 		type.addListener(pool2);

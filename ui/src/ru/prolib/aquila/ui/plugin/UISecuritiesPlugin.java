@@ -74,15 +74,15 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 		cols.addColumnsToModel(model, text);
 
 		DataSourceEventTranslator onRowAvailableListener = new DataSourceEventTranslator(
-				dispatcher, ev.createGenericType(dispatcher));
+				dispatcher, dispatcher.createType());
 		model.setOnRowAvailableListener(onRowAvailableListener);
 		
 		
 		DataSourceEventTranslator onRowChangedListener = new DataSourceEventTranslator(
-				dispatcher, ev.createGenericType(dispatcher));
+				dispatcher, dispatcher.createType());
 		model.setOnRowChangedListener(onRowChangedListener);		
 		
-		tb = new TableImpl(model, dispatcher, ev.createGenericType(dispatcher));		
+		tb = new TableImpl(model, dispatcher, dispatcher.createType());		
 		tb.start();
 		
 		facade.addTab(text.get(TITLE), panel);

@@ -1,23 +1,19 @@
 package ru.prolib.aquila.core;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-import org.easymock.IMocksControl;
 import org.junit.*;
 
 /**
  * 2012-04-09
  */
 public class EventImplTest {
-	private IMocksControl control;
 	private EventType type,type2;
 	private EventImpl event;
 
 	@Before
 	public void setUp() throws Exception {
-		control = createStrictControl();
-		type = control.createMock(EventType.class);
-		type2 = control.createMock(EventType.class);
+		type = new EventTypeImpl("foo");
+		type2 = new EventTypeImpl("bar");
 		event = new EventImpl(type);
 	}
 	
@@ -72,10 +68,7 @@ public class EventImplTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		expect(type.asString()).andReturn("One.Two");
-		control.replay();
-		assertEquals("One.Two.BasicEvent", event.toString());
-		control.verify();
+		assertEquals("foo.BasicEvent", event.toString());
 	}
 	
 	static class DerivedEventImpl extends EventImpl {

@@ -5,12 +5,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventDispatcherImpl;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.EventTypeImpl;
-import ru.prolib.aquila.core.SimpleEventQueue;
+import ru.prolib.aquila.core.*;
 
 /**
  * Значение неопределенного типа.
@@ -80,8 +75,8 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 		id = valueId;
 		limit = storageLimit;
 		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), id);
-		onAdd = new EventTypeImpl(dispatcher, "Add");
-		onUpd = new EventTypeImpl(dispatcher, "Upd");
+		onAdd = dispatcher.createType("Add");
+		onUpd = dispatcher.createType("Upd");
 	}
 
 	/**

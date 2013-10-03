@@ -96,7 +96,7 @@ public class EventTypeMapTest {
 	@Test
 	public void testGet_FirstTime() throws Exception {
 		expect(storage.get(eq(765))).andReturn(null);
-		expect(es.createGenericType(dispatcher, "765")).andReturn(type1);
+		expect(dispatcher.createType("765")).andReturn(type1);
 		expect(storage.put(eq(765), same(type1))).andReturn(null);
 		control.replay();
 		

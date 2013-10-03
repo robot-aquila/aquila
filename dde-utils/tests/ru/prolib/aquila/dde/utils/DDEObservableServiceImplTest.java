@@ -214,18 +214,12 @@ public class DDEObservableServiceImplTest {
 	@Test
 	public void testCreateService3() throws Exception {
 		expect(eventSystem.createEventDispatcher()).andReturn(dispatcher);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etConnect);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etDisconnect);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etRegister);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etUnregister);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etData);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etTable);
+		expect(dispatcher.createType()).andReturn(etConnect);
+		expect(dispatcher.createType()).andReturn(etDisconnect);
+		expect(dispatcher.createType()).andReturn(etRegister);
+		expect(dispatcher.createType()).andReturn(etUnregister);
+		expect(dispatcher.createType()).andReturn(etData);
+		expect(dispatcher.createType()).andReturn(etTable);
 		control.replay();
 		
 		service = (DDEObservableServiceImpl) DDEObservableServiceImpl
@@ -247,18 +241,12 @@ public class DDEObservableServiceImplTest {
 	@Test
 	public void testCreateService2() throws Exception {
 		expect(eventSystem.createEventDispatcher()).andReturn(dispatcher);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etConnect);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etDisconnect);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etRegister);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etUnregister);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etData);
-		expect(eventSystem.createGenericType(same(dispatcher)))
-			.andReturn(etTable);
+		expect(dispatcher.createType()).andReturn(etConnect);
+		expect(dispatcher.createType()).andReturn(etDisconnect);
+		expect(dispatcher.createType()).andReturn(etRegister);
+		expect(dispatcher.createType()).andReturn(etUnregister);
+		expect(dispatcher.createType()).andReturn(etData);
+		expect(dispatcher.createType()).andReturn(etTable);
 		control.replay();
 		
 		service = (DDEObservableServiceImpl) DDEObservableServiceImpl

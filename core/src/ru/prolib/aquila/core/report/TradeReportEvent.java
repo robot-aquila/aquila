@@ -56,7 +56,7 @@ public class TradeReportEvent extends EventImpl {
 	
 	@Override
 	public String toString() {
-		return getType().asString() + "." + getClass().getSimpleName()
+		return getType().toString() + "." + getClass().getSimpleName()
 			+ "[#" + index + ", report=" + report + "]";
 	}
 

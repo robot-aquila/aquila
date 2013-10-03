@@ -56,12 +56,12 @@ public class DDEObservableServiceImpl
 	{
 		EventDispatcher dispatcher = eventSystem.createEventDispatcher();
 		return new DDEObservableServiceImpl(name, access, dispatcher,
-				eventSystem.createGenericType(dispatcher),
-				eventSystem.createGenericType(dispatcher),
-				eventSystem.createGenericType(dispatcher),
-				eventSystem.createGenericType(dispatcher),
-				eventSystem.createGenericType(dispatcher),
-				eventSystem.createGenericType(dispatcher));
+				dispatcher.createType(),
+				dispatcher.createType(),
+				dispatcher.createType(),
+				dispatcher.createType(),
+				dispatcher.createType(),
+				dispatcher.createType());
 	}
 	
 	/**

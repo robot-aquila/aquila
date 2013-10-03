@@ -14,54 +14,34 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class EventTypeImplTest {
 	private IMocksControl control;
-	private EventDispatcher dispatcher;
 	private EventTypeImpl type;
 	private EventListener listener1, listener2, listener3;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		dispatcher = control.createMock(EventDispatcherImpl.class);
 		listener1 = control.createMock(EventListener.class);
 		listener2 = control.createMock(EventListener.class);
 		listener3 = control.createMock(EventListener.class);
-		type = new EventTypeImpl(dispatcher, "MyType");
-	}
-	
-	@Test (expected=NullPointerException.class)
-	public void testConstruct1_ThrowsIfDispatcherIsNull() throws Exception {
-		new EventTypeImpl(null);
+		type = new EventTypeImpl("MyType");
 	}
 	
 	@Test
-	public void testConstruct1_Ok() throws Exception {
+	public void testConstruct0() throws Exception {
 		int autoId = EventTypeImpl.getAutoId();
-		type = new EventTypeImpl(dispatcher);
-		assertSame(dispatcher, type.getEventDispatcher());
+		type = new EventTypeImpl();
 		assertEquals("EvtType" + autoId, type.getId());
 		assertEquals(autoId + 1, EventTypeImpl.getAutoId());
 	}
 	
 	@Test
-	public void testConstruct2() throws Exception {
-		assertSame(dispatcher, type.getEventDispatcher());
+	public void testConstruct1() throws Exception {
 		assertEquals("MyType", type.getId());
 	}
 	
 	@Test
 	public void testToString() throws Exception {
-		expect(dispatcher.asString()).andReturn("MyDisp");
-		control.replay();
-		assertEquals("MyDisp.MyType", type.toString());
-		control.verify();
-	}
-	
-	@Test
-	public void testAsString() throws Exception {
-		expect(dispatcher.asString()).andReturn("MyDisp");
-		control.replay();
-		assertEquals("MyDisp.MyType", type.asString());
-		control.verify();
+		assertEquals("MyType", type.toString());
 	}
 	
 	@Test
@@ -105,7 +85,8 @@ public class EventTypeImplTest {
 	@Test
 	public void testEquals() throws Exception {
 		assertTrue(type.equals(type));
-		assertTrue(type.equals(new EventTypeImpl(dispatcher, "MyType")));
+		assertTrue(type.equals(new EventTypeImpl("MyType")));
+		assertFalse(type.equals(new EventTypeImpl("OtherType")));
 		assertFalse(type.equals(null));
 		assertFalse(type.equals(this));
 	}
@@ -172,7 +153,7 @@ public class EventTypeImplTest {
 		int foundCnt = 0;
 		EventTypeImpl x, found = null;
 		do {
-			x = new EventTypeImpl(dispatcher);
+			x = new EventTypeImpl();
 			for ( EventListener l : vRows.get() ) { x.addListener(l); }
 			if ( type.compareListeners(x) ) {
 				foundCnt ++;

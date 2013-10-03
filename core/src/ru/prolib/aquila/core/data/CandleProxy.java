@@ -1,14 +1,7 @@
 package ru.prolib.aquila.core.data;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventDispatcherImpl;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.EventTypeImpl;
-import ru.prolib.aquila.core.SimpleEventQueue;
+import ru.prolib.aquila.core.*;
 
 /**
  * Конвертер свечи в составной элемент свечи.
@@ -44,8 +37,8 @@ public class CandleProxy<T> implements Series<T>, EventListener {
 		this.candles = candles;
 		this.getter = getter;
 		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), id);
-		onAdd = new EventTypeImpl(dispatcher, "Add");
-		onUpd = new EventTypeImpl(dispatcher, "Upd");
+		onAdd = dispatcher.createType("Add");
+		onUpd = dispatcher.createType("Upd");
 		candles.OnAdd().addListener(this);
 		candles.OnUpd().addListener(this);
 	}

@@ -50,7 +50,7 @@ public class EventImpl implements Event {
 	
 	@Override
 	public String toString() {
-		return type.asString() + "." + ID; 
+		return type.toString() + "." + ID; 
 	}
 
 }

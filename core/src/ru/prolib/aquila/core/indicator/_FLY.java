@@ -29,8 +29,8 @@ abstract public class _FLY<T> implements DataSeries {
 		this.source = source;
 		this.id = makeId(id);
 		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), id);
-		onAdd = new EventTypeImpl(dispatcher, "Add");
-		onUpd = new EventTypeImpl(dispatcher, "Upd");
+		onAdd = dispatcher.createType("Add");
+		onUpd = dispatcher.createType("Upd");
 		init();
 	}
 

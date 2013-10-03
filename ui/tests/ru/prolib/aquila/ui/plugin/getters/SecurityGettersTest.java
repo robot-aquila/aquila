@@ -5,24 +5,12 @@ import static org.junit.Assert.*;
 
 import org.hamcrest.core.IsInstanceOf;
 import org.easymock.IMocksControl;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
-import ru.prolib.aquila.core.BusinessEntities.SecurityImpl;
-import ru.prolib.aquila.core.BusinessEntities.SecurityStatus;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.core.data.G;
-import ru.prolib.aquila.core.data.GDouble;
-import ru.prolib.aquila.core.data.GInteger;
-import ru.prolib.aquila.core.data.GLong;
-import ru.prolib.aquila.core.data.GString;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.data.*;
 
 /**
  * $Id$
@@ -39,12 +27,10 @@ public class SecurityGettersTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		
-		Terminal terminal = control.createMock(Terminal.class);
-		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
+		EditableTerminal terminal = new TerminalBuilder().createTerminal("foo");
 		
 		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
-		SecurityImpl sc = new SecurityImpl(terminal, descr, dispatcher,
-				control.createMock(EventType.class), control.createMock(EventType.class));
+		EditableSecurity sc = terminal.getEditableSecurity(descr);
 		sc.setPrecision(3);
 		sc.setMinPrice(90.00d);
 		sc.setMaxPrice(130.00d);

@@ -80,7 +80,7 @@ public class EventTypeMap<T> implements Map<T, EventType> {
 	public EventType get(Object key) {
 		EventType type = storage.get(key);
 		if ( type == null ) {
-			type = es.createGenericType(dispatcher, key.toString());
+			type = dispatcher.createType(key.toString());
 			storage.put((T) key, type);
 		}
 		return type;

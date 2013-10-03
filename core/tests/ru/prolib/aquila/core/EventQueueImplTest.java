@@ -131,8 +131,8 @@ public class EventQueueImplTest {
 		// учитывается при непосредственно отправке события.
 		final CountDownLatch finished = new CountDownLatch(3);
 		EventDispatcher dispatcher = eSys.createEventDispatcher();
-		type1 = eSys.createGenericType(dispatcher);
-		type2 = eSys.createGenericType(dispatcher);
+		type1 = dispatcher.createType();
+		type2 = dispatcher.createType();
 		type1.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {

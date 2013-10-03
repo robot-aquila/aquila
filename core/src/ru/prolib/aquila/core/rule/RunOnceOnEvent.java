@@ -14,6 +14,7 @@ import ru.prolib.aquila.core.EventType;
  * 2013-01-07<br>
  * $Id: RunOnceOnEvent.java 400 2013-01-08 05:22:51Z whirlwind $
  */
+@Deprecated
 public class RunOnceOnEvent implements EventListener, Runnable {
 	private final EventType type;
 	private final Runnable runnable;

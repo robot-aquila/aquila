@@ -57,7 +57,7 @@ public class DataSourceEventTranslatorTest {
 		control = createStrictControl();
 		dispatcher = eventSystem.createEventDispatcher();
 		source = control.createMock(Event.class);
-		onOccur = eventSystem.createGenericType(dispatcher);
+		onOccur = dispatcher.createType();
 		
 		evt = new DataSourceEventTranslator(dispatcher, onOccur);
 		queue.start();

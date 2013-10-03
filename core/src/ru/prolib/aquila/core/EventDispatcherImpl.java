@@ -131,12 +131,12 @@ public class EventDispatcherImpl implements EventDispatcher {
 
 	@Override
 	public EventType createType() {
-		return new EventTypeImpl(this);
+		return new EventTypeImpl(getId() + "." + EventTypeImpl.nextId());
 	}
 
 	@Override
 	public EventType createType(String typeId) {
-		return new EventTypeImpl(this, typeId);
+		return new EventTypeImpl(getId() + "." + typeId);
 	}
 	
 	/**

@@ -254,7 +254,7 @@ public class Menu {
 		if ( isItemExists(id) ) {
 			throw new MenuItemAlreadyExistsException(id);
 		}
-		final EventType eventType = es.createGenericType(dispatcher, id);		
+		final EventType eventType = dispatcher.createType(id);		
 		underlyed.setText(title);
 		MenuItem item = new MenuItem(underlyed, eventType); 
 		item.getUnderlyingObject().addActionListener(new ActionListener() {

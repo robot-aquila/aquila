@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -22,8 +22,8 @@ public class PanicEventTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		control = createStrictControl();
-		type = control.createMock(EventType.class);
-		type2 = control.createMock(EventType.class);
+		type = new EventTypeImpl("foo");
+		type2 = new EventTypeImpl("bar");
 		event = new PanicEvent(type, 123, "TEST_MSG", new Object[] { 1, "A" });
 	}
 
@@ -98,8 +98,6 @@ public class PanicEventTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		expect(type.asString()).andReturn("foo");
-		control.replay();
 		assertEquals("foo.PanicEvent[123] TEST_MSG", event.toString());
 	}
 

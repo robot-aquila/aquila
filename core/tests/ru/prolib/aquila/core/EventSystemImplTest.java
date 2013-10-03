@@ -7,7 +7,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.rule.EachEventOneTime;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -17,7 +16,6 @@ import static org.junit.Assert.*;
  */
 public class EventSystemImplTest {
 	private IMocksControl control;
-	private EventDispatcher dispatcher;
 	private EventQueue queue;
 	private EventSystemImpl eventSystem;
 	private EventType[] types;
@@ -26,7 +24,6 @@ public class EventSystemImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		dispatcher = control.createMock(EventDispatcher.class);
 		queue = control.createMock(EventQueue.class);
 		eventSystem = new EventSystemImpl(queue);
 		types = new EventType[2];
@@ -69,58 +66,6 @@ public class EventSystemImplTest {
 		assertNotNull(d);
 		assertSame(queue, d.getEventQueue());
 		assertEquals("Zulu", d.getId());
-	}
-	
-	@Test
-	public void testCreateGenericType1() throws Exception {
-		EventTypeImpl type = (EventTypeImpl)
-			eventSystem.createGenericType(dispatcher);
-		assertSame(dispatcher, type.getEventDispatcher());
-	}
-	
-	@Test
-	public void testCreateGenericType2() throws Exception {
-		EventTypeImpl type = (EventTypeImpl)
-			eventSystem.createGenericType(dispatcher, "foo");
-		assertSame(dispatcher, type.getEventDispatcher());
-		assertEquals("foo", type.getId());
-	}
-
-	
-	@Test
-	public void testCreateTypeEachEventOneTime2() throws Exception {
-		CompositeEventTypeImpl type = (CompositeEventTypeImpl)
-			eventSystem.createTypeEachEventOneTime(dispatcher, types);
-		assertSame(dispatcher, type.getEventDispatcher());
-		assertSame(EachEventOneTime.class, type.getRule().getClass());
-		assertSame(CompositeEventGeneratorImpl.class,
-				   type.getEventGenerator().getClass());
-		assertEquals(state, type.getCurrentState());
-	}
-	
-	@Test
-	public void testCreateTypeEachEventOneTime1() throws Exception {
-		CompositeEventTypeImpl type = (CompositeEventTypeImpl)
-			eventSystem.createTypeEachEventOneTime(types);
-		EventDispatcherImpl dispatcher = (EventDispatcherImpl)
-			type.getEventDispatcher(); 
-		assertNotNull(dispatcher);
-		assertSame(EachEventOneTime.class, type.getRule().getClass());
-		assertSame(CompositeEventGeneratorImpl.class,
-			   type.getEventGenerator().getClass());
-		assertEquals(state, type.getCurrentState());
-	}
-	
-	@Test
-	public void testCreateTypeEachEventOneTime3() throws Exception {
-		CompositeEventGenerator gen =
-			control.createMock(CompositeEventGenerator.class);
-		CompositeEventTypeImpl type = (CompositeEventTypeImpl)
-			eventSystem.createTypeEachEventOneTime(dispatcher, types, gen);
-		assertSame(dispatcher, type.getEventDispatcher());
-		assertSame(EachEventOneTime.class, type.getRule().getClass());
-		assertSame(gen, type.getEventGenerator());
-		assertEquals(state, type.getCurrentState());
 	}
 	
 	@Test

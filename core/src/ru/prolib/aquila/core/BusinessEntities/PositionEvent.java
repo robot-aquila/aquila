@@ -50,7 +50,7 @@ public class PositionEvent extends EventImpl {
 	
 	@Override
 	public String toString() {
-		return getType().asString() + " ["
+		return getType().toString() + " ["
 			+ "acc=" + position.getAccount() + ", "
 			+ "sec=" + position.getSecurityDescriptor() + ", "
 			+ "open=" + position.getOpenQty() + ", "

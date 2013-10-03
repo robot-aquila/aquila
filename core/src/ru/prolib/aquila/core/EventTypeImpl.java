@@ -11,36 +11,16 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 public class EventTypeImpl implements EventType {
 	public static final String AUTO_ID_PREFIX = "EvtType";
 	private static int autoId = 1;
-	private final EventDispatcher dispatcher;
 	private final String id;
 	private final List<EventListener> listeners;
 	
 	/**
-	 * Создать тип события.
+	 * Получить следующий идентификатор типа событий по-умолчанию.
 	 * <p>
-	 * Создается объект с идентификатором по умолчанию. Идентификатор
-	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId;
-	 * <p>
-	 * @param dispatcher диспетчер событий
+	 * @return идентификатор типа события
 	 */
-	public EventTypeImpl(EventDispatcher dispatcher) {
-		this(dispatcher, AUTO_ID_PREFIX + (autoId ++));
-	}
-	
-	/**
-	 * Создать тип события.
-	 * <p>
-	 * @param dispatcher диспетчер событий
-	 * @param id идентификатор типа события
-	 */
-	public EventTypeImpl(EventDispatcher dispatcher, String id) {
-		super();
-		if ( dispatcher == null ) {
-			throw new NullPointerException("Dispatcher cannot be null"); 
-		}
-		this.dispatcher = dispatcher;
-		this.id = id;
-		listeners = new ArrayList<EventListener>();
+	public static synchronized final String nextId() {
+		return AUTO_ID_PREFIX + (autoId ++);
 	}
 	
 	/**
@@ -48,8 +28,30 @@ public class EventTypeImpl implements EventType {
 	 * <p>
 	 * @return текущее значение идентификатора
 	 */
-	public static synchronized int getAutoId() {
+	public static synchronized final int getAutoId() {
 		return autoId;
+	}
+	
+	/**
+	 * Создать тип события.
+	 * <p>
+	 * Создается объект с идентификатором по умолчанию. Идентификатор
+	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId;
+	 * <p>
+	 */
+	public EventTypeImpl() {
+		this(nextId());
+	}
+	
+	/**
+	 * Создать тип события.
+	 * <p>
+	 * @param id идентификатор типа события
+	 */
+	public EventTypeImpl(String id) {
+		super();
+		this.id = id;
+		listeners = new ArrayList<EventListener>();
 	}
 	
 	@Override
@@ -59,12 +61,7 @@ public class EventTypeImpl implements EventType {
 	
 	@Override
 	public String toString() {
-		return asString();
-	}
-	
-	@Override
-	public String asString() {
-		return dispatcher.asString() + "." + id;
+		return id;
 	}
 	
 	@Override
@@ -77,14 +74,6 @@ public class EventTypeImpl implements EventType {
 	@Override
 	public synchronized void removeListener(EventListener listener) {
 		listeners.remove(listener);
-	}
-
-	/**
-	 * Получить диспетчер событий
-	 * @return диспетчер событий
-	 */
-	public EventDispatcher getEventDispatcher() {
-		return dispatcher;
 	}
 
 	@Override
@@ -129,7 +118,6 @@ public class EventTypeImpl implements EventType {
 		}
 		EventTypeImpl o = (EventTypeImpl) other;
 		return new EqualsBuilder()
-			.append(dispatcher, o.dispatcher)
 			.append(id, o.id)
 			.isEquals();
 	}

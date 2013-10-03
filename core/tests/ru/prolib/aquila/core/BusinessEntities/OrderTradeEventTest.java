@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class OrderTradeEventTest {
@@ -22,11 +22,9 @@ public class OrderTradeEventTest {
 		o2 = control.createMock(Order.class);
 		t1 = control.createMock(Trade.class);
 		t2 = control.createMock(Trade.class);
-		type1 = control.createMock(EventType.class);
-		type2 = control.createMock(EventType.class);
+		type1 = new EventTypeImpl("type1");
+		type2 = new EventTypeImpl("type2");
 		event = new OrderTradeEvent(type1, o1, t1);
-		expect(type1.asString()).andStubReturn("type1");
-		expect(type2.asString()).andStubReturn("type2");
 	}
 	
 	@Test

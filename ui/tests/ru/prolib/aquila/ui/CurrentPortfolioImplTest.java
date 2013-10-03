@@ -72,7 +72,7 @@ public class CurrentPortfolioImplTest {
 		
 		dispatcher = eventSystem.createEventDispatcher();
 		portfolios = control.createMock(Portfolios.class);
-		portfolioChanged = eventSystem.createGenericType(dispatcher);
+		portfolioChanged = dispatcher.createType();
 		acc = new Account("Foo", "Bar", "Trulala");
 		
 		menu = new Menu(new JMenu(), eventSystem);
@@ -111,7 +111,7 @@ public class CurrentPortfolioImplTest {
 	
 	@Test
 	public void testOnEvent_HandledCurrPortfolioNotSet() throws Exception {
-		EventType onPortfolioAvailable = eventSystem.createGenericType(dispatcher);
+		EventType onPortfolioAvailable = dispatcher.createType();
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
 		final CountDownLatch finished = new CountDownLatch(1);
@@ -150,7 +150,7 @@ public class CurrentPortfolioImplTest {
 	
 	@Test
 	public void testOnEvent_HandledCurrPortfolioSet() throws Exception {
-		EventType onPortfolioAvailable = eventSystem.createGenericType(dispatcher);
+		EventType onPortfolioAvailable = dispatcher.createType();
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
@@ -184,7 +184,7 @@ public class CurrentPortfolioImplTest {
 	
 	@Test
 	public void testOnEvent_Unhandled() {
-		EventType onPortfolioAvailable = eventSystem.createGenericType(dispatcher);
+		EventType onPortfolioAvailable = dispatcher.createType();
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
 		
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
@@ -197,7 +197,7 @@ public class CurrentPortfolioImplTest {
 		});
 		control.replay();
 		
-		prt.onEvent(new EventImpl(eventSystem.createGenericType(dispatcher)));
+		prt.onEvent(new EventImpl(dispatcher.createType()));
 		
 		control.verify();
 	}

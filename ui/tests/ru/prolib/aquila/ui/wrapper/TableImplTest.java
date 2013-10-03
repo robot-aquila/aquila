@@ -18,15 +18,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.EventSystemImpl;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.row.RowAdapter;
 
@@ -62,7 +54,7 @@ public class TableImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		dispatcher = eventSystem.createEventDispatcher();
-		onRowSelected = new EventTypeImpl(dispatcher);
+		onRowSelected = dispatcher.createType();
 		model = new TableModelImpl(control.createMock(G.class));
 		
 		tb = new TableImpl(model, dispatcher, onRowSelected);

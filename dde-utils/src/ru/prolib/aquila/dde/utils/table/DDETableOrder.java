@@ -78,7 +78,7 @@ public class DDETableOrder extends EventTypeImpl implements EventListener {
 						 Dependencies<String> deps,
 						 Map<String, DependencyRule> rules)
 	{
-		super(dispatcher);
+		super();
 		this.dispatcher = dispatcher;
 		this.deps = deps;
 		this.queue = new LinkedList<DDETableEvent>();
