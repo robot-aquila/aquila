@@ -7,15 +7,17 @@ import java.text.SimpleDateFormat;
 import java.util.TimerTask;
 
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleFlusherTest {
 	private static SimpleDateFormat df;
 	private IMocksControl control;
-	private CandleAggregator aggregator;
+	private EditableCandleSeries candles;
 	private java.util.Timer scheduler;
 	private Scheduler timer;
 	private CandleFlusher flusher;
@@ -28,17 +30,17 @@ public class CandleFlusherTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		aggregator = new CandleAggregator(5);
+		candles = new CandleSeriesImpl(Timeframe.M5);
 		scheduler = control.createMock(java.util.Timer.class);
 		timer = control.createMock(Scheduler.class);
-		flusher = new CandleFlusher(aggregator, timer, scheduler);
+		flusher = new CandleFlusher(candles, timer, scheduler);
 		expect(timer.getCurrentTime())
-			.andStubReturn(df.parse("2008-12-08 00:01:12"));
+			.andStubReturn(new DateTime(2008, 12, 8, 0, 1, 12));
 	}
 	
 	@Test
 	public void testStart() throws Exception {
-		TimerTask expected = new CandleFlusherTask(aggregator, timer);
+		TimerTask expected = new CandleFlusherTask(candles, timer);
 		scheduler.scheduleAtFixedRate(eq(expected),
 				eq(df.parse("2008-12-08 00:05:00")), eq(300000L));
 		control.replay();
@@ -92,34 +94,35 @@ public class CandleFlusherTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<CandleAggregator> vAggr = new Variant<CandleAggregator>()
-			.add(aggregator)
-			.add(new CandleAggregator(7));
-		Variant<Scheduler> vTmr = new Variant<Scheduler>(vAggr)
+		Variant<EditableCandleSeries> vCndl =
+				new Variant<EditableCandleSeries>()
+			.add(candles)
+			.add(new CandleSeriesImpl(Timeframe.M15));
+		Variant<Scheduler> vTmr = new Variant<Scheduler>(vCndl)
 			.add(timer)
 			.add(new SchedulerLocal());
 		Variant<?> iterator = vTmr;
 		int foundCnt = 0;
 		CandleFlusher x, found = null;
 		do {
-			x = new CandleFlusher(vAggr.get(), vTmr.get(), scheduler);
+			x = new CandleFlusher(vCndl.get(), vTmr.get(), scheduler);
 			if ( flusher.equals(x) ) {
 				foundCnt ++;
 				found = x;
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(aggregator, found.getAggregator());
+		assertSame(candles, found.getCandles());
 		assertSame(scheduler, found.getScheduler());
 		assertSame(timer, found.getTimeSource());
 	}
 	
 	@Test
 	public void testConstruct2() throws Exception {
-		flusher = new CandleFlusher(aggregator, timer);
+		flusher = new CandleFlusher(candles, timer);
 		java.util.Timer expected = flusher.getScheduler();
 		assertNotNull(expected);
-		assertSame(aggregator, flusher.getAggregator());
+		assertSame(candles, flusher.getCandles());
 		assertSame(timer, flusher.getTimeSource());
 	}
 

@@ -2,11 +2,9 @@ package ru.prolib.aquila.core.data.filler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.Starter;
-import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.StarterStub;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.data.CandleSeries;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 
 /**
  * Генератор серии свечей.
@@ -36,33 +34,33 @@ public class CandleSeriesFiller implements Starter {
 	 * Создать генератор свечей по сделкам инструмента.
 	 * <p>
 	 * @param security инструмент-источник сделок
-	 * @param periodMinutes таймфрейм свечи в минутах
+	 * @param timeframe таймфрейм
 	 * @param candleAutoFlush если true, то свечи будут закрываться по
 	 * границе свечи (по локальному времени). Иначе закрываются только при
 	 * поступлении сделки из следующего периода.
 	 */
-	public CandleSeriesFiller(Security security, int periodMinutes,
+	public CandleSeriesFiller(Security security, Timeframe timeframe,
 			boolean candleAutoFlush)
 	{
-		this(security, new CandleAggregator(periodMinutes), candleAutoFlush);
+		this(security, new CandleSeriesImpl(timeframe), candleAutoFlush);
 	}
 	
 	/**
 	 * Создать генератор свечей по сделкам инструмента.
 	 * <p>
 	 * @param security инструмент-источник сделок
-	 * @param aggregator агрегатор свечей
+	 * @param candles последовательность свечей
 	 * @param candleAutoFlush если true, то свечи будут закрываться по
 	 * границе свечи (по локальному времени). Иначе закрываются только при
 	 * поступлении сделки из следующего периода.
 	 */
-	public CandleSeriesFiller(Security security, CandleAggregator aggregator,
+	public CandleSeriesFiller(Security security, EditableCandleSeries candles,
 			boolean candleAutoFlush)
 	{
-		this(aggregator.getCandles(),
-			new CandleByTrades(security, aggregator),
+		this(candles,
+			new CandleByTrades(security, candles),
 			candleAutoFlush ?
-				new CandleFlusher(aggregator, security.getTerminal()) :
+				new CandleFlusher(candles, security.getTerminal()) :
 				new StarterStub());
 	}
 	

@@ -1,10 +1,12 @@
 package ru.prolib.aquila.core.data.filler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 
 /**
  * Сервис формирования свечей на основании сделок инструмента.
@@ -13,27 +15,32 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
  * в агрегатор свечей.
  */
 class CandleByTrades implements Starter, EventListener {
+	private static final Logger logger;
 	private final Security security;
-	private final CandleAggregator aggregator;
+	private final EditableCandleSeries candles;
+	
+	static {
+		logger = LoggerFactory.getLogger(LoggerFactory.class);
+	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
 	 * @param security инструмент-источник сделок
-	 * @param aggregator целевой агрегатор
+	 * @param candles целевой агрегатор
 	 */
-	public CandleByTrades(Security security, CandleAggregator aggregator) {
+	public CandleByTrades(Security security, EditableCandleSeries candles) {
 		super();
 		this.security = security;
-		this.aggregator = aggregator;
+		this.candles = candles;
 	}
 	
 	Security getSecurity() {
 		return security;
 	}
 	
-	CandleAggregator getAggregator() {
-		return aggregator;
+	EditableCandleSeries getCandles() {
+		return candles;
 	}
 
 	@Override
@@ -49,7 +56,11 @@ class CandleByTrades implements Starter, EventListener {
 	@Override
 	public void onEvent(Event event) {
 		SecurityTradeEvent e = (SecurityTradeEvent) event;
-		aggregator.add(e.getTrade());
+		try {
+			candles.aggregate(e.getTrade(), true);
+		} catch ( ValueException ex ) {
+			logger.error("Unexpected exception: ", ex);
+		}
 	}
 	
 	@Override
@@ -63,7 +74,7 @@ class CandleByTrades implements Starter, EventListener {
 		CandleByTrades o = (CandleByTrades) other;
 		return new EqualsBuilder()
 			.appendSuper(o.security == security)
-			.append(o.aggregator, aggregator)
+			.append(o.candles, candles)
 			.isEquals();
 	}
 

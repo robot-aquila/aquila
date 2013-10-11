@@ -1,28 +1,24 @@
 package ru.prolib.aquila.core.data;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.joda.time.*;
+
+import ru.prolib.aquila.core.BusinessEntities.Trade;
 
 /**
- * Данные японской свечи.
+ * Представление динамики цены за период.
  * <p>
  * 2012-04-20<br>
  * $Id: Candle.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class Candle {
-	private static final SimpleDateFormat df;
-	
-	static {
-		df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	}
 	
 	/**
 	 * Экземпляр свечи, использующийся для индикации конца последовательности.
 	 * Содержимое этой свечи не должно использоваться в качестве данных.
 	 */
 	public static final Candle END = new Candle(null,0,0,0,0,0);
-	private final Date time;
+	private final Interval interval;
 	private final double open;
 	private final double close;
 	private final double high;
@@ -32,22 +28,22 @@ public class Candle {
 	/**
 	 * Создать свечу на основании указанных параметров.
 	 * <p> 
-	 * @param time время
+	 * @param interval временной интервал свечи
 	 * @param open цена открытия
 	 * @param high максимальная цена
 	 * @param low минимальная цена
 	 * @param close цена закрытия
 	 * @param volume объем
 	 */
-	public Candle(Date time, double open, double high, double low,
+	public Candle(Interval interval, double open, double high, double low,
 			double close, long volume)
 	{
 		super();
-		this.time	= time;
-		this.open	= open;
-		this.high	= high;
-		this.low	= low;
-		this.close	= close;
+		this.interval = interval;
+		this.open = open;
+		this.high = high;
+		this.low = low;
+		this.close = close;
 		this.volume	= volume;
 	}
 	
@@ -57,36 +53,35 @@ public class Candle {
 	 * @param candle свеча-основание
 	 */
 	public Candle(Candle candle) {
-		this(candle.getTime(), candle.getOpen(),
-				candle.getHigh(), candle.getLow(),
-				candle.getClose(), candle.getVolume());		
+		this(candle.interval, candle.open, candle.high, candle.low,
+				candle.close, candle.volume);
 	}
 	
 	/**
 	 * Создать свечу на основе сделки.
 	 * <p>
-	 * @param time время
+	 * @param interval интервал свечи
 	 * @param price цена (используется для всех компонентов цены свечи)
 	 * @param volume объем
 	 */
-	public Candle(Date time, double price, long volume) {
-		this(time, price, price, price, price, volume);
+	public Candle(Interval interval, double price, long volume) {
+		this(interval, price, price, price, price, volume);
 	}
 	
 	/**
 	 * Создать новую свечу путем добавления сделки к текущей.
 	 * <p>
-	 * В качестве времени и цены открытия используются соответствующие значения
-	 * текущей свечи. Цена учитывается при расчете максимума и минимума новой
-	 * свечи. А так же цена используется в качестве цены закрытия новой свечи.
-	 * Указанный объем суммируется с объемом текущей свечи.
+	 * В качестве интервала и цены открытия используются соответствующие
+	 * значения текущей свечи. Цена учитывается при расчете максимума и минимума
+	 * новой свечи. А так же цена используется в качестве цены закрытия новой
+	 * свечи. Указанный объем суммируется с объемом текущей свечи.
 	 * <p>
 	 * @param price цена
 	 * @param volume объем сделки
 	 * @return новая свеча
 	 */
 	public Candle addDeal(double price, long volume) {
-		return new Candle(time, open,
+		return new Candle(interval, open,
 				price > high ? price : high,
 				price < low ? price : low,
 				price,
@@ -96,20 +91,80 @@ public class Candle {
 	/**
 	 * Создать новую свечу путем объединения с указанной.
 	 * <p>
-	 * В качестве времени и цены открытия используются соответствующие значения
-	 * текущей свечи. Цены максимума и минимума расчитываются на основе обеих
-	 * свечей. В качестве цены закрытия используется цена закрытия указанной
-	 * свечи. Объем обеих свечей суммируется.
+	 * Интервал добавляемой свечи должен принадлежать интервалу текущей.
+	 * В качестве интервала и цены открытия результирующей свечи используются
+	 * соответствующие значения текущей свечи. Цены максимума и минимума
+	 * расчитываются на основе обеих свечей. В качестве цены закрытия
+	 * используется цена закрытия указанной свечи. Объем обеих свечей
+	 * суммируется.
 	 * <p>
 	 * @param candle свеча
 	 * @return новая свеча
+	 * @throws OutOfIntervalException интервал аргумента выходит за
+	 * границы интервала данной свечи 
 	 */
-	public Candle addCandle(Candle candle) {
-		return new Candle(time, open,
+	public Candle addCandle(Candle candle)
+		throws OutOfIntervalException
+	{
+		if ( ! interval.contains(candle.interval) ) {
+			throw new OutOfIntervalException(interval, candle);
+		}
+		return new Candle(interval, open,
 				candle.high > high ? candle.high : high,
 				candle.low < low ? candle.low : low,
 				candle.close,
 				volume + candle.volume);
+	}
+	
+	/**
+	 * Создать свечу путем добавления сделки к текущей.
+	 * <p>
+	 * @param trade сделка
+	 * @return новая свеча
+	 * @throws OutOfIntervalException время сделки за границей интервала свечи
+	 */
+	public Candle addTrade(Trade trade) throws OutOfIntervalException {
+		if ( ! interval.contains(trade.getTime()) ) {
+			throw new OutOfIntervalException(interval, trade);
+		}
+		return addDeal(trade.getPrice(), trade.getQty());
+	}
+	
+	/**
+	 * Создать свечу путем добавления тика к текущей свече.
+	 * <p>
+	 * @param tick тик данных
+	 * @return новая свеча
+	 * @throws OutOfIntervalException время тика за границей интервала свечи
+	 */
+	public Candle addTick(Tick tick) throws OutOfIntervalException {
+		if ( ! interval.contains(tick.getTime()) ) {
+			throw new OutOfIntervalException(interval, tick);
+		}
+		Long qty = tick.getVolume() == null ? 0L : tick.getVolume().longValue();
+		return addDeal(tick.getValue(), qty);
+	}
+	
+	/**
+	 * Получить время начала интервала свечи.
+	 * <p>
+	 * @return время начала интервала
+	 */
+	public DateTime getStartTime() {
+		return interval.getStart();
+	}
+	
+	/**
+	 * Получить время окончания интервала свечи.
+	 * <p>
+	 * Подразумевается время окончания периода в соответствии с соглашениями,
+	 * принятыми библиотекой joda, т.е. время окончания интервала не принадлежит
+	 * интервалу, а указывает на следующую миллисекунду после интервала.
+	 * <p>
+	 * @return время окончания интервала
+	 */
+	public DateTime getEndTime() {
+		return interval.getEnd();
 	}
 	
 	/**
@@ -119,7 +174,7 @@ public class Candle {
 	 * <p>
 	 * @return высота свечи
 	 */
-	public double getCandleHeight() {
+	public double getBody() {
 		return Math.abs(open - close);
 	}
 	
@@ -135,6 +190,24 @@ public class Candle {
 	}
 	
 	/**
+	 * Бычья свечка?
+	 * <p>
+	 * @return true если свечка бычья (рост цены)
+	 */
+	public boolean isBullish() {
+		return close > open;
+	}
+	
+	/**
+	 * Медвежья свечка?
+	 * <p>
+	 * @return true если свечка медвежья (снижение цены)
+	 */
+	public boolean isBearish() {
+		return close < open;
+	}
+	
+	/**
 	 * Получить среднюю цену тела свечи или цену закрытия, в зависимости
 	 * что выше.
 	 * <p>
@@ -145,8 +218,8 @@ public class Candle {
 	 * <p>
 	 * @return цена
 	 */
-	public double getCandleCenterOrCloseIfHigher() {
-		return close > open ? close : getCandleCenter();
+	public double getBodyMiddleOrCloseIfBullish() {
+		return isBullish() ? close : getBodyMiddle();
 	}
 	
 	/**
@@ -160,8 +233,8 @@ public class Candle {
 	 * <p>
 	 * @return цена
 	 */
-	public double getCandleCenterOrCloseIfLower() {
-		return close < open ? close : getCandleCenter();
+	public double getBodyMiddleOrCloseIfBearish() {
+		return isBearish() ? close : getBodyMiddle();
 	}
 	
 	/**
@@ -171,17 +244,17 @@ public class Candle {
 	 * <p>
 	 * @return цена
 	 */
-	public double getCandleCenter() {
+	public double getBodyMiddle() {
 		return (open + close) / 2;
 	}
 	
 	/**
-	 * Получить время.
+	 * Получить интервал.
 	 * <p>
-	 * @return время свечи
+	 * @return интервал свечи
 	 */
-	public Date getTime() {
-		return time;
+	public Interval getInterval() {
+		return interval;
 	}
 	
 	/**
@@ -242,7 +315,7 @@ public class Candle {
 				.append(low, other.low)
 				.append(close, other.close)
 				.append(volume, other.volume)
-				.append(time, other.time)
+				.append(interval, other.interval)
 				.isEquals();
 		}
 		return false;
@@ -251,12 +324,30 @@ public class Candle {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() +
-			"[T=" + df.format(time) + "," +
+			"[T=" + interval.getStart() + " " + interval.toPeriod() + "," +
 			" O=" + open + "," +
 			" H=" + high + "," +
 			" L=" + low + "," +
 			" C=" + close + "," +
 			" V=" + volume + "]";
+	}
+	
+	/**
+	 * Получить высоту верхней тени.
+	 * <p>
+	 * @return высота тени
+	 */
+	public double getTopShadow() {
+		return high - (isBullish() ? close : open);
+	}
+	
+	/**
+	 * Получить высоту нижней тени.
+	 * <p>
+	 * @return высота тени
+	 */
+	public double getBottomShadow() {
+		return (isBearish() ? close : open) - low;
 	}
 	
 }

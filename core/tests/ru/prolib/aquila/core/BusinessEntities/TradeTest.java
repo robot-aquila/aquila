@@ -9,6 +9,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Variant;
@@ -41,7 +42,7 @@ public class TradeTest {
 		trade.setId(105L);
 		trade.setSecurityDescriptor(descr);
 		trade.setDirection(Direction.BUY);
-		trade.setTime(cal.getTime());
+		trade.setTime(new DateTime(cal.getTime()));
 		trade.setPrice(100.00d);
 		trade.setQty(1L);
 		trade.setVolume(200.00d);
@@ -60,7 +61,7 @@ public class TradeTest {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Trade trade = new Trade(terminal);
 		trade.setId(id);
-		trade.setTime(format.parse(time));
+		trade.setTime(new DateTime(format.parse(time)));
 		return trade;
 	}
 	
@@ -70,7 +71,7 @@ public class TradeTest {
 		assertSame(terminal, trade.getTerminal());
 		assertEquals(descr, trade.getSecurityDescriptor());
 		assertSame(Direction.BUY, trade.getDirection());
-		assertEquals(cal.getTime(), trade.getTime());
+		assertEquals(new DateTime(2010, 9, 1, 3, 45, 15), trade.getTime());
 		assertEquals(100.00d, trade.getPrice(), 0.001d);
 		assertEquals((Long) 1L, trade.getQty());
 		assertEquals(200.00d, trade.getVolume(), 0.001d);
@@ -80,9 +81,8 @@ public class TradeTest {
 	@Test
 	public void testToString() {
 		control.replay();
-		assertEquals("Trade: " +
-			"2010-09-01 03:45:15 #105 Buy SBER@EQBR(STK/RUB) 1x100.0 Vol=200.0",
-			trade.toString());
+		assertEquals("Trade: 2010-09-01T03:45:15.000+04:00 #105 Buy " +
+				"SBER@EQBR(STK/RUB) 1x100.0 Vol=200.0", trade.toString());
 	}
 	
 	@Test
@@ -128,7 +128,7 @@ public class TradeTest {
 			actual.setId(vId.get());
 			actual.setSecurityDescriptor(vSecDescr.get());
 			actual.setDirection(vDir.get());
-			actual.setTime(vTime.get());
+			actual.setTime(new DateTime(vTime.get()));
 			actual.setPrice(vPrice.get());
 			actual.setQty(vQty.get());
 			actual.setVolume(vVol.get());
@@ -163,7 +163,7 @@ public class TradeTest {
 			.append(105L)
 			.append(descr)
 			.append(Direction.BUY)
-			.append(cal.getTime())
+			.append(new DateTime(2010, 9, 1, 3, 45, 15))
 			.append(100.00d)
 			.append(1L)
 			.append(200.00d)

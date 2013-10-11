@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import java.util.Date;
+import org.joda.time.Interval;
 
 /**
  * Интерфейс редактируемого ряда временных меток.
@@ -8,6 +8,8 @@ import java.util.Date;
  * 2013-03-11<br>
  * $Id: EditableTimeSeries.java 566 2013-03-11 01:52:40Z whirlwind $
  */
-public interface EditableTimeSeries extends TimeSeries, EditableSeries<Date> {
+public interface EditableIntervalSeries
+	extends IntervalSeries, EditableSeries<Interval>
+{
 
 }

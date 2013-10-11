@@ -1,10 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities.setter;
 
 import static org.junit.Assert.*;
-
-import java.util.Date;
-
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.joda.time.DateTime;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.setter.TradeSetTime;
@@ -24,7 +22,7 @@ public class TradeSetTimeTest {
 
 	@Test
 	public void testSet() throws Exception {
-		Date time = new Date();
+		DateTime time = new DateTime();
 		Object fixture[][] = {
 				// value, expected, set?
 				{ null,		null,	false },

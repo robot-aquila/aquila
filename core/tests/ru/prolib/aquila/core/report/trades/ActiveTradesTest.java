@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.report.*;
@@ -59,7 +60,8 @@ public class ActiveTradesTest {
 			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
-		return createTrade(descr, format.parse(time), dir, qty, price, volume);
+		return createTrade(descr, new DateTime(format.parse(time)), dir, qty,
+				price, volume);
 	}
 	
 	/**
@@ -73,7 +75,7 @@ public class ActiveTradesTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(SecurityDescriptor descr, Date time,
+	private Trade createTrade(SecurityDescriptor descr, DateTime time,
 			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);

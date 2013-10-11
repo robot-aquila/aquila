@@ -1,9 +1,9 @@
 package ru.prolib.aquila.quik.assembler;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,7 +216,7 @@ public class AssemblerL2 {
 		
 	}
 	
-	private Date getTime(T2QTrade trade) {
+	private DateTime getTime(T2QTrade trade) {
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.MILLISECOND, 0);
 		
@@ -232,7 +232,7 @@ public class AssemblerL2 {
 		c.set(Calendar.MINUTE, part % 100);
 		c.set(Calendar.HOUR_OF_DAY, part / 100);
 		
-		return c.getTime();
+		return new DateTime(c.getTime());
 	}
 
 	/**

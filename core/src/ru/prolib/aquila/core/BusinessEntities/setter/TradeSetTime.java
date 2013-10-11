@@ -1,9 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.setter;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
+import org.joda.time.DateTime;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.data.ValueException;
@@ -25,8 +23,8 @@ public class TradeSetTime implements S<Trade> {
 
 	@Override
 	public void set(Trade object, Object value) throws ValueException {
-		if ( value instanceof Date ) {
-			object.setTime((Date) value);
+		if ( value instanceof DateTime ) {
+			object.setTime((DateTime) value);
 		}
 	}
 	

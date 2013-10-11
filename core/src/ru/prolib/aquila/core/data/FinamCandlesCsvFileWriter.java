@@ -189,8 +189,8 @@ public class FinamCandlesCsvFileWriter implements CandlesWriter, EventListener {
 	
 	private void writeCandle(Candle candle) throws IOException {
 		Object row[] = {
-				formatDate(candle.getTime()),
-				formatTime(candle.getTime()),
+				formatDate(candle.getStartTime().toDate()),
+				formatTime(candle.getStartTime().toDate()),
 				candle.getOpen(),
 				candle.getHigh(),
 				candle.getLow(),

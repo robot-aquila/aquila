@@ -8,11 +8,12 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleByTradesTest {
 	private IMocksControl control;
-	private CandleAggregator aggregator;
+	private EditableCandleSeries candles;
 	private Security security;
 	private EventType type;
 	private Trade trade;
@@ -21,11 +22,11 @@ public class CandleByTradesTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		aggregator = control.createMock(CandleAggregator.class);
+		candles = control.createMock(EditableCandleSeries.class);
 		security = control.createMock(Security.class);
 		type = control.createMock(EventType.class);
 		trade = control.createMock(Trade.class);
-		updater = new CandleByTrades(security, aggregator);
+		updater = new CandleByTrades(security, candles);
 		
 		expect(security.OnTrade()).andStubReturn(type);
 	}
@@ -52,7 +53,7 @@ public class CandleByTradesTest {
 	
 	@Test
 	public void testOnEvent() throws Exception {
-		expect(aggregator.add(same(trade))).andReturn(true);
+		candles.aggregate(same(trade), eq(true));
 		control.replay();
 		
 		updater.onEvent(new SecurityTradeEvent(type, security, trade));
@@ -72,9 +73,10 @@ public class CandleByTradesTest {
 		Variant<Security> vSec = new Variant<Security>()
 			.add(security)
 			.add(control.createMock(Security.class));
-		Variant<CandleAggregator> vAggr = new Variant<CandleAggregator>(vSec)
-			.add(aggregator)
-			.add(control.createMock(CandleAggregator.class));
+		Variant<EditableCandleSeries> vAggr =
+				new Variant<EditableCandleSeries>(vSec)
+			.add(candles)
+			.add(control.createMock(EditableCandleSeries.class));
 		Variant<?> iterator = vAggr;
 		int foundCnt = 0;
 		CandleByTrades x, found = null;
@@ -87,7 +89,7 @@ public class CandleByTradesTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(security, found.getSecurity());
-		assertSame(aggregator, found.getAggregator());
+		assertSame(candles, found.getCandles());
 	}
 
 }

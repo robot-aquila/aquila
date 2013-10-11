@@ -2,8 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
-import java.util.Date;
 import org.easymock.IMocksControl;
+import org.joda.time.*;
 import org.junit.*;
 
 import ru.prolib.aquila.core.EventListener;
@@ -14,19 +14,28 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: CandleProxyTest.java 565 2013-03-10 19:32:12Z whirlwind $
  */
 public class CandleProxyTest {
+	private static Interval interval1, interval2, interval3;
 	private IMocksControl control;
 	private EditableSeries<Candle> candles;
 	private CandleProxy<Double> proxy;
 	private GCandlePart<Double> getter;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		Minutes period = Minutes.minutes(5);
+		interval1 = new Interval(new DateTime(2013, 10, 6, 10, 0, 0), period);
+		interval2 = new Interval(interval1.getEnd(), period);
+		interval3 = new Interval(interval2.getEnd(), period);
+	}
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		getter = new GCandleOpen();
 		candles = new SeriesImpl<Candle>();
-		candles.add(new Candle(new Date(), 12.34d, 0d, 0d, 0d, 0l));
-		candles.add(new Candle(new Date(), 15.84d, 0d, 0d, 0d, 0l));
-		candles.add(new Candle(new Date(), 11.92d, 0d, 0d, 0d, 0l));
+		candles.add(new Candle(interval1, 12.34d, 0d, 0d, 0d, 0l));
+		candles.add(new Candle(interval2, 15.84d, 0d, 0d, 0d, 0l));
+		candles.add(new Candle(interval3, 11.92d, 0d, 0d, 0d, 0l));
 		proxy = new CandleProxy<Double>("foobar", candles, getter);
 	}
 	
@@ -96,8 +105,8 @@ public class CandleProxyTest {
 		control.replay();
 		
 		proxy.OnAdd().addListener(listener);
-		candles.add(new Candle(new Date(), 19.12d, 0d, 0d, 0d, 0l));
-		candles.add(new Candle(new Date(), 19.85d, 0d, 0d, 0d, 0l));
+		candles.add(new Candle(interval1, 19.12d, 0d, 0d, 0d, 0l));
+		candles.add(new Candle(interval2, 19.85d, 0d, 0d, 0d, 0l));
 		
 		control.verify();
 	}
@@ -105,13 +114,15 @@ public class CandleProxyTest {
 	@Test
 	public void testOnUpd() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(new ValueEvent<Double>(proxy.OnUpd(),12.34d,11.20d,0));
 		listener.onEvent(new ValueEvent<Double>(proxy.OnUpd(),11.92d,15.29d,2));
+		listener.onEvent(new ValueEvent<Double>(proxy.OnUpd(),15.29d,16.24d,2));
+		
 		control.replay();
 		
 		proxy.OnUpd().addListener(listener);
-		candles.set(new Candle(new Date(),11.20,0d,0d,0d,0l), 0);
-		candles.set(new Candle(new Date(),15.29,0d,0d,0d,0l));
+		candles.set(new Candle(interval3, 15.29, 0d, 0d, 0d, 0l));
+		candles.set(new Candle(interval3, 16.24, 0d, 0d, 0d, 0l));
+		
 		
 		control.verify();
 	}

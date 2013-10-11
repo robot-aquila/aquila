@@ -2,18 +2,18 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 
 public class SchedulerLocalTest {
 	private IMocksControl control;
 	private SchedulerLocal scheduler;
 	private TimerTask task;
-	private Date time = new Date();
+	private DateTime time = new DateTime(2013, 10, 9, 14, 12, 47);
 	private Timer timer;
 
 	@Before
@@ -26,7 +26,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testGetCurrentTime() throws Exception {
-		assertEquals(new Date(), scheduler.getCurrentTime());
+		assertEquals(new DateTime(), scheduler.getCurrentTime());
 	}
 	
 	@Test
@@ -45,7 +45,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testSchedule_TD() throws Exception {
-		timer.schedule(task, time);
+		timer.schedule(task, time.toDate());
 		control.replay();
 		
 		scheduler.schedule(task, time);
@@ -55,7 +55,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testSchedule_TDL() throws Exception {
-		timer.schedule(task, time, 215L);
+		timer.schedule(task, time.toDate(), 215L);
 		control.replay();
 		
 		scheduler.schedule(task, time, 215L);
@@ -85,7 +85,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testScheduleAtFixedRate_TDL() throws Exception {
-		timer.scheduleAtFixedRate(task, time, 302L);
+		timer.scheduleAtFixedRate(task, time.toDate(), 302L);
 		control.replay();
 		
 		scheduler.scheduleAtFixedRate(task, time, 302L);

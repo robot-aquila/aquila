@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import java.util.Date;
+import org.joda.time.*;
 import org.junit.*;
 
 /**
@@ -18,7 +18,9 @@ public class GCandleVolumeTest {
 	
 	@Test
 	public void testGet() throws Exception {
-		Candle candle = new Candle(new Date(), 0, 0, 0, 0, 1000L);
+		Candle candle =
+			new Candle(new Interval(new DateTime(2013, 10, 6, 0, 0, 0),
+				Minutes.minutes(5)), 0, 0, 0, 0, 1000L);
 		assertEquals(new Double(1000.0), getter.get(candle));
 		assertNull(getter.get(null));
 		assertNull(getter.get(this));

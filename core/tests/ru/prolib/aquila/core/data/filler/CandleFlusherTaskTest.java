@@ -2,34 +2,32 @@ package ru.prolib.aquila.core.data.filler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.Date;
-
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
-
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
+import ru.prolib.aquila.core.data.EditableCandleSeries;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleFlusherTaskTest {
 	private IMocksControl control;
-	private CandleAggregator aggregator;
+	private EditableCandleSeries aggregator;
 	private Scheduler timer;
 	private CandleFlusherTask task;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		aggregator = control.createMock(CandleAggregator.class);
+		aggregator = control.createMock(EditableCandleSeries.class);
 		timer = control.createMock(Scheduler.class);
 		task = new CandleFlusherTask(aggregator, timer);
 	}
 	
 	@Test
 	public void testRun() throws Exception {
-		Date time = new Date();
+		DateTime time = new DateTime();
 		expect(timer.getCurrentTime()).andReturn(time);
-		expect(aggregator.add(same(time))).andReturn(false);
+		aggregator.aggregate(same(time), eq(true));
 		control.replay();
 		
 		task.run();
@@ -46,9 +44,10 @@ public class CandleFlusherTaskTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<CandleAggregator> vAggr = new Variant<CandleAggregator>()
+		Variant<EditableCandleSeries> vAggr =
+				new Variant<EditableCandleSeries>()
 			.add(aggregator)
-			.add(control.createMock(CandleAggregator.class));
+			.add(control.createMock(EditableCandleSeries.class));
 		Variant<Scheduler> vTmr = new Variant<Scheduler>(vAggr)
 			.add(timer)
 			.add(control.createMock(Scheduler.class));
@@ -63,7 +62,7 @@ public class CandleFlusherTaskTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(aggregator, found.getAggregator());
+		assertSame(aggregator, found.getCandles());
 		assertSame(timer, found.getTimer());
 	}
 

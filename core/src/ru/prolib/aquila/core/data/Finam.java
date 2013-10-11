@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import ru.prolib.aquila.core.data.row.CsvRowSet;
+import org.joda.time.DateTime;
+
 import ru.prolib.aquila.core.data.row.*;
 
 /**
@@ -31,14 +33,18 @@ public class Finam {
 	 * @param candles целевой набор свечей
 	 * @throws FileNotFoundException
 	 * @throws ParseException  
+	 * @throws ValueException 
+	 * @throws NumberFormatException 
 	 * @throws RowSetException
 	 */
-	public void loadCandles(File csvfile, EditableSeries<Candle> candles)
-			throws FileNotFoundException, ParseException, RowException
+	public void loadCandles(File csvfile, EditableCandleSeries candles)
+			throws FileNotFoundException, ParseException, NumberFormatException,
+				ValueException
 	{
 		SimpleDateFormat df = new SimpleDateFormat(TIMEFORMAT);
 		RowSet rs = new CsvRowSet(csvfile);
 		Long volume = 0L;
+		Timeframe tf = candles.getTimeframe();
 		while ( rs.next() ) {
 			Object rawVol = rs.get(VOLUME);
 			if ( rawVol != null && ! rawVol.equals("") ) {
@@ -46,8 +52,9 @@ public class Finam {
 			} else {
 				volume = 0L;				
 			}
+			Date time = df.parse(rs.get(DATE) + " " + rs.get(TIME));
 			candles.add(new Candle(
-				df.parse(rs.get(DATE) + " " + rs.get(TIME)),
+				tf.getInterval(new DateTime(time)),
 				Double.parseDouble((String) rs.get(OPEN)),
 				Double.parseDouble((String) rs.get(HIGH)),
 				Double.parseDouble((String) rs.get(LOW)),

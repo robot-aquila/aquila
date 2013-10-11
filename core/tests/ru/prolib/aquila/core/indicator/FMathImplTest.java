@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.indicator;
 
 import static org.junit.Assert.*;
-import java.util.Date;
+import org.joda.time.*;
 import org.junit.*;
 import ru.prolib.aquila.core.data.*;
 
@@ -130,7 +130,7 @@ public class FMathImplTest {
 			new FR(165.2345d,  0.0412d),	// 2013-09-03 10:37:00
 			new FR(165.2050d,  0.0202d),	// 2013-09-03 10:38:00
 		};
-	private final Date time = new Date();
+	
 	private FMath math;
 	private EditableDataSeries value;
 	private EditableSeries<Candle> candles;
@@ -284,21 +284,28 @@ public class FMathImplTest {
 		candles.add(null);
 		assertNull(math.tr(candles));
 		assertNull(math.tr(candles, 0));
+
+		DateTime time = new DateTime(2013, 10, 11, 11, 9, 43);
 		
 		// H-L
-		candles.add(new Candle(time, 0, 48.70, 47.79, 48.16, 0L));
+		candles.add(new Candle(Timeframe.M5.getInterval(time),
+				0, 48.70, 47.79, 48.16, 0L));
 		assertEquals(0.91, math.tr(candles), 0.01d);
 		assertEquals(0.91, math.tr(candles, 1), 0.01d);
 		
 		// |H-Cp|
-		candles.add(new Candle(time, 0, 49.35, 48.86, 49.32, 0L));
-		candles.add(new Candle(time, 0, 49.92, 49.50, 49.91, 0L));
+		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(5)),
+				0, 49.35, 48.86, 49.32, 0L));
+		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(10)),
+				0, 49.92, 49.50, 49.91, 0L));
 		assertEquals(0.6, math.tr(candles), 0.001);
 		assertEquals(0.6, math.tr(candles, 3), 0.001);
 		
 		// |L-Cp|
-		candles.add(new Candle(time, 0, 50.19, 49.87, 50.13, 0L));
-		candles.add(new Candle(time, 0, 50.12, 49.20, 49.53, 0L));
+		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(15)),
+				0, 50.19, 49.87, 50.13, 0L));
+		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(20)),
+				0, 50.12, 49.20, 49.53, 0L));
 		assertEquals(0.93, math.tr(candles), 0.001);
 		assertEquals(0.93, math.tr(candles, 5), 0.001);
 	}

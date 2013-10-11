@@ -2,12 +2,9 @@ package ru.prolib.aquila.quik.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -20,7 +17,6 @@ import ru.prolib.aquila.t2q.*;
 public class AssemblerL2Test {
 	private static Account account;
 	private static SecurityDescriptor descr;
-	private static SimpleDateFormat df;
 	private IMocksControl control;
 	private QUIKEditableTerminal terminal;
 	private EditableSecurities securities;
@@ -34,7 +30,6 @@ public class AssemblerL2Test {
 		BasicConfigurator.configure();
 		account = new Account("TEST", "1", "2");
 		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
-		df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	}
 
 	@Before
@@ -309,7 +304,7 @@ public class AssemblerL2Test {
 		expected.setPrice(12.34d);
 		expected.setQty(1000L);
 		expected.setSecurityDescriptor(descr);
-		expected.setTime(df.parse("2013-07-22 09:33:17"));
+		expected.setTime(new DateTime(2013, 7, 22, 9, 33, 17));
 		expected.setVolume(123400d);
 
 		expect(order.hasTrade(eq(814L))).andReturn(false);
@@ -364,7 +359,7 @@ public class AssemblerL2Test {
 	public void testTryFinalize_FilledOk() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
 		T2QOrder entry = control.createMock(T2QOrder.class);
-		Date time = new Date();
+		DateTime time = new DateTime();
 		expect(order.getId()).andStubReturn(829);
 		expect(order.getQtyRest()).andReturn(0L);
 		order.setStatus(eq(OrderStatus.FILLED));
@@ -380,7 +375,7 @@ public class AssemblerL2Test {
 	
 	@Test
 	public void testTryFinalize_KilledOk() throws Exception {
-		Date time = new Date();
+		DateTime time = new DateTime();
 		T2QOrder entry = control.createMock(T2QOrder.class);
 		expect(entry.getBalance()).andStubReturn(5L);
 		expect(entry.getStatus()).andStubReturn(2);

@@ -1,20 +1,14 @@
 package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import static org.junit.Assert.*;
-
-import java.text.SimpleDateFormat;
 import java.util.*;
-
 import org.apache.log4j.BasicConfigurator;
+import org.joda.time.DateTime;
 import org.junit.*;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.quik.assembler.cache.dde.RowDataConverter;
-import ru.prolib.aquila.quik.assembler.cache.dde.RowDataTypeMismatchException;
-import ru.prolib.aquila.quik.assembler.cache.dde.RowNullValueException;
 
 public class RowDataConverterTest {
-	private SimpleDateFormat format;
 	private Row row;
 	private Map<String, Object> data;
 	private RowDataConverter converter;
@@ -27,7 +21,6 @@ public class RowDataConverterTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		data = new HashMap<String, Object>();
 		row = new SimpleRow(data);
 		converter = new RowDataConverter("yyyy-MM-dd", "HH:mm:ss");
@@ -76,18 +69,19 @@ public class RowDataConverterTest {
 			.add(null)
 			.add(new Double(32.48d));
 		Variant<?> iterator = vTime;
-		Set<Date> found = new HashSet<Date>();
+		Set<DateTime> found = new HashSet<DateTime>();
 		do {
 			data.put("date", vDate.get());
 			data.put("time", vTime.get());
 			try {
-				Date x = converter.getTime(row, "date", "time", true);
+				DateTime x = converter.getTime(row, "date", "time", true);
 				found.add(x);
 			} catch ( Exception e ) { }
 		} while ( iterator.next() );
 		assertEquals(2, found.size());
 		assertTrue(found.contains(null));
-		assertTrue(found.contains(format.parse("2013-06-01 23:45:30")));
+		assertTrue(found.contains(new DateTime(2013, 6, 1, 23, 45, 30)));
+		//assertTrue(found.contains(format.parse("2013-06-01 23:45:30")));
 	}
 		
 	@Test
@@ -106,18 +100,19 @@ public class RowDataConverterTest {
 			.add(new Double(32.48d));
 		Variant<?> iterator = vTime;
 		int foundCnt = 0;
-		Date found = null;
+		DateTime found = null;
 		do {
 			data.put("date", vDate.get());
 			data.put("time", vTime.get());
 			try {
-				Date x = converter.getTime(row, "date", "time", false);
+				DateTime x = converter.getTime(row, "date", "time", false);
 				found = x;
 				foundCnt ++;
 			} catch ( Exception e ) { }
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(format.parse("2013-06-01 23:45:30"), found);
+		assertEquals(new DateTime(2013, 6, 1, 23, 45, 30), found);
+		//assertEquals(format.parse("2013-06-01 23:45:30"), found);
 	}
 
 	@Test

@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.Date;
 import java.util.TimerTask;
+import org.joda.time.DateTime;
 
 /**
  * Интерфейс планировщика задач.
@@ -13,7 +13,7 @@ public interface Scheduler {
 	 * <p>
 	 * @return текущее время
 	 */
-	public Date getCurrentTime();
+	public DateTime getCurrentTime();
 
 	/**
 	 * Schedules the specified task for execution at the specified time.
@@ -21,7 +21,7 @@ public interface Scheduler {
 	 * @param task - task to be scheduled
 	 * @param time - time at which task is to be executed
 	 */
-	public void schedule(TimerTask task, Date time);
+	public void schedule(TimerTask task, DateTime time);
 	
 	/**
 	 * Schedules the specified task for repeated fixed-delay execution,
@@ -31,7 +31,7 @@ public interface Scheduler {
 	 * @param firstTime - First time at which task is to be executed
 	 * @param period - time in milliseconds between successive task executions
 	 */
-	public void schedule(TimerTask task, Date firstTime, long period);
+	public void schedule(TimerTask task, DateTime firstTime, long period);
 
 	/**
 	 * Schedules the specified task for execution after the specified delay.
@@ -59,7 +59,8 @@ public interface Scheduler {
      * @param firstTime - First time at which task is to be executed
      * @param period - time in milliseconds between successive task executions
      */
-    public void scheduleAtFixedRate(TimerTask task, Date firstTime, long period);
+    public void scheduleAtFixedRate(TimerTask task, DateTime firstTime,
+    		long period);
     
     /**
      * Schedules the specified task for repeated fixed-rate execution, beginning

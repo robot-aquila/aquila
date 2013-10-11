@@ -1,9 +1,7 @@
 package ru.prolib.aquila.core.indicator;
 
 import static org.junit.Assert.*;
-
-import java.util.Date;
-
+import org.joda.time.*;
 import org.junit.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -26,7 +24,7 @@ public class TRTest {
 
 	@Before
 	public void setUp() throws Exception {
-		source = new CandleSeriesImpl();
+		source = new CandleSeriesImpl(Timeframe.M1);
 		tr = new TR("foo", source);
 	}
 	
@@ -45,8 +43,10 @@ public class TRTest {
 	
 	@Test
 	public void testCalculate() throws Exception {
+		DateTime time = new DateTime(2013, 10, 11, 11, 12, 34);
 		for ( int i = 0; i < fixture.length; i ++ ) {
-			source.add(new Candle(new Date(), 0d, fixture[i][0],
+			source.add(new Candle(source.getTimeframe()
+				.getInterval(time.plusMinutes(i)), 0d, fixture[i][0],
 					fixture[i][1], fixture[i][2], 0));
 			String msg = "At #" + i;
 			assertEquals(msg, fixture[i][3], tr.get(), 0.01d);
@@ -67,8 +67,8 @@ public class TRTest {
 			.add("foo")
 			.add("bar");
 		Variant<CandleSeries> vSrc = new Variant<CandleSeries>(vId)
-			.add(new CandleSeriesImpl())
-			.add(new CandleSeriesImpl("zulu46"));
+			.add(new CandleSeriesImpl(Timeframe.M1))
+			.add(new CandleSeriesImpl(Timeframe.M10, "zulu46"));
 		Variant<?> iterator = vSrc;
 		int foundCnt = 0;
 		TR x, found = null;

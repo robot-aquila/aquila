@@ -2,22 +2,19 @@ package ru.prolib.aquila.core.data.filler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.Date;
-
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleByLastPriceTest {
 	private IMocksControl control;
 	private Terminal terminal;
-	private CandleAggregator aggregator;
+	private EditableCandleSeries candles;
 	private Security security;
 	private EventType type;
 	private CandleByLastPrice updater;
@@ -32,10 +29,10 @@ public class CandleByLastPriceTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
-		aggregator = control.createMock(CandleAggregator.class);
+		candles = control.createMock(EditableCandleSeries.class);
 		security = control.createMock(Security.class);
 		type = control.createMock(EventType.class);
-		updater = new CandleByLastPrice(security, aggregator);
+		updater = new CandleByLastPrice(security, candles);
 		
 		expect(security.OnChanged()).andStubReturn(type);
 		expect(security.getTerminal()).andStubReturn(terminal);
@@ -63,10 +60,10 @@ public class CandleByLastPriceTest {
 	
 	@Test
 	public void testOnEvent() throws Exception {
-		Date time = new DateTime(2013, 6, 2, 13, 45, 23).toDate();
+		DateTime time = new DateTime(2013, 6, 2, 13, 45, 23);
 		expect(terminal.getCurrentTime()).andReturn(time);
 		expect(security.getLastPrice()).andReturn(85.23d);
-		expect(aggregator.add(eq(new Tick(time, 85.23d)))).andReturn(true);
+		candles.aggregate(eq(new Tick(time, 85.23d)), eq(true));
 		control.replay();
 		
 		updater.onEvent(null);
@@ -86,9 +83,10 @@ public class CandleByLastPriceTest {
 		Variant<Security> vSec = new Variant<Security>()
 			.add(security)
 			.add(control.createMock(Security.class));
-		Variant<CandleAggregator> vAggr = new Variant<CandleAggregator>(vSec)
-			.add(aggregator)
-			.add(control.createMock(CandleAggregator.class));
+		Variant<EditableCandleSeries> vAggr =
+				new Variant<EditableCandleSeries>(vSec)
+			.add(candles)
+			.add(control.createMock(EditableCandleSeries.class));
 		Variant<?> iterator = vAggr;
 		int foundCnt = 0;
 		CandleByLastPrice x, found = null;
@@ -101,7 +99,7 @@ public class CandleByLastPriceTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(security, found.getSecurity());
-		assertSame(aggregator, found.getAggregator());
+		assertSame(candles, found.getCandles());
 	}
 
 }

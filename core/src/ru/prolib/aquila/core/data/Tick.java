@@ -1,9 +1,7 @@
 package ru.prolib.aquila.core.data;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.joda.time.DateTime;
 
 /**
  * Тиковые данные.
@@ -14,13 +12,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * в определенный момент времени.  
  */
 public class Tick {
-	private static final SimpleDateFormat format;
-	
-	static {
-		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	}
-	
-	private final Date time;
+	private final DateTime time;
 	private final Double value;
 	private final Double volume;
 
@@ -31,7 +23,7 @@ public class Tick {
 	 * @param value основное значение
 	 * @param volume опциональное значение
 	 */
-	public Tick(Date time, Double value, Double volume) {
+	public Tick(DateTime time, Double value, Double volume) {
 		super();
 		this.time = time;
 		this.value = value;
@@ -46,7 +38,7 @@ public class Tick {
 	 * @param time время
 	 * @param value значение
 	 */
-	public Tick(Date time, Double value) {
+	public Tick(DateTime time, Double value) {
 		this(time, value, null);
 	}
 	
@@ -55,7 +47,7 @@ public class Tick {
 	 * <p>
 	 * @return время
 	 */
-	public Date getTime() {
+	public DateTime getTime() {
 		return time;
 	}
 	
@@ -98,7 +90,7 @@ public class Tick {
 	public String toString() {
 		return getClass().getSimpleName() + "[val=" + value
 			+ (volume == null ? "" : ", vol=" + volume)
-			+ " at " + format.format(time) + "]";
+			+ " at " + time + "]";
 	}
 	
 

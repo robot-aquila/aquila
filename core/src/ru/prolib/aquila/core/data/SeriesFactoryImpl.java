@@ -57,8 +57,8 @@ public class SeriesFactoryImpl implements SeriesFactory {
 	}
 
 	@Override
-	public EditableTimeSeries createTime(String id) {
-		return new TimeSeriesImpl(id, limit);
+	public EditableIntervalSeries createInterval(String id) {
+		return new IntervalSeriesImpl(id, limit);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -68,8 +68,8 @@ public class SeriesFactoryImpl implements SeriesFactory {
 	}
 
 	@Override
-	public EditableCandleSeries createCandle(String id) {
-		return new CandleSeriesImpl(id, limit);
+	public EditableCandleSeries createCandle(Timeframe tf, String id) {
+		return new CandleSeriesImpl(tf, id, limit);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -90,13 +90,13 @@ public class SeriesFactoryImpl implements SeriesFactory {
 	}
 
 	@Override
-	public EditableCandleSeries createCandle() {
-		return createCandle(Series.DEFAULT_ID);
+	public EditableCandleSeries createCandle(Timeframe tf) {
+		return createCandle(tf, Series.DEFAULT_ID);
 	}
 
 	@Override
-	public EditableTimeSeries createTime() {
-		return createTime(Series.DEFAULT_ID);
+	public EditableIntervalSeries createInterval() {
+		return createInterval(Series.DEFAULT_ID);
 	}
 
 	@Override

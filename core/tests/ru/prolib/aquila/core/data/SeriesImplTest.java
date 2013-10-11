@@ -93,15 +93,6 @@ public class SeriesImplTest {
 	}
 	
 	@Test
-	public void testSet2_Ok() throws Exception {
-		val1.set(80, 2); // by positive index
-		assertEquals(80, (int)val1.get(2));
-		
-		val1.set(200, -1); // by negative index
-		assertEquals(200, (int)val1.get(2));
-	}
-	
-	@Test
 	public void testGet0_AfterLimited() throws Exception {
 		assertEquals(7, (int)val2.get());
 	}
@@ -221,15 +212,16 @@ public class SeriesImplTest {
 	@Test
 	public void testOnUpd() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(), 4, 6, 1)));
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(), 8, 7, 2)));
 		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(), 16, 24, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(), 24,  6, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(),  6,  7, 3)));
+
 		control.replay();
 		
 		val1.OnUpd().addListener(listener);
-		val1.set(6, 1);
-		val1.set(7, 2);
 		val1.set(24);
+		val1.set( 6);
+		val1.set( 7);
 		
 		control.verify();
 	}

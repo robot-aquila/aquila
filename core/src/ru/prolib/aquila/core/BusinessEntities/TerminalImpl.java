@@ -1,18 +1,14 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.Date;
 import java.util.List;
 import java.util.TimerTask;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
-import ru.prolib.aquila.core.utils.Counter;
-import ru.prolib.aquila.core.utils.SimpleCounter;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.utils.*;
 
 /**
  * Базовая реализация терминала.
@@ -562,7 +558,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public Date getCurrentTime() {
+	final public DateTime getCurrentTime() {
 		return scheduler.getCurrentTime();
 	}
 
@@ -708,12 +704,13 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public void schedule(TimerTask task, Date time) {
+	final public void schedule(TimerTask task, DateTime time) {
 		scheduler.schedule(task, time);
 	}
 
 	@Override
-	final public void schedule(TimerTask task, Date firstTime, long period) {
+	final public void schedule(TimerTask task, DateTime firstTime, long period)
+	{
 		scheduler.schedule(task, firstTime, period);
 	}
 
@@ -728,8 +725,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public
-		void scheduleAtFixedRate(TimerTask task, Date firstTime, long period)
+	final public void scheduleAtFixedRate(TimerTask task, DateTime firstTime,
+			long period)
 	{
 		scheduler.scheduleAtFixedRate(task, firstTime, period);		
 	}

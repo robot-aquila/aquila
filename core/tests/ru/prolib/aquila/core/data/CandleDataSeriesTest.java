@@ -1,9 +1,8 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import java.util.Date;
+import org.joda.time.*;
 import org.junit.*;
-
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -39,7 +38,8 @@ public class CandleDataSeriesTest {
 	@Test
 	public void testEquals() throws Exception {
 		SeriesImpl<Candle> candles2 = new SeriesImpl<Candle>();
-		candles2.add(new Candle(new Date(), 10d, 20l));
+		candles2.add(new Candle(new Interval(new DateTime(),Minutes.minutes(1)),
+				10d, 20l));
 		Variant<String> vId = new Variant<String>()
 			.add("bar")
 			.add("foo");

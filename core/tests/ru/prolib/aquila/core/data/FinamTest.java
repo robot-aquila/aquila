@@ -1,11 +1,9 @@
 package ru.prolib.aquila.core.data;
 
-
 import static org.junit.Assert.*;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
-
+import org.joda.time.*;
 import org.junit.*;
 
 /**
@@ -33,15 +31,16 @@ public class FinamTest {
 			{ "20130307100000", 134.97d, 135.21d, 134.52d, 134.67d, 5386540L },
 			{ "20130307110000", 134.68d, 135.59d, 134.62d, 135.40d, 1906010L },
 		};
-		EditableSeries<Candle> expected = new SeriesImpl<Candle>();
+		EditableCandleSeries expected = new CandleSeriesImpl(Timeframe.M5);
 		for ( int i = 0; i < fix.length; i ++ ) {
-			expected.add(new Candle(df.parse((String) fix[i][0]),
+			DateTime time = new DateTime(df.parse((String) fix[i][0]));
+			expected.add(new Candle(Timeframe.M5.getInterval(time),
 					(Double) fix[i][1], (Double) fix[i][2],
 					(Double) fix[i][3], (Double) fix[i][4],
 					(Long) fix[i][5]));
 		}
 		
-		EditableSeries<Candle> actual = new SeriesImpl<Candle>();
+		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
 		finam.loadCandles(new File("fixture/GAZP.txt"), actual);
 		
 		assertEquals(expected, actual);
@@ -55,14 +54,15 @@ public class FinamTest {
 				{ "20130301101000",152370.0,152380.0,152060.0,152200.0 },
 				{ "20130301101500",152200.0,152250.0,152130.0,152190.0 },
 		};
-		EditableSeries<Candle> expected = new SeriesImpl<Candle>();
+		EditableCandleSeries expected = new CandleSeriesImpl(Timeframe.M5);
 		for ( int i = 0; i < fix.length; i ++ ) {
-			expected.add(new Candle(df.parse((String) fix[i][0]),
+			DateTime time = new DateTime(df.parse((String) fix[i][0]));
+			expected.add(new Candle(Timeframe.M5.getInterval(time),
 					(Double) fix[i][1], (Double) fix[i][2],
 					(Double) fix[i][3], (Double) fix[i][4], 0L));
 		}
 
-		EditableSeries<Candle> actual = new SeriesImpl<Candle>();
+		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
 		finam.loadCandles(new File("fixture/SPFB.RTS.txt"), actual);
 		
 		assertEquals(expected, actual);
@@ -71,7 +71,7 @@ public class FinamTest {
 	@Test
 	public void testCreateWriter() throws Exception {
 		File file = File.createTempFile("finam-", ".csv");
-		EditableCandleSeries candles = new CandleSeriesImpl();
+		EditableCandleSeries candles = new CandleSeriesImpl(Timeframe.M5);
 		
 		CandlesWriter expected = new FinamCandlesCsvFileWriter(candles, file);
 		assertEquals(expected, finam.createWriter(file, candles));

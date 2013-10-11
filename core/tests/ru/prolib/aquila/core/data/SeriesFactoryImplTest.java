@@ -36,26 +36,26 @@ public class SeriesFactoryImplTest {
 	
 	@Test
 	public void testCreateCandle() throws Exception {
-		assertEquals(new CandleSeriesImpl(Series.DEFAULT_ID, 0),
-				factory1.createCandle());
-		assertEquals(new CandleSeriesImpl("zulu", 0),
-				factory1.createCandle("zulu"));
-		assertEquals(new CandleSeriesImpl(Series.DEFAULT_ID, 128),
-				factory2.createCandle());
-		assertEquals(new CandleSeriesImpl("pimba", 128),
-				factory2.createCandle("pimba"));
+		assertEquals(new CandleSeriesImpl(Timeframe.M1, Series.DEFAULT_ID, 0),
+				factory1.createCandle(Timeframe.M1));
+		assertEquals(new CandleSeriesImpl(Timeframe.M5, "zulu", 0),
+				factory1.createCandle(Timeframe.M5, "zulu"));
+		assertEquals(new CandleSeriesImpl(Timeframe.M10,Series.DEFAULT_ID, 128),
+				factory2.createCandle(Timeframe.M10));
+		assertEquals(new CandleSeriesImpl(Timeframe.M15, "pimba", 128),
+				factory2.createCandle(Timeframe.M15, "pimba"));
 	}
 
 	@Test
-	public void testCreateTime() throws Exception {
-		assertEquals(new TimeSeriesImpl(Series.DEFAULT_ID, 0),
-				factory1.createTime());
-		assertEquals(new TimeSeriesImpl("mobi", 0),
-				factory1.createTime("mobi"));
-		assertEquals(new TimeSeriesImpl(Series.DEFAULT_ID, 128),
-				factory2.createTime());
-		assertEquals(new TimeSeriesImpl("zippo", 128),
-				factory2.createTime("zippo"));
+	public void testCreateInterval() throws Exception {
+		assertEquals(new IntervalSeriesImpl(Series.DEFAULT_ID, 0),
+				factory1.createInterval());
+		assertEquals(new IntervalSeriesImpl("mobi", 0),
+				factory1.createInterval("mobi"));
+		assertEquals(new IntervalSeriesImpl(Series.DEFAULT_ID, 128),
+				factory2.createInterval());
+		assertEquals(new IntervalSeriesImpl("zippo", 128),
+				factory2.createInterval("zippo"));
 	}
 
 	@Test

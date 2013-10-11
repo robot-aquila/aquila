@@ -1,8 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.Date;
 import java.util.List;
-
+import org.joda.time.DateTime;
 import ru.prolib.aquila.core.EventType;
 
 /**
@@ -209,7 +208,7 @@ public interface Order {
 	 * <p>
 	 * @return время выставления заявки или null, если заявка не выставлена
 	 */
-	public Date getTime();
+	public DateTime getTime();
 	
 	/**
 	 * Получить время последнего изменения заявки.
@@ -220,7 +219,7 @@ public interface Order {
 	 * @return время последнего изменения или null, если заявка не в финальном
 	 * статусе
 	 */
-	public Date getLastChangeTime();
+	public DateTime getLastChangeTime();
 	
 	/**
 	 * Получить список сделок заявки.
@@ -251,7 +250,7 @@ public interface Order {
 	 * <p>
 	 * @return время последней сделки или null, если нет сделок
 	 */
-	public Date getLastTradeTime();
+	public DateTime getLastTradeTime();
 	
 	/**
 	 * Получить служебную информацию заявки.

@@ -2,10 +2,10 @@ package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public class RowDataConverter {
 	 * @throws RowNullValueException нулевое значение элемента ряда
 	 * @throws RowDataTypeMismatchException неожиданный тип данных
 	 */
-	public Date getTime(Row row, String dateId, String timeId,
+	public DateTime getTime(Row row, String dateId, String timeId,
 			boolean permitNullResult) throws ValueException
 	{
 		String date = getString(row, dateId);
@@ -73,7 +73,7 @@ public class RowDataConverter {
 			return null;
 		}
 		try {
-			return fullTimeFormat.parse(date + " " + time);
+			return new DateTime(fullTimeFormat.parse(date + " " + time));
 		} catch ( ParseException e ) {
 			throw new RowTimeParseException(dateId, timeId,
 					date, time, dateFormat, timeFormat);

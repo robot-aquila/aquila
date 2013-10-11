@@ -1,7 +1,5 @@
 package ru.prolib.aquila.ui;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import ru.prolib.aquila.core.*;
@@ -15,7 +13,6 @@ public class TradesReportTableModel extends AbstractTableModel
 {
 	private static final long serialVersionUID = 676641706428117427L;
 	private static final String TEXT_SEC = "TradeReport";
-	private static final SimpleDateFormat timeFormat;
 	private static final String COL_TYPE = "COL_TYPE";
 	private static final String COL_SEC_DESCR = "COL_SEC_DESCR";
 	private static final String COL_QTY = "COL_QTY";
@@ -43,10 +40,6 @@ public class TradesReportTableModel extends AbstractTableModel
 		COL_PROF_LOSS,
 		COL_PROF_LOSS_PERC,
 	};
-	
-	static {
-		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	}
 	
 	private final TradeReport trades;
 	private final ClassLabels labels;
@@ -87,11 +80,11 @@ public class TradesReportTableModel extends AbstractTableModel
 		} else if ( hdr == COL_UNCOVERED_QTY ) {
 			return report.getUncoveredQty();
 		} else if ( hdr == COL_ENTER_TIME ) {
-			return formatTime(report.getEnterTime());
+			return report.getEnterTime();
 		} else if ( hdr == COL_ENTER_PRICE ) {
 			return report.getEnterPrice();
 		} else if ( hdr == COL_EXIT_TIME ) {
-			return formatTime(report.getExitTime());
+			return report.getExitTime();
 		} else if ( hdr == COL_EXIT_PRICE ) {
 			return report.getExitPrice();
 		} else if ( hdr == COL_ENTER_VOL ) {
@@ -104,10 +97,6 @@ public class TradesReportTableModel extends AbstractTableModel
 			return report.getProfitPerc();
 		}
 		return null;
-	}
-	
-	private String formatTime(Date time) {
-		return time == null ? null : timeFormat.format(time);
 	}
 
 	@Override

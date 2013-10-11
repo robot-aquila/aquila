@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import org.joda.time.DateTime;
+
 /**
  * Интерфейс ряда свечей.
  * <p>
@@ -13,41 +15,64 @@ public interface CandleSeries extends Series<Candle> {
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getOpen();
+	public DataSeries getOpenSeries();
 
 	/**
 	 * Получить ряд данных, соответствующий максимальной цене свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getHigh();
+	public DataSeries getHighSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий минимальной цене свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getLow();
+	public DataSeries getLowSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий цене закрытия свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getClose();
+	public DataSeries getCloseSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий объему торгов свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getVolume();
+	public DataSeries getVolumeSeries();
 	
 	/**
-	 * Получить ряд данных, соответствующий времени открытия свечи.
+	 * Получить ряд данных, соответствующий интервалу свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public TimeSeries getTime();
+	public IntervalSeries getIntervalSeries();
+	
+	/**
+	 * Получить точку актуальности.
+	 * <p>
+	 * @return время точки актуальности
+	 */
+	public DateTime getPOA();
+	
+	/**
+	 * Получить таймфрейм свечей.
+	 * <p>
+	 * @return таймфрейм
+	 */
+	public Timeframe getTimeframe();
+	
+	/**
+	 * Найти первую внутридневную свечу.
+	 * <p>
+	 * Ищет самую раннюю свечу текущего дня начиная с конца последовательности.
+	 * <p>
+	 * @return свеча или null, если последовательность пуста
+	 */
+	public Candle findFirstIntradayCandle();
 
 }

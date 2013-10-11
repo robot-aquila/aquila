@@ -94,5 +94,30 @@ public class QUIK_EMATest {
 			}
 		}
 	}
+	
+	@Test
+	public void testUpdate() throws Exception {
+		for ( int i = 0; i < fixture.length; i ++ ) source.add(fixture[i][0]);
+		
+		// Текущее последнее значение
+		assertEquals(224.892500d, ma.get(), 0.0000001d);
+		
+		Double fix[][] = {
+				// update to, expected ma
+				{ 224.19d, 222.757500d },
+				{ 210.46d, 215.892500d }, 
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			String msg = "At #" + i;
+			source.set(fix[i][0]);
+			assertEquals(msg, fix[i][1], ma.get(), 0.0000001d);
+		}
+		
+		//{ 223.80d, 221.325000d }, // prev
+		//{ 228.46d, 224.892500d }, // last
+		
+		// period=3, EMAp=221.325
+		// return (EMAp * (period - 1) + 2 * value) / (period + 1);
+	}
 
 }

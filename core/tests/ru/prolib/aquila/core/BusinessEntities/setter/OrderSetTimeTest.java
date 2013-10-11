@@ -1,14 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities.setter;
 
 
-import static org.easymock.EasyMock.createStrictControl;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.Date;
-
 import org.easymock.*;
+import org.joda.time.DateTime;
 import org.junit.*;
-
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
@@ -34,7 +31,7 @@ public class OrderSetTimeTest {
 	
 	@Test
 	public void testSet() throws Exception {
-		Date d = new Date();
+		DateTime d = new DateTime();
 		Object fixture[][] = {
 			// value, expected value, set?
 			{ d,		d,		true },
@@ -45,7 +42,7 @@ public class OrderSetTimeTest {
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			control.resetToStrict();
 			if ( (Boolean) fixture[i][2] ) {
-				order.setTime((Date) fixture[i][1]);
+				order.setTime((DateTime) fixture[i][1]);
 			}
 			control.replay();
 			setter.set(order, fixture[i][0]);

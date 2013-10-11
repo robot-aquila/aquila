@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities.setter;
 
-import java.util.Date;
-
+import org.joda.time.DateTime;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.data.S;
 import ru.prolib.aquila.core.data.ValueException;
@@ -20,8 +19,8 @@ public class OrderSetTime implements S<EditableOrder> {
 
 	@Override
 	public void set(EditableOrder object, Object value) throws ValueException {
-		if ( value != null && value.getClass() == Date.class ) {
-			object.setTime((Date) value);
+		if ( value != null && value.getClass() == DateTime.class ) {
+			object.setTime((DateTime) value);
 		}
 	}
 	

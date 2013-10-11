@@ -1,20 +1,18 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.joda.time.DateTime;
 import org.junit.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class TickTest {
-	private static Date time1, time2;
+	private static DateTime time1, time2;
 	private Tick tick;
 	
 	@BeforeClass
 	public static void setUpBeforClass() throws Exception {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		time1 = df.parse("2013-03-07 15:53:00.123");
-		time2 = df.parse("2013-03-07 16:00:00.001");
+		time1 = new DateTime(2013, 10, 6, 15, 44, 51, 123);
+		time2 = new DateTime(2013, 6, 2, 11, 49, 24, 861);
 		
 	}
 
@@ -47,7 +45,7 @@ public class TickTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<Date> vTime = new Variant<Date>()
+		Variant<DateTime> vTime = new Variant<DateTime>()
 			.add(time1)
 			.add(time2);
 		Variant<Double> vVal = new Variant<Double>(vTime)
@@ -74,8 +72,9 @@ public class TickTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		assertEquals("Tick[val=1828.14, vol=1000.0 at 2013-03-07 15:53:00.123]",
-				tick.toString());
+		assertEquals(
+			"Tick[val=1828.14, vol=1000.0 at 2013-10-06T15:44:51.123+04:00]",
+			tick.toString());
 	}
 
 }

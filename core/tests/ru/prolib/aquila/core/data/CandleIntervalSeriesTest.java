@@ -1,36 +1,25 @@
 package ru.prolib.aquila.core.data;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Date;
-
+import static org.junit.Assert.*;
+import org.joda.time.*;
 import org.junit.*;
-
 import ru.prolib.aquila.core.utils.Variant;
 
-/**
- * 2013-03-11<br>
- * $Id: CandleTimeSeriesTest.java 566 2013-03-11 01:52:40Z whirlwind $
- */
-public class CandleTimeSeriesTest {
+public class CandleIntervalSeriesTest {
 	private Series<Candle> candles;
-	private CandleTimeSeries series;
+	private CandleIntervalSeries series;
 
 	@Before
 	public void setUp() throws Exception {
 		candles = new SeriesImpl<Candle>();
-		series = new CandleTimeSeries("foo", candles);
+		series = new CandleIntervalSeries("foo", candles);
 	}
 	
 	@Test
 	public void testConstruct3() throws Exception {
 		assertEquals("foo", series.getId());
 		assertSame(candles, series.getCandles());
-		assertEquals(new GCandleTime(), series.getGetter());
+		assertEquals(new GCandleInterval(), series.getGetter());
 	}
 	
 	@Test
@@ -42,8 +31,9 @@ public class CandleTimeSeriesTest {
 
 	@Test
 	public void testEquals() throws Exception {
+		Interval interval = new Interval(new DateTime(), Minutes.minutes(5));
 		SeriesImpl<Candle> candles2 = new SeriesImpl<Candle>();
-		candles2.add(new Candle(new Date(), 10d, 20l));
+		candles2.add(new Candle(interval, 10d, 20l));
 		Variant<String> vId = new Variant<String>()
 			.add("bar")
 			.add("foo");
@@ -52,9 +42,9 @@ public class CandleTimeSeriesTest {
 			.add(candles2);
 		Variant<?> iterator = vCandles;
 		int foundCnt = 0;
-		CandleTimeSeries x = null, found = null;
+		CandleIntervalSeries x = null, found = null;
 		do {
-			x = new CandleTimeSeries(vId.get(), vCandles.get());
+			x = new CandleIntervalSeries(vId.get(), vCandles.get());
 			if ( series.equals(x) ) {
 				foundCnt ++;
 				found = x;

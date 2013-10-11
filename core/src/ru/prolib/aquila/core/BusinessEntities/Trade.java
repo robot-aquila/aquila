@@ -1,11 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
+import org.joda.time.DateTime;
 
 /**
  * Модель сделки.
@@ -14,17 +11,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * $Id: Trade.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class Trade implements Comparable<Trade> {
-	private final static SimpleDateFormat df;
-	
-	static {
-		df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	}
-	
 	private final Terminal terminal;
 	private Long id;
 	private SecurityDescriptor descr;
 	private Direction direction;
-	private Date time;
+	private DateTime time;
 	private Double price;
 	private Long qty;
 	private Double volume;
@@ -67,11 +58,16 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return время сделки
 	 */
-	public synchronized Date getTime() {
+	public synchronized DateTime getTime() {
 		return time;
 	}
 	
-	public synchronized void setTime(Date time) {
+	/**
+	 * Установить время сделки.
+	 * <p>
+	 * @param time время сделки
+	 */
+	public synchronized void setTime(DateTime time) {
 		this.time = time;
 	}
 	
@@ -192,7 +188,7 @@ public class Trade implements Comparable<Trade> {
 	@Override
 	public synchronized String toString() {
 		return "Trade: "
-		 	+ (time == null ? time : df.format(time))
+		 	+ time
 			+ " #" + id + " " +  direction + " "
 			+ descr + " " + qty + "x" + price
 			+ " Vol=" + volume;

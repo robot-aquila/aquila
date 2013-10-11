@@ -2,9 +2,8 @@ package ru.prolib.aquila.core.report.trades;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import org.apache.commons.lang3.builder.*;
+import org.joda.time.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.report.RTrade;
 
@@ -12,21 +11,16 @@ import ru.prolib.aquila.core.report.RTrade;
  * Отчет по трейду.
  */
 public class RTradeImpl implements ERTrade {
-	private static final SimpleDateFormat format;
 	private final SecurityDescriptor descr;
 	private final PositionType type;
-	private Date enterTime;
-	private Date exitTime;
+	private DateTime enterTime;
+	private DateTime exitTime;
 	private Long enterQty;
 	private Long exitQty;
 	private Double sumByEnterPrice;
 	private Double sumByExitPrice;
 	private Double enterVol;
 	private Double exitVol;
-	
-	static {
-		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	}
 	
 	/**
 	 * Конструктор (для тестов).
@@ -43,7 +37,7 @@ public class RTradeImpl implements ERTrade {
 	 * @param exitVol суммарный объем выхода
 	 */
 	public RTradeImpl(SecurityDescriptor descr, PositionType type,
-			Date enterTime, Date exitTime, Long enterQty, Long exitQty,
+			DateTime enterTime, DateTime exitTime, Long enterQty, Long exitQty,
 			Double sumByEnterPrice, Double sumByExitPrice,
 			Double enterVol, Double exitVol)
 	{
@@ -118,12 +112,12 @@ public class RTradeImpl implements ERTrade {
 	}
 	
 	@Override
-	public synchronized Date getExitTime() {
+	public synchronized DateTime getExitTime() {
 		return exitTime;
 	}
 	
 	@Override
-	public synchronized Date getEnterTime() {
+	public synchronized DateTime getEnterTime() {
 		return enterTime;
 	}
 	
@@ -222,26 +216,16 @@ public class RTradeImpl implements ERTrade {
 		return getClass().getSimpleName() + "["
 			+ "sec=" + descr + ", "
 			+ "type=" + type + ", "
-			+ "enterTime=" + formatTime(enterTime) + ", "
+			+ "enterTime=" + enterTime + ", "
 			+ "enterPrice=" + getEnterPrice() + ", "
 			+ "enterVol=" + enterVol + ", "
 			+ "qty=" + enterQty + ", "
 			+ "uncovered=" + getUncoveredQty() + ", "
 			+ "exitPrice=" + getExitPrice() + ", "
 			+ "exitVol=" + exitVol + ", "
-			+ "exitTime=" + formatTime(exitTime) + "]";
+			+ "exitTime=" + exitTime + "]";
 	}
 	
-	/**
-	 * Форматировать время.
-	 * <p>
-	 * @param time время
-	 * @return строка времени или null, если время не определено
-	 */
-	private String formatTime(Date time) {
-		return time == null ? null : format.format(time);
-	}
-
 	@Override
 	public synchronized int compareTo(RTrade o) {
 		if ( o == null ) {
@@ -250,7 +234,7 @@ public class RTradeImpl implements ERTrade {
 		if ( enterTime.equals(o.getEnterTime()) ) {
 			return 0;
 		}
-		return enterTime.after(o.getEnterTime()) ? 1 : -1;
+		return enterTime.isAfter(o.getEnterTime()) ? 1 : -1;
 	}
 	
 	@Override

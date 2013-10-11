@@ -1,12 +1,13 @@
 package ru.prolib.aquila.core.data.filler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.data.*;
 
 /**
  * Бары по цене последней сделки инструмента.
@@ -28,20 +29,20 @@ public class CandleByLastPrice implements EventListener, Starter {
 	}
 	
 	private final Security security;
-	private final CandleAggregator aggregator;
+	private final EditableCandleSeries candles;
 	
-	public CandleByLastPrice(Security security, CandleAggregator aggregator) {
+	public CandleByLastPrice(Security security, EditableCandleSeries candles) {
 		super();
 		this.security = security;
-		this.aggregator = aggregator;
+		this.candles = candles;
 	}
 	
 	Security getSecurity() {
 		return security;
 	}
 	
-	CandleAggregator getAggregator() {
-		return aggregator;
+	EditableCandleSeries getCandles() {
+		return candles;
 	}
 
 	@Override
@@ -57,8 +58,12 @@ public class CandleByLastPrice implements EventListener, Starter {
 
 	@Override
 	public void onEvent(Event event) {
-		aggregator.add(new Tick(security.getTerminal().getCurrentTime(),
-				security.getLastPrice()));
+		DateTime time = new DateTime(security.getTerminal().getCurrentTime());
+		try {
+			candles.aggregate(new Tick(time, security.getLastPrice()), true);
+		} catch ( OutOfDateException e ) {
+			logger.error("Unexpected exception", e);
+		}
 	}
 	
 	@Override
@@ -72,7 +77,7 @@ public class CandleByLastPrice implements EventListener, Starter {
 		CandleByLastPrice o = (CandleByLastPrice) other;
 		return new EqualsBuilder()
 			.appendSuper(o.security == security)
-			.appendSuper(o.aggregator == aggregator)
+			.appendSuper(o.candles == candles)
 			.isEquals();
 	}
 

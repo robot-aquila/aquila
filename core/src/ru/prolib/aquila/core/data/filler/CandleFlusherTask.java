@@ -3,24 +3,34 @@ package ru.prolib.aquila.core.data.filler;
 import java.util.TimerTask;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
+import ru.prolib.aquila.core.data.EditableCandleSeries;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Служебный класс: задача закрытия свечи агрегатора по времени.
  */
 class CandleFlusherTask extends TimerTask {
-	private final CandleAggregator aggregator;
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(CandleFlusherTask.class);
+	}
+	
+	private final EditableCandleSeries candles;
 	private final Scheduler timer;
 	
-	CandleFlusherTask(CandleAggregator aggregator, Scheduler timer) {
+	CandleFlusherTask(EditableCandleSeries candles, Scheduler timer) {
 		super();
-		this.aggregator = aggregator;
+		this.candles = candles;
 		this.timer = timer;
 	}
 	
-	CandleAggregator getAggregator() {
-		return aggregator;
+	EditableCandleSeries getCandles() {
+		return candles;
 	}
 	
 	Scheduler getTimer() {
@@ -29,7 +39,11 @@ class CandleFlusherTask extends TimerTask {
 
 	@Override
 	public void run() {
-		aggregator.add(timer.getCurrentTime());
+		try {
+			candles.aggregate(timer.getCurrentTime(), true);
+		} catch ( ValueException e ) {
+			logger.error("Unexpected exception: ", e);
+		}
 	}
 	
 	@Override
@@ -43,7 +57,7 @@ class CandleFlusherTask extends TimerTask {
 		CandleFlusherTask o = (CandleFlusherTask) other;
 		return new EqualsBuilder()
 			.appendSuper(o.timer == timer)
-			.append(o.aggregator, aggregator)
+			.append(o.candles, candles)
 			.isEquals();
 	}
 

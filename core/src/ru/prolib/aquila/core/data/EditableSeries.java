@@ -24,20 +24,11 @@ public interface EditableSeries<T> extends Series<T> {
 	public void set(T value) throws ValueException;
 	
 	/**
-	 * Установить значение по индексу.
-	 * <p>
-	 * @param value значение
-	 * @param index индекс значения в последовательности
-	 * @throws ValueException
-	 */
-	public void set(T value, int index) throws ValueException;
-	
-	/**
 	 * Добавить значение.
 	 * <p>
 	 * @param value
 	 */
-	public void add(T value);
+	public void add(T value) throws ValueException;
 	
 	/**
 	 * Удалить все значения.

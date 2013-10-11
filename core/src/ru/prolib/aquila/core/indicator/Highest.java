@@ -1,9 +1,7 @@
 package ru.prolib.aquila.core.indicator;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.data.EditableSeries;
-import ru.prolib.aquila.core.data.ValueEvent;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.FixedList;
 
 /**
@@ -38,7 +36,11 @@ public class Highest extends CommonPeriod implements EventListener {
 				hi = cv;
 			}
 		}
-		target.add(hi);
+		try {
+			target.add(hi);
+		} catch ( ValueException ex ) {
+			throw new RuntimeException("Unexpected exception: ", ex);
+		}
 	}
 
 }

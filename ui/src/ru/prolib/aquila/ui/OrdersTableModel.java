@@ -1,26 +1,16 @@
 package ru.prolib.aquila.ui;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.Starter;
-import ru.prolib.aquila.core.BusinessEntities.Order;
-import ru.prolib.aquila.core.BusinessEntities.OrderEvent;
-import ru.prolib.aquila.core.BusinessEntities.Orders;
-import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 
 public class OrdersTableModel extends AbstractTableModel implements
 		EventListener, Starter
 {
-	private static final SimpleDateFormat format;
 	private static final long serialVersionUID = 2523179020342012340L;
 	private static Logger logger = LoggerFactory.getLogger(OrdersTableModel.class);
 	private static final String COL_ID = "COL_ID";
@@ -58,10 +48,6 @@ public class OrdersTableModel extends AbstractTableModel implements
 	private ClassLabels uiLabels;
 	private final Orders orders;
 	private final List<Order> list;
-	
-	static {
-		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	}
 	
 	public OrdersTableModel(Orders orders, UiTexts uiTexts) {
 		super();
@@ -111,9 +97,9 @@ public class OrdersTableModel extends AbstractTableModel implements
 			} else if ( header[col] == COL_ACCOUNT) {
 				return order.getAccount();
 			} else if ( header[col] == COL_TIME) {
-				return formatTime(order.getTime());
+				return order.getTime();
 			} else if ( header[col] == COL_CHNG_TIME ) {
-				return formatTime(order.getLastChangeTime());
+				return order.getLastChangeTime();
 			} else if ( header[col] == COL_AVG_EXEC_PRICE ) {
 				return order.getAvgExecutedPrice();
 			} else if ( header[col] == COL_ACTIVATOR ) {
@@ -127,16 +113,6 @@ public class OrdersTableModel extends AbstractTableModel implements
 			logger.error("SecurityException: ", e);
 			return null;
 		}
-	}
-	
-	/**
-	 * Форматировать время.
-	 * <p>
-	 * @param time время
-	 * @return строка времени или null, если время не определено
-	 */
-	private String formatTime(Date time) {
-		return time == null ? null : format.format(time);
 	}
 
 	@Override

@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
 
+import org.joda.time.DateTime;
+
 /**
  * Стандартный планировщик задач.
  */
@@ -27,8 +29,8 @@ public class SchedulerLocal implements Scheduler {
 	}
 
 	@Override
-	public Date getCurrentTime() {
-		return new Date();
+	public DateTime getCurrentTime() {
+		return new DateTime();
 	}
 	
 	@Override
@@ -40,13 +42,13 @@ public class SchedulerLocal implements Scheduler {
 	}
 
 	@Override
-	public void schedule(TimerTask task, Date time) {
-		timer.schedule(task, time);
+	public void schedule(TimerTask task, DateTime time) {
+		timer.schedule(task, time.toDate());
 	}
 
 	@Override
-	public void schedule(TimerTask task, Date firstTime, long period) {
-		timer.schedule(task, firstTime, period);
+	public void schedule(TimerTask task, DateTime firstTime, long period) {
+		timer.schedule(task, firstTime.toDate(), period);
 	}
 
 	@Override
@@ -60,9 +62,10 @@ public class SchedulerLocal implements Scheduler {
 	}
 
 	@Override
-	public void scheduleAtFixedRate(TimerTask task, Date firstTime, long period)
+	public void scheduleAtFixedRate(TimerTask task, DateTime firstTime,
+			long period)
 	{
-		timer.scheduleAtFixedRate(task, firstTime, period);
+		timer.scheduleAtFixedRate(task, firstTime.toDate(), period);
 	}
 
 	@Override

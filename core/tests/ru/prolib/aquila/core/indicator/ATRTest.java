@@ -12,7 +12,7 @@ public class ATRTest {
 
 	@Before
 	public void setUp() throws Exception {
-		candles = new CandleSeriesImpl();
+		candles = new CandleSeriesImpl(Timeframe.M1);
 		atr = new ATR("bar", candles, 5, 1024);
 	}
 	
@@ -56,7 +56,7 @@ public class ATRTest {
 			.add("foo");
 		Variant<CandleSeries> vSrc = new Variant<CandleSeries>(vId)
 			.add(candles)
-			.add(new CandleSeriesImpl("zulubaba"));
+			.add(new CandleSeriesImpl(Timeframe.M1, "zulubaba"));
 		Variant<Integer> vPer = new Variant<Integer>(vSrc)
 			.add(5)
 			.add(24);

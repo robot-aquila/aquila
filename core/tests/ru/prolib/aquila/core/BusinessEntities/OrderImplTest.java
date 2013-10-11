@@ -8,6 +8,7 @@ import java.util.*;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
@@ -92,7 +93,7 @@ public class OrderImplTest {
 		trade.setPrice(price);
 		trade.setQty(qty);
 		trade.setSecurityDescriptor(descr);
-		trade.setTime(format.parse(time));
+		trade.setTime(new DateTime(format.parse(time)));
 		trade.setVolume(vol);
 		return trade;		
 	}
@@ -516,18 +517,17 @@ public class OrderImplTest {
 		setter = new S<OrderImpl>() {
 			@Override
 			public void set(OrderImpl object, Object value) {
-				object.setTime((Date) value);
+				object.setTime((DateTime) value);
 			}
 		};
-		getter = new G<Date>() {
+		getter = new G<DateTime>() {
 			@Override
-			public Date get(Object object) throws ValueException {
+			public DateTime get(Object object) throws ValueException {
 				return ((OrderImpl) object).getTime();
 			}
 		};
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		testSetterGetter(df.parse("2011-01-01 00:00:00"),
-						 df.parse("2013-02-21 06:58:00"));
+		testSetterGetter(new DateTime(2011, 1, 1, 0, 0, 0),
+						 new DateTime(2013, 2, 21, 6, 58, 0));
 	}
 	
 	@Test
@@ -535,18 +535,17 @@ public class OrderImplTest {
 		setter = new S<OrderImpl>() {
 			@Override
 			public void set(OrderImpl object, Object value) {
-				object.setLastChangeTime((Date) value);
+				object.setLastChangeTime((DateTime) value);
 			}
 		};
-		getter = new G<Date>() {
+		getter = new G<DateTime>() {
 			@Override
-			public Date get(Object object) throws ValueException {
+			public DateTime get(Object object) throws ValueException {
 				return ((OrderImpl) object).getLastChangeTime();
 			}
 		};
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		testSetterGetter(df.parse("1991-07-01 13:00:00"),
-						 df.parse("2032-02-21 06:58:00"));
+		testSetterGetter(new DateTime(1991, 7,  1, 13,  0, 0),
+						 new DateTime(2032, 2, 21,  6, 58, 0));	
 	}
 	
 	@Test
@@ -656,10 +655,10 @@ public class OrderImplTest {
 		order.setQty(20L);
 		assertNull(order.getLastTradeTime());
 		order.addTrade(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
-		assertEquals(format.parse("2013-05-01 00:00:01"),
+		assertEquals(new DateTime(2013, 5, 1, 0, 0, 1),
 				order.getLastTradeTime());
 		order.addTrade(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-		assertEquals(format.parse("2013-05-01 00:00:05"),
+		assertEquals(new DateTime(2013, 5, 1, 0, 0, 5),
 				order.getLastTradeTime());
 	}
 	
@@ -686,8 +685,8 @@ public class OrderImplTest {
 		order.setQty(200L);
 		order.setStatus(OrderStatus.CANCELLED);
 		order.setType(OrderType.LIMIT);
-		order.setTime(format.parse("2013-05-15 08:32:00"));
-		order.setLastChangeTime(format.parse("1998-01-01 01:02:03"));
+		order.setTime(new DateTime(2013, 5, 15, 8, 32, 0));
+		order.setLastChangeTime(new DateTime(1998, 1, 1, 1, 2, 3));
 		for ( Trade trade : trds1 ) {
 			order.addTrade(trade);
 		}
@@ -732,13 +731,13 @@ public class OrderImplTest {
 		if ( rnd.nextDouble() > aprob ) {
 			vTerm.add(control.createMock(Terminal.class));
 		}
-		Variant<Date> vTime = new Variant<Date>(vTerm)
-			.add(format.parse("2013-05-15 08:32:00"));
+		Variant<DateTime> vTime = new Variant<DateTime>(vTerm)
+			.add(new DateTime(2013, 5, 15, 8, 32, 0));
 		if ( rnd.nextDouble() > aprob ) {
-			vTime.add(format.parse("2013-01-01 00:00:00"));
+			vTime.add(new DateTime(2013, 1, 1, 0, 0, 0));
 		}
-		Variant<Date> vLastTime = new Variant<Date>(vTime)
-			.add(format.parse("1998-01-01 01:02:03"));
+		Variant<DateTime> vLastTime = new Variant<DateTime>(vTime)
+			.add(new DateTime(1998, 1, 1, 1, 2, 3));
 		if ( rnd.nextDouble() > aprob ) {
 			vLastTime.add(null);
 		}
@@ -805,8 +804,8 @@ public class OrderImplTest {
 		assertEquals(new Long(200L), found.getQty());
 		assertEquals(OrderStatus.CANCELLED, found.getStatus());
 		assertEquals(OrderType.LIMIT, found.getType());
-		assertEquals(format.parse("2013-05-15 08:32:00"), found.getTime());
-		assertEquals(format.parse("1998-01-01 01:02:03"),
+		assertEquals(new DateTime(2013, 5, 15, 8, 32, 0), found.getTime());
+		assertEquals(new DateTime(1998, 1, 1, 1, 2, 3),
 				found.getLastChangeTime());
 		assertEquals(trds1, found.getTrades());
 		assertTrue(found.isAvailable());

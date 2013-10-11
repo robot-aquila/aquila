@@ -5,11 +5,10 @@ import static org.junit.Assert.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.report.RTrade;
-import ru.prolib.aquila.core.report.trades.ERTrade;
-import ru.prolib.aquila.core.report.trades.RTradeImpl;
+import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class RTradeImplTest {
@@ -19,7 +18,7 @@ public class RTradeImplTest {
 	private static Direction BUY = Direction.BUY;
 	private static Direction SELL = Direction.SELL;
 	private static SecurityDescriptor descr1, descr2;
-	private static Date time1, time2;
+	private static DateTime time1, time2;
 	private IMocksControl control;
 	private Terminal terminal;
 
@@ -28,8 +27,8 @@ public class RTradeImplTest {
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		descr1 = new SecurityDescriptor("Foo", "Bar", "USD", SecurityType.UNK);
 		descr2 = new SecurityDescriptor("Bar", "Buz", "SUR", SecurityType.FUT);
-		time1 = format.parse("2013-01-01 00:00:00");
-		time2 = format.parse("2013-01-02 00:00:00");
+		time1 = new DateTime(format.parse("2013-01-01 00:00:00"));
+		time2 = new DateTime(format.parse("2013-01-02 00:00:00"));
 	}
 	
 	@Before
@@ -53,7 +52,8 @@ public class RTradeImplTest {
 			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
-		return createTrade(descr, format.parse(time), dir, qty, price, volume);
+		return createTrade(descr, new DateTime(format.parse(time)),
+				dir, qty, price, volume);
 	}
 	
 	/**
@@ -67,7 +67,7 @@ public class RTradeImplTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(SecurityDescriptor descr, Date time,
+	private Trade createTrade(SecurityDescriptor descr, DateTime time,
 			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);
@@ -160,12 +160,12 @@ public class RTradeImplTest {
 		Variant<PositionType> vType = new Variant<PositionType>(vDescr)
 			.add(SHORT)
 			.add(LONG);
-		Variant<Date> vOpnTime = new Variant<Date>(vType)
-			.add(format.parse("2013-01-01 00:00:00"))
-			.add(format.parse("2015-12-31 00:00:00"));
-		Variant<Date> vClsTime = new Variant<Date>(vOpnTime)
-			.add(format.parse("2013-01-02 00:00:00"))
-			.add(format.parse("1992-01-02 00:00:00"))
+		Variant<DateTime> vOpnTime = new Variant<DateTime>(vType)
+			.add(new DateTime(format.parse("2013-01-01 00:00:00")))
+			.add(new DateTime(format.parse("2015-12-31 00:00:00")));
+		Variant<DateTime> vClsTime = new Variant<DateTime>(vOpnTime)
+			.add(new DateTime(format.parse("2013-01-02 00:00:00")))
+			.add(new DateTime(format.parse("1992-01-02 00:00:00")))
 			.add(null);
 		Variant<Long> vOpnQty = new Variant<Long>(vClsTime)
 			.add(200L)
@@ -205,8 +205,10 @@ public class RTradeImplTest {
 		assertEquals(1, foundCnt);
 		assertSame(descr2, found.getSecurityDescriptor());
 		assertSame(LONG, found.getType());
-		assertEquals(format.parse("2013-01-01 00:00:00"), found.getEnterTime());
-		assertEquals(format.parse("2013-01-02 00:00:00"), found.getExitTime());
+		assertEquals(new DateTime(format.parse("2013-01-01 00:00:00")),
+				found.getEnterTime());
+		assertEquals(new DateTime(format.parse("2013-01-02 00:00:00")),
+				found.getExitTime());
 		assertEquals(new Long(200L), found.getQty());
 		assertEquals(new Long(75L), found.getUncoveredQty());
 		assertEquals(4.00d, found.getEnterPrice(), 0.001d);
@@ -230,8 +232,8 @@ public class RTradeImplTest {
 		List<FR> fix = new Vector<FR>();
 		// #0, Короткая, закрытая
 		FR row = new FR(new RTradeImpl(descr1, SHORT,
-				format.parse("1998-08-01 20:35:00"),
-				format.parse("1998-08-02 00:00:00"),
+				new DateTime(format.parse("1998-08-01 20:35:00")),
+				new DateTime(format.parse("1998-08-02 00:00:00")),
 				200L, 200L,
 				2000.0d, 1800.0d,
 				4000.0d, 3600.0d), null);
@@ -249,7 +251,7 @@ public class RTradeImplTest {
 		
 		// #1, Длинная, не закрытая
 		row = new FR(new RTradeImpl(descr2, LONG,
-				format.parse("2001-01-01 00:00:00"),
+				new DateTime(format.parse("2001-01-01 00:00:00")),
 				null,
 				200L, null,
 				2000.0d, null,
@@ -262,7 +264,7 @@ public class RTradeImplTest {
 		
 		// #2, Длинная, частично-закрытая
 		row = new FR(new RTradeImpl(descr1, LONG,
-				format.parse("1998-01-01 00:00:00"),
+				new DateTime(format.parse("1998-01-01 00:00:00")),
 				null,
 				200L, 50L,
 				2000.0d, 500.0d,
@@ -275,13 +277,13 @@ public class RTradeImplTest {
 		
 		// #3, Длинная, закрытая, с разворотом одной сделкой
 		row = new FR(new RTradeImpl(descr1, LONG,
-				format.parse("1996-06-01 00:00:00"),
-				format.parse("1996-06-02 00:00:00"),
+				new DateTime(format.parse("1996-06-01 00:00:00")),
+				new DateTime(format.parse("1996-06-02 00:00:00")),
 				1L, 1L,
 				138770d, 138380d,
 				86951.89d, 86726.32d),
 			new RTradeImpl(descr1, SHORT,
-				format.parse("1996-06-02 00:00:00"),
+				new DateTime(format.parse("1996-06-02 00:00:00")),
 				null,
 				1L, null,
 				138380d, null,
@@ -294,13 +296,13 @@ public class RTradeImplTest {
 		
 		// #4, Короткая, закрытая, с сокращением и разворотом
 		row = new FR(new RTradeImpl(descr2, SHORT,
-				format.parse("2018-01-15 03:00:01"),
-				format.parse("2018-01-15 03:00:10"),
+				new DateTime(format.parse("2018-01-15 03:00:01")),
+				new DateTime(format.parse("2018-01-15 03:00:10")),
 				10L, 10L,
 				50d,  40d,
 				100d, 80d),
 			new RTradeImpl(descr2, LONG,
-				format.parse("2018-01-15 03:00:10"),
+				new DateTime(format.parse("2018-01-15 03:00:10")),
 				null,
 				5L, null,
 				20d, null,

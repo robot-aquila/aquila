@@ -3,8 +3,9 @@ package ru.prolib.aquila.core.report.io;
 import java.io.*;
 import java.nio.channels.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
+
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
@@ -163,8 +164,11 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 		}
 	}
 	
-	private String formatTime(Date time) {
-		return time == null ? null : dateFormat.format(time);
+	private String formatTime(DateTime time) {
+		if ( time == null ) {
+			return null;
+		}
+		return dateFormat.format(time.toDate());
 	}
 	
 	private String joinToString(Object entries[]) {

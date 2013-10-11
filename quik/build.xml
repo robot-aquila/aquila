@@ -19,6 +19,7 @@
 		<include name="jddesvr.jar" />
 		<include name="JQTrans.jar" />
 		<include name="xstream-1.4.1.jar" />
+		<include name="joda-time-2.2.jar" />
 	</fileset>
 	
 	<fileset id="compile-build-jars" dir="${build}" >

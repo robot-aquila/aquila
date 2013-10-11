@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Vector;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 import com.csvreader.CsvReader;
 import ru.prolib.aquila.core.*;
@@ -115,7 +116,7 @@ public class CommonTRTest {
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
 			trade.setSecurityDescriptor(getSecDescr(reader));
-			trade.setTime(timeFormat.parse(reader.get(TIME)));
+			trade.setTime(new DateTime(timeFormat.parse(reader.get(TIME))));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);
 		}
@@ -175,8 +176,8 @@ public class CommonTRTest {
 		RTrade report = new RTradeImpl(getSecDescr(reader),
 			(LONG.equals(reader.get(TYPE))
 				? PositionType.LONG : PositionType.SHORT),
-			timeFormat.parse(reader.get(ENTER_TIME)),
-			(exTime.equals("") ? null : timeFormat.parse(exTime)),
+			new DateTime(timeFormat.parse(reader.get(ENTER_TIME))),
+			(exTime.equals("") ? null : new DateTime(timeFormat.parse(exTime))),
 			Long.parseLong(reader.get(ENTER_QTY)),
 			(exQty.equals("") ? null : Long.parseLong(exQty)),
 			Double.parseDouble(reader.get(ENTER_PRICE)),

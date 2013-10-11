@@ -3,12 +3,12 @@ package ru.prolib.aquila.core.report.io;
 import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileInputStream;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.log4j.BasicConfigurator;
+import org.joda.time.DateTime;
 import org.junit.*;
 
 import com.csvreader.CsvReader;
@@ -107,7 +107,7 @@ public class TradesCsvFileWriterTest {
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
 			trade.setSecurityDescriptor(getSecDescr(reader));
-			trade.setTime(timeFormat.parse(reader.get(TIME)));
+			trade.setTime(new DateTime(timeFormat.parse(reader.get(TIME))));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);
 		}

@@ -3,7 +3,6 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimerTask;
@@ -12,14 +11,12 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
-import ru.prolib.aquila.core.utils.Counter;
-import ru.prolib.aquila.core.utils.SimpleCounter;
-import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.utils.*;
 
 
 /**
@@ -43,7 +40,7 @@ public class TerminalImplTest {
 	private Security security;
 	private Scheduler scheduler;
 	private TimerTask task;
-	private Date time = new Date();
+	private DateTime time = new DateTime();
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -877,7 +874,6 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testGetCurrentTime() throws Exception {
-		Date time = new Date();
 		expect(scheduler.getCurrentTime()).andReturn(time);
 		control.replay();
 		
@@ -1035,7 +1031,6 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testCreateOrder5() throws Exception {
-		Date time = new Date();
 		terminal.getOrderNumerator().set(216);
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		expect(scheduler.getCurrentTime()).andReturn(time);
@@ -1061,7 +1056,6 @@ public class TerminalImplTest {
 	@Test
 	public void testCreateOrder5_WithActivator() throws Exception {
 		OrderActivator activator = control.createMock(OrderActivator.class); 
-		Date time = new Date();
 		terminal.getOrderNumerator().set(216);
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		expect(scheduler.getCurrentTime()).andReturn(time);
@@ -1087,7 +1081,6 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testCreateOrder4() throws Exception {
-		Date time = new Date();
 		terminal.getOrderNumerator().set(554);
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		expect(scheduler.getCurrentTime()).andReturn(time);
@@ -1112,7 +1105,6 @@ public class TerminalImplTest {
 	@Test
 	public void testCreateOrder4_WithActivator() throws Exception {
 		OrderActivator activator = control.createMock(OrderActivator.class);
-		Date time = new Date();
 		terminal.getOrderNumerator().set(554);
 		expect(orders.createOrder(same(terminal))).andReturn(order);
 		expect(scheduler.getCurrentTime()).andReturn(time);

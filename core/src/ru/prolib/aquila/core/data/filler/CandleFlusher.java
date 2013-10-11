@@ -1,39 +1,36 @@
 package ru.prolib.aquila.core.data.filler;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.TimerTask;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
+import org.joda.time.*;
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.Scheduler;
-import ru.prolib.aquila.core.utils.AlignTime;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 
 /**
  * Служебный класс: сервис закрытия свечи по времени.
  */
 class CandleFlusher implements Starter {
-	private final CandleAggregator aggregator;
+	private final EditableCandleSeries candles;
 	private final java.util.Timer scheduler;
 	private final Scheduler source;
 	private TimerTask task;
 	
-	public CandleFlusher(CandleAggregator aggregator, Scheduler source) {
-		this(aggregator, source, new java.util.Timer(true));
+	public CandleFlusher(EditableCandleSeries candles, Scheduler source) {
+		this(candles, source, new java.util.Timer(true));
 	}
 	
-	public CandleFlusher(CandleAggregator aggregator,
+	public CandleFlusher(EditableCandleSeries candles,
 			Scheduler source, java.util.Timer scheduler)
 	{
 		super();
-		this.aggregator = aggregator;
+		this.candles = candles;
 		this.scheduler = scheduler;
 		this.source = source;
 	}
 	
-	CandleAggregator getAggregator() {
-		return aggregator;
+	EditableCandleSeries getCandles() {
+		return candles;
 	}
 	
 	java.util.Timer getScheduler() {
@@ -69,8 +66,11 @@ class CandleFlusher implements Starter {
 	@Override
 	public synchronized void start() throws StarterException {
 		if ( task == null ) {
-			task = new CandleFlusherTask(aggregator, source);
-			scheduler.scheduleAtFixedRate(task, getFirstTime(), getPeriod());
+			task = new CandleFlusherTask(candles, source);
+			Interval interval = candles.getTimeframe()
+				.getInterval(source.getCurrentTime());
+			scheduler.scheduleAtFixedRate(task, interval.getEnd().toDate(),
+					interval.toDurationMillis());
 		}
 	}
 
@@ -81,7 +81,7 @@ class CandleFlusher implements Starter {
 			task = null;
 		}
 	}
-	
+	/*
 	private Date getFirstTime() {
 		Calendar c = Calendar.getInstance();
 		c.setTime(aligner().align(source.getCurrentTime()));
@@ -96,8 +96,9 @@ class CandleFlusher implements Starter {
 	}
 
 	private AlignTime aligner() {
-		return aggregator.getTimeAligner();
+		return candles.getTimeAligner();
 	}
+	*/
 	
 	@Override
 	public boolean equals(Object other) {
@@ -110,7 +111,7 @@ class CandleFlusher implements Starter {
 		CandleFlusher o = (CandleFlusher) other;
 		return new EqualsBuilder()
 			.appendSuper(o.source == source)
-			.append(o.aggregator, aggregator)
+			.append(o.candles, candles)
 			.isEquals();
 	}
 

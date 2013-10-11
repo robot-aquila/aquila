@@ -104,7 +104,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	}
 	
 	@Override
-	public synchronized void add(T value) {
+	public synchronized void add(T value) throws ValueException {
 		Event event = null;
 		synchronized ( this ) {
 			event = new ValueEvent<T>(onAdd, value, history.size());
@@ -145,14 +145,6 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	@Override
 	public synchronized void set(T value) throws ValueException {
 		int index = history.size() - 1;
-		T oldValue = get(index);
-		history.set(index, value);
-		dispatcher.dispatch(new ValueEvent<T>(onUpd, oldValue, value, index));
-	}
-	
-	@Override
-	public synchronized void set(T value, int index) throws ValueException {
-		index = normalizeIndex(index);
 		T oldValue = get(index);
 		history.set(index, value);
 		dispatcher.dispatch(new ValueEvent<T>(onUpd, oldValue, value, index));

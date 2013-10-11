@@ -3,9 +3,9 @@ package ru.prolib.aquila.quik.assembler.cache.dde;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import org.easymock.IMocksControl;
+import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -111,14 +111,13 @@ public class TradesGatewayTest {
 		expect(cache.getDescriptor(eq("SBER"), eq("EQBR"))).andReturn(descr);
 		control.replay();
 		
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Trade expected = new Trade(terminal);
 		expected.setDirection(Direction.SELL);
 		expected.setId(894L);
 		expected.setPrice(45.90d);
 		expected.setQty(1000L);
 		expected.setSecurityDescriptor(descr);
-		expected.setTime(df.parse("1998-01-15 00:20:19"));
+		expected.setTime(new DateTime(1998, 1, 15, 0, 20, 19));
 		expected.setVolume(200d);
 		assertEquals(expected, gateway.makeTrade(terminal, row));
 

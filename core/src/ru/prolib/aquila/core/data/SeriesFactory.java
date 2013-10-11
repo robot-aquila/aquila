@@ -40,32 +40,34 @@ public interface SeriesFactory {
 	/**
 	 * Создать ряд типа {@link Candle}.
 	 * <p>
+	 * @param tf таймфрейм
 	 * @param id идентификатор ряда
 	 * @return ряд
 	 */
-	public EditableCandleSeries createCandle(String id);
+	public EditableCandleSeries createCandle(Timeframe tf, String id);
 	
 	/**
 	 * Создать ряд типа {@link Candle}.
 	 * <p>
+	 * @param tf таймфрейм
 	 * @return ряд
 	 */
-	public EditableCandleSeries createCandle();
+	public EditableCandleSeries createCandle(Timeframe tf);
 	
 	/**
-	 * Создать ряд типа {@link java.util.Date}.
+	 * Создать ряд временных интервалов.
 	 * <p>
 	 * @param id идентификатор ряда
 	 * @return ряд
 	 */
-	public EditableTimeSeries createTime(String id);
+	public EditableIntervalSeries createInterval(String id);
 	
 	/**
-	 * Создать ряд типа {@link java.util.Date}.
+	 * Создать ряд временных интервалов.
 	 * <p>
 	 * @return ряд
 	 */
-	public EditableTimeSeries createTime();
+	public EditableIntervalSeries createInterval();
 	
 	/**
 	 * Создать ряд типа {@link java.lang.Double}.

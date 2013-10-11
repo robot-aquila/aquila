@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.CandleSeries;
 import ru.prolib.aquila.core.data.CandleSeriesImpl;
+import ru.prolib.aquila.core.data.Timeframe;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleSeriesFillerTest {
@@ -23,7 +24,7 @@ public class CandleSeriesFillerTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		candles = new CandleSeriesImpl();
+		candles = new CandleSeriesImpl(Timeframe.M5);
 		updater = control.createMock(Starter.class);
 		flusher = control.createMock(Starter.class);
 		filler = new CandleSeriesFiller(candles, updater, flusher);
@@ -91,14 +92,15 @@ public class CandleSeriesFillerTest {
 		Security security = control.createMock(Security.class);
 		Terminal terminal = control.createMock(Terminal.class);
 		expect(security.getTerminal()).andStubReturn(terminal);
-		CandleAggregator aggregator = new CandleAggregator(15);
+		CandleSeriesImpl candles = new CandleSeriesImpl(Timeframe.M15);
 		CandleSeriesFiller expected = new CandleSeriesFiller(
-				new CandleSeriesImpl(),
-				new CandleByTrades(security, aggregator),
-				new CandleFlusher(aggregator, terminal));
+				candles,
+				new CandleByTrades(security, candles),
+				new CandleFlusher(candles, terminal));
 		control.replay();
 		
-		assertEquals(expected, new CandleSeriesFiller(security, 15, true));
+		assertEquals(expected,
+				new CandleSeriesFiller(security, Timeframe.M15, true));
 		
 		control.verify();
 	}
@@ -108,14 +110,15 @@ public class CandleSeriesFillerTest {
 		Security security = control.createMock(Security.class);
 		Terminal terminal = control.createMock(Terminal.class);
 		expect(security.getTerminal()).andStubReturn(terminal);
-		CandleAggregator aggregator = new CandleAggregator(15);
+		CandleSeriesImpl candles = new CandleSeriesImpl(Timeframe.M15);
 		CandleSeriesFiller expected = new CandleSeriesFiller(
-				new CandleSeriesImpl(),
-				new CandleByTrades(security, aggregator),
+				candles,
+				new CandleByTrades(security, candles),
 				new StarterStub());
 		control.replay();
 		
-		assertEquals(expected, new CandleSeriesFiller(security, 15, false));
+		assertEquals(expected,
+				new CandleSeriesFiller(security, Timeframe.M15, false));
 		
 		control.verify();
 	}
