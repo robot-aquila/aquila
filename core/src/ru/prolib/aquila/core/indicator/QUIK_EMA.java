@@ -18,15 +18,43 @@ import ru.prolib.aquila.core.data.*;
  */
 public class QUIK_EMA extends _MA {
 	
-	public QUIK_EMA(String id, DataSeries source, int period, int limit) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id символьный идентификатор
+	 * @param source источник данных (исходный ряд)
+	 * @param period период скользящей средней
+	 * @param limit лимит хранилища
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public QUIK_EMA(String id, DataSeries source, int period, int limit)
+		throws ValueException
+	{
 		super(id, source, period, limit);
 	}
 	
-	public QUIK_EMA(String id, DataSeries source, int period) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id символьный идентификатор
+	 * @param source источник данных (исходный ряд)
+	 * @param period период скользящей средней
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public QUIK_EMA(String id, DataSeries source, int period)
+		throws ValueException
+	{
 		this(id, source, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
-	public QUIK_EMA(DataSeries source, int period) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param source источник данных (исходный ряд)
+	 * @param period период скользящей средней
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public QUIK_EMA(DataSeries source, int period) throws ValueException {
 		this(null, source, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 

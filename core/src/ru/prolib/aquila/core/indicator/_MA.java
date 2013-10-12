@@ -10,6 +10,8 @@ import ru.prolib.aquila.core.data.*;
 /**
  * Абстрактная заготовка под индикатор типа MA.
  * <p>
+ * Используется как основа индикаторов с отдельным источником данных и периодом.
+ * <p>
  * 2013-03-12<br>
  * $Id: _MA.java 571 2013-03-12 00:53:34Z whirlwind $
  */
@@ -23,7 +25,18 @@ abstract public class _MA implements DataSeries {
 		logger = LoggerFactory.getLogger(_MA.class);
 	}
 
-	public _MA(String id, DataSeries source, int period, int storageLimit) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id идентификатор
+	 * @param source источник данных
+	 * @param period период индикатора
+	 * @param storageLimit лимит размера хранимых значений 
+	 * @throws ValueException исключение перерасчета значений индикатора
+	 */
+	public _MA(String id, DataSeries source, int period, int storageLimit)
+		throws ValueException
+	{
 		super();
 		if ( period < 2 ) {
 			throw new IllegalArgumentException("Period cannot be less than 2");
@@ -91,27 +104,29 @@ abstract public class _MA implements DataSeries {
 		return series.OnUpd();
 	}
 	
-	private void init() {
-		source.OnAdd().addListener(new EventListener() {
-			@SuppressWarnings("unchecked")
-			@Override public void onEvent(Event event) {
-				onSourceValueAdded((ValueEvent<Double>) event);
-			}
-		});
-		source.OnUpd().addListener(new EventListener() {
-			@SuppressWarnings("unchecked")
-			@Override public void onEvent(Event event) {
-				onSourceValueUpdated((ValueEvent<Double>) event);
-			}
-		});
+	/**
+	 * Инициализация ряда.
+	 * <p>
+	 * @throws ValueException ошибка перерасчета ряда для существующих значений
+	 * ряда-источника
+	 */
+	private void init() throws ValueException {
 		synchronized ( source ) {
 			for ( int i = 0; i < source.getLength(); i ++ ) {
-				try {
-					series.add(calculate(i));
-				} catch ( ValueException e ) {
-					logger.error("Unexpected exception: ", e);
-				}
+				series.add(calculate(i));
 			}
+			source.OnAdd().addListener(new EventListener() {
+				@SuppressWarnings("unchecked")
+				@Override public void onEvent(Event event) {
+					onSourceValueAdded((ValueEvent<Double>) event);
+				}
+			});
+			source.OnUpd().addListener(new EventListener() {
+				@SuppressWarnings("unchecked")
+				@Override public void onEvent(Event event) {
+					onSourceValueUpdated((ValueEvent<Double>) event);
+				}
+			});
 		}
 	}
 	

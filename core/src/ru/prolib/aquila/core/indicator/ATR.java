@@ -7,15 +7,43 @@ import ru.prolib.aquila.core.data.*;
  */
 public class ATR extends WilderMA {
 
-	public ATR(String id, CandleSeries candles, int period, int limit) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id символьный идентификатор
+	 * @param candles исходная последовательность свечей
+	 * @param period период усреднения
+	 * @param limit лимит хранилища
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public ATR(String id, CandleSeries candles, int period, int limit)
+		throws ValueException
+	{
 		super(id, new TR(candles), period, limit);
 	}
 	
-	public ATR(String id, CandleSeries candles, int period) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id символьный идентификатор
+	 * @param candles исходная последовательность свечей
+	 * @param period период усреднения
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public ATR(String id, CandleSeries candles, int period)
+		throws ValueException
+	{
 		this(id, candles, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
-	public ATR(CandleSeries candles, int period) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param candles исходная последовательность свечей
+	 * @param period период усреднения
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public ATR(CandleSeries candles, int period) throws ValueException {
 		this(null, candles, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	

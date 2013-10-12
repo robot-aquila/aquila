@@ -21,15 +21,43 @@ import ru.prolib.aquila.core.data.ValueException;
  */
 public class WilderMA extends _MA {
 
-	public WilderMA(String id, DataSeries source, int period, int limit) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id символьный идентификатор
+	 * @param source источник данных (исходный ряд)
+	 * @param period период скользящей средней
+	 * @param limit лимит хранилища
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public WilderMA(String id, DataSeries source, int period, int limit)
+		throws ValueException
+	{
 		super(id, source, period, limit);
 	}
 	
-	public WilderMA(String id, DataSeries source, int period) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id символьный идентификатор
+	 * @param source источник данных (исходный ряд)
+	 * @param period период скользящей средней
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public WilderMA(String id, DataSeries source, int period)
+		throws ValueException
+	{
 		this(id, source, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
-	public WilderMA(DataSeries source, int period) {
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param source источник данных (исходный ряд)
+	 * @param period период скользящей средней
+	 * @throws ValueException ошибка перерасчета значений индикатора
+	 */
+	public WilderMA(DataSeries source, int period) throws ValueException {
 		this(null, source, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 
