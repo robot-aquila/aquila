@@ -146,8 +146,15 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		if ( ! candle.getInterval().equals(expected) ) {
 			throw new OutOfIntervalException(expected, candle);
 		}
-		super.add(candle);
-		poa = candle.getEndTime();
+		DateTime prevPOA = poa;
+		try {
+			poa = candle.getEndTime();
+			super.add(candle);
+		} catch ( ValueException e ) {
+			poa = prevPOA;
+			throw e;
+		}
+		
 	}
 	
 	/**
@@ -169,8 +176,14 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		if ( ! candle.getInterval().equals(current) ) {
 			throw new OutOfIntervalException(current, candle);
 		}
-		super.set(candle);
-		poa = candle.getEndTime();
+		DateTime prevPOA = poa;
+		try {
+			poa = candle.getEndTime();
+			super.set(candle);
+		} catch ( ValueException e ) {
+			poa = prevPOA;
+			throw e;
+		}
 	}
 
 	@Override
@@ -219,7 +232,9 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		Interval intr = timeframe.getInterval(tickTime);
 		Candle newCandle = new Candle(intr, tick.getValue(),
 				tick.getVolume() == null ? 0L : tick.getVolume().longValue());
+		DateTime prevPOA = poa;
 		try {
+			poa = tickTime;
 			if ( getLength() == 0 ) {
 				super.add(newCandle);
 			} else {
@@ -231,9 +246,9 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 				}
 			}
 		} catch ( ValueException e ) {
+			poa = prevPOA;
 			throw new RuntimeException("Unexpected exception", e);
 		}
-		poa = tickTime; // Сдвигаем ТА только в случае успеха
 	}
 
 	@Override
@@ -249,7 +264,9 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		}
 		Interval intr = timeframe.getInterval(time);
 		Candle newCandle = new Candle(intr, trade.getPrice(), trade.getQty());
+		DateTime prevPOA = poa;
 		try {
+			poa = time;
 			if ( getLength() == 0 ) {
 				super.add(newCandle);
 			} else {
@@ -261,9 +278,9 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 				}
 			}
 		} catch ( ValueException e ) {
+			poa = prevPOA;
 			throw new RuntimeException("Unexpected exception", e);
 		}
-		poa = time; // Сдвигаем ТА только в случае успеха
 	}
 
 	@Override
@@ -281,6 +298,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		// Нужно определить целевой интервал в рамках последовательности.
 		Interval intr;
 		Candle current, newCandle;
+		DateTime prevPOA = poa, newPOA = candle.getEndTime();
 		if ( getLength() > 0 ) {
 			try {
 				current = get();
@@ -298,8 +316,10 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 					throw new OutOfIntervalException(intr, candle);
 				}
 				try {
+					poa = newPOA;
 					super.set(current.addCandle(candle));
 				} catch ( ValueException e ) {
+					poa = prevPOA;
 					throw new RuntimeException("Unexpected exception", e);
 				}
 				
@@ -315,8 +335,10 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 				newCandle = new Candle(intr, candle.getOpen(), candle.getHigh(),
 						candle.getLow(), candle.getClose(), candle.getVolume());
 				try {
+					poa = newPOA;
 					super.add(newCandle);
 				} catch ( ValueException e ) {
+					poa = prevPOA;
 					throw new RuntimeException("Unexpected exception", e);
 				}
 				
@@ -333,13 +355,14 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 			newCandle = new Candle(intr, candle.getOpen(), candle.getHigh(),
 					candle.getLow(), candle.getClose(), candle.getVolume());
 			try {
+				poa = newPOA;
 				super.add(newCandle);
 			} catch ( ValueException e ) {
+				poa = prevPOA;
 				throw new RuntimeException("Unexpected exception", e);
 			}
 			
 		}
-		poa = candle.getEndTime(); // Сдвигаем ТА только в случае успеха
 	}
 
 	@Override
