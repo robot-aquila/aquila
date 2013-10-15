@@ -39,8 +39,8 @@ public class CandleProxy<T> implements Series<T>, EventListener {
 		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), id);
 		onAdd = dispatcher.createType("Add");
 		onUpd = dispatcher.createType("Upd");
-		candles.OnAdd().addListener(this);
-		candles.OnUpd().addListener(this);
+		candles.OnAdded().addListener(this);
+		candles.OnUpdated().addListener(this);
 	}
 	
 	/**
@@ -103,24 +103,24 @@ public class CandleProxy<T> implements Series<T>, EventListener {
 	}
 
 	@Override
-	public EventType OnAdd() {
+	public EventType OnAdded() {
 		return onAdd;
 	}
 
 	@Override
-	public EventType OnUpd() {
+	public EventType OnUpdated() {
 		return onUpd;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onEvent(Event event) {
-		if ( event.isType(candles.OnAdd()) ) {
+		if ( event.isType(candles.OnAdded()) ) {
 			ValueEvent<Candle> candleEvent = (ValueEvent<Candle>) event;
 			dispatcher.dispatch(new ValueEvent<T>(onAdd,
 					getter.get(candleEvent.getNewValue()),
 					candleEvent.getValueIndex()));
-		} else if ( event.isType(candles.OnUpd()) ) {
+		} else if ( event.isType(candles.OnUpdated()) ) {
 			ValueEvent<Candle> candleEvent = (ValueEvent<Candle>) event;
 			dispatcher.dispatch(new ValueEvent<T>(onUpd,
 					getter.get(candleEvent.getOldValue()),

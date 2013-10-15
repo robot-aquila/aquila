@@ -66,13 +66,13 @@ public interface Series<T> {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnAdd();
+	public EventType OnAdded();
 	
 	/**
 	 * Получить тип события: текущее значение обновлено.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnUpd();
+	public EventType OnUpdated();
 
 }

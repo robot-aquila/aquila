@@ -64,23 +64,23 @@ abstract public class _FLY<T> implements DataSeries {
 	}
 
 	@Override
-	public EventType OnAdd() {
+	public EventType OnAdded() {
 		return onAdd;
 	}
 
 	@Override
-	public EventType OnUpd() {
+	public EventType OnUpdated() {
 		return onUpd;
 	}
 	
 	private void init() {
-		source.OnAdd().addListener(new EventListener() {
+		source.OnAdded().addListener(new EventListener() {
 			@SuppressWarnings("unchecked")
 			@Override public void onEvent(Event event) {
 				onSourceValueAdded((ValueEvent<Double>) event);
 			}
 		});
-		source.OnUpd().addListener(new EventListener() {
+		source.OnUpdated().addListener(new EventListener() {
 			@SuppressWarnings("unchecked")
 			@Override public void onEvent(Event event) {
 				onSourceValueUpdated((ValueEvent<Double>) event);

@@ -196,13 +196,13 @@ public class SeriesImplTest {
 	}
 	
 	@Test
-	public void testOnAdd() throws Exception {
+	public void testOnAdded() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnAdd(), 80, 4)));
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnAdd(), 75, 5)));
+		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnAdded(), 80, 4)));
+		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnAdded(), 75, 5)));
 		control.replay();
 		
-		val1.OnAdd().addListener(listener);
+		val1.OnAdded().addListener(listener);
 		val1.add(80);
 		val1.add(75);
 		
@@ -210,15 +210,15 @@ public class SeriesImplTest {
 	}
 	
 	@Test
-	public void testOnUpd() throws Exception {
+	public void testOnUpdated() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(), 16, 24, 3)));
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(), 24,  6, 3)));
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpd(),  6,  7, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpdated(), 16, 24, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpdated(), 24,  6, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpdated(),  6,  7, 3)));
 
 		control.replay();
 		
-		val1.OnUpd().addListener(listener);
+		val1.OnUpdated().addListener(listener);
 		val1.set(24);
 		val1.set( 6);
 		val1.set( 7);

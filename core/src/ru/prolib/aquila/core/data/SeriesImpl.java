@@ -211,12 +211,12 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	}
 
 	@Override
-	public EventType OnAdd() {
+	public EventType OnAdded() {
 		return onAdd;
 	}
 
 	@Override
-	public EventType OnUpd() {
+	public EventType OnUpdated() {
 		return onUpd;
 	}
 

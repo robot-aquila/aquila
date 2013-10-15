@@ -95,13 +95,13 @@ abstract public class _MA implements DataSeries {
 	}
 
 	@Override
-	public EventType OnAdd() {
-		return series.OnAdd();
+	public EventType OnAdded() {
+		return series.OnAdded();
 	}
 
 	@Override
-	public EventType OnUpd() {
-		return series.OnUpd();
+	public EventType OnUpdated() {
+		return series.OnUpdated();
 	}
 	
 	/**
@@ -115,13 +115,13 @@ abstract public class _MA implements DataSeries {
 			for ( int i = 0; i < source.getLength(); i ++ ) {
 				series.add(calculate(i));
 			}
-			source.OnAdd().addListener(new EventListener() {
+			source.OnAdded().addListener(new EventListener() {
 				@SuppressWarnings("unchecked")
 				@Override public void onEvent(Event event) {
 					onSourceValueAdded((ValueEvent<Double>) event);
 				}
 			});
-			source.OnUpd().addListener(new EventListener() {
+			source.OnUpdated().addListener(new EventListener() {
 				@SuppressWarnings("unchecked")
 				@Override public void onEvent(Event event) {
 					onSourceValueUpdated((ValueEvent<Double>) event);

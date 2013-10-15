@@ -54,7 +54,7 @@ public class FinamCandlesCsvFileWriter implements CandlesWriter, EventListener {
 			throw new StarterException("Error initialization: " + file, e);
 		}
 		logger.debug("Start save candles to: {}", file);
-		candles.OnAdd().addListener(this);
+		candles.OnAdded().addListener(this);
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class FinamCandlesCsvFileWriter implements CandlesWriter, EventListener {
 			target = null;
 			logger.debug("Stop save candles to: {}", file);
 		}
-		candles.OnAdd().removeListener(this);
+		candles.OnAdded().removeListener(this);
 	}
 
 	@Override

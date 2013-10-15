@@ -98,13 +98,13 @@ public class CandleProxyTest {
 	}
 	
 	@Test
-	public void testOnAdd() throws Exception {
+	public void testOnAdded() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(eq(new ValueEvent<Double>(proxy.OnAdd(), 19.12d, 3)));
-		listener.onEvent(eq(new ValueEvent<Double>(proxy.OnAdd(), 19.85d, 4)));
+		listener.onEvent(eq(new ValueEvent<Double>(proxy.OnAdded(), 19.12d, 3)));
+		listener.onEvent(eq(new ValueEvent<Double>(proxy.OnAdded(), 19.85d, 4)));
 		control.replay();
 		
-		proxy.OnAdd().addListener(listener);
+		proxy.OnAdded().addListener(listener);
 		candles.add(new Candle(interval1, 19.12d, 0d, 0d, 0d, 0l));
 		candles.add(new Candle(interval2, 19.85d, 0d, 0d, 0d, 0l));
 		
@@ -112,14 +112,14 @@ public class CandleProxyTest {
 	}
 	
 	@Test
-	public void testOnUpd() throws Exception {
+	public void testOnUpdated() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(new ValueEvent<Double>(proxy.OnUpd(),11.92d,15.29d,2));
-		listener.onEvent(new ValueEvent<Double>(proxy.OnUpd(),15.29d,16.24d,2));
+		listener.onEvent(new ValueEvent<Double>(proxy.OnUpdated(),11.92d,15.29d,2));
+		listener.onEvent(new ValueEvent<Double>(proxy.OnUpdated(),15.29d,16.24d,2));
 		
 		control.replay();
 		
-		proxy.OnUpd().addListener(listener);
+		proxy.OnUpdated().addListener(listener);
 		candles.set(new Candle(interval3, 15.29, 0d, 0d, 0d, 0l));
 		candles.set(new Candle(interval3, 16.24, 0d, 0d, 0d, 0l));
 		

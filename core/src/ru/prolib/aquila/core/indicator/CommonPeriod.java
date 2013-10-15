@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.data.EditableSeries;
  * 2012-05-14<br>
  * $Id: CommonPeriod.java 565 2013-03-10 19:32:12Z whirlwind $
  */
-public abstract class CommonPeriod extends Common {
+public abstract class CommonPeriod extends Common<Double> {
 	protected final int period;
 
 	/**
