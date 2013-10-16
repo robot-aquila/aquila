@@ -8,8 +8,8 @@ import ru.prolib.aquila.core.*;
  * @param <T> - тип значения индикатора
  */
 public abstract class CommonIndicator<T> implements Indicator<T> {
-	private final IndicatorEventDispatcher dispatcher;
-	private boolean started = false;
+	protected final IndicatorEventDispatcher dispatcher;
+	protected boolean started = false;
 	
 	/**
 	 * Конструктор.
@@ -49,6 +49,7 @@ public abstract class CommonIndicator<T> implements Indicator<T> {
 		}
 		onStart();
 		started = true;
+		dispatcher.fireStarted();
 	}
 
 	@Override
@@ -56,6 +57,7 @@ public abstract class CommonIndicator<T> implements Indicator<T> {
 		if ( started ) {
 			onStop();
 			started = false;
+			dispatcher.fireStopped();
 		}
 	}
 
@@ -87,5 +89,17 @@ public abstract class CommonIndicator<T> implements Indicator<T> {
 	 * @throws StarterException
 	 */
 	abstract protected void onStop() throws StarterException;
+	
+	/**
+	 * Сравнить атрибуты объектов.
+	 * <p>
+	 * @param other экземпляр для сравнения
+	 * @return true атрибуты равны, false не равны
+	 */
+	protected synchronized boolean fieldsEquals(CommonIndicator<?> other) {
+		synchronized ( other ) {
+			return started == other.started;
+		}
+	}
 
 }
