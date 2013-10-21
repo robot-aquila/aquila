@@ -73,7 +73,11 @@ public class SecuritiesGateway implements TableGateway {
 	
 	static {
 		TYPE_MAP = new HashMap<String, SecurityType>();
-		TYPE_MAP.put("ФОРТС фьючерсы", SecurityType.FUT);
+		// Идентификаторы одинаковых типов различаются в зависи от брокера.
+		// Например в БКС "ФОРТС фьючерсы" а в ФИНАМ "FORTS: Фьючерсы".
+		// Поскольку пользы от указания типа в данный момент не просматривается,
+		// принимаем решение, что лучше пусть будут все с одинаковым типом.
+		//TYPE_MAP.put("ФОРТС фьючерсы", SecurityType.FUT);
 	}
 
 	private final Assembler asm;

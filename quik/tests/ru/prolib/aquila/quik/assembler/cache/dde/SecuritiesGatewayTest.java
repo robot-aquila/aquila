@@ -46,8 +46,8 @@ public class SecuritiesGatewayTest {
 			"CODE",
 			"CLASS_CODE",
 			"last",
-			"open",
-			"prevlegalclosepr",
+			//"open",
+			//"prevlegalclosepr",
 			"LONGNAME",
 			"SHORTNAME",
 			"offer",
@@ -82,11 +82,11 @@ public class SecuritiesGatewayTest {
 		map.put("high", "");
 		map.put("low", "");
 		map.put("curstepprice", "USD");
-		map.put("CLASSNAME", "ФОРТС фьючерсы");
+		map.put("CLASSNAME", "ФОРТС фьючерсы"); // всегда STK
 		SecurityEntry expected = new SecurityEntry(1, 145600.0d, 135060.0d,
 				6.20866d, 10.0, 0, 140720.0d, null, null, "RTS-3.13", "RIM3",
 				null, null, null, null, new SecurityDescriptor("RIM3", "SPBFUT",
-						"USD", SecurityType.FUT));
+						"USD", SecurityType.STK));
 		asm.assemble(eq(expected));
 		control.replay();
 		
