@@ -135,6 +135,7 @@ public class AssemblerTest {
 	public void testAssemble_Order() throws Exception {
 		T2QOrder entry = control.createMock(T2QOrder.class);
 		l1.correctOrderNumerator(same(entry));
+		expect(l1.fixme(same(entry))).andReturn(entry);
 		cache.put(same(entry));
 		l1.tryAssemble(same(entry));
 		control.replay();

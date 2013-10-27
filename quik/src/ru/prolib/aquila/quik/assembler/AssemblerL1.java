@@ -1,6 +1,9 @@
 package ru.prolib.aquila.quik.assembler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
@@ -16,6 +19,12 @@ import ru.prolib.aquila.t2q.T2QTrade;
  * сборки.
  */
 public class AssemblerL1 {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(AssemblerL1.class);
+	}
+	
 	private final QUIKEditableTerminal terminal;
 	private final AssemblerL2 l2;
 	
@@ -163,6 +172,40 @@ public class AssemblerL1 {
 			.appendSuper(o.terminal == terminal)
 			.append(o.l2, l2)
 			.isEquals();
+	}
+	
+	/**
+	 * Исправить пропадающий номер транзакции.
+	 * <p>
+	 * Фикс квикового глюка, когда перенесенные на следующий день заявки теряют
+	 * заданный при создании номер транзакции. Исправление выполняется только
+	 * в случае если номер транзакции кэш-записи равен нулю. В этом случае, 
+	 * если заявка с таким системным номером уже есть в кэше, то создается
+	 * новая кэш-запись на основе полученной в качестве аргумента и с номером
+	 * транзакции, который соответствует кэш-записи находящейся в кэше (то есть
+	 * предыдущей версии).
+	 * <p>
+	 * @param entry исходная кэш-запись
+	 * @return исправленная кэш-запись
+	 */
+	public T2QOrder fixme(T2QOrder entry) {
+		if ( entry.getTransId() != 0L ) {
+			return entry;
+		}
+		Cache cache = terminal.getDataCache();
+		synchronized ( cache ) {
+			long orderId = entry.getOrderId();
+			T2QOrder prevEntry = cache.getOrder(orderId);
+			if ( prevEntry == null ) {
+				logger.debug("New order #{} entry without trans.ID", orderId);
+				return entry;
+			} else {
+				long transId = prevEntry.getTransId();
+				Object args[] = { orderId, transId };
+				logger.debug("For order #{} zeroed trans.ID fixed to {}", args);
+				return new T2QOrder(entry, transId);
+			}
+		}
 	}
 
 }

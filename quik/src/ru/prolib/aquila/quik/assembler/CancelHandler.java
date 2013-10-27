@@ -74,6 +74,8 @@ public class CancelHandler implements QUIKTransactionHandler {
 			order.getSystemInfo().getCancellation().setRequestTime();
 			send(trspec);
 			changeStatus(OrderStatus.CANCEL_SENT);
+			logger.debug(trspec);
+			
 		} catch ( OrderException e ) {
 			changeStatus(OrderStatus.CANCEL_FAILED);
 			removeHandler();

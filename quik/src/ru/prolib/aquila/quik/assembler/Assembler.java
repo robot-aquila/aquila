@@ -143,6 +143,7 @@ public class Assembler implements Starter, EventListener {
 	 */
 	public void assemble(T2QOrder entry) {
 		l1.correctOrderNumerator(entry);
+		entry = l1.fixme(entry);
 		terminal.getDataCache().put(entry);
 		l1.tryAssemble(entry);
 	}

@@ -3,6 +3,8 @@ package ru.prolib.aquila.quik.assembler;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import java.util.*;
+
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -20,6 +22,12 @@ public class AssemblerL1Test {
 	private TradesCache tradesCache;
 	private AssemblerL2 l2;
 	private AssemblerL1 asm;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -222,6 +230,58 @@ public class AssemblerL1Test {
 		asm.tryAssemble(entry);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testFixme_Order_IfOkEntryThenSame() throws Exception {
+		T2QOrder initial = new T2QOrder(0, 215L, 344152L, "SPBFUT", "RIZ3",
+				145920d, 0L, 123456d, true, 0, "GOO", "826", "XXL", 1L,
+				20131027L, 164653L, 0L, 153945L, 20131101L, 1d, 2d, 765L,
+				"X", "Y");
+		control.replay();
+		
+		assertSame(initial, asm.fixme(initial));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testFixme_Order_IfTransIdZeroAndHasNoPrevEntryThenSame()
+		throws Exception
+	{
+		T2QOrder initial = new T2QOrder(0, 0L, 344152L, "SPBFUT", "RIZ3",
+				145920d, 0L, 123456d, true, 0, "GOO", "826", "XXL", 1L,
+				20131027L, 164653L, 0L, 153945L, 20131101L, 1d, 2d, 765L,
+				"X", "Y");
+		
+		expect(cache.getOrder(eq(344152L))).andReturn(null);
+		control.replay();
+		
+		assertSame(initial, asm.fixme(initial));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testFixme_Order_IfTransIdZeroAndHasPrevEntryThenNew()
+		throws Exception
+	{
+		T2QOrder initial = new T2QOrder(0, 0L, 344152L, "SPBFUT", "RIZ3",
+				145920d, 0L, 123456d, true, 0, "GOO", "826", "XXL", 1L,
+				20131027L, 164653L, 0L, 153945L, 20131101L, 1d, 2d, 765L,
+				"X", "Y"),
+			previous = new T2QOrder(0, 224L, 344152L, "", "", 0d, 0L, 0d, false,
+				0, "", "", "", 0L, 0L, 0L, 0L, 0L, 0L, 0d, 0d, 0L, "", "");
+		
+		expect(cache.getOrder(eq(344152L))).andReturn(previous);
+		control.replay();
+		
+		T2QOrder expected = new T2QOrder(initial, 224L);
+		T2QOrder actual = asm.fixme(initial);
+		
+		control.verify();
+		assertNotSame(actual, initial);
+		assertEquals(expected, actual);
 	}
 
 }
