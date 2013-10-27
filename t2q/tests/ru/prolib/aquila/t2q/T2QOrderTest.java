@@ -24,6 +24,35 @@ public class T2QOrderTest {
 	}
 	
 	@Test
+	public void testConstruct2() throws Exception {
+		T2QOrder o2 = new T2QOrder(order, 284L);
+		assertEquals(1, o2.getMode());
+		assertEquals(284L, o2.getTransId());
+		assertEquals(256L, o2.getOrderId());
+		assertEquals("SPBFUT", o2.getClassCode());
+		assertEquals("RIH3", o2.getSecCode());
+		assertEquals(156190.d, o2.getPrice(), 0.01d);
+		assertEquals(10L, o2.getBalance());
+		assertEquals(1561900.d, o2.getValue(), 0.01d);
+		assertTrue(o2.isSell());
+		assertEquals(0, o2.getStatus());
+		assertEquals("FIRM", o2.getFirmId());
+		assertEquals("CLIENT", o2.getClientCode());
+		assertEquals("LX01", o2.getAccount());
+		assertEquals(100, o2.getQty());
+		assertEquals(20130313l, o2.getDate());
+		assertEquals(82153l, o2.getTime());
+		assertEquals(12345, o2.getActivationTime());
+		assertEquals(6789, o2.getWithdrawTime());
+		assertEquals(4567, o2.getExpiry());
+		assertEquals(12.34d, o2.getAccruedInt(), 0.01d);
+		assertEquals(56.78d, o2.getYield(), 0.01d);
+		assertEquals(777L, o2.getUid());
+		assertEquals("USERID", o2.getUserId());
+		assertEquals("Comment", o2.getBrokerRef());
+	}
+	
+	@Test
 	public void testEquals() throws Exception {
 		Variant<Integer> vMode = new Variant<Integer>()
 			.add(1)

@@ -61,7 +61,7 @@ public class T2QOrder {
 	 * @param accruedInt НКД
 	 * @param yield доходность
 	 * @param uid идентификатор пользователя
-	 * @param userId строковый идентификатор трейдера, от имено которого
+	 * @param userId строковый идентификатор трейдера, от имени которого
 	 * отправлена заявка
 	 * @param brokerRef комментарий
 	 */
@@ -98,6 +98,25 @@ public class T2QOrder {
 		this.uid = uid;
 		this.userId = userId;
 		this.brokerRef = brokerRef;
+	}
+	
+	/**
+	 * Конструктор.
+	 * <p>
+	 * Создает экземпляр на основе существующего экземпляра с форсированием
+	 * идентификатора транзакции. 
+	 * <p>
+	 * @param order экземпляр-основание
+	 * @param forceTransId новый идентификатор транзакции
+	 */
+	public T2QOrder(T2QOrder order, long forceTransId) {
+		this(order.mode, forceTransId, order.orderId,
+				order.classCode, order.secCode, order.price, order.balance,
+				order.value, order.isSell, order.status,
+				order.firmId, order.clientCode, order.account,
+				order.qty, order.date, order.time, order.activationTime,
+				order.withdrawTime, order.expiry, order.accruedInt, order.yield,
+				order.uid, order.userId, order.brokerRef);
 	}
 	
 	public long getQty() {
