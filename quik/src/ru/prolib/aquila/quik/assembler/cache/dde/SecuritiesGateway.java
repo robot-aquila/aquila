@@ -38,7 +38,6 @@ public class SecuritiesGateway implements TableGateway {
 	private static final String HIGH = "high";
 	private static final String LOW = "low";
 	private static final String CURRENCY = "curstepprice";
-	private static final String TYPE = "CLASSNAME";
 	private static final String REQUIRED_HEADERS[] = {
 		LOT_SIZE,
 		PRICE_MAX,
@@ -64,7 +63,6 @@ public class SecuritiesGateway implements TableGateway {
 		HIGH,
 		LOW,
 		CURRENCY,
-		TYPE,
 	};
 	
 	private static final String DEFAULT_CURRENCY = "SUR";
@@ -73,11 +71,14 @@ public class SecuritiesGateway implements TableGateway {
 	
 	static {
 		TYPE_MAP = new HashMap<String, SecurityType>();
-		// Идентификаторы одинаковых типов различаются в зависи от брокера.
-		// Например в БКС "ФОРТС фьючерсы" а в ФИНАМ "FORTS: Фьючерсы".
-		// Поскольку пользы от указания типа в данный момент не просматривается,
-		// принимаем решение, что лучше пусть будут все с одинаковым типом.
-		//TYPE_MAP.put("ФОРТС фьючерсы", SecurityType.FUT);
+
+		TYPE_MAP.put("SPBFUT", SecurityType.FUT);
+		TYPE_MAP.put("SPBOPT", SecurityType.OPT);
+		TYPE_MAP.put("EQOB", SecurityType.BOND);
+		TYPE_MAP.put("EQOV", SecurityType.BOND);
+		TYPE_MAP.put("EQNB", SecurityType.BOND);
+		TYPE_MAP.put("EQDB", SecurityType.BOND);
+		TYPE_MAP.put("TQOB", SecurityType.BOND);
 	}
 
 	private final Assembler asm;
@@ -172,7 +173,7 @@ public class SecuritiesGateway implements TableGateway {
 	 * @throws ValueException
 	 */
 	private SecurityType getType(Row row) throws ValueException {
-		String strType = converter.getString(row, TYPE);
+		String strType = converter.getString(row, CLASS_CODE);
 		SecurityType type = TYPE_MAP.get(strType);
 		if ( type == null ) {
 			type = DEFAULT_TYPE;
@@ -201,7 +202,9 @@ public class SecuritiesGateway implements TableGateway {
 	}
 
 	@Override
-	public boolean shouldProcessRowByRow(TableMeta meta, RowSet rs) throws DDEException {
+	public boolean shouldProcessRowByRow(TableMeta meta, RowSet rs)
+		throws DDEException
+	{
 		return true;
 	}
 

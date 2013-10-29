@@ -55,7 +55,6 @@ public class SecuritiesGatewayTest {
 			"high",
 			"low",
 			"curstepprice",
-			"CLASSNAME",
 		};
 		assertArrayEquals(expected, gateway.getRequiredHeaders());
 	}
@@ -82,11 +81,10 @@ public class SecuritiesGatewayTest {
 		map.put("high", "");
 		map.put("low", "");
 		map.put("curstepprice", "USD");
-		map.put("CLASSNAME", "ФОРТС фьючерсы"); // всегда STK
 		SecurityEntry expected = new SecurityEntry(1, 145600.0d, 135060.0d,
 				6.20866d, 10.0, 0, 140720.0d, null, null, "RTS-3.13", "RIM3",
 				null, null, null, null, new SecurityDescriptor("RIM3", "SPBFUT",
-						"USD", SecurityType.STK));
+						"USD", SecurityType.FUT));
 		asm.assemble(eq(expected));
 		control.replay();
 		
@@ -118,7 +116,6 @@ public class SecuritiesGatewayTest {
 		map.put("high", 230.0d);
 		map.put("low", 227.39d);
 		map.put("curstepprice", "");
-		map.put("CLASSNAME", "А1-Акции");
 		SecurityEntry expected = new SecurityEntry(10, null, null,
 				null, 0.01d, 2, null, 227.39d, 227.76d, "Уралкалий (ОАО) ао",
 				"Уралкалий-ао", null, null, 230.0d, 227.39d,
