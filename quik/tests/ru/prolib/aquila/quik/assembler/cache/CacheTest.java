@@ -12,7 +12,7 @@ import ru.prolib.aquila.t2q.*;
 
 public class CacheTest {
 	private static Account account;
-	private static SecurityDescriptor descr;
+	private static QUIKSecurityDescriptor descr;
 	private IMocksControl control;
 	private DescriptorsCache descrs;
 	private PositionsCache positions;
@@ -25,7 +25,8 @@ public class CacheTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		account = new Account("BCS", "LX01");
-		descr = new SecurityDescriptor("GAZP", "EQBR", "SUR", SecurityType.STK);
+		descr = new QUIKSecurityDescriptor("GAZP", "EQBR", ISO4217.RUB,
+				SecurityType.STK, "GAZP", "АО Газпром", "АО Газпром");
 	}
 
 	@Before
@@ -42,7 +43,8 @@ public class CacheTest {
 	
 	@Test
 	public void testGetDescriptors0() throws Exception {
-		List<SecurityDescriptor> expected = new Vector<SecurityDescriptor>();
+		List<QUIKSecurityDescriptor> expected =
+				new Vector<QUIKSecurityDescriptor>();
 		expect(descrs.get()).andReturn(expected);
 		control.replay();
 		
@@ -82,12 +84,11 @@ public class CacheTest {
 	}
 	
 	@Test
-	public void testPut_SecurityEntry() throws Exception {
-		SecurityEntry entry = control.createMock(SecurityEntry.class);
-		expect(descrs.put(same(entry))).andReturn(true);
+	public void testPut_SecurityDescriptor() throws Exception {
+		expect(descrs.put(same(descr))).andReturn(true);
 		control.replay();
 		
-		assertTrue(cache.put(entry));
+		assertTrue(cache.put(descr));
 		
 		control.verify();
 	}

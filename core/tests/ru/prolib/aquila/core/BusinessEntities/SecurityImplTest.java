@@ -25,7 +25,7 @@ public class SecurityImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr1 = new SecurityDescriptor("GAZP", "EQBR", "RUR",SecurityType.STK);
+		descr1 = new SecurityDescriptor("GAZP", "EQBR", "RUB",SecurityType.STK);
 		descr2 = new SecurityDescriptor("RIM3", "SPFT", "USD",SecurityType.FUT);
 	}
 

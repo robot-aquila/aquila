@@ -32,7 +32,7 @@ public class PositionImplTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		account = new Account("TST01");
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
+		descr = new SecurityDescriptor("GAZP", "EQBR", "RUB", SecurityType.STK);
 	}
 
 	@Before

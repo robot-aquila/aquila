@@ -130,7 +130,7 @@ public class Assembler implements Starter, EventListener {
 		// данных позиций до тех пор, пока кэш позиций в его текущем состоянии
 		// не будет обработан.
 		synchronized ( cache ) {
-			if ( cache.put(entry) ) {
+			if ( cache.put(entry.getDescriptor()) ) {
 				l1.tryAssemblePositions(entry.getShortName());
 			}
 		}

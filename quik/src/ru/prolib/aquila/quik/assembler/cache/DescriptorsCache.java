@@ -1,17 +1,16 @@
 package ru.prolib.aquila.quik.assembler.cache;
 
 import java.util.*;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
- * Кэш дескрипторов инструментов.
+ * Кэш идентификации инструментов.
  * <p>
- * Обеспечивает доступ к дескрипторам инструментов по частичной идентификации.
- * Позволяет отслеживать изменения содержимого кэша.
+ * Обеспечивает доступ к дескрипторам инструментов по неполным
+ * идентификационным данным, которые транслируются терминалом QUIK при передаче
+ * связанных таблиц. Позволяет отслеживать изменения содержимого кэша через
+ * прослушивание события. 
  */
 public class DescriptorsCache {
 	/**
@@ -20,23 +19,29 @@ public class DescriptorsCache {
 	private static final String SEP = "#";
 	
 	/**
-	 * Карта сопоставления краткого наименования дескриптору инструмента.
+	 * Список всех зарегистрированных дескрипторов.
 	 */
-	private final Map<String, SecurityDescriptor> short2descr;
+	private final List<QUIKSecurityDescriptor> descrList;
 	
 	/**
-	 * Карта сопоставления комбинации кода инструмента и кода класса
+	 * Карта сопоставления краткого наименования дескриптору инструмента.
+	 */
+	private final Map<String, QUIKSecurityDescriptor> short2descr;
+	
+	/**
+	 * Карта сопоставления комбинации системного кода инструмента и кода класса
 	 * дескриптору инструмента.
 	 */
-	private final Map<String, SecurityDescriptor> long2descr;
+	private final Map<String, QUIKSecurityDescriptor> long2descr;
 	
 	private final EventDispatcher dispatcher;
 	private final EventType onUpdate; 
 	
 	public DescriptorsCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super();
-		short2descr = new LinkedHashMap<String, SecurityDescriptor>();
-		long2descr = new Hashtable<String, SecurityDescriptor>();
+		descrList = new Vector<QUIKSecurityDescriptor>();
+		short2descr = new LinkedHashMap<String, QUIKSecurityDescriptor>();
+		long2descr = new Hashtable<String, QUIKSecurityDescriptor>();
 		this.dispatcher = dispatcher;
 		this.onUpdate = onUpdate;
 	}
@@ -50,42 +55,45 @@ public class DescriptorsCache {
 	}
 	
 	/**
-	 * Зарегистрировать инструмент.
+	 * Зарегистрировать дескриптор.
 	 * <p>
-	 * Регистрирует инструмент для последующего доступа к дескриптору с неполной
-	 * идентификацией. Если дескриптор, соответствующий записи, уже
-	 * зарегистрирован, то никаких изменений не выполняется. Если запись
-	 * ссылается на незарегистрированный ранее дескриптор, то выполняется
-	 * регистрация с последующей генерацией события о доступности нового
-	 * дескриптора. Сама запись инструмента не кэшируется и впоследствии
-	 * недоступна через кэш.
+	 * Регистрирует дескриптор для последующего доступа по неполной
+	 * идентификации. Уникальность дескриптора определяется комбинацией всех
+	 * его атрибутов, включая расширенные. Это означает, что например фьючерсы 
+	 * разных годов с совпадающими системными кодами будут признаны в рамках 
+	 * кэша различными.
 	 * <p>
-	 * @param entry запись инструмента
+	 * Если дескриптор уже зарегистрирован, то никаких изменений не выполняется. 
+	 * Если передается новый дескриптор, то выполняется обновление информации
+	 * о связях по неполным идентификационным данным с последующей генерацией
+	 * о регистрации нового дескриптора.
+	 * <p>
+	 * @param descr дескриптор
 	 * @return возвращает true, если был зарегистрирован новый дескриптор
 	 */
-	public synchronized boolean put(SecurityEntry entry) {
-		String shortName = entry.getShortName();
-		if ( ! short2descr.containsKey(shortName) ) {
-			set(entry);
-			dispatcher.dispatch(new EventImpl(onUpdate));
-			return true;
-		} else {
+	public synchronized boolean put(QUIKSecurityDescriptor descr) {
+		if ( descrList.contains(descr) ) {
 			return false;
 		}
+		set(descr);
+		dispatcher.dispatch(new EventImpl(onUpdate));
+		return true;
 	}
 	
 	/**
 	 * Получить дескриптор инструмента.
 	 * <p>
 	 * Позволяет получить дескриптор инструмента по неполным идентификационным
-	 * данным: комбинации кода инструмента и кода класса инструмента.
+	 * данным: комбинации системного кода инструмента и кода класса инструмента.
 	 * <p>
-	 * @param code код инструмента
+	 * @param systemCode системный код инструмента
 	 * @param classCode код класса инструмента
 	 * @return дескриптор инструмента или null, если нет такого инструмента
 	 */
-	public synchronized SecurityDescriptor get(String code, String classCode) {
-		return long2descr.get(code + SEP + classCode);
+	public synchronized
+		QUIKSecurityDescriptor get(String systemCode, String classCode)
+	{
+		return long2descr.get(systemCode + SEP + classCode);
 	}
 	
 	/**
@@ -97,7 +105,7 @@ public class DescriptorsCache {
 	 * @param shortName краткое наименование инструмента
 	 * @return дескриптор инструмента или null, если нет такого инструмента
 	 */
-	public synchronized SecurityDescriptor get(String shortName) {
+	public synchronized QUIKSecurityDescriptor get(String shortName) {
 		return short2descr.get(shortName);
 	}
 	
@@ -106,21 +114,21 @@ public class DescriptorsCache {
 	 * <p>
 	 * @return список дескрипторов инструментов
 	 */
-	public synchronized List<SecurityDescriptor> get() {
-		return new Vector<SecurityDescriptor>(short2descr.values());
+	public synchronized List<QUIKSecurityDescriptor> get() {
+		return new Vector<QUIKSecurityDescriptor>(descrList);
 	}
 	
 	/**
-	 * Сохранить кэш-запись (без генерации событий).
+	 * Сохранить дескриптор (без генерации событий).
 	 * <p>
 	 * Служебный метод.
 	 * <p>
-	 * @param entry кэш-запись
+	 * @param d дескриптор
 	 */
-	void set(SecurityEntry entry) {
-		SecurityDescriptor descr = entry.getDescriptor();
-		short2descr.put(entry.getShortName(), descr);
-		long2descr.put(descr.getCode() + SEP + descr.getClassCode(), descr);
+	void set(QUIKSecurityDescriptor d) {
+		descrList.add(d);
+		short2descr.put(d.getShortName(), d);
+		long2descr.put(d.getSystemCode() + SEP + d.getClassCode(), d);
 	}
 	
 	@Override
@@ -133,6 +141,7 @@ public class DescriptorsCache {
 		}
 		DescriptorsCache o = (DescriptorsCache) other;
 		return new EqualsBuilder()
+			.append(o.descrList, descrList)
 			.append(o.dispatcher, dispatcher)
 			.append(o.long2descr, long2descr)
 			.append(o.onUpdate, onUpdate)

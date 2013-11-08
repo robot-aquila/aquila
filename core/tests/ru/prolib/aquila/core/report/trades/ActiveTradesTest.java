@@ -28,8 +28,8 @@ public class ActiveTradesTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		descr1 = new SecurityDescriptor("Foo", "GZ", "Bar", SecurityType.UNK);
-		descr2 = new SecurityDescriptor("Bar", "BZ", "Foo", SecurityType.UNK);
+		descr1 = new SecurityDescriptor("Foo", "GZ", "USD", SecurityType.UNK);
+		descr2 = new SecurityDescriptor("Bar", "BZ", "RUB", SecurityType.UNK);
 	}
 	
 	@Before

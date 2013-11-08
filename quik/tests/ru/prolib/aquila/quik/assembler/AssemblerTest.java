@@ -7,6 +7,8 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.ISO4217;
+import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.data.row.RowSetException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
@@ -21,6 +23,7 @@ public class AssemblerTest {
 	private DescriptorsCache descrsCache;
 	private AssemblerL1 l1;
 	private Assembler assembler;
+	private QUIKSecurityDescriptor descr;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -36,6 +39,8 @@ public class AssemblerTest {
 		descrsCache = control.createMock(DescriptorsCache.class);
 		l1 = control.createMock(AssemblerL1.class);
 		assembler = new Assembler(terminal, l1);
+		descr = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT", ISO4217.USD,
+				SecurityType.FUT, "RIZ3", "RIZ3", "RTS-12.13");
 		
 		expect(terminal.getDataCache()).andStubReturn(cache);
 		expect(cache.getDescriptorsCache()).andStubReturn(descrsCache);
@@ -108,8 +113,9 @@ public class AssemblerTest {
 	@Test
 	public void testAssemble_Security_Existing() throws Exception {
 		SecurityEntry entry = control.createMock(SecurityEntry.class);
+		expect(entry.getDescriptor()).andStubReturn(descr);
 		expect(l1.tryAssemble(same(entry))).andReturn(true);
-		expect(descrsCache.put(same(entry))).andReturn(false);
+		expect(descrsCache.put(same(descr))).andReturn(false);
 		control.replay();
 		
 		assembler.assemble(entry);
@@ -120,10 +126,11 @@ public class AssemblerTest {
 	@Test
 	public void testAssemble_Security_New() throws Exception {
 		SecurityEntry entry = control.createMock(SecurityEntry.class);
+		expect(entry.getDescriptor()).andStubReturn(descr);
+		expect(entry.getShortName()).andStubReturn("RIZ3");
 		expect(l1.tryAssemble(same(entry))).andReturn(true);
-		expect(descrsCache.put(same(entry))).andReturn(true);
-		expect(entry.getShortName()).andReturn("LKOH");
-		l1.tryAssemblePositions(eq("LKOH"));
+		expect(descrsCache.put(same(descr))).andReturn(true);
+		l1.tryAssemblePositions(eq("RIZ3"));
 		control.replay();
 		
 		assembler.assemble(entry);

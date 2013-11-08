@@ -18,7 +18,7 @@ public class SecurityFactoryTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
+		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
 	}
 	
 	@Before

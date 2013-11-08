@@ -11,6 +11,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.quik.assembler.*;
 import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
 import ru.prolib.aquila.quik.assembler.cache.dde.RowDataConverter;
@@ -83,8 +84,8 @@ public class SecuritiesGatewayTest {
 		map.put("curstepprice", "USD");
 		SecurityEntry expected = new SecurityEntry(1, 145600.0d, 135060.0d,
 				6.20866d, 10.0, 0, 140720.0d, null, null, "RTS-3.13", "RIM3",
-				null, null, null, null, new SecurityDescriptor("RIM3", "SPBFUT",
-						"USD", SecurityType.FUT));
+				null, null, null, null, "RIM3", "SPBFUT", ISO4217.USD,
+				SecurityType.FUT);
 		asm.assemble(eq(expected));
 		control.replay();
 		
@@ -115,17 +116,99 @@ public class SecuritiesGatewayTest {
 		map.put("bid", 0.0d);
 		map.put("high", 230.0d);
 		map.put("low", 227.39d);
-		map.put("curstepprice", "");
+		map.put("curstepprice", "USD");
 		SecurityEntry expected = new SecurityEntry(10, null, null,
 				null, 0.01d, 2, null, 227.39d, 227.76d, "Уралкалий (ОАО) ао",
 				"Уралкалий-ао", null, null, 230.0d, 227.39d,
-				new SecurityDescriptor("URKA", "EQBR", "SUR",SecurityType.STK));
+				"URKA", "EQBR", ISO4217.USD, SecurityType.STK);
 		asm.assemble(eq(expected));
 		control.replay();
 		
 		gateway.process(row);
 		
 		control.verify();
+	}
+	
+	@Test (expected=DDEException.class)
+	public void testProcess_ThrowsIfCurrencyCodeZero() throws Exception {
+		map.put("lotsize", 10.0d);
+		map.put("pricemax", "");
+		map.put("pricemin", "");
+		map.put("steppricet", "");
+		map.put("SEC_PRICE_STEP", 0.01d);
+		map.put("SEC_SCALE", 2d);
+		map.put("CODE", "URKA");
+		map.put("CLASS_CODE", "EQBR");
+		map.put("last", 0.0d);
+		map.put("open", 227.39d);
+		map.put("prevlegalclosepr", 227.76d);
+		map.put("LONGNAME", "Уралкалий (ОАО) ао");
+		map.put("SHORTNAME", "Уралкалий-ао");
+		map.put("offer", 0.0d);
+		map.put("bid", 0.0d);
+		map.put("high", 230.0d);
+		map.put("low", 227.39d);
+		map.put("curstepprice", ""); // <-- !!!
+		control.replay();
+		
+		gateway.process(row);
+	}
+	
+	@Test
+	public void testProcess_CurrencyCodeFix() throws Exception {
+		map.put("lotsize", 10.0d);
+		map.put("pricemax", "");
+		map.put("pricemin", "");
+		map.put("steppricet", "");
+		map.put("SEC_PRICE_STEP", 0.01d);
+		map.put("SEC_SCALE", 2d);
+		map.put("CODE", "URKA");
+		map.put("CLASS_CODE", "EQBR");
+		map.put("last", 0.0d);
+		map.put("open", 227.39d);
+		map.put("prevlegalclosepr", 227.76d);
+		map.put("LONGNAME", "Уралкалий (ОАО) ао");
+		map.put("SHORTNAME", "Уралкалий-ао");
+		map.put("offer", 0.0d);
+		map.put("bid", 0.0d);
+		map.put("high", 230.0d);
+		map.put("low", 227.39d);
+		map.put("curstepprice", "SUR"); // <-- !!!
+		SecurityEntry expected = new SecurityEntry(10, null, null,
+				null, 0.01d, 2, null, 227.39d, 227.76d, "Уралкалий (ОАО) ао",
+				"Уралкалий-ао", null, null, 230.0d, 227.39d,
+				"URKA", "EQBR", ISO4217.RUB, SecurityType.STK);
+		asm.assemble(eq(expected));
+		control.replay();
+		
+		gateway.process(row);
+		
+		control.verify();
+	}
+	
+	@Test (expected=DDEException.class)
+	public void testProcess_ThrowsIfCurrencyNotExists() throws Exception {
+		map.put("lotsize", 10.0d);
+		map.put("pricemax", "");
+		map.put("pricemin", "");
+		map.put("steppricet", "");
+		map.put("SEC_PRICE_STEP", 0.01d);
+		map.put("SEC_SCALE", 2d);
+		map.put("CODE", "URKA");
+		map.put("CLASS_CODE", "EQBR");
+		map.put("last", 0.0d);
+		map.put("open", 227.39d);
+		map.put("prevlegalclosepr", 227.76d);
+		map.put("LONGNAME", "Уралкалий (ОАО) ао");
+		map.put("SHORTNAME", "Уралкалий-ао");
+		map.put("offer", 0.0d);
+		map.put("bid", 0.0d);
+		map.put("high", 230.0d);
+		map.put("low", 227.39d);
+		map.put("curstepprice", "ZZZ"); // <-- !!!
+		control.replay();
+		
+		gateway.process(row);
 	}
 	
 	@Test

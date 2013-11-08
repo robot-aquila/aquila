@@ -2,6 +2,7 @@ package ru.prolib.aquila.quik.assembler.cache;
 
 import static org.junit.Assert.*;
 
+import java.util.Currency;
 import java.util.Date;
 
 import org.junit.*;
@@ -10,20 +11,20 @@ import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
 
 public class SecurityEntryTest {
-	private static SecurityDescriptor descr1, descr2;
+	private QUIKSecurityDescriptor expected;
 	private SecurityEntry row;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr1 = new SecurityDescriptor("FOO", "ONE", "RUB", SecurityType.STK);
-		descr2 = new SecurityDescriptor("BAR", "TWO", "USD", SecurityType.FUT);
+
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		row = new SecurityEntry(20, 180.13d, 160.24d, 0.01d, 0.02d, 2,
 				150.82d, 153.14d, 153.12d, "test security", "test",
-				150.84d, 150.90d, /*151.12d*/null, 149.82d, descr1);
+				150.84d, 150.90d, /*151.12d*/null, 149.82d,
+				"SBER", "EQBR", ISO4217.RUB, SecurityType.STK);
 	}
 	
 	@Test
@@ -86,11 +87,19 @@ public class SecurityEntryTest {
 		Variant<Double> vLow = new Variant<Double>(vHigh)
 			.add(149.82d)
 			.add(151.12d);
-		Variant<SecurityDescriptor> vDesc =
-				new Variant<SecurityDescriptor>(vLow)
-			.add(descr1)
-			.add(descr2);
-		Variant<?> iterator = vDesc;
+		Variant<String> vCode = new Variant<String>(vLow)
+			.add("SBER")
+			.add("GAZP");
+		Variant<String> vClass = new Variant<String>(vCode)
+			.add("EQBR")
+			.add("SPBFUT");
+		Variant<Currency> vCurr = new Variant<Currency>(vClass)
+			.add(ISO4217.RUB)
+			.add(ISO4217.GBP);
+		Variant<SecurityType> vType = new Variant<SecurityType>(vCurr)
+			.add(SecurityType.STK)
+			.add(SecurityType.OPT);
+		Variant<?> iterator = vType;
 		int foundCnt = 0;
 		SecurityEntry x = null, found = null;
 		do {
@@ -98,7 +107,8 @@ public class SecurityEntryTest {
 					vMinStPr.get(), vMinStSz.get(), vPrec.get(),
 					vLast.get(), vOpen.get(), vClose.get(), vDispNm.get(),
 					vShrtNm.get(), vAsk.get(), vBid.get(), vHigh.get(),
-					vLow.get(), vDesc.get());
+					vLow.get(),
+					vCode.get(), vClass.get(), vCurr.get(), vType.get());
 			if ( row.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -121,7 +131,29 @@ public class SecurityEntryTest {
 		//assertEquals(151.12d, found.getHighPrice(), 0.001d);
 		assertNull(found.getHighPrice());
 		assertEquals(149.82d, found.getLowPrice(), 0.001d);
-		assertEquals(descr1, found.getDescriptor());
+		assertEquals("SBER", found.getCode());
+		assertEquals("EQBR", found.getClassCode());
+		assertEquals(ISO4217.RUB, found.getCurrency());
+		assertEquals(SecurityType.STK, found.getType());
+	}
+	
+	@Test
+	public void testGetDescriptor_ForFutures() throws Exception {
+		row = new SecurityEntry(0, 0d, 0d, 0d, 0d, 0, 0d, 0d, 0d,
+				"RTS-12.13", "_RIZ3", 0d, 0d, 0d, 0d,
+				"RIZ3", "SPBFUT", ISO4217.USD, SecurityType.FUT);
+		expected = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT",
+				ISO4217.USD, SecurityType.FUT, "RIZ3", "_RIZ3", "RTS-12.13");
+		
+		assertEquals(expected, row.getDescriptor());
+	}
+	
+	@Test
+	public void testGetDescriptor_Default() throws Exception {
+		expected = new QUIKSecurityDescriptor("SBER", "EQBR", ISO4217.RUB,
+				SecurityType.STK, "SBER", "test", "test security");
+		
+		assertEquals(expected, row.getDescriptor());
 	}
 
 }

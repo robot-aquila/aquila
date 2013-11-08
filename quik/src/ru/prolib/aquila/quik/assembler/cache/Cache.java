@@ -72,7 +72,7 @@ public class Cache {
 	 * <p>
 	 * @return список дескрипторов
 	 */
-	public List<SecurityDescriptor> getDescriptors() {
+	public List<QUIKSecurityDescriptor> getDescriptors() {
 		return descrs.get();
 	}
 	
@@ -82,19 +82,21 @@ public class Cache {
 	 * @param shortName краткое наименование инструмента
 	 * @return дескриптор или null, если нет соответствующего дескриптора
 	 */
-	public SecurityDescriptor getDescriptor(String shortName) {
+	public QUIKSecurityDescriptor getDescriptor(String shortName) {
 		return descrs.get(shortName);
 	}
 	
 	/**
 	 * Получить дескриптор по комбинации кодов инструмента и класса.
 	 * <p>
-	 * @param code код инструмента
+	 * @param systemCode системный код инструмента
 	 * @param classCode код класса инструмента
 	 * @return дескриптор или null, если нет соответствующего дескриптора
 	 */
-	public SecurityDescriptor getDescriptor(String code, String classCode) {
-		return descrs.get(code, classCode);
+	public QUIKSecurityDescriptor
+		getDescriptor(String systemCode, String classCode)
+	{
+		return descrs.get(systemCode, classCode);
 	}
 	
 	/**
@@ -109,11 +111,11 @@ public class Cache {
 	/**
 	 * Обновить кэш дескрипторов.
 	 * <p>
-	 * @param entry кэш-запись инструмента
+	 * @param descr дескриптор инструмента
 	 * @return true - был добавлен новый дескриптор, false - без изменений
 	 */
-	public boolean put(SecurityEntry entry) {
-		return descrs.put(entry);
+	public boolean put(QUIKSecurityDescriptor descr) {
+		return descrs.put(descr);
 	}
 	
 	/**

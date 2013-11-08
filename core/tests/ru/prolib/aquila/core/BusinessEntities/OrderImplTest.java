@@ -409,7 +409,7 @@ public class OrderImplTest {
 			}
 		};
 		testSetterGetter(descr,
-			new SecurityDescriptor("USD","IDEALPRO","JPY",SecurityType.CASH));
+			new SecurityDescriptor("USD","IDEALPRO","USD",SecurityType.CASH));
 	}
 	
 	@Test
@@ -706,7 +706,7 @@ public class OrderImplTest {
 				new Variant<SecurityDescriptor>(vAcnt)
 			.add(descr);
 		if ( rnd.nextDouble() > aprob ) {
-			vDescr.add(new SecurityDescriptor("A","B","C",SecurityType.UNK));
+			vDescr.add(new SecurityDescriptor("A","B","USD",SecurityType.UNK));
 		}
 		Variant<Direction> vDir = new Variant<Direction>(vDescr)
 			.add(Direction.SELL);

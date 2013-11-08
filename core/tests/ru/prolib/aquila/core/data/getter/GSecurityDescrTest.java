@@ -50,9 +50,7 @@ public class GSecurityDescrTest {
 			.add("")
 			.add(null);
 		Variant<String> vCurr = new Variant<String>(vClass)
-			.add("USD")
-			.add("")
-			.add(null);
+			.add("USD");
 		Variant<SecurityType> vType = new Variant<SecurityType>(vCurr)
 			.add(null)
 			.add(SecurityType.OPT);
@@ -77,7 +75,7 @@ public class GSecurityDescrTest {
 		assertEquals(1, foundCnt);
 		assertEquals("SBER", found.getCode());
 		assertEquals("EQBR", found.getClassCode());
-		assertEquals("USD", found.getCurrency());
+		assertEquals("USD", found.getCurrencyCode());
 		assertEquals(SecurityType.OPT, found.getType());
 	}
 	

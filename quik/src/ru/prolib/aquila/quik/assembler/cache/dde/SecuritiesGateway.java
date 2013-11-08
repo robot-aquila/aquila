@@ -5,9 +5,8 @@ import java.util.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.ValueException;
-import ru.prolib.aquila.core.data.row.Row;
-import ru.prolib.aquila.core.data.row.RowSet;
+import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.dde.DDEException;
 import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
@@ -65,13 +64,17 @@ public class SecuritiesGateway implements TableGateway {
 		CURRENCY,
 	};
 	
-	private static final String DEFAULT_CURRENCY = "SUR";
+	/**
+	 * Карта маппинга нестандартных кодов валют. Стандартные коды преобразуются
+	 * в валюту через {@link Currency#valueOf(String)}.
+	 */
+	private static final Map<String, Currency> FIX_CURRENCY_MAP;
+	
 	private static final SecurityType DEFAULT_TYPE = SecurityType.STK;
 	private static final Map<String, SecurityType> TYPE_MAP;
 	
 	static {
 		TYPE_MAP = new HashMap<String, SecurityType>();
-
 		TYPE_MAP.put("SPBFUT", SecurityType.FUT);
 		TYPE_MAP.put("SPBOPT", SecurityType.OPT);
 		TYPE_MAP.put("EQOB", SecurityType.BOND);
@@ -79,6 +82,9 @@ public class SecuritiesGateway implements TableGateway {
 		TYPE_MAP.put("EQNB", SecurityType.BOND);
 		TYPE_MAP.put("EQDB", SecurityType.BOND);
 		TYPE_MAP.put("TQOB", SecurityType.BOND);
+		
+		FIX_CURRENCY_MAP = new HashMap<String, Currency>();
+		FIX_CURRENCY_MAP.put("SUR", ISO4217.RUB);
 	}
 
 	private final Assembler asm;
@@ -121,43 +127,36 @@ public class SecuritiesGateway implements TableGateway {
 					converter.getDoubleOrNull(row, BID),
 					converter.getDoubleOrNull(row, HIGH),
 					converter.getDoubleOrNull(row, LOW),
-					getDescriptor(row)));
-		} catch ( ValueException e ) {
-			throw new DDEException(e.getMessage());
-		}
-	}
-
-	/**
-	 * Сформировать дескриптор инструмента.
-	 * <p>
-	 * @param row ряд
-	 * @return дескриптор
-	 * @throws DDEException
-	 */
-	private SecurityDescriptor getDescriptor(Row row) throws DDEException {
-		try {
-			return new SecurityDescriptor(converter.getString(row, CODE),
-				converter.getString(row, CLASS_CODE),
-				getCurrency(row), getType(row));
+					converter.getString(row, CODE),
+					converter.getString(row, CLASS_CODE),
+					getCurrency(row),
+					getType(row)));
 		} catch ( ValueException e ) {
 			throw new DDEException(e.getMessage());
 		}
 	}
 	
 	/**
-	 * Получить код валюты шага цены.
-	 * <p>
-	 * Возвращает код валюты по-умолчанию, если соответствующее значение ряда
-	 * пустая строка.
+	 * Получить валюту шага цены.
 	 * <p>
 	 * @param row ряд
-	 * @return код валюты
-	 * @throws ValueException
+	 * @return валюта
+	 * @throws ValueException ошибка доступа к элементу ряда
+	 * @throws ValueNotExistsException валюта с таким кодом не найдена или
+	 * пустое значение кода валюты
 	 */
-	private String getCurrency(Row row) throws ValueException {
-		String currency = converter.getString(row, CURRENCY);
-		if ( currency.length() == 0 ) {
-			currency = DEFAULT_CURRENCY;
+	private Currency getCurrency(Row row) throws ValueException {
+		String code = converter.getString(row, CURRENCY);
+		if ( code.length() == 0 ) {
+			throw new ValueException("Zero currency code");
+		}
+		Currency currency = FIX_CURRENCY_MAP.get(code);
+		if ( currency == null ) {
+			try {
+				currency = Currency.getInstance(code);
+			} catch ( IllegalArgumentException e ) {
+				throw new ValueException("Unknown currency: " + code);
+			}
 		}
 		return currency;
 	}

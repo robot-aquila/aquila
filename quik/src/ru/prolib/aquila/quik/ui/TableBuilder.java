@@ -208,6 +208,21 @@ public class TableBuilder {
 				return (((SecurityDescriptor) obj).getCurrency());
 			}
 		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_DESCR_SYSCODE", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((QUIKSecurityDescriptor) obj).getSystemCode());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_DESCR_SHORTNAME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((QUIKSecurityDescriptor) obj).getShortName());
+			}
+		}, Column.MIDDLE));
+		columns.add(new Column("COL_CACHE_DESCR_DISPNAME", new G<Object>() {
+			@Override public Object get(Object obj) {
+				return (((QUIKSecurityDescriptor) obj).getDisplayName());
+			}
+		}, Column.MIDDLE));
 		return new Table(new DescriptorsCacheTableModel(labels, columns, cache));
 	}
 	

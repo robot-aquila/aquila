@@ -16,7 +16,7 @@ import ru.prolib.aquila.t2q.*;
 
 public class AssemblerL2Test {
 	private static Account account;
-	private static SecurityDescriptor descr;
+	private static QUIKSecurityDescriptor descr;
 	private IMocksControl control;
 	private QUIKEditableTerminal terminal;
 	private EditableSecurities securities;
@@ -29,7 +29,8 @@ public class AssemblerL2Test {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		account = new Account("TEST", "1", "2");
-		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
+		descr = new QUIKSecurityDescriptor("SBER", "EQBR", ISO4217.RUB,
+				SecurityType.STK, "SBER", "Сбербанк", "АО СБЕРБАНК");
 	}
 
 	@Before
@@ -111,7 +112,11 @@ public class AssemblerL2Test {
 	public void testTryAssemble_Security() throws Exception {
 		SecurityEntry entry = new SecurityEntry(1, 142820d, 132480d,
 				6.48020d, 10d, 0, 137950d, 137000d, 136900d, "RTS-9.13",
-				"RIU3", 138040d, 137990d, 138100d, 136050d, descr);
+				"RIU3", 138040d, 137990d, 138100d, 136050d, "RIU3", "SPBFUT",
+				ISO4217.USD, SecurityType.FUT);
+		descr = new QUIKSecurityDescriptor("RTS-9.13", "SPBFUT", ISO4217.USD,
+				SecurityType.FUT, "RIU3", "RIU3", "RTS-9.13");
+		
 		EditableSecurity security = control.createMock(EditableSecurity.class);
 		expect(terminal.getEditableSecurity(eq(descr))).andReturn(security);
 		security.setLotSize(eq(1));

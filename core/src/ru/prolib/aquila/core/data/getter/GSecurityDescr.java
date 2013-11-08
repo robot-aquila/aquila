@@ -17,6 +17,7 @@ import ru.prolib.aquila.core.data.ValueException;
  * 2012-08-28<br>
  * $Id: GSecurityDescr.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class GSecurityDescr implements G<SecurityDescriptor> {
 	private final G<String> gCode;
 	private final G<String> gClass;

@@ -30,7 +30,7 @@ public class PositionsImplTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		account = new Account("T01");
-		descr1 = new SecurityDescriptor("SBER", "ONE", "RUR", SecurityType.STK);
+		descr1 = new SecurityDescriptor("SBER", "ONE", "RUB", SecurityType.STK);
 		descr2 = new SecurityDescriptor("GAZP", "TWO", "USD", SecurityType.FUT);
 	}
 

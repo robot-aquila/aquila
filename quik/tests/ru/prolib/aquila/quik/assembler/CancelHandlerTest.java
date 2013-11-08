@@ -25,7 +25,7 @@ public class CancelHandlerTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
+		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
 	}
 	
 	@Before

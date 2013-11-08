@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
+
+import java.util.Currency;
+
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.*;
 
@@ -19,11 +22,23 @@ public class SecurityDescriptorTest {
 	}
 	
 	@Test
-	public void testConstruct_Ok() throws Exception {
+	public void testConstruct_WithCurrencyCode() throws Exception {
 		assertEquals("SBER", descr.getCode());
 		assertEquals("EQBR", descr.getClassCode());
-		assertEquals("USD", descr.getCurrency());
+		assertEquals(ISO4217.USD, descr.getCurrency());
+		assertEquals("USD", descr.getCurrencyCode());
 		assertEquals(SecurityType.STK, descr.getType());
+	}
+	
+	@Test
+	public void testConstruct_WithCurrency() throws Exception {
+		descr = new SecurityDescriptor("ZZZ-12.13", "XYZ",
+				ISO4217.EUR, SecurityType.FUT);
+		assertEquals("ZZZ-12.13", descr.getCode());
+		assertEquals("XYZ", descr.getClassCode());
+		assertEquals(ISO4217.EUR, descr.getCurrency());
+		assertEquals("EUR", descr.getCurrencyCode());
+		assertEquals(SecurityType.FUT, descr.getType());		
 	}
 	
 	@Test
@@ -31,7 +46,7 @@ public class SecurityDescriptorTest {
 		assertEquals(new HashCodeBuilder()
 			.append("SBER")
 			.append("EQBR")
-			.append("USD")
+			.append(ISO4217.USD)
 			.append(SecurityType.STK)
 			.hashCode(), descr.hashCode());
 	}
@@ -54,9 +69,8 @@ public class SecurityDescriptorTest {
 			.add("SMART")
 			.add(null);
 		Variant<String> vCurr = new Variant<String>(vClass)
-			.add("RUR")
-			.add("USD")
-			.add(null);
+			.add("RUB")
+			.add("USD");
 		Variant<SecurityType> vType = new Variant<SecurityType>(vCurr)
 			.add(SecurityType.UNK)
 			.add(SecurityType.STK)
@@ -75,7 +89,7 @@ public class SecurityDescriptorTest {
 		assertEquals(1, foundCnt);
 		assertEquals("SBER", found.getCode());
 		assertEquals("EQBR", found.getClassCode());
-		assertEquals("USD", found.getCurrency());
+		assertEquals("USD", found.getCurrencyCode());
 		assertEquals(SecurityType.STK, found.getType());
 	}
 	
@@ -89,9 +103,8 @@ public class SecurityDescriptorTest {
 			.add("")
 			.add("SMART")
 			.add(null);
-		Variant<String> vCurr = new Variant<String>(vClass)
-			.add("")
-			.add("USD")
+		Variant<Currency> vCurr = new Variant<Currency>(vClass)
+			.add(ISO4217.USD)
 			.add(null);
 		Variant<SecurityType> vType = new Variant<SecurityType>(vCurr)
 			.add(SecurityType.STK)
@@ -110,7 +123,7 @@ public class SecurityDescriptorTest {
 		assertEquals(1, foundCnt);
 		assertEquals("AAPL", found.getCode());
 		assertEquals("SMART", found.getClassCode());
-		assertEquals("USD", found.getCurrency());
+		assertEquals(ISO4217.USD, found.getCurrency());
 		assertEquals(SecurityType.STK, found.getType());
 	}
 	
@@ -118,5 +131,6 @@ public class SecurityDescriptorTest {
 	public void testToString() throws Exception {
 		assertEquals("SBER@EQBR(STK/USD)", descr.toString());
 	}
+
 
 }

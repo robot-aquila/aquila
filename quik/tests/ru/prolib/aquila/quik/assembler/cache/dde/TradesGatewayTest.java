@@ -14,11 +14,10 @@ import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.dde.utils.table.DDETableRange;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
 import ru.prolib.aquila.quik.assembler.Assembler;
-import ru.prolib.aquila.quik.assembler.cache.Cache;
-import ru.prolib.aquila.quik.assembler.cache.TradesEntry;
+import ru.prolib.aquila.quik.assembler.cache.*;
 
 public class TradesGatewayTest {
-	private static SecurityDescriptor descr;
+	private static QUIKSecurityDescriptor descr;
 	private IMocksControl control;
 	private Assembler asm;
 	private RowDataConverter converter;
@@ -30,7 +29,8 @@ public class TradesGatewayTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("A", "B", "C", SecurityType.CASH);
+		descr = new QUIKSecurityDescriptor("A", "B", ISO4217.USD,
+				SecurityType.CASH, "A", "A", "A");
 	}
 
 	@Before

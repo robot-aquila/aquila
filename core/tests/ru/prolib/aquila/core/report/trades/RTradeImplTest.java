@@ -26,7 +26,7 @@ public class RTradeImplTest {
 	public static void setUpBeforeClass() throws Exception {
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		descr1 = new SecurityDescriptor("Foo", "Bar", "USD", SecurityType.UNK);
-		descr2 = new SecurityDescriptor("Bar", "Buz", "SUR", SecurityType.FUT);
+		descr2 = new SecurityDescriptor("Bar", "Buz", "GBP", SecurityType.FUT);
 		time1 = new DateTime(format.parse("2013-01-01 00:00:00"));
 		time2 = new DateTime(format.parse("2013-01-02 00:00:00"));
 	}

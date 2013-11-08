@@ -1,8 +1,8 @@
 package ru.prolib.aquila.quik.assembler.cache;
 
+import java.util.Currency;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
  * Запись строки таблицы инструментов.
@@ -23,7 +23,10 @@ public class SecurityEntry extends CacheEntry {
 	private final Double bidPrice;
 	private final Double highPrice;
 	private final Double lowPrice;
-	private final SecurityDescriptor descriptor;
+	private final String code, classCode;
+	private final Currency currency;
+	private final SecurityType type;
+	private QUIKSecurityDescriptor descriptor;
 	
 	/**
 	 * Конструктор.
@@ -43,14 +46,17 @@ public class SecurityEntry extends CacheEntry {
 	 * @param bidPrice цена спроса
 	 * @param highPrice максимальная цена за сессию
 	 * @param lowPrice минимальная цена за сессию
-	 * @param descriptor дескриптор инструмента
+	 * @param code код инструмента
+	 * @param classCode код класса
+	 * @param currency валюта инструмента
+	 * @param type тип инструмента
 	 */
 	public SecurityEntry(Integer lotSize, Double maxPrice, Double minPrice,
 			Double minStepPrice, Double minStepSize, Integer precision,
 			Double lastPrice, Double openPrice, Double closePrice,
 			String displayName, String shortName, Double askPrice,
 			Double bidPrice, Double highPrice, Double lowPrice,
-			SecurityDescriptor descriptor)
+			String code, String classCode, Currency currency, SecurityType type)
 	{
 		super();
 		this.lotSize = lotSize;
@@ -68,7 +74,11 @@ public class SecurityEntry extends CacheEntry {
 		this.bidPrice = bidPrice;
 		this.highPrice = highPrice;
 		this.lowPrice = lowPrice;
-		this.descriptor = descriptor;
+		
+		this.code = code;
+		this.classCode = classCode;
+		this.currency = currency;
+		this.type = type;
 	}
 	
 	public Integer getLotSize() {
@@ -130,8 +140,33 @@ public class SecurityEntry extends CacheEntry {
 	public Double getLowPrice() {
 		return lowPrice;
 	}
+	
+	public String getCode() {
+		return code;
+	}
+	
+	public String getClassCode() {
+		return classCode;
+	}
+	
+	public Currency getCurrency() {
+		return currency;
+	}
+	
+	public SecurityType getType() {
+		return type;
+	}
 		
-	public SecurityDescriptor getDescriptor() {
+	public synchronized QUIKSecurityDescriptor getDescriptor() {
+		if ( descriptor == null ) {
+			if ( type ==SecurityType.FUT ) {
+				descriptor = new QUIKSecurityDescriptor(displayName, classCode,
+						currency, type, code, shortName, displayName);
+			} else {
+				descriptor = new QUIKSecurityDescriptor(code, classCode,
+						currency, type, code, shortName, displayName);
+			}
+		}
 		return descriptor;
 	}
 	
@@ -151,7 +186,6 @@ public class SecurityEntry extends CacheEntry {
 			.append(askPrice, o.askPrice)
 			.append(bidPrice, o.bidPrice)
 			.append(closePrice, o.closePrice)
-			.append(descriptor, o.descriptor)
 			.append(displayName, o.displayName)
 			.append(highPrice, o.highPrice)
 			.append(lastPrice, o.lastPrice)
@@ -164,17 +198,26 @@ public class SecurityEntry extends CacheEntry {
 			.append(openPrice, o.openPrice)
 			.append(precision, o.precision)
 			.append(shortName, o.shortName)
+			.append(code, o.code)
+			.append(classCode, o.classCode)
+			.append(currency, o.currency)
+			.append(type, o.type)
 			.isEquals();
 	}
 	
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "["
+			+ "code=" + code + ", "
+			+ "class=" + classCode + ", "
+			+ "currency=" + currency + ", "
+			+ "type=" + type + ", "
+			+ "dispName=" + displayName + ", "
+			+ "shortName=" + shortName + ", "
+			
 			+ "ask=" + askPrice + ", "
 			+ "bid=" + bidPrice + ", "
 			+ "close=" + closePrice + ", "
-			+ "descr=" + descriptor + ", "
-			+ "dispName=" + displayName + ", "
 			+ "high=" + highPrice + ", "
 			+ "last=" + lastPrice + ", "
 			+ "lot=" + lotSize + ", "
@@ -185,7 +228,6 @@ public class SecurityEntry extends CacheEntry {
 			+ "minStepSize=" + minStepSize + ", "
 			+ "open=" + openPrice + ", "
 			+ "prec=" + precision + ", "
-			+ "shortName=" + shortName
 			+ "]";
 	}
 

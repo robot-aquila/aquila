@@ -48,7 +48,7 @@ public class TerminalImplTest {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.ERROR);
 		account = new Account("test");
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
+		descr = new SecurityDescriptor("GAZP", "EQBR", "RUB", SecurityType.STK);
 	}
 
 	@Before
@@ -115,7 +115,7 @@ public class TerminalImplTest {
 	public void testGetSecurity() throws Exception {
 		Security s = control.createMock(Security.class);
 		SecurityDescriptor descr =
-			new SecurityDescriptor("foo", "bar", "JPY", SecurityType.UNK);
+			new SecurityDescriptor("foo", "bar", "USD", SecurityType.UNK);
 		expect(securities.getSecurity(eq(descr))).andReturn(s);
 		control.replay();
 		

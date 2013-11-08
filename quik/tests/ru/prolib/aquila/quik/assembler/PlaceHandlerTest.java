@@ -12,12 +12,13 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.quik.QUIKEditableTerminal;
 import ru.prolib.aquila.quik.api.*;
+import ru.prolib.aquila.quik.assembler.cache.QUIKSecurityDescriptor;
 import ru.prolib.aquila.t2q.T2QException;
 import ru.prolib.aquila.t2q.T2QTransStatus;
 
 public class PlaceHandlerTest {
 	private static Account account;
-	private static SecurityDescriptor descr;
+	private static QUIKSecurityDescriptor descr;
 	private IMocksControl control;
 	private QUIKEditableTerminal terminal;
 	private QUIKClient client;
@@ -32,7 +33,8 @@ public class PlaceHandlerTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		account = new Account("SPOT", "18210", "LX01");
-		descr = new SecurityDescriptor("SBER", "EQBR", "SUR", SecurityType.STK);
+		descr = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT", ISO4217.USD,
+				SecurityType.STK, "RIZ3", "ShortCode", "Future RTS-12.13");
 	}
 
 	@Before
@@ -118,8 +120,8 @@ public class PlaceHandlerTest {
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
 		expect(order.getComment()).andStubReturn("");
 		String expected = "TRANS_ID=214; ACTION=NEW_ORDER; "
-			+ "CLIENT_CODE=18210; ACCOUNT=LX01; CLASSCODE=EQBR; "
-			+ "SECCODE=SBER; OPERATION=B; QUANTITY=1000; TYPE=M; PRICE=0";
+			+ "CLIENT_CODE=18210; ACCOUNT=LX01; CLASSCODE=SPBFUT; "
+			+ "SECCODE=RIZ3; OPERATION=B; QUANTITY=1000; TYPE=M; PRICE=0";
 		client.send(expected);
 		order.setStatus(OrderStatus.SENT);
 		order.fireChangedEvent();
@@ -144,7 +146,7 @@ public class PlaceHandlerTest {
 		
 		String expected = "TRANS_ID=214; ACTION=NEW_ORDER; "
 			+ "CLIENT_CODE=18210; ACCOUNT=LX01; "
-			+ "CLASSCODE=EQBR; SECCODE=SBER; OPERATION=S; QUANTITY=1000; "
+			+ "CLASSCODE=SPBFUT; SECCODE=RIZ3; OPERATION=S; QUANTITY=1000; "
 			+ "TYPE=L; PRICE=14.5";
 		client.send(expected);
 		order.setStatus(OrderStatus.SENT);

@@ -38,5 +38,10 @@ public class SecurityTypeTest {
 		assertEquals(4, SecurityType.BOND.ordinal());
 		assertEquals(5, SecurityType.CASH.ordinal());
 	}
+	
+	@Test
+	public void testValueOf() throws Exception {
+		assertSame(SecurityType.FUT, SecurityType.valueOf("FUT"));
+	}
 
 }

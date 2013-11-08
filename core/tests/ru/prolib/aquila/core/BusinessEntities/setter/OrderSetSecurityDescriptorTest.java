@@ -24,7 +24,7 @@ public class OrderSetSecurityDescriptorTest {
 		control = createStrictControl();
 		order = control.createMock(EditableOrder.class);
 		setter = new OrderSetSecurityDescriptor();
-		descr = new SecurityDescriptor("SBER", "EQBR", "RUR", SecurityType.STK);
+		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
 	}
 
 	@Before

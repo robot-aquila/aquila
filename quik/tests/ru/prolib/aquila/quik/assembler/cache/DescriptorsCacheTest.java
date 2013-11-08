@@ -11,8 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class DescriptorsCacheTest {
-	private static SecurityDescriptor descr1, descr2, descr3;
-	private static SecurityEntry entry1, entry2, entry3;
+	private static QUIKSecurityDescriptor descr1, descr2, descr3, descr4;
 	private IMocksControl control;
 	private EventDispatcher dispatcher;
 	private EventType type;
@@ -20,16 +19,14 @@ public class DescriptorsCacheTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr1 = new SecurityDescriptor("LKOH","RTSST", "RUB",SecurityType.STK);
-		descr2 = new SecurityDescriptor("LKOH","EQBR",  "RUB",SecurityType.STK);
-		descr3 = new SecurityDescriptor("RIM2","SPBFUT","USD",SecurityType.FUT);
-		entry1 = new SecurityEntry(0, null, null, 0d, 0d, 0, 0d, 0d, 0d,
-				"", "LKOH", 0d, 0d, 0d, 0d, descr1);
-		entry2 = new SecurityEntry(0, null, null, 0d, 0d, 0, 0d, 0d, 0d,
-				"", "ЛУКОЙЛ", 0d, 0d, 0d, 0d, descr2);
-		entry3 = new SecurityEntry(0, null, null, 0d, 0d, 0, 0d, 0d, 0d,
-				"", "RIM2", 0d, 0d, 0d, 0d, descr3);
-
+		descr1 = new QUIKSecurityDescriptor("LKOH", "RTSST", ISO4217.RUB,
+				SecurityType.STK, "LKOH", "LKOH", "Лукоил");
+		descr2 = new QUIKSecurityDescriptor("LKOH", "EQBR",  ISO4217.RUB,
+				SecurityType.STK, "LKOH", "Лукоил", "АО ЛУКОИЛ");
+		descr3 = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT", ISO4217.USD,
+				SecurityType.FUT, "RIZ3", "RIZ3", "RTS-12.13");
+		descr4 = new QUIKSecurityDescriptor("RTS-12.3", "SPBFUT", ISO4217.USD,
+				SecurityType.FUT, "RIZ3", "RIZ3", "RTS-12.3");
 	}
 
 	@Before
@@ -42,40 +39,65 @@ public class DescriptorsCacheTest {
 	
 	@Test
 	public void testGet_ByShortName() throws Exception {
-		cache.set(entry1);
-		cache.set(entry2);
-		cache.set(entry3);
+		cache.set(descr1);
+		cache.set(descr2);
+		cache.set(descr3);
 		
 		assertEquals(descr1, cache.get("LKOH"));
-		assertEquals(descr2, cache.get("ЛУКОЙЛ"));
-		assertEquals(descr3, cache.get("RIM2"));
+		assertEquals(descr2, cache.get("Лукоил"));
+		assertEquals(descr3, cache.get("RIZ3"));
 		assertNull(cache.get("zulu24"));
 	}
 	
 	@Test
-	public void testGet_ByCodeAndClass() throws Exception {
-		cache.set(entry1);
-		cache.set(entry2);
-		cache.set(entry3);
+	public void testGet_ByShortName_LastForSameNames() throws Exception {
+		cache.set(descr4);
+		
+		assertSame(descr4, cache.get("RIZ3"));
+		
+		cache.set(descr3);
+		
+		assertSame(descr3, cache.get("RIZ3"));
+	}
+	
+	@Test
+	public void testGet_BySystemCodeAndClass() throws Exception {
+		cache.set(descr1);
+		cache.set(descr2);
+		cache.set(descr3);
 		
 		assertEquals(descr1, cache.get("LKOH", "RTSST"));
 		assertEquals(descr2, cache.get("LKOH", "EQBR"));
-		assertEquals(descr3, cache.get("RIM2", "SPBFUT"));
+		assertEquals(descr3, cache.get("RIZ3", "SPBFUT"));
 		assertNull(cache.get("zulu24", "buzz"));
 		assertNull(cache.get("LKOH", "buzz"));
 		assertNull(cache.get("zulu24", "EQBR"));
 	}
 	
 	@Test
-	public void testGet_All() throws Exception {
-		cache.set(entry1);
-		cache.set(entry2);
-		cache.set(entry3);
+	public void testGet_BySystemCodeAndClass_LastForSameCom() throws Exception {
+		cache.set(descr4);
 		
-		List<SecurityDescriptor> expected = new Vector<SecurityDescriptor>();
+		assertSame(descr4, cache.get("RIZ3", "SPBFUT"));
+		
+		cache.set(descr3);
+		
+		assertSame(descr3, cache.get("RIZ3", "SPBFUT"));
+	}
+	
+	@Test
+	public void testGet_All() throws Exception {
+		cache.set(descr1);
+		cache.set(descr2);
+		cache.set(descr3);
+		cache.set(descr4);
+		
+		List<QUIKSecurityDescriptor> expected =
+			new Vector<QUIKSecurityDescriptor>();
 		expected.add(descr1);
 		expected.add(descr2);
 		expected.add(descr3);
+		expected.add(descr4);
 		assertEquals(expected, cache.get());
 	}
 	
@@ -84,21 +106,21 @@ public class DescriptorsCacheTest {
 		dispatcher.dispatch(eq(new EventImpl(type)));
 		control.replay();
 		
-		cache.put(entry2);
+		assertTrue(cache.put(descr2));
 		
 		control.verify();
-		assertEquals(descr2, cache.get("ЛУКОЙЛ"));
+		assertEquals(descr2, cache.get("Лукоил"));
 	}
 	
 	@Test
 	public void testPut_Existing() throws Exception {
-		cache.set(entry3);
+		cache.set(descr3);
 		control.replay();
 		
-		cache.put(entry3);
+		assertFalse(cache.put(descr3));
 		
 		control.verify();
-		assertEquals(descr3, cache.get("RIM2"));
+		assertEquals(descr3, cache.get("RIZ3"));
 	}
 	
 	@Test
@@ -110,22 +132,21 @@ public class DescriptorsCacheTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		List<SecurityEntry> rows1 = new Vector<SecurityEntry>();
-		rows1.add(entry1);
-		rows1.add(entry3);
-		List<SecurityEntry> rows2 = new Vector<SecurityEntry>();
-		rows2.add(entry2);
-		for ( SecurityEntry entry : rows1 ) {
-			cache.set(entry);
-		}
+		List<QUIKSecurityDescriptor> rows1, rows2;
+		rows1 = new Vector<QUIKSecurityDescriptor>();
+		rows1.add(descr1);
+		rows1.add(descr3);
+		rows2 = new Vector<QUIKSecurityDescriptor>();
+		rows2.add(descr2);
+		for ( QUIKSecurityDescriptor descr : rows1 ) cache.set(descr);
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>()
 			.add(dispatcher)
 			.add(control.createMock(EventDispatcher.class));
 		Variant<EventType> vType = new Variant<EventType>(vDisp)
 			.add(type)
 			.add(control.createMock(EventType.class));
-		Variant<List<SecurityEntry>> vRows =
-				new Variant<List<SecurityEntry>>(vType)
+		Variant<List<QUIKSecurityDescriptor>> vRows =
+				new Variant<List<QUIKSecurityDescriptor>>(vType)
 			.add(rows1)
 			.add(rows2);
 		Variant<?> iterator = vRows;
@@ -133,9 +154,7 @@ public class DescriptorsCacheTest {
 		DescriptorsCache x, found = null;
 		do {
 			x = new DescriptorsCache(vDisp.get(), vType.get());
-			for ( SecurityEntry entry : vRows.get() ) {
-				x.set(entry);
-			}
+			for ( QUIKSecurityDescriptor descr : vRows.get() ) x.set(descr);
 			if ( cache.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -144,10 +163,10 @@ public class DescriptorsCacheTest {
 		assertEquals(1, foundCnt);
 		assertSame(dispatcher, found.getEventDispatcher());
 		assertSame(type, found.OnUpdate());
-		for ( SecurityEntry entry : rows1 ) {
-			SecurityDescriptor desc = entry.getDescriptor();
-			assertEquals(desc, cache.get(entry.getShortName()));
-			assertEquals(desc, cache.get(desc.getCode(), desc.getClassCode()));
+		for ( QUIKSecurityDescriptor descr : rows1 ) {
+			assertSame(descr, cache.get(descr.getShortName()));
+			assertSame(descr,
+					cache.get(descr.getSystemCode(), descr.getClassCode()));
 		}
 		List<SecurityDescriptor> expected = new Vector<SecurityDescriptor>();
 		expected.add(descr1);

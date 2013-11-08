@@ -27,7 +27,7 @@ public class GSecurityTest {
 	public static void setUpBeforeClass() throws Exception {
 		control = createStrictControl();
 		gDescr = control.createMock(G.class);
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
+		descr = new SecurityDescriptor("GAZP", "EQBR", "RUB", SecurityType.STK);
 		securities = control.createMock(Securities.class);
 		security = control.createMock(Security.class);
 		getter = new GSecurity(gDescr, securities);
