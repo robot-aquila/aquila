@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<security>
+	<code>RTS-12.13</code>
+	<class>SPBFUT</class>
+	<currency>USD</currency>
+	<type>FUT</type>
+	<lot>1</lot>
+	<tick>10</tick>
+	<precision>0</precision>
+	<tickPriceRate>0.2</tickPriceRate>
+	<initialMarginRate>0.2</initialMarginRate>
+	<firstTradingDate>2012-10-04</firstTradingDate>
+	<lastTradingDate>2013-12-16</lastTradingDate>
+	<settlementDate>2013-12-16</settlementDate>
+</security>
