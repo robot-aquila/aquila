@@ -20,9 +20,9 @@ public class TLEventSourceRegistryTest {
 		s2 = control.createMock(TLEventSource.class);
 		s3 = control.createMock(TLEventSource.class);
 		registry = new TLEventSourceRegistry();
-		registry.addSource(s1);
-		registry.addSource(s2);
-		registry.addSource(s3);
+		registry.registerSource(s1);
+		registry.registerSource(s2);
+		registry.registerSource(s3);
 		registry.disableUntil(s1, new DateTime(2014,  1, 22,  0,  0, 0));
 		registry.disableUntil(s3, new DateTime(2013, 12, 31, 23, 59, 0));
 	}

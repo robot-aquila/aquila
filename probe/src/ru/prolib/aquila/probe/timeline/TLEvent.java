@@ -3,11 +3,16 @@ package ru.prolib.aquila.probe.timeline;
 import org.joda.time.DateTime;
 
 /**
- * Базовое событие хронологии.
+ * Событие хронологии.
+ * <p>
+ * Событие хронологии - это произвольная процедура, связанная с определенной
+ * временной меткой. Однажды исполненное событие не может быть выполнена
+ * повторно.
  */
-public class TLEvent implements Runnable {
+public class TLEvent {
 	private final DateTime time;
-	private final Runnable procedure; 
+	private final Runnable procedure;
+	private boolean executed = false;
 
 	/**
 	 * Конструктор.
@@ -35,16 +40,29 @@ public class TLEvent implements Runnable {
 	 * <p>
 	 * @return процедура
 	 */
-	public Runnable getProcedurte() {
+	public Runnable getProcedure() {
 		return procedure;
 	}
 
 	/**
-	 * Выполнить процедуру исполнения события.
+	 * Исполнить событие.
+	 * <p>
+	 * Если событие уже было выполнено, то ничего не происходит.
 	 */
-	@Override
-	public void run() {
-		procedure.run();
+	public synchronized void execute() {
+		if ( ! executed ) {
+			procedure.run();
+			executed = true;
+		}
+	}
+	
+	/**
+	 * Проверить факт исполнения события.
+	 * <p>
+	 * @return true - событие исполнено, false - не исполнено
+	 */
+	public synchronized boolean executed() {
+		return executed;
 	}
 
 }

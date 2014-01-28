@@ -63,7 +63,7 @@ public class TLEventSourceRegistry {
 	 * <p>
 	 * @param source источник событий
 	 */
-	public synchronized void addSource(TLEventSource source) {
+	public synchronized void registerSource(TLEventSource source) {
 		KW<TLEventSource> key = new KW<TLEventSource>(source);
 		if ( ! registry.containsKey(key)) {
 			registry.put(key, null);

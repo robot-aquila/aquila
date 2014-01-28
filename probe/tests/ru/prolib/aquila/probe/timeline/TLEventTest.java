@@ -22,15 +22,27 @@ public class TLEventTest {
 	@Test
 	public void testGetters() throws Exception {
 		assertEquals(new DateTime(2013, 11, 29, 13, 10, 52, 0), e.getTime());
-		assertSame(procedure, e.getProcedurte());
+		assertSame(procedure, e.getProcedure());
 	}
 	
 	@Test
-	public void testRun() throws Exception {
+	public void testExecute() throws Exception {
 		procedure.run();
 		control.replay();
 		
-		e.run();
+		e.execute();
+		
+		control.verify();
+		assertTrue(e.executed());
+	}
+	
+	@Test
+	public void testExecute_RunsOnce() throws Exception {
+		procedure.run();
+		control.replay();
+		
+		e.execute();
+		e.execute();
 		
 		control.verify();
 	}
