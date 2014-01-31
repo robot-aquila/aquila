@@ -19,7 +19,7 @@ public class TerminalStartSequenceTest {
 	private IMocksControl control;
 	private EditableTerminal terminal;
 	private CountDownLatch started;
-	private Starter starter;
+	private StarterQueue starter;
 	private TerminalStartSequence sequence;
 	
 	@BeforeClass
@@ -33,7 +33,7 @@ public class TerminalStartSequenceTest {
 		control = createStrictControl();
 		terminal = control.createMock(EditableTerminal.class);
 		started = control.createMock(CountDownLatch.class);
-		starter = control.createMock(Starter.class);
+		starter = control.createMock(StarterQueue.class);
 		sequence = new TerminalStartSequence(terminal, started);
 		expect(terminal.getStarter()).andStubReturn(starter);
 	}

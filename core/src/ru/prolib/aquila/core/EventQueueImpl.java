@@ -165,9 +165,7 @@ public class EventQueueImpl implements EventQueue {
 		if ( listeners == null ) {
 			throw new NullPointerException("The listeners cannot be null");
 		}
-		if ( ! queue.offer(new QueueEntry(event, listeners)) ) {
-			logger.error("Last event has been be rejected by queue (1)");
-		}
+		enqueue(new QueueEntry(event, listeners));
 	}
 	
 	@Override
@@ -181,9 +179,16 @@ public class EventQueueImpl implements EventQueue {
 		if ( dispatcher == null ) {
 			throw new NullPointerException("The dispatcher cannot be null");
 		}
-		if ( ! queue.offer(new QueueEntry(event, dispatcher)) ) {
-			logger.error("Last event has been be rejected by queue (2)");
-		}
+		enqueue(new QueueEntry(event, dispatcher));
+	}
+	
+	private void enqueue(QueueEntry entry) {
+		try {
+			queue.put(entry);
+		} catch ( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			logger.warn("Thread interrupted");
+		}		
 	}
 	
 	/**

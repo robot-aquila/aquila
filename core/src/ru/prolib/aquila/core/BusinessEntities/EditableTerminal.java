@@ -70,7 +70,7 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	 * <p>
 	 * @return стартер
 	 */
-	public Starter getStarter();
+	public StarterQueue getStarter();
 
 	/**
 	 * Генерировать событие о старте терминала.

@@ -28,7 +28,7 @@ public class TerminalImplTest {
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
 	private EventSystem es;
-	private Starter starter;
+	private StarterQueue starter;
 	private EditableSecurities securities;
 	private EditablePortfolios portfolios;
 	private EditableOrders orders;
@@ -56,7 +56,7 @@ public class TerminalImplTest {
 		control = createStrictControl();
 		task = control.createMock(TimerTask.class);
 		controller = control.createMock(TerminalController.class);
-		starter = control.createMock(Starter.class);
+		starter = control.createMock(StarterQueue.class);
 		securities = control.createMock(EditableSecurities.class);
 		portfolios = control.createMock(EditablePortfolios.class);
 		orders = control.createMock(EditableOrders.class);
@@ -928,9 +928,9 @@ public class TerminalImplTest {
 		Variant<Scheduler> vSched = new Variant<Scheduler>(vEs)
 			.add(scheduler)
 			.add(control.createMock(Scheduler.class));
-		Variant<Starter> vSta = new Variant<Starter>(vSched)
+		Variant<StarterQueue> vSta = new Variant<StarterQueue>(vSched)
 			.add(starter)
-			.add(control.createMock(Starter.class));
+			.add(control.createMock(StarterQueue.class));
 		Variant<EditableSecurities> vScs = new Variant<EditableSecurities>(vSta)
 			.add(securities)
 			.add(control.createMock(EditableSecurities.class));

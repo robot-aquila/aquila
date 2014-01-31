@@ -40,7 +40,7 @@ public class TerminalImpl implements EditableTerminal {
 	private final EventSystem es;
 	private final EditableSecurities securities;
 	private final EditablePortfolios portfolios;
-	private final Starter starter;
+	private final StarterQueue starter;
 	private final EditableOrders orders;
 	private final TerminalEventDispatcher dispatcher;
 	private volatile TerminalState state = TerminalState.STOPPED;
@@ -67,7 +67,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param dispatcher диспетчер событий
 	 */
 	public TerminalImpl(EventSystem eventSystem,
-						Starter starter,
+						StarterQueue starter,
 						EditableSecurities securities,
 						EditablePortfolios portfolios,
 						EditableOrders orders,
@@ -91,7 +91,7 @@ public class TerminalImpl implements EditableTerminal {
 	 */
 	public TerminalImpl(EventSystem eventSystem,
 						Scheduler scheduler,
-						Starter starter,
+						StarterQueue starter,
 						EditableSecurities securities,
 						EditablePortfolios portfolios,
 						EditableOrders orders,
@@ -160,7 +160,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	final public Starter getStarter() {
+	final public StarterQueue getStarter() {
 		return starter;
 	}
 	
