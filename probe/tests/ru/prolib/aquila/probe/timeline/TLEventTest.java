@@ -46,5 +46,11 @@ public class TLEventTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testToString() throws Exception {
+		String expected = "TLEvent[" + e.getTime() + " for " + procedure + "]";
+		assertEquals(expected, e.toString());
+	}
 
 }

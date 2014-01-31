@@ -6,7 +6,7 @@ import org.joda.time.DateTime;
  * Событие хронологии.
  * <p>
  * Событие хронологии - это произвольная процедура, связанная с определенной
- * временной меткой. Однажды исполненное событие не может быть выполнена
+ * временной меткой. Однажды исполненное событие не может быть выполнено
  * повторно.
  */
 public class TLEvent {
@@ -63,6 +63,12 @@ public class TLEvent {
 	 */
 	public synchronized boolean executed() {
 		return executed;
+	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()
+			+ "[" + time + " for " + procedure + "]";
 	}
 
 }

@@ -6,9 +6,9 @@ package ru.prolib.aquila.probe.timeline;
 public interface TLEventSource {
 	
 	/**
-	 * Получить очередное событие.
+	 * Извлечь очередное событие.
 	 * <p>
-	 * @return очередное событие или null, если нет больше событий
+	 * @return событие или null, если нет больше событий
 	 * @throws TLException 
 	 */
 	public TLEvent pullEvent() throws TLException;

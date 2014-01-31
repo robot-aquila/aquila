@@ -1,103 +1,146 @@
 package ru.prolib.aquila.probe.timeline;
 
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
- * Хронология.
- * <p>
- * Объект хронологии используется для формирования единой последовательности
- * событий. Данная хронология подразумевает точность работы до миллисекунд.
- * <p> 
- * Работа с объектом состоит из двух чередующихся фаз: фаза накопления событий и
- * фаза извлечения стека. 
- * <p>
- * Время POA (ТА, точка актуальности) указывает на текущее время начала
- * последовательности. Попытка отнести к хронологии событие, датированное
- * временем меньше POA приведет к возбуждению исключения. Таким образом,
- * события из различных источников могут быть добавлены в последовательность
- * в произвольном порядке. Главное условие, что бы они были позже или на точке
- * актуальности.
- * <p>
- * Поскольку для определения момента готовности очередного стека событий
- * требуется дополнительные данные, эта функция вынесена за пределы зоны
- * ответственности класса хронологии. Момент достаточности данных определяется
- * пользовательским кодом и фиксируется в хронологии вместе с извлечением
- * очередного стека событий. При извлечении событий POA сдвигается в будущее
- * (см. {@link #pullStack()}).
- * 
+ * Хронология событий.
  */
 public class TLTimeline {
-	private DateTime poa;
-	private final Map<DateTime, TLEventStack> stacks;
+	private final TLEventSources sources;
+	private final TLEventCache cache;
+	private final TLTimelineHelper helper;
+	private final Interval interval;
+	
+	/**
+	 * Конструктор (для тестов).
+	 * <p>
+	 * @param sources источник событий
+	 * @param timeline хронология
+	 * @param helper набор вспомогательных функций 
+	 * @param interval рабочий период
+	 */
+	public TLTimeline(TLEventSources sources, TLEventCache timeline,
+			TLTimelineHelper helper, Interval interval)
+	{
+		super();
+		this.sources = sources;
+		this.cache = timeline;
+		this.helper = helper;
+		this.interval = interval;
+	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
-	 * @param pointOfActuality точка актуальности
+	 * @param sources источник событий
+	 * @param timeline хронология
+	 * @param interval рабочий период
 	 */
-	public TLTimeline(DateTime pointOfActuality) {
-		super();
-		poa = pointOfActuality;
-		stacks = new Hashtable<DateTime, TLEventStack>();
+	public TLTimeline(TLEventSources sources, TLEventCache timeline,
+			Interval interval)
+	{
+		this(sources, timeline, new TLTimelineHelper(), interval);
 	}
 	
 	/**
-	 * Получить значение точки актуальности.
+	 * Конструктор.
+	 * <p>
+	 * @param interval рабочий период
+	 */
+	public TLTimeline(Interval interval) {
+		this(new TLEventSources(), new TLEventCache(interval.getStart()),
+				interval);
+	}
+	
+	TLEventSources getEventSources() {
+		return sources;
+	}
+	
+	TLEventCache getEventCache() {
+		return cache;
+	}
+	
+	TLTimelineHelper getHelper() {
+		return helper;
+	}
+	
+	/**
+	 * Получить ТА.
 	 * <p>
 	 * @return точка актуальности
 	 */
-	public synchronized DateTime getPOA() {
-		return poa;
+	public DateTime getPOA() {
+		return cache.getPOA();
 	}
 	
 	/**
-	 * Разместить событие в последовательности.
+	 * Получить рабочий период.
 	 * <p>
-	 * @param event экземпляр события
-	 * @throws TLOutOfDateException попытка разместить событие раньше чем POA 
+	 * @return РП
 	 */
-	public synchronized void pushEvent(TLEvent event)
-		throws TLOutOfDateException
-	{
-		DateTime time = event.getTime();
-		if ( time.compareTo(poa) < 0 ) {
-			throw new
-				TLOutOfDateException("Event of " + time + " but POA " + poa);
+	public Interval getInterval() {
+		return interval;
+	}
+	
+	/**
+	 * Добавить событие на шкалу времени.
+	 * <p>
+	 * @param event событие
+	 * @throws TLOutOfDateException запаздывающее событие 
+	 */
+	public void pushEvent(TLEvent event) throws TLOutOfDateException {
+		cache.pushEvent(event);
+	}
+	
+	/**
+	 * Зарегистрировать источник событий.
+	 * <p>
+	 * @param source источник событий
+	 */
+	public void registerSource(TLEventSource source) {
+		sources.registerSource(source);
+	}
+	
+	/**
+	 * Прекратить работу с источником событий.
+	 * <p>
+	 * @param source источник событий
+	 */
+	public void removeSource(TLEventSource source) {
+		sources.removeSource(source);
+	}
+	
+	/**
+	 * Выполнить шаг вперед по шкале времени.
+	 * <p>
+	 * Данный метод является основным методом работы с временной шкалой - он
+	 * формирует стек событий очередного шага и выполняет события шага. 
+	 * <p>
+	 * @return true - можно продолжать, false - конец данных
+	 * @throws TLException
+	 */
+	public boolean nextTimeStep() throws TLException {
+		List<TLEvent> events = helper.pullEvents(getPOA(), sources);
+		if ( events.size() == 0 ) {
+			return false;
 		}
-		TLEventStack stack = stacks.get(time);
+		helper.pushEvents(events, cache);
+		TLEventStack stack = cache.pullStack();
 		if ( stack == null ) {
-			stack = new TLEventStack(event);
-			stacks.put(time, stack);
-		} else {
-			stack.pushEvent(event);
+			return false;
 		}
+		stack.execute();
+		return interval.contains(cache.getPOA());
 	}
 	
 	/**
-	 * Получить очередной стек событий.
-	 * <p>
-	 * Данный метод извлекает очередной (самый ранний) стек событий и сдвигает
-	 * ТА на следующую миллисекунду после времени извлеченного стека. Если
-	 * последовательность не содержит событий, то сдвиг ТА не выполняется,
-	 * а результатом вызова будет null.
-	 * <p>
-	 * @return стек событий или null, если нет событий
+	 * Закрыть источники событий.
 	 */
-	public synchronized TLEventStack pullStack() {
-		if ( stacks.size() == 0 ) {
-			return null;
-		}
-		List<DateTime> dummy = new Vector<DateTime>(stacks.keySet());
-		Collections.sort(dummy);
-		DateTime time = dummy.get(0);
-		poa = time.plus(1);
-		return stacks.remove(time);
+	public void close() {
+		sources.close();
 	}
-
+	
 }

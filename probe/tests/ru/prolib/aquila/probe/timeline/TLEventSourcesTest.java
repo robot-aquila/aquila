@@ -8,10 +8,10 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-public class TLEventSourceRegistryTest {
+public class TLEventSourcesTest {
 	private IMocksControl control;
 	private TLEventSource s1, s2, s3;
-	private TLEventSourceRegistry registry;
+	private TLEventSources registry;
 
 	@Before
 	public void setUp() throws Exception {
@@ -19,7 +19,7 @@ public class TLEventSourceRegistryTest {
 		s1 = control.createMock(TLEventSource.class);
 		s2 = control.createMock(TLEventSource.class);
 		s3 = control.createMock(TLEventSource.class);
-		registry = new TLEventSourceRegistry();
+		registry = new TLEventSources();
 		registry.registerSource(s1);
 		registry.registerSource(s2);
 		registry.registerSource(s3);

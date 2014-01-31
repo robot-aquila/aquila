@@ -11,16 +11,30 @@ import ru.prolib.aquila.core.utils.KW;
 
 /**
  * Реестр источников событий.
+ * <p>
+ * Задача данного класса заключается в управлении набором источников событий в
+ * контексте работы с хронологией. Помимо непосредственно хранения набора,
+ * объект класса позволяет временно исключать источники до наступления
+ * заданного времени.
+ * <p>
+ * Так как различные источники не связаны между собой, последовательности
+ * событий, выдаваемые двумя разными источниками, могут значительно различаться
+ * как по датировке, так и по объему данных. Поскольку система рассчитана
+ * исходя из предположения, что объем прокачиваемых за сеанс данных будет
+ * огромен (например, все сделки по инструменту за торговую сессию), отсутствие
+ * какой либо синхронизации источников практически наверняка приведет к
+ * перегрузке объекта хронологии будущими событиями. Что бы избежать "забегания"
+ * далеко вперед, данный класс позволяет исключать источники по времени. 
  */
-public class TLEventSourceRegistry {
-	private Map<KW<TLEventSource>, DateTime> registry; 
+public class TLEventSources {
+	private Map<KW<TLEventSource>, DateTime> sources; 
 	
 	/**
 	 * Конструктор.
 	 */
-	public TLEventSourceRegistry() {
+	public TLEventSources() {
 		super();
-		registry = new LinkedHashMap<KW<TLEventSource>, DateTime>();
+		sources = new LinkedHashMap<KW<TLEventSource>, DateTime>();
 	}
 	
 	/**
@@ -34,7 +48,7 @@ public class TLEventSourceRegistry {
 	 */
 	public synchronized List<TLEventSource> getSources(DateTime time) {
 		List<TLEventSource> list = new Vector<TLEventSource>();
-		for ( Map.Entry<KW<TLEventSource>, DateTime> e : registry.entrySet() ) {
+		for ( Map.Entry<KW<TLEventSource>, DateTime> e : sources.entrySet() ) {
 			DateTime entryTime = e.getValue();
 			if ( entryTime == null || entryTime.compareTo(time) <= 0 ) {
 				list.add(e.getKey().instance());
@@ -52,7 +66,7 @@ public class TLEventSourceRegistry {
 	 */
 	public synchronized List<TLEventSource> getSources() {
 		List<TLEventSource> list = new Vector<TLEventSource>();
-		for ( KW<TLEventSource> key : registry.keySet() ) {
+		for ( KW<TLEventSource> key : sources.keySet() ) {
 			list.add(key.instance());
 		}
 		return list;
@@ -65,8 +79,8 @@ public class TLEventSourceRegistry {
 	 */
 	public synchronized void registerSource(TLEventSource source) {
 		KW<TLEventSource> key = new KW<TLEventSource>(source);
-		if ( ! registry.containsKey(key)) {
-			registry.put(key, null);
+		if ( ! sources.containsKey(key)) {
+			sources.put(key, null);
 		}
 	}
 	
@@ -79,7 +93,7 @@ public class TLEventSourceRegistry {
 	 * @param source источник событий
 	 */
 	public synchronized void removeSource(TLEventSource source) {
-		registry.remove(new KW<TLEventSource>(source));
+		sources.remove(new KW<TLEventSource>(source));
 	}
 	
 	/**
@@ -97,8 +111,8 @@ public class TLEventSourceRegistry {
 	 */
 	public synchronized void disableUntil(TLEventSource source, DateTime time) {
 		KW<TLEventSource> key = new KW<TLEventSource>(source);
-		if ( registry.containsKey(key) ) {
-			registry.put(key, time);
+		if ( sources.containsKey(key) ) {
+			sources.put(key, time);
 		}
 	}
 	
@@ -106,10 +120,10 @@ public class TLEventSourceRegistry {
 	 * Завершить работу со всеми источниками событий.
 	 */
 	public synchronized void close() {
-		for ( KW<TLEventSource> key : registry.keySet() ) {
+		for ( KW<TLEventSource> key : sources.keySet() ) {
 			key.instance().close();
 		}
-		registry.clear();
+		sources.clear();
 	}
 
 }
