@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.List;
-import java.util.TimerTask;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -704,43 +703,54 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public void schedule(TimerTask task, DateTime time) {
-		scheduler.schedule(task, time);
+	final public TaskHandler schedule(Runnable task, DateTime time) {
+		return scheduler.schedule(task, time);
 	}
 
 	@Override
-	final public void schedule(TimerTask task, DateTime firstTime, long period)
+	final public TaskHandler
+		schedule(Runnable task, DateTime firstTime, long period)
 	{
-		scheduler.schedule(task, firstTime, period);
+		return scheduler.schedule(task, firstTime, period);
 	}
 
 	@Override
-	final public void schedule(TimerTask task, long delay) {
-		scheduler.schedule(task, delay);
+	final public TaskHandler schedule(Runnable task, long delay) {
+		return scheduler.schedule(task, delay);
 	}
 
 	@Override
-	final public void schedule(TimerTask task, long delay, long period) {
-		scheduler.schedule(task, delay, period);
+	final public TaskHandler schedule(Runnable task, long delay, long period) {
+		return scheduler.schedule(task, delay, period);
 	}
 
 	@Override
-	final public void scheduleAtFixedRate(TimerTask task, DateTime firstTime,
-			long period)
+	final public TaskHandler
+		scheduleAtFixedRate(Runnable task, DateTime firstTime, long period)
 	{
-		scheduler.scheduleAtFixedRate(task, firstTime, period);		
+		return scheduler.scheduleAtFixedRate(task, firstTime, period);		
 	}
 
 	@Override
-	final public
-		void scheduleAtFixedRate(TimerTask task, long delay, long period)
+	final public TaskHandler
+		scheduleAtFixedRate(Runnable task, long delay, long period)
 	{
-		scheduler.scheduleAtFixedRate(task, delay, period);
+		return scheduler.scheduleAtFixedRate(task, delay, period);
 	}
 
 	@Override
-	final public boolean cancel(TimerTask task) {
-		return scheduler.cancel(task);
+	final public void cancel(Runnable task) {
+		scheduler.cancel(task);
+	}
+	
+	@Override
+	final public boolean scheduled(Runnable task) {
+		return scheduler.scheduled(task);
+	}
+
+	@Override
+	final public TaskHandler getTaskHandler(Runnable task) {
+		return scheduler.getTaskHandler(task);
 	}
 
 	@Override

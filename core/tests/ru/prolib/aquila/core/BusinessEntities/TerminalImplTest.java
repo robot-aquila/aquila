@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimerTask;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -39,7 +38,8 @@ public class TerminalImplTest {
 	private EditableOrder order;
 	private Security security;
 	private Scheduler scheduler;
-	private TimerTask task;
+	private Runnable task;
+	private TaskHandler taskHandler;
 	private DateTime time = new DateTime();
 	
 	@BeforeClass
@@ -54,7 +54,7 @@ public class TerminalImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		task = control.createMock(TimerTask.class);
+		task = control.createMock(Runnable.class);
 		controller = control.createMock(TerminalController.class);
 		starter = control.createMock(StarterQueue.class);
 		securities = control.createMock(EditableSecurities.class);
@@ -69,6 +69,8 @@ public class TerminalImplTest {
 		terminal = new TerminalImpl(es, scheduler, starter, securities,
 				portfolios, orders, controller, dispatcher);
 		expect(security.getDescriptor()).andStubReturn(descr);
+		
+		taskHandler = new TaskHandlerImpl(task, scheduler);
 	}
 	
 	@Test
@@ -95,7 +97,7 @@ public class TerminalImplTest {
 		assertSame(orders, terminal.getOrdersInstance());
 		assertEquals(new TerminalController(),terminal.getTerminalController());
 		assertSame(dispatcher, terminal.getEventDispatcher());
-		assertEquals(new SchedulerLocal(), terminal.getScheduler());
+		assertEquals(SchedulerLocal.class, terminal.getScheduler().getClass());
 	}
 	
 	@Test
@@ -1129,70 +1131,94 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testSchedule_TD() throws Exception {
-		scheduler.schedule(task, time);
+		expect(scheduler.schedule(task, time)).andReturn(taskHandler);
 		control.replay();
 		
-		terminal.schedule(task, time);
+		assertSame(taskHandler, terminal.schedule(task, time));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testSchedule_TDL() throws Exception {
-		scheduler.schedule(task, time, 215L);
+		expect(scheduler.schedule(task, time, 215L)).andReturn(taskHandler);
 		control.replay();
 		
-		terminal.schedule(task, time, 215L);
+		assertSame(taskHandler, terminal.schedule(task, time, 215L));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testSchedule_TL() throws Exception {
-		scheduler.schedule(task, 220L);
+		expect(scheduler.schedule(task, 220L)).andReturn(taskHandler);
 		control.replay();
 		
-		terminal.schedule(task, 220L);
+		assertSame(taskHandler, terminal.schedule(task, 220L));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testSchedule_TLL() throws Exception {
-		scheduler.schedule(task, 118L, 215L);
+		expect(scheduler.schedule(task, 118L, 215L)).andReturn(taskHandler);
 		control.replay();
 		
-		terminal.schedule(task, 118L, 215L);
+		assertSame(taskHandler, terminal.schedule(task, 118L, 215L));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testScheduleAtFixedRate_TDL() throws Exception {
-		scheduler.scheduleAtFixedRate(task, time, 302L);
+		expect(scheduler.scheduleAtFixedRate(task, time, 302L))
+			.andReturn(taskHandler);
 		control.replay();
 		
-		terminal.scheduleAtFixedRate(task, time, 302L);
+		assertSame(taskHandler, terminal.scheduleAtFixedRate(task, time, 302L));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testScheduleAtFixedRate_TLL() throws Exception {
-		scheduler.scheduleAtFixedRate(task, 80L, 94L);
+		expect(scheduler.scheduleAtFixedRate(task, 80L, 94L))
+			.andReturn(taskHandler);
 		control.replay();
 		
-		terminal.scheduleAtFixedRate(task, 80L, 94L);
+		assertSame(taskHandler, terminal.scheduleAtFixedRate(task, 80L, 94L));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testCancel() throws Exception {
-		expect(scheduler.cancel(task)).andReturn(true);
+		scheduler.cancel(task);
 		control.replay();
 		
-		assertTrue(terminal.cancel(task));
+		terminal.cancel(task);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetTaskHandler() throws Exception {
+		expect(scheduler.getTaskHandler(task)).andReturn(taskHandler);
+		control.replay();
+		
+		assertSame(taskHandler, terminal.getTaskHandler(task));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testScheduled() throws Exception {
+		expect(scheduler.scheduled(task)).andReturn(true);
+		expect(scheduler.scheduled(task)).andReturn(false);
+		control.replay();
+		
+		assertTrue(terminal.scheduled(task));
+		assertFalse(terminal.scheduled(task));
 		
 		control.verify();
 	}
