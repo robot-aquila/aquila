@@ -35,7 +35,7 @@ public class QUIKTerminalImpl extends TerminalImpl
 	 * @param client подключение к API
 	 */
 	public QUIKTerminalImpl(EventSystem eventSystem, Scheduler scheduler,
-			Starter starter, EditableSecurities securities,
+			StarterQueue starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
 			TerminalController controller, TerminalEventDispatcher dispatcher,
 			Cache cache, QUIKClient client)
@@ -63,7 +63,7 @@ public class QUIKTerminalImpl extends TerminalImpl
 	 * @param client подключение к API
 	 */
 	public QUIKTerminalImpl(EventSystem eventSystem,
-			Starter starter, EditableSecurities securities,
+			StarterQueue starter, EditableSecurities securities,
 			EditablePortfolios portfolios, EditableOrders orders,
 			TerminalEventDispatcher dispatcher, Cache cache, QUIKClient client)
 	{

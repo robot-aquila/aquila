@@ -2,6 +2,7 @@ package ru.prolib.aquila.quik;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -19,7 +20,7 @@ import ru.prolib.aquila.quik.assembler.cache.Cache;
 public class QUIKTerminalImplTest {
 	private IMocksControl control;
 	private EventSystem es;
-	private Starter starter;
+	private StarterQueue starter;
 	private EditableSecurities securities;
 	private EditablePortfolios portfolios;
 	private EditableOrders orders;
@@ -42,7 +43,7 @@ public class QUIKTerminalImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		controller = control.createMock(TerminalController.class);
-		starter = control.createMock(Starter.class);
+		starter = control.createMock(StarterQueue.class);
 		securities = control.createMock(EditableSecurities.class);
 		portfolios = control.createMock(EditablePortfolios.class);
 		orders = control.createMock(EditableOrders.class);
@@ -71,9 +72,9 @@ public class QUIKTerminalImplTest {
 		Variant<Scheduler> vSched = new Variant<Scheduler>(vEs)
 			.add(scheduler)
 			.add(control.createMock(Scheduler.class));
-		Variant<Starter> vSta = new Variant<Starter>(vSched)
+		Variant<StarterQueue> vSta = new Variant<StarterQueue>(vSched)
 			.add(starter)
-			.add(control.createMock(Starter.class));
+			.add(control.createMock(StarterQueue.class));
 		Variant<EditableSecurities> vScs = new Variant<EditableSecurities>(vSta)
 			.add(securities)
 			.add(control.createMock(EditableSecurities.class));
@@ -132,11 +133,18 @@ public class QUIKTerminalImplTest {
 	public void testConstruct_Short() throws Exception {
 		terminal = new QUIKTerminalImpl(es, starter, securities, portfolios,
 				orders, dispatcher, cache, client);
-		Terminal expected = new QUIKTerminalImpl(es, new SchedulerLocal(),
-				starter, securities, portfolios, orders, 
-				new TerminalController(), dispatcher, cache, client);
-		assertEquals(expected, terminal);
+		assertSame(es, terminal.getEventSystem());
+		assertThat(terminal.getScheduler(), instanceOf(SchedulerLocal.class));
+		assertSame(starter, terminal.getStarter());
+		assertSame(securities, terminal.getSecuritiesInstance());
+		assertSame(portfolios, terminal.getPortfoliosInstance());
+		assertSame(orders, terminal.getOrdersInstance());
+		assertNotNull(terminal.getTerminalController());
+		assertSame(dispatcher, terminal.getEventDispatcher());
+		assertSame(cache, terminal.getDataCache());
+		assertSame(client, terminal.getClient());
 	}
+	
 	@Test
 	public void testRequestSecurity() throws Exception {
 		// Пока ничего не делает.

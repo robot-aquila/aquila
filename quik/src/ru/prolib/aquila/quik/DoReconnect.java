@@ -1,6 +1,5 @@
 package ru.prolib.aquila.quik;
 
-import java.util.TimerTask;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,7 @@ import ru.prolib.aquila.t2q.T2QException;
 /**
  * Процедура установления подключения.
  */
-public class DoReconnect extends TimerTask {
+public class DoReconnect implements Runnable {
 	private static final Logger logger;
 	
 	static {
@@ -66,13 +65,7 @@ public class DoReconnect extends TimerTask {
 			}
 		}
 	}
-	
-	@Override
-	public boolean cancel() {
-		logger.debug("cancelled");
-		return super.cancel();
-	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {
