@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class GNotNullTest {
 	private IMocksControl control;
-	private FirePanicEvent firePanic;
+	private EditableTerminal firePanic;
 	private G<Integer> gValue;
 	private GNotNull<Integer> getter;
 
@@ -24,7 +24,7 @@ public class GNotNullTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		firePanic = control.createMock(FirePanicEvent.class);
+		firePanic = control.createMock(EditableTerminal.class);
 		gValue = control.createMock(G.class);
 		getter = new GNotNull<Integer>(firePanic, gValue, "Test: ");
 	}
@@ -70,9 +70,9 @@ public class GNotNullTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
-		Variant<FirePanicEvent> vFire = new Variant<FirePanicEvent>()
+		Variant<EditableTerminal> vFire = new Variant<EditableTerminal>()
 			.add(firePanic)
-			.add(control.createMock(FirePanicEvent.class));
+			.add(control.createMock(EditableTerminal.class));
 		Variant<G<Integer>> vGtr = new Variant<G<Integer>>(vFire)
 			.add(gValue)
 			.add(control.createMock(G.class));

@@ -6,9 +6,7 @@ package ru.prolib.aquila.core.BusinessEntities;
  * 2012-09-05<br>
  * $Id$
  */
-public interface EditablePortfolio
-	extends Portfolio, Editable, EditablePositions
-{
+public interface EditablePortfolio extends Portfolio, Editable {
 	
 	/**
 	 * Установить размер вариационной маржи.
@@ -30,5 +28,21 @@ public interface EditablePortfolio
 	 * @param value новое значение
 	 */
 	public void setBalance(Double value);
+	
+	
+	/**
+	 * Генерировать события позиции.
+	 * <p>
+	 * @param position позиция
+	 */
+	public void fireEvents(EditablePosition position);
+	
+	/**
+	 * Получить экземпляр редактируемой позиции.
+	 * <p>
+	 * @param security инструмент
+	 * @return позиция
+	 */
+	public EditablePosition getEditablePosition(Security security);
 
 }

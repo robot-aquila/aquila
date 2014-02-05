@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.Positions;
 
 /**
  * Фабрика портфелей.
@@ -18,7 +19,7 @@ public class PortfolioFactory {
 		EventSystem es = terminal.getEventSystem();
 		PortfolioImpl p = new PortfolioImpl(terminal, account,
 				new PortfolioEventDispatcher(es, account));
-		p.setPositionsInstance(new PositionsImpl(p,
+		p.setPositionsInstance(new Positions(p,
 				new PositionsEventDispatcher(es, account)));
 		return p;
 	}

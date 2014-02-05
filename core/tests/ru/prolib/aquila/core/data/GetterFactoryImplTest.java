@@ -11,6 +11,7 @@ import org.easymock.*;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.getter.GAccount;
 import ru.prolib.aquila.core.data.getter.GPrice;
 import ru.prolib.aquila.core.data.getter.GSecurityDescr;

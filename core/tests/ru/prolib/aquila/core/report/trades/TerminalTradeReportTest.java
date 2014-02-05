@@ -11,7 +11,6 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -165,9 +164,8 @@ public class TerminalTradeReportTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		TerminalBuilder tb = new TerminalBuilder();
-		Terminal t1 = tb.createTerminal("foo");
-		Terminal t2 = tb.createTerminal("foo");
+		Terminal t1 = new TerminalImpl("foo");
+		Terminal t2 = new TerminalImpl("foo");
 		report = new TerminalTradeReport(t1, selector, underlying);
 		Variant<Terminal> vTerm = new Variant<Terminal>()
 			.add(t1)

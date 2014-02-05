@@ -9,7 +9,7 @@ import java.util.Map;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -19,7 +19,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class GStringMapTest {
 	private IMocksControl control;
-	private FirePanicEvent fire;
+	private EditableTerminal fire;
 	private G<String> gKey;
 	private Map<String, Integer> map1,map2;
 	private GStringMap<Integer> getter_st,getter_ni;
@@ -28,7 +28,7 @@ public class GStringMapTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		fire = control.createMock(FirePanicEvent.class);
+		fire = control.createMock(EditableTerminal.class);
 		gKey = control.createMock(G.class);
 		map1 = new HashMap<String, Integer>();
 		map1.put("one", 1);
@@ -112,9 +112,9 @@ public class GStringMapTest {
 	@Test
 	public void testEquals() throws Exception {
 		//getter_ni = new GStringMap<Integer>(fire,gKey,map2,123,false,"A");
-		Variant<FirePanicEvent> vFire = new Variant<FirePanicEvent>()
+		Variant<EditableTerminal> vFire = new Variant<EditableTerminal>()
 			.add(fire)
-			.add(control.createMock(FirePanicEvent.class));
+			.add(control.createMock(EditableTerminal.class));
 		Variant<G<String>> vGtr = new Variant<G<String>>(vFire)
 			.add(gKey)
 			.add(control.createMock(G.class));

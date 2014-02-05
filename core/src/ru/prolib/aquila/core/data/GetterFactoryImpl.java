@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.getter.GAccount;
 import ru.prolib.aquila.core.data.getter.GPrice;
 import ru.prolib.aquila.core.data.getter.GSecurityDescr;
@@ -16,6 +17,7 @@ import ru.prolib.aquila.core.utils.ValidatorEq;
  * 2012-10-19<br>
  * $Id: GetterFactoryImpl.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class GetterFactoryImpl implements GetterFactory {
 	
 	/**

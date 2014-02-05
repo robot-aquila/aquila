@@ -14,7 +14,6 @@ import org.junit.*;
 import com.csvreader.CsvReader;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -66,7 +65,7 @@ public class CommonTRTest {
 		activeTrades = control.createMock(ActiveTrades.class);
 		record = control.createMock(RTrade.class);
 		security = control.createMock(Security.class);
-		terminal = new TerminalBuilder().createTerminal("test");
+		terminal = new TerminalImpl("test");
 		es = terminal.getEventSystem();
 		dispatcher = new CommonTREventDispatcher(es);
 		trades = new CommonTR(dispatcher);

@@ -2,10 +2,8 @@ package ru.prolib.aquila.core.BusinessEntities.getter;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
-import ru.prolib.aquila.core.BusinessEntities.Direction;
-import ru.prolib.aquila.core.data.G;
-import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 
 /**
  * Конвертер направления заявки или сделки.
@@ -19,8 +17,9 @@ import ru.prolib.aquila.core.data.ValueException;
  * 2013-02-14<br>
  * $Id$
  */
+@Deprecated
 public class GOrderDir implements G<Direction> {
-	private final FirePanicEvent firePanic;
+	private final EditableTerminal firePanic;
 	private final G<String> gString;
 	private final String msgPrefix, buyEquiv, sellEquiv;
 
@@ -33,7 +32,7 @@ public class GOrderDir implements G<Direction> {
 	 * @param sellEquiv строковый эквивалент продажи
 	 * @param msgPrefix префикс сообщения о паническом состоянии
 	 */
-	public GOrderDir(FirePanicEvent firePanic, G<String> gString,
+	public GOrderDir(EditableTerminal firePanic, G<String> gString,
 			String buyEquiv, String sellEquiv, String msgPrefix)
 	{
 		super();
@@ -49,7 +48,7 @@ public class GOrderDir implements G<Direction> {
 	 * <p>
 	 * @return генератор событий
 	 */
-	public FirePanicEvent getFirePanicEvent() {
+	public EditableTerminal getFirePanicEvent() {
 		return firePanic;
 	}
 

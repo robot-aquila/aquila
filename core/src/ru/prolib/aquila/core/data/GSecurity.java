@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.Securities;
 import ru.prolib.aquila.core.data.getter.GSecurityDescr;
 
 /**
@@ -18,6 +19,7 @@ import ru.prolib.aquila.core.data.getter.GSecurityDescr;
  * 2012-09-27<br>
  * $Id: GSecurity.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class GSecurity implements G<Security> {
 	private final G<SecurityDescriptor> gDescr;
 	private final Securities securities;

@@ -42,8 +42,9 @@ import ru.prolib.aquila.core.data.ValueException;
  * 2013-02-14<br>
  * $Id$
  */
+@Deprecated
 public class GDate2E implements G<Date> {
-	private final FirePanicEvent firePanic;
+	private final EditableTerminal firePanic;
 	private final G<String> gDate, gTime;
 	private final String formatString;
 	private final SimpleDateFormat format;
@@ -67,7 +68,7 @@ public class GDate2E implements G<Date> {
 	 * @param timeFormat формат времени
 	 * @param msgPrefix префикс сообщения о паническом состоянии
 	 */
-	public GDate2E(FirePanicEvent firePanic, boolean strict,
+	public GDate2E(EditableTerminal firePanic, boolean strict,
 			G<String> gDate, G<String> gTime,
 			String dateFormat, String timeFormat,
 			String msgPrefix)
@@ -87,7 +88,7 @@ public class GDate2E implements G<Date> {
 	 * <p>
 	 * @return генератор событий
 	 */
-	public FirePanicEvent getFirePanicEvent() {
+	public EditableTerminal getFirePanicEvent() {
 		return firePanic;
 	}
 	

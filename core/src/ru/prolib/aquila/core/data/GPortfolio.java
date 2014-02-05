@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.Portfolios;
 
 /**
  * Геттер экземпляра портфеля.
@@ -14,6 +15,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * 2012-09-27<br>
  * $Id: GPortfolio.java 490 2013-02-05 19:42:02Z whirlwind $
  */
+@Deprecated
 public class GPortfolio implements G<Portfolio> {
 	private final G<Account> gAcc;
 	private final Portfolios portfolios;

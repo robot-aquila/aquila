@@ -1,11 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioEventDispatcher;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
 /**
  * Редактируемый портфель.
@@ -17,7 +15,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	public static final int VERSION = 0x03;
 	private final Terminal terminal;
 	private final Account account;
-	private EditablePositions positions;
+	private Positions positions;
 	private final PortfolioEventDispatcher dispatcher;
 	private Double variationMargin, cash, balance;
 
@@ -51,7 +49,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	 * <p>
 	 * @param positions набор позциий
 	 */
-	public synchronized void setPositionsInstance(EditablePositions positions) {
+	public synchronized void setPositionsInstance(Positions positions) {
 		this.positions = positions;
 	}
 
@@ -70,7 +68,7 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 	 * <p>
 	 * @return набор позиций
 	 */
-	public synchronized EditablePositions getPositionsInstance() {
+	public synchronized Positions getPositionsInstance() {
 		return positions;
 	}
 	
@@ -167,26 +165,6 @@ public class PortfolioImpl extends EditableImpl implements EditablePortfolio {
 			EditablePosition getEditablePosition(Security security)
 	{
 		return positions.getEditablePosition(security);
-	}
-	
-	@Override
-	public synchronized boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		if ( other == null || other.getClass() != PortfolioImpl.class ) {
-			return false;
-		}
-		PortfolioImpl o = (PortfolioImpl) other;
-		return new EqualsBuilder()
-			.append(o.isAvailable(), isAvailable())
-			.append(o.account, account)
-			.append(o.balance, balance)
-			.append(o.cash, cash)
-			.append(o.positions, positions)
-			.appendSuper(o.terminal == terminal)
-			.append(o.variationMargin, variationMargin)
-			.isEquals();
 	}
 
 }

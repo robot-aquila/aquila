@@ -77,7 +77,7 @@ public class TerminalController {
 		helper.createThread(helper.createStopSequence(terminal, sig)).start();
 		try {
 			if ( ! sig.await(1000, TimeUnit.MILLISECONDS) ) {
-				logger.warn("stop: Timeout during start sequence");
+				logger.warn("stop: Timeout during stop sequence");
 			}
 		} catch ( InterruptedException e ) {
 			throw new RuntimeException(e);

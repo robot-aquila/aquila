@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.utils.Validator;
 
 /**

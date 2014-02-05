@@ -6,9 +6,8 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
-import ru.prolib.aquila.core.BusinessEntities.Direction;
-import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -17,7 +16,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class GOrderDirTest {
 	private IMocksControl control;
-	private FirePanicEvent firePanic;
+	private EditableTerminal firePanic;
 	private G<String> gString;
 	private GOrderDir getter;
 
@@ -25,7 +24,7 @@ public class GOrderDirTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		firePanic = control.createMock(FirePanicEvent.class);
+		firePanic = control.createMock(EditableTerminal.class);
 		gString = control.createMock(G.class);
 		getter = new GOrderDir(firePanic, gString, "BUY", "SELL", "Test: ");
 	}
@@ -87,9 +86,9 @@ public class GOrderDirTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
-		Variant<FirePanicEvent> vFire = new Variant<FirePanicEvent>()
+		Variant<EditableTerminal> vFire = new Variant<EditableTerminal>()
 			.add(firePanic)
-			.add(control.createMock(FirePanicEvent.class));
+			.add(control.createMock(EditableTerminal.class));
 		Variant<G<String>> vGtr = new Variant<G<String>>(vFire)
 			.add(gString)
 			.add(control.createMock(G.class));

@@ -20,7 +20,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class GDate2ETest {
 	private IMocksControl control;
-	private FirePanicEvent firePanic;
+	private EditableTerminal firePanic;
 	private G<String> gDate, gTime;
 	private GDate2E getter_strict, getter_nice;
 
@@ -28,7 +28,7 @@ public class GDate2ETest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		firePanic = control.createMock(FirePanicEvent.class);
+		firePanic = control.createMock(EditableTerminal.class);
 		gDate = control.createMock(G.class);
 		gTime = control.createMock(G.class);
 		getter_strict = new GDate2E(firePanic, true, gDate, gTime,
@@ -164,9 +164,9 @@ public class GDate2ETest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<FirePanicEvent> vFire = new Variant<FirePanicEvent>()
+		Variant<EditableTerminal> vFire = new Variant<EditableTerminal>()
 			.add(firePanic)
-			.add(control.createMock(FirePanicEvent.class));
+			.add(control.createMock(EditableTerminal.class));
 		Variant<Boolean> vStrict = new Variant<Boolean>(vFire)
 			.add(true)
 			.add(false);

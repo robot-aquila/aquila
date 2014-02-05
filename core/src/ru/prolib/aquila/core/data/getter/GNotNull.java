@@ -2,7 +2,7 @@ package ru.prolib.aquila.core.data.getter;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -19,8 +19,9 @@ import ru.prolib.aquila.core.data.ValueException;
  * 2013-02-16<br>
  * $Id$
  */
+@Deprecated
 public class GNotNull<R> implements G<R> {
-	private final FirePanicEvent firePanic;
+	private final EditableTerminal firePanic;
 	private final G<R> gValue;
 	private final String msgPrefix;
 	
@@ -31,7 +32,7 @@ public class GNotNull<R> implements G<R> {
 	 * @param gValue источник значений
 	 * @param msgPrefix msgPrefix префикс сообщения о паническом состоянии
 	 */
-	public GNotNull(FirePanicEvent firePanic, G<R> gValue, String msgPrefix) {
+	public GNotNull(EditableTerminal firePanic, G<R> gValue, String msgPrefix) {
 		super();
 		this.firePanic = firePanic;
 		this.gValue = gValue;
@@ -43,7 +44,7 @@ public class GNotNull<R> implements G<R> {
 	 * <p>
 	 * @return генератор событий
 	 */
-	public FirePanicEvent getFirePanicEvent() {
+	public EditableTerminal getFirePanicEvent() {
 		return firePanic;
 	}
 

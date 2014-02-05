@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.List;
+
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.Starter;
 
@@ -15,9 +17,7 @@ import ru.prolib.aquila.core.Starter;
  * 2012-05-30<br>
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public interface Terminal extends Securities, Portfolios, Starter, Orders,
-	OrderProcessor, Scheduler
-{
+public interface Terminal extends Starter, OrderProcessor, Scheduler {
 	
 	/**
 	 * Проверить состояние терминала.
@@ -253,4 +253,241 @@ public interface Terminal extends Securities, Portfolios, Starter, Orders,
 	 */
 	public EventType OnRequestSecurityError();
 	
+
+	/**
+	 * Проверить наличие заявки.
+	 * <p>
+	 * @param id идентификатор заявки
+	 * @return true - есть заявка с таким идентификатором
+	 */
+	public boolean isOrderExists(int id);
+	
+	/**
+	 * Получить список заявок.
+	 * <p>
+	 * @return список заявок
+	 */
+	public List<Order> getOrders();
+	
+	/**
+	 * Получить количество заявок.
+	 * <p>
+	 * @return количество заявок
+	 */
+	public int getOrdersCount();
+	
+	/**
+	 * Получить заявку по идентификатору.
+	 * <p>
+	 * @param id идентификатор заявки
+	 * @return заявка
+	 * @throws OrderNotExistsException
+	 */
+	public Order getOrder(int id) throws OrderException;
+	
+	/**
+	 * Получить тип события: при поступлении информации о новой заявке.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderAvailable();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderCancelFailed();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderCancelled();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderChanged();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderDone();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderFailed();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderFilled();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderPartiallyFilled();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderRegistered();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderRegisterFailed();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех заявок.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnOrderTrade();
+
+	
+	/**
+	 * Проверить доступность информации о портфеле.
+	 * <p>
+	 * @param account идентификатор портфеля
+	 * @return true если информация доступна, иначе - false
+	 */
+	public boolean isPortfolioAvailable(Account account);
+	
+	/**
+	 * Получить тип события: при доступности информации по портфелю.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnPortfolioAvailable();
+	
+	/**
+	 * Получить список доступных портфелей.
+	 * <p>
+	 * @return список портфелей
+	 */
+	public List<Portfolio> getPortfolios();
+	
+	/**
+	 * Получить портфель по идентификатору.
+	 * <p>
+	 * @param account счет портфеля
+	 * @return экземпляр портфеля
+	 * @throws PortfolioNotExistsException
+	 */
+	public Portfolio getPortfolio(Account account)
+		throws PortfolioException;
+	
+	/**
+	 * Получить портфель по-умолчанию.
+	 * <p>
+	 * Метод возвращает портфель в зависимости от реализации терминала. Это
+	 * может быть единственный доступный портфель или первый попавшийся портфель
+	 * из набора доступных.
+	 * <p>
+	 * @return портфель по-умолчанию
+	 */
+	public Portfolio getDefaultPortfolio() throws PortfolioException;
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех портфелей.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnPortfolioChanged();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех портфелей.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnPositionAvailable();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех портфелей.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnPositionChanged();
+	
+	/**
+	 * Получить количество доступных портфелей.
+	 * <p>
+	 * @return количество портфелей
+	 */
+	public int getPortfoliosCount();
+
+
+	/**
+	 * Получить список доступных инструментов
+	 * <p>
+	 * @return список инструментов
+	 */
+	public List<Security> getSecurities();
+	
+	/**
+	 * Получить инструмент по дескриптору
+	 * <p>
+	 * @param descr дескриптор инструмента
+	 * @return инструмент
+	 * @throws SecurityNotExistsException
+	 */
+	public Security getSecurity(SecurityDescriptor descr)
+			throws SecurityException;
+	
+	/**
+	 * Проверить наличие инструмента по дескриптору.
+	 * <p>
+	 * @param descr дескриптор инструмента
+	 * @return наличие инструмента
+	 */
+	public boolean isSecurityExists(SecurityDescriptor descr);
+
+	/**
+	 * Получить тип события: при появлении информации о новом инструменте.
+	 * <p>
+	 * Генерируется событие {@link SecurityEvent}.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnSecurityAvailable();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех инструментов.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnSecurityChanged();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех инструментов.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnSecurityTrade();
+	
+	/**
+	 * Получить количество доступных инструментов.
+	 * <p>
+	 * @return количество инструментов
+	 */
+	public int getSecuritiesCount();
+
 }

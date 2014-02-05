@@ -9,9 +9,7 @@ import ru.prolib.aquila.core.utils.Counter;
  * 2013-01-05<br>
  * $Id: EditableTerminal.java 527 2013-02-14 15:14:09Z whirlwind $
  */
-public interface EditableTerminal extends Terminal, EditableOrders,
-	EditablePortfolios, EditableSecurities, FirePanicEvent
-{
+public interface EditableTerminal extends Terminal {
 	
 	/**
 	 * Получить фасад событийной системы.
@@ -35,35 +33,14 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	 * <p>
 	 * @return процессор заявок
 	 */
-	public OrderProcessor getOrderProcessorInstance();
+	public OrderProcessor getOrderProcessor();
 	
 	/**
 	 * Установить экземпляр процессора заявок.
 	 * <p>
 	 * @param processor процессор заявок
 	 */
-	public void setOrderProcessorInstance(OrderProcessor processor);
-	
-	/**
-	 * Получить экземпляр хранилища заявок.
-	 * <p>
-	 * @return хранилище заявок
-	 */
-	public EditableSecurities getSecuritiesInstance();
-	
-	/**
-	 * Получить экземпляр хранилища портфелей.
-	 * <p>
-	 * @return хранилище портфелей
-	 */
-	public EditablePortfolios getPortfoliosInstance();
-	
-	/**
-	 * Получить экземпляр хранилища заявок.
-	 * <p>
-	 * @return хранилище заявок
-	 */
-	public EditableOrders getOrdersInstance();
+	public void setOrderProcessor(OrderProcessor processor);
 	
 	/**
 	 * Получить стартер терминала.
@@ -157,5 +134,120 @@ public interface EditableTerminal extends Terminal, EditableOrders,
 	 */
 	public void fireSecurityRequestError(SecurityDescriptor descr,
 			int errorCode, String errorMsg);
+	
+	/**
+	 * Получить экземпляр инструмента.
+	 * <p>
+	 * Если инструмент не существует, создает инструмент и добавляет его в
+	 * набор. В результате вызова никаких событий не генерируется.
+	 * <p>
+	 * @param terminal терминал
+	 * @param descr дескриптор инструмента
+	 * @return инструмент
+	 */
+	public EditableSecurity getEditableSecurity(EditableTerminal terminal,
+			SecurityDescriptor descr);
+	
+	/**
+	 * Генерировать события инструмента.
+	 * <p>
+	 * @param security инструмент
+	 */
+	public void fireEvents(EditableSecurity security);
+	
+
+	/**
+	 * Генерировать событие о паническом состоянии.
+	 * <p>
+	 * @param code код ситуации
+	 * @param msgId идентификатор сообщения
+	 */
+	public void firePanicEvent(int code, String msgId);
+
+	/**
+	 * Генерировать событие о паническом состоянии.
+	 * <p>
+	 * Данный метод используется для описания состояний, характеризующемся
+	 * дополнительными аргументами. Как правило, идентификатор сообщения
+	 * указывает на строку с плейсхолдерами, а массив аргументов содержит
+	 * значения для подстановки. 
+	 * <p>
+	 * @param code код ситуации
+	 * @param msgId идентификатор сообщения
+	 * @param args аргументы, описывающие ситуацию
+	 */
+	public void firePanicEvent(int code, String msgId, Object[] args);
+	
+	
+	/**
+	 * Генерировать события заявки.
+	 * <p>
+	 * @param order заявка
+	 */
+	public void fireEvents(EditableOrder order);
+	
+	/**
+	 * Получить экземпляр редактируемой заявки.
+	 * <p>
+	 * @param id идентификатор заявки
+	 * @return заявка
+	 * @throws OrderNotExistsException
+	 */
+	public EditableOrder getEditableOrder(int id)
+		throws OrderNotExistsException;
+	
+	/**
+	 * Зарегистрировать новую заявку.
+	 * <p>
+	 * @param id номер заявки (будет установлен для экземпляра)
+	 * @param order заявка
+	 * @throws OrderAlreadyExistsException
+	 */
+	public void registerOrder(int id, EditableOrder order)
+		throws OrderAlreadyExistsException;
+	
+	/**
+	 * Удалить заявку из набора.
+	 * <p>
+	 * Если заявки с указанным номером нет в реестре, то ничего не происходит.
+	 * <p>
+	 * @param id идентификатор заявки
+	 */
+	public void purgeOrder(int id);
+	
+	/**
+	 * Создать экземпляр заявки.
+	 * <p>
+	 * @param terminal терминал
+	 * @return экземпляр заявки
+	 */
+	public EditableOrder createOrder(EditableTerminal terminal);
+
+	
+	/**
+	 * Генерировать события портфеля.
+	 * <p>
+	 * @param portfolio портфель
+	 */
+	public void fireEvents(EditablePortfolio portfolio);
+	
+	/**
+	 * Получить экземпляр редактируемого портфеля.
+	 * <p>
+	 * Если портфель не существует, то он будет создан.
+	 * <p>
+	 * @param terminal терминал
+	 * @param account идентификатор счета
+	 * @return портфель
+	 */
+	public EditablePortfolio
+		getEditablePortfolio(EditableTerminal terminal, Account account);
+	
+	/**
+	 * Установить портфель по-умолчанию.
+	 * <p>
+	 * @param portfolio экземпляр портфеля
+	 */
+	public void setDefaultPortfolio(EditablePortfolio portfolio);
 
 }

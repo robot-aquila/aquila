@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -30,8 +30,9 @@ import ru.prolib.aquila.core.data.ValueException;
  * 2013-02-22<br>
  * $Id: GStringMap.java 542 2013-02-23 04:15:34Z whirlwind $
  */
+@Deprecated
 public class GStringMap<R> implements G<R> {
-	private final FirePanicEvent firePanic;
+	private final EditableTerminal firePanic;
 	private final G<String> gKey;
 	private final Map<String, R> map;
 	private final R defaultValue;
@@ -48,7 +49,7 @@ public class GStringMap<R> implements G<R> {
 	 * @param strict характер поведения: true - строгий, false - нестрогий
 	 * @param msgPrefix  префикс сообщения о паническом состоянии
 	 */
-	public GStringMap(FirePanicEvent firePanic, G<String> gKey,
+	public GStringMap(EditableTerminal firePanic, G<String> gKey,
 			Map<String, R> map, R defaultValue, boolean strict,
 			String msgPrefix)
 	{
@@ -66,7 +67,7 @@ public class GStringMap<R> implements G<R> {
 	 * <p>
 	 * @return генератор событий
 	 */
-	public FirePanicEvent getFirePanicEvent() {
+	public EditableTerminal getFirePanicEvent() {
 		return firePanic;
 	}
 	

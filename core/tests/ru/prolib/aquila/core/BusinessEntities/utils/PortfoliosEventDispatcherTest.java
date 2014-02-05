@@ -8,6 +8,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.Positions;
 
 public class PortfoliosEventDispatcherTest {
 	private static Account account;
@@ -33,7 +34,7 @@ public class PortfoliosEventDispatcherTest {
 		terminal = control.createMock(Terminal.class);
 		portfolio = new PortfolioImpl(terminal, account,
 				new PortfolioEventDispatcher(es, account));
-		portfolio.setPositionsInstance(new PositionsImpl(portfolio,
+		portfolio.setPositionsInstance(new Positions(portfolio,
 				new PositionsEventDispatcher(es, account)));
 		position = control.createMock(Position.class);
 		listener = control.createMock(EventListener.class);

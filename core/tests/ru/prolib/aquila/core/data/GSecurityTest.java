@@ -8,6 +8,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.Securities;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**

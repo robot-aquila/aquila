@@ -3,7 +3,6 @@ package ru.prolib.aquila.core.report;
 import static org.junit.Assert.*;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.report.trades.*;
 
 public class ReportBuilderTest {
@@ -12,7 +11,7 @@ public class ReportBuilderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalBuilder().createTerminal("foo");
+		terminal = new TerminalImpl("foo");
 		builder = new ReportBuilder();
 	}
 	

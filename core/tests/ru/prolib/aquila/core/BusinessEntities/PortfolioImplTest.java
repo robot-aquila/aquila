@@ -7,10 +7,9 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfolioEventDispatcher;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2012-09-06
@@ -19,7 +18,7 @@ public class PortfolioImplTest {
 	private static Account account;
 	private IMocksControl control;
 	private PortfolioEventDispatcher dispatcher;
-	private EditablePositions positions;
+	private Positions positions;
 	private Terminal terminal;
 	private PortfolioImpl portfolio;
 	private G<?> getter;
@@ -33,7 +32,7 @@ public class PortfolioImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		positions = control.createMock(EditablePositions.class);
+		positions = control.createMock(Positions.class);
 		terminal = control.createMock(Terminal.class);
 		dispatcher = control.createMock(PortfolioEventDispatcher.class);
 		
@@ -230,65 +229,6 @@ public class PortfolioImplTest {
 		assertTrue(portfolio.equals(portfolio));
 		assertFalse(portfolio.equals(null));
 		assertFalse(portfolio.equals(this));
-	}
-	
-	@Test
-	public void testEquals() throws Exception {
-		TerminalBuilder tb = new TerminalBuilder();
-		Terminal t1 = tb.createTerminal("foo");
-		Terminal t2 = tb.createTerminal("foo");
-		
-		portfolio = new PortfolioImpl(t1, account, dispatcher);
-		portfolio.setAvailable(true);
-		portfolio.setBalance(180.00d);
-		portfolio.setCash(20.00d);
-		portfolio.setVariationMargin(-30.00d);
-		portfolio.setPositionsInstance(positions);
-		
-		Variant<Terminal> vTerm = new Variant<Terminal>()
-			.add(t1)
-			.add(t2);
-		Variant<Account> vAcc = new Variant<Account>(vTerm)
-			.add(new Account("ZX80"))
-			.add(account);
-		Variant<EditablePositions> vPos = new Variant<EditablePositions>(vAcc)
-			.add(positions)
-			.add(control.createMock(EditablePositions.class));
-		Variant<Boolean> vAvl = new Variant<Boolean>(vPos)
-			.add(true)
-			.add(false);
-		Variant<Double> vBal = new Variant<Double>(vAvl)
-			.add(180.00d)
-			.add(100.00d);
-		Variant<Double> vCash = new Variant<Double>(vBal)
-			.add(20.00d)
-			.add(10.00d);
-		Variant<Double> vVarMgn = new Variant<Double>(vCash)
-			.add(-30.00d)
-			.add( 30.00d);
-		Variant<?> iterator = vVarMgn;
-		int foundCnt = 0;
-		PortfolioImpl x = null, found = null;
-		do {
-			x = new PortfolioImpl(vTerm.get(), vAcc.get(), dispatcher);
-			x.setPositionsInstance(vPos.get());
-			x.setAvailable(vAvl.get());
-			x.setBalance(vBal.get());
-			x.setCash(vCash.get());
-			x.setVariationMargin(vVarMgn.get());
-			if ( portfolio.equals(x) ) {
-				foundCnt ++;
-				found = x;
-			}
-		} while( iterator.next() );
-		assertEquals(1, foundCnt);
-		assertSame(t1, found.getTerminal());
-		assertSame(account, found.getAccount());
-		assertSame(positions, found.getPositionsInstance());
-		assertTrue(found.isAvailable());
-		assertEquals(180.00d, found.getBalance(), 0.001d);
-		assertEquals(20.00d, found.getCash(), 0.001d);
-		assertEquals(-30.00d, found.getVariationMargin(), 0.001d);
 	}
 	
 	@Test

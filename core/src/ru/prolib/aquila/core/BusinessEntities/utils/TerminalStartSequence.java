@@ -6,9 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
-import ru.prolib.aquila.core.BusinessEntities.TerminalState;
+import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
  * Процедура запуска терминала.
@@ -41,7 +39,7 @@ public class TerminalStartSequence implements Runnable {
 	 * <p>
 	 * @return терминал
 	 */
-	public FirePanicEvent getTerminal() {
+	public EditableTerminal getTerminal() {
 		return terminal;
 	}
 	

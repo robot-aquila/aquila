@@ -2,7 +2,7 @@ package ru.prolib.aquila.core.data.getter;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -28,8 +28,9 @@ import ru.prolib.aquila.core.data.ValueException;
  * 2013-02-25<br>
  * $Id: GDouble2X.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 abstract public class GDouble2X<R> implements G<R> {
-	private final FirePanicEvent firePanic;
+	private final EditableTerminal firePanic;
 	private final G<Double> gDouble;
 	private final boolean strict;
 	private final String msgPrefix;
@@ -42,7 +43,7 @@ abstract public class GDouble2X<R> implements G<R> {
 	 * @param strict характер поведения: true - строгий, false - нестрогий
 	 * @param msgPrefix префикс сообщения о паническом состоянии
 	 */
-	public GDouble2X(FirePanicEvent firePanic, G<Double> gDouble,
+	public GDouble2X(EditableTerminal firePanic, G<Double> gDouble,
 			boolean strict, String msgPrefix)
 	{
 		super();
@@ -57,7 +58,7 @@ abstract public class GDouble2X<R> implements G<R> {
 	 * <p>
 	 * @return генератор событий
 	 */
-	public FirePanicEvent getFirePanicEvent() {
+	public EditableTerminal getFirePanicEvent() {
 		return firePanic;
 	}
 

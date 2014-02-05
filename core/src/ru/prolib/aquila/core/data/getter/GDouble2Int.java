@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.data.getter;
 
-import ru.prolib.aquila.core.BusinessEntities.FirePanicEvent;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.G;
 
 /**
@@ -13,6 +13,7 @@ import ru.prolib.aquila.core.data.G;
  * 2013-02-25<br>
  * $Id: GDouble2Int.java 543 2013-02-25 06:35:27Z whirlwind $
  */
+@Deprecated
 public class GDouble2Int extends GDouble2X<Integer> {
 
 	/**
@@ -23,7 +24,7 @@ public class GDouble2Int extends GDouble2X<Integer> {
 	 * @param strict характер поведения: true - строгий, false - нестрогий
 	 * @param msgPrefix префикс сообщения о паническом состоянии
 	 */
-	public GDouble2Int(FirePanicEvent firePanic, G<Double> gDouble,
+	public GDouble2Int(EditableTerminal firePanic, G<Double> gDouble,
 			boolean strict, String msgPrefix) {
 		super(firePanic, gDouble, strict, msgPrefix);
 	}

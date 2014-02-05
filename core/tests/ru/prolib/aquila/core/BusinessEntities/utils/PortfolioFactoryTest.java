@@ -34,12 +34,11 @@ public class PortfolioFactoryTest {
 	public void testCreateInstance() throws Exception {
 		control.replay();
 		
-		PortfolioImpl expected = new PortfolioImpl(terminal, account,
-					new PortfolioEventDispatcher(es, account));
-		expected.setPositionsInstance(new PositionsImpl(expected,
-				new PositionsEventDispatcher(es, account)));
-		
-		assertEquals(expected, factory.createInstance(terminal, account));
+		Portfolio actual = factory.createInstance(terminal, account);
+		assertNotNull(actual);
+		assertSame(terminal, actual.getTerminal());
+		assertSame(account, actual.getAccount());
+		assertNotNull(((PortfolioImpl)actual).getPositionsInstance());
 	}
 	
 	@Test

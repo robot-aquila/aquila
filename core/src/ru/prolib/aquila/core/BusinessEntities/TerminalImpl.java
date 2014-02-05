@@ -1,16 +1,16 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.List;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.utils.*;
 
 /**
- * Базовая реализация терминала.
+ * Типовая реализация терминала.
  * <p>
  * Данный класс выполняет дополнительную обработку событий
  * {@link #OnConnected()} и {@link #OnDisconnected()}. Запрос на генерацию
@@ -35,185 +35,169 @@ import ru.prolib.aquila.core.utils.*;
  * запрещающие работу с терминалом. 
  */
 public class TerminalImpl implements EditableTerminal {
-	private static final Logger logger;
-	private final EventSystem es;
-	private final EditableSecurities securities;
-	private final EditablePortfolios portfolios;
-	private final StarterQueue starter;
-	private final EditableOrders orders;
-	private final TerminalEventDispatcher dispatcher;
+	private static Logger logger;
 	private volatile TerminalState state = TerminalState.STOPPED;
-	private final TerminalController controller;
+	private EventSystem es;
+	protected Securities securities;
+	protected Portfolios portfolios;
+	protected Orders orders;
+	private StarterQueue starter;
+	protected Scheduler scheduler;
+	private Counter orderNumerator;	
+	protected TerminalEventDispatcher dispatcher;
+	protected TerminalController controller;
 	private OrderProcessor orderProcessor;
-	private final Scheduler scheduler;
-	private final Counter orderNumerator;
 	
 	static {
 		logger = LoggerFactory.getLogger(TerminalImpl.class);
 	}
 	
 	/**
-	 * Создать объект (короткий конструктор).
+	 * Конструктор (полный).
 	 * <p>
-	 * Автоматически создает экземпляры планировщика задач и контроллера
-	 * терминала.
+	 * Данный конструктор позволяет определить все связанные объекты.
+	 * Основное назначение этого конструктора - обеспечить возможность
+	 * тестирования класса терминала. В большинстве случаев, пользователям
+	 * класса нет необходимости использовать данный конструктор для
+	 * инстанцирования терминала. Большая часть передаваемых объектов фактически
+	 * является частью терминала и не имеют смысла в отрыве от него. В
+	 * большинстве случаев, достаточно воспользоваться конструктором с более
+	 * короткой сигнатурой.    
 	 * <p>
-	 * @param eventSystem фасад подсистемы событий
-	 * @param starter пускач
-	 * @param securities набор инструментов
-	 * @param portfolios набор портфелей
-	 * @param orders набор заявок
-	 * @param dispatcher диспетчер событий
-	 */
-	public TerminalImpl(EventSystem eventSystem,
-						StarterQueue starter,
-						EditableSecurities securities,
-						EditablePortfolios portfolios,
-						EditableOrders orders,
-						TerminalEventDispatcher dispatcher)
-	{
-		this(eventSystem, new SchedulerLocal(), starter, securities, portfolios,
-				orders, new TerminalController(), dispatcher);
-	}
-	
-	/**
-	 * Создать объект.
+	 * Аргументы отсортированны в порядке связанности. Первые фактически
+	 * являются частью данного класса и были выделенны исключительно в целях
+	 * облегчения дизайна. Ближе к концу аргументы менее связаны. Для них чаще
+	 * возникает необходимость передачи извне.
 	 * <p>
-	 * @param eventSystem фасад подсистемы событий
-	 * @param scheduler планировщик задач
-	 * @param starter пускач
-	 * @param securities набор инструментов
-	 * @param portfolios набор портфелей
-	 * @param orders набор заявок
 	 * @param controller контроллер терминала
 	 * @param dispatcher диспетчер событий
+	 * @param securities набор инструментов
+	 * @param portfolios набор портфелей
+	 * @param orders набор заявок
+	 * @param numerator нумератор заявок
+	 * @param starter пускач
+	 * @param scheduler планировщик задач
+	 * @param eventSystem фасад подсистемы событий
 	 */
-	public TerminalImpl(EventSystem eventSystem,
-						Scheduler scheduler,
-						StarterQueue starter,
-						EditableSecurities securities,
-						EditablePortfolios portfolios,
-						EditableOrders orders,
-						TerminalController controller,
-						TerminalEventDispatcher dispatcher)
+	public TerminalImpl(TerminalController controller,
+			TerminalEventDispatcher dispatcher,
+			Securities securities,
+			Portfolios portfolios,
+			Orders orders,
+			Counter numerator,
+			StarterQueue starter,
+			Scheduler scheduler,
+			EventSystem eventSystem)
 	{
 		super();
-		this.es = eventSystem;
-		this.starter = starter;
+		this.controller = controller;
+		this.dispatcher = dispatcher;
 		this.securities = securities;
 		this.portfolios = portfolios;
 		this.orders = orders;
-		this.controller = controller;
-		this.dispatcher = dispatcher;
+		this.orderNumerator = numerator;
+		this.starter = starter;
 		this.scheduler = scheduler;
-		orderNumerator = new SimpleCounter();
+		this.es = eventSystem;
 	}
 	
 	/**
-	 * Получить экземпляр таймера.
+	 * Конструктор (ультракороткий).
 	 * <p>
-	 * @return таймер
+	 * Данный конструктор предназначен для создания экземпляра терминала со
+	 * всеми связанными объектами по-умолчанию. В качестве предустановленного
+	 * объекта используется только система событий. Это может быть полезно
+	 * например когда необходимо присоединить терминал к существующей очереди
+	 * событий или к специфической реализации событий (например синхронные).
+	 * <p>
+	 * @param es фасад системы событий
 	 */
-	final public Scheduler getScheduler() {
-		return scheduler;
+	public TerminalImpl(EventSystem es) {
+		this(new TerminalController(), new TerminalEventDispatcher(es),
+			new Securities(new SecuritiesEventDispatcher(es)),
+			new Portfolios(new PortfoliosEventDispatcher(es)),
+			new Orders(new OrdersEventDispatcher(es)),
+			new SimpleCounter(),
+			new StarterQueue(),
+			new SchedulerLocal(),
+			es);
 	}
 	
 	/**
-	 * Получить контроллер терминала.
+	 * Конструктор (ультракороткий).
 	 * <p>
-	 * @return контроллер терминала
-	 */
-	final public TerminalController getTerminalController() {
-		return controller;
-	}
-	
-	/**
-	 * Получить диспетчер событий.
+	 * Данный конструктор предназначен для создания экземпляра терминала со
+	 * всеми связанными объектами по-умолчанию. Для организации цикла обмена
+	 * сообщениями создается стандартная очередь событий типа
+	 * {@link EventQueueImpl}.  
 	 * <p>
-	 * @return диспетчер событий
+	 * @param queueId идентификатор очереди событий
 	 */
-	final public TerminalEventDispatcher getEventDispatcher() {
-		return dispatcher;
+	public TerminalImpl(String queueId) {
+		this(new EventSystemImpl(new EventQueueImpl(queueId)));
 	}
 	
 	@Override
-	final public synchronized OrderProcessor getOrderProcessorInstance() {
+	public synchronized OrderProcessor getOrderProcessor() {
 		return orderProcessor;
 	}
 	
 	@Override
-	final public synchronized
-		void setOrderProcessorInstance(OrderProcessor processor)
-	{
+	public synchronized void setOrderProcessor(OrderProcessor processor) {
 		this.orderProcessor = processor;
 	}
 	
 	@Override
-	final public EditableSecurities getSecuritiesInstance() {
-		return securities;
-	}
-	
-	@Override
-	final public EditablePortfolios getPortfoliosInstance() {
-		return portfolios;
-	}
-	
-	@Override
-	final public StarterQueue getStarter() {
+	public StarterQueue getStarter() {
 		return starter;
 	}
 	
 	@Override
-	final public EditableOrders getOrdersInstance() {
-		return orders;
-	}
-	
-	@Override
-	final public List<Security> getSecurities() {
+	public synchronized List<Security> getSecurities() {
 		return securities.getSecurities();
 	}
 
 	@Override
-	final public Security getSecurity(SecurityDescriptor descr)
+	public synchronized Security getSecurity(SecurityDescriptor descr)
 			throws SecurityException
 	{
 		return securities.getSecurity(descr);
 	}
 
 	@Override
-	final public boolean isSecurityExists(SecurityDescriptor descr) {
+	public synchronized boolean isSecurityExists(SecurityDescriptor descr) {
 		return securities.isSecurityExists(descr);
 	}
 
 	@Override
-	final public EventType OnSecurityAvailable() {
+	public EventType OnSecurityAvailable() {
 		return securities.OnSecurityAvailable();
 	}
 
 	@Override
-	final public List<Portfolio> getPortfolios() {
+	public synchronized List<Portfolio> getPortfolios() {
 		return portfolios.getPortfolios();
 	}
 
 	@Override
-	final public Portfolio getPortfolio(Account account)
+	public synchronized Portfolio getPortfolio(Account account)
 			throws PortfolioException
 	{
 		return portfolios.getPortfolio(account);
 	}
 
 	@Override
-	final public boolean isPortfolioAvailable(Account account) {
+	public synchronized boolean isPortfolioAvailable(Account account) {
 		return portfolios.isPortfolioAvailable(account);
 	}
 
 	@Override
-	final public EventType OnPortfolioAvailable() {
+	public EventType OnPortfolioAvailable() {
 		return portfolios.OnPortfolioAvailable();
 	}
 
 	@Override
-	final public synchronized void start() throws StarterException {
+	public synchronized void start() throws StarterException {
 		if ( state == TerminalState.STOPPED ) {
 			setTerminalState(TerminalState.STARTING);
 			logger.debug("Run start sequence");
@@ -228,7 +212,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public synchronized void stop() throws StarterException {
+	public synchronized void stop() throws StarterException {
 		if (state == TerminalState.STARTED||state == TerminalState.CONNECTED) {
 			setTerminalState(TerminalState.STOPPING);
 			logger.debug("Run stop sequence");
@@ -243,34 +227,34 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public Portfolio getDefaultPortfolio()
+	public synchronized Portfolio getDefaultPortfolio()
 		throws PortfolioException
 	{
 		return portfolios.getDefaultPortfolio();
 	}
 
 	@Override
-	final public boolean isOrderExists(int id) {
+	public synchronized boolean isOrderExists(int id) {
 		return orders.isOrderExists(id);
 	}
 
 	@Override
-	final public List<Order> getOrders() {
+	public synchronized List<Order> getOrders() {
 		return orders.getOrders();
 	}
 
 	@Override
-	final public Order getOrder(int id) throws OrderException {
+	public synchronized Order getOrder(int id) throws OrderException {
 		return orders.getOrder(id);
 	}
 
 	@Override
-	final public EventType OnOrderAvailable() {
+	public EventType OnOrderAvailable() {
 		return orders.OnOrderAvailable();
 	}
 
 	@Override
-	final public void placeOrder(Order order) throws OrderException {
+	public synchronized void placeOrder(Order order) throws OrderException {
 		synchronized ( order ) {
 			OrderStatus status = order.getStatus();
 			EditableOrder o = (EditableOrder) order;
@@ -292,7 +276,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public void cancelOrder(Order order) throws OrderException {
+	public synchronized void cancelOrder(Order order) throws OrderException {
 		synchronized ( order ) {
 			EditableOrder o = (EditableOrder) order;
 			OrderStatus status = o.getStatus();
@@ -314,152 +298,157 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public int getOrdersCount() {
+	public synchronized int getOrdersCount() {
 		return orders.getOrdersCount();
 	}
 
 	@Override
-	final public EventType OnOrderCancelFailed() {
+	public EventType OnOrderCancelFailed() {
 		return orders.OnOrderCancelFailed();
 	}
 
 	@Override
-	final public EventType OnOrderCancelled() {
+	public EventType OnOrderCancelled() {
 		return orders.OnOrderCancelled();
 	}
 
 	@Override
-	final public EventType OnOrderChanged() {
+	public EventType OnOrderChanged() {
 		return orders.OnOrderChanged();
 	}
 
 	@Override
-	final public EventType OnOrderDone() {
+	public EventType OnOrderDone() {
 		return orders.OnOrderDone();
 	}
 
 	@Override
-	final public EventType OnOrderFailed() {
+	public EventType OnOrderFailed() {
 		return orders.OnOrderFailed();
 	}
 
 	@Override
-	final public EventType OnOrderFilled() {
+	public EventType OnOrderFilled() {
 		return orders.OnOrderFilled();
 	}
 
 	@Override
-	final public EventType OnOrderPartiallyFilled() {
+	public EventType OnOrderPartiallyFilled() {
 		return orders.OnOrderPartiallyFilled();
 	}
 
 	@Override
-	final public EventType OnOrderRegistered() {
+	public EventType OnOrderRegistered() {
 		return orders.OnOrderRegistered();
 	}
 
 	@Override
-	final public EventType OnOrderRegisterFailed() {
+	public EventType OnOrderRegisterFailed() {
 		return orders.OnOrderRegisterFailed();
 	}
 
 	@Override
-	final public EventType OnSecurityChanged() {
+	public EventType OnSecurityChanged() {
 		return securities.OnSecurityChanged();
 	}
 
 	@Override
-	final public EventType OnSecurityTrade() {
+	public EventType OnSecurityTrade() {
 		return securities.OnSecurityTrade();
 	}
 
 	@Override
-	final public EventType OnPortfolioChanged() {
+	public EventType OnPortfolioChanged() {
 		return portfolios.OnPortfolioChanged();
 	}
 
 	@Override
-	final public EventType OnPositionAvailable() {
+	public EventType OnPositionAvailable() {
 		return portfolios.OnPositionAvailable();
 	}
 
 	@Override
-	final public EventType OnPositionChanged() {
+	public EventType OnPositionChanged() {
 		return portfolios.OnPositionChanged();
 	}
 
 	@Override
-	final public int getSecuritiesCount() {
+	public synchronized int getSecuritiesCount() {
 		return securities.getSecuritiesCount();
 	}
 
 	@Override
-	final public int getPortfoliosCount() {
+	public synchronized int getPortfoliosCount() {
 		return portfolios.getPortfoliosCount();
 	}
 
 	@Override
-	final public void fireEvents(EditableOrder order) {
+	public synchronized void fireEvents(EditableOrder order) {
 		orders.fireEvents(order);
 	}
 
 	@Override
-	final public EditableOrder getEditableOrder(int id)
+	public synchronized EditableOrder getEditableOrder(int id)
 		throws OrderNotExistsException
 	{
 		return orders.getEditableOrder(id);
 	}
 
 	@Override
-	final public void registerOrder(int id, EditableOrder order)
+	public synchronized void registerOrder(int id, EditableOrder order)
 		throws OrderAlreadyExistsException
 	{
 		orders.registerOrder(id, order);
 	}
 
 	@Override
-	final public void purgeOrder(int id) {
+	public synchronized void purgeOrder(int id) {
 		orders.purgeOrder(id);
 	}
 
 	@Override
-	final public void fireEvents(EditablePortfolio portfolio) {
+	public synchronized void fireEvents(EditablePortfolio portfolio) {
 		portfolios.fireEvents(portfolio);
 	}
 
 	@Override
-	final public EditablePortfolio getEditablePortfolio(Account account) {
+	public synchronized EditablePortfolio
+		getEditablePortfolio(Account account)
+	{
 		return portfolios.getEditablePortfolio(this, account);
 	}
 
 	@Override
-	final public void setDefaultPortfolio(EditablePortfolio portfolio) {
+	public synchronized void
+		setDefaultPortfolio(EditablePortfolio portfolio)
+	{
 		portfolios.setDefaultPortfolio(portfolio);
 	}
 
 	@Override
-	final public EditableSecurity getEditableSecurity(SecurityDescriptor descr)
+	public synchronized EditableSecurity
+		getEditableSecurity(SecurityDescriptor descr)
 	{
 		return securities.getEditableSecurity(this, descr);
 	}
 
 	@Override
-	final public void fireEvents(EditableSecurity security) {
+	public synchronized void fireEvents(EditableSecurity security) {
 		securities.fireEvents(security);
 	}
 
 	@Override
-	final public EventType OnConnected() {
+	public EventType OnConnected() {
 		return dispatcher.OnConnected();
 	}
 
 	@Override
-	final public EventType OnDisconnected() {
+	public EventType OnDisconnected() {
 		return dispatcher.OnDisconnected();
 	}
 
 	@Override
-	final public synchronized void fireTerminalConnectedEvent() {
+	public synchronized void fireTerminalConnectedEvent() {
 		if ( state == TerminalState.STARTED ) {
 			state = TerminalState.CONNECTED;
 			dispatcher.fireConnected();
@@ -470,7 +459,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public synchronized void fireTerminalDisconnectedEvent() {
+	public synchronized void fireTerminalDisconnectedEvent() {
 		if ( state == TerminalState.CONNECTED
 		  || state == TerminalState.STOPPING )
 		{
@@ -485,37 +474,37 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	final public void fireTerminalStartedEvent() {
+	public void fireTerminalStartedEvent() {
 		dispatcher.fireStarted();
 	}
 	
 	@Override
-	final public void fireTerminalStoppedEvent() {
+	public void fireTerminalStoppedEvent() {
 		dispatcher.fireStopped();
 	}
 
 	@Override
-	final public EventType OnStarted() {
+	public EventType OnStarted() {
 		return dispatcher.OnStarted();
 	}
 
 	@Override
-	final public EventType OnStopped() {
+	public EventType OnStopped() {
 		return dispatcher.OnStopped();
 	}
 
 	@Override
-	final public EventType OnPanic() {
+	public EventType OnPanic() {
 		return dispatcher.OnPanic();
 	}
 
 	@Override
-	final public void firePanicEvent(int code, String msgId) {
+	public void firePanicEvent(int code, String msgId) {
 		firePanicEvent(code, msgId, new Object[] { });
 	}
 
 	@Override
-	final public synchronized void
+	public synchronized void
 		firePanicEvent(int code, String msgId, Object[] args)
 	{
 		if ( started() ) {
@@ -530,110 +519,78 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public synchronized boolean stopped() {
+	public synchronized boolean stopped() {
 		return state == TerminalState.STOPPED;
 	}
 
 	@Override
-	final public synchronized boolean connected() {
+	public synchronized boolean connected() {
 		return state == TerminalState.CONNECTED;
 	}
 	
 	@Override
-	final public synchronized boolean started() {
+	public synchronized boolean started() {
 		return state == TerminalState.CONNECTED
 			|| state == TerminalState.STARTED;
 	}
 
 	@Override
-	final public synchronized TerminalState getTerminalState() {
+	public synchronized TerminalState getTerminalState() {
 		return state;
 	}
 
 	@Override
-	final public synchronized void setTerminalState(TerminalState state) {
+	public synchronized void setTerminalState(TerminalState state) {
 		logger.debug("Change terminal state to {}", state);
 		this.state = state;
 	}
 
 	@Override
-	final public DateTime getCurrentTime() {
+	public synchronized DateTime getCurrentTime() {
 		return scheduler.getCurrentTime();
 	}
 
 	@Override
-	final public EventSystem getEventSystem() {
+	public EventSystem getEventSystem() {
 		return es;
 	}
 
 	@Override
-	final public EditableOrder createOrder(EditableTerminal terminal) {
+	public synchronized EditableOrder createOrder(EditableTerminal terminal) {
 		return orders.createOrder(terminal);
 	}
 
 	@Override
-	final public EditableOrder createOrder() {
+	public synchronized EditableOrder createOrder() {
 		return orders.createOrder(this);
 	}
 
 	@Override
-	public synchronized boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		if ( other == null || other.getClass() != TerminalImpl.class ) {
-			return false;
-		}
-		return fieldsEquals(other);
-	}
-	
-	/**
-	 * Служебный метод сравнения полей экземпляра.
-	 * <p>
-	 * @param other объект для сравнения
-	 * @return результат сравнения
-	 */
-	protected boolean fieldsEquals(Object other) {
-		TerminalImpl o = (TerminalImpl) other;
-		return new EqualsBuilder()
-			.append(o.controller, controller)
-			.append(o.es, es)
-			.append(o.orderProcessor, orderProcessor)
-			.append(o.orders, orders)
-			.append(o.portfolios, portfolios)
-			.append(o.securities, securities)
-			.append(o.starter, starter)
-			.append(o.state, state)
-			.append(o.scheduler, scheduler)
-			.isEquals();
-	}
-
-	@Override
-	final public EventType OnOrderTrade() {
+	public EventType OnOrderTrade() {
 		return orders.OnOrderTrade();
 	}
 
 	@Override
-	final public Counter getOrderNumerator() {
+	public synchronized Counter getOrderNumerator() {
 		return orderNumerator;
 	}
 
 	@Override
-	final public Order createOrder(Account account, Direction dir,
+	public synchronized Order createOrder(Account account, Direction dir,
 			Security security, long qty, double price)
 	{
 		return createOrder(account, dir, security, qty, price, null);
 	}
 
 	@Override
-	final public Order createOrder(Account account, Direction dir,
+	public synchronized Order createOrder(Account account, Direction dir,
 			Security security, long qty)
 	{
 		return createOrder(account, dir, security, qty, null);
 	}
 	
 	@Override
-	final public Order createOrder(Account account, Direction dir,
+	public synchronized Order createOrder(Account account, Direction dir,
 		Security security, long qty, double price, OrderActivator activator)
 	{
 		EditableOrder order = createOrder();
@@ -659,7 +616,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public Order createOrder(Account account, Direction dir,
+	public synchronized Order createOrder(Account account, Direction dir,
 		Security security, long qty, OrderActivator activator)
 	{
 		EditableOrder order = createOrder();
@@ -689,12 +646,13 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public EventType OnRequestSecurityError() {
+	public EventType OnRequestSecurityError() {
 		return dispatcher.OnRequestSecurityError();
 	}
 
 	@Override
-	public void fireSecurityRequestError(SecurityDescriptor descr,
+	public synchronized
+		void fireSecurityRequestError(SecurityDescriptor descr,
 			int errorCode, String errorMsg)
 	{
 		Object args[] = { descr, errorCode, errorMsg };
@@ -703,65 +661,67 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	final public TaskHandler schedule(Runnable task, DateTime time) {
+	public synchronized TaskHandler schedule(Runnable task, DateTime time) {
 		return scheduler.schedule(task, time);
 	}
 
 	@Override
-	final public TaskHandler
+	public synchronized TaskHandler
 		schedule(Runnable task, DateTime firstTime, long period)
 	{
 		return scheduler.schedule(task, firstTime, period);
 	}
 
 	@Override
-	final public TaskHandler schedule(Runnable task, long delay) {
+	public synchronized TaskHandler schedule(Runnable task, long delay) {
 		return scheduler.schedule(task, delay);
 	}
 
 	@Override
-	final public TaskHandler schedule(Runnable task, long delay, long period) {
+	public synchronized
+		TaskHandler schedule(Runnable task, long delay, long period)
+	{
 		return scheduler.schedule(task, delay, period);
 	}
 
 	@Override
-	final public TaskHandler
+	public synchronized TaskHandler
 		scheduleAtFixedRate(Runnable task, DateTime firstTime, long period)
 	{
 		return scheduler.scheduleAtFixedRate(task, firstTime, period);		
 	}
 
 	@Override
-	final public TaskHandler
+	public synchronized TaskHandler
 		scheduleAtFixedRate(Runnable task, long delay, long period)
 	{
 		return scheduler.scheduleAtFixedRate(task, delay, period);
 	}
 
 	@Override
-	final public void cancel(Runnable task) {
+	public synchronized void cancel(Runnable task) {
 		scheduler.cancel(task);
 	}
 	
 	@Override
-	final public boolean scheduled(Runnable task) {
+	public synchronized boolean scheduled(Runnable task) {
 		return scheduler.scheduled(task);
 	}
 
 	@Override
-	final public TaskHandler getTaskHandler(Runnable task) {
+	public synchronized TaskHandler getTaskHandler(Runnable task) {
 		return scheduler.getTaskHandler(task);
 	}
 
 	@Override
-	public EditablePortfolio
+	public synchronized EditablePortfolio
 		getEditablePortfolio(EditableTerminal terminal, Account account)
 	{
 		return portfolios.getEditablePortfolio(terminal, account);
 	}
 
 	@Override
-	public EditableSecurity
+	public synchronized EditableSecurity
 		getEditableSecurity(EditableTerminal terminal, SecurityDescriptor descr)
 	{
 		return securities.getEditableSecurity(terminal, descr);
