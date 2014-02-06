@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Counter;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.cache.*;
 import ru.prolib.aquila.t2q.T2QOrder;
 import ru.prolib.aquila.t2q.T2QTrade;
@@ -25,20 +25,20 @@ public class AssemblerL1 {
 		logger = LoggerFactory.getLogger(AssemblerL1.class);
 	}
 	
-	private final QUIKEditableTerminal terminal;
+	private final QUIKTerminal terminal;
 	private final AssemblerL2 l2;
 	
-	AssemblerL1(QUIKEditableTerminal terminal, AssemblerL2 l2) {
+	AssemblerL1(QUIKTerminal terminal, AssemblerL2 l2) {
 		super();
 		this.terminal = terminal;
 		this.l2 = l2;
 	}
 	
-	AssemblerL1(QUIKEditableTerminal terminal) {
+	AssemblerL1(QUIKTerminal terminal) {
 		this(terminal, new AssemblerL2(terminal));
 	}
 	
-	QUIKEditableTerminal getTerminal() {
+	QUIKTerminal getTerminal() {
 		return terminal;
 	}
 	

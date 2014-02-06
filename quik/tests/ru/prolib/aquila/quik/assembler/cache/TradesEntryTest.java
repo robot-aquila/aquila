@@ -11,13 +11,13 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 import ru.prolib.aquila.core.data.row.RowSet;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.cache.dde.TradesGateway;
 
 public class TradesEntryTest {
 	private IMocksControl control;
 	private TradesGateway gateway;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private RowSet rs;
 	private Trade trade;
 	private TradesEntry entry;
@@ -26,7 +26,7 @@ public class TradesEntryTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		gateway = control.createMock(TradesGateway.class);
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		rs = control.createMock(RowSet.class);
 		trade = control.createMock(Trade.class);
 		entry = new TradesEntry(gateway, rs, 100);

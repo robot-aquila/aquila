@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.QUIKClient;
 import ru.prolib.aquila.quik.api.QUIKResponse;
 import ru.prolib.aquila.quik.api.QUIKTransactionHandler;
@@ -110,7 +110,7 @@ public class CancelHandler implements QUIKTransactionHandler {
 	 * @return экземпляр подключения
 	 */
 	private final QUIKClient getClient() {
-		return ((QUIKEditableTerminal) order.getTerminal()).getClient();
+		return ((QUIKTerminal) order.getTerminal()).getClient();
 	}
 	
 	/**

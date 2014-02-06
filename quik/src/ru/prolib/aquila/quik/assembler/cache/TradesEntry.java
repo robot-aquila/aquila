@@ -4,7 +4,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.row.*;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.cache.dde.TradesGateway;
 
 /**
@@ -91,7 +91,7 @@ public class TradesEntry extends CacheEntry {
 	 * @return сделка или null, если не удалось сформировать сделку
 	 * @throws RowException ошибка доступа к данным ряда
 	 */
-	public synchronized Trade access(QUIKEditableTerminal terminal)
+	public synchronized Trade access(QUIKTerminal terminal)
 		throws RowException
 	{
 		Trade trade = gateway.makeTrade(terminal, rs);

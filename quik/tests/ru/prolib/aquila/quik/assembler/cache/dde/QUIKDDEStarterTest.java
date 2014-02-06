@@ -16,7 +16,7 @@ public class QUIKDDEStarterTest {
 	private QUIKConfigImpl config;
 	private Assembler asm;
 	private DDEServer server;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private QUIKDDEStarter starter;
 
 	@Before
@@ -32,7 +32,7 @@ public class QUIKDDEStarterTest {
 		config.securities = "securities";
 		asm = control.createMock(Assembler.class);
 		server = control.createMock(DDEServer.class);
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		starter = new QUIKDDEStarter(config, asm, server);
 		expect(asm.getTerminal()).andStubReturn(terminal);
 	}

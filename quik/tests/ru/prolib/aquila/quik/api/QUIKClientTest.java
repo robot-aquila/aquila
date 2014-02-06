@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.Check;
 import ru.prolib.aquila.t2q.*;
 import ru.prolib.aquila.t2q.jqt.JQTService;
 
@@ -115,17 +116,11 @@ public class QUIKClientTest {
 	
 	@Test
 	public void testConstruct0() throws Exception {
-		// Этот тест всегда будет проваливаться под линуксом,
-		// так как для работы JQT нужна бинарная виндовая либа.
-		if ( System.getProperty("os.name").toLowerCase().startsWith("win") ) {
-			client = new QUIKClient();
-			assertEquals(new QUIKWrapper(), client.getWrapper());
-			JQTService srv = (JQTService) client.getService();
-			assertSame(client.getWrapper(), srv.getHandler());
-		} else {
-			System.err.println(getClass().getName() +
-				"#testConstruct0 skipped, for win only");
-		}
+		assertTrue(Check.NOTWIN, Check.isWin());
+		client = new QUIKClient();
+		assertEquals(new QUIKWrapper(), client.getWrapper());
+		JQTService srv = (JQTService) client.getService();
+		assertSame(client.getWrapper(), srv.getHandler());
 	}
 
 }

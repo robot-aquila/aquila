@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.*;
 import ru.prolib.aquila.quik.assembler.cache.QUIKSecurityDescriptor;
 import ru.prolib.aquila.t2q.T2QException;
@@ -38,7 +38,7 @@ public class PlaceHandler implements QUIKTransactionHandler {
 	@Override
 	public void handle(QUIKResponse response) {
 		if ( ! response.isFinal() ) return;
-		QUIKEditableTerminal term = (QUIKEditableTerminal) order.getTerminal();
+		QUIKTerminal term = (QUIKTerminal) order.getTerminal();
 		synchronized ( order ) {
 			Transaction t = order.getSystemInfo().getRegistration(); 
 			t.setResponse(response);
@@ -156,7 +156,7 @@ public class PlaceHandler implements QUIKTransactionHandler {
 	 * @return экземпляр подключения
 	 */
 	private final QUIKClient getClient() {
-		return ((QUIKEditableTerminal) order.getTerminal()).getClient();
+		return ((QUIKTerminal) order.getTerminal()).getClient();
 	}
 	
 	/**

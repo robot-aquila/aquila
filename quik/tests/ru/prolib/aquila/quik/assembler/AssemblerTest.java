@@ -11,14 +11,14 @@ import ru.prolib.aquila.core.BusinessEntities.ISO4217;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.data.row.RowSetException;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.cache.*;
 import ru.prolib.aquila.t2q.T2QOrder;
 import ru.prolib.aquila.t2q.T2QTrade;
 
 public class AssemblerTest {
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private Cache cache;
 	private DescriptorsCache descrsCache;
 	private AssemblerL1 l1;
@@ -34,7 +34,7 @@ public class AssemblerTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		cache = control.createMock(Cache.class);
 		descrsCache = control.createMock(DescriptorsCache.class);
 		l1 = control.createMock(AssemblerL1.class);
@@ -263,9 +263,9 @@ public class AssemblerTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<QUIKEditableTerminal> vTerm = new Variant<QUIKEditableTerminal>()
+		Variant<QUIKTerminal> vTerm = new Variant<QUIKTerminal>()
 			.add(terminal)
-			.add(control.createMock(QUIKEditableTerminal.class));
+			.add(control.createMock(QUIKTerminal.class));
 		Variant<AssemblerL1> vL1 = new Variant<AssemblerL1>(vTerm)
 			.add(l1)
 			.add(control.createMock(AssemblerL1.class));

@@ -7,14 +7,14 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.*;
 import ru.prolib.aquila.t2q.*;
 
 public class CancelHandlerTest {
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private QUIKClient client;
 	private EditableOrder order;
 	private CancelHandler handler;
@@ -31,7 +31,7 @@ public class CancelHandlerTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		client = control.createMock(QUIKClient.class);
 		order = control.createMock(EditableOrder.class);
 		handler = new CancelHandler(215, order);

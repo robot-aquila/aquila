@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.row.RowException;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.cache.*;
 import ru.prolib.aquila.t2q.*;
 
@@ -26,9 +26,9 @@ public class AssemblerL2 {
 		logger = LoggerFactory.getLogger(AssemblerL2.class);
 	}
 	
-	private final QUIKEditableTerminal terminal;
+	private final QUIKTerminal terminal;
 	
-	AssemblerL2(QUIKEditableTerminal terminal) {
+	AssemblerL2(QUIKTerminal terminal) {
 		super();
 		this.terminal = terminal;
 	}

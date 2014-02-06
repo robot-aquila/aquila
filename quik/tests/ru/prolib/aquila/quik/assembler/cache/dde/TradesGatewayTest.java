@@ -12,7 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.dde.utils.table.DDETableRange;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.cache.*;
 
@@ -24,7 +24,7 @@ public class TradesGatewayTest {
 	private TradesGateway gateway;
 	private Map<String, Object> map;
 	private Row row;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private Cache cache;
 	
 	@BeforeClass
@@ -41,7 +41,7 @@ public class TradesGatewayTest {
 		gateway = new TradesGateway(converter, asm);
 		map = new HashMap<String, Object>();
 		row = new SimpleRow(map);
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		cache = control.createMock(Cache.class);
 		expect(terminal.getDataCache()).andStubReturn(cache);
 	}

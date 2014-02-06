@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.dde.DDEException;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.cache.TradesEntry;
 
@@ -102,9 +102,7 @@ public class TradesGateway implements TableGateway {
 	 * @return сделка или null, если не удалось создать сделку
 	 * @throws RowException ошибка доступа к данным ряда
 	 */
-	public Trade makeTrade(QUIKEditableTerminal terminal, Row row)
-		throws RowException
-	{
+	public Trade makeTrade(QUIKTerminal terminal, Row row) throws RowException {
 		try {
 			SecurityDescriptor descr = terminal.getDataCache()
 				.getDescriptor(converter.getString(row, SEC_CODE),

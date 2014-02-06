@@ -146,12 +146,11 @@ public class QUIKFactory implements TerminalFactory {
 	 * @return терминал
 	 */
 	public Terminal createTerminal(QUIKConfig config, final DDEServer server) {
-		QUIKEditableTerminal terminal;
-		terminal = new QUIKTerminalBuilder().createTerminal(getNextId());
+		QUIKTerminal terminal = new QUIKTerminal(getNextId());
 		StarterQueue starter = (StarterQueue) terminal.getStarter();
 		Assembler asm = new Assembler(terminal);
 		terminal.getClient().setMainHandler(new MainHandler(terminal, asm));
-		terminal.setOrderProcessorInstance(new QUIKOrderProcessor(terminal));
+		terminal.setOrderProcessor(new QUIKOrderProcessor(terminal));
 		starter.add(asm);
 		starter.add(new QUIKDDEStarter(config, asm, server));
 		starter.add(new ConnectionHandler(terminal, config));

@@ -16,7 +16,7 @@ public class DoReconnect implements Runnable {
 		logger = LoggerFactory.getLogger(DoReconnect.class);
 	}
 	
-	private final QUIKEditableTerminal terminal;
+	private final QUIKTerminal terminal;
 	private final QUIKConfig config;
 	
 	/**
@@ -25,7 +25,7 @@ public class DoReconnect implements Runnable {
 	 * @param terminal терминал 
 	 * @param config конфигурация соединения
 	 */
-	public DoReconnect(QUIKEditableTerminal terminal, QUIKConfig config) {
+	public DoReconnect(QUIKTerminal terminal, QUIKConfig config) {
 		super();
 		this.terminal = terminal;
 		this.config = config;
@@ -36,7 +36,7 @@ public class DoReconnect implements Runnable {
 	 * <p>
 	 * @return терминал
 	 */
-	public QUIKEditableTerminal getTerminal() {
+	public QUIKTerminal getTerminal() {
 		return terminal;
 	}
 	

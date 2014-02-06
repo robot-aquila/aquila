@@ -12,7 +12,7 @@ import ru.prolib.aquila.t2q.T2QException;
 public class DoReconnectTest {
 	private static QUIKConfigImpl config;
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private QUIKClient client;
 	private DoReconnect task;
 
@@ -27,7 +27,7 @@ public class DoReconnectTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		client = control.createMock(QUIKClient.class);
 		expect(terminal.getClient()).andStubReturn(client);
 		task = new DoReconnect(terminal, config);
@@ -91,10 +91,9 @@ public class DoReconnectTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<QUIKEditableTerminal> vTerm =
-				new Variant<QUIKEditableTerminal>()
+		Variant<QUIKTerminal> vTerm = new Variant<QUIKTerminal>()
 			.add(terminal)
-			.add(control.createMock(QUIKEditableTerminal.class));
+			.add(control.createMock(QUIKTerminal.class));
 		Variant<QUIKConfig> vConf = new Variant<QUIKConfig>(vTerm)
 			.add(config)
 			.add(new QUIKConfigImpl());

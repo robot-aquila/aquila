@@ -2,13 +2,13 @@ package ru.prolib.aquila.quik.assembler;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 
 /**
  * Обработчик заявок.
  */
 public class QUIKOrderProcessor implements OrderProcessor {
-	private final QUIKEditableTerminal terminal;
+	private final QUIKTerminal terminal;
 	private final HandlerFactory factory;
 	
 	/**
@@ -17,7 +17,7 @@ public class QUIKOrderProcessor implements OrderProcessor {
 	 * @param terminal терминал
 	 * @param factory фабрика обработчиков
 	 */
-	QUIKOrderProcessor(QUIKEditableTerminal terminal, HandlerFactory factory) {
+	QUIKOrderProcessor(QUIKTerminal terminal, HandlerFactory factory) {
 		super();
 		this.terminal = terminal;
 		this.factory = factory;
@@ -28,11 +28,11 @@ public class QUIKOrderProcessor implements OrderProcessor {
 	 * <p>
 	 * @param terminal терминал
 	 */
-	public QUIKOrderProcessor(QUIKEditableTerminal terminal) {
+	public QUIKOrderProcessor(QUIKTerminal terminal) {
 		this(terminal, new HandlerFactory());
 	}
 	
-	QUIKEditableTerminal getTerminal() {
+	QUIKTerminal getTerminal() {
 		return  terminal;
 	}
 	

@@ -9,12 +9,12 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Counter;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.QUIKClient;
 
 public class QUIKOrderProcessorTest {
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private QUIKClient client;
 	private HandlerFactory factory;
 	private EditableOrder order;
@@ -29,7 +29,7 @@ public class QUIKOrderProcessorTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		factory = control.createMock(HandlerFactory.class);
 		order = control.createMock(EditableOrder.class);
 		numerator = control.createMock(Counter.class);
@@ -156,10 +156,9 @@ public class QUIKOrderProcessorTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<QUIKEditableTerminal> vTerm =
-				new Variant<QUIKEditableTerminal>()
+		Variant<QUIKTerminal> vTerm = new Variant<QUIKTerminal>()
 			.add(terminal)
-			.add(control.createMock(QUIKEditableTerminal.class));
+			.add(control.createMock(QUIKTerminal.class));
 		Variant<HandlerFactory> vFact = new Variant<HandlerFactory>()
 			.add(factory)
 			.add(control.createMock(HandlerFactory.class));

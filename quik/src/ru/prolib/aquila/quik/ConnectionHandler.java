@@ -9,22 +9,22 @@ import ru.prolib.aquila.core.*;
  * Выполняет своевременное подключение, отключение и восстановление соединения.
  */
 public class ConnectionHandler implements Starter, EventListener {
-	private final QUIKEditableTerminal terminal;
+	private final QUIKTerminal terminal;
 	private final QUIKConfig config;
 	
 	/**
 	 * Служебный конструктор.
 	 * <p>
-	 * @param terminal экземпляр терминала
+	 * @param terminal терминал
 	 * @param config параметры подключения
 	 */
-	ConnectionHandler(QUIKEditableTerminal terminal, QUIKConfig config) {
+	ConnectionHandler(QUIKTerminal terminal, QUIKConfig config) {
 		super();
 		this.terminal = terminal;
 		this.config = config;
 	}
 	
-	QUIKEditableTerminal getTerminal() {
+	QUIKTerminal getTerminal() {
 		return terminal;
 	}
 	

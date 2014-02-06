@@ -10,7 +10,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.*;
 import ru.prolib.aquila.quik.assembler.cache.QUIKSecurityDescriptor;
 import ru.prolib.aquila.t2q.T2QException;
@@ -20,7 +20,7 @@ public class PlaceHandlerTest {
 	private static Account account;
 	private static QUIKSecurityDescriptor descr;
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private QUIKClient client;
 	private EditableOrder order;
 	private Security security;
@@ -40,7 +40,7 @@ public class PlaceHandlerTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		order = control.createMock(EditableOrder.class);
 		client = control.createMock(QUIKClient.class);
 		security = control.createMock(Security.class);

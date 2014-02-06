@@ -10,7 +10,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.row.RowException;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.QUIKTerminal;
 import ru.prolib.aquila.quik.assembler.cache.*;
 import ru.prolib.aquila.t2q.*;
 
@@ -18,9 +18,7 @@ public class AssemblerL2Test {
 	private static Account account;
 	private static QUIKSecurityDescriptor descr;
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
-	private EditableSecurities securities;
-	private EditablePortfolios portfolios;
+	private QUIKTerminal terminal;
 	private Cache cache;
 	private AssemblerL2 asm;
 	
@@ -36,15 +34,11 @@ public class AssemblerL2Test {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
-		securities = control.createMock(EditableSecurities.class);
-		portfolios = control.createMock(EditablePortfolios.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		cache = control.createMock(Cache.class);
 		asm = new AssemblerL2(terminal);
 		
 		expect(terminal.getDataCache()).andStubReturn(cache);
-		expect(terminal.getSecuritiesInstance()).andStubReturn(securities);
-		expect(terminal.getPortfoliosInstance()).andStubReturn(portfolios);
 	}
 	
 	@Test
@@ -143,7 +137,7 @@ public class AssemblerL2Test {
 	
 	@Test
 	public void testEquals() throws Exception {
-		QUIKEditableTerminal t = control.createMock(QUIKEditableTerminal.class);
+		QUIKTerminal t = control.createMock(QUIKTerminal.class);
 		assertTrue(asm.equals(asm));
 		assertTrue(asm.equals(new AssemblerL2(terminal)));
 		assertFalse(asm.equals(new AssemblerL2(t)));

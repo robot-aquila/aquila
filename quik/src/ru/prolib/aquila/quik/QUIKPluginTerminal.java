@@ -22,7 +22,7 @@ public class QUIKPluginTerminal implements AquilaPluginTerminal, EventListener {
 		logger = LoggerFactory.getLogger(QUIKPluginTerminal.class);
 	}
 
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private ClassLabels labels;
 	private AquilaUI facade;
 	private EventType onShowDdeCache;
@@ -65,8 +65,8 @@ public class QUIKPluginTerminal implements AquilaPluginTerminal, EventListener {
 	public void
 		initialize(ServiceLocator locator, Terminal terminal, String arg)
 	{
-		if ( terminal instanceof QUIKEditableTerminal ) {
-			this.terminal = (QUIKEditableTerminal) terminal;
+		if ( terminal.getClass() != QUIKTerminal.class ) {
+			this.terminal = (QUIKTerminal) terminal;
 		} else {
 			logger.warn("Unexpected terminal type");
 		}

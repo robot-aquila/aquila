@@ -10,13 +10,13 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.*;
-import ru.prolib.aquila.quik.QUIKEditableTerminal;
+import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.assembler.cache.*;
 import ru.prolib.aquila.t2q.*;
 
 public class AssemblerL1Test {
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private Cache cache;
 	private PositionsCache posCache;
 	private TradesCache tradesCache;
@@ -32,7 +32,7 @@ public class AssemblerL1Test {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		cache = control.createMock(Cache.class);
 		posCache = control.createMock(PositionsCache.class);
 		tradesCache = control.createMock(TradesCache.class);
@@ -142,9 +142,9 @@ public class AssemblerL1Test {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<QUIKEditableTerminal> vTerm = new Variant<QUIKEditableTerminal>()
+		Variant<QUIKTerminal> vTerm = new Variant<QUIKTerminal>()
 			.add(terminal)
-			.add(control.createMock(QUIKEditableTerminal.class));
+			.add(control.createMock(QUIKTerminal.class));
 		Variant<AssemblerL2> vL2 = new Variant<AssemblerL2>(vTerm)
 			.add(l2)
 			.add(control.createMock(AssemblerL2.class));

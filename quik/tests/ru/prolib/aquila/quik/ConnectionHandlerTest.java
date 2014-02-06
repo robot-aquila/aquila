@@ -13,7 +13,7 @@ import ru.prolib.aquila.quik.api.QUIKClient;
 
 public class ConnectionHandlerTest {
 	private IMocksControl control;
-	private QUIKEditableTerminal terminal;
+	private QUIKTerminal terminal;
 	private QUIKClient client;
 	private EventType onStarted, onStopped, onDisconnected;
 	private QUIKConfigImpl config;
@@ -22,7 +22,7 @@ public class ConnectionHandlerTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = control.createMock(QUIKEditableTerminal.class);
+		terminal = control.createMock(QUIKTerminal.class);
 		client = control.createMock(QUIKClient.class);
 		onStarted = control.createMock(EventType.class);
 		onStopped = control.createMock(EventType.class);
@@ -118,10 +118,9 @@ public class ConnectionHandlerTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<QUIKEditableTerminal> vTerm =
-				new Variant<QUIKEditableTerminal>()
+		Variant<QUIKTerminal> vTerm = new Variant<QUIKTerminal>()
 			.add(terminal)
-			.add(control.createMock(QUIKEditableTerminal.class));
+			.add(control.createMock(QUIKTerminal.class));
 		Variant<QUIKConfig> vConf = new Variant<QUIKConfig>(vTerm)
 			.add(config)
 			.add(new QUIKConfigImpl());

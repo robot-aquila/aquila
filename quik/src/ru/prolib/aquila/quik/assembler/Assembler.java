@@ -21,7 +21,7 @@ public class Assembler implements Starter, EventListener {
 		logger = LoggerFactory.getLogger(Assembler.class);
 	}
 	
-	private final QUIKEditableTerminal terminal;
+	private final QUIKTerminal terminal;
 	private final AssemblerL1 l1;
 	
 	/**
@@ -30,7 +30,7 @@ public class Assembler implements Starter, EventListener {
 	 * @param terminal терминал
 	 * @param l1 функции сборки L1
 	 */
-	Assembler(QUIKEditableTerminal terminal, AssemblerL1 l1) {
+	Assembler(QUIKTerminal terminal, AssemblerL1 l1) {
 		super();
 		this.terminal = terminal;
 		this.l1 = l1;
@@ -41,7 +41,7 @@ public class Assembler implements Starter, EventListener {
 	 * <p>
 	 * @param terminal терминал
 	 */
-	public Assembler(QUIKEditableTerminal terminal) {
+	public Assembler(QUIKTerminal terminal) {
 		this(terminal, new AssemblerL1(terminal));
 	}
 	
@@ -59,7 +59,7 @@ public class Assembler implements Starter, EventListener {
 	 * <p>
 	 * @return терминал
 	 */
-	public QUIKEditableTerminal getTerminal() {
+	public QUIKTerminal getTerminal() {
 		return terminal;
 	}
 
