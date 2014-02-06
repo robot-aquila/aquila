@@ -12,10 +12,10 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class AccountCombo extends JComboBox implements Starter, EventListener {
 	private static final long serialVersionUID = -7501535410571675108L;
-	private final Portfolios portfolios;
+	private final Terminal portfolios;
 	private final Vector<Portfolio> list = new Vector<Portfolio>();
 
-	public AccountCombo(Portfolios portfolios) {
+	public AccountCombo(Terminal portfolios) {
 		super();
 		this.portfolios = portfolios;
 	}

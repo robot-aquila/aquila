@@ -36,10 +36,10 @@ public class PositionsTableModel extends AbstractTableModel implements
 		COL_BALANCE,
 	};
 	private final ClassLabels uiLabels;
-	private final Portfolios portfolios;
+	private final Terminal portfolios;
 	private final List<Position> list;
 	
-	public PositionsTableModel(Portfolios portfolios, UiTexts uiTexts) {
+	public PositionsTableModel(Terminal portfolios, UiTexts uiTexts) {
 		super();
 		uiLabels = uiTexts.get("PositionsTableModel");
 		this.portfolios = portfolios;

@@ -4,18 +4,11 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.BusinessEntities.Securities;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.ui.*;
 import ru.prolib.aquila.ui.plugin.getters.GSecurity;
-import ru.prolib.aquila.ui.wrapper.DataSourceEventTranslator;
-import ru.prolib.aquila.ui.wrapper.Table;
-import ru.prolib.aquila.ui.wrapper.TableImpl;
-import ru.prolib.aquila.ui.wrapper.TableModel;
-import ru.prolib.aquila.ui.wrapper.TableModelImpl;
+import ru.prolib.aquila.ui.wrapper.*;
 
 /**
  * Плагин отображающий доступные инструменты в виде таблицы на вкладке.
@@ -93,18 +86,18 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 	
 	@Override
 	public void start() throws StarterException {
-		((Securities) terminal).OnSecurityAvailable().addListener(
-				model.getOnRowAvailableListener());
-		((Securities) terminal).OnSecurityChanged().addListener(
-				model.getOnRowChangedListener());
+		terminal.OnSecurityAvailable()
+			.addListener(model.getOnRowAvailableListener());
+		terminal.OnSecurityChanged()
+			.addListener(model.getOnRowChangedListener());
 	}
 	
 	@Override
 	public void stop() throws StarterException {
-		((Securities) terminal).OnSecurityAvailable().removeListener(
-				model.getOnRowAvailableListener());
-		((Securities) terminal).OnSecurityChanged().removeListener(
-				model.getOnRowChangedListener());
+		terminal.OnSecurityAvailable()
+			.removeListener(model.getOnRowAvailableListener());
+		terminal.OnSecurityChanged()
+			.removeListener(model.getOnRowChangedListener());
 	}
 
 }

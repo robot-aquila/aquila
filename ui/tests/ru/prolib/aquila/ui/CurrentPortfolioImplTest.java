@@ -19,18 +19,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.EventSystemImpl;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.Portfolio;
-import ru.prolib.aquila.core.BusinessEntities.PortfolioEvent;
-import ru.prolib.aquila.core.BusinessEntities.Portfolios;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.ui.wrapper.Menu;
 import ru.prolib.aquila.ui.wrapper.MenuItem;
 
@@ -44,7 +34,7 @@ public class CurrentPortfolioImplTest {
 	private static EventQueue queue;
 	
 	private Account acc;
-	private Portfolios portfolios;
+	private Terminal portfolios;
 	private EventDispatcher dispatcher;
 	private EventType portfolioChanged;
 	private Menu menu;
@@ -71,7 +61,7 @@ public class CurrentPortfolioImplTest {
 		control = createStrictControl();
 		
 		dispatcher = eventSystem.createEventDispatcher();
-		portfolios = control.createMock(Portfolios.class);
+		portfolios = control.createMock(Terminal.class);
 		portfolioChanged = dispatcher.createType();
 		acc = new Account("Foo", "Bar", "Trulala");
 		

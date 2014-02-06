@@ -46,10 +46,10 @@ public class OrdersTableModel extends AbstractTableModel implements
 		COL_COMMENT,
 	};
 	private ClassLabels uiLabels;
-	private final Orders orders;
+	private final Terminal orders;
 	private final List<Order> list;
 	
-	public OrdersTableModel(Orders orders, UiTexts uiTexts) {
+	public OrdersTableModel(Terminal orders, UiTexts uiTexts) {
 		super();
 		uiLabels = uiTexts.get("OrdersTableModel");
 		this.orders = orders;

@@ -11,10 +11,10 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class SecurityCombo extends JComboBox implements Starter, EventListener {
 	private static final long serialVersionUID = -3328773972490353436L;
-	private final Securities securities;
+	private final Terminal securities;
 	private final Vector<Security> list = new Vector<Security>();
 	
-	public SecurityCombo(Securities securities) {
+	public SecurityCombo(Terminal securities) {
 		super();
 		this.securities = securities;
 	}

@@ -27,10 +27,10 @@ public class PortfoliosTableModel extends AbstractTableModel
 		COL_CASH,
 	};
 	
-	private final Portfolios portfolios;
+	private final Terminal portfolios;
 	private final List<Account> list;
 	
-	public PortfoliosTableModel(Portfolios portfolios) {
+	public PortfoliosTableModel(Terminal portfolios) {
 		super();
 		this.portfolios = portfolios;
 		this.list = new Vector<Account>();

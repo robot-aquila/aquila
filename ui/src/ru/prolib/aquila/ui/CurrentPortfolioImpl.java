@@ -9,25 +9,15 @@ import javax.swing.JRadioButtonMenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.BusinessEntities.Portfolio;
-import ru.prolib.aquila.core.BusinessEntities.PortfolioEvent;
-import ru.prolib.aquila.core.BusinessEntities.Portfolios;
-import ru.prolib.aquila.ui.wrapper.Menu;
-import ru.prolib.aquila.ui.wrapper.MenuException;
-import ru.prolib.aquila.ui.wrapper.MenuItem;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.ui.wrapper.*;
 
 public class CurrentPortfolioImpl implements CurrentPortfolio {
-	/**
-	 * $Id: CurrentPortfolioImpl.java 525 2013-02-12 19:51:39Z huan.kaktus $
-	 */
 	private static Logger logger = LoggerFactory.getLogger(CurrentPortfolioImpl.class);
 	private final EventType portfolioChanged;
 	private final EventDispatcher dispatcher;
-	private Portfolios portfolios;
+	private Terminal portfolios;
 	private Portfolio portfolio;
 	private ButtonGroup buttons = new ButtonGroup();
 	private Menu menu;
@@ -35,7 +25,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	private Map<EventType, Portfolio> prtList = new HashMap<EventType, Portfolio>();
 	
 	public CurrentPortfolioImpl(
-			Portfolios portfolios, EventType portfolioChanged, 
+			Terminal portfolios, EventType portfolioChanged, 
 			EventDispatcher dispatcher, Menu menu) 
 	{
 		this.portfolioChanged = portfolioChanged;
@@ -119,7 +109,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 		prtList.put(evt, prt);
 	}
 	
-	public Portfolios getPortfolios() {
+	public Terminal getPortfolios() {
 		return portfolios;
 	}
 	
