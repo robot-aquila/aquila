@@ -151,6 +151,8 @@ public class QUIKFactory implements TerminalFactory {
 		Assembler asm = new Assembler(terminal);
 		terminal.getClient().setMainHandler(new MainHandler(terminal, asm));
 		terminal.setOrderProcessor(new QUIKOrderProcessor(terminal));
+		starter.add(new EventQueueStarter(terminal.getEventSystem()
+				.getEventQueue(), 3000));
 		starter.add(asm);
 		starter.add(new QUIKDDEStarter(config, asm, server));
 		starter.add(new ConnectionHandler(terminal, config));
