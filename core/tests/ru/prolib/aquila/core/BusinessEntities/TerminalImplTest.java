@@ -37,7 +37,7 @@ public class TerminalImplTest {
 	private Scheduler scheduler;
 	private EventSystem es;
 	private OrderProcessor orderProcessor;
-	private TerminalImpl terminal;
+	private TerminalImpl<TerminalImplTest> terminal;
 	private EditableOrder order;
 	private Security security;
 	private Runnable task;
@@ -69,8 +69,9 @@ public class TerminalImplTest {
 		orderProcessor = control.createMock(OrderProcessor.class);
 		security = control.createMock(Security.class);
 		order = control.createMock(EditableOrder.class);
-		terminal = new TerminalImpl(controller, dispatcher, securities,
-				portfolios, orders, numerator, starter, scheduler, es);
+		terminal = new TerminalImpl<TerminalImplTest>(controller, dispatcher,
+				securities, portfolios, orders,
+				numerator, starter, scheduler, es);
 
 		expect(security.getDescriptor()).andStubReturn(descr);
 		taskHandler = new TaskHandlerImpl(task, scheduler);
@@ -91,7 +92,7 @@ public class TerminalImplTest {
 
 	@Test // Тест конструктора с 1 аргументом типа строка (ID очереди)
 	public void testConstruct1_S() throws Exception {
-		terminal = new TerminalImpl("foo");
+		terminal = new TerminalImpl<TerminalImplTest>("foo");
 		assertNotNull(terminal.controller);
 		assertNotNull(terminal.dispatcher);
 		assertNotNull(terminal.securities);
@@ -107,7 +108,7 @@ public class TerminalImplTest {
 	
 	@Test // Тест конструктора с 1 аргументом типа фасад событийной системы
 	public void testConstruct1_E() throws Exception {
-		terminal = new TerminalImpl(es);
+		terminal = new TerminalImpl<TerminalImplTest>(es);
 		assertNotNull(terminal.controller);
 		assertNotNull(terminal.dispatcher);
 		assertNotNull(terminal.securities);
@@ -630,19 +631,6 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testGetEditablePortfolio2() throws Exception {
-		Account a = new Account("BUZZ");
-		EditablePortfolio p = control.createMock(EditablePortfolio.class);
-		EditableTerminal t = control.createMock(EditableTerminal.class);
-		expect(portfolios.getEditablePortfolio(same(t), eq(a))).andReturn(p);
-		control.replay();
-		
-		assertSame(p, terminal.getEditablePortfolio(t, a));
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testSetDefaultPortfolio() throws Exception {
 		EditablePortfolio port = control.createMock(EditablePortfolio.class);
 		portfolios.setDefaultPortfolio(same(port));
@@ -663,21 +651,6 @@ public class TerminalImplTest {
 		
 		control.verify();
 	}
-	
-	@Test
-	public void testGetEditableSecurity2() throws Exception {
-		EditableTerminal t = control.createMock(EditableTerminal.class);
-		EditableSecurity security = control.createMock(EditableSecurity.class);
-		SecurityDescriptor descr = control.createMock(SecurityDescriptor.class);
-		expect(securities.getEditableSecurity(same(t), eq(descr)))
-			.andReturn(security);
-		control.replay();
-		
-		assertSame(security, terminal.getEditableSecurity(t, descr));
-		
-		control.verify();
-	}
-
 	
 	@Test
 	public void testFireEvents_Security() throws Exception {
@@ -911,18 +884,6 @@ public class TerminalImplTest {
 		assertSame(orderProcessor, terminal.getOrderProcessor());
 		assertSame(orderProcessor, terminal.getOrderProcessor());
 	}
-	
-	@Test
-	public void testCreateOrder1() throws Exception {
-		EditableTerminal t2 = control.createMock(EditableTerminal.class);
-		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(orders.createOrder(same(t2))).andReturn(order);
-		control.replay();
-		
-		assertSame(order, terminal.createOrder(t2));
-		
-		control.verify();
-	}
 
 	@Test
 	public void testCreateOrder0() throws Exception {
@@ -969,7 +930,7 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testEventTypes() throws Exception {
-		terminal = new TerminalImpl("test");
+		terminal = new TerminalImpl<TerminalImplTest>("test");
 		dispatcher = terminal.dispatcher;
 		assertSame(dispatcher.OnConnected(), terminal.OnConnected());
 		assertSame(dispatcher.OnDisconnected(), terminal.OnDisconnected());
@@ -1180,6 +1141,13 @@ public class TerminalImplTest {
 		assertFalse(terminal.scheduled(task));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testSetServiceLocator() throws Exception {
+		assertNull(terminal.getServiceLocator());
+		terminal.setServiceLocator(this);
+		assertSame(this, terminal.getServiceLocator());
 	}
 	
 }

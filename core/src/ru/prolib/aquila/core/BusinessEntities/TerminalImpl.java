@@ -32,9 +32,12 @@ import ru.prolib.aquila.core.utils.*;
  * корректном порядке следования соответствующих событий позаботится данный
  * класс. Предсказуемая последовательность событий необходима для потребителей,
  * которые будут использовать данные события как сигналы разрешающие или
- * запрещающие работу с терминалом. 
+ * запрещающие работу с терминалом.
+ * <p>
+ * @param <T> - тип объекта связывания терминала со спецификой реализации.
+ * см. {@link EditableTerminal}.
  */
-public class TerminalImpl implements EditableTerminal {
+public class TerminalImpl<T> implements EditableTerminal<T> {
 	private static Logger logger;
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private EventSystem es;
@@ -47,6 +50,7 @@ public class TerminalImpl implements EditableTerminal {
 	protected TerminalEventDispatcher dispatcher;
 	protected TerminalController controller;
 	private OrderProcessor orderProcessor;
+	private T serviceLocator;
 	
 	static {
 		logger = LoggerFactory.getLogger(TerminalImpl.class);
@@ -556,11 +560,6 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public synchronized EditableOrder createOrder(EditableTerminal terminal) {
-		return orders.createOrder(terminal);
-	}
-
-	@Override
 	public synchronized EditableOrder createOrder() {
 		return orders.createOrder(this);
 	}
@@ -714,17 +713,13 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public synchronized EditablePortfolio
-		getEditablePortfolio(EditableTerminal terminal, Account account)
-	{
-		return portfolios.getEditablePortfolio(terminal, account);
+	public synchronized T getServiceLocator() {
+		return serviceLocator;
 	}
 
 	@Override
-	public synchronized EditableSecurity
-		getEditableSecurity(EditableTerminal terminal, SecurityDescriptor descr)
-	{
-		return securities.getEditableSecurity(terminal, descr);
+	public synchronized void setServiceLocator(T locator) {
+		serviceLocator = locator;
 	}
 
 }
