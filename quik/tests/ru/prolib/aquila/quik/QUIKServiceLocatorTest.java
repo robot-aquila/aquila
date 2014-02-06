@@ -33,7 +33,9 @@ public class QUIKServiceLocatorTest {
 	@Test
 	public void testConstructor1() throws Exception {
 		assertTrue(Check.NOTWIN, Check.isWin());
-		fail("TODO: not implemented");
+		locator = new QUIKServiceLocator(es);
+		assertNotNull(locator.getClient());
+		assertNotNull(locator.getDataCache());
 	}
 
 }

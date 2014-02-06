@@ -69,7 +69,7 @@ public class QUIKTerminal extends TerminalImpl<QUIKServiceLocator> {
 	
 	@Override
 	public void requestSecurity(SecurityDescriptor descr) {
-		logger.warn("TODO: not implemented");
+		logger.warn("TODO: requestSecurity() not implemented");
 	}
 
 }

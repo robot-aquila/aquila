@@ -120,7 +120,7 @@ public class QUIKClientTest {
 		client = new QUIKClient();
 		assertEquals(new QUIKWrapper(), client.getWrapper());
 		JQTService srv = (JQTService) client.getService();
-		assertSame(client.getWrapper(), srv.getHandler());
+		assertSame(client.getWrapper(), srv.getHandler().getCommonHandler());
 	}
 
 }

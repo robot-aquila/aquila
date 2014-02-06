@@ -57,9 +57,23 @@ public class QUIKTerminalTest {
 	}
 	
 	@Test
-	public void testConstruct1() throws Exception {
+	public void testConstruct1_E() throws Exception {
 		assertTrue(Check.NOTWIN, Check.isWin());
-		fail("TODO: not implemented");
+		terminal = new QUIKTerminal(es);
+		assertNotNull(terminal.getEventSystem());
+		assertSame(es, terminal.getEventSystem());
+		assertNotNull(terminal.getClient());
+		assertNotNull(terminal.getDataCache());
+	}
+	
+	@Test
+	public void testConstruct1_S() throws Exception {
+		assertTrue(Check.NOTWIN, Check.isWin());
+		terminal = new QUIKTerminal("foo");
+		assertNotNull(terminal.getEventSystem());
+		assertEquals("foo", terminal.getEventSystem().getEventQueue().getId());
+		assertNotNull(terminal.getClient());
+		assertNotNull(terminal.getDataCache());
 	}
 
 }
