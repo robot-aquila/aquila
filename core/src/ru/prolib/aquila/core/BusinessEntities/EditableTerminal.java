@@ -115,7 +115,7 @@ public interface EditableTerminal<T> extends Terminal {
 	 * с помощью {@link #createOrder(Account, Direction, Security, long)} или
 	 * других аналогичных методов, ей автоматически присваивается очередной
 	 * номер. Номер заявке <b>НЕ НАЗНАЧАЕТСЯ</b> при создании экземпляра через
-	 * вызовы {@link #createOrder()} или {@link #createOrder(EditableTerminal)}.
+	 * вызовы {@link #createOrder()}.
  	 * <p>
 	 * Непрерывность номеров заявок не имеет никакого практического значения для
 	 * терминала. По этому данный нумератор может быть использован конкретной
