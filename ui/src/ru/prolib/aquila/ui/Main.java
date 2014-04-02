@@ -142,7 +142,7 @@ public class Main implements Runnable {
 		String className = null;
 		while ( (className = reader.readLine()) != null ) {
 			className = className.trim();
-			if ( className.startsWith(";") ) {
+			if ( className.length() == 0 || className.startsWith(";") ) {
 				continue;
 			}
 			String chunks[] = StringUtils.split(className, " ", 2);
