@@ -35,7 +35,8 @@ public class QUIKPluginTerminal implements AquilaPluginTerminal, EventListener {
 	@Override
 	public void createUI(AquilaUI facade) {
 		if ( terminal == null ) {
-			logger.warn("Additional functionality disabled.");
+			logger.error("Terminal instance not available.");
+			logger.error("Additional functionality has been disabled.");
 			return;
 		}
 		this.facade = facade;
@@ -65,10 +66,10 @@ public class QUIKPluginTerminal implements AquilaPluginTerminal, EventListener {
 	public void
 		initialize(ServiceLocator locator, Terminal terminal, String arg)
 	{
-		if ( terminal.getClass() != QUIKTerminal.class ) {
+		if ( terminal.getClass() == QUIKTerminal.class ) {
 			this.terminal = (QUIKTerminal) terminal;
 		} else {
-			logger.warn("Unexpected terminal type");
+			logger.error("Unexpected terminal type: " + terminal.getClass());
 		}
 	}
 
