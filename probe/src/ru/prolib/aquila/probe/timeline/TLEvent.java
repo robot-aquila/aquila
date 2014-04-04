@@ -1,5 +1,6 @@
 package ru.prolib.aquila.probe.timeline;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
 
 /**
@@ -10,8 +11,8 @@ import org.joda.time.DateTime;
  * повторно.
  */
 public class TLEvent {
-	private final DateTime time;
-	private final Runnable procedure;
+	protected final DateTime time;
+	protected final Runnable procedure;
 	private boolean executed = false;
 
 	/**
@@ -29,7 +30,7 @@ public class TLEvent {
 	/**
 	 * Получить время наступления события.
 	 * <p>
-	 * @return время события
+	 * @return  время события
 	 */
 	public DateTime getTime() {
 		return time;
@@ -38,7 +39,7 @@ public class TLEvent {
 	/**
 	 * Получить процедуру исполнения события.
 	 * <p>
-	 * @return процедура
+	 * @return  процедура
 	 */
 	public Runnable getProcedure() {
 		return procedure;
@@ -69,6 +70,22 @@ public class TLEvent {
 	public String toString() {
 		return getClass().getSimpleName()
 			+ "[" + time + " for " + procedure + "]";
+	}
+	
+	@Override
+	public synchronized boolean equals(Object other) {
+		if ( this == other ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != TLEvent.class ) {
+			return false;
+		}
+		TLEvent o = (TLEvent) other;
+		return new EqualsBuilder()
+			.append(o.executed, executed)
+			.append(o.time, time)
+			.append(o.procedure == procedure, true)
+			.isEquals();
 	}
 
 }

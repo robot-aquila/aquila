@@ -1,70 +1,31 @@
 package ru.prolib.aquila.probe.timeline;
 
-import java.util.List;
-
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
-/**
+
+/** 
  * Хронология событий.
  */
 public class TLTimeline {
 	private final TLEventSources sources;
-	private final TLEventCache cache;
-	private final TLTimelineHelper helper;
-	private final Interval interval;
+	private final TLEventQueue queue;
+	private final TLSimulationStrategy simulation;
 	
 	/**
 	 * Конструктор (для тестов).
 	 * <p>
 	 * @param sources источник событий
-	 * @param timeline хронология
-	 * @param helper набор вспомогательных функций 
-	 * @param interval рабочий период
+	 * @param queue последовательность событий
+	 * @param simulation процедуры симуляции
 	 */
-	public TLTimeline(TLEventSources sources, TLEventCache timeline,
-			TLTimelineHelper helper, Interval interval)
+	public TLTimeline(TLEventSources sources, TLEventQueue queue,
+			TLSimulationStrategy simulation)
 	{
 		super();
 		this.sources = sources;
-		this.cache = timeline;
-		this.helper = helper;
-		this.interval = interval;
-	}
-	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param sources источник событий
-	 * @param timeline хронология
-	 * @param interval рабочий период
-	 */
-	public TLTimeline(TLEventSources sources, TLEventCache timeline,
-			Interval interval)
-	{
-		this(sources, timeline, new TLTimelineHelper(), interval);
-	}
-	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param interval рабочий период
-	 */
-	public TLTimeline(Interval interval) {
-		this(new TLEventSources(), new TLEventCache(interval.getStart()),
-				interval);
-	}
-	
-	TLEventSources getEventSources() {
-		return sources;
-	}
-	
-	TLEventCache getEventCache() {
-		return cache;
-	}
-	
-	TLTimelineHelper getHelper() {
-		return helper;
+		this.queue = queue;
+		this.simulation = simulation;
 	}
 	
 	/**
@@ -73,7 +34,7 @@ public class TLTimeline {
 	 * @return точка актуальности
 	 */
 	public DateTime getPOA() {
-		return cache.getPOA();
+		return queue.getPOA();
 	}
 	
 	/**
@@ -82,17 +43,26 @@ public class TLTimeline {
 	 * @return РП
 	 */
 	public Interval getInterval() {
-		return interval;
+		return queue.getInterval();
 	}
 	
 	/**
-	 * Добавить событие на шкалу времени.
+	 * Добавить событие в последовательность.
+	 * <p>
+	 * @param time позиция события на временной шкале
+	 * @param procedure процедура события
+	 */
+	public void pushEvent(DateTime time, Runnable procedure) {
+		queue.pushEvent(new TLEvent(time, procedure));
+	}
+	
+	/**
+	 * Добавить событие в последовательность.
 	 * <p>
 	 * @param event событие
-	 * @throws TLOutOfDateException запаздывающее событие 
 	 */
-	public void pushEvent(TLEvent event) throws TLOutOfDateException {
-		cache.pushEvent(event);
+	public void pushEvent(TLEvent event) {
+		queue.pushEvent(event);
 	}
 	
 	/**
@@ -114,33 +84,54 @@ public class TLTimeline {
 	}
 	
 	/**
-	 * Выполнить шаг вперед по шкале времени.
+	 * Симуляция выполняется?
 	 * <p>
-	 * Данный метод является основным методом работы с временной шкалой - он
-	 * формирует стек событий очередного шага и выполняет события шага. 
-	 * <p>
-	 * @return true - можно продолжать, false - конец данных
-	 * @throws TLException
+	 * @return true - на момент вызова выполнялась симуляция событий, false -
+	 * обработка приостановлена или завершена
 	 */
-	public boolean nextTimeStep() throws TLException {
-		List<TLEvent> events = helper.pullEvents(getPOA(), sources);
-		if ( events.size() == 0 ) {
-			return false;
-		}
-		helper.pushEvents(events, cache);
-		TLEventStack stack = cache.pullStack();
-		if ( stack == null ) {
-			return false;
-		}
-		stack.execute();
-		return interval.contains(cache.getPOA());
+	public boolean running() {
+		// TODO: not yet implemented
+		return false;
 	}
 	
 	/**
-	 * Закрыть источники событий.
+	 * Симуляция приостановлена?
+	 * <p>
+	 * @return true - симуляция приостановлена, false - симуляция выполняется
+	 * или завершена
 	 */
-	public void close() {
+	public boolean paused() {
+		// TODO: not yet implemented
+		return false;
+	}
+	
+	/**
+	 * Симуляция завершена?
+	 * <p>
+	 * @return true - симуляция завершена, false - не завершена 
+	 */
+	public boolean finished() {
+		// TODO: not yet implemented
+		return false;
+	}
+	
+	/**
+	 * Завершить работу.
+	 */
+	public void finish() {
 		sources.close();
+	}
+	
+	public void pause() {
+		// TODO: not yet implemented
+	}
+	
+	public void runTo(DateTime stopTime) {
+		// TODO: not yet implemented
+	}
+	
+	public void run() {
+		// TODO: not yet implemented
 	}
 	
 }

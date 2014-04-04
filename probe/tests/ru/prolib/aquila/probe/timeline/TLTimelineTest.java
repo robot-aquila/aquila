@@ -11,12 +11,13 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.*;
 
+
 public class TLTimelineTest {
 	private static Interval interval;
 	private IMocksControl control;
 	private TLEventSources sources;
-	private TLEventCache cache;
-	private TLTimelineHelper helper;
+	private TLSimulationStrategy simulation;
+	private TLEventQueue queue;
 	private TLTimeline timeline;
 	
 	@BeforeClass
@@ -30,42 +31,14 @@ public class TLTimelineTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		sources = control.createMock(TLEventSources.class);
-		cache = control.createMock(TLEventCache.class);
-		helper = control.createMock(TLTimelineHelper.class);
-		timeline = new TLTimeline(sources, cache, helper, interval);
-	}
-	
-	@Test
-	public void testConstruct4() throws Exception {
-		assertSame(sources, timeline.getEventSources());
-		assertSame(cache, timeline.getEventCache());
-		assertSame(helper, timeline.getHelper());
-		assertSame(interval, timeline.getInterval());
-	}
-	
-	@Test
-	public void testConstruct3() throws Exception {
-		timeline = new TLTimeline(sources, cache, interval);
-		assertSame(sources, timeline.getEventSources());
-		assertSame(cache, timeline.getEventCache());
-		assertNotNull(timeline.getHelper());
-		assertSame(interval, timeline.getInterval());
-	}
-	
-	@Test
-	public void testConstruct1() throws Exception {
-		timeline = new TLTimeline(interval);
-		assertNotNull(timeline.getEventSources());
-		cache = timeline.getEventCache();
-		assertNotNull(cache);
-		assertEquals(interval.getStart(), cache.getPOA());
-		assertNotNull(timeline.getHelper());
-		assertSame(interval, timeline.getInterval());
+		queue = control.createMock(TLEventQueue.class);
+		simulation = control.createMock(TLSimulationStrategy.class);
+		timeline = new TLTimeline(sources, queue, simulation);
 	}
 	
 	@Test
 	public void testGetPOA() throws Exception {
-		expect(cache.getPOA()).andStubReturn(interval.getStart());
+		expect(queue.getPOA()).andStubReturn(interval.getStart());
 		control.replay();
 		
 		assertEquals(interval.getStart(), timeline.getPOA());
@@ -74,9 +47,21 @@ public class TLTimelineTest {
 	}
 	
 	@Test
-	public void testPushEvent() throws Exception {
-		TLEvent event = new TLEvent(interval.getStart(), null);
-		timeline.pushEvent(same(event));
+	public void testPushEvent2() throws Exception {
+		DateTime time = new DateTime(2013, 12, 31, 0, 0, 0, 0);
+		Runnable procedure = control.createMock(Runnable.class);
+		queue.pushEvent(eq(new TLEvent(time, procedure)));
+		control.replay();
+		
+		timeline.pushEvent(time, procedure);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPushEvent1() throws Exception {
+		TLEvent event = control.createMock(TLEvent.class);
+		queue.pushEvent(same(event));
 		control.replay();
 		
 		timeline.pushEvent(event);
@@ -107,76 +92,43 @@ public class TLTimelineTest {
 	}
 	
 	@Test
-	public void testNextTimeStep_NoEvents() throws Exception {
-		List<TLEvent> list = new Vector<TLEvent>();
-		expect(cache.getPOA()).andReturn(interval.getStart());
-		expect(helper.pullEvents(interval.getStart(), sources)).andReturn(list);
-		control.replay();
-		
-		assertFalse(timeline.nextTimeStep());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testNextTimeStep_NullStack() throws Exception {
-		List<TLEvent> list = new Vector<TLEvent>();
-		list.add(new TLEvent(interval.getStart(), null));
-		expect(cache.getPOA()).andReturn(interval.getStart());
-		expect(helper.pullEvents(interval.getStart(), sources)).andReturn(list);
-		helper.pushEvents(same(list), same(cache));
-		expect(cache.pullStack()).andReturn(null);
-		control.replay();
-		
-		assertFalse(timeline.nextTimeStep());
-		
-		control.verify();
-	}
-
-	@Test
-	public void testNextTimeStep_Ok() throws Exception {
-		List<TLEvent> list = new Vector<TLEvent>();
-		list.add(new TLEvent(interval.getStart(), null));
-		expect(cache.getPOA()).andReturn(interval.getStart());
-		expect(helper.pullEvents(interval.getStart(), sources)).andReturn(list);
-		helper.pushEvents(same(list), same(cache));
-		TLEventStack stack = control.createMock(TLEventStack.class);
-		expect(cache.pullStack()).andReturn(stack);
-		stack.execute();
-		expect(cache.getPOA()).andReturn(new DateTime(2014, 1, 30, 1, 0, 0, 0));
-		control.replay();
-		
-		assertTrue(timeline.nextTimeStep());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testNextTimeStep_EndOfData() throws Exception {
-		List<TLEvent> list = new Vector<TLEvent>();
-		list.add(new TLEvent(interval.getStart(), null));
-		expect(cache.getPOA()).andReturn(interval.getStart());
-		expect(helper.pullEvents(interval.getStart(), sources)).andReturn(list);
-		helper.pushEvents(same(list), same(cache));
-		TLEventStack stack = control.createMock(TLEventStack.class);
-		expect(cache.pullStack()).andReturn(stack);
-		stack.execute();
-		expect(cache.getPOA()).andReturn(new DateTime(2014, 2, 1, 0, 0, 0, 0));
-		control.replay();
-		
-		assertFalse(timeline.nextTimeStep());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testClose() throws Exception {
+	public void testFinish() throws Exception {
 		sources.close();
 		control.replay();
 		
-		timeline.close();
+		timeline.finish();
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testRunning() throws Exception {
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testPaused() throws Exception {
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testFinished() throws Exception {
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testPause() throws Exception {
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testRunTo() throws Exception {
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testRun() throws Exception {
+		fail("Not yet implemented");
 	}
 
 }

@@ -8,7 +8,7 @@ import org.joda.time.DateTime;
  * Стек событий.
  * <p>
  * Стек событий аккумулирует события, соответствующие единой временной метке.
- * Все события стека могут быть исполнены вызовом одного метода стека. 
+ * Все события стека могут быть исполнены вызовом одного метода стека.
  */
 public class TLEventStack implements Comparable<TLEventStack> {
 	private final DateTime time;
@@ -39,7 +39,7 @@ public class TLEventStack implements Comparable<TLEventStack> {
 	/**
 	 * Получить временную метку слота.
 	 * <p>
-	 * @return время
+	 * @return  время
 	 */
 	public DateTime getTime() {
 		return time;
