@@ -42,7 +42,7 @@ public class SMStateMachineTest {
 	
 	@Test (expected=SMBadInputException.class)
 	public void testInput2_ThrowsIfInputOfDifferentState() throws Exception {
-		exit2 = state2.registerExit();
+		exit2 = state2.registerExit("booka");
 		in2 = state2.registerInput(new SMInputStub(exit2));
 		
 		automat.start();
@@ -51,7 +51,7 @@ public class SMStateMachineTest {
 	
 	@Test (expected=SMTransitionNotExistsException.class)
 	public void testInput2_ThrowsIfTransitionNotExists() throws Exception {
-		exit1 = initState.registerExit();
+		exit1 = initState.registerExit("xena");
 		in1 = initState.registerInput(new SMInputStub(exit1));
 		
 		automat.start();
@@ -71,7 +71,7 @@ public class SMStateMachineTest {
 	
 	@Test (expected=SMAmbiguousInputException.class)
 	public void testInput1_ThrowsIfAmbiguousInput() throws Exception {
-		exit1 = initState.registerExit();
+		exit1 = initState.registerExit("foo");
 		in1 = initState.registerInput(new SMInputStub(exit1));
 		in2 = initState.registerInput(new SMInputStub(exit1));
 		automat.start();
@@ -80,7 +80,7 @@ public class SMStateMachineTest {
 	
 	@Test (expected=SMTransitionNotExistsException.class)
 	public void testInput1_ThrowsIfTransitionNotExists() throws Exception {
-		exit1 = initState.registerExit();
+		exit1 = initState.registerExit("gabba");
 		in1 = initState.registerInput(new SMInputStub(exit1));
 		
 		automat.start();
@@ -97,7 +97,7 @@ public class SMStateMachineTest {
 	public void testStart_ThrowsIfTransitionNotExists() throws Exception {
 		SMEnterAction enterAction = control.createMock(SMEnterAction.class);
 		SMExitAction exitAction = control.createMock(SMExitAction.class);
-		exit1 = initState.registerExit();
+		exit1 = initState.registerExit("achiless");
 		initState.setEnterAction(enterAction);
 		initState.setExitAction(exitAction); // exit actions should work too
 		expect(enterAction.enter()).andReturn(exit1);

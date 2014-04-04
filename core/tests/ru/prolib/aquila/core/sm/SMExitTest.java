@@ -12,12 +12,22 @@ public class SMExitTest {
 	@Before
 	public void setUp() throws Exception {
 		state = new SMState();
-		exit = new SMExit(state);
+		exit = new SMExit(state, "foobar");
 	}
 
 	@Test
-	public void testGetState() {
+	public void testGetState() throws Exception {
 		assertSame(state, exit.getState());
+	}
+	
+	@Test
+	public void testGetId() throws Exception {
+		assertEquals("foobar", exit.getId());
+	}
+	
+	@Test
+	public void testToString() throws Exception {
+		assertEquals("foobar", exit.toString());
 	}
 
 }

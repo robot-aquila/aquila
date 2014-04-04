@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.sm;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Заготовка состояния.
@@ -12,8 +11,8 @@ public class SMState {
 	 * Финальное состояние.
 	 */
 	public static final SMState FINAL = new SMState();
-	private final List<SMExit> exits = new Vector<SMExit>();
-	private final List<SMInput> inputs = new Vector<SMInput>();
+	private final Map<String, SMExit> exits;
+	private final List<SMInput> inputs;
 	private SMEnterAction enterAction;
 	private SMExitAction exitAction;
 	
@@ -25,6 +24,8 @@ public class SMState {
 	 */
 	public SMState(SMEnterAction enterAction, SMExitAction exitAction) {
 		super();
+		inputs = new Vector<SMInput>();
+		exits = new LinkedHashMap<String, SMExit>();
 		this.enterAction = enterAction;
 		this.exitAction = exitAction;
 	}
@@ -76,12 +77,20 @@ public class SMState {
 	/**
 	 * Зарегистрировать выход.
 	 * <p>
+	 * @param exitId символьный идентификатор выхода
 	 * @return дескриптор выхода
+	 * @throws NullPointerExceptionException пустой идентификатор
 	 */
-	protected synchronized SMExit registerExit() {
-		SMExit exit = new SMExit(this);
-		exits.add(exit);
-		return exit;
+	protected synchronized SMExit registerExit(String exitId) {
+		if ( exits.containsKey(exitId) ) {
+			return exits.get(exitId);
+		} else if ( exitId == null ){
+			throw new NullPointerException("ID cannot be null");
+		} else {
+			SMExit exit = new SMExit(this, exitId);
+			exits.put(exitId, exit);
+			return exit;
+		}
 	}
 	
 	/**
@@ -108,7 +117,24 @@ public class SMState {
 	 * @return список выходов из состояния
 	 */
 	public synchronized List<SMExit> getExits() {
-		return exits;
+		return new Vector<SMExit>(exits.values());
+	}
+	
+	/**
+	 * Получить дескриптор выхода.
+	 * <p>
+	 * @param exitId идентификатор выхода
+	 * @return дескриптор
+	 * @throws IllegalArgumentException выхода с указанным идентификатором
+	 * не существует
+	 */
+	public synchronized SMExit getExit(String exitId) {
+		SMExit exit = exits.get(exitId);
+		if ( exit == null ) {
+			throw new IllegalArgumentException("ID not exists: " + exitId);
+		} else {
+			return exit;
+		}
 	}
 
 	/**

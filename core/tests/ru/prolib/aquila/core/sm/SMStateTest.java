@@ -74,12 +74,25 @@ public class SMStateTest {
 	
 	@Test
 	public void testRegisterExit() throws Exception {
-		SMExit ex1 = state.registerExit();
-		SMExit ex2 = state.registerExit();
+		SMExit ex1 = state.registerExit("foo");
+		SMExit ex2 = state.registerExit("bar");
+		assertEquals("foo", ex1.getId());
+		assertEquals("bar", ex2.getId());
 		List<SMExit> expected = new Vector<SMExit>();
 		expected.add(ex1);
 		expected.add(ex2);
 		assertEquals(expected, state.getExits());
+	}
+	
+	@Test (expected=NullPointerException.class)
+	public void testRegisterExit_ThrowsIfNullId() throws Exception {
+		state.registerExit(null);
+	}
+	
+	@Test
+	public void testRegisterExit_ReturnExistingIfRegistered() throws Exception {
+		SMExit ex1 = state.registerExit("foo");
+		assertSame(ex1, state.registerExit("foo"));
 	}
 	
 	@Test
@@ -92,6 +105,19 @@ public class SMStateTest {
 	public void testSetExitAction() throws Exception {
 		state.setExitAction(exitAction);
 		assertSame(exitAction, state.getExitAction());
+	}
+	
+	@Test
+	public void testGetExit() throws Exception {
+		SMExit ex1 = state.registerExit("foo"),
+			   ex2 = state.registerExit("bar");
+		assertSame(ex1, state.getExit("foo"));
+		assertSame(ex2, state.getExit("bar"));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testGetExit_ThrowsIfNotExists() throws Exception {
+		state.getExit("zulu42");
 	}
 	
 }

@@ -18,7 +18,7 @@ public class SMInputTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		state = new SMState();
-		exit = new SMExit(state);
+		exit = state.registerExit("zulu24");
 		inputAction = control.createMock(SMInputAction.class);
 		input = new SMInput(state, inputAction);
 	}

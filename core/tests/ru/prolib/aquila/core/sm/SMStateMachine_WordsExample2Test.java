@@ -61,8 +61,8 @@ public class SMStateMachine_WordsExample2Test {
 		StartingWord(final Data data) {
 			super();
 			this.data = data;
-			onWordStarted = registerExit();
-			onDataEnd = registerExit();
+			onWordStarted = registerExit("WordStarted");
+			onDataEnd = registerExit("DataEnd");
 			setEnterAction(this);
 		}
 		
@@ -90,9 +90,9 @@ public class SMStateMachine_WordsExample2Test {
 		Word(final Data data) {
 			super();
 			this.data = data;
-			onClauseEnd = registerExit();
-			onWordEnd = registerExit();
-			onDataEnd = registerExit();
+			onClauseEnd = registerExit("CauseEnd");
+			onWordEnd = registerExit("WordEnd");
+			onDataEnd = registerExit("DataEnd");
 			setEnterAction(this);
 		}
 		

@@ -38,7 +38,7 @@ public class SMStateMachine_WordsExample1Test {
 		private final SMExit onWordStarted;
 		StartingWord(final Words words) {
 			super();
-			onWordStarted = registerExit();
+			onWordStarted = registerExit("WordStarted");
 			registerInput(new SMInputAction() {
 				@Override public SMExit input(Object data) {
 					Character c = (Character) data;
@@ -62,8 +62,8 @@ public class SMStateMachine_WordsExample1Test {
 			super(new SMExitAction() {
 				@Override public void exit() { words.currentWord = ""; }
 			});
-			onClauseEnd = registerExit();
-			onWordEnd = registerExit();
+			onClauseEnd = registerExit("CauseEnd");
+			onWordEnd = registerExit("WordEnd");
 			registerInput(new SMInputAction() {
 				@Override public SMExit input(Object data) {
 					Character c = (Character)data;
