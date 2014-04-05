@@ -48,7 +48,13 @@ public class EventSystemImplTest {
 	
 	@Test (expected=NullPointerException.class)
 	public void testConstruct1_ThrowsIfQueueIsNull() throws Exception {
-		new EventSystemImpl(null);
+		new EventSystemImpl((EventQueue)null);
+	}
+	
+	@Test
+	public void testConstruct1Str() throws Exception {
+		eventSystem = new EventSystemImpl("zulu24");
+		assertEquals("zulu24", eventSystem.getEventQueue().getId());
 	}
 	
 	@Test

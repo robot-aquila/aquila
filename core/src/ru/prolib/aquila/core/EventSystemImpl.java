@@ -35,6 +35,15 @@ public class EventSystemImpl implements EventSystem {
 	public EventSystemImpl() {
 		this(new EventQueueImpl());
 	}
+	
+	/**
+	 * Создать объект.
+	 * <p>
+	 * @param queueId идентификатор потока очереди событий
+	 */
+	public EventSystemImpl(String queueId) {
+		this(new EventQueueImpl(queueId));
+	}
 
 	@Override
 	public EventQueue getEventQueue() {
