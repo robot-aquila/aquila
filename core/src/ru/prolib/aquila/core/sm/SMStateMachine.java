@@ -13,6 +13,7 @@ public class SMStateMachine {
 	private final Map<KW<SMExit>, SMState> transitions;
 	private final SMState initialState;
 	private SMState currentState;
+	private SMTriggerRegistry triggers;
 	
 	/**
 	 * Конструктор.
@@ -106,8 +107,9 @@ public class SMStateMachine {
 		}
 		currentState = initialState;
 		SMEnterAction action = currentState.getEnterAction();
+		createTriggers();
 		if ( action != null ) {
-			_(action.enter());
+			_(action.enter(triggers));
 		}
 	}
 	
@@ -148,6 +150,7 @@ public class SMStateMachine {
 			return;
 		}
 		do {
+			triggers.deactivateAndRemoveAll();
 			SMExitAction exitAction = currentState.getExitAction(); 
 			if ( exitAction != null ) {
 				exitAction.exit();
@@ -160,8 +163,21 @@ public class SMStateMachine {
 				throw new SMTransitionNotExistsException();
 			}
 			SMEnterAction enterAction = currentState.getEnterAction();
-			exit = enterAction == null ? null : enterAction.enter();
+			createTriggers();
+			exit = enterAction == null ? null : enterAction.enter(triggers);
 		} while ( exit != null );
+	}
+	
+	/**
+	 * Конструктор реестра триггеров.
+	 * <p>
+	 * Создает новый реестр для текущего состояния и устанавливает его в
+	 * качестве текущего. Служебный метод.
+	 * <p>
+	 * @return текущий реестр триггеров
+	 */
+	private SMTriggerRegistry createTriggers() {
+		return triggers = new SMTriggerRegistry(this, currentState);
 	}
 
 }

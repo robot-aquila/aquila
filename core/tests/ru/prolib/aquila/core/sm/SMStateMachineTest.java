@@ -100,7 +100,8 @@ public class SMStateMachineTest {
 		exit1 = initState.registerExit("achiless");
 		initState.setEnterAction(enterAction);
 		initState.setExitAction(exitAction); // exit actions should work too
-		expect(enterAction.enter()).andReturn(exit1);
+		expect(enterAction.enter((SMTriggerRegistry) anyObject()))
+			.andReturn(exit1);
 		exitAction.exit();
 		control.replay();
 		

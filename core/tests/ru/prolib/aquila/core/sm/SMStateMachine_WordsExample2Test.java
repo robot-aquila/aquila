@@ -67,7 +67,7 @@ public class SMStateMachine_WordsExample2Test {
 		}
 		
 		@Override
-		public SMExit enter() {
+		public SMExit enter(SMTriggerRegistry unused) {
 			Character c;
 			data.currentWord = "";
 			while ( (c = data.read()) != null ) {
@@ -97,7 +97,7 @@ public class SMStateMachine_WordsExample2Test {
 		}
 		
 		@Override
-		public SMExit enter() {
+		public SMExit enter(SMTriggerRegistry unused) {
 			Character c;
 			while ( (c = data.read()) != null ) {
 				if ( c == '.' ) {

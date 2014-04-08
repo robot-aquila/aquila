@@ -1,19 +1,12 @@
 package ru.prolib.aquila.core.sm;
 
 /**
- * Триггер.
- * <p>
- * Любое взаимодействие с автоматом осуществляется через триггеры. 
- * Триггер - это объект, инициирующий активность в конкретном состоянии.
- * Это значит, что  
- * 
+ * Интерфейс триггера.
  */
 public interface SMTrigger {
 	
-	public void enable();
+	public void activate(SMTriggerRegistry registry);
 	
-	public void disable();
-	
-	public void input(Object object);
+	public void deactivate();
 
 }
