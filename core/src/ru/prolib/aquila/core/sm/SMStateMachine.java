@@ -150,7 +150,7 @@ public class SMStateMachine {
 			return;
 		}
 		do {
-			triggers.deactivateAndRemoveAll();
+			triggers.removeAll();
 			SMExitAction exitAction = currentState.getExitAction(); 
 			if ( exitAction != null ) {
 				exitAction.exit();

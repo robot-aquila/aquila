@@ -26,58 +26,58 @@ public class SMTriggerRegistryTest {
 	}
 	
 	@Test
-	public void testRegisterAndActivate() throws Exception {
+	public void testAdd() throws Exception {
 		t1.activate(same(registry));
 		control.replay();
 		
-		registry.registerAndActivate(t1);
+		registry.add(t1);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testRegisterAndActivate_SkipsIfExists() throws Exception {
+	public void testAdd_SkipsIfExists() throws Exception {
 		t1.activate(same(registry));
 		control.replay();
 		
-		registry.registerAndActivate(t1);
-		registry.registerAndActivate(t1);
+		registry.add(t1);
+		registry.add(t1);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testDeactivateAndRemove() throws Exception {
+	public void testRemove() throws Exception {
 		t1.activate(same(registry));
 		t1.deactivate();
 		control.replay();
 		
-		registry.registerAndActivate(t1);
-		registry.deactivateAndRremove(t1);
+		registry.add(t1);
+		registry.remove(t1);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testDeactivateAndRemove_SkipsIfExists() throws Exception {
+	public void testRemove_SkipsIfExists() throws Exception {
 		control.replay();
 		
-		registry.deactivateAndRremove(t1);
+		registry.remove(t1);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testDeactivateAndRemoveAll() throws Exception {
+	public void testRemoveAll() throws Exception {
 		t1.activate(same(registry));
 		t2.activate(same(registry));
 		t1.deactivate();
 		t2.deactivate();
 		control.replay();
 		
-		registry.registerAndActivate(t1);
-		registry.registerAndActivate(t2);
-		registry.deactivateAndRemoveAll();
+		registry.add(t1);
+		registry.add(t2);
+		registry.removeAll();
 		
 		control.verify();
 	}

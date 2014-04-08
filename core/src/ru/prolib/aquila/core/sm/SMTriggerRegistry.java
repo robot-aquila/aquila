@@ -27,14 +27,14 @@ public class SMTriggerRegistry {
 	}
 	
 	/**
-	 * Зарегистрировать и активировать триггер.
+	 * Зарегистрировать триггер.
 	 * <p>
-	 * Если указанный триггер уже добавлен, то повторная активация выполнена
-	 * не будет.
+	 * Регистрирует и активирует указанный триггер. Если указанный триггер уже
+	 * добавлен, то повторная активация выполнена не будет.
 	 * <p>
 	 * @param trigger триггер
 	 */
-	public synchronized void registerAndActivate(SMTrigger trigger) {
+	public synchronized void add(SMTrigger trigger) {
 		KW<SMTrigger> k = new KW<SMTrigger>(trigger);
 		if ( ! triggers.contains(k) ) {
 			triggers.add(k);
@@ -43,14 +43,14 @@ public class SMTriggerRegistry {
 	}
 	
 	/**
-	 * Деактивировать и удалить триггер.
+	 * Удалить триггер.
 	 * <p>
-	 * Незарегистрированные триггеры просто игнорируются. Деактивация для них
-	 * не выполняется.
+	 * Деактивирует и удаляет триггер из реестра. Незарегистрированные триггеры
+	 * просто игнорируются. Деактивация для них не выполняется.
 	 * <p>
 	 * @param trigger триггер
 	 */
-	public synchronized void deactivateAndRremove(SMTrigger trigger) {
+	public synchronized void remove(SMTrigger trigger) {
 		KW<SMTrigger> k = new KW<SMTrigger>(trigger);
 		if ( triggers.contains(k) ) {
 			trigger.deactivate();
@@ -59,9 +59,11 @@ public class SMTriggerRegistry {
 	}
 	
 	/**
-	 * Деактивировать и удалить все триггеры.
+	 * Удалить все триггеры.
+	 * <p>
+	 * Деактивирует и удаляет все триггеры реестра.
 	 */
-	public synchronized void deactivateAndRemoveAll() {
+	public synchronized void removeAll() {
 		for ( KW<SMTrigger> k : triggers ) {
 			k.instance().deactivate();
 		}

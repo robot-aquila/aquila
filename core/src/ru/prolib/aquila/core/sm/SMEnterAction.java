@@ -8,9 +8,9 @@ public interface SMEnterAction {
 	/**
 	 * Выполнить действие входа в состояние.
 	 * <p>
-	 * @param registry реестр триггеров
+	 * @param triggers реестр триггеров
 	 * @return дескриптор выхода или null, если остаться в текущем состоянии
 	 */
-	public SMExit enter(SMTriggerRegistry registry);
+	public SMExit enter(SMTriggerRegistry triggers);
 
 }

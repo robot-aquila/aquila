@@ -29,9 +29,9 @@ public class SMStateMachine_TriggersExampleTest {
 		}
 		
 		@Override
-		public SMExit enter(SMTriggerRegistry registry) {
-			registry.registerAndActivate(new SMTriggerOnEvent(s1skip));
-			registry.registerAndActivate(new SMTriggerOnEvent(s1exit));
+		public SMExit enter(SMTriggerRegistry triggers) {
+			triggers.add(new SMTriggerOnEvent(s1skip));
+			triggers.add(new SMTriggerOnEvent(s1exit));
 			return null;
 		}
 
@@ -60,9 +60,9 @@ public class SMStateMachine_TriggersExampleTest {
 		}
 
 		@Override
-		public SMExit enter(SMTriggerRegistry registry) {
-			registry.registerAndActivate(new SMTriggerOnEvent(s2back, in1));
-			registry.registerAndActivate(new SMTriggerOnEvent(s2exit));
+		public SMExit enter(SMTriggerRegistry triggers) {
+			triggers.add(new SMTriggerOnEvent(s2back, in1));
+			triggers.add(new SMTriggerOnEvent(s2exit));
 			return null;
 		}
 
