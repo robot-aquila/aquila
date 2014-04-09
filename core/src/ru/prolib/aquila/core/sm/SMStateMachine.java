@@ -3,6 +3,9 @@ package ru.prolib.aquila.core.sm;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.utils.KW;
 
 /**
@@ -10,6 +13,14 @@ import ru.prolib.aquila.core.utils.KW;
  * <p>
  */
 public class SMStateMachine {
+	private static final Logger logger;
+	private static int lastId = 0;
+	
+	static {
+		logger = LoggerFactory.getLogger(SMStateMachine.class);
+	}
+
+	private String id;
 	private final Map<KW<SMExit>, SMState> transitions;
 	private final SMState initialState;
 	private SMState currentState;
@@ -25,8 +36,30 @@ public class SMStateMachine {
 			SMState> transitions)
 	{
 		super();
+		id = getNextId();
 		this.initialState = initialState;
 		this.transitions = transitions;
+	}
+	
+	/**
+	 * Установить идентификатор.
+	 * <p>
+	 * Идентификатор автомата используется исключительно в отладочных целях
+	 * как отличительный признак конкретного автомата в журнале. По-умолчанию в
+	 * качестве идентификатора используется автоматически-сгенерированный
+	 * идентификатор, который определяется в момент инстанцирования.
+	 */
+	public synchronized void setId(String id) {
+		this.id = id;
+	}
+	
+	/**
+	 * Получить идентификатор.
+	 * <p>
+	 * @return идентификатор
+	 */
+	public synchronized String getId() {
+		return id;
 	}
 	
 	/**
@@ -108,6 +141,10 @@ public class SMStateMachine {
 		currentState = initialState;
 		SMEnterAction action = currentState.getEnterAction();
 		createTriggers();
+		if ( logger.isDebugEnabled() ) {
+			Object args[] = { id, currentState };
+			logger.debug("{}: started from: {}", args);
+		}
 		if ( action != null ) {
 			_(action.enter(triggers));
 		}
@@ -155,8 +192,14 @@ public class SMStateMachine {
 			if ( exitAction != null ) {
 				exitAction.exit();
 			}
+			SMState pstate = currentState;
 			currentState = transitions.get(new KW<SMExit>(exit));
+			if ( logger.isDebugEnabled() ) {
+				Object args[] = { id, pstate, exit, currentState };
+				logger.debug("{}: transition: {}.{} -> {}", args);
+			}
 			if ( finished() ) {
+				logger.debug("{}: finished", id);
 				return;
 			}
 			if ( currentState == null ) {
@@ -178,6 +221,17 @@ public class SMStateMachine {
 	 */
 	private SMTriggerRegistry createTriggers() {
 		return triggers = new SMTriggerRegistry(this, currentState);
+	}
+
+	/**
+	 * Генерировать очередной идентификатор объекта.
+	 * <p>
+	 * Служебный метод. 
+	 * <p>
+	 * @return идентификатор
+	 */
+	private static synchronized String getNextId() {
+		return SMStateMachine.class.getSimpleName() + (lastId++);
 	}
 
 }

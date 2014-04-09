@@ -10,7 +10,9 @@ public class SMState {
 	/**
 	 * Финальное состояние.
 	 */
-	public static final SMState FINAL = new SMState();
+	public static final SMState FINAL = new SMState() {
+		@Override public String toString() { return "[FinalState]"; }
+	};
 	private final Map<String, SMExit> exits;
 	private final List<SMInput> inputs;
 	private SMEnterAction enterAction;
@@ -162,6 +164,11 @@ public class SMState {
 	 */
 	public synchronized SMExitAction getExitAction() {
 		return exitAction;
+	}
+	
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName();
 	}
 	
 }

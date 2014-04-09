@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.sm;
 
 import static org.easymock.EasyMock.*;
+
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -13,6 +15,12 @@ public class SMTriggerRegistryTest {
 	private SMInput in1;
 	private SMTrigger t1, t2;
 
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
