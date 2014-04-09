@@ -12,17 +12,26 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * элементов событийной системы в рамках набора. Так же предоставляет интерфейс
  * для генерации конкретных событий и выполняет ретрансляцию событий подчиненных
  * позиций.
+ * <p>
+ * <i>2014-04-09 Архитектурная проблема</i> (см. одноименный параграф в
+ * документации к {@link OrdersEventDispatcher}).
+ * <p>
  */
 public class SecuritiesEventDispatcher implements EventListener {
-	private final EventDispatcher dispatcher;
+	private final EventDispatcher dispatcher, sync_disp;
 	private final EventType onAvailable, onChanged, onTrade;
 	
 	public SecuritiesEventDispatcher(EventSystem es) {
 		super();
 		dispatcher = es.createEventDispatcher("Securities");
 		onAvailable = dispatcher.createType("Available");
-		onChanged = dispatcher.createType("Changed");
-		onTrade = dispatcher.createType("Trade");
+		sync_disp = createSyncDispatcher();
+		onChanged = sync_disp.createType("Changed");
+		onTrade = sync_disp.createType("Trade");
+	}
+	
+	private final EventDispatcher createSyncDispatcher() {
+		 return new EventDispatcherImpl(new SimpleEventQueue(), "Securities");
 	}
 	
 	/**
@@ -76,13 +85,13 @@ public class SecuritiesEventDispatcher implements EventListener {
 	public void onEvent(Event event) {
 		if ( event instanceof SecurityTradeEvent ) {
 			SecurityTradeEvent e = (SecurityTradeEvent) event;
-			dispatcher.dispatch(new SecurityTradeEvent(onTrade, e.getSecurity(),
+			sync_disp.dispatch(new SecurityTradeEvent(onTrade, e.getSecurity(),
 					e.getTrade()));
 		} else if ( event instanceof SecurityEvent ) {
 			SecurityEvent e = (SecurityEvent) event;
 			Security security = e.getSecurity();
 			if ( e.isType(security.OnChanged()) ) {
-				dispatcher.dispatch(new SecurityEvent(onChanged, security));
+				sync_disp.dispatch(new SecurityEvent(onChanged, security));
 			}
 		}
 	}

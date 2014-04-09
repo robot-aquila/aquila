@@ -1,183 +1,175 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import java.util.List;
 import java.util.Vector;
-import org.easymock.IMocksControl;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 
 public class OrdersEventDispatcherTest {
-	private IMocksControl control;
-	private Terminal terminal;
-	private OrderImpl order;
-	private EventSystem es;
-	private EventListener listener;
-	private EventQueue queue;
+	@SuppressWarnings("rawtypes")
+	private EditableTerminal terminal;
+	private EditableOrder order;
 	private OrdersEventDispatcher dispatcher;
+	private List<Event> eventsActual, eventsExpected;
+	private Event e;	
 	
+	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
-		control = createStrictControl();
-		queue = control.createMock(EventQueue.class);
-		es = new EventSystemImpl(queue);
-		terminal = control.createMock(Terminal.class);
-		order = new OrderImpl(new OrderEventDispatcher(es),
-				new Vector<OrderStateHandler>(), terminal);
-		listener = control.createMock(EventListener.class);
-		dispatcher = new OrdersEventDispatcher(es);
+		terminal = new TerminalImpl("test");
+		order = terminal.createOrder();
+		dispatcher = new OrdersEventDispatcher(terminal.getEventSystem());
+		terminal.getEventSystem().getEventQueue().start();
+		eventsActual = new Vector<Event>();
+		eventsExpected = new Vector<Event>();
+		e = null;
 	}
 	
-	@Test
-	public void testStructure() throws Exception {
-		EventDispatcher ed = es.createEventDispatcher("Orders");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnAvailable(), ed.createType("Available"));
-		assertEquals(dispatcher.OnRegistered(), ed.createType("Registered"));
-		assertEquals(dispatcher.OnRegisterFailed(), ed.createType("RegisterFailed"));
-		assertEquals(dispatcher.OnCancelled(), ed.createType("Cancelled"));
-		assertEquals(dispatcher.OnCancelFailed(), ed.createType("CancelFailed"));
-		assertEquals(dispatcher.OnFilled(), ed.createType("Filled"));
-		assertEquals(dispatcher.OnPartiallyFilled(), ed.createType("PartiallyFilled"));
-		assertEquals(dispatcher.OnChanged(), ed.createType("Changed"));
-		assertEquals(dispatcher.OnDone(), ed.createType("Done"));
-		assertEquals(dispatcher.OnFailed(), ed.createType("Failed"));
-		assertEquals(dispatcher.OnTrade(), ed.createType("Trade"));
+	@After
+	public void tearDown() throws Exception {
+		terminal.getEventSystem().getEventQueue().stop();
+		terminal.getEventSystem().getEventQueue().join(5000L);
+	}
+	
+	/**
+	 * Тестировать синхронное событие.
+	 * <p>
+	 * @param eventType тип события, которое должно быть синхронным
+	 * @param expected ожидаемое итоговое событие (результат ретрансляции)
+	 * @param incoming исходное событие (основание ретрансляции)
+	 * @throws Exception
+	 */
+	private final void testSynchronousEvent(EventType eventType,
+			Event expected, Event incoming) throws Exception
+	{
+		final CountDownLatch counter1 = new CountDownLatch(1),
+				counter2 = new CountDownLatch(1);
+		// Используем этот тип события для симуляции асинхронного события 
+		dispatcher.OnAvailable().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				try {
+					// Приостановить обработку очереди минимум на пол секунды
+					assertTrue(counter1.await(500L, TimeUnit.MILLISECONDS));
+					eventsActual.add(event);
+					counter2.countDown();
+				} catch ( InterruptedException e ) { }
+			}
+		});
+		// Навешиваем обозревателя на тестируемый синхронный тип событий
+		eventType.addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				eventsActual.add(event);
+				counter1.countDown(); // разблокировать асинхронную очередь
+			}
+		});
+		// Ожидаемое событие (например, об изменении позиции) будет
+		// ретранслировано непосредственно в момент поступления исходного
+		// события. Для диспетчеризации этого события будет использована
+		// отдельная очередь событий.
+		eventsExpected.add(expected);
+		// Асинхронное событие окажется на втором месте, так как очередь будет
+		// на время заморожена обработчиком этого события.
+		e = new OrderEvent(dispatcher.OnAvailable(), order);
+		eventsExpected.add(e);
+		
+		dispatcher.fireAvailable(order);
+		dispatcher.onEvent(incoming);
+		assertTrue(counter2.await(500L, TimeUnit.MILLISECONDS));
+
+		assertEquals(eventsExpected, eventsActual);
 	}
 	
 	@Test
 	public void testFireAvailable() throws Exception {
-		dispatcher.OnAvailable().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnAvailable(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
+		e = new OrderEvent(dispatcher.OnAvailable(), order);
+		eventsExpected.add(e);
+		final CountDownLatch counter = new CountDownLatch(1);
+		dispatcher.OnAvailable().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				eventsActual.add(event);
+				counter.countDown();
+			}
+		});
 		
 		dispatcher.fireAvailable(order);
-		
-		control.verify();
+		assertTrue(counter.await(500L, TimeUnit.MILLISECONDS));
+		assertEquals(eventsExpected, eventsActual);
 	}
 
 	@Test
 	public void testOnEvent_OnRegistered() throws Exception {
-		dispatcher.OnRegistered().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnRegistered(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnRegistered(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnRegistered(),
+				new OrderEvent(dispatcher.OnRegistered(), order),
+				new OrderEvent(order.OnRegistered(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnRegisterFailed() throws Exception {
-		dispatcher.OnRegisterFailed().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnRegisterFailed(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnRegisterFailed(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnRegisterFailed(),
+				new OrderEvent(dispatcher.OnRegisterFailed(), order),
+				new OrderEvent(order.OnRegisterFailed(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnCancelled() throws Exception {
-		dispatcher.OnCancelled().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnCancelled(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnCancelled(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnCancelled(),
+				new OrderEvent(dispatcher.OnCancelled(), order),
+				new OrderEvent(order.OnCancelled(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnCancelFailed() throws Exception {
-		dispatcher.OnCancelFailed().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnCancelFailed(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnCancelFailed(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnCancelFailed(),
+				new OrderEvent(dispatcher.OnCancelFailed(), order),
+				new OrderEvent(order.OnCancelFailed(), order));
 	}
 
 	@Test
 	public void testOnEvent_OnFilled() throws Exception {
-		dispatcher.OnFilled().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnFilled(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnFilled(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnFilled(),
+				new OrderEvent(dispatcher.OnFilled(), order),
+				new OrderEvent(order.OnFilled(), order));
 	}
 
 	@Test
 	public void testOnEvent_OnPartiallyFilled() throws Exception {
-		dispatcher.OnPartiallyFilled().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnPartiallyFilled(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnPartiallyFilled(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnPartiallyFilled(),
+				new OrderEvent(dispatcher.OnPartiallyFilled(), order),
+				new OrderEvent(order.OnPartiallyFilled(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnChanged() throws Exception {
-		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnChanged(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnChanged(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnChanged(),
+				new OrderEvent(dispatcher.OnChanged(), order),
+				new OrderEvent(order.OnChanged(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnDone() throws Exception {
-		dispatcher.OnDone().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnDone(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnDone(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnDone(),
+				new OrderEvent(dispatcher.OnDone(), order),
+				new OrderEvent(order.OnDone(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnFailed() throws Exception {
-		dispatcher.OnFailed().addListener(listener);
-		queue.enqueue(eq(new OrderEvent(dispatcher.OnFailed(), order)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderEvent(order.OnFailed(), order));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnFailed(),
+				new OrderEvent(dispatcher.OnFailed(), order),
+				new OrderEvent(order.OnFailed(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnTrade() throws Exception {
-		Trade trd = control.createMock(Trade.class);
-		dispatcher.OnTrade().addListener(listener);
-		queue.enqueue(eq(new OrderTradeEvent(dispatcher.OnTrade(), order, trd)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new OrderTradeEvent(order.OnTrade(), order, trd));
-		
-		control.verify();
+		Trade t = new Trade(terminal);
+		testSynchronousEvent(dispatcher.OnTrade(),
+				new OrderTradeEvent(dispatcher.OnTrade(), order, t),
+				new OrderTradeEvent(order.OnTrade(), order, t));
 	}
 
 	@Test

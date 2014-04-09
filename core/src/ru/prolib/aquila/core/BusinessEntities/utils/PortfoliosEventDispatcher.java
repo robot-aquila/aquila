@@ -11,9 +11,13 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * позволяет избегать комплексных операций проверки элементов событийной системы
  * в рамках набора. Так же предоставляет интерфейс для генерации конкретных
  * событий и выполняет ретрансляцию событий подчиненных портфелей.
+ * <p>
+ * <i>2014-04-09 Архитектурная проблема</i> (см. одноименный параграф в
+ * документации к {@link OrdersEventDispatcher}).
+ * <p>
  */
 public class PortfoliosEventDispatcher implements EventListener {
-	private final EventDispatcher dispatcher;
+	private final EventDispatcher dispatcher, sync_disp;
 	private final EventType onAvailable, onChanged, onPosAvailable,
 		onPosChanged;
 	
@@ -21,9 +25,14 @@ public class PortfoliosEventDispatcher implements EventListener {
 		super();
 		dispatcher = es.createEventDispatcher("Portfolios");
 		onAvailable = dispatcher.createType("Available");
-		onChanged = dispatcher.createType("Changed");
-		onPosAvailable = dispatcher.createType("PositionAvailable");
-		onPosChanged = dispatcher.createType("PositionChanged");
+		sync_disp = createSyncDispatcher();
+		onChanged = sync_disp.createType("Changed");
+		onPosAvailable = sync_disp.createType("PositionAvailable");
+		onPosChanged = sync_disp.createType("PositionChanged");
+	}
+	
+	private final EventDispatcher createSyncDispatcher() {
+		 return new EventDispatcherImpl(new SimpleEventQueue(), "Portfolios");
 	}
 	
 	/**
@@ -87,16 +96,16 @@ public class PortfoliosEventDispatcher implements EventListener {
 			Position position = e.getPosition();
 			Portfolio portfolio = position.getPortfolio();
 			if ( event.isType(portfolio.OnPositionChanged()) ) {
-				dispatcher.dispatch(new PositionEvent(onPosChanged, position));
+				sync_disp.dispatch(new PositionEvent(onPosChanged, position));
 			} else if ( event.isType(portfolio.OnPositionAvailable())) {
-				dispatcher.dispatch(new PositionEvent(onPosAvailable, position));
+				sync_disp.dispatch(new PositionEvent(onPosAvailable, position));
 			}
 			
 		} else if ( event instanceof PortfolioEvent ) {
 			PortfolioEvent e = (PortfolioEvent) event;
 			Portfolio portfolio = e.getPortfolio();
 			if ( event.isType(portfolio.OnChanged()) ) {
-				dispatcher.dispatch(new PortfolioEvent(onChanged, portfolio));
+				sync_disp.dispatch(new PortfolioEvent(onChanged, portfolio));
 			}
 		}
 	}

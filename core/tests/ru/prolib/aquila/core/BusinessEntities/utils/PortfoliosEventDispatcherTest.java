@@ -1,120 +1,140 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import org.easymock.IMocksControl;
+import java.util.List;
+import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.Positions;
 
 public class PortfoliosEventDispatcherTest {
-	private static Account account;
-	private IMocksControl control;
-	private Terminal terminal;
-	private PortfolioImpl portfolio;
-	private Position position;
-	private EventSystem es;
-	private EventListener listener;
-	private EventQueue queue;
+	private static Account account = new Account("foo", "bar");
+	private static SecurityDescriptor descr =
+			new SecurityDescriptor("zu", "lu", ISO4217.USD, SecurityType.FUT);
+	@SuppressWarnings("rawtypes")
+	private EditableTerminal terminal;
+	private EditablePortfolio portfolio;
+	private EditableSecurity security;
+	private EditablePosition position;
 	private PortfoliosEventDispatcher dispatcher;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		account = new Account("foo", "bar");
-	}
+	private List<Event> eventsActual, eventsExpected;
+	private Event e;
 
+	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
-		control = createStrictControl();
-		queue = control.createMock(EventQueue.class);
-		es = new EventSystemImpl(queue);
-		terminal = control.createMock(Terminal.class);
-		portfolio = new PortfolioImpl(terminal, account,
-				new PortfolioEventDispatcher(es, account));
-		portfolio.setPositionsInstance(new Positions(portfolio,
-				new PositionsEventDispatcher(es, account)));
-		position = control.createMock(Position.class);
-		listener = control.createMock(EventListener.class);
-		dispatcher = new PortfoliosEventDispatcher(es);
-		
-		expect(position.getPortfolio()).andStubReturn(portfolio);
+		terminal = new TerminalImpl("test");
+		portfolio = terminal.getEditablePortfolio(account);
+		security = terminal.getEditableSecurity(descr);
+		position = portfolio.getEditablePosition(security);
+		dispatcher = new PortfoliosEventDispatcher(terminal.getEventSystem());
+		terminal.getEventSystem().getEventQueue().start();
+		eventsActual = new Vector<Event>();
+		eventsExpected = new Vector<Event>();
+		e = null;
 	}
 	
-	@Test
-	public void testStructure() throws Exception {
-		EventDispatcher ed = es.createEventDispatcher("Portfolios");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnPortfolioChanged(), ed.createType("Changed"));
-		assertEquals(dispatcher.OnPortfolioAvailable(), ed.createType("Available"));
-		assertEquals(dispatcher.OnPositionAvailable(), ed.createType("PositionAvailable"));
-		assertEquals(dispatcher.OnPositionChanged(), ed.createType("PositionChanged"));
+	@After
+	public void tearDown() throws Exception {
+		terminal.getEventSystem().getEventQueue().stop();
+		terminal.getEventSystem().getEventQueue().join(5000L);
+	}
+	
+	/**
+	 * Тестировать синхронное событие.
+	 * <p>
+	 * @param eventType тип события, которое должно быть синхронным
+	 * @param expected ожидаемое итоговое событие (результат ретрансляции)
+	 * @param incoming исходное событие (основание ретрансляции)
+	 * @throws Exception
+	 */
+	private final void testSynchronousEvent(EventType eventType,
+			Event expected, Event incoming) throws Exception
+	{
+		final CountDownLatch counter1 = new CountDownLatch(1),
+				counter2 = new CountDownLatch(1);
+		// Используем этот тип события для симуляции асинхронного события 
+		dispatcher.OnPortfolioAvailable().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				try {
+					// Приостановить обработку очереди минимум на пол секунды
+					assertTrue(counter1.await(500L, TimeUnit.MILLISECONDS));
+					eventsActual.add(event);
+					counter2.countDown();
+				} catch ( InterruptedException e ) { }
+			}
+		});
+		// Навешиваем обозревателя на тестируемый синхронный тип событий
+		eventType.addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				eventsActual.add(event);
+				counter1.countDown(); // разблокировать асинхронную очередь
+			}
+		});
+		// Ожидаемое событие (например, об изменении позиции) будет
+		// ретранслировано непосредственно в момент поступления исходного
+		// события. Для диспетчеризации этого события будет использована
+		// отдельная очередь событий.
+		eventsExpected.add(expected);
+		// Асинхронное событие окажется на втором месте, так как очередь будет
+		// на время заморожена обработчиком этого события.
+		e = new PortfolioEvent(dispatcher.OnPortfolioAvailable(), portfolio);
+		eventsExpected.add(e);
+		
+		dispatcher.fireAvailable(portfolio);
+		dispatcher.onEvent(incoming);
+		assertTrue(counter2.await(500L, TimeUnit.MILLISECONDS));
+
+		assertEquals(eventsExpected, eventsActual);
 	}
 	
 	@Test
 	public void testFireAvailable() throws Exception {
-		dispatcher.OnPortfolioAvailable().addListener(listener);
-		queue.enqueue(eq(new PortfolioEvent(dispatcher.OnPortfolioAvailable(),
-				portfolio)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
+		e = new PortfolioEvent(dispatcher.OnPortfolioAvailable(), portfolio);
+		eventsExpected.add(e);
+		final CountDownLatch counter = new CountDownLatch(1);
+		dispatcher.OnPortfolioAvailable().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				eventsActual.add(event);
+				counter.countDown();
+			}
+		});
+
 		dispatcher.fireAvailable(portfolio);
-		
-		control.verify();
+		assertTrue(counter.await(500L, TimeUnit.MILLISECONDS));
+		assertEquals(eventsExpected, eventsActual);
 	}
 	
 	@Test
 	public void testOnEvent_PositionChanged() throws Exception {
-		dispatcher.OnPositionChanged().addListener(listener);
-		queue.enqueue(eq(new PositionEvent(dispatcher.OnPositionChanged(),
-				position)), same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new PositionEvent(portfolio.OnPositionChanged(),
-				position));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnPositionChanged(),
+			new PositionEvent(dispatcher.OnPositionChanged(), position),
+			new PositionEvent(portfolio.OnPositionChanged(), position));
 	}
 	
 	@Test
 	public void testOnEvent_PositionAvailable() throws Exception {
-		dispatcher.OnPositionAvailable().addListener(listener);
-		queue.enqueue(eq(new PositionEvent(dispatcher.OnPositionAvailable(),
-				position)), same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new PositionEvent(portfolio.OnPositionAvailable(),
-				position));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnPositionAvailable(),
+			new PositionEvent(dispatcher.OnPositionAvailable(), position),
+			new PositionEvent(portfolio.OnPositionAvailable(), position));
 	}
 	
 	@Test
 	public void testOnEvent_PortfolioChanged() throws Exception {
-		dispatcher.OnPortfolioChanged().addListener(listener);
-		queue.enqueue(eq(new PortfolioEvent(dispatcher.OnPortfolioChanged(),
-				portfolio)), eq(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new PortfolioEvent(portfolio.OnChanged(), portfolio));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnPortfolioChanged(),
+			new PortfolioEvent(dispatcher.OnPortfolioChanged(), portfolio),
+			new PortfolioEvent(portfolio.OnChanged(), portfolio));
 	}
 	
 	@Test
 	public void testStartRelayFor() throws Exception {
-		control.replay();
-		
 		dispatcher.startRelayFor(portfolio);
 		
-		control.verify();
 		assertTrue(portfolio.OnChanged().isListener(dispatcher));
 		assertTrue(portfolio.OnPositionAvailable().isListener(dispatcher));
 		assertTrue(portfolio.OnPositionChanged().isListener(dispatcher));
 	}
-
 
 }

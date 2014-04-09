@@ -1,5 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
@@ -11,9 +14,39 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * позволяет избегать комплексных операций проверки элементов событийной системы
  * в рамках набора. Так же предоставляет интерфейс для генерации конкретных
  * событий и выполняет ретрансляцию событий подчиненных позиций.
+ * <p>
+ * <i>2014-04-09 Архитектурная проблема</i>
+ * <p>
+ * Обнаруженная проблема рассинхронизации последовательности событий
+ * при работе через непосредственно события объекта и при работе через
+ * аналогичные ретрансляционные-события хранилища серьезно влияет на
+ * работоспособность пользовательского кода. Для решения данной проблемы, все
+ * события подчиненных объектов должны перенаправляться обозревателям
+ * события ретрансляторного типа синхронно в момент получения исходного
+ * события непосредственно от объекта-источника.
+ * <p>
+ * Например, проблемная ситуация с отчетом по трейдам, который учитывает
+ * собственные сделки, полученные через соответствующий ретрансляторный тип
+ * события терминала. Если реакция (например стратегии) связана с
+ * {@link Order#OnDone()}, а отчет собирает сделки по
+ * {@link Terminal#OnOrderTrade()}, то в момент поступления в обработчик события
+ * {@link Order#OnDone()} трейд-отчет не будет содержать корректную информацию
+ * об открытой позиции, так как на этот момент трейд-отчет еще не получит
+ * перенаправленное события типа {@link Terminal#OnOrderTrade()}. Такого эффекта
+ * не будет, если отлавливать сделки напрямую через {@link Order#OnTrade()}. Но
+ * при этом смысл организации ретрансляции через хранилище полностью теряется.
+ * Данный фикс исправляет вышеописанную ситуацию.
+ * <p>
  */
 public class OrdersEventDispatcher implements EventListener {
-	private final EventDispatcher dispatcher;
+	@SuppressWarnings("unused")
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(OrdersEventDispatcher.class);
+	}
+	
+	private final EventDispatcher dispatcher, sync_disp;
 	private final EventType onRegistered, onRegisterFailed, onCancelled,
 		onCancelFailed, onFilled, onPartiallyFilled, onChanged, onDone,
 		onFailed, onTrade, onAvailable;
@@ -22,16 +55,21 @@ public class OrdersEventDispatcher implements EventListener {
 		super();
 		dispatcher = es.createEventDispatcher("Orders");
 		onAvailable = dispatcher.createType("Available");
-		onRegistered = dispatcher.createType("Registered");
-		onRegisterFailed = dispatcher.createType("RegisterFailed");
-		onCancelled = dispatcher.createType("Cancelled");
-		onCancelFailed = dispatcher.createType("CancelFailed");
-		onFilled = dispatcher.createType("Filled");
-		onPartiallyFilled = dispatcher.createType("PartiallyFilled");
-		onChanged = dispatcher.createType("Changed");
-		onDone = dispatcher.createType("Done");
-		onFailed = dispatcher.createType("Failed");
-		onTrade = dispatcher.createType("Trade");
+		sync_disp = createSyncDispatcher();
+		onRegistered = sync_disp.createType("Registered");
+		onRegisterFailed = sync_disp.createType("RegisterFailed");
+		onCancelled = sync_disp.createType("Cancelled");
+		onCancelFailed = sync_disp.createType("CancelFailed");
+		onFilled = sync_disp.createType("Filled");
+		onPartiallyFilled = sync_disp.createType("PartiallyFilled");
+		onChanged = sync_disp.createType("Changed");
+		onDone = sync_disp.createType("Done");
+		onFailed = sync_disp.createType("Failed");
+		onTrade = sync_disp.createType("Trade");
+	}
+	
+	private final EventDispatcher createSyncDispatcher() {
+		 return new EventDispatcherImpl(new SimpleEventQueue(), "Orders");
 	}
 	
 	/**
@@ -156,9 +194,9 @@ public class OrdersEventDispatcher implements EventListener {
 	@Override
 	public void onEvent(Event event) {
 		if ( event instanceof OrderTradeEvent ) {
-			OrderTradeEvent e = (OrderTradeEvent) event;
-			dispatcher.dispatch(new OrderTradeEvent(onTrade, e.getOrder(),
-					e.getTrade()));
+			OrderTradeEvent e = (OrderTradeEvent) event,
+				ne = new OrderTradeEvent(onTrade, e.getOrder(), e.getTrade());
+			sync_disp.dispatch(ne);
 		} else if ( event instanceof OrderEvent ) {
 			Order order = ((OrderEvent) event).getOrder();
 			EventType map[][] = {
@@ -174,10 +212,12 @@ public class OrdersEventDispatcher implements EventListener {
 			};
 			for ( int i = 0; i < map.length; i ++ ) {
 				if ( event.isType(map[i][0]) ) {
-					dispatcher.dispatch(new OrderEvent(map[i][1], order));
+					sync_disp.dispatch(new OrderEvent(map[i][1], order));
 					break;
 				}
 			}
+			// TODO: прекратить трансляцию при финальном событии?
+			// Сначала нужно определиться какое будет действительно финальным.  
 		}
 	}
 	

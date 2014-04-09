@@ -11,16 +11,26 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * позволяет избегать комплексных операций проверки элементов событийной системы
  * в рамках набора. Так же предоставляет интерфейс для генерации конкретных
  * событий и выполняет ретрансляцию событий подчиненных позиций.
+ * <p>
+ * <i>2014-04-09 Архитектурная проблема</i> (см. одноименный параграф в
+ * документации к {@link OrdersEventDispatcher}).
+ * <p>
  */
 public class PositionsEventDispatcher implements EventListener {
-	private final EventDispatcher dispatcher;
+	private final EventDispatcher dispatcher, sync_disp;
 	private final EventType onAvailable, onChanged;
 	
 	public PositionsEventDispatcher(EventSystem es, Account account) {
 		super();
-		dispatcher = es.createEventDispatcher("Positions[" + account + "]");
+		String id = "Positions[" + account + "]";
+		dispatcher = es.createEventDispatcher(id);
 		onAvailable = dispatcher.createType("Available");
-		onChanged = dispatcher.createType("Changed");
+		sync_disp = createSyncDispatcher(id);
+		onChanged = sync_disp.createType("Changed");
+	}
+	
+	private final EventDispatcher createSyncDispatcher(String id) {
+		 return new EventDispatcherImpl(new SimpleEventQueue(), id);
 	}
 	
 	/**
@@ -67,7 +77,7 @@ public class PositionsEventDispatcher implements EventListener {
 	@Override
 	public void onEvent(Event event) {
 		Position position = ((PositionEvent) event).getPosition();
-		dispatcher.dispatch(new PositionEvent(onChanged, position));
+		sync_disp.dispatch(new PositionEvent(onChanged, position));
 	}
 
 }

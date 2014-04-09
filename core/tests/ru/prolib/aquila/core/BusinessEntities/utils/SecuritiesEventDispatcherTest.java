@@ -1,86 +1,120 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import org.easymock.IMocksControl;
+import java.util.List;
+import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class SecuritiesEventDispatcherTest {
-	private static SecurityDescriptor descr;
-	private IMocksControl control;
-	private Terminal terminal;
-	private Security security;
-	private EventSystem es;
-	private EventListener listener;
-	private EventQueue queue;
+	private static SecurityDescriptor descr =
+			new SecurityDescriptor("zu", "lu", ISO4217.USD, SecurityType.FUT);
+	@SuppressWarnings("rawtypes")
+	private EditableTerminal terminal;
+	private EditableSecurity security;
 	private SecuritiesEventDispatcher dispatcher;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("RI", "SPBFUT", "USD", SecurityType.FUT);
-	}
-	
+	private List<Event> eventsActual, eventsExpected;
+	private Event e;
+
+	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
-		control = createStrictControl();
-		terminal = control.createMock(Terminal.class);
-		queue = control.createMock(EventQueue.class);
-		listener = control.createMock(EventListener.class);
-		es = new EventSystemImpl(queue);
-		security = new SecurityImpl(terminal, descr,
-				new SecurityEventDispatcher(es, descr));
-		dispatcher = new SecuritiesEventDispatcher(es);
+		terminal = new TerminalImpl("test");
+		security = terminal.getEditableSecurity(descr);
+		dispatcher = new SecuritiesEventDispatcher(terminal.getEventSystem());
+		terminal.getEventSystem().getEventQueue().start();
+		eventsActual = new Vector<Event>();
+		eventsExpected = new Vector<Event>();
+		e = null;
 	}
 	
-	@Test
-	public void testStructure() throws Exception {
-		EventDispatcher ed = es.createEventDispatcher("Securities");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnChanged(), ed.createType("Changed"));
-		assertEquals(dispatcher.OnAvailable(), ed.createType("Available"));
-		assertEquals(dispatcher.OnTrade(), ed.createType("Trade"));
+	@After
+	public void tearDown() throws Exception {
+		terminal.getEventSystem().getEventQueue().stop();
+		terminal.getEventSystem().getEventQueue().join(5000L);
 	}
-	
-	@Test
-	public void testFireAvailable() throws Exception {
-		dispatcher.OnAvailable().addListener(listener);
-		queue.enqueue(eq(new SecurityEvent(dispatcher.OnAvailable(), security)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
+
+	/**
+	 * Тестировать синхронное событие.
+	 * <p>
+	 * @param eventType тип события, которое должно быть синхронным
+	 * @param expected ожидаемое итоговое событие (результат ретрансляции)
+	 * @param incoming исходное событие (основание ретрансляции)
+	 * @throws Exception
+	 */
+	private final void testSynchronousEvent(EventType eventType,
+			Event expected, Event incoming) throws Exception
+	{
+		final CountDownLatch counter1 = new CountDownLatch(1),
+				counter2 = new CountDownLatch(1);
+		// Используем этот тип события для симуляции асинхронного события 
+		dispatcher.OnAvailable().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				try {
+					// Приостановить обработку очереди минимум на пол секунды
+					assertTrue(counter1.await(500L, TimeUnit.MILLISECONDS));
+					eventsActual.add(event);
+					counter2.countDown();
+				} catch ( InterruptedException e ) { }
+			}
+		});
+		// Навешиваем обозревателя на тестируемый синхронный тип событий
+		eventType.addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				eventsActual.add(event);
+				counter1.countDown(); // разблокировать асинхронную очередь
+			}
+		});
+		// Ожидаемое событие (например, об изменении позиции) будет
+		// ретранслировано непосредственно в момент поступления исходного
+		// события. Для диспетчеризации этого события будет использована
+		// отдельная очередь событий.
+		eventsExpected.add(expected);
+		// Асинхронное событие окажется на втором месте, так как очередь будет
+		// на время заморожена обработчиком этого события.
+		e = new SecurityEvent(dispatcher.OnAvailable(), security);
+		eventsExpected.add(e);
 		
 		dispatcher.fireAvailable(security);
-		
-		control.verify();
+		dispatcher.onEvent(incoming);
+		assertTrue(counter2.await(500L, TimeUnit.MILLISECONDS));
+
+		assertEquals(eventsExpected, eventsActual);
+	}
+
+	@Test
+	public void testFireAvailable() throws Exception {
+		e = new SecurityEvent(dispatcher.OnAvailable(), security);
+		eventsExpected.add(e);
+		final CountDownLatch counter = new CountDownLatch(1);
+		dispatcher.OnAvailable().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				eventsActual.add(event);
+				counter.countDown();
+			}
+		});
+
+		dispatcher.fireAvailable(security);
+		assertTrue(counter.await(500L, TimeUnit.MILLISECONDS));
+		assertEquals(eventsExpected, eventsActual);
 	}
 	
 	@Test
 	public void testOnEvent_OnChanged() throws Exception {
-		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new SecurityEvent(dispatcher.OnChanged(), security)),
-				same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new SecurityEvent(security.OnChanged(), security));
-		
-		control.verify();
+		testSynchronousEvent(dispatcher.OnChanged(),
+				new SecurityEvent(dispatcher.OnChanged(), security),
+				new SecurityEvent(security.OnChanged(), security));
 	}
 	
 	@Test
 	public void testOnEvent_OnTrade() throws Exception {
-		Trade trade = control.createMock(Trade.class);
-		dispatcher.OnTrade().addListener(listener);
-		queue.enqueue(eq(new SecurityTradeEvent(dispatcher.OnTrade(), security,
-				trade)), same(dispatcher.getEventDispatcher()));
-		control.replay();
-		
-		dispatcher.onEvent(new SecurityTradeEvent(security.OnTrade(), security,
-				trade));
-		
-		control.verify();
+		Trade t = new Trade(terminal);
+		testSynchronousEvent(dispatcher.OnTrade(),
+				new SecurityTradeEvent(dispatcher.OnTrade(), security, t),
+				new SecurityTradeEvent(security.OnTrade(), security, t));
 	}
 	
 	@Test
