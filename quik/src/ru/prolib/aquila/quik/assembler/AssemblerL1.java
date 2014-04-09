@@ -19,6 +19,7 @@ import ru.prolib.aquila.t2q.T2QTrade;
  * сборки.
  */
 public class AssemblerL1 {
+	@SuppressWarnings("unused")
 	private static final Logger logger;
 	
 	static {
@@ -197,12 +198,12 @@ public class AssemblerL1 {
 			long orderId = entry.getOrderId();
 			T2QOrder prevEntry = cache.getOrder(orderId);
 			if ( prevEntry == null ) {
-				logger.debug("New order #{} entry without trans.ID", orderId);
+				//logger.debug("New order #{} entry without trans.ID", orderId);
 				return entry;
 			} else {
 				long transId = prevEntry.getTransId();
-				Object args[] = { orderId, transId };
-				logger.debug("For order #{} zeroed trans.ID fixed to {}", args);
+				//Object args[] = { orderId, transId };
+				//logger.debug("For order #{} zeroed trans.ID fixed to {}", args);
 				return new T2QOrder(entry, transId);
 			}
 		}

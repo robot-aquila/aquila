@@ -152,7 +152,6 @@ public class OrderPoolBase implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		logger.debug("Incoming event: {}", event);
 		if ( event instanceof OrderEvent ) {
 			OrderEvent e = (OrderEvent) event;
 			Order order = e.getOrder();
