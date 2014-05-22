@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
 
-public class TLSimulationEventDispatcherTest {
+public class TLSEventDispatcherTest {
 	private EventSystem es;
-	private TLSimulationEventDispatcher dispatcher;
+	private TLSEventDispatcher dispatcher;
 	private EventListener listener;
 	private CountDownLatch counter;
 
@@ -18,7 +18,7 @@ public class TLSimulationEventDispatcherTest {
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		dispatcher = new TLSimulationEventDispatcher(es);
+		dispatcher = new TLSEventDispatcher(es);
 	}
 	
 	@After
@@ -31,11 +31,11 @@ public class TLSimulationEventDispatcherTest {
 	
 	@Test
 	public void testEventTypes() throws Exception {
-		String id = "Timeline" + TLSimulationEventDispatcher.getLastId() + ".";
-		assertEquals(id + "Running", dispatcher.OnRunning().getId());
-		assertEquals(id + "Paused", dispatcher.OnPaused().getId());
-		assertEquals(id + "Finished", dispatcher.OnFinished().getId());
-		assertEquals(id + "Stepping", dispatcher.OnStepping().getId());
+		String id = "Timeline" + TLSEventDispatcher.getLastId() + ".";
+		assertEquals(id + "Run", dispatcher.OnRun().getId());
+		assertEquals(id + "Pause", dispatcher.OnPause().getId());
+		assertEquals(id + "Finish", dispatcher.OnFinish().getId());
+		assertEquals(id + "Step", dispatcher.OnStep().getId());
 	}
 	
 	private void prepareListener(final EventType forType) throws Exception {
@@ -52,33 +52,33 @@ public class TLSimulationEventDispatcherTest {
 	}
 	
 	@Test
-	public void testFireRunning() throws Exception {
-		prepareListener(dispatcher.OnRunning());
-		dispatcher.fireRunning();
+	public void testFireRun() throws Exception {
+		prepareListener(dispatcher.OnRun());
+		dispatcher.fireRun();
 		
 		assertTrue(counter.await(1L, TimeUnit.SECONDS));
 	}
 
 	@Test
-	public void testFirePaused() throws Exception {
-		prepareListener(dispatcher.OnPaused());
-		dispatcher.firePaused();
+	public void testFirePause() throws Exception {
+		prepareListener(dispatcher.OnPause());
+		dispatcher.firePause();
 		
 		assertTrue(counter.await(1L, TimeUnit.SECONDS));
 	}
 
 	@Test
-	public void testFireFinished() throws Exception {
-		prepareListener(dispatcher.OnFinished());
-		dispatcher.fireFinished();
+	public void testFireFinish() throws Exception {
+		prepareListener(dispatcher.OnFinish());
+		dispatcher.fireFinish();
 		
 		assertTrue(counter.await(1L, TimeUnit.SECONDS));
 	}
 
 	@Test
-	public void testFireStepping() throws Exception {
-		prepareListener(dispatcher.OnStepping());
-		dispatcher.fireStepping();
+	public void testFireStep() throws Exception {
+		prepareListener(dispatcher.OnStep());
+		dispatcher.fireStep();
 		
 		assertTrue(counter.await(1L, TimeUnit.SECONDS));
 	}

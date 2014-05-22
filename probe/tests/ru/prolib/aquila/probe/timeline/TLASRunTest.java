@@ -8,7 +8,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.probe.timeline.TLCommand;
+import ru.prolib.aquila.probe.timeline.TLCmd;
 
 /**
  * Протестированы не все варианты ветвления алгоритма. 
@@ -17,25 +17,25 @@ import ru.prolib.aquila.probe.timeline.TLCommand;
  * шага выполняется одинаково. Что бы подсократить, тесты логики симуляции
  * шага используют первую команду или последующие команды в смешенном режиме.   
  */
-public class TLStateRunningTest {
+public class TLASRunTest {
 	private IMocksControl control;
-	private TLSimulationFacade facade;
+	private TLSTimeline facade;
 	private DateTime poa;
-	private TLStateRunning state;
-	private TLCommand c, c2;
+	private TLASRun state;
+	private TLCmd c, c2;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		facade = control.createMock(TLSimulationFacade.class);
+		facade = control.createMock(TLSTimeline.class);
 		poa = new DateTime(1997, 7, 12, 20, 15, 0, 999);
-		state = new TLStateRunning(facade);
+		state = new TLASRun(facade);
 	}
 	
 	@Test
 	public void testPrepare() throws Exception {
-		state.setCurrentCommand(TLCommand.FINISH);
-		facade.fireRunning();
+		state.setCurrentCommand(TLCmd.FINISH);
+		facade.fireRun();
 		control.replay();
 		
 		state.prepare();
@@ -61,14 +61,14 @@ public class TLStateRunningTest {
 	 */
 	@Test
 	public void testPass_Continue() throws Exception {
-		c = new TLCommand(new DateTime(1997, 7, 12, 0, 0, 0, 0));
+		c = new TLCmd(new DateTime(1997, 7, 12, 0, 0, 0, 0));
 		state.setCurrentCommand(c);
-		c2 = new TLCommand(new DateTime(1997, 7, 12, 1, 0, 0, 0));
+		c2 = new TLCmd(new DateTime(1997, 7, 12, 1, 0, 0, 0));
 		expect(facade.pull()).andReturn(c2);
 		expect(facade.getPOA()).andReturn(poa);
-		expect(facade.executeSimulation()).andReturn(true);
-		facade.fireStepping();
-		expect(facade.simulationFinished()).andReturn(false);
+		expect(facade.execute()).andReturn(true);
+		facade.fireStep();
+		expect(facade.finished()).andReturn(false);
 		control.replay();
 		
 		assertNull(state.pass());
@@ -83,12 +83,12 @@ public class TLStateRunningTest {
 	 */
 	@Test
 	public void testPass_Finish() throws Exception {
-		c = new TLCommand(new DateTime(1997, 7, 12, 0, 0, 0, 0));
+		c = new TLCmd(new DateTime(1997, 7, 12, 0, 0, 0, 0));
 		state.setCurrentCommand(c);
 		expect(facade.pull()).andReturn(null);
 		expect(facade.getPOA()).andReturn(poa);
-		expect(facade.executeSimulation()).andReturn(false);
-		expect(facade.simulationFinished()).andReturn(true);
+		expect(facade.execute()).andReturn(false);
+		expect(facade.finished()).andReturn(true);
 		control.replay();
 		
 		assertSame(state.onFinish, state.pass());
@@ -103,12 +103,12 @@ public class TLStateRunningTest {
 	 */
 	@Test
 	public void testPass_AftPOA_Pause() throws Exception {
-		c = new TLCommand(new DateTime(1997, 7, 12, 0, 0, 0, 0));
+		c = new TLCmd(new DateTime(1997, 7, 12, 0, 0, 0, 0));
 		state.setCurrentCommand(c);
-		c2 = new TLCommand(new DateTime(1997, 7, 13, 0, 0, 0, 0));
+		c2 = new TLCmd(new DateTime(1997, 7, 13, 0, 0, 0, 0));
 		expect(facade.pull()).andReturn(c2);
 		expect(facade.getPOA()).andReturn(poa);
-		expect(facade.simulationFinished()).andReturn(false);
+		expect(facade.finished()).andReturn(false);
 		control.replay();
 		
 		assertSame(state.onPause, state.pass());
@@ -123,11 +123,11 @@ public class TLStateRunningTest {
 	 */
 	@Test
 	public void testPass_AftPOA_Finish() throws Exception {
-		c = new TLCommand(new DateTime(1997, 7, 13, 0, 0, 0, 0));
+		c = new TLCmd(new DateTime(1997, 7, 13, 0, 0, 0, 0));
 		state.setCurrentCommand(c);
 		expect(facade.pull()).andReturn(null);
 		expect(facade.getPOA()).andReturn(poa);
-		expect(facade.simulationFinished()).andReturn(true);
+		expect(facade.finished()).andReturn(true);
 		control.replay();
 		
 		assertSame(state.onFinish, state.pass());
@@ -137,9 +137,9 @@ public class TLStateRunningTest {
 
 	@Test
 	public void testPass_CmdPause() throws Exception {
-		c = new TLCommand(new DateTime(1997, 7, 12, 0, 0, 0, 0));
+		c = new TLCmd(new DateTime(1997, 7, 12, 0, 0, 0, 0));
 		state.setCurrentCommand(c);
-		expect(facade.pull()).andReturn(TLCommand.PAUSE);
+		expect(facade.pull()).andReturn(TLCmd.PAUSE);
 		control.replay();
 		
 		assertSame(state.onPause, state.pass());
@@ -149,9 +149,9 @@ public class TLStateRunningTest {
 	
 	@Test
 	public void testPass_CmdFinish() throws Exception {
-		c = new TLCommand(new DateTime(1997, 7, 12, 0, 0, 0, 0));
+		c = new TLCmd(new DateTime(1997, 7, 12, 0, 0, 0, 0));
 		state.setCurrentCommand(c);
-		expect(facade.pull()).andReturn(TLCommand.FINISH);
+		expect(facade.pull()).andReturn(TLCmd.FINISH);
 		control.replay();
 		
 		assertSame(state.onFinish, state.pass());

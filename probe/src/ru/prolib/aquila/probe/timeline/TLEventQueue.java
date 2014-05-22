@@ -124,5 +124,12 @@ public class TLEventQueue {
 	public synchronized boolean finished() {
 		return ! interval.contains(poa);
 	}
+	
+	/**
+	 * Удалить все события.
+	 */
+	public synchronized void clear() {
+		stacks.clear();
+	}
 
 }

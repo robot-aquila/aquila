@@ -9,20 +9,20 @@ import java.util.Vector;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-public class TLSimulationStrategyTest {
+public class TLSStrategyTest {
 	private IMocksControl control;
-	private TLInterrogationStrategy helper;
+	private TLSInterrogationStrategy helper;
 	private TLEventQueue eventQueue;
-	private TLSimulationStrategy simulation;
+	private TLSStrategy simulation;
 	private TLEventSource src1, src2, src3, src4;
 	private List<TLEventSource> list1, list2, list3;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		helper = control.createMock(TLInterrogationStrategy.class);
+		helper = control.createMock(TLSInterrogationStrategy.class);
 		eventQueue = control.createMock(TLEventQueue.class);
-		simulation = new TLSimulationStrategy(helper, eventQueue);
+		simulation = new TLSStrategy(helper, eventQueue);
 		src1 = control.createMock(TLEventSource.class);
 		src2 = control.createMock(TLEventSource.class);
 		src3 = control.createMock(TLEventSource.class);

@@ -3,22 +3,21 @@ package ru.prolib.aquila.probe.timeline;
 import java.util.concurrent.*;
 
 /**
- * Очередь команд управления симуляцией.
+ * Очередь команд управления эмуляцией.
  * <p>
- * Симуляция выполняется в реальном времени. Команды позволяют управлять
- * симуляцией: приостанавливать выполняющуются симуляцию, выполнять до указанной
- * временной отсечки или принудительно завершать симуляцию.
+ * Очередь команд используется для передачи управляющих инструкций исполняющему
+ * потоку.
  */
-public class TLCommandQueue {
-	private final BlockingQueue<TLCommand> queue;
-	private TLCommand last;
+public class TLCmdQueue {
+	private final BlockingQueue<TLCmd> queue;
+	private TLCmd last;
 	
 	/**
 	 * Конструктор.
 	 * <p>
 	 * @param queue очередь команд
 	 */
-	public TLCommandQueue(BlockingQueue<TLCommand> queue) {
+	public TLCmdQueue(BlockingQueue<TLCmd> queue) {
 		super();
 		this.queue = queue;
 	}
@@ -26,8 +25,8 @@ public class TLCommandQueue {
 	/**
 	 * Конструктор.
 	 */
-	public TLCommandQueue() {
-		this(new LinkedBlockingQueue<TLCommand>());
+	public TLCmdQueue() {
+		this(new LinkedBlockingQueue<TLCmd>());
 	}
 	
 	/**
@@ -36,7 +35,7 @@ public class TLCommandQueue {
 	 * @param command команда
 	 * @throws TLInterruptionsNotAllowedException
 	 */
-	public synchronized void put(TLCommand command) {
+	public synchronized void put(TLCmd command) {
 		try {
 			queue.put(command);
 		} catch ( InterruptedException e ) {
@@ -56,7 +55,7 @@ public class TLCommandQueue {
 	 * <p>
 	 * @return очередная команда или null, если очередь пуста
 	 */
-	public synchronized TLCommand tell() {
+	public synchronized TLCmd tell() {
 		if ( last == null ) {
 			last = queue.poll();
 		}
@@ -77,7 +76,7 @@ public class TLCommandQueue {
 	 * @return очередная команда
 	 * @throws TLInterruptionsNotAllowedException
 	 */
-	public synchronized TLCommand tellb() {
+	public synchronized TLCmd tellb() {
 		if ( last == null ) {
 			try {
 				last = queue.take();
@@ -99,8 +98,8 @@ public class TLCommandQueue {
 	 * <p>
 	 * @return команда или null, если очередь не содержит команд
 	 */
-	public synchronized TLCommand pull() {
-		TLCommand result = last;
+	public synchronized TLCmd pull() {
+		TLCmd result = last;
 		if ( result == null ) {
 			result = tell();
 		}
@@ -121,8 +120,8 @@ public class TLCommandQueue {
 	 * @return команда
 	 * @throws TLInterruptionsNotAllowedException
 	 */
-	public synchronized TLCommand pullb() {
-		TLCommand result = last;
+	public synchronized TLCmd pullb() {
+		TLCmd result = last;
 		if ( result == null ) {
 			result = tellb();
 		}

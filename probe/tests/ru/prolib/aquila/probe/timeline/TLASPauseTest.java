@@ -7,24 +7,24 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.probe.timeline.TLCommand;
-import ru.prolib.aquila.probe.timeline.TLStatePause;
+import ru.prolib.aquila.probe.timeline.TLCmd;
+import ru.prolib.aquila.probe.timeline.TLASPause;
 
-public class TLStatePauseTest {
+public class TLASPauseTest {
 	private IMocksControl control;
-	private TLSimulationFacade facade;
-	private TLStatePause state;
+	private TLSTimeline facade;
+	private TLASPause state;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		facade = control.createMock(TLSimulationFacade.class);
-		state = new TLStatePause(facade);
+		facade = control.createMock(TLSTimeline.class);
+		state = new TLASPause(facade);
 	}
 	
 	@Test
 	public void testPrepare() throws Exception {
-		facade.firePaused();
+		facade.firePause();
 		control.replay();
 		
 		state.prepare();
@@ -44,7 +44,7 @@ public class TLStatePauseTest {
 	
 	@Test
 	public void testPass_Run() throws Exception {
-		expect(facade.tellb()).andReturn(new TLCommand());
+		expect(facade.tellb()).andReturn(new TLCmd());
 		control.replay();
 		
 		assertSame(state.onRun, state.pass());
@@ -54,8 +54,8 @@ public class TLStatePauseTest {
 
 	@Test
 	public void testPass_Pause() throws Exception {
-		expect(facade.tellb()).andReturn(TLCommand.PAUSE);
-		expect(facade.pull()).andReturn(TLCommand.PAUSE);
+		expect(facade.tellb()).andReturn(TLCmd.PAUSE);
+		expect(facade.pull()).andReturn(TLCmd.PAUSE);
 		control.replay();
 		
 		assertNull(state.pass());
@@ -65,8 +65,8 @@ public class TLStatePauseTest {
 
 	@Test
 	public void testPass_Finish() throws Exception {
-		expect(facade.tellb()).andReturn(TLCommand.FINISH);
-		expect(facade.pull()).andReturn(TLCommand.FINISH);
+		expect(facade.tellb()).andReturn(TLCmd.FINISH);
+		expect(facade.pull()).andReturn(TLCmd.FINISH);
 		control.replay();
 		
 		assertSame(state.onFinish, state.pass());

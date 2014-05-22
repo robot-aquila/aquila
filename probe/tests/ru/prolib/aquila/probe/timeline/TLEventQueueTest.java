@@ -6,16 +6,24 @@ import org.joda.time.*;
 import org.junit.*;
 
 public class TLEventQueueTest {
-	private static Interval interval;
-	private static DateTime startTime, endTime;
+	private static DateTime startTime = new DateTime(2014, 1, 27, 19, 40, 0),
+							  endTime = new DateTime(2014, 1, 27, 19, 50, 0);
+	private static Interval interval = new Interval(startTime, endTime);
+	private static TLEvent sharedEvents[] = {
+		new TLEvent(startTime.plus(1), null), // #0
+		new TLEvent(startTime.plus(5), null), // #1
+		new TLEvent(startTime.plus(2), null), // #2
+		new TLEvent(startTime.plus(1), null), // #3
+		new TLEvent(startTime.plus(2), null), // #4
+		new TLEvent(startTime.plus(6), null), // #5
+		new TLEvent(startTime.plus(2), null), // #6
+		new TLEvent(startTime.plus(5), null), // #7
+		new TLEvent(startTime.plus(2), null), // #8
+		new TLEvent(endTime.minus(1),  null), // #9
+		new TLEvent(endTime.plus(123), null), // out of interval
+		new TLEvent(endTime.plus(125), null), // out of interval
+	};
 	private TLEventQueue queue;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		startTime = new DateTime(2014, 1, 27, 19, 40, 0);
-		endTime = new DateTime(2014, 1, 27, 19, 50, 0);
-		interval = new Interval(startTime, endTime);
-	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -41,20 +49,7 @@ public class TLEventQueueTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testPullStack() throws Exception {
-		TLEvent event[] = {
-				new TLEvent(startTime.plus(1), null), // #0
-				new TLEvent(startTime.plus(5), null), // #1
-				new TLEvent(startTime.plus(2), null), // #2
-				new TLEvent(startTime.plus(1), null), // #3
-				new TLEvent(startTime.plus(2), null), // #4
-				new TLEvent(startTime.plus(6), null), // #5
-				new TLEvent(startTime.plus(2), null), // #6
-				new TLEvent(startTime.plus(5), null), // #7
-				new TLEvent(startTime.plus(2), null), // #8
-				new TLEvent(endTime.minus(1),  null), // #9
-				new TLEvent(endTime.plus(123), null), // out of interval
-				new TLEvent(endTime.plus(125), null), // out of interval
-		};
+		TLEvent event[] = sharedEvents;
 		Vector stackEvents[] = {
 				new Vector(),
 				new Vector(),
@@ -127,6 +122,16 @@ public class TLEventQueueTest {
 		queue.pushEvent(new TLEvent(endTime.plus(100500), null));
 		queue.pullStack();
 		assertTrue(queue.finished());
+	}
+	
+	@Test
+	public void testClear() throws Exception {
+		for ( TLEvent e : sharedEvents ) {
+			queue.pushEvent(e);
+		}
+		queue.clear();
+		
+		assertEquals(0, queue.size());
 	}
 	
 }

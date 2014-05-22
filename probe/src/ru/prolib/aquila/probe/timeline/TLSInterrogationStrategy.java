@@ -6,16 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Стратегия опроса источников.
+ * Стратегия опроса источников событий.
  * <p>
- * Этот служебный класс реализует специфику работы отдельных фаз шага эмуляции.
- * Фактически представляет собой низкий уровень процесса симуляции. 
+ * Этот класс содержит набор низкоуровневых функций эмулятора. 
  */
-public class TLInterrogationStrategy {
+public class TLSInterrogationStrategy {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(TLInterrogationStrategy.class);
+		logger = LoggerFactory.getLogger(TLSInterrogationStrategy.class);
 	}
 	
 	private final TLEventSources sources;
@@ -27,7 +26,7 @@ public class TLInterrogationStrategy {
 	 * @param sources набор источников событий
 	 * @param queue последовательность событий
 	 */
-	public TLInterrogationStrategy(TLEventSources sources, TLEventQueue queue) {
+	public TLSInterrogationStrategy(TLEventSources sources, TLEventQueue queue) {
 		super();
 		this.sources = sources;
 		this.queue = queue;

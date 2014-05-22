@@ -10,24 +10,24 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.probe.timeline.TLCommand;
-import ru.prolib.aquila.probe.timeline.TLCommandQueue;
+import ru.prolib.aquila.probe.timeline.TLCmd;
+import ru.prolib.aquila.probe.timeline.TLCmdQueue;
 
-public class TLCommandQueueTest {
+public class TLCmdQueueTest {
 	private IMocksControl control;
-	private TLCommand c1, c2;
-	private BlockingQueue<TLCommand> subQueue;
-	private TLCommandQueue queue;
+	private TLCmd c1, c2;
+	private BlockingQueue<TLCmd> subQueue;
+	private TLCmdQueue queue;
 
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		DateTime time = new DateTime(1998, 1, 7, 23, 15, 40, 999);
-		c1 = new TLCommand(time);
-		c2 = new TLCommand(time.plus(10));
+		c1 = new TLCmd(time);
+		c2 = new TLCmd(time.plus(10));
 		control = createStrictControl();
 		subQueue = control.createMock(BlockingQueue.class);
-		queue = new TLCommandQueue(subQueue);
+		queue = new TLCmdQueue(subQueue);
 	}
 	
 	@Test

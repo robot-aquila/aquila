@@ -3,24 +3,25 @@ package ru.prolib.aquila.probe.timeline;
 import java.util.List;
 
 /**
- * Шаг симуляции.
+ * Шага эмуляции терминала.
  * <p>
+ * Данный класс реализует механизм отработки шага симуляции.
  */
-public class TLSimulationStrategy {
-	private final TLInterrogationStrategy helper;
+public class TLSStrategy {
+	private final TLSInterrogationStrategy strategy;
 	private final TLEventQueue eventQueue;
 	
 	/**
 	 * Конструктор.
 	 * <p>
-	 * @param helper процедуры нижнего уровня
+	 * @param strategy стратегия опроса источников событий
 	 * @param eventQueue очередь событий хронологии
 	 */
-	public TLSimulationStrategy(TLInterrogationStrategy helper,
+	public TLSStrategy(TLSInterrogationStrategy strategy,
 			TLEventQueue eventQueue)
 	{
 		super();
-		this.helper = helper;
+		this.strategy = strategy;
 		this.eventQueue = eventQueue;
 	}
 	
@@ -31,9 +32,9 @@ public class TLSimulationStrategy {
 	 */
 	public boolean execute() {
 		List<TLEventSource> list;
-		while ( (list = helper.getForInterrogating()).size() > 0 ) {
+		while ( (list = strategy.getForInterrogating()).size() > 0 ) {
 			for ( TLEventSource src : list ) {
-				helper.interrogate(src);
+				strategy.interrogate(src);
 			}
 		}
 		TLEventStack stack = eventQueue.pullStack();

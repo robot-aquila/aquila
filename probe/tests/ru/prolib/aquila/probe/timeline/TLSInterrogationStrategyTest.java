@@ -13,13 +13,13 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-public class TLInterrogationStrategyTest {
+public class TLSInterrogationStrategyTest {
 	private static final DateTime poa = new DateTime(2013, 1, 1, 0, 0, 15, 0);
 	private IMocksControl control;
 	private TLEventSources sources;
 	private TLEventSource source;
 	private TLEventQueue queue;
-	private TLInterrogationStrategy phases;
+	private TLSInterrogationStrategy phases;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -34,7 +34,7 @@ public class TLInterrogationStrategyTest {
 		sources = control.createMock(TLEventSources.class);
 		source = control.createMock(TLEventSource.class);
 		queue = control.createMock(TLEventQueue.class);
-		phases = new TLInterrogationStrategy(sources, queue);
+		phases = new TLSInterrogationStrategy(sources, queue);
 		
 		expect(queue.getPOA()).andStubReturn(poa);
 	}
