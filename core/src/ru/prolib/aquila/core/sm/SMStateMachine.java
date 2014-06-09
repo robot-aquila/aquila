@@ -15,6 +15,7 @@ import ru.prolib.aquila.core.utils.KW;
 public class SMStateMachine {
 	private static final Logger logger;
 	private static int lastId = 0;
+	private boolean debug = false;
 	
 	static {
 		logger = LoggerFactory.getLogger(SMStateMachine.class);
@@ -39,6 +40,15 @@ public class SMStateMachine {
 		id = getNextId();
 		this.initialState = initialState;
 		this.transitions = transitions;
+	}
+	
+	/**
+	 * Включить отладочные сообщения.
+	 * <p>
+	 * @param enabled true - включить, false - отключить
+	 */
+	public synchronized void setDebug(boolean enabled) {
+		this.debug = enabled;
 	}
 	
 	/**
@@ -91,7 +101,15 @@ public class SMStateMachine {
 		if ( input.getState() != currentState ) {
 			throw new SMBadInputException();
 		}
+		//if ( debug && logger.isDebugEnabled() ) {
+		//	Object args[] = { id, currentState };
+		//	logger.debug("{}: input for: {}", args); 
+		//}
 		_(input.input(data));
+		//if ( debug && logger.isDebugEnabled() ) {
+		//	Object args[] = { id, currentState };
+		//	logger.debug("{}: input finished at: {}", args); 
+		//}
 	}
 	
 	/**
@@ -115,6 +133,10 @@ public class SMStateMachine {
 		if ( ! started() ) {
 			throw new SMStateMachineNotStartedException();
 		}
+		//if ( debug && logger.isDebugEnabled() ) {
+		//	Object args[] = { id, currentState };
+		//	logger.debug("{}: input (default) for: {}", args); 
+		//}
 		List<SMInput> list = currentState.getInputs();
 		if ( list.size() == 0 ) {
 			throw new SMStateHasNoInputException();
@@ -123,6 +145,10 @@ public class SMStateMachine {
 			throw new SMAmbiguousInputException();
 		}
 		_(list.get(0).input(data));
+		//if ( debug && logger.isDebugEnabled() ) {
+		//	Object args[] = { id, currentState };
+		//	logger.debug("{}: input (default) finished at: {}", args); 
+		//}
 	}
 	
 	/**
@@ -141,12 +167,17 @@ public class SMStateMachine {
 		currentState = initialState;
 		SMEnterAction action = currentState.getEnterAction();
 		createTriggers();
-		if ( logger.isDebugEnabled() ) {
+		if ( debug && logger.isDebugEnabled() ) {
 			Object args[] = { id, currentState };
 			logger.debug("{}: started from: {}", args);
 		}
 		if ( action != null ) {
+			dbgEnterAction();
 			_(action.enter(triggers));
+		}
+		if ( debug && logger.isDebugEnabled() ) {
+			Object args[] = { id, currentState };
+			logger.debug("{}: start procedure finished at: {}", args);
 		}
 	}
 	
@@ -190,16 +221,19 @@ public class SMStateMachine {
 			triggers.removeAll();
 			SMExitAction exitAction = currentState.getExitAction(); 
 			if ( exitAction != null ) {
+				dbgExitAction();
 				exitAction.exit();
 			}
 			SMState pstate = currentState;
 			currentState = transitions.get(new KW<SMExit>(exit));
-			if ( logger.isDebugEnabled() ) {
+			if ( debug && logger.isDebugEnabled() ) {
 				Object args[] = { id, pstate, exit, currentState };
 				logger.debug("{}: transition: {}.{} -> {}", args);
 			}
 			if ( finished() ) {
-				logger.debug("{}: finished", id);
+				if ( debug && logger.isDebugEnabled() ) {
+					logger.debug("{}: finished", id);
+				}
 				return;
 			}
 			if ( currentState == null ) {
@@ -207,7 +241,11 @@ public class SMStateMachine {
 			}
 			SMEnterAction enterAction = currentState.getEnterAction();
 			createTriggers();
-			exit = enterAction == null ? null : enterAction.enter(triggers);
+			exit = null;
+			if ( enterAction != null ) {
+				dbgEnterAction();
+				exit = enterAction.enter(triggers);
+			}
 		} while ( exit != null );
 	}
 	
@@ -232,6 +270,20 @@ public class SMStateMachine {
 	 */
 	private static synchronized String getNextId() {
 		return SMStateMachine.class.getSimpleName() + (lastId++);
+	}
+	
+	private void dbgEnterAction() {
+		//if ( debug && logger.isDebugEnabled() ) {
+		//	Object args[] = { id, currentState };
+		//	logger.debug("{}: enter action: {}", args);
+		//}
+	}
+	
+	private void dbgExitAction() {
+		//if ( debug && logger.isDebugEnabled() ) {
+		//	Object args[] = { id, currentState };
+		//	logger.debug("{}: exit action: {}", args);
+		//}
 	}
 
 }

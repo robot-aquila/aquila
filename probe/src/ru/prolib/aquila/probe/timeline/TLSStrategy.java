@@ -8,7 +8,7 @@ import java.util.List;
  * Данный класс реализует механизм отработки шага симуляции.
  */
 public class TLSStrategy {
-	private final TLSInterrogationStrategy strategy;
+	private final TLSIntrgStrategy strategy;
 	private final TLEventQueue eventQueue;
 	
 	/**
@@ -17,7 +17,7 @@ public class TLSStrategy {
 	 * @param strategy стратегия опроса источников событий
 	 * @param eventQueue очередь событий хронологии
 	 */
-	public TLSStrategy(TLSInterrogationStrategy strategy,
+	public TLSStrategy(TLSIntrgStrategy strategy,
 			TLEventQueue eventQueue)
 	{
 		super();

@@ -100,10 +100,8 @@ public class EventQueueImpl implements EventQueue {
 	public void stop() {
 		synchronized ( this ) {
 			if ( ! started() ) {
-				logger.debug("Ignore stop request cuz not started: {}", name);
 				return;
 			}
-			logger.debug("Offered exit request: {}", name);
 			queue.offer(EXIT);
 		}
 	}
@@ -123,7 +121,7 @@ public class EventQueueImpl implements EventQueue {
 		synchronized ( this ) {
 			if ( ! started() ) return true;
 			if ( isDispatchThread() ) {
-				logger.warn("Cannot join(X) dispatch thread from himself");
+				logger.warn("Cannot join(X) dispatch thread from itself");
 				return false;
 			} else {
 				queueThread = thread;
@@ -139,7 +137,7 @@ public class EventQueueImpl implements EventQueue {
 		synchronized ( this ) {
 			if ( ! started() ) return;
 			if ( isDispatchThread() ) {
-				logger.warn("Cannot join() dispatch thread from himself");
+				logger.warn("Cannot join() dispatch thread from itself");
 				return;
 			}
 			queueThread = thread;
@@ -187,7 +185,7 @@ public class EventQueueImpl implements EventQueue {
 			queue.put(entry);
 		} catch ( InterruptedException e ) {
 			Thread.currentThread().interrupt();
-			logger.warn("Thread interrupted");
+			logger.error("Thread interrupted: ", e);
 		}		
 	}
 	
@@ -218,7 +216,6 @@ public class EventQueueImpl implements EventQueue {
 		@Override
 		public void run() {
 			started.countDown();
-			logger.debug("Queue thread started: {}", name);
 			try {
 				QueueEntry e;
 				List<EventListener> list;
@@ -251,7 +248,6 @@ public class EventQueueImpl implements EventQueue {
 				Object args[] = { name, e };
 				logger.error("Queue thread exception: {}", args);
 			}
-			logger.debug("Exit queue thread: {}", name);
 		}
 		
 	}

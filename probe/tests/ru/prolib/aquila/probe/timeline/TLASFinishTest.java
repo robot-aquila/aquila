@@ -11,25 +11,32 @@ import ru.prolib.aquila.probe.timeline.TLASFinish;
 
 public class TLASFinishTest {
 	private IMocksControl control;
-	private TLSTimeline facade;
+	private TLSTimeline timeline;
 	private TLASFinish state;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		facade = control.createMock(TLSTimeline.class);
-		state = new TLASFinish(facade);
+		timeline = control.createMock(TLSTimeline.class);
+		state = new TLASFinish(timeline);
 	}
 
 	@Test
-	public void testPass() throws Exception {
-		facade.clearCommands();
-		facade.fireFinish();
+	public void testEnter() throws Exception {
+		timeline.setState(TLCmdType.FINISH);
+		timeline.fireFinish();
+		timeline.close();
 		control.replay();
 		
-		assertSame(state.onFinished, state.pass());
+		assertSame(state.getExit(TLASFinish.EOK), state.enter(null));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testActions() throws Exception {
+		assertSame(state, state.getEnterAction());
+		assertNull(state.getExitAction());
 	}
 
 }

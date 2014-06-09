@@ -9,6 +9,7 @@ import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.probe.timeline.TLCmd;
 import ru.prolib.aquila.probe.timeline.TLCmdQueue;
 import ru.prolib.aquila.probe.timeline.TLSEventDispatcher;
@@ -27,6 +28,8 @@ public class TLSTimelineTest {
 	private TLSEventDispatcher dispatcher;
 	private TLEventSources sources;
 	private TLSTimeline timeline;
+	private TLSThreadStarter starter;
+	private EventType evtType;
 
 	@Before
 	public void setUp() throws Exception {
@@ -36,8 +39,10 @@ public class TLSTimelineTest {
 		simulation = control.createMock(TLSStrategy.class);
 		dispatcher = control.createMock(TLSEventDispatcher.class);
 		sources = control.createMock(TLEventSources.class);
+		starter = control.createMock(TLSThreadStarter.class);
 		timeline = new TLSTimeline(cmdQueue, evtQueue, simulation,
 				dispatcher, sources);
+		evtType = control.createMock(EventType.class);
 	}
 	
 	@Test
@@ -286,8 +291,10 @@ public class TLSTimelineTest {
 	@Test
 	public void testRunTo() throws Exception {
 		DateTime time = new DateTime(2014, 5, 22, 0, 0, 0, 0);
+		starter.start();
 		cmdQueue.put(new TLCmd(time));
 		control.replay();
+		timeline.setStarter(starter);
 		
 		timeline.runTo(time);
 		
@@ -298,6 +305,7 @@ public class TLSTimelineTest {
 	public void testRunTo_SkipIfFinished() throws Exception {
 		timeline.setState(TLCmdType.FINISH);
 		control.replay();
+		timeline.setStarter(starter);
 		
 		timeline.runTo(from);
 		
@@ -307,8 +315,10 @@ public class TLSTimelineTest {
 	@Test
 	public void testRun() throws Exception {
 		expect(evtQueue.getInterval()).andStubReturn(interval);
+		starter.start();
 		cmdQueue.put(new TLCmd(to));
 		control.replay();
+		timeline.setStarter(starter);
 		
 		timeline.run();
 		
@@ -320,10 +330,84 @@ public class TLSTimelineTest {
 		timeline.setState(TLCmdType.FINISH);
 		expect(evtQueue.getInterval()).andStubReturn(interval);
 		control.replay();
+		timeline.setStarter(starter);
 		
 		timeline.run();
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testIsCutoff() throws Exception {
+		DateTime poa = new DateTime(2014,5,27,15,30,0,0);
+		expect(evtQueue.getPOA()).andStubReturn(poa);
+		control.replay();
+		
+		assertFalse(timeline.isCutoff()); // cutoff is null (not specified)
+		
+		timeline.setCutoff(new DateTime(2015,1,1,0,0,0,0));
+		assertFalse(timeline.isCutoff());
 
+		timeline.setCutoff(new DateTime(2014,5,27,15,30,0,0));
+		assertTrue(timeline.isCutoff());
+
+		timeline.setCutoff(new DateTime(2014,5,27,15,29,59,999));
+		assertTrue(timeline.isCutoff());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnFinish() throws Exception {
+		expect(dispatcher.OnFinish()).andReturn(evtType);
+		control.replay();
+		
+		assertSame(evtType, timeline.OnFinish());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnPause() throws Exception {
+		expect(dispatcher.OnPause()).andReturn(evtType);
+		control.replay();
+		
+		assertSame(evtType, timeline.OnPause());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testOnRun() throws Exception {
+		expect(dispatcher.OnRun()).andReturn(evtType);
+		control.replay();
+		
+		assertSame(evtType, timeline.OnRun());
+		
+		control.verify();
+	}
+
+	@Test
+	public void testOnStep() throws Exception {
+		expect(dispatcher.OnStep()).andReturn(evtType);
+		control.replay();
+		
+		assertSame(evtType, timeline.OnStep());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSetDebug() throws Exception {
+		starter.setDebug(eq(true));
+		starter.setDebug(eq(false));
+		control.replay();
+		timeline.setStarter(starter);
+		
+		timeline.setDebug(true);
+		timeline.setDebug(false);
+		
+		control.verify();
+	}
+	
 }

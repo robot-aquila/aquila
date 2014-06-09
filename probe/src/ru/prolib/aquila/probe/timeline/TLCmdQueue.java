@@ -35,7 +35,7 @@ public class TLCmdQueue {
 	 * @param command команда
 	 * @throws TLInterruptionsNotAllowedException
 	 */
-	public synchronized void put(TLCmd command) {
+	public void put(TLCmd command) {
 		try {
 			queue.put(command);
 		} catch ( InterruptedException e ) {
@@ -132,7 +132,7 @@ public class TLCmdQueue {
 	/**
 	 * Очистить очередь команд.
 	 */
-	public synchronized void clear() {
+	public void clear() {
 		queue.clear();
 	}
 	

@@ -9,8 +9,8 @@ import ru.prolib.aquila.core.sm.*;
  * пока не будет выполнено одни из условий выхода:
  * <ul>
  * <li>Поступила команда {@link TLCmd#FINISH} или {@link TLCmd#PAUSE};</li>
- * <li>ТА достигло времени отсечки;</li>
- * <li>ТА вышло за границу РП.</li>
+ * <li>ТА достигла времени отсечки;</li>
+ * <li>ТА вышла за границу РП.</li>
  * </ul>
  */
 public class TLASRun  extends SMState
@@ -57,7 +57,7 @@ public class TLASRun  extends SMState
 			}			
 		}
 		
-		if ( heap.getPOA().compareTo(heap.getCutoff()) >= 0 ) {
+		if ( heap.isCutoff() ) {
 			return getExit(EPAUSE);
 		}
 		

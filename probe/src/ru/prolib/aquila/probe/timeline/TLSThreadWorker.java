@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.sm.*;
 
 /**
- * Исполнитель хронологии событий. 
+ * Функция потока исполнения хронологии событий.
+ * <p>
+ * Данный класс обеспечивает цикл получения данных и подачу их на вход
+ * автомата состояний, реализующего процесс эмуляции.
  */
 public class TLSThreadWorker implements Runnable {
 	static final Logger logger;
@@ -50,9 +53,19 @@ public class TLSThreadWorker implements Runnable {
 			while ( ! timeline.finished() ) {
 				automat.input(timeline.pullCommand());
 			}
+			
 		} catch ( SMException e ) {
 			logger.error("Unexpected automat exception: ", e);
 		}
+	}
+	
+	/**
+	 * Включить отладочные сообщения.
+	 * <p>
+	 * @param enabled true - включить, false - отключить
+	 */
+	public void setDebug(boolean enabled) {
+		automat.setDebug(enabled);
 	}
 
 }

@@ -20,6 +20,7 @@ public class TLASFinish extends SMState implements SMEnterAction {
 		super();
 		this.heap = heap;
 		registerExit(EOK);
+		setEnterAction(this);
 	}
 
 	@Override

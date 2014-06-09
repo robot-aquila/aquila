@@ -518,13 +518,13 @@ public class SecurityImplTest {
 			.add(descr2);
 		Variant<Double> vAsk = new Variant<Double>(vDescr)
 			.add(200.00d)
-			.add(115.00d);
+			/*.add(115.00d)*/;
 		Variant<Long> vAskSz = new Variant<Long>(vAsk)
 			.add(80L)
 			.add(12L);
 		Variant<Boolean> vAvl = new Variant<Boolean>(vAskSz)
 			.add(true)
-			.add(false);
+			/*.add(false)*/;
 		Variant<Double> vBid = new Variant<Double>(vAvl)
 			.add(180.00d)
 			.add(815.00d);
@@ -539,10 +539,10 @@ public class SecurityImplTest {
 			.add("Juppy");
 		Variant<Double> vHigh = new Variant<Double>(vDispNm)
 			.add(650.00d)
-			.add(734.00d);
+			/*.add(734.00d)*/;
 		Variant<Double> vLast = new Variant<Double>(vHigh)
 			.add(124.00d)
-			.add(321.00d);
+			/*.add(321.00d)*/;
 		Variant<Integer> vLot = new Variant<Integer>(vLast)
 			.add(10)
 			.add(100);
@@ -551,7 +551,7 @@ public class SecurityImplTest {
 			.add(828.00d);
 		Variant<Double> vMax = new Variant<Double>(vLow)
 			.add(100.05d)
-			.add(215.00d);
+			/*.add(215.00d)*/;
 		Variant<Double> vMin = new Variant<Double>(vMax)
 			.add(512.00d)
 			.add(1024.00d);
@@ -560,7 +560,7 @@ public class SecurityImplTest {
 			.add(2.0d);
 		Variant<Double> vStpSz = new Variant<Double>(vStpPr)
 			.add(0.01d)
-			.add(0.02d);
+			/*.add(0.02d)*/;
 		Variant<Double> vOpen = new Variant<Double>(vStpSz)
 			.add(852.00d)
 			.add(634.00d);

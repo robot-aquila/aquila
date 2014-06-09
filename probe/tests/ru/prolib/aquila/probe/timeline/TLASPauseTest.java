@@ -4,74 +4,66 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
-import org.junit.Before;
-import org.junit.Test;
-
-import ru.prolib.aquila.probe.timeline.TLCmd;
-import ru.prolib.aquila.probe.timeline.TLASPause;
+import org.joda.time.DateTime;
+import org.junit.*;
 
 public class TLASPauseTest {
 	private IMocksControl control;
-	private TLSTimeline facade;
+	private TLSTimeline timeline;
 	private TLASPause state;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		facade = control.createMock(TLSTimeline.class);
-		state = new TLASPause(facade);
+		timeline = control.createMock(TLSTimeline.class);
+		state = new TLASPause(timeline);
 	}
 	
 	@Test
-	public void testPrepare() throws Exception {
-		facade.firePause();
+	public void testEnter() throws Exception {
+		timeline.setState(TLCmdType.PAUSE);
+		timeline.setBlockingMode(true);
+		timeline.firePause();
 		control.replay();
 		
-		state.prepare();
+		assertNull(state.enter(null));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testPass_Interrupted() throws Exception {
-		expect(facade.tellb()).andThrow(new InterruptedException("test error"));
+	public void testInput_InFinish() throws Exception {
 		control.replay();
 		
-		assertSame(state.onFinish, state.pass());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testPass_Run() throws Exception {
-		expect(facade.tellb()).andReturn(new TLCmd());
-		control.replay();
-		
-		assertSame(state.onRun, state.pass());
+		assertSame(state.getExit(TLASPause.EEND), state.input(TLCmd.FINISH));
 		
 		control.verify();
 	}
 
 	@Test
-	public void testPass_Pause() throws Exception {
-		expect(facade.tellb()).andReturn(TLCmd.PAUSE);
-		expect(facade.pull()).andReturn(TLCmd.PAUSE);
+	public void testInput_InRun() throws Exception {
+		DateTime time = new DateTime(1998, 1, 1, 23, 59, 59, 0);
+		timeline.setCutoff(eq(time));
 		control.replay();
 		
-		assertNull(state.pass());
+		assertSame(state.getExit(TLASPause.ERUN), state.input(new TLCmd(time)));
 		
 		control.verify();
 	}
 
 	@Test
-	public void testPass_Finish() throws Exception {
-		expect(facade.tellb()).andReturn(TLCmd.FINISH);
-		expect(facade.pull()).andReturn(TLCmd.FINISH);
+	public void testInput_InPause() throws Exception {
 		control.replay();
 		
-		assertSame(state.onFinish, state.pass());
+		assertNull(state.input(TLCmd.PAUSE));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testActions() throws Exception {
+		assertSame(state, state.getEnterAction());
+		assertNull(state.getExitAction());
 	}
 
 }

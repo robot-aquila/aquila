@@ -3,6 +3,8 @@ package ru.prolib.aquila.probe.timeline;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
+import ru.prolib.aquila.core.EventType;
+
 
 /**
  * Хронология.
@@ -19,9 +21,10 @@ public class TLSTimeline {
 	private final TLSStrategy simulation;
 	private final TLSEventDispatcher dispatcher;
 	private final TLEventSources sources;
-	private boolean blocking = false;
-	private DateTime cutoff = null;
-	private TLCmdType state = null;
+	private volatile TLSThreadStarter starter;
+	private volatile boolean blocking = false;
+	private volatile DateTime cutoff = null;
+	private volatile TLCmdType state = null;
 	
 	/**
 	 * Конструктор.
@@ -42,6 +45,22 @@ public class TLSTimeline {
 		this.simulation = simulation;
 		this.dispatcher = dispatcher;
 		this.sources = sources;
+	}
+	
+	/**
+	 * Установить пускач потока.
+	 * <p>
+	 * Функция потока эмуляции содержит ссылку на объект хронологии и по этому
+	 * не может быть создана заранее и передана непосредственно в конструктор
+	 * объекта данного класса. Вместо этого, функция потока создается после
+	 * инстанцирования экземпляра данного класса, после чего создается пускач
+	 * который и определяется для созданной хронологии на последнем этапе
+	 * сборки.
+	 * <p>
+	 * @param starter пускач потока
+	 */
+	void setStarter(TLSThreadStarter starter) {
+		this.starter = starter;
 	}
 	
 	/**
@@ -183,7 +202,7 @@ public class TLSTimeline {
 	 * <p>
 	 * @param state идентификатор состояния
 	 */
-	synchronized void setState(TLCmdType state) {
+	void setState(TLCmdType state) {
 		this.state = state;
 	}
 	
@@ -192,7 +211,7 @@ public class TLSTimeline {
 	 * <p>
 	 * @return идентификатор состояния
 	 */
-	public synchronized TLCmdType getState() {
+	public TLCmdType getState() {
 		return state;
 	}
 	
@@ -231,7 +250,7 @@ public class TLSTimeline {
 	 * <p>
 	 * @return true - в процессе, false - обработка приостановлена/завершена
 	 */
-	public synchronized boolean running() {
+	public boolean running() {
 		return state == TLCmdType.RUN;
 	}
 	
@@ -240,7 +259,7 @@ public class TLSTimeline {
 	 * <p>
 	 * @return true - приостановлена, false - выполняется или завершена
 	 */
-	public synchronized boolean paused() {
+	public boolean paused() {
 		return state == TLCmdType.PAUSE;
 	}
 	
@@ -249,14 +268,14 @@ public class TLSTimeline {
 	 * <p>
 	 * @return true - завершена, false - симуляция продолжается или не начата
 	 */
-	public synchronized boolean finished() {
+	public boolean finished() {
 		return state == TLCmdType.FINISH;
 	}
 
 	/**
 	 * Завершить работу.
 	 */
-	public synchronized void finish() {
+	public void finish() {
 		if ( ! finished() ) {
 			cmdQueue.put(TLCmd.FINISH);
 		}
@@ -265,7 +284,7 @@ public class TLSTimeline {
 	/**
 	 * Приостановить работу.
 	 */
-	public synchronized void pause() {
+	public void pause() {
 		if ( running() ) {
 			cmdQueue.put(TLCmd.PAUSE);
 		}
@@ -276,9 +295,12 @@ public class TLSTimeline {
 	 * <p>
 	 * @param cutoff время отсечки
 	 */
-	public synchronized void runTo(DateTime cutoff) {
-		if ( ! finished() ) {
-			cmdQueue.put(new TLCmd(cutoff));
+	public void runTo(DateTime cutoff) {
+		synchronized ( starter ) {
+			if ( ! finished() ) {
+				starter.start();
+				cmdQueue.put(new TLCmd(cutoff));
+			}
 		}
 	}
 
@@ -287,8 +309,63 @@ public class TLSTimeline {
 	 * <p>
 	 * Запускает процесс эмуляции до достижения конца рабочего периода.
 	 */
-	public synchronized void run() {
+	public void run() {
 		runTo(getInterval().getEnd());
+	}
+	
+	/**
+	 * Выполнить проверку ТА на достижение времени отсечки.
+	 * <p>
+	 * @return true - текущая ТА больше или равна времени отсечки, false -
+	 * ТА меньше времени отсечки или время отсечки не определено
+	 */
+	boolean isCutoff() {
+		return cutoff != null && getPOA().compareTo(cutoff) >= 0;
+	}
+	
+	/**
+	 * Получить тип события: эмуляция завершена.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnFinish() {
+		return dispatcher.OnFinish();
+	}
+	
+	/**
+	 * Получить тип события: эмуляция приостановлена.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnPause() {
+		return dispatcher.OnPause();
+	}
+	
+	/**
+	 * Получить тип события: эмуляция продолжена.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnRun() {
+		return dispatcher.OnRun();
+	}
+	
+	/**
+	 * Получить тип события: выполнен шаг эмуляции.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnStep() {
+		return dispatcher.OnStep();
+	}
+	
+	/**
+	 * Установить режим вывода отладочных сообщений.
+	 * <p>
+	 * @param enabled true - включить, false - выключить
+	 */
+	public void setDebug(boolean enabled) {
+		starter.setDebug(enabled);
 	}
 
 }

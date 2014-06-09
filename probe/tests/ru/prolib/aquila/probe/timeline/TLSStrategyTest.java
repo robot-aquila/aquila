@@ -11,7 +11,7 @@ import org.junit.*;
 
 public class TLSStrategyTest {
 	private IMocksControl control;
-	private TLSInterrogationStrategy helper;
+	private TLSIntrgStrategy helper;
 	private TLEventQueue eventQueue;
 	private TLSStrategy simulation;
 	private TLEventSource src1, src2, src3, src4;
@@ -20,7 +20,7 @@ public class TLSStrategyTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		helper = control.createMock(TLSInterrogationStrategy.class);
+		helper = control.createMock(TLSIntrgStrategy.class);
 		eventQueue = control.createMock(TLEventQueue.class);
 		simulation = new TLSStrategy(helper, eventQueue);
 		src1 = control.createMock(TLEventSource.class);

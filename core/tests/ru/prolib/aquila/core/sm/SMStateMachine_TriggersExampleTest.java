@@ -3,7 +3,10 @@ package ru.prolib.aquila.core.sm;
 import static org.junit.Assert.*;
 
 import java.util.*;
+
+import org.apache.log4j.BasicConfigurator;
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.KW;
 
@@ -14,6 +17,12 @@ public class SMStateMachine_TriggersExampleTest {
 	private List<Event> events;
 	private EventType s1exit, s1skip, s2back, s2exit;
 	private SMStateMachine automat;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	/**
 	 * Первое тестовое состояние имеет один вход и один выход. Сигналом на выход
@@ -89,6 +98,7 @@ public class SMStateMachine_TriggersExampleTest {
 		transitions.put(new KW<SMExit>(s2.getExit("BACK")), s1);
 		transitions.put(new KW<SMExit>(s2.getExit("EXIT")), SMState.FINAL);
 		automat = new SMStateMachine(s1, transitions);
+		automat.setDebug(true);
 	}
 	
 	@Test

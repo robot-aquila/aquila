@@ -6,10 +6,9 @@ import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.*;
 import ru.prolib.aquila.core.utils.KW;
 
 /**
@@ -24,6 +23,12 @@ public class SMStateMachineTest {
 	private SMExit exit1, exit2;
 	private SMStateMachine automat;
 	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		exit1 = exit2 = null;
@@ -33,6 +38,7 @@ public class SMStateMachineTest {
 		state2 = new SMState();
 		transitions = new HashMap<KW<SMExit>, SMState>();
 		automat = new SMStateMachine(initState, transitions);
+		automat.setDebug(true);
 	}
 
 	@Test (expected=SMStateMachineNotStartedException.class)

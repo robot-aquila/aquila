@@ -51,5 +51,17 @@ public class TLSThreadWorkerTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testSetDebug() throws Exception {
+		automat.setDebug(eq(true));
+		automat.setDebug(eq(false));
+		control.replay();
+		
+		worker.setDebug(true);
+		worker.setDebug(false);
+		
+		control.verify();
+	}
 
 }
