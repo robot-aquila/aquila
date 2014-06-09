@@ -33,9 +33,12 @@ public class TLASPause extends SMState
 
 	@Override
 	public SMExit enter(SMTriggerRegistry triggers) {
+		boolean first = heap.getState() == null;
 		heap.setState(TLCmdType.PAUSE);
 		heap.setBlockingMode(true);
-		heap.firePause();
+		if ( ! first ) { 
+			heap.firePause();
+		}		
 		return null;
 	}
 

@@ -20,10 +20,23 @@ public class TLASPauseTest {
 	}
 	
 	@Test
-	public void testEnter() throws Exception {
+	public void testEnter_NextTimes() throws Exception {
+		expect(timeline.getState()).andReturn(TLCmdType.FINISH); // any non-null
 		timeline.setState(TLCmdType.PAUSE);
 		timeline.setBlockingMode(true);
 		timeline.firePause();
+		control.replay();
+		
+		assertNull(state.enter(null));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testEnter_FirstTime() throws Exception {
+		expect(timeline.getState()).andReturn(null);
+		timeline.setState(TLCmdType.PAUSE);
+		timeline.setBlockingMode(true);
 		control.replay();
 		
 		assertNull(state.enter(null));

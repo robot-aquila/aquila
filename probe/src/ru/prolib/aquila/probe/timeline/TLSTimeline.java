@@ -324,6 +324,16 @@ public class TLSTimeline {
 	}
 	
 	/**
+	 * Выполнить проверку ТА на выход за пределы РП.
+	 * <p>
+	 * @return true - текущая ТА находится за границами рабочего периода,
+	 * false - ТА внутри РП.
+	 */
+	boolean isOutOfInterval() {
+		return ! getInterval().contains(getPOA());
+	}
+	
+	/**
 	 * Получить тип события: эмуляция завершена.
 	 * <p>
 	 * @return тип события

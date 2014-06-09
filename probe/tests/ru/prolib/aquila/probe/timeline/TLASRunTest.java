@@ -52,8 +52,20 @@ public class TLASRunTest {
 	}
 	
 	@Test
+	public void testInput_InRun_OutOfInterval() throws Exception {
+		timeline.setCutoff(eq(time));
+		expect(timeline.isOutOfInterval()).andReturn(true);
+		control.replay();
+		
+		assertEquals(state.getExit(TLASRun.EEND), state.input(new TLCmd(time)));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testInput_InRun_Cutoff() throws Exception {
 		timeline.setCutoff(eq(time));
+		expect(timeline.isOutOfInterval()).andReturn(false);
 		expect(timeline.isCutoff()).andReturn(true);
 		control.replay();
 		
@@ -66,10 +78,10 @@ public class TLASRunTest {
 	@Test
 	public void testInput_InRun_Continue() throws Exception {
 		timeline.setCutoff(eq(time));
+		expect(timeline.isOutOfInterval()).andReturn(false);
 		expect(timeline.isCutoff()).andReturn(false);
 		expect(timeline.execute()).andReturn(true);
 		timeline.fireStep();
-		expect(timeline.finished()).andReturn(false);
 		control.replay();
 		
 		assertNull(state.input(new TLCmd(time)));
@@ -80,6 +92,7 @@ public class TLASRunTest {
 	@Test
 	public void testInput_InRun_Executed() throws Exception {
 		timeline.setCutoff(eq(time));
+		expect(timeline.isOutOfInterval()).andReturn(false);
 		expect(timeline.isCutoff()).andReturn(false);
 		expect(timeline.execute()).andReturn(false);
 		timeline.fireStep();
@@ -91,21 +104,18 @@ public class TLASRunTest {
 	}
 
 	@Test
-	public void testInput_InRun_Finished() throws Exception {
-		timeline.setCutoff(eq(time));
-		expect(timeline.isCutoff()).andReturn(false);
-		expect(timeline.execute()).andReturn(true);
-		timeline.fireStep();
-		expect(timeline.finished()).andReturn(true);
+	public void testInput_InNull_OutOfInterval() throws Exception {
+		expect(timeline.isOutOfInterval()).andReturn(true);
 		control.replay();
 		
-		assertEquals(state.getExit(TLASRun.EEND), state.input(new TLCmd(time)));
+		assertEquals(state.getExit(TLASRun.EEND), state.input(null));
 		
 		control.verify();
 	}
 
 	@Test
 	public void testInput_InNull_Cutoff() throws Exception {
+		expect(timeline.isOutOfInterval()).andReturn(false);
 		expect(timeline.isCutoff()).andReturn(true);
 		control.replay();
 		
@@ -116,10 +126,10 @@ public class TLASRunTest {
 	
 	@Test
 	public void testInput_InNull_Continue() throws Exception {
+		expect(timeline.isOutOfInterval()).andReturn(false);
 		expect(timeline.isCutoff()).andReturn(false);
 		expect(timeline.execute()).andReturn(true);
 		timeline.fireStep();
-		expect(timeline.finished()).andReturn(false);
 		control.replay();
 		
 		assertNull(state.input(null));
@@ -129,6 +139,7 @@ public class TLASRunTest {
 	
 	@Test
 	public void testInput_InNull_Executed() throws Exception {
+		expect(timeline.isOutOfInterval()).andReturn(false);
 		expect(timeline.isCutoff()).andReturn(false);
 		expect(timeline.execute()).andReturn(false);
 		timeline.fireStep();
@@ -137,19 +148,6 @@ public class TLASRunTest {
 		assertEquals(state.getExit(TLASRun.EEND), state.input(null));
 		
 		control.verify();
-	}
-
-	@Test
-	public void testInput_InNull_Finished() throws Exception {
-		expect(timeline.isCutoff()).andReturn(false);
-		expect(timeline.execute()).andReturn(true);
-		timeline.fireStep();
-		expect(timeline.finished()).andReturn(true);
-		control.replay();
-		
-		assertEquals(state.getExit(TLASRun.EEND), state.input(null));
-		
-		control.verify();	
 	}
 	
 	@Test

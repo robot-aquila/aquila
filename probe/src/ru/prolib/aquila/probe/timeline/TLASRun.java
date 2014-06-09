@@ -56,14 +56,15 @@ public class TLASRun  extends SMState
 				break;
 			}			
 		}
-		
+		if ( heap.isOutOfInterval() ) {
+			return getExit(EEND);
+		}
 		if ( heap.isCutoff() ) {
 			return getExit(EPAUSE);
 		}
-		
 		boolean res = heap.execute();
 		heap.fireStep();
-		return res && ! heap.finished() ? null : getExit(EEND);
+		return res ? null : getExit(EEND);
 	}
 
 }

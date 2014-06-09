@@ -358,6 +358,42 @@ public class TLSTimelineTest {
 	}
 	
 	@Test
+	public void testIsOutOfInterval_In() throws Exception {
+		DateTime poa = new DateTime(2014, 5, 31, 23, 59, 59, 999);
+		expect(evtQueue.getPOA()).andStubReturn(poa);
+		expect(evtQueue.getInterval()).andStubReturn(interval);
+		control.replay();
+
+		assertFalse(timeline.isOutOfInterval());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testIsOutOfInterval_AtEnd() throws Exception {
+		DateTime poa = new DateTime(2014, 6, 1, 0, 0, 0, 0);
+		expect(evtQueue.getPOA()).andStubReturn(poa);
+		expect(evtQueue.getInterval()).andStubReturn(interval);
+		control.replay();
+
+		assertTrue(timeline.isOutOfInterval());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testIsOutOfInterval_Out() throws Exception {
+		DateTime poa = new DateTime(2015, 1, 1, 0, 0, 0, 0);
+		expect(evtQueue.getPOA()).andStubReturn(poa);
+		expect(evtQueue.getInterval()).andStubReturn(interval);
+		control.replay();
+
+		assertTrue(timeline.isOutOfInterval());
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testOnFinish() throws Exception {
 		expect(dispatcher.OnFinish()).andReturn(evtType);
 		control.replay();
