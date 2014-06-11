@@ -11,15 +11,15 @@ import org.joda.time.DateTime;
  * $Id: Trade.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class Trade implements Comparable<Trade> {
-	private final Terminal terminal;
-	private Long id;
-	private SecurityDescriptor descr;
-	private Direction direction;
-	private DateTime time;
-	private Double price;
-	private Long qty;
-	private Double volume;
-	private Long orderId;
+	private volatile Terminal terminal;
+	private volatile Long id;
+	private volatile SecurityDescriptor descr;
+	private volatile Direction direction;
+	private volatile DateTime time;
+	private volatile Double price;
+	private volatile Long qty;
+	private volatile Double volume;
+	private volatile Long orderId;
 	
 	/**
 	 * Создать экземпляр сделки.
@@ -32,33 +32,54 @@ public class Trade implements Comparable<Trade> {
 	}
 	
 	/**
+	 * Конструктор.
+	 */
+	public Trade() {
+		super();
+	}
+	
+	/**
 	 * Получить терминал сделки.
 	 * <p>
-	 * @return терминал
+	 * @return терминал или null, если сделка без связи с терминалом
 	 */
 	public Terminal getTerminal() {
 		return terminal;
 	}
 	
 	/**
+	 * Связать сделку с терминалом.
+	 * <p> 
+	 * @param terminal экземпляр терминала
+	 */
+	public void setTerminal(Terminal terminal) {
+		this.terminal = terminal;
+	}
+	
+	/**
 	 * Получить идентификатор сделки
 	 * <p>
-	 * @return идентификатор сделки
+	 * @return идентификатор сделки или null, если идентификатор не определен
 	 */
-	public synchronized Long getId() {
+	public Long getId() {
 		return id;
 	}
 	
-	public synchronized void setId(Long id) {
+	/**
+	 * Установить идентификатор сделки.
+	 * <p>
+	 * @param id идентификатор сделки
+	 */
+	public void setId(Long id) {
 		this.id = id;
 	}
 	
 	/**
 	 * Получить время сделки
 	 * <p>
-	 * @return время сделки
+	 * @return время сделки или null, если время сделки не определено
 	 */
-	public synchronized DateTime getTime() {
+	public DateTime getTime() {
 		return time;
 	}
 	
@@ -67,59 +88,79 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param time время сделки
 	 */
-	public synchronized void setTime(DateTime time) {
+	public void setTime(DateTime time) {
 		this.time = time;
 	}
 	
 	/**
 	 * Получить направление сделки
 	 * <p>
-	 * @return направление сделки
+	 * @return направление сделки или null, если направление не определено
 	 */
-	public synchronized Direction getDirection() {
+	public Direction getDirection() {
 		return direction;
 	}
 	
-	public synchronized void setDirection(Direction dir) {
+	/**
+	 * Установить направление сделки.
+	 * <p>
+	 * @param dir направление сделки
+	 */
+	public void setDirection(Direction dir) {
 		this.direction = dir;
 	}
 	
 	/**
 	 * Получить цену сделки
 	 * <p>
-	 * @return цена сделки
+	 * @return цена сделки или null, если цена не определена
 	 */
-	public synchronized Double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 	
-	public synchronized void setPrice(Double price) {
+	/**
+	 * Установить цену сделки.
+	 * <p>
+	 * @param price цена сделки
+	 */
+	public void setPrice(Double price) {
 		this.price = price;
 	}
 	
 	/**
 	 * Получить количество сделки
 	 * <p>
-	 * @return количество сделки
+	 * @return количество сделки или null, если количество не определено
 	 */
-	public synchronized Long getQty() {
+	public Long getQty() {
 		return qty;
 	}
 	
-	public synchronized void setQty(Long qty) {
+	/**
+	 * Установить количество сделки.
+	 * <p>
+	 * @param qty количество сделки
+	 */
+	public void setQty(Long qty) {
 		this.qty = qty;
 	}
 	
 	/**
 	 * Получить объем сделки.
 	 * <p>
-	 * @return объем
+	 * @return объем сделки или null, если объем не определен
 	 */
-	public synchronized Double getVolume() {
+	public Double getVolume() {
 		return volume;
 	}
 	
-	public synchronized void setVolume(Double vol) {
+	/**
+	 * Установить объем сделки.
+	 * <p>
+	 * @param vol объем сделки
+	 */
+	public void setVolume(Double vol) {
 		volume = vol;
 	}
 	
@@ -128,7 +169,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return номер заявки или null для анонимной сделки
 	 */
-	public synchronized Long getOrderId() {
+	public Long getOrderId() {
 		return orderId;
 	}
 	
@@ -137,7 +178,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param orderId номер заявки
 	 */
-	public synchronized void setOrderId(Long orderId) {
+	public void setOrderId(Long orderId) {
 		this.orderId = orderId;
 	}
 	
@@ -146,11 +187,16 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return инструмент
 	 */
-	public synchronized Security getSecurity() throws SecurityException {
+	public Security getSecurity() throws SecurityException {
 		return terminal.getSecurity(descr);
 	}
 	
-	public synchronized void setSecurityDescriptor(SecurityDescriptor descr) {
+	/**
+	 * Установить дескриптор инструмента.
+	 * <p>
+	 * @param descr дескриптор
+	 */
+	public void setSecurityDescriptor(SecurityDescriptor descr) {
 		this.descr = descr;
 	}
 	
@@ -159,12 +205,12 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return дескриптор инструмента
 	 */
-	public synchronized SecurityDescriptor getSecurityDescriptor() {
+	public SecurityDescriptor getSecurityDescriptor() {
 		return descr;
 	}
 	
 	@Override
-	public synchronized boolean equals(Object other) {
+	public boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
@@ -179,6 +225,7 @@ public class Trade implements Comparable<Trade> {
 				.append(qty, o.qty)
 				.append(volume, o.volume)
 				.append(orderId, o.orderId)
+				.append(terminal, o.terminal)
 				.isEquals();
 		} else {
 			return false;
@@ -186,7 +233,7 @@ public class Trade implements Comparable<Trade> {
 	}
 	
 	@Override
-	public synchronized String toString() {
+	public String toString() {
 		return "Trade: "
 		 	+ time
 			+ " #" + id + " " +  direction + " "
@@ -195,7 +242,7 @@ public class Trade implements Comparable<Trade> {
 	}
 	
 	@Override
-	public synchronized int hashCode() {
+	public int hashCode() {
 		return new HashCodeBuilder(20121031, 120517)
 			.append(id)
 			.append(descr)
@@ -205,11 +252,12 @@ public class Trade implements Comparable<Trade> {
 			.append(qty)
 			.append(volume)
 			.append(orderId)
+			.append(terminal)
 			.toHashCode();
 	}
 
 	@Override
-	public synchronized int compareTo(Trade o) {
+	public int compareTo(Trade o) {
 		if ( o == null ) {
 			return 1;
 		}

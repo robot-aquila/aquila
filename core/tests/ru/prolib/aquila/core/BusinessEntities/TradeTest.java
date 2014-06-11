@@ -20,7 +20,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class TradeTest {
 	private static IMocksControl control;
-	private static Terminal terminal;
+	private static Terminal terminal, terminal2;
 	private static SecurityDescriptor descr;
 	private Trade trade;
 	private static Calendar cal;
@@ -30,6 +30,7 @@ public class TradeTest {
 		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
+		terminal2 = control.createMock(Terminal.class);
 		cal = Calendar.getInstance();
 		cal.set(2010, 8, 1, 3, 45, 15); // 2010-08-01 03:45:15
 		cal.set(Calendar.MILLISECOND, 0);
@@ -66,7 +67,7 @@ public class TradeTest {
 	}
 	
 	@Test
-	public void testConstruct() throws Exception {
+	public void testConstruct1() throws Exception {
 		assertEquals((Long) 105L, trade.getId());
 		assertSame(terminal, trade.getTerminal());
 		assertEquals(descr, trade.getSecurityDescriptor());
@@ -76,6 +77,19 @@ public class TradeTest {
 		assertEquals((Long) 1L, trade.getQty());
 		assertEquals(200.00d, trade.getVolume(), 0.001d);
 		assertEquals((Long) 1024L, trade.getOrderId());
+	}
+	
+	@Test
+	public void testConstruct0() throws Exception {
+		trade = new Trade();
+		assertNull(trade.getTerminal());
+	}
+	
+	@Test
+	public void testSetTerminal() throws Exception {
+		assertSame(terminal, trade.getTerminal());
+		trade.setTerminal(terminal2);
+		assertSame(terminal2, trade.getTerminal());
 	}
 	
 	@Test
@@ -120,11 +134,15 @@ public class TradeTest {
 			.add(null)
 			.add(1024L)
 			.add(256L);
-		Variant<?> iterator = vOrdId;
+		Variant<Terminal> vTerm = new Variant<Terminal>(vOrdId)
+			.add(null)
+			.add(terminal)
+			.add(terminal2);
+		Variant<?> iterator = vTerm;
 		int foundCnt = 0;
 		Trade found = null;
 		do {
-			Trade actual = new Trade(terminal);
+			Trade actual = new Trade(vTerm.get());
 			actual.setId(vId.get());
 			actual.setSecurityDescriptor(vSecDescr.get());
 			actual.setDirection(vDir.get());
@@ -148,6 +166,7 @@ public class TradeTest {
 		assertEquals((Long) 1L, found.getQty());
 		assertEquals(200.00d, found.getVolume(), 0.001d);
 		assertEquals((Long) 1024L, found.getOrderId());
+		assertSame(terminal, found.getTerminal());
 	}
 	
 	@Test
@@ -168,6 +187,7 @@ public class TradeTest {
 			.append(1L)
 			.append(200.00d)
 			.append(1024L)
+			.append(terminal)
 			.toHashCode();
 		assertEquals(hashCode, trade.hashCode());
 	}
