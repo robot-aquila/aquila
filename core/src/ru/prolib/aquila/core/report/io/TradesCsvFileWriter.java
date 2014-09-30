@@ -90,6 +90,7 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 	public synchronized void onEvent(Event event) {
 		try {
 			update();
+			
 		} catch ( Exception e ) {
 			Object args[] = { file, e };
 			logger.error("Error update report: {}", args);
@@ -107,7 +108,7 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 	 * @throws IOException
 	 */
 	private void init() throws IOException {
-		target = new RandomAccessFile(file, "rws");
+		target = new RandomAccessFile(file, "rw");
 		FileChannel channel = target.getChannel();
 		FileLock lock = channel.lock();
 		try {
@@ -154,7 +155,7 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 					uncoveredPos = target.getFilePointer();
 				}
 			}
-			channel.force(true);
+			channel.force(false);
 		} finally {
 			try {
 				lock.release();
@@ -184,8 +185,7 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 	}
 	
 	private void writeLine(String line) throws IOException {
-		target.write(line.getBytes());
-		target.write(EOL.getBytes());
+		target.writeBytes(line + EOL);
 	}
 	
 	private void writeHeaders() throws IOException {

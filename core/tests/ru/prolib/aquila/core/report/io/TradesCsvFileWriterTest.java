@@ -142,14 +142,10 @@ public class TradesCsvFileWriterTest {
 	
 	@Test
 	public void testMain() throws Exception {
-		long start = System.currentTimeMillis();
 		writer.start();
 		loadTrades(report, "csv-writer-trades.csv");
 		queue.stop();
-		System.err.println((System.currentTimeMillis() - start) + " joining");
 		assertTrue(queue.join(2000L));
-		fail("TODO: toooooooo sloooooowww or test from another thread");
-		System.err.println((System.currentTimeMillis() - start) + " finished");
 		
 		String expected = readFile("csv-writer-report.csv");
 		String actual = readFile(target);

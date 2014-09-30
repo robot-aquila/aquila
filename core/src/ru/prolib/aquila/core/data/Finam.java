@@ -24,7 +24,9 @@ public class Finam {
 	public static final String LOW = "<LOW>";
 	public static final String CLOSE = "<CLOSE>";
 	public static final String VOLUME = "<VOL>";
+	public static final String LAST = "<LAST>";
 	private static final String TIMEFORMAT = "yyyyMMdd HHmmss";
+	public static SimpleDateFormat df = new SimpleDateFormat(TIMEFORMAT);
 	
 	/**
 	 * Загрузить свечи из CSV-файла.
@@ -41,7 +43,7 @@ public class Finam {
 			throws FileNotFoundException, ParseException, NumberFormatException,
 				ValueException
 	{
-		SimpleDateFormat df = new SimpleDateFormat(TIMEFORMAT);
+		//SimpleDateFormat df = new SimpleDateFormat(TIMEFORMAT);
 		RowSet rs = new CsvRowSet(csvfile);
 		Long volume = 0L;
 		Timeframe tf = candles.getTimeframe();
