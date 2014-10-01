@@ -130,16 +130,6 @@ public class TLSTimelineTest {
 		
 		control.verify();
 	}
-
-	@Test
-	public void testFireStep() throws Exception {
-		dispatcher.fireStep();
-		control.replay();
-		
-		timeline.fireStep();
-		
-		control.verify();
-	}
 	
 	@Test
 	public void testPullCommand_BlockingMode() throws Exception {
@@ -423,14 +413,9 @@ public class TLSTimelineTest {
 		control.verify();
 	}
 
-	@Test
-	public void testOnStep() throws Exception {
-		expect(dispatcher.OnStep()).andReturn(evtType);
-		control.replay();
-		
-		assertSame(evtType, timeline.OnStep());
-		
-		control.verify();
+	@Test (expected=NoSuchMethodException.class)
+	public void testOnStepEventTypeRemoved() throws Exception {
+		timeline.getClass().getMethod("OnStep");
 	}
 	
 	@Test

@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.*;
 public class TLSEventDispatcher {
 	private static int lastId = 0;
 	private final EventDispatcher dispatcher;
-	private final EventType onRun, onPause, onFinish, onStep;
+	private final EventType onRun, onPause, onFinish;
 	
 	/**
 	 * Генерировать идентификатор очередного объекта.
@@ -39,7 +39,6 @@ public class TLSEventDispatcher {
 		onRun = dispatcher.createType("Run");
 		onPause = dispatcher.createType("Pause");
 		onFinish = dispatcher.createType("Finish");
-		onStep = dispatcher.createType("Step");
 	}
 	
 	/**
@@ -70,15 +69,6 @@ public class TLSEventDispatcher {
 	}
 	
 	/**
-	 * Получить тип события: выполнен очередной шаг эмуляции.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnStep() {
-		return onStep;
-	}
-	
-	/**
 	 * Генерировать событие: эмуляция продолжена.
 	 */
 	public void fireRun() {
@@ -98,12 +88,6 @@ public class TLSEventDispatcher {
 	public void fireFinish() {
 		dispatcher.dispatch(new EventImpl(onFinish));
 	}
-	
-	/**
-	 * Генерировать событие: выполнен шаг эмуляции.
-	 */
-	public void fireStep() {
-		dispatcher.dispatch(new EventImpl(onStep));
-	}
+
 
 }

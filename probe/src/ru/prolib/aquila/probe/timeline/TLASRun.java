@@ -63,7 +63,6 @@ public class TLASRun  extends SMState
 			return getExit(EPAUSE);
 		}
 		boolean res = heap.execute();
-		heap.fireStep();
 		return res ? null : getExit(EEND);
 	}
 

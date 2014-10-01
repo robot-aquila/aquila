@@ -35,7 +35,11 @@ public class TLSEventDispatcherTest {
 		assertEquals(id + "Run", dispatcher.OnRun().getId());
 		assertEquals(id + "Pause", dispatcher.OnPause().getId());
 		assertEquals(id + "Finish", dispatcher.OnFinish().getId());
-		assertEquals(id + "Step", dispatcher.OnStep().getId());
+	}
+	
+	@Test (expected=NoSuchMethodException.class)
+	public void testOnStepEventTypeRemoved() throws Exception {
+		TLSEventDispatcher.class.getMethod("OnStep");
 	}
 	
 	private void prepareListener(final EventType forType) throws Exception {
@@ -71,14 +75,6 @@ public class TLSEventDispatcherTest {
 	public void testFireFinish() throws Exception {
 		prepareListener(dispatcher.OnFinish());
 		dispatcher.fireFinish();
-		
-		assertTrue(counter.await(1L, TimeUnit.SECONDS));
-	}
-
-	@Test
-	public void testFireStep() throws Exception {
-		prepareListener(dispatcher.OnStep());
-		dispatcher.fireStep();
 		
 		assertTrue(counter.await(1L, TimeUnit.SECONDS));
 	}

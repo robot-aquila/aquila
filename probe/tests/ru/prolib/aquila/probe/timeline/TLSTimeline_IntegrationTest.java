@@ -167,11 +167,6 @@ public class TLSTimeline_IntegrationTest {
 				actual.add(event);
 			}
 		});
-		timeline.OnStep().addListener(new EventListener() {
-			@Override public void onEvent(Event event) {
-				actual.add(event);
-			}
-		});
 		timeline.OnPause().addListener(new EventListener() {
 			@Override public void onEvent(Event event) {
 				actual.add(event);
@@ -180,10 +175,9 @@ public class TLSTimeline_IntegrationTest {
 		
 		timeline.run();
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
-		assertEquals(3, actual.size());
+		assertEquals(2, actual.size());
 		assertTrue(actual.get(0).isType(timeline.OnRun()));
-		assertTrue(actual.get(1).isType(timeline.OnStep()));
-		assertTrue(actual.get(2).isType(timeline.OnFinish()));
+		assertTrue(actual.get(1).isType(timeline.OnFinish()));
 		assertTrue(timeline.finished());
 	}
 	
