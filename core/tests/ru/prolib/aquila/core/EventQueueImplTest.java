@@ -320,7 +320,7 @@ public class EventQueueImplTest {
 			public void onEvent(Event event) {
 				try {
 					started.await();
-					Thread.sleep(1000);
+					Thread.sleep(50);
 					queue.stop();
 				} catch ( Exception e ) {
 					Thread.currentThread().interrupt();
@@ -359,6 +359,11 @@ public class EventQueueImplTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertEquals("EVNT", found.getId());
+	}
+	
+	@Test
+	public void testFunctionalTest() throws Exception {
+		new EventQueue_FunctionalTest().testSchedulingSequence(queue);
 	}
 	
 }

@@ -37,6 +37,23 @@ public class EventImplTest {
 	public void testEquals_TrueWithSameObject() throws Exception {
 		assertTrue(event.equals(event));
 	}
+
+	/**
+	 * Тестовый класс для проверки работоспособности сравнения событий.
+	 */
+	static class MyTestEvent extends EventImpl {
+
+		public MyTestEvent(EventType type) {
+			super(type);
+		}
+		
+	}
+	
+	@Test
+	public void testEqusl_TrueWithSameObject_EvenForDerivedClasses() throws Exception {
+		MyTestEvent e = new MyTestEvent(type);
+		assertTrue(e.equals(e));
+	}
 	
 	@Test
 	public void testEquals_TrueWithSameType() throws Exception {

@@ -124,5 +124,10 @@ public class SimpleEventQueueTest {
 		assertEquals(1, foundCnt);
 		assertEquals("test", found.getId());
 	}
+	
+	@Test
+	public void testFunctionalTest() throws Exception {
+		new EventQueue_FunctionalTest().testSchedulingSequence(queue);
+	}
 
 }

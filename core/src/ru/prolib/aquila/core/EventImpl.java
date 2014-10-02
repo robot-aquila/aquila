@@ -40,6 +40,9 @@ public class EventImpl implements Event {
 	
 	@Override
 	public boolean equals(Object other) {
+		if ( this == other ) {
+			return true;
+		}
 		if ( other != null && other.getClass() == EventImpl.class ) {
 			EventImpl o = (EventImpl)other;
 			return o.type == type;
