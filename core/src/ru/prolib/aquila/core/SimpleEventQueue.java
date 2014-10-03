@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -35,10 +36,41 @@ public class SimpleEventQueue implements EventQueue {
 
 	}
 
+	private static class CachedEvent {
+		private final Event event;
+		private final List<EventListener> listeners;
+		
+		CachedEvent(Event event, List<EventListener> listeners) {
+			super();
+			this.event = event;
+			this.listeners = listeners;
+		}
+		
+		void fire() {
+			for ( EventListener listener : listeners ) {
+				listener.onEvent(event);
+			}
+		}
+		
+	}
+	
+	private final LinkedList<CachedEvent> cache = new LinkedList<CachedEvent>();
+
 	@Override
 	public void enqueue(Event event, List<EventListener> listeners) {
-		for ( EventListener listener : listeners ) {
-			listener.onEvent(event);
+		// Кэшированние событий используется для соблюдения требования
+		// диспетчеризации событий в порядке их поступления. Если этого не
+		// сделать, то при генерации событий из обработчика другого события
+		// нарушение неизбежно.
+		cache.addLast(new CachedEvent(event, listeners));
+		if ( cache.size() == 1 ) {
+			// Только в этом случае мы можем начинать диспетчеризацию.
+			// Более одного элемента в кэше означает, что выше по стеку
+			// очередь уже обрабатывается.
+			do {
+				cache.getFirst().fire(); // Сразу удалять нельзя!
+				cache.pollFirst();
+			} while ( cache.size() > 0 );
 		}
 	}
 

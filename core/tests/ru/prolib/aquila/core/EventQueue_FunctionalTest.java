@@ -33,7 +33,7 @@ public class EventQueue_FunctionalTest {
 		
 		public void activate() {
 			if ( finished.getCount() == 0 ) {
-				throw new RuntimeException("Already finished");
+				throw new RuntimeException("Already finished: " + id);
 			}
 			if ( action != null ) {
 				action.run();
