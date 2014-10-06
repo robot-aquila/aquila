@@ -20,8 +20,6 @@ public class TLEventQueueTest {
 		new TLEvent(startTime.plus(5), null), // #7
 		new TLEvent(startTime.plus(2), null), // #8
 		new TLEvent(endTime.minus(1),  null), // #9
-		new TLEvent(endTime.plus(123), null), // out of interval
-		new TLEvent(endTime.plus(125), null), // out of interval
 	};
 	private TLEventQueue queue;
 
@@ -32,7 +30,20 @@ public class TLEventQueueTest {
 	
 	@Test
 	public void testGetInterval() throws Exception {
-		assertSame(interval, queue.getInterval());
+		assertEquals(interval, queue.getInterval());
+	}
+	
+	@Test
+	public void testGetInterval_ReturnsCurrentActiveInterval() throws Exception {
+		queue.pushEvent(sharedEvents[1]); // +5 ms
+		queue.pullStack(); // move AP to +6 ms
+		
+		assertEquals(new Interval(startTime.plus(6), endTime), queue.getInterval());
+		
+		queue.pushEvent(sharedEvents[9]); // to last ms of interval
+		queue.pullStack(); // move to end of interval
+		
+		assertEquals(new Interval(endTime, endTime), queue.getInterval());
 	}
 	
 	@Test
@@ -89,14 +100,14 @@ public class TLEventQueueTest {
 		assertEquals(endTime, queue.getPOA());
 	}
 	
-	@Test
-	public void testPushEvent_SkipBeforePOA() throws Exception {
+	@Test (expected=TLOutOfIntervalException.class)
+	public void testPushEvent_ThrowsBeforePOA() throws Exception {
 		queue.pushEvent(new TLEvent(startTime.minus(1), null));
 		assertEquals(0,queue.size());
 	}
 	
-	@Test
-	public void testPushEvent_SkipAfterEnfOfInterval() throws Exception {
+	@Test (expected=TLOutOfIntervalException.class)
+	public void testPushEvent_ThrowsAfterEnfOfInterval() throws Exception {
 		queue.pushEvent(new TLEvent(endTime, null));
 		queue.pushEvent(new TLEvent(endTime.plus(1), null));
 		assertEquals(0,queue.size());
@@ -104,26 +115,19 @@ public class TLEventQueueTest {
 	
 	@Test
 	public void testIsFinished1() throws Exception {
-		// Конец РП=2014-01-27T19:50:00.000
-		// Первое событие датированное этим или более поздним временем
+		// Конец РП=2014-01-27T19:50:00.000 НЕ входит в РП!!!
+		// Первое событие датированное последней ms РП
 		// переводит очередь в состояние завершенности.
 		assertFalse(queue.finished());
 		queue.pushEvent(new TLEvent(startTime.plus(1), null));
 		queue.pullStack();
 		assertFalse(queue.finished());
-		queue.pushEvent(new TLEvent(endTime, null));
+		queue.pushEvent(new TLEvent(endTime.minus(1), null));
 		queue.pullStack();
 		assertTrue(queue.finished());
+		assertEquals(new Interval(endTime, endTime), queue.getInterval());
 	}
 
-	@Test
-	public void testIsFinished2() throws Exception {
-		assertFalse(queue.finished());
-		queue.pushEvent(new TLEvent(endTime.plus(100500), null));
-		queue.pullStack();
-		assertTrue(queue.finished());
-	}
-	
 	@Test
 	public void testClear() throws Exception {
 		for ( TLEvent e : sharedEvents ) {

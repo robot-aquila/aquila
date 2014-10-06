@@ -24,7 +24,7 @@ import org.joda.time.*;
  */
 public class TLEventQueue {
 	private final Map<DateTime, TLEventStack> stacks;
-	private final Interval interval;
+	private final DateTime end;
 	private DateTime poa;
 	
 	/**
@@ -34,8 +34,8 @@ public class TLEventQueue {
 	 */
 	public TLEventQueue(Interval interval) {
 		super();
-		this.interval = interval;
-		this.poa = interval.getStart();
+		poa = interval.getStart();
+		end = interval.getEnd();
 		stacks = new Hashtable<DateTime, TLEventStack>();
 	}
 	
@@ -49,12 +49,12 @@ public class TLEventQueue {
 	}
 	
 	/**
-	 * Получить рабочий период.
+	 * Получить активный рабочий период.
 	 * <p>
 	 * @return период
 	 */
 	public Interval getInterval() {
-		return interval;
+		return new Interval(poa, end);
 	}
 	
 	/**
@@ -63,12 +63,16 @@ public class TLEventQueue {
 	 * Размещает событие в общей последовательности.
 	 * <p>
 	 * @param event экземпляр события
+	 * @throws TLOutOfIntervalException событие находится за пределами текущего
+	 * интервала
 	 */
-	public synchronized void pushEvent(TLEvent event) {
+	public synchronized void pushEvent(TLEvent event)
+		throws TLOutOfIntervalException
+	{
 		DateTime time = event.getTime();
-		Interval currentInterval = new Interval(poa, interval.getEnd());
+		Interval currentInterval = getInterval();
 		if ( ! currentInterval.contains(time) ) {
-			return;
+			throw new TLOutOfIntervalException();
 		}
 		TLEventStack stack = stacks.get(time);
 		if ( stack == null ) {
@@ -92,7 +96,7 @@ public class TLEventQueue {
 	 */
 	public synchronized TLEventStack pullStack() {
 		if ( stacks.size() == 0 ) {
-			poa = interval.getEnd();
+			poa = end;
 			return null;
 		}
 		List<DateTime> dummy = new Vector<DateTime>(stacks.keySet());
@@ -122,7 +126,7 @@ public class TLEventQueue {
 	 * еще не завершена
 	 */
 	public synchronized boolean finished() {
-		return ! interval.contains(poa);
+		return ! poa.isBefore(end);
 	}
 	
 	/**

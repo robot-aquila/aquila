@@ -92,7 +92,7 @@ public class TLSTimeline {
 	}
 	
 	/**
-	 * Получить рабочий период.
+	 * Получить активный рабочий период.
 	 * <p>
 	 * @return РП
 	 */
@@ -105,8 +105,11 @@ public class TLSTimeline {
 	 * <p>
 	 * @param time позиция события на временной шкале
 	 * @param procedure процедура события
+	 * @throws TLOutOfIntervalException событие за пределами рабочего периода
 	 */
-	public void schedule(DateTime time, Runnable procedure) {
+	public void schedule(DateTime time, Runnable procedure)
+			throws TLOutOfIntervalException
+	{
 		schedule(new TLEvent(time, procedure));
 	}
 	
@@ -114,8 +117,9 @@ public class TLSTimeline {
 	 * Добавить событие в последовательность.
 	 * <p>
 	 * @param event событие хронологии
+	 * @throws TLOutOfIntervalException событие за пределами рабочего периода
 	 */
-	public void schedule(TLEvent event) {
+	public void schedule(TLEvent event) throws TLOutOfIntervalException {
 		evtQueue.pushEvent(event);
 	}
 	
