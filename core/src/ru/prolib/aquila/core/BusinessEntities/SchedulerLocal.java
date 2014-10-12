@@ -82,7 +82,7 @@ public class SchedulerLocal implements Scheduler {
 	@Override
 	public synchronized TaskHandler schedule(Runnable task, DateTime time) {
 		timer.schedule(createTask(task), time.toDate());
-		return new TaskHandlerImpl(task, this);
+		return createHandler(task);
 	}
 
 	@Override

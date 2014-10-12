@@ -1,6 +1,5 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.TimerTask;
 import org.joda.time.DateTime;
 
 /**
@@ -22,20 +21,27 @@ public interface Scheduler {
 	public DateTime getCurrentTime();
 
 	/**
-	 * Schedules the specified task for execution at the specified time.
+	 * Schedules the specified task for execution at the specified time. If the
+	 * time is in the past, the task is scheduled for immediate execution.
 	 * <p> 
 	 * @param task - task to be scheduled
 	 * @param time - time at which task is to be executed
+	 * @throws NullPointerException if task or time is null
+	 * @throws IllegalStateException if task already scheduled
 	 */
 	public TaskHandler schedule(Runnable task, DateTime time);
 	
 	/**
 	 * Schedules the specified task for repeated fixed-delay execution,
-	 * beginning at the specified time.
+	 * beginning at the specified time. If the time is in the past, the task is
+	 * scheduled for immediate execution.
 	 * <p>
 	 * @param task - task to be scheduled
 	 * @param firstTime - First time at which task is to be executed
 	 * @param period - time in milliseconds between successive task executions
+	 * @throws NullPointerException if task or time is null
+	 * @throws IllegalStateException if task already scheduled
+	 * @throws IllegalArgumentException if period <= 0 
 	 */
 	public TaskHandler schedule(Runnable task, DateTime firstTime, long period);
 
@@ -44,6 +50,9 @@ public interface Scheduler {
 	 * <p>
 	 * @param task - task to be scheduled
 	 * @param delay - delay in milliseconds before task is to be executed
+	 * @throws NullPointerException if task is null
+	 * @throws IllegalStateException if task already scheduled
+	 * @throws IllegalArgumentException if delay < 0
 	 */
 	public TaskHandler schedule(Runnable task, long delay);
 
@@ -54,16 +63,23 @@ public interface Scheduler {
 	 * @param task - task to be scheduled
 	 * @param delay - delay in milliseconds before task is to be executed
 	 * @param period - time in milliseconds between successive task executions
+	 * @throws NullPointerException if task is null
+	 * @throws IllegalStateException if task already scheduled
+	 * @throws IllegalArgumentException if delay < 0 or period <= 0
 	 */
     public TaskHandler schedule(Runnable task, long delay, long period);
 
     /**
      * Schedules the specified task for repeated fixed-rate execution, beginning
-     * at the specified time.
+     * at the specified time.  If the time is in the past, the task is scheduled
+     * for immediate execution.
      * <p>
      * @param task - task to be scheduled
      * @param firstTime - First time at which task is to be executed
      * @param period - time in milliseconds between successive task executions
+     * @throws NullPointerException if task or time is null
+	 * @throws IllegalStateException if task already scheduled
+	 * @throws IllegalArgumentException if period <= 0
      */
     public TaskHandler
     	scheduleAtFixedRate(Runnable task, DateTime firstTime, long period);
@@ -75,6 +91,9 @@ public interface Scheduler {
      * @param task - task to be scheduled
      * @param delay - delay in milliseconds before task is to be executed
      * @param period - time in milliseconds between successive task executions
+     * @throws NullPointerException if task is null
+	 * @throws IllegalStateException if task already scheduled
+	 * @throws IllegalArgumentException if delay < 0 or period <= 0
      */
     public TaskHandler
     	scheduleAtFixedRate(Runnable task, long delay, long period);
@@ -82,19 +101,18 @@ public interface Scheduler {
     /**
      * Отменить задачу.
      * <p>
-     * Данный метод просто вызывает {@link TimerTask#cancel()} задачи. Метод
-     * предназначен в отсновном для тестирования пользовательских классов.
-     * <p>
      * @param task задача
+     * @throws NullPointerException if task is null
      */
     public void cancel(Runnable task);
     
 	/**
-	 * Проверить состояния задачи.
+	 * Проверить состояние задачи.
 	 * <p>
 	 * @param task задача
 	 * @return true - запланировано исполнение задачи, false - отменена,
-	 * исполнена или нет такой задачи
+	 * исполнена или нет такой задачи.
+	 * @throws NullPointerException if task is null
 	 */
     public boolean scheduled(Runnable task);
     
@@ -102,8 +120,9 @@ public interface Scheduler {
      * Получить дескриптор задачи.
      * <p>
      * @param task задача
-     * @return дескриптор задачи или null, если указанная задача отменена,
-     * исполнена или нет такой задачи 
+     * @return дескриптор задачи. Дескриптор возвращается всегда, независимо от
+     * наличия указанной задачи в реестре задач.
+     * @throws NullPointerException if task is null
      */
     public TaskHandler getTaskHandler(Runnable task);
 
