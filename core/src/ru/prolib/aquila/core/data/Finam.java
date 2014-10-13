@@ -1,18 +1,21 @@
 package ru.prolib.aquila.core.data;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.*;
+import java.text.*;
 import java.util.Date;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.joda.time.DateTime;
 
+import com.csvreader.CsvReader;
+
+import ru.prolib.aquila.core.data.finam.CsvTickReader;
 import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
 import ru.prolib.aquila.core.data.row.*;
 
 /**
- * Фасад загрузчика данных формата ФИНАМ.
+ * Фасад к функциям обработки данных формата FINAM.
  * <p>
  * 2013-03-07<br>
  * $Id: Finam.java 565 2013-03-10 19:32:12Z whirlwind $
@@ -81,6 +84,27 @@ public class Finam {
 		createWriter(File csvfile, EditableCandleSeries candles)
 	{
 		return new Quote2CsvWriter(candles, csvfile);
+	}
+	
+	/**
+	 * Создать поток чтения тиков.
+	 * <p>
+	 * Формат файла: &lt;DATE&gt;,&lt;TIME&gt;,&lt;LAST&gt;,&lt;VOL&gt; 
+	 * <p>
+	 * @param filename
+	 * @return поток тиков
+	 * @throws IOException
+	 */
+	public TickReader createTickReader(String filename) throws IOException {
+		CsvReader csv;
+		if ( FilenameUtils.getExtension(filename).equals("gz") ) {
+			csv = new CsvReader(new BufferedReader(new InputStreamReader(
+					new GZIPInputStream(new FileInputStream(filename)))));
+		} else {
+			csv = new CsvReader(filename);
+		}
+		csv.readHeaders();
+		return new CsvTickReader(csv);
 	}
 
 }

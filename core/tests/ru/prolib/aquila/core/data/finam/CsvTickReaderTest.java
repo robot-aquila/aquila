@@ -1,35 +1,14 @@
 package ru.prolib.aquila.core.data.finam;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
-import java.util.Vector;
-
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
-
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.data.TickReader_FunctionalTest;
 import ru.prolib.aquila.core.data.finam.CsvTickReader;
 
 import com.csvreader.CsvReader;
 
 public class CsvTickReaderTest {
-	private static final Vector<Tick> expected = new Vector<Tick>();
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		expected.add(new Tick(new DateTime(2014,6,18,9,59,59,0),144.79d, 250d));
-		expected.add(new Tick(new DateTime(2014,6,18,9,59,59,0),144.79d,   5d));
-		expected.add(new Tick(new DateTime(2014,6,18,9,59,59,0),144.79d,  10d));
-		expected.add(new Tick(new DateTime(2014,6,18,10,0,0,0),144.98d, 1.54d));
-		expected.add(new Tick(new DateTime(2014,6,18,10,0,0,0),144.80d, 500d));
-		expected.add(new Tick(new DateTime(2014,6,18,10,0,1,0),144.70d, 300d));
-		expected.add(new Tick(new DateTime(2014,6,18,10,0,1,0),144.70d, 1.4d));
-		expected.add(new Tick(new DateTime(2014,6,18,10,0,2,0),144.64d, 80d));
-		expected.add(new Tick(new DateTime(2014,6,18,10,0,2,0),144.70d, 3d));
-	}
-	
 	private IMocksControl control;
 	private CsvReader csv;
 	private CsvTickReader reader;
@@ -42,19 +21,10 @@ public class CsvTickReaderTest {
 	}
 	
 	@Test
-	public void testRead() throws Exception {
+	public void testRead2() throws Exception {
 		csv = new CsvReader("fixture/GAZP_ticks.csv");
 		csv.readHeaders();
-		reader = new CsvTickReader(csv);
-		
-		Tick t = null;
-		Vector<Tick> actual = new Vector<Tick>();
-		while ( (t = reader.read()) != null ) {
-			actual.add(t);
-		}
-		reader.close();
-		
-		assertEquals(expected, actual);
+		new TickReader_FunctionalTest().testStreamContent(new CsvTickReader(csv));
 	}
 
 	@Test

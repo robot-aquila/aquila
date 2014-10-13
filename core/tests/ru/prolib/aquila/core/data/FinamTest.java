@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import org.joda.time.*;
 import org.junit.*;
@@ -77,6 +78,32 @@ public class FinamTest {
 		
 		CandlesWriter expected = new Quote2CsvWriter(candles, file);
 		assertEquals(expected, finam.createWriter(file, candles));
+	}
+	
+	@Test
+	public void testCreateTickReader_Csv() throws Exception {
+		TickReader reader = finam.createTickReader("fixture/GAZP_ticks.csv");
+		new TickReader_FunctionalTest().testStreamContent(reader);
+	}
+	
+	@Test (expected=FileNotFoundException.class)
+	public void testCreateTickReader_Csv_ThrowsIfFileNotFound()
+			throws Exception
+	{
+		finam.createTickReader("fixture/GAZ-maz-vaz-baz.txt");
+	}
+	
+	@Test
+	public void testCreateTickReader_GZippedCsv() throws Exception {
+		TickReader reader = finam.createTickReader("fixture/GAZP_ticks.csv.gz");
+		new TickReader_FunctionalTest().testStreamContent(reader);
+	}
+	
+	@Test (expected=NullPointerException.class)
+	public void testCreateTickReader_ThrowsIfFilenameIsNull()
+			throws Exception
+	{
+		finam.createTickReader(null);
 	}
 
 }
