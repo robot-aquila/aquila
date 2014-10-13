@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.data.finam;
 
 import static org.junit.Assert.*;
 
@@ -11,9 +11,16 @@ import org.apache.log4j.BasicConfigurator;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-public class FinamCandlesCsvFileWriterTest {
+import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.EditableCandleSeries;
+import ru.prolib.aquila.core.data.Finam;
+import ru.prolib.aquila.core.data.SeriesFactoryImpl;
+import ru.prolib.aquila.core.data.Timeframe;
+import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
+
+public class Quote2CsvWriterTest {
 	private static final Timeframe T = Timeframe.M1;
-	private FinamCandlesCsvFileWriter writer;
+	private Quote2CsvWriter writer;
 	private EditableCandleSeries candles;
 	
 	@BeforeClass
@@ -64,7 +71,7 @@ public class FinamCandlesCsvFileWriterTest {
 		File dst = File.createTempFile("finam-", ".csv");
 		dst.deleteOnExit();
 		
-		writer = new FinamCandlesCsvFileWriter(candles, dst);
+		writer = new Quote2CsvWriter(candles, dst);
 		writer.start();
 		
 		candles.add(candle("20130906 150718", 18.1d, 19.8d, 17.5d, 17.5d, 124));
@@ -85,7 +92,7 @@ public class FinamCandlesCsvFileWriterTest {
 		dst.deleteOnExit();
 		
 		new Finam().loadCandles(dst, candles);
-		writer = new FinamCandlesCsvFileWriter(candles, dst);
+		writer = new Quote2CsvWriter(candles, dst);
 		writer.start();
 		
 		candles.add(candle("20130906 150718", 18.1d, 19.8d, 17.5d, 17.5d, 124));
@@ -106,11 +113,11 @@ public class FinamCandlesCsvFileWriterTest {
 	public void testEquals() throws Exception {
 		File dst = File.createTempFile("finam-", ".csv");
 		dst.deleteOnExit();
-		writer = new FinamCandlesCsvFileWriter(candles, dst);
+		writer = new Quote2CsvWriter(candles, dst);
 		assertTrue(writer.equals(writer));
 		assertFalse(writer.equals(null));
 		assertFalse(writer.equals(this));
-		assertTrue(writer.equals(new FinamCandlesCsvFileWriter(candles, dst)));
+		assertTrue(writer.equals(new Quote2CsvWriter(candles, dst)));
 	}
 
 }

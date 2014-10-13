@@ -1,8 +1,13 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.data.finam;
 
 import java.io.IOException;
 import java.text.ParseException;
 import org.joda.time.DateTime;
+
+import ru.prolib.aquila.core.data.Finam;
+import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.data.TickReader;
+
 import com.csvreader.CsvReader;
 
 /**
@@ -10,7 +15,7 @@ import com.csvreader.CsvReader;
  * <p>
  * Использует идентификаторы полей, определенные в классе {@link Finam}. 
  */
-public class FinamCsvTickStreamReader implements TickStreamReader {
+public class CsvTickReader implements TickReader {
 	private final CsvReader reader;
 	
 	/**
@@ -19,7 +24,7 @@ public class FinamCsvTickStreamReader implements TickStreamReader {
 	 * @param reader ридер CSV-потока. Подразумевается, что заголовки CSV-файла
 	 * уже прочитаны посредством вызова {@link CsvReader#readHeaders()}.
 	 */
-	public FinamCsvTickStreamReader(CsvReader reader) {
+	public CsvTickReader(CsvReader reader) {
 		super();
 		this.reader = reader;
 	}

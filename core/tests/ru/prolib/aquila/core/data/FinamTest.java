@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import org.joda.time.*;
 import org.junit.*;
 
+import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
+
 /**
  * 2013-03-08<br>
  * $Id: FinamTest.java 565 2013-03-10 19:32:12Z whirlwind $
@@ -73,7 +75,7 @@ public class FinamTest {
 		File file = File.createTempFile("finam-", ".csv");
 		EditableCandleSeries candles = new CandleSeriesImpl(Timeframe.M5);
 		
-		CandlesWriter expected = new FinamCandlesCsvFileWriter(candles, file);
+		CandlesWriter expected = new Quote2CsvWriter(candles, file);
 		assertEquals(expected, finam.createWriter(file, candles));
 	}
 

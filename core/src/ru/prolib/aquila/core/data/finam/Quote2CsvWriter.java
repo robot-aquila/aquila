@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.data.finam;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -11,19 +11,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleSeries;
+import ru.prolib.aquila.core.data.CandlesWriter;
+import ru.prolib.aquila.core.data.Finam;
+import ru.prolib.aquila.core.data.ValueException;
 
 /**
- * Сервис записи котировок в csv-файл формата ФИНАМ.
+ * Сервис записи котировок в csv-файл в формате ФИНАМ.
  * <p>
  */
-public class FinamCandlesCsvFileWriter implements CandlesWriter, EventListener {
+public class Quote2CsvWriter implements CandlesWriter, EventListener {
 	private static final Logger logger;
 	private static final SimpleDateFormat dateFormat, timeFormat;
 	private static final String SEPARATOR = ",";
 	private static final String EOL = System.getProperty("line.separator");
 	
 	static {
-		logger = LoggerFactory.getLogger(FinamCandlesCsvFileWriter.class);
+		logger = LoggerFactory.getLogger(Quote2CsvWriter.class);
 		dateFormat = new SimpleDateFormat("yyyyMMdd");
 		timeFormat = new SimpleDateFormat("HHmmss");
 	}
@@ -36,7 +41,7 @@ public class FinamCandlesCsvFileWriter implements CandlesWriter, EventListener {
 	 */
 	private int savedCandleIndex;
 	
-	public FinamCandlesCsvFileWriter(CandleSeries candles, File file) {
+	public Quote2CsvWriter(CandleSeries candles, File file) {
 		super();
 		this.candles = candles;
 		this.file = file;
@@ -96,7 +101,7 @@ public class FinamCandlesCsvFileWriter implements CandlesWriter, EventListener {
 	 * @throws IOException
 	 */
 	private void init() throws IOException {
-		target = new RandomAccessFile(file, "rws");
+		target = new RandomAccessFile(file, "rw");
 		FileChannel channel = target.getChannel();
 		FileLock lock = channel.lock();
 		try {
@@ -206,11 +211,11 @@ public class FinamCandlesCsvFileWriter implements CandlesWriter, EventListener {
 			return true;
 		}
 		if ( other == null
-				|| other.getClass() != FinamCandlesCsvFileWriter.class )
+				|| other.getClass() != Quote2CsvWriter.class )
 		{
 			return false;
 		}
-		FinamCandlesCsvFileWriter o = (FinamCandlesCsvFileWriter) other;
+		Quote2CsvWriter o = (Quote2CsvWriter) other;
 		return new EqualsBuilder()
 			.append(o.savedCandleIndex, savedCandleIndex)
 			.append(o.candles, candles)

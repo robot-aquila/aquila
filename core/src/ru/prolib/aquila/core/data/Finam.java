@@ -8,10 +8,11 @@ import java.util.Date;
 
 import org.joda.time.DateTime;
 
+import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
 import ru.prolib.aquila.core.data.row.*;
 
 /**
- * Загрузчик последовательности свечей формата ФИНАМ.
+ * Фасад загрузчика данных формата ФИНАМ.
  * <p>
  * 2013-03-07<br>
  * $Id: Finam.java 565 2013-03-10 19:32:12Z whirlwind $
@@ -79,7 +80,7 @@ public class Finam {
 	public CandlesWriter
 		createWriter(File csvfile, EditableCandleSeries candles)
 	{
-		return new FinamCandlesCsvFileWriter(candles, csvfile);
+		return new Quote2CsvWriter(candles, csvfile);
 	}
 
 }

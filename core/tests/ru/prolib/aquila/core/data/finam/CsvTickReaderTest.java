@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.data.finam;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -9,9 +9,12 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
+import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.data.finam.CsvTickReader;
+
 import com.csvreader.CsvReader;
 
-public class FinamCsvTickStreamReaderTest {
+public class CsvTickReaderTest {
 	private static final Vector<Tick> expected = new Vector<Tick>();
 	
 	@BeforeClass
@@ -29,20 +32,20 @@ public class FinamCsvTickStreamReaderTest {
 	
 	private IMocksControl control;
 	private CsvReader csv;
-	private FinamCsvTickStreamReader reader;
+	private CsvTickReader reader;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		csv = control.createMock(CsvReader.class);
-		reader = new FinamCsvTickStreamReader(csv);
+		reader = new CsvTickReader(csv);
 	}
 	
 	@Test
 	public void testRead() throws Exception {
 		csv = new CsvReader("fixture/GAZP_ticks.csv");
 		csv.readHeaders();
-		reader = new FinamCsvTickStreamReader(csv);
+		reader = new CsvTickReader(csv);
 		
 		Tick t = null;
 		Vector<Tick> actual = new Vector<Tick>();

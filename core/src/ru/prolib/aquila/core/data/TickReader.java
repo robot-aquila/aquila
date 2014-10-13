@@ -6,7 +6,7 @@ import java.io.IOException;
  * Интерфейс ридера потока тиковых данных.
  * <p>
  */
-public interface TickStreamReader {
+public interface TickReader {
 	
 	/**
 	 * Извлечь очередной тик данных.
