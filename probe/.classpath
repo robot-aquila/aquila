@@ -20,11 +20,10 @@
 	<classpathentry kind="lib" path="../contrib/junit-4.8.2.jar"/>
 	<classpathentry kind="lib" path="../contrib/cglib-nodep-2.2.jar"/>
 	<classpathentry kind="lib" path="../contrib/objenesis-1.2.jar"/>
-	<classpathentry kind="output" path="bin"/>
-	<!-- spec libs -->
 	<classpathentry kind="lib" path="../build/aquila-core.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:../build/aquila-core-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
