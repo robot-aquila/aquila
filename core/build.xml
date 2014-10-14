@@ -14,6 +14,7 @@
         <include name="slf4j-log4j12-1.6.4.jar"/>
         <include name="log4j-1.2.16.jar"/>
         <include name="commons-lang3-3.1.jar" />
+    	<include name="commons-io-2.4.jar" />
     	<include name="javacsv.jar" />
     	<include name="xstream-1.4.1.jar" />
     	<include name="joda-time-2.2.jar" />
