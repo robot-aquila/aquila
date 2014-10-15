@@ -3,6 +3,7 @@ package ru.prolib.aquila.probe.internal;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.timeline.TLEvent;
+import ru.prolib.aquila.probe.timeline.TLException;
 
 public class SecurityDataDispatcherTest {
 	private IMocksControl control;
@@ -131,14 +133,34 @@ public class SecurityDataDispatcherTest {
 		assertEquals(expected, actual);
 	}
 
-	@Test
-	public void testPullEvent_ThrowsIfReaderThrows() {
-		fail("TODO: ");
+	@Test (expected=TLException.class)
+	public void testPullEvent_ThrowsIfReaderThrows() throws Exception {
+		TickReader reader = control.createMock(TickReader.class);
+		expect(reader.read()).andThrow(new IOException("test error"));
+		control.replay();
+		
+		dispatcher = new SecurityDataDispatcher(reader, tasks);
+		dispatcher.pullEvent();
 	}
 	
 	@Test
-	public void testWorkflow_IfClosed() {
-		fail("TODO: ");
+	public void testWorkflow_IfClosed() throws Exception {
+		control.replay();
+		
+		dispatcher = new SecurityDataDispatcher(createTestReader(), tasks);
+		assertFalse(dispatcher.closed());
+		dispatcher.close();
+		assertTrue(dispatcher.closed());
+		
+		Vector<TaskCheck> actual = new Vector<TaskCheck>();
+		TLEvent event = null;
+		while ( (event = dispatcher.pullEvent()) != null ) {
+			actual.add((TaskCheck)event.getProcedure());
+		}
+		
+		control.verify();
+		Vector<TaskCheck> expected = new Vector<TaskCheck>();
+		assertEquals(expected, actual);
 	}
 
 }
