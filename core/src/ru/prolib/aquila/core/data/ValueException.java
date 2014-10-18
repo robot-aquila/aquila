@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.data;
 /**
  * Базовое исключение в связи со значением или его получением.
  */
-public class ValueException extends Exception {
+public class ValueException extends DataException {
 	private static final long serialVersionUID = 1L;
 	
 	public ValueException(String msg, Throwable t) {

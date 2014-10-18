@@ -72,5 +72,19 @@ public class SimpleTickReaderTest {
 		
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testConstruct0() throws Exception {
+		List<Tick> expected = new LinkedList<Tick>(),
+				actual = new LinkedList<Tick>();
+		
+		TickReader reader = new SimpleTickReader();
+		Tick tick;
+		while ( (tick = reader.read()) != null ) {
+			actual.add(tick);
+		}
+		
+		assertEquals(expected, actual);
+	}
 
 }

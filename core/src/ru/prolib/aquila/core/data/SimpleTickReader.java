@@ -17,6 +17,11 @@ public class SimpleTickReader implements TickReader {
 		super();
 		this.ticks = new ArrayDeque<Tick>(ticks);
 	}
+	
+	public SimpleTickReader() {
+		super();
+		this.ticks = new ArrayDeque<Tick>();
+	}
 
 	@Override
 	public Tick read() throws IOException {
