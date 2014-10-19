@@ -19,30 +19,35 @@ public class StorageScanner {
 	}
 	
 	/**
-	 * Определение наличия внутридневных данных.
+	 * Перечисление файлов внутридневных данных.
 	 * <p>
-	 * Внутридневные данные хранятся в файлах с именами yyyyMMdd
+	 * Внутридневные данные хранятся в файлах с именами S-N-C-T-yyyyMMdd
 	 * и расширением csv или csv.gz. Данный метод сканирует указанный каталог
 	 * на предмет наличия таких файлов. Имена файлов преобразуются в даты,
 	 * которые, при условии подходящей даты, помещаются в список.
 	 * <p>
+	 * @param filePrefix префикс имени файла
 	 * @param path путь к каталогу с файлами
 	 * @param from дата, включительно с которой интересует наличие данных  
 	 * @return отсортированный список подходящих дат  
 	 */
-	public List<LocalDate> findIntradayFiles(File path, LocalDate from) {
+	public List<LocalDate> findIntradayFiles(final String filePrefix, File path,
+			LocalDate from)
+	{
 		List<LocalDate> result = new ArrayList<LocalDate>();
 		File files[] = path.listFiles(new FileFilter() {
 			@Override public boolean accept(File pathname) {
-				return pathname.isFile();
+				return pathname.isFile()
+						&& pathname.getName().startsWith(filePrefix);
 			}
 		});
+		int startFrom = filePrefix.length();
 		for ( File file : files ) {
 			String x = file.getName();
 			if ( x.endsWith(".csv") ) {
-				x = x.substring(0, x.length() - 4);
+				x = x.substring(startFrom, x.length() - 4);
 			} else if ( x.endsWith(".csv.gz") ) {
-				x = x.substring(0, x.length() - 7);
+				x = x.substring(startFrom, x.length() - 7);
 			} else {
 				continue;
 			}
