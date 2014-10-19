@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.data.finam;
 import static org.easymock.EasyMock.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
+
+import ru.prolib.aquila.core.data.DataException;
 import ru.prolib.aquila.core.data.TickReader_FunctionalTest;
 import ru.prolib.aquila.core.data.finam.CsvTickReader;
 
@@ -20,11 +22,15 @@ public class CsvTickReaderTest {
 		reader = new CsvTickReader(csv);
 	}
 	
-	@Test
-	public void testRead2() throws Exception {
-		csv = new CsvReader("fixture/GAZP_ticks.csv");
+	private CsvTickReader createReader() throws Exception {
+		CsvReader csv = new CsvReader("fixture/GAZP_ticks.csv");
 		csv.readHeaders();
-		new TickReader_FunctionalTest().testStreamContent(new CsvTickReader(csv));
+		return new CsvTickReader(csv);
+	}
+	
+	@Test
+	public void testContent() throws Exception {
+		new TickReader_FunctionalTest().testStreamContent(createReader());
 	}
 
 	@Test
@@ -35,6 +41,27 @@ public class CsvTickReaderTest {
 		reader.close();
 		
 		control.verify();
+	}
+	
+	@Test (expected=DataException.class)
+	public void testCurrent_ThrowsIfBeforeStart() throws Exception {
+		reader = createReader();
+		reader.current();
+	}
+	
+	@Test (expected=DataException.class)
+	public void testCurrent_ThrowsIfAfterEnd() throws Exception {
+		reader = createReader();
+		while ( reader.next() ) { }
+		reader.current();
+	}
+	
+	@Test (expected=DataException.class)
+	public void testCurrent_ThrowsIfClosed() throws Exception {
+		reader = createReader();
+		reader.next();
+		reader.close();
+		reader.current();
 	}
 
 }

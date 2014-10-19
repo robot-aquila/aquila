@@ -30,10 +30,9 @@ public class TickReader_FunctionalTest {
 	 * @throws Exception
 	 */
 	public void testStreamContent(final TickReader reader) throws Exception {
-		Tick t = null;
 		Vector<Tick> actual = new Vector<Tick>();
-		while ( (t = reader.read()) != null ) {
-			actual.add(t);
+		while ( reader.next() ) {
+			actual.add(reader.current());
 		}
 		reader.close();
 		

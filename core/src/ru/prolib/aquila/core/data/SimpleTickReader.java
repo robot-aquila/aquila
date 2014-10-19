@@ -1,9 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 
 /** 
  * Элементарный ридер тиков.
@@ -12,6 +9,8 @@ import java.util.List;
  */
 public class SimpleTickReader implements TickReader {
 	private final Deque<Tick> ticks;
+	private Tick curr;
+	private boolean closed = false;
 	
 	public SimpleTickReader(List<Tick> ticks) {
 		super();
@@ -24,13 +23,28 @@ public class SimpleTickReader implements TickReader {
 	}
 
 	@Override
-	public Tick read() throws IOException {
-		return ticks.pollFirst();
+	public Tick current() throws DataException {
+		if ( curr == null || closed ) {
+			throw new DataException("No data under cursor");
+		}
+		return curr;
+	}
+	
+	@Override
+	public boolean next() throws DataException {
+		if ( ticks.size() > 0 ) {
+			curr = ticks.pollFirst();
+			return true;
+		} else {
+			closed = true;
+			return false;
+		}
 	}
 
 	@Override
 	public void close() {
 		ticks.clear();
+		closed = true;
 	}
 
 }

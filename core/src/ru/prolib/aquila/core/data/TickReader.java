@@ -1,24 +1,10 @@
 package ru.prolib.aquila.core.data;
 
-import java.io.IOException;
 
 /**
- * Интерфейс ридера потока тиковых данных.
+ * Интерфейс потока тиковых данных.
  * <p>
  */
-public interface TickReader {
-	
-	/**
-	 * Извлечь очередной тик данных.
-	 * <p>
-	 * @return тик данных или null, если достигнут конец потока
-	 * @throws IOException
-	 */
-	public Tick read() throws IOException;
-	
-	/**
-	 * Закрыть поток и освободить занятые ресурсы. 
-	 */
-	public void close();
+public interface TickReader extends CloseableIterator<Tick> {
 
 }

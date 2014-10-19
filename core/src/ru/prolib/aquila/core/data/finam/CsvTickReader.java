@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.data.finam;
 import java.io.IOException;
 import java.text.ParseException;
 import org.joda.time.DateTime;
-
+import ru.prolib.aquila.core.data.DataException;
 import ru.prolib.aquila.core.data.Finam;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.core.data.TickReader;
@@ -17,6 +17,8 @@ import com.csvreader.CsvReader;
  */
 public class CsvTickReader implements TickReader {
 	private final CsvReader reader;
+	private Tick curr;
+	private boolean closed = false;
 	
 	/**
 	 * Конструктор.
@@ -30,23 +32,39 @@ public class CsvTickReader implements TickReader {
 	}
 
 	@Override
-	public Tick read() throws IOException {
-		if ( ! reader.readRecord() ) {
-			return null;
-		}
+	public boolean next() throws DataException {
 		try {
-			return new Tick(new DateTime(Finam.df.parse(reader.get(Finam.DATE)
+			if ( closed ) {
+				return false;
+			}
+			if ( ! reader.readRecord() ) {
+				close();
+				return false;
+			}
+			curr = new Tick(new DateTime(Finam.df.parse(reader.get(Finam.DATE)
 					+ " " + reader.get(Finam.TIME))),
 				Double.parseDouble(reader.get(Finam.LAST)),
 				Double.parseDouble(reader.get(Finam.VOLUME)));
+			return true;
 		} catch ( ParseException e ) {
-			throw new IOException(e);
+			throw new DataException(e);
+		} catch ( IOException e ) {
+			throw new DataException(e);			
 		}
+	}
+	
+	@Override
+	public Tick current() throws DataException {
+		if ( curr == null || closed ) {
+			throw new DataException("No data under cursor");
+		}
+		return curr;
 	}
 
 	@Override
 	public void close() {
 		reader.close();
+		closed = true;
 	}
 
 }

@@ -50,9 +50,8 @@ public class SimpleTickReaderTest {
 		List<Tick> expected = getExpectedAsList(),
 				actual = new LinkedList<Tick>();
 		TickReader reader = getExpectedAsReader();
-		Tick tick = null;
-		while ( (tick = reader.read()) != null ) {
-			actual.add(tick);
+		while ( reader.next() ) {
+			actual.add(reader.current());
 		}
 		
 		assertEquals(expected, actual);
@@ -65,9 +64,8 @@ public class SimpleTickReaderTest {
 		
 		TickReader reader = getExpectedAsReader();
 		reader.close();
-		Tick tick = null;
-		while ( (tick = reader.read()) != null ) {
-			actual.add(tick);
+		while ( reader.next() ) {
+			actual.add(reader.current());
 		}
 		
 		assertEquals(expected, actual);
@@ -79,12 +77,32 @@ public class SimpleTickReaderTest {
 				actual = new LinkedList<Tick>();
 		
 		TickReader reader = new SimpleTickReader();
-		Tick tick;
-		while ( (tick = reader.read()) != null ) {
-			actual.add(tick);
+		while ( reader.next() ) {
+			actual.add(reader.current());
 		}
 		
 		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=DataException.class)
+	public void testCurrent_ThrowsIfBeforeStart() throws Exception {
+		new SimpleTickReader().current();
+	}
+	
+	@Test (expected=DataException.class)
+	public void testCurrent_ThrowsIfAfterEnd() throws Exception {
+		TickReader reader = getExpectedAsReader();
+		reader.next();
+		reader.close();
+		reader.current();
+	}
+	
+	@Test (expected=DataException.class)
+	public void testCurrent_ThrowsIfClosed() throws Exception {
+		TickReader reader = getExpectedAsReader();
+		reader.next();
+		reader.close();
+		reader.current();
 	}
 
 }
