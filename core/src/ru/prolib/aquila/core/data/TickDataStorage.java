@@ -20,10 +20,10 @@ public interface TickDataStorage {
 	 * <p>
 	 * @param descr дескриптор инструмента
 	 * @param from время начала данных
-	 * @return ридер тиков
+	 * @return итератор тиковых данных
 	 * @throws DataException ошибка доступа к данным. 
 	 */
-	public TickReader getTicks(SecurityDescriptor descr, DateTime from)
+	public Aqiterator<Tick> getTicks(SecurityDescriptor descr, DateTime from)
 			throws DataException;
 
 }

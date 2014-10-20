@@ -47,7 +47,6 @@ public class Finam {
 			throws FileNotFoundException, ParseException, NumberFormatException,
 				ValueException
 	{
-		//SimpleDateFormat df = new SimpleDateFormat(TIMEFORMAT);
 		RowSet rs = new CsvRowSet(csvfile);
 		Long volume = 0L;
 		Timeframe tf = candles.getTimeframe();
@@ -95,7 +94,9 @@ public class Finam {
 	 * @return поток тиков
 	 * @throws IOException
 	 */
-	public TickReader createTickReader(String filename) throws IOException {
+	public Aqiterator<Tick>
+		createTickReader(String filename) throws IOException
+	{
 		CsvReader csv;
 		if ( FilenameUtils.getExtension(filename).equals("gz") ) {
 			csv = new CsvReader(new BufferedReader(new InputStreamReader(

@@ -7,6 +7,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import ru.prolib.aquila.core.data.Aqiterator;
+import ru.prolib.aquila.core.data.SimpleIterator;
+
 public class StorageScanner {
 	private static final DateTimeFormatter df;
 	
@@ -21,20 +24,23 @@ public class StorageScanner {
 	/**
 	 * Перечисление файлов внутридневных данных.
 	 * <p>
-	 * Внутридневные данные хранятся в файлах с именами S-N-C-T-yyyyMMdd
-	 * и расширением csv или csv.gz. Данный метод сканирует указанный каталог
+	 * Внутридневные тиковые данные хранятся в файлах с именами PFXyyyyMMdd
+	 * и расширением csv или csv.gz, где PFX - произвольный префикс (обычно
+	 * идентификатор инструмента). Данный метод сканирует указанный каталог
 	 * на предмет наличия таких файлов. Имена файлов преобразуются в даты,
-	 * которые, при условии подходящей даты, помещаются в список.
+	 * которые затем проверяются на вхождение в соответствие с условием по
+	 * начальной дате. Если данные подходят, то формируется дескриптор файла. 
 	 * <p>
-	 * @param filePrefix префикс имени файла
 	 * @param path путь к каталогу с файлами
+	 * @param filePrefix префикс имени файла
 	 * @param from дата, включительно с которой интересует наличие данных  
-	 * @return отсортированный список подходящих дат  
+	 * @return список подходящих дескрипторов, отсортированный в порядке
+	 * возрастания даты  
 	 */
-	public List<LocalDate> findIntradayFiles(final String filePrefix, File path,
-			LocalDate from)
+	public Aqiterator<FileEntry>
+		findIntradayFiles(File path, final String filePrefix, LocalDate start)
 	{
-		List<LocalDate> result = new ArrayList<LocalDate>();
+		List<FileEntry> result = new Vector<FileEntry>();
 		File files[] = path.listFiles(new FileFilter() {
 			@Override public boolean accept(File pathname) {
 				return pathname.isFile()
@@ -53,15 +59,15 @@ public class StorageScanner {
 			}
 			try {
 				LocalDate date = df.parseLocalDate(x);
-				if ( ! date.isBefore(from) ) {
-					result.add(date);
+				if ( ! date.isBefore(start) ) {
+					result.add(new FileEntry(file, date));
 				}
 			} catch ( IllegalArgumentException e ) {
 				
 			}
 		}
 		Collections.sort(result);
-		return result;
+		return new SimpleIterator<FileEntry>(result);
 	}
 
 }

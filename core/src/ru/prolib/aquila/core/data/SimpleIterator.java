@@ -9,7 +9,7 @@ import java.util.List;
  * <p>
  * @param <T> - тип значений
  */
-public class SimpleIterator<T> implements CloseableIterator<T> {
+public class SimpleIterator<T> implements Aqiterator<T> {
 	protected final Deque<T> data;
 	private T curr;
 	private boolean closed = false;
@@ -25,7 +25,7 @@ public class SimpleIterator<T> implements CloseableIterator<T> {
 	}
 
 	@Override
-	public T current() throws DataException {
+	public T item() throws DataException {
 		if ( curr == null || closed ) {
 			throw new DataException("No data under cursor");
 		}

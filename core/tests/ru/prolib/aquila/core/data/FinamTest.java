@@ -82,7 +82,8 @@ public class FinamTest {
 	
 	@Test
 	public void testCreateTickReader_Csv() throws Exception {
-		TickReader reader = finam.createTickReader("fixture/GAZP_ticks.csv");
+		Aqiterator<Tick> reader =
+				finam.createTickReader("fixture/GAZP_ticks.csv");
 		new TickReader_FunctionalTest().testStreamContent(reader);
 	}
 	
@@ -95,7 +96,8 @@ public class FinamTest {
 	
 	@Test
 	public void testCreateTickReader_GZippedCsv() throws Exception {
-		TickReader reader = finam.createTickReader("fixture/GAZP_ticks.csv.gz");
+		Aqiterator<Tick> reader =
+				finam.createTickReader("fixture/GAZP_ticks.csv.gz");
 		new TickReader_FunctionalTest().testStreamContent(reader);
 	}
 	

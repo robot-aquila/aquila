@@ -46,14 +46,14 @@ public class CsvTickReaderTest {
 	@Test (expected=DataException.class)
 	public void testCurrent_ThrowsIfBeforeStart() throws Exception {
 		reader = createReader();
-		reader.current();
+		reader.item();
 	}
 	
 	@Test (expected=DataException.class)
 	public void testCurrent_ThrowsIfAfterEnd() throws Exception {
 		reader = createReader();
 		while ( reader.next() ) { }
-		reader.current();
+		reader.item();
 	}
 	
 	@Test (expected=DataException.class)
@@ -61,7 +61,7 @@ public class CsvTickReaderTest {
 		reader = createReader();
 		reader.next();
 		reader.close();
-		reader.current();
+		reader.item();
 	}
 
 }

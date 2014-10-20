@@ -13,6 +13,6 @@ public interface TickReaderFactory {
 	 * @return поток тиковых данных
 	 * @throws DataException
 	 */
-	public TickReader createTickReader(String param) throws DataException;
+	public Aqiterator<Tick> createTickReader(String param) throws DataException;
 
 }

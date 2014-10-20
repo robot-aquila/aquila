@@ -5,7 +5,7 @@ package ru.prolib.aquila.core.data;
  * <p>
  * @param <T> - тип элементов
  */
-public interface CloseableIterator<T> {
+public interface Aqiterator<T> {
 	
 	/**
 	 * Освободить используемые ресурсы. 
@@ -19,7 +19,7 @@ public interface CloseableIterator<T> {
 	 * @throws NoSuchElementException нет элемента под курсором
 	 * @throws DataException
 	 */
-	public T current() throws DataException;
+	public T item() throws DataException;
 	
 	/**
 	 * Переместиться на следующий элемент.

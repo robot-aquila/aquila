@@ -9,7 +9,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-public class SimpleTickReaderTest {
+public class SimpleIteratorTest {
 	private final SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
 	
 	/**
@@ -41,17 +41,17 @@ public class SimpleTickReaderTest {
 		return ticks;
 	}
 	
-	public SimpleTickReader getExpectedAsReader() throws Exception {
-		return new SimpleTickReader(getExpectedAsList());
+	public Aqiterator<Tick> getExpectedAsReader() throws Exception {
+		return new SimpleIterator<Tick>(getExpectedAsList());
 	}
 
 	@Test
 	public void testRead() throws Exception {
 		List<Tick> expected = getExpectedAsList(),
 				actual = new LinkedList<Tick>();
-		TickReader reader = getExpectedAsReader();
+		Aqiterator<Tick> reader = getExpectedAsReader();
 		while ( reader.next() ) {
-			actual.add(reader.current());
+			actual.add(reader.item());
 		}
 		
 		assertEquals(expected, actual);
@@ -62,10 +62,10 @@ public class SimpleTickReaderTest {
 		List<Tick> expected = new LinkedList<Tick>(),
 				actual = new LinkedList<Tick>();
 		
-		TickReader reader = getExpectedAsReader();
+		Aqiterator<Tick> reader = getExpectedAsReader();
 		reader.close();
 		while ( reader.next() ) {
-			actual.add(reader.current());
+			actual.add(reader.item());
 		}
 		
 		assertEquals(expected, actual);
@@ -76,9 +76,9 @@ public class SimpleTickReaderTest {
 		List<Tick> expected = new LinkedList<Tick>(),
 				actual = new LinkedList<Tick>();
 		
-		TickReader reader = new SimpleTickReader();
+		Aqiterator<Tick> reader = new SimpleIterator<Tick>();
 		while ( reader.next() ) {
-			actual.add(reader.current());
+			actual.add(reader.item());
 		}
 		
 		assertEquals(expected, actual);
@@ -86,23 +86,23 @@ public class SimpleTickReaderTest {
 	
 	@Test (expected=DataException.class)
 	public void testCurrent_ThrowsIfBeforeStart() throws Exception {
-		new SimpleTickReader().current();
+		new SimpleIterator<Tick>().item();
 	}
 	
 	@Test (expected=DataException.class)
 	public void testCurrent_ThrowsIfAfterEnd() throws Exception {
-		TickReader reader = getExpectedAsReader();
+		Aqiterator<Tick> reader = getExpectedAsReader();
 		reader.next();
 		reader.close();
-		reader.current();
+		reader.item();
 	}
 	
 	@Test (expected=DataException.class)
 	public void testCurrent_ThrowsIfClosed() throws Exception {
-		TickReader reader = getExpectedAsReader();
+		Aqiterator<Tick> reader = getExpectedAsReader();
 		reader.next();
 		reader.close();
-		reader.current();
+		reader.item();
 	}
 
 }

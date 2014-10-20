@@ -29,10 +29,12 @@ public class TickReader_FunctionalTest {
 	 * @param reader
 	 * @throws Exception
 	 */
-	public void testStreamContent(final TickReader reader) throws Exception {
+	public void testStreamContent(final Aqiterator<Tick> reader)
+			throws Exception
+	{
 		Vector<Tick> actual = new Vector<Tick>();
 		while ( reader.next() ) {
-			actual.add(reader.current());
+			actual.add(reader.item());
 		}
 		reader.close();
 		

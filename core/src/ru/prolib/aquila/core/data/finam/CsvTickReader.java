@@ -3,10 +3,7 @@ package ru.prolib.aquila.core.data.finam;
 import java.io.IOException;
 import java.text.ParseException;
 import org.joda.time.DateTime;
-import ru.prolib.aquila.core.data.DataException;
-import ru.prolib.aquila.core.data.Finam;
-import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.core.data.TickReader;
+import ru.prolib.aquila.core.data.*;
 
 import com.csvreader.CsvReader;
 
@@ -15,7 +12,7 @@ import com.csvreader.CsvReader;
  * <p>
  * Использует идентификаторы полей, определенные в классе {@link Finam}. 
  */
-public class CsvTickReader implements TickReader {
+public class CsvTickReader implements Aqiterator<Tick> {
 	private final CsvReader reader;
 	private Tick curr;
 	private boolean closed = false;
@@ -54,7 +51,7 @@ public class CsvTickReader implements TickReader {
 	}
 	
 	@Override
-	public Tick current() throws DataException {
+	public Tick item() throws DataException {
 		if ( curr == null || closed ) {
 			throw new DataException("No data under cursor");
 		}

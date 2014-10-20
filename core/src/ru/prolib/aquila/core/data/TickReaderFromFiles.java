@@ -1,17 +1,18 @@
 package ru.prolib.aquila.core.data;
 
+import java.io.File;
+
 /**
  * Абстрактный поток тиков на основе набора файлов.
  * <p>
- * 
  */
-public class TickReaderFromFiles implements TickReader {
-	private final FileIterator fileset;
+public class TickReaderFromFiles implements Aqiterator<Tick> {
+	private final Aqiterator<File> fileset;
 	private final TickReaderFactory factory;
-	private TickReader currentReader;
+	private Aqiterator<Tick> currentReader;
 	private boolean closed = false;
 	
-	public TickReaderFromFiles(FileIterator fileset,
+	public TickReaderFromFiles(Aqiterator<File> fileset,
 			TickReaderFactory factory)
 	{
 		super();
@@ -26,11 +27,11 @@ public class TickReaderFromFiles implements TickReader {
 	}
 
 	@Override
-	public Tick current() throws DataException {
+	public Tick item() throws DataException {
 		if ( currentReader == null || closed ) {
 			throw new DataException("No data under cursor");
 		}
-		return currentReader.current();
+		return currentReader.item();
 	}
 
 	@Override
@@ -44,8 +45,8 @@ public class TickReaderFromFiles implements TickReader {
 				close();
 				return false;
 			}
-			TickReader r = factory.createTickReader(fileset.current()
-					.getAbsolutePath());
+			Aqiterator<Tick> r =
+				factory.createTickReader(fileset.item().getAbsolutePath());
 			if ( r.next() ) {
 				currentReader = r;
 				return true;
