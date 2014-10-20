@@ -3,7 +3,6 @@ package ru.prolib.aquila.probe.internal;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,8 +74,8 @@ public class SecurityDataDispatcherTest {
 		return ticks;
 	}
 	
-	private static TickReader createTestReader() throws Exception {
-		return new SimpleTickReader(getExpectedAsList());
+	private static Aqiterator<Tick> createTestReader() throws Exception {
+		return new SimpleIterator<Tick>(getExpectedAsList());
 	}
 
 	@Before
@@ -133,10 +132,11 @@ public class SecurityDataDispatcherTest {
 		assertEquals(expected, actual);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test (expected=TLException.class)
 	public void testPullEvent_ThrowsIfReaderThrows() throws Exception {
-		TickReader reader = control.createMock(TickReader.class);
-		expect(reader.read()).andThrow(new IOException("test error"));
+		Aqiterator<Tick> reader = control.createMock(Aqiterator.class);
+		expect(reader.next()).andThrow(new DataException("test error"));
 		control.replay();
 		
 		dispatcher = new SecurityDataDispatcher(reader, tasks);
