@@ -16,7 +16,6 @@ public interface Aqiterator<T> {
 	 * Получить элемент под курсором.
 	 * <p>
 	 * @return текущий элемент
-	 * @throws NoSuchElementException нет элемента под курсором
 	 * @throws DataException
 	 */
 	public T item() throws DataException;

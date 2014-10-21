@@ -63,5 +63,45 @@ public class StorageScannerTest {
 		
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testFindMonthlyDirs() throws Exception {
+		final String fpfx = basePath + "/2014/";
+		List<FileEntry> actual = new Vector<FileEntry>(),
+				expected = new Vector<FileEntry>();
+		expected.add(fileEntry(fpfx, "02", "1998-02-01"));
+		expected.add(fileEntry(fpfx, "05", "1998-05-01"));
+		expected.add(fileEntry(fpfx, "10", "1998-10-01"));
+		expected.add(fileEntry(fpfx, "11", "1998-11-01"));
+		expected.add(fileEntry(fpfx, "12", "1998-12-01"));
+		
+		Aqiterator<FileEntry> it =
+				scanner.findMonthlyDirs(new File(basePath + "/2014"),
+						new LocalDate(1998, 2, 14));
+		while ( it.next() ) {
+			actual.add(it.item());
+		}
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testFindYearsDirs() throws Exception {
+		final String fpfx = basePath + "/";
+		List<FileEntry> actual = new Vector<FileEntry>(),
+				expected = new Vector<FileEntry>();
+		expected.add(fileEntry(fpfx, "2011", "2011-01-01"));
+		expected.add(fileEntry(fpfx, "2014", "2014-01-01"));
+		expected.add(fileEntry(fpfx, "2029", "2029-01-01"));
+		
+		Aqiterator<FileEntry> it =
+				scanner.findYearlyDirs(new File(basePath),
+						new LocalDate(2011, 6, 19));
+		while ( it.next() ) {
+			actual.add(it.item());
+		}
+		
+		assertEquals(expected, actual);
+	}
 
 }
