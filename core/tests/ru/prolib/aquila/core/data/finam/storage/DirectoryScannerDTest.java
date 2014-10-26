@@ -14,19 +14,19 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Aqiterator;
 
-public class StorageScannerTest {
+public class DirectoryScannerDTest {
 	private static final DateTimeFormatter df;
 	
 	static {
 		df = DateTimeFormat.forPattern("yyyy-MM-dd");
 	}
 	
-	private StorageScanner scanner;
+	private DirectoryScannerD scanner;
 	private String basePath = "fixture/csv-storage/ticks";
 
 	@Before
 	public void setUp() throws Exception {
-		scanner = new StorageScanner();
+		scanner = new DirectoryScannerD("GAZP-EQBR-RUR-STK-");
 	}
 	
 	/**
@@ -40,9 +40,9 @@ public class StorageScannerTest {
 	private FileEntry fileEntry(String pfx, String name, String date) {
 		return new FileEntry(new File(pfx + name), df.parseLocalDate(date));
 	}
-	
+
 	@Test
-	public void testFindIntradayFiles() throws Exception {
+	public void testMakeScan() throws Exception {
 		final String pfx = "GAZP-EQBR-RUR-STK-",
 				fpfx = basePath + "/2014/10/" + pfx;
 		
@@ -55,8 +55,8 @@ public class StorageScannerTest {
 		expected.add(fileEntry(fpfx, "20141019.csv",    "2014-10-19"));
 
 		Aqiterator<FileEntry> it =
-				scanner.findIntradayFiles(new File(basePath + "/2014/10"),
-						pfx, new LocalDate(2014, 10, 5));
+				scanner.makeScan(new FileEntry(new File(basePath + "/2014/10"),
+						new LocalDate(2014, 10, 5)));
 		while ( it.next() ) {
 			actual.add(it.item());
 		}
@@ -64,44 +64,6 @@ public class StorageScannerTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testFindMonthlyDirs() throws Exception {
-		final String fpfx = basePath + "/2014/";
-		List<FileEntry> actual = new Vector<FileEntry>(),
-				expected = new Vector<FileEntry>();
-		expected.add(fileEntry(fpfx, "02", "1998-02-01"));
-		expected.add(fileEntry(fpfx, "05", "1998-05-01"));
-		expected.add(fileEntry(fpfx, "10", "1998-10-01"));
-		expected.add(fileEntry(fpfx, "11", "1998-11-01"));
-		expected.add(fileEntry(fpfx, "12", "1998-12-01"));
-		
-		Aqiterator<FileEntry> it =
-				scanner.findMonthlyDirs(new File(basePath + "/2014"),
-						new LocalDate(1998, 2, 14));
-		while ( it.next() ) {
-			actual.add(it.item());
-		}
-		
-		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testFindYearsDirs() throws Exception {
-		final String fpfx = basePath + "/";
-		List<FileEntry> actual = new Vector<FileEntry>(),
-				expected = new Vector<FileEntry>();
-		expected.add(fileEntry(fpfx, "2011", "2011-01-01"));
-		expected.add(fileEntry(fpfx, "2014", "2014-01-01"));
-		expected.add(fileEntry(fpfx, "2029", "2029-01-01"));
-		
-		Aqiterator<FileEntry> it =
-				scanner.findYearlyDirs(new File(basePath),
-						new LocalDate(2011, 6, 19));
-		while ( it.next() ) {
-			actual.add(it.item());
-		}
-		
-		assertEquals(expected, actual);
-	}
+
 
 }
