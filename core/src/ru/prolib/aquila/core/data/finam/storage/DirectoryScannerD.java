@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -74,6 +75,20 @@ public class DirectoryScannerD implements DirectoryScanner {
 		}
 		Collections.sort(result);
 		return new SimpleIterator<FileEntry>(result);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != DirectoryScannerD.class ) {
+			return false;
+		}
+		DirectoryScannerD o = (DirectoryScannerD) other;
+		return new EqualsBuilder()
+			.append(filePrefix, o.filePrefix)
+			.isEquals();
 	}
 
 }

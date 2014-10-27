@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data.finam.storage;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.DataException;
 
@@ -68,6 +70,21 @@ public class DirListScanner implements Aqiterator<FileEntry> {
 			subList = dirScanner.makeScan(dirList.item());
 		} while ( ! subList.next() );
 		return true;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != DirListScanner.class ) {
+			return false;
+		}
+		DirListScanner o = (DirListScanner) other;
+		return new EqualsBuilder()
+			.append(dirList, o.dirList)
+			.append(dirScanner, o.dirScanner)
+			.isEquals();
 	}
 
 }

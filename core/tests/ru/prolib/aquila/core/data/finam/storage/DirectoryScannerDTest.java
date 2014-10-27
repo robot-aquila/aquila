@@ -64,6 +64,13 @@ public class DirectoryScannerDTest {
 		assertEquals(expected, actual);
 	}
 	
-
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(scanner.equals(scanner));
+		assertTrue(scanner.equals(new DirectoryScannerD("GAZP-EQBR-RUR-STK-")));
+		assertFalse(scanner.equals(new DirectoryScannerD("another prefix")));
+		assertFalse(scanner.equals(this));
+		assertFalse(scanner.equals(null));
+	}
 
 }

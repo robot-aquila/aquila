@@ -63,5 +63,15 @@ public class DirectoryScannerM implements DirectoryScanner {
 		return new SimpleIterator<FileEntry>(result);
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != DirectoryScannerM.class ) {
+			return false;
+		}
+		return true;
+	}
 
 }

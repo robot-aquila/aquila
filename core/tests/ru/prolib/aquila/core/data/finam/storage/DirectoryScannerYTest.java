@@ -59,5 +59,13 @@ public class DirectoryScannerYTest {
 		
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(scanner.equals(scanner));
+		assertTrue(scanner.equals(new DirectoryScannerY()));
+		assertFalse(scanner.equals(null));
+		assertFalse(scanner.equals(this));
+	}
 
 }
