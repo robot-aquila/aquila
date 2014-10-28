@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.data.*;
  * Данный метод позволяет отбирать подходящие каталоги для последующего
  * сканирования.
  */
-public class DirectoryScannerY implements DirectoryScanner {
+public class DirectoryScannerY implements SubScanner<FileEntry> {
 	private static final DateTimeFormatter yearFormat;
 	
 	static {

@@ -12,6 +12,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.SimpleIterator;
+import ru.prolib.aquila.core.data.SubScanner;
 
 /**
  * Сканер уровня суточных данных.
@@ -23,7 +24,7 @@ import ru.prolib.aquila.core.data.SimpleIterator;
  * которые затем проверяются на вхождение в соответствие с условием по
  * начальной дате. Если данные подходят, то формируется дескриптор файла. 
  */
-public class DirectoryScannerD implements DirectoryScanner {
+public class DirectoryScannerD implements SubScanner<FileEntry> {
 	private static final DateTimeFormatter dateFormat;
 	
 	static {

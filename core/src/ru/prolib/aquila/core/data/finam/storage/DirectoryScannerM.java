@@ -11,6 +11,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.SimpleIterator;
+import ru.prolib.aquila.core.data.SubScanner;
 
 /**
  * Сканер уровня группировки по месяцам.
@@ -19,7 +20,7 @@ import ru.prolib.aquila.core.data.SimpleIterator;
  * году, приведенному к строке в соответствии с шаблоном MM. Данный класс
  * позволяет отобрать подходящие каталоги для последующего сканирования.
  */
-public class DirectoryScannerM implements DirectoryScanner {
+public class DirectoryScannerM implements SubScanner<FileEntry> {
 	private static final DateTimeFormatter monthFormat;
 	
 	static {

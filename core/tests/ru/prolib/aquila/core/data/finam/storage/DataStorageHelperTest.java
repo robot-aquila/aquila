@@ -9,6 +9,8 @@ import org.junit.*;
 import ru.prolib.aquila.core.BusinessEntities.ISO4217;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.data.SubScanIteratorBuilder;
+import ru.prolib.aquila.core.data.SubScanner;
 import ru.prolib.aquila.core.utils.FileNameEncoder;
 
 public class DataStorageHelperTest {
@@ -40,9 +42,9 @@ public class DataStorageHelperTest {
 
 	@Test
 	public void testCreateTickFilesScanner() throws Exception {
-		DirectoryScanner expected =
-				new DirListScannerBuilder(new DirectoryScannerY(),
-						new DirListScannerBuilder(new DirectoryScannerM(),
+		SubScanner<FileEntry> expected =
+			new SubScanIteratorBuilder<FileEntry>(new DirectoryScannerY(),
+				new SubScanIteratorBuilder<FileEntry>(new DirectoryScannerM(),
 								new DirectoryScannerD("boom!"))),
 		actual = helper.createTickFilesScanner("boom!");
 		

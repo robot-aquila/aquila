@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.data.finam.storage;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.data.SubScanIteratorBuilder;
+import ru.prolib.aquila.core.data.SubScanner;
 import ru.prolib.aquila.core.utils.FileNameEncoder;
 
 public class DataStorageHelper {
@@ -47,9 +49,9 @@ public class DataStorageHelper {
 	 * @param filePrefix префикс файлов
 	 * @return сканер файлов тиковых данных
 	 */
-	public DirectoryScanner createTickFilesScanner(String filePrefix) {
-		return new DirListScannerBuilder(new DirectoryScannerY(),
-			new DirListScannerBuilder(new DirectoryScannerM(),
+	public SubScanner<FileEntry> createTickFilesScanner(String filePrefix) {
+		return new SubScanIteratorBuilder<FileEntry>(new DirectoryScannerY(),
+			new SubScanIteratorBuilder<FileEntry>(new DirectoryScannerM(),
 				new DirectoryScannerD(filePrefix)));
 	}
 
