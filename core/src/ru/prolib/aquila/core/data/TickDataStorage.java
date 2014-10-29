@@ -19,11 +19,11 @@ public interface TickDataStorage {
 	 * периода отсутствия торгов или невысокой ликвидности инструмента.  
 	 * <p>
 	 * @param descr дескриптор инструмента
-	 * @param from время начала данных
+	 * @param start время начала данных
 	 * @return итератор тиковых данных
 	 * @throws DataException ошибка доступа к данным. 
 	 */
-	public Aqiterator<Tick> getTicks(SecurityDescriptor descr, DateTime from)
+	public Aqiterator<Tick> getTicks(SecurityDescriptor descr, DateTime start)
 			throws DataException;
 
 }

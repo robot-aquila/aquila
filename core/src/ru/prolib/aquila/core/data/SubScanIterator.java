@@ -36,8 +36,14 @@ public class SubScanIterator<T> implements Aqiterator<T> {
 
 	@Override
 	public void close() {
-		closed = true;
-		list.close();
+		if ( ! closed ) {
+			if ( subList != null ) {
+				subList.close();
+				subList = null;
+			}
+			list.close();
+			closed = true;
+		}
 	}
 
 	@Override

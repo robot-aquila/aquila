@@ -9,7 +9,7 @@ import java.util.Vector;
 
 import org.easymock.IMocksControl;
 import org.joda.time.format.*;
-import org.junit.Test;
+import org.junit.*;
 
 import ru.prolib.aquila.core.data.finam.storage.*;
 
@@ -22,6 +22,20 @@ public class SubScanIteratorTest {
 	
 	private final String basePath = "fixture/csv-storage/ticks/2014";
 	private final String pfx = "GAZP-EQBR-RUR-STK-";
+	
+	private IMocksControl control;
+	private Aqiterator<FileEntry> it1, it2;
+	private SubScanner<FileEntry> sc1, sc2;
+	
+	@SuppressWarnings("unchecked")
+	@Before
+	public void setUp() throws Exception {
+		control = createStrictControl();
+		it1 = control.createMock(Aqiterator.class);
+		it2 = control.createMock(Aqiterator.class);
+		sc1 = control.createMock(SubScanner.class);
+		sc2 = control.createMock(SubScanner.class);
+	}
 	
 	/**
 	 * Создать дескриптор файла.
@@ -51,7 +65,7 @@ public class SubScanIteratorTest {
 	}
 
 	@Test
-	public void testScanner() throws Exception {
+	public void testIterator() throws Exception {
 		List<FileEntry> dirList = new Vector<FileEntry>(),
 				expected = new Vector<FileEntry>(),
 				actual = new Vector<FileEntry>();
@@ -86,19 +100,43 @@ public class SubScanIteratorTest {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void testEquals() throws Exception {
-		IMocksControl control = createStrictControl();
-		Aqiterator<FileEntry> it1, it2;
-		it1 = control.createMock(Aqiterator.class);
-		it2 = control.createMock(Aqiterator.class);
-		SubScanner<FileEntry> sc1, sc2;
-		sc1 = control.createMock(SubScanner.class);
-		sc2 = control.createMock(SubScanner.class);
-		
 		SubScanIterator obj = new SubScanIterator(it1, sc1);
 		assertTrue(obj.equals(new SubScanIterator(it1, sc1)));
 		assertFalse(obj.equals(new SubScanIterator(it2, sc1)));
 		assertFalse(obj.equals(new SubScanIterator(it2, sc2)));
 		assertFalse(obj.equals(new SubScanIterator(it1, sc2)));
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void testClose() throws Exception {
+		SubScanIterator obj = new SubScanIterator(it1, sc1);
+		it1.close();
+		control.replay();
+		
+		obj.close();
+		obj.close();
+		
+		control.verify();
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void testClose_ClosesSubList() throws Exception {
+		List<FileEntry> list = new Vector<FileEntry>();
+		list.add(fileEntry("foo/", "bar", "2014-02-01"));
+		expect(sc1.makeScan(eq(fileEntry("foo/", "bar", "2014-02-01"))))
+			.andReturn(it2);
+		expect(it2.next()).andReturn(true);
+		it2.close();
+		control.replay();
+		
+		SubScanIterator obj = new SubScanIterator(new SimpleIterator(list), sc1);
+		obj.next();
+		obj.close();
+		obj.close();
+		
+		control.verify();
 	}
 	
 }

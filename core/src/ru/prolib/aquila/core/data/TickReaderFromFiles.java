@@ -22,6 +22,10 @@ public class TickReaderFromFiles implements Aqiterator<Tick> {
 
 	@Override
 	public void close() {
+		if ( currentReader != null ) {
+			currentReader.close();
+			currentReader = null;
+		}
 		fileset.close();
 		closed = true;
 	}
