@@ -11,6 +11,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import ru.prolib.aquila.core.data.Aqiterator;
+import ru.prolib.aquila.core.data.DataException;
 import ru.prolib.aquila.core.data.SimpleIterator;
 import ru.prolib.aquila.core.data.SubScanner;
 
@@ -47,10 +48,14 @@ public class DirectoryScannerD implements SubScanner<FileEntry> {
 	 * возрастания даты  
 	 */
 	@Override
-	public Aqiterator<FileEntry> makeScan(FileEntry entry) {
+	public Aqiterator<FileEntry> makeScan(FileEntry entry) throws DataException {
 		List<FileEntry> result = new Vector<FileEntry>();
 		int startFrom = filePrefix.length();
-		for ( File file : entry.getFile().listFiles() ) {
+		File dir = entry.getFile();
+		if ( ! dir.exists() ) {
+			throw new DataException("Path not exists: " + dir);
+		}
+		for ( File file : dir.listFiles() ) {
 			if ( ! file.isFile() ) {
 				continue;
 			}

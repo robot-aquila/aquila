@@ -15,7 +15,8 @@ public interface SubScanner<T> {
 	 * <p> 
 	 * @param basis значение-основание
 	 * @return результат сканирования
+	 * @throws DataException TODO
 	 */
-	public Aqiterator<T> makeScan(T basis);
+	public Aqiterator<T> makeScan(T basis) throws DataException;
 
 }

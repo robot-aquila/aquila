@@ -10,5 +10,6 @@ public class ISO4217 {
 		USD = Currency.getInstance("USD"),
 		EUR = Currency.getInstance("EUR"),
 		RUB = Currency.getInstance("RUB"),
+		RUR = Currency.getInstance("RUR"), // PS. Рубль до деноминации 1998
 		GBP = Currency.getInstance("GBP");
 }

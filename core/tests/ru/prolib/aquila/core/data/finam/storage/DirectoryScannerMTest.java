@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Aqiterator;
+import ru.prolib.aquila.core.data.DataException;
 
 public class DirectoryScannerMTest {
 	private static final DateTimeFormatter df;
@@ -22,7 +23,7 @@ public class DirectoryScannerMTest {
 	}
 	
 	private DirectoryScannerM scanner;
-	private String basePath = "fixture/csv-storage/ticks";
+	private String basePath = "fixture/GAZP-EQBR-RUR-STK";
 
 	@Before
 	public void setUp() throws Exception {
@@ -60,6 +61,12 @@ public class DirectoryScannerMTest {
 		}
 		
 		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=DataException.class)
+	public void testMakeScan_ThrowsIfDirectoryNotExists() throws Exception {
+		scanner.makeScan(new FileEntry(new File("lakumba/barumba"),
+				new LocalDate(2014, 10, 15)));
 	}
 	
 	@Test

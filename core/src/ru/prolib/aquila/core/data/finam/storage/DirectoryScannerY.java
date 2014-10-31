@@ -34,10 +34,14 @@ public class DirectoryScannerY implements SubScanner<FileEntry> {
 	 * возрастания даты. В качестве номера месяца и дня месяца всегда
 	 * устанавливается единица.
 	 */
-	public Aqiterator<FileEntry> makeScan(FileEntry entry) {
+	public Aqiterator<FileEntry> makeScan(FileEntry entry) throws DataException {
 		LocalDate start = new LocalDate(entry.getDate().getYear(), 1, 1);
 		List<FileEntry> result = new Vector<FileEntry>();
-		for ( File file : entry.getFile().listFiles() ) {
+		File dir = entry.getFile();
+		if ( ! dir.exists() ) {
+			throw new DataException("Path not exists: " + dir);
+		}
+		for ( File file : dir.listFiles() ) {
 			if ( ! file.isDirectory() ) {
 				continue;
 			}

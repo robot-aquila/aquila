@@ -20,7 +20,7 @@ public class SubScanIteratorTest {
 		df = DateTimeFormat.forPattern("yyyy-MM-dd");
 	}
 	
-	private final String basePath = "fixture/csv-storage/ticks/2014";
+	private final String basePath = "fixture/GAZP-EQBR-RUR-STK/2014";
 	private final String pfx = "GAZP-EQBR-RUR-STK-";
 	
 	private IMocksControl control;

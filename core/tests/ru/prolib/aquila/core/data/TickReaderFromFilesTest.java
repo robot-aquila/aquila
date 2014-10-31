@@ -9,7 +9,7 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-import ru.prolib.aquila.core.data.finam.FinamTickReaderFactory;
+import ru.prolib.aquila.core.data.finam.CsvTickReaderFactory;
 
 public class TickReaderFromFilesTest {
 	private IMocksControl control;
@@ -63,12 +63,12 @@ public class TickReaderFromFilesTest {
 	@Test
 	public void testIterate() throws Exception {
 		List<File> list = new Vector<File>();
-		final String basePath = "fixture/csv-storage/ticks/2014/";
+		final String basePath = "fixture/GAZP-EQBR-RUR-STK/2014/";
 		list.add(new File(basePath + "02/GAZP-EQBR-RUR-STK-20140201.csv"));
 		list.add(new File(basePath + "10/GAZP-EQBR-RUR-STK-20141005.csv.gz"));
 		list.add(new File(basePath + "10/GAZP-EQBR-RUR-STK-20141014.csv"));
 		reader = new TickReaderFromFiles(new SimpleIterator<File>(list),
-				new FinamTickReaderFactory());
+				new CsvTickReaderFactory());
 		
 		List<Tick> actual = new Vector<Tick>(),
 				expected = new Vector<Tick>();

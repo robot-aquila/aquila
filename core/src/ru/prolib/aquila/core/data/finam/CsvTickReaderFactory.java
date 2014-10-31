@@ -7,15 +7,15 @@ import ru.prolib.aquila.core.data.*;
 /**
  * Фабрика потока тиков на базе файлов FINAM.
  */
-public class FinamTickReaderFactory implements TickReaderFactory {
+public class CsvTickReaderFactory implements TickReaderFactory {
 	private final Finam facade;
 	
-	public FinamTickReaderFactory(Finam facade) {
+	public CsvTickReaderFactory(Finam facade) {
 		super();
 		this.facade = facade;
 	}
 	
-	public FinamTickReaderFactory() {
+	public CsvTickReaderFactory() {
 		this(new Finam());
 	}
 

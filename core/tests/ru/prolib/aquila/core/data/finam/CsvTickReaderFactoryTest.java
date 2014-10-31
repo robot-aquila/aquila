@@ -9,16 +9,16 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.data.*;
 
-public class FinamTickReaderFactoryTest {
+public class CsvTickReaderFactoryTest {
 	private IMocksControl control;
 	private Finam facade;
-	private FinamTickReaderFactory factory;
+	private CsvTickReaderFactory factory;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		facade = control.createMock(Finam.class);
-		factory = new FinamTickReaderFactory(facade);
+		factory = new CsvTickReaderFactory(facade);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -31,7 +31,7 @@ public class SubScanIteratorBuilder<T> implements SubScanner<T> {
 	}
 	
 	@Override
-	public Aqiterator<T> makeScan(T basis) {
+	public Aqiterator<T> makeScan(T basis) throws DataException {
 		return new SubScanIterator<T>(mainScanner.makeScan(basis), subScanner);
 	}
 	
