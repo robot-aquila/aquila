@@ -52,6 +52,7 @@ public class AssemblerL2Test {
 		terminal.fireEvents(same(p));
 		control.replay();
 
+		assertEquals(1, Portfolio.VERSION);
 		assertTrue(asm.tryAssemble(entry));
 		
 		control.verify();
@@ -96,7 +97,8 @@ public class AssemblerL2Test {
 		pos.setVarMargin(eq(12d));
 		p.fireEvents(same(pos));
 		control.replay();
-		
+
+		assertEquals(1, Position.VERSION);
 		assertTrue(asm.tryAssemble(entry));
 		
 		control.verify();
@@ -130,6 +132,7 @@ public class AssemblerL2Test {
 		terminal.fireEvents(same(security));
 		control.replay();
 		
+		assertEquals(1, Security.VERSION);
 		asm.tryAssemble(entry);
 		
 		control.verify();
@@ -263,6 +266,7 @@ public class AssemblerL2Test {
 		expect(order.getStatus()).andReturn(OrderStatus.SENT);
 		control.replay();
 		
+		assertEquals(1, Order.VERSION);
 		assertSame(order, asm.tryGetOrder(entry));
 		
 		control.verify();
