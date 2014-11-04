@@ -78,6 +78,11 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testVersion() throws Exception {
+		assertEquals(1, Terminal.VERSION);
+	}
+	
+	@Test
 	public void testConstruct_Full() throws Exception {
 		assertSame(controller, terminal.controller);
 		assertSame(dispatcher, terminal.dispatcher);

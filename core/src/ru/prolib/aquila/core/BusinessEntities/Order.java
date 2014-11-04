@@ -11,6 +11,7 @@ import ru.prolib.aquila.core.EventType;
  * $Id: Order.java 542 2013-02-23 04:15:34Z whirlwind $
  */
 public interface Order {
+	public static final int VERSION = 1;
 	
 	/**
 	 * Получить тип события: в случае провала операции

@@ -99,6 +99,11 @@ public class OrderImplTest {
 	}
 	
 	@Test
+	public void testVersion() throws Exception {
+		assertEquals(1, Order.VERSION);
+	}
+	
+	@Test
 	public void testConstruct() throws Exception {
 		assertSame(terminal, order.getTerminal());
 	}

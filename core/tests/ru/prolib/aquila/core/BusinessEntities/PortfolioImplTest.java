@@ -74,6 +74,7 @@ public class PortfolioImplTest {
 	
 	@Test
 	public void testVersion() throws Exception {
+		assertEquals(1, Portfolio.VERSION);
 		assertEquals(3, PortfolioImpl.VERSION);
 	}
 	

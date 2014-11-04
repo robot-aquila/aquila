@@ -13,6 +13,7 @@ import ru.prolib.aquila.core.EventType;
  * $Id: Security.java 552 2013-03-01 13:35:35Z whirlwind $
  */
 public interface Security {
+	public static final int VERSION = 1;
 	
 	/**
 	 * Получить терминал, через который был получен инструмент.

@@ -68,6 +68,11 @@ public class SecurityImplTest {
 	}
 	
 	@Test
+	public void testVersion() throws Exception {
+		assertEquals(1, Security.VERSION);
+	}
+	
+	@Test
 	public void testDefaultValues() throws Exception {
 		assertEquals(0, security.getPrecision());
 		assertNull(security.getMinPrice());

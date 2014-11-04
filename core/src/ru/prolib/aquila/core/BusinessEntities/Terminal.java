@@ -18,6 +18,7 @@ import ru.prolib.aquila.core.Starter;
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public interface Terminal extends Starter, OrderProcessor, Scheduler {
+	public static final int VERSION = 1;
 	
 	/**
 	 * Проверить состояние терминала.

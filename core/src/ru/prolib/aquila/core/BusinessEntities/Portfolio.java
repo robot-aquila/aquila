@@ -11,6 +11,7 @@ import ru.prolib.aquila.core.EventType;
  * $Id: Portfolio.java 388 2012-12-30 12:58:15Z whirlwind $
  */
 public interface Portfolio {
+	public static final int VERSION = 1;
 	
 	/**
 	 * Получить терминал.

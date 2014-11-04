@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.EventType;
  * $Id: Position.java 529 2013-02-19 08:49:04Z whirlwind $
  */
 public interface Position {
+	public static final int VERSION = 1;
 	
 	/**
 	 * Получить торговый счет позиции.

@@ -82,6 +82,11 @@ public class PositionImplTest {
 	}
 	
 	@Test
+	public void testVersion() throws Exception {
+		assertEquals(1, Position.VERSION);
+	}
+	
+	@Test
 	public void testDefaults() throws Exception {
 		assertEquals(0l, position.getCurrQty());
 		assertEquals(0.0d, position.getMarketValue(), 0.01d);
