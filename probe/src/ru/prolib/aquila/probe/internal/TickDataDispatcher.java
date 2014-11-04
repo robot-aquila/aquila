@@ -4,12 +4,15 @@ import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 /**
- * Диспетчер данных инструмента.
+ * Диспетчер тиковых данных.
  * <p>
+ * Диспетчер тиковых данных объединяет две роли: источник событий для
+ * хронологии и диспетчер специфических событий посредством интерфейса
+ * {@link TickHandler}. 
  */
-public class SecurityDataDispatcher implements TLEventSource {
+public class TickDataDispatcher implements TLEventSource {
 	private final Aqiterator<Tick> reader;
-	private final SecurityTasks tasks;
+	private final TickHandler tasks;
 	private Tick prevTick;
 	private boolean inWork = true; 
 	
@@ -19,7 +22,7 @@ public class SecurityDataDispatcher implements TLEventSource {
 	 * @param reader поток данных
 	 * @param tasks
 	 */
-	public SecurityDataDispatcher(Aqiterator<Tick> reader, SecurityTasks tasks) {
+	public TickDataDispatcher(Aqiterator<Tick> reader, TickHandler tasks) {
 		super();
 		this.reader = reader;
 		this.tasks = tasks;

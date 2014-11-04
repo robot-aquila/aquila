@@ -16,10 +16,10 @@ import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.timeline.TLEvent;
 import ru.prolib.aquila.probe.timeline.TLException;
 
-public class SecurityDataDispatcherTest {
+public class TickDataDispatcherTest {
 	private IMocksControl control;
-	private SecurityTasks tasks;
-	private SecurityDataDispatcher dispatcher;
+	private TickHandler tasks;
+	private TickDataDispatcher dispatcher;
 	
 	private static final SimpleDateFormat f =
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
@@ -81,7 +81,7 @@ public class SecurityDataDispatcherTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		tasks = control.createMock(SecurityTasks.class);
+		tasks = control.createMock(TickHandler.class);
 	}
 	
 	@Test
@@ -116,7 +116,7 @@ public class SecurityDataDispatcherTest {
 		tasks.doFinalTask(eq(tick));
 		control.replay();
 		
-		dispatcher = new SecurityDataDispatcher(createTestReader(), tasks);
+		dispatcher = new TickDataDispatcher(createTestReader(), tasks);
 		
 		Vector<TaskCheck> actual = new Vector<TaskCheck>();
 		TLEvent event = null;
@@ -139,7 +139,7 @@ public class SecurityDataDispatcherTest {
 		expect(reader.next()).andThrow(new DataException("test error"));
 		control.replay();
 		
-		dispatcher = new SecurityDataDispatcher(reader, tasks);
+		dispatcher = new TickDataDispatcher(reader, tasks);
 		dispatcher.pullEvent();
 	}
 	
@@ -147,7 +147,7 @@ public class SecurityDataDispatcherTest {
 	public void testWorkflow_IfClosed() throws Exception {
 		control.replay();
 		
-		dispatcher = new SecurityDataDispatcher(createTestReader(), tasks);
+		dispatcher = new TickDataDispatcher(createTestReader(), tasks);
 		assertFalse(dispatcher.closed());
 		dispatcher.close();
 		assertTrue(dispatcher.closed());

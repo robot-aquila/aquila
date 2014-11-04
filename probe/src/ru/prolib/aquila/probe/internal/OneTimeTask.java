@@ -1,5 +1,7 @@
 package ru.prolib.aquila.probe.internal;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 
 /**
@@ -37,8 +39,10 @@ public class OneTimeTask implements SchedulerTask {
 			return false;
 		}
 		OneTimeTask o = (OneTimeTask) other;
-		return o.scheduler == scheduler
-				&& o.task == task;
+		return new EqualsBuilder()
+			.append(o.scheduler, scheduler)
+			.append(o.task, task)
+			.isEquals();
 	}
 
 }

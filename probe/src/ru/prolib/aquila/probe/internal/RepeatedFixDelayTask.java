@@ -1,5 +1,7 @@
 package ru.prolib.aquila.probe.internal;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.probe.timeline.TLOutOfIntervalException;
 import ru.prolib.aquila.probe.timeline.TLSTimeline;
@@ -51,10 +53,12 @@ public class RepeatedFixDelayTask implements SchedulerTask {
 			return false;
 		}
 		RepeatedFixDelayTask o = (RepeatedFixDelayTask) other;
-		return o.timeline == timeline
-				&& o.delay == delay
-				&& o.scheduler == scheduler
-				&& o.task == task;
+		return new EqualsBuilder()
+			.append(o.timeline, timeline)
+			.append(o.delay, delay)
+			.append(o.scheduler, scheduler)
+			.append(o.task, task)
+			.isEquals();
 	}
 
 }
