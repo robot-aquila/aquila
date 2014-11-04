@@ -4,7 +4,8 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
-import ru.prolib.aquila.core.data.finam.storage.*;
+
+import ru.prolib.aquila.core.data.finam.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SubScanIteratorBuilderTest {

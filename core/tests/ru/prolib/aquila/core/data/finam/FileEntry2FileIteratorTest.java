@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data.finam.storage;
+package ru.prolib.aquila.core.data.finam;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -10,6 +10,8 @@ import org.joda.time.LocalDate;
 import org.junit.*;
 
 import ru.prolib.aquila.core.data.Aqiterator;
+import ru.prolib.aquila.core.data.finam.FileEntry;
+import ru.prolib.aquila.core.data.finam.FileEntry2FileIterator;
 
 public class FileEntry2FileIteratorTest {
 	private IMocksControl control;

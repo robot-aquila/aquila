@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data.finam.storage;
+package ru.prolib.aquila.core.data.finam;
 
 import static org.junit.Assert.*;
 
@@ -7,6 +7,8 @@ import java.io.File;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
+
+import ru.prolib.aquila.core.data.finam.FileEntry;
 
 public class FileEntryTest {
 	private FileEntry e1, e2, e3, e4, e5;

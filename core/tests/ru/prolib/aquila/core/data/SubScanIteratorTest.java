@@ -11,7 +11,7 @@ import org.easymock.IMocksControl;
 import org.joda.time.format.*;
 import org.junit.*;
 
-import ru.prolib.aquila.core.data.finam.storage.*;
+import ru.prolib.aquila.core.data.finam.*;
 
 public class SubScanIteratorTest {
 	private static final DateTimeFormatter df;

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data.finam.storage;
+package ru.prolib.aquila.core.data.finam;
 
 import static org.junit.Assert.*;
 
@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.DataException;
+import ru.prolib.aquila.core.data.finam.DirectoryScannerY;
+import ru.prolib.aquila.core.data.finam.FileEntry;
 
 public class DirectoryScannerYTest {
 	private static final DateTimeFormatter df;

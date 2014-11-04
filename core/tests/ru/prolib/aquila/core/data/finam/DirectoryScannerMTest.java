@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data.finam.storage;
+package ru.prolib.aquila.core.data.finam;
 
 import static org.junit.Assert.*;
 
@@ -14,20 +14,22 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.DataException;
+import ru.prolib.aquila.core.data.finam.DirectoryScannerM;
+import ru.prolib.aquila.core.data.finam.FileEntry;
 
-public class DirectoryScannerDTest {
+public class DirectoryScannerMTest {
 	private static final DateTimeFormatter df;
 	
 	static {
 		df = DateTimeFormat.forPattern("yyyy-MM-dd");
 	}
 	
-	private DirectoryScannerD scanner;
+	private DirectoryScannerM scanner;
 	private String basePath = "fixture/GAZP-EQBR-RUR-STK";
 
 	@Before
 	public void setUp() throws Exception {
-		scanner = new DirectoryScannerD("GAZP-EQBR-RUR-STK-");
+		scanner = new DirectoryScannerM();
 	}
 	
 	/**
@@ -44,20 +46,18 @@ public class DirectoryScannerDTest {
 
 	@Test
 	public void testMakeScan() throws Exception {
-		final String pfx = "GAZP-EQBR-RUR-STK-",
-				fpfx = basePath + "/2014/10/" + pfx;
-		
+		final String fpfx = basePath + "/2014/";
 		List<FileEntry> actual = new Vector<FileEntry>(),
 				expected = new Vector<FileEntry>();
-		expected.add(fileEntry(fpfx, "20141005.csv.gz", "2014-10-05"));
-		expected.add(fileEntry(fpfx, "20141013.csv",    "2014-10-13"));
-		expected.add(fileEntry(fpfx, "20141014.csv",    "2014-10-14"));
-		expected.add(fileEntry(fpfx, "20141015.csv.gz", "2014-10-15"));
-		expected.add(fileEntry(fpfx, "20141019.csv",    "2014-10-19"));
-
+		expected.add(fileEntry(fpfx, "02", "1998-02-01"));
+		expected.add(fileEntry(fpfx, "05", "1998-05-01"));
+		expected.add(fileEntry(fpfx, "10", "1998-10-01"));
+		expected.add(fileEntry(fpfx, "11", "1998-11-01"));
+		expected.add(fileEntry(fpfx, "12", "1998-12-01"));
+		
 		Aqiterator<FileEntry> it =
-				scanner.makeScan(new FileEntry(new File(basePath + "/2014/10"),
-						new LocalDate(2014, 10, 5)));
+				scanner.makeScan(new FileEntry(new File(basePath + "/2014"),
+						new LocalDate(1998, 2, 15)));
 		while ( it.next() ) {
 			actual.add(it.item());
 		}
@@ -74,8 +74,7 @@ public class DirectoryScannerDTest {
 	@Test
 	public void testEquals() throws Exception {
 		assertTrue(scanner.equals(scanner));
-		assertTrue(scanner.equals(new DirectoryScannerD("GAZP-EQBR-RUR-STK-")));
-		assertFalse(scanner.equals(new DirectoryScannerD("another prefix")));
+		assertTrue(scanner.equals(new DirectoryScannerM()));
 		assertFalse(scanner.equals(this));
 		assertFalse(scanner.equals(null));
 	}

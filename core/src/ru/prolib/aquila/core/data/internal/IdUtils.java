@@ -1,20 +1,18 @@
-package ru.prolib.aquila.core.data.finam.storage;
+package ru.prolib.aquila.core.data.internal;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.data.SubScanIteratorBuilder;
-import ru.prolib.aquila.core.data.SubScanner;
 import ru.prolib.aquila.core.utils.FileNameEncoder;
 
-public class DataStorageHelper {
+public class IdUtils {
 	private static final String SEPARATOR = "-";
 	private final FileNameEncoder nameEncoder;
-	
-	public DataStorageHelper(FileNameEncoder nameEncoder) {
+
+	public IdUtils(FileNameEncoder nameEncoder) {
 		super();
 		this.nameEncoder = nameEncoder;
 	}
 	
-	public DataStorageHelper() {
+	public IdUtils() {
 		this(new FileNameEncoder());
 	}
 
@@ -41,18 +39,6 @@ public class DataStorageHelper {
 				+ nameEncoder.encode(descr.getClassCode()) + SEPARATOR
 				+ nameEncoder.encode(descr.getCurrencyCode()) + SEPARATOR
 				+ nameEncoder.encode(descr.getType().toString());
-	}
-	
-	/**
-	 * Получить сканер тиковых данных.
-	 * <p>
-	 * @param filePrefix префикс файлов
-	 * @return сканер файлов тиковых данных
-	 */
-	public SubScanner<FileEntry> createTickFilesScanner(String filePrefix) {
-		return new SubScanIteratorBuilder<FileEntry>(new DirectoryScannerY(),
-			new SubScanIteratorBuilder<FileEntry>(new DirectoryScannerM(),
-				new DirectoryScannerD(filePrefix)));
 	}
 
 }
