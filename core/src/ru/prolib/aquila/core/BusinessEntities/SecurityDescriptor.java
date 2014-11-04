@@ -64,6 +64,32 @@ public class SecurityDescriptor {
 	}
 	
 	/**
+	 * Конструктор.
+	 * <p>
+	 * Создает дескриптор инструмента типа {@link SecurityType#STK}.
+	 * <p>
+	 * @param code код инструмента
+	 * @param classCode код класса
+	 * @param curCode код валюты согласно ISO 4217
+	 */
+	public SecurityDescriptor(String code, String classCode, String curCode) {
+		this(code, classCode, curCode, SecurityType.STK);
+	}
+	
+	/**
+	 * Конструктор.
+	 * <p>
+	 * Создает дескриптор инструмента типа {@link SecurityType#STK}.
+	 * <p>
+	 * @param code код инструмента
+	 * @param classCode код класса
+	 * @param currency валюта инструмента
+	 */
+	public SecurityDescriptor(String code, String classCode, Currency currency) {
+		this(code, classCode, currency, SecurityType.STK);
+	}
+	
+	/**
 	 * Получить код инструмента
 	 * <p>
 	 * @return код инструмента

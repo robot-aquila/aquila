@@ -22,7 +22,7 @@ public class SecurityDescriptorTest {
 	}
 	
 	@Test
-	public void testConstruct_WithCurrencyCode() throws Exception {
+	public void testConstruct4_WithCurrencyCode() throws Exception {
 		assertEquals("SBER", descr.getCode());
 		assertEquals("EQBR", descr.getClassCode());
 		assertEquals(ISO4217.USD, descr.getCurrency());
@@ -31,7 +31,7 @@ public class SecurityDescriptorTest {
 	}
 	
 	@Test
-	public void testConstruct_WithCurrency() throws Exception {
+	public void testConstruct4_WithCurrency() throws Exception {
 		descr = new SecurityDescriptor("ZZZ-12.13", "XYZ",
 				ISO4217.EUR, SecurityType.FUT);
 		assertEquals("ZZZ-12.13", descr.getCode());
@@ -39,6 +39,26 @@ public class SecurityDescriptorTest {
 		assertEquals(ISO4217.EUR, descr.getCurrency());
 		assertEquals("EUR", descr.getCurrencyCode());
 		assertEquals(SecurityType.FUT, descr.getType());		
+	}
+	
+	@Test
+	public void testConstruct3_WithCurrencyCode() throws Exception {
+		descr = new SecurityDescriptor("SBER", "EQBR", "USD");
+		assertEquals("SBER", descr.getCode());
+		assertEquals("EQBR", descr.getClassCode());
+		assertEquals(ISO4217.USD, descr.getCurrency());
+		assertEquals("USD", descr.getCurrencyCode());
+		assertEquals(SecurityType.STK, descr.getType());
+	}
+	
+	@Test
+	public void testConstruct3_WithCurrency() throws Exception {
+		descr = new SecurityDescriptor("SBER", "EQBR", ISO4217.USD);
+		assertEquals("SBER", descr.getCode());
+		assertEquals("EQBR", descr.getClassCode());
+		assertEquals(ISO4217.USD, descr.getCurrency());
+		assertEquals("USD", descr.getCurrencyCode());
+		assertEquals(SecurityType.STK, descr.getType());
 	}
 	
 	@Test
