@@ -43,7 +43,6 @@ public class OrderEventTest {
 			.add(null)
 			.add(order1)
 			.add(order2);
-		int index = 0;
 		int foundCount = 0;
 		OrderEvent foundEvent = null;
 		do {
@@ -52,7 +51,6 @@ public class OrderEventTest {
 				foundCount ++;
 				foundEvent = actual;
 			}
-			index ++;
 		} while ( vOrder.next() );
 		assertEquals(1, foundCount);
 		assertNotNull(foundEvent);

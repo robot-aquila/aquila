@@ -55,7 +55,7 @@ public class TerminalController {
 	 * <p>
 	 * @param terminal целевой терминал
 	 */
-	public void runStartSequence(EditableTerminal terminal) {
+	public void runStartSequence(EditableTerminal<?> terminal) {
 		CountDownLatch sig = helper.createStartedSignal();
 		helper.createThread(helper.createStartSequence(terminal, sig)).start();
 		try {
@@ -72,7 +72,7 @@ public class TerminalController {
 	 * <p>
 	 * @param terminal целевой терминал
 	 */
-	public void runStopSequence(EditableTerminal terminal) {
+	public void runStopSequence(EditableTerminal<?> terminal) {
 		CountDownLatch sig = helper.createStartedSignal();
 		helper.createThread(helper.createStopSequence(terminal, sig)).start();
 		try {

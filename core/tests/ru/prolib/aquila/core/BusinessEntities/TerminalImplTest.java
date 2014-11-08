@@ -84,29 +84,29 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testConstruct_Full() throws Exception {
-		assertSame(controller, terminal.controller);
-		assertSame(dispatcher, terminal.dispatcher);
-		assertSame(securities, terminal.securities);
-		assertSame(portfolios, terminal.portfolios);
-		assertSame(orders, terminal.orders);
+		assertSame(controller, terminal.getTerminalController());
+		assertSame(dispatcher, terminal.getTerminalEventDispatcher());
+		assertSame(securities, terminal.getSecurityStorage());
+		assertSame(portfolios, terminal.getPortfolioStorage());
+		assertSame(orders, terminal.getOrderStorage());
 		assertSame(numerator, terminal.getOrderNumerator());
 		assertSame(starter, terminal.getStarter());
-		assertSame(scheduler, terminal.scheduler);
+		assertSame(scheduler, terminal.getScheduler());
 		assertSame(es, terminal.getEventSystem());
 	}
 
 	@Test // Тест конструктора с 1 аргументом типа строка (ID очереди)
 	public void testConstruct1_S() throws Exception {
 		terminal = new TerminalImpl<TerminalImplTest>("foo");
-		assertNotNull(terminal.controller);
-		assertNotNull(terminal.dispatcher);
-		assertNotNull(terminal.securities);
-		assertNotNull(terminal.portfolios);
-		assertNotNull(terminal.orders);
+		assertNotNull(terminal.getTerminalController());
+		assertNotNull(terminal.getTerminalEventDispatcher());
+		assertNotNull(terminal.getSecurityStorage());
+		assertNotNull(terminal.getPortfolioStorage());
+		assertNotNull(terminal.getOrderStorage());
 		assertEquals(SimpleCounter.class,
 				terminal.getOrderNumerator().getClass());
 		assertNotNull(terminal.getStarter());
-		assertEquals(SchedulerLocal.class, terminal.scheduler.getClass());
+		assertEquals(SchedulerLocal.class, terminal.getScheduler().getClass());
 		assertNotNull(terminal.getEventSystem());
 		assertEquals("foo", terminal.getEventSystem().getEventQueue().getId());
 	}
@@ -114,15 +114,15 @@ public class TerminalImplTest {
 	@Test // Тест конструктора с 1 аргументом типа фасад событийной системы
 	public void testConstruct1_E() throws Exception {
 		terminal = new TerminalImpl<TerminalImplTest>(es);
-		assertNotNull(terminal.controller);
-		assertNotNull(terminal.dispatcher);
-		assertNotNull(terminal.securities);
-		assertNotNull(terminal.portfolios);
-		assertNotNull(terminal.orders);
+		assertNotNull(terminal.getTerminalController());
+		assertNotNull(terminal.getTerminalEventDispatcher());
+		assertNotNull(terminal.getSecurityStorage());
+		assertNotNull(terminal.getPortfolioStorage());
+		assertNotNull(terminal.getOrderStorage());
 		assertEquals(SimpleCounter.class,
 				terminal.getOrderNumerator().getClass());
 		assertNotNull(terminal.getStarter());
-		assertEquals(SchedulerLocal.class, terminal.scheduler.getClass());
+		assertEquals(SchedulerLocal.class, terminal.getScheduler().getClass());
 		assertSame(es, terminal.getEventSystem());
 	}
 	
@@ -936,7 +936,7 @@ public class TerminalImplTest {
 	@Test
 	public void testEventTypes() throws Exception {
 		terminal = new TerminalImpl<TerminalImplTest>("test");
-		dispatcher = terminal.dispatcher;
+		dispatcher = terminal.getTerminalEventDispatcher();
 		assertSame(dispatcher.OnConnected(), terminal.OnConnected());
 		assertSame(dispatcher.OnDisconnected(), terminal.OnDisconnected());
 		assertSame(dispatcher.OnPanic(), terminal.OnPanic());
@@ -1153,6 +1153,20 @@ public class TerminalImplTest {
 		assertNull(terminal.getServiceLocator());
 		terminal.setServiceLocator(this);
 		assertSame(this, terminal.getServiceLocator());
+	}
+	
+	@Test
+	public void testSetScheduler() throws Exception {
+		Scheduler newScheduler = control.createMock(Scheduler.class);
+		terminal.setScheduler(newScheduler);
+		assertSame(newScheduler, terminal.getScheduler());
+	}
+	
+	@Test
+	public void testStarter() throws Exception {
+		StarterQueue newStarter = control.createMock(StarterQueue.class);
+		terminal.setStarter(newStarter);
+		assertSame(newStarter, terminal.getStarter());
 	}
 	
 }

@@ -41,14 +41,14 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	private static Logger logger;
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private EventSystem es;
-	protected Securities securities;
-	protected Portfolios portfolios;
-	protected Orders orders;
+	private Securities securities;
+	private Portfolios portfolios;
+	private Orders orders;
 	private StarterQueue starter;
-	protected Scheduler scheduler;
+	private Scheduler scheduler;
 	private Counter orderNumerator;	
-	protected TerminalEventDispatcher dispatcher;
-	protected TerminalController controller;
+	private TerminalEventDispatcher dispatcher;
+	private TerminalController controller;
 	private OrderProcessor orderProcessor;
 	private T serviceLocator;
 	
@@ -720,6 +720,74 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	@Override
 	public synchronized void setServiceLocator(T locator) {
 		serviceLocator = locator;
+	}
+
+	@Override
+	public synchronized void setStarter(StarterQueue starter) {
+		this.starter = starter;
+	}
+
+	/**
+	 * Установить планировщик задач.
+	 * <P>
+	 * @param scheduler планировщик
+	 */
+	public synchronized void setScheduler(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
+	/**
+	 * Получить планировщик задач.
+	 * <p>
+	 * @return планировщик
+	 */
+	public synchronized Scheduler getScheduler() {
+		return scheduler;
+	}
+	
+	/** 
+	 * Получить контроллер терминала.
+	 * <p>
+	 * @return контроллер терминала
+	 */
+	public synchronized TerminalController getTerminalController() {
+		return controller;
+	}
+	
+	/**
+	 * Получить диспетчер событий терминала.
+	 * <p>
+	 * @return диспетчер событий
+	 */
+	public synchronized TerminalEventDispatcher getTerminalEventDispatcher() {
+		return dispatcher;
+	}
+	
+	/**
+	 * Получить хранилище инструментов.
+	 * <p>
+	 * @return хранилище инструментов
+	 */
+	public synchronized Securities getSecurityStorage() {
+		return securities;
+	}
+	
+	/**
+	 * Получить хранилище портфелей.
+	 * <p>
+	 * @return хранилище портфелей
+	 */
+	public synchronized Portfolios getPortfolioStorage() {
+		return portfolios;
+	}
+	
+	/**
+	 * Получить хранилище заявок.
+	 * <p>
+	 * @return хранилище заявок
+	 */
+	public synchronized Orders getOrderStorage() {
+		return orders;
 	}
 
 }

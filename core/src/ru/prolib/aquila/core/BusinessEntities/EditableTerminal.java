@@ -57,6 +57,13 @@ public interface EditableTerminal<T> extends Terminal {
 	public void setOrderProcessor(OrderProcessor processor);
 	
 	/**
+	 * Установить стартер терминала.
+	 * <p>
+	 * @param starter стартер
+	 */
+	public void setStarter(StarterQueue starter);
+	
+	/**
 	 * Получить стартер терминала.
 	 * <p>
 	 * @return стартер
@@ -232,7 +239,7 @@ public interface EditableTerminal<T> extends Terminal {
 	public void setDefaultPortfolio(EditablePortfolio portfolio);
 	
 	/**
-	 * Получиь сервис-локатор.
+	 * Получить сервис-локатор.
 	 * <p>
 	 * @return сервис-локатор
 	 */
@@ -251,5 +258,5 @@ public interface EditableTerminal<T> extends Terminal {
 	 * @param locator
 	 */
 	public void setServiceLocator(T locator);
-
+	
 }
