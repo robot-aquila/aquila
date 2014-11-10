@@ -1,5 +1,6 @@
 package ru.prolib.aquila.probe.internal;
 
+import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.data.Tick;
 
 /**
@@ -10,21 +11,25 @@ import ru.prolib.aquila.core.data.Tick;
  * - минимальный шаг цены
  * - установить точность цены
  */
-public class SecurityTickHandler implements TickHandler {
+public class CommonTickHandler implements TickHandler {
+	private final EditableSecurity security;
 	
-	public SecurityTickHandler() {
+	public CommonTickHandler(EditableSecurity security) {
 		super();
+		this.security = security;
 	}
 
 	/**
 	 * Обработка первого тика.
 	 * <p>
+	 * ! - позже.
+	 * <p>
 	 * На данном этапе:<br>
-	 * - цена тика устанавливается в качестве значения расчетной цены
-	 * - выполняется расчет гарантийного обеспечения
+	 * - (!) цена тика устанавливается в качестве значения расчетной цены
+	 * - (!) выполняется расчет гарантийного обеспечения
 	 * - цена тика используется в качестве цены закрытия предыдущего дня
-	 * - нижнюю и верхнюю планку цен в зависимости от расчетной цены
-	 * - стоимость минимального шага цены
+	 * - (!) нижнюю и верхнюю планку цен в зависимости от расчетной цены
+	 * - (!) стоимость минимального шага цены
 	 */
 	@Override
 	public void doInitialTask(Tick firstTick) {
@@ -33,7 +38,7 @@ public class SecurityTickHandler implements TickHandler {
 
 	@Override
 	public void doFinalTask(Tick lastTick) {
-		// TODO: клиринг?
+		// TODO: клиринг не нужен т.к. запланирован на этапе daily task
 	}
 
 	@Override

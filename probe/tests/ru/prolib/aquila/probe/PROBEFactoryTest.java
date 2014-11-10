@@ -1,14 +1,16 @@
-package ru.prolib.aquila.probe.internal;
+package ru.prolib.aquila.probe;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class SecurityTickHandlerTest {
+public class PROBEFactoryTest {
+	private PROBEFactory factory;
 
 	@Before
 	public void setUp() throws Exception {
+		factory = new PROBEFactory();
 	}
 
 	@Test

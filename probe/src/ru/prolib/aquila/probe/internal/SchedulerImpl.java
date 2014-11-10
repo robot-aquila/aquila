@@ -51,7 +51,7 @@ public class SchedulerImpl implements Scheduler {
 		if ( scheduled(task) ) {
 			throw new IllegalStateException();
 		}
-		Interval wp = timeline.getInterval();
+		Interval wp = timeline.getRunInterval();
 		if ( wp.isBefore(time) ) {
 			return getTaskHandler(task);
 		}
@@ -88,7 +88,7 @@ public class SchedulerImpl implements Scheduler {
 		if ( scheduled(task) ) {
 			throw new IllegalStateException();
 		}
-		Interval wp = timeline.getInterval();
+		Interval wp = timeline.getRunInterval();
 		if ( wp.isBefore(firstTime) ) {
 			return getTaskHandler(task);
 		}

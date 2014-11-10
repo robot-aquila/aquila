@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.probe.SimulationController;
 
 
 /**
@@ -21,7 +22,7 @@ import ru.prolib.aquila.core.EventType;
  * для этих целей достаточно воспользоваться штатным способом и реализовать
  * индикацию путем регистрации событий в границах хронологии. 
  */
-public class TLSTimeline {
+public class TLSTimeline implements SimulationController {
 	private final TLCmdQueue cmdQueue;
 	private final TLEventQueue evtQueue;
 	private final TLSStrategy simulation;
@@ -91,12 +92,11 @@ public class TLSTimeline {
 		return evtQueue.getPOA();
 	}
 	
-	/**
-	 * Получить активный рабочий период.
-	 * <p>
-	 * @return РП
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#getInterval()
 	 */
-	public Interval getInterval() {
+	@Override
+	public Interval getRunInterval() {
 		return evtQueue.getInterval();
 	}
 	
@@ -246,56 +246,54 @@ public class TLSTimeline {
 		sources.removeSource(source);
 	}
 	
-	/**
-	 * В процессе выполнения?
-	 * <p>
-	 * @return true - в процессе, false - обработка приостановлена/завершена
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#running()
 	 */
+	@Override
 	public boolean running() {
 		return state == TLCmdType.RUN;
 	}
 	
-	/**
-	 * Эмуляция приостановлена?
-	 * <p>
-	 * @return true - приостановлена, false - выполняется или завершена
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#paused()
 	 */
+	@Override
 	public boolean paused() {
 		return state == TLCmdType.PAUSE;
 	}
 	
-	/**
-	 * Эмуляция завершена?
-	 * <p>
-	 * @return true - завершена, false - симуляция продолжается или не начата
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#finished()
 	 */
+	@Override
 	public boolean finished() {
 		return state == TLCmdType.FINISH;
 	}
 
-	/**
-	 * Завершить работу.
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#finish()
 	 */
+	@Override
 	public void finish() {
 		if ( ! finished() ) {
 			cmdQueue.put(TLCmd.FINISH);
 		}
 	}
 	
-	/**
-	 * Приостановить работу.
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#pause()
 	 */
+	@Override
 	public void pause() {
 		if ( running() ) {
 			cmdQueue.put(TLCmd.PAUSE);
 		}
 	}
 	
-	/**
-	 * Выполнять эмуляцию до отсечки.
-	 * <p>
-	 * @param cutoff время отсечки
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#runTo(org.joda.time.DateTime)
 	 */
+	@Override
 	public void runTo(DateTime cutoff) {
 		synchronized ( starter ) {
 			if ( ! finished() ) {
@@ -305,13 +303,12 @@ public class TLSTimeline {
 		}
 	}
 
-	/**
-	 * Выполнять эмуляцию до конца РП.
-	 * <p>
-	 * Запускает процесс эмуляции до достижения конца рабочего периода.
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#run()
 	 */
+	@Override
 	public void run() {
-		runTo(getInterval().getEnd());
+		runTo(getRunInterval().getEnd());
 	}
 	
 	/**
@@ -331,32 +328,29 @@ public class TLSTimeline {
 	 * false - ТА внутри РП.
 	 */
 	boolean isOutOfInterval() {
-		return ! getInterval().contains(getPOA());
+		return ! getRunInterval().contains(getPOA());
 	}
 	
-	/**
-	 * Получить тип события: эмуляция завершена.
-	 * <p>
-	 * @return тип события
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#OnFinish()
 	 */
+	@Override
 	public EventType OnFinish() {
 		return dispatcher.OnFinish();
 	}
 	
-	/**
-	 * Получить тип события: эмуляция приостановлена.
-	 * <p>
-	 * @return тип события
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#OnPause()
 	 */
+	@Override
 	public EventType OnPause() {
 		return dispatcher.OnPause();
 	}
 	
-	/**
-	 * Получить тип события: эмуляция продолжена.
-	 * <p>
-	 * @return тип события
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.TimelineController#OnRun()
 	 */
+	@Override
 	public EventType OnRun() {
 		return dispatcher.OnRun();
 	}

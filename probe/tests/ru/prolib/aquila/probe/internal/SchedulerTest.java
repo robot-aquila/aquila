@@ -14,6 +14,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandlerImpl;
+import ru.prolib.aquila.probe.SimulationController;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class SchedulerTest {
@@ -31,7 +32,7 @@ public class SchedulerTest {
 	 */
 	static class Finisher {
 		final CountDownLatch finished = new CountDownLatch(1);
-		Finisher(TLSTimeline timeline) {
+		Finisher(SimulationController timeline) {
 			new ListenOnce(timeline.OnFinish(), new EventListener() {
 				@Override public void onEvent(Event arg0) {
 					finished.countDown();

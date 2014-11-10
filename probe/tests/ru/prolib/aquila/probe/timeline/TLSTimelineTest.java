@@ -69,11 +69,11 @@ public class TLSTimelineTest {
 	}
 	
 	@Test
-	public void testGetInterval() throws Exception {
+	public void testGetRunInterval() throws Exception {
 		expect(evtQueue.getInterval()).andReturn(interval);
 		control.replay();
 		
-		assertSame(interval, timeline.getInterval());
+		assertSame(interval, timeline.getRunInterval());
 		
 		control.verify();
 	}
