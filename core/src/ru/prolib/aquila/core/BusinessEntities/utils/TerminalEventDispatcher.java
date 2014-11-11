@@ -148,7 +148,8 @@ public class TerminalEventDispatcher {
 	public void fireSecurityRequestError(SecurityDescriptor descr,
 			int errorCode, String errorMsg)
 	{
-		dispatcher.dispatch(new EventImpl(onRequestSecurityError));
+		dispatcher.dispatch(new RequestSecurityEvent(onRequestSecurityError,
+				descr, errorCode, errorMsg));
 	}
 
 }

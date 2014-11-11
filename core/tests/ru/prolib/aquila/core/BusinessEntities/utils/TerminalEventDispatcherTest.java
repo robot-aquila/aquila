@@ -117,8 +117,9 @@ public class TerminalEventDispatcherTest {
 
 	@Test
 	public void testRequestSecurityError() throws Exception {
-		dispatcher.OnRequestSecurityError().addListener(listener);
-		queue.enqueue(eq(new EventImpl(dispatcher.OnRequestSecurityError())), 
+		EventType type = dispatcher.OnRequestSecurityError(); 
+		type.addListener(listener);
+		queue.enqueue(eq(new RequestSecurityEvent(type, descr, 500, "test")), 
 				same(dispatcher.getEventDispatcher()));
 		control.replay();
 		

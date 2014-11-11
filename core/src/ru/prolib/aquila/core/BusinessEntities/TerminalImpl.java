@@ -654,8 +654,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 		void fireSecurityRequestError(SecurityDescriptor descr,
 			int errorCode, String errorMsg)
 	{
-		Object args[] = { descr, errorCode, errorMsg };
-		logger.error("TODO: fire request {} error: [{}] {}", args);
 		dispatcher.fireSecurityRequestError(descr, errorCode, errorMsg);
 	}
 
