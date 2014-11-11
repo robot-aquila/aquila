@@ -2,22 +2,40 @@ package ru.prolib.aquila.probe;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.joda.time.*;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.probe.internal.*;
+import ru.prolib.aquila.core.BusinessEntities.RequestSecurityEvent;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
+import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.data.DataException;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class PROBETerminalTest {
+	private static final SecurityDescriptor descr;
+	
+	static {
+		descr = new SecurityDescriptor("foo", "bar", "RUR");
+	}
+	
 	private IMocksControl control;
 	private PROBETerminal terminal;
 	private TLSTimeline timeline;
 	private EventType eventType;
 	private PROBEServiceLocator locator;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -27,33 +45,60 @@ public class PROBETerminalTest {
 		terminal = new PROBETerminal("foobar");
 		locator = terminal.getServiceLocator();
 		locator.setTimeline(timeline);
+		terminal.getEventSystem().getEventQueue().start();
 	}
 	
-	@SuppressWarnings("unchecked")
+	@After
+	public void tearDown() throws Exception {
+		EventQueue queue = terminal.getEventSystem().getEventQueue(); 
+		queue.stop();
+		queue.join(1000);
+	}
+	
 	@Test
 	public void testRequestSecurity() throws Exception {
-		SecurityDescriptor descr = new SecurityDescriptor("foo", "bar", "RUR");
 		locator = control.createMock(PROBEServiceLocator.class);
 		Scheduler scheduler = control.createMock(Scheduler.class);
-		Aqiterator<Tick> it = control.createMock(Aqiterator.class);
 		terminal.setServiceLocator(locator);
 		terminal.setScheduler(scheduler);
 		DateTime start = DateTime.now();
 		expect(scheduler.getCurrentTime()).andReturn(start);
-		expect(locator.getDataIterator(descr, start)).andReturn(it);
-		locator.registerTimelineEvents(new TickDataDispatcher(it,
-				new CommonTickHandler(terminal.getEditableSecurity(descr))));
+		locator.startSimulation(descr, start);
 		control.replay();
 		
 		terminal.requestSecurity(descr);
 		terminal.requestSecurity(descr); // ignore repeated requests
-
+		
 		control.verify();
 	}
 	
 	@Test
 	public void testRequestSecurity_Error() throws Exception {
-		// TODO: 
+		final EventType type = terminal.OnRequestSecurityError(); 
+		final CountDownLatch finished = new CountDownLatch(1);
+		type.addListener(new EventListener() {
+			@Override
+			public void onEvent(Event actual) {
+				assertEquals(new RequestSecurityEvent(type, descr, -1,
+						"Test error"), actual);
+				finished.countDown();
+			}
+		});
+		
+		locator = control.createMock(PROBEServiceLocator.class);
+		Scheduler scheduler = control.createMock(Scheduler.class);
+		terminal.setServiceLocator(locator);
+		terminal.setScheduler(scheduler);
+		DateTime start = DateTime.now();
+		expect(scheduler.getCurrentTime()).andReturn(start);
+		locator.startSimulation(descr, start);
+		expectLastCall().andThrow(new DataException("Test error"));
+		control.replay();
+		
+		terminal.requestSecurity(descr);
+		
+		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
+		control.verify();
 	}
 	
 	@Test

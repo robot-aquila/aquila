@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.probe.internal.*;
 
 /**
  * Эмулятор торгового терминала.
@@ -58,16 +57,14 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 	
 	@Override
 	public void requestSecurity(SecurityDescriptor descr) {
-		PROBEServiceLocator locator = getServiceLocator();
 		if ( ! registered.contains(descr) ) {
 			try {
-				locator.registerTimelineEvents(new TickDataDispatcher(
-						locator.getDataIterator(descr, getCurrentTime()),
-						new CommonTickHandler(getEditableSecurity(descr))));
+				getServiceLocator().startSimulation(descr, getCurrentTime());
 				registered.add(descr);
-				
 			} catch (DataException e) {
-				logger.error("Failed connect to security data: ", e);
+				logger.error("Failed to start simulation " + descr + ": ", e);
+				logger.error("", e);
+				fireSecurityRequestError(descr, -1, e.getMessage());
 			}
 		}
 	}

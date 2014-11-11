@@ -2,12 +2,14 @@ package ru.prolib.aquila.probe;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
+
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.probe.internal.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class PROBEServiceLocatorTest {
@@ -15,12 +17,14 @@ public class PROBEServiceLocatorTest {
 	private PROBEServiceLocator locator;
 	private TLSTimeline timeline;
 	private DataStorage dataStorage;
+	private DataProvider dataProvider;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		timeline = control.createMock(TLSTimeline.class);
 		dataStorage = control.createMock(DataStorage.class);
+		dataProvider = control.createMock(DataProvider.class);
 		locator = new PROBEServiceLocator();
 	}
 	
@@ -46,29 +50,26 @@ public class PROBEServiceLocatorTest {
 		assertSame(dataStorage, locator.getDataStorage());
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testGetDataIterator() throws Exception {
-		SecurityDescriptor descr = new SecurityDescriptor("foo", "bar", "USD");
-		Aqiterator<Tick> it = control.createMock(Aqiterator.class);
-		DateTime time = DateTime.now();
-		expect(dataStorage.getIterator(descr, time)).andReturn(it);
-		control.replay();
-		locator.setDataStorage(dataStorage);
-		
-		assertSame(it, locator.getDataIterator(descr, time));
-		
-		control.verify();
+	@Test (expected=NullPointerException.class)
+	public void testGetDataProvider_ThrowsIfNotDefined() throws Exception {
+		locator.getDataProvider();
 	}
 	
 	@Test
-	public void testRegisterTimelineEvents() throws Exception {
-		TLEventSource source = control.createMock(TLEventSource.class);
-		timeline.registerSource(source);
+	public void testGetDataProvider() throws Exception {
+		locator.setDataProvider(dataProvider);
+		assertSame(dataProvider, locator.getDataProvider());
+	}
+	
+	@Test
+	public void testStartSimulation() throws Exception {
+		SecurityDescriptor descr = new SecurityDescriptor("foo", "bar", "RUR");
+		DateTime time = DateTime.now();
+		dataProvider.startSupply(descr, time);
 		control.replay();
-		locator.setTimeline(timeline);
+		locator.setDataProvider(dataProvider);
 		
-		locator.registerTimelineEvents(source);
+		locator.startSimulation(descr, time);
 		
 		control.verify();
 	}

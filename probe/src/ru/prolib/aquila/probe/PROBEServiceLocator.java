@@ -3,6 +3,7 @@ package ru.prolib.aquila.probe;
 import org.joda.time.DateTime;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.probe.internal.DataProvider;
 import ru.prolib.aquila.probe.timeline.*;
 
 /**
@@ -10,6 +11,7 @@ import ru.prolib.aquila.probe.timeline.*;
  */
 public class PROBEServiceLocator {
 	private DataStorage dataStorage;
+	private DataProvider dataProvider;
 	private TLSTimeline timeline;
 	
 	/**
@@ -62,33 +64,40 @@ public class PROBEServiceLocator {
 	public void setTimeline(TLSTimeline timeline) {
 		this.timeline = timeline;
 	}
-
+	
 	/**
-	 * Получить итератор тиковых данных.
+	 * Получить провайдер данных.
 	 * <p>
-	 * Ярлык. Делегирует хранилищу данных.
-	 * <p>
-	 * @param descr дескриптор инструмента
-	 * @param start время начала данных
-	 * @return итератор данных соответствующего инструмента
-	 * @throws DataException ошибка доступа к данным
+	 * @return провайдер данных
+	 * @throws NullPointerException экземпляр не определен
 	 */
-	public Aqiterator<Tick>
-		getDataIterator(SecurityDescriptor descr, DateTime start)
-			throws DataException
-	{
-		return getDataStorage().getIterator(descr, start);
+	public DataProvider getDataProvider() {
+		if ( dataProvider == null ) {
+			throw new NullPointerException("Data provider was not defined");
+		}
+		return dataProvider;
 	}
 	
 	/**
-	 * Зарегистрировать источник временных событий.
+	 * Назначить провайдер данных.
 	 * <p>
-	 * Ярлык. Делегирует объекту хронологии.
-	 * <p>
-	 * @param source источник событий
+	 * @param dataProvider провайдер данных
 	 */
-	public void registerTimelineEvents(TLEventSource source) {
-		getTimeline().registerSource(source);
+	public void setDataProvider(DataProvider dataProvider) {
+		this.dataProvider = dataProvider;
+	}
+	
+	/**
+	 * Запустить симуляцию инструмента.
+	 * <p> 
+	 * @param descr дескриптор инструмента
+	 * @param start начальная датировка данных 
+	 * @throws DataException ошибка инициализации
+	 */
+	public void startSimulation(SecurityDescriptor descr, DateTime start)
+			throws DataException
+	{
+		getDataProvider().startSupply(descr, start);
 	}
 	
 }
