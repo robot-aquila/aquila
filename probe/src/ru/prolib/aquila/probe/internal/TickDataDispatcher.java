@@ -1,5 +1,6 @@
 package ru.prolib.aquila.probe.internal;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.timeline.*;
 
@@ -71,6 +72,21 @@ public class TickDataDispatcher implements TLEventSource {
 	@Override
 	public boolean closed() {
 		return ! inWork;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != TickDataDispatcher.class ) {
+			return false;
+		}
+		TickDataDispatcher o = (TickDataDispatcher) other;
+		return new EqualsBuilder()
+			.append(o.reader, reader)
+			.append(o.tasks, tasks)
+			.isEquals();
 	}
 
 }

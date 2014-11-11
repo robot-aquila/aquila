@@ -1,5 +1,6 @@
 package ru.prolib.aquila.probe.internal;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.data.Tick;
 
@@ -50,6 +51,20 @@ public class CommonTickHandler implements TickHandler {
 	public Runnable createTask(Tick tick) {
 		// TODO: генерация сделок, установка атрибутов
 		return null;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != CommonTickHandler.class ) {
+			return false;
+		}
+		CommonTickHandler o = (CommonTickHandler) other;
+		return new EqualsBuilder()
+			.append(o.security, security)
+			.isEquals();
 	}
 
 }

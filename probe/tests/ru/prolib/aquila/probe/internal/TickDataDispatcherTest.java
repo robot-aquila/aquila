@@ -18,7 +18,8 @@ import ru.prolib.aquila.probe.timeline.TLException;
 
 public class TickDataDispatcherTest {
 	private IMocksControl control;
-	private TickHandler tasks;
+	private Aqiterator<Tick> it1, it2;
+	private TickHandler tasks, tasks2;
 	private TickDataDispatcher dispatcher;
 	
 	private static final SimpleDateFormat f =
@@ -78,10 +79,14 @@ public class TickDataDispatcherTest {
 		return new SimpleIterator<Tick>(getExpectedAsList());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
+		it1 = control.createMock(Aqiterator.class);
+		it2 = control.createMock(Aqiterator.class);
 		tasks = control.createMock(TickHandler.class);
+		tasks2 = control.createMock(TickHandler.class);
 	}
 	
 	@Test
@@ -161,6 +166,22 @@ public class TickDataDispatcherTest {
 		control.verify();
 		Vector<TaskCheck> expected = new Vector<TaskCheck>();
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		dispatcher = new TickDataDispatcher(it1, tasks);
+		TickDataDispatcher d1 = new TickDataDispatcher(it1, tasks),
+				d2 = new TickDataDispatcher(it2, tasks),
+				d3 = new TickDataDispatcher(it1, tasks2),
+				d4 = new TickDataDispatcher(it2, tasks2);
+		assertTrue(dispatcher.equals(dispatcher));
+		assertTrue(dispatcher.equals(d1));
+		assertFalse(dispatcher.equals(null));
+		assertFalse(dispatcher.equals(this));
+		assertFalse(dispatcher.equals(d2));
+		assertFalse(dispatcher.equals(d3));
+		assertFalse(dispatcher.equals(d4));
 	}
 
 }

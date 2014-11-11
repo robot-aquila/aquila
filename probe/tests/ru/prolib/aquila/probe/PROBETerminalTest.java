@@ -6,8 +6,9 @@ import org.easymock.IMocksControl;
 import org.joda.time.*;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.internal.*;
 import ru.prolib.aquila.probe.timeline.*;
 
@@ -16,6 +17,7 @@ public class PROBETerminalTest {
 	private PROBETerminal terminal;
 	private TLSTimeline timeline;
 	private EventType eventType;
+	private PROBEServiceLocator locator;
 
 	@Before
 	public void setUp() throws Exception {
@@ -23,18 +25,35 @@ public class PROBETerminalTest {
 		eventType = control.createMock(EventType.class);
 		timeline = control.createMock(TLSTimeline.class);
 		terminal = new PROBETerminal("foobar");
-		terminal.getServiceLocator().setTimeline(timeline);
+		locator = terminal.getServiceLocator();
+		locator.setTimeline(timeline);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testRequestSecurity() throws Exception {
 		SecurityDescriptor descr = new SecurityDescriptor("foo", "bar", "RUR");
-		fail("TODO: ");
-		//control.replay();
+		locator = control.createMock(PROBEServiceLocator.class);
+		Scheduler scheduler = control.createMock(Scheduler.class);
+		Aqiterator<Tick> it = control.createMock(Aqiterator.class);
+		terminal.setServiceLocator(locator);
+		terminal.setScheduler(scheduler);
+		DateTime start = DateTime.now();
+		expect(scheduler.getCurrentTime()).andReturn(start);
+		expect(locator.getDataIterator(descr, start)).andReturn(it);
+		locator.registerTimelineEvents(new TickDataDispatcher(it,
+				new CommonTickHandler(terminal.getEditableSecurity(descr))));
+		control.replay();
 		
-		//terminal.requestSecurity(descr);
-		
-		//control.verify();
+		terminal.requestSecurity(descr);
+		terminal.requestSecurity(descr); // ignore repeated requests
+
+		control.verify();
+	}
+	
+	@Test
+	public void testRequestSecurity_Error() throws Exception {
+		// TODO: 
 	}
 	
 	@Test
