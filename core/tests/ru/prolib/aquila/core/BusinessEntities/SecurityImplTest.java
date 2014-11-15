@@ -69,7 +69,7 @@ public class SecurityImplTest {
 	
 	@Test
 	public void testVersion() throws Exception {
-		assertEquals(1, Security.VERSION);
+		assertEquals(2, Security.VERSION);
 	}
 	
 	@Test
@@ -92,6 +92,8 @@ public class SecurityImplTest {
 		assertNull(security.getClosePrice());
 		assertNull(security.getHighPrice());
 		assertNull(security.getLowPrice());
+		assertNull(security.getInitialPrice());
+		assertNull(security.getInitialMargin());
 	}
 	
 	@Test
@@ -113,6 +115,8 @@ public class SecurityImplTest {
 		security.setLowPrice(24.56d);
 		security.setHighPrice(18.44d);
 		security.setStatus(SecurityStatus.TRADING);
+		security.setInitialPrice(54.32d);
+		security.setInitialMargin(5.43d);
 		
 		assertEquals(3, security.getPrecision());
 		assertEquals(130.00d, security.getMaxPrice(), 0.001d);
@@ -131,6 +135,8 @@ public class SecurityImplTest {
 		assertEquals(24.56d, security.getLowPrice(), 0.01d);
 		assertEquals(18.44d, security.getHighPrice(), 0.01d);
 		assertSame(SecurityStatus.TRADING, security.getStatus());
+		assertEquals(54.32d, security.getInitialPrice(), 0.01d);
+		assertEquals(5.43d, security.getInitialMargin(), 0.01d);
 		
 		security.setAvailable(true);
 		assertTrue(security.isAvailable());
@@ -512,6 +518,8 @@ public class SecurityImplTest {
 		security.setOpenPrice(852.00d);
 		security.setPrecision(2);
 		security.setStatus(SecurityStatus.TRADING);
+		security.setInitialPrice(145.28d);
+		security.setInitialMargin(219.24d);
 		security.fireTradeEvent(trade);
 
 		Variant<Terminal> vTerm = new Variant<Terminal>()
@@ -578,7 +586,15 @@ public class SecurityImplTest {
 		Variant<Trade> vLastTrd = new Variant<Trade>(vStat)
 			.add(trade)
 			.add(null);
-		Variant<?> iterator = vLastTrd;
+		Variant<Double> vInitPrice = new Variant<Double>(vLastTrd)
+			.add(145.28d)
+			.add(729.11d)
+			.add(null);
+		Variant<Double> vInitMrgn = new Variant<Double>(vInitPrice)
+			.add(219.24d)
+			.add(447.95d)
+			.add(null);
+		Variant<?> iterator = vInitMrgn;
 		int foundCnt = 0;
 		SecurityImpl x = null, found = null;
 		do {
@@ -601,6 +617,8 @@ public class SecurityImplTest {
 			x.setOpenPrice(vOpen.get());
 			x.setPrecision(vPrec.get());
 			x.setStatus(vStat.get());
+			x.setInitialPrice(vInitPrice.get());
+			x.setInitialMargin(vInitMrgn.get());
 			if ( vLastTrd.get() != null ) {
 				x.fireTradeEvent(vLastTrd.get());
 			}
@@ -631,6 +649,8 @@ public class SecurityImplTest {
 		assertEquals(852.00d, found.getOpenPrice(), 0.01d);
 		assertEquals(2, found.getPrecision());
 		assertEquals(SecurityStatus.TRADING, found.getStatus());
+		assertEquals(145.28d, security.getInitialPrice(), 0.01d);
+		assertEquals(219.24d, security.getInitialMargin(), 0.01d);
 		assertSame(trade, found.getLastTrade());
 	}
 	
@@ -763,6 +783,46 @@ public class SecurityImplTest {
 			security.setPrecision(fr.precision);
 			assertEquals(msg, fr.expected,
 					security.isPricesEquals(fr.price1, fr.price2));
+		}
+	}
+	
+	@Test
+	public void testSetInitialPrice_SetsChanged() throws Exception {
+		Object fixture[][] = {
+				// initial value, new value, changed?
+				{ null,		null,		false },
+				{ null,		81.345d,	true  },
+				{ 81.345d,	null,		true  },
+				{ 81.345d,	81.345d,	false },
+				{ 81.2345d,	812.2223d,	true  },
+		};
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			String msg = "At #" + i;
+			security.setInitialPrice((Double) fixture[i][0]);
+			security.resetChanges();
+			security.setInitialPrice((Double) fixture[i][1]);
+			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
+			assertEquals(msg, (Double) fixture[i][1], security.getInitialPrice());
+		}
+	}
+
+	@Test
+	public void testSetInitialMargin_SetsChanged() throws Exception {
+		Object fixture[][] = {
+				// initial value, new value, changed?
+				{ null,		null,		false },
+				{ null,		81.345d,	true  },
+				{ 81.345d,	null,		true  },
+				{ 81.345d,	81.345d,	false },
+				{ 81.2345d,	812.2223d,	true  },
+		};
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			String msg = "At #" + i;
+			security.setInitialMargin((Double) fixture[i][0]);
+			security.resetChanges();
+			security.setInitialMargin((Double) fixture[i][1]);
+			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
+			assertEquals(msg, (Double) fixture[i][1], security.getInitialMargin());
 		}
 	}
 

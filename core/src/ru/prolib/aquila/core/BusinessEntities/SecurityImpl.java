@@ -30,6 +30,7 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	private Double open,close,high,low;
 	private SecurityStatus status = SecurityStatus.STOPPED;
 	private DecimalFormat priceFormat;
+	private Double initialPrice, initialMargin;
 	
 	/**
 	 * Конструктор.
@@ -400,6 +401,8 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			.append(o.stepPrice, stepPrice)
 			.appendSuper(o.terminal == terminal)
 			.append(o.isAvailable(), isAvailable())
+			.append(o.initialPrice, initialPrice)
+			.append(o.initialMargin, initialMargin)
 			.isEquals();
 	}
 
@@ -443,6 +446,36 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 		double epsilon = Math.pow(10, -(decimals + 1));
 		double delta = Math.abs(price1 - price2);
 		return delta <= epsilon;
+	}
+
+	@Override
+	public synchronized Double getInitialPrice() {
+		return initialPrice;
+	}
+
+	@Override
+	public synchronized Double getInitialMargin() {
+		return initialMargin;
+	}
+
+	@Override
+	public synchronized void setInitialPrice(Double value) {
+		if ( value == null ?
+				initialPrice != null : ! value.equals(initialPrice) )
+		{
+			initialPrice = value;
+			setChanged();
+		}
+	}
+
+	@Override
+	public synchronized void setInitialMargin(Double value) {
+		if ( value == null ?
+				initialMargin != null : ! value.equals(initialMargin) )
+		{
+			initialMargin = value;
+			setChanged();
+		}
 	}
 
 }

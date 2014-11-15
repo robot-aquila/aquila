@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.EventType;
  * $Id: Security.java 552 2013-03-01 13:35:35Z whirlwind $
  */
 public interface Security {
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	
 	/**
 	 * Получить терминал, через который был получен инструмент.
@@ -255,5 +255,19 @@ public interface Security {
 	 * значения цены, установленной для инструмента
 	 */
 	public boolean isPricesEquals(Double price1, Double price2);
+	
+	/**
+	 * Получить расчетную цену.
+	 * <p>
+	 * @return цена
+	 */
+	public Double getInitialPrice();
+	
+	/**
+	 * Получить начальную маржу.
+	 * <p>
+	 * @return маржа
+	 */
+	public Double getInitialMargin();
 	
 }

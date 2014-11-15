@@ -208,4 +208,26 @@ public interface EditableSecurity extends Security, Editable {
 	 */
 	public void setStatus(SecurityStatus status);
 	
+	/**
+	 * Установить расчетную цену.
+	 * <p>
+	 * Если устанавливаемое значение отличается от текущего, то выставляется
+	 * признак изменения объекта, после чего, вызов метода
+	 * {@link EditableSecurity#hasChanged()} начинает возвращать true.
+	 * <p>
+	 * @param value цена
+	 */
+	public void setInitialPrice(Double value);
+	
+	/**
+	 * Установить начальную маржу.
+	 * <p>
+	 * Если устанавливаемое значение отличается от текущего, то выставляется
+	 * признак изменения объекта, после чего, вызов метода
+	 * {@link EditableSecurity#hasChanged()} начинает возвращать true.
+	 * <p>
+	 * @param value маржа
+	 */
+	public void setInitialMargin(Double value);
+	
 }
