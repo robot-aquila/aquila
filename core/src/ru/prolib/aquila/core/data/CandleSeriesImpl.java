@@ -230,8 +230,8 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 			throw new OutOfDateException(poa, tick);
 		}
 		Interval intr = timeframe.getInterval(tickTime);
-		Candle newCandle = new Candle(intr, tick.getValue(),
-				tick.getVolume() == null ? 0L : tick.getVolume().longValue());
+		Candle newCandle =
+			new Candle(intr, tick.getValue(), tick.getOptionalValueAsLong());
 		DateTime prevPOA = poa;
 		try {
 			poa = tickTime;

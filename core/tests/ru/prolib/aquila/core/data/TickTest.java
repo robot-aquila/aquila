@@ -25,7 +25,7 @@ public class TickTest {
 	public void testConstruct3() throws Exception {
 		assertSame(time1, tick.getTime());
 		assertEquals(1828.14d, tick.getValue(), 0.01d);
-		assertEquals(1000.0d, tick.getVolume(), 0.01d);
+		assertEquals(1000.0d, tick.getOptionalValue(), 0.01d);
 	}
 	
 	@Test
@@ -33,7 +33,7 @@ public class TickTest {
 		tick = new Tick(time1, 1828.14d);
 		assertSame(time1, tick.getTime());
 		assertEquals(1828.14d, tick.getValue(), 0.01d);
-		assertNull(tick.getVolume());
+		assertNull(tick.getOptionalValue());
 	}
 	
 	@Test
@@ -51,14 +51,14 @@ public class TickTest {
 		Variant<Double> vVal = new Variant<Double>(vTime)
 			.add(1828.14d)
 			.add(5268.20d);
-		Variant<Double> vVol = new Variant<Double>(vVal)
+		Variant<Double> vOpt = new Variant<Double>(vVal)
 			.add(1000.0d)
 			.add(824d);
-		Variant<?> iterator = vVol;
+		Variant<?> iterator = vOpt;
 		int foundCnt = 0;
 		Tick found = null, x = null;
 		do {
-			x = new Tick(vTime.get(), vVal.get(), vVol.get());
+			x = new Tick(vTime.get(), vVal.get(), vOpt.get());
 			if ( tick.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -67,14 +67,20 @@ public class TickTest {
 		assertEquals(1, foundCnt);
 		assertSame(time1, found.getTime());
 		assertEquals(1828.14d, found.getValue(), 0.001d);
-		assertEquals(1000.0d, found.getVolume(), 0.001d);
+		assertEquals(1000.0d, found.getOptionalValue(), 0.001d);
 	}
 	
 	@Test
 	public void testToString() throws Exception {
 		assertEquals(
-			"Tick[val=1828.14, vol=1000.0 at 2013-10-06T15:44:51.123+04:00]",
+			"Tick[val=1828.14, opt=1000.0 at 2013-10-06T15:44:51.123+04:00]",
 			tick.toString());
+	}
+	
+	@Test
+	public void testGetOptionalValueAsLong() throws Exception {
+		assertEquals(15L, new Tick(time1, 420d, 15d).getOptionalValueAsLong());
+		assertEquals(0L, new Tick(time1, 420d).getOptionalValueAsLong());
 	}
 
 }

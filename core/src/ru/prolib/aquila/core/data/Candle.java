@@ -141,8 +141,7 @@ public class Candle {
 		if ( ! interval.contains(tick.getTime()) ) {
 			throw new OutOfIntervalException(interval, tick);
 		}
-		Long qty = tick.getVolume() == null ? 0L : tick.getVolume().longValue();
-		return addDeal(tick.getValue(), qty);
+		return addDeal(tick.getValue(), tick.getOptionalValueAsLong());
 	}
 	
 	/**

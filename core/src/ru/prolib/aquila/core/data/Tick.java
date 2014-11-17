@@ -6,34 +6,34 @@ import org.joda.time.DateTime;
 /**
  * Тиковые данные.
  * <p>
- * Представляет собой два значения (основное-value и опциональное-volume)
- * связанные с определенным моментом на временной оси. Предназначен для
+ * Представляет собой пару значений (основное и опциональное) связанные с
+ * определенным моментом на временной шкале. Можно использовать для
  * представления значения цены, цены/объема или значения произвольного индекса
  * в определенный момент времени.  
  */
 public class Tick {
 	private final DateTime time;
 	private final Double value;
-	private final Double volume;
+	private final Double optValue;
 
 	/**
 	 * Конструктор.
 	 * <p>
 	 * @param time время
 	 * @param value основное значение
-	 * @param volume опциональное значение
+	 * @param optValue опциональное значение
 	 */
-	public Tick(DateTime time, Double value, Double volume) {
+	public Tick(DateTime time, Double value, Double optValue) {
 		super();
 		this.time = time;
 		this.value = value;
-		this.volume = volume;
+		this.optValue = optValue;
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
-	 * Значение объема не используется.
+	 * Опциональное значение не используется.
 	 * <p>
 	 * @param time время
 	 * @param value значение
@@ -65,8 +65,17 @@ public class Tick {
 	 * <p>
 	 * @return опциональное значение
 	 */
-	public Double getVolume() {
-		return volume;
+	public Double getOptionalValue() {
+		return optValue;
+	}
+	
+	/**
+	 * Получить опциональное значение.
+	 * <p>
+	 * @return опциональное значение или 0, если значение не определено
+	 */
+	public long getOptionalValueAsLong() {
+		return optValue == null ? 0L : optValue.longValue();
 	}
 	
 	@Override
@@ -79,7 +88,7 @@ public class Tick {
 			return new EqualsBuilder()
 				.append(time, o.time)
 				.append(value, o.value)
-				.append(volume, o.volume)
+				.append(optValue, o.optValue)
 				.isEquals();
 		} else {
 			return false;
@@ -89,7 +98,7 @@ public class Tick {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[val=" + value
-			+ (volume == null ? "" : ", vol=" + volume)
+			+ (optValue == null ? "" : ", opt=" + optValue)
 			+ " at " + time + "]";
 	}
 	
