@@ -1,4 +1,4 @@
-package ru.prolib.aquila.probe;
+package ru.prolib.aquila.probe.internal;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;

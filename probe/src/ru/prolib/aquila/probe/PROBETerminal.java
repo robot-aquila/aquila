@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
+import ru.prolib.aquila.probe.internal.SimulationController;
 
 /**
  * Эмулятор торгового терминала.

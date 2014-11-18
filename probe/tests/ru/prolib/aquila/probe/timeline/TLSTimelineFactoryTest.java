@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.joda.time.*;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.probe.SimulationController;
+import ru.prolib.aquila.probe.internal.SimulationController;
 
 public class TLSTimelineFactoryTest {
 	private EventSystem es;

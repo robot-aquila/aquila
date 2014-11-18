@@ -16,6 +16,7 @@ import ru.prolib.aquila.core.BusinessEntities.RequestSecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.DataException;
+import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class PROBETerminalTest {

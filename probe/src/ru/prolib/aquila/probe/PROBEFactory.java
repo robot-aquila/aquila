@@ -6,6 +6,7 @@ import org.joda.time.format.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
 import ru.prolib.aquila.probe.timeline.*;
 
 /**

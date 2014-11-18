@@ -14,7 +14,6 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandlerImpl;
-import ru.prolib.aquila.probe.SimulationController;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class SchedulerTest {

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.probe;
+package ru.prolib.aquila.probe.internal;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
@@ -8,22 +8,20 @@ import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.probe.internal.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class PROBEServiceLocatorTest {
 	private IMocksControl control;
 	private PROBEServiceLocator locator;
 	private TLSTimeline timeline;
-	private DataStorage dataStorage;
+	private PROBEDataStorage dataStorage;
 	private DataProvider dataProvider;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		timeline = control.createMock(TLSTimeline.class);
-		dataStorage = control.createMock(DataStorage.class);
+		dataStorage = control.createMock(PROBEDataStorage.class);
 		dataProvider = control.createMock(DataProvider.class);
 		locator = new PROBEServiceLocator();
 	}

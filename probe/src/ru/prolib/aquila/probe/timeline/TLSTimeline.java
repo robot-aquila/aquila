@@ -4,7 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.probe.SimulationController;
+import ru.prolib.aquila.probe.internal.SimulationController;
 
 
 /**

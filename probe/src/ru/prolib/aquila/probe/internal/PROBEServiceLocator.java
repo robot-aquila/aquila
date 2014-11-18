@@ -1,16 +1,15 @@
-package ru.prolib.aquila.probe;
+package ru.prolib.aquila.probe.internal;
 
 import org.joda.time.DateTime;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.probe.internal.DataProvider;
 import ru.prolib.aquila.probe.timeline.*;
 
 /**
  * Сервис-локатор.
  */
 public class PROBEServiceLocator {
-	private DataStorage dataStorage;
+	private PROBEDataStorage dataStorage;
 	private DataProvider dataProvider;
 	private TLSTimeline timeline;
 	
@@ -27,7 +26,7 @@ public class PROBEServiceLocator {
 	 * @return хранилище данных
 	 * @throws NullPointerException экземпляр хранилища не определен
 	 */
-	public DataStorage getDataStorage() {
+	public PROBEDataStorage getDataStorage() {
 		if ( dataStorage == null ) {
 			throw new NullPointerException("Storage was not defined");
 		}
@@ -39,7 +38,7 @@ public class PROBEServiceLocator {
 	 * <p>
 	 * @param storage хранилище данных
 	 */
-	public void setDataStorage(DataStorage storage) {
+	public void setDataStorage(PROBEDataStorage storage) {
 		this.dataStorage = storage;
 	}
 	
