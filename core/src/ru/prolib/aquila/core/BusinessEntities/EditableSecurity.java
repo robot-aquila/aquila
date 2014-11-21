@@ -21,7 +21,7 @@ public interface EditableSecurity extends Security, Editable {
 	 * <p>
 	 * @param value размер лота
 	 */
-	public void setLotSize(int value);
+	public void setLotSize(Integer value);
 	
 	/**
 	 * Установить последнюю цену.
@@ -76,7 +76,7 @@ public interface EditableSecurity extends Security, Editable {
 	 * <p>
 	 * @param value величина шага цены
 	 */
-	public void setMinStepSize(double value);
+	public void setMinStepSize(Double value);
 	
 	/**
 	 * Установить точность цены в десятичных знаках после запятой.
@@ -87,7 +87,7 @@ public interface EditableSecurity extends Security, Editable {
 	 * <p>
 	 * @param value точность цены
 	 */
-	public void setPrecision(int value);
+	public void setPrecision(Integer value);
 	
 	/**
 	 * Генерировать событие о получении новой сделки по инструменту.

@@ -48,7 +48,7 @@ public interface Security {
 	 * <p>
 	 * @return размер лота
 	 */
-	public int getLotSize();
+	public Integer getLotSize();
 
 	/**
 	 * Получить верхний лимит цены.
@@ -82,14 +82,14 @@ public interface Security {
 	 * <p>
 	 * @return минимальный шаг цены
 	 */
-	public double getMinStepSize();
+	public Double getMinStepSize();
 	
 	/**
 	 * Получить точность цены в десятичных разрядах.
 	 * <p> 
 	 * @return точность цены
 	 */
-	public int getPrecision();
+	public Integer getPrecision();
 	
 	/**
 	 * Получить последнюю сделку.

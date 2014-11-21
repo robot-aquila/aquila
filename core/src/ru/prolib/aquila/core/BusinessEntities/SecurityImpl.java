@@ -20,9 +20,9 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	private Double maxPrice;
 	private Double stepPrice;
 	private Double lastPrice;
-	private double stepSize;
-	private int lotSize;
-	private int decimals;
+	private Double stepSize;
+	private Integer lotSize;
+	private Integer decimals;
 	private Trade lastTrade = null;
 	private String displayName;
 	private Double askPrice,bidPrice;
@@ -74,13 +74,13 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	}
 
 	@Override
-	public synchronized int getLotSize() {
+	public synchronized Integer getLotSize() {
 		return lotSize;
 	}
 
 	@Override
-	public synchronized void setLotSize(int value) {
-		if ( value != lotSize ) {
+	public synchronized void setLotSize(Integer value) {
+		if ( lotSize != value ) {
 			lotSize = value;
 			setChanged();
 		}
@@ -132,25 +132,27 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	}
 
 	@Override
-	public synchronized double getMinStepSize() {
+	public synchronized Double getMinStepSize() {
 		return stepSize;
 	}
 	
 	@Override
-	public synchronized void setMinStepSize(double value) {
-		if ( value != stepSize ) {
+	public synchronized void setMinStepSize(Double value) {
+		if ( (stepSize == null && value != null)
+		  || (stepSize != null && ! stepSize.equals(value)) )
+		{
 			stepSize = value;
 			setChanged();
 		}
 	}
 
 	@Override
-	public synchronized int getPrecision() {
+	public synchronized Integer getPrecision() {
 		return decimals;
 	}
 	
 	@Override
-	public synchronized void setPrecision(int value) {
+	public synchronized void setPrecision(Integer value) {
 		if ( value != decimals ) {
 			decimals = value;
 			setChanged();
@@ -359,15 +361,19 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	}
 	
 	private synchronized void changePriceFormat() {
-		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-		symbols.setDecimalSeparator('.');
-		String format = "";
-		if ( decimals > 0 ) {
-			format = "0." + StringUtils.repeat('0', decimals);
+		if ( decimals == null ) {
+			priceFormat = null;
 		} else {
-			format = "0";
+			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+			symbols.setDecimalSeparator('.');
+			String format = "";
+			if ( decimals != 0 ) {
+				format = "0." + StringUtils.repeat('0', decimals);
+			} else {
+				format = "0";
+			}
+			priceFormat = new DecimalFormat(format, symbols);
 		}
-		priceFormat = new DecimalFormat(format, symbols);
 	}
 	
 	@Override

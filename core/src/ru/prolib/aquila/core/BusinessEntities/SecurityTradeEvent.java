@@ -48,5 +48,10 @@ public class SecurityTradeEvent extends SecurityEvent {
 		}
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + trade.toString() + "]";
+	}
 
 }

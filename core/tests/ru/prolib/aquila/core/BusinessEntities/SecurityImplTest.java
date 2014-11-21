@@ -74,12 +74,12 @@ public class SecurityImplTest {
 	
 	@Test
 	public void testDefaultValues() throws Exception {
-		assertEquals(0, security.getPrecision());
+		assertNull(security.getPrecision());
 		assertNull(security.getMinPrice());
 		assertNull(security.getMaxPrice());
-		assertEquals(0, security.getLotSize());
+		assertNull(security.getLotSize());
 		assertNull(security.getMinStepPrice());
-		assertEquals(0.0d, security.getMinStepSize(), 0.01d);
+		assertNull(security.getMinStepSize());
 		assertNull(security.getLastTrade());
 		assertNull(security.getLastPrice());
 		assertFalse(security.isAvailable());
@@ -118,10 +118,10 @@ public class SecurityImplTest {
 		security.setInitialPrice(54.32d);
 		security.setInitialMargin(5.43d);
 		
-		assertEquals(3, security.getPrecision());
+		assertEquals(3, (int)security.getPrecision());
 		assertEquals(130.00d, security.getMaxPrice(), 0.001d);
 		assertEquals(90.00d, security.getMinPrice(), 0.001d);
-		assertEquals(1, security.getLotSize());
+		assertEquals(1, (int)security.getLotSize());
 		assertEquals(0.1d, security.getMinStepPrice(), 0.001d);
 		assertEquals(1.00d, security.getMinStepSize(), 0.001d);
 		assertEquals(20.44d, security.getLastPrice(), 0.001d);
@@ -169,6 +169,11 @@ public class SecurityImplTest {
 		assertEquals("14550", security.shrinkPrice(14553.15));
 		assertEquals("14560", security.shrinkPrice(14555.55));
 	}
+	
+	@Test (expected=NullPointerException.class)
+	public void testShrinkPrice_ThrowsIfDecimalsNotSet() throws Exception {
+		security.shrinkPrice(14553.15d);
+	}
 
 	@Test
 	public void testFireTradeEvent() throws Exception {
@@ -195,24 +200,42 @@ public class SecurityImplTest {
 	
 	@Test
 	public void testSetPrecision_SetsChanged() throws Exception {
-		assertFalse(security.hasChanged());
-		security.setPrecision(5);
-		assertTrue(security.hasChanged());
-		security.resetChanges();
-		assertFalse(security.hasChanged());
-		security.setPrecision(5);
-		assertFalse(security.hasChanged());
+		Object fixture[][] = {
+			// initial value, new value, changed?
+			{ null,			null,		false },
+			{ null,			   2,		true  },
+			{    2,	 		   2,		false },
+			{    2,			null,		true  },
+			{    2,			   3,		true  },
+		};
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			String msg = "At #" + i;
+			security.setPrecision((Integer) fixture[i][0]);
+			security.resetChanges();
+			security.setPrecision((Integer) fixture[i][1]);
+			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
+			assertEquals((Integer) fixture[i][1], security.getPrecision());
+		}
 	}
 	
 	@Test
 	public void testSetLotSize_SetsChanged() throws Exception {
-		assertFalse(security.hasChanged());
-		security.setLotSize(10);
-		assertTrue(security.hasChanged());
-		security.resetChanges();
-		assertFalse(security.hasChanged());
-		security.setLotSize(10);
-		assertFalse(security.hasChanged());
+		Object fixture[][] = {
+			// initial value, new value, changed?
+			{ null,			null,		false },
+			{ null,			10,			true  },
+			{   10,	 		10,			false },
+			{   10,			null,		true  },
+			{   10,			15,			true  },
+		};
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			String msg = "At #" + i;
+			security.setLotSize((Integer) fixture[i][0]);
+			security.resetChanges();
+			security.setLotSize((Integer) fixture[i][1]);
+			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
+			assertEquals((Integer) fixture[i][1], security.getLotSize());
+		}
 	}
 	
 	@Test
@@ -294,14 +317,22 @@ public class SecurityImplTest {
 	
 	@Test
 	public void testSetMinStepSize_SetsChanged() throws Exception {
-		assertFalse(security.hasChanged());
-		security.setMinStepSize(0.0005d);
-		assertTrue(security.hasChanged());
-		assertEquals(0.0005d, security.getMinStepSize(), 0.00001d);
-		security.resetChanges();
-		assertFalse(security.hasChanged());
-		security.setMinStepSize(0.0005d);
-		assertFalse(security.hasChanged());
+		Object fixture[][] = {
+			// initial value, new value, changed?
+			{ null,		null,		false },
+			{ null,		0.5d,		true  },
+			{ 0.5d,		null,		true  },
+			{ 0.5d,		0.5d,		false },
+			{ 0.5d,		0.3d,		true  },
+		};
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			String msg = "At #" + i;
+			security.setMinStepSize((Double) fixture[i][0]);
+			security.resetChanges();
+			security.setMinStepSize((Double) fixture[i][1]);
+			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
+			assertEquals((Double) fixture[i][1], security.getMinStepSize());
+		}
 	}
 	
 	@Test
@@ -640,14 +671,14 @@ public class SecurityImplTest {
 		assertEquals("Yuppy", found.getDisplayName());
 		assertEquals(650.00d, found.getHighPrice(), 0.01d);
 		assertEquals(124.00d, found.getLastPrice(), 0.01d);
-		assertEquals(10, found.getLotSize());
+		assertEquals(10, (int)found.getLotSize());
 		assertEquals(754.00d, found.getLowPrice(), 0.01d);
 		assertEquals(100.05d, found.getMaxPrice(), 0.01d);
 		assertEquals(512.00d, found.getMinPrice(), 0.01d);
 		assertEquals(1.0d, found.getMinStepPrice(), 0.01d);
 		assertEquals(0.01d, found.getMinStepSize(), 0.01d);
 		assertEquals(852.00d, found.getOpenPrice(), 0.01d);
-		assertEquals(2, found.getPrecision());
+		assertEquals(2, (int)found.getPrecision());
 		assertEquals(SecurityStatus.TRADING, found.getStatus());
 		assertEquals(145.28d, security.getInitialPrice(), 0.01d);
 		assertEquals(219.24d, security.getInitialMargin(), 0.01d);
