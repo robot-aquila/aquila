@@ -237,6 +237,8 @@ public interface Security {
 	 * @param price цена
 	 * @param qty количество
 	 * @return объем или null, если не удалось расчитать
+	 * @throws NullPointerException не определен размер тика или один из
+	 * аргументов
 	 */
 	public Double getMostAccurateVolume(Double price, Long qty);
 	

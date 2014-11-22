@@ -15,9 +15,11 @@ import ru.prolib.aquila.core.data.Tick;
 
 public class BMUtilsTest {
 	private static final SecurityDescriptor descr;
+	private static final Tick tick;
 	
 	static {
 		descr = new SecurityDescriptor("foo", "bar", "USD");
+		tick = new Tick(new DateTime(2014, 11, 19, 4, 37, 39, 50), 21.45d, 84d);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -40,15 +42,22 @@ public class BMUtilsTest {
 		
 		Trade expected = new Trade(terminal);
 		expected.setDirection(Direction.BUY);
-		expected.setPrice(212.45d);
-		expected.setQty(824L);
+		expected.setPrice(21.45d);
+		expected.setQty(84L);
 		expected.setSecurityDescriptor(descr);
-		expected.setTime(new DateTime(2014, 11, 19, 4, 37, 39, 500));
-		expected.setVolume(350117.6);
+		expected.setTime(new DateTime(2014, 11, 19, 4, 37, 39, 50));
+		expected.setVolume(3603.6);
 		
-		assertEquals(expected, utils.tradeFromTick(
-			new Tick(new DateTime(2014, 11, 19, 4, 37, 39, 500), 212.45d, 824d),
-			security));
+		assertEquals(expected, utils.tradeFromTick(tick, security));
 	}
-
+	
+	@Test (expected=NullPointerException.class)
+	public void testTradeFromTick_ThrowsIfMinStepSizeNotDefined()
+			throws Exception
+	{
+		security.setMinStepPrice(0.02d);
+		
+		utils.tradeFromTick(tick, security);
+	}
+	
 }

@@ -23,18 +23,22 @@ public class SecurityTradeEventTest {
 	}
 	
 	private IMocksControl control;
-	private Security security;
-	private EventType eventType;
+	private Security security, security2;
+	private EventType eventType, eventType2;
+	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
 	private Trade trade;
 	private SecurityTradeEvent event;
 
+	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = new TerminalImpl("zulu24");
 		security = terminal.getEditableSecurity(descr);
+		security2 = control.createMock(Security.class);
 		eventType = security.OnTrade();
+		eventType2 = control.createMock(EventType.class);
 		trade = new BMUtils().tradeFromTick(
 			new Tick(new DateTime(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
 			security);
@@ -57,17 +61,24 @@ public class SecurityTradeEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
+		Tick
+		tick1 = new Tick(new DateTime(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
+		tick2 = new Tick(new DateTime(2014, 11, 20, 1,  4,  2, 9), 132d, 15d); 
+				
 		BMUtils utils = new BMUtils();
-		Trade trade1 = utils.tradeFromTick(
-			new Tick(new DateTime(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
-			security);
-		Trade trade2 = utils.tradeFromTick(
-			new Tick(new DateTime(2014, 11, 20, 1,  4,  2, 9), 132d, 15d),
-			security);
+		Trade trade1 = utils.tradeFromTick(tick1, security);
+		Trade trade2 = utils.tradeFromTick(tick2, security);
 		
-		
-		
-		fail("TODO: ");
+		SecurityTradeEvent
+		e1 = new SecurityTradeEvent(eventType, security, trade1),
+		e2 = new SecurityTradeEvent(eventType2, security, trade1),
+		e3 = new SecurityTradeEvent(eventType, security2, trade1),
+		e4 = new SecurityTradeEvent(eventType, security, trade2);
+
+		assertTrue(event.equals(e1));
+		assertFalse(event.equals(e2));
+		assertFalse(event.equals(e3));
+		assertFalse(event.equals(e4));
 	}
 	
 	@Test

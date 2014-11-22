@@ -728,23 +728,39 @@ public class SecurityImplTest {
 		// Для первой строки:
 		// 6.38818 / 10 = X / 130430 -> X = 130430 * 6.38818 / 10
 		//	-> X = price * tick price / tick 
-		Double fix[][] = {
-			// tick, tick price, price, qty, expected
-			{ 10.0, 6.38818, 130430.0, 1.0, 83321.03174 },
-			{ 10.0, 6.38818, 130430.0, 2.0, 166642.06348 },
-			{ 10.0, null,    130430.0, 1.0, 130430.0 },
-			{ 10.0, null,    130430.0, 2.0, 260860.0 },
-			{  1.0, 1.0,     32044.0,  5.0, 160220.0 },
-			{ 0.01, 3.19409, 100.3,    1.0, 32036.7227 },
-			{ 0.01, null,    100.3,    5.0, 501.5 },
+		Object fix[][] = {
+			// tick, tick price, price, qty, expected,     exception?
+			{ 10.0, 6.38818, 130430.0,   1L, 83321.03174,	false },
+			{ 10.0, 6.38818, 130430.0,   2L, 166642.06348,	false },
+			{ 10.0, null,    130430.0,   1L, 130430.0,		false },
+			{ 10.0, null,    130430.0,   2L, 260860.0,		false },
+			{  1.0, 1.0,     32044.0,    5L, 160220.0,		false },
+			{ 0.01, 3.19409, 100.3,      1L, 32036.7227,	false },
+			{ 0.01, null,    100.3,      5L, 501.5,			false },
+			{ null, 3.19409, 100.3,	     1L, 0d,			true  },
+			{ 0.01, 3.19409, null,       1L, 0d,            true  },
+			{ 0.01, 3.19409, 100.3,    null, 0d,			true  },
+			
 		};
+		Double expected, actual;
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			security.setMinStepSize(fix[i][0]);
-			security.setMinStepPrice(fix[i][1]);
-			assertEquals(msg, fix[i][4], security
-					.getMostAccurateVolume(fix[i][2], fix[i][3].longValue()),
-					0.000001d);
+			security.setMinStepSize((Double) fix[i][0]);
+			security.setMinStepPrice((Double) fix[i][1]);
+			expected = (Double) fix[i][4];
+			if ( (Boolean) fix[i][5] ) {
+				try {
+					security.getMostAccurateVolume((Double) fix[i][2],
+							(Long) fix[i][3]);
+					fail(msg + " expected exception: NullPointerException");
+				} catch ( NullPointerException e ) {
+					
+				}
+			} else {
+				actual = security.getMostAccurateVolume((Double) fix[i][2],
+						(Long) fix[i][3]);
+				assertEquals(msg, expected, actual, 0.000001d);
+			}
 		}
 	}
 	
