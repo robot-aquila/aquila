@@ -23,7 +23,7 @@ public class SecurityTradeEventTest {
 	}
 	
 	private IMocksControl control;
-	private Security security, security2;
+	private EditableSecurity security, security2;
 	private EventType eventType, eventType2;
 	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
@@ -36,7 +36,9 @@ public class SecurityTradeEventTest {
 		control = createStrictControl();
 		terminal = new TerminalImpl("zulu24");
 		security = terminal.getEditableSecurity(descr);
-		security2 = control.createMock(Security.class);
+		security.setMinStepSize(1d);
+		security.setMinStepPrice(1d);
+		security2 = control.createMock(EditableSecurity.class);
 		eventType = security.OnTrade();
 		eventType2 = control.createMock(EventType.class);
 		trade = new BMUtils().tradeFromTick(
