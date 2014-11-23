@@ -14,21 +14,15 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.Scheduler;
-import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
-import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
 import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.probe.PROBETerminal;
 
 public class SecurityHandlerFORTSTest {
 	private static SecurityDescriptor descr;
+	private static BMUtils ut = new BMUtils();
 	
 	static {
 		descr = new SecurityDescriptor("RTS-12.14", "FORTS", "USD", SecurityType.FUT);
@@ -74,8 +68,8 @@ public class SecurityHandlerFORTSTest {
 		handler.doInitialTask(new Tick(DateTime.now(), 142912d));
 		
 		assertEquals("RTS-future-12.14", security.getDisplayName());
-		assertEquals(1, security.getLotSize());
-		assertEquals(0, security.getPrecision());
+		assertEquals(new Integer(1), security.getLotSize());
+		assertEquals(new Integer(0), security.getPrecision());
 		assertEquals(10d, security.getMinStepSize(), 0.1d);
 		assertNull(security.getAskPrice());
 		assertNull(security.getAskSize());
@@ -130,12 +124,13 @@ public class SecurityHandlerFORTSTest {
 	
 	@Test
 	public void testCreateTask() throws Exception {
+		handler.doInitialTask(new Tick(null, 120140d));
 		DateTime time = DateTime.now();
+		Trade expTrade = ut.tradeFromTick(new Tick(time, 119540d, 120d), security); 
 		final List<Event> expected = new Vector<Event>(),
 				actual = new Vector<Event>();
 		expected.add(new SecurityEvent(security.OnChanged(), security));
-		expected.add(new SecurityTradeEvent(security.OnTrade(), security,
-			new BMUtils().tradeFromTick(new Tick(time, 119540d, 120d), security)));
+		expected.add(new SecurityTradeEvent(security.OnTrade(), security, expTrade));
 		final CountDownLatch finished = new CountDownLatch(2);
 		EventListener listener = new EventListener() {
 			@Override public void onEvent(Event event) {
@@ -145,12 +140,55 @@ public class SecurityHandlerFORTSTest {
 		};
 		security.OnChanged().addListener(listener);
 		security.OnTrade().addListener(listener);
-		handler.doInitialTask(new Tick(null, 120140d));
 		
 		handler.createTask(new Tick(time, 119540d, 120d)).run();
 		
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		assertEquals(expected, actual);
+		assertEquals(expTrade, security.getLastTrade());
+		assertEquals(119540d, security.getLastPrice(), 0.1d);
+		assertEquals(120140d, security.getHighPrice(), 0.1d);
+		assertEquals(119540d, security.getLowPrice(), 0.1d);
+		assertEquals(120140d, security.getOpenPrice(), 0.1d);
+		assertEquals(120140d, security.getClosePrice(), 0.1d);
+	}
+	
+	@Test
+	public void testCreateTask_IfOpenPriceUndefined() throws Exception {
+		security.setMinStepSize(10d);
+		security.setMinStepPrice(1d);
+		security.setHighPrice(112000d);
+		security.setLowPrice(111000d);
+		
+		handler.createTask(new Tick(DateTime.now(), 115240d, 10d)).run();
+		
+		assertEquals(115240d, security.getOpenPrice(), 0.1d);
+		assertEquals(115240d, security.getHighPrice(), 0.1d);
+		assertEquals(115240d, security.getLowPrice(), 0.1d);
+	}
+	
+	@Test
+	public void testCreateTask_UpdatesHigh() throws Exception {
+		security.setMinStepSize(10d);
+		security.setMinStepPrice(1d);
+		handler.doInitialTask(new Tick(null, 120140d));
+		
+		handler.createTask(new Tick(DateTime.now(), 135240d, 10d)).run();
+		
+		assertEquals(135240d, security.getHighPrice(), 1d);
+		assertEquals(120140d, security.getLowPrice(), 1d);
+	}
+	
+	@Test
+	public void testCreateTask_UpdatesLow() throws Exception {
+		security.setMinStepSize(10d);
+		security.setMinStepPrice(1d);
+		handler.doInitialTask(new Tick(null, 120140d));
+		
+		handler.createTask(new Tick(DateTime.now(), 115240d, 10d)).run();
+		
+		assertEquals(120140d, security.getHighPrice(), 1d);
+		assertEquals(115240d, security.getLowPrice(), 1d);
 	}
 	
 	@Test
@@ -162,7 +200,27 @@ public class SecurityHandlerFORTSTest {
 	
 	@Test
 	public void testEquals() {
-		fail("TODO: incomplete");
+		Variant<PROBETerminal> vTerm = new Variant<PROBETerminal>()
+				.add(terminal)
+				.add(control.createMock(PROBETerminal.class));
+		Variant<EditableSecurity> vSec = new Variant<EditableSecurity>(vTerm)
+				.add(security)
+				.add(control.createMock(EditableSecurity.class));
+		Variant<SecurityProperties> vProps =
+					new Variant<SecurityProperties>(vSec)
+				.add(props)
+				.add(control.createMock(SecurityProperties.class));
+		Variant<?> iterator = vProps;
+		int foundCnt = 0;
+		SecurityHandlerFORTS x = null/*, found = null*/;
+		do {
+			x = new SecurityHandlerFORTS(vTerm.get(), vSec.get(), vProps.get());
+			if ( handler.equals(x) ) {
+				foundCnt ++;
+				//found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
 	}
 
 }

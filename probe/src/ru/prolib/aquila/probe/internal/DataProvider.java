@@ -14,7 +14,7 @@ public interface DataProvider {
 	 * Начать симуляцию инструмента.
 	 * <p>
 	 * @param descr дескриптор инструмента
-	 * @param start время начала данных
+	 * @param startTime время начала данных
 	 * @throws DataException ошибка инициализации поставщика
 	 */
 	public void startSupply(SecurityDescriptor descr, DateTime startTime)

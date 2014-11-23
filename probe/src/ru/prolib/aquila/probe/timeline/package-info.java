@@ -42,6 +42,6 @@
  * и выдает по запросу ближайший (наиболее ранний) стек событий.
  * <p>
  * Для создания объекта хронологии следует использовать фабрику
- * {@link TLSTimelineFactory}.
+ * {@link ru.prolib.aquila.probe.timeline.TLSTimelineFactory TLSTimelineFactory}.
  */
 package ru.prolib.aquila.probe.timeline;

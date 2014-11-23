@@ -11,6 +11,7 @@ import ru.prolib.aquila.probe.PROBETerminal;
  * <p>
  */
 public class SecurityHandlerFORTS implements TickHandler {
+	private final BMUtils bmut = new BMUtils();
 	private final PROBETerminal terminal;
 	private final EditableSecurity security;
 	private final SecurityProperties props;
@@ -73,7 +74,7 @@ public class SecurityHandlerFORTS implements TickHandler {
 	@Override
 	public Runnable createTask(final Tick tick) {
 		return new Runnable() {
-			@Override public void run() { regularTrade(tick); }
+			@Override public void run() { onEachTick(tick); }
 		};
 	}
 
@@ -93,7 +94,7 @@ public class SecurityHandlerFORTS implements TickHandler {
 	 * <p>
 	 * @param tick тик данных
 	 */
-	private void regularTrade(Tick tick) {
+	private void onEachTick(Tick tick) {
 		double price = tick.getValue();
 		if ( security.getOpenPrice() == null ) {
 			security.setOpenPrice(price);
@@ -104,7 +105,8 @@ public class SecurityHandlerFORTS implements TickHandler {
 			security.setLowPrice(Math.min(security.getLowPrice(), price));
 		}
 		security.fireChangedEvent();
-		security.fireTradeEvent(new BMUtils().tradeFromTick(tick, security));
+		security.setLastPrice(price);
+		security.fireTradeEvent(bmut.tradeFromTick(tick, security));
 	}
 	
 	@Override
@@ -117,7 +119,9 @@ public class SecurityHandlerFORTS implements TickHandler {
 		}
 		SecurityHandlerFORTS o = (SecurityHandlerFORTS) other;
 		return new EqualsBuilder()
-			.appendSuper(o.security == security)
+			.append(o.security, security)
+			.append(o.terminal, terminal)
+			.append(o.props, props)
 			.isEquals();
 	}
 
