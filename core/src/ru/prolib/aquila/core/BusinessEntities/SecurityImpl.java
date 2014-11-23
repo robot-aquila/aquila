@@ -437,11 +437,7 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 
 	@Override
 	public synchronized Double getMostAccurateVolume(Double price, Long qty) {
-		if ( stepPrice != null ) {
-			return price * stepPrice / stepSize * (double) qty;
-		} else {
-			return price * (double) qty;
-		}
+		return price * stepPrice / stepSize * (double) qty;
 	}
 
 	@Override
