@@ -13,7 +13,7 @@ import ru.prolib.aquila.probe.timeline.*;
  */
 public class TickDataDispatcher implements TLEventSource {
 	private final Aqiterator<Tick> reader;
-	private final TickHandler tasks;
+	private final TickHandler handler;
 	private Tick prevTick;
 	private boolean inWork = true; 
 	
@@ -21,12 +21,12 @@ public class TickDataDispatcher implements TLEventSource {
 	 * Конструктор.
 	 * <p>
 	 * @param reader поток данных
-	 * @param tasks
+	 * @param handler обработчик
 	 */
-	public TickDataDispatcher(Aqiterator<Tick> reader, TickHandler tasks) {
+	public TickDataDispatcher(Aqiterator<Tick> reader, TickHandler handler) {
 		super();
 		this.reader = reader;
-		this.tasks = tasks;
+		this.handler = handler;
 	}
 
 	@Override
@@ -37,20 +37,20 @@ public class TickDataDispatcher implements TLEventSource {
 		try {
 			if ( ! reader.next() ) {
 				if ( prevTick != null ) {
-					tasks.doFinalTask(prevTick);
+					handler.doFinalTask(prevTick);
 				}
 			} else {
 				Tick currTick = reader.item();
 				if ( prevTick == null ) {
-					tasks.doInitialTask(currTick);
-					tasks.doDailyTask(null, currTick);
+					handler.doInitialTask(currTick);
+					handler.doDailyTask(null, currTick);
 				} else if ( currTick.getTime().toLocalDate()
 						.isAfter(prevTick.getTime().toLocalDate()) )
 				{
-					tasks.doDailyTask(prevTick, currTick);
+					handler.doDailyTask(prevTick, currTick);
 				}
 				TLEvent event = new TLEvent(currTick.getTime(),
-						tasks.createTask(currTick));
+						handler.createTask(currTick));
 				prevTick = currTick;
 				return event;
 			}
@@ -85,7 +85,7 @@ public class TickDataDispatcher implements TLEventSource {
 		TickDataDispatcher o = (TickDataDispatcher) other;
 		return new EqualsBuilder()
 			.append(o.reader, reader)
-			.append(o.tasks, tasks)
+			.append(o.handler, handler)
 			.isEquals();
 	}
 
