@@ -36,5 +36,10 @@ public class IdUtilsTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testAppendSeparator() throws Exception {
+		assertEquals("foo-", utils.appendSeparator("foo"));
+	}
 
 }

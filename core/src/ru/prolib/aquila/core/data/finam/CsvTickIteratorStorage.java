@@ -11,7 +11,6 @@ import ru.prolib.aquila.core.data.internal.IdUtils;
  * Хранилище сделок на основе csv-файлов формата FINAM.
  */
 public class CsvTickIteratorStorage implements TickIteratorStorage {
-	private static final String SEPARATOR = "-";
 	private final File root;
 	private final IdUtils idUtils;
 	
@@ -32,7 +31,7 @@ public class CsvTickIteratorStorage implements TickIteratorStorage {
 		Aqiterator<FileEntry> it = new SubScanIteratorBuilder<FileEntry>(
 			new DirectoryScannerY(), new SubScanIteratorBuilder<FileEntry>(
 				new DirectoryScannerM(),
-				new DirectoryScannerD(dataId + SEPARATOR)))
+				new DirectoryScannerD(idUtils.appendSeparator(dataId))))
 			.makeScan(new FileEntry(new File(root,dataId),start.toLocalDate()));
 		return new TickReaderFilterByTime(new TickReaderFromFiles(
 			new FileEntry2FileIterator(it), new CsvTickReaderFactory()), start);

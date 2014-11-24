@@ -40,5 +40,15 @@ public class IdUtils {
 				+ nameEncoder.encode(descr.getCurrencyCode()) + SEPARATOR
 				+ nameEncoder.encode(descr.getType().toString());
 	}
+	
+	/**
+	 * Добавить разделитель в конец строки.
+	 * <p>
+	 * @param str исходная строка
+	 * @return строка с добавленным разделителем
+	 */
+	public String appendSeparator(String str) {
+		return str + SEPARATOR;
+	}
 
 }

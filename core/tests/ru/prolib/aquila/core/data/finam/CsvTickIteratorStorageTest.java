@@ -1,20 +1,14 @@
 package ru.prolib.aquila.core.data.finam;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
 import java.io.File;
 import java.util.List;
 import java.util.Vector;
-
-import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.joda.time.format.*;
 import org.junit.*;
-
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.data.internal.IdUtils;
 
 public class CsvTickIteratorStorageTest {
 	private static final DateTimeFormatter df;
@@ -25,17 +19,13 @@ public class CsvTickIteratorStorageTest {
 		descr = new SecurityDescriptor("GAZP", "EQBR", ISO4217.RUR, SecurityType.STK);
 	}
 
-	private IMocksControl control;
-	private IdUtils idUtils;
 	private String dataId = "GAZP-EQBR-RUR-STK";
 	private CsvTickIteratorStorage storage;
 	private Aqiterator<Tick> ticks;
 
 	@Before
 	public void setUp() throws Exception {
-		control = createStrictControl();
-		idUtils = control.createMock(IdUtils.class);
-		storage = new CsvTickIteratorStorage(new File("fixture"), idUtils);
+		storage = new CsvTickIteratorStorage(new File("fixture"));
 		ticks = null;
 	}
 	
@@ -102,13 +92,8 @@ public class CsvTickIteratorStorageTest {
 	
 	@Test
 	public void testGetIterator_Dsc_IfTimeBeforeData() throws Exception {
-		expect(idUtils.getSafeFilename(descr)).andReturn(dataId);
-		control.replay();
-		
 		testGetIterator_IfTimeBeforeData(storage.getIterator(descr,
 				new DateTime( 538, 1, 1, 0, 0, 0, 0)));
-		
-		control.verify();
 	}
 
 	@Test
@@ -119,13 +104,8 @@ public class CsvTickIteratorStorageTest {
 	
 	@Test
 	public void testGetIterator_Dsc_IfTimeAfterData() throws Exception {
-		expect(idUtils.getSafeFilename(descr)).andReturn(dataId);
-		control.replay();
-		
 		ticks = storage.getIterator(descr, new DateTime(2100, 1, 1, 0, 0, 0, 0));
 		assertFalse(ticks.next());
-		
-		control.verify();
 	}
 	
 	@Test
@@ -140,13 +120,8 @@ public class CsvTickIteratorStorageTest {
 	public void testGetIterator_Dsc_TimeAfterEndOfTradingSession_HasNoMoreData()
 			throws Exception
 	{
-		expect(idUtils.getSafeFilename(descr)).andReturn(dataId);
-		control.replay();
-
 		ticks = storage.getIterator(descr, new DateTime(2014, 12, 4, 23, 55, 0, 0));
 		assertFalse(ticks.next());
-		
-		control.verify();
 	}
 	
 	private void testGetIterator_TimeAfterEndOfTradingSession_HasMoreData
@@ -178,14 +153,9 @@ public class CsvTickIteratorStorageTest {
 	public void testGetIterator_Dsc_TimeAfterEndOfTradingSession_HasMoreData()
 			throws Exception
 	{
-		expect(idUtils.getSafeFilename(descr)).andReturn(dataId);
-		control.replay();
-		
 		testGetIterator_TimeAfterEndOfTradingSession_HasMoreData(
-				storage.getIterator(descr,
-						new DateTime(2014, 10, 14, 23, 55, 0, 0)));
-		
-		control.verify();
+			storage.getIterator(descr,
+				new DateTime(2014, 10, 14, 23, 55, 0, 0)));
 	}
 	
 	private void testGetIterator_ThroughWeekend(Aqiterator<Tick> ticks)
@@ -211,13 +181,8 @@ public class CsvTickIteratorStorageTest {
 	public void testGetIterator_Dsc_ThroughWeekend()
 			throws Exception
 	{
-		expect(idUtils.getSafeFilename(descr)).andReturn(dataId);
-		control.replay();
-
 		testGetIterator_ThroughWeekend(storage.getIterator(descr,
 				new DateTime( 538, 1, 1, 0, 0, 0, 0)));
-		
-		control.verify();
 	}
 
 }
