@@ -10,7 +10,7 @@ import ru.prolib.aquila.probe.PROBETerminal;
 /**
  * Типовой поставщик данных.
  * <p>
- * TODO: 
+ * Данный класс представляет собой фасад к сервисам поставки данных.
  */
 public class DefaultDataProvider implements DataProvider {
 	private final PROBETerminal terminal;

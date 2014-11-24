@@ -124,5 +124,32 @@ public class SecurityHandlerFORTS implements TickHandler {
 			.append(o.props, props)
 			.isEquals();
 	}
+	
+	/**
+	 * Получить терминал.
+	 * <p>
+	 * @return терминал
+	 */
+	public PROBETerminal getTerminal() {
+		return terminal;
+	}
+	
+	/**
+	 * Получить инструмент.
+	 * <p>
+	 * @return инструмент
+	 */
+	public EditableSecurity getSecurity() {
+		return security;
+	}
+	
+	/**
+	 * Получить первичные свойства инструмента.
+	 * <p>
+	 * @return свойства инструмента
+	 */
+	public SecurityProperties getSecurityProperties() {
+		return props;
+	}
 
 }

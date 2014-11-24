@@ -46,8 +46,8 @@ public class SecurityHandlerFORTSTest {
 		props.setLotSize(1);
 		props.setPricePrecision(0);
 		props.setMinStepSize(10d);
-		props.setInitialMarginCalculationBase(0.15d);
-		props.setStepPriceCalculationBase(0.2d);
+		props.setInitialMarginCalcBase(0.15d);
+		props.setStepPriceCalcBase(0.2d);
 		handler = new SecurityHandlerFORTS(terminal, security, props);
 		terminal.getEventSystem().getEventQueue().start();
 	}
@@ -212,15 +212,18 @@ public class SecurityHandlerFORTSTest {
 				.add(control.createMock(SecurityProperties.class));
 		Variant<?> iterator = vProps;
 		int foundCnt = 0;
-		SecurityHandlerFORTS x = null/*, found = null*/;
+		SecurityHandlerFORTS x = null, found = null;
 		do {
 			x = new SecurityHandlerFORTS(vTerm.get(), vSec.get(), vProps.get());
 			if ( handler.equals(x) ) {
 				foundCnt ++;
-				//found = x;
+				found = x;
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
+		assertSame(terminal, found.getTerminal());
+		assertSame(security, found.getSecurity());
+		assertSame(props, found.getSecurityProperties());
 	}
 
 }

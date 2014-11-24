@@ -92,7 +92,7 @@ public class SecurityProperties {
 	 * <p>
 	 * @return основание для расчета
 	 */
-	public Double getStepPriceCalculationBase() {
+	public Double getStepPriceCalcBase() {
 		return stepPriceBase;
 	}
 	
@@ -101,7 +101,7 @@ public class SecurityProperties {
 	 * <p>
 	 * @param value основание для расчета
 	 */
-	public void setStepPriceCalculationBase(Double value) {
+	public void setStepPriceCalcBase(Double value) {
 		this.stepPriceBase = value;
 	}
 	
@@ -116,7 +116,7 @@ public class SecurityProperties {
 	 * <p>
 	 * @return основание для расчета
 	 */
-	public Double getInitialMarginCalculationBase() {
+	public Double getInitialMarginCalcBase() {
 		return initMarginBase;
 	}
 	
@@ -125,7 +125,7 @@ public class SecurityProperties {
 	 * <p>
 	 * @param value основание для расчета
 	 */
-	public void setInitialMarginCalculationBase(Double value) {
+	public void setInitialMarginCalcBase(Double value) {
 		this.initMarginBase = value;
 	}
 
