@@ -8,7 +8,9 @@
 			<attribute name="javadoc_location" value="jar:file:../contrib/joda-time-2.2-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="../contrib/javacsv.jar"/>
 	<classpathentry kind="lib" path="../contrib/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="../contrib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="../contrib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="../contrib/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="../contrib/slf4j-log4j12-1.6.4.jar"/>
