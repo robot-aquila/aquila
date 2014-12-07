@@ -685,7 +685,7 @@ public class TerminalImplTest {
 			TerminalState state = (TerminalState) fix[i][0];
 			terminal.setTerminalState(state);
 			if ( flag ) {
-				dispatcher.fireConnected();
+				dispatcher.fireConnected(null);
 			}
 			control.replay();
 			
@@ -714,7 +714,7 @@ public class TerminalImplTest {
 			boolean flag = (Boolean) fix[i][1];
 			terminal.setTerminalState((TerminalState) fix[i][0]);
 			if ( flag ) {
-				dispatcher.fireDisconnected();
+				dispatcher.fireDisconnected(null);
 			}
 			control.replay();
 			
@@ -1168,5 +1168,28 @@ public class TerminalImplTest {
 		terminal.setStarter(newStarter);
 		assertSame(newStarter, terminal.getStarter());
 	}
+	
+	@Test
+	public void testSubscribe() throws Exception {
+		TerminalObserver o = control.createMock(TerminalObserver.class);
+		dispatcher.subscribe(same(o));
+		control.replay();
+		
+		terminal.subscribe(o);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUnsubscribe() throws Exception {
+		TerminalObserver o = control.createMock(TerminalObserver.class);
+		dispatcher.unsubscribe(same(o));
+		control.replay();
+		
+		terminal.unsubscribe(o);
+		
+		control.verify();
+	}
+
 	
 }

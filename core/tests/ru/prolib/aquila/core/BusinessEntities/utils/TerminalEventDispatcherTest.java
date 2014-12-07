@@ -13,6 +13,8 @@ public class TerminalEventDispatcherTest {
 	private EventSystem es;
 	private EventListener listener;
 	private EventQueue queue;
+	private Terminal terminal;
+	private TerminalObserver observer1, observer2, observer3;
 	private TerminalEventDispatcher dispatcher;
 	
 	@BeforeClass
@@ -25,6 +27,10 @@ public class TerminalEventDispatcherTest {
 		control = createStrictControl();
 		queue = control.createMock(EventQueue.class);
 		listener = control.createMock(EventListener.class);
+		terminal = control.createMock(Terminal.class);
+		observer1 = control.createMock(TerminalObserver.class);
+		observer2 = control.createMock(TerminalObserver.class);
+		observer3 = control.createMock(TerminalObserver.class);
 		es = new EventSystemImpl(queue);
 		dispatcher = new TerminalEventDispatcher(es);
 	}
@@ -47,9 +53,15 @@ public class TerminalEventDispatcherTest {
 		dispatcher.OnConnected().addListener(listener);
 		queue.enqueue(eq(new EventImpl(dispatcher.OnConnected())),
 				same(dispatcher.getEventDispatcher()));
+		observer1.OnTerminalReady(terminal);
+		observer2.OnTerminalReady(terminal);
+		observer3.OnTerminalReady(terminal);
 		control.replay();
+		dispatcher.subscribe(observer1);
+		dispatcher.subscribe(observer2);
+		dispatcher.subscribe(observer3);
 		
-		dispatcher.fireConnected();
+		dispatcher.fireConnected(terminal);
 		
 		control.verify();
 	}
@@ -59,9 +71,15 @@ public class TerminalEventDispatcherTest {
 		dispatcher.OnDisconnected().addListener(listener);
 		queue.enqueue(eq(new EventImpl(dispatcher.OnDisconnected())), 
 				same(dispatcher.getEventDispatcher()));
+		observer1.OnTerminalUnready(terminal);
+		observer2.OnTerminalUnready(terminal);
+		observer3.OnTerminalUnready(terminal);
 		control.replay();
-		
-		dispatcher.fireDisconnected();
+		dispatcher.subscribe(observer1);
+		dispatcher.subscribe(observer2);
+		dispatcher.subscribe(observer3);
+			
+		dispatcher.fireDisconnected(terminal);
 		
 		control.verify();
 	}
@@ -124,6 +142,21 @@ public class TerminalEventDispatcherTest {
 		control.replay();
 		
 		dispatcher.fireSecurityRequestError(descr, 500, "test");
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUnsubscribe() throws Exception {
+		observer3.OnTerminalUnready(terminal);
+		control.replay();
+		dispatcher.subscribe(observer1);
+		dispatcher.subscribe(observer2);
+		dispatcher.subscribe(observer3);
+		dispatcher.unsubscribe(observer1);
+		dispatcher.unsubscribe(observer2);
+			
+		dispatcher.fireDisconnected(terminal);
 		
 		control.verify();
 	}

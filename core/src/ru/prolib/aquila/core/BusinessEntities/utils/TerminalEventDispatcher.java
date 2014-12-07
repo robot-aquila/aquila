@@ -1,7 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.KW;
 
 /**
  * Диспетчер событий терминала.
@@ -12,6 +16,7 @@ public class TerminalEventDispatcher {
 	private final EventDispatcher dispatcher;
 	private final EventType onConnected, onDisconnected, onStarted,
 		onStopped, onPanic, onRequestSecurityError;
+	private final List<KW<TerminalObserver>> observers;
 	
 	public TerminalEventDispatcher(EventSystem es) {
 		super();
@@ -22,6 +27,7 @@ public class TerminalEventDispatcher {
 		onStopped = dispatcher.createType("Stopped");
 		onPanic = dispatcher.createType("Panic");
 		onRequestSecurityError = dispatcher.createType("RequestSecurityError");
+		observers = new ArrayList<KW<TerminalObserver>>();
 	}
 	
 	/**
@@ -91,16 +97,36 @@ public class TerminalEventDispatcher {
 	
 	/**
 	 * Генератор события: установлено соединение с удаленной системой.
+	 * <p>
+	 * Этот метод помещает в очередь событие типа {@link #OnConnected()}, а так
+	 * же выполняет оповещение обозревателей синхронных событий посредством
+	 * вызова метода {@link TerminalObserver#OnTerminalReady(Terminal)} для
+	 * каждого зарегистрированного обозревателя.
+	 * <p>
+	 * @param terminal терминал
 	 */
-	public void fireConnected() {
+	public synchronized void fireConnected(Terminal terminal) {
 		dispatcher.dispatch(new EventImpl(onConnected));
+		for ( KW<TerminalObserver> o : observers ) {
+			o.instance().OnTerminalReady(terminal);
+		}
 	}
 
 	/**
 	 * Генератор события: соединение с удаленной системой разорвано.
+	 * <p>
+	 * Этот метод помещает в очередь событие типа {@link #OnDisconnected()}, а
+	 * так же выполняет оповещение обозревателей синхронных событий посредством
+	 * вызова метода {@link TerminalObserver#OnTerminalUnready(Terminal)} для
+	 * каждого зарегистрированного обозревателя.
+	 * <p>
+	 * @param terminal терминал
 	 */
-	public void fireDisconnected() {
+	public synchronized void fireDisconnected(Terminal terminal) {
 		dispatcher.dispatch(new EventImpl(onDisconnected));
+		for ( KW<TerminalObserver> o : observers ) {
+			o.instance().OnTerminalUnready(terminal);
+		}
 	}
 	
 	/**
@@ -150,6 +176,27 @@ public class TerminalEventDispatcher {
 	{
 		dispatcher.dispatch(new RequestSecurityEvent(onRequestSecurityError,
 				descr, errorCode, errorMsg));
+	}
+	
+	/**
+	 * Подписать обозревателя на синхронные события.
+	 * <p>
+	 * @param observer обозреватель
+	 */
+	public synchronized void subscribe(TerminalObserver observer) {
+		KW<TerminalObserver> o = new KW<TerminalObserver>(observer);
+		if ( ! observers.contains(o) ) {
+			observers.add(o);
+		}
+	}
+	
+	/**
+	 * Отписать обозревателя от синхронных событий.
+	 * <p>
+	 * @param observer обозреватель
+	 */
+	public synchronized void unsubscribe(TerminalObserver observer) {
+		observers.remove(new KW<TerminalObserver>(observer));
 	}
 
 }

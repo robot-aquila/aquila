@@ -455,7 +455,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	public synchronized void fireTerminalConnectedEvent() {
 		if ( state == TerminalState.STARTED ) {
 			state = TerminalState.CONNECTED;
-			dispatcher.fireConnected();
+			dispatcher.fireConnected(null);
 			logger.info("Terminal connected");
 		} else {
 			logger.debug("Skip connected event request cuz {}", state);
@@ -470,7 +470,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 			if ( state == TerminalState.CONNECTED ) {
 				setTerminalState(TerminalState.STARTED);
 			}
-			dispatcher.fireDisconnected();
+			dispatcher.fireDisconnected(null);
 			logger.info("Terminal disconnected");
 		} else {
 			logger.debug("Skip disconnected event request cuz {}", state);
@@ -786,6 +786,16 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 */
 	public synchronized Orders getOrderStorage() {
 		return orders;
+	}
+
+	@Override
+	public void subscribe(TerminalObserver observer) {
+		dispatcher.subscribe(observer);
+	}
+
+	@Override
+	public void unsubscribe(TerminalObserver observer) {
+		dispatcher.unsubscribe(observer);
 	}
 
 }
