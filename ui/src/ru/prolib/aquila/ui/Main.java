@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.*;
 
-import javax.swing.UIManager;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.ini4j.Profile.Section;
@@ -82,10 +80,9 @@ public class Main implements Runnable {
 	}
 	
 	private void run(String[] args) throws Exception {
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		
 		Wini ini = new Wini(new File(MAIN_INI));
 		DOMConfigurator.configure(ini.get(MAIN_SEC, LOGGER));
+
 		locator.getTexts().load();
 		starter.add(locator.getEventSystem().getEventQueue());
 		boolean isUiMode = true;
