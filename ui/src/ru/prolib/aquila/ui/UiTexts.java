@@ -12,11 +12,14 @@ import org.ini4j.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.text.IMessages;
+import ru.prolib.aquila.core.text.IMessagesRegistry;
+
 /**
  * $Id: UiTexts.java 570 2013-03-12 00:03:15Z huan.kaktus $
  *
  */
-public class UiTexts {
+public class UiTexts implements IMessagesRegistry {
 	
 	private static Logger logger = LoggerFactory.getLogger(UiTexts.class);
 	private String defLng = "en_US";
@@ -101,5 +104,10 @@ public class UiTexts {
 	
 	public Map<String, ClassLabels> getLabels() {
 		return labels;
+	}
+
+	@Override
+	public IMessages getMessages(String id) {
+		return get(id);
 	}
 }

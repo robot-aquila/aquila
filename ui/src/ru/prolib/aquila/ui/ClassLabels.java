@@ -5,11 +5,13 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.text.IMessages;
+
 /**
  * $Id: ClassLabels.java 541 2013-02-21 21:27:39Z huan.kaktus $
  *
  */
-public class ClassLabels {
+public class ClassLabels implements IMessages {
 	private static Logger logger = LoggerFactory.getLogger(ClassLabels.class);
 	private Properties labels;
 	private final String name;
@@ -38,6 +40,16 @@ public class ClassLabels {
 	
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public String getId() {
+		return name;
+	}
+
+	@Override
+	public String format(String label, Object... args) {
+		return get(label);
 	}
 	
 }
