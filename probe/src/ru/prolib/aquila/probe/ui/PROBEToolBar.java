@@ -9,6 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JToolBar;
 
+import org.joda.time.DateTime;
+
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.probe.internal.SimulationController;
@@ -23,11 +25,13 @@ public class PROBEToolBar extends JToolBar
 	private final JButton btnOptions, btnRunTo, btnStep,
 		btnPauseRunRt, btnRunAll, btnFinish;
 	private final Icon iconPause, iconRunRt;
+	private final SelectTargetTimeDialogView selectTargetTimeDialog;
 	
 	public PROBEToolBar(SimulationController ctrl, ClassLabels texts) {
 		super();
 		this.ctrl = ctrl;
 		this.labels = texts;
+		selectTargetTimeDialog = new SelectTargetTimeDialog(texts);
 		setName(texts.get("TOOLBAR_NAME"));
 		btnOptions = makeButton("options.png", "options", "TTIP_OPTIONS");
 		btnRunTo = makeButton("runto.png", "runto", "TTIP_RUNTO");
@@ -78,9 +82,8 @@ public class PROBEToolBar extends JToolBar
 			btnPauseRunRt.setActionCommand("runrt");
 			ctrl.pause();
 		} else if ( cmd.equals("runto") ) {
-			SelectTimeDialog dialog = new SelectTimeDialog();
-			dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-			dialog.setVisible(true);
+			DateTime startTime = ctrl.getRunInterval().getStart();
+			DateTime selected = selectTargetTimeDialog.showDialog(startTime);
 		}
 	}
 
