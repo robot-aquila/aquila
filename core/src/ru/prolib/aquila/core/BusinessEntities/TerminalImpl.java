@@ -453,28 +453,38 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 
 	@Override
 	public synchronized void fireTerminalConnectedEvent() {
+		markTerminalConnected();
+	}
+	
+	@Override
+	public synchronized void markTerminalConnected() {
 		if ( state == TerminalState.STARTED ) {
 			state = TerminalState.CONNECTED;
-			dispatcher.fireConnected(null);
+			dispatcher.fireConnected(this);
 			logger.info("Terminal connected");
 		} else {
 			logger.debug("Skip connected event request cuz {}", state);
-		}
+		}		
 	}
 
 	@Override
 	public synchronized void fireTerminalDisconnectedEvent() {
+		markTerminalDisconnected();
+	}
+	
+	@Override
+	public synchronized void markTerminalDisconnected() {
 		if ( state == TerminalState.CONNECTED
 		  || state == TerminalState.STOPPING )
 		{
 			if ( state == TerminalState.CONNECTED ) {
 				setTerminalState(TerminalState.STARTED);
 			}
-			dispatcher.fireDisconnected(null);
+			dispatcher.fireDisconnected(this);
 			logger.info("Terminal disconnected");
 		} else {
 			logger.debug("Skip disconnected event request cuz {}", state);
-		}
+		}		
 	}
 	
 	@Override

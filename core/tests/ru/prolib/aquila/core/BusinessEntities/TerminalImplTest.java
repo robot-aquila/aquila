@@ -668,8 +668,7 @@ public class TerminalImplTest {
 		control.verify();
 	}
 	
-	@Test
-	public void testFireTerminalConnectedEvent() throws Exception {
+	public void testTerminalConnected(Runnable initiator) throws Exception {
 		Object[][] fix = {
 				// initial state, dispatch & change?
 				{ TerminalState.CONNECTED, false },
@@ -685,11 +684,11 @@ public class TerminalImplTest {
 			TerminalState state = (TerminalState) fix[i][0];
 			terminal.setTerminalState(state);
 			if ( flag ) {
-				dispatcher.fireConnected(null);
+				dispatcher.fireConnected(same(terminal));
 			}
 			control.replay();
 			
-			terminal.fireTerminalConnectedEvent();
+			initiator.run();
 			
 			control.verify();
 			assertEquals(msg, flag ? TerminalState.CONNECTED : state,
@@ -698,7 +697,24 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testFireTerminalDisconnectedEvent() throws Exception {
+	public void testFireTerminalConnectedEvent() throws Exception {
+		testTerminalConnected(new Runnable() {
+			@Override public void run() {
+				terminal.fireTerminalConnectedEvent();				
+			}
+		});
+	}
+	
+	@Test
+	public void testMarkTerminalConnected() throws Exception {
+		testTerminalConnected(new Runnable() {
+			@Override public void run() {
+				terminal.markTerminalConnected();
+			}
+		});
+	}
+	
+	private void testTerminalDisconnected(Runnable initiator) throws Exception {
 		Object[][] fix = {
 				// initial state, dispatch & change?, expected state
 				{ TerminalState.CONNECTED, true,  TerminalState.STARTED },
@@ -714,16 +730,34 @@ public class TerminalImplTest {
 			boolean flag = (Boolean) fix[i][1];
 			terminal.setTerminalState((TerminalState) fix[i][0]);
 			if ( flag ) {
-				dispatcher.fireDisconnected(null);
+				dispatcher.fireDisconnected(same(terminal));
 			}
 			control.replay();
 			
-			terminal.fireTerminalDisconnectedEvent();
+			initiator.run();
 			
 			control.verify();
 			assertEquals(msg, (TerminalState) fix[i][2],
 					terminal.getTerminalState());
 		}
+	}
+	
+	@Test
+	public void testFireTerminalDisconnectedEvent() throws Exception {
+		testTerminalDisconnected(new Runnable() {
+			@Override public void run() {
+				terminal.fireTerminalDisconnectedEvent();
+			}
+		});
+	}
+	
+	@Test
+	public void testMarkTerminalDisconnected() throws Exception {
+		testTerminalDisconnected(new Runnable() {
+			@Override public void run() {
+				terminal.markTerminalDisconnected();
+			}
+		});
 	}
 	
 	@Test
