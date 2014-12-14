@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
 import ru.prolib.aquila.probe.internal.XFactory;
+import ru.prolib.aquila.probe.timeline.TLSTimeline;
 
 /**
  * Фабрика эмулятора терминала.
@@ -79,10 +80,12 @@ public class PROBEFactory implements TerminalFactory {
 		PROBETerminal terminal = x.newTerminal(getNextId());
 		PROBEServiceLocator locator = terminal.getServiceLocator();
 		EventSystem es = terminal.getEventSystem();
-		locator.setTimeline(x.newTimeline(es, new Interval(
+		TLSTimeline timeline = x.newTimeline(es, new Interval(
 				df.parseDateTime(config.getProperty(RUN_INTERVAL_START)),
-				df.parseDateTime(config.getProperty(RUN_INTERVAL_END)))));
-		terminal.setScheduler(x.newScheduler(locator.getTimeline()));
+				df.parseDateTime(config.getProperty(RUN_INTERVAL_END))));
+		timeline.setDebug(true);
+		locator.setTimeline(timeline);
+		terminal.setScheduler(x.newScheduler(timeline));
 		locator.setDataProvider(x.newDataProvider(terminal));
 		File root = new File(config.getProperty(DATA_STORAGE_PATH));
 		locator.setDataStorage(x.newDataStorage(root));		

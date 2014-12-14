@@ -275,8 +275,11 @@ public class TLSTimeline implements SimulationController {
 	 */
 	@Override
 	public void finish() {
-		if ( ! finished() ) {
-			cmdQueue.put(TLCmd.FINISH);
+		synchronized ( starter ) {
+			if ( ! finished() ) {
+				starter.start();
+				cmdQueue.put(TLCmd.FINISH);
+			}
 		}
 	}
 	

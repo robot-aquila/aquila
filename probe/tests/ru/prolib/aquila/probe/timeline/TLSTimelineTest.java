@@ -239,8 +239,10 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testFinish() throws Exception {
+		starter.start();
 		cmdQueue.put(same(TLCmd.FINISH));
 		control.replay();
+		timeline.setStarter(starter);
 		
 		timeline.finish();
 		
@@ -251,6 +253,7 @@ public class TLSTimelineTest {
 	public void testFinish_SkipIfFinished() throws Exception {
 		timeline.setState(TLCmdType.FINISH);
 		control.replay();
+		timeline.setStarter(starter);
 		
 		timeline.finish();
 		

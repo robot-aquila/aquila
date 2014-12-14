@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
@@ -16,6 +18,12 @@ import ru.prolib.aquila.probe.PROBETerminal;
 public class PROBEToolBar extends JToolBar
 	implements ActionListener, EventListener
 {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(PROBEToolBar.class);
+	}
+	
 	private static final String ICON_PREFIX = "shared/images/probe_";
 	private static final String ICON_SUFFIX = ".png";
 	private static final String NOT_IMPLEMENTED = "NOT_IMPLEMENTED";
@@ -106,6 +114,8 @@ public class PROBEToolBar extends JToolBar
 			terminal.run();
 			
 		} else if ( cmd.equals(FINISH) ) {
+			// TODO: 
+			// Не срабатывает. После этого вызова не приходит событие OnFinish.
 			terminal.finish();
 			
 		}
@@ -120,6 +130,7 @@ public class PROBEToolBar extends JToolBar
 			terminal.OnConnected().removeListener(this);
 			terminal.OnDisconnected().removeListener(this);
 			disableAllButtons();
+			logger.debug("The timeline ended and controls has been permanently disabled.");
 			
 		} else if ( event.isType(terminal.OnPause())
 				 || event.isType(terminal.OnConnected()))

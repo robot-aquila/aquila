@@ -54,6 +54,7 @@ public class PROBEFactoryTest {
 				new DateTime(2014, 11, 1, 0, 0, 0, 0),
 				new DateTime(2014, 11, 30, 23, 59, 59, 999))))
 			.andReturn(timeline);
+		timeline.setDebug(true);
 		expect(x.newScheduler(same(timeline))).andReturn(scheduler);
 		expect(x.newDataProvider(terminal)).andReturn(dataProvider);
 		expect(x.newDataStorage(new File("/data/path"))).andReturn(dataStorage);
