@@ -90,5 +90,12 @@ public class XFactoryTest {
 		assertNotNull(tl);
 		assertEquals(interval, tl.getRunInterval());
 	}
+	
+	@Test
+	public void testNewScheduler() throws Exception {
+		TLSTimeline timeline = control.createMock(TLSTimeline.class);
+		SchedulerImpl scheduler = (SchedulerImpl) x.newScheduler(timeline);
+		assertNotNull(scheduler);
+	}
 
 }

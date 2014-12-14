@@ -15,6 +15,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.RequestSecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.TerminalState;
 import ru.prolib.aquila.core.data.DataException;
 import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
 import ru.prolib.aquila.probe.timeline.*;
@@ -153,6 +154,7 @@ public class PROBETerminalTest {
 	public void testFinish() throws Exception {
 		timeline.finish();
 		control.replay();
+		terminal.setTerminalState(TerminalState.CONNECTED);
 		
 		terminal.finish();
 		
@@ -163,6 +165,7 @@ public class PROBETerminalTest {
 	public void testPause() throws Exception {
 		timeline.pause();
 		control.replay();
+		terminal.setTerminalState(TerminalState.CONNECTED);
 		
 		terminal.pause();
 		
@@ -174,6 +177,7 @@ public class PROBETerminalTest {
 		DateTime t = DateTime.now();
 		timeline.runTo(t);
 		control.replay();
+		terminal.setTerminalState(TerminalState.CONNECTED);
 		
 		terminal.runTo(t);
 		
@@ -184,6 +188,7 @@ public class PROBETerminalTest {
 	public void testRun() throws Exception {
 		timeline.run();
 		control.replay();
+		terminal.setTerminalState(TerminalState.CONNECTED);
 		
 		terminal.run();
 		
@@ -216,6 +221,42 @@ public class PROBETerminalTest {
 		control.replay();
 		
 		assertSame(eventType, terminal.OnRun());
+		
+		control.verify();
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testRun_ThrowsIfNotConnected() {
+		terminal.run();
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testRunTo_ThrowsIfNotConnected() {
+		terminal.runTo(DateTime.now());
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testPause_ThrowsIfNotConnected() {
+		terminal.pause();
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testFinish_ThrowsIfNotConnected() {
+		terminal.finish();
+	}
+	
+	@Test
+	public void testMarkTerminalConnected() {
+		// skipped, too complex
+	}
+	
+	@Test
+	public void testMarkTerminalConnected_SkipsIfFinished() {
+		expect(timeline.finished()).andReturn(true);
+		control.replay();
+		terminal.setTerminalState(TerminalState.CONNECTED);
+		
+		terminal.markTerminalConnected();
 		
 		control.verify();
 	}

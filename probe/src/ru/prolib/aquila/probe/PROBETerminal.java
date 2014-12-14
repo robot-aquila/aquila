@@ -93,21 +93,33 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 
 	@Override
 	public void finish() {
+		if ( ! connected() ) {
+			throw new IllegalStateException("Terminal not connected");
+		}
 		getTimeline().finish();
 	}
 
 	@Override
 	public void pause() {
+		if ( ! connected() ) {
+			throw new IllegalStateException("Terminal not connected");
+		}
 		getTimeline().pause();
 	}
 
 	@Override
 	public void runTo(DateTime cutoff) {
+		if ( ! connected() ) {
+			throw new IllegalStateException("Terminal not connected");
+		}
 		getTimeline().runTo(cutoff);
 	}
 
 	@Override
 	public void run() {
+		if ( ! connected() ) {
+			throw new IllegalStateException("Terminal not connected");
+		}
 		getTimeline().run();
 	}
 
@@ -128,6 +140,15 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 	
 	private SimulationController getTimeline() {
 		return getServiceLocator().getTimeline();
+	}
+	
+	@Override
+	public void markTerminalConnected() {
+		if ( ! getTimeline().finished() ) {
+			super.markTerminalConnected();
+		} else {
+			logger.info("Mark connected request skipped because end of timeline reached.");
+		}
 	}
 
 }

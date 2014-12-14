@@ -82,6 +82,7 @@ public class PROBEFactory implements TerminalFactory {
 		locator.setTimeline(x.newTimeline(es, new Interval(
 				df.parseDateTime(config.getProperty(RUN_INTERVAL_START)),
 				df.parseDateTime(config.getProperty(RUN_INTERVAL_END)))));
+		terminal.setScheduler(x.newScheduler(locator.getTimeline()));
 		locator.setDataProvider(x.newDataProvider(terminal));
 		File root = new File(config.getProperty(DATA_STORAGE_PATH));
 		locator.setDataStorage(x.newDataStorage(root));		

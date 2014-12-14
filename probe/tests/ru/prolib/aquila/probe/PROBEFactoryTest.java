@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventQueueStarter;
 import ru.prolib.aquila.core.StarterQueue;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.probe.internal.DataProvider;
 import ru.prolib.aquila.probe.internal.PROBEDataStorage;
 import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
@@ -40,6 +41,7 @@ public class PROBEFactoryTest {
 		props.setProperty(PROBEFactory.RUN_INTERVAL_END, "2014-11-30 23:59:59.999");
 		PROBETerminal terminal = new PROBETerminal("xxx");
 		TLSTimeline timeline = control.createMock(TLSTimeline.class);
+		Scheduler scheduler = control.createMock(Scheduler.class);
 		DataProvider dataProvider = control.createMock(DataProvider.class);
 		PROBEDataStorage dataStorage = control.createMock(PROBEDataStorage.class);
 		EventQueueStarter eventQueueStarter = control.createMock(EventQueueStarter.class);
@@ -52,6 +54,7 @@ public class PROBEFactoryTest {
 				new DateTime(2014, 11, 1, 0, 0, 0, 0),
 				new DateTime(2014, 11, 30, 23, 59, 59, 999))))
 			.andReturn(timeline);
+		expect(x.newScheduler(same(timeline))).andReturn(scheduler);
 		expect(x.newDataProvider(terminal)).andReturn(dataProvider);
 		expect(x.newDataStorage(new File("/data/path"))).andReturn(dataStorage);
 		expect(x.newQueueStarter(terminal.getEventSystem().getEventQueue(), 3000L))
@@ -66,6 +69,7 @@ public class PROBEFactoryTest {
 		PROBEServiceLocator locator = terminal.getServiceLocator();
 		assertSame(dataProvider, locator.getDataProvider());
 		assertSame(timeline, locator.getTimeline());
+		assertSame(scheduler, terminal.getScheduler());
 		assertSame(dataStorage, locator.getDataStorage());
 	}
 

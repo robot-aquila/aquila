@@ -6,6 +6,7 @@ import org.joda.time.Interval;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.probe.PROBETerminal;
@@ -48,6 +49,10 @@ public class XFactory {
 	
 	public TLSTimeline newTimeline(EventSystem es, Interval interval) {
 		return new TLSTimelineFactory(es).produce(interval);
+	}
+	
+	public Scheduler newScheduler(TLSTimeline timeline) {
+		return new SchedulerImpl(timeline);
 	}
 
 }
