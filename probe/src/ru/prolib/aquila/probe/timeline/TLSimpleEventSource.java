@@ -6,7 +6,32 @@ import java.util.*;
  * Реализация простого источника событий хронологии на основе очереди.
  */
 public class TLSimpleEventSource implements TLEventSource {
+	private final String id;
 	private final Deque<TLEvent> queue;
+
+	/**
+	 * Конструктор.
+	 * <p>
+	 * @param id идентификатор объекта 
+	 * @param events список событий, которые будут скопированы в создаваемый
+	 * объект
+	 */
+	public TLSimpleEventSource(String id, List<TLEvent> events) {
+		super();
+		this.id = id;
+		this.queue = new ArrayDeque<TLEvent>(events);
+	}
+	
+	/**
+	 * Конструктор.
+	 * <p>
+	 * Создает объект с указанным идентификаторов и пустой очередью событий.
+	 * <p>
+	 * @param id идентификатор объекта
+	 */
+	public TLSimpleEventSource(String id) {
+		this(id, new Vector<TLEvent>());
+	}
 	
 	/**
 	 * Конструктор.
@@ -15,8 +40,7 @@ public class TLSimpleEventSource implements TLEventSource {
 	 * объект
 	 */
 	public TLSimpleEventSource(List<TLEvent> events) {
-		super();
-		this.queue = new ArrayDeque<TLEvent>(events);
+		this(null, events);
 	}
 	
 	/**
@@ -25,10 +49,9 @@ public class TLSimpleEventSource implements TLEventSource {
 	 * Создает объект с пустой очередью событий.
 	 */
 	public TLSimpleEventSource() {
-		super();
-		this.queue = new ArrayDeque<TLEvent>();
+		this((String) null);
 	}
-	
+
 	/**
 	 * Добавить событие в конец очереди.
 	 * <p>
@@ -53,6 +76,11 @@ public class TLSimpleEventSource implements TLEventSource {
 	@Override
 	public boolean closed() {
 		return queue.size() == 0;
+	}
+	
+	@Override
+	public String toString() {
+		return id == null ? super.toString() : id;
 	}
 
 }

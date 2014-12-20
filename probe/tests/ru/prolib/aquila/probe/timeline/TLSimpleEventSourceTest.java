@@ -25,8 +25,7 @@ public class TLSimpleEventSourceTest {
 		source = new TLSimpleEventSource();
 	}
 
-	@Test
-	public void testAdd() throws Exception {
+	private void testAdd(TLSimpleEventSource source) throws Exception {
 		List<TLEvent> expected = new ArrayList<TLEvent>(),
 				actual = new ArrayList<TLEvent>();
 		expected.add(e1);
@@ -45,23 +44,50 @@ public class TLSimpleEventSourceTest {
 	}
 	
 	@Test
-	public void testConstruct1() throws Exception {
-		List<TLEvent> expected = new ArrayList<TLEvent>(),
-				actual = new ArrayList<TLEvent>();
-		expected.add(e1);
-		expected.add(e2);
-		expected.add(e3);
-		expected.add(e4);
-		expected.add(e5);
-		
-		source = new TLSimpleEventSource(expected);
+	public void testAdd_Construct0() throws Exception {
+		testAdd(new TLSimpleEventSource());
+	}
+	
+	@Test
+	public void testAdd_Construct1_Id() throws Exception {
+		testAdd(new TLSimpleEventSource("foo"));
+	}
+	
+	@Test
+	public void testAdd_Construct1_List() throws Exception {
+		testAdd(new TLSimpleEventSource(new ArrayList<TLEvent>()));
+	}
+	
+	@Test
+	public void testAdd_Construct2() throws Exception {
+		testAdd(new TLSimpleEventSource("foo", new ArrayList<TLEvent>()));
+	}
+	
+	private void testContents(TLSimpleEventSource source,
+							  List<TLEvent> expected,
+							  int expectedSize)
+					throws Exception
+	{
+		List<TLEvent> actual = new ArrayList<TLEvent>();
 		TLEvent x;
 		while ( (x = source.pullEvent()) != null ) {
 			actual.add(x);
 		}
 
-		assertEquals(5, actual.size());
+		assertEquals(expectedSize, expected.size());
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testConstruct() throws Exception {
+		List<TLEvent> expected = new ArrayList<TLEvent>();
+		expected.add(e1);
+		expected.add(e2);
+		expected.add(e3);
+		expected.add(e4);
+		expected.add(e5);
+		testContents(new TLSimpleEventSource(expected), expected, 5);
+		testContents(new TLSimpleEventSource("foo", expected), expected, 5);
 	}
 	
 	@Test
@@ -72,6 +98,25 @@ public class TLSimpleEventSourceTest {
 		source.close();
 		assertTrue(source.closed());
 		assertNull(source.pullEvent());
+	}
+	
+	@Test
+	public void testToString() throws Exception {
+		List<TLEvent> list = new ArrayList<TLEvent>();
+		list.add(e1);
+		list.add(e2);
+		list.add(e3);
+		TLSimpleEventSource src1 = new TLSimpleEventSource("foo"),
+				src2 = new TLSimpleEventSource("bar", list),
+				src3 = new TLSimpleEventSource(),
+				src4 = new TLSimpleEventSource(list);
+		
+		assertEquals("foo", src1.toString());
+		assertEquals("bar", src2.toString());
+		assertEquals(src3.getClass().getName() + "@"
+				+ String.format("%x", src3.hashCode()), src3.toString());
+		assertEquals(src4.getClass().getName()+ "@"
+				+ String.format("%x", src4.hashCode()), src4.toString());
 	}
 
 }
