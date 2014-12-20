@@ -125,5 +125,29 @@ public class TLEventSources {
 		}
 		sources.clear();
 	}
+	
+	/**
+	 * Проверить факт регистрации источника событий.
+	 * <p>
+	 * @param source источник для проверки
+	 * @return true - если источник зарегистрирован, false - источник не
+	 * зарегистрирован
+	 */
+	public synchronized boolean isRegistered(TLEventSource source) {
+		return sources.containsKey(new KW<TLEventSource>(source));
+	}
+	
+	/**
+	 * Получить время следующего включения источника в выборку.
+	 * <p>
+	 * @param source источник событий
+	 * @return null, если источник не зарегистрирован или
+	 * не находится в состоянии временного исключения. Если источник временно
+	 * исключен из процесса, то возвращается временная метка, указывающая на
+	 * момент включения источника в выборку. 
+	 */
+	public synchronized DateTime getDisabledUntil(TLEventSource source) {
+		return sources.get(new KW<TLEventSource>(source));
+	}
 
 }

@@ -84,5 +84,25 @@ public class TLEventSourcesTest {
 		control.verify();
 		assertEquals(new Vector<TLEventSource>(), registry.getSources());
 	}
+	
+	@Test
+	public void testIsRegistered() throws Exception {
+		assertTrue(registry.isRegistered(s1));
+		assertTrue(registry.isRegistered(s2));
+		registry.removeSource(s1);
+		assertFalse(registry.isRegistered(s1));
+		assertTrue(registry.isRegistered(s2));
+	}
+	
+	@Test
+	public void testGetDisableUntil() throws Exception {
+		registry.removeSource(s1); // disabled until 2014-01-22 00:00:00
+		assertNull(registry.getDisabledUntil(s1));
+
+		assertNull(registry.getDisabledUntil(s2)); // not disabled
+		
+		assertEquals(new DateTime(2013, 12, 31, 23, 59, 0),
+				registry.getDisabledUntil(s3));
+	}
 
 }
