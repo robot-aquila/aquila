@@ -1,6 +1,9 @@
 package ru.prolib.aquila.probe.internal;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
 import ru.prolib.aquila.core.data.Tick;
@@ -57,6 +60,12 @@ import ru.prolib.aquila.probe.PROBETerminal;
  * <p>
  */
 public class SecurityHandlerFORTS implements TickHandler {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(SecurityHandlerFORTS.class);
+	}
+	
 	private final BMUtils bmut = new BMUtils();
 	private final PROBETerminal terminal;
 	private final EditableSecurity security;
@@ -113,14 +122,25 @@ public class SecurityHandlerFORTS implements TickHandler {
 	@Override
 	public void doDailyTask(Tick prevDateTick, Tick nextDateTick) {
 		terminal.schedule(new Runnable() {
-			@Override public void run() { eveningClearing(); }
+			@Override public void run() {
+				eveningClearing();
+			}
+			@Override public String toString() {
+				return "clearing"; // TODO:
+			}
 			}, nextDateTick.getTime().withTime(18, 55, 0, 0));
 	}
 	
 	@Override
 	public Runnable createTask(final Tick tick) {
+		logger.debug("createTask for {}", tick);
 		return new Runnable() {
-			@Override public void run() { onEachTick(tick); }
+			@Override public void run() {
+				onEachTick(tick);
+			}
+			@Override public String toString() {
+				return "eachTick"; // TODO: 
+			}
 		};
 	}
 

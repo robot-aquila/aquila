@@ -2,6 +2,8 @@ package ru.prolib.aquila.probe.timeline;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.probe.internal.SimulationController;
@@ -23,6 +25,12 @@ import ru.prolib.aquila.probe.internal.SimulationController;
  * индикацию путем регистрации событий в границах хронологии. 
  */
 public class TLSTimeline implements SimulationController {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(TLSTimeline.class);
+	}
+	
 	private final TLCmdQueue cmdQueue;
 	private final TLEventQueue evtQueue;
 	private final TLSStrategy simulation;
@@ -186,7 +194,18 @@ public class TLSTimeline implements SimulationController {
 	 * @param time время
 	 */
 	void setCutoff(DateTime time) {
-		cutoff = time;
+		if ( time == null ) {
+			cutoff = null;
+			return;
+		}
+		try {
+			evtQueue.pushEvent(new TLEvent(time, new Runnable() {
+				@Override public void run() { }
+			}));
+			cutoff = time;
+		} catch ( TLOutOfIntervalException e ) {
+			logger.error("Couldn't set cutoff time: ", e);
+		}
 	}
 	
 	/**
@@ -311,7 +330,7 @@ public class TLSTimeline implements SimulationController {
 	 */
 	@Override
 	public void run() {
-		runTo(getRunInterval().getEnd());
+		runTo(null);
 	}
 	
 	/**

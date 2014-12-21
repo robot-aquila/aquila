@@ -183,11 +183,18 @@ public class TLSTimeline_IntegrationTest {
 	
 	@Test
 	public void testRunTo_AndContinue() throws Exception {
-		DateTime stopAt = stack.getLast().time.plus(1);
 		final CountDownLatch paused = new CountDownLatch(1);
+		// Нужной определить такое время, которое будет лежать откровенно вне
+		// точек срабатывания событий: отсечка должна останавливать точно на
+		// указанном времени, независимо от наличия событий.
+		int index = stack.size();
+		DateTime x1 = stack.getLast().time;
 		pushToStack(src2);
+		DateTime x2 = stack.get(index).time;
+		DateTime stopAt = x1.plus((x2.getMillis() - x1.getMillis()) / 2);
+		
 		timeline = factory.produce(new Interval(from, to));
-		//timeline.setDebug(true);
+		timeline.setDebug(true);
 		timeline.OnPause().addListener(new EventListener() {
 			@Override public void onEvent(Event arg0) {
 				paused.countDown();
@@ -248,7 +255,8 @@ public class TLSTimeline_IntegrationTest {
 	@Test
 	public void testRun_EndOfPeriod() throws Exception {
 		timeline = factory.produce(new Interval(from, to));
-		pushToStack(src2);
+		pushToStack(src2);	// Это нормально. Тестируем, что источники не
+							// будут опрашиваться за пределами РП
 		//timeline.setDebug(true);
 		timeline.OnFinish().addListener(new EventListener() {
 			@Override public void onEvent(Event event) {

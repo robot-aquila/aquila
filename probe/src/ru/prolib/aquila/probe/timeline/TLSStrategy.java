@@ -2,27 +2,37 @@ package ru.prolib.aquila.probe.timeline;
 
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * Шага эмуляции терминала.
+ * Конвейр симуляции хронологии.
  * <p>
- * Данный класс реализует механизм отработки шага симуляции.
  */
 public class TLSStrategy {
-	private final TLSIntrgStrategy strategy;
-	private final TLEventQueue eventQueue;
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(TLSStrategy.class);
+	}
+	
+	private final TLEventSources sources;
+	private final TLEventQueue queue;
 	
 	/**
 	 * Конструктор.
 	 * <p>
-	 * @param strategy стратегия опроса источников событий
-	 * @param eventQueue очередь событий хронологии
+	 * @param sources реестр источников событий
+	 * @param queue очередь событий хронологии
 	 */
-	public TLSStrategy(TLSIntrgStrategy strategy,
-			TLEventQueue eventQueue)
+	public TLSStrategy(TLEventSources sources,
+			TLEventQueue queue)
 	{
 		super();
-		this.strategy = strategy;
-		this.eventQueue = eventQueue;
+		this.sources = sources;
+		this.queue = queue;
 	}
 	
 	/**
@@ -32,17 +42,55 @@ public class TLSStrategy {
 	 */
 	public boolean execute() {
 		List<TLEventSource> list;
-		while ( (list = strategy.getForInterrogating()).size() > 0 ) {
+		while ( (list = sources.getSources(queue.getPOA())).size() > 0 ) {
 			for ( TLEventSource src : list ) {
-				strategy.interrogate(src);
+				interrogate(src);
 			}
 		}
-		TLEventStack stack = eventQueue.pullStack();
-		if ( stack == null ) {
-			return false;
+		TLEventStack stack = queue.pullStack();
+		if ( stack != null ) {
+			stack.execute();
 		}
-		stack.execute();
-		return true;
+		return queue.shiftToNextStack();
+	}
+	
+	/**
+	 * Опросить источник событий.
+	 * <p>
+	 * @param src источник событий
+	 */
+	private void interrogate(TLEventSource src) {
+		TLEvent event;
+		DateTime poa = queue.getPOA();
+		Interval wp = queue.getInterval();
+		try {
+			if ( src.closed() || (event = src.pullEvent()) == null ) {
+				sources.removeSource(src);
+			} else if ( wp.contains(event.getTime()) ) {
+				queue.pushEvent(event);
+				if ( poa.compareTo(event.getTime()) < 0 ) {
+					sources.disableUntil(src, event.getTime());
+				}
+			} else if ( poa.compareTo(event.getTime()) > 0 ) {
+				// Источник выдал событие более раннее, чем текущее значение ТА.
+				// Такого быть не должно - этот источник баганутый.
+				sources.removeSource(src);
+				logger.error("Remove corrupted event source (gave past event): {}", src);
+			} else {
+				// Источник выдал событие более позднее, чем конец РП.
+				// Это нормальная ситуация, но источник нужно исключить из
+				// реестра, что бы не опрашивать его в дальнейшем.
+				sources.removeSource(src);
+				logger.debug("Remove event source (end of period reached): {}", src);
+			}
+		} catch ( TLException e ) {
+			// Это может быть либо ошибка работы источника (например IO),
+			// либо запоздавшее событие, что означает некорректную реализацию
+			// источника. Независимо от причин, удаляем "сломанный" источник
+			// из набора доступных источников.
+			sources.removeSource(src);
+			logger.error("Remove event source " + src + " due exception", e);
+		}
 	}
 
 }

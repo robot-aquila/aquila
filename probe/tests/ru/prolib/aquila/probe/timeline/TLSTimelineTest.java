@@ -164,11 +164,14 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testSetCutoff() throws Exception {
+		// TODO: тест пуша события для целей точного позицирования при останове
 		assertNull(timeline.getCutoff());
 		timeline.setCutoff(from);
 		assertEquals(from, timeline.getCutoff());
 		timeline.setCutoff(to);
 		assertEquals(to, timeline.getCutoff());
+		timeline.setCutoff(null);
+		assertNull(timeline.getCutoff());
 	}
 	
 	@Test
@@ -309,7 +312,7 @@ public class TLSTimelineTest {
 	public void testRun() throws Exception {
 		expect(evtQueue.getInterval()).andStubReturn(interval);
 		starter.start();
-		cmdQueue.put(new TLCmd(to));
+		cmdQueue.put(new TLCmd((DateTime) null));
 		control.replay();
 		timeline.setStarter(starter);
 		
@@ -334,6 +337,8 @@ public class TLSTimelineTest {
 	public void testIsCutoff() throws Exception {
 		DateTime poa = new DateTime(2014,5,27,15,30,0,0);
 		expect(evtQueue.getPOA()).andStubReturn(poa);
+		evtQueue.pushEvent((TLEvent)anyObject());
+		expectLastCall().anyTimes();
 		control.replay();
 		
 		assertFalse(timeline.isCutoff()); // cutoff is null (not specified)

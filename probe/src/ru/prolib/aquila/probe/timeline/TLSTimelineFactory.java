@@ -25,7 +25,7 @@ public class TLSTimelineFactory {
 		
 		
 		TLSTimeline timeline = new TLSTimeline(new TLCmdQueue(), evtQue,
-			new TLSStrategy(new TLSIntrgStrategy(evtSrc, evtQue), evtQue),
+			new TLSStrategy(evtSrc, evtQue),
 			new TLSEventDispatcher(es), evtSrc);
 		
 		SMState pause	= new TLASPause(timeline),

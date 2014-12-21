@@ -1,5 +1,8 @@
 package ru.prolib.aquila.probe.timeline;
 
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+
 /**
  * Значение за границами интервала.
  */
@@ -8,6 +11,31 @@ public class TLOutOfIntervalException extends TLException {
 	
 	public TLOutOfIntervalException() {
 		super();
+	}
+	
+	/**
+	 * Этот конструктор формирует сообщение на основании указанного временного
+	 * интервала и момента времени, который находится за пределами интервала.
+	 * <p>
+	 * @param interval интервал
+	 * @param time момент времени
+	 */
+	public TLOutOfIntervalException(Interval interval, DateTime time) {
+		super("Interval: " + interval + " time: " + time);
+	}
+	
+	/**
+	 * Этот конструктор формирует сообщение на основании указанного временного
+	 * интервала и некоего объекта, имеющего связь с моментом во времени, при
+	 * том, что это время лежит за пределами интервала. Для получения
+	 * информативного сообщения, объект должен приводиться к строке, в которой
+	 * содержится информация о времени, с которым он связан.
+	 * <p>
+	 * @param interval интервал
+	 * @param subject субъект
+	 */
+	public TLOutOfIntervalException(Interval interval, Object subject) {
+		super("Interval: " + interval + " subject: " + subject);
 	}
 
 }
