@@ -36,11 +36,13 @@ public class TLEventQueueTest {
 	@Test
 	public void testGetInterval_ReturnsCurrentActiveInterval() throws Exception {
 		queue.pushEvent(sharedEvents[1]); // +5 ms
+		queue.shiftToNextStack();
 		queue.pullStack(); // move AP to +6 ms
 		
 		assertEquals(new Interval(startTime.plus(6), endTime), queue.getInterval());
 		
 		queue.pushEvent(sharedEvents[9]); // to last ms of interval
+		queue.shiftToNextStack();
 		queue.pullStack(); // move to end of interval
 		
 		assertEquals(new Interval(endTime, endTime), queue.getInterval());
@@ -52,52 +54,44 @@ public class TLEventQueueTest {
 	}
 	
 	@Test
-	public void testPullStack_NoData() throws Exception {
+	public void testPullStack_NullIfNoDataAtPOA() throws Exception {
 		assertNull(queue.pullStack());
-		assertEquals(endTime, queue.getPOA());
+		assertEquals(startTime.plus(1), queue.getPOA());
+		assertNull(queue.pullStack());
+		assertEquals(startTime.plus(2), queue.getPOA());
+		assertNull(queue.pullStack());
+		assertEquals(startTime.plus(3), queue.getPOA());
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void testPullStack_IgnoresEndOfInterval() throws Exception {
+		int protector = 0;
+		while ( queue.getPOA().compareTo(endTime.plus(100)) < 0 ) {
+			assertNull(queue.pullStack());
+			if ( ++protector > 1000000 ) fail("Enabled protection");
+		}
+	}
+	
 	@Test
 	public void testPullStack() throws Exception {
-		TLEvent event[] = sharedEvents;
-		Vector stackEvents[] = {
-				new Vector(),
-				new Vector(),
-				new Vector(),
-				new Vector(),
-				new Vector(),
-		};
-		stackEvents[0].add(event[0]);
-		stackEvents[0].add(event[3]);
-		stackEvents[1].add(event[2]);
-		stackEvents[1].add(event[4]);
-		stackEvents[1].add(event[6]);
-		stackEvents[1].add(event[8]);
-		stackEvents[2].add(event[1]);
-		stackEvents[2].add(event[7]);
-		stackEvents[3].add(event[5]);
-		stackEvents[4].add(event[9]);
-		DateTime POAs[] = {
-				startTime.plus(2),
-				startTime.plus(3),
-				startTime.plus(6),
-				startTime.plus(7),
-				endTime,
-		};
-		for ( TLEvent e : event ) {
-			queue.pushEvent(e);
-		}
-		assertEquals(POAs.length, queue.size());
-		for ( int i = 0; i < stackEvents.length; i ++ ) {
-			String msg = "at #" + i;
-			TLEventStack stack = queue.pullStack();
-			assertNotNull("Stack " + msg, stack);
-			assertEquals("Events " + msg, stackEvents[i], stack.getEvents());
-			assertEquals("POA " + msg, POAs[i], queue.getPOA());
-		}
-		assertNull("Expected end of queue", queue.pullStack());
-		assertEquals(endTime, queue.getPOA());
+		Vector<TLEvent> expected = new Vector<TLEvent>();
+		expected.add(new TLEvent(startTime, null));
+		expected.add(new TLEvent(startTime, null));
+		expected.add(new TLEvent(startTime, null));
+		
+		queue.pushEvent(new TLEvent(startTime.plus(240), null));
+		queue.pushEvent(new TLEvent(startTime.plus(240), null));
+		queue.pushEvent(new TLEvent(startTime.plus(529), null));
+		queue.pushEvent(new TLEvent(startTime.plus(419), null));
+		queue.pushEvent(expected.get(0));
+		queue.pushEvent(expected.get(1));
+		queue.pushEvent(expected.get(2));
+		queue.pushEvent(new TLEvent(startTime.plus(986), null));
+		
+		TLEventStack stack = queue.pullStack();
+		assertNotNull(stack);
+		assertEquals(startTime.plus(1), queue.getPOA());
+		assertEquals(expected, stack.getEvents());
 	}
 	
 	@Test (expected=TLOutOfIntervalException.class)
@@ -120,10 +114,14 @@ public class TLEventQueueTest {
 		// переводит очередь в состояние завершенности.
 		assertFalse(queue.finished());
 		queue.pushEvent(new TLEvent(startTime.plus(1), null));
-		queue.pullStack();
+		assertTrue(queue.shiftToNextStack());
+		assertNotNull(queue.pullStack());
 		assertFalse(queue.finished());
-		queue.pushEvent(new TLEvent(endTime.minus(1), null));
-		queue.pullStack();
+		queue.pushEvent(new TLEvent(endTime.minus(200), null));
+		assertTrue(queue.shiftToNextStack());
+		assertNotNull(queue.pullStack());
+		assertFalse(queue.finished());
+		assertFalse(queue.shiftToNextStack());
 		assertTrue(queue.finished());
 		assertEquals(new Interval(endTime, endTime), queue.getInterval());
 	}
@@ -136,6 +134,33 @@ public class TLEventQueueTest {
 		queue.clear();
 		
 		assertEquals(0, queue.size());
+	}
+	
+	@Test
+	public void testShiftToNextStack() throws Exception {
+		long OFF1=510, OFF2 = 1690, OFF3 = 24596, OFF4 = 51001;
+		queue.pushEvent(new TLEvent(startTime.plus(OFF1), null));
+		queue.pushEvent(new TLEvent(startTime.plus(OFF2), null));
+		queue.pushEvent(new TLEvent(startTime.plus(OFF3), null));
+		queue.pushEvent(new TLEvent(startTime.plus(OFF4), null));
+		
+		assertEquals(startTime, queue.getPOA());
+		assertTrue(queue.shiftToNextStack());
+		assertEquals(startTime.plus(OFF1), queue.getPOA());
+		queue.pullStack(); // Нужно извлечь стек, инача дальше не пойдет
+		assertEquals(startTime.plus(OFF1 + 1), queue.getPOA());
+		assertTrue(queue.shiftToNextStack());
+		assertEquals(startTime.plus(OFF2), queue.getPOA());
+		queue.pullStack();
+		assertTrue(queue.shiftToNextStack());
+		assertEquals(startTime.plus(OFF3), queue.getPOA());
+		queue.pullStack();
+		assertTrue(queue.shiftToNextStack());
+		assertEquals(startTime.plus(OFF4), queue.getPOA());
+		queue.pullStack();
+		assertFalse(queue.shiftToNextStack());
+		assertEquals(endTime, queue.getPOA());
+		assertTrue(queue.finished());
 	}
 	
 }

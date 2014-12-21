@@ -72,7 +72,7 @@ public class TLEventQueue {
 		DateTime time = event.getTime();
 		Interval currentInterval = getInterval();
 		if ( ! currentInterval.contains(time) ) {
-			throw new TLOutOfIntervalException();
+			throw new TLOutOfIntervalException(currentInterval, event);
 		}
 		TLEventStack stack = stacks.get(time);
 		if ( stack == null ) {
@@ -84,26 +84,37 @@ public class TLEventQueue {
 	}
 	
 	/**
-	 * Получить стек событий.
+	 * Получить текущий стек событий.
 	 * <p>
-	 * Данный метод извлекает очередной стек событий и сдвигает ТА на следующую
-	 * миллисекунду после времени извлеченного стека. Если последовательность не
-	 * содержит событий, то сдвиг ТА не выполняется, а результатом вызова будет
-	 * null. Первый вызов, завершившийся возвратом null-результата, сдвигает ТА
-	 * на конец РП.  
+	 * Текущий стек событий означает стек, соответствующей текущему значению ТА.
+	 * Независимо от наличия стека на ТА, само значение ТА сдвигается на 1 мс.
+	 * в будущее, что бы предотвратить в момент отработки стека добавление
+	 * событий на момент времени, соответствующий извлеченному стеку.  
 	 * <p>
-	 * @return стек событий или null, если нет событий
+	 * @return стек событий на ТА или null, если нет событий на ТА
 	 */
 	public synchronized TLEventStack pullStack() {
+		TLEventStack stack = stacks.remove(poa);
+		poa = poa.plus(1);
+		return stack;
+	}
+	
+	/**
+	 * Переместить ТА на время следующего стека событий.
+	 * <p>
+	 * При определении конца данных ТА смещается на время кона периода.
+	 * <p>
+	 * @return true - если ТА смещено, false - если конец данных
+	 */
+	public synchronized boolean shiftToNextStack() {
 		if ( stacks.size() == 0 ) {
 			poa = end;
-			return null;
+			return false;
 		}
 		List<DateTime> dummy = new Vector<DateTime>(stacks.keySet());
 		Collections.sort(dummy);
-		DateTime time = dummy.get(0);
-		poa = time.plus(1);
-		return stacks.remove(time);
+		poa = dummy.get(0);
+		return true;
 	}
 	
 	/**
