@@ -16,7 +16,7 @@ import ru.prolib.aquila.probe.PROBETerminal;
 
 @SuppressWarnings("serial")
 public class PROBEToolBar extends JToolBar
-	implements ActionListener, EventListener
+	implements ActionListener, EventListener, Runnable
 {
 	private static final Logger logger;
 	
@@ -68,12 +68,12 @@ public class PROBEToolBar extends JToolBar
 		btnFinish = makeButton(FINISH, TTIP_FINISH);
 		iconPause = getIcon(PAUSE);
 		iconRunRt = btnPauseRunRt.getIcon();
-		disableAllButtons();
 		terminal.OnFinish().addListener(this);
 		terminal.OnPause().addListener(this);
 		terminal.OnRun().addListener(this);
 		terminal.OnConnected().addListener(this);
 		terminal.OnDisconnected().addListener(this);
+		refreshControls();
 	}
 	
 	private JButton makeButton(String actionId,
@@ -114,8 +114,6 @@ public class PROBEToolBar extends JToolBar
 			terminal.run();
 			
 		} else if ( cmd.equals(FINISH) ) {
-			// TODO: 
-			// Не срабатывает. После этого вызова не приходит событие OnFinish.
 			terminal.finish();
 			
 		}
@@ -123,26 +121,25 @@ public class PROBEToolBar extends JToolBar
 
 	@Override
 	public void onEvent(Event event) {
-		if ( event.isType(terminal.OnFinish()) ) {
-			terminal.OnFinish().removeListener(this);
-			terminal.OnPause().removeListener(this);
-			terminal.OnRun().removeListener(this);
-			terminal.OnConnected().removeListener(this);
-			terminal.OnDisconnected().removeListener(this);
+		SwingUtilities.invokeLater(this);
+	}
+	
+	private void refreshControls() {
+		if ( terminal.finished() ) {
 			disableAllButtons();
 			logger.debug("The timeline ended and controls has been permanently disabled.");
 			
-		} else if ( event.isType(terminal.OnPause())
-				 || event.isType(terminal.OnConnected()))
-		{
-			switchToPausedMode();
+		} else if ( terminal.connected() ) {
+			if ( terminal.running() ) {
+				switchToRunningMode();
+			} else if ( terminal.paused() ) {
+				switchToPausedMode();
+			}
 			
-		} else if ( event.isType(terminal.OnRun()) ) {
-			switchToRunningMode();
-			
-		} else if ( event.isType(terminal.OnDisconnected()) ) {
+		} else {
+			// disconnected
 			disableAllButtons();
-
+			
 		}
 	}
 	
@@ -184,12 +181,17 @@ public class PROBEToolBar extends JToolBar
 		btnFinish.setEnabled(enable);
 	}
 
-	public void enableAllButtons() {
+	private void enableAllButtons() {
 		setEnabledAllButtons(true);
 	}
 
-	public void disableAllButtons() {
+	private void disableAllButtons() {
 		setEnabledAllButtons(false);
+	}
+	
+	@Override
+	public void run() {
+		refreshControls();
 	}
 
 }
