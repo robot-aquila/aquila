@@ -22,7 +22,10 @@ import ru.prolib.aquila.probe.internal.SimulationController;
  * оверхед в случае большого количества событий. В моменте трудно предположить
  * варианты использования данного события, кроме индикации процесса в UI. Но
  * для этих целей достаточно воспользоваться штатным способом и реализовать
- * индикацию путем регистрации событий в границах хронологии. 
+ * индикацию путем регистрации событий в границах хронологии.
+ * <p>
+ * <i>2014-12-26</i> Удалены все ссылки на пускач потока.
+ * <p> 
  */
 public class TLSTimeline implements SimulationController {
 	private static final Logger logger;
@@ -36,7 +39,6 @@ public class TLSTimeline implements SimulationController {
 	private final TLSStrategy simulation;
 	private final TLSEventDispatcher dispatcher;
 	private final TLEventSources sources;
-	private volatile TLSThreadStarter starter;
 	private volatile boolean blocking = false;
 	private volatile DateTime cutoff = null;
 	private volatile TLCmdType state = null;
@@ -60,22 +62,6 @@ public class TLSTimeline implements SimulationController {
 		this.simulation = simulation;
 		this.dispatcher = dispatcher;
 		this.sources = sources;
-	}
-	
-	/**
-	 * Установить пускач потока.
-	 * <p>
-	 * Функция потока эмуляции содержит ссылку на объект хронологии и по этому
-	 * не может быть создана заранее и передана непосредственно в конструктор
-	 * объекта данного класса. Вместо этого, функция потока создается после
-	 * инстанцирования экземпляра данного класса, после чего создается пускач
-	 * который и определяется для созданной хронологии на последнем этапе
-	 * сборки.
-	 * <p>
-	 * @param starter пускач потока
-	 */
-	void setStarter(TLSThreadStarter starter) {
-		this.starter = starter;
 	}
 	
 	/**
@@ -294,11 +280,8 @@ public class TLSTimeline implements SimulationController {
 	 */
 	@Override
 	public void finish() {
-		synchronized ( starter ) {
-			if ( ! finished() ) {
-				starter.start();
-				cmdQueue.put(TLCmd.FINISH);
-			}
+		if ( ! finished() ) {
+			cmdQueue.put(TLCmd.FINISH);
 		}
 	}
 	
@@ -317,11 +300,8 @@ public class TLSTimeline implements SimulationController {
 	 */
 	@Override
 	public void runTo(DateTime cutoff) {
-		synchronized ( starter ) {
-			if ( ! finished() ) {
-				starter.start();
-				cmdQueue.put(new TLCmd(cutoff));
-			}
+		if ( ! finished() ) {
+			cmdQueue.put(new TLCmd(cutoff));
 		}
 	}
 
@@ -375,15 +355,6 @@ public class TLSTimeline implements SimulationController {
 	@Override
 	public EventType OnRun() {
 		return dispatcher.OnRun();
-	}
-	
-	/**
-	 * Установить режим вывода отладочных сообщений.
-	 * <p>
-	 * @param enabled true - включить, false - выключить
-	 */
-	public void setDebug(boolean enabled) {
-		starter.setDebug(enabled);
 	}
 
 }

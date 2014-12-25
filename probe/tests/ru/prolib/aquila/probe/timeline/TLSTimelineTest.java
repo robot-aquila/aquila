@@ -28,7 +28,6 @@ public class TLSTimelineTest {
 	private TLSEventDispatcher dispatcher;
 	private TLEventSources sources;
 	private TLSTimeline timeline;
-	private TLSThreadStarter starter;
 	private EventType evtType;
 
 	@Before
@@ -39,7 +38,6 @@ public class TLSTimelineTest {
 		simulation = control.createMock(TLSStrategy.class);
 		dispatcher = control.createMock(TLSEventDispatcher.class);
 		sources = control.createMock(TLEventSources.class);
-		starter = control.createMock(TLSThreadStarter.class);
 		timeline = new TLSTimeline(cmdQueue, evtQueue, simulation,
 				dispatcher, sources);
 		evtType = control.createMock(EventType.class);
@@ -242,10 +240,8 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testFinish() throws Exception {
-		starter.start();
 		cmdQueue.put(same(TLCmd.FINISH));
 		control.replay();
-		timeline.setStarter(starter);
 		
 		timeline.finish();
 		
@@ -256,7 +252,6 @@ public class TLSTimelineTest {
 	public void testFinish_SkipIfFinished() throws Exception {
 		timeline.setState(TLCmdType.FINISH);
 		control.replay();
-		timeline.setStarter(starter);
 		
 		timeline.finish();
 		
@@ -287,10 +282,8 @@ public class TLSTimelineTest {
 	@Test
 	public void testRunTo() throws Exception {
 		DateTime time = new DateTime(2014, 5, 22, 0, 0, 0, 0);
-		starter.start();
 		cmdQueue.put(new TLCmd(time));
 		control.replay();
-		timeline.setStarter(starter);
 		
 		timeline.runTo(time);
 		
@@ -301,7 +294,6 @@ public class TLSTimelineTest {
 	public void testRunTo_SkipIfFinished() throws Exception {
 		timeline.setState(TLCmdType.FINISH);
 		control.replay();
-		timeline.setStarter(starter);
 		
 		timeline.runTo(from);
 		
@@ -311,10 +303,8 @@ public class TLSTimelineTest {
 	@Test
 	public void testRun() throws Exception {
 		expect(evtQueue.getInterval()).andStubReturn(interval);
-		starter.start();
 		cmdQueue.put(new TLCmd((DateTime) null));
 		control.replay();
-		timeline.setStarter(starter);
 		
 		timeline.run();
 		
@@ -326,7 +316,6 @@ public class TLSTimelineTest {
 		timeline.setState(TLCmdType.FINISH);
 		expect(evtQueue.getInterval()).andStubReturn(interval);
 		control.replay();
-		timeline.setStarter(starter);
 		
 		timeline.run();
 		
@@ -424,19 +413,6 @@ public class TLSTimelineTest {
 	@Test (expected=NoSuchMethodException.class)
 	public void testOnStepEventTypeRemoved() throws Exception {
 		timeline.getClass().getMethod("OnStep");
-	}
-	
-	@Test
-	public void testSetDebug() throws Exception {
-		starter.setDebug(eq(true));
-		starter.setDebug(eq(false));
-		control.replay();
-		timeline.setStarter(starter);
-		
-		timeline.setDebug(true);
-		timeline.setDebug(false);
-		
-		control.verify();
 	}
 	
 }
