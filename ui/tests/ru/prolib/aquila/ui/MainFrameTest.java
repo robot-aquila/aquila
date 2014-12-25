@@ -24,7 +24,7 @@ import ru.prolib.aquila.ui.wrapper.MenuBar;
 public class MainFrameTest {
 	private static IMocksControl control;
 	
-	private AquilaUI facade;
+	private ServiceLocator facade;
 	private UiTexts texts = new UiTexts();
 	private Runnable exitAction;
 	private Terminal terminal;
@@ -61,7 +61,7 @@ public class MainFrameTest {
 	
 	@Test
 	public void testCreateUI() throws Exception {		
-		
+		fail("TODO: ");
 		EventType onStarted = control.createMock(EventType.class);
 		EventType onStopped = control.createMock(EventType.class);
 		expect(terminal.OnStarted()).andStubReturn(onStarted);
@@ -69,7 +69,7 @@ public class MainFrameTest {
 		
 		onStarted.addListener(same(main));
 		onStopped.addListener(same(main));
-		main.setTerminal(terminal);
+		main.initialize(facade, terminal, null);
 		
 		control.replay();
 		main.createUI(facade);
@@ -80,10 +80,10 @@ public class MainFrameTest {
 		IsInstanceOf.instanceOf(PortfolioDataPanel.class).
 			matches(main.getContentPane().getComponent(0));
 		assertEquals(main.getTabPanel(), main.getContentPane().getComponent(0));		
-		assertEquals(main.getStatus(), main.getContentPane().getComponent(1));
-		IsInstanceOf.instanceOf(StatusBar.class).matches(main.getStatus());
-		IsInstanceOf.instanceOf(PortfolioDataPanel.class).
-			matches(main.getStatus().getPortfolioPanel());
+		//assertEquals(main.getStatus(), main.getContentPane().getComponent(1));
+		//IsInstanceOf.instanceOf(TerminalStatusBar.class).matches(main.getStatus());
+		//IsInstanceOf.instanceOf(PortfolioDataPanel.class).
+		//	matches(main.getStatus().getPortfolioPanel());
 		
 		MenuBar menu = main.getMainMenu();
 		assertEquals(menu.getUnderlyingObject(), main.getJMenuBar());
@@ -96,12 +96,13 @@ public class MainFrameTest {
 	
 	@Test
 	public void testStop_TerminalNotStarted() throws Exception {
-		StatusBar status = control.createMock(StatusBar.class);
-		main.setStatus(status);
-		main.setTerminal(terminal);
+		fail("TODO: ");
+		TerminalStatusBar status = control.createMock(TerminalStatusBar.class);
+		//main.setStatus(status);
+		//main.setTerminal(terminal);
 		
 		expect(terminal.started()).andReturn(false);
-		status.stop();		
+		//status.stop();		
 		control.replay();
 		main.stop();
 		control.verify();
@@ -110,13 +111,14 @@ public class MainFrameTest {
 	
 	@Test
 	public void testStop_TerminalStarted() throws Exception {
-		StatusBar status = control.createMock(StatusBar.class);
-		main.setStatus(status);
-		main.setTerminal(terminal);
+		fail("TODO: ");
+		TerminalStatusBar status = control.createMock(TerminalStatusBar.class);
+		//main.setStatus(status);
+		//main.setTerminal(terminal);
 		
 		expect(terminal.started()).andReturn(true);
 		terminal.stop();
-		status.stop();		
+		//status.stop();		
 		control.replay();
 		main.stop();
 		control.verify();
@@ -125,11 +127,12 @@ public class MainFrameTest {
 	
 	@Test
 	public void testStart_TerminalNotStopped() throws Exception {
-		StatusBar status = control.createMock(StatusBar.class);
-		main.setStatus(status);
-		main.setTerminal(terminal);
+		fail("TODO: ");
+		TerminalStatusBar status = control.createMock(TerminalStatusBar.class);
+		//main.setStatus(status);
+		//main.setTerminal(terminal);
 		
-		status.start();
+		//status.start();
 		expect(terminal.stopped()).andReturn(false);
 		control.replay();
 		main.start();
@@ -139,24 +142,18 @@ public class MainFrameTest {
 	
 	@Test
 	public void testStart_TerminalStopped() throws Exception {
-		StatusBar status = control.createMock(StatusBar.class);
-		main.setStatus(status);
-		main.setTerminal(terminal);
+		fail("TODO: ");
+		TerminalStatusBar status = control.createMock(TerminalStatusBar.class);
+		//main.setStatus(status);
+		//main.setTerminal(terminal);
 		
-		status.start();
+		//status.start();
 		expect(terminal.stopped()).andReturn(true);
 		terminal.start();
 		control.replay();
 		main.start();
 		control.verify();
 		assertTrue(main.isVisible());
-	}
-	
-	@Test
-	public void testInitialize() {
-		ServiceLocator locator = control.createMock(ServiceLocator.class);
-		main.initialize(locator, terminal, null);
-		assertEquals(terminal, main.getTerminal());
 	}
 
 	@Test

@@ -94,6 +94,10 @@ public class SecurityHandlerFORTS implements TickHandler {
 		security.setHighPrice(price);
 		security.setLowPrice(price);
 		security.setClosePrice(price);
+		terminal.fireEvents(security);
+		if ( logger.isDebugEnabled() ) {
+			logger.debug("Initialize security: {}", security.getDescriptor());
+		}
 	}
 	
 	/**

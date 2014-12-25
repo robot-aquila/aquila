@@ -41,7 +41,8 @@ public class TLSTimelineFactory {
 		TLSThread thread = new TLSThread(new TLSThreadWorker(started, timeline,
 				new SMStateMachine(pause, tr)));
 		timeline.setStarter(new TLSThreadStarter(started, thread));
-		
+		timeline.setDebug(true);
+		timeline.setState(TLCmdType.PAUSE); // TODO: убрать, сделать запуск потока
 		return timeline;
 	}
 

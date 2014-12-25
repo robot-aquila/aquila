@@ -3,6 +3,7 @@ package ru.prolib.aquila.ui.FastOrder;
 import java.util.Vector;
 
 import javax.swing.JComboBox;
+import javax.swing.SwingUtilities;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -10,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 /**
  * Селектор торгового счета.
  */
-public class AccountCombo extends JComboBox implements Starter, EventListener {
+public class AccountCombo extends JComboBox<Account> implements Starter, EventListener {
 	private static final long serialVersionUID = -7501535410571675108L;
 	private final Terminal portfolios;
 	private final Vector<Portfolio> list = new Vector<Portfolio>();
@@ -47,10 +48,18 @@ public class AccountCombo extends JComboBox implements Starter, EventListener {
 	 * <p>
 	 * @param portfolio портфель
 	 */
-	private void addPortfolio(Portfolio portfolio) {
+	private void addPortfolio(final Portfolio portfolio) {
 		if ( ! list.contains(portfolio) ) {
-			list.add(portfolio);
-			addItem(portfolio.getAccount());
+			if ( SwingUtilities.isEventDispatchThread() ) {
+				list.add(portfolio);
+				addItem(portfolio.getAccount());
+			} else {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override public void run() {
+						addPortfolio(portfolio);
+					}
+				});				
+			}
 		}
 	}
 	

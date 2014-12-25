@@ -2,6 +2,8 @@ package ru.prolib.aquila.ui.FastOrder;
 
 import java.util.*;
 import javax.swing.JComboBox;
+import javax.swing.SwingUtilities;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -9,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 /**
  * Селектор инструмента.
  */
-public class SecurityCombo extends JComboBox implements Starter, EventListener {
+public class SecurityCombo extends JComboBox<SecurityDescriptor> implements Starter, EventListener {
 	private static final long serialVersionUID = -3328773972490353436L;
 	private final Terminal securities;
 	private final Vector<Security> list = new Vector<Security>();
@@ -46,10 +48,18 @@ public class SecurityCombo extends JComboBox implements Starter, EventListener {
 	 * <p>
 	 * @param security инструмент
 	 */
-	private void addSecurity(Security security) {
+	private void addSecurity(final Security security) {
 		if ( ! list.contains(security) ) {
-			list.add(security);
-			addItem(security.getDescriptor());
+			if ( SwingUtilities.isEventDispatchThread() ) {
+				list.add(security);
+				addItem(security.getDescriptor());
+			} else {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override public void run() {
+						addSecurity(security);
+					}
+				});
+			}
 		}
 	}
 	

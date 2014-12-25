@@ -73,6 +73,8 @@ public class PROBEToolBar extends JToolBar
 		terminal.OnRun().addListener(this);
 		terminal.OnConnected().addListener(this);
 		terminal.OnDisconnected().addListener(this);
+		terminal.OnStarted().addListener(this);
+		terminal.OnStopped().addListener(this);
 		refreshControls();
 	}
 	
@@ -125,6 +127,8 @@ public class PROBEToolBar extends JToolBar
 	}
 	
 	private void refreshControls() {
+		logger.debug("connected={}, started={}, finished={}, paused={}, running={}", new Object[]{
+				terminal.connected(), terminal.started(), terminal.finished(), terminal.paused(), terminal.running() });
 		if ( terminal.finished() ) {
 			disableAllButtons();
 			logger.debug("The timeline ended and controls has been permanently disabled.");

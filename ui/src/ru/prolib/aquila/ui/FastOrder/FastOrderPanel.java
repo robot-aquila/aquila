@@ -3,7 +3,6 @@ package ru.prolib.aquila.ui.FastOrder;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Dimension2D;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -23,13 +22,13 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 public class FastOrderPanel extends JPanel implements Starter {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger;
-	private static final String ACCOUNT_PROTO;
-	private static final String SECURITY_PROTO;
+	private static final Account ACCOUNT_PROTO;
+	private static final SecurityDescriptor SECURITY_PROTO;
 	
 	static {
 		logger = LoggerFactory.getLogger(FastOrderPanel.class);
-		ACCOUNT_PROTO = "SPBFUT#SPBFUTXXXXX#SPBFUTXXXXX__";
-		SECURITY_PROTO = "RIU3@SPBFUT(FUT/USD)__";
+		ACCOUNT_PROTO = new Account("SPBFUT", "SPBFUTXXXXX", "SPBFUTXXXXX__");// "SPBFUT#SPBFUTXXXXX#SPBFUTXXXXX__";
+		SECURITY_PROTO = new SecurityDescriptor("RIU3", "SPBFUT", ISO4217.USD, SecurityType.FUT);// "RIU3@SPBFUT(FUT/USD)__";
 	}
 	
 	private final Terminal terminal;

@@ -86,6 +86,8 @@ public class SecurityHandlerFORTSTest {
 		assertNull(security.getMaxPrice());
 		assertNull(security.getMinPrice());
 		assertEquals(1d, security.getMinStepPrice(), 0.1d);
+		
+		fail("TODO: test fireEvents");
 	}
 	
 	@Test

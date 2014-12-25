@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.*;
 
+import javax.swing.SwingUtilities;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.ini4j.Profile.Section;
@@ -69,14 +71,19 @@ public class Main implements Runnable {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		try {
-			new Main().run(args);
-		} catch ( Exception e ) {
-			System.err.println("Bootstrap exception: " + e.getMessage());
-			e.printStackTrace(System.err);
-			System.exit(1);
-		}
+	public static void main(final String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override public void run() {
+				try {
+					new Main().run(args);
+				} catch ( Exception e ) {
+					System.err.println("Bootstrap exception: " + e.getMessage());
+					e.printStackTrace(System.err);
+					System.exit(1);
+				}
+			}
+		});
+
 	}
 	
 	private void run(String[] args) throws Exception {
@@ -194,7 +201,9 @@ public class Main implements Runnable {
 	public void run() {
 		try {
 			starter.stop();
-		} catch ( StarterException e ) { }
+		} catch ( StarterException e ) {
+			logger.error("Error stop sequence: ", e);
+		}
 		System.exit(0);
 	}
 	

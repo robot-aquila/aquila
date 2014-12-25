@@ -1,6 +1,9 @@
 package ru.prolib.aquila.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
@@ -9,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.ui.StatusBar;
+import ru.prolib.aquila.ui.TerminalStatusBar;
 import ru.prolib.aquila.ui.FastOrder.FastOrderPanel;
 import ru.prolib.aquila.ui.wrapper.Menu;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
@@ -22,10 +25,11 @@ import ru.prolib.aquila.ui.wrapper.MenuItem;
  * 2012-12-07<br>
  * $Id: MainFrame.java 573 2013-03-12 18:18:44Z huan.kaktus $
  */
-public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
-	private static final long serialVersionUID = -3728478826451820673L;
+@SuppressWarnings("serial")
+public class MainFrame extends JFrame implements EventListener, AquilaPlugin, ActionListener {
 	private static Logger logger = LoggerFactory.getLogger(MainFrame.class);
 
+	public static final String TERMINAL_STATUS_SECT = "StatusBar";
 	public static final String MENU_SECT = "MenuBar";
 	public static final String MENU_FILE = "MENU_FILE";
 	public static final String MENU_TERM = "MENU_TERM";
@@ -38,11 +42,13 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	private Runnable exitAction;
 	private Terminal terminal;
 	private MenuBar mainMenu;
-	private EventType onExit;
+	private JMenuItem exit;
 	private MenuItem cmdStart, cmdStop;
 	private FastOrderPanel fastOrder;
+	private JPanel statusBar = new JPanel();
 	
-	private StatusBar status;
+	private TerminalStatusBar terminalStatusBar;
+	private PortfolioDataPanel portfolioStatusBar;
 	private CurrentPortfolio currPortfolio;
 	
 	private final JTabbedPane tabPanel = new JTabbedPane();	
@@ -68,19 +74,24 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 				terminal, dispatcher.createType(), dispatcher,
 				mainMenu.getMenu(MENU_VIEW).getSubMenu(MENU_VIEW_PORTFOLIO_STATUS));
 		
-		PortfolioDataPanel portfolioBox = new PortfolioDataPanel(
-				currPortfolio, uiLabels);
-		
         setSize(800, 600);
         
         fastOrder = new FastOrderPanel(terminal);
         getContentPane().add(fastOrder, BorderLayout.NORTH);
         getContentPane().add(tabPanel, BorderLayout.CENTER);
         
-        status = new StatusBar(portfolioBox, terminal, uiLabels);        
-        getContentPane().add(status, BorderLayout.SOUTH);
+        terminalStatusBar = new TerminalStatusBar(uiLabels.get(TERMINAL_STATUS_SECT));
+		portfolioStatusBar = new PortfolioDataPanel(currPortfolio, uiLabels);
+        
+        statusBar.setLayout(new FlowLayout());
+        statusBar.add(terminalStatusBar);
+        statusBar.add(portfolioStatusBar);
+        getContentPane().add(statusBar, BorderLayout.SOUTH);
+        
         terminal.OnStarted().addListener(this);
         terminal.OnStopped().addListener(this);
+		terminal.OnConnected().addListener(this);
+        terminal.OnDisconnected().addListener(this);
 	}
 	
 	public void startTerminal() {
@@ -108,13 +119,18 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 		if ( event.isType(terminal.OnStarted()) ) {
 			cmdStart.setEnabled(false);
 			cmdStop.setEnabled(true);
+			terminalStatusBar.updateTerminalStatus(terminal);
 			
 		} else if ( event.isType(terminal.OnStopped()) ) {
 			cmdStart.setEnabled(true);
 			cmdStop.setEnabled(false);
+			terminalStatusBar.updateTerminalStatus(terminal);
 			
-		} else if ( event.isType(onExit) ) {
-			exit();
+		} else if ( event.isType(terminal.OnConnected()) ) {
+			terminalStatusBar.updateTerminalStatus(terminal);
+			
+		} else if ( event.isType(terminal.OnDisconnected()) ) {
+			terminalStatusBar.updateTerminalStatus(terminal);
 			
 		} else if ( event.isType(cmdStart.OnCommand()) ) {
 			startTerminal();
@@ -141,9 +157,10 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 		
 		Menu menu = mainMenu.addMenu(MENU_FILE, text.get(MENU_FILE));
 		menu.addBottomSeparator();
-		onExit = menu.addBottomItem(MENU_FILE_EXIT,
-				text.get(MENU_FILE_EXIT)).OnCommand();
-		onExit.addListener(this);
+		exit = menu.addBottomItem(MENU_FILE_EXIT, text.get(MENU_FILE_EXIT))
+				.getUnderlyingObject();
+		exit.setActionCommand(MENU_FILE_EXIT);
+		exit.addActionListener(this);
 		
 		menu = mainMenu.addMenu(MENU_TERM, text.get(MENU_TERM));
 		cmdStart = menu.addItem(MENU_TERM_START, text.get(MENU_TERM_START));
@@ -170,32 +187,14 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	public void start() throws StarterException {
 		setVisible(true);
 		fastOrder.start();
-		status.start();
 		startTerminal();
 	}
 
 	@Override
 	public void stop() throws StarterException {
 		stopTerminal();
-		status.stop();
 		fastOrder.stop();
 		dispose();
-	}
-	
-	public Terminal getTerminal() {
-		return terminal;
-	}
-	
-	public void setTerminal(Terminal term) {
-		terminal = term;
-	}
-	
-	public void setStatus(StatusBar status) {
-		this.status = status;
-	}
-	
-	public StatusBar getStatus() {
-		return status;
 	}
 	
 	public CurrentPortfolio getCurrPortfolio() {
@@ -223,6 +222,14 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin {
 	 */
 	public MenuBar getMainMenu() {
 		return mainMenu;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		switch ( e.getActionCommand() ) {
+		case MENU_FILE_EXIT:
+			exit();
+		} 
 	}
 
 }

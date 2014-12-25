@@ -10,11 +10,10 @@ import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioEvent;
 
+/**
+ * $Id: PortfolioDataPanel.java 544 2013-02-25 14:31:32Z huan.kaktus $
+ */
 public class PortfolioDataPanel extends JPanel implements EventListener, Starter {
-
-	/**
-	 * $Id: PortfolioDataPanel.java 544 2013-02-25 14:31:32Z huan.kaktus $
-	 */
 	private static final long serialVersionUID = -5773959478808068827L;
 	public static final String TEXT_SECT = "PortfolioDataPanel";
 	private LabeledTextValue cashVal;
@@ -37,7 +36,7 @@ public class PortfolioDataPanel extends JPanel implements EventListener, Starter
 		add(cashVal);
 		add(balanceVal);
 		add(varMargin);
-	}	
+	}
 	
 	/* (non-Javadoc)
 	 * @see ru.prolib.aquila.core.Starter#start()
