@@ -83,7 +83,6 @@ public class PROBEFactory implements TerminalFactory {
 		TLSTimeline timeline = x.newTimeline(es, new Interval(
 				df.parseDateTime(config.getProperty(RUN_INTERVAL_START)),
 				df.parseDateTime(config.getProperty(RUN_INTERVAL_END))));
-		timeline.setDebug(true);
 		locator.setTimeline(timeline);
 		terminal.setScheduler(x.newScheduler(timeline));
 		locator.setDataProvider(x.newDataProvider(terminal));

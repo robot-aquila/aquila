@@ -13,8 +13,8 @@ public class TestStrategyPlugin implements AquilaPlugin {
 	
 	public TestStrategyPlugin() {
 		super();
-		SecurityDescriptor descr = new SecurityDescriptor("Si-12.14",
-				"SPBFUT", "USD", SecurityType.FUT);
+		SecurityDescriptor descr = new SecurityDescriptor("Si-3.15",
+				"SPBFUT", "RUR", SecurityType.FUT);
 		strategy = new TestStrategy(descr);
 	}
 

@@ -8,6 +8,7 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
@@ -34,6 +35,12 @@ public class SecurityHandlerFORTSTest {
 	private PROBETerminal terminal;
 	private SecurityProperties props;
 	private SecurityHandlerFORTS handler;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -65,6 +72,12 @@ public class SecurityHandlerFORTSTest {
 	
 	@Test
 	public void testDoInitialTask() throws Exception {
+		final Vector<Event> actual = new Vector<Event>();
+		terminal.OnSecurityAvailable().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				actual.add(event);
+			}
+		});
 		handler.doInitialTask(new Tick(DateTime.now(), 142912d));
 		
 		assertEquals("RTS-future-12.14", security.getDisplayName());
@@ -87,7 +100,9 @@ public class SecurityHandlerFORTSTest {
 		assertNull(security.getMinPrice());
 		assertEquals(1d, security.getMinStepPrice(), 0.1d);
 		
-		fail("TODO: test fireEvents");
+		assertEquals(1, actual.size());
+		assertEquals(new SecurityEvent(terminal.OnSecurityAvailable(), security),
+				actual.get(0));
 	}
 	
 	@Test

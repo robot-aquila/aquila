@@ -38,11 +38,15 @@ public class TLSTimelineFactory {
 		tr.put(new KW<SMExit>(run.getExit(TLASRun.EPAUSE)), pause);
 		tr.put(new KW<SMExit>(finish.getExit(TLASFinish.EOK)), SMState.FINAL);
 	
-		TLSThread thread = new TLSThread(new TLSThreadWorker(started, timeline,
+		Thread thread = new Thread(new TLSThreadWorker(started, timeline,
 				new SMStateMachine(pause, tr)));
-		timeline.setStarter(new TLSThreadStarter(started, thread));
-		timeline.setDebug(true);
-		timeline.setState(TLCmdType.PAUSE); // TODO: убрать, сделать запуск потока
+		thread.setDaemon(true);
+		thread.start();
+		try {
+			started.await();
+		} catch ( InterruptedException e ) {
+			throw new TLInterruptionsNotAllowedException(e);
+		}
 		return timeline;
 	}
 

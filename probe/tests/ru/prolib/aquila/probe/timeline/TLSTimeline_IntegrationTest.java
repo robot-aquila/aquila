@@ -173,6 +173,7 @@ public class TLSTimeline_IntegrationTest {
 			}
 		});
 		
+		assertTrue(timeline.paused());
 		timeline.run();
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
 		assertEquals(2, actual.size());
@@ -194,7 +195,6 @@ public class TLSTimeline_IntegrationTest {
 		DateTime stopAt = x1.plus((x2.getMillis() - x1.getMillis()) / 2);
 		
 		timeline = factory.produce(new Interval(from, to));
-		timeline.setDebug(true);
 		timeline.OnPause().addListener(new EventListener() {
 			@Override public void onEvent(Event arg0) {
 				paused.countDown();
