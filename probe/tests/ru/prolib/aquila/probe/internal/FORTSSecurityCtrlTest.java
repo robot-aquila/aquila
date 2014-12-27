@@ -21,7 +21,7 @@ import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.probe.PROBETerminal;
 
-public class SecurityHandlerFORTSTest {
+public class FORTSSecurityCtrlTest {
 	private static SecurityDescriptor descr;
 	private static BMUtils ut = new BMUtils();
 	
@@ -34,7 +34,7 @@ public class SecurityHandlerFORTSTest {
 	private EditableSecurity security;
 	private PROBETerminal terminal;
 	private SecurityProperties props;
-	private SecurityHandlerFORTS handler;
+	private FORTSSecurityCtrl ctrl;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -55,7 +55,7 @@ public class SecurityHandlerFORTSTest {
 		props.setMinStepSize(10d);
 		props.setInitialMarginCalcBase(0.15d);
 		props.setStepPriceCalcBase(0.2d);
-		handler = new SecurityHandlerFORTS(terminal, security, props);
+		ctrl = new FORTSSecurityCtrl(terminal, security, props);
 		terminal.getEventSystem().getEventQueue().start();
 	}
 	
@@ -78,7 +78,7 @@ public class SecurityHandlerFORTSTest {
 				actual.add(event);
 			}
 		});
-		handler.doInitialTask(new Tick(DateTime.now(), 142912d));
+		ctrl.doInitialTask(new Tick(DateTime.now(), 142912d));
 		
 		assertEquals("RTS-future-12.14", security.getDisplayName());
 		assertEquals(new Integer(1), security.getLotSize());
@@ -107,7 +107,7 @@ public class SecurityHandlerFORTSTest {
 	
 	@Test
 	public void testDoFinalTask() throws Exception {
-		handler.doFinalTask(new Tick(DateTime.now(), 115240d));		
+		ctrl.doFinalTask(new Tick(DateTime.now(), 115240d));		
 	}
 	
 	@Test
@@ -125,7 +125,7 @@ public class SecurityHandlerFORTSTest {
 		terminal.setScheduler(scheduler);
 		security.setLastPrice(112590d); // Используется как цена закрытия сессии
 		
-		handler.doDailyTask(null,
+		ctrl.doDailyTask(null,
 				new Tick(new DateTime(2014, 11, 18, 15, 34, 29, 0), 138940d));
 		
 		control.verify();
@@ -141,7 +141,7 @@ public class SecurityHandlerFORTSTest {
 	
 	@Test
 	public void testCreateTask() throws Exception {
-		handler.doInitialTask(new Tick(null, 120140d));
+		ctrl.doInitialTask(new Tick(null, 120140d));
 		DateTime time = DateTime.now();
 		Trade expTrade = ut.tradeFromTick(new Tick(time, 119540d, 120d), security); 
 		final List<Event> expected = new Vector<Event>(),
@@ -158,7 +158,7 @@ public class SecurityHandlerFORTSTest {
 		security.OnChanged().addListener(listener);
 		security.OnTrade().addListener(listener);
 		
-		handler.createTask(new Tick(time, 119540d, 120d)).run();
+		ctrl.createTask(new Tick(time, 119540d, 120d)).run();
 		
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		assertEquals(expected, actual);
@@ -177,7 +177,7 @@ public class SecurityHandlerFORTSTest {
 		security.setHighPrice(112000d);
 		security.setLowPrice(111000d);
 		
-		handler.createTask(new Tick(DateTime.now(), 115240d, 10d)).run();
+		ctrl.createTask(new Tick(DateTime.now(), 115240d, 10d)).run();
 		
 		assertEquals(115240d, security.getOpenPrice(), 0.1d);
 		assertEquals(115240d, security.getHighPrice(), 0.1d);
@@ -188,9 +188,9 @@ public class SecurityHandlerFORTSTest {
 	public void testCreateTask_UpdatesHigh() throws Exception {
 		security.setMinStepSize(10d);
 		security.setMinStepPrice(1d);
-		handler.doInitialTask(new Tick(null, 120140d));
+		ctrl.doInitialTask(new Tick(null, 120140d));
 		
-		handler.createTask(new Tick(DateTime.now(), 135240d, 10d)).run();
+		ctrl.createTask(new Tick(DateTime.now(), 135240d, 10d)).run();
 		
 		assertEquals(135240d, security.getHighPrice(), 1d);
 		assertEquals(120140d, security.getLowPrice(), 1d);
@@ -200,9 +200,9 @@ public class SecurityHandlerFORTSTest {
 	public void testCreateTask_UpdatesLow() throws Exception {
 		security.setMinStepSize(10d);
 		security.setMinStepPrice(1d);
-		handler.doInitialTask(new Tick(null, 120140d));
+		ctrl.doInitialTask(new Tick(null, 120140d));
 		
-		handler.createTask(new Tick(DateTime.now(), 115240d, 10d)).run();
+		ctrl.createTask(new Tick(DateTime.now(), 115240d, 10d)).run();
 		
 		assertEquals(120140d, security.getHighPrice(), 1d);
 		assertEquals(115240d, security.getLowPrice(), 1d);
@@ -210,9 +210,9 @@ public class SecurityHandlerFORTSTest {
 	
 	@Test
 	public void testEquals_SpecialCases() throws Exception {
-		assertTrue(handler.equals(handler));
-		assertFalse(handler.equals(null));
-		assertFalse(handler.equals(this));
+		assertTrue(ctrl.equals(ctrl));
+		assertFalse(ctrl.equals(null));
+		assertFalse(ctrl.equals(this));
 	}
 	
 	@Test
@@ -229,10 +229,10 @@ public class SecurityHandlerFORTSTest {
 				.add(control.createMock(SecurityProperties.class));
 		Variant<?> iterator = vProps;
 		int foundCnt = 0;
-		SecurityHandlerFORTS x = null, found = null;
+		FORTSSecurityCtrl x = null, found = null;
 		do {
-			x = new SecurityHandlerFORTS(vTerm.get(), vSec.get(), vProps.get());
-			if ( handler.equals(x) ) {
+			x = new FORTSSecurityCtrl(vTerm.get(), vSec.get(), vProps.get());
+			if ( ctrl.equals(x) ) {
 				foundCnt ++;
 				found = x;
 			}

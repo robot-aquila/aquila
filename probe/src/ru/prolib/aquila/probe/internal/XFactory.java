@@ -27,10 +27,10 @@ public class XFactory {
 		return new EventQueueStarter(queue, timeout);
 	}
 	
-	public SecurityHandlerFORTS newSecurityHandlerFORTS(PROBETerminal terminal,
+	public FORTSSecurityCtrl newFORTSSecurityCtrl(PROBETerminal terminal,
 			EditableSecurity security, SecurityProperties properties)
 	{
-		return new SecurityHandlerFORTS(terminal, security, properties);
+		return new FORTSSecurityCtrl(terminal, security, properties);
 	}
 	
 	public TickDataDispatcher newTickDataDispatcher(Aqiterator<Tick> it,

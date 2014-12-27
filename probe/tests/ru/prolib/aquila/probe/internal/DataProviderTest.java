@@ -45,15 +45,15 @@ public class DataProviderTest {
 		Aqiterator<Tick> it = control.createMock(Aqiterator.class);
 		SecurityProperties props = control.createMock(SecurityProperties.class);
 		EditableSecurity es = terminal.getEditableSecurity(descr);
-		SecurityHandlerFORTS h = control.createMock(SecurityHandlerFORTS.class);
+		FORTSSecurityCtrl ctrl = control.createMock(FORTSSecurityCtrl.class);
 		TickDataDispatcher th = control.createMock(TickDataDispatcher.class);
 		DateTime time = DateTime.now();
 		locator.setDataStorage(ds);
 		locator.setTimeline(tl);
 		expect(ds.getIterator(descr, time)).andReturn(it);
 		expect(ds.getSecurityProperties(descr)).andReturn(props);
-		expect(x.newSecurityHandlerFORTS(terminal, es, props)).andReturn(h);
-		expect(x.newTickDataDispatcher(it, h)).andReturn(th);
+		expect(x.newFORTSSecurityCtrl(terminal, es, props)).andReturn(ctrl);
+		expect(x.newTickDataDispatcher(it, ctrl)).andReturn(th);
 		tl.registerSource(th);
 		control.replay();
 		

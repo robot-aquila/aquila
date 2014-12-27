@@ -50,12 +50,11 @@ public class XFactoryTest {
 		PROBETerminal terminal = control.createMock(PROBETerminal.class);
 		EditableSecurity security = control.createMock(EditableSecurity.class);
 		SecurityProperties props = control.createMock(SecurityProperties.class);
-		SecurityHandlerFORTS handler =
-				x.newSecurityHandlerFORTS(terminal, security, props);
-		assertNotNull(handler);
-		assertSame(terminal, handler.getTerminal());
-		assertSame(security, handler.getSecurity());
-		assertSame(props, handler.getSecurityProperties());
+		FORTSSecurityCtrl ctrl = x.newFORTSSecurityCtrl(terminal, security, props);
+		assertNotNull(ctrl);
+		assertSame(terminal, ctrl.getTerminal());
+		assertSame(security, ctrl.getSecurity());
+		assertSame(props, ctrl.getSecurityProperties());
 	}
 	
 	@SuppressWarnings("unchecked")

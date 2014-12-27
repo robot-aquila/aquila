@@ -39,7 +39,7 @@ public class DataProvider {
 		Aqiterator<Tick> it = ds.getIterator(descr, startTime);
 		SecurityProperties props = ds.getSecurityProperties(descr); 
 		EditableSecurity security = terminal.getEditableSecurity(descr);
-		TickHandler th = x.newSecurityHandlerFORTS(terminal, security, props);
+		TickHandler th = x.newFORTSSecurityCtrl(terminal, security, props);
 		locator.getTimeline().registerSource(x.newTickDataDispatcher(it, th));
 	}
 

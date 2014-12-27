@@ -59,11 +59,11 @@ import ru.prolib.aquila.probe.PROBETerminal;
  * специального метода провайдера данных.
  * <p>
  */
-public class SecurityHandlerFORTS implements TickHandler {
+public class FORTSSecurityCtrl implements TickHandler {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SecurityHandlerFORTS.class);
+		logger = LoggerFactory.getLogger(FORTSSecurityCtrl.class);
 	}
 	
 	private final BMUtils bmut = new BMUtils();
@@ -71,7 +71,7 @@ public class SecurityHandlerFORTS implements TickHandler {
 	private final EditableSecurity security;
 	private final SecurityProperties props;
 	
-	public SecurityHandlerFORTS(PROBETerminal terminal,
+	public FORTSSecurityCtrl(PROBETerminal terminal,
 			EditableSecurity security, SecurityProperties props)
 	{
 		super();
@@ -189,10 +189,10 @@ public class SecurityHandlerFORTS implements TickHandler {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != SecurityHandlerFORTS.class ) {
+		if ( other == null || other.getClass() != FORTSSecurityCtrl.class ) {
 			return false;
 		}
-		SecurityHandlerFORTS o = (SecurityHandlerFORTS) other;
+		FORTSSecurityCtrl o = (FORTSSecurityCtrl) other;
 		return new EqualsBuilder()
 			.append(o.security, security)
 			.append(o.terminal, terminal)
