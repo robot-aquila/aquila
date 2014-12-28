@@ -64,8 +64,12 @@ public class TLSStrategy {
 		DateTime poa = queue.getPOA();
 		Interval wp = queue.getInterval();
 		try {
-			if ( src.closed() || (event = src.pullEvent()) == null ) {
+			if ( src.closed() ) {
 				sources.removeSource(src);
+				logger.debug("Remove event source (closed): {}", src);
+			} else if ( (event = src.pullEvent()) == null ) {
+				sources.removeSource(src);
+				logger.debug("Remove event source (gave null event): {}", src);
 			} else if ( wp.contains(event.getTime()) ) {
 				queue.pushEvent(event);
 				if ( poa.compareTo(event.getTime()) < 0 ) {

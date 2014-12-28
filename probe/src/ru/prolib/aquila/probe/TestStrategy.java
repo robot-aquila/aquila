@@ -81,6 +81,7 @@ public class TestStrategy implements TerminalObserver, EventListener {
 
 	@Override
 	public void onEvent(Event event) {
+		logger.debug("onEvent: {}", event);
 		if ( event.isType(terminal.OnSecurityAvailable()) ) {
 			SecurityEvent e = (SecurityEvent) event;
 			if ( e.getSecurity().getDescriptor().equals(descr) ) {

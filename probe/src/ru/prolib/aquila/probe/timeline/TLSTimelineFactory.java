@@ -38,8 +38,9 @@ public class TLSTimelineFactory {
 		tr.put(new KW<SMExit>(run.getExit(TLASRun.EPAUSE)), pause);
 		tr.put(new KW<SMExit>(finish.getExit(TLASFinish.EOK)), SMState.FINAL);
 	
-		Thread thread = new Thread(new TLSThreadWorker(started, timeline,
-				new SMStateMachine(pause, tr)));
+		SMStateMachine sm = new SMStateMachine(pause, tr);
+		sm.setDebug(true);
+		Thread thread = new Thread(new TLSThreadWorker(started, timeline, sm));
 		thread.setDaemon(true);
 		thread.start();
 		try {
