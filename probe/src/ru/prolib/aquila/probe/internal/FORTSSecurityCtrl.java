@@ -1,6 +1,7 @@
 package ru.prolib.aquila.probe.internal;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +67,76 @@ public class FORTSSecurityCtrl implements TickHandler {
 		logger = LoggerFactory.getLogger(FORTSSecurityCtrl.class);
 	}
 	
+	public static class EveningClearing implements Runnable {
+		private final FORTSSecurityCtrl ctrl;
+		
+		public EveningClearing(FORTSSecurityCtrl ctrl) {
+			super();
+			this.ctrl = ctrl;
+		}
+
+		@Override
+		public void run() {
+			ctrl.eveningClearing();
+		}
+		
+		@Override
+		public String toString() {
+			return ctrl.toString() + "." + getClass().getSimpleName();
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != getClass() ) {
+				return false;
+			}
+			EveningClearing o = (EveningClearing) other;
+			return ctrl == o.ctrl;
+		}
+		
+	}
+	
+	public static class ForTick implements Runnable {
+		private final FORTSSecurityCtrl ctrl;
+		private final Tick data;
+		
+		public ForTick(FORTSSecurityCtrl ctrl, Tick data) {
+			super();
+			this.ctrl = ctrl;
+			this.data = data;
+		}
+
+		@Override
+		public void run() {
+			ctrl.onTick(data);
+		}
+		
+		@Override
+		public String toString() {
+			return ctrl.toString()
+					+ "." + getClass().getSimpleName() + "{" + data + "}";
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != getClass() ) {
+				return false;
+			}
+			ForTick o = (ForTick) other;
+			return new EqualsBuilder()
+				.append(ctrl, o.ctrl)
+				.append(data, o.data)
+				.isEquals();
+		}
+		
+	}
+	
 	private final BMUtils bmut = new BMUtils();
 	private final PROBETerminal terminal;
 	private final EditableSecurity security;
@@ -122,37 +193,25 @@ public class FORTSSecurityCtrl implements TickHandler {
 	public void doFinalTask(Tick lastTick) {
 
 	}
-
+	
 	@Override
 	public void doDailyTask(Tick prevDateTick, Tick nextDateTick) {
-		terminal.schedule(new Runnable() {
-			@Override public void run() {
-				eveningClearing();
-			}
-			@Override public String toString() {
-				return "clearing"; // TODO:
-			}
-			}, nextDateTick.getTime().withTime(18, 55, 0, 0));
+		DateTime dummy = nextDateTick.getTime(),
+				x = dummy.withTime(18, 55, 0, 0);
+		if ( ! dummy.isBefore(x) ) x = x.plusDays(1);
+		terminal.schedule(new EveningClearing(this), x);
 	}
 	
 	@Override
 	public Runnable createTask(final Tick tick) {
-		logger.debug("createTask for {}", tick);
-		return new Runnable() {
-			@Override public void run() {
-				onEachTick(tick);
-			}
-			@Override public String toString() {
-				return "eachTick"; // TODO: 
-			}
-		};
+		return new ForTick(this, tick);
 	}
 
 	/**
-	 * Вечерний клиринг.
+	 * Симуляция вечернего клиринга.
 	 * <p>
 	 */
-	private void eveningClearing() {
+	public void eveningClearing() {
 		// TODO: вернуть ГО на баланс
 		// TODO: пересчитать вариационку и перевести ее на баланс
 		security.setClosePrice(security.getLastPrice());
@@ -169,7 +228,7 @@ public class FORTSSecurityCtrl implements TickHandler {
 	 * <p>
 	 * @param tick тик данных
 	 */
-	private void onEachTick(Tick tick) {
+	public void onTick(Tick tick) {
 		double price = tick.getValue();
 		if ( security.getOpenPrice() == null ) {
 			security.setOpenPrice(price);
@@ -225,6 +284,11 @@ public class FORTSSecurityCtrl implements TickHandler {
 	 */
 	public SecurityProperties getSecurityProperties() {
 		return props;
+	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "{" + security.getDescriptor() + "}";
 	}
 
 }

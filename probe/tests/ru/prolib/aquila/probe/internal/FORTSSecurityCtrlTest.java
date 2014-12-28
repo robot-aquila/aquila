@@ -20,6 +20,8 @@ import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.probe.PROBETerminal;
+import ru.prolib.aquila.probe.internal.FORTSSecurityCtrl.EveningClearing;
+import ru.prolib.aquila.probe.internal.FORTSSecurityCtrl.ForTick;
 
 public class FORTSSecurityCtrlTest {
 	private static SecurityDescriptor descr;
@@ -111,25 +113,57 @@ public class FORTSSecurityCtrlTest {
 	}
 	
 	@Test
-	public void testDoDailyTask() throws Exception {
-		final List<Runnable> tmp = new Vector<Runnable>();
-		DateTime expected = new DateTime(2014, 11, 18, 18, 55, 0, 0);
-		expect(scheduler.schedule(anyObject(Runnable.class), eq(expected)))
-			.andDelegateTo(new SchedulerLocal() {
-				@Override public TaskHandler schedule(Runnable r, DateTime t) {
-					tmp.add(r);
-					return null;
-				}
-		});
+	public void testDoDailyTask_TickBeforeEveningClearing() throws Exception {
+		expect(scheduler.schedule(
+					eq(new FORTSSecurityCtrl.EveningClearing(ctrl)),
+					eq(new DateTime(2014, 11, 18, 18, 55, 0, 0))))
+				.andReturn(null);
 		control.replay();
 		terminal.setScheduler(scheduler);
-		security.setLastPrice(112590d); // Используется как цена закрытия сессии
 		
-		ctrl.doDailyTask(null,
-				new Tick(new DateTime(2014, 11, 18, 15, 34, 29, 0), 138940d));
+		ctrl.doDailyTask(null, // not used
+				new Tick(new DateTime(2014, 11, 18, 15, 34, 29, 0), 0d));
 		
 		control.verify();
-		tmp.get(0).run();
+	}
+	
+	@Test
+	public void testDoDailyTask_TickAtEveningClearing() throws Exception {
+		expect(scheduler.schedule(
+					eq(new FORTSSecurityCtrl.EveningClearing(ctrl)),
+					eq(new DateTime(2014, 11, 19, 18, 55, 0, 0))))
+				.andReturn(null);
+		control.replay();
+		terminal.setScheduler(scheduler);
+		
+		ctrl.doDailyTask(null, // not used
+				new Tick(new DateTime(2014, 11, 18, 18, 55, 0, 0), 0d));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testDoDailyTask_TickAfterEveningClearing() throws Exception {
+		expect(scheduler.schedule(
+					eq(new FORTSSecurityCtrl.EveningClearing(ctrl)),
+					eq(new DateTime(2014, 11, 19, 18, 55, 0, 0))))
+				.andReturn(null);
+		control.replay();
+		terminal.setScheduler(scheduler);
+		
+		ctrl.doDailyTask(null, // not used
+				new Tick(new DateTime(2014, 11, 18, 23, 19, 48, 354), 0d));
+		
+		control.verify();
+	}
+
+	
+	@Test
+	public void testEveningClearing() throws Exception {
+		security.setLastPrice(112590d); // Используется как цена закрытия сессии
+		
+		ctrl.eveningClearing();
+		
 		assertEquals(112590d, security.getClosePrice(), 0.01d);
 		assertNull(security.getHighPrice());
 		assertNull(security.getLowPrice());
@@ -141,6 +175,12 @@ public class FORTSSecurityCtrlTest {
 	
 	@Test
 	public void testCreateTask() throws Exception {
+		Tick tick = new Tick(DateTime.now(), 824d);
+		assertEquals(new ForTick(ctrl, tick), ctrl.createTask(tick));
+	}
+	
+	@Test
+	public void testOnTick() throws Exception {
 		ctrl.doInitialTask(new Tick(null, 120140d));
 		DateTime time = DateTime.now();
 		Trade expTrade = ut.tradeFromTick(new Tick(time, 119540d, 120d), security); 
@@ -158,7 +198,7 @@ public class FORTSSecurityCtrlTest {
 		security.OnChanged().addListener(listener);
 		security.OnTrade().addListener(listener);
 		
-		ctrl.createTask(new Tick(time, 119540d, 120d)).run();
+		ctrl.onTick(new Tick(time, 119540d, 120d));
 		
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		assertEquals(expected, actual);
@@ -171,13 +211,13 @@ public class FORTSSecurityCtrlTest {
 	}
 	
 	@Test
-	public void testCreateTask_IfOpenPriceUndefined() throws Exception {
+	public void testOnTick_IfOpenPriceUndefined() throws Exception {
 		security.setMinStepSize(10d);
 		security.setMinStepPrice(1d);
 		security.setHighPrice(112000d);
 		security.setLowPrice(111000d);
 		
-		ctrl.createTask(new Tick(DateTime.now(), 115240d, 10d)).run();
+		ctrl.onTick(new Tick(DateTime.now(), 115240d, 10d));
 		
 		assertEquals(115240d, security.getOpenPrice(), 0.1d);
 		assertEquals(115240d, security.getHighPrice(), 0.1d);
@@ -185,19 +225,19 @@ public class FORTSSecurityCtrlTest {
 	}
 	
 	@Test
-	public void testCreateTask_UpdatesHigh() throws Exception {
+	public void testOnTick_UpdatesHigh() throws Exception {
 		security.setMinStepSize(10d);
 		security.setMinStepPrice(1d);
 		ctrl.doInitialTask(new Tick(null, 120140d));
 		
-		ctrl.createTask(new Tick(DateTime.now(), 135240d, 10d)).run();
+		ctrl.onTick(new Tick(DateTime.now(), 135240d, 10d));
 		
 		assertEquals(135240d, security.getHighPrice(), 1d);
 		assertEquals(120140d, security.getLowPrice(), 1d);
 	}
 	
 	@Test
-	public void testCreateTask_UpdatesLow() throws Exception {
+	public void testOnTick_UpdatesLow() throws Exception {
 		security.setMinStepSize(10d);
 		security.setMinStepPrice(1d);
 		ctrl.doInitialTask(new Tick(null, 120140d));
@@ -241,6 +281,93 @@ public class FORTSSecurityCtrlTest {
 		assertSame(terminal, found.getTerminal());
 		assertSame(security, found.getSecurity());
 		assertSame(props, found.getSecurityProperties());
+	}
+	
+	@Test
+	public void testToString() throws Exception {
+		String expected = ctrl.getClass().getSimpleName() + "{" + descr + "}";
+		assertEquals(expected, ctrl.toString());
+	}
+	
+	@Test
+	public void testEveningClearing_run() throws Exception {
+		FORTSSecurityCtrl ctrl = control.createMock(FORTSSecurityCtrl.class);
+		ctrl.eveningClearing();
+		control.replay();
+		
+		new EveningClearing(ctrl).run();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testEveningClearing_ToString() throws Exception {
+		EveningClearing delegate = new EveningClearing(ctrl);
+		String expected = ctrl.toString() + ".EveningClearing";
+		assertEquals(expected, delegate.toString());
+	}
+	
+	@Test
+	public void testEventClearing_Equals() throws Exception {
+		FORTSSecurityCtrl ctrl2 = control.createMock(FORTSSecurityCtrl.class);
+		EveningClearing delegate1 = new EveningClearing(ctrl),
+				delegate2 = new EveningClearing(ctrl),
+				delegate3 = new EveningClearing(ctrl2);
+		
+		assertFalse(delegate1.equals(null));
+		assertFalse(delegate1.equals(this));
+		assertFalse(delegate1.equals(delegate3));
+		assertEquals(delegate1, delegate1);
+		assertEquals(delegate1, delegate2);
+	}
+	
+	@Test
+	public void testForTick_run() throws Exception {
+		Tick tick = new Tick(new DateTime(2014, 12, 28, 2, 23, 8, 0), 114d);
+		FORTSSecurityCtrl ctrl = control.createMock(FORTSSecurityCtrl.class);
+		ctrl.onTick(eq(tick));
+		control.replay();
+		
+		new ForTick(ctrl, tick).run();
+		
+		control.verify();
+	}
+
+	@Test
+	public void testForTick_ToString() throws Exception {
+		Tick tick = new Tick(new DateTime(2014, 12, 28, 2, 23, 8, 0), 114d);
+		ForTick delegate = new ForTick(ctrl, tick);
+		String expected = ctrl.toString() + ".ForTick{" + tick + "}";
+		assertEquals(expected, delegate.toString());
+	}
+	
+	@Test
+	public void testForTick_Equals() throws Exception {
+		Tick tick1 = new Tick(new DateTime(2014, 12, 28, 2, 23, 8, 0), 114d),
+			 tick2 = new Tick(new DateTime(2015,  1, 14, 2, 23, 8, 0), 229d);
+		FORTSSecurityCtrl ctrl2 = control.createMock(FORTSSecurityCtrl.class);
+		Variant<FORTSSecurityCtrl> vCtrl = new Variant<FORTSSecurityCtrl>()
+				.add(ctrl)
+				.add(ctrl2);
+		Variant<Tick> vTick = new Variant<Tick>(vCtrl)
+				.add(tick1)
+				.add(tick2);
+		Variant<?> iterator = vTick;
+		ForTick x, found = null, expected = new ForTick(ctrl, tick1);
+		int foundCnt = 0;
+		do {
+			x = new ForTick(vCtrl.get(), vTick.get());
+			if ( expected.equals(x) ) {
+				found = x;
+				foundCnt ++;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals(expected, found);
+		// special cases
+		assertEquals(expected, expected);
+		assertFalse(expected.equals(null));
+		assertFalse(expected.equals(this));
 	}
 
 }
