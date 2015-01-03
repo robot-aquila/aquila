@@ -76,9 +76,12 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 		
         setSize(800, 600);
         
+        JPanel inp = new JPanel();
+        inp.setLayout(new BorderLayout());
         fastOrder = new FastOrderPanel(terminal);
-        getContentPane().add(fastOrder, BorderLayout.NORTH);
-        getContentPane().add(tabPanel, BorderLayout.CENTER);
+        inp.add(fastOrder, BorderLayout.NORTH);
+        inp.add(tabPanel, BorderLayout.CENTER);
+        getContentPane().add(inp, BorderLayout.CENTER);
         
         terminalStatusBar = new TerminalStatusBar(uiLabels.get(TERMINAL_STATUS_SECT));
 		portfolioStatusBar = new PortfolioDataPanel(currPortfolio, uiLabels);
