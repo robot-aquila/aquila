@@ -111,23 +111,23 @@ public class SelectTargetTimeDialog extends JDialog
 				okButton = new JButton(messages.get(OK));
 				okButton.setActionCommand(OK);
 				okButton.addActionListener(this);
-				getRootPane().setDefaultButton(okButton);
 			}
 			buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 			buttonPane.add(cancelButton);
 			buttonPane.add(okButton);
 		}
+		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		getRootPane().setDefaultButton(okButton);
+		pack();
 	}
 
 	@Override
 	public DateTime showDialog(DateTime initialTime) {
 		selectedTime = null;
-		lblCurrentTimeValue.setText(format.format(initialTime.toDate()));
-		Date startTime = initialTime.plus(1).toDate();
-		spinner.setValue(startTime);
-		spinnerData.setStart(startTime);
-		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		pack();
+		Date j_startTime = initialTime.toDate();
+		lblCurrentTimeValue.setText(format.format(j_startTime));
+		spinner.setValue(j_startTime);
+		spinnerData.setStart(j_startTime);
 		setVisible(true);
 		return selectedTime;
 	}
@@ -135,11 +135,13 @@ public class SelectTargetTimeDialog extends JDialog
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if ( e.getActionCommand().equals(OK) ) {
-			selectedTime = new DateTime(spinner.getValue());
-			setVisible(false);
-		} else if ( e.getActionCommand().equals(CANCEL) ) {
-			setVisible(false);
+			Date j_selected = (Date) spinner.getValue(),
+					j_start = (Date) spinnerData.getStart();
+			if ( j_selected.compareTo(j_start) > 0 ) {
+				selectedTime = new DateTime(spinner.getValue());	
+			}
 		}
+		setVisible(false);
 	}
 
 }
