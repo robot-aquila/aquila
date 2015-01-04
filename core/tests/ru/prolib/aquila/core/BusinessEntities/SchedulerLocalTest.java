@@ -10,6 +10,10 @@ import org.junit.*;
 public class SchedulerLocalTest {
 	private IMocksControl control;
 	private SchedulerLocal scheduler;
+	/**
+	 * The scheduler instance for integration testing.
+	 */
+	private SchedulerLocal scheduler_4it;
 	private Runnable task;
 	private DateTime time = new DateTime(2013, 10, 9, 14, 12, 47);
 	private Timer timer;
@@ -23,6 +27,7 @@ public class SchedulerLocalTest {
 		task = control.createMock(Runnable.class);
 		pool = control.createMock(SchedulerLocal_Pool.class);
 		scheduler = new SchedulerLocal(timer, pool);
+		scheduler_4it = new SchedulerLocal();
 		tt = new SchedulerLocal_TimerTask(task, scheduler);
 	}
 	
@@ -181,5 +186,45 @@ public class SchedulerLocalTest {
 		
 		control.verify();
 	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testSchedule_TD_ThrowsIfTaskDuplicated() throws Exception {
+		scheduler_4it.schedule(task, DateTime.now().plus(2000));
+		scheduler_4it.schedule(task, DateTime.now().plus(3000));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testSchedule_TDL_ThrowsIfTaskDuplicated() throws Exception {
+		scheduler_4it.schedule(task, DateTime.now().plus(800), 2000L);
+		scheduler_4it.schedule(task, DateTime.now().plus(100), 4000L);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testSchedule_TL_ThrowsIfTaskDuplicated() throws Exception {
+		scheduler_4it.schedule(task, 4500);
+		scheduler_4it.schedule(task, 8100);
+	}
 
+	@Test (expected=IllegalArgumentException.class)
+	public void testSchedule_TLL_ThrowsIfTaskDuplicated() throws Exception {
+		scheduler_4it.schedule(task, 800, 5000);
+		scheduler_4it.schedule(task, 740, 2900);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testScheduleAtFixedRate_TDL_ThrowsIfTaskDuplicated()
+			throws Exception
+	{
+		scheduler_4it.scheduleAtFixedRate(task, DateTime.now().plus(100), 800);
+		scheduler_4it.scheduleAtFixedRate(task, DateTime.now().plus(600), 200);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testScheduleAtFixedRate_TLL_ThrowsIfTaskDuplicated()
+			throws Exception
+	{
+		scheduler_4it.scheduleAtFixedRate(task,  4500, 1200);
+		scheduler_4it.scheduleAtFixedRate(task,  8241, 1882);
+	}
+	
 }
