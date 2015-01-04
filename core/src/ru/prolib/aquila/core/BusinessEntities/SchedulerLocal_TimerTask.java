@@ -44,10 +44,10 @@ class SchedulerLocal_TimerTask extends TimerTask {
 
 	@Override
 	public void run() {
-		task.run();
 		if ( scheduler != null ) {
 			scheduler.cancel(task);
 		}
+		task.run();
 	}
 	
 	/**

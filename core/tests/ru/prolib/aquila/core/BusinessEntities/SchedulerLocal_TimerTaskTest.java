@@ -27,8 +27,8 @@ public class SchedulerLocal_TimerTaskTest {
 	
 	@Test
 	public void testRun_AutoClear() throws Exception {
-		task.run();
 		scheduler.cancel(same(task));
+		task.run();
 		control.replay();
 		
 		timerTask1.run();
