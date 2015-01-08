@@ -36,7 +36,7 @@ public class PortfolioStatusBar extends JPanel implements PortfolioStatusBarView
 	@Override
 	public void updateDisplayData(final Portfolio portfolio) {
 		if ( SwingUtilities.isEventDispatchThread() ) {
-			accountVal.setValue(String.format("%-40s",portfolio.getAccount()));
+			accountVal.setValue(String.format("%-40s", portfolio.getAccount()));
 			cashVal.setValue(String.format("%20.2f", portfolio.getCash()));
 			balanceVal.setValue(String.format("%20.2f", portfolio.getBalance()));
 			Double vm = portfolio.getVariationMargin();
