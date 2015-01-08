@@ -19,7 +19,7 @@ public class PortfoliosTableModel extends AbstractTableModel
 	implements EventListener, Starter
 {
 	private static final long serialVersionUID = -5756493335060286251L;
-	private static Logger logger = LoggerFactory.getLogger(PortfolioDataPanel.class);
+	private static Logger logger = LoggerFactory.getLogger(PortfolioStatusBar.class);
 	private static final String COL_ACCOUNT = "Account";
 	private static final String COL_CASH = "Cash";
 	private static final String[] header = {

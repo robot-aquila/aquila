@@ -48,8 +48,8 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 	private JPanel statusBar = new JPanel();
 	
 	private TerminalStatusBar terminalStatusBar;
-	private PortfolioDataPanel portfolioStatusBar;
-	private CurrentPortfolio currPortfolio;
+	private PortfolioStatusBar portfolioStatusBar;
+	private CurrentPortfolio portfolioSelector;
 	
 	private final JTabbedPane tabPanel = new JTabbedPane();	
 	
@@ -70,7 +70,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 		UiTexts uiLabels = facade.getTexts();
 		
 		EventDispatcher dispatcher = es.createEventDispatcher(); 
-		currPortfolio = new CurrentPortfolioImpl(
+		portfolioSelector = new CurrentPortfolioImpl(
 				terminal, dispatcher.createType(), dispatcher,
 				mainMenu.getMenu(MENU_VIEW).getSubMenu(MENU_VIEW_PORTFOLIO_STATUS));
 		
@@ -84,7 +84,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
         getContentPane().add(inp, BorderLayout.CENTER);
         
         terminalStatusBar = new TerminalStatusBar(uiLabels.get(TERMINAL_STATUS_SECT));
-		portfolioStatusBar = new PortfolioDataPanel(currPortfolio, uiLabels);
+		portfolioStatusBar = new PortfolioStatusBar(uiLabels);
         
         statusBar.setLayout(new FlowLayout());
         statusBar.add(terminalStatusBar);
@@ -95,6 +95,9 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
         terminal.OnStopped().addListener(this);
 		terminal.OnConnected().addListener(this);
         terminal.OnDisconnected().addListener(this);
+        terminal.OnPortfolioAvailable().addListener(this);
+        terminal.OnPortfolioChanged().addListener(this);
+        portfolioSelector.OnCurrentPortfolioChanged().addListener(this);
 	}
 	
 	public void startTerminal() {
@@ -140,6 +143,15 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 			
 		} else if ( event.isType(cmdStop.OnCommand()) ) {
 			stopTerminal();
+			
+		} else if ( event.isType(terminal.OnPortfolioAvailable())
+				|| event.isType(terminal.OnPortfolioChanged())
+				|| event.isType(portfolioSelector.OnCurrentPortfolioChanged()) )
+		{
+			Portfolio p = portfolioSelector.getCurrentPortfolio();
+			if ( p == ((PortfolioEvent)event).getPortfolio() ) {
+				portfolioStatusBar.updateDisplayData(p);
+			}
 			
 		} else {
 			event.getType().removeListener(this);
@@ -189,6 +201,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 	@Override
 	public void start() throws StarterException {
 		setVisible(true);
+		portfolioSelector.start();
 		fastOrder.start();
 		startTerminal();
 	}
@@ -197,11 +210,12 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 	public void stop() throws StarterException {
 		stopTerminal();
 		fastOrder.stop();
+		portfolioSelector.stop();
 		dispose();
 	}
 	
 	public CurrentPortfolio getCurrPortfolio() {
-		return currPortfolio;
+		return portfolioSelector;
 	}
 	
 	public JTabbedPane getTabPanel() {

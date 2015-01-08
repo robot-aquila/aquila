@@ -77,7 +77,7 @@ public class MainFrameTest {
 		
 		IsInstanceOf.instanceOf(CurrentPortfolioImpl.class).
 			matches(main.getCurrPortfolio());
-		IsInstanceOf.instanceOf(PortfolioDataPanel.class).
+		IsInstanceOf.instanceOf(PortfolioStatusBar.class).
 			matches(main.getContentPane().getComponent(0));
 		assertEquals(main.getTabPanel(), main.getContentPane().getComponent(0));		
 		//assertEquals(main.getStatus(), main.getContentPane().getComponent(1));

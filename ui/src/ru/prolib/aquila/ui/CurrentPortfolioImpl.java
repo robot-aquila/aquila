@@ -35,7 +35,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	}
 	
 	@Override
-	public Portfolio getCurrentPortfolio() {		
+	public Portfolio getCurrentPortfolio() {
 		return portfolio;
 	}
 
