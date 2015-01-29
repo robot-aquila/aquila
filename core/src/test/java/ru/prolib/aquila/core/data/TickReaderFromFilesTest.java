@@ -43,12 +43,15 @@ public class TickReaderFromFilesTest {
 	
 	@Test
 	public void testClose_ClosesCurrentReader() throws Exception {
+		File dummy;
 		List<File> list = new Vector<File>();
-		list.add(new File("/home/work/1.csv"));
-		list.add(new File("/home/work/2.csv"));
+		list.add(dummy = new File("./home/work/1.csv"));
+		list.add(new File("./home/work/2.csv"));
 		reader = new TickReaderFromFiles(new SimpleIterator<File>(list), factory);
 		
-		expect(factory.createTickReader(eq("/home/work/1.csv"))).andReturn(ticks);
+		// to work under windows and linux
+		expect(factory.createTickReader(eq(dummy.getAbsolutePath().toString())))
+			.andReturn(ticks);
 		expect(ticks.next()).andReturn(true);
 		ticks.close();
 		control.replay();

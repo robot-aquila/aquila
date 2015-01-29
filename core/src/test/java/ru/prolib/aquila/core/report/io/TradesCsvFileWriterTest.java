@@ -146,9 +146,10 @@ public class TradesCsvFileWriterTest {
 		loadTrades(report, "csv-writer-trades.csv");
 		queue.stop();
 		assertTrue(queue.join(2000L));
-		
-		String expected = readFile("csv-writer-report.csv");
-		String actual = readFile(target);
+
+		// to be done under linux and windows
+		String expected = readFile("csv-writer-report.csv").replaceAll("\r", "");
+		String actual = readFile(target).replaceAll("\r", "");
 		
 		assertEquals(expected, actual);
 	}

@@ -55,7 +55,8 @@ public class FileEntryTest {
 	
 	@Test
 	public void testToString() {
-		assertEquals("FileEntry[date=2014-10-21 file=/foo/bar]", e1.toString());
+		assertEquals("FileEntry[date=2014-10-21 file="
+				+ new File("/foo/bar") + "]", e1.toString());
 	}
 
 }
