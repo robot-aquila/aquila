@@ -7,6 +7,7 @@ import org.easymock.IMocksControl;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
@@ -64,6 +65,7 @@ public class UISecuritiesPluginTest {
 	 * Test method for {@link ru.prolib.aquila.ui.plugin.UISecuritiesPlugin#createUI(ru.prolib.aquila.ui.AquilaUI)}.
 	 */
 	@Test
+	@Ignore
 	public void testCreateUI() {
 		fail("Not yet implemented"); // TODO
 	}

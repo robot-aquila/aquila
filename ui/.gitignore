@@ -1,4 +1,4 @@
-.classpath
 .project
-bin/
-javadoc/
+.settings/
+.classpath
+target/
