@@ -3,8 +3,11 @@ package ru.prolib.aquila.core.data;
 import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.SimpleDateFormat;
+import java.io.FileWriter;
+import java.text.ParseException;
 import org.joda.time.*;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.*;
 
 import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
@@ -14,12 +17,12 @@ import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
  * $Id: FinamTest.java 565 2013-03-10 19:32:12Z whirlwind $
  */
 public class FinamTest {
-	private static SimpleDateFormat df;
+	private static DateTimeFormatter df;
 	private static Finam finam;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		df = new SimpleDateFormat("yyyyMMddHHmmss");
+		df = DateTimeFormat.forPattern("yyyyMMddHHmmss");
 		finam = new Finam();
 	}
 
@@ -36,7 +39,7 @@ public class FinamTest {
 		};
 		EditableCandleSeries expected = new CandleSeriesImpl(Timeframe.M5);
 		for ( int i = 0; i < fix.length; i ++ ) {
-			DateTime time = new DateTime(df.parse((String) fix[i][0]));
+			DateTime time = df.parseDateTime((String) fix[i][0]);
 			expected.add(new Candle(Timeframe.M5.getInterval(time),
 					(Double) fix[i][1], (Double) fix[i][2],
 					(Double) fix[i][3], (Double) fix[i][4],
@@ -59,7 +62,7 @@ public class FinamTest {
 		};
 		EditableCandleSeries expected = new CandleSeriesImpl(Timeframe.M5);
 		for ( int i = 0; i < fix.length; i ++ ) {
-			DateTime time = new DateTime(df.parse((String) fix[i][0]));
+			DateTime time = df.parseDateTime((String) fix[i][0]);
 			expected.add(new Candle(Timeframe.M5.getInterval(time),
 					(Double) fix[i][1], (Double) fix[i][2],
 					(Double) fix[i][3], (Double) fix[i][4], 0L));
@@ -74,6 +77,7 @@ public class FinamTest {
 	@Test
 	public void testCreateWriter() throws Exception {
 		File file = File.createTempFile("finam-", ".csv");
+		file.deleteOnExit();
 		EditableCandleSeries candles = new CandleSeriesImpl(Timeframe.M5);
 		
 		CandlesWriter expected = new Quote2CsvWriter(candles, file);
@@ -106,6 +110,84 @@ public class FinamTest {
 			throws Exception
 	{
 		finam.createTickReader(null);
+	}
+	
+	@Test
+	public void testParseDateTime() throws Exception {
+		DateTime expected = new DateTime(2015, 1, 29, 8, 52, 38);
+		DateTime actual = Finam.parseDateTime("20150129", "085238");
+		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=ParseException.class)
+	public void testParseDateTime_ThrowsIfBadDateFormat() throws Exception {
+		Finam.parseDateTime("xxx", "085238");
+	}
+	
+	@Test (expected=ParseException.class)
+	public void testParseDateTime_ThrowsIfBadTimeFormat() throws Exception {
+		Finam.parseDateTime("20150129", "xxx");
+	}
+
+	/**
+	 * Тест багфикса парсинга, когда парсинг 2014-12-04 10:00:00 давал
+	 * 2014-12-04 11:00:00, то есть добавлялся час откуда-то.
+	 * Этот баг проявился на jdk 1.7.
+	 * См. {@link #testLoadCandles_2014_12_04_10_00_00_Bugfix()} 
+	 * @throws Exception
+	 */
+	@Test
+	public void testParseDateTime_2014_12_04_10_00_00_Bugfix()
+			throws Exception
+	{
+		DateTime expected = new DateTime(2014, 12, 4, 10, 0, 0);
+		DateTime actual = Finam.parseDateTime("20141204", "100000");
+		assertEquals(expected, actual);
+	}
+
+	
+	@Test (expected=ParseException.class)
+	public void testLoadCandles_ThrowsIfBadDateFormat() throws Exception {
+		File file = File.createTempFile("finam-", ".csv");
+		file.deleteOnExit();
+		FileWriter writer = new FileWriter(file);
+		writer.write("<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOL>\n");
+		writer.write("20141204,100000,0,0,0,0,0\n");
+		writer.write("xxxxxxxx,110002,0,0,0,0,0\n");
+		writer.close();
+		
+		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		finam.loadCandles(file, actual);
+	}
+	
+	@Test (expected=ParseException.class)
+	public void testLoadCandles_ThrowsIfBadTimeFormat() throws Exception {
+		File file = File.createTempFile("finam-", ".csv");
+		file.deleteOnExit();
+		FileWriter writer = new FileWriter(file);
+		writer.write("<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOL>\n");
+		writer.write("20141204,100000,0,0,0,0,0\n");
+		writer.write("20141204,xxxxxx,0,0,0,0,0\n");
+		writer.close();
+		
+		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		finam.loadCandles(file, actual);
+	}
+	
+	@Test
+	public void testLoadCandles_2014_12_04_10_00_00_Bugfix() throws Exception {
+		File file = File.createTempFile("finam-", ".csv");
+		file.deleteOnExit();
+		FileWriter writer = new FileWriter(file);
+		writer.write("<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOL>\n");
+		writer.write("20141204,100001,0,0,0,0,0\n");
+		writer.write("20141204,110002,0,0,0,0,0\n");
+		writer.close();
+		
+		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		finam.loadCandles(file, actual);
+		assertEquals(df.parseDateTime("20141204100000"), actual.get(0).getStartTime());
+		assertEquals(df.parseDateTime("20141204110000"), actual.get(1).getStartTime());
 	}
 
 }

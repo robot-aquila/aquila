@@ -2,7 +2,6 @@ package ru.prolib.aquila.core.data.finam;
 
 import java.io.IOException;
 import java.text.ParseException;
-import org.joda.time.DateTime;
 import ru.prolib.aquila.core.data.*;
 import com.csvreader.CsvReader;
 
@@ -37,15 +36,16 @@ public class CsvTickReader implements Aqiterator<Tick> {
 				close();
 				return false;
 			}
-			curr = new Tick(new DateTime(Finam.df.parse(reader.get(Finam.DATE)
-					+ " " + reader.get(Finam.TIME))),
+			curr = new Tick(
+				Finam.parseDateTime(reader.get(Finam.DATE),
+									reader.get(Finam.TIME)),
 				Double.parseDouble(reader.get(Finam.LAST)),
 				Double.parseDouble(reader.get(Finam.VOLUME)));
 			return true;
 		} catch ( ParseException e ) {
 			throw new DataException(e);
 		} catch ( IOException e ) {
-			throw new DataException(e);			
+			throw new DataException(e);	
 		}
 	}
 	

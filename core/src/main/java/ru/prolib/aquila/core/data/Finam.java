@@ -2,11 +2,12 @@ package ru.prolib.aquila.core.data;
 
 import java.io.*;
 import java.text.*;
-import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.csvreader.CsvReader;
 
@@ -29,9 +30,30 @@ public class Finam {
 	public static final String CLOSE = "<CLOSE>";
 	public static final String VOLUME = "<VOL>";
 	public static final String LAST = "<LAST>";
-	private static final String TIMEFORMAT = "yyyyMMdd HHmmss";
-	public static SimpleDateFormat df = new SimpleDateFormat(TIMEFORMAT);
+	private static final DateTimeFormatter df;
 	
+	static {
+		df = DateTimeFormat.forPattern("yyyyMMdd HHmmss");
+	}
+	
+	/**
+	 * Получить временную метку из его строкового представления в формате FINAM.
+	 * <p>
+	 * @param date строковое представление даты
+	 * @param time строковое представление времени
+	 * @return временная метка
+	 * @throws ParseException некорректный формат даты или времени
+	 */
+	public static DateTime parseDateTime(String date, String time)
+			throws ParseException
+	{
+		try {
+			return df.parseDateTime(date + " " + time);
+		} catch ( IllegalArgumentException e ) {
+			throw new ParseException(e.getMessage(), 0);
+		}
+	}
+
 	/**
 	 * Загрузить свечи из CSV-файла.
 	 * <p>
@@ -57,9 +79,10 @@ public class Finam {
 			} else {
 				volume = 0L;				
 			}
-			Date time = df.parse(rs.get(DATE) + " " + rs.get(TIME));
 			candles.add(new Candle(
-				tf.getInterval(new DateTime(time)),
+				tf.getInterval(parseDateTime(
+						rs.get(DATE).toString(),
+						rs.get(TIME).toString())),
 				Double.parseDouble((String) rs.get(OPEN)),
 				Double.parseDouble((String) rs.get(HIGH)),
 				Double.parseDouble((String) rs.get(LOW)),
