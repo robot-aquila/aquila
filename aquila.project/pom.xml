@@ -4,11 +4,10 @@
 	<groupId>ru.prolib</groupId>
 	<artifactId>aquila</artifactId>
 	<packaging>pom</packaging>
-	<version>${aquila.version}</version>
+	<version>0.1.40-SNAPSHOT</version>
   
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<aquila.version>0.1.40-SNAPSHOT</aquila.version>
 	</properties>
 
 	<modules>
@@ -38,8 +37,8 @@
 	</dependencies>
   
     <build>
-  		<plugins>
-			<plugin>
+	<plugins>
+		<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
