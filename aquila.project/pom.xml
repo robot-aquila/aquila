@@ -13,6 +13,7 @@
 	<modules>
 		<module>../core</module>
 		<module>../ui</module>
+		<module>../probe</module>
 	</modules>
   
 	<dependencies>
