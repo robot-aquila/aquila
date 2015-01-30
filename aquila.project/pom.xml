@@ -4,10 +4,11 @@
 	<groupId>ru.prolib</groupId>
 	<artifactId>aquila</artifactId>
 	<packaging>pom</packaging>
-	<version>0.1.40-SNAPSHOT</version>
+	<version>${aquila.version}</version>
   
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<aquila.version>0.1.40-SNAPSHOT</aquila.version>
 	</properties>
 
 	<modules>
