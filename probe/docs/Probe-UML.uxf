@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.1">
+  <zoom_level>7</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>14</x>
+      <y>7</y>
+      <w>637</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>TradingDataStorage
+--
+--
++getSecurityProperties(descr: SecurityDescriptor): ConstantSecurityProperties
++getTradingSessionSnapshots(descr: SecurityDescriptor, startingTime: DateTime): Aqiterator&lt;TradingSessionSnapshot&gt;
++getTicks(descr: SecurityDescriptor, startingTime: DateTime): Aqiterator&lt;Tick&gt;
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>273</x>
+      <y>105</y>
+      <w>175</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>ConstantSecurityProperties
+--
+--
++getDisplayName(): String
++getExpirationTime(): DateTime</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>350</x>
+      <y>63</y>
+      <w>21</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>476</x>
+      <y>105</y>
+      <w>189</w>
+      <h>147</h>
+    </coordinates>
+    <panel_attributes>TradingSessionSnapshot
+--
+--
++getCurrencyOfValue(): Currency
++getTickValue(): BigDecimal
++getInitialMarginValue(): Double
++getInitialPrice(): Double
++getLowerPriceLimit(): Double
++getUpperPriceLimit(): Double
++getLotSize(): Integer
++getTickSize(): BigDecimal
++getSnapshotTime(): DateTime
++getClearingTime(): DateTime
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>63</y>
+      <w>21</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>546</x>
+      <y>364</y>
+      <w>259</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>PositionController
+--
+--
++updatePosition(EditablePosition position): void
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>280</x>
+      <y>420</y>
+      <w>259</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>SecurityController
+--
+--
++start(): void
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>406</x>
+      <y>378</y>
+      <w>154</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>200.0;10.0;10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>308</x>
+      <y>532</y>
+      <w>427</w>
+      <h>98</h>
+    </coordinates>
+    <panel_attributes>PortfolioController
+--
+--
++requestClearing(descr: SecurityDescriptor, time: DateTime): void
++lockInitialMargin(descr: SecurityDescriptor, value: Double): void
++freeInitialMargin(descr: SecurityDescriptor, value: Double): void
++freeInitialMargin(descr: SecurityDescriptor): void
++registerPositionController(descr: SecurityDescriptor, ctrl: SecurityController): void
++removePositionController(descr: SecurityDescriptor): void
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>420</x>
+      <y>455</y>
+      <w>21</w>
+      <h>91</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+</diagram>
