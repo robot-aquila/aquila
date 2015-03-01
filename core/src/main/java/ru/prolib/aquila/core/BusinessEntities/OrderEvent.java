@@ -17,7 +17,7 @@ public class OrderEvent extends EventImpl {
 	 * @param type тип события
 	 * @param order заявка
 	 */
-	public OrderEvent(EventType type, Order order) {
+	public OrderEvent(EventTypeSI type, Order order) {
 		super(type);
 		this.order = order;
 	}

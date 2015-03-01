@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * Событие, возникающее при поступлении новой сделки по инструменту.
@@ -18,7 +18,7 @@ public class SecurityTradeEvent extends SecurityEvent {
 	 * @param security инструмент
 	 * @param trade сделка
 	 */
-	public SecurityTradeEvent(EventType type, Security security, Trade trade) {
+	public SecurityTradeEvent(EventTypeSI type, Security security, Trade trade) {
 		super(type, security);
 		this.trade = trade;
 	}

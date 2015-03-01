@@ -1,9 +1,5 @@
 package ru.prolib.aquila.core;
 
-import java.util.*;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
 /**
  * Диспетчер событий. 
  * <p>
@@ -80,20 +76,8 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public void addListener(EventType type, EventListener listener) {
-		type.addListener(listener);
-	}
-
-	@Override
-	public void removeListener(EventType type, EventListener listener) {
-		type.removeListener(listener);
-	}
-
-	@Override
-	public void dispatch(Event event) {
-		if ( countListeners(event.getType()) > 0 ) {
-			queue.enqueue(event, this);
-		}
+	public void dispatch(EventSI event) {
+		queue.enqueue(event);
 	}
 
 	@Override
@@ -102,59 +86,23 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public int countListeners(EventType type) {
-		return type.countListeners();
-	}
-
-	@Override
-	public List<EventListener> getListeners(EventType type) {
-		return type.getListeners();
-	}
-
-	@Override
-	public boolean isTypeListener(EventType type, EventListener listener) {
-		return type.isListener(listener);
-	}
-
-	@Override
-	public void removeListeners(EventType type) {
-		type.removeListeners();
-	}
-
-	@Override
-	public void dispatchForCurrentList(Event event) {
-		EventType type = event.getType();
-		if ( type.countListeners() > 0 ) {
-			queue.enqueue(event, type.getListeners());
-		}
-	}
-
-	@Override
-	public EventType createType() {
+	public EventTypeSI createType() {
 		return new EventTypeImpl(getId() + "." + EventTypeImpl.nextId());
 	}
 
 	@Override
-	public EventType createType(String typeId) {
+	public EventTypeSI createType(String typeId) {
 		return new EventTypeImpl(getId() + "." + typeId);
 	}
-	
-	/**
-	 * Сравнивает иерархию идентификаторов.
-	 */
+
 	@Override
-	public boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		if ( other == null || other.getClass() != EventDispatcherImpl.class ) {
-			return false;
-		}
-		EventDispatcherImpl o = (EventDispatcherImpl) other;
-		return new EqualsBuilder()
-			.append(o.queue, queue)
-			.append(o.id, id)
-			.isEquals();
+	public EventTypeSI createSyncType() {
+		return new EventTypeImpl(getId() + "." + EventTypeImpl.nextId(), true);
+	}
+
+	@Override
+	public EventTypeSI createSyncType(String typeId) {
+		return new EventTypeImpl(getId() + "." + typeId, true);
 	}
 
 }

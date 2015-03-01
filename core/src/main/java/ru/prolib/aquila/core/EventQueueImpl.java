@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
  */
 public class EventQueueImpl implements EventQueue {
 	private static final Logger logger;
-	static private final QueueEntry EXIT = new QueueEntry();
-	private final BlockingQueue<QueueEntry> queue;
+	static private final EventSI EXIT = new EventImpl(null);
+	private final BlockingQueue<EventSI> queue;
 	private final String name;
 	private volatile Thread thread = null;
 	
@@ -35,7 +35,7 @@ public class EventQueueImpl implements EventQueue {
 	public EventQueueImpl(String threadName) {
 		super();
 		this.name = threadName;
-		queue = new LinkedBlockingQueue<QueueEntry>();
+		queue = new LinkedBlockingQueue<EventSI>();
 	}
 	
 	/**
@@ -151,50 +151,27 @@ public class EventQueueImpl implements EventQueue {
 	 * @throws IllegalStateException поток обработки не запущен
 	 */
 	@Override
-	public synchronized
-		void enqueue(Event event, List<EventListener> listeners)
-	{
+	public synchronized void enqueue(EventSI event) {
 		if ( ! started() ) {
 			throw new IllegalStateException("Queue not started: " + name);
 		}
 		if ( event == null ) {
 			throw new NullPointerException("The event cannot be null");
 		}
-		if ( listeners == null ) {
-			throw new NullPointerException("The listeners cannot be null");
-		}
-		enqueue(new QueueEntry(event, listeners));
-	}
-	
-	@Override
-	public synchronized void enqueue(Event event, EventDispatcher dispatcher) {
-		if ( ! started() ) {
-			throw new IllegalStateException("Queue not started: " + name);
-		}
-		if ( event == null ) {
-			throw new NullPointerException("The event cannot be null");
-		}
-		if ( dispatcher == null ) {
-			throw new NullPointerException("The dispatcher cannot be null");
-		}
-		enqueue(new QueueEntry(event, dispatcher));
-	}
-	
-	private void enqueue(QueueEntry entry) {
 		try {
-			queue.put(entry);
+			queue.put(event);
 		} catch ( InterruptedException e ) {
 			Thread.currentThread().interrupt();
 			logger.error("Thread interrupted: ", e);
-		}		
+		}
 	}
 	
 	/**
 	 * Реализация диспетчеризации событий из очереди.
 	 */
 	static private class QueueWorker implements Runnable {
-		private final BlockingQueue<QueueEntry> queue;
-		private final CountDownLatch started;
+		private final BlockingQueue<EventSI> queue;
+		private CountDownLatch started;
 		private final String name;
 		
 		/**
@@ -204,7 +181,7 @@ public class EventQueueImpl implements EventQueue {
 		 * @param started сигнал успешного запуска
 		 * @param name имя потока
 		 */
-		public QueueWorker(BlockingQueue<QueueEntry> queue,
+		public QueueWorker(BlockingQueue<EventSI> queue,
 						   CountDownLatch started, String name)
 		{
 			super();
@@ -216,25 +193,18 @@ public class EventQueueImpl implements EventQueue {
 		@Override
 		public void run() {
 			started.countDown();
+			started = null;
 			try {
-				QueueEntry e;
-				List<EventListener> list;
-				while ( (e = queue.take()) != null ) {
-					if ( e == EXIT ) {
+				EventSI event;
+				List<EventListener> listeners;
+				while ( (event = queue.take()) != null ) {
+					if ( event == EXIT ) {
 						break;
 					}
-					// TODO: 
-					// http://kobresia.acunote.com/projects/15260/tasks/1033
-					if ( e.dispatcher != null ) {
-						list = e.event.getType().getListeners(); 
-					} else if ( e.listeners != null ) {
-						list = e.listeners;
-					} else {
-						list = new Vector<EventListener>();
-					}
-					for ( EventListener listener : list ) {
+					listeners = event.getTypeSI().getAsyncListeners();
+					for ( EventListener listener : listeners ) {
 						try {
-							listener.onEvent(e.event);
+							listener.onEvent(event);
 						} catch ( Exception ex ) {
 							logger.error("Unhandled exception: ", ex);
 						}
@@ -250,83 +220,6 @@ public class EventQueueImpl implements EventQueue {
 			}
 		}
 		
-	}
-	
-	/**
-	 * Запись очереди событий.
-	 */
-	static private class QueueEntry {
-		private final Event event;
-		private final List<EventListener> listeners;
-		private final EventDispatcher dispatcher;
-		
-		/**
-		 * Создать запись на основе списка наблюдателей.
-		 * <p>
-		 * Такая структура подразумевает рассылку события указанному списку
-		 * наблюдателей независимо от состояния диспетчера на момент рассылки.
-		 * Иначе говоря, данный подход определяет неизменный список получателей.  
-		 * <p>
-		 * @param e событие
-		 * @param listeners получатели
-		 */
-		public QueueEntry(Event e, List<EventListener> listeners) {
-			super();
-			this.event = e;
-			this.listeners = listeners;
-			this.dispatcher = null;
-		}
-		
-		/**
-		 * Создать запись на основе диспетчера.
-		 * <p>
-		 * Такая структура подразумевает рассылку события наблюдателям, список
-		 * которых определяется непосредственно на момент рассылки. Иначе
-		 * говоря, список получателей может меняться в зависимости от состояния
-		 * диспетчера на момент отправки.
-		 * <p>
-		 * @param e событие
-		 * @param dispatcher диспетчер
-		 */
-		public QueueEntry(Event e, EventDispatcher dispatcher) {
-			super();
-			this.event = e;
-			this.listeners = null;
-			this.dispatcher = dispatcher;
-		}
-		
-		/**
-		 * Создать пустую запись.
-		 */
-		public QueueEntry() {
-			super();
-			this.event = null;
-			this.listeners = null;
-			this.dispatcher = null;
-		}
-		
-	}
-	
-	/**
-	 * Сравнивает только идентификаторы очередей.
-	 */
-	@Override
-	public final boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		if ( other == null || other.getClass() != EventQueueImpl.class ) {
-			return false;
-		}
-		EventQueueImpl o = (EventQueueImpl) other;
-		return new EqualsBuilder()
-			.append(o.name, name)
-			.isEquals();
-	}
-	
-	@Override
-	public final int hashCode() {
-		return super.hashCode();
 	}
 
 }

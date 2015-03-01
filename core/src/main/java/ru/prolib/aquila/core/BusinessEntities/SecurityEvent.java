@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * Событие связанное с инструментом торговли.
@@ -18,7 +17,7 @@ public class SecurityEvent extends EventImpl {
 	 * @param type тип события
 	 * @param security экземпляр инструмента
 	 */
-	public SecurityEvent(EventType type, Security security) {
+	public SecurityEvent(EventTypeSI type, Security security) {
 		super(type);
 		this.security = security;
 	}

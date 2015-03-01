@@ -20,7 +20,7 @@ public class RequestSecurityEvent extends EventImpl {
 	 * @param code целочисленный код события
 	 * @param msg сопроводительное текстовое сообщение
 	 */
-	public RequestSecurityEvent(EventType type,
+	public RequestSecurityEvent(EventTypeSI type,
 			SecurityDescriptor descr, int code, String msg)
 	{
 		super(type);

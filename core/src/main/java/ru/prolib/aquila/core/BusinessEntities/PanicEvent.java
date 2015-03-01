@@ -1,10 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
+import org.apache.commons.lang3.builder.*;
+import ru.prolib.aquila.core.*;
 
 /**
  * Событие, описывающее паническое состояние терминала.
@@ -25,7 +22,7 @@ public class PanicEvent extends EventImpl {
 	 * @param msgId идентификатор сообщения
 	 * @param args аргументы события
 	 */
-	public PanicEvent(EventType type, int code, String msgId, Object[] args) {
+	public PanicEvent(EventTypeSI type, int code, String msgId, Object[] args) {
 		super(type);
 		this.code = code;
 		this.msgId = msgId;
@@ -39,7 +36,7 @@ public class PanicEvent extends EventImpl {
 	 * @param code код состояния
 	 * @param msgId идентификатор сообщения
 	 */
-	public PanicEvent(EventType type, int code, String msgId) {
+	public PanicEvent(EventTypeSI type, int code, String msgId) {
 		this(type, code, msgId, new Object[] { });
 	}
 

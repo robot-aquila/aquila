@@ -1,18 +1,18 @@
 package ru.prolib.aquila.core;
 
 import java.util.*;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * Базовый тип события.
  * <p>
  * 2012-04-09<br>
  */
-public class EventTypeImpl implements EventType {
+public class EventTypeImpl implements EventTypeSI {
 	public static final String AUTO_ID_PREFIX = "EvtType";
 	private static int autoId = 1;
 	private final String id;
-	private final List<EventListener> listeners;
+	private final List<EventListener> asyncListeners, syncListeners;
+	private final boolean onlySync;
 	
 	/**
 	 * Получить следующий идентификатор типа событий по-умолчанию.
@@ -36,7 +36,7 @@ public class EventTypeImpl implements EventType {
 	 * Создать тип события.
 	 * <p>
 	 * Создается объект с идентификатором по умолчанию. Идентификатор
-	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId;
+	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId
 	 * <p>
 	 */
 	public EventTypeImpl() {
@@ -49,9 +49,33 @@ public class EventTypeImpl implements EventType {
 	 * @param id идентификатор типа события
 	 */
 	public EventTypeImpl(String id) {
-		super();
+		this(id, false);
+	}
+	
+	/**
+	 * Создать тип события.
+	 * <p>
+	 * <p>
+	 * Создается объект с идентификатором по умолчанию. Идентификатор
+	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId
+	 * <p>
+	 * @param onlySync разрешить только синхронную трансляцию
+	 */
+	public EventTypeImpl(boolean onlySync) {
+		this(nextId(), onlySync);
+	}
+	
+	/**
+	 * Создать тип события.
+	 * <p>
+	 * @param id идентификатор типа события
+	 * @param onlySync разрешить только синхронную трансляцию
+	 */
+	public EventTypeImpl(String id, boolean onlySync) {
 		this.id = id;
-		listeners = new ArrayList<EventListener>();
+		this.onlySync = onlySync;
+		asyncListeners = new ArrayList<EventListener>();
+		syncListeners = new ArrayList<EventListener>();
 	}
 	
 	@Override
@@ -66,28 +90,29 @@ public class EventTypeImpl implements EventType {
 	
 	@Override
 	public synchronized void addListener(EventListener listener) {
-		if ( ! isListener(listener) ) {
-			listeners.add(listener);
+		if ( onlySync ) {
+			addSyncListener(listener);
+		} else {
+			syncListeners.remove(listener);
+			if ( ! isAsyncListener(listener) ) {
+				asyncListeners.add(listener);
+			}			
 		}
 	}
 	
 	@Override
 	public synchronized void removeListener(EventListener listener) {
-		listeners.remove(listener);
+		asyncListeners.remove(listener);
+		syncListeners.remove(listener);
 	}
 
 	@Override
 	public synchronized boolean isListener(EventListener listener) {
-		for ( EventListener l : listeners ) {
-			if ( listener == l ) {
-				return true;
-			}
-		}
-		return false;
+		return isAsyncListener(listener) || isSyncListener(listener);
 	}
 	
 	@Override
-	public EventListener once(EventListener listener) {
+	public EventListener listenOnce(EventListener listener) {
 		ListenOnce once = new ListenOnce(this, listener);
 		once.start();
 		return once;
@@ -95,47 +120,56 @@ public class EventTypeImpl implements EventType {
 
 	@Override
 	public synchronized void removeListeners() {
-		listeners.clear();
+		asyncListeners.clear();
+		syncListeners.clear();
 	}
 
 	@Override
 	public synchronized int countListeners() {
-		return listeners.size();
+		return asyncListeners.size() + syncListeners.size();
 	}
 
 	@Override
-	public synchronized List<EventListener> getListeners() {
-		return new Vector<EventListener>(listeners);
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		if ( other == null || other.getClass() != EventTypeImpl.class ) {
-			return false;
-		}
-		EventTypeImpl o = (EventTypeImpl) other;
-		return new EqualsBuilder()
-			.append(id, o.id)
-			.isEquals();
+	public synchronized List<EventListener> getAsyncListeners() {
+		return new ArrayList<EventListener>(asyncListeners);
 	}
 
 	@Override
-	public synchronized boolean compareListeners(EventType other) {
-		synchronized ( other ) {
-			List<EventListener> otherListeners = other.getListeners();
-			if ( listeners.size() != otherListeners.size() ) {
-				return false;
+	public synchronized List<EventListener> getSyncListeners() {
+		return new ArrayList<EventListener>(syncListeners);
+	}
+
+	@Override
+	public synchronized boolean isSyncListener(EventListener listener) {
+		for ( EventListener l : syncListeners ) {
+			if ( listener == l ) {
+				return true;
 			}
-			for ( int i = 0; i < listeners.size(); i ++ ) {
-				if ( listeners.get(i) != otherListeners.get(i) ) {
-					return false;
-				}
-			}
-			return true;
 		}
+		return false;
+	}
+
+	@Override
+	public synchronized boolean isAsyncListener(EventListener listener) {
+		for ( EventListener l : asyncListeners ) {
+			if ( listener == l ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public synchronized void addSyncListener(EventListener listener) {
+		asyncListeners.remove(listener);
+		if ( ! isSyncListener(listener) ) {
+			syncListeners.add(listener);
+		}
+	}
+
+	@Override
+	public boolean isOnlySyncMode() {
+		return onlySync;
 	}
 
 }

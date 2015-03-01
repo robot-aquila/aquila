@@ -1,7 +1,5 @@
 package ru.prolib.aquila.core;
 
-import java.util.List;
-
 /**
  * Интерфейс очереди событий.
  * <p>
@@ -17,23 +15,9 @@ public interface EventQueue extends Starter {
 	/**
 	 * Поместить событие в очередь на обработку.
 	 * <p>
-	 * <i>Метод был добавлен для решения проблемы синхронных обработчиков.
-	 * Эта задача решена путем расширения функционала событийной подсистемы.
-	 * см. dir-20150225 
-	 * </i>
-	 * <p>
 	 * @param event событие
-	 * @param listeners список получателей
 	 */
-	public void enqueue(Event event, List<EventListener> listeners);
-	
-	/**
-	 * Поместить событие в очередь на обработку.
-	 * <p>
-	 * @param event событие
-	 * @param dispatcher диспетчер событий
-	 */
-	public void enqueue(Event event, EventDispatcher dispatcher);
+	public void enqueue(EventSI event);
 	
 	/**
 	 * Проверить запущен-ли поток диспетчеризации событий.

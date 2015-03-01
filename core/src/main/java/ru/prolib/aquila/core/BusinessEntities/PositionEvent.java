@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * Событие связанное с торговой позицией.
@@ -18,7 +17,7 @@ public class PositionEvent extends EventImpl {
 	 * @param type тип события
 	 * @param position объект позиции
 	 */
-	public PositionEvent(EventType type, Position position) {
+	public PositionEvent(EventTypeSI type, Position position) {
 		super(type);
 		this.position = position;
 	}
