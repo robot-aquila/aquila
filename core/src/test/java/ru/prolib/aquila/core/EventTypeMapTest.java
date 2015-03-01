@@ -15,9 +15,9 @@ public class EventTypeMapTest {
 	private IMocksControl control;
 	private EventSystem es;
 	private EventDispatcher dispatcher;
-	private Hashtable<Integer, EventType> storage;
+	private Hashtable<Integer, EventTypeSI> storage;
 	private EventTypeMap<Integer> map;
-	private EventType type1, type2;
+	private EventTypeSI type1, type2;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -26,8 +26,8 @@ public class EventTypeMapTest {
 		es = control.createMock(EventSystem.class);
 		dispatcher = control.createMock(EventDispatcher.class);
 		storage = control.createMock(Hashtable.class);
-		type1 = control.createMock(EventType.class);
-		type2 = control.createMock(EventType.class);
+		type1 = control.createMock(EventTypeSI.class);
+		type2 = control.createMock(EventTypeSI.class);
 		map = new EventTypeMap<Integer>(es, dispatcher, storage);
 	}
 	
@@ -83,7 +83,7 @@ public class EventTypeMapTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEntrySet() throws Exception {
-		Set<Map.Entry<Integer, EventType>> expected =
+		Set<Map.Entry<Integer, EventTypeSI>> expected =
 			control.createMock(Set.class);
 		expect(storage.entrySet()).andReturn(expected);
 		control.replay();
@@ -173,7 +173,7 @@ public class EventTypeMapTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testValues() throws Exception {
-		Collection<EventType> expected = control.createMock(Collection.class);
+		Collection<EventTypeSI> expected = control.createMock(Collection.class);
 		expect(storage.values()).andReturn(expected);
 		control.replay();
 		

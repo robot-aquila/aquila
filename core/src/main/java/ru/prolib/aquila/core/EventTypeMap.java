@@ -25,17 +25,17 @@ import java.util.Set;
  * <p>
  * @param <T> тип ассоциативного значения
  */
-public class EventTypeMap<T> implements Map<T, EventType> {
+public class EventTypeMap<T> implements Map<T, EventTypeSI> {
 	private final EventSystem es;
 	private final EventDispatcher dispatcher;
-	private final Map<T, EventType> storage;
+	private final Map<T, EventTypeSI> storage;
 	
 	public EventTypeMap(EventSystem es, EventDispatcher dispatcher) {
-		this(es, dispatcher, new Hashtable<T, EventType>());
+		this(es, dispatcher, new Hashtable<T, EventTypeSI>());
 	}
 	
 	public EventTypeMap(EventSystem es, EventDispatcher dispatcher,
-			Map<T, EventType> storage)
+			Map<T, EventTypeSI> storage)
 	{
 		super();
 		this.es = es;
@@ -43,7 +43,7 @@ public class EventTypeMap<T> implements Map<T, EventType> {
 		this.storage = storage;
 	}
 	
-	public Map<T, EventType> getUnderlyingMap() {
+	public Map<T, EventTypeSI> getUnderlyingMap() {
 		return storage;
 	}
 	
@@ -71,14 +71,14 @@ public class EventTypeMap<T> implements Map<T, EventType> {
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<T, EventType>> entrySet() {
+	public Set<java.util.Map.Entry<T, EventTypeSI>> entrySet() {
 		return storage.entrySet();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public EventType get(Object key) {
-		EventType type = storage.get(key);
+	public EventTypeSI get(Object key) {
+		EventTypeSI type = storage.get(key);
 		if ( type == null ) {
 			type = dispatcher.createType(key.toString());
 			storage.put((T) key, type);
@@ -97,18 +97,18 @@ public class EventTypeMap<T> implements Map<T, EventType> {
 	}
 
 	@Override
-	public EventType put(T arg0, EventType arg1) {
+	public EventTypeSI put(T arg0, EventTypeSI arg1) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void putAll(Map<? extends T, ? extends EventType> arg0) {
+	public void putAll(Map<? extends T, ? extends EventTypeSI> arg0) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public EventType remove(Object key) {
-		EventType type = storage.remove(key);
+	public EventTypeSI remove(Object key) {
+		EventTypeSI type = storage.remove(key);
 		type.removeListeners();
 		return type;
 	}
@@ -119,7 +119,7 @@ public class EventTypeMap<T> implements Map<T, EventType> {
 	}
 
 	@Override
-	public Collection<EventType> values() {
+	public Collection<EventTypeSI> values() {
 		return storage.values();
 	}
 	
