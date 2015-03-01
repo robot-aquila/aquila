@@ -75,7 +75,7 @@ public class EventQueue_FunctionalTest {
 	public void testSchedulingSequence(final EventQueue queue) throws Exception {
 		final CountDownLatch finished = new CountDownLatch(1);
 		final EventDispatcher dispatcher = new EventDispatcherImpl(queue);
-		EventTypeSI type = new EventTypeImpl();
+		EventTypeSI type = dispatcher.createType();
 		Listener listener = new Listener();
 		
 		type.addListener(listener);

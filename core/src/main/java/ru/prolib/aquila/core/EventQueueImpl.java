@@ -1,12 +1,7 @@
 package ru.prolib.aquila.core;
 
-import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
+import java.util.*;
+import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +17,7 @@ public class EventQueueImpl implements EventQueue {
 	private final BlockingQueue<EventSI> queue;
 	private final String name;
 	private volatile Thread thread = null;
+	private final LinkedList<EventSI> cache1, cache2;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -36,6 +32,8 @@ public class EventQueueImpl implements EventQueue {
 		super();
 		this.name = threadName;
 		queue = new LinkedBlockingQueue<EventSI>();
+		cache1 = new LinkedList<EventSI>();
+		cache2 = new LinkedList<EventSI>();
 	}
 	
 	/**
@@ -158,12 +156,38 @@ public class EventQueueImpl implements EventQueue {
 		if ( event == null ) {
 			throw new NullPointerException("The event cannot be null");
 		}
-		try {
-			queue.put(event);
-		} catch ( InterruptedException e ) {
-			Thread.currentThread().interrupt();
-			logger.error("Thread interrupted: ", e);
+		// Кэшированние событий используется для соблюдения требования
+		// диспетчеризации событий в порядке их поступления. Если этого не
+		// сделать, то при генерации событий из обработчика другого события
+		// нарушение неизбежно.
+		cache1.add(event);
+		if ( cache1.size() == 1 ) {
+			List<EventListener> listeners;
+			// Только в этом случае мы можем начинать диспетчеризацию.
+			// Более одного элемента в кэше означает, что выше по стеку
+			// очередь уже обрабатывается.
+			do {
+				event = cache1.getFirst(); // Сразу удалять нельзя!
+				listeners = event.getTypeSI().getSyncListeners();
+				for ( EventListener listener : listeners ) {
+					try {
+						listener.onEvent(event);
+					} catch ( Throwable e ) {
+						logger.error("Unhandled exception: ", e);
+					}
+				}
+				cache2.add(cache1.pollFirst());
+			} while ( cache1.size() > 0 );
+			while ( cache2.size() > 0 ) {
+				try {
+					queue.put(cache2.pollFirst());
+				} catch ( InterruptedException e ) {
+					Thread.currentThread().interrupt();
+					logger.error("Thread interrupted: ", e);
+				}				
+			}
 		}
+
 	}
 	
 	/**

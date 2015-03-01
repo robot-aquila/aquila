@@ -1,8 +1,9 @@
 package ru.prolib.aquila.core;
 
 import static org.junit.Assert.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -269,6 +270,61 @@ public class EventQueueImplTest {
 	@Test
 	public void testFunctionalTest() throws Exception {
 		new EventQueue_FunctionalTest().testSchedulingSequence(queue);
+	}
+	
+	@Test
+	public void testFunctionalTest_MixedSyncAndAsyncEvents() throws Exception {
+		// Тест последовательности трансляции событий для различных способов
+		// доставки. Синхронные получатели должны получать события в первую
+		// очередь. В том числе, если новые события возникают в результате
+		// обработки предыдущих. Асинхронные получатели получают события только
+		// после доставки всех событий синхронным наблюдателям.
+		final List<String> actual = new LinkedList<String>(),
+				expected = new LinkedList<String>();
+		expected.add("T1L2s");
+		expected.add("T3L1s");
+		expected.add("T1L1");
+		expected.add("T2L1s");
+		expected.add("T4L1");
+		final EventTypeSI type3 = dispatcher.createSyncType(),
+				type4 = dispatcher.createType();
+		final CountDownLatch finished = new CountDownLatch(1);
+		type1.addListener(new EventListener() { 				// #3
+			@Override public void onEvent(Event event) {
+				actual.add("T1L1");
+				dispatcher.dispatch(new EventImpl(type2));
+			}
+		});
+		type1.addSyncListener(new EventListener() {  			// #1
+			@Override public void onEvent(Event event) {
+				actual.add("T1L2s");
+				dispatcher.dispatch(new EventImpl(type3));
+			}
+		});
+		type2.addSyncListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				actual.add("T2L1s");
+				dispatcher.dispatch(new EventImpl(type4));		// #4 
+			}
+		});
+		type3.addSyncListener(new EventListener() {
+			@Override public void onEvent(Event event) {		// #2
+				actual.add("T3L1s");
+			}
+		});
+		type4.addListener(new EventListener() {					// #5
+			@Override public void onEvent(Event event) {
+				actual.add("T4L1");
+				finished.countDown();
+			}
+		});
+		
+		queue.start();
+		queue.enqueue(new EventImpl(type1));
+		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
+		queue.stop();
+		queue.join(100);
+		assertEquals(expected, actual);
 	}
 	
 }
