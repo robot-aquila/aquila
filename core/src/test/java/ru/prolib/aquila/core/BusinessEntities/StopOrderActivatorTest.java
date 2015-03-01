@@ -16,7 +16,7 @@ public class StopOrderActivatorTest {
 	private OrderActivatorLink link;
 	private EditableOrder order;
 	private Security security;
-	private EventType onChanged, onTrade;
+	private EventTypeSI onChanged, onTrade;
 	private StopOrderActivator activator;
 	
 	@BeforeClass
@@ -31,8 +31,8 @@ public class StopOrderActivatorTest {
 		link = control.createMock(OrderActivatorLink.class);
 		order = control.createMock(EditableOrder.class);
 		security = control.createMock(Security.class);
-		onChanged = control.createMock(EventType.class);
-		onTrade = control.createMock(EventType.class);
+		onChanged = control.createMock(EventTypeSI.class);
+		onTrade = control.createMock(EventTypeSI.class);
 		activator = new StopOrderActivator(link, 18.24d);
 		
 		expect(link.getOrder()).andStubReturn(order);

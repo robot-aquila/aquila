@@ -1,14 +1,12 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.createStrictControl;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * 2012-09-05<br>
@@ -16,15 +14,15 @@ import ru.prolib.aquila.core.EventType;
  */
 public class PortfolioEventTest {
 	private IMocksControl control;
-	private EventType eventType1,eventType2;
+	private EventTypeSI eventType1,eventType2;
 	private Portfolio port1,port2;
 	private PortfolioEvent event;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		eventType1 = control.createMock(EventType.class);
-		eventType2 = control.createMock(EventType.class);
+		eventType1 = control.createMock(EventTypeSI.class);
+		eventType2 = control.createMock(EventTypeSI.class);
 		port1 = control.createMock(Portfolio.class);
 		port2 = control.createMock(Portfolio.class);
 		event = new PortfolioEvent(eventType1, port1);

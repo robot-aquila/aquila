@@ -7,7 +7,7 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
 import ru.prolib.aquila.core.data.Tick;
 
@@ -24,7 +24,7 @@ public class SecurityTradeEventTest {
 	
 	private IMocksControl control;
 	private EditableSecurity security, security2;
-	private EventType eventType, eventType2;
+	private EventTypeSI eventType, eventType2;
 	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
 	private Trade trade;
@@ -39,8 +39,8 @@ public class SecurityTradeEventTest {
 		security.setMinStepSize(1d);
 		security.setMinStepPrice(1d);
 		security2 = control.createMock(EditableSecurity.class);
-		eventType = security.OnTrade();
-		eventType2 = control.createMock(EventType.class);
+		eventType = (EventTypeSI) security.OnTrade();
+		eventType2 = control.createMock(EventTypeSI.class);
 		trade = new BMUtils().tradeFromTick(
 			new Tick(new DateTime(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
 			security);

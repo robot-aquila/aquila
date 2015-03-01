@@ -155,7 +155,7 @@ public class Orders {
 			OrderEventDispatcher dispatcher, OrderStateValidator validator,
 			EventType targetType)
 	{
-		list.add(new OrderStateHandler(dispatcher, validator, targetType));
+		list.add(new OrderStateHandler(dispatcher, validator, (EventTypeSI) targetType));
 	}
 	
 	/**

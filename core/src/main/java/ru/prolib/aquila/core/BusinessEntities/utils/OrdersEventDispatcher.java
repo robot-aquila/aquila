@@ -46,8 +46,8 @@ public class OrdersEventDispatcher implements EventListener {
 		logger = LoggerFactory.getLogger(OrdersEventDispatcher.class);
 	}
 	
-	private final EventDispatcher dispatcher, sync_disp;
-	private final EventType onRegistered, onRegisterFailed, onCancelled,
+	private final EventDispatcher dispatcher;
+	private final EventTypeSI onRegistered, onRegisterFailed, onCancelled,
 		onCancelFailed, onFilled, onPartiallyFilled, onChanged, onDone,
 		onFailed, onTrade, onAvailable;
 	
@@ -55,21 +55,16 @@ public class OrdersEventDispatcher implements EventListener {
 		super();
 		dispatcher = es.createEventDispatcher("Orders");
 		onAvailable = dispatcher.createType("Available");
-		sync_disp = createSyncDispatcher();
-		onRegistered = sync_disp.createType("Registered");
-		onRegisterFailed = sync_disp.createType("RegisterFailed");
-		onCancelled = sync_disp.createType("Cancelled");
-		onCancelFailed = sync_disp.createType("CancelFailed");
-		onFilled = sync_disp.createType("Filled");
-		onPartiallyFilled = sync_disp.createType("PartiallyFilled");
-		onChanged = sync_disp.createType("Changed");
-		onDone = sync_disp.createType("Done");
-		onFailed = sync_disp.createType("Failed");
-		onTrade = sync_disp.createType("Trade");
-	}
-	
-	private final EventDispatcher createSyncDispatcher() {
-		 return new EventDispatcherImpl(new SimpleEventQueue(), "Orders");
+		onRegistered = dispatcher.createSyncType("Registered");
+		onRegisterFailed = dispatcher.createSyncType("RegisterFailed");
+		onCancelled = dispatcher.createSyncType("Cancelled");
+		onCancelFailed = dispatcher.createSyncType("CancelFailed");
+		onFilled = dispatcher.createSyncType("Filled");
+		onPartiallyFilled = dispatcher.createSyncType("PartiallyFilled");
+		onChanged = dispatcher.createSyncType("Changed");
+		onDone = dispatcher.createSyncType("Done");
+		onFailed = dispatcher.createSyncType("Failed");
+		onTrade = dispatcher.createSyncType("Trade");
 	}
 	
 	/**
@@ -196,23 +191,23 @@ public class OrdersEventDispatcher implements EventListener {
 		if ( event instanceof OrderTradeEvent ) {
 			OrderTradeEvent e = (OrderTradeEvent) event,
 				ne = new OrderTradeEvent(onTrade, e.getOrder(), e.getTrade());
-			sync_disp.dispatch(ne);
+			dispatcher.dispatch(ne);
 		} else if ( event instanceof OrderEvent ) {
 			Order order = ((OrderEvent) event).getOrder();
-			EventType map[][] = {
-					{ order.OnRegistered(), onRegistered },
-					{ order.OnRegisterFailed(), onRegisterFailed },
-					{ order.OnCancelled(), onCancelled },
-					{ order.OnCancelFailed(), onCancelFailed },
-					{ order.OnFilled(), onFilled },
-					{ order.OnPartiallyFilled(), onPartiallyFilled },
-					{ order.OnChanged(), onChanged },
-					{ order.OnDone(), onDone },
-					{ order.OnFailed(), onFailed },
+			EventTypeSI map[][] = {
+				{ (EventTypeSI) order.OnRegistered(), onRegistered },
+				{ (EventTypeSI) order.OnRegisterFailed(), onRegisterFailed },
+				{ (EventTypeSI) order.OnCancelled(), onCancelled },
+				{ (EventTypeSI) order.OnCancelFailed(), onCancelFailed },
+				{ (EventTypeSI) order.OnFilled(), onFilled },
+				{ (EventTypeSI) order.OnPartiallyFilled(), onPartiallyFilled },
+				{ (EventTypeSI) order.OnChanged(), onChanged },
+				{ (EventTypeSI) order.OnDone(), onDone },
+				{ (EventTypeSI) order.OnFailed(), onFailed },
 			};
 			for ( int i = 0; i < map.length; i ++ ) {
 				if ( event.isType(map[i][0]) ) {
-					sync_disp.dispatch(new OrderEvent(map[i][1], order));
+					dispatcher.dispatch(new OrderEvent(map[i][1], order));
 					break;
 				}
 			}

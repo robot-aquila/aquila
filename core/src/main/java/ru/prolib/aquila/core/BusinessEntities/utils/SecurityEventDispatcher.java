@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.BusinessEntities.Trade;
  */
 public class SecurityEventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventType onChanged, onTrade;
+	private final EventTypeSI onChanged, onTrade;
 	
 	public SecurityEventDispatcher(EventSystem es, SecurityDescriptor descr) {
 		super();

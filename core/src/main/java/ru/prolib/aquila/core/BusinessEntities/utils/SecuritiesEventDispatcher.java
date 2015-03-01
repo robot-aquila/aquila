@@ -18,20 +18,15 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * <p>
  */
 public class SecuritiesEventDispatcher implements EventListener {
-	private final EventDispatcher dispatcher, sync_disp;
-	private final EventType onAvailable, onChanged, onTrade;
+	private final EventDispatcher dispatcher;
+	private final EventTypeSI onAvailable, onChanged, onTrade;
 	
 	public SecuritiesEventDispatcher(EventSystem es) {
 		super();
 		dispatcher = es.createEventDispatcher("Securities");
 		onAvailable = dispatcher.createType("Available");
-		sync_disp = createSyncDispatcher();
-		onChanged = sync_disp.createType("Changed");
-		onTrade = sync_disp.createType("Trade");
-	}
-	
-	private final EventDispatcher createSyncDispatcher() {
-		 return new EventDispatcherImpl(new SimpleEventQueue(), "Securities");
+		onChanged = dispatcher.createSyncType("Changed");
+		onTrade = dispatcher.createSyncType("Trade");
 	}
 	
 	/**
@@ -85,13 +80,13 @@ public class SecuritiesEventDispatcher implements EventListener {
 	public void onEvent(Event event) {
 		if ( event instanceof SecurityTradeEvent ) {
 			SecurityTradeEvent e = (SecurityTradeEvent) event;
-			sync_disp.dispatch(new SecurityTradeEvent(onTrade, e.getSecurity(),
+			dispatcher.dispatch(new SecurityTradeEvent(onTrade, e.getSecurity(),
 					e.getTrade()));
 		} else if ( event instanceof SecurityEvent ) {
 			SecurityEvent e = (SecurityEvent) event;
 			Security security = e.getSecurity();
 			if ( e.isType(security.OnChanged()) ) {
-				sync_disp.dispatch(new SecurityEvent(onChanged, security));
+				dispatcher.dispatch(new SecurityEvent(onChanged, security));
 			}
 		}
 	}

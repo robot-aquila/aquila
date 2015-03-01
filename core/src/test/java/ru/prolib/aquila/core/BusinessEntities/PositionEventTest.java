@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * 2012-08-03<br>
@@ -14,15 +14,15 @@ import ru.prolib.aquila.core.EventType;
  */
 public class PositionEventTest {
 	private IMocksControl control;
-	private EventType eventType1,eventType2;
+	private EventTypeSI eventType1,eventType2;
 	private Position position1,position2;
 	private PositionEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		eventType1 = control.createMock(EventType.class);
-		eventType2 = control.createMock(EventType.class);
+		eventType1 = control.createMock(EventTypeSI.class);
+		eventType2 = control.createMock(EventTypeSI.class);
 		position1 = control.createMock(Position.class);
 		position2 = control.createMock(Position.class);
 		event = new PositionEvent(eventType1, position1);

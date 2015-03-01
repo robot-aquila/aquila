@@ -75,7 +75,7 @@ public class SecuritiesEventDispatcherTest {
 		eventsExpected.add(expected);
 		// Асинхронное событие окажется на втором месте, так как очередь будет
 		// на время заморожена обработчиком этого события.
-		e = new SecurityEvent(dispatcher.OnAvailable(), security);
+		e = new SecurityEvent((EventTypeSI) dispatcher.OnAvailable(), security);
 		eventsExpected.add(e);
 		
 		dispatcher.fireAvailable(security);
@@ -87,7 +87,7 @@ public class SecuritiesEventDispatcherTest {
 
 	@Test
 	public void testFireAvailable() throws Exception {
-		e = new SecurityEvent(dispatcher.OnAvailable(), security);
+		e = new SecurityEvent((EventTypeSI) dispatcher.OnAvailable(), security);
 		eventsExpected.add(e);
 		final CountDownLatch counter = new CountDownLatch(1);
 		dispatcher.OnAvailable().addListener(new EventListener() {
@@ -105,16 +105,16 @@ public class SecuritiesEventDispatcherTest {
 	@Test
 	public void testOnEvent_OnChanged() throws Exception {
 		testSynchronousEvent(dispatcher.OnChanged(),
-				new SecurityEvent(dispatcher.OnChanged(), security),
-				new SecurityEvent(security.OnChanged(), security));
+			new SecurityEvent((EventTypeSI) dispatcher.OnChanged(), security),
+			new SecurityEvent((EventTypeSI) security.OnChanged(), security));
 	}
 	
 	@Test
 	public void testOnEvent_OnTrade() throws Exception {
 		Trade t = new Trade(terminal);
 		testSynchronousEvent(dispatcher.OnTrade(),
-				new SecurityTradeEvent(dispatcher.OnTrade(), security, t),
-				new SecurityTradeEvent(security.OnTrade(), security, t));
+			new SecurityTradeEvent((EventTypeSI) dispatcher.OnTrade(), security, t),
+			new SecurityTradeEvent((EventTypeSI) security.OnTrade(), security, t));
 	}
 	
 	@Test

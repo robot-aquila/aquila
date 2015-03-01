@@ -38,5 +38,16 @@ public class EventImpl implements EventSI {
 	public String toString() {
 		return type.toString() + "." + ID; 
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != EventImpl.class ) {
+			return false;
+		}
+		return type == ((EventImpl) other).type;
+	}
 
 }

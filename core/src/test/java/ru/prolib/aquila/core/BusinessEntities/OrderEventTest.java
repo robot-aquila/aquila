@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -14,15 +14,15 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class OrderEventTest {
 	private IMocksControl control;
-	private EventType type1,type2;
+	private EventTypeSI type1,type2;
 	private Order order1,order2;
 	private OrderEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type1 = control.createMock(EventType.class);
-		type2 = control.createMock(EventType.class);
+		type1 = control.createMock(EventTypeSI.class);
+		type2 = control.createMock(EventTypeSI.class);
 		order1 = control.createMock(Order.class);
 		order2 = control.createMock(Order.class);
 		event = new OrderEvent(type1, order1);
@@ -36,7 +36,7 @@ public class OrderEventTest {
 	
 	@Test
 	public void testEquals_MixedVars() throws Exception {
-		Variant<EventType> vType = new Variant<EventType>()
+		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
 			.add(type1)
 			.add(type2);
 		Variant<Order> vOrder = new Variant<Order>(vType)

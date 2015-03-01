@@ -105,7 +105,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	
 	@Override
 	public synchronized void add(T value) throws ValueException {
-		Event event = null;
+		EventSI event = null;
 		synchronized ( this ) {
 			event = new ValueEvent<T>(onAdd, value, history.size());
 			history.add(value);

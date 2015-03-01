@@ -80,7 +80,7 @@ public class PortfoliosEventDispatcherTest {
 		eventsExpected.add(expected);
 		// Асинхронное событие окажется на втором месте, так как очередь будет
 		// на время заморожена обработчиком этого события.
-		e = new PortfolioEvent(dispatcher.OnPortfolioAvailable(), portfolio);
+		e = new PortfolioEvent((EventTypeSI) dispatcher.OnPortfolioAvailable(), portfolio);
 		eventsExpected.add(e);
 		
 		dispatcher.fireAvailable(portfolio);
@@ -91,8 +91,32 @@ public class PortfoliosEventDispatcherTest {
 	}
 	
 	@Test
+	public void testStructure() throws Exception {
+		String did = "Portfolios";
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals(did, ed.getId());
+		
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnPortfolioAvailable();
+		assertEquals(did + ".Available", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnPortfolioChanged();
+		assertEquals(did + ".Changed", type.getId());
+		assertTrue(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnPositionAvailable();
+		assertEquals(did + ".PositionAvailable", type.getId());
+		assertTrue(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnPositionChanged();
+		assertEquals(did + ".PositionChanged", type.getId());
+		assertTrue(type.isOnlySyncMode());
+	}
+	
+	@Test
 	public void testFireAvailable() throws Exception {
-		e = new PortfolioEvent(dispatcher.OnPortfolioAvailable(), portfolio);
+		e = new PortfolioEvent((EventTypeSI) dispatcher.OnPortfolioAvailable(), portfolio);
 		eventsExpected.add(e);
 		final CountDownLatch counter = new CountDownLatch(1);
 		dispatcher.OnPortfolioAvailable().addListener(new EventListener() {
@@ -110,22 +134,22 @@ public class PortfoliosEventDispatcherTest {
 	@Test
 	public void testOnEvent_PositionChanged() throws Exception {
 		testSynchronousEvent(dispatcher.OnPositionChanged(),
-			new PositionEvent(dispatcher.OnPositionChanged(), position),
-			new PositionEvent(portfolio.OnPositionChanged(), position));
+			new PositionEvent((EventTypeSI) dispatcher.OnPositionChanged(), position),
+			new PositionEvent((EventTypeSI) portfolio.OnPositionChanged(), position));
 	}
 	
 	@Test
 	public void testOnEvent_PositionAvailable() throws Exception {
 		testSynchronousEvent(dispatcher.OnPositionAvailable(),
-			new PositionEvent(dispatcher.OnPositionAvailable(), position),
-			new PositionEvent(portfolio.OnPositionAvailable(), position));
+			new PositionEvent((EventTypeSI) dispatcher.OnPositionAvailable(), position),
+			new PositionEvent((EventTypeSI) portfolio.OnPositionAvailable(), position));
 	}
 	
 	@Test
 	public void testOnEvent_PortfolioChanged() throws Exception {
 		testSynchronousEvent(dispatcher.OnPortfolioChanged(),
-			new PortfolioEvent(dispatcher.OnPortfolioChanged(), portfolio),
-			new PortfolioEvent(portfolio.OnChanged(), portfolio));
+			new PortfolioEvent((EventTypeSI) dispatcher.OnPortfolioChanged(), portfolio),
+			new PortfolioEvent((EventTypeSI) portfolio.OnChanged(), portfolio));
 	}
 	
 	@Test

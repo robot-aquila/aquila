@@ -5,20 +5,20 @@ import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class RequestSecurityEventTest {
 	private IMocksControl control;
-	private EventType type1, type2;
+	private EventTypeSI type1, type2;
 	private SecurityDescriptor descr1, descr2;
 	private RequestSecurityEvent event;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type1 = control.createMock(EventType.class);
-		type2 = control.createMock(EventType.class);
+		type1 = control.createMock(EventTypeSI.class);
+		type2 = control.createMock(EventTypeSI.class);
 		descr1 = new SecurityDescriptor("SBER", "EQBR", "RUR");
 		descr2 = new SecurityDescriptor("GAZP", "EQBR", "RUR");
 		event = new RequestSecurityEvent(type1, descr1, 1, "foobar text");
@@ -41,7 +41,7 @@ public class RequestSecurityEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventType> vType = new Variant<EventType>()
+		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
 			.add(type1)
 			.add(type2);
 		Variant<SecurityDescriptor> vDescr =

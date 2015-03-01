@@ -15,7 +15,7 @@ public class OrderStateHandlerTest {
 	private static IMocksControl control;
 	private static OrderEventDispatcher dispatcher;
 	private static OrderStateValidator validator;
-	private static EventType type;
+	private static EventTypeSI type;
 	private static EditableOrder order;
 	private static OrderStateHandler handler;
 
@@ -24,7 +24,7 @@ public class OrderStateHandlerTest {
 		control = createStrictControl();
 		dispatcher = control.createMock(OrderEventDispatcher.class);
 		validator = control.createMock(OrderStateValidator.class);
-		type = control.createMock(EventType.class);
+		type = control.createMock(EventTypeSI.class);
 		order = control.createMock(EditableOrder.class);
 		handler = new OrderStateHandler(dispatcher, validator, type);
 	}
@@ -76,9 +76,9 @@ public class OrderStateHandlerTest {
 				new Variant<OrderStateValidator>(vDisp)
 			.add(validator)
 			.add(control.createMock(OrderStateValidator.class));
-		Variant<EventType> vType = new Variant<EventType>(vVldr)
+		Variant<EventTypeSI> vType = new Variant<EventTypeSI>(vVldr)
 			.add(type)
-			.add(control.createMock(EventType.class));
+			.add(control.createMock(EventTypeSI.class));
 		Variant<?> iterator = vType;
 		int foundCnt = 0;
 		OrderStateHandler x = null, found = null;

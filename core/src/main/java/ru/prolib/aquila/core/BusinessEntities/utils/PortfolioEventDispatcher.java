@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class PortfolioEventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventType onChanged;
+	private final EventTypeSI onChanged;
 	
 	public PortfolioEventDispatcher(EventSystem es, Account account) {
 		super();

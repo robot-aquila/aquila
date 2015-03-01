@@ -12,7 +12,7 @@ public class OrderTradeEventTest {
 	private IMocksControl control;
 	private Order o1, o2;
 	private Trade t1, t2;
-	private EventType type1, type2;
+	private EventTypeSI type1, type2;
 	private OrderTradeEvent event;
 
 	@Before
@@ -36,7 +36,7 @@ public class OrderTradeEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventType> vType = new Variant<EventType>()
+		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
 			.add(type1)
 			.add(type2);
 		Variant<Order> vOrder = new Variant<Order>(vType)

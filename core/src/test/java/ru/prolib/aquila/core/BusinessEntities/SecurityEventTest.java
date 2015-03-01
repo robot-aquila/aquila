@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * 2012-06-01<br>
@@ -14,15 +14,15 @@ import ru.prolib.aquila.core.EventType;
  */
 public class SecurityEventTest {
 	private IMocksControl control;
-	private EventType eventType1,eventType2;
+	private EventTypeSI eventType1,eventType2;
 	private Security security1,security2;
 	private SecurityEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		eventType1 = control.createMock(EventType.class);
-		eventType2 = control.createMock(EventType.class);
+		eventType1 = control.createMock(EventTypeSI.class);
+		eventType2 = control.createMock(EventTypeSI.class);
 		security1 = control.createMock(Security.class);
 		security2 = control.createMock(Security.class);
 		event = new SecurityEvent(eventType1, security1);

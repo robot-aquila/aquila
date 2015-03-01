@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -15,7 +15,7 @@ public class CandleByTradesTest {
 	private IMocksControl control;
 	private EditableCandleSeries candles;
 	private Security security;
-	private EventType type;
+	private EventTypeSI type;
 	private Trade trade;
 	private CandleByTrades updater;
 
@@ -24,7 +24,7 @@ public class CandleByTradesTest {
 		control = createStrictControl();
 		candles = control.createMock(EditableCandleSeries.class);
 		security = control.createMock(Security.class);
-		type = control.createMock(EventType.class);
+		type = control.createMock(EventTypeSI.class);
 		trade = control.createMock(Trade.class);
 		updater = new CandleByTrades(security, candles);
 		

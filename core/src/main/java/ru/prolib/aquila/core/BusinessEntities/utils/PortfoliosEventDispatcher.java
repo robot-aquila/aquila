@@ -17,22 +17,17 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * <p>
  */
 public class PortfoliosEventDispatcher implements EventListener {
-	private final EventDispatcher dispatcher, sync_disp;
-	private final EventType onAvailable, onChanged, onPosAvailable,
+	private final EventDispatcher dispatcher;
+	private final EventTypeSI onAvailable, onChanged, onPosAvailable,
 		onPosChanged;
 	
 	public PortfoliosEventDispatcher(EventSystem es) {
 		super();
 		dispatcher = es.createEventDispatcher("Portfolios");
 		onAvailable = dispatcher.createType("Available");
-		sync_disp = createSyncDispatcher();
-		onChanged = sync_disp.createType("Changed");
-		onPosAvailable = sync_disp.createType("PositionAvailable");
-		onPosChanged = sync_disp.createType("PositionChanged");
-	}
-	
-	private final EventDispatcher createSyncDispatcher() {
-		 return new EventDispatcherImpl(new SimpleEventQueue(), "Portfolios");
+		onChanged = dispatcher.createSyncType("Changed");
+		onPosAvailable = dispatcher.createSyncType("PositionAvailable");
+		onPosChanged = dispatcher.createSyncType("PositionChanged");
 	}
 	
 	/**
@@ -96,16 +91,16 @@ public class PortfoliosEventDispatcher implements EventListener {
 			Position position = e.getPosition();
 			Portfolio portfolio = position.getPortfolio();
 			if ( event.isType(portfolio.OnPositionChanged()) ) {
-				sync_disp.dispatch(new PositionEvent(onPosChanged, position));
+				dispatcher.dispatch(new PositionEvent(onPosChanged, position));
 			} else if ( event.isType(portfolio.OnPositionAvailable())) {
-				sync_disp.dispatch(new PositionEvent(onPosAvailable, position));
+				dispatcher.dispatch(new PositionEvent(onPosAvailable, position));
 			}
 			
 		} else if ( event instanceof PortfolioEvent ) {
 			PortfolioEvent e = (PortfolioEvent) event;
 			Portfolio portfolio = e.getPortfolio();
 			if ( event.isType(portfolio.OnChanged()) ) {
-				sync_disp.dispatch(new PortfolioEvent(onChanged, portfolio));
+				dispatcher.dispatch(new PortfolioEvent(onChanged, portfolio));
 			}
 		}
 	}

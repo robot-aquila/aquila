@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class PositionEventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventType onChanged;
+	private final EventTypeSI onChanged;
 	
 	public PositionEventDispatcher(EventSystem es, Account account,
 			SecurityDescriptor descr)

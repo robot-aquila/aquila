@@ -30,25 +30,55 @@ public class OrderEventDispatcherTest {
 	
 	@Test
 	public void testStructure() throws Exception {
-		EventDispatcher ed = es.createEventDispatcher("Order");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnRegistered(), ed.createType("Registered"));
-		assertEquals(dispatcher.OnRegisterFailed(), ed.createType("RegisterFailed"));
-		assertEquals(dispatcher.OnCancelled(), ed.createType("Cancelled"));
-		assertEquals(dispatcher.OnCancelFailed(), ed.createType("CancelFailed"));
-		assertEquals(dispatcher.OnFilled(), ed.createType("Filled"));
-		assertEquals(dispatcher.OnPartiallyFilled(), ed.createType("PartiallyFilled"));
-		assertEquals(dispatcher.OnChanged(), ed.createType("Changed"));
-		assertEquals(dispatcher.OnDone(), ed.createType("Done"));
-		assertEquals(dispatcher.OnFailed(), ed.createType("Failed"));
-		assertEquals(dispatcher.OnTrade(), ed.createType("Trade"));
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals("Order", ed.getId());
+				
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnRegistered();
+		assertEquals("Order.Registered", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnRegisterFailed();
+		assertEquals("Order.RegisterFailed", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnCancelled();
+		assertEquals("Order.Cancelled", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnCancelFailed();
+		assertEquals("Order.CancelFailed", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnFilled();
+		assertEquals("Order.Filled", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnPartiallyFilled();
+		assertEquals("Order.PartiallyFilled", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnChanged();
+		assertEquals("Order.Changed", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnDone();
+		assertEquals("Order.Done", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnFailed();
+		assertEquals("Order.Failed", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnTrade();
+		assertEquals("Order.Trade", type.getId());
+		assertFalse(type.isOnlySyncMode());
 	}
 	
 	@Test
 	public void testFireTrade() throws Exception {
 		dispatcher.OnTrade().addListener(listener);
-		queue.enqueue(eq(new OrderTradeEvent(dispatcher.OnTrade(),
-				order, trade)), same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new OrderTradeEvent((EventTypeSI) dispatcher.OnTrade(), order, trade)));
 		control.replay();
 		
 		dispatcher.fireTrade(order, trade);
@@ -85,10 +115,10 @@ public class OrderEventDispatcherTest {
 	
 	@Test
 	public void testDispatch() throws Exception {
-		EventType testType = dispatcher.getEventDispatcher().createType("test");
+		EventTypeSI testType = dispatcher.getEventDispatcher().createType("test");
 		testType.addListener(listener);
-		Event event = new EventImpl(testType);
-		queue.enqueue(same(event), same(dispatcher.getEventDispatcher()));
+		EventSI event = new EventImpl(testType);
+		queue.enqueue(same(event));
 		control.replay();
 		
 		dispatcher.dispatch(event);

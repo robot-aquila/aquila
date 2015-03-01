@@ -37,22 +37,39 @@ public class TerminalEventDispatcherTest {
 	
 	@Test
 	public void testStructure() throws Exception {
-		EventDispatcher ed = es.createEventDispatcher("Terminal");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnConnected(), ed.createType("Connected"));
-		assertEquals(dispatcher.OnDisconnected(), ed.createType("Disconnected"));
-		assertEquals(dispatcher.OnPanic(), ed.createType("Panic"));
-		assertEquals(dispatcher.OnRequestSecurityError(),
-				ed.createType("RequestSecurityError"));
-		assertEquals(dispatcher.OnStarted(), ed.createType("Started"));
-		assertEquals(dispatcher.OnStopped(), ed.createType("Stopped"));
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals("Terminal", ed.getId());
+		
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnConnected();
+		assertEquals("Terminal.Connected", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnDisconnected();
+		assertEquals("Terminal.Disconnected", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnPanic();
+		assertEquals("Terminal.Panic", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnRequestSecurityError();
+		assertEquals("Terminal.RequestSecurityError", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnStarted();
+		assertEquals("Terminal.Started", type.getId());
+		assertFalse(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnStopped();
+		assertEquals("Terminal.Stopped", type.getId());
+		assertFalse(type.isOnlySyncMode());
 	}
 	
 	@Test
 	public void testFireConnected() throws Exception {
 		dispatcher.OnConnected().addListener(listener);
-		queue.enqueue(eq(new EventImpl(dispatcher.OnConnected())),
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new EventImpl((EventTypeSI) dispatcher.OnConnected())));
 		observer1.OnTerminalReady(terminal);
 		observer2.OnTerminalReady(terminal);
 		observer3.OnTerminalReady(terminal);
@@ -69,8 +86,7 @@ public class TerminalEventDispatcherTest {
 	@Test
 	public void testFireDisconnected() throws Exception {
 		dispatcher.OnDisconnected().addListener(listener);
-		queue.enqueue(eq(new EventImpl(dispatcher.OnDisconnected())), 
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new EventImpl((EventTypeSI) dispatcher.OnDisconnected())));
 		observer1.OnTerminalUnready(terminal);
 		observer2.OnTerminalUnready(terminal);
 		observer3.OnTerminalUnready(terminal);
@@ -87,8 +103,7 @@ public class TerminalEventDispatcherTest {
 	@Test
 	public void testFireStarted() throws Exception {
 		dispatcher.OnStarted().addListener(listener);
-		queue.enqueue(eq(new EventImpl(dispatcher.OnStarted())), 
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new EventImpl((EventTypeSI) dispatcher.OnStarted())));
 		control.replay();
 		
 		dispatcher.fireStarted();
@@ -99,8 +114,7 @@ public class TerminalEventDispatcherTest {
 	@Test
 	public void testFireStopped() throws Exception {
 		dispatcher.OnStopped().addListener(listener);
-		queue.enqueue(eq(new EventImpl(dispatcher.OnStopped())), 
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new EventImpl((EventTypeSI) dispatcher.OnStopped())));
 		control.replay();
 		
 		dispatcher.fireStopped();
@@ -111,8 +125,7 @@ public class TerminalEventDispatcherTest {
 	@Test
 	public void testFirePanic2() throws Exception {
 		dispatcher.OnPanic().addListener(listener);
-		queue.enqueue(eq(new PanicEvent(dispatcher.OnPanic(), 80, "test")), 
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new PanicEvent((EventTypeSI) dispatcher.OnPanic(), 80, "test")));
 		control.replay();
 		
 		dispatcher.firePanic(80, "test");
@@ -124,8 +137,7 @@ public class TerminalEventDispatcherTest {
 	public void testFirePanic3() throws Exception {
 		Object args[] = { "foo", 23 };
 		dispatcher.OnPanic().addListener(listener);
-		queue.enqueue(eq(new PanicEvent(dispatcher.OnPanic(), 13, "foo", args)), 
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new PanicEvent((EventTypeSI) dispatcher.OnPanic(), 13, "foo", args)));
 		control.replay();
 		
 		dispatcher.firePanic(13, "foo", args);
@@ -135,10 +147,9 @@ public class TerminalEventDispatcherTest {
 
 	@Test
 	public void testRequestSecurityError() throws Exception {
-		EventType type = dispatcher.OnRequestSecurityError(); 
+		EventTypeSI type = (EventTypeSI) dispatcher.OnRequestSecurityError(); 
 		type.addListener(listener);
-		queue.enqueue(eq(new RequestSecurityEvent(type, descr, 500, "test")), 
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new RequestSecurityEvent(type, descr, 500, "test")));
 		control.replay();
 		
 		dispatcher.fireSecurityRequestError(descr, 500, "test");
@@ -148,6 +159,7 @@ public class TerminalEventDispatcherTest {
 	
 	@Test
 	public void testUnsubscribe() throws Exception {
+		queue.enqueue(new EventImpl((EventTypeSI) dispatcher.OnDisconnected()));
 		observer3.OnTerminalUnready(terminal);
 		control.replay();
 		dispatcher.subscribe(observer1);

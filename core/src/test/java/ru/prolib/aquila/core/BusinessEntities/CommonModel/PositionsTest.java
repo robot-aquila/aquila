@@ -14,12 +14,11 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
  * $Id: PositionsImplTest.java 527 2013-02-14 15:14:09Z whirlwind $
  */
 public class PositionsTest {
-	private static EventQueue queue = new SimpleEventQueue();
 	private static Account account;
 	private static SecurityDescriptor descr1,descr2;
 	private IMocksControl control;
 	private EventSystem es;
-	private EditableTerminal terminal;
+	private EditableTerminal<?> terminal;
 	private Portfolio portfolio;
 	private EditablePosition position1, position2;
 	private Security security1, security2;
@@ -44,7 +43,7 @@ public class PositionsTest {
 		position1 = control.createMock(EditablePosition.class);
 		position2 = control.createMock(EditablePosition.class);
 		
-		es = new EventSystemImpl(queue);
+		es = new EventSystemImpl();
 		positions = new Positions(portfolio, dispatcher);
 		
 		expect(terminal.getEventSystem()).andStubReturn(es);

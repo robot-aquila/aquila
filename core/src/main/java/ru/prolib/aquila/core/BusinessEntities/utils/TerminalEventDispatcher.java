@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.utils.KW;
  */
 public class TerminalEventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventType onConnected, onDisconnected, onStarted,
+	private final EventTypeSI onConnected, onDisconnected, onStarted,
 		onStopped, onPanic, onRequestSecurityError;
 	private final List<KW<TerminalObserver>> observers;
 	

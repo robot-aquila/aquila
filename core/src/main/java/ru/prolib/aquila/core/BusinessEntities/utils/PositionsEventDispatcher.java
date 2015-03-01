@@ -17,20 +17,15 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * <p>
  */
 public class PositionsEventDispatcher implements EventListener {
-	private final EventDispatcher dispatcher, sync_disp;
-	private final EventType onAvailable, onChanged;
+	private final EventDispatcher dispatcher;
+	private final EventTypeSI onAvailable, onChanged;
 	
 	public PositionsEventDispatcher(EventSystem es, Account account) {
 		super();
 		String id = "Positions[" + account + "]";
 		dispatcher = es.createEventDispatcher(id);
 		onAvailable = dispatcher.createType("Available");
-		sync_disp = createSyncDispatcher(id);
-		onChanged = sync_disp.createType("Changed");
-	}
-	
-	private final EventDispatcher createSyncDispatcher(String id) {
-		 return new EventDispatcherImpl(new SimpleEventQueue(), id);
+		onChanged = dispatcher.createSyncType("Changed");
 	}
 	
 	/**
@@ -77,7 +72,7 @@ public class PositionsEventDispatcher implements EventListener {
 	@Override
 	public void onEvent(Event event) {
 		Position position = ((PositionEvent) event).getPosition();
-		sync_disp.dispatch(new PositionEvent(onChanged, position));
+		dispatcher.dispatch(new PositionEvent(onChanged, position));
 	}
 
 }

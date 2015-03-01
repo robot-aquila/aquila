@@ -18,7 +18,7 @@ public class PortfoliosTest {
 	private static Account account1, account2, account3;
 	private static EventSystem es;
 	private IMocksControl control;
-	private EditableTerminal terminal;
+	private EditableTerminal<?> terminal;
 	private PortfoliosEventDispatcher dispatcher;
 	private EventType type;
 	private Portfolios portfolios;

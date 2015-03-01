@@ -19,14 +19,14 @@ public class OrderPoolBaseTest {
 	private Terminal terminal;
 	private Order order1, order2, order3, order4, order5;
 	private Set<Order> pending, active, done;
-	private EventType onDone;
+	private EventTypeSI onDone;
 	private OrderPoolBase base;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
-		onDone = control.createMock(EventType.class);
+		onDone = control.createMock(EventTypeSI.class);
 		order1 = control.createMock(Order.class);
 		order2 = control.createMock(Order.class);
 		order3 = control.createMock(Order.class);
@@ -327,12 +327,12 @@ public class OrderPoolBaseTest {
 	public void testListenerSpecialCase() throws Exception {
 		// Тест проверяет, что разные экземпляры пула с одинаковым содержимым
 		// являются отличными друг от друга наблюдателями.
-		EventType type = new EventTypeImpl("foo");
+		EventTypeSI type = new EventTypeImpl("foo");
 		OrderPoolBase pool1 = new OrderPoolBase(), pool2 = new OrderPoolBase();
 		type.addListener(pool1);
 		type.addListener(pool2);
 		
-		List<EventListener> actual = type.getListeners();
+		List<EventListener> actual = type.getAsyncListeners();
 		assertEquals(2, actual.size());
 		assertSame(pool1, actual.get(0));
 		assertSame(pool2, actual.get(1));

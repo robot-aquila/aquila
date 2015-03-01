@@ -33,5 +33,18 @@ public class EventImplTest {
 	public void testToString() throws Exception {
 		assertEquals("foo.BasicEvent", event.toString());
 	}
+	
+	@Test
+	public void testEquals_SpecialCases() throws Exception {
+		assertTrue(event.equals(event));
+		assertFalse(event.equals(null));
+		assertFalse(event.equals(this));
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		assertTrue(event.equals(new EventImpl(type)));
+		assertFalse(event.equals(new EventImpl(type2)));
+	}
 
 }

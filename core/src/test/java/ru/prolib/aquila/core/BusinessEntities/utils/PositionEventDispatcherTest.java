@@ -37,17 +37,20 @@ public class PositionEventDispatcherTest {
 	
 	@Test
 	public void testStructure() throws Exception {
-		EventDispatcher ed =
-			es.createEventDispatcher("Position[foo#bar:RI@SPBFUT(FUT/USD)]");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnChanged(), ed.createType("Changed"));
+		String did = "Position[foo#bar:RI@SPBFUT(FUT/USD)]";
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals(did, ed.getId());
+		
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnChanged();
+		assertEquals(did + ".Changed", type.getId());
+		assertFalse(type.isOnlySyncMode());
 	}
 	
 	@Test
 	public void testFireChanged() throws Exception {
 		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new PositionEvent(dispatcher.OnChanged(), position)),
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new PositionEvent((EventTypeSI) dispatcher.OnChanged(), position)));
 		control.replay();
 		
 		dispatcher.fireChanged(position);

@@ -37,18 +37,23 @@ public class SecurityEventDispatcherTest {
 	
 	@Test
 	public void testStructure() throws Exception {
-		EventDispatcher ed =
-			es.createEventDispatcher("Security[RI@SPBFUT(FUT/USD)]");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnChanged(), ed.createType("Changed"));
-		assertEquals(dispatcher.OnTrade(), ed.createType("Trade"));
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals("Security[RI@SPBFUT(FUT/USD)]", ed.getId());
+
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnChanged();
+		assertEquals("Security[RI@SPBFUT(FUT/USD)].Changed", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnTrade();
+		assertEquals("Security[RI@SPBFUT(FUT/USD)].Trade", type.getId());
+		assertFalse(type.isOnlySyncMode());
 	}
 	
 	@Test
 	public void testFireChanged() throws Exception {
 		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new SecurityEvent(dispatcher.OnChanged(), security)),
-				same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new SecurityEvent((EventTypeSI) dispatcher.OnChanged(), security)));
 		control.replay();
 		
 		dispatcher.fireChanged(security);
@@ -59,8 +64,7 @@ public class SecurityEventDispatcherTest {
 	@Test
 	public void testFireTrade() throws Exception {
 		dispatcher.OnTrade().addListener(listener);
-		queue.enqueue(eq(new SecurityTradeEvent(dispatcher.OnTrade(),
-				security, trade)), same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new SecurityTradeEvent((EventTypeSI) dispatcher.OnTrade(), security, trade)));
 		control.replay();
 		
 		dispatcher.fireTrade(security, trade);
