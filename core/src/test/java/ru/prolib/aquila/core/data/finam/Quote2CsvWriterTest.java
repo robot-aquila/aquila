@@ -11,15 +11,14 @@ import org.apache.log4j.BasicConfigurator;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.EditableCandleSeries;
-import ru.prolib.aquila.core.data.Finam;
-import ru.prolib.aquila.core.data.SeriesFactoryImpl;
-import ru.prolib.aquila.core.data.Timeframe;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
 
 public class Quote2CsvWriterTest {
 	private static final Timeframe T = Timeframe.M1;
+	private EventSystem es;
+	private SeriesFactory seriesFactory;
 	private Quote2CsvWriter writer;
 	private EditableCandleSeries candles;
 	
@@ -31,7 +30,15 @@ public class Quote2CsvWriterTest {
 
 	@Before
 	public void setUp() throws Exception {
-		candles = new SeriesFactoryImpl().createCandle(Timeframe.M1);
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		seriesFactory = new SeriesFactoryImpl(es);
+		candles = seriesFactory.createCandle(Timeframe.M1);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	/**
@@ -80,7 +87,7 @@ public class Quote2CsvWriterTest {
 		
 		writer.stop();
 		
-		EditableCandleSeries loaded = new SeriesFactoryImpl().createCandle(T);
+		EditableCandleSeries loaded = seriesFactory.createCandle(T);
 		new Finam().loadCandles(dst, loaded);
 		
 		assertEquals(candles, loaded);
@@ -101,12 +108,11 @@ public class Quote2CsvWriterTest {
 		
 		writer.stop();
 		
-		EditableCandleSeries loaded = new SeriesFactoryImpl()
-			.createCandle(Timeframe.M1);
+		EditableCandleSeries loaded = seriesFactory.createCandle(Timeframe.M1);
 		new Finam().loadCandles(dst, loaded);
-		assertEquals(candles, loaded);
 		assertEquals(5, candles.getLength());
 		assertEquals(candles.getLength(), loaded.getLength());
+		assertEquals(candles, loaded);
 	}
 	
 	@Test

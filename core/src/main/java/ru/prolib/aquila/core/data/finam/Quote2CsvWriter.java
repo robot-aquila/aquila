@@ -59,7 +59,7 @@ public class Quote2CsvWriter implements CandlesWriter, EventListener {
 			throw new StarterException("Error initialization: " + file, e);
 		}
 		logger.debug("Start save candles to: {}", file);
-		candles.OnAdded().addListener(this);
+		candles.OnAdded().addSyncListener(this);
 	}
 
 	@Override
