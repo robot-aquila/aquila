@@ -86,12 +86,13 @@ public class SMStateMachine_TriggersExampleTest {
 	@Before
 	public void setUp() throws Exception {
 		events = new LinkedList<Event>();
-		es = new EventSystemImpl(new SimpleEventQueue());
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		dispatcher = es.createEventDispatcher();
-		s1exit = dispatcher.createType("s1exit");
-		s1skip = dispatcher.createType("s1skip");
-		s2back = dispatcher.createType("s2back");
-		s2exit = dispatcher.createType("s2exit");
+		s1exit = dispatcher.createSyncType("s1exit");
+		s1skip = dispatcher.createSyncType("s1skip");
+		s2back = dispatcher.createSyncType("s2back");
+		s2exit = dispatcher.createSyncType("s2exit");
 		SMState s1 = new State1(), s2 = new State2();
 		transitions = new HashMap<KW<SMExit>, SMState>();
 		transitions.put(new KW<SMExit>(s1.getExit("EXIT")), s2);
@@ -99,6 +100,11 @@ public class SMStateMachine_TriggersExampleTest {
 		transitions.put(new KW<SMExit>(s2.getExit("EXIT")), SMState.FINAL);
 		automat = new SMStateMachine(s1, transitions);
 		automat.setDebug(true);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
