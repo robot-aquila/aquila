@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 
@@ -15,33 +15,56 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: SeriesImplTest.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class SeriesImplTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private SeriesImpl<Integer> val1,val2;
 	
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
-		val1 = new SeriesImpl<Integer>("zulu4");
+		val1 = new SeriesImpl<Integer>(es, "zulu4");
 		val1.add( 2); val1.add( 4); val1.add( 8); val1.add(16);
-		val2 = new SeriesImpl<Integer>("foo", 4);
+		val2 = new SeriesImpl<Integer>(es, "foo", 4);
 		val2.add( 2); val2.add( 4); val2.add( 8); val2.add(16);
 		val2.add(-1); val2.add(-2); val2.add(-3); val2.add(-4); // здесь оптим.
 		val2.add( 0); val2.add( 9); val2.add( 8); val2.add( 7); // здесь оптим.
 	}
 	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
+	}
+	
 	@Test (expected=NullPointerException.class)
-	public void testConstruct1_ThrowsIfIdIsNull() throws Exception {
+	public void testConstruct1_ThrowsIfEventSystemIsNull() throws Exception {
 		new SeriesImpl<Integer>(null);
 	}
-		
+	
+	@Test (expected=NullPointerException.class)
+	public void testConstruct2_ThrowsIfEventSystemIsNull() throws Exception {
+		new SeriesImpl<Integer>(null, "zulu24");
+	}
+	
 	@Test (expected=NullPointerException.class)
 	public void testConstruct2_ThrowsIfIdIsNull() throws Exception {
-		new SeriesImpl<Integer>(null, 128);
+		new SeriesImpl<Integer>(es, null);
+	}
+
+	@Test (expected=NullPointerException.class)
+	public void testConstruct3_ThrowsIfEventSystemIsNull() throws Exception {
+		new SeriesImpl<Integer>(null, "zulu24", 128);
+	}
+	
+	@Test (expected=NullPointerException.class)
+	public void testConstruct3_ThrowsIfIdIsNull() throws Exception {
+		new SeriesImpl<Integer>(es, null, 128);
 	}
 	
 	@Test
-	public void testConstruct0_Ok() throws Exception {
-		val2 = new SeriesImpl<Integer>();
+	public void testConstruct1_Ok() throws Exception {
+		val2 = new SeriesImpl<Integer>(es);
 		assertEquals(Series.DEFAULT_ID, val2.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, val2.getStorageLimit());
 	}
@@ -54,7 +77,7 @@ public class SeriesImplTest {
 
 	@Test (expected=ValueNotExistsException.class)
 	public void testGet0_ThrowsIfNoValue() throws Exception {
-		val1 = new SeriesImpl<Integer>();
+		val1 = new SeriesImpl<Integer>(es);
 		val1.get();
 	}
 	
@@ -146,7 +169,7 @@ public class SeriesImplTest {
 	
 	@Test
 	public void testEquals_CommonParams() throws Exception {
-		val1 = new SeriesImpl<Integer>("foo", 5);
+		val1 = new SeriesImpl<Integer>(es, "foo", 5);
 		Variant<String> vId = new Variant<String>()
 			.add("foo")
 			.add("bar");
@@ -157,7 +180,7 @@ public class SeriesImplTest {
 		int foundCnt = 0;
 		SeriesImpl<Integer> x = null, found = null;
 		do {
-			x = new SeriesImpl<Integer>(vId.get(), vLmt.get());
+			x = new SeriesImpl<Integer>(es, vId.get(), vLmt.get());
 			if ( val1.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -170,8 +193,8 @@ public class SeriesImplTest {
 	
 	@Test
 	public void testEquals_StorageAffected() throws Exception {
-		val1 = new SeriesImpl<Integer>("foo", 5);
-		val2 = new SeriesImpl<Integer>("foo", 5);
+		val1 = new SeriesImpl<Integer>(es, "foo", 5);
+		val2 = new SeriesImpl<Integer>(es, "foo", 5);
 		assertTrue(val1.equals(val2));
 		
 		val1.add(1);
@@ -182,10 +205,10 @@ public class SeriesImplTest {
 	
 	@Test
 	public void testEquals_StorageOffsetAffected() throws Exception {
-		val1 = new SeriesImpl<Integer>("foo", 4);
+		val1 = new SeriesImpl<Integer>(es, "foo", 4);
 		val1.add(-1); val1.add(-2); val1.add(-3); val1.add(-4);
 		
-		val2 = new SeriesImpl<Integer>("foo", 4);
+		val2 = new SeriesImpl<Integer>(es, "foo", 4);
 		val2.add( 2); val2.add( 4); val2.add( 8); val2.add(16);
 		val2.add(-1); val2.add(-2); val2.add(-3); val2.add(-4); // здесь оптим.
 		
@@ -198,11 +221,11 @@ public class SeriesImplTest {
 	@Test
 	public void testOnAdded() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnAdded(), 80, 4)));
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnAdded(), 75, 5)));
+		listener.onEvent(eq(new ValueEvent<Integer>((EventTypeSI) val1.OnAdded(), 80, 4)));
+		listener.onEvent(eq(new ValueEvent<Integer>((EventTypeSI) val1.OnAdded(), 75, 5)));
 		control.replay();
 		
-		val1.OnAdded().addListener(listener);
+		val1.OnAdded().addSyncListener(listener);
 		val1.add(80);
 		val1.add(75);
 		
@@ -212,13 +235,13 @@ public class SeriesImplTest {
 	@Test
 	public void testOnUpdated() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpdated(), 16, 24, 3)));
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpdated(), 24,  6, 3)));
-		listener.onEvent(eq(new ValueEvent<Integer>(val1.OnUpdated(),  6,  7, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>((EventTypeSI) val1.OnUpdated(), 16, 24, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>((EventTypeSI) val1.OnUpdated(), 24,  6, 3)));
+		listener.onEvent(eq(new ValueEvent<Integer>((EventTypeSI) val1.OnUpdated(),  6,  7, 3)));
 
 		control.replay();
 		
-		val1.OnUpdated().addListener(listener);
+		val1.OnUpdated().addSyncListener(listener);
 		val1.set(24);
 		val1.set( 6);
 		val1.set( 7);

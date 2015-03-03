@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import org.joda.time.Interval;
 
+import ru.prolib.aquila.core.EventSystem;
+
 /**
  * Ряд временных интервалов.
  * <p>
@@ -17,11 +19,14 @@ public class CandleIntervalSeries extends CandleProxy<Interval>
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param valueId идентификатор
 	 * @param candles ряд свечей
 	 */
-	public CandleIntervalSeries(String valueId, Series<Candle> candles) {
-		super(valueId, candles, new GCandleInterval());
+	public CandleIntervalSeries(EventSystem es, String valueId,
+			Series<Candle> candles) 
+	{
+		super(es, valueId, candles, new GCandleInterval());
 	}
 	
 	@Override

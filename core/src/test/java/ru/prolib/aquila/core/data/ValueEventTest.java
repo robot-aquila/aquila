@@ -5,8 +5,7 @@ import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.data.ValueEvent;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -15,13 +14,13 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class ValueEventTest {
 	private IMocksControl control;
-	private EventType type;
+	private EventTypeSI type;
 	private ValueEvent<Double> event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type = control.createMock(EventType.class);
+		type = control.createMock(EventTypeSI.class);
 		event = new ValueEvent<Double>(type, 123.45d, 123);
 	}
 	
@@ -38,11 +37,6 @@ public class ValueEventTest {
 		assertSame(type, event.getType());
 		assertNull(event.getNewValue());
 		assertEquals(123, event.getValueIndex());
-	}
-	
-	@Test (expected=NullPointerException.class)
-	public void testConstruct_ThrowsIfTypeIsNull() throws Exception {
-		new ValueEvent<Double>(null, 123.45d, 123);
 	}
 	
 	@Test
@@ -63,9 +57,9 @@ public class ValueEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventType> vType = new Variant<EventType>()
+		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
 			.add(type)
-			.add(control.createMock(EventType.class));
+			.add(control.createMock(EventTypeSI.class));
 		Variant<Double> vOld = new Variant<Double>(vType)
 			.add(null)
 			.add(157.21d);

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.EventSystem;
+
 
 /**
  * Ряд данных для конвертации атрибута свечи в обособленный ряд.
@@ -14,14 +16,15 @@ public class CandleDataSeries extends CandleProxy<Double>
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param valueId идентификатор
 	 * @param candles ряд свечей
 	 * @param getter геттер значения атрибута свечи
 	 */
-	public CandleDataSeries(String valueId, Series<Candle> candles,
-			GCandlePart<Double> getter)
+	public CandleDataSeries(EventSystem es, String valueId,
+			Series<Candle> candles, GCandlePart<Double> getter)
 	{
-		super(valueId, candles, getter);
+		super(es, valueId, candles, getter);
 	}
 	
 	@Override

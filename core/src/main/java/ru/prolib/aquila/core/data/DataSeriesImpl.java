@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.EventSystem;
+
 /**
  * Реализация ряда данных.
  * <p>
@@ -15,9 +17,11 @@ public class DataSeriesImpl extends SeriesImpl<Double>
 	 * <p>
 	 * В качестве идентификатора значения используется {@link Series#DEFAULT_ID}.
 	 * Реальное ограничение длины не используется.
+	 * <p>
+	 * @param es фасад системы событий
 	 */
-	public DataSeriesImpl() {
-		super();
+	public DataSeriesImpl(EventSystem es) {
+		super(es);
 	}
 	
 	/**
@@ -25,21 +29,23 @@ public class DataSeriesImpl extends SeriesImpl<Double>
 	 * <p>
 	 * Реальное ограничение длины не используется.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param valueId идентификатор ряда
 	 */
-	public DataSeriesImpl(String valueId) {
-		super(valueId);
+	public DataSeriesImpl(EventSystem es, String valueId) {
+		super(es, valueId);
 	}
 	
 	/**
 	 * Создать ряд данных.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param valueId идентификатор ряда
 	 * @param lengthLimit реальное ограничение длины. Если меньше нуля, то
 	 * используется {@link #STORAGE_NOT_LIMITED}
 	 */
-	public DataSeriesImpl(String valueId, int lengthLimit) {
-		super(valueId, lengthLimit);
+	public DataSeriesImpl(EventSystem es, String valueId, int lengthLimit) {
+		super(es, valueId, lengthLimit);
 	}
 	
 	@Override

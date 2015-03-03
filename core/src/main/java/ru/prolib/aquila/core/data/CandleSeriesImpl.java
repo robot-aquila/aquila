@@ -5,8 +5,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
-
 
 /**
  * Ряд свечей.
@@ -49,23 +49,27 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	private final IntervalSeries interval;
 	private DateTime poa;
 	
-	public CandleSeriesImpl(Timeframe timeframe) {
-		this(timeframe, Series.DEFAULT_ID);
+	public CandleSeriesImpl(EventSystem es, Timeframe timeframe) {
+		this(es, timeframe, Series.DEFAULT_ID);
 	}
 	
-	public CandleSeriesImpl(Timeframe timeframe, String valueId) {
-		this(timeframe, valueId, SeriesImpl.STORAGE_NOT_LIMITED);
+	public CandleSeriesImpl(EventSystem es, Timeframe timeframe,
+			String valueId)
+	{
+		this(es, timeframe, valueId, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
-	public CandleSeriesImpl(Timeframe timeframe, String id, int storageLimit) {
-		super(id, storageLimit);
+	public CandleSeriesImpl(EventSystem es, Timeframe timeframe, String id,
+			int storageLimit)
+	{
+		super(es, id, storageLimit);
 		this.timeframe = timeframe;
-		open = new CandleDataSeries(id + ".open", this, new GCandleOpen());
-		close = new CandleDataSeries(id + ".close", this, new GCandleClose());
-		high = new CandleDataSeries(id + ".high", this, new GCandleHigh());
-		low = new CandleDataSeries(id + ".low", this, new GCandleLow());
-		vol = new CandleDataSeries(id + ".volume", this, new GCandleVolume());
-		interval = new CandleIntervalSeries(id + ".interval", this);
+		open = new CandleDataSeries(es, id + ".open", this, new GCandleOpen());
+		close = new CandleDataSeries(es, id + ".close", this, new GCandleClose());
+		high = new CandleDataSeries(es, id + ".high", this, new GCandleHigh());
+		low = new CandleDataSeries(es, id + ".low", this, new GCandleLow());
+		vol = new CandleDataSeries(es, id + ".volume", this, new GCandleVolume());
+		interval = new CandleIntervalSeries(es, id + ".interval", this);
 	}
 	
 	@Override

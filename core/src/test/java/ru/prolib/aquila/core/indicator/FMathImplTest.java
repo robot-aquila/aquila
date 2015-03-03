@@ -139,7 +139,7 @@ public class FMathImplTest {
 	public void setUp() throws Exception {
 		math = new FMathImpl();
 		value = new DataSeriesImpl();
-		candles = new SeriesImpl<Candle>();
+		candles = new SeriesImpl<Candle>(null);
 	}
 	
 	@Test

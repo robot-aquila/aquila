@@ -6,7 +6,7 @@ import org.easymock.IMocksControl;
 import org.joda.time.*;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -15,6 +15,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class CandleProxyTest {
 	private static Interval interval1, interval2, interval3;
+	private EventSystem es;
 	private IMocksControl control;
 	private EditableSeries<Candle> candles;
 	private CandleProxy<Double> proxy;
@@ -30,13 +31,20 @@ public class CandleProxyTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		getter = new GCandleOpen();
-		candles = new SeriesImpl<Candle>();
+		candles = new SeriesImpl<Candle>(es);
 		candles.add(new Candle(interval1, 12.34d, 0d, 0d, 0d, 0l));
 		candles.add(new Candle(interval2, 15.84d, 0d, 0d, 0d, 0l));
 		candles.add(new Candle(interval3, 11.92d, 0d, 0d, 0d, 0l));
-		proxy = new CandleProxy<Double>("foobar", candles, getter);
+		proxy = new CandleProxy<Double>(es, "foobar", candles, getter);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -44,6 +52,15 @@ public class CandleProxyTest {
 		assertEquals("foobar", proxy.getId());
 		assertSame(candles, proxy.getCandles());
 		assertSame(getter, proxy.getGetter());
+		
+		EventTypeSI type;
+		type = (EventTypeSI) proxy.OnAdded();
+		assertEquals("foobar.Add", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) proxy.OnUpdated();
+		assertEquals("foobar.Upd", type.getId());
+		assertFalse(type.isOnlySyncMode());
 	}
 	
 	@Test
@@ -76,7 +93,7 @@ public class CandleProxyTest {
 			.add("kappa");
 		Variant<Series<Candle>> vSrc = new Variant<Series<Candle>>(vId)
 			.add(candles)
-			.add(new SeriesImpl<Candle>());
+			.add(new SeriesImpl<Candle>(es));
 		Variant<GCandlePart<Double>> vGtr =
 				new Variant<GCandlePart<Double>>(vSrc)
 			.add(getter)
@@ -85,7 +102,7 @@ public class CandleProxyTest {
 		int foundCnt = 0;
 		CandleProxy<Double> found = null, x = null;
 		do {
-			x = new CandleProxy<Double>(vId.get(), vSrc.get(), vGtr.get());
+			x = new CandleProxy<Double>(es, vId.get(), vSrc.get(), vGtr.get());
 			if ( proxy.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -100,11 +117,11 @@ public class CandleProxyTest {
 	@Test
 	public void testOnAdded() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(eq(new ValueEvent<Double>(proxy.OnAdded(), 19.12d, 3)));
-		listener.onEvent(eq(new ValueEvent<Double>(proxy.OnAdded(), 19.85d, 4)));
+		listener.onEvent(eq(new ValueEvent<Double>((EventTypeSI) proxy.OnAdded(), 19.12d, 3)));
+		listener.onEvent(eq(new ValueEvent<Double>((EventTypeSI) proxy.OnAdded(), 19.85d, 4)));
 		control.replay();
 		
-		proxy.OnAdded().addListener(listener);
+		proxy.OnAdded().addSyncListener(listener);
 		candles.add(new Candle(interval1, 19.12d, 0d, 0d, 0d, 0l));
 		candles.add(new Candle(interval2, 19.85d, 0d, 0d, 0d, 0l));
 		
@@ -114,12 +131,12 @@ public class CandleProxyTest {
 	@Test
 	public void testOnUpdated() throws Exception {
 		EventListener listener = control.createMock(EventListener.class);
-		listener.onEvent(new ValueEvent<Double>(proxy.OnUpdated(),11.92d,15.29d,2));
-		listener.onEvent(new ValueEvent<Double>(proxy.OnUpdated(),15.29d,16.24d,2));
+		listener.onEvent(new ValueEvent<Double>((EventTypeSI) proxy.OnUpdated(),11.92d,15.29d,2));
+		listener.onEvent(new ValueEvent<Double>((EventTypeSI) proxy.OnUpdated(),15.29d,16.24d,2));
 		
 		control.replay();
 		
-		proxy.OnUpdated().addListener(listener);
+		proxy.OnUpdated().addSyncListener(listener);
 		candles.set(new Candle(interval3, 15.29, 0d, 0d, 0d, 0l));
 		candles.set(new Candle(interval3, 16.24, 0d, 0d, 0d, 0l));
 		

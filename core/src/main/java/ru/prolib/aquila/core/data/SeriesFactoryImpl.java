@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.EventSystem;
+
 /**
  * Фабрика значений.
  * <p>
@@ -11,23 +13,28 @@ package ru.prolib.aquila.core.data;
  */
 public class SeriesFactoryImpl implements SeriesFactory {
 	private final int limit;
+	private final EventSystem es;
 	
 	/**
 	 * Конструктор по умолчанию.
 	 * <p>
 	 * Ограничение длины истории для порождаемых объектов не используется.
+	 * <p>
+	 * @param es фасад системы событий
 	 */
-	public SeriesFactoryImpl() {
-		this(SeriesImpl.STORAGE_NOT_LIMITED);
+	public SeriesFactoryImpl(EventSystem es) {
+		this(es, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param lengthLimit ограничение длины хранимой истории
 	 */
-	public SeriesFactoryImpl(int lengthLimit) {
+	public SeriesFactoryImpl(EventSystem es, int lengthLimit) {
 		super();
+		this.es = es;
 		this.limit = lengthLimit;
 	}
 	
@@ -42,12 +49,12 @@ public class SeriesFactoryImpl implements SeriesFactory {
 	
 	@SuppressWarnings({ "rawtypes" })
 	private EditableSeries createValue(String id) {
-		return new SeriesImpl(id, limit);
+		return new SeriesImpl(es, id, limit);
 	}
 	
 	@Override
 	public EditableDataSeries createDouble(String id) {
-		return new DataSeriesImpl(id, limit);
+		return new DataSeriesImpl(es, id, limit);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -58,7 +65,7 @@ public class SeriesFactoryImpl implements SeriesFactory {
 
 	@Override
 	public EditableIntervalSeries createInterval(String id) {
-		return new IntervalSeriesImpl(id, limit);
+		return new IntervalSeriesImpl(es, id, limit);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -69,7 +76,7 @@ public class SeriesFactoryImpl implements SeriesFactory {
 
 	@Override
 	public EditableCandleSeries createCandle(Timeframe tf, String id) {
-		return new CandleSeriesImpl(tf, id, limit);
+		return new CandleSeriesImpl(es, tf, id, limit);
 	}
 
 	@SuppressWarnings("unchecked")

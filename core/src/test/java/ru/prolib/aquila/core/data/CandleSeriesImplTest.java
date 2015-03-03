@@ -18,6 +18,7 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: CandleSeriesImplTest.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class CandleSeriesImplTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private CandleSeriesImpl series;
 	private DateTime time1, time2, time3;
@@ -26,8 +27,10 @@ public class CandleSeriesImplTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
-		series = new CandleSeriesImpl(Timeframe.M5, "foo", 512);
+		series = new CandleSeriesImpl(es, Timeframe.M5, "foo", 512);
 		time1 = new DateTime(2013, 10, 7, 11, 0, 0);
 		time2 = time1.plusMinutes(5);
 		time3 = time2.plusMinutes(5);
@@ -39,25 +42,30 @@ public class CandleSeriesImplTest {
 		candle3 = new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L);
 	}
 	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
+	}
+	
 	@Test
-	public void testConstruct1() throws Exception {
-		series = new CandleSeriesImpl(Timeframe.M15);
+	public void testConstruct2() throws Exception {
+		series = new CandleSeriesImpl(es, Timeframe.M15);
 		assertEquals(Series.DEFAULT_ID, series.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, series.getStorageLimit());
 		assertEquals(Timeframe.M15, series.getTimeframe());
 	}
 	
 	@Test
-	public void testConstruct2() throws Exception {
-		series = new CandleSeriesImpl(Timeframe.M1, "zulu24");
+	public void testConstruct3() throws Exception {
+		series = new CandleSeriesImpl(es, Timeframe.M1, "zulu24");
 		assertEquals("zulu24", series.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, series.getStorageLimit());
 		assertEquals(Timeframe.M1, series.getTimeframe());
 	}
 	
 	@Test
-	public void testConstruct3() throws Exception {
-		series = new CandleSeriesImpl(Timeframe.M10, "zulu24", 128);
+	public void testConstruct4() throws Exception {
+		series = new CandleSeriesImpl(es, Timeframe.M10, "zulu24", 128);
 		assertEquals("zulu24", series.getId());
 		assertEquals(128, series.getStorageLimit());
 		assertEquals(Timeframe.M10, series.getTimeframe());
@@ -98,7 +106,7 @@ public class CandleSeriesImplTest {
 		CandleSeriesImpl x, found = null;
 		do {
 			Timeframe t = vTf.get();
-			x = new CandleSeriesImpl(t, vId.get(), vLmt.get());
+			x = new CandleSeriesImpl(es, t, vId.get(), vLmt.get());
 			for ( Candle candle : vRows.get() ) {
 				DateTime from = null;
 				if ( x.getLength() == 0 ) {
@@ -248,18 +256,18 @@ public class CandleSeriesImplTest {
 				actual.add(event);
 			}
 		};
-		series.OnAdded().addListener(listener);
+		series.OnAdded().addSyncListener(listener);
 		
 		series.add(candle1);
-		expected.add(new ValueEvent<Candle>(series.OnAdded(), candle1, 0));
+		expected.add(new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle1, 0));
 		assertEquals(expected, actual);
 		
 		series.add(candle2);
-		expected.add(new ValueEvent<Candle>(series.OnAdded(), candle2, 1));
+		expected.add(new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle2, 1));
 		assertEquals(expected, actual);
 		
 		series.add(candle3);
-		expected.add(new ValueEvent<Candle>(series.OnAdded(), candle3, 2));
+		expected.add(new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle3, 2));
 		assertEquals(expected, actual);
 	}
 	
@@ -354,19 +362,19 @@ public class CandleSeriesImplTest {
 				new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L),
 		};
 		Event event[] = {
-				new ValueEvent<Candle>(series.OnAdded(), candle[0], 0),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[0], candle[1], 0),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[1], candle[2], 0),
+				new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[0], 0),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[0], candle[1], 0),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[1], candle[2], 0),
 				
-				new ValueEvent<Candle>(series.OnAdded(), candle[3], 1),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[3], candle[4], 1),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[4], candle[5], 1),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[5], candle[6], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[3], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[3], candle[4], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[4], candle[5], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[5], candle[6], 1),
 				
-				new ValueEvent<Candle>(series.OnAdded(), candle[7], 2),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[7], candle[8], 2),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[8], candle[9], 2),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[9], candle[10],2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[7], 2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[7], candle[8], 2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[8], candle[9], 2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[9], candle[10],2),
 		};
 		DateTime poa[] = {
 				time1.plusMinutes(1),
@@ -395,8 +403,8 @@ public class CandleSeriesImplTest {
 				events.add(event);
 			}
 		};
-		series.OnAdded().addListener(listener);
-		series.OnUpdated().addListener(listener);
+		series.OnAdded().addSyncListener(listener);
+		series.OnUpdated().addSyncListener(listener);
 		for ( int i = 0; i < tick.length; i ++ ) {
 			String msg = "At #" + i;
 			action.aggregate(tick[i]);
@@ -536,19 +544,19 @@ public class CandleSeriesImplTest {
 				new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L),
 		};
 		Event event[] = {
-				new ValueEvent<Candle>(series.OnAdded(), candle[0], 0),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[0], candle[1], 0),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[1], candle[2], 0),
+				new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[0], 0),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[0], candle[1], 0),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[1], candle[2], 0),
 				
-				new ValueEvent<Candle>(series.OnAdded(), candle[3], 1),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[3], candle[4], 1),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[4], candle[5], 1),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[5], candle[6], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[3], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[3], candle[4], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[4], candle[5], 1),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[5], candle[6], 1),
 				
-				new ValueEvent<Candle>(series.OnAdded(), candle[7], 2),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[7], candle[8], 2),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[8], candle[9], 2),
-				new ValueEvent<Candle>(series.OnUpdated(), candle[9], candle[10],2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[7], 2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[7], candle[8], 2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[8], candle[9], 2),
+				new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[9], candle[10],2),
 		};
 		DateTime poa[] = {
 				time1.plusMinutes(1),
@@ -577,8 +585,8 @@ public class CandleSeriesImplTest {
 				events.add(event);
 			}
 		};
-		series.OnAdded().addListener(listener);
-		series.OnUpdated().addListener(listener);
+		series.OnAdded().addSyncListener(listener);
+		series.OnUpdated().addSyncListener(listener);
 		for ( int i = 0; i < trade.length; i ++ ) {
 			String msg = "At #" + i;
 			action.aggregate(trade[i]);
@@ -714,21 +722,21 @@ public class CandleSeriesImplTest {
 		};
 		Event event[] = {
 			// candle 1 events
-			new ValueEvent<Candle>(series.OnAdded(), candle[0], 0),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[0], candle[1], 0),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[1], candle[2], 0),
+			new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[0], 0),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[0], candle[1], 0),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[1], candle[2], 0),
 			
 			// candle 2 events
-			new ValueEvent<Candle>(series.OnAdded(), candle[3], 1),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[3], candle[4], 1),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[4], candle[5], 1),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[5], candle[6], 1),
+			new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[3], 1),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[3], candle[4], 1),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[4], candle[5], 1),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[5], candle[6], 1),
 			
 			// candle 3 events
-			new ValueEvent<Candle>(series.OnAdded(), candle[7], 2),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[7], candle[8], 2),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[8], candle[9], 2),
-			new ValueEvent<Candle>(series.OnUpdated(), candle[9], candle[10],2),
+			new ValueEvent<Candle>((EventTypeSI) series.OnAdded(), candle[7], 2),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[7], candle[8], 2),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[8], candle[9], 2),
+			new ValueEvent<Candle>((EventTypeSI) series.OnUpdated(), candle[9], candle[10],2),
 		};
 		DateTime poa[] = {
 			// candle 1 POA changes
@@ -760,8 +768,8 @@ public class CandleSeriesImplTest {
 				events.add(event);
 			}
 		};
-		series.OnAdded().addListener(listener);
-		series.OnUpdated().addListener(listener);
+		series.OnAdded().addSyncListener(listener);
+		series.OnUpdated().addSyncListener(listener);
 		for ( int i = 0; i < input.length; i ++ ) {
 			String msg = "At #" + i;
 			action.aggregate(input[i]);

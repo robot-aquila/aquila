@@ -29,7 +29,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	private final int limit;
 	private final LinkedList<T> history = new LinkedList<T>();
 	private final EventDispatcher dispatcher;
-	private final EventType onAdd, onUpd;
+	private final EventTypeSI onAdd, onUpd;
 	
 	/**
 	 * Реальный индекс первого элемента в хранилище.
@@ -41,9 +41,11 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	 * <p>
 	 * В качестве идентификатора значения используется {@link Series#DEFAULT_ID}.
 	 * Ограничение размера хранилища используется.
+	 * <p>
+	 * @param es фасад системы событий
 	 */
-	public SeriesImpl() {
-		this(Series.DEFAULT_ID);
+	public SeriesImpl(EventSystem es) {
+		this(es, Series.DEFAULT_ID);
 	}
 	
 	/**
@@ -51,20 +53,22 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	 * <p>
 	 * Ограничение размера хранилища используется.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param valueId идентификатор ряда
 	 */
-	public SeriesImpl(String valueId) {
-		this(valueId, STORAGE_NOT_LIMITED);
+	public SeriesImpl(EventSystem es, String valueId) {
+		this(es, valueId, STORAGE_NOT_LIMITED);
 	}
 	
 	/**
 	 * Создать ряд.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param valueId идентификатор ряда
 	 * @param storageLimit ограничение размера хранилища. Если меньше нуля, то
 	 * используется {@link #STORAGE_NOT_LIMITED}
 	 */
-	public SeriesImpl(String valueId, int storageLimit) {
+	public SeriesImpl(EventSystem es, String valueId, int storageLimit) {
 		super();
 		if ( valueId == null ) {
 			throw new NullPointerException("Id cannot be null");
@@ -74,7 +78,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 		}
 		id = valueId;
 		limit = storageLimit;
-		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), id);
+		dispatcher = es.createEventDispatcher(id);
 		onAdd = dispatcher.createType("Add");
 		onUpd = dispatcher.createType("Upd");
 	}

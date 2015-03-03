@@ -1,9 +1,7 @@
 package ru.prolib.aquila.core.data;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * Событие связанное со значением.
@@ -24,7 +22,7 @@ public class ValueEvent<T> extends EventImpl {
 	 * @param newValue новое значение
 	 * @param newValueIndex индекс нового значения
 	 */
-	public ValueEvent(EventType type, T newValue, int newValueIndex) {
+	public ValueEvent(EventTypeSI type, T newValue, int newValueIndex) {
 		super(type);
 		this.oldValue = null;
 		this.newValue = newValue;
@@ -39,7 +37,7 @@ public class ValueEvent<T> extends EventImpl {
 	 * @param newValue новое значение
 	 * @param index индекс обновленного элемента
 	 */
-	public ValueEvent(EventType type, T oldValue, T newValue, int index) {
+	public ValueEvent(EventTypeSI type, T oldValue, T newValue, int index) {
 		super(type);
 		this.oldValue = oldValue;
 		this.newValue = newValue;

@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.data;
 import static org.junit.Assert.*;
 import org.joda.time.*;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -10,28 +12,36 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: TimeSeriesImplTest.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class IntervalSeriesImplTest {
+	private EventSystem es;
 	private Interval interval1, interval2, interval3;
 	private IntervalSeriesImpl series;
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		Minutes period = Minutes.minutes(5);
 		interval1 = new Interval(new DateTime(2010, 1, 1, 8, 30, 0), period);
 		interval2 = new Interval(interval1.getEnd(), period);
 		interval3 = new Interval(interval2.getEnd(), period);
-		series = new IntervalSeriesImpl("test", 512);
+		series = new IntervalSeriesImpl(es, "test", 512);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
 	public void testConstruct0() throws Exception {
-		series = new IntervalSeriesImpl();
+		series = new IntervalSeriesImpl(es);
 		assertEquals(Series.DEFAULT_ID, series.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, series.getStorageLimit());
 	}
 	
 	@Test
 	public void testConstruct1() throws Exception {
-		series = new IntervalSeriesImpl("foobar");
+		series = new IntervalSeriesImpl(es, "foobar");
 		assertEquals("foobar", series.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, series.getStorageLimit());
 	}
@@ -66,7 +76,7 @@ public class IntervalSeriesImplTest {
 		int foundCnt = 0;
 		IntervalSeriesImpl found = null, x = null;
 		do {
-			x = new IntervalSeriesImpl(vId.get(), vLmt.get());
+			x = new IntervalSeriesImpl(es, vId.get(), vLmt.get());
 			for ( Interval i : vInt.get() ) x.add(i);
 			if ( series.equals(x) ) {
 				foundCnt ++;

@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import org.joda.time.Interval;
 
+import ru.prolib.aquila.core.EventSystem;
+
 /**
  * Реализация ряда временных интервалов.
  * <p>
@@ -12,16 +14,16 @@ public class IntervalSeriesImpl extends SeriesImpl<Interval>
 		implements EditableIntervalSeries
 {
 	
-	public IntervalSeriesImpl() {
-		super();
+	public IntervalSeriesImpl(EventSystem es) {
+		super(es);
 	}
 	
-	public IntervalSeriesImpl(String valueId) {
-		super(valueId);
+	public IntervalSeriesImpl(EventSystem es, String valueId) {
+		super(es, valueId);
 	}
 	
-	public IntervalSeriesImpl(String valueId, int lengthLimit) {
-		super(valueId, lengthLimit);
+	public IntervalSeriesImpl(EventSystem es, String valueId, int lengthLimit) {
+		super(es, valueId, lengthLimit);
 	}
 	
 	@Override

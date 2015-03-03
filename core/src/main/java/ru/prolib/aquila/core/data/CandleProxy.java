@@ -20,27 +20,28 @@ public class CandleProxy<T> implements Series<T>, EventListener {
 	private final Series<Candle> candles;
 	private final String id;
 	private final EventDispatcher dispatcher;
-	private final EventType onAdd, onUpd;
+	private final EventTypeSI onAdd, onUpd;
 	
 	/**
 	 * Создать объект.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param valueId идентификатор значения
 	 * @param candles источник свечей
 	 * @param getter геттер атрибута свечи
 	 */
-	public CandleProxy(String valueId,  Series<Candle> candles,
-			GCandlePart<T> getter)
+	public CandleProxy(EventSystem es,  String valueId,
+			Series<Candle> candles, GCandlePart<T> getter)
 	{
 		super();
 		this.id = valueId;
 		this.candles = candles;
 		this.getter = getter;
-		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), id);
+		dispatcher = es.createEventDispatcher(id);
 		onAdd = dispatcher.createType("Add");
 		onUpd = dispatcher.createType("Upd");
-		candles.OnAdded().addListener(this);
-		candles.OnUpdated().addListener(this);
+		candles.OnAdded().addSyncListener(this);
+		candles.OnUpdated().addSyncListener(this);
 	}
 	
 	/**

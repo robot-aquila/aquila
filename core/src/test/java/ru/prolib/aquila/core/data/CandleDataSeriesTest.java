@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.data;
 import static org.junit.Assert.*;
 import org.joda.time.*;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 /**
@@ -10,15 +12,23 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: CandleDataSeriesTest.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class CandleDataSeriesTest {
+	private EventSystem es;
 	private Series<Candle> candles;
 	private GCandlePart<Double> getter;
 	private CandleDataSeries series;
 
 	@Before
 	public void setUp() throws Exception {
-		candles = new SeriesImpl<Candle>();
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		candles = new SeriesImpl<Candle>(es);
 		getter = new GCandleOpen();
-		series = new CandleDataSeries("foo", candles, getter);
+		series = new CandleDataSeries(es, "foo", candles, getter);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -37,7 +47,7 @@ public class CandleDataSeriesTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		SeriesImpl<Candle> candles2 = new SeriesImpl<Candle>();
+		SeriesImpl<Candle> candles2 = new SeriesImpl<Candle>(es);
 		candles2.add(new Candle(new Interval(new DateTime(),Minutes.minutes(1)),
 				10d, 20l));
 		Variant<String> vId = new Variant<String>()
@@ -54,7 +64,7 @@ public class CandleDataSeriesTest {
 		int foundCnt = 0;
 		CandleDataSeries x = null, found = null;
 		do {
-			x = new CandleDataSeries(vId.get(), vCandles.get(), vGtr.get());
+			x = new CandleDataSeries(es, vId.get(), vCandles.get(), vGtr.get());
 			if ( series.equals(x) ) {
 				foundCnt ++;
 				found = x;

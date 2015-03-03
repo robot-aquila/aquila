@@ -10,6 +10,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.*;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
 
 /**
@@ -19,6 +20,7 @@ import ru.prolib.aquila.core.data.finam.Quote2CsvWriter;
 public class FinamTest {
 	private static DateTimeFormatter df;
 	private static Finam finam;
+	private EventSystem es;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -28,7 +30,13 @@ public class FinamTest {
 
 	@Before
 	public void setUp() throws Exception {
-		
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -37,7 +45,7 @@ public class FinamTest {
 			{ "20130307100000", 134.97d, 135.21d, 134.52d, 134.67d, 5386540L },
 			{ "20130307110000", 134.68d, 135.59d, 134.62d, 135.40d, 1906010L },
 		};
-		EditableCandleSeries expected = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries expected = new CandleSeriesImpl(es, Timeframe.M5);
 		for ( int i = 0; i < fix.length; i ++ ) {
 			DateTime time = df.parseDateTime((String) fix[i][0]);
 			expected.add(new Candle(Timeframe.M5.getInterval(time),
@@ -46,7 +54,7 @@ public class FinamTest {
 					(Long) fix[i][5]));
 		}
 		
-		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries actual = new CandleSeriesImpl(es, Timeframe.M5);
 		finam.loadCandles(new File("fixture/GAZP.txt"), actual);
 		
 		assertEquals(expected, actual);
@@ -60,7 +68,7 @@ public class FinamTest {
 				{ "20130301101000",152370.0,152380.0,152060.0,152200.0 },
 				{ "20130301101500",152200.0,152250.0,152130.0,152190.0 },
 		};
-		EditableCandleSeries expected = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries expected = new CandleSeriesImpl(es, Timeframe.M5);
 		for ( int i = 0; i < fix.length; i ++ ) {
 			DateTime time = df.parseDateTime((String) fix[i][0]);
 			expected.add(new Candle(Timeframe.M5.getInterval(time),
@@ -68,7 +76,7 @@ public class FinamTest {
 					(Double) fix[i][3], (Double) fix[i][4], 0L));
 		}
 
-		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries actual = new CandleSeriesImpl(es, Timeframe.M5);
 		finam.loadCandles(new File("fixture/SPFB.RTS.txt"), actual);
 		
 		assertEquals(expected, actual);
@@ -78,7 +86,7 @@ public class FinamTest {
 	public void testCreateWriter() throws Exception {
 		File file = File.createTempFile("finam-", ".csv");
 		file.deleteOnExit();
-		EditableCandleSeries candles = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries candles = new CandleSeriesImpl(es, Timeframe.M5);
 		
 		CandlesWriter expected = new Quote2CsvWriter(candles, file);
 		assertEquals(expected, finam.createWriter(file, candles));
@@ -156,7 +164,7 @@ public class FinamTest {
 		writer.write("xxxxxxxx,110002,0,0,0,0,0\n");
 		writer.close();
 		
-		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries actual = new CandleSeriesImpl(es, Timeframe.M5);
 		finam.loadCandles(file, actual);
 	}
 	
@@ -170,7 +178,7 @@ public class FinamTest {
 		writer.write("20141204,xxxxxx,0,0,0,0,0\n");
 		writer.close();
 		
-		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries actual = new CandleSeriesImpl(es, Timeframe.M5);
 		finam.loadCandles(file, actual);
 	}
 	
@@ -184,7 +192,7 @@ public class FinamTest {
 		writer.write("20141204,110002,0,0,0,0,0\n");
 		writer.close();
 		
-		EditableCandleSeries actual = new CandleSeriesImpl(Timeframe.M5);
+		EditableCandleSeries actual = new CandleSeriesImpl(es, Timeframe.M5);
 		finam.loadCandles(file, actual);
 		assertEquals(df.parseDateTime("20141204100000"), actual.get(0).getStartTime());
 		assertEquals(df.parseDateTime("20141204110000"), actual.get(1).getStartTime());
