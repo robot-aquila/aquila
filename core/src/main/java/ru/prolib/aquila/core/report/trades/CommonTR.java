@@ -43,8 +43,8 @@ public class CommonTR implements EditableTradeReport, EventListener {
 		this.indices = new Hashtable<RTrade, Integer>();
 	}
 
-	public CommonTR(CommonTREventDispatcher dispatcher) {
-		this(dispatcher, new ActiveTrades());
+	public CommonTR(EventSystem es, CommonTREventDispatcher dispatcher) {
+		this(dispatcher, new ActiveTrades(es));
 	}
 	
 	/**

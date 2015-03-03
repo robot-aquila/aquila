@@ -32,7 +32,7 @@ public class ReportBuilder {
 	 * @return отчет
 	 */
 	public EditableTradeReport createReport(EventSystem es) {
-		return new CommonTR(new CommonTREventDispatcher(es));
+		return new CommonTR(es, new CommonTREventDispatcher(es));
 	}
 	
 	/**
@@ -59,7 +59,7 @@ public class ReportBuilder {
 	private TradeReport createReport(Terminal terminal, TradeSelector selector)
 	{
 		return new TerminalTradeReport(terminal, selector,
-			createReport(((EditableTerminal) terminal).getEventSystem()));
+			createReport(((EditableTerminal<?>) terminal).getEventSystem()));
 	}
 	
 	@Override

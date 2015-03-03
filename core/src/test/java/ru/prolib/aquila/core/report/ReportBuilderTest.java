@@ -2,23 +2,33 @@ package ru.prolib.aquila.core.report;
 
 import static org.junit.Assert.*;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.report.trades.*;
 
 public class ReportBuilderTest {
-	private EditableTerminal terminal;
+	private EventSystem es;
+	private EditableTerminal<?> terminal;
 	private ReportBuilder builder;
 
+	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		terminal = new TerminalImpl("foo");
+		es = terminal.getEventSystem();
+		es.getEventQueue().start();
 		builder = new ReportBuilder();
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
 	public void testCreateReport_EventSystem() throws Exception {
-		TradeReport expected =
-			new CommonTR(new CommonTREventDispatcher(terminal.getEventSystem()));
+		TradeReport expected = new CommonTR(es, new CommonTREventDispatcher(es));
 		
 		TradeReport actual = builder.createReport(terminal.getEventSystem());
 		assertEquals(expected, actual);

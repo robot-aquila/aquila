@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.utils.Variant;
 public class TerminalTradeReportTest {
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
-	private EventType onEvent;
+	private EventTypeSI onEvent;
 	private Terminal terminal;
 	private EditableTradeReport underlying;
 	private Order order;
@@ -37,7 +37,7 @@ public class TerminalTradeReportTest {
 		control = createStrictControl();
 		record = control.createMock(RTrade.class);
 		security = control.createMock(Security.class);
-		onEvent = control.createMock(EventType.class);
+		onEvent = control.createMock(EventTypeSI.class);
 		terminal = control.createMock(Terminal.class);
 		underlying = control.createMock(EditableTradeReport.class);
 		order = control.createMock(Order.class);
@@ -134,7 +134,7 @@ public class TerminalTradeReportTest {
 	
 	@Test
 	public void testOnEvent_TradeApproved() throws Exception {
-		OrderTradeEvent e = new OrderTradeEvent(onEvent, order, trade);
+		OrderTradeEvent e = new OrderTradeEvent((EventTypeSI) onEvent, order, trade);
 		expect(selector.mustBeAdded(same(trade), same(order))).andReturn(true);
 		underlying.addTrade(same(trade));
 		control.replay();
@@ -146,7 +146,7 @@ public class TerminalTradeReportTest {
 	
 	@Test
 	public void testOnEvent_TradeRejected() throws Exception {
-		OrderTradeEvent e = new OrderTradeEvent(onEvent, order, trade);
+		OrderTradeEvent e = new OrderTradeEvent((EventTypeSI) onEvent, order, trade);
 		expect(selector.mustBeAdded(same(trade), same(order))).andReturn(false);
 		control.replay();
 		
@@ -162,6 +162,7 @@ public class TerminalTradeReportTest {
 		assertFalse(report.equals(this));
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testEquals() throws Exception {
 		Terminal t1 = new TerminalImpl("foo");

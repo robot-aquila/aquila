@@ -27,18 +27,27 @@ public class CommonTREventDispatcherTest {
 	
 	@Test
 	public void testStructure() throws Exception {
-		EventDispatcher ed = es.createEventDispatcher("Report");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnEnter(), ed.createType("Enter"));
-		assertEquals(dispatcher.OnExit(), ed.createType("Exit"));
-		assertEquals(dispatcher.OnChanged(), ed.createType("Changed"));
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals("Report", ed.getId());
+		
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnEnter();
+		assertEquals("Report.Enter", type.getId());
+		assertTrue(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnExit();
+		assertEquals("Report.Exit", type.getId());
+		assertTrue(type.isOnlySyncMode());
+
+		type = (EventTypeSI) dispatcher.OnChanged();
+		assertEquals("Report.Changed", type.getId());
+		assertTrue(type.isOnlySyncMode());
 	}
 	
 	@Test
 	public void testFireEnter() throws Exception {
 		dispatcher.OnEnter().addListener(listener);
-		queue.enqueue(eq(new TradeReportEvent(dispatcher.OnEnter(),
-				report, 8)), same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new TradeReportEvent((EventTypeSI) dispatcher.OnEnter(), report, 8)));
 		control.replay();
 		
 		dispatcher.fireEnter(report, 8);
@@ -49,8 +58,7 @@ public class CommonTREventDispatcherTest {
 	@Test
 	public void testFireExit() throws Exception {
 		dispatcher.OnExit().addListener(listener);
-		queue.enqueue(eq(new TradeReportEvent(dispatcher.OnExit(),
-				report, 12)), same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new TradeReportEvent((EventTypeSI) dispatcher.OnExit(), report, 12)));
 		control.replay();
 		
 		dispatcher.fireExit(report, 12);
@@ -61,8 +69,7 @@ public class CommonTREventDispatcherTest {
 	@Test
 	public void testFireChanged() throws Exception {
 		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new TradeReportEvent(dispatcher.OnChanged(),
-				report, 5)), same(dispatcher.getEventDispatcher()));
+		queue.enqueue(eq(new TradeReportEvent((EventTypeSI) dispatcher.OnChanged(), report, 5)));
 		control.replay();
 		
 		dispatcher.fireChanged(report, 5);

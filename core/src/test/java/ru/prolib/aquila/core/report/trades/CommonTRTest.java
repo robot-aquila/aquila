@@ -43,7 +43,7 @@ public class CommonTRTest {
 	private static SecurityDescriptor descr;
 	
 	private IMocksControl control;
-	private EditableTerminal terminal;
+	private EditableTerminal<?> terminal;
 	private EventSystem es;
 	private CommonTREventDispatcher dispatcher;
 	private CommonTR trades;
@@ -59,6 +59,7 @@ public class CommonTRTest {
 		descr = new SecurityDescriptor("RI", "SPFB", "USD", SecurityType.FUT);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
@@ -68,7 +69,7 @@ public class CommonTRTest {
 		terminal = new TerminalImpl("test");
 		es = terminal.getEventSystem();
 		dispatcher = new CommonTREventDispatcher(es);
-		trades = new CommonTR(dispatcher);
+		trades = new CommonTR(es, dispatcher);
 		es.getEventQueue().start();
 	}
 	
@@ -146,10 +147,10 @@ public class CommonTRTest {
 		throws Exception
 	{
 		CsvReader reader = new CsvReader(getFullPath(filename));
-		Map<String, EventType> evtMap = new Hashtable<String, EventType>();
-		evtMap.put("ENTER", dispatcher.OnEnter());
-		evtMap.put("CHANGE", dispatcher.OnChanged());
-		evtMap.put("EXIT", dispatcher.OnExit());
+		Map<String, EventTypeSI> evtMap = new Hashtable<String, EventTypeSI>();
+		evtMap.put("ENTER", (EventTypeSI) dispatcher.OnEnter());
+		evtMap.put("CHANGE", (EventTypeSI) dispatcher.OnChanged());
+		evtMap.put("EXIT", (EventTypeSI) dispatcher.OnExit());
 		List<TradeReportEvent> list = new Vector<TradeReportEvent>();
 		reader.readHeaders();
 		while ( reader.readRecord() ) {
@@ -292,7 +293,7 @@ public class CommonTRTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		trades = new CommonTR(dispatcher);
+		trades = new CommonTR(es, dispatcher);
 		
 		Variant<String> vTrdFile = new Variant<String>()
 			.add("trades1.csv")
@@ -303,7 +304,7 @@ public class CommonTRTest {
 		int foundCnt = 0;
 		CommonTR x = null, found = null;
 		do {
-			x = new CommonTR(dispatcher);
+			x = new CommonTR(es, dispatcher);
 			x.start();
 			loadTrades(x, vTrdFile.get());
 			if ( trades.equals(x) ) {

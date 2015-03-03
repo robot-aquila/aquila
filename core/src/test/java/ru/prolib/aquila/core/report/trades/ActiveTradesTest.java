@@ -8,6 +8,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -16,6 +18,7 @@ public class ActiveTradesTest {
 	private static SimpleDateFormat format;
 	private static Direction BUY = Direction.BUY;
 	private static SecurityDescriptor descr1, descr2;
+	private EventSystem es;
 	private Trade trade;
 	private IMocksControl control;
 	private ActiveTradesEventDispatcher dispatcher;
@@ -34,6 +37,8 @@ public class ActiveTradesTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		dispatcher = control.createMock(ActiveTradesEventDispatcher.class);
 		report1 = control.createMock(ERTrade.class);
@@ -43,6 +48,11 @@ public class ActiveTradesTest {
 		trade = createTrade(descr1, "1999-01-01 00:00:00", BUY, 1L, 1d, 10d);
 		expect(report1.getSecurityDescriptor()).andStubReturn(descr1);
 		expect(report2.getSecurityDescriptor()).andStubReturn(descr2);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	/**
@@ -180,7 +190,7 @@ public class ActiveTradesTest {
 		ActiveTrades x = null, found = null;
 		do {
 			// Объекты системы событий не участвуют в сравнении
-			x = new ActiveTrades();
+			x = new ActiveTrades(es);
 			for ( ERTrade r : vRows.get() ) {
 				x.setReport(r.getSecurityDescriptor(), r);
 			}
@@ -207,9 +217,9 @@ public class ActiveTradesTest {
 	@Test
 	public void testConstruct_Min() throws Exception {
 		ActiveTrades expected =
-			new ActiveTrades(new ActiveTradesEventDispatcher());
+			new ActiveTrades(new ActiveTradesEventDispatcher(es));
 		
-		assertTrue(expected.equals(new ActiveTrades()));
+		assertTrue(expected.equals(new ActiveTrades(es)));
 	}
 	
 }

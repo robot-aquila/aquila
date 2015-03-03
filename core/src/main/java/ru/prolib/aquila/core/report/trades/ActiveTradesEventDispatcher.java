@@ -15,14 +15,14 @@ import ru.prolib.aquila.core.report.*;
 public class ActiveTradesEventDispatcher {
 	private static final String ID = "ActiveTrades";
 	private final EventDispatcher dispatcher;
-	private final EventType onEnter, onExit, onChanged;
+	private final EventTypeSI onEnter, onExit, onChanged;
 	
-	public ActiveTradesEventDispatcher() {
+	public ActiveTradesEventDispatcher(EventSystem es) {
 		super();
-		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), ID);
-		onEnter = dispatcher.createType("Enter");
-		onExit = dispatcher.createType("Exit");
-		onChanged = dispatcher.createType("Changed");
+		dispatcher = es.createEventDispatcher(ID);
+		onEnter = dispatcher.createSyncType("Enter");
+		onExit = dispatcher.createSyncType("Exit");
+		onChanged = dispatcher.createSyncType("Changed");
 	}
 	
 	/**

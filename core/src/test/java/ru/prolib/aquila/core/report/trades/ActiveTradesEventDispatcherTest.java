@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.report.*;
 
 public class ActiveTradesEventDispatcherTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private RTrade report;
 	private EventListener listener;
@@ -15,26 +16,42 @@ public class ActiveTradesEventDispatcherTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		report = control.createMock(RTrade.class);
 		listener = control.createMock(EventListener.class);
-		dispatcher = new ActiveTradesEventDispatcher();
+		dispatcher = new ActiveTradesEventDispatcher(es);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
 	public void testStructure() throws Exception {
-		EventDispatcher ed =
-			new EventDispatcherImpl(new SimpleEventQueue(), "ActiveTrades");
-		assertEquals(dispatcher.getEventDispatcher(), ed);
-		assertEquals(dispatcher.OnEnter(), ed.createType("Enter"));
-		assertEquals(dispatcher.OnExit(), ed.createType("Exit"));
-		assertEquals(dispatcher.OnChanged(), ed.createType("Changed"));
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals("ActiveTrades", ed.getId());
+
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnEnter();
+		assertEquals("ActiveTrades.Enter", type.getId());
+		assertTrue(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnExit();
+		assertEquals("ActiveTrades.Exit", type.getId());
+		assertTrue(type.isOnlySyncMode());
+		
+		type = (EventTypeSI) dispatcher.OnChanged();
+		assertEquals("ActiveTrades.Changed", type.getId());
+		assertTrue(type.isOnlySyncMode());
 	}
 	
 	@Test
 	public void testFireEnter() throws Exception {
 		dispatcher.OnEnter().addListener(listener);
-		listener.onEvent(eq(new TradeReportEvent(dispatcher.OnEnter(), report)));
+		listener.onEvent(eq(new TradeReportEvent((EventTypeSI) dispatcher.OnEnter(), report)));
 		control.replay();
 		
 		dispatcher.fireEnter(report);
@@ -45,7 +62,7 @@ public class ActiveTradesEventDispatcherTest {
 	@Test
 	public void testFireExit() throws Exception {
 		dispatcher.OnExit().addListener(listener);
-		listener.onEvent(eq(new TradeReportEvent(dispatcher.OnExit(), report)));
+		listener.onEvent(eq(new TradeReportEvent((EventTypeSI) dispatcher.OnExit(), report)));
 		control.replay();
 		
 		dispatcher.fireExit(report);
@@ -56,7 +73,7 @@ public class ActiveTradesEventDispatcherTest {
 	@Test
 	public void testFireChanged() throws Exception {
 		dispatcher.OnChanged().addListener(listener);
-		listener.onEvent(eq(new TradeReportEvent(dispatcher.OnChanged(), report)));
+		listener.onEvent(eq(new TradeReportEvent((EventTypeSI) dispatcher.OnChanged(), report)));
 		control.replay();
 		
 		dispatcher.fireChanged(report);

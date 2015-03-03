@@ -14,14 +14,14 @@ import ru.prolib.aquila.core.report.*;
  */
 public class CommonTREventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventType onEnter, onExit, onChanged;
+	private final EventTypeSI onEnter, onExit, onChanged;
 	
 	public CommonTREventDispatcher(EventSystem es) {
 		super();
 		dispatcher = es.createEventDispatcher("Report");
-		onEnter = dispatcher.createType("Enter");
-		onExit = dispatcher.createType("Exit");
-		onChanged = dispatcher.createType("Changed");
+		onEnter = dispatcher.createSyncType("Enter");
+		onExit = dispatcher.createSyncType("Exit");
+		onChanged = dispatcher.createSyncType("Changed");
 	}
 	
 	/**

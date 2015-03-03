@@ -18,9 +18,11 @@ public class ActiveTrades {
 	
 	/**
 	 * Публичный конструктор.
+	 * <p>
+	 * @param es фасад системы событий
 	 */
-	public ActiveTrades() {
-		this(new ActiveTradesEventDispatcher());
+	public ActiveTrades(EventSystem es) {
+		this(new ActiveTradesEventDispatcher(es));
 	}
 	
 	/**
