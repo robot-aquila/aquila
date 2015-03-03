@@ -10,12 +10,14 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleFlusherTest {
 	private static SimpleDateFormat df;
+	private EventSystem es;
 	private IMocksControl control;
 	private EditableCandleSeries candles;
 	private java.util.Timer scheduler;
@@ -29,13 +31,20 @@ public class CandleFlusherTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
-		candles = new CandleSeriesImpl(Timeframe.M5);
+		candles = new CandleSeriesImpl(es, Timeframe.M5);
 		scheduler = control.createMock(java.util.Timer.class);
 		timer = control.createMock(Scheduler.class);
 		flusher = new CandleFlusher(candles, timer, scheduler);
 		expect(timer.getCurrentTime())
 			.andStubReturn(new DateTime(2008, 12, 8, 0, 1, 12));
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -97,7 +106,7 @@ public class CandleFlusherTest {
 		Variant<EditableCandleSeries> vCndl =
 				new Variant<EditableCandleSeries>()
 			.add(candles)
-			.add(new CandleSeriesImpl(Timeframe.M15));
+			.add(new CandleSeriesImpl(es, Timeframe.M15));
 		Variant<Scheduler> vTmr = new Variant<Scheduler>(vCndl)
 			.add(timer)
 			.add(new SchedulerLocal());

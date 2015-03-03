@@ -26,11 +26,12 @@ public class FSMEventDispatcher extends EventDispatcherImpl {
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param queue очередь событий
 	 * @param owner актор-владелец
 	 * @param id идентификатор
 	 */
-	public FSMEventDispatcher(FSMStateActor owner, String id) {
-		super(new SimpleEventQueue(), id);
+	public FSMEventDispatcher(EventQueue queue, FSMStateActor owner, String id) {
+		super(queue, id);
 		this.owner = owner;
 		types = new Vector<FSMEventType>();
 	}

@@ -21,8 +21,8 @@ public class CandleSeriesFiller implements Starter {
 	 * @param updater субсервис обновления свечей
 	 * @param flusher субсервис закрытия свечи (по времени)
 	 */
-	public CandleSeriesFiller(CandleSeries series,
-			Starter updater, Starter flusher)
+	public CandleSeriesFiller(CandleSeries series, Starter updater,
+			Starter flusher)
 	{
 		super();
 		this.series = series;
@@ -33,16 +33,17 @@ public class CandleSeriesFiller implements Starter {
 	/**
 	 * Создать генератор свечей по сделкам инструмента.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param security инструмент-источник сделок
 	 * @param timeframe таймфрейм
 	 * @param candleAutoFlush если true, то свечи будут закрываться по
 	 * границе свечи (по локальному времени). Иначе закрываются только при
 	 * поступлении сделки из следующего периода.
 	 */
-	public CandleSeriesFiller(Security security, Timeframe timeframe,
-			boolean candleAutoFlush)
+	public CandleSeriesFiller(EventSystem es, Security security,
+			Timeframe timeframe, boolean candleAutoFlush)
 	{
-		this(security, new CandleSeriesImpl(timeframe), candleAutoFlush);
+		this(security, new CandleSeriesImpl(es, timeframe), candleAutoFlush);
 	}
 	
 	/**
@@ -58,8 +59,7 @@ public class CandleSeriesFiller implements Starter {
 			boolean candleAutoFlush)
 	{
 		this(candles,
-			new CandleByTrades(security, candles),
-			candleAutoFlush ?
+			new CandleByTrades(security, candles), candleAutoFlush ?
 				new CandleFlusher(candles, security.getTerminal()) :
 				new StarterStub());
 	}

@@ -22,7 +22,7 @@ public class FSMEventType extends EventTypeImpl {
 	 * @param id идентификатор типа событий
 	 */
 	public FSMEventType(FSMStateActor owner, String id) {
-		super(id);
+		super(id, true);
 		this.owner = owner;
 	}
 	

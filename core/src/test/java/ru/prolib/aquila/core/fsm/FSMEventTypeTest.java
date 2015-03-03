@@ -26,6 +26,7 @@ public class FSMEventTypeTest {
 	@Test
 	public void testBaseClass() throws Exception {
 		assertTrue(type instanceof EventTypeImpl);
+		assertTrue(type.isOnlySyncMode());
 	}
 	
 	@Test

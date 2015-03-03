@@ -17,6 +17,7 @@ import ru.prolib.aquila.core.fsm.FSMTransitionExistsException;
  * Тест на примере разбиения текста на лексемы.
  */
 public class FSMAutomatTest {
+	private EventSystem es;
 	private FSMAutomat automat;
 	private Words words;
 	private StartingWord aStartWord;
@@ -42,7 +43,7 @@ public class FSMAutomatTest {
 	 */
 	static class CharEvent extends EventImpl {
 		private final char c;
-		public CharEvent(EventType type, char c) {
+		public CharEvent(EventTypeSI type, char c) {
 			super(type);
 			this.c = c;
 		}
@@ -59,8 +60,8 @@ public class FSMAutomatTest {
 		private final Words words;
 		private final FSMEventType onWordEnd, onClauseEnd;
 		
-		Word(EventType onChar, Words words) {
-			super();
+		Word(EventSystem es, EventType onChar, Words words) {
+			super(es.getEventQueue());
 			this.onChar = onChar;
 			this.words = words;
 			onWordEnd = createType("WordEnd");
@@ -123,8 +124,8 @@ public class FSMAutomatTest {
 		private final Words words;
 		private final FSMEventType onWordStarted;
 		
-		StartingWord(EventType onChar, Words words) {
-			super();
+		StartingWord(EventSystem es, EventType onChar, Words words) {
+			super(es.getEventQueue());
 			this.onChar = onChar;
 			this.words = words;
 			onWordStarted = createType("WordStarted");
@@ -167,8 +168,8 @@ public class FSMAutomatTest {
 	static class Stub extends FSMStateActor {
 		private final FSMEventType onSomeExit;
 		
-		public Stub() {
-			super();
+		public Stub(EventSystem es) {
+			super(es.getEventQueue());
 			onSomeExit = createType("SomeExit");
 		}
 		
@@ -199,8 +200,8 @@ public class FSMAutomatTest {
 	static class Error extends FSMStateActor {
 		private final FSMEventType onError;
 		
-		public Error() {
-			super();
+		public Error(EventSystem es) {
+			super(es.getEventQueue());
 			onError = createType("Error");
 		}
 		
@@ -233,15 +234,21 @@ public class FSMAutomatTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		automat = new FSMAutomat();
-		charDispatcher = new EventSystemImpl(new SimpleEventQueue())
-			.createEventDispatcher();
-		onChar = charDispatcher.createType();
+		charDispatcher = es.createEventDispatcher();
+		onChar = charDispatcher.createSyncType();
 		words = new Words();
-		aStartWord = new StartingWord(onChar, words);
-		aWord = new Word(onChar, words);
-		aStub = new Stub();
-		aError = new Error();
+		aStartWord = new StartingWord(es, onChar, words);
+		aWord = new Word(es, onChar, words);
+		aStub = new Stub(es);
+		aError = new Error(es);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -313,7 +320,7 @@ public class FSMAutomatTest {
 		
 		String source = "Thus a Days object can only store a number of days.";
 		for ( int i = 0; i < source.length(); i ++ ) {
-			charDispatcher.dispatch(new CharEvent(onChar, source.charAt(i)));
+			charDispatcher.dispatch(new CharEvent((EventTypeSI) onChar, source.charAt(i)));
 		}
 		assertNull(automat.getCurrentState());
 		
@@ -339,7 +346,7 @@ public class FSMAutomatTest {
 		automat.transitExit(aStub.OnSomeExit());
 		automat.start(aStartWord);
 		
-		charDispatcher.dispatch(new CharEvent(onChar, 'a'));
+		charDispatcher.dispatch(new CharEvent((EventTypeSI) onChar, 'a'));
 		
 		assertSame(aStub, automat.getCurrentState());
 	}

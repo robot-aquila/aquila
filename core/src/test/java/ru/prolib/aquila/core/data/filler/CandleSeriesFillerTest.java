@@ -6,8 +6,7 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.Starter;
-import ru.prolib.aquila.core.StarterStub;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.CandleSeries;
@@ -16,6 +15,7 @@ import ru.prolib.aquila.core.data.Timeframe;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class CandleSeriesFillerTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private CandleSeries candles;
 	private Starter updater, flusher;
@@ -23,11 +23,18 @@ public class CandleSeriesFillerTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
-		candles = new CandleSeriesImpl(Timeframe.M5);
+		candles = new CandleSeriesImpl(es, Timeframe.M5);
 		updater = control.createMock(Starter.class);
 		flusher = control.createMock(Starter.class);
 		filler = new CandleSeriesFiller(candles, updater, flusher);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -92,15 +99,14 @@ public class CandleSeriesFillerTest {
 		Security security = control.createMock(Security.class);
 		Terminal terminal = control.createMock(Terminal.class);
 		expect(security.getTerminal()).andStubReturn(terminal);
-		CandleSeriesImpl candles = new CandleSeriesImpl(Timeframe.M15);
-		CandleSeriesFiller expected = new CandleSeriesFiller(
-				candles,
+		CandleSeriesImpl candles = new CandleSeriesImpl(es, Timeframe.M15);
+		CandleSeriesFiller expected = new CandleSeriesFiller( candles,
 				new CandleByTrades(security, candles),
 				new CandleFlusher(candles, terminal));
 		control.replay();
 		
 		assertEquals(expected,
-				new CandleSeriesFiller(security, Timeframe.M15, true));
+				new CandleSeriesFiller(es, security, Timeframe.M15, true));
 		
 		control.verify();
 	}
@@ -110,15 +116,13 @@ public class CandleSeriesFillerTest {
 		Security security = control.createMock(Security.class);
 		Terminal terminal = control.createMock(Terminal.class);
 		expect(security.getTerminal()).andStubReturn(terminal);
-		CandleSeriesImpl candles = new CandleSeriesImpl(Timeframe.M15);
-		CandleSeriesFiller expected = new CandleSeriesFiller(
-				candles,
-				new CandleByTrades(security, candles),
-				new StarterStub());
+		CandleSeriesImpl candles = new CandleSeriesImpl(es, Timeframe.M15);
+		CandleSeriesFiller expected = new CandleSeriesFiller(candles,
+				new CandleByTrades(security, candles), new StarterStub());
 		control.replay();
 		
 		assertEquals(expected,
-				new CandleSeriesFiller(security, Timeframe.M15, false));
+				new CandleSeriesFiller(es, security, Timeframe.M15, false));
 		
 		control.verify();
 	}

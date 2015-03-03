@@ -15,15 +15,23 @@ import ru.prolib.aquila.core.fsm.FSMStateActor;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class FSMEventDispatcherTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private FSMStateActor actor;
 	private FSMEventDispatcher dispatcher;
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		actor = control.createMock(FSMStateActor.class);
-		dispatcher = new FSMEventDispatcher(actor, "bar");
+		dispatcher = new FSMEventDispatcher(es.getEventQueue(), actor, "bar");
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -101,7 +109,7 @@ public class FSMEventDispatcherTest {
 		int foundCnt = 0;
 		FSMEventDispatcher x, found = null;
 		do {
-			x = new FSMEventDispatcher(vOwner.get(), vId.get());
+			x = new FSMEventDispatcher(es.getEventQueue(), vOwner.get(), vId.get());
 			for ( String id : vRows.get() ) x.createType(id);
 			if ( dispatcher.equals(x) ) {
 				foundCnt ++;

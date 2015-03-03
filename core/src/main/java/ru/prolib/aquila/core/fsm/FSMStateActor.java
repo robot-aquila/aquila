@@ -14,9 +14,9 @@ public abstract class FSMStateActor {
 		this.dispatcher = dispatcher;
 	}
 	
-	public FSMStateActor() {
+	public FSMStateActor(EventQueue queue) {
 		super();
-		dispatcher = new FSMEventDispatcher(this, getClass().getSimpleName());
+		dispatcher = new FSMEventDispatcher(queue, this, getClass().getSimpleName());
 	}
 	
 	/**
