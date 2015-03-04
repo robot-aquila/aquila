@@ -31,10 +31,17 @@ public class TLSEventDispatcherTest {
 	
 	@Test
 	public void testEventTypes() throws Exception {
-		String id = "Timeline" + TLSEventDispatcher.getLastId() + ".";
-		assertEquals(id + "Run", dispatcher.OnRun().getId());
-		assertEquals(id + "Pause", dispatcher.OnPause().getId());
-		assertEquals(id + "Finish", dispatcher.OnFinish().getId());
+		String did = "Timeline" + TLSEventDispatcher.getLastId();
+		
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnRun();
+		assertEquals(did + ".Run", type.getId());
+		
+		type = (EventTypeSI) dispatcher.OnPause();
+		assertEquals(did + ".Pause", type.getId());
+		
+		type = (EventTypeSI) dispatcher.OnFinish();
+		assertEquals(did + ".Finish", type.getId());
 	}
 	
 	@Test (expected=NoSuchMethodException.class)

@@ -7,6 +7,7 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.joda.time.*;
 import org.junit.*;
@@ -17,6 +18,7 @@ import ru.prolib.aquila.core.BusinessEntities.TaskHandlerImpl;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class SchedulerTest {
+	private EventSystem es;
 	private Interval interval;
 	private IMocksControl control;
 	private TLSTimeline timeline;
@@ -26,6 +28,12 @@ public class SchedulerTest {
 	private Finisher finisher;
 	private CollectPOA collectPOA;
 
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
+	
 	/**
 	 * Индикатор завершения эмуляции.
 	 */
@@ -95,19 +103,25 @@ public class SchedulerTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		// interval= 2014-10-12 15:17:45.000 - 2014-10-12 20:10:10.000,
 		// someTime= 2014-10-12 18:00:00.000
 		interval = new Interval(new DateTime(2014, 10, 12, 15, 17, 45, 0),
 				new DateTime(2014, 10, 12, 20, 10, 10, 0));
 		someTime = new DateTime(2014, 10, 12, 18, 0, 0, 0);
 		control = createStrictControl();
-		timeline = new TLSTimelineFactory(
-				new EventSystemImpl(new SimpleEventQueue())).produce(interval);
+		timeline = new TLSTimelineFactory(es).produce(interval);
 		finisher = new Finisher(timeline);
 		scheduler = new SchedulerImpl(timeline);
 		r1 = control.createMock(Runnable.class);
 		r2 = control.createMock(Runnable.class);
 		collectPOA = new CollectPOA(timeline);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test

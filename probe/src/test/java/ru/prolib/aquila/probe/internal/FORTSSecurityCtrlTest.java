@@ -15,6 +15,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.EventTypeSI;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
 import ru.prolib.aquila.core.data.Tick;
@@ -103,8 +104,7 @@ public class FORTSSecurityCtrlTest {
 		assertEquals(1d, security.getMinStepPrice(), 0.1d);
 		
 		assertEquals(1, actual.size());
-		assertEquals(new SecurityEvent(terminal.OnSecurityAvailable(), security),
-				actual.get(0));
+		assertEquals(new SecurityEvent((EventTypeSI) terminal.OnSecurityAvailable(), security), actual.get(0));
 	}
 	
 	@Test
@@ -186,8 +186,8 @@ public class FORTSSecurityCtrlTest {
 		Trade expTrade = ut.tradeFromTick(new Tick(time, 119540d, 120d), security); 
 		final List<Event> expected = new Vector<Event>(),
 				actual = new Vector<Event>();
-		expected.add(new SecurityEvent(security.OnChanged(), security));
-		expected.add(new SecurityTradeEvent(security.OnTrade(), security, expTrade));
+		expected.add(new SecurityEvent((EventTypeSI) security.OnChanged(), security));
+		expected.add(new SecurityTradeEvent((EventTypeSI) security.OnTrade(), security, expTrade));
 		final CountDownLatch finished = new CountDownLatch(2);
 		EventListener listener = new EventListener() {
 			@Override public void onEvent(Event event) {
