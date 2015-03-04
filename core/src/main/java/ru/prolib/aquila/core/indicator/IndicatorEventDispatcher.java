@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.data.*;
  */
 public class IndicatorEventDispatcher implements EventListener {
 	private final EventDispatcher dispatcher;
-	private final EventType onStarted, onStopped, onAdd, onUpd;
+	private final EventTypeSI onStarted, onStopped, onAdd, onUpd;
 	private Series<?> relayed;
 	
 	/**
@@ -32,10 +32,10 @@ public class IndicatorEventDispatcher implements EventListener {
 		} else {
 			dispatcher = es.createEventDispatcher(id);
 		}
-		onStarted = dispatcher.createType("Started");
-		onStopped = dispatcher.createType("Stopped");
-		onAdd = dispatcher.createType("Add");
-		onUpd = dispatcher.createType("Upd");
+		onStarted = dispatcher.createSyncType("Started");
+		onStopped = dispatcher.createSyncType("Stopped");
+		onAdd = dispatcher.createSyncType("Add");
+		onUpd = dispatcher.createSyncType("Upd");
 	}
 	
 	/**
@@ -45,16 +45,6 @@ public class IndicatorEventDispatcher implements EventListener {
 	 */
 	public IndicatorEventDispatcher(EventSystem es) {
 		this(es, null);
-	}
-	
-	/**
-	 * Конструктор по-умолчанию
-	 * <p>
-	 * Создает диспетчер с идентификатором по-умолчанию и очередью синхронной
-	 * подачи событий {@link SimpleEventQueue}.
-	 */
-	public IndicatorEventDispatcher() {
-		this(new EventSystemImpl(new SimpleEventQueue()));
 	}
 	
 	/**
@@ -162,8 +152,8 @@ public class IndicatorEventDispatcher implements EventListener {
 	public synchronized void startRelayFor(Series<?> source) {
 		if ( relayed == null ) {
 			relayed = source;
-			relayed.OnAdded().addListener(this);
-			relayed.OnUpdated().addListener(this);
+			relayed.OnAdded().addSyncListener(this);
+			relayed.OnUpdated().addSyncListener(this);
 		} else {
 			throw new IllegalStateException("Relay already started");
 		}

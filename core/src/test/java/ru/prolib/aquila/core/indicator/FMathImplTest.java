@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.indicator;
 import static org.junit.Assert.*;
 import org.joda.time.*;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 
 /**
@@ -131,15 +133,23 @@ public class FMathImplTest {
 			new FR(165.2050d,  0.0202d),	// 2013-09-03 10:38:00
 		};
 	
+	private EventSystem es;
 	private FMath math;
 	private EditableDataSeries value;
 	private EditableSeries<Candle> candles;
 	
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		math = new FMathImpl();
-		value = new DataSeriesImpl();
-		candles = new SeriesImpl<Candle>(null);
+		value = new DataSeriesImpl(es);
+		candles = new SeriesImpl<Candle>(es);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -352,7 +362,7 @@ public class FMathImplTest {
 	@Test
 	public void testMaxVA23() throws Exception {
 		int period = 4;
-		EditableDataSeries value2 = new DataSeriesImpl();
+		EditableDataSeries value2 = new DataSeriesImpl(es);
 		Double fix[][] = {
 				// value, value2, max
 				{ 19.29d, null,   19.29d },
@@ -416,7 +426,7 @@ public class FMathImplTest {
 	@Test
 	public void testMinVA23() throws Exception {
 		int period = 4;
-		EditableDataSeries value2 = new DataSeriesImpl();
+		EditableDataSeries value2 = new DataSeriesImpl(es);
 		Double fix[][] = {
 				// value, value2, min
 				{ 19.29d, null,   19.29d },

@@ -14,6 +14,7 @@ import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class SimpleIndicatorTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private SimpleFunction<Double, Double> fn;
 	private IndicatorEventDispatcher dispatcher;
@@ -44,13 +45,20 @@ public class SimpleIndicatorTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		dispatcher = control.createMock(IndicatorEventDispatcher.class);
 		type = control.createMock(EventType.class);
 		fn = new StubFunction();
-		sourceSeries = new DataSeriesImpl();
+		sourceSeries = new DataSeriesImpl(es);
 		indicator = new SimpleIndicator<Double, Double>("foobar", fn,
 				sourceSeries, dispatcher);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -177,7 +185,7 @@ public class SimpleIndicatorTest {
 	@Test
 	public void testSourceSeriesAdded() throws Exception {
 		indicator = new SimpleIndicator<Double, Double>(null, fn, sourceSeries,
-				new IndicatorEventDispatcher());
+				new IndicatorEventDispatcher(es));
 		indicator.start();
 		
 		final List<Event> actual = new Vector<Event>();
@@ -199,9 +207,9 @@ public class SimpleIndicatorTest {
 		
 		// test events
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(indicator.OnAdded(), 20d, 0));
-		expected.add(new ValueEvent(indicator.OnAdded(), 40d, 1));
-		expected.add(new ValueEvent(indicator.OnAdded(), 60d, 2));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnAdded(), 20d, 0));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnAdded(), 40d, 1));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnAdded(), 60d, 2));
 		assertEquals(expected, actual);
 	}
 	
@@ -209,7 +217,7 @@ public class SimpleIndicatorTest {
 	@Test
 	public void testSourceSeriesUpdated() throws Exception {
 		indicator = new SimpleIndicator<Double, Double>(null, fn, sourceSeries,
-				new IndicatorEventDispatcher());
+				new IndicatorEventDispatcher(es));
 		indicator.start();
 		
 		final List<Event> actual = new Vector<Event>();
@@ -218,7 +226,7 @@ public class SimpleIndicatorTest {
 				actual.add(event);
 			}
 		};
-		indicator.OnUpdated().addListener(listener);
+		indicator.OnUpdated().addSyncListener(listener);
 
 		sourceSeries.add(150d);
 		sourceSeries.add(213d);
@@ -230,8 +238,8 @@ public class SimpleIndicatorTest {
 		
 		// test events
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(indicator.OnUpdated(),  842d, 1));
-		expected.add(new ValueEvent(indicator.OnUpdated(), 1204d, 1));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnUpdated(),  842d, 1));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnUpdated(), 1204d, 1));
 		assertEquals(expected, actual);
 	}
 	

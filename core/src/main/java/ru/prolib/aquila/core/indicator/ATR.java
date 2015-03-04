@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.indicator;
 
+import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.data.*;
 
 /**
@@ -10,41 +11,46 @@ public class ATR extends WilderMA {
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param id символьный идентификатор
 	 * @param candles исходная последовательность свечей
 	 * @param period период усреднения
 	 * @param limit лимит хранилища
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public ATR(String id, CandleSeries candles, int period, int limit)
-		throws ValueException
+	public ATR(EventSystem es, String id, CandleSeries candles, int period,
+			int limit) throws ValueException
 	{
-		super(id, new TR(candles), period, limit);
+		super(es, id, new TR(es, candles), period, limit);
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param id символьный идентификатор
 	 * @param candles исходная последовательность свечей
 	 * @param period период усреднения
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public ATR(String id, CandleSeries candles, int period)
+	public ATR(EventSystem es, String id, CandleSeries candles, int period)
 		throws ValueException
 	{
-		this(id, candles, period, SeriesImpl.STORAGE_NOT_LIMITED);
+		this(es, id, candles, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param candles исходная последовательность свечей
 	 * @param period период усреднения
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public ATR(CandleSeries candles, int period) throws ValueException {
-		this(null, candles, period, SeriesImpl.STORAGE_NOT_LIMITED);
+	public ATR(EventSystem es, CandleSeries candles, int period)
+			throws ValueException
+	{
+		this(es, null, candles, period, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
 	@Override

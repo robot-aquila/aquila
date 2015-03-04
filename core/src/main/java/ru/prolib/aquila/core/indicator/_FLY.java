@@ -18,19 +18,19 @@ abstract public class _FLY<T> implements DataSeries {
 	protected final Series<T> source;
 	private final String id;
 	private final EventDispatcher dispatcher;
-	private final EventType onAdd, onUpd;
+	private final EventTypeSI onAdd, onUpd;
 	
 	static {
 		logger = LoggerFactory.getLogger(_FLY.class);
 	}
 
-	public _FLY(String id, Series<T> source) {
+	public _FLY(EventSystem es, String id, Series<T> source) {
 		super();
 		this.source = source;
 		this.id = makeId(id);
-		dispatcher = new EventDispatcherImpl(new SimpleEventQueue(), id);
-		onAdd = dispatcher.createType("Add");
-		onUpd = dispatcher.createType("Upd");
+		dispatcher = es.createEventDispatcher(id);
+		onAdd = dispatcher.createSyncType("Add");
+		onUpd = dispatcher.createSyncType("Upd");
 		init();
 	}
 

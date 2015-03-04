@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Vector;
 
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -33,11 +35,19 @@ public class WilderMATest {
 
 	private DataSeriesImpl source;
 	private WilderMA ma;
+	private EventSystem es;
 
 	@Before
 	public void setUp() throws Exception {
-		source = new DataSeriesImpl();
-		ma = new WilderMA("foo", source, 3, 128);
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		source = new DataSeriesImpl(es);
+		ma = new WilderMA(es, "foo", source, 3, 128);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -50,7 +60,7 @@ public class WilderMATest {
 	
 	@Test
 	public void testConstruct3() throws Exception {
-		ma = new WilderMA("bar", source, 5);
+		ma = new WilderMA(es, "bar", source, 5);
 		assertEquals("bar", ma.getId());
 		assertSame(source, ma.getSource());
 		assertEquals(5, ma.getPeriod());
@@ -59,7 +69,7 @@ public class WilderMATest {
 	
 	@Test
 	public void testConstruct2() throws Exception {
-		ma = new WilderMA(source, 14);
+		ma = new WilderMA(es, source, 14);
 		assertEquals("WilderMA(14)", ma.getId());
 		assertSame(source, ma.getSource());
 		assertEquals(14, ma.getPeriod());
@@ -87,7 +97,7 @@ public class WilderMATest {
 		for ( int i = 0; i < 5; i ++ ) {
 			source.add(fixture[i][0]);
 		}
-		ma = new WilderMA(source, 3);
+		ma = new WilderMA(es, source, 3);
 		for ( int i = 0; i < 5; i ++ ) {
 			Double expected = fixture[i][1];
 			String msg = "At #" + i;
@@ -135,8 +145,8 @@ public class WilderMATest {
 		int foundCnt = 0;
 		WilderMA x, found = null;
 		do {
-			DataSeriesImpl ds = new DataSeriesImpl();
-			x = new WilderMA(vId.get(), ds, vPer.get(), vLen.get());
+			DataSeriesImpl ds = new DataSeriesImpl(es);
+			x = new WilderMA(es, vId.get(), ds, vPer.get(), vLen.get());
 			for ( int i = 0; i < vSrc.get().size(); i ++ ) {
 				ds.add(vSrc.get().get(i));
 			}

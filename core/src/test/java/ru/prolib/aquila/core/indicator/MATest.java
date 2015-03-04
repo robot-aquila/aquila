@@ -6,11 +6,13 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.indicator.function.MAFunction;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class MATest {
+	private EventSystem es;
 	private IMocksControl control;
 	private MAFunction fn;
 	private DataSeries sourceSeries;
@@ -20,12 +22,19 @@ public class MATest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		fn = control.createMock(MAFunction.class);
-		sourceSeries = new DataSeriesImpl();
-		ownSeries = new DataSeriesImpl();
-		dispatcher = new IndicatorEventDispatcher();
+		sourceSeries = new DataSeriesImpl(es);
+		ownSeries = new DataSeriesImpl(es);
+		dispatcher = new IndicatorEventDispatcher(es);
 		indicator = new MA("zulu", fn, sourceSeries, ownSeries, dispatcher);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -44,10 +53,10 @@ public class MATest {
 	
 	@Test
 	public void testConstruct3() throws Exception {
-		indicator = new MA("foobar", fn, sourceSeries);
+		indicator = new MA(es, "foobar", fn, sourceSeries);
 		assertSame(fn, indicator.getFunction());
 		assertSame(sourceSeries, indicator.getSourceSeries());
-		assertEquals(new DataSeriesImpl(), indicator.getOwnSeries());
+		assertEquals(new DataSeriesImpl(es), indicator.getOwnSeries());
 		assertNotNull(indicator.getEventDispatcher());
 		assertEquals("foobar", indicator.getId());
 	}
@@ -57,10 +66,10 @@ public class MATest {
 		expect(fn.getDefaultId()).andReturn("zoom");
 		control.replay();
 		
-		indicator = new MA(fn, sourceSeries);
+		indicator = new MA(es, fn, sourceSeries);
 		assertSame(fn, indicator.getFunction());
 		assertSame(sourceSeries, indicator.getSourceSeries());
-		assertEquals(new DataSeriesImpl(), indicator.getOwnSeries());
+		assertEquals(new DataSeriesImpl(es), indicator.getOwnSeries());
 		assertNotNull(indicator.getEventDispatcher());
 		assertEquals("zoom", indicator.getId());
 		
@@ -111,10 +120,10 @@ public class MATest {
 			.add(control.createMock(MAFunction.class));
 		Variant<DataSeries> vSrc = new Variant<DataSeries>(vFn)
 			.add(sourceSeries)
-			.add(new DataSeriesImpl("gamma"));
+			.add(new DataSeriesImpl(es, "gamma"));
 		Variant<EditableDataSeries> vOwn = new Variant<EditableDataSeries>(vSrc)
 			.add(ownSeries)
-			.add(new DataSeriesImpl("beta"));
+			.add(new DataSeriesImpl(es, "beta"));
 		Variant<?> iterator = vOwn;
 		int foundCnt = 0;
 		MA x, found = null;

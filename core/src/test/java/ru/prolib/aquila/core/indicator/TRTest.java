@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.indicator;
 import static org.junit.Assert.*;
 import org.joda.time.*;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -21,11 +23,14 @@ public class TRTest {
 	};
 	private EditableCandleSeries source;
 	private TR tr;
+	private EventSystem es;
 
 	@Before
 	public void setUp() throws Exception {
-		source = new CandleSeriesImpl(Timeframe.M1);
-		tr = new TR("foo", source);
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		source = new CandleSeriesImpl(es, Timeframe.M1);
+		tr = new TR(es, "foo", source);
 	}
 	
 	@Test
@@ -36,7 +41,7 @@ public class TRTest {
 	
 	@Test
 	public void testConstruct1() throws Exception {
-		tr = new TR(source);
+		tr = new TR(es, source);
 		assertEquals(Series.DEFAULT_ID, tr.getId());
 		assertSame(source, tr.getSource());
 	}
@@ -67,13 +72,13 @@ public class TRTest {
 			.add("foo")
 			.add("bar");
 		Variant<CandleSeries> vSrc = new Variant<CandleSeries>(vId)
-			.add(new CandleSeriesImpl(Timeframe.M1))
-			.add(new CandleSeriesImpl(Timeframe.M10, "zulu46"));
+			.add(new CandleSeriesImpl(es, Timeframe.M1))
+			.add(new CandleSeriesImpl(es, Timeframe.M10, "zulu46"));
 		Variant<?> iterator = vSrc;
 		int foundCnt = 0;
 		TR x, found = null;
 		do {
-			x = new TR(vId.get(), vSrc.get());
+			x = new TR(es, vId.get(), vSrc.get());
 			if ( tr.equals(x) ) {
 				foundCnt ++;
 				found = x;

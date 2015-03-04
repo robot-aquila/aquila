@@ -18,8 +18,9 @@ public class IndicatorEventDispatcherTest {
 
 	@Before
 	public void setUp() throws Exception {
-		es = new EventSystemImpl(new SimpleEventQueue("test"));
-		series = new SeriesFactoryImpl().createDouble("foo");
+		es = new EventSystemImpl("test");
+		es.getEventQueue().start();
+		series = new SeriesFactoryImpl(es).createDouble("foo");
 		dispatcher = new IndicatorEventDispatcher(es, "zulu24");
 		
 		actualEvents = new Vector<Event>();
@@ -32,98 +33,106 @@ public class IndicatorEventDispatcherTest {
 		};
 	}
 	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
+	}
+	
 	@Test
 	public void testConstruct2() throws Exception {
-		EventDispatcher d = es.createEventDispatcher("zulu24");
-		assertEquals(d, dispatcher.getEventDispatcher());
-		assertEquals(d.createType("Started"), dispatcher.OnStarted());
-		assertEquals(d.createType("Stopped"), dispatcher.OnStopped());
-		assertEquals(d.createType("Add"), dispatcher.OnAdded());
-		assertEquals(d.createType("Upd"), dispatcher.OnUpdated());
+		EventDispatcher d = dispatcher.getEventDispatcher();
+		assertEquals("zulu24", d.getId());
+		
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnStarted();
+		assertEquals("zulu24.Started", type.getId());
+
+		type = (EventTypeSI) dispatcher.OnStopped();
+		assertEquals("zulu24.Stopped", type.getId());
+
+		type = (EventTypeSI) dispatcher.OnAdded();
+		assertEquals("zulu24.Add", type.getId());
+		
+		type = (EventTypeSI) dispatcher.OnUpdated();
+		assertEquals("zulu24.Upd", type.getId());
 	}
 	
 	@Test
 	public void testConstruct1() throws Exception {
-		String expectedId =
-			EventDispatcherImpl.AUTO_ID_PREFIX + EventDispatcherImpl.getAutoId();
+		String did = EventDispatcherImpl.AUTO_ID_PREFIX + EventDispatcherImpl.getAutoId();
 		dispatcher = new IndicatorEventDispatcher(es);
-		EventDispatcher d = es.createEventDispatcher(expectedId);
-		assertEquals(d, dispatcher.getEventDispatcher());
-		assertEquals(d.createType("Started"), dispatcher.OnStarted());
-		assertEquals(d.createType("Stopped"), dispatcher.OnStopped());
-		assertEquals(d.createType("Add"), dispatcher.OnAdded());
-		assertEquals(d.createType("Upd"), dispatcher.OnUpdated());
-	}
-	
-	@Test
-	public void testConstruct0() throws Exception {
-		String expectedId =
-			EventDispatcherImpl.AUTO_ID_PREFIX + EventDispatcherImpl.getAutoId();
-		dispatcher = new IndicatorEventDispatcher();
-		es = new EventSystemImpl(new SimpleEventQueue());
-		EventDispatcher d = es.createEventDispatcher(expectedId);
-		assertEquals(d, dispatcher.getEventDispatcher());
-		assertEquals(d.createType("Started"), dispatcher.OnStarted());
-		assertEquals(d.createType("Stopped"), dispatcher.OnStopped());
-		assertEquals(d.createType("Add"), dispatcher.OnAdded());
-		assertEquals(d.createType("Upd"), dispatcher.OnUpdated());
+		EventDispatcher d = dispatcher.getEventDispatcher();
+		assertEquals(did, d.getId());
+		
+		EventTypeSI type;
+		type = (EventTypeSI) dispatcher.OnStarted();
+		assertEquals(did + ".Started", type.getId());
+
+		type = (EventTypeSI) dispatcher.OnStopped();
+		assertEquals(did + ".Stopped", type.getId());
+
+		type = (EventTypeSI) dispatcher.OnAdded();
+		assertEquals(did + ".Add", type.getId());
+		
+		type = (EventTypeSI) dispatcher.OnUpdated();
+		assertEquals(did + ".Upd", type.getId());
 	}
 	
 	@Test
 	public void testFireStarted() throws Exception {
-		dispatcher.OnStarted().addListener(eventListener);
+		dispatcher.OnStarted().addSyncListener(eventListener);
 		
 		dispatcher.fireStarted();
 		
 		List<Event> expected = new Vector<Event>();
-		expected.add(new EventImpl(dispatcher.OnStarted()));
+		expected.add(new EventImpl((EventTypeSI) dispatcher.OnStarted()));
 		assertEquals(expected, actualEvents);
 	}
 	
 	@Test
 	public void testFireStopped() throws Exception {
-		dispatcher.OnStopped().addListener(eventListener);
+		dispatcher.OnStopped().addSyncListener(eventListener);
 		
 		dispatcher.fireStopped();
 		
 		List<Event> expected = new Vector<Event>();
-		expected.add(new EventImpl(dispatcher.OnStopped()));
+		expected.add(new EventImpl((EventTypeSI) dispatcher.OnStopped()));
 		assertEquals(expected, actualEvents);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testFireAdded() throws Exception {
-		dispatcher.OnAdded().addListener(eventListener);
+		dispatcher.OnAdded().addSyncListener(eventListener);
 		
 		dispatcher.fireAdded(429d, 128);
 		
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(dispatcher.OnAdded(), 429d, 128));
+		expected.add(new ValueEvent((EventTypeSI) dispatcher.OnAdded(), 429d, 128));
 		assertEquals(expected, actualEvents);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testFireUpdated2() throws Exception {
-		dispatcher.OnUpdated().addListener(eventListener);
+		dispatcher.OnUpdated().addSyncListener(eventListener);
 		
 		dispatcher.fireUpdated(631d, 183);
 		
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(dispatcher.OnUpdated(), 631d, 183));
+		expected.add(new ValueEvent((EventTypeSI) dispatcher.OnUpdated(), 631d, 183));
 		assertEquals(expected, actualEvents);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void testFireUpdated3() throws Exception {
-		dispatcher.OnUpdated().addListener(eventListener);
+		dispatcher.OnUpdated().addSyncListener(eventListener);
 		
 		dispatcher.fireUpdated(112d, 613d, 1912);
 		
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(dispatcher.OnUpdated(), 112d, 613d, 1912));
+		expected.add(new ValueEvent((EventTypeSI) dispatcher.OnUpdated(), 112d, 613d, 1912));
 		assertEquals(expected, actualEvents);
 	}
 	
@@ -159,13 +168,13 @@ public class IndicatorEventDispatcherTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testOnEvent_RelayAddedEvent() throws Exception {
-		dispatcher.OnAdded().addListener(eventListener);
+		dispatcher.OnAdded().addSyncListener(eventListener);
 		dispatcher.startRelayFor(series);
 		
 		series.add(815.32d);
 		
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(dispatcher.OnAdded(), 815.32d, 0));
+		expected.add(new ValueEvent((EventTypeSI) dispatcher.OnAdded(), 815.32d, 0));
 		assertEquals(expected, actualEvents);
 	}
 	
@@ -173,13 +182,13 @@ public class IndicatorEventDispatcherTest {
 	@Test
 	public void testOnEvent_RelayUpdatedEvent() throws Exception {
 		series.add(81.32d);
-		dispatcher.OnUpdated().addListener(eventListener);
+		dispatcher.OnUpdated().addSyncListener(eventListener);
 		dispatcher.startRelayFor(series);
 		
 		series.set(21.24d);
 		
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(dispatcher.OnUpdated(), 81.32d, 21.24d, 0));
+		expected.add(new ValueEvent((EventTypeSI) dispatcher.OnUpdated(), 81.32d, 21.24d, 0));
 		assertEquals(expected, actualEvents);
 	}
 

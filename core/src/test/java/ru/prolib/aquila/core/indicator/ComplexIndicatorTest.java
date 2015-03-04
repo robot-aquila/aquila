@@ -21,6 +21,7 @@ public class ComplexIndicatorTest {
 	private EditableDataSeries sourceSeries, ownSeries;
 	private EventType type;
 	private ComplexIndicator<Double, Double> indicator;
+	private EventSystem es;
 	
 	class StubFunction implements ComplexFunction<Double, Double> {
 
@@ -45,14 +46,21 @@ public class ComplexIndicatorTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		dispatcher = control.createMock(IndicatorEventDispatcher.class);
 		type = control.createMock(EventType.class);
 		fn = new StubFunction();
-		sourceSeries = new DataSeriesImpl();
-		ownSeries = new DataSeriesImpl();
+		sourceSeries = new DataSeriesImpl(es);
+		ownSeries = new DataSeriesImpl(es);
 		indicator = new ComplexIndicator<Double, Double>("foobar", fn,
 				sourceSeries, ownSeries, dispatcher);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -198,7 +206,7 @@ public class ComplexIndicatorTest {
 	@Test
 	public void testSourceSeriesAdded() throws Exception {
 		indicator = new ComplexIndicator<Double, Double>(null, fn, sourceSeries,
-				ownSeries, new IndicatorEventDispatcher());
+				ownSeries, new IndicatorEventDispatcher(es));
 		indicator.start();
 		
 		final List<Event> actual = new Vector<Event>();
@@ -207,7 +215,7 @@ public class ComplexIndicatorTest {
 				actual.add(event);
 			}
 		};
-		indicator.OnAdded().addListener(listener);
+		indicator.OnAdded().addSyncListener(listener);
 
 		sourceSeries.add(10d);
 		sourceSeries.add(20d);
@@ -220,9 +228,9 @@ public class ComplexIndicatorTest {
 		
 		// test events
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(indicator.OnAdded(), 15d, 0));
-		expected.add(new ValueEvent(indicator.OnAdded(), 25d, 1));
-		expected.add(new ValueEvent(indicator.OnAdded(), 35d, 2));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnAdded(), 15d, 0));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnAdded(), 25d, 1));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnAdded(), 35d, 2));
 		assertEquals(expected, actual);
 	}
 	
@@ -230,7 +238,7 @@ public class ComplexIndicatorTest {
 	@Test
 	public void testSourceSeriesUpdated() throws Exception {
 		indicator = new ComplexIndicator<Double, Double>(null, fn, sourceSeries,
-				ownSeries, new IndicatorEventDispatcher());
+				ownSeries, new IndicatorEventDispatcher(es));
 		indicator.start();
 		
 		final List<Event> actual = new Vector<Event>();
@@ -239,7 +247,7 @@ public class ComplexIndicatorTest {
 				actual.add(event);
 			}
 		};
-		indicator.OnUpdated().addListener(listener);
+		indicator.OnUpdated().addSyncListener(listener);
 		
 		sourceSeries.add(150d);
 		sourceSeries.add(213d);
@@ -251,8 +259,8 @@ public class ComplexIndicatorTest {
 		
 		// test events
 		List<Event> expected = new Vector<Event>();
-		expected.add(new ValueEvent(indicator.OnUpdated(), 218d, 426d, 1));
-		expected.add(new ValueEvent(indicator.OnUpdated(), 426d, 607d, 1));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnUpdated(), 218d, 426d, 1));
+		expected.add(new ValueEvent((EventTypeSI) indicator.OnUpdated(), 426d, 607d, 1));
 		assertEquals(expected, actual);
 	}
 	

@@ -5,14 +5,14 @@ import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.data.EditableSeries;
-import ru.prolib.aquila.core.data.ValueEvent;
+
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.indicator.Highest;
 
 public class HighestTest {
 	private IMocksControl control;
-	private EventType type;
+	private EventTypeSI type;
 	private EditableSeries<Double> target;
 	private Highest indicator;
 
@@ -20,7 +20,7 @@ public class HighestTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type = control.createMock(EventType.class);
+		type = control.createMock(EventTypeSI.class);
 		target = control.createMock(EditableSeries.class);
 		indicator = new Highest(target, 5);
 	}

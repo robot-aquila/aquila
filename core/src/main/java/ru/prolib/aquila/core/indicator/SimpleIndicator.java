@@ -87,8 +87,8 @@ public class SimpleIndicator<T, R> extends CommonIndicator<R>
 
 	@Override
 	protected void onStart() throws StarterException {
-		sourceSeries.OnAdded().addListener(this);
-		sourceSeries.OnUpdated().addListener(this);
+		sourceSeries.OnAdded().addSyncListener(this);
+		sourceSeries.OnUpdated().addSyncListener(this);
 	}
 
 	@Override

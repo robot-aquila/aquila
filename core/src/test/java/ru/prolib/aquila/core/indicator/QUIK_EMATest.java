@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.indicator;
 
 import static org.junit.Assert.*;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 
 /**
@@ -27,11 +29,14 @@ public class QUIK_EMATest {
 	
 	private DataSeriesImpl source;
 	private QUIK_EMA ma;
+	private EventSystem es;
 
 	@Before
 	public void setUp() throws Exception {
-		source = new DataSeriesImpl();
-		ma = new QUIK_EMA("foo", source, 3, 128);
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		source = new DataSeriesImpl(es);
+		ma = new QUIK_EMA(es, "foo", source, 3, 128);
 	}
 	
 	@Test
@@ -44,7 +49,7 @@ public class QUIK_EMATest {
 	
 	@Test
 	public void testConstruct3() throws Exception {
-		ma = new QUIK_EMA("bar", source, 5);
+		ma = new QUIK_EMA(es, "bar", source, 5);
 		assertEquals("bar", ma.getId());
 		assertSame(source, ma.getSource());
 		assertEquals(5, ma.getPeriod());
@@ -53,7 +58,7 @@ public class QUIK_EMATest {
 	
 	@Test
 	public void testConstruct2() throws Exception {
-		ma = new QUIK_EMA(source, 14);
+		ma = new QUIK_EMA(es, source, 14);
 		assertEquals("QUIK_EMA(14)", ma.getId());
 		assertSame(source, ma.getSource());
 		assertEquals(14, ma.getPeriod());
@@ -81,7 +86,7 @@ public class QUIK_EMATest {
 		for ( int i = 0; i < 5; i ++ ) {
 			source.add(fixture[i][0]);
 		}
-		ma = new QUIK_EMA(source, 3);
+		ma = new QUIK_EMA(es, source, 3);
 		for ( int i = 0; i < 5; i ++ ) {
 			Double expected = fixture[i][1];
 			String msg = "At #" + i;

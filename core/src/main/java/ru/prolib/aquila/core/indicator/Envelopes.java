@@ -30,28 +30,32 @@ public class Envelopes implements Starter {
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param id идентификатор (может быть null)
 	 * @param sourceSeries исходный ряд данных
 	 * @param function функция расчета скользящей средней
 	 * @param k коэффициент сдвига
 	 */
-	public Envelopes(String id, DataSeries sourceSeries, MAFunction function,
-			double k)
+	public Envelopes(EventSystem es, String id, DataSeries sourceSeries,
+			MAFunction function, double k)
 	{
-		ma = new MA(id, function, sourceSeries);
-		upper = new EnvelopeBand(ma, true, k);
-		lower = new EnvelopeBand(ma, false, k);
+		ma = new MA(es, id, function, sourceSeries);
+		upper = new EnvelopeBand(es, ma, true, k);
+		lower = new EnvelopeBand(es, ma, false, k);
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param sourceSeries исходный ряд данных
 	 * @param function функция расчета скользящей средней
 	 * @param k коэффециент сдвига
 	 */
-	public Envelopes(DataSeries sourceSeries, MAFunction function,  double k) {
-		this(null, sourceSeries, function, k);
+	public Envelopes(EventSystem es, DataSeries sourceSeries,
+			MAFunction function,  double k)
+	{
+		this(es, null, sourceSeries, function, k);
 	}
 	
 	/**
@@ -60,13 +64,16 @@ public class Envelopes implements Starter {
 	 * Создает конверты на базе скользящей средней по формуле
 	 * {@link QuikEMAFunction}.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param id идентификатор (может быть null)
 	 * @param sourceSeries исходный ряд данных
 	 * @param period период скользящей средней
 	 * @param k коэффициент сдвига
 	 */
-	public Envelopes(String id, DataSeries sourceSeries, int period, double k) {
-		this(id, sourceSeries, new QuikEMAFunction(period), k);
+	public Envelopes(EventSystem es, String id, DataSeries sourceSeries,
+			int period, double k)
+	{
+		this(es, id, sourceSeries, new QuikEMAFunction(period), k);
 	}
 	
 	/**
@@ -75,12 +82,15 @@ public class Envelopes implements Starter {
 	 * Создает конверты на базе скользящей средней по формуле
 	 * {@link QuikEMAFunction}.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param sourceSeries исходный ряд данных
 	 * @param period период скользящей средней
 	 * @param k коэффициент сдвига
 	 */
-	public Envelopes(DataSeries sourceSeries, int period, double k) {
-		this(null, sourceSeries, period, k);
+	public Envelopes(EventSystem es, DataSeries sourceSeries, int period,
+			double k)
+	{
+		this(es, null, sourceSeries, period, k);
 	}
 	
 	/**
@@ -89,11 +99,12 @@ public class Envelopes implements Starter {
 	 * Создает конверты на базе скользящей средней по формуле
 	 * {@link QuikEMAFunction} и коэффициентом сдвига 2.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param sourceSeries исходный ряд данных
 	 * @param period период скользящей средней
 	 */
-	public Envelopes(DataSeries sourceSeries, int period) {
-		this(sourceSeries, period, 2.0d);
+	public Envelopes(EventSystem es, DataSeries sourceSeries, int period) {
+		this(es, sourceSeries, period, 2.0d);
 	}
 	
 	/**

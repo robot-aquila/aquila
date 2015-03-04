@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.indicator.function;
 import static org.junit.Assert.*;
 
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 
 public class EnvelopeFunctionTest {
@@ -16,12 +18,20 @@ public class EnvelopeFunctionTest {
 	};
 	private EditableDataSeries sourceSeries;
 	private EnvelopeFunction upper, lower;
+	private EventSystem es;
 
 	@Before
 	public void setUp() throws Exception {
-		sourceSeries = new DataSeriesImpl();
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		sourceSeries = new DataSeriesImpl(es);
 		upper = new EnvelopeFunction(true, 0.5d);
 		lower = new EnvelopeFunction(false, 0.5d);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test

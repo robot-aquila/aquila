@@ -1,23 +1,19 @@
 package ru.prolib.aquila.core.indicator;
 
-import static org.easymock.EasyMock.createStrictControl;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.data.EditableSeries;
-import ru.prolib.aquila.core.data.ValueEvent;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.indicator.Lowest;
 
 
 public class LowestTest {
 	private IMocksControl control;
-	private EventType type;
+	private EventTypeSI type;
 	private EditableSeries<Double> target;
 	private Lowest indicator;
 
@@ -25,7 +21,7 @@ public class LowestTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type = control.createMock(EventType.class);
+		type = control.createMock(EventTypeSI.class);
 		target = control.createMock(EditableSeries.class);
 		indicator = new Lowest(target, 5);
 	}

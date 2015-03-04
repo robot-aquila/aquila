@@ -4,11 +4,14 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
+
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.indicator.function.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class EnvelopeBandTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private EnvelopeFunction fn;
 	private DataSeries sourceSeries;
@@ -17,11 +20,18 @@ public class EnvelopeBandTest {
 
 	@Before
 	public void setUp() throws Exception {
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
 		control = createStrictControl();
 		fn = control.createMock(EnvelopeFunction.class);
-		sourceSeries = new DataSeriesImpl();
-		dispatcher = new IndicatorEventDispatcher();
+		sourceSeries = new DataSeriesImpl(es);
+		dispatcher = new IndicatorEventDispatcher(es);
 		indicator = new EnvelopeBand("foobar", fn, sourceSeries, dispatcher);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -39,7 +49,7 @@ public class EnvelopeBandTest {
 	
 	@Test
 	public void testConstruct4() throws Exception {
-		indicator = new EnvelopeBand("foobar", sourceSeries, true, 1.5d);
+		indicator = new EnvelopeBand(es, "foobar", sourceSeries, true, 1.5d);
 		assertEquals("foobar", indicator.getId());
 		assertEquals(new EnvelopeFunction(true, 1.5d), indicator.getFunction());
 		assertSame(sourceSeries, indicator.getSourceSeries());
@@ -48,7 +58,7 @@ public class EnvelopeBandTest {
 	
 	@Test
 	public void testConstruct3() throws Exception {
-		indicator = new EnvelopeBand(sourceSeries, false, 0.5d);
+		indicator = new EnvelopeBand(es, sourceSeries, false, 0.5d);
 		assertEquals("EnvelopeLower(0.5)", indicator.getId());
 		assertEquals(new EnvelopeFunction(false, 0.5d), indicator.getFunction());
 		assertSame(sourceSeries, indicator.getSourceSeries());
@@ -99,7 +109,7 @@ public class EnvelopeBandTest {
 			.add(control.createMock(EnvelopeFunction.class));
 		Variant<DataSeries> vSrc = new Variant<DataSeries>(vFn)
 			.add(sourceSeries)
-			.add(new DataSeriesImpl("zerg"));
+			.add(new DataSeriesImpl(es, "zerg"));
 		Variant<?> iterator = vSrc;
 		int foundCnt = 0;
 		EnvelopeBand x, found = null;

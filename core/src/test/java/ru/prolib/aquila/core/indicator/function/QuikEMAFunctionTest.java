@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 
 public class QuikEMAFunctionTest {
@@ -25,12 +26,20 @@ public class QuikEMAFunctionTest {
 	
 	private EditableDataSeries source, own;
 	private QuikEMAFunction fn;
+	private EventSystem es;
 	
 	@Before
 	public void setUp() throws Exception {
-		source = new DataSeriesImpl();
-		own = new DataSeriesImpl();
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		source = new DataSeriesImpl(es);
+		own = new DataSeriesImpl(es);
 		fn = new QuikEMAFunction(3);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test

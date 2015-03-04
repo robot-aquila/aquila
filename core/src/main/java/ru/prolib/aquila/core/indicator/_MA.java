@@ -28,14 +28,15 @@ abstract public class _MA implements DataSeries {
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param id идентификатор
 	 * @param source источник данных
 	 * @param period период индикатора
 	 * @param storageLimit лимит размера хранимых значений 
 	 * @throws ValueException исключение перерасчета значений индикатора
 	 */
-	public _MA(String id, DataSeries source, int period, int storageLimit)
-		throws ValueException
+	public _MA(EventSystem es, String id, DataSeries source, int period,
+			int storageLimit) throws ValueException
 	{
 		super();
 		if ( period < 2 ) {
@@ -43,7 +44,7 @@ abstract public class _MA implements DataSeries {
 		}
 		this.source = source;
 		this.period = period;
-		series = new DataSeriesImpl(makeId(id), storageLimit);
+		series = new DataSeriesImpl(es, makeId(id), storageLimit);
 		init();
 	}
 
@@ -115,13 +116,13 @@ abstract public class _MA implements DataSeries {
 			for ( int i = 0; i < source.getLength(); i ++ ) {
 				series.add(calculate(i));
 			}
-			source.OnAdded().addListener(new EventListener() {
+			source.OnAdded().addSyncListener(new EventListener() {
 				@SuppressWarnings("unchecked")
 				@Override public void onEvent(Event event) {
 					onSourceValueAdded((ValueEvent<Double>) event);
 				}
 			});
-			source.OnUpdated().addListener(new EventListener() {
+			source.OnUpdated().addSyncListener(new EventListener() {
 				@SuppressWarnings("unchecked")
 				@Override public void onEvent(Event event) {
 					onSourceValueUpdated((ValueEvent<Double>) event);

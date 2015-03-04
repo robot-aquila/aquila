@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.indicator;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.indicator.function.*;
 
@@ -24,27 +25,31 @@ public class EnvelopeBand extends SimpleIndicator<Double, Double> {
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param id идентификатор (может быть null)
 	 * @param sourceSeries исходный ряд данных
 	 * @param upper тип: true - верхняя, false - нижняя граница конвертов
 	 * @param k коэффициент сдвига
 	 */
-	public EnvelopeBand(String id, Series<Double> sourceSeries,
+	public EnvelopeBand(EventSystem es, String id, Series<Double> sourceSeries,
 			boolean upper, double k)
 	{
 		this(id, new EnvelopeFunction(upper, k), sourceSeries,
-				new IndicatorEventDispatcher());
+				new IndicatorEventDispatcher(es));
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param sourceSeries исходный ряд данных
 	 * @param upper тип: true - верхняя, false - нижняя граница конвертов
 	 * @param k коэффициент сдвига
 	 */
-	public EnvelopeBand(Series<Double> sourceSeries, boolean upper, double k) {
-		this(null, sourceSeries, upper, k);
+	public EnvelopeBand(EventSystem es, Series<Double> sourceSeries,
+			boolean upper, double k)
+	{
+		this(es, null, sourceSeries, upper, k);
 	}
 
 	/**

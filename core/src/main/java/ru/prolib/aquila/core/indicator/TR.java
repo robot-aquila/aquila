@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.indicator;
 
+import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.data.*;
 
 /**
@@ -11,12 +12,12 @@ import ru.prolib.aquila.core.data.*;
 public class TR extends _FLY<Candle> {
 	private static final FMath math = new FMathImpl(); 
 
-	public TR(CandleSeries source) {
-		this(Series.DEFAULT_ID, source);
+	public TR(EventSystem es, CandleSeries source) {
+		this(es, Series.DEFAULT_ID, source);
 	}
 	
-	public TR(String id, CandleSeries source) {
-		super(id, source);
+	public TR(EventSystem es, String id, CandleSeries source) {
+		super(es, id, source);
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.*;
 public class TLSEventDispatcher {
 	private static int lastId = 0;
 	private final EventDispatcher dispatcher;
-	private final EventType onRun, onPause, onFinish;
+	private final EventTypeSI onRun, onPause, onFinish;
 	
 	/**
 	 * Генерировать идентификатор очередного объекта.

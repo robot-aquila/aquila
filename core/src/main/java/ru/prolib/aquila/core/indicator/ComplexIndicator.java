@@ -113,8 +113,8 @@ public class ComplexIndicator<T, R> extends CommonIndicator<R>
 				}
 			}
 			dispatcher.startRelayFor(ownSeries);
-			sourceSeries.OnAdded().addListener(this);
-			sourceSeries.OnUpdated().addListener(this);
+			sourceSeries.OnAdded().addSyncListener(this);
+			sourceSeries.OnUpdated().addSyncListener(this);
 		}
 	}
 

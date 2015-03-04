@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.indicator;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.indicator.function.*;
 
@@ -26,23 +27,27 @@ public class MA extends ComplexIndicator<Double, Double> {
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param id идентификатор (может быть null)
 	 * @param function функция расчета
 	 * @param sourceSeries исходный ряд данных
 	 */
-	public MA(String id, MAFunction function, DataSeries sourceSeries) {
-		this(id, function, sourceSeries, new DataSeriesImpl(),
-			new IndicatorEventDispatcher());
+	public MA(EventSystem es, String id, MAFunction function,
+			DataSeries sourceSeries)
+	{
+		this(id, function, sourceSeries, new DataSeriesImpl(es),
+			new IndicatorEventDispatcher(es));
 	}
 	
 	/**
 	 * Конструктор.
 	 * <p>
+	 * @param es фасад системы событий
 	 * @param function функция расчета
 	 * @param sourceSeries исходный ряд данных
 	 */
-	public MA(MAFunction function, DataSeries sourceSeries) {
-		this(null, function, sourceSeries);
+	public MA(EventSystem es, MAFunction function, DataSeries sourceSeries) {
+		this(es, null, function, sourceSeries);
 	}
 	
 	@Override

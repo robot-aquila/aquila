@@ -5,10 +5,12 @@ import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.indicator.function.*;
 
 public class EnvelopesTest {
+	private EventSystem es;
 	private IMocksControl control;
 	private DataSeries sourceSeries;
 	private MA movingAverage;
@@ -17,12 +19,19 @@ public class EnvelopesTest {
 
 	@Before
 	public void setUp() throws Exception {
-		sourceSeries = new DataSeriesImpl();
+		es = new EventSystemImpl();
+		es.getEventQueue().start();
+		sourceSeries = new DataSeriesImpl(es);
 		control = createStrictControl();
 		movingAverage = control.createMock(MA.class);
 		upper = control.createMock(EnvelopeBand.class);
 		lower = control.createMock(EnvelopeBand.class);
 		indicator = new Envelopes(movingAverage, upper, lower);
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		es.getEventQueue().stop();
 	}
 	
 	@Test
@@ -35,48 +44,48 @@ public class EnvelopesTest {
 	@Test
 	public void testConstruct4_WithFN() throws Exception {
 		MAFunction fn = control.createMock(MAFunction.class);
-		MA expectedMa = new MA("zulu", fn, sourceSeries);
+		MA expectedMa = new MA(es, "zulu", fn, sourceSeries);
 		Envelopes expected = new Envelopes(expectedMa,
-				new EnvelopeBand(expectedMa, true, 1.5d),
-				new EnvelopeBand(expectedMa, false, 1.5d));
-		assertEquals(expected, new Envelopes("zulu", sourceSeries, fn, 1.5d));
+				new EnvelopeBand(es, expectedMa, true, 1.5d),
+				new EnvelopeBand(es, expectedMa, false, 1.5d));
+		assertEquals(expected, new Envelopes(es, "zulu", sourceSeries, fn, 1.5d));
 	}
 	
 	@Test
 	public void testConstruct3_WithFN() throws Exception {
 		MAFunction fn = control.createMock(MAFunction.class);
-		MA expectedMa = new MA(fn, sourceSeries);
+		MA expectedMa = new MA(es, fn, sourceSeries);
 		Envelopes expected = new Envelopes(expectedMa,
-				new EnvelopeBand(expectedMa, true, 0.5d),
-				new EnvelopeBand(expectedMa, false, 0.5d));
-		assertEquals(expected, new Envelopes(sourceSeries, fn, 0.5d));
+				new EnvelopeBand(es, expectedMa, true, 0.5d),
+				new EnvelopeBand(es, expectedMa, false, 0.5d));
+		assertEquals(expected, new Envelopes(es, sourceSeries, fn, 0.5d));
 	}
 	
 	@Test
 	public void testConstruct4_WithPeriod() throws Exception {
-		MA expectedMa = new MA("foo", new QuikEMAFunction(5), sourceSeries);
+		MA expectedMa = new MA(es, "foo", new QuikEMAFunction(5), sourceSeries);
 		Envelopes expected = new Envelopes(expectedMa,
-				new EnvelopeBand(expectedMa, true, 1.0d),
-				new EnvelopeBand(expectedMa, false, 1.0d));
-		assertEquals(expected, new Envelopes("foo", sourceSeries, 5, 1.0d));
+				new EnvelopeBand(es, expectedMa, true, 1.0d),
+				new EnvelopeBand(es, expectedMa, false, 1.0d));
+		assertEquals(expected, new Envelopes(es, "foo", sourceSeries, 5, 1.0d));
 	}
 	
 	@Test
 	public void testConstruct3_WithPeriod() throws Exception {
-		MA expectedMa = new MA(new QuikEMAFunction(9), sourceSeries);
+		MA expectedMa = new MA(es, new QuikEMAFunction(9), sourceSeries);
 		Envelopes expected = new Envelopes(expectedMa,
-				new EnvelopeBand(expectedMa, true, 0.3d),
-				new EnvelopeBand(expectedMa, false, 0.3d));
-		assertEquals(expected, new Envelopes(sourceSeries, 9, 0.3d));
+				new EnvelopeBand(es, expectedMa, true, 0.3d),
+				new EnvelopeBand(es, expectedMa, false, 0.3d));
+		assertEquals(expected, new Envelopes(es, sourceSeries, 9, 0.3d));
 	}
 	
 	@Test
 	public void testConstruct2() throws Exception {
-		MA expectedMa = new MA(new QuikEMAFunction(7), sourceSeries);
+		MA expectedMa = new MA(es, new QuikEMAFunction(7), sourceSeries);
 		Envelopes expected = new Envelopes(expectedMa,
-				new EnvelopeBand(expectedMa, true, 2.0d),
-				new EnvelopeBand(expectedMa, false, 2.0d));
-		assertEquals(expected, new Envelopes(sourceSeries, 7));
+				new EnvelopeBand(es, expectedMa, true, 2.0d),
+				new EnvelopeBand(es, expectedMa, false, 2.0d));
+		assertEquals(expected, new Envelopes(es, sourceSeries, 7));
 	}
 	
 	@Test

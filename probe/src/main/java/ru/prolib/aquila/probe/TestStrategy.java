@@ -3,13 +3,8 @@ package ru.prolib.aquila.probe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.core.BusinessEntities.TerminalObserver;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.CandleSeries;
 import ru.prolib.aquila.core.data.filler.CandleSeriesFiller;
 import ru.prolib.aquila.core.data.timeframe.TFMinutes;
@@ -67,7 +62,9 @@ public class TestStrategy implements TerminalObserver, EventListener {
 			if ( security == null ) {
 				logger.debug("Aquire security instance: {}", descr);
 				security = terminal.getSecurity(descr);
-				candleFiller = new CandleSeriesFiller(security,
+				candleFiller = new CandleSeriesFiller(
+						((EditableTerminal<?>) terminal).getEventSystem(), 
+						security,
 						new TFMinutes(5), false);
 				candles = candleFiller.getCandles();
 				candles.OnAdded().addListener(this);
