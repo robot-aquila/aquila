@@ -1,8 +1,7 @@
 package ru.prolib.aquila.ui;
 
-import static org.easymock.EasyMock.createStrictControl;
-import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -14,10 +13,7 @@ import javax.swing.JRadioButtonMenuItem;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -36,7 +32,7 @@ public class CurrentPortfolioImplTest {
 	private Account acc;
 	private Terminal portfolios;
 	private EventDispatcher dispatcher;
-	private EventType portfolioChanged;
+	private EventTypeSI portfolioChanged;
 	private Menu menu;
 	
 	private CurrentPortfolioImpl prt;
@@ -101,7 +97,7 @@ public class CurrentPortfolioImplTest {
 	
 	@Test
 	public void testOnEvent_HandledCurrPortfolioNotSet() throws Exception {
-		EventType onPortfolioAvailable = dispatcher.createType();
+		EventTypeSI onPortfolioAvailable = dispatcher.createType();
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
 		final CountDownLatch finished = new CountDownLatch(1);
@@ -140,7 +136,7 @@ public class CurrentPortfolioImplTest {
 	
 	@Test
 	public void testOnEvent_HandledCurrPortfolioSet() throws Exception {
-		EventType onPortfolioAvailable = dispatcher.createType();
+		EventTypeSI onPortfolioAvailable = dispatcher.createType();
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);

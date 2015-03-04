@@ -10,18 +10,10 @@ import javax.swing.event.TableModelListener;
 
 import org.easymock.IMocksControl;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.data.G;
-import ru.prolib.aquila.core.data.GInteger;
-import ru.prolib.aquila.core.data.GString;
-import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.row.RowAdapter;
 /**
  * $Id: TableModelTest.java 578 2013-03-14 23:37:31Z huan.kaktus $
@@ -54,7 +46,7 @@ public class TableModelImplTest {
 	@Test
 	public void testOnEvent_RowInserted() throws Exception {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
-		EventType evtType = control.createMock(EventType.class);
+		EventTypeSI evtType = control.createMock(EventTypeSI.class);
 
 		tm.setOnRowAvailableListener(new DataSourceEventTranslator(
 				dispatcher, evtType));
@@ -96,9 +88,9 @@ public class TableModelImplTest {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
 		
 		tm.setOnRowAvailableListener(new DataSourceEventTranslator(
-				dispatcher, control.createMock(EventType.class)));
+				dispatcher, control.createMock(EventTypeSI.class)));
 		
-		EventType evtType = control.createMock(EventType.class);
+		EventTypeSI evtType = control.createMock(EventTypeSI.class);
 		tm.setOnRowChangedListener(new DataSourceEventTranslator(
 				dispatcher, evtType));
 		
@@ -209,15 +201,15 @@ public class TableModelImplTest {
 	public void testStart() throws Exception {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
 		
-		EventType onAvailableEvt = control.createMock(EventType.class);
-		EventType onChangedEvt = control.createMock(EventType.class);
+		EventTypeSI onAvailableEvt = control.createMock(EventTypeSI.class);
+		EventTypeSI onChangedEvt = control.createMock(EventTypeSI.class);
 		
-		DataSourceEventTranslator onAvailableListener = new DataSourceEventTranslator(
-				dispatcher, onAvailableEvt);
+		DataSourceEventTranslator onAvailableListener
+			= new DataSourceEventTranslator(dispatcher, onAvailableEvt);
 		tm.setOnRowAvailableListener(onAvailableListener);
 		
-		DataSourceEventTranslator onChangedListener = new DataSourceEventTranslator(
-				dispatcher, onChangedEvt);
+		DataSourceEventTranslator onChangedListener
+			= new DataSourceEventTranslator(dispatcher, onChangedEvt);
 		tm.setOnRowChangedListener(onChangedListener);
 		
 		onAvailableEvt.addListener(tm);
@@ -231,15 +223,15 @@ public class TableModelImplTest {
 	public void testStop() throws StarterException {
 		EventDispatcher dispatcher = control.createMock(EventDispatcher.class);
 		
-		EventType onAvailableEvt = control.createMock(EventType.class);
-		EventType onChangedEvt = control.createMock(EventType.class);
+		EventTypeSI onAvailableEvt = control.createMock(EventTypeSI.class);
+		EventTypeSI onChangedEvt = control.createMock(EventTypeSI.class);
 		
-		DataSourceEventTranslator onAvailableListener = new DataSourceEventTranslator(
-				dispatcher, onAvailableEvt);
+		DataSourceEventTranslator onAvailableListener
+			= new DataSourceEventTranslator(dispatcher, onAvailableEvt);
 		tm.setOnRowAvailableListener(onAvailableListener);
 		
-		DataSourceEventTranslator onChangedListener = new DataSourceEventTranslator(
-				dispatcher, onChangedEvt);
+		DataSourceEventTranslator onChangedListener 
+			= new DataSourceEventTranslator(dispatcher, onChangedEvt);
 		tm.setOnRowChangedListener(onChangedListener);
 		
 		onAvailableEvt.removeListener(tm);

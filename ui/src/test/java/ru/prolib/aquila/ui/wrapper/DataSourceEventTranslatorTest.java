@@ -9,18 +9,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.EventSystemImpl;
-import ru.prolib.aquila.core.EventType;
+import org.junit.*;
+import ru.prolib.aquila.core.*;
 
 /**
  * $Id$
@@ -32,7 +22,7 @@ public class DataSourceEventTranslatorTest {
 	private static EventQueue queue;
 	
 	private Event source;
-	private EventType onOccur;
+	private EventTypeSI onOccur;
 	private EventDispatcher dispatcher;
 	
 	private DataSourceEventTranslator evt;

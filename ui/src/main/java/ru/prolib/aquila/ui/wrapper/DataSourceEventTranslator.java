@@ -1,9 +1,6 @@
 package ru.prolib.aquila.ui.wrapper;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * $Id: DataSourceEventTranslator.java 577 2013-03-14 23:17:54Z huan.kaktus $
@@ -11,9 +8,9 @@ import ru.prolib.aquila.core.EventType;
 public class DataSourceEventTranslator implements EventListener {
 	
 	private EventDispatcher dispatcher;	
-	private EventType onEventOccur;
+	private EventTypeSI onEventOccur;
 	
-	public DataSourceEventTranslator(EventDispatcher dispatcher, EventType onEventOccur) {
+	public DataSourceEventTranslator(EventDispatcher dispatcher, EventTypeSI onEventOccur) {
 		this.dispatcher = dispatcher;
 		this.onEventOccur = onEventOccur;
 	}
@@ -35,8 +32,7 @@ public class DataSourceEventTranslator implements EventListener {
 	}
 	
 	private void fireOnEventOccur(Event source) {
-		dispatcher.dispatch(new EventTranslatorEvent(
-				onEventOccur, source));
+		dispatcher.dispatch(new EventTranslatorEvent(onEventOccur, source));
 	}
 
 }

@@ -3,12 +3,8 @@ package ru.prolib.aquila.ui.wrapper;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.easymock.IMocksControl;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventType;
+import org.junit.*;
+import ru.prolib.aquila.core.*;
 
 /**
  * $Id: DataSourceEventTranslatorEventTest.java 577 2013-03-14 23:17:54Z huan.kaktus $
@@ -17,7 +13,7 @@ public class EventTranslatorEventTest {
 
 	private static IMocksControl control;
 	
-	private EventType type;
+	private EventTypeSI type;
 	private Event source;
 	private EventTranslatorEvent e;
 	
@@ -25,7 +21,7 @@ public class EventTranslatorEventTest {
 	public void setUp() {	
 		control = createStrictControl();
 		
-		type = control.createMock(EventType.class);
+		type = control.createMock(EventTypeSI.class);
 		source = control.createMock(Event.class);
 		
 		e = new EventTranslatorEvent(type, source);
@@ -55,7 +51,7 @@ public class EventTranslatorEventTest {
 	
 	@Test
 	public void testEquals_FalseWithAnotherType() {
-		EventType t = control.createMock(EventType.class);
+		EventTypeSI t = control.createMock(EventTypeSI.class);
 		EventTranslatorEvent e2 = new EventTranslatorEvent(t, source);
 		assertFalse(e.equals(e2));
 	}

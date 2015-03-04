@@ -26,7 +26,8 @@ public class SecurityGettersTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		
-		EditableTerminal terminal = new TerminalImpl("foo");
+		@SuppressWarnings("rawtypes")
+		EditableTerminal<?> terminal = new TerminalImpl("foo");
 		
 		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
 		EditableSecurity sc = terminal.getEditableSecurity(descr);
@@ -63,7 +64,7 @@ public class SecurityGettersTest {
 		GSecurity g = new GSecurity();
 		IsInstanceOf.instanceOf(G.class).matches(g);		
 		SecurityEvent e = new SecurityEvent(
-				control.createMock(EventType.class), (Security) security);
+				control.createMock(EventTypeSI.class), (Security) security);
 		assertEquals(security, g.get(e));
 	}
 	

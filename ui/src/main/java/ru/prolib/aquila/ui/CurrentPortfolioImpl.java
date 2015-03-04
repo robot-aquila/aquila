@@ -15,7 +15,7 @@ import ru.prolib.aquila.ui.wrapper.*;
 
 public class CurrentPortfolioImpl implements CurrentPortfolio {
 	private static Logger logger = LoggerFactory.getLogger(CurrentPortfolioImpl.class);
-	private final EventType portfolioChanged;
+	private final EventTypeSI portfolioChanged;
 	private final EventDispatcher dispatcher;
 	private Terminal portfolios;
 	private Portfolio portfolio;
@@ -25,7 +25,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	private Map<EventType, Portfolio> prtList = new HashMap<EventType, Portfolio>();
 	
 	public CurrentPortfolioImpl(
-			Terminal portfolios, EventType portfolioChanged, 
+			Terminal portfolios, EventTypeSI portfolioChanged, 
 			EventDispatcher dispatcher, Menu menu) 
 	{
 		this.portfolioChanged = portfolioChanged;

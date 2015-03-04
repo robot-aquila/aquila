@@ -8,10 +8,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
-import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.StarterException;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.row.RowAdapter;
 
 /**
@@ -23,9 +20,9 @@ public class TableImpl implements Table {
 	private JTable underlayed;
 	
 	private EventDispatcher dispatcher;
-	private EventType onRowSelected;
+	private EventTypeSI onRowSelected;
 	
-	public TableImpl(TableModel model, EventDispatcher dispatcher, EventType onRowSelected) {
+	public TableImpl(TableModel model, EventDispatcher dispatcher, EventTypeSI onRowSelected) {
 		super();
 		this.model = model;
 		this.dispatcher = dispatcher;

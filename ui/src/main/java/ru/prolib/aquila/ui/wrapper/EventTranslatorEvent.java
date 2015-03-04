@@ -1,8 +1,6 @@
 package ru.prolib.aquila.ui.wrapper;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.*;
 
 /**
  * $Id: DataSourceEventTranslatorEvent.java 577 2013-03-14 23:17:54Z huan.kaktus $
@@ -10,7 +8,7 @@ import ru.prolib.aquila.core.EventType;
 public class EventTranslatorEvent extends EventImpl {
 	private Event source;
 	
-	public EventTranslatorEvent(EventType eType, Event source) {
+	public EventTranslatorEvent(EventTypeSI eType, Event source) {
 		super(eType);
 		this.source = source;
 	}

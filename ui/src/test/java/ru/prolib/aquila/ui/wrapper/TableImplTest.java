@@ -30,7 +30,7 @@ public class TableImplTest {
 	private static IMocksControl control;
 	private static EventSystem eventSystem;
 	private static EventQueue queue;
-	private EventType onRowSelected;
+	private EventTypeSI onRowSelected;
 	private EventDispatcher dispatcher;
 	private TableModel model;
 	private TableImpl tb;
@@ -107,8 +107,8 @@ public class TableImplTest {
 		model.addColumn(col1);
 		model.addColumn(col2);
 		
-		EventType onRowAvailable = control.createMock(EventType.class);
-		EventType onRowChanged = control.createMock(EventType.class);
+		EventTypeSI onRowAvailable = control.createMock(EventTypeSI.class);
+		EventTypeSI onRowChanged = control.createMock(EventTypeSI.class);
 		
 		model.setOnRowAvailableListener(
 				new DataSourceEventTranslator(dispatcher, onRowAvailable));
