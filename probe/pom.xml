@@ -24,7 +24,7 @@
   
 	<build>
 		<plugins>
-			<!-- plugin>
+			<plugin>
         		<artifactId>maven-assembly-plugin</artifactId>
         		<version>2.2.1</version>
         		<configuration>
@@ -40,7 +40,7 @@
 				    	</goals>
 					</execution>
 				</executions>
-			</plugin -->
+			</plugin>
         	</plugins>
 	</build>
   
