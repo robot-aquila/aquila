@@ -1,9 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.List;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
@@ -799,13 +801,23 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public void subscribe(TerminalObserver observer) {
-		dispatcher.subscribe(observer);
+	public EventType OnReady() {
+		return dispatcher.OnReady();
 	}
 
 	@Override
-	public void unsubscribe(TerminalObserver observer) {
-		dispatcher.unsubscribe(observer);
+	public EventType OnUnready() {
+		return dispatcher.OnUnready();
+	}
+
+	@Override
+	public void fireTerminalReady() {
+		dispatcher.fireReady();
+	}
+
+	@Override
+	public void fireTerminalUnready() {
+		dispatcher.fireUnready();
 	}
 
 }

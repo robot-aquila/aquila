@@ -4,6 +4,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.easymock.IMocksControl;
@@ -30,7 +31,7 @@ public class RowAdapterTest {
 		control = createStrictControl();
 		adapter1 = control.createMock(G.class);
 		adapter2 = control.createMock(G.class);
-		adapters = new HashMap<String, G<?>>();
+		adapters = new LinkedHashMap<String, G<?>>();
 		adapters.put("foo", adapter1);
 		adapters.put("bar", adapter2);
 		adapter = new RowAdapter(source, adapters);
@@ -120,8 +121,8 @@ public class RowAdapterTest {
 	
 	@Test
 	public void testGetRowCopy() throws Exception {
-		expect(adapter1.get(same(source))).andReturn("zulu4");
-		expect(adapter2.get(same(source))).andReturn(152);
+		expect(adapter1.get(eq(source))).andReturn("zulu4");
+		expect(adapter2.get(eq(source))).andReturn(152);
 		control.replay();
 		
 		Row expected = new SimpleRow(new String[] { "foo", "bar" },

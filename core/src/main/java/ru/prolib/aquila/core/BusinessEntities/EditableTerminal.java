@@ -113,6 +113,16 @@ public interface EditableTerminal<T> extends Terminal {
 	public void fireTerminalStoppedEvent();
 	
 	/**
+	 * Генерировать событие о готовности терминала.
+	 */
+	public void fireTerminalReady();
+	
+	/**
+	 * Генерировать событие о неготовности терминала.
+	 */
+	public void fireTerminalUnready();
+	
+	/**
 	 * Установить состояние терминала.
 	 * <p>
 	 * @param state новое состояние

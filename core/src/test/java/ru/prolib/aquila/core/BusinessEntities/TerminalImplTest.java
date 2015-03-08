@@ -1204,26 +1204,41 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testSubscribe() throws Exception {
-		TerminalObserver o = control.createMock(TerminalObserver.class);
-		dispatcher.subscribe(same(o));
+	public void testOnReady() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnReady()).andReturn(type);
+		control.replay();
+		assertSame(type, terminal.OnReady());
+		control.verify();
+	}
+	
+	@Test
+	public void testOnUnready() throws Exception {
+		EventType type = control.createMock(EventType.class);
+		expect(dispatcher.OnUnready()).andReturn(type);
+		control.replay();
+		assertSame(type, terminal.OnUnready());
+		control.verify();
+	}
+	
+	@Test
+	public void testFireTerminalReady() throws Exception {
+		dispatcher.fireReady();
 		control.replay();
 		
-		terminal.subscribe(o);
+		terminal.fireTerminalReady();
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testUnsubscribe() throws Exception {
-		TerminalObserver o = control.createMock(TerminalObserver.class);
-		dispatcher.unsubscribe(same(o));
+	public void testFireTerminalUnready() throws Exception {
+		dispatcher.fireUnready();
 		control.replay();
 		
-		terminal.unsubscribe(o);
+		terminal.fireTerminalUnready();
 		
 		control.verify();
 	}
-
 	
 }

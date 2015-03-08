@@ -1,11 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.utils.KW;
 
 /**
  * Диспетчер событий терминала.
@@ -15,8 +11,7 @@ import ru.prolib.aquila.core.utils.KW;
 public class TerminalEventDispatcher {
 	private final EventDispatcher dispatcher;
 	private final EventTypeSI onConnected, onDisconnected, onStarted,
-		onStopped, onPanic, onRequestSecurityError;
-	private final List<KW<TerminalObserver>> observers;
+		onStopped, onPanic, onRequestSecurityError, onReady, onUnready;
 	
 	public TerminalEventDispatcher(EventSystem es) {
 		super();
@@ -26,8 +21,9 @@ public class TerminalEventDispatcher {
 		onStarted = dispatcher.createType("Started");
 		onStopped = dispatcher.createType("Stopped");
 		onPanic = dispatcher.createType("Panic");
+		onReady = dispatcher.createSyncType("Ready");
+		onUnready = dispatcher.createSyncType("Unready");
 		onRequestSecurityError = dispatcher.createType("RequestSecurityError");
-		observers = new ArrayList<KW<TerminalObserver>>();
 	}
 	
 	/**
@@ -96,37 +92,43 @@ public class TerminalEventDispatcher {
 	}
 	
 	/**
+	 * Получить тип события: терминал готов к приему запросов.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnReady() {
+		return onReady;
+	}
+	
+	/**
+	 * Получить тип события: терминал не готов к приему запросов.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType OnUnready() {
+		return onUnready;
+	}
+	
+	/**
 	 * Генератор события: установлено соединение с удаленной системой.
 	 * <p>
-	 * Этот метод помещает в очередь событие типа {@link #OnConnected()}, а так
-	 * же выполняет оповещение обозревателей синхронных событий посредством
-	 * вызова метода {@link TerminalObserver#OnTerminalReady(Terminal)} для
-	 * каждого зарегистрированного обозревателя.
+	 * Этот метод помещает в очередь событие типа {@link #OnConnected()}
 	 * <p>
 	 * @param terminal терминал
 	 */
 	public synchronized void fireConnected(Terminal terminal) {
 		dispatcher.dispatch(new EventImpl(onConnected));
-		for ( KW<TerminalObserver> o : observers ) {
-			o.instance().OnTerminalReady(terminal);
-		}
 	}
 
 	/**
 	 * Генератор события: соединение с удаленной системой разорвано.
 	 * <p>
-	 * Этот метод помещает в очередь событие типа {@link #OnDisconnected()}, а
-	 * так же выполняет оповещение обозревателей синхронных событий посредством
-	 * вызова метода {@link TerminalObserver#OnTerminalUnready(Terminal)} для
-	 * каждого зарегистрированного обозревателя.
+	 * Этот метод помещает в очередь событие типа {@link #OnDisconnected()}
 	 * <p>
 	 * @param terminal терминал
 	 */
 	public synchronized void fireDisconnected(Terminal terminal) {
 		dispatcher.dispatch(new EventImpl(onDisconnected));
-		for ( KW<TerminalObserver> o : observers ) {
-			o.instance().OnTerminalUnready(terminal);
-		}
 	}
 	
 	/**
@@ -179,24 +181,17 @@ public class TerminalEventDispatcher {
 	}
 	
 	/**
-	 * Подписать обозревателя на синхронные события.
-	 * <p>
-	 * @param observer обозреватель
+	 * Генератор события: терминал готов к приему запросов.
 	 */
-	public synchronized void subscribe(TerminalObserver observer) {
-		KW<TerminalObserver> o = new KW<TerminalObserver>(observer);
-		if ( ! observers.contains(o) ) {
-			observers.add(o);
-		}
+	public void fireReady() {
+		dispatcher.dispatch(new EventImpl(onReady));
 	}
 	
 	/**
-	 * Отписать обозревателя от синхронных событий.
-	 * <p>
-	 * @param observer обозреватель
+	 * Генератор события: терминал не готов к приему запросов.
 	 */
-	public synchronized void unsubscribe(TerminalObserver observer) {
-		observers.remove(new KW<TerminalObserver>(observer));
+	public void fireUnready() {
+		dispatcher.dispatch(new EventImpl(onUnready));
 	}
 
 }
