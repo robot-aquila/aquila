@@ -9,13 +9,10 @@ import ru.prolib.aquila.ui.AquilaUI;
 import ru.prolib.aquila.ui.ServiceLocator;
 
 public class TestStrategyPlugin implements AquilaPlugin {
-	private final TestStrategy strategy;
+	private TestStrategy strategy;
 	
 	public TestStrategyPlugin() {
 		super();
-		SecurityDescriptor descr = new SecurityDescriptor("Si-3.15",
-				"SPBFUT", "RUR", SecurityType.FUT);
-		strategy = new TestStrategy(descr);
 	}
 
 	@Override
@@ -37,7 +34,9 @@ public class TestStrategyPlugin implements AquilaPlugin {
 	public void initialize(ServiceLocator locator, Terminal terminal, String arg)
 			throws Exception
 	{
-		terminal.subscribe(strategy);
+		SecurityDescriptor descr = new SecurityDescriptor("Si-3.15", "SPBFUT", "RUR", SecurityType.FUT);
+		strategy = new TestStrategy(terminal, descr);
+		strategy.start();
 	}
 
 }

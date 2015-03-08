@@ -146,9 +146,16 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 	public void markTerminalConnected() {
 		if ( ! getTimeline().finished() ) {
 			super.markTerminalConnected();
+			fireTerminalReady();
 		} else {
 			logger.info("Mark connected request skipped because end of timeline reached.");
 		}
+	}
+	
+	@Override
+	public void markTerminalDisconnected() {
+		fireTerminalUnready();
+		super.markTerminalDisconnected();
 	}
 
 }

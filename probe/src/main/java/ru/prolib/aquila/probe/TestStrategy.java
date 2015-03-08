@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.data.CandleSeries;
 import ru.prolib.aquila.core.data.filler.CandleSeriesFiller;
 import ru.prolib.aquila.core.data.timeframe.TFMinutes;
 
-public class TestStrategy implements TerminalObserver, EventListener {
+public class TestStrategy implements EventListener, Starter {
 	private static final Logger logger;
 	
 	static {
@@ -22,15 +22,15 @@ public class TestStrategy implements TerminalObserver, EventListener {
 	private CandleSeriesFiller candleFiller;
 	private CandleSeries candles;
 	
-	public TestStrategy(SecurityDescriptor descr) {
+	public TestStrategy(Terminal terminal, SecurityDescriptor descr) {
 		super();
+		this.terminal = terminal;
 		this.descr = descr;
 	}
 
-	@Override
-	public void OnTerminalReady(Terminal terminal) {
+	public void onTerminalReady() {
 		logger.debug("Terminal Ready.");
-		this.terminal = terminal; 
+
 		if ( terminal.isSecurityExists(descr) ) {
 			logger.debug("Security exists. Subscribe right now.");
 			subscribeOnSecurityEvents();
@@ -42,8 +42,7 @@ public class TestStrategy implements TerminalObserver, EventListener {
 		terminal.requestSecurity(descr);
 	}
 
-	@Override
-	public void OnTerminalUnready(Terminal terminal) {
+	public void onTerminalUnready() {
 		try {
 			logger.debug("Terminal Unready");
 			if ( candleFiller != null ) {
@@ -86,9 +85,27 @@ public class TestStrategy implements TerminalObserver, EventListener {
 				terminal.OnSecurityAvailable().removeListener(this);
 				subscribeOnSecurityEvents();
 			}
+		} else if ( event.isType(terminal.OnReady()) ) {
+			onTerminalReady();
+		
+		} else if ( event.isType(terminal.OnUnready()) ) {
+			onTerminalUnready();
+			
 		} else if ( candles != null && event.isType(candles.OnAdded()) ) {
 			logger.debug("Candle added.");
 		}
+	}
+
+	@Override
+	public void start() throws StarterException {
+		terminal.OnReady().addListener(this);
+		terminal.OnUnready().addListener(this);
+	}
+
+	@Override
+	public void stop() throws StarterException {
+		terminal.OnReady().removeListener(this);
+		terminal.OnUnready().removeListener(this);
 	}
 
 }

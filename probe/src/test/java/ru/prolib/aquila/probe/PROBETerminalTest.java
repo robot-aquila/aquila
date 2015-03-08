@@ -244,9 +244,11 @@ public class PROBETerminalTest {
 		terminal.finish();
 	}
 	
+	@Ignore
 	@Test
 	public void testMarkTerminalConnected() {
 		// skipped, too complex
+		fail("TODO: incomplete");
 	}
 	
 	@Test
@@ -258,6 +260,12 @@ public class PROBETerminalTest {
 		terminal.markTerminalConnected();
 		
 		control.verify();
+	}
+	
+	@Ignore
+	@Test
+	public void testMarkTerminalDisconnected() throws Exception {
+		fail("TODO: incomplete");
 	}
 
 }
