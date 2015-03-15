@@ -117,6 +117,8 @@ public class AssemblerL2 {
 			security.setBidPrice(entry.getBidPrice());
 			security.setHighPrice(entry.getHighPrice());
 			security.setLowPrice(entry.getLowPrice());
+			security.setInitialPrice(entry.getInitialPrice());
+			security.setInitialMargin(entry.getInitialMargin());
 			terminal.fireEvents(security);
 		}
 		return true;

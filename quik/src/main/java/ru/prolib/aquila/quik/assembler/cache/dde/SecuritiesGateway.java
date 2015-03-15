@@ -37,6 +37,9 @@ public class SecuritiesGateway implements TableGateway {
 	private static final String HIGH = "high";
 	private static final String LOW = "low";
 	private static final String CURRENCY = "curstepprice";
+	private static final String INITIAL_PRICE = "settleprice";
+	private static final String INITIAL_MARGIN_BUY = "buydepo";
+	private static final String INITIAL_MARGIN_SELL = "selldepo";
 	private static final String REQUIRED_HEADERS[] = {
 		LOT_SIZE,
 		PRICE_MAX,
@@ -62,6 +65,9 @@ public class SecuritiesGateway implements TableGateway {
 		HIGH,
 		LOW,
 		CURRENCY,
+		INITIAL_PRICE,
+		INITIAL_MARGIN_BUY,
+		INITIAL_MARGIN_SELL,
 	};
 	
 	/**
@@ -130,7 +136,9 @@ public class SecuritiesGateway implements TableGateway {
 					converter.getString(row, CODE),
 					converter.getString(row, CLASS_CODE),
 					getCurrency(row),
-					getType(row)));
+					getType(row),
+					converter.getDoubleOrNull(row, INITIAL_PRICE),
+					converter.getDoubleOrNull(row, INITIAL_MARGIN_BUY)));
 		} catch ( ValueException e ) {
 			throw new DDEException(e.getMessage());
 		}

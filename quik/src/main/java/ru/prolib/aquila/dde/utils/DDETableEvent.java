@@ -25,6 +25,9 @@ public class DDETableEvent extends DDEEvent {
 	 */
 	public DDETableEvent(EventTypeSI type, String service, DDETable table) {
 		super(type, service);
+		if ( type == null ) {
+			throw new NullPointerException("Type cannot be null");
+		}
 		if ( table == null ) {
 			throw new NullPointerException("Table cannot be null");
 		}

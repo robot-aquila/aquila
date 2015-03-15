@@ -24,6 +24,9 @@ public class DDETopicEvent extends DDEEvent {
 	 */
 	public DDETopicEvent(EventTypeSI type, String service, String topic) {
 		super(type, service);
+		if ( type == null ) {
+			throw new NullPointerException("Type cannot be null");
+		}
 		if ( topic == null ) {
 			throw new NullPointerException("Topic cannot be null");
 		}

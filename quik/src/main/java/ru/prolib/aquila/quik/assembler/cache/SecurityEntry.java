@@ -27,6 +27,8 @@ public class SecurityEntry extends CacheEntry {
 	private final Currency currency;
 	private final SecurityType type;
 	private QUIKSecurityDescriptor descriptor;
+	private final Double initialPrice;
+	private final Double initialMargin;
 	
 	/**
 	 * Конструктор.
@@ -50,13 +52,16 @@ public class SecurityEntry extends CacheEntry {
 	 * @param classCode код класса
 	 * @param currency валюта инструмента
 	 * @param type тип инструмента
+	 * @param initialPrice расчетная цена
+	 * @param initialMargin начальная маржа 
 	 */
 	public SecurityEntry(Integer lotSize, Double maxPrice, Double minPrice,
 			Double minStepPrice, Double minStepSize, Integer precision,
 			Double lastPrice, Double openPrice, Double closePrice,
 			String displayName, String shortName, Double askPrice,
 			Double bidPrice, Double highPrice, Double lowPrice,
-			String code, String classCode, Currency currency, SecurityType type)
+			String code, String classCode, Currency currency, SecurityType type,
+			Double initialPrice, Double initialMargin)
 	{
 		super();
 		this.lotSize = lotSize;
@@ -74,11 +79,20 @@ public class SecurityEntry extends CacheEntry {
 		this.bidPrice = bidPrice;
 		this.highPrice = highPrice;
 		this.lowPrice = lowPrice;
-		
+		this.initialPrice = initialPrice;
+		this.initialMargin = initialMargin;
 		this.code = code;
 		this.classCode = classCode;
 		this.currency = currency;
 		this.type = type;
+	}
+	
+	public Double getInitialPrice() {
+		return initialPrice;
+	}
+	
+	public Double getInitialMargin() {
+		return initialMargin;
 	}
 	
 	public Integer getLotSize() {
@@ -202,6 +216,8 @@ public class SecurityEntry extends CacheEntry {
 			.append(classCode, o.classCode)
 			.append(currency, o.currency)
 			.append(type, o.type)
+			.append(initialPrice, o.initialPrice)
+			.append(initialMargin, o.initialMargin)
 			.isEquals();
 	}
 	
@@ -228,6 +244,8 @@ public class SecurityEntry extends CacheEntry {
 			+ "minStepSize=" + minStepSize + ", "
 			+ "open=" + openPrice + ", "
 			+ "prec=" + precision + ", "
+			+ "initPrice=" + initialPrice + ", "
+			+ "initMargin=" + initialMargin
 			+ "]";
 	}
 

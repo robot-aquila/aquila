@@ -5,11 +5,11 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 public class DDETableImplTest {
-	private static Object[] array;
-	private static DDETableImpl table;
+	private Object[] array;
+	private DDETableImpl table;
 	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		array = new Object[24];
 		array[3 * 0 + 1] = new String("zulu4");
 		array[3 * 2 + 0] = new Integer(54321);

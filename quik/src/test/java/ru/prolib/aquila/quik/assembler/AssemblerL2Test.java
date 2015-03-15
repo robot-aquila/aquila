@@ -109,7 +109,8 @@ public class AssemblerL2Test {
 		SecurityEntry entry = new SecurityEntry(1, 142820d, 132480d,
 				6.48020d, 10d, 0, 137950d, 137000d, 136900d, "RTS-9.13",
 				"RIU3", 138040d, 137990d, 138100d, 136050d, "RIU3", "SPBFUT",
-				ISO4217.USD, SecurityType.FUT);
+				ISO4217.USD, SecurityType.FUT,
+				132020d, 12450d);
 		descr = new QUIKSecurityDescriptor("RTS-9.13", "SPBFUT", ISO4217.USD,
 				SecurityType.FUT, "RIU3", "RIU3", "RTS-9.13");
 		
@@ -129,10 +130,12 @@ public class AssemblerL2Test {
 		security.setBidPrice(eq(137990d));
 		security.setHighPrice(eq(138100d));
 		security.setLowPrice(eq(136050d));
+		security.setInitialPrice(eq(132020d));
+		security.setInitialMargin(eq(12450d));
 		terminal.fireEvents(same(security));
 		control.replay();
 		
-		assertEquals(1, Security.VERSION);
+		assertEquals(2, Security.VERSION);
 		asm.tryAssemble(entry);
 		
 		control.verify();

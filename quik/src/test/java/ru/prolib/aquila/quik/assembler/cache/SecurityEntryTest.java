@@ -24,7 +24,8 @@ public class SecurityEntryTest {
 		row = new SecurityEntry(20, 180.13d, 160.24d, 0.01d, 0.02d, 2,
 				150.82d, 153.14d, 153.12d, "test security", "test",
 				150.84d, 150.90d, /*151.12d*/null, 149.82d,
-				"SBER", "EQBR", ISO4217.RUB, SecurityType.STK);
+				"SBER", "EQBR", ISO4217.RUB, SecurityType.STK,
+				201.12d, 20.10d); // init price, initmargin
 	}
 	
 	@Test
@@ -99,7 +100,13 @@ public class SecurityEntryTest {
 		Variant<SecurityType> vType = new Variant<SecurityType>(vCurr)
 			.add(SecurityType.STK)
 			.add(SecurityType.OPT);
-		Variant<?> iterator = vType;
+		Variant<Double> vInitPrice = new Variant<Double>(vType)
+			.add(201.12d)
+			.add(113.28d);
+		Variant<Double> vInitMargin = new Variant<Double>(vInitPrice)
+			.add(20.10d)
+			.add(18.34d);
+		Variant<?> iterator = vInitMargin;
 		int foundCnt = 0;
 		SecurityEntry x = null, found = null;
 		do {
@@ -108,7 +115,8 @@ public class SecurityEntryTest {
 					vLast.get(), vOpen.get(), vClose.get(), vDispNm.get(),
 					vShrtNm.get(), vAsk.get(), vBid.get(), vHigh.get(),
 					vLow.get(),
-					vCode.get(), vClass.get(), vCurr.get(), vType.get());
+					vCode.get(), vClass.get(), vCurr.get(), vType.get(),
+					vInitPrice.get(), vInitMargin.get());
 			if ( row.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -135,13 +143,15 @@ public class SecurityEntryTest {
 		assertEquals("EQBR", found.getClassCode());
 		assertEquals(ISO4217.RUB, found.getCurrency());
 		assertEquals(SecurityType.STK, found.getType());
+		assertEquals(201.12d, found.getInitialPrice(), 0.001d);
+		assertEquals(20.10d, found.getInitialMargin(), 0.001d);
 	}
 	
 	@Test
 	public void testGetDescriptor_ForFutures() throws Exception {
 		row = new SecurityEntry(0, 0d, 0d, 0d, 0d, 0, 0d, 0d, 0d,
 				"RTS-12.13", "_RIZ3", 0d, 0d, 0d, 0d,
-				"RIZ3", "SPBFUT", ISO4217.USD, SecurityType.FUT);
+				"RIZ3", "SPBFUT", ISO4217.USD, SecurityType.FUT, 0d, 0d);
 		expected = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT",
 				ISO4217.USD, SecurityType.FUT, "RIZ3", "_RIZ3", "RTS-12.13");
 		

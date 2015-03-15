@@ -22,6 +22,9 @@ public class DDEEvent extends EventImpl {
 	 */
 	public DDEEvent(EventTypeSI type, String service) {
 		super(type);
+		if ( type == null ) {
+			throw new NullPointerException("Type cannot be null");
+		}
 		if ( service == null ) {
 			throw new NullPointerException("Service cannot be null");
 		}

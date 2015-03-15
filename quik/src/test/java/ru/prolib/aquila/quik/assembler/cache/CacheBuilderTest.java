@@ -1,7 +1,9 @@
 package ru.prolib.aquila.quik.assembler.cache;
 
 import static org.junit.Assert.*;
+
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 
 public class CacheBuilderTest {
@@ -16,14 +18,20 @@ public class CacheBuilderTest {
 	
 	@Test
 	public void testCreateCache() throws Exception {
-		EventDispatcher d = es.createEventDispatcher("Cache");
+		Cache actual = builder.createCache(es);
+		DescriptorsCache descrCache = actual.getDescriptorsCache();
+		PositionsCache posCache = actual.getPositionsCache();
+		OrdersCache ordersCache = actual.getOrdersCache();
+		OwnTradesCache ownTradesCache = actual.getOwnTradesCache();
+		TradesCache tradesCache = actual.getTradesCache();
+		EventDispatcher d = descrCache.getEventDispatcher();
 		Cache expected = new Cache(
-				new DescriptorsCache(d, d.createType("Descriptors")),
-				new PositionsCache(d, d.createType("Positions")),
-				new OrdersCache(d, d.createType("Orders")),
-				new OwnTradesCache(d, d.createType("OwnTrades")),
-				new TradesCache(d, d.createType("Trades")));
-		assertEquals(expected, builder.createCache(es));
+				new DescriptorsCache(d, (EventTypeSI) descrCache.OnUpdate()),
+				new PositionsCache(d, (EventTypeSI) posCache.OnUpdate()),
+				new OrdersCache(d, (EventTypeSI) ordersCache.OnUpdate()),
+				new OwnTradesCache(d, (EventTypeSI) ownTradesCache.OnUpdate()),
+				new TradesCache(d, (EventTypeSI) tradesCache.OnUpdate()));
+		assertEquals(expected, actual);
 	}
 
 }

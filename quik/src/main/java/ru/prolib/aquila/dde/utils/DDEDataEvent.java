@@ -29,6 +29,9 @@ public class DDEDataEvent extends DDETopicEvent {
 						String item, byte[] data)
 	{
 		super(type, service, topic);
+		if ( type == null ) {
+			throw new NullPointerException("Type cannot be null");
+		}
 		if ( item == null ) {
 			throw new NullPointerException("Item cannot be null");
 		}

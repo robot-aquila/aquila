@@ -15,6 +15,7 @@ public class QUIKFactoryTest {
 		
 	}
 	
+	@Ignore
 	@Test
 	public void testIncomplete() throws Exception {
 		fail("Incomplete");

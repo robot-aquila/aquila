@@ -56,6 +56,9 @@ public class SecuritiesGatewayTest {
 			"high",
 			"low",
 			"curstepprice",
+			"settleprice",	// Расчетная цена
+			"buydepo",		// ГО покупателя
+			"selldepo",		// ГО продавца
 		};
 		assertArrayEquals(expected, gateway.getRequiredHeaders());
 	}
@@ -82,10 +85,14 @@ public class SecuritiesGatewayTest {
 		map.put("high", "");
 		map.put("low", "");
 		map.put("curstepprice", "USD");
+		map.put("buydepo", 12350.0d);
+		map.put("selldepo", 0.0d);
+		map.put("settleprice", 143800.0d);
 		SecurityEntry expected = new SecurityEntry(1, 145600.0d, 135060.0d,
 				6.20866d, 10.0, 0, 140720.0d, null, null, "RTS-3.13", "RIM3",
 				null, null, null, null, "RIM3", "SPBFUT", ISO4217.USD,
-				SecurityType.FUT);
+				SecurityType.FUT,
+				143800.0d, 12350.0d);
 		asm.assemble(eq(expected));
 		control.replay();
 		
@@ -99,6 +106,7 @@ public class SecuritiesGatewayTest {
 		// акция (тип пустая строка), валюта шага пустая строка
 		// макс/мин цена - пустая строка (д.б. null)
 		// bid/ask/last - нулевые значения (д.б. null)
+		// ГО, расч. цена - нулевые значения (д.б. null)
 		map.put("lotsize", 10.0d);
 		map.put("pricemax", "");
 		map.put("pricemin", "");
@@ -117,10 +125,14 @@ public class SecuritiesGatewayTest {
 		map.put("high", 230.0d);
 		map.put("low", 227.39d);
 		map.put("curstepprice", "USD");
+		map.put("buydepo", "");
+		map.put("selldepo", 0.0d);
+		//map.put("settleprice", 0.0d);
 		SecurityEntry expected = new SecurityEntry(10, null, null,
 				null, 0.01d, 2, null, 227.39d, 227.76d, "Уралкалий (ОАО) ао",
 				"Уралкалий-ао", null, null, 230.0d, 227.39d,
-				"URKA", "EQBR", ISO4217.USD, SecurityType.STK);
+				"URKA", "EQBR", ISO4217.USD, SecurityType.STK,
+				null, null);
 		asm.assemble(eq(expected));
 		control.replay();
 		
@@ -149,6 +161,9 @@ public class SecuritiesGatewayTest {
 		map.put("high", 230.0d);
 		map.put("low", 227.39d);
 		map.put("curstepprice", ""); // <-- !!!
+		map.put("buydepo", 0.0d);
+		map.put("selldepo", 0.0d);
+		map.put("settleprice", 0.0d);
 		control.replay();
 		
 		gateway.process(row);
@@ -174,10 +189,13 @@ public class SecuritiesGatewayTest {
 		map.put("high", 230.0d);
 		map.put("low", 227.39d);
 		map.put("curstepprice", "SUR"); // <-- !!!
+		map.put("buydepo", 12350.0d);
+		map.put("selldepo", 0.0d);
+		map.put("settleprice", "zuzumber");
 		SecurityEntry expected = new SecurityEntry(10, null, null,
 				null, 0.01d, 2, null, 227.39d, 227.76d, "Уралкалий (ОАО) ао",
 				"Уралкалий-ао", null, null, 230.0d, 227.39d,
-				"URKA", "EQBR", ISO4217.RUB, SecurityType.STK);
+				"URKA", "EQBR", ISO4217.RUB, SecurityType.STK, null, 12350.0d);
 		asm.assemble(eq(expected));
 		control.replay();
 		
@@ -206,6 +224,9 @@ public class SecuritiesGatewayTest {
 		map.put("high", 230.0d);
 		map.put("low", 227.39d);
 		map.put("curstepprice", "ZZZ"); // <-- !!!
+		map.put("buydepo", 12350.0d);
+		map.put("selldepo", 0.0d);
+		map.put("settleprice", 143800.0d);
 		control.replay();
 		
 		gateway.process(row);
