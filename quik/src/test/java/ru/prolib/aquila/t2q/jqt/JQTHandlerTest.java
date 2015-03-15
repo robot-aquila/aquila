@@ -12,6 +12,8 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.JQTrans.JQTransServer;
+import ru.prolib.aquila.JQTrans.QTransOrderStatus;
+import ru.prolib.aquila.JQTrans.QTransTradeStatus;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.t2q.T2QConnStatus;
 import ru.prolib.aquila.t2q.T2QHandler;
@@ -136,8 +138,20 @@ public class JQTHandlerTest {
 		commonHandler.OnOrderStatus(eq(expected));
 		control.replay();
 		
-		fail("TODO: incomplete");
-		//handler.OnOrderStatus(1,2L,34L,"foo","bar",5.6d,7,8.9d,true,2,891);
+		QTransOrderStatus status = new QTransOrderStatus();
+		status.setMode(1);
+		status.setTransId(2L);
+		status.setOrderId(34L);
+		status.setClassCode("foo");
+		status.setSecCode("bar");
+		status.setPrice(5.6d);
+		status.setBalance(7);
+		status.setValue(8.9d);
+		status.setIsSell(true);
+		status.setStatus(2);
+		status.setOrderDescriptor(891L);
+		
+		handler.OnOrderStatus(status);
 		
 		control.verify();
 	}
@@ -147,8 +161,7 @@ public class JQTHandlerTest {
 		handler.setServer(null);
 		control.replay();
 		
-		fail("TODO: incomplete");
-		//handler.OnOrderStatus(1,2L,34L,"foo","bar",5.6d,7,8.9d,true,2,891);
+		handler.OnOrderStatus(new QTransOrderStatus());
 		
 		control.verify();
 	}
@@ -158,8 +171,7 @@ public class JQTHandlerTest {
 		handler.setServer(null);
 		control.replay();
 		
-		fail("TODO: incomplete");
-		//handler.OnTradeStatus(0,80L,18L,"SRT","APL",420.0d,100L,42.0d,false,3L);
+		handler.OnTradeStatus(new QTransTradeStatus());
 		
 		control.verify();
 	}
@@ -213,8 +225,19 @@ public class JQTHandlerTest {
 		commonHandler.OnTradeStatus(eq(expected));
 		control.replay();
 		
-		fail("TODO: incomplete");
-		//handler.OnTradeStatus(0,80L,8L,"SRT","APL",420.0d,100L,42.0d,false,34L);
+		QTransTradeStatus status = new QTransTradeStatus();
+		status.setMode(0);
+		status.setId(80L);
+		status.setOrderId(8L);
+		status.setClassCode("SRT");
+		status.setSecCode("APL");
+		status.setPrice(420.0d);
+		status.setQty(100);
+		status.setValue(42.0d);
+		status.setIsSell(false);
+		status.setTradeDescriptor(34L);
+		
+		handler.OnTradeStatus(status);
 		
 		control.verify();
 	}
