@@ -79,7 +79,7 @@ public class Positions {
 		if ( pos == null ) {
 			pos = createPosition(security);
 			map.put(descr, pos);
-			pos.OnChanged().addListener(dispatcher);
+			dispatcher.startRelayFor(pos);
 		}
 		return pos;
 	}
@@ -100,7 +100,7 @@ public class Positions {
 	 */
 	private EditablePosition createPosition(Security security) {
 		return new PositionImpl(portfolio, security,
-			new PositionEventDispatcher(((EditableTerminal)
+			new PositionEventDispatcher(((EditableTerminal<?>)
 				portfolio.getTerminal()).getEventSystem(),
 					portfolio.getAccount(),
 					security.getDescriptor()));

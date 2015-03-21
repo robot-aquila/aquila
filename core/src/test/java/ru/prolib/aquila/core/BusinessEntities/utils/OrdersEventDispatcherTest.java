@@ -1,11 +1,15 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.junit.Assert.*;
+
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.log4j.BasicConfigurator;
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
@@ -16,7 +20,13 @@ public class OrdersEventDispatcherTest {
 	private EditableOrder order;
 	private OrdersEventDispatcher dispatcher;
 	private List<Event> eventsActual, eventsExpected;
-	private Event e;	
+	private Event e;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 	
 	@SuppressWarnings("rawtypes")
 	@Before
@@ -61,7 +71,7 @@ public class OrdersEventDispatcherTest {
 			}
 		});
 		// Навешиваем обозревателя на тестируемый синхронный тип событий
-		eventType.addListener(new EventListener() {
+		eventType.addSyncListener(new EventListener() {
 			@Override public void onEvent(Event event) {
 				eventsActual.add(event);
 				counter1.countDown(); // разблокировать асинхронную очередь
@@ -89,50 +99,40 @@ public class OrdersEventDispatcherTest {
 		EventDispatcher d = dispatcher.getEventDispatcher();
 		assertEquals("Orders", d.getId());
 		
-		EventTypeSI type;
-		type = (EventTypeSI) dispatcher.OnAvailable();
-		assertEquals("Orders.Available", type.getId());
-		assertFalse(type.isOnlySyncMode());
+		assertEquals("Orders.Available", dispatcher.OnAvailable().getId());
+		assertFalse(dispatcher.OnAvailable().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnRegistered();
-		assertEquals("Orders.Registered", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.Registered", dispatcher.OnRegistered().getId());
+		assertFalse(dispatcher.OnRegistered().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnRegisterFailed();
-		assertEquals("Orders.RegisterFailed", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.RegisterFailed",
+				dispatcher.OnRegisterFailed().getId());
+		assertFalse(dispatcher.OnRegisterFailed().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnCancelled();
-		assertEquals("Orders.Cancelled", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.Cancelled", dispatcher.OnCancelled().getId());
+		assertFalse(dispatcher.OnCancelled().isOnlySyncMode());
 
-		type = (EventTypeSI) dispatcher.OnCancelFailed();
-		assertEquals("Orders.CancelFailed", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.CancelFailed", dispatcher.OnCancelFailed().getId());
+		assertFalse(dispatcher.OnCancelFailed().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnFilled();
-		assertEquals("Orders.Filled", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.Filled", dispatcher.OnFilled().getId());
+		assertFalse(dispatcher.OnFilled().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnPartiallyFilled();
-		assertEquals("Orders.PartiallyFilled", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.PartiallyFilled",
+				dispatcher.OnPartiallyFilled().getId());
+		assertFalse(dispatcher.OnPartiallyFilled().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnChanged();
-		assertEquals("Orders.Changed", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.Changed", dispatcher.OnChanged().getId());
+		assertFalse(dispatcher.OnChanged().isOnlySyncMode());
 
-		type = (EventTypeSI) dispatcher.OnDone();
-		assertEquals("Orders.Done", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.Done", dispatcher.OnDone().getId());
+		assertFalse(dispatcher.OnDone().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnFailed();
-		assertEquals("Orders.Failed", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.Failed", dispatcher.OnFailed().getId());
+		assertFalse(dispatcher.OnFailed().isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnTrade();
-		assertEquals("Orders.Trade", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertEquals("Orders.Trade", dispatcher.OnTrade().getId());
+		assertFalse(dispatcher.OnTrade().isOnlySyncMode());
 	}
 	
 	@Test
@@ -227,30 +227,30 @@ public class OrdersEventDispatcherTest {
 	public void testStartRelayFor() throws Exception {
 		dispatcher.startRelayFor(order);
 		
-		assertTrue(order.OnCancelFailed().isListener(dispatcher));
-		assertTrue(order.OnCancelled().isListener(dispatcher));
-		assertTrue(order.OnChanged().isListener(dispatcher));
-		assertTrue(order.OnDone().isListener(dispatcher));
-		assertTrue(order.OnFailed().isListener(dispatcher));
-		assertTrue(order.OnFilled().isListener(dispatcher));
-		assertTrue(order.OnPartiallyFilled().isListener(dispatcher));
-		assertTrue(order.OnRegistered().isListener(dispatcher));
-		assertTrue(order.OnRegisterFailed().isListener(dispatcher));
-		assertTrue(order.OnTrade().isListener(dispatcher));
+		assertTrue(order.OnCancelFailed().isSyncListener(dispatcher));
+		assertTrue(order.OnCancelled().isSyncListener(dispatcher));
+		assertTrue(order.OnChanged().isSyncListener(dispatcher));
+		assertTrue(order.OnDone().isSyncListener(dispatcher));
+		assertTrue(order.OnFailed().isSyncListener(dispatcher));
+		assertTrue(order.OnFilled().isSyncListener(dispatcher));
+		assertTrue(order.OnPartiallyFilled().isSyncListener(dispatcher));
+		assertTrue(order.OnRegistered().isSyncListener(dispatcher));
+		assertTrue(order.OnRegisterFailed().isSyncListener(dispatcher));
+		assertTrue(order.OnTrade().isSyncListener(dispatcher));
 	}
 
 	@Test
 	public void testStopRelayFor() throws Exception {
-		order.OnCancelFailed().addListener(dispatcher);
-		order.OnCancelled().addListener(dispatcher);
-		order.OnChanged().addListener(dispatcher);
-		order.OnDone().addListener(dispatcher);
-		order.OnFailed().addListener(dispatcher);
-		order.OnFilled().addListener(dispatcher);
-		order.OnPartiallyFilled().addListener(dispatcher);
-		order.OnRegistered().addListener(dispatcher);
-		order.OnRegisterFailed().addListener(dispatcher);
-		order.OnTrade().addListener(dispatcher);
+		order.OnCancelFailed().addSyncListener(dispatcher);
+		order.OnCancelled().addSyncListener(dispatcher);
+		order.OnChanged().addSyncListener(dispatcher);
+		order.OnDone().addSyncListener(dispatcher);
+		order.OnFailed().addSyncListener(dispatcher);
+		order.OnFilled().addSyncListener(dispatcher);
+		order.OnPartiallyFilled().addSyncListener(dispatcher);
+		order.OnRegistered().addSyncListener(dispatcher);
+		order.OnRegisterFailed().addSyncListener(dispatcher);
+		order.OnTrade().addSyncListener(dispatcher);
 		
 		dispatcher.stopRelayFor(order);
 		

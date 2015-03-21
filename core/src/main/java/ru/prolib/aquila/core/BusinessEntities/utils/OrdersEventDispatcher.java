@@ -15,6 +15,15 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * в рамках набора. Так же предоставляет интерфейс для генерации конкретных
  * событий и выполняет ретрансляцию событий подчиненных позиций.
  * <p>
+ * <i>2015-03-21 Примечания (dir-20150225)</i>
+ * <p>
+ * Объекты типов событий раньше использовали синхронную очередь, что бы
+ * обеспечивать мгновенную реакцию при ретрансляции событий заявок. Теперь
+ * схема немного изменилась. Все типы события создаются обыкновенными
+ * (двухрежимными). А синхронность ретрансляции событий отдельной заявки 
+ * обеспечивается за счет подписки на эти события в синхронном режиме в момент
+ * старта ретрансляции для заявки.
+ * <p>
  * <i>2014-04-09 Архитектурная проблема</i>
  * <p>
  * Обнаруженная проблема рассинхронизации последовательности событий
@@ -55,16 +64,16 @@ public class OrdersEventDispatcher implements EventListener {
 		super();
 		dispatcher = es.createEventDispatcher("Orders");
 		onAvailable = dispatcher.createType("Available");
-		onRegistered = dispatcher.createSyncType("Registered");
-		onRegisterFailed = dispatcher.createSyncType("RegisterFailed");
-		onCancelled = dispatcher.createSyncType("Cancelled");
-		onCancelFailed = dispatcher.createSyncType("CancelFailed");
-		onFilled = dispatcher.createSyncType("Filled");
-		onPartiallyFilled = dispatcher.createSyncType("PartiallyFilled");
-		onChanged = dispatcher.createSyncType("Changed");
-		onDone = dispatcher.createSyncType("Done");
-		onFailed = dispatcher.createSyncType("Failed");
-		onTrade = dispatcher.createSyncType("Trade");
+		onRegistered = dispatcher.createType("Registered");
+		onRegisterFailed = dispatcher.createType("RegisterFailed");
+		onCancelled = dispatcher.createType("Cancelled");
+		onCancelFailed = dispatcher.createType("CancelFailed");
+		onFilled = dispatcher.createType("Filled");
+		onPartiallyFilled = dispatcher.createType("PartiallyFilled");
+		onChanged = dispatcher.createType("Changed");
+		onDone = dispatcher.createType("Done");
+		onFailed = dispatcher.createType("Failed");
+		onTrade = dispatcher.createType("Trade");
 	}
 	
 	/**
@@ -222,16 +231,16 @@ public class OrdersEventDispatcher implements EventListener {
 	 * @param order заявка
 	 */
 	public void startRelayFor(Order order) {
-		order.OnCancelFailed().addListener(this);
-		order.OnCancelled().addListener(this);
-		order.OnChanged().addListener(this);
-		order.OnDone().addListener(this);
-		order.OnFailed().addListener(this);
-		order.OnFilled().addListener(this);
-		order.OnPartiallyFilled().addListener(this);
-		order.OnRegistered().addListener(this);
-		order.OnRegisterFailed().addListener(this);
-		order.OnTrade().addListener(this);
+		order.OnCancelFailed().addSyncListener(this);
+		order.OnCancelled().addSyncListener(this);
+		order.OnChanged().addSyncListener(this);
+		order.OnDone().addSyncListener(this);
+		order.OnFailed().addSyncListener(this);
+		order.OnFilled().addSyncListener(this);
+		order.OnPartiallyFilled().addSyncListener(this);
+		order.OnRegistered().addSyncListener(this);
+		order.OnRegisterFailed().addSyncListener(this);
+		order.OnTrade().addSyncListener(this);
 	}
 	
 	/**

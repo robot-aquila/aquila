@@ -25,7 +25,7 @@ public class PositionsEventDispatcher implements EventListener {
 		String id = "Positions[" + account + "]";
 		dispatcher = es.createEventDispatcher(id);
 		onAvailable = dispatcher.createType("Available");
-		onChanged = dispatcher.createSyncType("Changed");
+		onChanged = dispatcher.createType("Changed");
 	}
 	
 	/**
@@ -73,6 +73,15 @@ public class PositionsEventDispatcher implements EventListener {
 	public void onEvent(Event event) {
 		Position position = ((PositionEvent) event).getPosition();
 		dispatcher.dispatch(new PositionEvent(onChanged, position));
+	}
+	
+	/**
+	 * Начать ретрансляцию событий позиции.
+	 * <p>
+	 * @param position позиция
+	 */
+	public void startRelayFor(Position position) {
+		position.OnChanged().addSyncListener(this);
 	}
 
 }

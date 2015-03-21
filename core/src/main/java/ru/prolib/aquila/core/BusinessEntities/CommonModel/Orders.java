@@ -134,7 +134,7 @@ public class Orders {
 		dispatcher.startRelayFor(order);
 	}
 
-	public EditableOrder createOrder(EditableTerminal terminal) {
+	public EditableOrder createOrder(EditableTerminal<?> terminal) {
 		OrderEventDispatcher d =
 			new OrderEventDispatcher(terminal.getEventSystem()); 
 

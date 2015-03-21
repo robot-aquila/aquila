@@ -2,9 +2,12 @@ package ru.prolib.aquila.core.BusinessEntities.CommonModel;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
 import java.util.*;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
@@ -84,6 +87,7 @@ public class PositionsTest {
 	public void testGetEditablePosition_New() throws Exception {
 		Position expected = new PositionImpl(portfolio, security2,
 				new PositionEventDispatcher(es, account, descr1));
+		dispatcher.startRelayFor((Position) anyObject());
 		control.replay();
 
 		Position actual = positions.getEditablePosition(security2);
@@ -92,7 +96,6 @@ public class PositionsTest {
 		assertNotNull(actual);
 		assertEquals(expected, actual);
 		assertNotSame(expected, actual);
-		assertTrue(actual.OnChanged().isListener(dispatcher));
 		assertSame(actual, positions.getEditablePosition(security2));
 	}
 	
@@ -112,6 +115,7 @@ public class PositionsTest {
 	public void testGetPosition_New() throws Exception {
 		Position expected = new PositionImpl(portfolio, security1,
 				new PositionEventDispatcher(es, account, descr1));
+		dispatcher.startRelayFor((Position) anyObject());
 		control.replay();
 		
 		Position actual = positions.getPosition(security1);
@@ -120,7 +124,6 @@ public class PositionsTest {
 		assertNotNull(actual);
 		assertEquals(expected, actual);
 		assertNotSame(expected, actual);
-		assertTrue(actual.OnChanged().isListener(dispatcher));
 		assertSame(actual, positions.getPosition(security1));
 	}
 	

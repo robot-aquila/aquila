@@ -13,9 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * для генерации конкретных событий и выполняет ретрансляцию событий подчиненных
  * позиций.
  * <p>
- * <i>2014-04-09 Архитектурная проблема</i> (см. одноименный параграф в
- * документации к {@link OrdersEventDispatcher}).
- * <p>
+ * См. примечания {@link OrdersEventDispatcher}.
  */
 public class SecuritiesEventDispatcher implements EventListener {
 	private final EventDispatcher dispatcher;
@@ -25,8 +23,8 @@ public class SecuritiesEventDispatcher implements EventListener {
 		super();
 		dispatcher = es.createEventDispatcher("Securities");
 		onAvailable = dispatcher.createType("Available");
-		onChanged = dispatcher.createSyncType("Changed");
-		onTrade = dispatcher.createSyncType("Trade");
+		onChanged = dispatcher.createType("Changed");
+		onTrade = dispatcher.createType("Trade");
 	}
 	
 	/**
@@ -97,8 +95,8 @@ public class SecuritiesEventDispatcher implements EventListener {
 	 * @param security инструмент
 	 */
 	public void startRelayFor(Security security) {
-		security.OnChanged().addListener(this);
-		security.OnTrade().addListener(this);
+		security.OnChanged().addSyncListener(this);
+		security.OnTrade().addSyncListener(this);
 	}
 	
 	/**

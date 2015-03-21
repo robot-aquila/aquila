@@ -67,7 +67,7 @@ public class PortfoliosEventDispatcherTest {
 			}
 		});
 		// Навешиваем обозревателя на тестируемый синхронный тип событий
-		eventType.addListener(new EventListener() {
+		eventType.addSyncListener(new EventListener() {
 			@Override public void onEvent(Event event) {
 				eventsActual.add(event);
 				counter1.countDown(); // разблокировать асинхронную очередь
@@ -96,22 +96,22 @@ public class PortfoliosEventDispatcherTest {
 		EventDispatcher ed = dispatcher.getEventDispatcher();
 		assertEquals(did, ed.getId());
 		
-		EventTypeSI type;
-		type = (EventTypeSI) dispatcher.OnPortfolioAvailable();
-		assertEquals(did + ".Available", type.getId());
+		EventType type;
+		type = dispatcher.OnPortfolioAvailable();
+		assertEquals("Portfolios.Available", type.getId());
 		assertFalse(type.isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnPortfolioChanged();
+		type = dispatcher.OnPortfolioChanged();
 		assertEquals(did + ".Changed", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertFalse(type.isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnPositionAvailable();
+		type = dispatcher.OnPositionAvailable();
 		assertEquals(did + ".PositionAvailable", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertFalse(type.isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnPositionChanged();
+		type = dispatcher.OnPositionChanged();
 		assertEquals(did + ".PositionChanged", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertFalse(type.isOnlySyncMode());
 	}
 	
 	@Test
@@ -156,9 +156,9 @@ public class PortfoliosEventDispatcherTest {
 	public void testStartRelayFor() throws Exception {
 		dispatcher.startRelayFor(portfolio);
 		
-		assertTrue(portfolio.OnChanged().isListener(dispatcher));
-		assertTrue(portfolio.OnPositionAvailable().isListener(dispatcher));
-		assertTrue(portfolio.OnPositionChanged().isListener(dispatcher));
+		assertTrue(portfolio.OnChanged().isSyncListener(dispatcher));
+		assertTrue(portfolio.OnPositionAvailable().isSyncListener(dispatcher));
+		assertTrue(portfolio.OnPositionChanged().isSyncListener(dispatcher));
 	}
 
 }

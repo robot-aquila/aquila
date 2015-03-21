@@ -1,11 +1,14 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.junit.Assert.*;
+
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
@@ -62,7 +65,7 @@ public class SecuritiesEventDispatcherTest {
 			}
 		});
 		// Навешиваем обозревателя на тестируемый синхронный тип событий
-		eventType.addListener(new EventListener() {
+		eventType.addSyncListener(new EventListener() {
 			@Override public void onEvent(Event event) {
 				eventsActual.add(event);
 				counter1.countDown(); // разблокировать асинхронную очередь
@@ -83,6 +86,25 @@ public class SecuritiesEventDispatcherTest {
 		assertTrue(counter2.await(500L, TimeUnit.MILLISECONDS));
 
 		assertEquals(eventsExpected, eventsActual);
+	}
+	
+	@Test
+	public void testStructure() throws Exception {
+		EventDispatcher ed = dispatcher.getEventDispatcher();
+		assertEquals("Securities", ed.getId());
+		
+		EventType type;
+		type = dispatcher.OnAvailable();
+		assertEquals("Securities.Available", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = dispatcher.OnChanged();
+		assertEquals("Securities.Changed", type.getId());
+		assertFalse(type.isOnlySyncMode());
+		
+		type = dispatcher.OnTrade();
+		assertEquals("Securities.Trade", type.getId());
+		assertFalse(type.isOnlySyncMode());
 	}
 
 	@Test
@@ -121,14 +143,14 @@ public class SecuritiesEventDispatcherTest {
 	public void testStartRelayFor() throws Exception {
 		dispatcher.startRelayFor(security);
 		
-		assertTrue(security.OnChanged().isListener(dispatcher));
-		assertTrue(security.OnTrade().isListener(dispatcher));
+		assertTrue(security.OnChanged().isSyncListener(dispatcher));
+		assertTrue(security.OnTrade().isSyncListener(dispatcher));
 	}
 	
 	@Test
 	public void testStopRelayFor() throws Exception {
-		security.OnChanged().addListener(dispatcher);
-		security.OnTrade().addListener(dispatcher);
+		security.OnChanged().addSyncListener(dispatcher);
+		security.OnTrade().addSyncListener(dispatcher);
 		
 		dispatcher.stopRelayFor(security);
 		

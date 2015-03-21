@@ -7,6 +7,18 @@ package ru.prolib.aquila.core;
  * $Id: EventType.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public interface EventType {
+	
+	/**
+	 * Получить идентификатор типа события.
+	 * <p>
+	 * Идентификатор позволяет отличать конкретный тип события среди множества
+	 * других типов по уникальной строке. Идентификатор задается явно при
+	 * создании объекта или назначается автоматически, если не указан.
+	 * Предназначен для использования в отладочных целях.
+	 * <p>
+	 * @return строковый идентификатор
+	 */
+	public String getId();
 
 	/**
 	 * Подписаться на событие.
@@ -68,5 +80,28 @@ public interface EventType {
 	 * @return промежуточный обозреватель
 	 */
 	public EventListener listenOnce(EventListener listener);
+	
+	/**
+	 * Проверить принадлежность к синхронным получателям.
+	 * <p>
+	 * @param listener получатель
+	 * @return true - если это синхронный получатель событий, false - иначе
+	 */
+	public boolean isSyncListener(EventListener listener);
+	
+	/**
+	 * Проверить принадлежность к асинхронным получателям.
+	 * <p>
+	 * @param listener получатель
+	 * @return true - если это асинхронный получатель событий, false - иначе 
+	 */
+	public boolean isAsyncListener(EventListener listener);
+	
+	/**
+	 * Проверить режим только синхронной трансляции.
+	 * <p>
+	 * @return true - если разрешена только синхронная трансляция событий 
+	 */
+	public boolean isOnlySyncMode();
 	
 }

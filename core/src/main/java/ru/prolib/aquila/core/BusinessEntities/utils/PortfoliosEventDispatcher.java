@@ -12,9 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * в рамках набора. Так же предоставляет интерфейс для генерации конкретных
  * событий и выполняет ретрансляцию событий подчиненных портфелей.
  * <p>
- * <i>2014-04-09 Архитектурная проблема</i> (см. одноименный параграф в
- * документации к {@link OrdersEventDispatcher}).
- * <p>
+ * См. примечания {@link OrdersEventDispatcher}.
  */
 public class PortfoliosEventDispatcher implements EventListener {
 	private final EventDispatcher dispatcher;
@@ -25,9 +23,9 @@ public class PortfoliosEventDispatcher implements EventListener {
 		super();
 		dispatcher = es.createEventDispatcher("Portfolios");
 		onAvailable = dispatcher.createType("Available");
-		onChanged = dispatcher.createSyncType("Changed");
-		onPosAvailable = dispatcher.createSyncType("PositionAvailable");
-		onPosChanged = dispatcher.createSyncType("PositionChanged");
+		onChanged = dispatcher.createType("Changed");
+		onPosAvailable = dispatcher.createType("PositionAvailable");
+		onPosChanged = dispatcher.createType("PositionChanged");
 	}
 	
 	/**
@@ -111,9 +109,9 @@ public class PortfoliosEventDispatcher implements EventListener {
 	 * @param portfolio портфель
 	 */
 	public void startRelayFor(Portfolio portfolio) {
-		portfolio.OnChanged().addListener(this);
-		portfolio.OnPositionAvailable().addListener(this);
-		portfolio.OnPositionChanged().addListener(this);
+		portfolio.OnChanged().addSyncListener(this);
+		portfolio.OnPositionAvailable().addSyncListener(this);
+		portfolio.OnPositionChanged().addSyncListener(this);
 	}
 
 }

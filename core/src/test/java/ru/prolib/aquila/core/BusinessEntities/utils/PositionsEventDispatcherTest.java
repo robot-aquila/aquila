@@ -1,11 +1,14 @@
 package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.junit.Assert.*;
+
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
@@ -67,7 +70,7 @@ public class PositionsEventDispatcherTest {
 			}
 		});
 		// Навешиваем обозревателя на тестируемый синхронный тип событий
-		eventType.addListener(new EventListener() {
+		eventType.addSyncListener(new EventListener() {
 			@Override public void onEvent(Event event) {
 				eventsActual.add(event);
 				counter1.countDown(); // разблокировать асинхронную очередь
@@ -103,7 +106,7 @@ public class PositionsEventDispatcherTest {
 		
 		type = (EventTypeSI) dispatcher.OnChanged();
 		assertEquals(did + ".Changed", type.getId());
-		assertTrue(type.isOnlySyncMode());
+		assertFalse(type.isOnlySyncMode());
 	}
 
 	
@@ -129,6 +132,13 @@ public class PositionsEventDispatcherTest {
 		testSynchronousEvent(dispatcher.OnChanged(),
 			new PositionEvent((EventTypeSI) dispatcher.OnChanged(), position),
 			new PositionEvent((EventTypeSI) position.OnChanged(), position));
+	}
+	
+	@Test
+	public void testStartRelayFor() throws Exception {
+		dispatcher.startRelayFor(position);
+		
+		assertTrue(position.OnChanged().isSyncListener(dispatcher));
 	}
 	
 }
