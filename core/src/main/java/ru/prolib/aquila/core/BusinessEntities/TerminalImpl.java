@@ -812,11 +812,13 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 
 	@Override
 	public void fireTerminalReady() {
+		logger.debug("Terminal marked as ready");
 		dispatcher.fireReady();
 	}
 
 	@Override
 	public void fireTerminalUnready() {
+		logger.debug("Terminal marked as unready");
 		dispatcher.fireUnready();
 	}
 

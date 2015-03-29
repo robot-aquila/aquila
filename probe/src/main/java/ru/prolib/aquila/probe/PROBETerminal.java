@@ -143,7 +143,7 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 	}
 	
 	@Override
-	public void markTerminalConnected() {
+	public synchronized void markTerminalConnected() {
 		if ( ! getTimeline().finished() ) {
 			super.markTerminalConnected();
 			fireTerminalReady();
@@ -153,7 +153,7 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 	}
 	
 	@Override
-	public void markTerminalDisconnected() {
+	public synchronized void markTerminalDisconnected() {
 		fireTerminalUnready();
 		super.markTerminalDisconnected();
 	}

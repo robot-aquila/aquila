@@ -76,7 +76,7 @@ public class FORTSSecurityCtrlTest {
 	@Test
 	public void testDoInitialTask() throws Exception {
 		final Vector<Event> actual = new Vector<Event>();
-		terminal.OnSecurityAvailable().addListener(new EventListener() {
+		terminal.OnSecurityAvailable().addSyncListener(new EventListener() {
 			@Override public void onEvent(Event event) {
 				actual.add(event);
 			}

@@ -6,6 +6,7 @@ import java.util.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalReadyIfConnected;
 import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.quik.assembler.*;
@@ -156,6 +157,7 @@ public class QUIKFactory implements TerminalFactory {
 		starter.add(asm);
 		starter.add(new QUIKDDEStarter(config, asm, server));
 		starter.add(new ConnectionHandler(terminal, config));
+		starter.add(new TerminalReadyIfConnected(terminal));
 		return terminal;
 	}
 
