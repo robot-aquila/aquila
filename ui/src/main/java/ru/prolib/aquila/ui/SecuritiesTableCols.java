@@ -36,6 +36,8 @@ public class SecuritiesTableCols {
 		"COL_PREC",
 		"COL_MIN",
 		"COL_MAX",
+		"COL_INIT_PRICE",
+		"COL_INIT_MARGIN"
 	};
 	
 	private static final Map<String, Integer> width = new HashMap<String, Integer>();
@@ -64,6 +66,8 @@ public class SecuritiesTableCols {
 		getters.put("COL_PREC", new GSecurityPrecision());
 		getters.put("COL_MIN", new GSecurityMinPrice());
 		getters.put("COL_MAX", new GSecurityMaxPrice());
+		getters.put("COL_INIT_PRICE", new GSecurityInitialPrice());
+		getters.put("COL_INIT_MARGIN", new GSecurityInitialMargin());
 		
 		width.put("COL_NAME", 200);
 	}
