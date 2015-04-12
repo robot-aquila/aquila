@@ -48,7 +48,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	private Orders orders;
 	private StarterQueue starter;
 	private Scheduler scheduler;
-	private Counter orderNumerator;	
 	private TerminalEventDispatcher dispatcher;
 	private TerminalController controller;
 	private OrderProcessor orderProcessor;
@@ -80,7 +79,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * @param securities набор инструментов
 	 * @param portfolios набор портфелей
 	 * @param orders набор заявок
-	 * @param numerator нумератор заявок
 	 * @param starter пускач
 	 * @param scheduler планировщик задач
 	 * @param eventSystem фасад подсистемы событий
@@ -90,7 +88,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 			Securities securities,
 			Portfolios portfolios,
 			Orders orders,
-			Counter numerator,
 			StarterQueue starter,
 			Scheduler scheduler,
 			EventSystem eventSystem)
@@ -101,7 +98,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 		this.securities = securities;
 		this.portfolios = portfolios;
 		this.orders = orders;
-		this.orderNumerator = numerator;
 		this.starter = starter;
 		this.scheduler = scheduler;
 		this.es = eventSystem;
@@ -118,12 +114,12 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @param es фасад системы событий
 	 */
+	@Deprecated // TODO: to remove, use a terminal builder
 	public TerminalImpl(EventSystem es) {
 		this(new TerminalController(), new TerminalEventDispatcher(es),
 			new Securities(new SecuritiesEventDispatcher(es)),
 			new Portfolios(new PortfoliosEventDispatcher(es)),
-			new Orders(new OrdersEventDispatcher(es)),
-			new SimpleCounter(),
+			new OrdersImpl(new OrdersEventDispatcher(es), new OrderFactoryImpl(), new SimpleCounter()),
 			new StarterQueue(),
 			new SchedulerLocal(),
 			es);
@@ -139,6 +135,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @param queueId идентификатор очереди событий
 	 */
+	@Deprecated // TODO: to remove, use a terminal builder
 	public TerminalImpl(String queueId) {
 		this(new EventSystemImpl(new EventQueueImpl(queueId)));
 	}
@@ -401,13 +398,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized void registerOrder(int id, EditableOrder order)
-		throws OrderAlreadyExistsException
-	{
-		orders.registerOrder(id, order);
-	}
-
-	@Override
 	public synchronized void purgeOrder(int id) {
 		orders.purgeOrder(id);
 	}
@@ -582,11 +572,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized Counter getOrderNumerator() {
-		return orderNumerator;
-	}
-
-	@Override
 	public synchronized Order createOrder(Account account, Direction dir,
 			Security security, long qty, double price)
 	{
@@ -617,11 +602,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 			order.setActivator(activator);
 		}
 		order.resetChanges();
-		try {
-			orders.registerOrder(orderNumerator.incrementAndGet(), order);
-		} catch ( OrderException e ) {
-			throw new IllegalStateException("Corrupted internal state: ", e);
-		}
 		orders.fireEvents(order);
 		return order;
 	}
@@ -642,11 +622,6 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 			order.setActivator(activator);
 		}
 		order.resetChanges();
-		try {
-			orders.registerOrder(orderNumerator.incrementAndGet(), order);
-		} catch ( OrderException e ) {
-			throw new IllegalStateException("Corrupted internal state: ", e);
-		}
 		orders.fireEvents(order);
 		return order;
 	}

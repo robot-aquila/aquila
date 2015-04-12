@@ -32,7 +32,6 @@ public class TerminalImplTest {
 	private Securities securities;
 	private Portfolios portfolios;
 	private Orders orders;
-	private Counter numerator;
 	private StarterQueue starter;
 	private Scheduler scheduler;
 	private EventSystem es;
@@ -61,8 +60,7 @@ public class TerminalImplTest {
 		dispatcher = control.createMock(TerminalEventDispatcher.class);
 		securities = control.createMock(Securities.class);
 		portfolios = control.createMock(Portfolios.class);
-		orders = control.createMock(Orders.class);
-		numerator = control.createMock(Counter.class);
+		orders = control.createMock(OrdersImpl.class);
 		starter = control.createMock(StarterQueue.class);
 		scheduler = control.createMock(Scheduler.class);
 		es = new EventSystemImpl();
@@ -70,8 +68,7 @@ public class TerminalImplTest {
 		security = control.createMock(Security.class);
 		order = control.createMock(EditableOrder.class);
 		terminal = new TerminalImpl<TerminalImplTest>(controller, dispatcher,
-				securities, portfolios, orders,
-				numerator, starter, scheduler, es);
+				securities, portfolios, orders, starter, scheduler, es);
 
 		expect(security.getDescriptor()).andStubReturn(descr);
 		taskHandler = new TaskHandlerImpl(task, scheduler);
@@ -89,7 +86,6 @@ public class TerminalImplTest {
 		assertSame(securities, terminal.getSecurityStorage());
 		assertSame(portfolios, terminal.getPortfolioStorage());
 		assertSame(orders, terminal.getOrderStorage());
-		assertSame(numerator, terminal.getOrderNumerator());
 		assertSame(starter, terminal.getStarter());
 		assertSame(scheduler, terminal.getScheduler());
 		assertSame(es, terminal.getEventSystem());
@@ -103,8 +99,6 @@ public class TerminalImplTest {
 		assertNotNull(terminal.getSecurityStorage());
 		assertNotNull(terminal.getPortfolioStorage());
 		assertNotNull(terminal.getOrderStorage());
-		assertEquals(SimpleCounter.class,
-				terminal.getOrderNumerator().getClass());
 		assertNotNull(terminal.getStarter());
 		assertEquals(SchedulerLocal.class, terminal.getScheduler().getClass());
 		assertNotNull(terminal.getEventSystem());
@@ -119,8 +113,6 @@ public class TerminalImplTest {
 		assertNotNull(terminal.getSecurityStorage());
 		assertNotNull(terminal.getPortfolioStorage());
 		assertNotNull(terminal.getOrderStorage());
-		assertEquals(SimpleCounter.class,
-				terminal.getOrderNumerator().getClass());
 		assertNotNull(terminal.getStarter());
 		assertEquals(SchedulerLocal.class, terminal.getScheduler().getClass());
 		assertSame(es, terminal.getEventSystem());
@@ -595,15 +587,6 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testRegisterOrder() throws Exception {
-		EditableOrder order = control.createMock(EditableOrder.class);
-		orders.registerOrder(eq(123), same(order));
-		control.replay();
-		terminal.registerOrder(123, order);
-		control.verify();
-	}
-	
-	@Test
 	public void testPurgeOrder() throws Exception {
 		orders.purgeOrder(eq(192));
 		control.replay();
@@ -954,11 +937,6 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testGetOrderNumerator() throws Exception {
-		assertSame(numerator, terminal.getOrderNumerator());
-	}
-	
-	@Test
 	public void testRequestSecurity() throws Exception {
 		control.replay();
 		
@@ -1003,8 +981,6 @@ public class TerminalImplTest {
 		order.setQtyRest(eq(1L));
 		order.setPrice(eq(15d));
 		order.resetChanges();
-		expect(numerator.incrementAndGet()).andReturn(217);
-		orders.registerOrder(eq(217), same(order));
 		orders.fireEvents(same(order));
 		control.replay();
 		
@@ -1029,8 +1005,6 @@ public class TerminalImplTest {
 		order.setPrice(eq(15d));
 		order.setActivator(same(activator));
 		order.resetChanges();
-		expect(numerator.incrementAndGet()).andReturn(217);
-		orders.registerOrder(eq(217), same(order));
 		orders.fireEvents(same(order));
 		control.replay();
 		
@@ -1052,8 +1026,6 @@ public class TerminalImplTest {
 		order.setQty(eq(10L));
 		order.setQtyRest(eq(10L));
 		order.resetChanges();
-		expect(numerator.incrementAndGet()).andReturn(555);
-		orders.registerOrder(eq(555), same(order));
 		orders.fireEvents(same(order));
 		control.replay();
 		
@@ -1077,8 +1049,6 @@ public class TerminalImplTest {
 		order.setQtyRest(eq(10L));
 		order.setActivator(same(activator));
 		order.resetChanges();
-		expect(numerator.incrementAndGet()).andReturn(555);
-		orders.registerOrder(eq(555), same(order));
 		orders.fireEvents(same(order));
 		control.replay();
 		

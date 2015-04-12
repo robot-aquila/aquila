@@ -2,21 +2,27 @@ package ru.prolib.aquila.core.BusinessEntities.CommonModel;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
 import java.util.*;
+
 import org.apache.log4j.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.utils.*;
 
-public class OrdersTest {
+public class OrdersImplTest {
 	private IMocksControl control;
 	private EventSystem es;
 	private OrdersEventDispatcher dispatcher;
 	private EditableTerminal<?> terminal;
 	private EditableOrder o1,o2,o3;
-	private Orders orders;
+	private OrdersImpl orders;
+	private OrderFactory factory;
+	private Counter orderIdSeq;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -32,18 +38,27 @@ public class OrdersTest {
 		dispatcher = control.createMock(OrdersEventDispatcher.class);
 		terminal = control.createMock(EditableTerminal.class);
 		expect(terminal.getEventSystem()).andStubReturn(es);
+		factory = control.createMock(OrderFactory.class);
+		orderIdSeq = new SimpleCounter(200);
 		
 		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
 		o1 = new OrderImpl(new OrderEventDispatcher(es), h, terminal);
 		o2 = new OrderImpl(new OrderEventDispatcher(es), h, terminal);
 		o3 = new OrderImpl(new OrderEventDispatcher(es), h, terminal);
-		orders = new Orders(dispatcher);
+		orders = new OrdersImpl(dispatcher, factory, orderIdSeq);
+	}
+	
+	@Test
+	public void testConstructor2() throws Exception {
+		assertSame(dispatcher, orders.getEventDispatcher());
+		assertSame(factory, orders.getOrderFactory());
+		assertSame(orderIdSeq, orders.getIdSequence());
 	}
 	
 	@Test
 	public void testEventTypes() throws Exception {
 		dispatcher = new OrdersEventDispatcher(es);
-		orders = new Orders(dispatcher);
+		orders = new OrdersImpl(dispatcher, factory, orderIdSeq);
 		assertSame(dispatcher, orders.getEventDispatcher());
 		assertSame(dispatcher.OnAvailable(), orders.OnOrderAvailable());
 		assertSame(dispatcher.OnCancelFailed(), orders.OnOrderCancelFailed());
@@ -168,52 +183,19 @@ public class OrdersTest {
 	}
 	
 	@Test
-	public void testRegisterOrder() throws Exception {
+	public void testCreateOrder() throws Exception {
+		expect(factory.createOrder(same(terminal))).andReturn(o1);
 		dispatcher.startRelayFor(same(o1));
 		control.replay();
 		
-		orders.registerOrder(200, o1);
+		EditableOrder actual = orders.createOrder(terminal);
 		
 		control.verify();
-		
-		assertTrue(orders.isOrderExists(200));
-		assertSame(o1, orders.getOrder(200));
-		assertEquals(new Integer(200), o1.getId());
-	}
-	
-	@Test (expected=OrderAlreadyExistsException.class)
-	public void testRegisterOrder_ThrowsIfOrderExists() throws Exception {
-		o2.setId(123);
-		orders.setOrder(123, o2);
-		
-		orders.registerOrder(123, o1);
-	}
-	
-	@Test
-	public void testCreateOrder() throws Exception {
-		OrderImpl expected = new OrderImpl(new OrderEventDispatcher(es),
-				new Vector<OrderStateHandler>(), terminal);
-		control.replay();
-		
-		OrderImpl actual = (OrderImpl) orders.createOrder(terminal);
-		
-		control.verify();
-		assertNotNull(actual);
-		assertEquals(expected, actual);
-		
-		OrderEventDispatcher d = actual.getEventDispatcher();
-		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
-		h.add(new OrderStateHandler(d, new OrderIsRegistered(), (EventTypeSI) d.OnRegistered()));
-		h.add(new OrderStateHandler(d, new OrderIsRegisterFailed(), (EventTypeSI) d.OnRegisterFailed()));
-		h.add(new OrderStateHandler(d, new OrderIsCancelled(), (EventTypeSI) d.OnCancelled()));
-		h.add(new OrderStateHandler(d, new OrderIsCancelFailed(), (EventTypeSI) d.OnCancelFailed()));
-		h.add(new OrderStateHandler(d, new OrderIsFilled(), (EventTypeSI) d.OnFilled()));
-		h.add(new OrderStateHandler(d, new OrderIsPartiallyFilled(), (EventTypeSI) d.OnPartiallyFilled()));
-		h.add(new OrderStateHandler(d, new OrderIsChanged(), (EventTypeSI) d.OnChanged()));
-		h.add(new OrderStateHandler(d, new OrderIsDone(), (EventTypeSI) d.OnDone()));
-		h.add(new OrderStateHandler(d, new OrderIsFailed(), (EventTypeSI) d.OnFailed()));
-		
-		assertEquals(h, actual.getStateHandlers());
+		assertSame(actual, o1);
+		assertEquals(201, (int)o1.getId());
+		assertTrue(orders.isOrderExists(201));
+		assertSame(actual, orders.getOrder(201));
+		assertEquals(201, orderIdSeq.get()); // the ID should be incremented
 	}
 	
 	@Test

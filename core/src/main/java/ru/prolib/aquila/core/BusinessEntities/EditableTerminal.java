@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.utils.Counter;
 
 /**
  * Интерфейс модифицируемого терминала.
@@ -86,6 +85,7 @@ public interface EditableTerminal<T> extends Terminal {
 	 * <p>
 	 * @param processor процессор заявок
 	 */
+	@Deprecated // TODO: use injection by terminal builder
 	public void setOrderProcessor(OrderProcessor processor);
 	
 	/**
@@ -93,6 +93,7 @@ public interface EditableTerminal<T> extends Terminal {
 	 * <p>
 	 * @param starter стартер
 	 */
+	@Deprecated // TODO: use injection by terminal builder
 	public void setStarter(StarterQueue starter);
 	
 	/**
@@ -157,34 +158,6 @@ public interface EditableTerminal<T> extends Terminal {
 	public EditableOrder createOrder();
 	
 	/**
-	 * Получить нумератор заявок.
-	 * <p>
-	 * Номер заявки - это суррогатный ключ, однозначно идентифицирующий
-	 * экземпляр заявки в рамках экземпляра терминала. При создании заявки
-	 * с помощью {@link #createOrder(Account, Direction, Security, long)} или
-	 * других аналогичных методов, ей автоматически присваивается очередной
-	 * номер. Номер заявке <b>НЕ НАЗНАЧАЕТСЯ</b> при создании экземпляра через
-	 * вызовы {@link #createOrder()}.
- 	 * <p>
-	 * Непрерывность номеров заявок не имеет никакого практического значения для
-	 * терминала. По этому данный нумератор может быть использован конкретной
-	 * реализацией терминала для решения своих специфических задач. Например,
-	 * для сквозной нумерации всех запросов в удаленную систему. Единственное
-	 * требование - это увеличение значение счетчика в процессе работы, что бы
-	 * избежать дублирования номеров для разных экземпляров заявок.
-	 * <p>
-	 * В любой момент времени этот счетчик указывает на последний использованный
-	 * номер. Что бы получить следующий номер необходимо выполнить атомарный
-	 * инкремент с возвратом через {@link Counter#incrementAndGet()}. Для
-	 * установки последнего использованного значения можно использовать
-	 * {@link Counter#set(int)}. В целях избежания дубликатов номеров важно
-	 * гарантировать, что устанавливаемое значение больше текущего.
-	 * <p>
-	 * @return нумератор заявок
-	 */
-	public Counter getOrderNumerator();
-	
-	/**
 	 * Генерировать событие о недоступности инструмента.
 	 * <p>
 	 * Служебный метод, генерирующий событие об отрицательном результате
@@ -247,16 +220,6 @@ public interface EditableTerminal<T> extends Terminal {
 		throws OrderNotExistsException;
 	
 	/**
-	 * Зарегистрировать новую заявку.
-	 * <p>
-	 * @param id номер заявки (будет установлен для экземпляра)
-	 * @param order заявка
-	 * @throws OrderAlreadyExistsException
-	 */
-	public void registerOrder(int id, EditableOrder order)
-		throws OrderAlreadyExistsException;
-	
-	/**
 	 * Удалить заявку из набора.
 	 * <p>
 	 * Если заявки с указанным номером нет в реестре, то ничего не происходит.
@@ -285,6 +248,7 @@ public interface EditableTerminal<T> extends Terminal {
 	 * <p>
 	 * @return сервис-локатор
 	 */
+	@Deprecated // TODO: to remove
 	public T getServiceLocator();
 	
 	/**
@@ -299,6 +263,7 @@ public interface EditableTerminal<T> extends Terminal {
 	 * <p>
 	 * @param locator
 	 */
+	@Deprecated  // TODO: to remove
 	public void setServiceLocator(T locator);
 	
 }

@@ -128,5 +128,29 @@ public class StarterQueueTest {
 		}
 		control.verify();
 	}
+	
+	@Test
+	public void testGet() throws Exception {
+		queue.add(s1).add(s2).add(s3);
+		assertSame(s1, queue.get(0));
+		assertSame(s2, queue.get(1));
+		assertSame(s3, queue.get(2));
+	}
+	
+	@Test (expected=IndexOutOfBoundsException.class)
+	public void testGet_ThrowsIfOutOfRange() throws Exception {
+		queue.get(2);
+	}
+	
+	@Test
+	public void testCount() throws Exception {
+		assertEquals(0, queue.count());
+		queue.add(s1);
+		assertEquals(1, queue.count());
+		queue.add(s2);
+		assertEquals(2, queue.count());
+		queue.add(s3);
+		assertEquals(3, queue.count());
+	}
 
 }

@@ -37,6 +37,27 @@ public class StarterQueue implements Starter {
 		queue.add(starter);
 		return this;
 	}
+	
+	/**
+	 * Get subsequent starter at index.
+	 * <p>
+	 * @param index - index of srarter
+	 * @return the starter
+	 * @throws IndexOutOfBoundsException
+	 */
+	public synchronized Starter get(int index)
+			throws IndexOutOfBoundsException
+	{
+		try {
+			return queue.get(index);
+		} catch ( ArrayIndexOutOfBoundsException e ) {
+			throw new IndexOutOfBoundsException(e.getMessage());
+		}
+	}
+	
+	public synchronized int count() {
+		return queue.size();
+	}
 
 	@Override
 	public synchronized void start() throws StarterException {
