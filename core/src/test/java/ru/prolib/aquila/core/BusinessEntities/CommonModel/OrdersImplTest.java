@@ -18,7 +18,7 @@ public class OrdersImplTest {
 	private IMocksControl control;
 	private EventSystem es;
 	private OrdersEventDispatcher dispatcher;
-	private EditableTerminal<?> terminal;
+	private EditableTerminal terminal;
 	private EditableOrder o1,o2,o3;
 	private OrdersImpl orders;
 	private OrderFactory factory;

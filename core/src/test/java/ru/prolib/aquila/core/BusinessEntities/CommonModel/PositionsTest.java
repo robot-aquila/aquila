@@ -21,7 +21,7 @@ public class PositionsTest {
 	private static SecurityDescriptor descr1,descr2;
 	private IMocksControl control;
 	private EventSystem es;
-	private EditableTerminal<?> terminal;
+	private EditableTerminal terminal;
 	private Portfolio portfolio;
 	private EditablePosition position1, position2;
 	private Security security1, security2;

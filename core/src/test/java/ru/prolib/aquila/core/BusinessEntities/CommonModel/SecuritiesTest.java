@@ -12,7 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
 public class SecuritiesTest {
 	private static SecurityDescriptor descr1, descr2, descr3;
 	private IMocksControl control;
-	private EditableTerminal<?> terminal;
+	private EditableTerminal terminal;
 	private EditableSecurity security1, security2, security3;
 	private Securities securities;
 	private SecuritiesEventDispatcher dispatcher;

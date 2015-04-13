@@ -36,7 +36,7 @@ public class TerminalImplTest {
 	private Scheduler scheduler;
 	private EventSystem es;
 	private OrderProcessor orderProcessor;
-	private TerminalImpl<TerminalImplTest> terminal;
+	private TerminalImpl terminal;
 	private EditableOrder order;
 	private Security security;
 	private Runnable task;
@@ -67,7 +67,7 @@ public class TerminalImplTest {
 		orderProcessor = control.createMock(OrderProcessor.class);
 		security = control.createMock(Security.class);
 		order = control.createMock(EditableOrder.class);
-		terminal = new TerminalImpl<TerminalImplTest>(controller, dispatcher,
+		terminal = new TerminalImpl(controller, dispatcher,
 				securities, portfolios, orders, starter, scheduler, es);
 
 		expect(security.getDescriptor()).andStubReturn(descr);
@@ -93,7 +93,7 @@ public class TerminalImplTest {
 
 	@Test // Тест конструктора с 1 аргументом типа строка (ID очереди)
 	public void testConstruct1_S() throws Exception {
-		terminal = new TerminalImpl<TerminalImplTest>("foo");
+		terminal = new TerminalImpl("foo");
 		assertNotNull(terminal.getTerminalController());
 		assertNotNull(terminal.getTerminalEventDispatcher());
 		assertNotNull(terminal.getSecurityStorage());
@@ -107,7 +107,7 @@ public class TerminalImplTest {
 	
 	@Test // Тест конструктора с 1 аргументом типа фасад событийной системы
 	public void testConstruct1_E() throws Exception {
-		terminal = new TerminalImpl<TerminalImplTest>(es);
+		terminal = new TerminalImpl(es);
 		assertNotNull(terminal.getTerminalController());
 		assertNotNull(terminal.getTerminalEventDispatcher());
 		assertNotNull(terminal.getSecurityStorage());
@@ -947,7 +947,7 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testEventTypes() throws Exception {
-		terminal = new TerminalImpl<TerminalImplTest>("test");
+		terminal = new TerminalImpl("test");
 		dispatcher = terminal.getTerminalEventDispatcher();
 		assertSame(dispatcher.OnConnected(), terminal.OnConnected());
 		assertSame(dispatcher.OnDisconnected(), terminal.OnDisconnected());
@@ -1150,13 +1150,6 @@ public class TerminalImplTest {
 		assertFalse(terminal.scheduled(task));
 		
 		control.verify();
-	}
-	
-	@Test
-	public void testSetServiceLocator() throws Exception {
-		assertNull(terminal.getServiceLocator());
-		terminal.setServiceLocator(this);
-		assertSame(this, terminal.getServiceLocator());
 	}
 	
 	@Test

@@ -39,7 +39,7 @@ import ru.prolib.aquila.core.utils.*;
  * @param <T> - тип объекта связывания терминала со спецификой реализации.
  * см. {@link EditableTerminal}.
  */
-final public class TerminalImpl<T> implements EditableTerminal<T> {
+final public class TerminalImpl implements EditableTerminal {
 	private static Logger logger;
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private EventSystem es;
@@ -51,7 +51,6 @@ final public class TerminalImpl<T> implements EditableTerminal<T> {
 	private TerminalEventDispatcher dispatcher;
 	private TerminalController controller;
 	private OrderProcessor orderProcessor;
-	private T serviceLocator;
 	
 	static {
 		logger = LoggerFactory.getLogger(TerminalImpl.class);
@@ -682,18 +681,6 @@ final public class TerminalImpl<T> implements EditableTerminal<T> {
 	@Override
 	public TaskHandler getTaskHandler(Runnable task) {
 		return scheduler.getTaskHandler(task);
-	}
-
-	@Override
-	@Deprecated
-	public T getServiceLocator() {
-		return serviceLocator;
-	}
-
-	@Override
-	@Deprecated
-	public void setServiceLocator(T locator) {
-		serviceLocator = locator;
 	}
 
 	@Override

@@ -43,7 +43,7 @@ public class CommonTRTest {
 	private static SecurityDescriptor descr;
 	
 	private IMocksControl control;
-	private EditableTerminal<?> terminal;
+	private EditableTerminal terminal;
 	private EventSystem es;
 	private CommonTREventDispatcher dispatcher;
 	private CommonTR trades;
@@ -59,7 +59,6 @@ public class CommonTRTest {
 		descr = new SecurityDescriptor("RI", "SPFB", "USD", SecurityType.FUT);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();

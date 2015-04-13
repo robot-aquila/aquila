@@ -22,7 +22,7 @@ import ru.prolib.aquila.core.*;
  * 2013-01-05<br>
  * $Id: EditableTerminal.java 527 2013-02-14 15:14:09Z whirlwind $
  */
-public interface EditableTerminal<T> extends Terminal {
+public interface EditableTerminal extends Terminal {
 	
 	/**
 	 * Получить фасад событийной системы.
@@ -242,28 +242,5 @@ public interface EditableTerminal<T> extends Terminal {
 	 * @param portfolio экземпляр портфеля
 	 */
 	public void setDefaultPortfolio(EditablePortfolio portfolio);
-	
-	/**
-	 * Получить сервис-локатор.
-	 * <p>
-	 * @return сервис-локатор
-	 */
-	@Deprecated // TODO: to remove
-	public T getServiceLocator();
-	
-	/**
-	 * Установить сервис-локатор.
-	 * <p>
-	 * Что бы избежать всяческих ограничений, сервис-локатор может быть
-	 * определен или подменен в любой момент времени. Невозможно знать
-	 * заранее, позволяет-ли реализация инстанцировать сервис-локатор
-	 * непосредственно в конструкторе терминала или есть какие-то ограничения,
-	 * которые позволяют получить экземпляр сервис-локатора после конструкции
-	 * неизменной части (модели). 
-	 * <p>
-	 * @param locator
-	 */
-	@Deprecated  // TODO: to remove
-	public void setServiceLocator(T locator);
 	
 }

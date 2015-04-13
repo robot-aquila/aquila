@@ -14,9 +14,9 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
  * стартера терминала.
  */
 public class TerminalReadyIfConnected implements Starter, EventListener {
-	private final EditableTerminal<?> terminal; 
+	private final EditableTerminal terminal; 
 	
-	public TerminalReadyIfConnected(EditableTerminal<?> terminal) {
+	public TerminalReadyIfConnected(EditableTerminal terminal) {
 		super();
 		this.terminal = terminal;
 	}

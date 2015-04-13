@@ -9,10 +9,9 @@ import ru.prolib.aquila.core.report.trades.*;
 
 public class ReportBuilderTest {
 	private EventSystem es;
-	private EditableTerminal<?> terminal;
+	private EditableTerminal terminal;
 	private ReportBuilder builder;
 
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		terminal = new TerminalImpl("foo");

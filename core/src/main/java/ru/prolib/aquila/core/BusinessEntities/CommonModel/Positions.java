@@ -100,7 +100,7 @@ public class Positions {
 	 */
 	private EditablePosition createPosition(Security security) {
 		return new PositionImpl(portfolio, security,
-			new PositionEventDispatcher(((EditableTerminal<?>)
+			new PositionEventDispatcher(((EditableTerminal)
 				portfolio.getTerminal()).getEventSystem(),
 					portfolio.getAccount(),
 					security.getDescriptor()));
