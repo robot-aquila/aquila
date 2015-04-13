@@ -6,24 +6,24 @@ import static org.junit.Assert.*;
 import org.easymock.*;
 import org.junit.*;
 
-import ru.prolib.aquila.core.EventQueueStarter;
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.EventSystemImpl;
-import ru.prolib.aquila.core.StarterQueue;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.Orders;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.OrdersImpl;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.Portfolios;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.Securities;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 
 public class TerminalBuilderTest {
 	private IMocksControl control;
 	private TerminalBuilder builder;
-
+	private EventSystem eventSystem1, eventSystem2;
+	private Scheduler scheduler1, scheduler2;
+	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		builder = new TerminalBuilder();
+		eventSystem1 = new EventSystemImpl();
+		eventSystem2 = new EventSystemImpl();
+		scheduler1 = control.createMock(Scheduler.class);
+		scheduler2 = control.createMock(Scheduler.class);
 	}
 	
 	@Test
@@ -43,11 +43,38 @@ public class TerminalBuilderTest {
 		assertSame(es.getEventQueue(),
 				((EventQueueStarter)starter.get(0)).getEventQueue());
 	}
+	
+	@Test
+	public void testBuildTerminal_WithEventSystem() throws Exception {
+		TerminalImpl terminal =
+			(TerminalImpl) builder.withEventSystem(eventSystem1)
+			.withEventSystem(eventSystem2) // the last one will be used
+			.buildTerminal();
+		assertNotNull(terminal);
+		assertSame(eventSystem2, terminal.getEventSystem());
+	}
+	
+	@Test
+	public void testBuildTerminal_WithCommonEventSystemAndQueueId()
+			throws Exception
+	{
+		TerminalImpl terminal =
+			(TerminalImpl) builder.withEventSystem(eventSystem1)
+			.withCommonEventSystemAndQueueId("Jool")
+			.buildTerminal();
+		assertNotNull(terminal);
+		EventSystemImpl x = (EventSystemImpl) terminal.getEventSystem();
+		assertEquals("Jool", x.getEventQueue().getId());
+	}
 
 	@Test
-	@Ignore
-	public void test() {
-		fail("Not yet implemented");
+	public void testBuildTerminal_WithScheduler() throws Exception {
+		TerminalImpl terminal =
+			(TerminalImpl) builder.withScheduler(scheduler1)
+			.withScheduler(scheduler2) // the last one will be used
+			.buildTerminal();
+		assertNotNull(terminal);
+		assertSame(scheduler2, terminal.getScheduler());
 	}
 
 }

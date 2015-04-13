@@ -39,7 +39,7 @@ import ru.prolib.aquila.core.utils.*;
  * @param <T> - тип объекта связывания терминала со спецификой реализации.
  * см. {@link EditableTerminal}.
  */
-public class TerminalImpl<T> implements EditableTerminal<T> {
+final public class TerminalImpl<T> implements EditableTerminal<T> {
 	private static Logger logger;
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private EventSystem es;
@@ -156,19 +156,19 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 	
 	@Override
-	public synchronized List<Security> getSecurities() {
+	public List<Security> getSecurities() {
 		return securities.getSecurities();
 	}
 
 	@Override
-	public synchronized Security getSecurity(SecurityDescriptor descr)
+	public Security getSecurity(SecurityDescriptor descr)
 			throws SecurityException
 	{
 		return securities.getSecurity(descr);
 	}
 
 	@Override
-	public synchronized boolean isSecurityExists(SecurityDescriptor descr) {
+	public boolean isSecurityExists(SecurityDescriptor descr) {
 		return securities.isSecurityExists(descr);
 	}
 
@@ -178,19 +178,19 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized List<Portfolio> getPortfolios() {
+	public List<Portfolio> getPortfolios() {
 		return portfolios.getPortfolios();
 	}
 
 	@Override
-	public synchronized Portfolio getPortfolio(Account account)
+	public Portfolio getPortfolio(Account account)
 			throws PortfolioException
 	{
 		return portfolios.getPortfolio(account);
 	}
 
 	@Override
-	public synchronized boolean isPortfolioAvailable(Account account) {
+	public boolean isPortfolioAvailable(Account account) {
 		return portfolios.isPortfolioAvailable(account);
 	}
 
@@ -230,24 +230,24 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized Portfolio getDefaultPortfolio()
+	public Portfolio getDefaultPortfolio()
 		throws PortfolioException
 	{
 		return portfolios.getDefaultPortfolio();
 	}
 
 	@Override
-	public synchronized boolean isOrderExists(int id) {
+	public boolean isOrderExists(int id) {
 		return orders.isOrderExists(id);
 	}
 
 	@Override
-	public synchronized List<Order> getOrders() {
+	public List<Order> getOrders() {
 		return orders.getOrders();
 	}
 
 	@Override
-	public synchronized Order getOrder(int id) throws OrderException {
+	public Order getOrder(int id) throws OrderException {
 		return orders.getOrder(id);
 	}
 
@@ -257,7 +257,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized void placeOrder(Order order) throws OrderException {
+	public void placeOrder(Order order) throws OrderException {
 		synchronized ( order ) {
 			OrderStatus status = order.getStatus();
 			EditableOrder o = (EditableOrder) order;
@@ -272,9 +272,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 			} else if ( status == OrderStatus.CONDITION ) {
 				order.getActivator().stop();
 			}
-			synchronized ( this ) {
-				orderProcessor.placeOrder(order);
-			}
+			orderProcessor.placeOrder(order);
 		}
 	}
 
@@ -301,7 +299,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized int getOrdersCount() {
+	public int getOrdersCount() {
 		return orders.getOrdersCount();
 	}
 
@@ -376,60 +374,54 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized int getSecuritiesCount() {
+	public int getSecuritiesCount() {
 		return securities.getSecuritiesCount();
 	}
 
 	@Override
-	public synchronized int getPortfoliosCount() {
+	public int getPortfoliosCount() {
 		return portfolios.getPortfoliosCount();
 	}
 
 	@Override
-	public synchronized void fireEvents(EditableOrder order) {
+	public void fireEvents(EditableOrder order) {
 		orders.fireEvents(order);
 	}
 
 	@Override
-	public synchronized EditableOrder getEditableOrder(int id)
+	public EditableOrder getEditableOrder(int id)
 		throws OrderNotExistsException
 	{
 		return orders.getEditableOrder(id);
 	}
 
 	@Override
-	public synchronized void purgeOrder(int id) {
+	public void purgeOrder(int id) {
 		orders.purgeOrder(id);
 	}
 
 	@Override
-	public synchronized void fireEvents(EditablePortfolio portfolio) {
+	public void fireEvents(EditablePortfolio portfolio) {
 		portfolios.fireEvents(portfolio);
 	}
 
 	@Override
-	public synchronized EditablePortfolio
-		getEditablePortfolio(Account account)
-	{
+	public EditablePortfolio getEditablePortfolio(Account account) {
 		return portfolios.getEditablePortfolio(this, account);
 	}
 
 	@Override
-	public synchronized void
-		setDefaultPortfolio(EditablePortfolio portfolio)
-	{
+	public void setDefaultPortfolio(EditablePortfolio portfolio) {
 		portfolios.setDefaultPortfolio(portfolio);
 	}
 
 	@Override
-	public synchronized EditableSecurity
-		getEditableSecurity(SecurityDescriptor descr)
-	{
+	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) {
 		return securities.getEditableSecurity(this, descr);
 	}
 
 	@Override
-	public synchronized void fireEvents(EditableSecurity security) {
+	public void fireEvents(EditableSecurity security) {
 		securities.fireEvents(security);
 	}
 
@@ -444,7 +436,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized void fireTerminalConnectedEvent() {
+	public void fireTerminalConnectedEvent() {
 		markTerminalConnected();
 	}
 	
@@ -460,7 +452,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized void fireTerminalDisconnectedEvent() {
+	public void fireTerminalDisconnectedEvent() {
 		markTerminalDisconnected();
 	}
 	
@@ -510,9 +502,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized void
-		firePanicEvent(int code, String msgId, Object[] args)
-	{
+	public void firePanicEvent(int code, String msgId, Object[] args) {
 		if ( started() ) {
 			logger.error("PANIC[" + code + "]: " + msgId, args);
 			dispatcher.firePanic(code, msgId, args);
@@ -552,7 +542,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized DateTime getCurrentTime() {
+	public DateTime getCurrentTime() {
 		return scheduler.getCurrentTime();
 	}
 
@@ -562,7 +552,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized EditableOrder createOrder() {
+	public EditableOrder createOrder() {
 		return orders.createOrder(this);
 	}
 
@@ -572,22 +562,22 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized Order createOrder(Account account, Direction dir,
-			Security security, long qty, double price)
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty, double price)
 	{
 		return createOrder(account, dir, security, qty, price, null);
 	}
 
 	@Override
-	public synchronized Order createOrder(Account account, Direction dir,
-			Security security, long qty)
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty)
 	{
 		return createOrder(account, dir, security, qty, null);
 	}
 	
 	@Override
-	public synchronized Order createOrder(Account account, Direction dir,
-		Security security, long qty, double price, OrderActivator activator)
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty, double price, OrderActivator activator)
 	{
 		EditableOrder order = createOrder();
 		order.setTime(getCurrentTime());
@@ -607,8 +597,8 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized Order createOrder(Account account, Direction dir,
-		Security security, long qty, OrderActivator activator)
+	public Order createOrder(Account account, Direction dir, Security security,
+			long qty, OrderActivator activator)
 	{
 		EditableOrder order = createOrder();
 		order.setTime(getCurrentTime());
@@ -637,78 +627,78 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	}
 
 	@Override
-	public synchronized
-		void fireSecurityRequestError(SecurityDescriptor descr,
+	public void fireSecurityRequestError(SecurityDescriptor descr,
 			int errorCode, String errorMsg)
 	{
 		dispatcher.fireSecurityRequestError(descr, errorCode, errorMsg);
 	}
 
 	@Override
-	public synchronized TaskHandler schedule(Runnable task, DateTime time) {
+	public TaskHandler schedule(Runnable task, DateTime time) {
 		return scheduler.schedule(task, time);
 	}
 
 	@Override
-	public synchronized TaskHandler
-		schedule(Runnable task, DateTime firstTime, long period)
+	public TaskHandler schedule(Runnable task, DateTime firstTime,
+			long period)
 	{
 		return scheduler.schedule(task, firstTime, period);
 	}
 
 	@Override
-	public synchronized TaskHandler schedule(Runnable task, long delay) {
+	public TaskHandler schedule(Runnable task, long delay) {
 		return scheduler.schedule(task, delay);
 	}
 
 	@Override
-	public synchronized
-		TaskHandler schedule(Runnable task, long delay, long period)
-	{
+	public TaskHandler schedule(Runnable task, long delay, long period) {
 		return scheduler.schedule(task, delay, period);
 	}
 
 	@Override
-	public synchronized TaskHandler
-		scheduleAtFixedRate(Runnable task, DateTime firstTime, long period)
+	public TaskHandler scheduleAtFixedRate(Runnable task, DateTime firstTime,
+			long period)
 	{
 		return scheduler.scheduleAtFixedRate(task, firstTime, period);		
 	}
 
 	@Override
-	public synchronized TaskHandler
-		scheduleAtFixedRate(Runnable task, long delay, long period)
+	public TaskHandler scheduleAtFixedRate(Runnable task, long delay,
+			long period)
 	{
 		return scheduler.scheduleAtFixedRate(task, delay, period);
 	}
 
 	@Override
-	public synchronized void cancel(Runnable task) {
+	public void cancel(Runnable task) {
 		scheduler.cancel(task);
 	}
 	
 	@Override
-	public synchronized boolean scheduled(Runnable task) {
+	public boolean scheduled(Runnable task) {
 		return scheduler.scheduled(task);
 	}
 
 	@Override
-	public synchronized TaskHandler getTaskHandler(Runnable task) {
+	public TaskHandler getTaskHandler(Runnable task) {
 		return scheduler.getTaskHandler(task);
 	}
 
 	@Override
-	public synchronized T getServiceLocator() {
+	@Deprecated
+	public T getServiceLocator() {
 		return serviceLocator;
 	}
 
 	@Override
-	public synchronized void setServiceLocator(T locator) {
+	@Deprecated
+	public void setServiceLocator(T locator) {
 		serviceLocator = locator;
 	}
 
 	@Override
-	public synchronized void setStarter(StarterQueue starter) {
+	@Deprecated
+	public void setStarter(StarterQueue starter) {
 		this.starter = starter;
 	}
 
@@ -717,7 +707,8 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <P>
 	 * @param scheduler планировщик
 	 */
-	public synchronized void setScheduler(Scheduler scheduler) {
+	@Deprecated
+	public void setScheduler(Scheduler scheduler) {
 		this.scheduler = scheduler;
 	}
 
@@ -726,7 +717,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @return планировщик
 	 */
-	public synchronized Scheduler getScheduler() {
+	public Scheduler getScheduler() {
 		return scheduler;
 	}
 	
@@ -735,7 +726,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @return контроллер терминала
 	 */
-	public synchronized TerminalController getTerminalController() {
+	public TerminalController getTerminalController() {
 		return controller;
 	}
 	
@@ -744,7 +735,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @return диспетчер событий
 	 */
-	public synchronized TerminalEventDispatcher getTerminalEventDispatcher() {
+	public TerminalEventDispatcher getTerminalEventDispatcher() {
 		return dispatcher;
 	}
 	
@@ -753,7 +744,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @return хранилище инструментов
 	 */
-	public synchronized Securities getSecurityStorage() {
+	public Securities getSecurityStorage() {
 		return securities;
 	}
 	
@@ -762,7 +753,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @return хранилище портфелей
 	 */
-	public synchronized Portfolios getPortfolioStorage() {
+	public Portfolios getPortfolioStorage() {
 		return portfolios;
 	}
 	
@@ -771,7 +762,7 @@ public class TerminalImpl<T> implements EditableTerminal<T> {
 	 * <p>
 	 * @return хранилище заявок
 	 */
-	public synchronized Orders getOrderStorage() {
+	public Orders getOrderStorage() {
 		return orders;
 	}
 

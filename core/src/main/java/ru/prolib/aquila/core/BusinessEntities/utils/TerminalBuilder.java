@@ -10,13 +10,15 @@ import ru.prolib.aquila.core.utils.SimpleCounter;
  * <p>
  */
 public class TerminalBuilder {
+	private EventSystem eventSystem;
+	private Scheduler scheduler;
 	
 	public TerminalBuilder() {
 		
 	}
 	
 	public EditableTerminal buildTerminal() {
-		EventSystem es = new EventSystemImpl();
+		EventSystem es = getEventSystem();
 		TerminalImpl terminal = new TerminalImpl(new TerminalController(),
 				new TerminalEventDispatcher(es),
 				new Securities(new SecuritiesEventDispatcher(es)),
@@ -24,7 +26,7 @@ public class TerminalBuilder {
 				new OrdersImpl(new OrdersEventDispatcher(es),
 						new OrderFactoryImpl(), new SimpleCounter()),
 				new StarterQueue(),
-				new SchedulerLocal(),
+				getScheduler(),
 				es);
 		StarterQueue starter = terminal.getStarter(); 
 		starter.add(new EventQueueStarter(es.getEventQueue(), 3000));
@@ -38,24 +40,50 @@ public class TerminalBuilder {
 	 * @return the builder instance
 	 */
 	public TerminalBuilder withEventSystem(EventSystem facade) {
+		this.eventSystem = facade;
 		return this;
 	}
 
 	/**
-	 * Use a common event system facade with specified ID.
+	 * Use a common event system facade with the specified ID.
 	 * <p>
 	 * @param id - the thread identifier of event queue 
 	 * @return the builder instance
 	 */
 	public TerminalBuilder withCommonEventSystemAndQueueId(String id) {
+		this.eventSystem = new EventSystemImpl(id);
 		return this;
 	}
 	
+	/**
+	 * Use specified scheduler.
+	 * <p>
+	 * @param scheduler - scheduler to use
+	 * @return the builder instance
+	 */
+	public TerminalBuilder withScheduler(Scheduler scheduler) {
+		this.scheduler = scheduler;
+		return this;
+	}
+
+	/*
 	public TerminalBuilder withSecurities(Securities repository) {
 		return this;
 	}
 	
+	public TerminalBuilder
+		withCommonSecuritiesAndFactory(SecurityFactory factory)
+	{
+		return this;
+	}
+	
 	public TerminalBuilder withPortfolios(Portfolios repository) {
+		return this;
+	}
+	
+	public TerminalBuilder
+		withCommonPortfoliosAndFactory(PortfolioFactory factory)
+	{
 		return this;
 	}
 	
@@ -67,20 +95,17 @@ public class TerminalBuilder {
 		return this;
 	}
 	
-	public TerminalBuilder withScheduler(Scheduler scheduler) {
-		return this;
-	}
-	
 	public TerminalBuilder withOrderProcessor(OrderProcessor processor) {
 		return this;
 	}
+	*/
 	
-	public TerminalBuilder withCommonSecuritiesAndFactory(SecurityFactory factory) {
-		return this;
+	private EventSystem getEventSystem() {
+		return eventSystem == null ? new EventSystemImpl() : eventSystem;
 	}
 	
-	public TerminalBuilder withCommonPortfoliosAndFactory(PortfolioFactory factory) {
-		return this;
+	private Scheduler getScheduler() {
+		return scheduler == null ? new SchedulerLocal() : scheduler;
 	}
-
+	
 }
