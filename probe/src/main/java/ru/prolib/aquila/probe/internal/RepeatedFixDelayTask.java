@@ -3,8 +3,7 @@ package ru.prolib.aquila.probe.internal;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.probe.timeline.TLOutOfIntervalException;
-import ru.prolib.aquila.probe.timeline.TLSTimeline;
+import ru.prolib.aquila.probe.timeline.*;
 
 /**
  * Периодическая задача с фиксированным интервалом между исполнениями.
@@ -14,13 +13,13 @@ import ru.prolib.aquila.probe.timeline.TLSTimeline;
  * плюс указанный интервал исполнения. 
  */
 public class RepeatedFixDelayTask implements SchedulerTask {
-	private final TLSTimeline timeline;
+	private final Timeline timeline;
 	private final Scheduler scheduler;
 	private final Runnable task;
 	private final long delay;
 	
 	public RepeatedFixDelayTask(Scheduler scheduler, Runnable task,
-			TLSTimeline timeline, long delay)
+			Timeline timeline, long delay)
 	{
 		super();
 		this.timeline = timeline;

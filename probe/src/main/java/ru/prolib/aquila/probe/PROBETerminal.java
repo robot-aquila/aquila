@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
 import ru.prolib.aquila.probe.internal.SimulationController;
@@ -16,7 +17,7 @@ import ru.prolib.aquila.probe.internal.SimulationController;
 /**
  * Эмулятор торгового терминала.
  */
-public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
+public class PROBETerminal extends TerminalDecorator
 	implements SimulationController
 {
 	private static final Logger logger;
@@ -26,42 +27,30 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 	}
 	
 	private final Set<SecurityDescriptor> registered;
+	private final PROBEServiceLocator locator;
 	
 	/**
-	 * Конструктор.
+	 * Constructor.
 	 * <p>
-	 * @param es фасад событийной системы
-	 * @param locator сервис-локатор
+	 * @param terminal - the underlying terminal
+s
 	 */
-	public PROBETerminal(EventSystem es, PROBEServiceLocator locator) {
-		super(es);
-		setServiceLocator(locator);
+	public PROBETerminal(EditableTerminal terminal, PROBEServiceLocator locator) {
+		super(terminal);
+		this.locator = locator;
 		this.registered = new HashSet<SecurityDescriptor>();
 	}
 	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param es фасад событийной системы
-	 */
-	public PROBETerminal(EventSystem es) {
-		this(es, new PROBEServiceLocator());
-	}
-	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param queueId идентификатор очереди событий
-	 */
-	public PROBETerminal(String queueId) {
-		this(new EventSystemImpl(new EventQueueImpl(queueId)));
+	public PROBEServiceLocator getServiceLocator() {
+		return locator;
 	}
 	
 	@Override
 	public void requestSecurity(SecurityDescriptor descr) {
 		if ( ! registered.contains(descr) ) {
 			try {
-				getServiceLocator().startSimulation(descr, getCurrentTime());
+				locator.getDataProvider()
+					.startSupply(this, descr, getCurrentTime());
 				registered.add(descr);
 			} catch (DataException e) {
 				logger.error("Failed to start simulation " + descr + ": ", e);
@@ -139,7 +128,7 @@ public class PROBETerminal extends TerminalImpl<PROBEServiceLocator>
 	}
 	
 	private SimulationController getTimeline() {
-		return getServiceLocator().getTimeline();
+		return locator.getTimeline();
 	}
 	
 	@Override

@@ -61,8 +61,7 @@ public class TestStrategy implements EventListener, Starter {
 			if ( security == null ) {
 				logger.debug("Aquire security instance: {}", descr);
 				security = terminal.getSecurity(descr);
-				candleFiller = new CandleSeriesFiller(
-						((EditableTerminal<?>) terminal).getEventSystem(), 
+				candleFiller = new CandleSeriesFiller(((EditableTerminal) terminal).getEventSystem(), 
 						security,
 						new TFMinutes(5), false);
 				candles = candleFiller.getCandles();

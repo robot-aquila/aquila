@@ -1,19 +1,17 @@
 package ru.prolib.aquila.probe.internal;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
-import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
-
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.data.Aqiterator;
-import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.probe.PROBETerminal;
-import ru.prolib.aquila.probe.timeline.TLSTimeline;
+import java.util.*;
+import org.apache.log4j.BasicConfigurator;
+import org.easymock.*;
+import org.joda.time.*;
+import org.junit.*;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.probe.*;
+import ru.prolib.aquila.probe.timeline.*;
 
 public class DataProviderTest {
 	private static final SecurityDescriptor descr;
@@ -23,43 +21,60 @@ public class DataProviderTest {
 	}
 	
 	private IMocksControl control;
-	private DataProvider dp;
-	private PROBETerminal terminal;
+	private DataProvider dataProvider;
+	private EditableTerminal underlyingTerminal;
 	private PROBEServiceLocator locator;
-	private XFactory x;
+	private PROBETerminal terminal;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = new XFactory().newTerminal("charlie");
-		locator = terminal.getServiceLocator();
-		x = control.createMock(XFactory.class);
-		dp = new DataProvider(terminal, x);
+		underlyingTerminal = control.createMock(EditableTerminal.class);
+		locator = new PROBEServiceLocator();
+		terminal = new PROBETerminal(underlyingTerminal, locator);
+		dataProvider = new DataProvider();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testStartSupply() throws Exception {
-		PROBEDataStorage ds = control.createMock(PROBEDataStorage.class);
-		TLSTimeline tl = control.createMock(TLSTimeline.class);
-		Aqiterator<Tick> it = control.createMock(Aqiterator.class);
+		PROBEDataStorage storage = control.createMock(PROBEDataStorage.class);
+		Aqiterator<Tick> iterator = control.createMock(Aqiterator.class);
+		Timeline timeline = control.createMock(Timeline.class);
 		SecurityProperties props = control.createMock(SecurityProperties.class);
-		EditableSecurity es = terminal.getEditableSecurity(descr);
-		FORTSSecurityCtrl ctrl = control.createMock(FORTSSecurityCtrl.class);
-		TickDataDispatcher th = control.createMock(TickDataDispatcher.class);
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		
 		DateTime time = DateTime.now();
-		locator.setDataStorage(ds);
-		locator.setTimeline(tl);
-		expect(ds.getIterator(descr, time)).andReturn(it);
-		expect(ds.getSecurityProperties(descr)).andReturn(props);
-		expect(x.newFORTSSecurityCtrl(terminal, es, props)).andReturn(ctrl);
-		expect(x.newTickDataDispatcher(it, ctrl)).andReturn(th);
-		tl.registerSource(th);
+		locator.setDataStorage(storage);
+		locator.setTimeline(timeline);
+		expect(storage.getIterator(descr, time)).andReturn(iterator);
+		expect(underlyingTerminal.getEditableSecurity(descr))
+			.andReturn(security);
+		expect(storage.getSecurityProperties(descr)).andReturn(props);
+		final Vector<TLEventSource> actual = new Vector<TLEventSource>();
+		timeline.registerSource((TLEventSource) anyObject());
+		expectLastCall().andAnswer(new IAnswer<Object>() {
+			@Override public Object answer() throws Throwable {
+				actual.add((TLEventSource) getCurrentArguments()[0]);
+				return null;
+			}});
 		control.replay();
 		
-		dp.startSupply(descr, time);
+		dataProvider.startSupply(terminal, descr, time);
 		
 		control.verify();
+		assertEquals(1, actual.size());
+		TickDataDispatcher tdd = (TickDataDispatcher) actual.get(0);
+		FORTSSecurityCtrl ctrl = (FORTSSecurityCtrl) tdd.getTickHandler();
+		assertSame(terminal, ctrl.getTerminal());
+		assertSame(security, ctrl.getSecurity());
+		assertSame(props, ctrl.getSecurityProperties());
 	}
 	
 }

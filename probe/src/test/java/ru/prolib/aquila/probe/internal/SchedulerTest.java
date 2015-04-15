@@ -21,7 +21,7 @@ public class SchedulerTest {
 	private EventSystem es;
 	private Interval interval;
 	private IMocksControl control;
-	private TLSTimeline timeline;
+	private Timeline timeline;
 	private SchedulerImpl scheduler;
 	private Runnable r1,r2;
 	private DateTime someTime;
@@ -57,8 +57,8 @@ public class SchedulerTest {
 	 */
 	static class CollectPOA implements Runnable {
 		final Vector<DateTime> actual = new Vector<DateTime>();
-		final TLSTimeline timeline;
-		CollectPOA(TLSTimeline timeline) {
+		final Timeline timeline;
+		CollectPOA(Timeline timeline) {
 			this.timeline = timeline;
 		}
 		

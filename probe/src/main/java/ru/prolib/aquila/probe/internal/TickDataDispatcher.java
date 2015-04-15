@@ -28,6 +28,10 @@ public class TickDataDispatcher implements TLEventSource {
 		this.reader = reader;
 		this.handler = handler;
 	}
+	
+	public TickHandler getTickHandler() {
+		return handler;
+	}
 
 	@Override
 	public TLEvent pullEvent() throws TLException {

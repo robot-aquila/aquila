@@ -1,15 +1,10 @@
 package ru.prolib.aquila.probe.internal;
 
-import java.util.Hashtable;
-import java.util.Map;
-
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-
+import java.util.*;
+import org.joda.time.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.KW;
-import ru.prolib.aquila.probe.timeline.TLOutOfIntervalException;
-import ru.prolib.aquila.probe.timeline.TLSTimeline;
+import ru.prolib.aquila.probe.timeline.*;
 
 /**
  * Планировщик на базе хронологии {@link TLSTimeline}.
@@ -20,9 +15,9 @@ import ru.prolib.aquila.probe.timeline.TLSTimeline;
  */
 public class SchedulerImpl implements Scheduler {
 	private final Map<KW<Runnable>, SchedulerTask> tasks;
-	private final TLSTimeline timeline;
+	private final Timeline timeline;
 	
-	public SchedulerImpl(TLSTimeline timeline) {
+	public SchedulerImpl(Timeline timeline) {
 		super();
 		this.timeline = timeline;
 		tasks = new Hashtable<KW<Runnable>, SchedulerTask>();

@@ -1,12 +1,12 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.util.List;
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.probe.internal.SimulationController;
 
 
 /**
@@ -27,7 +27,7 @@ import ru.prolib.aquila.probe.internal.SimulationController;
  * <i>2014-12-26</i> Удалены все ссылки на пускач потока.
  * <p> 
  */
-public class TLSTimeline implements SimulationController {
+public class TLSTimeline implements Timeline {
 	private static final Logger logger;
 	
 	static {
@@ -38,7 +38,7 @@ public class TLSTimeline implements SimulationController {
 	private final TLEventQueue evtQueue;
 	private final TLSStrategy simulation;
 	private final TLSEventDispatcher dispatcher;
-	private final TLEventSources sources;
+	private final EventSourceRepository sources;
 	private volatile boolean blocking = false;
 	private volatile DateTime cutoff = null;
 	private volatile TLCmdType state = null;
@@ -54,7 +54,7 @@ public class TLSTimeline implements SimulationController {
 	 */
 	TLSTimeline(TLCmdQueue cmdQueue, TLEventQueue evtQueue,
 			TLSStrategy simulation, TLSEventDispatcher dispatcher,
-			TLEventSources sources)
+			EventSourceRepository sources)
 	{
 		super();
 		this.cmdQueue = cmdQueue;
@@ -77,11 +77,7 @@ public class TLSTimeline implements SimulationController {
 		return simulation.execute();
 	}
 	
-	/**
-	 * Получить значение ТА.
-	 * <p>
-	 * @return ТА
-	 */
+	@Override
 	public DateTime getPOA() {
 		return evtQueue.getPOA();
 	}
@@ -94,25 +90,20 @@ public class TLSTimeline implements SimulationController {
 		return evtQueue.getInterval();
 	}
 	
-	/**
-	 * Добавить событие в последовательность.
-	 * <p>
-	 * @param time позиция события на временной шкале
-	 * @param procedure процедура события
-	 * @throws TLOutOfIntervalException событие за пределами рабочего периода
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.Timeline#schedule(org.joda.time.DateTime, java.lang.Runnable)
 	 */
+	@Override
 	public void schedule(DateTime time, Runnable procedure)
 			throws TLOutOfIntervalException
 	{
 		schedule(new TLEvent(time, procedure));
 	}
 	
-	/**
-	 * Добавить событие в последовательность.
-	 * <p>
-	 * @param event событие хронологии
-	 * @throws TLOutOfIntervalException событие за пределами рабочего периода
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.Timeline#schedule(ru.prolib.aquila.probe.timeline.TLEvent)
 	 */
+	@Override
 	public void schedule(TLEvent event) throws TLOutOfIntervalException {
 		evtQueue.pushEvent(event);
 	}
@@ -227,7 +218,8 @@ public class TLSTimeline implements SimulationController {
 	 * Очищает очереди команд и событий и завершает работу с источниками
 	 * событий.
 	 */
-	void close() {
+	@Override
+	public void close() {
 		cmdQueue.clear();
 		evtQueue.clear();
 		sources.close();
@@ -238,6 +230,7 @@ public class TLSTimeline implements SimulationController {
 	 * <p>
 	 * @param source источник событий
 	 */
+	@Override
 	public void registerSource(TLEventSource source) {
 		sources.registerSource(source);
 	}
@@ -247,6 +240,7 @@ public class TLSTimeline implements SimulationController {
 	 * <p>
 	 * @param source источник событий
 	 */
+	@Override
 	public void removeSource(TLEventSource source) {
 		sources.removeSource(source);
 	}
@@ -355,6 +349,31 @@ public class TLSTimeline implements SimulationController {
 	@Override
 	public EventType OnRun() {
 		return dispatcher.OnRun();
+	}
+
+	@Override
+	public List<TLEventSource> getSources(DateTime time) {
+		return sources.getSources(time);
+	}
+
+	@Override
+	public List<TLEventSource> getSources() {
+		return sources.getSources();
+	}
+
+	@Override
+	public void disableUntil(TLEventSource source, DateTime time) {
+		sources.disableUntil(source, time);
+	}
+
+	@Override
+	public boolean isRegistered(TLEventSource source) {
+		return sources.isRegistered(source);
+	}
+
+	@Override
+	public DateTime getDisabledUntil(TLEventSource source) {
+		return sources.getDisabledUntil(source);
 	}
 
 }

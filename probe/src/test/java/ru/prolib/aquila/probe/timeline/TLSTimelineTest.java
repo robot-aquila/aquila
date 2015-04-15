@@ -3,18 +3,12 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.*;
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.junit.Before;
-import org.junit.Test;
+import org.joda.time.*;
+import org.junit.*;
 
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.probe.timeline.TLCmd;
-import ru.prolib.aquila.probe.timeline.TLCmdQueue;
-import ru.prolib.aquila.probe.timeline.TLSEventDispatcher;
-import ru.prolib.aquila.probe.timeline.TLSTimeline;
-import ru.prolib.aquila.probe.timeline.TLSStrategy;
 
 public class TLSTimelineTest {
 	private static DateTime from = new DateTime(2014, 5, 21, 20, 0, 0, 0);
@@ -26,7 +20,8 @@ public class TLSTimelineTest {
 	private TLEventQueue evtQueue;
 	private TLSStrategy simulation;
 	private TLSEventDispatcher dispatcher;
-	private TLEventSources sources;
+	private EventSourceRepository sources;
+	private TLEventSource source;
 	private TLSTimeline timeline;
 	private EventType evtType;
 
@@ -37,7 +32,8 @@ public class TLSTimelineTest {
 		evtQueue = control.createMock(TLEventQueue.class);
 		simulation = control.createMock(TLSStrategy.class);
 		dispatcher = control.createMock(TLSEventDispatcher.class);
-		sources = control.createMock(TLEventSources.class);
+		sources = control.createMock(EventSourceRepository.class);
+		source = control.createMock(TLEventSource.class);
 		timeline = new TLSTimeline(cmdQueue, evtQueue, simulation,
 				dispatcher, sources);
 		evtType = control.createMock(EventType.class);
@@ -415,4 +411,60 @@ public class TLSTimelineTest {
 		timeline.getClass().getMethod("OnStep");
 	}
 	
+	@Test
+	public void testGetSources0() throws Exception {
+		List<TLEventSource> list = new Vector<TLEventSource>();
+		expect(sources.getSources()).andReturn(list);
+		control.replay();
+		
+		assertSame(list, timeline.getSources());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetSources1() throws Exception {
+		List<TLEventSource> list = new Vector<TLEventSource>();
+		expect(sources.getSources(from)).andReturn(list);
+		control.replay();
+		
+		assertSame(list, timeline.getSources(from));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testDisableUntil() throws Exception {
+		sources.disableUntil(source, to);
+		control.replay();
+		
+		timeline.disableUntil(source, to);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testIsRegistered() throws Exception {
+		expect(sources.isRegistered(source)).andReturn(true);
+		expect(sources.isRegistered(source)).andReturn(false);
+		control.replay();
+		
+		assertTrue(timeline.isRegistered(source));
+		assertFalse(timeline.isRegistered(source));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetDisabledUntil() throws Exception {
+		expect(sources.getDisabledUntil(source)).andReturn(from);
+		expect(sources.getDisabledUntil(source)).andReturn(to);
+		control.replay();
+		
+		assertSame(from, timeline.getDisabledUntil(source));
+		assertSame(to, timeline.getDisabledUntil(source));
+		
+		control.verify();
+	}
+
 }

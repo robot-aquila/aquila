@@ -18,7 +18,7 @@ public class TLSStrategy {
 		logger = LoggerFactory.getLogger(TLSStrategy.class);
 	}
 	
-	private final TLEventSources sources;
+	private final EventSourceRepository sources;
 	private final TLEventQueue queue;
 	
 	/**
@@ -27,7 +27,7 @@ public class TLSStrategy {
 	 * @param sources реестр источников событий
 	 * @param queue очередь событий хронологии
 	 */
-	public TLSStrategy(TLEventSources sources,
+	public TLSStrategy(EventSourceRepository sources,
 			TLEventQueue queue)
 	{
 		super();

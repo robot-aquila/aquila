@@ -26,8 +26,7 @@ public class SecurityGettersTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		
-		@SuppressWarnings("rawtypes")
-		EditableTerminal<?> terminal = new TerminalImpl("foo");
+		EditableTerminal terminal = new TerminalImpl("foo");
 		
 		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
 		EditableSecurity sc = terminal.getEditableSecurity(descr);

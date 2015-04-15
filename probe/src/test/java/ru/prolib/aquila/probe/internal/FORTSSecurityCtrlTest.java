@@ -13,14 +13,12 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventTypeSI;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.probe.PROBETerminal;
+import ru.prolib.aquila.probe.*;
 import ru.prolib.aquila.probe.internal.FORTSSecurityCtrl.EveningClearing;
 import ru.prolib.aquila.probe.internal.FORTSSecurityCtrl.ForTick;
 
@@ -49,7 +47,9 @@ public class FORTSSecurityCtrlTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		scheduler = control.createMock(Scheduler.class);
-		terminal = new PROBETerminal("foo");
+		terminal = new PROBETerminalBuilder()
+			.withScheduler(scheduler)
+			.buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 		props = new SecurityProperties();
 		props.setDisplayName("RTS-future-12.14");
@@ -119,7 +119,6 @@ public class FORTSSecurityCtrlTest {
 					eq(new DateTime(2014, 11, 18, 18, 55, 0, 0))))
 				.andReturn(null);
 		control.replay();
-		terminal.setScheduler(scheduler);
 		
 		ctrl.doDailyTask(null, // not used
 				new Tick(new DateTime(2014, 11, 18, 15, 34, 29, 0), 0d));
@@ -134,7 +133,6 @@ public class FORTSSecurityCtrlTest {
 					eq(new DateTime(2014, 11, 19, 18, 55, 0, 0))))
 				.andReturn(null);
 		control.replay();
-		terminal.setScheduler(scheduler);
 		
 		ctrl.doDailyTask(null, // not used
 				new Tick(new DateTime(2014, 11, 18, 18, 55, 0, 0), 0d));
@@ -149,7 +147,6 @@ public class FORTSSecurityCtrlTest {
 					eq(new DateTime(2014, 11, 19, 18, 55, 0, 0))))
 				.andReturn(null);
 		control.replay();
-		terminal.setScheduler(scheduler);
 		
 		ctrl.doDailyTask(null, // not used
 				new Tick(new DateTime(2014, 11, 18, 23, 19, 48, 354), 0d));

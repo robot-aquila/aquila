@@ -11,7 +11,7 @@ import org.junit.*;
 public class TLEventSourcesTest {
 	private IMocksControl control;
 	private TLEventSource s1, s2, s3;
-	private TLEventSources registry;
+	private EventSourceRepository registry;
 
 	@Before
 	public void setUp() throws Exception {

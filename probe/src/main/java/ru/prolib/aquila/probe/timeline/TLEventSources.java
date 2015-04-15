@@ -26,7 +26,7 @@ import ru.prolib.aquila.core.utils.KW;
  * избежать "забегания" далеко вперед, данный класс позволяет исключать
  * источники по времени.
  */
-public class TLEventSources {
+public class TLEventSources implements EventSourceRepository {
 	private final Map<KW<TLEventSource>, DateTime> sources; 
 	
 	/**
@@ -37,15 +37,10 @@ public class TLEventSources {
 		sources = new LinkedHashMap<KW<TLEventSource>, DateTime>();
 	}
 	
-	/**
-	 * Получить источники событий.
-	 * <p>
-	 * Возвращает источники событий, которые действительны начиная с указанного
-	 * времени.
-	 * <p>
-	 * @param time временная метка
-	 * @return список источников
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#getSources(org.joda.time.DateTime)
 	 */
+	@Override
 	public synchronized List<TLEventSource> getSources(DateTime time) {
 		List<TLEventSource> list = new Vector<TLEventSource>();
 		for ( Map.Entry<KW<TLEventSource>, DateTime> e : sources.entrySet() ) {
@@ -57,13 +52,10 @@ public class TLEventSources {
 		return list;
 	}
 	
-	/**
-	 * Получить источники событий.
-	 * <p>
-	 * Возвращает список всех зарегистрированных источников событий.
-	 * <p>
-	 * @return список источников
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#getSources()
 	 */
+	@Override
 	public synchronized List<TLEventSource> getSources() {
 		List<TLEventSource> list = new Vector<TLEventSource>();
 		for ( KW<TLEventSource> key : sources.keySet() ) {
@@ -72,11 +64,10 @@ public class TLEventSources {
 		return list;
 	}
 	
-	/**
-	 * Добавить источник событий.
-	 * <p>
-	 * @param source источник событий
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#registerSource(ru.prolib.aquila.probe.timeline.TLEventSource)
 	 */
+	@Override
 	public synchronized void registerSource(TLEventSource source) {
 		KW<TLEventSource> key = new KW<TLEventSource>(source);
 		if ( ! sources.containsKey(key)) {
@@ -84,31 +75,18 @@ public class TLEventSources {
 		}
 	}
 	
-	/**
-	 * Удалить источник событий.
-	 * <p>
-	 * Удаляет источник из реестра. Если указанный источник не был добавлен,
-	 * то ничего не выполняет.
-	 * <p>
-	 * @param source источник событий
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#removeSource(ru.prolib.aquila.probe.timeline.TLEventSource)
 	 */
+	@Override
 	public synchronized void removeSource(TLEventSource source) {
 		sources.remove(new KW<TLEventSource>(source));
 	}
 	
-	/**
-	 * Отметить источник неактивным.
-	 * <p>
-	 * Делает источник событий неактивным до наступления указанного времени.
-	 * Неактивные источники не возвращаются методом
-	 * {@link #getSources(DateTime)}, если в качестве его аргумента указано
-	 * время меньше времени активации источника. Изначально все источники
-	 * считаются активными. Если указан незарегистрированный источник, то ничего
-	 * не выполняет.
-	 * <p>
-	 * @param source источник событий
-	 * @param time время активации
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#disableUntil(ru.prolib.aquila.probe.timeline.TLEventSource, org.joda.time.DateTime)
 	 */
+	@Override
 	public synchronized void disableUntil(TLEventSource source, DateTime time) {
 		KW<TLEventSource> key = new KW<TLEventSource>(source);
 		if ( sources.containsKey(key) ) {
@@ -116,9 +94,10 @@ public class TLEventSources {
 		}
 	}
 	
-	/**
-	 * Завершить работу со всеми источниками событий.
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#close()
 	 */
+	@Override
 	public synchronized void close() {
 		for ( KW<TLEventSource> key : sources.keySet() ) {
 			key.instance().close();
@@ -126,26 +105,18 @@ public class TLEventSources {
 		sources.clear();
 	}
 	
-	/**
-	 * Проверить факт регистрации источника событий.
-	 * <p>
-	 * @param source источник для проверки
-	 * @return true - если источник зарегистрирован, false - источник не
-	 * зарегистрирован
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#isRegistered(ru.prolib.aquila.probe.timeline.TLEventSource)
 	 */
+	@Override
 	public synchronized boolean isRegistered(TLEventSource source) {
 		return sources.containsKey(new KW<TLEventSource>(source));
 	}
 	
-	/**
-	 * Получить время следующего включения источника в выборку.
-	 * <p>
-	 * @param source источник событий
-	 * @return null, если источник не зарегистрирован или
-	 * не находится в состоянии временного исключения. Если источник временно
-	 * исключен из процесса, то возвращается временная метка, указывающая на
-	 * момент включения источника в выборку. 
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#getDisabledUntil(ru.prolib.aquila.probe.timeline.TLEventSource)
 	 */
+	@Override
 	public synchronized DateTime getDisabledUntil(TLEventSource source) {
 		return sources.get(new KW<TLEventSource>(source));
 	}

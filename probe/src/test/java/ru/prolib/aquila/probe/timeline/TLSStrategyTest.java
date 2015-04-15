@@ -110,7 +110,7 @@ public class TLSStrategyTest {
 		Interval interval = new Interval(T("2014-12-01 10:00:00"),
 										 T("2014-12-01 10:10:00"));
 		TLEventQueue queue = new TLEventQueue(interval);
-		TLEventSources sources = new TLEventSources();
+		EventSourceRepository sources = new TLEventSources();
 		TLSStrategy strategy = new TLSStrategy(sources, queue);
 		
 		// Несколько источников данных для теста ситуаций:

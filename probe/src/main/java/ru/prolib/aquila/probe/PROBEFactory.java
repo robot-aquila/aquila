@@ -1,15 +1,10 @@
 package ru.prolib.aquila.probe;
 
-import java.io.File;
 import java.util.Properties;
 import org.joda.time.*;
 import org.joda.time.format.*;
-import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.*;
-import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
-import ru.prolib.aquila.probe.internal.XFactory;
-import ru.prolib.aquila.probe.timeline.TLSTimeline;
 
 /**
  * Фабрика эмулятора терминала.
@@ -27,23 +22,19 @@ public class PROBEFactory implements TerminalFactory {
 		df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 	
-	private final XFactory x;
+	private final PROBETerminalBuilder builder;
 
-	/**
-	 * Конструктор (служебный).
-	 * <p>
-	 * @param x
-	 */
-	public PROBEFactory(XFactory x) {
-		super();
-		this.x = x;
+	public PROBEFactory() {
+		this(new PROBETerminalBuilder());
 	}
 	
-	/**
-	 * Конструктор.
-	 */
-	public PROBEFactory() {
-		this(new XFactory());
+	public PROBEFactory(PROBETerminalBuilder builder) {
+		super();
+		this.builder = builder;
+	}
+	
+	private PROBETerminalBuilder getTerminalBuilder() {
+		return builder;
 	}
 	
 	/**
@@ -65,6 +56,14 @@ public class PROBEFactory implements TerminalFactory {
 	public synchronized int getInstancesCount() {
 		return id.get();
 	}
+	
+	public PROBETerminal createTerminal() throws Exception {
+		Properties props = new Properties();
+		props.setProperty(PROBEFactory.RUN_INTERVAL_START, "2015-01-01 00:00:00.000");
+		props.setProperty(PROBEFactory.RUN_INTERVAL_END, "2015-01-01 23:59:59.000");
+		props.setProperty(PROBEFactory.DATA_STORAGE_PATH, "");
+		return createTerminal(props);
+	}
 
 	/**
 	 * Создать терминал.
@@ -76,21 +75,14 @@ public class PROBEFactory implements TerminalFactory {
 	 * <i>data-storage-path</i> - путь к каталогу с данными<br>
 	 */
 	@Override
-	public Terminal createTerminal(Properties config) throws Exception {
-		PROBETerminal terminal = x.newTerminal(getNextId());
-		PROBEServiceLocator locator = terminal.getServiceLocator();
-		EventSystem es = terminal.getEventSystem();
-		TLSTimeline timeline = x.newTimeline(es, new Interval(
-				df.parseDateTime(config.getProperty(RUN_INTERVAL_START)),
-				df.parseDateTime(config.getProperty(RUN_INTERVAL_END))));
-		locator.setTimeline(timeline);
-		terminal.setScheduler(x.newScheduler(timeline));
-		locator.setDataProvider(x.newDataProvider(terminal));
-		File root = new File(config.getProperty(DATA_STORAGE_PATH));
-		locator.setDataStorage(x.newDataStorage(root));		
-		StarterQueue starter = terminal.getStarter();
-		starter.add(x.newQueueStarter(es.getEventQueue(), 3000));
-		return terminal;
+	public PROBETerminal createTerminal(Properties config) throws Exception {
+		return getTerminalBuilder()
+			.withCommonEventSystemAndQueueId(getNextId())
+			.withCommonTimelineAndTimeInterval(new Interval(
+					df.parseDateTime(config.getProperty(RUN_INTERVAL_START)),
+					df.parseDateTime(config.getProperty(RUN_INTERVAL_END))))
+			.withCommonDataStorageAndPath(config.getProperty(DATA_STORAGE_PATH))
+			.buildTerminal();
 	}
 
 }

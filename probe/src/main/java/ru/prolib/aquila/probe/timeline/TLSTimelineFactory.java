@@ -21,7 +21,7 @@ public class TLSTimelineFactory {
 	public TLSTimeline produce(Interval interval) {
 		CountDownLatch started = new CountDownLatch(1);
 		TLEventQueue evtQue = new TLEventQueue(interval);
-		TLEventSources evtSrc = new TLEventSources();
+		EventSourceRepository evtSrc = new TLEventSources();
 		
 		
 		TLSTimeline timeline = new TLSTimeline(new TLCmdQueue(), evtQue,

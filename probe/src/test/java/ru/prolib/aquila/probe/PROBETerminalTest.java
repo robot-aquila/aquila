@@ -12,12 +12,9 @@ import org.joda.time.*;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.RequestSecurityEvent;
-import ru.prolib.aquila.core.BusinessEntities.Scheduler;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.TerminalState;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.DataException;
-import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
+import ru.prolib.aquila.probe.internal.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class PROBETerminalTest {
@@ -29,9 +26,10 @@ public class PROBETerminalTest {
 	
 	private IMocksControl control;
 	private PROBETerminal terminal;
-	private TLSTimeline timeline;
+	private Timeline timeline;
 	private EventType eventType;
-	private PROBEServiceLocator locator;
+	private Scheduler scheduler;
+	private DataProvider dataProvider;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -43,10 +41,14 @@ public class PROBETerminalTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		eventType = control.createMock(EventType.class);
-		timeline = control.createMock(TLSTimeline.class);
-		terminal = new PROBETerminal("foobar");
-		locator = terminal.getServiceLocator();
-		locator.setTimeline(timeline);
+		timeline = control.createMock(Timeline.class);
+		scheduler = control.createMock(Scheduler.class);
+		dataProvider = control.createMock(DataProvider.class);
+		terminal = new PROBETerminalBuilder()
+			.withScheduler(scheduler)
+			.withTimeline(timeline)
+			.withDataProvider(dataProvider)
+			.buildTerminal();
 		terminal.getEventSystem().getEventQueue().start();
 	}
 	
@@ -59,13 +61,9 @@ public class PROBETerminalTest {
 	
 	@Test
 	public void testRequestSecurity() throws Exception {
-		locator = control.createMock(PROBEServiceLocator.class);
-		Scheduler scheduler = control.createMock(Scheduler.class);
-		terminal.setServiceLocator(locator);
-		terminal.setScheduler(scheduler);
 		DateTime start = DateTime.now();
 		expect(scheduler.getCurrentTime()).andReturn(start);
-		locator.startSimulation(descr, start);
+		dataProvider.startSupply(terminal, descr, start);
 		control.replay();
 		
 		terminal.requestSecurity(descr);
@@ -81,18 +79,15 @@ public class PROBETerminalTest {
 		type.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event actual) {
-				assertEquals(new RequestSecurityEvent((EventTypeSI) type, descr, -1, "Test error"), actual);
+				assertEquals(new RequestSecurityEvent((EventTypeSI) type,
+						descr, -1, "Test error"), actual);
 				finished.countDown();
 			}
 		});
 		
-		locator = control.createMock(PROBEServiceLocator.class);
-		Scheduler scheduler = control.createMock(Scheduler.class);
-		terminal.setServiceLocator(locator);
-		terminal.setScheduler(scheduler);
 		DateTime start = DateTime.now();
 		expect(scheduler.getCurrentTime()).andReturn(start);
-		locator.startSimulation(descr, start);
+		dataProvider.startSupply(terminal, descr, start);
 		expectLastCall().andThrow(new DataException("Test error"));
 		control.replay();
 		

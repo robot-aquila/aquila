@@ -1,8 +1,5 @@
 package ru.prolib.aquila.probe.internal;
 
-import org.joda.time.DateTime;
-import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 /**
@@ -11,7 +8,7 @@ import ru.prolib.aquila.probe.timeline.*;
 public class PROBEServiceLocator {
 	private PROBEDataStorage dataStorage;
 	private DataProvider dataProvider;
-	private TLSTimeline timeline;
+	private Timeline timeline;
 	
 	/**
 	 * Конструктор.
@@ -48,7 +45,7 @@ public class PROBEServiceLocator {
 	 * @return хронология событий
 	 * @throws NullPointerException экземпляр не определен
 	 */
-	public TLSTimeline getTimeline() {
+	public Timeline getTimeline() {
 		if ( timeline == null ) {
 			throw new NullPointerException("Timeline instance was not defined");
 		}
@@ -60,7 +57,7 @@ public class PROBEServiceLocator {
 	 * <p>
 	 * @param timeline хронология событий
 	 */
-	public void setTimeline(TLSTimeline timeline) {
+	public void setTimeline(Timeline timeline) {
 		this.timeline = timeline;
 	}
 	
@@ -84,19 +81,6 @@ public class PROBEServiceLocator {
 	 */
 	public void setDataProvider(DataProvider dataProvider) {
 		this.dataProvider = dataProvider;
-	}
-	
-	/**
-	 * Запустить симуляцию инструмента.
-	 * <p> 
-	 * @param descr дескриптор инструмента
-	 * @param start начальная датировка данных 
-	 * @throws DataException ошибка инициализации
-	 */
-	public void startSimulation(SecurityDescriptor descr, DateTime start)
-			throws DataException
-	{
-		getDataProvider().startSupply(descr, start);
 	}
 	
 }
