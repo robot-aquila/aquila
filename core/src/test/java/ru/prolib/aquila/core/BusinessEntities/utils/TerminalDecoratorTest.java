@@ -3,15 +3,14 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.util.List;
-import java.util.Vector;
-
+import java.util.*;
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.utils.*;
 
 public class TerminalDecoratorTest {
 	private IMocksControl control;
@@ -969,6 +968,17 @@ public class TerminalDecoratorTest {
 		control.replay();
 		
 		decorator.setDefaultPortfolio(portMock);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetOrderIdSequence() throws Exception {
+		Counter idSeq = new SimpleCounter();
+		expect(terminalMock.getOrderIdSequence()).andReturn(idSeq);
+		control.replay();
+		
+		assertSame(idSeq, decorator.getOrderIdSequence());
 		
 		control.verify();
 	}

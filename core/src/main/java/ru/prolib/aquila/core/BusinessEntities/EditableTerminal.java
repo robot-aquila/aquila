@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.utils.Counter;
 
 /**
  * Интерфейс модифицируемого терминала.
@@ -228,5 +229,12 @@ public interface EditableTerminal extends Terminal {
 	 * @param portfolio экземпляр портфеля
 	 */
 	public void setDefaultPortfolio(EditablePortfolio portfolio);
+	
+	/**
+	 * Get order ID sequence.
+	 * <p>
+	 * @return ID sequence
+	 */
+	public Counter getOrderIdSequence();
 	
 }

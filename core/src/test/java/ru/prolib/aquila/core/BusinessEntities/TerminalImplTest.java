@@ -1176,4 +1176,15 @@ public class TerminalImplTest {
 		control.verify();
 	}
 	
+	@Test
+	public void testGetOrderIdSequence() throws Exception {
+		Counter idSeq = new SimpleCounter();
+		expect(orders.getIdSequence()).andReturn(idSeq);
+		control.replay();
+		
+		assertSame(idSeq, terminal.getOrderIdSequence());
+		
+		control.verify();
+	}
+	
 }

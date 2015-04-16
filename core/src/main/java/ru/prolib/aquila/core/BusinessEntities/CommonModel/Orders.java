@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Order;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.OrderNotExistsException;
+import ru.prolib.aquila.core.utils.Counter;
 
 public interface Orders {
 
@@ -58,5 +59,12 @@ public interface Orders {
 	public abstract EditableOrder createOrder(EditableTerminal terminal);
 
 	public abstract EventType OnOrderTrade();
+	
+	/**
+	 * Get order ID sequence.
+	 * <p>
+	 * @return ID sequence
+	 */
+	public Counter getIdSequence();
 
 }

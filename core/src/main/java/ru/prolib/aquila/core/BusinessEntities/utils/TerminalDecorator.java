@@ -7,6 +7,7 @@ import org.joda.time.DateTime;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
+import ru.prolib.aquila.core.utils.Counter;
 
 public class TerminalDecorator implements EditableTerminal {
 	private final EditableTerminal terminal;
@@ -14,7 +15,6 @@ public class TerminalDecorator implements EditableTerminal {
 	public TerminalDecorator(EditableTerminal terminal) {
 		this.terminal = terminal;
 	}
-	
 	
 	/**
 	 * Get decorated terminal.
@@ -483,6 +483,11 @@ public class TerminalDecorator implements EditableTerminal {
 	@Override
 	public void setDefaultPortfolio(EditablePortfolio portfolio) {
 		terminal.setDefaultPortfolio(portfolio);
+	}
+
+	@Override
+	public Counter getOrderIdSequence() {
+		return terminal.getOrderIdSequence();
 	}
 
 }

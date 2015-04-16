@@ -56,11 +56,7 @@ public class OrdersImpl implements Orders {
 		return factory;
 	}
 	
-	/**
-	 * Get order ID sequence.
-	 * <p>
-	 * @return ID sequence
-	 */
+	@Override
 	public Counter getIdSequence() {
 		return idSeq;
 	}

@@ -735,4 +735,9 @@ final public class TerminalImpl implements EditableTerminal {
 		dispatcher.fireUnready();
 	}
 
+	@Override
+	public Counter getOrderIdSequence() {
+		return orders.getIdSequence();
+	}
+
 }
