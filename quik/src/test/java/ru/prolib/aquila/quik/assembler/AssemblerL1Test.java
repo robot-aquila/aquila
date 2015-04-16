@@ -174,7 +174,7 @@ public class AssemblerL1Test {
 		Counter numerator = control.createMock(Counter.class);
 		T2QOrder order = control.createMock(T2QOrder.class);
 		expect(order.getTransId()).andReturn(101L);
-		expect(terminal.getOrderNumerator()).andReturn(numerator);
+		expect(terminal.getOrderIdSequence()).andReturn(numerator);
 		expect(numerator.get()).andReturn(100);
 		numerator.set(eq(101));
 		control.replay();
@@ -189,7 +189,7 @@ public class AssemblerL1Test {
 		Counter numerator = control.createMock(Counter.class);
 		T2QOrder order = control.createMock(T2QOrder.class);
 		expect(order.getTransId()).andReturn(80L);
-		expect(terminal.getOrderNumerator()).andReturn(numerator);
+		expect(terminal.getOrderIdSequence()).andReturn(numerator);
 		expect(numerator.get()).andReturn(100);
 		control.replay();
 		

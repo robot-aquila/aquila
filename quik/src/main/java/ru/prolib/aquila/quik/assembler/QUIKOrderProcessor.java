@@ -1,47 +1,31 @@
 package ru.prolib.aquila.quik.assembler;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.quik.*;
 
 /**
- * Обработчик заявок.
+ * QUIK order processor.
  */
 public class QUIKOrderProcessor implements OrderProcessor {
-	private final QUIKTerminal terminal;
 	private final HandlerFactory factory;
 	
-	/**
-	 * Служебный конструктор.
-	 * <p>
-	 * @param terminal терминал
-	 * @param factory фабрика обработчиков
-	 */
-	QUIKOrderProcessor(QUIKTerminal terminal, HandlerFactory factory) {
+	QUIKOrderProcessor(HandlerFactory factory) {
 		super();
-		this.terminal = terminal;
 		this.factory = factory;
 	}
-	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param terminal терминал
-	 */
-	public QUIKOrderProcessor(QUIKTerminal terminal) {
-		this(terminal, new HandlerFactory());
+
+	public QUIKOrderProcessor() {
+		this(new HandlerFactory());
 	}
 	
-	QUIKTerminal getTerminal() {
-		return  terminal;
-	}
 	
 	HandlerFactory getFactory() {
 		return factory;
 	}
 	
 	@Override
-	public void cancelOrder(Order o) throws OrderException {
+	public void cancelOrder(EditableTerminal t, Order o) throws OrderException {
+		QUIKTerminal terminal = (QUIKTerminal) t;
 		EditableOrder order = (EditableOrder) o;
 		synchronized ( order ) {
 			OrderStatus status = order.getStatus();
@@ -50,7 +34,7 @@ public class QUIKOrderProcessor implements OrderProcessor {
 			} else if ( status != OrderStatus.ACTIVE ) {
 				throw new OrderException("Rejected by status: " + status);
 			}
-			int transId = terminal.getOrderNumerator().incrementAndGet();
+			int transId = terminal.getOrderIdSequence().incrementAndGet();
 			CancelHandler handler = factory.createCancelOrder(transId, order);
 			terminal.getClient().setHandler(transId, handler);
 			handler.cancelOrder();
@@ -58,7 +42,8 @@ public class QUIKOrderProcessor implements OrderProcessor {
 	}
 
 	@Override
-	public void placeOrder(Order o) throws OrderException {
+	public void placeOrder(EditableTerminal t, Order o) throws OrderException {
+		QUIKTerminal terminal = (QUIKTerminal) t;
 		EditableOrder order = (EditableOrder) o;
 		synchronized ( order ) {
 			OrderStatus status = order.getStatus();
@@ -71,20 +56,6 @@ public class QUIKOrderProcessor implements OrderProcessor {
 			terminal.getClient().setHandler(order.getId(), handler);
 			handler.placeOrder();
 		}
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		return other != null && other.getClass() == QUIKOrderProcessor.class
-			? fieldsEquals(other) : false;
-	}
-	
-	protected boolean fieldsEquals(Object other) {
-		QUIKOrderProcessor o = (QUIKOrderProcessor) other;
-		return new EqualsBuilder()
-			.appendSuper(terminal == o.terminal)
-			.append(factory, o.factory)
-			.isEquals();
 	}
 
 }

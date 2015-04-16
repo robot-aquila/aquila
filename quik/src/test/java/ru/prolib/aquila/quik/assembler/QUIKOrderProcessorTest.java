@@ -7,8 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.utils.Counter;
-import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.QUIKClient;
 
@@ -34,9 +33,9 @@ public class QUIKOrderProcessorTest {
 		order = control.createMock(EditableOrder.class);
 		numerator = control.createMock(Counter.class);
 		client = control.createMock(QUIKClient.class);
-		processor = new QUIKOrderProcessor(terminal, factory);
+		processor = new QUIKOrderProcessor(factory);
 
-		expect(terminal.getOrderNumerator()).andStubReturn(numerator);
+		expect(terminal.getOrderIdSequence()).andStubReturn(numerator);
 		expect(terminal.getClient()).andStubReturn(client);
 		expect(order.getId()).andStubReturn(835);
 	}
@@ -51,7 +50,7 @@ public class QUIKOrderProcessorTest {
 		handler.cancelOrder();
 		control.replay();
 		
-		processor.cancelOrder(order);
+		processor.cancelOrder(terminal, order);
 		
 		control.verify();
 	}
@@ -70,7 +69,7 @@ public class QUIKOrderProcessorTest {
 			expect(order.getStatus()).andReturn(expected[i]);
 			control.replay();
 			
-			processor.cancelOrder(order);
+			processor.cancelOrder(terminal, order);
 			
 			control.verify();
 		}
@@ -88,7 +87,7 @@ public class QUIKOrderProcessorTest {
 			control.replay();
 			
 			try {
-				processor.cancelOrder(order);
+				processor.cancelOrder(terminal, order);
 				fail("Expected: " + OrderException.class);
 			} catch ( OrderException e ) {
 				
@@ -114,7 +113,7 @@ public class QUIKOrderProcessorTest {
 			handler.placeOrder();
 			control.replay();
 			
-			processor.placeOrder(order);
+			processor.placeOrder(terminal, order);
 			
 			control.verify();
 		}
@@ -137,7 +136,7 @@ public class QUIKOrderProcessorTest {
 			control.replay();
 			
 			try {
-				processor.placeOrder(order);
+				processor.placeOrder(terminal, order);
 				fail("Expected: " + OrderException.class);
 			} catch ( OrderException e ) {
 				
@@ -145,45 +144,6 @@ public class QUIKOrderProcessorTest {
 			
 			control.verify();
 		}
-	}
-	
-	@Test
-	public void testEquals_SpecialCases() throws Exception {
-		assertTrue(processor.equals(processor));
-		assertFalse(processor.equals(null));
-		assertFalse(processor.equals(this));
-	}
-	
-	@Test
-	public void testEquals() throws Exception {
-		Variant<QUIKTerminal> vTerm = new Variant<QUIKTerminal>()
-			.add(terminal)
-			.add(control.createMock(QUIKTerminal.class));
-		Variant<HandlerFactory> vFact = new Variant<HandlerFactory>()
-			.add(factory)
-			.add(control.createMock(HandlerFactory.class));
-		Variant<?> iterator = vFact;
-		int foundCnt = 0;
-		QUIKOrderProcessor x, found = null;
-		do {
-			x = new QUIKOrderProcessor(vTerm.get(), vFact.get());
-			if ( processor.equals(x) ) {
-				foundCnt ++;
-				found = x;
-			}
-		} while ( iterator.next() );
-		assertEquals(1, foundCnt);
-		assertSame(terminal, found.getTerminal());
-		assertSame(factory, found.getFactory());
-	}
-
-	@Test
-	public void testConstruct1() throws Exception {
-		QUIKOrderProcessor
-			expected = new QUIKOrderProcessor(terminal, new HandlerFactory()),
-			actual = new QUIKOrderProcessor(terminal);
-		
-		assertEquals(expected, actual);
 	}
 	
 }

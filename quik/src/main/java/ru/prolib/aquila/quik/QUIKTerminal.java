@@ -2,51 +2,32 @@ package ru.prolib.aquila.quik;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalDecorator;
 import ru.prolib.aquila.quik.api.QUIKClient;
 import ru.prolib.aquila.quik.assembler.cache.Cache;
 
 /**
- * Терминал QUIK.
+ * QUIK terminal implementation.
  */
-public class QUIKTerminal extends TerminalImpl<QUIKServiceLocator> {
+public class QUIKTerminal extends TerminalDecorator {
 	private static final Logger logger;
 	
 	static {
 		logger = LoggerFactory.getLogger(QUIKTerminal.class);
 	}
+	
+	private final QUIKServiceLocator locator;
 
-	/**
-	 * Конструктор (служебный).
-	 * <p>
-	 * @param es фасад событийной системы
-	 * @param locator сервис-локатор
-	 */
-	public QUIKTerminal(EventSystem es, QUIKServiceLocator locator) {
-		super(es);
-		setServiceLocator(locator);
+	public QUIKTerminal(EditableTerminal underlyingTerminal,
+			QUIKServiceLocator locator)
+	{
+		super(underlyingTerminal);
+		this.locator = locator;
 	}
 	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * Создает экземпляр боевой версии сервис-локатора (только для Win).
-	 * <p>
-	 * @param es фасад событийной системы
-	 */
-	public QUIKTerminal(EventSystem es) {
-		this(es, new QUIKServiceLocator(es));
-	}
-	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param queueId идентификатор очереди событий
-	 */
-	public QUIKTerminal(String queueId) {
-		this(new EventSystemImpl(new EventQueueImpl(queueId)));
+	public QUIKServiceLocator getServiceLocator() {
+		return locator;
 	}
 
 	/**

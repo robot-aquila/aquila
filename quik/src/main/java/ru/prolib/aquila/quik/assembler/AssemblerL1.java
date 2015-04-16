@@ -152,7 +152,7 @@ public class AssemblerL1 {
 	 */
 	public void correctOrderNumerator(T2QOrder entry) {
 		int id = (int) entry.getTransId();
-		Counter numerator = terminal.getOrderNumerator();
+		Counter numerator = terminal.getOrderIdSequence();
 		synchronized ( numerator ) {
 			if ( numerator.get() < id ) {
 				numerator.set(id);
