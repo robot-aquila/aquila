@@ -37,7 +37,6 @@ public class EventTypeImpl implements EventTypeSI {
 	 * <p>
 	 * Создается объект с идентификатором по умолчанию. Идентификатор
 	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId
-	 * <p>
 	 */
 	public EventTypeImpl() {
 		this(nextId());
@@ -54,7 +53,6 @@ public class EventTypeImpl implements EventTypeSI {
 	
 	/**
 	 * Создать тип события.
-	 * <p>
 	 * <p>
 	 * Создается объект с идентификатором по умолчанию. Идентификатор
 	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId

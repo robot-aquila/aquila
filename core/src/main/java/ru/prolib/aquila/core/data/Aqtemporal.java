@@ -22,7 +22,7 @@ public interface Aqtemporal<T> {
 	 * <p>
 	 * @param time момент времени
 	 * @return значение, актуальное на указанное время.
-	 * @throws DataException
+	 * @throws DataException - If error occured.
 	 */
 	public T at(DateTime time) throws DataException;
 

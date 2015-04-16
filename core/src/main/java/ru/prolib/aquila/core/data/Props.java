@@ -111,7 +111,7 @@ public class Props {
 	 * @param defaultValue значение по-умолчанию возвращается в том случае,
 	 * если значения нет в наборе
 	 * @return целочисленное значение
-	 * @throws DataException 
+	 * @throws DataException - If error occurred. 
 	 * @throws ValueFormatException некорректный формат
 	 */
 	public Integer getInteger(String variable, Integer defaultValue)
@@ -126,7 +126,7 @@ public class Props {
 	 * Делегирует методу {@link Properties#load(Reader)}. 
 	 * <p>
 	 * @param reader входящий поток данных
-	 * @throws DataException
+	 * @throws DataException - If error occurred.
 	 */
 	public void load(Reader reader) throws DataException {
 		try {

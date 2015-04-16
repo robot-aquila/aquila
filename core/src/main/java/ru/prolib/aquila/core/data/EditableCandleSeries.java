@@ -21,7 +21,7 @@ public interface EditableCandleSeries
 	 * с false в качестве второго аргумента.
 	 * <p>
 	 * @param tick агрегируемый тик данных
-	 * @throws OutOfDateException
+	 * @throws OutOfDateException - If error occured.
 	 */
 	public void aggregate(Tick tick) throws OutOfDateException;
 	
@@ -36,7 +36,7 @@ public interface EditableCandleSeries
 	 * @param tick агрегируемый тик данных
 	 * @param silent при true тики данных датированные ранее ТА отбрасываются,
 	 * при false будет возбуждено исключение
-	 * @throws OutOfDateException
+	 * @throws OutOfDateException - If error occured.
 	 */
 	public void aggregate(Tick tick, boolean silent)
 		throws OutOfDateException;
@@ -49,7 +49,7 @@ public interface EditableCandleSeries
 	 * {@link #aggregate(Trade, boolean)} с false в качестве второго аргумента.
 	 * <p>
 	 * @param trade агрегируемая сделка
-	 * @throws OutOfDateException
+	 * @throws OutOfDateException - If error occured.
 	 */
 	public void aggregate(Trade trade) throws OutOfDateException;
 	
@@ -59,7 +59,7 @@ public interface EditableCandleSeries
 	 * @param trade агрегируемая сделка
 	 * @param silent при true сделка датированная ранее ТА будет отброшена,
 	 * при false будет возбуждено исключение
-	 * @throws OutOfDateException
+	 * @throws OutOfDateException - If error occured.
 	 */
 	public void aggregate(Trade trade, boolean silent)
 		throws OutOfDateException;

@@ -12,13 +12,15 @@ public interface OrderProcessor {
 	 * Разместить заявку на бирже для исполнения.
 	 * <p>
 	 * @param order заявка
+	 * @throws OrderException - TODO:
 	 */
 	public void placeOrder(Order order) throws OrderException;
 	
 	/**
 	 * Отменить заявку.
 	 * <p>
-	 * @param order заявку
+	 * @param order заявка
+	 * @throws OrderException - TODO:
 	 */
 	public void cancelOrder(Order order) throws OrderException;
 

@@ -13,7 +13,7 @@ public interface Validator {
 	 * <p>
 	 * @param object объект проверки
 	 * @return true - удовлетворяет условиям, false - условия не выполнены 
-	 * @throws ValidatorException
+	 * @throws ValidatorException - If error occurred.
 	 */
 	public boolean validate(Object object) throws ValidatorException;
 

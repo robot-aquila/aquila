@@ -43,7 +43,7 @@ public class StarterQueue implements Starter {
 	 * <p>
 	 * @param index - index of srarter
 	 * @return the starter
-	 * @throws IndexOutOfBoundsException
+	 * @throws IndexOutOfBoundsException - The starter is not exists  
 	 */
 	public synchronized Starter get(int index)
 			throws IndexOutOfBoundsException

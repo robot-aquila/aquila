@@ -59,11 +59,11 @@ public class Finam {
 	 * <p>
 	 * @param csvfile файл с котировками в формате ФИНАМ CSV
 	 * @param candles целевой набор свечей
-	 * @throws FileNotFoundException
-	 * @throws ParseException  
-	 * @throws ValueException 
-	 * @throws NumberFormatException 
-	 * @throws RowSetException
+	 * @throws FileNotFoundException - If the CSV file does not exists.
+	 * @throws ParseException - If the CSV file contanins corrupted data.
+	 * @throws ValueException - If error occured.
+	 * @throws NumberFormatException - If error occured.
+	 * @throws RowSetException - If error occured.
 	 */
 	public void loadCandles(File csvfile, EditableCandleSeries candles)
 			throws FileNotFoundException, ParseException, NumberFormatException,
@@ -113,9 +113,9 @@ public class Finam {
 	 * <p>
 	 * Формат файла: &lt;DATE&gt;,&lt;TIME&gt;,&lt;LAST&gt;,&lt;VOL&gt; 
 	 * <p>
-	 * @param filename
+	 * @param filename - filename
 	 * @return поток тиков
-	 * @throws IOException
+	 * @throws IOException - If error occured. 
 	 */
 	public Aqiterator<Tick>
 		createTickReader(String filename) throws IOException

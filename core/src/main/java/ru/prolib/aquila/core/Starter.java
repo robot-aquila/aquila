@@ -10,11 +10,15 @@ public interface Starter {
 
 	/**
 	 * Запустить в работу.
+	 * <p>
+	 * @throws StarterException - error at starting.
 	 */
 	public void start() throws StarterException;
 
 	/**
 	 * Остановить работу.
+	 * <p>
+	 * @throws StarterException - error at stopping.
 	 */
 	public void stop() throws StarterException;
 

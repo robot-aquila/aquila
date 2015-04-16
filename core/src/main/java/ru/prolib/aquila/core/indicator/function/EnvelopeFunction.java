@@ -7,7 +7,6 @@ import ru.prolib.aquila.core.indicator.SimpleFunction;
 
 /**
  * Функция расчета границы конверта.
- * <p>
  */
 public class EnvelopeFunction implements SimpleFunction<Double, Double> {
 	private final boolean upper;

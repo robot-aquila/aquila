@@ -10,7 +10,6 @@ import com.thoughtworks.xstream.annotations.*;
 
 /**
  * Составной период дат.
- * <p>
  */
 @XStreamAlias("DateComposite")
 public class DateCompositePeriod implements DatePeriod {

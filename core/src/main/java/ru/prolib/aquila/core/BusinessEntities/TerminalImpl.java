@@ -35,9 +35,6 @@ import ru.prolib.aquila.core.utils.*;
  * класс. Предсказуемая последовательность событий необходима для потребителей,
  * которые будут использовать данные события как сигналы разрешающие или
  * запрещающие работу с терминалом.
- * <p>
- * @param <T> - тип объекта связывания терминала со спецификой реализации.
- * см. {@link EditableTerminal}.
  */
 final public class TerminalImpl implements EditableTerminal {
 	private static Logger logger;

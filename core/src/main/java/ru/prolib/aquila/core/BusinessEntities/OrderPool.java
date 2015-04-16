@@ -40,7 +40,7 @@ public interface OrderPool {
 	 * которой возник отказ, автоматически перенесется в категорию
 	 * финализированных заявок. 
 	 * <p>
-	 * @throws OrderException 
+	 * @throws OrderException - TODO: 
 	 */
 	public void placeOrders() throws OrderException;
 

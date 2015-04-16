@@ -13,7 +13,7 @@ public interface FMath {
 	/**
 	 * Абсолютное значение.
 	 * <p>
-	 * @param val
+	 * @param val - value
 	 * @return абсолютное значение
 	 */
 	public Double abs(Double val);
@@ -29,7 +29,7 @@ public interface FMath {
 	 * @param index индекс последнего элемента базы расчета
 	 * @param period период скользящей средней
 	 * @return значение скользящей средней или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double sma(DataSeries value, int index, int period)
 			throws ValueException;
@@ -43,7 +43,7 @@ public interface FMath {
 	 * @param value ряд данных
 	 * @param period период скользящей средней
 	 * @return значение скользящей средней или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double sma(DataSeries value, int period) throws ValueException;
 	
@@ -70,7 +70,7 @@ public interface FMath {
 	 * @param index индекс последнего элемента базы расчета
 	 * @param period период расчета максимума
 	 * @return значение максимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double max(DataSeries value, int index, int period)
 			throws ValueException;
@@ -84,7 +84,7 @@ public interface FMath {
 	 * @param value ряд данных
 	 * @param period период расчета максимума
 	 * @return значение максимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double max(DataSeries value, int period) throws ValueException;
 	
@@ -94,7 +94,7 @@ public interface FMath {
 	 * @param period период расчета максимума
 	 * @param values ряды данных, по которым расчитывается максимум
 	 * @return значение максимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double max(int period, DataSeries... values) throws ValueException;
 	
@@ -105,7 +105,7 @@ public interface FMath {
 	 * @param period период расчета максимума
 	 * @param values ряды данных, по которым расчитывается максимум
 	 * @return значение максимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double max(int index, int period, DataSeries... values)
 			throws ValueException;
@@ -117,7 +117,7 @@ public interface FMath {
 	 * @param index индекс последнего элемента базы расчета
 	 * @param period период расчета минимума
 	 * @return значение минимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double min(DataSeries value, int index, int period)
 			throws ValueException;
@@ -128,7 +128,7 @@ public interface FMath {
 	 * @param value ряд данных
 	 * @param period период расчета минимума
 	 * @return значение минимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double min(DataSeries value, int period) throws ValueException;
 	
@@ -138,7 +138,7 @@ public interface FMath {
 	 * @param period период расчета минимума
 	 * @param values ряды данных, по которым расчитывается минимум
 	 * @return значение минимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double min(int period, DataSeries... values) throws ValueException;
 	
@@ -149,7 +149,7 @@ public interface FMath {
 	 * @param period период расчета минимума
 	 * @param values ряды данных, по которым расчитывается минимум
 	 * @return значение минимума или null, если не удалось расчитать
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double min(int index, int period, DataSeries... values)
 			throws ValueException;
@@ -161,7 +161,7 @@ public interface FMath {
 	 * @param index индекс последнего элемента базы расчета
 	 * @param period количество элементов базы расчета
 	 * @return true - есть null-значения в базе ресчета, false - нет
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public boolean hasNulls(Series<?> value, int index, int period)
 			throws ValueException;
@@ -172,7 +172,7 @@ public interface FMath {
 	 * @param value источник значений
 	 * @param period количество элементов базы расчета
 	 * @return true - есть null-значения в базе ресчета, false - нет
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public boolean hasNulls(Series<?> value, int period) throws ValueException;
 	
@@ -182,7 +182,7 @@ public interface FMath {
 	 * @param candles источник свечей
 	 * @param index индекс элемента для расчета TR
 	 * @return TR или null, если расчитать не удалось
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double tr(Series<Candle> candles, int index) throws ValueException;
 
@@ -191,7 +191,7 @@ public interface FMath {
 	 * <p>
 	 * @param candles источник свечей
 	 * @return TR или null, если расчитать не удалось
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double tr(Series<Candle> candles) throws ValueException;
 	
@@ -203,6 +203,7 @@ public interface FMath {
 	 * @param close ряд данных
 	 * @param index индекс элемента для расчета DPO
 	 * @param period количество элементов базы расчета
+	 * @throws ValueException - TODO:
 	 * @return значение DPO или null, если расчитать не удалось
 	 */
 	public Double vv_dpo(DataSeries close, int index, int period)
@@ -215,6 +216,7 @@ public interface FMath {
 	 * <p>
 	 * @param close ряд данных
 	 * @param period количество элементов базы расчета
+	 * @throws ValueException - TODO:
 	 * @return значение DPO или null, если расчитать не удалось
 	 */
 	public Double vv_dpo(DataSeries close, int period)  throws ValueException;
@@ -225,7 +227,7 @@ public interface FMath {
 	 * @param value ряд данных
 	 * @param index индекс элемента для расчета пересечения
 	 * @return true - есть пересечение нуля сверху-вниз, false - нет пересечения
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public boolean crossUnderZero(DataSeries value, int index)
 			throws ValueException;
@@ -235,7 +237,7 @@ public interface FMath {
 	 * <p>
 	 * @param value ряд данных
 	 * @return true - есть пересечение нуля сверху-вниз, false - нет пересечения
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public boolean crossUnderZero(DataSeries value) throws ValueException;
 
@@ -245,7 +247,7 @@ public interface FMath {
 	 * @param value ряд данных
 	 * @param index индекс элемента для расчета пересечения
 	 * @return true - есть пересечение нуля снизу-вверх, false - нет пересечения
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public boolean crossOverZero(DataSeries value, int index)
 			throws ValueException;
@@ -255,7 +257,7 @@ public interface FMath {
 	 * <p>
 	 * @param value ряд данных
 	 * @return true - есть пересечение нуля снизу-вверх, false - нет пересечения
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public boolean crossOverZero(DataSeries value) throws ValueException;
 	

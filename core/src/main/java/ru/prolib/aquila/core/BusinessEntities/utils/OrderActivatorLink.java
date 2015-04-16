@@ -37,7 +37,8 @@ public class OrderActivatorLink {
 	 * заявки на {@link OrderStatus#CONDITION} и генерации события об изменении
 	 * заявки. После генерации события выполняется сброс маркера изменений.
 	 * <p>
-	 * @param order заявка
+	 * @param activator - The order activator.
+	 * @param order - The order.
 	 * @throws OrderException контроллер уже связан с заявкой или заявка
 	 * в несоответствующем статусе
 	 */

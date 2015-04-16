@@ -6,8 +6,7 @@ import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.utils.SimpleCounter;
 
 /**
- * A terminal builder.
- * <p>
+ * The terminal builder.
  */
 public class TerminalBuilder {
 	private EventSystem eventSystem;

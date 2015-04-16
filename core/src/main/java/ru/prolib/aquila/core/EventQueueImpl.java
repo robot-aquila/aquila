@@ -92,7 +92,6 @@ public class EventQueueImpl implements EventQueue {
 	 * событий. Для ожидания гарантированного завершения потока очереди следует
 	 * использовать метод {@link #join()} или {@link #join(long)} с последующим
 	 * вызовом {@link #started()}. 
-	 * <p> 
 	 */
 	@Override
 	public void stop() {

@@ -13,8 +13,8 @@ import java.util.List;
  * Пример
  * <pre>
  * 
- * Variant<Long> id = new Variant<Long>(new Long[] {1L, 2L});
- * Variant<Integer> qty = new Variant<Integer>(id).add(100).add(200);
+ * Variant&lt;Long&gt; id = new Variant&lt;Long&gt;(new Long[] {1L, 2L});
+ * Variant&lt;Integer&gt; qty = new Variant&lt;Integer&gt;(id).add(100).add(200);
  * do {
  *    System.out.println("id=" + id.get() + " qty=" + qty.get());
  * } while ( qty.next() );
@@ -29,7 +29,7 @@ import java.util.List;
  * id=2 qty=200
  * </pre>
  *
- * @param <T>
+ * @param <T> - Type of data.
  */
 public class Variant<T> {
 	final Variant<?> child;

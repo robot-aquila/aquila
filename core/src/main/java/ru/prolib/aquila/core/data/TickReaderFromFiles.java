@@ -4,7 +4,6 @@ import java.io.File;
 
 /**
  * Абстрактный поток тиков на основе набора файлов.
- * <p>
  */
 public class TickReaderFromFiles implements Aqiterator<Tick> {
 	private final Aqiterator<File> fileset;

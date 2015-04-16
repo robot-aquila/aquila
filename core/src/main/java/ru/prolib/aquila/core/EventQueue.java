@@ -40,9 +40,9 @@ public interface EventQueue extends Starter {
 	 * поток до момента завершения потока очереди. Если вызов осуществлен из
 	 * потока очереди, то осуществляет немедленный возврат. 
 	 * <p>
-	 * @param timeout таймаут в миллисекундах значение > 0
+	 * @param timeout таймаут в миллисекундах значение &gt; 0
 	 * @return true, если дождалить завершения, иначе false
-	 * @throws InterruptedException
+	 * @throws InterruptedException - The waiting thread have interrupted
 	 */
 	public boolean join(long timeout) throws InterruptedException;
 	
@@ -52,6 +52,8 @@ public interface EventQueue extends Starter {
 	 * Если поток обработки очереди событий выполняется, то блокирует текущий
 	 * поток до момента завершения потока очереди. Если вызов осуществлен из
 	 * потока очереди, то осуществляет немедленный возврат. 
+	 * <p>
+	 * @throws InterruptedException - The waiting thread have interrupted
 	 */
 	public void join() throws InterruptedException;
 	

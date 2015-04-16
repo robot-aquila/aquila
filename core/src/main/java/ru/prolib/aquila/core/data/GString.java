@@ -15,7 +15,6 @@ public class GString implements G<String> {
 
 	/**
 	 * Создать геттер.
-	 * <p>
 	 */
 	public GString() {
 		super();

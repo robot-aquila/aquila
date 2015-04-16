@@ -15,7 +15,7 @@ public interface S<T> {
 	 * <p>
 	 * @param object объект модификации
 	 * @param value значение элемента
-	 * @throws ValueException
+	 * @throws ValueException - If error occurred.
 	 */
 	public void set(T object, Object value) throws ValueException;
 

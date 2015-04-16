@@ -45,7 +45,6 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * не будет, если отлавливать сделки напрямую через {@link Order#OnTrade()}. Но
  * при этом смысл организации ретрансляции через хранилище полностью теряется.
  * Данный фикс исправляет вышеописанную ситуацию.
- * <p>
  */
 public class OrdersEventDispatcher implements EventListener {
 	@SuppressWarnings("unused")

@@ -4,7 +4,6 @@ import java.util.*;
 
 /**
  * Заготовка состояния.
- * <p>
  */
 public class SMState {
 	/**
@@ -81,7 +80,6 @@ public class SMState {
 	 * <p>
 	 * @param exitId символьный идентификатор выхода
 	 * @return дескриптор выхода
-	 * @throws NullPointerExceptionException пустой идентификатор
 	 */
 	protected synchronized SMExit registerExit(String exitId) {
 		if ( exits.containsKey(exitId) ) {

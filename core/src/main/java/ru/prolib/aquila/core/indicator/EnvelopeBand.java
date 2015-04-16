@@ -15,6 +15,7 @@ public class EnvelopeBand extends SimpleIndicator<Double, Double> {
 	 * @param id идентификатор (может быть null)
 	 * @param function функция расчета
 	 * @param sourceSeries исходный ряд данных
+	 * @param dispatcher - event dispatcher
 	 */
 	public EnvelopeBand(String id, EnvelopeFunction function,
 			Series<Double> sourceSeries, IndicatorEventDispatcher dispatcher)

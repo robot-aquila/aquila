@@ -15,7 +15,7 @@ public interface G<R> {
 	 * <p>
 	 * @param source источник
 	 * @return значение
-	 * @throws ValueException
+	 * @throws ValueException - If error occured.
 	 */
 	public R get(Object source) throws ValueException;
 

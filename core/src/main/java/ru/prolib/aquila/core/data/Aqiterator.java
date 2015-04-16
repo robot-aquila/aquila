@@ -16,7 +16,7 @@ public interface Aqiterator<T> {
 	 * Получить элемент под курсором.
 	 * <p>
 	 * @return текущий элемент
-	 * @throws DataException
+	 * @throws DataException - If error occured.
 	 */
 	public T item() throws DataException;
 	
@@ -24,7 +24,7 @@ public interface Aqiterator<T> {
 	 * Переместиться на следующий элемент.
 	 * <p>
 	 * @return true - доступен очередной элемент, false - конец данных
-	 * @throws DataException
+	 * @throws DataException - If error occured.
 	 */
 	public boolean next() throws DataException;
 

@@ -87,7 +87,7 @@ public class OrderPoolBase implements EventListener {
 	/**
 	 * Запустить новые заявки в работу.
 	 * <p>
-	 * @throws OrderException
+	 * @throws OrderException - TODO:
 	 */
 	public synchronized void placeOrders() throws OrderException {
 		Set<Order> set = new LinkedHashSet<Order>(pending);

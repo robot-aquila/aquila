@@ -186,6 +186,7 @@ public class Trade implements Comparable<Trade> {
 	 * Получить инструмент, по которому совершена сделка
 	 * <p>
 	 * @return инструмент
+	 * @throws SecurityException - TODO:
 	 */
 	public Security getSecurity() throws SecurityException {
 		return terminal.getSecurity(descr);

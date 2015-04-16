@@ -12,7 +12,7 @@ public interface TickTemporalStorage {
 	 * <p>
 	 * @param dataId идентификатор переменной
 	 * @return хранилище темпорального значения
-	 * @throws DataException
+	 * @throws DataException - If error occured.
 	 */
 	public Aqtemporal<Tick> getTemporal(String dataId) throws DataException;
 	

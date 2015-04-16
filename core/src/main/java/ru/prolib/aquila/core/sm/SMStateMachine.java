@@ -10,7 +10,6 @@ import ru.prolib.aquila.core.utils.KW;
 
 /**
  * Автомат.
- * <p>
  */
 public class SMStateMachine {
 	private static final Logger logger;
@@ -58,6 +57,8 @@ public class SMStateMachine {
 	 * как отличительный признак конкретного автомата в журнале. По-умолчанию в
 	 * качестве идентификатора используется автоматически-сгенерированный
 	 * идентификатор, который определяется в момент инстанцирования.
+	 * <p>
+	 * @param id - identifier of the automat.
 	 */
 	public synchronized void setId(String id) {
 		this.id = id;
@@ -86,9 +87,9 @@ public class SMStateMachine {
 	 * <p>
 	 * @param input идентификатор входа текущего состояния
 	 * @param data данные
-	 * @throws SMStateMachineNotStartedException
-	 * @throws SMBadInputException
-	 * @throws SMTransitionNotExistsException
+	 * @throws SMStateMachineNotStartedException - TODO:
+	 * @throws SMBadInputException - TODO:
+	 * @throws SMTransitionNotExistsException - TODO:
 	 */
 	public synchronized void input(SMInput input, Object data) throws
 		SMStateMachineNotStartedException,
@@ -105,7 +106,7 @@ public class SMStateMachine {
 		//	Object args[] = { id, currentState };
 		//	logger.debug("{}: input for: {}", args); 
 		//}
-		_(input.input(data));
+		doExit(input.input(data));
 		//if ( debug && logger.isDebugEnabled() ) {
 		//	Object args[] = { id, currentState };
 		//	logger.debug("{}: input finished at: {}", args); 
@@ -119,10 +120,10 @@ public class SMStateMachine {
 	 * вход для подачи данных.
 	 * <p>
 	 * @param data данные
-	 * @throws SMStateMachineNotStartedException
-	 * @throws SMStateHasNoInputException
-	 * @throws SMAmbiguousInputException
-	 * @throws SMTransitionNotExistsException
+	 * @throws SMStateMachineNotStartedException - TODO:
+	 * @throws SMStateHasNoInputException - TODO:
+	 * @throws SMAmbiguousInputException - TODO: 
+	 * @throws SMTransitionNotExistsException - TODO:
 	 */
 	public synchronized void input(Object data) throws
 		SMStateMachineNotStartedException,
@@ -144,7 +145,7 @@ public class SMStateMachine {
 		if ( list.size() > 1 ) {
 			throw new SMAmbiguousInputException();
 		}
-		_(list.get(0).input(data));
+		doExit(list.get(0).input(data));
 		//if ( debug && logger.isDebugEnabled() ) {
 		//	Object args[] = { id, currentState };
 		//	logger.debug("{}: input (default) finished at: {}", args); 
@@ -154,8 +155,8 @@ public class SMStateMachine {
 	/**
 	 * Запустить автомат в работу.
 	 * <p>
-	 * @throws SMStateMachineAlreadyStartedException 
-	 * @throws SMTransitionNotExistsException 
+	 * @throws SMStateMachineAlreadyStartedException - TODO:
+	 * @throws SMTransitionNotExistsException - TODO:
 	 */
 	public synchronized void start() throws
 		SMStateMachineAlreadyStartedException,
@@ -173,7 +174,7 @@ public class SMStateMachine {
 		}
 		if ( action != null ) {
 			dbgEnterAction();
-			_(action.enter(triggers));
+			doExit(action.enter(triggers));
 		}
 		if ( debug && logger.isDebugEnabled() ) {
 			Object args[] = { id, currentState };
@@ -211,9 +212,9 @@ public class SMStateMachine {
 	 * завершится сохранением автомата в этом состоянии.
 	 * <p>
 	 * @param exit выход или null, если не нужно осуществлять переход
-	 * @throws SMTransitionNotExistsException
+	 * @throws SMTransitionNotExistsException - TODO:
 	 */
-	private void _(SMExit exit) throws SMTransitionNotExistsException {
+	private void doExit(SMExit exit) throws SMTransitionNotExistsException {
 		if ( exit == null ) {
 			return;
 		}

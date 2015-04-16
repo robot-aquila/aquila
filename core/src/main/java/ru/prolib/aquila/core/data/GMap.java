@@ -27,7 +27,7 @@ public class GMap<R> implements G<R> {
 	/**
 	 * Создать геттер.
 	 * <p>
-	 * @param map 
+	 * @param map - the map of getters.
 	 */
 	public GMap(Map<Validator, G<R>> map) {
 		super();

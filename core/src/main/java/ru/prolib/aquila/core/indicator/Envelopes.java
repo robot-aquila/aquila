@@ -138,7 +138,7 @@ public class Envelopes implements Starter {
 	 * Получить текущее значение скользящей средней.
 	 * <p>
 	 * @return значение индикатора
-	 * @throws ValueException
+	 * @throws ValueException - TODO: 
 	 */
 	public Double getMovingAverage() throws ValueException {
 		return ma.get();
@@ -149,7 +149,7 @@ public class Envelopes implements Starter {
 	 * <p>
 	 * @param index индекс элемента ряда
 	 * @return значение индикатора
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double getMovingAverage(int index) throws ValueException {
 		return ma.get(index);
@@ -159,7 +159,7 @@ public class Envelopes implements Starter {
 	 * Получить текущее значение верхней границы конвертов.
 	 * <p>
 	 * @return значение индикатора
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double getUpper() throws ValueException {
 		return upper.get();
@@ -170,7 +170,7 @@ public class Envelopes implements Starter {
 	 * <p>
 	 * @param index индекс элемента ряда
 	 * @return значение индикатора
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double getUpper(int index) throws ValueException {
 		return upper.get(index);
@@ -180,7 +180,7 @@ public class Envelopes implements Starter {
 	 * Получить текущее значение нижней границы конвертов.
 	 * <p>
 	 * @return значение индикатора
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double getLower() throws ValueException {
 		return lower.get();
@@ -191,7 +191,7 @@ public class Envelopes implements Starter {
 	 * <p>
 	 * @param index индекс элемента ряда
 	 * @return значение индикатора
-	 * @throws ValueException
+	 * @throws ValueException - TODO:
 	 */
 	public Double getLower(int index) throws ValueException {
 		return lower.get(index);

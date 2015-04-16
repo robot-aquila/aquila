@@ -16,7 +16,7 @@ public interface Row {
 	 * <p>
 	 * @param name идентификатор объкта
 	 * @return объект
-	 * @throws RowException TODO
+	 * @throws RowException - TODO:
 	 */
 	public Object get(String name) throws RowException;
 	
@@ -24,7 +24,7 @@ public interface Row {
 	 * Получить копию ряда.
 	 * <p>
 	 * @return копия ряда
-	 * @throws RowException
+	 * @throws RowException - TODO:
 	 */
 	public Row getRowCopy() throws RowException;
 

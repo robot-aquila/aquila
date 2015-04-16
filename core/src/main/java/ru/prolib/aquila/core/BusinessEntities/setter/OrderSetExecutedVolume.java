@@ -19,10 +19,6 @@ public class OrderSetExecutedVolume implements S<EditableOrder> {
 		super();
 	}
 
-	/**
-	 * Установить цену заявки.
-	 * <p>
-	 */
 	@Override
 	public void set(EditableOrder object, Object value) throws ValueException {
 		if ( value != null && value.getClass() == Double.class ) {

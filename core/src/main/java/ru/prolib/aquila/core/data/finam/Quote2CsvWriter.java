@@ -19,7 +19,6 @@ import ru.prolib.aquila.core.data.ValueException;
 
 /**
  * Сервис записи котировок в csv-файл в формате ФИНАМ.
- * <p>
  */
 public class Quote2CsvWriter implements CandlesWriter, EventListener {
 	private static final Logger logger;

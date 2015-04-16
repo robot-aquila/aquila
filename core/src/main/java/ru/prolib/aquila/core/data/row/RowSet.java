@@ -12,7 +12,7 @@ public interface RowSet extends Row {
 	 * Перейти к следующему ряду.
 	 * <p>
 	 * @return true в случае успеха, false при достижении конца набора
-	 * @throws RowSetException
+	 * @throws RowSetException - If error occurred.
 	 */
 	public boolean next() throws RowSetException;
 	
@@ -21,7 +21,7 @@ public interface RowSet extends Row {
 	 * <p>
 	 * Фактически вызов данного метода приводит объект в первоначальное
 	 * состояние, соответствующее состоянию до первого вызова {@link #next()}.
-	 * @throws RowSetException
+	 * @throws RowSetException - If error occurred.
 	 */
 	public void reset() throws RowSetException;
 	

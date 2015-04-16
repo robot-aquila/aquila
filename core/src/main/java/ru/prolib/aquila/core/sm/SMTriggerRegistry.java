@@ -6,7 +6,6 @@ import ru.prolib.aquila.core.utils.KW;
 
 /**
  * Реестр триггеров.
- * <p>
  */
 public class SMTriggerRegistry {
 	private final SMStateMachine machine;

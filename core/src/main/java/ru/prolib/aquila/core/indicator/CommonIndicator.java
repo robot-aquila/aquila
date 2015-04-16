@@ -14,7 +14,7 @@ public abstract class CommonIndicator<T> implements Indicator<T> {
 	/**
 	 * Конструктор.
 	 * <p>
-	 * @param dispatcher
+	 * @param dispatcher - event dispatcher
 	 */
 	public CommonIndicator(IndicatorEventDispatcher dispatcher) {
 		super();
@@ -79,14 +79,14 @@ public abstract class CommonIndicator<T> implements Indicator<T> {
 	/**
 	 * Запустить индикатор в работу.
 	 * <p>
-	 * @throws StarterException
+	 * @throws StarterException - TODO:
 	 */
 	abstract protected void onStart() throws StarterException;
 	
 	/**
 	 * Остановить индикатор.
 	 * <p>
-	 * @throws StarterException
+	 * @throws StarterException - TODO:
 	 */
 	abstract protected void onStop() throws StarterException;
 	

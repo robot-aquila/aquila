@@ -64,7 +64,7 @@ public class OrderStateHandler {
 	 * состояние удовлетворяет определенным условиям, генерирует соответствующее
 	 * событие заявки.
 	 * <p>
-	 * @param order
+	 * @param order - The order.
 	 */
 	public void handle(EditableOrder order) {
 		if ( validator.validate(order) ) {

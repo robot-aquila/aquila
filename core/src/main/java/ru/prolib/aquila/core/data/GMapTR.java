@@ -12,7 +12,7 @@ import ru.prolib.aquila.core.utils.Validator;
 import ru.prolib.aquila.core.utils.ValidatorEq;
 
 /**
- * Геттер на основе карты сопоставлений (Source Type -> Result).
+ * Геттер на основе карты сопоставлений (Source Type -gt; Result).
  * <p>
  * Использует геттер ключа для определения соответствующего возвращаемого
  * значения. Если набор не содержит соответствующего ключа, то возвращается

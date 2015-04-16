@@ -123,6 +123,7 @@ public interface Order {
 	 * Получить портфель, в рамках которого торгуется данная заявка.
 	 * <p>
 	 * @return портфель
+	 * @throws PortfolioException - TODO: 
 	 */
 	public Portfolio getPortfolio() throws PortfolioException;
 	
@@ -136,6 +137,7 @@ public interface Order {
 	/**
 	 * Получить торгуемый инструмент.
 	 * <p>
+	 * @throws SecurityException - TODO:
 	 * @return инструмент
 	 */
 	public Security getSecurity() throws SecurityException;

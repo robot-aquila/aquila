@@ -26,6 +26,7 @@ public interface Scheduler {
 	 * <p> 
 	 * @param task - task to be scheduled
 	 * @param time - time at which task is to be executed
+	 * @return a new task handler
 	 * @throws NullPointerException if task or time is null
 	 * @throws IllegalStateException if task already scheduled
 	 */
@@ -39,9 +40,10 @@ public interface Scheduler {
 	 * @param task - task to be scheduled
 	 * @param firstTime - First time at which task is to be executed
 	 * @param period - time in milliseconds between successive task executions
+	 * @return a new task handler
 	 * @throws NullPointerException if task or time is null
 	 * @throws IllegalStateException if task already scheduled
-	 * @throws IllegalArgumentException if period <= 0 
+	 * @throws IllegalArgumentException if period &lt;= 0 
 	 */
 	public TaskHandler schedule(Runnable task, DateTime firstTime, long period);
 
@@ -50,9 +52,10 @@ public interface Scheduler {
 	 * <p>
 	 * @param task - task to be scheduled
 	 * @param delay - delay in milliseconds before task is to be executed
+	 * @return a new task handler
 	 * @throws NullPointerException if task is null
 	 * @throws IllegalStateException if task already scheduled
-	 * @throws IllegalArgumentException if delay < 0
+	 * @throws IllegalArgumentException if delay &lt; 0
 	 */
 	public TaskHandler schedule(Runnable task, long delay);
 
@@ -63,9 +66,10 @@ public interface Scheduler {
 	 * @param task - task to be scheduled
 	 * @param delay - delay in milliseconds before task is to be executed
 	 * @param period - time in milliseconds between successive task executions
+	 * @return a new task handler
 	 * @throws NullPointerException if task is null
 	 * @throws IllegalStateException if task already scheduled
-	 * @throws IllegalArgumentException if delay < 0 or period <= 0
+	 * @throws IllegalArgumentException if delay &lt; 0 or period &lt;= 0
 	 */
     public TaskHandler schedule(Runnable task, long delay, long period);
 
@@ -77,9 +81,10 @@ public interface Scheduler {
      * @param task - task to be scheduled
      * @param firstTime - First time at which task is to be executed
      * @param period - time in milliseconds between successive task executions
+     * @return a new task handler
      * @throws NullPointerException if task or time is null
 	 * @throws IllegalStateException if task already scheduled
-	 * @throws IllegalArgumentException if period <= 0
+	 * @throws IllegalArgumentException if period &lt;= 0
      */
     public TaskHandler
     	scheduleAtFixedRate(Runnable task, DateTime firstTime, long period);
@@ -91,9 +96,10 @@ public interface Scheduler {
      * @param task - task to be scheduled
      * @param delay - delay in milliseconds before task is to be executed
      * @param period - time in milliseconds between successive task executions
+     * @return a new task handler
      * @throws NullPointerException if task is null
 	 * @throws IllegalStateException if task already scheduled
-	 * @throws IllegalArgumentException if delay < 0 or period <= 0
+	 * @throws IllegalArgumentException if delay &lt; 0 or period &lt;= 0
      */
     public TaskHandler
     	scheduleAtFixedRate(Runnable task, long delay, long period);

@@ -50,7 +50,7 @@ public interface Series<T> {
 	 * @return значение
 	 * @throws ValueOutOfDateException индекс указывает на архивное значение
 	 * @throws ValueOutOfRangeException индекс за границами диапазона
-	 * @throws ValueException
+	 * @throws ValueException - If error occured.
 	 */
 	public T get(int index) throws ValueException;
 

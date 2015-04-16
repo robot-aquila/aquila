@@ -168,7 +168,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	 * <p>
 	 * @param index исходный индекс
 	 * @return нормализованный индекс
-	 * @throws ValueException
+	 * @throws ValueException - If error occured.
 	 */
 	protected int normalizeIndex(int index) throws ValueException {
 		int length = history.size();

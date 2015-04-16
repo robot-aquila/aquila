@@ -9,7 +9,6 @@ public interface EventTypeSI extends EventType {
 
 	/**
 	 * Очистить списки получателей.
-	 * <p>
 	 */
 	public void removeListeners();
 

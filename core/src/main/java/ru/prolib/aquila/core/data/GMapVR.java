@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import ru.prolib.aquila.core.utils.Validator;
 
 /**
- * Геттер на основе карты сопоставлений (Validator -> Result).
+ * Геттер на основе карты сопоставлений (Validator -gt; Result).
  * <p>
  * Использует набор валидаторов для определения соответствующего значения.
  * Если все валидаторы на запрос ответили отрицательно, то возвращается null.
@@ -28,7 +28,7 @@ public class GMapVR<R> implements G<R> {
 	/**
 	 * Создать геттер.
 	 * <p>
-	 * @param map
+	 * @param map - map of validators to values.
 	 */
 	public GMapVR(Map<Validator, R> map) {
 		super();

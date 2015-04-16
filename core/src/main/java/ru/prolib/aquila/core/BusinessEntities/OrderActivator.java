@@ -20,7 +20,7 @@ abstract public class OrderActivator {
 	 * пользовательским кодом.
 	 * <p>
 	 * @param order заявка
-	 * @throws OrderException
+	 * @throws OrderException - TODO:
 	 */
 	protected void start(EditableOrder order) throws OrderException {
 		synchronized ( order ) {
@@ -64,7 +64,7 @@ abstract public class OrderActivator {
 	 * <p>
 	 * Данный метод определяется конкретной реализацией активатора.
 	 * <p>
-	 * @throws OrderException
+	 * @throws OrderException - TODO:
 	 */
 	abstract protected void begin() throws OrderException;
 	

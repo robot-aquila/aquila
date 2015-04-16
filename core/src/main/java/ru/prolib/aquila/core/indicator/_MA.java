@@ -167,9 +167,9 @@ abstract public class _MA implements DataSeries {
 	/**
 	 * Расчитать значение.
 	 * <p>
-	 * @param index индекс исходного элемента ряда (всегда гарантировано >=0)
+	 * @param index индекс исходного элемента ряда (всегда гарантировано &gt;=0)
 	 * @return новое значение
-	 * @throws ValueException 
+	 * @throws ValueException - TODO:
 	 */
 	abstract protected Double calculate(int index) throws ValueException;
 	

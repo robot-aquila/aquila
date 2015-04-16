@@ -14,7 +14,6 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * <p>
  * <i>2014-04-09 Архитектурная проблема</i> (см. одноименный параграф в
  * документации к {@link OrdersEventDispatcher}).
- * <p>
  */
 public class PositionsEventDispatcher implements EventListener {
 	private final EventDispatcher dispatcher;

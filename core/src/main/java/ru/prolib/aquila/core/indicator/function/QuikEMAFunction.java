@@ -12,7 +12,6 @@ import ru.prolib.aquila.core.data.*;
  * где Pi - значение цены в текущем периоде, EMAi - значение EMA текущего
  * периода, EMAi-1 - значение EMA предыдущего периода. В качестве первого
  * значения берется значение источника как есть. 
- * <p>
  */
 public class QuikEMAFunction extends MAFunction {
 

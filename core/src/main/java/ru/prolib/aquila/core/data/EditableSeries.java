@@ -26,7 +26,8 @@ public interface EditableSeries<T> extends Series<T> {
 	/**
 	 * Добавить значение.
 	 * <p>
-	 * @param value
+	 * @param value - value to add.
+	 * @throws ValueException - If error occurred.
 	 */
 	public void add(T value) throws ValueException;
 	

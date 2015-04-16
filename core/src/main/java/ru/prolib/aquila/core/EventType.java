@@ -48,14 +48,14 @@ public interface EventType {
 	 * режиме, повторная подписка с помощью этого метода переведет его в режим
 	 * синхронного получения событий.
 	 * <p>
-	 * @param listener
+	 * @param listener - The event listener.
 	 */
 	public void addSyncListener(EventListener listener);
 
 	/**
 	 * Отписаться от события.
 	 * <p>
-	 * @param listener получатель
+	 * @param listener - The event listener.
 	 */
 	public void removeListener(EventListener listener);
 	

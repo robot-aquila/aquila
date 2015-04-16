@@ -2,7 +2,6 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 /**
  * Интерфейс дескриптора задачи.
- * <p>
  */
 public interface TaskHandler {
 	

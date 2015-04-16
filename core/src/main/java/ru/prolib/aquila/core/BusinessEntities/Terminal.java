@@ -302,7 +302,7 @@ public interface Terminal extends Starter, OrderProcessor, Scheduler {
 	 * <p>
 	 * @param id идентификатор заявки
 	 * @return заявка
-	 * @throws OrderNotExistsException
+	 * @throws OrderNotExistsException - TODO:
 	 */
 	public Order getOrder(int id) throws OrderException;
 	
@@ -411,7 +411,7 @@ public interface Terminal extends Starter, OrderProcessor, Scheduler {
 	 * <p>
 	 * @param account счет портфеля
 	 * @return экземпляр портфеля
-	 * @throws PortfolioNotExistsException
+	 * @throws PortfolioNotExistsException - TODO:
 	 */
 	public Portfolio getPortfolio(Account account)
 		throws PortfolioException;
@@ -423,6 +423,7 @@ public interface Terminal extends Starter, OrderProcessor, Scheduler {
 	 * может быть единственный доступный портфель или первый попавшийся портфель
 	 * из набора доступных.
 	 * <p>
+	 * @throws PortfolioException - TODO:
 	 * @return портфель по-умолчанию
 	 */
 	public Portfolio getDefaultPortfolio() throws PortfolioException;
@@ -468,7 +469,7 @@ public interface Terminal extends Starter, OrderProcessor, Scheduler {
 	 * <p>
 	 * @param descr дескриптор инструмента
 	 * @return инструмент
-	 * @throws SecurityNotExistsException
+	 * @throws SecurityNotExistsException - TODO:
 	 */
 	public Security getSecurity(SecurityDescriptor descr)
 			throws SecurityException;

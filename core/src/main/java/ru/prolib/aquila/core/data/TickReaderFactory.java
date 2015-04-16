@@ -2,7 +2,6 @@ package ru.prolib.aquila.core.data;
 
 /**
  * Интерфейс фабрики потока тиковых данных.
- * <p>
  */
 public interface TickReaderFactory {
 	
@@ -11,7 +10,7 @@ public interface TickReaderFactory {
 	 * <p>
 	 * @param param параметр создания
 	 * @return поток тиковых данных
-	 * @throws DataException
+	 * @throws DataException - If error occurred.
 	 */
 	public Aqiterator<Tick> createTickReader(String param) throws DataException;
 

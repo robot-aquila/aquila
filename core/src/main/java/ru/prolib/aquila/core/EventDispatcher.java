@@ -77,6 +77,7 @@ public interface EventDispatcher {
 	 * допускающий только синхронную доставку событий независимо от желания
 	 * подписчика.
 	 * <p>
+	 * @param typeId идентификатор типа события
 	 * @return тип события
 	 */
 	public EventTypeSI createSyncType(String typeId);
