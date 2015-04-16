@@ -15,17 +15,15 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 public class SecuritiesEventDispatcherTest {
 	private static SecurityDescriptor descr =
 			new SecurityDescriptor("zu", "lu", ISO4217.USD, SecurityType.FUT);
-	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
 	private EditableSecurity security;
 	private SecuritiesEventDispatcher dispatcher;
 	private List<Event> eventsActual, eventsExpected;
 	private Event e;
 
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalImpl("test");
+		terminal = new TerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 		dispatcher = new SecuritiesEventDispatcher(terminal.getEventSystem());
 		terminal.getEventSystem().getEventQueue().start();

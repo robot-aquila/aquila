@@ -18,7 +18,6 @@ import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.utils.*;
 
-
 /**
  * 2012-08-16<br>
  * $Id: TerminalImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
@@ -80,7 +79,7 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testConstruct_Full() throws Exception {
+	public void testConstruct8() throws Exception {
 		assertSame(controller, terminal.getTerminalController());
 		assertSame(dispatcher, terminal.getTerminalEventDispatcher());
 		assertSame(securities, terminal.getSecurityStorage());
@@ -88,33 +87,6 @@ public class TerminalImplTest {
 		assertSame(orders, terminal.getOrderStorage());
 		assertSame(starter, terminal.getStarter());
 		assertSame(scheduler, terminal.getScheduler());
-		assertSame(es, terminal.getEventSystem());
-	}
-
-	@Test // Тест конструктора с 1 аргументом типа строка (ID очереди)
-	public void testConstruct1_S() throws Exception {
-		terminal = new TerminalImpl("foo");
-		assertNotNull(terminal.getTerminalController());
-		assertNotNull(terminal.getTerminalEventDispatcher());
-		assertNotNull(terminal.getSecurityStorage());
-		assertNotNull(terminal.getPortfolioStorage());
-		assertNotNull(terminal.getOrderStorage());
-		assertNotNull(terminal.getStarter());
-		assertEquals(SchedulerLocal.class, terminal.getScheduler().getClass());
-		assertNotNull(terminal.getEventSystem());
-		assertEquals("foo", terminal.getEventSystem().getEventQueue().getId());
-	}
-	
-	@Test // Тест конструктора с 1 аргументом типа фасад событийной системы
-	public void testConstruct1_E() throws Exception {
-		terminal = new TerminalImpl(es);
-		assertNotNull(terminal.getTerminalController());
-		assertNotNull(terminal.getTerminalEventDispatcher());
-		assertNotNull(terminal.getSecurityStorage());
-		assertNotNull(terminal.getPortfolioStorage());
-		assertNotNull(terminal.getOrderStorage());
-		assertNotNull(terminal.getStarter());
-		assertEquals(SchedulerLocal.class, terminal.getScheduler().getClass());
 		assertSame(es, terminal.getEventSystem());
 	}
 	
@@ -334,7 +306,7 @@ public class TerminalImplTest {
 	public void testPlaceOrder1() throws Exception {
 		expect(order.getStatus()).andReturn(OrderStatus.PENDING);
 		expect(order.getActivator()).andReturn(null);
-		orderProcessor.placeOrder(same(order));
+		orderProcessor.placeOrder(same(terminal), same(order));
 		control.replay();
 		terminal.setOrderProcessor(orderProcessor);
 		
@@ -364,7 +336,7 @@ public class TerminalImplTest {
 		expect(order.getStatus()).andReturn(OrderStatus.CONDITION);
 		expect(order.getActivator()).andReturn(activator);
 		activator.stop();
-		orderProcessor.placeOrder(same(order));
+		orderProcessor.placeOrder(same(terminal), same(order));
 		control.replay();
 		terminal.setOrderProcessor(orderProcessor);
 		
@@ -376,7 +348,7 @@ public class TerminalImplTest {
 	@Test
 	public void testCancelOrder_Active() throws Exception {
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
-		orderProcessor.cancelOrder(same(order));
+		orderProcessor.cancelOrder(same(terminal), same(order));
 		control.replay();
 		terminal.setOrderProcessor(orderProcessor);
 		
@@ -947,7 +919,7 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testEventTypes() throws Exception {
-		terminal = new TerminalImpl("test");
+		terminal = (TerminalImpl) new TerminalBuilder().buildTerminal();
 		dispatcher = terminal.getTerminalEventDispatcher();
 		assertSame(dispatcher.OnConnected(), terminal.OnConnected());
 		assertSame(dispatcher.OnDisconnected(), terminal.OnDisconnected());

@@ -1,10 +1,12 @@
 package ru.prolib.aquila.core.report;
 
 import static org.junit.Assert.*;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.report.trades.*;
 
 public class ReportBuilderTest {
@@ -14,7 +16,7 @@ public class ReportBuilderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalImpl("foo");
+		terminal = new TerminalBuilder().buildTerminal();
 		es = terminal.getEventSystem();
 		es.getEventQueue().start();
 		builder = new ReportBuilder();

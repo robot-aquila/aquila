@@ -16,7 +16,6 @@ public class PositionsEventDispatcherTest {
 	private static Account account = new Account("foo", "bar");
 	private static SecurityDescriptor descr =
 			new SecurityDescriptor("zu", "lu", ISO4217.USD, SecurityType.FUT);
-	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
 	private EditablePortfolio portfolio;
 	private EditableSecurity security;
@@ -25,10 +24,9 @@ public class PositionsEventDispatcherTest {
 	private List<Event> eventsActual, eventsExpected;
 	private Event e;
 
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalImpl("test");
+		terminal = new TerminalBuilder().buildTerminal();
 		portfolio = terminal.getEditablePortfolio(account);
 		security = terminal.getEditableSecurity(descr);
 		position = portfolio.getEditablePosition(security);

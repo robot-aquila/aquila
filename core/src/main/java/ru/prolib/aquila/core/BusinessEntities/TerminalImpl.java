@@ -99,43 +99,6 @@ final public class TerminalImpl implements EditableTerminal {
 		this.es = eventSystem;
 	}
 	
-	/**
-	 * Конструктор (ультракороткий).
-	 * <p>
-	 * Данный конструктор предназначен для создания экземпляра терминала со
-	 * всеми связанными объектами по-умолчанию. В качестве предустановленного
-	 * объекта используется только система событий. Это может быть полезно
-	 * например когда необходимо присоединить терминал к существующей очереди
-	 * событий или к специфической реализации событий (например синхронные).
-	 * <p>
-	 * @param es фасад системы событий
-	 */
-	@Deprecated // TODO: to remove, use a terminal builder
-	public TerminalImpl(EventSystem es) {
-		this(new TerminalController(), new TerminalEventDispatcher(es),
-			new Securities(new SecuritiesEventDispatcher(es)),
-			new Portfolios(new PortfoliosEventDispatcher(es)),
-			new OrdersImpl(new OrdersEventDispatcher(es), new OrderFactoryImpl(), new SimpleCounter()),
-			new StarterQueue(),
-			new SchedulerLocal(),
-			es);
-	}
-	
-	/**
-	 * Конструктор (ультракороткий).
-	 * <p>
-	 * Данный конструктор предназначен для создания экземпляра терминала со
-	 * всеми связанными объектами по-умолчанию. Для организации цикла обмена
-	 * сообщениями создается стандартная очередь событий типа
-	 * {@link EventQueueImpl}.  
-	 * <p>
-	 * @param queueId идентификатор очереди событий
-	 */
-	@Deprecated // TODO: to remove, use a terminal builder
-	public TerminalImpl(String queueId) {
-		this(new EventSystemImpl(new EventQueueImpl(queueId)));
-	}
-	
 	@Override
 	public synchronized OrderProcessor getOrderProcessor() {
 		return orderProcessor;
@@ -268,7 +231,7 @@ final public class TerminalImpl implements EditableTerminal {
 			} else if ( status == OrderStatus.CONDITION ) {
 				order.getActivator().stop();
 			}
-			orderProcessor.placeOrder(order);
+			orderProcessor.placeOrder(this, order);
 		}
 	}
 
@@ -288,7 +251,7 @@ final public class TerminalImpl implements EditableTerminal {
 				orders.fireEvents(o);
 			} else {
 				synchronized ( this ) {
-					orderProcessor.cancelOrder(order);
+					orderProcessor.cancelOrder(this, order);
 				}
 			}
 		}

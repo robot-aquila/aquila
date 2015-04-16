@@ -13,9 +13,7 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
-
 public class OrdersEventDispatcherTest {
-	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
 	private EditableOrder order;
 	private OrdersEventDispatcher dispatcher;
@@ -28,10 +26,9 @@ public class OrdersEventDispatcherTest {
 		BasicConfigurator.configure();
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalImpl("test");
+		terminal = new TerminalBuilder().buildTerminal();
 		order = terminal.createOrder();
 		dispatcher = new OrdersEventDispatcher(terminal.getEventSystem());
 		terminal.getEventSystem().getEventQueue().start();

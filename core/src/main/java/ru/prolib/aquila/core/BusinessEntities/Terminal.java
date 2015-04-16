@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.Starter;
  * 2012-05-30<br>
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public interface Terminal extends Starter, OrderProcessor, Scheduler {
+public interface Terminal extends Starter, Scheduler {
 	public static final int VERSION = 1;
 	
 	/**
@@ -511,5 +511,21 @@ public interface Terminal extends Starter, OrderProcessor, Scheduler {
 	 * @return количество инструментов
 	 */
 	public int getSecuritiesCount();
+	
+	/**
+	 * Place order for execution.
+	 * <p>
+	 * @param order - the order.
+	 * @throws OrderException - TODO:
+	 */
+	public void placeOrder(Order order) throws OrderException;
+	
+	/**
+	 * Cancel order.
+	 * <p>
+	 * @param order - the order.
+	 * @throws OrderException - TODO:
+	 */
+	public void cancelOrder(Order order) throws OrderException;
 
 }

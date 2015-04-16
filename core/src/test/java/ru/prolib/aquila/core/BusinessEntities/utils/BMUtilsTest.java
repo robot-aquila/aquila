@@ -5,12 +5,7 @@ import static org.junit.Assert.*;
 import org.joda.time.DateTime;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.Direction;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.TerminalImpl;
-import ru.prolib.aquila.core.BusinessEntities.Trade;
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.Tick;
 
 public class BMUtilsTest {
@@ -22,16 +17,14 @@ public class BMUtilsTest {
 		tick = new Tick(new DateTime(2014, 11, 19, 4, 37, 39, 50), 21.45d, 84d);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
 	private EditableSecurity security; 
 	private BMUtils utils;
 
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		utils = new BMUtils();
-		terminal = new TerminalImpl("foobar");
+		terminal = new TerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 	}
 

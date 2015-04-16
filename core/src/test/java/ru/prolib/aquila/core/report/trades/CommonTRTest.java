@@ -2,18 +2,23 @@ package ru.prolib.aquila.core.report.trades;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
+
 import com.csvreader.CsvReader;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -65,7 +70,7 @@ public class CommonTRTest {
 		activeTrades = control.createMock(ActiveTrades.class);
 		record = control.createMock(RTrade.class);
 		security = control.createMock(Security.class);
-		terminal = new TerminalImpl("test");
+		terminal = new TerminalBuilder().buildTerminal();
 		es = terminal.getEventSystem();
 		dispatcher = new CommonTREventDispatcher(es);
 		trades = new CommonTR(es, dispatcher);

@@ -11,6 +11,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -162,11 +163,10 @@ public class TerminalTradeReportTest {
 		assertFalse(report.equals(this));
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void testEquals() throws Exception {
-		Terminal t1 = new TerminalImpl("foo");
-		Terminal t2 = new TerminalImpl("foo");
+		Terminal t1 = new TerminalBuilder().buildTerminal();
+		Terminal t2 = new TerminalBuilder().buildTerminal();
 		report = new TerminalTradeReport(t1, selector, underlying);
 		Variant<Terminal> vTerm = new Variant<Terminal>()
 			.add(t1)

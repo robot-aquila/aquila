@@ -9,6 +9,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
+import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.data.Tick;
 
 /**
@@ -25,16 +26,14 @@ public class SecurityTradeEventTest {
 	private IMocksControl control;
 	private EditableSecurity security, security2;
 	private EventTypeSI eventType, eventType2;
-	@SuppressWarnings("rawtypes")
 	private EditableTerminal terminal;
 	private Trade trade;
 	private SecurityTradeEvent event;
 
-	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = new TerminalImpl("zulu24");
+		terminal = new TerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 		security.setMinStepSize(1d);
 		security.setMinStepPrice(1d);
