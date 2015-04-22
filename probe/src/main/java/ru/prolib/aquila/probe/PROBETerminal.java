@@ -33,7 +33,6 @@ public class PROBETerminal extends TerminalDecorator
 	 * Constructor.
 	 * <p>
 	 * @param terminal - the underlying terminal
-s
 	 */
 	public PROBETerminal(EditableTerminal terminal, PROBEServiceLocator locator) {
 		super(terminal);

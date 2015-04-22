@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+ 
+    <changeSet id="initial_changeset" author="whirlwind">
+        <comment>Initial changeset</comment>
+ 
+        <createTable tableName="security_descriptors">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints primaryKey="true" nullable="false"
+                    primaryKeyName="pk_security_descriptors" />
+            </column>
+            <column name="code" type="varchar(16)" >
+            	<constraints nullable="false" />
+            </column>
+            <column name="class_code" type="varchar(16)" >
+            	<constraints nullable="false" />
+            </column>
+            <column name="currency" type="varchar(3)" >
+            	<constraints nullable="false" />
+            </column>
+            <column name="type" type="varchar(4)" >
+            	<constraints nullable="false" />
+            </column>
+        </createTable>
+        
+        <createTable tableName="constant_security_properties">
+        	<column name="id" autoIncrement="true" type="int">
+        		<constraints primaryKey="true" nullable="false"
+                    primaryKeyName="pk_constant_security_properties" />
+        	</column>
+        	<column name="security_descriptor" type="int">
+        		<constraints foreignKeyName="fk_constant_security_properties_security_descriptors"
+                    references="security_descriptors(id)" nullable="false" />
+        	</column>
+        	<column name="display_name" type="varchar(128)" >
+            	<constraints nullable="false" />
+            </column>
+            <column name="expiration_time" type="datetime" >
+            	<constraints nullable="true" />
+            </column>
+            <column name="currency" type="varchar(3)" >
+            	<constraints nullable="false" />
+            </column>
+        </createTable>
+        
+        <createTable tableName="trading_session_properties">
+        	<column name="id" autoIncrement="true" type="int">
+        		<constraints primaryKey="true" nullable="false"
+                    primaryKeyName="pk_trading_session_properties" />
+        	</column>
+        	<column name="security_descriptor" type="int">
+        		<constraints foreignKeyName="fk_trading_session_properties_security_descriptors"
+                    references="security_descriptors(id)" nullable="false" />
+        	</column>
+			<column name="scale" type="int" >
+            	<constraints nullable="false" />
+            </column>
+            <column name="tick_cost" type="double" >
+            	<constraints nullable="false" />
+            </column>
+			<column name="initial_margin_cost" type="double" >
+            	<constraints nullable="true" />
+            </column>
+			<column name="initial_price" type="double" >
+            	<constraints nullable="false" />
+            </column>
+			<column name="lower_price_limit" type="double" >
+            	<constraints nullable="true" />
+            </column>
+            <column name="upper_price_limit" type="double" >
+            	<constraints nullable="true" />
+            </column>
+			<column name="lot_size" type="int" >
+            	<constraints nullable="false" />
+            </column>
+			<column name="tick_size" type="double" >
+            	<constraints nullable="false" />
+            </column>
+			<column name="snapshot_time" type="datetime" >
+            	<constraints nullable="false" />
+            </column>
+			<column name="clearing_time" type="datetime" >
+            	<constraints nullable="false" />
+            </column>
+            
+		</createTable>
+        
+ 
+    </changeSet>
+    
+</databaseChangeLog>
