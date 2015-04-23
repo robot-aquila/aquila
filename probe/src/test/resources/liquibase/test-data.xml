@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+ 
+    <include file="src/main/resources/liquibase/master.xml" />
+ 
+    <changeSet id="" author="whirlwind" context="test" >
+		<insert tableName="security_descriptors">
+			<column name="id">1001</column>
+			<column name="code">RTS-6.15</column>
+			<column name="class_code">SPBFUT</column>
+			<column name="currency">USD</column>
+			<column name="type">FUT</column>
+		</insert>
+		<insert tableName="security_descriptors">
+			<column name="id">1002</column>
+			<column name="code">Si-6.15</column>
+			<column name="class_code">SPBFUT</column>
+			<column name="currency">RUB</column>
+			<column name="type">FUT</column>
+		</insert>
+    </changeSet>
+    
+</databaseChangeLog>
