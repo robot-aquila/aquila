@@ -6,10 +6,10 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.HsqlConnection;
 import liquibase.resource.*;
 
-public class HsqlLiquibaseInstantiator implements LiquibaseInstantiator {
+public class LiquibaseTestHelperImpl implements LiquibaseTestHelper {
 	private Liquibase liquibase;
 	
-	public HsqlLiquibaseInstantiator(DataSource dataSource, String changelog) {
+	public LiquibaseTestHelperImpl(DataSource dataSource, String changelog) {
 		super();
 		try {
 			liquibase = new Liquibase(changelog,
@@ -26,6 +26,17 @@ public class HsqlLiquibaseInstantiator implements LiquibaseInstantiator {
 	@Override
 	public Liquibase getLiquibase() {
 		return liquibase;
+	}
+
+	@Override
+	public void cleanUpAfterTestClass() throws Exception {
+		setUpBeforeTestClass();
+	}
+
+	@Override
+	public void setUpBeforeTestClass() throws Exception {
+		liquibase.dropAll();
+		liquibase.update("test");		
 	}
 
 }

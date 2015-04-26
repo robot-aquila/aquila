@@ -1,11 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.io.Serializable;
 import java.util.Currency;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import com.thoughtworks.xstream.annotations.*;
+import org.apache.commons.lang3.builder.*;
 
 /**
  * Дескриптор инструмента.
@@ -25,8 +22,8 @@ import com.thoughtworks.xstream.annotations.*;
  * 2012-06-01<br>
  * $Id: SecurityDescriptor.java 341 2012-12-18 17:16:30Z whirlwind $
  */
-@XStreamAlias("SecurityDescriptor")
-public class SecurityDescriptor {
+public class SecurityDescriptor implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private final String code;
 	private final String classCode;
 	private final Currency currency;

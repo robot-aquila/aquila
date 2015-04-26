@@ -8,14 +8,14 @@
     <include file="src/main/resources/liquibase/master.xml" />
  
     <changeSet id="" author="whirlwind" context="test" >
-		<insert tableName="security_descriptors">
+		<insert tableName="security_ids">
 			<column name="id">1001</column>
 			<column name="code">RTS-6.15</column>
 			<column name="class_code">SPBFUT</column>
 			<column name="currency">USD</column>
 			<column name="type">FUT</column>
 		</insert>
-		<insert tableName="security_descriptors">
+		<insert tableName="security_ids">
 			<column name="id">1002</column>
 			<column name="code">Si-6.15</column>
 			<column name="class_code">SPBFUT</column>
