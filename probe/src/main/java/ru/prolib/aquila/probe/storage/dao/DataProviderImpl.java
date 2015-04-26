@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
 
-import ru.prolib.aquila.probe.storage.model.SecurityId;
+import ru.prolib.aquila.probe.storage.model.SymbolEntity;
 
 @Repository
 public class DataProviderImpl implements DataProvider {
@@ -17,7 +17,7 @@ public class DataProviderImpl implements DataProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public List<SecurityId> getSecurityDescriptors() {
+	public List<SymbolEntity> getSecurityDescriptors() {
 		Session session = sessionFactory.getCurrentSession();
 		return session.createQuery("from security_descriptors d").list();
 	}

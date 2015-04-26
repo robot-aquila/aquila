@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-	<class name="ru.prolib.aquila.probe.storage.model.SecurityId" table="security_ids">
+	<class name="ru.prolib.aquila.probe.storage.model.SymbolEntity" table="symbols">
 		<id name="id" access="field">
 			<generator class="increment" />
 		</id>

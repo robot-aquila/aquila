@@ -18,6 +18,7 @@
     <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
     	<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
     	<property name="url" value="jdbc:hsqldb:mem:testdb;shutdown=false" />
+    	<!-- property name="url" value="jdbc:hsqldb:hsql://localhost/probe-test" / -->
     	<property name="username" value="SA" />
     	<property name="password" value="" />
 	</bean>

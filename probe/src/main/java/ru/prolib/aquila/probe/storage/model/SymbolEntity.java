@@ -1,16 +1,21 @@
 package ru.prolib.aquila.probe.storage.model;
 
-import javax.persistence.Entity;
-
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 
-@Entity
-public class SecurityId {
-	private long id;
+public class SymbolEntity {
+	private Long id;
 	private SecurityDescriptor descr;
+
+	public SymbolEntity() {
+		super();
+	}
 	
-	public long getId() {
+	public Long getId() {
 		return id;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 	public SecurityDescriptor getDescriptor() {

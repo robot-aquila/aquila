@@ -19,7 +19,7 @@
     <category name="org.springframework">
         <priority value="error" />
     </category>
- 
+    
     <root>
         <priority value="INFO" />
         <appender-ref ref="ASYNC" />

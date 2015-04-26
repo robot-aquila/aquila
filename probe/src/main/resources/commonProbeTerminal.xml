@@ -9,7 +9,7 @@
     	<property name="packagesToScan" value="ru.prolib.aquila.probe.storage" />
     	<property name="hibernateProperties">
         	<props>
-            	<prop key="hibernate.connection.pool_size">1</prop>
+            	<prop key="hibernate.connection.pool_size">10</prop>
             	<prop key="hibernate.connection.show_sql">true</prop>
             	<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
             	<prop key="hibernate.show_sql">true</prop>
@@ -17,7 +17,8 @@
     	</property>
     	<property name="mappingResources">
 			<list>
-				<value>hibernate/SecurityId.hbm.xml</value>
+				<value>hibernate/SymbolEntity.hbm.xml</value>
+				<value>hibernate/ConstantSecurityPropertiesEntity.hbm.xml</value>
 			</list>
 		</property>
 	</bean>

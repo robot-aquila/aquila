@@ -2,10 +2,10 @@ package ru.prolib.aquila.probe.storage.dao;
 
 import java.util.List;
 
-import ru.prolib.aquila.probe.storage.model.SecurityId;
+import ru.prolib.aquila.probe.storage.model.SymbolEntity;
 
 public interface DataProvider {
 	
-	public List<SecurityId> getSecurityDescriptors();
+	public List<SymbolEntity> getSecurityDescriptors();
 
 }

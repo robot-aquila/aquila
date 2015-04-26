@@ -7,20 +7,44 @@
  
     <include file="src/main/resources/liquibase/master.xml" />
  
-    <changeSet id="" author="whirlwind" context="test" >
-		<insert tableName="security_ids">
+    <changeSet id="symbol_test_data" author="whirlwind" context="test" >
+		<insert tableName="symbols">
 			<column name="id">1001</column>
 			<column name="code">RTS-6.15</column>
 			<column name="class_code">SPBFUT</column>
 			<column name="currency">USD</column>
 			<column name="type">FUT</column>
 		</insert>
-		<insert tableName="security_ids">
+		<insert tableName="symbols">
 			<column name="id">1002</column>
 			<column name="code">Si-6.15</column>
 			<column name="class_code">SPBFUT</column>
 			<column name="currency">RUB</column>
 			<column name="type">FUT</column>
+		</insert>
+		<insert tableName="symbols">
+			<column name="id">1003</column>
+			<column name="code">ED-6.15</column>
+			<column name="class_code">SPBFUT</column>
+			<column name="currency">USD</column>
+			<column name="type">FUT</column>
+		</insert>
+    </changeSet>
+    
+    <changeSet id="constant_security_properties_test_data" author="whirlwind" context="test" >
+		<insert tableName="constant_security_properties">
+			<column name="id">15</column>
+			<column name="symbol">1001</column>
+			<column name="display_name">RTS</column>
+			<column name="expiration_time">2015-04-15 00:00:00</column>
+			<column name="currency_of_cost">USD</column>
+		</insert>
+		<insert tableName="constant_security_properties">
+			<column name="id">16</column>
+			<column name="symbol">1002</column>
+			<column name="display_name">Si</column>
+			<column name="expiration_time">2015-06-16 00:00:00</column>
+			<column name="currency_of_cost">RUB</column>
 		</insert>
     </changeSet>
     

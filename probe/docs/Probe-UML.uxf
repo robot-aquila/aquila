@@ -9,12 +9,12 @@
       <w>637</w>
       <h>63</h>
     </coordinates>
-    <panel_attributes>TradingDataStorage
+    <panel_attributes>TradingDataProvider
 --
 --
 +getSecurityProperties(descr: SecurityDescriptor): ConstantSecurityProperties
-+getSessionData(descr: SecurityDescriptor, startingTime: DateTime): Aqiterator&lt;TradingSessionProperties&gt;
-+getTickData(descr: SecurityDescriptor, startingTime: DateTime): Aqiterator&lt;Tick&gt;
++getSessionData(descr: SecurityDescriptor, startingTime: LocalDateTime): Aqiterator&lt;TradingSessionProperties&gt;
++getTickData(descr: SecurityDescriptor, startingTime: LocalDateTime): Aqiterator&lt;Tick&gt;
 </panel_attributes>
     <additional_attributes/>
   </element>
@@ -31,7 +31,7 @@
 --
 +getSecurityDescriptor(): SecurityDescriptor
 +getDisplayName(): String
-+getExpirationTime(): DateTime
++getExpirationTime(): LocalDateTime
 +getCurrencyOfCost(): Currency</panel_attributes>
     <additional_attributes/>
   </element>
@@ -66,8 +66,8 @@
 +getUpperPriceLimit(): Double
 +getLotSize(): Integer
 +getTickSize(): Double
-+getSnapshotTime(): DateTime
-+getClearingTime(): DateTime
++getSnapshotTime(): LocalDateTime
++getClearingTime(): LocalDateTime
 
 </panel_attributes>
     <additional_attributes/>

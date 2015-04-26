@@ -7,10 +7,9 @@
     <changeSet id="initial_changeset" author="whirlwind">
         <comment>Initial changeset</comment>
  
-        <createTable tableName="security_ids">
+        <createTable tableName="symbols">
             <column name="id" autoIncrement="true" type="bigint">
-                <constraints primaryKey="true" nullable="false"
-                    primaryKeyName="pk_security_ids" />
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_symbols" />
             </column>
             <column name="code" type="varchar(16)" >
             	<constraints nullable="false" />
@@ -29,19 +28,19 @@
         <createTable tableName="constant_security_properties">
         	<column name="id" autoIncrement="true" type="bigint">
         		<constraints primaryKey="true" nullable="false"
-                    primaryKeyName="pk_constant_security_properties" />
+        			primaryKeyName="pk_constant_security_properties" />
         	</column>
-        	<column name="security_id" type="bigint">
-        		<constraints foreignKeyName="fk_constant_security_properties_security_ids"
-                    references="security_ids(id)" nullable="false" />
+        	<column name="symbol" type="bigint" >
+        		<constraints foreignKeyName="fk_constant_security_properties_symbols"
+                    references="symbols(id)" nullable="false" />
         	</column>
         	<column name="display_name" type="varchar(128)" >
             	<constraints nullable="false" />
             </column>
-            <column name="expiration_time" type="datetime" >
+            <column name="expiration_time" type="timestamp with timezone" >
             	<constraints nullable="true" />
             </column>
-            <column name="currency" type="varchar(3)" >
+            <column name="currency_of_cost" type="varchar(3)" >
             	<constraints nullable="false" />
             </column>
         </createTable>
@@ -51,9 +50,9 @@
         		<constraints primaryKey="true" nullable="false"
                     primaryKeyName="pk_trading_session_properties" />
         	</column>
-        	<column name="security_id" type="bigint">
-        		<constraints foreignKeyName="fk_trading_session_properties_security_ids"
-                    references="security_ids(id)" nullable="false" />
+        	<column name="symbol" type="bigint">
+        		<constraints foreignKeyName="fk_trading_session_properties_symbols"
+        			references="symbols(id)" nullable="false" />
         	</column>
 			<column name="scale" type="int" >
             	<constraints nullable="false" />

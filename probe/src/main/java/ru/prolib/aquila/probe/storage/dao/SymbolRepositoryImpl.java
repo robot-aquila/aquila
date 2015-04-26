@@ -10,51 +10,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.probe.storage.model.SecurityId;
+import ru.prolib.aquila.probe.storage.model.SymbolEntity;
 
 @Repository
-public class SecurityIdDAOImpl implements SecurityIdDAO {
+public class SymbolRepositoryImpl implements SymbolRepository {
 	private SessionFactory sessionFactory;
 	
-	public SecurityIdDAOImpl() {
+	public SymbolRepositoryImpl() {
 		super();
 	}
 	
 	@Autowired
 	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+		this.sessionFactory = sessionFactory;		
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public SecurityId getByDescriptor(SecurityDescriptor descr) {
+	public SymbolEntity getByDescriptor(SecurityDescriptor descr) {
 		Session session = getSession();
-		List list = session.createCriteria(SecurityId.class)
+		SymbolEntity x = (SymbolEntity)
+				session.createCriteria(SymbolEntity.class)
 				.add(Restrictions.eq("descr", descr))
 				.setMaxResults(1)
-				.list();
-		if ( list.size() > 0 ) {
-			return (SecurityId) list.get(0);	
+				.uniqueResult();
+		if ( x == null ) {
+			x = new SymbolEntity();
+			x.setDescriptor(descr);
+			session.save(x);			
+
 		}
-		SecurityId x = new SecurityId();
-		x.setDescriptor(descr);
-		session.save(x);
 		return x;
 	}
 
 	@Override
-	public SecurityId getById(long id) {
-		SecurityId x = (SecurityId) getSession().get(SecurityId.class, id);
+	public SymbolEntity getById(Long id) {
+		SymbolEntity x = (SymbolEntity) getSession().get(SymbolEntity.class, id);
 		if ( x == null ) {
-			throw new ObjectNotFoundException(id, SecurityId.class.toString());
+			throw new ObjectNotFoundException(id, SymbolEntity.class.toString());
 		}
 		return x;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<SecurityId> getAll() {
-		return getSession().createCriteria(SecurityId.class).list();
+	public List<SymbolEntity> getAll() {
+		return getSession().createCriteria(SymbolEntity.class).list();
 	}
 	
 	private Session getSession() {
