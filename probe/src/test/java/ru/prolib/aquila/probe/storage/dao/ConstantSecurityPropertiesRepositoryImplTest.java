@@ -2,33 +2,22 @@ package ru.prolib.aquila.probe.storage.dao;
 
 import static org.junit.Assert.*;
 
-import java.util.Currency;
-import java.util.List;
-
-import org.hibernate.ObjectNotFoundException;
-import org.hibernate.SessionFactory;
+import java.util.*;
+import org.hibernate.*;
 import org.joda.time.*;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.probe.storage.model.ConstantSecurityPropertiesEntity;
-import ru.prolib.aquila.probe.storage.model.SymbolEntity;
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.probe.storage.model.*;
 import ru.prolib.aquila.probe.utils.LiquibaseTestHelper;
 
-@Transactional
-@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/testApplicationContext.xml"})
-@TransactionConfiguration(transactionManager="transactionManager")
-public class ConstantSecurityPropertiesRepositoryImplTest {
+public class ConstantSecurityPropertiesRepositoryImplTest
+	extends AbstractTransactionalJUnit4SpringContextTests
+{
 	static private boolean firstCall = true;
 	private LiquibaseTestHelper liquibaseHelper;
 	private SessionFactory sessionFactory;
@@ -55,8 +44,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest {
 	private void assertTime(DateTime expected, DateTime actual)
 			throws Exception
 	{
-		// TODO: fixme
-		assertEquals(expected, actual.minusHours(1));
+		assertEquals(expected, actual);
 	}
 
 	@Before
@@ -132,6 +120,70 @@ public class ConstantSecurityPropertiesRepositoryImplTest {
 	public void testGetByDescirptor_ThrowsIfNotExists() {
 		descr = new SecurityDescriptor("XXX", "YYY", "RUB", SecurityType.CASH);
 		repository.getByDescriptor(descr);
+	}
+	
+	@Test
+	public void testCreate() throws Exception {
+		entity = repository.createEntity();
+		assertNotNull(entity);
+		assertNotSame(entity, repository.createEntity());
+	}
+	
+	@Test
+	public void testUpdate_NewEntity() throws Exception {
+		liquibaseHelper.cleanUpAfterTestClass();
+		
+		entity = repository.createEntity();
+		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
+		entity.setDisplayName("Zulu24");
+		entity.setExpirationTime(new DateTime(2015, 04, 15, 13, 45, 10, 540));
+		entity.setSymbol(symbols.getById(1003L));
+		
+		repository.update(entity);
+		sessionFactory.getCurrentSession().flush();
+		
+		assertEquals(new Long(17), entity.getId());
+		assertEquals(1, super.countRowsInTableWhere("constant_security_properties",
+				"id=17 AND symbol=1003 AND display_name='Zulu24' AND " +
+				"expiration_time='2015-04-15 13:45:10.540' AND " +
+				"currency_of_cost='EUR'"));
+	}
+	
+	@Test
+	public void testUpdate_ExistingEntity() throws Exception {
+		liquibaseHelper.setUpBeforeTestClass();
+		
+		entity = repository.getById(16L);
+		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
+		entity.setDisplayName("Zuko");
+		entity.setExpirationTime(new DateTime(2000, 1, 1, 23, 59, 59, 999));
+		entity.setSymbol(symbols.getById(1003L));
+		
+		repository.update(entity);
+		sessionFactory.getCurrentSession().flush();
+		
+		assertEquals(1, super.countRowsInTableWhere("constant_security_properties",
+				"id=16 AND symbol=1003 AND display_name='Zuko' AND " +
+				"expiration_time='2000-01-01 23:59:59.999' AND " +
+				"currency_of_cost='EUR'"));
+		assertEquals(0, super.countRowsInTableWhere("constant_security_properties",
+				"id=16 AND symbol=1002 AND display_name='Si' AND " +
+				"expiration_time='2015-06-16 00:00:00.000' AND " +
+				"currency_of_cost='RUB'"));
+	}
+	
+	@Test
+	public void testDelete() throws Exception {
+		liquibaseHelper.setUpBeforeTestClass();
+		
+		entity = repository.getById(16L);
+		assertNotNull(entity);
+
+		repository.delete(entity);
+		sessionFactory.getCurrentSession().flush();
+		
+		assertEquals(0, super.countRowsInTableWhere("constant_security_properties",
+				"id=16"));
 	}
 
 }

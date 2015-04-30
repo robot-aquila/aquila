@@ -16,5 +16,11 @@ public interface ConstantSecurityPropertiesRepository {
 	public ConstantSecurityPropertiesEntity getById(Long id);
 	
 	public List<ConstantSecurityPropertiesEntity> getAll();
+	
+	public void update(ConstantSecurityPropertiesEntity entity);
+	
+	public void delete(ConstantSecurityPropertiesEntity entity);
+	
+	public ConstantSecurityPropertiesEntity createEntity();
 
 }

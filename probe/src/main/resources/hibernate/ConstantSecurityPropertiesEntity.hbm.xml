@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	<class name="ru.prolib.aquila.probe.storage.model.ConstantSecurityPropertiesEntity" table="constant_security_properties">
 		<id name="id">
@@ -9,7 +9,7 @@
 		<many-to-one name="symbol" class="ru.prolib.aquila.probe.storage.model.SymbolEntity" column="symbol" unique="true" />
 		<property name="displayName" column="display_name" length="128" not-null="true" />
 		<property name="expirationTime" column="expiration_time" not-null="true"
-			type="org.joda.time.contrib.hibernate.PersistentDateTime" />
+			type="ru.prolib.aquila.probe.storage.dao.DateTimeType" />
 		<property name="currencyOfCost" column="currency_of_cost" length="3" not-null="true" />
 	</class>
 </hibernate-mapping>

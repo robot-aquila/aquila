@@ -91,4 +91,19 @@ public class ConstantSecurityPropertiesRepositoryImpl implements
 		return sessionFactory.getCurrentSession();
 	}
 
+	@Override
+	public void update(ConstantSecurityPropertiesEntity entity) {
+		getSession().saveOrUpdate(entity);
+	}
+
+	@Override
+	public void delete(ConstantSecurityPropertiesEntity entity) {
+		getSession().delete(entity);
+	}
+
+	@Override
+	public ConstantSecurityPropertiesEntity createEntity() {
+		return new ConstantSecurityPropertiesEntity();
+	}
+
 }

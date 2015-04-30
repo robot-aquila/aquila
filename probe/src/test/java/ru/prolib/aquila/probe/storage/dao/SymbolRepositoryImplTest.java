@@ -80,6 +80,7 @@ public class SymbolRepositoryImplTest
 	public void testGetByDescriptor_CreatesNewIfNotExists() throws Exception {
 		SecurityDescriptor descr;
 		descr = new SecurityDescriptor("XXX", "YYY", "EUR", SecurityType.OPT);
+		
 		SymbolEntity x = repository.getByDescriptor(descr);
 		sessionFactory.getCurrentSession().flush();
 		
