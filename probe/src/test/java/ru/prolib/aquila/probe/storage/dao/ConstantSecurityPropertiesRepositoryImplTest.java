@@ -18,7 +18,6 @@ import ru.prolib.aquila.probe.utils.LiquibaseTestHelper;
 public class ConstantSecurityPropertiesRepositoryImplTest
 	extends AbstractTransactionalJUnit4SpringContextTests
 {
-	static private boolean firstCall = true;
 	private LiquibaseTestHelper liquibaseHelper;
 	private SessionFactory sessionFactory;
 	private SymbolRepositoryImpl symbols;
@@ -36,11 +35,6 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		this.liquibaseHelper = liquibaseHelper;
 	}
 	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		firstCall = true;
-	}
-	
 	private void assertTime(DateTime expected, DateTime actual)
 			throws Exception
 	{
@@ -49,10 +43,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 
 	@Before
 	public void setUp() throws Exception {
-		if ( firstCall ) {
-			liquibaseHelper.setUpBeforeTestClass();
-			firstCall = false;
-		}
+		liquibaseHelper.setUpBeforeTestClass();
 		repository = new ConstantSecurityPropertiesRepositoryImpl();
 		repository.setSessionFactory(sessionFactory);
 		symbols = new SymbolRepositoryImpl();
@@ -131,8 +122,6 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 	
 	@Test
 	public void testUpdate_NewEntity() throws Exception {
-		liquibaseHelper.cleanUpAfterTestClass();
-		
 		entity = repository.createEntity();
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zulu24");
@@ -151,8 +140,6 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 	
 	@Test
 	public void testUpdate_ExistingEntity() throws Exception {
-		liquibaseHelper.setUpBeforeTestClass();
-		
 		entity = repository.getById(16L);
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zuko");
@@ -174,8 +161,6 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 	
 	@Test
 	public void testDelete() throws Exception {
-		liquibaseHelper.setUpBeforeTestClass();
-		
 		entity = repository.getById(16L);
 		assertNotNull(entity);
 
@@ -184,6 +169,15 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		
 		assertEquals(0, super.countRowsInTableWhere("constant_security_properties",
 				"id=16"));
+	}
+	
+	@Test
+	public void testGetEntitySecurityDescriptor() throws Exception {
+		entity = repository.getById(16L);
+		SecurityDescriptor expected, actual;
+		expected = new SecurityDescriptor("Si-6.15", "SPBFUT", "RUB", SecurityType.FUT);
+		actual = entity.getSecurityDescriptor();
+		assertEquals(expected, actual);
 	}
 
 }

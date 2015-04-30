@@ -1,7 +1,5 @@
 package ru.prolib.aquila.probe.storage;
 
-import java.math.BigDecimal;
-
 import org.joda.time.DateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
@@ -31,7 +29,7 @@ public interface TradingSessionProperties {
 	 * @return cost of the one tick in the currency specified in appropriate
 	 * {@link ConstantSecurityProperties} instance.
 	 */
-	public BigDecimal getTickCost();
+	public Double getTickCost();
 	
 	/**
 	 * Get initial margin per contract.
@@ -41,19 +39,56 @@ public interface TradingSessionProperties {
 	 * The result may be null if the security don't use an initial margin.    
 	 */
 	public Double getInitialMarginCost();
-		
+	
+	/**
+	 * Get initial price.
+	 * <p>
+	 * Initial price is some basic price for the session.
+	 * <p>
+	 * @return initial price
+	 */
 	public Double getInitialPrice();
 	
+	/**
+	 * Get lower price limit.
+	 * <p>
+	 * @return the lower price which can be accepted starting this snapshot. 
+	 */
 	public Double getLowerPriceLimit();
 	
+	/**
+	 * Get upper price limit.
+	 * <p>
+	 * @return the upper price which can be accepted starting this snapshot.
+	 */
 	public Double getUpperPriceLimit();
 	
+	/**
+	 * Get lot size.
+	 * <p>
+	 * @return the lot size.
+	 */
 	public Integer getLotSize();
 	
-	public BigDecimal getTickSize();
+	/**
+	 * Get size of tick.
+	 * <p>
+	 * @return the tick size in units of price.
+	 */
+	public Double getTickSize();
 	
+	/**
+	 * Get snapshot time.
+	 * <p>
+	 * @return the starting time of the property values.
+	 */
 	public DateTime getSnapshotTime();
 	
+	/**
+	 * Get clearing time.
+	 * <p>
+	 * @return the time of the next clearing.
+	 */
 	public DateTime getClearingTime();
 
 }
