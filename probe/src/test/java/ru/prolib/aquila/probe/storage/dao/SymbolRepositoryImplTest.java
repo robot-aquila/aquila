@@ -1,30 +1,24 @@
 package ru.prolib.aquila.probe.storage.dao;
 
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
 
 import java.util.List;
 
-import org.hibernate.ObjectNotFoundException;
-import org.hibernate.SessionFactory;
+import org.hibernate.*;
 import org.junit.*;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.probe.storage.model.SymbolEntity;
 import ru.prolib.aquila.probe.utils.LiquibaseTestHelper;
 
-@Transactional
-@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/testApplicationContext.xml"})
-@TransactionConfiguration(transactionManager="transactionManager")
-public class SymbolRepositoryImplTest {
+public class SymbolRepositoryImplTest
+	extends AbstractTransactionalJUnit4SpringContextTests
+{
 	static private boolean firstCall = true;
 	private LiquibaseTestHelper liquibaseHelper;
 	private SessionFactory sessionFactory;
@@ -84,13 +78,16 @@ public class SymbolRepositoryImplTest {
 	
 	@Test
 	public void testGetByDescriptor_CreatesNewIfNotExists() throws Exception {
-		SecurityDescriptor descr, actual;
+		SecurityDescriptor descr;
 		descr = new SecurityDescriptor("XXX", "YYY", "EUR", SecurityType.OPT);
 		SymbolEntity x = repository.getByDescriptor(descr);
+		sessionFactory.getCurrentSession().flush();
+		
+		Long expectedId = new Long(1004);
 		assertNotNull(x);
-		assertThat(x.getId(), not(equalTo(0l)));
-		actual = x.getDescriptor();
-		assertSame(descr, actual);
+		assertEquals(expectedId, x.getId());
+		assertEquals(1, super.countRowsInTableWhere("symbols",
+			"id=1004 AND code='XXX' AND class_code='YYY' AND currency='EUR' AND type='OPT'"));
 	}
 	
 	@Test
@@ -100,9 +97,9 @@ public class SymbolRepositoryImplTest {
 		List<SymbolEntity> list = repository.getAll();
 		assertNotNull(list);
 		assertEquals(3, list.size());
-		assertEquals(new Long(1001), list.get(0).getId());
-		assertEquals(new Long(1002), list.get(1).getId());
-		assertEquals(new Long(1003), list.get(2).getId());
+		assertEquals(repository.getById(1001L), list.get(0));
+		assertEquals(repository.getById(1002L), list.get(1));
+		assertEquals(repository.getById(1003L), list.get(2));
 	}
 
 }
