@@ -65,14 +65,18 @@ public class DateTimeType implements UserType {
 		}
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(time);
-		return time == null ? null :
+		DateTime jodaTime = time == null ? null :
 			new DateTime(cal.get(Calendar.YEAR),
-					cal.get(Calendar.MONTH) + 1, // Jan = 0
-					cal.get(Calendar.DAY_OF_MONTH),
-					cal.get(Calendar.HOUR_OF_DAY),
-					cal.get(Calendar.MINUTE),
-					cal.get(Calendar.SECOND),
-					cal.get(Calendar.MILLISECOND));
+				cal.get(Calendar.MONTH) + 1, // Jan = 0
+				cal.get(Calendar.DAY_OF_MONTH),
+				cal.get(Calendar.HOUR_OF_DAY),
+				cal.get(Calendar.MINUTE),
+				cal.get(Calendar.SECOND),
+				cal.get(Calendar.MILLISECOND));
+		//System.err.println(">>> INFO: java Date is " + time);
+		//System.err.println(">>> INFO: joda DateTime is " + jodaTime);
+		return jodaTime;
+
 	}
 
 	@SuppressWarnings("deprecation")
@@ -83,16 +87,19 @@ public class DateTimeType implements UserType {
 		if ( value == null ) {
 			TimestampType.INSTANCE.nullSafeSet(st, null, index);
 		}
-		DateTime time = (DateTime) value;
+		DateTime jodaTime = (DateTime) value;
 		Calendar cal = Calendar.getInstance();
-		cal.set(time.getYear(),
-				time.getMonthOfYear() - 1,
-				time.getDayOfMonth(),
-				time.getHourOfDay(),
-				time.getMinuteOfDay(),
-				time.getSecondOfDay());
-		cal.set(Calendar.MILLISECOND, time.getMillisOfSecond());
-		TimestampType.INSTANCE.nullSafeSet(st, cal.getTime(), index);
+		cal.set(jodaTime.getYear(),
+				jodaTime.getMonthOfYear() - 1,
+				jodaTime.getDayOfMonth(),
+				jodaTime.getHourOfDay(),
+				jodaTime.getMinuteOfHour(),
+				jodaTime.getSecondOfMinute());
+		cal.set(Calendar.MILLISECOND, jodaTime.getMillisOfSecond());
+		Date time = cal.getTime();
+		//System.err.println(">>> INFO: java Date is " + time);
+		//System.err.println(">>> INFO: joda DateTime is " + jodaTime);
+		TimestampType.INSTANCE.nullSafeSet(st, time, index);
 	}
 
 	@Override
