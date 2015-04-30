@@ -74,11 +74,6 @@
 			<artifactId>javassist</artifactId>
 			<version>3.19.0-GA</version>
 		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time-hibernate</artifactId>
-			<version>1.3</version>
-		</dependency>
 		
 	</dependencies>
   
@@ -108,8 +103,8 @@
             	<version>3.3.2</version>
             	<configuration>
                 	<propertyFile>src/main/resources/liquibase/liquibase.properties</propertyFile>
-                	<!-- changeLogFile>src/main/resources/liquibase/master.xml</changeLogFile -->
-                	<changeLogFile>src/test/resources/liquibase/test-data.xml</changeLogFile>
+                	<changeLogFile>src/main/resources/liquibase/master.xml</changeLogFile>
+                	<!-- changeLogFile>src/test/resources/liquibase/test-data.xml</changeLogFile -->
             	</configuration>
         	</plugin>
         
