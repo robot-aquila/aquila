@@ -37,7 +37,7 @@
 			<column name="symbol">1001</column>
 			<column name="display_name">RTS</column>
 			<column name="expiration_time">2015-04-15 00:00:00</column>
-			<column name="currency_of_cost">USD</column>
+			<column name="currency_of_cost">RUB</column>
 		</insert>
 		<insert tableName="constant_security_properties">
 			<column name="id">16</column>
@@ -47,5 +47,65 @@
 			<column name="currency_of_cost">RUB</column>
 		</insert>
     </changeSet>
+    
+    <changeSet id="trading_session_properties_test_data" author="whirlwind" context="test" >
+		<insert tableName="trading_session_properties">
+			<column name="id">1</column>
+			<column name="symbol">1001</column>
+			<column name="scale">0</column>
+			<column name="tick_cost">10.2924</column>
+			<column name="initial_margin_cost">22897.86</column>
+			<column name="initial_price">101970</column>
+			<column name="lower_price_limit">93460</column>
+			<column name="upper_price_limit">110840</column>
+			<column name="lot_size">1</column>
+			<column name="tick_size">10</column>
+			<column name="snapshot_time">2015-04-30 10:00:00</column>
+			<column name="clearing_time">2015-04-30 18:45:00</column>
+		</insert>
+		<insert tableName="trading_session_properties">
+			<column name="id">2</column>
+			<column name="symbol">1001</column>
+			<column name="scale">2</column>
+			<column name="tick_cost">10.2415</column>
+			<column name="initial_margin_cost">22621.45</column>
+			<column name="initial_price">101800</column>
+			<column name="lower_price_limit">92000</column>
+			<column name="upper_price_limit">19250</column>
+			<column name="lot_size">2</column>
+			<column name="tick_size">10</column>
+			<column name="snapshot_time">2015-05-01 10:00:00</column>
+			<column name="clearing_time">2015-05-01 18:45:00</column>
+		</insert>
+		<insert tableName="trading_session_properties">
+			<column name="id">3</column>
+			<column name="symbol">1002</column>
+			<column name="scale">0</column>
+			<column name="tick_cost">11.5521</column>
+			<column name="initial_margin_cost">20000.0</column>
+			<column name="initial_price">85000</column>
+			<column name="lower_price_limit">80000</column>
+			<column name="upper_price_limit">90000</column>
+			<column name="lot_size">1</column>
+			<column name="tick_size">1</column>
+			<column name="snapshot_time">2015-04-28 10:00:00</column>
+			<column name="clearing_time">2015-04-28 18:45:00</column>
+		</insert>
+		<insert tableName="trading_session_properties">
+			<column name="id">4</column>
+			<column name="symbol">1001</column>
+			<column name="scale">0</column>
+			<column name="tick_cost">10.0</column>
+			<column name="initial_margin_cost">20001.0</column>
+			<column name="initial_price">85001</column>
+			<column name="lower_price_limit">80001</column>
+			<column name="upper_price_limit">90001</column>
+			<column name="lot_size">5</column>
+			<column name="tick_size">20</column>
+			<column name="snapshot_time">2015-04-28 10:00:00</column>
+			<column name="clearing_time">2015-04-28 18:45:00</column>
+		</insert>
+		
+	</changeSet>
     
 </databaseChangeLog>

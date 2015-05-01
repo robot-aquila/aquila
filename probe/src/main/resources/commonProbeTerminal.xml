@@ -19,6 +19,7 @@
 			<list>
 				<value>hibernate/SymbolEntity.hbm.xml</value>
 				<value>hibernate/ConstantSecurityPropertiesEntity.hbm.xml</value>
+				<value>hibernate/TradingSessionPropertiesEntity.hbm.xml</value>
 			</list>
 		</property>
 	</bean>
