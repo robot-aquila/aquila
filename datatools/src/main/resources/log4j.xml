@@ -12,8 +12,12 @@
         </layout>
     </appender>
     
+    <category name="ru.prolib.aquila">
+        <priority value="DEBUG" />
+    </category>
+    
     <root>
-        <priority value="INFO" />
+        <priority value="ERROR" />
         <appender-ref ref="ASYNC" />
     </root>
  

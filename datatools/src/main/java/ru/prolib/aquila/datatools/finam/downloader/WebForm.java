@@ -1,26 +1,44 @@
-package ru.prolib.aquila.finamtools;
+package ru.prolib.aquila.datatools.finam.downloader;
 
+import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.openqa.selenium.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class FinamDownloader implements AutoCloseable {
+public class WebForm implements Closeable {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(WebForm.class);
+	}
+	
 	private final WebDriver driver;
-	private final DownloadDriver downloadDriver;
+	private final Downloader downloadDriver;
 	private boolean initialRequestIsMade = false;
 	
-	public FinamDownloader(WebDriver driver, DownloadDriver downloadDriver) {
+	public static WebForm createFirefoxDownloader() {
+    	FirefoxDownloader driver = new FirefoxDownloader();
+    	return new WebForm(driver.getWebDriver(), driver);
+	}
+	
+	public static WebForm createHtmlUnitDownloader() {
+    	HtmlUnitDownloader driver = new HtmlUnitDownloader();
+    	return new WebForm(driver.getWebDriver(), driver);
+	}
+	
+	public WebForm(WebDriver driver, Downloader downloadDriver) {
 		super();
 		this.driver = driver;
 		this.downloadDriver = downloadDriver;
 	}
 	
-	public FinamDownloader initialRequest() {
+	public WebForm initialRequest() {
 		if ( initialRequestIsMade == false ) {
 			driver.get("http://www.finam.ru/profile/moex-akcii/gazprom/export/");
 			initialRequestIsMade = true;
@@ -28,9 +46,14 @@ public class FinamDownloader implements AutoCloseable {
 		return this;
 	}
 	
-	public File download() throws IOException {
+	public File download() throws DownloaderException {
 		initialRequest();
-		File destination = File.createTempFile("finam-", ".txt");
+		File destination;
+		try {
+			destination = File.createTempFile("finam-", ".txt");
+		} catch ( Exception e ) {
+			throw new DownloaderException("Error creating temp file", e);
+		}
 		destination.delete();
 		selectFileName(FilenameUtils.removeExtension(destination.getName()));
 		selectFileExt(".txt");
@@ -45,24 +68,24 @@ public class FinamDownloader implements AutoCloseable {
 		return "//div[@id=\"issuer-profile-export-button\"]/button";
 	}
 	
-	public FinamDownloader selectDateFrom(LocalDate date) {
+	public WebForm selectDateFrom(LocalDate date) {
 		initialRequest();
 		setDate("issuer-profile-export-from", date);
 		return this;
 	}
 	
-	public FinamDownloader selectDateTo(LocalDate date) {
+	public WebForm selectDateTo(LocalDate date) {
 		initialRequest();
 		setDate("issuer-profile-export-to", date);
 		return this;
 	}
 	
-	public FinamDownloader selectDate(LocalDate date) {
+	public WebForm selectDate(LocalDate date) {
 		return selectDateFrom(date)
 				.selectDateTo(date);
 	}
 	
-	public FinamDownloader selectQuote(String quoteName) {
+	public WebForm selectQuote(String quoteName) {
 		initialRequest();
 		driver.findElement(By.id("issuer-profile-header"))
 			.findElement(By.className("finam-ui-quote-selector-quote"))
@@ -72,7 +95,7 @@ public class FinamDownloader implements AutoCloseable {
 		return this;
 	}
 	
-	public FinamDownloader selectMarket(String marketName) {
+	public WebForm selectMarket(String marketName) {
 		initialRequest();
 		driver.findElement(By.id("issuer-profile-header"))
 			.findElement(By.className("finam-ui-quote-selector-market"))
@@ -82,7 +105,7 @@ public class FinamDownloader implements AutoCloseable {
 		return this;
 	}
 	
-	public FinamDownloader selectPeriod(String periodName) {
+	public WebForm selectPeriod(String periodName) {
 		initialRequest();
 		driver.findElement(By.id("issuer-profile-export-first-row"))
 			.findElement(By.className("finam-ui-controls-select"))
@@ -92,11 +115,34 @@ public class FinamDownloader implements AutoCloseable {
 		return this;
 	}
 	
-	public FinamDownloader selectPeriodTick() {
+	public WebForm selectPeriodTick() {
 		return selectPeriod("тики");
 	}
+
+	public WebForm selectFileFormat(String formatName) {
+		initialRequest();
+		driver.findElement(By.id("issuer-profile-export-fileformat-row"))
+			.findElement(By.className("finam-ui-controls-select"))
+			.findElement(By.className("finam-ui-controls-select-arrow"))
+			.click();
+		selectLink(getFileFormatSelectorOwner(), formatName);
+		return this;
+	}
+
+	/**
+	 * Select output file format.
+	 * <p>
+	 * Select "DATE, TIME, LAST, VOL, ID" file format.
+	 * This preset will work only for tick data interval which should be
+	 * currently selected on the page.
+	 * <p>
+	 * @return the downloader
+	 */
+	public WebForm selectFileFormat_FullWoTicker() {
+		return selectFileFormat("DATE, TIME, LAST, VOL, ID");
+	}
 	
-	private FinamDownloader selectFileExt(String extName) {
+	private WebForm selectFileExt(String extName) {
 		initialRequest();
 		driver.findElement(By.id("issuer-profile-export-second-row"))
 			.findElement(By.className("finam-ui-controls-select"))
@@ -127,10 +173,12 @@ public class FinamDownloader implements AutoCloseable {
 		selectLink(owner, Integer.toString(expectedValue));
 	}
 	
-	private void selectLink(WebElement owner, String expectedValue) {
+	private void selectLink(WebElement owner, String expectedValue)
+		throws WebFormException
+	{
 		List<WebElement> elements = owner.findElements(By.tagName("a"));
 		if ( elements.size() == 0 ) {
-			throw new FinamDownloaderException("Hyperlinks were not found");
+			throw new WebFormException("Hyperlinks were not found");
 		}
 		for  ( WebElement e : elements ) {
 			if ( expectedValue.equals(e.getText().trim()) ) {
@@ -138,7 +186,7 @@ public class FinamDownloader implements AutoCloseable {
 				return;
 			}
 		}
-		throw new FinamDownloaderException
+		throw new WebFormException
 			("Couldn't find an appropriate hyperlink: " + expectedValue);
 	}
 	
@@ -149,7 +197,7 @@ public class FinamDownloader implements AutoCloseable {
 	private void selectOption(WebElement owner, String expectedValue) {
 		List<WebElement> elements = owner.findElements(By.tagName("option"));
 		if ( elements.size() == 0 ) {
-			throw new FinamDownloaderException("Options were not found");
+			throw new WebFormException("Options were not found");
 		}
 		for  ( WebElement e : elements ) {
 			String actualValue = e.getAttribute("value");
@@ -158,7 +206,7 @@ public class FinamDownloader implements AutoCloseable {
 				return;
 			}
 		}
-		throw new FinamDownloaderException
+		throw new WebFormException
 			("Couldn't find an appropriate option: " + expectedValue);
 	}
 	
@@ -182,9 +230,17 @@ public class FinamDownloader implements AutoCloseable {
 	private WebElement getFileExtSelectorOwner() {
 		return getFinamDropDown(3);
 	}
+	
+	private WebElement getFileFormatSelectorOwner() {
+		return getFinamDropDown(8);
+	}
 
-	public void close() throws Exception {
-		driver.close();		
+	public void close() {
+		try {
+			driver.close();
+		} catch ( Exception e ) {
+			logger.warn("Exception while closing web form: ", e);
+		}
 	}
 
 }
