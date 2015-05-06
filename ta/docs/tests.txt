@@ -1,7 +1,0 @@
-Некоторые тесты требуют доступа к тестовой базе данных. В базу нужно залить 
-дамп из файла tests-initial.sql 
-
-Run -> Run Configurations создать новую конфигурацию, на вкладке Arguments
-в поле VM Arguments указать параметры подключения к базе данных, например:
-
--Dtest.database=jdbc:mysql://localhost/testdb?user=sqluser&password=sqluserpw
