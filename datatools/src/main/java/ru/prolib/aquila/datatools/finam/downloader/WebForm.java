@@ -136,10 +136,23 @@ public class WebForm implements Closeable {
 	 * This preset will work only for tick data interval which should be
 	 * currently selected on the page.
 	 * <p>
-	 * @return the downloader
+	 * @return this object
 	 */
-	public WebForm selectFileFormat_FullWoTicker() {
+	public WebForm selectFileFormat_TimePriceVolId() {
 		return selectFileFormat("DATE, TIME, LAST, VOL, ID");
+	}
+	
+	/**
+	 * Select output file format.
+	 * <p>
+	 * Select "DATE, TIME, LAST, VOL" file format.
+	 * This preset will work only for tick data interval which should be
+	 * currently selected on the page.
+	 * <p>
+	 * @return this object
+	 */
+	public WebForm selectFileFormat_TimePriceVol() {
+		return selectFileFormat("DATE, TIME, LAST, VOL");
 	}
 	
 	private WebForm selectFileExt(String extName) {

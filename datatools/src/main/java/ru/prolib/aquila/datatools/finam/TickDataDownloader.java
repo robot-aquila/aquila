@@ -81,8 +81,8 @@ public class TickDataDownloader {
 	 */
 	public File download() throws FinamException {
 		WebForm form  = null;
+		String id = String.format("[%s@%s] for %s", quote, market, date);
 		try {
-			String id = String.format("[%s@%s] for %s", quote, market, date);
 			logger.debug("Start downloading tick data: {}", id);
 			form = createWebForm();
 			File file = form.selectMarket(market)
@@ -90,20 +90,21 @@ public class TickDataDownloader {
 				.selectDateTo(date)
 				.selectDateFrom(date)
 				.selectPeriodTick()
-				.selectFileFormat_FullWoTicker()
+				.selectFileFormat_TimePriceVolId()
 				.download();
 			logger.debug("Tick data {} download finished: {} (size {} bytes)",
 					new Object[] { id, file, file.length() });
 			return file;
 			
 		} catch ( Exception e ) {
+			logger.error("Error downloading file: ", e);
 			throw new FinamException("Error downloading file", e);
 		} finally {
 			if ( form != null ) form.close();
 		}
 	}
 	
-	private WebForm createWebForm() {
+	protected WebForm createWebForm() {
 		return driver == FIREFOX_DRIVER ? WebForm.createFirefoxDownloader()
 				: WebForm.createHtmlUnitDownloader();
 	}
