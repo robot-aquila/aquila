@@ -1,11 +1,12 @@
 package ru.prolib.aquila.core.data.finam;
 
 import java.io.File;
+
 import org.joda.time.DateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.data.internal.IdUtils;
+import ru.prolib.aquila.core.utils.IdUtils;
 
 /**
  * Хранилище сделок на основе csv-файлов формата FINAM.
@@ -42,7 +43,7 @@ public class CsvTickIteratorStorage implements TickIteratorStorage {
 		getIterator(SecurityDescriptor descr, DateTime start)
 			throws DataException
 	{
-		return getIterator(idUtils.getSafeFilename(descr), start);
+		return getIterator(idUtils.getSafeId(descr), start);
 	}
 
 }

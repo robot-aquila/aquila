@@ -1,23 +1,37 @@
-package ru.prolib.aquila.core.data.internal;
+package ru.prolib.aquila.core.utils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.utils.FileNameEncoder;
 
 public class IdUtils {
 	private static final String SEPARATOR = "-";
-	private final FileNameEncoder nameEncoder;
+	private static final DateTimeFormatter dateFormat;
+	
+	static {
+		dateFormat = DateTimeFormat.forPattern("yyyyMMdd");
+	}
 
-	public IdUtils(FileNameEncoder nameEncoder) {
+	private final StrCoder coder;
+	
+	public IdUtils(StrCoder coder) {
 		super();
-		this.nameEncoder = nameEncoder;
+		this.coder = coder; 
 	}
 	
 	public IdUtils() {
-		this(new FileNameEncoder());
+		this(new StrCoder());
+	}
+	
+	public StrCoder getStrCoder() {
+		return coder;
 	}
 
 	/**
-	 * Получить безопасное имя файла.
+	 * Получить безопасный идентификатор.
 	 * <p>
 	 * Атрибуты дескриптора инструмента могут содержать любые символы, включая
 	 * спецсимволы файловой системы. Что бы избежать потенциальных проблем и
@@ -31,14 +45,35 @@ public class IdUtils {
 	 * способствует узнаваемости данных а, также позволяет выполнять обратное
 	 * преобразование из строкового значения в дескриптор инструмента.  
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param descr - security descriptor
 	 * @return безопасный строковый идентификатор
 	 */
-	public String getSafeFilename(SecurityDescriptor descr) {
-		return nameEncoder.encode(descr.getCode()) + SEPARATOR
-				+ nameEncoder.encode(descr.getClassCode()) + SEPARATOR
-				+ nameEncoder.encode(descr.getCurrencyCode()) + SEPARATOR
-				+ nameEncoder.encode(descr.getType().toString());
+	public String getSafeId(SecurityDescriptor descr) {
+		String[] chunks = {
+				coder.encode(descr.getCode()),
+				coder.encode(descr.getClassCode()),
+				coder.encode(descr.getCurrencyCode()),
+				coder.encode(descr.getType().toString())
+		};
+		return StringUtils.join(chunks, SEPARATOR);
+	}
+	
+	/**
+	 * Get safe ID.
+	 * <p>
+	 * @param descr - security descriptor
+	 * @param date - date
+	 * @return the safe identifier based on arguments
+	 */
+	public String getSafeId(SecurityDescriptor descr, LocalDate date) {
+		String[] chunks = {
+				coder.encode(descr.getCode()),
+				coder.encode(descr.getClassCode()),
+				coder.encode(descr.getCurrencyCode()),
+				coder.encode(descr.getType().toString()),
+				dateFormat.print(date)
+		};
+		return StringUtils.join(chunks, SEPARATOR);
 	}
 	
 	/**

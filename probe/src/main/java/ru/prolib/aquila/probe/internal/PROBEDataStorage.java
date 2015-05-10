@@ -7,7 +7,7 @@ import java.io.IOException;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.finam.CsvTickIteratorStorage;
-import ru.prolib.aquila.core.data.internal.IdUtils;
+import ru.prolib.aquila.core.utils.IdUtils;
 
 public class PROBEDataStorage extends DataStorageImpl {
 	private static final String DISPLAY_NAME = "DisplayName";
@@ -35,7 +35,7 @@ public class PROBEDataStorage extends DataStorageImpl {
 		throws DataException
 	{
 		try {
-			String pfx =idUtils.getSafeFilename(descr);
+			String pfx =idUtils.getSafeId(descr);
 			Props props = new Props();
 			props.load(new FileReader(new File(root,
 					pfx + File.separator + pfx + INI_FILE_SUFFIX)));
