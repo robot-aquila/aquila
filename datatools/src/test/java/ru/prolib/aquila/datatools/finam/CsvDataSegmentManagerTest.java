@@ -20,6 +20,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
 import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriter;
 
 public class CsvDataSegmentManagerTest {
@@ -69,6 +70,11 @@ public class CsvDataSegmentManagerTest {
 				"20150513,094500,105.46,120\n" +
 				"20150513,100000,106.11,135\n";
 		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=GeneralException.class)
+	public void testCtor_ThrowsIfDirectoryNotExists() throws Exception {
+		new CsvDataSegmentManager(terminal, new File(root, "bergandabupkhta"));
 	}
 
 }
