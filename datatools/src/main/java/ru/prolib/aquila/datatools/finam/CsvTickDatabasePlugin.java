@@ -36,6 +36,7 @@ public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener {
 	@Override
 	public void stop() throws StarterException {
 		terminal.OnSecurityTrade().removeListener(this);
+		database.close();
 	}
 
 	@Override
@@ -58,7 +59,8 @@ public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener {
 		Trade trade = e.getTrade();
 		try {
 			database.write(trade.getSecurityDescriptor(),
-				new Tick(trade.getTime(), trade.getPrice(), trade.getVolume()));
+				new Tick(trade.getTime(), trade.getPrice(),
+					trade.getQty().intValue()));
 		} catch (GeneralException x) {
 			logger.error("Error writing tick: ", x);
 		}
