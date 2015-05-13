@@ -5,14 +5,17 @@ import static org.junit.Assert.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
@@ -61,14 +64,15 @@ public class CsvDataSegmentManagerTest {
 		writer.write(new Tick(time.plusMinutes(30), 106.112d, 135));
 		segmentManager.close(writer);
 
-		String actual = IOUtils.readFully(new GZIPInputStream(
+		List<String> actual = IOUtils.readLines(new GZIPInputStream(
 			new BufferedInputStream(new FileInputStream(new File(root,
-				"RTS-SPB-USD-FUT/2015/05/RTS-SPB-USD-FUT-20150513.csv.gz")))));
-		String expected =
-				"<DATE>,<TIME>,<LAST>,<VOL>\n" +
-				"20150513,093000,100.30,100\n" +
-				"20150513,094500,105.46,120\n" +
-				"20150513,100000,106.11,135\n";
+				"RTS-SPB-USD-FUT/2015/05/RTS-SPB-USD-FUT-20150513.csv.gz")))),
+				Charset.defaultCharset());
+		List<String> expected = new Vector<String>();
+		expected.add("<DATE>,<TIME>,<LAST>,<VOL>");
+		expected.add("20150513,093000,100.30,100");
+		expected.add("20150513,094500,105.46,120");
+		expected.add("20150513,100000,106.11,135");
 		assertEquals(expected, actual);
 	}
 	

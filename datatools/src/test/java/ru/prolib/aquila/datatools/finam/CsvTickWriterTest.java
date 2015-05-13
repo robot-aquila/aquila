@@ -6,12 +6,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Vector;
 
+import org.apache.commons.io.IOUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
@@ -59,13 +62,13 @@ public class CsvTickWriterTest {
 		writer.write(createTick("2015-05-09 18:15:00", 76.13001, 25));
 		writer.close();
 		
-		String expected =
-				"<DATE>,<TIME>,<LAST>,<VOL>\n" +
-				"20150509,174450,76.03,10\n" +
-				"20150509,181244,76.15,20\n" +
-				"20150509,181500,76.13,25\n";
+		List<String> expected = new Vector<String>();
+		expected.add("<DATE>,<TIME>,<LAST>,<VOL>");
+		expected.add("20150509,174450,76.03,10");
+		expected.add("20150509,181244,76.15,20");
+		expected.add("20150509,181500,76.13,25");
 		InputStream input = new FileInputStream(file);
-		String actual = IOUtils.readFully(input);
+		List<String> actual = IOUtils.readLines(input, Charset.defaultCharset());
 		input.close();
 		assertEquals(expected, actual);
 	}
@@ -79,11 +82,11 @@ public class CsvTickWriterTest {
 		writer.write(createTick("2015-05-09 18:30:00", 125.923, 200));
 		writer.close();
 		
-		String expected =
-				"20150509,181500,120,100\n" +
-				"20150509,183000,130,200\n";
+		List<String> expected = new Vector<String>();
+		expected.add("20150509,181500,120,100");
+		expected.add("20150509,183000,130,200");
 		InputStream input = new FileInputStream(file);
-		String actual = IOUtils.readFully(input);
+		List<String> actual = IOUtils.readLines(input, Charset.defaultCharset());
 		input.close();
 		assertEquals(expected, actual);
 	}
