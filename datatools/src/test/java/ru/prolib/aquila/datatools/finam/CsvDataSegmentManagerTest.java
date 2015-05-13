@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Vector;
@@ -64,10 +65,11 @@ public class CsvDataSegmentManagerTest {
 		writer.write(new Tick(time.plusMinutes(30), 106.112d, 135));
 		segmentManager.close(writer);
 
-		List<String> actual = IOUtils.readLines(new GZIPInputStream(
-			new BufferedInputStream(new FileInputStream(new File(root,
-				"RTS-SPB-USD-FUT/2015/05/RTS-SPB-USD-FUT-20150513.csv.gz")))),
-				Charset.defaultCharset());
+		InputStream is = new GZIPInputStream(new BufferedInputStream(
+			new FileInputStream(new File(root,
+				"RTS-SPB-USD-FUT/2015/05/RTS-SPB-USD-FUT-20150513.csv.gz"))));
+		List<String> actual = IOUtils.readLines(is, Charset.defaultCharset());
+		is.close();
 		List<String> expected = new Vector<String>();
 		expected.add("<DATE>,<TIME>,<LAST>,<VOL>");
 		expected.add("20150513,093000,100.30,100");
