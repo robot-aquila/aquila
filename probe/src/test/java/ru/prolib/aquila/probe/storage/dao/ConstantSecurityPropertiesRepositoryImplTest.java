@@ -60,7 +60,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		assertEquals(new Long(1001L), symbol.getId());
 		assertEquals("RTS", entity.getDisplayName());
 		assertTime(new DateTime(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
-		assertEquals(Currency.getInstance("USD"), entity.getCurrencyOfCost());
+		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
 	
 	@Test (expected=ObjectNotFoundException.class)
@@ -104,7 +104,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		assertEquals(new Long(1001), entity.getSymbol().getId());
 		assertEquals("RTS", entity.getDisplayName());
 		assertTime(new DateTime(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
-		assertEquals(Currency.getInstance("USD"), entity.getCurrencyOfCost());
+		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
 	
 	@Test (expected=RepositoryObjectNotFoundException.class)
