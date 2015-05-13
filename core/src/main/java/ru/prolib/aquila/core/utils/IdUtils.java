@@ -67,10 +67,7 @@ public class IdUtils {
 	 */
 	public String getSafeId(SecurityDescriptor descr, LocalDate date) {
 		String[] chunks = {
-				coder.encode(descr.getCode()),
-				coder.encode(descr.getClassCode()),
-				coder.encode(descr.getCurrencyCode()),
-				coder.encode(descr.getType().toString()),
+				getSafeId(descr),
 				dateFormat.print(date)
 		};
 		return StringUtils.join(chunks, SEPARATOR);

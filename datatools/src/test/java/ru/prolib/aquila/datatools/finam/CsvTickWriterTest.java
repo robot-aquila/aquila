@@ -13,13 +13,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.io.IOUtils;
 
-import ru.prolib.aquila.core.BusinessEntities.Direction;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.Trade;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.data.Tick;
 
 public class CsvTickWriterTest {
 	private static final SecurityDescriptor descr;
@@ -45,25 +44,19 @@ public class CsvTickWriterTest {
 		security = terminal.getEditableSecurity(descr);
 		security.setPrecision(2);
 		security.setMinStepSize(0.01d);
-		writer = new CsvTickWriter(output);
+		writer = new CsvTickWriter(security, output);
 	}
 	
-	private Trade createTrade(String time, double price, long qty) {
-		Trade trade = new Trade(terminal);
-		trade.setDirection(Direction.BUY);
-		trade.setSecurityDescriptor(descr);
-		trade.setPrice(price);
-		trade.setQty(qty);
-		trade.setTime(df.parseDateTime(time));
-		return trade;
+	private Tick createTick(String time, double price, long qty) {
+		return new Tick(df.parseDateTime(time), price, new Double(qty));
 	}
 	
 	@Test
 	public void testWrite() throws Exception {
 		writer.writeHeader();
-		writer.write(createTrade("2015-05-09 17:44:50", 76.03112, 10));
-		writer.write(createTrade("2015-05-09 18:12:44", 76.15010, 20));
-		writer.write(createTrade("2015-05-09 18:15:00", 76.13001, 25));
+		writer.write(createTick("2015-05-09 17:44:50", 76.03112, 10));
+		writer.write(createTick("2015-05-09 18:12:44", 76.15010, 20));
+		writer.write(createTick("2015-05-09 18:15:00", 76.13001, 25));
 		writer.close();
 		
 		String expected =
@@ -82,8 +75,8 @@ public class CsvTickWriterTest {
 		security.setPrecision(0);
 		security.setMinStepSize(10d);
 		
-		writer.write(createTrade("2015-05-09 18:15:00", 120.131, 100));
-		writer.write(createTrade("2015-05-09 18:30:00", 125.923, 200));
+		writer.write(createTick("2015-05-09 18:15:00", 120.131, 100));
+		writer.write(createTick("2015-05-09 18:30:00", 125.923, 200));
 		writer.close();
 		
 		String expected =

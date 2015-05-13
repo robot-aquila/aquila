@@ -22,10 +22,18 @@ public class TickTest {
 	}
 	
 	@Test
-	public void testConstruct3() throws Exception {
+	public void testConstruct3TDD() throws Exception {
 		assertSame(time1, tick.getTime());
 		assertEquals(1828.14d, tick.getValue(), 0.01d);
 		assertEquals(1000.0d, tick.getOptionalValue(), 0.01d);
+	}
+	
+	@Test
+	public void testConstruct3TDL() throws Exception {
+		tick = new Tick(time1, 256.27d, 100);
+		assertEquals(time1, tick.getTime());
+		assertEquals(256.27d, tick.getValue(), 0.01d);
+		assertEquals(100, tick.getOptionalValueAsLong());
 	}
 	
 	@Test

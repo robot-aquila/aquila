@@ -42,6 +42,10 @@ public class Tick {
 		this(time, value, null);
 	}
 	
+	public Tick(DateTime time, Double value, int optValue) {
+		this(time, value, new Double(optValue));
+	}
+	
 	/**
 	 * Получить время.
 	 * <p>

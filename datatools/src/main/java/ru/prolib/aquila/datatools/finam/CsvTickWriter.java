@@ -1,6 +1,6 @@
 package ru.prolib.aquila.datatools.finam;
 
-import java.io.*;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import org.joda.time.format.DateTimeFormat;
@@ -8,8 +8,11 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.csvreader.CsvWriter;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityException;
-import ru.prolib.aquila.core.BusinessEntities.Trade;
+import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.datatools.GeneralException;
+import ru.prolib.aquila.datatools.IOException;
+import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 /**
  * Tick-data writer.
@@ -17,7 +20,7 @@ import ru.prolib.aquila.core.BusinessEntities.Trade;
  * Writes tick-data to CSV-file. The output is compatible with Finam CSV file
  * for tick data and "DATE, TIME, LAST, VOL" format.  
  */
-public class CsvTickWriter implements Closeable {
+public class CsvTickWriter implements TickWriter {
 	private static final DateTimeFormatter dateFormat;
 	private static final DateTimeFormatter timeFormat;
 	
@@ -27,32 +30,42 @@ public class CsvTickWriter implements Closeable {
 	}
 	
 	private final CsvWriter writer;
+	private final Security security;
 	
-	public CsvTickWriter(OutputStream stream) {
+	public CsvTickWriter(Security security, OutputStream stream) {
 		super();
+		this.security = security;
 		writer = new CsvWriter(stream, ',', Charset.forName("UTF-8"));
 	}
-	
-	public void write(Trade trade) throws IOException {
+
+	@Override
+	public void write(Tick tick) throws GeneralException {
 		try {
 			String entries[] = {
-				dateFormat.print(trade.getTime()),
-				timeFormat.print(trade.getTime()),
-				trade.getSecurity().shrinkPrice(trade.getPrice()),
-				Long.toString(trade.getQty())
+				dateFormat.print(tick.getTime()),
+				timeFormat.print(tick.getTime()),
+				security.shrinkPrice(tick.getValue()),
+				Long.toString(tick.getOptionalValueAsLong())
 			};
 			writer.writeRecord(entries);
-		} catch ( SecurityException e ) {
-			throw new RuntimeException(e);
+		} catch ( java.io.IOException e ) {
+			throw new IOException(e);
+		} catch ( Exception e ) {
+			throw new GeneralException(e);
 		}
 	}
 	
-	public void writeHeader() throws IOException {
+	public void writeHeader() throws GeneralException {
 		String headers[] = { "<DATE>", "<TIME>", "<LAST>", "<VOL>" };
-		writer.writeRecord(headers);
+		try {
+			writer.writeRecord(headers);
+		} catch ( java.io.IOException e ) {
+			throw new IOException(e);
+		}
 	}
 
-	public void close() throws IOException {
+	@Override
+	public void close() {
 		writer.close();
 	}
 
