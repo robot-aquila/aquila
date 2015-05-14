@@ -1,11 +1,11 @@
 package ru.prolib.aquila.quik.assembler.cache.dde;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +25,14 @@ public class RowDataConverter {
 		logger = LoggerFactory.getLogger(RowDataConverter.class);
 	}
 	
-	private final SimpleDateFormat fullTimeFormat;
+	private final DateTimeFormatter fullTimeFormat;
 	private final String dateFormat, timeFormat;
 	
 	public RowDataConverter(String dateFormat, String timeFormat) {
 		super();
 		this.dateFormat = dateFormat;
 		this.timeFormat = timeFormat;
-		fullTimeFormat = new SimpleDateFormat(dateFormat + " " + timeFormat);
+		fullTimeFormat = DateTimeFormat.forPattern(dateFormat + " " + timeFormat);
 	}
 	
 	String getTimeFormat() {
@@ -73,8 +73,8 @@ public class RowDataConverter {
 			return null;
 		}
 		try {
-			return new DateTime(fullTimeFormat.parse(date + " " + time));
-		} catch ( ParseException e ) {
+			return fullTimeFormat.parseDateTime(date + " " + time);
+		} catch ( Exception e ) {
 			throw new RowTimeParseException(dateId, timeId,
 					date, time, dateFormat, timeFormat);
 		}

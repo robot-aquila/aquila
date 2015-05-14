@@ -114,6 +114,16 @@ public class RowDataConverterTest {
 		assertEquals(new DateTime(2013, 6, 1, 23, 45, 30), found);
 		//assertEquals(format.parse("2013-06-01 23:45:30"), found);
 	}
+	
+	@Test
+	public void testGetTime_TheOneHourErrorIssue() throws Exception {
+		data.put("date", "2015-05-13");
+		data.put("time", "10:05:50");
+		DateTime x = converter.getTime(row, "date", "time", false);
+		assertEquals(10, x.getHourOfDay());
+		assertEquals( 5, x.getMinuteOfHour());
+		assertEquals(50, x.getSecondOfMinute());
+	}
 
 	@Test
 	public void testGetDouble() throws Exception {
