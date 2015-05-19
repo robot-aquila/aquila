@@ -41,7 +41,9 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	{
 		File file = getFile(descr, date);
 		CsvTickWriter writer = null;
-		boolean append = file.exists() && file.length() > 0;
+								// TODO: Just better for QUIK. 
+								// Need improvements for universal approach.
+		boolean append = false; // file.exists() && file.length() > 0;
 		try {
 			writer = new CsvTickWriter(terminal.getSecurity(descr),
 					createStream(file, append));
