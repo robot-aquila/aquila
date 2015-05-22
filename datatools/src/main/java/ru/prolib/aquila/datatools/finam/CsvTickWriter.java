@@ -17,15 +17,15 @@ import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 /**
  * Tick-data writer.
  * <p>
- * Writes tick-data to CSV-file. The output is compatible with Finam CSV file
- * for tick data and "DATE, TIME, LAST, VOL" format.  
+ * Writes tick-data to CSV-file. The output is close to Finam CSV file
+ * of tick data and "DATE, TIME, LAST, VOL" format. The DATA column is not using
+ * because the date can be determined by file name. Additional column
+ * MILLISECONDS stores a millisecond of tick time. 
  */
 public class CsvTickWriter implements TickWriter {
-	private static final DateTimeFormatter dateFormat;
 	private static final DateTimeFormatter timeFormat;
 	
 	static {
-		dateFormat = DateTimeFormat.forPattern("yyyyMMdd");
 		timeFormat = DateTimeFormat.forPattern("HHmmss");
 	}
 	
@@ -42,10 +42,10 @@ public class CsvTickWriter implements TickWriter {
 	public void write(Tick tick) throws GeneralException {
 		try {
 			String entries[] = {
-				dateFormat.print(tick.getTime()),
 				timeFormat.print(tick.getTime()),
 				security.shrinkPrice(tick.getValue()),
-				Long.toString(tick.getOptionalValueAsLong())
+				Long.toString(tick.getOptionalValueAsLong()),
+				Long.toString(tick.getTime().getMillisOfSecond())
 			};
 			writer.writeRecord(entries);
 		} catch ( java.io.IOException e ) {
@@ -56,7 +56,7 @@ public class CsvTickWriter implements TickWriter {
 	}
 	
 	public void writeHeader() throws GeneralException {
-		String headers[] = { "<DATE>", "<TIME>", "<LAST>", "<VOL>" };
+		String headers[] = { "<TIME>", "<LAST>", "<VOL>", "<MILLISECONDS>" };
 		try {
 			writer.writeRecord(headers);
 		} catch ( java.io.IOException e ) {

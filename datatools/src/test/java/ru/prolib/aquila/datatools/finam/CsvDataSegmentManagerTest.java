@@ -71,10 +71,10 @@ public class CsvDataSegmentManagerTest {
 		List<String> actual = IOUtils.readLines(is, Charset.defaultCharset());
 		is.close();
 		List<String> expected = new Vector<String>();
-		expected.add("<DATE>,<TIME>,<LAST>,<VOL>");
-		expected.add("20150513,093000,100.30,100");
-		expected.add("20150513,094500,105.46,120");
-		expected.add("20150513,100000,106.11,135");
+		expected.add("<TIME>,<LAST>,<VOL>,<MILLISECONDS>");
+		expected.add("093000,100.30,100,0");
+		expected.add("094500,105.46,120,0");
+		expected.add("100000,106.11,135,0");
 		assertEquals(expected, actual);
 	}
 	
