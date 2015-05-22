@@ -35,7 +35,8 @@ public class TradesEntryTest {
 	@Test
 	public void testGetEntryTime() {
 		entry = new TradesEntry(gateway, rs, 100);
-		assertEquals(new Date(), entry.getEntryTime());
+		long d = Math.abs(new Date().getTime() - entry.getEntryTime().getTime());
+		assertTrue(d <= 1000);
 	}
 	
 	@Test

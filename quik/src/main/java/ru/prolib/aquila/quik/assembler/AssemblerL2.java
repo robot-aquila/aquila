@@ -27,6 +27,7 @@ public class AssemblerL2 {
 	}
 	
 	private final QUIKTerminal terminal;
+	private long lastTradeId = 0, skippedTradesCount = 0;
 	
 	AssemblerL2(QUIKTerminal terminal) {
 		super();
@@ -157,8 +158,21 @@ public class AssemblerL2 {
 				if ( trade == null ) {
 					return false;
 				}
-				terminal.getEditableSecurity(trade.getSecurityDescriptor())
-					.fireTradeEvent(trade);
+				long tradeId = trade.getId();
+				if ( tradeId > lastTradeId ) {
+					if ( skippedTradesCount > 0 ) {
+						logger.warn("Duplicate trades were skipped: {} pcs.",
+								skippedTradesCount);
+						skippedTradesCount = 0;
+					}
+					
+					terminal.getEditableSecurity(trade.getSecurityDescriptor())
+						.fireTradeEvent(trade);
+					lastTradeId = tradeId;
+				} else {
+					skippedTradesCount ++;
+				}
+				
 			} while ( entry.next() );
 		} catch ( RowException e ) {
 			Object args[] = { entry.count(), e };

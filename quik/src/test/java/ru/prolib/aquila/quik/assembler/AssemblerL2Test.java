@@ -156,18 +156,18 @@ public class AssemblerL2Test {
 		// Две сделки в блоке и блок завершен
 		EditableSecurity s = control.createMock(EditableSecurity.class);
 		TradesEntry entry = control.createMock(TradesEntry.class);
-		Trade trade = control.createMock(Trade.class);
+		Trade trade1 = new Trade(terminal), trade2 = new Trade(terminal);
+		trade1.setId(1L); trade1.setSecurityDescriptor(descr);
+		trade2.setId(2L); trade2.setSecurityDescriptor(descr);
 		
-		expect(entry.access(same(terminal))).andReturn(trade);
-		expect(trade.getSecurityDescriptor()).andReturn(descr);
+		expect(entry.access(same(terminal))).andReturn(trade1);
 		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
-		s.fireTradeEvent(same(trade));
+		s.fireTradeEvent(same(trade1));
 		expect(entry.next()).andReturn(true);
 		
-		expect(entry.access(same(terminal))).andReturn(trade);
-		expect(trade.getSecurityDescriptor()).andReturn(descr);
+		expect(entry.access(same(terminal))).andReturn(trade2);
 		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
-		s.fireTradeEvent(same(trade));
+		s.fireTradeEvent(same(trade2));
 		expect(entry.next()).andReturn(false);
 		
 		control.replay();
@@ -182,18 +182,18 @@ public class AssemblerL2Test {
 		// Две сделки в блоке и блок не завершен
 		EditableSecurity s = control.createMock(EditableSecurity.class);
 		TradesEntry entry = control.createMock(TradesEntry.class);
-		Trade trade = control.createMock(Trade.class);
+		Trade trade1 = new Trade(terminal), trade2 = new Trade(terminal);
+		trade1.setId(1L); trade1.setSecurityDescriptor(descr);
+		trade2.setId(2L); trade2.setSecurityDescriptor(descr);
 		
-		expect(entry.access(same(terminal))).andReturn(trade);
-		expect(trade.getSecurityDescriptor()).andReturn(descr);
+		expect(entry.access(same(terminal))).andReturn(trade1);
 		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
-		s.fireTradeEvent(same(trade));
+		s.fireTradeEvent(same(trade1));
 		expect(entry.next()).andReturn(true);
 		
-		expect(entry.access(same(terminal))).andReturn(trade);
-		expect(trade.getSecurityDescriptor()).andReturn(descr);
+		expect(entry.access(same(terminal))).andReturn(trade2);
 		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
-		s.fireTradeEvent(same(trade));
+		s.fireTradeEvent(same(trade2));
 		expect(entry.next()).andReturn(true);
 		
 		expect(entry.access(same(terminal))).andReturn(null);
@@ -202,6 +202,37 @@ public class AssemblerL2Test {
 		
 		assertFalse(asm.tryAssemble(entry));
 		
+		control.verify();
+	}
+	
+	@Test
+	public void testAssemble_Trades_SkipDuplicatesById() throws Exception {
+		EditableSecurity s = control.createMock(EditableSecurity.class);
+		TradesEntry entry = control.createMock(TradesEntry.class);
+		Trade trade1, trade2, trade3;
+		trade1 = new Trade(terminal);
+		trade2 = new Trade(terminal);
+		trade3 = new Trade(terminal);
+		trade1.setId(98L); trade1.setSecurityDescriptor(descr);
+		trade2.setId(99L); trade2.setSecurityDescriptor(descr);
+		trade3.setId(98L); trade3.setSecurityDescriptor(descr); // duplicate
+
+		expect(entry.access(same(terminal))).andReturn(trade1);
+		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		s.fireTradeEvent(same(trade1));
+		expect(entry.next()).andReturn(true);
+		
+		expect(entry.access(same(terminal))).andReturn(trade2);
+		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		s.fireTradeEvent(same(trade2));
+		expect(entry.next()).andReturn(true);
+		
+		expect(entry.access(same(terminal))).andReturn(trade3);
+		expect(entry.next()).andReturn(false);
+		control.replay();
+		
+		assertTrue(asm.tryAssemble(entry));
+
 		control.verify();
 	}
 	

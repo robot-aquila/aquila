@@ -1,8 +1,11 @@
 package ru.prolib.aquila.quik.assembler.cache;
 
 import static org.junit.Assert.*;
+
 import java.util.Date;
+
 import org.junit.*;
+
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -23,7 +26,8 @@ public class PortfolioEntryTest {
 	
 	@Test
 	public void testGetEntryTime() throws Exception {
-		assertEquals(new Date(), row.getEntryTime());
+		long d = Math.abs(new Date().getTime() - row.getEntryTime().getTime());
+		assertTrue(d <= 1000);
 	}
 	
 	@Test

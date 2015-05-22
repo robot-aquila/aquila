@@ -21,7 +21,8 @@ public class PositionEntryTest {
 	
 	@Test
 	public void testGetEntryTime() throws Exception {
-		assertEquals(new Date(), row.getEntryTime());
+		long d = Math.abs(new Date().getTime() - row.getEntryTime().getTime());
+		assertTrue(d <= 1000);
 	}
 	
 	@Test
