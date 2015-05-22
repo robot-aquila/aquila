@@ -37,6 +37,7 @@ public class TradesGateway implements TableGateway {
 	private static final String QTY = "QTY";
 	private static final String DIR = "BUYSELL";
 	private static final String VALUE = "VALUE";
+	private static final String MICROSECONDS = "TRADETIME_MSEC";
 	private static final String REQUIRED_HEADERS[] = {
 		ID,
 		DATE,
@@ -47,6 +48,7 @@ public class TradesGateway implements TableGateway {
 		QTY,
 		DIR,
 		VALUE,
+		MICROSECONDS,
 	};
 	private static final Map<String, Direction> DIR_MAP;
 	
@@ -117,7 +119,8 @@ public class TradesGateway implements TableGateway {
 			trade.setPrice(converter.getDouble(row, PRICE));
 			trade.setQty(converter.getLong(row, QTY));
 			trade.setSecurityDescriptor(descr);
-			trade.setTime(converter.getTime(row, DATE, TIME, false));
+			trade.setTime(converter.getTime(row, DATE, TIME, false)
+				.plusMillis(converter.getInteger(row, MICROSECONDS) / 1000));
 			trade.setVolume(converter.getDouble(row, VALUE));
 			return trade;
 		} catch ( ValueException e ) {

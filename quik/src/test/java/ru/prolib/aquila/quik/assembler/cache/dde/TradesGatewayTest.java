@@ -58,6 +58,7 @@ public class TradesGatewayTest {
 				"QTY",
 				"BUYSELL",
 				"VALUE",
+				"TRADETIME_MSEC",
 		};
 		assertArrayEquals(expected, gateway.getRequiredHeaders());
 	}
@@ -108,6 +109,7 @@ public class TradesGatewayTest {
 		map.put("TRADEDATE", "1998-01-15");
 		map.put("TRADETIME", "00:20:19");
 		map.put("VALUE", 200d);
+		map.put("TRADETIME_MSEC", 214525d);
 		expect(cache.getDescriptor(eq("SBER"), eq("EQBR"))).andReturn(descr);
 		control.replay();
 		
@@ -117,7 +119,7 @@ public class TradesGatewayTest {
 		expected.setPrice(45.90d);
 		expected.setQty(1000L);
 		expected.setSecurityDescriptor(descr);
-		expected.setTime(new DateTime(1998, 1, 15, 0, 20, 19));
+		expected.setTime(new DateTime(1998, 1, 15, 0, 20, 19, 214));
 		expected.setVolume(200d);
 		assertEquals(expected, gateway.makeTrade(terminal, row));
 
