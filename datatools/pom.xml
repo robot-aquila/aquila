@@ -8,6 +8,11 @@
 	  	<version>0.1.40-SNAPSHOT</version>
 	  	<relativePath>../aquila.project/pom.xml</relativePath>
 	</parent>
+	<properties>
+		<spring.version>4.1.6.RELEASE</spring.version>
+		<hibernate.version>3.6.10.Final</hibernate.version>
+	</properties>
+	
 		
 	<dependencies>
 		<dependency>
@@ -25,6 +30,58 @@
 			<artifactId>selenium-java</artifactId>
 			<version>2.45.0</version>
 		</dependency>
+		<dependency>
+        	<groupId>org.hsqldb</groupId>
+        	<artifactId>hsqldb</artifactId>
+        	<version>2.3.2</version>
+    	</dependency>
+    	<dependency>
+        	<groupId>org.liquibase</groupId>
+        	<artifactId>liquibase-core</artifactId>
+        	<version>3.3.2</version>
+    	</dependency>
+    	<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+		   <groupId>org.hibernate</groupId>
+		   <artifactId>hibernate-core</artifactId>
+		   <version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.19.0-GA</version>
+		</dependency>
+		
 	</dependencies>
 	
 	<build>
@@ -46,8 +103,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+            	<groupId>org.liquibase</groupId>
+            	<artifactId>liquibase-maven-plugin</artifactId>
+            	<version>3.3.2</version>
+            	<configuration>
+                	<propertyFile>src/main/resources/liquibase/liquibase.properties</propertyFile>
+                	<changeLogFile>src/main/resources/liquibase/master.xml</changeLogFile>
+                	<!-- changeLogFile>src/test/resources/liquibase/test-data.xml</changeLogFile -->
+            	</configuration>
+        	</plugin>
+			
 		</plugins>
 	</build>
 	
 </project>
-
