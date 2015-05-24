@@ -29,22 +29,26 @@ public class ConstantSecurityPropertiesEntityTest {
 		assertNull(entity.getSymbol());
 		assertNull(entity.getDisplayName());
 		assertNull(entity.getExpirationTime());
+		assertNull(entity.getStartingTime());
 		assertNull(entity.getCurrencyOfCost());
 	}
 
 	@Test
 	public void testSettersAndGetters() throws Exception {
+		DateTime starting = new DateTime(2010, 1, 1, 0, 0, 0, 0);
 		DateTime expiration = new DateTime(2015, 4, 26, 14, 30, 20, 0);
 		Currency currency = Currency.getInstance("EUR");
 		entity.setId(215L);
 		entity.setSymbol(symbol);
 		entity.setDisplayName("foobar");
+		entity.setStartingTime(starting);
 		entity.setExpirationTime(expiration);
 		entity.setCurrencyOfCost(currency);
 		
 		assertEquals(new Long(215L), entity.getId());
 		assertSame(symbol, entity.getSymbol());
 		assertEquals("foobar", entity.getDisplayName());
+		assertEquals(starting, entity.getStartingTime());
 		assertEquals(expiration, entity.getExpirationTime());
 		assertEquals(currency, entity.getCurrencyOfCost());
 	}

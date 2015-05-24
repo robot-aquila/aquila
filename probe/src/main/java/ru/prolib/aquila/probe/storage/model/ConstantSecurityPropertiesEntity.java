@@ -13,7 +13,7 @@ public class ConstantSecurityPropertiesEntity
 	private Long id;
 	private SymbolEntity symbol;
 	private String displayName;
-	private DateTime expirationTime;
+	private DateTime expirationTime, startingTime;
 	private Currency currencyOfCost;
 	
 	public ConstantSecurityPropertiesEntity() {
@@ -66,6 +66,15 @@ public class ConstantSecurityPropertiesEntity
 	
 	public void setCurrencyOfCost(Currency currency) {
 		this.currencyOfCost = currency;
+	}
+
+	@Override
+	public DateTime getStartingTime() {
+		return startingTime;
+	}
+	
+	public void setStartingTime(DateTime time) {
+		this.startingTime = time;
 	}
 
 }

@@ -59,6 +59,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		assertNotNull(symbol);
 		assertEquals(new Long(1001L), symbol.getId());
 		assertEquals("RTS", entity.getDisplayName());
+		assertTime(new DateTime(2010, 1, 1, 0, 0, 0, 15), entity.getStartingTime());
 		assertTime(new DateTime(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
 		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
@@ -85,6 +86,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		assertEquals(new Long(16), entity.getId());
 		assertEquals(new Long(1002), entity.getSymbol().getId());
 		assertEquals("Si", entity.getDisplayName());
+		assertTime(new DateTime(2012, 12, 31, 23, 59, 59, 999), entity.getStartingTime());
 		assertTime(new DateTime(2015, 6, 16, 0, 0, 0), entity.getExpirationTime());
 		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
@@ -103,6 +105,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		assertEquals(new Long(15), entity.getId());
 		assertEquals(new Long(1001), entity.getSymbol().getId());
 		assertEquals("RTS", entity.getDisplayName());
+		assertTime(new DateTime(2010, 1, 1, 0, 0, 0, 15), entity.getStartingTime());
 		assertTime(new DateTime(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
 		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
@@ -125,6 +128,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		entity = repository.createEntity();
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zulu24");
+		entity.setStartingTime(new DateTime(2010, 1, 1, 0, 0, 0, 0));
 		entity.setExpirationTime(new DateTime(2015, 04, 15, 13, 45, 10, 540));
 		entity.setSymbol(symbols.getById(1003L));
 		
@@ -134,6 +138,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		assertEquals(new Long(17), entity.getId());
 		assertEquals(1, super.countRowsInTableWhere("constant_security_properties",
 				"id=17 AND symbol=1003 AND display_name='Zulu24' AND " +
+				"starting_time='2010-01-01 00:00:00.000' AND " +
 				"expiration_time='2015-04-15 13:45:10.540' AND " +
 				"currency_of_cost='EUR'"));
 	}
@@ -143,6 +148,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		entity = repository.getById(16L);
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zuko");
+		entity.setStartingTime(new DateTime(1999, 6, 1, 0, 0, 0, 1));
 		entity.setExpirationTime(new DateTime(2000, 1, 1, 23, 59, 59, 999));
 		entity.setSymbol(symbols.getById(1003L));
 		
@@ -151,10 +157,12 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		
 		assertEquals(1, super.countRowsInTableWhere("constant_security_properties",
 				"id=16 AND symbol=1003 AND display_name='Zuko' AND " +
+				"starting_time='1999-06-01 00:00:00.001' AND " +
 				"expiration_time='2000-01-01 23:59:59.999' AND " +
 				"currency_of_cost='EUR'"));
 		assertEquals(0, super.countRowsInTableWhere("constant_security_properties",
 				"id=16 AND symbol=1002 AND display_name='Si' AND " +
+				"starting_time='2012-12-31 23:59:59.999' AND " +
 				"expiration_time='2015-06-16 00:00:00.000' AND " +
 				"currency_of_cost='RUB'"));
 	}

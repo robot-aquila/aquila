@@ -36,6 +36,7 @@
 			<column name="id">15</column>
 			<column name="symbol">1001</column>
 			<column name="display_name">RTS</column>
+			<column name="starting_time">2010-01-01 00:00:00.015</column>
 			<column name="expiration_time">2015-04-15 00:00:00</column>
 			<column name="currency_of_cost">RUB</column>
 		</insert>
@@ -43,6 +44,7 @@
 			<column name="id">16</column>
 			<column name="symbol">1002</column>
 			<column name="display_name">Si</column>
+			<column name="starting_time">2012-12-31 23:59:59.999</column>
 			<column name="expiration_time">2015-06-16 00:00:00</column>
 			<column name="currency_of_cost">RUB</column>
 		</insert>

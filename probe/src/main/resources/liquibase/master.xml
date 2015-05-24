@@ -37,7 +37,10 @@
         	<column name="display_name" type="varchar(128)" >
             	<constraints nullable="false" />
             </column>
-            <column name="expiration_time" type="timestamp with timezone" >
+            <column name="starting_time" type="timestamp" >
+				<constraints nullable="false" />
+            </column>
+            <column name="expiration_time" type="timestamp" >
             	<constraints nullable="true" />
             </column>
             <column name="currency_of_cost" type="varchar(3)" >

@@ -28,9 +28,17 @@ public interface ConstantSecurityProperties {
 	/**
 	 * Get expiration time of the security.
 	 * <p>
-	 * @return expiration time or null if the security doesn't expire
+	 * @return expiration time or null if the security doesn't expire or
+	 * expiration time is unknown.
 	 */
 	public DateTime getExpirationTime();
+	
+	/**
+	 * Get starting time of the security.
+	 * <p>
+	 * @return
+	 */
+	public DateTime getStartingTime();
 
 	/**
 	 * Get the currency of cost values of {@link TradingSessionProperties}.

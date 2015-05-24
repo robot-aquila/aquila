@@ -24,14 +24,15 @@
       <x>203</x>
       <y>119</y>
       <w>245</w>
-      <h>77</h>
+      <h>91</h>
     </coordinates>
     <panel_attributes>ConstantSecurityProperties
 --
 --
 +getSecurityDescriptor(): SecurityDescriptor
 +getDisplayName(): String
-+getExpirationTime(): LocalDateTime
++getExpirationTime(): DateTime
++getStartingTime(): DateTime
 +getCurrencyOfCost(): Currency</panel_attributes>
     <additional_attributes/>
   </element>

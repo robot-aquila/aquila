@@ -8,6 +8,8 @@
 		</id>
 		<many-to-one name="symbol" class="ru.prolib.aquila.probe.storage.model.SymbolEntity" column="symbol" unique="true" />
 		<property name="displayName" column="display_name" length="128" not-null="true" />
+		<property name="startingTime" column="starting_time" not-null="true"
+			type="ru.prolib.aquila.probe.storage.dao.DateTimeType" />
 		<property name="expirationTime" column="expiration_time" not-null="true"
 			type="ru.prolib.aquila.probe.storage.dao.DateTimeType" />
 		<property name="currencyOfCost" column="currency_of_cost" length="3" not-null="true" />
