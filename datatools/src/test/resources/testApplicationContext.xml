@@ -28,6 +28,6 @@
 		<constructor-arg type="java.lang.String" value="src/test/resources/liquibase/test-data.xml" />
 	</bean>
 	
-	<import resource="commonProbeTerminal.xml"></import>
+	<import resource="storage.xml"></import>
  
 </beans>

@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>aquila-ui</artifactId>
 	<parent>
-		<groupId>ru.prolib</groupId>
+		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
 	  	<version>0.1.40-SNAPSHOT</version>
 		<relativePath>../aquila.project/pom.xml</relativePath>
@@ -10,7 +10,7 @@
   
 	<dependencies>
 		<dependency>
-			<groupId>ru.prolib</groupId>
+			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-core</artifactId>
 			<version>0.1.40-SNAPSHOT</version>
 		</dependency>

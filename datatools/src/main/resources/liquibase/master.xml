@@ -24,6 +24,8 @@
             	<constraints nullable="false" />
             </column>
         </createTable>
+        <addUniqueConstraint tableName="symbols"
+        	columnNames="code, class_code, currency, type" />
         
         <createTable tableName="constant_security_properties">
         	<column name="id" autoIncrement="true" type="bigint">
