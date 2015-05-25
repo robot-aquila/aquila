@@ -20,7 +20,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.data.Tick;
 
 public class CsvTickWriterTest {
@@ -43,7 +43,7 @@ public class CsvTickWriterTest {
 		file = File.createTempFile("finam-tick-writer-test-", ".csv");
 		file.deleteOnExit();
 		output = new FileOutputStream(file);
-		terminal = new TerminalBuilder().buildTerminal();
+		terminal = new BasicTerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 		security.setPrecision(2);
 		security.setMinStepSize(0.01d);

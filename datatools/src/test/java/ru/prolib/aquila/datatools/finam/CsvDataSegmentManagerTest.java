@@ -22,7 +22,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriter;
@@ -44,7 +44,7 @@ public class CsvDataSegmentManagerTest {
 	@Before
 	public void setUp() throws Exception {
 		root.mkdirs();
-		terminal = new TerminalBuilder().buildTerminal();
+		terminal = new BasicTerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr1);
 		security.setPrecision(2);
 		security.setMinStepSize(0.01d);
