@@ -6,13 +6,13 @@ import org.joda.time.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.probe.internal.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class PROBETerminalBuilder {
-	private TerminalBuilder childBuilder;
-	private EditableTerminal underlyingTerminal;
+	private BasicTerminalBuilder childBuilder;
 	private Timeline timeline;
 	private EventSystem eventSystem;
 	private Interval timeInterval;
@@ -25,14 +25,14 @@ public class PROBETerminalBuilder {
 		this(null);
 	}
 	
-	public PROBETerminalBuilder(TerminalBuilder childBuilder) {
+	public PROBETerminalBuilder(BasicTerminalBuilder childBuilder) {
 		super();
 		this.childBuilder = childBuilder;
 	}
 	
-	private TerminalBuilder getChildBuilder() {
+	private BasicTerminalBuilder getChildBuilder() {
 		if ( childBuilder == null ) {
-			childBuilder = new TerminalBuilder();
+			childBuilder = new BasicTerminalBuilder();
 		}
 		return childBuilder;
 	}
@@ -66,14 +66,11 @@ public class PROBETerminalBuilder {
 		return scheduler;
 	}
 	
-	private EditableTerminal getUnderlyingTerminal() {
-		if ( underlyingTerminal == null ) {
-			underlyingTerminal = getChildBuilder()
-				.withEventSystem(getEventSystem())
-				.withScheduler(getScheduler())
-				.buildTerminal();
-		}
-		return underlyingTerminal;
+	private BasicTerminalParams getBasicTerminalParams() {
+		return getChildBuilder()
+			.withEventSystem(getEventSystem())
+			.withScheduler(getScheduler())
+			.buildParams();
 	}
 	
 	private PROBEServiceLocator getServiceLocator() {
@@ -100,7 +97,7 @@ public class PROBETerminalBuilder {
 	public PROBETerminal buildTerminal() {
 		PROBEServiceLocator locator = getServiceLocator();
 		PROBETerminal terminal =
-				new PROBETerminal(getUnderlyingTerminal(), locator);
+				new PROBETerminal(getBasicTerminalParams(), locator);
 		locator.setDataStorage(getDataStorage());
 		locator.setDataProvider(getDataProvider());
 		locator.setTimeline(getTimeline());

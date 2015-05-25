@@ -22,7 +22,6 @@ public class DataProviderTest {
 	
 	private IMocksControl control;
 	private DataProvider dataProvider;
-	private EditableTerminal underlyingTerminal;
 	private PROBEServiceLocator locator;
 	private PROBETerminal terminal;
 	
@@ -35,9 +34,8 @@ public class DataProviderTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		underlyingTerminal = control.createMock(EditableTerminal.class);
 		locator = new PROBEServiceLocator();
-		terminal = new PROBETerminal(underlyingTerminal, locator);
+		terminal = control.createMock(PROBETerminal.class);
 		dataProvider = new DataProvider();
 	}
 
@@ -53,9 +51,9 @@ public class DataProviderTest {
 		DateTime time = DateTime.now();
 		locator.setDataStorage(storage);
 		locator.setTimeline(timeline);
+		expect(terminal.getServiceLocator()).andStubReturn(locator);
 		expect(storage.getIterator(descr, time)).andReturn(iterator);
-		expect(underlyingTerminal.getEditableSecurity(descr))
-			.andReturn(security);
+		expect(terminal.getEditableSecurity(descr)).andReturn(security);
 		expect(storage.getSecurityProperties(descr)).andReturn(props);
 		final Vector<TLEventSource> actual = new Vector<TLEventSource>();
 		timeline.registerSource((TLEventSource) anyObject());

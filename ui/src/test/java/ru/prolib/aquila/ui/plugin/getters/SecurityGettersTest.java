@@ -9,7 +9,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.data.*;
 
 /**
@@ -27,7 +27,7 @@ public class SecurityGettersTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		
-		EditableTerminal terminal = new TerminalBuilder().buildTerminal();
+		EditableTerminal terminal = new BasicTerminalBuilder().buildTerminal();
 		
 		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
 		EditableSecurity sc = terminal.getEditableSecurity(descr);
