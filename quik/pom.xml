@@ -100,21 +100,21 @@
 			      		<configuration>
 			        		<artifactItems>
 			          			<artifactItem>
-			            			<groupId>ru.prolib</groupId>
+			            			<groupId>ru.prolib.aquila</groupId>
 			            			<artifactId>aquila-JQTrans-win-x86</artifactId>
 			            			<version>1.0</version>
 			            			<type>dll</type>
 			            			<destFileName>JQTrans.dll</destFileName>
 			          			</artifactItem>
 			          			<artifactItem>
-			            			<groupId>ru.prolib</groupId>
+			            			<groupId>ru.prolib.aquila</groupId>
 			            			<artifactId>aquila-TRANS2QUIK-win-x86</artifactId>
 			            			<version>1.0</version>
 			            			<type>dll</type>
 			            			<destFileName>TRANS2QUIK.dll</destFileName>
 			          			</artifactItem>
 			          			<artifactItem>
-			            			<groupId>ru.prolib</groupId>
+			            			<groupId>ru.prolib.aquila</groupId>
 			            			<artifactId>aquila-jddesvr-win-x86</artifactId>
 			            			<version>1.0</version>
 			            			<type>dll</type>
