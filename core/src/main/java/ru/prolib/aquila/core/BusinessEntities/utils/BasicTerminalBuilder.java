@@ -8,28 +8,34 @@ import ru.prolib.aquila.core.utils.SimpleCounter;
 /**
  * The terminal builder.
  */
-public class TerminalBuilder {
+public class BasicTerminalBuilder {
 	private EventSystem eventSystem;
 	private Scheduler scheduler;
+	private OrderProcessor orderProcessor;
 	
-	public TerminalBuilder() {
+	public BasicTerminalBuilder() {
 		
 	}
 	
 	public EditableTerminal buildTerminal() {
+		return new BasicTerminal(buildParams());
+	}
+	
+	public BasicTerminalParams buildParams() {
 		EventSystem es = getEventSystem();
-		TerminalImpl terminal = new TerminalImpl(new TerminalController(),
+		StarterQueue starter = new StarterQueue();
+		starter.add(new EventQueueStarter(es.getEventQueue(), 3000));
+		return new BasicTerminalParams(
+				new TerminalController(),
 				new TerminalEventDispatcher(es),
 				new Securities(new SecuritiesEventDispatcher(es)),
 				new Portfolios(new PortfoliosEventDispatcher(es)),
 				new OrdersImpl(new OrdersEventDispatcher(es),
 						new OrderFactoryImpl(), new SimpleCounter()),
-				new StarterQueue(),
+				starter,
 				getScheduler(),
-				es);
-		StarterQueue starter = terminal.getStarter(); 
-		starter.add(new EventQueueStarter(es.getEventQueue(), 3000));
-		return terminal;
+				es,
+				getOrderProcessor());
 	}
 	
 	/**
@@ -38,7 +44,7 @@ public class TerminalBuilder {
 	 * @param facade - the specified event system facade to use in terminal
 	 * @return the builder instance
 	 */
-	public TerminalBuilder withEventSystem(EventSystem facade) {
+	public BasicTerminalBuilder withEventSystem(EventSystem facade) {
 		this.eventSystem = facade;
 		return this;
 	}
@@ -49,7 +55,7 @@ public class TerminalBuilder {
 	 * @param id - the thread identifier of event queue 
 	 * @return the builder instance
 	 */
-	public TerminalBuilder withCommonEventSystemAndQueueId(String id) {
+	public BasicTerminalBuilder withCommonEventSystemAndQueueId(String id) {
 		this.eventSystem = new EventSystemImpl(id);
 		return this;
 	}
@@ -60,7 +66,7 @@ public class TerminalBuilder {
 	 * @param scheduler - scheduler to use
 	 * @return the builder instance
 	 */
-	public TerminalBuilder withScheduler(Scheduler scheduler) {
+	public BasicTerminalBuilder withScheduler(Scheduler scheduler) {
 		this.scheduler = scheduler;
 		return this;
 	}
@@ -93,11 +99,13 @@ public class TerminalBuilder {
 	public TerminalBuilder withStarter(StarterQueue starter) {
 		return this;
 	}
+	*/
 	
-	public TerminalBuilder withOrderProcessor(OrderProcessor processor) {
+	public BasicTerminalBuilder withOrderProcessor(OrderProcessor processor) {
+		this.orderProcessor = processor;
 		return this;
 	}
-	*/
+	
 	
 	private EventSystem getEventSystem() {
 		return eventSystem == null ? new EventSystemImpl() : eventSystem;
@@ -105,6 +113,10 @@ public class TerminalBuilder {
 	
 	private Scheduler getScheduler() {
 		return scheduler == null ? new SchedulerLocal() : scheduler;
+	}
+	
+	private OrderProcessor getOrderProcessor() {
+		return orderProcessor;
 	}
 	
 }

@@ -22,7 +22,7 @@ import ru.prolib.aquila.core.utils.*;
  * 2012-08-16<br>
  * $Id: TerminalImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
  */
-public class TerminalImplTest {
+public class BasicTerminalTest {
 	private static Account account;
 	private static SecurityDescriptor descr;
 	private IMocksControl control;
@@ -35,7 +35,7 @@ public class TerminalImplTest {
 	private Scheduler scheduler;
 	private EventSystem es;
 	private OrderProcessor orderProcessor;
-	private TerminalImpl terminal;
+	private BasicTerminal terminal;
 	private EditableOrder order;
 	private Security security;
 	private Runnable task;
@@ -66,8 +66,9 @@ public class TerminalImplTest {
 		orderProcessor = control.createMock(OrderProcessor.class);
 		security = control.createMock(Security.class);
 		order = control.createMock(EditableOrder.class);
-		terminal = new TerminalImpl(controller, dispatcher,
-				securities, portfolios, orders, starter, scheduler, es);
+		terminal = new BasicTerminal(new BasicTerminalParams(controller,
+				dispatcher, securities, portfolios, orders, starter, scheduler,
+				es, orderProcessor));
 
 		expect(security.getDescriptor()).andStubReturn(descr);
 		taskHandler = new TaskHandlerImpl(task, scheduler);
@@ -79,7 +80,7 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testConstruct8() throws Exception {
+	public void testConstruct1() throws Exception {
 		assertSame(controller, terminal.getTerminalController());
 		assertSame(dispatcher, terminal.getTerminalEventDispatcher());
 		assertSame(securities, terminal.getSecurityStorage());
@@ -88,6 +89,7 @@ public class TerminalImplTest {
 		assertSame(starter, terminal.getStarter());
 		assertSame(scheduler, terminal.getScheduler());
 		assertSame(es, terminal.getEventSystem());
+		assertSame(orderProcessor, terminal.getOrderProcessor());
 	}
 	
 	@Test
@@ -308,7 +310,6 @@ public class TerminalImplTest {
 		expect(order.getActivator()).andReturn(null);
 		orderProcessor.placeOrder(same(terminal), same(order));
 		control.replay();
-		terminal.setOrderProcessor(orderProcessor);
 		
 		terminal.placeOrder(order);
 		
@@ -338,7 +339,6 @@ public class TerminalImplTest {
 		activator.stop();
 		orderProcessor.placeOrder(same(terminal), same(order));
 		control.replay();
-		terminal.setOrderProcessor(orderProcessor);
 		
 		terminal.placeOrder(order);
 		
@@ -350,7 +350,6 @@ public class TerminalImplTest {
 		expect(order.getStatus()).andReturn(OrderStatus.ACTIVE);
 		orderProcessor.cancelOrder(same(terminal), same(order));
 		control.replay();
-		terminal.setOrderProcessor(orderProcessor);
 		
 		terminal.cancelOrder(order);
 		
@@ -767,8 +766,8 @@ public class TerminalImplTest {
 	 * Вспомогательный метод тестирования.
 	 * <p>
 	 * Предназначен для тестирования методов
-	 * {@link TerminalImpl#firePanicEvent(int, String) и
-	 * {@link TerminalImpl#firePanicEvent(int, String, Object[])}. 
+	 * {@link BasicTerminal#firePanicEvent(int, String) и
+	 * {@link BasicTerminal#firePanicEvent(int, String, Object[])}. 
 	 * <p>
 	 * @param expectAction установить ожидания
 	 * @param initAction инициирующее действие
@@ -872,14 +871,6 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testSetGetOrderProcessor() throws Exception {
-		assertNull(terminal.getOrderProcessor());
-		terminal.setOrderProcessor(orderProcessor);
-		assertSame(orderProcessor, terminal.getOrderProcessor());
-		assertSame(orderProcessor, terminal.getOrderProcessor());
-	}
-
-	@Test
 	public void testCreateOrder0() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
 		expect(orders.createOrder(same(terminal))).andReturn(order);
@@ -919,7 +910,7 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testEventTypes() throws Exception {
-		terminal = (TerminalImpl) new TerminalBuilder().buildTerminal();
+		terminal = (BasicTerminal) new BasicTerminalBuilder().buildTerminal();
 		dispatcher = terminal.getTerminalEventDispatcher();
 		assertSame(dispatcher.OnConnected(), terminal.OnConnected());
 		assertSame(dispatcher.OnDisconnected(), terminal.OnDisconnected());
@@ -1122,20 +1113,6 @@ public class TerminalImplTest {
 		assertFalse(terminal.scheduled(task));
 		
 		control.verify();
-	}
-	
-	@Test
-	public void testSetScheduler() throws Exception {
-		Scheduler newScheduler = control.createMock(Scheduler.class);
-		terminal.setScheduler(newScheduler);
-		assertSame(newScheduler, terminal.getScheduler());
-	}
-	
-	@Test
-	public void testStarter() throws Exception {
-		StarterQueue newStarter = control.createMock(StarterQueue.class);
-		terminal.setStarter(newStarter);
-		assertSame(newStarter, terminal.getStarter());
 	}
 	
 	@Test

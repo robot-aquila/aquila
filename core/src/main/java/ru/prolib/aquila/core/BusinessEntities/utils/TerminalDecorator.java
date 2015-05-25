@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.utils.Counter;
 
+@Deprecated
 public class TerminalDecorator implements EditableTerminal {
 	private final EditableTerminal terminal;
 	
@@ -379,16 +380,6 @@ public class TerminalDecorator implements EditableTerminal {
 	@Override
 	public OrderProcessor getOrderProcessor() {
 		return terminal.getOrderProcessor();
-	}
-
-	@Override
-	public void setOrderProcessor(OrderProcessor processor) {
-		terminal.setOrderProcessor(processor);
-	}
-
-	@Override
-	public void setStarter(StarterQueue starter) {
-		terminal.setStarter(starter);
 	}
 
 	@Override

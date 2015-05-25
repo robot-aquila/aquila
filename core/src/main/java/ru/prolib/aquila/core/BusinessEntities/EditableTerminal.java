@@ -68,22 +68,6 @@ public interface EditableTerminal extends Terminal {
 	public OrderProcessor getOrderProcessor();
 	
 	/**
-	 * Установить экземпляр процессора заявок.
-	 * <p>
-	 * @param processor процессор заявок
-	 */
-	@Deprecated // TODO: use injection by terminal builder
-	public void setOrderProcessor(OrderProcessor processor);
-	
-	/**
-	 * Установить стартер терминала.
-	 * <p>
-	 * @param starter стартер
-	 */
-	@Deprecated // TODO: use injection by terminal builder
-	public void setStarter(StarterQueue starter);
-	
-	/**
 	 * Получить стартер терминала.
 	 * <p>
 	 * @return стартер

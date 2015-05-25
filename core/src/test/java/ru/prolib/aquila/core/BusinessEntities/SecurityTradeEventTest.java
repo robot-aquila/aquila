@@ -9,7 +9,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.BMUtils;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.data.Tick;
 
 /**
@@ -33,7 +33,7 @@ public class SecurityTradeEventTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		terminal = new TerminalBuilder().buildTerminal();
+		terminal = new BasicTerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 		security.setMinStepSize(1d);
 		security.setMinStepPrice(1d);

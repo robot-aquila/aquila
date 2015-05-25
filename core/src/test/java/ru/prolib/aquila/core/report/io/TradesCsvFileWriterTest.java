@@ -137,6 +137,7 @@ public class TradesCsvFileWriterTest {
 		FileInputStream fs = new FileInputStream(file);
 		byte b[] = new byte[(int) file.length()];
 		fs.read(b);
+		fs.close();
 		return new String(b);
 	}
 	

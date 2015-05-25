@@ -23,7 +23,7 @@ public class SecuritiesEventDispatcherTest {
 
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalBuilder().buildTerminal();
+		terminal = new BasicTerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 		dispatcher = new SecuritiesEventDispatcher(terminal.getEventSystem());
 		terminal.getEventSystem().getEventQueue().start();

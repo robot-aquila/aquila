@@ -12,7 +12,9 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.utils.*;
 
 /**
- * Типовая реализация терминала.
+ * Basic terminal.
+ * <p>
+ * Basic terminal functionality implementation.
  * <p>
  * Данный класс выполняет дополнительную обработку событий
  * {@link #OnConnected()} и {@link #OnDisconnected()}. Запрос на генерацию
@@ -36,77 +38,44 @@ import ru.prolib.aquila.core.utils.*;
  * которые будут использовать данные события как сигналы разрешающие или
  * запрещающие работу с терминалом.
  */
-final public class TerminalImpl implements EditableTerminal {
+public class BasicTerminal implements EditableTerminal {
 	private static Logger logger;
 	private volatile TerminalState state = TerminalState.STOPPED;
-	private EventSystem es;
-	private Securities securities;
-	private Portfolios portfolios;
-	private Orders orders;
-	private StarterQueue starter;
-	private Scheduler scheduler;
-	private TerminalEventDispatcher dispatcher;
-	private TerminalController controller;
-	private OrderProcessor orderProcessor;
+	private final EventSystem es;
+	private final Securities securities;
+	private final Portfolios portfolios;
+	private final Orders orders;
+	private final StarterQueue starter;
+	private final Scheduler scheduler;
+	private final TerminalEventDispatcher dispatcher;
+	private final TerminalController controller;
+	private final OrderProcessor orderProcessor;
 	
 	static {
-		logger = LoggerFactory.getLogger(TerminalImpl.class);
+		logger = LoggerFactory.getLogger(BasicTerminal.class);
 	}
 	
 	/**
-	 * Конструктор (полный).
+	 * Constructor.
 	 * <p>
-	 * Данный конструктор позволяет определить все связанные объекты.
-	 * Основное назначение этого конструктора - обеспечить возможность
-	 * тестирования класса терминала. В большинстве случаев, пользователям
-	 * класса нет необходимости использовать данный конструктор для
-	 * инстанцирования терминала. Большая часть передаваемых объектов фактически
-	 * является частью терминала и не имеют смысла в отрыве от него. В
-	 * большинстве случаев, достаточно воспользоваться конструктором с более
-	 * короткой сигнатурой.    
-	 * <p>
-	 * Аргументы отсортированны в порядке связанности. Первые фактически
-	 * являются частью данного класса и были выделенны исключительно в целях
-	 * облегчения дизайна. Ближе к концу аргументы менее связаны. Для них чаще
-	 * возникает необходимость передачи извне.
-	 * <p>
-	 * @param controller контроллер терминала
-	 * @param dispatcher диспетчер событий
-	 * @param securities набор инструментов
-	 * @param portfolios набор портфелей
-	 * @param orders набор заявок
-	 * @param starter пускач
-	 * @param scheduler планировщик задач
-	 * @param eventSystem фасад подсистемы событий
+	 * @param params - basic terminal constructor parameters
 	 */
-	public TerminalImpl(TerminalController controller,
-			TerminalEventDispatcher dispatcher,
-			Securities securities,
-			Portfolios portfolios,
-			Orders orders,
-			StarterQueue starter,
-			Scheduler scheduler,
-			EventSystem eventSystem)
-	{
+	public BasicTerminal(BasicTerminalParams params) {
 		super();
-		this.controller = controller;
-		this.dispatcher = dispatcher;
-		this.securities = securities;
-		this.portfolios = portfolios;
-		this.orders = orders;
-		this.starter = starter;
-		this.scheduler = scheduler;
-		this.es = eventSystem;
+		this.controller = params.getController();
+		this.dispatcher = params.getEventDispatcher();
+		this.securities = params.getSecurityStorage();
+		this.portfolios = params.getPortfolioStorage();
+		this.orders = params.getOrderStorage();
+		this.starter = params.getStarter();
+		this.scheduler = params.getScheduler();
+		this.es = params.getEventSystem();
+		this.orderProcessor = params.getOrderProcessor();
 	}
 	
 	@Override
-	public synchronized OrderProcessor getOrderProcessor() {
+	public OrderProcessor getOrderProcessor() {
 		return orderProcessor;
-	}
-	
-	@Override
-	public synchronized void setOrderProcessor(OrderProcessor processor) {
-		this.orderProcessor = processor;
 	}
 	
 	@Override
@@ -641,22 +610,6 @@ final public class TerminalImpl implements EditableTerminal {
 	@Override
 	public TaskHandler getTaskHandler(Runnable task) {
 		return scheduler.getTaskHandler(task);
-	}
-
-	@Override
-	@Deprecated
-	public void setStarter(StarterQueue starter) {
-		this.starter = starter;
-	}
-
-	/**
-	 * Установить планировщик задач.
-	 * <P>
-	 * @param scheduler планировщик
-	 */
-	@Deprecated
-	public void setScheduler(Scheduler scheduler) {
-		this.scheduler = scheduler;
 	}
 
 	/**

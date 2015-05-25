@@ -24,7 +24,7 @@ public class BMUtilsTest {
 	@Before
 	public void setUp() throws Exception {
 		utils = new BMUtils();
-		terminal = new TerminalBuilder().buildTerminal();
+		terminal = new BasicTerminalBuilder().buildTerminal();
 		security = terminal.getEditableSecurity(descr);
 	}
 

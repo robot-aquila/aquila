@@ -28,7 +28,7 @@ public class OrdersEventDispatcherTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalBuilder().buildTerminal();
+		terminal = new BasicTerminalBuilder().buildTerminal();
 		order = terminal.createOrder();
 		dispatcher = new OrdersEventDispatcher(terminal.getEventSystem());
 		terminal.getEventSystem().getEventQueue().start();

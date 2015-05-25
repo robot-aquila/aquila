@@ -23,7 +23,7 @@ public class PortfoliosEventDispatcherTest {
 
 	@Before
 	public void setUp() throws Exception {
-		terminal = new TerminalBuilder().buildTerminal();
+		terminal = new BasicTerminalBuilder().buildTerminal();
 		portfolio = terminal.getEditablePortfolio(account);
 		security = terminal.getEditableSecurity(descr);
 		position = portfolio.getEditablePosition(security);

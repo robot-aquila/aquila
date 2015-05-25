@@ -761,28 +761,6 @@ public class TerminalDecoratorTest {
 	}
 	
 	@Test
-	public void testSetOrderProcessor() throws Exception {
-		OrderProcessor opMock = control.createMock(OrderProcessor.class);
-		terminalMock.setOrderProcessor(opMock);
-		control.replay();
-		
-		decorator.setOrderProcessor(opMock);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testSetStarter() throws Exception {
-		StarterQueue starterMock = control.createMock(StarterQueue.class);
-		terminalMock.setStarter(starterMock);
-		control.replay();
-		
-		decorator.setStarter(starterMock);
-		
-		control.verify();;
-	}
-	
-	@Test
 	public void testGetStarter() throws Exception {
 		StarterQueue starterMock = control.createMock(StarterQueue.class);
 		expect(terminalMock.getStarter()).andReturn(starterMock);
