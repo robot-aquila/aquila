@@ -7,7 +7,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.MainHandler;
@@ -80,11 +80,11 @@ public class MainHandlerTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		EditableTerminal t1 = new TerminalBuilder().buildTerminal();
+		EditableTerminal t1 = new BasicTerminalBuilder().buildTerminal();
 		handler = new MainHandler(t1, asm);
 		Variant<EditableTerminal> vTerm = new Variant<EditableTerminal>()
 			.add(t1)
-			.add(new TerminalBuilder().buildTerminal());
+			.add(new BasicTerminalBuilder().buildTerminal());
 		Variant<Assembler> vAsm = new Variant<Assembler>(vTerm)
 			.add(asm)
 			.add(control.createMock(Assembler.class));

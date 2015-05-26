@@ -6,7 +6,8 @@ import java.util.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalReadyIfConnected;
 import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.dde.*;
@@ -148,14 +149,14 @@ public class QUIKFactory implements TerminalFactory {
 	 * @return терминал
 	 */
 	public Terminal createTerminal(QUIKConfig config, final DDEServer server) {
-		EditableTerminal underlyingTerminal = new TerminalBuilder()
+		BasicTerminalParams params = new BasicTerminalBuilder()
 			.withCommonEventSystemAndQueueId(getNextId())
-			.buildTerminal();
-		QUIKTerminal terminal = new QUIKTerminal(underlyingTerminal,
-				new QUIKServiceLocator(underlyingTerminal.getEventSystem()));
+			.withOrderProcessor(new QUIKOrderProcessor())
+			.buildParams();
+		QUIKTerminal terminal = new QUIKTerminal(params,
+				new QUIKServiceLocator(params.getEventSystem()));
 		Assembler asm = new Assembler(terminal);
 		terminal.getClient().setMainHandler(new MainHandler(terminal, asm));
-		terminal.setOrderProcessor(new QUIKOrderProcessor());
 		StarterQueue starter = terminal.getStarter();
 		starter.add(asm);
 		starter.add(new QUIKDDEStarter(config, asm, server));

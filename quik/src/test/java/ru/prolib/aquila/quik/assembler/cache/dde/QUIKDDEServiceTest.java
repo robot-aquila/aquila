@@ -9,7 +9,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.table.*;
@@ -141,8 +141,8 @@ public class QUIKDDEServiceTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		EditableTerminal t1 = new TerminalBuilder().buildTerminal(),
-						 t2 = new TerminalBuilder().buildTerminal();
+		EditableTerminal t1 = new BasicTerminalBuilder().buildTerminal(),
+						 t2 = new BasicTerminalBuilder().buildTerminal();
 		List<FR> rows1 = new Vector<FR>();
 		rows1.add(new FR("first", handler1));
 		rows1.add(new FR("second", handler2));

@@ -10,12 +10,15 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
+import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.quik.api.QUIKClient;
 import ru.prolib.aquila.quik.assembler.cache.Cache;
 
 public class QUIKTerminalTest {
 	private IMocksControl control;
-	private EditableTerminal underlyingTerminal; 
+	private BasicTerminalParams params;
+	private OrderProcessor orderProcessor;
 	private QUIKServiceLocator locator;
 	private QUIKTerminal terminal;
 	
@@ -29,10 +32,25 @@ public class QUIKTerminalTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		underlyingTerminal = control.createMock(EditableTerminal.class);
+		params = new BasicTerminalBuilder().withOrderProcessor(orderProcessor)
+				.buildParams();
 		locator = new QUIKServiceLocator(control.createMock(QUIKClient.class),
 				control.createMock(Cache.class));
-		terminal = new QUIKTerminal(underlyingTerminal, locator);
+		terminal = new QUIKTerminal(params, locator);
+	}
+	
+	@Test
+	public void testCtor2() throws Exception {
+		assertSame(params.getController(), terminal.getTerminalController());
+		assertSame(params.getEventDispatcher(), terminal.getTerminalEventDispatcher());
+		assertSame(orderProcessor, terminal.getOrderProcessor());
+		assertSame(params.getOrderStorage(), terminal.getOrderStorage());
+		assertSame(params.getPortfolioStorage(), terminal.getPortfolioStorage());
+		assertSame(params.getScheduler(), terminal.getScheduler());
+		assertSame(params.getSecurityStorage(), terminal.getSecurityStorage());
+		assertSame(params.getStarter(), terminal.getStarter());
+		assertSame(params.getEventSystem(), terminal.getEventSystem());
+		assertSame(locator, terminal.getServiceLocator());
 	}
 	
 	@Test
@@ -56,12 +74,6 @@ public class QUIKTerminalTest {
 		terminal.requestSecurity(null);
 		
 		control.verify();
-	}
-	
-	@Test
-	public void testConstruct2() throws Exception {
-		assertSame(underlyingTerminal, terminal.getTerminal());
-		assertSame(locator, terminal.getServiceLocator());
 	}
 
 }
