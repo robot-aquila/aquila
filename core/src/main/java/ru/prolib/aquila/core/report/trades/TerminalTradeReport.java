@@ -45,7 +45,7 @@ public class TerminalTradeReport implements TradeReport, EventListener {
 	@Override
 	public void start() throws StarterException {
 		report.start();
-		terminal.OnOrderTrade().addListener(this);
+		terminal.OnOrderTrade().addSyncListener(this);
 	}
 
 	@Override

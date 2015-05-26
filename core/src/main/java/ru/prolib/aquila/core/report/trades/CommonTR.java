@@ -103,9 +103,9 @@ public class CommonTR implements EditableTradeReport, EventListener {
 	
 	@Override
 	public synchronized void start() throws StarterException {
-		activeTrades.OnEnter().addListener(this);
-		activeTrades.OnChanged().addListener(this);
-		activeTrades.OnExit().addListener(this);
+		activeTrades.OnEnter().addSyncListener(this);
+		activeTrades.OnChanged().addSyncListener(this);
+		activeTrades.OnExit().addSyncListener(this);
 	}
 
 	@Override

@@ -52,7 +52,7 @@ public class TerminalTradeReportTest {
 	@Test
 	public void testStart() throws Exception {
 		underlying.start();
-		onEvent.addListener(report);
+		onEvent.addSyncListener(report);
 		control.replay();
 		
 		report.start();
