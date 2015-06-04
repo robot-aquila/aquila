@@ -69,4 +69,9 @@ public class CsvTickWriter implements TickWriter {
 		writer.close();
 	}
 
+	@Override
+	public void flush() {
+		writer.flush();
+	}
+
 }

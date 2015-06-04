@@ -3,7 +3,6 @@ package ru.prolib.aquila.datatools.finam;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -56,7 +55,11 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 
 	@Override
 	public void close(DataSegmentWriter writer) throws GeneralException {
-		writer.close();
+		try {
+			writer.close();
+		} catch ( java.io.IOException e ) {
+			throw new ru.prolib.aquila.datatools.IOException(e);
+		}
 	}
 	
 	protected File getFile(SecurityDescriptor descr, LocalDate date) {
@@ -71,7 +74,7 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	}
 	
 	protected OutputStream createStream(File file, boolean append)
-		throws IOException
+		throws java.io.IOException
 	{
 		return new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(file, append)));
 	}

@@ -1,16 +1,19 @@
 package ru.prolib.aquila.datatools.finam;
 
 import static org.junit.Assert.*;
+import static org.easymock.EasyMock.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.io.IOUtils;
+import org.easymock.IMocksControl;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
@@ -32,6 +35,7 @@ public class CsvTickWriterTest {
 		df = DateTimeFormat.forPattern("yyy-MM-dd HH:mm:ss.SSS");
 	}
 	
+	private IMocksControl control;
 	private EditableTerminal terminal;
 	private EditableSecurity security;
 	private File file;
@@ -40,6 +44,7 @@ public class CsvTickWriterTest {
 
 	@Before
 	public void setUp() throws Exception {
+		control = createStrictControl();
 		file = File.createTempFile("finam-tick-writer-test-", ".csv");
 		file.deleteOnExit();
 		output = new FileOutputStream(file);
@@ -89,6 +94,30 @@ public class CsvTickWriterTest {
 		List<String> actual = IOUtils.readLines(input, Charset.defaultCharset());
 		input.close();
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testClose() throws Exception {
+		OutputStream output = control.createMock(OutputStream.class);
+		output.close();
+		control.replay();
+		
+		writer = new CsvTickWriter(security, output);
+		writer.close();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testFlush() throws Exception {
+		OutputStream output = control.createMock(OutputStream.class);
+		output.flush();
+		control.replay();
+		
+		writer = new CsvTickWriter(security, output);
+		writer.flush();
+		
+		control.verify();
 	}
 
 }

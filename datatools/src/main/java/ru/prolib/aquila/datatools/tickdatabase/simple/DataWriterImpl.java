@@ -1,6 +1,9 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
+import java.io.IOException;
+
 import org.joda.time.LocalDate;
+
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.GeneralException;
@@ -31,7 +34,7 @@ public class DataWriterImpl implements DataWriter {
 	}
 
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		if ( currentSegment != null ) {
 			currentSegment.close();
 			currentSegment = null;
@@ -45,6 +48,13 @@ public class DataWriterImpl implements DataWriter {
 	
 	public DataSegmentManager getDataSegmentManager() {
 		return segmentManager;
+	}
+
+	@Override
+	public void flush() throws IOException {
+		if ( currentSegment != null ) {
+			currentSegment.flush();
+		}
 	}
 
 }

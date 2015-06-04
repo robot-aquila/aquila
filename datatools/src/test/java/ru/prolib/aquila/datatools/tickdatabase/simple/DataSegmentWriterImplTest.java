@@ -96,5 +96,15 @@ public class DataSegmentWriterImplTest {
 		tick1 = new Tick(new DateTime(2015, 5, 12, 14, 59, 59, 999), 1d, 1d);
 		segment.write(tick1);
 	}
+	
+	@Test
+	public void testFlush() throws Exception {
+		writer.flush();
+		control.replay();
+		
+		segment.flush();
+		
+		control.verify();
+	}
 
 }

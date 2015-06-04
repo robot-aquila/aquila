@@ -1,6 +1,7 @@
 package ru.prolib.aquila.datatools.finam;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,11 @@ public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener {
 	@Override
 	public void stop() throws StarterException {
 		terminal.OnSecurityTrade().removeListener(this);
-		database.close();
+		try {
+			database.close();
+		} catch ( IOException e ) {
+			throw new StarterException(e);
+		}
 	}
 
 	@Override

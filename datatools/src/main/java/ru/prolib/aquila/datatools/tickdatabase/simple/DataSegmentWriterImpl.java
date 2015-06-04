@@ -1,6 +1,8 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 
+import java.io.IOException;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
@@ -89,8 +91,13 @@ public class DataSegmentWriterImpl implements DataSegmentWriter {
 	}
 
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		writer.close();
+	}
+
+	@Override
+	public void flush() throws IOException {
+		writer.flush();
 	}
 
 }
