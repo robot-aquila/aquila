@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
+import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
@@ -39,6 +41,7 @@ public class CsvDataSegmentManagerTest {
 	
 	private EditableTerminal terminal;
 	private EditableSecurity security;
+	private Scheduler scheduler;
 	private CsvDataSegmentManager segmentManager;
 	
 	@Before
@@ -48,7 +51,8 @@ public class CsvDataSegmentManagerTest {
 		security = terminal.getEditableSecurity(descr1);
 		security.setPrecision(2);
 		security.setMinStepSize(0.01d);
-		segmentManager = new CsvDataSegmentManager(terminal, root);
+		scheduler = new SchedulerLocal();
+		segmentManager = new CsvDataSegmentManager(terminal, root, scheduler);
 	}
 	
 	@After
@@ -57,7 +61,7 @@ public class CsvDataSegmentManagerTest {
 	}
 	
 	@Test
-	public void testNewSegment() throws Exception {
+	public void testOpen_NewSegment() throws Exception {
 		DateTime time = new DateTime(2015, 5, 13, 9, 30, 0);
 		DataSegmentWriter writer = segmentManager.open(descr1, time.toLocalDate());
 		writer.write(new Tick(time, 100.299d, 100));
@@ -80,7 +84,8 @@ public class CsvDataSegmentManagerTest {
 	
 	@Test (expected=GeneralException.class)
 	public void testCtor_ThrowsIfDirectoryNotExists() throws Exception {
-		new CsvDataSegmentManager(terminal, new File(root, "bergandabupkhta"));
+		new CsvDataSegmentManager(terminal,
+				new File(root, "bergandabupkhta"), scheduler);
 	}
 
 }

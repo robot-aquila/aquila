@@ -8,6 +8,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.joda.time.LocalDate;
 
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.utils.IdUtils;
@@ -15,15 +16,17 @@ import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentManager;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriter;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriterImpl;
+import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushTickWriter;
 
 public class CsvDataSegmentManager implements DataSegmentManager {
-	private static final String FILE_EXT = ".csv.gz"; 
+	private static final String FILE_EXT = ".csv.gz";
+	private final Scheduler scheduler;
 	private final IdUtils idUtils;
 	private final Terminal terminal;
 	private final File root;
 	
-	public CsvDataSegmentManager(Terminal terminal, File dbpath)
-			throws FinamException
+	public CsvDataSegmentManager(Terminal terminal, File dbpath,
+			Scheduler scheduler) throws FinamException
 	{
 		super();
 		this.idUtils = new IdUtils();
@@ -32,6 +35,7 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 		if ( ! root.isDirectory() ) {
 			throw new FinamException("Directory not exists: " + root);
 		}
+		this.scheduler = scheduler;
 	}
 
 	@Override
@@ -39,15 +43,17 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 			throws GeneralException
 	{
 		File file = getFile(descr, date);
-		CsvTickWriter writer = null;
 								// TODO: Just better for QUIK. 
 								// Need improvements for universal approach.
 		boolean append = false; // file.exists() && file.length() > 0;
 		try {
-			writer = new CsvTickWriter(terminal.getSecurity(descr),
+			CsvTickWriter writer = new CsvTickWriter(terminal.getSecurity(descr),
 					createStream(file, append));
 			if ( ! append ) writer.writeHeader();
-			return new DataSegmentWriterImpl(descr, date, writer);
+			String streamId = "[" + descr + "#" + date + "]";
+			
+			return new DataSegmentWriterImpl(descr, date,
+					new SmartFlushTickWriter(writer, scheduler, streamId));
 		} catch ( Exception e ) {
 			throw new GeneralException(e);
 		}

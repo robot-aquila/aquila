@@ -2,6 +2,7 @@ package ru.prolib.aquila.datatools.finam;
 
 import java.io.File;
 
+import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.TickDatabase;
@@ -14,7 +15,7 @@ public class FinamTools {
 			throws GeneralException
 	{
 		return new SimpleTickDatabase(new DataWriterFactoryImpl(
-				new CsvDataSegmentManager(terminal, dbpath)));
+			new CsvDataSegmentManager(terminal, dbpath, new SchedulerLocal())));
 	}
 
 }
