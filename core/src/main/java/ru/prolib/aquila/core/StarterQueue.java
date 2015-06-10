@@ -65,12 +65,12 @@ public class StarterQueue implements Starter {
 		int qs = queue.size();
 		for ( int i = 0; i < qs; i ++ ) {
 			try {
-				logger.debug("queue.get(i).start() for {}/" + qs + " ....",i+1);
+				//logger.debug("queue.get(i).start() for {}/" + qs + " ....",i+1);
 				queue.get(i).start();
-				logger.debug("queue.get(i).start() for {}/" + qs + " done",i+1);
+				//logger.debug("queue.get(i).start() for {}/" + qs + " done",i+1);
 				started.addFirst(queue.get(i));
 			} catch ( StarterException eStart ) {
-				logger.debug("rollback");
+				//logger.debug("rollback");
 				for ( int k = 0; k < started.size(); k ++ ) {
 					try {
 						started.get(k).stop();
@@ -89,9 +89,9 @@ public class StarterQueue implements Starter {
 		int qs = queue.size();
 		for ( int i = qs - 1; i >= 0; i -- ) {
 			try {
-				logger.debug("queue.get(i).stop() for {}/" + qs + " ....", i+1);
+				//logger.debug("queue.get(i).stop() for {}/" + qs + " ....", i+1);
 				queue.get(i).stop();
-				logger.debug("queue.get(i).stop() for {}/" + qs + " done", i+1);
+				//logger.debug("queue.get(i).stop() for {}/" + qs + " done", i+1);
 			} catch ( StarterException e ) {
 				logger.error("Exception during stop", e);
 				last = e;
