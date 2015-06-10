@@ -20,6 +20,7 @@ public class SmartFlushTickWriterTest {
 	private IMocksControl control;
 	private TickWriter writer;
 	private Scheduler scheduler;
+	private SmartFlushSetup setup;
 	private SmartFlushTickWriter flusher;
 	private DateTime time;
 
@@ -34,7 +35,10 @@ public class SmartFlushTickWriterTest {
 		control = createStrictControl();
 		writer = control.createMock(TickWriter.class);
 		scheduler = control.createMock(Scheduler.class);
-		flusher = new SmartFlushTickWriter(writer, scheduler, "ZUMBA", 10, 50);
+		setup = new SmartFlushSetup();
+		setup.setExecutionPeriod(10);
+		setup.setFlushPeriod(50);
+		flusher = new SmartFlushTickWriter(writer, scheduler, "ZUMBA", setup);
 		time = new DateTime();
 	}
 	
@@ -43,8 +47,7 @@ public class SmartFlushTickWriterTest {
 		assertSame(writer, flusher.getTickWriter());
 		assertSame(scheduler, flusher.getScheduler());
 		assertEquals("ZUMBA", flusher.getStreamId());
-		assertEquals(10L, flusher.getExecutionPeriod());
-		assertEquals(50L, flusher.getFlushPeriod());
+		assertSame(setup, flusher.getSetup());
 		assertNull(flusher.getLastFlushTime());
 		assertFalse(flusher.hasUpdate());
 	}
@@ -103,6 +106,7 @@ public class SmartFlushTickWriterTest {
 	@Test
 	public void testRun_NoUpdates() throws Exception {
 		control.replay();
+		flusher.setHasUpdate(false);
 		
 		flusher.run();
 		

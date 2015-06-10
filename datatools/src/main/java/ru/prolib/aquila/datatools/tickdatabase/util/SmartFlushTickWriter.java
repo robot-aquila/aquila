@@ -16,8 +16,6 @@ import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
  */
 public class SmartFlushTickWriter implements TickWriter, Runnable {
 	private static final Logger logger;
-	public static final long DEFAULT_EXECUTION_PERIOD = 60000; // 1 minute
-	public static final long DEFAULT_FLUSH_PERIOD = 300000; // 5 minutes
 	
 	static {
 		logger = LoggerFactory.getLogger(SmartFlushTickWriter.class);
@@ -25,8 +23,8 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	
 	private final Scheduler scheduler;
 	private final TickWriter writer;
-	private final long executionPeriod, flushPeriod;
 	private final String streamId;
+	private final SmartFlushSetup setup;
 	private DateTime lastTime;
 	private boolean hasUpdate;
 	
@@ -36,18 +34,16 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	 * @param writer - tick writer
 	 * @param scheduler - scheduler
 	 * @param streamId - identifier for log messages
-	 * @param executionPeriod - period of check execution
-	 * @param flushPeriod - period of flush since last update
+	 * @param setup - smart flush setup
 	 */
 	public SmartFlushTickWriter(TickWriter writer, Scheduler scheduler,
-			String streamId, long executionPeriod, long flushPeriod)
+			String streamId, SmartFlushSetup setup)
 	{
 		super();
 		this.writer = writer;
 		this.scheduler = scheduler;
 		this.streamId = streamId;
-		this.executionPeriod = executionPeriod;
-		this.flushPeriod = flushPeriod;
+		this.setup = setup;
 	}
 	
 	/**
@@ -60,8 +56,7 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	public SmartFlushTickWriter(TickWriter writer, Scheduler scheduler,
 			String streamId)
 	{
-		this(writer, scheduler, streamId,
-				DEFAULT_EXECUTION_PERIOD, DEFAULT_FLUSH_PERIOD);
+		this(writer, scheduler, streamId, new SmartFlushSetup());
 	}
 	
 	/**
@@ -92,36 +87,48 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	}
 	
 	/**
-	 * Get execution period.
+	 * Get smart flush setup.
 	 * <p>
-	 * @return period of check execution
+	 * @return setup
 	 */
-	public long getExecutionPeriod() {
-		return executionPeriod;
+	public SmartFlushSetup getSetup() {
+		return setup;
 	}
 	
 	/**
-	 * Get flush period.
-	 * <p>
-	 * @return period of flush since last update
+	 * Get time of last flush.
+	 * <p> 
+	 * @return the time of last flush
 	 */
-	public long getFlushPeriod() {
-		return flushPeriod;
-	}
-	
 	public synchronized DateTime getLastFlushTime() {
 		return lastTime;
 	}
 	
+	/**
+	 * Set time of last flash.
+	 * <p>
+	 * @param time - the time to set
+	 */
 	protected synchronized void setLastFlushTime(DateTime time) {
 		this.lastTime = time;
 	}
 	
+	/**
+	 * Check update since the last flush.
+	 * <p>
+	 * @return true - if there's at least the one update, false - no updates
+	 */
 	public synchronized boolean hasUpdate() {
 		return hasUpdate;
 	}
 	
-	public synchronized void setHasUpdate(boolean update) {
+	/**
+	 * Set update sign.
+	 * <p>
+	 * @param update - true - mark that the update available, false - reset the
+	 * update sign.
+	 */
+	protected synchronized void setHasUpdate(boolean update) {
 		this.hasUpdate = update;
 	}
 
@@ -139,7 +146,9 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	@Override
 	public synchronized void write(Tick tick) throws GeneralException {
 		if ( lastTime == null ) {
-			scheduler.schedule(this, executionPeriod, executionPeriod);
+			long period = setup.getExecutionPeriod();
+			scheduler.schedule(this, period, period);
+			logger.info(streamId + ": Started");
 		}
 		writer.write(tick);
 		lastTime = scheduler.getCurrentTime();
@@ -152,7 +161,8 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 			return;
 		}
 		DateTime time = scheduler.getCurrentTime();
-		if ( time.getMillis() - lastTime.getMillis() > flushPeriod ) {
+		long diff = time.getMillis() - lastTime.getMillis();
+		if ( diff > setup.getFlushPeriod() ) {
 			try {
 				writer.flush();
 				hasUpdate = false;

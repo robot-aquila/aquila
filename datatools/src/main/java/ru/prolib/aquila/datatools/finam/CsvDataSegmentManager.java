@@ -9,6 +9,7 @@ import java.util.zip.GZIPOutputStream;
 import org.joda.time.LocalDate;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
+import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.utils.IdUtils;
@@ -16,6 +17,7 @@ import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentManager;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriter;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriterImpl;
+import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushSetup;
 import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushTickWriter;
 
 public class CsvDataSegmentManager implements DataSegmentManager {
@@ -24,9 +26,11 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	private final IdUtils idUtils;
 	private final Terminal terminal;
 	private final File root;
+	private final SmartFlushSetup flushSetup;
 	
 	public CsvDataSegmentManager(Terminal terminal, File dbpath,
-			Scheduler scheduler) throws FinamException
+			Scheduler scheduler, SmartFlushSetup flushSetup)
+					throws FinamException
 	{
 		super();
 		this.idUtils = new IdUtils();
@@ -36,6 +40,7 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 			throw new FinamException("Directory not exists: " + root);
 		}
 		this.scheduler = scheduler;
+		this.flushSetup = flushSetup;
 	}
 
 	@Override
@@ -47,13 +52,14 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 								// Need improvements for universal approach.
 		boolean append = false; // file.exists() && file.length() > 0;
 		try {
-			CsvTickWriter writer = new CsvTickWriter(terminal.getSecurity(descr),
-					createStream(file, append));
+			Security security = terminal.getSecurity(descr);
+			OutputStream stream = createStream(file, append);
+			CsvTickWriter writer = new CsvTickWriter(security, stream);
 			if ( ! append ) writer.writeHeader();
 			String streamId = "[" + descr + "#" + date + "]";
-			
-			return new DataSegmentWriterImpl(descr, date,
-					new SmartFlushTickWriter(writer, scheduler, streamId));
+			SmartFlushTickWriter smartWriter = new SmartFlushTickWriter(writer,
+					scheduler, streamId, flushSetup);
+			return new DataSegmentWriterImpl(descr, date, smartWriter);
 		} catch ( Exception e ) {
 			throw new GeneralException(e);
 		}
@@ -82,7 +88,8 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	protected OutputStream createStream(File file, boolean append)
 		throws java.io.IOException
 	{
-		return new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(file, append)));
+		OutputStream stream = new FileOutputStream(file, append);
+		return new GZIPOutputStream(new BufferedOutputStream(stream), true);
 	}
 
 }
