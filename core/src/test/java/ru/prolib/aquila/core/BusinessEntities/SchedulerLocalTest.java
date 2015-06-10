@@ -2,7 +2,11 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
 import java.util.Timer;
+import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
+
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.*;
@@ -19,6 +23,12 @@ public class SchedulerLocalTest {
 	private Timer timer;
 	private SchedulerLocal_Pool pool;
 	private SchedulerLocal_TimerTask tt;
+	
+	// Helpers for test actual execution
+	private CountDownLatch finished;
+	private Vector<DateTime> ticks;
+	private int tickLimit;
+	private Runnable helper;
 
 	@Before
 	public void setUp() throws Exception {
@@ -29,6 +39,19 @@ public class SchedulerLocalTest {
 		scheduler = new SchedulerLocal(timer, pool);
 		scheduler_4it = new SchedulerLocal();
 		tt = new SchedulerLocal_TimerTask(task, scheduler);
+		
+		finished = new CountDownLatch(1);
+		ticks = new Vector<DateTime>();
+		tickLimit = 3;
+		helper = new Runnable() {
+			@Override public void run() {
+				ticks.add(DateTime.now());
+				if ( ticks.size() >= tickLimit ) {
+					scheduler_4it.cancel(this);
+					finished.countDown();
+				}
+			}
+		};
 	}
 	
 	@Test
@@ -65,7 +88,16 @@ public class SchedulerLocalTest {
 	}
 	
 	@Test
+	public void testSchedule_TD_ActualExecution() throws Exception {
+		scheduler_4it.schedule(helper, DateTime.now().plus(100));
+		finished.await(300, java.util.concurrent.TimeUnit.MILLISECONDS);
+		assertEquals(1, ticks.size());
+		scheduler_4it.cancel(helper);
+	}
+	
+	@Test
 	public void testSchedule_TDL() throws Exception {
+		tt = new SchedulerLocal_TimerTask(task);
 		expect(pool.put(eq(tt))).andReturn(tt);
 		timer.schedule(eq(tt), eq(time.toDate()), eq(215L));
 		control.replay();
@@ -75,6 +107,13 @@ public class SchedulerLocalTest {
 		
 		control.verify();
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testSchedule_TDL_ActualExecution() throws Exception {
+		scheduler_4it.schedule(helper, DateTime.now().plus(100), 100);
+		assertTrue(finished.await(2, java.util.concurrent.TimeUnit.SECONDS));
+		assertEquals(3, ticks.size());
 	}
 	
 	@Test
@@ -91,7 +130,16 @@ public class SchedulerLocalTest {
 	}
 	
 	@Test
+	public void testSchedule_TL_ActualExecution() throws Exception {
+		scheduler_4it.schedule(helper, 100);
+		finished.await(300, java.util.concurrent.TimeUnit.MILLISECONDS);
+		assertEquals(1, ticks.size());
+		scheduler_4it.cancel(helper);
+	}
+	
+	@Test
 	public void testSchedule_TLL() throws Exception {
+		tt = new SchedulerLocal_TimerTask(task);
 		expect(pool.put(eq(tt))).andReturn(tt);
 		timer.schedule(eq(tt), eq(118L), eq(215L));
 		control.replay();
@@ -104,7 +152,15 @@ public class SchedulerLocalTest {
 	}
 	
 	@Test
+	public void testSchedule_TLL_ActualExecution() throws Exception {
+		scheduler_4it.schedule(helper, 50, 100);
+		assertTrue(finished.await(2, java.util.concurrent.TimeUnit.SECONDS));
+		assertEquals(3, ticks.size());
+	}
+	
+	@Test
 	public void testScheduleAtFixedRate_TDL() throws Exception {
+		tt = new SchedulerLocal_TimerTask(task);
 		expect(pool.put(eq(tt))).andReturn(tt);
 		timer.scheduleAtFixedRate(eq(tt), eq(time.toDate()), eq(302L));
 		control.replay();
@@ -117,7 +173,15 @@ public class SchedulerLocalTest {
 	}
 	
 	@Test
+	public void testScheduleAtFixedRate_TDL_ActualExecution() throws Exception {
+		scheduler_4it.scheduleAtFixedRate(helper, DateTime.now().plus(50), 100);
+		assertTrue(finished.await(2, java.util.concurrent.TimeUnit.SECONDS));
+		assertEquals(3, ticks.size());
+	}
+	
+	@Test
 	public void testScheduleAtFixedRate_TLL() throws Exception {
+		tt = new SchedulerLocal_TimerTask(task);
 		expect(pool.put(eq(tt))).andReturn(tt);
 		timer.scheduleAtFixedRate(eq(tt), eq(80L), eq(94L));
 		control.replay();
@@ -127,6 +191,13 @@ public class SchedulerLocalTest {
 		
 		control.verify();
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testScheduleAtFixedRate_TLL_ActualExecution() throws Exception {
+		scheduler_4it.scheduleAtFixedRate(helper, 100, 100);
+		assertTrue(finished.await(2, java.util.concurrent.TimeUnit.SECONDS));
+		assertEquals(3, ticks.size());
 	}
 	
 	@Test

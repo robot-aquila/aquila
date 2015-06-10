@@ -59,14 +59,24 @@ public class SchedulerLocal implements Scheduler {
 	}
 	
 	/**
-	 * Создать задачу для таймера и добавить в пул.
+	 * Создать разовую задачу.
 	 * <p>
 	 * @param task задача
 	 * @return задача в обертке
 	 * @throws IllegalArgumentException если экземпляр задачи уже в пуле
 	 */
-	private SchedulerLocal_TimerTask createTask(Runnable task) {
+	private SchedulerLocal_TimerTask makeRunOnce(Runnable task) {
 		return pool.put(new SchedulerLocal_TimerTask(task, this));
+	}
+	
+	/**
+	 * Make a periodic task.
+	 * <p>
+	 * @param task - the task instance
+	 * @return the task handler
+	 */
+	private SchedulerLocal_TimerTask makePeriodic(Runnable task) {
+		return pool.put(new SchedulerLocal_TimerTask(task)); 	
 	}
 	
 	/**
@@ -81,7 +91,7 @@ public class SchedulerLocal implements Scheduler {
 
 	@Override
 	public synchronized TaskHandler schedule(Runnable task, DateTime time) {
-		timer.schedule(createTask(task), time.toDate());
+		timer.schedule(makeRunOnce(task), time.toDate());
 		return createHandler(task);
 	}
 
@@ -89,13 +99,13 @@ public class SchedulerLocal implements Scheduler {
 	public synchronized
 		TaskHandler schedule(Runnable task, DateTime firstTime, long period)
 	{
-		timer.schedule(createTask(task), firstTime.toDate(), period);
+		timer.schedule(makePeriodic(task), firstTime.toDate(), period);
 		return createHandler(task);
 	}
 
 	@Override
 	public synchronized TaskHandler schedule(Runnable task, long delay) {
-		timer.schedule(createTask(task), delay);
+		timer.schedule(makeRunOnce(task), delay);
 		return createHandler(task);
 	}
 
@@ -103,7 +113,7 @@ public class SchedulerLocal implements Scheduler {
 	public synchronized TaskHandler
 		schedule(Runnable task, long delay, long period)
 	{
-		timer.schedule(createTask(task), delay, period);
+		timer.schedule(makePeriodic(task), delay, period);
 		return createHandler(task);
 	}
 
@@ -111,7 +121,7 @@ public class SchedulerLocal implements Scheduler {
 	public synchronized TaskHandler
 		scheduleAtFixedRate(Runnable task, DateTime firstTime, long period)
 	{
-		timer.scheduleAtFixedRate(createTask(task), firstTime.toDate(), period);
+		timer.scheduleAtFixedRate(makePeriodic(task), firstTime.toDate(), period);
 		return createHandler(task);
 	}
 
@@ -119,7 +129,7 @@ public class SchedulerLocal implements Scheduler {
 	public synchronized TaskHandler
 		scheduleAtFixedRate(Runnable task, long delay, long period)
 	{
-		timer.scheduleAtFixedRate(createTask(task), delay, period);
+		timer.scheduleAtFixedRate(makePeriodic(task), delay, period);
 		return createHandler(task);
 	}
 
