@@ -1,11 +1,15 @@
 package ru.prolib.aquila.datatools.finam;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
@@ -21,7 +25,9 @@ import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushSetup;
 import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushTickWriter;
 
 public class CsvDataSegmentManager implements DataSegmentManager {
-	private static final String FILE_EXT = ".csv.gz";
+	private static final String PART_FILE_EXT = ".csv.part";
+	private static final String TEMP_FILE_EXT = ".csv.gz.part";
+	private static final String ARCH_FILE_EXT = ".csv.gz";
 	private final Scheduler scheduler;
 	private final IdUtils idUtils;
 	private final Terminal terminal;
@@ -47,13 +53,13 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	public DataSegmentWriter open(SecurityDescriptor descr, LocalDate date)
 			throws GeneralException
 	{
-		File file = getFile(descr, date);
+		File file = getFile(descr, date, PART_FILE_EXT);
 								// TODO: Just better for QUIK. 
 								// Need improvements for universal approach.
 		boolean append = false; // file.exists() && file.length() > 0;
 		try {
 			Security security = terminal.getSecurity(descr);
-			OutputStream stream = createStream(file, append);
+			OutputStream stream = createDataStream(file, append);
 			CsvTickWriter writer = new CsvTickWriter(security, stream);
 			if ( ! append ) writer.writeHeader();
 			String streamId = "[" + descr + "#" + date + "]";
@@ -69,27 +75,52 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	public void close(DataSegmentWriter writer) throws GeneralException {
 		try {
 			writer.close();
+			makeArchive(writer.getSecurityDescriptor(), writer.getDate());
+		
+			
+			
 		} catch ( java.io.IOException e ) {
 			throw new ru.prolib.aquila.datatools.IOException(e);
 		}
 	}
 	
-	protected File getFile(SecurityDescriptor descr, LocalDate date) {
+	private void makeArchive(SecurityDescriptor descr, LocalDate date)
+			throws java.io.IOException
+	{
+		File part = getFile(descr, date, PART_FILE_EXT),
+			temp = getFile(descr, date, TEMP_FILE_EXT);
+		InputStream input = new BufferedInputStream(new FileInputStream(part));
+		OutputStream output = createGzipStream(temp);
+		IOUtils.copy(input, output);
+		input.close();
+		output.close();
+		temp.renameTo(getFile(descr, date, ARCH_FILE_EXT));
+		part.delete();
+	}
+	
+	protected File getFile(SecurityDescriptor descr, LocalDate date,
+			String suffix)
+	{
 		File file = new File(root, idUtils.getSafeId(descr));
 		file = new File(file, String.format("%04d", date.getYear()));
 		file = new File(file, String.format("%02d", date.getMonthOfYear()));
 		if ( ! file.exists() ) {
 			file.mkdirs();
 		}
-		file = new File(file, idUtils.getSafeId(descr, date) + FILE_EXT);
+		file = new File(file, idUtils.getSafeId(descr, date) + suffix);
 		return file;
 	}
 	
-	protected OutputStream createStream(File file, boolean append)
+	protected OutputStream createDataStream(File file, boolean append)
 		throws java.io.IOException
 	{
-		OutputStream stream = new FileOutputStream(file, append);
-		return new GZIPOutputStream(new BufferedOutputStream(stream), true);
+		return new BufferedOutputStream(new FileOutputStream(file, append));
+	}
+	
+	protected OutputStream createGzipStream(File file)
+		throws java.io.IOException
+	{
+		return new GZIPOutputStream(createDataStream(file, true));
 	}
 
 }

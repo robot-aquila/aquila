@@ -72,13 +72,16 @@ public class CsvDataSegmentManagerTest {
 		FileUtils.deleteDirectory(root);
 	}
 	
+	private InputStream createGzipStream(String filename) throws IOException {
+		return new GZIPInputStream(new BufferedInputStream(createStream(filename)));
+	}
+	
 	private InputStream createStream(String filename) throws IOException {
-		return new GZIPInputStream(new BufferedInputStream(
-			new FileInputStream(new File(root, filename))));
+		return new FileInputStream(new File(root, filename));
 	}
 	
 	@Test
-	public void testWriterSegment() throws Exception {
+	public void testWriteSegment() throws Exception {
 		DateTime time = new DateTime(2015, 5, 13, 9, 30, 0);
 		DataSegmentWriter writer = segmentManager.open(descr1, time.toLocalDate());
 		writer.write(new Tick(time, 100.299d, 100));
@@ -86,7 +89,7 @@ public class CsvDataSegmentManagerTest {
 		writer.write(new Tick(time.plusMinutes(30), 106.112d, 135));
 		segmentManager.close(writer);
 
-		InputStream is = createStream("RTS-SPB-USD-FUT/2015/05/RTS-SPB-USD-FUT-20150513.csv.gz");
+		InputStream is = createGzipStream("RTS-SPB-USD-FUT/2015/05/RTS-SPB-USD-FUT-20150513.csv.gz");
 		List<String> actual = IOUtils.readLines(is, Charset.defaultCharset());
 		is.close();
 		List<String> expected = new Vector<String>();
@@ -105,7 +108,7 @@ public class CsvDataSegmentManagerTest {
 	
 	@Test
 	public void testSmartFlush() throws Exception {
-		File file = new File(root, "RTS-SPB-USD-FUT/2015/06/RTS-SPB-USD-FUT-20150610.csv.gz");
+		File file = new File(root, "RTS-SPB-USD-FUT/2015/06/RTS-SPB-USD-FUT-20150610.csv.part");
 		DateTime time = new DateTime(2015, 6, 10, 9, 30, 0);
 		DataSegmentWriter writer = segmentManager.open(descr1, time.toLocalDate());
 		long length = file.length();
