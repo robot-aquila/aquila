@@ -25,10 +25,10 @@ public class DataWriterImpl implements DataWriter {
 	public void write(Tick tick) throws GeneralException {
 		LocalDate date = tick.getTime().toLocalDate();
 		if ( currentSegment == null ) {
-			currentSegment = segmentManager.open(descr, date);
+			currentSegment = segmentManager.openWriter(descr, date);
 		} else if ( ! date.equals(currentSegment.getDate()) ) {
 			segmentManager.close(currentSegment);
-			currentSegment = segmentManager.open(descr, date);
+			currentSegment = segmentManager.openWriter(descr, date);
 		}
 		currentSegment.write(tick);
 	}
