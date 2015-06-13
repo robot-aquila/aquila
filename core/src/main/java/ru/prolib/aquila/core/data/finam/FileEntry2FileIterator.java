@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.data.*;
  * Данный класс адаптирует итератор по типу {@link FileEntry} к итератору по
  * типу {@link java.io.File File}.
  */
+@Deprecated
 public class FileEntry2FileIterator implements Aqiterator<File> {
 	private final Aqiterator<FileEntry> files;
 	

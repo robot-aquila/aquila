@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.data.finam;
 
 import java.io.*;
 import java.util.*;
+
 import org.joda.time.LocalDate;
 import org.joda.time.format.*;
 
@@ -13,6 +14,7 @@ import ru.prolib.aquila.core.data.*;
  * Данный метод позволяет отбирать подходящие каталоги для последующего
  * сканирования.
  */
+@Deprecated
 public class DirectoryScannerY implements SubScanner<FileEntry> {
 	private static final DateTimeFormatter yearFormat;
 	

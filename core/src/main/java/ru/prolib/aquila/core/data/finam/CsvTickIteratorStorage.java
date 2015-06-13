@@ -11,6 +11,7 @@ import ru.prolib.aquila.core.utils.IdUtils;
 /**
  * Хранилище сделок на основе csv-файлов формата FINAM.
  */
+@Deprecated
 public class CsvTickIteratorStorage implements TickIteratorStorage {
 	private final File root;
 	private final IdUtils idUtils;

@@ -10,6 +10,7 @@ import com.csvreader.CsvReader;
  * <p>
  * Использует идентификаторы полей, определенные в классе {@link Finam}. 
  */
+@Deprecated
 public class CsvTickReader implements Aqiterator<Tick> {
 	private final CsvReader reader;
 	private Tick curr;

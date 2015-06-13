@@ -9,6 +9,7 @@ import org.joda.time.LocalDate;
  * <p>
  * Инкапсулирует характерные атрибуты файлов исторических данных. 
  */
+@Deprecated
 public class FileEntry implements Comparable<FileEntry> {
 	private final File file;
 	private final LocalDate date;

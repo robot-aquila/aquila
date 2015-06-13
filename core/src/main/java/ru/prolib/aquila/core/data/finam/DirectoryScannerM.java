@@ -21,6 +21,7 @@ import ru.prolib.aquila.core.data.SubScanner;
  * году, приведенному к строке в соответствии с шаблоном MM. Данный класс
  * позволяет отобрать подходящие каталоги для последующего сканирования.
  */
+@Deprecated
 public class DirectoryScannerM implements SubScanner<FileEntry> {
 	private static final DateTimeFormatter monthFormat;
 	

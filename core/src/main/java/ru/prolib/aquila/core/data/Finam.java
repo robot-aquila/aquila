@@ -21,6 +21,7 @@ import ru.prolib.aquila.core.data.row.*;
  * 2013-03-07<br>
  * $Id: Finam.java 565 2013-03-10 19:32:12Z whirlwind $
  */
+@Deprecated
 public class Finam {
 	public static final String DATE = "<DATE>";
 	public static final String TIME = "<TIME>";

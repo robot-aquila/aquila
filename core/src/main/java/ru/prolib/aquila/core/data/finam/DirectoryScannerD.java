@@ -25,6 +25,7 @@ import ru.prolib.aquila.core.data.SubScanner;
  * которые затем проверяются на вхождение в соответствие с условием по
  * начальной дате. Если данные подходят, то формируется дескриптор файла. 
  */
+@Deprecated
 public class DirectoryScannerD implements SubScanner<FileEntry> {
 	private static final DateTimeFormatter dateFormat;
 	
