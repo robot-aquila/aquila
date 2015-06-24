@@ -1,8 +1,6 @@
 package ru.prolib.aquila.datatools.finam;
 
-import ru.prolib.aquila.datatools.GeneralException;
-
-public class FinamException extends GeneralException {
+public class FinamException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 	

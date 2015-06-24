@@ -13,7 +13,6 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.TickDatabase;
 import ru.prolib.aquila.ui.AquilaPlugin;
 import ru.prolib.aquila.ui.AquilaUI;
@@ -66,7 +65,7 @@ public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener {
 			database.write(trade.getSecurityDescriptor(),
 				new Tick(trade.getTime(), trade.getPrice(),
 					trade.getQty().intValue()));
-		} catch (GeneralException x) {
+		} catch (IOException x) {
 			logger.error("Error writing tick: ", x);
 		}
 	}

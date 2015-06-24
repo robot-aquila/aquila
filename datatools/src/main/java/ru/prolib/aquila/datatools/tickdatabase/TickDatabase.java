@@ -1,25 +1,22 @@
 package ru.prolib.aquila.datatools.tickdatabase;
 
 import java.io.Closeable;
+import java.io.IOException;
 
-import org.joda.time.LocalDateTime;
+import org.joda.time.DateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 
 public interface TickDatabase extends Closeable {
 
-	public void write(SecurityDescriptor descr, Tick tick)
-			throws GeneralException;
+	public void write(SecurityDescriptor descr, Tick tick) throws IOException;
+	
+	public void sendMarker(DateTime date) throws IOException;
 	
 	public Aqiterator<Tick>
-		getIterator(SecurityDescriptor descr, LocalDateTime startingTime)
-			throws GeneralException;
-	
-	//public Aqiterator<Tick>
-	//	getIterator(SecurityDescriptor descr, int numLastDays)
-	//		throws GeneralException;
+		getIterator(SecurityDescriptor descr, DateTime startingTime)
+			throws IOException;
 	
 }

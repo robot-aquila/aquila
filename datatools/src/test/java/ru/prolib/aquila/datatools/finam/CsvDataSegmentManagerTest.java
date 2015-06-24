@@ -35,10 +35,9 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
-import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriter;
-import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriterImpl;
+import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegment;
+import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentImpl;
 import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushSetup;
 
 @SuppressWarnings("unused")
@@ -91,13 +90,13 @@ public class CsvDataSegmentManagerTest {
 		FileUtils.deleteDirectory(root);
 	}
 	
-	@Test (expected=GeneralException.class)
+	@Test (expected=FinamException.class)
 	public void testCtor_ThrowsIfDirectoryNotExists() throws Exception {
 		new CsvDataSegmentManager(terminal, new File(root, "bergandabupkhta"));
 	}
 	
 	@Test
-	public void testOpenWriter() throws Exception {
+	public void testOpenSegment() throws Exception {
 		segmentManager = new CsvDataSegmentManager(terminal, helper);
 		LocalDate date = new LocalDate(1998, 1, 15);
 		CsvTickWriter csvWriter = control.createMock(CsvTickWriter.class);
@@ -114,10 +113,10 @@ public class CsvDataSegmentManagerTest {
 			.andReturn(flusher);
 		control.replay();
 		
-		DataSegmentWriter dummy = segmentManager.openWriter(descr1, date);
+		DataSegment dummy = segmentManager.openSegment(descr1, date);
 		
 		assertNotNull(dummy);
-		DataSegmentWriterImpl x = (DataSegmentWriterImpl) dummy;
+		DataSegmentImpl x = (DataSegmentImpl) dummy;
 		assertSame(flusher, x.getWriter());
 		assertEquals(descr1, x.getSecurityDescriptor());
 		assertEquals(date, x.getDate());
@@ -125,10 +124,10 @@ public class CsvDataSegmentManagerTest {
 	}
 	
 	@Test
-	public void testClose_TickWriter() throws Exception {
+	public void testCloseSegment() throws Exception {
 		segmentManager = new CsvDataSegmentManager(terminal, helper);
 		LocalDate date = new LocalDate(2001, 9, 11);
-		DataSegmentWriter writer = control.createMock(DataSegmentWriter.class);
+		DataSegment writer = control.createMock(DataSegment.class);
 		expect(writer.getDate()).andStubReturn(date);
 		expect(writer.getSecurityDescriptor()).andStubReturn(descr1);
 		writer.close();
@@ -144,7 +143,7 @@ public class CsvDataSegmentManagerTest {
 		expect(file1.delete()).andReturn(true);
 		control.replay();
 		
-		segmentManager.close(writer);
+		segmentManager.closeSegment(writer);
 		
 		control.verify();
 	}

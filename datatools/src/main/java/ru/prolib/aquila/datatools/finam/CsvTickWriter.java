@@ -1,5 +1,6 @@
 package ru.prolib.aquila.datatools.finam;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
@@ -10,8 +11,6 @@ import com.csvreader.CsvWriter;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
-import ru.prolib.aquila.datatools.IOException;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 /**
@@ -39,7 +38,7 @@ public class CsvTickWriter implements TickWriter {
 	}
 
 	@Override
-	public void write(Tick tick) throws GeneralException {
+	public void write(Tick tick) throws IOException {
 		try {
 			String entries[] = {
 				timeFormat.print(tick.getTime()),
@@ -48,20 +47,16 @@ public class CsvTickWriter implements TickWriter {
 				Long.toString(tick.getTime().getMillisOfSecond())
 			};
 			writer.writeRecord(entries);
-		} catch ( java.io.IOException e ) {
-			throw new IOException(e);
+		} catch ( IOException e ) {
+			throw e;
 		} catch ( Exception e ) {
-			throw new GeneralException(e);
+			throw new IOException(e);
 		}
 	}
 	
-	public void writeHeader() throws GeneralException {
+	public void writeHeader() throws IOException {
 		String headers[] = { "<TIME>", "<LAST>", "<VOL>", "<MILLISECONDS>" };
-		try {
-			writer.writeRecord(headers);
-		} catch ( java.io.IOException e ) {
-			throw new IOException(e);
-		}
+		writer.writeRecord(headers);
 	}
 
 	@Override

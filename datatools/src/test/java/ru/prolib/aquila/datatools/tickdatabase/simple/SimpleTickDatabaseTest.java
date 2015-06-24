@@ -3,18 +3,19 @@ package ru.prolib.aquila.datatools.tickdatabase.simple;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
+import org.joda.time.LocalDate;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 
 public class SimpleTickDatabaseTest {
 	private static final SecurityDescriptor descr1, descr2, descr3;
@@ -29,28 +30,30 @@ public class SimpleTickDatabaseTest {
 	}
 	
 	private IMocksControl control;
-	private DataWriterFactory factory;
-	private DataWriter writer1, writer2, writer3;
-	private Map<SecurityDescriptor, DataWriter> segments;
+	private DataSegmentManager manager;
+	private DataSegment segment1, segment2, segment3;
+	private Map<SecurityDescriptor, DataSegment> segments;
 	private SimpleTickDatabase database;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		factory = control.createMock(DataWriterFactory.class);
-		writer1 = control.createMock(DataWriter.class);
-		writer2 = control.createMock(DataWriter.class);
-		writer3 = control.createMock(DataWriter.class);
-		segments = new LinkedHashMap<SecurityDescriptor, DataWriter>();
-		database = new SimpleTickDatabase(factory, segments);
+		manager = control.createMock(DataSegmentManager.class);
+		segment1 = control.createMock(DataSegment.class);
+		segment2 = control.createMock(DataSegment.class);
+		segment3 = control.createMock(DataSegment.class);
+		segments = new LinkedHashMap<SecurityDescriptor, DataSegment>();
+		database = new SimpleTickDatabase(manager, segments);
 	}
 	
 	@Test
 	public void testCtor1() throws Exception {
-		database = new SimpleTickDatabase(factory);
-		expect(factory.createWriter(descr1)).andReturn(writer1);
-		writer1.write(tick1);
-		writer1.write(tick2);
+		LocalDate date = new LocalDate(2015, 5, 12);
+		database = new SimpleTickDatabase(manager);
+		expect(manager.openSegment(descr1, date)).andReturn(segment1);
+		expect(segment1.getDate()).andStubReturn(date);
+		segment1.write(tick1);
+		segment1.write(tick2);
 		control.replay();
 		
 		database.write(descr1, tick1);
@@ -61,22 +64,25 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testWrite_NewWriter() throws Exception {
-		segments.put(descr1, writer1);
-		segments.put(descr3, writer3);
-		expect(factory.createWriter(descr2)).andReturn(writer2);
-		writer2.write(tick1);
+		LocalDate date = new LocalDate(2015, 5, 12);
+		segments.put(descr1, segment1);
+		segments.put(descr3, segment3);
+		expect(manager.openSegment(descr2, date)).andReturn(segment2);
+		segment2.write(tick1);
 		control.replay();
 		
 		database.write(descr2, tick1);
 		
 		control.verify();
-		assertSame(writer2, segments.get(descr2));
+		assertSame(segment2, segments.get(descr2));
 	}
 	
 	@Test
 	public void testWrite_ExistingWriter() throws Exception {
-		segments.put(descr1, writer1);
-		writer1.write(tick1);
+		LocalDate date = new LocalDate(2015, 5, 12);
+		expect(segment1.getDate()).andStubReturn(date);
+		segments.put(descr1, segment1);
+		segment1.write(tick1);
 		control.replay();
 		
 		database.write(descr1, tick1);
@@ -84,25 +90,31 @@ public class SimpleTickDatabaseTest {
 		control.verify();
 	}
 	
-	@Test (expected=GeneralException.class)
+	@Test (expected=IOException.class)
 	public void testGetIterator_ShouldThrows() throws Exception {
-		database.getIterator(descr1, new LocalDateTime());
+		database.getIterator(descr1, new DateTime());
 	}
 
 	@Test
 	public void testClose() throws Exception {
-		segments.put(descr1, writer1);
-		segments.put(descr2, writer2);
-		segments.put(descr3, writer3);
-		writer1.close();
-		writer2.close();
-		writer3.close();
+		segments.put(descr1, segment1);
+		segments.put(descr2, segment2);
+		segments.put(descr3, segment3);
+		manager.closeSegment(segment1);
+		manager.closeSegment(segment2);
+		manager.closeSegment(segment3);
 		control.replay();
 		
 		database.close();
 		
 		control.verify();
 		assertEquals(0, segments.size());
+	}
+	
+	@Test
+	@Ignore
+	public void testSendMarker() throws Exception {
+		fail("TODO: incomplete");
 	}
 
 }

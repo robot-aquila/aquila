@@ -1,6 +1,7 @@
 package ru.prolib.aquila.datatools.finam;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -11,10 +12,9 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
+import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegment;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentManager;
-import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriter;
-import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentWriterImpl;
+import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentImpl;
 
 public class CsvDataSegmentManager implements DataSegmentManager {
 	private static final String PART_FILE_EXT = ".csv.part";
@@ -47,9 +47,9 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	}
 
 	@Override
-	public DataSegmentWriter
-		openWriter(SecurityDescriptor descr, LocalDate date)
-			throws GeneralException
+	public DataSegment
+		openSegment(SecurityDescriptor descr, LocalDate date)
+			throws IOException
 	{
 		File file = helper.getFile(descr, date, PART_FILE_EXT);
 		File parent = file.getParentFile();
@@ -65,50 +65,48 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 			CsvTickWriter writer = helper.createCsvTickWriter(security, stream);
 			if ( ! append ) writer.writeHeader();
 			String streamId = "[" + descr + "#" + date + "]";
-			return new DataSegmentWriterImpl(descr, date,
+			return new DataSegmentImpl(descr, date,
 					helper.addSmartFlush(writer, streamId));
+		} catch ( IOException e ) {
+			throw e;
 		} catch ( Exception e ) {
-			throw new GeneralException(e);
+			throw new IOException(e);
 		}
 	}
 
 	@Override
-	public void close(DataSegmentWriter writer) throws GeneralException {
-		try {
-			SecurityDescriptor descr = writer.getSecurityDescriptor();
-			LocalDate date = writer.getDate();
-			writer.close();
-			File part = helper.getFile(descr, date, PART_FILE_EXT),
-					temp = helper.getFile(descr, date, TEMP_FILE_EXT);
-			InputStream input = helper.createInputStream(part);
-			OutputStream output = helper.createGzipOutputStream(temp);
-			helper.copyStream(input, output);
-			input.close();
-			output.close();
-			temp.renameTo(helper.getFile(descr, date, ARCH_FILE_EXT));
-			part.delete();
-		} catch ( java.io.IOException e ) {
-			throw new ru.prolib.aquila.datatools.IOException(e);
-		}
+	public void closeSegment(DataSegment segment) throws IOException {
+		SecurityDescriptor descr = segment.getSecurityDescriptor();
+		LocalDate date = segment.getDate();
+		segment.close();
+		File part = helper.getFile(descr, date, PART_FILE_EXT),
+				temp = helper.getFile(descr, date, TEMP_FILE_EXT);
+		InputStream input = helper.createInputStream(part);
+		OutputStream output = helper.createGzipOutputStream(temp);
+		helper.copyStream(input, output);
+		input.close();
+		output.close();
+		temp.renameTo(helper.getFile(descr, date, ARCH_FILE_EXT));
+		part.delete();
 	}
 	
 	@Override
 	public Aqiterator<Tick> openReader(SecurityDescriptor descr, LocalDate date)
-			throws GeneralException
+			throws IOException
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void close(Aqiterator<Tick> reader) throws GeneralException {
+	public void closeReader(Aqiterator<Tick> reader) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public boolean isDataAvailable(SecurityDescriptor descr)
-			throws GeneralException
+			throws IOException
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -116,23 +114,23 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 
 	@Override
 	public boolean isDataAvailable(SecurityDescriptor descr, LocalDate date)
-			throws GeneralException
+			throws IOException
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public LocalDate getFirstSegment(SecurityDescriptor descr)
-			throws GeneralException
+	public LocalDate getDateOfFirstSegment(SecurityDescriptor descr)
+			throws IOException
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public LocalDate getLastSegment(SecurityDescriptor descr)
-			throws GeneralException
+	public LocalDate getDateOfLastSegment(SecurityDescriptor descr)
+			throws IOException
 	{
 		// TODO Auto-generated method stub
 		return null;

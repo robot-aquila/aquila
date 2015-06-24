@@ -3,6 +3,8 @@ package ru.prolib.aquila.datatools.tickdatabase.simple;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.io.IOException;
+
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -13,10 +15,9 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
-public class DataSegmentWriterImplTest {
+public class DataSegmentImplTest {
 	private static final SecurityDescriptor descr;
 	
 	static {
@@ -25,7 +26,7 @@ public class DataSegmentWriterImplTest {
 	
 	private IMocksControl control;
 	private TickWriter writer;
-	private DataSegmentWriterImpl segment;
+	private DataSegmentImpl segment;
 	private LocalDate date1;
 	private Tick tick1, tick2;
 
@@ -34,13 +35,13 @@ public class DataSegmentWriterImplTest {
 		control = createStrictControl();
 		date1 = new LocalDate(2015, 5, 12);
 		writer = control.createMock(TickWriter.class);
-		segment = new DataSegmentWriterImpl(descr, date1, writer,
+		segment = new DataSegmentImpl(descr, date1, writer,
 				new LocalTime(15, 0, 0), 5);
 	}
 	
 	@Test
 	public void testCtor3() throws Exception {
-		segment = new DataSegmentWriterImpl(descr, date1, writer);
+		segment = new DataSegmentImpl(descr, date1, writer);
 		assertEquals(descr, segment.getSecurityDescriptor());
 		assertEquals(date1, segment.getDate());
 		assertEquals(writer, segment.getWriter());
@@ -85,13 +86,13 @@ public class DataSegmentWriterImplTest {
 		control.verify();
 	}
 	
-	@Test (expected=GeneralException.class)
+	@Test (expected=IOException.class)
 	public void testWrite_ThrowsIfDateMismatch() throws Exception {
 		tick1 = new Tick(new DateTime(2015, 5, 11, 23, 59, 59, 999), 1d, 1d); 
 		segment.write(tick1);
 	}
 	
-	@Test (expected=GeneralException.class)
+	@Test (expected=IOException.class)
 	public void testWrite_ThrowsIfTimeLessThanTheLastTime() throws Exception {
 		tick1 = new Tick(new DateTime(2015, 5, 12, 14, 59, 59, 999), 1d, 1d);
 		segment.write(tick1);

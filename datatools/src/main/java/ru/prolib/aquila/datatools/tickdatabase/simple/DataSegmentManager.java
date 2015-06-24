@@ -1,11 +1,10 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
+import java.io.IOException;
 import org.joda.time.LocalDate;
-
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 
 /**
  * Data segment manager interface.
@@ -13,24 +12,23 @@ import ru.prolib.aquila.datatools.GeneralException;
 public interface DataSegmentManager {
 
 	/**
-	 * Open a tick data writer.
+	 * Open data segment for writing.
 	 * <p> 
 	 * @param descr - associated security descriptor
 	 * @param date - associated date
-	 * @return data writer
-	 * @throws GeneralException - error opening the data segment for writing
+	 * @return data segment
+	 * @throws IOException - error opening the data segment for writing
 	 */
-	public DataSegmentWriter
-		openWriter(SecurityDescriptor descr, LocalDate date)
-			throws GeneralException;
+	public DataSegment openSegment(SecurityDescriptor descr, LocalDate date)
+			throws IOException;
 	
 	/**
-	 * Close the previously opened data writer.
+	 * Close the previously opened data segment.
 	 * <p>
-	 * @param writer - the tick data writer
-	 * @throws GeneralException - error closing the data segment
+	 * @param segment - the tick data segment
+	 * @throws IOException - error closing the data segment
 	 */
-	public void close(DataSegmentWriter writer) throws GeneralException;
+	public void closeSegment(DataSegment segment) throws IOException;
 	
 	/**
 	 * Open a tick data reader.
@@ -38,19 +36,19 @@ public interface DataSegmentManager {
 	 * @param descr - associated security descriptor
 	 * @param date - associated date
 	 * @return data reader
-	 * @throws GeneralException - error opening data segment for reading
+	 * @throws IOException - error opening data segment for reading
 	 */
 	public Aqiterator<Tick>
 		openReader(SecurityDescriptor descr, LocalDate date)
-			throws GeneralException;
+			throws IOException;
 	
 	/**
 	 * Close the previously opened data reader. 
 	 * <p>
 	 * @param reader - data reader
-	 * @throws GeneralException - error closing data segment
+	 * @throws IOException - error closing data segment
 	 */
-	public void close(Aqiterator<Tick> reader) throws GeneralException;
+	public void closeReader(Aqiterator<Tick> reader) throws IOException;
 	
 	/**
 	 * Test the data availability.
@@ -58,40 +56,40 @@ public interface DataSegmentManager {
 	 * @param descr - security descriptor
 	 * @return - true - if at least one data segment exists for the specified
 	 * security 
-	 * @throws GeneralException - error accessing storage
+	 * @throws IOException - error accessing storage
 	 */
 	public boolean isDataAvailable(SecurityDescriptor descr)
-		throws GeneralException;
+		throws IOException;
 	
 	/**
 	 * Test the data segment availability.
 	 * <p>
 	 * @param descr - security descriptor
 	 * @param date - date of the data segment
-	 * @return true - if the segment exists, false - if not exists
-	 * @throws GeneralException - error accessing storage
+	 * @return true - if the data segment exists, false - if not exists
+	 * @throws IOException - error accessing storage
 	 */
 	public boolean isDataAvailable(SecurityDescriptor descr, LocalDate date)
-		throws GeneralException;
+		throws IOException;
 	
 	/**
 	 * Get date of the first available segment.
 	 * <p>
 	 * @param descr - security descriptor
 	 * @return date of the first available segment
-	 * @throws GeneralException - error accessing storage or data not available 
+	 * @throws IOException - error accessing storage or data not available 
 	 */
-	public LocalDate getFirstSegment(SecurityDescriptor descr)
-		throws GeneralException;
+	public LocalDate getDateOfFirstSegment(SecurityDescriptor descr)
+		throws IOException;
 	
 	/**
 	 * Get date of the last available segment.
 	 * <p>
 	 * @param descr - security descriptor
 	 * @return date of the last available segment
-	 * @throws GeneralException - error accessing storage or data not available
+	 * @throws IOException - error accessing storage or data not available
 	 */
-	public LocalDate getLastSegment(SecurityDescriptor descr)
-		throws GeneralException;
+	public LocalDate getDateOfLastSegment(SecurityDescriptor descr)
+		throws IOException;
 
 }

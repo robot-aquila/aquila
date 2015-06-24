@@ -8,17 +8,16 @@ import org.joda.time.LocalTime;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
-public class DataSegmentWriterImpl implements DataSegmentWriter {
+public class DataSegmentImpl implements DataSegment {
 	private final LocalDate date;
 	private final TickWriter writer;
 	private final SecurityDescriptor descr;
 	private int lastNumber;
 	private LocalTime lastTime;
 	
-	public DataSegmentWriterImpl(SecurityDescriptor descr, LocalDate date,
+	public DataSegmentImpl(SecurityDescriptor descr, LocalDate date,
 			TickWriter writer, LocalTime lastTime, int lastTickNumber)
 	{
 		super();
@@ -29,7 +28,7 @@ public class DataSegmentWriterImpl implements DataSegmentWriter {
 		this.lastNumber = lastTickNumber;
 	}
 	
-	public DataSegmentWriterImpl(SecurityDescriptor descr, LocalDate date,
+	public DataSegmentImpl(SecurityDescriptor descr, LocalDate date,
 			TickWriter writer)
 	{
 		this(descr, date, writer, LocalTime.MIDNIGHT, 0);
@@ -74,16 +73,16 @@ public class DataSegmentWriterImpl implements DataSegmentWriter {
 	}
 	
 	@Override
-	public void write(Tick tick) throws GeneralException {
+	public void write(Tick tick) throws IOException {
 		LocalDate d = tick.getTime().toLocalDate();
 		if ( ! date.equals(d) ) {
-			throw new GeneralException("Tick date mismatch: tick="
+			throw new IOException("Tick date mismatch: tick="
 					+ d + " segment=" + date);
 		}
 		writer.write(tick);
 		LocalTime t = tick.getTime().toLocalTime();
 		if ( t.compareTo(lastTime) < 0 ) {
-			throw new GeneralException("Cannot write the past data: tick="
+			throw new IOException("Cannot write the past data: tick="
 					+ t + " segment=" + lastTime);
 		}
 		lastTime = t;

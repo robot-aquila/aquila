@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.joda.time.LocalDateTime;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.TickDatabase;
 
 public class SimpleTickDatabase implements TickDatabase {
@@ -21,50 +21,64 @@ public class SimpleTickDatabase implements TickDatabase {
 		logger = LoggerFactory.getLogger(SimpleTickDatabase.class);
 	}
 	
-	private final DataWriterFactory factory;
-	private final Map<SecurityDescriptor, DataWriter> segments;
+	private final DataSegmentManager manager;
+	private final Map<SecurityDescriptor, DataSegment> segments;
 	
-	public SimpleTickDatabase(DataWriterFactory factory,
-			Map<SecurityDescriptor, DataWriter> segments)
+	public SimpleTickDatabase(DataSegmentManager manager,
+			Map<SecurityDescriptor, DataSegment> segments)
 	{
 		super();
-		this.factory = factory;
+		this.manager = manager;
 		this.segments = segments;
 	}
 	
-	public SimpleTickDatabase(DataWriterFactory factory) {
-		this(factory, new Hashtable<SecurityDescriptor, DataWriter>());
+	public SimpleTickDatabase(DataSegmentManager manager) {
+		this(manager, new Hashtable<SecurityDescriptor, DataSegment>());
 	}
 
 	@Override
 	public void write(SecurityDescriptor descr, Tick tick)
-			throws GeneralException
+			throws IOException
 	{
-		DataWriter writer = segments.get(descr);
-		if ( writer == null ) {
-			writer = factory.createWriter(descr);
-			segments.put(descr, writer);
+		LocalDate date = tick.getTime().toLocalDate();
+		DataSegment segment = segments.get(descr);
+		if ( segment != null ) {
+			if ( segment.getDate().equals(date) == false ) {
+				manager.closeSegment(segment);
+				segment = null;
+			}
 		}
-		writer.write(tick);
+		if ( segment == null ) {
+			segment = manager.openSegment(descr, date);
+			segments.put(descr, segment);
+		}
+		segment.write(tick);
 	}
 
 	@Override
-	public Aqiterator<Tick> getIterator(SecurityDescriptor descr,
-			LocalDateTime startingTime) throws GeneralException
+	public Aqiterator<Tick>
+		getIterator(SecurityDescriptor descr, DateTime startingTime)
+			throws IOException
 	{
-		throw new GeneralException("Not implemented");
+		throw new IOException("Not implemented");
 	}
 
 	@Override
 	public void close() {
-		for ( DataWriter writer : segments.values() ) {
+		for ( DataSegment segment : segments.values() ) {
 			try {
-				writer.close();
+				manager.closeSegment(segment);
 			} catch ( IOException e ) {
-				logger.error("Error closing the data writer: ", e);
+				logger.error("Error closing data segment: ", e);
 			}
 		}
 		segments.clear();
+	}
+
+	@Override
+	public void sendMarker(DateTime date) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

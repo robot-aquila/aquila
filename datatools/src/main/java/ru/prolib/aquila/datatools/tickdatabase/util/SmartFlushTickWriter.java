@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.GeneralException;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 /**
@@ -144,7 +143,7 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	}
 
 	@Override
-	public synchronized void write(Tick tick) throws GeneralException {
+	public synchronized void write(Tick tick) throws IOException {
 		if ( lastTime == null ) {
 			long period = setup.getExecutionPeriod();
 			scheduler.schedule(this, period, period);
