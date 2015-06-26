@@ -2,6 +2,8 @@ package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
@@ -76,8 +78,21 @@ public class SimpleTickDatabase implements TickDatabase {
 	}
 
 	@Override
-	public void sendMarker(DateTime date) throws IOException {
-		// TODO Auto-generated method stub
+	public void sendMarker(DateTime time) throws IOException {
+		LocalDate date = time.toLocalDate();
+		List<SecurityDescriptor>
+			keys = new LinkedList<SecurityDescriptor>(segments.keySet());
+		for ( SecurityDescriptor descr : keys ) {
+			DataSegment segment = segments.get(descr);
+			if ( date.compareTo(segment.getDate()) >= 0 ) {
+				segments.remove(descr);
+				try {
+					manager.closeSegment(segment);
+				} catch ( IOException e ) {
+					logger.error("Error closing data segment: ", e);	
+				}
+			}
+		}
 		
 	}
 

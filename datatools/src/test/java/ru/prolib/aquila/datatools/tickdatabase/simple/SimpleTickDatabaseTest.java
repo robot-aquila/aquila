@@ -11,7 +11,6 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
@@ -112,9 +111,24 @@ public class SimpleTickDatabaseTest {
 	}
 	
 	@Test
-	@Ignore
 	public void testSendMarker() throws Exception {
-		fail("TODO: incomplete");
+		segments.put(descr1, segment1);
+		segments.put(descr2, segment2);
+		segments.put(descr3, segment3);
+		LocalDate base = new LocalDate(2015, 6, 1);
+		expect(segment1.getDate()).andStubReturn(base);
+		expect(segment2.getDate()).andStubReturn(base.plusDays(1));
+		expect(segment3.getDate()).andStubReturn(base.minusDays(1));
+		manager.closeSegment(segment1);
+		manager.closeSegment(segment3);
+		control.replay();
+		
+		database.sendMarker(new DateTime(2015, 6, 1, 0, 0, 0));
+		
+		control.verify();
+		assertFalse(segments.containsKey(descr1));
+		assertTrue(segments.containsKey(descr2));
+		assertFalse(segments.containsKey(descr3));
 	}
 
 }

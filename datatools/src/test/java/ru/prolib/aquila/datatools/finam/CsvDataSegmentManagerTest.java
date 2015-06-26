@@ -133,12 +133,12 @@ public class CsvDataSegmentManagerTest {
 		writer.close();
 		expect(helper.getFile(descr1, date, ".csv.part")).andReturn(file1);
 		expect(helper.getFile(descr1, date, ".csv.gz.part")).andReturn(file2);
+		expect(helper.getFile(descr1, date, ".csv.gz")).andReturn(file3);
 		expect(helper.createInputStream(file1)).andReturn(inputStream);
 		expect(helper.createGzipOutputStream(file2)).andReturn(outputStream);
 		helper.copyStream(inputStream, outputStream);
 		inputStream.close();
 		outputStream.close();
-		expect(helper.getFile(descr1, date, ".csv.gz")).andReturn(file3);
 		expect(file2.renameTo(file3)).andReturn(true);
 		expect(file1.delete()).andReturn(true);
 		control.replay();

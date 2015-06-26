@@ -13,7 +13,7 @@ public interface TickDatabase extends Closeable {
 
 	public void write(SecurityDescriptor descr, Tick tick) throws IOException;
 	
-	public void sendMarker(DateTime date) throws IOException;
+	public void sendMarker(DateTime time) throws IOException;
 	
 	public Aqiterator<Tick>
 		getIterator(SecurityDescriptor descr, DateTime startingTime)
