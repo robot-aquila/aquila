@@ -43,7 +43,7 @@ public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener, Runna
 	
 	private DateTime getTimeToSendMarker(DateTime x) {
 		// TODO: fix the hours offset after test
-		DateTime dummy = x.plusMinutes(5).plusHours(1);
+		DateTime dummy = x.plusMinutes(5);
 		logger.debug("Time to send marker: {}", dummy);
 		return dummy;
 	}
