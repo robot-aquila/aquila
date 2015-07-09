@@ -9,11 +9,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
@@ -25,10 +35,20 @@ import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushSetup;
 import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushTickWriter;
 
 public class IOHelper {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(IOHelper.class);
+	}
+	
 	private final IdUtils idUtils;
 	private final File root;
 	private final Scheduler scheduler;
 	private final SmartFlushSetup flushSetup;
+	public static final String DATA_FILE_EXT = ".csv";
+	public static final String ARCH_FILE_EXT = ".csv.gz";
+	public static final String TEMP_FILE_EXT = ".csv.gz.part";
+	public static final String PART_FILE_EXT = ".csv.part";
 	
 	public IOHelper(File root) {
 		super();
@@ -192,6 +212,21 @@ public class IOHelper {
 	}
 	
 	/**
+	 * Create csv-reader for the data segment.
+	 * <p>
+	 * @param inputStream - the input stream
+	 * @param date - date
+	 * @return tick-data reader
+	 * @throws IOException - IO error
+	 */
+	public CsvTickReader
+		createCsvTickReader(InputStream inputStream, LocalDate date)
+			throws IOException
+	{
+		return new CsvTickReader(inputStream, date);
+	}
+	
+	/**
 	 * Decorate tick writer with smart flusher.
 	 * <p>
 	 * @param writer - the writer to decorate
@@ -200,6 +235,75 @@ public class IOHelper {
 	 */
 	public TickWriter addSmartFlush(TickWriter writer, String streamId) {
 		return new SmartFlushTickWriter(writer, scheduler, streamId, flushSetup);
+	}
+	
+	/**
+	 * Get list of dates of available segments.
+	 * <p>
+	 * @param descr - security descriptor
+	 * @return list of dates
+	 * @throws IOException - IO error
+	 */
+	public List<LocalDate> getAvailableDataSegments(SecurityDescriptor descr)
+			throws IOException
+	{
+		List<LocalDate> result = new Vector<LocalDate>();
+		DateTimeFormatter df = DateTimeFormat.forPattern("yyyyMMdd");
+		String prefix = idUtils.getSafeId(descr);
+		int dateStart = prefix.length() + 1, dateLength = 8;
+		Iterator<File> it = FileUtils.iterateFiles(getRootDir(descr), null, true);
+		while ( it.hasNext() ) {
+			File x = it.next();
+			if ( x.isDirectory() ) {
+				continue;
+			}
+			File p = x.getParentFile();
+			if ( p == null || ! StringUtils.isNumeric(p.getName())) {
+				invalidFilename(x);
+				continue;
+			}
+			p = p.getParentFile();
+			if ( p == null || ! StringUtils.isNumeric(p.getName())) {
+				invalidFilename(x);
+				continue;
+			}
+			if ( ! p.getParentFile().getName().equals(prefix)) {
+				invalidFilename(x);
+				continue;
+			}
+			
+			String filename =  x.getName();
+			if ( ! filename.startsWith(prefix) ) {
+				invalidFilename(x);
+				continue;
+			}
+			int end = dateStart + dateLength;
+			if ( end >= filename.length()) {
+				invalidFilename(x);
+				continue;
+			}
+			String datestr = filename.substring(dateStart, end);
+			String ext = filename.substring(end);
+			if ( ! ext.equals(ARCH_FILE_EXT) && ! ext.equals(DATA_FILE_EXT) ) {
+				invalidFilename(x);
+				continue;
+			}
+			try {
+				LocalDate date = df.parseLocalDate(datestr);
+				if ( ! result.contains(date) ) {
+					result.add(date);
+				}
+			} catch ( Exception e ) {
+				invalidFilename(x);
+			}
+			
+		}
+		Collections.sort(result);
+		return result;
+	}
+	
+	private void invalidFilename(File x) {
+		logger.warn("Invalid filename detected: {}", x);
 	}
 
 }

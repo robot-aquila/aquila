@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Aqiterator;
+import ru.prolib.aquila.core.data.SimpleIterator;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickDatabase;
 
@@ -62,7 +64,9 @@ public class SimpleTickDatabase implements TickDatabase {
 		getIterator(SecurityDescriptor descr, DateTime startingTime)
 			throws IOException
 	{
-		throw new IOException("Not implemented");
+		return manager.isDataAvailable(descr) ?
+				new SeamlessTickReader(descr, startingTime, manager) :
+				new SimpleIterator<Tick>(new Vector<Tick>());
 	}
 
 	@Override

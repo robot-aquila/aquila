@@ -83,6 +83,19 @@ public interface DataSegmentManager {
 		throws IOException;
 	
 	/**
+	 * Get the date of the next available segment.
+	 * <p>
+	 * @param descr - security descriptor
+	 * @param date - date starting from
+	 * @return date of the next available data segment or null if no more
+	 * segments after the specified date
+	 * @throws IOException - error accessing storage
+	 */
+	public LocalDate
+		getDateOfNextSegment(SecurityDescriptor descr, LocalDate date)
+			throws IOException;
+	
+	/**
 	 * Get date of the last available segment.
 	 * <p>
 	 * @param descr - security descriptor

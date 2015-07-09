@@ -3,7 +3,6 @@ package ru.prolib.aquila.datatools.tickdatabase.simple;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.data.SimpleIterator;
 import ru.prolib.aquila.core.data.Tick;
 
 public class SimpleTickDatabaseTest {
@@ -89,9 +89,34 @@ public class SimpleTickDatabaseTest {
 		control.verify();
 	}
 	
-	@Test (expected=IOException.class)
-	public void testGetIterator_ShouldThrows() throws Exception {
-		database.getIterator(descr1, new DateTime());
+	@Test
+	public void testGetIterator_IfDataNotAvailable() throws Exception {
+		DateTime time = new DateTime(2015, 7, 8, 0, 0, 0);
+		expect(manager.isDataAvailable(descr1)).andReturn(false);
+		control.replay();
+		
+		SimpleIterator<Tick> it =
+				(SimpleIterator<Tick>) database.getIterator(descr1, time);
+		
+		assertNotNull(it);
+		assertFalse(it.next()); // empty iterator
+		control.verify();
+	}
+	
+	@Test
+	public void testGetIterator_IfDataAvailable() throws Exception {
+		DateTime time = new DateTime(2015, 7, 8, 0, 0, 0);
+		expect(manager.isDataAvailable(descr1)).andReturn(true);
+		control.replay();
+		
+		SeamlessTickReader it =
+				(SeamlessTickReader) database.getIterator(descr1, time);
+		
+		assertNotNull(it);
+		assertEquals(time, it.getCurrentTime());
+		assertEquals(descr1, it.getSecurityDescriptor());
+		assertSame(manager, it.getDataSegmentManager());
+		control.verify();
 	}
 
 	@Test
