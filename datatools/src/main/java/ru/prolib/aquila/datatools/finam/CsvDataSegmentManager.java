@@ -171,4 +171,11 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 		return null;
 	}
 
+	@Override
+	public List<LocalDate> getSegmentList(SecurityDescriptor descr)
+			throws IOException
+	{
+		return helper.getAvailableDataSegments(descr);
+	}
+
 }

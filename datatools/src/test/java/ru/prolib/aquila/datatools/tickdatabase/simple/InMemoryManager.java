@@ -103,5 +103,12 @@ class InMemoryManager implements DataSegmentManager {
 	{
 		throw new IOException("Not implemented");
 	}
+
+	@Override
+	public List<LocalDate> getSegmentList(SecurityDescriptor descr)
+			throws IOException
+	{
+		throw new IOException("Not implemented");
+	}
 	
 }

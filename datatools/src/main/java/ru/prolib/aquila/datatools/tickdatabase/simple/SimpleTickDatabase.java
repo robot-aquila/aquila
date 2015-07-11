@@ -61,7 +61,7 @@ public class SimpleTickDatabase implements TickDatabase {
 
 	@Override
 	public Aqiterator<Tick>
-		getIterator(SecurityDescriptor descr, DateTime startingTime)
+		getTicks(SecurityDescriptor descr, DateTime startingTime)
 			throws IOException
 	{
 		return manager.isDataAvailable(descr) ?
@@ -98,6 +98,25 @@ public class SimpleTickDatabase implements TickDatabase {
 			}
 		}
 		
+	}
+
+	@Override
+	public Aqiterator<Tick>
+		getTicks(SecurityDescriptor descr, int numLastSegments)
+			throws IOException
+	{
+		List<LocalDate> list = manager.getSegmentList(descr);
+		int size = list.size();
+		if ( size == 0 ) {
+			return new SimpleIterator<Tick>(new Vector<Tick>());
+		} else if ( size <= numLastSegments ) {
+			return new SeamlessTickReader(descr,
+					list.get(0).toDateTimeAtStartOfDay(), manager);
+		} else {
+			return new SeamlessTickReader(descr,
+					list.get(size - numLastSegments).toDateTimeAtStartOfDay(),
+					manager);
+		}
 	}
 
 }

@@ -1,7 +1,10 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 import java.io.IOException;
+import java.util.List;
+
 import org.joda.time.LocalDate;
+
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
@@ -103,6 +106,16 @@ public interface DataSegmentManager {
 	 * @throws IOException - error accessing storage or data not available
 	 */
 	public LocalDate getDateOfLastSegment(SecurityDescriptor descr)
+		throws IOException;
+	
+	/**
+	 * Get list of available segments.
+	 * <p>
+	 * @param descr - security descriptor
+	 * @return list of dates
+	 * @throws IOException - error accessing storage or data not available
+	 */
+	public List<LocalDate> getSegmentList(SecurityDescriptor descr)
 		throws IOException;
 
 }

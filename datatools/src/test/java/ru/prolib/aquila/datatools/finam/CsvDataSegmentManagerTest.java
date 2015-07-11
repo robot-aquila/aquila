@@ -348,5 +348,17 @@ public class CsvDataSegmentManagerTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testGetSegmentList() throws Exception {
+		List<LocalDate> list = new Vector<LocalDate>();
+		list.add(new LocalDate(1999, 11, 2));
+		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		control.replay();
+		
+		assertSame(list, manager.getSegmentList(descr1));
+		
+		control.verify();
+	}
 
 }

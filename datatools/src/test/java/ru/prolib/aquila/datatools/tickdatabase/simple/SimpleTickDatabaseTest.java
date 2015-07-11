@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
@@ -90,13 +92,13 @@ public class SimpleTickDatabaseTest {
 	}
 	
 	@Test
-	public void testGetIterator_IfDataNotAvailable() throws Exception {
+	public void testGetTicksSD_IfDataNotAvailable() throws Exception {
 		DateTime time = new DateTime(2015, 7, 8, 0, 0, 0);
 		expect(manager.isDataAvailable(descr1)).andReturn(false);
 		control.replay();
 		
 		SimpleIterator<Tick> it =
-				(SimpleIterator<Tick>) database.getIterator(descr1, time);
+				(SimpleIterator<Tick>) database.getTicks(descr1, time);
 		
 		assertNotNull(it);
 		assertFalse(it.next()); // empty iterator
@@ -104,13 +106,13 @@ public class SimpleTickDatabaseTest {
 	}
 	
 	@Test
-	public void testGetIterator_IfDataAvailable() throws Exception {
+	public void testGetTicksSD_IfDataAvailable() throws Exception {
 		DateTime time = new DateTime(2015, 7, 8, 0, 0, 0);
 		expect(manager.isDataAvailable(descr1)).andReturn(true);
 		control.replay();
 		
 		SeamlessTickReader it =
-				(SeamlessTickReader) database.getIterator(descr1, time);
+				(SeamlessTickReader) database.getTicks(descr1, time);
 		
 		assertNotNull(it);
 		assertEquals(time, it.getCurrentTime());
@@ -154,6 +156,64 @@ public class SimpleTickDatabaseTest {
 		assertFalse(segments.containsKey(descr1));
 		assertTrue(segments.containsKey(descr2));
 		assertFalse(segments.containsKey(descr3));
+	}
+	
+	@Test
+	public void testGetTicksSI_IfDataNotAvailable() throws Exception {
+		List<LocalDate> list = new Vector<LocalDate>();
+		expect(manager.getSegmentList(descr1)).andReturn(list);
+		control.replay();
+		
+		SimpleIterator<Tick> it =
+				(SimpleIterator<Tick>) database.getTicks(descr1, 5);
+		
+		assertNotNull(it);
+		assertFalse(it.next()); // empty iterator
+		
+		control.verify();
+	}
+
+	@Test
+	public void testGetTicksSI_IfNoEnoughSegments() throws Exception {
+		List<LocalDate> list = new Vector<LocalDate>();
+		list.add(new LocalDate(1998, 6, 1));
+		list.add(new LocalDate(1998, 7, 1));
+		list.add(new LocalDate(1998, 8, 1));
+		expect(manager.getSegmentList(descr1)).andReturn(list);
+		control.replay();
+		
+		SeamlessTickReader it =
+				(SeamlessTickReader) database.getTicks(descr1, 5);
+		
+		assertNotNull(it);
+		assertEquals(new DateTime(1998, 6, 1, 0, 0, 0), it.getCurrentTime());
+		assertEquals(descr1, it.getSecurityDescriptor());
+		assertSame(manager, it.getDataSegmentManager());
+		control.verify();
+	}
+	
+	@Test
+	public void testGetTicksSI_OK() throws Exception {
+		List<LocalDate> list = new Vector<LocalDate>();
+		list.add(new LocalDate(1998, 1, 1));
+		list.add(new LocalDate(1998, 2, 1));
+		list.add(new LocalDate(1998, 3, 1));
+		list.add(new LocalDate(1998, 4, 1));
+		list.add(new LocalDate(1998, 5, 1));
+		list.add(new LocalDate(1998, 6, 1));
+		list.add(new LocalDate(1998, 7, 1));
+		list.add(new LocalDate(1998, 8, 1));
+		expect(manager.getSegmentList(descr1)).andReturn(list);
+		control.replay();
+		
+		SeamlessTickReader it =
+				(SeamlessTickReader) database.getTicks(descr1, 5);
+		
+		assertNotNull(it);
+		assertEquals(new DateTime(1998, 4, 1, 0, 0, 0), it.getCurrentTime());
+		assertEquals(descr1, it.getSecurityDescriptor());
+		assertSame(manager, it.getDataSegmentManager());
+		control.verify();
 	}
 
 }
