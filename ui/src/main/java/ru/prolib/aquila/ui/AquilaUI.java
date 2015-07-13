@@ -2,6 +2,8 @@ package ru.prolib.aquila.ui;
 
 import javax.swing.*;
 
+import org.springframework.context.ApplicationContext;
+
 import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
 
@@ -45,5 +47,12 @@ public interface AquilaUI {
 	public UiTexts getTexts();
 	
 	public Runnable getExitAction();
+	
+	/**
+	 * Get Spring application context.
+	 * <p>
+	 * @return application context
+	 */
+	public ApplicationContext getApplicationContext();
 
 }

@@ -3,6 +3,8 @@ package ru.prolib.aquila.ui;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import org.springframework.context.ApplicationContext;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
 
@@ -17,6 +19,7 @@ public class ServiceLocator implements AquilaUI {
 	private final UiTexts texts;
 	private final Runnable exitAction;
 	private MainFrame frame;
+	private ApplicationContext appContext;
 	
 	public ServiceLocator(UiTexts texts, Runnable exitAction) {
 		super();
@@ -62,6 +65,15 @@ public class ServiceLocator implements AquilaUI {
 	 */
 	public void setMainFrame(MainFrame frame) {
 		this.frame = frame;
+	}
+
+	@Override
+	public ApplicationContext getApplicationContext() {
+		return appContext;
+	}
+	
+	public void setApplicationContext(ApplicationContext context) {
+		this.appContext = context;
 	}
 
 }

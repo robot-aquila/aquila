@@ -9,7 +9,6 @@
 	  	<relativePath>../aquila.project/pom.xml</relativePath>
 	</parent>
 	<properties>
-		<spring.version>4.1.6.RELEASE</spring.version>
 		<hibernate.version>3.6.10.Final</hibernate.version>
 	</properties>
 	
@@ -47,11 +46,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
             <version>${spring.version}</version>
         </dependency>
@@ -59,12 +53,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
         </dependency>
 		<dependency>
 		   <groupId>org.hibernate</groupId>

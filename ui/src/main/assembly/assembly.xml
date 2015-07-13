@@ -35,6 +35,8 @@
 			<includes>
 				<include>aquila-simple.sh</include>
 				<include>aquila-simple.bat</include>
+				<!-- Do not copy to prevent overwriting -->
+				<!-- include>application-context.xml</include -->
 			</includes>
 		</fileSet>
 	</fileSets>
