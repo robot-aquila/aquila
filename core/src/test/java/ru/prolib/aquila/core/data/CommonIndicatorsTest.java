@@ -1,6 +1,7 @@
-package ru.prolib.aquila.core.indicator;
+package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
+
 import org.joda.time.*;
 import org.junit.*;
 
@@ -11,7 +12,7 @@ import ru.prolib.aquila.core.data.*;
  * 2013-03-04<br>
  * $Id: FMathImplTest.java 571 2013-03-12 00:53:34Z whirlwind $
  */
-public class FMathImplTest {
+public class CommonIndicatorsTest {
 	
 	/**
 	 * Запись фикстуры для проверки расчета вещественного значения.
@@ -134,16 +135,16 @@ public class FMathImplTest {
 		};
 	
 	private EventSystem es;
-	private FMath math;
-	private EditableDataSeries value;
+	private CommonIndicators math;
+	private EditableSeries<Double> value;
 	private EditableSeries<Candle> candles;
 	
 	@Before
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		math = new FMathImpl();
-		value = new DataSeriesImpl(es);
+		math = new CommonIndicators();
+		value = new SeriesImpl<Double>(es);
 		candles = new SeriesImpl<Candle>(es);
 	}
 	
@@ -223,14 +224,14 @@ public class FMathImplTest {
 	}
 	
 	@Test
-	public void testVv_dpo3_3args() throws Exception {
+	public void testVvdpo3_3args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			value.add(fix_vv_dpo3[i].value);
 		}
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
-			Double dpo = math.vv_dpo(value, i, 3);
+			Double dpo = math.vvdpo(value, i, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -240,12 +241,12 @@ public class FMathImplTest {
 	}
 	
 	@Test
-	public void testVv_dpo3_2args() throws Exception {
+	public void testVvdpo3_2args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
 			value.add(fr.value);
-			Double dpo = math.vv_dpo(value, 3);
+			Double dpo = math.vvdpo(value, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -255,14 +256,14 @@ public class FMathImplTest {
 	}
 	
 	@Test
-	public void testVv_dpo20_3args() throws Exception {
+	public void testVvdpo20_3args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			value.add(fix_vv_dpo20[i].value);
 		}
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
-			Double dpo = math.vv_dpo(value, i, 20);
+			Double dpo = math.vvdpo(value, i, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -272,12 +273,12 @@ public class FMathImplTest {
 	}
 	
 	@Test
-	public void testVv_dpo20_2args() throws Exception {
+	public void testVvdpo20_2args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
 			value.add(fr.value);
-			Double dpo = math.vv_dpo(value, 20);
+			Double dpo = math.vvdpo(value, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -362,7 +363,7 @@ public class FMathImplTest {
 	@Test
 	public void testMaxVA23() throws Exception {
 		int period = 4;
-		EditableDataSeries value2 = new DataSeriesImpl(es);
+		EditableSeries<Double> value2 = new SeriesImpl<Double>(es);
 		Double fix[][] = {
 				// value, value2, max
 				{ 19.29d, null,   19.29d },
@@ -426,7 +427,7 @@ public class FMathImplTest {
 	@Test
 	public void testMinVA23() throws Exception {
 		int period = 4;
-		EditableDataSeries value2 = new DataSeriesImpl(es);
+		EditableSeries<Double> value2 = new SeriesImpl<Double>(es);
 		Double fix[][] = {
 				// value, value2, min
 				{ 19.29d, null,   19.29d },

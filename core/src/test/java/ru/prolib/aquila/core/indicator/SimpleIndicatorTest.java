@@ -18,7 +18,7 @@ public class SimpleIndicatorTest {
 	private IMocksControl control;
 	private SimpleFunction<Double, Double> fn;
 	private IndicatorEventDispatcher dispatcher;
-	private EditableDataSeries sourceSeries;
+	private EditableSeries<Double> sourceSeries;
 	private EventType type;
 	private SimpleIndicator<Double, Double> indicator;
 	
@@ -51,7 +51,7 @@ public class SimpleIndicatorTest {
 		dispatcher = control.createMock(IndicatorEventDispatcher.class);
 		type = control.createMock(EventType.class);
 		fn = new StubFunction();
-		sourceSeries = new DataSeriesImpl(es);
+		sourceSeries = new SeriesImpl<Double>(es);
 		indicator = new SimpleIndicator<Double, Double>("foobar", fn,
 				sourceSeries, dispatcher);
 	}
@@ -260,9 +260,9 @@ public class SimpleIndicatorTest {
 				new Variant<SimpleFunction<Double, Double>>(vId)
 			.add(fn)
 			.add(control.createMock(SimpleFunction.class));
-		Variant<DataSeries> vSrc = new Variant<DataSeries>(vFn)
+		Variant<Series<Double>> vSrc = new Variant<Series<Double>>(vFn)
 			.add(sourceSeries)
-			.add(control.createMock(DataSeries.class));
+			.add(control.createMock(Series.class));
 		Variant<?> iterator = vSrc;
 		int foundCnt = 0;
 		SimpleIndicator<Double, Double> x, found = null;

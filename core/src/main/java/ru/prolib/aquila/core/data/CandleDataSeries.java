@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.EventSystem;
  * $Id: CandleDataSeries.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class CandleDataSeries extends CandleProxy<Double>
-		implements DataSeries
+		implements Series<Double>
 {
 
 	/**

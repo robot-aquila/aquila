@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.data.*;
 
 public class IndicatorEventDispatcherTest {
 	private EventSystem es;
-	private EditableDataSeries series;
+	private EditableSeries<Double> series;
 	private IndicatorEventDispatcher dispatcher;
 	private List<Event> actualEvents;
 	private EventListener eventListener;

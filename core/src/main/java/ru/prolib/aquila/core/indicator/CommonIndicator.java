@@ -7,6 +7,7 @@ import ru.prolib.aquila.core.*;
  * <p>
  * @param <T> - тип значения индикатора
  */
+@Deprecated
 public abstract class CommonIndicator<T> implements Indicator<T> {
 	protected final IndicatorEventDispatcher dispatcher;
 	protected boolean started = false;

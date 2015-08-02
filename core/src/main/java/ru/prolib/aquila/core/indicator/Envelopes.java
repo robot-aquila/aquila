@@ -36,7 +36,7 @@ public class Envelopes implements Starter {
 	 * @param function функция расчета скользящей средней
 	 * @param k коэффициент сдвига
 	 */
-	public Envelopes(EventSystem es, String id, DataSeries sourceSeries,
+	public Envelopes(EventSystem es, String id, Series<Double> sourceSeries,
 			MAFunction function, double k)
 	{
 		ma = new MA(es, id, function, sourceSeries);
@@ -52,7 +52,7 @@ public class Envelopes implements Starter {
 	 * @param function функция расчета скользящей средней
 	 * @param k коэффециент сдвига
 	 */
-	public Envelopes(EventSystem es, DataSeries sourceSeries,
+	public Envelopes(EventSystem es, Series<Double> sourceSeries,
 			MAFunction function,  double k)
 	{
 		this(es, null, sourceSeries, function, k);
@@ -70,7 +70,7 @@ public class Envelopes implements Starter {
 	 * @param period период скользящей средней
 	 * @param k коэффициент сдвига
 	 */
-	public Envelopes(EventSystem es, String id, DataSeries sourceSeries,
+	public Envelopes(EventSystem es, String id, Series<Double> sourceSeries,
 			int period, double k)
 	{
 		this(es, id, sourceSeries, new QuikEMAFunction(period), k);
@@ -87,7 +87,7 @@ public class Envelopes implements Starter {
 	 * @param period период скользящей средней
 	 * @param k коэффициент сдвига
 	 */
-	public Envelopes(EventSystem es, DataSeries sourceSeries, int period,
+	public Envelopes(EventSystem es, Series<Double> sourceSeries, int period,
 			double k)
 	{
 		this(es, null, sourceSeries, period, k);
@@ -103,7 +103,7 @@ public class Envelopes implements Starter {
 	 * @param sourceSeries исходный ряд данных
 	 * @param period период скользящей средней
 	 */
-	public Envelopes(EventSystem es, DataSeries sourceSeries, int period) {
+	public Envelopes(EventSystem es, Series<Double> sourceSeries, int period) {
 		this(es, sourceSeries, period, 2.0d);
 	}
 	

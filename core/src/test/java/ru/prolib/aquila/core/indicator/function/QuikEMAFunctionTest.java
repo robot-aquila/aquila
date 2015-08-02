@@ -24,7 +24,7 @@ public class QuikEMAFunctionTest {
 		{ 228.46d, 224.892500d },
 	};
 	
-	private EditableDataSeries source, own;
+	private EditableSeries<Double> source, own;
 	private QuikEMAFunction fn;
 	private EventSystem es;
 	
@@ -32,8 +32,8 @@ public class QuikEMAFunctionTest {
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		source = new DataSeriesImpl(es);
-		own = new DataSeriesImpl(es);
+		source = new SeriesImpl<Double>(es);
+		own = new SeriesImpl<Double>(es);
 		fn = new QuikEMAFunction(3);
 	}
 	

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import org.joda.time.Interval;
+
 /**
  * Интерфейс фабрики рядов.
  * <p>
@@ -60,14 +62,14 @@ public interface SeriesFactory {
 	 * @param id идентификатор ряда
 	 * @return ряд
 	 */
-	public EditableIntervalSeries createInterval(String id);
+	public EditableSeries<Interval> createInterval(String id);
 	
 	/**
 	 * Создать ряд временных интервалов.
 	 * <p>
 	 * @return ряд
 	 */
-	public EditableIntervalSeries createInterval();
+	public EditableSeries<Interval> createInterval();
 	
 	/**
 	 * Создать ряд типа {@link java.lang.Double}.
@@ -75,14 +77,14 @@ public interface SeriesFactory {
 	 * @param id идентификатор ряда
 	 * @return ряд
 	 */
-	public EditableDataSeries createDouble(String id);
+	public EditableSeries<Double> createDouble(String id);
 	
 	/**
 	 * Создать ряд типа {@link java.lang.Double}.
 	 * <p>
 	 * @return ряд
 	 */
-	public EditableDataSeries createDouble();
+	public EditableSeries<Double> createDouble();
 	
 	/**
 	 * Создать ряд типа {@link java.lang.Integer}.

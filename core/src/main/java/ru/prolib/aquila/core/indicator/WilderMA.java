@@ -1,9 +1,7 @@
 package ru.prolib.aquila.core.indicator;
 
 import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.data.DataSeries;
-import ru.prolib.aquila.core.data.SeriesImpl;
-import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.data.*;
 
 /**
  * Wilder Moving Average (WilderMA).
@@ -32,7 +30,7 @@ public class WilderMA extends _MA {
 	 * @param limit лимит хранилища
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public WilderMA(EventSystem es, String id, DataSeries source, int period,
+	public WilderMA(EventSystem es, String id, Series<Double> source, int period,
 			int limit) throws ValueException
 	{
 		super(es, id, source, period, limit);
@@ -47,7 +45,7 @@ public class WilderMA extends _MA {
 	 * @param period период скользящей средней
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public WilderMA(EventSystem es, String id, DataSeries source, int period)
+	public WilderMA(EventSystem es, String id, Series<Double> source, int period)
 		throws ValueException
 	{
 		this(es, id, source, period, SeriesImpl.STORAGE_NOT_LIMITED);
@@ -61,7 +59,7 @@ public class WilderMA extends _MA {
 	 * @param period период скользящей средней
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public WilderMA(EventSystem es, DataSeries source, int period)
+	public WilderMA(EventSystem es, Series<Double> source, int period)
 			throws ValueException
 	{
 		this(es, null, source, period, SeriesImpl.STORAGE_NOT_LIMITED);

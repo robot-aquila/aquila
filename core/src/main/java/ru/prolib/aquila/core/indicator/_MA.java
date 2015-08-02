@@ -15,10 +15,11 @@ import ru.prolib.aquila.core.data.*;
  * 2013-03-12<br>
  * $Id: _MA.java 571 2013-03-12 00:53:34Z whirlwind $
  */
-abstract public class _MA implements DataSeries {
+@Deprecated
+abstract public class _MA implements Series<Double> {
 	private static final Logger logger;
-	protected final DataSeriesImpl series;
-	protected final DataSeries source;
+	protected final SeriesImpl<Double> series;
+	protected final Series<Double> source;
 	protected final int period;
 	
 	static {
@@ -35,7 +36,7 @@ abstract public class _MA implements DataSeries {
 	 * @param storageLimit лимит размера хранимых значений 
 	 * @throws ValueException исключение перерасчета значений индикатора
 	 */
-	public _MA(EventSystem es, String id, DataSeries source, int period,
+	public _MA(EventSystem es, String id, Series<Double> source, int period,
 			int storageLimit) throws ValueException
 	{
 		super();
@@ -44,7 +45,7 @@ abstract public class _MA implements DataSeries {
 		}
 		this.source = source;
 		this.period = period;
-		series = new DataSeriesImpl(es, makeId(id), storageLimit);
+		series = new SeriesImpl<Double>(es, makeId(id), storageLimit);
 		init();
 	}
 
@@ -62,7 +63,7 @@ abstract public class _MA implements DataSeries {
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getSource() {
+	public Series<Double> getSource() {
 		return source;
 	}
 

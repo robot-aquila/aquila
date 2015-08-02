@@ -31,7 +31,7 @@ public class QUIK_EMA extends _MA {
 	 * @param limit лимит хранилища
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public QUIK_EMA(EventSystem es, String id, DataSeries source, int period,
+	public QUIK_EMA(EventSystem es, String id, Series<Double> source, int period,
 			int limit) throws ValueException
 	{
 		super(es, id, source, period, limit);
@@ -46,7 +46,7 @@ public class QUIK_EMA extends _MA {
 	 * @param period период скользящей средней
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public QUIK_EMA(EventSystem es, String id, DataSeries source, int period)
+	public QUIK_EMA(EventSystem es, String id, Series<Double> source, int period)
 		throws ValueException
 	{
 		this(es, id, source, period, SeriesImpl.STORAGE_NOT_LIMITED);
@@ -60,7 +60,7 @@ public class QUIK_EMA extends _MA {
 	 * @param period период скользящей средней
 	 * @throws ValueException ошибка перерасчета значений индикатора
 	 */
-	public QUIK_EMA(EventSystem es, DataSeries source, int period)
+	public QUIK_EMA(EventSystem es, Series<Double> source, int period)
 			throws ValueException
 	{
 		this(es, null, source, period, SeriesImpl.STORAGE_NOT_LIMITED);

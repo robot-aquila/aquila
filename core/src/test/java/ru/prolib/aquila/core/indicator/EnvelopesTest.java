@@ -12,7 +12,7 @@ import ru.prolib.aquila.core.indicator.function.*;
 public class EnvelopesTest {
 	private EventSystem es;
 	private IMocksControl control;
-	private DataSeries sourceSeries;
+	private Series<Double> sourceSeries;
 	private MA movingAverage;
 	private EnvelopeBand upper, lower;
 	private Envelopes indicator;
@@ -21,7 +21,7 @@ public class EnvelopesTest {
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		sourceSeries = new DataSeriesImpl(es);
+		sourceSeries = new SeriesImpl<Double>(es);
 		control = createStrictControl();
 		movingAverage = control.createMock(MA.class);
 		upper = control.createMock(EnvelopeBand.class);

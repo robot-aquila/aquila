@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
+
+import org.joda.time.Interval;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
@@ -58,25 +60,25 @@ public class SeriesFactoryImplTest {
 
 	@Test
 	public void testCreateInterval() throws Exception {
-		assertEquals(new IntervalSeriesImpl(es, Series.DEFAULT_ID, 0),
+		assertEquals(new SeriesImpl<Interval>(es, Series.DEFAULT_ID, 0),
 				factory1.createInterval());
-		assertEquals(new IntervalSeriesImpl(es, "mobi", 0),
+		assertEquals(new SeriesImpl<Interval>(es, "mobi", 0),
 				factory1.createInterval("mobi"));
-		assertEquals(new IntervalSeriesImpl(es, Series.DEFAULT_ID, 128),
+		assertEquals(new SeriesImpl<Interval>(es, Series.DEFAULT_ID, 128),
 				factory2.createInterval());
-		assertEquals(new IntervalSeriesImpl(es, "zippo", 128),
+		assertEquals(new SeriesImpl<Interval>(es, "zippo", 128),
 				factory2.createInterval("zippo"));
 	}
 
 	@Test
 	public void testCreateDouble() throws Exception {
-		assertEquals(new DataSeriesImpl(es, Series.DEFAULT_ID, 0),
+		assertEquals(new SeriesImpl<Double>(es, Series.DEFAULT_ID, 0),
 				factory1.createDouble());
-		assertEquals(new DataSeriesImpl(es, "jamal", 0),
+		assertEquals(new SeriesImpl<Double>(es, "jamal", 0),
 				factory1.createDouble("jamal"));
-		assertEquals(new DataSeriesImpl(es, Series.DEFAULT_ID, 128),
+		assertEquals(new SeriesImpl<Double>(es, Series.DEFAULT_ID, 128),
 				factory2.createDouble());
-		assertEquals(new DataSeriesImpl(es, "panam", 128),
+		assertEquals(new SeriesImpl<Double>(es, "panam", 128),
 				factory2.createDouble("panam"));
 	}
 

@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.data.*;
  * 2013-03-12<br>
  * $Id: _FLY.java 571 2013-03-12 00:53:34Z whirlwind $
  */
-abstract public class _FLY<T> implements DataSeries {
+abstract public class _FLY<T> implements Series<Double> {
 	private static final Logger logger;
 	protected final Series<T> source;
 	private final String id;

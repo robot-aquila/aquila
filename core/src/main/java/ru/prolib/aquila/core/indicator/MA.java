@@ -18,8 +18,8 @@ public class MA extends ComplexIndicator<Double, Double> {
 	 * @param ownSeries собственный ряд данных
 	 * @param dispatcher диспетчер событий
 	 */
-	public MA(String id, MAFunction function, DataSeries sourceSeries,
-			EditableDataSeries ownSeries, IndicatorEventDispatcher dispatcher)
+	public MA(String id, MAFunction function, Series<Double> sourceSeries,
+			EditableSeries<Double> ownSeries, IndicatorEventDispatcher dispatcher)
 	{
 		super(id, function, sourceSeries, ownSeries, dispatcher);
 	}
@@ -33,9 +33,9 @@ public class MA extends ComplexIndicator<Double, Double> {
 	 * @param sourceSeries исходный ряд данных
 	 */
 	public MA(EventSystem es, String id, MAFunction function,
-			DataSeries sourceSeries)
+			Series<Double> sourceSeries)
 	{
-		this(id, function, sourceSeries, new DataSeriesImpl(es),
+		this(id, function, sourceSeries, new SeriesImpl<Double>(es),
 			new IndicatorEventDispatcher(es));
 	}
 	
@@ -46,7 +46,7 @@ public class MA extends ComplexIndicator<Double, Double> {
 	 * @param function функция расчета
 	 * @param sourceSeries исходный ряд данных
 	 */
-	public MA(EventSystem es, MAFunction function, DataSeries sourceSeries) {
+	public MA(EventSystem es, MAFunction function, Series<Double> sourceSeries) {
 		this(es, null, function, sourceSeries);
 	}
 	

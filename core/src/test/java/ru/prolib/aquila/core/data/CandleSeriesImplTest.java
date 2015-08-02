@@ -140,7 +140,7 @@ public class CandleSeriesImplTest {
 		series.add(candle2);
 		series.add(candle3);
 		Double expected[] = { 144440d, 143230d, 143280d };
-		DataSeries s = series.getOpenSeries();
+		Series<Double> s = series.getOpenSeries();
 		assertEquals(expected.length, s.getLength());
 		for ( int i = 0; i < expected.length; i ++ ) {
 			assertEquals("At #" + i, expected[i], s.get(i), 0.1d);
@@ -153,7 +153,7 @@ public class CandleSeriesImplTest {
 		series.add(candle2);
 		series.add(candle3);
 		Double expected[] = { 144440d, 143390d, 143320d };
-		DataSeries s = series.getHighSeries();
+		Series<Double> s = series.getHighSeries();
 		assertEquals(expected.length, s.getLength());
 		for ( int i = 0; i < expected.length; i ++ ) {
 			assertEquals("At #" + i, expected[i], s.get(i), 0.1d);
@@ -166,7 +166,7 @@ public class CandleSeriesImplTest {
 		series.add(candle2);
 		series.add(candle3);
 		Double expected[] = { 143130d, 143100d, 143110d };
-		DataSeries s = series.getLowSeries();
+		Series<Double> s = series.getLowSeries();
 		assertEquals(expected.length, s.getLength());
 		for ( int i = 0; i < expected.length; i ++ ) {
 			assertEquals("At #" + i, expected[i], s.get(i), 0.1d);
@@ -179,7 +179,7 @@ public class CandleSeriesImplTest {
 		series.add(candle2);
 		series.add(candle3);
 		Double expected[] = { 143210d, 143290d, 143190d };
-		DataSeries s = series.getCloseSeries();
+		Series<Double> s = series.getCloseSeries();
 		assertEquals(expected.length, s.getLength());
 		for ( int i = 0; i < expected.length; i ++ ) {
 			assertEquals("At #" + i, expected[i], s.get(i), 0.1d);
@@ -192,7 +192,7 @@ public class CandleSeriesImplTest {
 		series.add(candle2);
 		series.add(candle3);
 		Double expected[] = { 39621d, 12279d, 11990d };
-		DataSeries s = series.getVolumeSeries();
+		Series<Double> s = series.getVolumeSeries();
 		assertEquals(expected.length, s.getLength());
 		for ( int i = 0; i < expected.length; i ++ ) {
 			assertEquals("At #" + i, expected[i], s.get(i), 0.1d);
@@ -205,7 +205,7 @@ public class CandleSeriesImplTest {
 		series.add(candle2);
 		series.add(candle3);
 		Interval expected[] = { int1, int2, int3 };
-		IntervalSeries s = series.getIntervalSeries();
+		Series<Interval> s = series.getIntervalSeries();
 		assertEquals(expected.length, s.getLength());
 		for ( int i = 0; i < expected.length; i ++ ) {
 			assertEquals("At #" + i, expected[i], s.get(i));

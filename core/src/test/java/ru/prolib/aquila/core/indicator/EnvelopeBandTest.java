@@ -14,7 +14,7 @@ public class EnvelopeBandTest {
 	private EventSystem es;
 	private IMocksControl control;
 	private EnvelopeFunction fn;
-	private DataSeries sourceSeries;
+	private Series<Double> sourceSeries;
 	private IndicatorEventDispatcher dispatcher;
 	private EnvelopeBand indicator;
 
@@ -24,7 +24,7 @@ public class EnvelopeBandTest {
 		es.getEventQueue().start();
 		control = createStrictControl();
 		fn = control.createMock(EnvelopeFunction.class);
-		sourceSeries = new DataSeriesImpl(es);
+		sourceSeries = new SeriesImpl<Double>(es);
 		dispatcher = new IndicatorEventDispatcher(es);
 		indicator = new EnvelopeBand("foobar", fn, sourceSeries, dispatcher);
 	}
@@ -107,9 +107,9 @@ public class EnvelopeBandTest {
 		Variant<EnvelopeFunction> vFn = new Variant<EnvelopeFunction>()
 			.add(fn)
 			.add(control.createMock(EnvelopeFunction.class));
-		Variant<DataSeries> vSrc = new Variant<DataSeries>(vFn)
+		Variant<Series<Double>> vSrc = new Variant<Series<Double>>(vFn)
 			.add(sourceSeries)
-			.add(new DataSeriesImpl(es, "zerg"));
+			.add(new SeriesImpl<Double>(es, "zerg"));
 		Variant<?> iterator = vSrc;
 		int foundCnt = 0;
 		EnvelopeBand x, found = null;

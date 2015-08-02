@@ -15,8 +15,8 @@ public class MATest {
 	private EventSystem es;
 	private IMocksControl control;
 	private MAFunction fn;
-	private DataSeries sourceSeries;
-	private EditableDataSeries ownSeries;
+	private Series<Double> sourceSeries;
+	private EditableSeries<Double> ownSeries;
 	private IndicatorEventDispatcher dispatcher;
 	private MA indicator;
 
@@ -26,8 +26,8 @@ public class MATest {
 		es.getEventQueue().start();
 		control = createStrictControl();
 		fn = control.createMock(MAFunction.class);
-		sourceSeries = new DataSeriesImpl(es);
-		ownSeries = new DataSeriesImpl(es);
+		sourceSeries = new SeriesImpl<Double>(es);
+		ownSeries = new SeriesImpl<Double>(es);
 		dispatcher = new IndicatorEventDispatcher(es);
 		indicator = new MA("zulu", fn, sourceSeries, ownSeries, dispatcher);
 	}
@@ -56,7 +56,7 @@ public class MATest {
 		indicator = new MA(es, "foobar", fn, sourceSeries);
 		assertSame(fn, indicator.getFunction());
 		assertSame(sourceSeries, indicator.getSourceSeries());
-		assertEquals(new DataSeriesImpl(es), indicator.getOwnSeries());
+		assertEquals(new SeriesImpl<Double>(es), indicator.getOwnSeries());
 		assertNotNull(indicator.getEventDispatcher());
 		assertEquals("foobar", indicator.getId());
 	}
@@ -69,7 +69,7 @@ public class MATest {
 		indicator = new MA(es, fn, sourceSeries);
 		assertSame(fn, indicator.getFunction());
 		assertSame(sourceSeries, indicator.getSourceSeries());
-		assertEquals(new DataSeriesImpl(es), indicator.getOwnSeries());
+		assertEquals(new SeriesImpl<Double>(es), indicator.getOwnSeries());
 		assertNotNull(indicator.getEventDispatcher());
 		assertEquals("zoom", indicator.getId());
 		
@@ -118,12 +118,12 @@ public class MATest {
 		Variant<MAFunction> vFn = new Variant<MAFunction>(vId)
 			.add(fn)
 			.add(control.createMock(MAFunction.class));
-		Variant<DataSeries> vSrc = new Variant<DataSeries>(vFn)
+		Variant<Series<Double>> vSrc = new Variant<Series<Double>>(vFn)
 			.add(sourceSeries)
-			.add(new DataSeriesImpl(es, "gamma"));
-		Variant<EditableDataSeries> vOwn = new Variant<EditableDataSeries>(vSrc)
+			.add(new SeriesImpl<Double>(es, "gamma"));
+		Variant<EditableSeries<Double>> vOwn = new Variant<EditableSeries<Double>>(vSrc)
 			.add(ownSeries)
-			.add(new DataSeriesImpl(es, "beta"));
+			.add(new SeriesImpl<Double>(es, "beta"));
 		Variant<?> iterator = vOwn;
 		int foundCnt = 0;
 		MA x, found = null;

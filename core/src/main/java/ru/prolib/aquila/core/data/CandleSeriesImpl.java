@@ -45,7 +45,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		implements EditableCandleSeries
 {
 	private final Timeframe timeframe;
-	private final DataSeries open, high, low, close, vol;
+	private final Series<Double> open, high, low, close, vol;
 	private final IntervalSeries interval;
 	private DateTime poa;
 	
@@ -91,32 +91,32 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	}
 
 	@Override
-	public DataSeries getOpenSeries() {
+	public Series<Double> getOpenSeries() {
 		return open;
 	}
 
 	@Override
-	public DataSeries getHighSeries() {
+	public Series<Double> getHighSeries() {
 		return high;
 	}
 
 	@Override
-	public DataSeries getLowSeries() {
+	public Series<Double> getLowSeries() {
 		return low;
 	}
 
 	@Override
-	public DataSeries getCloseSeries() {
+	public Series<Double> getCloseSeries() {
 		return close;
 	}
 
 	@Override
-	public DataSeries getVolumeSeries() {
+	public Series<Double> getVolumeSeries() {
 		return vol;
 	}
 
 	@Override
-	public IntervalSeries getIntervalSeries() {
+	public Series<Interval> getIntervalSeries() {
 		return interval;
 	}
 

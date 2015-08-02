@@ -27,7 +27,7 @@ public class QUIK_EMATest {
 		{ 228.46d, 224.892500d },
 	};
 	
-	private DataSeriesImpl source;
+	private SeriesImpl<Double> source;
 	private QUIK_EMA ma;
 	private EventSystem es;
 
@@ -35,7 +35,7 @@ public class QUIK_EMATest {
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		source = new DataSeriesImpl(es);
+		source = new SeriesImpl<Double>(es);
 		ma = new QUIK_EMA(es, "foo", source, 3, 128);
 	}
 	

@@ -16,7 +16,7 @@ public class EnvelopeFunctionTest {
 		{ 149061.272587d, 149806.578950d, 148315.966224d },
 		{ 149056.908946d, 149802.193491d, 148311.624401d },
 	};
-	private EditableDataSeries sourceSeries;
+	private EditableSeries<Double> sourceSeries;
 	private EnvelopeFunction upper, lower;
 	private EventSystem es;
 
@@ -24,7 +24,7 @@ public class EnvelopeFunctionTest {
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		sourceSeries = new DataSeriesImpl(es);
+		sourceSeries = new SeriesImpl<Double>(es);
 		upper = new EnvelopeFunction(true, 0.5d);
 		lower = new EnvelopeFunction(false, 0.5d);
 	}

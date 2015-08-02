@@ -33,7 +33,7 @@ public class WilderMATest {
 		{ 228.46d, 223.153333d },
 	};
 
-	private DataSeriesImpl source;
+	private SeriesImpl<Double> source;
 	private WilderMA ma;
 	private EventSystem es;
 
@@ -41,7 +41,7 @@ public class WilderMATest {
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		source = new DataSeriesImpl(es);
+		source = new SeriesImpl<Double>(es);
 		ma = new WilderMA(es, "foo", source, 3, 128);
 	}
 	
@@ -145,7 +145,7 @@ public class WilderMATest {
 		int foundCnt = 0;
 		WilderMA x, found = null;
 		do {
-			DataSeriesImpl ds = new DataSeriesImpl(es);
+			SeriesImpl<Double> ds = new SeriesImpl<Double>(es);
 			x = new WilderMA(es, vId.get(), ds, vPer.get(), vLen.get());
 			for ( int i = 0; i < vSrc.get().size(); i ++ ) {
 				ds.add(vSrc.get().get(i));

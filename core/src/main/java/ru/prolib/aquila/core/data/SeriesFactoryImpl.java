@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import org.joda.time.Interval;
+
 import ru.prolib.aquila.core.EventSystem;
 
 /**
@@ -52,9 +54,10 @@ public class SeriesFactoryImpl implements SeriesFactory {
 		return new SeriesImpl(es, id, limit);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public EditableDataSeries createDouble(String id) {
-		return new DataSeriesImpl(es, id, limit);
+	public EditableSeries<Double> createDouble(String id) {
+		return createValue(id);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -63,9 +66,10 @@ public class SeriesFactoryImpl implements SeriesFactory {
 		return createValue(id);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public EditableIntervalSeries createInterval(String id) {
-		return new IntervalSeriesImpl(es, id, limit);
+	public EditableSeries<Interval> createInterval(String id) {
+		return createValue(id);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -102,12 +106,12 @@ public class SeriesFactoryImpl implements SeriesFactory {
 	}
 
 	@Override
-	public EditableIntervalSeries createInterval() {
+	public EditableSeries<Interval> createInterval() {
 		return createInterval(Series.DEFAULT_ID);
 	}
 
 	@Override
-	public EditableDataSeries createDouble() {
+	public EditableSeries<Double> createDouble() {
 		return createDouble(Series.DEFAULT_ID);
 	}
 

@@ -24,7 +24,7 @@ public interface EditableSeries<T> extends Series<T> {
 	public void set(T value) throws ValueException;
 	
 	/**
-	 * Добавить значение.
+	 * Добавить значение в конец последовательности.
 	 * <p>
 	 * @param value - value to add.
 	 * @throws ValueException - If error occurred.

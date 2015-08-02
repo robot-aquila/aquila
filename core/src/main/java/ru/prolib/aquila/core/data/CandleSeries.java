@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.data;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * Интерфейс ряда свечей.
@@ -15,42 +16,42 @@ public interface CandleSeries extends Series<Candle> {
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getOpenSeries();
+	public Series<Double> getOpenSeries();
 
 	/**
 	 * Получить ряд данных, соответствующий максимальной цене свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getHighSeries();
+	public Series<Double> getHighSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий минимальной цене свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getLowSeries();
+	public Series<Double> getLowSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий цене закрытия свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getCloseSeries();
+	public Series<Double> getCloseSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий объему торгов свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public DataSeries getVolumeSeries();
+	public Series<Double> getVolumeSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий интервалу свечи.
 	 * <p>
 	 * @return ряд
 	 */
-	public IntervalSeries getIntervalSeries();
+	public Series<Interval> getIntervalSeries();
 	
 	/**
 	 * Получить точку актуальности.

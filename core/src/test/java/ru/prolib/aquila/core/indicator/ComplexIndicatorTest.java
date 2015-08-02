@@ -18,7 +18,7 @@ public class ComplexIndicatorTest {
 	private IMocksControl control;
 	private ComplexFunction<Double, Double> fn;
 	private IndicatorEventDispatcher dispatcher;
-	private EditableDataSeries sourceSeries, ownSeries;
+	private EditableSeries<Double> sourceSeries, ownSeries;
 	private EventType type;
 	private ComplexIndicator<Double, Double> indicator;
 	private EventSystem es;
@@ -52,8 +52,8 @@ public class ComplexIndicatorTest {
 		dispatcher = control.createMock(IndicatorEventDispatcher.class);
 		type = control.createMock(EventType.class);
 		fn = new StubFunction();
-		sourceSeries = new DataSeriesImpl(es);
-		ownSeries = new DataSeriesImpl(es);
+		sourceSeries = new SeriesImpl<Double>(es);
+		ownSeries = new SeriesImpl<Double>(es);
 		indicator = new ComplexIndicator<Double, Double>("foobar", fn,
 				sourceSeries, ownSeries, dispatcher);
 	}
@@ -271,6 +271,7 @@ public class ComplexIndicatorTest {
 		assertFalse(indicator.equals(this));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
 		Variant<String> vId = new Variant<String>()
@@ -280,12 +281,12 @@ public class ComplexIndicatorTest {
 				new Variant<ComplexFunction<Double, Double>>(vId)
 			.add(fn)
 			.add(control.createMock(MAFunction.class));
-		Variant<DataSeries> vSrc = new Variant<DataSeries>(vFn)
+		Variant<Series<Double>> vSrc = new Variant<Series<Double>>(vFn)
 			.add(sourceSeries)
-			.add(control.createMock(DataSeries.class));
-		Variant<EditableDataSeries> vOwn = new Variant<EditableDataSeries>(vSrc)
+			.add(control.createMock(Series.class));
+		Variant<EditableSeries<Double>> vOwn = new Variant<EditableSeries<Double>>(vSrc)
 			.add(ownSeries)
-			.add(control.createMock(EditableDataSeries.class));
+			.add(control.createMock(EditableSeries.class));
 		Variant<?> iterator = vOwn;
 		int foundCnt = 0;
 		ComplexIndicator<Double, Double> x, found = null;
