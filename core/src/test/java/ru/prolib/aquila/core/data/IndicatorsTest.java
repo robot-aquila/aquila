@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.*;
  * 2013-03-04<br>
  * $Id: FMathImplTest.java 571 2013-03-12 00:53:34Z whirlwind $
  */
-public class CommonIndicatorsTest {
+public class IndicatorsTest {
 	
 	/**
 	 * Запись фикстуры для проверки расчета вещественного значения.
@@ -175,7 +175,7 @@ public class CommonIndicatorsTest {
 		};
 	
 	private EventSystem es;
-	private CommonIndicators indicators;
+	private Indicators indicators;
 	private EditableSeries<Double> series;
 	private EditableSeries<Candle> candles;
 	
@@ -183,7 +183,7 @@ public class CommonIndicatorsTest {
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		indicators = new CommonIndicators();
+		indicators = new Indicators();
 		series = new SeriesImpl<Double>(es);
 		candles = new SeriesImpl<Candle>(es);
 	}

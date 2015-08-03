@@ -6,9 +6,9 @@ package ru.prolib.aquila.core.data;
  * 2013-03-04<br>
  * $Id: FMathImpl.java 571 2013-03-12 00:53:34Z whirlwind $
  */
-public class CommonIndicators {
+public class Indicators {
 	
-	public CommonIndicators() {
+	public Indicators() {
 		super();
 	}
 	

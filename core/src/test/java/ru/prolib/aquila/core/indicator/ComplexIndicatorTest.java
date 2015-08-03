@@ -11,7 +11,6 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.indicator.function.MAFunction;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class ComplexIndicatorTest {
@@ -280,7 +279,7 @@ public class ComplexIndicatorTest {
 		Variant<ComplexFunction<Double, Double>> vFn =
 				new Variant<ComplexFunction<Double, Double>>(vId)
 			.add(fn)
-			.add(control.createMock(MAFunction.class));
+			.add(control.createMock(ComplexFunction.class));
 		Variant<Series<Double>> vSrc = new Variant<Series<Double>>(vFn)
 			.add(sourceSeries)
 			.add(control.createMock(Series.class));

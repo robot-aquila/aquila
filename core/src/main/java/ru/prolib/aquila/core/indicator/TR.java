@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.data.*;
  * $Id: TR.java 571 2013-03-12 00:53:34Z whirlwind $
  */
 public class TR extends _FLY<Candle> {
-	private static final CommonIndicators math = new CommonIndicators(); 
+	private static final Indicators math = new Indicators(); 
 
 	public TR(EventSystem es, CandleSeries source) {
 		this(es, Series.DEFAULT_ID, source);
