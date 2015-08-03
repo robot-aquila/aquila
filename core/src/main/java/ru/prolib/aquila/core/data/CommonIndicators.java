@@ -516,5 +516,89 @@ public class CommonIndicators {
 	public boolean crossOverZero(Series<Double> value) throws ValueException {
 		return crossOverZero(value, getLastIndex(value));
 	}
+	
+	/**
+	 * Exponential Moving Average (EMA) по формуле QUIK.
+	 * <p>
+	 * Расчет выполняется по формуле:
+	 * <pre>
+	 * 		EMAi = (EMAi - 1 * (n - 1) + 2 * Pi) / (n + 1)
+	 * </pre>
+	 * где Pi - значение цены в текущем периоде, EMAi - значение EMA текущего
+	 * периода, EMAi-1 - значение EMA предыдущего периода. В качестве первого
+	 * значения берется значение источника как есть. 
+	 * <p>
+	 * @param value ряд данных
+	 * @param index индекс элемента ряда для которого рассчитывается значение
+	 * @param period период скользящей средней
+	 * @return значение скользящей средней или null, если не удалось расчитать
+	 * @throws ValueException - error accessing data
+	 * @throws IllegalArgumentException - period too low
+	 */
+	public Double qema(Series<Double> value, int index, int period)
+			throws ValueException, IllegalArgumentException
+	{
+		if ( period < 2 ) {
+			throw new IllegalArgumentException("Period too low");
+		}
+		index = makeIndexPositive(value, index);
+		int start = getStartIndex(index, period);
+		if ( start < 0 ) {
+			return null;
+		} else if ( start == 0 ) {
+			return qemaFirst(value, index, period);
+		}
+		
+		// Если start > 0, значит у нас будет более одной итерации.
+		// Определяем позицию первого элемента, для которого возможно
+		// рассчитать начальное значение EMA:
+		// NOTE: Варианты типа Min(start, period * X) дают результат,
+		// который не соответствует результату рассчетов в QUIK.
+		int pos = index - start,
+			period_minus1 = period - 1, period_plus1 = period + 1;
+		Double prev = null, curr, result = null;
+		// Ожидаем последовательность длинной period, которая не содержит null
+		for ( ; pos < index; pos ++ ) {
+			prev = qemaFirst(value, pos, period);
+			if ( prev != null ) {
+				break;
+			}
+		}
+		if ( prev == null ) {
+			return null; // Couldn't obtain start EMA value
+		}
+		
+		for ( ++pos; pos <= index; pos ++ ) {
+			curr = value.get(pos);
+			if ( curr != null ) {
+				// TODO: check for null
+				result = (prev * period_minus1 + 2 * curr) / period_plus1;
+				prev = result;
+			}
+		}
+		return result;
+	}
+	
+	private Double qemaFirst(Series<Double> value, int index, int period)
+		throws ValueException
+	{
+		int start = getStartIndex(index, period);
+		if ( start < 0 ) {
+			return null;
+		}
+		Double prev = value.get(start), curr = null;
+		if ( prev == null ) {
+			return null;
+		}
+		int period_minus1 = period - 1, period_plus1 = period + 1;
+		for ( int i = start + 1; i <= index; i ++ ) {
+			curr = value.get(i);
+			if ( curr == null ) {
+				return null;
+			}
+			prev = (prev * period_minus1 + 2 * curr) / period_plus1;
+		}
+		return prev;
+	}
 
 }

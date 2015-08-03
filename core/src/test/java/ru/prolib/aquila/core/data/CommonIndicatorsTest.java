@@ -6,7 +6,6 @@ import org.joda.time.*;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.data.*;
 
 /**
  * 2013-03-04<br>
@@ -132,19 +131,60 @@ public class CommonIndicatorsTest {
 			new FR(165.1600d, -0.0393d),	// 2013-09-03 10:36:00
 			new FR(165.2345d,  0.0412d),	// 2013-09-03 10:37:00
 			new FR(165.2050d,  0.0202d),	// 2013-09-03 10:38:00
+		},
+		/**
+		 * Фикстура теста Quik EMA(5)
+		 */
+		fix_qema5[] = {
+			// RIU5, 2015-07-31, m15, close
+			new FR(85990.000000, null), //09:15
+			new FR(85190.000000, null), //10:00
+			new FR(85290.000000, null), //10:15
+			new FR(84980.000000, null), //10:30
+			new FR(85260.000000, 85339.506173), //10:45
+			new FR(85120.000000, 85266.337449),
+			new FR(84730.000000, 85087.558299),
+			new FR(84890.000000, 85021.705533),
+			new FR(84900.000000, 84981.137022),
+			new FR(85120.000000, 85027.424681),
+			new FR(85150.000000, 85068.283121),
+			new FR(84950.000000, 85028.855414),
+			new FR(85010.000000, 85022.570276),
+			new FR(85150.000000, 85065.046851),//13:00
+			new FR(85150.000000, 85093.364567),//13:15
+			new FR(84940.000000, 85042.243045),
+			new FR(84900.000000, 84994.828696),
+			new FR(84440.000000, 84809.885798),
+			new FR(84200.000000, 84606.590532),
+			new FR(84230.000000, 84481.060355),
+			new FR(84180.000000, 84380.706903),
+			new FR(84430.000000, 84397.137935),
+			new FR(84230.000000, 84341.425290),
+			new FR(84850.000000, 84510.950193),
+			new FR(84740.000000, 84587.300129),
+			new FR(85230.000000, 84801.533419),
+			new FR(85770.000000, 85124.355613),
+			new FR(85480.000000, 85242.903742),
+			new FR(86130.000000, 85538.602495),
+			new FR(85720.000000, 85599.068330),
+			new FR(85840.000000, 85679.378886),
+			new FR(85830.000000, 85729.585924),
+			new FR(85690.000000, 85716.390616),//17:45
+			new FR(85670.000000, 85700.927077),//18:00
+			new FR(85850.000000, 85750.618052),//18:15
 		};
 	
 	private EventSystem es;
-	private CommonIndicators math;
-	private EditableSeries<Double> value;
+	private CommonIndicators indicators;
+	private EditableSeries<Double> series;
 	private EditableSeries<Candle> candles;
 	
 	@Before
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
 		es.getEventQueue().start();
-		math = new CommonIndicators();
-		value = new SeriesImpl<Double>(es);
+		indicators = new CommonIndicators();
+		series = new SeriesImpl<Double>(es);
 		candles = new SeriesImpl<Candle>(es);
 	}
 	
@@ -155,83 +195,83 @@ public class CommonIndicatorsTest {
 	
 	@Test
 	public void testAbs() throws Exception {
-		assertEquals(123.45d, math.abs(123.45d), 0.01d);
-		assertEquals(123.45d, math.abs(-123.45d), 0.01d);
-		assertNull(math.abs(null));
+		assertEquals(123.45d, indicators.abs(123.45d), 0.01d);
+		assertEquals(123.45d, indicators.abs(-123.45d), 0.01d);
+		assertNull(indicators.abs(null));
 	}
 	
 	@Test
 	public void testMaxVA() throws Exception {
-		assertEquals(180.24, math.max(67.4, null, 180.24, null, 159.12), 0.001);
-		assertEquals(12.34, math.max(12.34, 12.34, null), 0.001);
-		assertNull(math.max((Double) null));
+		assertEquals(180.24, indicators.max(67.4, null, 180.24, null, 159.12), 0.001);
+		assertEquals(12.34, indicators.max(12.34, 12.34, null), 0.001);
+		assertNull(indicators.max((Double) null));
 	}
 	
 	@Test
 	public void testMinVA() throws Exception {
-		assertEquals(67.4, math.min(67.4, null, 180.24, null, 159.12), 0.001);
-		assertEquals(12.34, math.min(12.34, 12.34, null), 0.001);
-		assertNull(math.min((Double) null));
+		assertEquals(67.4, indicators.min(67.4, null, 180.24, null, 159.12), 0.001);
+		assertEquals(12.34, indicators.min(12.34, 12.34, null), 0.001);
+		assertNull(indicators.min((Double) null));
 	}
 	
 	@Test
 	public void testHasNulls() throws Exception {
-		assertFalse(math.hasNulls(value, 200));
+		assertFalse(indicators.hasNulls(series, 200));
 		
-		assertFalse(math.hasNulls(value, 0, 0));
-		assertFalse(math.hasNulls(value, 0));
-		value.add(null);
-		value.add(12.34d);
-		value.add(11.62d);
-		assertFalse(math.hasNulls(value, 2, 1));
-		assertFalse(math.hasNulls(value, 1));
-		assertFalse(math.hasNulls(value, 2, 2));
-		assertFalse(math.hasNulls(value, 2));
-		assertTrue(math.hasNulls(value, 2, 3));
-		assertTrue(math.hasNulls(value, 3));
-		assertFalse(math.hasNulls(value, -1, 1));
-		assertTrue(math.hasNulls(value, -1, 2));
+		assertFalse(indicators.hasNulls(series, 0, 0));
+		assertFalse(indicators.hasNulls(series, 0));
+		series.add(null);
+		series.add(12.34d);
+		series.add(11.62d);
+		assertFalse(indicators.hasNulls(series, 2, 1));
+		assertFalse(indicators.hasNulls(series, 1));
+		assertFalse(indicators.hasNulls(series, 2, 2));
+		assertFalse(indicators.hasNulls(series, 2));
+		assertTrue(indicators.hasNulls(series, 2, 3));
+		assertTrue(indicators.hasNulls(series, 3));
+		assertFalse(indicators.hasNulls(series, -1, 1));
+		assertTrue(indicators.hasNulls(series, -1, 2));
 		
-		assertTrue(math.hasNulls(value, 200));
+		assertTrue(indicators.hasNulls(series, 200));
 	}
 
 	@Test
 	public void testSma() throws Exception {
-		assertNull(math.sma(value, 5));
-		assertNull(math.sma(value, 0, 5));
+		assertNull(indicators.sma(series, 5));
+		assertNull(indicators.sma(series, 0, 5));
 		
-		value.add(null);
-		assertNull(math.sma(value, 5));
-		assertNull(math.sma(value, 0, 5));
+		series.add(null);
+		assertNull(indicators.sma(series, 5));
+		assertNull(indicators.sma(series, 0, 5));
 		
-		value.add(10.0d);
-		value.add(20.0d);
-		assertNull(math.sma(value, 5));
+		series.add(10.0d);
+		series.add(20.0d);
+		assertNull(indicators.sma(series, 5));
 		
-		value.add(30.0d);
-		value.add(40.0d);
-		assertNull(math.sma(value, 5));
-		assertNull(math.sma(value, 1, 5));
+		series.add(30.0d);
+		series.add(40.0d);
+		assertNull(indicators.sma(series, 5));
+		assertNull(indicators.sma(series, 1, 5));
 		
-		value.add(50.00d);
-		assertEquals(30.00d, math.sma(value, 5), 0.01d);
-		assertEquals(30.00d, math.sma(value, 5, 5), 0.01d);
+		series.add(50.00d);
+		assertEquals(30.00d, indicators.sma(series, 5), 0.01d);
+		assertEquals(30.00d, indicators.sma(series, 5, 5), 0.01d);
 		
-		value.add(null);
-		assertEquals(30.00d, math.sma(value, -1, 5), 0.01d);
-		assertNull(math.sma(value, 5));
-		assertNull(math.sma(value, 6, 5));
+		series.add(null);
+		assertEquals(30.00d, indicators.sma(series, -1, 5), 0.01d);
+		assertNull(indicators.sma(series, 5));
+		assertNull(indicators.sma(series, 6, 5));
 	}
 	
 	@Test
 	public void testVvdpo3_3args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
-			value.add(fix_vv_dpo3[i].value);
+			series.add(fix_vv_dpo3[i].value);
 		}
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
-			Double dpo = math.vvdpo(value, i, 3);
+			Double dpo = indicators.vvdpo(series, i, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -245,8 +285,8 @@ public class CommonIndicatorsTest {
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
-			value.add(fr.value);
-			Double dpo = math.vvdpo(value, 3);
+			series.add(fr.value);
+			Double dpo = indicators.vvdpo(series, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -258,12 +298,12 @@ public class CommonIndicatorsTest {
 	@Test
 	public void testVvdpo20_3args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
-			value.add(fix_vv_dpo20[i].value);
+			series.add(fix_vv_dpo20[i].value);
 		}
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
-			Double dpo = math.vvdpo(value, i, 20);
+			Double dpo = indicators.vvdpo(series, i, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -277,8 +317,8 @@ public class CommonIndicatorsTest {
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
-			value.add(fr.value);
-			Double dpo = math.vvdpo(value, 20);
+			series.add(fr.value);
+			Double dpo = indicators.vvdpo(series, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -289,36 +329,36 @@ public class CommonIndicatorsTest {
 	
 	@Test
 	public void testTr() throws Exception {
-		assertNull(math.tr(candles));
-		assertNull(math.tr(candles, 0));
+		assertNull(indicators.tr(candles));
+		assertNull(indicators.tr(candles, 0));
 		
 		candles.add(null);
-		assertNull(math.tr(candles));
-		assertNull(math.tr(candles, 0));
+		assertNull(indicators.tr(candles));
+		assertNull(indicators.tr(candles, 0));
 
 		DateTime time = new DateTime(2013, 10, 11, 11, 9, 43);
 		
 		// H-L
 		candles.add(new Candle(Timeframe.M5.getInterval(time),
 				0, 48.70, 47.79, 48.16, 0L));
-		assertEquals(0.91, math.tr(candles), 0.01d);
-		assertEquals(0.91, math.tr(candles, 1), 0.01d);
+		assertEquals(0.91, indicators.tr(candles), 0.01d);
+		assertEquals(0.91, indicators.tr(candles, 1), 0.01d);
 		
 		// |H-Cp|
 		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(5)),
 				0, 49.35, 48.86, 49.32, 0L));
 		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(10)),
 				0, 49.92, 49.50, 49.91, 0L));
-		assertEquals(0.6, math.tr(candles), 0.001);
-		assertEquals(0.6, math.tr(candles, 3), 0.001);
+		assertEquals(0.6, indicators.tr(candles), 0.001);
+		assertEquals(0.6, indicators.tr(candles, 3), 0.001);
 		
 		// |L-Cp|
 		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(15)),
 				0, 50.19, 49.87, 50.13, 0L));
 		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(20)),
 				0, 50.12, 49.20, 49.53, 0L));
-		assertEquals(0.93, math.tr(candles), 0.001);
-		assertEquals(0.93, math.tr(candles, 5), 0.001);
+		assertEquals(0.93, indicators.tr(candles), 0.001);
+		assertEquals(0.93, indicators.tr(candles, 5), 0.001);
 	}
 	
 	@Test
@@ -342,22 +382,22 @@ public class CommonIndicatorsTest {
 				{  1.15d,  1.15d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			value.add(fix[i][0]);
+			series.add(fix[i][0]);
 			Double expect = fix[i][1];
 			String msg = "At #" + i;
 			if ( expect == null ) {
-				assertNull(msg, math.max(value, i, period));
-				assertNull(msg, math.max(value, period));
+				assertNull(msg, indicators.max(series, i, period));
+				assertNull(msg, indicators.max(series, period));
 			} else {
-				assertEquals(msg, expect, math.max(value, i, period), 0.01d);
-				assertEquals(msg, expect, math.max(value, period), 0.01d);
+				assertEquals(msg, expect, indicators.max(series, i, period), 0.01d);
+				assertEquals(msg, expect, indicators.max(series, period), 0.01d);
 			}
 		}
 		// additional tests
-		assertEquals(17.76d, math.max(value, -2, period), 0.01d);
-		assertEquals(18.54d, math.max(value, -3, period), 0.01d);
-		assertEquals(18.54d, math.max(value, -5, period), 0.01d);
-		assertEquals(16.12d, math.max(value, -7, period), 0.01d);
+		assertEquals(17.76d, indicators.max(series, -2, period), 0.01d);
+		assertEquals(18.54d, indicators.max(series, -3, period), 0.01d);
+		assertEquals(18.54d, indicators.max(series, -5, period), 0.01d);
+		assertEquals(16.12d, indicators.max(series, -7, period), 0.01d);
 	}
 	
 	@Test
@@ -376,12 +416,12 @@ public class CommonIndicatorsTest {
 				{ 15.12d,  6.18d, 23.17d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			value.add(fix[i][0]);
+			series.add(fix[i][0]);
 			value2.add(fix[i][1]);
 			String msg = "At #" + i;
 			Double expect = fix[i][2];
-			assertEquals(msg, expect, math.max(period, value, value2), 0.01d);
-			assertEquals(msg, expect, math.max(i, period, value2, value),0.01d);
+			assertEquals(msg, expect, indicators.max(period, series, value2), 0.01d);
+			assertEquals(msg, expect, indicators.max(i, period, value2, series),0.01d);
 		}
 	}
 	
@@ -406,22 +446,22 @@ public class CommonIndicatorsTest {
 				{  1.15d,  1.15d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			value.add(fix[i][0]);
+			series.add(fix[i][0]);
 			Double expect = fix[i][1];
 			String msg = "At #" + i;
 			if ( expect == null ) {
-				assertNull(msg, math.min(value, i, period));
-				assertNull(msg, math.min(value, period));
+				assertNull(msg, indicators.min(series, i, period));
+				assertNull(msg, indicators.min(series, period));
 			} else {
-				assertEquals(msg, expect, math.min(value, i, period), 0.01d);
-				assertEquals(msg, expect, math.min(value, period), 0.01d);
+				assertEquals(msg, expect, indicators.min(series, i, period), 0.01d);
+				assertEquals(msg, expect, indicators.min(series, period), 0.01d);
 			}
 		}
 		// additional tests
-		assertEquals(17.76d, math.min(value, -2, period), 0.01d);
-		assertEquals(17.76d, math.min(value, -3, period), 0.01d);
-		assertEquals(11.92d, math.min(value, -5, period), 0.01d);
-		assertEquals(13.21d, math.min(value, -7, period), 0.01d);
+		assertEquals(17.76d, indicators.min(series, -2, period), 0.01d);
+		assertEquals(17.76d, indicators.min(series, -3, period), 0.01d);
+		assertEquals(11.92d, indicators.min(series, -5, period), 0.01d);
+		assertEquals(13.21d, indicators.min(series, -7, period), 0.01d);
 	}
 	
 	@Test
@@ -440,12 +480,12 @@ public class CommonIndicatorsTest {
 				{ 15.12d,  6.18d,  2.20d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			value.add(fix[i][0]);
+			series.add(fix[i][0]);
 			value2.add(fix[i][1]);
 			String msg = "At #" + i;
 			Double expect = fix[i][2];
-			assertEquals(msg, expect, math.min(period, value, value2), 0.01d);
-			assertEquals(msg, expect, math.min(i, period, value2, value),0.01d);
+			assertEquals(msg, expect, indicators.min(period, series, value2), 0.01d);
+			assertEquals(msg, expect, indicators.min(i, period, value2, series),0.01d);
 		}
 	}
 	
@@ -467,11 +507,11 @@ public class CommonIndicatorsTest {
 			{ -5.33d, true  },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			value.add((Double) fix[i][0]);
+			series.add((Double) fix[i][0]);
 			String msg = "At #" + i;
 			Boolean expect = (Boolean) fix[i][1];
-			assertEquals(msg, expect, math.crossUnderZero(value));
-			assertEquals(msg, expect, math.crossUnderZero(value, i));
+			assertEquals(msg, expect, indicators.crossUnderZero(series));
+			assertEquals(msg, expect, indicators.crossUnderZero(series, i));
 		}
 	}
 
@@ -493,13 +533,104 @@ public class CommonIndicatorsTest {
 				{  5.33d, true  },
 			};
 			for ( int i = 0; i < fix.length; i ++ ) {
-				value.add((Double) fix[i][0]);
+				series.add((Double) fix[i][0]);
 				String msg = "At #" + i;
 				Boolean expect = (Boolean) fix[i][1];
-				assertEquals(msg, expect, math.crossOverZero(value));
-				assertEquals(msg, expect, math.crossOverZero(value, i));
+				assertEquals(msg, expect, indicators.crossOverZero(series));
+				assertEquals(msg, expect, indicators.crossOverZero(series, i));
 			}
 
+	}
+	
+	@Test
+	public void testQema() throws Exception {
+		for ( int i = 0; i < fix_qema5.length; i ++ ) {
+			series.add(fix_qema5[i].value);
+		}
+		for ( int i = 0; i < fix_qema5.length; i ++ ) {
+			String msg = "At #" + i;
+			FR fr = fix_qema5[i];
+			Double value = indicators.qema(series, i, 5);
+			if ( fr.expected == null ) {
+				assertNull(msg, value);
+			} else {
+				assertNotNull(msg, value);
+				assertEquals(msg, fr.expected, value, 0.000001d);
+			}
+		}
+	}
+	
+	@Test
+	public void testQema_RevOrder() throws Exception {
+		for ( int i = 0; i < fix_qema5.length; i ++ ) {
+			series.add(fix_qema5[i].value);
+		}
+		for ( int i = 0; i < fix_qema5.length - 1; i ++ ) {
+			int index = i - fix_qema5.length + 1;
+			String msg = "At #" + index;
+			FR fr = fix_qema5[i];
+			Double value = indicators.qema(series, index, 5);
+			if ( fr.expected == null ) {
+				assertNull(msg, value);
+			} else {
+				assertNotNull(msg, value);
+				assertEquals(msg, fr.expected, value, 0.000001d);
+			}
+		}
+	}
+	
+	@Test
+	public void testQema_NullIfCannotObtainStartValue() throws Exception {
+		series.add(40.27d);
+		series.add(null);
+		series.add(40.92d);
+		series.add(44.33d);
+		series.add(null);
+		series.add(null);
+		series.add(45.02d);
+		series.add(48.13d);
+		for ( int i = 0; i < series.getLength(); i ++ ) {
+			String msg = "At #" + i;
+			assertNull(msg, indicators.qema(series, i, 3));
+		}
+	}
+	
+	@Test
+	public void testQema_WithNullsButOk() throws Exception {
+		Double fixture[][] = {
+			//  value, expected MA
+			{  40.27d,          null },
+			{    null,          null },
+			{  40.92d,	        null }, //  40.9200
+			{  44.33d,          null }, // (40.9200 * 2 + 2 * 44.33) / 4 = 42.625
+			{  53.50d,          null }, // (42.6250 * 2 + 2 * 53.50) / 4 = 48.0625
+			{  52.13d, 50.096250000d }, // (48.0625 * 2 + 2 * 52.13) / 4 = 50.09625
+			{  45.02d, 47.558125000d }, // (50.09625 * 2 + 2 * 45.02) / 4 = 47.558125
+			{    null, 47.558125000d },
+			{    null, 47.558125000d },
+			{  48.13d, 47.844062500d }, // (47.558125 * 2 + 2 * 48.13) / 4 = 47.8440625
+			{  51.14d, 49.492031250d }, // (47.8440625 * 2 + 2 * 51.14) / 4 = 49.49203125
+			{  52.18d, 50.836015625d }, // (49.49203125 * 2 + 2 * 52.18) / 4 = 50.836015625
+		};
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			series.add(fixture[i][0]);
+		}
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			String msg = "At #" + i;
+			Double expected = fixture[i][1];
+			Double actual = indicators.qema(series, i, 3);
+			if ( expected == null ) {
+				assertNull(msg, actual);
+			} else {
+				assertNotNull(msg + " expected: " + expected + " but null", actual);
+				assertEquals(msg, expected, actual, 0.0001d);
+			}
+		}
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testQema_ThrowsIfPeriodTooLow() throws Exception {
+		indicators.qema(series, 0, 1);
 	}
 
 }

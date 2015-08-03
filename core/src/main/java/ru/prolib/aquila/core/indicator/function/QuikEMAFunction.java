@@ -2,17 +2,7 @@ package ru.prolib.aquila.core.indicator.function;
 
 import ru.prolib.aquila.core.data.*;
 
-/**
- * Exponential Moving Average (EMA) по формуле QUIK.
- * <p>
- * Расчет выполняется по формуле:
- * <pre>
- * 		EMAi = (EMAi - 1 * (n - 1) + 2 * Pi) / (n + 1)
- * </pre>
- * где Pi - значение цены в текущем периоде, EMAi - значение EMA текущего
- * периода, EMAi-1 - значение EMA предыдущего периода. В качестве первого
- * значения берется значение источника как есть. 
- */
+@Deprecated
 public class QuikEMAFunction extends MAFunction {
 
 	public QuikEMAFunction(int period) {
