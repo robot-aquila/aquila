@@ -1,11 +1,9 @@
 package ru.prolib.aquila.core.data;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
-import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 
 /**
@@ -44,50 +42,28 @@ import ru.prolib.aquila.core.BusinessEntities.Trade;
 public class CandleSeriesImpl extends SeriesImpl<Candle>
 		implements EditableCandleSeries
 {
-	private final Timeframe timeframe;
+	private final TimeFrame timeframe;
 	private final Series<Double> open, high, low, close, vol;
-	private final IntervalSeries interval;
+	private final Series<Interval> interval;
 	private DateTime poa;
 	
-	public CandleSeriesImpl(EventSystem es, Timeframe timeframe) {
-		this(es, timeframe, Series.DEFAULT_ID);
+	public CandleSeriesImpl(TimeFrame timeframe) {
+		this(timeframe, Series.DEFAULT_ID);
 	}
 	
-	public CandleSeriesImpl(EventSystem es, Timeframe timeframe,
-			String valueId)
-	{
-		this(es, timeframe, valueId, SeriesImpl.STORAGE_NOT_LIMITED);
+	public CandleSeriesImpl(TimeFrame timeframe, String valueId) {
+		this(timeframe, valueId, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
-	public CandleSeriesImpl(EventSystem es, Timeframe timeframe, String id,
-			int storageLimit)
-	{
-		super(es, id, storageLimit);
+	public CandleSeriesImpl(TimeFrame timeframe, String id, int storageLimit) {
+		super(id, storageLimit);
 		this.timeframe = timeframe;
-		open = new CandleDataSeries(es, id + ".open", this, new GCandleOpen());
-		close = new CandleDataSeries(es, id + ".close", this, new GCandleClose());
-		high = new CandleDataSeries(es, id + ".high", this, new GCandleHigh());
-		low = new CandleDataSeries(es, id + ".low", this, new GCandleLow());
-		vol = new CandleDataSeries(es, id + ".volume", this, new GCandleVolume());
-		interval = new CandleIntervalSeries(es, id + ".interval", this);
-	}
-	
-	@Override
-	public synchronized boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		return other != null && other.getClass() == CandleSeriesImpl.class
-			? fieldsEquals(other) : false;
-	}
-	
-	@Override
-	protected boolean fieldsEquals(Object other) {
-		CandleSeriesImpl o = (CandleSeriesImpl) other;
-		return new EqualsBuilder()
-			.appendSuper(super.fieldsEquals(other))
-			.append(o.timeframe, timeframe)
-			.isEquals();
+		open = new CandleOpenSeries(this);
+		close = new CandleCloseSeries(this);
+		high = new CandleHighSeries(this);
+		low = new CandleLowSeries(this);
+		vol = new CandleVolumeSeries(this);
+		interval = new CandleIntervalSeries(this);
 	}
 
 	@Override
@@ -218,7 +194,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	}
 
 	@Override
-	public Timeframe getTimeframe() {
+	public TimeFrame getTimeFrame() {
 		return timeframe;
 	}
 

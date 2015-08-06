@@ -5,8 +5,6 @@ import static org.junit.Assert.*;
 import org.joda.time.*;
 import org.junit.*;
 
-import ru.prolib.aquila.core.*;
-
 /**
  * 2013-03-04<br>
  * $Id: FMathImplTest.java 571 2013-03-12 00:53:34Z whirlwind $
@@ -174,23 +172,21 @@ public class IndicatorsTest {
 			new FR(85850.000000, 85750.618052),//18:15
 		};
 	
-	private EventSystem es;
+	
 	private Indicators indicators;
 	private EditableSeries<Double> series;
 	private EditableSeries<Candle> candles;
 	
 	@Before
 	public void setUp() throws Exception {
-		es = new EventSystemImpl();
-		es.getEventQueue().start();
 		indicators = new Indicators();
-		series = new SeriesImpl<Double>(es);
-		candles = new SeriesImpl<Candle>(es);
+		series = new SeriesImpl<Double>();
+		candles = new SeriesImpl<Candle>();
 	}
 	
 	@After
 	public void tearDown() throws Exception {
-		es.getEventQueue().stop();
+
 	}
 	
 	@Test
@@ -339,23 +335,23 @@ public class IndicatorsTest {
 		DateTime time = new DateTime(2013, 10, 11, 11, 9, 43);
 		
 		// H-L
-		candles.add(new Candle(Timeframe.M5.getInterval(time),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time),
 				0, 48.70, 47.79, 48.16, 0L));
 		assertEquals(0.91, indicators.tr(candles), 0.01d);
 		assertEquals(0.91, indicators.tr(candles, 1), 0.01d);
 		
 		// |H-Cp|
-		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(5)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(5)),
 				0, 49.35, 48.86, 49.32, 0L));
-		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(10)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(10)),
 				0, 49.92, 49.50, 49.91, 0L));
 		assertEquals(0.6, indicators.tr(candles), 0.001);
 		assertEquals(0.6, indicators.tr(candles, 3), 0.001);
 		
 		// |L-Cp|
-		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(15)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(15)),
 				0, 50.19, 49.87, 50.13, 0L));
-		candles.add(new Candle(Timeframe.M5.getInterval(time.plusMinutes(20)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(20)),
 				0, 50.12, 49.20, 49.53, 0L));
 		assertEquals(0.93, indicators.tr(candles), 0.001);
 		assertEquals(0.93, indicators.tr(candles, 5), 0.001);
@@ -403,7 +399,7 @@ public class IndicatorsTest {
 	@Test
 	public void testMaxVA23() throws Exception {
 		int period = 4;
-		EditableSeries<Double> value2 = new SeriesImpl<Double>(es);
+		EditableSeries<Double> value2 = new SeriesImpl<Double>();
 		Double fix[][] = {
 				// value, value2, max
 				{ 19.29d, null,   19.29d },
@@ -467,7 +463,7 @@ public class IndicatorsTest {
 	@Test
 	public void testMinVA23() throws Exception {
 		int period = 4;
-		EditableSeries<Double> value2 = new SeriesImpl<Double>(es);
+		EditableSeries<Double> value2 = new SeriesImpl<Double>();
 		Double fix[][] = {
 				// value, value2, min
 				{ 19.29d, null,   19.29d },
@@ -631,6 +627,63 @@ public class IndicatorsTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testQema_ThrowsIfPeriodTooLow() throws Exception {
 		indicators.qema(series, 0, 1);
+	}
+	
+	/**
+	 * Фикстура теста Quik ATR(5)
+	 */
+	static Double fix_qatr5[][] = {
+		// RIU5, 2015-08-06, h1
+		// open, high,low,close, expected ATR
+		{82960d,82960d,82960d,82960d, null},
+		{82840d,83700d,82840d,83380d, null},
+		{83390d,83490d,83110d,83310d, null},
+		{83280d,83310d,83140d,83220d, null},
+		{83200d,83200d,82610d,82660d, 404.000000d},
+		{82640d,83090d,82480d,82880d, 445.200000d},
+		{82890d,83140d,82830d,83040d, 418.160000d},
+		{82970d,82990d,82550d,82720d, 432.528000d},
+		{82730d,82950d,82660d,82790d, 404.022400d},
+		{82760d,82860d,82610d,82700d, 373.217920d},
+		{82690d,82920d,82620d,82770d, 358.574336d},
+		{82780d,82850d,82640d,82670d, 328.859469d},
+		{82660d,82740d,82530d,82700d, 305.087575d},
+		{82680d,82830d,82590d,82710d, 292.070060d},
+		{82720d,82780d,82610d,82700d, 267.656048d},
+		{82690d,82760d,82080d,82190d, 350.124838d},
+		{82190d,82250d,81680d,81860d, 394.099871d},
+		{81830d,81970d,81630d,81770d, 383.279897d},
+		{81790d,82120d,81760d,82090d, 378.623917d},
+		{82060d,82260d,81830d,82050d, 388.899134d},
+		{82020d,82190d,81770d,81810d, 395.119307d},
+	};
+	
+	private void fillCandlesQatr5() throws Exception {
+		Double fixture[][] = fix_qatr5;
+		Interval interval = new Interval(0, 0);
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			candles.add(new Candle(interval, fixture[i][0], fixture[i][1],
+					fixture[i][2], fixture[i][3], 0l));
+		}
+	}
+	
+	@Test
+	public void testQatr() throws Exception {
+		fillCandlesQatr5();
+		Double fixture[][] = fix_qatr5;
+		Double expected = null, actual = null;
+		for ( int i = 0; i < fixture.length; i ++ ) {
+			String msg = "At #" + i;
+			expected = fixture[i][4];
+			actual = indicators.qatr(candles, i, 5);
+			if ( expected == null ) {
+				assertNull(msg, actual);
+			} else {
+				assertNotNull(msg + " expected: " + expected + " but null", actual);
+				assertEquals(msg, expected, actual, 0.000001d);
+			}
+		}
+		assertEquals(expected, indicators.qatr(candles, 5), 0.000001d);
 	}
 
 }

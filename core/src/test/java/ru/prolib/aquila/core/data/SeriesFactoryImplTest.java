@@ -5,27 +5,22 @@ import static org.junit.Assert.*;
 import org.joda.time.Interval;
 import org.junit.*;
 
-import ru.prolib.aquila.core.*;
-
 /**
  * 2012-04-09<br>
  * $Id: SeriesFactoryImplTest.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class SeriesFactoryImplTest {
-	private EventSystem es;
 	private SeriesFactoryImpl factory1,factory2;
 	
 	@Before
 	public void setUp() throws Exception {
-		es = new EventSystemImpl();
-		es.getEventQueue().start();
-		factory1 = new SeriesFactoryImpl(es);
-		factory2 = new SeriesFactoryImpl(es, 128);
+		factory1 = new SeriesFactoryImpl();
+		factory2 = new SeriesFactoryImpl(128);
 	}
 	
 	@After
 	public void tearDown() throws Exception {
-		es.getEventQueue().stop();
+
 	}
 	
 	@Test
@@ -36,86 +31,174 @@ public class SeriesFactoryImplTest {
 	
 	@Test
 	public void testCreateBoolean() throws Exception {
-		assertEquals(new SeriesImpl<Boolean>(es, Series.DEFAULT_ID, 0),
-				factory1.createBoolean());
-		assertEquals(new SeriesImpl<Boolean>(es, "foo", 0),
-				factory1.createBoolean("foo"));
-		assertEquals(new SeriesImpl<Boolean>(es, Series.DEFAULT_ID, 128),
-				factory2.createBoolean());
-		assertEquals(new SeriesImpl<Boolean>(es, "bar", 128),
-				factory2.createBoolean("bar"));
+		SeriesImpl<Boolean>
+		series = (SeriesImpl<Boolean>) factory1.createBoolean();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(0, series.getStorageLimit());
+
+		series = (SeriesImpl<Boolean>) factory1.createBoolean("foo");
+		assertNotNull(series);
+		assertEquals("foo", series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Boolean>) factory2.createBoolean();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(128, series.getStorageLimit());
+
+		series = (SeriesImpl<Boolean>) factory2.createBoolean("bar");
+		assertNotNull(series);
+		assertEquals("bar", series.getId());
+		assertEquals(128, series.getStorageLimit());
 	}
 	
 	@Test
 	public void testCreateCandle() throws Exception {
-		assertEquals(new CandleSeriesImpl(es, Timeframe.M1, Series.DEFAULT_ID, 0),
-				factory1.createCandle(Timeframe.M1));
-		assertEquals(new CandleSeriesImpl(es, Timeframe.M5, "zulu", 0),
-				factory1.createCandle(Timeframe.M5, "zulu"));
-		assertEquals(new CandleSeriesImpl(es, Timeframe.M10,Series.DEFAULT_ID, 128),
-				factory2.createCandle(Timeframe.M10));
-		assertEquals(new CandleSeriesImpl(es, Timeframe.M15, "pimba", 128),
-				factory2.createCandle(Timeframe.M15, "pimba"));
+		CandleSeriesImpl
+		series = (CandleSeriesImpl) factory1.createCandle(TimeFrame.M1);
+		assertNotNull(series);
+		assertEquals(TimeFrame.M1, series.getTimeFrame());
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (CandleSeriesImpl) factory1.createCandle(TimeFrame.M5, "zulu");
+		assertNotNull(series);
+		assertEquals(TimeFrame.M5, series.getTimeFrame());
+		assertEquals("zulu", series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (CandleSeriesImpl) factory2.createCandle(TimeFrame.M10);
+		assertNotNull(series);
+		assertEquals(TimeFrame.M10, series.getTimeFrame());
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(128, series.getStorageLimit());
+		
+		series = (CandleSeriesImpl) factory2.createCandle(TimeFrame.M15, "pimba");
+		assertNotNull(series);
+		assertEquals(TimeFrame.M15, series.getTimeFrame());
+		assertEquals("pimba", series.getId());
+		assertEquals(128, series.getStorageLimit());
 	}
 
 	@Test
 	public void testCreateInterval() throws Exception {
-		assertEquals(new SeriesImpl<Interval>(es, Series.DEFAULT_ID, 0),
-				factory1.createInterval());
-		assertEquals(new SeriesImpl<Interval>(es, "mobi", 0),
-				factory1.createInterval("mobi"));
-		assertEquals(new SeriesImpl<Interval>(es, Series.DEFAULT_ID, 128),
-				factory2.createInterval());
-		assertEquals(new SeriesImpl<Interval>(es, "zippo", 128),
-				factory2.createInterval("zippo"));
+		SeriesImpl<Interval>
+		series = (SeriesImpl<Interval>) factory1.createInterval();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Interval>) factory1.createInterval("mobi");
+		assertNotNull(series);
+		assertEquals("mobi", series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Interval>) factory2.createInterval();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(128, series.getStorageLimit());
+		
+		series = (SeriesImpl<Interval>) factory2.createInterval("zippo");
+		assertNotNull(series);
+		assertEquals("zippo", series.getId());
+		assertEquals(128, series.getStorageLimit());
 	}
 
 	@Test
 	public void testCreateDouble() throws Exception {
-		assertEquals(new SeriesImpl<Double>(es, Series.DEFAULT_ID, 0),
-				factory1.createDouble());
-		assertEquals(new SeriesImpl<Double>(es, "jamal", 0),
-				factory1.createDouble("jamal"));
-		assertEquals(new SeriesImpl<Double>(es, Series.DEFAULT_ID, 128),
-				factory2.createDouble());
-		assertEquals(new SeriesImpl<Double>(es, "panam", 128),
-				factory2.createDouble("panam"));
+		SeriesImpl<Double>
+		series = (SeriesImpl<Double>) factory1.createDouble();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Double>) factory1.createDouble("jamal");
+		assertNotNull(series);
+		assertEquals("jamal", series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Double>) factory2.createDouble();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(128, series.getStorageLimit());
+		
+		series = (SeriesImpl<Double>) factory2.createDouble("panam");
+		assertNotNull(series);
+		assertEquals("panam", series.getId());
+		assertEquals(128, series.getStorageLimit());
 	}
 
 	@Test
 	public void testCreateInteger() throws Exception {
-		assertEquals(new SeriesImpl<Integer>(es, Series.DEFAULT_ID, 0),
-				factory1.createInteger());
-		assertEquals(new SeriesImpl<Integer>(es, "zulu", 0),
-				factory1.createInteger("zulu"));
-		assertEquals(new SeriesImpl<Integer>(es, Series.DEFAULT_ID, 128),
-				factory2.createInteger());
-		assertEquals(new SeriesImpl<Integer>(es, "illa", 128),
-				factory2.createInteger("illa"));
+		SeriesImpl<Integer>
+		series = (SeriesImpl<Integer>) factory1.createInteger();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Integer>) factory1.createInteger("zulu");
+		assertNotNull(series);
+		assertEquals("zulu", series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Integer>) factory2.createInteger();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(128, series.getStorageLimit());
+		
+		series = (SeriesImpl<Integer>) factory2.createInteger("illa");
+		assertNotNull(series);
+		assertEquals("illa", series.getId());
+		assertEquals(128, series.getStorageLimit());
 	}
 
 	@Test
 	public void testCreateLong() throws Exception {
-		assertEquals(new SeriesImpl<Long>(es, Series.DEFAULT_ID, 0),
-				factory1.createLong());
-		assertEquals(new SeriesImpl<Long>(es, "antares", 0),
-				factory1.createLong("antares"));
-		assertEquals(new SeriesImpl<Long>(es, Series.DEFAULT_ID, 128),
-				factory2.createLong());
-		assertEquals(new SeriesImpl<Long>(es, "bear", 128),
-				factory2.createLong("bear"));
+		SeriesImpl<Long>
+		series = (SeriesImpl<Long>) factory1.createLong();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Long>) factory1.createLong("antares");
+		assertNotNull(series);
+		assertEquals("antares", series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<Long>) factory2.createLong();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(128, series.getStorageLimit());
+		
+		series = (SeriesImpl<Long>) factory2.createLong("bear");
+		assertNotNull(series);
+		assertEquals("bear", series.getId());
+		assertEquals(128, series.getStorageLimit());
 	}
 	
 	@Test
 	public void testCreateString() throws Exception {
-		assertEquals(new SeriesImpl<String>(es, Series.DEFAULT_ID, 0),
-				factory1.createString());
-		assertEquals(new SeriesImpl<String>(es, "yummy", 0),
-				factory1.createString("yummy"));
-		assertEquals(new SeriesImpl<String>(es, Series.DEFAULT_ID, 128),
-				factory2.createString());
-		assertEquals(new SeriesImpl<String>(es, "zax", 128),
-				factory2.createString("zax"));
+		SeriesImpl<String>
+		series = (SeriesImpl<String>) factory1.createString();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(0, series.getStorageLimit());
+		
+		series = (SeriesImpl<String>) factory1.createString("yummy");
+		assertNotNull(series);
+		assertEquals("yummy", series.getId());
+		assertEquals(0, series.getStorageLimit());
+
+		series = (SeriesImpl<String>) factory2.createString();
+		assertNotNull(series);
+		assertEquals(Series.DEFAULT_ID, series.getId());
+		assertEquals(128, series.getStorageLimit());
+
+		series = (SeriesImpl<String>) factory2.createString("zax");
+		assertNotNull(series);
+		assertEquals("zax", series.getId());
+		assertEquals(128, series.getStorageLimit());
 	}
 
 }

@@ -600,5 +600,59 @@ public class Indicators {
 		}
 		return prev;
 	}
+	
+	/**
+	 * Average True Range (QUIK).
+	 * <p>
+	 * Calculates ATR using the candle series.
+	 * <p>
+	 * @param candles - candles
+	 * @param index - index of candle to calculate ATR
+	 * @param period - ATR period
+	 * @return ATR value
+	 * @throws ValueException - error accessing data
+	 * @throws IllegalArgumentException - period too low
+	 */
+	public Double qatr(Series<Candle> candles, int index, int period)
+		throws ValueException
+	{
+		if ( period < 2 ) {
+			throw new IllegalArgumentException("Period too low");
+		}
+		index = makeIndexPositive(candles, index);
+		int start = getStartIndex(index, period), period_minus1 = period - 1;
+		if ( start < 0 ) {
+			return null;
+		}
+		Double prev = 0d;
+		for ( int i = 0; i < period; i ++ ) {
+			prev += tr(candles, i);
+		}
+		prev /= period;
+		if ( index == period_minus1 ) {
+			return prev;
+		}
+		for ( int i = period; i <= index; i ++ ) {
+			prev = (prev * period_minus1 + tr(candles, i)) / period;
+		}
+		return prev;
+	}
+
+	/**
+	 * Average True Range (QUIK).
+	 * <p>
+	 * Calculates ATR using the candle series.
+	 * <p>
+	 * @param candles - candles
+	 * @param period - ATR period
+	 * @return ATR value
+	 * @throws ValueException - error accessing data
+	 * @throws IllegalArgumentException - period too low
+	 */
+	public Double qatr(Series<Candle> candles, int period)
+		throws ValueException
+	{
+		return qatr(candles, candles.getLength() - 1, period);
+	}
 
 }

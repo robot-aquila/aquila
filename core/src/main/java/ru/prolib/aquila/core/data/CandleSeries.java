@@ -65,7 +65,7 @@ public interface CandleSeries extends Series<Candle> {
 	 * <p>
 	 * @return таймфрейм
 	 */
-	public Timeframe getTimeframe();
+	public TimeFrame getTimeFrame();
 	
 	/**
 	 * Найти первую внутридневную свечу.

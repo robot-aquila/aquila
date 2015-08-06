@@ -2,8 +2,6 @@ package ru.prolib.aquila.core.data;
 
 import org.joda.time.Interval;
 
-import ru.prolib.aquila.core.EventSystem;
-
 /**
  * Ряд временных интервалов.
  * <p>
@@ -12,30 +10,32 @@ import ru.prolib.aquila.core.EventSystem;
  * 2013-03-11<br>
  * $Id: CandleTimeSeries.java 566 2013-03-11 01:52:40Z whirlwind $
  */
-public class CandleIntervalSeries extends CandleProxy<Interval>
-	implements IntervalSeries
-{
+public class CandleIntervalSeries implements Series<Interval> {
+	private final Series<Candle> candles;
 
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param es фасад системы событий
-	 * @param valueId идентификатор
-	 * @param candles ряд свечей
-	 */
-	public CandleIntervalSeries(EventSystem es, String valueId,
-			Series<Candle> candles) 
-	{
-		super(es, valueId, candles, new GCandleInterval());
+	public CandleIntervalSeries(Series<Candle> candles) {
+		super();
+		this.candles = candles;
 	}
-	
+
 	@Override
-	public boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		return other != null && other.getClass() == CandleIntervalSeries.class
-			? fieldsEquals(other) : false;
+	public String getId() {
+		return candles.getId() + ".INTERVAL";
+	}
+
+	@Override
+	public Interval get() throws ValueException {
+		return candles.get().getInterval();
+	}
+
+	@Override
+	public Interval get(int index) throws ValueException {
+		return candles.get(index).getInterval();
+	}
+
+	@Override
+	public int getLength() {
+		return candles.getLength();
 	}
 
 }

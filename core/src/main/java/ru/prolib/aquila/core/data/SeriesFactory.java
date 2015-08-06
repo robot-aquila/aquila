@@ -46,7 +46,7 @@ public interface SeriesFactory {
 	 * @param id идентификатор ряда
 	 * @return ряд
 	 */
-	public EditableCandleSeries createCandle(Timeframe tf, String id);
+	public EditableCandleSeries createCandle(TimeFrame tf, String id);
 	
 	/**
 	 * Создать ряд типа {@link Candle}.
@@ -54,7 +54,7 @@ public interface SeriesFactory {
 	 * @param tf таймфрейм
 	 * @return ряд
 	 */
-	public EditableCandleSeries createCandle(Timeframe tf);
+	public EditableCandleSeries createCandle(TimeFrame tf);
 	
 	/**
 	 * Создать ряд временных интервалов.

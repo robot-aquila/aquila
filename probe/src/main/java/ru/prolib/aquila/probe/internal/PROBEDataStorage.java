@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.data.finam.CsvTickIteratorStorage;
 import ru.prolib.aquila.core.utils.IdUtils;
 
 public class PROBEDataStorage extends DataStorageImpl {
@@ -24,7 +23,8 @@ public class PROBEDataStorage extends DataStorageImpl {
 		super();
 		this.root = root;
 		this.idUtils = idUtils;
-		setIteratorStorage(new CsvTickIteratorStorage(root));
+		//setIteratorStorage(new CsvTickIteratorStorage(root));
+		throw new RuntimeException("Do not use this class");
 	}
 	
 	public PROBEDataStorage(File root) {

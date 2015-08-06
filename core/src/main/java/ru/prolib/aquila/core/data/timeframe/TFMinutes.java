@@ -2,12 +2,12 @@ package ru.prolib.aquila.core.data.timeframe;
 
 import org.joda.time.*;
 import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
-import ru.prolib.aquila.core.data.Timeframe;
+import ru.prolib.aquila.core.data.TimeFrame;
 
 /**
  * Минутный таймфрейм.
  */
-public class TFMinutes implements Timeframe {
+public class TFMinutes implements TimeFrame {
 	private final int length;
 	
 	/**

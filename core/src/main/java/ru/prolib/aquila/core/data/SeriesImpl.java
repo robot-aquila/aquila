@@ -1,14 +1,10 @@
 package ru.prolib.aquila.core.data;
 
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
-import ru.prolib.aquila.core.*;
+import java.util.List;
+import java.util.Vector;
 
 /**
- * Значение неопределенного типа.
+ * Ряд значений неопределенного типа.
  * <p>
  * Опционально поддерживает ограничение размера хранилища значений. 
  * <p>
@@ -27,9 +23,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	
 	private final String id;
 	private final int limit;
-	private final LinkedList<T> history = new LinkedList<T>();
-	private final EventDispatcher dispatcher;
-	private final EventTypeSI onAdd, onUpd;
+	private final List<T> history = new Vector<T>();
 	
 	/**
 	 * Реальный индекс первого элемента в хранилище.
@@ -40,35 +34,31 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	 * Создать ряд.
 	 * <p>
 	 * В качестве идентификатора значения используется {@link Series#DEFAULT_ID}.
-	 * Ограничение размера хранилища используется.
-	 * <p>
-	 * @param es фасад системы событий
+	 * Ограничение размера хранилища не используется.
 	 */
-	public SeriesImpl(EventSystem es) {
-		this(es, Series.DEFAULT_ID);
+	public SeriesImpl() {
+		this(Series.DEFAULT_ID);
 	}
 	
 	/**
 	 * Создать ряд.
 	 * <p>
-	 * Ограничение размера хранилища используется.
+	 * Ограничение размера хранилища не используется.
 	 * <p>
-	 * @param es фасад системы событий
-	 * @param valueId идентификатор ряда
+	 * @param valueId строковый идентификатор ряда
 	 */
-	public SeriesImpl(EventSystem es, String valueId) {
-		this(es, valueId, STORAGE_NOT_LIMITED);
+	public SeriesImpl(String valueId) {
+		this(valueId, STORAGE_NOT_LIMITED);
 	}
 	
 	/**
 	 * Создать ряд.
 	 * <p>
-	 * @param es фасад системы событий
 	 * @param valueId идентификатор ряда
 	 * @param storageLimit ограничение размера хранилища. Если меньше нуля, то
 	 * используется {@link #STORAGE_NOT_LIMITED}
 	 */
-	public SeriesImpl(EventSystem es, String valueId, int storageLimit) {
+	public SeriesImpl(String valueId, int storageLimit) {
 		super();
 		if ( valueId == null ) {
 			throw new NullPointerException("Id cannot be null");
@@ -78,9 +68,6 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 		}
 		id = valueId;
 		limit = storageLimit;
-		dispatcher = es.createEventDispatcher(id);
-		onAdd = dispatcher.createType("Add");
-		onUpd = dispatcher.createType("Upd");
 	}
 
 	/**
@@ -109,25 +96,20 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	
 	@Override
 	public synchronized void add(T value) throws ValueException {
-		EventSI event = null;
-		synchronized ( this ) {
-			event = new ValueEvent<T>(onAdd, value, history.size());
-			history.add(value);
-			if ( limit > 0 ) {
-				if ( history.size() >= limit * 2 ) {
-					history.subList(0, limit).clear();
-					offset += limit;
-				}
+		history.add(value);
+		if ( limit > 0 ) {
+			if ( history.size() >= limit * 2 ) {
+				history.subList(0, limit).clear();
+				offset += limit;
 			}
 		}
-		dispatcher.dispatch(event);
 	}
 
 	@Override
 	public synchronized T get() throws ValueException {
 		try {
-			return history.getLast();
-		} catch ( NoSuchElementException e ) {
+			return history.get(history.size() - 1);
+		} catch ( ArrayIndexOutOfBoundsException e ) {
 			throw new ValueNotExistsException();
 		}
 	}
@@ -149,9 +131,11 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	@Override
 	public synchronized void set(T value) throws ValueException {
 		int index = history.size() - 1;
-		T oldValue = get(index);
-		history.set(index, value);
-		dispatcher.dispatch(new ValueEvent<T>(onUpd, oldValue, value, index));
+		try {
+			history.set(index, value);
+		} catch ( ArrayIndexOutOfBoundsException e ) {
+			throw new ValueNotExistsException();
+		}
 	}
 
 	@Override
@@ -184,44 +168,6 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 			throw new ValueOutOfDateException();
 		}
 		return index;
-	}
-	
-	@Override
-	public synchronized boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		if ( other != null && other.getClass() == SeriesImpl.class ) {
-			return fieldsEquals(other);
-		} else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Сравнить значения атрибутов ряда.
-	 * <p>
-	 * @param other объект для сравнения
-	 * @return результат сравнения
-	 */
-	protected boolean fieldsEquals(Object other) {
-		SeriesImpl<?> o = (SeriesImpl<?>) other;
-		return new EqualsBuilder()
-			.append(id, o.id)
-			.append(limit, o.limit)
-			.append(history, o.history)
-			.append(offset, o.offset)
-			.isEquals();		
-	}
-
-	@Override
-	public EventType OnAdded() {
-		return onAdd;
-	}
-
-	@Override
-	public EventType OnUpdated() {
-		return onUpd;
 	}
 
 }

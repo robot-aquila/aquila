@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.CandleSeries;
-import ru.prolib.aquila.core.data.filler.CandleSeriesFiller;
 import ru.prolib.aquila.core.data.timeframe.TFMinutes;
 
 public class TestStrategy implements EventListener, Starter {
@@ -19,7 +18,6 @@ public class TestStrategy implements EventListener, Starter {
 	private final SecurityDescriptor descr;
 	private Terminal terminal;
 	private Security security;
-	private CandleSeriesFiller candleFiller;
 	private CandleSeries candles;
 	
 	public TestStrategy(Terminal terminal, SecurityDescriptor descr) {
@@ -45,12 +43,12 @@ public class TestStrategy implements EventListener, Starter {
 	public void onTerminalUnready() {
 		try {
 			logger.debug("Terminal Unready");
-			if ( candleFiller != null ) {
-				candleFiller.stop();
-				logger.debug("Candle filler defined. Stop candle filler.");
-			} else {
-				logger.debug("Candle filler still undefined. Nothing to do.");
-			}
+			//if ( candleFiller != null ) {
+			//	candleFiller.stop();
+			//	logger.debug("Candle filler defined. Stop candle filler.");
+			//} else {
+			//	logger.debug("Candle filler still undefined. Nothing to do.");
+			//}
 		} catch ( Exception e ) {
 			logger.error("Unexpected exception: {}", e);
 		}
@@ -61,14 +59,14 @@ public class TestStrategy implements EventListener, Starter {
 			if ( security == null ) {
 				logger.debug("Aquire security instance: {}", descr);
 				security = terminal.getSecurity(descr);
-				candleFiller = new CandleSeriesFiller(((EditableTerminal) terminal).getEventSystem(), 
-						security,
-						new TFMinutes(5), false);
-				candles = candleFiller.getCandles();
-				candles.OnAdded().addListener(this);
+				//candleFiller = new CandleSeriesFiller(((EditableTerminal) terminal).getEventSystem(), 
+				//		security,
+				//		new TFMinutes(5), false);
+				//candles = candleFiller.getCandles();
+				//candles.OnAdded().addListener(this);
 			}
-			logger.debug("Start candle filler.");
-			candleFiller.start();
+			//logger.debug("Start candle filler.");
+			//candleFiller.start();
 		} catch ( Exception e ) {
 			logger.error("Unexpected exception: {}", e);
 		}
@@ -90,8 +88,6 @@ public class TestStrategy implements EventListener, Starter {
 		} else if ( event.isType(terminal.OnUnready()) ) {
 			onTerminalUnready();
 			
-		} else if ( candles != null && event.isType(candles.OnAdded()) ) {
-			logger.debug("Candle added.");
 		}
 	}
 

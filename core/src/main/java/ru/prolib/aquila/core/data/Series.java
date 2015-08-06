@@ -1,6 +1,5 @@
 package ru.prolib.aquila.core.data;
 
-import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.data.ValueException;
 
 /**
@@ -60,19 +59,5 @@ public interface Series<T> {
 	 * @return количество элементов
 	 */
 	public int getLength();
-	
-	/**
-	 * Получить тип события: добавлено новое значение.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnAdded();
-	
-	/**
-	 * Получить тип события: текущее значение обновлено.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnUpdated();
 
 }

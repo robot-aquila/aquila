@@ -2,15 +2,17 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.*;
-import org.junit.*;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.junit.Before;
+import org.junit.Test;
 
-public class CandleIntervalSeriesTest {
+public class CandleVolumeSeriesTest {
 	private EditableCandleSeries candles;
 	private DateTime time1, time2, time3;
 	private Interval int1, int2, int3;
 	private Candle candle1, candle2, candle3;
-	private CandleIntervalSeries series;
+	private CandleVolumeSeries series;
 
 	@Before
 	public void setUp() throws Exception {
@@ -27,28 +29,29 @@ public class CandleIntervalSeriesTest {
 		candles.add(candle1);
 		candles.add(candle2);
 		candles.add(candle3);
-		series = new CandleIntervalSeries(candles);
+		series = new CandleVolumeSeries(candles);
 	}
 	
 	@Test
 	public void testGetId() {
-		assertEquals("foo.INTERVAL", series.getId());
+		assertEquals("foo.VOLUME", series.getId());
 	}
 	
 	@Test
 	public void testGet0() throws Exception {
-		assertEquals(int3, series.get());
+		assertEquals(11990d, series.get(), 0.1d);
 	}
 	
 	@Test
 	public void testGet1() throws Exception {
-		assertEquals(int1, series.get(0));
-		assertEquals(int2, series.get(1));
-		assertEquals(int3, series.get(2));
+		assertEquals(39621d, series.get(0), 0.1d);
+		assertEquals(12279d, series.get(1), 0.1d);
+		assertEquals(11990d, series.get(2), 0.1d);
 	}
 
 	@Test
 	public void testGetLength() {
 		assertEquals(3, series.getLength());
 	}
+
 }
