@@ -1,6 +1,5 @@
-package ru.prolib.aquila.datatools.finam;
+package ru.prolib.aquila.datatools.tickdatabase;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.joda.time.DateTime;
@@ -14,16 +13,18 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 import ru.prolib.aquila.core.data.Tick;
-import ru.prolib.aquila.datatools.tickdatabase.TickDatabase;
 import ru.prolib.aquila.ui.AquilaPlugin;
 import ru.prolib.aquila.ui.AquilaUI;
 import ru.prolib.aquila.ui.ServiceLocator;
 
-public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener, Runnable {
+/**
+ * Plugin to write to tick database.
+ */
+public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(CsvTickDatabasePlugin.class);
+		logger = LoggerFactory.getLogger(TickDatabasePlugin.class);
 	}
 	
 	private Terminal terminal;
@@ -73,7 +74,8 @@ public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener, Runna
 			throws Exception
 	{
 		this.terminal = terminal;
-		database = FinamTools.newTickDatabase(terminal, new File(dbpath));
+		database = (TickDatabase) locator.getApplicationContext()
+				.getBean("tickDatabase");
 	}
 
 	@Override
@@ -93,7 +95,6 @@ public class CsvTickDatabasePlugin implements AquilaPlugin, EventListener, Runna
 			logger.error("Error writing tick: ", x);
 		}
 	}
-	
 
 	@Override
 	public void run() {

@@ -27,12 +27,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.core.utils.IdUtils;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
@@ -50,8 +47,6 @@ public class IOHelperTest {
 	}
 	
 	private IOHelper helper;
-	private EditableTerminal terminal;
-	private EditableSecurity security;
 	private IMocksControl control;
 	
 	@BeforeClass
@@ -65,10 +60,6 @@ public class IOHelperTest {
 		control = createStrictControl();
 		root.mkdirs();
 		helper = new IOHelper(root);
-		terminal = new BasicTerminalBuilder().buildTerminal();
-		security = terminal.getEditableSecurity(descr);
-		security.setPrecision(2);
-		security.setMinStepSize(0.01d);
 	}
 	
 	@After
@@ -263,7 +254,7 @@ public class IOHelperTest {
 		File file = new File(root, "data.csv");
 		OutputStream output = new FileOutputStream(file);
 		
-		CsvTickWriter writer = helper.createCsvTickWriter(security, output);
+		CsvTickWriter writer = helper.createCsvTickWriter(output);
 		
 		assertNotNull(writer);
 		writer.writeHeader();
@@ -271,7 +262,7 @@ public class IOHelperTest {
 		writer.close();
 		List<String> expected = new Vector<String>();
 		expected.add("<TIME>,<LAST>,<VOL>,<MILLISECONDS>");
-		expected.add("203055,2.00,5,30");
+		expected.add("203055,2.0,5,30");
 		InputStream input = new FileInputStream(file);
 		List<String> actual = IOUtils.readLines(input, Charset.defaultCharset());
 		input.close();

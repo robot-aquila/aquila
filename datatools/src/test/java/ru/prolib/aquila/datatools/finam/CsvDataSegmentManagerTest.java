@@ -52,8 +52,6 @@ public class CsvDataSegmentManagerTest {
 		descr1 = new SecurityDescriptor("RTS", "SPB", "USD", SecurityType.FUT);
 	}
 	
-	private EditableTerminal terminal;
-	private EditableSecurity security;
 	private Scheduler scheduler;
 	private CsvDataSegmentManager manager;
 	private InputStream inputStream;
@@ -74,12 +72,7 @@ public class CsvDataSegmentManagerTest {
 		file3 = control.createMock(File.class);
 		helper = control.createMock(IOHelper.class);
 		
-		terminal = new BasicTerminalBuilder().buildTerminal();
-		security = terminal.getEditableSecurity(descr1);
-		security.setPrecision(2);
-		security.setMinStepSize(0.01d);
-		
-		manager = new CsvDataSegmentManager(terminal, helper);
+		manager = new CsvDataSegmentManager(helper);
 	}
 	
 	@After
@@ -89,7 +82,7 @@ public class CsvDataSegmentManagerTest {
 	
 	@Test (expected=FinamException.class)
 	public void testCtor_ThrowsIfDirectoryNotExists() throws Exception {
-		new CsvDataSegmentManager(terminal, new File(root, "bergandabupkhta"));
+		new CsvDataSegmentManager(new File(root, "bergandabupkhta"));
 	}
 	
 	@Test
@@ -102,8 +95,7 @@ public class CsvDataSegmentManagerTest {
 		expect(file2.exists()).andReturn(false);
 		expect(file2.mkdirs()).andReturn(true);
 		expect(helper.createOutputStream(file1, false)).andReturn(outputStream);
-		expect(helper.createCsvTickWriter(security, outputStream))
-			.andReturn(csvWriter);
+		expect(helper.createCsvTickWriter(outputStream)).andReturn(csvWriter);
 		csvWriter.writeHeader();
 		expect(helper.addSmartFlush(csvWriter, "[RTS@SPB(FUT/USD)#1998-01-15]"))
 			.andReturn(flusher);

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
-import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.utils.IdUtils;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
@@ -201,14 +200,11 @@ public class IOHelper {
 	/**
 	 * Create csv-writer for the tick data.
 	 * <p>
-	 * @param security - security instance
 	 * @param output - the output stream
 	 * @return the writer
 	 */
-	public CsvTickWriter
-		createCsvTickWriter(Security security, OutputStream output)
-	{
-		return new CsvTickWriter(security, output);
+	public CsvTickWriter createCsvTickWriter(OutputStream output) {
+		return new CsvTickWriter(output);
 	}
 	
 	/**

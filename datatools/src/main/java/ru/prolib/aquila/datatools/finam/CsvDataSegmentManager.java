@@ -10,9 +10,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegment;
@@ -26,21 +24,21 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	}
 	
 	private final IOHelper helper;
-	private final Terminal terminal;
 	
-	public CsvDataSegmentManager(Terminal terminal, File dbpath)
-		throws FinamException
-	{
-		this(terminal, new IOHelper(dbpath));
+	public CsvDataSegmentManager(File dbpath) throws FinamException {
+		this(new IOHelper(dbpath));
 		if ( ! dbpath.isDirectory() ) {
 			throw new FinamException("Directory not exists: " + dbpath);
 		}	
 	}
 	
-	public CsvDataSegmentManager(Terminal terminal, IOHelper helper) {
+	public CsvDataSegmentManager(String dbpath) throws FinamException {
+		this(new File(dbpath));
+	}
+	
+	public CsvDataSegmentManager(IOHelper helper) {
 		super();
 		this.helper = helper;
-		this.terminal = terminal;
 	}
 	
 	public void setSmartFlushExecutionPeriod(long period) {
@@ -65,9 +63,8 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 								// Need improvements for universal approach.
 		boolean append = false; // file.exists() && file.length() > 0;
 		try {
-			Security security = terminal.getSecurity(descr);
 			OutputStream stream = helper.createOutputStream(file, append);
-			CsvTickWriter writer = helper.createCsvTickWriter(security, stream);
+			CsvTickWriter writer = helper.createCsvTickWriter(stream);
 			if ( ! append ) writer.writeHeader();
 			return new DataSegmentImpl(descr, date,
 					helper.addSmartFlush(writer, getStreamId(descr, date)));

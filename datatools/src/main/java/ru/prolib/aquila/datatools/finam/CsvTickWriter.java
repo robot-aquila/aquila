@@ -9,7 +9,6 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.csvreader.CsvWriter;
 
-import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
@@ -29,11 +28,9 @@ public class CsvTickWriter implements TickWriter {
 	}
 	
 	private final CsvWriter writer;
-	private final Security security;
 	
-	public CsvTickWriter(Security security, OutputStream stream) {
+	public CsvTickWriter(OutputStream stream) {
 		super();
-		this.security = security;
 		writer = new CsvWriter(stream, ',', Charset.forName("UTF-8"));
 	}
 
@@ -42,7 +39,7 @@ public class CsvTickWriter implements TickWriter {
 		try {
 			String entries[] = {
 				timeFormat.print(tick.getTime()),
-				security.shrinkPrice(tick.getValue()),
+				formatPrice(tick.getValue()),
 				Long.toString(tick.getOptionalValueAsLong()),
 				Long.toString(tick.getTime().getMillisOfSecond())
 			};
@@ -67,6 +64,10 @@ public class CsvTickWriter implements TickWriter {
 	@Override
 	public void flush() {
 		writer.flush();
+	}
+	
+	private String formatPrice(Double value) {
+		return value == null ? "0" : value.toString();
 	}
 
 }
