@@ -74,8 +74,8 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 			throws Exception
 	{
 		this.terminal = terminal;
-		database = (TickDatabase) locator.getApplicationContext()
-				.getBean("tickDatabase");
+		database = (TickDatabase)
+				locator.getApplicationContext().getBean("tickDatabase");
 	}
 
 	@Override
