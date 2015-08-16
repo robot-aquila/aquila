@@ -27,6 +27,8 @@ public class DataProvider {
 	public void startSupply(PROBETerminal terminal, SecurityDescriptor descr,
 			DateTime startTime) throws DataException
 	{
+		throw new RuntimeException("Not implemented");
+		/*
 		PROBEServiceLocator locator = terminal.getServiceLocator();
 		PROBEDataStorage ds = locator.getDataStorage();
 		Aqiterator<Tick> it = ds.getIterator(descr, startTime);
@@ -34,6 +36,7 @@ public class DataProvider {
 				new FORTSSecurityCtrl(terminal,
 						terminal.getEditableSecurity(descr),
 						ds.getSecurityProperties(descr))));
+		*/
 	}
 
 }

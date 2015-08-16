@@ -18,7 +18,7 @@ public class PROBETerminalBuilder {
 	private Interval timeInterval;
 	private Scheduler scheduler;
 	private PROBEServiceLocator locator;
-	private PROBEDataStorage dataStorage;
+	//private PROBEDataStorage dataStorage;
 	private DataProvider dataProvider;
 	
 	public PROBETerminalBuilder() {
@@ -80,12 +80,12 @@ public class PROBETerminalBuilder {
 		return locator;
 	}
 	
-	private PROBEDataStorage getDataStorage() {
-		if ( dataStorage == null ) {
-			dataStorage = new PROBEDataStorage(new File(""));
-		}
-		return dataStorage;
-	}
+	//private PROBEDataStorage getDataStorage() {
+	//	if ( dataStorage == null ) {
+	//		dataStorage = new PROBEDataStorage(new File(""));
+	//	}
+	//	return dataStorage;
+	//}
 	
 	private DataProvider getDataProvider() {
 		if ( dataProvider == null ) {
@@ -95,6 +95,8 @@ public class PROBETerminalBuilder {
 	}
 	
 	public PROBETerminal buildTerminal() {
+		throw new RuntimeException("Not implemented");
+		/*
 		PROBEServiceLocator locator = getServiceLocator();
 		PROBETerminal terminal =
 				new PROBETerminal(getBasicTerminalParams(), locator);
@@ -102,6 +104,7 @@ public class PROBETerminalBuilder {
 		locator.setDataProvider(getDataProvider());
 		locator.setTimeline(getTimeline());
 		return terminal;
+		*/
 	}
 	
 	public PROBETerminalBuilder withEventSystem(EventSystem facade) {
@@ -139,13 +142,13 @@ public class PROBETerminalBuilder {
 		return this;
 	}
 	
-	public PROBETerminalBuilder withDataStorage(PROBEDataStorage storage) {
-		return this;
-	}
+	//public PROBETerminalBuilder withDataStorage(PROBEDataStorage storage) {
+	//	return this;
+	//}
 	
-	public PROBETerminalBuilder withCommonDataStorageAndPath(String path) {
-		this.dataStorage = new PROBEDataStorage(new File(path));
-		return this;
-	}
+	//public PROBETerminalBuilder withCommonDataStorageAndPath(String path) {
+	//	this.dataStorage = new PROBEDataStorage(new File(path));
+	//	return this;
+	//}
 
 }

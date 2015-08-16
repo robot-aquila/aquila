@@ -1,12 +1,13 @@
 package ru.prolib.aquila.probe.internal;
 
+import ru.prolib.aquila.datatools.tickdatabase.TickDatabase;
 import ru.prolib.aquila.probe.timeline.*;
 
 /**
  * Сервис-локатор.
  */
 public class PROBEServiceLocator {
-	private PROBEDataStorage dataStorage;
+	private TickDatabase tickDatabase;
 	private DataProvider dataProvider;
 	private Timeline timeline;
 	
@@ -18,25 +19,25 @@ public class PROBEServiceLocator {
 	}
 	
 	/**
-	 * Получить хранилище данных.
+	 * Получить хранилище тиковых данных.
 	 * <p>
-	 * @return хранилище данных
+	 * @return хранилище тиковых данных
 	 * @throws NullPointerException экземпляр хранилища не определен
 	 */
-	public PROBEDataStorage getDataStorage() {
-		if ( dataStorage == null ) {
-			throw new NullPointerException("Storage was not defined");
+	public TickDatabase getTickDatabase() {
+		if ( tickDatabase == null ) {
+			throw new NullPointerException("Tick database was not defined");
 		}
-		return dataStorage;
+		return tickDatabase;
 	}
 	
 	/**
-	 * Назначить хранилище данных.
+	 * Назначить хранилище тиковых данных.
 	 * <p>
-	 * @param storage хранилище данных
+	 * @param storage хранилище тиковых данных
 	 */
-	public void setDataStorage(PROBEDataStorage storage) {
-		this.dataStorage = storage;
+	public void setTickDatabase(TickDatabase storage) {
+		this.tickDatabase = storage;
 	}
 	
 	/**

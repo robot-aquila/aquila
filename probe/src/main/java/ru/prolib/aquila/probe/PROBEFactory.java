@@ -76,6 +76,8 @@ public class PROBEFactory implements TerminalFactory {
 	 */
 	@Override
 	public PROBETerminal createTerminal(Properties config) throws Exception {
+		throw new RuntimeException("Not implemented");
+		/*
 		return getTerminalBuilder()
 			.withCommonEventSystemAndQueueId(getNextId())
 			.withCommonTimelineAndTimeInterval(new Interval(
@@ -83,6 +85,7 @@ public class PROBEFactory implements TerminalFactory {
 					df.parseDateTime(config.getProperty(RUN_INTERVAL_END))))
 			.withCommonDataStorageAndPath(config.getProperty(DATA_STORAGE_PATH))
 			.buildTerminal();
+		*/
 	}
 
 }
