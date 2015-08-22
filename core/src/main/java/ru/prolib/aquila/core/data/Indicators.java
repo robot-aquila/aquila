@@ -97,8 +97,7 @@ public class Indicators {
 	/**
 	 * Simple Moving Average (SMA).
 	 * <p>
-	 * Работает через {@link #sma(DataSeries, int, int)}. Расчитывает значение
-	 * простой скользящей средней для последнего элемента. 
+	 * Рассчитывает значение простой скользящей средней для последнего элемента. 
 	 * <p>
 	 * @param value ряд данных
 	 * @param period период скользящей средней
@@ -149,6 +148,7 @@ public class Indicators {
  	 * Формула DPO из платформы VectorVest.
 	 * <p>
 	 * @param close ряд данных
+	 * @param index индекс элемента для рассчета значения
 	 * @param period количество элементов базы расчета
 	 * @throws ValueException - ошибка доступа к данным
 	 * @return значение DPO или null, если расчитать не удалось
@@ -224,7 +224,7 @@ public class Indicators {
 	/**
 	 * True Range (TR).
 	 * <p>
-	 * @param candles источник свечей
+	 * @param value источник свечей
 	 * @param index индекс элемента для расчета TR
 	 * @return TR или null, если расчитать не удалось
 	 * @throws ValueException - ошибка доступа к данным
@@ -253,7 +253,7 @@ public class Indicators {
 	/**
 	 * True Range (TR).
 	 * <p>
-	 * @param candles источник свечей
+	 * @param value источник свечей
 	 * @return TR или null, если расчитать не удалось
 	 * @throws ValueException - ошибка доступа к данным
 	 */
@@ -267,7 +267,6 @@ public class Indicators {
 	 * Формула DPO из платформы VectorVest.
 	 * <p>
 	 * @param close ряд данных
-	 * @param index индекс элемента для расчета DPO
 	 * @param period количество элементов базы расчета
 	 * @throws ValueException - ошибка доступа к данным
 	 * @return значение DPO или null, если расчитать не удалось
@@ -313,8 +312,7 @@ public class Indicators {
 	/**
 	 * Получить максимальное значение за период.
 	 * <p>
-	 * Работает через {@link #max(DataSeries, int, int)}. Расчитывает значение
-	 * максимума за период относительно последнего элемента в источнике.
+	 * Раcсчитывает значение максимума за период с конца ряда данных.
 	 * <p>
 	 * @param value ряд данных
 	 * @param period период расчета максимума
@@ -346,7 +344,10 @@ public class Indicators {
 	/**
 	 * Получить максимальное значение за период.
 	 * <p>
-	 * @param index индекс последнего элемента базы расчета
+	 * Рассчитывает значение максимума за период относительно указанной позиции
+	 * в ряду.
+	 * <p>
+	 * @param index позиция последнего элемента в ряду
 	 * @param period период расчета максимума
 	 * @param values ряды данных, по которым расчитывается максимум
 	 * @return значение максимума или null, если не удалось расчитать
