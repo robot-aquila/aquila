@@ -28,7 +28,7 @@ public class DlgDriver extends JDialog {
 	private final JComboBox drvSelect = new JComboBox();
 	private String selectedDriver = null;
 	
-	public DlgDriver(UiTexts uiTexts, Set<String> drivers) {
+	public DlgDriver(MessageRegistry uiTexts, Set<String> drivers) {
 		super((Frame) null, true);
 		ClassLabels uiLabels = uiTexts.get("DlgDriver");
 		

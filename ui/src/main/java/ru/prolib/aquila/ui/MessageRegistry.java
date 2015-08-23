@@ -13,26 +13,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.text.IMessages;
-import ru.prolib.aquila.core.text.IMessagesRegistry;
+import ru.prolib.aquila.core.text.IMessageRegistry;
 
 /**
  * $Id: UiTexts.java 570 2013-03-12 00:03:15Z huan.kaktus $
  *
  */
-public class UiTexts implements IMessagesRegistry {
+public class MessageRegistry implements IMessageRegistry {
 	
-	private static Logger logger = LoggerFactory.getLogger(UiTexts.class);
+	private static Logger logger = LoggerFactory.getLogger(MessageRegistry.class);
 	private String defLng = "en_US";
 	private String[] localesPath = {"shared", "lang"};
 	private String dirSeparator = System.getProperty("file.separator");
 	private Map<String, ClassLabels> labels = new HashMap<String, ClassLabels>();
 	private String lang;
 	
-	public UiTexts() {
+	public MessageRegistry() {
 		super();		
 	}
 	
-	public UiTexts(String lang) {
+	public MessageRegistry(String lang) {
 		super();
 		if(lang != defLng) {
 			this.lang = lang;

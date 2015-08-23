@@ -67,7 +67,7 @@ public class Main implements Runnable {
 	
 	public Main() {
 		super();
-		locator = new ServiceLocator(new UiTexts(), this);
+		locator = new ServiceLocator(new MessageRegistry(), this);
 	}
 
 	/**

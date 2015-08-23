@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.text;
 /**
  * Фасад к подсистеме текстовых сообщений и меток.
  */
-public interface IMessagesRegistry {
+public interface IMessageRegistry {
 	
 	/**
 	 * Получить набор сообщений.

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.ui.msg.SecurityMsg;
 import ru.prolib.aquila.ui.plugin.getters.*;
 import ru.prolib.aquila.ui.wrapper.TableColumnAlreadyExistsException;
 import ru.prolib.aquila.ui.wrapper.TableColumnWrp;
@@ -15,29 +16,29 @@ import ru.prolib.aquila.ui.wrapper.TableModel;
 public class SecuritiesTableCols {
 
 	private final String[] colIndex = {
-		"COL_NAME",
-		"COL_TYPE",
-		"COL_STATUS",
-		"COL_CURR",
-		"COL_SYMBOL",
-		"COL_CLASS",
-		"COL_LAST",
-		"COL_OPEN",
-		"COL_HIGH",
-		"COL_LOW",
-		"COL_CLOSE",
-		"COL_ASK",
-		"COL_ASK_SIZE",
-		"COL_BID",
-		"COL_BID_SIZE",
-		"COL_LOT",
-		"COL_TICK",
-		"COL_STEP_PRICE",
-		"COL_PREC",
-		"COL_MIN",
-		"COL_MAX",
-		"COL_INIT_PRICE",
-		"COL_INIT_MARGIN"
+		SecurityMsg.NAME,
+		SecurityMsg.TYPE,
+		SecurityMsg.STATUS,
+		SecurityMsg.CURRENCY,
+		SecurityMsg.SYMBOL,
+		SecurityMsg.CLASS,
+		SecurityMsg.LAST_PRICE,
+		SecurityMsg.OPEN_PRICE,
+		SecurityMsg.HIGH_PRICE,
+		SecurityMsg.LOW_PRICE,
+		SecurityMsg.CLOSE_PRICE,
+		SecurityMsg.ASK_PRICE,
+		SecurityMsg.ASK_SIZE,
+		SecurityMsg.BID_PRICE,
+		SecurityMsg.BID_SIZE,
+		SecurityMsg.LOT_SIZE,
+		SecurityMsg.TICK_SIZE,
+		SecurityMsg.TICK_PRICE,
+		SecurityMsg.PRICE_PREC,
+		SecurityMsg.MIN_PRICE,
+		SecurityMsg.MAX_PRICE,
+		SecurityMsg.INIT_PRICE,
+		SecurityMsg.INIT_MARGIN
 	};
 	
 	private static final Map<String, Integer> width = new HashMap<String, Integer>();
@@ -45,31 +46,31 @@ public class SecuritiesTableCols {
 	private static final Map<String, G<?>> getters = new HashMap<String, G<?>>();
 	
 	static {
-		getters.put("COL_NAME", new GSecurityName());
-		getters.put("COL_TYPE", new GSecurityType());
-		getters.put("COL_STATUS", new GSecurityStatus());
-		getters.put("COL_CURR", new GSecurityCurrency());
-		getters.put("COL_SYMBOL", new GSecuritySymbol());
-		getters.put("COL_CLASS", new GSecurityClass());
-		getters.put("COL_LAST", new GSecurityLastPrice());
-		getters.put("COL_OPEN", new GSecurityOpenPrice());
-		getters.put("COL_HIGH", new GSecurityHighPrice());
-		getters.put("COL_LOW", new GSecurityLowPrice());
-		getters.put("COL_CLOSE", new GSecurityClosePrice());
-		getters.put("COL_ASK", new GSecurityAskPrice());
-		getters.put("COL_ASK_SIZE", new GSecurityAskSize());
-		getters.put("COL_BID", new GSecurityBidPrice());
-		getters.put("COL_BID_SIZE", new GSecurityBidSize());
-		getters.put("COL_LOT", new GSecurityLotSize());
-		getters.put("COL_TICK", new GSecurityMinStep());
-		getters.put("COL_STEP_PRICE", new GSecurityMinStepPrice());
-		getters.put("COL_PREC", new GSecurityPrecision());
-		getters.put("COL_MIN", new GSecurityMinPrice());
-		getters.put("COL_MAX", new GSecurityMaxPrice());
-		getters.put("COL_INIT_PRICE", new GSecurityInitialPrice());
-		getters.put("COL_INIT_MARGIN", new GSecurityInitialMargin());
+		getters.put(SecurityMsg.NAME, new GSecurityName());
+		getters.put(SecurityMsg.TYPE, new GSecurityType());
+		getters.put(SecurityMsg.STATUS, new GSecurityStatus());
+		getters.put(SecurityMsg.CURRENCY, new GSecurityCurrency());
+		getters.put(SecurityMsg.SYMBOL, new GSecuritySymbol());
+		getters.put(SecurityMsg.CLASS, new GSecurityClass());
+		getters.put(SecurityMsg.LAST_PRICE, new GSecurityLastPrice());
+		getters.put(SecurityMsg.OPEN_PRICE, new GSecurityOpenPrice());
+		getters.put(SecurityMsg.HIGH_PRICE, new GSecurityHighPrice());
+		getters.put(SecurityMsg.LOW_PRICE, new GSecurityLowPrice());
+		getters.put(SecurityMsg.CLOSE_PRICE, new GSecurityClosePrice());
+		getters.put(SecurityMsg.ASK_PRICE, new GSecurityAskPrice());
+		getters.put(SecurityMsg.ASK_SIZE, new GSecurityAskSize());
+		getters.put(SecurityMsg.BID_PRICE, new GSecurityBidPrice());
+		getters.put(SecurityMsg.BID_SIZE, new GSecurityBidSize());
+		getters.put(SecurityMsg.LOT_SIZE, new GSecurityLotSize());
+		getters.put(SecurityMsg.TICK_SIZE, new GSecurityMinStep());
+		getters.put(SecurityMsg.TICK_PRICE, new GSecurityMinStepPrice());
+		getters.put(SecurityMsg.PRICE_PREC, new GSecurityPrecision());
+		getters.put(SecurityMsg.MIN_PRICE, new GSecurityMinPrice());
+		getters.put(SecurityMsg.MAX_PRICE, new GSecurityMaxPrice());
+		getters.put(SecurityMsg.INIT_PRICE, new GSecurityInitialPrice());
+		getters.put(SecurityMsg.INIT_MARGIN, new GSecurityInitialMargin());
 		
-		width.put("COL_NAME", 200);
+		width.put(SecurityMsg.NAME, 200);
 	}
 	
 	public SecuritiesTableCols() {

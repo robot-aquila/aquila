@@ -6,7 +6,7 @@ import javax.swing.SwingUtilities;
 
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.text.IMessages;
-import ru.prolib.aquila.core.text.IMessagesRegistry;
+import ru.prolib.aquila.core.text.IMessageRegistry;
 
 /**
  * $Id: PortfolioDataPanel.java 544 2013-02-25 14:31:32Z huan.kaktus $
@@ -19,7 +19,7 @@ public class PortfolioStatusBar extends JPanel implements PortfolioStatusBarView
 	private LabeledTextValue varMargin;
 	private LabeledTextValue accountVal;
 	
-	public PortfolioStatusBar(IMessagesRegistry texts) {
+	public PortfolioStatusBar(IMessageRegistry texts) {
 		super();
 		IMessages messages = texts.getMessages(TEXT_SECT);
 		accountVal = new LabeledTextValue(messages.get("LB_ACCOUNT"));

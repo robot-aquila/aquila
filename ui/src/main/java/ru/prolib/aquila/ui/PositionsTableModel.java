@@ -39,7 +39,7 @@ public class PositionsTableModel extends AbstractTableModel implements
 	private final Terminal portfolios;
 	private final List<Position> list;
 	
-	public PositionsTableModel(Terminal portfolios, UiTexts uiTexts) {
+	public PositionsTableModel(Terminal portfolios, MessageRegistry uiTexts) {
 		super();
 		uiLabels = uiTexts.get("PositionsTableModel");
 		this.portfolios = portfolios;

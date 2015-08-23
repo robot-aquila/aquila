@@ -26,7 +26,7 @@ public class MainFrameTest {
 	private static IMocksControl control;
 	
 	private ServiceLocator facade;
-	private UiTexts texts = new UiTexts();
+	private MessageRegistry texts = new MessageRegistry();
 	private Runnable exitAction;
 	private Terminal terminal;
 	

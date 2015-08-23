@@ -44,7 +44,7 @@ public interface AquilaUI {
 	 */
 	public JFrame getMainFrame();
 	
-	public UiTexts getTexts();
+	public MessageRegistry getTexts();
 	
 	public Runnable getExitAction();
 	

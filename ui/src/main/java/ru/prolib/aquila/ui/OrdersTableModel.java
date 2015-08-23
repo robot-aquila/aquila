@@ -49,7 +49,7 @@ public class OrdersTableModel extends AbstractTableModel implements
 	private final Terminal orders;
 	private final List<Order> list;
 	
-	public OrdersTableModel(Terminal orders, UiTexts uiTexts) {
+	public OrdersTableModel(Terminal orders, MessageRegistry uiTexts) {
 		super();
 		uiLabels = uiTexts.get("OrdersTableModel");
 		this.orders = orders;

@@ -45,7 +45,7 @@ public class TradesReportTableModel extends AbstractTableModel
 	private final ClassLabels labels;
 	private List<RTrade> list;
 	
-	public TradesReportTableModel(TradeReport trades, UiTexts texts) {
+	public TradesReportTableModel(TradeReport trades, MessageRegistry texts) {
 		super();
 		this.trades = trades;
 		this.labels = texts.get(TEXT_SEC);

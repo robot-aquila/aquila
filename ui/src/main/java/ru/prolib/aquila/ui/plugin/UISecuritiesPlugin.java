@@ -1,12 +1,18 @@
 package ru.prolib.aquila.ui.plugin;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.ui.*;
+import ru.prolib.aquila.ui.form.SelectSecurityDialog;
+import ru.prolib.aquila.ui.msg.SecurityMsg;
 import ru.prolib.aquila.ui.plugin.getters.GSecurity;
 import ru.prolib.aquila.ui.wrapper.*;
 
@@ -17,9 +23,9 @@ import ru.prolib.aquila.ui.wrapper.*;
  * $Id: UISecuritiesPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
 public class UISecuritiesPlugin implements AquilaPlugin {
-	public static final String TEXT_SECT = "UISecuritiesPlugin";
-	public static final String TITLE = "TAB_SECURITIES";
-	public static final String MENU_SECURITY = "MENU_SEC";
+	public static final String TEXT_SECT = SecurityMsg.SECTION_ID;
+	public static final String TITLE = SecurityMsg.SECURITIES_TITLE;
+	public static final String MENU_SECURITIES = SecurityMsg.SECURITIES_MENU;
 	
 	private Terminal terminal;
 	private SecuritiesTableCols cols = new SecuritiesTableCols();
@@ -59,7 +65,7 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 	}
 
 	@Override
-	public void createUI(AquilaUI facade) throws Exception {
+	public void createUI(final AquilaUI facade) throws Exception {
 		EventSystem ev = ((ServiceLocator) facade).getEventSystem();
 		EventDispatcher dispatcher = ev.createEventDispatcher();
 		ClassLabels text = facade.getTexts().get(TEXT_SECT);
@@ -81,7 +87,22 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 		facade.addTab(text.get(TITLE), panel);
         panel.add(new JScrollPane(tb.getUnderlayed()));
 		
-        facade.getMainMenu().addMenu(MENU_SECURITY, text.get(MENU_SECURITY));
+        facade.getMainMenu().addMenu(MENU_SECURITIES, text.get(MENU_SECURITIES));
+        // Test security selector dialog
+        facade.getMainMenu().getMenu(MENU_SECURITIES)
+        	.addBottomItem("SELECT_SECURITY", "Select security (test)")
+        	.getUnderlyingObject().addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					SelectSecurityDialog dialog = new SelectSecurityDialog(facade.getMainFrame(), facade.getTexts());
+					dialog.pack();
+					dialog.setModal(true);
+					dialog.setVisible(true);
+					Security security = dialog.getSelectedSecurity();
+					JOptionPane.showMessageDialog(null, "Selected: "
+						+ (security == null ? null : security.getDescriptor()));
+				}
+        });
 	}
 	
 	@Override

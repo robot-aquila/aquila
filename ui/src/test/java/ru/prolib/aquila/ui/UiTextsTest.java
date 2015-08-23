@@ -23,11 +23,11 @@ public class UiTextsTest {
 	}
 	
 	/**
-	 * Test method for {@link ru.prolib.aquila.ui.UiTexts#UiTexts(java.lang.String)}.
+	 * Test method for {@link ru.prolib.aquila.ui.MessageRegistry#UiTexts(java.lang.String)}.
 	 */
 	@Test
 	public void testConstructor_WithArgs() {
-		UiTexts t = new UiTexts("ru_RU");
+		MessageRegistry t = new MessageRegistry("ru_RU");
 		assertEquals("en_US", t.getDefLang());
 		String[] path = t.getLocalesPath();
 		assertEquals("shared", path[0]);
@@ -36,11 +36,11 @@ public class UiTextsTest {
 	}
 	
 	/**
-	 * Test method for {@link ru.prolib.aquila.ui.UiTexts#UiTexts()}.
+	 * Test method for {@link ru.prolib.aquila.ui.MessageRegistry#UiTexts()}.
 	 */
 	@Test
 	public void testConstructor_WithoutArgs() {
-		UiTexts t = new UiTexts();
+		MessageRegistry t = new MessageRegistry();
 		assertEquals("en_US", t.getDefLang());
 		String[] path = t.getLocalesPath();
 		assertEquals("shared", path[0]);
@@ -50,11 +50,11 @@ public class UiTextsTest {
 	}
 
 	/**
-	 * Test method for {@link ru.prolib.aquila.ui.UiTexts#load()}.
+	 * Test method for {@link ru.prolib.aquila.ui.MessageRegistry#load()}.
 	 */
 	@Test
 	public void testLoad_DefaultLocale() {
-		UiTexts t = new UiTexts();
+		MessageRegistry t = new MessageRegistry();
 		t.setLocalesPath(new String[] {"fixture", "lang"});
 		t.load();
 		Map<String, ClassLabels> lbs = t.getLabels();
@@ -67,11 +67,11 @@ public class UiTextsTest {
 	}
 	
 	/**
-	 * Test method for {@link ru.prolib.aquila.ui.UiTexts#load()}.
+	 * Test method for {@link ru.prolib.aquila.ui.MessageRegistry#load()}.
 	 */
 	@Test
 	public void testLoad_RuLocale() {
-		UiTexts t = new UiTexts("ru_RU");
+		MessageRegistry t = new MessageRegistry("ru_RU");
 		t.setLocalesPath(new String[] {"fixture", "lang"});
 		t.load();
 		Map<String, ClassLabels> lbs = t.getLabels();
@@ -85,11 +85,11 @@ public class UiTextsTest {
 	}
 
 	/**
-	 * Test method for {@link ru.prolib.aquila.ui.UiTexts#get(java.lang.String)}.
+	 * Test method for {@link ru.prolib.aquila.ui.MessageRegistry#get(java.lang.String)}.
 	 */
 	@Test
 	public void testGet() {
-		UiTexts t = new UiTexts();
+		MessageRegistry t = new MessageRegistry();
 		t.setLocalesPath(new String[] {"fixture", "lang"});
 		t.load();
 		ClassLabels l = t.get("FirstTest");
@@ -103,11 +103,11 @@ public class UiTextsTest {
 	}
 
 	/**
-	 * Test method for {@link ru.prolib.aquila.ui.UiTexts#setClassLabels(java.lang.String, ru.prolib.aquila.ui.ClassLabels)}.
+	 * Test method for {@link ru.prolib.aquila.ui.MessageRegistry#setClassLabels(java.lang.String, ru.prolib.aquila.ui.ClassLabels)}.
 	 */
 	@Test
 	public void testSetClassLabels() {
-		UiTexts t = new UiTexts();
+		MessageRegistry t = new MessageRegistry();
 		ClassLabels l = new ClassLabels("SomeName");
 		t.setClassLabels("SomeName", l);
 		assertEquals(l, t.get("SomeName"));

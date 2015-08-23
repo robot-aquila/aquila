@@ -16,12 +16,12 @@ import ru.prolib.aquila.ui.wrapper.MenuBar;
  */
 public class ServiceLocator implements AquilaUI {
 	private final EventSystem es;
-	private final UiTexts texts;
+	private final MessageRegistry texts;
 	private final Runnable exitAction;
 	private MainFrame frame;
 	private ApplicationContext appContext;
 	
-	public ServiceLocator(UiTexts texts, Runnable exitAction) {
+	public ServiceLocator(MessageRegistry texts, Runnable exitAction) {
 		super();
 		es = new EventSystemImpl(new EventQueueImpl("AQUILA-UI"));
 		this.texts = texts;
@@ -34,7 +34,7 @@ public class ServiceLocator implements AquilaUI {
 	}
 	
 	@Override
-	public UiTexts getTexts() {
+	public MessageRegistry getTexts() {
 		return texts;
 	}
 	

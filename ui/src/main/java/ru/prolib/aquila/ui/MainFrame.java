@@ -6,12 +6,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.text.IMessageRegistry;
 import ru.prolib.aquila.ui.TerminalStatusBar;
 import ru.prolib.aquila.ui.FastOrder.FastOrderPanel;
 import ru.prolib.aquila.ui.wrapper.Menu;
@@ -67,7 +70,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 		
 		EventSystem es = facade.getEventSystem();
  
-		UiTexts uiLabels = facade.getTexts();
+		IMessageRegistry uiLabels = facade.getTexts();
 		
 		EventDispatcher dispatcher = es.createEventDispatcher(); 
 		portfolioSelector = new CurrentPortfolioImpl(
@@ -83,7 +86,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
         inp.add(tabPanel, BorderLayout.CENTER);
         getContentPane().add(inp, BorderLayout.CENTER);
         
-        terminalStatusBar = new TerminalStatusBar(uiLabels.get(TERMINAL_STATUS_SECT));
+        terminalStatusBar = new TerminalStatusBar(uiLabels.getMessages(TERMINAL_STATUS_SECT));
 		portfolioStatusBar = new PortfolioStatusBar(uiLabels);
         
         statusBar.setLayout(new FlowLayout());
