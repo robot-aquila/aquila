@@ -72,6 +72,16 @@ public class SelectSecurityTableModel extends AbstractTableModel {
 		}
 	}
 	
+	/**
+	 * Return column index by ID.
+	 * <p> 
+	 * @param columnId - one of {@link SecurityMsg} constants.
+	 * @return return index of specified column
+	 */
+	public int getColumnIndex(String columnId) {
+		return mapIndexToName.indexOf(columnId);
+	}
+	
 	@Override
 	public String getColumnName(int c) {
 		return messages.get(mapIndexToName.get(c));

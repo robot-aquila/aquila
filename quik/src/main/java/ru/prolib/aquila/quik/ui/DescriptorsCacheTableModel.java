@@ -1,8 +1,8 @@
 package ru.prolib.aquila.quik.ui;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.quik.assembler.cache.Cache;
-import ru.prolib.aquila.ui.ClassLabels;
 import ru.prolib.aquila.ui.table.*;
 
 /**
@@ -14,10 +14,10 @@ public class DescriptorsCacheTableModel extends TableModel
 	private static final long serialVersionUID = 1680298196695807848L;
 	private final Cache cache;
 
-	public DescriptorsCacheTableModel(ClassLabels labels, Columns columns,
+	public DescriptorsCacheTableModel(IMessages messages, Columns columns,
 			Cache cache)
 	{
-		super(labels, columns);
+		super(messages, columns);
 		this.cache = cache;
 	}
 	

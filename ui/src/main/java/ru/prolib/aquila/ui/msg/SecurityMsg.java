@@ -29,4 +29,5 @@ public class SecurityMsg {
 	
 	public static final String SECURITIES_TITLE = "TAB_SECURITIES";
 	public static final String SECURITIES_MENU = "MENU_SEC";
+	public static final String SELECT_SECURITY = "SELECT_SECURITY";
 }

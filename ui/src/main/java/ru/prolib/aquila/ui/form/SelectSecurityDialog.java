@@ -1,6 +1,7 @@
 package ru.prolib.aquila.ui.form;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,9 +45,15 @@ public class SelectSecurityDialog extends JDialog
 		
 		JPanel filterPanel = new JPanel();
 		
-		JScrollPane tablePanel = new JScrollPane();
 		tableModel = new SelectSecurityTableModel(securityMsg);
 		table = new JTable(tableModel);
+		table.setFillsViewportHeight(true);
+		setColumnWidth(SecurityMsg.NAME, 160);
+		setColumnWidth(SecurityMsg.SYMBOL, 80);
+		setColumnWidth(SecurityMsg.CLASS, 50);
+		setColumnWidth(SecurityMsg.TYPE, 50);
+		setColumnWidth(SecurityMsg.CURRENCY, 50);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e){
@@ -58,7 +65,7 @@ public class SelectSecurityDialog extends JDialog
 		ListSelectionModel selectionModel = table.getSelectionModel();
 		selectionModel.addListSelectionListener(this);
 		selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tablePanel.add(table);
+		JScrollPane tablePanel = new JScrollPane(table);
 		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());
@@ -75,7 +82,14 @@ public class SelectSecurityDialog extends JDialog
 		panel.add(filterPanel, BorderLayout.NORTH);
 		panel.add(tablePanel, BorderLayout.CENTER);
 		panel.add(buttonPanel, BorderLayout.SOUTH);
-		this.getContentPane().add(panel);
+		getContentPane().add(panel);
+		setTitle(securityMsg.get(SecurityMsg.SELECT_SECURITY));
+		setPreferredSize(new Dimension(800, 600));
+	}
+	
+	private void setColumnWidth(String columnId, int width) {
+		table.getColumnModel().getColumn(tableModel.getColumnIndex(columnId))
+			.setPreferredWidth(width);
 	}
 
 	@Override

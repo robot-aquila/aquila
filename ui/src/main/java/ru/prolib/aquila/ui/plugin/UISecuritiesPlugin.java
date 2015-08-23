@@ -1,6 +1,7 @@
 package ru.prolib.aquila.ui.plugin;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -95,6 +96,7 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					SelectSecurityDialog dialog = new SelectSecurityDialog(facade.getMainFrame(), facade.getTexts());
+					dialog.add(terminal);
 					dialog.pack();
 					dialog.setModal(true);
 					dialog.setVisible(true);

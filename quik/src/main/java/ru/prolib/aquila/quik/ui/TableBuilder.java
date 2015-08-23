@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.quik.assembler.cache.*;
 import ru.prolib.aquila.t2q.*;
 import ru.prolib.aquila.ui.ClassLabels;
@@ -16,12 +17,12 @@ public class TableBuilder {
 		dateFormatMs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 	
-	private final ClassLabels labels;
+	private final IMessages messages;
 	private final Cache cache; 
 	
-	public TableBuilder(ClassLabels labels, Cache cache) {
+	public TableBuilder(IMessages messages, Cache cache) {
 		super();
-		this.labels = labels;
+		this.messages = messages;
 		this.cache = cache;
 	}
 	
@@ -82,7 +83,7 @@ public class TableBuilder {
 				return ((T2QTrade) obj).getTime();
 			}
 		}, Column.MIDDLE));
-		return new Table(new OwnTradesCacheTableModel(labels, columns, cache));
+		return new Table(new OwnTradesCacheTableModel(messages, columns, cache));
 	}
 
 	public Table createOrdersTable() {
@@ -158,7 +159,7 @@ public class TableBuilder {
 			}
 		}, Column.MIDDLE));
 
-		return new Table(new OrdersCacheTableModel(labels, columns, cache));
+		return new Table(new OrdersCacheTableModel(messages, columns, cache));
 	}
 	
 	public Table createTradesTable() {
@@ -183,7 +184,7 @@ public class TableBuilder {
 				return dateFormatMs.format(((TradesEntry) obj).getEntryTime());
 			}
 		}, Column.LONG));
-		return new Table(new TradesCacheTableModel(labels, columns, cache));
+		return new Table(new TradesCacheTableModel(messages, columns, cache));
 	}
 	
 	public Table createDescriptorsTable() {
@@ -223,7 +224,7 @@ public class TableBuilder {
 				return (((QUIKSecurityDescriptor) obj).getDisplayName());
 			}
 		}, Column.MIDDLE));
-		return new Table(new DescriptorsCacheTableModel(labels, columns, cache));
+		return new Table(new DescriptorsCacheTableModel(messages, columns, cache));
 	}
 	
 	public Table createPositionsCacheTable() {
@@ -259,7 +260,7 @@ public class TableBuilder {
 						.getEntryTime());
 			}
 		}, Column.LONG));
-		return new Table(new PositionsCacheTableModel(labels, columns, cache));
+		return new Table(new PositionsCacheTableModel(messages, columns, cache));
 	}
 	
 }

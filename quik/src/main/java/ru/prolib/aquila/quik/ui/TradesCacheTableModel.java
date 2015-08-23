@@ -2,8 +2,8 @@ package ru.prolib.aquila.quik.ui;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.quik.assembler.cache.*;
-import ru.prolib.aquila.ui.ClassLabels;
 import ru.prolib.aquila.ui.table.Columns;
 import ru.prolib.aquila.ui.table.TableModel;
 
@@ -16,10 +16,10 @@ public class TradesCacheTableModel extends TableModel
 	private static final long serialVersionUID = -5026260965294799524L;
 	private final Cache cache;
 
-	public TradesCacheTableModel(ClassLabels labels, Columns columns,
+	public TradesCacheTableModel(IMessages messages, Columns columns,
 			Cache cache)
 	{
-		super(labels, columns);
+		super(messages, columns);
 		this.cache = cache;
 	}
 

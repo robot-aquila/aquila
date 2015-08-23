@@ -2,14 +2,16 @@ package ru.prolib.aquila.quik.ui;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
+
 import java.util.LinkedList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.quik.*;
-import ru.prolib.aquila.ui.ClassLabels;
 import ru.prolib.aquila.ui.table.Table;
 
 /**
@@ -37,11 +39,11 @@ public class CacheWindow {
 	
 	private final JDialog window;
 	private final QUIKTerminal terminal;
-	private final ClassLabels labels;
+	private final IMessages labels;
 	private final JTabbedPane tabbedPane = new JTabbedPane();
 	private final LinkedList<Table> tables = new LinkedList<Table>();
 	
-	public CacheWindow(JFrame owner, QUIKTerminal terminal, ClassLabels labels)	{
+	public CacheWindow(JFrame owner, QUIKTerminal terminal, IMessages labels)	{
 		super();
 		window = new JDialog(owner);
 		this.terminal = terminal;
