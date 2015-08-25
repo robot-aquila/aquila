@@ -1,9 +1,14 @@
 package ru.prolib.aquila.ui;
 
 import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.report.*;
+import ru.prolib.aquila.core.text.IMessages;
+import ru.prolib.aquila.core.text.Messages;
+import ru.prolib.aquila.core.text.MsgID;
 
 /**
  * Модель таблицы отчета по трейдам.
@@ -42,13 +47,13 @@ public class TradesReportTableModel extends AbstractTableModel
 	};
 	
 	private final TradeReport trades;
-	private final ClassLabels labels;
+	private final IMessages labels;
 	private List<RTrade> list;
 	
-	public TradesReportTableModel(TradeReport trades, MessageRegistry texts) {
+	public TradesReportTableModel(TradeReport trades, IMessages texts) {
 		super();
 		this.trades = trades;
-		this.labels = texts.get(TEXT_SEC);
+		this.labels = texts;
 		list = trades.getRecords();
 	}
 
@@ -64,7 +69,7 @@ public class TradesReportTableModel extends AbstractTableModel
 	
 	@Override
 	public String getColumnName(int col) {
-		return labels.get(header[col]);
+		return labels.get(new MsgID(TEXT_SEC, header[col]));
 	}
 
 	@Override

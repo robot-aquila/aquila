@@ -17,6 +17,10 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import ru.prolib.aquila.core.text.IMessages;
+import ru.prolib.aquila.core.text.Messages;
+import ru.prolib.aquila.ui.msg.CommonMsg;
+
 /**
  * Диалог выбора драйвера.
  * <p>
@@ -28,9 +32,8 @@ public class DlgDriver extends JDialog {
 	private final JComboBox drvSelect = new JComboBox();
 	private String selectedDriver = null;
 	
-	public DlgDriver(MessageRegistry uiTexts, Set<String> drivers) {
+	public DlgDriver(IMessages messages, Set<String> drivers) {
 		super((Frame) null, true);
-		ClassLabels uiLabels = uiTexts.get("DlgDriver");
 		
 		JPanel fields = new JPanel();
 		fields.setLayout(new GridLayout(0, 2));
@@ -40,11 +43,12 @@ public class DlgDriver extends JDialog {
 		}
 		drvSelect.setSelectedIndex(0);
 		
-		fields.add(new JLabel(uiLabels.get("LB_DRIVER")));
+		fields.add(new JLabel(messages.get(CommonMsg.DRIVER)));
 		fields.add(drvSelect);
 		
 		JPanel buttons = new JPanel();
-		JButton ok = new JButton("Ok"), cancel = new JButton("Cancel");
+		JButton ok = new JButton(messages.get(CommonMsg.OK)),
+				cancel = new JButton(messages.get(CommonMsg.CANCEL));
 		buttons.add(ok);
 		buttons.add(cancel);
 		ok.addActionListener(new ActionListener() {
@@ -62,7 +66,7 @@ public class DlgDriver extends JDialog {
 		main.add(buttons);
 		
 		JPanel border = new JPanel(new BorderLayout());
-		String title = uiLabels.get("T_SELECT_DRIVER");
+		String title = messages.get(CommonMsg.TITLE_SELECT_DRIVER);
 		border.setBorder(BorderFactory.createTitledBorder(title));
 		border.add(main);
 		

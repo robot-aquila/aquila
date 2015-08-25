@@ -59,7 +59,7 @@ public class PROBEToolBar extends JToolBar
 		this.terminal = terminal;
 		this.messages = messages;
 		targetTimeDialog = new SelectTargetTimeDialog(messages);
-		setName(messages.get(NAME));
+		setName(messages.get(ProbeMsg.msgID(NAME)));
 		btnOptions = makeButton(OPTIONS, TTIP_OPTIONS);
 		btnRunTo = makeButton(RUN_TO, TTIP_RUN_TO);
 		btnStep = makeButton(STEP, TTIP_STEP);
@@ -83,7 +83,7 @@ public class PROBEToolBar extends JToolBar
 	{
 		JButton button = new JButton();
 		button.setActionCommand(actionId);
-		button.setToolTipText(messages.get(toolTipId));
+		button.setToolTipText(messages.get(ProbeMsg.msgID(toolTipId)));
 		button.setIcon(getIcon(actionId));
 		button.addActionListener(this);
 		add(button);
@@ -152,13 +152,13 @@ public class PROBEToolBar extends JToolBar
 	
 	private void switchToRunRTButton() {
 		btnPauseRunRt.setIcon(iconRunRt);
-		btnPauseRunRt.setToolTipText(messages.get(TTIP_RUN_RT));
+		btnPauseRunRt.setToolTipText(messages.get(ProbeMsg.msgID(TTIP_RUN_RT)));
 		btnPauseRunRt.setActionCommand(RUN_RT);
 	}
 	
 	private void switchToPauseButton() {
 		btnPauseRunRt.setIcon(iconPause);
-		btnPauseRunRt.setToolTipText(messages.get(TTIP_PAUSE));
+		btnPauseRunRt.setToolTipText(messages.get(ProbeMsg.msgID(TTIP_PAUSE)));
 		btnPauseRunRt.setActionCommand(PAUSE);
 	}
 	
@@ -171,7 +171,7 @@ public class PROBEToolBar extends JToolBar
 	}
 	
 	private void popUpNotImplemented() {
-		JOptionPane.showMessageDialog(this, messages.get(NOT_IMPLEMENTED));
+		JOptionPane.showMessageDialog(this, messages.get(ProbeMsg.msgID(NOT_IMPLEMENTED)));
 	}
 	
 	private void setEnabledAllButtons(boolean enable) {

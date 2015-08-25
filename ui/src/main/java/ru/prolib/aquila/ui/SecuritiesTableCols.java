@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.text.IMessages;
+import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
 import ru.prolib.aquila.ui.plugin.getters.*;
 import ru.prolib.aquila.ui.wrapper.TableColumnAlreadyExistsException;
@@ -15,7 +17,7 @@ import ru.prolib.aquila.ui.wrapper.TableModel;
  */
 public class SecuritiesTableCols {
 
-	private final String[] colIndex = {
+	private final MsgID[] colIndex = {
 		SecurityMsg.NAME,
 		SecurityMsg.TYPE,
 		SecurityMsg.STATUS,
@@ -41,11 +43,13 @@ public class SecuritiesTableCols {
 		SecurityMsg.INIT_MARGIN
 	};
 	
-	private static final Map<String, Integer> width = new HashMap<String, Integer>();
-	
-	private static final Map<String, G<?>> getters = new HashMap<String, G<?>>();
+	private static final Map<MsgID, Integer> width;
+	private static final Map<MsgID, G<?>> getters;
 	
 	static {
+		width = new HashMap<MsgID, Integer>();
+		getters = new HashMap<MsgID, G<?>>();
+		
 		getters.put(SecurityMsg.NAME, new GSecurityName());
 		getters.put(SecurityMsg.TYPE, new GSecurityType());
 		getters.put(SecurityMsg.STATUS, new GSecurityStatus());
@@ -77,27 +81,29 @@ public class SecuritiesTableCols {
 		super();
 	}
 	
-	public String[] getColIndex() {
+	public MsgID[] getColIndex() {
 		return colIndex;
 	}
 	
-	public Map<String, Integer> getWidth() {
+	public Map<MsgID, Integer> getWidth() {
 		return width;
 	}
 	
-	public Map<String, G<?>> getGetters() {
+	public Map<MsgID, G<?>> getGetters() {
 		return getters;
 	}
 	
-	public void addColumnsToModel(TableModel model, ClassLabels texts) throws TableColumnAlreadyExistsException {
+	public void addColumnsToModel(TableModel model, IMessages messages)
+			throws TableColumnAlreadyExistsException
+	{
 		for(int i = 0; i < colIndex.length; i++) {
-			String colId = colIndex[i];
+			MsgID colId = colIndex[i];
 			if(width.containsKey(colId)) {
-				model.addColumn(new TableColumnWrp(
-						colId, getters.get(colId), texts.get(colId), width.get(colId)));
+				model.addColumn(new TableColumnWrp(colId, getters.get(colId),
+					messages.get(colId), width.get(colId)));
 			} else {
-				model.addColumn(new TableColumnWrp(
-					colId, getters.get(colId), texts.get(colId)));
+				model.addColumn(new TableColumnWrp(colId, getters.get(colId),
+					messages.get(colId)));
 			}
 		}
 	

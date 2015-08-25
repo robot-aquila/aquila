@@ -5,35 +5,36 @@ import javax.swing.table.TableColumn;
 import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.data.G;
+import ru.prolib.aquila.core.text.MsgID;
 /**
  * $Id: TableColumn.java 575 2013-03-13 23:40:00Z huan.kaktus $
  */
 public class TableColumnWrp implements Starter {
-	private String name;
+	private MsgID id;
 	private String text = "";
 	private G<?> getter;
 	private int width;
 	private TableColumn underlayed;
 	
-	public TableColumnWrp(String name, G<?> getter) {
-		this.name = name;
+	public TableColumnWrp(MsgID id, G<?> getter) {
+		this.id = id;
 		this.getter = getter;
 	}
 	
-	public TableColumnWrp(String name, G<?> getter, String text) {
-		this.name = name;
+	public TableColumnWrp(MsgID id, G<?> getter, String text) {
+		this.id = id;
 		this.getter = getter;
 		this.text = text;
 	}
 	
-	public TableColumnWrp(String name, G<?> getter, int width) {
-		this.name = name;
+	public TableColumnWrp(MsgID id, G<?> getter, int width) {
+		this.id = id;
 		this.getter = getter;
 		this.width = width;
 	}
 	
-	public TableColumnWrp(String name, G<?> getter, String text, int width) {
-		this.name = name;
+	public TableColumnWrp(MsgID id, G<?> getter, String text, int width) {
+		this.id = id;
 		this.getter = getter;
 		this.width = width;
 		this.text = text;
@@ -51,8 +52,8 @@ public class TableColumnWrp implements Starter {
 		return text;
 	}
 	
-	public String getName() {
-		return name;
+	public MsgID getID() {
+		return id;
 	}
 	
 	public G<?> getGetter() {

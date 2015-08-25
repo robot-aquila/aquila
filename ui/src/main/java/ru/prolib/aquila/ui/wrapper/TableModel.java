@@ -5,10 +5,12 @@ import java.util.List;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.core.data.row.RowAdapter;
+import ru.prolib.aquila.core.text.MsgID;
 
 /**
  * $Id$
  */
+@Deprecated
 public interface TableModel extends Starter, EventListener {
 	/**
 	 * Добавляет столбец в модель
@@ -22,10 +24,10 @@ public interface TableModel extends Starter, EventListener {
 	/**
 	 * Поверяет, не существует ли уже такой столбец
 	 * 
-	 * @param String colId
+	 * @param colId - column ID
 	 * @return boolean
 	 */
-	public boolean isColumnExists(String colId);
+	public boolean isColumnExists(MsgID colId);
 
 	/**
 	 * Устанавливает объект-слущатель для прослушивания источника данных 
@@ -64,11 +66,11 @@ public interface TableModel extends Starter, EventListener {
 	/**
 	 * Возвращает объект столбца по имени
 	 * 
-	 * @param String name
+	 * @param colId - column ID
 	 * @return TableColumn
 	 * @throws TableColumnNotExistsException
 	 */
-	public TableColumnWrp getColumn(String name) throws TableColumnNotExistsException;
+	public TableColumnWrp getColumn(MsgID colId) throws TableColumnNotExistsException;
 	
 	/**
 	 * Возвращает объект столбца по индексу

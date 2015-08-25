@@ -9,6 +9,8 @@ import javax.swing.JTable;
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.ui.*;
+import ru.prolib.aquila.ui.form.PositionListTableModel;
+import ru.prolib.aquila.ui.msg.CommonMsg;
 
 /**
  * Плагин отображающий открытые позиции в виде таблицы на вкладке.
@@ -17,11 +19,8 @@ import ru.prolib.aquila.ui.*;
  * $Id: UIPositionsPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
 public class UIPositionsPlugin implements AquilaPlugin {
-	public static final String TEXT_SECTION = "PositionsTableModel";
-	public static final String TITLE = "TAB_POSITIONS";
-	
 	private Terminal terminal;
-	private PositionsTableModel model;
+	private PositionListTableModel model;
 	
 	public UIPositionsPlugin() {
 		super();
@@ -46,14 +45,15 @@ public class UIPositionsPlugin implements AquilaPlugin {
 
 	@Override
 	public void createUI(AquilaUI facade) throws Exception {
-		model = new PositionsTableModel(terminal, facade.getTexts());
+		model = new PositionListTableModel(facade.getTexts());
+		model.add(terminal);
 		model.start();
 		
 		JTable table = new JTable(model);
         table.getColumnModel().getColumn(1).setPreferredWidth(200);
         
         JPanel panel = new JPanel(new BorderLayout());
-		facade.addTab(facade.getTexts().get(TEXT_SECTION).get(TITLE), panel);
+		facade.addTab(facade.getTexts().get(CommonMsg.POSITIONS), panel);
         panel.add(new JScrollPane(table));
 	}
 

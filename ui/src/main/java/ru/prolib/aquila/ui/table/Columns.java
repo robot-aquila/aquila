@@ -2,18 +2,20 @@ package ru.prolib.aquila.ui.table;
 
 import java.util.*;
 
+import ru.prolib.aquila.core.text.MsgID;
+
 
 /**
  * Набор колонок.
  */
 public class Columns {
 	private final List<Column> columns;
-	private final Map<String, Integer> id2index;
+	private final Map<MsgID, Integer> id2index;
 	
 	public Columns() {
 		super();
 		columns = new Vector<Column>();
-		id2index = new Hashtable<String, Integer>();
+		id2index = new Hashtable<MsgID, Integer>();
 	}
 	
 	public synchronized Columns add(Column column) {

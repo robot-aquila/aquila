@@ -46,7 +46,7 @@ public class SelectTargetTimeDialog extends JDialog
 		super();
 		setResizable(false);
 		setAlwaysOnTop(true);
-		setTitle(messages.get(TITLE));
+		setTitle(messages.get(ProbeMsg.msgID(TITLE)));
 		setModal(true);
 		setBounds(100, 100, 321, 150);
 		getContentPane().setLayout(new BorderLayout());
@@ -55,7 +55,7 @@ public class SelectTargetTimeDialog extends JDialog
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
 		contentPanel.setLayout(gbl_contentPanel);
 		{
-			JLabel lblCurrentTime = new JLabel(messages.get(CURTIME));
+			JLabel lblCurrentTime = new JLabel(messages.get(ProbeMsg.msgID(CURTIME)));
 			lblCurrentTime.setHorizontalAlignment(SwingConstants.RIGHT);
 			GridBagConstraints gbc_lblCurrentTime = new GridBagConstraints();
 			gbc_lblCurrentTime.fill = GridBagConstraints.BOTH;
@@ -74,7 +74,7 @@ public class SelectTargetTimeDialog extends JDialog
 			contentPanel.add(lblCurrentTimeValue, gbc_lblCurrentTimeValue);
 		}
 		{
-			JLabel lblTargetTime = new JLabel(messages.get(TGTTIME));
+			JLabel lblTargetTime = new JLabel(messages.get(ProbeMsg.msgID(TGTTIME)));
 			lblTargetTime.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblTargetTime.setHorizontalTextPosition(SwingConstants.RIGHT);
 			GridBagConstraints gbc_lblTargetTime = new GridBagConstraints();
@@ -103,12 +103,12 @@ public class SelectTargetTimeDialog extends JDialog
 			JPanel buttonPane = new JPanel();
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				cancelButton = new JButton(messages.get(CANCEL));
+				cancelButton = new JButton(messages.get(ProbeMsg.msgID(CANCEL)));
 				cancelButton.setActionCommand(CANCEL);
 				cancelButton.addActionListener(this);
 			}
 			{
-				okButton = new JButton(messages.get(OK));
+				okButton = new JButton(messages.get(ProbeMsg.msgID(OK)));
 				okButton.setActionCommand(OK);
 				okButton.addActionListener(this);
 			}

@@ -15,6 +15,8 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.ui.*;
+import ru.prolib.aquila.ui.form.OrderListTableModel;
+import ru.prolib.aquila.ui.msg.CommonMsg;
 import ru.prolib.aquila.ui.wrapper.*;
 
 /**
@@ -24,13 +26,11 @@ import ru.prolib.aquila.ui.wrapper.*;
  * $Id: UIOrdersPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
 public class UIOrdersPlugin implements AquilaPlugin {
-	public static final String TEXT_SECT = "UIOrdersPlugin";
-	public static final String TITLE = "TAB_ORDERS";
-	public static final String MENU_ORDER = "MENU_ORDER";
-	public static final String MENU_ORDER_CANCEL = "MENU_ORDER_CANCEL";
+	public static final String MENU_ORDER = CommonMsg.MENU_ORDER.toString();
+	public static final String MENU_ORDER_CANCEL = CommonMsg.MENU_ORDER_CANCEL.toString();
 
 	private Terminal terminal;
-	private OrdersTableModel model;
+	private OrderListTableModel model;
 	private JTable table;
 	private JMenuItem cmdCancel;
 
@@ -53,7 +53,8 @@ public class UIOrdersPlugin implements AquilaPlugin {
 
 	@Override
 	public void createUI(AquilaUI facade) throws Exception {
-		model = new OrdersTableModel(terminal, facade.getTexts());
+		model = new OrderListTableModel(facade.getTexts());
+		model.add(terminal);
 		table = new JTable(model);
 		table.getSelectionModel()
 			.addListSelectionListener(new ListSelectionListener() {
@@ -61,14 +62,14 @@ public class UIOrdersPlugin implements AquilaPlugin {
 					if ( ! e.getValueIsAdjusting() ) { onTableRowSelect(); } }
     		});
 		
-		IMessages texts = facade.getTexts().get(TEXT_SECT);
+		IMessages texts = facade.getTexts();
         JPanel panel = new JPanel(new BorderLayout());
-		facade.addTab(texts.get(TITLE), panel);
+		facade.addTab(texts.get(CommonMsg.ORDERS), panel);
         panel.add(new JScrollPane(table));
 		
 		Menu menu = facade.getMainMenu()
-			.addMenu(MENU_ORDER, texts.get(MENU_ORDER));
-		cmdCancel = menu.addItem(MENU_ORDER_CANCEL, texts.get(MENU_ORDER_CANCEL))
+			.addMenu(MENU_ORDER, texts.get(CommonMsg.MENU_ORDER));
+		cmdCancel = menu.addItem(MENU_ORDER_CANCEL, texts.get(CommonMsg.MENU_ORDER_CANCEL))
 				.getUnderlyingObject();
 		cmdCancel.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {

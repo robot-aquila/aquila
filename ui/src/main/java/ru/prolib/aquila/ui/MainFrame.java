@@ -14,9 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.text.IMessageRegistry;
+import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.ui.TerminalStatusBar;
 import ru.prolib.aquila.ui.FastOrder.FastOrderPanel;
+import ru.prolib.aquila.ui.msg.CommonMsg;
 import ru.prolib.aquila.ui.wrapper.Menu;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
 import ru.prolib.aquila.ui.wrapper.MenuException;
@@ -32,15 +33,13 @@ import ru.prolib.aquila.ui.wrapper.MenuItem;
 public class MainFrame extends JFrame implements EventListener, AquilaPlugin, ActionListener {
 	private static Logger logger = LoggerFactory.getLogger(MainFrame.class);
 
-	public static final String TERMINAL_STATUS_SECT = "StatusBar";
-	public static final String MENU_SECT = "MenuBar";
-	public static final String MENU_FILE = "MENU_FILE";
-	public static final String MENU_TERM = "MENU_TERM";
-	public static final String MENU_VIEW = "MENU_VIEW";
+	public static final String MENU_FILE = CommonMsg.MENU_FILE.getMessageId();
+	public static final String MENU_TERM = CommonMsg.MENU_TERM.getMessageId();
+	public static final String MENU_VIEW = CommonMsg.MENU_VIEW.getMessageId();
 	public static final String MENU_VIEW_PORTFOLIO_STATUS = "MENU_VIEW_PORTFOLIO_STATUS";
-	public static final String MENU_FILE_EXIT = "MENU_FILE_EXIT";
-	public static final String MENU_TERM_START = "MENU_TERM_START";
-	public static final String MENU_TERM_STOP = "MENU_TERM_STOP";
+	public static final String MENU_FILE_EXIT = CommonMsg.MENU_FILE_EXIT.getMessageId();
+	public static final String MENU_TERM_START = CommonMsg.MENU_TERM_START.getMessageId();
+	public static final String MENU_TERM_STOP = CommonMsg.MENU_TERM_STOP.getMessageId();
 
 	private Runnable exitAction;
 	private Terminal terminal;
@@ -70,7 +69,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 		
 		EventSystem es = facade.getEventSystem();
  
-		IMessageRegistry uiLabels = facade.getTexts();
+		IMessages messages = facade.getTexts();
 		
 		EventDispatcher dispatcher = es.createEventDispatcher(); 
 		portfolioSelector = new CurrentPortfolioImpl(
@@ -86,8 +85,8 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
         inp.add(tabPanel, BorderLayout.CENTER);
         getContentPane().add(inp, BorderLayout.CENTER);
         
-        terminalStatusBar = new TerminalStatusBar(uiLabels.getMessages(TERMINAL_STATUS_SECT));
-		portfolioStatusBar = new PortfolioStatusBar(uiLabels);
+        terminalStatusBar = new TerminalStatusBar(messages);
+		portfolioStatusBar = new PortfolioStatusBar(messages);
         
         statusBar.setLayout(new FlowLayout());
         statusBar.add(terminalStatusBar);
@@ -171,23 +170,23 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 	private void createMainMenu(AquilaUI facade) throws MenuException {
 		mainMenu = new MenuBar(facade.getEventSystem());
 		setJMenuBar(mainMenu.getUnderlyingObject());
-		ClassLabels text = facade.getTexts().get(MENU_SECT);
 		
-		Menu menu = mainMenu.addMenu(MENU_FILE, text.get(MENU_FILE));
+		IMessages messages = facade.getTexts();
+		Menu menu = mainMenu.addMenu(MENU_FILE, messages.get(CommonMsg.MENU_FILE));
 		menu.addBottomSeparator();
-		exit = menu.addBottomItem(MENU_FILE_EXIT, text.get(MENU_FILE_EXIT))
+		exit = menu.addBottomItem(MENU_FILE_EXIT, messages.get(CommonMsg.MENU_FILE_EXIT))
 				.getUnderlyingObject();
 		exit.setActionCommand(MENU_FILE_EXIT);
 		exit.addActionListener(this);
 		
-		menu = mainMenu.addMenu(MENU_TERM, text.get(MENU_TERM));
-		cmdStart = menu.addItem(MENU_TERM_START, text.get(MENU_TERM_START));
+		menu = mainMenu.addMenu(MENU_TERM, messages.get(CommonMsg.MENU_TERM));
+		cmdStart = menu.addItem(MENU_TERM_START, messages.get(CommonMsg.MENU_TERM_START));
 		cmdStart.OnCommand().addListener(this);
-		cmdStop = menu.addItem(MENU_TERM_STOP, text.get(MENU_TERM_STOP));
+		cmdStop = menu.addItem(MENU_TERM_STOP, messages.get(CommonMsg.MENU_TERM_STOP));
 		cmdStop.OnCommand().addListener(this);
 		
-		menu = mainMenu.addMenu(MENU_VIEW, text.get(MENU_VIEW));
-		menu.addSubMenu(MENU_VIEW_PORTFOLIO_STATUS, text.get(MENU_VIEW_PORTFOLIO_STATUS));
+		menu = mainMenu.addMenu(MENU_VIEW, messages.get(CommonMsg.MENU_VIEW));
+		menu.addSubMenu(MENU_VIEW_PORTFOLIO_STATUS, messages.get(CommonMsg.MENU_VIEW_PORTFOLIO_STATUS));
 	}
 	
 	private void exit() {
@@ -246,8 +245,7 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		switch ( e.getActionCommand() ) {
-		case MENU_FILE_EXIT:
+		if ( MENU_FILE_EXIT.equals(e.getActionCommand()) ) {
 			exit();
 		} 
 	}

@@ -11,9 +11,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.ui.SecuritiesTableCols;
 import ru.prolib.aquila.ui.ServiceLocator;
-import ru.prolib.aquila.ui.MessageRegistry;
 
 /**
  * $Id$
@@ -22,7 +22,7 @@ public class UISecuritiesPluginTest {
 
 	private static IMocksControl control;
 	private Terminal terminal;
-	private MessageRegistry texts;
+	private Messages texts;
 	private ServiceLocator locator;
 	
 	private UISecuritiesPlugin plugin;
@@ -34,7 +34,7 @@ public class UISecuritiesPluginTest {
 		control = createStrictControl();
 		
 		terminal = control.createMock(Terminal.class);
-		texts = control.createMock(MessageRegistry.class);
+		texts = control.createMock(Messages.class);
 		locator = new ServiceLocator(texts, control.createMock(Runnable.class));
 		
 		plugin = new UISecuritiesPlugin();

@@ -62,7 +62,7 @@ public class CacheWindow {
 		addTab(builder.createOwnTradesTable(), TEXT_TAB_CACHE_OWNTRADES);
 
 		window.add(tabbedPane);
-		window.setTitle(labels.get(TEXT_WIN_CACHE_TITLE));
+		window.setTitle(labels.get(TableBuilder.msgID(TEXT_WIN_CACHE_TITLE)));
 		window.setPreferredSize(new Dimension(1100, 600));
 		window.pack();
 	}
@@ -71,7 +71,7 @@ public class CacheWindow {
 		tables.add(table);
 		table.setFillsViewportHeight(true);
 		JScrollPane scrollPane = new JScrollPane(table);
-		tabbedPane.add(labels.get(titleId), scrollPane);
+		tabbedPane.add(labels.get(TableBuilder.msgID(titleId)), scrollPane);
 	}
 	
 	public void showWindow() {

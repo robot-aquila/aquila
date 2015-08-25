@@ -1,18 +1,19 @@
 package ru.prolib.aquila.ui.plugin;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.ui.*;
-import ru.prolib.aquila.ui.form.SelectSecurityDialog;
+import ru.prolib.aquila.ui.form.SecurityListDialog;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
 import ru.prolib.aquila.ui.plugin.getters.GSecurity;
 import ru.prolib.aquila.ui.wrapper.*;
@@ -24,10 +25,6 @@ import ru.prolib.aquila.ui.wrapper.*;
  * $Id: UISecuritiesPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
 public class UISecuritiesPlugin implements AquilaPlugin {
-	public static final String TEXT_SECT = SecurityMsg.SECTION_ID;
-	public static final String TITLE = SecurityMsg.SECURITIES_TITLE;
-	public static final String MENU_SECURITIES = SecurityMsg.SECURITIES_MENU;
-	
 	private Terminal terminal;
 	private SecuritiesTableCols cols = new SecuritiesTableCols();
 	private TableModel model = new TableModelImpl(new GSecurity());
@@ -69,33 +66,35 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 	public void createUI(final AquilaUI facade) throws Exception {
 		EventSystem ev = ((ServiceLocator) facade).getEventSystem();
 		EventDispatcher dispatcher = ev.createEventDispatcher();
-		ClassLabels text = facade.getTexts().get(TEXT_SECT);
+		final JFrame frame = facade.getMainFrame();
+		final IMessages messages = facade.getTexts();
 		
-		cols.addColumnsToModel(model, text);
+		cols.addColumnsToModel(model, messages);
 
-		DataSourceEventTranslator onRowAvailableListener = new DataSourceEventTranslator(
-				dispatcher, dispatcher.createType());
+		DataSourceEventTranslator onRowAvailableListener =
+			new DataSourceEventTranslator(dispatcher, dispatcher.createType());
 		model.setOnRowAvailableListener(onRowAvailableListener);
 		
-		
-		DataSourceEventTranslator onRowChangedListener = new DataSourceEventTranslator(
-				dispatcher, dispatcher.createType());
+		DataSourceEventTranslator onRowChangedListener =
+			new DataSourceEventTranslator(dispatcher, dispatcher.createType());
 		model.setOnRowChangedListener(onRowChangedListener);		
 		
 		tb = new TableImpl(model, dispatcher, dispatcher.createType());		
 		tb.start();
 		
-		facade.addTab(text.get(TITLE), panel);
+		facade.addTab(messages.get(SecurityMsg.SECURITIES_TITLE), panel);
         panel.add(new JScrollPane(tb.getUnderlayed()));
 		
-        facade.getMainMenu().addMenu(MENU_SECURITIES, text.get(MENU_SECURITIES));
-        // Test security selector dialog
-        facade.getMainMenu().getMenu(MENU_SECURITIES)
-        	.addBottomItem("SELECT_SECURITY", "Select security (test)")
+        String menuID = SecurityMsg.SECURITIES_MENU.toString();
+        facade.getMainMenu().addMenu(menuID, messages.get(SecurityMsg.SECURITIES_MENU));
+        facade.getMainMenu().getMenu(menuID)
+        	.addBottomItem(SecurityMsg.SHOW_SECURITIES.toString(),
+        		messages.get(SecurityMsg.SHOW_SECURITIES))
         	.getUnderlyingObject().addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					SelectSecurityDialog dialog = new SelectSecurityDialog(facade.getMainFrame(), facade.getTexts());
+					SecurityListDialog dialog = new SecurityListDialog(frame,
+							SecurityListDialog.TYPE_SELECT, messages);
 					dialog.add(terminal);
 					dialog.pack();
 					dialog.setModal(true);

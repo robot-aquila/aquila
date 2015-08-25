@@ -10,11 +10,12 @@ import javax.swing.table.AbstractTableModel;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
+import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
 
-public class SelectSecurityTableModel extends AbstractTableModel {
+public class SecurityListTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 1L;
-	private static final List<String> mapIndexToName;
+	private static final List<MsgID> mapIndexToID;
 	private static final Comparator<Security> compareSecuritiesByName;
 	
 	static {
@@ -23,18 +24,18 @@ public class SelectSecurityTableModel extends AbstractTableModel {
 				return o1.getDisplayName().compareTo(o2.getDisplayName());
 			}
 		};
-		mapIndexToName = new Vector<String>();
-		mapIndexToName.add(SecurityMsg.NAME);
-		mapIndexToName.add(SecurityMsg.SYMBOL);
-		mapIndexToName.add(SecurityMsg.CLASS);
-		mapIndexToName.add(SecurityMsg.TYPE);
-		mapIndexToName.add(SecurityMsg.CURRENCY);
+		mapIndexToID = new Vector<MsgID>();
+		mapIndexToID.add(SecurityMsg.NAME);
+		mapIndexToID.add(SecurityMsg.SYMBOL);
+		mapIndexToID.add(SecurityMsg.CLASS);
+		mapIndexToID.add(SecurityMsg.TYPE);
+		mapIndexToID.add(SecurityMsg.CURRENCY);
 	}
 	
 	private final IMessages messages;
 	private final List<Security> data;
 	
-	public SelectSecurityTableModel(IMessages messages) {
+	public SecurityListTableModel(IMessages messages) {
 		super();
 		this.messages = messages;
 		this.data = new Vector<Security>();
@@ -47,27 +48,27 @@ public class SelectSecurityTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return mapIndexToName.size();
+		return mapIndexToID.size();
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		if ( rowIndex >= data.size() || columnIndex >= mapIndexToName.size() ) {
+		if ( rowIndex >= data.size() || columnIndex >= mapIndexToID.size() ) {
 			return null;
 		}
 		Security security = data.get(rowIndex);
-		switch ( mapIndexToName.get(columnIndex) ) {
-		case SecurityMsg.NAME:
+		MsgID id = mapIndexToID.get(columnIndex); 
+		if ( id == SecurityMsg.NAME ) {
 			return security.getDisplayName();
-		case SecurityMsg.SYMBOL:
+		} else if ( id == SecurityMsg.SYMBOL ) {
 			return security.getCode();
-		case SecurityMsg.CLASS:
+		} else if ( id == SecurityMsg.CLASS ) {
 			return security.getClassCode();
-		case SecurityMsg.TYPE:
+		} else if ( id == SecurityMsg.TYPE ) {
 			return security.getDescriptor().getType();
-		case SecurityMsg.CURRENCY:
+		} else if ( id == SecurityMsg.CURRENCY ) {
 			return security.getDescriptor().getCurrencyCode();
-		default:
+		} else {
 			return null;			
 		}
 	}
@@ -78,13 +79,13 @@ public class SelectSecurityTableModel extends AbstractTableModel {
 	 * @param columnId - one of {@link SecurityMsg} constants.
 	 * @return return index of specified column
 	 */
-	public int getColumnIndex(String columnId) {
-		return mapIndexToName.indexOf(columnId);
+	public int getColumnIndex(MsgID columnId) {
+		return mapIndexToID.indexOf(columnId);
 	}
 	
 	@Override
 	public String getColumnName(int c) {
-		return messages.get(mapIndexToName.get(c));
+		return messages.get(mapIndexToID.get(c));
 	}
 	
 	/**

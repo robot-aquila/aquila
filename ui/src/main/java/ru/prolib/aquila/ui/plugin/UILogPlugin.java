@@ -2,6 +2,7 @@ package ru.prolib.aquila.ui.plugin;
 
 import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.ui.AquilaPlugin;
 import ru.prolib.aquila.ui.AquilaUI;
 import ru.prolib.aquila.ui.LogTab;
@@ -42,7 +43,7 @@ public class UILogPlugin implements AquilaPlugin {
 	@Override
 	public void createUI(AquilaUI facade) throws Exception {
 		panel = new LogTab();
-		facade.addTab(facade.getTexts().get(TEXT_SEC).get(TITLE), panel);
+		facade.addTab(facade.getTexts().get(new MsgID(TEXT_SEC, TITLE)), panel);
 	}
 
 }

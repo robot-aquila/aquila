@@ -18,6 +18,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.text.Messages;
 
 /**
  * 2012-11-19<br>
@@ -67,7 +68,7 @@ public class Main implements Runnable {
 	
 	public Main() {
 		super();
-		locator = new ServiceLocator(new MessageRegistry(), this);
+		locator = new ServiceLocator(new Messages(), this);
 	}
 
 	/**

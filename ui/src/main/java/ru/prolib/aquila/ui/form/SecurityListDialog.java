@@ -21,31 +21,45 @@ import javax.swing.event.ListSelectionListener;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
-import ru.prolib.aquila.ui.MessageRegistry;
+import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
 
-public class SelectSecurityDialog extends JDialog
+public class SecurityListDialog extends JDialog
 	implements ActionListener, ListSelectionListener
 {
+	/**
+	 * Just show the security table. 
+	 */
+	public static final int TYPE_SHOW = 0;
+	/**
+	 * Show table for security selection.
+	 */
+	public static final int TYPE_SELECT = 1;
 	private static final long serialVersionUID = 1L;
 	public static final String SELECT = "SELECT";
 	public static final String CANCEL = "CANCEL";
 	private final JPanel panel;
-	private final SelectSecurityTableModel tableModel;
+	private final SecurityListTableModel tableModel;
 	private final JTable table;
-	private final JButton buttonSelect, buttonCancel;
+	private final JButton buttonSelect, buttonCancel, buttonClose;
+	private final int type;
 	private Security selectedSecurity;
 	
-	public SelectSecurityDialog(JFrame frame, MessageRegistry messageRegistry) {
+	public SecurityListDialog(JFrame frame, IMessages messages) {
+		this(frame, TYPE_SHOW, messages);
+	}
+	
+	public SecurityListDialog(JFrame frame, final int type,
+			IMessages messages)
+	{
 		super(frame);
+		this.type = type;
 		panel = new JPanel(new BorderLayout());
-		IMessages commonMsg = messageRegistry.getMessages(CommonMsg.SECTION_ID);
-		IMessages securityMsg = messageRegistry.getMessages(SecurityMsg.SECTION_ID);
 		
 		JPanel filterPanel = new JPanel();
 		
-		tableModel = new SelectSecurityTableModel(securityMsg);
+		tableModel = new SecurityListTableModel(messages);
 		table = new JTable(tableModel);
 		table.setFillsViewportHeight(true);
 		setColumnWidth(SecurityMsg.NAME, 160);
@@ -58,7 +72,11 @@ public class SelectSecurityDialog extends JDialog
 			@Override
 			public void mouseClicked(MouseEvent e){
 				if (e.getClickCount() == 2) {
-					onSelect();
+					if ( type == TYPE_SELECT ) {
+						onSelect();	
+					} else {
+						onCancel();
+					}
 				}
 			}
 		});
@@ -69,25 +87,32 @@ public class SelectSecurityDialog extends JDialog
 		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());
-		buttonCancel = new JButton(commonMsg.get(CommonMsg.CANCEL));
-		buttonCancel.setActionCommand(CANCEL);
-		buttonCancel.addActionListener(this);
-		buttonPanel.add(buttonCancel);
-		buttonSelect = new JButton(commonMsg.get(CommonMsg.SELECT));
-		buttonSelect.setActionCommand(SELECT);
-		buttonSelect.addActionListener(this);
-		buttonSelect.setEnabled(false); // Initially disabled
-		buttonPanel.add(buttonSelect);
-		
+		buttonClose = new JButton(messages.get(CommonMsg.CLOSE));
+		buttonCancel = new JButton(messages.get(CommonMsg.CANCEL));
+		buttonSelect = new JButton(messages.get(CommonMsg.SELECT));
+		if ( type == TYPE_SHOW ) {
+			buttonClose.setActionCommand(CANCEL);
+			buttonClose.addActionListener(this);
+			buttonPanel.add(buttonClose);
+		} else {
+			buttonCancel.setActionCommand(CANCEL);
+			buttonCancel.addActionListener(this);
+			buttonPanel.add(buttonCancel);
+			buttonSelect.setActionCommand(SELECT);
+			buttonSelect.addActionListener(this);
+			buttonSelect.setEnabled(false); // Initially disabled
+			buttonPanel.add(buttonSelect);			
+		}
 		panel.add(filterPanel, BorderLayout.NORTH);
 		panel.add(tablePanel, BorderLayout.CENTER);
 		panel.add(buttonPanel, BorderLayout.SOUTH);
 		getContentPane().add(panel);
-		setTitle(securityMsg.get(SecurityMsg.SELECT_SECURITY));
+		setTitle(messages.get(type == TYPE_SELECT ?
+				SecurityMsg.SELECT_SECURITY : SecurityMsg.SHOW_SECURITIES));
 		setPreferredSize(new Dimension(800, 600));
 	}
 	
-	private void setColumnWidth(String columnId, int width) {
+	private void setColumnWidth(MsgID columnId, int width) {
 		table.getColumnModel().getColumn(tableModel.getColumnIndex(columnId))
 			.setPreferredWidth(width);
 	}
@@ -103,7 +128,7 @@ public class SelectSecurityDialog extends JDialog
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		if ( ! e.getValueIsAdjusting() ) {
+		if ( ! e.getValueIsAdjusting() && type == TYPE_SELECT ) {
 			buttonSelect.setEnabled(isSelected());
 		}
 	}

@@ -16,6 +16,7 @@ import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.row.RowAdapter;
 import ru.prolib.aquila.core.data.row.RowException;
+import ru.prolib.aquila.core.text.MsgID;
 /**
  * $Id: TableModel.java 578 2013-03-14 23:37:31Z huan.kaktus $
  */
@@ -28,15 +29,15 @@ public class TableModelImpl extends AbstractTableModel
 	/*
 	 * Индекс названий колонок
 	 */
-	private List<String> index = new Vector<String>();
+	private List<MsgID> index = new Vector<MsgID>();
 	/*
 	 * колонки по названиям
 	 */
-	private Map<String, TableColumnWrp> cols = new HashMap<String, TableColumnWrp>();
+	private Map<MsgID, TableColumnWrp> cols = new HashMap<MsgID, TableColumnWrp>();
 	/*
 	 * карта геттеров для RowAdapter
 	 */
-	private Map<String, G<?>> getters = new HashMap<String, G<?>>();
+	private Map<MsgID, G<?>> getters = new HashMap<MsgID, G<?>>();
 	/*
 	 * геттер объекта строки из специфичного события
 	 */
@@ -64,27 +65,28 @@ public class TableModelImpl extends AbstractTableModel
 	 */
 	@Override
 	public synchronized void addColumn(TableColumnWrp column) throws TableColumnAlreadyExistsException {
-		if(isColumnExists(column.getName())) {
-			throw new TableColumnAlreadyExistsException(column.getName());
+		MsgID id = column.getID();
+		if(isColumnExists(id)) {
+			throw new TableColumnAlreadyExistsException(id.toString());
 		}
-		cols.put(column.getName(), column);
-		getters.put(column.getName(), column.getGetter());
-		index.add(column.getName());
+		cols.put(id, column);
+		getters.put(id, column.getGetter());
+		index.add(id);
 	}
 
 	/* (non-Javadoc)
 	 * @see ru.prolib.aquila.ui.wrapper.TableModel#isColumnExists(java.lang.String)
 	 */
 	@Override
-	public synchronized boolean isColumnExists(String colId) {
+	public synchronized boolean isColumnExists(MsgID colId) {
 		return cols.containsKey(colId);
 	}
 	
-	public synchronized TableColumnWrp getColumn(String name) throws TableColumnNotExistsException {
-		if(! isColumnExists(name)) {
-			throw new TableColumnNotExistsException(name);
+	public synchronized TableColumnWrp getColumn(MsgID colId) throws TableColumnNotExistsException {
+		if(! isColumnExists(colId)) {
+			throw new TableColumnNotExistsException(colId.toString());
 		}
-		return cols.get(name);
+		return cols.get(colId);
 	}
 	
 	public synchronized TableColumnWrp getColumn(int i)  throws TableColumnNotExistsException {
@@ -126,16 +128,16 @@ public class TableModelImpl extends AbstractTableModel
 		return rowReader;
 	}
 	
-	public List<String> getIndex() {
+	public List<MsgID> getIndex() {
 		return index;
 	}
 	
-	public Map<String, G<?>> getGetters() {
+	public Map<MsgID, G<?>> getGetters() {
 		return getters;
 	}
 	
-	public void insertRow(Object source) {		
-		RowAdapter row = new RowAdapter(source, getters);
+	public void insertRow(Object source) {
+		RowAdapter row = new RowAdapter(source, gettersForAdapter());
 		rows.add(row);
 		rowIndex.add(source);
 	}
@@ -179,7 +181,7 @@ public class TableModelImpl extends AbstractTableModel
 	public Object getValueAt(int r, int c) {
 		try {
 			RowAdapter row = rows.get(r);
-			return row.get(index.get(c));
+			return row.get(index.get(c).toString());
 		} catch (ArrayIndexOutOfBoundsException e) {
 			logger.debug("Out of bound exception");
 			return null;
@@ -198,7 +200,7 @@ public class TableModelImpl extends AbstractTableModel
 			if(event.getType() == onRowAvailableListener.OnEventOccur()) {
 				EventTranslatorEvent e = (EventTranslatorEvent) event;			
 				Object r = rowReader.get(e.getSource());
-				RowAdapter row = new RowAdapter(r, getters);
+				RowAdapter row = new RowAdapter(r, gettersForAdapter());
 				int index = rowIndex.size();
 				rowIndex.add(r);
 				rows.add(row);
@@ -232,5 +234,13 @@ public class TableModelImpl extends AbstractTableModel
 	public void stop() throws StarterException {
 		onRowAvailableListener.OnEventOccur().removeListener(this);
 		onRowChangedListener.OnEventOccur().removeListener(this);
+	}
+	
+	private Map<String, G<?>> gettersForAdapter() {
+		Map<String, G<?>> adapterGetters = new HashMap<String, G<?>>();
+		for ( Map.Entry<MsgID, G<?>> entry : getters.entrySet() ) {
+			adapterGetters.put(entry.getKey().toString(), entry.getValue());
+		}
+		return adapterGetters;
 	}
 }

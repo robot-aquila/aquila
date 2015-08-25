@@ -5,6 +5,7 @@ import javax.swing.*;
 import org.springframework.context.ApplicationContext;
 
 import ru.prolib.aquila.core.EventSystem;
+import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
 
 /**
@@ -44,7 +45,7 @@ public interface AquilaUI {
 	 */
 	public JFrame getMainFrame();
 	
-	public MessageRegistry getTexts();
+	public Messages getTexts();
 	
 	public Runnable getExitAction();
 	

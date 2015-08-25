@@ -7,10 +7,12 @@ import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
+import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.probe.PROBEFactory;
 import ru.prolib.aquila.probe.PROBETerminal;
 import ru.prolib.aquila.ui.*;
@@ -21,7 +23,6 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 {
 	@SuppressWarnings("unused")
 	private static final Logger logger;
-	private static final String TEXT_SECTION = "Probe";
 	private static final String CONNECT = "MENU_CONNECT";
 	private static final String DISCONNECT = "MENU_DISCONNECT";
 	
@@ -37,17 +38,21 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 	public PROBEPluginTerminal() {
 		super();
 	}
+	
+	public static MsgID msgID(String messageId) {
+		return ProbeMsg.msgID(messageId);
+	}
 
 	@Override
 	public void createUI(AquilaUI facade) throws Exception {
-		texts = facade.getTexts().getMessages(TEXT_SECTION);
+		texts = facade.getTexts();
 		toolBar = new PROBEToolBar(terminal, texts);
 		facade.getMainFrame().getContentPane()
 			.add(toolBar, BorderLayout.PAGE_START);
 		Menu menu = facade.getMainMenu().getMenu(MainFrame.MENU_TERM);
 		menu.addBottomSeparator();
-		cmdConnect = menu.addBottomItem(CONNECT, texts.get(CONNECT));
-		cmdDisconnect = menu.addBottomItem(DISCONNECT, texts.get(DISCONNECT));
+		cmdConnect = menu.addBottomItem(CONNECT, texts.get(msgID(CONNECT)));
+		cmdDisconnect = menu.addBottomItem(DISCONNECT, texts.get(msgID(DISCONNECT)));
 		terminal.OnStarted().addListener(this);
 		terminal.OnConnected().addListener(this);
 		terminal.OnDisconnected().addListener(this);

@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import org.springframework.context.ApplicationContext;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
 
 /**
@@ -16,12 +17,12 @@ import ru.prolib.aquila.ui.wrapper.MenuBar;
  */
 public class ServiceLocator implements AquilaUI {
 	private final EventSystem es;
-	private final MessageRegistry texts;
+	private final Messages texts;
 	private final Runnable exitAction;
 	private MainFrame frame;
 	private ApplicationContext appContext;
 	
-	public ServiceLocator(MessageRegistry texts, Runnable exitAction) {
+	public ServiceLocator(Messages texts, Runnable exitAction) {
 		super();
 		es = new EventSystemImpl(new EventQueueImpl("AQUILA-UI"));
 		this.texts = texts;
@@ -34,7 +35,7 @@ public class ServiceLocator implements AquilaUI {
 	}
 	
 	@Override
-	public MessageRegistry getTexts() {
+	public Messages getTexts() {
 		return texts;
 	}
 	

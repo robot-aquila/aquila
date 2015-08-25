@@ -1,12 +1,13 @@
 package ru.prolib.aquila.ui;
 
 import java.awt.FlowLayout;
+
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.text.IMessages;
-import ru.prolib.aquila.core.text.IMessageRegistry;
+import ru.prolib.aquila.ui.msg.CommonMsg;
 
 /**
  * $Id: PortfolioDataPanel.java 544 2013-02-25 14:31:32Z huan.kaktus $
@@ -19,13 +20,12 @@ public class PortfolioStatusBar extends JPanel implements PortfolioStatusBarView
 	private LabeledTextValue varMargin;
 	private LabeledTextValue accountVal;
 	
-	public PortfolioStatusBar(IMessageRegistry texts) {
+	public PortfolioStatusBar(IMessages messages) {
 		super();
-		IMessages messages = texts.getMessages(TEXT_SECT);
-		accountVal = new LabeledTextValue(messages.get("LB_ACCOUNT"));
-		cashVal = new LabeledTextValue(messages.get("LB_CASH"));
-		balanceVal = new LabeledTextValue(messages.get("LB_BALANCE"));
-		varMargin = new LabeledTextValue(messages.get("LB_VAR_MARGIN"));
+		accountVal = new LabeledTextValue(messages.get(CommonMsg.ACCOUNT));
+		cashVal = new LabeledTextValue(messages.get(CommonMsg.CASH));
+		balanceVal = new LabeledTextValue(messages.get(CommonMsg.BALANCE));
+		varMargin = new LabeledTextValue(messages.get(CommonMsg.VMARGIN));
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		add(accountVal);
 		add(cashVal);

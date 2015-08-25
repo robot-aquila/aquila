@@ -1,38 +1,37 @@
-package ru.prolib.aquila.ui;
+package ru.prolib.aquila.core.text;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-
 import org.apache.commons.lang3.StringUtils;
 import org.ini4j.InvalidFileFormatException;
 import org.ini4j.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.text.IMessages;
-import ru.prolib.aquila.core.text.IMessageRegistry;
-
 /**
  * $Id: UiTexts.java 570 2013-03-12 00:03:15Z huan.kaktus $
  *
  */
-public class MessageRegistry implements IMessageRegistry {
+public class Messages implements IMessages {
+	private static Logger logger;
 	
-	private static Logger logger = LoggerFactory.getLogger(MessageRegistry.class);
+	static {
+		logger = LoggerFactory.getLogger(Messages.class);
+	}
+	
 	private String defLng = "en_US";
 	private String[] localesPath = {"shared", "lang"};
 	private String dirSeparator = System.getProperty("file.separator");
-	private Map<String, ClassLabels> labels = new HashMap<String, ClassLabels>();
+	private Map<String, Options> data = new HashMap<String, Options>();
 	private String lang;
 	
-	public MessageRegistry() {
+	public Messages() {
 		super();		
 	}
 	
-	public MessageRegistry(String lang) {
+	public Messages(String lang) {
 		super();
 		if(lang != defLng) {
 			this.lang = lang;
@@ -52,10 +51,11 @@ public class MessageRegistry implements IMessageRegistry {
 		File[] files = folder.listFiles();
 		for(int i = 0; i < files.length; i++) {
 			try {
-				Options opt = new Options(files[i]);
 				String[] name = StringUtils.split(files[i].getName(), ".");
-				loadClassLabels(name[0], opt);
-				
+				Options section = get(name[0]), loaded = new Options(files[i]);
+				for( String key: loaded.keySet() ) {
+					section.put(key, loaded.get(key));
+				}
 			} catch (InvalidFileFormatException e) {
 				logger.error("Invalid locale file format:{}", e.getMessage());
 			}catch(IOException e) {
@@ -64,26 +64,15 @@ public class MessageRegistry implements IMessageRegistry {
 		}
 	}
 	
-	public ClassLabels get(String name) {
-		if(! labels.containsKey(name)) {
-			labels.put(name, createClassLabel(name));
+	public void set(String sectionId, Options values) {
+		data.put(sectionId, values);
+	}
+	
+	private Options get(String sectionId) {
+		if(! data.containsKey(sectionId)) {
+			data.put(sectionId, new Options());
 		}
-		return labels.get(name);
-	}
-	
-	public void setClassLabels(String className, ClassLabels lbs) {
-		labels.put(className, lbs);
-	}
-	
-	private void loadClassLabels(String className, Options opt) {		
-		Properties props = get(className).getLabels();
-		for(String key: opt.keySet()) {
-			props.setProperty(key, opt.get(key));
-		}
-	}
-	
-	private ClassLabels createClassLabel(String name) {
-		return new ClassLabels(name);
+		return data.get(sectionId);
 	}
 	
 	public void setLocalesPath(String[] path) {
@@ -101,13 +90,21 @@ public class MessageRegistry implements IMessageRegistry {
 	public String getDefLang() {
 		return defLng;
 	}
-	
-	public Map<String, ClassLabels> getLabels() {
-		return labels;
+
+	@Override
+	public String get(MsgID msgId) {
+		Options section = get(msgId.getSectionId());
+		String id = msgId.getMessageId();
+		if ( section.containsKey(id) ) {
+			return section.get(id);	
+		} else {
+			logger.warn("Message not found: {}", msgId.toString());
+			return id;
+		}
 	}
 
 	@Override
-	public IMessages getMessages(String id) {
-		return get(id);
+	public String format(MsgID msgId, Object... args) {
+		return get(msgId);
 	}
 }

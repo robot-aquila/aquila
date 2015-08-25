@@ -12,6 +12,7 @@ import javax.swing.JTabbedPane;
 
 import org.easymock.IMocksControl;
 import org.hamcrest.core.IsInstanceOf;
+import org.ini4j.Options;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -19,6 +20,8 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.core.text.Messages;
+import ru.prolib.aquila.ui.msg.CommonMsg;
 import ru.prolib.aquila.ui.wrapper.Menu;
 import ru.prolib.aquila.ui.wrapper.MenuBar;
 
@@ -26,7 +29,7 @@ public class MainFrameTest {
 	private static IMocksControl control;
 	
 	private ServiceLocator facade;
-	private MessageRegistry texts = new MessageRegistry();
+	private Messages texts = new Messages();
 	private Runnable exitAction;
 	private Terminal terminal;
 	
@@ -36,17 +39,14 @@ public class MainFrameTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		
-		Properties labels = new Properties();
-		labels.setProperty("MENU_FILE", "MENU_FILE");
-		labels.setProperty("MENU_TERM", "MENU_TERM");
-		labels.setProperty("MENU_FILE_EXIT", "MENU_FILE_EXIT");
-		labels.setProperty("MENU_TERM_START", "MENU_TERM_START");
-		labels.setProperty("MENU_TERM_STOP", "MENU_TERM_STOP");
-		texts.setClassLabels("MenuBar",new ClassLabels("MenuBar", labels));
-		texts.setClassLabels("PortfolioDataPanel",
-				new ClassLabels("PortfolioDataPanel", new Properties()));
-		texts.setClassLabels("StatusBar",
-				new ClassLabels("StatusBar", new Properties()));
+		Options labels = new Options();
+		labels.put("MENU_FILE", "MENU_FILE");
+		labels.put("MENU_TERM", "MENU_TERM");
+		labels.put("MENU_FILE_EXIT", "MENU_FILE_EXIT");
+		labels.put("MENU_TERM_START", "MENU_TERM_START");
+		labels.put("MENU_TERM_STOP", "MENU_TERM_STOP");
+		texts.set(CommonMsg.SECTION_ID, labels);
+		texts.set("PortfolioDataPanel", new Options());
 		
 		terminal = control.createMock(Terminal.class);		
 		exitAction = control.createMock(Runnable.class);
@@ -164,7 +164,6 @@ public class MainFrameTest {
 
 	@Test
 	public void testMenuLabels() {
-		assertEquals("MenuBar", MainFrame.MENU_SECT);
 		assertEquals("MENU_FILE", MainFrame.MENU_FILE);
 		assertEquals("MENU_TERM", MainFrame.MENU_TERM);
 		assertEquals("MENU_FILE_EXIT", MainFrame.MENU_FILE_EXIT);
