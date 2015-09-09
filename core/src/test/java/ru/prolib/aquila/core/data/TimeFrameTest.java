@@ -17,6 +17,7 @@ public class TimeFrameTest {
 		assertEquals(new TFMinutes(15), TimeFrame.M15);
 		assertEquals(new TFMinutes(30), TimeFrame.M30);
 		assertEquals(new TFMinutes(60), TimeFrame.M60);
+		assertEquals(new TFDays(1), TimeFrame.D1);
 	}
 	
 }

@@ -25,6 +25,16 @@ public interface TickDatabase extends Closeable {
 	 */
 	public void write(SecurityDescriptor descr, Tick tick) throws IOException;
 	
+	/**
+	 * Send time marker.
+	 * <p>
+	 * The time marker is used for inform database of current time when tick
+	 * data doesn't available. It allows to close currently opened segments
+	 * which was tied to previous date or make some actions linked with time.
+	 * <p>
+	 * @param time - time marker value
+	 * @throws IOException - IO Error.
+	 */
 	public void sendMarker(DateTime time) throws IOException;
 	
 	/**

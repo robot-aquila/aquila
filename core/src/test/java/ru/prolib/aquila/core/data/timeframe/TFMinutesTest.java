@@ -38,7 +38,7 @@ public class TFMinutesTest {
 	}
 	
 	@Test
-	public void testGetlength() throws Exception {
+	public void testGetLength() throws Exception {
 		assertEquals(1, m1.getLength());
 		assertEquals(5, m5.getLength());
 		assertEquals(7, m7.getLength());

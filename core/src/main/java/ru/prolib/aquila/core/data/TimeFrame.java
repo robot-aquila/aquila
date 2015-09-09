@@ -42,6 +42,11 @@ public interface TimeFrame {
 	public static final TimeFrame M60 = new TFMinutes(60);
 	
 	/**
+	 * Daily timeframe.
+	 */
+	public static final TimeFrame D1 = new TFDays(1);
+	
+	/**
 	 * Получить интервал для временной метки.
 	 * <p>
 	 * @param time временная метка
