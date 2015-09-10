@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -39,7 +41,9 @@ public class IOHelper {
 	static {
 		logger = LoggerFactory.getLogger(IOHelper.class);
 	}
+
 	
+	private final Map<File, Integer> mapInvalidFileCount;
 	private final IdUtils idUtils;
 	private final File root;
 	private final Scheduler scheduler;
@@ -51,6 +55,7 @@ public class IOHelper {
 	
 	public IOHelper(File root) {
 		super();
+		this.mapInvalidFileCount = new Hashtable<File, Integer>();
 		this.idUtils = new IdUtils();
 		this.root = root;
 		this.scheduler = new SchedulerLocal();
@@ -298,8 +303,15 @@ public class IOHelper {
 		return result;
 	}
 	
-	private void invalidFilename(File x) {
-		logger.warn("Invalid filename detected: {}", x);
+	private synchronized void invalidFilename(File x) {
+		Integer count = mapInvalidFileCount.get(x); 
+		if ( count == null ) {
+			count = 1;
+			logger.warn("Invalid filename detected: {}", x);
+		} else {
+			count ++;
+		}
+		mapInvalidFileCount.put(x, count);
 	}
 
 }
