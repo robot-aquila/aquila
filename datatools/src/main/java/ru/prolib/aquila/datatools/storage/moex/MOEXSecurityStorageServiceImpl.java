@@ -6,7 +6,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
@@ -56,17 +55,14 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 			new HashMap<SecurityDescriptor, Boolean>());
 	}
 	
-	@Autowired
 	public void setSymbolRepository(SymbolRepository repository) {
 		this.symbolRepository = repository;
 	}
 	
-	@Autowired
 	public void setSecurityPropertiesRepository(SecurityPropertiesRepository repository) {
 		this.securityPropertiesRepository = repository;
 	}
 	
-	@Autowired
 	public void setSecuritySessionPropertiesRepository(SecuritySessionPropertiesRepository repository) {
 		this.securitySessionPropertiesRepository = repository;
 	}

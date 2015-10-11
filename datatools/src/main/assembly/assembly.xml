@@ -29,8 +29,9 @@
 			<directory>${project.basedir}/src/main/resources</directory>
 			<outputDirectory>aquila-simple/config</outputDirectory>
 			<includes>
-				<include>storage.xml</include>
-				<include>exampleContext-Datatools.xml</include>
+				<include>StorageSettings.xml</include>
+				<include>example-DataSourceSettings.xml</include>
+				<include>example-DatatoolsSettings.xml</include>
 			</includes>
 		</fileSet>
 		<fileSet>

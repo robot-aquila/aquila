@@ -28,6 +28,15 @@
 		<constructor-arg type="java.lang.String" value="src/test/resources/liquibase/test-data.xml" />
 	</bean>
 	
-	<import resource="storage.xml"></import>
+	<import resource="StorageSettings.xml"></import>
+	
+	<bean id="symbolRepository" class="ru.prolib.aquila.datatools.storage.dao.SymbolRepositoryImpl" />
+	<bean id="securityPropertiesRepository" class="ru.prolib.aquila.datatools.storage.dao.SecurityPropertiesRepositoryImpl" />
+	<bean id="securitySessionPropertiesRepository" class="ru.prolib.aquila.datatools.storage.dao.SecuritySessionPropertiesRepositoryImpl" />
+	<bean id="securityStorageService" class="ru.prolib.aquila.datatools.storage.moex.MOEXSecurityStorageServiceImpl" >
+		<property name="symbolRepository" ref="symbolRepository" />
+		<property name="securityPropertiesRepository" ref="securityPropertiesRepository" />
+		<property name="securitySessionPropertiesRepository" ref="securitySessionPropertiesRepository" />
+	</bean>
  
 </beans>

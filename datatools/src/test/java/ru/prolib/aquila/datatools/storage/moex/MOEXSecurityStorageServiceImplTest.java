@@ -10,6 +10,11 @@ import org.easymock.IMocksControl;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
@@ -18,6 +23,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.datatools.storage.SecuritySessionProperties;
+import ru.prolib.aquila.datatools.storage.SecurityStorageService;
 import ru.prolib.aquila.datatools.storage.dao.RepositoryObjectNotFoundException;
 import ru.prolib.aquila.datatools.storage.dao.SecurityPropertiesRepository;
 import ru.prolib.aquila.datatools.storage.dao.SecuritySessionPropertiesRepository;
@@ -26,7 +32,11 @@ import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 
-public class MOEXSecurityStorageServiceImplTest {
+@ContextConfiguration(locations = {"/testApplicationContext.xml"})
+public class MOEXSecurityStorageServiceImplTest
+	extends AbstractTransactionalJUnit4SpringContextTests
+	implements ApplicationContextAware
+{
 	private static final SecurityDescriptor descr1, descr2;
 	
 	static {
@@ -48,6 +58,8 @@ public class MOEXSecurityStorageServiceImplTest {
 	private DateTime time1, time2;
 	private SecuritySessionPropertiesEntity sessProps1, sessProps2;
 	private SymbolEntity symbol1, symbol2;
+	@Autowired
+	private ApplicationContext applicationContext;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -219,6 +231,13 @@ public class MOEXSecurityStorageServiceImplTest {
 		assertSame(symbol1, sessProps2.getSymbol());
 		assertEquals(time1, sessProps2.getSnapshotTime());
 		assertEquals(time2, sessProps2.getClearingTime());
+	}
+	
+	@Test
+	public void testFromApplicationContext() throws Exception {
+		SecurityStorageService service = (SecurityStorageService)
+				applicationContext.getBean("securityStorageService");
+		assertNotNull(service);
 	}
 
 }
