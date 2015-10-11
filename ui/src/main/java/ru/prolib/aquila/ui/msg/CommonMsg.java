@@ -44,7 +44,7 @@ public class CommonMsg {
 	public static final MsgID LOCKED_VAL = new MsgID(SECTION_ID, "ID_LOCKED_VAL");
 	public static final MsgID OPEN_VAL = new MsgID(SECTION_ID, "ID_OPEN_VAL");
 	public static final MsgID BALANCE_VAL = new MsgID(SECTION_ID, "ID_BALANCE_VAL");
-	public static final MsgID POSITIONS = new MsgID(SECTION_ID, "ID_POS_TITLE");
+	public static final MsgID POSITIONS = new MsgID(SECTION_ID, "ID_POSITIONS");
 	public static final MsgID ID = new MsgID(SECTION_ID, "ID_ID");
 	public static final MsgID DIR = new MsgID(SECTION_ID, "ID_DIR");
 	public static final MsgID TIME = new MsgID(SECTION_ID, "ID_TIME");
@@ -57,5 +57,6 @@ public class CommonMsg {
 	public static final MsgID AVG_EXEC_PRICE = new MsgID(SECTION_ID, "ID_AVG_EXEC_PRICE");
 	public static final MsgID ACTIVATOR = new MsgID(SECTION_ID, "ID_ACTIVATOR");
 	public static final MsgID COMMENT = new MsgID(SECTION_ID, "ID_COMMENT");
+	
 
 }

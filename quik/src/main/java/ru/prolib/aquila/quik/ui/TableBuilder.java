@@ -11,7 +11,7 @@ import ru.prolib.aquila.t2q.*;
 import ru.prolib.aquila.ui.table.*;
 
 public class TableBuilder {
-	private static final String SECTION_ID = "Quick";
+	private static final String SECTION_ID = "Quik";
 	private static final SimpleDateFormat dateFormatMs;
 	
 	static {
