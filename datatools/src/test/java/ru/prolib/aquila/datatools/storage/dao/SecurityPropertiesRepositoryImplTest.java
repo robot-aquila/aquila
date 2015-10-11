@@ -12,22 +12,22 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.datatools.storage.dao.ConstantSecurityPropertiesRepositoryImpl;
+import ru.prolib.aquila.datatools.storage.dao.SecurityPropertiesRepositoryImpl;
 import ru.prolib.aquila.datatools.storage.dao.RepositoryObjectNotFoundException;
 import ru.prolib.aquila.datatools.storage.dao.SymbolRepositoryImpl;
-import ru.prolib.aquila.datatools.storage.model.ConstantSecurityPropertiesEntity;
+import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 import ru.prolib.aquila.datatools.utils.LiquibaseTestHelper;
 
 @ContextConfiguration(locations = {"/testApplicationContext.xml"})
-public class ConstantSecurityPropertiesRepositoryImplTest
+public class SecurityPropertiesRepositoryImplTest
 	extends AbstractTransactionalJUnit4SpringContextTests
 {
 	private LiquibaseTestHelper liquibaseHelper;
 	private SessionFactory sessionFactory;
 	private SymbolRepositoryImpl symbols;
-	private ConstantSecurityPropertiesRepositoryImpl repository;
-	private ConstantSecurityPropertiesEntity entity;
+	private SecurityPropertiesRepositoryImpl repository;
+	private SecurityPropertiesEntity entity;
 	private SecurityDescriptor descr;
 	
 	@Autowired
@@ -49,7 +49,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 	@Before
 	public void setUp() throws Exception {
 		liquibaseHelper.setUpBeforeTestClass();
-		repository = new ConstantSecurityPropertiesRepositoryImpl();
+		repository = new SecurityPropertiesRepositoryImpl();
 		repository.setSessionFactory(sessionFactory);
 		symbols = new SymbolRepositoryImpl();
 		symbols.setSessionFactory(sessionFactory);
@@ -76,7 +76,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 	
 	@Test
 	public void testGetAll() throws Exception {
-		List<ConstantSecurityPropertiesEntity> list = repository.getAll();
+		List<SecurityPropertiesEntity> list = repository.getAll();
 		assertNotNull(list);
 		assertEquals(2, list.size());
 		assertEquals(new Long(15), list.get(0).getId());
@@ -129,7 +129,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 	}
 	
 	@Test
-	public void testUpdate_NewEntity() throws Exception {
+	public void testSave_NewEntity() throws Exception {
 		entity = repository.createEntity();
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zulu24");
@@ -137,11 +137,11 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		entity.setExpirationTime(new DateTime(2015, 04, 15, 13, 45, 10, 540));
 		entity.setSymbol(symbols.getById(1003L));
 		
-		repository.update(entity);
+		repository.save(entity);
 		sessionFactory.getCurrentSession().flush();
 		
 		assertEquals(new Long(17), entity.getId());
-		assertEquals(1, super.countRowsInTableWhere("constant_security_properties",
+		assertEquals(1, super.countRowsInTableWhere("security_properties",
 				"id=17 AND symbol=1003 AND display_name='Zulu24' AND " +
 				"starting_time='2010-01-01 00:00:00.000' AND " +
 				"expiration_time='2015-04-15 13:45:10.540' AND " +
@@ -149,7 +149,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 	}
 	
 	@Test
-	public void testUpdate_ExistingEntity() throws Exception {
+	public void testSave_ExistingEntity() throws Exception {
 		entity = repository.getById(16L);
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zuko");
@@ -157,15 +157,15 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		entity.setExpirationTime(new DateTime(2000, 1, 1, 23, 59, 59, 999));
 		entity.setSymbol(symbols.getById(1003L));
 		
-		repository.update(entity);
+		repository.save(entity);
 		sessionFactory.getCurrentSession().flush();
 		
-		assertEquals(1, super.countRowsInTableWhere("constant_security_properties",
+		assertEquals(1, super.countRowsInTableWhere("security_properties",
 				"id=16 AND symbol=1003 AND display_name='Zuko' AND " +
 				"starting_time='1999-06-01 00:00:00.001' AND " +
 				"expiration_time='2000-01-01 23:59:59.999' AND " +
 				"currency_of_cost='EUR'"));
-		assertEquals(0, super.countRowsInTableWhere("constant_security_properties",
+		assertEquals(0, super.countRowsInTableWhere("security_properties",
 				"id=16 AND symbol=1002 AND display_name='Si' AND " +
 				"starting_time='2012-12-31 23:59:59.999' AND " +
 				"expiration_time='2015-06-16 00:00:00.000' AND " +
@@ -180,7 +180,7 @@ public class ConstantSecurityPropertiesRepositoryImplTest
 		repository.delete(entity);
 		sessionFactory.getCurrentSession().flush();
 		
-		assertEquals(0, super.countRowsInTableWhere("constant_security_properties",
+		assertEquals(0, super.countRowsInTableWhere("security_properties",
 				"id=16"));
 	}
 	

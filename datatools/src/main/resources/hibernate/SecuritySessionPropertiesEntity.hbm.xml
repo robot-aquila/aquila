@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-	<class name="ru.prolib.aquila.datatools.storage.model.TradingSessionPropertiesEntity" table="trading_session_properties">
+	<class name="ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity" table="security_session_properties">
 		<id name="id">
 			<generator class="increment" />
 		</id>

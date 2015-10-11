@@ -9,19 +9,19 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
-import ru.prolib.aquila.datatools.storage.model.TradingSessionPropertiesEntity;
+import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
 
-public class TradingSessionPropertiesEntityTest {
+public class SecuritySessionPropertiesEntityTest {
 	private SecurityDescriptor descr;
 	private SymbolEntity symbol;
-	private TradingSessionPropertiesEntity entity;
+	private SecuritySessionPropertiesEntity entity;
 
 	@Before
 	public void setUp() throws Exception {
 		descr = new SecurityDescriptor("SPY", "ARCA", "USD", SecurityType.FUT);
 		symbol = new SymbolEntity();
 		symbol.setDescriptor(descr);
-		entity = new TradingSessionPropertiesEntity();
+		entity = new SecuritySessionPropertiesEntity();
 	}
 	
 	@Test

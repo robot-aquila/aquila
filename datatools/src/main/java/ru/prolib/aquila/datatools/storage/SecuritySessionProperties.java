@@ -5,9 +5,9 @@ import org.joda.time.DateTime;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 
 /**
- * The properties of trading session of one security.
+ * The trading session properties of a security.
  */
-public interface TradingSessionProperties {
+public interface SecuritySessionProperties {
 	
 	/**
 	 * Get descriptor of the security.
@@ -27,7 +27,7 @@ public interface TradingSessionProperties {
 	 * Get cost of one price tick.
 	 * <p>
 	 * @return cost of the one tick in the currency specified in appropriate
-	 * {@link ConstantSecurityProperties} instance.
+	 * {@link SecurityProperties} instance.
 	 */
 	public Double getTickCost();
 	
@@ -35,7 +35,7 @@ public interface TradingSessionProperties {
 	 * Get initial margin per contract.
 	 * <p>
 	 * @return the initial margin per contract in the currency specified in
-	 * appropriate {@link ConstantSecurityProperties} instance. 
+	 * appropriate {@link SecurityProperties} instance. 
 	 * The result may be null if the security don't use an initial margin.    
 	 */
 	public Double getInitialMarginCost();

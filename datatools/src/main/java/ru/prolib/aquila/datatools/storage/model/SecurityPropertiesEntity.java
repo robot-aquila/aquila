@@ -5,10 +5,10 @@ import java.util.*;
 import org.joda.time.*;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.datatools.storage.ConstantSecurityProperties;
+import ru.prolib.aquila.datatools.storage.SecurityProperties;
 
-public class ConstantSecurityPropertiesEntity
-	implements ConstantSecurityProperties
+public class SecurityPropertiesEntity
+	implements SecurityProperties
 {
 	private Long id;
 	private SymbolEntity symbol;
@@ -16,7 +16,7 @@ public class ConstantSecurityPropertiesEntity
 	private DateTime expirationTime, startingTime;
 	private Currency currencyOfCost;
 	
-	public ConstantSecurityPropertiesEntity() {
+	public SecurityPropertiesEntity() {
 		super();
 	}
 	

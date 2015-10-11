@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+      	http://www.springframework.org/schema/context
+      	http://www.springframework.org/schema/context/spring-context.xsd
+      	http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd">
+        
+	<context:annotation-config />
+    
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+    	<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+    	<property name="url" value="jdbc:hsqldb:hsqls://localhost/database" />
+    	<property name="username" value="SA" />
+    	<property name="password" value="" />
+	</bean>
+	
+	<bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase">
+	    <property name="dataSource" ref="dataSource" />
+	    <property name="changeLog" value="classpath:config/liquibase/master.xml" />
+	</bean>
+	
+	<import resource="storage.xml" />
+        
+ </beans>

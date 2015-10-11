@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.Currency;
+
 import ru.prolib.aquila.core.EventType;
 
 /**
@@ -269,5 +271,19 @@ public interface Security {
 	 * @return маржа
 	 */
 	public Double getInitialMargin();
+	
+	/**
+	 * Get security type.
+	 * <p>
+	 * @return security type
+	 */
+	public SecurityType getType();
+	
+	/**
+	 * Get currency.
+	 * <p>
+	 * @return currency of the security
+	 */
+	public Currency getCurrency();
 	
 }

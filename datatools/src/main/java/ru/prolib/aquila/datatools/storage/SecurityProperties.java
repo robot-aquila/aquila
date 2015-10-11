@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 /**
  * Constant properties which exists all of the security lifetime. 
  */
-public interface ConstantSecurityProperties {
+public interface SecurityProperties {
 
 	/**
 	 * Get descriptor of the security.
@@ -41,7 +41,7 @@ public interface ConstantSecurityProperties {
 	public DateTime getStartingTime();
 
 	/**
-	 * Get the currency of cost values of {@link TradingSessionProperties}.
+	 * Get the currency of cost values of {@link SecuritySessionProperties}.
 	 * <p>
 	 * Some securities may have quotes in different units than the portfolio's
 	 * currency. To combine securities with a different price units in one

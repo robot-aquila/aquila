@@ -15,18 +15,18 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 
 import ru.prolib.aquila.datatools.storage.dao.SymbolRepositoryImpl;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
-import ru.prolib.aquila.datatools.storage.model.TradingSessionPropertiesEntity;
+import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
 import ru.prolib.aquila.datatools.utils.LiquibaseTestHelper;
 
 @ContextConfiguration(locations = {"/testApplicationContext.xml"})
-public class TradingSessionPropertiesRepositoryTest
+public class SecuritySessionPropertiesRepositoryImplTest
 	extends AbstractTransactionalJUnit4SpringContextTests
 {
 	private LiquibaseTestHelper liquibaseHelper;
 	private SessionFactory sessionFactory;
 	private SymbolRepositoryImpl symbols;
-	private TradingSessionPropertiesRepositoryImpl repository;
-	private TradingSessionPropertiesEntity entity;
+	private SecuritySessionPropertiesRepositoryImpl repository;
+	private SecuritySessionPropertiesEntity entity;
 	
 	@Autowired
 	public void setSessionFactory(SessionFactory sessionFactory) {
@@ -41,7 +41,7 @@ public class TradingSessionPropertiesRepositoryTest
 	@Before
 	public void setUp() throws Exception {
 		liquibaseHelper.setUpBeforeTestClass();
-		repository = new TradingSessionPropertiesRepositoryImpl();
+		repository = new SecuritySessionPropertiesRepositoryImpl();
 		repository.setSessionFactory(sessionFactory);
 		symbols = new SymbolRepositoryImpl();
 		symbols.setSessionFactory(sessionFactory);
@@ -74,7 +74,7 @@ public class TradingSessionPropertiesRepositoryTest
 	
 	@Test
 	public void testGetAll() throws Exception {
-		List<TradingSessionPropertiesEntity> list = repository.getAll();
+		List<SecuritySessionPropertiesEntity> list = repository.getAll();
 		assertNotNull(list);
 		assertEquals(4, list.size());
 		assertEquals(repository.getById(3L), list.get(0));
@@ -84,7 +84,7 @@ public class TradingSessionPropertiesRepositoryTest
 	}
 	
 	@Test
-	public void testUpdate_ExistingEntry() throws Exception {
+	public void testSave_ExistingEntry() throws Exception {
 		entity = repository.getById(2L);
 		assertNotNull(entity);
 		entity.setSymbol(symbols.getById(1002L));
@@ -99,17 +99,17 @@ public class TradingSessionPropertiesRepositoryTest
 		entity.setSnapshotTime(new DateTime(1999, 12, 31, 23, 59, 59, 999));
 		entity.setClearingTime(new DateTime(2000, 1, 1, 0, 0, 0, 0));
 		
-		repository.update(entity);
+		repository.save(entity);
 		sessionFactory.getCurrentSession().flush();
 		
-		assertEquals(1, super.countRowsInTableWhere("trading_session_properties",
+		assertEquals(1, super.countRowsInTableWhere("security_session_properties",
 			"id=2 AND symbol=1002 AND scale=1 AND tick_cost=5.1534 AND " +
 			"initial_margin_cost=21500.0 AND initial_price=100250.0 AND " +
 			"lower_price_limit=50000.0 AND upper_price_limit=130000.0 AND " +
 			"lot_size=1 AND tick_size=20.0 AND " +
 			"snapshot_time='1999-12-31 23:59:59.999' AND " +
 			"clearing_time='2000-01-01 00:00:00.000'"));
-		assertEquals(0, super.countRowsInTableWhere("trading_session_properties",
+		assertEquals(0, super.countRowsInTableWhere("security_session_properties",
 			"id=2 AND symbol=1001 AND scale=2 AND tick_cost=10.2415 AND " +
 			"initial_margin_cost=22621.45 AND initial_price=101800.0 AND " +
 			"lower_price_limit=92000.0 AND upper_price_limit=130000.0 AND " +
@@ -119,7 +119,7 @@ public class TradingSessionPropertiesRepositoryTest
 	}
 	
 	@Test
-	public void testUpdate_NewEntry() throws Exception {
+	public void testSave_NewEntry() throws Exception {
 		entity = repository.createEntity();
 		assertNotNull(entity);
 		entity.setSymbol(symbols.getById(1001L));
@@ -134,11 +134,11 @@ public class TradingSessionPropertiesRepositoryTest
 		entity.setSnapshotTime(new DateTime(1998, 1, 1, 15, 30, 45, 150));
 		entity.setClearingTime(new DateTime(1999, 1, 1, 18, 45, 0, 0));
 		
-		repository.update(entity);
+		repository.save(entity);
 		sessionFactory.getCurrentSession().flush();
 		
 		assertEquals(new Long(5), entity.getId());
-		assertEquals(1, super.countRowsInTableWhere("trading_session_properties",
+		assertEquals(1, super.countRowsInTableWhere("security_session_properties",
 				"id=5 AND symbol=1001 AND scale=15 AND tick_cost=1.0 AND " +
 				"initial_margin_cost=2.0 AND initial_price=3.0 AND " +
 				"lower_price_limit=500.0 AND upper_price_limit=1500.0 AND " +
@@ -155,7 +155,7 @@ public class TradingSessionPropertiesRepositoryTest
 		repository.delete(entity);
 		sessionFactory.getCurrentSession().flush();
 		
-		assertEquals(0, super.countRowsInTableWhere("trading_session_properties",
+		assertEquals(0, super.countRowsInTableWhere("security_session_properties",
 				"id=3"));
 	}
 

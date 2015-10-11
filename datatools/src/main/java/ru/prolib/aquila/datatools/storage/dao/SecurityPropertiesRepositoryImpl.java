@@ -10,17 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.datatools.storage.ConstantSecurityProperties;
-import ru.prolib.aquila.datatools.storage.model.ConstantSecurityPropertiesEntity;
+import ru.prolib.aquila.datatools.storage.SecurityProperties;
+import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 
 @Repository
-public class ConstantSecurityPropertiesRepositoryImpl implements
-		ConstantSecurityPropertiesRepository
+public class SecurityPropertiesRepositoryImpl implements
+		SecurityPropertiesRepository
 {
 	private SessionFactory sessionFactory;
 
-	public ConstantSecurityPropertiesRepositoryImpl() {
+	public SecurityPropertiesRepositoryImpl() {
 		super();
 	}
 	
@@ -30,38 +30,38 @@ public class ConstantSecurityPropertiesRepositoryImpl implements
 	}
 
 	@Override
-	public ConstantSecurityPropertiesEntity getById(Long id) {
-		ConstantSecurityPropertiesEntity x;
-		x = (ConstantSecurityPropertiesEntity)
-				getSession().get(ConstantSecurityPropertiesEntity.class, id);
+	public SecurityPropertiesEntity getById(Long id) {
+		SecurityPropertiesEntity x;
+		x = (SecurityPropertiesEntity)
+				getSession().get(SecurityPropertiesEntity.class, id);
 		if ( x == null ) {
 			throw new ObjectNotFoundException(id,
-					ConstantSecurityProperties.class.toString());
+					SecurityProperties.class.toString());
 		}
 		return x;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<ConstantSecurityPropertiesEntity> getAll() {
+	public List<SecurityPropertiesEntity> getAll() {
 		return getSession()
-				.createCriteria(ConstantSecurityPropertiesEntity.class).list();
+				.createCriteria(SecurityPropertiesEntity.class).list();
 	}
 
 	@Override
-	public ConstantSecurityPropertiesEntity
+	public SecurityPropertiesEntity
 		getByDescriptor(SecurityDescriptor descr)
 	{
 		Session session = getSession();
-		ConstantSecurityPropertiesEntity x = (ConstantSecurityPropertiesEntity)
-			session.createCriteria(ConstantSecurityPropertiesEntity.class, "p")
+		SecurityPropertiesEntity x = (SecurityPropertiesEntity)
+			session.createCriteria(SecurityPropertiesEntity.class, "p")
 			.createAlias("p.symbol", "s")
 			.add(Restrictions.eq("s.descr", descr))
 			.setMaxResults(1)
 			.uniqueResult();
 		if ( x == null ) {
 			throw new RepositoryObjectNotFoundException(
-					ConstantSecurityPropertiesEntity.class.toString()
+					SecurityPropertiesEntity.class.toString()
 					+ " of "
 					+ descr.toString());
 		}
@@ -69,16 +69,16 @@ public class ConstantSecurityPropertiesRepositoryImpl implements
 	}
 
 	@Override
-	public ConstantSecurityPropertiesEntity getBySymbol(SymbolEntity symbol) {
+	public SecurityPropertiesEntity getBySymbol(SymbolEntity symbol) {
 		Session session = getSession();
-		ConstantSecurityPropertiesEntity x = (ConstantSecurityPropertiesEntity)
-				session.createCriteria(ConstantSecurityPropertiesEntity.class)
+		SecurityPropertiesEntity x = (SecurityPropertiesEntity)
+				session.createCriteria(SecurityPropertiesEntity.class)
 				.add(Restrictions.eq("symbol", symbol))
 				.setMaxResults(1)
 				.uniqueResult();
 		if ( x == null ) {
 			throw new RepositoryObjectNotFoundException(
-					ConstantSecurityPropertiesEntity.class.toString()
+					SecurityPropertiesEntity.class.toString()
 					+ " of "
 					+ SymbolEntity.class.toString()
 					+ "#"
@@ -92,18 +92,18 @@ public class ConstantSecurityPropertiesRepositoryImpl implements
 	}
 
 	@Override
-	public void update(ConstantSecurityPropertiesEntity entity) {
+	public void save(SecurityPropertiesEntity entity) {
 		getSession().saveOrUpdate(entity);
 	}
 
 	@Override
-	public void delete(ConstantSecurityPropertiesEntity entity) {
+	public void delete(SecurityPropertiesEntity entity) {
 		getSession().delete(entity);
 	}
 
 	@Override
-	public ConstantSecurityPropertiesEntity createEntity() {
-		return new ConstantSecurityPropertiesEntity();
+	public SecurityPropertiesEntity createEntity() {
+		return new SecurityPropertiesEntity();
 	}
 
 }

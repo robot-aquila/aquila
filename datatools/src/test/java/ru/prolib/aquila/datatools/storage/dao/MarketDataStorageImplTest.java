@@ -17,7 +17,7 @@ import ru.prolib.aquila.datatools.utils.LiquibaseTestHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/testApplicationContext.xml"})
-public class DataProviderImplTest {
+public class MarketDataStorageImplTest {
 	private DataSource dataSource;
 	private Liquibase liquibase;
 	
@@ -38,10 +38,12 @@ public class DataProviderImplTest {
 	}
 
 	@Test
+	@Ignore
 	public void test_() throws Exception {
 		Connection conn = dataSource.getConnection();
 		System.out.println(conn);
 		assertTrue(true);
+		fail("TODO: not implemented");
 	}
 
 }

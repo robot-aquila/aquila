@@ -31,8 +31,8 @@
 		</insert>
     </changeSet>
     
-    <changeSet id="constant_security_properties_test_data" author="whirlwind" context="test" >
-		<insert tableName="constant_security_properties">
+    <changeSet id="security_properties_test_data" author="whirlwind" context="test" >
+		<insert tableName="security_properties">
 			<column name="id">15</column>
 			<column name="symbol">1001</column>
 			<column name="display_name">RTS</column>
@@ -40,7 +40,7 @@
 			<column name="expiration_time">2015-04-15 00:00:00</column>
 			<column name="currency_of_cost">RUB</column>
 		</insert>
-		<insert tableName="constant_security_properties">
+		<insert tableName="security_properties">
 			<column name="id">16</column>
 			<column name="symbol">1002</column>
 			<column name="display_name">Si</column>
@@ -50,8 +50,8 @@
 		</insert>
     </changeSet>
     
-    <changeSet id="trading_session_properties_test_data" author="whirlwind" context="test" >
-		<insert tableName="trading_session_properties">
+    <changeSet id="security_session_properties_test_data" author="whirlwind" context="test" >
+		<insert tableName="security_session_properties">
 			<column name="id">1</column>
 			<column name="symbol">1001</column>
 			<column name="scale">0</column>
@@ -65,7 +65,7 @@
 			<column name="snapshot_time">2015-04-30 10:00:00</column>
 			<column name="clearing_time">2015-04-30 18:45:00</column>
 		</insert>
-		<insert tableName="trading_session_properties">
+		<insert tableName="security_session_properties">
 			<column name="id">2</column>
 			<column name="symbol">1001</column>
 			<column name="scale">2</column>
@@ -79,7 +79,7 @@
 			<column name="snapshot_time">2015-05-01 10:00:00</column>
 			<column name="clearing_time">2015-05-01 18:45:00</column>
 		</insert>
-		<insert tableName="trading_session_properties">
+		<insert tableName="security_session_properties">
 			<column name="id">3</column>
 			<column name="symbol">1002</column>
 			<column name="scale">0</column>
@@ -93,7 +93,7 @@
 			<column name="snapshot_time">2015-04-28 10:00:00</column>
 			<column name="clearing_time">2015-04-28 18:45:00</column>
 		</insert>
-		<insert tableName="trading_session_properties">
+		<insert tableName="security_session_properties">
 			<column name="id">4</column>
 			<column name="symbol">1001</column>
 			<column name="scale">0</column>

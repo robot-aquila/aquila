@@ -3,9 +3,9 @@ package ru.prolib.aquila.datatools.storage.model;
 import org.joda.time.DateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.datatools.storage.TradingSessionProperties;
+import ru.prolib.aquila.datatools.storage.SecuritySessionProperties;
 
-public class TradingSessionPropertiesEntity implements TradingSessionProperties {
+public class SecuritySessionPropertiesEntity implements SecuritySessionProperties {
 	private Long id;
 	private SymbolEntity symbol;
 	private Integer scale, lotSize;
@@ -13,7 +13,7 @@ public class TradingSessionPropertiesEntity implements TradingSessionProperties 
 	private Double lowerPriceLimit, upperPriceLimit, tickSize;
 	private DateTime snapshotTime, clearingTime;
 	
-	public TradingSessionPropertiesEntity() {
+	public SecuritySessionPropertiesEntity() {
 		super();
 	}
 	

@@ -2,6 +2,9 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.util.Currency;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -871,6 +874,26 @@ public class SecurityImplTest {
 			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
 			assertEquals(msg, (Double) fixture[i][1], security.getInitialMargin());
 		}
+	}
+	
+	@Test
+	public void testGetCode() {
+		assertEquals("GAZP", security.getCode());
+	}
+	
+	@Test
+	public void testGetClassCode() {
+		assertEquals("EQBR", security.getClassCode());
+	}
+	
+	@Test
+	public void testGetType() {
+		assertEquals(SecurityType.STK, security.getType());
+	}
+	
+	@Test
+	public void testGetCurrency() {
+		assertEquals(Currency.getInstance("RUB"), security.getCurrency());
 	}
 
 }

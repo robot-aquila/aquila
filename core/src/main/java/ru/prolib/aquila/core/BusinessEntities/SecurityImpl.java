@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Currency;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -478,6 +479,16 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			initialMargin = value;
 			setChanged();
 		}
+	}
+
+	@Override
+	public SecurityType getType() {
+		return descr.getType();
+	}
+
+	@Override
+	public Currency getCurrency() {
+		return descr.getCurrency();
 	}
 
 }

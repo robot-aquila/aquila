@@ -9,20 +9,20 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 import ru.prolib.aquila.core.BusinessEntities.SecurityType;
-import ru.prolib.aquila.datatools.storage.model.ConstantSecurityPropertiesEntity;
+import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 
-public class ConstantSecurityPropertiesEntityTest {
+public class SecurityPropertiesEntityTest {
 	private SecurityDescriptor descr;
 	private SymbolEntity symbol;
-	private ConstantSecurityPropertiesEntity entity;
+	private SecurityPropertiesEntity entity;
 
 	@Before
 	public void setUp() throws Exception {
 		descr = new SecurityDescriptor("RTS", "SPB", "USD", SecurityType.FUT);
 		symbol = new SymbolEntity();
 		symbol.setDescriptor(descr);
-		entity = new ConstantSecurityPropertiesEntity();
+		entity = new SecurityPropertiesEntity();
 	}
 	
 	@Test

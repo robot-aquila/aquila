@@ -27,13 +27,13 @@
         <addUniqueConstraint tableName="symbols"
         	columnNames="code, class_code, currency, type" />
         
-        <createTable tableName="constant_security_properties">
+        <createTable tableName="security_properties">
         	<column name="id" autoIncrement="true" type="bigint">
         		<constraints primaryKey="true" nullable="false"
-        			primaryKeyName="pk_constant_security_properties" />
+        			primaryKeyName="pk_security_properties" />
         	</column>
         	<column name="symbol" type="bigint" >
-        		<constraints foreignKeyName="fk_constant_security_properties_symbols"
+        		<constraints foreignKeyName="fk_security_properties_symbols"
                     references="symbols(id)" nullable="false" />
         	</column>
         	<column name="display_name" type="varchar(128)" >
@@ -50,13 +50,13 @@
             </column>
         </createTable>
         
-        <createTable tableName="trading_session_properties">
+        <createTable tableName="security_session_properties">
         	<column name="id" autoIncrement="true" type="bigint">
         		<constraints primaryKey="true" nullable="false"
-                    primaryKeyName="pk_trading_session_properties" />
+                    primaryKeyName="pk_security_session_properties" />
         	</column>
         	<column name="symbol" type="bigint">
-        		<constraints foreignKeyName="fk_trading_session_properties_symbols"
+        		<constraints foreignKeyName="fk_security_session_properties_symbols"
         			references="symbols(id)" nullable="false" />
         	</column>
 			<column name="scale" type="int" >

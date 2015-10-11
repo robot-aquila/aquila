@@ -25,6 +25,28 @@
 				<include>*.jar</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/src/main/resources</directory>
+			<outputDirectory>aquila-simple/config</outputDirectory>
+			<includes>
+				<include>storage.xml</include>
+				<include>exampleContext-Datatools.xml</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/src/main/resources/hibernate</directory>
+			<outputDirectory>aquila-simple/config/hibernate</outputDirectory>
+			<includes>
+				<include>*.xml</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/src/main/resources/liquibase</directory>
+			<outputDirectory>aquila-simple/config/liquibase</outputDirectory>
+			<includes>
+				<include>*.xml</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 
 </assembly>
