@@ -81,7 +81,7 @@ public class TickTest {
 	@Test
 	public void testToString() throws Exception {
 		assertEquals(
-			"Tick[val=1828.14, opt=1000.0 at 2013-10-06T15:44:51.123+04:00]",
+			"Tick[val=1828.14, opt=1000.0 at " + tick.getTime()  + "]",
 			tick.toString());
 	}
 	

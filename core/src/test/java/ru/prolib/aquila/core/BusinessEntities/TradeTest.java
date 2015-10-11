@@ -95,7 +95,7 @@ public class TradeTest {
 	@Test
 	public void testToString() {
 		control.replay();
-		assertEquals("Trade: 2010-09-01T03:45:15.000+04:00 #105 Buy " +
+		assertEquals("Trade: " + trade.getTime()  + " #105 Buy " +
 				"SBER@EQBR(STK/RUB) 1x100.0 Vol=200.0", trade.toString());
 	}
 	

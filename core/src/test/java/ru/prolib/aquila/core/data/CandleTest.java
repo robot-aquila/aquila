@@ -230,7 +230,7 @@ public class CandleTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		String expected = "Candle[T=2013-10-05T19:50:00.000+04:00 PT5M, " +
+		String expected = "Candle[T=" + c2.getStartTime() + " PT5M, " +
 				"O=120.05, H=130.0, L=90.55, C=125.15, V=10000]";
 		assertEquals(expected, c2.toString());
 	}
