@@ -40,7 +40,7 @@
             	<constraints nullable="false" />
             </column>
             <column name="starting_time" type="timestamp" >
-				<constraints nullable="false" />
+				<constraints nullable="true" />
             </column>
             <column name="expiration_time" type="timestamp" >
             	<constraints nullable="true" />

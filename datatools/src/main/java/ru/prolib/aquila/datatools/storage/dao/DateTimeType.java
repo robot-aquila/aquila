@@ -86,6 +86,7 @@ public class DateTimeType implements UserType {
 	{
 		if ( value == null ) {
 			TimestampType.INSTANCE.nullSafeSet(st, null, index);
+			return;
 		}
 		DateTime jodaTime = (DateTime) value;
 		Calendar cal = Calendar.getInstance();

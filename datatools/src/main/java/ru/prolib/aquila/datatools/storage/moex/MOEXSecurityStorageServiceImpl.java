@@ -6,6 +6,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.joda.time.DateTime;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
@@ -20,6 +23,12 @@ import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
 
 public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(MOEXSecurityStorageServiceImpl.class);
+	}
+	
 	private SymbolRepository symbolRepository;
 	private SecurityPropertiesRepository securityPropertiesRepository;
 	private SecuritySessionPropertiesRepository securitySessionPropertiesRepository;
@@ -68,11 +77,13 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 	}
 
 	@Override
+	@Transactional
 	public void snapshotSessionAttributes(Security security, DateTime time) {
 		makeSnapshot(security, time, true);
 	}
 
 	@Override
+	@Transactional
 	public void snapshotSessionAttributes(Security security) {
 		makeSnapshot(security, security.getTerminal().getCurrentTime(), false);
 	}
@@ -93,6 +104,7 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 			p2.setClearingTime(utils.getClearingTime(descr, time));
 			entityCache.put(descr, p2);
 			securitySessionPropertiesRepository.save(p2);
+			logger.debug("Security session properties updated: {}", descr);
 		} finally {
 			lock.unlock();
 		}
@@ -127,6 +139,7 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 			p.setSymbol(getSymbolEntity(descr));
 			utils.fillProperties(security, p);
 			securityPropertiesRepository.save(p);
+			logger.debug("Security properties updated: {}", descr);
 		}
 		propertiesSaved.put(descr, true);
 	}
