@@ -37,7 +37,7 @@ public class SecuritiesGateway implements TableGateway {
 	private static final String HIGH = "high";
 	private static final String LOW = "low";
 	private static final String CURRENCY = "curstepprice";
-	private static final String INITIAL_PRICE = "settleprice";
+	private static final String INITIAL_PRICE = "prevsettleprice";
 	private static final String INITIAL_MARGIN_BUY = "buydepo";
 	private static final String INITIAL_MARGIN_SELL = "selldepo";
 	private static final String REQUIRED_HEADERS[] = {
