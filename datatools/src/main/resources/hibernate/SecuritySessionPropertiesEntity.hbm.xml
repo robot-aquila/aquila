@@ -9,8 +9,8 @@
 		<many-to-one name="symbol" class="ru.prolib.aquila.datatools.storage.model.SymbolEntity" column="symbol" unique="true" />
 		<property name="scale" column="scale" not-null="true" />
 		<property name="tickCost" column="tick_cost" not-null="true" />
-		<property name="initialMarginCost" column="initial_margin_cost" not-null="true" />
-		<property name="initialPrice" column="initial_price" not-null="true" />
+		<property name="initialMarginCost" column="initial_margin_cost" not-null="false" />
+		<property name="initialPrice" column="initial_price" not-null="false" />
 		<property name="lowerPriceLimit" column="lower_price_limit" not-null="true" />
 		<property name="upperPriceLimit" column="upper_price_limit" not-null="true" />
 		<property name="lotSize" column="lot_size" not-null="true" />

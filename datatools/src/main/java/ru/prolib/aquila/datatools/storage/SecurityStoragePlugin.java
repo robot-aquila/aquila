@@ -26,12 +26,17 @@ public class SecurityStoragePlugin implements AquilaPlugin, EventListener {
 	@Override
 	public void start() throws StarterException {
 		terminal.OnSecurityChanged().addListener(this);
+		terminal.OnSecurityAvailable().addListener(this);
+		for ( Security security : terminal.getSecurities() ) {
+			securityStorageService.snapshotSessionAttributes(security);
+		}
 		logger.info("Update service started (v{})", VERSION);
 	}
 
 	@Override
 	public void stop() throws StarterException {
 		terminal.OnSecurityChanged().removeListener(this);
+		terminal.OnSecurityAvailable().removeListener(this);
 		logger.info("Update service stopped (v{})", VERSION);
 	}
 
