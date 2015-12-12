@@ -10,7 +10,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegment;
@@ -50,11 +50,8 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	}
 
 	@Override
-	public DataSegment
-		openSegment(SecurityDescriptor descr, LocalDate date)
-			throws IOException
-	{
-		File file = helper.getFile(descr, date, IOHelper.PART_FILE_EXT);
+	public DataSegment openSegment(Symbol symbol, LocalDate date) throws IOException {
+		File file = helper.getFile(symbol, date, IOHelper.PART_FILE_EXT);
 		File parent = file.getParentFile();
 		if ( ! parent.exists() ) {
 			parent.mkdirs();
@@ -66,8 +63,8 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 			OutputStream stream = helper.createOutputStream(file, append);
 			CsvTickWriter writer = helper.createCsvTickWriter(stream);
 			if ( ! append ) writer.writeHeader();
-			return new DataSegmentImpl(descr, date,
-					helper.addSmartFlush(writer, getStreamId(descr, date)));
+			return new DataSegmentImpl(symbol, date,
+					helper.addSmartFlush(writer, getStreamId(symbol, date)));
 		} catch ( IOException e ) {
 			throw e;
 		} catch ( Exception e ) {
@@ -75,18 +72,18 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 		}
 	}
 	
-	private String getStreamId(SecurityDescriptor descr, LocalDate date) {
-		 return "[" + descr + "#" + date + "]";
+	private String getStreamId(Symbol symbol, LocalDate date) {
+		 return "[" + symbol + "#" + date + "]";
 	}
 
 	@Override
 	public void closeSegment(DataSegment segment) throws IOException {
-		SecurityDescriptor descr = segment.getSecurityDescriptor();
+		Symbol symbol = segment.getSymbol();
 		LocalDate date = segment.getDate();
 		segment.close();
-		File part = helper.getFile(descr, date, IOHelper.PART_FILE_EXT),
-			temp = helper.getFile(descr, date, IOHelper.TEMP_FILE_EXT),
-			dest = helper.getFile(descr, date, IOHelper.ARCH_FILE_EXT);
+		File part = helper.getFile(symbol, date, IOHelper.PART_FILE_EXT),
+			temp = helper.getFile(symbol, date, IOHelper.TEMP_FILE_EXT),
+			dest = helper.getFile(symbol, date, IOHelper.ARCH_FILE_EXT);
 		InputStream input = helper.createInputStream(part);
 		OutputStream output = helper.createGzipOutputStream(temp);
 		helper.copyStream(input, output);
@@ -94,22 +91,20 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 		output.close();
 		temp.renameTo(dest);
 		part.delete();
-		logger.debug("Data segment closed: {}", getStreamId(descr, date));
+		logger.debug("Data segment closed: {}", getStreamId(symbol, date));
 	}
 	
 	@Override
-	public Aqiterator<Tick> openReader(SecurityDescriptor descr, LocalDate date)
-			throws IOException
-	{
+	public Aqiterator<Tick> openReader(Symbol symbol, LocalDate date) throws IOException {
 		InputStream input = null;
-		File zip = helper.getFile(descr, date, IOHelper.ARCH_FILE_EXT),
-			raw = helper.getFile(descr, date, IOHelper.DATA_FILE_EXT);
+		File zip = helper.getFile(symbol, date, IOHelper.ARCH_FILE_EXT),
+			raw = helper.getFile(symbol, date, IOHelper.DATA_FILE_EXT);
 		if ( zip.exists() ) {
 			input = helper.createGzipInputStream(zip);
 		} else if ( raw.exists() ) {
 			input = helper.createInputStream(raw);
 		} else {
-			throw new IOException("No segment: " + getStreamId(descr, date));
+			throw new IOException("No segment: " + getStreamId(symbol, date));
 		}
 		CsvTickReader reader = helper.createCsvTickReader(input, date);
 		reader.readHeader();
@@ -122,44 +117,33 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	}
 
 	@Override
-	public boolean isDataAvailable(SecurityDescriptor descr)
-			throws IOException
-	{
-		List<LocalDate> list = helper.getAvailableDataSegments(descr);
+	public boolean isDataAvailable(Symbol symbol) throws IOException {
+		List<LocalDate> list = helper.getAvailableDataSegments(symbol);
 		return list.size() > 0;
 	}
 
 	@Override
-	public boolean isDataAvailable(SecurityDescriptor descr, LocalDate date)
-			throws IOException
-	{
-		List<LocalDate> list = helper.getAvailableDataSegments(descr);
+	public boolean isDataAvailable(Symbol symbol, LocalDate date) throws IOException {
+		List<LocalDate> list = helper.getAvailableDataSegments(symbol);
 		return list.contains(date);
 	}
 
 	@Override
-	public LocalDate getDateOfFirstSegment(SecurityDescriptor descr)
-			throws IOException
-	{
-		List<LocalDate> list = helper.getAvailableDataSegments(descr);
+	public LocalDate getDateOfFirstSegment(Symbol symbol) throws IOException {
+		List<LocalDate> list = helper.getAvailableDataSegments(symbol);
 		return list.size() > 0 ? list.get(0) : null;
 	}
 
 	@Override
-	public LocalDate getDateOfLastSegment(SecurityDescriptor descr)
-			throws IOException
-	{
-		List<LocalDate> list = helper.getAvailableDataSegments(descr);
+	public LocalDate getDateOfLastSegment(Symbol symbol) throws IOException {
+		List<LocalDate> list = helper.getAvailableDataSegments(symbol);
 		int index = list.size() - 1;
 		return index < 0 ? null : list.get(index);
 	}
 
 	@Override
-	public LocalDate
-		getDateOfNextSegment(SecurityDescriptor descr, LocalDate date)
-			throws IOException
-	{
-		List<LocalDate> list = helper.getAvailableDataSegments(descr);
+	public LocalDate getDateOfNextSegment(Symbol symbol, LocalDate date) throws IOException {
+		List<LocalDate> list = helper.getAvailableDataSegments(symbol);
 		for ( LocalDate x : list ) {
 			if ( x.isAfter(date) ) {
 				return x;
@@ -169,10 +153,8 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 	}
 
 	@Override
-	public List<LocalDate> getSegmentList(SecurityDescriptor descr)
-			throws IOException
-	{
-		return helper.getAvailableDataSegments(descr);
+	public List<LocalDate> getSegmentList(Symbol symbol) throws IOException {
+		return helper.getAvailableDataSegments(symbol);
 	}
 
 }

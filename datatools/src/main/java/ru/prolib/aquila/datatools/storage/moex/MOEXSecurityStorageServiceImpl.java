@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.storage.SecurityStorageService;
 import ru.prolib.aquila.datatools.storage.SecuritySessionProperties;
 import ru.prolib.aquila.datatools.storage.dao.RepositoryObjectNotFoundException;
@@ -33,8 +33,8 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 	private SecurityPropertiesRepository securityPropertiesRepository;
 	private SecuritySessionPropertiesRepository securitySessionPropertiesRepository;
 	private final MOEXUtils utils;
-	private final Map<SecurityDescriptor, SecuritySessionProperties> entityCache;
-	private final Map<SecurityDescriptor, Boolean> propertiesSaved;
+	private final Map<Symbol, SecuritySessionProperties> entityCache;
+	private final Map<Symbol, Boolean> propertiesSaved;
 	private final Lock lock;
 	
 	/**
@@ -45,8 +45,8 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 	 * @param propertiesSaved - security properties status
 	 */
 	protected MOEXSecurityStorageServiceImpl(MOEXUtils utils,
-			Map<SecurityDescriptor, SecuritySessionProperties> entityCache,
-			Map<SecurityDescriptor, Boolean> propertiesSaved)
+			Map<Symbol, SecuritySessionProperties> entityCache,
+			Map<Symbol, Boolean> propertiesSaved)
 	{
 		super();
 		this.entityCache = entityCache;
@@ -60,8 +60,8 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 	 */
 	public MOEXSecurityStorageServiceImpl() {
 		this(new MOEXUtils(),
-			new HashMap<SecurityDescriptor, SecuritySessionProperties>(),
-			new HashMap<SecurityDescriptor, Boolean>());
+			new HashMap<Symbol, SecuritySessionProperties>(),
+			new HashMap<Symbol, Boolean>());
 	}
 	
 	public void setSymbolRepository(SymbolRepository repository) {
@@ -91,20 +91,20 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 	private void makeSnapshot(Security security, DateTime time, boolean force) {
 		lock.lock();
 		try {
-			SecurityDescriptor descr = security.getDescriptor();
-			if ( ! propertiesSaved.containsKey(descr) ) {
+			Symbol symbol = security.getSymbol();
+			if ( ! propertiesSaved.containsKey(symbol) ) {
 				updateSecurityProperties(security);
 			}
-			SecuritySessionProperties p1 = entityCache.get(descr);
+			SecuritySessionProperties p1 = entityCache.get(symbol);
 			SecuritySessionPropertiesEntity p2 = toProperties(security);
 			if ( ! force && p1 != null && utils.isPropertiesEquals(p1, p2) ) {
 				return; // skip this update
 			}
 			p2.setSnapshotTime(time);
-			p2.setClearingTime(utils.getClearingTime(descr, time));
-			entityCache.put(descr, p2);
+			p2.setClearingTime(utils.getClearingTime(symbol, time));
+			entityCache.put(symbol, p2);
 			securitySessionPropertiesRepository.save(p2);
-			logger.debug("Security session properties updated: {}", descr);
+			logger.debug("Security session properties updated: {}", symbol);
 		} finally {
 			lock.unlock();
 		}
@@ -118,30 +118,30 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 	}
 	
 	private SymbolEntity getSymbolEntity(Security security) {
-		return getSymbolEntity(security.getDescriptor());
+		return getSymbolEntity(security.getSymbol());
 	}
 	
-	private SymbolEntity getSymbolEntity(SecurityDescriptor descr) {
-		return symbolRepository.getByDescriptor(descr);
+	private SymbolEntity getSymbolEntity(Symbol symbol) {
+		return symbolRepository.getBySymbol(symbol);
 	}
 	
 	private void updateSecurityProperties(Security security) {
-		SecurityDescriptor descr = security.getDescriptor();
-		Boolean x = propertiesSaved.get(descr); 
+		Symbol symbol = security.getSymbol();
+		Boolean x = propertiesSaved.get(symbol); 
 		if ( x != null && x ) {
 			return;
 		}
 		SecurityPropertiesEntity p = null;
 		try {
-			p = securityPropertiesRepository.getByDescriptor(descr);
+			p = securityPropertiesRepository.getBySymbol(symbol);
 		} catch ( RepositoryObjectNotFoundException e ) {
 			p = securityPropertiesRepository.createEntity();
-			p.setSymbol(getSymbolEntity(descr));
+			p.setSymbol(getSymbolEntity(symbol));
 			utils.fillProperties(security, p);
 			securityPropertiesRepository.save(p);
-			logger.debug("Security properties updated: {}", descr);
+			logger.debug("Security properties updated: {}", symbol);
 		}
-		propertiesSaved.put(descr, true);
+		propertiesSaved.put(symbol, true);
 	}
 
 }

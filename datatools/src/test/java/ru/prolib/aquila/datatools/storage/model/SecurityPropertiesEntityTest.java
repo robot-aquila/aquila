@@ -7,21 +7,21 @@ import java.util.Currency;
 import org.joda.time.*;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 
 public class SecurityPropertiesEntityTest {
-	private SecurityDescriptor descr;
-	private SymbolEntity symbol;
+	private Symbol symbol;
+	private SymbolEntity symbolEntity;
 	private SecurityPropertiesEntity entity;
 
 	@Before
 	public void setUp() throws Exception {
-		descr = new SecurityDescriptor("RTS", "SPB", "USD", SecurityType.FUT);
-		symbol = new SymbolEntity();
-		symbol.setDescriptor(descr);
+		symbol = new Symbol("RTS", "SPB", "USD", SymbolType.FUT);
+		symbolEntity = new SymbolEntity();
+		symbolEntity.setSymbol(symbol);
 		entity = new SecurityPropertiesEntity();
 	}
 	
@@ -41,14 +41,14 @@ public class SecurityPropertiesEntityTest {
 		DateTime expiration = new DateTime(2015, 4, 26, 14, 30, 20, 0);
 		Currency currency = Currency.getInstance("EUR");
 		entity.setId(215L);
-		entity.setSymbol(symbol);
+		entity.setSymbol(symbolEntity);
 		entity.setDisplayName("foobar");
 		entity.setStartingTime(starting);
 		entity.setExpirationTime(expiration);
 		entity.setCurrencyOfCost(currency);
 		
 		assertEquals(new Long(215L), entity.getId());
-		assertSame(symbol, entity.getSymbol());
+		assertSame(symbolEntity, entity.getSymbol());
 		assertEquals("foobar", entity.getDisplayName());
 		assertEquals(starting, entity.getStartingTime());
 		assertEquals(expiration, entity.getExpirationTime());
@@ -56,9 +56,9 @@ public class SecurityPropertiesEntityTest {
 	}
 	
 	@Test
-	public void testGetSecurityDescriptor() throws Exception {
-		entity.setSymbol(symbol);
-		assertSame(descr, entity.getSecurityDescriptor());
+	public void testGetSymbol() throws Exception {
+		entity.setSymbol(symbolEntity);
+		assertSame(symbol, entity.getSymbolInfo());
 	}
 
 }

@@ -12,7 +12,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.SimpleIterator;
 import ru.prolib.aquila.core.data.Tick;
@@ -26,10 +26,10 @@ public class SimpleTickDatabase implements TickDatabase {
 	}
 	
 	private final DataSegmentManager manager;
-	private final Map<SecurityDescriptor, DataSegment> segments;
+	private final Map<Symbol, DataSegment> segments;
 	
 	public SimpleTickDatabase(DataSegmentManager manager,
-			Map<SecurityDescriptor, DataSegment> segments)
+			Map<Symbol, DataSegment> segments)
 	{
 		super();
 		this.manager = manager;
@@ -37,15 +37,13 @@ public class SimpleTickDatabase implements TickDatabase {
 	}
 	
 	public SimpleTickDatabase(DataSegmentManager manager) {
-		this(manager, new Hashtable<SecurityDescriptor, DataSegment>());
+		this(manager, new Hashtable<Symbol, DataSegment>());
 	}
 
 	@Override
-	public void write(SecurityDescriptor descr, Tick tick)
-			throws IOException
-	{
+	public void write(Symbol symbol, Tick tick) throws IOException {
 		LocalDate date = tick.getTime().toLocalDate();
-		DataSegment segment = segments.get(descr);
+		DataSegment segment = segments.get(symbol);
 		if ( segment != null ) {
 			if ( segment.getDate().equals(date) == false ) {
 				manager.closeSegment(segment);
@@ -53,19 +51,16 @@ public class SimpleTickDatabase implements TickDatabase {
 			}
 		}
 		if ( segment == null ) {
-			segment = manager.openSegment(descr, date);
-			segments.put(descr, segment);
+			segment = manager.openSegment(symbol, date);
+			segments.put(symbol, segment);
 		}
 		segment.write(tick);
 	}
 
 	@Override
-	public Aqiterator<Tick>
-		getTicks(SecurityDescriptor descr, DateTime startingTime)
-			throws IOException
-	{
-		return manager.isDataAvailable(descr) ?
-				new SeamlessTickReader(descr, startingTime, manager) :
+	public Aqiterator<Tick> getTicks(Symbol symbol, DateTime startingTime) throws IOException {
+		return manager.isDataAvailable(symbol) ?
+				new SeamlessTickReader(symbol, startingTime, manager) :
 				new SimpleIterator<Tick>(new Vector<Tick>());
 	}
 
@@ -84,12 +79,11 @@ public class SimpleTickDatabase implements TickDatabase {
 	@Override
 	public void sendMarker(DateTime time) throws IOException {
 		LocalDate date = time.toLocalDate();
-		List<SecurityDescriptor>
-			keys = new LinkedList<SecurityDescriptor>(segments.keySet());
-		for ( SecurityDescriptor descr : keys ) {
-			DataSegment segment = segments.get(descr);
+		List<Symbol> keys = new LinkedList<Symbol>(segments.keySet());
+		for ( Symbol symbol : keys ) {
+			DataSegment segment = segments.get(symbol);
 			if ( date.compareTo(segment.getDate()) >= 0 ) {
-				segments.remove(descr);
+				segments.remove(symbol);
 				try {
 					manager.closeSegment(segment);
 				} catch ( IOException e ) {
@@ -101,19 +95,16 @@ public class SimpleTickDatabase implements TickDatabase {
 	}
 
 	@Override
-	public Aqiterator<Tick>
-		getTicks(SecurityDescriptor descr, int numLastSegments)
-			throws IOException
-	{
-		List<LocalDate> list = manager.getSegmentList(descr);
+	public Aqiterator<Tick> getTicks(Symbol symbol, int numLastSegments) throws IOException {
+		List<LocalDate> list = manager.getSegmentList(symbol);
 		int size = list.size();
 		if ( size == 0 ) {
 			return new SimpleIterator<Tick>(new Vector<Tick>());
 		} else if ( size <= numLastSegments ) {
-			return new SeamlessTickReader(descr,
+			return new SeamlessTickReader(symbol,
 					list.get(0).toDateTimeAtStartOfDay(), manager);
 		} else {
-			return new SeamlessTickReader(descr,
+			return new SeamlessTickReader(symbol,
 					list.get(size - numLastSegments).toDateTimeAtStartOfDay(),
 					manager);
 		}

@@ -4,7 +4,7 @@ import java.util.*;
 
 import org.joda.time.*;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.storage.SecurityProperties;
 
 public class SecurityPropertiesEntity
@@ -36,9 +36,10 @@ public class SecurityPropertiesEntity
 		this.symbol = id;
 	}
 	
+	// TODO: SymbolEntity needs refactoring
 	@Override
-	public SecurityDescriptor getSecurityDescriptor() {
-		return symbol.getDescriptor();
+	public Symbol getSymbolInfo() {
+		return symbol.getSymbol();
 	}
 	
 	@Override

@@ -5,33 +5,33 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 
 public class SymbolEntityTest {
-	private SecurityDescriptor descr;
-	private SymbolEntity entity;
+	private Symbol symbol;
+	private SymbolEntity symbolEntity;
 
 	@Before
 	public void setUp() throws Exception {
-		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
-		entity = new SymbolEntity();
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
+		symbolEntity = new SymbolEntity();
 	}
 
 	@Test
 	public void testCtor_Defaults() {
-		assertNull(entity.getId());
-		assertNull(entity.getDescriptor());
+		assertNull(symbolEntity.getId());
+		assertNull(symbolEntity.getSymbol());
 	}
 	
 	@Test
 	public void testSettersAndGetters() throws Exception {
-		entity.setId(815L);
-		entity.setDescriptor(descr);
+		symbolEntity.setId(815L);
+		symbolEntity.setSymbol(symbol);
 		
-		assertEquals(new Long(815), entity.getId());
-		assertSame(descr, entity.getDescriptor());
+		assertEquals(new Long(815), symbolEntity.getId());
+		assertSame(symbol, symbolEntity.getSymbol());
 	}
 
 }

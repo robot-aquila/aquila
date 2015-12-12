@@ -7,7 +7,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.DataException;
 import ru.prolib.aquila.core.data.Tick;
@@ -19,16 +19,16 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 		logger = LoggerFactory.getLogger(SeamlessTickReader.class);
 	}
 	
-	private final SecurityDescriptor descr;
+	private final Symbol symbol;
 	private final DataSegmentManager segmentManager;
 	private DateTime currentTime;
 	private Aqiterator<Tick> currentSegment;
 	
-	public SeamlessTickReader(SecurityDescriptor descr,
+	public SeamlessTickReader(Symbol symbol,
 			DateTime startingTime, DataSegmentManager segmentManager)
 	{
 		super();
-		this.descr = descr;
+		this.symbol = symbol;
 		this.segmentManager = segmentManager;
 		currentTime = startingTime;
 	}
@@ -48,12 +48,12 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 	}
 	
 	/**
-	 * Get security descriptor.
+	 * Get symbol info.
 	 * <p>
-	 * @return security descriptor
+	 * @return symbol info
 	 */
-	public SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+	public Symbol getSymbol() {
+		return symbol;
 	}
 	
 	/**
@@ -107,14 +107,14 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 	private boolean openNextSegment() {
 		try {
 			LocalDate date = currentTime.toLocalDate();
-			if ( ! segmentManager.isDataAvailable(descr, date) ) {
-				date = segmentManager.getDateOfNextSegment(descr, date);
+			if ( ! segmentManager.isDataAvailable(symbol, date) ) {
+				date = segmentManager.getDateOfNextSegment(symbol, date);
 				if ( date == null ) {
 					return false;
 				}
 				currentTime = date.toDateTimeAtStartOfDay();
 			}
-			currentSegment = segmentManager.openReader(descr, date);
+			currentSegment = segmentManager.openReader(symbol, date);
 			return true;
 		} catch ( IOException e ) {
 			logger.error("Error opening segment: ", e);

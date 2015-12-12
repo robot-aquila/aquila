@@ -6,32 +6,32 @@ import java.io.IOException;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 public class DataSegmentImpl implements DataSegment {
 	private final LocalDate date;
 	private final TickWriter writer;
-	private final SecurityDescriptor descr;
+	private final Symbol symbol;
 	private int lastNumber;
 	private LocalTime lastTime;
 	
-	public DataSegmentImpl(SecurityDescriptor descr, LocalDate date,
+	public DataSegmentImpl(Symbol symbol, LocalDate date,
 			TickWriter writer, LocalTime lastTime, int lastTickNumber)
 	{
 		super();
-		this.descr = descr;
+		this.symbol = symbol;
 		this.date = date;
 		this.writer = writer;
 		this.lastTime = lastTime;
 		this.lastNumber = lastTickNumber;
 	}
 	
-	public DataSegmentImpl(SecurityDescriptor descr, LocalDate date,
+	public DataSegmentImpl(Symbol symbol, LocalDate date,
 			TickWriter writer)
 	{
-		this(descr, date, writer, LocalTime.MIDNIGHT, 0);
+		this(symbol, date, writer, LocalTime.MIDNIGHT, 0);
 	}
 
 	@Override
@@ -41,8 +41,8 @@ public class DataSegmentImpl implements DataSegment {
 	
 
 	@Override
-	public SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+	public Symbol getSymbol() {
+		return symbol;
 	}
 	
 	/**

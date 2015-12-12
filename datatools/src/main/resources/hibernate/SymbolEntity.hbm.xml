@@ -6,8 +6,8 @@
 		<id name="id" access="field">
 			<generator class="increment" />
 		</id>
-		<property name="descr" unique="true" access="field" not-null="true"
-			type="ru.prolib.aquila.datatools.storage.dao.SecurityDescriptorType" >
+		<property name="symbol" unique="true" access="field" not-null="true"
+			type="ru.prolib.aquila.datatools.storage.dao.HibernateSymbolType" >
 			<column name="code" length="16" not-null="true" />
 			<column name="class_code" length="16" not-null="true" />
 			<column name="currency" length="3" not-null="true" />

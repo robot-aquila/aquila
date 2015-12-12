@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.datatools.storage.dao.SymbolRepositoryImpl;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 import ru.prolib.aquila.datatools.utils.LiquibaseTestHelper;
@@ -55,9 +55,9 @@ public class SymbolRepositoryImplTest
 		SymbolEntity x = repository.getById(1001L);
 		assertNotNull(x);
 		assertEquals(new Long(1001), x.getId());
-		SecurityDescriptor expected, actual;
-		expected = new SecurityDescriptor("RTS-6.15", "SPBFUT", "USD", SecurityType.FUT);
-		actual = x.getDescriptor();
+		Symbol expected, actual;
+		expected = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUT);
+		actual = x.getSymbol();
 		assertEquals(expected, actual);
 	}
 	
@@ -67,22 +67,21 @@ public class SymbolRepositoryImplTest
 	}
 	
 	@Test
-	public void testGetByDescriptor() {
-		SecurityDescriptor descr, actual;
-		descr = new SecurityDescriptor("Si-6.15", "SPBFUT", "RUB", SecurityType.FUT);
-		SymbolEntity x = repository.getByDescriptor(descr);
+	public void testGetBySymbol() {
+		Symbol expected, actual;
+		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUT);
+		SymbolEntity x = repository.getBySymbol(expected);
 		assertNotNull(x);
 		assertEquals(new Long(1002), x.getId());
-		actual = x.getDescriptor();
-		assertEquals(descr, actual);
+		actual = x.getSymbol();
+		assertEquals(expected, actual);
 	}
 	
 	@Test
-	public void testGetByDescriptor_CreatesNewIfNotExists() throws Exception {
-		SecurityDescriptor descr;
-		descr = new SecurityDescriptor("XXX", "YYY", "EUR", SecurityType.OPT);
+	public void testGetBySymbol_CreatesNewIfNotExists() throws Exception {
+		Symbol symbol = new Symbol("XXX", "YYY", "EUR", SymbolType.OPT);
 		
-		SymbolEntity x = repository.getByDescriptor(descr);
+		SymbolEntity x = repository.getBySymbol(symbol);
 		sessionFactory.getCurrentSession().flush();
 		
 		Long expectedId = new Long(1004);

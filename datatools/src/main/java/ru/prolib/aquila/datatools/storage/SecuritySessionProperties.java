@@ -2,7 +2,7 @@ package ru.prolib.aquila.datatools.storage;
 
 import org.joda.time.DateTime;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 /**
  * The trading session properties of a security.
@@ -10,11 +10,11 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 public interface SecuritySessionProperties {
 	
 	/**
-	 * Get descriptor of the security.
+	 * Get symbol info of the security.
 	 * <p>
-	 * @return security descriptor
+	 * @return symbol info
 	 */
-	public SecurityDescriptor getSecurityDescriptor();
+	public Symbol getSymbolInfo();
 	
 	/**
 	 * Get scale of the price values.

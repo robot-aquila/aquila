@@ -88,7 +88,7 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 		SecurityTradeEvent e = (SecurityTradeEvent) event;
 		Trade trade = e.getTrade();
 		try {
-			database.write(trade.getSecurityDescriptor(),
+			database.write(trade.getSymbol(),
 				new Tick(trade.getTime(), trade.getPrice(),
 					trade.getQty().intValue()));
 		} catch (IOException x) {

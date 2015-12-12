@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
@@ -19,12 +19,12 @@ import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 
 public class MOEXUtilsTest {
-	private static final SecurityDescriptor descr1, descr2, descr3;
+	private static final Symbol symbol1, symbol2, symbol3;
 	
 	static {
-		descr1 = new SecurityDescriptor("RTS", "SPBFUT", "USD", SecurityType.FUT);
-		descr2 = new SecurityDescriptor("XXX", "SPBFUT", "RUR", SecurityType.OPT);
-		descr3 = new SecurityDescriptor("SPY", "SPBFUT", "USD", SecurityType.STK);
+		symbol1 = new Symbol("RTS", "SPBFUT", "USD", SymbolType.FUT);
+		symbol2 = new Symbol("XXX", "SPBFUT", "RUR", SymbolType.OPT);
+		symbol3 = new Symbol("SPY", "SPBFUT", "USD", SymbolType.STK);
 	}
 	
 	private EditableTerminal terminal;
@@ -34,7 +34,7 @@ public class MOEXUtilsTest {
 	@Before
 	public void setUp() throws Exception {
 		terminal = new BasicTerminalBuilder().buildTerminal();
-		security = terminal.getEditableSecurity(descr1);
+		security = terminal.getEditableSecurity(symbol1);
 		moexUtils = new MOEXUtils();
 	}
 
@@ -149,17 +149,17 @@ public class MOEXUtilsTest {
 	public void testGetClearingTime() throws Exception {
 		DateTime initial = new DateTime(2014, 10, 1, 10, 15, 0);
 		DateTime expected = new DateTime(2014, 10, 1, 18, 45, 0);
-		assertEquals(expected, moexUtils.getClearingTime(descr1, initial));
-		assertEquals(expected, moexUtils.getClearingTime(descr2, initial));
-		assertEquals(expected, moexUtils.getClearingTime(descr3, initial));
+		assertEquals(expected, moexUtils.getClearingTime(symbol1, initial));
+		assertEquals(expected, moexUtils.getClearingTime(symbol2, initial));
+		assertEquals(expected, moexUtils.getClearingTime(symbol3, initial));
 		
 		initial = new DateTime(2009, 11, 15, 19, 10, 0);
 		expected = new DateTime(2009, 11, 15, 23, 50, 0);
-		assertEquals(expected, moexUtils.getClearingTime(descr1, initial));
-		assertEquals(expected, moexUtils.getClearingTime(descr2, initial));
+		assertEquals(expected, moexUtils.getClearingTime(symbol1, initial));
+		assertEquals(expected, moexUtils.getClearingTime(symbol2, initial));
 		
 		expected = new DateTime(2009, 11, 16, 18, 45, 0);
-		assertEquals(expected, moexUtils.getClearingTime(descr3, initial));
+		assertEquals(expected, moexUtils.getClearingTime(symbol3, initial));
 	}
 
 }

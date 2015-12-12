@@ -1,10 +1,10 @@
 package ru.prolib.aquila.datatools.storage.model;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class SymbolEntity {
 	private Long id;
-	private SecurityDescriptor descr;
+	private Symbol symbol;
 
 	public SymbolEntity() {
 		super();
@@ -18,12 +18,12 @@ public class SymbolEntity {
 		this.id = id;
 	}
 	
-	public SecurityDescriptor getDescriptor() {
-		return descr;
+	public Symbol getSymbol() {
+		return symbol;
 	}
 	
-	public void setDescriptor(SecurityDescriptor descr) {
-		this.descr = descr;
+	public void setSymbol(Symbol symbol) {
+		this.symbol = symbol;
 	}
 
 }

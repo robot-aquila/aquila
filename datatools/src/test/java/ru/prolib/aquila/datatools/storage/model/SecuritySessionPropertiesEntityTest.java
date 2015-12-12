@@ -6,21 +6,21 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
 
 public class SecuritySessionPropertiesEntityTest {
-	private SecurityDescriptor descr;
-	private SymbolEntity symbol;
+	private Symbol symbol;
+	private SymbolEntity symbolEntity;
 	private SecuritySessionPropertiesEntity entity;
 
 	@Before
 	public void setUp() throws Exception {
-		descr = new SecurityDescriptor("SPY", "ARCA", "USD", SecurityType.FUT);
-		symbol = new SymbolEntity();
-		symbol.setDescriptor(descr);
+		symbol = new Symbol("SPY", "ARCA", "USD", SymbolType.FUT);
+		symbolEntity = new SymbolEntity();
+		symbolEntity.setSymbol(symbol);
 		entity = new SecuritySessionPropertiesEntity();
 	}
 	
@@ -28,7 +28,7 @@ public class SecuritySessionPropertiesEntityTest {
 	public void testCtor_Defaults() {
 		assertNull(entity.getId());
 		assertNull(entity.getSymbol());
-		assertNull(entity.getSecurityDescriptor());
+		assertNull(entity.getSymbolInfo());
 		assertNull(entity.getScale());
 		assertNull(entity.getTickCost());
 		assertNull(entity.getInitialMarginCost());
@@ -44,7 +44,7 @@ public class SecuritySessionPropertiesEntityTest {
 	@Test
 	public void testSettersAndGetters() throws Exception {
 		entity.setId(280L);
-		entity.setSymbol(symbol);
+		entity.setSymbol(symbolEntity);
 		entity.setScale(2);
 		entity.setTickCost(12.34);
 		entity.setInitialMarginCost(22897.86);
@@ -57,7 +57,7 @@ public class SecuritySessionPropertiesEntityTest {
 		entity.setClearingTime(new DateTime(2001, 1, 11, 18, 45, 0, 0));
 		
 		assertEquals(new Long(280), entity.getId());
-		assertSame(symbol, entity.getSymbol());
+		assertSame(symbolEntity, entity.getSymbol());
 		assertEquals(new Integer(2), entity.getScale());
 		assertEquals(new Double(12.34), entity.getTickCost(), 0.01);
 		assertEquals(new Double(22897.86), entity.getInitialMarginCost(), 0.01);
@@ -71,9 +71,9 @@ public class SecuritySessionPropertiesEntityTest {
 	}
 	
 	@Test
-	public void testGetSecurityDescriptor() throws Exception {
-		entity.setSymbol(symbol);
-		assertSame(descr, entity.getSecurityDescriptor());
+	public void testGetSymbol() throws Exception {
+		entity.setSymbol(symbolEntity);
+		assertSame(symbol, entity.getSymbolInfo());
 	}
 
 }

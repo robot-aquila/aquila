@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
 
 @Repository
@@ -26,16 +26,16 @@ public class SymbolRepositoryImpl implements SymbolRepository {
 	}
 
 	@Override
-	public SymbolEntity getByDescriptor(SecurityDescriptor descr) {
+	public SymbolEntity getBySymbol(Symbol symbol) {
 		Session session = getSession();
 		SymbolEntity x = (SymbolEntity)
 				session.createCriteria(SymbolEntity.class)
-				.add(Restrictions.eq("descr", descr))
+				.add(Restrictions.eq("symbol", symbol))
 				.setMaxResults(1)
 				.uniqueResult();
 		if ( x == null ) {
 			x = new SymbolEntity();
-			x.setDescriptor(descr);
+			x.setSymbol(symbol);
 			session.save(x);			
 
 		}

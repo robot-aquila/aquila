@@ -4,7 +4,7 @@ import java.util.Currency;
 
 import org.joda.time.*;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 /**
  * Constant properties which exists all of the security lifetime. 
@@ -12,11 +12,11 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
 public interface SecurityProperties {
 
 	/**
-	 * Get descriptor of the security.
+	 * Get symbol of the security.
 	 * <p>
-	 * @return security descriptor
+	 * @return symbol info
 	 */
-	public SecurityDescriptor getSecurityDescriptor();
+	public Symbol getSymbolInfo();
 	
 	/**
 	 * Get display name of the security.

@@ -28,7 +28,7 @@ public class SecurityPropertiesRepositoryImplTest
 	private SymbolRepositoryImpl symbols;
 	private SecurityPropertiesRepositoryImpl repository;
 	private SecurityPropertiesEntity entity;
-	private SecurityDescriptor descr;
+	private Symbol symbol;
 	
 	@Autowired
 	public void setSessionFactory(SessionFactory sessionFactory) {
@@ -84,9 +84,9 @@ public class SecurityPropertiesRepositoryImplTest
 	}
 	
 	@Test
-	public void testGetBySymbol() throws Exception {
+	public void testGetBySymbolEntity() throws Exception {
 		SymbolEntity symbol = symbols.getById(1002L);
-		entity = repository.getBySymbol(symbol);
+		entity = repository.getBySymbolEntity(symbol);
 		assertNotNull(entity);
 		assertEquals(new Long(16), entity.getId());
 		assertEquals(new Long(1002), entity.getSymbol().getId());
@@ -97,15 +97,15 @@ public class SecurityPropertiesRepositoryImplTest
 	}
 	
 	@Test (expected=RepositoryObjectNotFoundException.class)
-	public void testGetBySymbol_ThrowsIfNotExists() throws Exception {
+	public void testGetBySymbolEntity_ThrowsIfNotExists() throws Exception {
 		SymbolEntity symbol = symbols.getById(1003L);
-		repository.getBySymbol(symbol);
+		repository.getBySymbolEntity(symbol);
 	}
 
 	@Test
-	public void testGetByDescirptor() throws Exception {
-		descr = new SecurityDescriptor("RTS-6.15", "SPBFUT", "USD", SecurityType.FUT);
-		entity = repository.getByDescriptor(descr);
+	public void testGetBySymbol() throws Exception {
+		symbol = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUT);
+		entity = repository.getBySymbol(symbol);
 		assertNotNull(entity);
 		assertEquals(new Long(15), entity.getId());
 		assertEquals(new Long(1001), entity.getSymbol().getId());
@@ -116,9 +116,9 @@ public class SecurityPropertiesRepositoryImplTest
 	}
 	
 	@Test (expected=RepositoryObjectNotFoundException.class)
-	public void testGetByDescirptor_ThrowsIfNotExists() {
-		descr = new SecurityDescriptor("XXX", "YYY", "RUB", SecurityType.CASH);
-		repository.getByDescriptor(descr);
+	public void testGetBySymbol_ThrowsIfNotExists() {
+		symbol = new Symbol("XXX", "YYY", "RUB", SymbolType.CASH);
+		repository.getBySymbol(symbol);
 	}
 	
 	@Test
@@ -185,11 +185,11 @@ public class SecurityPropertiesRepositoryImplTest
 	}
 	
 	@Test
-	public void testGetEntitySecurityDescriptor() throws Exception {
+	public void testGetSymbol() throws Exception {
 		entity = repository.getById(16L);
-		SecurityDescriptor expected, actual;
-		expected = new SecurityDescriptor("Si-6.15", "SPBFUT", "RUB", SecurityType.FUT);
-		actual = entity.getSecurityDescriptor();
+		Symbol expected, actual;
+		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUT);
+		actual = entity.getSymbolInfo();
 		assertEquals(expected, actual);
 	}
 

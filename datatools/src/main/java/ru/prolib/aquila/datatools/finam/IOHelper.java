@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.utils.IdUtils;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushSetup;
@@ -136,27 +136,25 @@ public class IOHelper {
 	/**
 	 * Get data segment filename.
 	 * <p> 
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @param date - the date of segment
 	 * @param suffix - file suffix
 	 * @return the full path to segment file
 	 */
-	public File getFile(SecurityDescriptor descr, LocalDate date,
-			String suffix)
-	{
-		File file = getLevel2Dir(descr, date);
-		file = new File(file, idUtils.getSafeId(descr, date) + suffix);
+	public File getFile(Symbol symbol, LocalDate date, String suffix) {
+		File file = getLevel2Dir(symbol, date);
+		file = new File(file, idUtils.getSafeId(symbol, date) + suffix);
 		return file;
 	}
 	
 	/**
 	 * Get the root directory of the security data.
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @return the root directory of the security data storage
 	 */
-	public File getRootDir(SecurityDescriptor descr) {
-		return new File(root, idUtils.getSafeId(descr));
+	public File getRootDir(Symbol symbol) {
+		return new File(root, idUtils.getSafeId(symbol));
 	}
 	
 	/**
@@ -164,12 +162,12 @@ public class IOHelper {
 	 * <p>
 	 * The Level 1 directory contains data of the year. 
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @param date - the date to get year of
 	 * @return the directory
 	 */
-	public File getLevel1Dir(SecurityDescriptor descr, LocalDate date) {
-		File file = getRootDir(descr);
+	public File getLevel1Dir(Symbol symbol, LocalDate date) {
+		File file = getRootDir(symbol);
 		file = new File(file, String.format("%04d", date.getYear()));
 		return file;
 	}
@@ -179,12 +177,12 @@ public class IOHelper {
 	 * <p>
 	 * The Level 2 directory contains data of the month of year.
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @param date - the date to get month of 
 	 * @return the directory
 	 */
-	public File getLevel2Dir(SecurityDescriptor descr, LocalDate date) {
-		File file = getLevel1Dir(descr, date);
+	public File getLevel2Dir(Symbol symbol, LocalDate date) {
+		File file = getLevel1Dir(symbol, date);
 		file = new File(file, String.format("%02d", date.getMonthOfYear()));
 		return file;
 	}
@@ -241,18 +239,18 @@ public class IOHelper {
 	/**
 	 * Get list of dates of available segments.
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @return list of dates
 	 * @throws IOException - IO error
 	 */
-	public List<LocalDate> getAvailableDataSegments(SecurityDescriptor descr)
+	public List<LocalDate> getAvailableDataSegments(Symbol symbol)
 			throws IOException
 	{
 		List<LocalDate> result = new Vector<LocalDate>();
 		DateTimeFormatter df = DateTimeFormat.forPattern("yyyyMMdd");
-		String prefix = idUtils.getSafeId(descr);
+		String prefix = idUtils.getSafeId(symbol);
 		int dateStart = prefix.length() + 1, dateLength = 8;
-		Iterator<File> it = FileUtils.iterateFiles(getRootDir(descr), null, true);
+		Iterator<File> it = FileUtils.iterateFiles(getRootDir(symbol), null, true);
 		while ( it.hasNext() ) {
 			File x = it.next();
 			if ( x.isDirectory() ) {

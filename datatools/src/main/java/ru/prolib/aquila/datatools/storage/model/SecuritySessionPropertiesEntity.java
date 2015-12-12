@@ -2,7 +2,7 @@ package ru.prolib.aquila.datatools.storage.model;
 
 import org.joda.time.DateTime;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.storage.SecuritySessionProperties;
 
 public class SecuritySessionPropertiesEntity implements SecuritySessionProperties {
@@ -33,10 +33,11 @@ public class SecuritySessionPropertiesEntity implements SecuritySessionPropertie
 		this.symbol = symbol;
 	}
 
+	// TODO: SymbolEntity needs refactoring
 	@Override
-	public SecurityDescriptor getSecurityDescriptor() {
+	public Symbol getSymbolInfo() {
 		SymbolEntity x = getSymbol(); 
-		return x == null ? null : x.getDescriptor();
+		return x == null ? null : x.getSymbol();
 	}
 
 	@Override

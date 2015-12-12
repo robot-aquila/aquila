@@ -28,8 +28,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.core.utils.IdUtils;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
@@ -37,12 +37,12 @@ import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushTickWriter;
 
 public class IOHelperTest {
 	private static final File root;
-	private static final SecurityDescriptor descr;
+	private static final Symbol symbol;
 	private static final IdUtils idUtils;
 	
 	static {
 		root = new File("fixture", "finam-tests");
-		descr = new SecurityDescriptor("Si-6.15","SPB","USD",SecurityType.FUT);
+		symbol = new Symbol("Si-6.15","SPB","USD",SymbolType.FUT);
 		idUtils = new IdUtils();
 	}
 	
@@ -191,7 +191,7 @@ public class IOHelperTest {
 				+ File.separator + "2015" + File.separator + "10"
 				+ File.separator + "Si%2D6%2E15-SPB-USD-FUT-20151013.xx");
 		
-		File actual = helper.getFile(descr, new LocalDate(2015, 10, 13), ".xx");
+		File actual = helper.getFile(symbol, new LocalDate(2015, 10, 13), ".xx");
 		
 		assertNotNull(actual);
 		assertEquals(expected, actual);
@@ -201,7 +201,7 @@ public class IOHelperTest {
 	public void testGetRootDir() {
 		File expected = new File(root, "Si%2D6%2E15-SPB-USD-FUT");
 		
-		File actual = helper.getRootDir(descr);
+		File actual = helper.getRootDir(symbol);
 		
 		assertNotNull(actual);
 		assertEquals(expected, actual);
@@ -212,7 +212,7 @@ public class IOHelperTest {
 		File expected = new File(root, "Si%2D6%2E15-SPB-USD-FUT"
 				+ File.separator + "2015");
 		
-		File actual = helper.getLevel1Dir(descr, new LocalDate(2015, 10, 13));
+		File actual = helper.getLevel1Dir(symbol, new LocalDate(2015, 10, 13));
 		
 		assertNotNull(actual);
 		assertEquals(expected, actual);
@@ -223,7 +223,7 @@ public class IOHelperTest {
 		File expected = new File(root, "Si%2D6%2E15-SPB-USD-FUT"
 				+ File.separator + "2015" + File.separator + "10");
 		
-		File actual = helper.getLevel2Dir(descr, new LocalDate(2015, 10, 13));
+		File actual = helper.getLevel2Dir(symbol, new LocalDate(2015, 10, 13));
 		
 		assertNotNull(actual);
 		assertEquals(expected, actual);
@@ -295,7 +295,7 @@ public class IOHelperTest {
 	
 	@Test
 	public void testGetAvailableDataSegments_() throws Exception {
-		String prefix = idUtils.getSafeId(descr);
+		String prefix = idUtils.getSafeId(symbol);
 		String fs = File.separator; 
 		File dir = new File(root, prefix + fs + "2010" + fs + "01");
 		dir.mkdirs();
@@ -335,7 +335,7 @@ public class IOHelperTest {
 		expected.add(new LocalDate(2010, 5, 1));
 		expected.add(new LocalDate(2011, 1, 1));
 		
-		List<LocalDate> actual = helper.getAvailableDataSegments(descr);
+		List<LocalDate> actual = helper.getAvailableDataSegments(symbol);
 		
 		assertEquals(expected, actual);
 	}

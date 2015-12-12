@@ -19,8 +19,8 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.datatools.storage.SecuritySessionProperties;
 import ru.prolib.aquila.datatools.storage.SecurityStorageService;
@@ -37,11 +37,11 @@ public class MOEXSecurityStorageServiceImplTest
 	extends AbstractTransactionalJUnit4SpringContextTests
 	implements ApplicationContextAware
 {
-	private static final SecurityDescriptor descr1, descr2;
+	private static final Symbol symbol1, symbol2;
 	
 	static {
-		descr1 = new SecurityDescriptor("RTS-12.15", "SPBFUT", "USD", SecurityType.FUT);
-		descr2 = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
+		symbol1 = new Symbol("RTS-12.15", "SPBFUT", "USD", SymbolType.FUT);
+		symbol2 = new Symbol("GAZP", "EQBR", "RUR", SymbolType.STK);
 	}
 	
 	private IMocksControl control;
@@ -50,14 +50,14 @@ public class MOEXSecurityStorageServiceImplTest
 	private SecuritySessionPropertiesRepository securitySessionPropertiesRepositoryMock;
 	private MOEXUtils moexUtilsMock;
 	private Scheduler schedulerMock;
-	private Map<SecurityDescriptor, SecuritySessionProperties> entityCache;
-	private Map<SecurityDescriptor, Boolean> propertiesSaved;
+	private Map<Symbol, SecuritySessionProperties> entityCache;
+	private Map<Symbol, Boolean> propertiesSaved;
 	private EditableTerminal terminal;
 	private Security security1, security2;
 	private MOEXSecurityStorageServiceImpl service;
 	private DateTime time1, time2;
 	private SecuritySessionPropertiesEntity sessProps1, sessProps2;
-	private SymbolEntity symbol1, symbol2;
+	private SymbolEntity symbolEntity1, symbolEntity2;
 	@Autowired
 	private ApplicationContext applicationContext;
 	
@@ -69,13 +69,13 @@ public class MOEXSecurityStorageServiceImplTest
 		securitySessionPropertiesRepositoryMock = control.createMock(SecuritySessionPropertiesRepository.class);
 		moexUtilsMock = control.createMock(MOEXUtils.class);
 		schedulerMock = control.createMock(Scheduler.class);
-		entityCache = new HashMap<SecurityDescriptor, SecuritySessionProperties>();
-		propertiesSaved = new HashMap<SecurityDescriptor, Boolean>();
+		entityCache = new HashMap<Symbol, SecuritySessionProperties>();
+		propertiesSaved = new HashMap<Symbol, Boolean>();
 		terminal = new BasicTerminalBuilder()
 			.withScheduler(schedulerMock)
 			.buildTerminal();
-		security1 = terminal.getEditableSecurity(descr1);
-		security2 = terminal.getEditableSecurity(descr2);
+		security1 = terminal.getEditableSecurity(symbol1);
+		security2 = terminal.getEditableSecurity(symbol2);
 		service = new MOEXSecurityStorageServiceImpl(moexUtilsMock, entityCache, propertiesSaved);
 		service.setSymbolRepository(symbolRepositoryMock);
 		service.setSecurityPropertiesRepository(securityPropertiesRepositoryMock);
@@ -85,28 +85,28 @@ public class MOEXSecurityStorageServiceImplTest
 		time2 = new DateTime(2012, 1, 15, 18, 45, 0);
 		sessProps1 = new SecuritySessionPropertiesEntity();
 		sessProps2 = new SecuritySessionPropertiesEntity();
-		symbol1 = new SymbolEntity();
-		symbol2 = new SymbolEntity();
+		symbolEntity1 = new SymbolEntity();
+		symbolEntity2 = new SymbolEntity();
 	}
 	
 	@Test
 	public void testSnapshotSessionAttributes2_Case1() throws Exception {
 		// Case 1:	constant security properties entity already checked
 		// 			previously cached session properties must be rewritten
-		propertiesSaved.put(descr1, true);
-		entityCache.put(descr1, sessProps1);
+		propertiesSaved.put(symbol1, true);
+		entityCache.put(symbol1, sessProps1);
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
-		expect(symbolRepositoryMock.getByDescriptor(descr1)).andReturn(symbol1);
+		expect(symbolRepositoryMock.getBySymbol(symbol1)).andReturn(symbolEntity1);
 		moexUtilsMock.fillSessionProperties(security1, sessProps2);
-		expect(moexUtilsMock.getClearingTime(descr1, time1)).andReturn(time2);
+		expect(moexUtilsMock.getClearingTime(symbol1, time1)).andReturn(time2);
 		securitySessionPropertiesRepositoryMock.save(sessProps2);
 		control.replay();
 		
 		service.snapshotSessionAttributes(security1, time1);
 		
 		control.verify();
-		assertSame(symbol1, sessProps2.getSymbol());
-		assertSame(sessProps2, entityCache.get(descr1));
+		assertSame(symbolEntity1, sessProps2.getSymbol());
+		assertSame(sessProps2, entityCache.get(symbol1));
 		assertEquals(time1, sessProps2.getSnapshotTime());
 		assertEquals(time2, sessProps2.getClearingTime());
 	}
@@ -119,26 +119,26 @@ public class MOEXSecurityStorageServiceImplTest
 		
 		// Processing of constant security properties
 		SecurityPropertiesEntity props2 = new SecurityPropertiesEntity();
-		expect(securityPropertiesRepositoryMock.getByDescriptor(descr2))
+		expect(securityPropertiesRepositoryMock.getBySymbol(symbol2))
 			.andThrow(new RepositoryObjectNotFoundException("xxx"));
 		expect(securityPropertiesRepositoryMock.createEntity()).andReturn(props2);
-		expect(symbolRepositoryMock.getByDescriptor(descr2)).andReturn(symbol2);
+		expect(symbolRepositoryMock.getBySymbol(symbol2)).andReturn(symbolEntity2);
 		moexUtilsMock.fillProperties(security2, props2);
 		securityPropertiesRepositoryMock.save(props2);
 		// Processing of session properties
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
-		expect(symbolRepositoryMock.getByDescriptor(descr2)).andReturn(symbol2);
+		expect(symbolRepositoryMock.getBySymbol(symbol2)).andReturn(symbolEntity2);
 		moexUtilsMock.fillSessionProperties(security2, sessProps2);
-		expect(moexUtilsMock.getClearingTime(descr2, time1)).andReturn(time2);
+		expect(moexUtilsMock.getClearingTime(symbol2, time1)).andReturn(time2);
 		securitySessionPropertiesRepositoryMock.save(sessProps2);
 		control.replay();
 		
 		service.snapshotSessionAttributes(security2, time1);
 		
 		control.verify();
-		assertTrue(propertiesSaved.get(descr2));
-		assertEquals(symbol2, props2.getSymbol());
-		assertSame(sessProps2, entityCache.get(descr2));
+		assertTrue(propertiesSaved.get(symbol2));
+		assertEquals(symbolEntity2, props2.getSymbol());
+		assertSame(sessProps2, entityCache.get(symbol2));
 		assertEquals(time1, sessProps2.getSnapshotTime());
 		assertEquals(time2, sessProps2.getClearingTime());
 	}
@@ -150,20 +150,20 @@ public class MOEXSecurityStorageServiceImplTest
 		//			session properties was not cached
 		// Processing of constant security properties
 		SecurityPropertiesEntity props1 = new SecurityPropertiesEntity();
-		expect(securityPropertiesRepositoryMock.getByDescriptor(descr1)).andReturn(props1);
+		expect(securityPropertiesRepositoryMock.getBySymbol(symbol1)).andReturn(props1);
 		// Processing of session properties
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps1);
-		expect(symbolRepositoryMock.getByDescriptor(descr1)).andReturn(symbol1);
+		expect(symbolRepositoryMock.getBySymbol(symbol1)).andReturn(symbolEntity1);
 		moexUtilsMock.fillSessionProperties(security1, sessProps1);
-		expect(moexUtilsMock.getClearingTime(descr1, time1)).andReturn(time2);
+		expect(moexUtilsMock.getClearingTime(symbol1, time1)).andReturn(time2);
 		securitySessionPropertiesRepositoryMock.save(sessProps1);
 		control.replay();
 		
 		service.snapshotSessionAttributes(security1, time1);
 		
 		control.verify();
-		assertTrue(propertiesSaved.get(descr1));
-		assertSame(sessProps1, entityCache.get(descr1));
+		assertTrue(propertiesSaved.get(symbol1));
+		assertSame(sessProps1, entityCache.get(symbol1));
 		assertEquals(time1, sessProps1.getSnapshotTime());
 		assertEquals(time2, sessProps1.getClearingTime());
 	}
@@ -172,20 +172,20 @@ public class MOEXSecurityStorageServiceImplTest
 	public void testSnapshotSessionAttributes1_Case1() throws Exception {
 		// Case 1:	constant security properties already checked
 		//			session properties entity was not cached
-		propertiesSaved.put(descr1, true);
+		propertiesSaved.put(symbol1, true);
 		expect(schedulerMock.getCurrentTime()).andReturn(time1);
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
-		expect(symbolRepositoryMock.getByDescriptor(descr1)).andReturn(symbol1);
+		expect(symbolRepositoryMock.getBySymbol(symbol1)).andReturn(symbolEntity1);
 		moexUtilsMock.fillSessionProperties(security1, sessProps2);
-		expect(moexUtilsMock.getClearingTime(descr1, time1)).andReturn(time2);
+		expect(moexUtilsMock.getClearingTime(symbol1, time1)).andReturn(time2);
 		securitySessionPropertiesRepositoryMock.save(sessProps2);
 		control.replay();
 		
 		service.snapshotSessionAttributes(security1);
 		
 		control.verify();
-		assertSame(sessProps2, entityCache.get(descr1));
-		assertSame(symbol1, sessProps2.getSymbol());
+		assertSame(sessProps2, entityCache.get(symbol1));
+		assertSame(symbolEntity1, sessProps2.getSymbol());
 		assertEquals(time1, sessProps2.getSnapshotTime());
 		assertEquals(time2, sessProps2.getClearingTime());
 	}
@@ -194,11 +194,11 @@ public class MOEXSecurityStorageServiceImplTest
 	public void testSnapshotSessionAttributes1_Case2() throws Exception {
 		// Case 2:	constant security properties already checked
 		//			session properties entity was cached and not updated
-		propertiesSaved.put(descr2, true);
-		entityCache.put(descr2, sessProps1);
+		propertiesSaved.put(symbol2, true);
+		entityCache.put(symbol2, sessProps1);
 		expect(schedulerMock.getCurrentTime()).andReturn(time1);
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
-		expect(symbolRepositoryMock.getByDescriptor(descr2)).andReturn(symbol2);
+		expect(symbolRepositoryMock.getBySymbol(symbol2)).andReturn(symbolEntity2);
 		moexUtilsMock.fillSessionProperties(security2, sessProps2);
 		expect(moexUtilsMock.isPropertiesEquals(sessProps1, sessProps2)).andReturn(true);
 		control.replay();
@@ -206,29 +206,29 @@ public class MOEXSecurityStorageServiceImplTest
 		service.snapshotSessionAttributes(security2);
 		
 		control.verify();
-		assertSame(sessProps1, entityCache.get(descr2));
+		assertSame(sessProps1, entityCache.get(symbol2));
 	}
 	
 	@Test
 	public void testSnapshotSessionAttributes1_Case3() throws Exception {
 		// Case 3:	constant security properties already checked
 		//			session properties entity was cached and updated
-		propertiesSaved.put(descr1, true);
-		entityCache.put(descr1, sessProps1);
+		propertiesSaved.put(symbol1, true);
+		entityCache.put(symbol1, sessProps1);
 		expect(schedulerMock.getCurrentTime()).andReturn(time1);
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
-		expect(symbolRepositoryMock.getByDescriptor(descr1)).andReturn(symbol1);
+		expect(symbolRepositoryMock.getBySymbol(symbol1)).andReturn(symbolEntity1);
 		moexUtilsMock.fillSessionProperties(security1, sessProps2);
 		expect(moexUtilsMock.isPropertiesEquals(sessProps1, sessProps2)).andReturn(false);
-		expect(moexUtilsMock.getClearingTime(descr1, time1)).andReturn(time2);
+		expect(moexUtilsMock.getClearingTime(symbol1, time1)).andReturn(time2);
 		securitySessionPropertiesRepositoryMock.save(sessProps2);
 		control.replay();
 		
 		service.snapshotSessionAttributes(security1);
 		
 		control.verify();
-		assertSame(sessProps2, entityCache.get(descr1));
-		assertSame(symbol1, sessProps2.getSymbol());
+		assertSame(sessProps2, entityCache.get(symbol1));
+		assertSame(symbolEntity1, sessProps2.getSymbol());
 		assertEquals(time1, sessProps2.getSnapshotTime());
 		assertEquals(time2, sessProps2.getClearingTime());
 	}

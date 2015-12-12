@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.storage.SecurityProperties;
 import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SymbolEntity;
@@ -49,27 +49,25 @@ public class SecurityPropertiesRepositoryImpl implements
 	}
 
 	@Override
-	public SecurityPropertiesEntity
-		getByDescriptor(SecurityDescriptor descr)
-	{
+	public SecurityPropertiesEntity getBySymbol(Symbol symbol) {
 		Session session = getSession();
 		SecurityPropertiesEntity x = (SecurityPropertiesEntity)
 			session.createCriteria(SecurityPropertiesEntity.class, "p")
 			.createAlias("p.symbol", "s")
-			.add(Restrictions.eq("s.descr", descr))
+			.add(Restrictions.eq("s.symbol", symbol))
 			.setMaxResults(1)
 			.uniqueResult();
 		if ( x == null ) {
 			throw new RepositoryObjectNotFoundException(
 					SecurityPropertiesEntity.class.toString()
 					+ " of "
-					+ descr.toString());
+					+ symbol.toString());
 		}
 		return x;
 	}
 
 	@Override
-	public SecurityPropertiesEntity getBySymbol(SymbolEntity symbol) {
+	public SecurityPropertiesEntity getBySymbolEntity(SymbolEntity symbol) {
 		Session session = getSession();
 		SecurityPropertiesEntity x = (SecurityPropertiesEntity)
 				session.createCriteria(SecurityPropertiesEntity.class)

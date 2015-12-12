@@ -6,8 +6,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.datatools.storage.SecuritySessionProperties;
 import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
@@ -51,7 +51,7 @@ public class MOEXUtils {
 		p.setDisplayName(security.getDisplayName());
 	}
 	
-	public DateTime getClearingTime(SecurityDescriptor descr, DateTime time) {
+	public DateTime getClearingTime(Symbol symbol, DateTime time) {
 		LocalTime dummyTime = time.toLocalTime(),
 				clearing1 = new LocalTime(18, 45, 0),
 				clearing2 = new LocalTime(23, 50, 0);
@@ -59,8 +59,8 @@ public class MOEXUtils {
 		if ( dummyTime.compareTo(clearing1) < 0 ) {
 			return dummyDate.toDateTime(clearing1);
 		}
-		if ( descr.getType() == SecurityType.FUT
-		  || descr.getType() == SecurityType.OPT )
+		if ( symbol.getType() == SymbolType.FUT
+		  || symbol.getType() == SymbolType.OPT )
 		{
 			return dummyDate.toDateTime(clearing2);
 		} else {

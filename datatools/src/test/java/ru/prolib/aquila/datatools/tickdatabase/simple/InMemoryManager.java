@@ -8,29 +8,29 @@ import java.util.Vector;
 
 import org.joda.time.LocalDate;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.SimpleIterator;
 import ru.prolib.aquila.core.data.Tick;
 
 class InMemoryManager implements DataSegmentManager {
-	private HashMap<SecurityDescriptor, HashMap<LocalDate, List<Tick>>> data;
+	private HashMap<Symbol, HashMap<LocalDate, List<Tick>>> data;
 	
 	public InMemoryManager() {
-		data = new HashMap<SecurityDescriptor, HashMap<LocalDate, List<Tick>>>();
+		data = new HashMap<Symbol, HashMap<LocalDate, List<Tick>>>();
 	}
 	
-	public void setSegmentData(SecurityDescriptor descr, LocalDate date, List<Tick> list) {
-		HashMap<LocalDate, List<Tick>> x1 = data.get(descr);
+	public void setSegmentData(Symbol symbol, LocalDate date, List<Tick> list) {
+		HashMap<LocalDate, List<Tick>> x1 = data.get(symbol);
 		if ( x1 == null ) {
 			x1 = new HashMap<LocalDate, List<Tick>>();
-			data.put(descr, x1);
+			data.put(symbol, x1);
 		}
 		x1.put(date, new Vector<Tick>(list));
 	}
 
 	@Override
-	public DataSegment openSegment(SecurityDescriptor descr, LocalDate date)
+	public DataSegment openSegment(Symbol symbol, LocalDate date)
 			throws IOException
 	{
 		throw new IOException("Not implemented");
@@ -42,11 +42,8 @@ class InMemoryManager implements DataSegmentManager {
 	}
 
 	@Override
-	public Aqiterator<Tick>
-		openReader(SecurityDescriptor descr, LocalDate date)
-			throws IOException
-	{
-		return new SimpleIterator<Tick>(data.get(descr).get(date));
+	public Aqiterator<Tick> openReader(Symbol symbol, LocalDate date) throws IOException {
+		return new SimpleIterator<Tick>(data.get(symbol).get(date));
 	}
 
 	@Override
@@ -55,39 +52,31 @@ class InMemoryManager implements DataSegmentManager {
 	}
 
 	@Override
-	public boolean isDataAvailable(SecurityDescriptor descr)
-			throws IOException
-	{
-		return data.containsKey(descr);
+	public boolean isDataAvailable(Symbol symbol) throws IOException {
+		return data.containsKey(symbol);
 	}
 
 	@Override
-	public boolean isDataAvailable(SecurityDescriptor descr, LocalDate date)
-			throws IOException
-	{
-		return isDataAvailable(descr) && data.get(descr).containsKey(date);
+	public boolean isDataAvailable(Symbol symbol, LocalDate date) throws IOException {
+		return isDataAvailable(symbol) && data.get(symbol).containsKey(date);
 	}
 
 	@Override
-	public LocalDate getDateOfFirstSegment(SecurityDescriptor descr)
-			throws IOException
-	{
-		if ( ! isDataAvailable(descr) ) {
+	public LocalDate getDateOfFirstSegment(Symbol symbol) throws IOException {
+		if ( ! isDataAvailable(symbol) ) {
 			return null;
 		}
-		List<LocalDate> dates = new Vector<LocalDate>(data.get(descr).keySet());
+		List<LocalDate> dates = new Vector<LocalDate>(data.get(symbol).keySet());
 		Collections.sort(dates);
 		return dates.size() > 0 ? dates.get(0) : null;
 	}
 
 	@Override
-	public LocalDate getDateOfNextSegment(SecurityDescriptor descr,
-			LocalDate date) throws IOException
-	{
-		if ( ! isDataAvailable(descr) ) {
+	public LocalDate getDateOfNextSegment(Symbol symbol, LocalDate date) throws IOException {
+		if ( ! isDataAvailable(symbol) ) {
 			return null;
 		}
-		List<LocalDate> dates = new Vector<LocalDate>(data.get(descr).keySet());
+		List<LocalDate> dates = new Vector<LocalDate>(data.get(symbol).keySet());
 		Collections.sort(dates);
 		for ( LocalDate x : dates ) {
 			if ( x.isAfter(date) ) {
@@ -98,16 +87,12 @@ class InMemoryManager implements DataSegmentManager {
 	}
 
 	@Override
-	public LocalDate getDateOfLastSegment(SecurityDescriptor descr)
-			throws IOException
-	{
+	public LocalDate getDateOfLastSegment(Symbol symbol) throws IOException {
 		throw new IOException("Not implemented");
 	}
 
 	@Override
-	public List<LocalDate> getSegmentList(SecurityDescriptor descr)
-			throws IOException
-	{
+	public List<LocalDate> getSegmentList(Symbol symbol) throws IOException {
 		throw new IOException("Not implemented");
 	}
 	

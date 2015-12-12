@@ -31,8 +31,8 @@ import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
@@ -44,12 +44,12 @@ import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentImpl;
 public class CsvDataSegmentManagerTest {
 	private static final Logger logger;
 	private static final File root;
-	private static final SecurityDescriptor descr1;
+	private static final Symbol symbol1;
 
 	static {
 		logger = LoggerFactory.getLogger(CsvDataSegmentManagerTest.class);
 		root = new File("fixture", "finam-tests");
-		descr1 = new SecurityDescriptor("RTS", "SPB", "USD", SecurityType.FUT);
+		symbol1 = new Symbol("RTS", "SPB", "USD", SymbolType.FUT);
 	}
 	
 	private Scheduler scheduler;
@@ -90,7 +90,7 @@ public class CsvDataSegmentManagerTest {
 		LocalDate date = new LocalDate(1998, 1, 15);
 		CsvTickWriter csvWriter = control.createMock(CsvTickWriter.class);
 		TickWriter flusher = control.createMock(TickWriter.class);
-		expect(helper.getFile(descr1, date, ".csv.part")).andReturn(file1);
+		expect(helper.getFile(symbol1, date, ".csv.part")).andReturn(file1);
 		expect(file1.getParentFile()).andReturn(file2);
 		expect(file2.exists()).andReturn(false);
 		expect(file2.mkdirs()).andReturn(true);
@@ -101,12 +101,12 @@ public class CsvDataSegmentManagerTest {
 			.andReturn(flusher);
 		control.replay();
 		
-		DataSegment dummy = manager.openSegment(descr1, date);
+		DataSegment dummy = manager.openSegment(symbol1, date);
 		
 		assertNotNull(dummy);
 		DataSegmentImpl x = (DataSegmentImpl) dummy;
 		assertSame(flusher, x.getWriter());
-		assertEquals(descr1, x.getSecurityDescriptor());
+		assertEquals(symbol1, x.getSymbol());
 		assertEquals(date, x.getDate());
 		control.verify();
 	}
@@ -116,11 +116,11 @@ public class CsvDataSegmentManagerTest {
 		LocalDate date = new LocalDate(2001, 9, 11);
 		DataSegment writer = control.createMock(DataSegment.class);
 		expect(writer.getDate()).andStubReturn(date);
-		expect(writer.getSecurityDescriptor()).andStubReturn(descr1);
+		expect(writer.getSymbol()).andStubReturn(symbol1);
 		writer.close();
-		expect(helper.getFile(descr1, date, ".csv.part")).andReturn(file1);
-		expect(helper.getFile(descr1, date, ".csv.gz.part")).andReturn(file2);
-		expect(helper.getFile(descr1, date, ".csv.gz")).andReturn(file3);
+		expect(helper.getFile(symbol1, date, ".csv.part")).andReturn(file1);
+		expect(helper.getFile(symbol1, date, ".csv.gz.part")).andReturn(file2);
+		expect(helper.getFile(symbol1, date, ".csv.gz")).andReturn(file3);
 		expect(helper.createInputStream(file1)).andReturn(inputStream);
 		expect(helper.createGzipOutputStream(file2)).andReturn(outputStream);
 		helper.copyStream(inputStream, outputStream);
@@ -139,15 +139,15 @@ public class CsvDataSegmentManagerTest {
 	public void testOpenReader_Zipped() throws Exception {
 		LocalDate date = new LocalDate(1998, 1, 15);
 		CsvTickReader reader = control.createMock(CsvTickReader.class);
-		expect(helper.getFile(descr1, date, ".csv.gz")).andReturn(file1);
-		expect(helper.getFile(descr1, date, ".csv")).andReturn(file2);
+		expect(helper.getFile(symbol1, date, ".csv.gz")).andReturn(file1);
+		expect(helper.getFile(symbol1, date, ".csv")).andReturn(file2);
 		expect(file1.exists()).andReturn(true);
 		expect(helper.createGzipInputStream(file1)).andReturn(inputStream);
 		expect(helper.createCsvTickReader(inputStream, date)).andReturn(reader);
 		reader.readHeader();
 		control.replay();
 		
-		Aqiterator<Tick> actual = manager.openReader(descr1, date);
+		Aqiterator<Tick> actual = manager.openReader(symbol1, date);
 		
 		assertNotNull(actual);
 		assertSame(reader, actual);
@@ -157,8 +157,8 @@ public class CsvDataSegmentManagerTest {
 	public void testOpenReader_Raw() throws Exception {
 		LocalDate date = new LocalDate(2001, 1, 29);
 		CsvTickReader reader = control.createMock(CsvTickReader.class);
-		expect(helper.getFile(descr1, date, ".csv.gz")).andReturn(file1);
-		expect(helper.getFile(descr1, date, ".csv")).andReturn(file2);
+		expect(helper.getFile(symbol1, date, ".csv.gz")).andReturn(file1);
+		expect(helper.getFile(symbol1, date, ".csv")).andReturn(file2);
 		expect(file1.exists()).andReturn(false);
 		expect(file2.exists()).andReturn(true);
 		expect(helper.createInputStream(file2)).andReturn(inputStream);
@@ -166,7 +166,7 @@ public class CsvDataSegmentManagerTest {
 		reader.readHeader();
 		control.replay();
 		
-		Aqiterator<Tick> actual = manager.openReader(descr1, date);
+		Aqiterator<Tick> actual = manager.openReader(symbol1, date);
 		
 		assertNotNull(actual);
 		assertSame(reader, actual);
@@ -176,13 +176,13 @@ public class CsvDataSegmentManagerTest {
 	public void testOpenReader_NoSegmentFile() throws Exception {
 		LocalDate date = new LocalDate(2001, 1, 29);
 		CsvTickReader reader = control.createMock(CsvTickReader.class);
-		expect(helper.getFile(descr1, date, ".csv.gz")).andReturn(file1);
-		expect(helper.getFile(descr1, date, ".csv")).andReturn(file2);
+		expect(helper.getFile(symbol1, date, ".csv.gz")).andReturn(file1);
+		expect(helper.getFile(symbol1, date, ".csv")).andReturn(file2);
 		expect(file1.exists()).andReturn(false);
 		expect(file2.exists()).andReturn(false);
 		control.replay();
 		
-		manager.openReader(descr1, date);
+		manager.openReader(symbol1, date);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -201,10 +201,10 @@ public class CsvDataSegmentManagerTest {
 	public void testIsDataAvailable1_Yes() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
 		list.add(new LocalDate());
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
-		assertTrue(manager.isDataAvailable(descr1));
+		assertTrue(manager.isDataAvailable(symbol1));
 		
 		control.verify();
 	}
@@ -212,10 +212,10 @@ public class CsvDataSegmentManagerTest {
 	@Test
 	public void testIsDataAvailable1_No() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
-		assertFalse(manager.isDataAvailable(descr1));
+		assertFalse(manager.isDataAvailable(symbol1));
 		
 		control.verify();
 	}
@@ -225,10 +225,10 @@ public class CsvDataSegmentManagerTest {
 		List<LocalDate> list = new Vector<LocalDate>();
 		list.add(new LocalDate(2015, 8, 24));
 		list.add(new LocalDate(2015, 8, 25));
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
-		assertTrue(manager.isDataAvailable(descr1, new LocalDate(2015, 8, 24)));
+		assertTrue(manager.isDataAvailable(symbol1, new LocalDate(2015, 8, 24)));
 		
 		control.verify();
 	}
@@ -238,10 +238,10 @@ public class CsvDataSegmentManagerTest {
 		List<LocalDate> list = new Vector<LocalDate>();
 		list.add(new LocalDate(2015, 8, 24));
 		list.add(new LocalDate(2015, 8, 25));
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
-		assertFalse(manager.isDataAvailable(descr1, new LocalDate(2015, 8, 23)));
+		assertFalse(manager.isDataAvailable(symbol1, new LocalDate(2015, 8, 23)));
 		
 		control.verify();
 	}
@@ -252,11 +252,11 @@ public class CsvDataSegmentManagerTest {
 		list.add(new LocalDate(2015, 8, 24));
 		list.add(new LocalDate(2015, 8, 25));
 		list.add(new LocalDate(2015, 8, 26));
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
 		LocalDate expected = new LocalDate(2015, 8, 24),
-				actual = manager.getDateOfFirstSegment(descr1);
+				actual = manager.getDateOfFirstSegment(symbol1);
 		
 		assertEquals(expected, actual);
 		control.verify();
@@ -265,10 +265,10 @@ public class CsvDataSegmentManagerTest {
 	@Test
 	public void testGetDateOfFirstSegment_NoDataAvailable() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
-		LocalDate actual = manager.getDateOfFirstSegment(descr1);
+		LocalDate actual = manager.getDateOfFirstSegment(symbol1);
 		
 		assertNull(actual);
 		control.verify();
@@ -281,11 +281,11 @@ public class CsvDataSegmentManagerTest {
 		list.add(new LocalDate(2012, 1, 1));
 		list.add(new LocalDate(2013, 2, 1));
 		list.add(new LocalDate(2014, 3, 1));
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
 		LocalDate expected = new LocalDate(2014, 3, 1),
-				actual = manager.getDateOfLastSegment(descr1);
+				actual = manager.getDateOfLastSegment(symbol1);
 		
 		assertEquals(expected, actual);
 		control.verify();
@@ -294,10 +294,10 @@ public class CsvDataSegmentManagerTest {
 	@Test
 	public void testGetDateOfLastSegment_NoDataAvailable() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
-		LocalDate actual = manager.getDateOfLastSegment(descr1);
+		LocalDate actual = manager.getDateOfLastSegment(symbol1);
 		
 		assertNull(actual);
 		control.verify();
@@ -316,13 +316,13 @@ public class CsvDataSegmentManagerTest {
 		list.add(new LocalDate(2004,  6, 11));
 		list.add(new LocalDate(2004,  6, 12));
 		list.add(new LocalDate(2005,  6, 10));
-		expect(helper.getAvailableDataSegments(descr1)).andStubReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andStubReturn(list);
 		control.replay();
 		
 		LocalDate expected1 = new LocalDate(2004, 6, 12),
 			expected2 = new LocalDate(1999, 12, 29),
-			actual1 = manager.getDateOfNextSegment(descr1, new LocalDate(2004, 6, 11)),
-			actual2 = manager.getDateOfNextSegment(descr1, new LocalDate(1999, 11, 1));
+			actual1 = manager.getDateOfNextSegment(symbol1, new LocalDate(2004, 6, 11)),
+			actual2 = manager.getDateOfNextSegment(symbol1, new LocalDate(1999, 11, 1));
 		
 		assertEquals(expected1, actual1);
 		assertEquals(expected2, actual2);
@@ -332,11 +332,11 @@ public class CsvDataSegmentManagerTest {
 	@Test
 	public void testGetDateOfNextSegment_NoDataAvailable() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
-		expect(helper.getAvailableDataSegments(descr1)).andStubReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andStubReturn(list);
 		control.replay();
 		
-		assertNull(manager.getDateOfNextSegment(descr1, new LocalDate(1999, 12, 1)));
-		assertNull(manager.getDateOfNextSegment(descr1, new LocalDate(2004, 6, 11)));
+		assertNull(manager.getDateOfNextSegment(symbol1, new LocalDate(1999, 12, 1)));
+		assertNull(manager.getDateOfNextSegment(symbol1, new LocalDate(2004, 6, 11)));
 		
 		control.verify();
 	}
@@ -345,10 +345,10 @@ public class CsvDataSegmentManagerTest {
 	public void testGetSegmentList() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
 		list.add(new LocalDate(1999, 11, 2));
-		expect(helper.getAvailableDataSegments(descr1)).andReturn(list);
+		expect(helper.getAvailableDataSegments(symbol1)).andReturn(list);
 		control.replay();
 		
-		assertSame(list, manager.getSegmentList(descr1));
+		assertSame(list, manager.getSegmentList(symbol1));
 		
 		control.verify();
 	}

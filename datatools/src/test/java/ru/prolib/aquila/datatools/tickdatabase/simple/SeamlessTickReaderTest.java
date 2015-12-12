@@ -11,15 +11,15 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Tick;
 
 public class SeamlessTickReaderTest {
-	private static final SecurityDescriptor descr;
+	private static final Symbol symbol;
 	private static final DateTimeFormatter df;
 	
 	static {
-		descr = new SecurityDescriptor("SBRF", "EQBR", "RUR");
+		symbol = new Symbol("SBRF", "EQBR", "RUR");
 		df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 	}
 	
@@ -37,8 +37,8 @@ public class SeamlessTickReaderTest {
 	@Test
 	public void testCtor() {
 		DateTime time = new DateTime(2015, 7, 6, 0, 0, 0); 
-		SeamlessTickReader reader = new SeamlessTickReader(descr, time, manager);
-		assertEquals(descr, reader.getSecurityDescriptor());
+		SeamlessTickReader reader = new SeamlessTickReader(symbol, time, manager);
+		assertEquals(symbol, reader.getSymbol());
 		assertEquals(time, reader.getCurrentTime());
 		assertEquals(manager, reader.getDataSegmentManager());
 	}
@@ -53,18 +53,18 @@ public class SeamlessTickReaderTest {
 		data.add(newTick("2015-07-06 00:00:00", 215.0, 10)); // to skip
 		data.add(newTick("2015-07-01 00:00:00", 218.0, 80)); // to skip
 		data.add(newTick("2015-07-06 15:45:10", 202.0, 20));
-		manager.setSegmentData(descr, new LocalDate(2015, 7, 6), data);
+		manager.setSegmentData(symbol, new LocalDate(2015, 7, 6), data);
 		data = new Vector<Tick>();
 		data.add(newTick("2015-07-07 10:00:00", 198.8, 11));
 		data.add(newTick("2015-07-07 10:00:01", 199.2, 12));
 		data.add(newTick("2015-07-07 10:00:02", 201.5, 15));
 		data.add(newTick("2015-07-06 00:00:00", 197.1, 10)); // to skip
-		manager.setSegmentData(descr, new LocalDate(2015, 7, 7), data);
+		manager.setSegmentData(symbol, new LocalDate(2015, 7, 7), data);
 		// there's gap between segments
 		data = new Vector<Tick>();
 		data.add(newTick("2015-07-09 10:00:00", 186.5, 20));
 		data.add(newTick("2015-07-09 11:00:00", 185.1, 10));
-		manager.setSegmentData(descr, new LocalDate(2015, 7, 9), data);
+		manager.setSegmentData(symbol, new LocalDate(2015, 7, 9), data);
 		
 		List<Tick> expected = new Vector<Tick>(), actual = new Vector<Tick>();
 		expected.add(newTick("2015-07-06 15:45:00", 201.0, 20));
@@ -75,7 +75,7 @@ public class SeamlessTickReaderTest {
 		expected.add(newTick("2015-07-09 10:00:00", 186.5, 20));
 		expected.add(newTick("2015-07-09 11:00:00", 185.1, 10));
 		
-		SeamlessTickReader reader = new SeamlessTickReader(descr,
+		SeamlessTickReader reader = new SeamlessTickReader(symbol,
 				new DateTime(2015, 7, 6, 15, 45, 0), manager);
 		while ( reader.next() ) {
 			actual.add(reader.item());

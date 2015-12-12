@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.storage.SecurityProperties;
@@ -30,14 +30,14 @@ public class MarketDataStorageImpl implements MarketDataStorage {
 	}
 
 	@Override
-	public SecurityProperties getProperties(SecurityDescriptor descr) {
+	public SecurityProperties getProperties(Symbol symbol) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Aqiterator<SecuritySessionProperties>
-		getSessionData(SecurityDescriptor descr, LocalDateTime startingTime) 
+		getSessionData(Symbol symbol, LocalDateTime startingTime) 
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -45,7 +45,7 @@ public class MarketDataStorageImpl implements MarketDataStorage {
 
 	@Override
 	public Aqiterator<Tick>
-		getTickData(SecurityDescriptor descr, LocalDateTime startingTime)
+		getTickData(Symbol symbol, LocalDateTime startingTime)
 	{
 		// TODO Auto-generated method stub
 		return null;

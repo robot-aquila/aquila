@@ -12,16 +12,16 @@ import org.joda.time.LocalTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 public class DataSegmentImplTest {
-	private static final SecurityDescriptor descr;
+	private static final Symbol symbol;
 	
 	static {
-		descr = new SecurityDescriptor("SBRF", "EQBR", "RUR", SecurityType.STK);
+		symbol = new Symbol("SBRF", "EQBR", "RUR", SymbolType.STK);
 	}
 	
 	private IMocksControl control;
@@ -35,14 +35,14 @@ public class DataSegmentImplTest {
 		control = createStrictControl();
 		date1 = new LocalDate(2015, 5, 12);
 		writer = control.createMock(TickWriter.class);
-		segment = new DataSegmentImpl(descr, date1, writer,
+		segment = new DataSegmentImpl(symbol, date1, writer,
 				new LocalTime(15, 0, 0), 5);
 	}
 	
 	@Test
 	public void testCtor3() throws Exception {
-		segment = new DataSegmentImpl(descr, date1, writer);
-		assertEquals(descr, segment.getSecurityDescriptor());
+		segment = new DataSegmentImpl(symbol, date1, writer);
+		assertEquals(symbol, segment.getSymbol());
 		assertEquals(date1, segment.getDate());
 		assertEquals(writer, segment.getWriter());
 		assertEquals(new LocalTime(0, 0, 0), segment.getTimeOfLastTick());
@@ -51,7 +51,7 @@ public class DataSegmentImplTest {
 	
 	@Test
 	public void testCtor5() throws Exception {
-		assertEquals(descr, segment.getSecurityDescriptor());
+		assertEquals(symbol, segment.getSymbol());
 		assertEquals(date1, segment.getDate());
 		assertEquals(writer, segment.getWriter());
 		assertEquals(new LocalTime(15, 0, 0), segment.getTimeOfLastTick());

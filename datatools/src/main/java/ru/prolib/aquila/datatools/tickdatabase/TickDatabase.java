@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.joda.time.DateTime;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.Tick;
 
@@ -19,11 +19,11 @@ public interface TickDatabase extends Closeable {
 	 * <p>
 	 * Use this method for writing consecutive ticks to the database.
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @param tick - tick
 	 * @throws IOException - IO error. Also may thrown when tick from the past. 
 	 */
-	public void write(SecurityDescriptor descr, Tick tick) throws IOException;
+	public void write(Symbol symbol, Tick tick) throws IOException;
 	
 	/**
 	 * Send time marker.
@@ -40,25 +40,21 @@ public interface TickDatabase extends Closeable {
 	/**
 	 * Get ticks.
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @param startingTime - time of start data
 	 * @return tick iterator
 	 * @throws IOException - IO error
 	 */
-	public Aqiterator<Tick>
-		getTicks(SecurityDescriptor descr, DateTime startingTime)
-			throws IOException;
+	public Aqiterator<Tick> getTicks(Symbol symbol, DateTime startingTime) throws IOException;
 	
 	/**
 	 * Get ticks.
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @param numLastSegments - number of daily segments from end to include
 	 * @return tick iterator
 	 * @throws IOException - IO error
 	 */
-	public Aqiterator<Tick>
-		getTicks(SecurityDescriptor descr, int numLastSegments)
-			throws IOException;
+	public Aqiterator<Tick> getTicks(Symbol symbol, int numLastSegments) throws IOException;
 	
 }
