@@ -48,7 +48,7 @@ public class QUIKTerminal extends BasicTerminal {
 	}
 	
 	@Override
-	public void requestSecurity(SecurityDescriptor descr) {
+	public void requestSecurity(Symbol symbol) {
 		logger.warn("TODO: requestSecurity() not implemented");
 	}
 

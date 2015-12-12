@@ -19,14 +19,14 @@ public class CacheBuilderTest {
 	@Test
 	public void testCreateCache() throws Exception {
 		Cache actual = builder.createCache(es);
-		DescriptorsCache descrCache = actual.getDescriptorsCache();
+		SymbolsCache symbols = actual.getSymbolsCache();
 		PositionsCache posCache = actual.getPositionsCache();
 		OrdersCache ordersCache = actual.getOrdersCache();
 		OwnTradesCache ownTradesCache = actual.getOwnTradesCache();
 		TradesCache tradesCache = actual.getTradesCache();
-		EventDispatcher d = descrCache.getEventDispatcher();
+		EventDispatcher d = symbols.getEventDispatcher();
 		Cache expected = new Cache(
-				new DescriptorsCache(d, (EventTypeSI) descrCache.OnUpdate()),
+				new SymbolsCache(d, (EventTypeSI) symbols.OnUpdate()),
 				new PositionsCache(d, (EventTypeSI) posCache.OnUpdate()),
 				new OrdersCache(d, (EventTypeSI) ordersCache.OnUpdate()),
 				new OwnTradesCache(d, (EventTypeSI) ownTradesCache.OnUpdate()),

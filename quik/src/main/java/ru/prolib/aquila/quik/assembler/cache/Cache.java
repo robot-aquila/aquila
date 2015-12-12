@@ -14,17 +14,17 @@ import ru.prolib.aquila.t2q.*;
  * объектов бизнес-модели. 
  */
 public class Cache {
-	private final DescriptorsCache descrs;
+	private final SymbolsCache symbols;
 	private final PositionsCache positions;
 	private final OrdersCache orders;
 	private final OwnTradesCache ownTrades;
 	private final TradesCache trades;
 
-	public Cache(DescriptorsCache descr, PositionsCache positions,
+	public Cache(SymbolsCache symbols, PositionsCache positions,
 			OrdersCache orders, OwnTradesCache ownTrades, TradesCache trades)
 	{
 		super();
-		this.descrs = descr;
+		this.symbols = symbols;
 		this.positions = positions;
 		this.orders = orders;
 		this.ownTrades = ownTrades;
@@ -39,8 +39,8 @@ public class Cache {
 	 * <p>
 	 * @return кэш дескрипторов
 	 */
-	public DescriptorsCache getDescriptorsCache() {
-		return descrs;
+	public SymbolsCache getSymbolsCache() {
+		return symbols;
 	}
 
 	/**
@@ -72,8 +72,8 @@ public class Cache {
 	 * <p>
 	 * @return список дескрипторов
 	 */
-	public List<QUIKSecurityDescriptor> getDescriptors() {
-		return descrs.get();
+	public List<QUIKSymbol> getSymbols() {
+		return symbols.get();
 	}
 	
 	/**
@@ -82,8 +82,8 @@ public class Cache {
 	 * @param shortName краткое наименование инструмента
 	 * @return дескриптор или null, если нет соответствующего дескриптора
 	 */
-	public QUIKSecurityDescriptor getDescriptor(String shortName) {
-		return descrs.get(shortName);
+	public QUIKSymbol getSymbol(String shortName) {
+		return symbols.get(shortName);
 	}
 	
 	/**
@@ -93,10 +93,10 @@ public class Cache {
 	 * @param classCode код класса инструмента
 	 * @return дескриптор или null, если нет соответствующего дескриптора
 	 */
-	public QUIKSecurityDescriptor
-		getDescriptor(String systemCode, String classCode)
+	public QUIKSymbol
+		getSymbol(String systemCode, String classCode)
 	{
-		return descrs.get(systemCode, classCode);
+		return symbols.get(systemCode, classCode);
 	}
 	
 	/**
@@ -104,18 +104,18 @@ public class Cache {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnDescriptorsUpdate() {
-		return descrs.OnUpdate();
+	public EventType OnSymbolsUpdate() {
+		return symbols.OnUpdate();
 	}
 	
 	/**
 	 * Обновить кэш дескрипторов.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @return true - был добавлен новый дескриптор, false - без изменений
 	 */
-	public boolean put(QUIKSecurityDescriptor descr) {
-		return descrs.put(descr);
+	public boolean put(QUIKSymbol symbol) {
+		return symbols.put(symbol);
 	}
 	
 	/**
@@ -241,7 +241,7 @@ public class Cache {
 		}
 		Cache o = (Cache) other;
 		return new EqualsBuilder()
-			.append(o.descrs, descrs)
+			.append(o.symbols, symbols)
 			.append(o.orders, orders)
 			.append(o.positions, positions)
 			.append(o.ownTrades, ownTrades)

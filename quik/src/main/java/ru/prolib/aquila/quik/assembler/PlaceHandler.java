@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.*;
-import ru.prolib.aquila.quik.assembler.cache.QUIKSecurityDescriptor;
+import ru.prolib.aquila.quik.assembler.cache.QUIKSymbol;
 import ru.prolib.aquila.t2q.T2QException;
 
 /**
@@ -61,14 +61,13 @@ public class PlaceHandler implements QUIKTransactionHandler {
 	public void placeOrder() throws OrderException {
 		try {
 			Account account = order.getAccount();
-			QUIKSecurityDescriptor descr =
-				(QUIKSecurityDescriptor) order.getSecurityDescriptor();
+			QUIKSymbol symbol = (QUIKSymbol) order.getSymbol();
 			String trspec = "TRANS_ID=" + order.getId()
 				+ "; ACTION=NEW_ORDER; CLIENT_CODE=" +
 					getClientCode(account)
 				+ "; ACCOUNT=" + account.getSubCode2()
-				+ "; CLASSCODE=" + descr.getClassCode()
-				+ "; SECCODE=" + descr.getSystemCode()
+				+ "; CLASSCODE=" + symbol.getClassCode()
+				+ "; SECCODE=" + symbol.getSystemCode()
 				+ "; OPERATION=" + dir.get(order.getDirection())
 				+ "; QUANTITY=" + order.getQty();
 			OrderType type = order.getType();

@@ -17,7 +17,7 @@ import ru.prolib.aquila.quik.assembler.Assembler;
 import ru.prolib.aquila.quik.assembler.cache.*;
 
 public class TradesGatewayTest {
-	private static QUIKSecurityDescriptor descr;
+	private static QUIKSymbol symbol;
 	private IMocksControl control;
 	private Assembler asm;
 	private RowDataConverter converter;
@@ -29,8 +29,7 @@ public class TradesGatewayTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new QUIKSecurityDescriptor("A", "B", ISO4217.USD,
-				SecurityType.CASH, "A", "A", "A");
+		symbol = new QUIKSymbol("A", "B", ISO4217.USD, SymbolType.CASH, "A", "A", "A");
 	}
 
 	@Before
@@ -87,10 +86,10 @@ public class TradesGatewayTest {
 	}
 
 	@Test
-	public void testMakeTrade_NoDescriptor() throws Exception {
+	public void testMakeTrade_NoSymbol() throws Exception {
 		map.put("SECCODE", "SBER");
 		map.put("CLASSCODE", "EQBR");
-		expect(cache.getDescriptor(eq("SBER"), eq("EQBR"))).andReturn(null);
+		expect(cache.getSymbol(eq("SBER"), eq("EQBR"))).andReturn(null);
 		control.replay();
 		
 		assertNull(gateway.makeTrade(terminal, row));
@@ -110,7 +109,7 @@ public class TradesGatewayTest {
 		map.put("TRADETIME", "00:20:19");
 		map.put("VALUE", 200d);
 		map.put("TRADETIME_MSEC", 214525d);
-		expect(cache.getDescriptor(eq("SBER"), eq("EQBR"))).andReturn(descr);
+		expect(cache.getSymbol(eq("SBER"), eq("EQBR"))).andReturn(symbol);
 		control.replay();
 		
 		Trade expected = new Trade(terminal);
@@ -118,7 +117,7 @@ public class TradesGatewayTest {
 		expected.setId(894L);
 		expected.setPrice(45.90d);
 		expected.setQty(1000L);
-		expected.setSecurityDescriptor(descr);
+		expected.setSymbol(symbol);
 		expected.setTime(new DateTime(1998, 1, 15, 0, 20, 19, 214));
 		expected.setVolume(200d);
 		assertEquals(expected, gateway.makeTrade(terminal, row));

@@ -2,7 +2,7 @@ package ru.prolib.aquila.quik.ui;
 
 import java.text.SimpleDateFormat;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
@@ -192,44 +192,44 @@ public class TableBuilder {
 		return new Table(new TradesCacheTableModel(messages, columns, cache));
 	}
 	
-	public Table createDescriptorsTable() {
+	public Table createSymbolsTable() {
 		Columns columns = new Columns();
 		columns.add(new Column(msgID("COL_CACHE_DESCR_CODE"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((SecurityDescriptor) obj).getCode());
+				return (((Symbol) obj).getCode());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_CLASS"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((SecurityDescriptor) obj).getClassCode());
+				return (((Symbol) obj).getClassCode());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_TYPE"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((SecurityDescriptor) obj).getType());
+				return (((Symbol) obj).getType());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_CURR"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((SecurityDescriptor) obj).getCurrency());
+				return (((Symbol) obj).getCurrency());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_SYSCODE"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((QUIKSecurityDescriptor) obj).getSystemCode());
+				return (((QUIKSymbol) obj).getSystemCode());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_SHORTNAME"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((QUIKSecurityDescriptor) obj).getShortName());
+				return (((QUIKSymbol) obj).getShortName());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_DISPNAME"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((QUIKSecurityDescriptor) obj).getDisplayName());
+				return (((QUIKSymbol) obj).getDisplayName());
 			}
 		}, Column.MIDDLE));
-		return new Table(new DescriptorsCacheTableModel(messages, columns, cache));
+		return new Table(new SymbolsCacheTableModel(messages, columns, cache));
 	}
 	
 	public Table createPositionsCacheTable() {

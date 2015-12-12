@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.assembler.cache.SecurityEntry;
 
 public class SecurityEntryTest {
-	private QUIKSecurityDescriptor expected;
+	private QUIKSymbol expected;
 	private SecurityEntry row;
 	
 	@BeforeClass
@@ -24,7 +24,7 @@ public class SecurityEntryTest {
 		row = new SecurityEntry(20, 180.13d, 160.24d, 0.01d, 0.02d, 2,
 				150.82d, 153.14d, 153.12d, "test security", "test",
 				150.84d, 150.90d, /*151.12d*/null, 149.82d,
-				"SBER", "EQBR", ISO4217.RUB, SecurityType.STK,
+				"SBER", "EQBR", ISO4217.RUB, SymbolType.STK,
 				201.12d, 20.10d); // init price, initmargin
 	}
 	
@@ -98,9 +98,9 @@ public class SecurityEntryTest {
 		Variant<Currency> vCurr = new Variant<Currency>(vClass)
 			.add(ISO4217.RUB)
 			.add(ISO4217.GBP);
-		Variant<SecurityType> vType = new Variant<SecurityType>(vCurr)
-			.add(SecurityType.STK)
-			.add(SecurityType.OPT);
+		Variant<SymbolType> vType = new Variant<SymbolType>(vCurr)
+			.add(SymbolType.STK)
+			.add(SymbolType.OPT);
 		Variant<Double> vInitPrice = new Variant<Double>(vType)
 			.add(201.12d)
 			.add(113.28d);
@@ -143,28 +143,28 @@ public class SecurityEntryTest {
 		assertEquals("SBER", found.getCode());
 		assertEquals("EQBR", found.getClassCode());
 		assertEquals(ISO4217.RUB, found.getCurrency());
-		assertEquals(SecurityType.STK, found.getType());
+		assertEquals(SymbolType.STK, found.getType());
 		assertEquals(201.12d, found.getInitialPrice(), 0.001d);
 		assertEquals(20.10d, found.getInitialMargin(), 0.001d);
 	}
 	
 	@Test
-	public void testGetDescriptor_ForFutures() throws Exception {
+	public void testGetSymbol_ForFutures() throws Exception {
 		row = new SecurityEntry(0, 0d, 0d, 0d, 0d, 0, 0d, 0d, 0d,
 				"RTS-12.13", "_RIZ3", 0d, 0d, 0d, 0d,
-				"RIZ3", "SPBFUT", ISO4217.USD, SecurityType.FUT, 0d, 0d);
-		expected = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT",
-				ISO4217.USD, SecurityType.FUT, "RIZ3", "_RIZ3", "RTS-12.13");
+				"RIZ3", "SPBFUT", ISO4217.USD, SymbolType.FUT, 0d, 0d);
+		expected = new QUIKSymbol("RTS-12.13", "SPBFUT",
+				ISO4217.USD, SymbolType.FUT, "RIZ3", "_RIZ3", "RTS-12.13");
 		
-		assertEquals(expected, row.getDescriptor());
+		assertEquals(expected, row.getSymbol());
 	}
 	
 	@Test
-	public void testGetDescriptor_Default() throws Exception {
-		expected = new QUIKSecurityDescriptor("SBER", "EQBR", ISO4217.RUB,
-				SecurityType.STK, "SBER", "test", "test security");
+	public void testGetSymbol_Default() throws Exception {
+		expected = new QUIKSymbol("SBER", "EQBR", ISO4217.RUB,
+				SymbolType.STK, "SBER", "test", "test security");
 		
-		assertEquals(expected, row.getDescriptor());
+		assertEquals(expected, row.getSymbol());
 	}
 
 }

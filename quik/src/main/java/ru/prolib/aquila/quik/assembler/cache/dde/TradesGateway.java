@@ -106,10 +106,10 @@ public class TradesGateway implements TableGateway {
 	 */
 	public Trade makeTrade(QUIKTerminal terminal, Row row) throws RowException {
 		try {
-			SecurityDescriptor descr = terminal.getDataCache()
-				.getDescriptor(converter.getString(row, SEC_CODE),
+			Symbol symbol = terminal.getDataCache()
+				.getSymbol(converter.getString(row, SEC_CODE),
 						converter.getString(row, SEC_CLASS));
-			if ( descr == null ) {
+			if ( symbol == null ) {
 				return null;
 			}
 			Trade trade  = new Trade(terminal);
@@ -118,7 +118,7 @@ public class TradesGateway implements TableGateway {
 			trade.setId(converter.getLong(row, ID));
 			trade.setPrice(converter.getDouble(row, PRICE));
 			trade.setQty(converter.getLong(row, QTY));
-			trade.setSecurityDescriptor(descr);
+			trade.setSymbol(symbol);
 			trade.setTime(converter.getTime(row, DATE, TIME, false)
 				.plusMillis(converter.getInteger(row, MICROSECONDS) / 1000));
 			trade.setVolume(converter.getDouble(row, VALUE));

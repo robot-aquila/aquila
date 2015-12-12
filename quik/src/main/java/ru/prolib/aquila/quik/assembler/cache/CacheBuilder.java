@@ -20,7 +20,7 @@ public class CacheBuilder {
 	public Cache createCache(EventSystem es) {
 		EventDispatcher d = es.createEventDispatcher("Cache");
 		return new Cache(
-				new DescriptorsCache(d, d.createType("Descriptors")),
+				new SymbolsCache(d, d.createType("Symbols")),
 				new PositionsCache(d, d.createType("Positions")),
 				new OrdersCache(d, d.createType("Orders")),
 				new OwnTradesCache(d, d.createType("OwnTrades")),

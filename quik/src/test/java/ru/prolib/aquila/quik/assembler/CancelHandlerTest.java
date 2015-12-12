@@ -12,7 +12,7 @@ import ru.prolib.aquila.quik.api.*;
 import ru.prolib.aquila.t2q.*;
 
 public class CancelHandlerTest {
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private IMocksControl control;
 	private QUIKTerminal terminal;
 	private QUIKClient client;
@@ -25,7 +25,7 @@ public class CancelHandlerTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
 	}
 	
 	@Before
@@ -39,7 +39,7 @@ public class CancelHandlerTest {
 		
 		expect(order.getSystemInfo()).andStubReturn(info);
 		expect(order.getTerminal()).andStubReturn(terminal);
-		expect(order.getSecurityDescriptor()).andStubReturn(descr);
+		expect(order.getSymbol()).andStubReturn(symbol);
 		expect(terminal.getClient()).andStubReturn(client);
 	}
 	

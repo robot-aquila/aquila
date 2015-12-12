@@ -69,7 +69,7 @@ public class Assembler implements Starter, EventListener {
 		// Обработка анонимных сделок выполняется в отложеном режиме.
 		// Попытка обработать анонимные сделки выполняется при появлении
 		// нового дескриптора или нового блока сделок.
-		cache.OnDescriptorsUpdate().addListener(this);
+		cache.OnSymbolsUpdate().addListener(this);
 		cache.OnTradesUpdate().addListener(this);
 		logger.debug("started");
 	}
@@ -78,7 +78,7 @@ public class Assembler implements Starter, EventListener {
 	public void stop() throws StarterException {
 		Cache cache = terminal.getDataCache();
 		cache.OnTradesUpdate().removeListener(this);
-		cache.OnDescriptorsUpdate().removeListener(this);
+		cache.OnSymbolsUpdate().removeListener(this);
 		logger.debug("stopped");
 	}
 	
@@ -124,13 +124,13 @@ public class Assembler implements Starter, EventListener {
 	 */
 	public void assemble(SecurityEntry entry) {
 		l1.tryAssemble(entry);
-		DescriptorsCache cache = terminal.getDataCache().getDescriptorsCache();
+		SymbolsCache cache = terminal.getDataCache().getSymbolsCache();
 		// Если будет добавлен новый дескриптор, то нужно запретить аналогичную
 		// параллельную реакцию на добавление дескриптора или обработку входящих
 		// данных позиций до тех пор, пока кэш позиций в его текущем состоянии
 		// не будет обработан.
 		synchronized ( cache ) {
-			if ( cache.put(entry.getDescriptor()) ) {
+			if ( cache.put(entry.getSymbol()) ) {
 				l1.tryAssemblePositions(entry.getShortName());
 			}
 		}
@@ -190,7 +190,7 @@ public class Assembler implements Starter, EventListener {
 	@Override
 	public void onEvent(Event event) {
 		Cache cache = terminal.getDataCache();
-		if ( event.isType(cache.OnDescriptorsUpdate())
+		if ( event.isType(cache.OnSymbolsUpdate())
 				|| (event.isType(cache.OnTradesUpdate())
 						&& ((CacheEvent) event).isDataAdded()) )
 		{

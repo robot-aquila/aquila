@@ -8,7 +8,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.ISO4217;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.data.row.RowSetException;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.*;
@@ -20,10 +20,10 @@ public class AssemblerTest {
 	private IMocksControl control;
 	private QUIKTerminal terminal;
 	private Cache cache;
-	private DescriptorsCache descrsCache;
+	private SymbolsCache symbolsCache;
 	private AssemblerL1 l1;
 	private Assembler assembler;
-	private QUIKSecurityDescriptor descr;
+	private QUIKSymbol symbol;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -36,23 +36,23 @@ public class AssemblerTest {
 		control = createStrictControl();
 		terminal = control.createMock(QUIKTerminal.class);
 		cache = control.createMock(Cache.class);
-		descrsCache = control.createMock(DescriptorsCache.class);
+		symbolsCache = control.createMock(SymbolsCache.class);
 		l1 = control.createMock(AssemblerL1.class);
 		assembler = new Assembler(terminal, l1);
-		descr = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT", ISO4217.USD,
-				SecurityType.FUT, "RIZ3", "RIZ3", "RTS-12.13");
+		symbol = new QUIKSymbol("RTS-12.13", "SPBFUT", ISO4217.USD,
+				SymbolType.FUT, "RIZ3", "RIZ3", "RTS-12.13");
 		
 		expect(terminal.getDataCache()).andStubReturn(cache);
-		expect(cache.getDescriptorsCache()).andStubReturn(descrsCache);
+		expect(cache.getSymbolsCache()).andStubReturn(symbolsCache);
 	}
 	
 	@Test
 	public void testStart() throws Exception {
-		EventType onDescrsUpdate = control.createMock(EventType.class),
+		EventType onSymbolsUpdate = control.createMock(EventType.class),
 				  onTradesUpdate = control.createMock(EventType.class);
-		expect(cache.OnDescriptorsUpdate()).andStubReturn(onDescrsUpdate);
+		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		expect(cache.OnTradesUpdate()).andStubReturn(onTradesUpdate);
-		onDescrsUpdate.addListener(assembler);
+		onSymbolsUpdate.addListener(assembler);
 		onTradesUpdate.addListener(assembler);
 		control.replay();
 		
@@ -63,12 +63,12 @@ public class AssemblerTest {
 	
 	@Test
 	public void testStop() throws Exception {
-		EventType onDescrsUpdate = control.createMock(EventType.class),
+		EventType onSymbolsUpdate = control.createMock(EventType.class),
 				  onTradesUpdate = control.createMock(EventType.class);
-		expect(cache.OnDescriptorsUpdate()).andStubReturn(onDescrsUpdate);
+		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		expect(cache.OnTradesUpdate()).andStubReturn(onTradesUpdate);
 		onTradesUpdate.removeListener(assembler);
-		onDescrsUpdate.removeListener(assembler);
+		onSymbolsUpdate.removeListener(assembler);
 		control.replay();
 
 		assembler.stop();
@@ -113,9 +113,9 @@ public class AssemblerTest {
 	@Test
 	public void testAssemble_Security_Existing() throws Exception {
 		SecurityEntry entry = control.createMock(SecurityEntry.class);
-		expect(entry.getDescriptor()).andStubReturn(descr);
+		expect(entry.getSymbol()).andStubReturn(symbol);
 		expect(l1.tryAssemble(same(entry))).andReturn(true);
-		expect(descrsCache.put(same(descr))).andReturn(false);
+		expect(symbolsCache.put(same(symbol))).andReturn(false);
 		control.replay();
 		
 		assembler.assemble(entry);
@@ -126,10 +126,10 @@ public class AssemblerTest {
 	@Test
 	public void testAssemble_Security_New() throws Exception {
 		SecurityEntry entry = control.createMock(SecurityEntry.class);
-		expect(entry.getDescriptor()).andStubReturn(descr);
+		expect(entry.getSymbol()).andStubReturn(symbol);
 		expect(entry.getShortName()).andStubReturn("RIZ3");
 		expect(l1.tryAssemble(same(entry))).andReturn(true);
-		expect(descrsCache.put(same(descr))).andReturn(true);
+		expect(symbolsCache.put(same(symbol))).andReturn(true);
 		l1.tryAssemblePositions(eq("RIZ3"));
 		control.replay();
 		
@@ -216,22 +216,22 @@ public class AssemblerTest {
 	}
 	
 	@Test
-	public void testOnEvent_OnDescriptorsUpdate() throws Exception {
-		EventTypeSI onDescrsUpdate = control.createMock(EventTypeSI.class);
-		expect(cache.OnDescriptorsUpdate()).andStubReturn(onDescrsUpdate);
+	public void testOnEvent_OnSymbolsUpdate() throws Exception {
+		EventTypeSI onSymbolsUpdate = control.createMock(EventTypeSI.class);
+		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		l1.tryAssembleTrades();
 		control.replay();
 		
-		assembler.onEvent(new EventImpl(onDescrsUpdate));
+		assembler.onEvent(new EventImpl(onSymbolsUpdate));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testOnEvent_OnTradesUpdate_BlockRemoved() throws Exception {
-		EventTypeSI onDescrsUpdate = control.createMock(EventTypeSI.class),
+		EventTypeSI onSymbolsUpdate = control.createMock(EventTypeSI.class),
 				  onTradesUpdate = control.createMock(EventTypeSI.class);
-		expect(cache.OnDescriptorsUpdate()).andStubReturn(onDescrsUpdate);
+		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		expect(cache.OnTradesUpdate()).andStubReturn(onTradesUpdate);
 		control.replay();
 		
@@ -242,9 +242,9 @@ public class AssemblerTest {
 	
 	@Test
 	public void testOnEvent_OnTradesUpdate_BlockAdded() throws Exception {
-		EventTypeSI onDescrsUpdate = control.createMock(EventTypeSI.class),
+		EventTypeSI onSymbolsUpdate = control.createMock(EventTypeSI.class),
 				  onTradesUpdate = control.createMock(EventTypeSI.class);
-		expect(cache.OnDescriptorsUpdate()).andStubReturn(onDescrsUpdate);
+		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		expect(cache.OnTradesUpdate()).andStubReturn(onTradesUpdate);
 		l1.tryAssembleTrades();
 		control.replay();

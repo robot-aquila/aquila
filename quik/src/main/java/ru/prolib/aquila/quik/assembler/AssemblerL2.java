@@ -69,15 +69,14 @@ public class AssemblerL2 {
 	 * @return true - данные были применены, false - данные не согласованы
 	 */
 	public boolean tryAssemble(PositionEntry entry) {
-		SecurityDescriptor descr = terminal.getDataCache()
-			.getDescriptor(entry.getSecurityShortName());
-		if ( descr == null ) {
+		Symbol symbol = terminal.getDataCache().getSymbol(entry.getSecurityShortName());
+		if ( symbol == null ) {
 			return false;
 		}
 
 		Security security;
 		try {
-			security = terminal.getSecurity(descr);
+			security = terminal.getSecurity(symbol);
 		} catch ( SecurityException e ) {
 			logger.error("Unexpected exception: ", e);
 			return false;
@@ -102,7 +101,7 @@ public class AssemblerL2 {
 	 */
 	public boolean tryAssemble(SecurityEntry entry) {
 		EditableSecurity security;
-		security = terminal.getEditableSecurity(entry.getDescriptor());
+		security = terminal.getEditableSecurity(entry.getSymbol());
 		synchronized ( security ) {
 			security.setLotSize(entry.getLotSize());
 			security.setMaxPrice(entry.getMaxPrice());
@@ -166,7 +165,7 @@ public class AssemblerL2 {
 						skippedTradesCount = 0;
 					}
 					
-					terminal.getEditableSecurity(trade.getSecurityDescriptor())
+					terminal.getEditableSecurity(trade.getSymbol())
 						.fireTradeEvent(trade);
 					lastTradeId = tradeId;
 				} else {
@@ -223,7 +222,7 @@ public class AssemblerL2 {
 		trade.setOrderId((long) order.getId());
 		trade.setPrice(entry.getPrice());
 		trade.setQty(entry.getQty());
-		trade.setSecurityDescriptor(order.getSecurityDescriptor());
+		trade.setSymbol(order.getSymbol());
 		trade.setTime(getTime(entry));
 		trade.setVolume(entry.getValue());
 		order.addTrade(trade);

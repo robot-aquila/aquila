@@ -12,9 +12,9 @@ import ru.prolib.aquila.t2q.*;
 
 public class CacheTest {
 	private static Account account;
-	private static QUIKSecurityDescriptor descr;
+	private static QUIKSymbol symbol;
 	private IMocksControl control;
-	private DescriptorsCache descrs;
+	private SymbolsCache symbols;
 	private PositionsCache positions;
 	private OrdersCache orders;
 	private OwnTradesCache ownTrades;
@@ -25,70 +25,69 @@ public class CacheTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		account = new Account("BCS", "LX01");
-		descr = new QUIKSecurityDescriptor("GAZP", "EQBR", ISO4217.RUB,
-				SecurityType.STK, "GAZP", "АО Газпром", "АО Газпром");
+		symbol = new QUIKSymbol("GAZP", "EQBR", ISO4217.RUB,
+				SymbolType.STK, "GAZP", "АО Газпром", "АО Газпром");
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		descrs = control.createMock(DescriptorsCache.class);
+		symbols = control.createMock(SymbolsCache.class);
 		positions = control.createMock(PositionsCache.class);
 		orders = control.createMock(OrdersCache.class);
 		ownTrades = control.createMock(OwnTradesCache.class);
 		trades = control.createMock(TradesCache.class);
 		type = control.createMock(EventType.class);
-		cache = new Cache(descrs, positions, orders, ownTrades, trades);
+		cache = new Cache(symbols, positions, orders, ownTrades, trades);
 	}
 	
 	@Test
-	public void testGetDescriptors0() throws Exception {
-		List<QUIKSecurityDescriptor> expected =
-				new Vector<QUIKSecurityDescriptor>();
-		expect(descrs.get()).andReturn(expected);
+	public void testGetSymbols0() throws Exception {
+		List<QUIKSymbol> expected = new Vector<QUIKSymbol>();
+		expect(symbols.get()).andReturn(expected);
 		control.replay();
 		
-		assertSame(expected, cache.getDescriptors());
+		assertSame(expected, cache.getSymbols());
 		
 		control.verify();
 	}
 
 	@Test
-	public void testGetDescriptor1() throws Exception {
-		expect(descrs.get(eq("foo"))).andReturn(descr);
+	public void testGetSymbol1() throws Exception {
+		expect(symbols.get(eq("foo"))).andReturn(symbol);
 		control.replay();
 		
-		assertSame(descr, cache.getDescriptor("foo"));
+		assertSame(symbol, cache.getSymbol("foo"));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testGetDescriptor2() throws Exception {
-		expect(descrs.get(eq("foo"), eq("bar"))).andReturn(descr);
+	public void testGetSymbol2() throws Exception {
+		expect(symbols.get(eq("foo"), eq("bar"))).andReturn(symbol);
 		control.replay();
 		
-		assertSame(descr, cache.getDescriptor("foo", "bar"));
+		assertSame(symbol, cache.getSymbol("foo", "bar"));
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testOnDescriptorsUpdate() throws Exception {
-		expect(descrs.OnUpdate()).andReturn(type);
+	public void testOnSymbolsUpdate() throws Exception {
+		expect(symbols.OnUpdate()).andReturn(type);
 		control.replay();
 		
-		assertSame(type, cache.OnDescriptorsUpdate());
+		assertSame(type, cache.OnSymbolsUpdate());
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testPut_SecurityDescriptor() throws Exception {
-		expect(descrs.put(same(descr))).andReturn(true);
+	public void testPut_Symbol() throws Exception {
+		expect(symbols.put(same(symbol))).andReturn(true);
 		control.replay();
 		
-		assertTrue(cache.put(descr));
+		assertTrue(cache.put(symbol));
 		
 		control.verify();
 	}
@@ -231,9 +230,9 @@ public class CacheTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<DescriptorsCache> vDsc = new Variant<DescriptorsCache>()
-			.add(descrs)
-			.add(control.createMock(DescriptorsCache.class));
+		Variant<SymbolsCache> vDsc = new Variant<SymbolsCache>()
+			.add(symbols)
+			.add(control.createMock(SymbolsCache.class));
 		Variant<PositionsCache> vPos = new Variant<PositionsCache>(vDsc)
 			.add(positions)
 			.add(control.createMock(PositionsCache.class));
@@ -258,7 +257,7 @@ public class CacheTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(descrs, found.getDescriptorsCache());
+		assertSame(symbols, found.getSymbolsCache());
 		assertSame(positions, found.getPositionsCache());
 		assertSame(orders, found.getOrdersCache());
 		assertSame(ownTrades, found.getOwnTradesCache());

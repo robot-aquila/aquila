@@ -12,13 +12,13 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.quik.*;
 import ru.prolib.aquila.quik.api.*;
-import ru.prolib.aquila.quik.assembler.cache.QUIKSecurityDescriptor;
+import ru.prolib.aquila.quik.assembler.cache.QUIKSymbol;
 import ru.prolib.aquila.t2q.T2QException;
 import ru.prolib.aquila.t2q.T2QTransStatus;
 
 public class PlaceHandlerTest {
 	private static Account account;
-	private static QUIKSecurityDescriptor descr;
+	private static QUIKSymbol symbol;
 	private IMocksControl control;
 	private QUIKTerminal terminal;
 	private QUIKClient client;
@@ -33,8 +33,8 @@ public class PlaceHandlerTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		account = new Account("SPOT", "18210", "LX01");
-		descr = new QUIKSecurityDescriptor("RTS-12.13", "SPBFUT", ISO4217.USD,
-				SecurityType.STK, "RIZ3", "ShortCode", "Future RTS-12.13");
+		symbol = new QUIKSymbol("RTS-12.13", "SPBFUT", ISO4217.USD,
+				SymbolType.STK, "RIZ3", "ShortCode", "Future RTS-12.13");
 	}
 
 	@Before
@@ -51,7 +51,7 @@ public class PlaceHandlerTest {
 		expect(order.getId()).andStubReturn(214);
 		expect(order.getSystemInfo()).andStubReturn(info);
 		expect(order.getAccount()).andStubReturn(account);
-		expect(order.getSecurityDescriptor()).andStubReturn(descr);
+		expect(order.getSymbol()).andStubReturn(symbol);
 		expect(order.getSecurity()).andStubReturn(security);
 		expect(order.getQty()).andStubReturn(1000L);
 		expect(terminal.getClient()).andStubReturn(client);

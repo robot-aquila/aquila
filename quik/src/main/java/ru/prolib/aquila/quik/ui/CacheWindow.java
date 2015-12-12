@@ -55,7 +55,7 @@ public class CacheWindow {
 			public void windowClosing(WindowEvent e) { onHide(); }
 		});
 		TableBuilder builder = new TableBuilder(labels, terminal.getDataCache());
-		addTab(builder.createDescriptorsTable(), TEXT_TAB_CACHE_DESCRS);
+		addTab(builder.createSymbolsTable(), TEXT_TAB_CACHE_DESCRS);
 		addTab(builder.createTradesTable(), TEXT_TAB_CACHE_TRADES);
 		addTab(builder.createPositionsCacheTable(), TEXT_TAB_CACHE_POSITIONS);
 		addTab(builder.createOrdersTable(), TEXT_TAB_CACHE_ORDERS);

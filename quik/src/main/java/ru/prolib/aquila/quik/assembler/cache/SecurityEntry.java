@@ -25,8 +25,8 @@ public class SecurityEntry extends CacheEntry {
 	private final Double lowPrice;
 	private final String code, classCode;
 	private final Currency currency;
-	private final SecurityType type;
-	private QUIKSecurityDescriptor descriptor;
+	private final SymbolType type;
+	private QUIKSymbol symbol;
 	private final Double initialPrice;
 	private final Double initialMargin;
 	
@@ -60,7 +60,7 @@ public class SecurityEntry extends CacheEntry {
 			Double lastPrice, Double openPrice, Double closePrice,
 			String displayName, String shortName, Double askPrice,
 			Double bidPrice, Double highPrice, Double lowPrice,
-			String code, String classCode, Currency currency, SecurityType type,
+			String code, String classCode, Currency currency, SymbolType type,
 			Double initialPrice, Double initialMargin)
 	{
 		super();
@@ -167,21 +167,21 @@ public class SecurityEntry extends CacheEntry {
 		return currency;
 	}
 	
-	public SecurityType getType() {
+	public SymbolType getType() {
 		return type;
 	}
 		
-	public synchronized QUIKSecurityDescriptor getDescriptor() {
-		if ( descriptor == null ) {
-			if ( type ==SecurityType.FUT ) {
-				descriptor = new QUIKSecurityDescriptor(displayName, classCode,
+	public synchronized QUIKSymbol getSymbol() {
+		if ( symbol == null ) {
+			if ( type ==SymbolType.FUT ) {
+				symbol = new QUIKSymbol(displayName, classCode,
 						currency, type, code, shortName, displayName);
 			} else {
-				descriptor = new QUIKSecurityDescriptor(code, classCode,
+				symbol = new QUIKSymbol(code, classCode,
 						currency, type, code, shortName, displayName);
 			}
 		}
-		return descriptor;
+		return symbol;
 	}
 	
 	@Override

@@ -16,7 +16,7 @@ import ru.prolib.aquila.t2q.*;
 
 public class AssemblerL2Test {
 	private static Account account;
-	private static QUIKSecurityDescriptor descr;
+	private static QUIKSymbol symbol;
 	private IMocksControl control;
 	private QUIKTerminal terminal;
 	private Cache cache;
@@ -27,8 +27,8 @@ public class AssemblerL2Test {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		account = new Account("TEST", "1", "2");
-		descr = new QUIKSecurityDescriptor("SBER", "EQBR", ISO4217.RUB,
-				SecurityType.STK, "SBER", "Сбербанк", "АО СБЕРБАНК");
+		symbol = new QUIKSymbol("SBER", "EQBR", ISO4217.RUB,
+				SymbolType.STK, "SBER", "Сбербанк", "АО СБЕРБАНК");
 	}
 
 	@Before
@@ -59,9 +59,9 @@ public class AssemblerL2Test {
 	}
 	
 	@Test
-	public void testTryAssemble_Position_NoDescr() throws Exception {
+	public void testTryAssemble_Position_NoSymbol() throws Exception {
 		PositionEntry entry = new PositionEntry(account, "LKOH", 1L, 0L, 12d);
-		expect(cache.getDescriptor(eq("LKOH"))).andReturn(null);
+		expect(cache.getSymbol(eq("LKOH"))).andReturn(null);
 		control.replay();
 		
 		assertFalse(asm.tryAssemble(entry));
@@ -72,8 +72,8 @@ public class AssemblerL2Test {
 	@Test
 	public void testTryAssemble_Position_NoSecurity() throws Exception {
 		PositionEntry entry = new PositionEntry(account, "LKOH", 1L, 0L, 12d);
-		expect(cache.getDescriptor(eq("LKOH"))).andReturn(descr);
-		expect(terminal.getSecurity(descr))
+		expect(cache.getSymbol(eq("LKOH"))).andReturn(symbol);
+		expect(terminal.getSecurity(symbol))
 			.andThrow(new SecurityException("test error"));
 		control.replay();
 		
@@ -88,8 +88,8 @@ public class AssemblerL2Test {
 		EditableSecurity security = control.createMock(EditableSecurity.class);
 		EditablePortfolio p = control.createMock(EditablePortfolio.class);
 		EditablePosition pos = control.createMock(EditablePosition.class);
-		expect(cache.getDescriptor(eq("LKOH"))).andReturn(descr);
-		expect(terminal.getSecurity(descr)).andReturn(security);
+		expect(cache.getSymbol(eq("LKOH"))).andReturn(symbol);
+		expect(terminal.getSecurity(symbol)).andReturn(security);
 		expect(terminal.getEditablePortfolio(eq(account))).andReturn(p);
 		expect(p.getEditablePosition(security)).andReturn(pos);
 		pos.setOpenQty(eq(1L));
@@ -109,13 +109,13 @@ public class AssemblerL2Test {
 		SecurityEntry entry = new SecurityEntry(1, 142820d, 132480d,
 				6.48020d, 10d, 0, 137950d, 137000d, 136900d, "RTS-9.13",
 				"RIU3", 138040d, 137990d, 138100d, 136050d, "RIU3", "SPBFUT",
-				ISO4217.USD, SecurityType.FUT,
+				ISO4217.USD, SymbolType.FUT,
 				132020d, 12450d);
-		descr = new QUIKSecurityDescriptor("RTS-9.13", "SPBFUT", ISO4217.USD,
-				SecurityType.FUT, "RIU3", "RIU3", "RTS-9.13");
+		symbol = new QUIKSymbol("RTS-9.13", "SPBFUT", ISO4217.USD,
+				SymbolType.FUT, "RIU3", "RIU3", "RTS-9.13");
 		
 		EditableSecurity security = control.createMock(EditableSecurity.class);
-		expect(terminal.getEditableSecurity(eq(descr))).andReturn(security);
+		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(security);
 		security.setLotSize(eq(1));
 		security.setMaxPrice(eq(142820d));
 		security.setMinPrice(eq(132480d));
@@ -157,16 +157,16 @@ public class AssemblerL2Test {
 		EditableSecurity s = control.createMock(EditableSecurity.class);
 		TradesEntry entry = control.createMock(TradesEntry.class);
 		Trade trade1 = new Trade(terminal), trade2 = new Trade(terminal);
-		trade1.setId(1L); trade1.setSecurityDescriptor(descr);
-		trade2.setId(2L); trade2.setSecurityDescriptor(descr);
+		trade1.setId(1L); trade1.setSymbol(symbol);
+		trade2.setId(2L); trade2.setSymbol(symbol);
 		
 		expect(entry.access(same(terminal))).andReturn(trade1);
-		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(s);
 		s.fireTradeEvent(same(trade1));
 		expect(entry.next()).andReturn(true);
 		
 		expect(entry.access(same(terminal))).andReturn(trade2);
-		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(s);
 		s.fireTradeEvent(same(trade2));
 		expect(entry.next()).andReturn(false);
 		
@@ -183,16 +183,16 @@ public class AssemblerL2Test {
 		EditableSecurity s = control.createMock(EditableSecurity.class);
 		TradesEntry entry = control.createMock(TradesEntry.class);
 		Trade trade1 = new Trade(terminal), trade2 = new Trade(terminal);
-		trade1.setId(1L); trade1.setSecurityDescriptor(descr);
-		trade2.setId(2L); trade2.setSecurityDescriptor(descr);
+		trade1.setId(1L); trade1.setSymbol(symbol);
+		trade2.setId(2L); trade2.setSymbol(symbol);
 		
 		expect(entry.access(same(terminal))).andReturn(trade1);
-		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(s);
 		s.fireTradeEvent(same(trade1));
 		expect(entry.next()).andReturn(true);
 		
 		expect(entry.access(same(terminal))).andReturn(trade2);
-		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(s);
 		s.fireTradeEvent(same(trade2));
 		expect(entry.next()).andReturn(true);
 		
@@ -213,17 +213,17 @@ public class AssemblerL2Test {
 		trade1 = new Trade(terminal);
 		trade2 = new Trade(terminal);
 		trade3 = new Trade(terminal);
-		trade1.setId(98L); trade1.setSecurityDescriptor(descr);
-		trade2.setId(99L); trade2.setSecurityDescriptor(descr);
-		trade3.setId(98L); trade3.setSecurityDescriptor(descr); // duplicate
+		trade1.setId(98L); trade1.setSymbol(symbol);
+		trade2.setId(99L); trade2.setSymbol(symbol);
+		trade3.setId(98L); trade3.setSymbol(symbol); // duplicate
 
 		expect(entry.access(same(terminal))).andReturn(trade1);
-		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(s);
 		s.fireTradeEvent(same(trade1));
 		expect(entry.next()).andReturn(true);
 		
 		expect(entry.access(same(terminal))).andReturn(trade2);
-		expect(terminal.getEditableSecurity(eq(descr))).andReturn(s);
+		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(s);
 		s.fireTradeEvent(same(trade2));
 		expect(entry.next()).andReturn(true);
 		
@@ -324,7 +324,7 @@ public class AssemblerL2Test {
 		EditableOrder order = control.createMock(EditableOrder.class);
 		expect(order.getDirection()).andStubReturn(Direction.SELL);
 		expect(order.getId()).andStubReturn(832);
-		expect(order.getSecurityDescriptor()).andStubReturn(descr);
+		expect(order.getSymbol()).andStubReturn(symbol);
 		
 		T2QTrade entry = control.createMock(T2QTrade.class);
 		expect(entry.getId()).andStubReturn(814L);
@@ -340,7 +340,7 @@ public class AssemblerL2Test {
 		expected.setOrderId(832L);
 		expected.setPrice(12.34d);
 		expected.setQty(1000L);
-		expected.setSecurityDescriptor(descr);
+		expected.setSymbol(symbol);
 		expected.setTime(new DateTime(2013, 7, 22, 9, 33, 17));
 		expected.setVolume(123400d);
 

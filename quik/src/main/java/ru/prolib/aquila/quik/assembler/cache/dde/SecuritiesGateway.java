@@ -76,18 +76,18 @@ public class SecuritiesGateway implements TableGateway {
 	 */
 	private static final Map<String, Currency> FIX_CURRENCY_MAP;
 	
-	private static final SecurityType DEFAULT_TYPE = SecurityType.STK;
-	private static final Map<String, SecurityType> TYPE_MAP;
+	private static final SymbolType DEFAULT_TYPE = SymbolType.STK;
+	private static final Map<String, SymbolType> TYPE_MAP;
 	
 	static {
-		TYPE_MAP = new HashMap<String, SecurityType>();
-		TYPE_MAP.put("SPBFUT", SecurityType.FUT);
-		TYPE_MAP.put("SPBOPT", SecurityType.OPT);
-		TYPE_MAP.put("EQOB", SecurityType.BOND);
-		TYPE_MAP.put("EQOV", SecurityType.BOND);
-		TYPE_MAP.put("EQNB", SecurityType.BOND);
-		TYPE_MAP.put("EQDB", SecurityType.BOND);
-		TYPE_MAP.put("TQOB", SecurityType.BOND);
+		TYPE_MAP = new HashMap<String, SymbolType>();
+		TYPE_MAP.put("SPBFUT", SymbolType.FUT);
+		TYPE_MAP.put("SPBOPT", SymbolType.OPT);
+		TYPE_MAP.put("EQOB", SymbolType.BOND);
+		TYPE_MAP.put("EQOV", SymbolType.BOND);
+		TYPE_MAP.put("EQNB", SymbolType.BOND);
+		TYPE_MAP.put("EQDB", SymbolType.BOND);
+		TYPE_MAP.put("TQOB", SymbolType.BOND);
 		
 		FIX_CURRENCY_MAP = new HashMap<String, Currency>();
 		FIX_CURRENCY_MAP.put("SUR", ISO4217.RUB);
@@ -179,9 +179,9 @@ public class SecuritiesGateway implements TableGateway {
 	 * @return тип инструмента
 	 * @throws ValueException
 	 */
-	private SecurityType getType(Row row) throws ValueException {
+	private SymbolType getType(Row row) throws ValueException {
 		String strType = converter.getString(row, CLASS_CODE);
-		SecurityType type = TYPE_MAP.get(strType);
+		SymbolType type = TYPE_MAP.get(strType);
 		if ( type == null ) {
 			type = DEFAULT_TYPE;
 		}

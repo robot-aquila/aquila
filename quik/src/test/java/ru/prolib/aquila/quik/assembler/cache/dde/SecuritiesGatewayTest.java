@@ -91,7 +91,7 @@ public class SecuritiesGatewayTest {
 		SecurityEntry expected = new SecurityEntry(1, 145600.0d, 135060.0d,
 				6.20866d, 10.0, 0, 140720.0d, null, null, "RTS-3.13", "RIM3",
 				null, null, null, null, "RIM3", "SPBFUT", ISO4217.USD,
-				SecurityType.FUT,
+				SymbolType.FUT,
 				143800.0d, 12350.0d);
 		asm.assemble(eq(expected));
 		control.replay();
@@ -131,7 +131,7 @@ public class SecuritiesGatewayTest {
 		SecurityEntry expected = new SecurityEntry(10, null, null,
 				null, 0.01d, 2, null, 227.39d, 227.76d, "Уралкалий (ОАО) ао",
 				"Уралкалий-ао", null, null, 230.0d, 227.39d,
-				"URKA", "EQBR", ISO4217.USD, SecurityType.STK,
+				"URKA", "EQBR", ISO4217.USD, SymbolType.STK,
 				null, null);
 		asm.assemble(eq(expected));
 		control.replay();
@@ -195,7 +195,7 @@ public class SecuritiesGatewayTest {
 		SecurityEntry expected = new SecurityEntry(10, null, null,
 				null, 0.01d, 2, null, 227.39d, 227.76d, "Уралкалий (ОАО) ао",
 				"Уралкалий-ао", null, null, 230.0d, 227.39d,
-				"URKA", "EQBR", ISO4217.RUB, SecurityType.STK, null, 12350.0d);
+				"URKA", "EQBR", ISO4217.RUB, SymbolType.STK, null, 12350.0d);
 		asm.assemble(eq(expected));
 		control.replay();
 		
