@@ -19,7 +19,7 @@ public class TradesReportTableModel extends AbstractTableModel
 	private static final long serialVersionUID = 676641706428117427L;
 	private static final String TEXT_SEC = "TradeReport";
 	private static final String COL_TYPE = "COL_TYPE";
-	private static final String COL_SEC_DESCR = "COL_SEC_DESCR";
+	private static final String COL_SYMBOL = "COL_SYMBOL";
 	private static final String COL_QTY = "COL_QTY";
 	private static final String COL_UNCOVERED_QTY = "COL_UNCOVERED_QTY";
 	private static final String COL_ENTER_TIME = "COL_ENTER_TIME";
@@ -33,7 +33,7 @@ public class TradesReportTableModel extends AbstractTableModel
 	
 	private static final String[] header = {
 		COL_TYPE,
-		COL_SEC_DESCR,
+		COL_SYMBOL,
 		COL_QTY,
 		COL_UNCOVERED_QTY,
 		COL_ENTER_TIME,
@@ -78,8 +78,8 @@ public class TradesReportTableModel extends AbstractTableModel
 		String hdr = header[col];
 		if ( hdr == COL_TYPE ) {
 			return report.getType();
-		} else if ( hdr == COL_SEC_DESCR ) {
-			return report.getSecurityDescriptor();
+		} else if ( hdr == COL_SYMBOL ) {
+			return report.getSymbol();
 		} else if ( hdr == COL_QTY ) {
 			return report.getQty();
 		} else if ( hdr == COL_UNCOVERED_QTY ) {

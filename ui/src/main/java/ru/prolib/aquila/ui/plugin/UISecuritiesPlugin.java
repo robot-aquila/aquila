@@ -101,7 +101,7 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 					dialog.setVisible(true);
 					Security security = dialog.getSelectedSecurity();
 					JOptionPane.showMessageDialog(null, "Selected: "
-						+ (security == null ? null : security.getDescriptor()));
+						+ (security == null ? null : security.getSymbol()));
 				}
         });
 	}

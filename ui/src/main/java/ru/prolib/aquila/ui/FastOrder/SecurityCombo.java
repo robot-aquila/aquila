@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 /**
  * Селектор инструмента.
  */
-public class SecurityCombo extends JComboBox<SecurityDescriptor> implements Starter, EventListener {
+public class SecurityCombo extends JComboBox<Symbol> implements Starter, EventListener {
 	private static final long serialVersionUID = -3328773972490353436L;
 	private final Terminal securities;
 	private final Vector<Security> list = new Vector<Security>();
@@ -52,7 +52,7 @@ public class SecurityCombo extends JComboBox<SecurityDescriptor> implements Star
 		if ( ! list.contains(security) ) {
 			if ( SwingUtilities.isEventDispatchThread() ) {
 				list.add(security);
-				addItem(security.getDescriptor());
+				addItem(security.getSymbol());
 			} else {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override public void run() {
@@ -68,9 +68,9 @@ public class SecurityCombo extends JComboBox<SecurityDescriptor> implements Star
 	 * <p>
 	 * @return дескриптор инструмента или null, если инструмент не выбран
 	 */
-	public SecurityDescriptor getSelectedDescriptor() {
+	public Symbol getSelectedSymbol() {
 		Security selected = getSelectedSecurity();
-		return selected != null ? selected.getDescriptor() : null;
+		return selected != null ? selected.getSymbol() : null;
 	}
 	
 	/**

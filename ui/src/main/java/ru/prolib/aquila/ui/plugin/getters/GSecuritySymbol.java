@@ -12,7 +12,7 @@ public class GSecuritySymbol extends GString {
 	@Override
 	public String get(Object obj) throws ValueException {
 		Security o = (Security) obj;
-		return super.get(o.getDescriptor().getCode());
+		return super.get(o.getSymbol().getCode());
 	}
 
 }

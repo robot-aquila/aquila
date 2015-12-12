@@ -118,7 +118,7 @@ public class PositionListTableModel extends AbstractTableModel implements
 		} else if ( id == CommonMsg.TERMINAL ) {
 			return "TODO";
 		} else if ( id == CommonMsg.SECURITY ) {			
-			return p.getSecurity().getDescriptor();
+			return p.getSecurity().getSymbol();
 		} else if ( id == CommonMsg.VMARGIN ) {
 			return p.getVarMargin();
 		} else if ( id == CommonMsg.OPEN_VAL ) {

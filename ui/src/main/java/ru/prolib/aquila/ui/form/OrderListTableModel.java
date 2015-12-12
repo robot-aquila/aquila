@@ -99,7 +99,7 @@ public class OrderListTableModel extends AbstractTableModel implements
 			return order.getType();
 		} else if ( id == CommonMsg.SECURITY) {
 			try {
-				return order.getSecurity().getDescriptor();
+				return order.getSecurity().getSymbol();
 			} catch ( SecurityException e ) {
 				logger.error("Unexpected exception: ", e);
 				return null;

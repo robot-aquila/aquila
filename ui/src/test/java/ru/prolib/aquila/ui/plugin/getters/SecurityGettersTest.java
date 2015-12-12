@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.data.*;
 public class SecurityGettersTest {
 
 	private static IMocksControl control;
-	private SecurityDescriptor descr;
+	private Symbol symbol;
 	private Object security;
 	/**
 	 * @throws java.lang.Exception
@@ -29,8 +29,8 @@ public class SecurityGettersTest {
 		
 		EditableTerminal terminal = new BasicTerminalBuilder().buildTerminal();
 		
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUR", SecurityType.STK);
-		EditableSecurity sc = terminal.getEditableSecurity(descr);
+		symbol = new Symbol("GAZP", "EQBR", "RUR", SymbolType.STK);
+		EditableSecurity sc = terminal.getEditableSecurity(symbol);
 		sc.setPrecision(3);
 		sc.setMinPrice(90.00d);
 		sc.setMaxPrice(130.00d);

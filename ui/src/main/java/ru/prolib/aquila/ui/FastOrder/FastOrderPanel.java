@@ -23,12 +23,12 @@ public class FastOrderPanel extends JPanel implements Starter {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger;
 	private static final Account ACCOUNT_PROTO;
-	private static final SecurityDescriptor SECURITY_PROTO;
+	private static final Symbol SECURITY_PROTO;
 	
 	static {
 		logger = LoggerFactory.getLogger(FastOrderPanel.class);
 		ACCOUNT_PROTO = new Account("SPBFUT", "SPBFUTXXXXX", "SPBFUTXXXXX__");// "SPBFUT#SPBFUTXXXXX#SPBFUTXXXXX__";
-		SECURITY_PROTO = new SecurityDescriptor("RIU3", "SPBFUT", ISO4217.USD, SecurityType.FUT);// "RIU3@SPBFUT(FUT/USD)__";
+		SECURITY_PROTO = new Symbol("RIU3", "SPBFUT", ISO4217.USD, SymbolType.FUT);// "RIU3@SPBFUT(FUT/USD)__";
 	}
 	
 	private final Terminal terminal;

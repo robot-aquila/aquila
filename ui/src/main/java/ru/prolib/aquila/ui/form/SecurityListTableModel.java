@@ -65,9 +65,9 @@ public class SecurityListTableModel extends AbstractTableModel {
 		} else if ( id == SecurityMsg.CLASS ) {
 			return security.getClassCode();
 		} else if ( id == SecurityMsg.TYPE ) {
-			return security.getDescriptor().getType();
+			return security.getSymbol().getType();
 		} else if ( id == SecurityMsg.CURRENCY ) {
-			return security.getDescriptor().getCurrencyCode();
+			return security.getSymbol().getCurrencyCode();
 		} else {
 			return null;			
 		}
