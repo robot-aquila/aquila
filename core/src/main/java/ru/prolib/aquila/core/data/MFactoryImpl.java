@@ -114,9 +114,9 @@ public class MFactoryImpl implements MFactory {
 	}
 
 	@Override
-	public S<EditableOrder> rowOrdSecDescr(G<SecurityDescriptor> gSecDescr) {
-		return new MStd<EditableOrder>(gSecDescr,
-				sfactory.orderSetSecurityDescriptor());
+	public S<EditableOrder> rowOrdSymbol(G<Symbol> gSymbol) {
+		return new MStd<EditableOrder>(gSymbol,
+				sfactory.orderSetSymbol());
 	}
 
 	@Override
@@ -243,8 +243,8 @@ public class MFactoryImpl implements MFactory {
 	}
 
 	@Override
-	public S<Trade> rowTrdSecDescr(G<SecurityDescriptor> gSecDescr) {
-		return new MStd<Trade>(gSecDescr, sfactory.tradeSetSecurityDescr());
+	public S<Trade> rowTrdSymbol(G<Symbol> gSymbol) {
+		return new MStd<Trade>(gSymbol, sfactory.tradeSetSymbol());
 	}
 
 	@Override

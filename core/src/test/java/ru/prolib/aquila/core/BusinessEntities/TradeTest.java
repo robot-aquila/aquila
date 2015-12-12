@@ -21,13 +21,13 @@ import ru.prolib.aquila.core.utils.Variant;
 public class TradeTest {
 	private static IMocksControl control;
 	private static Terminal terminal, terminal2;
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private Trade trade;
 	private static Calendar cal;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
 		terminal2 = control.createMock(Terminal.class);
@@ -41,7 +41,7 @@ public class TradeTest {
 		control.resetToStrict();
 		trade = new Trade(terminal);
 		trade.setId(105L);
-		trade.setSecurityDescriptor(descr);
+		trade.setSymbol(symbol);
 		trade.setDirection(Direction.BUY);
 		trade.setTime(new DateTime(cal.getTime()));
 		trade.setPrice(100.00d);
@@ -70,7 +70,7 @@ public class TradeTest {
 	public void testConstruct1() throws Exception {
 		assertEquals((Long) 105L, trade.getId());
 		assertSame(terminal, trade.getTerminal());
-		assertEquals(descr, trade.getSecurityDescriptor());
+		assertEquals(symbol, trade.getSymbol());
 		assertSame(Direction.BUY, trade.getDirection());
 		assertEquals(new DateTime(2010, 9, 1, 3, 45, 15), trade.getTime());
 		assertEquals(100.00d, trade.getPrice(), 0.001d);
@@ -105,12 +105,11 @@ public class TradeTest {
 			.add(null)
 			.add(100500L)
 			.add(105L);
-		Variant<SecurityDescriptor> vSecDescr =
-				new Variant<SecurityDescriptor>(vId)
+		Variant<Symbol> vSymbol = new Variant<Symbol>(vId)
 			.add(null)
-			.add(descr)
-			.add(control.createMock(SecurityDescriptor.class));
-		Variant<Direction> vDir = new Variant<Direction>(vSecDescr)
+			.add(symbol)
+			.add(control.createMock(Symbol.class));
+		Variant<Direction> vDir = new Variant<Direction>(vSymbol)
 			.add(null)
 			.add(Direction.BUY)
 			.add(Direction.SELL);
@@ -144,7 +143,7 @@ public class TradeTest {
 		do {
 			Trade actual = new Trade(vTerm.get());
 			actual.setId(vId.get());
-			actual.setSecurityDescriptor(vSecDescr.get());
+			actual.setSymbol(vSymbol.get());
 			actual.setDirection(vDir.get());
 			actual.setTime(new DateTime(vTime.get()));
 			actual.setPrice(vPrice.get());
@@ -159,7 +158,7 @@ public class TradeTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertEquals((Long) 105L, found.getId());
-		assertSame(descr, found.getSecurityDescriptor());
+		assertSame(symbol, found.getSymbol());
 		assertSame(Direction.BUY, found.getDirection());
 		assertEquals(trade.getTime(), found.getTime());
 		assertEquals(100.00d, found.getPrice(), 0.001d);
@@ -180,7 +179,7 @@ public class TradeTest {
 	public void testHashCode() throws Exception {
 		int hashCode = new HashCodeBuilder(20121031, 120517)
 			.append(105L)
-			.append(descr)
+			.append(symbol)
 			.append(Direction.BUY)
 			.append(new DateTime(2010, 9, 1, 3, 45, 15))
 			.append(100.00d)
@@ -195,7 +194,7 @@ public class TradeTest {
 	@Test
 	public void testGetSecurity() throws Exception {
 		Security security = control.createMock(Security.class);
-		expect(terminal.getSecurity(eq(descr))).andReturn(security);
+		expect(terminal.getSecurity(eq(symbol))).andReturn(security);
 		control.replay();
 		assertSame(security, trade.getSecurity());
 		control.verify();

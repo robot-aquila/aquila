@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class TerminalTradeReportTest {
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private IMocksControl control;
 	private EventTypeSI onEvent;
 	private Terminal terminal;
@@ -30,7 +30,7 @@ public class TerminalTradeReportTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("RI", "SPFB", "USD", SecurityType.FUT);
+		symbol = new Symbol("RI", "SPFB", "USD", SymbolType.FUT);
 	}
 
 	@Before
@@ -196,10 +196,10 @@ public class TerminalTradeReportTest {
 	
 	@Test
 	public void testGetCurrent_SD() throws Exception {
-		expect(underlying.getCurrent(descr)).andReturn(record);
+		expect(underlying.getCurrent(symbol)).andReturn(record);
 		control.replay();
 		
-		assertSame(record, report.getCurrent(descr));
+		assertSame(record, report.getCurrent(symbol));
 		
 		control.verify();
 	}
@@ -216,10 +216,10 @@ public class TerminalTradeReportTest {
 	
 	@Test
 	public void testGetPosition_SD() throws Exception {
-		expect(underlying.getPosition(descr)).andReturn(5L);
+		expect(underlying.getPosition(symbol)).andReturn(5L);
 		control.replay();
 		
-		assertEquals(5L, report.getPosition(descr));
+		assertEquals(5L, report.getPosition(symbol));
 		
 		control.verify();
 	}

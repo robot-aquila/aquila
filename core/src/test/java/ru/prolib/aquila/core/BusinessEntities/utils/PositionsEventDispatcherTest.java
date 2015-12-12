@@ -14,8 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class PositionsEventDispatcherTest {
 	private static Account account = new Account("foo", "bar");
-	private static SecurityDescriptor descr =
-			new SecurityDescriptor("zu", "lu", ISO4217.USD, SecurityType.FUT);
+	private static Symbol symbol = new Symbol("zu", "lu", ISO4217.USD, SymbolType.FUT);
 	private EditableTerminal terminal;
 	private EditablePortfolio portfolio;
 	private EditableSecurity security;
@@ -28,7 +27,7 @@ public class PositionsEventDispatcherTest {
 	public void setUp() throws Exception {
 		terminal = new BasicTerminalBuilder().buildTerminal();
 		portfolio = terminal.getEditablePortfolio(account);
-		security = terminal.getEditableSecurity(descr);
+		security = terminal.getEditableSecurity(symbol);
 		position = portfolio.getEditablePosition(security);
 		dispatcher = new PositionsEventDispatcher(terminal.getEventSystem(), account);
 		terminal.getEventSystem().getEventQueue().start();

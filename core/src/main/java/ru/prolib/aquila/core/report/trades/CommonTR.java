@@ -168,18 +168,18 @@ public class CommonTR implements EditableTradeReport, EventListener {
 	}
 
 	@Override
-	public RTrade getCurrent(SecurityDescriptor descr) {
-		return activeTrades.getReport(descr);
+	public RTrade getCurrent(Symbol symbol) {
+		return activeTrades.getReport(symbol);
 	}
 
 	@Override
 	public RTrade getCurrent(Security security) {
-		return getCurrent(security.getDescriptor());
+		return getCurrent(security.getSymbol());
 	}
 
 	@Override
-	public long getPosition(SecurityDescriptor descr) {
-		RTrade record = getCurrent(descr);
+	public long getPosition(Symbol symbol) {
+		RTrade record = getCurrent(symbol);
 		if ( record == null ) return 0;
 		if ( record.getType() == PositionType.LONG ) {
 			return record.getUncoveredQty();
@@ -190,7 +190,7 @@ public class CommonTR implements EditableTradeReport, EventListener {
 
 	@Override
 	public long getPosition(Security security) {
-		return getPosition(security.getDescriptor());
+		return getPosition(security.getSymbol());
 	}
 
 }

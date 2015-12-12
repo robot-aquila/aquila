@@ -27,7 +27,7 @@ public interface SetterFactory {
 	
 	public S<EditableOrder> orderSetQtyRest();
 	
-	public S<EditableOrder> orderSetSecurityDescriptor();
+	public S<EditableOrder> orderSetSymbol();
 	
 	public S<EditableOrder> orderSetStatus();
 	
@@ -101,7 +101,7 @@ public interface SetterFactory {
 	
 	public S<Trade> tradeSetQty();
 	
-	public S<Trade> tradeSetSecurityDescr();
+	public S<Trade> tradeSetSymbol();
 	
 	public S<Trade> tradeSetTime();
 	

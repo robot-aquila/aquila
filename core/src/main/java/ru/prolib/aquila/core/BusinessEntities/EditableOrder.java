@@ -46,9 +46,9 @@ public interface EditableOrder extends Order, Editable {
 	/**
 	 * Установить дескриптор торгуемого инструмента.
 	 * <p>
-	 * @param descr дескриптор инструмена
+	 * @param symbol дескриптор инструмена
 	 */
-	public void setSecurityDescriptor(SecurityDescriptor descr);
+	public void setSymbol(Symbol symbol);
 	
 	/**
 	 * Установить количество заявки.

@@ -43,7 +43,7 @@ public interface Security {
 	 * <p>
 	 * @return дескриптор инструмента
 	 */
-	public SecurityDescriptor getDescriptor();
+	public Symbol getSymbol();
 	
 	/**
 	 * Получить размер лота.
@@ -277,7 +277,7 @@ public interface Security {
 	 * <p>
 	 * @return security type
 	 */
-	public SecurityType getType();
+	public SymbolType getType();
 	
 	/**
 	 * Get currency.

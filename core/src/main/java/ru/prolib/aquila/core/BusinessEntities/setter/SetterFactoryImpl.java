@@ -65,8 +65,8 @@ public class SetterFactoryImpl implements SetterFactory {
 	}
 
 	@Override
-	public S<EditableOrder> orderSetSecurityDescriptor() {
-		return new OrderSetSecurityDescriptor();
+	public S<EditableOrder> orderSetSymbol() {
+		return new OrderSetSymbol();
 	}
 
 	@Override
@@ -165,8 +165,8 @@ public class SetterFactoryImpl implements SetterFactory {
 	}
 
 	@Override
-	public S<Trade> tradeSetSecurityDescr() {
-		return new TradeSetSecurityDescriptor();
+	public S<Trade> tradeSetSymbol() {
+		return new TradeSetSymbol();
 	}
 
 	@Override

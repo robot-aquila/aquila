@@ -72,9 +72,8 @@ public class TradesCsvFileWriterTest {
 	 * @param reader источник данных
 	 * @return дескриптор инструмента
 	 */
-	private SecurityDescriptor getSecDescr(CsvReader reader) throws Exception {
-		return new SecurityDescriptor(reader.get(SEC_CODE),
-				"TEST", "USD", SecurityType.FUT);
+	private Symbol getSymbol(CsvReader reader) throws Exception {
+		return new Symbol(reader.get(SEC_CODE), "TEST", "USD", SymbolType.FUT);
 	}
 	
 	/**
@@ -106,7 +105,7 @@ public class TradesCsvFileWriterTest {
 			trade.setOrderId(Long.parseLong(reader.get(ORD_ID)));
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
-			trade.setSecurityDescriptor(getSecDescr(reader));
+			trade.setSymbol(getSymbol(reader));
 			trade.setTime(new DateTime(timeFormat.parse(reader.get(TIME))));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);

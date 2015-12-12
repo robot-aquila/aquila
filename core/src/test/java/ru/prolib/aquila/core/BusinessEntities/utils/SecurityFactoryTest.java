@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class SecurityFactoryTest {
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private IMocksControl control;
 	private EventSystem es;
 	private EditableTerminal terminal;
@@ -18,7 +18,7 @@ public class SecurityFactoryTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("SBER", "EQBR", "RUB", SecurityType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
 	}
 	
 	@Before
@@ -33,11 +33,11 @@ public class SecurityFactoryTest {
 	@Test
 	public void testCreateInstance() throws Exception {
 		control.replay();
-		SecurityEventDispatcher d = new SecurityEventDispatcher(es, descr);
-		Security expected = new SecurityImpl(terminal, descr, d);
+		SecurityEventDispatcher d = new SecurityEventDispatcher(es, symbol);
+		Security expected = new SecurityImpl(terminal, symbol, d);
 		
 		SecurityImpl actual = (SecurityImpl)
-			factory.createInstance(terminal, descr);
+			factory.createInstance(terminal, symbol);
 		assertEquals(expected, actual);
 		assertNotNull(actual.getEventDispatcher());
 	}

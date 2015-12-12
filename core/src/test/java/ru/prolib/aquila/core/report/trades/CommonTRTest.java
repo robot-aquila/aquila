@@ -45,7 +45,7 @@ public class CommonTRTest {
 	private static final String DIR_BUY = "B";
 	private static final String LONG = "LONG";
 	private static SimpleDateFormat timeFormat;
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	
 	private IMocksControl control;
 	private EditableTerminal terminal;
@@ -61,7 +61,7 @@ public class CommonTRTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		descr = new SecurityDescriptor("RI", "SPFB", "USD", SecurityType.FUT);
+		symbol = new Symbol("RI", "SPFB", "USD", SymbolType.FUT);
 	}
 
 	@Before
@@ -119,7 +119,7 @@ public class CommonTRTest {
 			trade.setOrderId(Long.parseLong(reader.get(ORD_ID)));
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
-			trade.setSecurityDescriptor(getSecDescr(reader));
+			trade.setSymbol(getSymbol(reader));
 			trade.setTime(new DateTime(timeFormat.parse(reader.get(TIME))));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);
@@ -177,7 +177,7 @@ public class CommonTRTest {
 		String exQty = reader.get(EXIT_QTY);
 		String exPrice = reader.get(EXIT_PRICE);
 		String exVol = reader.get(EXIT_VOL);
-		RTrade report = new RTradeImpl(getSecDescr(reader),
+		RTrade report = new RTradeImpl(getSymbol(reader),
 			(LONG.equals(reader.get(TYPE))
 				? PositionType.LONG : PositionType.SHORT),
 			new DateTime(timeFormat.parse(reader.get(ENTER_TIME))),
@@ -197,9 +197,9 @@ public class CommonTRTest {
 	 * @param reader источник данных
 	 * @return дескриптор инструмента
 	 */
-	private SecurityDescriptor getSecDescr(CsvReader reader) throws Exception {
-		return new SecurityDescriptor(reader.get(SEC_CODE),
-				"TEST", "USD", SecurityType.FUT);
+	private Symbol getSymbol(CsvReader reader) throws Exception {
+		return new Symbol(reader.get(SEC_CODE),
+				"TEST", "USD", SymbolType.FUT);
 	}
 	
 	/**
@@ -325,10 +325,10 @@ public class CommonTRTest {
 	public void testGetCurrent_SD() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(activeTrades.getReport(symbol)).andReturn(record);
 		control.replay();
 		
-		assertSame(record, trades.getCurrent(descr));
+		assertSame(record, trades.getCurrent(symbol));
 		
 		control.verify();
 	}
@@ -337,8 +337,8 @@ public class CommonTRTest {
 	public void testGetCurrent_S() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(security.getDescriptor()).andReturn(descr);
-		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(security.getSymbol()).andReturn(symbol);
+		expect(activeTrades.getReport(symbol)).andReturn(record);
 		control.replay();
 		
 		assertSame(record, trades.getCurrent(security));
@@ -350,10 +350,10 @@ public class CommonTRTest {
 	public void testGetPosition_SD_Zero() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(activeTrades.getReport(descr)).andReturn(null);
+		expect(activeTrades.getReport(symbol)).andReturn(null);
 		control.replay();
 		
-		assertEquals(0L, trades.getPosition(descr));
+		assertEquals(0L, trades.getPosition(symbol));
 		
 		control.verify();
 	}
@@ -362,12 +362,12 @@ public class CommonTRTest {
 	public void testGetPosition_SD_Long() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(activeTrades.getReport(symbol)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.LONG);
 		expect(record.getUncoveredQty()).andReturn(10L);
 		control.replay();
 		
-		assertEquals(10L, trades.getPosition(descr));
+		assertEquals(10L, trades.getPosition(symbol));
 		
 		control.verify();
 	}
@@ -376,12 +376,12 @@ public class CommonTRTest {
 	public void testGetPosition_SD_Short() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(activeTrades.getReport(symbol)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.SHORT);
 		expect(record.getUncoveredQty()).andReturn(5L);
 		control.replay();
 		
-		assertEquals(-5L, trades.getPosition(descr));
+		assertEquals(-5L, trades.getPosition(symbol));
 		
 		control.verify();
 	}
@@ -390,8 +390,8 @@ public class CommonTRTest {
 	public void testGetPosition_S_Zero() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(security.getDescriptor()).andReturn(descr);
-		expect(activeTrades.getReport(descr)).andReturn(null);
+		expect(security.getSymbol()).andReturn(symbol);
+		expect(activeTrades.getReport(symbol)).andReturn(null);
 		control.replay();
 		
 		assertEquals(0L, trades.getPosition(security));
@@ -403,8 +403,8 @@ public class CommonTRTest {
 	public void testGetPosition_S_Long() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(security.getDescriptor()).andReturn(descr);
-		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(security.getSymbol()).andReturn(symbol);
+		expect(activeTrades.getReport(symbol)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.LONG);
 		expect(record.getUncoveredQty()).andReturn(10L);
 		control.replay();
@@ -418,8 +418,8 @@ public class CommonTRTest {
 	public void testGetPosition_S_Short() throws Exception {
 		dispatcher = control.createMock(CommonTREventDispatcher.class);
 		trades = new CommonTR(dispatcher, activeTrades);
-		expect(security.getDescriptor()).andReturn(descr);
-		expect(activeTrades.getReport(descr)).andReturn(record);
+		expect(security.getSymbol()).andReturn(symbol);
+		expect(activeTrades.getReport(symbol)).andReturn(record);
 		expect(record.getType()).andReturn(PositionType.SHORT);
 		expect(record.getUncoveredQty()).andReturn(5L);
 		control.replay();

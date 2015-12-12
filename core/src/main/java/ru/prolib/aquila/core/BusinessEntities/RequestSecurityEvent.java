@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.*;
  * Событие в связи с запросом инструмента.
  */
 public class RequestSecurityEvent extends EventImpl {
-	private final SecurityDescriptor descr;
+	private final Symbol symbol;
 	private final int code;
 	private final String msg;
 
@@ -16,15 +16,15 @@ public class RequestSecurityEvent extends EventImpl {
 	 * Конструктор.
 	 * <p>
 	 * @param type тип события
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param code целочисленный код события
 	 * @param msg сопроводительное текстовое сообщение
 	 */
 	public RequestSecurityEvent(EventTypeSI type,
-			SecurityDescriptor descr, int code, String msg)
+			Symbol symbol, int code, String msg)
 	{
 		super(type);
-		this.descr = descr;
+		this.symbol = symbol;
 		this.code = code;
 		this.msg = msg;
 	}
@@ -34,8 +34,8 @@ public class RequestSecurityEvent extends EventImpl {
 	 * <p>
 	 * @return дескриптор инструмента, с которым связано событие
 	 */
-	public SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+	public Symbol getSymbol() {
+		return symbol;
 	}
 	
 	/**
@@ -67,7 +67,7 @@ public class RequestSecurityEvent extends EventImpl {
 		RequestSecurityEvent o = (RequestSecurityEvent) other;
 		return new EqualsBuilder()
 			.appendSuper(o.isType(getType()))
-			.append(o.descr, descr)
+			.append(o.symbol, symbol)
 			.append(o.code, code)
 			.append(o.msg, msg)
 			.isEquals();

@@ -110,8 +110,8 @@ public class TerminalTradeReport implements TradeReport, EventListener {
 	}
 
 	@Override
-	public RTrade getCurrent(SecurityDescriptor descr) {
-		return report.getCurrent(descr);
+	public RTrade getCurrent(Symbol symbol) {
+		return report.getCurrent(symbol);
 	}
 
 	@Override
@@ -120,8 +120,8 @@ public class TerminalTradeReport implements TradeReport, EventListener {
 	}
 
 	@Override
-	public long getPosition(SecurityDescriptor descr) {
-		return report.getPosition(descr);
+	public long getPosition(Symbol symbol) {
+		return report.getPosition(symbol);
 	}
 
 	@Override

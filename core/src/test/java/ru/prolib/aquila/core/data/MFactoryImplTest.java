@@ -177,13 +177,13 @@ public class MFactoryImplTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testRowOrdSecDescr() throws Exception {
-		G<SecurityDescriptor> getter = control.createMock(G.class);
+	public void testRowOrdSymbol() throws Exception {
+		G<Symbol> getter = control.createMock(G.class);
 		S<EditableOrder> setter = control.createMock(S.class);
-		expect(sfactory.orderSetSecurityDescriptor()).andReturn(setter);
+		expect(sfactory.orderSetSymbol()).andReturn(setter);
 		control.replay();
 		S<EditableOrder> expected = new MStd<EditableOrder>(getter, setter);
-		assertEquals(expected, factory.rowOrdSecDescr(getter));
+		assertEquals(expected, factory.rowOrdSymbol(getter));
 		control.verify();
 	}
 	
@@ -484,13 +484,13 @@ public class MFactoryImplTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testRowTrdSecDescr() throws Exception {
-		G<SecurityDescriptor> getter = control.createMock(G.class);
+	public void testRowTrdSymbol() throws Exception {
+		G<Symbol> getter = control.createMock(G.class);
 		S<Trade> setter = control.createMock(S.class);
-		expect(sfactory.tradeSetSecurityDescr()).andReturn(setter);
+		expect(sfactory.tradeSetSymbol()).andReturn(setter);
 		control.replay();
 		S<Trade> expected = new MStd<Trade>(getter, setter);
-		assertEquals(expected, factory.rowTrdSecDescr(getter));
+		assertEquals(expected, factory.rowTrdSymbol(getter));
 		control.verify();
 	}
 

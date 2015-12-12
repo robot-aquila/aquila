@@ -169,15 +169,12 @@ public class TerminalEventDispatcher {
 	/**
 	 * Генератор события: запрос инструмента отклонен.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param errorCode код ошибки
 	 * @param errorMsg расшифровка
 	 */
-	public void fireSecurityRequestError(SecurityDescriptor descr,
-			int errorCode, String errorMsg)
-	{
-		dispatcher.dispatch(new RequestSecurityEvent(onRequestSecurityError,
-				descr, errorCode, errorMsg));
+	public void fireSecurityRequestError(Symbol symbol, int errorCode, String errorMsg) {
+		dispatcher.dispatch(new RequestSecurityEvent(onRequestSecurityError, symbol, errorCode, errorMsg));
 	}
 	
 	/**

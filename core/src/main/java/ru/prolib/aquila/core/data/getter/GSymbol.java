@@ -3,8 +3,8 @@ package ru.prolib.aquila.core.data.getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.data.G;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -13,16 +13,13 @@ import ru.prolib.aquila.core.data.ValueException;
  * <p>
  * Использует два геттера для доступа к коду инструмента и коду класса. В
  * случае отсутствия возможности создать дескриптор, возвращает null.  
- * <p>
- * 2012-08-28<br>
- * $Id: GSecurityDescr.java 543 2013-02-25 06:35:27Z whirlwind $
  */
 @Deprecated
-public class GSecurityDescr implements G<SecurityDescriptor> {
+public class GSymbol implements G<Symbol> {
 	private final G<String> gCode;
 	private final G<String> gClass;
 	private final G<String> gCurr;
-	private final G<SecurityType> gType;
+	private final G<SymbolType> gType;
 	
 	/**
 	 * Создать геттер.
@@ -32,8 +29,8 @@ public class GSecurityDescr implements G<SecurityDescriptor> {
 	 * @param gCurr геттер кода валюты
 	 * @param gType геттер типа инструмента
 	 */
-	public GSecurityDescr(G<String> gCode, G<String> gClass,
-			G<String> gCurr, G<SecurityType> gType)
+	public GSymbol(G<String> gCode, G<String> gClass,
+			G<String> gCurr, G<SymbolType> gType)
 	{
 		super();
 		this.gCode = gCode;
@@ -74,21 +71,21 @@ public class GSecurityDescr implements G<SecurityDescriptor> {
 	 * <p>
 	 * @return геттер
 	 */
-	public G<SecurityType> getTypeGetter() {
+	public G<SymbolType> getTypeGetter() {
 		return gType;
 	}
 
 	@Override
-	public SecurityDescriptor get(Object source) throws ValueException {
-		SecurityDescriptor descr = new SecurityDescriptor(gCode.get(source),
+	public Symbol get(Object source) throws ValueException {
+		Symbol symbol = new Symbol(gCode.get(source),
 				gClass.get(source), gCurr.get(source), gType.get(source));
-		return descr.isValid() ? descr : null;
+		return symbol.isValid() ? symbol : null;
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		if ( other != null && other instanceof GSecurityDescr ) {
-			GSecurityDescr o = (GSecurityDescr) other;
+		if ( other != null && other instanceof GSymbol ) {
+			GSymbol o = (GSymbol) other;
 			return new EqualsBuilder()
 				.append(gCode, o.gCode)
 				.append(gClass, o.gClass)

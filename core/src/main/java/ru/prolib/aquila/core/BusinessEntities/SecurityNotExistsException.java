@@ -18,8 +18,8 @@ public class SecurityNotExistsException extends SecurityException {
 		super("Security not exists: " + code);
 	}
 	
-	public SecurityNotExistsException(SecurityDescriptor descr) {
-		super("Security not exists: " + descr);
+	public SecurityNotExistsException(Symbol symbol) {
+		super("Security not exists: " + symbol);
 	}
 
 }

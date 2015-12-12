@@ -13,7 +13,7 @@ import org.joda.time.DateTime;
 public class Trade implements Comparable<Trade> {
 	private volatile Terminal terminal;
 	private volatile Long id;
-	private volatile SecurityDescriptor descr;
+	private volatile Symbol symbol;
 	private volatile Direction direction;
 	private volatile DateTime time;
 	private volatile Double price;
@@ -189,16 +189,16 @@ public class Trade implements Comparable<Trade> {
 	 * @throws SecurityException - TODO:
 	 */
 	public Security getSecurity() throws SecurityException {
-		return terminal.getSecurity(descr);
+		return terminal.getSecurity(symbol);
 	}
 	
 	/**
 	 * Установить дескриптор инструмента.
 	 * <p>
-	 * @param descr дескриптор
+	 * @param symbol дескриптор
 	 */
-	public void setSecurityDescriptor(SecurityDescriptor descr) {
-		this.descr = descr;
+	public void setSymbol(Symbol symbol) {
+		this.symbol = symbol;
 	}
 	
 	/**
@@ -206,8 +206,8 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return дескриптор инструмента
 	 */
-	public SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+	public Symbol getSymbol() {
+		return symbol;
 	}
 	
 	@Override
@@ -220,7 +220,7 @@ public class Trade implements Comparable<Trade> {
 			return new EqualsBuilder()
 				.append(id, o.id)
 				.append(direction, o.direction)
-				.append(descr, o.descr)
+				.append(symbol, o.symbol)
 				.append(time, o.time)
 				.append(price, o.price)
 				.append(qty, o.qty)
@@ -238,7 +238,7 @@ public class Trade implements Comparable<Trade> {
 		return "Trade: "
 		 	+ time
 			+ " #" + id + " " +  direction + " "
-			+ descr + " " + qty + "x" + price
+			+ symbol + " " + qty + "x" + price
 			+ " Vol=" + volume;
 	}
 	
@@ -246,7 +246,7 @@ public class Trade implements Comparable<Trade> {
 	public int hashCode() {
 		return new HashCodeBuilder(20121031, 120517)
 			.append(id)
-			.append(descr)
+			.append(symbol)
 			.append(direction)
 			.append(time)
 			.append(price)

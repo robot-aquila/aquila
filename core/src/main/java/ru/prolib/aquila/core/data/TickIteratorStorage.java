@@ -2,7 +2,7 @@ package ru.prolib.aquila.core.data;
 
 import org.joda.time.DateTime;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 /**
  * Интерфейс хранилища тиковых данных.
@@ -32,8 +32,7 @@ public interface TickIteratorStorage {
 	public Aqiterator<Tick> getIterator(String dataId, DateTime start)
 			throws DataException;
 	
-	public Aqiterator<Tick>
-		getIterator(SecurityDescriptor descr, DateTime start)
+	public Aqiterator<Tick> getIterator(Symbol symbol, DateTime start)
 			throws DataException;
 
 }

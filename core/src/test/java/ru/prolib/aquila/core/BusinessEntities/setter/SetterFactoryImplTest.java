@@ -64,8 +64,8 @@ public class SetterFactoryImplTest {
 
 	@Test
 	public void testOrderSetSecurity() throws Exception {
-		assertEquals(new OrderSetSecurityDescriptor(),
-				factory.orderSetSecurityDescriptor());
+		assertEquals(new OrderSetSymbol(),
+				factory.orderSetSymbol());
 	}
 
 	@Test
@@ -186,7 +186,7 @@ public class SetterFactoryImplTest {
 	
 	@Test
 	public void testTradeSetSecurity() throws Exception {
-		assertEquals(new TradeSetSecurityDescriptor(), factory.tradeSetSecurityDescr());
+		assertEquals(new TradeSetSymbol(), factory.tradeSetSymbol());
 	}
 
 	@Test

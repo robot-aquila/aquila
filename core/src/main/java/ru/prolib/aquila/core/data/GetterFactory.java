@@ -139,8 +139,8 @@ public interface GetterFactory {
 	 * @param valSecType предустановленное <b>ЗНАЧЕНИЕ</b> типа инструмента
 	 * @return геттер дескриптора инструмента
 	 */
-	public G<SecurityDescriptor> rowSecurityDescr(String colCode,
-			String colClassCode, String valCurrCode, SecurityType valSecType);
+	public G<Symbol> rowSymbol(String colCode,
+			String colClassCode, String valCurrCode, SymbolType valSecType);
 	
 	/**
 	 * Создать геттер даты.
@@ -228,11 +228,11 @@ public interface GetterFactory {
 	 * Создать геттер инструмента.
 	 * <p>
 	 * @param securities набор инструментов
-	 * @param gDescr геттер дескриптора инструмента
+	 * @param gSymbol геттер дескриптора инструмента
 	 * @return геттер инструмента
 	 */
 	public G<Security>
-			security(Securities securities, G<SecurityDescriptor> gDescr);
+			security(Securities securities, G<Symbol> gSymbol);
 	
 	/**
 	 * Создать геттер инструмента.
@@ -250,7 +250,7 @@ public interface GetterFactory {
 	 * @return геттер инструмента
 	 */
 	public G<Security> rowSecurity(Securities securities, String colCode,
-			String colClassCode, String valCurrCode, SecurityType valSecType);
+			String colClassCode, String valCurrCode, SymbolType valSecType);
 	
 	/**
 	 * Создать геттер цены.

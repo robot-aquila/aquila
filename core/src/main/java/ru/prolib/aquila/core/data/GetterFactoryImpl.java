@@ -7,7 +7,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.getter.GAccount;
 import ru.prolib.aquila.core.data.getter.GPrice;
-import ru.prolib.aquila.core.data.getter.GSecurityDescr;
+import ru.prolib.aquila.core.data.getter.GSymbol;
 import ru.prolib.aquila.core.utils.Validator;
 import ru.prolib.aquila.core.utils.ValidatorEq;
 
@@ -53,13 +53,13 @@ public class GetterFactoryImpl implements GetterFactory {
 	}
 
 	@Override
-	public G<SecurityDescriptor> rowSecurityDescr(String secCode,
-			String colClassCode, String valCurrCode, SecurityType valSecType)
+	public G<Symbol> rowSymbol(String secCode,
+			String colClassCode, String valCurrCode, SymbolType valSecType)
 	{
-		return new GSecurityDescr(rowString(secCode),
+		return new GSymbol(rowString(secCode),
 								  rowString(colClassCode),
 								  constString(valCurrCode),
-								  new GConst<SecurityType>(valSecType));
+								  new GConst<SymbolType>(valSecType));
 	}
 
 	@Override
@@ -112,9 +112,9 @@ public class GetterFactoryImpl implements GetterFactory {
 
 	@Override
 	public G<Security>
-			security(Securities securities, G<SecurityDescriptor> gDescr)
+			security(Securities securities, G<Symbol> gSymbol)
 	{
-		return new GSecurity(gDescr, securities);
+		return new GSecurity(gSymbol, securities);
 	}
 
 	@Override
@@ -131,9 +131,9 @@ public class GetterFactoryImpl implements GetterFactory {
 
 	@Override
 	public G<Security> rowSecurity(Securities securities, String colCode,
-			String colClassCode, String valCurrCode, SecurityType valSecType)
+			String colClassCode, String valCurrCode, SymbolType valSecType)
 	{
-		return security(securities, rowSecurityDescr(colCode, colClassCode,
+		return security(securities, rowSymbol(colCode, colClassCode,
 				valCurrCode, valSecType));
 	}
 

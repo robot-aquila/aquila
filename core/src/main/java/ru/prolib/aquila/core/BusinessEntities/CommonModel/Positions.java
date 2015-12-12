@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
  * $Id: PositionsImpl.java 527 2013-02-14 15:14:09Z whirlwind $
  */
 public class Positions {
-	private final Map<SecurityDescriptor, EditablePosition> map;
+	private final Map<Symbol, EditablePosition> map;
 	private final Portfolio portfolio;
 	private final PositionsEventDispatcher dispatcher;
 	
@@ -32,7 +32,7 @@ public class Positions {
 		super();
 		this.portfolio = portfolio;
 		this.dispatcher = dispatcher;
-		map = new LinkedHashMap<SecurityDescriptor, EditablePosition>();
+		map = new LinkedHashMap<Symbol, EditablePosition>();
 	}
 	
 	/**
@@ -74,11 +74,11 @@ public class Positions {
 	}
 
 	public EditablePosition getEditablePosition(Security security) {
-		SecurityDescriptor descr = security.getDescriptor();
-		EditablePosition pos = map.get(descr);
+		Symbol symbol = security.getSymbol();
+		EditablePosition pos = map.get(symbol);
 		if ( pos == null ) {
 			pos = createPosition(security);
-			map.put(descr, pos);
+			map.put(symbol, pos);
 			dispatcher.startRelayFor(pos);
 		}
 		return pos;
@@ -103,7 +103,7 @@ public class Positions {
 			new PositionEventDispatcher(((EditableTerminal)
 				portfolio.getTerminal()).getEventSystem(),
 					portfolio.getAccount(),
-					security.getDescriptor()));
+					security.getSymbol()));
 	}
 
 	public Position getPosition(Security security) {
@@ -115,11 +115,11 @@ public class Positions {
 	 * <p>
 	 * Только для тестирования.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param p экземпляр позиции
 	 */
-	protected void setPosition(SecurityDescriptor descr, EditablePosition p) {
-		map.put(descr, p);
+	protected void setPosition(Symbol symbol, EditablePosition p) {
+		map.put(symbol, p);
 	}
 
 }

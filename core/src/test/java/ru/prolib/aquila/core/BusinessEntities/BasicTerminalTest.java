@@ -24,7 +24,7 @@ import ru.prolib.aquila.core.utils.*;
  */
 public class BasicTerminalTest {
 	private static Account account;
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private IMocksControl control;
 	private TerminalController controller;
 	private TerminalEventDispatcher dispatcher;
@@ -48,7 +48,7 @@ public class BasicTerminalTest {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.ERROR);
 		account = new Account("test");
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUB", SecurityType.STK);
+		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STK);
 	}
 
 	@Before
@@ -70,7 +70,7 @@ public class BasicTerminalTest {
 				dispatcher, securities, portfolios, orders, starter, scheduler,
 				es, orderProcessor));
 
-		expect(security.getDescriptor()).andStubReturn(descr);
+		expect(security.getSymbol()).andStubReturn(symbol);
 		taskHandler = new TaskHandlerImpl(task, scheduler);
 	}
 	
@@ -108,24 +108,22 @@ public class BasicTerminalTest {
 	@Test
 	public void testGetSecurity() throws Exception {
 		Security s = control.createMock(Security.class);
-		SecurityDescriptor descr =
-			new SecurityDescriptor("foo", "bar", "USD", SecurityType.UNK);
-		expect(securities.getSecurity(eq(descr))).andReturn(s);
+		Symbol symbol = new Symbol("foo", "bar", "USD", SymbolType.UNK);
+		expect(securities.getSecurity(eq(symbol))).andReturn(s);
 		control.replay();
 		
-		assertSame(s, terminal.getSecurity(descr));
+		assertSame(s, terminal.getSecurity(symbol));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testIsSecurityExists() throws Exception {
-		SecurityDescriptor descr =
-			new SecurityDescriptor("foo", "bar", "EUR", SecurityType.OPT);
-		expect(securities.isSecurityExists(eq(descr))).andReturn(true);
+		Symbol symbol = new Symbol("foo", "bar", "EUR", SymbolType.OPT);
+		expect(securities.isSecurityExists(eq(symbol))).andReturn(true);
 		control.replay();
 		
-		assertTrue(terminal.isSecurityExists(descr));
+		assertTrue(terminal.isSecurityExists(symbol));
 		
 		control.verify();
 	}
@@ -601,12 +599,11 @@ public class BasicTerminalTest {
 	@Test
 	public void testGetEditableSecurity1() throws Exception {
 		EditableSecurity security = control.createMock(EditableSecurity.class);
-		SecurityDescriptor descr = control.createMock(SecurityDescriptor.class);
-		expect(securities.getEditableSecurity(same(terminal), eq(descr)))
-			.andReturn(security);
+		Symbol symbol = control.createMock(Symbol.class);
+		expect(securities.getEditableSecurity(same(terminal), eq(symbol))).andReturn(security);
 		control.replay();
 		
-		assertSame(security, terminal.getEditableSecurity(descr));
+		assertSame(security, terminal.getEditableSecurity(symbol));
 		
 		control.verify();
 	}
@@ -903,7 +900,7 @@ public class BasicTerminalTest {
 	public void testRequestSecurity() throws Exception {
 		control.replay();
 		
-		terminal.requestSecurity(descr);
+		terminal.requestSecurity(symbol);
 		
 		control.verify();
 	}
@@ -923,10 +920,10 @@ public class BasicTerminalTest {
 	
 	@Test
 	public void testFireRequestSecurityError() throws Exception {
-		dispatcher.fireSecurityRequestError(eq(descr), eq(1), eq("test msg"));
+		dispatcher.fireSecurityRequestError(eq(symbol), eq(1), eq("test msg"));
 		control.replay();
 		
-		terminal.fireSecurityRequestError(descr, 1, "test msg");
+		terminal.fireSecurityRequestError(symbol, 1, "test msg");
 		
 		control.verify();
 	}
@@ -939,7 +936,7 @@ public class BasicTerminalTest {
 		order.setType(eq(OrderType.LIMIT));
 		order.setAccount(eq(account));
 		order.setDirection(eq(Direction.BUY));
-		order.setSecurityDescriptor(eq(descr));
+		order.setSymbol(eq(symbol));
 		order.setQty(eq(1L));
 		order.setQtyRest(eq(1L));
 		order.setPrice(eq(15d));
@@ -962,7 +959,7 @@ public class BasicTerminalTest {
 		order.setType(eq(OrderType.LIMIT));
 		order.setAccount(eq(account));
 		order.setDirection(eq(Direction.BUY));
-		order.setSecurityDescriptor(eq(descr));
+		order.setSymbol(eq(symbol));
 		order.setQty(eq(1L));
 		order.setQtyRest(eq(1L));
 		order.setPrice(eq(15d));
@@ -985,7 +982,7 @@ public class BasicTerminalTest {
 		order.setType(eq(OrderType.MARKET));
 		order.setAccount(eq(account));
 		order.setDirection(eq(Direction.SELL));
-		order.setSecurityDescriptor(eq(descr));
+		order.setSymbol(eq(symbol));
 		order.setQty(eq(10L));
 		order.setQtyRest(eq(10L));
 		order.resetChanges();
@@ -1007,7 +1004,7 @@ public class BasicTerminalTest {
 		order.setType(eq(OrderType.MARKET));
 		order.setAccount(eq(account));
 		order.setDirection(eq(Direction.SELL));
-		order.setSecurityDescriptor(eq(descr));
+		order.setSymbol(eq(symbol));
 		order.setQty(eq(10L));
 		order.setQtyRest(eq(10L));
 		order.setActivator(same(activator));

@@ -30,7 +30,7 @@ public interface Position {
 	 * <p>
 	 * @return дескриптор инструмента
 	 */
-	public SecurityDescriptor getSecurityDescriptor();
+	public Symbol getSymbol();
 	
 	/**
 	 * Получить инструмент.

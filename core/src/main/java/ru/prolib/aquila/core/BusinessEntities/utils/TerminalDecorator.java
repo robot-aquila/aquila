@@ -110,8 +110,8 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public void requestSecurity(SecurityDescriptor descr) {
-		terminal.requestSecurity(descr);
+	public void requestSecurity(Symbol symbol) {
+		terminal.requestSecurity(symbol);
 	}
 
 	@Override
@@ -245,15 +245,13 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public Security getSecurity(SecurityDescriptor descr)
-			throws SecurityException
-	{
-		return terminal.getSecurity(descr);
+	public Security getSecurity(Symbol symbol) throws SecurityException {
+		return terminal.getSecurity(symbol);
 	}
 
 	@Override
-	public boolean isSecurityExists(SecurityDescriptor descr) {
-		return terminal.isSecurityExists(descr);
+	public boolean isSecurityExists(Symbol symbol) {
+		return terminal.isSecurityExists(symbol);
 	}
 
 	@Override
@@ -413,8 +411,8 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) {
-		return terminal.getEditableSecurity(descr);
+	public EditableSecurity getEditableSecurity(Symbol symbol) {
+		return terminal.getEditableSecurity(symbol);
 	}
 
 	@Override
@@ -428,10 +426,8 @@ public class TerminalDecorator implements EditableTerminal {
 	}
 
 	@Override
-	public void fireSecurityRequestError(SecurityDescriptor descr,
-			int errorCode, String errorMsg)
-	{
-		terminal.fireSecurityRequestError(descr, errorCode, errorMsg);
+	public void fireSecurityRequestError(Symbol symbol, int errorCode, String errorMsg) {
+		terminal.fireSecurityRequestError(symbol, errorCode, errorMsg);
 	}
 
 	@Override

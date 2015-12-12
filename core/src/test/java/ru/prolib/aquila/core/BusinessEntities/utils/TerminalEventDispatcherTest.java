@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class TerminalEventDispatcherTest {
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private IMocksControl control;
 	private EventSystem es;
 	private EventListener listener;
@@ -18,7 +18,7 @@ public class TerminalEventDispatcherTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("RI", "SPBFUT", "USD", SecurityType.FUT);
+		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUT);
 	}
 	
 	@Before
@@ -141,10 +141,10 @@ public class TerminalEventDispatcherTest {
 	public void testRequestSecurityError() throws Exception {
 		EventTypeSI type = (EventTypeSI) dispatcher.OnRequestSecurityError(); 
 		type.addListener(listener);
-		queue.enqueue(eq(new RequestSecurityEvent(type, descr, 500, "test")));
+		queue.enqueue(eq(new RequestSecurityEvent(type, symbol, 500, "test")));
 		control.replay();
 		
-		dispatcher.fireSecurityRequestError(descr, 500, "test");
+		dispatcher.fireSecurityRequestError(symbol, 500, "test");
 		
 		control.verify();
 	}

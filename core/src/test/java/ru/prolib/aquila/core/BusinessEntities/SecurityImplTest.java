@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: SecurityImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
  */
 public class SecurityImplTest {
-	private static SecurityDescriptor descr1, descr2;
+	private static Symbol symbol1, symbol2;
 	private IMocksControl control;
 	private Terminal terminal;
 	private SecurityEventDispatcher dispatcher;
@@ -28,8 +28,8 @@ public class SecurityImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr1 = new SecurityDescriptor("GAZP", "EQBR", "RUB",SecurityType.STK);
-		descr2 = new SecurityDescriptor("RIM3", "SPFT", "USD",SecurityType.FUT);
+		symbol1 = new Symbol("GAZP", "EQBR", "RUB",SymbolType.STK);
+		symbol2 = new Symbol("RIM3", "SPFT", "USD",SymbolType.FUT);
 	}
 
 	@Before
@@ -38,7 +38,7 @@ public class SecurityImplTest {
 		terminal = control.createMock(Terminal.class);
 		dispatcher = control.createMock(SecurityEventDispatcher.class);
 		 
-		security = new SecurityImpl(terminal, descr1, dispatcher);
+		security = new SecurityImpl(terminal, symbol1, dispatcher);
 		setter = null;
 		getter = null;
 	}
@@ -559,11 +559,10 @@ public class SecurityImplTest {
 		Variant<Terminal> vTerm = new Variant<Terminal>()
 			.add(terminal)
 			.add(control.createMock(Terminal.class));
-		Variant<SecurityDescriptor> vDescr =
-				new Variant<SecurityDescriptor>(vTerm)
-			.add(descr1)
-			.add(descr2);
-		Variant<Double> vAsk = new Variant<Double>(vDescr)
+		Variant<Symbol> vSymbol = new Variant<Symbol>(vTerm)
+			.add(symbol1)
+			.add(symbol2);
+		Variant<Double> vAsk = new Variant<Double>(vSymbol)
 			.add(200.00d)
 			/*.add(115.00d)*/;
 		Variant<Long> vAskSz = new Variant<Long>(vAsk)
@@ -632,7 +631,7 @@ public class SecurityImplTest {
 		int foundCnt = 0;
 		SecurityImpl x = null, found = null;
 		do {
-			x = new SecurityImpl(vTerm.get(), vDescr.get(), dispatcher);
+			x = new SecurityImpl(vTerm.get(), vSymbol.get(), dispatcher);
 			x.setAskPrice(vAsk.get());
 			x.setAskSize(vAskSz.get());
 			x.setAvailable(vAvl.get());
@@ -663,7 +662,7 @@ public class SecurityImplTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(terminal, found.getTerminal());
-		assertEquals(descr1, found.getDescriptor());
+		assertEquals(symbol1, found.getSymbol());
 		assertEquals(dispatcher, found.getEventDispatcher());
 		assertEquals(200.00d, found.getAskPrice(), 0.01d);
 		assertEquals(new Long(80L), found.getAskSize());
@@ -888,7 +887,7 @@ public class SecurityImplTest {
 	
 	@Test
 	public void testGetType() {
-		assertEquals(SecurityType.STK, security.getType());
+		assertEquals(SymbolType.STK, security.getType());
 	}
 	
 	@Test

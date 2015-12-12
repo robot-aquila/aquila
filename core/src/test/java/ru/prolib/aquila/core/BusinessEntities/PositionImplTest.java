@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: PositionImplTest.java 529 2013-02-19 08:49:04Z whirlwind $
  */
 public class PositionImplTest {
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private static Account account;
 	private IMocksControl control;
 	private Terminal terminal;
@@ -32,7 +32,7 @@ public class PositionImplTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		account = new Account("TST01");
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUB", SecurityType.STK);
+		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STK);
 	}
 
 	@Before
@@ -45,7 +45,7 @@ public class PositionImplTest {
 		position = new PositionImpl(portfolio, security, dispatcher);
 		expect(portfolio.getTerminal()).andStubReturn(terminal);
 		expect(portfolio.getAccount()).andStubReturn(account);
-		expect(security.getDescriptor()).andStubReturn(descr);
+		expect(security.getSymbol()).andStubReturn(symbol);
 
 		getter = null;
 		setter = null;
@@ -201,10 +201,10 @@ public class PositionImplTest {
 	}
 	
 	@Test
-	public void testGetSecurityDescriptor() throws Exception {
+	public void testGetSymbol() throws Exception {
 		control.replay();
 		
-		assertSame(descr, position.getSecurityDescriptor());
+		assertSame(symbol, position.getSymbol());
 		
 		control.verify();
 	}

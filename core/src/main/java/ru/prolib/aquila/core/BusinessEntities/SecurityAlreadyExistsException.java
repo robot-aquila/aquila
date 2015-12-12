@@ -23,10 +23,10 @@ public class SecurityAlreadyExistsException extends SecurityException {
 	/**
 	 * Создать исключение
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 */
-	public SecurityAlreadyExistsException(SecurityDescriptor descr) {
-		this(descr.getCode(), descr.getClassCode());
+	public SecurityAlreadyExistsException(Symbol symbol) {
+		this(symbol.getCode(), symbol.getClassCode());
 	}
 
 }

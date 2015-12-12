@@ -5,7 +5,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class IdUtils {
 	private static final String SEPARATOR = "-";
@@ -45,15 +45,15 @@ public class IdUtils {
 	 * способствует узнаваемости данных а, также позволяет выполнять обратное
 	 * преобразование из строкового значения в дескриптор инструмента.  
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @return безопасный строковый идентификатор
 	 */
-	public String getSafeId(SecurityDescriptor descr) {
+	public String getSafeId(Symbol symbol) {
 		String[] chunks = {
-				coder.encode(descr.getCode()),
-				coder.encode(descr.getClassCode()),
-				coder.encode(descr.getCurrencyCode()),
-				coder.encode(descr.getType().toString())
+				coder.encode(symbol.getCode()),
+				coder.encode(symbol.getClassCode()),
+				coder.encode(symbol.getCurrencyCode()),
+				coder.encode(symbol.getType().toString())
 		};
 		return StringUtils.join(chunks, SEPARATOR);
 	}
@@ -61,13 +61,13 @@ public class IdUtils {
 	/**
 	 * Get safe ID.
 	 * <p>
-	 * @param descr - security descriptor
+	 * @param symbol - symbol info
 	 * @param date - date
 	 * @return the safe identifier based on arguments
 	 */
-	public String getSafeId(SecurityDescriptor descr, LocalDate date) {
+	public String getSafeId(Symbol symbol, LocalDate date) {
 		String[] chunks = {
-				getSafeId(descr),
+				getSafeId(symbol),
 				dateFormat.print(date)
 		};
 		return StringUtils.join(chunks, SEPARATOR);

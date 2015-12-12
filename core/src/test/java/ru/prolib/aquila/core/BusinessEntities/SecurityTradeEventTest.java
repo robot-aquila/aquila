@@ -17,10 +17,10 @@ import ru.prolib.aquila.core.data.Tick;
  * $Id: SecurityTradeEventTest.java 442 2013-01-24 03:22:10Z whirlwind $
  */
 public class SecurityTradeEventTest {
-	private static final SecurityDescriptor descr;
+	private static final Symbol symbol;
 	
 	static {
-		descr = new SecurityDescriptor("alpha", "phi", "USD");
+		symbol = new Symbol("alpha", "phi", "USD");
 	}
 	
 	private IMocksControl control;
@@ -34,7 +34,7 @@ public class SecurityTradeEventTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		terminal = new BasicTerminalBuilder().buildTerminal();
-		security = terminal.getEditableSecurity(descr);
+		security = terminal.getEditableSecurity(symbol);
 		security.setMinStepSize(1d);
 		security.setMinStepPrice(1d);
 		security2 = control.createMock(EditableSecurity.class);

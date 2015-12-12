@@ -17,7 +17,7 @@ public class Securities {
 	 * Карта определения инструмента по дескриптору.
 	 * Содержит записи для каждого инструмента.
 	 */
-	private final Map<SecurityDescriptor, EditableSecurity> map;
+	private final Map<Symbol, EditableSecurity> map;
 	
 	/**
 	 * Конструктор
@@ -30,7 +30,7 @@ public class Securities {
 	{
 		super();
 		this.dispatcher = dispatcher;
-		map = new LinkedHashMap<SecurityDescriptor, EditableSecurity>();
+		map = new LinkedHashMap<Symbol, EditableSecurity>();
 		this.factory = factory;
 	}
 	
@@ -60,18 +60,18 @@ public class Securities {
 		return dispatcher;
 	}
 	
-	public Security getSecurity(SecurityDescriptor descr)
+	public Security getSecurity(Symbol symbol)
 		throws SecurityException
 	{
-		Security security = map.get(descr);
+		Security security = map.get(symbol);
 		if ( security == null ) {
-			throw new SecurityNotExistsException(descr);
+			throw new SecurityNotExistsException(symbol);
 		}
 		return security;
 	}
 	
-	public boolean isSecurityExists(SecurityDescriptor descr) {
-		return map.containsKey(descr);
+	public boolean isSecurityExists(Symbol symbol) {
+		return map.containsKey(symbol);
 	}
 
 	public EventType OnSecurityAvailable() {
@@ -79,12 +79,12 @@ public class Securities {
 	}
 
 	public EditableSecurity
-		getEditableSecurity(EditableTerminal terminal, SecurityDescriptor descr)
+		getEditableSecurity(EditableTerminal terminal, Symbol symbol)
 	{
-		EditableSecurity security = map.get(descr);
+		EditableSecurity security = map.get(symbol);
 		if ( security == null ) {
-			security = factory.createInstance(terminal, descr);
-			map.put(descr, security);
+			security = factory.createInstance(terminal, symbol);
+			map.put(symbol, security);
 			dispatcher.startRelayFor(security);
 		}
 		return security;
@@ -119,13 +119,11 @@ public class Securities {
 	 * <p>
 	 * Только для тестирования.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param security экземпляр инструмента
 	 */
-	protected void
-		setSecurity(SecurityDescriptor descr, EditableSecurity security)
-	{
-		map.put(descr, security);
+	protected void setSecurity(Symbol symbol, EditableSecurity security) {
+		map.put(symbol, security);
 	}
 
 }

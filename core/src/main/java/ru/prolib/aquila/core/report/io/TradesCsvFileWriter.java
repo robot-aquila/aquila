@@ -209,7 +209,7 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 	private void writeReport(RTrade report) throws IOException {
 		Object[] row = {
 				report.getType(),
-				report.getSecurityDescriptor(),
+				report.getSymbol(),
 				report.getQty(),
 				report.getUncoveredQty(),
 				formatTime(report.getEnterTime()), 

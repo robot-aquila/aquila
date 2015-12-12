@@ -58,8 +58,8 @@ public class PositionImpl extends EditableImpl implements EditablePosition {
 	}
 
 	@Override
-	public SecurityDescriptor getSecurityDescriptor() {
-		return security.getDescriptor();
+	public Symbol getSymbol() {
+		return security.getSymbol();
 	}
 	
 	@Override

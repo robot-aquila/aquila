@@ -25,7 +25,7 @@ public interface RTrade extends Comparable<RTrade>, Cloneable {
 	 * <p>
 	 * @return дескриптор инструмента
 	 */
-	public SecurityDescriptor getSecurityDescriptor();
+	public Symbol getSymbol();
 	
 	/**
 	 * Получить суммарный объем по сделкам входа в трейд.

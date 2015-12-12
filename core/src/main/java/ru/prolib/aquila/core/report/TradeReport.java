@@ -34,10 +34,10 @@ public interface TradeReport extends Starter {
 	/**
 	 * Получить текущий трейд по инструменту.
 	 * <p> 
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @return трейд или null, если трейд не открыт
 	 */
-	public RTrade getCurrent(SecurityDescriptor descr);
+	public RTrade getCurrent(Symbol symbol);
 	
 	/**
 	 * Получить текущий трейд по инструменту.
@@ -57,15 +57,15 @@ public interface TradeReport extends Starter {
 	 * количества (uncovered qty). Для длинного трейда возвращается непокрытое
 	 * количество "как есть".
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @return текущая позиция
 	 */
-	public long getPosition(SecurityDescriptor descr);
+	public long getPosition(Symbol symbol);
 	
 	/**
 	 * Получить текущую позицию по инструменту.
 	 * <p>
-	 * Метод работает аналогично {@link #getPosition(SecurityDescriptor)}.
+	 * Метод работает аналогично {@link #getPosition(Symbol)}.
 	 * <p>
 	 * @param security инструмент
 	 * @return текущая позиция

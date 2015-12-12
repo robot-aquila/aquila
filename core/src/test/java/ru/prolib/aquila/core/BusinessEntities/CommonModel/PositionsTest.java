@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
  */
 public class PositionsTest {
 	private static Account account;
-	private static SecurityDescriptor descr1,descr2;
+	private static Symbol symbol1,symbol2;
 	private IMocksControl control;
 	private EventSystem es;
 	private EditableTerminal terminal;
@@ -31,8 +31,8 @@ public class PositionsTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		account = new Account("T01");
-		descr1 = new SecurityDescriptor("SBER", "ONE", "RUB", SecurityType.STK);
-		descr2 = new SecurityDescriptor("GAZP", "TWO", "USD", SecurityType.FUT);
+		symbol1 = new Symbol("SBER", "ONE", "RUB", SymbolType.STK);
+		symbol2 = new Symbol("GAZP", "TWO", "USD", SymbolType.FUT);
 	}
 
 	@Before
@@ -52,10 +52,10 @@ public class PositionsTest {
 		expect(terminal.getEventSystem()).andStubReturn(es);
 		expect(portfolio.getAccount()).andStubReturn(account);
 		expect(portfolio.getTerminal()).andStubReturn(terminal);
-		expect(security1.getDescriptor()).andStubReturn(descr1);
-		expect(security2.getDescriptor()).andStubReturn(descr2);
-		expect(position1.getSecurityDescriptor()).andStubReturn(descr1);
-		expect(position2.getSecurityDescriptor()).andStubReturn(descr2);
+		expect(security1.getSymbol()).andStubReturn(symbol1);
+		expect(security2.getSymbol()).andStubReturn(symbol2);
+		expect(position1.getSymbol()).andStubReturn(symbol1);
+		expect(position2.getSymbol()).andStubReturn(symbol2);
 	}
 	
 	@Test
@@ -86,7 +86,7 @@ public class PositionsTest {
 	@Test
 	public void testGetEditablePosition_New() throws Exception {
 		Position expected = new PositionImpl(portfolio, security2,
-				new PositionEventDispatcher(es, account, descr1));
+				new PositionEventDispatcher(es, account, symbol1));
 		dispatcher.startRelayFor((Position) anyObject());
 		control.replay();
 
@@ -101,8 +101,8 @@ public class PositionsTest {
 	
 	@Test
 	public void testGetEditablePosition_Existing() throws Exception {
-		positions.setPosition(descr1, position1);
-		positions.setPosition(descr2, position2);
+		positions.setPosition(symbol1, position1);
+		positions.setPosition(symbol2, position2);
 		control.replay();
 		
 		assertSame(position1, positions.getEditablePosition(security1));
@@ -114,7 +114,7 @@ public class PositionsTest {
 	@Test
 	public void testGetPosition_New() throws Exception {
 		Position expected = new PositionImpl(portfolio, security1,
-				new PositionEventDispatcher(es, account, descr1));
+				new PositionEventDispatcher(es, account, symbol1));
 		dispatcher.startRelayFor((Position) anyObject());
 		control.replay();
 		
@@ -129,8 +129,8 @@ public class PositionsTest {
 	
 	@Test
 	public void testGetPosition_Existing() throws Exception {
-		positions.setPosition(descr1, position1);
-		positions.setPosition(descr2, position2);
+		positions.setPosition(symbol1, position1);
+		positions.setPosition(symbol2, position2);
 		control.replay();
 		
 		assertSame(position1, positions.getPosition(security1));
@@ -143,10 +143,10 @@ public class PositionsTest {
 	public void testGetPositions() throws Exception {
 		List<Position> expected = new Vector<Position>();
 		assertEquals(expected, positions.getPositions());
-		positions.setPosition(descr1, position1);
+		positions.setPosition(symbol1, position1);
 		expected.add(position1);
 		assertEquals(expected, positions.getPositions());
-		positions.setPosition(descr2, position2);
+		positions.setPosition(symbol2, position2);
 		expected.add(position2);
 		assertEquals(expected, positions.getPositions());
 	}
@@ -154,9 +154,9 @@ public class PositionsTest {
 	@Test
 	public void testGetPositionsCount() throws Exception {
 		assertEquals(0, positions.getPositionsCount());
-		positions.setPosition(descr1, position1);
+		positions.setPosition(symbol1, position1);
 		assertEquals(1, positions.getPositionsCount());
-		positions.setPosition(descr2, position2);
+		positions.setPosition(symbol2, position2);
 		assertEquals(2, positions.getPositionsCount());
 	}
 	

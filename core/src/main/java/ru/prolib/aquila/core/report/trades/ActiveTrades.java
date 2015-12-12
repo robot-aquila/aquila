@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.report.*;
  * сохраняет никакой истории.
  */
 public class ActiveTrades {
-	private Map<SecurityDescriptor, ERTrade> reports;
+	private Map<Symbol, ERTrade> reports;
 	private final ActiveTradesEventDispatcher dispatcher;
 	
 	/**
@@ -32,7 +32,7 @@ public class ActiveTrades {
 	 */
 	ActiveTrades(ActiveTradesEventDispatcher dispatcher) {
 		this.dispatcher = dispatcher;
-		reports = new LinkedHashMap<SecurityDescriptor, ERTrade>();
+		reports = new LinkedHashMap<Symbol, ERTrade>();
 	}
 	
 	/**
@@ -77,11 +77,11 @@ public class ActiveTrades {
 	 * @param trade сделка
 	 */
 	public synchronized void addTrade(Trade trade) {
-		SecurityDescriptor descr = trade.getSecurityDescriptor();
-		ERTrade report = reports.get(descr);
+		Symbol symbol = trade.getSymbol();
+		ERTrade report = reports.get(symbol);
 		if ( report == null ) {
 			report = new RTradeImpl(trade);
-			reports.put(descr, report);
+			reports.put(symbol, report);
 			dispatcher.fireEnter(report);
 		} else {
 			ERTrade next = report.addTrade(trade);
@@ -89,9 +89,9 @@ public class ActiveTrades {
 				dispatcher.fireExit(report);
 				if ( next != null ) {
 					dispatcher.fireEnter(next);
-					reports.put(descr, next);
+					reports.put(symbol, next);
 				} else {				
-					reports.remove(descr);
+					reports.remove(symbol);
 				}
 			} else {
 				dispatcher.fireChanged(report);
@@ -102,11 +102,11 @@ public class ActiveTrades {
 	/**
 	 * Получить текущий трейд по сделке.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @return трейд или null, если трейд по инструменту не открыт
 	 */
-	public synchronized RTrade getReport(SecurityDescriptor descr) {
-		return reports.get(descr);
+	public synchronized RTrade getReport(Symbol symbol) {
+		return reports.get(symbol);
 	}
 	
 	/**
@@ -125,13 +125,11 @@ public class ActiveTrades {
 	 * <p>
 	 * Только для тестов.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param report отчет
 	 */
-	protected synchronized
-		void setReport(SecurityDescriptor descr, ERTrade report)
-	{
-		reports.put(descr, report);
+	protected synchronized void setReport(Symbol symbol, ERTrade report) {
+		reports.put(symbol, report);
 	}
 	
 	@Override

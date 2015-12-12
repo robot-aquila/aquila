@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.SecurityEventDispatcher;
  */
 public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	private final Terminal terminal;
-	private final SecurityDescriptor descr;
+	private final Symbol symbol;
 	private final SecurityEventDispatcher dispatcher;
 	private Double minPrice;
 	private Double maxPrice;
@@ -37,15 +37,13 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	 * Конструктор.
 	 * <p>
 	 * @param terminal терминал
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param dispatcher диспетчер событий
 	 */
-	public SecurityImpl(Terminal terminal, SecurityDescriptor descr,
-					    SecurityEventDispatcher dispatcher)
-	{
+	public SecurityImpl(Terminal terminal, Symbol symbol, SecurityEventDispatcher dispatcher) {
 		super();
 		this.terminal = terminal;
-		this.descr = descr;
+		this.symbol = symbol;
 		this.dispatcher = dispatcher;
 		changePriceFormat();
 	}
@@ -66,12 +64,12 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 
 	@Override
 	public String getCode() {
-		return descr.getCode();
+		return symbol.getCode();
 	}
 
 	@Override
 	public String getClassCode() {
-		return descr.getClassCode();
+		return symbol.getClassCode();
 	}
 
 	@Override
@@ -202,8 +200,8 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	}
 
 	@Override
-	public SecurityDescriptor getDescriptor() {
-		return descr;
+	public Symbol getSymbol() {
+		return symbol;
 	}
 
 	@Override
@@ -395,7 +393,7 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 			.append(o.bidPrice, bidPrice)
 			.append(o.bidSize, bidSize)
 			.append(o.close, close)
-			.append(o.descr, descr)
+			.append(o.symbol, symbol)
 			.append(o.displayName, displayName)
 			.append(o.high, high)
 			.append(o.lastPrice, lastPrice)
@@ -482,13 +480,13 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 	}
 
 	@Override
-	public SecurityType getType() {
-		return descr.getType();
+	public SymbolType getType() {
+		return symbol.getType();
 	}
 
 	@Override
 	public Currency getCurrency() {
-		return descr.getCurrency();
+		return symbol.getCurrency();
 	}
 
 }

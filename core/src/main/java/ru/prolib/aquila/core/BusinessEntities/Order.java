@@ -147,7 +147,7 @@ public interface Order {
 	 * <p>
 	 * @return дескриптор инструмента
 	 */
-	public SecurityDescriptor getSecurityDescriptor();
+	public Symbol getSymbol();
 	
 	/**
 	 * Получить количество заявки.

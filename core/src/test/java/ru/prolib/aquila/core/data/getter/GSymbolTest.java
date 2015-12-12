@@ -7,21 +7,17 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.data.G;
-import ru.prolib.aquila.core.data.getter.GSecurityDescr;
+import ru.prolib.aquila.core.data.getter.GSymbol;
 import ru.prolib.aquila.core.utils.Variant;
 
-/**
- * 2012-08-28<br>
- * $Id: GSecurityDescrTest.java 543 2013-02-25 06:35:27Z whirlwind $
- */
-public class GSecurityDescrTest {
+public class GSymbolTest {
 	private static IMocksControl control;
-	private static GSecurityDescr getter;
+	private static GSymbol getter;
 	private static G<String> gCode,gClass,gCurr;
-	private static G<SecurityType> gType;
+	private static G<SymbolType> gType;
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
@@ -31,7 +27,7 @@ public class GSecurityDescrTest {
 		gClass = control.createMock(G.class);
 		gCurr = control.createMock(G.class);
 		gType = control.createMock(G.class);
-		getter = new GSecurityDescr(gCode, gClass, gCurr, gType);
+		getter = new GSymbol(gCode, gClass, gCurr, gType);
 	}
 	
 	@Before
@@ -51,12 +47,12 @@ public class GSecurityDescrTest {
 			.add(null);
 		Variant<String> vCurr = new Variant<String>(vClass)
 			.add("USD");
-		Variant<SecurityType> vType = new Variant<SecurityType>(vCurr)
+		Variant<SymbolType> vType = new Variant<SymbolType>(vCurr)
 			.add(null)
-			.add(SecurityType.OPT);
+			.add(SymbolType.OPT);
 		Variant<?> iterator = vType;
 		int foundCnt = 0;
-		SecurityDescriptor x = null, found = null;
+		Symbol x = null, found = null;
 		final Object source = new Object();
 		do {
 			control.resetToStrict();
@@ -76,7 +72,7 @@ public class GSecurityDescrTest {
 		assertEquals("SBER", found.getCode());
 		assertEquals("EQBR", found.getClassCode());
 		assertEquals("USD", found.getCurrencyCode());
-		assertEquals(SecurityType.OPT, found.getType());
+		assertEquals(SymbolType.OPT, found.getType());
 	}
 	
 	@Test
@@ -90,14 +86,14 @@ public class GSecurityDescrTest {
 		Variant<G<String>> vCurr = new Variant<G<String>>(vCls)
 			.add(null)
 			.add(gCurr);
-		Variant<G<SecurityType>> vType = new Variant<G<SecurityType>>(vCurr)
+		Variant<G<SymbolType>> vType = new Variant<G<SymbolType>>(vCurr)
 			.add(null)
 			.add(gType);
 		Variant<?> iterator = vType;
 		int foundCnt = 0;
-		GSecurityDescr found = null;
+		GSymbol found = null;
 		do {
-			GSecurityDescr actual = new GSecurityDescr(vCode.get(),
+			GSymbol actual = new GSymbol(vCode.get(),
 					vCls.get(), vCurr.get(), vType.get());
 			if ( getter.equals(actual) ) {
 				foundCnt ++;

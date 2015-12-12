@@ -15,7 +15,7 @@ public class IdUtilsTest {
 	private IMocksControl control;
 	private StrCoder coder;
 	private IdUtils utils;
-	private SecurityDescriptor descr;
+	private Symbol symbol;
 
 	@Before
 	public void setUp() throws Exception {
@@ -37,14 +37,14 @@ public class IdUtilsTest {
 
 	@Test
 	public void testGetSafeId1() throws Exception {
-		descr = new SecurityDescriptor("XXX", "YYY", "GBP");
+		symbol = new Symbol("XXX", "YYY", "GBP");
 		expect(coder.encode("XXX")).andReturn("P1");
 		expect(coder.encode("YYY")).andReturn("P2");
 		expect(coder.encode("GBP")).andReturn("P3");
 		expect(coder.encode("STK")).andReturn("P4");
 		control.replay();
 
-		String expected = "P1-P2-P3-P4", actual = utils.getSafeId(descr);
+		String expected = "P1-P2-P3-P4", actual = utils.getSafeId(symbol);
 		assertEquals(expected, actual);
 		
 		control.verify();
@@ -52,7 +52,7 @@ public class IdUtilsTest {
 	
 	@Test
 	public void testGetSafeId2() throws Exception {
-		descr = new SecurityDescriptor("RTS", "ZZZ", "USD", SecurityType.FUT);
+		symbol = new Symbol("RTS", "ZZZ", "USD", SymbolType.FUT);
 		expect(coder.encode("RTS")).andReturn("X1");
 		expect(coder.encode("ZZZ")).andReturn("X2");
 		expect(coder.encode("USD")).andReturn("X3");
@@ -60,7 +60,7 @@ public class IdUtilsTest {
 		control.replay();
 		
 		String expected = "X1-X2-X3-X4-20120805",
-				actual = utils.getSafeId(descr, new LocalDate(2012, 8, 5));
+				actual = utils.getSafeId(symbol, new LocalDate(2012, 8, 5));
 		assertEquals(expected, actual);
 		
 		control.verify();

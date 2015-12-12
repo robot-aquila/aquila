@@ -2,7 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
@@ -20,9 +20,9 @@ public class SecurityEventDispatcher {
 	private final EventDispatcher dispatcher;
 	private final EventTypeSI onChanged, onTrade;
 	
-	public SecurityEventDispatcher(EventSystem es, SecurityDescriptor descr) {
+	public SecurityEventDispatcher(EventSystem es, Symbol symbol) {
 		super();
-		dispatcher = es.createEventDispatcher("Security[" + descr + "]");
+		dispatcher = es.createEventDispatcher("Security[" + symbol + "]");
 		onChanged = dispatcher.createType("Changed");
 		onTrade = dispatcher.createType("Trade");
 	}

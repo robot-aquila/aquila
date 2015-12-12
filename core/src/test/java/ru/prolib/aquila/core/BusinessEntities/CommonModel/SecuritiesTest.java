@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
 public class SecuritiesTest {
-	private static SecurityDescriptor descr1, descr2, descr3;
+	private static Symbol symbol1, symbol2, symbol3;
 	private IMocksControl control;
 	private EditableTerminal terminal;
 	private EditableSecurity security1, security2, security3;
@@ -20,9 +20,9 @@ public class SecuritiesTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr1 = new SecurityDescriptor("SBER", "EQBR","RUB", SecurityType.STK);
-		descr2 = new SecurityDescriptor("RIM2", "SPBF","USD", SecurityType.FUT);
-		descr3 = new SecurityDescriptor("SBER", "RTSS","RUB", SecurityType.STK);
+		symbol1 = new Symbol("SBER", "EQBR","RUB", SymbolType.STK);
+		symbol2 = new Symbol("RIM2", "SPBF","USD", SymbolType.FUT);
+		symbol3 = new Symbol("SBER", "RTSS","RUB", SymbolType.STK);
 	}
 
 	@Before
@@ -36,9 +36,9 @@ public class SecuritiesTest {
 		factory = control.createMock(SecurityFactory.class);
 		securities = new Securities(dispatcher, factory);
 		
-		expect(security1.getDescriptor()).andStubReturn(descr1);
-		expect(security2.getDescriptor()).andStubReturn(descr2);
-		expect(security3.getDescriptor()).andStubReturn(descr3);
+		expect(security1.getSymbol()).andStubReturn(symbol1);
+		expect(security2.getSymbol()).andStubReturn(symbol2);
+		expect(security3.getSymbol()).andStubReturn(symbol3);
 	}
 	
 	@Test
@@ -54,9 +54,9 @@ public class SecuritiesTest {
 	
 	@Test
 	public void testGetSecurities() throws Exception {
-		securities.setSecurity(descr1, security1);
-		securities.setSecurity(descr2, security2);
-		securities.setSecurity(descr3, security3);
+		securities.setSecurity(symbol1, security1);
+		securities.setSecurity(symbol2, security2);
+		securities.setSecurity(symbol3, security3);
 		
 		List<Security> expected = new Vector<Security>();
 		expected.add(security1);
@@ -68,49 +68,49 @@ public class SecuritiesTest {
 	
 	@Test
 	public void testGetSecurity() throws Exception {
-		securities.setSecurity(descr3, security3);
-		securities.setSecurity(descr2, security2);
+		securities.setSecurity(symbol3, security3);
+		securities.setSecurity(symbol2, security2);
 		
-		assertSame(security2, securities.getSecurity(descr2));
-		assertSame(security3, securities.getSecurity(descr3));
+		assertSame(security2, securities.getSecurity(symbol2));
+		assertSame(security3, securities.getSecurity(symbol3));
 	}
 	
 	@Test (expected=SecurityNotExistsException.class)
 	public void testGetSecurity_ThrowsIfNotExists() throws Exception {
-		securities.getSecurity(descr1);
+		securities.getSecurity(symbol1);
 	}
 
 	@Test
 	public void testIsSecurityExists() throws Exception {
-		securities.setSecurity(descr2, security2);
-		securities.setSecurity(descr3, security3);
+		securities.setSecurity(symbol2, security2);
+		securities.setSecurity(symbol3, security3);
 		
-		assertFalse(securities.isSecurityExists(descr1));
-		assertTrue(securities.isSecurityExists(descr2));
-		assertTrue(securities.isSecurityExists(descr3));
+		assertFalse(securities.isSecurityExists(symbol1));
+		assertTrue(securities.isSecurityExists(symbol2));
+		assertTrue(securities.isSecurityExists(symbol3));
 	}
 
 	@Test
 	public void testGetEditableSecurity() throws Exception {
-		securities.setSecurity(descr1, security1);
-		securities.setSecurity(descr2, security2);
+		securities.setSecurity(symbol1, security1);
+		securities.setSecurity(symbol2, security2);
 
-		assertSame(security1, securities.getEditableSecurity(terminal, descr1));
-		assertSame(security2, securities.getEditableSecurity(terminal, descr2));
+		assertSame(security1, securities.getEditableSecurity(terminal, symbol1));
+		assertSame(security2, securities.getEditableSecurity(terminal, symbol2));
 	}
 	
 	@Test 
 	public void testGetEditableSecurity_CreateIfNotExists() throws Exception {
-		expect(factory.createInstance(terminal, descr1)).andReturn(security1);
+		expect(factory.createInstance(terminal, symbol1)).andReturn(security1);
 		dispatcher.startRelayFor(same(security1));
 		control.replay();
 		
 		EditableSecurity actual =
-			securities.getEditableSecurity(terminal, descr1);
+			securities.getEditableSecurity(terminal, symbol1);
 		
 		control.verify();
 		assertSame(security1, actual);
-		assertSame(security1, securities.getSecurity(descr1));
+		assertSame(security1, securities.getSecurity(symbol1));
 	}
 
 	@Test
@@ -141,11 +141,11 @@ public class SecuritiesTest {
 	@Test
 	public void testGetSecuritiesCount() throws Exception {
 		assertEquals(0, securities.getSecuritiesCount());
-		securities.setSecurity(descr1, security1);
+		securities.setSecurity(symbol1, security1);
 		assertEquals(1, securities.getSecuritiesCount());
-		securities.setSecurity(descr2, security2);
+		securities.setSecurity(symbol2, security2);
 		assertEquals(2, securities.getSecuritiesCount());
-		securities.setSecurity(descr3, security3);
+		securities.setSecurity(symbol3, security3);
 		assertEquals(3, securities.getSecuritiesCount());
 	}
 	

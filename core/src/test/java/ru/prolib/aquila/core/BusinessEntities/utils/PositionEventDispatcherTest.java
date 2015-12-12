@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class PositionEventDispatcherTest {
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private static Account account;
 	private IMocksControl control;
 	private Position position;
@@ -21,7 +21,7 @@ public class PositionEventDispatcherTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		descr = new SecurityDescriptor("RI", "SPBFUT", "USD", SecurityType.FUT);
+		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUT);
 		account = new Account("foo", "bar");
 	}
 
@@ -32,7 +32,7 @@ public class PositionEventDispatcherTest {
 		position = control.createMock(Position.class);
 		listener = control.createMock(EventListener.class);
 		es = new EventSystemImpl(queue);
-		dispatcher = new PositionEventDispatcher(es, account, descr);
+		dispatcher = new PositionEventDispatcher(es, account, symbol);
 	}
 	
 	@Test

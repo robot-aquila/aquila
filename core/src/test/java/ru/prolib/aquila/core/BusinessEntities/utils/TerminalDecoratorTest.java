@@ -20,7 +20,7 @@ public class TerminalDecoratorTest {
 	private Security securityMock;
 	private Order orderMock;
 	private Portfolio portfolioMock;
-	private SecurityDescriptor descr;
+	private Symbol symbol;
 	private DateTime time;
 	private Runnable runnable;
 	private TaskHandler taskHandler; 
@@ -35,7 +35,7 @@ public class TerminalDecoratorTest {
 		securityMock = control.createMock(Security.class);
 		orderMock = control.createMock(Order.class);
 		portfolioMock = control.createMock(Portfolio.class);
-		descr = new SecurityDescriptor("KSPS", "XXX", ISO4217.USD);
+		symbol = new Symbol("KSPS", "XXX", ISO4217.USD);
 		time = new DateTime();
 		runnable = control.createMock(Runnable.class);
 		taskHandler = control.createMock(TaskHandler.class);
@@ -217,10 +217,10 @@ public class TerminalDecoratorTest {
 
 	@Test
 	public void testRequestSecurity() throws Exception {
-		terminalMock.requestSecurity(descr);
+		terminalMock.requestSecurity(symbol);
 		control.replay();
 		
-		decorator.requestSecurity(descr);
+		decorator.requestSecurity(symbol);
 		
 		control.verify();
 	}
@@ -494,22 +494,22 @@ public class TerminalDecoratorTest {
 
 	@Test
 	public void testGetSecurity() throws Exception {
-		expect(terminalMock.getSecurity(descr)).andReturn(securityMock);
+		expect(terminalMock.getSecurity(symbol)).andReturn(securityMock);
 		control.replay();
 		
-		assertSame(securityMock, decorator.getSecurity(descr));
+		assertSame(securityMock, decorator.getSecurity(symbol));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testIsSecurityExists() throws Exception {
-		expect(terminalMock.isSecurityExists(descr)).andReturn(false);
-		expect(terminalMock.isSecurityExists(descr)).andReturn(true);
+		expect(terminalMock.isSecurityExists(symbol)).andReturn(false);
+		expect(terminalMock.isSecurityExists(symbol)).andReturn(true);
 		control.replay();
 		
-		assertFalse(decorator.isSecurityExists(descr));
-		assertTrue(decorator.isSecurityExists(descr));
+		assertFalse(decorator.isSecurityExists(symbol));
+		assertTrue(decorator.isSecurityExists(symbol));
 		
 		control.verify();
 	}
@@ -824,10 +824,10 @@ public class TerminalDecoratorTest {
 	@Test
 	public void testGetEditableSecurity() throws Exception {
 		EditableSecurity secMock = control.createMock(EditableSecurity.class);
-		expect(terminalMock.getEditableSecurity(descr)).andReturn(secMock);
+		expect(terminalMock.getEditableSecurity(symbol)).andReturn(secMock);
 		control.replay();
 		
-		assertSame(secMock, decorator.getEditableSecurity(descr));
+		assertSame(secMock, decorator.getEditableSecurity(symbol));
 		
 		control.verify();
 	}
@@ -856,10 +856,10 @@ public class TerminalDecoratorTest {
 	
 	@Test
 	public void testFireSecurityRequestError() throws Exception {
-		terminalMock.fireSecurityRequestError(descr, 1, "foo");
+		terminalMock.fireSecurityRequestError(symbol, 1, "foo");
 		control.replay();
 		
-		decorator.fireSecurityRequestError(descr, 1, "foo");
+		decorator.fireSecurityRequestError(symbol, 1, "foo");
 		
 		control.verify();
 	}

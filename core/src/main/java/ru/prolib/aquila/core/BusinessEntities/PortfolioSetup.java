@@ -18,14 +18,14 @@ import com.thoughtworks.xstream.annotations.*;
 @XStreamAlias("PortfolioSetup")
 public class PortfolioSetup {
 	@XStreamAlias("entries")
-	private final Map<SecurityDescriptor, PositionSetup> map;
+	private final Map<Symbol, PositionSetup> map;
 	
 	/**
 	 * Конструктор.
 	 */
 	public PortfolioSetup() {
 		super();
-		map = new LinkedHashMap<SecurityDescriptor, PositionSetup>();
+		map = new LinkedHashMap<Symbol, PositionSetup>();
 	}
 	
 	/**
@@ -34,14 +34,14 @@ public class PortfolioSetup {
 	 * Если это новый инструмент, то создается настройка нейтральной позиции по
 	 * инструменту.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @return спецификация позиции
 	 */
-	public synchronized PositionSetup getPosition(SecurityDescriptor descr) {
-		PositionSetup setup = map.get(descr);
+	public synchronized PositionSetup getPosition(Symbol symbol) {
+		PositionSetup setup = map.get(symbol);
 		if ( setup == null ) {
 			setup = createPositionSetup();
-			map.put(descr, setup);
+			map.put(symbol, setup);
 		}
 		return setup;
 	}
@@ -49,10 +49,10 @@ public class PortfolioSetup {
 	/**
 	 * Удалить спецификацию позиции из портфеля.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 */
-	public synchronized void removePosition(SecurityDescriptor descr) {
-		map.remove(descr);
+	public synchronized void removePosition(Symbol symbol) {
+		map.remove(symbol);
 	}
 
 	/**
@@ -60,8 +60,8 @@ public class PortfolioSetup {
 	 * <p>
 	 * @return карта спецификаций
 	 */
-	public synchronized Map<SecurityDescriptor, PositionSetup> getPositions() {
-		return new LinkedHashMap<SecurityDescriptor, PositionSetup>(map);
+	public synchronized Map<Symbol, PositionSetup> getPositions() {
+		return new LinkedHashMap<Symbol, PositionSetup>(map);
 	}
 	
 	/**
@@ -69,8 +69,8 @@ public class PortfolioSetup {
 	 * <p>
 	 * @return список инструментов, включенных в сетап
 	 */
-	public synchronized List<SecurityDescriptor> getSecurities() {
-		return new Vector<SecurityDescriptor>(map.keySet());
+	public synchronized List<Symbol> getSecurities() {
+		return new Vector<Symbol>(map.keySet());
 	}
 	
 	@Override

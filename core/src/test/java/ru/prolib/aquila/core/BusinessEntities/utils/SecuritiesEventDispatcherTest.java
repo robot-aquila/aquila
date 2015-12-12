@@ -13,8 +13,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class SecuritiesEventDispatcherTest {
-	private static SecurityDescriptor descr =
-			new SecurityDescriptor("zu", "lu", ISO4217.USD, SecurityType.FUT);
+	private static Symbol symbol = new Symbol("zu", "lu", ISO4217.USD, SymbolType.FUT);
 	private EditableTerminal terminal;
 	private EditableSecurity security;
 	private SecuritiesEventDispatcher dispatcher;
@@ -24,7 +23,7 @@ public class SecuritiesEventDispatcherTest {
 	@Before
 	public void setUp() throws Exception {
 		terminal = new BasicTerminalBuilder().buildTerminal();
-		security = terminal.getEditableSecurity(descr);
+		security = terminal.getEditableSecurity(symbol);
 		dispatcher = new SecuritiesEventDispatcher(terminal.getEventSystem());
 		terminal.getEventSystem().getEventQueue().start();
 		eventsActual = new Vector<Event>();

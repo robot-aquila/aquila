@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
 public class OrderImpl extends EditableImpl implements EditableOrder {
 	public static final int VERSION = 0x06;
 	private Account account;
-	private SecurityDescriptor descr;
+	private Symbol symbol;
 	private Direction direction;
 	private Integer id;
 	private Double price;
@@ -148,7 +148,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 
 	@Override
 	public Security getSecurity() throws SecurityException {
-		return terminal.getSecurity(getSecurityDescriptor());
+		return terminal.getSecurity(getSymbol());
 	}
 
 	@Override
@@ -223,9 +223,9 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized void setSecurityDescriptor(SecurityDescriptor descr) {
-		if ( descr == null ? this.descr != null : ! descr.equals(this.descr) ) {
-			this.descr = descr;
+	public synchronized void setSymbol(Symbol symbol) {
+		if ( symbol == null ? this.symbol != null : ! symbol.equals(this.symbol) ) {
+			this.symbol = symbol;
 			setChanged();
 		}
 	}
@@ -254,8 +254,8 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+	public synchronized Symbol getSymbol() {
+		return symbol;
 	}
 
 	@Override
@@ -388,7 +388,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 		return new EqualsBuilder()
 			.appendSuper(o.terminal == terminal)
 			.append(o.account, account)
-			.append(o.descr, descr)
+			.append(o.symbol, symbol)
 			.append(o.direction, direction)
 			.append(o.id, id)
 			.append(o.lastChangeTime, lastChangeTime)

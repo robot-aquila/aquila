@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.utils.Variant;
 public class RequestSecurityEventTest {
 	private IMocksControl control;
 	private EventTypeSI type1, type2;
-	private SecurityDescriptor descr1, descr2;
+	private Symbol symbol1, symbol2;
 	private RequestSecurityEvent event;
 	
 	@Before
@@ -19,15 +19,15 @@ public class RequestSecurityEventTest {
 		control = createStrictControl();
 		type1 = control.createMock(EventTypeSI.class);
 		type2 = control.createMock(EventTypeSI.class);
-		descr1 = new SecurityDescriptor("SBER", "EQBR", "RUR");
-		descr2 = new SecurityDescriptor("GAZP", "EQBR", "RUR");
-		event = new RequestSecurityEvent(type1, descr1, 1, "foobar text");
+		symbol1 = new Symbol("SBER", "EQBR", "RUR");
+		symbol2 = new Symbol("GAZP", "EQBR", "RUR");
+		event = new RequestSecurityEvent(type1, symbol1, 1, "foobar text");
 	}
 	
 	@Test
 	public void testAccessors() throws Exception {
 		assertEquals(type1, event.getType());
-		assertEquals(descr1, event.getSecurityDescriptor());
+		assertEquals(symbol1, event.getSymbol());
 		assertEquals(1, event.getCode());
 		assertEquals("foobar text", event.getMessage());
 	}
@@ -44,12 +44,11 @@ public class RequestSecurityEventTest {
 		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
 			.add(type1)
 			.add(type2);
-		Variant<SecurityDescriptor> vDescr =
-				new Variant<SecurityDescriptor>(vType)
+		Variant<Symbol> vSymbol = new Variant<Symbol>(vType)
 			.add(null)
-			.add(descr1)
-			.add(descr2);
-		Variant<Integer> vCode = new Variant<Integer>(vDescr)
+			.add(symbol1)
+			.add(symbol2);
+		Variant<Integer> vCode = new Variant<Integer>(vSymbol)
 			.add(1)
 			.add(256);
 		Variant<String> vMsg = new Variant<String>(vCode)
@@ -61,7 +60,7 @@ public class RequestSecurityEventTest {
 		RequestSecurityEvent found = null;
 		do {
 			RequestSecurityEvent actual = new RequestSecurityEvent(vType.get(),
-					vDescr.get(), vCode.get(), vMsg.get());
+					vSymbol.get(), vCode.get(), vMsg.get());
 			if ( event.equals(actual) ) {
 				foundCount ++;
 				found = actual;
@@ -70,7 +69,7 @@ public class RequestSecurityEventTest {
 		assertEquals(1, foundCount);
 		assertNotNull(found);
 		assertSame(type1, found.getType());
-		assertSame(descr1, found.getSecurityDescriptor());
+		assertSame(symbol1, found.getSymbol());
 		assertEquals(1, found.getCode());
 		assertEquals("foobar text", found.getMessage());
 	}

@@ -89,15 +89,13 @@ public class BasicTerminal implements EditableTerminal {
 	}
 
 	@Override
-	public Security getSecurity(SecurityDescriptor descr)
-			throws SecurityException
-	{
-		return securities.getSecurity(descr);
+	public Security getSecurity(Symbol symbol) throws SecurityException {
+		return securities.getSecurity(symbol);
 	}
 
 	@Override
-	public boolean isSecurityExists(SecurityDescriptor descr) {
-		return securities.isSecurityExists(descr);
+	public boolean isSecurityExists(Symbol symbol) {
+		return securities.isSecurityExists(symbol);
 	}
 
 	@Override
@@ -344,8 +342,8 @@ public class BasicTerminal implements EditableTerminal {
 	}
 
 	@Override
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr) {
-		return securities.getEditableSecurity(this, descr);
+	public EditableSecurity getEditableSecurity(Symbol symbol) {
+		return securities.getEditableSecurity(this, symbol);
 	}
 
 	@Override
@@ -512,7 +510,7 @@ public class BasicTerminal implements EditableTerminal {
 		order.setType(OrderType.LIMIT);
 		order.setAccount(account);
 		order.setDirection(dir);
-		order.setSecurityDescriptor(security.getDescriptor());
+		order.setSymbol(security.getSymbol());
 		order.setQty(qty);
 		order.setQtyRest(qty);
 		order.setPrice(price);
@@ -533,7 +531,7 @@ public class BasicTerminal implements EditableTerminal {
 		order.setType(OrderType.MARKET);
 		order.setAccount(account);
 		order.setDirection(dir);
-		order.setSecurityDescriptor(security.getDescriptor());
+		order.setSymbol(security.getSymbol());
 		order.setQty(qty);
 		order.setQtyRest(qty);
 		if ( activator != null ) {
@@ -545,7 +543,7 @@ public class BasicTerminal implements EditableTerminal {
 	}
 
 	@Override
-	public void requestSecurity(SecurityDescriptor descr) {
+	public void requestSecurity(Symbol symbol) {
 		
 	}
 
@@ -555,10 +553,8 @@ public class BasicTerminal implements EditableTerminal {
 	}
 
 	@Override
-	public void fireSecurityRequestError(SecurityDescriptor descr,
-			int errorCode, String errorMsg)
-	{
-		dispatcher.fireSecurityRequestError(descr, errorCode, errorMsg);
+	public void fireSecurityRequestError(Symbol symbol, int errorCode, String errorMsg) {
+		dispatcher.fireSecurityRequestError(symbol, errorCode, errorMsg);
 	}
 
 	@Override

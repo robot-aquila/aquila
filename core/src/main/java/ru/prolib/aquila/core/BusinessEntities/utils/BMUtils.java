@@ -26,7 +26,7 @@ public class BMUtils {
 		t.setDirection(Direction.BUY);
 		t.setPrice(tick.getValue());
 		t.setQty(tick.getOptionalValueAsLong());
-		t.setSecurityDescriptor(security.getDescriptor());
+		t.setSymbol(security.getSymbol());
 		t.setTime(tick.getTime());
 		t.setVolume(security.getMostAccurateVolume(t.getPrice(), t.getQty()));
 		return t;

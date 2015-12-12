@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.utils.Variant;
 public class ActiveTradesTest {
 	private static SimpleDateFormat format;
 	private static Direction BUY = Direction.BUY;
-	private static SecurityDescriptor descr1, descr2;
+	private static Symbol symbol1, symbol2;
 	private EventSystem es;
 	private Trade trade;
 	private IMocksControl control;
@@ -31,8 +31,8 @@ public class ActiveTradesTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		descr1 = new SecurityDescriptor("Foo", "GZ", "USD", SecurityType.UNK);
-		descr2 = new SecurityDescriptor("Bar", "BZ", "RUB", SecurityType.UNK);
+		symbol1 = new Symbol("Foo", "GZ", "USD", SymbolType.UNK);
+		symbol2 = new Symbol("Bar", "BZ", "RUB", SymbolType.UNK);
 	}
 	
 	@Before
@@ -45,9 +45,9 @@ public class ActiveTradesTest {
 		report2 = control.createMock(ERTrade.class);
 		terminal = control.createMock(Terminal.class);
 		reports = new ActiveTrades(dispatcher);
-		trade = createTrade(descr1, "1999-01-01 00:00:00", BUY, 1L, 1d, 10d);
-		expect(report1.getSecurityDescriptor()).andStubReturn(descr1);
-		expect(report2.getSecurityDescriptor()).andStubReturn(descr2);
+		trade = createTrade(symbol1, "1999-01-01 00:00:00", BUY, 1L, 1d, 10d);
+		expect(report1.getSymbol()).andStubReturn(symbol1);
+		expect(report2.getSymbol()).andStubReturn(symbol2);
 	}
 	
 	@After
@@ -58,7 +58,7 @@ public class ActiveTradesTest {
 	/**
 	 * Создать сделку.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param time строка yyyy-MM-dd HH:mm:ss время сделки
 	 * @param dir направление
 	 * @param qty количество
@@ -66,18 +66,18 @@ public class ActiveTradesTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(SecurityDescriptor descr, String time,
+	private Trade createTrade(Symbol symbol, String time,
 			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
-		return createTrade(descr, new DateTime(format.parse(time)), dir, qty,
+		return createTrade(symbol, new DateTime(format.parse(time)), dir, qty,
 				price, volume);
 	}
 	
 	/**
 	 * Создать сделку.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param time время сделки
 	 * @param dir направление
 	 * @param qty количество
@@ -85,14 +85,14 @@ public class ActiveTradesTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(SecurityDescriptor descr, DateTime time,
+	private Trade createTrade(Symbol symbol, DateTime time,
 			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);
 		trade.setDirection(dir);
 		trade.setPrice(price);
 		trade.setQty(qty);
-		trade.setSecurityDescriptor(descr);
+		trade.setSymbol(symbol);
 		trade.setTime(time);
 		trade.setVolume(volume);
 		return trade;		
@@ -107,12 +107,12 @@ public class ActiveTradesTest {
 		reports.addTrade(trade);
 		
 		control.verify();
-		assertEquals(expected, reports.getReport(descr1));
+		assertEquals(expected, reports.getReport(symbol1));
 	}
 	
 	@Test
 	public void testAddTrade_UpdatedReport() throws Exception {
-		reports.setReport(descr1, report1);
+		reports.setReport(symbol1, report1);
 		expect(report1.addTrade(same(trade))).andReturn(null);
 		expect(report1.isOpen()).andReturn(true);
 		dispatcher.fireChanged(same(report1));
@@ -121,12 +121,12 @@ public class ActiveTradesTest {
 		reports.addTrade(trade);
 		
 		control.verify();
-		assertSame(report1, reports.getReport(descr1));
+		assertSame(report1, reports.getReport(symbol1));
 	}
 	
 	@Test
 	public void testAddTrade_ExitReport() throws Exception {
-		reports.setReport(descr1, report1);
+		reports.setReport(symbol1, report1);
 		expect(report1.addTrade(same(trade))).andReturn(null);
 		expect(report1.isOpen()).andReturn(false);
 		dispatcher.fireExit(same(report1));
@@ -135,12 +135,12 @@ public class ActiveTradesTest {
 		reports.addTrade(trade);
 		
 		control.verify();
-		assertNull(reports.getReport(descr1));
+		assertNull(reports.getReport(symbol1));
 	}
 
 	@Test
 	public void testAddTrade_ExitReportWithReverse() throws Exception {
-		reports.setReport(descr1, report1);
+		reports.setReport(symbol1, report1);
 		expect(report1.addTrade(same(trade))).andReturn(report2);
 		expect(report1.isOpen()).andReturn(false);
 		dispatcher.fireExit(same(report1));
@@ -150,13 +150,13 @@ public class ActiveTradesTest {
 		reports.addTrade(trade);
 		
 		control.verify();
-		assertSame(report2, reports.getReport(descr1));
+		assertSame(report2, reports.getReport(symbol1));
 	}
 	
 	@Test
 	public void testGetReports() throws Exception {
-		reports.setReport(descr1, report1);
-		reports.setReport(descr2, report2);
+		reports.setReport(symbol1, report1);
+		reports.setReport(symbol2, report2);
 		List<RTrade> expected = new Vector<RTrade>();
 		expected.add(report1);
 		expected.add(report2);
@@ -184,7 +184,7 @@ public class ActiveTradesTest {
 		Variant<?> iterator = vRows;
 		control.replay();
 		for ( ERTrade r : rows1 ) {
-			reports.setReport(r.getSecurityDescriptor(), r);
+			reports.setReport(r.getSymbol(), r);
 		}
 		int foundCnt = 0;
 		ActiveTrades x = null, found = null;
@@ -192,7 +192,7 @@ public class ActiveTradesTest {
 			// Объекты системы событий не участвуют в сравнении
 			x = new ActiveTrades(es);
 			for ( ERTrade r : vRows.get() ) {
-				x.setReport(r.getSecurityDescriptor(), r);
+				x.setReport(r.getSymbol(), r);
 			}
 			if ( reports.equals(x) ) {
 				foundCnt ++;
@@ -200,14 +200,14 @@ public class ActiveTradesTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(report1, found.getReport(descr1));
-		assertSame(report2, found.getReport(descr2));
+		assertSame(report1, found.getReport(symbol1));
+		assertSame(report2, found.getReport(symbol2));
 	}
 	
 	@Test
 	public void testClear() throws Exception {
-		reports.setReport(descr1, report1);
-		reports.setReport(descr2, report2);
+		reports.setReport(symbol1, report1);
+		reports.setReport(symbol2, report2);
 		List<RTrade> expected = new Vector<RTrade>();
 		reports.clear();
 		

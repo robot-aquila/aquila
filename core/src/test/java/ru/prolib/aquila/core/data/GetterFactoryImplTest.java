@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.getter.GAccount;
 import ru.prolib.aquila.core.data.getter.GPrice;
-import ru.prolib.aquila.core.data.getter.GSecurityDescr;
+import ru.prolib.aquila.core.data.getter.GSymbol;
 import ru.prolib.aquila.core.utils.ValidatorEq;
 
 /**
@@ -182,25 +182,25 @@ public class GetterFactoryImplTest {
 	@Test
 	public void testRowSecurity() throws Exception {
 		Securities securities = control.createMock(Securities.class);
-		G<Security> expected = new GSecurity(new GSecurityDescr(
+		G<Security> expected = new GSecurity(new GSymbol(
 					new GRowObj<String>("code", new GString()),
 					new GRowObj<String>("class", new GString()),
 					new GConst<String>("EUR"),
-					new GConst<SecurityType>(SecurityType.STK)),
+					new GConst<SymbolType>(SymbolType.STK)),
 				securities);
 		assertEquals(expected, factory.rowSecurity(securities, "code", "class",
-				"EUR", SecurityType.STK));
+				"EUR", SymbolType.STK));
 	}
 	
 	@Test
-	public void testRowSecurityDescriptor() throws Exception {
-		G<SecurityDescriptor> expected = new GSecurityDescr(
+	public void testRowSymbol() throws Exception {
+		G<Symbol> expected = new GSymbol(
 				new GRowObj<String>("code", new GString()),
 				new GRowObj<String>("class", new GString()),
 				new GConst<String>("USD"),
-				new GConst<SecurityType>(SecurityType.UNK));
-		assertEquals(expected, factory.rowSecurityDescr("code", "class",
-				"USD", SecurityType.UNK));
+				new GConst<SymbolType>(SymbolType.UNK));
+		assertEquals(expected, factory.rowSymbol("code", "class",
+				"USD", SymbolType.UNK));
 	}
 	
 	@Test
@@ -212,10 +212,10 @@ public class GetterFactoryImplTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSecurity() throws Exception {
-		G<SecurityDescriptor> gDescr = control.createMock(G.class);
+		G<Symbol> gSymbol = control.createMock(G.class);
 		Securities securities = control.createMock(Securities.class);
-		G<Security> expected = new GSecurity(gDescr, securities);
-		assertEquals(expected, factory.security(securities, gDescr));
+		G<Security> expected = new GSecurity(gSymbol, securities);
+		assertEquals(expected, factory.security(securities, gSymbol));
 	}
 
 }

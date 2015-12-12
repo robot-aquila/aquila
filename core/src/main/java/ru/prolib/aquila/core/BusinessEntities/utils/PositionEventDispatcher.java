@@ -16,12 +16,9 @@ public class PositionEventDispatcher {
 	private final EventDispatcher dispatcher;
 	private final EventTypeSI onChanged;
 	
-	public PositionEventDispatcher(EventSystem es, Account account,
-			SecurityDescriptor descr)
-	{
+	public PositionEventDispatcher(EventSystem es, Account account, Symbol symbol) {
 		super();
-		dispatcher =
-			es.createEventDispatcher("Position[" + account + ":" + descr + "]");
+		dispatcher = es.createEventDispatcher("Position[" + account + ":" + symbol + "]");
 		onChanged = dispatcher.createType("Changed");
 	}
 	

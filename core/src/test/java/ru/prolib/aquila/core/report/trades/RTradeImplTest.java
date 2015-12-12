@@ -17,7 +17,7 @@ public class RTradeImplTest {
 	private static PositionType SHORT = PositionType.SHORT;
 	private static Direction BUY = Direction.BUY;
 	private static Direction SELL = Direction.SELL;
-	private static SecurityDescriptor descr1, descr2;
+	private static Symbol symbol1, symbol2;
 	private static DateTime time1, time2;
 	private IMocksControl control;
 	private Terminal terminal;
@@ -25,8 +25,8 @@ public class RTradeImplTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		descr1 = new SecurityDescriptor("Foo", "Bar", "USD", SecurityType.UNK);
-		descr2 = new SecurityDescriptor("Bar", "Buz", "GBP", SecurityType.FUT);
+		symbol1 = new Symbol("Foo", "Bar", "USD", SymbolType.UNK);
+		symbol2 = new Symbol("Bar", "Buz", "GBP", SymbolType.FUT);
 		time1 = new DateTime(format.parse("2013-01-01 00:00:00"));
 		time2 = new DateTime(format.parse("2013-01-02 00:00:00"));
 	}
@@ -40,7 +40,7 @@ public class RTradeImplTest {
 	/**
 	 * Создать сделку.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param time строка yyyy-MM-dd HH:mm:ss время сделки
 	 * @param dir направление
 	 * @param qty количество
@@ -48,18 +48,18 @@ public class RTradeImplTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(SecurityDescriptor descr, String time,
+	private Trade createTrade(Symbol symbol, String time,
 			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
-		return createTrade(descr, new DateTime(format.parse(time)),
+		return createTrade(symbol, new DateTime(format.parse(time)),
 				dir, qty, price, volume);
 	}
 	
 	/**
 	 * Создать сделку.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param time время сделки
 	 * @param dir направление
 	 * @param qty количество
@@ -67,14 +67,14 @@ public class RTradeImplTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(SecurityDescriptor descr, DateTime time,
+	private Trade createTrade(Symbol symbol, DateTime time,
 			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);
 		trade.setDirection(dir);
 		trade.setPrice(price);
 		trade.setQty(qty);
-		trade.setSecurityDescriptor(descr);
+		trade.setSymbol(symbol);
 		trade.setTime(time);
 		trade.setVolume(volume);
 		return trade;		
@@ -108,7 +108,7 @@ public class RTradeImplTest {
 	
 	@Test
 	public void testConstructor1() throws Exception {
-		Trade trade = createTrade(descr1, time1, BUY, 50L, 10.0d, 1000.0d);
+		Trade trade = createTrade(symbol1, time1, BUY, 50L, 10.0d, 1000.0d);
 		RTradeImpl report = new RTradeImpl(trade);
 		assertNull(report.getExitPrice());
 		assertEquals(10.0d, report.getEnterPrice(), 0.01d);
@@ -116,7 +116,7 @@ public class RTradeImplTest {
 		assertEquals(time1, report.getEnterTime());
 		assertEquals(1000.0d, report.getEnterVolume(), 0.01d);
 		assertEquals(new Long(50L), report.getQty());
-		assertEquals(descr1, report.getSecurityDescriptor());
+		assertEquals(symbol1, report.getSymbol());
 		assertEquals(LONG, report.getType());
 		assertEquals(new Long(50L), report.getUncoveredQty());
 		assertTrue(report.isOpen());
@@ -124,7 +124,7 @@ public class RTradeImplTest {
 	
 	@Test
 	public void testConstruct10() throws Exception {
-		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, time2,
+		RTradeImpl report = new RTradeImpl(symbol2, LONG, time1, time2,
 				10L, 5L, 120.35d, 60.15d, 200.0d, 100.0d);
 		assertEquals(12.03d, report.getExitPrice(), 0.001d);
 		assertEquals(12.035d, report.getEnterPrice(), 0.001d);
@@ -132,7 +132,7 @@ public class RTradeImplTest {
 		assertEquals(time1, report.getEnterTime());
 		assertEquals(200.0d, report.getEnterVolume(), 0.001d);
 		assertEquals(new Long(10L), report.getQty());
-		assertEquals(descr2, report.getSecurityDescriptor());
+		assertEquals(symbol2, report.getSymbol());
 		assertEquals(LONG, report.getType());
 		assertEquals(new Long(5L), report.getUncoveredQty());
 		assertTrue(report.isOpen());
@@ -141,23 +141,23 @@ public class RTradeImplTest {
 	@Test
 	public void testIsOpen() throws Exception {
 		RTradeImpl report =
-			new RTradeImpl(createTrade(descr1, time1, SELL, 50L, 0d, 0d));
+			new RTradeImpl(createTrade(symbol1, time1, SELL, 50L, 0d, 0d));
 		assertTrue(report.isOpen());
-		report.addTrade(createTrade(descr1, time1, BUY, 25L, 0d, 0d));
+		report.addTrade(createTrade(symbol1, time1, BUY, 25L, 0d, 0d));
 		assertTrue(report.isOpen());
-		report.addTrade(createTrade(descr1, time2, BUY, 25L, 0d, 0d));
+		report.addTrade(createTrade(symbol1, time2, BUY, 25L, 0d, 0d));
 		assertFalse(report.isOpen());
 	}
 	
 	@Test
 	public void testEquals() throws Exception {
-		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, time2,
+		RTradeImpl report = new RTradeImpl(symbol2, LONG, time1, time2,
 				200L, 125L, 800.0d, 224.0d, 1024.0d, 650.0d);
 
-		Variant<SecurityDescriptor> vDescr = new Variant<SecurityDescriptor>()
-			.add(descr1)
-			.add(descr2);
-		Variant<PositionType> vType = new Variant<PositionType>(vDescr)
+		Variant<Symbol> vSymbol = new Variant<Symbol>()
+			.add(symbol1)
+			.add(symbol2);
+		Variant<PositionType> vType = new Variant<PositionType>(vSymbol)
 			.add(SHORT)
 			.add(LONG);
 		Variant<DateTime> vOpnTime = new Variant<DateTime>(vType)
@@ -192,7 +192,7 @@ public class RTradeImplTest {
 		int foundCnt = 0;
 		RTradeImpl x = null, found = null;
 		do {
-			x = new RTradeImpl(vDescr.get(), vType.get(),
+			x = new RTradeImpl(vSymbol.get(), vType.get(),
 					vOpnTime.get(), vClsTime.get(),
 					vOpnQty.get(), vClsQty.get(),
 					vOpnPrice.get(), vClsPrice.get(),
@@ -203,7 +203,7 @@ public class RTradeImplTest {
 			}
 		} while( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(descr2, found.getSecurityDescriptor());
+		assertSame(symbol2, found.getSymbol());
 		assertSame(LONG, found.getType());
 		assertEquals(new DateTime(format.parse("2013-01-01 00:00:00")),
 				found.getEnterTime());
@@ -219,7 +219,7 @@ public class RTradeImplTest {
 	
 	@Test
 	public void testEquals_SpecialCases() throws Exception {
-		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, time2,
+		RTradeImpl report = new RTradeImpl(symbol2, LONG, time1, time2,
 				200L, 125L, 800.0d, 224.0d, 1024.0d, 650.0d);
 		
 		assertTrue(report.equals(report));
@@ -231,89 +231,89 @@ public class RTradeImplTest {
 	public void testAddTrade() throws Exception {
 		List<FR> fix = new Vector<FR>();
 		// #0, Короткая, закрытая
-		FR row = new FR(new RTradeImpl(descr1, SHORT,
+		FR row = new FR(new RTradeImpl(symbol1, SHORT,
 				new DateTime(format.parse("1998-08-01 20:35:00")),
 				new DateTime(format.parse("1998-08-02 00:00:00")),
 				200L, 200L,
 				2000.0d, 1800.0d,
 				4000.0d, 3600.0d), null);
-		row.trades.add(createTrade(descr1, "1998-08-01 20:35:00",
+		row.trades.add(createTrade(symbol1, "1998-08-01 20:35:00",
 				SELL, 100L, 10.0d, 2000.0d));
-		row.trades.add(createTrade(descr1, "1998-08-01 22:48:15",
+		row.trades.add(createTrade(symbol1, "1998-08-01 22:48:15",
 				SELL, 50L, 9.0d, 900.0d));
-		row.trades.add(createTrade(descr1, "1998-08-01 23:15:00",
+		row.trades.add(createTrade(symbol1, "1998-08-01 23:15:00",
 				SELL, 50L, 11.0d, 1100.0d));
-		row.trades.add(createTrade(descr1, "1998-08-01 23:59:00",
+		row.trades.add(createTrade(symbol1, "1998-08-01 23:59:00",
 				BUY, 100L, 8.0d, 1800.0d));
-		row.trades.add(createTrade(descr1, "1998-08-02 00:00:00",
+		row.trades.add(createTrade(symbol1, "1998-08-02 00:00:00",
 				BUY, 100L, 10.0d, 1800.0d));
 		fix.add(row);
 		
 		// #1, Длинная, не закрытая
-		row = new FR(new RTradeImpl(descr2, LONG,
+		row = new FR(new RTradeImpl(symbol2, LONG,
 				new DateTime(format.parse("2001-01-01 00:00:00")),
 				null,
 				200L, null,
 				2000.0d, null,
 				4000.0d, null), null);
-		row.trades.add(createTrade(descr2, "2001-01-01 00:00:00",
+		row.trades.add(createTrade(symbol2, "2001-01-01 00:00:00",
 				BUY, 100L, 10.0d, 2000.0d));
-		row.trades.add(createTrade(descr2, "2001-01-02 00:00:00",
+		row.trades.add(createTrade(symbol2, "2001-01-02 00:00:00",
 				BUY, 100L, 10.0d, 2000.0d));
 		fix.add(row);
 		
 		// #2, Длинная, частично-закрытая
-		row = new FR(new RTradeImpl(descr1, LONG,
+		row = new FR(new RTradeImpl(symbol1, LONG,
 				new DateTime(format.parse("1998-01-01 00:00:00")),
 				null,
 				200L, 50L,
 				2000.0d, 500.0d,
 				4000.0d, 1000.0d), null);
-		row.trades.add(createTrade(descr1, "1998-01-01 00:00:00",
+		row.trades.add(createTrade(symbol1, "1998-01-01 00:00:00",
 				BUY, 200L, 10.0d, 4000.0d));
-		row.trades.add(createTrade(descr1, "1998-01-01 01:00:00",
+		row.trades.add(createTrade(symbol1, "1998-01-01 01:00:00",
 				SELL, 50L, 10.0d, 1000.0d));
 		fix.add(row);
 		
 		// #3, Длинная, закрытая, с разворотом одной сделкой
-		row = new FR(new RTradeImpl(descr1, LONG,
+		row = new FR(new RTradeImpl(symbol1, LONG,
 				new DateTime(format.parse("1996-06-01 00:00:00")),
 				new DateTime(format.parse("1996-06-02 00:00:00")),
 				1L, 1L,
 				138770d, 138380d,
 				86951.89d, 86726.32d),
-			new RTradeImpl(descr1, SHORT,
+			new RTradeImpl(symbol1, SHORT,
 				new DateTime(format.parse("1996-06-02 00:00:00")),
 				null,
 				1L, null,
 				138380d, null,
 				86726.32d, null));
-		row.trades.add(createTrade(descr1, "1996-06-01 00:00:00",
+		row.trades.add(createTrade(symbol1, "1996-06-01 00:00:00",
 				BUY, 1L, 138770d, 86951.89d));
-		row.trades.add(createTrade(descr1, "1996-06-02 00:00:00",
+		row.trades.add(createTrade(symbol1, "1996-06-02 00:00:00",
 				SELL, 2L, 138380d, 173452.64d));
 		fix.add(row);
 		
 		// #4, Короткая, закрытая, с сокращением и разворотом
-		row = new FR(new RTradeImpl(descr2, SHORT,
+		row = new FR(new RTradeImpl(symbol2, SHORT,
 				new DateTime(format.parse("2018-01-15 03:00:01")),
 				new DateTime(format.parse("2018-01-15 03:00:10")),
 				10L, 10L,
 				50d,  40d,
 				100d, 80d),
-			new RTradeImpl(descr2, LONG,
+			new RTradeImpl(symbol2, LONG,
 				new DateTime(format.parse("2018-01-15 03:00:10")),
 				null,
 				5L, null,
 				20d, null,
 				40d, null));
-		row.trades.add(createTrade(descr2, "2018-01-15 03:00:01",
+		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:01",
 				SELL, 4L, 5d, 40d));
-		row.trades.add(createTrade(descr2, "2018-01-15 03:00:05",
+		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:05",
 				SELL, 6L, 5d, 60d));
-		row.trades.add(createTrade(descr2, "2018-01-15 03:00:10",
+		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:10",
 				BUY, 5L, 4d, 40d));
-		row.trades.add(createTrade(descr2, "2018-01-15 03:00:10",
+		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:10",
 				BUY, 10L, 4d, 80d));
 		fix.add(row);
 		
@@ -336,11 +336,11 @@ public class RTradeImplTest {
 
 	@Test
 	public void testCompareTo() throws Exception {
-		RTradeImpl report1 = new RTradeImpl(descr2, SHORT, time1, null,
+		RTradeImpl report1 = new RTradeImpl(symbol2, SHORT, time1, null,
 				1L, null, 0d, null, 0d, null),
-			report2 = new RTradeImpl(descr1, LONG, time2, null,
+			report2 = new RTradeImpl(symbol1, LONG, time2, null,
 				1L, null, 0d, null, 0d, null),
-			report3 = new RTradeImpl(descr1, LONG, time2, null,
+			report3 = new RTradeImpl(symbol1, LONG, time2, null,
 				1L, null, 0d, null, 0d, null);
 		// сравнивается только время открытия
 		assertEquals(1, report1.compareTo(null));
@@ -351,12 +351,12 @@ public class RTradeImplTest {
 	
 	@Test
 	public void testClone() throws Exception {
-		RTradeImpl report = new RTradeImpl(descr2, LONG, time1, null,
+		RTradeImpl report = new RTradeImpl(symbol2, LONG, time1, null,
 				200L, null, 800.0d, null, 1024.0d, null);
 		RTrade copy = report.clone();
 		assertEquals(report, copy);
 		assertNotSame(report, copy);
-		report.addTrade(createTrade(descr2, time2, SELL, 5L, 4d, 12d));
+		report.addTrade(createTrade(symbol2, time2, SELL, 5L, 4d, 12d));
 		assertFalse(report.equals(copy));
 	}
 	
@@ -373,7 +373,7 @@ public class RTradeImplTest {
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			RTrade report = new RTradeImpl(descr1,
+			RTrade report = new RTradeImpl(symbol1,
 					(PositionType) fix[i][0], time1, null,
 					(Long)fix[i][3],
 					(fix[i][2] == null ? null : (Long)fix[i][3]),

@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.report.RTrade;
  * Отчет по трейду.
  */
 public class RTradeImpl implements ERTrade {
-	private final SecurityDescriptor descr;
+	private final Symbol symbol;
 	private final PositionType type;
 	private DateTime enterTime;
 	private DateTime exitTime;
@@ -25,7 +25,7 @@ public class RTradeImpl implements ERTrade {
 	/**
 	 * Конструктор (для тестов).
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param type тип трейда
 	 * @param enterTime время входа
 	 * @param exitTime время выхода
@@ -36,13 +36,13 @@ public class RTradeImpl implements ERTrade {
 	 * @param enterVol суммарный объем входа
 	 * @param exitVol суммарный объем выхода
 	 */
-	public RTradeImpl(SecurityDescriptor descr, PositionType type,
+	public RTradeImpl(Symbol symbol, PositionType type,
 			DateTime enterTime, DateTime exitTime, Long enterQty, Long exitQty,
 			Double sumByEnterPrice, Double sumByExitPrice,
 			Double enterVol, Double exitVol)
 	{
 		super();
-		this.descr = descr;
+		this.symbol = symbol;
 		this.type = type;
 		this.enterTime = enterTime;
 		this.exitTime = exitTime;
@@ -61,7 +61,7 @@ public class RTradeImpl implements ERTrade {
 	 */
 	public RTradeImpl(Trade trade) {
 		super();
-		descr = trade.getSecurityDescriptor();
+		symbol = trade.getSymbol();
 		type = trade.getDirection() == Direction.BUY ?
 				PositionType.LONG : PositionType.SHORT;
 		enterTime = trade.getTime();
@@ -107,8 +107,8 @@ public class RTradeImpl implements ERTrade {
 	}
 	
 	@Override
-	public SecurityDescriptor getSecurityDescriptor() {
-		return descr;
+	public Symbol getSymbol() {
+		return symbol;
 	}
 	
 	@Override
@@ -152,7 +152,7 @@ public class RTradeImpl implements ERTrade {
 			.append(o.exitQty, exitQty)
 			.append(o.exitTime, exitTime)
 			.append(o.exitVol, exitVol)
-			.append(o.descr, descr)
+			.append(o.symbol, symbol)
 			.append(o.enterQty, enterQty)
 			.append(o.enterTime, enterTime)
 			.append(o.enterVol, enterVol)
@@ -187,7 +187,7 @@ public class RTradeImpl implements ERTrade {
 		if ( currQty > uncoveredQty ) {
 			// Необходимо разбить сделку
 			Long nextQty = currQty - uncoveredQty;
-			next = new RTradeImpl(descr,
+			next = new RTradeImpl(symbol,
 				type == PositionType.LONG ?
 						PositionType.SHORT : PositionType.LONG,
 				trade.getTime(), null,
@@ -214,7 +214,7 @@ public class RTradeImpl implements ERTrade {
 	@Override
 	public synchronized String toString() {
 		return getClass().getSimpleName() + "["
-			+ "sec=" + descr + ", "
+			+ "sec=" + symbol + ", "
 			+ "type=" + type + ", "
 			+ "enterTime=" + enterTime + ", "
 			+ "enterPrice=" + getEnterPrice() + ", "
@@ -239,7 +239,7 @@ public class RTradeImpl implements ERTrade {
 	
 	@Override
 	public synchronized RTrade clone() {
-		return new RTradeImpl(descr, type, enterTime, exitTime,
+		return new RTradeImpl(symbol, type, enterTime, exitTime,
 				enterQty, exitQty, sumByEnterPrice, sumByExitPrice,
 				enterVol, exitVol);
 	}

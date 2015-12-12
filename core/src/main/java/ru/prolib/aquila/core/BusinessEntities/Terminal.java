@@ -259,16 +259,16 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * В базовой реализации представляет собой метод-заглушку.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 */
-	public void requestSecurity(SecurityDescriptor descr);
+	public void requestSecurity(Symbol symbol);
 	
 	/**
 	 * Тип события: Ошибка загрузки инструмента.
 	 * <p>
 	 * Данный тип события позволяет реагировать на возможные отклонения
 	 * запросов, выполненных посредством вызова метода
-	 * {@link #requestSecurity(SecurityDescriptor)}.
+	 * {@link #requestSecurity(Symbol)}.
 	 * <p>
 	 * @return тип события
 	 */
@@ -467,20 +467,19 @@ public interface Terminal extends Starter, Scheduler {
 	/**
 	 * Получить инструмент по дескриптору
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @return инструмент
 	 * @throws SecurityNotExistsException - TODO:
 	 */
-	public Security getSecurity(SecurityDescriptor descr)
-			throws SecurityException;
+	public Security getSecurity(Symbol symbol) throws SecurityException;
 	
 	/**
 	 * Проверить наличие инструмента по дескриптору.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @return наличие инструмента
 	 */
-	public boolean isSecurityExists(SecurityDescriptor descr);
+	public boolean isSecurityExists(Symbol symbol);
 
 	/**
 	 * Получить тип события: при появлении информации о новом инструменте.

@@ -22,7 +22,7 @@ import ru.prolib.aquila.core.utils.Variant;
 public class OrderImplTest {
 	private static SimpleDateFormat format;
 	private static Account account;
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private IMocksControl control;
 	private OrderEventDispatcher dispatcher;
 	private EventType type;
@@ -39,7 +39,7 @@ public class OrderImplTest {
 		BasicConfigurator.configure();
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		account = new Account("LX01");
-		descr = new SecurityDescriptor("AAPL", "SMART", "USD",SecurityType.STK);
+		symbol = new Symbol("AAPL", "SMART", "USD",SymbolType.STK);
 	}
 
 	@Before
@@ -92,7 +92,7 @@ public class OrderImplTest {
 		trade.setId(id);
 		trade.setPrice(price);
 		trade.setQty(qty);
-		trade.setSecurityDescriptor(descr);
+		trade.setSymbol(symbol);
 		trade.setTime(new DateTime(format.parse(time)));
 		trade.setVolume(vol);
 		return trade;		
@@ -112,7 +112,7 @@ public class OrderImplTest {
 	public void testDefaults() throws Exception {
 		assertEquals(0x06, OrderImpl.VERSION);
 		assertNull(order.getAccount());
-		assertNull(order.getSecurityDescriptor());
+		assertNull(order.getSymbol());
 		assertNull(order.getId());
 		assertNull(order.getDirection());
 		assertNull(order.getType());
@@ -391,30 +391,30 @@ public class OrderImplTest {
 	
 	@Test
 	public void testGetSecurity() throws Exception {
-		order.setSecurityDescriptor(descr);
+		order.setSymbol(symbol);
 		Security security = control.createMock(Security.class);
-		expect(terminal.getSecurity(eq(descr))).andReturn(security);
+		expect(terminal.getSecurity(eq(symbol))).andReturn(security);
 		control.replay();
 		assertSame(security, order.getSecurity());
 		control.verify();
 	}
 	
 	@Test
-	public void testSetSecurityDescriptor() throws Exception {
+	public void testSetSymbol() throws Exception {
 		setter = new S<OrderImpl>() {
 			@Override
 			public void set(OrderImpl object, Object value) {
-				object.setSecurityDescriptor((SecurityDescriptor) value);
+				object.setSymbol((Symbol) value);
 			}
 		};
-		getter = new G<SecurityDescriptor>() {
+		getter = new G<Symbol>() {
 			@Override
-			public SecurityDescriptor get(Object object) throws ValueException {
-				return ((OrderImpl) object).getSecurityDescriptor();
+			public Symbol get(Object object) throws ValueException {
+				return ((OrderImpl) object).getSymbol();
 			}
 		};
-		testSetterGetter(descr,
-			new SecurityDescriptor("USD","IDEALPRO","USD",SecurityType.CASH));
+		testSetterGetter(symbol,
+			new Symbol("USD","IDEALPRO","USD",SymbolType.CASH));
 	}
 	
 	@Test
@@ -683,7 +683,7 @@ public class OrderImplTest {
 		trds2.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
 
 		order.setAccount(account);
-		order.setSecurityDescriptor(descr);
+		order.setSymbol(symbol);
 		order.setDirection(Direction.SELL);
 		order.setId(1000);
 		order.setPrice(135.67d);
@@ -707,13 +707,12 @@ public class OrderImplTest {
 		Variant<Account> vAcnt = new Variant<Account>()
 			.add(account);
 		if ( rnd.nextDouble() > aprob ) vAcnt.add(new Account("foobar"));
-		Variant<SecurityDescriptor> vDescr =
-				new Variant<SecurityDescriptor>(vAcnt)
-			.add(descr);
+		Variant<Symbol> vSymbol = new Variant<Symbol>(vAcnt)
+			.add(symbol);
 		if ( rnd.nextDouble() > aprob ) {
-			vDescr.add(new SecurityDescriptor("A","B","USD",SecurityType.UNK));
+			vSymbol.add(new Symbol("A","B","USD",SymbolType.UNK));
 		}
-		Variant<Direction> vDir = new Variant<Direction>(vDescr)
+		Variant<Direction> vDir = new Variant<Direction>(vSymbol)
 			.add(Direction.SELL);
 		if ( rnd.nextDouble() > aprob ) vDir.add(Direction.BUY);
 		Variant<Integer> vId = new Variant<Integer>(vDir)
@@ -775,7 +774,7 @@ public class OrderImplTest {
 		do {
 			x = new OrderImpl(dispatcher, stateHandlers, vTerm.get());
 			x.setAccount(vAcnt.get());
-			x.setSecurityDescriptor(vDescr.get());
+			x.setSymbol(vSymbol.get());
 			x.setDirection(vDir.get());
 			x.setId(vId.get());
 			x.setPrice(vPrice.get());
@@ -802,7 +801,7 @@ public class OrderImplTest {
 		assertEquals(1, foundCnt);
 		assertEquals(terminal, found.getTerminal());
 		assertEquals(account, found.getAccount());
-		assertEquals(descr, found.getSecurityDescriptor());
+		assertEquals(symbol, found.getSymbol());
 		assertEquals(Direction.SELL, found.getDirection());
 		assertEquals(new Integer(1000), found.getId());
 		assertEquals(135.67d, found.getPrice(), 0.01d);

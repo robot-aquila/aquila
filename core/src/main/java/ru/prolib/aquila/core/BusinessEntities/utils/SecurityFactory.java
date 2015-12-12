@@ -12,10 +12,10 @@ public class SecurityFactory {
 	}
 	
 	public EditableSecurity
-		createInstance(EditableTerminal terminal, SecurityDescriptor descr)
+		createInstance(EditableTerminal terminal, Symbol symbol)
 	{
-		return new SecurityImpl(terminal, descr,
-				new SecurityEventDispatcher(terminal.getEventSystem(), descr));
+		return new SecurityImpl(terminal, symbol,
+				new SecurityEventDispatcher(terminal.getEventSystem(), symbol));
 	}
 	
 	@Override

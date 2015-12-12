@@ -17,8 +17,8 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class GSecurityTest {
 	private static IMocksControl control;
-	private static G<SecurityDescriptor> gDescr;
-	private static SecurityDescriptor descr;
+	private static G<Symbol> gSymbol;
+	private static Symbol symbol;
 	private static Securities securities;
 	private static Security security;
 	private static GSecurity getter;
@@ -27,11 +27,11 @@ public class GSecurityTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		control = createStrictControl();
-		gDescr = control.createMock(G.class);
-		descr = new SecurityDescriptor("GAZP", "EQBR", "RUB", SecurityType.STK);
+		gSymbol = control.createMock(G.class);
+		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STK);
 		securities = control.createMock(Securities.class);
 		security = control.createMock(Security.class);
-		getter = new GSecurity(gDescr, securities);
+		getter = new GSecurity(gSymbol, securities);
 	}
 	
 	@Before
@@ -41,13 +41,13 @@ public class GSecurityTest {
 	
 	@Test
 	public void testConstruct() throws Exception {
-		assertSame(gDescr, getter.getDescriptorGetter());
+		assertSame(gSymbol, getter.getSymbolGetter());
 		assertSame(securities, getter.getSecurities());
 	}
 	
 	@Test
-	public void testGet_IfNoDescriptor() throws Exception {
-		expect(gDescr.get(this)).andReturn(null);
+	public void testGet_IfNoSymbol() throws Exception {
+		expect(gSymbol.get(this)).andReturn(null);
 		control.replay();
 		assertNull(getter.get(this));
 		control.verify();
@@ -55,8 +55,8 @@ public class GSecurityTest {
 	
 	@Test
 	public void testGet_IfNoSecurity() throws Exception {
-		expect(gDescr.get(this)).andReturn(descr);
-		expect(securities.isSecurityExists(descr)).andReturn(false);
+		expect(gSymbol.get(this)).andReturn(symbol);
+		expect(securities.isSecurityExists(symbol)).andReturn(false);
 		control.replay();
 		assertNull(getter.get(this));
 		control.verify();
@@ -64,9 +64,9 @@ public class GSecurityTest {
 	
 	@Test
 	public void testGet_Ok() throws Exception {
-		expect(gDescr.get(this)).andReturn(descr);
-		expect(securities.isSecurityExists(descr)).andReturn(true);
-		expect(securities.getSecurity(descr)).andReturn(security);
+		expect(gSymbol.get(this)).andReturn(symbol);
+		expect(securities.isSecurityExists(symbol)).andReturn(true);
+		expect(securities.getSecurity(symbol)).andReturn(security);
 		control.replay();
 		assertSame(security, getter.get(this));
 		control.verify();
@@ -75,12 +75,11 @@ public class GSecurityTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testEquals() throws Exception {
-		Variant<G<SecurityDescriptor>> vDescr =
-				new Variant<G<SecurityDescriptor>>()
+		Variant<G<Symbol>> vSymbol = new Variant<G<Symbol>>()
 			.add(null)
-			.add(gDescr)
+			.add(gSymbol)
 			.add(control.createMock(G.class));
-		Variant<Securities> vSecurities = new Variant<Securities>(vDescr)
+		Variant<Securities> vSecurities = new Variant<Securities>(vSymbol)
 			.add(null)
 			.add(securities)
 			.add(control.createMock(Securities.class));
@@ -88,7 +87,7 @@ public class GSecurityTest {
 		GSecurity found = null;
 		do {
 			GSecurity actual =
-				new GSecurity(vDescr.get(), vSecurities.get());
+				new GSecurity(vSymbol.get(), vSecurities.get());
 			if ( getter.equals(actual) ) {
 				foundCnt ++;
 				found = actual;
@@ -96,7 +95,7 @@ public class GSecurityTest {
 			
 		} while ( vSecurities.next() );
 		assertEquals(1, foundCnt);
-		assertSame(gDescr, found.getDescriptorGetter());
+		assertSame(gSymbol, found.getSymbolGetter());
 		assertSame(securities, found.getSecurities());
 	}
 	
@@ -110,7 +109,7 @@ public class GSecurityTest {
 	@Test
 	public void testHashCode() throws Exception {
 		int hashCode = new HashCodeBuilder(20121103, /*0*/51621)
-			.append(gDescr)
+			.append(gSymbol)
 			.append(securities)
 			.toHashCode();
 		assertEquals(hashCode, getter.hashCode());

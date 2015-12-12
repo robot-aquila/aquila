@@ -84,10 +84,10 @@ public interface MFactory {
 	/**
 	 * Создать модификатор дескриптора инструмента заявки.
 	 * <p>
-	 * @param gSecDescr геттер инструмента
+	 * @param gSymbol геттер инструмента
 	 * @return модификатор
 	 */
-	public S<EditableOrder> rowOrdSecDescr(G<SecurityDescriptor> gSecDescr);
+	public S<EditableOrder> rowOrdSymbol(G<Symbol> gSymbol);
 
 	/**
 	 * Создать модификатор статуса заявки.
@@ -361,10 +361,10 @@ public interface MFactory {
 	/**
 	 * Создать модификатор дескриптор инструмента сделки.
 	 * <p>
-	 * @param gSecDescr геттер дескриптора инструмента
+	 * @param gSymbol геттер дескриптора инструмента
 	 * @return модификатор
 	 */
-	public S<Trade> rowTrdSecDescr(G<SecurityDescriptor> gSecDescr);
+	public S<Trade> rowTrdSymbol(G<Symbol> gSymbol);
 	
 	/**
 	 * Создать модификатор времени сделки.

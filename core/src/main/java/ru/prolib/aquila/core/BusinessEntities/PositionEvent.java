@@ -51,7 +51,7 @@ public class PositionEvent extends EventImpl {
 	public String toString() {
 		return getType().toString() + " ["
 			+ "acc=" + position.getAccount() + ", "
-			+ "sec=" + position.getSecurityDescriptor() + ", "
+			+ "sec=" + position.getSymbol() + ", "
 			+ "open=" + position.getOpenQty() + ", "
 			+ "curr=" + position.getCurrQty() + ", "
 			+ "lock=" + position.getLockQty() + ", "

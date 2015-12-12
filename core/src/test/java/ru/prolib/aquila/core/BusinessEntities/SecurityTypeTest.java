@@ -15,33 +15,33 @@ public class SecurityTypeTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		Map<SecurityType, String> map = new HashMap<SecurityType, String>();
-		map.put(SecurityType.UNK,  "UNK");
-		map.put(SecurityType.STK,  "STK");
-		map.put(SecurityType.OPT,  "OPT");
-		map.put(SecurityType.FUT,  "FUT");
-		map.put(SecurityType.BOND, "BOND");
-		map.put(SecurityType.CASH, "CASH");
-		Iterator<Entry<SecurityType, String>> it = map.entrySet().iterator();
+		Map<SymbolType, String> map = new HashMap<SymbolType, String>();
+		map.put(SymbolType.UNK,  "UNK");
+		map.put(SymbolType.STK,  "STK");
+		map.put(SymbolType.OPT,  "OPT");
+		map.put(SymbolType.FUT,  "FUT");
+		map.put(SymbolType.BOND, "BOND");
+		map.put(SymbolType.CASH, "CASH");
+		Iterator<Entry<SymbolType, String>> it = map.entrySet().iterator();
 		while ( it.hasNext() ) {
-			Entry<SecurityType, String> entry = it.next();
+			Entry<SymbolType, String> entry = it.next();
 			assertEquals(entry.getValue(), entry.getKey().toString());
 		}
 	}
 	
 	@Test
 	public void testOrdinal() throws Exception {
-		assertEquals(0, SecurityType.UNK.ordinal());
-		assertEquals(1, SecurityType.STK.ordinal());
-		assertEquals(2, SecurityType.OPT.ordinal());
-		assertEquals(3, SecurityType.FUT.ordinal());
-		assertEquals(4, SecurityType.BOND.ordinal());
-		assertEquals(5, SecurityType.CASH.ordinal());
+		assertEquals(0, SymbolType.UNK.ordinal());
+		assertEquals(1, SymbolType.STK.ordinal());
+		assertEquals(2, SymbolType.OPT.ordinal());
+		assertEquals(3, SymbolType.FUT.ordinal());
+		assertEquals(4, SymbolType.BOND.ordinal());
+		assertEquals(5, SymbolType.CASH.ordinal());
 	}
 	
 	@Test
 	public void testValueOf() throws Exception {
-		assertSame(SecurityType.FUT, SecurityType.valueOf("FUT"));
+		assertSame(SymbolType.FUT, SymbolType.valueOf("FUT"));
 	}
 
 }

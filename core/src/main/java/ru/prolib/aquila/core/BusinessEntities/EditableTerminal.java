@@ -106,10 +106,10 @@ public interface EditableTerminal extends Terminal {
 	 * <p>
 	 * Если инструмент не существует, то он будет создан.
 	 * <p>
-	 * @param descr дескриптор нового инструмента
+	 * @param symbol дескриптор нового инструмента
 	 * @return инструмент
 	 */
-	public EditableSecurity getEditableSecurity(SecurityDescriptor descr);
+	public EditableSecurity getEditableSecurity(Symbol symbol);
 	
 	/**
 	 * Получить портфель.
@@ -133,14 +133,13 @@ public interface EditableTerminal extends Terminal {
 	 * <p>
 	 * Служебный метод, генерирующий событие об отрицательном результате
 	 * на запрос инструмента, который был выполнен посредством вызова метода
-	 * {@link #requestSecurity(SecurityDescriptor)}.
+	 * {@link #requestSecurity(Symbol)}.
 	 * <p>
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param errorCode код ошибки
 	 * @param errorMsg текст ошибки
 	 */
-	public void fireSecurityRequestError(SecurityDescriptor descr,
-			int errorCode, String errorMsg);
+	public void fireSecurityRequestError(Symbol symbol, int errorCode, String errorMsg);
 	
 	/**
 	 * Генерировать события инструмента.
