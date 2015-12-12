@@ -167,7 +167,7 @@ public class FORTSSecurityCtrl implements TickHandler {
 		security.setClosePrice(price);
 		terminal.fireEvents(security);
 		if ( logger.isDebugEnabled() ) {
-			logger.debug("Initialize security: {}", security.getDescriptor());
+			logger.debug("Initialize security: {}", security.getSymbol());
 		}
 	}
 	
@@ -288,7 +288,7 @@ public class FORTSSecurityCtrl implements TickHandler {
 	
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "{" + security.getDescriptor() + "}";
+		return getClass().getSimpleName() + "{" + security.getSymbol() + "}";
 	}
 
 }

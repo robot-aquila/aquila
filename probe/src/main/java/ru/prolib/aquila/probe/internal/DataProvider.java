@@ -20,22 +20,22 @@ public class DataProvider {
 	 * Запустить эмуляцию инструмента.
 	 * <p>
 	 * @param terminal - the terminal
-	 * @param descr дескриптор инструмента
+	 * @param symbol дескриптор инструмента
 	 * @param startTime время начала данных
 	 * @throws DataException ошибка инициализации поставщика
 	 */
-	public void startSupply(PROBETerminal terminal, SecurityDescriptor descr,
+	public void startSupply(PROBETerminal terminal, Symbol symbol,
 			DateTime startTime) throws DataException
 	{
 		throw new RuntimeException("Not implemented");
 		/*
 		PROBEServiceLocator locator = terminal.getServiceLocator();
 		PROBEDataStorage ds = locator.getDataStorage();
-		Aqiterator<Tick> it = ds.getIterator(descr, startTime);
+		Aqiterator<Tick> it = ds.getIterator(symbol, startTime);
 		locator.getTimeline().registerSource(new TickDataDispatcher(it,
 				new FORTSSecurityCtrl(terminal,
-						terminal.getEditableSecurity(descr),
-						ds.getSecurityProperties(descr))));
+						terminal.getEditableSecurity(symbol),
+						ds.getSecurityProperties(symbol))));
 		*/
 	}
 

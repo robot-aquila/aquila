@@ -64,10 +64,9 @@ public class PROBEFactoryTest {
 		PROBETerminal terminal = (PROBETerminal)
 				new PROBEFactory().createTerminal(props);
 		
-		SecurityDescriptor descr = new SecurityDescriptor("Si-3.15", "SPBFUT",
-				"RUR", SecurityType.FUT);
+		Symbol symbol = new Symbol("Si-3.15", "SPBFUT", "RUR", SymbolType.FUT);
 		Aqiterator<Tick> it = terminal.getServiceLocator().getDataStorage()
-				.getIterator(descr, new DateTime(2014, 12, 12, 10, 0, 0, 0));
+				.getIterator(symbol, new DateTime(2014, 12, 12, 10, 0, 0, 0));
 		assertTrue(it.next());
 		Tick first = it.item(), last = null, expected;
 		while ( it.next() ) {

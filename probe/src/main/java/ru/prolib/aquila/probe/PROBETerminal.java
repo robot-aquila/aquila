@@ -26,7 +26,7 @@ public class PROBETerminal extends BasicTerminal
 		logger = LoggerFactory.getLogger(PROBETerminal.class);
 	}
 	
-	private final Set<SecurityDescriptor> registered;
+	private final Set<Symbol> registered;
 	private final PROBEServiceLocator locator;
 	
 	/**
@@ -38,7 +38,7 @@ public class PROBETerminal extends BasicTerminal
 	public PROBETerminal(BasicTerminalParams params, PROBEServiceLocator locator) {
 		super(params);
 		this.locator = locator;
-		this.registered = new HashSet<SecurityDescriptor>();
+		this.registered = new HashSet<Symbol>();
 	}
 	
 	public PROBEServiceLocator getServiceLocator() {
@@ -46,16 +46,16 @@ public class PROBETerminal extends BasicTerminal
 	}
 	
 	@Override
-	public void requestSecurity(SecurityDescriptor descr) {
-		if ( ! registered.contains(descr) ) {
+	public void requestSecurity(Symbol symbol) {
+		if ( ! registered.contains(symbol) ) {
 			try {
 				locator.getDataProvider()
-					.startSupply(this, descr, getCurrentTime());
-				registered.add(descr);
+					.startSupply(this, symbol, getCurrentTime());
+				registered.add(symbol);
 			} catch (DataException e) {
-				logger.error("Failed to start simulation " + descr + ": ", e);
+				logger.error("Failed to start simulation " + symbol + ": ", e);
 				logger.error("", e);
-				fireSecurityRequestError(descr, -1, e.getMessage());
+				fireSecurityRequestError(symbol, -1, e.getMessage());
 			}
 		}
 	}

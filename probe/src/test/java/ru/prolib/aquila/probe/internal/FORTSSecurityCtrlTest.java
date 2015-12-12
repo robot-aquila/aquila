@@ -23,11 +23,11 @@ import ru.prolib.aquila.probe.internal.FORTSSecurityCtrl.EveningClearing;
 import ru.prolib.aquila.probe.internal.FORTSSecurityCtrl.ForTick;
 
 public class FORTSSecurityCtrlTest {
-	private static SecurityDescriptor descr;
+	private static Symbol symbol;
 	private static BMUtils ut = new BMUtils();
 	
 	static {
-		descr = new SecurityDescriptor("RTS-12.14", "FORTS", "USD", SecurityType.FUT);
+		symbol = new Symbol("RTS-12.14", "FORTS", "USD", SymbolType.FUT);
 	}
 	
 	private IMocksControl control;
@@ -50,7 +50,7 @@ public class FORTSSecurityCtrlTest {
 		terminal = new PROBETerminalBuilder()
 			.withScheduler(scheduler)
 			.buildTerminal();
-		security = terminal.getEditableSecurity(descr);
+		security = terminal.getEditableSecurity(symbol);
 		props = new SecurityProperties();
 		props.setDisplayName("RTS-future-12.14");
 		props.setLotSize(1);
@@ -282,7 +282,7 @@ public class FORTSSecurityCtrlTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		String expected = ctrl.getClass().getSimpleName() + "{" + descr + "}";
+		String expected = ctrl.getClass().getSimpleName() + "{" + symbol + "}";
 		assertEquals(expected, ctrl.toString());
 	}
 	

@@ -16,10 +16,10 @@ import ru.prolib.aquila.probe.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class DataProviderTest {
-	private static final SecurityDescriptor descr;
+	private static final Symbol symbol;
 	
 	static {
-		descr = new SecurityDescriptor("AXE", "BLAH", "USD", SecurityType.BOND);
+		symbol = new Symbol("AXE", "BLAH", "USD", SymbolType.BOND);
 	}
 	
 	private IMocksControl control;
@@ -56,9 +56,9 @@ public class DataProviderTest {
 		locator.setDataStorage(storage);
 		locator.setTimeline(timeline);
 		expect(terminal.getServiceLocator()).andStubReturn(locator);
-		expect(storage.getIterator(descr, time)).andReturn(iterator);
-		expect(terminal.getEditableSecurity(descr)).andReturn(security);
-		expect(storage.getSecurityProperties(descr)).andReturn(props);
+		expect(storage.getIterator(symbol, time)).andReturn(iterator);
+		expect(terminal.getEditableSecurity(symbol)).andReturn(security);
+		expect(storage.getSecurityProperties(symbol)).andReturn(props);
 		final Vector<TLEventSource> actual = new Vector<TLEventSource>();
 		timeline.registerSource((TLEventSource) anyObject());
 		expectLastCall().andAnswer(new IAnswer<Object>() {
@@ -68,7 +68,7 @@ public class DataProviderTest {
 			}});
 		control.replay();
 		
-		dataProvider.startSupply(terminal, descr, time);
+		dataProvider.startSupply(terminal, symbol, time);
 		
 		control.verify();
 		assertEquals(1, actual.size());

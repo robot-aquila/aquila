@@ -15,29 +15,29 @@ public class TestStrategy implements EventListener, Starter {
 		logger = LoggerFactory.getLogger(TestStrategy.class);
 	}
 	
-	private final SecurityDescriptor descr;
+	private final Symbol symbol;
 	private Terminal terminal;
 	private Security security;
 	private CandleSeries candles;
 	
-	public TestStrategy(Terminal terminal, SecurityDescriptor descr) {
+	public TestStrategy(Terminal terminal, Symbol symbol) {
 		super();
 		this.terminal = terminal;
-		this.descr = descr;
+		this.symbol = symbol;
 	}
 
 	public void onTerminalReady() {
 		logger.debug("Terminal Ready.");
 
-		if ( terminal.isSecurityExists(descr) ) {
+		if ( terminal.isSecurityExists(symbol) ) {
 			logger.debug("Security exists. Subscribe right now.");
 			subscribeOnSecurityEvents();
 		} else {
 			logger.debug("Security not exists. Wait for availability.");
 			terminal.OnSecurityAvailable().addListener(this);
 		}
-		logger.debug("Requesting security: {}", descr);
-		terminal.requestSecurity(descr);
+		logger.debug("Requesting security: {}", symbol);
+		terminal.requestSecurity(symbol);
 	}
 
 	public void onTerminalUnready() {
@@ -57,8 +57,8 @@ public class TestStrategy implements EventListener, Starter {
 	private void subscribeOnSecurityEvents() {
 		try {
 			if ( security == null ) {
-				logger.debug("Aquire security instance: {}", descr);
-				security = terminal.getSecurity(descr);
+				logger.debug("Aquire security instance: {}", symbol);
+				security = terminal.getSecurity(symbol);
 				//candleFiller = new CandleSeriesFiller(((EditableTerminal) terminal).getEventSystem(), 
 				//		security,
 				//		new TFMinutes(5), false);
@@ -77,8 +77,8 @@ public class TestStrategy implements EventListener, Starter {
 		logger.debug("onEvent: {}", event);
 		if ( event.isType(terminal.OnSecurityAvailable()) ) {
 			SecurityEvent e = (SecurityEvent) event;
-			if ( e.getSecurity().getDescriptor().equals(descr) ) {
-				logger.debug("Wanted security available: {}", descr);
+			if ( e.getSecurity().getSymbol().equals(symbol) ) {
+				logger.debug("Wanted security available: {}", symbol);
 				terminal.OnSecurityAvailable().removeListener(this);
 				subscribeOnSecurityEvents();
 			}

@@ -1,8 +1,8 @@
 package ru.prolib.aquila.probe;
 
 import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.BusinessEntities.SecurityDescriptor;
-import ru.prolib.aquila.core.BusinessEntities.SecurityType;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.ui.AquilaPlugin;
 import ru.prolib.aquila.ui.AquilaUI;
@@ -34,8 +34,8 @@ public class TestStrategyPlugin implements AquilaPlugin {
 	public void initialize(ServiceLocator locator, Terminal terminal, String arg)
 			throws Exception
 	{
-		SecurityDescriptor descr = new SecurityDescriptor("Si-3.15", "SPBFUT", "RUR", SecurityType.FUT);
-		strategy = new TestStrategy(terminal, descr);
+		Symbol symbol = new Symbol("Si-3.15", "SPBFUT", "RUR", SymbolType.FUT);
+		strategy = new TestStrategy(terminal, symbol);
 		strategy.start();
 	}
 

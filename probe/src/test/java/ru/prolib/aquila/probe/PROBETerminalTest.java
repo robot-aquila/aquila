@@ -18,10 +18,10 @@ import ru.prolib.aquila.probe.internal.*;
 import ru.prolib.aquila.probe.timeline.*;
 
 public class PROBETerminalTest {
-	private static final SecurityDescriptor descr;
+	private static final Symbol symbol;
 	
 	static {
-		descr = new SecurityDescriptor("foo", "bar", "RUR");
+		symbol = new Symbol("foo", "bar", "RUR");
 	}
 	
 	private IMocksControl control;
@@ -63,11 +63,11 @@ public class PROBETerminalTest {
 	public void testRequestSecurity() throws Exception {
 		DateTime start = DateTime.now();
 		expect(scheduler.getCurrentTime()).andReturn(start);
-		dataProvider.startSupply(terminal, descr, start);
+		dataProvider.startSupply(terminal, symbol, start);
 		control.replay();
 		
-		terminal.requestSecurity(descr);
-		terminal.requestSecurity(descr); // ignore repeated requests
+		terminal.requestSecurity(symbol);
+		terminal.requestSecurity(symbol); // ignore repeated requests
 		
 		control.verify();
 	}
@@ -80,18 +80,18 @@ public class PROBETerminalTest {
 			@Override
 			public void onEvent(Event actual) {
 				assertEquals(new RequestSecurityEvent((EventTypeSI) type,
-						descr, -1, "Test error"), actual);
+						symbol, -1, "Test error"), actual);
 				finished.countDown();
 			}
 		});
 		
 		DateTime start = DateTime.now();
 		expect(scheduler.getCurrentTime()).andReturn(start);
-		dataProvider.startSupply(terminal, descr, start);
+		dataProvider.startSupply(terminal, symbol, start);
 		expectLastCall().andThrow(new DataException("Test error"));
 		control.replay();
 		
-		terminal.requestSecurity(descr);
+		terminal.requestSecurity(symbol);
 		
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		control.verify();
