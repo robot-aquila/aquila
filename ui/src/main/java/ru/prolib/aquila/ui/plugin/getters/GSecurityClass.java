@@ -12,6 +12,6 @@ public class GSecurityClass extends GString {
 	@Override
 	public String get(Object obj) throws ValueException {
 		Security o = (Security) obj;
-		return super.get(o.getSymbol().getClassCode());
+		return super.get(o.getSymbol().getExchangeID());
 	}
 }

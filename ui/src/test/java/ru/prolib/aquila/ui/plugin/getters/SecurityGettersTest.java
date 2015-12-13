@@ -29,7 +29,7 @@ public class SecurityGettersTest {
 		
 		EditableTerminal terminal = new BasicTerminalBuilder().buildTerminal();
 		
-		symbol = new Symbol("GAZP", "EQBR", "RUR", SymbolType.STK);
+		symbol = new Symbol("GAZP", "EQBR", "RUR", SymbolType.STOCK);
 		EditableSecurity sc = terminal.getEditableSecurity(symbol);
 		sc.setPrecision(3);
 		sc.setMinPrice(90.00d);
