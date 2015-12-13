@@ -27,7 +27,7 @@ public class FORTSSecurityCtrlTest {
 	private static BMUtils ut = new BMUtils();
 	
 	static {
-		symbol = new Symbol("RTS-12.14", "FORTS", "USD", SymbolType.FUT);
+		symbol = new Symbol("RTS-12.14", "FORTS", "USD", SymbolType.FUTURE);
 	}
 	
 	private IMocksControl control;

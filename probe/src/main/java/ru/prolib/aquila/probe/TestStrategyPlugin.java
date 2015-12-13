@@ -34,7 +34,7 @@ public class TestStrategyPlugin implements AquilaPlugin {
 	public void initialize(ServiceLocator locator, Terminal terminal, String arg)
 			throws Exception
 	{
-		Symbol symbol = new Symbol("Si-3.15", "SPBFUT", "RUR", SymbolType.FUT);
+		Symbol symbol = new Symbol("Si-3.15", "SPBFUT", "RUR", SymbolType.FUTURE);
 		strategy = new TestStrategy(terminal, symbol);
 		strategy.start();
 	}
