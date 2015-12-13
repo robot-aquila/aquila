@@ -128,7 +128,7 @@ public class SymbolsCache {
 	void set(QUIKSymbol d) {
 		symbols.add(d);
 		short2symbol.put(d.getShortName(), d);
-		long2symbol.put(d.getSystemCode() + SEP + d.getClassCode(), d);
+		long2symbol.put(d.getSystemCode() + SEP + d.getExchangeID(), d);
 	}
 	
 	@Override

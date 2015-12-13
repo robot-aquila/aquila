@@ -201,7 +201,7 @@ public class TableBuilder {
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_CLASS"), new G<Object>() {
 			@Override public Object get(Object obj) {
-				return (((Symbol) obj).getClassCode());
+				return (((Symbol) obj).getExchangeID());
 			}
 		}, Column.MIDDLE));
 		columns.add(new Column(msgID("COL_CACHE_DESCR_TYPE"), new G<Object>() {

@@ -26,7 +26,7 @@ public class CacheTest {
 	public static void setUpBeforeClass() throws Exception {
 		account = new Account("BCS", "LX01");
 		symbol = new QUIKSymbol("GAZP", "EQBR", ISO4217.RUB,
-				SymbolType.STK, "GAZP", "АО Газпром", "АО Газпром");
+				SymbolType.STOCK, "GAZP", "АО Газпром", "АО Газпром");
 	}
 
 	@Before

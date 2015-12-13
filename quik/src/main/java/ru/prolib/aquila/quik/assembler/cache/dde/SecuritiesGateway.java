@@ -76,13 +76,13 @@ public class SecuritiesGateway implements TableGateway {
 	 */
 	private static final Map<String, Currency> FIX_CURRENCY_MAP;
 	
-	private static final SymbolType DEFAULT_TYPE = SymbolType.STK;
+	private static final SymbolType DEFAULT_TYPE = SymbolType.STOCK;
 	private static final Map<String, SymbolType> TYPE_MAP;
 	
 	static {
 		TYPE_MAP = new HashMap<String, SymbolType>();
-		TYPE_MAP.put("SPBFUT", SymbolType.FUT);
-		TYPE_MAP.put("SPBOPT", SymbolType.OPT);
+		TYPE_MAP.put("SPBFUT", SymbolType.FUTURE);
+		TYPE_MAP.put("SPBOPT", SymbolType.OPTION);
 		TYPE_MAP.put("EQOB", SymbolType.BOND);
 		TYPE_MAP.put("EQOV", SymbolType.BOND);
 		TYPE_MAP.put("EQNB", SymbolType.BOND);

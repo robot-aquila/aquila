@@ -19,10 +19,10 @@ public class SymbolsCacheTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol1 = new QUIKSymbol("LKOH", "RTSST", ISO4217.RUB, SymbolType.STK, "LKOH", "LKOH", "Лукоил");
-		symbol2 = new QUIKSymbol("LKOH", "EQBR",  ISO4217.RUB, SymbolType.STK, "LKOH", "Лукоил", "АО ЛУКОИЛ");
-		symbol3 = new QUIKSymbol("RTS-12.13", "SPBFUT", ISO4217.USD, SymbolType.FUT, "RIZ3", "RIZ3", "RTS-12.13");
-		symbol4 = new QUIKSymbol("RTS-12.3", "SPBFUT", ISO4217.USD, SymbolType.FUT, "RIZ3", "RIZ3", "RTS-12.3");
+		symbol1 = new QUIKSymbol("LKOH", "RTSST", ISO4217.RUB, SymbolType.STOCK, "LKOH", "LKOH", "Лукоил");
+		symbol2 = new QUIKSymbol("LKOH", "EQBR",  ISO4217.RUB, SymbolType.STOCK, "LKOH", "Лукоил", "АО ЛУКОИЛ");
+		symbol3 = new QUIKSymbol("RTS-12.13", "SPBFUT", ISO4217.USD, SymbolType.FUTURE, "RIZ3", "RIZ3", "RTS-12.13");
+		symbol4 = new QUIKSymbol("RTS-12.3", "SPBFUT", ISO4217.USD, SymbolType.FUTURE, "RIZ3", "RIZ3", "RTS-12.3");
 	}
 
 	@Before
@@ -161,7 +161,7 @@ public class SymbolsCacheTest {
 		for ( QUIKSymbol symbol : rows1 ) {
 			assertSame(symbol, cache.get(symbol.getShortName()));
 			assertSame(symbol,
-					cache.get(symbol.getSystemCode(), symbol.getClassCode()));
+					cache.get(symbol.getSystemCode(), symbol.getExchangeID()));
 		}
 		List<Symbol> expected = new Vector<Symbol>();
 		expected.add(symbol1);

@@ -24,7 +24,7 @@ public class SecurityEntryTest {
 		row = new SecurityEntry(20, 180.13d, 160.24d, 0.01d, 0.02d, 2,
 				150.82d, 153.14d, 153.12d, "test security", "test",
 				150.84d, 150.90d, /*151.12d*/null, 149.82d,
-				"SBER", "EQBR", ISO4217.RUB, SymbolType.STK,
+				"SBER", "EQBR", ISO4217.RUB, SymbolType.STOCK,
 				201.12d, 20.10d); // init price, initmargin
 	}
 	
@@ -99,8 +99,8 @@ public class SecurityEntryTest {
 			.add(ISO4217.RUB)
 			.add(ISO4217.GBP);
 		Variant<SymbolType> vType = new Variant<SymbolType>(vCurr)
-			.add(SymbolType.STK)
-			.add(SymbolType.OPT);
+			.add(SymbolType.STOCK)
+			.add(SymbolType.OPTION);
 		Variant<Double> vInitPrice = new Variant<Double>(vType)
 			.add(201.12d)
 			.add(113.28d);
@@ -143,7 +143,7 @@ public class SecurityEntryTest {
 		assertEquals("SBER", found.getCode());
 		assertEquals("EQBR", found.getClassCode());
 		assertEquals(ISO4217.RUB, found.getCurrency());
-		assertEquals(SymbolType.STK, found.getType());
+		assertEquals(SymbolType.STOCK, found.getType());
 		assertEquals(201.12d, found.getInitialPrice(), 0.001d);
 		assertEquals(20.10d, found.getInitialMargin(), 0.001d);
 	}
@@ -152,9 +152,9 @@ public class SecurityEntryTest {
 	public void testGetSymbol_ForFutures() throws Exception {
 		row = new SecurityEntry(0, 0d, 0d, 0d, 0d, 0, 0d, 0d, 0d,
 				"RTS-12.13", "_RIZ3", 0d, 0d, 0d, 0d,
-				"RIZ3", "SPBFUT", ISO4217.USD, SymbolType.FUT, 0d, 0d);
+				"RIZ3", "SPBFUT", ISO4217.USD, SymbolType.FUTURE, 0d, 0d);
 		expected = new QUIKSymbol("RTS-12.13", "SPBFUT",
-				ISO4217.USD, SymbolType.FUT, "RIZ3", "_RIZ3", "RTS-12.13");
+				ISO4217.USD, SymbolType.FUTURE, "RIZ3", "_RIZ3", "RTS-12.13");
 		
 		assertEquals(expected, row.getSymbol());
 	}
@@ -162,7 +162,7 @@ public class SecurityEntryTest {
 	@Test
 	public void testGetSymbol_Default() throws Exception {
 		expected = new QUIKSymbol("SBER", "EQBR", ISO4217.RUB,
-				SymbolType.STK, "SBER", "test", "test security");
+				SymbolType.STOCK, "SBER", "test", "test security");
 		
 		assertEquals(expected, row.getSymbol());
 	}

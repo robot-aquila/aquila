@@ -25,7 +25,7 @@ public class CancelHandlerTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STOCK);
 	}
 	
 	@Before

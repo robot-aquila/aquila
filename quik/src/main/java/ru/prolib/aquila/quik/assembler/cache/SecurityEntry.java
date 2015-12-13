@@ -173,7 +173,7 @@ public class SecurityEntry extends CacheEntry {
 		
 	public synchronized QUIKSymbol getSymbol() {
 		if ( symbol == null ) {
-			if ( type ==SymbolType.FUT ) {
+			if ( type ==SymbolType.FUTURE ) {
 				symbol = new QUIKSymbol(displayName, classCode,
 						currency, type, code, shortName, displayName);
 			} else {

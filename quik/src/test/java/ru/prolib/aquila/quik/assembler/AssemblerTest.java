@@ -40,7 +40,7 @@ public class AssemblerTest {
 		l1 = control.createMock(AssemblerL1.class);
 		assembler = new Assembler(terminal, l1);
 		symbol = new QUIKSymbol("RTS-12.13", "SPBFUT", ISO4217.USD,
-				SymbolType.FUT, "RIZ3", "RIZ3", "RTS-12.13");
+				SymbolType.FUTURE, "RIZ3", "RIZ3", "RTS-12.13");
 		
 		expect(terminal.getDataCache()).andStubReturn(cache);
 		expect(cache.getSymbolsCache()).andStubReturn(symbolsCache);

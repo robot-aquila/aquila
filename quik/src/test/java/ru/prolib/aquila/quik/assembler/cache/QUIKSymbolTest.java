@@ -12,15 +12,15 @@ public class QUIKSymbolTest {
 	@Before
 	public void setUp() throws Exception {
 		symbol = new QUIKSymbol("RTS-12.13", "SPBFUT", ISO4217.USD,
-				SymbolType.FUT, "RIZ3", "ShortName", "Future RTS-12.13");
+				SymbolType.FUTURE, "RIZ3", "ShortName", "Future RTS-12.13");
 	}
 	
 	@Test
 	public void testConstruct() throws Exception {
 		assertEquals("RTS-12.13", symbol.getCode());
-		assertEquals("SPBFUT", symbol.getClassCode());
+		assertEquals("SPBFUT", symbol.getExchangeID());
 		assertEquals(ISO4217.USD, symbol.getCurrency());
-		assertEquals(SymbolType.FUT, symbol.getType());
+		assertEquals(SymbolType.FUTURE, symbol.getType());
 		assertEquals("RIZ3", symbol.getSystemCode());
 		assertEquals("ShortName", symbol.getShortName());
 		assertEquals("Future RTS-12.13", symbol.getDisplayName());
@@ -28,13 +28,13 @@ public class QUIKSymbolTest {
 	
 	@Test
 	public void testHashCode() throws Exception {
-		int expected = new Symbol("RTS-12.13", "SPBFUT", ISO4217.USD, SymbolType.FUT).hashCode(); 
+		int expected = new Symbol("RTS-12.13", "SPBFUT", ISO4217.USD, SymbolType.FUTURE).hashCode(); 
 		assertEquals(expected, symbol.hashCode());
 	}
 	
 	@Test
 	public void testEquals_SpecialCases() throws Exception {
-		assertTrue(symbol.equals(new Symbol("RTS-12.13", "SPBFUT", ISO4217.USD, SymbolType.FUT)));
+		assertTrue(symbol.equals(new Symbol("RTS-12.13", "SPBFUT", ISO4217.USD, SymbolType.FUTURE)));
 		assertTrue(symbol.equals(symbol));
 		assertFalse(symbol.equals(null));
 		assertFalse(symbol.equals(this));
@@ -52,8 +52,8 @@ public class QUIKSymbolTest {
 			.add(ISO4217.USD)
 			.add(ISO4217.EUR);
 		Variant<SymbolType> vType = new Variant<SymbolType>(vCurr)
-			.add(SymbolType.FUT)
-			.add(SymbolType.CASH);
+			.add(SymbolType.FUTURE)
+			.add(SymbolType.CURRENCY);
 		Variant<?> iterator = vType;
 		int foundCnt = 0;
 		QUIKSymbol x, found = null;
@@ -67,9 +67,9 @@ public class QUIKSymbolTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertEquals("RTS-12.13", found.getCode());
-		assertEquals("SPBFUT", found.getClassCode());
+		assertEquals("SPBFUT", found.getExchangeID());
 		assertEquals(ISO4217.USD, found.getCurrency());
-		assertEquals(SymbolType.FUT, found.getType());
+		assertEquals(SymbolType.FUTURE, found.getType());
 		assertEquals("NotUsed", found.getSystemCode());
 		assertEquals("AnyName", found.getShortName());
 		assertEquals("Jubba", found.getDisplayName());

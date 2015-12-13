@@ -29,7 +29,7 @@ public class TradesGatewayTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol = new QUIKSymbol("A", "B", ISO4217.USD, SymbolType.CASH, "A", "A", "A");
+		symbol = new QUIKSymbol("A", "B", ISO4217.USD, SymbolType.CURRENCY, "A", "A", "A");
 	}
 
 	@Before

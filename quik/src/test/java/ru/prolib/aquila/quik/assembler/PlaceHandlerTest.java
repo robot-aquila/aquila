@@ -34,7 +34,7 @@ public class PlaceHandlerTest {
 		BasicConfigurator.configure();
 		account = new Account("SPOT", "18210", "LX01");
 		symbol = new QUIKSymbol("RTS-12.13", "SPBFUT", ISO4217.USD,
-				SymbolType.STK, "RIZ3", "ShortCode", "Future RTS-12.13");
+				SymbolType.STOCK, "RIZ3", "ShortCode", "Future RTS-12.13");
 	}
 
 	@Before

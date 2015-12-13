@@ -69,7 +69,7 @@ public class CancelHandler implements QUIKTransactionHandler {
 					.getRegistration().getResponse()).getOrderId();
 			String trspec = "TRANS_ID=" + transId
 				+ "; ACTION=KILL_ORDER; ORDER_KEY=" + orderId + "; CLASSCODE="
-				+ order.getSymbol().getClassCode();
+				+ order.getSymbol().getExchangeID();
 			order.getSystemInfo().getCancellation().setRequest(trspec);
 			order.getSystemInfo().getCancellation().setRequestTime();
 			send(trspec);

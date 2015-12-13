@@ -66,7 +66,7 @@ public class PlaceHandler implements QUIKTransactionHandler {
 				+ "; ACTION=NEW_ORDER; CLIENT_CODE=" +
 					getClientCode(account)
 				+ "; ACCOUNT=" + account.getSubCode2()
-				+ "; CLASSCODE=" + symbol.getClassCode()
+				+ "; CLASSCODE=" + symbol.getExchangeID()
 				+ "; SECCODE=" + symbol.getSystemCode()
 				+ "; OPERATION=" + dir.get(order.getDirection())
 				+ "; QUANTITY=" + order.getQty();

@@ -28,7 +28,7 @@ public class AssemblerL2Test {
 		BasicConfigurator.configure();
 		account = new Account("TEST", "1", "2");
 		symbol = new QUIKSymbol("SBER", "EQBR", ISO4217.RUB,
-				SymbolType.STK, "SBER", "Сбербанк", "АО СБЕРБАНК");
+				SymbolType.STOCK, "SBER", "Сбербанк", "АО СБЕРБАНК");
 	}
 
 	@Before
@@ -109,10 +109,10 @@ public class AssemblerL2Test {
 		SecurityEntry entry = new SecurityEntry(1, 142820d, 132480d,
 				6.48020d, 10d, 0, 137950d, 137000d, 136900d, "RTS-9.13",
 				"RIU3", 138040d, 137990d, 138100d, 136050d, "RIU3", "SPBFUT",
-				ISO4217.USD, SymbolType.FUT,
+				ISO4217.USD, SymbolType.FUTURE,
 				132020d, 12450d);
 		symbol = new QUIKSymbol("RTS-9.13", "SPBFUT", ISO4217.USD,
-				SymbolType.FUT, "RIU3", "RIU3", "RTS-9.13");
+				SymbolType.FUTURE, "RIU3", "RIU3", "RTS-9.13");
 		
 		EditableSecurity security = control.createMock(EditableSecurity.class);
 		expect(terminal.getEditableSecurity(eq(symbol))).andReturn(security);
