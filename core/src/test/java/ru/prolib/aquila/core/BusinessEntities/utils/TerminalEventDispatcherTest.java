@@ -18,7 +18,7 @@ public class TerminalEventDispatcherTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUT);
+		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUTURE);
 	}
 	
 	@Before

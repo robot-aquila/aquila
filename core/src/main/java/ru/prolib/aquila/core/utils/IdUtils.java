@@ -51,9 +51,9 @@ public class IdUtils {
 	public String getSafeId(Symbol symbol) {
 		String[] chunks = {
 				coder.encode(symbol.getCode()),
-				coder.encode(symbol.getClassCode()),
+				coder.encode(symbol.getExchangeID()),
 				coder.encode(symbol.getCurrencyCode()),
-				coder.encode(symbol.getType().toString())
+				coder.encode(symbol.getTypeCode())
 		};
 		return StringUtils.join(chunks, SEPARATOR);
 	}

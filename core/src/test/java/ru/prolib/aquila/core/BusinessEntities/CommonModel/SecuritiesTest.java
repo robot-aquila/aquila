@@ -20,9 +20,9 @@ public class SecuritiesTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol1 = new Symbol("SBER", "EQBR","RUB", SymbolType.STK);
-		symbol2 = new Symbol("RIM2", "SPBF","USD", SymbolType.FUT);
-		symbol3 = new Symbol("SBER", "RTSS","RUB", SymbolType.STK);
+		symbol1 = new Symbol("SBER", "EQBR","RUB", SymbolType.STOCK);
+		symbol2 = new Symbol("RIM2", "SPBF","USD", SymbolType.FUTURE);
+		symbol3 = new Symbol("SBER", "RTSS","RUB", SymbolType.STOCK);
 	}
 
 	@Before

@@ -25,8 +25,8 @@ public class RTradeImplTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		symbol1 = new Symbol("Foo", "Bar", "USD", SymbolType.UNK);
-		symbol2 = new Symbol("Bar", "Buz", "GBP", SymbolType.FUT);
+		symbol1 = new Symbol("Foo", "Bar", "USD", SymbolType.UNKNOWN);
+		symbol2 = new Symbol("Bar", "Buz", "GBP", SymbolType.FUTURE);
 		time1 = new DateTime(format.parse("2013-01-01 00:00:00"));
 		time2 = new DateTime(format.parse("2013-01-02 00:00:00"));
 	}

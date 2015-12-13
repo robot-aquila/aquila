@@ -31,8 +31,8 @@ public class ActiveTradesTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		symbol1 = new Symbol("Foo", "GZ", "USD", SymbolType.UNK);
-		symbol2 = new Symbol("Bar", "BZ", "RUB", SymbolType.UNK);
+		symbol1 = new Symbol("Foo", "GZ", "USD", SymbolType.UNKNOWN);
+		symbol2 = new Symbol("Bar", "BZ", "RUB", SymbolType.UNKNOWN);
 	}
 	
 	@Before

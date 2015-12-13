@@ -21,7 +21,7 @@ public class PositionEventDispatcherTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUT);
+		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUTURE);
 		account = new Account("foo", "bar");
 	}
 
@@ -37,7 +37,7 @@ public class PositionEventDispatcherTest {
 	
 	@Test
 	public void testStructure() throws Exception {
-		String did = "Position[foo#bar:RI@SPBFUT(FUT/USD)]";
+		String did = "Position[foo#bar:F:RI@SPBFUT:USD]";
 		EventDispatcher ed = dispatcher.getEventDispatcher();
 		assertEquals(did, ed.getId());
 		

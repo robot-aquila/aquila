@@ -30,7 +30,7 @@ public class TerminalTradeReportTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol = new Symbol("RI", "SPFB", "USD", SymbolType.FUT);
+		symbol = new Symbol("RI", "SPFB", "USD", SymbolType.FUTURE);
 	}
 
 	@Before

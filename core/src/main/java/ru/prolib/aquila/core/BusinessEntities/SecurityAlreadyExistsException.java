@@ -26,7 +26,7 @@ public class SecurityAlreadyExistsException extends SecurityException {
 	 * @param symbol дескриптор инструмента
 	 */
 	public SecurityAlreadyExistsException(Symbol symbol) {
-		this(symbol.getCode(), symbol.getClassCode());
+		this(symbol.getCode(), symbol.getExchangeID());
 	}
 
 }

@@ -32,7 +32,7 @@ public class PositionImplTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		account = new Account("TST01");
-		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STOCK);
 	}
 
 	@Before

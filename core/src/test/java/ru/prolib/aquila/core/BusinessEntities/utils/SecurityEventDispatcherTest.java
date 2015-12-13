@@ -21,7 +21,7 @@ public class SecurityEventDispatcherTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUT);
+		symbol = new Symbol("RI", "SPBFUT", "USD", SymbolType.FUTURE);
 	}
 
 	@Before
@@ -38,15 +38,15 @@ public class SecurityEventDispatcherTest {
 	@Test
 	public void testStructure() throws Exception {
 		EventDispatcher ed = dispatcher.getEventDispatcher();
-		assertEquals("Security[RI@SPBFUT(FUT/USD)]", ed.getId());
+		assertEquals("Security[F:RI@SPBFUT:USD]", ed.getId());
 
 		EventTypeSI type;
 		type = (EventTypeSI) dispatcher.OnChanged();
-		assertEquals("Security[RI@SPBFUT(FUT/USD)].Changed", type.getId());
+		assertEquals("Security[F:RI@SPBFUT:USD].Changed", type.getId());
 		assertFalse(type.isOnlySyncMode());
 		
 		type = (EventTypeSI) dispatcher.OnTrade();
-		assertEquals("Security[RI@SPBFUT(FUT/USD)].Trade", type.getId());
+		assertEquals("Security[F:RI@SPBFUT:USD].Trade", type.getId());
 		assertFalse(type.isOnlySyncMode());
 	}
 	

@@ -48,7 +48,7 @@ public class BasicTerminalTest {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.ERROR);
 		account = new Account("test");
-		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STOCK);
 	}
 
 	@Before
@@ -108,7 +108,7 @@ public class BasicTerminalTest {
 	@Test
 	public void testGetSecurity() throws Exception {
 		Security s = control.createMock(Security.class);
-		Symbol symbol = new Symbol("foo", "bar", "USD", SymbolType.UNK);
+		Symbol symbol = new Symbol("foo", "bar", "USD", SymbolType.UNKNOWN);
 		expect(securities.getSecurity(eq(symbol))).andReturn(s);
 		control.replay();
 		
@@ -119,7 +119,7 @@ public class BasicTerminalTest {
 	
 	@Test
 	public void testIsSecurityExists() throws Exception {
-		Symbol symbol = new Symbol("foo", "bar", "EUR", SymbolType.OPT);
+		Symbol symbol = new Symbol("foo", "bar", "EUR", SymbolType.OPTION);
 		expect(securities.isSecurityExists(eq(symbol))).andReturn(true);
 		control.replay();
 		

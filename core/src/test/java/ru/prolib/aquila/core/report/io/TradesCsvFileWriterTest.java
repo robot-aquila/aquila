@@ -73,7 +73,7 @@ public class TradesCsvFileWriterTest {
 	 * @return дескриптор инструмента
 	 */
 	private Symbol getSymbol(CsvReader reader) throws Exception {
-		return new Symbol(reader.get(SEC_CODE), "TEST", "USD", SymbolType.FUT);
+		return new Symbol(reader.get(SEC_CODE), "TEST", "USD", SymbolType.FUTURE);
 	}
 	
 	/**

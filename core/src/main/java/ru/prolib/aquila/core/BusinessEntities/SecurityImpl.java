@@ -69,7 +69,7 @@ public class SecurityImpl extends EditableImpl implements EditableSecurity {
 
 	@Override
 	public String getClassCode() {
-		return symbol.getClassCode();
+		return symbol.getExchangeID();
 	}
 
 	@Override

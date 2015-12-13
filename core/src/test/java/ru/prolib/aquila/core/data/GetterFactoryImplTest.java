@@ -186,10 +186,10 @@ public class GetterFactoryImplTest {
 					new GRowObj<String>("code", new GString()),
 					new GRowObj<String>("class", new GString()),
 					new GConst<String>("EUR"),
-					new GConst<SymbolType>(SymbolType.STK)),
+					new GConst<SymbolType>(SymbolType.STOCK)),
 				securities);
 		assertEquals(expected, factory.rowSecurity(securities, "code", "class",
-				"EUR", SymbolType.STK));
+				"EUR", SymbolType.STOCK));
 	}
 	
 	@Test
@@ -198,9 +198,9 @@ public class GetterFactoryImplTest {
 				new GRowObj<String>("code", new GString()),
 				new GRowObj<String>("class", new GString()),
 				new GConst<String>("USD"),
-				new GConst<SymbolType>(SymbolType.UNK));
+				new GConst<SymbolType>(SymbolType.UNKNOWN));
 		assertEquals(expected, factory.rowSymbol("code", "class",
-				"USD", SymbolType.UNK));
+				"USD", SymbolType.UNKNOWN));
 	}
 	
 	@Test

@@ -31,8 +31,8 @@ public class PositionsTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		account = new Account("T01");
-		symbol1 = new Symbol("SBER", "ONE", "RUB", SymbolType.STK);
-		symbol2 = new Symbol("GAZP", "TWO", "USD", SymbolType.FUT);
+		symbol1 = new Symbol("SBER", "ONE", "RUB", SymbolType.STOCK);
+		symbol2 = new Symbol("GAZP", "TWO", "USD", SymbolType.FUTURE);
 	}
 
 	@Before

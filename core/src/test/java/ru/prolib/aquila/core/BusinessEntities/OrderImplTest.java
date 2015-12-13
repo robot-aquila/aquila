@@ -39,7 +39,7 @@ public class OrderImplTest {
 		BasicConfigurator.configure();
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		account = new Account("LX01");
-		symbol = new Symbol("AAPL", "SMART", "USD",SymbolType.STK);
+		symbol = new Symbol("AAPL", "SMART", "USD",SymbolType.STOCK);
 	}
 
 	@Before
@@ -414,7 +414,7 @@ public class OrderImplTest {
 			}
 		};
 		testSetterGetter(symbol,
-			new Symbol("USD","IDEALPRO","USD",SymbolType.CASH));
+			new Symbol("USD","IDEALPRO","USD",SymbolType.CURRENCY));
 	}
 	
 	@Test
@@ -710,7 +710,7 @@ public class OrderImplTest {
 		Variant<Symbol> vSymbol = new Variant<Symbol>(vAcnt)
 			.add(symbol);
 		if ( rnd.nextDouble() > aprob ) {
-			vSymbol.add(new Symbol("A","B","USD",SymbolType.UNK));
+			vSymbol.add(new Symbol("A","B","USD",SymbolType.UNKNOWN));
 		}
 		Variant<Direction> vDir = new Variant<Direction>(vSymbol)
 			.add(Direction.SELL);

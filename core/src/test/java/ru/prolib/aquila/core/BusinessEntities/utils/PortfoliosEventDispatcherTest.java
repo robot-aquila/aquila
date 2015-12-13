@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class PortfoliosEventDispatcherTest {
 	private static Account account = new Account("foo", "bar");
-	private static Symbol symbol = new Symbol("zu", "lu", ISO4217.USD, SymbolType.FUT);
+	private static Symbol symbol = new Symbol("zu", "lu", ISO4217.USD, SymbolType.FUTURE);
 	private EditableTerminal terminal;
 	private EditablePortfolio portfolio;
 	private EditableSecurity security;

@@ -10,9 +10,9 @@ public class PortfolioSetupTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol1 = new Symbol("SBER", "EQBR", "RUB",SymbolType.STK);
-		symbol2 = new Symbol("AAPL", "ARCA", "USD",SymbolType.STK);
-		symbol3 = new Symbol("RIM2", "SPB", "USD",SymbolType.FUT);
+		symbol1 = new Symbol("SBER", "EQBR", "RUB",SymbolType.STOCK);
+		symbol2 = new Symbol("AAPL", "ARCA", "USD",SymbolType.STOCK);
+		symbol3 = new Symbol("RIM2", "SPB", "USD",SymbolType.FUTURE);
 	}
 
 	@Before

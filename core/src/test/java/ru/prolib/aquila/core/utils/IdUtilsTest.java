@@ -37,11 +37,11 @@ public class IdUtilsTest {
 
 	@Test
 	public void testGetSafeId1() throws Exception {
-		symbol = new Symbol("XXX", "YYY", "GBP");
+		symbol = new Symbol("S:XXX@YYY:GBP");
 		expect(coder.encode("XXX")).andReturn("P1");
 		expect(coder.encode("YYY")).andReturn("P2");
 		expect(coder.encode("GBP")).andReturn("P3");
-		expect(coder.encode("STK")).andReturn("P4");
+		expect(coder.encode("S")).andReturn("P4");
 		control.replay();
 
 		String expected = "P1-P2-P3-P4", actual = utils.getSafeId(symbol);
@@ -52,11 +52,11 @@ public class IdUtilsTest {
 	
 	@Test
 	public void testGetSafeId2() throws Exception {
-		symbol = new Symbol("RTS", "ZZZ", "USD", SymbolType.FUT);
+		symbol = new Symbol("F:RTS@ZZZ:USD");
 		expect(coder.encode("RTS")).andReturn("X1");
 		expect(coder.encode("ZZZ")).andReturn("X2");
 		expect(coder.encode("USD")).andReturn("X3");
-		expect(coder.encode("FUT")).andReturn("X4");
+		expect(coder.encode("F")).andReturn("X4");
 		control.replay();
 		
 		String expected = "X1-X2-X3-X4-20120805",

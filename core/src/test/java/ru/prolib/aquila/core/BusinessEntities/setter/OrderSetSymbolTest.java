@@ -20,7 +20,7 @@ public class OrderSetSymbolTest {
 		control = createStrictControl();
 		order = control.createMock(EditableOrder.class);
 		setter = new OrderSetSymbol();
-		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STOCK);
 	}
 
 	@Before

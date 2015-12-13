@@ -28,8 +28,8 @@ public class SecurityImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol1 = new Symbol("GAZP", "EQBR", "RUB",SymbolType.STK);
-		symbol2 = new Symbol("RIM3", "SPFT", "USD",SymbolType.FUT);
+		symbol1 = new Symbol("GAZP", "EQBR", "RUB",SymbolType.STOCK);
+		symbol2 = new Symbol("RIM3", "SPFT", "USD",SymbolType.FUTURE);
 	}
 
 	@Before
@@ -887,7 +887,7 @@ public class SecurityImplTest {
 	
 	@Test
 	public void testGetType() {
-		assertEquals(SymbolType.STK, security.getType());
+		assertEquals(SymbolType.STOCK, security.getType());
 	}
 	
 	@Test

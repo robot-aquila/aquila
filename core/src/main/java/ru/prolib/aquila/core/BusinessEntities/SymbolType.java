@@ -1,29 +1,43 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.Hashtable;
+import java.util.Map;
+
 /**
- * Тип инструмента.
- * <p>
- * 2012-12-18<br>
- * $Id: SecurityType.java 341 2012-12-18 17:16:30Z whirlwind $
+ * Known symbol type constants.
  */
-public enum SymbolType {
-	UNK ("UNK", "Unknown"),
-	STK ("STK", "Stock"),
-	OPT ("OPT", "Option"),
-	FUT ("FUT", "Futures"),
-	BOND ("BOND", "Bond"),
-	CASH ("CASH", "Cash");
+public class SymbolType {
+	public static final SymbolType UNKNOWN = new SymbolType("U", "Unknown");
+	public static final SymbolType STOCK = new SymbolType("S", "Stock");
+	public static final SymbolType OPTION = new SymbolType("O", "Option");
+	public static final SymbolType FUTURE = new SymbolType("F", "Future");
+	public static final SymbolType BOND = new SymbolType("B", "Bond");
+	public static final SymbolType CURRENCY = new SymbolType("C", "Currency");
+	
+	private static final Map<String, SymbolType> codeToType;
+	private static final Map<String, Integer> codeToIndex;
+	
+	static {
+		codeToType = new Hashtable<String, SymbolType>();
+		codeToIndex = new Hashtable<String, Integer>();
+		registerType(UNKNOWN);
+		registerType(STOCK);
+		registerType(OPTION);
+		registerType(FUTURE);
+		registerType(BOND);
+		registerType(CURRENCY);
+	}
+	
+	private static void registerType(SymbolType type) {
+		codeToType.put(type.code, type);
+		codeToIndex.put(type.code, codeToIndex.size());
+	}
 	
 	private final String code;
 	private final String name;
 	
-	/**
-	 * Создать тип инструмента.
-	 * <p>
-	 * @param code код типа
-	 * @param name наименование типа
-	 */
 	private SymbolType(String code, String name) {
+		super();
 		this.code = code;
 		this.name = name;
 	}
@@ -34,21 +48,29 @@ public enum SymbolType {
 	}
 	
 	/**
-	 * Получить наименование типа.
+	 * Get type name.
 	 * <p>
-	 * @return наименование
+	 * @return type name
 	 */
 	public String getName() {
 		return name;
 	}
 	
 	/**
-	 * Получить код типа.
+	 * Get type code.
 	 * <p>
-	 * @return код типа
+	 * @return type code
 	 */
 	public String getCode() {
 		return code;
+	}
+	
+	public int ordinal() {
+		return codeToIndex.get(code);
+	}
+	
+	public static SymbolType valueOf(String code) {
+		return codeToType.get(code);
 	}
 
 }

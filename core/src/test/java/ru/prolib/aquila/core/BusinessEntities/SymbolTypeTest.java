@@ -11,17 +11,17 @@ import org.junit.*;
  * 2012-12-18<br>
  * $Id: SecurityTypeTest.java 341 2012-12-18 17:16:30Z whirlwind $
  */
-public class SecurityTypeTest {
+public class SymbolTypeTest {
 	
 	@Test
 	public void testToString() throws Exception {
 		Map<SymbolType, String> map = new HashMap<SymbolType, String>();
-		map.put(SymbolType.UNK,  "UNK");
-		map.put(SymbolType.STK,  "STK");
-		map.put(SymbolType.OPT,  "OPT");
-		map.put(SymbolType.FUT,  "FUT");
-		map.put(SymbolType.BOND, "BOND");
-		map.put(SymbolType.CASH, "CASH");
+		map.put(SymbolType.UNKNOWN,  "U");
+		map.put(SymbolType.STOCK,	 "S");
+		map.put(SymbolType.OPTION,	 "O");
+		map.put(SymbolType.FUTURE,	 "F");
+		map.put(SymbolType.BOND,	 "B");
+		map.put(SymbolType.CURRENCY, "C");
 		Iterator<Entry<SymbolType, String>> it = map.entrySet().iterator();
 		while ( it.hasNext() ) {
 			Entry<SymbolType, String> entry = it.next();
@@ -31,17 +31,17 @@ public class SecurityTypeTest {
 	
 	@Test
 	public void testOrdinal() throws Exception {
-		assertEquals(0, SymbolType.UNK.ordinal());
-		assertEquals(1, SymbolType.STK.ordinal());
-		assertEquals(2, SymbolType.OPT.ordinal());
-		assertEquals(3, SymbolType.FUT.ordinal());
+		assertEquals(0, SymbolType.UNKNOWN.ordinal());
+		assertEquals(1, SymbolType.STOCK.ordinal());
+		assertEquals(2, SymbolType.OPTION.ordinal());
+		assertEquals(3, SymbolType.FUTURE.ordinal());
 		assertEquals(4, SymbolType.BOND.ordinal());
-		assertEquals(5, SymbolType.CASH.ordinal());
+		assertEquals(5, SymbolType.CURRENCY.ordinal());
 	}
 	
 	@Test
 	public void testValueOf() throws Exception {
-		assertSame(SymbolType.FUT, SymbolType.valueOf("FUT"));
+		assertSame(SymbolType.FUTURE, SymbolType.valueOf("F"));
 	}
 
 }

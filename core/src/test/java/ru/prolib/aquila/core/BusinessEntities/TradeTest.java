@@ -27,7 +27,7 @@ public class TradeTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STOCK);
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
 		terminal2 = control.createMock(Terminal.class);
@@ -96,7 +96,7 @@ public class TradeTest {
 	public void testToString() {
 		control.replay();
 		assertEquals("Trade: " + trade.getTime()  + " #105 Buy " +
-				"SBER@EQBR(STK/RUB) 1x100.0 Vol=200.0", trade.toString());
+				"S:SBER@EQBR:RUB 1x100.0 Vol=200.0", trade.toString());
 	}
 	
 	@Test

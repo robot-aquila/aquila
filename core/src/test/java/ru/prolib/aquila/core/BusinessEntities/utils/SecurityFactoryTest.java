@@ -18,7 +18,7 @@ public class SecurityFactoryTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STOCK);
 	}
 	
 	@Before

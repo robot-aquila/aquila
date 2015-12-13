@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 public class SecuritiesEventDispatcherTest {
-	private static Symbol symbol = new Symbol("zu", "lu", ISO4217.USD, SymbolType.FUT);
+	private static Symbol symbol = new Symbol("zu", "lu", ISO4217.USD, SymbolType.FUTURE);
 	private EditableTerminal terminal;
 	private EditableSecurity security;
 	private SecuritiesEventDispatcher dispatcher;

@@ -37,42 +37,20 @@ public class GSymbolTest {
 	
 	@Test
 	public void testGet() throws Exception {
-		Variant<String> vCode = new Variant<String>()
-			.add("SBER")
-			.add("")
-			.add(null);
-		Variant<String> vClass = new Variant<String>(vCode)
-			.add("EQBR")
-			.add("")
-			.add(null);
-		Variant<String> vCurr = new Variant<String>(vClass)
-			.add("USD");
-		Variant<SymbolType> vType = new Variant<SymbolType>(vCurr)
-			.add(null)
-			.add(SymbolType.OPT);
-		Variant<?> iterator = vType;
-		int foundCnt = 0;
-		Symbol x = null, found = null;
-		final Object source = new Object();
-		do {
-			control.resetToStrict();
-			expect(gCode.get(same(source))).andReturn(vCode.get());
-			expect(gClass.get(same(source))).andReturn(vClass.get());
-			expect(gCurr.get(same(source))).andReturn(vCurr.get());
-			expect(gType.get(same(source))).andReturn(vType.get());
-			control.replay();
-			x = getter.get(source);
-			control.verify();
-			if ( x != null ) {
-				foundCnt ++;
-				found = x;
-			}
-		} while ( iterator.next() );
-		assertEquals(1, foundCnt);
-		assertEquals("SBER", found.getCode());
-		assertEquals("EQBR", found.getClassCode());
-		assertEquals("USD", found.getCurrencyCode());
-		assertEquals(SymbolType.OPT, found.getType());
+		Object source = new Object();
+		expect(gCode.get(same(source))).andReturn("SBER");
+		expect(gClass.get(same(source))).andReturn("EQBR");
+		expect(gCurr.get(same(source))).andReturn("USD");
+		expect(gType.get(same(source))).andReturn(SymbolType.OPTION);
+		control.replay();
+		
+		Symbol x = getter.get(source);
+		
+		control.verify();
+		assertEquals("SBER", x.getCode());
+		assertEquals("EQBR", x.getExchangeID());
+		assertEquals("USD", x.getCurrencyCode());
+		assertEquals(SymbolType.OPTION, x.getType());
 	}
 	
 	@Test

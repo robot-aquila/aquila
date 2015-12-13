@@ -28,7 +28,7 @@ public class GSecurityTest {
 	public static void setUpBeforeClass() throws Exception {
 		control = createStrictControl();
 		gSymbol = control.createMock(G.class);
-		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("GAZP", "EQBR", "RUB", SymbolType.STOCK);
 		securities = control.createMock(Securities.class);
 		security = control.createMock(Security.class);
 		getter = new GSecurity(gSymbol, securities);

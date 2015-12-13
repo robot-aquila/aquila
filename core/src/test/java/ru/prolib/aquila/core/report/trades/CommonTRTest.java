@@ -61,7 +61,7 @@ public class CommonTRTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		symbol = new Symbol("RI", "SPFB", "USD", SymbolType.FUT);
+		symbol = new Symbol("RI", "SPFB", "USD", SymbolType.FUTURE);
 	}
 
 	@Before
@@ -199,7 +199,7 @@ public class CommonTRTest {
 	 */
 	private Symbol getSymbol(CsvReader reader) throws Exception {
 		return new Symbol(reader.get(SEC_CODE),
-				"TEST", "USD", SymbolType.FUT);
+				"TEST", "USD", SymbolType.FUTURE);
 	}
 	
 	/**

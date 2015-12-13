@@ -14,7 +14,7 @@ public class TradeSetSymbolTest {
 	@Before
 	public void setUp() throws Exception {
 		setter = new TradeSetSymbol();
-		symbol = new Symbol("AAPL","SMART","USD",SymbolType.STK);
+		symbol = new Symbol("AAPL","SMART","USD",SymbolType.STOCK);
 	}
 
 	@Test
