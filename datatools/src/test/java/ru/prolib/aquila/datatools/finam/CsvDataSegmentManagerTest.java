@@ -49,7 +49,7 @@ public class CsvDataSegmentManagerTest {
 	static {
 		logger = LoggerFactory.getLogger(CsvDataSegmentManagerTest.class);
 		root = new File("fixture", "finam-tests");
-		symbol1 = new Symbol("RTS", "SPB", "USD", SymbolType.FUT);
+		symbol1 = new Symbol("RTS", "SPB", "USD", SymbolType.FUTURE);
 	}
 	
 	private Scheduler scheduler;
@@ -97,7 +97,7 @@ public class CsvDataSegmentManagerTest {
 		expect(helper.createOutputStream(file1, false)).andReturn(outputStream);
 		expect(helper.createCsvTickWriter(outputStream)).andReturn(csvWriter);
 		csvWriter.writeHeader();
-		expect(helper.addSmartFlush(csvWriter, "[RTS@SPB(FUT/USD)#1998-01-15]"))
+		expect(helper.addSmartFlush(csvWriter, "[F:RTS@SPB:USD#1998-01-15]"))
 			.andReturn(flusher);
 		control.replay();
 		

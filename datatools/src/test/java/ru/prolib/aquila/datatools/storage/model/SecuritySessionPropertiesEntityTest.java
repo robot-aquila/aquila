@@ -18,7 +18,7 @@ public class SecuritySessionPropertiesEntityTest {
 
 	@Before
 	public void setUp() throws Exception {
-		symbol = new Symbol("SPY", "ARCA", "USD", SymbolType.FUT);
+		symbol = new Symbol("SPY", "ARCA", "USD", SymbolType.FUTURE);
 		symbolEntity = new SymbolEntity();
 		symbolEntity.setSymbol(symbol);
 		entity = new SecuritySessionPropertiesEntity();

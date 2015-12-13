@@ -22,9 +22,9 @@ public class MOEXUtilsTest {
 	private static final Symbol symbol1, symbol2, symbol3;
 	
 	static {
-		symbol1 = new Symbol("RTS", "SPBFUT", "USD", SymbolType.FUT);
-		symbol2 = new Symbol("XXX", "SPBFUT", "RUR", SymbolType.OPT);
-		symbol3 = new Symbol("SPY", "SPBFUT", "USD", SymbolType.STK);
+		symbol1 = new Symbol("RTS", "SPBFUT", "USD", SymbolType.FUTURE);
+		symbol2 = new Symbol("XXX", "SPBFUT", "RUR", SymbolType.OPTION);
+		symbol3 = new Symbol("SPY", "SPBFUT", "USD", SymbolType.STOCK);
 	}
 	
 	private EditableTerminal terminal;

@@ -42,7 +42,7 @@ public class IOHelperTest {
 	
 	static {
 		root = new File("fixture", "finam-tests");
-		symbol = new Symbol("Si-6.15","SPB","USD",SymbolType.FUT);
+		symbol = new Symbol("Si-6.15","SPB","USD",SymbolType.FUTURE);
 		idUtils = new IdUtils();
 	}
 	
@@ -187,9 +187,9 @@ public class IOHelperTest {
 	
 	@Test
 	public void testGetFile() {
-		File expected = new File(root, "Si%2D6%2E15-SPB-USD-FUT"
+		File expected = new File(root, "Si%2D6%2E15-SPB-USD-F"
 				+ File.separator + "2015" + File.separator + "10"
-				+ File.separator + "Si%2D6%2E15-SPB-USD-FUT-20151013.xx");
+				+ File.separator + "Si%2D6%2E15-SPB-USD-F-20151013.xx");
 		
 		File actual = helper.getFile(symbol, new LocalDate(2015, 10, 13), ".xx");
 		
@@ -199,7 +199,7 @@ public class IOHelperTest {
 	
 	@Test
 	public void testGetRootDir() {
-		File expected = new File(root, "Si%2D6%2E15-SPB-USD-FUT");
+		File expected = new File(root, "Si%2D6%2E15-SPB-USD-F");
 		
 		File actual = helper.getRootDir(symbol);
 		
@@ -209,8 +209,7 @@ public class IOHelperTest {
 	
 	@Test
 	public void testGetLeve1Dir() {
-		File expected = new File(root, "Si%2D6%2E15-SPB-USD-FUT"
-				+ File.separator + "2015");
+		File expected = new File(root, "Si%2D6%2E15-SPB-USD-F" + File.separator + "2015");
 		
 		File actual = helper.getLevel1Dir(symbol, new LocalDate(2015, 10, 13));
 		
@@ -220,8 +219,8 @@ public class IOHelperTest {
 	
 	@Test
 	public void testGetLevel2Dir() {
-		File expected = new File(root, "Si%2D6%2E15-SPB-USD-FUT"
-				+ File.separator + "2015" + File.separator + "10");
+		File expected = new File(root, "Si%2D6%2E15-SPB-USD-F" +
+			File.separator + "2015" + File.separator + "10");
 		
 		File actual = helper.getLevel2Dir(symbol, new LocalDate(2015, 10, 13));
 		

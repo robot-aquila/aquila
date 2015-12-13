@@ -11,23 +11,23 @@
 		<insert tableName="symbols">
 			<column name="id">1001</column>
 			<column name="code">RTS-6.15</column>
-			<column name="class_code">SPBFUT</column>
-			<column name="currency">USD</column>
-			<column name="type">FUT</column>
+			<column name="exchange_id">SPBFUT</column>
+			<column name="currency_code">USD</column>
+			<column name="type_code">F</column>
 		</insert>
 		<insert tableName="symbols">
 			<column name="id">1002</column>
 			<column name="code">Si-6.15</column>
-			<column name="class_code">SPBFUT</column>
-			<column name="currency">RUB</column>
-			<column name="type">FUT</column>
+			<column name="exchange_id">SPBFUT</column>
+			<column name="currency_code">RUB</column>
+			<column name="type_code">F</column>
 		</insert>
 		<insert tableName="symbols">
 			<column name="id">1003</column>
 			<column name="code">ED-6.15</column>
-			<column name="class_code">SPBFUT</column>
-			<column name="currency">USD</column>
-			<column name="type">FUT</column>
+			<column name="exchange_id">SPBFUT</column>
+			<column name="currency_code">USD</column>
+			<column name="type_code">F</column>
 		</insert>
     </changeSet>
     

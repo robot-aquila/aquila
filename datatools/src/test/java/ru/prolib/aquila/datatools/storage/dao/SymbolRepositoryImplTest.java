@@ -56,7 +56,7 @@ public class SymbolRepositoryImplTest
 		assertNotNull(x);
 		assertEquals(new Long(1001), x.getId());
 		Symbol expected, actual;
-		expected = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUT);
+		expected = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUTURE);
 		actual = x.getSymbol();
 		assertEquals(expected, actual);
 	}
@@ -69,7 +69,7 @@ public class SymbolRepositoryImplTest
 	@Test
 	public void testGetBySymbol() {
 		Symbol expected, actual;
-		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUT);
+		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUTURE);
 		SymbolEntity x = repository.getBySymbol(expected);
 		assertNotNull(x);
 		assertEquals(new Long(1002), x.getId());
@@ -79,7 +79,7 @@ public class SymbolRepositoryImplTest
 	
 	@Test
 	public void testGetBySymbol_CreatesNewIfNotExists() throws Exception {
-		Symbol symbol = new Symbol("XXX", "YYY", "EUR", SymbolType.OPT);
+		Symbol symbol = new Symbol("XXX", "YYY", "EUR", SymbolType.OPTION);
 		
 		SymbolEntity x = repository.getBySymbol(symbol);
 		sessionFactory.getCurrentSession().flush();
@@ -88,7 +88,7 @@ public class SymbolRepositoryImplTest
 		assertNotNull(x);
 		assertEquals(expectedId, x.getId());
 		assertEquals(1, super.countRowsInTableWhere("symbols",
-			"id=1004 AND code='XXX' AND class_code='YYY' AND currency='EUR' AND type='OPT'"));
+			"id=1004 AND code='XXX' AND exchange_id='YYY' AND currency_code='EUR' AND type_code='O'"));
 	}
 	
 	@Test

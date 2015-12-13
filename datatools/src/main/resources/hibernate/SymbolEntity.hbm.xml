@@ -8,10 +8,10 @@
 		</id>
 		<property name="symbol" unique="true" access="field" not-null="true"
 			type="ru.prolib.aquila.datatools.storage.dao.HibernateSymbolType" >
-			<column name="code" length="16" not-null="true" />
-			<column name="class_code" length="16" not-null="true" />
-			<column name="currency" length="3" not-null="true" />
-			<column name="type" length="4" not-null="true" />
+			<column name="code" length="16" not-null="false" />
+			<column name="exchange_id" length="16" not-null="false" />
+			<column name="currency_code" length="3" not-null="false" />
+			<column name="type_code" length="4" not-null="false" />
 		</property>
 	</class>
 </hibernate-mapping>

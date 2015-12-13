@@ -15,7 +15,7 @@ public class SymbolEntityTest {
 
 	@Before
 	public void setUp() throws Exception {
-		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STK);
+		symbol = new Symbol("SBER", "EQBR", "RUB", SymbolType.STOCK);
 		symbolEntity = new SymbolEntity();
 	}
 

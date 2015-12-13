@@ -59,8 +59,8 @@ public class MOEXUtils {
 		if ( dummyTime.compareTo(clearing1) < 0 ) {
 			return dummyDate.toDateTime(clearing1);
 		}
-		if ( symbol.getType() == SymbolType.FUT
-		  || symbol.getType() == SymbolType.OPT )
+		if ( symbol.getType() == SymbolType.FUTURE
+		  || symbol.getType() == SymbolType.OPTION )
 		{
 			return dummyDate.toDateTime(clearing2);
 		} else {

@@ -14,18 +14,18 @@
             <column name="code" type="varchar(16)" >
             	<constraints nullable="false" />
             </column>
-            <column name="class_code" type="varchar(16)" >
-            	<constraints nullable="false" />
+            <column name="exchange_id" type="varchar(16)" >
+            	<constraints nullable="true" />
             </column>
-            <column name="currency" type="varchar(3)" >
-            	<constraints nullable="false" />
+            <column name="currency_code" type="varchar(3)" >
+            	<constraints nullable="true" />
             </column>
-            <column name="type" type="varchar(4)" >
-            	<constraints nullable="false" />
+            <column name="type_code" type="varchar(4)" >
+            	<constraints nullable="true" />
             </column>
         </createTable>
         <addUniqueConstraint tableName="symbols"
-        	columnNames="code, class_code, currency, type" />
+        	columnNames="code, exchange_id, currency_code, type_code" />
         
         <createTable tableName="security_properties">
         	<column name="id" autoIncrement="true" type="bigint">

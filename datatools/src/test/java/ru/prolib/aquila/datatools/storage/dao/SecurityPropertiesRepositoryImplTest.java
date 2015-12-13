@@ -104,7 +104,7 @@ public class SecurityPropertiesRepositoryImplTest
 
 	@Test
 	public void testGetBySymbol() throws Exception {
-		symbol = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUT);
+		symbol = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUTURE);
 		entity = repository.getBySymbol(symbol);
 		assertNotNull(entity);
 		assertEquals(new Long(15), entity.getId());
@@ -117,7 +117,7 @@ public class SecurityPropertiesRepositoryImplTest
 	
 	@Test (expected=RepositoryObjectNotFoundException.class)
 	public void testGetBySymbol_ThrowsIfNotExists() {
-		symbol = new Symbol("XXX", "YYY", "RUB", SymbolType.CASH);
+		symbol = new Symbol("XXX", "YYY", "RUB", SymbolType.CURRENCY);
 		repository.getBySymbol(symbol);
 	}
 	
@@ -188,7 +188,7 @@ public class SecurityPropertiesRepositoryImplTest
 	public void testGetSymbol() throws Exception {
 		entity = repository.getById(16L);
 		Symbol expected, actual;
-		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUT);
+		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUTURE);
 		actual = entity.getSymbolInfo();
 		assertEquals(expected, actual);
 	}

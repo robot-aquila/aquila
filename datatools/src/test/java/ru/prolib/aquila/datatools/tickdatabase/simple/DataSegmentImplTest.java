@@ -21,7 +21,7 @@ public class DataSegmentImplTest {
 	private static final Symbol symbol;
 	
 	static {
-		symbol = new Symbol("SBRF", "EQBR", "RUR", SymbolType.STK);
+		symbol = new Symbol("SBRF", "EQBR", "RUR", SymbolType.STOCK);
 	}
 	
 	private IMocksControl control;

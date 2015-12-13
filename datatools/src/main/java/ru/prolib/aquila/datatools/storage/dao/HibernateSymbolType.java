@@ -70,29 +70,7 @@ public class HibernateSymbolType implements UserType {
 		if ( code == null ) {
 			throw new HibernateException("Code cannot be null");
 		}
-		if ( classCode == null ) {
-			throw new HibernateException("Class code cannot be null");
-		}
-		if ( currencyCode == null ) {
-			throw new HibernateException("Currency code cannot be null");
-		}
-		if ( typeCode == null ) {
-			throw new HibernateException("Type code cannot be null");
-		}
-		Currency currency;
-		try {
-			currency = Currency.getInstance(currencyCode);
-		} catch ( IllegalArgumentException e ) {
-			throw new HibernateException("Wrong currency code: "
-					+ currencyCode, e);
-		}
-		SymbolType type;
-		try {
-			type = SymbolType.valueOf(typeCode);
-		} catch ( IllegalArgumentException e ) {
-			throw new HibernateException("Wrong security type: " + typeCode, e);
-		}
-		return new Symbol(code, classCode, currency, type);
+		return new Symbol(code, classCode, currencyCode, typeCode);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -109,9 +87,9 @@ public class HibernateSymbolType implements UserType {
 		} else {
 			final Symbol symbol = (Symbol) value;
 			x.set(st, symbol.getCode(), index);
-			x.set(st, symbol.getClassCode(), index + 1);
-			x.set(st, symbol.getCurrency().getCurrencyCode(), index + 2);
-			x.set(st,  symbol.getType().getCode(), index  +3);
+			x.set(st, symbol.getExchangeID(), index + 1);
+			x.set(st, symbol.getCurrencyCode(), index + 2);
+			x.set(st,  symbol.getTypeCode(), index  +3);
 		}
 	}
 
