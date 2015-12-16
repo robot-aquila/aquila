@@ -89,6 +89,7 @@ public class CsvDataSegmentManager implements DataSegmentManager {
 		helper.copyStream(input, output);
 		input.close();
 		output.close();
+		dest.delete();
 		temp.renameTo(dest);
 		part.delete();
 		logger.debug("Data segment closed: {}", getStreamId(symbol, date));

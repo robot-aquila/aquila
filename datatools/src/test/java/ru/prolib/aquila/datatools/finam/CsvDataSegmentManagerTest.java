@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*; 
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -126,6 +127,7 @@ public class CsvDataSegmentManagerTest {
 		helper.copyStream(inputStream, outputStream);
 		inputStream.close();
 		outputStream.close();
+		expect(file3.delete()).andReturn(true);
 		expect(file2.renameTo(file3)).andReturn(true);
 		expect(file1.delete()).andReturn(true);
 		control.replay();
@@ -351,6 +353,22 @@ public class CsvDataSegmentManagerTest {
 		assertSame(list, manager.getSegmentList(symbol1));
 		
 		control.verify();
+	}
+	
+	@Test 
+	public void testCloseSegment_ExestingArchivBugFix() throws Exception {
+		DataSegment dataSegment = new DataSegmentImpl(symbol1, new LocalDate(2001, 9, 11), new CsvTickWriter(new ByteArrayOutputStream()));
+		new File(root, "RTS-SPB-USD-F/2001/09").mkdirs();
+		File f1 = new File(root, "RTS-SPB-USD-F/2001/09/RTS-SPB-USD-F-20010911.csv.part");
+		FileUtils.copyFile(new File("fixture/CsvDataSegmentManager-Test1.csv.part"), f1);
+		File f2 = new File(root, "RTS-SPB-USD-F/2001/09/RTS-SPB-USD-F-20010911.csv.gz");
+		f2.createNewFile();
+		manager = new CsvDataSegmentManager(root);
+		
+		manager.closeSegment(dataSegment);
+		
+	    assertTrue(FileUtils.contentEquals(new File("fixture/EttalonRTS-SPB-USD-F-20010911.csv.gz"), f2));
+		assertFalse(new File(root, "RTS-SPB-USD-F/2001/09/RTS-SPB-USD-F-20010911.csv.gz.part").exists());
 	}
 
 }
