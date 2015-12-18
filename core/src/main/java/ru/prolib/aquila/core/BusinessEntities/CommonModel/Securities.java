@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.*;
 /**
  * Набор инструментов торговли.
  */
+@Deprecated
 public class Securities {
 	private final SecuritiesEventDispatcher dispatcher;
 	private final SecurityFactory factory;

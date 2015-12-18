@@ -8,6 +8,7 @@ import java.util.Properties;
  * 2013-01-31<br>
  * $Id: TerminalFactory.java 472 2013-02-01 11:21:06Z huan.kaktus $
  */
+@Deprecated
 public interface TerminalFactory {
 	
 	/**
