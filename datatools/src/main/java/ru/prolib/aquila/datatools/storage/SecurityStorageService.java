@@ -7,6 +7,7 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 /**
  * Security attributes storage service.
  */
+@Deprecated
 public interface SecurityStorageService {
 	
 	/**
