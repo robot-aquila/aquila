@@ -10,15 +10,15 @@ import ru.prolib.aquila.core.utils.Variant;
 
 public class RequestSecurityEventTest {
 	private IMocksControl control;
-	private EventTypeSI type1, type2;
+	private EventType type1, type2;
 	private Symbol symbol1, symbol2;
 	private RequestSecurityEvent event;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type1 = control.createMock(EventTypeSI.class);
-		type2 = control.createMock(EventTypeSI.class);
+		type1 = control.createMock(EventType.class);
+		type2 = control.createMock(EventType.class);
 		symbol1 = new Symbol("SBER", "EQBR", "RUR");
 		symbol2 = new Symbol("GAZP", "EQBR", "RUR");
 		event = new RequestSecurityEvent(type1, symbol1, 1, "foobar text");
@@ -41,7 +41,7 @@ public class RequestSecurityEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
+		Variant<EventType> vType = new Variant<EventType>()
 			.add(type1)
 			.add(type2);
 		Variant<Symbol> vSymbol = new Variant<Symbol>(vType)

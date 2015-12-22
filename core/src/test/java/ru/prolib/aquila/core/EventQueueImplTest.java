@@ -18,7 +18,7 @@ public class EventQueueImplTest {
 	private static EventSystem eSys;
 	private static EventQueueImpl queue;
 	private static EventDispatcher dispatcher;
-	private static EventTypeSI type1,type2;
+	private static EventType type1,type2;
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
@@ -138,7 +138,7 @@ public class EventQueueImplTest {
 	
 	@Test
 	public void testJoin1_TrueIfFinished() throws Exception {
-		final EventSI event = new EventImpl(type1);
+		final Event event = new EventImpl(type1);
 		type1.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
@@ -170,7 +170,7 @@ public class EventQueueImplTest {
 	@Test
 	public void testJoin1_IgnoreInQueueThread() throws Exception {
 		final CountDownLatch exit = new CountDownLatch(1);
-		final EventSI event = new EventImpl(type1);
+		final Event event = new EventImpl(type1);
 		type1.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
@@ -286,7 +286,7 @@ public class EventQueueImplTest {
 		expected.add("T1L1");
 		expected.add("T2L1s");
 		expected.add("T4L1");
-		final EventTypeSI type3 = dispatcher.createSyncType(),
+		final EventType type3 = dispatcher.createSyncType(),
 				type4 = dispatcher.createType();
 		final CountDownLatch finished = new CountDownLatch(1);
 		type1.addListener(new EventListener() { 				// #3

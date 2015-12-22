@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.report.*;
 public class ActiveTradesEventDispatcher {
 	private static final String ID = "ActiveTrades";
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onEnter, onExit, onChanged;
+	private final EventType onEnter, onExit, onChanged;
 	
 	public ActiveTradesEventDispatcher(EventSystem es) {
 		super();

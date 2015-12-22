@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.*;
 public class SMTriggerOnEventTest {
 	private IMocksControl control;
 	private SMTriggerRegistry registry;
-	private EventTypeSI type;
+	private EventType type;
 	private Event event;
 	private SMState state;
 	private SMInput in1;
@@ -66,7 +66,7 @@ public class SMTriggerOnEventTest {
 	
 	@Test
 	public void testActivate_SkipIfActive() throws Exception {
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		trigger = new SMTriggerOnEvent(type);
 		type.addSyncListener(same(trigger));
 		control.replay();
@@ -79,7 +79,7 @@ public class SMTriggerOnEventTest {
 	
 	@Test
 	public void testDeactivate() throws Exception {
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		trigger = new SMTriggerOnEvent(type);
 		type.addSyncListener(same(trigger));
 		type.removeListener(same(trigger));

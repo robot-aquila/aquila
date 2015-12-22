@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class PortfoliosEventDispatcher implements EventListener {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onAvailable, onChanged, onPosAvailable,
+	private final EventType onAvailable, onChanged, onPosAvailable,
 		onPosChanged;
 	
 	public PortfoliosEventDispatcher(EventSystem es) {

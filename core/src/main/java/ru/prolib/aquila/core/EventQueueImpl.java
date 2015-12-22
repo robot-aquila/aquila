@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
  */
 public class EventQueueImpl implements EventQueue {
 	private static final Logger logger;
-	static private final EventSI EXIT = new EventImpl(null);
-	private final BlockingQueue<EventSI> queue;
+	static private final Event EXIT = new EventImpl(null);
+	private final BlockingQueue<Event> queue;
 	private final String name;
 	private volatile Thread thread = null;
-	private final LinkedList<EventSI> cache1, cache2;
+	private final LinkedList<Event> cache1, cache2;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -31,9 +31,9 @@ public class EventQueueImpl implements EventQueue {
 	public EventQueueImpl(String threadName) {
 		super();
 		this.name = threadName;
-		queue = new LinkedBlockingQueue<EventSI>();
-		cache1 = new LinkedList<EventSI>();
-		cache2 = new LinkedList<EventSI>();
+		queue = new LinkedBlockingQueue<Event>();
+		cache1 = new LinkedList<Event>();
+		cache2 = new LinkedList<Event>();
 	}
 	
 	/**
@@ -148,7 +148,7 @@ public class EventQueueImpl implements EventQueue {
 	 * @throws IllegalStateException поток обработки не запущен
 	 */
 	@Override
-	public synchronized void enqueue(EventSI event) {
+	public synchronized void enqueue(Event event) {
 		if ( ! started() ) {
 			throw new IllegalStateException("Queue not started: " + name);
 		}
@@ -167,7 +167,7 @@ public class EventQueueImpl implements EventQueue {
 			// очередь уже обрабатывается.
 			do {
 				event = cache1.getFirst(); // Сразу удалять нельзя!
-				listeners = event.getTypeSI().getSyncListeners();
+				listeners = event.getType().getSyncListeners();
 				for ( EventListener listener : listeners ) {
 					try {
 						listener.onEvent(event);
@@ -193,7 +193,7 @@ public class EventQueueImpl implements EventQueue {
 	 * Реализация диспетчеризации событий из очереди.
 	 */
 	static private class QueueWorker implements Runnable {
-		private final BlockingQueue<EventSI> queue;
+		private final BlockingQueue<Event> queue;
 		private CountDownLatch started;
 		private final String name;
 		
@@ -204,7 +204,7 @@ public class EventQueueImpl implements EventQueue {
 		 * @param started сигнал успешного запуска
 		 * @param name имя потока
 		 */
-		public QueueWorker(BlockingQueue<EventSI> queue,
+		public QueueWorker(BlockingQueue<Event> queue,
 						   CountDownLatch started, String name)
 		{
 			super();
@@ -218,13 +218,13 @@ public class EventQueueImpl implements EventQueue {
 			started.countDown();
 			started = null;
 			try {
-				EventSI event;
+				Event event;
 				List<EventListener> listeners;
 				while ( (event = queue.take()) != null ) {
 					if ( event == EXIT ) {
 						break;
 					}
-					listeners = event.getTypeSI().getAsyncListeners();
+					listeners = event.getType().getAsyncListeners();
 					for ( EventListener listener : listeners ) {
 						try {
 							listener.onEvent(event);

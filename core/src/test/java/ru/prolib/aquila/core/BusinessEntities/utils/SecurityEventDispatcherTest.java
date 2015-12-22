@@ -40,12 +40,12 @@ public class SecurityEventDispatcherTest {
 		EventDispatcher ed = dispatcher.getEventDispatcher();
 		assertEquals("Security[F:RI@SPBFUT:USD]", ed.getId());
 
-		EventTypeSI type;
-		type = (EventTypeSI) dispatcher.OnChanged();
+		EventType type;
+		type = dispatcher.OnChanged();
 		assertEquals("Security[F:RI@SPBFUT:USD].Changed", type.getId());
 		assertFalse(type.isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnTrade();
+		type = dispatcher.OnTrade();
 		assertEquals("Security[F:RI@SPBFUT:USD].Trade", type.getId());
 		assertFalse(type.isOnlySyncMode());
 	}
@@ -53,7 +53,7 @@ public class SecurityEventDispatcherTest {
 	@Test
 	public void testFireChanged() throws Exception {
 		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new SecurityEvent((EventTypeSI) dispatcher.OnChanged(), security)));
+		queue.enqueue(eq(new SecurityEvent(dispatcher.OnChanged(), security)));
 		control.replay();
 		
 		dispatcher.fireChanged(security);
@@ -64,7 +64,7 @@ public class SecurityEventDispatcherTest {
 	@Test
 	public void testFireTrade() throws Exception {
 		dispatcher.OnTrade().addListener(listener);
-		queue.enqueue(eq(new SecurityTradeEvent((EventTypeSI) dispatcher.OnTrade(), security, trade)));
+		queue.enqueue(eq(new SecurityTradeEvent(dispatcher.OnTrade(), security, trade)));
 		control.replay();
 		
 		dispatcher.fireTrade(security, trade);

@@ -22,7 +22,7 @@ public class PanicEvent extends EventImpl {
 	 * @param msgId идентификатор сообщения
 	 * @param args аргументы события
 	 */
-	public PanicEvent(EventTypeSI type, int code, String msgId, Object[] args) {
+	public PanicEvent(EventType type, int code, String msgId, Object[] args) {
 		super(type);
 		this.code = code;
 		this.msgId = msgId;
@@ -36,7 +36,7 @@ public class PanicEvent extends EventImpl {
 	 * @param code код состояния
 	 * @param msgId идентификатор сообщения
 	 */
-	public PanicEvent(EventTypeSI type, int code, String msgId) {
+	public PanicEvent(EventType type, int code, String msgId) {
 		this(type, code, msgId, new Object[] { });
 	}
 

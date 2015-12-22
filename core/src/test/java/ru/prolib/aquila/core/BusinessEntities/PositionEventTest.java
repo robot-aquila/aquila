@@ -14,15 +14,15 @@ import ru.prolib.aquila.core.*;
  */
 public class PositionEventTest {
 	private IMocksControl control;
-	private EventTypeSI eventType1,eventType2;
+	private EventType eventType1,eventType2;
 	private Position position1,position2;
 	private PositionEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		eventType1 = control.createMock(EventTypeSI.class);
-		eventType2 = control.createMock(EventTypeSI.class);
+		eventType1 = control.createMock(EventType.class);
+		eventType2 = control.createMock(EventType.class);
 		position1 = control.createMock(Position.class);
 		position2 = control.createMock(Position.class);
 		event = new PositionEvent(eventType1, position1);

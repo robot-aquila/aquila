@@ -17,7 +17,7 @@ public interface EventQueue extends Starter {
 	 * <p>
 	 * @param event событие
 	 */
-	public void enqueue(EventSI event);
+	public void enqueue(Event event);
 	
 	/**
 	 * Проверить запущен-ли поток диспетчеризации событий.

@@ -80,7 +80,7 @@ public class PositionsEventDispatcherTest {
 		eventsExpected.add(expected);
 		// Асинхронное событие окажется на втором месте, так как очередь будет
 		// на время заморожена обработчиком этого события.
-		e = new PositionEvent((EventTypeSI) dispatcher.OnAvailable(), position);
+		e = new PositionEvent(dispatcher.OnAvailable(), position);
 		eventsExpected.add(e);
 		
 		dispatcher.fireAvailable(position);
@@ -96,12 +96,12 @@ public class PositionsEventDispatcherTest {
 		EventDispatcher ed = dispatcher.getEventDispatcher();
 		assertEquals(did, ed.getId());
 		
-		EventTypeSI type;
-		type = (EventTypeSI) dispatcher.OnAvailable();
+		EventType type;
+		type = dispatcher.OnAvailable();
 		assertEquals(did + ".Available", type.getId());
 		assertFalse(type.isOnlySyncMode());
 		
-		type = (EventTypeSI) dispatcher.OnChanged();
+		type = dispatcher.OnChanged();
 		assertEquals(did + ".Changed", type.getId());
 		assertFalse(type.isOnlySyncMode());
 	}
@@ -109,7 +109,7 @@ public class PositionsEventDispatcherTest {
 	
 	@Test
 	public void testFireAvailable() throws Exception {
-		e = new PositionEvent((EventTypeSI) dispatcher.OnAvailable(), position);
+		e = new PositionEvent(dispatcher.OnAvailable(), position);
 		eventsExpected.add(e);
 		final CountDownLatch counter = new CountDownLatch(1);
 		dispatcher.OnAvailable().addListener(new EventListener() {
@@ -127,8 +127,8 @@ public class PositionsEventDispatcherTest {
 	@Test
 	public void testOnEvent_OnChanged() throws Exception {
 		testSynchronousEvent(dispatcher.OnChanged(),
-			new PositionEvent((EventTypeSI) dispatcher.OnChanged(), position),
-			new PositionEvent((EventTypeSI) position.OnChanged(), position));
+			new PositionEvent(dispatcher.OnChanged(), position),
+			new PositionEvent(position.OnChanged(), position));
 	}
 	
 	@Test

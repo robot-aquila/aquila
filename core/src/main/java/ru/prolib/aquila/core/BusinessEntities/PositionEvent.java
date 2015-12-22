@@ -17,7 +17,7 @@ public class PositionEvent extends EventImpl {
 	 * @param type тип события
 	 * @param position объект позиции
 	 */
-	public PositionEvent(EventTypeSI type, Position position) {
+	public PositionEvent(EventType type, Position position) {
 		super(type);
 		this.position = position;
 	}

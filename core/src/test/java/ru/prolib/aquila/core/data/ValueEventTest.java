@@ -14,13 +14,13 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class ValueEventTest {
 	private IMocksControl control;
-	private EventTypeSI type;
+	private EventType type;
 	private ValueEvent<Double> event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		event = new ValueEvent<Double>(type, 123.45d, 123);
 	}
 	
@@ -57,9 +57,9 @@ public class ValueEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
+		Variant<EventType> vType = new Variant<EventType>()
 			.add(type)
-			.add(control.createMock(EventTypeSI.class));
+			.add(control.createMock(EventType.class));
 		Variant<Double> vOld = new Variant<Double>(vType)
 			.add(null)
 			.add(157.21d);

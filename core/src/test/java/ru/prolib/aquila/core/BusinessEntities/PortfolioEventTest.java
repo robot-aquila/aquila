@@ -14,15 +14,15 @@ import ru.prolib.aquila.core.*;
  */
 public class PortfolioEventTest {
 	private IMocksControl control;
-	private EventTypeSI eventType1,eventType2;
+	private EventType eventType1,eventType2;
 	private Portfolio port1,port2;
 	private PortfolioEvent event;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		eventType1 = control.createMock(EventTypeSI.class);
-		eventType2 = control.createMock(EventTypeSI.class);
+		eventType1 = control.createMock(EventType.class);
+		eventType2 = control.createMock(EventType.class);
 		port1 = control.createMock(Portfolio.class);
 		port2 = control.createMock(Portfolio.class);
 		event = new PortfolioEvent(eventType1, port1);

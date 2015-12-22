@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class SecuritiesEventDispatcher implements EventListener {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onAvailable, onChanged, onTrade;
+	private final EventType onAvailable, onChanged, onTrade;
 	
 	public SecuritiesEventDispatcher(EventSystem es) {
 		super();

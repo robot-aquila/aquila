@@ -6,26 +6,21 @@ package ru.prolib.aquila.core;
  * 2012-04-13<br>
  * $Id: EventImpl.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public class EventImpl implements EventSI {
+public class EventImpl implements Event {
 	public static final String ID = "BasicEvent";
-	private final EventTypeSI type;
+	private final EventType type;
 
 	/**
 	 * Конструктор
 	 * @param type тип события
 	 */
-	public EventImpl(EventTypeSI type) {
+	public EventImpl(EventType type) {
 		super();
 		this.type = type;
 	}
 	
 	@Override
 	public EventType getType() {
-		return type;
-	}
-	
-	@Override
-	public EventTypeSI getTypeSI() {
 		return type;
 	}
 	

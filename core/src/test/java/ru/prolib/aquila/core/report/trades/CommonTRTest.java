@@ -151,10 +151,10 @@ public class CommonTRTest {
 		throws Exception
 	{
 		CsvReader reader = new CsvReader(getFullPath(filename));
-		Map<String, EventTypeSI> evtMap = new Hashtable<String, EventTypeSI>();
-		evtMap.put("ENTER", (EventTypeSI) dispatcher.OnEnter());
-		evtMap.put("CHANGE", (EventTypeSI) dispatcher.OnChanged());
-		evtMap.put("EXIT", (EventTypeSI) dispatcher.OnExit());
+		Map<String, EventType> evtMap = new Hashtable<String, EventType>();
+		evtMap.put("ENTER", dispatcher.OnEnter());
+		evtMap.put("CHANGE", dispatcher.OnChanged());
+		evtMap.put("EXIT", dispatcher.OnExit());
 		List<TradeReportEvent> list = new Vector<TradeReportEvent>();
 		reader.readHeaders();
 		while ( reader.readRecord() ) {

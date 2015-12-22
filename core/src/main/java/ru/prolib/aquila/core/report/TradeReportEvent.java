@@ -10,13 +10,13 @@ public class TradeReportEvent extends EventImpl {
 	private final RTrade report;
 	private final Integer index;
 
-	public TradeReportEvent(EventTypeSI type, RTrade report, Integer index) {
+	public TradeReportEvent(EventType type, RTrade report, Integer index) {
 		super(type);
 		this.report = report;
 		this.index = index;
 	}
 	
-	public TradeReportEvent(EventTypeSI type, RTrade report) {
+	public TradeReportEvent(EventType type, RTrade report) {
 		this(type, report, null);
 	}
 

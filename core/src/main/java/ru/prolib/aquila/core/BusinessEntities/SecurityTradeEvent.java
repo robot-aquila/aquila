@@ -18,7 +18,7 @@ public class SecurityTradeEvent extends SecurityEvent {
 	 * @param security инструмент
 	 * @param trade сделка
 	 */
-	public SecurityTradeEvent(EventTypeSI type, Security security, Trade trade) {
+	public SecurityTradeEvent(EventType type, Security security, Trade trade) {
 		super(type, security);
 		this.trade = trade;
 	}

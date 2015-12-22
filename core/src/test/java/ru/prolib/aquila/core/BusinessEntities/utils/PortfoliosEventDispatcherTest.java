@@ -77,7 +77,7 @@ public class PortfoliosEventDispatcherTest {
 		eventsExpected.add(expected);
 		// Асинхронное событие окажется на втором месте, так как очередь будет
 		// на время заморожена обработчиком этого события.
-		e = new PortfolioEvent((EventTypeSI) dispatcher.OnPortfolioAvailable(), portfolio);
+		e = new PortfolioEvent(dispatcher.OnPortfolioAvailable(), portfolio);
 		eventsExpected.add(e);
 		
 		dispatcher.fireAvailable(portfolio);
@@ -113,7 +113,7 @@ public class PortfoliosEventDispatcherTest {
 	
 	@Test
 	public void testFireAvailable() throws Exception {
-		e = new PortfolioEvent((EventTypeSI) dispatcher.OnPortfolioAvailable(), portfolio);
+		e = new PortfolioEvent(dispatcher.OnPortfolioAvailable(), portfolio);
 		eventsExpected.add(e);
 		final CountDownLatch counter = new CountDownLatch(1);
 		dispatcher.OnPortfolioAvailable().addListener(new EventListener() {
@@ -131,22 +131,22 @@ public class PortfoliosEventDispatcherTest {
 	@Test
 	public void testOnEvent_PositionChanged() throws Exception {
 		testSynchronousEvent(dispatcher.OnPositionChanged(),
-			new PositionEvent((EventTypeSI) dispatcher.OnPositionChanged(), position),
-			new PositionEvent((EventTypeSI) portfolio.OnPositionChanged(), position));
+			new PositionEvent(dispatcher.OnPositionChanged(), position),
+			new PositionEvent(portfolio.OnPositionChanged(), position));
 	}
 	
 	@Test
 	public void testOnEvent_PositionAvailable() throws Exception {
 		testSynchronousEvent(dispatcher.OnPositionAvailable(),
-			new PositionEvent((EventTypeSI) dispatcher.OnPositionAvailable(), position),
-			new PositionEvent((EventTypeSI) portfolio.OnPositionAvailable(), position));
+			new PositionEvent(dispatcher.OnPositionAvailable(), position),
+			new PositionEvent(portfolio.OnPositionAvailable(), position));
 	}
 	
 	@Test
 	public void testOnEvent_PortfolioChanged() throws Exception {
 		testSynchronousEvent(dispatcher.OnPortfolioChanged(),
-			new PortfolioEvent((EventTypeSI) dispatcher.OnPortfolioChanged(), portfolio),
-			new PortfolioEvent((EventTypeSI) portfolio.OnChanged(), portfolio));
+			new PortfolioEvent(dispatcher.OnPortfolioChanged(), portfolio),
+			new PortfolioEvent(portfolio.OnChanged(), portfolio));
 	}
 	
 	@Test

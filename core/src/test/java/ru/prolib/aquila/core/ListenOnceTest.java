@@ -10,14 +10,14 @@ import ru.prolib.aquila.core.utils.Variant;
 
 public class ListenOnceTest {
 	private IMocksControl control;
-	private EventTypeSI type;
+	private EventType type;
 	private EventListener listener;
 	private ListenOnce once;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		listener = control.createMock(EventListener.class);
 		once = new ListenOnce(type, listener);
 	}

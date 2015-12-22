@@ -7,7 +7,7 @@ import org.junit.*;
  * 2012-04-09
  */
 public class EventImplTest {
-	private EventTypeSI type,type2;
+	private EventType type,type2;
 	private EventImpl event;
 
 	@Before
@@ -20,7 +20,6 @@ public class EventImplTest {
 	@Test
 	public void testConstruct_Ok() throws Exception {
 		assertSame(type, event.getType());
-		assertSame(type, event.getTypeSI());
 	}
 	
 	@Test

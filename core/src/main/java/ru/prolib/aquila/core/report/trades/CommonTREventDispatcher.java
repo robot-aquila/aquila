@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.report.*;
  */
 public class CommonTREventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onEnter, onExit, onChanged;
+	private final EventType onEnter, onExit, onChanged;
 	
 	public CommonTREventDispatcher(EventSystem es) {
 		super();

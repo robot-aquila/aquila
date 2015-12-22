@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.utils.TerminalReadyIfConnected;
 public class TerminalReadyIfConnectedTest {
 	private IMocksControl control;
 	private EditableTerminal terminal;
-	private EventTypeSI onConnected, onDisconnected;
+	private EventType onConnected, onDisconnected;
 	private TerminalReadyIfConnected handler;
 
 	@Before

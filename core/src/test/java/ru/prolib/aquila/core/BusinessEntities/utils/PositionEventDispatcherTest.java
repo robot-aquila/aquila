@@ -41,8 +41,8 @@ public class PositionEventDispatcherTest {
 		EventDispatcher ed = dispatcher.getEventDispatcher();
 		assertEquals(did, ed.getId());
 		
-		EventTypeSI type;
-		type = (EventTypeSI) dispatcher.OnChanged();
+		EventType type;
+		type = dispatcher.OnChanged();
 		assertEquals(did + ".Changed", type.getId());
 		assertFalse(type.isOnlySyncMode());
 	}
@@ -50,7 +50,7 @@ public class PositionEventDispatcherTest {
 	@Test
 	public void testFireChanged() throws Exception {
 		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new PositionEvent((EventTypeSI) dispatcher.OnChanged(), position)));
+		queue.enqueue(eq(new PositionEvent(dispatcher.OnChanged(), position)));
 		control.replay();
 		
 		dispatcher.fireChanged(position);

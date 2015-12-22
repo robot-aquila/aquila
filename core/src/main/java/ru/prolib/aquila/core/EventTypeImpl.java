@@ -7,7 +7,7 @@ import java.util.*;
  * <p>
  * 2012-04-09<br>
  */
-public class EventTypeImpl implements EventTypeSI {
+public class EventTypeImpl implements EventType {
 	public static final String AUTO_ID_PREFIX = "EvtType";
 	private static int autoId = 1;
 	private final String id;

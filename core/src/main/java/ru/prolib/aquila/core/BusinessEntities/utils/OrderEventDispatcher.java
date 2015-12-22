@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class OrderEventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onRegistered, onRegisterFailed, onCancelled,
+	private final EventType onRegistered, onRegisterFailed, onCancelled,
 		onCancelFailed, onFilled, onPartiallyFilled, onChanged, onDone,
 		onFailed, onTrade;
 	
@@ -167,7 +167,7 @@ public class OrderEventDispatcher {
 	 * <p>
 	 * @param event экземпляр события
 	 */
-	public void dispatch(EventSI event) {
+	public void dispatch(Event event) {
 		dispatcher.dispatch(event);
 	}
 	

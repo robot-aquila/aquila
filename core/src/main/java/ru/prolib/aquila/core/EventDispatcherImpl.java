@@ -76,7 +76,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public void dispatch(EventSI event) {
+	public void dispatch(Event event) {
 		queue.enqueue(event);
 	}
 
@@ -86,22 +86,22 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public EventTypeSI createType() {
+	public EventType createType() {
 		return new EventTypeImpl(getId() + "." + EventTypeImpl.nextId());
 	}
 
 	@Override
-	public EventTypeSI createType(String typeId) {
+	public EventType createType(String typeId) {
 		return new EventTypeImpl(getId() + "." + typeId);
 	}
 
 	@Override
-	public EventTypeSI createSyncType() {
+	public EventType createSyncType() {
 		return new EventTypeImpl(getId() + "." + EventTypeImpl.nextId(), true);
 	}
 
 	@Override
-	public EventTypeSI createSyncType(String typeId) {
+	public EventType createSyncType(String typeId) {
 		return new EventTypeImpl(getId() + "." + typeId, true);
 	}
 

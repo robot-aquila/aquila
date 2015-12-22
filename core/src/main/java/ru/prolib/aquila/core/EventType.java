@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core;
 
+import java.util.List;
+
 /**
  * Интерфейс типа события.
  * <p> 
@@ -103,5 +105,31 @@ public interface EventType {
 	 * @return true - если разрешена только синхронная трансляция событий 
 	 */
 	public boolean isOnlySyncMode();
+	
+	/**
+	 * Очистить списки получателей.
+	 */
+	public void removeListeners();
+
+	/**
+	 * Получить общее количество получателей.
+	 * <p>
+	 * @return общее количество получателей
+	 */
+	public int countListeners();
+	
+	/**
+	 * Получить список асинхронных получателей.
+	 * <p>
+	 * @return дубликат списка асинхронных получателей
+	 */
+	public List<EventListener> getAsyncListeners();
+	
+	/**
+	 * Получить список синхронных получателей.
+	 * <p>
+	 * @return дубликат списка синхронных получателей
+	 */
+	public List<EventListener> getSyncListeners();
 	
 }

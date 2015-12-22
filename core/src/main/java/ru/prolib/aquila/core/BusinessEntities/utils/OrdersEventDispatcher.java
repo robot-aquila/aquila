@@ -55,7 +55,7 @@ public class OrdersEventDispatcher implements EventListener {
 	}
 	
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onRegistered, onRegisterFailed, onCancelled,
+	private final EventType onRegistered, onRegisterFailed, onCancelled,
 		onCancelFailed, onFilled, onPartiallyFilled, onChanged, onDone,
 		onFailed, onTrade, onAvailable;
 	
@@ -202,16 +202,16 @@ public class OrdersEventDispatcher implements EventListener {
 			dispatcher.dispatch(ne);
 		} else if ( event instanceof OrderEvent ) {
 			Order order = ((OrderEvent) event).getOrder();
-			EventTypeSI map[][] = {
-				{ (EventTypeSI) order.OnRegistered(), onRegistered },
-				{ (EventTypeSI) order.OnRegisterFailed(), onRegisterFailed },
-				{ (EventTypeSI) order.OnCancelled(), onCancelled },
-				{ (EventTypeSI) order.OnCancelFailed(), onCancelFailed },
-				{ (EventTypeSI) order.OnFilled(), onFilled },
-				{ (EventTypeSI) order.OnPartiallyFilled(), onPartiallyFilled },
-				{ (EventTypeSI) order.OnChanged(), onChanged },
-				{ (EventTypeSI) order.OnDone(), onDone },
-				{ (EventTypeSI) order.OnFailed(), onFailed },
+			EventType map[][] = {
+				{ (EventType) order.OnRegistered(), onRegistered },
+				{ (EventType) order.OnRegisterFailed(), onRegisterFailed },
+				{ (EventType) order.OnCancelled(), onCancelled },
+				{ (EventType) order.OnCancelFailed(), onCancelFailed },
+				{ (EventType) order.OnFilled(), onFilled },
+				{ (EventType) order.OnPartiallyFilled(), onPartiallyFilled },
+				{ (EventType) order.OnChanged(), onChanged },
+				{ (EventType) order.OnDone(), onDone },
+				{ (EventType) order.OnFailed(), onFailed },
 			};
 			for ( int i = 0; i < map.length; i ++ ) {
 				if ( event.isType(map[i][0]) ) {

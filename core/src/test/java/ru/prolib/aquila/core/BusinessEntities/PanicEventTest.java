@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.utils.Variant;
  */
 public class PanicEventTest {
 	private static IMocksControl control;
-	private static EventTypeSI type,type2;
+	private static EventType type,type2;
 	private static PanicEvent event;
 
 	@BeforeClass
@@ -57,7 +57,7 @@ public class PanicEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
+		Variant<EventType> vType = new Variant<EventType>()
 			.add(type)
 			.add(type2);
 		Variant<Integer> vCode = new Variant<Integer>(vType)

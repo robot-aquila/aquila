@@ -11,7 +11,7 @@ import org.junit.*;
 
 public class EventDispatcherImplTest {
 	private IMocksControl control;
-	private EventTypeSI type1;
+	private EventType type1;
 	private EventQueue queue;
 	private EventDispatcherImpl dispatcher;
 	
@@ -27,7 +27,7 @@ public class EventDispatcherImplTest {
 		control = createStrictControl();
 		queue = control.createMock(EventQueue.class);
 		dispatcher = new EventDispatcherImpl(queue, "TD");
-		type1 = control.createMock(EventTypeSI.class);
+		type1 = control.createMock(EventType.class);
 	}
 
 	@Test (expected=NullPointerException.class)
@@ -58,7 +58,7 @@ public class EventDispatcherImplTest {
 	
 	@Test
 	public void testDispatch() throws Exception {
-		EventSI event = new EventImpl(type1);
+		Event event = new EventImpl(type1);
 		queue.enqueue(same(event));
 		control.replay();
 		
@@ -79,7 +79,7 @@ public class EventDispatcherImplTest {
 	@Test
 	public void testCreateType0() throws Exception {
 		String expectedId = "TD.EvtType" + EventTypeImpl.getAutoId();
-		EventTypeSI actual = dispatcher.createType();
+		EventType actual = dispatcher.createType();
 		assertNotNull(actual);
 		assertEquals(expectedId, actual.getId());
 		assertFalse(actual.isOnlySyncMode());
@@ -88,7 +88,7 @@ public class EventDispatcherImplTest {
 	@Test
 	public void testCreateSyncType0() throws Exception {
 		String expectedId = "TD.EvtType" + EventTypeImpl.getAutoId();
-		EventTypeSI actual = dispatcher.createSyncType();
+		EventType actual = dispatcher.createSyncType();
 		assertNotNull(actual);
 		assertEquals(expectedId, actual.getId());
 		assertTrue(actual.isOnlySyncMode());
@@ -96,7 +96,7 @@ public class EventDispatcherImplTest {
 
 	@Test
 	public void testCreateType1() throws Exception {
-		EventTypeSI actual = dispatcher.createType("foo");
+		EventType actual = dispatcher.createType("foo");
 		assertNotNull(actual);
 		assertEquals("TD.foo", actual.getId());
 		assertFalse(actual.isOnlySyncMode());
@@ -104,7 +104,7 @@ public class EventDispatcherImplTest {
 	
 	@Test
 	public void testCreateSyncType1() throws Exception {
-		EventTypeSI actual = dispatcher.createSyncType("bar");
+		EventType actual = dispatcher.createSyncType("bar");
 		assertNotNull(actual);
 		assertEquals("TD.bar", actual.getId());
 		assertTrue(actual.isOnlySyncMode());

@@ -13,7 +13,7 @@ public interface EventDispatcher {
 	 * <p>
 	 * @param event событие
 	 */
-	public void dispatch(EventSI event);
+	public void dispatch(Event event);
 	
 	/**
 	 * Завершить работу
@@ -47,7 +47,7 @@ public interface EventDispatcher {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventTypeSI createType();
+	public EventType createType();
 	
 	/**
 	 * Создать тип события с синхронной доставкой.
@@ -58,7 +58,7 @@ public interface EventDispatcher {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventTypeSI createSyncType();
+	public EventType createSyncType();
 	
 	/**
 	 * Создать тип события.
@@ -68,7 +68,7 @@ public interface EventDispatcher {
 	 * @param typeId идентификатор типа события
 	 * @return тип события
 	 */
-	public EventTypeSI createType(String typeId);
+	public EventType createType(String typeId);
 	
 	/**
 	 * Создать тип события с синхронной доставкой.
@@ -80,6 +80,6 @@ public interface EventDispatcher {
 	 * @param typeId идентификатор типа события
 	 * @return тип события
 	 */
-	public EventTypeSI createSyncType(String typeId);
+	public EventType createSyncType(String typeId);
 
 }

@@ -43,7 +43,7 @@ public class FSMAutomatTest {
 	 */
 	static class CharEvent extends EventImpl {
 		private final char c;
-		public CharEvent(EventTypeSI type, char c) {
+		public CharEvent(EventType type, char c) {
 			super(type);
 			this.c = c;
 		}
@@ -320,7 +320,7 @@ public class FSMAutomatTest {
 		
 		String source = "Thus a Days object can only store a number of days.";
 		for ( int i = 0; i < source.length(); i ++ ) {
-			charDispatcher.dispatch(new CharEvent((EventTypeSI) onChar, source.charAt(i)));
+			charDispatcher.dispatch(new CharEvent(onChar, source.charAt(i)));
 		}
 		assertNull(automat.getCurrentState());
 		
@@ -346,7 +346,7 @@ public class FSMAutomatTest {
 		automat.transitExit(aStub.OnSomeExit());
 		automat.start(aStartWord);
 		
-		charDispatcher.dispatch(new CharEvent((EventTypeSI) onChar, 'a'));
+		charDispatcher.dispatch(new CharEvent(onChar, 'a'));
 		
 		assertSame(aStub, automat.getCurrentState());
 	}

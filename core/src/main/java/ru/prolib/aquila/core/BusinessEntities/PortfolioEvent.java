@@ -17,7 +17,7 @@ public class PortfolioEvent extends EventImpl {
 	 * @param type экземпляр типа
 	 * @param portfolio портфель
 	 */
-	public PortfolioEvent(EventTypeSI type, Portfolio portfolio) {
+	public PortfolioEvent(EventType type, Portfolio portfolio) {
 		super(type);
 		this.portfolio = portfolio;
 	}

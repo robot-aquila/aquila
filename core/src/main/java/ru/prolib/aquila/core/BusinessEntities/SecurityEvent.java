@@ -17,7 +17,7 @@ public class SecurityEvent extends EventImpl {
 	 * @param type тип события
 	 * @param security экземпляр инструмента
 	 */
-	public SecurityEvent(EventTypeSI type, Security security) {
+	public SecurityEvent(EventType type, Security security) {
 		super(type);
 		this.security = security;
 	}

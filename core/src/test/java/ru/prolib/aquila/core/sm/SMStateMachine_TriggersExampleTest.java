@@ -15,7 +15,7 @@ public class SMStateMachine_TriggersExampleTest {
 	private EventDispatcher dispatcher;
 	private Map<KW<SMExit>, SMState> transitions;
 	private List<Event> events;
-	private EventTypeSI s1exit, s1skip, s2back, s2exit;
+	private EventType s1exit, s1skip, s2back, s2exit;
 	private SMStateMachine automat;
 	
 	@BeforeClass
@@ -112,7 +112,7 @@ public class SMStateMachine_TriggersExampleTest {
 		assertFalse(automat.started());
 		assertFalse(automat.finished());
 		automat.start();
-		EventTypeSI src[] = {
+		EventType src[] = {
 				s1skip,
 				s1exit,
 				s1skip, // д.б. проигнорировано, т.к. триггер деактивирован
@@ -121,14 +121,14 @@ public class SMStateMachine_TriggersExampleTest {
 				s1exit,
 				s2exit
 		};
-		for ( EventTypeSI t: src ) {
+		for ( EventType t: src ) {
 			dispatcher.dispatch(new EventImpl(t));
 		}
 		assertTrue(automat.started());
 		assertTrue(automat.finished());
 		assertSame(SMState.FINAL, automat.getCurrentState());
 		
-		EventTypeSI exp[] = {
+		EventType exp[] = {
 				s1skip,
 				s1exit,
 				s2back,

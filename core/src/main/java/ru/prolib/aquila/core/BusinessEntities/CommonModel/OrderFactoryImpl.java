@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Vector;
 
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.EventTypeSI;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderImpl;
@@ -53,8 +52,7 @@ public class OrderFactoryImpl implements OrderFactory {
 			OrderEventDispatcher dispatcher, OrderStateValidator validator,
 			EventType targetType)
 	{
-		list.add(new OrderStateHandler(dispatcher, validator,
-				(EventTypeSI) targetType));
+		list.add(new OrderStateHandler(dispatcher, validator, targetType));
 	}
 
 }

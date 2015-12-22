@@ -22,7 +22,7 @@ public class ValueEvent<T> extends EventImpl {
 	 * @param newValue новое значение
 	 * @param newValueIndex индекс нового значения
 	 */
-	public ValueEvent(EventTypeSI type, T newValue, int newValueIndex) {
+	public ValueEvent(EventType type, T newValue, int newValueIndex) {
 		super(type);
 		this.oldValue = null;
 		this.newValue = newValue;
@@ -37,7 +37,7 @@ public class ValueEvent<T> extends EventImpl {
 	 * @param newValue новое значение
 	 * @param index индекс обновленного элемента
 	 */
-	public ValueEvent(EventTypeSI type, T oldValue, T newValue, int index) {
+	public ValueEvent(EventType type, T oldValue, T newValue, int index) {
 		super(type);
 		this.oldValue = oldValue;
 		this.newValue = newValue;

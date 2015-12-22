@@ -51,15 +51,15 @@ public class OrderFactoryTest {
 		
 		OrderEventDispatcher d = actual.getEventDispatcher();
 		List<OrderStateHandler> h = new Vector<OrderStateHandler>();
-		h.add(new OrderStateHandler(d, new OrderIsRegistered(), (EventTypeSI) d.OnRegistered()));
-		h.add(new OrderStateHandler(d, new OrderIsRegisterFailed(), (EventTypeSI) d.OnRegisterFailed()));
-		h.add(new OrderStateHandler(d, new OrderIsCancelled(), (EventTypeSI) d.OnCancelled()));
-		h.add(new OrderStateHandler(d, new OrderIsCancelFailed(), (EventTypeSI) d.OnCancelFailed()));
-		h.add(new OrderStateHandler(d, new OrderIsFilled(), (EventTypeSI) d.OnFilled()));
-		h.add(new OrderStateHandler(d, new OrderIsPartiallyFilled(), (EventTypeSI) d.OnPartiallyFilled()));
-		h.add(new OrderStateHandler(d, new OrderIsChanged(), (EventTypeSI) d.OnChanged()));
-		h.add(new OrderStateHandler(d, new OrderIsDone(), (EventTypeSI) d.OnDone()));
-		h.add(new OrderStateHandler(d, new OrderIsFailed(), (EventTypeSI) d.OnFailed()));
+		h.add(new OrderStateHandler(d, new OrderIsRegistered(), d.OnRegistered()));
+		h.add(new OrderStateHandler(d, new OrderIsRegisterFailed(), d.OnRegisterFailed()));
+		h.add(new OrderStateHandler(d, new OrderIsCancelled(), d.OnCancelled()));
+		h.add(new OrderStateHandler(d, new OrderIsCancelFailed(), d.OnCancelFailed()));
+		h.add(new OrderStateHandler(d, new OrderIsFilled(), d.OnFilled()));
+		h.add(new OrderStateHandler(d, new OrderIsPartiallyFilled(), d.OnPartiallyFilled()));
+		h.add(new OrderStateHandler(d, new OrderIsChanged(), d.OnChanged()));
+		h.add(new OrderStateHandler(d, new OrderIsDone(), d.OnDone()));
+		h.add(new OrderStateHandler(d, new OrderIsFailed(), d.OnFailed()));
 		
 		assertEquals(h, actual.getStateHandlers());
 	}

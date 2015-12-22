@@ -38,8 +38,8 @@ public class PortfolioEventDispatcherTest {
 		EventDispatcher ed = dispatcher.getEventDispatcher();
 		assertEquals(did, ed.getId());
 		
-		EventTypeSI type;
-		type = (EventTypeSI) dispatcher.OnChanged();
+		EventType type;
+		type = dispatcher.OnChanged();
 		assertEquals(did + ".Changed", type.getId());
 		assertFalse(type.isOnlySyncMode());
 	}
@@ -47,7 +47,7 @@ public class PortfolioEventDispatcherTest {
 	@Test
 	public void testFireChanged() throws Exception {
 		dispatcher.OnChanged().addListener(listener);
-		queue.enqueue(eq(new PortfolioEvent((EventTypeSI) dispatcher.OnChanged(), portfolio)));
+		queue.enqueue(eq(new PortfolioEvent(dispatcher.OnChanged(), portfolio)));
 		control.replay();
 		
 		dispatcher.fireChanged(portfolio);

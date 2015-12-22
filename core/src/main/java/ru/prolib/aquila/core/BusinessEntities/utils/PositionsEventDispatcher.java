@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class PositionsEventDispatcher implements EventListener {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onAvailable, onChanged;
+	private final EventType onAvailable, onChanged;
 	
 	public PositionsEventDispatcher(EventSystem es, Account account) {
 		super();

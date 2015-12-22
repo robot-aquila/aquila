@@ -21,11 +21,11 @@ public class EventQueue_FunctionalTest {
 		private final String id;
 		private final CountDownLatch finished = new CountDownLatch(1);
 
-		public ActiveEvent(EventTypeSI type, String id) {
+		public ActiveEvent(EventType type, String id) {
 			this(type, id, null);
 		}
 		
-		public ActiveEvent(EventTypeSI type, String id, Runnable action) {
+		public ActiveEvent(EventType type, String id, Runnable action) {
 			super(type);
 			this.action = action;
 			this.id = id;
@@ -75,12 +75,12 @@ public class EventQueue_FunctionalTest {
 	public void testSchedulingSequence(final EventQueue queue) throws Exception {
 		final CountDownLatch finished = new CountDownLatch(1);
 		final EventDispatcher dispatcher = new EventDispatcherImpl(queue);
-		EventTypeSI type = dispatcher.createType();
+		EventType type = dispatcher.createType();
 		Listener listener = new Listener();
 		
 		type.addListener(listener);
 		
-		final EventSI eX = new ActiveEvent(type, "eX");
+		final Event eX = new ActiveEvent(type, "eX");
 		final ActiveEvent e1 = new ActiveEvent(type, "e1");
 		final ActiveEvent e1_a = new ActiveEvent(type, "e1_a");
 		final ActiveEvent e2 = new ActiveEvent(type, "e2", new Runnable() {

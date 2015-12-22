@@ -8,9 +8,10 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * <p>
  * Абстрагирует терминал от набора типов событий.
  */
+@Deprecated
 public class TerminalEventDispatcher {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onConnected, onDisconnected, onStarted,
+	private final EventType onConnected, onDisconnected, onStarted,
 		onStopped, onPanic, onRequestSecurityError, onReady, onUnready;
 	
 	public TerminalEventDispatcher(EventSystem es) {

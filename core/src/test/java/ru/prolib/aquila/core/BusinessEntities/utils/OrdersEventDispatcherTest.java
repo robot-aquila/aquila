@@ -81,7 +81,7 @@ public class OrdersEventDispatcherTest {
 		eventsExpected.add(expected);
 		// Асинхронное событие окажется на втором месте, так как очередь будет
 		// на время заморожена обработчиком этого события.
-		e = new OrderEvent((EventTypeSI) dispatcher.OnAvailable(), order);
+		e = new OrderEvent(dispatcher.OnAvailable(), order);
 		eventsExpected.add(e);
 		
 		dispatcher.fireAvailable(order);
@@ -134,7 +134,7 @@ public class OrdersEventDispatcherTest {
 	
 	@Test
 	public void testFireAvailable() throws Exception {
-		e = new OrderEvent((EventTypeSI) dispatcher.OnAvailable(), order);
+		e = new OrderEvent(dispatcher.OnAvailable(), order);
 		eventsExpected.add(e);
 		final CountDownLatch counter = new CountDownLatch(1);
 		dispatcher.OnAvailable().addListener(new EventListener() {
@@ -152,72 +152,72 @@ public class OrdersEventDispatcherTest {
 	@Test
 	public void testOnEvent_OnRegistered() throws Exception {
 		testSynchronousEvent(dispatcher.OnRegistered(),
-			new OrderEvent((EventTypeSI) dispatcher.OnRegistered(), order),
-			new OrderEvent((EventTypeSI) order.OnRegistered(), order));
+			new OrderEvent(dispatcher.OnRegistered(), order),
+			new OrderEvent(order.OnRegistered(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnRegisterFailed() throws Exception {
 		testSynchronousEvent(dispatcher.OnRegisterFailed(),
-			new OrderEvent((EventTypeSI) dispatcher.OnRegisterFailed(), order),
-			new OrderEvent((EventTypeSI) order.OnRegisterFailed(), order));
+			new OrderEvent(dispatcher.OnRegisterFailed(), order),
+			new OrderEvent(order.OnRegisterFailed(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnCancelled() throws Exception {
 		testSynchronousEvent(dispatcher.OnCancelled(),
-			new OrderEvent((EventTypeSI) dispatcher.OnCancelled(), order),
-			new OrderEvent((EventTypeSI) order.OnCancelled(), order));
+			new OrderEvent(dispatcher.OnCancelled(), order),
+			new OrderEvent(order.OnCancelled(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnCancelFailed() throws Exception {
 		testSynchronousEvent(dispatcher.OnCancelFailed(),
-			new OrderEvent((EventTypeSI) dispatcher.OnCancelFailed(), order),
-			new OrderEvent((EventTypeSI) order.OnCancelFailed(), order));
+			new OrderEvent(dispatcher.OnCancelFailed(), order),
+			new OrderEvent(order.OnCancelFailed(), order));
 	}
 
 	@Test
 	public void testOnEvent_OnFilled() throws Exception {
 		testSynchronousEvent(dispatcher.OnFilled(),
-			new OrderEvent((EventTypeSI) dispatcher.OnFilled(), order),
-			new OrderEvent((EventTypeSI) order.OnFilled(), order));
+			new OrderEvent(dispatcher.OnFilled(), order),
+			new OrderEvent(order.OnFilled(), order));
 	}
 
 	@Test
 	public void testOnEvent_OnPartiallyFilled() throws Exception {
 		testSynchronousEvent(dispatcher.OnPartiallyFilled(),
-			new OrderEvent((EventTypeSI) dispatcher.OnPartiallyFilled(), order),
-			new OrderEvent((EventTypeSI) order.OnPartiallyFilled(), order));
+			new OrderEvent(dispatcher.OnPartiallyFilled(), order),
+			new OrderEvent(order.OnPartiallyFilled(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnChanged() throws Exception {
 		testSynchronousEvent(dispatcher.OnChanged(),
-			new OrderEvent((EventTypeSI) dispatcher.OnChanged(), order),
-			new OrderEvent((EventTypeSI) order.OnChanged(), order));
+			new OrderEvent(dispatcher.OnChanged(), order),
+			new OrderEvent(order.OnChanged(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnDone() throws Exception {
 		testSynchronousEvent(dispatcher.OnDone(),
-			new OrderEvent((EventTypeSI) dispatcher.OnDone(), order),
-			new OrderEvent((EventTypeSI) order.OnDone(), order));
+			new OrderEvent(dispatcher.OnDone(), order),
+			new OrderEvent(order.OnDone(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnFailed() throws Exception {
 		testSynchronousEvent(dispatcher.OnFailed(),
-			new OrderEvent((EventTypeSI) dispatcher.OnFailed(), order),
-			new OrderEvent((EventTypeSI) order.OnFailed(), order));
+			new OrderEvent(dispatcher.OnFailed(), order),
+			new OrderEvent(order.OnFailed(), order));
 	}
 	
 	@Test
 	public void testOnEvent_OnTrade() throws Exception {
 		Trade t = new Trade(terminal);
 		testSynchronousEvent(dispatcher.OnTrade(),
-			new OrderTradeEvent((EventTypeSI) dispatcher.OnTrade(), order, t),
-			new OrderTradeEvent((EventTypeSI) order.OnTrade(), order, t));
+			new OrderTradeEvent(dispatcher.OnTrade(), order, t),
+			new OrderTradeEvent(order.OnTrade(), order, t));
 	}
 
 	@Test

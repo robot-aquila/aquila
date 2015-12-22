@@ -25,7 +25,7 @@ public class SecurityTradeEventTest {
 	
 	private IMocksControl control;
 	private EditableSecurity security, security2;
-	private EventTypeSI eventType, eventType2;
+	private EventType eventType, eventType2;
 	private EditableTerminal terminal;
 	private Trade trade;
 	private SecurityTradeEvent event;
@@ -38,8 +38,8 @@ public class SecurityTradeEventTest {
 		security.setMinStepSize(1d);
 		security.setMinStepPrice(1d);
 		security2 = control.createMock(EditableSecurity.class);
-		eventType = (EventTypeSI) security.OnTrade();
-		eventType2 = control.createMock(EventTypeSI.class);
+		eventType = security.OnTrade();
+		eventType2 = control.createMock(EventType.class);
 		trade = new BMUtils().tradeFromTick(
 			new Tick(new DateTime(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
 			security);

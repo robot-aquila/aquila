@@ -10,15 +10,15 @@ import ru.prolib.aquila.core.utils.Variant;
 
 public class TradeReportEventTest {
 	private IMocksControl control;
-	private EventTypeSI type1, type2;
+	private EventType type1, type2;
 	private RTradeImpl report1, report2;
 	private TradeReportEvent event;
 	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type1 = control.createMock(EventTypeSI.class);
-		type2 = control.createMock(EventTypeSI.class);
+		type1 = control.createMock(EventType.class);
+		type2 = control.createMock(EventType.class);
 		report1 = control.createMock(RTradeImpl.class);
 		report2 = control.createMock(RTradeImpl.class);
 		event = new TradeReportEvent(type1, report1, 8);
@@ -33,7 +33,7 @@ public class TradeReportEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
+		Variant<EventType> vType = new Variant<EventType>()
 			.add(type1)
 			.add(type2);
 		Variant<RTradeImpl> vRep = new Variant<RTradeImpl>(vType)

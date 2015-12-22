@@ -1,7 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import ru.prolib.aquila.core.EventTypeSI;
+
+import ru.prolib.aquila.core.EventType;
 
 /**
  * Событие в связи с новой сделкой по заявке.
@@ -16,7 +17,7 @@ public class OrderTradeEvent extends OrderEvent {
 	 * @param order заявка
 	 * @param trade сделка
 	 */
-	public OrderTradeEvent(EventTypeSI type, Order order, Trade trade) {
+	public OrderTradeEvent(EventType type, Order order, Trade trade) {
 		super(type, order);
 		this.trade = trade;
 	}

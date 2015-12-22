@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 public class OrderStateHandler {
 	private final OrderEventDispatcher dispatcher;
 	private final OrderStateValidator validator;
-	private final EventTypeSI type;
+	private final EventType type;
 	
 	/**
 	 * Конструктор.
@@ -22,7 +22,7 @@ public class OrderStateHandler {
 	 */
 	public OrderStateHandler(OrderEventDispatcher dispatcher,
 							 OrderStateValidator validator,
-							 EventTypeSI type)
+							 EventType type)
 	{
 		super();
 		this.dispatcher = dispatcher;
