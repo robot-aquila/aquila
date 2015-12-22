@@ -77,7 +77,7 @@ public class QUIKSymbolTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		assertEquals("RTS-12.13@SPBFUT(FUT/USD)", symbol.toString());
+		assertEquals("F:RTS-12.13@SPBFUT:USD", symbol.toString());
 	}
 
 }
