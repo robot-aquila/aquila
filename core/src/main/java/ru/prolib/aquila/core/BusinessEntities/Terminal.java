@@ -28,6 +28,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return true если терминал запущен, иначе false
 	 */
+	@Deprecated
 	public boolean started();
 	
 	/**
@@ -39,6 +40,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return true если терминал остановлен, иначе false
 	 */
+	@Deprecated
 	public boolean stopped();
 	
 	/**
@@ -46,6 +48,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return true если терминал подключен, иначе false
 	 */
+	@Deprecated
 	public boolean connected();
 	
 	/**
@@ -53,6 +56,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return состояние терминала
 	 */
+	@Deprecated
 	public TerminalState getTerminalState();
 	
 	/**
@@ -69,6 +73,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return тип события
 	 */
+	@Deprecated
 	public EventType OnConnected();
 	
 	/**
@@ -84,6 +89,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return тип события
 	 */
+	@Deprecated
 	public EventType OnDisconnected();
 
 	/**
@@ -100,6 +106,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return тип события
 	 */
+	@Deprecated
 	public EventType OnStarted();
 
 	/**
@@ -116,6 +123,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return тип события
 	 */
+	@Deprecated
 	public EventType OnStopped();
 	
 	/**
@@ -144,25 +152,20 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return тип события
 	 */
+	@Deprecated
 	public EventType OnPanic();
 
 	/**
-	 * Получить тип события: терминал готов к работе.
+	 * Get event type: terminal is ready to work.
 	 * <p>
-	 * Данное событие сигнализирует о переходе терминала в состояние готовности
-	 * к приему запросов.
-	 * <p>
-	 * @return тип события
+	 * @return event type
 	 */
 	public EventType OnReady();
 	
 	/**
-	 * Получить тип события: терминал не готов к работе.
+	 * Get vent type: terminal is unready.
 	 * <p>
-	 * Данное событие сигнализирует о выходе терминала из состояния готовности
-	 * к приему запросов. 
-	 * <p>
-	 * @return тип события
+	 * @return event type
 	 */
 	public EventType OnUnready();
 	
@@ -243,23 +246,17 @@ public interface Terminal extends Starter, Scheduler {
 			long qty, OrderActivator activator);
 	
 	/**
-	 * Инициировать использование инструмента.
+	 * Request for new security instance.
 	 * <p>
-	 * Данный метод должен использоваться торговыми стратегиями для декларации
-	 * инструментов, необходимых для работы.
+	 * This method should be used to request required securities. Different
+	 * trading systems may work with securities in different ways. Some of them
+	 * may give an access to predefined set of securities. In this case such
+	 * call does not make sense. But some systems require initiate request to
+	 * get security updates. This method is universal way to ask for securities.
+	 * Use this method to request every security you want to work if you want
+	 * your program work with every terminal implementation.
 	 * <p>
-	 * Разные терминалы по-разному предоставляют данные об инструментах. В
-	 * некоторых терминалах для того, что бы существующий в торговой системе
-	 * инструмент получил отражение в локальном терминале, необходимо 
-	 * предварительно отправить в удаленную систему запрос. В других
-	 * реализациях, где набор доступных инструментов определяется удаленной
-	 * стороной, этот метод может реализовывать проверку доступности инструмента
-	 * по истечении определенного времени, которого должно быть достаточно для
-	 * получения от удаленной системы полного списка инструментов.
-	 * <p>
-	 * В базовой реализации представляет собой метод-заглушку.
-	 * <p>
-	 * @param symbol дескриптор инструмента
+	 * @param symbol - the symbol
 	 */
 	public void requestSecurity(Symbol symbol);
 	
