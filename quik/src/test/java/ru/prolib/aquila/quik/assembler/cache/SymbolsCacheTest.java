@@ -14,7 +14,7 @@ public class SymbolsCacheTest {
 	private static QUIKSymbol symbol1, symbol2, symbol3, symbol4;
 	private IMocksControl control;
 	private EventDispatcher dispatcher;
-	private EventTypeSI type;
+	private EventType type;
 	private SymbolsCache cache;
 	
 	@BeforeClass
@@ -29,7 +29,7 @@ public class SymbolsCacheTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		dispatcher = control.createMock(EventDispatcher.class);
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		cache = new SymbolsCache(dispatcher, type);
 	}
 	
@@ -137,9 +137,9 @@ public class SymbolsCacheTest {
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>()
 			.add(dispatcher)
 			.add(control.createMock(EventDispatcher.class));
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>(vDisp)
+		Variant<EventType> vType = new Variant<EventType>(vDisp)
 			.add(type)
-			.add(control.createMock(EventTypeSI.class));
+			.add(control.createMock(EventType.class));
 		Variant<List<QUIKSymbol>> vRows =
 				new Variant<List<QUIKSymbol>>(vType)
 			.add(rows1)

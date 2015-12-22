@@ -14,8 +14,8 @@ import ru.prolib.aquila.dde.DDETable;
 public class DDEObservableServiceImplTest {
 	private IMocksControl control;
 	private EventDispatcher dispatcher;
-	private EventTypeSI etConnect,etDisconnect,etRegister,etUnregister;
-	private EventTypeSI etData,etTable;
+	private EventType etConnect,etDisconnect,etRegister,etUnregister;
+	private EventType etData,etTable;
 	private DDEAccessControl access;
 	private DDEObservableServiceImpl service;
 	private DDETable table;
@@ -27,12 +27,12 @@ public class DDEObservableServiceImplTest {
 		eventSystem = control.createMock(EventSystem.class);
 		table = control.createMock(DDETable.class);
 		dispatcher = control.createMock(EventDispatcher.class);
-		etConnect = control.createMock(EventTypeSI.class);
-		etDisconnect = control.createMock(EventTypeSI.class);
-		etRegister = control.createMock(EventTypeSI.class);
-		etUnregister = control.createMock(EventTypeSI.class);
-		etData = control.createMock(EventTypeSI.class);
-		etTable = control.createMock(EventTypeSI.class);
+		etConnect = control.createMock(EventType.class);
+		etDisconnect = control.createMock(EventType.class);
+		etRegister = control.createMock(EventType.class);
+		etUnregister = control.createMock(EventType.class);
+		etData = control.createMock(EventType.class);
+		etTable = control.createMock(EventType.class);
 		access = control.createMock(DDEAccessControl.class);
 		service = new DDEObservableServiceImpl("name", access, dispatcher,
 				etConnect, etDisconnect, etRegister, etUnregister,
@@ -274,24 +274,24 @@ public class DDEObservableServiceImplTest {
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vAcc)
 			.add(dispatcher)
 			.add(control.createMock(EventDispatcher.class));
-		Variant<EventTypeSI> vCon = new Variant<EventTypeSI>(vDisp)
+		Variant<EventType> vCon = new Variant<EventType>(vDisp)
 			.add(etConnect)
-			.add(control.createMock(EventTypeSI.class));
-		Variant<EventTypeSI> vDisc = new Variant<EventTypeSI>(vCon)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vDisc = new Variant<EventType>(vCon)
 			.add(etDisconnect)
-			.add(control.createMock(EventTypeSI.class));
-		Variant<EventTypeSI> vReg = new Variant<EventTypeSI>(vDisc)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vReg = new Variant<EventType>(vDisc)
 			.add(etRegister)
-			.add(control.createMock(EventTypeSI.class));
-		Variant<EventTypeSI> vUnr = new Variant<EventTypeSI>(vReg)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vUnr = new Variant<EventType>(vReg)
 			.add(etUnregister)
-			.add(control.createMock(EventTypeSI.class));
-		Variant<EventTypeSI> vDat = new Variant<EventTypeSI>(vUnr)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vDat = new Variant<EventType>(vUnr)
 			.add(etData)
-			.add(control.createMock(EventTypeSI.class));
-		Variant<EventTypeSI> vTab = new Variant<EventTypeSI>(vDat)
+			.add(control.createMock(EventType.class));
+		Variant<EventType> vTab = new Variant<EventType>(vDat)
 			.add(etTable)
-			.add(control.createMock(EventTypeSI.class));
+			.add(control.createMock(EventType.class));
 		int foundCnt = 0;
 		DDEObservableServiceImpl found = null, x = null;
 		do {

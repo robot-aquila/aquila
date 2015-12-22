@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.utils.Variant;
 public class TradesCacheTest {
 	private IMocksControl control;
 	private EventDispatcher dispatcher;
-	private EventTypeSI type;
+	private EventType type;
 	private TradesEntry entry1, entry2, entry3, entry4;
 	private TradesCache cache;
 
@@ -19,7 +19,7 @@ public class TradesCacheTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		dispatcher = control.createMock(EventDispatcher.class);
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		entry1 = control.createMock(TradesEntry.class);
 		entry2 = control.createMock(TradesEntry.class);
 		entry3 = control.createMock(TradesEntry.class);
@@ -128,9 +128,9 @@ public class TradesCacheTest {
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vRows)
 			.add(dispatcher)
 			.add(control.createMock(EventDispatcher.class));
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>(vDisp)
+		Variant<EventType> vType = new Variant<EventType>(vDisp)
 			.add(type)
-			.add(control.createMock(EventTypeSI.class));
+			.add(control.createMock(EventType.class));
 		Variant<?> iterator = vType;
 		int foundCnt = 0;
 		TradesCache x, found = null;

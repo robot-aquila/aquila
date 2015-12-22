@@ -18,10 +18,10 @@ import ru.prolib.aquila.core.BusinessEntities.Account;
 public class PositionsCache {
 	private static final String SEP = "#";
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onUpdate;
+	private final EventType onUpdate;
 	private final Map<String, PositionEntry> data;
 	
-	public PositionsCache(EventDispatcher dispatcher, EventTypeSI onUpdate) {
+	public PositionsCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super();
 		this.dispatcher = dispatcher;
 		this.onUpdate = onUpdate;

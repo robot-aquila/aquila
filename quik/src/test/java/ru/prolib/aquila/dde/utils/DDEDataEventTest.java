@@ -12,14 +12,14 @@ import ru.prolib.aquila.core.utils.Variant;
 
 public class DDEDataEventTest {
 	private IMocksControl control;
-	private EventTypeSI type;
+	private EventType type;
 	private byte[] data;
 	private DDEDataEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		data = new byte[128];
 		for ( int i = 0; i < data.length; i ++ ) { data[i] = (byte) (i / 2); }
 		event = new DDEDataEvent(type, "service", "topic", "item", data);
@@ -67,9 +67,9 @@ public class DDEDataEventTest {
 		for ( int i = 0; i < data3.length; i ++ ) { data3[i] = (byte) (i / 2); }
 		byte data4[] = new byte[2]; data4[0] = 64; data4[1] = 32;
 		
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>()
+		Variant<EventType> vType = new Variant<EventType>()
 			.add(type)
-			.add(control.createMock(EventTypeSI.class));
+			.add(control.createMock(EventType.class));
 		Variant<String> vService = new Variant<String>(vType)
 			.add("service")
 			.add("bubba");

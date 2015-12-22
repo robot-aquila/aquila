@@ -12,15 +12,15 @@ import ru.prolib.aquila.dde.DDETable;
 
 public class DDETableEventTest {
 	private IMocksControl control;
-	private EventTypeSI type1,type2;
+	private EventType type1,type2;
 	private DDETable table1,table2;
 	private DDETableEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type1 = control.createMock(EventTypeSI.class);
-		type2 = control.createMock(EventTypeSI.class);
+		type1 = control.createMock(EventType.class);
+		type2 = control.createMock(EventType.class);
 		table1 = control.createMock(DDETable.class);
 		table2 = control.createMock(DDETable.class);
 		event = new DDETableEvent(type1, "service", table1);

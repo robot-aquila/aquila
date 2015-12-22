@@ -20,10 +20,10 @@ import ru.prolib.aquila.t2q.T2QOrder;
  */
 public class OrdersCache {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onUpdate;
+	private final EventType onUpdate;
 	private final Map<Long, T2QOrder> data;
 	
-	public OrdersCache(EventDispatcher dispatcher, EventTypeSI onUpdate) {
+	public OrdersCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super();
 		this.dispatcher = dispatcher;
 		this.onUpdate = onUpdate;

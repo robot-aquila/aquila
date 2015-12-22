@@ -35,9 +35,9 @@ public class SymbolsCache {
 	private final Map<String, QUIKSymbol> long2symbol;
 	
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onUpdate; 
+	private final EventType onUpdate; 
 	
-	public SymbolsCache(EventDispatcher dispatcher, EventTypeSI onUpdate) {
+	public SymbolsCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super();
 		symbols = new Vector<QUIKSymbol>();
 		short2symbol = new LinkedHashMap<String, QUIKSymbol>();

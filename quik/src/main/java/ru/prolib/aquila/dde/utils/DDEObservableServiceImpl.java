@@ -17,9 +17,9 @@ public class DDEObservableServiceImpl
 	private final String name;
 	private final DDEAccessControl access;
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI etConnect,etDisconnect;
-	private final EventTypeSI etRegister,etUnregister;
-	private final EventTypeSI etData,etTable;
+	private final EventType etConnect,etDisconnect;
+	private final EventType etRegister,etUnregister;
+	private final EventType etData,etTable;
 	
 	/**
 	 * Создать экземпляр обозреваемого DDE-сервиса.
@@ -75,9 +75,9 @@ public class DDEObservableServiceImpl
 	 */
 	public DDEObservableServiceImpl(String name, DDEAccessControl access,
 			EventDispatcher dispatcher,
-			EventTypeSI onConnect, EventTypeSI onDisconnect,
-			EventTypeSI onRegister, EventTypeSI onUnregister,
-			EventTypeSI onData, EventTypeSI onTable)
+			EventType onConnect, EventType onDisconnect,
+			EventType onRegister, EventType onUnregister,
+			EventType onData, EventType onTable)
 	{
 		super();
 		if ( name == null ) {

@@ -15,7 +15,7 @@ public class ConnectionHandlerTest {
 	private IMocksControl control;
 	private QUIKTerminal terminal;
 	private QUIKClient client;
-	private EventTypeSI onStarted, onStopped, onDisconnected;
+	private EventType onStarted, onStopped, onDisconnected;
 	private QUIKConfigImpl config;
 	private ConnectionHandler handler;
 
@@ -24,9 +24,9 @@ public class ConnectionHandlerTest {
 		control = createStrictControl();
 		terminal = control.createMock(QUIKTerminal.class);
 		client = control.createMock(QUIKClient.class);
-		onStarted = control.createMock(EventTypeSI.class);
-		onStopped = control.createMock(EventTypeSI.class);
-		onDisconnected = control.createMock(EventTypeSI.class);
+		onStarted = control.createMock(EventType.class);
+		onStopped = control.createMock(EventType.class);
+		onDisconnected = control.createMock(EventType.class);
 		config = new QUIKConfigImpl();
 		config.quikPath = "C:/work/quik";
 		handler = new ConnectionHandler(terminal, config);

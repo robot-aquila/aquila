@@ -23,7 +23,7 @@ public class DDETableEvent extends DDEEvent {
 	 * @param service наименование сервиса
 	 * @param table экземпляр входящей таблицы
 	 */
-	public DDETableEvent(EventTypeSI type, String service, DDETable table) {
+	public DDETableEvent(EventType type, String service, DDETable table) {
 		super(type, service);
 		if ( type == null ) {
 			throw new NullPointerException("Type cannot be null");

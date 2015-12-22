@@ -22,7 +22,7 @@ public class DDETopicEvent extends DDEEvent {
 	 * @param service имя DDE-сервиса
 	 * @param topic тема события
 	 */
-	public DDETopicEvent(EventTypeSI type, String service, String topic) {
+	public DDETopicEvent(EventType type, String service, String topic) {
 		super(type, service);
 		if ( type == null ) {
 			throw new NullPointerException("Type cannot be null");

@@ -217,7 +217,7 @@ public class AssemblerTest {
 	
 	@Test
 	public void testOnEvent_OnSymbolsUpdate() throws Exception {
-		EventTypeSI onSymbolsUpdate = control.createMock(EventTypeSI.class);
+		EventType onSymbolsUpdate = control.createMock(EventType.class);
 		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		l1.tryAssembleTrades();
 		control.replay();
@@ -229,8 +229,8 @@ public class AssemblerTest {
 	
 	@Test
 	public void testOnEvent_OnTradesUpdate_BlockRemoved() throws Exception {
-		EventTypeSI onSymbolsUpdate = control.createMock(EventTypeSI.class),
-				  onTradesUpdate = control.createMock(EventTypeSI.class);
+		EventType onSymbolsUpdate = control.createMock(EventType.class),
+				  onTradesUpdate = control.createMock(EventType.class);
 		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		expect(cache.OnTradesUpdate()).andStubReturn(onTradesUpdate);
 		control.replay();
@@ -242,8 +242,8 @@ public class AssemblerTest {
 	
 	@Test
 	public void testOnEvent_OnTradesUpdate_BlockAdded() throws Exception {
-		EventTypeSI onSymbolsUpdate = control.createMock(EventTypeSI.class),
-				  onTradesUpdate = control.createMock(EventTypeSI.class);
+		EventType onSymbolsUpdate = control.createMock(EventType.class),
+				  onTradesUpdate = control.createMock(EventType.class);
 		expect(cache.OnSymbolsUpdate()).andStubReturn(onSymbolsUpdate);
 		expect(cache.OnTradesUpdate()).andStubReturn(onTradesUpdate);
 		l1.tryAssembleTrades();

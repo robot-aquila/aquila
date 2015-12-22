@@ -26,11 +26,11 @@ public class CacheBuilderTest {
 		TradesCache tradesCache = actual.getTradesCache();
 		EventDispatcher d = symbols.getEventDispatcher();
 		Cache expected = new Cache(
-				new SymbolsCache(d, (EventTypeSI) symbols.OnUpdate()),
-				new PositionsCache(d, (EventTypeSI) posCache.OnUpdate()),
-				new OrdersCache(d, (EventTypeSI) ordersCache.OnUpdate()),
-				new OwnTradesCache(d, (EventTypeSI) ownTradesCache.OnUpdate()),
-				new TradesCache(d, (EventTypeSI) tradesCache.OnUpdate()));
+				new SymbolsCache(d, symbols.OnUpdate()),
+				new PositionsCache(d, posCache.OnUpdate()),
+				new OrdersCache(d, ordersCache.OnUpdate()),
+				new OwnTradesCache(d, ownTradesCache.OnUpdate()),
+				new TradesCache(d, tradesCache.OnUpdate()));
 		assertEquals(expected, actual);
 	}
 

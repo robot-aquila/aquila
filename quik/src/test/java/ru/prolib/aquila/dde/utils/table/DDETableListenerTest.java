@@ -22,7 +22,7 @@ public class DDETableListenerTest {
 	private IMocksControl control;
 	private DDETableHandler handler;
 	private DDETable table;
-	private EventTypeSI type;
+	private EventType type;
 	private DDETableEvent event;
 	private DDETableListener listener;
 	
@@ -37,7 +37,7 @@ public class DDETableListenerTest {
 		control = createStrictControl();
 		handler = control.createMock(DDETableHandler.class);
 		table = control.createMock(DDETable.class);
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		event = new DDETableEvent(type, "foobar", table);
 		listener = new DDETableListener("hello", handler);
 	}

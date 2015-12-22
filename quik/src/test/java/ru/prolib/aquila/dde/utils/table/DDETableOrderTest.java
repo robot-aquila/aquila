@@ -158,7 +158,7 @@ public class DDETableOrderTest {
 			}
 		});
 		EventDispatcher d2 = eventSystem.createEventDispatcher();
-		EventTypeSI t2 = d2.createType();
+		EventType t2 = d2.createType();
 		t2.addListener(order);
 		for ( int i = 0; i < src.size(); i ++ ) {
 			d2.dispatch(new DDETableEvent(t2, "SVC", src.get(i)));

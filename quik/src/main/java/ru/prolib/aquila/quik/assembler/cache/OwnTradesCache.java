@@ -15,10 +15,10 @@ import ru.prolib.aquila.t2q.*;
  */
 public class OwnTradesCache {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onUpdate;
+	private final EventType onUpdate;
 	private final Map<Long, T2QTrade> data;
 	
-	public OwnTradesCache(EventDispatcher dispatcher, EventTypeSI onUpdate) {
+	public OwnTradesCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super();
 		this.dispatcher = dispatcher;
 		this.onUpdate = onUpdate;

@@ -11,14 +11,14 @@ import ru.prolib.aquila.core.*;
 
 public class DDEEventTest {
 	private IMocksControl control;
-	private EventTypeSI type1,type2;
+	private EventType type1,type2;
 	private DDEEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		type1 = control.createMock(EventTypeSI.class);
-		type2 = control.createMock(EventTypeSI.class);
+		type1 = control.createMock(EventType.class);
+		type2 = control.createMock(EventType.class);
 		event = new DDEEvent(type1, "foobar");
 	}
 	

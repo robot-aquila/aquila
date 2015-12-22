@@ -25,7 +25,7 @@ public class DDEDataEvent extends DDETopicEvent {
 	 * @param item субъект
 	 * @param data массив данных
 	 */
-	public DDEDataEvent(EventTypeSI type, String service, String topic,
+	public DDEDataEvent(EventType type, String service, String topic,
 						String item, byte[] data)
 	{
 		super(type, service, topic);

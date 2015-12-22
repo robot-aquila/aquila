@@ -14,7 +14,7 @@ public class OrdersCacheTest {
 	private IMocksControl control;
 	private T2QOrder order1, order2, order3, order4;
 	private EventDispatcher dispatcher;
-	private EventTypeSI type;
+	private EventType type;
 	private OrdersCache cache;
 
 	@Before
@@ -25,7 +25,7 @@ public class OrdersCacheTest {
 		order3 = control.createMock(T2QOrder.class);
 		order4 = control.createMock(T2QOrder.class);
 		dispatcher = control.createMock(EventDispatcher.class);
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		cache = new OrdersCache(dispatcher, type);
 		
 		expect(order1.getOrderId()).andStubReturn(10L);
@@ -148,9 +148,9 @@ public class OrdersCacheTest {
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vRows)
 			.add(dispatcher)
 			.add(control.createMock(EventDispatcher.class));
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>(vDisp)
+		Variant<EventType> vType = new Variant<EventType>(vDisp)
 			.add(type)
-			.add(control.createMock(EventTypeSI.class));
+			.add(control.createMock(EventType.class));
 		Variant<?> iterator = vType;
 		int foundCnt = 0;
 		OrdersCache x, found = null;

@@ -15,7 +15,7 @@ public class OwnTradesCacheTest {
 	private IMocksControl control;
 	private T2QTrade trade1, trade2, trade3, trade4;
 	private EventDispatcher dispatcher;
-	private EventTypeSI type;
+	private EventType type;
 	private OwnTradesCache cache;
 
 	@Before
@@ -26,7 +26,7 @@ public class OwnTradesCacheTest {
 		trade3 = control.createMock(T2QTrade.class);
 		trade4 = control.createMock(T2QTrade.class);
 		dispatcher = control.createMock(EventDispatcher.class);
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		cache = new OwnTradesCache(dispatcher, type);
 		
 		expect(trade1.getOrderId()).andStubReturn(10L);
@@ -160,9 +160,9 @@ public class OwnTradesCacheTest {
 		Variant<EventDispatcher> vDisp = new Variant<EventDispatcher>(vRows)
 			.add(dispatcher)
 			.add(control.createMock(EventDispatcher.class));
-		Variant<EventTypeSI> vType = new Variant<EventTypeSI>(vDisp)
+		Variant<EventType> vType = new Variant<EventType>(vDisp)
 			.add(type)
-			.add(control.createMock(EventTypeSI.class));
+			.add(control.createMock(EventType.class));
 		Variant<?> iterator = vType;
 		int foundCnt = 0;
 		OwnTradesCache x, found = null;

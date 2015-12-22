@@ -13,10 +13,10 @@ import ru.prolib.aquila.core.*;
  */
 public class TradesCache {
 	private final EventDispatcher dispatcher;
-	private final EventTypeSI onUpdate;
+	private final EventType onUpdate;
 	private final LinkedList<TradesEntry> data;
 	
-	public TradesCache(EventDispatcher dispatcher, EventTypeSI onUpdate) {
+	public TradesCache(EventDispatcher dispatcher, EventType onUpdate) {
 		super();
 		this.dispatcher = dispatcher;
 		this.onUpdate = onUpdate;

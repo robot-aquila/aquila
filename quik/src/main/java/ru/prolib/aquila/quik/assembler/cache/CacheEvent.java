@@ -16,7 +16,7 @@ public class CacheEvent extends EventImpl {
 	 * @param type тип события
 	 * @param isDataAdded признак добавления в кэш новых данных
 	 */
-	public CacheEvent(EventTypeSI type, boolean isDataAdded) {
+	public CacheEvent(EventType type, boolean isDataAdded) {
 		super(type);
 		this.isDataAdded = isDataAdded;
 	}
