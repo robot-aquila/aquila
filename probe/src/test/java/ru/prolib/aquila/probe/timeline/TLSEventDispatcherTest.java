@@ -33,14 +33,14 @@ public class TLSEventDispatcherTest {
 	public void testEventTypes() throws Exception {
 		String did = "Timeline" + TLSEventDispatcher.getLastId();
 		
-		EventTypeSI type;
-		type = (EventTypeSI) dispatcher.OnRun();
+		EventType type;
+		type = dispatcher.OnRun();
 		assertEquals(did + ".Run", type.getId());
 		
-		type = (EventTypeSI) dispatcher.OnPause();
+		type = dispatcher.OnPause();
 		assertEquals(did + ".Pause", type.getId());
 		
-		type = (EventTypeSI) dispatcher.OnFinish();
+		type = dispatcher.OnFinish();
 		assertEquals(did + ".Finish", type.getId());
 	}
 	

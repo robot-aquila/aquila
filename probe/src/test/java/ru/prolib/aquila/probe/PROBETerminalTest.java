@@ -79,7 +79,7 @@ public class PROBETerminalTest {
 		type.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event actual) {
-				assertEquals(new RequestSecurityEvent((EventTypeSI) type,
+				assertEquals(new RequestSecurityEvent(type,
 						symbol, -1, "Test error"), actual);
 				finished.countDown();
 			}
