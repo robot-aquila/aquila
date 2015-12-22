@@ -13,7 +13,7 @@ public class EventTranslatorEventTest {
 
 	private static IMocksControl control;
 	
-	private EventTypeSI type;
+	private EventType type;
 	private Event source;
 	private EventTranslatorEvent e;
 	
@@ -21,7 +21,7 @@ public class EventTranslatorEventTest {
 	public void setUp() {	
 		control = createStrictControl();
 		
-		type = control.createMock(EventTypeSI.class);
+		type = control.createMock(EventType.class);
 		source = control.createMock(Event.class);
 		
 		e = new EventTranslatorEvent(type, source);
@@ -51,7 +51,7 @@ public class EventTranslatorEventTest {
 	
 	@Test
 	public void testEquals_FalseWithAnotherType() {
-		EventTypeSI t = control.createMock(EventTypeSI.class);
+		EventType t = control.createMock(EventType.class);
 		EventTranslatorEvent e2 = new EventTranslatorEvent(t, source);
 		assertFalse(e.equals(e2));
 	}

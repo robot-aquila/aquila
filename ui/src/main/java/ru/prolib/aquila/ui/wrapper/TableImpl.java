@@ -20,9 +20,9 @@ public class TableImpl implements Table {
 	private JTable underlayed;
 	
 	private EventDispatcher dispatcher;
-	private EventTypeSI onRowSelected;
+	private EventType onRowSelected;
 	
-	public TableImpl(TableModel model, EventDispatcher dispatcher, EventTypeSI onRowSelected) {
+	public TableImpl(TableModel model, EventDispatcher dispatcher, EventType onRowSelected) {
 		super();
 		this.model = model;
 		this.dispatcher = dispatcher;

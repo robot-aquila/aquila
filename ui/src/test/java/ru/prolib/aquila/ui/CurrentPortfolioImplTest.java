@@ -32,7 +32,7 @@ public class CurrentPortfolioImplTest {
 	private Account acc;
 	private Terminal portfolios;
 	private EventDispatcher dispatcher;
-	private EventTypeSI portfolioChanged;
+	private EventType portfolioChanged;
 	private Menu menu;
 	
 	private CurrentPortfolioImpl prt;
@@ -97,7 +97,7 @@ public class CurrentPortfolioImplTest {
 	
 	@Test
 	public void testOnEvent_HandledCurrPortfolioNotSet() throws Exception {
-		EventTypeSI onPortfolioAvailable = dispatcher.createType();
+		EventType onPortfolioAvailable = dispatcher.createType();
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
 		final CountDownLatch finished = new CountDownLatch(1);
@@ -136,7 +136,7 @@ public class CurrentPortfolioImplTest {
 	
 	@Test
 	public void testOnEvent_HandledCurrPortfolioSet() throws Exception {
-		EventTypeSI onPortfolioAvailable = dispatcher.createType();
+		EventType onPortfolioAvailable = dispatcher.createType();
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
 		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);

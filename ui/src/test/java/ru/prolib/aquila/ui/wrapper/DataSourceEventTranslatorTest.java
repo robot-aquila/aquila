@@ -22,7 +22,7 @@ public class DataSourceEventTranslatorTest {
 	private static EventQueue queue;
 	
 	private Event source;
-	private EventTypeSI onOccur;
+	private EventType onOccur;
 	private EventDispatcher dispatcher;
 	
 	private DataSourceEventTranslator evt;

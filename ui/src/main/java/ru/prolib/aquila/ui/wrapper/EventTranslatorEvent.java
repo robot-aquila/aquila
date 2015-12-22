@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.*;
 public class EventTranslatorEvent extends EventImpl {
 	private Event source;
 	
-	public EventTranslatorEvent(EventTypeSI eType, Event source) {
+	public EventTranslatorEvent(EventType eType, Event source) {
 		super(eType);
 		this.source = source;
 	}

@@ -8,9 +8,9 @@ import ru.prolib.aquila.core.*;
 public class DataSourceEventTranslator implements EventListener {
 	
 	private EventDispatcher dispatcher;	
-	private EventTypeSI onEventOccur;
+	private EventType onEventOccur;
 	
-	public DataSourceEventTranslator(EventDispatcher dispatcher, EventTypeSI onEventOccur) {
+	public DataSourceEventTranslator(EventDispatcher dispatcher, EventType onEventOccur) {
 		this.dispatcher = dispatcher;
 		this.onEventOccur = onEventOccur;
 	}
