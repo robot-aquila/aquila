@@ -14,6 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
  * <p>
  * Выполняет запуск процедур старта/останова терминала в отдельном потоке.
  */
+@Deprecated
 public class TerminalController {
 	private static final Logger logger;
 	private final TerminalControllerHelper helper;

@@ -1,90 +1,41 @@
 package ru.prolib.aquila.core.data;
 
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import ru.prolib.aquila.core.IObservable;
 
-public class DataHandler extends Observable implements IDataHandler {
-	protected final Lock lock;
-	private final String descriptor;
-	private DataHandlerState state;
+/**
+ * Data handler interface.
+ * <p>
+ * This interface declares an access to attributes and methods of a separate data stream.
+ */
+public interface DataHandler extends IObservable {
 	
-	public DataHandler(String descriptor, DataHandlerState initialState, Lock lock) {
-		super();
-		this.descriptor = descriptor;
-		this.state = initialState;
-		this.lock = lock;
-	}
+	/**
+	 * Get current handler state.
+	 * <p>
+	 * @return handler state
+	 */
+	public DataHandlerState getState();
 	
-	public DataHandler(String descriptor, DataHandlerState initialState) {
-		this(descriptor, initialState, new ReentrantLock());
-	}
+	/**
+	 * Get text descriptor of the handler.
+	 * <p>
+	 * @return descriptor
+	 */
+	public String getDescriptor();
 	
-	public DataHandler(String descriptor) {
-		this(descriptor, DataHandlerState.PENDING);
-	}
-	
-	@Override
-	public DataHandlerState getState() {
-		lock.lock();
-		try {
-			return state;
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	public void setState(DataHandlerState newState) {
-		lock.lock();
-		try {
-			if ( newState != state ) {
-				setChanged();
-				state = newState;
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
+	/**
+	 * Close the handler and free all acquired resources.
+	 */
+	public void close();
 
-	@Override
-	public String getDescriptor() {
-		return descriptor;
-	}
-
-	@Override
-	public void close() {
-		
-	}
-
-	@Override
-	public void lock() {
-		lock.lock();
-	}
-
-	@Override
-	public void unlock() {
-		lock.unlock();
-	}
+	/**
+	 * Lock this object for reading or changing its state.
+	 */
+	public void lock();
 	
-	@Override
-	public void addObserver(Observer o) {
-		lock.lock();
-		try {
-			super.addObserver(o);
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	@Override
-	public void deleteObserver(Observer o) {
-		lock.lock();
-		try {
-			super.deleteObserver(o);
-		} finally {
-			lock.unlock();
-		}
-	}
+	/**
+	 * Release lock.
+	 */
+	public void unlock();
 
 }

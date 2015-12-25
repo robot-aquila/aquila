@@ -9,16 +9,16 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DataHandlerTest {
+public class DataHandlerImplTest {
 	private IMocksControl control;
 	private Lock lockMock;
-	private DataHandler handler;
+	private DataHandlerImpl handler;
 
 	@Before
 	public void setUp() throws Exception {
 		control = EasyMock.createStrictControl();
 		lockMock = control.createMock(Lock.class);
-		handler = new DataHandler("foobar");
+		handler = new DataHandlerImpl("foobar");
 	}
 	
 	@Test
@@ -29,14 +29,14 @@ public class DataHandlerTest {
 	
 	@Test
 	public void testCtor3() {
-		handler = new DataHandler("charlie", DataHandlerState.AVAILABLE);
+		handler = new DataHandlerImpl("charlie", DataHandlerState.AVAILABLE);
 		assertEquals("charlie", handler.getDescriptor());
 		assertEquals(DataHandlerState.AVAILABLE, handler.getState());
 	}
 	
 	@Test
 	public void testLockUnlock() {
-		handler = new DataHandler("zulu", DataHandlerState.ERROR, lockMock);
+		handler = new DataHandlerImpl("zulu", DataHandlerState.ERROR, lockMock);
 		lockMock.lock();
 		lockMock.unlock();
 		control.replay();

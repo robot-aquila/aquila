@@ -30,7 +30,7 @@ public class BasicTerminalBuilderTest {
 	
 	@Test
 	public void testDefaults() throws Exception {
-		BasicTerminal terminal = (BasicTerminal)builder.buildTerminal();
+		TerminalImpl terminal = (TerminalImpl)builder.buildTerminal();
 		assertNotNull(terminal);
 		assertNotNull(terminal.getTerminalController());
 		assertNotNull(terminal.getTerminalEventDispatcher());
@@ -46,18 +46,18 @@ public class BasicTerminalBuilderTest {
 				((EventQueueStarter)starter.get(0)).getEventQueue());
 		assertNull(terminal.getOrderProcessor());
 		
-		BasicTerminalParams params = builder.buildParams();
+		TerminalParams params = builder.buildParams();
 		assertNotNull(params);
 		assertNotNull(params.getController());
 		assertNotSame(terminal.getTerminalController(), params.getController());
 		assertNotNull(params.getEventDispatcher());
 		assertNotSame(terminal.getTerminalEventDispatcher(), params.getEventDispatcher());
-		assertNotNull(params.getSecurityStorage());
-		assertNotSame(terminal.getSecurityStorage(), params.getSecurityStorage());
-		assertNotNull(params.getPortfolioStorage());
-		assertNotSame(terminal.getPortfolioStorage(), params.getPortfolioStorage());
-		assertNotNull(params.getOrderStorage());
-		assertNotSame(terminal.getOrderStorage(), params.getOrderStorage());
+		assertNotNull(params.getSecurityRepository());
+		assertNotSame(terminal.getSecurityStorage(), params.getSecurityRepository());
+		assertNotNull(params.getPortfolioRepository());
+		assertNotSame(terminal.getPortfolioStorage(), params.getPortfolioRepository());
+		assertNotNull(params.getOrderRepository());
+		assertNotSame(terminal.getOrderStorage(), params.getOrderRepository());
 		assertNotNull(params.getScheduler());
 		assertNotSame(terminal.getScheduler(), params.getScheduler());
 		assertNotNull(params.getEventSystem());
@@ -72,11 +72,11 @@ public class BasicTerminalBuilderTest {
 		builder.withEventSystem(eventSystem1)
 			.withEventSystem(eventSystem2); // the last one will be used
 		
-		BasicTerminal terminal = (BasicTerminal) builder.buildTerminal();
+		TerminalImpl terminal = (TerminalImpl) builder.buildTerminal();
 		assertNotNull(terminal);
 		assertSame(eventSystem2, terminal.getEventSystem());
 		
-		BasicTerminalParams params = builder.buildParams();
+		TerminalParams params = builder.buildParams();
 		assertNotNull(params);
 		assertSame(eventSystem2, params.getEventSystem());
 	}
@@ -86,12 +86,12 @@ public class BasicTerminalBuilderTest {
 		builder.withEventSystem(eventSystem1)
 			.withCommonEventSystemAndQueueId("Jool");
 		
-		BasicTerminal terminal = (BasicTerminal) builder.buildTerminal();
+		TerminalImpl terminal = (TerminalImpl) builder.buildTerminal();
 		assertNotNull(terminal);
 		EventSystemImpl x = (EventSystemImpl) terminal.getEventSystem();
 		assertEquals("Jool", x.getEventQueue().getId());
 		
-		BasicTerminalParams params = builder.buildParams();
+		TerminalParams params = builder.buildParams();
 		assertNotNull(params);
 		assertSame(x, params.getEventSystem());
 	}
@@ -101,11 +101,11 @@ public class BasicTerminalBuilderTest {
 		builder.withScheduler(scheduler1)
 			.withScheduler(scheduler2); // the last one will be used
 		
-		BasicTerminal terminal = (BasicTerminal) builder.buildTerminal();
+		TerminalImpl terminal = (TerminalImpl) builder.buildTerminal();
 		assertNotNull(terminal);
 		assertSame(scheduler2, terminal.getScheduler());
 		
-		BasicTerminalParams params = builder.buildParams();
+		TerminalParams params = builder.buildParams();
 		assertNotNull(params);
 		assertSame(scheduler2, params.getScheduler());
 	}
@@ -114,11 +114,11 @@ public class BasicTerminalBuilderTest {
 	public void testWithOrderProcessor() throws Exception {
 		builder.withOrderProcessor(orderProcessor);
 		
-		BasicTerminal terminal = (BasicTerminal) builder.buildTerminal();
+		TerminalImpl terminal = (TerminalImpl) builder.buildTerminal();
 		assertNotNull(terminal);
 		assertSame(orderProcessor, terminal.getOrderProcessor());
 		
-		BasicTerminalParams params = builder.buildParams();
+		TerminalParams params = builder.buildParams();
 		assertNotNull(params);
 		assertSame(orderProcessor, params.getOrderProcessor());
 	}

@@ -21,6 +21,13 @@ public interface Terminal extends Starter, Scheduler {
 	public static final int VERSION = 1;
 	
 	/**
+	 * Get ID of the terminal.
+	 * <p>
+	 * @return terminal ID
+	 */
+	public String getTerminalID();
+	
+	/**
 	 * Проверить состояние терминала.
 	 * <p>
 	 * Терминал может в промежуточном состоянии. То есть, если терминал не
@@ -160,6 +167,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return event type
 	 */
+	@Deprecated
 	public EventType OnReady();
 	
 	/**
@@ -167,6 +175,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return event type
 	 */
+	@Deprecated
 	public EventType OnUnready();
 	
 	/**
@@ -269,6 +278,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return тип события
 	 */
+	@Deprecated
 	public EventType OnRequestSecurityError();
 	
 
@@ -523,5 +533,15 @@ public interface Terminal extends Starter, Scheduler {
 	 * @throws OrderException - TODO:
 	 */
 	public void cancelOrder(Order order) throws OrderException;
+	
+	/**
+	 * Lock object for updates.
+	 */
+	public void lock();
+	
+	/**
+	 * Unlock object.
+	 */
+	public void unlock();
 
 }

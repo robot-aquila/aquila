@@ -16,13 +16,16 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.data.DataHandler;
+import ru.prolib.aquila.core.data.DataHandlerImpl;
+import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.utils.*;
 
 /**
  * 2012-08-16<br>
  * $Id: TerminalImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
  */
-public class BasicTerminalTest {
+public class TerminalImplTest {
 	private static Account account;
 	private static Symbol symbol;
 	private IMocksControl control;
@@ -35,12 +38,13 @@ public class BasicTerminalTest {
 	private Scheduler scheduler;
 	private EventSystem es;
 	private OrderProcessor orderProcessor;
-	private BasicTerminal terminal;
+	private TerminalImpl terminal;
 	private EditableOrder order;
 	private Security security;
 	private Runnable task;
 	private TaskHandler taskHandler;
 	private DateTime time = new DateTime();
+	private DataProvider dataProvider;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -66,9 +70,20 @@ public class BasicTerminalTest {
 		orderProcessor = control.createMock(OrderProcessor.class);
 		security = control.createMock(Security.class);
 		order = control.createMock(EditableOrder.class);
-		terminal = new BasicTerminal(new BasicTerminalParams(controller,
-				dispatcher, securities, portfolios, orders, starter, scheduler,
-				es, orderProcessor));
+		dataProvider = control.createMock(DataProvider.class);
+		TerminalParams params = new TerminalParams();
+		params.setTerminalController(controller);
+		params.setEventDispatcher(dispatcher);
+		params.setSecurityRepository(securities);
+		params.setPortfolioRepository(portfolios);
+		params.setOrderRepository(orders);
+		params.setStarter(starter);
+		params.setScheduler(scheduler);
+		params.setEventSystem(es);
+		params.setOrderProcessor(orderProcessor);
+		params.setDataProvider(dataProvider);
+		params.setTerminalID("DummyTerminal");
+		terminal = new TerminalImpl(params);
 
 		expect(security.getSymbol()).andStubReturn(symbol);
 		taskHandler = new TaskHandlerImpl(task, scheduler);
@@ -90,6 +105,8 @@ public class BasicTerminalTest {
 		assertSame(scheduler, terminal.getScheduler());
 		assertSame(es, terminal.getEventSystem());
 		assertSame(orderProcessor, terminal.getOrderProcessor());
+		assertEquals("DummyTerminal", terminal.getTerminalID());
+		assertSame(dataProvider, terminal.getDataProvider());
 	}
 	
 	@Test
@@ -763,8 +780,8 @@ public class BasicTerminalTest {
 	 * Вспомогательный метод тестирования.
 	 * <p>
 	 * Предназначен для тестирования методов
-	 * {@link BasicTerminal#firePanicEvent(int, String) и
-	 * {@link BasicTerminal#firePanicEvent(int, String, Object[])}. 
+	 * {@link TerminalImpl#firePanicEvent(int, String) и
+	 * {@link TerminalImpl#firePanicEvent(int, String, Object[])}. 
 	 * <p>
 	 * @param expectAction установить ожидания
 	 * @param initAction инициирующее действие
@@ -897,7 +914,24 @@ public class BasicTerminalTest {
 	}
 	
 	@Test
-	public void testRequestSecurity() throws Exception {
+	public void testRequestSecurity_IfNotExists() throws Exception {
+		DataHandler h1 = new DataHandlerImpl("state-update");
+		DataHandler h2 = new DataHandlerImpl("trade-update");
+		EditableSecurity security = control.createMock(EditableSecurity.class);
+		expect(securities.isSecurityExists(symbol)).andReturn(false);
+		expect(securities.getEditableSecurity(terminal, symbol)).andReturn(security);
+		expect(dataProvider.subscribeForStateUpdates(security)).andReturn(h1);
+		expect(dataProvider.subscribeForTradeUpdates(security)).andReturn(h2);
+		control.replay();
+		
+		terminal.requestSecurity(symbol);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testRequestSecurity_IfExists() throws Exception {
+		expect(securities.isSecurityExists(symbol)).andReturn(true);
 		control.replay();
 		
 		terminal.requestSecurity(symbol);
@@ -907,7 +941,7 @@ public class BasicTerminalTest {
 	
 	@Test
 	public void testEventTypes() throws Exception {
-		terminal = (BasicTerminal) new BasicTerminalBuilder().buildTerminal();
+		terminal = (TerminalImpl) new BasicTerminalBuilder().buildTerminal();
 		dispatcher = terminal.getTerminalEventDispatcher();
 		assertSame(dispatcher.OnConnected(), terminal.OnConnected());
 		assertSame(dispatcher.OnDisconnected(), terminal.OnDisconnected());

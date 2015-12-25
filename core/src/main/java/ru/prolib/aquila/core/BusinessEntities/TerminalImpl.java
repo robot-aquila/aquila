@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -9,37 +11,19 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.data.DataHandler;
+import ru.prolib.aquila.core.data.DataHandlerState;
+import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.utils.*;
 
 /**
- * Basic terminal.
+ * Terminal model implementation.
  * <p>
- * Basic terminal functionality implementation.
- * <p>
- * Данный класс выполняет дополнительную обработку событий
- * {@link #OnConnected()} и {@link #OnDisconnected()}. Запрос на генерацию
- * события {@link #OnConnected()} выполняется посредством вызова метода
- * {@link #fireTerminalConnectedEvent()}, но фактически генерируется только
- * один раз и только в том случае, если предыдущее событие терминала было
- * {@link #OnStarted()} или {@link #OnDisconnected()}. Генерация события
- * {@link #OnDisconnected()} выполняется посредством вызова метода
- * {@link #fireTerminalDisconnectedEvent()}, но фактически генерируется один раз
- * в случае, если предыдущее сгенерированное событие терминала было
- * {@link #OnConnected()}. Кроме того, данный класс автоматически выполняет
- * запрос на генерацию события {@link #OnDisconnected()} перед генерацией
- * события останова терминала. При этом так же учитывается вышеописанное
- * условие.
- * <p>
- * Таким образом, каждая специфическая реализация терминала, использующая данный
- * класс в качестве основы, должна обеспечить принципиальную возможность
- * получения информации о наличии соединения с удаленной системой, а о
- * корректном порядке следования соответствующих событий позаботится данный
- * класс. Предсказуемая последовательность событий необходима для потребителей,
- * которые будут использовать данные события как сигналы разрешающие или
- * запрещающие работу с терминалом.
+ * Common terminal functionality implementation.
  */
-public class BasicTerminal implements EditableTerminal {
+public class TerminalImpl implements EditableTerminal {
 	private static Logger logger;
+	private final Lock lock;
 	private volatile TerminalState state = TerminalState.STOPPED;
 	private final EventSystem es;
 	private final Securities securities;
@@ -50,9 +34,11 @@ public class BasicTerminal implements EditableTerminal {
 	private final TerminalEventDispatcher dispatcher;
 	private final TerminalController controller;
 	private final OrderProcessor orderProcessor;
+	private final String terminalID;
+	private final DataProvider dataProvider;
 	
 	static {
-		logger = LoggerFactory.getLogger(BasicTerminal.class);
+		logger = LoggerFactory.getLogger(TerminalImpl.class);
 	}
 	
 	/**
@@ -60,17 +46,29 @@ public class BasicTerminal implements EditableTerminal {
 	 * <p>
 	 * @param params - basic terminal constructor parameters
 	 */
-	public BasicTerminal(BasicTerminalParams params) {
+	public TerminalImpl(TerminalParams params) {
 		super();
+		this.lock = new ReentrantLock();
 		this.controller = params.getController();
 		this.dispatcher = params.getEventDispatcher();
-		this.securities = params.getSecurityStorage();
-		this.portfolios = params.getPortfolioStorage();
-		this.orders = params.getOrderStorage();
+		this.securities = params.getSecurityRepository();
+		this.portfolios = params.getPortfolioRepository();
+		this.orders = params.getOrderRepository();
 		this.starter = params.getStarter();
 		this.scheduler = params.getScheduler();
 		this.es = params.getEventSystem();
 		this.orderProcessor = params.getOrderProcessor();
+		this.terminalID = params.getTerminalID();
+		this.dataProvider = params.getDataProvider();
+	}
+	
+	public DataProvider getDataProvider() {
+		return dataProvider;
+	}
+	
+	@Override
+	public String getTerminalID() {
+		return terminalID;
 	}
 	
 	@Override
@@ -544,7 +542,16 @@ public class BasicTerminal implements EditableTerminal {
 
 	@Override
 	public void requestSecurity(Symbol symbol) {
-		
+		lock.lock();
+		try {
+			if ( ! isSecurityExists(symbol) ) {
+				EditableSecurity security = getEditableSecurity(symbol);
+				dataProvider.subscribeForStateUpdates(security);
+				dataProvider.subscribeForTradeUpdates(security);
+			}
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
@@ -687,6 +694,16 @@ public class BasicTerminal implements EditableTerminal {
 	@Override
 	public Counter getOrderIdSequence() {
 		return orders.getIdSequence();
+	}
+
+	@Override
+	public void lock() {
+		lock.lock();
+	}
+
+	@Override
+	public void unlock() {
+		lock.unlock();
 	}
 
 }

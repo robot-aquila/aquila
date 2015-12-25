@@ -18,24 +18,19 @@ public class BasicTerminalBuilder {
 	}
 	
 	public EditableTerminal buildTerminal() {
-		return new BasicTerminal(buildParams());
+		return new TerminalImpl(buildParams());
 	}
 	
-	public BasicTerminalParams buildParams() {
+	public TerminalParams buildParams() {
 		EventSystem es = getEventSystem();
 		StarterQueue starter = new StarterQueue();
 		starter.add(new EventQueueStarter(es.getEventQueue(), 3000));
-		return new BasicTerminalParams(
-				new TerminalController(),
-				new TerminalEventDispatcher(es),
-				new Securities(new SecuritiesEventDispatcher(es)),
-				new Portfolios(new PortfoliosEventDispatcher(es)),
-				new OrdersImpl(new OrdersEventDispatcher(es),
-						new OrderFactoryImpl(), new SimpleCounter()),
-				starter,
-				getScheduler(),
-				es,
-				getOrderProcessor());
+		TerminalParams params = new TerminalParams();
+		params.setStarter(starter);
+		params.setScheduler(getScheduler());
+		params.setEventSystem(es);
+		params.setOrderProcessor(getOrderProcessor());
+		return params;
 	}
 	
 	/**
