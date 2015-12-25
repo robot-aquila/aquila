@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.probe.internal.PROBEServiceLocator;
 import ru.prolib.aquila.probe.internal.SimulationController;
@@ -17,7 +16,7 @@ import ru.prolib.aquila.probe.internal.SimulationController;
 /**
  * Terminal simulator.
  */
-public class PROBETerminal extends BasicTerminal
+public class PROBETerminal extends TerminalImpl
 	implements SimulationController
 {
 	private static final Logger logger;
@@ -35,7 +34,7 @@ public class PROBETerminal extends BasicTerminal
 	 * @param params - the basic terminal parameters
 	 * @param locator - the service locator
 	 */
-	public PROBETerminal(BasicTerminalParams params, PROBEServiceLocator locator) {
+	public PROBETerminal(TerminalParams params, PROBEServiceLocator locator) {
 		super(params);
 		this.locator = locator;
 		this.registered = new HashSet<Symbol>();

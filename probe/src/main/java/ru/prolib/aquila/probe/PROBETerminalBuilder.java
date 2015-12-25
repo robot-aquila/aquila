@@ -6,7 +6,6 @@ import org.joda.time.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.probe.internal.*;
 import ru.prolib.aquila.probe.timeline.*;
@@ -66,7 +65,7 @@ public class PROBETerminalBuilder {
 		return scheduler;
 	}
 	
-	private BasicTerminalParams getBasicTerminalParams() {
+	private TerminalParams getBasicTerminalParams() {
 		return getChildBuilder()
 			.withEventSystem(getEventSystem())
 			.withScheduler(getScheduler())
