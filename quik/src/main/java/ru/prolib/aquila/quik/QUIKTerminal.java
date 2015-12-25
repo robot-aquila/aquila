@@ -4,14 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
 import ru.prolib.aquila.quik.api.QUIKClient;
 import ru.prolib.aquila.quik.assembler.cache.Cache;
 
 /**
  * QUIK terminal implementation.
  */
-public class QUIKTerminal extends BasicTerminal {
+public class QUIKTerminal extends TerminalImpl {
 	private static final Logger logger;
 	
 	static {
@@ -20,7 +19,7 @@ public class QUIKTerminal extends BasicTerminal {
 	
 	private final QUIKServiceLocator locator;
 
-	public QUIKTerminal(BasicTerminalParams params, QUIKServiceLocator locator) {
+	public QUIKTerminal(TerminalParams params, QUIKServiceLocator locator) {
 		super(params);
 		this.locator = locator;
 	}

@@ -10,14 +10,13 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.quik.api.QUIKClient;
 import ru.prolib.aquila.quik.assembler.cache.Cache;
 
 public class QUIKTerminalTest {
 	private IMocksControl control;
-	private BasicTerminalParams params;
+	private TerminalParams params;
 	private OrderProcessor orderProcessor;
 	private QUIKServiceLocator locator;
 	private QUIKTerminal terminal;
@@ -44,10 +43,10 @@ public class QUIKTerminalTest {
 		assertSame(params.getController(), terminal.getTerminalController());
 		assertSame(params.getEventDispatcher(), terminal.getTerminalEventDispatcher());
 		assertSame(orderProcessor, terminal.getOrderProcessor());
-		assertSame(params.getOrderStorage(), terminal.getOrderStorage());
-		assertSame(params.getPortfolioStorage(), terminal.getPortfolioStorage());
+		assertSame(params.getOrderRepository(), terminal.getOrderStorage());
+		assertSame(params.getPortfolioRepository(), terminal.getPortfolioStorage());
 		assertSame(params.getScheduler(), terminal.getScheduler());
-		assertSame(params.getSecurityStorage(), terminal.getSecurityStorage());
+		assertSame(params.getSecurityRepository(), terminal.getSecurityStorage());
 		assertSame(params.getStarter(), terminal.getStarter());
 		assertSame(params.getEventSystem(), terminal.getEventSystem());
 		assertSame(locator, terminal.getServiceLocator());

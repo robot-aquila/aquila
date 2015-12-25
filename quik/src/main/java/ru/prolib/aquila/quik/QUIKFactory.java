@@ -6,7 +6,6 @@ import java.util.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.BasicTerminalParams;
 import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalReadyIfConnected;
 import ru.prolib.aquila.core.utils.*;
@@ -149,7 +148,7 @@ public class QUIKFactory implements TerminalFactory {
 	 * @return терминал
 	 */
 	public Terminal createTerminal(QUIKConfig config, final DDEServer server) {
-		BasicTerminalParams params = new BasicTerminalBuilder()
+		TerminalParams params = new BasicTerminalBuilder()
 			.withCommonEventSystemAndQueueId(getNextId())
 			.withOrderProcessor(new QUIKOrderProcessor())
 			.buildParams();
