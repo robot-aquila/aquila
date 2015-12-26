@@ -18,7 +18,8 @@ public class EventQueueImplTest {
 	private static EventSystem eSys;
 	private static EventQueueImpl queue;
 	private static EventDispatcher dispatcher;
-	private static EventType type1,type2;
+	private static EventType type1,type2,type3;
+	private EventListenerStub listener1, listener2, listener3;
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
@@ -34,7 +35,10 @@ public class EventQueueImplTest {
 		dispatcher = eSys.createEventDispatcher();
 		type1 = dispatcher.createType();
 		type2 = dispatcher.createType();
-		
+		type3 = new EventTypeImpl("foo");
+		listener1 = new EventListenerStub();
+		listener2 = new EventListenerStub();
+		listener3 = new EventListenerStub();
 	}
 	
 	@After
@@ -325,6 +329,60 @@ public class EventQueueImplTest {
 		queue.stop();
 		queue.join(100);
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testEnqueue2_DispatchForAlternates() throws Exception {
+		type1.addListener(listener1);
+		type2.addListener(listener2);
+		type3.addListener(listener3);
+		type1.addAlternateType(type2);
+		type1.addAlternateType(type3);
+		
+		queue.start();
+		queue.enqueue(type1, new SimpleEventFactory());
+		queue.stop();
+		assertTrue(queue.join(1000));
+
+		assertEquals(1, listener1.getEventCount());
+		assertEquals(1, listener2.getEventCount());
+		assertEquals(1, listener3.getEventCount());
+	}
+	
+	@Test
+	public void testEnqueue2_DispatchForAllAlternatesOfAlternates()
+			throws Exception
+	{
+		type1.addListener(listener1);
+		type2.addListener(listener2);
+		type3.addListener(listener3);
+		type1.addAlternateType(type2);
+		type2.addAlternateType(type3);
+		
+		queue.start();
+		queue.enqueue(type1, new SimpleEventFactory());
+		queue.stop();
+		assertTrue(queue.join(1000));
+		
+		assertEquals(1, listener1.getEventCount());
+		assertEquals(1, listener2.getEventCount());
+		assertEquals(1, listener3.getEventCount());
+	}
+	
+	@Test
+	public void testEnqueue2_CircularReferencesAreFine() throws Exception {
+		type1.addListener(listener1);
+		type2.addListener(listener2);
+		type1.addAlternateType(type2);
+		type2.addAlternateType(type1);
+		
+		queue.start();
+		queue.enqueue(type1, new SimpleEventFactory());
+		queue.stop();
+		assertTrue(queue.join(1000));
+		
+		assertEquals(1, listener1.getEventCount());
+		assertEquals(1, listener2.getEventCount());
 	}
 	
 }

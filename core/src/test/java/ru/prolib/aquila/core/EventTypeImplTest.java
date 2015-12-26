@@ -13,7 +13,7 @@ import org.junit.*;
  */
 public class EventTypeImplTest {
 	private IMocksControl control;
-	private EventTypeImpl type;
+	private EventTypeImpl type, type1, type2;
 	private EventListener listener1, listener2, listener3;
 	
 	@Before
@@ -23,6 +23,8 @@ public class EventTypeImplTest {
 		listener2 = control.createMock(EventListener.class);
 		listener3 = control.createMock(EventListener.class);
 		type = new EventTypeImpl("MyType");
+		type1 = new EventTypeImpl("Alternate1");
+		type2 = new EventTypeImpl("Alternate2");
 	}
 	
 	@Test
@@ -334,6 +336,45 @@ public class EventTypeImplTest {
 		assertEquals(2, list.size());
 		assertSame(listener2, list.get(0));
 		assertSame(listener3, list.get(1));
+	}
+	
+	@Test
+	public void testAddAlternateType() throws Exception {
+		type.addAlternateType(type1);
+		
+		Set<EventType> expected = new HashSet<EventType>();
+		expected.add(type1);
+		assertEquals(expected, type.getAlternateTypes());
+	}
+	
+	@Test (expected=NullPointerException.class)
+	public void testAddAlternateType_ThrowsNullPointer() throws Exception {
+		type.addAlternateType(null);
+	}
+	
+	@Test
+	public void testIsAlternateType() throws Exception {
+		type.addAlternateType(type1);
+		
+		assertTrue(type.isAlternateType(type1));
+		assertFalse(type.isAlternateType(type2));
+	}
+	
+	@Test
+	public void testRemoveAlternateType() throws Exception {
+		type.addAlternateType(type1);
+		type.addAlternateType(type2);
+		type.removeAlternateType(type1);
+		
+		assertFalse(type.isAlternateType(type1));
+		assertTrue(type.isAlternateType(type2));
+	}
+	
+	@Test
+	public void testHasAlternates() throws Exception {
+		assertFalse(type.hasAlternates());
+		type.addAlternateType(type1);
+		assertTrue(type.hasAlternates());
 	}
 	
 }

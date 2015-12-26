@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Интерфейс типа события.
@@ -131,5 +132,59 @@ public interface EventType {
 	 * @return дубликат списка синхронных получателей
 	 */
 	public List<EventListener> getSyncListeners();
+	
+	/**
+	 * Add an alternate type.
+	 * <p>
+	 * Alternate type is an event type which should repeat events of this type.
+	 * This may be accomplished with using of event factory which will build an
+	 * event with same meaning but for different event type instances. Such
+	 * behavior can be initiated by using
+	 * {@link EventQueue#enqueue(EventType, EventFactory)} enqueue method.
+	 * <p>
+	 * @param type - event type to add
+	 */
+	public void addAlternateType(EventType type);
+	
+	/**
+	 * Remove an alternate type.
+	 * <p>
+	 * For more details see description of the
+	 * {@link #addAlternateType(EventType)} method.
+	 * <p>
+	 * @param type - event type to remove
+	 */
+	public void removeAlternateType(EventType type);
+	
+	/**
+	 * Test that type is alternate for this type.
+	 * <p>
+	 * For more details see description of the
+	 * {@link #addAlternateType(EventType)} method.
+	 * <p>
+	 * @param type - event type to check
+	 * @return true if argument is an alternate type for this event type
+	 */
+	public boolean isAlternateType(EventType type);
+	
+	/**
+	 * Get set of alternate types.
+	 * <p>
+	 * For more details see description of the
+	 * {@link #addAlternateType(EventType)} method.
+	 * <p>
+	 * @return set of alternate types
+	 */
+	public Set<EventType> getAlternateTypes();
+	
+	/**
+	 * Test does it have alternates or not.
+	 * <p>
+	 * For more details see description of the
+	 * {@link #addAlternateType(EventType)} method.
+	 * <p>
+	 * @return returns true if this type does have at least one alternate type 
+	 */
+	public boolean hasAlternates();
 	
 }

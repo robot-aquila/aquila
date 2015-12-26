@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Очередь событий.
+ * Event queue implementation.
  * <p>
  * 2012-04-16<br>
  * $Id: EventQueueImpl.java 513 2013-02-11 01:17:18Z whirlwind $
@@ -244,5 +244,30 @@ public class EventQueueImpl implements EventQueue {
 		}
 		
 	}
+
+	@Override
+	public synchronized void enqueue(EventType type, EventFactory factory) {
+		if ( type.hasAlternates() ) {
+			Set<EventType> alternates = new HashSet<EventType>();
+			alternates.add(type);
+			fillUniqueAlternates(alternates, type);
+			for ( EventType alternate : alternates ) {
+				enqueue(factory.produceEvent(alternate));
+			}
+		} else {
+			enqueue(factory.produceEvent(type));	
+		}
+	}
+	
+	private void fillUniqueAlternates(Set<EventType> alternates, EventType type) {
+		for ( EventType alternate : type.getAlternateTypes() ) {
+			if ( ! alternates.contains(alternate) ) {
+				alternates.add(alternate);
+				fillUniqueAlternates(alternates, alternate);
+			}
+		}
+	}
+	
+	
 
 }

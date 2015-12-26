@@ -3,7 +3,7 @@ package ru.prolib.aquila.core;
 import java.util.*;
 
 /**
- * Базовый тип события.
+ * Basic event type.
  * <p>
  * 2012-04-09<br>
  */
@@ -13,13 +13,14 @@ public class EventTypeImpl implements EventType {
 	private final String id;
 	private final List<EventListener> asyncListeners, syncListeners;
 	private final boolean onlySync;
+	private final Set<EventType> alternates;
 	
 	/**
 	 * Получить следующий идентификатор типа событий по-умолчанию.
 	 * <p>
 	 * @return идентификатор типа события
 	 */
-	public static synchronized final String nextId() {
+	public static synchronized String nextId() {
 		return AUTO_ID_PREFIX + (autoId ++);
 	}
 	
@@ -28,7 +29,7 @@ public class EventTypeImpl implements EventType {
 	 * <p>
 	 * @return текущее значение идентификатора
 	 */
-	public static synchronized final int getAutoId() {
+	public static synchronized int getAutoId() {
 		return autoId;
 	}
 	
@@ -74,6 +75,7 @@ public class EventTypeImpl implements EventType {
 		this.onlySync = onlySync;
 		asyncListeners = new ArrayList<EventListener>();
 		syncListeners = new ArrayList<EventListener>();
+		alternates = new HashSet<EventType>();
 	}
 	
 	@Override
@@ -168,6 +170,34 @@ public class EventTypeImpl implements EventType {
 	@Override
 	public boolean isOnlySyncMode() {
 		return onlySync;
+	}
+
+	@Override
+	public synchronized void addAlternateType(EventType type) {
+		if ( type == null ) {
+			throw new NullPointerException();
+		}
+		alternates.add(type);
+	}
+
+	@Override
+	public synchronized void removeAlternateType(EventType type) {
+		alternates.remove(type);
+	}
+
+	@Override
+	public synchronized boolean isAlternateType(EventType type) {
+		return alternates.contains(type);
+	}
+
+	@Override
+	public synchronized Set<EventType> getAlternateTypes() {
+		return alternates;
+	}
+
+	@Override
+	public synchronized boolean hasAlternates() {
+		return alternates.size() > 0;
 	}
 
 }
