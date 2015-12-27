@@ -16,6 +16,7 @@ public interface EditableTerminal extends Terminal {
 	 * <p>
 	 * @return фасад системы событий
 	 */
+	@Deprecated
 	public EventSystem getEventSystem();
 	
 	/**
@@ -27,6 +28,7 @@ public interface EditableTerminal extends Terminal {
 	 * вызова терминал не находится в состоянии {@link TerminalState#STARTED},
 	 * то вызов игнорируется, а в журнал направляется предупреждающее сообщение. 
 	 */
+	@Deprecated
 	public void markTerminalConnected();
 	
 	/**
@@ -42,6 +44,7 @@ public interface EditableTerminal extends Terminal {
 	 * не находится в одном из подходящих состояний, то вызов игнорируется, а в
 	 * журнал направляется соответствующее предупреждение.
 	 */
+	@Deprecated
 	public void markTerminalDisconnected();
 	
 	/**
@@ -65,6 +68,7 @@ public interface EditableTerminal extends Terminal {
 	 * <p>
 	 * @return процессор заявок
 	 */
+	@Deprecated
 	public OrderProcessor getOrderProcessor();
 	
 	/**
@@ -72,26 +76,31 @@ public interface EditableTerminal extends Terminal {
 	 * <p>
 	 * @return стартер
 	 */
+	@Deprecated
 	public StarterQueue getStarter();
 
 	/**
 	 * Генерировать событие о старте терминала.
 	 */
+	@Deprecated
 	public void fireTerminalStartedEvent();
 
 	/**
 	 * Генерировать событие об останове терминала.
 	 */
+	@Deprecated
 	public void fireTerminalStoppedEvent();
 	
 	/**
 	 * Генерировать событие о готовности терминала.
 	 */
+	@Deprecated
 	public void fireTerminalReady();
 	
 	/**
 	 * Генерировать событие о неготовности терминала.
 	 */
+	@Deprecated
 	public void fireTerminalUnready();
 	
 	/**
@@ -99,6 +108,7 @@ public interface EditableTerminal extends Terminal {
 	 * <p>
 	 * @param state новое состояние
 	 */
+	@Deprecated
 	public void setTerminalState(TerminalState state);
 	
 	/**
@@ -155,6 +165,7 @@ public interface EditableTerminal extends Terminal {
 	 * @param code код ситуации
 	 * @param msgId идентификатор сообщения
 	 */
+	@Deprecated
 	public void firePanicEvent(int code, String msgId);
 
 	/**
@@ -169,6 +180,7 @@ public interface EditableTerminal extends Terminal {
 	 * @param msgId идентификатор сообщения
 	 * @param args аргументы, описывающие ситуацию
 	 */
+	@Deprecated
 	public void firePanicEvent(int code, String msgId, Object[] args);
 	
 	
@@ -184,7 +196,7 @@ public interface EditableTerminal extends Terminal {
 	 * <p>
 	 * @param id идентификатор заявки
 	 * @return заявка
-	 * @throws OrderNotExistsException - TODO:
+	 * @throws OrderNotExistsException - if order not exists
 	 */
 	public EditableOrder getEditableOrder(int id)
 		throws OrderNotExistsException;
