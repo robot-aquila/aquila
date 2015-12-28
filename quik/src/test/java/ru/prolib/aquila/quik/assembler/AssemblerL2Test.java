@@ -2,9 +2,11 @@ package ru.prolib.aquila.quik.assembler;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.time.LocalDateTime;
+
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -341,7 +343,7 @@ public class AssemblerL2Test {
 		expected.setPrice(12.34d);
 		expected.setQty(1000L);
 		expected.setSymbol(symbol);
-		expected.setTime(new DateTime(2013, 7, 22, 9, 33, 17));
+		expected.setTime(LocalDateTime.of(2013, 7, 22, 9, 33, 17));
 		expected.setVolume(123400d);
 
 		expect(order.hasTrade(eq(814L))).andReturn(false);
@@ -396,7 +398,7 @@ public class AssemblerL2Test {
 	public void testTryFinalize_FilledOk() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
 		T2QOrder entry = control.createMock(T2QOrder.class);
-		DateTime time = new DateTime();
+		LocalDateTime time = LocalDateTime.now();
 		expect(order.getId()).andStubReturn(829);
 		expect(order.getQtyRest()).andReturn(0L);
 		order.setStatus(eq(OrderStatus.FILLED));
@@ -412,7 +414,7 @@ public class AssemblerL2Test {
 	
 	@Test
 	public void testTryFinalize_KilledOk() throws Exception {
-		DateTime time = new DateTime();
+		LocalDateTime time = LocalDateTime.now();
 		T2QOrder entry = control.createMock(T2QOrder.class);
 		expect(entry.getBalance()).andStubReturn(5L);
 		expect(entry.getStatus()).andStubReturn(2);

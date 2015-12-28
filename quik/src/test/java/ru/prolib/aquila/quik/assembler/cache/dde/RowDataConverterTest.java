@@ -1,10 +1,13 @@
 package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import static org.junit.Assert.*;
+
+import java.time.LocalDateTime;
 import java.util.*;
+
 import org.apache.log4j.BasicConfigurator;
-import org.joda.time.DateTime;
 import org.junit.*;
+
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
 
@@ -69,18 +72,18 @@ public class RowDataConverterTest {
 			.add(null)
 			.add(new Double(32.48d));
 		Variant<?> iterator = vTime;
-		Set<DateTime> found = new HashSet<DateTime>();
+		Set<LocalDateTime> found = new HashSet<LocalDateTime>();
 		do {
 			data.put("date", vDate.get());
 			data.put("time", vTime.get());
 			try {
-				DateTime x = converter.getTime(row, "date", "time", true);
+				LocalDateTime x = converter.getTime(row, "date", "time", true);
 				found.add(x);
 			} catch ( Exception e ) { }
 		} while ( iterator.next() );
 		assertEquals(2, found.size());
 		assertTrue(found.contains(null));
-		assertTrue(found.contains(new DateTime(2013, 6, 1, 23, 45, 30)));
+		assertTrue(found.contains(LocalDateTime.of(2013, 6, 1, 23, 45, 30)));
 		//assertTrue(found.contains(format.parse("2013-06-01 23:45:30")));
 	}
 		
@@ -100,18 +103,18 @@ public class RowDataConverterTest {
 			.add(new Double(32.48d));
 		Variant<?> iterator = vTime;
 		int foundCnt = 0;
-		DateTime found = null;
+		LocalDateTime found = null;
 		do {
 			data.put("date", vDate.get());
 			data.put("time", vTime.get());
 			try {
-				DateTime x = converter.getTime(row, "date", "time", false);
+				LocalDateTime x = converter.getTime(row, "date", "time", false);
 				found = x;
 				foundCnt ++;
 			} catch ( Exception e ) { }
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(new DateTime(2013, 6, 1, 23, 45, 30), found);
+		assertEquals(LocalDateTime.of(2013, 6, 1, 23, 45, 30), found);
 		//assertEquals(format.parse("2013-06-01 23:45:30"), found);
 	}
 	
@@ -119,10 +122,10 @@ public class RowDataConverterTest {
 	public void testGetTime_TheOneHourErrorIssue() throws Exception {
 		data.put("date", "2015-05-13");
 		data.put("time", "10:05:50");
-		DateTime x = converter.getTime(row, "date", "time", false);
-		assertEquals(10, x.getHourOfDay());
-		assertEquals( 5, x.getMinuteOfHour());
-		assertEquals(50, x.getSecondOfMinute());
+		LocalDateTime x = converter.getTime(row, "date", "time", false);
+		assertEquals(10, x.getHour());
+		assertEquals( 5, x.getMinute());
+		assertEquals(50, x.getSecond());
 	}
 
 	@Test

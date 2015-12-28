@@ -1,9 +1,11 @@
 package ru.prolib.aquila.quik.assembler;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,7 +232,7 @@ public class AssemblerL2 {
 		//logger.debug("Trade event fired: {}", trade);
 	}
 	
-	private DateTime getTime(T2QTrade trade) {
+	private LocalDateTime getTime(T2QTrade trade) {
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.MILLISECOND, 0);
 		
@@ -245,8 +247,8 @@ public class AssemblerL2 {
 		part /= 100;
 		c.set(Calendar.MINUTE, part % 100);
 		c.set(Calendar.HOUR_OF_DAY, part / 100);
-		
-		return new DateTime(c.getTime());
+		Instant instant = Instant.ofEpochMilli(c.getTimeInMillis());
+		return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package ru.prolib.aquila.quik.assembler.cache.dde;
 
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -120,7 +121,7 @@ public class TradesGateway implements TableGateway {
 			trade.setQty(converter.getLong(row, QTY));
 			trade.setSymbol(symbol);
 			trade.setTime(converter.getTime(row, DATE, TIME, false)
-				.plusMillis(converter.getInteger(row, MICROSECONDS) / 1000));
+				.plus(converter.getInteger(row, MICROSECONDS) / 1000, ChronoUnit.MILLIS));
 			trade.setVolume(converter.getDouble(row, VALUE));
 			return trade;
 		} catch ( ValueException e ) {

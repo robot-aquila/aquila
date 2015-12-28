@@ -3,9 +3,10 @@ package ru.prolib.aquila.quik.assembler.cache.dde;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -118,7 +119,7 @@ public class TradesGatewayTest {
 		expected.setPrice(45.90d);
 		expected.setQty(1000L);
 		expected.setSymbol(symbol);
-		expected.setTime(new DateTime(1998, 1, 15, 0, 20, 19, 214));
+		expected.setTime(LocalDateTime.of(1998, 1, 15, 0, 20, 19, 214000000));
 		expected.setVolume(200d);
 		assertEquals(expected, gateway.makeTrade(terminal, row));
 

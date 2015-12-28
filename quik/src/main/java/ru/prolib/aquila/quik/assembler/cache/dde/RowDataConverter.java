@@ -1,11 +1,10 @@
 package ru.prolib.aquila.quik.assembler.cache.dde;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public class RowDataConverter {
 		super();
 		this.dateFormat = dateFormat;
 		this.timeFormat = timeFormat;
-		fullTimeFormat = DateTimeFormat.forPattern(dateFormat + " " + timeFormat);
+		fullTimeFormat = DateTimeFormatter.ofPattern(dateFormat + " " + timeFormat);
 	}
 	
 	String getTimeFormat() {
@@ -64,7 +63,7 @@ public class RowDataConverter {
 	 * @throws RowNullValueException нулевое значение элемента ряда
 	 * @throws RowDataTypeMismatchException неожиданный тип данных
 	 */
-	public DateTime getTime(Row row, String dateId, String timeId,
+	public LocalDateTime getTime(Row row, String dateId, String timeId,
 			boolean permitNullResult) throws ValueException
 	{
 		String date = getString(row, dateId);
@@ -73,7 +72,7 @@ public class RowDataConverter {
 			return null;
 		}
 		try {
-			return fullTimeFormat.parseDateTime(date + " " + time);
+			return LocalDateTime.parse(date + " " + time, fullTimeFormat);
 		} catch ( Exception e ) {
 			throw new RowTimeParseException(dateId, timeId,
 					date, time, dateFormat, timeFormat);
