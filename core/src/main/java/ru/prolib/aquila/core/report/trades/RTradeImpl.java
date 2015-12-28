@@ -2,8 +2,10 @@ package ru.prolib.aquila.core.report.trades;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.builder.*;
-import org.joda.time.*;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.report.RTrade;
 
@@ -13,8 +15,8 @@ import ru.prolib.aquila.core.report.RTrade;
 public class RTradeImpl implements ERTrade {
 	private final Symbol symbol;
 	private final PositionType type;
-	private DateTime enterTime;
-	private DateTime exitTime;
+	private LocalDateTime enterTime;
+	private LocalDateTime exitTime;
 	private Long enterQty;
 	private Long exitQty;
 	private Double sumByEnterPrice;
@@ -37,7 +39,8 @@ public class RTradeImpl implements ERTrade {
 	 * @param exitVol суммарный объем выхода
 	 */
 	public RTradeImpl(Symbol symbol, PositionType type,
-			DateTime enterTime, DateTime exitTime, Long enterQty, Long exitQty,
+			LocalDateTime enterTime, LocalDateTime exitTime,
+			Long enterQty, Long exitQty,
 			Double sumByEnterPrice, Double sumByExitPrice,
 			Double enterVol, Double exitVol)
 	{
@@ -112,12 +115,12 @@ public class RTradeImpl implements ERTrade {
 	}
 	
 	@Override
-	public synchronized DateTime getExitTime() {
+	public synchronized LocalDateTime getExitTime() {
 		return exitTime;
 	}
 	
 	@Override
-	public synchronized DateTime getEnterTime() {
+	public synchronized LocalDateTime getEnterTime() {
 		return enterTime;
 	}
 	

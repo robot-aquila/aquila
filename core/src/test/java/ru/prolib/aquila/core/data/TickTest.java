@@ -1,18 +1,21 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import org.joda.time.DateTime;
+
+import java.time.LocalDateTime;
+
 import org.junit.*;
+
 import ru.prolib.aquila.core.utils.Variant;
 
 public class TickTest {
-	private static DateTime time1, time2;
+	private static LocalDateTime time1, time2;
 	private Tick tick;
 	
 	@BeforeClass
 	public static void setUpBeforClass() throws Exception {
-		time1 = new DateTime(2013, 10, 6, 15, 44, 51, 123);
-		time2 = new DateTime(2013, 6, 2, 11, 49, 24, 861);
+		time1 = LocalDateTime.of(2013, 10, 6, 15, 44, 51, 123);
+		time2 = LocalDateTime.of(2013, 6, 2, 11, 49, 24, 861);
 		
 	}
 
@@ -53,7 +56,7 @@ public class TickTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<DateTime> vTime = new Variant<DateTime>()
+		Variant<LocalDateTime> vTime = new Variant<LocalDateTime>()
 			.add(time1)
 			.add(time2);
 		Variant<Double> vVal = new Variant<Double>(vTime)

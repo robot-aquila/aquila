@@ -1,8 +1,12 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import org.joda.time.*;
+
+import java.time.LocalDateTime;
+
 import org.junit.*;
+import org.threeten.extra.Interval;
+
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 
 /**
@@ -11,14 +15,14 @@ import ru.prolib.aquila.core.BusinessEntities.Trade;
  */
 public class CandleSeriesImplTest {
 	private CandleSeriesImpl series;
-	private DateTime time1, time2, time3;
+	private LocalDateTime time1, time2, time3;
 	private Interval int1, int2, int3;
 	private Candle candle1, candle2, candle3;
 
 	@Before
 	public void setUp() throws Exception {
 		series = new CandleSeriesImpl(TimeFrame.M5, "foo", 512);
-		time1 = new DateTime(2013, 10, 7, 11, 0, 0);
+		time1 = LocalDateTime.of(2013, 10, 7, 11, 0, 0);
 		time2 = time1.plusMinutes(5);
 		time3 = time2.plusMinutes(5);
 		int1 = TimeFrame.M5.getInterval(time1);
@@ -260,7 +264,7 @@ public class CandleSeriesImplTest {
 				new Candle(int3, 143280d, 143320d, 143110d, 143320d,  1990L),
 				new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L),
 		};
-		DateTime poa[] = {
+		LocalDateTime poa[] = {
 				time1.plusMinutes(1),
 				time1.plusMinutes(1),
 				time1.plusMinutes(3),
@@ -352,7 +356,7 @@ public class CandleSeriesImplTest {
 	 * @param qty количество
 	 * @return
 	 */
-	private Trade trade(DateTime time, double price, long qty) {
+	private Trade trade(LocalDateTime time, double price, long qty) {
 		Trade trade = new Trade(null);
 		trade.setTime(time);
 		trade.setPrice(price);
@@ -408,7 +412,7 @@ public class CandleSeriesImplTest {
 				new Candle(int3, 143280d, 143320d, 143110d, 143320d,  1990L),
 				new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L),
 		};
-		DateTime poa[] = {
+		LocalDateTime poa[] = {
 				time1.plusMinutes(1),
 				time1.plusMinutes(1),
 				time1.plusMinutes(3),
@@ -551,7 +555,7 @@ public class CandleSeriesImplTest {
 			new Candle(int3, 143210d, 143320d, 143110d, 143320d,  1990L),
 			new Candle(int3, 143210d, 143320d, 143110d, 143190d, 11990L),
 		};
-		DateTime poa[] = {
+		LocalDateTime poa[] = {
 			// candle 1 POA changes
 			time1.plusMinutes(2),
 			time1.plusMinutes(3),
@@ -684,7 +688,7 @@ public class CandleSeriesImplTest {
 		aggregateCandle_TestOverlapsInterval(AggregateAction<Candle> action)
 			throws Exception
 	{
-		DateTime time = new DateTime(2013, 10, 9, 0, 0, 0, 0);
+		LocalDateTime time = LocalDateTime.of(2013, 10, 9, 0, 0, 0, 0);
 		Candle c1, c2;
 		c1 = new Candle(TimeFrame.M3.getInterval(time),
 				146110d, 146110d, 145910d, 145930d, 1L);
@@ -746,23 +750,23 @@ public class CandleSeriesImplTest {
 		series.add(candle1);
 		series.add(candle2);
 		
-		series.aggregate(new DateTime(2013, 10, 7, 11, 13, 0, 0));
-		assertEquals(new DateTime(2013, 10, 7, 11, 13, 0, 0), series.getPOA());
+		series.aggregate(LocalDateTime.of(2013, 10, 7, 11, 13, 0, 0));
+		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 13, 0, 0), series.getPOA());
 		
-		series.aggregate(new DateTime(2013, 10, 7, 11, 14, 0, 0), false);
-		assertEquals(new DateTime(2013, 10, 7, 11, 14, 0, 0), series.getPOA());
+		series.aggregate(LocalDateTime.of(2013, 10, 7, 11, 14, 0, 0), false);
+		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 14, 0, 0), series.getPOA());
 		
-		series.aggregate(new DateTime(2013, 10, 7, 11, 16, 0, 0), true);
-		assertEquals(new DateTime(2013, 10, 7, 11, 16, 0, 0), series.getPOA());
+		series.aggregate(LocalDateTime.of(2013, 10, 7, 11, 16, 0, 0), true);
+		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 16, 0, 0), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime2_Strict_ThrowsIfOutOfDate() throws Exception {
 		series.add(candle1);
-		assertEquals(new DateTime(2013, 10, 7, 11, 5, 0, 0), series.getPOA());
+		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 5, 0, 0), series.getPOA());
 		
 		try {
-			series.aggregate(new DateTime(2013, 10, 7, 10, 59, 0, 0), false);
+			series.aggregate(LocalDateTime.of(2013, 10, 7, 10, 59, 0, 0), false);
 			fail("Expected: " + OutOfDateException.class.getSimpleName());
 		} catch ( OutOfDateException e ) {
 			
@@ -774,7 +778,7 @@ public class CandleSeriesImplTest {
 		series.add(candle1);
 		
 		try {
-			series.aggregate(new DateTime(2013, 10, 7, 10, 59, 0, 0));
+			series.aggregate(LocalDateTime.of(2013, 10, 7, 10, 59, 0, 0));
 			fail("Expected: " + OutOfDateException.class.getSimpleName());
 		} catch ( OutOfDateException e ) {
 			
@@ -785,34 +789,34 @@ public class CandleSeriesImplTest {
 	public void testAggregateTime2_Silent_SkipsIfOutOfDate() throws Exception {
 		series.add(candle1);
 		
-		series.aggregate(new DateTime(2013, 10, 7, 10, 59, 0, 0), true);
+		series.aggregate(LocalDateTime.of(2013, 10, 7, 10, 59, 0, 0), true);
 	
 		assertEquals(candle1.getEndTime(), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime2_Strict_FirstTime() throws Exception {
-		series.aggregate(new DateTime(2013, 10, 7, 8, 0, 0, 0), false);
-		assertEquals(new DateTime(2013, 10, 7, 8, 0, 0), series.getPOA());
+		series.aggregate(LocalDateTime.of(2013, 10, 7, 8, 0, 0, 0), false);
+		assertEquals(LocalDateTime.of(2013, 10, 7, 8, 0, 0), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime2_Silent_FirstTime() throws Exception {
-		series.aggregate(new DateTime(2013, 10, 7, 8, 0, 0, 0), true);
-		assertEquals(new DateTime(2013, 10, 7, 8, 0, 0), series.getPOA());
+		series.aggregate(LocalDateTime.of(2013, 10, 7, 8, 0, 0, 0), true);
+		assertEquals(LocalDateTime.of(2013, 10, 7, 8, 0, 0), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime1_FirstTime() throws Exception {
-		series.aggregate(new DateTime(2013, 10, 7, 8, 0, 0, 0));
-		assertEquals(new DateTime(2013, 10, 7, 8, 0, 0), series.getPOA());
+		series.aggregate(LocalDateTime.of(2013, 10, 7, 8, 0, 0, 0));
+		assertEquals(LocalDateTime.of(2013, 10, 7, 8, 0, 0), series.getPOA());
 	}
 
 	@Test
 	public void testFindFirstIntradayCandle() throws Exception {
 		assertNull(series.findFirstIntradayCandle());
 		
-		DateTime prev = candle1.getStartTime().minusDays(1);
+		LocalDateTime prev = candle1.getStartTime().minusDays(1);
 		TimeFrame t = TimeFrame.M5;
 		Candle candle0 = new Candle(t.getInterval(prev), 0d, 0d, 0d, 0d, 0L);
 		series.add(candle0);

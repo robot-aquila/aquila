@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.timetable;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Период дат.
@@ -16,7 +16,7 @@ public interface DatePeriod extends Period {
 	 * @param time время, дата которого берется за исходную дату
 	 * @return время начала следующего рабочего дня, null - конец расписания
 	 */
-	public DateTime nextDate(DateTime time);
+	public LocalDateTime nextDate(LocalDateTime time);
 	
 	/**
 	 * Это дата конца периода?
@@ -27,7 +27,7 @@ public interface DatePeriod extends Period {
 	 * @param time проверяемое время
 	 * @return true - дата аргумента указывает на последний день периода
 	 */
-	public boolean isEndDate(DateTime time);
+	public boolean isEndDate(LocalDateTime time);
 	
 	/**
 	 * Получить дату конца периода.
@@ -40,6 +40,6 @@ public interface DatePeriod extends Period {
 	 * расписания. Если исходное время указывает на последний день периода,
 	 * то возвращается исходное время без изменений.
 	 */
-	public DateTime nextEndDate(DateTime time);
+	public LocalDateTime nextEndDate(LocalDateTime time);
 
 }

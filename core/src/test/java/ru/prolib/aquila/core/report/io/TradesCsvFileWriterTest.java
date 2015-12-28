@@ -1,14 +1,16 @@
 package ru.prolib.aquila.core.report.io;
 
 import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.log4j.BasicConfigurator;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import com.csvreader.CsvReader;
@@ -28,7 +30,7 @@ public class TradesCsvFileWriterTest {
 	private static final String ID = "ID";
 	private static final String ORD_ID = "ORD_ID";
 	private static final String DIR_BUY = "B";
-	private static SimpleDateFormat timeFormat;
+	private static DateTimeFormatter timeFormat;
 
 	private EventSystem es;
 	private EventQueue queue;
@@ -40,7 +42,7 @@ public class TradesCsvFileWriterTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		timeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	}
 
 	@Before
@@ -106,7 +108,7 @@ public class TradesCsvFileWriterTest {
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
 			trade.setSymbol(getSymbol(reader));
-			trade.setTime(new DateTime(timeFormat.parse(reader.get(TIME))));
+			trade.setTime(LocalDateTime.parse(reader.get(TIME), timeFormat));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);
 		}

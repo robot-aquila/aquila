@@ -2,8 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.Interval;
 import org.junit.*;
+import org.threeten.extra.Interval;
 
 /**
  * 2012-04-09<br>

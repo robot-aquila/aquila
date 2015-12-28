@@ -1,7 +1,9 @@
 package ru.prolib.aquila.core.timetable;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 import com.thoughtworks.xstream.annotations.*;
 
@@ -37,23 +39,23 @@ public class DOWSpan implements Span {
 	}
 	
 	@Override
-	public boolean less(DateTime time) {
-		return day.getNumber() < time.getDayOfWeek();
+	public boolean less(LocalDateTime time) {
+		return day.getNumber() < time.getDayOfWeek().getValue();
 	}
 
 	@Override
-	public boolean lessOrEquals(DateTime time) {
-		return day.getNumber() <= time.getDayOfWeek();
+	public boolean lessOrEquals(LocalDateTime time) {
+		return day.getNumber() <= time.getDayOfWeek().getValue();
 	}
 
 	@Override
-	public boolean greater(DateTime time) {
-		return day.getNumber() > time.getDayOfWeek();
+	public boolean greater(LocalDateTime time) {
+		return day.getNumber() > time.getDayOfWeek().getValue();
 	}
 	
 	@Override
-	public boolean greaterOrEquals(DateTime time) {
-		return day.getNumber() >= time.getDayOfWeek();
+	public boolean greaterOrEquals(LocalDateTime time) {
+		return day.getNumber() >= time.getDayOfWeek().getValue();
 	}
 
 	/**
@@ -64,8 +66,8 @@ public class DOWSpan implements Span {
 	 * изменяется.
 	 */
 	@Override
-	public DateTime align(DateTime time) {
-		DateTime aligned = time.withDayOfWeek(day.getNumber()); 
+	public LocalDateTime align(LocalDateTime time) {
+		LocalDateTime aligned = (LocalDateTime) DayOfWeek.of(day.getNumber()).adjustInto(time);
 		return aligned.isBefore(time) ? aligned.plusWeeks(1) : aligned;
 	}
 	

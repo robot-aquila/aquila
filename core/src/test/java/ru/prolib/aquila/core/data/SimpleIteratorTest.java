@@ -1,16 +1,15 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.junit.Test;
 
 public class SimpleIteratorTest {
-	private final SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+	private final DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  
 	
 	/**
 	 * Parse string "yyyy-MM-dd HH:mm:ss" datetime format into joda-time.
@@ -19,8 +18,8 @@ public class SimpleIteratorTest {
 	 * @return
 	 * @throws Exception
 	 */
-	public DateTime time(String time) throws Exception {
-		return new DateTime(f.parse(time));
+	public LocalDateTime time(String time) throws Exception {
+		return LocalDateTime.parse(time, f);
 	}
 	
 	/**

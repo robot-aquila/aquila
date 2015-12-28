@@ -2,14 +2,15 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
+import java.time.LocalDateTime;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.threeten.extra.Interval;
 
 public class CandleOpenSeriesTest {
 	private EditableCandleSeries candles;
-	private DateTime time1, time2, time3;
+	private LocalDateTime time1, time2, time3;
 	private Interval int1, int2, int3;
 	private Candle candle1, candle2, candle3;
 	private CandleOpenSeries series;
@@ -17,7 +18,7 @@ public class CandleOpenSeriesTest {
 	@Before
 	public void setUp() throws Exception {
 		candles = new CandleSeriesImpl(TimeFrame.M5, "foo");
-		time1 = new DateTime(2013, 10, 7, 11, 0, 0);
+		time1 = LocalDateTime.of(2013, 10, 7, 11, 0, 0);
 		time2 = time1.plusMinutes(5);
 		time3 = time2.plusMinutes(5);
 		int1 = TimeFrame.M5.getInterval(time1);

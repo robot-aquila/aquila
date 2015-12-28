@@ -1,8 +1,9 @@
 package ru.prolib.aquila.core.timetable;
 
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 import com.thoughtworks.xstream.annotations.*;
 
@@ -70,21 +71,21 @@ public class DOWPeriod implements DatePeriod {
 	}
 
 	@Override
-	public boolean contains(DateTime time) {
+	public boolean contains(LocalDateTime time) {
 		return from.lessOrEquals(time) && to.greaterOrEquals(time);
 	}
 	
 	@Override
-	public DateTime nextDate(DateTime time) {
+	public LocalDateTime nextDate(LocalDateTime time) {
 		time = time.plusDays(1);
 		if ( contains(time) ) {
-			return time.withTimeAtStartOfDay();
+			return time.toLocalDate().atStartOfDay();
 		}
-		DateTime aligned = from.align(time);
+		LocalDateTime aligned = from.align(time);
 		if ( aligned.isBefore(time) ) {
 			aligned = aligned.plusWeeks(1);
 		}
-		return aligned.withTimeAtStartOfDay();
+		return aligned.toLocalDate().atStartOfDay();
 	}
 
 	@Override
@@ -103,16 +104,16 @@ public class DOWPeriod implements DatePeriod {
 	}
 	
 	@Override
-	public boolean isEndDate(DateTime time) {
+	public boolean isEndDate(LocalDateTime time) {
 		return to.lessOrEquals(time) && to.greaterOrEquals(time);
 	}
 	
 	@Override
-	public DateTime nextEndDate(DateTime time) {
-		if ( time.getDayOfWeek() == to.getDayOfWeek().getNumber() ) {
+	public LocalDateTime nextEndDate(LocalDateTime time) {
+		if ( time.getDayOfWeek().getValue() == to.getDayOfWeek().getNumber() ) {
 			return time;
 		}
-		return to.align(time).withTimeAtStartOfDay();
+		return to.align(time).toLocalDate().atStartOfDay();
 	}
 	
 	/**

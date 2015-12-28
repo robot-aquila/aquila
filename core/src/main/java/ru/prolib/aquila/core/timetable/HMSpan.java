@@ -1,7 +1,9 @@
 package ru.prolib.aquila.core.timetable;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 import com.thoughtworks.xstream.annotations.*;
 
@@ -74,7 +76,7 @@ public class HMSpan implements Span {
 	 * миллисекунду минуты часа, соответствующей времени дескриптора.
 	 */
 	@Override
-	public boolean less(DateTime time) {
+	public boolean less(LocalDateTime time) {
 		return align(time).compareTo(time) < 0;
 	}
 
@@ -88,7 +90,7 @@ public class HMSpan implements Span {
 	 * внутридневное время, соответствующее времени дескриптора.
 	 */
 	@Override
-	public boolean lessOrEquals(DateTime time) {
+	public boolean lessOrEquals(LocalDateTime time) {
 		return align(time).compareTo(time) <= 0;
 	}
 
@@ -101,7 +103,7 @@ public class HMSpan implements Span {
 	 * миллисекунды предыдущей минуты. 
 	 */
 	@Override
-	public boolean greater(DateTime time) {
+	public boolean greater(LocalDateTime time) {
 		return align(time).compareTo(time) > 0;
 	}
 	
@@ -116,7 +118,7 @@ public class HMSpan implements Span {
 	 * дескриптора.
 	 */
 	@Override
-	public boolean greaterOrEquals(DateTime time) {
+	public boolean greaterOrEquals(LocalDateTime time) {
 		return align(time).compareTo(time) >= 0;
 	}
 
@@ -128,8 +130,8 @@ public class HMSpan implements Span {
 	 * значение.
 	 */
 	@Override
-	public DateTime align(DateTime time) {
-		return time.withTime(hour, minute, 0, 0); 
+	public LocalDateTime align(LocalDateTime time) {
+		return LocalDateTime.of(time.toLocalDate(), LocalTime.of(hour, minute)); 
 	}
 	
 	@Override

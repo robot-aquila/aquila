@@ -1,7 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
-import org.joda.time.DateTime;
 
 /**
  * Стандартный планировщик задач.
@@ -54,8 +55,8 @@ public class SchedulerLocal implements Scheduler {
 	}
 	
 	@Override
-	public DateTime getCurrentTime() {
-		return new DateTime();
+	public LocalDateTime getCurrentTime() {
+		return LocalDateTime.now();
 	}
 	
 	/**
@@ -88,18 +89,22 @@ public class SchedulerLocal implements Scheduler {
 	private TaskHandler createHandler(Runnable task) {
 		return new TaskHandlerImpl(task, this);
 	}
+	
+	private Date toDate(LocalDateTime time) {
+		return Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
+	}
 
 	@Override
-	public synchronized TaskHandler schedule(Runnable task, DateTime time) {
-		timer.schedule(makeRunOnce(task), time.toDate());
+	public synchronized TaskHandler schedule(Runnable task, LocalDateTime time) {
+		timer.schedule(makeRunOnce(task), toDate(time));
 		return createHandler(task);
 	}
 
 	@Override
 	public synchronized
-		TaskHandler schedule(Runnable task, DateTime firstTime, long period)
+		TaskHandler schedule(Runnable task, LocalDateTime firstTime, long period)
 	{
-		timer.schedule(makePeriodic(task), firstTime.toDate(), period);
+		timer.schedule(makePeriodic(task), toDate(firstTime), period);
 		return createHandler(task);
 	}
 
@@ -119,9 +124,9 @@ public class SchedulerLocal implements Scheduler {
 
 	@Override
 	public synchronized TaskHandler
-		scheduleAtFixedRate(Runnable task, DateTime firstTime, long period)
+		scheduleAtFixedRate(Runnable task, LocalDateTime firstTime, long period)
 	{
-		timer.scheduleAtFixedRate(makePeriodic(task), firstTime.toDate(), period);
+		timer.scheduleAtFixedRate(makePeriodic(task), toDate(firstTime), period);
 		return createHandler(task);
 	}
 

@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
@@ -29,10 +29,10 @@ public interface TickIteratorStorage {
 	 * @return итератор тиковых данных
 	 * @throws DataException ошибка доступа к данным. 
 	 */
-	public Aqiterator<Tick> getIterator(String dataId, DateTime start)
+	public Aqiterator<Tick> getIterator(String dataId, LocalDateTime start)
 			throws DataException;
 	
-	public Aqiterator<Tick> getIterator(Symbol symbol, DateTime start)
+	public Aqiterator<Tick> getIterator(Symbol symbol, LocalDateTime start)
 			throws DataException;
 
 }

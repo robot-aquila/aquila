@@ -1,9 +1,9 @@
 package ru.prolib.aquila.core.timetable;
 
-
 import static org.junit.Assert.*;
 
-import org.joda.time.*;
+import java.time.LocalDateTime;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Variant;
@@ -19,12 +19,12 @@ public class HMSpanTest {
 	@Test
 	public void testLess() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(1998, 1, 15, 19, 44, 59, 999), false),
-				new FR(new DateTime(2013, 8, 10, 19, 44, 59, 999), false),
-				new FR(new DateTime(2013, 8, 10, 19, 45,  0,   0), false),
-				new FR(new DateTime(2013, 8, 10, 19, 45,  0,   1), true),
-				new FR(new DateTime(1998, 1, 15, 23, 50,  1,   0), true),
-				new FR(new DateTime(1992, 8, 14, 19, 47,  1,   0), true),
+				new FR(LocalDateTime.of(1998, 1, 15, 19, 44, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 44, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 45,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 45,  0,   1), true),
+				new FR(LocalDateTime.of(1998, 1, 15, 23, 50,  1,   0), true),
+				new FR(LocalDateTime.of(1992, 8, 14, 19, 47,  1,   0), true),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -36,12 +36,12 @@ public class HMSpanTest {
 	@Test
 	public void testLessOrEquals() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(1998, 1, 15, 19, 44, 59, 999), false),
-				new FR(new DateTime(2013, 8, 10, 19, 44, 59, 999), false),
-				new FR(new DateTime(2013, 8, 10, 19, 45,  0,   0), true),
-				new FR(new DateTime(2013, 8, 10, 19, 45,  0,   1), true),
-				new FR(new DateTime(1998, 1, 15, 23, 50,  1,   0), true),
-				new FR(new DateTime(1992, 8, 14, 19, 47,  1,   0), true),
+				new FR(LocalDateTime.of(1998, 1, 15, 19, 44, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 44, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 45,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 45,  0,   1), true),
+				new FR(LocalDateTime.of(1998, 1, 15, 23, 50,  1,   0), true),
+				new FR(LocalDateTime.of(1992, 8, 14, 19, 47,  1,   0), true),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -53,11 +53,11 @@ public class HMSpanTest {
 	@Test
 	public void testGreater() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2014, 8, 10, 19, 10, 15,   0), true),
-				new FR(new DateTime(2013, 8, 10, 19, 44,  0,   0), true),
-				new FR(new DateTime(2013, 8, 10, 19, 44, 59, 999), true),
-				new FR(new DateTime(2013, 8, 10, 19, 45,  0,   0), false),
-				new FR(new DateTime(2058, 8, 10, 19, 45,  0,   1), false),
+				new FR(LocalDateTime.of(2014, 8, 10, 19, 10, 15,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 44,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 44, 59, 999), true),
+				new FR(LocalDateTime.of(2013, 8, 10, 19, 45,  0,   0), false),
+				new FR(LocalDateTime.of(2058, 8, 10, 19, 45,  0,   1), false),
 				
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
@@ -70,11 +70,11 @@ public class HMSpanTest {
 	@Test
 	public void testGreaterOrEquals() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013, 8, 14, 10, 41, 02, 125), true),
-				new FR(new DateTime(2013, 8, 14, 19, 44, 59, 999), true),
-				new FR(new DateTime(2013, 8, 14, 19, 45,  0,   0), true),
-				new FR(new DateTime(2013, 8, 14, 19, 45,  0,   1), false),
-				new FR(new DateTime(2013, 8, 14, 23, 19, 24, 831), false),
+				new FR(LocalDateTime.of(2013, 8, 14, 10, 41, 02, 125), true),
+				new FR(LocalDateTime.of(2013, 8, 14, 19, 44, 59, 999), true),
+				new FR(LocalDateTime.of(2013, 8, 14, 19, 45,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 14, 19, 45,  0,   1), false),
+				new FR(LocalDateTime.of(2013, 8, 14, 23, 19, 24, 831), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -85,8 +85,8 @@ public class HMSpanTest {
 	
 	@Test
 	public void testAlign() throws Exception {
-		DateTime initial = new DateTime(2013, 8, 10, 12, 28, 49, 180);
-		DateTime expected = new DateTime(2013, 8, 10, 19, 45, 0, 0); 
+		LocalDateTime initial = LocalDateTime.of(2013, 8, 10, 12, 28, 49, 180);
+		LocalDateTime expected = LocalDateTime.of(2013, 8, 10, 19, 45, 0, 0); 
 		assertEquals(expected, span.align(initial));
 	}
 	

@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.data;
 
-import org.joda.time.*;
+import java.time.LocalDateTime;
+import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 import ru.prolib.aquila.core.data.timeframe.*;
 
@@ -52,7 +53,7 @@ public interface TimeFrame {
 	 * @param time временная метка
 	 * @return интервал
 	 */
-	public Interval getInterval(DateTime time);
+	public Interval getInterval(LocalDateTime time);
 	
 	/**
 	 * Внутридневной таймфрейм?

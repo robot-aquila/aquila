@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import java.time.LocalDateTime;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 /**
  * Тиковые данные.
@@ -12,7 +12,7 @@ import org.joda.time.DateTime;
  * в определенный момент времени.  
  */
 public class Tick {
-	private final DateTime time;
+	private final LocalDateTime time;
 	private final Double value;
 	private final Double optValue;
 
@@ -23,7 +23,7 @@ public class Tick {
 	 * @param value основное значение
 	 * @param optValue опциональное значение
 	 */
-	public Tick(DateTime time, Double value, Double optValue) {
+	public Tick(LocalDateTime time, Double value, Double optValue) {
 		super();
 		this.time = time;
 		this.value = value;
@@ -38,11 +38,11 @@ public class Tick {
 	 * @param time время
 	 * @param value значение
 	 */
-	public Tick(DateTime time, Double value) {
+	public Tick(LocalDateTime time, Double value) {
 		this(time, value, null);
 	}
 	
-	public Tick(DateTime time, Double value, int optValue) {
+	public Tick(LocalDateTime time, Double value, int optValue) {
 		this(time, value, new Double(optValue));
 	}
 	
@@ -51,7 +51,7 @@ public class Tick {
 	 * <p>
 	 * @return время
 	 */
-	public DateTime getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
 	

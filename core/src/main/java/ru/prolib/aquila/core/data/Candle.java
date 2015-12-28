@@ -1,7 +1,10 @@
 package ru.prolib.aquila.core.data;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.*;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 
@@ -106,7 +109,7 @@ public class Candle {
 	public Candle addCandle(Candle candle)
 		throws OutOfIntervalException
 	{
-		if ( ! interval.contains(candle.interval) ) {
+		if ( ! interval.encloses(candle.interval) ) {
 			throw new OutOfIntervalException(interval, candle);
 		}
 		return new Candle(interval, open,
@@ -124,7 +127,7 @@ public class Candle {
 	 * @throws OutOfIntervalException время сделки за границей интервала свечи
 	 */
 	public Candle addTrade(Trade trade) throws OutOfIntervalException {
-		if ( ! interval.contains(trade.getTime()) ) {
+		if ( ! interval.contains(trade.getTime().toInstant(ZoneOffset.UTC)) ) {
 			throw new OutOfIntervalException(interval, trade);
 		}
 		return addDeal(trade.getPrice(), trade.getQty());
@@ -138,7 +141,7 @@ public class Candle {
 	 * @throws OutOfIntervalException время тика за границей интервала свечи
 	 */
 	public Candle addTick(Tick tick) throws OutOfIntervalException {
-		if ( ! interval.contains(tick.getTime()) ) {
+		if ( ! interval.contains(tick.getTime().toInstant(ZoneOffset.UTC)) ) {
 			throw new OutOfIntervalException(interval, tick);
 		}
 		return addDeal(tick.getValue(), tick.getOptionalValueAsLong());
@@ -149,8 +152,8 @@ public class Candle {
 	 * <p>
 	 * @return время начала интервала
 	 */
-	public DateTime getStartTime() {
-		return interval.getStart();
+	public LocalDateTime getStartTime() {
+		return LocalDateTime.ofInstant(interval.getStart(), ZoneOffset.UTC);
 	}
 	
 	/**
@@ -162,8 +165,8 @@ public class Candle {
 	 * <p>
 	 * @return время окончания интервала
 	 */
-	public DateTime getEndTime() {
-		return interval.getEnd();
+	public LocalDateTime getEndTime() {
+		return LocalDateTime.ofInstant(interval.getEnd(), ZoneOffset.UTC);
 	}
 	
 	/**
@@ -323,7 +326,7 @@ public class Candle {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() +
-			"[T=" + interval.getStart() + " " + interval.toPeriod() + "," +
+			"[T=" + interval.getStart() + " " + interval.toDuration() + "," +
 			" O=" + open + "," +
 			" H=" + high + "," +
 			" L=" + low + "," +

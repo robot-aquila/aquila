@@ -2,7 +2,8 @@ package ru.prolib.aquila.core.timetable;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
+
 import org.junit.*;
 
 public class DOWSpanTest {
@@ -10,8 +11,8 @@ public class DOWSpanTest {
 	
 	static class FR2 {
 		private final DOW dow;
-		private final DateTime time, expected;
-		FR2(DOW dow, DateTime time, DateTime expected) {
+		private final LocalDateTime time, expected;
+		FR2(DOW dow, LocalDateTime time, LocalDateTime expected) {
 			this.dow = dow;
 			this.time = time;
 			this.expected = expected;
@@ -26,17 +27,17 @@ public class DOWSpanTest {
 	@Test
 	public void testLess() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013, 8, 11, 14, 31, 53,  19), true),
-				new FR(new DateTime(2013, 8, 12,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 13, 18, 24, 15,  48), false),
-				new FR(new DateTime(2013, 8, 14,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 14, 12, 45, 19, 292), false),
-				new FR(new DateTime(2013, 8, 14, 23, 59, 59, 999), false),
-				new FR(new DateTime(2013, 8, 15,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 16,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 17,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 18,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 19,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 11, 14, 31, 53,  19), true),
+				new FR(LocalDateTime.of(2013, 8, 12,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 13, 18, 24, 15,  48), false),
+				new FR(LocalDateTime.of(2013, 8, 14,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 14, 12, 45, 19, 292), false),
+				new FR(LocalDateTime.of(2013, 8, 14, 23, 59, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 15,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 16,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 17,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 18,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 19,  0,  0,  0,   0), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -48,9 +49,9 @@ public class DOWSpanTest {
 	@Test
 	public void testLessOrEquals() throws Exception {
 		FR fix[] = {
-			new FR(new DateTime(2013, 8, 11, 14, 31, 53, 19), true),
-			new FR(new DateTime(2013, 8, 12, 0, 0, 0, 0), false),
-			new FR(new DateTime(2013, 8, 14, 0, 0, 0, 0), true),
+			new FR(LocalDateTime.of(2013, 8, 11, 14, 31, 53, 19), true),
+			new FR(LocalDateTime.of(2013, 8, 12, 0, 0, 0, 0), false),
+			new FR(LocalDateTime.of(2013, 8, 14, 0, 0, 0, 0), true),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -62,15 +63,15 @@ public class DOWSpanTest {
 	@Test
 	public void testGreater() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013, 8, 11, 14, 31, 53, 19), false),
-				new FR(new DateTime(2013, 8, 12, 0, 0, 0, 0), true),
-				new FR(new DateTime(2013, 8, 13, 0, 0, 0, 0), true),
-				new FR(new DateTime(2013, 8, 14, 0, 0, 0, 0), false),
-				new FR(new DateTime(2013, 8, 14, 23, 59, 59, 999), false),
-				new FR(new DateTime(2013, 8, 15, 0, 0, 0, 0), false),
-				new FR(new DateTime(2013, 8, 16, 0, 0, 0, 0), false),
-				new FR(new DateTime(2013, 8, 17, 0, 0, 0, 0), false),
-				new FR(new DateTime(2013, 8, 18, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 11, 14, 31, 53, 19), false),
+				new FR(LocalDateTime.of(2013, 8, 12, 0, 0, 0, 0), true),
+				new FR(LocalDateTime.of(2013, 8, 13, 0, 0, 0, 0), true),
+				new FR(LocalDateTime.of(2013, 8, 14, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 14, 23, 59, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 15, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 16, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 17, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 18, 0, 0, 0, 0), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -82,15 +83,15 @@ public class DOWSpanTest {
 	@Test
 	public void testGreaterOrEquals() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013, 8, 11, 14, 31, 53, 19), false),
-				new FR(new DateTime(2013, 8, 12, 0, 0, 0, 0), true),
-				new FR(new DateTime(2013, 8, 13, 0, 0, 0, 0), true),
-				new FR(new DateTime(2013, 8, 14, 0, 0, 0, 0), true),
-				new FR(new DateTime(2013, 8, 14, 23, 59, 59, 999), true),
-				new FR(new DateTime(2013, 8, 15, 0, 0, 0, 0), false),
-				new FR(new DateTime(2013, 8, 16, 0, 0, 0, 0), false),
-				new FR(new DateTime(2013, 8, 17, 0, 0, 0, 0), false),
-				new FR(new DateTime(2013, 8, 18, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 11, 14, 31, 53, 19), false),
+				new FR(LocalDateTime.of(2013, 8, 12, 0, 0, 0, 0), true),
+				new FR(LocalDateTime.of(2013, 8, 13, 0, 0, 0, 0), true),
+				new FR(LocalDateTime.of(2013, 8, 14, 0, 0, 0, 0), true),
+				new FR(LocalDateTime.of(2013, 8, 14, 23, 59, 59, 999), true),
+				new FR(LocalDateTime.of(2013, 8, 15, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 16, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 17, 0, 0, 0, 0), false),
+				new FR(LocalDateTime.of(2013, 8, 18, 0, 0, 0, 0), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -102,20 +103,20 @@ public class DOWSpanTest {
 	@Test
 	public void testAlign() throws Exception {
 		FR2 fix[] = {
-			new FR2(DOW.WEDNESDAY, new DateTime(2013, 8, 11, 12, 28, 49, 180),
-					   new DateTime(2013, 8, 14, 12, 28, 49, 180)),
-			new FR2(DOW.WEDNESDAY, new DateTime(2013, 8,  6, 12, 28, 49, 180),
-					   new DateTime(2013, 8,  7, 12, 28, 49, 180)),
-			new FR2(DOW.MONDAY, new DateTime(2013, 8,  5, 12, 28, 49, 180),
-					   new DateTime(2013, 8,  5, 12, 28, 49, 180)),
-			new FR2(DOW.MONDAY, new DateTime(2013, 8,  4, 12, 28, 49, 180),
-					   new DateTime(2013, 8,  5, 12, 28, 49, 180)),
-			new FR2(DOW.MONDAY, new DateTime(2013, 8,  5, 12, 28, 49, 180),
-					   new DateTime(2013, 8,  5, 12, 28, 49, 180)),
-			new FR2(DOW.MONDAY, new DateTime(2013, 8,  6, 12, 28, 49, 180),
-					   new DateTime(2013, 8, 12, 12, 28, 49, 180)),
-			new FR2(DOW.MONDAY, new DateTime(2013, 8, 10, 12, 28, 49, 180),
-					   new DateTime(2013, 8, 12, 12, 28, 49, 180)),
+			new FR2(DOW.WEDNESDAY, LocalDateTime.of(2013, 8, 11, 12, 28, 49, 180),
+					LocalDateTime.of(2013, 8, 14, 12, 28, 49, 180)),
+			new FR2(DOW.WEDNESDAY, LocalDateTime.of(2013, 8,  6, 12, 28, 49, 180),
+					LocalDateTime.of(2013, 8,  7, 12, 28, 49, 180)),
+			new FR2(DOW.MONDAY, LocalDateTime.of(2013, 8,  5, 12, 28, 49, 180),
+					LocalDateTime.of(2013, 8,  5, 12, 28, 49, 180)),
+			new FR2(DOW.MONDAY, LocalDateTime.of(2013, 8,  4, 12, 28, 49, 180),
+					LocalDateTime.of(2013, 8,  5, 12, 28, 49, 180)),
+			new FR2(DOW.MONDAY, LocalDateTime.of(2013, 8,  5, 12, 28, 49, 180),
+					LocalDateTime.of(2013, 8,  5, 12, 28, 49, 180)),
+			new FR2(DOW.MONDAY, LocalDateTime.of(2013, 8,  6, 12, 28, 49, 180),
+					LocalDateTime.of(2013, 8, 12, 12, 28, 49, 180)),
+			new FR2(DOW.MONDAY, LocalDateTime.of(2013, 8, 10, 12, 28, 49, 180),
+					LocalDateTime.of(2013, 8, 12, 12, 28, 49, 180)),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;

@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Устаревшие данные.
@@ -12,7 +12,7 @@ import org.joda.time.DateTime;
  */
 public class OutOfDateException extends ValueException {
 	private static final long serialVersionUID = -6368714328899539492L;
-	private final DateTime time;
+	private final LocalDateTime time;
 	private final Object operand;
 	
 	/**
@@ -21,7 +21,7 @@ public class OutOfDateException extends ValueException {
 	 * @param time время, относительно которого данные признаны устаревшими
 	 * @param operand в зависимости от контекста дата, интервал, свеча и т.п.
 	 */
-	public OutOfDateException(DateTime time, Object operand) {
+	public OutOfDateException(LocalDateTime time, Object operand) {
 		super("Out of date " + time + ": " + operand);
 		this.time = time;
 		this.operand = operand;
@@ -32,7 +32,7 @@ public class OutOfDateException extends ValueException {
 	 * <p>
 	 * @return время
 	 */
-	public DateTime getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
 	

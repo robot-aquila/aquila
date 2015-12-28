@@ -2,12 +2,13 @@ package ru.prolib.aquila.core.report.io;
 
 import java.io.*;
 import java.nio.channels.*;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.report.*;
 
@@ -21,13 +22,13 @@ import ru.prolib.aquila.core.report.*;
  */
 public class TradesCsvFileWriter implements TradesWriter, EventListener {
 	private static final Logger logger;
-	private static final SimpleDateFormat dateFormat;
+	private static final DateTimeFormatter dateFormat;
 	private static final String SEPARATOR = ",";
 	private static final String EOL = System.getProperty("line.separator");
 	
 	static {
 		logger = LoggerFactory.getLogger(TradesCsvFileWriter.class);
-		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	}
 	
 	private final TradeReport report;
@@ -165,11 +166,11 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 		}
 	}
 	
-	private String formatTime(DateTime time) {
+	private String formatTime(LocalDateTime time) {
 		if ( time == null ) {
 			return null;
 		}
-		return dateFormat.format(time.toDate());
+		return dateFormat.format(time);
 	}
 	
 	private String joinToString(Object entries[]) {

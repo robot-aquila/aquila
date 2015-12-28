@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.timetable;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Дескриптор времени.
@@ -27,7 +27,7 @@ public interface Span {
 	 * @param time проверяемая временная метка
 	 * @return true - время дескриптора меньше аргумента 
 	 */
-	public boolean less(DateTime time);
+	public boolean less(LocalDateTime time);
 	
 	/**
 	 * Дескриптор меньше или равен указанному времени?
@@ -38,7 +38,7 @@ public interface Span {
 	 * @param time проверяемая временная метка
 	 * @return true - время дескриптора меньше или равно аргументу 
 	 */
-	public boolean lessOrEquals(DateTime time);
+	public boolean lessOrEquals(LocalDateTime time);
 	
 	/**
 	 * Дескриптор больше указанного времени?
@@ -49,7 +49,7 @@ public interface Span {
 	 * @param time проверяемая временная метка
 	 * @return true - время дескриптора больше аргумента
 	 */
-	public boolean greater(DateTime time);
+	public boolean greater(LocalDateTime time);
 	
 	/**
 	 * Дескриптор больше или равен указанному времени?
@@ -57,7 +57,7 @@ public interface Span {
 	 * @param time временная метка для сравнения
 	 * @return true - время дескриптора больше или равно аргументу
 	 */
-	public boolean greaterOrEquals(DateTime time);
+	public boolean greaterOrEquals(LocalDateTime time);
 	
 	/**
 	 * Привести к соответствию.
@@ -68,6 +68,6 @@ public interface Span {
 	 * @param time исходное время
 	 * @return соответствующее время
 	 */
-	public DateTime align(DateTime time);
+	public LocalDateTime align(LocalDateTime time);
 
 }

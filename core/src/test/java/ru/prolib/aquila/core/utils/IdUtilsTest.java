@@ -3,8 +3,9 @@ package ru.prolib.aquila.core.utils;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDate;
+
 import org.easymock.IMocksControl;
-import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,7 +61,7 @@ public class IdUtilsTest {
 		control.replay();
 		
 		String expected = "X1-X2-X3-X4-20120805",
-				actual = utils.getSafeId(symbol, new LocalDate(2012, 8, 5));
+				actual = utils.getSafeId(symbol, LocalDate.of(2012, 8, 5));
 		assertEquals(expected, actual);
 		
 		control.verify();

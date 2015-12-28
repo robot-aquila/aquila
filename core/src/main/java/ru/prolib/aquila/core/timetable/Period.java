@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.timetable;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Интерфейс временного периода.
@@ -13,6 +13,6 @@ public interface Period {
 	 * @param time временная метка
 	 * @return true - время внутри периода, иначе - время за пределами периода  
 	 */
-	public boolean contains(DateTime time);
+	public boolean contains(LocalDateTime time);
 
 }

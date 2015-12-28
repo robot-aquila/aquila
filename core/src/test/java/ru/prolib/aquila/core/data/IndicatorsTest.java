@@ -2,8 +2,12 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+
 import org.junit.*;
+import org.threeten.extra.Interval;
 
 /**
  * 2013-03-04<br>
@@ -332,7 +336,7 @@ public class IndicatorsTest {
 		assertNull(indicators.tr(candles));
 		assertNull(indicators.tr(candles, 0));
 
-		DateTime time = new DateTime(2013, 10, 11, 11, 9, 43);
+		LocalDateTime time = LocalDateTime.of(2013, 10, 11, 11, 9, 43);
 		
 		// H-L
 		candles.add(new Candle(TimeFrame.M5.getInterval(time),
@@ -660,7 +664,7 @@ public class IndicatorsTest {
 	
 	private void fillCandlesQatr5() throws Exception {
 		Double fixture[][] = fix_qatr5;
-		Interval interval = new Interval(0, 0);
+		Interval interval = Interval.of(Instant.now(), Duration.ZERO);
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			candles.add(new Candle(interval, fixture[i][0], fixture[i][1],
 					fixture[i][2], fixture[i][3], 0l));

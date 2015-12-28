@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import org.joda.time.Interval;
+import org.threeten.extra.Interval;
 
 /**
  * Нарушении границ интервала.

@@ -1,9 +1,9 @@
 package ru.prolib.aquila.core.utils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
@@ -12,7 +12,7 @@ public class IdUtils {
 	private static final DateTimeFormatter dateFormat;
 	
 	static {
-		dateFormat = DateTimeFormat.forPattern("yyyyMMdd");
+		dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
 	}
 
 	private final StrCoder coder;
@@ -68,7 +68,7 @@ public class IdUtils {
 	public String getSafeId(Symbol symbol, LocalDate date) {
 		String[] chunks = {
 				getSafeId(symbol),
-				dateFormat.print(date)
+				dateFormat.format(date)
 		};
 		return StringUtils.join(chunks, SEPARATOR);
 	}

@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.data.Tick;
 /**
  * Набор вспомогательных функций для работы с объектами бизнес-модели.
  */
+@Deprecated
 public class BMUtils {
 	
 	public BMUtils() {

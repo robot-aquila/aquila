@@ -2,14 +2,10 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Variant;
@@ -23,7 +19,6 @@ public class TradeTest {
 	private static Terminal terminal, terminal2;
 	private static Symbol symbol;
 	private Trade trade;
-	private static Calendar cal;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -31,9 +26,6 @@ public class TradeTest {
 		control = createStrictControl();
 		terminal = control.createMock(Terminal.class);
 		terminal2 = control.createMock(Terminal.class);
-		cal = Calendar.getInstance();
-		cal.set(2010, 8, 1, 3, 45, 15); // 2010-08-01 03:45:15
-		cal.set(Calendar.MILLISECOND, 0);
 	}
 
 	@Before
@@ -43,7 +35,7 @@ public class TradeTest {
 		trade.setId(105L);
 		trade.setSymbol(symbol);
 		trade.setDirection(Direction.BUY);
-		trade.setTime(new DateTime(cal.getTime()));
+		trade.setTime(LocalDateTime.of(2010, 8, 1, 3, 45, 15));
 		trade.setPrice(100.00d);
 		trade.setQty(1L);
 		trade.setVolume(200.00d);
@@ -59,10 +51,10 @@ public class TradeTest {
 	 * @throws Exception
 	 */
 	private Trade createTrade(Long id, String time) throws Exception {
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		Trade trade = new Trade(terminal);
 		trade.setId(id);
-		trade.setTime(new DateTime(format.parse(time)));
+		trade.setTime(LocalDateTime.parse(time, format));
 		return trade;
 	}
 	
@@ -72,7 +64,7 @@ public class TradeTest {
 		assertSame(terminal, trade.getTerminal());
 		assertEquals(symbol, trade.getSymbol());
 		assertSame(Direction.BUY, trade.getDirection());
-		assertEquals(new DateTime(2010, 9, 1, 3, 45, 15), trade.getTime());
+		assertEquals(LocalDateTime.of(2010, 8, 1, 3, 45, 15), trade.getTime());
 		assertEquals(100.00d, trade.getPrice(), 0.001d);
 		assertEquals((Long) 1L, trade.getQty());
 		assertEquals(200.00d, trade.getVolume(), 0.001d);
@@ -113,10 +105,10 @@ public class TradeTest {
 			.add(null)
 			.add(Direction.BUY)
 			.add(Direction.SELL);
-		Variant<Date> vTime = new Variant<Date>(vDir)
+		Variant<LocalDateTime> vTime = new Variant<LocalDateTime>(vDir)
 			.add(null)
-			.add(cal.getTime())
-			.add(new Date());
+			.add(LocalDateTime.of(2010, 8, 1, 3, 45, 15))
+			.add(LocalDateTime.now());
 		Variant<Double> vPrice = new Variant<Double>(vTime)
 			.add(null)
 			.add(100.00d)
@@ -145,7 +137,7 @@ public class TradeTest {
 			actual.setId(vId.get());
 			actual.setSymbol(vSymbol.get());
 			actual.setDirection(vDir.get());
-			actual.setTime(new DateTime(vTime.get()));
+			actual.setTime(vTime.get());
 			actual.setPrice(vPrice.get());
 			actual.setQty(vQty.get());
 			actual.setVolume(vVol.get());
@@ -181,7 +173,7 @@ public class TradeTest {
 			.append(105L)
 			.append(symbol)
 			.append(Direction.BUY)
-			.append(new DateTime(2010, 9, 1, 3, 45, 15))
+			.append(LocalDateTime.of(2010, 8, 1, 3, 45, 15))
 			.append(100.00d)
 			.append(1L)
 			.append(200.00d)

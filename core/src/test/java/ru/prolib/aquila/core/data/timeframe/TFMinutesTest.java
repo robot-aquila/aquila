@@ -2,8 +2,11 @@ package ru.prolib.aquila.core.data.timeframe;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import org.junit.*;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 
@@ -48,108 +51,113 @@ public class TFMinutesTest {
 	
 	@Test
 	public void testGetInterval_m1() throws Exception {
-		DateTime fix[][] = {
+		LocalDateTime fix[][] = {
 			// timestamp, from, to
-			{	new DateTime(2013, 10, 6, 20, 22,  5,  15),
-				new DateTime(2013, 10, 6, 20, 22,  0,   0),
-				new DateTime(2013, 10, 6, 20, 23,  0,   0) },
-			{	new DateTime(2013, 10, 6, 23, 57, 19, 213),
-				new DateTime(2013, 10, 6, 23, 57,  0,   0),
-				new DateTime(2013, 10, 6, 23, 58,  0,   0) },
-			{	new DateTime(2013, 10, 6, 23, 59, 34, 117),
-				new DateTime(2013, 10, 6, 23, 59,  0,   0),
-				new DateTime(2013, 10, 7,  0,  0,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 20, 22,  5,  15),
+				LocalDateTime.of(2013, 10, 6, 20, 22,  0,   0),
+				LocalDateTime.of(2013, 10, 6, 20, 23,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 23, 57, 19, 213),
+				LocalDateTime.of(2013, 10, 6, 23, 57,  0,   0),
+				LocalDateTime.of(2013, 10, 6, 23, 58,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 23, 59, 34, 117),
+				LocalDateTime.of(2013, 10, 6, 23, 59,  0,   0),
+				LocalDateTime.of(2013, 10, 7,  0,  0,  0,   0) },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			Interval expected = new Interval(fix[i][1], fix[i][2]);
+			Interval expected = Interval.of(fix[i][1].toInstant(ZoneOffset.UTC),
+					fix[i][2].toInstant(ZoneOffset.UTC));
 			assertEquals(msg, expected, m1.getInterval(fix[i][0]));
 		}
 	}
 	
 	@Test
 	public void testGetInterval_m5() throws Exception {
-		DateTime fix[][] = {
+		LocalDateTime fix[][] = {
 			// timestamp, from, to
-			{	new DateTime(2013, 10, 6, 20, 22,  5,  15),
-				new DateTime(2013, 10, 6, 20, 20,  0,   0),
-				new DateTime(2013, 10, 6, 20, 25,  0,   0) },
-			{	new DateTime(2013, 10, 6, 23, 57, 19, 213),
-				new DateTime(2013, 10, 6, 23, 55,  0,   0),
-				new DateTime(2013, 10, 7,  0,  0,  0,   0) },
-			{	new DateTime(2013, 10, 6, 23, 59, 34, 117),
-				new DateTime(2013, 10, 6, 23, 55,  0,   0),
-				new DateTime(2013, 10, 7,  0,  0,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 20, 22,  5,  15),
+				LocalDateTime.of(2013, 10, 6, 20, 20,  0,   0),
+				LocalDateTime.of(2013, 10, 6, 20, 25,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 23, 57, 19, 213),
+				LocalDateTime.of(2013, 10, 6, 23, 55,  0,   0),
+				LocalDateTime.of(2013, 10, 7,  0,  0,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 23, 59, 34, 117),
+				LocalDateTime.of(2013, 10, 6, 23, 55,  0,   0),
+				LocalDateTime.of(2013, 10, 7,  0,  0,  0,   0) },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			Interval expected = new Interval(fix[i][1], fix[i][2]);
+			Interval expected = Interval.of(fix[i][1].toInstant(ZoneOffset.UTC),
+					fix[i][2].toInstant(ZoneOffset.UTC));
 			assertEquals(msg, expected, m5.getInterval(fix[i][0]));
 		}
 	}
 	
 	@Test
 	public void testGetInterval_m7() throws Exception {
-		DateTime fix[][] = {
+		LocalDateTime fix[][] = {
 			// timestamp, from, to
-			{	new DateTime(2013, 10, 6,  0,  1, 14, 715),
-				new DateTime(2013, 10, 6,  0,  0,  0,   0),
-				new DateTime(2013, 10, 6,  0,  7,  0,   0) },
-			{	new DateTime(2013, 10, 6,  0,  7,  0,   0),
-				new DateTime(2013, 10, 6,  0,  7,  0,   0),
-				new DateTime(2013, 10, 6,  0, 14,  0,   0) },
-			{	new DateTime(2013, 10, 6, 23, 51,  2, 472),
-				new DateTime(2013, 10, 6, 23, 48,  0,   0),
-				new DateTime(2013, 10, 6, 23, 55,  0,   0) },
-			{	new DateTime(2013, 10, 6, 23, 55, 13,  24),
-				new DateTime(2013, 10, 6, 23, 55,  0,   0),
-				new DateTime(2013, 10, 7,  0,  0,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6,  0,  1, 14, 715),
+				LocalDateTime.of(2013, 10, 6,  0,  0,  0,   0),
+				LocalDateTime.of(2013, 10, 6,  0,  7,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6,  0,  7,  0,   0),
+				LocalDateTime.of(2013, 10, 6,  0,  7,  0,   0),
+				LocalDateTime.of(2013, 10, 6,  0, 14,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 23, 51,  2, 472),
+				LocalDateTime.of(2013, 10, 6, 23, 48,  0,   0),
+				LocalDateTime.of(2013, 10, 6, 23, 55,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 23, 55, 13,  24),
+				LocalDateTime.of(2013, 10, 6, 23, 55,  0,   0),
+				LocalDateTime.of(2013, 10, 7,  0,  0,  0,   0) },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			Interval expected = new Interval(fix[i][1], fix[i][2]);
+			Interval expected = Interval.of(fix[i][1].toInstant(ZoneOffset.UTC),
+					fix[i][2].toInstant(ZoneOffset.UTC));
 			assertEquals(msg, expected, m7.getInterval(fix[i][0]));
 		}
 	}
 
 	@Test
 	public void testGetInterval_m15() throws Exception {
-		DateTime fix[][] = {
+		LocalDateTime fix[][] = {
 			// timestamp, from, to
-			{	new DateTime(2013, 10, 6,  0,  1, 14, 715),
-				new DateTime(2013, 10, 6,  0,  0,  0,   0),
-				new DateTime(2013, 10, 6,  0, 15,  0,   0) },
-			{	new DateTime(2013, 10, 6,  0,  7,  0,   0),
-				new DateTime(2013, 10, 6,  0,  0,  0,   0),
-				new DateTime(2013, 10, 6,  0, 15,  0,   0) },
-			{	new DateTime(2013, 10, 6, 23, 51,  2, 472),
-				new DateTime(2013, 10, 6, 23, 45,  0,   0),
-				new DateTime(2013, 10, 7,  0,  0,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6,  0,  1, 14, 715),
+				LocalDateTime.of(2013, 10, 6,  0,  0,  0,   0),
+				LocalDateTime.of(2013, 10, 6,  0, 15,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6,  0,  7,  0,   0),
+				LocalDateTime.of(2013, 10, 6,  0,  0,  0,   0),
+				LocalDateTime.of(2013, 10, 6,  0, 15,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 23, 51,  2, 472),
+				LocalDateTime.of(2013, 10, 6, 23, 45,  0,   0),
+				LocalDateTime.of(2013, 10, 7,  0,  0,  0,   0) },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			Interval expected = new Interval(fix[i][1], fix[i][2]);
+			Interval expected = Interval.of(fix[i][1].toInstant(ZoneOffset.UTC),
+					fix[i][2].toInstant(ZoneOffset.UTC));
 			assertEquals(msg, expected, m15.getInterval(fix[i][0]));
 		}
 	}
 	
 	@Test
 	public void testGetInterval_m241() throws Exception {
-		DateTime fix[][] = {
+		LocalDateTime fix[][] = {
 			// timestamp, from, to
-			{	new DateTime(2013, 10, 6,  0,  1, 14, 715),
-				new DateTime(2013, 10, 6,  0,  0,  0,   0),
-				new DateTime(2013, 10, 6,  4,  1,  0,   0) },
-			{	new DateTime(2013, 10, 6, 15, 27, 13,  28),
-				new DateTime(2013, 10, 6, 12,  3,  0,   0),
-				new DateTime(2013, 10, 6, 16,  4,  0,   0) }, 
-			{	new DateTime(2013, 10, 6, 23, 15,  8, 182),
-				new DateTime(2013, 10, 6, 20,  5,  0,   0),
-				new DateTime(2013, 10, 7,  0,  0,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6,  0,  1, 14, 715),
+				LocalDateTime.of(2013, 10, 6,  0,  0,  0,   0),
+				LocalDateTime.of(2013, 10, 6,  4,  1,  0,   0) },
+			{	LocalDateTime.of(2013, 10, 6, 15, 27, 13,  28),
+				LocalDateTime.of(2013, 10, 6, 12,  3,  0,   0),
+				LocalDateTime.of(2013, 10, 6, 16,  4,  0,   0) }, 
+			{	LocalDateTime.of(2013, 10, 6, 23, 15,  8, 182),
+				LocalDateTime.of(2013, 10, 6, 20,  5,  0,   0),
+				LocalDateTime.of(2013, 10, 7,  0,  0,  0,   0) },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			Interval expected = new Interval(fix[i][1], fix[i][2]);
+			Interval expected = Interval.of(fix[i][1].toInstant(ZoneOffset.UTC),
+					fix[i][2].toInstant(ZoneOffset.UTC));
 			assertEquals(msg, expected, m241.getInterval(fix[i][0]));
 		}
 	}

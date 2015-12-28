@@ -2,8 +2,8 @@ package ru.prolib.aquila.core.report.trades;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +11,6 @@ import java.util.Vector;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import com.csvreader.CsvReader;
@@ -44,7 +43,7 @@ public class CommonTRTest {
 	private static final String EVT_TYPE = "EVT_TYPE";
 	private static final String DIR_BUY = "B";
 	private static final String LONG = "LONG";
-	private static SimpleDateFormat timeFormat;
+	private static DateTimeFormatter timeFormat;
 	private static Symbol symbol;
 	
 	private IMocksControl control;
@@ -60,7 +59,7 @@ public class CommonTRTest {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		timeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		symbol = new Symbol("RI", "SPFB", "USD", SymbolType.FUTURE);
 	}
 
@@ -120,7 +119,7 @@ public class CommonTRTest {
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
 			trade.setSymbol(getSymbol(reader));
-			trade.setTime(new DateTime(timeFormat.parse(reader.get(TIME))));
+			trade.setTime(LocalDateTime.parse(reader.get(TIME), timeFormat));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);
 		}
@@ -180,8 +179,8 @@ public class CommonTRTest {
 		RTrade report = new RTradeImpl(getSymbol(reader),
 			(LONG.equals(reader.get(TYPE))
 				? PositionType.LONG : PositionType.SHORT),
-			new DateTime(timeFormat.parse(reader.get(ENTER_TIME))),
-			(exTime.equals("") ? null : new DateTime(timeFormat.parse(exTime))),
+			LocalDateTime.parse(reader.get(ENTER_TIME), timeFormat),
+			(exTime.equals("") ? null : LocalDateTime.parse(exTime, timeFormat)),
 			Long.parseLong(reader.get(ENTER_QTY)),
 			(exQty.equals("") ? null : Long.parseLong(exQty)),
 			Double.parseDouble(reader.get(ENTER_PRICE)),

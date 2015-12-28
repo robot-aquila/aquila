@@ -1,18 +1,15 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
-import ru.prolib.aquila.core.data.DataHandler;
-import ru.prolib.aquila.core.data.DataHandlerState;
 import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.utils.*;
 
@@ -466,7 +463,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public DateTime getCurrentTime() {
+	public LocalDateTime getCurrentTime() {
 		return scheduler.getCurrentTime();
 	}
 
@@ -565,12 +562,12 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public TaskHandler schedule(Runnable task, DateTime time) {
+	public TaskHandler schedule(Runnable task, LocalDateTime time) {
 		return scheduler.schedule(task, time);
 	}
 
 	@Override
-	public TaskHandler schedule(Runnable task, DateTime firstTime,
+	public TaskHandler schedule(Runnable task, LocalDateTime firstTime,
 			long period)
 	{
 		return scheduler.schedule(task, firstTime, period);
@@ -587,8 +584,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public TaskHandler scheduleAtFixedRate(Runnable task, DateTime firstTime,
-			long period)
+	public TaskHandler scheduleAtFixedRate(Runnable task,
+			LocalDateTime firstTime, long period)
 	{
 		return scheduler.scheduleAtFixedRate(task, firstTime, period);		
 	}

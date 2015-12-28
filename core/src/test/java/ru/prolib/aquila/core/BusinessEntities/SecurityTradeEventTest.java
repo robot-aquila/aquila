@@ -3,8 +3,9 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
@@ -41,7 +42,7 @@ public class SecurityTradeEventTest {
 		eventType = security.OnTrade();
 		eventType2 = control.createMock(EventType.class);
 		trade = new BMUtils().tradeFromTick(
-			new Tick(new DateTime(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
+			new Tick(LocalDateTime.of(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
 			security);
 		event = new SecurityTradeEvent(eventType, security, trade);
 	}
@@ -63,8 +64,8 @@ public class SecurityTradeEventTest {
 	@Test
 	public void testEquals() throws Exception {
 		Tick
-		tick1 = new Tick(new DateTime(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
-		tick2 = new Tick(new DateTime(2014, 11, 20, 1,  4,  2, 9), 132d, 15d); 
+		tick1 = new Tick(LocalDateTime.of(2013, 11, 20, 0, 54, 39, 1), 125d, 10d),
+		tick2 = new Tick(LocalDateTime.of(2014, 11, 20, 1,  4,  2, 9), 132d, 15d); 
 				
 		BMUtils utils = new BMUtils();
 		Trade trade1 = utils.tradeFromTick(tick1, security);

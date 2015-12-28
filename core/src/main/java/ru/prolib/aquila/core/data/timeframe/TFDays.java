@@ -1,7 +1,9 @@
 package ru.prolib.aquila.core.data.timeframe;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 import ru.prolib.aquila.core.data.TimeFrame;
@@ -18,12 +20,12 @@ public class TFDays implements TimeFrame {
 	}
 
 	@Override
-	public Interval getInterval(DateTime time) {
+	public Interval getInterval(LocalDateTime time) {
 		int segmentIndex = (time.getDayOfYear() - 1) / length;
 		int firstDayOffset = segmentIndex * length; 
-		DateTime firstDay = new DateTime(time.getYear(), 1, 1, 0, 0, 0, 0);
-		return new Interval(firstDay.plusDays(firstDayOffset),
-				firstDay.plusDays(firstDayOffset + length));
+		LocalDateTime firstDay = LocalDateTime.of(time.getYear(), 1, 1, 0, 0, 0, 0);
+		return Interval.of(firstDay.plusDays(firstDayOffset).toInstant(ZoneOffset.UTC),
+				firstDay.plusDays(firstDayOffset + length).toInstant(ZoneOffset.UTC));
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.report;
 
-import org.joda.time.*;
+import java.time.LocalDateTime;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
@@ -74,14 +75,14 @@ public interface RTrade extends Comparable<RTrade>, Cloneable {
 	 * <p>
 	 * @return время входа в трейд
 	 */
-	public DateTime getEnterTime();
+	public LocalDateTime getEnterTime();
 	
 	/**
 	 * Получить время выхода из трейда.
 	 * <p>
 	 * @return время выхода из трейда или null, если трейд не закрыт
 	 */
-	public DateTime getExitTime();
+	public LocalDateTime getExitTime();
 	
 	/**
 	 * Этот трейд открыт?

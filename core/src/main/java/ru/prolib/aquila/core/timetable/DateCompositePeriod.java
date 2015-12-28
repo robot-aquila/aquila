@@ -1,11 +1,12 @@
 package ru.prolib.aquila.core.timetable;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
+
 import com.thoughtworks.xstream.annotations.*;
 
 /**
@@ -23,7 +24,7 @@ public class DateCompositePeriod implements DatePeriod {
 	}
 
 	@Override
-	public synchronized boolean contains(DateTime time) {
+	public synchronized boolean contains(LocalDateTime time) {
 		for ( DatePeriod p : periods ) {
 			if ( p.contains(time) ) {
 				return true;
@@ -33,10 +34,10 @@ public class DateCompositePeriod implements DatePeriod {
 	}
 
 	@Override
-	public synchronized DateTime nextDate(DateTime time) {
-		List<DateTime> list = new Vector<DateTime>();
+	public synchronized LocalDateTime nextDate(LocalDateTime time) {
+		List<LocalDateTime> list = new Vector<LocalDateTime>();
 		for ( DatePeriod p : periods ) {
-			DateTime next = p.nextDate(time);
+			LocalDateTime next = p.nextDate(time);
 			if ( next != null ) {
 				list.add(next);
 			}
@@ -49,7 +50,7 @@ public class DateCompositePeriod implements DatePeriod {
 	}
 
 	@Override
-	public synchronized boolean isEndDate(DateTime time) {
+	public synchronized boolean isEndDate(LocalDateTime time) {
 		for ( DatePeriod p : periods ) {
 			if ( p.isEndDate(time) ) {
 				return true;
@@ -59,10 +60,10 @@ public class DateCompositePeriod implements DatePeriod {
 	}
 
 	@Override
-	public synchronized DateTime nextEndDate(DateTime time) {
-		List<DateTime> list = new Vector<DateTime>();
+	public synchronized LocalDateTime nextEndDate(LocalDateTime time) {
+		List<LocalDateTime> list = new Vector<LocalDateTime>();
 		for ( DatePeriod p : periods ) {
-			DateTime next = p.nextEndDate(time);
+			LocalDateTime next = p.nextEndDate(time);
 			if ( next != null ) {
 				list.add(next);
 			}

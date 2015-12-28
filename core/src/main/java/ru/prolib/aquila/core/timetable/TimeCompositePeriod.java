@@ -1,9 +1,10 @@
 package ru.prolib.aquila.core.timetable;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
+
 import com.thoughtworks.xstream.annotations.*;
 
 /**
@@ -21,7 +22,7 @@ public class TimeCompositePeriod implements TimePeriod {
 	}
 
 	@Override
-	public synchronized boolean contains(DateTime time) {
+	public synchronized boolean contains(LocalDateTime time) {
 		for ( TimePeriod p : periods ) {
 			if ( p.contains(time) ) {
 				return true;
@@ -31,9 +32,9 @@ public class TimeCompositePeriod implements TimePeriod {
 	}
 
 	@Override
-	public synchronized DateTime nextStartTime(DateTime time) {
+	public synchronized LocalDateTime nextStartTime(LocalDateTime time) {
 		for ( TimePeriod p : periods ) {
-			DateTime next = p.nextStartTime(time);
+			LocalDateTime next = p.nextStartTime(time);
 			if ( next != null && time.compareTo(next) <= 0 ) {
 				return next;
 			}
@@ -42,10 +43,10 @@ public class TimeCompositePeriod implements TimePeriod {
 	}
 
 	@Override
-	public synchronized DateTime nextEndTime(DateTime time) {
-		List<DateTime> list = new Vector<DateTime>();
+	public synchronized LocalDateTime nextEndTime(LocalDateTime time) {
+		List<LocalDateTime> list = new Vector<LocalDateTime>();
 		for ( TimePeriod p : periods ) {
-			DateTime end = p.nextEndTime(time);
+			LocalDateTime end = p.nextEndTime(time);
 			if ( end != null ) {
 				list.add(end);
 			}

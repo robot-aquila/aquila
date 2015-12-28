@@ -1,9 +1,9 @@
 package ru.prolib.aquila.core.timetable;
 
-
 import static org.junit.Assert.*;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Variant;
@@ -43,12 +43,12 @@ public class HMPeriodTest {
 	@Test
 	public void testContains_DateTime() throws Exception {
 		FR fix[] = {
-			new FR(new DateTime(2013, 8, 10,  9, 59, 59, 999), false),
-			new FR(new DateTime(2013, 8, 10, 10, 30,  0,   0), true),
-			new FR(new DateTime(2013, 8, 10, 12, 18, 42, 115), true),
-			new FR(new DateTime(2013, 8, 10, 13, 59, 59, 999), true),
-			new FR(new DateTime(2013, 8, 10, 14,  0,  0,   0), false),
-			new FR(new DateTime(2013, 8, 10, 19,  3, 52, 992), false),
+			new FR(LocalDateTime.of(2013, 8, 10,  9, 59, 59, 999), false),
+			new FR(LocalDateTime.of(2013, 8, 10, 10, 30,  0,   0), true),
+			new FR(LocalDateTime.of(2013, 8, 10, 12, 18, 42, 115), true),
+			new FR(LocalDateTime.of(2013, 8, 10, 13, 59, 59, 999), true),
+			new FR(LocalDateTime.of(2013, 8, 10, 14,  0,  0,   0), false),
+			new FR(LocalDateTime.of(2013, 8, 10, 19,  3, 52, 992), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -77,14 +77,14 @@ public class HMPeriodTest {
 	@Test
 	public void testNextStartTime() throws Exception {
 		FR2 fix[] = {
-			new FR2(new DateTime(2013, 8, 10,  0,  0,  0,   0),
-					new DateTime(2013, 8, 10, 10, 30,  0,   0)),
-			new FR2(new DateTime(2013, 8, 10,  9, 50, 13, 181),
-					new DateTime(2013, 8, 10, 10, 30,  0,   0)),
-			new FR2(new DateTime(2013, 8, 10, 10, 30,  0,   0), null),
-			new FR2(new DateTime(2013, 8, 10, 10, 30,  0,   1), null),
-			new FR2(new DateTime(2013, 8, 10, 19,  3, 52, 992), null),
-			new FR2(new DateTime(2013, 7, 31, 23, 59,  0,   1), null),
+			new FR2(LocalDateTime.of(2013, 8, 10,  0,  0,  0,   0),
+					LocalDateTime.of(2013, 8, 10, 10, 30,  0,   0)),
+			new FR2(LocalDateTime.of(2013, 8, 10,  9, 50, 13, 181),
+					LocalDateTime.of(2013, 8, 10, 10, 30,  0,   0)),
+			new FR2(LocalDateTime.of(2013, 8, 10, 10, 30,  0,   0), null),
+			new FR2(LocalDateTime.of(2013, 8, 10, 10, 30,  0,   1), null),
+			new FR2(LocalDateTime.of(2013, 8, 10, 19,  3, 52, 992), null),
+			new FR2(LocalDateTime.of(2013, 7, 31, 23, 59,  0,   1), null),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -96,13 +96,13 @@ public class HMPeriodTest {
 	@Test
 	public void testNextEndTime() throws Exception {
 		FR2 fix[] = {
-			new FR2(new DateTime(2013, 8, 10,  8,  0,  0,   0),
-					new DateTime(2013, 8, 10, 14,  0,  0,   0)),
-			new FR2(new DateTime(2013, 8, 10, 12,  1,  0, 999),
-					new DateTime(2013, 8, 10, 14,  0,  0,   0)),
-			new FR2(new DateTime(2013, 8, 10, 14,  0,  0,   0), null),
-			new FR2(new DateTime(2013, 8, 10, 14,  0,  0,   1), null),
-			new FR2(new DateTime(2013, 8, 10, 23, 18, 54,  15), null),
+			new FR2(LocalDateTime.of(2013, 8, 10,  8,  0,  0,   0),
+					LocalDateTime.of(2013, 8, 10, 14,  0,  0,   0)),
+			new FR2(LocalDateTime.of(2013, 8, 10, 12,  1,  0, 999),
+					LocalDateTime.of(2013, 8, 10, 14,  0,  0,   0)),
+			new FR2(LocalDateTime.of(2013, 8, 10, 14,  0,  0,   0), null),
+			new FR2(LocalDateTime.of(2013, 8, 10, 14,  0,  0,   1), null),
+			new FR2(LocalDateTime.of(2013, 8, 10, 23, 18, 54,  15), null),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;

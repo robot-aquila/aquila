@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,7 +11,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
@@ -43,7 +43,7 @@ public class TerminalImplTest {
 	private Security security;
 	private Runnable task;
 	private TaskHandler taskHandler;
-	private DateTime time = new DateTime();
+	private LocalDateTime time = LocalDateTime.now();
 	private DataProvider dataProvider;
 	
 	@BeforeClass

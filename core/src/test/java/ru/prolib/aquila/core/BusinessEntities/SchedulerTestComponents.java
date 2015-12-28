@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Вспомогательные классы для тестирования элементов планировщика задач.
@@ -19,18 +19,18 @@ public class SchedulerTestComponents {
 	 * Для тестирования процедур сравнения.
 	 */
 	static class MyScheduler implements Scheduler {
-		@Override public DateTime getCurrentTime() { return null; }
-		@Override public TaskHandler schedule(Runnable task, DateTime time)
+		@Override public LocalDateTime getCurrentTime() { return null; }
+		@Override public TaskHandler schedule(Runnable task, LocalDateTime time)
 			{ return null; }
 		@Override public TaskHandler
-			schedule(Runnable task, DateTime firstTime, long period)
+			schedule(Runnable task, LocalDateTime firstTime, long period)
 			{ return null; }
 		@Override public TaskHandler
 			schedule(Runnable task, long delay) { return null; }
 		@Override public TaskHandler
 			schedule(Runnable task, long delay, long period) { return null; }
 		@Override public TaskHandler
-			scheduleAtFixedRate(Runnable task, DateTime firstTime, long period)
+			scheduleAtFixedRate(Runnable task, LocalDateTime firstTime, long period)
 			{ return null; }
 		@Override public TaskHandler
 			scheduleAtFixedRate(Runnable task, long delay, long period)

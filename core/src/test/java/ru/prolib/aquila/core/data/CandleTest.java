@@ -2,9 +2,14 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+
 import org.apache.log4j.BasicConfigurator;
-import org.joda.time.*;
 import org.junit.*;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.Variant;
@@ -14,7 +19,7 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: CandleTest.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class CandleTest {
-	private DateTime from, to;
+	private LocalDateTime from, to;
 	private Interval interval1, interval2; 
 	private Candle c1, c2;
 	
@@ -26,22 +31,23 @@ public class CandleTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		from = new DateTime(2013, 10, 5, 19, 40, 0);
-		to = new DateTime(2013, 10, 5, 19, 45, 0);
-		interval1 = new Interval(from, to);
-		interval2 = new Interval(new DateTime(2013, 10, 5, 19, 50, 0),
-				Minutes.minutes(5));
+		from = LocalDateTime.of(2013, 10, 5, 19, 40, 0);
+		to = LocalDateTime.of(2013, 10, 5, 19, 45, 0);
+		interval1 = Interval.of(from.toInstant(ZoneOffset.UTC),
+				to.toInstant(ZoneOffset.UTC));
+		interval2 = Interval.of(LocalDateTime.of(2013, 10, 5, 19, 50, 0)
+				.toInstant(ZoneOffset.UTC), Duration.of(5,  ChronoUnit.MINUTES));
 		c2 = new Candle(interval2, 120.05d, 130.00d, 90.55d, 125.15d, 10000L);
 	}
 	
 	@Test
 	public void testGetStartTime() throws Exception {
-		assertEquals(new DateTime(2013, 10, 5, 19, 50, 0, 0), c2.getStartTime());
+		assertEquals(LocalDateTime.of(2013, 10, 5, 19, 50, 0, 0), c2.getStartTime());
 	}
 	
 	@Test
 	public void testGetEndTime() throws Exception {
-		assertEquals(new DateTime(2013, 10, 5, 19, 55, 0, 0), c2.getEndTime());
+		assertEquals(LocalDateTime.of(2013, 10, 5, 19, 55, 0, 0), c2.getEndTime());
 	}
 	
 	@Test
@@ -94,8 +100,8 @@ public class CandleTest {
 	@Test
 	public void testAddCandle() throws Exception {
 		c1 = new Candle(interval1, 120.05d, 130.00d, 80.55d, 125.15d, 10000L);
-		interval2 = new Interval(new DateTime(2013, 10, 5, 19, 44, 0, 0),
-				Minutes.minutes(1));
+		interval2 = Interval.of(LocalDateTime.of(2013, 10, 5, 19, 44, 0, 0)
+				.toInstant(ZoneOffset.UTC), Duration.of(1, ChronoUnit.MINUTES));
 		c2 = new Candle(interval2, 140.05d, 150.00d, 90.55d, 128.00d,   100L);
 		Candle c3 = c1.addCandle(c2);
 		assertNotNull(c3);
@@ -230,7 +236,7 @@ public class CandleTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		String expected = "Candle[T=" + c2.getStartTime() + " PT5M, " +
+		String expected = "Candle[T=" + interval2.getStart() + " PT5M, " +
 				"O=120.05, H=130.0, L=90.55, C=125.15, V=10000]";
 		assertEquals(expected, c2.toString());
 	}
@@ -240,7 +246,7 @@ public class CandleTest {
 		Trade trade = new Trade(null);
 		trade.setPrice(131.12d);
 		trade.setQty(800L);
-		trade.setTime(new DateTime(2013, 10, 5, 19, 54, 59, 999));
+		trade.setTime(LocalDateTime.of(2013, 10, 5, 19, 54, 59, 999));
 		Candle result = c2.addTrade(trade);
 		assertNotNull(result);
 		assertEquals(interval2, result.getInterval());
@@ -254,7 +260,7 @@ public class CandleTest {
 	@Test (expected=OutOfIntervalException.class)
 	public void testAddTrade_ThrowsIfOutOfInterval() throws Exception {
 		Trade trade = new Trade(null);
-		trade.setTime(new DateTime(2013, 10, 5, 19, 55, 0, 0));
+		trade.setTime(LocalDateTime.of(2013, 10, 5, 19, 55, 0, 0));
 		c2.addTrade(trade);
 	}
 	
@@ -262,9 +268,9 @@ public class CandleTest {
 	public void testAddTick() throws Exception {
 		Tick tick1, tick2;
 		// тик без опционального значения -> объем равен 0
-		tick1 = new Tick(new DateTime(2013, 10, 5, 19, 50, 2), 131.12d);
+		tick1 = new Tick(LocalDateTime.of(2013, 10, 5, 19, 50, 2), 131.12d);
 		// тип раньше предыдущего, но в рамках интервала это игнорируется
-		tick2 = new Tick(new DateTime(2013, 10, 5, 19, 50, 1), 90.12d, 2d);
+		tick2 = new Tick(LocalDateTime.of(2013, 10, 5, 19, 50, 1), 90.12d, 2d);
 		Candle result = c2.addTick(tick1).addTick(tick2);
 		assertNotNull(result);
 		assertEquals(interval2, result.getInterval());
@@ -277,7 +283,7 @@ public class CandleTest {
 	
 	@Test (expected=OutOfIntervalException.class)
 	public void testAddTick_ThrowsIfOutOfInterval() throws Exception {
-		c2.addTick(new Tick(new DateTime(2013, 10, 5, 19, 55, 0), 180d, 10d));
+		c2.addTick(new Tick(LocalDateTime.of(2013, 10, 5, 19, 55, 0), 180d, 10d));
 	}
 
 }

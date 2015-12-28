@@ -2,10 +2,10 @@ package ru.prolib.aquila.core.timetable;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 import com.thoughtworks.xstream.annotations.*;
 
@@ -60,7 +60,7 @@ public class HMPeriod implements TimePeriod {
 	}
 
 	@Override
-	public boolean contains(DateTime time) {
+	public boolean contains(LocalDateTime time) {
 		return from.lessOrEquals(time) && to.greater(time);
 	}
 	
@@ -76,14 +76,14 @@ public class HMPeriod implements TimePeriod {
 	}
 
 	@Override
-	public DateTime nextStartTime(DateTime time) {
-		DateTime aligned = from.align(time);
+	public LocalDateTime nextStartTime(LocalDateTime time) {
+		LocalDateTime aligned = from.align(time);
 		return aligned.compareTo(time) <= 0 ? null : aligned;
 	}
 
 	@Override
-	public DateTime nextEndTime(DateTime time) {
-		DateTime aligned = to.align(time);
+	public LocalDateTime nextEndTime(LocalDateTime time) {
+		LocalDateTime aligned = to.align(time);
 		return aligned.compareTo(time) <= 0 ? null : aligned;
 	}
 	

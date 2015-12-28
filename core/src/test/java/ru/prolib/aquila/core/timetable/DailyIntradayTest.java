@@ -3,8 +3,9 @@ package ru.prolib.aquila.core.timetable;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import com.thoughtworks.xstream.*;
@@ -31,18 +32,18 @@ public class DailyIntradayTest {
 	@Test
 	public void testContains() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013,  8, 12,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013,  8, 12, 10, 15, 30, 581), false),
-				new FR(new DateTime(2013,  8, 13,  8, 29, 45, 112), false),
-				new FR(new DateTime(2013,  8, 13,  9, 59, 59, 999), false),
-				new FR(new DateTime(2013,  8, 13, 10,  0,  0,   0), true),
-				new FR(new DateTime(2013,  8, 13, 10, 15, 32,  12), true),
-				new FR(new DateTime(2013,  8, 13, 18, 15, 32,  12), true),
-				new FR(new DateTime(2013,  8, 13, 18, 44, 59, 999), true),
-				new FR(new DateTime(2013,  8, 13, 18, 45,  0,   0), false),
-				new FR(new DateTime(2013,  8, 16, 10,  0,  0,   0), true),
-				new FR(new DateTime(2013,  8, 17, 10,  0,  0,   0), false),
-				new FR(new DateTime(2013,  8, 18, 10,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013,  8, 12,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013,  8, 12, 10, 15, 30, 581), false),
+				new FR(LocalDateTime.of(2013,  8, 13,  8, 29, 45, 112), false),
+				new FR(LocalDateTime.of(2013,  8, 13,  9, 59, 59, 999), false),
+				new FR(LocalDateTime.of(2013,  8, 13, 10,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013,  8, 13, 10, 15, 32,  12), true),
+				new FR(LocalDateTime.of(2013,  8, 13, 18, 15, 32,  12), true),
+				new FR(LocalDateTime.of(2013,  8, 13, 18, 44, 59, 999), true),
+				new FR(LocalDateTime.of(2013,  8, 13, 18, 45,  0,   0), false),
+				new FR(LocalDateTime.of(2013,  8, 16, 10,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013,  8, 17, 10,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013,  8, 18, 10,  0,  0,   0), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -56,7 +57,7 @@ public class DailyIntradayTest {
 		date = control.createMock(DatePeriod.class);
 		time = control.createMock(TimePeriod.class);
 		period = new DailyIntraday(date, time);
-		DateTime t = new DateTime();
+		LocalDateTime t = LocalDateTime.now();
 		expect(date.contains(same(t))).andReturn(false);
 		expect(date.nextDate(same(t))).andReturn(null);
 		control.replay();
@@ -71,7 +72,9 @@ public class DailyIntradayTest {
 		date = control.createMock(DatePeriod.class);
 		time = control.createMock(TimePeriod.class);
 		period = new DailyIntraday(date, time);
-		DateTime t = new DateTime(), t2 = new DateTime(), t3 = new DateTime();
+		LocalDateTime t = LocalDateTime.now(),
+				t2 = LocalDateTime.now(),
+				t3 = LocalDateTime.now();
 		expect(date.contains(same(t))).andReturn(true);
 		expect(time.nextStartTime(same(t))).andReturn(null);
 		expect(date.nextDate(same(t))).andReturn(t2);
@@ -90,7 +93,7 @@ public class DailyIntradayTest {
 		date = control.createMock(DatePeriod.class);
 		time = control.createMock(TimePeriod.class);
 		period = new DailyIntraday(date, time);
-		DateTime t = new DateTime();
+		LocalDateTime t = LocalDateTime.now();
 		expect(date.contains(same(t))).andReturn(true);
 		expect(time.nextStartTime(same(t))).andReturn(null);
 		expect(date.nextDate(same(t))).andReturn(null);
@@ -104,34 +107,34 @@ public class DailyIntradayTest {
 	@Test
 	public void testNextStartTime() throws Exception {
 		FR2 fix[] = {
-				new FR2(new DateTime(2013, 8, 12,  0,  0,  0,   0),
-						new DateTime(2013, 8, 13, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13,  1, 15, 34, 180),
-						new DateTime(2013, 8, 13, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13,  9, 59, 59, 999),
-						new DateTime(2013, 8, 13, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13, 10,  0,  0,   0),
-						new DateTime(2013, 8, 14, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13, 10,  0,  0,   1),
-						new DateTime(2013, 8, 14, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13, 18, 44, 59, 999),
-						new DateTime(2013, 8, 14, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13, 18, 45,  0,   0),
-						new DateTime(2013, 8, 14, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13, 23, 59, 59, 999),
-						new DateTime(2013, 8, 14, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 14,  7, 30,  0,   0),
-						new DateTime(2013, 8, 14, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 14, 15, 18, 22, 634),
-						new DateTime(2013, 8, 15, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 15,  0,  0,  0,   0),
-						new DateTime(2013, 8, 15, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 15, 18, 40,  0,   0),
-						new DateTime(2013, 8, 16, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 16, 23, 59, 59, 999),
-						new DateTime(2013, 8, 20, 10,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 17,  3, 15,  0,   0),
-						new DateTime(2013, 8, 20, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 12,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 13, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13,  1, 15, 34, 180),
+						LocalDateTime.of(2013, 8, 13, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13,  9, 59, 59, 999),
+						LocalDateTime.of(2013, 8, 13, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13, 10,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 14, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13, 10,  0,  0,   1),
+						LocalDateTime.of(2013, 8, 14, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13, 18, 44, 59, 999),
+						LocalDateTime.of(2013, 8, 14, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13, 18, 45,  0,   0),
+						LocalDateTime.of(2013, 8, 14, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13, 23, 59, 59, 999),
+						LocalDateTime.of(2013, 8, 14, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 14,  7, 30,  0,   0),
+						LocalDateTime.of(2013, 8, 14, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 14, 15, 18, 22, 634),
+						LocalDateTime.of(2013, 8, 15, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 15,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 15, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 15, 18, 40,  0,   0),
+						LocalDateTime.of(2013, 8, 16, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 16, 23, 59, 59, 999),
+						LocalDateTime.of(2013, 8, 20, 10,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 17,  3, 15,  0,   0),
+						LocalDateTime.of(2013, 8, 20, 10,  0,  0,   0)),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -143,24 +146,24 @@ public class DailyIntradayTest {
 	@Test
 	public void testNextEndTime() throws Exception {
 		FR2 fix[] = {
-				new FR2(new DateTime(2013, 8, 12,  0,  0,  0,   0),
-						new DateTime(2013, 8, 13, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13,  1, 15, 34, 180),
-						new DateTime(2013, 8, 13, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13, 18, 44, 59, 999),
-						new DateTime(2013, 8, 13, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13, 18, 45,  0,   0),
-						new DateTime(2013, 8, 14, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 14, 10,  0,  0,   1),
-						new DateTime(2013, 8, 14, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 14, 18, 45,  0,   1),
-						new DateTime(2013, 8, 15, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 16,  8, 10,  0,   0),
-						new DateTime(2013, 8, 16, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 16, 21, 19, 23, 911),
-						new DateTime(2013, 8, 20, 18, 45,  0,   0)),
-				new FR2(new DateTime(2013, 8, 17,  0,  0,  0,   0),
-						new DateTime(2013, 8, 20, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 12,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 13, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13,  1, 15, 34, 180),
+						LocalDateTime.of(2013, 8, 13, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13, 18, 44, 59, 999),
+						LocalDateTime.of(2013, 8, 13, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13, 18, 45,  0,   0),
+						LocalDateTime.of(2013, 8, 14, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 14, 10,  0,  0,   1),
+						LocalDateTime.of(2013, 8, 14, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 14, 18, 45,  0,   1),
+						LocalDateTime.of(2013, 8, 15, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 16,  8, 10,  0,   0),
+						LocalDateTime.of(2013, 8, 16, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 16, 21, 19, 23, 911),
+						LocalDateTime.of(2013, 8, 20, 18, 45,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 17,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 20, 18, 45,  0,   0)),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;

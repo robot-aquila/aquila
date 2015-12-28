@@ -2,7 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -14,7 +14,7 @@ public class BMUtilsTest {
 	
 	static {
 		symbol = new Symbol("foo", "bar", "USD");
-		tick = new Tick(new DateTime(2014, 11, 19, 4, 37, 39, 50), 21.45d, 84d);
+		tick = new Tick(LocalDateTime.of(2014, 11, 19, 4, 37, 39, 50), 21.45d, 84d);
 	}
 	
 	private EditableTerminal terminal;
@@ -38,7 +38,7 @@ public class BMUtilsTest {
 		expected.setPrice(21.45d);
 		expected.setQty(84L);
 		expected.setSymbol(symbol);
-		expected.setTime(new DateTime(2014, 11, 19, 4, 37, 39, 50));
+		expected.setTime(LocalDateTime.of(2014, 11, 19, 4, 37, 39, 50));
 		expected.setVolume(3603.6);
 		
 		assertEquals(expected, utils.tradeFromTick(tick, security));

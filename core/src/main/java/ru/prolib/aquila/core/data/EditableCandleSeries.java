@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 import ru.prolib.aquila.core.BusinessEntities.*;
 
 /**
@@ -122,7 +122,7 @@ public interface EditableCandleSeries
 	 * @param time временная метка
 	 * @throws OutOfDateException попытка смещения ТА в прошлое
 	 */
-	public void aggregate(DateTime time) throws OutOfDateException;
+	public void aggregate(LocalDateTime time) throws OutOfDateException;
 	
 	/**
 	 * Агрегировать временную метку.
@@ -134,7 +134,7 @@ public interface EditableCandleSeries
 	 * проигнорирована, при false будет возбуждено исключение
 	 * @throws OutOfDateException попытка смещения ТА в прошлое
 	 */
-	public void aggregate(DateTime time, boolean silent)
+	public void aggregate(LocalDateTime time, boolean silent)
 		throws OutOfDateException;
 	
 }

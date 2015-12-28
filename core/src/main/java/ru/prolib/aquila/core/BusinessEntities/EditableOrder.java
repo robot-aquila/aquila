@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Служебный интерфейс заявки.
@@ -108,7 +108,7 @@ public interface EditableOrder extends Order, Editable {
 	 * <p>
 	 * @param time время выставления заявки
 	 */
-	public void setTime(DateTime time);
+	public void setTime(LocalDateTime time);
 	
 	/**
 	 * Установить время последнего изменения заявки.
@@ -118,7 +118,7 @@ public interface EditableOrder extends Order, Editable {
 	 * <p>
 	 * @param time время последнего изменения
 	 */
-	public void setLastChangeTime(DateTime time);
+	public void setLastChangeTime(LocalDateTime time);
 	
 	/**
 	 * Добавить сделку по заявке.

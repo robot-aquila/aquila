@@ -1,7 +1,9 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import org.joda.time.*;
+
+import java.time.LocalDateTime;
+
 import org.junit.*;
 
 /**
@@ -39,7 +41,7 @@ public class TrueRangeTest {
 	
 	@Test
 	public void testGet() throws Exception {
-		DateTime time = new DateTime(2013, 10, 11, 11, 12, 34);
+		LocalDateTime time = LocalDateTime.of(2013, 10, 11, 11, 12, 34);
 		TimeFrame tf = source.getTimeFrame();
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			source.add(new Candle(tf.getInterval(time.plusMinutes(i)), 0d,

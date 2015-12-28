@@ -1,8 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.joda.time.DateTime;
 
 /**
  * Модель сделки.
@@ -15,7 +16,7 @@ public class Trade implements Comparable<Trade> {
 	private volatile Long id;
 	private volatile Symbol symbol;
 	private volatile Direction direction;
-	private volatile DateTime time;
+	private volatile LocalDateTime time;
 	private volatile Double price;
 	private volatile Long qty;
 	private volatile Double volume;
@@ -79,7 +80,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return время сделки или null, если время сделки не определено
 	 */
-	public DateTime getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
 	
@@ -88,7 +89,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param time время сделки
 	 */
-	public void setTime(DateTime time) {
+	public void setTime(LocalDateTime time) {
 		this.time = time;
 	}
 	

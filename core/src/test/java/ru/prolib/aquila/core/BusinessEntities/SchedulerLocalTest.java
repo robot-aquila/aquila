@@ -3,15 +3,18 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 
 public class SchedulerLocalTest {
+	private static final int MS2NANO_MULT = 1000000;
 	private IMocksControl control;
 	private SchedulerLocal scheduler;
 	/**
@@ -19,19 +22,24 @@ public class SchedulerLocalTest {
 	 */
 	private SchedulerLocal scheduler_4it;
 	private Runnable task;
-	private DateTime time = new DateTime(2013, 10, 9, 14, 12, 47);
+	private LocalDateTime time;
 	private Timer timer;
 	private SchedulerLocal_Pool pool;
 	private SchedulerLocal_TimerTask tt;
+	private Calendar calendar;
 	
 	// Helpers for test actual execution
 	private CountDownLatch finished;
-	private Vector<DateTime> ticks;
+	private Vector<LocalDateTime> ticks;
 	private int tickLimit;
 	private Runnable helper;
 
 	@Before
 	public void setUp() throws Exception {
+		time = LocalDateTime.of(2013, 10, 9, 14, 12, 47, 125 * MS2NANO_MULT);
+		calendar = Calendar.getInstance();
+		calendar.set(2013, 9, 9, 14, 12, 47); // Don't forget month starts from 0
+		calendar.set(Calendar.MILLISECOND, 125);
 		control = createStrictControl();
 		timer = control.createMock(Timer.class);
 		task = control.createMock(Runnable.class);
@@ -41,11 +49,11 @@ public class SchedulerLocalTest {
 		tt = new SchedulerLocal_TimerTask(task, scheduler);
 		
 		finished = new CountDownLatch(1);
-		ticks = new Vector<DateTime>();
+		ticks = new Vector<LocalDateTime>();
 		tickLimit = 3;
 		helper = new Runnable() {
 			@Override public void run() {
-				ticks.add(DateTime.now());
+				ticks.add(LocalDateTime.now());
 				if ( ticks.size() >= tickLimit ) {
 					scheduler_4it.cancel(this);
 					finished.countDown();
@@ -56,7 +64,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testGetCurrentTime() throws Exception {
-		assertEquals(new DateTime(), scheduler.getCurrentTime());
+		assertEquals(LocalDateTime.now(), scheduler.getCurrentTime());
 	}
 	
 	@Test
@@ -77,7 +85,7 @@ public class SchedulerLocalTest {
 	@Test
 	public void testSchedule_TD() throws Exception {
 		expect(pool.put(eq(tt))).andReturn(tt);
-		timer.schedule(eq(tt), eq(time.toDate()));
+		timer.schedule(eq(tt), eq(calendar.getTime()));
 		control.replay();
 		
 		TaskHandler expected = new TaskHandlerImpl(task, scheduler),
@@ -89,7 +97,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testSchedule_TD_ActualExecution() throws Exception {
-		scheduler_4it.schedule(helper, DateTime.now().plus(100));
+		scheduler_4it.schedule(helper, LocalDateTime.now().plusNanos(100 * MS2NANO_MULT));
 		finished.await(300, java.util.concurrent.TimeUnit.MILLISECONDS);
 		assertEquals(1, ticks.size());
 		scheduler_4it.cancel(helper);
@@ -99,7 +107,7 @@ public class SchedulerLocalTest {
 	public void testSchedule_TDL() throws Exception {
 		tt = new SchedulerLocal_TimerTask(task);
 		expect(pool.put(eq(tt))).andReturn(tt);
-		timer.schedule(eq(tt), eq(time.toDate()), eq(215L));
+		timer.schedule(eq(tt), eq(calendar.getTime()), eq(215L));
 		control.replay();
 		
 		TaskHandler expected = new TaskHandlerImpl(task, scheduler),
@@ -111,7 +119,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testSchedule_TDL_ActualExecution() throws Exception {
-		scheduler_4it.schedule(helper, DateTime.now().plus(100), 100);
+		scheduler_4it.schedule(helper, LocalDateTime.now().plusNanos(100 * MS2NANO_MULT), 100);
 		assertTrue(finished.await(2, java.util.concurrent.TimeUnit.SECONDS));
 		assertEquals(3, ticks.size());
 	}
@@ -162,7 +170,7 @@ public class SchedulerLocalTest {
 	public void testScheduleAtFixedRate_TDL() throws Exception {
 		tt = new SchedulerLocal_TimerTask(task);
 		expect(pool.put(eq(tt))).andReturn(tt);
-		timer.scheduleAtFixedRate(eq(tt), eq(time.toDate()), eq(302L));
+		timer.scheduleAtFixedRate(eq(tt), eq(calendar.getTime()), eq(302L));
 		control.replay();
 		
 		TaskHandler expected = new TaskHandlerImpl(task, scheduler),
@@ -174,7 +182,7 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testScheduleAtFixedRate_TDL_ActualExecution() throws Exception {
-		scheduler_4it.scheduleAtFixedRate(helper, DateTime.now().plus(50), 100);
+		scheduler_4it.scheduleAtFixedRate(helper, LocalDateTime.now().plusNanos(50 * MS2NANO_MULT), 100);
 		assertTrue(finished.await(2, java.util.concurrent.TimeUnit.SECONDS));
 		assertEquals(3, ticks.size());
 	}
@@ -260,14 +268,14 @@ public class SchedulerLocalTest {
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testSchedule_TD_ThrowsIfTaskDuplicated() throws Exception {
-		scheduler_4it.schedule(task, DateTime.now().plus(2000));
-		scheduler_4it.schedule(task, DateTime.now().plus(3000));
+		scheduler_4it.schedule(task, LocalDateTime.now().plusNanos(2000));
+		scheduler_4it.schedule(task, LocalDateTime.now().plusNanos(3000));
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testSchedule_TDL_ThrowsIfTaskDuplicated() throws Exception {
-		scheduler_4it.schedule(task, DateTime.now().plus(800), 2000L);
-		scheduler_4it.schedule(task, DateTime.now().plus(100), 4000L);
+		scheduler_4it.schedule(task, LocalDateTime.now().plusNanos(800), 2000L);
+		scheduler_4it.schedule(task, LocalDateTime.now().plusNanos(100), 4000L);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -286,8 +294,8 @@ public class SchedulerLocalTest {
 	public void testScheduleAtFixedRate_TDL_ThrowsIfTaskDuplicated()
 			throws Exception
 	{
-		scheduler_4it.scheduleAtFixedRate(task, DateTime.now().plus(100), 800);
-		scheduler_4it.scheduleAtFixedRate(task, DateTime.now().plus(600), 200);
+		scheduler_4it.scheduleAtFixedRate(task, LocalDateTime.now().plusNanos(100), 800);
+		scheduler_4it.scheduleAtFixedRate(task, LocalDateTime.now().plusNanos(600), 200);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)

@@ -1,7 +1,8 @@
 package ru.prolib.aquila.core.data;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
+import java.time.LocalDateTime;
+
+import org.threeten.extra.Interval;
 
 /**
  * Интерфейс ряда свечей.
@@ -58,7 +59,7 @@ public interface CandleSeries extends Series<Candle> {
 	 * <p>
 	 * @return время точки актуальности
 	 */
-	public DateTime getPOA();
+	public LocalDateTime getPOA();
 	
 	/**
 	 * Получить таймфрейм свечей.

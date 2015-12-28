@@ -1,7 +1,8 @@
 package ru.prolib.aquila.core.timetable;
 
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -44,12 +45,12 @@ public class DailyIntraday implements TimePeriod {
 	}
 
 	@Override
-	public boolean contains(DateTime time) {
+	public boolean contains(LocalDateTime time) {
 		return datePeriod.contains(time) && timePeriod.contains(time);
 	}
 
 	@Override
-	public DateTime nextStartTime(DateTime time) {
+	public LocalDateTime nextStartTime(LocalDateTime time) {
 		if ( ! datePeriod.contains(time) ) {
 			time = datePeriod.nextDate(time);
 			if ( time == null ) {
@@ -65,7 +66,7 @@ public class DailyIntraday implements TimePeriod {
 		// границей завершения периода, то попытка получить время входа даст
 		// нулевой результат. В этом случае нужно попытаться получить
 		// время для следующего дня.
-		DateTime next = timePeriod.nextStartTime(time);
+		LocalDateTime next = timePeriod.nextStartTime(time);
 		if ( next == null ) {
 			next = datePeriod.nextDate(time);
 			return next == null ? null : timePeriod.nextStartTime(next);
@@ -75,7 +76,7 @@ public class DailyIntraday implements TimePeriod {
 	}
 
 	@Override
-	public DateTime nextEndTime(DateTime time) {
+	public LocalDateTime nextEndTime(LocalDateTime time) {
 		if ( ! datePeriod.contains(time)
 			|| timePeriod.nextEndTime(time) == null )
 		{

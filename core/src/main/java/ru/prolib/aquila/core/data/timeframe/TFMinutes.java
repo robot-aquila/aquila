@@ -1,6 +1,13 @@
 package ru.prolib.aquila.core.data.timeframe;
 
-import org.joda.time.*;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+
+import org.threeten.extra.Interval;
+
 import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 import ru.prolib.aquila.core.data.TimeFrame;
 
@@ -21,16 +28,18 @@ public class TFMinutes implements TimeFrame {
 	}
 
 	@Override
-	public Interval getInterval(DateTime time) {
-		DateTime from = time.withMillisOfDay(time.getMinuteOfDay() /
-				length * length * 60000);
-		DateTime to = from.plusMinutes(length);
+	public Interval getInterval(LocalDateTime time) {
+		long secondOfDay = ChronoUnit.MINUTES.between(LocalTime.MIDNIGHT,
+				time.toLocalTime()) / length * length * 60;
+		LocalDateTime from = LocalDateTime.of(time.toLocalDate(),
+				LocalTime.ofSecondOfDay(secondOfDay));
+		LocalDateTime to = from.plusMinutes(length);
 		if ( to.toLocalDate().isAfter(from.toLocalDate()) ) {
 			// Конец периода указывает на дату следующего дня.
 			// В таком случае конец интервала выравнивается по началу след. дня.
-			to = from.plusDays(1).withMillisOfDay(0);
+			to = LocalDateTime.of(from.toLocalDate().plusDays(1), LocalTime.MIDNIGHT);
 		}
-		return new Interval(from, to);
+		return Interval.of(from.toInstant(ZoneOffset.UTC), to.toInstant(ZoneOffset.UTC));
 	}
 
 	@Override

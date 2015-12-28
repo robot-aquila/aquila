@@ -1,9 +1,9 @@
 package ru.prolib.aquila.core.timetable;
 
-
 import static org.junit.Assert.*;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Variant;
@@ -22,17 +22,17 @@ public class DOWPeriodTest {
 	@Test
 	public void testContains_DateTime() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013, 8, 11, 18, 41, 54,   0), false),
-				new FR(new DateTime(2013, 8, 12,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 12, 18, 41, 54, 102), false),
-				new FR(new DateTime(2013, 8, 12, 23, 59, 59, 999), false),
-				new FR(new DateTime(2013, 8, 13,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 14, 10, 31, 21, 908), true),
-				new FR(new DateTime(2013, 8, 16, 10, 31, 21, 908), true),
-				new FR(new DateTime(2013, 8, 16, 23, 59, 59, 999), true),
-				new FR(new DateTime(2013, 8, 17,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 17,  0,  0,  0, 112), false),
-				new FR(new DateTime(2013, 8, 18, 23, 59, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 11, 18, 41, 54,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 12,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 12, 18, 41, 54, 102), false),
+				new FR(LocalDateTime.of(2013, 8, 12, 23, 59, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 13,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 14, 10, 31, 21, 908), true),
+				new FR(LocalDateTime.of(2013, 8, 16, 10, 31, 21, 908), true),
+				new FR(LocalDateTime.of(2013, 8, 16, 23, 59, 59, 999), true),
+				new FR(LocalDateTime.of(2013, 8, 17,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 17,  0,  0,  0, 112), false),
+				new FR(LocalDateTime.of(2013, 8, 18, 23, 59, 59, 999), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -55,26 +55,26 @@ public class DOWPeriodTest {
 	@Test
 	public void testNextDate() throws Exception {
 		FR2 fix[] = {
-				new FR2(new DateTime(2013, 8, 11,  2, 15, 24,   8),
-						new DateTime(2013, 8, 13,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 12, 12, 45, 12, 928),
-						new DateTime(2013, 8, 13,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 13,  0,  0,  0,   0),
-						new DateTime(2013, 8, 14,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 14, 22, 50, 10, 154),
-						new DateTime(2013, 8, 15,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 15,  1, 12, 41, 871),
-						new DateTime(2013, 8, 16,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 16, 23, 59, 59, 999),
-						new DateTime(2013, 8, 20,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 17,  0,  0,  0,   0),
-						new DateTime(2013, 8, 20,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 18,  9, 45,  0,   1),
-						new DateTime(2013, 8, 20,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 19, 10,  0,  0,   0),
-						new DateTime(2013, 8, 20,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 20,  7, 50, 32, 475),
-						new DateTime(2013, 8, 21,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 11,  2, 15, 24,   8),
+						LocalDateTime.of(2013, 8, 13,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 12, 12, 45, 12, 928),
+						LocalDateTime.of(2013, 8, 13,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 13,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 14,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 14, 22, 50, 10, 154),
+						LocalDateTime.of(2013, 8, 15,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 15,  1, 12, 41, 871),
+						LocalDateTime.of(2013, 8, 16,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 16, 23, 59, 59, 999),
+						LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 17,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 18,  9, 45,  0,   1),
+						LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 19, 10,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 20,  7, 50, 32, 475),
+						LocalDateTime.of(2013, 8, 21,  0,  0,  0,   0)),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -115,35 +115,35 @@ public class DOWPeriodTest {
 	
 	@Test
 	public void testIsEndDate() throws Exception {
-		assertFalse(period.isEndDate(new DateTime(2013, 8, 12, 0, 0, 0, 0)));
-		assertFalse(period.isEndDate(new DateTime(2013, 8, 13, 0, 0, 0, 0)));
-		assertFalse(period.isEndDate(new DateTime(2013, 8, 14, 0, 0, 0, 0)));
-		assertFalse(period.isEndDate(new DateTime(2013, 8, 15, 0, 0, 0, 0)));
-		assertTrue(period.isEndDate(new DateTime(2013, 8, 16, 0, 0, 0, 0)));
-		assertFalse(period.isEndDate(new DateTime(2013, 8, 17, 0, 0, 0, 0)));
-		assertFalse(period.isEndDate(new DateTime(2013, 8, 18, 0, 0, 0, 0)));
-		assertFalse(period.isEndDate(new DateTime(2013, 8, 19, 0, 0, 0, 0)));
+		assertFalse(period.isEndDate(LocalDateTime.of(2013, 8, 12, 0, 0, 0, 0)));
+		assertFalse(period.isEndDate(LocalDateTime.of(2013, 8, 13, 0, 0, 0, 0)));
+		assertFalse(period.isEndDate(LocalDateTime.of(2013, 8, 14, 0, 0, 0, 0)));
+		assertFalse(period.isEndDate(LocalDateTime.of(2013, 8, 15, 0, 0, 0, 0)));
+		assertTrue(period.isEndDate(LocalDateTime.of(2013, 8, 16, 0, 0, 0, 0)));
+		assertFalse(period.isEndDate(LocalDateTime.of(2013, 8, 17, 0, 0, 0, 0)));
+		assertFalse(period.isEndDate(LocalDateTime.of(2013, 8, 18, 0, 0, 0, 0)));
+		assertFalse(period.isEndDate(LocalDateTime.of(2013, 8, 19, 0, 0, 0, 0)));
 	}
 	
 	@Test
 	public void testNextEndDate() throws Exception {
 		FR2 fix[] = {
-				new FR2(new DateTime(2013, 8, 11,  2, 15, 24,   8),
-						new DateTime(2013, 8, 16,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 12,  0,  0,  0,   0),
-						new DateTime(2013, 8, 16,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 14,  0,  0,  0,   0),
-						new DateTime(2013, 8, 16,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 16,  0,  0,  0,   0),
-						new DateTime(2013, 8, 16,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 16, 18, 54, 12, 827),
-						new DateTime(2013, 8, 16, 18, 54, 12, 827)),						
-				new FR2(new DateTime(2013, 8, 17, 11, 20, 48, 191),
-						new DateTime(2013, 8, 23,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 23,  0,  0,  0,   0),
-						new DateTime(2013, 8, 23,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 24,  1,  0,  0,   0),
-						new DateTime(2013, 8, 30,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 11,  2, 15, 24,   8),
+						LocalDateTime.of(2013, 8, 16,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 12,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 16,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 14,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 16,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 16,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 16,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 16, 18, 54, 12, 827),
+						LocalDateTime.of(2013, 8, 16, 18, 54, 12, 827)),						
+				new FR2(LocalDateTime.of(2013, 8, 17, 11, 20, 48, 191),
+						LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 24,  1,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 30,  0,  0,  0,   0)),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;

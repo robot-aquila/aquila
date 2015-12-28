@@ -1,8 +1,10 @@
 package ru.prolib.aquila.core.data;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 
@@ -45,7 +47,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	private final TimeFrame timeframe;
 	private final Series<Double> open, high, low, close, vol;
 	private final Series<Interval> interval;
-	private DateTime poa;
+	private LocalDateTime poa;
 	
 	public CandleSeriesImpl(TimeFrame timeframe) {
 		this(timeframe, Series.DEFAULT_ID);
@@ -120,7 +122,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		if ( ! candle.getInterval().equals(expected) ) {
 			throw new OutOfIntervalException(expected, candle);
 		}
-		DateTime prevPOA = poa;
+		LocalDateTime prevPOA = poa;
 		try {
 			poa = candle.getEndTime();
 			super.add(candle);
@@ -150,7 +152,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		if ( ! candle.getInterval().equals(current) ) {
 			throw new OutOfIntervalException(current, candle);
 		}
-		DateTime prevPOA = poa;
+		LocalDateTime prevPOA = poa;
 		try {
 			poa = candle.getEndTime();
 			super.set(candle);
@@ -176,14 +178,14 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	}
 
 	@Override
-	public synchronized void aggregate(DateTime time)
+	public synchronized void aggregate(LocalDateTime time)
 		throws OutOfDateException
 	{
 		aggregate(time, false);
 	}
 
 	@Override
-	public synchronized DateTime getPOA() {
+	public synchronized LocalDateTime getPOA() {
 		return poa;
 	}
 
@@ -196,7 +198,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	public synchronized void aggregate(Tick tick, boolean silent)
 		throws OutOfDateException
 	{
-		DateTime tickTime = tick.getTime();
+		LocalDateTime tickTime = tick.getTime();
 		if ( poa != null && tickTime.isBefore(poa) ) {
 			if ( silent ) {
 				return;
@@ -206,7 +208,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		Interval intr = timeframe.getInterval(tickTime);
 		Candle newCandle =
 			new Candle(intr, tick.getValue(), tick.getOptionalValueAsLong());
-		DateTime prevPOA = poa;
+		LocalDateTime prevPOA = poa;
 		try {
 			poa = tickTime;
 			if ( getLength() == 0 ) {
@@ -229,7 +231,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	public synchronized void aggregate(Trade trade, boolean silent)
 			throws OutOfDateException
 	{
-		DateTime time = trade.getTime();
+		LocalDateTime time = trade.getTime();
 		if ( poa != null && time.isBefore(poa) ) {
 			if ( silent ) {
 				return;
@@ -238,7 +240,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		}
 		Interval intr = timeframe.getInterval(time);
 		Candle newCandle = new Candle(intr, trade.getPrice(), trade.getQty());
-		DateTime prevPOA = poa;
+		LocalDateTime prevPOA = poa;
 		try {
 			poa = time;
 			if ( getLength() == 0 ) {
@@ -262,7 +264,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		throws ValueException
 	{
 		// Интервал агрегируемой свечи (далее АС) не должен быть раньше ТА
-		DateTime startTime = candle.getStartTime();
+		LocalDateTime startTime = candle.getStartTime();
 		if ( poa != null && startTime.isBefore(poa) ) {
 			if ( silent ) {
 				return;
@@ -272,20 +274,21 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		// Нужно определить целевой интервал в рамках последовательности.
 		Interval intr;
 		Candle current, newCandle;
-		DateTime prevPOA = poa, newPOA = candle.getEndTime();
+		LocalDateTime prevPOA = poa, newPOA = candle.getEndTime();
 		if ( getLength() > 0 ) {
 			try {
 				current = get();
 			} catch ( ValueException e ) {
 				throw new RuntimeException("Unexpected exception", e);
 			}
-			if ( current.getInterval().contains(startTime) ) {
+			if ( current.getInterval().contains(startTime.toInstant(ZoneOffset.UTC)) ) {
 				// Если есть текущая свеча и начало АС в интервале этой свечи,
 				// то будет выполнена попытка агрегировать АС внутри текущей.
 				// Это значит, что доступен интервал в пределах от ТА до конца
 				// текущей свечи. И АС должна принадлежать этому интервалу.
-				intr = new Interval(poa, current.getEndTime());
-				if ( ! intr.contains(candle.getInterval()) ) {
+				intr = Interval.of(poa.toInstant(ZoneOffset.UTC),
+						current.getEndTime().toInstant(ZoneOffset.UTC));
+				if ( ! intr.encloses(candle.getInterval()) ) {
 					// В текущей свече нет места для АС
 					throw new OutOfIntervalException(intr, candle);
 				}
@@ -301,7 +304,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 				// Интервал АС более поздний чем интервал текущей свечи.
 				// Интервал АС должен быть меньше или равным таймфрейму.
 				intr = timeframe.getInterval(startTime);
-				if ( ! intr.contains(candle.getInterval()) ) {
+				if ( ! intr.encloses(candle.getInterval()) ) {
 					// Интервал АС превышает таймфрейм
 					throw new OutOfIntervalException(intr, candle);
 				}
@@ -322,7 +325,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 			// Нет свечей. Целевым интервалом является расчетный интервал
 			// последовательности для времени начала АС.
 			intr = timeframe.getInterval(candle.getStartTime());
-			if ( ! intr.contains(candle.getInterval()) ) {
+			if ( ! intr.encloses(candle.getInterval()) ) {
 				// Интервал АС больше заданного таймфрейма последовательности
 				throw new OutOfIntervalException(intr, candle);
 			}
@@ -340,7 +343,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	}
 
 	@Override
-	public synchronized void aggregate(DateTime time, boolean silent)
+	public synchronized void aggregate(LocalDateTime time, boolean silent)
 			throws OutOfDateException
 	{
 		if ( poa != null && time.isBefore(poa) ) {

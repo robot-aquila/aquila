@@ -2,11 +2,12 @@ package ru.prolib.aquila.core.data;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.*;
 
 @SuppressWarnings({"unchecked","rawtypes"})
@@ -14,19 +15,19 @@ public class TickReaderFilterByTimeTest {
 	private static final DateTimeFormatter df;
 	
 	static {
-		df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS");
+		df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 
 	private IMocksControl control;
 	private Aqiterator<Tick> decorated;
-	private DateTime startTime;
+	private LocalDateTime startTime;
 	private TickReaderFilterByTime iterator;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		decorated = control.createMock(Aqiterator.class);
-		startTime = new DateTime(2014, 10, 30, 7, 58, 18, 0);
+		startTime = LocalDateTime.of(2014, 10, 30, 7, 58, 18, 0);
 		iterator = new TickReaderFilterByTime(decorated, startTime);
 	}
 	
@@ -40,7 +41,7 @@ public class TickReaderFilterByTimeTest {
 	 * @return тик
 	 */
 	private Tick newTick(String time, double price, double value) {
-		return new Tick(df.parseDateTime(time), price, value);
+		return new Tick(LocalDateTime.parse(time, df), price, value);
 	}
 	
 	@Test
@@ -81,9 +82,9 @@ public class TickReaderFilterByTimeTest {
 		Aqiterator decorated2 = control.createMock(Aqiterator.class);
 		TickReaderFilterByTime
 			it1 = new TickReaderFilterByTime(decorated, startTime),
-			it2 = new TickReaderFilterByTime(decorated, startTime.plus(1)),
+			it2 = new TickReaderFilterByTime(decorated, startTime.plusSeconds(1)),
 			it3 = new TickReaderFilterByTime(decorated2, startTime),
-			it4 = new TickReaderFilterByTime(decorated2, startTime.plus(1));
+			it4 = new TickReaderFilterByTime(decorated2, startTime.plusSeconds(1));
 		assertTrue(iterator.equals(iterator));
 		assertTrue(iterator.equals(it1));
 		assertFalse(iterator.equals(it2));

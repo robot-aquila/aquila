@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.timetable;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Период времени.
@@ -18,7 +18,7 @@ public interface TimePeriod extends Period {
 	 * @return время начала следующего периода или null, если в будущем нет
 	 * рабочего периода
 	 */
-	public DateTime nextStartTime(DateTime time);
+	public LocalDateTime nextStartTime(LocalDateTime time);
 	
 	/**
 	 * Получить время окончания следующего периода.
@@ -32,6 +32,6 @@ public interface TimePeriod extends Period {
 	 * окончание следующего периода, если вне отрезка или null, если вне периода
 	 * и в будущем нет рабочего периода
 	 */
-	public DateTime nextEndTime(DateTime time);
+	public LocalDateTime nextEndTime(LocalDateTime time);
 
 }

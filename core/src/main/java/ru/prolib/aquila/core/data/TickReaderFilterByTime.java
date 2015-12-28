@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import java.time.LocalDateTime;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 /**
  * Фильтр тиков по времени. 
@@ -15,7 +15,7 @@ import org.joda.time.DateTime;
  */
 public class TickReaderFilterByTime implements Aqiterator<Tick> {
 	private final Aqiterator<Tick> decorated;
-	private final DateTime start;
+	private final LocalDateTime start;
 	private boolean filtered = false;
 	
 	/**
@@ -24,7 +24,7 @@ public class TickReaderFilterByTime implements Aqiterator<Tick> {
 	 * @param iterator подконтрольный итератор
 	 * @param start время начала периода отбора данных
 	 */
-	public TickReaderFilterByTime(Aqiterator<Tick> iterator, DateTime start) {
+	public TickReaderFilterByTime(Aqiterator<Tick> iterator, LocalDateTime start) {
 		super();
 		this.decorated = iterator;
 		this.start = start;

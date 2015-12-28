@@ -3,10 +3,10 @@ package ru.prolib.aquila.core.timetable;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Vector;
 
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import com.thoughtworks.xstream.XStream;
@@ -27,15 +27,15 @@ public class DateCompositePeriodTest {
 	@Test
 	public void testContains() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013, 8, 19,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 19, 23, 59, 59, 999), false),
-				new FR(new DateTime(2013, 8, 20,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 20, 23, 59, 59, 999), true),
-				new FR(new DateTime(2013, 8, 21,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 22,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 23,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 24,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 25,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 19,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 19, 23, 59, 59, 999), false),
+				new FR(LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 20, 23, 59, 59, 999), true),
+				new FR(LocalDateTime.of(2013, 8, 21,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 22,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 24,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 25,  0,  0,  0,   0), false),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -47,20 +47,20 @@ public class DateCompositePeriodTest {
 	@Test
 	public void testNextDate() throws Exception {
 		FR2 fix[] = {
-				new FR2(new DateTime(2013, 8, 19, 12, 14, 25, 815),
-						new DateTime(2013, 8, 20,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 20,  0,  0,  0,   0),
-						new DateTime(2013, 8, 22,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 20, 23, 59, 59, 999),
-						new DateTime(2013, 8, 22,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 21,  8, 40, 12,  34),
-						new DateTime(2013, 8, 22,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 22,  0,  0,  0,   0),
-						new DateTime(2013, 8, 23,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 23,  0,  0,  0,   0),
-						new DateTime(2013, 8, 27,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 24, 15, 26, 10, 120),
-						new DateTime(2013, 8, 27,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 19, 12, 14, 25, 815),
+						LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 22,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 20, 23, 59, 59, 999),
+						LocalDateTime.of(2013, 8, 22,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 21,  8, 40, 12,  34),
+						LocalDateTime.of(2013, 8, 22,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 22,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 27,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 24, 15, 26, 10, 120),
+						LocalDateTime.of(2013, 8, 27,  0,  0,  0,   0)),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -72,16 +72,16 @@ public class DateCompositePeriodTest {
 	@Test
 	public void testIsEndDate() throws Exception {
 		FR fix[] = {
-				new FR(new DateTime(2013, 8, 19, 12, 14, 25, 815), false),
-				new FR(new DateTime(2013, 8, 20,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 20, 23, 59, 59, 999), true),
-				new FR(new DateTime(2013, 8, 21,  8, 40, 12,  34), false),
-				new FR(new DateTime(2013, 8, 22,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 23,  0,  0,  0,   0), true),
-				new FR(new DateTime(2013, 8, 24, 15, 26, 10, 120), false),
-				new FR(new DateTime(2013, 8, 25, 21, 30, 15, 220), false),
-				new FR(new DateTime(2013, 8, 26,  0,  0,  0,   0), false),
-				new FR(new DateTime(2013, 8, 27,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 19, 12, 14, 25, 815), false),
+				new FR(LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 20, 23, 59, 59, 999), true),
+				new FR(LocalDateTime.of(2013, 8, 21,  8, 40, 12,  34), false),
+				new FR(LocalDateTime.of(2013, 8, 22,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0), true),
+				new FR(LocalDateTime.of(2013, 8, 24, 15, 26, 10, 120), false),
+				new FR(LocalDateTime.of(2013, 8, 25, 21, 30, 15, 220), false),
+				new FR(LocalDateTime.of(2013, 8, 26,  0,  0,  0,   0), false),
+				new FR(LocalDateTime.of(2013, 8, 27,  0,  0,  0,   0), true),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
@@ -93,19 +93,18 @@ public class DateCompositePeriodTest {
 	@Test
 	public void testNextEndDate() throws Exception {
 		FR2 fix[] = {
-				new FR2(new DateTime(2013, 8, 19, 12, 14, 25, 815),
-						new DateTime(2013, 8, 20,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 20, 12, 30, 59, 428),
-						new DateTime(2013, 8, 20, 12, 30, 59, 428)),
-						
-				new FR2(new DateTime(2013, 8, 21,  8, 40, 12,  34),
-						new DateTime(2013, 8, 23,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 22,  0,  0,  0,   0),
-						new DateTime(2013, 8, 23,  0,  0,  0,   0)),
-				new FR2(new DateTime(2013, 8, 23, 15, 10, 20,  11),
-						new DateTime(2013, 8, 23, 15, 10, 20,  11)),
-				new FR2(new DateTime(2013, 8, 24, 15, 26, 10, 120),
-						new DateTime(2013, 8, 27,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 19, 12, 14, 25, 815),
+						LocalDateTime.of(2013, 8, 20,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 20, 12, 30, 59, 428),
+						LocalDateTime.of(2013, 8, 20, 12, 30, 59, 428)),
+				new FR2(LocalDateTime.of(2013, 8, 21,  8, 40, 12,  34),
+						LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 22,  0,  0,  0,   0),
+						LocalDateTime.of(2013, 8, 23,  0,  0,  0,   0)),
+				new FR2(LocalDateTime.of(2013, 8, 23, 15, 10, 20,  11),
+						LocalDateTime.of(2013, 8, 23, 15, 10, 20,  11)),
+				new FR2(LocalDateTime.of(2013, 8, 24, 15, 26, 10, 120),
+						LocalDateTime.of(2013, 8, 27,  0,  0,  0,   0)),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
