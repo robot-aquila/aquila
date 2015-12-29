@@ -161,7 +161,7 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 			return;
 		}
 		LocalDateTime time = scheduler.getCurrentTime();
-		long diff = Math.abs(ChronoUnit.MILLIS.between(time, lastTime));
+		long diff = ChronoUnit.MILLIS.between(lastTime, time);
 		if ( diff > setup.getFlushPeriod() ) {
 			try {
 				writer.flush();
