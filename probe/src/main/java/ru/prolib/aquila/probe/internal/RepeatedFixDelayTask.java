@@ -1,5 +1,7 @@
 package ru.prolib.aquila.probe.internal;
 
+import java.time.temporal.ChronoUnit;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -33,7 +35,7 @@ public class RepeatedFixDelayTask implements SchedulerTask {
 		if ( scheduler.scheduled(task) ) {
 			task.run();
 			try {
-				timeline.schedule(timeline.getPOA().plus(delay), this);
+				timeline.schedule(timeline.getPOA().plus(delay, ChronoUnit.MILLIS), this);
 			} catch ( TLOutOfIntervalException e ) {
 				scheduler.cancel(task);
 			}

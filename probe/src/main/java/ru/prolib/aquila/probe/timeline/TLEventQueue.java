@@ -1,12 +1,16 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.joda.time.*;
+import org.threeten.extra.Interval;
 
 /**
  * Последовательность событий.
@@ -23,9 +27,9 @@ import org.joda.time.*;
  * сдвигается в будущее на миллисекунду (см. {@link #pullStack()}).
  */
 public class TLEventQueue {
-	private final Map<DateTime, TLEventStack> stacks;
-	private final DateTime end;
-	private DateTime poa;
+	private final Map<LocalDateTime, TLEventStack> stacks;
+	private final LocalDateTime end;
+	private LocalDateTime poa;
 	
 	/**
 	 * Конструктор.
@@ -34,9 +38,9 @@ public class TLEventQueue {
 	 */
 	public TLEventQueue(Interval interval) {
 		super();
-		poa = interval.getStart();
-		end = interval.getEnd();
-		stacks = new Hashtable<DateTime, TLEventStack>();
+		poa = LocalDateTime.ofInstant(interval.getStart(), ZoneOffset.UTC);
+		end = LocalDateTime.ofInstant(interval.getEnd(), ZoneOffset.UTC);
+		stacks = new Hashtable<LocalDateTime, TLEventStack>();
 	}
 	
 	/**
@@ -44,7 +48,7 @@ public class TLEventQueue {
 	 * <p>
 	 * @return точка актуальности
 	 */
-	public synchronized DateTime getPOA() {
+	public synchronized LocalDateTime getPOA() {
 		return poa;
 	}
 	
@@ -54,7 +58,7 @@ public class TLEventQueue {
 	 * @return период
 	 */
 	public Interval getInterval() {
-		return new Interval(poa, end);
+		return Interval.of(poa.toInstant(ZoneOffset.UTC), end.toInstant(ZoneOffset.UTC));
 	}
 	
 	/**
@@ -69,9 +73,9 @@ public class TLEventQueue {
 	public synchronized void pushEvent(TLEvent event)
 		throws TLOutOfIntervalException
 	{
-		DateTime time = event.getTime();
+		LocalDateTime time = event.getTime();
 		Interval currentInterval = getInterval();
-		if ( ! currentInterval.contains(time) ) {
+		if ( ! currentInterval.contains(time.toInstant(ZoneOffset.UTC)) ) {
 			throw new TLOutOfIntervalException(currentInterval, event);
 		}
 		TLEventStack stack = stacks.get(time);
@@ -95,7 +99,7 @@ public class TLEventQueue {
 	 */
 	public synchronized TLEventStack pullStack() {
 		TLEventStack stack = stacks.remove(poa);
-		poa = poa.plus(1);
+		poa = poa.plus(1, ChronoUnit.MILLIS);
 		return stack;
 	}
 	
@@ -111,7 +115,7 @@ public class TLEventQueue {
 			poa = end;
 			return false;
 		}
-		List<DateTime> dummy = new Vector<DateTime>(stacks.keySet());
+		List<LocalDateTime> dummy = new Vector<LocalDateTime>(stacks.keySet());
 		Collections.sort(dummy);
 		poa = dummy.get(0);
 		return true;

@@ -3,9 +3,10 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 public class TLEventSourcesTest {
@@ -23,8 +24,8 @@ public class TLEventSourcesTest {
 		registry.registerSource(s1);
 		registry.registerSource(s2);
 		registry.registerSource(s3);
-		registry.disableUntil(s1, new DateTime(2014,  1, 22,  0,  0, 0));
-		registry.disableUntil(s3, new DateTime(2013, 12, 31, 23, 59, 0));
+		registry.disableUntil(s1, LocalDateTime.of(2014,  1, 22,  0,  0, 0));
+		registry.disableUntil(s3, LocalDateTime.of(2013, 12, 31, 23, 59, 0));
 	}
 	
 	@Test
@@ -43,7 +44,7 @@ public class TLEventSourcesTest {
 		expected.add(s2);
 		expected.add(s3);
 		assertEquals(expected,
-				registry.getSources(new DateTime(2014,  2,  1,  0,  0,  0)));
+				registry.getSources(LocalDateTime.of(2014,  2,  1,  0,  0,  0)));
 	}
 	
 	@Test
@@ -52,7 +53,7 @@ public class TLEventSourcesTest {
 		expected.add(s2);
 		expected.add(s3);
 		assertEquals(expected,
-				registry.getSources(new DateTime(2014,  1,  1,  0,  0,  0)));
+				registry.getSources(LocalDateTime.of(2014,  1,  1,  0,  0,  0)));
 	}
 	
 	@Test
@@ -60,7 +61,7 @@ public class TLEventSourcesTest {
 		List<TLEventSource> expected = new Vector<TLEventSource>();
 		expected.add(s2);
 		assertEquals(expected,
-				registry.getSources(new DateTime(2012, 12, 31, 23, 59, 59)));
+				registry.getSources(LocalDateTime.of(2012, 12, 31, 23, 59, 59)));
 	}
 
 	@Test
@@ -101,7 +102,7 @@ public class TLEventSourcesTest {
 
 		assertNull(registry.getDisabledUntil(s2)); // not disabled
 		
-		assertEquals(new DateTime(2013, 12, 31, 23, 59, 0),
+		assertEquals(LocalDateTime.of(2013, 12, 31, 23, 59, 0),
 				registry.getDisabledUntil(s3));
 	}
 

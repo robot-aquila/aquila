@@ -2,23 +2,24 @@ package ru.prolib.aquila.probe.timeline;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
-
-import org.joda.time.*;
-import org.joda.time.format.*;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.threeten.extra.Interval;
 
 public class TLSStrategyTest {
 	private static final DateTimeFormatter df;
 	private static final Logger logger;
 	
 	static {
-		df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+		df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		logger = LoggerFactory.getLogger(TLSStrategyTest.class);
 	}
 	
@@ -42,8 +43,8 @@ public class TLSStrategyTest {
 	
 	private LinkedList<String> actual, expected;
 	
-	private DateTime T(String time) {
-		return df.parseDateTime(time);
+	private LocalDateTime T(String time) {
+		return LocalDateTime.parse(time, df);
 	}
 	
 	/**
@@ -64,7 +65,7 @@ public class TLSStrategyTest {
 	 * @param tag строка-идентификатор события
 	 * @return экземпляр события хронологии
 	 */
-	private TLEvent E(DateTime time, String tag) {
+	private TLEvent E(LocalDateTime time, String tag) {
 		return new TLEvent(time, new PushToStack(actual, tag));
 	}
 	
@@ -76,7 +77,7 @@ public class TLSStrategyTest {
 	 * ожидаемых результатов
 	 * @return экземпляр события хронологии
 	 */
-	private TLEvent EE(DateTime time, String tag) {
+	private TLEvent EE(LocalDateTime time, String tag) {
 		expected.add(tag);
 		return E(time, tag);
 	}
@@ -107,8 +108,8 @@ public class TLSStrategyTest {
 	
 	@Test
 	public void testExecute_Complex() throws Exception {
-		Interval interval = new Interval(T("2014-12-01 10:00:00"),
-										 T("2014-12-01 10:10:00"));
+		Interval interval = Interval.of(T("2014-12-01 10:00:00").toInstant(ZoneOffset.UTC),
+										 T("2014-12-01 10:10:00").toInstant(ZoneOffset.UTC));
 		TLEventQueue queue = new TLEventQueue(interval);
 		EventSourceRepository sources = new TLEventSources();
 		TLSStrategy strategy = new TLSStrategy(sources, queue);

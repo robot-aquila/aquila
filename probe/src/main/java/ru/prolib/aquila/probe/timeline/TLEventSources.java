@@ -1,11 +1,10 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
-import org.joda.time.DateTime;
 
 import ru.prolib.aquila.core.utils.KW;
 
@@ -27,24 +26,24 @@ import ru.prolib.aquila.core.utils.KW;
  * источники по времени.
  */
 public class TLEventSources implements EventSourceRepository {
-	private final Map<KW<TLEventSource>, DateTime> sources; 
+	private final Map<KW<TLEventSource>, LocalDateTime> sources; 
 	
 	/**
 	 * Конструктор.
 	 */
 	public TLEventSources() {
 		super();
-		sources = new LinkedHashMap<KW<TLEventSource>, DateTime>();
+		sources = new LinkedHashMap<KW<TLEventSource>, LocalDateTime>();
 	}
 	
 	/* (non-Javadoc)
 	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#getSources(org.joda.time.DateTime)
 	 */
 	@Override
-	public synchronized List<TLEventSource> getSources(DateTime time) {
+	public synchronized List<TLEventSource> getSources(LocalDateTime time) {
 		List<TLEventSource> list = new Vector<TLEventSource>();
-		for ( Map.Entry<KW<TLEventSource>, DateTime> e : sources.entrySet() ) {
-			DateTime entryTime = e.getValue();
+		for ( Map.Entry<KW<TLEventSource>, LocalDateTime> e : sources.entrySet() ) {
+			LocalDateTime entryTime = e.getValue();
 			if ( entryTime == null || entryTime.compareTo(time) <= 0 ) {
 				list.add(e.getKey().instance());
 			}
@@ -87,7 +86,7 @@ public class TLEventSources implements EventSourceRepository {
 	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#disableUntil(ru.prolib.aquila.probe.timeline.TLEventSource, org.joda.time.DateTime)
 	 */
 	@Override
-	public synchronized void disableUntil(TLEventSource source, DateTime time) {
+	public synchronized void disableUntil(TLEventSource source, LocalDateTime time) {
 		KW<TLEventSource> key = new KW<TLEventSource>(source);
 		if ( sources.containsKey(key) ) {
 			sources.put(key, time);
@@ -117,7 +116,7 @@ public class TLEventSources implements EventSourceRepository {
 	 * @see ru.prolib.aquila.probe.timeline.EventSourceRepository#getDisabledUntil(ru.prolib.aquila.probe.timeline.TLEventSource)
 	 */
 	@Override
-	public synchronized DateTime getDisabledUntil(TLEventSource source) {
+	public synchronized LocalDateTime getDisabledUntil(TLEventSource source) {
 		return sources.get(new KW<TLEventSource>(source));
 	}
 

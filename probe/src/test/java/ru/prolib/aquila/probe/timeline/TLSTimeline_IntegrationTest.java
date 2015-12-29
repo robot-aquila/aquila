@@ -2,13 +2,16 @@ package ru.prolib.aquila.probe.timeline;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.BasicConfigurator;
-import org.joda.time.*;
 import org.junit.*;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
@@ -60,8 +63,8 @@ public class TLSTimeline_IntegrationTest {
 	private Result res;
 	private TLSTimelineFactory factory;
 	private TLSTimeline timeline;
-	static private final DateTime from = new DateTime(2014,6,3,0,0,0,0);
-	private DateTime to;
+	static private final LocalDateTime from = LocalDateTime.of(2014,6,3,0,0,0,0);
+	private LocalDateTime to;
 	private CountDownLatch finished;
 
 	/**
@@ -69,8 +72,8 @@ public class TLSTimeline_IntegrationTest {
 	 */
 	static class Entry {
 		final char c;
-		final DateTime time;
-		Entry(char c, DateTime time) {
+		final LocalDateTime time;
+		Entry(char c, LocalDateTime time) {
 			this.c = c;
 			this.time = time;
 		}
@@ -123,15 +126,15 @@ public class TLSTimeline_IntegrationTest {
 	 * @param str строка для добавления
 	 */
 	void pushToStack(String str) {
-		DateTime time = from;
+		LocalDateTime time = from;
 		if ( stack.size() > 0 ) {
-			time = stack.getLast().time.plus(rnd.nextInt(maxDiffMs));
+			time = stack.getLast().time.plus(rnd.nextInt(maxDiffMs), ChronoUnit.MILLIS);
 		}
 		for ( int i = 0; i < str.length(); i ++ ) {
 			stack.add(new Entry(str.charAt(i), time));
-			time = time.plus(rnd.nextInt(maxDiffMs));
+			time = time.plus(rnd.nextInt(maxDiffMs), ChronoUnit.MILLIS);
 		}
-		to = stack.getLast().time.plus(1);
+		to = stack.getLast().time.plus(1, ChronoUnit.MILLIS);
 	}
 	
 	@Before
@@ -153,7 +156,7 @@ public class TLSTimeline_IntegrationTest {
 	
 	@Test
 	public void test_Empty() throws Exception {
-		timeline = factory.produce(new Interval(from, to));
+		timeline = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC), to.toInstant(ZoneOffset.UTC)));
 		//timeline.setDebug(true);
 		final List<Event> actual = new Vector<Event>();
 		timeline.OnFinish().addListener(new EventListener() {
@@ -189,12 +192,12 @@ public class TLSTimeline_IntegrationTest {
 		// точек срабатывания событий: отсечка должна останавливать точно на
 		// указанном времени, независимо от наличия событий.
 		int index = stack.size();
-		DateTime x1 = stack.getLast().time;
+		LocalDateTime x1 = stack.getLast().time;
 		pushToStack(src2);
-		DateTime x2 = stack.get(index).time;
-		DateTime stopAt = x1.plus((x2.getMillis() - x1.getMillis()) / 2);
+		LocalDateTime x2 = stack.get(index).time;
+		LocalDateTime stopAt = x1.plus(ChronoUnit.MILLIS.between(x1, x2) / 2, ChronoUnit.MILLIS);
 		
-		timeline = factory.produce(new Interval(from, to));
+		timeline = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC), to.toInstant(ZoneOffset.UTC)));
 		timeline.OnPause().addListener(new EventListener() {
 			@Override public void onEvent(Event arg0) {
 				paused.countDown();
@@ -222,10 +225,11 @@ public class TLSTimeline_IntegrationTest {
 	
 	@Test
 	public void testRunTo_AndFinish() throws Exception {
-		DateTime stopAt = stack.getLast().time.plus(1);
+		LocalDateTime stopAt = stack.getLast().time.plus(1, ChronoUnit.MILLIS);
 		final CountDownLatch paused = new CountDownLatch(1);
 		pushToStack(src2);
-		timeline = factory.produce(new Interval(from, to));
+		timeline = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC),
+				to.toInstant(ZoneOffset.UTC)));
 		//timeline.setDebug(true);
 		timeline.OnPause().addListener(new EventListener() {
 			@Override public void onEvent(Event arg0) {
@@ -254,7 +258,8 @@ public class TLSTimeline_IntegrationTest {
 	
 	@Test
 	public void testRun_EndOfPeriod() throws Exception {
-		timeline = factory.produce(new Interval(from, to));
+		timeline = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC),
+				to.toInstant(ZoneOffset.UTC)));
 		pushToStack(src2);	// Это нормально. Тестируем, что источники не
 							// будут опрашиваться за пределами РП
 		//timeline.setDebug(true);
@@ -275,7 +280,8 @@ public class TLSTimeline_IntegrationTest {
 	
 	@Test
 	public void testRun_EndOfData() throws Exception {
-		timeline = factory.produce(new Interval(from, to.plusDays(365)));
+		timeline = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC),
+				to.plusDays(365).toInstant(ZoneOffset.UTC)));
 		//timeline.setDebug(true);
 		timeline.OnFinish().addListener(new EventListener() {
 			@Override public void onEvent(Event event) {

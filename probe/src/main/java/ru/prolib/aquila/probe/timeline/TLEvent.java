@@ -1,7 +1,8 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 /**
  * Событие хронологии.
@@ -11,7 +12,7 @@ import org.joda.time.DateTime;
  * повторно.
  */
 public class TLEvent {
-	protected final DateTime time;
+	protected final LocalDateTime time;
 	protected final Runnable procedure;
 	private boolean executed = false;
 
@@ -21,7 +22,7 @@ public class TLEvent {
 	 * @param time время наступления события
 	 * @param procedure процедура исполнения события
 	 */
-	public TLEvent(DateTime time, Runnable procedure) {
+	public TLEvent(LocalDateTime time, Runnable procedure) {
 		super();
 		this.time = time;
 		this.procedure = procedure;
@@ -32,7 +33,7 @@ public class TLEvent {
 	 * <p>
 	 * @return  время события
 	 */
-	public DateTime getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
 	

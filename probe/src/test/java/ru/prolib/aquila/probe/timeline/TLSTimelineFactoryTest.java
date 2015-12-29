@@ -2,8 +2,12 @@ package ru.prolib.aquila.probe.timeline;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import org.junit.*;
+import org.threeten.extra.Interval;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.probe.internal.SimulationController;
 
@@ -19,9 +23,10 @@ public class TLSTimelineFactoryTest {
 	
 	@Test
 	public void testProduce() throws Exception {
-		DateTime from = new DateTime(1998, 7, 1, 13, 30, 45, 0);
-		DateTime to = new DateTime(2004, 1, 1, 23, 59, 59, 999);
-		SimulationController actual = factory.produce(new Interval(from, to));
+		LocalDateTime from = LocalDateTime.of(1998, 7, 1, 13, 30, 45, 0);
+		LocalDateTime to = LocalDateTime.of(2004, 1, 1, 23, 59, 59, 999);
+		SimulationController actual = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC),
+				to.toInstant(ZoneOffset.UTC)));
 		assertNotNull(actual);
 		/**
 		 * Непосредственно структура порожденного объекта нас не интересует.

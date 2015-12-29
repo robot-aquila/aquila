@@ -1,9 +1,9 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.joda.time.DateTime;
-
+@Deprecated
 public interface EventSourceRepository {
 
 	/**
@@ -15,7 +15,7 @@ public interface EventSourceRepository {
 	 * @param time временная метка
 	 * @return список источников
 	 */
-	public abstract List<TLEventSource> getSources(DateTime time);
+	public abstract List<TLEventSource> getSources(LocalDateTime time);
 
 	/**
 	 * Получить источники событий.
@@ -56,7 +56,7 @@ public interface EventSourceRepository {
 	 * @param source источник событий
 	 * @param time время активации
 	 */
-	public abstract void disableUntil(TLEventSource source, DateTime time);
+	public abstract void disableUntil(TLEventSource source, LocalDateTime time);
 
 	/**
 	 * Завершить работу со всеми источниками событий.
@@ -81,6 +81,6 @@ public interface EventSourceRepository {
 	 * исключен из процесса, то возвращается временная метка, указывающая на
 	 * момент включения источника в выборку. 
 	 */
-	public abstract DateTime getDisabledUntil(TLEventSource source);
+	public abstract LocalDateTime getDisabledUntil(TLEventSource source);
 
 }

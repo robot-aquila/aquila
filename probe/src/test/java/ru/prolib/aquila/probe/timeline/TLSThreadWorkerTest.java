@@ -1,10 +1,13 @@
 package ru.prolib.aquila.probe.timeline;
 
 import static org.easymock.EasyMock.*;
+
+import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
+
 import ru.prolib.aquila.core.sm.SMStateMachine;
 
 public class TLSThreadWorkerTest {
@@ -31,12 +34,12 @@ public class TLSThreadWorkerTest {
 		started.countDown();
 		// pass 1
 		expect(timeline.finished()).andReturn(false);
-		cmd = new TLCmd(new DateTime());
+		cmd = new TLCmd(LocalDateTime.now());
 		expect(timeline.pullCommand()).andReturn(cmd);
 		automat.input(same(cmd));
 		// pass 2
 		expect(timeline.finished()).andReturn(false);
-		cmd = new TLCmd(new DateTime(2014,5,22,10,0,0,0));
+		cmd = new TLCmd(LocalDateTime.of(2014,5,22,10,0,0,0));
 		expect(timeline.pullCommand()).andReturn(cmd);
 		automat.input(same(cmd));
 		// pass 3

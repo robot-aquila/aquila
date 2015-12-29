@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 
 /**
@@ -91,7 +91,7 @@ public class SchedulerLocal implements Scheduler {
 	}
 	
 	private Date toDate(LocalDateTime time) {
-		return Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
+		return Date.from(time.atZone(ZoneOffset.UTC).toInstant());
 	}
 
 	@Override

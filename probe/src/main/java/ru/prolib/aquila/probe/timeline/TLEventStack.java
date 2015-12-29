@@ -1,8 +1,8 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Vector;
-import org.joda.time.DateTime;
 
 /**
  * Стек событий.
@@ -11,7 +11,7 @@ import org.joda.time.DateTime;
  * Все события стека могут быть исполнены одним вызовом.
  */
 public class TLEventStack implements Comparable<TLEventStack> {
-	private final DateTime time;
+	private final LocalDateTime time;
 	private final List<TLEvent> events;
 	private boolean executed = false;
 	
@@ -41,7 +41,7 @@ public class TLEventStack implements Comparable<TLEventStack> {
 	 * <p>
 	 * @return  время
 	 */
-	public DateTime getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
 

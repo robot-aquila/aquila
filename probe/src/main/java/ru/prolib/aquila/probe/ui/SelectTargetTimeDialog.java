@@ -3,12 +3,15 @@ package ru.prolib.aquila.probe.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DateFormatter;
-
-import org.joda.time.DateTime;
 
 import ru.prolib.aquila.core.text.IMessages;
 
@@ -40,7 +43,7 @@ public class SelectTargetTimeDialog extends JDialog
 	private final JSpinner spinner;
 	private final JLabel lblCurrentTimeValue;
 	private final SpinnerDateModel spinnerData;
-	private DateTime selectedTime;
+	private LocalDateTime selectedTime;
 
 	public SelectTargetTimeDialog(IMessages messages) {
 		super();
@@ -122,9 +125,9 @@ public class SelectTargetTimeDialog extends JDialog
 	}
 
 	@Override
-	public DateTime showDialog(DateTime initialTime) {
+	public LocalDateTime showDialog(LocalDateTime initialTime) {
 		selectedTime = null;
-		Date j_startTime = initialTime.toDate();
+		Date j_startTime = Date.from(initialTime.toInstant(ZoneOffset.UTC));
 		lblCurrentTimeValue.setText(format.format(j_startTime));
 		spinner.setValue(j_startTime);
 		spinnerData.setStart(j_startTime);
@@ -138,7 +141,9 @@ public class SelectTargetTimeDialog extends JDialog
 			Date j_selected = (Date) spinner.getValue(),
 					j_start = (Date) spinnerData.getStart();
 			if ( j_selected.compareTo(j_start) > 0 ) {
-				selectedTime = new DateTime(spinner.getValue());	
+				Date j_time = (Date) spinner.getValue();
+				Instant instant = Instant.ofEpochMilli(j_time.getTime());
+				selectedTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
 			}
 		}
 		setVisible(false);

@@ -3,10 +3,11 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Vector;
 
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 public class TLEventStackTest {
@@ -30,7 +31,7 @@ public class TLEventStackTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		indicator = control.createMock(Indicator.class);
-		evt = new TLEvent(new DateTime(2013, 11, 29, 16, 1, 5, 0), indicate(1));
+		evt = new TLEvent(LocalDateTime.of(2013, 11, 29, 16, 1, 5, 0), indicate(1));
 		stack = new TLEventStack(evt);
 	}
 	
@@ -101,7 +102,7 @@ public class TLEventStackTest {
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testPushEvent_ThrowsIfEventDifferentTime() throws Exception {
-		stack.pushEvent(new TLEvent(new DateTime(), null));
+		stack.pushEvent(new TLEvent(LocalDateTime.now(), null));
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -116,10 +117,10 @@ public class TLEventStackTest {
 	@Test
 	public void testCompareTo() throws Exception {
 		Runnable any = null;
-		DateTime t = evt.getTime();
-		TLEventStack past = new TLEventStack(new TLEvent(t.minus(1), any)),
+		LocalDateTime t = evt.getTime();
+		TLEventStack past = new TLEventStack(new TLEvent(t.minus(1, ChronoUnit.MILLIS), any)),
 			same = new TLEventStack(new TLEvent(t, any)),
-			fut = new TLEventStack(new TLEvent(t.plus(1), any));
+			fut = new TLEventStack(new TLEvent(t.plus(1, ChronoUnit.MILLIS), any));
 		
 		assertEquals( 1, stack.compareTo(null));
 		assertEquals( 1, stack.compareTo(past));

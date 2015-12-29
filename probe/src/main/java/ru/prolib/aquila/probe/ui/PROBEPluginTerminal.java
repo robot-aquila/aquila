@@ -13,11 +13,10 @@ import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
-import ru.prolib.aquila.probe.PROBEFactory;
-import ru.prolib.aquila.probe.PROBETerminal;
 import ru.prolib.aquila.ui.*;
 import ru.prolib.aquila.ui.wrapper.*;
 
+@Deprecated // TODO: Have to be rewritten due to probe concept change 
 public class PROBEPluginTerminal implements AquilaPluginTerminal,
 	EventListener, Runnable
 {
@@ -30,7 +29,7 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 		logger = LoggerFactory.getLogger(PROBEPluginTerminal.class);
 	}
 	
-	private PROBETerminal terminal;
+	private Terminal terminal;
 	private IMessages texts;
 	private PROBEToolBar toolBar;
 	private MenuItem cmdConnect, cmdDisconnect;
@@ -66,7 +65,7 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 	public void initialize(ServiceLocator locator, Terminal terminal, String arg)
 			throws Exception
 	{
-		this.terminal = (PROBETerminal) terminal;
+		this.terminal = /*(PROBETerminal)*/ terminal;
 	}
 
 	@Override
@@ -81,16 +80,16 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 
 	@Override
 	public Terminal createTerminal(Properties props) throws Exception {
-		return new PROBEFactory().createTerminal(props);
+		return null;/*new PROBEFactory().createTerminal(props);*/
 	}
 
 	@Override
 	public void onEvent(Event event) {
 		if ( event.isType(cmdConnect.OnCommand()) ) {
-			terminal.markTerminalConnected();
+			//terminal.markTerminalConnected();
 			
 		} else if ( event.isType(cmdDisconnect.OnCommand()) ) {
-			terminal.markTerminalDisconnected();
+			//terminal.markTerminalDisconnected();
 			
 		} else {
 			SwingUtilities.invokeLater(this);
@@ -104,18 +103,18 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 	}
 	
 	private void setControlsToConnected() {
-		cmdConnect.setEnabled(false);
-		cmdDisconnect.setEnabled(true);
+		//cmdConnect.setEnabled(false);
+		//cmdDisconnect.setEnabled(true);
 	}
 	
 	private void setControlsToDisconnected() {
-		cmdConnect.setEnabled(! terminal.finished());
-		cmdDisconnect.setEnabled(false);
+		//cmdConnect.setEnabled(! terminal.finished());
+		//cmdDisconnect.setEnabled(false);
 	}
 	
 	private void setControlsToDisabled() {
-		cmdConnect.setEnabled(false);
-		cmdDisconnect.setEnabled(false);
+		//cmdConnect.setEnabled(false);
+		//cmdDisconnect.setEnabled(false);
 	}
 	
 	private void refreshControls() {

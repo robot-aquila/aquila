@@ -1,6 +1,6 @@
 package ru.prolib.aquila.probe.ui;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 public interface SelectTargetTimeDialogView {
 	
@@ -12,6 +12,6 @@ public interface SelectTargetTimeDialogView {
 	 * @return возвращает выборанное время или null, если пользователь закрыл
 	 * диалог, отменив выбор значения или выбранное время равно начальному
 	 */
-	public DateTime showDialog(DateTime initialTime);
+	public LocalDateTime showDialog(LocalDateTime initialTime);
 
 }

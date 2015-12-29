@@ -3,10 +3,11 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.BlockingQueue;
 
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,9 +23,9 @@ public class TLCmdQueueTest {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
-		DateTime time = new DateTime(1998, 1, 7, 23, 15, 40, 999);
+		LocalDateTime time = LocalDateTime.of(1998, 1, 7, 23, 15, 40, 999);
 		c1 = new TLCmd(time);
-		c2 = new TLCmd(time.plus(10));
+		c2 = new TLCmd(time.plus(10, ChronoUnit.MILLIS));
 		control = createStrictControl();
 		subQueue = control.createMock(BlockingQueue.class);
 		queue = new TLCmdQueue(subQueue);

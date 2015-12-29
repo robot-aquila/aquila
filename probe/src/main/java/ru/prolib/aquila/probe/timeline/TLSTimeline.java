@@ -1,11 +1,13 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.threeten.extra.Interval;
+
 import ru.prolib.aquila.core.EventType;
 
 
@@ -40,7 +42,7 @@ public class TLSTimeline implements Timeline {
 	private final TLSEventDispatcher dispatcher;
 	private final EventSourceRepository sources;
 	private volatile boolean blocking = false;
-	private volatile DateTime cutoff = null;
+	private volatile LocalDateTime cutoff = null;
 	private volatile TLCmdType state = null;
 	
 	/**
@@ -78,7 +80,7 @@ public class TLSTimeline implements Timeline {
 	}
 	
 	@Override
-	public DateTime getPOA() {
+	public LocalDateTime getPOA() {
 		return evtQueue.getPOA();
 	}
 	
@@ -94,7 +96,7 @@ public class TLSTimeline implements Timeline {
 	 * @see ru.prolib.aquila.probe.timeline.Timeline#schedule(org.joda.time.DateTime, java.lang.Runnable)
 	 */
 	@Override
-	public void schedule(DateTime time, Runnable procedure)
+	public void schedule(LocalDateTime time, Runnable procedure)
 			throws TLOutOfIntervalException
 	{
 		schedule(new TLEvent(time, procedure));
@@ -170,7 +172,7 @@ public class TLSTimeline implements Timeline {
 	 * <p>
 	 * @param time время
 	 */
-	void setCutoff(DateTime time) {
+	void setCutoff(LocalDateTime time) {
 		if ( time == null ) {
 			cutoff = null;
 			return;
@@ -190,7 +192,7 @@ public class TLSTimeline implements Timeline {
 	 * <p>
 	 * @return время 
 	 */
-	DateTime getCutoff() {
+	LocalDateTime getCutoff() {
 		return cutoff;
 	}
 
@@ -293,7 +295,7 @@ public class TLSTimeline implements Timeline {
 	 * @see ru.prolib.aquila.probe.timeline.TimelineController#runTo(org.joda.time.DateTime)
 	 */
 	@Override
-	public void runTo(DateTime cutoff) {
+	public void runTo(LocalDateTime cutoff) {
 		if ( ! finished() ) {
 			cmdQueue.put(new TLCmd(cutoff));
 		}
@@ -324,7 +326,7 @@ public class TLSTimeline implements Timeline {
 	 * false - ТА внутри РП.
 	 */
 	boolean isOutOfInterval() {
-		return ! getRunInterval().contains(getPOA());
+		return ! getRunInterval().contains(getPOA().toInstant(ZoneOffset.UTC));
 	}
 	
 	/* (non-Javadoc)
@@ -352,7 +354,7 @@ public class TLSTimeline implements Timeline {
 	}
 
 	@Override
-	public List<TLEventSource> getSources(DateTime time) {
+	public List<TLEventSource> getSources(LocalDateTime time) {
 		return sources.getSources(time);
 	}
 
@@ -362,7 +364,7 @@ public class TLSTimeline implements Timeline {
 	}
 
 	@Override
-	public void disableUntil(TLEventSource source, DateTime time) {
+	public void disableUntil(TLEventSource source, LocalDateTime time) {
 		sources.disableUntil(source, time);
 	}
 
@@ -372,7 +374,7 @@ public class TLSTimeline implements Timeline {
 	}
 
 	@Override
-	public DateTime getDisabledUntil(TLEventSource source) {
+	public LocalDateTime getDisabledUntil(TLEventSource source) {
 		return sources.getDisabledUntil(source);
 	}
 

@@ -2,14 +2,13 @@ package ru.prolib.aquila.probe.internal;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.data.*;
@@ -22,8 +21,8 @@ public class TickDataDispatcherTest {
 	private TickHandler tasks, tasks2;
 	private TickDataDispatcher dispatcher;
 	
-	private static final SimpleDateFormat f =
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+	private static final DateTimeFormatter f =
+			DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  
 	
 	/**
 	 * Parse string "yyyy-MM-dd HH:mm:ss" datetime format into joda-time.
@@ -32,8 +31,8 @@ public class TickDataDispatcherTest {
 	 * @return
 	 * @throws Exception
 	 */
-	public static DateTime time(String time) throws Exception {
-		return new DateTime(f.parse(time));
+	public static LocalDateTime time(String time) throws Exception {
+		return LocalDateTime.parse(time, f);
 	}
 
 	

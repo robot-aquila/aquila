@@ -4,15 +4,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
-
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
-import ru.prolib.aquila.probe.PROBETerminal;
 
 @SuppressWarnings("serial")
 public class PROBEToolBar extends JToolBar
@@ -43,7 +41,7 @@ public class PROBEToolBar extends JToolBar
 	private static final String TTIP_PAUSE = "TTIP_PAUSE";
 	private static final String TTIP_FINISH = "TTIP_FINISH";
 
-	private final PROBETerminal terminal;
+	private final Terminal terminal;
 	private final IMessages messages;
 	private final JButton btnOptions;
 	private final JButton btnRunTo;
@@ -54,7 +52,7 @@ public class PROBEToolBar extends JToolBar
 	private final Icon iconPause, iconRunRt;
 	private final SelectTargetTimeDialogView targetTimeDialog;
 	
-	public PROBEToolBar(PROBETerminal terminal, IMessages messages) {
+	public PROBEToolBar(Terminal terminal, IMessages messages) {
 		super();
 		this.terminal = terminal;
 		this.messages = messages;
@@ -68,9 +66,11 @@ public class PROBEToolBar extends JToolBar
 		btnFinish = makeButton(FINISH, TTIP_FINISH);
 		iconPause = getIcon(PAUSE);
 		iconRunRt = btnPauseRunRt.getIcon();
+		/*
 		terminal.OnFinish().addListener(this);
 		terminal.OnPause().addListener(this);
 		terminal.OnRun().addListener(this);
+		*/
 		terminal.OnConnected().addListener(this);
 		terminal.OnDisconnected().addListener(this);
 		terminal.OnStarted().addListener(this);
@@ -101,22 +101,22 @@ public class PROBEToolBar extends JToolBar
 			popUpNotImplemented();
 			
 		} else if ( cmd.equals(PAUSE) ) {
-			terminal.pause();
+			//terminal.pause();
 			
 		} else if ( cmd.equals(RUN_TO) ) {
-			DateTime x = targetTimeDialog.showDialog(terminal.getCurrentTime());
-			if ( x != null ) {
-				terminal.runTo(x);
-			}
+			//DateTime x = targetTimeDialog.showDialog(terminal.getCurrentTime());
+			//if ( x != null ) {
+			//	terminal.runTo(x);
+			//}
 			
 		} else if ( cmd.equals(STEP) ) {
 			popUpNotImplemented();
 			
 		} else if ( cmd.equals(RUN_ALL) ) {
-			terminal.run();
+			//terminal.run();
 			
 		} else if ( cmd.equals(FINISH) ) {
-			terminal.finish();
+			//terminal.finish();
 			
 		}
 	}
@@ -127,22 +127,22 @@ public class PROBEToolBar extends JToolBar
 	}
 	
 	private void refreshControls() {
-		if ( terminal.finished() ) {
-			disableAllButtons();
-			logger.debug("The timeline ended and controls has been permanently disabled.");
-			
-		} else if ( terminal.connected() ) {
-			if ( terminal.running() ) {
-				switchToRunningMode();
-			} else if ( terminal.paused() ) {
-				switchToPausedMode();
-			}
-			
-		} else {
-			// disconnected
-			disableAllButtons();
-			
-		}
+		//if ( terminal.finished() ) {
+		//	disableAllButtons();
+		//	logger.debug("The timeline ended and controls has been permanently disabled.");
+		//	
+		//} else if ( terminal.connected() ) {
+		//	if ( terminal.running() ) {
+		//		switchToRunningMode();
+		//	} else if ( terminal.paused() ) {
+		//		switchToPausedMode();
+		//	}
+		//	
+		//} else {
+		//	// disconnected
+		//	disableAllButtons();
+		//	
+		//}
 	}
 	
 	private void switchToPausedMode() {

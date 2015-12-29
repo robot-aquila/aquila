@@ -3,8 +3,9 @@ package ru.prolib.aquila.probe.internal;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,8 +44,8 @@ public class RepeatedFixDelayTaskTest {
 		expect(scheduler.scheduled(same(runnable))).andReturn(true);
 		runnable.run();
 		expect(timeline.getPOA())
-			.andReturn(new DateTime(2014, 10, 12, 2, 52, 8, 450));
-		timeline.schedule(new DateTime(2014, 10, 12, 2, 52, 8, 950), task);
+			.andReturn(LocalDateTime.of(2014, 10, 12, 2, 52, 8, 450000000));
+		timeline.schedule(LocalDateTime.of(2014, 10, 12, 2, 52, 8, 950000000), task);
 		control.replay();
 		
 		task.run();
@@ -57,8 +58,8 @@ public class RepeatedFixDelayTaskTest {
 		expect(scheduler.scheduled(same(runnable))).andReturn(true);
 		runnable.run();
 		expect(timeline.getPOA())
-			.andReturn(new DateTime(2014, 10, 12, 2, 52, 8, 450));
-		timeline.schedule(new DateTime(2014, 10, 12, 2, 52, 8, 950), task);
+			.andReturn(LocalDateTime.of(2014, 10, 12, 2, 52, 8, 450000000));
+		timeline.schedule(LocalDateTime.of(2014, 10, 12, 2, 52, 8, 950000000), task);
 		expectLastCall().andThrow(new TLOutOfIntervalException());
 		scheduler.cancel(same(runnable));
 		control.replay();

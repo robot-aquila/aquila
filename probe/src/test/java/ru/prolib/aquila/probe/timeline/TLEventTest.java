@@ -3,8 +3,9 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.utils.Variant;
@@ -33,12 +34,12 @@ public class TLEventTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		procedure = control.createMock(Runnable.class);
-		e = new TLEvent(new DateTime(2013, 11, 29, 13, 10, 52, 0), procedure);
+		e = new TLEvent(LocalDateTime.of(2013, 11, 29, 13, 10, 52, 0), procedure);
 	}
 
 	@Test
 	public void testGetters() throws Exception {
-		assertEquals(new DateTime(2013, 11, 29, 13, 10, 52, 0), e.getTime());
+		assertEquals(LocalDateTime.of(2013, 11, 29, 13, 10, 52, 0), e.getTime());
 		assertSame(procedure, e.getProcedure());
 	}
 	
@@ -81,10 +82,10 @@ public class TLEventTest {
 	@Test
 	public void testEquals() throws Exception {
 		procedure = new MyRunnable();
-		e = new TLEvent(new DateTime(2013, 11, 29, 13, 10, 52, 0), procedure);
-		Variant<DateTime> vTime = new Variant<DateTime>()
-			.add(new DateTime(2013, 11, 29, 13, 10, 52, 0))
-			.add(new DateTime());
+		e = new TLEvent(LocalDateTime.of(2013, 11, 29, 13, 10, 52, 0), procedure);
+		Variant<LocalDateTime> vTime = new Variant<LocalDateTime>()
+			.add(LocalDateTime.of(2013, 11, 29, 13, 10, 52, 0))
+			.add(LocalDateTime.now());
 		Variant<Runnable> vProc = new Variant<Runnable>(vTime)
 			.add(procedure)
 			.add(new MyRunnable());
@@ -106,7 +107,7 @@ public class TLEventTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(procedure, found.procedure);
-		assertEquals(new DateTime(2013, 11, 29, 13, 10, 52, 0), found.time);
+		assertEquals(LocalDateTime.of(2013, 11, 29, 13, 10, 52, 0), found.time);
 	}
 
 }

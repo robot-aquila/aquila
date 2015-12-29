@@ -2,7 +2,9 @@ package ru.prolib.aquila.probe.timeline;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import org.joda.time.Interval;
+
+import org.threeten.extra.Interval;
+
 import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.sm.*;
 import ru.prolib.aquila.core.utils.KW;

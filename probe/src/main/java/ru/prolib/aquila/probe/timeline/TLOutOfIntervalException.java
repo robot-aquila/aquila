@@ -1,7 +1,8 @@
 package ru.prolib.aquila.probe.timeline;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
+import java.time.LocalDateTime;
+
+import org.threeten.extra.Interval;
 
 /**
  * Значение за границами интервала.
@@ -20,7 +21,7 @@ public class TLOutOfIntervalException extends TLException {
 	 * @param interval интервал
 	 * @param time момент времени
 	 */
-	public TLOutOfIntervalException(Interval interval, DateTime time) {
+	public TLOutOfIntervalException(Interval interval, LocalDateTime time) {
 		super("Interval: " + interval + " time: " + time);
 	}
 	

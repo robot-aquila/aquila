@@ -1,12 +1,15 @@
 package ru.prolib.aquila.probe.timeline;
 
 import static org.junit.Assert.*;
-import org.joda.time.*;
+
+import java.time.LocalDateTime;
+
 import org.junit.*;
+
 import ru.prolib.aquila.probe.timeline.TLCmd;
 
 public class TLCmdTest {
-	private static DateTime time = new DateTime(2014, 2, 12, 15, 4, 31, 0);
+	private static LocalDateTime time = LocalDateTime.of(2014, 2, 12, 15, 4, 31, 0);
 	private TLCmd cmd1,cmd2,cmd3;
 
 	@Before
@@ -43,9 +46,9 @@ public class TLCmdTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		cmd3 = new TLCmd(new DateTime(2014, 2, 12, 15, 4, 31, 0));
+		cmd3 = new TLCmd(LocalDateTime.of(2014, 2, 12, 15, 4, 31, 0));
 		assertTrue(cmd1.equals(cmd3));
-		cmd3 = new TLCmd(new DateTime(2022, 2, 12, 15, 4, 31, 0));
+		cmd3 = new TLCmd(LocalDateTime.of(2022, 2, 12, 15, 4, 31, 0));
 		assertFalse(cmd1.equals(cmd3));
 
 		assertFalse(cmd2.equals(cmd3));

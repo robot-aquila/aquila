@@ -1,7 +1,8 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 
 /**
  * Команда эмулятора.
@@ -10,7 +11,7 @@ import org.joda.time.DateTime;
  */
 public class TLCmd {
 	private final TLCmdType type;
-	private final DateTime time;
+	private final LocalDateTime time;
 	
 	public static final TLCmd FINISH = new TLCmd(TLCmdType.FINISH);
 	public static final TLCmd PAUSE = new TLCmd(TLCmdType.PAUSE);
@@ -37,7 +38,7 @@ public class TLCmd {
 	 * <p>
 	 * @param time аргумент-время
 	 */
-	public TLCmd(DateTime time) {
+	public TLCmd(LocalDateTime time) {
 		super();
 		this.type = TLCmdType.RUN;
 		this.time = time;
@@ -68,7 +69,7 @@ public class TLCmd {
 	 * @return время аргумент-команды. Для команд, отличных от
 	 * {@link TLCmdType#RUN} возвращается null. 
 	 */
-	public DateTime getTime() {
+	public LocalDateTime getTime() {
 		return time;
 	}
 	

@@ -3,8 +3,9 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 public class TLASPauseTest {
@@ -55,7 +56,7 @@ public class TLASPauseTest {
 
 	@Test
 	public void testInput_InRun() throws Exception {
-		DateTime time = new DateTime(1998, 1, 1, 23, 59, 59, 0);
+		LocalDateTime time = LocalDateTime.of(1998, 1, 1, 23, 59, 59, 0);
 		timeline.setCutoff(eq(time));
 		control.replay();
 		

@@ -3,17 +3,21 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+
 import org.easymock.IMocksControl;
-import org.joda.time.*;
 import org.junit.*;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.EventType;
 
 public class TLSTimelineTest {
-	private static DateTime from = new DateTime(2014, 5, 21, 20, 0, 0, 0);
-	private static DateTime to = new DateTime(2014, 6, 1, 0, 0, 0, 0);
-	private static Interval interval = new Interval(from, to);
+	private static LocalDateTime from = LocalDateTime.of(2014, 5, 21, 20, 0, 0, 0);
+	private static LocalDateTime to = LocalDateTime.of(2014, 6, 1, 0, 0, 0, 0);
+	private static Interval interval = Interval.of(from.toInstant(ZoneOffset.UTC),
+			to.toInstant(ZoneOffset.UTC));
 	
 	private IMocksControl control;
 	private TLCmdQueue cmdQueue;
@@ -53,7 +57,7 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testGetPOA() throws Exception {
-		DateTime time = new DateTime();
+		LocalDateTime time = LocalDateTime.now();
 		expect(evtQueue.getPOA()).andReturn(time);
 		control.replay();
 		
@@ -277,7 +281,7 @@ public class TLSTimelineTest {
 
 	@Test
 	public void testRunTo() throws Exception {
-		DateTime time = new DateTime(2014, 5, 22, 0, 0, 0, 0);
+		LocalDateTime time = LocalDateTime.of(2014, 5, 22, 0, 0, 0, 0);
 		cmdQueue.put(new TLCmd(time));
 		control.replay();
 		
@@ -299,7 +303,7 @@ public class TLSTimelineTest {
 	@Test
 	public void testRun() throws Exception {
 		expect(evtQueue.getInterval()).andStubReturn(interval);
-		cmdQueue.put(new TLCmd((DateTime) null));
+		cmdQueue.put(new TLCmd((LocalDateTime) null));
 		control.replay();
 		
 		timeline.run();
@@ -320,7 +324,7 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testIsCutoff() throws Exception {
-		DateTime poa = new DateTime(2014,5,27,15,30,0,0);
+		LocalDateTime poa = LocalDateTime.of(2014,5,27,15,30,0,0);
 		expect(evtQueue.getPOA()).andStubReturn(poa);
 		evtQueue.pushEvent((TLEvent)anyObject());
 		expectLastCall().anyTimes();
@@ -328,13 +332,13 @@ public class TLSTimelineTest {
 		
 		assertFalse(timeline.isCutoff()); // cutoff is null (not specified)
 		
-		timeline.setCutoff(new DateTime(2015,1,1,0,0,0,0));
+		timeline.setCutoff(LocalDateTime.of(2015,1,1,0,0,0,0));
 		assertFalse(timeline.isCutoff());
 
-		timeline.setCutoff(new DateTime(2014,5,27,15,30,0,0));
+		timeline.setCutoff(LocalDateTime.of(2014,5,27,15,30,0,0));
 		assertTrue(timeline.isCutoff());
 
-		timeline.setCutoff(new DateTime(2014,5,27,15,29,59,999));
+		timeline.setCutoff(LocalDateTime.of(2014,5,27,15,29,59,999));
 		assertTrue(timeline.isCutoff());
 		
 		control.verify();
@@ -342,7 +346,7 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testIsOutOfInterval_In() throws Exception {
-		DateTime poa = new DateTime(2014, 5, 31, 23, 59, 59, 999);
+		LocalDateTime poa = LocalDateTime.of(2014, 5, 31, 23, 59, 59, 999);
 		expect(evtQueue.getPOA()).andStubReturn(poa);
 		expect(evtQueue.getInterval()).andStubReturn(interval);
 		control.replay();
@@ -354,7 +358,7 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testIsOutOfInterval_AtEnd() throws Exception {
-		DateTime poa = new DateTime(2014, 6, 1, 0, 0, 0, 0);
+		LocalDateTime poa = LocalDateTime.of(2014, 6, 1, 0, 0, 0, 0);
 		expect(evtQueue.getPOA()).andStubReturn(poa);
 		expect(evtQueue.getInterval()).andStubReturn(interval);
 		control.replay();
@@ -366,7 +370,7 @@ public class TLSTimelineTest {
 	
 	@Test
 	public void testIsOutOfInterval_Out() throws Exception {
-		DateTime poa = new DateTime(2015, 1, 1, 0, 0, 0, 0);
+		LocalDateTime poa = LocalDateTime.of(2015, 1, 1, 0, 0, 0, 0);
 		expect(evtQueue.getPOA()).andStubReturn(poa);
 		expect(evtQueue.getInterval()).andStubReturn(interval);
 		control.replay();

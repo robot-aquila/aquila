@@ -1,7 +1,13 @@
 package ru.prolib.aquila.probe.internal;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
-import org.joda.time.*;
+
+import org.threeten.extra.Interval;
+
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.utils.KW;
 import ru.prolib.aquila.probe.timeline.*;
@@ -29,7 +35,7 @@ public class SchedulerImpl implements Scheduler {
 	}
 
 	@Override
-	public DateTime getCurrentTime() {
+	public LocalDateTime getCurrentTime() {
 		return timeline.getPOA();
 	}
 
@@ -39,19 +45,20 @@ public class SchedulerImpl implements Scheduler {
 	}
 
 	@Override
-	public TaskHandler schedule(Runnable task, DateTime time) {
+	public TaskHandler schedule(Runnable task, LocalDateTime time) {
 		if ( time == null ) {
 			throw new NullPointerException();
 		}
 		if ( scheduled(task) ) {
 			throw new IllegalStateException();
 		}
+		Instant instant = time.toInstant(ZoneOffset.UTC);
 		Interval wp = timeline.getRunInterval();
-		if ( wp.isBefore(time) ) {
+		if ( wp.getEnd().isBefore(instant) ) {
 			return getTaskHandler(task);
 		}
-		if ( wp.isAfter(time) ) {
-			time = wp.getStart();
+		if ( wp.getStart().isAfter(instant) ) {
+			time = LocalDateTime.ofInstant(wp.getStart(), ZoneOffset.UTC);
 		}
 		SchedulerTask ctrl = new OneTimeTask(this, task);
 		try {
@@ -69,11 +76,11 @@ public class SchedulerImpl implements Scheduler {
 		if ( delay < 0 ) {
 			throw new IllegalArgumentException();
 		}
-		return schedule(task, timeline.getPOA().plus(delay));
+		return schedule(task, timeline.getPOA().plus(delay, ChronoUnit.MILLIS));
 	}
 
 	@Override
-	public TaskHandler schedule(Runnable task, DateTime firstTime, long period) {
+	public TaskHandler schedule(Runnable task, LocalDateTime firstTime, long period) {
 		if ( firstTime == null ) {
 			throw new NullPointerException();
 		}
@@ -83,12 +90,13 @@ public class SchedulerImpl implements Scheduler {
 		if ( scheduled(task) ) {
 			throw new IllegalStateException();
 		}
+		Instant instant = firstTime.toInstant(ZoneOffset.UTC);
 		Interval wp = timeline.getRunInterval();
-		if ( wp.isBefore(firstTime) ) {
+		if ( wp.getEnd().isBefore(instant) ) {
 			return getTaskHandler(task);
 		}
-		if ( wp.isAfter(firstTime) ) {
-			firstTime = wp.getStart();
+		if ( wp.getStart().isAfter(instant) ) {
+			firstTime = LocalDateTime.ofInstant(wp.getStart(), ZoneOffset.UTC);
 		}
 		SchedulerTask ctrl =
 				new RepeatedFixDelayTask(this, task, timeline, period - 1);
@@ -107,11 +115,11 @@ public class SchedulerImpl implements Scheduler {
 		if ( delay < 0 ) {
 			throw new IllegalArgumentException();
 		}
-		return schedule(task, timeline.getPOA().plus(delay), period);
+		return schedule(task, timeline.getPOA().plus(delay, ChronoUnit.MILLIS), period);
 	}
 
 	@Override
-	public TaskHandler scheduleAtFixedRate(Runnable task, DateTime firstTime,
+	public TaskHandler scheduleAtFixedRate(Runnable task, LocalDateTime firstTime,
 			long period)
 	{
 		return schedule(task, firstTime, period);
@@ -124,7 +132,7 @@ public class SchedulerImpl implements Scheduler {
 		if ( delay < 0) {
 			throw new IllegalArgumentException();
 		}
-		return scheduleAtFixedRate(task, timeline.getPOA().plus(delay), period);
+		return scheduleAtFixedRate(task, timeline.getPOA().plus(delay, ChronoUnit.MILLIS), period);
 	}
 
 	@Override

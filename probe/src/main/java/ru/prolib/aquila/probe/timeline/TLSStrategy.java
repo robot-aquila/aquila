@@ -1,11 +1,12 @@
 package ru.prolib.aquila.probe.timeline;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.threeten.extra.Interval;
 
 /**
  * Конвейр симуляции хронологии.
@@ -61,7 +62,7 @@ public class TLSStrategy {
 	 */
 	private void interrogate(TLEventSource src) {
 		TLEvent event;
-		DateTime poa = queue.getPOA();
+		LocalDateTime poa = queue.getPOA();
 		Interval wp = queue.getInterval();
 		try {
 			if ( src.closed() ) {
@@ -70,7 +71,7 @@ public class TLSStrategy {
 			} else if ( (event = src.pullEvent()) == null ) {
 				sources.removeSource(src);
 				logger.debug("Remove event source (gave null event): {}", src);
-			} else if ( wp.contains(event.getTime()) ) {
+			} else if ( wp.contains(event.getTime().toInstant(ZoneOffset.UTC)) ) {
 				queue.pushEvent(event);
 				if ( poa.compareTo(event.getTime()) < 0 ) {
 					sources.disableUntil(src, event.getTime());

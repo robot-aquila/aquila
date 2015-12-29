@@ -3,21 +3,22 @@ package ru.prolib.aquila.probe.timeline;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.*;
 
 public class TLASRunTest {
 	private IMocksControl control;
 	private TLSTimeline timeline;
-	private DateTime time;
+	private LocalDateTime time;
 	private TLASRun state;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		timeline = control.createMock(TLSTimeline.class);
-		time = new DateTime(1997, 7, 12, 20, 15, 0, 999);
+		time = LocalDateTime.of(1997, 7, 12, 20, 15, 0, 999);
 		state = new TLASRun(timeline);
 	}
 	

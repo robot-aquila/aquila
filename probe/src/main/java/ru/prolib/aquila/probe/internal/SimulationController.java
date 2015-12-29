@@ -1,7 +1,8 @@
 package ru.prolib.aquila.probe.internal;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
+import java.time.LocalDateTime;
+
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.EventType;
 
@@ -53,7 +54,7 @@ public interface SimulationController {
 	 * <p>
 	 * @param cutoff время отсечки
 	 */
-	public void runTo(DateTime cutoff);
+	public void runTo(LocalDateTime cutoff);
 
 	/**
 	 * Выполнять симуляцию до конца РП.

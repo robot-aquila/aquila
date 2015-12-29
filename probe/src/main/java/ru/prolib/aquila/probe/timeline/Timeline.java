@@ -1,6 +1,6 @@
 package ru.prolib.aquila.probe.timeline;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 import ru.prolib.aquila.probe.internal.SimulationController;
 
@@ -15,7 +15,7 @@ public interface Timeline extends SimulationController,
 	 * @param procedure процедура события
 	 * @throws TLOutOfIntervalException событие за пределами рабочего периода
 	 */
-	public abstract void schedule(DateTime time, Runnable procedure)
+	public abstract void schedule(LocalDateTime time, Runnable procedure)
 			throws TLOutOfIntervalException;
 
 	/**
@@ -32,6 +32,6 @@ public interface Timeline extends SimulationController,
 	 * <p>
 	 * @return ТА
 	 */
-	public abstract DateTime getPOA();
+	public abstract LocalDateTime getPOA();
 	
 }

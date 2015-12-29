@@ -3,6 +3,7 @@ package ru.prolib.aquila.quik.assembler;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Calendar;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -248,7 +249,7 @@ public class AssemblerL2 {
 		c.set(Calendar.MINUTE, part % 100);
 		c.set(Calendar.HOUR_OF_DAY, part / 100);
 		Instant instant = Instant.ofEpochMilli(c.getTimeInMillis());
-		return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
 	}
 
 	/**
