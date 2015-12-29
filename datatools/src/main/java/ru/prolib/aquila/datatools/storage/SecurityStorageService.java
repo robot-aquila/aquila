@@ -1,6 +1,6 @@
 package ru.prolib.aquila.datatools.storage;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
 
@@ -30,6 +30,6 @@ public interface SecurityStorageService {
 	 * @param security - security to store attributes
 	 * @param time - timestamp of the snapshot
 	 */
-	public void snapshotSessionAttributes(Security security, DateTime time);
+	public void snapshotSessionAttributes(Security security, LocalDateTime time);
 
 }

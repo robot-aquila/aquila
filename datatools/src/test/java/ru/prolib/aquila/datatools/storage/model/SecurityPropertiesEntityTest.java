@@ -2,9 +2,9 @@ package ru.prolib.aquila.datatools.storage.model;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.Currency;
 
-import org.joda.time.*;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -37,8 +37,8 @@ public class SecurityPropertiesEntityTest {
 
 	@Test
 	public void testSettersAndGetters() throws Exception {
-		DateTime starting = new DateTime(2010, 1, 1, 0, 0, 0, 0);
-		DateTime expiration = new DateTime(2015, 4, 26, 14, 30, 20, 0);
+		LocalDateTime starting = LocalDateTime.of(2010, 1, 1, 0, 0, 0, 0);
+		LocalDateTime expiration = LocalDateTime.of(2015, 4, 26, 14, 30, 20, 0);
 		Currency currency = Currency.getInstance("EUR");
 		entity.setId(215L);
 		entity.setSymbol(symbolEntity);

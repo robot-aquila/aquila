@@ -1,6 +1,6 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;

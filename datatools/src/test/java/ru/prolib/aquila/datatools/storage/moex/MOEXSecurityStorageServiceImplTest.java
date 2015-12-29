@@ -3,11 +3,11 @@ package ru.prolib.aquila.datatools.storage.moex;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class MOEXSecurityStorageServiceImplTest
 	private EditableTerminal terminal;
 	private Security security1, security2;
 	private MOEXSecurityStorageServiceImpl service;
-	private DateTime time1, time2;
+	private LocalDateTime time1, time2;
 	private SecuritySessionPropertiesEntity sessProps1, sessProps2;
 	private SymbolEntity symbolEntity1, symbolEntity2;
 	@Autowired
@@ -81,8 +81,8 @@ public class MOEXSecurityStorageServiceImplTest
 		service.setSecurityPropertiesRepository(securityPropertiesRepositoryMock);
 		service.setSecuritySessionPropertiesRepository(securitySessionPropertiesRepositoryMock);
 		// just helper objects
-		time1 = new DateTime(2013, 1, 15, 13, 34, 48);
-		time2 = new DateTime(2012, 1, 15, 18, 45, 0);
+		time1 = LocalDateTime.of(2013, 1, 15, 13, 34, 48);
+		time2 = LocalDateTime.of(2012, 1, 15, 18, 45, 0);
 		sessProps1 = new SecuritySessionPropertiesEntity();
 		sessProps2 = new SecuritySessionPropertiesEntity();
 		symbolEntity1 = new SymbolEntity();

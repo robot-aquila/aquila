@@ -2,9 +2,9 @@ package ru.prolib.aquila.datatools.storage.moex;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.Currency;
 
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -92,9 +92,9 @@ public class MOEXUtilsTest {
 		p1.setTickCost(2.75d);
 		p1.setTickSize(0.01d);
 		// unused in comparison
-		p1.setClearingTime(new DateTime(2013, 9, 11, 15, 34, 0));
+		p1.setClearingTime(LocalDateTime.of(2013, 9, 11, 15, 34, 0));
 		p1.setId(800L);
-		p1.setSnapshotTime(new DateTime(2015, 10, 6, 12, 35, 0));
+		p1.setSnapshotTime(LocalDateTime.of(2015, 10, 6, 12, 35, 0));
 		p1.setSymbol(new SymbolEntity());
 		
 		Variant<Double> initMargin = new Variant<Double>()
@@ -147,18 +147,18 @@ public class MOEXUtilsTest {
 	
 	@Test
 	public void testGetClearingTime() throws Exception {
-		DateTime initial = new DateTime(2014, 10, 1, 10, 15, 0);
-		DateTime expected = new DateTime(2014, 10, 1, 18, 45, 0);
+		LocalDateTime initial = LocalDateTime.of(2014, 10, 1, 10, 15, 0);
+		LocalDateTime expected = LocalDateTime.of(2014, 10, 1, 18, 45, 0);
 		assertEquals(expected, moexUtils.getClearingTime(symbol1, initial));
 		assertEquals(expected, moexUtils.getClearingTime(symbol2, initial));
 		assertEquals(expected, moexUtils.getClearingTime(symbol3, initial));
 		
-		initial = new DateTime(2009, 11, 15, 19, 10, 0);
-		expected = new DateTime(2009, 11, 15, 23, 50, 0);
+		initial = LocalDateTime.of(2009, 11, 15, 19, 10, 0);
+		expected = LocalDateTime.of(2009, 11, 15, 23, 50, 0);
 		assertEquals(expected, moexUtils.getClearingTime(symbol1, initial));
 		assertEquals(expected, moexUtils.getClearingTime(symbol2, initial));
 		
-		expected = new DateTime(2009, 11, 16, 18, 45, 0);
+		expected = LocalDateTime.of(2009, 11, 16, 18, 45, 0);
 		assertEquals(expected, moexUtils.getClearingTime(symbol3, initial));
 	}
 

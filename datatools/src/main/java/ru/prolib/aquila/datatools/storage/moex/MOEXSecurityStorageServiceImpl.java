@@ -1,11 +1,11 @@
 package ru.prolib.aquila.datatools.storage.moex;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 
 	@Override
 	@Transactional
-	public void snapshotSessionAttributes(Security security, DateTime time) {
+	public void snapshotSessionAttributes(Security security, LocalDateTime time) {
 		makeSnapshot(security, time, true);
 	}
 
@@ -88,7 +88,7 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 		makeSnapshot(security, security.getTerminal().getCurrentTime(), false);
 	}
 	
-	private void makeSnapshot(Security security, DateTime time, boolean force) {
+	private void makeSnapshot(Security security, LocalDateTime time, boolean force) {
 		lock.lock();
 		try {
 			Symbol symbol = security.getSymbol();

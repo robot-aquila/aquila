@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
@@ -20,8 +22,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -191,7 +191,7 @@ public class IOHelperTest {
 				+ File.separator + "2015" + File.separator + "10"
 				+ File.separator + "Si%2D6%2E15-SPB-USD-F-20151013.xx");
 		
-		File actual = helper.getFile(symbol, new LocalDate(2015, 10, 13), ".xx");
+		File actual = helper.getFile(symbol, LocalDate.of(2015, 10, 13), ".xx");
 		
 		assertNotNull(actual);
 		assertEquals(expected, actual);
@@ -211,7 +211,7 @@ public class IOHelperTest {
 	public void testGetLeve1Dir() {
 		File expected = new File(root, "Si%2D6%2E15-SPB-USD-F" + File.separator + "2015");
 		
-		File actual = helper.getLevel1Dir(symbol, new LocalDate(2015, 10, 13));
+		File actual = helper.getLevel1Dir(symbol, LocalDate.of(2015, 10, 13));
 		
 		assertNotNull(actual);
 		assertEquals(expected, actual);
@@ -222,7 +222,7 @@ public class IOHelperTest {
 		File expected = new File(root, "Si%2D6%2E15-SPB-USD-F" +
 			File.separator + "2015" + File.separator + "10");
 		
-		File actual = helper.getLevel2Dir(symbol, new LocalDate(2015, 10, 13));
+		File actual = helper.getLevel2Dir(symbol, LocalDate.of(2015, 10, 13));
 		
 		assertNotNull(actual);
 		assertEquals(expected, actual);
@@ -257,7 +257,7 @@ public class IOHelperTest {
 		
 		assertNotNull(writer);
 		writer.writeHeader();
-		writer.write(new Tick(new DateTime(2014, 1, 1, 20, 30, 55, 30), 2d, 5));
+		writer.write(new Tick(LocalDateTime.of(2014, 1, 1, 20, 30, 55, 30000000), 2d, 5));
 		writer.close();
 		List<String> expected = new Vector<String>();
 		expected.add("<TIME>,<LAST>,<VOL>,<MILLISECONDS>");
@@ -283,12 +283,12 @@ public class IOHelperTest {
 	
 	@Test
 	public void testCreateCsvTickReader() throws Exception {
-		LocalDate date = new LocalDate(2015, 7, 1);
+		LocalDate date = LocalDate.of(2015, 7, 1);
 		CsvTickReader reader = helper.createCsvTickReader(createTestInput(), date);
 		assertNotNull(reader);
 		reader.readHeader();
 		reader.next();
-		Tick expected = new Tick(new DateTime(2015, 7, 1, 10, 0, 0, 957), 100.02, 105);
+		Tick expected = new Tick(LocalDateTime.of(2015, 7, 1, 10, 0, 0, 957000000), 100.02, 105);
 		assertEquals(expected, reader.item());
 	}
 	
@@ -328,11 +328,11 @@ public class IOHelperTest {
 		FileUtils.touch(new File(dir, prefix + "-bad.csv"));
 		
 		List<LocalDate> expected = new Vector<LocalDate>();
-		expected.add(new LocalDate(2010, 1, 1));
-		expected.add(new LocalDate(2010, 1, 2));
-		expected.add(new LocalDate(2010, 1, 3));
-		expected.add(new LocalDate(2010, 5, 1));
-		expected.add(new LocalDate(2011, 1, 1));
+		expected.add(LocalDate.of(2010, 1, 1));
+		expected.add(LocalDate.of(2010, 1, 2));
+		expected.add(LocalDate.of(2010, 1, 3));
+		expected.add(LocalDate.of(2010, 5, 1));
+		expected.add(LocalDate.of(2011, 1, 1));
 		
 		List<LocalDate> actual = helper.getAvailableDataSegments(symbol);
 		

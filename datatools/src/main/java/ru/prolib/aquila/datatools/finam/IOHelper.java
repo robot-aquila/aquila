@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -21,9 +23,6 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +182,7 @@ public class IOHelper {
 	 */
 	public File getLevel2Dir(Symbol symbol, LocalDate date) {
 		File file = getLevel1Dir(symbol, date);
-		file = new File(file, String.format("%02d", date.getMonthOfYear()));
+		file = new File(file, String.format("%02d", date.getMonth().getValue()));
 		return file;
 	}
 	
@@ -247,7 +246,7 @@ public class IOHelper {
 			throws IOException
 	{
 		List<LocalDate> result = new Vector<LocalDate>();
-		DateTimeFormatter df = DateTimeFormat.forPattern("yyyyMMdd");
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
 		String prefix = idUtils.getSafeId(symbol);
 		int dateStart = prefix.length() + 1, dateLength = 8;
 		Iterator<File> it = FileUtils.iterateFiles(getRootDir(symbol), null, true);
@@ -288,7 +287,7 @@ public class IOHelper {
 				continue;
 			}
 			try {
-				LocalDate date = df.parseLocalDate(datestr);
+				LocalDate date = LocalDate.parse(datestr, df);
 				if ( ! result.contains(date) ) {
 					result.add(date);
 				}

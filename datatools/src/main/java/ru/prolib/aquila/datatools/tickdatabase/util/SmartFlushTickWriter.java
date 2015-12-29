@@ -1,8 +1,9 @@
 package ru.prolib.aquila.datatools.tickdatabase.util;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	private final TickWriter writer;
 	private final String streamId;
 	private final SmartFlushSetup setup;
-	private DateTime lastTime;
+	private LocalDateTime lastTime;
 	private boolean hasUpdate;
 	
 	/**
@@ -99,7 +100,7 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	 * <p> 
 	 * @return the time of last flush
 	 */
-	public synchronized DateTime getLastFlushTime() {
+	public synchronized LocalDateTime getLastFlushTime() {
 		return lastTime;
 	}
 	
@@ -108,7 +109,7 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 	 * <p>
 	 * @param time - the time to set
 	 */
-	protected synchronized void setLastFlushTime(DateTime time) {
+	protected synchronized void setLastFlushTime(LocalDateTime time) {
 		this.lastTime = time;
 	}
 	
@@ -159,8 +160,8 @@ public class SmartFlushTickWriter implements TickWriter, Runnable {
 		if ( ! hasUpdate ) {
 			return;
 		}
-		DateTime time = scheduler.getCurrentTime();
-		long diff = time.getMillis() - lastTime.getMillis();
+		LocalDateTime time = scheduler.getCurrentTime();
+		long diff = Math.abs(ChronoUnit.MILLIS.between(time, lastTime));
 		if ( diff > setup.getFlushPeriod() ) {
 			try {
 				writer.flush();

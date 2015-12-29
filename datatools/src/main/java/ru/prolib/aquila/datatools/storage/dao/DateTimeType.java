@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
 import org.hibernate.HibernateException;
 import org.hibernate.type.TimestampType;
 import org.hibernate.usertype.UserType;
-import org.joda.time.DateTime;
 
 /**
  * Joda DateTime type adaptor for Hibernate.
@@ -65,17 +65,17 @@ public class DateTimeType implements UserType {
 		}
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(time);
-		DateTime jodaTime = time == null ? null :
-			new DateTime(cal.get(Calendar.YEAR),
+		LocalDateTime javaTime = time == null ? null :
+			LocalDateTime.of(cal.get(Calendar.YEAR),
 				cal.get(Calendar.MONTH) + 1, // Jan = 0
 				cal.get(Calendar.DAY_OF_MONTH),
 				cal.get(Calendar.HOUR_OF_DAY),
 				cal.get(Calendar.MINUTE),
 				cal.get(Calendar.SECOND),
-				cal.get(Calendar.MILLISECOND));
+				cal.get(Calendar.MILLISECOND) * 1000000);
 		//System.err.println(">>> INFO: java Date is " + time);
 		//System.err.println(">>> INFO: joda DateTime is " + jodaTime);
-		return jodaTime;
+		return javaTime;
 
 	}
 
@@ -88,15 +88,15 @@ public class DateTimeType implements UserType {
 			TimestampType.INSTANCE.nullSafeSet(st, null, index);
 			return;
 		}
-		DateTime jodaTime = (DateTime) value;
+		LocalDateTime javaTime = (LocalDateTime) value;
 		Calendar cal = Calendar.getInstance();
-		cal.set(jodaTime.getYear(),
-				jodaTime.getMonthOfYear() - 1,
-				jodaTime.getDayOfMonth(),
-				jodaTime.getHourOfDay(),
-				jodaTime.getMinuteOfHour(),
-				jodaTime.getSecondOfMinute());
-		cal.set(Calendar.MILLISECOND, jodaTime.getMillisOfSecond());
+		cal.set(javaTime.getYear(),
+				javaTime.getMonth().getValue() - 1,
+				javaTime.getDayOfMonth(),
+				javaTime.getHour(),
+				javaTime.getMinute(),
+				javaTime.getSecond());
+		cal.set(Calendar.MILLISECOND, javaTime.getNano() / 1000000);
 		Date time = cal.getTime();
 		//System.err.println(">>> INFO: java Date is " + time);
 		//System.err.println(">>> INFO: joda DateTime is " + jodaTime);
@@ -112,7 +112,7 @@ public class DateTimeType implements UserType {
 
 	@Override
 	public Class<?> returnedClass() {
-		return DateTime.class;
+		return LocalDateTime.class;
 	}
 
 	@Override

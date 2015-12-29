@@ -3,11 +3,11 @@ package ru.prolib.aquila.datatools.finam;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 import com.csvreader.CsvReader;
 
@@ -28,7 +28,7 @@ public class CsvTickReader implements Aqiterator<Tick> {
 	private static final DateTimeFormatter timeFormat;
 	
 	static {
-		timeFormat = DateTimeFormat.forPattern("HHmmss");
+		timeFormat = DateTimeFormatter.ofPattern("HHmmss");
 	}
 	
 	private final CsvReader csvReader;
@@ -99,9 +99,9 @@ public class CsvTickReader implements Aqiterator<Tick> {
 				close();
 				return false;
 			}
-			DateTime dt = date.toDateTime(timeFormat.parseLocalTime(csvReader.get(TIME)));
+			LocalDateTime dt = date.atTime(LocalTime.parse(csvReader.get(TIME), timeFormat));
 			if ( hasMilliseconds ) {
-				dt = dt.plus(Long.parseLong(csvReader.get(MILLISECONDS)));
+				dt = dt.plus(Long.parseLong(csvReader.get(MILLISECONDS)), ChronoUnit.MILLIS);
 			}
 			curr = new Tick(dt, Double.parseDouble(csvReader.get(LAST)),
 					Double.parseDouble(csvReader.get(VOL)));

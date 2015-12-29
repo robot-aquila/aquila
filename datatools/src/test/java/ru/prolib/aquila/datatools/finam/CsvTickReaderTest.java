@@ -6,10 +6,10 @@ import static org.easymock.EasyMock.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.easymock.IMocksControl;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.junit.*;
 
 import ru.prolib.aquila.core.data.DataException;
@@ -27,7 +27,7 @@ public class CsvTickReaderTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		csvReaderMock = control.createMock(CsvReader.class);
-		date = new LocalDate(1998, 9, 1);
+		date = LocalDate.of(1998, 9, 1);
 		reader = new CsvTickReader(csvReaderMock, date);
 	}
 	
@@ -154,11 +154,11 @@ public class CsvTickReaderTest {
 				+ "100002,100.96,238\n");
 		
 		assertTrue(reader.next());
-		Tick exp = new Tick(date.toDateTime(new LocalTime(10, 0, 0)), 100.02, 105); 
+		Tick exp = new Tick(date.atTime(LocalTime.of(10, 0, 0)), 100.02, 105); 
 		assertEquals(exp, reader.item());
 		
 		assertTrue(reader.next());
-		exp = new Tick(date.toDateTime(new LocalTime(10, 0, 1)), 100.18, 102); 
+		exp = new Tick(date.atTime(LocalTime.of(10, 0, 1)), 100.18, 102); 
 		assertEquals(exp, reader.item());
 	}
 
@@ -170,11 +170,11 @@ public class CsvTickReaderTest {
 				+ "100002,100.96,238,4\n");
 		
 		assertTrue(reader.next());
-		Tick exp = new Tick(date.toDateTime(new LocalTime(10, 0, 0, 999)), 100.02, 105); 
+		Tick exp = new Tick(date.atTime(LocalTime.of(10, 0, 0, 999000000)), 100.02, 105); 
 		assertEquals(exp, reader.item());
 		
 		assertTrue(reader.next());
-		exp = new Tick(date.toDateTime(new LocalTime(10, 0, 1,  21)), 100.18, 102); 
+		exp = new Tick(date.atTime(LocalTime.of(10, 0, 1,  21000000)), 100.18, 102); 
 		assertEquals(exp, reader.item());
 	}
 	
@@ -235,9 +235,9 @@ public class CsvTickReaderTest {
 		reader = createTestReader(data);
 		
 		Tick expected[] = {
-			new Tick(date.toDateTime(new LocalTime(10, 0, 0, 957)), 100.02, 105),
-			new Tick(date.toDateTime(new LocalTime(10, 0, 1,  13)), 100.18, 102),
-			new Tick(date.toDateTime(new LocalTime(10, 0, 2, 512)), 100.96, 238),
+			new Tick(date.atTime(LocalTime.of(10, 0, 0, 957000000)), 100.02, 105),
+			new Tick(date.atTime(LocalTime.of(10, 0, 1,  13000000)), 100.18, 102),
+			new Tick(date.atTime(LocalTime.of(10, 0, 2, 512000000)), 100.96, 238),
 		};
 		for ( Tick e : expected ) {
 			assertTrue(reader.next());
@@ -256,10 +256,10 @@ public class CsvTickReaderTest {
 		reader = createTestReader(data);
 		
 		Tick expected[] = {
-			new Tick(date.toDateTime(new LocalTime(10, 0, 0)), 100.02, 105),
-			new Tick(date.toDateTime(new LocalTime(10, 0, 1)), 100.18, 102),
-			new Tick(date.toDateTime(new LocalTime(10, 0, 2)), 100.96, 238),
-			new Tick(date.toDateTime(new LocalTime(10, 0, 5)), 100.42, 500),
+			new Tick(date.atTime(LocalTime.of(10, 0, 0)), 100.02, 105),
+			new Tick(date.atTime(LocalTime.of(10, 0, 1)), 100.18, 102),
+			new Tick(date.atTime(LocalTime.of(10, 0, 2)), 100.96, 238),
+			new Tick(date.atTime(LocalTime.of(10, 0, 5)), 100.42, 500),
 		};
 		for ( Tick e : expected ) {
 			assertTrue(reader.next());

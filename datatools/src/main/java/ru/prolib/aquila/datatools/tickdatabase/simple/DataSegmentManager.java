@@ -1,9 +1,8 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
-
-import org.joda.time.LocalDate;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Aqiterator;

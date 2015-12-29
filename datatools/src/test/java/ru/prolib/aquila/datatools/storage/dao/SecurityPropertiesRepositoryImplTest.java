@@ -2,10 +2,10 @@ package ru.prolib.aquila.datatools.storage.dao;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.hibernate.*;
-import org.joda.time.*;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,7 +40,7 @@ public class SecurityPropertiesRepositoryImplTest
 		this.liquibaseHelper = liquibaseHelper;
 	}
 	
-	private void assertTime(DateTime expected, DateTime actual)
+	private void assertTime(LocalDateTime expected, LocalDateTime actual)
 			throws Exception
 	{
 		assertEquals(expected, actual);
@@ -64,8 +64,8 @@ public class SecurityPropertiesRepositoryImplTest
 		assertNotNull(symbol);
 		assertEquals(new Long(1001L), symbol.getId());
 		assertEquals("RTS", entity.getDisplayName());
-		assertTime(new DateTime(2010, 1, 1, 0, 0, 0, 15), entity.getStartingTime());
-		assertTime(new DateTime(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
+		assertTime(LocalDateTime.of(2010, 1, 1, 0, 0, 0, 15000000), entity.getStartingTime());
+		assertTime(LocalDateTime.of(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
 		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
 	
@@ -91,8 +91,8 @@ public class SecurityPropertiesRepositoryImplTest
 		assertEquals(new Long(16), entity.getId());
 		assertEquals(new Long(1002), entity.getSymbol().getId());
 		assertEquals("Si", entity.getDisplayName());
-		assertTime(new DateTime(2012, 12, 31, 23, 59, 59, 999), entity.getStartingTime());
-		assertTime(new DateTime(2015, 6, 16, 0, 0, 0), entity.getExpirationTime());
+		assertTime(LocalDateTime.of(2012, 12, 31, 23, 59, 59, 999000000), entity.getStartingTime());
+		assertTime(LocalDateTime.of(2015, 6, 16, 0, 0, 0), entity.getExpirationTime());
 		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
 	
@@ -110,8 +110,8 @@ public class SecurityPropertiesRepositoryImplTest
 		assertEquals(new Long(15), entity.getId());
 		assertEquals(new Long(1001), entity.getSymbol().getId());
 		assertEquals("RTS", entity.getDisplayName());
-		assertTime(new DateTime(2010, 1, 1, 0, 0, 0, 15), entity.getStartingTime());
-		assertTime(new DateTime(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
+		assertTime(LocalDateTime.of(2010, 1, 1, 0, 0, 0, 15000000), entity.getStartingTime());
+		assertTime(LocalDateTime.of(2015, 4, 15, 0, 0, 0), entity.getExpirationTime());
 		assertEquals(Currency.getInstance("RUB"), entity.getCurrencyOfCost());
 	}
 	
@@ -133,8 +133,8 @@ public class SecurityPropertiesRepositoryImplTest
 		entity = repository.createEntity();
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zulu24");
-		entity.setStartingTime(new DateTime(2010, 1, 1, 0, 0, 0, 0));
-		entity.setExpirationTime(new DateTime(2015, 04, 15, 13, 45, 10, 540));
+		entity.setStartingTime(LocalDateTime.of(2010, 1, 1, 0, 0, 0, 0));
+		entity.setExpirationTime(LocalDateTime.of(2015, 04, 15, 13, 45, 10, 540000000));
 		entity.setSymbol(symbols.getById(1003L));
 		
 		repository.save(entity);
@@ -153,8 +153,8 @@ public class SecurityPropertiesRepositoryImplTest
 		entity = repository.getById(16L);
 		entity.setCurrencyOfCost(Currency.getInstance("EUR"));
 		entity.setDisplayName("Zuko");
-		entity.setStartingTime(new DateTime(1999, 6, 1, 0, 0, 0, 1));
-		entity.setExpirationTime(new DateTime(2000, 1, 1, 23, 59, 59, 999));
+		entity.setStartingTime(LocalDateTime.of(1999, 6, 1, 0, 0, 0, 1000000));
+		entity.setExpirationTime(LocalDateTime.of(2000, 1, 1, 23, 59, 59, 999000000));
 		entity.setSymbol(symbols.getById(1003L));
 		
 		repository.save(entity);

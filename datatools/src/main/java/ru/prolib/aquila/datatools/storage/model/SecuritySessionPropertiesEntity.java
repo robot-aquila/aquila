@@ -1,6 +1,6 @@
 package ru.prolib.aquila.datatools.storage.model;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.storage.SecuritySessionProperties;
@@ -11,7 +11,7 @@ public class SecuritySessionPropertiesEntity implements SecuritySessionPropertie
 	private Integer scale, lotSize;
 	private Double tickCost,initialMarginCost, initialPrice;
 	private Double lowerPriceLimit, upperPriceLimit, tickSize;
-	private DateTime snapshotTime, clearingTime;
+	private LocalDateTime snapshotTime, clearingTime;
 	
 	public SecuritySessionPropertiesEntity() {
 		super();
@@ -113,20 +113,20 @@ public class SecuritySessionPropertiesEntity implements SecuritySessionPropertie
 	}
 
 	@Override
-	public DateTime getSnapshotTime() {
+	public LocalDateTime getSnapshotTime() {
 		return snapshotTime;
 	}
 	
-	public void setSnapshotTime(DateTime time) {
+	public void setSnapshotTime(LocalDateTime time) {
 		this.snapshotTime = time;
 	}
 
 	@Override
-	public DateTime getClearingTime() {
+	public LocalDateTime getClearingTime() {
 		return clearingTime;
 	}
 	
-	public void setClearingTime(DateTime time) {
+	public void setClearingTime(LocalDateTime time) {
 		this.clearingTime = time;
 	}
 

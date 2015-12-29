@@ -1,9 +1,10 @@
 package ru.prolib.aquila.datatools.storage.moex;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -51,21 +52,21 @@ public class MOEXUtils {
 		p.setDisplayName(security.getDisplayName());
 	}
 	
-	public DateTime getClearingTime(Symbol symbol, DateTime time) {
+	public LocalDateTime getClearingTime(Symbol symbol, LocalDateTime time) {
 		LocalTime dummyTime = time.toLocalTime(),
-				clearing1 = new LocalTime(18, 45, 0),
-				clearing2 = new LocalTime(23, 50, 0);
+				clearing1 = LocalTime.of(18, 45, 0),
+				clearing2 = LocalTime.of(23, 50, 0);
 		LocalDate dummyDate = time.toLocalDate();
 		if ( dummyTime.compareTo(clearing1) < 0 ) {
-			return dummyDate.toDateTime(clearing1);
+			return dummyDate.atTime(clearing1);
 		}
 		if ( symbol.getType() == SymbolType.FUTURE
 		  || symbol.getType() == SymbolType.OPTION )
 		{
-			return dummyDate.toDateTime(clearing2);
+			return dummyDate.atTime(clearing2);
 		} else {
 			// This may work not good enough
-			return dummyDate.plusDays(1).toDateTime(clearing1);
+			return dummyDate.plusDays(1).atTime(clearing1);
 		}
 	}
 

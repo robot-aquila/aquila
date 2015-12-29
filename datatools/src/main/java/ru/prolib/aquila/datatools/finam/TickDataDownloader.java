@@ -1,8 +1,8 @@
 package ru.prolib.aquila.datatools.finam;
 
 import java.io.File;
+import java.time.LocalDate;
 
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class TickDataDownloader {
 		this.driver = driver;
 		market = "МосБиржа фьючерсы";
 		quote = "RTS";
-		date = new LocalDate().minusDays(1);
+		date = LocalDate.now().minusDays(1);
 	}
 	
 	public TickDataDownloader() {

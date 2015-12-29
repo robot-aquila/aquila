@@ -1,8 +1,9 @@
 package ru.prolib.aquila.datatools.tickdatabase;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 	
 	private Terminal terminal;
 	private TickDatabase database;
-	private DateTime marker;
+	private LocalDateTime marker;
 
 	@Override
 	public void start() throws StarterException {
@@ -42,17 +43,17 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 		terminal.schedule(this, getTimeToSendMarker(marker));
 	}
 	
-	private DateTime getTimeToSendMarker(DateTime x) {
-		DateTime dummy = x.plusMinutes(5);
+	private LocalDateTime getTimeToSendMarker(LocalDateTime x) {
+		LocalDateTime dummy = x.plusMinutes(5);
 		logger.debug("Time to send marker: {}", dummy);
 		return dummy;
 	}
 	
-	private DateTime getMarkerTime() {
-		DateTime dummy = terminal.getCurrentTime()
-				.withTimeAtStartOfDay()
+	private LocalDateTime getMarkerTime() {
+		LocalDateTime dummy = terminal.getCurrentTime().toLocalDate()
+				.atStartOfDay()
 				.plusDays(1)
-				.minus(1);
+				.minus(1, ChronoUnit.MILLIS);
 		logger.debug("Marker time: {}", dummy);
 		return dummy;
 	}

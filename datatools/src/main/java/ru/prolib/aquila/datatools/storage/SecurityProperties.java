@@ -1,8 +1,7 @@
 package ru.prolib.aquila.datatools.storage;
 
+import java.time.LocalDateTime;
 import java.util.Currency;
-
-import org.joda.time.*;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
@@ -31,14 +30,14 @@ public interface SecurityProperties {
 	 * @return expiration time or null if the security doesn't expire or
 	 * expiration time is unknown.
 	 */
-	public DateTime getExpirationTime();
+	public LocalDateTime getExpirationTime();
 	
 	/**
 	 * Get starting time of the security.
 	 * <p>
 	 * @return
 	 */
-	public DateTime getStartingTime();
+	public LocalDateTime getStartingTime();
 
 	/**
 	 * Get the currency of cost values of {@link SecuritySessionProperties}.

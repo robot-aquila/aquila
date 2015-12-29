@@ -1,9 +1,9 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +21,11 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 	
 	private final Symbol symbol;
 	private final DataSegmentManager segmentManager;
-	private DateTime currentTime;
+	private LocalDateTime currentTime;
 	private Aqiterator<Tick> currentSegment;
 	
 	public SeamlessTickReader(Symbol symbol,
-			DateTime startingTime, DataSegmentManager segmentManager)
+			LocalDateTime startingTime, DataSegmentManager segmentManager)
 	{
 		super();
 		this.symbol = symbol;
@@ -43,7 +43,7 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 	 * <p>
 	 * @return time
 	 */
-	public DateTime getCurrentTime() {
+	public LocalDateTime getCurrentTime() {
 		return currentTime;
 	}
 	
@@ -83,13 +83,13 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 				// 1) Segment just opened and empty;
 				// 2) End of segment was reached;
 				// Move current time pointer to the next date and try open next.
-				currentTime = currentTime.withMillisOfDay(0).plusDays(1);
+				currentTime = currentTime.toLocalDate().plusDays(1).atStartOfDay();
 				closeCurrentSegment();
 				continue;
 			}
 			// We may have some ticks to skip if they are before current time
 			do {
-				DateTime nextTime = currentSegment.item().getTime(); 
+				LocalDateTime nextTime = currentSegment.item().getTime(); 
 				if ( ! nextTime.isBefore(currentTime) ) {
 					currentTime = nextTime;
 					return true;
@@ -112,7 +112,7 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 				if ( date == null ) {
 					return false;
 				}
-				currentTime = date.toDateTimeAtStartOfDay();
+				currentTime = date.atStartOfDay();
 			}
 			currentSegment = segmentManager.openReader(symbol, date);
 			return true;

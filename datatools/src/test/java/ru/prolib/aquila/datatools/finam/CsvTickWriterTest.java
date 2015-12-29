@@ -9,13 +9,13 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.io.IOUtils;
 import org.easymock.IMocksControl;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class CsvTickWriterTest {
 	private static final DateTimeFormatter df;
 	
 	static {
-		df = DateTimeFormat.forPattern("yyy-MM-dd HH:mm:ss.SSS");
+		df = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss.SSS");
 	}
 	
 	private IMocksControl control;
@@ -43,7 +43,7 @@ public class CsvTickWriterTest {
 	}
 	
 	private Tick createTick(String time, double price, long qty) {
-		return new Tick(df.parseDateTime(time), price, new Double(qty));
+		return new Tick(LocalDateTime.parse(time, df), price, new Double(qty));
 	}
 	
 	@Test

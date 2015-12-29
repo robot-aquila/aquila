@@ -1,6 +1,6 @@
 package ru.prolib.aquila.datatools.storage;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
@@ -82,13 +82,13 @@ public interface SecuritySessionProperties {
 	 * <p>
 	 * @return the starting time of the property values.
 	 */
-	public DateTime getSnapshotTime();
+	public LocalDateTime getSnapshotTime();
 	
 	/**
 	 * Get clearing time.
 	 * <p>
 	 * @return the time of the next clearing.
 	 */
-	public DateTime getClearingTime();
+	public LocalDateTime getClearingTime();
 
 }

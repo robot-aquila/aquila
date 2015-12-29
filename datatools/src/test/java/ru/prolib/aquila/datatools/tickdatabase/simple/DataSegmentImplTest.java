@@ -4,11 +4,11 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,10 +33,10 @@ public class DataSegmentImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		date1 = new LocalDate(2015, 5, 12);
+		date1 = LocalDate.of(2015, 5, 12);
 		writer = control.createMock(TickWriter.class);
 		segment = new DataSegmentImpl(symbol, date1, writer,
-				new LocalTime(15, 0, 0), 5);
+				LocalTime.of(15, 0, 0), 5);
 	}
 	
 	@Test
@@ -45,7 +45,7 @@ public class DataSegmentImplTest {
 		assertEquals(symbol, segment.getSymbol());
 		assertEquals(date1, segment.getDate());
 		assertEquals(writer, segment.getWriter());
-		assertEquals(new LocalTime(0, 0, 0), segment.getTimeOfLastTick());
+		assertEquals(LocalTime.of(0, 0, 0), segment.getTimeOfLastTick());
 		assertEquals(0, segment.getNumberOfLastTick());
 	}
 	
@@ -54,7 +54,7 @@ public class DataSegmentImplTest {
 		assertEquals(symbol, segment.getSymbol());
 		assertEquals(date1, segment.getDate());
 		assertEquals(writer, segment.getWriter());
-		assertEquals(new LocalTime(15, 0, 0), segment.getTimeOfLastTick());
+		assertEquals(LocalTime.of(15, 0, 0), segment.getTimeOfLastTick());
 		assertEquals(5, segment.getNumberOfLastTick());
 	}
 	
@@ -70,17 +70,17 @@ public class DataSegmentImplTest {
 	
 	@Test
 	public void testWrite_Ok() throws Exception {
-		tick1 = new Tick(new DateTime(2015, 5, 12, 15, 0, 0), 129.0d, 10d);
-		tick2 = new Tick(new DateTime(2015, 5, 12, 15, 2, 5), 122.0d, 20d);
+		tick1 = new Tick(LocalDateTime.of(2015, 5, 12, 15, 0, 0), 129.0d, 10d);
+		tick2 = new Tick(LocalDateTime.of(2015, 5, 12, 15, 2, 5), 122.0d, 20d);
 		writer.write(tick1);
 		writer.write(tick2);
 		control.replay();
 		
 		segment.write(tick1);
-		assertEquals(new LocalTime(15, 0, 0), segment.getTimeOfLastTick());
+		assertEquals(LocalTime.of(15, 0, 0), segment.getTimeOfLastTick());
 		assertEquals(6, segment.getNumberOfLastTick());
 		segment.write(tick2);
-		assertEquals(new LocalTime(15, 2, 5), segment.getTimeOfLastTick());
+		assertEquals(LocalTime.of(15, 2, 5), segment.getTimeOfLastTick());
 		assertEquals(7, segment.getNumberOfLastTick());
 		
 		control.verify();
@@ -88,13 +88,13 @@ public class DataSegmentImplTest {
 	
 	@Test (expected=IOException.class)
 	public void testWrite_ThrowsIfDateMismatch() throws Exception {
-		tick1 = new Tick(new DateTime(2015, 5, 11, 23, 59, 59, 999), 1d, 1d); 
+		tick1 = new Tick(LocalDateTime.of(2015, 5, 11, 23, 59, 59, 999), 1d, 1d); 
 		segment.write(tick1);
 	}
 	
 	@Test (expected=IOException.class)
 	public void testWrite_ThrowsIfTimeLessThanTheLastTime() throws Exception {
-		tick1 = new Tick(new DateTime(2015, 5, 12, 14, 59, 59, 999), 1d, 1d);
+		tick1 = new Tick(LocalDateTime.of(2015, 5, 12, 14, 59, 59, 999), 1d, 1d);
 		segment.write(tick1);
 	}
 	

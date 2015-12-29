@@ -2,11 +2,11 @@ package ru.prolib.aquila.datatools.storage.dao;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.SessionFactory;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +63,8 @@ public class SecuritySessionPropertiesRepositoryImplTest
 		assertEquals(110840.0, entity.getUpperPriceLimit(), 0.01);
 		assertEquals(new Integer(1), entity.getLotSize());
 		assertEquals(10.0, entity.getTickSize(), 0.1);
-		assertEquals(new DateTime(2015, 4, 30, 10, 0, 0), entity.getSnapshotTime());
-		assertEquals(new DateTime(2015, 4, 30, 18, 45, 0), entity.getClearingTime());
+		assertEquals(LocalDateTime.of(2015, 4, 30, 10, 0, 0), entity.getSnapshotTime());
+		assertEquals(LocalDateTime.of(2015, 4, 30, 18, 45, 0), entity.getClearingTime());
 	}
 	
 	@Test (expected=ObjectNotFoundException.class)
@@ -96,8 +96,8 @@ public class SecuritySessionPropertiesRepositoryImplTest
 		entity.setUpperPriceLimit(130000.0);
 		entity.setLotSize(1);
 		entity.setTickSize(20.0);
-		entity.setSnapshotTime(new DateTime(1999, 12, 31, 23, 59, 59, 999));
-		entity.setClearingTime(new DateTime(2000, 1, 1, 0, 0, 0, 0));
+		entity.setSnapshotTime(LocalDateTime.of(1999, 12, 31, 23, 59, 59, 999000000));
+		entity.setClearingTime(LocalDateTime.of(2000, 1, 1, 0, 0, 0, 0));
 		
 		repository.save(entity);
 		sessionFactory.getCurrentSession().flush();
@@ -131,8 +131,8 @@ public class SecuritySessionPropertiesRepositoryImplTest
 		entity.setUpperPriceLimit(1500.0);
 		entity.setLotSize(5);
 		entity.setTickSize(0.1);
-		entity.setSnapshotTime(new DateTime(1998, 1, 1, 15, 30, 45, 150));
-		entity.setClearingTime(new DateTime(1999, 1, 1, 18, 45, 0, 0));
+		entity.setSnapshotTime(LocalDateTime.of(1998, 1, 1, 15, 30, 45, 150000000));
+		entity.setClearingTime(LocalDateTime.of(1999, 1, 1, 18, 45, 0, 0));
 		
 		repository.save(entity);
 		sessionFactory.getCurrentSession().flush();

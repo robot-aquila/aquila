@@ -15,7 +15,10 @@ import ru.prolib.aquila.probe.internal.SimulationController;
 
 /**
  * Terminal simulator.
+ * <p>
+ * Do not use this class.
  */
+@Deprecated
 public class PROBETerminal extends TerminalImpl
 	implements SimulationController
 {

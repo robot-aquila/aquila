@@ -3,14 +3,14 @@ package ru.prolib.aquila.datatools.tickdatabase.simple;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import org.easymock.IMocksControl;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,8 +26,8 @@ public class SimpleTickDatabaseTest {
 		symbol1 = new Symbol("SBRF", "EQBR", "RUR");
 		symbol2 = new Symbol("GAZP", "EQBR", "RUR");
 		symbol3 = new Symbol("LKOH", "EQBR", "RUR");
-		tick1 = new Tick(new DateTime(2015, 5, 12, 0, 0, 0, 0), 100d, 10);
-		tick2 = new Tick(new DateTime(2015, 5, 12, 9, 0, 0, 0), 105d, 15);
+		tick1 = new Tick(LocalDateTime.of(2015, 5, 12, 0, 0, 0, 0), 100d, 10);
+		tick2 = new Tick(LocalDateTime.of(2015, 5, 12, 9, 0, 0, 0), 105d, 15);
 	}
 	
 	private IMocksControl control;
@@ -49,7 +49,7 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testCtor1() throws Exception {
-		LocalDate date = new LocalDate(2015, 5, 12);
+		LocalDate date = LocalDate.of(2015, 5, 12);
 		database = new SimpleTickDatabase(manager);
 		expect(manager.openSegment(symbol1, date)).andReturn(segment1);
 		expect(segment1.getDate()).andStubReturn(date);
@@ -65,7 +65,7 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testWrite_NewWriter() throws Exception {
-		LocalDate date = new LocalDate(2015, 5, 12);
+		LocalDate date = LocalDate.of(2015, 5, 12);
 		segments.put(symbol1, segment1);
 		segments.put(symbol3, segment3);
 		expect(manager.openSegment(symbol2, date)).andReturn(segment2);
@@ -80,7 +80,7 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testWrite_ExistingWriter() throws Exception {
-		LocalDate date = new LocalDate(2015, 5, 12);
+		LocalDate date = LocalDate.of(2015, 5, 12);
 		expect(segment1.getDate()).andStubReturn(date);
 		segments.put(symbol1, segment1);
 		segment1.write(tick1);
@@ -93,7 +93,7 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testGetTicksSD_IfDataNotAvailable() throws Exception {
-		DateTime time = new DateTime(2015, 7, 8, 0, 0, 0);
+		LocalDateTime time = LocalDateTime.of(2015, 7, 8, 0, 0, 0);
 		expect(manager.isDataAvailable(symbol1)).andReturn(false);
 		control.replay();
 		
@@ -107,7 +107,7 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testGetTicksSD_IfDataAvailable() throws Exception {
-		DateTime time = new DateTime(2015, 7, 8, 0, 0, 0);
+		LocalDateTime time = LocalDateTime.of(2015, 7, 8, 0, 0, 0);
 		expect(manager.isDataAvailable(symbol1)).andReturn(true);
 		control.replay();
 		
@@ -142,7 +142,7 @@ public class SimpleTickDatabaseTest {
 		segments.put(symbol1, segment1);
 		segments.put(symbol2, segment2);
 		segments.put(symbol3, segment3);
-		LocalDate base = new LocalDate(2015, 6, 1);
+		LocalDate base = LocalDate.of(2015, 6, 1);
 		expect(segment1.getDate()).andStubReturn(base);
 		expect(segment2.getDate()).andStubReturn(base.plusDays(1));
 		expect(segment3.getDate()).andStubReturn(base.minusDays(1));
@@ -150,7 +150,7 @@ public class SimpleTickDatabaseTest {
 		manager.closeSegment(segment3);
 		control.replay();
 		
-		database.sendMarker(new DateTime(2015, 6, 1, 0, 0, 0));
+		database.sendMarker(LocalDateTime.of(2015, 6, 1, 0, 0, 0));
 		
 		control.verify();
 		assertFalse(segments.containsKey(symbol1));
@@ -176,9 +176,9 @@ public class SimpleTickDatabaseTest {
 	@Test
 	public void testGetTicksSI_IfNoEnoughSegments() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
-		list.add(new LocalDate(1998, 6, 1));
-		list.add(new LocalDate(1998, 7, 1));
-		list.add(new LocalDate(1998, 8, 1));
+		list.add(LocalDate.of(1998, 6, 1));
+		list.add(LocalDate.of(1998, 7, 1));
+		list.add(LocalDate.of(1998, 8, 1));
 		expect(manager.getSegmentList(symbol1)).andReturn(list);
 		control.replay();
 		
@@ -186,7 +186,7 @@ public class SimpleTickDatabaseTest {
 				(SeamlessTickReader) database.getTicks(symbol1, 5);
 		
 		assertNotNull(it);
-		assertEquals(new DateTime(1998, 6, 1, 0, 0, 0), it.getCurrentTime());
+		assertEquals(LocalDateTime.of(1998, 6, 1, 0, 0, 0), it.getCurrentTime());
 		assertEquals(symbol1, it.getSymbol());
 		assertSame(manager, it.getDataSegmentManager());
 		control.verify();
@@ -195,14 +195,14 @@ public class SimpleTickDatabaseTest {
 	@Test
 	public void testGetTicksSI_OK() throws Exception {
 		List<LocalDate> list = new Vector<LocalDate>();
-		list.add(new LocalDate(1998, 1, 1));
-		list.add(new LocalDate(1998, 2, 1));
-		list.add(new LocalDate(1998, 3, 1));
-		list.add(new LocalDate(1998, 4, 1));
-		list.add(new LocalDate(1998, 5, 1));
-		list.add(new LocalDate(1998, 6, 1));
-		list.add(new LocalDate(1998, 7, 1));
-		list.add(new LocalDate(1998, 8, 1));
+		list.add(LocalDate.of(1998, 1, 1));
+		list.add(LocalDate.of(1998, 2, 1));
+		list.add(LocalDate.of(1998, 3, 1));
+		list.add(LocalDate.of(1998, 4, 1));
+		list.add(LocalDate.of(1998, 5, 1));
+		list.add(LocalDate.of(1998, 6, 1));
+		list.add(LocalDate.of(1998, 7, 1));
+		list.add(LocalDate.of(1998, 8, 1));
 		expect(manager.getSegmentList(symbol1)).andReturn(list);
 		control.replay();
 		
@@ -210,7 +210,7 @@ public class SimpleTickDatabaseTest {
 				(SeamlessTickReader) database.getTicks(symbol1, 5);
 		
 		assertNotNull(it);
-		assertEquals(new DateTime(1998, 4, 1, 0, 0, 0), it.getCurrentTime());
+		assertEquals(LocalDateTime.of(1998, 4, 1, 0, 0, 0), it.getCurrentTime());
 		assertEquals(symbol1, it.getSymbol());
 		assertSame(manager, it.getDataSegmentManager());
 		control.verify();

@@ -2,7 +2,8 @@ package ru.prolib.aquila.datatools.storage.model;
 
 import static org.junit.Assert.*;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,8 +54,8 @@ public class SecuritySessionPropertiesEntityTest {
 		entity.setUpperPriceLimit(110000d);
 		entity.setLotSize(1);
 		entity.setTickSize(10d);
-		entity.setSnapshotTime(new DateTime(2001, 1, 10, 20, 30, 0, 954));
-		entity.setClearingTime(new DateTime(2001, 1, 11, 18, 45, 0, 0));
+		entity.setSnapshotTime(LocalDateTime.of(2001, 1, 10, 20, 30, 0, 954));
+		entity.setClearingTime(LocalDateTime.of(2001, 1, 11, 18, 45, 0, 0));
 		
 		assertEquals(new Long(280), entity.getId());
 		assertSame(symbolEntity, entity.getSymbol());
@@ -66,8 +67,8 @@ public class SecuritySessionPropertiesEntityTest {
 		assertEquals(new Double(110000.0), entity.getUpperPriceLimit(), 0.1);
 		assertEquals(new Integer(1), entity.getLotSize());
 		assertEquals(new Double(10.0), entity.getTickSize(), 0.1);
-		assertEquals(new DateTime(2001, 1, 10, 20, 30, 0, 954), entity.getSnapshotTime());
-		assertEquals(new DateTime(2001, 1, 11, 18, 45, 0, 0), entity.getClearingTime());
+		assertEquals(LocalDateTime.of(2001, 1, 10, 20, 30, 0, 954), entity.getSnapshotTime());
+		assertEquals(LocalDateTime.of(2001, 1, 11, 18, 45, 0, 0), entity.getClearingTime());
 	}
 	
 	@Test

@@ -1,8 +1,7 @@
 package ru.prolib.aquila.datatools.storage.model;
 
+import java.time.LocalDateTime;
 import java.util.*;
-
-import org.joda.time.*;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.datatools.storage.SecurityProperties;
@@ -13,7 +12,7 @@ public class SecurityPropertiesEntity
 	private Long id;
 	private SymbolEntity symbol;
 	private String displayName;
-	private DateTime expirationTime, startingTime;
+	private LocalDateTime expirationTime, startingTime;
 	private Currency currencyOfCost;
 	
 	public SecurityPropertiesEntity() {
@@ -52,11 +51,11 @@ public class SecurityPropertiesEntity
 	}
 	
 	@Override
-	public DateTime getExpirationTime() {
+	public LocalDateTime getExpirationTime() {
 		return expirationTime;
 	}
 	
-	public void setExpirationTime(DateTime time) {
+	public void setExpirationTime(LocalDateTime time) {
 		this.expirationTime = time;
 	}
 	
@@ -70,11 +69,11 @@ public class SecurityPropertiesEntity
 	}
 
 	@Override
-	public DateTime getStartingTime() {
+	public LocalDateTime getStartingTime() {
 		return startingTime;
 	}
 	
-	public void setStartingTime(DateTime time) {
+	public void setStartingTime(LocalDateTime time) {
 		this.startingTime = time;
 	}
 

@@ -2,11 +2,11 @@ package ru.prolib.aquila.datatools.finam.downloader;
 
 import java.io.Closeable;
 import java.io.File;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
 import org.openqa.selenium.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +176,7 @@ public class WebForm implements Closeable {
 		selectOption(driver.findElement(By.className("ui-datepicker-year")),
 				date.getYear());
 		selectOption(driver.findElement(By.className("ui-datepicker-month")),
-				date.getMonthOfYear() - 1); // january is 0 for finam
+				date.getMonth().getValue());
 		selectLink(driver.findElement
 			(By.xpath("//table[@class='ui-datepicker-calendar']/tbody")),
 				date.getDayOfMonth());

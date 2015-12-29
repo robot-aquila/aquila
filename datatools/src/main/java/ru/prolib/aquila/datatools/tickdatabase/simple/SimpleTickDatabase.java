@@ -1,14 +1,14 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,9 @@ public class SimpleTickDatabase implements TickDatabase {
 	}
 
 	@Override
-	public Aqiterator<Tick> getTicks(Symbol symbol, DateTime startingTime) throws IOException {
+	public Aqiterator<Tick> getTicks(Symbol symbol, LocalDateTime startingTime)
+			throws IOException
+	{
 		return manager.isDataAvailable(symbol) ?
 				new SeamlessTickReader(symbol, startingTime, manager) :
 				new SimpleIterator<Tick>(new Vector<Tick>());
@@ -77,7 +79,7 @@ public class SimpleTickDatabase implements TickDatabase {
 	}
 
 	@Override
-	public void sendMarker(DateTime time) throws IOException {
+	public void sendMarker(LocalDateTime time) throws IOException {
 		LocalDate date = time.toLocalDate();
 		List<Symbol> keys = new LinkedList<Symbol>(segments.keySet());
 		for ( Symbol symbol : keys ) {
@@ -102,10 +104,10 @@ public class SimpleTickDatabase implements TickDatabase {
 			return new SimpleIterator<Tick>(new Vector<Tick>());
 		} else if ( size <= numLastSegments ) {
 			return new SeamlessTickReader(symbol,
-					list.get(0).toDateTimeAtStartOfDay(), manager);
+					list.get(0).atStartOfDay(), manager);
 		} else {
 			return new SeamlessTickReader(symbol,
-					list.get(size - numLastSegments).toDateTimeAtStartOfDay(),
+					list.get(size - numLastSegments).atStartOfDay(),
 					manager);
 		}
 	}

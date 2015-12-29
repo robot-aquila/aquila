@@ -3,9 +3,7 @@ package ru.prolib.aquila.datatools.finam;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
 
 import com.csvreader.CsvWriter;
 
@@ -24,7 +22,7 @@ public class CsvTickWriter implements TickWriter {
 	private static final DateTimeFormatter timeFormat;
 	
 	static {
-		timeFormat = DateTimeFormat.forPattern("HHmmss");
+		timeFormat = DateTimeFormatter.ofPattern("HHmmss");
 	}
 	
 	private final CsvWriter writer;
@@ -38,10 +36,10 @@ public class CsvTickWriter implements TickWriter {
 	public void write(Tick tick) throws IOException {
 		try {
 			String entries[] = {
-				timeFormat.print(tick.getTime()),
+				timeFormat.format(tick.getTime()),
 				formatPrice(tick.getValue()),
 				Long.toString(tick.getOptionalValueAsLong()),
-				Long.toString(tick.getTime().getMillisOfSecond())
+				Long.toString(tick.getTime().getNano() / 1000000)
 			};
 			writer.writeRecord(entries);
 		} catch ( IOException e ) {
