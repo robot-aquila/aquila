@@ -3,11 +3,13 @@ package ru.prolib.aquila.datatools.finam;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import com.csvreader.CsvWriter;
 
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 /**
@@ -36,9 +38,9 @@ public class CsvTickWriter implements TickWriter {
 	public void write(Tick tick) throws IOException {
 		try {
 			String entries[] = {
-				timeFormat.format(tick.getTime()),
-				formatPrice(tick.getValue()),
-				Long.toString(tick.getOptionalValueAsLong()),
+				timeFormat.format(LocalDateTime.ofInstant(tick.getTime(), ZoneOffset.UTC)),
+				formatPrice(tick.getPrice()),
+				Long.toString(tick.getSize()),
 				Long.toString(tick.getTime().getNano() / 1000000)
 			};
 			writer.writeRecord(entries);

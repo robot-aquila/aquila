@@ -11,9 +11,9 @@ import java.time.temporal.ChronoUnit;
 
 import com.csvreader.CsvReader;
 
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.DataException;
-import ru.prolib.aquila.core.data.Tick;
 
 /**
  * Tick data segment reader.
@@ -103,8 +103,8 @@ public class CsvTickReader implements Aqiterator<Tick> {
 			if ( hasMilliseconds ) {
 				dt = dt.plus(Long.parseLong(csvReader.get(MILLISECONDS)), ChronoUnit.MILLIS);
 			}
-			curr = new Tick(dt, Double.parseDouble(csvReader.get(LAST)),
-					Double.parseDouble(csvReader.get(VOL)));
+			curr = Tick.of(dt, Double.parseDouble(csvReader.get(LAST)),
+					Long.parseLong(csvReader.get(VOL)));
 			return true;
 		} catch ( Exception e ) {
 			throw new DataException(e);

@@ -2,11 +2,12 @@ package ru.prolib.aquila.datatools.tickdatabase;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Aqiterator;
-import ru.prolib.aquila.core.data.Tick;
 
 /**
  * Tick database interface.
@@ -34,7 +35,7 @@ public interface TickDatabase extends Closeable {
 	 * @param time - time marker value
 	 * @throws IOException - IO Error.
 	 */
-	public void sendMarker(LocalDateTime time) throws IOException;
+	public void sendMarker(Instant time) throws IOException;
 	
 	/**
 	 * Get ticks.
@@ -44,7 +45,7 @@ public interface TickDatabase extends Closeable {
 	 * @return tick iterator
 	 * @throws IOException - IO error
 	 */
-	public Aqiterator<Tick> getTicks(Symbol symbol, LocalDateTime startingTime)
+	public Aqiterator<Tick> getTicks(Symbol symbol, Instant startingTime)
 			throws IOException;
 	
 	/**

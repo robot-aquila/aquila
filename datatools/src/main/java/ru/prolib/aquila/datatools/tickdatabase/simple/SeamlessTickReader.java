@@ -1,31 +1,35 @@
 package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.DataException;
-import ru.prolib.aquila.core.data.Tick;
 
 public class SeamlessTickReader implements Aqiterator<Tick> {
 	private static final Logger logger;
+	private static final ZoneOffset zone;
 	
 	static {
 		logger = LoggerFactory.getLogger(SeamlessTickReader.class);
+		zone = ZoneOffset.UTC;
 	}
 	
 	private final Symbol symbol;
 	private final DataSegmentManager segmentManager;
-	private LocalDateTime currentTime;
+	private Instant currentTime;
 	private Aqiterator<Tick> currentSegment;
 	
 	public SeamlessTickReader(Symbol symbol,
-			LocalDateTime startingTime, DataSegmentManager segmentManager)
+			Instant startingTime, DataSegmentManager segmentManager)
 	{
 		super();
 		this.symbol = symbol;
@@ -43,7 +47,7 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 	 * <p>
 	 * @return time
 	 */
-	public LocalDateTime getCurrentTime() {
+	public Instant getCurrentTime() {
 		return currentTime;
 	}
 	
@@ -83,13 +87,14 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 				// 1) Segment just opened and empty;
 				// 2) End of segment was reached;
 				// Move current time pointer to the next date and try open next.
-				currentTime = currentTime.toLocalDate().plusDays(1).atStartOfDay();
+				currentTime = LocalDateTime.ofInstant(currentTime, zone)
+						.toLocalDate().plusDays(1).atStartOfDay().toInstant(zone);
 				closeCurrentSegment();
 				continue;
 			}
 			// We may have some ticks to skip if they are before current time
 			do {
-				LocalDateTime nextTime = currentSegment.item().getTime(); 
+				Instant nextTime = currentSegment.item().getTime(); 
 				if ( ! nextTime.isBefore(currentTime) ) {
 					currentTime = nextTime;
 					return true;
@@ -106,13 +111,14 @@ public class SeamlessTickReader implements Aqiterator<Tick> {
 	 */
 	private boolean openNextSegment() {
 		try {
-			LocalDate date = currentTime.toLocalDate();
+			LocalDate date = LocalDateTime.ofInstant(currentTime, zone)
+					.toLocalDate();
 			if ( ! segmentManager.isDataAvailable(symbol, date) ) {
 				date = segmentManager.getDateOfNextSegment(symbol, date);
 				if ( date == null ) {
 					return false;
 				}
-				currentTime = date.atStartOfDay();
+				currentTime = date.atStartOfDay().toInstant(zone);
 			}
 			currentSegment = segmentManager.openReader(symbol, date);
 			return true;

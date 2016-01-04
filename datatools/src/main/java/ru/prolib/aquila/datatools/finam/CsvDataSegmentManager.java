@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Aqiterator;
-import ru.prolib.aquila.core.data.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegment;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentManager;
 import ru.prolib.aquila.datatools.tickdatabase.simple.DataSegmentImpl;

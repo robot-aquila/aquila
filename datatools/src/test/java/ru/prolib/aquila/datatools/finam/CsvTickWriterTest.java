@@ -19,7 +19,7 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 public class CsvTickWriterTest {
 	private static final DateTimeFormatter df;
@@ -43,7 +43,7 @@ public class CsvTickWriterTest {
 	}
 	
 	private Tick createTick(String time, double price, long qty) {
-		return new Tick(LocalDateTime.parse(time, df), price, new Double(qty));
+		return Tick.of(LocalDateTime.parse(time, df), price, qty);
 	}
 	
 	@Test

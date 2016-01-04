@@ -2,10 +2,12 @@ package ru.prolib.aquila.datatools.tickdatabase.simple;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 public class DataSegmentImpl implements DataSegment {
@@ -72,13 +74,14 @@ public class DataSegmentImpl implements DataSegment {
 	
 	@Override
 	public void write(Tick tick) throws IOException {
-		LocalDate d = tick.getTime().toLocalDate();
+		LocalDateTime dt = LocalDateTime.ofInstant(tick.getTime(), ZoneOffset.UTC);
+		LocalDate d = dt.toLocalDate();
 		if ( ! date.equals(d) ) {
 			throw new IOException("Tick date mismatch: tick="
 					+ d + " segment=" + date);
 		}
 		writer.write(tick);
-		LocalTime t = tick.getTime().toLocalTime();
+		LocalTime t = dt.toLocalTime();
 		if ( t.compareTo(lastTime) < 0 ) {
 			throw new IOException("Cannot write the past data: tick="
 					+ t + " segment=" + lastTime);

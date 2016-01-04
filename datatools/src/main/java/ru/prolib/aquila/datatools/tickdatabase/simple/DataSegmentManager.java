@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Aqiterator;
-import ru.prolib.aquila.core.data.Tick;
 
 /**
  * Data segment manager interface.

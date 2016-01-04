@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.SymbolType;
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 public class DataSegmentImplTest {
@@ -70,8 +70,8 @@ public class DataSegmentImplTest {
 	
 	@Test
 	public void testWrite_Ok() throws Exception {
-		tick1 = new Tick(LocalDateTime.of(2015, 5, 12, 15, 0, 0), 129.0d, 10d);
-		tick2 = new Tick(LocalDateTime.of(2015, 5, 12, 15, 2, 5), 122.0d, 20d);
+		tick1 = Tick.of(LocalDateTime.of(2015, 5, 12, 15, 0, 0), 129.0d, 10);
+		tick2 = Tick.of(LocalDateTime.of(2015, 5, 12, 15, 2, 5), 122.0d, 20);
 		writer.write(tick1);
 		writer.write(tick2);
 		control.replay();
@@ -88,13 +88,13 @@ public class DataSegmentImplTest {
 	
 	@Test (expected=IOException.class)
 	public void testWrite_ThrowsIfDateMismatch() throws Exception {
-		tick1 = new Tick(LocalDateTime.of(2015, 5, 11, 23, 59, 59, 999), 1d, 1d); 
+		tick1 = Tick.of(LocalDateTime.of(2015, 5, 11, 23, 59, 59, 999), 1d, 1); 
 		segment.write(tick1);
 	}
 	
 	@Test (expected=IOException.class)
 	public void testWrite_ThrowsIfTimeLessThanTheLastTime() throws Exception {
-		tick1 = new Tick(LocalDateTime.of(2015, 5, 12, 14, 59, 59, 999), 1d, 1d);
+		tick1 = Tick.of(LocalDateTime.of(2015, 5, 12, 14, 59, 59, 999), 1d, 1);
 		segment.write(tick1);
 	}
 	

@@ -3,8 +3,8 @@ package ru.prolib.aquila.datatools.tickdatabase.simple;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.SimpleIterator;
-import ru.prolib.aquila.core.data.Tick;
 
 public class SimpleTickDatabaseTest {
 	private static final Symbol symbol1, symbol2, symbol3;
@@ -26,8 +26,8 @@ public class SimpleTickDatabaseTest {
 		symbol1 = new Symbol("SBRF", "EQBR", "RUR");
 		symbol2 = new Symbol("GAZP", "EQBR", "RUR");
 		symbol3 = new Symbol("LKOH", "EQBR", "RUR");
-		tick1 = new Tick(LocalDateTime.of(2015, 5, 12, 0, 0, 0, 0), 100d, 10);
-		tick2 = new Tick(LocalDateTime.of(2015, 5, 12, 9, 0, 0, 0), 105d, 15);
+		tick1 = Tick.of(Instant.parse("2015-05-12T00:00:00Z"), 100d, 10);
+		tick2 = Tick.of(Instant.parse("2015-05-12T09:00:00Z"), 105d, 15);
 	}
 	
 	private IMocksControl control;
@@ -93,7 +93,7 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testGetTicksSD_IfDataNotAvailable() throws Exception {
-		LocalDateTime time = LocalDateTime.of(2015, 7, 8, 0, 0, 0);
+		Instant time = Instant.parse("2015-07-08T00:00:00Z");
 		expect(manager.isDataAvailable(symbol1)).andReturn(false);
 		control.replay();
 		
@@ -107,7 +107,7 @@ public class SimpleTickDatabaseTest {
 	
 	@Test
 	public void testGetTicksSD_IfDataAvailable() throws Exception {
-		LocalDateTime time = LocalDateTime.of(2015, 7, 8, 0, 0, 0);
+		Instant time = Instant.parse("2015-07-08T00:00:00Z");
 		expect(manager.isDataAvailable(symbol1)).andReturn(true);
 		control.replay();
 		
@@ -115,7 +115,7 @@ public class SimpleTickDatabaseTest {
 				(SeamlessTickReader) database.getTicks(symbol1, time);
 		
 		assertNotNull(it);
-		assertEquals(time, it.getCurrentTime());
+		assertEquals(Instant.parse("2015-07-08T00:00:00Z"), it.getCurrentTime());
 		assertEquals(symbol1, it.getSymbol());
 		assertSame(manager, it.getDataSegmentManager());
 		control.verify();
@@ -150,7 +150,7 @@ public class SimpleTickDatabaseTest {
 		manager.closeSegment(segment3);
 		control.replay();
 		
-		database.sendMarker(LocalDateTime.of(2015, 6, 1, 0, 0, 0));
+		database.sendMarker(Instant.parse("2015-06-01T00:00:00Z"));
 		
 		control.verify();
 		assertFalse(segments.containsKey(symbol1));
@@ -186,7 +186,7 @@ public class SimpleTickDatabaseTest {
 				(SeamlessTickReader) database.getTicks(symbol1, 5);
 		
 		assertNotNull(it);
-		assertEquals(LocalDateTime.of(1998, 6, 1, 0, 0, 0), it.getCurrentTime());
+		assertEquals(Instant.parse("1998-06-01T00:00:00Z"), it.getCurrentTime());
 		assertEquals(symbol1, it.getSymbol());
 		assertSame(manager, it.getDataSegmentManager());
 		control.verify();
@@ -210,7 +210,7 @@ public class SimpleTickDatabaseTest {
 				(SeamlessTickReader) database.getTicks(symbol1, 5);
 		
 		assertNotNull(it);
-		assertEquals(LocalDateTime.of(1998, 4, 1, 0, 0, 0), it.getCurrentTime());
+		assertEquals(Instant.parse("1998-04-01T00:00:00Z"), it.getCurrentTime());
 		assertEquals(symbol1, it.getSymbol());
 		assertSame(manager, it.getDataSegmentManager());
 		control.verify();

@@ -1,6 +1,7 @@
 package ru.prolib.aquila.datatools.storage.moex;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -85,7 +86,8 @@ public class MOEXSecurityStorageServiceImpl implements SecurityStorageService {
 	@Override
 	@Transactional
 	public void snapshotSessionAttributes(Security security) {
-		makeSnapshot(security, security.getTerminal().getCurrentTime(), false);
+		makeSnapshot(security, LocalDateTime.ofInstant(security.getTerminal()
+				.getCurrentTime(), ZoneOffset.UTC), false);
 	}
 	
 	private void makeSnapshot(Security security, LocalDateTime time, boolean force) {

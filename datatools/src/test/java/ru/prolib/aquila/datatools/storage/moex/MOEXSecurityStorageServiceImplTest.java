@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -173,7 +174,7 @@ public class MOEXSecurityStorageServiceImplTest
 		// Case 1:	constant security properties already checked
 		//			session properties entity was not cached
 		propertiesSaved.put(symbol1, true);
-		expect(schedulerMock.getCurrentTime()).andReturn(time1);
+		expect(schedulerMock.getCurrentTime()).andReturn(time1.toInstant(ZoneOffset.UTC));
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
 		expect(symbolRepositoryMock.getBySymbol(symbol1)).andReturn(symbolEntity1);
 		moexUtilsMock.fillSessionProperties(security1, sessProps2);
@@ -196,7 +197,7 @@ public class MOEXSecurityStorageServiceImplTest
 		//			session properties entity was cached and not updated
 		propertiesSaved.put(symbol2, true);
 		entityCache.put(symbol2, sessProps1);
-		expect(schedulerMock.getCurrentTime()).andReturn(time1);
+		expect(schedulerMock.getCurrentTime()).andReturn(time1.toInstant(ZoneOffset.UTC));
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
 		expect(symbolRepositoryMock.getBySymbol(symbol2)).andReturn(symbolEntity2);
 		moexUtilsMock.fillSessionProperties(security2, sessProps2);
@@ -215,7 +216,7 @@ public class MOEXSecurityStorageServiceImplTest
 		//			session properties entity was cached and updated
 		propertiesSaved.put(symbol1, true);
 		entityCache.put(symbol1, sessProps1);
-		expect(schedulerMock.getCurrentTime()).andReturn(time1);
+		expect(schedulerMock.getCurrentTime()).andReturn(time1.toInstant(ZoneOffset.UTC));
 		expect(securitySessionPropertiesRepositoryMock.createEntity()).andReturn(sessProps2);
 		expect(symbolRepositoryMock.getBySymbol(symbol1)).andReturn(symbolEntity1);
 		moexUtilsMock.fillSessionProperties(security1, sessProps2);

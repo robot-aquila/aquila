@@ -30,7 +30,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.SymbolType;
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.utils.IdUtils;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 import ru.prolib.aquila.datatools.tickdatabase.util.SmartFlushTickWriter;
@@ -257,7 +257,7 @@ public class IOHelperTest {
 		
 		assertNotNull(writer);
 		writer.writeHeader();
-		writer.write(new Tick(LocalDateTime.of(2014, 1, 1, 20, 30, 55, 30000000), 2d, 5));
+		writer.write(Tick.of(LocalDateTime.of(2014, 1, 1, 20, 30, 55, 30000000), 2d, 5));
 		writer.close();
 		List<String> expected = new Vector<String>();
 		expected.add("<TIME>,<LAST>,<VOL>,<MILLISECONDS>");
@@ -288,7 +288,7 @@ public class IOHelperTest {
 		assertNotNull(reader);
 		reader.readHeader();
 		reader.next();
-		Tick expected = new Tick(LocalDateTime.of(2015, 7, 1, 10, 0, 0, 957000000), 100.02, 105);
+		Tick expected = Tick.of(LocalDateTime.of(2015, 7, 1, 10, 0, 0, 957000000), 100.02, 105);
 		assertEquals(expected, reader.item());
 	}
 	

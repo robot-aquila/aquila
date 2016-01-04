@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import org.apache.log4j.BasicConfigurator;
@@ -14,7 +14,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
-import ru.prolib.aquila.core.data.Tick;
+import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.datatools.tickdatabase.TickWriter;
 
 public class SmartFlushTickWriterTest {
@@ -23,7 +24,8 @@ public class SmartFlushTickWriterTest {
 	private Scheduler scheduler;
 	private SmartFlushSetup setup;
 	private SmartFlushTickWriter flusher;
-	private LocalDateTime time;
+	private Instant time;
+	private TaskHandler taskHandler;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -36,11 +38,12 @@ public class SmartFlushTickWriterTest {
 		control = createStrictControl();
 		writer = control.createMock(TickWriter.class);
 		scheduler = control.createMock(Scheduler.class);
+		taskHandler = control.createMock(TaskHandler.class);
 		setup = new SmartFlushSetup();
 		setup.setExecutionPeriod(10);
 		setup.setFlushPeriod(50);
 		flusher = new SmartFlushTickWriter(writer, scheduler, "ZUMBA", setup);
-		time = LocalDateTime.of(2015, 12, 29, 18, 39, 16, 0);
+		time = Instant.parse("2015-12-29T18:39:16Z");
 	}
 	
 	@Test
@@ -55,7 +58,6 @@ public class SmartFlushTickWriterTest {
 	
 	@Test
 	public void testClose() throws Exception {
-		scheduler.cancel(same(flusher));
 		writer.close();
 		control.replay();
 		
@@ -76,8 +78,8 @@ public class SmartFlushTickWriterTest {
 	
 	@Test
 	public void testWrite_FirstTime() throws Exception {
-		Tick tick = new Tick(time.plus(21502, ChronoUnit.MILLIS), 215.12d);
-		expect(scheduler.schedule(flusher, 10, 10)).andReturn(null);
+		Tick tick = Tick.of(time.plus(21502, ChronoUnit.MILLIS), 215.12d);
+		expect(scheduler.schedule(flusher, 10, 10)).andReturn(taskHandler);
 		writer.write(tick);
 		expect(scheduler.getCurrentTime()).andReturn(time);
 		control.replay();
@@ -91,7 +93,7 @@ public class SmartFlushTickWriterTest {
 	
 	@Test
 	public void testWrite_NextTime() throws Exception {
-		Tick tick = new Tick(time.plus(88712, ChronoUnit.MILLIS), 112.54d);
+		Tick tick = Tick.of(time.plus(88712, ChronoUnit.MILLIS), 112.54d);
 		writer.write(tick);
 		expect(scheduler.getCurrentTime()).andReturn(time);
 		control.replay();

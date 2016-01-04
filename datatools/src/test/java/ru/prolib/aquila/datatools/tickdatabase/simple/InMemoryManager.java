@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Vector;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Aqiterator;
 import ru.prolib.aquila.core.data.SimpleIterator;
-import ru.prolib.aquila.core.data.Tick;
 
 class InMemoryManager implements DataSegmentManager {
 	private HashMap<Symbol, HashMap<LocalDate, List<Tick>>> data;
