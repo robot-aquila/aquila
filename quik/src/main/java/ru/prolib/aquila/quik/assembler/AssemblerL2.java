@@ -2,14 +2,9 @@ package ru.prolib.aquila.quik.assembler;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.Calendar;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.data.row.RowException;
@@ -233,23 +228,21 @@ public class AssemblerL2 {
 		//logger.debug("Trade event fired: {}", trade);
 	}
 	
-	private LocalDateTime getTime(T2QTrade trade) {
-		Calendar c = Calendar.getInstance();
-		c.set(Calendar.MILLISECOND, 0);
-		
+	private Instant getTime(T2QTrade trade) {
 		int part = (int) trade.getDate();
-		c.set(Calendar.DAY_OF_MONTH, part % 100);
+		int day = part % 100;
 		part /= 100;
-		c.set(Calendar.MONTH, (part % 100) - 1);
-		c.set(Calendar.YEAR, part / 100);
+		int month = part % 100;
+		int year = part / 100;
 		
 		part = (int) trade.getTime();
-		c.set(Calendar.SECOND, part % 100);
+		int second = part % 100;
 		part /= 100;
-		c.set(Calendar.MINUTE, part % 100);
-		c.set(Calendar.HOUR_OF_DAY, part / 100);
-		Instant instant = Instant.ofEpochMilli(c.getTimeInMillis());
-		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+		int minute = part % 100;
+		int hour = part / 100;
+		return LocalDateTime.of(year, month, day, hour, minute, second)
+				.atZone(QUIKSettings.TIMEZONE)
+				.toInstant();
 	}
 
 	/**

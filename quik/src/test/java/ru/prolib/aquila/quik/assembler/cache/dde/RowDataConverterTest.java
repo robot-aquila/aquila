@@ -2,6 +2,7 @@ package ru.prolib.aquila.quik.assembler.cache.dde;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -10,6 +11,7 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.data.row.*;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.quik.QUIKSettings;
 
 public class RowDataConverterTest {
 	private Row row;
@@ -72,18 +74,19 @@ public class RowDataConverterTest {
 			.add(null)
 			.add(new Double(32.48d));
 		Variant<?> iterator = vTime;
-		Set<LocalDateTime> found = new HashSet<LocalDateTime>();
+		Set<Instant> found = new HashSet<Instant>();
 		do {
 			data.put("date", vDate.get());
 			data.put("time", vTime.get());
 			try {
-				LocalDateTime x = converter.getTime(row, "date", "time", true);
+				Instant x = converter.getTime(row, "date", "time", true);
 				found.add(x);
 			} catch ( Exception e ) { }
 		} while ( iterator.next() );
 		assertEquals(2, found.size());
 		assertTrue(found.contains(null));
-		assertTrue(found.contains(LocalDateTime.of(2013, 6, 1, 23, 45, 30)));
+		assertTrue(found.contains(LocalDateTime.of(2013, 6, 1, 23, 45, 30)
+				.atZone(QUIKSettings.TIMEZONE).toInstant()));
 		//assertTrue(found.contains(format.parse("2013-06-01 23:45:30")));
 	}
 		
@@ -103,18 +106,19 @@ public class RowDataConverterTest {
 			.add(new Double(32.48d));
 		Variant<?> iterator = vTime;
 		int foundCnt = 0;
-		LocalDateTime found = null;
+		Instant found = null;
 		do {
 			data.put("date", vDate.get());
 			data.put("time", vTime.get());
 			try {
-				LocalDateTime x = converter.getTime(row, "date", "time", false);
+				Instant x = converter.getTime(row, "date", "time", false);
 				found = x;
 				foundCnt ++;
 			} catch ( Exception e ) { }
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(LocalDateTime.of(2013, 6, 1, 23, 45, 30), found);
+		assertEquals(LocalDateTime.of(2013, 6, 1, 23, 45, 30)
+				.atZone(QUIKSettings.TIMEZONE).toInstant(), found);
 		//assertEquals(format.parse("2013-06-01 23:45:30"), found);
 	}
 	
@@ -122,7 +126,8 @@ public class RowDataConverterTest {
 	public void testGetTime_TheOneHourErrorIssue() throws Exception {
 		data.put("date", "2015-05-13");
 		data.put("time", "10:05:50");
-		LocalDateTime x = converter.getTime(row, "date", "time", false);
+		LocalDateTime x = LocalDateTime.ofInstant(converter.getTime(row,
+				"date", "time", false), QUIKSettings.TIMEZONE);
 		assertEquals(10, x.getHour());
 		assertEquals( 5, x.getMinute());
 		assertEquals(50, x.getSecond());

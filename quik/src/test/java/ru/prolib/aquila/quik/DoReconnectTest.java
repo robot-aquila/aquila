@@ -36,7 +36,6 @@ public class DoReconnectTest {
 	@Test
 	public void testRun_Stopped() throws Exception {
 		expect(terminal.started()).andReturn(false);
-		terminal.cancel(task);
 		control.replay();
 
 		task.run();
@@ -48,7 +47,6 @@ public class DoReconnectTest {
 	public void testRun_StartedConnected() throws Exception {
 		expect(terminal.started()).andReturn(true);
 		expect(terminal.connected()).andReturn(true);
-		terminal.cancel(task);
 		control.replay();
 		
 		task.run();
@@ -61,7 +59,6 @@ public class DoReconnectTest {
 		expect(terminal.started()).andReturn(true);
 		expect(terminal.connected()).andReturn(false);
 		client.connect("C:/work/quik");
-		terminal.cancel(task);
 		control.replay();
 		
 		task.run();
@@ -75,6 +72,7 @@ public class DoReconnectTest {
 		expect(terminal.connected()).andReturn(false);
 		client.connect("C:/work/quik");
 		expectLastCall().andThrow(new T2QException("test error"));
+		expect(terminal.schedule(task, 5000L)).andReturn(null);
 		control.replay();
 		
 		task.run();

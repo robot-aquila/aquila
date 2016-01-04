@@ -50,10 +50,10 @@ public class ConnectionHandler implements Starter, EventListener {
 	@Override
 	public void onEvent(Event event) {
 		if ( event.isType(terminal.OnStarted()) ) {
-			terminal.schedule(new DoReconnect(terminal, config), 0L, 5000L);
+			new DoReconnect(terminal, config).run();
 		} else if ( event.isType(terminal.OnDisconnected()) ) {
 			if ( terminal.started() ) {
-				terminal.schedule(new DoReconnect(terminal, config), 0L, 5000L);
+				new DoReconnect(terminal, config).run();
 			}
 		
 		} else if ( event.isType(terminal.OnStopped()) ) {

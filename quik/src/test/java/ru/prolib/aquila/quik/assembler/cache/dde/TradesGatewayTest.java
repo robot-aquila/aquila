@@ -119,7 +119,8 @@ public class TradesGatewayTest {
 		expected.setPrice(45.90d);
 		expected.setQty(1000L);
 		expected.setSymbol(symbol);
-		expected.setTime(LocalDateTime.of(1998, 1, 15, 0, 20, 19, 214000000));
+		expected.setTime(LocalDateTime.of(1998, 1, 15, 0, 20, 19, 214000000)
+				.atZone(QUIKSettings.TIMEZONE).toInstant());
 		expected.setVolume(200d);
 		assertEquals(expected, gateway.makeTrade(terminal, row));
 

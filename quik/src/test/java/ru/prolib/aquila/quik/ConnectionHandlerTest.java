@@ -7,7 +7,6 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.quik.api.QUIKClient;
 
@@ -64,10 +63,9 @@ public class ConnectionHandlerTest {
 	
 	@Test
 	public void testOnEvent_OnStarted() throws Exception {
-		Runnable task = new DoReconnect(terminal, config);
-		TaskHandler th = control.createMock(TaskHandler.class);
-		
-		expect(terminal.schedule(eq(task),eq(0L),eq(5000L))).andReturn(th);
+		expect(terminal.started()).andStubReturn(true);
+		expect(terminal.connected()).andStubReturn(false);
+		client.connect("C:/work/quik");
 		control.replay();
 		
 		handler.onEvent(new EventImpl(onStarted));
@@ -87,11 +85,9 @@ public class ConnectionHandlerTest {
 	
 	@Test
 	public void testOnEvent_OnDisconnected_Started() throws Exception {
-		Runnable task = new DoReconnect(terminal, config);
-		TaskHandler th = control.createMock(TaskHandler.class);
-		
-		expect(terminal.started()).andReturn(true);
-		expect(terminal.schedule(eq(task),eq(0L),eq(5000L))).andReturn(th);
+		expect(terminal.started()).andStubReturn(true);
+		expect(terminal.connected()).andStubReturn(false);
+		client.connect("C:/work/quik");
 		control.replay();
 		
 		handler.onEvent(new EventImpl(onDisconnected));

@@ -3,7 +3,7 @@ package ru.prolib.aquila.quik.assembler;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
@@ -84,7 +84,7 @@ public class PlaceHandlerTest {
 	@Test
 	public void testHandle_ErrorAndOrderStatusSent() throws Exception {
 		response = new QUIKResponse(T2QTransStatus.ERR_LIMIT, 214, null, "ERR");
-		LocalDateTime time = LocalDateTime.now();
+		Instant time = Instant.now();
 		expect(order.getStatus()).andReturn(OrderStatus.SENT);
 		expect(terminal.getCurrentTime()).andReturn(time);
 		order.setLastChangeTime(time);

@@ -56,12 +56,10 @@ public class DoReconnect implements Runnable {
 			if ( terminal.started() && ! terminal.connected() ) {
 				try {
 					client.connect(config.getQUIKPath());
-					terminal.cancel(this);
 				} catch ( T2QException e ) {
 					logger.error(e.getMessage());
+					terminal.schedule(this, 5000L);
 				}
-			} else {
-				terminal.cancel(this);
 			}
 		}
 	}
