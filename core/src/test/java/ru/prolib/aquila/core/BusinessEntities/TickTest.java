@@ -50,6 +50,16 @@ public class TickTest {
 	}
 	
 	@Test
+	public void testOf2ID() throws Exception {
+		tick = Tick.of(time3, 80.32d);
+		assertSame(TickType.TICK, tick.getType());
+		assertEquals(time3, tick.getTime());
+		assertEquals(80.32d, tick.getPrice(), 0.01d);
+		assertEquals(0, tick.getSize());
+		assertEquals(0.0d, tick.getValue(), 0.01d);
+	}
+	
+	@Test
 	public void testOf3TDL() throws Exception {
 		tick = Tick.of(time1, 256.27d, 100);
 		assertSame(TickType.TICK, tick.getType());

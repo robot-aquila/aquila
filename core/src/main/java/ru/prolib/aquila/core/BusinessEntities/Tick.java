@@ -41,6 +41,10 @@ public class Tick {
 		return of(TickType.TICK, timestamp, price, size, 0);
 	}
 	
+	public static Tick of(Instant timestamp, double price) {
+		return of(TickType.TICK, timestamp, price, 0, 0);
+	}
+	
 	@Deprecated
 	public static Tick of(LocalDateTime time, double price, long size) {
 		return of(TickType.TICK, time.toInstant(ZoneOffset.UTC), price, size);
