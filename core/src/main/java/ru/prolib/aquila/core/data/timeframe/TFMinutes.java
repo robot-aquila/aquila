@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.data.timeframe;
 
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -28,7 +29,8 @@ public class TFMinutes implements TimeFrame {
 	}
 
 	@Override
-	public Interval getInterval(LocalDateTime time) {
+	public Interval getInterval(Instant timestamp) {
+		LocalDateTime time = LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC);
 		long secondOfDay = ChronoUnit.MINUTES.between(LocalTime.MIDNIGHT,
 				time.toLocalTime()) / length * length * 60;
 		LocalDateTime from = LocalDateTime.of(time.toLocalDate(),

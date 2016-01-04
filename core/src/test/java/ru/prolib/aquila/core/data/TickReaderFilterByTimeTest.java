@@ -2,46 +2,29 @@ package ru.prolib.aquila.core.data;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.*;
-
 import org.easymock.IMocksControl;
 import org.junit.*;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 @SuppressWarnings({"unchecked","rawtypes"})
 public class TickReaderFilterByTimeTest {
-	private static final DateTimeFormatter df;
-	
-	static {
-		df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-	}
-
 	private IMocksControl control;
 	private Aqiterator<Tick> decorated;
-	private LocalDateTime startTime;
+	private Instant startTime;
 	private TickReaderFilterByTime iterator;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		decorated = control.createMock(Aqiterator.class);
-		startTime = LocalDateTime.of(2014, 10, 30, 7, 58, 18, 0);
+		startTime = Instant.parse("2014-10-30T07:58:18Z");
 		iterator = new TickReaderFilterByTime(decorated, startTime);
 	}
 	
-	
-	/**
-	 * Создать тик.
-	 * <p>
-	 * @param time время в формате {@link #df}.
-	 * @param price цена
-	 * @param value объем
-	 * @return тик
-	 */
-	private Tick newTick(String time, double price, double value) {
-		return new Tick(LocalDateTime.parse(time, df), price, value);
+	private Tick newTick(String time, double price, long size) {
+		return Tick.of(Instant.parse(time), price, size);
 	}
 	
 	@Test
@@ -59,12 +42,12 @@ public class TickReaderFilterByTimeTest {
 		List<Tick> expected = new Vector<Tick>(),
 				actual = new Vector<Tick>(),
 				list = new Vector<Tick>();
-		list.add(newTick("2014-10-28 15:24:19.000", 1.23d, 100));
-		list.add(newTick("2014-10-29 00:00:00.000", 1.30d, 115));
-		list.add(newTick("2014-10-30 07:58:17.999", 1.31d, 300));
-		list.add(newTick("2014-10-30 07:58:18.000", 1.29d, 200));
-		list.add(newTick("2014-10-30 14:28:29.175", 1.32d, 800));
-		list.add(newTick("2015-01-01 00:00:00.000", 1.19d,  10));
+		list.add(newTick("2014-10-28T15:24:19.000Z", 1.23d, 100));
+		list.add(newTick("2014-10-29T00:00:00.000Z", 1.30d, 115));
+		list.add(newTick("2014-10-30T07:58:17.999Z", 1.31d, 300));
+		list.add(newTick("2014-10-30T07:58:18.000Z", 1.29d, 200));
+		list.add(newTick("2014-10-30T14:28:29.175Z", 1.32d, 800));
+		list.add(newTick("2015-01-01T00:00:00.000Z", 1.19d,  10));
 		expected.add(list.get(3));
 		expected.add(list.get(4));
 		expected.add(list.get(5));

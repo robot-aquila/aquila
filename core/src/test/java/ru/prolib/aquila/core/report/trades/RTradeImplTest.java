@@ -2,8 +2,8 @@ package ru.prolib.aquila.core.report.trades;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import java.time.Instant;
 import java.util.*;
 
 import org.easymock.IMocksControl;
@@ -14,23 +14,21 @@ import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class RTradeImplTest {
-	private static DateTimeFormatter format;
 	private static PositionType LONG = PositionType.LONG;
 	private static PositionType SHORT = PositionType.SHORT;
 	private static Direction BUY = Direction.BUY;
 	private static Direction SELL = Direction.SELL;
 	private static Symbol symbol1, symbol2;
-	private static LocalDateTime time1, time2;
+	private static Instant time1, time2;
 	private IMocksControl control;
 	private Terminal terminal;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		symbol1 = new Symbol("Foo", "Bar", "USD", SymbolType.UNKNOWN);
 		symbol2 = new Symbol("Bar", "Buz", "GBP", SymbolType.FUTURE);
-		time1 = LocalDateTime.parse("2013-01-01 00:00:00", format);
-		time2 = LocalDateTime.parse("2013-01-02 00:00:00", format);
+		time1 = Instant.parse("2013-01-01T00:00:00Z");
+		time2 = Instant.parse("2013-01-02T00:00:00Z");
 	}
 	
 	@Before
@@ -43,7 +41,7 @@ public class RTradeImplTest {
 	 * Создать сделку.
 	 * <p>
 	 * @param symbol дескриптор инструмента
-	 * @param time строка yyyy-MM-dd HH:mm:ss время сделки
+	 * @param time строка yyyy-MM-ddTHH:mm:ssZ время сделки
 	 * @param dir направление
 	 * @param qty количество
 	 * @param price цена
@@ -54,7 +52,7 @@ public class RTradeImplTest {
 			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
-		return createTrade(symbol, LocalDateTime.parse(time, format),
+		return createTrade(symbol, Instant.parse(time),
 				dir, qty, price, volume);
 	}
 	
@@ -69,7 +67,7 @@ public class RTradeImplTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(Symbol symbol, LocalDateTime time,
+	private Trade createTrade(Symbol symbol, Instant time,
 			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);
@@ -162,12 +160,12 @@ public class RTradeImplTest {
 		Variant<PositionType> vType = new Variant<PositionType>(vSymbol)
 			.add(SHORT)
 			.add(LONG);
-		Variant<LocalDateTime> vOpnTime = new Variant<LocalDateTime>(vType)
-			.add(LocalDateTime.parse("2013-01-01 00:00:00", format))
-			.add(LocalDateTime.parse("2015-12-31 00:00:00", format));
-		Variant<LocalDateTime> vClsTime = new Variant<LocalDateTime>(vOpnTime)
-			.add(LocalDateTime.parse("2013-01-02 00:00:00", format))
-			.add(LocalDateTime.parse("1992-01-02 00:00:00", format))
+		Variant<Instant> vOpnTime = new Variant<Instant>(vType)
+			.add(Instant.parse("2013-01-01T00:00:00Z"))
+			.add(Instant.parse("2015-12-31T00:00:00Z"));
+		Variant<Instant> vClsTime = new Variant<Instant>(vOpnTime)
+			.add(Instant.parse("2013-01-02T00:00:00Z"))
+			.add(Instant.parse("1992-01-02T00:00:00Z"))
 			.add(null);
 		Variant<Long> vOpnQty = new Variant<Long>(vClsTime)
 			.add(200L)
@@ -207,10 +205,8 @@ public class RTradeImplTest {
 		assertEquals(1, foundCnt);
 		assertSame(symbol2, found.getSymbol());
 		assertSame(LONG, found.getType());
-		assertEquals(LocalDateTime.parse("2013-01-01 00:00:00", format),
-				found.getEnterTime());
-		assertEquals(LocalDateTime.parse("2013-01-02 00:00:00", format),
-				found.getExitTime());
+		assertEquals(Instant.parse("2013-01-01T00:00:00Z"), found.getEnterTime());
+		assertEquals(Instant.parse("2013-01-02T00:00:00Z"), found.getExitTime());
 		assertEquals(new Long(200L), found.getQty());
 		assertEquals(new Long(75L), found.getUncoveredQty());
 		assertEquals(4.00d, found.getEnterPrice(), 0.001d);
@@ -234,88 +230,88 @@ public class RTradeImplTest {
 		List<FR> fix = new Vector<FR>();
 		// #0, Короткая, закрытая
 		FR row = new FR(new RTradeImpl(symbol1, SHORT,
-				LocalDateTime.parse("1998-08-01 20:35:00", format),
-				LocalDateTime.parse("1998-08-02 00:00:00", format),
+				Instant.parse("1998-08-01T20:35:00Z"),
+				Instant.parse("1998-08-02T00:00:00Z"),
 				200L, 200L,
 				2000.0d, 1800.0d,
 				4000.0d, 3600.0d), null);
-		row.trades.add(createTrade(symbol1, "1998-08-01 20:35:00",
+		row.trades.add(createTrade(symbol1, "1998-08-01T20:35:00Z",
 				SELL, 100L, 10.0d, 2000.0d));
-		row.trades.add(createTrade(symbol1, "1998-08-01 22:48:15",
+		row.trades.add(createTrade(symbol1, "1998-08-01T22:48:15Z",
 				SELL, 50L, 9.0d, 900.0d));
-		row.trades.add(createTrade(symbol1, "1998-08-01 23:15:00",
+		row.trades.add(createTrade(symbol1, "1998-08-01T23:15:00Z",
 				SELL, 50L, 11.0d, 1100.0d));
-		row.trades.add(createTrade(symbol1, "1998-08-01 23:59:00",
+		row.trades.add(createTrade(symbol1, "1998-08-01T23:59:00Z",
 				BUY, 100L, 8.0d, 1800.0d));
-		row.trades.add(createTrade(symbol1, "1998-08-02 00:00:00",
+		row.trades.add(createTrade(symbol1, "1998-08-02T00:00:00Z",
 				BUY, 100L, 10.0d, 1800.0d));
 		fix.add(row);
 		
 		// #1, Длинная, не закрытая
 		row = new FR(new RTradeImpl(symbol2, LONG,
-				LocalDateTime.parse("2001-01-01 00:00:00", format),
+				Instant.parse("2001-01-01T00:00:00Z"),
 				null,
 				200L, null,
 				2000.0d, null,
 				4000.0d, null), null);
-		row.trades.add(createTrade(symbol2, "2001-01-01 00:00:00",
+		row.trades.add(createTrade(symbol2, "2001-01-01T00:00:00Z",
 				BUY, 100L, 10.0d, 2000.0d));
-		row.trades.add(createTrade(symbol2, "2001-01-02 00:00:00",
+		row.trades.add(createTrade(symbol2, "2001-01-02T00:00:00Z",
 				BUY, 100L, 10.0d, 2000.0d));
 		fix.add(row);
 		
 		// #2, Длинная, частично-закрытая
 		row = new FR(new RTradeImpl(symbol1, LONG,
-				LocalDateTime.parse("1998-01-01 00:00:00", format),
+				Instant.parse("1998-01-01T00:00:00Z"),
 				null,
 				200L, 50L,
 				2000.0d, 500.0d,
 				4000.0d, 1000.0d), null);
-		row.trades.add(createTrade(symbol1, "1998-01-01 00:00:00",
+		row.trades.add(createTrade(symbol1, "1998-01-01T00:00:00Z",
 				BUY, 200L, 10.0d, 4000.0d));
-		row.trades.add(createTrade(symbol1, "1998-01-01 01:00:00",
+		row.trades.add(createTrade(symbol1, "1998-01-01T01:00:00Z",
 				SELL, 50L, 10.0d, 1000.0d));
 		fix.add(row);
 		
 		// #3, Длинная, закрытая, с разворотом одной сделкой
 		row = new FR(new RTradeImpl(symbol1, LONG,
-				LocalDateTime.parse("1996-06-01 00:00:00", format),
-				LocalDateTime.parse("1996-06-02 00:00:00", format),
+				Instant.parse("1996-06-01T00:00:00Z"),
+				Instant.parse("1996-06-02T00:00:00Z"),
 				1L, 1L,
 				138770d, 138380d,
 				86951.89d, 86726.32d),
 			new RTradeImpl(symbol1, SHORT,
-				LocalDateTime.parse("1996-06-02 00:00:00", format),
+				Instant.parse("1996-06-02T00:00:00Z"),
 				null,
 				1L, null,
 				138380d, null,
 				86726.32d, null));
-		row.trades.add(createTrade(symbol1, "1996-06-01 00:00:00",
+		row.trades.add(createTrade(symbol1, "1996-06-01T00:00:00Z",
 				BUY, 1L, 138770d, 86951.89d));
-		row.trades.add(createTrade(symbol1, "1996-06-02 00:00:00",
+		row.trades.add(createTrade(symbol1, "1996-06-02T00:00:00Z",
 				SELL, 2L, 138380d, 173452.64d));
 		fix.add(row);
 		
 		// #4, Короткая, закрытая, с сокращением и разворотом
 		row = new FR(new RTradeImpl(symbol2, SHORT,
-				LocalDateTime.parse("2018-01-15 03:00:01", format),
-				LocalDateTime.parse("2018-01-15 03:00:10", format),
+				Instant.parse("2018-01-15T03:00:01Z"),
+				Instant.parse("2018-01-15T03:00:10Z"),
 				10L, 10L,
 				50d,  40d,
 				100d, 80d),
 			new RTradeImpl(symbol2, LONG,
-				LocalDateTime.parse("2018-01-15 03:00:10", format),
+				Instant.parse("2018-01-15T03:00:10Z"),
 				null,
 				5L, null,
 				20d, null,
 				40d, null));
-		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:01",
+		row.trades.add(createTrade(symbol2, "2018-01-15T03:00:01Z",
 				SELL, 4L, 5d, 40d));
-		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:05",
+		row.trades.add(createTrade(symbol2, "2018-01-15T03:00:05Z",
 				SELL, 6L, 5d, 60d));
-		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:10",
+		row.trades.add(createTrade(symbol2, "2018-01-15T03:00:10Z",
 				BUY, 5L, 4d, 40d));
-		row.trades.add(createTrade(symbol2, "2018-01-15 03:00:10",
+		row.trades.add(createTrade(symbol2, "2018-01-15T03:00:10Z",
 				BUY, 10L, 4d, 80d));
 		fix.add(row);
 		

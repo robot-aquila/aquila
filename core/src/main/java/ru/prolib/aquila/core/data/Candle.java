@@ -1,11 +1,9 @@
 package ru.prolib.aquila.core.data;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
+import java.time.Instant;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.threeten.extra.Interval;
-
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 
 /**
@@ -127,7 +125,7 @@ public class Candle {
 	 * @throws OutOfIntervalException время сделки за границей интервала свечи
 	 */
 	public Candle addTrade(Trade trade) throws OutOfIntervalException {
-		if ( ! interval.contains(trade.getTime().toInstant(ZoneOffset.UTC)) ) {
+		if ( ! interval.contains(trade.getTime()) ) {
 			throw new OutOfIntervalException(interval, trade);
 		}
 		return addDeal(trade.getPrice(), trade.getQty());
@@ -141,10 +139,10 @@ public class Candle {
 	 * @throws OutOfIntervalException время тика за границей интервала свечи
 	 */
 	public Candle addTick(Tick tick) throws OutOfIntervalException {
-		if ( ! interval.contains(tick.getTime().toInstant(ZoneOffset.UTC)) ) {
+		if ( ! interval.contains(tick.getTime()) ) {
 			throw new OutOfIntervalException(interval, tick);
 		}
-		return addDeal(tick.getValue(), tick.getOptionalValueAsLong());
+		return addDeal(tick.getPrice(), tick.getSize());
 	}
 	
 	/**
@@ -152,8 +150,8 @@ public class Candle {
 	 * <p>
 	 * @return время начала интервала
 	 */
-	public LocalDateTime getStartTime() {
-		return LocalDateTime.ofInstant(interval.getStart(), ZoneOffset.UTC);
+	public Instant getStartTime() {
+		return interval.getStart();
 	}
 	
 	/**
@@ -165,8 +163,8 @@ public class Candle {
 	 * <p>
 	 * @return время окончания интервала
 	 */
-	public LocalDateTime getEndTime() {
-		return LocalDateTime.ofInstant(interval.getEnd(), ZoneOffset.UTC);
+	public Instant getEndTime() {
+		return interval.getEnd();
 	}
 	
 	/**

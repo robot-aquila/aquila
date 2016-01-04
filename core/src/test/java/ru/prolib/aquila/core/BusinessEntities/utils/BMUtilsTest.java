@@ -2,11 +2,12 @@ package ru.prolib.aquila.core.BusinessEntities.utils;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.data.Tick;
 
 public class BMUtilsTest {
 	private static final Symbol symbol;
@@ -14,7 +15,8 @@ public class BMUtilsTest {
 	
 	static {
 		symbol = new Symbol("foo", "bar", "USD");
-		tick = new Tick(LocalDateTime.of(2014, 11, 19, 4, 37, 39, 50), 21.45d, 84d);
+		tick = Tick.of(TickType.TRADE,
+				Instant.parse("2014-11-19T04:37:39.050Z"), 21.45d, 84, 3603.6d);
 	}
 	
 	private EditableTerminal terminal;
@@ -38,19 +40,10 @@ public class BMUtilsTest {
 		expected.setPrice(21.45d);
 		expected.setQty(84L);
 		expected.setSymbol(symbol);
-		expected.setTime(LocalDateTime.of(2014, 11, 19, 4, 37, 39, 50));
+		expected.setTime(Instant.parse("2014-11-19T04:37:39.050Z"));
 		expected.setVolume(3603.6);
 		
 		assertEquals(expected, utils.tradeFromTick(tick, security));
-	}
-	
-	@Test (expected=NullPointerException.class)
-	public void testTradeFromTick_ThrowsIfMinStepSizeNotDefined()
-			throws Exception
-	{
-		security.setMinStepPrice(0.02d);
-		
-		utils.tradeFromTick(tick, security);
 	}
 	
 }

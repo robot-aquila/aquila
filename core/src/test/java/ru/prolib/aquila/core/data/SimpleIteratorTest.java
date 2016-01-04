@@ -1,25 +1,16 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.junit.Test;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 public class SimpleIteratorTest {
-	private final DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  
 	
-	/**
-	 * Parse string "yyyy-MM-dd HH:mm:ss" datetime format into joda-time.
-	 * <p> 
-	 * @param time
-	 * @return
-	 * @throws Exception
-	 */
-	public LocalDateTime time(String time) throws Exception {
-		return LocalDateTime.parse(time, f);
+	public Instant time(String time) throws Exception {
+		return Instant.parse(time);
 	}
 	
 	/**
@@ -30,13 +21,13 @@ public class SimpleIteratorTest {
 	 */
 	public List<Tick> getExpectedAsList() throws Exception {
 		List<Tick> ticks = new LinkedList<Tick>();
-		ticks.add(new Tick(time("2014-06-18 09:59:59"), 144.79, 250.0));
-		ticks.add(new Tick(time("2014-06-18 18:34:20"), 148.79,   5.0));
-		ticks.add(new Tick(time("2014-06-18 18:44:15"), 141.79,  10.0));
-		ticks.add(new Tick(time("2014-06-19 10:00:00"), 154.98,   1.54));
-		ticks.add(new Tick(time("2014-06-19 15:00:00"), 154.80, 500.0));
-		ticks.add(new Tick(time("2014-06-25 10:00:01"), 148.70, 300.0));
-		ticks.add(new Tick(time("2014-06-25 10:00:02"), 147.70,   1.4));
+		ticks.add(Tick.of(time("2014-06-18T09:59:59Z"), 144.79, 250));
+		ticks.add(Tick.of(time("2014-06-18T18:34:20Z"), 148.79,   5));
+		ticks.add(Tick.of(time("2014-06-18T18:44:15Z"), 141.79,  10));
+		ticks.add(Tick.of(time("2014-06-19T10:00:00Z"), 154.98,   1));
+		ticks.add(Tick.of(time("2014-06-19T15:00:00Z"), 154.80, 500));
+		ticks.add(Tick.of(time("2014-06-25T10:00:01Z"), 148.70, 300));
+		ticks.add(Tick.of(time("2014-06-25T10:00:02Z"), 147.70,   1));
 		return ticks;
 	}
 	

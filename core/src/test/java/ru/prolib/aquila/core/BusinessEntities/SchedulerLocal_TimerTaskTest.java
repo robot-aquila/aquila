@@ -1,47 +1,56 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.core.BusinessEntities.SchedulerTestComponents.*;
-
 public class SchedulerLocal_TimerTaskTest {
 	private IMocksControl control;
-	private Runnable task;
-	private Scheduler scheduler;
+	private Runnable runnable1, runnable2;
+
 	private SchedulerLocal_TimerTask timerTask1, timerTask2;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		task = control.createMock(Runnable.class);
-		scheduler = control.createMock(Scheduler.class);
-		timerTask1 = new SchedulerLocal_TimerTask(task, scheduler);
-		timerTask2 = new SchedulerLocal_TimerTask(task);
+		runnable1 = control.createMock(Runnable.class);
+		runnable2 = control.createMock(Runnable.class);
+		timerTask1 = new SchedulerLocal_TimerTask(runnable1, true);
+		timerTask2 = new SchedulerLocal_TimerTask(runnable2, false);
 	}
 	
 	@Test
-	public void testRun_AutoClear() throws Exception {
-		scheduler.cancel(same(task));
-		task.run();
+	public void testRun_RunOnce() throws Exception {
+		runnable1.run();
 		control.replay();
 		
+		timerTask1.run();
 		timerTask1.run();
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testRun_WithoutAutoClear() throws Exception {
-		task.run();
+	public void testRun_RunRepeatedly() throws Exception {
+		runnable2.run();
+		runnable2.run();
+		runnable2.run();
 		control.replay();
 		
 		timerTask2.run();
+		timerTask2.run();
+		timerTask2.run();
+		
+		control.verify();	
+	}
+	
+	@Test
+	public void testCancel() throws Exception {
+		control.replay();
+		timerTask1.cancel();
+		
+		timerTask1.run();
 		
 		control.verify();		
 	}
@@ -55,28 +64,8 @@ public class SchedulerLocal_TimerTaskTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		task = new MyRunnable();
-		scheduler = new MyScheduler();
-		timerTask1 = new SchedulerLocal_TimerTask(task, scheduler);
-		Variant<Runnable> vTask = new Variant<Runnable>()
-			.add(task)
-			.add(new MyRunnable());
-		Variant<Scheduler> vSchd = new Variant<Scheduler>(vTask)
-			.add(scheduler)
-			.add(new MyScheduler());
-		Variant<?> iterator = vSchd;
-		int foundCnt = 0;
-		SchedulerLocal_TimerTask x, found = null;
-		do {
-			x = new SchedulerLocal_TimerTask(vTask.get(), vSchd.get());
-			if ( timerTask1.equals(x) ) {
-				foundCnt ++;
-				found = x;
-			}
-		} while ( iterator.next() );
-		assertEquals(1, foundCnt);
-		assertSame(task, found.getTask());
-		assertSame(scheduler, found.getScheduler());
+		assertEquals(timerTask1, new SchedulerLocal_TimerTask(runnable1, true));
+		assertNotEquals(timerTask1, timerTask2);
 	}
 
 }

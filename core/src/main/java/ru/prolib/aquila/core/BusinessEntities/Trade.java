@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.time.LocalDateTime;
-
+import java.time.Instant;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -16,10 +15,10 @@ public class Trade implements Comparable<Trade> {
 	private volatile Long id;
 	private volatile Symbol symbol;
 	private volatile Direction direction;
-	private volatile LocalDateTime time;
-	private volatile Double price;
-	private volatile Long qty;
-	private volatile Double volume;
+	private volatile Instant time;
+	private volatile double price;
+	private volatile long qty;
+	private volatile double volume;
 	private volatile Long orderId;
 	
 	/**
@@ -80,7 +79,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return время сделки или null, если время сделки не определено
 	 */
-	public LocalDateTime getTime() {
+	public Instant getTime() {
 		return time;
 	}
 	
@@ -89,7 +88,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param time время сделки
 	 */
-	public void setTime(LocalDateTime time) {
+	public void setTime(Instant time) {
 		this.time = time;
 	}
 	
@@ -116,7 +115,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return цена сделки или null, если цена не определена
 	 */
-	public Double getPrice() {
+	public double getPrice() {
 		return price;
 	}
 	
@@ -125,7 +124,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param price цена сделки
 	 */
-	public void setPrice(Double price) {
+	public void setPrice(double price) {
 		this.price = price;
 	}
 	
@@ -134,7 +133,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return количество сделки или null, если количество не определено
 	 */
-	public Long getQty() {
+	public long getQty() {
 		return qty;
 	}
 	
@@ -143,7 +142,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param qty количество сделки
 	 */
-	public void setQty(Long qty) {
+	public void setQty(long qty) {
 		this.qty = qty;
 	}
 	
@@ -152,7 +151,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return объем сделки или null, если объем не определен
 	 */
-	public Double getVolume() {
+	public double getVolume() {
 		return volume;
 	}
 	
@@ -161,7 +160,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param vol объем сделки
 	 */
-	public void setVolume(Double vol) {
+	public void setVolume(double vol) {
 		volume = vol;
 	}
 	

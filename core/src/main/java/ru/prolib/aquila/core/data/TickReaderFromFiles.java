@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import java.io.File;
 
+import ru.prolib.aquila.core.BusinessEntities.Tick;
+
 /**
  * Абстрактный поток тиков на основе набора файлов.
  */

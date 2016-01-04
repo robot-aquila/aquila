@@ -1,9 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -463,7 +465,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public LocalDateTime getCurrentTime() {
+	public Instant getCurrentTime() {
 		return scheduler.getCurrentTime();
 	}
 
@@ -562,12 +564,12 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public TaskHandler schedule(Runnable task, LocalDateTime time) {
+	public TaskHandler schedule(Runnable task, Instant time) {
 		return scheduler.schedule(task, time);
 	}
 
 	@Override
-	public TaskHandler schedule(Runnable task, LocalDateTime firstTime,
+	public TaskHandler schedule(Runnable task, Instant firstTime,
 			long period)
 	{
 		return scheduler.schedule(task, firstTime, period);
@@ -585,7 +587,7 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	public TaskHandler scheduleAtFixedRate(Runnable task,
-			LocalDateTime firstTime, long period)
+			Instant firstTime, long period)
 	{
 		return scheduler.scheduleAtFixedRate(task, firstTime, period);		
 	}
@@ -596,22 +598,7 @@ public class TerminalImpl implements EditableTerminal {
 	{
 		return scheduler.scheduleAtFixedRate(task, delay, period);
 	}
-
-	@Override
-	public void cancel(Runnable task) {
-		scheduler.cancel(task);
-	}
 	
-	@Override
-	public boolean scheduled(Runnable task) {
-		return scheduler.scheduled(task);
-	}
-
-	@Override
-	public TaskHandler getTaskHandler(Runnable task) {
-		return scheduler.getTaskHandler(task);
-	}
-
 	/**
 	 * Получить планировщик задач.
 	 * <p>
@@ -701,6 +688,11 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	public void unlock() {
 		lock.unlock();
+	}
+	
+	@Override
+	public void close() {
+		scheduler.close();
 	}
 
 }

@@ -2,11 +2,14 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.junit.*;
 import org.threeten.extra.Interval;
 
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.BusinessEntities.Trade;
 
 /**
@@ -15,16 +18,16 @@ import ru.prolib.aquila.core.BusinessEntities.Trade;
  */
 public class CandleSeriesImplTest {
 	private CandleSeriesImpl series;
-	private LocalDateTime time1, time2, time3;
+	private Instant time1, time2, time3;
 	private Interval int1, int2, int3;
 	private Candle candle1, candle2, candle3;
 
 	@Before
 	public void setUp() throws Exception {
 		series = new CandleSeriesImpl(TimeFrame.M5, "foo", 512);
-		time1 = LocalDateTime.of(2013, 10, 7, 11, 0, 0);
-		time2 = time1.plusMinutes(5);
-		time3 = time2.plusMinutes(5);
+		time1 = Instant.parse("2013-10-07T11:00:00Z");
+		time2 = time1.plusSeconds(5 * 60);
+		time3 = time2.plusSeconds(5 * 60);
 		int1 = TimeFrame.M5.getInterval(time1);
 		int2 = TimeFrame.M5.getInterval(time2);
 		int3 = TimeFrame.M5.getInterval(time3);
@@ -199,11 +202,11 @@ public class CandleSeriesImplTest {
 	
 	@Test
 	public void testSet_NudgePOAForAggregatedCandle() throws Exception {
-		series.aggregate(new Tick(time1.plusMinutes(3), 142350d, 120d), true);
+		series.aggregate(Tick.of(time1.plusSeconds(3 * 60), 142350d, 120), true);
 		Candle expected = new Candle(candle1.getInterval(),
 				142350d, 142350d, 142350d, 142350d, 120L);
 		assertEquals(expected, series.get());
-		assertEquals(time1.plusMinutes(3), series.getPOA());
+		assertEquals(time1.plusSeconds(3 * 60), series.getPOA());
 	}
 	
 	/**
@@ -230,21 +233,21 @@ public class CandleSeriesImplTest {
 	{
 		Tick tick[] = {
 				// candle 1
-				new Tick(time1.plusMinutes(1), 144440d,     1d),
-				new Tick(time1.plusMinutes(1), 143130d,    20d),
-				new Tick(time1.plusMinutes(3), 143210d, 39600d),
+				Tick.of(time1.plusSeconds(60 * 1), 144440d,     1),
+				Tick.of(time1.plusSeconds(60 * 1), 143130d,    20),
+				Tick.of(time1.plusSeconds(60 * 3), 143210d, 39600),
 				
 				// candle 2
-				new Tick(time2,				   143230d,     9d),
-				new Tick(time2.plusMinutes(2), 143290d,    70d),
-				new Tick(time2.plusMinutes(3), 143390d,   200d),
-				new Tick(time2.plusMinutes(4), 143290d, 12000d),
+				Tick.of(time2,				   143230d,     9),
+				Tick.of(time2.plusSeconds(60 * 2), 143290d,    70),
+				Tick.of(time2.plusSeconds(60 * 3), 143390d,   200),
+				Tick.of(time2.plusSeconds(60 * 4), 143290d, 12000),
 				
 				// candle3
-				new Tick(time3.plusMinutes(1), 143280d,    90d),
-				new Tick(time3.plusMinutes(2), 143110d,   900d),
-				new Tick(time3.plusMinutes(3), 143320d,  1000d),
-				new Tick(time3.plusMinutes(4), 143190d, 10000d),
+				Tick.of(time3.plusSeconds(60 * 1), 143280d,    90),
+				Tick.of(time3.plusSeconds(60 * 2), 143110d,   900),
+				Tick.of(time3.plusSeconds(60 * 3), 143320d,  1000),
+				Tick.of(time3.plusSeconds(60 * 4), 143190d, 10000),
 		};
 		Candle candle[] = {
 				// candle 1 changes
@@ -264,20 +267,20 @@ public class CandleSeriesImplTest {
 				new Candle(int3, 143280d, 143320d, 143110d, 143320d,  1990L),
 				new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L),
 		};
-		LocalDateTime poa[] = {
-				time1.plusMinutes(1),
-				time1.plusMinutes(1),
-				time1.plusMinutes(3),
+		Instant poa[] = {
+				time1.plusSeconds(60 * 1),
+				time1.plusSeconds(60 * 1),
+				time1.plusSeconds(60 * 3),
 				
 				time2,
-				time2.plusMinutes(2),
-				time2.plusMinutes(3),
-				time2.plusMinutes(4),
+				time2.plusSeconds(60 * 2),
+				time2.plusSeconds(60 * 3),
+				time2.plusSeconds(60 * 4),
 				
-				time3.plusMinutes(1),
-				time3.plusMinutes(2),
-				time3.plusMinutes(3),
-				time3.plusMinutes(4),
+				time3.plusSeconds(60 * 1),
+				time3.plusSeconds(60 * 2),
+				time3.plusSeconds(60 * 3),
+				time3.plusSeconds(60 * 4),
 		};
 		
 		assertEquals(tick.length, candle.length);
@@ -327,25 +330,25 @@ public class CandleSeriesImplTest {
 	
 	@Test (expected=OutOfDateException.class)
 	public void testAggregateTick2_Strict_ThrowsIfOutOfDate() throws Exception {
-		series.aggregate(new Tick(time1.plusMinutes(2), 144440d, 1d), false);
-		series.aggregate(new Tick(time1.plusMinutes(1), 144390d, 1d), false);
+		series.aggregate(Tick.of(time1.plusSeconds(60 * 2), 144440d, 1), false);
+		series.aggregate(Tick.of(time1.plusSeconds(60 * 1), 144390d, 1), false);
 	}
 	
 	@Test  (expected=OutOfDateException.class)
 	public void testAggregateTick1_ThrowsOutOfDate() throws Exception {
-		series.aggregate(new Tick(time1.plusMinutes(2), 144440d, 1d));
-		series.aggregate(new Tick(time1.plusMinutes(1), 144390d, 1d));
+		series.aggregate(Tick.of(time1.plusSeconds(60 * 2), 144440d, 1));
+		series.aggregate(Tick.of(time1.plusSeconds(60 * 1), 144390d, 1));
 	}
 	
 	@Test
 	public void testAggregateTick2_Silent_SkipsIfOutOfDate() throws Exception {
-		series.aggregate(new Tick(time1.plusMinutes(2), 144440d, 1d), false);
+		series.aggregate(Tick.of(time1.plusSeconds(60 * 2), 144440d, 1), false);
 		
-		series.aggregate(new Tick(time1.plusMinutes(1), 144390d, 1d), true);
+		series.aggregate(Tick.of(time1.plusSeconds(60 * 1), 144390d, 1), true);
 		
 		Candle exp = new Candle(int1, 144440d, 144440d, 144440d, 144440d, 1L);
 		assertEquals(exp, series.get());
-		assertEquals(time1.plusMinutes(2), series.getPOA());
+		assertEquals(time1.plusSeconds(60 * 2), series.getPOA());
 	}
 	
 	/**
@@ -356,7 +359,7 @@ public class CandleSeriesImplTest {
 	 * @param qty количество
 	 * @return
 	 */
-	private Trade trade(LocalDateTime time, double price, long qty) {
+	private Trade trade(Instant time, double price, long qty) {
 		Trade trade = new Trade(null);
 		trade.setTime(time);
 		trade.setPrice(price);
@@ -378,21 +381,21 @@ public class CandleSeriesImplTest {
 	{
 		Trade trade[] = {
 				// candle 1
-				trade(time1.plusMinutes(1), 144440d,     1L),
-				trade(time1.plusMinutes(1), 143130d,    20L),
-				trade(time1.plusMinutes(3), 143210d, 39600L),
+				trade(time1.plusSeconds(60 * 1), 144440d,     1L),
+				trade(time1.plusSeconds(60 * 1), 143130d,    20L),
+				trade(time1.plusSeconds(60 * 3), 143210d, 39600L),
 				
 				// candle 2
 				trade(time2,				143230d,     9L),
-				trade(time2.plusMinutes(2), 143290d,    70L),
-				trade(time2.plusMinutes(3), 143390d,   200L),
-				trade(time2.plusMinutes(4), 143290d, 12000L),
+				trade(time2.plusSeconds(60 * 2), 143290d,    70L),
+				trade(time2.plusSeconds(60 * 3), 143390d,   200L),
+				trade(time2.plusSeconds(60 * 4), 143290d, 12000L),
 				
 				// candle3
-				trade(time3.plusMinutes(1), 143280d,    90L),
-				trade(time3.plusMinutes(2), 143110d,   900L),
-				trade(time3.plusMinutes(3), 143320d,  1000L),
-				trade(time3.plusMinutes(4), 143190d, 10000L),
+				trade(time3.plusSeconds(60 * 1), 143280d,    90L),
+				trade(time3.plusSeconds(60 * 2), 143110d,   900L),
+				trade(time3.plusSeconds(60 * 3), 143320d,  1000L),
+				trade(time3.plusSeconds(60 * 4), 143190d, 10000L),
 		};
 		Candle candle[] = {
 				// candle 1 changes
@@ -412,20 +415,20 @@ public class CandleSeriesImplTest {
 				new Candle(int3, 143280d, 143320d, 143110d, 143320d,  1990L),
 				new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L),
 		};
-		LocalDateTime poa[] = {
-				time1.plusMinutes(1),
-				time1.plusMinutes(1),
-				time1.plusMinutes(3),
+		Instant poa[] = {
+				time1.plusSeconds(60 * 1),
+				time1.plusSeconds(60 * 1),
+				time1.plusSeconds(60 * 3),
 				
 				time2,
-				time2.plusMinutes(2),
-				time2.plusMinutes(3),
-				time2.plusMinutes(4),
+				time2.plusSeconds(60 * 2),
+				time2.plusSeconds(60 * 3),
+				time2.plusSeconds(60 * 4),
 				
-				time3.plusMinutes(1),
-				time3.plusMinutes(2),
-				time3.plusMinutes(3),
-				time3.plusMinutes(4),
+				time3.plusSeconds(60 * 1),
+				time3.plusSeconds(60 * 2),
+				time3.plusSeconds(60 * 3),
+				time3.plusSeconds(60 * 4),
 		};
 		
 		assertEquals(trade.length, candle.length);
@@ -474,25 +477,25 @@ public class CandleSeriesImplTest {
 
 	@Test (expected=OutOfDateException.class)
 	public void testAggregateTrade2_Strict_ThrowsIfOutOfDate() throws Exception {
-		series.aggregate(trade(time1.plusMinutes(2), 144440d, 1L), false);
-		series.aggregate(trade(time1.plusMinutes(1), 144390d, 1L), false);
+		series.aggregate(trade(time1.plusSeconds(60 * 2), 144440d, 1L), false);
+		series.aggregate(trade(time1.plusSeconds(60 * 1), 144390d, 1L), false);
 	}
 
 	@Test  (expected=OutOfDateException.class)
 	public void testAggregateTrade1_ThrowsOutOfDate() throws Exception {
-		series.aggregate(trade(time1.plusMinutes(2), 144440d, 1L));
-		series.aggregate(trade(time1.plusMinutes(1), 144390d, 1L));
+		series.aggregate(trade(time1.plusSeconds(60 * 2), 144440d, 1L));
+		series.aggregate(trade(time1.plusSeconds(60 * 1), 144390d, 1L));
 	}
 
 	@Test
 	public void testAggregateTrade2_Silent_SkipsIfOutOfDate() throws Exception {
-		series.aggregate(trade(time1.plusMinutes(2), 144440d, 1L), false);
+		series.aggregate(trade(time1.plusSeconds(60 * 2), 144440d, 1L), false);
 		
-		series.aggregate(trade(time1.plusMinutes(1), 144390d, 1L), true);
+		series.aggregate(trade(time1.plusSeconds(60 * 1), 144390d, 1L), true);
 		
 		Candle exp = new Candle(int1, 144440d, 144440d, 144440d, 144440d, 1L);
 		assertEquals(exp, series.get());
-		assertEquals(time1.plusMinutes(2), series.getPOA());
+		assertEquals(time1.plusSeconds(60 * 2), series.getPOA());
 	}
 	
 	/**
@@ -510,31 +513,31 @@ public class CandleSeriesImplTest {
 	{
 		Candle input[] = {
 			// candle 1
-			new Candle(TimeFrame.M2.getInterval(time1.plusMinutes(1)),
+			new Candle(TimeFrame.M2.getInterval(time1.plusSeconds(60 * 1)),
 					144440d, 144440d, 144390d, 144400d,     1L),
-			new Candle(TimeFrame.M1.getInterval(time1.plusMinutes(2)),
+			new Candle(TimeFrame.M1.getInterval(time1.plusSeconds(60 * 2)),
 					144410d, 144420d, 143130d, 143200d,    20L),
-			new Candle(TimeFrame.M1.getInterval(time1.plusMinutes(4)),
+			new Candle(TimeFrame.M1.getInterval(time1.plusSeconds(60 * 4)),
 					143190d, 144050d, 143280d, 143290d, 39600L),
 			
 			// candle 2
 			new Candle(TimeFrame.M1.getInterval(time2),
 					143230d, 143240d, 143230d, 143240d,     9L),
-			new Candle(TimeFrame.M1.getInterval(time2.plusMinutes(2)),
+			new Candle(TimeFrame.M1.getInterval(time2.plusSeconds(60 * 2)),
 					143240d, 143300d, 143240d, 143290d,    70L),
-			new Candle(TimeFrame.M1.getInterval(time2.plusMinutes(3)),
+			new Candle(TimeFrame.M1.getInterval(time2.plusSeconds(60 * 3)),
 					143300d, 143390d, 143290d, 143390d,   200L),
-			new Candle(TimeFrame.M1.getInterval(time2.plusMinutes(4)),
+			new Candle(TimeFrame.M1.getInterval(time2.plusSeconds(60 * 4)),
 					143320d, 143330d, 143240d, 143290d, 12000L),
 			
 			// candle3
 			new Candle(TimeFrame.M1.getInterval(time3),
 					143210d, 143280d, 143200d, 143280d,    90L),
-			new Candle(TimeFrame.M1.getInterval(time3.plusMinutes(1)),
+			new Candle(TimeFrame.M1.getInterval(time3.plusSeconds(60 * 1)),
 					143220d, 143260d, 143110d, 143110d,   900L),
-			new Candle(TimeFrame.M1.getInterval(time3.plusMinutes(2)),
+			new Candle(TimeFrame.M1.getInterval(time3.plusSeconds(60 * 2)),
 					143270d, 143320d, 143240d, 143320d,  1000L),
-			new Candle(TimeFrame.M1.getInterval(time3.plusMinutes(3)),
+			new Candle(TimeFrame.M1.getInterval(time3.plusSeconds(60 * 3)),
 					143300d, 143310d, 143200d, 143190d, 10000L),
 		};
 		Candle candle[] = {
@@ -555,23 +558,23 @@ public class CandleSeriesImplTest {
 			new Candle(int3, 143210d, 143320d, 143110d, 143320d,  1990L),
 			new Candle(int3, 143210d, 143320d, 143110d, 143190d, 11990L),
 		};
-		LocalDateTime poa[] = {
+		Instant poa[] = {
 			// candle 1 POA changes
-			time1.plusMinutes(2),
-			time1.plusMinutes(3),
-			time1.plusMinutes(5),
+			time1.plusSeconds(60 * 2),
+			time1.plusSeconds(60 * 3),
+			time1.plusSeconds(60 * 5),
 			
 			// candle 2 POA changes
-			time2.plusMinutes(1),
-			time2.plusMinutes(3),
-			time2.plusMinutes(4),
-			time2.plusMinutes(5),
+			time2.plusSeconds(60 * 1),
+			time2.plusSeconds(60 * 3),
+			time2.plusSeconds(60 * 4),
+			time2.plusSeconds(60 * 5),
 			
 			// candle 3 POA changes
-			time3.plusMinutes(1),
-			time3.plusMinutes(2),
-			time3.plusMinutes(3),
-			time3.plusMinutes(4),
+			time3.plusSeconds(60 * 1),
+			time3.plusSeconds(60 * 2),
+			time3.plusSeconds(60 * 3),
+			time3.plusSeconds(60 * 4),
 		};
 		
 		assertEquals(input.length, candle.length);
@@ -688,7 +691,7 @@ public class CandleSeriesImplTest {
 		aggregateCandle_TestOverlapsInterval(AggregateAction<Candle> action)
 			throws Exception
 	{
-		LocalDateTime time = LocalDateTime.of(2013, 10, 9, 0, 0, 0, 0);
+		Instant time = Instant.parse("2013-10-09T00:00:00Z");
 		Candle c1, c2;
 		c1 = new Candle(TimeFrame.M3.getInterval(time),
 				146110d, 146110d, 145910d, 145930d, 1L);
@@ -696,7 +699,7 @@ public class CandleSeriesImplTest {
 				145940d, 145960d, 145820d, 145910d, 1L);
 		
 		action.aggregate(c1);
-		assertEquals(time.plusMinutes(3), series.getPOA());
+		assertEquals(time.plusSeconds(60 * 3), series.getPOA());
 		
 		try {
 			action.aggregate(c2);
@@ -750,23 +753,23 @@ public class CandleSeriesImplTest {
 		series.add(candle1);
 		series.add(candle2);
 		
-		series.aggregate(LocalDateTime.of(2013, 10, 7, 11, 13, 0, 0));
-		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 13, 0, 0), series.getPOA());
+		series.aggregate(Instant.parse("2013-10-07T11:13:00Z"));
+		assertEquals(Instant.parse("2013-10-07T11:13:00Z"), series.getPOA());
 		
-		series.aggregate(LocalDateTime.of(2013, 10, 7, 11, 14, 0, 0), false);
-		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 14, 0, 0), series.getPOA());
+		series.aggregate(Instant.parse("2013-10-07T11:14:00Z"), false);
+		assertEquals(Instant.parse("2013-10-07T11:14:00Z"), series.getPOA());
 		
-		series.aggregate(LocalDateTime.of(2013, 10, 7, 11, 16, 0, 0), true);
-		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 16, 0, 0), series.getPOA());
+		series.aggregate(Instant.parse("2013-10-07T11:16:00Z"), true);
+		assertEquals(Instant.parse("2013-10-07T11:16:00Z"), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime2_Strict_ThrowsIfOutOfDate() throws Exception {
 		series.add(candle1);
-		assertEquals(LocalDateTime.of(2013, 10, 7, 11, 5, 0, 0), series.getPOA());
+		assertEquals(Instant.parse("2013-10-07T11:05:00Z"), series.getPOA());
 		
 		try {
-			series.aggregate(LocalDateTime.of(2013, 10, 7, 10, 59, 0, 0), false);
+			series.aggregate(Instant.parse("2013-10-07T10:59:00Z"), false);
 			fail("Expected: " + OutOfDateException.class.getSimpleName());
 		} catch ( OutOfDateException e ) {
 			
@@ -778,7 +781,7 @@ public class CandleSeriesImplTest {
 		series.add(candle1);
 		
 		try {
-			series.aggregate(LocalDateTime.of(2013, 10, 7, 10, 59, 0, 0));
+			series.aggregate(Instant.parse("2013-10-07T10:59:00Z"));
 			fail("Expected: " + OutOfDateException.class.getSimpleName());
 		} catch ( OutOfDateException e ) {
 			
@@ -789,34 +792,35 @@ public class CandleSeriesImplTest {
 	public void testAggregateTime2_Silent_SkipsIfOutOfDate() throws Exception {
 		series.add(candle1);
 		
-		series.aggregate(LocalDateTime.of(2013, 10, 7, 10, 59, 0, 0), true);
+		series.aggregate(Instant.parse("2013-10-07T10:59:00Z"), true);
 	
 		assertEquals(candle1.getEndTime(), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime2_Strict_FirstTime() throws Exception {
-		series.aggregate(LocalDateTime.of(2013, 10, 7, 8, 0, 0, 0), false);
-		assertEquals(LocalDateTime.of(2013, 10, 7, 8, 0, 0), series.getPOA());
+		series.aggregate(Instant.parse("2013-10-07T08:00:00Z"), false);
+		assertEquals(Instant.parse("2013-10-07T08:00:00Z"), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime2_Silent_FirstTime() throws Exception {
-		series.aggregate(LocalDateTime.of(2013, 10, 7, 8, 0, 0, 0), true);
-		assertEquals(LocalDateTime.of(2013, 10, 7, 8, 0, 0), series.getPOA());
+		series.aggregate(Instant.parse("2013-10-07T08:00:00Z"), true);
+		assertEquals(Instant.parse("2013-10-07T08:00:00Z"), series.getPOA());
 	}
 	
 	@Test
 	public void testAggregateTime1_FirstTime() throws Exception {
-		series.aggregate(LocalDateTime.of(2013, 10, 7, 8, 0, 0, 0));
-		assertEquals(LocalDateTime.of(2013, 10, 7, 8, 0, 0), series.getPOA());
+		series.aggregate(Instant.parse("2013-10-07T08:00:00Z"));
+		assertEquals(Instant.parse("2013-10-07T08:00:00Z"), series.getPOA());
 	}
 
 	@Test
 	public void testFindFirstIntradayCandle() throws Exception {
 		assertNull(series.findFirstIntradayCandle());
 		
-		LocalDateTime prev = candle1.getStartTime().minusDays(1);
+		Instant prev = LocalDateTime.ofInstant(candle1.getStartTime(),
+				ZoneOffset.UTC).minusDays(1).toInstant(ZoneOffset.UTC);
 		TimeFrame t = TimeFrame.M5;
 		Candle candle0 = new Candle(t.getInterval(prev), 0d, 0d, 0d, 0d, 0L);
 		series.add(candle0);

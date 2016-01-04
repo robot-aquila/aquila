@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,7 +43,7 @@ public class TerminalImplTest {
 	private Security security;
 	private Runnable task;
 	private TaskHandler taskHandler;
-	private LocalDateTime time = LocalDateTime.now();
+	private Instant time = Instant.now();
 	private DataProvider dataProvider;
 	
 	@BeforeClass
@@ -59,6 +59,7 @@ public class TerminalImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		task = control.createMock(Runnable.class);
+		taskHandler = control.createMock(SchedulerLocal_TimerTask.class);
 		controller = control.createMock(TerminalController.class);
 		dispatcher = control.createMock(TerminalEventDispatcher.class);
 		securities = control.createMock(Securities.class);
@@ -86,7 +87,6 @@ public class TerminalImplTest {
 		terminal = new TerminalImpl(params);
 
 		expect(security.getSymbol()).andStubReturn(symbol);
-		taskHandler = new TaskHandlerImpl(task, scheduler);
 	}
 	
 	@Test
@@ -1115,38 +1115,6 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCancel() throws Exception {
-		scheduler.cancel(task);
-		control.replay();
-		
-		terminal.cancel(task);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetTaskHandler() throws Exception {
-		expect(scheduler.getTaskHandler(task)).andReturn(taskHandler);
-		control.replay();
-		
-		assertSame(taskHandler, terminal.getTaskHandler(task));
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testScheduled() throws Exception {
-		expect(scheduler.scheduled(task)).andReturn(true);
-		expect(scheduler.scheduled(task)).andReturn(false);
-		control.replay();
-		
-		assertTrue(terminal.scheduled(task));
-		assertFalse(terminal.scheduled(task));
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testOnReady() throws Exception {
 		EventType type = control.createMock(EventType.class);
 		expect(dispatcher.OnReady()).andReturn(type);
@@ -1191,6 +1159,16 @@ public class TerminalImplTest {
 		control.replay();
 		
 		assertSame(idSeq, terminal.getOrderIdSequence());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testClose() {
+		scheduler.close();
+		control.replay();
+		
+		terminal.close();
 		
 		control.verify();
 	}

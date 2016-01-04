@@ -35,7 +35,7 @@ public class TradeSetVolumeTest {
 			if ( (Boolean) fixture[i][2] ) {
 				assertEquals(fixture[i][1], trade.getVolume());
 			} else {
-				assertNull(trade.getVolume());
+				assertEquals(0.0d, trade.getVolume(), 0.01d);
 			}
 		}
 	}

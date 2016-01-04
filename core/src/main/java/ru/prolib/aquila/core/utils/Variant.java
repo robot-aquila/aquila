@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.utils;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Объект, позволяющий перебирать все возможные комбинации значений.
@@ -43,7 +42,7 @@ public class Variant<T> {
 	public Variant(T[] values, Variant<?> childNode) {
 		super();
 		child = childNode;
-		this.values = new LinkedList<T>();
+		this.values = new Vector<T>();
 		if ( values != null ) {
 			for ( int i = 0; i < values.length; i ++ ) {
 				this.values.add(values[i]);

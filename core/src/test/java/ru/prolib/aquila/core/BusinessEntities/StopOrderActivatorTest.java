@@ -109,11 +109,11 @@ public class StopOrderActivatorTest {
 	@Test
 	public void testOnEvent_OnTrade() throws Exception {
 		FR fix[] = {
-				new FR(Direction.BUY, null,	false),
+				new FR(Direction.BUY, 18.23,  false),
 				new FR(Direction.BUY, 18.24d, true),
 				new FR(Direction.BUY, 18.50d, true),
 				new FR(Direction.BUY, 18.10d, false),
-				new FR(Direction.SELL, null, false),
+				new FR(Direction.SELL, 18.25d, false),
 				new FR(Direction.SELL, 18.24d, true),
 				new FR(Direction.SELL, 18.10d, true),
 				new FR(Direction.SELL, 18.50d, false),

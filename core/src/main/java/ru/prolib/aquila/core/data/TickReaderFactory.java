@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.BusinessEntities.Tick;
+
 /**
  * Интерфейс фабрики потока тиковых данных.
  */

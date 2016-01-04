@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data.timeframe;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -20,7 +21,8 @@ public class TFDays implements TimeFrame {
 	}
 
 	@Override
-	public Interval getInterval(LocalDateTime time) {
+	public Interval getInterval(Instant timestamp) {
+		LocalDateTime time = LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC);
 		int segmentIndex = (time.getDayOfYear() - 1) / length;
 		int firstDayOffset = segmentIndex * length; 
 		LocalDateTime firstDay = LocalDateTime.of(time.getYear(), 1, 1, 0, 0, 0, 0);

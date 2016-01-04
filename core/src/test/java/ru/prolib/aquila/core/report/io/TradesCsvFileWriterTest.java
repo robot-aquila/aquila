@@ -4,17 +4,14 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Vector;
-
 import org.apache.log4j.BasicConfigurator;
 import org.junit.*;
-
 import com.csvreader.CsvReader;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.report.*;
@@ -108,7 +105,7 @@ public class TradesCsvFileWriterTest {
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
 			trade.setSymbol(getSymbol(reader));
-			trade.setTime(LocalDateTime.parse(reader.get(TIME), timeFormat));
+			trade.setTime(LocalDateTime.parse(reader.get(TIME), timeFormat).toInstant(ZoneOffset.UTC));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);
 		}

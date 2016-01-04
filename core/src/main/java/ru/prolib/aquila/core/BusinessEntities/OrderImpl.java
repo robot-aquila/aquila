@@ -1,9 +1,10 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.utils.*;
 
@@ -25,7 +26,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	private Double avgExecPrice = null;
 	private final List<OrderStateHandler> stateHandlers;
 	private final Terminal terminal;
-	private LocalDateTime time,lastChangeTime;
+	private Instant time,lastChangeTime;
 	private final LinkedList<Trade> trades = new LinkedList<Trade>();
 	private final OrderSystemInfo systemInfo = new OrderSystemInfo();
 	private OrderActivator activator;
@@ -289,17 +290,17 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized LocalDateTime getTime() {
+	public synchronized Instant getTime() {
 		return time;
 	}
 
 	@Override
-	public synchronized LocalDateTime getLastChangeTime() {
+	public synchronized Instant getLastChangeTime() {
 		return lastChangeTime;
 	}
 
 	@Override
-	public synchronized void setTime(LocalDateTime value) {
+	public synchronized void setTime(Instant value) {
 		if ( value == null ? time != null : ! value.equals(time) ) {
 			time = value;
 			setChanged();
@@ -307,7 +308,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized void setLastChangeTime(LocalDateTime value) {
+	public synchronized void setLastChangeTime(Instant value) {
 		if ( value == null ? lastChangeTime != null
 				: ! value.equals(lastChangeTime) )
 		{
@@ -366,7 +367,7 @@ public class OrderImpl extends EditableImpl implements EditableOrder {
 	}
 
 	@Override
-	public synchronized LocalDateTime getLastTradeTime() {
+	public synchronized Instant getLastTradeTime() {
 		return trades.size() == 0 ? null : trades.getLast().getTime();
 	}
 

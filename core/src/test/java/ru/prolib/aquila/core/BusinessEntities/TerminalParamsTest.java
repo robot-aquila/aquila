@@ -87,11 +87,5 @@ public class TerminalParamsTest {
 		assertEquals(expected1, params.getTerminalID());
 		assertEquals(expected2, params.getTerminalID());
 	}
-	
-	@Ignore
-	@Test
-	public void testGetters_StrictMode() throws Exception {
-		// TODO: 
-	}
 
 }

@@ -35,7 +35,7 @@ public class TradeSetPriceTest {
 			if ( (Boolean) fixture[i][2] ) {
 				assertEquals(fixture[i][1], trade.getPrice());
 			} else {
-				assertNull(trade.getPrice());
+				assertEquals(0.0d, trade.getPrice(), 0.01d);
 			}
 		}
 	}

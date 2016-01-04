@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.data;
 import java.time.LocalDateTime;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 /**
  * Интерфейс хранилища тиковых данных.

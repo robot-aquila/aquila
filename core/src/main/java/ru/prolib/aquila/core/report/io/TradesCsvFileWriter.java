@@ -2,7 +2,9 @@ package ru.prolib.aquila.core.report.io;
 
 import java.io.*;
 import java.nio.channels.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -166,11 +168,11 @@ public class TradesCsvFileWriter implements TradesWriter, EventListener {
 		}
 	}
 	
-	private String formatTime(LocalDateTime time) {
+	private String formatTime(Instant time) {
 		if ( time == null ) {
 			return null;
 		}
-		return dateFormat.format(time);
+		return dateFormat.format(LocalDateTime.ofInstant(time, ZoneOffset.UTC));
 	}
 	
 	private String joinToString(Object entries[]) {

@@ -659,6 +659,7 @@ public class SecurityImplTest {
 				foundCnt ++;
 				found = x;
 			}
+			x = null; // perform GC ???
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(terminal, found.getTerminal());

@@ -2,7 +2,10 @@ package ru.prolib.aquila.core.report.trades;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Hashtable;
 import java.util.List;
@@ -119,7 +122,8 @@ public class CommonTRTest {
 			trade.setPrice(Double.parseDouble(reader.get(PRICE)));
 			trade.setQty(Long.parseLong(reader.get(QTY)));
 			trade.setSymbol(getSymbol(reader));
-			trade.setTime(LocalDateTime.parse(reader.get(TIME), timeFormat));
+			trade.setTime(LocalDateTime.parse(reader.get(TIME), timeFormat)
+					.toInstant(ZoneOffset.UTC));
 			trade.setVolume(Double.parseDouble(reader.get(VOL)));
 			list.add(trade);
 		}
@@ -176,11 +180,20 @@ public class CommonTRTest {
 		String exQty = reader.get(EXIT_QTY);
 		String exPrice = reader.get(EXIT_PRICE);
 		String exVol = reader.get(EXIT_VOL);
+		
+		assertNotNull(exTime);
+		assertNotNull(exQty);
+		assertNotNull(exPrice);
+		assertNotNull(exVol);
+		Instant exitTime = null;
+		if ( ! exTime.equals("") ) {
+			exitTime = LocalDateTime.parse(exTime, timeFormat).toInstant(ZoneOffset.UTC);
+		}
 		RTrade report = new RTradeImpl(getSymbol(reader),
 			(LONG.equals(reader.get(TYPE))
 				? PositionType.LONG : PositionType.SHORT),
-			LocalDateTime.parse(reader.get(ENTER_TIME), timeFormat),
-			(exTime.equals("") ? null : LocalDateTime.parse(exTime, timeFormat)),
+			LocalDateTime.parse(reader.get(ENTER_TIME), timeFormat).toInstant(ZoneOffset.UTC),
+			exitTime,
 			Long.parseLong(reader.get(ENTER_QTY)),
 			(exQty.equals("") ? null : Long.parseLong(exQty)),
 			Double.parseDouble(reader.get(ENTER_PRICE)),

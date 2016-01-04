@@ -2,21 +2,17 @@ package ru.prolib.aquila.core.report.trades;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.*;
-
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
-
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.report.*;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class ActiveTradesTest {
-	private static DateTimeFormatter format;
 	private static Direction BUY = Direction.BUY;
 	private static Symbol symbol1, symbol2;
 	private EventSystem es;
@@ -31,7 +27,6 @@ public class ActiveTradesTest {
 	public static void setUpBeforeCLass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		symbol1 = new Symbol("Foo", "GZ", "USD", SymbolType.UNKNOWN);
 		symbol2 = new Symbol("Bar", "BZ", "RUB", SymbolType.UNKNOWN);
 	}
@@ -46,7 +41,7 @@ public class ActiveTradesTest {
 		report2 = control.createMock(ERTrade.class);
 		terminal = control.createMock(Terminal.class);
 		reports = new ActiveTrades(dispatcher);
-		trade = createTrade(symbol1, "1999-01-01 00:00:00", BUY, 1L, 1d, 10d);
+		trade = createTrade(symbol1, "1999-01-01T00:00:00Z", BUY, 1L, 1d, 10d);
 		expect(report1.getSymbol()).andStubReturn(symbol1);
 		expect(report2.getSymbol()).andStubReturn(symbol2);
 	}
@@ -71,7 +66,7 @@ public class ActiveTradesTest {
 			Direction dir, Long qty, Double price, Double volume)
 		throws Exception
 	{
-		return createTrade(symbol, LocalDateTime.parse(time, format), dir, qty,
+		return createTrade(symbol, Instant.parse(time), dir, qty,
 				price, volume);
 	}
 	
@@ -86,7 +81,7 @@ public class ActiveTradesTest {
 	 * @param volume объем
 	 * @return сделка
 	 */
-	private Trade createTrade(Symbol symbol, LocalDateTime time,
+	private Trade createTrade(Symbol symbol, Instant time,
 			Direction dir, Long qty, Double price, Double volume)
 	{
 		Trade trade = new Trade(terminal);

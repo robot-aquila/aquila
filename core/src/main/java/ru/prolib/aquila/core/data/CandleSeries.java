@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import java.time.LocalDateTime;
-
+import java.time.Instant;
 import org.threeten.extra.Interval;
 
 /**
@@ -59,7 +58,7 @@ public interface CandleSeries extends Series<Candle> {
 	 * <p>
 	 * @return время точки актуальности
 	 */
-	public LocalDateTime getPOA();
+	public Instant getPOA();
 	
 	/**
 	 * Получить таймфрейм свечей.

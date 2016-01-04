@@ -1,11 +1,8 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-
 import org.junit.*;
 import org.threeten.extra.Interval;
 
@@ -336,7 +333,7 @@ public class IndicatorsTest {
 		assertNull(indicators.tr(candles));
 		assertNull(indicators.tr(candles, 0));
 
-		LocalDateTime time = LocalDateTime.of(2013, 10, 11, 11, 9, 43);
+		Instant time = Instant.parse("2013-10-11T11:09:43Z");
 		
 		// H-L
 		candles.add(new Candle(TimeFrame.M5.getInterval(time),
@@ -345,17 +342,17 @@ public class IndicatorsTest {
 		assertEquals(0.91, indicators.tr(candles, 1), 0.01d);
 		
 		// |H-Cp|
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(5)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(5 * 60)),
 				0, 49.35, 48.86, 49.32, 0L));
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(10)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(10 * 60)),
 				0, 49.92, 49.50, 49.91, 0L));
 		assertEquals(0.6, indicators.tr(candles), 0.001);
 		assertEquals(0.6, indicators.tr(candles, 3), 0.001);
 		
 		// |L-Cp|
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(15)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(15 * 60)),
 				0, 50.19, 49.87, 50.13, 0L));
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusMinutes(20)),
+		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(20 * 60)),
 				0, 50.12, 49.20, 49.53, 0L));
 		assertEquals(0.93, indicators.tr(candles), 0.001);
 		assertEquals(0.93, indicators.tr(candles, 5), 0.001);

@@ -37,7 +37,7 @@ public class TradeSetQtyTest {
 			if ( (Boolean) fixture[i][2] ) {
 				assertEquals(fixture[i][1], trade.getQty());
 			} else {
-				assertNull(trade.getQty());
+				assertEquals(0L, trade.getQty());
 			}
 		}
 	}

@@ -1,7 +1,8 @@
 package ru.prolib.aquila.core.data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 /**
  * Фильтр тиков по времени. 
@@ -15,7 +16,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  */
 public class TickReaderFilterByTime implements Aqiterator<Tick> {
 	private final Aqiterator<Tick> decorated;
-	private final LocalDateTime start;
+	private final Instant start;
 	private boolean filtered = false;
 	
 	/**
@@ -24,7 +25,7 @@ public class TickReaderFilterByTime implements Aqiterator<Tick> {
 	 * @param iterator подконтрольный итератор
 	 * @param start время начала периода отбора данных
 	 */
-	public TickReaderFilterByTime(Aqiterator<Tick> iterator, LocalDateTime start) {
+	public TickReaderFilterByTime(Aqiterator<Tick> iterator, Instant start) {
 		super();
 		this.decorated = iterator;
 		this.start = start;

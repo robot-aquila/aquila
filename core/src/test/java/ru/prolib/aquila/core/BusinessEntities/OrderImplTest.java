@@ -2,7 +2,10 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -93,7 +96,7 @@ public class OrderImplTest {
 		trade.setPrice(price);
 		trade.setQty(qty);
 		trade.setSymbol(symbol);
-		trade.setTime(LocalDateTime.parse(time, format));
+		trade.setTime(LocalDateTime.parse(time, format).toInstant(ZoneOffset.UTC));
 		trade.setVolume(vol);
 		return trade;		
 	}
@@ -522,17 +525,17 @@ public class OrderImplTest {
 		setter = new S<OrderImpl>() {
 			@Override
 			public void set(OrderImpl object, Object value) {
-				object.setTime((LocalDateTime) value);
+				object.setTime((Instant) value);
 			}
 		};
-		getter = new G<LocalDateTime>() {
+		getter = new G<Instant>() {
 			@Override
-			public LocalDateTime get(Object object) throws ValueException {
+			public Instant get(Object object) throws ValueException {
 				return ((OrderImpl) object).getTime();
 			}
 		};
-		testSetterGetter(LocalDateTime.of(2011, 1, 1, 0, 0, 0),
-						 LocalDateTime.of(2013, 2, 21, 6, 58, 0));
+		testSetterGetter(Instant.parse("2011-01-01T00:00:00Z"),
+						 Instant.parse("2013-02-21T06:58:00Z"));
 	}
 	
 	@Test
@@ -540,17 +543,17 @@ public class OrderImplTest {
 		setter = new S<OrderImpl>() {
 			@Override
 			public void set(OrderImpl object, Object value) {
-				object.setLastChangeTime((LocalDateTime) value);
+				object.setLastChangeTime((Instant) value);
 			}
 		};
-		getter = new G<LocalDateTime>() {
+		getter = new G<Instant>() {
 			@Override
-			public LocalDateTime get(Object object) throws ValueException {
+			public Instant get(Object object) throws ValueException {
 				return ((OrderImpl) object).getLastChangeTime();
 			}
 		};
-		testSetterGetter(LocalDateTime.of(1991, 7,  1, 13,  0, 0),
-						 LocalDateTime.of(2032, 2, 21,  6, 58, 0));	
+		testSetterGetter(Instant.parse("1991-07-01T13:00:00Z"),
+						 Instant.parse("2032-02-21T06:58:00Z"));	
 	}
 	
 	@Test
@@ -660,10 +663,10 @@ public class OrderImplTest {
 		order.setQty(20L);
 		assertNull(order.getLastTradeTime());
 		order.addTrade(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
-		assertEquals(LocalDateTime.of(2013, 5, 1, 0, 0, 1),
+		assertEquals(Instant.parse("2013-05-01T00:00:01Z"),
 				order.getLastTradeTime());
 		order.addTrade(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-		assertEquals(LocalDateTime.of(2013, 5, 1, 0, 0, 5),
+		assertEquals(Instant.parse("2013-05-01T00:00:05Z"),
 				order.getLastTradeTime());
 	}
 	
@@ -690,8 +693,8 @@ public class OrderImplTest {
 		order.setQty(200L);
 		order.setStatus(OrderStatus.CANCELLED);
 		order.setType(OrderType.LIMIT);
-		order.setTime(LocalDateTime.of(2013, 5, 15, 8, 32, 0));
-		order.setLastChangeTime(LocalDateTime.of(1998, 1, 1, 1, 2, 3));
+		order.setTime(Instant.parse("2013-05-15T08:32:00Z"));
+		order.setLastChangeTime(Instant.parse("1998-01-01T01:02:03Z"));
 		for ( Trade trade : trds1 ) {
 			order.addTrade(trade);
 		}
@@ -735,13 +738,13 @@ public class OrderImplTest {
 		if ( rnd.nextDouble() > aprob ) {
 			vTerm.add(control.createMock(Terminal.class));
 		}
-		Variant<LocalDateTime> vTime = new Variant<LocalDateTime>(vTerm)
-			.add(LocalDateTime.of(2013, 5, 15, 8, 32, 0));
+		Variant<Instant> vTime = new Variant<Instant>(vTerm)
+			.add(Instant.parse("2013-05-15T08:32:00Z"));
 		if ( rnd.nextDouble() > aprob ) {
-			vTime.add(LocalDateTime.of(2013, 1, 1, 0, 0, 0));
+			vTime.add(Instant.parse("2013-01-01T00:00:00Z"));
 		}
-		Variant<LocalDateTime> vLastTime = new Variant<LocalDateTime>(vTime)
-			.add(LocalDateTime.of(1998, 1, 1, 1, 2, 3));
+		Variant<Instant> vLastTime = new Variant<Instant>(vTime)
+			.add(Instant.parse("1998-01-01T01:02:03Z"));
 		if ( rnd.nextDouble() > aprob ) {
 			vLastTime.add(null);
 		}
@@ -808,8 +811,8 @@ public class OrderImplTest {
 		assertEquals(new Long(200L), found.getQty());
 		assertEquals(OrderStatus.CANCELLED, found.getStatus());
 		assertEquals(OrderType.LIMIT, found.getType());
-		assertEquals(LocalDateTime.of(2013, 5, 15, 8, 32, 0), found.getTime());
-		assertEquals(LocalDateTime.of(1998, 1, 1, 1, 2, 3),
+		assertEquals(Instant.parse("2013-05-15T08:32:00Z"), found.getTime());
+		assertEquals(Instant.parse("1998-01-01T01:02:03Z"),
 				found.getLastChangeTime());
 		assertEquals(trds1, found.getTrades());
 		assertTrue(found.isAvailable());

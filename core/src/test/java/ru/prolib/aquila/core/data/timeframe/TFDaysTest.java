@@ -1,14 +1,10 @@
 package ru.prolib.aquila.core.data.timeframe;
 
 import static org.junit.Assert.*;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
+import java.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
 import org.threeten.extra.Interval;
-
 import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 
 public class TFDaysTest {
@@ -44,44 +40,42 @@ public class TFDaysTest {
 	
 	@Test
 	public void testGetInterval_d1() {
-		LocalDateTime fix[][] = {
+		Instant fix[][] = {
 			// timestamp, from, to
-			{	LocalDateTime.of(2013, 10, 6,  0,  1, 14, 715),
-				LocalDateTime.of(2013, 10, 6,  0,  0,  0,   0),
-				LocalDateTime.of(2013, 10, 7,  0,  0,  0,   0) },
-			{	LocalDateTime.of(2013, 10, 9,  0,  7,  0,   0),
-				LocalDateTime.of(2013, 10, 9,  0,  0,  0,   0),
-				LocalDateTime.of(2013, 10,10,  0,  0,  0,   0) },
-			{	LocalDateTime.of(2013,  1, 1, 23, 51,  2, 472),
-				LocalDateTime.of(2013,  1, 1,  0,  0,  0,   0),
-				LocalDateTime.of(2013,  1, 2,  0,  0,  0,   0) },
+			{	Instant.parse("2013-10-06T00:01:14.715Z"),
+				Instant.parse("2013-10-06T00:00:00.000Z"),
+				Instant.parse("2013-10-07T00:00:00.000Z") },
+			{	Instant.parse("2013-10-09T00:07:00.000Z"),
+				Instant.parse("2013-10-09T00:00:00.000Z"),
+				Instant.parse("2013-10-10T00:00:00.000Z") },
+			{	Instant.parse("2013-01-01T23:51:02.472Z"),
+				Instant.parse("2013-01-01T00:00:00.000Z"),
+				Instant.parse("2013-01-02T00:00:00.000Z") },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			Interval expected = Interval.of(fix[i][1].toInstant(ZoneOffset.UTC),
-					fix[i][2].toInstant(ZoneOffset.UTC));
+			Interval expected = Interval.of(fix[i][1], fix[i][2]);
 			assertEquals(msg, expected, d1.getInterval(fix[i][0]));
 		}
 	}
 	
 	@Test
 	public void testGetInterval_d7() {
-		LocalDateTime fix[][] = {
+		Instant fix[][] = {
 			// timestamp, from, to
-			{	LocalDateTime.of(2015, 1, 12, 15, 48, 19, 112),
-				LocalDateTime.of(2015, 1,  8,  0,  0,  0,   0),
-				LocalDateTime.of(2015, 1, 15,  0,  0,  0,   0) },
-			{	LocalDateTime.of(2015, 5, 19, 20, 10, 24,  51),
-				LocalDateTime.of(2015, 5, 14,  0,  0,  0,   0),
-				LocalDateTime.of(2015, 5, 21,  0,  0,  0,   0) },
-			{	LocalDateTime.of(2015, 9,  8, 22, 10, 45, 972),
-				LocalDateTime.of(2015, 9,  3,  0,  0,  0,   0),
-				LocalDateTime.of(2015, 9, 10,  0,  0,  0,   0) }
+			{	Instant.parse("2015-01-12T15:48:19.112Z"),
+				Instant.parse("2015-01-08T00:00:00.000Z"),
+				Instant.parse("2015-01-15T00:00:00.000Z") },
+			{	Instant.parse("2015-05-19T20:10:24.051Z"),
+				Instant.parse("2015-05-14T00:00:00.000Z"),
+				Instant.parse("2015-05-21T00:00:00.000Z") },
+			{	Instant.parse("2015-09-08T22:10:45.972Z"),
+				Instant.parse("2015-09-03T00:00:00.000Z"),
+				Instant.parse("2015-09-10T00:00:00.000Z") }
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			String msg = "At #" + i;
-			Interval expected = Interval.of(fix[i][1].toInstant(ZoneOffset.UTC),
-					fix[i][2].toInstant(ZoneOffset.UTC));
+			Interval expected = Interval.of(fix[i][1], fix[i][2]);
 			assertEquals(msg, expected, d7.getInterval(fix[i][0]));
 		}
 	}

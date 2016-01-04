@@ -2,8 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -35,7 +34,7 @@ public class TradeTest {
 		trade.setId(105L);
 		trade.setSymbol(symbol);
 		trade.setDirection(Direction.BUY);
-		trade.setTime(LocalDateTime.of(2010, 8, 1, 3, 45, 15));
+		trade.setTime(Instant.parse("2010-08-01T03:45:15Z"));
 		trade.setPrice(100.00d);
 		trade.setQty(1L);
 		trade.setVolume(200.00d);
@@ -46,15 +45,14 @@ public class TradeTest {
 	 * Создать сделку.
 	 * <p>
 	 * @param id номер сделки
-	 * @param time время в формате yyyy-MM-dd HH:mm:ss
+	 * @param time время в формате yyyy-MM-ddTHH:mm:ss
 	 * @return сделка
 	 * @throws Exception
 	 */
 	private Trade createTrade(Long id, String time) throws Exception {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		Trade trade = new Trade(terminal);
 		trade.setId(id);
-		trade.setTime(LocalDateTime.parse(time, format));
+		trade.setTime(Instant.parse(time));
 		return trade;
 	}
 	
@@ -64,9 +62,9 @@ public class TradeTest {
 		assertSame(terminal, trade.getTerminal());
 		assertEquals(symbol, trade.getSymbol());
 		assertSame(Direction.BUY, trade.getDirection());
-		assertEquals(LocalDateTime.of(2010, 8, 1, 3, 45, 15), trade.getTime());
+		assertEquals(Instant.parse("2010-08-01T03:45:15Z"), trade.getTime());
 		assertEquals(100.00d, trade.getPrice(), 0.001d);
-		assertEquals((Long) 1L, trade.getQty());
+		assertEquals(1L, trade.getQty());
 		assertEquals(200.00d, trade.getVolume(), 0.001d);
 		assertEquals((Long) 1024L, trade.getOrderId());
 	}
@@ -105,20 +103,17 @@ public class TradeTest {
 			.add(null)
 			.add(Direction.BUY)
 			.add(Direction.SELL);
-		Variant<LocalDateTime> vTime = new Variant<LocalDateTime>(vDir)
+		Variant<Instant> vTime = new Variant<Instant>(vDir)
 			.add(null)
-			.add(LocalDateTime.of(2010, 8, 1, 3, 45, 15))
-			.add(LocalDateTime.now());
+			.add(Instant.parse("2010-08-01T03:45:15Z"))
+			.add(Instant.now());
 		Variant<Double> vPrice = new Variant<Double>(vTime)
-			.add(null)
 			.add(100.00d)
 			.add(123.45d);
 		Variant<Long> vQty = new Variant<Long>(vPrice)
-			.add(null)
 			.add(1L)
 			.add(2L);
 		Variant<Double> vVol = new Variant<Double>(vQty)
-			.add(null)
 			.add(200.00d)
 			.add(400.00d);
 		Variant<Long> vOrdId = new Variant<Long>(vVol)
@@ -154,7 +149,7 @@ public class TradeTest {
 		assertSame(Direction.BUY, found.getDirection());
 		assertEquals(trade.getTime(), found.getTime());
 		assertEquals(100.00d, found.getPrice(), 0.001d);
-		assertEquals((Long) 1L, found.getQty());
+		assertEquals(1L, found.getQty());
 		assertEquals(200.00d, found.getVolume(), 0.001d);
 		assertEquals((Long) 1024L, found.getOrderId());
 		assertSame(terminal, found.getTerminal());
@@ -173,7 +168,7 @@ public class TradeTest {
 			.append(105L)
 			.append(symbol)
 			.append(Direction.BUY)
-			.append(LocalDateTime.of(2010, 8, 1, 3, 45, 15))
+			.append(Instant.parse("2010-08-01T03:45:15Z"))
 			.append(100.00d)
 			.append(1L)
 			.append(200.00d)
@@ -194,13 +189,13 @@ public class TradeTest {
 	
 	@Test
 	public void testCompareTo() throws Exception {
-		Trade t0 = createTrade(100L, "2013-05-01 20:00:00");
+		Trade t0 = createTrade(100L, "2013-05-01T20:00:00Z");
 		assertEquals( 1,t0.compareTo(null));
-		assertEquals( 0,t0.compareTo(createTrade(100L, "2013-05-01 20:00:00")));
-		assertEquals( 1,t0.compareTo(createTrade( 99L, "2013-05-01 20:00:00")));
-		assertEquals(-1,t0.compareTo(createTrade(101L, "2013-05-01 20:00:00")));
-		assertEquals(-1,t0.compareTo(createTrade(100L, "2013-05-01 20:00:01")));
-		assertEquals( 1,t0.compareTo(createTrade(100L, "2013-05-01 19:00:59")));
+		assertEquals( 0,t0.compareTo(createTrade(100L, "2013-05-01T20:00:00Z")));
+		assertEquals( 1,t0.compareTo(createTrade( 99L, "2013-05-01T20:00:00Z")));
+		assertEquals(-1,t0.compareTo(createTrade(101L, "2013-05-01T20:00:00Z")));
+		assertEquals(-1,t0.compareTo(createTrade(100L, "2013-05-01T20:00:01Z")));
+		assertEquals( 1,t0.compareTo(createTrade(100L, "2013-05-01T19:00:59Z")));
 	}
 
 }

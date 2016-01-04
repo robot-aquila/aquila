@@ -1,62 +1,50 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.*;
 
+
 /**
- * Стандартный планировщик задач.
+ * The common task scheduler.
  * <p>
- * Реализация планировщика, основанная на {@link java.util.Timer}.
+ * Scheduler implementation based on {@link java.util.Timer}.
  */
 public class SchedulerLocal implements Scheduler {
 	private final Timer timer;
-	/**
-	 * Задача может быть удалена из пула двумя способами: в случае явного вызова
-	 * метода {@link #cancel(Runnable)} или автоматически после завершения
-	 * разовой задачи.
-	 */ 
-	private final SchedulerLocal_Pool pool;
 	
 	/**
-	 * Служебный конструктор.
+	 * Constructor.
 	 * <p>
-	 * @param timer таймер
+	 * For testing purposes only.
+	 * <p>
+	 * @param timer - the timer
 	 */
-	SchedulerLocal(Timer timer, SchedulerLocal_Pool pool) {
+	SchedulerLocal(Timer timer) {
 		super();
 		this.timer = timer;
-		this.pool = pool;
 	}
 
 	/**
 	 * Конструктор.
 	 */
 	public SchedulerLocal() {
-		this(new Timer(true), new SchedulerLocal_Pool());
+		this(new Timer(true));
 	}
 	
 	/**
-	 * Получить планировщик.
+	 * Get timer.
 	 * <p>
-	 * @return планировщик
+	 * For testing purposes only.
+	 * <p>
+	 * @return timer
 	 */
 	Timer getTimer() {
 		return timer;
 	}
 	
-	/**
-	 * Получить пул задач.
-	 * <p>
-	 * @return пул задач
-	 */
-	SchedulerLocal_Pool getPool() {
-		return pool;
-	}
-	
 	@Override
-	public LocalDateTime getCurrentTime() {
-		return LocalDateTime.now();
+	public Instant getCurrentTime() {
+		return Instant.now();
 	}
 	
 	/**
@@ -64,10 +52,9 @@ public class SchedulerLocal implements Scheduler {
 	 * <p>
 	 * @param task задача
 	 * @return задача в обертке
-	 * @throws IllegalArgumentException если экземпляр задачи уже в пуле
 	 */
 	private SchedulerLocal_TimerTask makeRunOnce(Runnable task) {
-		return pool.put(new SchedulerLocal_TimerTask(task, this));
+		return new SchedulerLocal_TimerTask(task, true);
 	}
 	
 	/**
@@ -77,88 +64,62 @@ public class SchedulerLocal implements Scheduler {
 	 * @return the task handler
 	 */
 	private SchedulerLocal_TimerTask makePeriodic(Runnable task) {
-		return pool.put(new SchedulerLocal_TimerTask(task)); 	
+		return new SchedulerLocal_TimerTask(task, false); 	
 	}
 	
-	/**
-	 * Создать дескриптор задачи.
-	 * <p>
-	 * @param task задача
-	 * @return дескриптор задачи
-	 */
-	private TaskHandler createHandler(Runnable task) {
-		return new TaskHandlerImpl(task, this);
-	}
-	
-	private Date toDate(LocalDateTime time) {
-		return Date.from(time.atZone(ZoneOffset.UTC).toInstant());
+	private Date toDate(Instant time) {
+		return Date.from(time);
 	}
 
 	@Override
-	public synchronized TaskHandler schedule(Runnable task, LocalDateTime time) {
-		timer.schedule(makeRunOnce(task), toDate(time));
-		return createHandler(task);
+	public TaskHandler schedule(Runnable task, Instant time) {
+		SchedulerLocal_TimerTask timerTask = makeRunOnce(task);
+		timer.schedule(timerTask, toDate(time));
+		return timerTask;
 	}
 
 	@Override
-	public synchronized
-		TaskHandler schedule(Runnable task, LocalDateTime firstTime, long period)
+	public TaskHandler schedule(Runnable task, Instant firstTime, long period) {
+		SchedulerLocal_TimerTask timerTask = makePeriodic(task);
+		timer.schedule(timerTask, toDate(firstTime), period);
+		return timerTask;
+	}
+
+	@Override
+	public TaskHandler schedule(Runnable task, long delay) {
+		SchedulerLocal_TimerTask timerTask = makeRunOnce(task);
+		timer.schedule(timerTask, delay);
+		return timerTask;
+	}
+
+	@Override
+	public TaskHandler schedule(Runnable task, long delay, long period) {
+		SchedulerLocal_TimerTask timerTask = makePeriodic(task);
+		timer.schedule(timerTask, delay, period);
+		return timerTask;
+	}
+
+	@Override
+	public TaskHandler scheduleAtFixedRate(Runnable task, Instant firstTime,
+			long period)
 	{
-		timer.schedule(makePeriodic(task), toDate(firstTime), period);
-		return createHandler(task);
-	}
-
-	@Override
-	public synchronized TaskHandler schedule(Runnable task, long delay) {
-		timer.schedule(makeRunOnce(task), delay);
-		return createHandler(task);
-	}
-
-	@Override
-	public synchronized TaskHandler
-		schedule(Runnable task, long delay, long period)
-	{
-		timer.schedule(makePeriodic(task), delay, period);
-		return createHandler(task);
-	}
-
-	@Override
-	public synchronized TaskHandler
-		scheduleAtFixedRate(Runnable task, LocalDateTime firstTime, long period)
-	{
-		timer.scheduleAtFixedRate(makePeriodic(task), toDate(firstTime), period);
-		return createHandler(task);
+		SchedulerLocal_TimerTask timerTask = makePeriodic(task);
+		timer.scheduleAtFixedRate(timerTask, toDate(firstTime), period);
+		return timerTask;
 	}
 
 	@Override
 	public synchronized TaskHandler
 		scheduleAtFixedRate(Runnable task, long delay, long period)
 	{
-		timer.scheduleAtFixedRate(makePeriodic(task), delay, period);
-		return createHandler(task);
+		SchedulerLocal_TimerTask timerTask = makePeriodic(task);
+		timer.scheduleAtFixedRate(timerTask, delay, period);
+		return timerTask;
 	}
-
+	
 	@Override
-	public synchronized void cancel(Runnable task) {
-		if ( pool.exists(task) ) {
-			TimerTask tt = pool.get(task);
-			tt.cancel();
-			pool.remove(task);
-		}
-	}
-
-	@Override
-	public synchronized boolean scheduled(Runnable task) {
-		return pool.exists(task);
-	}
-
-	@Override
-	public synchronized TaskHandler getTaskHandler(Runnable task) {
-		if ( pool.exists(task) ) {
-			return new TaskHandlerImpl(task, this);
-		} else {
-			return null;
-		}
+	public synchronized void close() {
+		timer.cancel();
 	}
 
 }
