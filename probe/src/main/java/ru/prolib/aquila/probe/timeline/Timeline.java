@@ -2,11 +2,8 @@ package ru.prolib.aquila.probe.timeline;
 
 import java.time.LocalDateTime;
 
-import ru.prolib.aquila.probe.internal.SimulationController;
-
-public interface Timeline extends SimulationController,
-	EventSourceRepository
-{
+@Deprecated
+public interface Timeline extends EventSourceRepository {
 
 	/**
 	 * Добавить событие в последовательность.

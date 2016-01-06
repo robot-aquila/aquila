@@ -9,7 +9,6 @@ import org.junit.*;
 import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.probe.internal.SimulationController;
 
 public class TLSTimelineFactoryTest {
 	private EventSystem es;
@@ -25,7 +24,7 @@ public class TLSTimelineFactoryTest {
 	public void testProduce() throws Exception {
 		LocalDateTime from = LocalDateTime.of(1998, 7, 1, 13, 30, 45, 0);
 		LocalDateTime to = LocalDateTime.of(2004, 1, 1, 23, 59, 59, 999);
-		SimulationController actual = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC),
+		TLSTimeline actual = factory.produce(Interval.of(from.toInstant(ZoneOffset.UTC),
 				to.toInstant(ZoneOffset.UTC)));
 		assertNotNull(actual);
 		/**

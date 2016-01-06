@@ -29,7 +29,8 @@ import ru.prolib.aquila.core.EventType;
  * <i>2014-12-26</i> Удалены все ссылки на пускач потока.
  * <p> 
  */
-public class TLSTimeline implements Timeline {
+@Deprecated
+public class TLSTimeline {
 	private static final Logger logger;
 	
 	static {
@@ -79,33 +80,20 @@ public class TLSTimeline implements Timeline {
 		return simulation.execute();
 	}
 	
-	@Override
 	public LocalDateTime getPOA() {
 		return evtQueue.getPOA();
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#getInterval()
-	 */
-	@Override
 	public Interval getRunInterval() {
 		return evtQueue.getInterval();
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.Timeline#schedule(org.joda.time.DateTime, java.lang.Runnable)
-	 */
-	@Override
 	public void schedule(LocalDateTime time, Runnable procedure)
 			throws TLOutOfIntervalException
 	{
 		schedule(new TLEvent(time, procedure));
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.Timeline#schedule(ru.prolib.aquila.probe.timeline.TLEvent)
-	 */
-	@Override
 	public void schedule(TLEvent event) throws TLOutOfIntervalException {
 		evtQueue.pushEvent(event);
 	}
@@ -214,97 +202,50 @@ public class TLSTimeline implements Timeline {
 		return state;
 	}
 	
-	/**
-	 * Завершить работу.
-	 * <p>
-	 * Очищает очереди команд и событий и завершает работу с источниками
-	 * событий.
-	 */
-	@Override
 	public void close() {
 		cmdQueue.clear();
 		evtQueue.clear();
 		sources.close();
 	}
 	
-	/**
-	 * Зарегистрировать источник событий.
-	 * <p>
-	 * @param source источник событий
-	 */
-	@Override
 	public void registerSource(TLEventSource source) {
 		sources.registerSource(source);
 	}
 	
-	/**
-	 * Прекратить работу с источником событий.
-	 * <p>
-	 * @param source источник событий
-	 */
-	@Override
 	public void removeSource(TLEventSource source) {
 		sources.removeSource(source);
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#running()
-	 */
-	@Override
 	public boolean running() {
 		return state == TLCmdType.RUN;
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#paused()
-	 */
-	@Override
 	public boolean paused() {
 		return state == TLCmdType.PAUSE;
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#finished()
-	 */
-	@Override
 	public boolean finished() {
 		return state == TLCmdType.FINISH;
 	}
 
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#finish()
-	 */
-	@Override
 	public void finish() {
 		if ( ! finished() ) {
 			cmdQueue.put(TLCmd.FINISH);
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#pause()
-	 */
-	@Override
 	public void pause() {
 		if ( running() ) {
 			cmdQueue.put(TLCmd.PAUSE);
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#runTo(org.joda.time.DateTime)
-	 */
-	@Override
 	public void runTo(LocalDateTime cutoff) {
 		if ( ! finished() ) {
 			cmdQueue.put(new TLCmd(cutoff));
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#run()
-	 */
-	@Override
 	public void run() {
 		runTo(null);
 	}
@@ -329,51 +270,34 @@ public class TLSTimeline implements Timeline {
 		return ! getRunInterval().contains(getPOA().toInstant(ZoneOffset.UTC));
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#OnFinish()
-	 */
-	@Override
 	public EventType OnFinish() {
 		return dispatcher.OnFinish();
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#OnPause()
-	 */
-	@Override
 	public EventType OnPause() {
 		return dispatcher.OnPause();
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.probe.timeline.TimelineController#OnRun()
-	 */
-	@Override
 	public EventType OnRun() {
 		return dispatcher.OnRun();
 	}
 
-	@Override
 	public List<TLEventSource> getSources(LocalDateTime time) {
 		return sources.getSources(time);
 	}
 
-	@Override
 	public List<TLEventSource> getSources() {
 		return sources.getSources();
 	}
 
-	@Override
 	public void disableUntil(TLEventSource source, LocalDateTime time) {
 		sources.disableUntil(source, time);
 	}
 
-	@Override
 	public boolean isRegistered(TLEventSource source) {
 		return sources.isRegistered(source);
 	}
 
-	@Override
 	public LocalDateTime getDisabledUntil(TLEventSource source) {
 		return sources.getDisabledUntil(source);
 	}
