@@ -22,27 +22,74 @@ import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
  * WAIT - do nothing (wait for mode change). This is default mode.
  * PULL_AND_RUN - pull a task and run it immediately
  */
-public class PROBEScheduler implements Scheduler {
-	public static final int MODE_CLOSED = -1;
-	public static final int MODE_WAIT = 0;
-	public static final int MODE_PULL_AND_RUN = 1;
+public class PROBEScheduler extends Observable implements Scheduler {	
 	private static final Logger logger;
 	
 	static {
 		logger = LoggerFactory.getLogger(PROBEScheduler.class);
 	}
 	
-	static class Task implements TaskHandler {
-		static final int ERROR = -1;
-		static final int VIRGIN = 0;
-		static final int SCHEDULED = 1;
-		static final int EXECUTED = 2;
-		static final int CANCELLED = 3;
+	public enum Mode {
+		/**
+		 * Waiting for mode change. Adding new tasks has no effect.
+		 */
+		WAIT,
 		
+		/**
+		 * Close scheduler.
+		 */
+		CLOSE,
+		
+		/**
+		 * Waiting for new tasks or mode change.
+		 * When a new task came then execute it immediately.
+		 */
+		PULL_AND_RUN
+	}
+	
+	/**
+	 * Scheduler state constants.
+	 */
+	public enum State {
+		/**
+		 * Waiting for mode change.
+		 */
+		WAIT_FOR_MODE,
+
+		/**
+		 * Waiting for new tasks or mode change.
+		 */
+		WAIT_FOR_TASK,
+		
+		/**
+		 * Executing stack of tasks.
+		 */
+		EXECUTING,
+		
+		/**
+		 * Simulating real-time delay between two time points.
+		 */
+		DELAY,
+		
+		/**
+		 * Scheduler closed.
+		 */
+		CLOSED,
+	}
+	
+	public enum TaskState {
+		VIRGIN,
+		ERROR,
+		SCHEDULED,
+		EXECUTED,
+		CANCELLED
+	}
+	
+	static class Task implements TaskHandler {
 		private final Lock lock;
 		private final long period;
 		private Runnable runnable;
-		private int state = VIRGIN;
+		private TaskState state = TaskState.VIRGIN;
 		private long nextExecutionTime;
 		
 		public Task(Runnable runnable, long period) {
@@ -67,18 +114,18 @@ public class PROBEScheduler implements Scheduler {
 		public void execute() {
 			lock.lock();
 			try {
-				if ( state == SCHEDULED ) {
+				if ( state == TaskState.SCHEDULED ) {
 					try {
 						runnable.run();
 						if ( period == 0 ) {
-							state = EXECUTED;
+							state = TaskState.EXECUTED;
 							runnable = null;
 						}
 					} catch ( Exception e ) {
 						// TODO: make message more informative
 						Object args[] = { runnable.toString(), e };
 						logger.error("Unhandled exception (Task ID: {}): ", args);
-						state = ERROR;
+						state = TaskState.ERROR;
 						runnable = null;
 					}
 				}
@@ -91,7 +138,7 @@ public class PROBEScheduler implements Scheduler {
 			return period != 0;
 		}
 		
-		public int getState() {
+		public TaskState getState() {
 			lock.lock();
 			try {
 				return state;
@@ -100,12 +147,16 @@ public class PROBEScheduler implements Scheduler {
 			}
 		}
 		
+		public boolean isState(TaskState state) {
+			return getState() == state;
+		}
+		
 		public long scheduleForFirstExecution(long currentTime, long delay) {
 			lock.lock();
 			try {
-				if ( state == VIRGIN ) {
+				if ( state == TaskState.VIRGIN ) {
 					nextExecutionTime = currentTime + delay;
-					state = SCHEDULED;
+					state = TaskState.SCHEDULED;
 				}
 				return nextExecutionTime;
 			} finally {
@@ -116,7 +167,7 @@ public class PROBEScheduler implements Scheduler {
 		public long scheduleForNextExecution(long currentTime) {
 			lock.lock();
 			try {
-				if ( state == SCHEDULED && period != 0 ) {
+				if ( state == TaskState.SCHEDULED && period != 0 ) {
 					nextExecutionTime = currentTime + period;
 				}
 				return nextExecutionTime;
@@ -138,10 +189,13 @@ public class PROBEScheduler implements Scheduler {
 		public boolean cancel() {
 			lock.lock();
 			try {
-				boolean result = (state == SCHEDULED);
-				state = CANCELLED;
-				runnable = null;
-				return result;
+				if ( state == TaskState.SCHEDULED ) {
+					state = TaskState.CANCELLED;
+					runnable = null;
+					return true;
+				} else {
+					return false;
+				}
 			} finally {
 				lock.unlock();
 			}
@@ -173,6 +227,12 @@ public class PROBEScheduler implements Scheduler {
 		
 		public void clearTasks() {
 			tasks.clear();
+		}
+		
+		public void cancelTasks() {
+			for ( Task task : tasks ) {
+				task.cancel();
+			}
 		}
 		
 	}
@@ -216,10 +276,11 @@ public class PROBEScheduler implements Scheduler {
 			}
 		}
 		
-		public void clear() {
+		public void close() {
 			lock.lock();
 			try {
 				for ( TaskStack stack : stacks.values() ) {
+					stack.cancelTasks();
 					stack.clearTasks();
 				}
 				stacks.clear();
@@ -228,17 +289,33 @@ public class PROBEScheduler implements Scheduler {
 			}
 		}
 		
-		public TaskStack popNextStack() {
+		/**
+		 * Get timestamp of lower stack.
+		 * <p>
+		 * @return timestamp of lower stack on the timeline or null if no stack
+		 * available
+		 */
+		public Long getTimeOfNextStack() {
 			lock.lock();
 			try {
-				if ( stacks.size() == 0 ) {
-					return null;
-				}
 				Long t = null;
 				for ( Long x : stacks.keySet() ) {
 					if ( t == null || x < t ) {
 						t = x;
 					}
+				}
+				return t;
+			} finally {
+				lock.unlock();
+			}
+		}
+		
+		public TaskStack popNextStack() {
+			lock.lock();
+			try {
+				Long t = getTimeOfNextStack();
+				if ( t == null ) {
+					return null;
 				}
 				return stacks.remove(t);
 			} finally {
@@ -250,8 +327,10 @@ public class PROBEScheduler implements Scheduler {
 	
 	private final Object lock = new Object();
 	private final TaskStackQueue queue = new TaskStackQueue();
-	private long currentTime = 0;
-	private int mode = MODE_WAIT;
+	private long currentTimestamp = 0;
+	private Mode mode = Mode.WAIT;
+	private State state = State.WAIT_FOR_MODE;
+	private boolean withRealtimeDelays = false;
 	
 	public PROBEScheduler() {
 		super();
@@ -267,7 +346,13 @@ public class PROBEScheduler implements Scheduler {
 	@Override
 	public Instant getCurrentTime() {
 		synchronized ( lock ) {
-			return Instant.ofEpochMilli(currentTime);
+			return Instant.ofEpochMilli(currentTimestamp);
+		}
+	}
+	
+	public long getCurrentTimestamp() {
+		synchronized ( lock ) {
+			return currentTimestamp;
 		}
 	}
 
@@ -279,9 +364,11 @@ public class PROBEScheduler implements Scheduler {
 	@Override
 	public TaskHandler schedule(Runnable task, Instant firstTime, long period) {
 		synchronized ( lock ) {
-			long delay = firstTime.toEpochMilli() - currentTime;
+			long delay = firstTime.toEpochMilli() - currentTimestamp;
 			if ( delay < 0 ) {
-				delay = 0;
+				throw new IllegalArgumentException("Task " + task
+					+ " in the past " + firstTime
+					+ ". Current time is " + getCurrentTime());
 			}
 			return schedule(task, delay, period);
 		}
@@ -295,8 +382,19 @@ public class PROBEScheduler implements Scheduler {
 	@Override
 	public TaskHandler schedule(Runnable task, long delay, long period) {
 		synchronized ( lock ) {
+			if ( mode == Mode.CLOSE ) {
+				throw new IllegalStateException("Object is closed");
+			}
+			if ( delay < 0 ) {
+				throw new IllegalArgumentException("Task " + task
+					+ " delay must be positive but: " + delay);
+			}
+			if ( period < 0 ) {
+				throw new IllegalArgumentException("Task " + task
+					+ " period must be positive but: " + period);
+			}
 			Task x = new Task(task, period);
-			x.scheduleForFirstExecution(currentTime, delay);
+			x.scheduleForFirstExecution(currentTimestamp, delay);
 			queue.addTask(x);
 			lock.notifyAll();
 			return x;
@@ -319,23 +417,79 @@ public class PROBEScheduler implements Scheduler {
 
 	@Override
 	public void close() {
-		setMode(MODE_CLOSED);
+		synchronized ( lock ) {
+			if ( mode != Mode.CLOSE ) {
+				setMode(Mode.CLOSE);
+			}
+		}
+	}
+	
+	public State getState() {
+		synchronized ( lock ) {
+			return state;
+		}
 	}
 	
 	/**
-	 * Switch to PULL_AND_RUN mode.
+	 * Get current execution mode.
+	 * <p>
+	 * @return mode of execution
 	 */
-	public void switchToPullAndRun() {
-		setMode(MODE_PULL_AND_RUN);
+	public Mode getMode() {
+		synchronized ( lock ) {
+			return mode;
+		}
 	}
 	
-	private void setMode(int newMode) {
+	public boolean getRealtimeDelays() {
 		synchronized ( lock ) {
+			return withRealtimeDelays;
+		}
+	}
+	
+	public void setRealtimeDelays(boolean delays) {
+		synchronized ( lock ) {
+			if ( withRealtimeDelays != delays ) {
+				withRealtimeDelays = delays;
+				lock.notifyAll();
+			}
+		}
+	}
+	
+	/**
+	 * Switch to pull and run mode.
+	 */
+	public void switchToPullAndRun() {
+		setMode(Mode.PULL_AND_RUN);
+	}
+	
+	/**
+	 * Switch to wait for mode change mode.
+	 */
+	public void switchToWait() {
+		setMode(Mode.WAIT);
+	}
+	
+	private void setMode(Mode newMode) {
+		synchronized ( lock ) {
+			if ( mode == Mode.CLOSE ) {
+				throw new IllegalStateException("Object is closed");
+			}
 			if ( mode != newMode ) {
 				mode = newMode;
 				lock.notifyAll();
 			}
 		}		
+	}
+	
+	private void switchState(State newState) {
+		synchronized ( lock ) {
+			if ( state != newState ) {
+				state = newState;
+				setChanged();
+				notifyObservers();
+			}
+		}
 	}
 	
 	private void mainLoop() {
@@ -344,8 +498,9 @@ public class PROBEScheduler implements Scheduler {
 		long timeShift = 0;
 		for ( ; ; ) {
 			synchronized ( lock ) {
-				if ( mode == MODE_WAIT ) {
+				if ( mode == Mode.WAIT ) {
 					try {
+						switchState(State.WAIT_FOR_MODE);
 						lock.wait();
 					} catch ( InterruptedException e ) {
 						Thread.interrupted();
@@ -353,16 +508,38 @@ public class PROBEScheduler implements Scheduler {
 					}
 					continue;
 				}
-				if ( mode == MODE_CLOSED ) {
-					queue.clear();
+				if ( mode == Mode.CLOSE ) {
 					break;
 				}
-				// MODE_PULL_AND_RUN
+				// Mode PULL_AND_RUN
+				if ( withRealtimeDelays ) {
+					// If delay emulation enabled, then we have to wait
+					// some time until next stack's time will be reached.
+					Long next = queue.getTimeOfNextStack();
+					if ( next != null ) {
+						long delay = next - currentTimestamp - 1;
+						if ( delay > 0 ) {
+							try {
+								switchState(State.DELAY);
+								long start = System.currentTimeMillis();
+								lock.wait(delay);
+								long actual = System.currentTimeMillis() - start;
+								currentTimestamp += Math.min(delay, actual);
+								continue;
+							} catch ( InterruptedException e ) {
+								Thread.interrupted();
+								break;
+							}
+						}
+					}
+				}
+				
 				stackForExec = queue.popNextStack();
 				if ( stackForExec == null ) {
 					// No more tasks in queue.
 					// Wait for state change or new tasks.
 					try {
+						switchState(State.WAIT_FOR_TASK);
 						lock.wait();
 						continue;
 					} catch ( InterruptedException e ) {
@@ -372,11 +549,12 @@ public class PROBEScheduler implements Scheduler {
 				} else {
 					long stackTime = stackForExec.getTime();
 					timeShift = 0;
-					if ( stackTime > currentTime ) {
-						currentTime = stackTime + 1;
+					if ( stackTime >= currentTimestamp ) {
+						currentTimestamp = stackTime + 1;
 						timeShift = -1;
 					}
 				}
+				switchState(State.EXECUTING);
 			} // end synchronization block
 			
 			for ( Task taskForExec : stackForExec.getTasks() ) {
@@ -384,9 +562,9 @@ public class PROBEScheduler implements Scheduler {
 				try {
 					taskForExec.execute();
 					if ( taskForExec.isRepeating()
-					  && taskForExec.getState() == Task.SCHEDULED )
+					  && taskForExec.isState(TaskState.SCHEDULED) )
 					{
-						taskForExec.scheduleForNextExecution(currentTime + timeShift);
+						taskForExec.scheduleForNextExecution(currentTimestamp + timeShift);
 						queue.addTask(taskForExec);
 					}
 					
@@ -396,6 +574,11 @@ public class PROBEScheduler implements Scheduler {
 			}
 			stackForExec.clearTasks();
 			
+		}
+		synchronized ( lock ) {
+			queue.close();
+			switchState(State.CLOSED);
+			deleteObservers();
 		}
 		logger.info("Worker thread finished");
 	}
