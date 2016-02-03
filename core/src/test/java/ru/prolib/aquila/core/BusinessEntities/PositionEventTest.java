@@ -48,18 +48,5 @@ public class PositionEventTest {
 	public void testEquals_FalseIfDifferentClass() throws Exception {
 		assertFalse(event.equals(this));
 	}
-	
-	@Test
-	public void testEquals_Ok() throws Exception {
-		PositionEvent event2 = new PositionEvent(eventType2, position1);
-		PositionEvent event3 = new PositionEvent(eventType1, position2);
-		PositionEvent event4 = new PositionEvent(eventType2, position2);
-		PositionEvent event5 = new PositionEvent(eventType1, position1);
-		
-		assertFalse(event.equals(event2));
-		assertFalse(event.equals(event3));
-		assertFalse(event.equals(event4));
-		assertTrue(event.equals(event5));
-	}
 
 }

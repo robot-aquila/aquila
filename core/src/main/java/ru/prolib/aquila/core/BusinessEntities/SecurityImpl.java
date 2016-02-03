@@ -1,492 +1,217 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Currency;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.SecurityEventDispatcher;
+import ru.prolib.aquila.core.data.Container;
+import ru.prolib.aquila.core.data.ContainerImpl;
+import ru.prolib.aquila.core.data.SecurityField;
 
 /**
- * Инструмент торговли.
+ * Security implementation.
  */
-public class SecurityImpl extends EditableImpl implements EditableSecurity {
-	private final Terminal terminal;
-	private final Symbol symbol;
-	private final SecurityEventDispatcher dispatcher;
-	private Double minPrice;
-	private Double maxPrice;
-	private Double stepPrice;
-	private Double lastPrice;
-	private Double stepSize;
-	private Integer lotSize;
-	private Integer decimals;
-	private Trade lastTrade = null;
-	private String displayName;
-	private Double askPrice,bidPrice;
-	private Long askSize,bidSize;
-	private Double open,close,high,low;
-	private SecurityStatus status = SecurityStatus.STOPPED;
-	private DecimalFormat priceFormat;
-	private Double initialPrice, initialMargin;
+public class SecurityImpl extends ContainerImpl implements EditableSecurity {
+	private static final int[] TOKENS_FOR_AVAILABILITY = {
+		SecurityField.DISPLAY_NAME,
+		SecurityField.SCALE,
+		SecurityField.LOT_SIZE,
+		SecurityField.TICK_SIZE,
+		SecurityField.TICK_VALUE
+	};
 	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param terminal терминал
-	 * @param symbol дескриптор инструмента
-	 * @param dispatcher диспетчер событий
-	 */
-	public SecurityImpl(Terminal terminal, Symbol symbol, SecurityEventDispatcher dispatcher) {
-		super();
-		this.terminal = terminal;
-		this.symbol = symbol;
-		this.dispatcher = dispatcher;
-		changePriceFormat();
+	private static final int[] TOKENS_FOR_SESSION_UPDATE = {
+		SecurityField.SCALE,
+		SecurityField.LOT_SIZE,
+		SecurityField.TICK_SIZE,
+		SecurityField.TICK_VALUE,
+		SecurityField.INITIAL_MARGIN,
+		SecurityField.INITIAL_PRICE,
+		SecurityField.OPEN_PRICE,
+		SecurityField.HIGH_PRICE,
+		SecurityField.LOW_PRICE,
+		SecurityField.CLOSE_PRICE,
+	};
+	
+	private final EventType onSessionUpdate;
+	private final Symbol symbol;
+	private Terminal terminal;
+	
+	private static String getID(Terminal terminal, Symbol symbol, String suffix) {
+		return String.format("%s.%s.%s", terminal.getTerminalID(), symbol, suffix);
+	}
+	
+	private String getID(String suffix) {
+		return getID(terminal, symbol, suffix);
+	}
+	
+	private EventType newEventType(String suffix) {
+		return new EventTypeImpl(getID(suffix));
 	}
 	
 	/**
-	 * Получить используемый диспетчер событий
+	 * Constructor.
 	 * <p>
-	 * @return диспетчер событий
+	 * @param terminal - owner terminal instance
+	 * @param symbol - the symbol
+	 * @param controller - controller
 	 */
-	public SecurityEventDispatcher getEventDispatcher() {
-		return dispatcher;
+	public SecurityImpl(EditableTerminal terminal, Symbol symbol, ContainerImpl.Controller controller) {
+		super(terminal.getEventQueue(), getID(terminal, symbol, "SECURITY"), controller);
+		this.terminal = terminal;
+		this.symbol = symbol;
+		this.onSessionUpdate = newEventType("SECURITY.SESSION_UPDATE");
+	}
+	
+	public SecurityImpl(EditableTerminal terminal, Symbol symbol) {
+		this(terminal, symbol, new SecurityController());
 	}
 
 	@Override
 	public Terminal getTerminal() {
-		return terminal;
-	}
-
-	@Override
-	public String getCode() {
-		return symbol.getCode();
-	}
-
-	@Override
-	public String getClassCode() {
-		return symbol.getExchangeID();
-	}
-
-	@Override
-	public synchronized Integer getLotSize() {
-		return lotSize;
-	}
-
-	@Override
-	public synchronized void setLotSize(Integer value) {
-		if ( lotSize != value ) {
-			lotSize = value;
-			setChanged();
+		lock.lock();
+		try {
+			return terminal;
+		} finally {
+			lock.unlock();
 		}
-	}
-
-	@Override
-	public synchronized Double getMaxPrice() {
-		return maxPrice;
-	}
-
-	@Override
-	public synchronized void setMaxPrice(Double value) {
-		if ( (maxPrice == null && value != null)
-		  || (maxPrice != null && ! maxPrice.equals(value)) )
-		{
-			maxPrice = value;
-			setChanged();			
-		}
-	}
-
-	@Override
-	public synchronized Double getMinPrice() {
-		return minPrice;
 	}
 	
 	@Override
-	public synchronized void setMinPrice(Double value) {
-		if ( (minPrice == null && value != null)
-		  || (minPrice != null && ! minPrice.equals(value)) )
-		{
-			minPrice = value;
-			setChanged();
-		}
+	public Integer getLotSize() {
+		return getInteger(SecurityField.LOT_SIZE);
 	}
 
 	@Override
-	public synchronized Double getMinStepPrice() {
-		return stepPrice;
+	public Double getUpperPriceLimit() {
+		return getDouble(SecurityField.UPPER_PRICE_LIMIT);
+	}
+
+	@Override
+	public Double getLowerPriceLimit() {
+		return getDouble(SecurityField.LOWER_PRICE_LIMIT);
 	}
 	
 	@Override
-	public synchronized void setMinStepPrice(Double value) {
-		if ( (stepPrice == null && value != null)
-		  || (stepPrice != null && ! stepPrice.equals(value)) )
-		{
-			stepPrice = value;
-			setChanged();
-		}
+	public Double getTickValue() {
+		return getDouble(SecurityField.TICK_VALUE);
 	}
 
 	@Override
-	public synchronized Double getMinStepSize() {
-		return stepSize;
+	public Double getTickSize() {
+		return getDouble(SecurityField.TICK_SIZE);
+	}
+
+	@Override
+	public Integer getScale() {
+		return getInteger(SecurityField.SCALE);
 	}
 	
-	@Override
-	public synchronized void setMinStepSize(Double value) {
-		if ( (stepSize == null && value != null)
-		  || (stepSize != null && ! stepSize.equals(value)) )
-		{
-			stepSize = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized Integer getPrecision() {
-		return decimals;
-	}
-	
-	@Override
-	public synchronized void setPrecision(Integer value) {
-		if ( value != decimals ) {
-			decimals = value;
-			setChanged();
-			changePriceFormat();
-		}
-	}
-
-	@Override
-	public synchronized EventType OnChanged() {
-		return dispatcher.OnChanged();
-	}
-
-	@Override
-	public synchronized EventType OnTrade() {
-		return dispatcher.OnTrade();
-	}
-
-	@Override
-	public String shrinkPrice(double price) {
-		double mPrice = Math.round(price / stepSize) * stepSize;
-		if ( decimals == 0 ) {
-			mPrice = Math.round(mPrice);
-		} else {
-			double mul = Math.pow(10, decimals);
-			mPrice = Math.round(mPrice * mul) / mul;
-		}
-		return priceFormat.format(mPrice);
-	}
-	
-	@Override
-	public void fireTradeEvent(Trade trade) {
-		synchronized ( this ) {
-			lastTrade = trade;
-		}
-		dispatcher.fireTrade(this, trade);
-	}
-	
-	@Override
-	public void fireChangedEvent() {
-		dispatcher.fireChanged(this);
-	}
-
-	@Override
-	public synchronized Trade getLastTrade() {
-		return lastTrade;
-	}
-
 	@Override
 	public Symbol getSymbol() {
 		return symbol;
 	}
 
 	@Override
-	public synchronized Double getLastPrice() {
-		return lastPrice;
+	public String getDisplayName() {
+		return getString(SecurityField.DISPLAY_NAME);
+	}
+	
+	@Override
+	public Double getOpenPrice() {
+		return getDouble(SecurityField.OPEN_PRICE);
 	}
 
 	@Override
-	public synchronized void setLastPrice(Double value) {
-		if ( (lastPrice == null && value != null)
-		  || (lastPrice != null && ! lastPrice.equals(value)) )
-		{
-			lastPrice = value;
-			setChanged();
-		}
+	public Double getClosePrice() {
+		return getDouble(SecurityField.CLOSE_PRICE);
 	}
 
 	@Override
-	public synchronized String getDisplayName() {
-		return displayName;
+	public Double getHighPrice() {
+		return getDouble(SecurityField.HIGH_PRICE);
 	}
 
 	@Override
-	public synchronized Double getAskPrice() {
-		return askPrice;
+	public Double getLowPrice() {
+		return getDouble(SecurityField.LOW_PRICE);
+	}
+	
+	@Override
+	public Double getInitialPrice() {
+		return getDouble(SecurityField.INITIAL_PRICE);
 	}
 
 	@Override
-	public synchronized Long getAskSize() {
-		return askSize;
+	public Double getInitialMargin() {
+		return getDouble(SecurityField.INITIAL_MARGIN);
 	}
 
 	@Override
-	public synchronized Double getBidPrice() {
-		return bidPrice;
+	public EventType onSessionUpdate() {
+		return onSessionUpdate;
 	}
-
+	
 	@Override
-	public synchronized Long getBidSize() {
-		return bidSize;
-	}
-
-	@Override
-	public synchronized void setDisplayName(String value) {
-		if ( (displayName == null && value != null)
-		  || (displayName != null && ! displayName.equals(value)) )
-		{
-			displayName = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setAskPrice(Double value) {
-		if ( (askPrice == null && value != null)
-		  || (askPrice != null && ! askPrice.equals(value)) )
-		{
-			askPrice = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setAskSize(Long value) {
-		if ( (askSize == null && value != null)
-		  || (askSize != null && ! askSize.equals(value)) )
-		{
-			askSize = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setBidPrice(Double value) {
-		if ( (bidPrice == null && value != null)
-		  || (bidPrice != null && ! bidPrice.equals(value)) )
-		{
-			bidPrice = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setBidSize(Long value) {
-		if ( (bidSize == null && value != null)
-		  || (bidSize != null && ! bidSize.equals(value)) )
-		{
-			bidSize = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized Double getOpenPrice() {
-		return open;
-	}
-
-	@Override
-	public synchronized Double getClosePrice() {
-		return close;
-	}
-
-	@Override
-	public synchronized Double getHighPrice() {
-		return high;
-	}
-
-	@Override
-	public synchronized Double getLowPrice() {
-		return low;
-	}
-
-	@Override
-	public synchronized SecurityStatus getStatus() {
-		return status;
-	}
-
-	@Override
-	public synchronized void setOpenPrice(Double value) {
-		if ( value == null ? open != null : ! value.equals(open) ) {
-			open = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setClosePrice(Double value) {
-		if ( value == null ? close != null : ! value.equals(close) ) {
-			close = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setHighPrice(Double value) {
-		if ( value == null ? high != null : ! value.equals(high) ) {
-			high = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setLowPrice(Double value) {
-		if ( value == null ? low != null : ! value.equals(low) ) {
-			low = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setStatus(SecurityStatus value) {
-		if ( value == null ? status != null : ! value.equals(status) ) {
-			status = value;
-			setChanged();
+	public void close() {
+		lock.lock();
+		try {
+			terminal = null;
+			onSessionUpdate.removeListeners();
+			onSessionUpdate.removeAlternates();
+			super.close();
+		} finally {
+			lock.unlock();
 		}
 	}
 	
-	private synchronized void changePriceFormat() {
-		if ( decimals == null ) {
-			priceFormat = null;
-		} else {
-			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-			symbols.setDecimalSeparator('.');
-			String format = "";
-			if ( decimals != 0 ) {
-				format = "0." + StringUtils.repeat('0', decimals);
-			} else {
-				format = "0";
+	static class SecurityController implements ContainerImpl.Controller {
+
+		@Override
+		public boolean hasMinimalData(Container container) {
+			return container.isDefined(TOKENS_FOR_AVAILABILITY);
+		}
+
+		@Override
+		public void processUpdate(Container container) {
+			SecurityImpl security = (SecurityImpl) container;
+			if ( security.atLeastOneHasChanged(TOKENS_FOR_SESSION_UPDATE) ) {
+				SecurityEventFactory factory = new SecurityEventFactory(security);
+				security.queue.enqueue(security.onSessionUpdate, factory);
 			}
-			priceFormat = new DecimalFormat(format, symbols);
+		}
+
+		@Override
+		public void processAvailable(Container container) {
+			
+		}
+		
+	}
+
+	static class SecurityEventFactory implements EventFactory {
+		final Security object;
+		
+		SecurityEventFactory(Security object) {
+			this.object = object;
+		}
+		
+		@Override
+		public Event produceEvent(EventType type) {
+			return new SecurityEvent(type, object);
 		}
 	}
 	
-	@Override
-	public synchronized boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
+	static class SecurityTickEventFactory implements EventFactory {
+		final Security object;
+		final Tick tick;
+		
+		SecurityTickEventFactory(Security object, Tick tick) {
+			this.object = object;
+			this.tick = tick;
 		}
-		if ( other == null || other.getClass() != SecurityImpl.class ) {
-			return false;
+		
+		@Override
+		public Event produceEvent(EventType type) {
+			return new SecurityTickEvent(type, object, tick);
 		}
-		SecurityImpl o = (SecurityImpl) other;
-		return new EqualsBuilder()
-			.append(o.decimals, decimals)
-			.append(o.lotSize, lotSize)
-			.append(o.stepSize, stepSize)
-			.append(o.askPrice, askPrice)
-			.append(o.askSize, askSize)
-			.append(o.bidPrice, bidPrice)
-			.append(o.bidSize, bidSize)
-			.append(o.close, close)
-			.append(o.symbol, symbol)
-			.append(o.displayName, displayName)
-			.append(o.high, high)
-			.append(o.lastPrice, lastPrice)
-			.append(o.lastTrade, lastTrade)
-			.append(o.low, low)
-			.append(o.maxPrice, maxPrice)
-			.append(o.minPrice, minPrice)
-			.append(o.open, open)
-			.append(o.status, status)
-			.append(o.stepPrice, stepPrice)
-			.appendSuper(o.terminal == terminal)
-			.append(o.isAvailable(), isAvailable())
-			.append(o.initialPrice, initialPrice)
-			.append(o.initialMargin, initialMargin)
-			.isEquals();
+		
 	}
-
-	@Override
-	public synchronized Double getMostAccuratePrice() {
-		if ( lastPrice != null ) {
-			return lastPrice;
-		}
-		if ( bidPrice != null && askPrice != null ) {
-			return (bidPrice + askPrice) / 2;
-		}
-		if ( open != null ) {
-			return open;
-		}
-		if ( close != null ) {
-			return close;
-		}
-		if ( high != null && low != null ) {
-			return (high + low) / 2;
-		}
-		if ( maxPrice != null && minPrice != null ) {
-			return (maxPrice + minPrice) / 2;
-		}
-		return null;
-	}
-
-	@Override
-	public synchronized Double getMostAccurateVolume(Double price, Long qty) {
-		return price * stepPrice / stepSize * (double) qty;
-	}
-
-	@Override
-	public synchronized boolean isPricesEquals(Double price1, Double price2) {
-		if ( price1 == null || price2 == null ) {
-			return false;
-		}
-		double epsilon = Math.pow(10, -(decimals + 1));
-		double delta = Math.abs(price1 - price2);
-		return delta <= epsilon;
-	}
-
-	@Override
-	public synchronized Double getInitialPrice() {
-		return initialPrice;
-	}
-
-	@Override
-	public synchronized Double getInitialMargin() {
-		return initialMargin;
-	}
-
-	@Override
-	public synchronized void setInitialPrice(Double value) {
-		if ( value == null ?
-				initialPrice != null : ! value.equals(initialPrice) )
-		{
-			initialPrice = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setInitialMargin(Double value) {
-		if ( value == null ?
-				initialMargin != null : ! value.equals(initialMargin) )
-		{
-			initialMargin = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public SymbolType getType() {
-		return symbol.getType();
-	}
-
-	@Override
-	public Currency getCurrency() {
-		return symbol.getCurrency();
-	}
-
+	
 }

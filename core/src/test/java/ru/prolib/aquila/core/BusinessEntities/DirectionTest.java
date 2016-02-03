@@ -9,8 +9,9 @@ public class DirectionTest {
 	
 	@Test
 	public void testConstants() throws Exception {
-		assertEquals("Buy", Direction.BUY.toString());
-		assertEquals("Sell", Direction.SELL.toString());
+		assertEquals("BUY", OrderAction.BUY.toString());
+		assertEquals("SELL", OrderAction.SELL.toString());
+		assertEquals("SELL_SHORT", OrderAction.SELL_SHORT.toString());
 	}
 
 }

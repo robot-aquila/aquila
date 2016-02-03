@@ -1,197 +1,165 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.PositionEventDispatcher;
+import ru.prolib.aquila.core.data.Container;
+import ru.prolib.aquila.core.data.ContainerImpl;
+import ru.prolib.aquila.core.data.PositionField;
 
 /**
- * Торговая позиция.
+ * Market position.
  * <p>
  * 2012-08-03<br>
  * $Id: PositionImpl.java 529 2013-02-19 08:49:04Z whirlwind $
  */
-public class PositionImpl extends EditableImpl implements EditablePosition {
-	private final Portfolio portfolio;
-	private final Security security;
-	private final PositionEventDispatcher dispatcher;
-	private long open;
-	private long lock;
-	private long curr;
-	private double variationMargin;
-	private Double marketValue = 0.0d, bookValue = 0.0d;
-	private PositionType type = PositionType.CLOSE;
-
-	/**
-	 * Создать объект позиции.
-	 * <p>
-	 * @param portfolio портфель, которому принадлежит позиция
-	 * @param security инструмент, по которому открыта позиция
-	 * @param dispatcher диспетчер событий
-	 */
-	public PositionImpl(Portfolio portfolio, Security security,
-			PositionEventDispatcher dispatcher)
+public class PositionImpl extends ContainerImpl implements EditablePosition {
+	private static final int[] TOKENS_FOR_AVAILABILITY = {
+		PositionField.CURRENT_VOLUME
+	};
+	
+	private final Symbol symbol;
+	private final Account account;
+	private Terminal terminal;
+	private final EventType onPositionChange, onCurrentPriceChange;
+	
+	private static String getID(Terminal terminal, Account account,
+			Symbol symbol, String suffix)
 	{
-		super();
-		this.portfolio = portfolio;
-		this.security = security;
-		this.dispatcher = dispatcher;
+		return String.format("%s.%s[%s].%s", terminal.getTerminalID(),
+				account, symbol, suffix);
+	}
+	
+	private String getID(String suffix) {
+		return getID(terminal, account, symbol, suffix);
+	}
+	
+	private EventType newEventType(String suffix) {
+		return new EventTypeImpl(getID(suffix));
+	}
+
+	public PositionImpl(EditableTerminal terminal, Account account,
+			Symbol symbol, ContainerImpl.Controller controller)
+	{
+		super(terminal.getEventQueue(), getID(terminal, account, symbol, "POSITION"), controller);
+		this.terminal = terminal;
+		this.account = account;
+		this.symbol = symbol;
+		this.onPositionChange = newEventType("POSITION.POSITION_CHANGE");
+		this.onCurrentPriceChange = newEventType("POSITION.CURRENT_PRICE_CHANGE");
+	}
+	
+	public PositionImpl(EditableTerminal terminal, Account account, Symbol symbol) {
+		this(terminal, account, symbol, new PositionController());
 	}
 	
 	@Override
 	public Terminal getTerminal() {
-		return portfolio.getTerminal();
-	}
-	
-	/**
-	 * Получить диспетчер событий.
-	 * <p>
-	 * @return диспетчер событий
-	 */
-	public PositionEventDispatcher getEventDispatcher() {
-		return dispatcher;
-	}
-
-	@Override
-	public Portfolio getPortfolio() {
-		return portfolio;
+		lock.lock();
+		try {
+			return terminal;
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
 	public Symbol getSymbol() {
-		return security.getSymbol();
-	}
-	
-	@Override
-	public Security getSecurity() {
-		return security;
+		return symbol;
 	}
 	
 	@Override
 	public Account getAccount() {
-		return portfolio.getAccount();
+		return account;
 	}
 
 	@Override
-	public EventType OnChanged() {
-		return dispatcher.OnChanged();
-	}
-
-	@Override
-	public void fireChangedEvent() {
-		dispatcher.fireChanged(this);
-	}
-
-	@Override
-	public synchronized double getVarMargin() {
-		return variationMargin;
-	}
-
-	@Override
-	public synchronized long getOpenQty() {
-		return open;
-	}
-
-	@Override
-	public synchronized long getLockQty() {
-		return lock;
-	}
-
-	@Override
-	public synchronized long getCurrQty() {
-		return curr;
-	}
-
-	@Override
-	public synchronized void setVarMargin(double margin) {
-		if ( variationMargin != margin ) {
-			variationMargin = margin;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setOpenQty(long value) {
-		if ( open != value ) {
-			open = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setLockQty(long value) {
-		if ( lock != value ) {
-			lock = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setCurrQty(long value) {
-		if ( curr != value ) {
-			curr = value;
-			if ( curr > 0 ) {
-				type = PositionType.LONG;
-			} else if ( curr < 0 ) {
-				type = PositionType.SHORT;
-			} else {
-				type = PositionType.CLOSE;
-			}
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized PositionType getType() {
-		return type;
-	}
-
-	@Override
-	public synchronized Double getMarketValue() {
-		return marketValue;
-	}
-
-	@Override
-	public synchronized void setMarketValue(Double value) {
-		if ( value== null ? marketValue != null : !value.equals(marketValue) ) {
-			marketValue = value;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized Double getBookValue() {
-		return bookValue;
-	}
-
-	@Override
-	public synchronized void setBookValue(Double value) {
-		if ( value== null ? bookValue != null : !value.equals(bookValue) ) {
-			bookValue = value;
-			setChanged();
-		}
+	public EventType onPositionChange() {
+		return onPositionChange;
 	}
 	
 	@Override
-	public synchronized boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
+	public EventType onCurrentPriceChange() {
+		return onCurrentPriceChange;
+	}
+
+	@Override
+	public Double getVariationMargin() {
+		return getDouble(PositionField.VARIATION_MARGIN);
+	}
+
+	@Override
+	public Long getCurrentVolume() {
+		return getLong(PositionField.CURRENT_VOLUME);
+	}
+
+	@Override
+	public Double getCurrentPrice() {
+		return getDouble(PositionField.CURRENT_PRICE);
+	}
+	
+	@Override
+	public Long getOpenVolume() {
+		return getLong(PositionField.OPEN_VOLUME);
+	}
+
+	@Override
+	public Double getOpenPrice() {
+		return getDouble(PositionField.OPEN_PRICE);
+	}
+	
+	@Override
+	public void close() {
+		lock.lock();
+		try {
+			terminal = null;
+			onCurrentPriceChange.removeListeners();
+			onCurrentPriceChange.removeAlternates();
+			onPositionChange.removeListeners();
+			onPositionChange.removeAlternates();
+			super.close();
+		} finally {
+			lock.unlock();
 		}
-		if ( other == null || other.getClass() != PositionImpl.class ) {
-			return false;
+	}
+	
+	static class PositionController implements ContainerImpl.Controller {
+		
+		@Override
+		public boolean hasMinimalData(Container container) {
+			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
-		PositionImpl o = (PositionImpl) other;
-		return new EqualsBuilder()
-			.append(o.curr, curr)
-			.append(o.lock, lock)
-			.append(o.open, open)
-			.append(o.variationMargin, variationMargin)
-			.append(o.bookValue, bookValue)
-			.append(o.marketValue, marketValue)
-			.appendSuper(o.portfolio == portfolio)
-			.appendSuper(o.security == security)
-			.append(o.isAvailable(), isAvailable())
-			.isEquals();
+
+		@Override
+		public void processUpdate(Container container) {
+			PositionImpl position = (PositionImpl) container;
+			PositionEventFactory factory = new PositionEventFactory(position);
+			if ( position.hasChanged(PositionField.CURRENT_VOLUME) ) {
+				position.queue.enqueue(position.onPositionChange, factory);
+			}
+			if ( position.hasChanged(PositionField.CURRENT_PRICE) ) {
+				position.queue.enqueue(position.onCurrentPriceChange, factory);					
+			}
+		}
+
+		@Override
+		public void processAvailable(Container container) {
+			
+		}
+		
+	}
+	
+	static class PositionEventFactory implements EventFactory {
+		private final Position position;
+		
+		PositionEventFactory(Position position) {
+			super();
+			this.position = position;
+		}
+
+		@Override
+		public Event produceEvent(EventType type) {
+			return new PositionEvent(type, position);
+		}
+		
 	}
 
 }

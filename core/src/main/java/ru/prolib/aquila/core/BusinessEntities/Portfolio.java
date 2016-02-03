@@ -1,117 +1,150 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.List;
-
+import java.util.Set;
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.data.Container;
 
 /**
- * Интерфейс портфеля.
+ * Interface of portfolio.
  * <p>
  * 2012-05-30<br>
  * $Id: Portfolio.java 388 2012-12-30 12:58:15Z whirlwind $
  */
-public interface Portfolio {
-	public static final int VERSION = 1;
+public interface Portfolio extends Container {
 	
 	/**
-	 * Получить терминал.
+	 * Get terminal instance.
 	 * <p>
-	 * @return терминал
+	 * @return terminal
 	 */
 	public Terminal getTerminal();
 	
 	/**
-	 * Получить торговый счет портфеля.
+	 * Get account code.
 	 * <p>
-	 * @return идентификатор счета
+	 * @return account code
 	 */
 	public Account getAccount();
 	
 	/**
-	 * Получить величину вариационной маржи.
+	 * Get account balance.
 	 * <p>
-	 * @return вариационная маржа или null, если значение недоступно
-	 */
-	public Double getVariationMargin();
-	
-	/**
-	 * Получить величину доступных денежных средств.
-	 * <p>
-	 * @return размер кэша или null, если значение недоступно
-	 */
-	public Double getCash();
-	
-	/**
-	 * Получить баланс портфеля.
-	 * <p>
-	 * @return баланс или null, если баланс недоступен
+	 * @return account balance or null if data not available
 	 */
 	public Double getBalance();
 	
 	/**
-	 * Получить тип события: при изменении атрибутов.
+	 * Get account equity.
 	 * <p>
-	 * @return тип события
+	 * @return account equity or null if data not available
 	 */
-	public EventType OnChanged();
-	
-	
-	/**
-	 * Получить список позиций.
-	 * <p>
-	 * Возвращает список позиций по которым имеется какая-либо информация.
-	 * <p>
-	 * @return список позиций
-	 */
-	public List<Position> getPositions();
+	public Double getEquity();
 	
 	/**
-	 * Получить позицию.
+	 * Get current profit of an account.
 	 * <p>
-	 * Если позиция не существует, то создает и регистрирует новый экземпляр
-	 * позиции. Никаких событий не генерирует и не меняет статус доступности.
-	 * Фактически, если позиция создана в результате пользовательского запроса,
-	 * первым событием будет событие о доступности, которое будет сгенерировано
-	 * поставщиком данных. То есть, первичная установка атрибутов не
-	 * рассматривается как изменение. Это нужно учитывать, в случае подписки
-	 * на изменение позиции до того, как поставщик данных сделает ее доступной.
-	 * <p>
-	 * @param security инструмент
-	 * @return позиция
+	 * @return current profit or null if data not available
 	 */
-	public Position getPosition(Security security);
+	public Double getProfitAndLoss();
 	
 	/**
-	 * Получить тип события: при появлении информации о позиции.
+	 * Get the margin is currently used.
 	 * <p>
-	 * Важно учитывать, что с точки зрения наблюдателя, получение события
-	 * данного типа не гарантируется. Событие данного типа будет получено
-	 * наблюдателем только для тех, позиций которые были добавлены в набор
-	 * после подписки. Если на момент подписки в наборе уже есть позиции,
-	 * наблюдатель не получит соответствующих событий, так как они уже
-	 * отправлены наблюдателям. Такие позиции должны быть обработаны явно.
-	 * <p>
-	 * Если стоит задача обрабатывать поступление вообще всех позиций (например
-	 * в целях подписки на изменение позиции), то в этом случае следует
-	 * воспользоваться ретранслятором на более высоком уровне, например,
-	 * соответствующее событие в составе терминала. 
-	 * <p>
-	 * @return тип события
+	 * @return margin used or null if data not available
 	 */
-	public EventType OnPositionAvailable();
+	public Double getUsedMargin();
 	
 	/**
-	 * Перехватчик событий соответствующего типа от всех позиций.
+	 * Get the free margin.
 	 * <p>
-	 * @return тип события
+	 * @return free margin  or null if data not available
 	 */
-	public EventType OnPositionChanged();
+	public Double getFreeMargin();
 	
 	/**
-	 * Получить количество позиций.
+	 * Get the margin call level.
 	 * <p>
-	 * @return количество позиций
+	 * @return margin call level or null if data not available
 	 */
-	public int getPositionsCount();
+	public Double getMarginCallLevel();
+	
+	/**
+	 * Get the margin stop out level.
+	 * <p>
+	 * @return stop out level or null if data not available
+	 */
+	public Double getMarginStopOutLevel();
+	
+	/**
+	 * Get the current assets of an account.
+	 * <p>
+	 * @return the current assets or null if data not available
+	 */
+	public Double getAssets();
+	
+	/**
+	 * Get the current liabilities of an account.
+	 * <p>
+	 * @return the current liabilities or null if data not available
+	 */
+	public Double getLiabilities();
+	
+	/**
+	 * Get account currency.
+	 * <p>
+	 * @return ISO 4217 currency code
+	 */
+	public String getCurrency();
+	
+	/**
+	 * Get position count.
+	 * <p>
+	 * @return count of positions
+	 */
+	public int getPositionCount();
+	
+	/**
+	 * Get existing positions.
+	 * <p>
+	 * @return set of positions. Position order is not a constant and may differ
+	 * for two consecutive calls.
+	 */
+	public Set<Position> getPositions();
+	
+	/**
+	 * Get position.
+	 * <p>
+	 * @param symbol - the symbol of position
+	 * @return position instance
+	 */
+	public Position getPosition(Symbol symbol);
+	
+	/**
+	 * When new position got minimum required data to be useful.
+	 * <p>
+	 * @return event type
+	 */
+	public EventType onPositionAvailable();
+	
+	/**
+	 * When opened position current price changed.
+	 * <p>
+	 * @return event type
+	 */
+	public EventType onPositionCurrentPriceChange();
+	
+	/**
+	 * When position volume changed.
+	 * <p>
+	 * @return event type
+	 */
+	public EventType onPositionChange();
+
+	/**
+	 * When one or more attributes of position were changed.
+	 * <p>
+	 * @return event type
+	 */
+	public EventType onPositionUpdate();
 	
 }

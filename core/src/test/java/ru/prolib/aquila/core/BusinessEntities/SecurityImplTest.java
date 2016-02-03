@@ -1,899 +1,297 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
-
-import java.util.Currency;
+import static org.easymock.EasyMock.*;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.SecurityEventDispatcher;
+import ru.prolib.aquila.core.BusinessEntities.SecurityImpl.SecurityController;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.utils.Variant;
 
 /**
  * 2012-05-30<br>
  * $Id: SecurityImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
  */
-public class SecurityImplTest {
-	private static Symbol symbol1, symbol2;
+public class SecurityImplTest extends ContainerImplTest {
+	private static Symbol symbol1 = new Symbol("S:GAZP@EQBR:RUB");
 	private IMocksControl control;
-	private Terminal terminal;
-	private SecurityEventDispatcher dispatcher;
+	private EditableTerminal terminal;
 	private SecurityImpl security;
-	private G<?> getter;
-	private S<SecurityImpl> setter;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		symbol1 = new Symbol("GAZP", "EQBR", "RUB",SymbolType.STOCK);
-		symbol2 = new Symbol("RIM3", "SPFT", "USD",SymbolType.FUTURE);
+		ContainerImplTest.setUpBeforeClass();
 	}
 
 	@Before
 	public void setUp() throws Exception {
+		super.setUp();
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		super.tearDown();
+	}
+	
+	@Override
+	protected String getID() {
+		return security.getContainerID();
+	}
+	
+	private void prepareTerminal() {
 		control = createStrictControl();
-		terminal = control.createMock(Terminal.class);
-		dispatcher = control.createMock(SecurityEventDispatcher.class);
-		 
-		security = new SecurityImpl(terminal, symbol1, dispatcher);
-		setter = null;
-		getter = null;
+		terminal = control.createMock(EditableTerminal.class);
+		expect(terminal.getTerminalID()).andStubReturn("foobar");
+		expect(terminal.getEventQueue()).andStubReturn(queue);
+		control.replay();		
 	}
 	
-	/**
-	 * Протестировать геттер/сеттер атрибута с проверкой признака изменения.
-	 * <p>
-	 * @param firstValue первое значение атрибута
-	 * @param secondValue второе значение атрибута
-	 */
-	private void testGetterSetter(Object firstValue, Object secondValue)
-			throws Exception
-	{
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null, 	  null,			false },
-				{ firstValue, firstValue,	false },
-				{ null,		  secondValue,	true  },
-				{ firstValue, secondValue,  true  },
-				{ firstValue, null,			true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			setter.set(security, fixture[i][0]);
-			security.resetChanges();
-			setter.set(security, fixture[i][1]);
-			assertEquals(msg, (Boolean)fixture[i][2], security.hasChanged());
-			assertEquals(msg, fixture[i][1], getter.get(security));
-		}
+	@Override
+	protected ContainerImpl produceContainer() {
+		prepareTerminal();
+		security = new SecurityImpl(terminal, symbol1);
+		return security;
+	}
+	
+	@Override
+	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+		prepareTerminal();
+		security = new SecurityImpl(terminal, symbol1, controller);
+		return security;
 	}
 	
 	@Test
-	public void testVersion() throws Exception {
-		assertEquals(2, Security.VERSION);
-	}
-	
-	@Test
-	public void testDefaultValues() throws Exception {
-		assertNull(security.getPrecision());
-		assertNull(security.getMinPrice());
-		assertNull(security.getMaxPrice());
-		assertNull(security.getLotSize());
-		assertNull(security.getMinStepPrice());
-		assertNull(security.getMinStepSize());
-		assertNull(security.getLastTrade());
-		assertNull(security.getLastPrice());
+	public void testCtor_DefaultController() throws Exception {
+		security = new SecurityImpl(terminal, symbol1);
+		assertEquals(SecurityController.class, security.getController().getClass());
+		assertNotNull(security.getTerminal());
+		assertNotNull(security.getEventQueue());
+		assertSame(terminal, security.getTerminal());
+		assertSame(queue, security.getEventQueue());
+		assertEquals(symbol1, security.getSymbol());
+		String prefix = String.format("%s.S:GAZP@EQBR:RUB.", "foobar");
+		assertEquals(prefix + "SECURITY", security.getContainerID());
+		assertEquals(prefix + "SECURITY.SESSION_UPDATE", security.onSessionUpdate().getId());
 		assertFalse(security.isAvailable());
-		assertNull(security.getDisplayName());
-		assertNull(security.getAskPrice());
-		assertNull(security.getAskSize());
-		assertNull(security.getBidPrice());
-		assertNull(security.getBidSize());
-		assertNull(security.getOpenPrice());
-		assertNull(security.getClosePrice());
-		assertNull(security.getHighPrice());
-		assertNull(security.getLowPrice());
-		assertNull(security.getInitialPrice());
-		assertNull(security.getInitialMargin());
+	}
+
+	@Test
+	public void testGetScale() throws Exception {
+		getter = new Getter<Integer>() {
+			@Override public Integer get() {
+				return security.getScale();
+			}
+		};
+		testGetter(SecurityField.SCALE, 2, 4);
 	}
 	
 	@Test
-	public void testAccessorsAndMutators() throws Exception {
-		security.setPrecision(3);
-		security.setMinPrice(90.00d);
-		security.setMaxPrice(130.00d);
-		security.setLotSize(1);
-		security.setMinStepPrice(0.1d);
-		security.setMinStepSize(1.00d);
-		security.setLastPrice(20.44d);
-		security.setDisplayName("zulu4");
-		security.setAskPrice(12.34d);
-		security.setAskSize(1000l);
-		security.setBidPrice(34.56d);
-		security.setBidSize(2000l);
-		security.setOpenPrice(13.45d);
-		security.setClosePrice(98.15d);
-		security.setLowPrice(24.56d);
-		security.setHighPrice(18.44d);
-		security.setStatus(SecurityStatus.TRADING);
-		security.setInitialPrice(54.32d);
-		security.setInitialMargin(5.43d);
+	public void testGetLotSize() throws Exception {
+		getter = new Getter<Integer>() {
+			@Override public Integer get() {
+				return security.getLotSize();
+			}	
+		};
+		testGetter(SecurityField.LOT_SIZE, 10, 1);
+	}
+	
+	@Test
+	public void testGetUpperPriceLimit() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getUpperPriceLimit();
+			}
+		};
+		testGetter(SecurityField.UPPER_PRICE_LIMIT, 137.15d, 158.12d);
+	}
+	
+	@Test
+	public void testGetLowerPriceLimit() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getLowerPriceLimit();
+			}
+		};
+		testGetter(SecurityField.LOWER_PRICE_LIMIT, 119.02d, 118.16d);
+	}
+	
+	@Test
+	public void testGetTickValue() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getTickValue();
+			}
+		};
+		testGetter(SecurityField.TICK_VALUE, 440.09d, 482.15d);
+	}
+	
+	@Test
+	public void testGetTickSize() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getTickSize();
+			}
+		};
+		testGetter(SecurityField.TICK_SIZE, 10.0d, 0.05d);
+	}
+	
+	@Test
+	public void testGetDisplayName() throws Exception {
+		getter = new Getter<String>() {
+			@Override public String get() {
+				return security.getDisplayName();
+			}
+		};
+		testGetter(SecurityField.DISPLAY_NAME, "foo", "bar");
+	}	
+	
+	@Test
+	public void testGetOpenPrice() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getOpenPrice();
+			}
+		};
+		testGetter(SecurityField.OPEN_PRICE, 321.19d, 280.04d);
+	}
+	
+	@Test
+	public void testGetClosePrice() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getClosePrice();
+			}
+		};
+		testGetter(SecurityField.CLOSE_PRICE, 10.03d, 12.34d);
+	}
+	
+	@Test
+	public void testGetLowPrice() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getLowPrice();
+			}
+		};
+		testGetter(SecurityField.LOW_PRICE, 8.02d, 15.87d);
+	}
+
+	@Test
+	public void testGetHighPrice() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getHighPrice();
+			}
+		};
+		testGetter(SecurityField.HIGH_PRICE, 4586.13d, 7002.17d);
+	}
+
+	@Test
+	public void testGetInitialPrice() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getInitialPrice();
+			}
+		};
+		testGetter(SecurityField.INITIAL_PRICE, 215.86d, 114.12d);
+	}
+
+	@Test
+	public void testGetInitialMargin() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return security.getInitialMargin();
+			}
+		};
+		testGetter(SecurityField.INITIAL_MARGIN, 118.99d, 120.01d);
+	}
+	
+	@Test
+	public void testClose() {
+		EventType type = new EventTypeImpl();
+		EventListener listener = new EventListenerStub();
+		security.onAvailable().addListener(listener);
+		security.onAvailable().addAlternateType(type);
+		security.onSessionUpdate().addListener(listener);
+		security.onSessionUpdate().addAlternateType(type);
+		security.onUpdate().addListener(listener);
+		security.onUpdate().addAlternateType(type);
 		
-		assertEquals(3, (int)security.getPrecision());
-		assertEquals(130.00d, security.getMaxPrice(), 0.001d);
-		assertEquals(90.00d, security.getMinPrice(), 0.001d);
-		assertEquals(1, (int)security.getLotSize());
-		assertEquals(0.1d, security.getMinStepPrice(), 0.001d);
-		assertEquals(1.00d, security.getMinStepSize(), 0.001d);
-		assertEquals(20.44d, security.getLastPrice(), 0.001d);
-		assertEquals("zulu4", security.getDisplayName());
-		assertEquals(12.34d, security.getAskPrice(), 0.01d);
-		assertEquals(1000l, (long) security.getAskSize());
-		assertEquals(34.56d, security.getBidPrice(), 0.01d);
-		assertEquals(2000l, (long) security.getBidSize());
-		assertEquals(13.45d, security.getOpenPrice(), 0.01d);
-		assertEquals(98.15d, security.getClosePrice(), 0.01d);
-		assertEquals(24.56d, security.getLowPrice(), 0.01d);
-		assertEquals(18.44d, security.getHighPrice(), 0.01d);
-		assertSame(SecurityStatus.TRADING, security.getStatus());
-		assertEquals(54.32d, security.getInitialPrice(), 0.01d);
-		assertEquals(5.43d, security.getInitialMargin(), 0.01d);
+		security.close();
 		
-		security.setAvailable(true);
-		assertTrue(security.isAvailable());
-		security.setAvailable(false);
+		assertFalse(security.onAvailable().hasListeners());
+		assertFalse(security.onAvailable().hasAlternates());
+		assertFalse(security.onSessionUpdate().hasListeners());
+		assertFalse(security.onSessionUpdate().hasAlternates());
+		assertFalse(security.onUpdate().hasListeners());
+		assertFalse(security.onUpdate().hasAlternates());
+		assertNull(security.getTerminal());
 		assertFalse(security.isAvailable());
-		security.setAvailable(true);
-		assertTrue(security.isAvailable());
+		assertTrue(security.isClosed());
 	}
 	
 	@Test
-	public void testShrinkPrice_DecimalsGreaterThanZero() throws Exception {
-		security.setMinStepSize(0.05d);
-		security.setPrecision(2);
-		assertEquals("123.00", security.shrinkPrice(123.00153123123d));
-		assertEquals("222.15", security.shrinkPrice(222.1345d));
-		security.setPrecision(4);
-		assertEquals("222.1500", security.shrinkPrice(222.1345d));
-		security.setMinStepSize(0.0005d);
-		assertEquals("0.1000", security.shrinkPrice(0.10001d));
-		assertEquals("222.1345", security.shrinkPrice(222.1345d));
+	public void testSecurityController_HasMinimalData() throws Exception {
+		SecurityController controller = new SecurityController();
+		
+		assertFalse(controller.hasMinimalData(security));
+		
+		data.put(SecurityField.DISPLAY_NAME, "GAZP");
+		data.put(SecurityField.SCALE, 2);
+		data.put(SecurityField.LOT_SIZE, 100);
+		data.put(SecurityField.TICK_SIZE, 5d);
+		data.put(SecurityField.TICK_VALUE, 2.37d);
+		security.update(data);
+		
+		assertTrue(controller.hasMinimalData(security));
 	}
 	
 	@Test
-	public void testShrinkPrice_DecimalsEqZero() throws Exception {
-		security.setMinStepSize(5.0d);
-		security.setPrecision(0);
-		assertEquals("14555", security.shrinkPrice(14553.15));
-		assertEquals("14550", security.shrinkPrice(14551.95));
-		security.setMinStepSize(10.0d);
-		assertEquals("14550", security.shrinkPrice(14553.15));
-		assertEquals("14560", security.shrinkPrice(14555.55));
-	}
-	
-	@Test (expected=NullPointerException.class)
-	public void testShrinkPrice_ThrowsIfDecimalsNotSet() throws Exception {
-		security.shrinkPrice(14553.15d);
+	public void testSecurityController_ProcessUpdate_SessionUpdate() {
+		data.put(SecurityField.SCALE, 10);
+		data.put(SecurityField.LOT_SIZE, 1);
+		data.put(SecurityField.TICK_SIZE, 0.05d);
+		data.put(SecurityField.TICK_VALUE, 0.01d);
+		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
+		data.put(SecurityField.INITIAL_PRICE, 80.93d);
+		data.put(SecurityField.OPEN_PRICE, 79.19d);
+		data.put(SecurityField.HIGH_PRICE, 83.64d);
+		data.put(SecurityField.LOW_PRICE, 79.19d);
+		data.put(SecurityField.CLOSE_PRICE, 79.18d);
+		security.update(data);
+		SecurityController controller = new SecurityController();
+		EventListenerStub listener = new EventListenerStub();
+		security.onSessionUpdate().addSyncListener(listener);
+		
+		controller.processUpdate(security);
+		
+		assertEquals(1, listener.getEventCount());
+		SecurityEvent e = (SecurityEvent) listener.getEvent(0);
+		assertTrue(e.isType(security.onSessionUpdate()));
+		assertSame(security, e.getSecurity());
 	}
 
 	@Test
-	public void testFireTradeEvent() throws Exception {
-		Trade trade = new Trade(terminal);
-		dispatcher.fireTrade(same(security), same(trade));
-		control.replay();
+	public void testSecurityController_ProcessAvailable() {
+		data.put(SecurityField.SCALE, 10);
+		data.put(SecurityField.LOT_SIZE, 1);
+		data.put(SecurityField.TICK_SIZE, 0.05d);
+		data.put(SecurityField.TICK_VALUE, 0.01d);
+		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
+		data.put(SecurityField.INITIAL_PRICE, 80.93d);
+		data.put(SecurityField.OPEN_PRICE, 79.19d);
+		data.put(SecurityField.HIGH_PRICE, 83.64d);
+		data.put(SecurityField.LOW_PRICE, 79.19d);
+		data.put(SecurityField.CLOSE_PRICE, 79.18d);
+		security.update(data);
+		SecurityController controller = new SecurityController();
+		EventListenerStub listener = new EventListenerStub();
+		security.onSessionUpdate().addSyncListener(listener);
 		
-		assertNull(security.getLastTrade());
-		security.fireTradeEvent(trade);
-		assertSame(trade, security.getLastTrade());
+		controller.processAvailable(security);
 		
-		control.verify();
-	}
-	
-	@Test
-	public void testFireChangedEvent() throws Exception {
-		dispatcher.fireChanged(same(security));
-		control.replay();
-		
-		security.fireChangedEvent();
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testSetPrecision_SetsChanged() throws Exception {
-		Object fixture[][] = {
-			// initial value, new value, changed?
-			{ null,			null,		false },
-			{ null,			   2,		true  },
-			{    2,	 		   2,		false },
-			{    2,			null,		true  },
-			{    2,			   3,		true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setPrecision((Integer) fixture[i][0]);
-			security.resetChanges();
-			security.setPrecision((Integer) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals((Integer) fixture[i][1], security.getPrecision());
-		}
-	}
-	
-	@Test
-	public void testSetLotSize_SetsChanged() throws Exception {
-		Object fixture[][] = {
-			// initial value, new value, changed?
-			{ null,			null,		false },
-			{ null,			10,			true  },
-			{   10,	 		10,			false },
-			{   10,			null,		true  },
-			{   10,			15,			true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setLotSize((Integer) fixture[i][0]);
-			security.resetChanges();
-			security.setLotSize((Integer) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals((Integer) fixture[i][1], security.getLotSize());
-		}
-	}
-	
-	@Test
-	public void testSetMaxPrice_SetsChanged() throws Exception {
-		Object fixture[][] = {
-			// initial value, new value, changed?
-			{ null,			null,		false },
-			{ null,			115.1234d,	true  },
-			{ 115.1234d,	115.1234d,	false },
-			{ 115.1234d,	null,		true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setMaxPrice((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setMaxPrice((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals((Double) fixture[i][1], security.getMaxPrice());
-		}
-	}
-	
-	@Test
-	public void testSetMinPrice_SetsChanged() throws Exception {
-		Object fixture[][] = {
-			// initial value, new value, changed?
-			{ null, 	null,		false },
-			{ null,		95.1234d,	true  },
-			{ 95.1234d, 95.1234d,	false },
-			{ 95.1234d, null,		true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setMinPrice((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setMinPrice((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals((Double) fixture[i][1], security.getMinPrice());
-		}
-	}
-	
-	@Test
-	public void testSetLastPrice_SetsChanged() throws Exception {
-		Object fix[][] = {
-				// initial value, new value, changed?
-				{ null, 	null,		false },
-				{ null,		5.1234d,	true  },
-				{ 5.1234d,  5.1234d,	false },
-				{ 5.1234d,  null,		true  },
-			};
-			for ( int i = 0; i < fix.length; i ++ ) {
-				String msg = "At #" + i;
-				security.setLastPrice((Double) fix[i][0]);
-				security.resetChanges();
-				security.setLastPrice((Double) fix[i][1]);
-				assertEquals(msg, (Boolean) fix[i][2], security.hasChanged());
-				assertEquals((Double) fix[i][1], security.getLastPrice());
-			}
-	}
-	
-	@Test
-	public void testSetMinStepPrice_SetsChanged() throws Exception {
-		Object fixture[][] = {
-			// initial value, new value, changed?
-			{ null,		null,		false },
-			{ null,		12.345d,	true  },
-			{ 12.345d,	null,		true  },
-			{ 12.345d,	12.345d,	false },
-			{ 1.2345d,	1.2223d,	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setMinStepPrice((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setMinStepPrice((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals((Double) fixture[i][1], security.getMinStepPrice());
-		}
-	}
-	
-	@Test
-	public void testSetMinStepSize_SetsChanged() throws Exception {
-		Object fixture[][] = {
-			// initial value, new value, changed?
-			{ null,		null,		false },
-			{ null,		0.5d,		true  },
-			{ 0.5d,		null,		true  },
-			{ 0.5d,		0.5d,		false },
-			{ 0.5d,		0.3d,		true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setMinStepSize((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setMinStepSize((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals((Double) fixture[i][1], security.getMinStepSize());
-		}
-	}
-	
-	@Test
-	public void testSetDisplayName_SetsChanged() throws Exception {
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null,		null,	false },
-				{ null,		"foo",	true  },
-				{ "foo",	null,	true  },
-				{ "foo",	"foo",	false },
-				{ "foo",	"bar",	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setDisplayName((String) fixture[i][0]);
-			security.resetChanges();
-			security.setDisplayName((String) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals(msg, (String)fixture[i][1], security.getDisplayName());
-		}
-	}
-	
-	@Test
-	public void testSetAskPrice_SetsChanged() throws Exception {
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null,		null,		false },
-				{ null,		812.345d,	true  },
-				{ 812.345d,	null,		true  },
-				{ 812.345d,	812.345d,	false },
-				{ 81.2345d,	81.2223d,	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setAskPrice((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setAskPrice((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals(msg, (Double) fixture[i][1], security.getAskPrice());
-		}
-	}
-	
-	@Test
-	public void testSetAskSize_SetsChanged() throws Exception {
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null,		null,		false },
-				{ null,		812345l,	true  },
-				{ 812345l,	null,		true  },
-				{ 812345l,	812345l,	false },
-				{ 812345l,	812223l,	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setAskSize((Long) fixture[i][0]);
-			security.resetChanges();
-			security.setAskSize((Long) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals(msg, (Long) fixture[i][1], security.getAskSize());
-		}
-	}
-	
-	@Test
-	public void testSetBidPrice_SetsChanged() throws Exception {
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null,		null,		false },
-				{ null,		212.345d,	true  },
-				{ 212.345d,	null,		true  },
-				{ 212.345d,	212.345d,	false },
-				{ 21.2345d,	21.2223d,	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setBidPrice((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setBidPrice((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals(msg, (Double) fixture[i][1], security.getBidPrice());
-		}
-
-	}
-	
-	@Test
-	public void testSetBidSize_SetsChanged() throws Exception {
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null,		null,	false },
-				{ null,		2345l,	true  },
-				{ 2345l,	null,	true  },
-				{ 2345l,	2345l,	false },
-				{ 2345l,	2223l,	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setBidSize((Long) fixture[i][0]);
-			security.resetChanges();
-			security.setBidSize((Long) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals(msg, (Long) fixture[i][1], security.getBidSize());
-		}
-	}
-	
-	@Test
-	public void testSetOpenPrice() throws Exception {
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object source) throws ValueException {
-				return ((Security) source).getOpenPrice();
-			}
-		};
-		setter = new S<SecurityImpl>() {
-			@Override
-			public void set(SecurityImpl object, Object value) throws ValueException {
-				object.setOpenPrice((Double) value);
-			}
-		};
-		testGetterSetter(123.45d, 678.901d);
-	}
-	
-	@Test
-	public void testSetClosePrice() throws Exception {
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object source) throws ValueException {
-				return ((Security) source).getClosePrice();
-			}
-		};
-		setter = new S<SecurityImpl>() {
-			@Override
-			public void set(SecurityImpl object, Object value) throws ValueException {
-				object.setClosePrice((Double) value);
-			}
-		};
-		testGetterSetter(87.56d, 72.11d);
-	}
-	
-	@Test
-	public void testSetLowPrice() throws Exception {
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object source) throws ValueException {
-				return ((Security) source).getLowPrice();
-			}
-		};
-		setter = new S<SecurityImpl>() {
-			@Override
-			public void set(SecurityImpl object, Object value) throws ValueException {
-				object.setLowPrice((Double) value);
-			}
-		};
-		testGetterSetter(91.23d, 17.24d);
-	}
-
-	@Test
-	public void testSetHighPrice() throws Exception {
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object source) throws ValueException {
-				return ((Security) source).getHighPrice();
-			}
-		};
-		setter = new S<SecurityImpl>() {
-			@Override
-			public void set(SecurityImpl object, Object value) throws ValueException {
-				object.setHighPrice((Double) value);
-			}
-		};
-		testGetterSetter(191.23d, 217.24d);
-	}
-
-	@Test
-	public void testSetStatus() throws Exception {
-		getter = new G<SecurityStatus>() {
-			@Override
-			public SecurityStatus get(Object source) throws ValueException {
-				return ((Security) source).getStatus();
-			}
-		};
-		setter = new S<SecurityImpl>() {
-			@Override
-			public void set(SecurityImpl object, Object value) throws ValueException {
-				object.setStatus((SecurityStatus) value);
-			}
-		};
-		testGetterSetter(SecurityStatus.TRADING, SecurityStatus.STOPPED);
-	}
-	
-	@Test
-	public void testEquals_SpecialCases() throws Exception {
-		assertTrue(security.equals(security));
-		assertFalse(security.equals(null));
-		assertFalse(security.equals(this));
-	}
-	
-	@Test
-	public void testEquals() throws Exception {
-		Trade trade = new Trade(terminal);
-		security.setAskPrice(200.00d);
-		security.setAskSize(80L);
-		security.setAvailable(true);
-		security.setBidPrice(180.00d);
-		security.setBidSize(100L);
-		security.setClosePrice(800.00d);
-		security.setDisplayName("Yuppy");
-		security.setHighPrice(650.00d);
-		security.setLastPrice(124.00d);
-		security.setLotSize(10);
-		security.setLowPrice(754.00d);
-		security.setMaxPrice(100.05d);
-		security.setMinPrice(512.00d);
-		security.setMinStepPrice(1.0d);
-		security.setMinStepSize(0.01d);
-		security.setOpenPrice(852.00d);
-		security.setPrecision(2);
-		security.setStatus(SecurityStatus.TRADING);
-		security.setInitialPrice(145.28d);
-		security.setInitialMargin(219.24d);
-		security.fireTradeEvent(trade);
-
-		Variant<Terminal> vTerm = new Variant<Terminal>()
-			.add(terminal)
-			.add(control.createMock(Terminal.class));
-		Variant<Symbol> vSymbol = new Variant<Symbol>(vTerm)
-			.add(symbol1)
-			.add(symbol2);
-		Variant<Double> vAsk = new Variant<Double>(vSymbol)
-			.add(200.00d)
-			/*.add(115.00d)*/;
-		Variant<Long> vAskSz = new Variant<Long>(vAsk)
-			.add(80L)
-			.add(12L);
-		Variant<Boolean> vAvl = new Variant<Boolean>(vAskSz)
-			.add(true)
-			/*.add(false)*/;
-		Variant<Double> vBid = new Variant<Double>(vAvl)
-			.add(180.00d)
-			.add(815.00d);
-		Variant<Long> vBidSz = new Variant<Long>(vBid)
-			.add(100L)
-			.add(256L);
-		Variant<Double> vClose = new Variant<Double>(vBidSz)
-			.add(800.00d)
-			.add(1800.00d);
-		Variant<String> vDispNm = new Variant<String>(vClose)
-			.add("Yuppy")
-			.add("Juppy");
-		Variant<Double> vHigh = new Variant<Double>(vDispNm)
-			.add(650.00d)
-			/*.add(734.00d)*/;
-		Variant<Double> vLast = new Variant<Double>(vHigh)
-			.add(124.00d)
-			/*.add(321.00d)*/;
-		Variant<Integer> vLot = new Variant<Integer>(vLast)
-			.add(10)
-			.add(100);
-		Variant<Double> vLow = new Variant<Double>(vLot)
-			.add(754.00d)
-			.add(828.00d);
-		Variant<Double> vMax = new Variant<Double>(vLow)
-			.add(100.05d)
-			/*.add(215.00d)*/;
-		Variant<Double> vMin = new Variant<Double>(vMax)
-			.add(512.00d)
-			.add(1024.00d);
-		Variant<Double> vStpPr = new Variant<Double>(vMin)
-			.add(1.0d)
-			.add(2.0d);
-		Variant<Double> vStpSz = new Variant<Double>(vStpPr)
-			.add(0.01d)
-			/*.add(0.02d)*/;
-		Variant<Double> vOpen = new Variant<Double>(vStpSz)
-			.add(852.00d)
-			.add(634.00d);
-		Variant<Integer> vPrec = new Variant<Integer>(vOpen)
-			.add(2)
-			.add(5);
-		Variant<SecurityStatus> vStat = new Variant<SecurityStatus>(vPrec)
-			.add(SecurityStatus.TRADING)
-			.add(SecurityStatus.STOPPED);
-		Variant<Trade> vLastTrd = new Variant<Trade>(vStat)
-			.add(trade)
-			.add(null);
-		Variant<Double> vInitPrice = new Variant<Double>(vLastTrd)
-			.add(145.28d)
-			.add(729.11d)
-			.add(null);
-		Variant<Double> vInitMrgn = new Variant<Double>(vInitPrice)
-			.add(219.24d)
-			.add(447.95d)
-			.add(null);
-		Variant<?> iterator = vInitMrgn;
-		int foundCnt = 0;
-		SecurityImpl x = null, found = null;
-		do {
-			x = new SecurityImpl(vTerm.get(), vSymbol.get(), dispatcher);
-			x.setAskPrice(vAsk.get());
-			x.setAskSize(vAskSz.get());
-			x.setAvailable(vAvl.get());
-			x.setBidPrice(vBid.get());
-			x.setBidSize(vBidSz.get());
-			x.setClosePrice(vClose.get());
-			x.setDisplayName(vDispNm.get());
-			x.setHighPrice(vHigh.get());
-			x.setLastPrice(vLast.get());
-			x.setLotSize(vLot.get());
-			x.setLowPrice(vLow.get());
-			x.setMaxPrice(vMax.get());
-			x.setMinPrice(vMin.get());
-			x.setMinStepPrice(vStpPr.get());
-			x.setMinStepSize(vStpSz.get());
-			x.setOpenPrice(vOpen.get());
-			x.setPrecision(vPrec.get());
-			x.setStatus(vStat.get());
-			x.setInitialPrice(vInitPrice.get());
-			x.setInitialMargin(vInitMrgn.get());
-			if ( vLastTrd.get() != null ) {
-				x.fireTradeEvent(vLastTrd.get());
-			}
-			if ( security.equals(x) ) {
-				foundCnt ++;
-				found = x;
-			}
-			x = null; // perform GC ???
-		} while ( iterator.next() );
-		assertEquals(1, foundCnt);
-		assertSame(terminal, found.getTerminal());
-		assertEquals(symbol1, found.getSymbol());
-		assertEquals(dispatcher, found.getEventDispatcher());
-		assertEquals(200.00d, found.getAskPrice(), 0.01d);
-		assertEquals(new Long(80L), found.getAskSize());
-		assertTrue(found.isAvailable());
-		assertEquals(180.00d, found.getBidPrice(), 0.01d);
-		assertEquals(new Long(100L), found.getBidSize());
-		assertEquals(800.00d, found.getClosePrice(), 0.01d);
-		assertEquals("Yuppy", found.getDisplayName());
-		assertEquals(650.00d, found.getHighPrice(), 0.01d);
-		assertEquals(124.00d, found.getLastPrice(), 0.01d);
-		assertEquals(10, (int)found.getLotSize());
-		assertEquals(754.00d, found.getLowPrice(), 0.01d);
-		assertEquals(100.05d, found.getMaxPrice(), 0.01d);
-		assertEquals(512.00d, found.getMinPrice(), 0.01d);
-		assertEquals(1.0d, found.getMinStepPrice(), 0.01d);
-		assertEquals(0.01d, found.getMinStepSize(), 0.01d);
-		assertEquals(852.00d, found.getOpenPrice(), 0.01d);
-		assertEquals(2, (int)found.getPrecision());
-		assertEquals(SecurityStatus.TRADING, found.getStatus());
-		assertEquals(145.28d, security.getInitialPrice(), 0.01d);
-		assertEquals(219.24d, security.getInitialMargin(), 0.01d);
-		assertSame(trade, found.getLastTrade());
-	}
-	
-	@Test
-	public void testGetMostAccuratePrice() throws Exception {
-		Double fix[][] = {
-			//last, bid,  ask,  open, close, high, low, max, min, expected
-			{ 10.1, 11.2, 12.4,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0, 10.1  },
-			{ null, 11.2, 12.4,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0, 11.8  },
-			{ null, null, 12.4,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0,  9.8  },
-			{ null, 11.2, null,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0,  9.8  },
-			{ null, null, null,  9.8,  8.9, 12.5,  9.6, 13.0,  9.0,  9.8  },
-			{ null, null, null, null,  8.9, 12.5,  9.6, 13.0,  9.0,  8.9  },
-			{ null, null, null, null, null, 12.5,  9.6, 13.0,  9.0, 11.05 },
-			{ null, null, null, null, null, null,  9.6, 13.0,  9.0, 11.0  },
-			{ null, null, null, null, null, 12.5, null, 13.0,  9.0, 11.0  },
-			{ null, null, null, null, null, null, null, 13.0,  9.0, 11.0  },
-			{ null, null, null, null, null, null, null, null,  9.0, null  },
-			{ null, null, null, null, null, null, null, 13.0, null, null  },
-			{ null, null, null, null, null, null, null, null, null, null  },
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setLastPrice(fix[i][0]);
-			security.setBidPrice(fix[i][1]);
-			security.setAskPrice(fix[i][2]);
-			security.setOpenPrice(fix[i][3]);
-			security.setClosePrice(fix[i][4]);
-			security.setHighPrice(fix[i][5]);
-			security.setLowPrice(fix[i][6]);
-			security.setMaxPrice(fix[i][7]);
-			security.setMinPrice(fix[i][8]);
-			if ( fix[i][9] == null ) {
-				assertNull(msg, security.getMostAccuratePrice());
-			} else {
-				assertEquals(msg, fix[i][9], security.getMostAccuratePrice(),
-						0.01d);
-			}
-		}
-	}
-
-	@Test
-	public void testGetMostAccurateVolume() throws Exception {
-		// Для первой строки:
-		// 6.38818 / 10 = X / 130430 -> X = 130430 * 6.38818 / 10
-		//	-> X = price * tick price / tick 
-		Object fix[][] = {
-			// tick, tick price, price, qty, expected,     exception?
-			{ 10.0, 6.38818, 130430.0,   1L, 83321.03174,	false },
-			{ 10.0, 6.38818, 130430.0,   2L, 166642.06348,	false },
-			{ 10.0, null,    130430.0,   1L, 130430.0,		true  },
-			{ 10.0, null,    130430.0,   2L, 260860.0,		true  },
-			{  1.0, 1.0,     32044.0,    5L, 160220.0,		false },
-			{ 0.01, 3.19409, 100.3,      1L, 32036.7227,	false },
-			{ 0.01, null,    100.3,      5L, 501.5,			true  },
-			{ null, 3.19409, 100.3,	     1L, 0d,			true  },
-			{ 0.01, 3.19409, null,       1L, 0d,            true  },
-			{ 0.01, 3.19409, 100.3,    null, 0d,			true  },
-			
-		};
-		Double expected, actual;
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setMinStepSize((Double) fix[i][0]);
-			security.setMinStepPrice((Double) fix[i][1]);
-			expected = (Double) fix[i][4];
-			if ( (Boolean) fix[i][5] ) {
-				try {
-					security.getMostAccurateVolume((Double) fix[i][2],
-							(Long) fix[i][3]);
-					fail(msg + " expected exception: NullPointerException");
-				} catch ( NullPointerException e ) {
-					
-				}
-			} else {
-				actual = security.getMostAccurateVolume((Double) fix[i][2],
-						(Long) fix[i][3]);
-				assertEquals(msg, expected, actual, 0.000001d);
-			}
-		}
-	}
-	
-	@Test
-	public void testOnChanged() throws Exception {
-		EventType type = control.createMock(EventType.class);
-		expect(dispatcher.OnChanged()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, security.OnChanged());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testOnTrade() throws Exception {
-		EventType type = control.createMock(EventType.class);
-		expect(dispatcher.OnTrade()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, security.OnTrade());
-		
-		control.verify();
-	}
-	
-	/**
-	 * Запись фикстуры для тестирования сравнения цен.
-	 */
-	static class FR {
-		final int precision;
-		final Double price1, price2;
-		final boolean expected;
-		FR(int precision, Double price1, Double price2, boolean expected) {
-			this.precision = precision;
-			this.price1 = price1;
-			this.price2 = price2;
-			this.expected = expected;
-		}
-	}
-	
-	@Test
-	public void testIsPricesEquals() throws Exception {
-		FR fix[] = {
-			new FR( 0, 142030.0000d, 142030.0000d, true),
-			new FR( 0, 142030.0000d, 142030.0001d, true),
-			new FR( 0, 142030.0000d, 142030.0010d, true),
-			new FR( 0, 142030.0000d, 142030.0100d, true),
-			new FR( 0, 142030.0000d, 142030.0999d, true),
-			new FR( 0, 142030.0000d, 142030.1000d, false),
-			new FR( 0, 142030.0000d, 142030.1001d, false),
-			new FR( 0, null, 		 142030.0000d, false),
-			new FR( 0, 142030.0000d, null,		   false),
-			new FR( 0, null,		 null,		   false),
-			new FR( 0, 142030.0000d, 142030.1534d, false),
-			new FR( 0, 142030.0000d, 142030.5102d, false),
-			new FR( 0, 142030.0000d, 142031.0000d, false),
-			new FR( 4, 1.3554d, 	1.3554d,	   true),
-			new FR( 4, 1.3554d,     1.355409d,	   true),
-			new FR( 4, 1.3554d,     1.3555d,	   false),
-			new FR( 4, -1.3554d,    1.3554d,	   false),
-			new FR( 4, 1.3554d,    -1.3554d,	   false),
-			
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			FR fr = fix[i];
-			security.setPrecision(fr.precision);
-			assertEquals(msg, fr.expected,
-					security.isPricesEquals(fr.price1, fr.price2));
-		}
-	}
-	
-	@Test
-	public void testSetInitialPrice_SetsChanged() throws Exception {
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null,		null,		false },
-				{ null,		81.345d,	true  },
-				{ 81.345d,	null,		true  },
-				{ 81.345d,	81.345d,	false },
-				{ 81.2345d,	812.2223d,	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setInitialPrice((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setInitialPrice((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals(msg, (Double) fixture[i][1], security.getInitialPrice());
-		}
-	}
-
-	@Test
-	public void testSetInitialMargin_SetsChanged() throws Exception {
-		Object fixture[][] = {
-				// initial value, new value, changed?
-				{ null,		null,		false },
-				{ null,		81.345d,	true  },
-				{ 81.345d,	null,		true  },
-				{ 81.345d,	81.345d,	false },
-				{ 81.2345d,	812.2223d,	true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			security.setInitialMargin((Double) fixture[i][0]);
-			security.resetChanges();
-			security.setInitialMargin((Double) fixture[i][1]);
-			assertEquals(msg, (Boolean) fixture[i][2], security.hasChanged());
-			assertEquals(msg, (Double) fixture[i][1], security.getInitialMargin());
-		}
-	}
-	
-	@Test
-	public void testGetCode() {
-		assertEquals("GAZP", security.getCode());
-	}
-	
-	@Test
-	public void testGetClassCode() {
-		assertEquals("EQBR", security.getClassCode());
-	}
-	
-	@Test
-	public void testGetType() {
-		assertEquals(SymbolType.STOCK, security.getType());
-	}
-	
-	@Test
-	public void testGetCurrency() {
-		assertEquals(Currency.getInstance("RUB"), security.getCurrency());
+		assertEquals(0, listener.getEventCount());
 	}
 
 }

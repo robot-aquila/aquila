@@ -46,20 +46,9 @@ public class EventQueueImplTest {
 		queue.stop();
 	}
 	
-	@Test (expected=IllegalStateException.class)
-	public void testStart_ThrowsIfAlreadyStarted() throws Exception {
-		queue.start();
-		queue.start();
-	}
-
 	@Test
 	public void testStarted() throws Exception {
-		assertFalse(queue.started());
-		queue.start();
 		assertTrue(queue.started());
-		queue.stop();
-		assertTrue(queue.join(1000));
-		assertFalse(queue.started());
 	}
 	
 	@Test
@@ -71,11 +60,6 @@ public class EventQueueImplTest {
 		queue.start();
 		queue.stop();
 		assertTrue(queue.join(1000));
-	}
-	
-	@Test (expected=IllegalStateException.class)
-	public void testEnqueue_ThrowsIfNotStarted() throws Exception {
-		queue.enqueue(new EventImpl(type1));
 	}
 	
 	@Test (expected=NullPointerException.class)
@@ -160,17 +144,7 @@ public class EventQueueImplTest {
 		assertTrue(queue.join(100));
 		assertFalse(queue.started());
 	}
-	
-	@Test
-	public void testJoin1_FalseIfNotFinished() throws Exception {
-		queue.start();
-		long start = System.currentTimeMillis();
-		assertFalse(queue.join(50));
-		assertTrue(System.currentTimeMillis() - start >= 50);
-		assertTrue(queue.started());
-		queue.stop();
-	}
-	
+		
 	@Test
 	public void testJoin1_IgnoreInQueueThread() throws Exception {
 		final CountDownLatch exit = new CountDownLatch(1);
@@ -191,13 +165,6 @@ public class EventQueueImplTest {
 		queue.enqueue(event);
 		assertTrue(exit.await(100, TimeUnit.MILLISECONDS));
 		queue.stop();
-	}
-	
-	@Test
-	public void testJoin1_IgnoreIfQueueStopped() throws Exception {
-		long start = System.currentTimeMillis();
-		assertTrue(queue.join(1000));
-		assertTrue(System.currentTimeMillis() - start <= 10);
 	}
 	
 	@Test
@@ -268,7 +235,7 @@ public class EventQueueImplTest {
 		queue.enqueue(new EventImpl(type1));
 		started.countDown();
 		queue.join();
-		assertFalse(queue.started());
+		assertTrue(queue.started());
 	}
 	
 	@Test

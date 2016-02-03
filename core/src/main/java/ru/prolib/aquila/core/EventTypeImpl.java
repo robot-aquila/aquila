@@ -200,4 +200,19 @@ public class EventTypeImpl implements EventType {
 		return alternates.size() > 0;
 	}
 
+	@Override
+	public synchronized void removeAlternates() {
+		alternates.clear();
+	}
+
+	@Override
+	public synchronized boolean hasListeners() {
+		return countListeners() > 0;
+	}
+
+	@Override
+	public synchronized int countAlternates() {
+		return alternates.size();
+	}
+
 }

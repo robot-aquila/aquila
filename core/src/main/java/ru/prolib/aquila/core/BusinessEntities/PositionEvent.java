@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import ru.prolib.aquila.core.*;
 
 /**
- * Событие связанное с торговой позицией.
+ * Event related to market position.
  * <p>
  * 2012-08-03<br>
  * $Id: PositionEvent.java 529 2013-02-19 08:49:04Z whirlwind $
@@ -11,53 +11,18 @@ import ru.prolib.aquila.core.*;
 public class PositionEvent extends EventImpl {
 	private final Position position;
 
-	/**
-	 * Создать событие.
-	 * <p>
-	 * @param type тип события
-	 * @param position объект позиции
-	 */
 	public PositionEvent(EventType type, Position position) {
 		super(type);
 		this.position = position;
 	}
 	
 	/**
-	 * Получить объект позиции.
+	 * Get position instance.
 	 * <p>
-	 * @return позиция
+	 * @return position instance
 	 */
 	public Position getPosition() {
 		return position;
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
-		}
-		if ( other == null ) {
-			return false;
-		}
-		if ( other.getClass() == this.getClass() ) {
-			PositionEvent o = (PositionEvent)other;
-			return o.getType() == getType()
-				&& o.getPosition() == getPosition();
-		}
-		return false;
-	}
-	
-	@Override
-	public String toString() {
-		return getType().toString() + " ["
-			+ "acc=" + position.getAccount() + ", "
-			+ "sec=" + position.getSymbol() + ", "
-			+ "open=" + position.getOpenQty() + ", "
-			+ "curr=" + position.getCurrQty() + ", "
-			+ "lock=" + position.getLockQty() + ", "
-			+ "vmargin=" + position.getVarMargin() + ", "
-			+ "book.val=" + position.getBookValue() + ", "
-			+ "mkt.val=" + position.getMarketValue() + "]";
 	}
 
 }

@@ -377,4 +377,47 @@ public class EventTypeImplTest {
 		assertTrue(type.hasAlternates());
 	}
 	
+	@Test
+	public void testHasListeners() throws Exception {
+		assertFalse(type.hasListeners());
+		
+		type.addListener(listener1);
+		
+		assertTrue(type.hasListeners());
+		
+		type.addSyncListener(listener2);
+		type.removeListener(listener1);
+		
+		assertTrue(type.hasListeners());
+		
+		type.removeListener(listener2);
+		
+		assertFalse(type.hasListeners());
+	}
+	
+	@Test
+	public void removeAlternates() {
+		type.addAlternateType(type1);
+		type.addAlternateType(type2);
+		
+		type.removeAlternates();
+		
+		assertFalse(type.isAlternateType(type1));
+		assertFalse(type.isAlternateType(type2));
+	}
+	
+	@Test
+	public void testCountAlternates() {
+		assertEquals(0, type.countAlternates());
+		
+		type.addAlternateType(type1);
+		type.addAlternateType(type2);
+		
+		assertEquals(2, type.countAlternates());
+		
+		type.removeAlternateType(type2);
+		
+		assertEquals(1, type.countAlternates());
+	}
+	
 }

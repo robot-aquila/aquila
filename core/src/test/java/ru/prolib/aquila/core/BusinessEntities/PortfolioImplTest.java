@@ -1,246 +1,330 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.easymock.EasyMock.*;
 
 import java.util.*;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
-import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
-import ru.prolib.aquila.core.data.*;
+
+import ru.prolib.aquila.core.EventListenerStub;
+import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.BusinessEntities.PortfolioImpl.PortfolioController;
+import ru.prolib.aquila.core.data.ContainerImpl;
+import ru.prolib.aquila.core.data.ContainerImplTest;
+import ru.prolib.aquila.core.data.PortfolioField;
 
 /**
  * 2012-09-06
  */
-public class PortfolioImplTest {
-	private static Account account;
+public class PortfolioImplTest extends ContainerImplTest {
+	private static Account account = new Account("ZUMBA");
 	private IMocksControl control;
-	private PortfolioEventDispatcher dispatcher;
-	private Positions positions;
-	private Terminal terminal;
+	private EditableTerminal terminal;
 	private PortfolioImpl portfolio;
-	private G<?> getter;
-	private S<PortfolioImpl> setter;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		account = new Account("LX01", "865");
+		ContainerImplTest.setUpBeforeClass();
 	}
 	
 	@Before
 	public void setUp() throws Exception {
+		super.setUp();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		super.tearDown();
+	}
+	
+	@Override
+	protected String getID() {
+		return portfolio.getContainerID();
+	}
+	
+	private void prepareTerminal() {
 		control = createStrictControl();
-		positions = control.createMock(Positions.class);
-		terminal = control.createMock(Terminal.class);
-		dispatcher = control.createMock(PortfolioEventDispatcher.class);
+		terminal = control.createMock(EditableTerminal.class);
+		expect(terminal.getTerminalID()).andStubReturn("Terminal#1");
+		expect(terminal.getEventQueue()).andStubReturn(queue);
+		control.replay();		
+	}
+	
+	@Override
+	protected ContainerImpl produceContainer() {
+		prepareTerminal();
+		portfolio = new PortfolioImpl(terminal, account);
+		return portfolio;
+	}
+	
+	@Override
+	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+		prepareTerminal();
+		portfolio = new PortfolioImpl(terminal, account, controller);
+		return portfolio;
+	}
+	
+	@Test
+	public void testCtor_DefaultController() throws Exception {
+		portfolio = new PortfolioImpl(terminal, account);
+		assertEquals(PortfolioController.class, portfolio.getController().getClass());
+		assertNotNull(portfolio.getTerminal());
+		assertNotNull(portfolio.getEventQueue());
+		assertSame(terminal, portfolio.getTerminal());
+		assertSame(queue, portfolio.getEventQueue());
+		assertEquals(account, portfolio.getAccount());
+		String prefix = String.format("%s.ZUMBA.PORTFOLIO", terminal.getTerminalID());
+		assertEquals(prefix, portfolio.getContainerID());
+		assertEquals(prefix + ".AVAILABLE", portfolio.onAvailable().getId());
+		assertEquals(prefix + ".UPDATE", portfolio.onUpdate().getId());
+		assertEquals(prefix + ".POSITION_AVAILABLE", portfolio.onPositionAvailable().getId());
+		assertEquals(prefix + ".POSITION_CHANGE", portfolio.onPositionChange().getId());
+		assertEquals(prefix + ".POSITION_PRICE_CHANGE", portfolio.onPositionCurrentPriceChange().getId());
+		assertEquals(prefix + ".POSITION_UPDATE", portfolio.onPositionUpdate().getId());
+	}
+	
+	@Test
+	public void testClose() throws Exception {
+		EventListenerStub listener = new EventListenerStub();
+		EventType type = new EventTypeImpl();
+		portfolio.onAvailable().addListener(listener);
+		portfolio.onAvailable().addAlternateType(type);
+		portfolio.onPositionAvailable().addListener(listener);
+		portfolio.onPositionAvailable().addAlternateType(type);
+		portfolio.onPositionChange().addListener(listener);
+		portfolio.onPositionChange().addAlternateType(type);
+		portfolio.onPositionCurrentPriceChange().addListener(listener);
+		portfolio.onPositionCurrentPriceChange().addAlternateType(type);
+		portfolio.onPositionUpdate().addListener(listener);
+		portfolio.onPositionUpdate().addAlternateType(type);
+		portfolio.onUpdate().addListener(listener);
+		portfolio.onUpdate().addAlternateType(type);
 		
-		portfolio = new PortfolioImpl(terminal, account, dispatcher);
-		portfolio.setPositionsInstance(positions);
-		getter = null;
-		setter = null;
-	}
-	
-	/**
-	 * Проверить работу геттера/сеттера с проверкой признака изменения.
-	 * <p>
-	 * Метод использует текущий экземпляр {@link #portfolio}, {@link #getter} и
-	 * {@link #setter}.
-	 * <p>
-	 * @param firstValue начальное значение
-	 * @param secondValue конечное значение
-	 */
-	private void testGetterSetter(Object firstValue, Object secondValue)
-			throws Exception
-	{
-		Object fixture[][] = {
-				{ null, 		null,			false },
-				{ null, 		secondValue,	true  },
-				{ firstValue,	secondValue,	true  },
-				{ secondValue,	secondValue,	false },
-				{ firstValue,   null,			true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			setter.set(portfolio, fixture[i][0]);
-			portfolio.resetChanges();
-			setter.set(portfolio, fixture[i][1]);
-			boolean expected = (Boolean) fixture[i][2];
-			assertEquals(msg, expected, portfolio.hasChanged());
-			assertEquals(msg, fixture[i][1], getter.get(portfolio));
-		}
-	}
-	
-	@Test
-	public void testVersion() throws Exception {
-		assertEquals(1, Portfolio.VERSION);
-		assertEquals(3, PortfolioImpl.VERSION);
-	}
-	
-	@Test
-	public void testDefaults() throws Exception {
-		assertNull(portfolio.getVariationMargin());
-		assertNull(portfolio.getCash());
-		assertNull(portfolio.getBalance());
-		assertFalse(portfolio.isAvailable());
-	}
-	
-	@Test
-	public void testFireChangedEvent() throws Exception {
-		dispatcher.fireChanged(same(portfolio));
-		control.replay();
+		portfolio.close();
 		
-		portfolio.fireChangedEvent();
+		assertNull(portfolio.getTerminal());
+		assertFalse(portfolio.onAvailable().hasListeners());
+		assertFalse(portfolio.onAvailable().hasAlternates());
+		assertFalse(portfolio.onPositionAvailable().hasListeners());
+		assertFalse(portfolio.onPositionAvailable().hasAlternates());
+		assertFalse(portfolio.onPositionChange().hasListeners());
+		assertFalse(portfolio.onPositionChange().hasAlternates());
+		assertFalse(portfolio.onPositionCurrentPriceChange().hasListeners());
+		assertFalse(portfolio.onPositionCurrentPriceChange().hasAlternates());
+		assertFalse(portfolio.onPositionUpdate().hasListeners());
+		assertFalse(portfolio.onPositionUpdate().hasAlternates());
+		assertFalse(portfolio.onUpdate().hasListeners());
+		assertFalse(portfolio.onUpdate().hasAlternates());
+	}
+	
+	@Test
+	public void testClose_ClosesAndRemovesAllPositions() throws Exception {
+		Position p1 = portfolio.getPosition(new Symbol("MSFT"));
+		Position p2 = portfolio.getPosition(new Symbol("AAPL"));
 		
-		control.verify();
+		portfolio.close();
+		
+		assertEquals(0, portfolio.getPositionCount());
+		assertTrue(p1.isClosed());
+		assertTrue(p2.isClosed());
 	}
 	
 	@Test
-	public void testSetCash() throws Exception {
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object source) throws ValueException {
-				return ((Portfolio) source).getCash();
+	public void testGetBalance() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getBalance();
 			}
 		};
-		setter = new S<PortfolioImpl>() {
-			@Override
-			public void set(PortfolioImpl object, Object value) throws ValueException {
-				object.setCash((Double) value);
+		testGetter(PortfolioField.BALANCE, 40560.28d, 80340.95d);
+	}
+
+	@Test
+	public void testGetEquity() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getEquity();
 			}
 		};
-		testGetterSetter(100.25d, 88.19d);
+		testGetter(PortfolioField.EQUITY, 812.76d, 324.10d);
 	}
 	
 	@Test
-	public void testSetVariationMargin() throws Exception {
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object source) throws ValueException {
-				return ((Portfolio) source).getVariationMargin();
+	public void testGetProfitAndLoss() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getProfitAndLoss();
 			}
 		};
-		setter = new S<PortfolioImpl>() {
-			@Override
-			public void set(PortfolioImpl object, Object value) throws ValueException {
-				object.setVariationMargin((Double) value);
+		testGetter(PortfolioField.PROFIT_AND_LOSS, 100000.00d, 80000.00d);
+	}
+
+	@Test
+	public void testGetUsedMargin() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getUsedMargin();
 			}
 		};
-		testGetterSetter(12.75d, 22.15d);
+		testGetter(PortfolioField.USED_MARGIN, 96283.15d, 94518.22d);
 	}
 	
 	@Test
-	public void testSetBalance() throws Exception {
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object source) throws ValueException {
-				return ((Portfolio)source).getBalance();
-			}};
-		setter = new S<PortfolioImpl>() {
-			@Override
-			public void set(PortfolioImpl object, Object value) throws ValueException {
-				object.setBalance((Double) value);
+	public void testGetFreeMargin() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getFreeMargin();
 			}
 		};
-		testGetterSetter(23.45d, 18.34d);
+		testGetter(PortfolioField.FREE_MARGIN, 4519.72d, 5425.12d);
+	}
+
+	@Test
+	public void testGetMarginCallLevel() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getMarginCallLevel();
+			}
+		};
+		testGetter(PortfolioField.MARGIN_CALL_AT, 0.30d, 0.25d);
+	}
+	
+	@Test
+	public void testGetMarginStopOutLevel() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getMarginStopOutLevel();
+			}
+		};
+		testGetter(PortfolioField.MARGIN_STOP_OUT_AT, 0.50d, 0.75d);
+	}
+
+	@Test
+	public void testGetAssets() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getAssets();
+			}
+		};
+		testGetter(PortfolioField.ASSETS, 12.34d, 56.78d);
+	}
+
+	@Test
+	public void testGetLiabilities() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getLiabilities();
+			}
+		};
+		testGetter(PortfolioField.LIABILITIES, 632.88d, 640.19d);
+	}
+
+	@Test
+	public void testGetCurrency() throws Exception {
+		getter = new Getter<String>() {
+			@Override public String get() {
+				return portfolio.getCurrency();
+			}
+		};
+		testGetter(PortfolioField.CURRENCY, "RUB", "USD");
+	}
+	
+	@Test
+	public void testGetPositionCount() throws Exception {
+		assertEquals(0, portfolio.getPositionCount());
+		
+		portfolio.getPosition(new Symbol("GAZP"));
+		portfolio.getPosition(new Symbol("SBER"));
+		
+		assertEquals(2, portfolio.getPositionCount());
+		
+		portfolio.getPosition(new Symbol("AAPL"));
+		
+		assertEquals(3, portfolio.getPositionCount());
 	}
 	
 	@Test
 	public void testGetPositions() throws Exception {
-		@SuppressWarnings("unchecked")
-		List<Position> list = control.createMock(List.class);
-		expect(positions.getPositions()).andReturn(list);
-		control.replay();
+		Set<Position> expected = new HashSet<Position>();
+		expected.add(portfolio.getPosition(new Symbol("MSFT")));
+		expected.add(portfolio.getPosition(new Symbol("AAPL")));
+		expected.add(portfolio.getPosition(new Symbol("SPY")));
 		
-		assertSame(list, portfolio.getPositions());
-		
-		control.verify();
+		assertEquals(expected, portfolio.getPositions());
 	}
-	
+
 	@Test
 	public void testGetPosition() throws Exception {
-		Security sec = control.createMock(Security.class);
-		Position p = control.createMock(Position.class);
-		expect(positions.getPosition(sec)).andReturn(p);
-		control.replay();
+		Position position = portfolio.getPosition(new Symbol("MSFT"));
 		
-		assertSame(p, portfolio.getPosition(sec));
-		
-		control.verify();
+		assertNotNull(position);
+		assertEquals(new Symbol("MSFT"), position.getSymbol());
+		assertEquals(account, position.getAccount());
+		assertSame(terminal, position.getTerminal());
+		assertTrue(position.onAvailable().isAlternateType(portfolio.onPositionAvailable()));
+		assertTrue(position.onCurrentPriceChange().isAlternateType(portfolio.onPositionCurrentPriceChange()));
+		assertTrue(position.onPositionChange().isAlternateType(portfolio.onPositionChange()));
+		assertTrue(position.onUpdate().isAlternateType(portfolio.onPositionUpdate()));		
+		assertSame(position, portfolio.getPosition(new Symbol("MSFT")));
 	}
 	
-	@Test
-	public void testOnPositionAvailable() throws Exception {
-		EventType e = control.createMock(EventType.class);
-		expect(positions.OnPositionAvailable()).andReturn(e);
-		control.replay();
+	@Test (expected=IllegalStateException.class)
+	public void testGetPosition_ThrowsIfClosed() throws Exception {
+		portfolio.close();
 		
-		assertSame(e, portfolio.OnPositionAvailable());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testFireEvents() throws Exception {
-		EditablePosition p = control.createMock(EditablePosition.class);
-		positions.fireEvents(same(p));
-		control.replay();
-		
-		portfolio.fireEvents(p);
-		
-		control.verify();
+		portfolio.getPosition(new Symbol("SBER"));
 	}
 
 	@Test
 	public void testGetEditablePosition() throws Exception {
-		EditablePosition p = control.createMock(EditablePosition.class);
-		Security sec = control.createMock(Security.class);
-		expect(positions.getEditablePosition(same(sec))).andReturn(p);
-		control.replay();
+		EditablePosition position = portfolio.getEditablePosition(new Symbol("MSFT"));
 		
-		assertSame(p, portfolio.getEditablePosition(sec));
+		assertNotNull(position);
+		assertEquals(new Symbol("MSFT"), position.getSymbol());
+		assertEquals(account, position.getAccount());
+		assertSame(terminal, position.getTerminal());
+		assertTrue(position.onAvailable().isAlternateType(portfolio.onPositionAvailable()));
+		assertTrue(position.onCurrentPriceChange().isAlternateType(portfolio.onPositionCurrentPriceChange()));
+		assertTrue(position.onPositionChange().isAlternateType(portfolio.onPositionChange()));
+		assertTrue(position.onUpdate().isAlternateType(portfolio.onPositionUpdate()));		
+		assertSame(position, portfolio.getEditablePosition(new Symbol("MSFT")));
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testGetEditablePosition_ThrowsIfClosed() throws Exception {
+		portfolio.close();
 		
-		control.verify();
+		portfolio.getEditablePosition(new Symbol("AAPL"));
+	}
+
+	@Test
+	public void testPortfolioController_HasMinimalData() {
+		PortfolioController controller = new PortfolioController();
+		
+		assertFalse(controller.hasMinimalData(portfolio));
+		
+		data.put(PortfolioField.CURRENCY, "USD");
+		data.put(PortfolioField.BALANCE, 415.08d);
+		data.put(PortfolioField.EQUITY, 213.34d);
+		data.put(PortfolioField.PROFIT_AND_LOSS, 1.18d);
+		data.put(PortfolioField.USED_MARGIN, 50.72d);
+		data.put(PortfolioField.FREE_MARGIN, 0.52d);
+		portfolio.update(data);
+		
+		assertTrue(controller.hasMinimalData(portfolio));
 	}
 	
 	@Test
-	public void testOnPositionChanged() throws Exception {
-		EventType type = control.createMock(EventType.class);
-		expect(positions.OnPositionChanged()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, portfolio.OnPositionChanged());
-		
-		control.verify();
+	public void testPortfolioController_ProcessAvailable() {
+		// No additional event types. Nothing to do.
 	}
 	
 	@Test
-	public void testGetPositionsCount() throws Exception {
-		expect(positions.getPositionsCount()).andReturn(200);
-		control.replay();
-		
-		assertEquals(200, portfolio.getPositionsCount());
-		
-		control.verify();
+	public void testPortfolioController_ProcessUpdate() {
+		// No additional event types. Nothing to do.
 	}
-	
-	@Test
-	public void testEquals_SpecialCases() throws Exception {
-		assertTrue(portfolio.equals(portfolio));
-		assertFalse(portfolio.equals(null));
-		assertFalse(portfolio.equals(this));
-	}
-	
-	@Test
-	public void testOnChanged() throws Exception {
-		EventType type = control.createMock(EventType.class);
-		expect(dispatcher.OnChanged()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, portfolio.OnChanged());
-		
-		control.verify();
-	}
-		
+
 }

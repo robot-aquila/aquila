@@ -1,142 +1,83 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.Currency;
-
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.data.Container;
 
 /**
- * Базовый интерфейс инструмента биржевой торговли.
- * <p>
- * Содержит общие для всех инструментов методы, предназначенные для
- * использования потребителями сервиса. Не содержит методов управления
- * инструментом.
+ * Security interface.
  * <p>
  * 2012-06-11<br>
  * $Id: Security.java 552 2013-03-01 13:35:35Z whirlwind $
  */
-public interface Security {
-	public static final int VERSION = 2;
+public interface Security extends Container {
 	
 	/**
-	 * Получить терминал, через который был получен инструмент.
+	 * Get terminal.
 	 * <p>
-	 * @return терминал
+	 * @return security owner terminal
 	 */
 	public Terminal getTerminal();
-	
+		
 	/**
-	 * Получить код инструмента.
+	 * Get symbol.
 	 * <p>
-	 * @return код инструмента
-	 */
-	public String getCode();
-	
-	/**
-	 * Получить код класса инструмента.
-	 * <p>
-	 * @return код класса
-	 */
-	public String getClassCode();
-	
-	/**
-	 * Получить дескриптор инструмента.
-	 * <p>
-	 * @return дескриптор инструмента
+	 * @return security symbol
 	 */
 	public Symbol getSymbol();
 	
 	/**
-	 * Получить размер лота.
+	 * Get lot size.
 	 * <p>
-	 * @return размер лота
+	 * @return lot size
 	 */
 	public Integer getLotSize();
 
 	/**
-	 * Получить верхний лимит цены.
+	 * Get lower price limit.
 	 * <p>
-	 * @return верхний лимит цены или null, если нет лимита
+	 * @return lower price limit
 	 */
-	public Double getMaxPrice();
+	public Double getLowerPriceLimit();
 	
 	/**
-	 * Получить нижний лимит цены.
+	 * Get upper price limit.
 	 * <p>
-	 * @return нижний лимит цены или null, если нет лимита
+	 * @return upper price limit
 	 */
-	public Double getMinPrice();
+	public Double getUpperPriceLimit();
 	
 	/**
-	 * Получить стоимость минимального шага цены.
+	 * Get tick price.
 	 * <p>
-	 * Стоимость шага цены отличается от значения шага цены, если валюта
-	 * цены инструмента отличается от базовой валюты. Например, цена фьючерса
-	 * на индекс RTS измеряется в пунктах. Для выражения стоимости фьючерса в
-	 * деньгах нужно количество шагов цены умножить на строимость шага цены.
+	 * The price of security expressed in a specific units (for example in
+	 * dollars, roubles, points, etc...) which may be different of units used in
+	 * portfolios. This value is how much it costs in a currency specified in
+	 * symbol and can be used to calculate position value in portfolios.
 	 * <p>
-	 * @return стоимость минимального шага цены или null, если цена выражается в
-	 * базовой валюте
+	 * @return calculated tick price
 	 */
-	public Double getMinStepPrice();
+	public Double getTickValue();
 	
 	/**
-	 * Получить минимальный шаг цены.
+	 * Get tick size.
 	 * <p>
-	 * @return минимальный шаг цены
+	 * @return minimal price change
 	 */
-	public Double getMinStepSize();
+	public Double getTickSize();
 	
 	/**
-	 * Получить точность цены в десятичных разрядах.
-	 * <p> 
-	 * @return точность цены
-	 */
-	public Integer getPrecision();
-	
-	/**
-	 * Получить последнюю сделку.
+	 * Get price scale.
 	 * <p>
-	 * @return последняя сделка или null, если информации о сделке нет
+	 * @return number of digits after a decimal point in price values.
 	 */
-	public Trade getLastTrade();
-	
+	public Integer getScale();
+		
 	/**
-	 * Обрезать цену, чтобы она стала кратной минимальному шагу.
+	 * Get session attributes update event type.
 	 * <p>
-	 * @param price исходная цена
-	 * @return строковое представление цены, выравненной в соответствии с
-	 * параметрами инструмента
+	 * @return event type
 	 */
-	public String shrinkPrice(double price);
-	
-	/**
-	 * Получить тип события: при изменении атрибутов инструмента.
-	 * Данный тип связан с получением события типа {@link SecurityEvent}.
-	 * <p>
-	 * <b>ВНИМАНИЕ!</b> данное событие не возникает при изменении цены последней
-	 * сделки. Для отслеживания изменений цены следует наблюдать событие
-	 * {@link #OnTrade}. 
-	 * <p> 
-	 * @return тип события
-	 */
-	public EventType OnChanged();
-	
-	/**
-	 * Получить тип события: при появлении новой (анонимной) сделки
-	 * по инструменту. Возможность получения сделок по инструменту зависит
-	 * от реализации. Данный тип связан с получением события типа
-	 * {@link SecurityTradeEvent}.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnTrade();
-	
-	/**
-	 * Получить цену последней сделки.
-	 * <p>
-	 * @return цена
-	 */
-	public Double getLastPrice();
+	public EventType onSessionUpdate();
 	
 	/**
 	 * Получить наименование инструмента для отображения в интерфейсе.
@@ -144,35 +85,7 @@ public interface Security {
 	 * @return наименование инструмента
 	 */
 	public String getDisplayName();
-	
-	/**
-	 * Получить лучшую цену предложения.
-	 * <p>
-	 * @return лучшая цена предложения
-	 */
-	public Double getAskPrice();
-	
-	/**
-	 * Получить размер заявки по лучшей цене.
-	 * <p>
-	 * @return размер заявки
-	 */
-	public Long getAskSize();
-	
-	/**
-	 * Получить лучшую цену спроса.
-	 * <p>
-	 * @return лучшая цена спроса
-	 */
-	public Double getBidPrice();
-	
-	/**
-	 * Получить размер заявки по лучшей цене.
-	 * <p>
-	 * @return размер заявки
-	 */
-	public Long getBidSize();
-	
+		
 	/**
 	 * Получить цену открытия сессии.
 	 * <p>
@@ -202,88 +115,21 @@ public interface Security {
 	public Double getLowPrice();
 	
 	/**
-	 * Получить статус инструмента.
+	 * Get initial price.
 	 * <p>
-	 * @return статус инструмента
-	 */
-	public SecurityStatus getStatus();
-	
-	/**
-	 * Расчитать наиболее точную цену.
-	 * <p>
-	 * Не все атрибуты инструмента могут быть доступны в момент обращения.
-	 * Причины могут быть абсолютно разные: от ограничений терминала до
-	 * недостаточной ликвидности. Данный метод выполняет попытку подобрать
-	 * наиболее точную цену, на которую можно ориентироваться при совершении
-	 * операций. Метод перебирает доступные атрибуты начиная от самых точных
-	 * (цена последней сделки) заканчивая наименее точными (среднее
-	 * арифметическое между допустимыми минимумом и максимумом цены) и
-	 * возвращает наиболее точную цену, какую можно получить для инструмента.
-	 * Приоритет следующий: last, (bid + ask) / 2, open, close,
-	 * (high + low) / 2, (max + min) / 2.
-	 * <p>
-	 * @return цена или null, если не удалось расчитать
-	 */
-	public Double getMostAccuratePrice();
-	
-	/**
-	 * Расчитать наиболее точный объем.
-	 * <p>
-	 * Выполняет попытку наиболее точно расчитать объем (стоимость в деньгах)
-	 * указанного количества бумаги. Для расчетов использует значения величины
-	 * шага цены (размер тика) и стоимости шага цены. Оба значения должны быть
-	 * определены. В противном случае, будет возбуждено исключение.
-	 * <p>
-	 * @param price цена
-	 * @param qty количество
-	 * @return объем или null, если не удалось расчитать
-	 * @throws NullPointerException один из необходимых атрибутов не определен
-	 * или аргумент не определен
-	 */
-	public Double getMostAccurateVolume(Double price, Long qty);
-	
-	/**
-	 * Сравнить два значения цены.
-	 * <p>
-	 * Сравнивает два значения в соответствии с точностью, установленной для
-	 * инструмента. Если одно из значений цены равно null, то результатом
-	 * сравнения будет false.
-	 * <p>
-	 * см. {@link #getPrecision()}.
-	 * <p>
-	 * @param price1 первое значение цены
-	 * @param price2 второе значение цены
-	 * @return true, если значения эквивалентны в соответствии с точностью
-	 * значения цены, установленной для инструмента
-	 */
-	public boolean isPricesEquals(Double price1, Double price2);
-	
-	/**
-	 * Получить расчетную цену.
-	 * <p>
-	 * @return цена
+	 * @return initial price
 	 */
 	public Double getInitialPrice();
 	
 	/**
-	 * Получить начальную маржу.
+	 * Get initial margin.
 	 * <p>
-	 * @return маржа
+	 * Initial margin means the amount in the margin currency required for
+	 * opening a position with the volume of one lot. It is used for checking a
+	 * client's assets when he or she enters the market.
+	 * <p>
+	 * @return initial margin
 	 */
 	public Double getInitialMargin();
-	
-	/**
-	 * Get security type.
-	 * <p>
-	 * @return security type
-	 */
-	public SymbolType getType();
-	
-	/**
-	 * Get currency.
-	 * <p>
-	 * @return currency of the security
-	 */
-	public Currency getCurrency();
 	
 }

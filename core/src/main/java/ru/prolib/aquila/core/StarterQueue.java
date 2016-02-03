@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * 2012-12-03<br>
  * $Id: StarterQueue.java 513 2013-02-11 01:17:18Z whirlwind $
  */
+@Deprecated
 public class StarterQueue implements Starter {
 	private static final Logger logger;
 	private final Vector<Starter> queue;

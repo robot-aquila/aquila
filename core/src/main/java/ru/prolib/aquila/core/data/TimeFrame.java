@@ -1,8 +1,10 @@
 package ru.prolib.aquila.core.data;
 
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
+
 import org.threeten.extra.Interval;
-import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
+
 import ru.prolib.aquila.core.data.timeframe.*;
 
 /**

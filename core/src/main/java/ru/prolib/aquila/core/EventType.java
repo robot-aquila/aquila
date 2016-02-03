@@ -187,4 +187,10 @@ public interface EventType {
 	 */
 	public boolean hasAlternates();
 	
+	public void removeAlternates();
+	
+	public boolean hasListeners();
+	
+	public int countAlternates();
+	
 }

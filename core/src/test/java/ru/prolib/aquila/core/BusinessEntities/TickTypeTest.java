@@ -14,10 +14,9 @@ public class TickTypeTest {
 
 	@Test
 	public void testConstants() {
-		assertEquals("Tick", TickType.TICK.toString());
-		assertEquals("Ask", TickType.ASK.toString());
-		assertEquals("Bid", TickType.BID.toString());
-		assertEquals("Trade", TickType.TRADE.toString());
+		assertEquals("ASK", TickType.ASK.toString());
+		assertEquals("BID", TickType.BID.toString());
+		assertEquals("TRADE", TickType.TRADE.toString());
 	}
 
 }

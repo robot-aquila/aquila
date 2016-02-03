@@ -1,20 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import ru.prolib.aquila.core.EventSystem;
-import ru.prolib.aquila.core.EventSystemImpl;
-import ru.prolib.aquila.core.StarterQueue;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.OrderFactoryImpl;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.Orders;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.OrdersImpl;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.Portfolios;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.Securities;
-import ru.prolib.aquila.core.BusinessEntities.utils.OrdersEventDispatcher;
-import ru.prolib.aquila.core.BusinessEntities.utils.PortfoliosEventDispatcher;
-import ru.prolib.aquila.core.BusinessEntities.utils.SecuritiesEventDispatcher;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalController;
-import ru.prolib.aquila.core.BusinessEntities.utils.TerminalEventDispatcher;
+import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.core.utils.SimpleCounter;
 
 /**
  * Terminal parameters.
@@ -24,23 +12,12 @@ import ru.prolib.aquila.core.utils.SimpleCounter;
  * purposes.
  */
 public class TerminalParams {
-	private static int lastAssignedNum = 0;
-	
-	@Deprecated
-	private TerminalController controller;
-	private TerminalEventDispatcher dispatcher;
-	private Securities securities;
-	private Portfolios portfolios;
-	private Orders orders;
-	@Deprecated
-	private StarterQueue starter;
+	private static int lastAssignedNum = 0;	
 	private Scheduler scheduler;
-	@Deprecated
-	private EventSystem eventSystem;
-	@Deprecated
-	private OrderProcessor orderProcessor;
+	private EventQueue eventQueue;
 	private String terminalID;
 	private DataProvider dataProvider;
+	private ObjectFactory objectFactory;
 	
 	public static synchronized int getCurrentGeneratedNumber() {
 		return lastAssignedNum;
@@ -50,65 +27,22 @@ public class TerminalParams {
 		return "Terminal#" + (++lastAssignedNum);
 	}
 	
-	public TerminalParams(EventSystem es) {
-		super();
-		this.controller = new TerminalController();
-		this.dispatcher = new TerminalEventDispatcher(es);
-		this.securities = new Securities(new SecuritiesEventDispatcher(es));
-		this.portfolios = new Portfolios(new PortfoliosEventDispatcher(es));
-		this.orders = new OrdersImpl(new OrdersEventDispatcher(es),
-				new OrderFactoryImpl(), new SimpleCounter());
-		this.starter = new StarterQueue();
-		this.scheduler = new SchedulerLocal();
-		this.eventSystem = es;
-	}
-	
 	public TerminalParams() {
-		this(new EventSystemImpl());
-	}
-	
-	@Deprecated
-	public TerminalController getController() {
-		return controller;
-	}
-	
-	@Deprecated
-	public TerminalEventDispatcher getEventDispatcher() {
-		return dispatcher;
-	}
-	
-	@Deprecated
-	public Securities getSecurityRepository() {
-		return securities;
-	}
-	
-	@Deprecated
-	public Portfolios getPortfolioRepository() {
-		return portfolios;
-	}
-	
-	@Deprecated
-	public Orders getOrderRepository() {
-		return orders;
-	}
-	
-	@Deprecated
-	public StarterQueue getStarter() {
-		return starter;
+		super();
 	}
 	
 	public Scheduler getScheduler() {
+		if ( scheduler == null ) {
+			scheduler = new SchedulerLocal();
+		}
 		return scheduler;
 	}
 	
-	@Deprecated
-	public EventSystem getEventSystem() {
-		return eventSystem;
-	}
-	
-	@Deprecated
-	public OrderProcessor getOrderProcessor() {
-		return orderProcessor;
+	public EventQueue getEventQueue() {
+		if ( eventQueue == null ) {
+			eventQueue = new EventQueueImpl(getTerminalID());
+		}
+		return eventQueue;
 	}
 	
 	public DataProvider getDataProvider() {
@@ -119,48 +53,15 @@ public class TerminalParams {
 		return terminalID == null ? generateNextGeneratedID() : terminalID;
 	}
 	
-	@Deprecated
-	public void setTerminalController(TerminalController controller) {
-		this.controller = controller;
-	}
-	
-	@Deprecated
-	public void setEventDispatcher(TerminalEventDispatcher dispatcher) {
-		this.dispatcher = dispatcher;
-	}
-	
-	@Deprecated
-	public void setSecurityRepository(Securities repository) {
-		this.securities = repository;
-	}
-	
-	@Deprecated
-	public void setPortfolioRepository(Portfolios repository) {
-		this.portfolios = repository;
-	}
-	
-	@Deprecated
-	public void setOrderRepository(Orders repository) {
-		this.orders = repository;
-	}
-	
-	@Deprecated
-	public void setStarter(StarterQueue starter) {
-		this.starter = starter;
+	public ObjectFactory getObjectFactory() {
+		if ( objectFactory == null ) {
+			objectFactory = new ObjectFactoryImpl();
+		}
+		return objectFactory;
 	}
 	
 	public void setScheduler(Scheduler scheduler) {
 		this.scheduler = scheduler;
-	}
-	
-	@Deprecated
-	public void setEventSystem(EventSystem eventSystem) {
-		this.eventSystem = eventSystem;
-	}
-	
-	@Deprecated
-	public void setOrderProcessor(OrderProcessor processor) {
-		this.orderProcessor = processor;
 	}
 	
 	public void setDataProvider(DataProvider dataProvider) {
@@ -169,6 +70,14 @@ public class TerminalParams {
 	
 	public void setTerminalID(String id) {
 		this.terminalID = id;
+	}
+	
+	public void setObjectFactory(ObjectFactory factory) {
+		this.objectFactory = factory;
+	}
+	
+	public void setEventQueue(EventQueue queue) {
+		this.eventQueue = queue;
 	}
 
 }

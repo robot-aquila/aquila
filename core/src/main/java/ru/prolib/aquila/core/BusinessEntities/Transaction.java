@@ -15,6 +15,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * Специфические терминалы реализуют собственные классы для представления
  * объектов запроса и ответа. 
  */
+@Deprecated // TODO: ???
 public class Transaction {
 	private Object request, response;
 	private Date requestTime, responseTime;

@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.utils.Counter;
+import ru.prolib.aquila.core.EventQueue;
 
 /**
  * Интерфейс модифицируемого терминала.
@@ -12,224 +11,56 @@ import ru.prolib.aquila.core.utils.Counter;
 public interface EditableTerminal extends Terminal {
 	
 	/**
-	 * Получить фасад событийной системы.
+	 * Get event queue.
 	 * <p>
-	 * @return фасад системы событий
+	 * @return the event queue
 	 */
-	@Deprecated
-	public EventSystem getEventSystem();
+	public EventQueue getEventQueue();
 	
 	/**
-	 * Перевести терминал в режим "Подключен".
+	 * Get security instance.
 	 * <p>
-	 * Этот метод меняет статус терминала, только если терминал находится
-	 * в состоянии {@link TerminalState#STARTED}. При этом генерируются
-	 * соответствующие события о смене состояния терминала. Если на момент
-	 * вызова терминал не находится в состоянии {@link TerminalState#STARTED},
-	 * то вызов игнорируется, а в журнал направляется предупреждающее сообщение. 
-	 */
-	@Deprecated
-	public void markTerminalConnected();
-	
-	/**
-	 * Перевести терминал в режим "Отключен".
+	 * If security not exists then new security instance will be created.
 	 * <p>
-	 * Этот метод меняют статус терминала и генерирует соответствующие события,
-	 * только если терминал находится в состоянии
-	 * {@link TerminalState#CONNECTED} или {@link TerminalState#STOPPING}. При
-	 * этом, статус меняется на {@link TerminalState#STARTED}, только в случае,
-	 * на момент вызова статус был {@link TerminalState#CONNECTED}. Если
-	 * терминал находился в процессе останова, то ожидается, что статус будет
-	 * сменен по завершении этой процедуры. Если на момент вызова терминал
-	 * не находится в одном из подходящих состояний, то вызов игнорируется, а в
-	 * журнал направляется соответствующее предупреждение.
-	 */
-	@Deprecated
-	public void markTerminalDisconnected();
-	
-	/**
-	 * Генерировать событие о подключении терминала.
-	 * <p>
-	 * Используй {@link #markTerminalConnected()} вместо вызова этого метода.
-	 */
-	@Deprecated
-	public void fireTerminalConnectedEvent();
-	
-	/**
-	 * Генерировать событие об отключении терминала.
-	 * <p>
-	 * Используй {@link #markTerminalDisconnected()} вместо вызова этого метода.
-	 */
-	@Deprecated
-	public void fireTerminalDisconnectedEvent();
-	
-	/**
-	 * Получить экземпляр процессора заявок.
-	 * <p>
-	 * @return процессор заявок
-	 */
-	@Deprecated
-	public OrderProcessor getOrderProcessor();
-	
-	/**
-	 * Получить стартер терминала.
-	 * <p>
-	 * @return стартер
-	 */
-	@Deprecated
-	public StarterQueue getStarter();
-
-	/**
-	 * Генерировать событие о старте терминала.
-	 */
-	@Deprecated
-	public void fireTerminalStartedEvent();
-
-	/**
-	 * Генерировать событие об останове терминала.
-	 */
-	@Deprecated
-	public void fireTerminalStoppedEvent();
-	
-	/**
-	 * Генерировать событие о готовности терминала.
-	 */
-	@Deprecated
-	public void fireTerminalReady();
-	
-	/**
-	 * Генерировать событие о неготовности терминала.
-	 */
-	@Deprecated
-	public void fireTerminalUnready();
-	
-	/**
-	 * Установить состояние терминала.
-	 * <p>
-	 * @param state новое состояние
-	 */
-	@Deprecated
-	public void setTerminalState(TerminalState state);
-	
-	/**
-	 * Получить инструмент.
-	 * <p>
-	 * Если инструмент не существует, то он будет создан.
-	 * <p>
-	 * @param symbol дескриптор нового инструмента
-	 * @return инструмент
+	 * @param symbol - symbol
+	 * @return security instance
 	 */
 	public EditableSecurity getEditableSecurity(Symbol symbol);
 	
 	/**
-	 * Получить портфель.
+	 * Get portfolio instance.
 	 * <p>
-	 * Если портфель не существует, то он будет создан.
+	 * If portfolio not exists then new portfolio will be created.
 	 * <p>
-	 * @param account счет
-	 * @return портфель
+	 * @param account - account
+	 * @return portfolio instance
 	 */
 	public EditablePortfolio getEditablePortfolio(Account account);
 	
 	/**
-	 * Создать заявку.
+	 * Create new order instance.
 	 * <p>
-	 * @return новая заявка
+	 * @param account - account
+	 * @param symbol - symbol
+	 * @return new order instance
 	 */
-	public EditableOrder createOrder();
-	
+	public EditableOrder createOrder(Account account, Symbol symbol);
+		
 	/**
-	 * Генерировать событие о недоступности инструмента.
+	 * Get order instance.
 	 * <p>
-	 * Служебный метод, генерирующий событие об отрицательном результате
-	 * на запрос инструмента, который был выполнен посредством вызова метода
-	 * {@link #requestSecurity(Symbol)}.
-	 * <p>
-	 * @param symbol дескриптор инструмента
-	 * @param errorCode код ошибки
-	 * @param errorMsg текст ошибки
-	 */
-	public void fireSecurityRequestError(Symbol symbol, int errorCode, String errorMsg);
-	
-	/**
-	 * Генерировать события инструмента.
-	 * <p>
-	 * @param security инструмент
-	 */
-	public void fireEvents(EditableSecurity security);
-	
-
-	/**
-	 * Генерировать событие о паническом состоянии.
-	 * <p>
-	 * @param code код ситуации
-	 * @param msgId идентификатор сообщения
-	 */
-	@Deprecated
-	public void firePanicEvent(int code, String msgId);
-
-	/**
-	 * Генерировать событие о паническом состоянии.
-	 * <p>
-	 * Данный метод используется для описания состояний, характеризующемся
-	 * дополнительными аргументами. Как правило, идентификатор сообщения
-	 * указывает на строку с плейсхолдерами, а массив аргументов содержит
-	 * значения для подстановки. 
-	 * <p>
-	 * @param code код ситуации
-	 * @param msgId идентификатор сообщения
-	 * @param args аргументы, описывающие ситуацию
-	 */
-	@Deprecated
-	public void firePanicEvent(int code, String msgId, Object[] args);
-	
-	
-	/**
-	 * Генерировать события заявки.
-	 * <p>
-	 * @param order заявка
-	 */
-	public void fireEvents(EditableOrder order);
-	
-	/**
-	 * Получить экземпляр редактируемой заявки.
-	 * <p>
-	 * @param id идентификатор заявки
-	 * @return заявка
+	 * @param id - order ID
+	 * @return order instance
 	 * @throws OrderNotExistsException - if order not exists
 	 */
-	public EditableOrder getEditableOrder(int id)
+	public EditableOrder getEditableOrder(long id)
 		throws OrderNotExistsException;
-	
-	/**
-	 * Удалить заявку из набора.
-	 * <p>
-	 * Если заявки с указанным номером нет в реестре, то ничего не происходит.
-	 * <p>
-	 * @param id идентификатор заявки
-	 */
-	public void purgeOrder(int id);
-	
-	/**
-	 * Генерировать события портфеля.
-	 * <p>
-	 * @param portfolio портфель
-	 */
-	public void fireEvents(EditablePortfolio portfolio);
-	
 
 	/**
-	 * Установить портфель по-умолчанию.
+	 * Set default portfolio.
 	 * <p>
-	 * @param portfolio экземпляр портфеля
+	 * @param portfolio - default portfolio instance
 	 */
 	public void setDefaultPortfolio(EditablePortfolio portfolio);
-	
-	/**
-	 * Get order ID sequence.
-	 * <p>
-	 * @return ID sequence
-	 */
-	public Counter getOrderIdSequence();
 	
 }

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 /**
  * Служебная информация заявки.
  */
+@Deprecated // TODO: ???
 public class OrderSystemInfo {
 	private final Transaction registration, cancellation;
 	

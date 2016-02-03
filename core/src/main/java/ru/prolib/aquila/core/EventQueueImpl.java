@@ -34,6 +34,7 @@ public class EventQueueImpl implements EventQueue {
 		queue = new LinkedBlockingQueue<Event>();
 		cache1 = new LinkedList<Event>();
 		cache2 = new LinkedList<Event>();
+		startWorker();
 	}
 	
 	/**
@@ -41,6 +42,12 @@ public class EventQueueImpl implements EventQueue {
 	 */
 	public EventQueueImpl() {
 		this("EVNT");
+	}
+	
+	private void startWorker() {
+		thread = new Thread(new QueueWorker(queue), name);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	@Override
@@ -63,27 +70,11 @@ public class EventQueueImpl implements EventQueue {
 	 * @throws IllegalStateException объект уже в работе
 	 */
 	@Override
+	@Deprecated
 	public void start() throws StarterException {
-		CountDownLatch started = new CountDownLatch(1);
-		synchronized ( this ) {
-			if ( started() ) {
-				throw new IllegalStateException("Queue already started");
-			}
-			if ( queue.size() > 0 ) {
-				logger.warn("start(): queue.size() > 0 for {}", name);
-			}
-			queue.clear();
-			thread = new Thread(new QueueWorker(queue, started, name), name);
-			thread.start();
-		}
-		try {
-			started.await();
-		} catch ( InterruptedException e ) {
-			Thread.currentThread().interrupt();
-			throw new StarterInterruptedException(e);
-		}
-	}
 
+	}
+	
 	/**
 	 * Остановить обработку событий.
 	 * <p>
@@ -94,6 +85,7 @@ public class EventQueueImpl implements EventQueue {
 	 * вызовом {@link #started()}. 
 	 */
 	@Override
+	@Deprecated
 	public void stop() {
 		synchronized ( this ) {
 			if ( ! started() ) {
@@ -139,7 +131,7 @@ public class EventQueueImpl implements EventQueue {
 			}
 			queueThread = thread;
 		}
-		queueThread.join();
+		//queueThread.join();
 	}
 	
 	/**
@@ -194,29 +186,19 @@ public class EventQueueImpl implements EventQueue {
 	 */
 	static private class QueueWorker implements Runnable {
 		private final BlockingQueue<Event> queue;
-		private CountDownLatch started;
-		private final String name;
 		
 		/**
 		 * Конструктор
 		 * <p>
 		 * @param queue очередь событий
-		 * @param started сигнал успешного запуска
-		 * @param name имя потока
 		 */
-		public QueueWorker(BlockingQueue<Event> queue,
-						   CountDownLatch started, String name)
-		{
+		public QueueWorker(BlockingQueue<Event> queue) {
 			super();
 			this.queue = queue;
-			this.started = started;
-			this.name = name;
 		}
 
 		@Override
 		public void run() {
-			started.countDown();
-			started = null;
 			try {
 				Event event;
 				List<EventListener> listeners;
@@ -234,12 +216,10 @@ public class EventQueueImpl implements EventQueue {
 					}
 				}
 			} catch ( InterruptedException e ) {
-				Object args[] = { name, e };
-				logger.error("Queue thread interrupted: {}", args);
+				logger.error("Queue thread interrupted: ", e);
 				Thread.currentThread().interrupt();
 			} catch ( Throwable e ) {
-				Object args[] = { name, e };
-				logger.error("Queue thread exception: {}", args);
+				logger.error("Queue thread exception: {}", e);
 			}
 		}
 		

@@ -3,10 +3,10 @@ package ru.prolib.aquila.core.data.timeframe;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.concurrent.TimeUnit;
 
 import org.threeten.extra.Interval;
 
-import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 import ru.prolib.aquila.core.data.TimeFrame;
 
 /**
@@ -37,7 +37,7 @@ public class TFDays implements TimeFrame {
 
 	@Override
 	public TimeUnit getUnit() {
-		return TimeUnit.DAY;
+		return TimeUnit.DAYS;
 	}
 
 	@Override

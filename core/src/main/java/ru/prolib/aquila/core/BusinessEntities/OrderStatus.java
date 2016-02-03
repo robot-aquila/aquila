@@ -9,97 +9,67 @@ package ru.prolib.aquila.core.BusinessEntities;
  * 2012-05-30<br>
  * $Id: OrderStatus.java 459 2013-01-29 17:11:57Z whirlwind $
  */
-public class OrderStatus {
-	public static final int VERSION = 0x02;
+public enum OrderStatus {
 	
 	/**
 	 * Заявка ожидает регистрации в терминале.
 	 */
-	public static final OrderStatus PENDING;
+	PENDING(false, false, false, true),
 	
 	/**
 	 * Алгоритмическая заявка в ожидании исполнения условия.
 	 */
-	public static final OrderStatus CONDITION;
+	CONDITION(false, false, true, true),
 	
 	/**
 	 * Заявка отправлена на регистрацию в торговую систему.
 	 * Подтверждение еще не получено.
 	 */
-	public static final OrderStatus SENT;
+	SENT(false, false, false, true),
 	
 	/**
 	 * Заявка активна.
 	 */
-	public static final OrderStatus ACTIVE;
+	ACTIVE(false, false, true, true),
 	
 	/**
 	 * В торговую систему отправлен запрос на снятие заявки.
 	 * Подтверждение еще не получено. 
 	 */
-	public static final OrderStatus CANCEL_SENT;
+	CANCEL_SENT(false, false, false, true),
 	
 	/**
 	 * Заявка исполнена.
 	 */
-	public static final OrderStatus FILLED;
+	FILLED(false, true, false, false),
 	
 	/**
 	 * Заявка отменена.
 	 */
-	public static final OrderStatus CANCELLED;
+	CANCELLED(false, true, false, false),
 	
 	/**
 	 * Заявка отклонена торговой системой на этапе регистрации.
 	 */
-	public static final OrderStatus REJECTED;
-	
+	REJECTED(true, true, false, false),
+
 	/**
 	 * Запрос на снятие заявки отклонен торговой системой.
 	 */
-	public static final OrderStatus CANCEL_FAILED;
+	CANCEL_FAILED(true, true, false, false);
 	
-	static {
-		PENDING = new OrderStatus("Pending", false, false, false, true);
-		ACTIVE = new OrderStatus("Active", false, false, true, true);
-		FILLED = new OrderStatus("Filled", false, true, false, false);
-		CANCELLED = new OrderStatus("Cancelled", false, true, false, false);
-		REJECTED = new OrderStatus("Rejected", true, true, false, false);
-		CANCEL_SENT = new OrderStatus("Cancelling", false, false, false, true);
-		CONDITION = new OrderStatus("Condition", false, false, true, true);
-		SENT = new OrderStatus("Sent", false, false, false, true);
-		CANCEL_FAILED = new OrderStatus("Cancel failed", true,true,false,false);
-	}
-	
-	private final String code;
 	private final boolean isError;
 	private final boolean isFinal;
 	private final boolean isActive;
 	private final boolean canBeUpdated;
 	
-	/**
-	 * Создать статус.
-	 * <p>
-	 * @param code код статуса
-	 * @param isError признак ошибки по заявке
-	 * @param isFinal признак финального статуса
-	 * @param isActive признак активности заявки
-	 * @param canBeUpdated признак модифицируемости заявки
-	 */
-	private OrderStatus(String code, boolean isError, boolean isFinal,
+	OrderStatus(boolean isError, boolean isFinal,
 			boolean isActive, boolean canBeUpdated)
 	{
-		super();
-		this.code = code;
 		this.isError = isError;
 		this.isFinal = isFinal;
 		this.isActive = isActive;
 		this.canBeUpdated = canBeUpdated;
-	}
-	
-	@Override
-	public String toString() {
-		return code;
 	}
 	
 	/**

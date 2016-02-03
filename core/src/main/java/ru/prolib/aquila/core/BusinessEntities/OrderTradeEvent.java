@@ -7,6 +7,7 @@ import ru.prolib.aquila.core.EventType;
 /**
  * Событие в связи с новой сделкой по заявке.
  */
+@Deprecated // TODO: rename???
 public class OrderTradeEvent extends OrderEvent {
 	private final Trade trade;
 

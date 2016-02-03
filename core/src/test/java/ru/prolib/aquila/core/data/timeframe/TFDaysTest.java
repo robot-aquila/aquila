@@ -1,11 +1,13 @@
 package ru.prolib.aquila.core.data.timeframe;
 
 import static org.junit.Assert.*;
+
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.threeten.extra.Interval;
-import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 
 public class TFDaysTest {
 	private TFDays d1, d7, d21;
@@ -26,9 +28,9 @@ public class TFDaysTest {
 	
 	@Test
 	public void testGetUnit() {
-		assertEquals(TimeUnit.DAY, d1.getUnit());
-		assertEquals(TimeUnit.DAY, d7.getUnit());
-		assertEquals(TimeUnit.DAY, d21.getUnit());
+		assertEquals(TimeUnit.DAYS, d1.getUnit());
+		assertEquals(TimeUnit.DAYS, d7.getUnit());
+		assertEquals(TimeUnit.DAYS, d21.getUnit());
 	}
 	
 	@Test

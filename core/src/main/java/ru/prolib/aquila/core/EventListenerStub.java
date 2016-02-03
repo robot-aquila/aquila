@@ -22,5 +22,9 @@ public class EventListenerStub implements EventListener {
 	public synchronized Event getEvent(int index) {
 		return events.get(index);
 	}
+	
+	public void clear() {
+		events.clear();
+	}
 
 }

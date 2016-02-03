@@ -1,48 +1,21 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import ru.prolib.aquila.core.data.EditableContainer;
+
 /**
- * Интерфейс управляемого портфеля.
+ * Portfolio service interface.
  * <p>
  * 2012-09-05<br>
  * $Id$
  */
-public interface EditablePortfolio extends Portfolio, Editable {
+public interface EditablePortfolio extends Portfolio, EditableContainer {
 	
 	/**
-	 * Установить размер вариационной маржи.
+	 * Get managed position.
 	 * <p>
-	 * @param margin вариационная маржа
+	 * @param symbol - the symbol
+	 * @return position instance
 	 */
-	public void setVariationMargin(Double margin);
-	
-	/**
-	 * Установить объем доступных денежных средств.
-	 * <p>
-	 * @param cash объем денежных средств
-	 */
-	public void setCash(Double cash);
-	
-	/**
-	 * Установить значение баланса портфеля.
-	 * <p>
-	 * @param value новое значение
-	 */
-	public void setBalance(Double value);
-	
-	
-	/**
-	 * Генерировать события позиции.
-	 * <p>
-	 * @param position позиция
-	 */
-	public void fireEvents(EditablePosition position);
-	
-	/**
-	 * Получить экземпляр редактируемой позиции.
-	 * <p>
-	 * @param security инструмент
-	 * @return позиция
-	 */
-	public EditablePosition getEditablePosition(Security security);
+	public EditablePosition getEditablePosition(Symbol symbol);
 
 }

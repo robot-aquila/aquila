@@ -10,11 +10,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * 2012-06-01<br>
  * $Id: Trade.java 513 2013-02-11 01:17:18Z whirlwind $
  */
+@Deprecated // TODO: rename to deal
 public class Trade implements Comparable<Trade> {
 	private volatile Terminal terminal;
 	private volatile Long id;
 	private volatile Symbol symbol;
-	private volatile Direction direction;
+	private volatile OrderAction direction;
 	private volatile Instant time;
 	private volatile double price;
 	private volatile long qty;
@@ -97,7 +98,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @return направление сделки или null, если направление не определено
 	 */
-	public Direction getDirection() {
+	public OrderAction getDirection() {
 		return direction;
 	}
 	
@@ -106,7 +107,7 @@ public class Trade implements Comparable<Trade> {
 	 * <p>
 	 * @param dir направление сделки
 	 */
-	public void setDirection(Direction dir) {
+	public void setDirection(OrderAction dir) {
 		this.direction = dir;
 	}
 	

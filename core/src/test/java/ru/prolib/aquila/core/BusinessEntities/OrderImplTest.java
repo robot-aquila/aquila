@@ -4,823 +4,393 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
 
-import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
-import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
-import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.BusinessEntities.OrderImpl.OrderController;
+import ru.prolib.aquila.core.data.ContainerImpl;
+import ru.prolib.aquila.core.data.ContainerImplTest;
+import ru.prolib.aquila.core.data.OrderField;
 
 /**
  * 2012-09-22<br>
  * $Id: OrderImplTest.java 542 2013-02-23 04:15:34Z whirlwind $
  */
-public class OrderImplTest {
-	private static DateTimeFormatter format;
-	private static Account account;
-	private static Symbol symbol;
+public class OrderImplTest extends ContainerImplTest {
+	private static Account account = new Account("port#120");
+	private static Symbol symbol = new Symbol("MSFT");
 	private IMocksControl control;
-	private OrderEventDispatcher dispatcher;
-	private EventType type;
 	private OrderImpl order;
-	private S<OrderImpl> setter;
-	private G<?> getter;
-	private List<OrderStateHandler> stateHandlers;
-	private Terminal terminal;
-	private OrderActivator activator;
+	private EditableTerminal terminal;
+	private OrderController controller;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		BasicConfigurator.resetConfiguration();
-		BasicConfigurator.configure();
-		format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		account = new Account("LX01");
-		symbol = new Symbol("AAPL", "SMART", "USD",SymbolType.STOCK);
+		ContainerImplTest.setUpBeforeClass();
 	}
 
 	@Before
 	public void setUp() throws Exception {
+		controller = new OrderController();
+		super.setUp();
+	}
+	
+	@Test
+	public void tearDown() throws Exception {
+		super.tearDown();
+	}
+	
+	@Override
+	protected String getID() {
+		return "foobar.port#120[MSFT].ORDER#240";
+	}
+	
+	private void prepareTerminal() {
 		control = createStrictControl();
-		dispatcher = control.createMock(OrderEventDispatcher.class);
-		activator = control.createMock(OrderActivator.class);
-		type = control.createMock(EventType.class);
-		stateHandlers = new LinkedList<OrderStateHandler>();
-		terminal = control.createMock(Terminal.class); 
-
-		order = new OrderImpl(dispatcher, stateHandlers, terminal);
-		setter = null;
-		getter = null;
+		terminal = control.createMock(EditableTerminal.class);
+		expect(terminal.getTerminalID()).andStubReturn("foobar");
+		expect(terminal.getEventQueue()).andStubReturn(queue);
+		control.replay();		
 	}
 	
-	/**
-	 * Создать сделку.
-	 * <p>
-	 * Так же устанавливает объем, равный qty * price.
-	 * <p>
-	 * @param id номер сделки
-	 * @param time время сделки в формате yyyy-MM-dd HH:mm:ss
-	 * @param price цена
-	 * @param qty количество
-	 * @return сделка
-	 * @throws Exception
-	 */
-	private Trade createTrade(Long id, String time, Double price, Long qty)
-			throws Exception
-	{
-		return createTrade(id, time, price, qty, price * qty);
+	@Override
+	protected ContainerImpl produceContainer() {
+		prepareTerminal();
+		order = new OrderImpl(terminal, account, symbol, 240);
+		return order;
 	}
 	
-	/**
-	 * Создать сделку.
-	 * <p>
-	 * @param id номер сделки
-	 * @param time время сделки в формате yyyy-MM-dd HH:mm:ss
-	 * @param price цена
-	 * @param qty количество
-	 * @param vol объем сделки
-	 * @return сделка
-	 * @throws Exception
-	 */
-	private Trade createTrade(Long id, String time, Double price, Long qty,
-			Double vol) throws Exception
-	{
-		Trade trade = new Trade(terminal);
-		trade.setId(id);
-		trade.setPrice(price);
-		trade.setQty(qty);
-		trade.setSymbol(symbol);
-		trade.setTime(LocalDateTime.parse(time, format).toInstant(ZoneOffset.UTC));
-		trade.setVolume(vol);
-		return trade;		
+	@Override
+	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+		prepareTerminal();
+		order = new OrderImpl(terminal, account, symbol, 240, controller);
+		return order;
+	}
+	
+	private void assertOrderEvent(Event event, EventType expectedType) {
+		OrderEvent e = (OrderEvent) event;
+		assertTrue(e.isType(expectedType));
+		assertSame(order, e.getOrder());
 	}
 	
 	@Test
-	public void testVersion() throws Exception {
-		assertEquals(1, Order.VERSION);
-	}
-	
-	@Test
-	public void testConstruct() throws Exception {
+	public void testCtor_DefaultContainer() throws Exception {
+		order = new OrderImpl(terminal, account, symbol, 240);
+		assertEquals(OrderController.class, order.getController().getClass());
+		assertNotNull(order.getTerminal());
+		assertNotNull(order.getEventQueue());
 		assertSame(terminal, order.getTerminal());
+		assertSame(queue, order.getEventQueue());
+		assertEquals(account, order.getAccount());
+		assertEquals(symbol, order.getSymbol());
+		String prefix = getID();
+		assertEquals(prefix, order.getContainerID());
+		assertEquals(prefix + ".CANCEL_FAILED", order.onCancelFailed().getId());
+		assertEquals(prefix + ".CANCELLED", order.onCancelled().getId());
+		assertEquals(prefix + ".DEAL", order.onDeal().getId());
+		assertEquals(prefix + ".DONE", order.onDone().getId());
+		assertEquals(prefix + ".FAILED", order.onFailed().getId());
+		assertEquals(prefix + ".FILLED", order.onFilled().getId());
+		assertEquals(prefix + ".PARTIALLY_FILLED", order.onPartiallyFilled().getId());
+		assertEquals(prefix + ".REGISTERED", order.onRegistered().getId());
+		assertEquals(prefix + ".REGISTER_FAILED", order.onRegisterFailed().getId());
+		assertEquals(240, order.getID());
 	}
 	
 	@Test
-	public void testDefaults() throws Exception {
-		assertEquals(0x06, OrderImpl.VERSION);
-		assertNull(order.getAccount());
-		assertNull(order.getSymbol());
-		assertNull(order.getId());
-		assertNull(order.getDirection());
-		assertNull(order.getType());
-		assertSame(OrderStatus.PENDING, order.getStatus());
-		assertNull(order.getPreviousStatus());
-		assertNull(order.getQty());
-		assertNull(order.getQtyRest());
-		assertNull(order.getPrice());
-		assertEquals(0.0d, order.getExecutedVolume(), 0.01d);
-		assertNull(order.getAvgExecutedPrice());
-		assertNull(order.getTime());
-		assertNull(order.getLastChangeTime());
-		assertEquals(new OrderSystemInfo(), order.getSystemInfo());
-	}
-	
-	@Test
-	public void testOnRegister() throws Exception {
-		expect(dispatcher.OnRegistered()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, order.OnRegistered());
-		
-		control.verify();
+	public void testGetAction() throws Exception {
+		getter = new Getter<OrderAction>() {
+			@Override public OrderAction get() {
+				return order.getAction();
+			}
+		};
+		testGetter(OrderField.ACTION, OrderAction.BUY, OrderAction.SELL_SHORT);
 	}
 
 	@Test
-	public void testOnRegisterFailed() throws Exception {
-		expect(dispatcher.OnRegisterFailed()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, order.OnRegisterFailed());
-		
-		control.verify();
+	public void testGetComment() throws Exception {
+		getter = new Getter<String>() {
+			@Override public String get() {
+				return order.getComment();
+			}
+		};
+		testGetter(OrderField.COMMENT, "foo", "bar");
 	}
 	
 	@Test
-	public void testOnCancelled() throws Exception {
-		expect(dispatcher.OnCancelled()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, order.OnCancelled());
-		
-		control.verify();
+	public void testGetCurrentVolume() throws Exception {
+		getter = new Getter<Long>() {
+			@Override public Long get() {
+				return order.getCurrentVolume();
+			}			
+		};
+		testGetter(OrderField.CURRENT_VOLUME, 214L, 178L);
 	}
 	
 	@Test
-	public void testOnCancelFailed() throws Exception {
-		expect(dispatcher.OnCancelFailed()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, order.OnCancelFailed());
-		
-		control.verify();
+	public void testGetDoneTime() throws Exception {
+		getter = new Getter<Instant>() {
+			@Override public Instant get() {
+				return order.getDoneTime();
+			}
+		};
+		testGetter(OrderField.DONE_TIME, Instant.parse("1997-08-19T20:54:15Z"),
+				Instant.parse("2045-01-15T00:19:34Z"));
 	}
 
 	@Test
-	public void testOnFilled() throws Exception {
-		expect(dispatcher.OnFilled()).andReturn(type);
-		control.replay();
-		
-		assertSame(type, order.OnFilled());
-		
-		control.verify();
+	public void testGetExecutedValue() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return order.getExecutedValue();
+			}			
+		};
+		testGetter(OrderField.EXECUTED_VALUE, 14052.13d, 16480.15d);
 	}
 	
 	@Test
-	public void testOnPartiallyFilled() throws Exception {
-		expect(dispatcher.OnPartiallyFilled()).andReturn(type);
-		control.replay();
+	public void testGetExternalID() throws Exception {
+		getter = new Getter<String>() {
+			@Override public String get() {
+				return order.getExternalID();
+			}
+		};
+		testGetter(OrderField.EXTERNAL_ID, "foo140", "foo250");
+	}
+	
+	@Test
+	public void testGetInitialVolume() throws Exception {
+		getter = new Getter<Long>() {
+			@Override public Long get() {
+				return order.getInitialVolume();
+			}			
+		};
+		testGetter(OrderField.INITIAL_VOLUME, 1000L, 450L);
+	}
+	
+	@Test
+	public void testGetPrice() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return order.getPrice();
+			}			
+		};
+		testGetter(OrderField.PRICE, 230.45d, 245.13d);
+	}
+	
+	@Test
+	public void testGetStatus() throws Exception {
+		getter = new Getter<OrderStatus>() {
+			@Override public OrderStatus get() {
+				return order.getStatus();
+			}			
+		};
+		testGetter(OrderField.STATUS, OrderStatus.ACTIVE, OrderStatus.FILLED);
+	}
+	
+	@Test
+	public void testGetTime() throws Exception {
+		getter = new Getter<Instant>() {
+			@Override public Instant get() {
+				return order.getTime();
+			}
+		};
+		testGetter(OrderField.TIME, Instant.now(), Instant.parse("1992-12-25T00:00:00Z"));
+	}
+	
+	@Test
+	public void testGetType() throws Exception {
+		getter = new Getter<OrderType>() {
+			@Override public OrderType get() {
+				return order.getType();
+			}
+		};
+		testGetter(OrderField.TYPE, OrderType.LIMIT, OrderType.MARKET);
+	}
+	
+	@Test
+	public void testClose() {
+		EventType type = new EventTypeImpl();
+		order.onAvailable().addSyncListener(listenerStub);
+		order.onAvailable().addAlternateType(type);
+		order.onCancelFailed().addSyncListener(listenerStub);
+		order.onCancelFailed().addAlternateType(type);
+		order.onCancelled().addSyncListener(listenerStub);
+		order.onCancelled().addAlternateType(type);
+		order.onDeal().addSyncListener(listenerStub);
+		order.onDeal().addAlternateType(type);
+		order.onDone().addSyncListener(listenerStub);
+		order.onDone().addAlternateType(type);
+		order.onFailed().addSyncListener(listenerStub);
+		order.onFailed().addAlternateType(type);
+		order.onFilled().addSyncListener(listenerStub);
+		order.onFilled().addAlternateType(type);
+		order.onPartiallyFilled().addSyncListener(listenerStub);
+		order.onPartiallyFilled().addAlternateType(type);
+		order.onRegistered().addSyncListener(listenerStub);
+		order.onRegistered().addAlternateType(type);
+		order.onRegisterFailed().addSyncListener(listenerStub);
+		order.onRegisterFailed().addAlternateType(type);
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onUpdate().addAlternateType(type);
 		
-		assertSame(type, order.OnPartiallyFilled());
+		order.close();
 		
-		control.verify();
+		assertFalse(order.onAvailable().hasListeners());
+		assertFalse(order.onAvailable().hasAlternates());
+		assertFalse(order.onCancelFailed().hasListeners());
+		assertFalse(order.onCancelFailed().hasAlternates());
+		assertFalse(order.onCancelled().hasListeners());
+		assertFalse(order.onCancelled().hasAlternates());
+		assertFalse(order.onDeal().hasListeners());
+		assertFalse(order.onDeal().hasAlternates());
+		assertFalse(order.onDone().hasListeners());
+		assertFalse(order.onDone().hasAlternates());
+		assertFalse(order.onFailed().hasListeners());
+		assertFalse(order.onFailed().hasAlternates());
+		assertFalse(order.onFilled().hasListeners());
+		assertFalse(order.onFilled().hasAlternates());
+		assertFalse(order.onPartiallyFilled().hasListeners());
+		assertFalse(order.onPartiallyFilled().hasAlternates());
+		assertFalse(order.onRegistered().hasListeners());
+		assertFalse(order.onRegistered().hasAlternates());
+		assertFalse(order.onRegisterFailed().hasListeners());
+		assertFalse(order.onRegisterFailed().hasAlternates());
+		assertFalse(order.onUpdate().hasListeners());
+		assertFalse(order.onUpdate().hasAlternates());
+		assertNull(order.getTerminal());
+	}
+	
+	@Test
+	public void testOrderController_HasMinimalData() throws Exception {
+		assertFalse(controller.hasMinimalData(order));
+		
+		data.put(OrderField.ACTION, OrderAction.BUY);
+		data.put(OrderField.TYPE, OrderType.LIMIT);
+		data.put(OrderField.STATUS, OrderStatus.PENDING);
+		data.put(OrderField.INITIAL_VOLUME, 100L);
+		data.put(OrderField.CURRENT_VOLUME, 50L);
+		order.update(data);
+		
+		assertTrue(controller.hasMinimalData(order));
 	}
 
 	@Test
-	public void testOnChanged() throws Exception {
-		expect(dispatcher.OnChanged()).andReturn(type);
-		control.replay();
+	public void testOrderController_CancelFailed() {
+		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
+		order.update(data);
+		order.onCancelFailed().addSyncListener(listenerStub);
 		
-		assertSame(type, order.OnChanged());
+		controller.processAvailable(order);
+		controller.processUpdate(order);
 		
-		control.verify();
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onCancelFailed());
+		assertOrderEvent(listenerStub.getEvent(1), order.onCancelFailed());
 	}
 	
 	@Test
-	public void testOnDone() throws Exception {
-		expect(dispatcher.OnDone()).andReturn(type);
-		control.replay();
+	public void testOrderController_Cancelled() {
+		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		order.update(data);
+		order.onCancelled().addSyncListener(listenerStub);
 		
-		assertSame(type, order.OnDone());
+		controller.processAvailable(order);
+		controller.processUpdate(order);
 		
-		control.verify();
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onCancelled());
+		assertOrderEvent(listenerStub.getEvent(1), order.onCancelled());
 	}
 	
 	@Test
-	public void testOnFailed() throws Exception {
-		expect(dispatcher.OnFailed()).andReturn(type);
-		control.replay();
+	public void testOrderController_Done() {
+		data.put(OrderField.STATUS, OrderStatus.FILLED);
+		order.update(data);
+		order.onDone().addSyncListener(listenerStub);
 		
-		assertSame(type, order.OnFailed());
+		controller.processAvailable(order);
+		controller.processUpdate(order);
 		
-		control.verify();
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onDone());
+		assertOrderEvent(listenerStub.getEvent(1), order.onDone());
 	}
 	
 	@Test
-	public void testOnTrade() throws Exception {
-		expect(dispatcher.OnTrade()).andReturn(type);
-		control.replay();
+	public void testOrderController_Failed() {
+		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
+		order.update(data);
+		order.onFailed().addSyncListener(listenerStub);
 		
-		assertSame(type, order.OnTrade());
+		controller.processAvailable(order);
+		controller.processUpdate(order);
 		
-		control.verify();
-	}
-	
-	/**
-	 * Проверить работу геттера/сеттера с проверкой признака изменения.
-	 * <p>
-	 * Метод использует текущий экземпляр {@link #order}, {@link #setter} и
-	 * {@link #getter}.
-	 * <p>
-	 * @param firstValue начальное значение
-	 * @param secondValue конечное значение
-	 * @param changeId идентификатор изменения для проверки (null - пропустить)
-	 */
-	private void testSetterGetterF(Object firstValue,
-			Object secondValue, Integer changeId) throws Exception
-	{
-		Object fixture[][] = {
-				{ null, 		null,			false },
-				{ null, 		secondValue,	true  },
-				{ firstValue,	secondValue,	true  },
-				{ secondValue,	secondValue,	false },
-				{ firstValue,   null,			true  },
-		};
-		for ( int i = 0; i < fixture.length; i ++ ) {
-			String msg = "At #" + i;
-			setter.set(order, fixture[i][0]);
-			order.resetChanges();
-			setter.set(order, fixture[i][1]);
-			boolean expected = (Boolean) fixture[i][2];
-			assertEquals(msg, expected, order.hasChanged());
-			if ( changeId != null ) {
-				assertEquals(msg, expected, order.hasChanged(changeId));
-			}
-			assertEquals(msg, fixture[i][1], getter.get(order));
-		}
-	}
-	
-	/**
-	 * Проверить работу геттера/сеттера.
-	 * <p>
-	 * Метод использует текущий экземпляр {@link #order}, {@link #setter} и
-	 * {@link #getter}.
-	 * <p>
-	 * @param firstValue начальное значение
-	 * @param secondValue конечное значение
-	 */
-	private void testSetterGetter(Object firstValue, Object secondValue)
-			throws Exception
-	{
-		testSetterGetterF(firstValue, secondValue, null);
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onFailed());
+		assertOrderEvent(listenerStub.getEvent(1), order.onFailed());
 	}
 	
 	@Test
-	public void testSetAccount() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setAccount((Account) value);
-			}
-		};
-		getter = new G<Account>() {
-			@Override
-			public Account get(Object object) throws ValueException {
-				return ((OrderImpl) object).getAccount();
-			}
-		};
-		testSetterGetter(new Account("LX001"), new Account("ZZZZZ"));
-	}
-	
-	@Test
-	public void testSetDirection() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setDirection((Direction) value);
-			}
-		};
-		getter = new G<Direction>() {
-			@Override
-			public Direction get(Object object) throws ValueException {
-				return ((OrderImpl) object).getDirection();
-			}
-		};
-		testSetterGetter(Direction.BUY, Direction.SELL);
-	}
-	
-	@Test
-	public void testSetId() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setId((Integer) value);
-			}
-		};
-		getter = new G<Integer>() {
-			@Override
-			public Integer get(Object object) throws ValueException {
-				return ((OrderImpl) object).getId();
-			}
-		};
-		testSetterGetter(100, 200);
-	}
-	
-	@Test
-	public void testGetPortfolio() throws Exception {
-		order.setAccount(account);
-		Portfolio portfolio = control.createMock(Portfolio.class);
-		expect(terminal.getPortfolio(eq(account))).andReturn(portfolio);
-		control.replay();
-		assertSame(portfolio, order.getPortfolio());
-		control.verify();
-	}
-	
-	@Test
-	public void testSetPrice() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setPrice((Double) value);
-			}
-		};
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object object) throws ValueException {
-				return ((OrderImpl) object).getPrice();
-			}
-		};
-		testSetterGetter(120.25D, 130.10D);
+	public void testOrderController_Filled() {
+		data.put(OrderField.STATUS, OrderStatus.FILLED);
+		order.update(data);
+		order.onFilled().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onFilled());
+		assertOrderEvent(listenerStub.getEvent(1), order.onFilled());
 	}
 
 	@Test
-	public void testSetQty() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setQty((Long) value);
-			}
-		};
-		getter = new G<Long>() {
-			@Override
-			public Long get(Object object) throws ValueException {
-				return ((OrderImpl) object).getQty();
-			}
-		};
-		testSetterGetter(1000L, 2000L);
+	public void testOrderController_PartiallyFilled() {
+		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		data.put(OrderField.CURRENT_VOLUME, 5L);
+		order.update(data);
+		order.onPartiallyFilled().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onPartiallyFilled());
+		assertOrderEvent(listenerStub.getEvent(1), order.onPartiallyFilled());
 	}
 	
 	@Test
-	public void testSetQtyRest() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setQtyRest((Long) value);
-			}
-		};
-		getter = new G<Long>() {
-			@Override
-			public Long get(Object object) throws ValueException {
-				return ((OrderImpl) object).getQtyRest();
-			}
-		};
-		testSetterGetter(5000L, 0L);
+	public void testOrderController_Registered() {
+		data.put(OrderField.STATUS, OrderStatus.ACTIVE);
+		order.update(data);
+		order.onRegistered().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onRegistered());
+		assertOrderEvent(listenerStub.getEvent(1), order.onRegistered());
 	}
 	
 	@Test
-	public void testGetSecurity() throws Exception {
-		order.setSymbol(symbol);
-		Security security = control.createMock(Security.class);
-		expect(terminal.getSecurity(eq(symbol))).andReturn(security);
-		control.replay();
-		assertSame(security, order.getSecurity());
-		control.verify();
-	}
-	
-	@Test
-	public void testSetSymbol() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setSymbol((Symbol) value);
-			}
-		};
-		getter = new G<Symbol>() {
-			@Override
-			public Symbol get(Object object) throws ValueException {
-				return ((OrderImpl) object).getSymbol();
-			}
-		};
-		testSetterGetter(symbol,
-			new Symbol("USD","IDEALPRO","USD",SymbolType.CURRENCY));
-	}
-	
-	@Test
-	public void testSetType() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setType((OrderType) value);
-			}
-		};
-		getter = new G<OrderType>() {
-			@Override
-			public OrderType get(Object object) throws ValueException {
-				return ((OrderImpl) object).getType();
-			}
-		};
-		testSetterGetter(OrderType.LIMIT, OrderType.MARKET);
+	public void testOrderController_RegisterFailed() {
+		data.put(OrderField.STATUS, OrderStatus.REJECTED);
+		order.update(data);
+		order.onRegisterFailed().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onRegisterFailed());
+		assertOrderEvent(listenerStub.getEvent(1), order.onRegisterFailed());
 	}
 
-	@Test
-	public void testSetStatus() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setStatus((OrderStatus) value);
-			}
-		};
-		getter = new G<OrderStatus>() {
-			@Override
-			public OrderStatus get(Object object) throws ValueException {
-				return ((OrderImpl) object).getStatus();
-			}
-		};
-		testSetterGetterF(OrderStatus.ACTIVE, OrderStatus.FILLED,
-				EditableOrder.STATUS_CHANGED);
-	}
-	
-	@Test
-	public void testFireChangedEvent() throws Exception {
-		OrderStateHandler h1,h2,h3;
-		h1 = control.createMock(OrderStateHandler.class);
-		h2 = control.createMock(OrderStateHandler.class);
-		h3 = control.createMock(OrderStateHandler.class);
-		stateHandlers.add(h1);
-		stateHandlers.add(h2);
-		stateHandlers.add(h3);
-		h1.handle(order);
-		h2.handle(order);
-		h3.handle(order);
-		control.replay();
-		
-		order.fireChangedEvent();
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testSetExecutedVolume() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setExecutedVolume((Double) value);
-			}
-		};
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object object) throws ValueException {
-				return ((OrderImpl) object).getExecutedVolume();
-			}
-		};
-		testSetterGetter(12.34d, 34.56d);
-	}
-	
-	@Test
-	public void testSetAvgExecutedPrice() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setAvgExecutedPrice((Double) value);
-			}
-		};
-		getter = new G<Double>() {
-			@Override
-			public Double get(Object object) throws ValueException {
-				return ((OrderImpl) object).getAvgExecutedPrice();
-			}
-		};
-		testSetterGetter(152.14d, 534.56d);
-	}
-	
-	@Test
-	public void testSetStatus_ChangesPreviousStatus() throws Exception {
-		assertSame(OrderStatus.PENDING, order.getStatus());
-		assertNull(order.getPreviousStatus());
-		order.setStatus(OrderStatus.ACTIVE);
-		assertSame(OrderStatus.ACTIVE, order.getStatus());
-		assertSame(OrderStatus.PENDING, order.getPreviousStatus());
-		order.setStatus(OrderStatus.FILLED);
-		assertSame(OrderStatus.FILLED, order.getStatus());
-		assertSame(OrderStatus.ACTIVE, order.getPreviousStatus());
-	}
-	
-	@Test
-	public void testSetTime() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setTime((Instant) value);
-			}
-		};
-		getter = new G<Instant>() {
-			@Override
-			public Instant get(Object object) throws ValueException {
-				return ((OrderImpl) object).getTime();
-			}
-		};
-		testSetterGetter(Instant.parse("2011-01-01T00:00:00Z"),
-						 Instant.parse("2013-02-21T06:58:00Z"));
-	}
-	
-	@Test
-	public void testSetLastChangeTime() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setLastChangeTime((Instant) value);
-			}
-		};
-		getter = new G<Instant>() {
-			@Override
-			public Instant get(Object object) throws ValueException {
-				return ((OrderImpl) object).getLastChangeTime();
-			}
-		};
-		testSetterGetter(Instant.parse("1991-07-01T13:00:00Z"),
-						 Instant.parse("2032-02-21T06:58:00Z"));	
-	}
-	
-	@Test
-	public void testSetActivator() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setActivator((OrderActivator) value);
-			}
-		};
-		getter = new G<OrderActivator>() {
-			@Override
-			public OrderActivator get(Object object) {
-				return ((OrderImpl) object).getActivator();
-			}
-		};
-		OrderActivator a1 = control.createMock(OrderActivator.class),
-			a2 = control.createMock(OrderActivator.class);
-		testSetterGetter(a1, a2);
-	}
-	
-	@Test
-	public void testSetComment() throws Exception {
-		setter = new S<OrderImpl>() {
-			@Override
-			public void set(OrderImpl object, Object value) {
-				object.setComment((String) value);
-			}
-		};
-		getter = new G<String>() {
-			@Override
-			public String get(Object object) {
-				return ((OrderImpl) object).getComment();
-			}
-		};
-		testSetterGetter("foo", "bar");
-	}
-	
-	@Test
-	public void testAddGetTrades() throws Exception {
-		order.setQty(25L);
-		List<Trade> expected = new Vector<Trade>();
-		expected.add(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
-		expected.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-		expected.add(createTrade(5L,"2013-05-01 00:00:02",13.01d, 5L,130.1d));
-		expected.add(createTrade(8L,"2013-05-01 00:00:02",12.80d, 7L,179.2d));
-		
-		// при добавлении сделки сортируются
-		order.addTrade(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-		order.addTrade(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
-		order.addTrade(createTrade(8L,"2013-05-01 00:00:02",12.80d, 7L,179.2d));
-		order.addTrade(createTrade(5L,"2013-05-01 00:00:02",13.01d, 5L,130.1d));
-		assertEquals(expected, order.getTrades());
-		// при добавлении перерасчитываются qty.rest, avg.exec.price, exec.vol
-		assertEquals(new Long(2), order.getQtyRest());
-		assertEquals(12.8239d, order.getAvgExecutedPrice(), 0.0001d);
-		assertEquals(589.9d, order.getExecutedVolume(), 0.0001d);
-	}
-	
-	@Test
-	public void testHasTrade() throws Exception {
-		order.setQty(20L);
-		assertFalse(order.hasTrade(2L));
-		assertFalse(order.hasTrade(8L));
-		order.addTrade(createTrade(2L, "2013-05-01 00:00:05", 12.80d, 10L));
-		order.addTrade(createTrade(8L, "2013-05-01 00:00:02", 12.80d,  7L));
-		assertTrue(order.hasTrade(2L));
-		assertTrue(order.hasTrade(8L));
-		assertFalse(order.hasTrade(5L));
-	}
-	
-	@Test
-	public void testFireTradeEvent() throws Exception {
-		Trade t0 = createTrade(100L, "2013-05-01 00:00:00", 25.19d, 10L);
-		dispatcher.fireTrade(same(order), same(t0));
-		control.replay();
-		
-		order.fireTradeEvent(t0);
-	
-		control.verify();
-	}
-	
-	@Test
-	public void testClearAllEventListsners() throws Exception {
-		dispatcher.removeListeners();
-		control.replay();
-		
-		order.clearAllEventListeners();
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetLastTrade() throws Exception {
-		order.setQty(20L);
-		assertNull(order.getLastTrade());
-		Trade t1 = createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d);
-		order.addTrade(t1);
-		assertSame(t1, order.getLastTrade());
-		Trade t2 = createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d);
-		order.addTrade(t2);
-		assertEquals(t2, order.getLastTrade());
-	}
-	
-	@Test
-	public void testGetLastTradeTime() throws Exception {
-		order.setQty(20L);
-		assertNull(order.getLastTradeTime());
-		order.addTrade(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
-		assertEquals(Instant.parse("2013-05-01T00:00:01Z"),
-				order.getLastTradeTime());
-		order.addTrade(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-		assertEquals(Instant.parse("2013-05-01T00:00:05Z"),
-				order.getLastTradeTime());
-	}
-	
-	@Test
-	public void testEquals_SpecialCases() throws Exception {
-		assertTrue(order.equals(order));
-		assertFalse(order.equals(null));
-		assertFalse(order.equals(this));
-	}
-	
-	@Test
-	public void testEquals() throws Exception {
-		List<Trade> trds1 = new Vector<Trade>();
-		trds1.add(createTrade(1L,"2013-05-01 00:00:01",12.30d, 1L, 24.6d));
-		trds1.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-		List<Trade> trds2 = new Vector<Trade>();
-		trds2.add(createTrade(2L,"2013-05-01 00:00:05",12.80d,10L,256.0d));
-
-		order.setAccount(account);
-		order.setSymbol(symbol);
-		order.setDirection(Direction.SELL);
-		order.setId(1000);
-		order.setPrice(135.67d);
-		order.setQty(200L);
-		order.setStatus(OrderStatus.CANCELLED);
-		order.setType(OrderType.LIMIT);
-		order.setTime(Instant.parse("2013-05-15T08:32:00Z"));
-		order.setLastChangeTime(Instant.parse("1998-01-01T01:02:03Z"));
-		for ( Trade trade : trds1 ) {
-			order.addTrade(trade);
-		}
-		order.setAvailable(true);
-		order.setQtyRest(190L);
-		order.setExecutedVolume(249400.00d);
-		order.setAvgExecutedPrice(182.34d);
-		order.getSystemInfo().getRegistration().setRequest(new Object());
-		order.setActivator(activator);
-		
-		double aprob = 0.3; // Probability of additional variant
-		Random rnd = new Random();
-		Variant<Account> vAcnt = new Variant<Account>()
-			.add(account);
-		if ( rnd.nextDouble() > aprob ) vAcnt.add(new Account("foobar"));
-		Variant<Symbol> vSymbol = new Variant<Symbol>(vAcnt)
-			.add(symbol);
-		if ( rnd.nextDouble() > aprob ) {
-			vSymbol.add(new Symbol("A","B","USD",SymbolType.UNKNOWN));
-		}
-		Variant<Direction> vDir = new Variant<Direction>(vSymbol)
-			.add(Direction.SELL);
-		if ( rnd.nextDouble() > aprob ) vDir.add(Direction.BUY);
-		Variant<Integer> vId = new Variant<Integer>(vDir)
-			.add(1000);
-		if ( rnd.nextDouble() > aprob ) vId.add(2220);
-		Variant<Double> vPrice = new Variant<Double>(vId)
-			.add(135.67d);
-		if ( rnd.nextDouble() > aprob ) vPrice.add(null);
-		Variant<Long> vQty = new Variant<Long>(vPrice)
-			.add(200L);
-		if ( rnd.nextDouble() > aprob ) vQty.add(400L);
-		Variant<OrderStatus> vStat = new Variant<OrderStatus>(vQty)
-			.add(OrderStatus.CANCELLED);
-		if ( rnd.nextDouble() > aprob ) vStat.add(OrderStatus.FILLED);
-		Variant<OrderType> vType = new Variant<OrderType>(vStat)
-			.add(OrderType.LIMIT);
-		if ( rnd.nextDouble() > aprob ) vType.add(OrderType.MARKET);
-		Variant<Terminal> vTerm = new Variant<Terminal>(vType)
-			.add(terminal);
-		if ( rnd.nextDouble() > aprob ) {
-			vTerm.add(control.createMock(Terminal.class));
-		}
-		Variant<Instant> vTime = new Variant<Instant>(vTerm)
-			.add(Instant.parse("2013-05-15T08:32:00Z"));
-		if ( rnd.nextDouble() > aprob ) {
-			vTime.add(Instant.parse("2013-01-01T00:00:00Z"));
-		}
-		Variant<Instant> vLastTime = new Variant<Instant>(vTime)
-			.add(Instant.parse("1998-01-01T01:02:03Z"));
-		if ( rnd.nextDouble() > aprob ) {
-			vLastTime.add(null);
-		}
-		Variant<List<Trade>> vTrds = new Variant<List<Trade>>(vLastTime)
-			.add(trds1);
-		if ( rnd.nextDouble() > aprob ) vTrds.add(trds2);
-		Variant<Boolean> vAvl = new Variant<Boolean>(vTrds)
-			.add(true);
-		if ( rnd.nextDouble() > aprob ) vAvl.add(false);
-		Variant<Long> vQtyRst = new Variant<Long>(vAvl)
-			.add(190L)
-			.add(450L);
-		Variant<Double> vExecVol = new Variant<Double>(vQtyRst)
-			.add(249400.00d)
-			.add(180230.00d);
-		Variant<Double> vAvgPr = new Variant<Double>(vExecVol)
-			.add(182.34d)
-			.add(202.15d);
-		Variant<Object> vRegReq = new Variant<Object>(vAvgPr)
-			.add(order.getSystemInfo().getRegistration().getRequest())
-			.add(new Object());
-		Variant<OrderActivator> vAct = new Variant<OrderActivator>(vRegReq)
-			.add(activator);
-		if ( rnd.nextDouble() > aprob ) {
-			vAct.add(control.createMock(OrderActivator.class));
-		}
-		Variant<?> iterator = vAct;
-		int foundCnt = 0;
-		OrderImpl x = null, found = null;
-		do {
-			x = new OrderImpl(dispatcher, stateHandlers, vTerm.get());
-			x.setAccount(vAcnt.get());
-			x.setSymbol(vSymbol.get());
-			x.setDirection(vDir.get());
-			x.setId(vId.get());
-			x.setPrice(vPrice.get());
-			x.setQty(vQty.get());
-			x.setStatus(vStat.get());
-			x.setType(vType.get());
-			x.setTime(vTime.get());
-			x.setLastChangeTime(vLastTime.get());
-			for ( Trade trade : vTrds.get() ) {
-				x.addTrade(trade);
-			}
-			x.setAvailable(vAvl.get());
-			x.setQtyRest(vQtyRst.get());
-			x.setAvgExecutedPrice(vAvgPr.get());
-			x.setExecutedVolume(vExecVol.get());
-			x.getSystemInfo().getRegistration().setRequest(vRegReq.get());
-			x.setActivator(vAct.get());
-			if ( order.equals(x) ) {
-				foundCnt ++;
-				found = x;
-			}
-
-		} while ( iterator.next() );
-		assertEquals(1, foundCnt);
-		assertEquals(terminal, found.getTerminal());
-		assertEquals(account, found.getAccount());
-		assertEquals(symbol, found.getSymbol());
-		assertEquals(Direction.SELL, found.getDirection());
-		assertEquals(new Integer(1000), found.getId());
-		assertEquals(135.67d, found.getPrice(), 0.01d);
-		assertEquals(new Long(200L), found.getQty());
-		assertEquals(OrderStatus.CANCELLED, found.getStatus());
-		assertEquals(OrderType.LIMIT, found.getType());
-		assertEquals(Instant.parse("2013-05-15T08:32:00Z"), found.getTime());
-		assertEquals(Instant.parse("1998-01-01T01:02:03Z"),
-				found.getLastChangeTime());
-		assertEquals(trds1, found.getTrades());
-		assertTrue(found.isAvailable());
-		assertEquals(new Long(190L), found.getQtyRest());
-		assertEquals(249400.00d, found.getExecutedVolume(), 0.01d);
-		assertEquals(182.34d, found.getAvgExecutedPrice(), 0.01d);
-		assertEquals(order.getSystemInfo(), found.getSystemInfo());
-		assertEquals(activator, found.getActivator());
-	}
-	
 }

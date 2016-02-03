@@ -1,24 +1,16 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.util.List;
+import java.util.Set;
 
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.Starter;
 
 /**
- * Интерфейс терминала.
- * <p>
- * Терминал представляет собой фасад подключения к биржевому терминалу.
- * Данный интерфейс позволяет абстрагироваться от специфической реализации
- * подключений к различным терминальным программам. Интерфейс обеспечивает
- * доступ к основным объектам биржевой торговли таким, как инструменты
- * типа {@link Security} и портфели типа {@link Portfolio}.  
+ * Terminal interface.
  * <p>
  * 2012-05-30<br>
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public interface Terminal extends Starter, Scheduler {
-	public static final int VERSION = 1;
+public interface Terminal extends Scheduler {
 	
 	/**
 	 * Get ID of the terminal.
@@ -26,157 +18,20 @@ public interface Terminal extends Starter, Scheduler {
 	 * @return terminal ID
 	 */
 	public String getTerminalID();
-	
-	/**
-	 * Проверить состояние терминала.
-	 * <p>
-	 * Терминал может в промежуточном состоянии. То есть, если терминал не
-	 * запущен, это не гарантирует true в результате вызова {@link #stopped()}.
-	 * <p>
-	 * @return true если терминал запущен, иначе false
-	 */
-	@Deprecated
-	public boolean started();
-	
-	/**
-	 * Проверить состояние терминала.
-	 * <p>
-	 * Терминал может в промежуточном состоянии. То есть, если терминал не
-	 * остановлен, это не гарантирует положительный результат вызова
-	 * {@link #started()}.
-	 * <p>
-	 * @return true если терминал остановлен, иначе false
-	 */
-	@Deprecated
-	public boolean stopped();
-	
-	/**
-	 * Проверить состояние подключения терминала.
-	 * <p>
-	 * @return true если терминал подключен, иначе false
-	 */
-	@Deprecated
-	public boolean connected();
-	
-	/**
-	 * Получить текущее состояние терминала.
-	 * <p>
-	 * @return состояние терминала
-	 */
-	@Deprecated
-	public TerminalState getTerminalState();
-	
-	/**
-	 * Получить тип события: при подключении к удаленной системе.
-	 * <p>
-	 * Данное событие сигнализирует о подключении терминала к удаленной системе.
-	 * Фактически данное событие должно рассматриваться программой как появление
-	 * технической возможности получения данных и выполнения транзакций. Каждая
-	 * реализация терминала должна реализовывать генерацию события данного
-	 * типа независимо от того, подразумевает протокол взаимодействия с
-	 * удаленной системой такое понятие как соединение или нет. Если соединение
-	 * не предусмотрено протоколом, терминал должен генерировать событие данного
-	 * типа сразу после старта терминала.
-	 * <p>
-	 * @return тип события
-	 */
-	@Deprecated
-	public EventType OnConnected();
-	
-	/**
-	 * Получить тип события: при отключении от удаленной системы.
-	 * <p>
-	 * Данное событие сигнализирует о разрыве соединения или запланированном
-	 * отключении от удаленной системы после того, как соединение было
-	 * установлено ранее. Каждая реализация терминала обязательно
-	 * предусматривает генерацию данного события, даже если протокол
-	 * взаимодействия не подразумевает наличие соединения. В этом случае,
-	 * терминал генерирует событие данного типа непосредственно перед остановом
-	 * терминала.  
-	 * <p>
-	 * @return тип события
-	 */
-	@Deprecated
-	public EventType OnDisconnected();
 
 	/**
-	 * Получить тип события: при запуске терминала.
-	 * <p>
-	 * Данное событие генерируется после успешного старта терминала. Фактически
-	 * данное событие должно рассматриваться как признание факта успешного
-	 * функционирование терминала. При этом техническая возможность получения
-	 * данных и исполнения транзакций не гарантируется, но подразумевается, что
-	 * теоретически такая возможность доступна - все подсистемы терминала
-	 * запущены, функционируют штатно и готовы принимать и обрабатывать данные
-	 * удаленной системы. Сам терминал при этом может находиться например в
-	 * состоянии открытия соединения с удаленной системой. 
-	 * <p>
-	 * @return тип события
-	 */
-	@Deprecated
-	public EventType OnStarted();
-
-	/**
-	 * Получить тип события: при останове терминала.
-	 * <p>
-	 * Данное событие сигнализирует о запланированном или экстренном останове
-	 * терминала после того, как он был запущен в работу. Получение данного
-	 * событие свидетельствует о том, что терминал находится в нерабочем
-	 * состоянии: никакие данные не поступают и не обрабатываются, транзакции
-	 * не могут быть выполнены, попытки установления соединения с удаленной
-	 * системой не выполняются. Попытки обращения к объектам терминала
-	 * в состоянии останова могут завершиться неопределенным результатом или
-	 * получением несогласованных данных (в случае экстренного останова).  
-	 * <p>
-	 * @return тип события
-	 */
-	@Deprecated
-	public EventType OnStopped();
-	
-	/**
-	 * Получить тип события: паническое состояние терминала.
-	 * <p>
-	 * Позволяет отлавливать события типа {@link PanicEvent}.
-	 * Данное событие сигнализирует о возникновении ситуации, когда возникает
-	 * проблема технического характера, которая не может быть решена
-	 * автоматически и по своему характеру может повлечь фатальные ошибки в
-	 * логике работы торговой системы. Подобные ситуации должны быть детально
-	 * рассмотрены и разрешены оператором. Например, восстановление соединения с
-	 * удаленной системой может быть выполнено автоматически и не относится
-	 * к паническому состоянию. Конечно это справедливо только в том случае,
-	 * если не нарушены установленные для терминала пределы, после которых
-	 * данная ситуация может рассматривается как неразрешимая. Но в другой
-	 * ситуации, например в случае невозможности связать одни объекты
-	 * бизнес-процесса с другими (позицию с инструментом, сделку с инструментом,
-	 * заявку с инструментом, стоп-заявку с порожденной заявкой и т.п.) по
-	 * причине отсутствия каких либо данных со стороны удаленной системы
-	 * (удаленная система не настроена должным образом), продолжение работы
-	 * может привести к потенциальными убытками. Как правило, после данного
-	 * события следует экстренный останов терминала. Каждая пользовательская
-	 * система в обязательном порядке должна информировать оператора о возникшей
-	 * проблеме всеми доступными способами, выполняя мониторинг событий данного
-	 * типа. 
-	 * <p>
-	 * @return тип события
-	 */
-	@Deprecated
-	public EventType OnPanic();
-
-	/**
-	 * Get event type: terminal is ready to work.
+	 * When terminal is ready to work.
 	 * <p>
 	 * @return event type
 	 */
-	@Deprecated
-	public EventType OnReady();
+	public EventType onTerminalReady();
 	
 	/**
-	 * Get vent type: terminal is unready.
+	 * When terminal is not ready to work.
 	 * <p>
 	 * @return event type
 	 */
-	@Deprecated
-	public EventType OnUnready();
+	public EventType onTerminalUnready();
 	
 	/**
 	 * Создать лимитную заявку.
@@ -188,13 +43,13 @@ public interface Terminal extends Starter, Scheduler {
 	 * метод {@link #placeOrder(Order)}.
 	 * <p>
 	 * @param account торговый счет
-	 * @param dir операция (направление заявки)
-	 * @param security инструмент
+	 * @param symbol инструмент
+	 * @param action операция (направление заявки)
 	 * @param qty количество
 	 * @param price цена
 	 * @return экземпляр заявки
 	 */
-	public Order createOrder(Account account, Direction dir, Security security,
+	public Order createOrder(Account account, Symbol symbol, OrderAction action,
 			long qty, double price);
 
 	/**
@@ -207,102 +62,48 @@ public interface Terminal extends Starter, Scheduler {
 	 * метод {@link #placeOrder(Order)}.
 	 * <p>
 	 * @param account торговый счет
-	 * @param dir операция (направление заявки)
-	 * @param security инструмент
+	 * @param symbol инструмент
+	 * @param action операция (направление заявки)
 	 * @param qty количество
 	 * @return экземпляр заявки
 	 */
-	public Order createOrder(Account account, Direction dir, Security security,
+	public Order createOrder(Account account, Symbol symbol, OrderAction action,
 			long qty);
-	
+		
 	/**
-	 * Создать лимитную заявку с условной активацией.
- 	 * <p>
-	 * Данный метод создает лимитную заявку с условной активацией. Новой заявке
-	 * автоматически назначается очередной номер, по которому можно обращаться к
-	 * заявке через терминал. В завершении генерируется событие о доступности
-	 * новой заявки. Для начала отслеживания условия активации следует
-	 * использовать метод {@link #placeOrder(Order)}.
+	 * Subscribe for security data.
 	 * <p>
-	 * @param account торговый счет
-	 * @param dir операция (направление заявки)
-	 * @param security инструмент
-	 * @param qty количество
-	 * @param price цена
-	 * @param activator активатор заявки
-	 * @return экземпляр заявки
-	 */
-	public Order createOrder(Account account, Direction dir, Security security,
-			long qty, double price, OrderActivator activator);
-	
-	/**
-	 * Создать рыночную заявку с условной активацией.
- 	 * <p>
-	 * Данный метод создает рыночную заявку с условной активацией. Новой заявке
-	 * автоматически назначается очередной номер, по которому можно обращаться к
-	 * заявке через терминал. В завершении генерируется событие о доступности
-	 * новой заявки. Для начала отслеживания условия активации следует
-	 * использовать метод {@link #placeOrder(Order)}.
-	 * <p>
-	 * @param account торговый счет
-	 * @param dir операция (направление заявки)
-	 * @param security инструмент
-	 * @param qty количество
-	 * @param activator активатор заявки
-	 * @return экземпляр заявки
-	 */
-	public Order createOrder(Account account, Direction dir, Security security,
-			long qty, OrderActivator activator);
-	
-	/**
-	 * Request for new security instance.
-	 * <p>
-	 * This method should be used to request required securities. Different
-	 * trading systems may work with securities in different ways. Some of them
-	 * may give an access to predefined set of securities. In this case such
-	 * call does not make sense. But some systems require initiate request to
-	 * get security updates. This method is universal way to ask for securities.
-	 * Use this method to request every security you want to work if you want
-	 * your program work with every terminal implementation.
+	 * This method should be used to request security data stream. Some trading
+	 * systems may require initial request to subscribe for security updates.
+	 * This method is universal way to ask terminal to subscribe for the data.
+	 * This method should be used to each security which will be used in a
+	 * program to get it available for work with every terminal implementation.
 	 * <p>
 	 * @param symbol - the symbol
 	 */
-	public void requestSecurity(Symbol symbol);
-	
-	/**
-	 * Тип события: Ошибка загрузки инструмента.
-	 * <p>
-	 * Данный тип события позволяет реагировать на возможные отклонения
-	 * запросов, выполненных посредством вызова метода
-	 * {@link #requestSecurity(Symbol)}.
-	 * <p>
-	 * @return тип события
-	 */
-	@Deprecated
-	public EventType OnRequestSecurityError();
-	
+	public void subscribe(Symbol symbol);
 
 	/**
-	 * Проверить наличие заявки.
+	 * Test that order exists.
 	 * <p>
-	 * @param id идентификатор заявки
-	 * @return true - есть заявка с таким идентификатором
+	 * @param id - the order ID
+	 * @return true if order with such identifier exists, false otherwise
 	 */
-	public boolean isOrderExists(int id);
+	public boolean isOrderExists(long id);
 	
 	/**
 	 * Получить список заявок.
 	 * <p>
 	 * @return список заявок
 	 */
-	public List<Order> getOrders();
+	public Set<Order> getOrders();
 	
 	/**
 	 * Получить количество заявок.
 	 * <p>
 	 * @return количество заявок
 	 */
-	public int getOrdersCount();
+	public int getOrderCount();
 	
 	/**
 	 * Получить заявку по идентификатору.
@@ -311,107 +112,99 @@ public interface Terminal extends Starter, Scheduler {
 	 * @return заявка
 	 * @throws OrderNotExistsException - TODO:
 	 */
-	public Order getOrder(int id) throws OrderException;
+	public Order getOrder(long id) throws OrderException;
 	
 	/**
 	 * Получить тип события: при поступлении информации о новой заявке.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderAvailable();
+	public EventType onOrderAvailable();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderCancelFailed();
+	public EventType onOrderCancelFailed();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderCancelled();
+	public EventType onOrderCancelled();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderChanged();
+	public EventType onOrderUpdate();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderDone();
+	public EventType onOrderDone();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderFailed();
+	public EventType onOrderFailed();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderFilled();
+	public EventType onOrderFilled();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderPartiallyFilled();
+	public EventType onOrderPartiallyFilled();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderRegistered();
+	public EventType onOrderRegistered();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderRegisterFailed();
+	public EventType onOrderRegisterFailed();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех заявок.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnOrderTrade();
+	public EventType onOrderDeal();
 
-	
 	/**
 	 * Проверить доступность информации о портфеле.
 	 * <p>
 	 * @param account идентификатор портфеля
 	 * @return true если информация доступна, иначе - false
 	 */
-	public boolean isPortfolioAvailable(Account account);
-	
-	/**
-	 * Получить тип события: при доступности информации по портфелю.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnPortfolioAvailable();
-	
+	public boolean isPortfolioExists(Account account);
+		
 	/**
 	 * Получить список доступных портфелей.
 	 * <p>
 	 * @return список портфелей
 	 */
-	public List<Portfolio> getPortfolios();
+	public Set<Portfolio> getPortfolios();
 	
 	/**
 	 * Получить портфель по идентификатору.
@@ -420,8 +213,7 @@ public interface Terminal extends Starter, Scheduler {
 	 * @return экземпляр портфеля
 	 * @throws PortfolioNotExistsException - TODO:
 	 */
-	public Portfolio getPortfolio(Account account)
-		throws PortfolioException;
+	public Portfolio getPortfolio(Account account) throws PortfolioException;
 	
 	/**
 	 * Получить портфель по-умолчанию.
@@ -436,40 +228,50 @@ public interface Terminal extends Starter, Scheduler {
 	public Portfolio getDefaultPortfolio() throws PortfolioException;
 	
 	/**
-	 * Перехватчик событий соответствующего типа от всех портфелей.
+	 * Get count of existing portfolios.
+	 * <p>
+	 * @return count of portfolios
+	 */
+	public int getPortfolioCount();
+	
+	/**
+	 * Получить тип события: при доступности информации по портфелю.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnPortfolioChanged();
-	
-	/**
-	 * Перехватчик событий соответствующего типа от всех портфелей.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnPositionAvailable();
-	
-	/**
-	 * Перехватчик событий соответствующего типа от всех портфелей.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnPositionChanged();
-	
-	/**
-	 * Получить количество доступных портфелей.
-	 * <p>
-	 * @return количество портфелей
-	 */
-	public int getPortfoliosCount();
+	public EventType onPortfolioAvailable();
 
-
+	/**
+	 * Перехватчик событий соответствующего типа от всех портфелей.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType onPortfolioUpdate();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех портфелей.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType onPositionAvailable();
+	
+	/**
+	 * Перехватчик событий соответствующего типа от всех портфелей.
+	 * <p>
+	 * @return тип события
+	 */
+	public EventType onPositionUpdate();
+	
+	public EventType onPositionChange();
+	
+	public EventType onPositionCurrentPriceChange();
+	
 	/**
 	 * Получить список доступных инструментов
 	 * <p>
 	 * @return список инструментов
 	 */
-	public List<Security> getSecurities();
+	public Set<Security> getSecurities();
 	
 	/**
 	 * Получить инструмент по дескриптору
@@ -495,28 +297,23 @@ public interface Terminal extends Starter, Scheduler {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnSecurityAvailable();
+	public EventType onSecurityAvailable();
 	
 	/**
 	 * Перехватчик событий соответствующего типа от всех инструментов.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnSecurityChanged();
+	public EventType onSecurityUpdate();
 	
-	/**
-	 * Перехватчик событий соответствующего типа от всех инструментов.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnSecurityTrade();
-	
+	public EventType onSecuritySessionUpdate();
+		
 	/**
 	 * Получить количество доступных инструментов.
 	 * <p>
 	 * @return количество инструментов
 	 */
-	public int getSecuritiesCount();
+	public int getSecurityCount();
 	
 	/**
 	 * Place order for execution.
@@ -535,7 +332,7 @@ public interface Terminal extends Starter, Scheduler {
 	public void cancelOrder(Order order) throws OrderException;
 	
 	/**
-	 * Lock object for updates.
+	 * Lock object.
 	 */
 	public void lock();
 	
@@ -543,5 +340,29 @@ public interface Terminal extends Starter, Scheduler {
 	 * Unlock object.
 	 */
 	public void unlock();
+	
+	/**
+	 * Check that terminal is closed.
+	 * <p>
+	 * @return true if terminal closed, false otherwise
+	 */
+	public boolean isClosed();
+	
+	/**
+	 * Start terminal.
+	 */
+	public void start();
+	
+	/**
+	 * Stop terminal.
+	 */
+	public void stop();
+	
+	/**
+	 * Check that terminal is started.
+	 * <p>
+	 * @return true if terminal started, false otherwise
+	 */
+	public boolean isStarted();
 
 }

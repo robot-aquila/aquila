@@ -3,10 +3,10 @@ package ru.prolib.aquila.core.data.timeframe;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.*;
 import org.threeten.extra.Interval;
-
-import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 
 public class TFMinutesTest {
 	private TFMinutes m1, m5, m7, m15, m241;
@@ -31,11 +31,11 @@ public class TFMinutesTest {
 	
 	@Test
 	public void testGetUnit() throws Exception {
-		assertEquals(TimeUnit.MINUTE, m1.getUnit());
-		assertEquals(TimeUnit.MINUTE, m5.getUnit());
-		assertEquals(TimeUnit.MINUTE, m7.getUnit());
-		assertEquals(TimeUnit.MINUTE, m15.getUnit());
-		assertEquals(TimeUnit.MINUTE, m241.getUnit());
+		assertEquals(TimeUnit.MINUTES, m1.getUnit());
+		assertEquals(TimeUnit.MINUTES, m5.getUnit());
+		assertEquals(TimeUnit.MINUTES, m7.getUnit());
+		assertEquals(TimeUnit.MINUTES, m15.getUnit());
+		assertEquals(TimeUnit.MINUTES, m241.getUnit());
 	}
 	
 	@Test

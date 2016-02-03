@@ -1,43 +1,48 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.CommonModel.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
 import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.core.utils.*;
+import ru.prolib.aquila.core.data.OrderField;
 
 /**
  * Terminal model implementation.
- * <p>
- * Common terminal functionality implementation.
  */
 public class TerminalImpl implements EditableTerminal {
-	private static Logger logger;
 	private final Lock lock;
-	private volatile TerminalState state = TerminalState.STOPPED;
-	private final EventSystem es;
-	private final Securities securities;
-	private final Portfolios portfolios;
-	private final Orders orders;
-	private final StarterQueue starter;
+	private final EventQueue queue;
+	private final Map<Symbol, EditableSecurity> securities;
+	private final Map<Account, EditablePortfolio> portfolios;
+	private EditablePortfolio defaultPortfolio;
+	private final Map<Long, EditableOrder> orders;
 	private final Scheduler scheduler;
-	private final TerminalEventDispatcher dispatcher;
-	private final TerminalController controller;
-	private final OrderProcessor orderProcessor;
 	private final String terminalID;
 	private final DataProvider dataProvider;
+	private final ObjectFactory objectFactory;
+	private final EventType onOrderAvailable, onOrderCancelFailed,
+		onOrderCancelled, onOrderDeal, onOrderDone, onOrderFailed,
+		onOrderFilled, onOrderPartiallyFilled, onOrderRegistered,
+		onOrderRegisterFailed, onOrderUpdate, onPortfolioAvailable,
+		onPortfolioUpdate, onPositionAvailable, onPositionChange,
+		onPositionCurrentPriceChange, onPositionUpdate, onSecurityAvailable,
+		onSecuritySessionUpdate, onSecurityUpdate, onTerminalReady,
+		onTerminalUnready;
+	private boolean closed = false;
+	private boolean started = false;
 	
-	static {
-		logger = LoggerFactory.getLogger(TerminalImpl.class);
+	private static String getID(TerminalImpl terminal, String suffix) {
+		return String.format("%s.%s", terminal.terminalID, suffix);
+	}
+	
+	private EventType newEventType(String suffix) {
+		return new EventTypeImpl(getID(this, suffix));
 	}
 	
 	/**
@@ -48,519 +53,336 @@ public class TerminalImpl implements EditableTerminal {
 	public TerminalImpl(TerminalParams params) {
 		super();
 		this.lock = new ReentrantLock();
-		this.controller = params.getController();
-		this.dispatcher = params.getEventDispatcher();
-		this.securities = params.getSecurityRepository();
-		this.portfolios = params.getPortfolioRepository();
-		this.orders = params.getOrderRepository();
-		this.starter = params.getStarter();
-		this.scheduler = params.getScheduler();
-		this.es = params.getEventSystem();
-		this.orderProcessor = params.getOrderProcessor();
 		this.terminalID = params.getTerminalID();
+		this.queue = params.getEventQueue();
+		this.scheduler = params.getScheduler();
+		this.objectFactory = params.getObjectFactory();
 		this.dataProvider = params.getDataProvider();
+		this.securities = new HashMap<Symbol, EditableSecurity>();
+		this.portfolios = new HashMap<Account, EditablePortfolio>();
+		this.orders = new HashMap<Long, EditableOrder>();
+		onOrderAvailable = newEventType("ORDER_AVAILABLE");
+		onOrderCancelFailed = newEventType("ORDER_CANCEL_FAILED");
+		onOrderCancelled = newEventType("ORDER_CANCELLED");
+		onOrderDeal = newEventType("ORDER_DEAL");
+		onOrderDone = newEventType("ORDER_DONE");
+		onOrderFailed = newEventType("ORDER_FAILED");
+		onOrderFilled = newEventType("ORDER_FILLED");
+		onOrderPartiallyFilled = newEventType("ORDER_PARTIALLY_FILLED");
+		onOrderRegistered = newEventType("ORDER_REGISTERED");
+		onOrderRegisterFailed = newEventType("ORDER_REGISTER_FAILED");
+		onOrderUpdate = newEventType("ORDER_UPDATE");
+		onPortfolioAvailable = newEventType("PORTFOLIO_AVAILABLE");
+		onPortfolioUpdate = newEventType("PORTFOLIO_UPDATE");
+		onPositionAvailable = newEventType("POSITION_AVAILABLE");
+		onPositionChange = newEventType("POSITION_CHANGE");
+		onPositionCurrentPriceChange = newEventType("POSITION_CURRENT_PRICE_CHANGE");
+		onPositionUpdate = newEventType("POSITION_UPDATE");
+		onSecurityAvailable = newEventType("SECURITY_AVAILABLE");
+		onSecuritySessionUpdate = newEventType("SECURITY_SESSION_UPDATE");
+		onSecurityUpdate = newEventType("SECURITY_UPDATE");
+		onTerminalReady = newEventType("TERMINAL_READY");
+		onTerminalUnready = newEventType("TERMINAL_UNREADY");
 	}
 	
-	public DataProvider getDataProvider() {
-		return dataProvider;
+	@Override
+	public EventQueue getEventQueue() {
+		return queue;
 	}
 	
 	@Override
 	public String getTerminalID() {
 		return terminalID;
 	}
-	
+		
 	@Override
-	public OrderProcessor getOrderProcessor() {
-		return orderProcessor;
-	}
-	
-	@Override
-	public StarterQueue getStarter() {
-		return starter;
-	}
-	
-	@Override
-	public List<Security> getSecurities() {
-		return securities.getSecurities();
-	}
-
-	@Override
-	public Security getSecurity(Symbol symbol) throws SecurityException {
-		return securities.getSecurity(symbol);
-	}
-
-	@Override
-	public boolean isSecurityExists(Symbol symbol) {
-		return securities.isSecurityExists(symbol);
-	}
-
-	@Override
-	public EventType OnSecurityAvailable() {
-		return securities.OnSecurityAvailable();
-	}
-
-	@Override
-	public List<Portfolio> getPortfolios() {
-		return portfolios.getPortfolios();
-	}
-
-	@Override
-	public Portfolio getPortfolio(Account account)
-			throws PortfolioException
-	{
-		return portfolios.getPortfolio(account);
-	}
-
-	@Override
-	public boolean isPortfolioAvailable(Account account) {
-		return portfolios.isPortfolioAvailable(account);
-	}
-
-	@Override
-	public EventType OnPortfolioAvailable() {
-		return portfolios.OnPortfolioAvailable();
-	}
-
-	@Override
-	public synchronized void start() throws StarterException {
-		if ( state == TerminalState.STOPPED ) {
-			setTerminalState(TerminalState.STARTING);
-			logger.debug("Run start sequence");
-			controller.runStartSequence(this);
-		} else if ( state == TerminalState.STARTING
-				 || state == TerminalState.STOPPING )
-		{
-			logger.warn("start(): terminal in intermediate state: {}", state);
-		} else {
-			throw new StarterException("Cannot start terminal: " + state);
-		}
-	}
-
-	@Override
-	public synchronized void stop() throws StarterException {
-		if (state == TerminalState.STARTED||state == TerminalState.CONNECTED) {
-			setTerminalState(TerminalState.STOPPING);
-			logger.debug("Run stop sequence");
-			controller.runStopSequence(this);
-		} else if ( state == TerminalState.STARTING
-				 || state == TerminalState.STOPPING )
-		{
-			logger.warn("stop(): terminal in intermediate state: {}", state);
-		} else {
-			throw new StarterException("Cannot stop terminal: " + state);
-		}
-	}
-
-	@Override
-	public Portfolio getDefaultPortfolio()
-		throws PortfolioException
-	{
-		return portfolios.getDefaultPortfolio();
-	}
-
-	@Override
-	public boolean isOrderExists(int id) {
-		return orders.isOrderExists(id);
-	}
-
-	@Override
-	public List<Order> getOrders() {
-		return orders.getOrders();
-	}
-
-	@Override
-	public Order getOrder(int id) throws OrderException {
-		return orders.getOrder(id);
-	}
-
-	@Override
-	public EventType OnOrderAvailable() {
-		return orders.OnOrderAvailable();
-	}
-
-	@Override
-	public void placeOrder(Order order) throws OrderException {
-		synchronized ( order ) {
-			OrderStatus status = order.getStatus();
-			EditableOrder o = (EditableOrder) order;
-			if ( status == OrderStatus.PENDING ) {
-				OrderActivator activator = o.getActivator();
-				if ( activator != null ) {
-					activator.start(o);
-					o.setStatus(OrderStatus.CONDITION);
-					orders.fireEvents(o);
-					return;
-				}
-			} else if ( status == OrderStatus.CONDITION ) {
-				order.getActivator().stop();
-			}
-			orderProcessor.placeOrder(this, order);
-		}
-	}
-
-	@Override
-	public synchronized void cancelOrder(Order order) throws OrderException {
-		synchronized ( order ) {
-			EditableOrder o = (EditableOrder) order;
-			OrderStatus status = o.getStatus();
-			if ( status == OrderStatus.PENDING ) {
-				o.setStatus(OrderStatus.CANCELLED);
-				o.setLastChangeTime(getCurrentTime());
-				orders.fireEvents(o);
-			} else if ( status == OrderStatus.CONDITION ) {
-				o.getActivator().stop();
-				o.setStatus(OrderStatus.CANCELLED);
-				o.setLastChangeTime(getCurrentTime());
-				orders.fireEvents(o);
-			} else {
-				synchronized ( this ) {
-					orderProcessor.cancelOrder(this, order);
-				}
-			}
-		}
-	}
-
-	@Override
-	public int getOrdersCount() {
-		return orders.getOrdersCount();
-	}
-
-	@Override
-	public EventType OnOrderCancelFailed() {
-		return orders.OnOrderCancelFailed();
-	}
-
-	@Override
-	public EventType OnOrderCancelled() {
-		return orders.OnOrderCancelled();
-	}
-
-	@Override
-	public EventType OnOrderChanged() {
-		return orders.OnOrderChanged();
-	}
-
-	@Override
-	public EventType OnOrderDone() {
-		return orders.OnOrderDone();
-	}
-
-	@Override
-	public EventType OnOrderFailed() {
-		return orders.OnOrderFailed();
-	}
-
-	@Override
-	public EventType OnOrderFilled() {
-		return orders.OnOrderFilled();
-	}
-
-	@Override
-	public EventType OnOrderPartiallyFilled() {
-		return orders.OnOrderPartiallyFilled();
-	}
-
-	@Override
-	public EventType OnOrderRegistered() {
-		return orders.OnOrderRegistered();
-	}
-
-	@Override
-	public EventType OnOrderRegisterFailed() {
-		return orders.OnOrderRegisterFailed();
-	}
-
-	@Override
-	public EventType OnSecurityChanged() {
-		return securities.OnSecurityChanged();
-	}
-
-	@Override
-	public EventType OnSecurityTrade() {
-		return securities.OnSecurityTrade();
-	}
-
-	@Override
-	public EventType OnPortfolioChanged() {
-		return portfolios.OnPortfolioChanged();
-	}
-
-	@Override
-	public EventType OnPositionAvailable() {
-		return portfolios.OnPositionAvailable();
-	}
-
-	@Override
-	public EventType OnPositionChanged() {
-		return portfolios.OnPositionChanged();
-	}
-
-	@Override
-	public int getSecuritiesCount() {
-		return securities.getSecuritiesCount();
-	}
-
-	@Override
-	public int getPortfoliosCount() {
-		return portfolios.getPortfoliosCount();
-	}
-
-	@Override
-	public void fireEvents(EditableOrder order) {
-		orders.fireEvents(order);
-	}
-
-	@Override
-	public EditableOrder getEditableOrder(int id)
-		throws OrderNotExistsException
-	{
-		return orders.getEditableOrder(id);
-	}
-
-	@Override
-	public void purgeOrder(int id) {
-		orders.purgeOrder(id);
-	}
-
-	@Override
-	public void fireEvents(EditablePortfolio portfolio) {
-		portfolios.fireEvents(portfolio);
-	}
-
-	@Override
-	public EditablePortfolio getEditablePortfolio(Account account) {
-		return portfolios.getEditablePortfolio(this, account);
-	}
-
-	@Override
-	public void setDefaultPortfolio(EditablePortfolio portfolio) {
-		portfolios.setDefaultPortfolio(portfolio);
-	}
-
-	@Override
-	public EditableSecurity getEditableSecurity(Symbol symbol) {
-		return securities.getEditableSecurity(this, symbol);
-	}
-
-	@Override
-	public void fireEvents(EditableSecurity security) {
-		securities.fireEvents(security);
-	}
-
-	@Override
-	public EventType OnConnected() {
-		return dispatcher.OnConnected();
-	}
-
-	@Override
-	public EventType OnDisconnected() {
-		return dispatcher.OnDisconnected();
-	}
-
-	@Override
-	public void fireTerminalConnectedEvent() {
-		markTerminalConnected();
-	}
-	
-	@Override
-	public synchronized void markTerminalConnected() {
-		if ( state == TerminalState.STARTED ) {
-			state = TerminalState.CONNECTED;
-			dispatcher.fireConnected(this);
-			logger.info("Terminal connected");
-		} else {
-			logger.debug("Skip connected event request cuz {}", state);
-		}		
-	}
-
-	@Override
-	public void fireTerminalDisconnectedEvent() {
-		markTerminalDisconnected();
-	}
-	
-	@Override
-	public synchronized void markTerminalDisconnected() {
-		if ( state == TerminalState.CONNECTED
-		  || state == TerminalState.STOPPING )
-		{
-			if ( state == TerminalState.CONNECTED ) {
-				setTerminalState(TerminalState.STARTED);
-			}
-			dispatcher.fireDisconnected(this);
-			logger.info("Terminal disconnected");
-		} else {
-			logger.debug("Skip disconnected event request cuz {}", state);
-		}		
-	}
-	
-	@Override
-	public void fireTerminalStartedEvent() {
-		dispatcher.fireStarted();
-	}
-	
-	@Override
-	public void fireTerminalStoppedEvent() {
-		dispatcher.fireStopped();
-	}
-
-	@Override
-	public EventType OnStarted() {
-		return dispatcher.OnStarted();
-	}
-
-	@Override
-	public EventType OnStopped() {
-		return dispatcher.OnStopped();
-	}
-
-	@Override
-	public EventType OnPanic() {
-		return dispatcher.OnPanic();
-	}
-
-	@Override
-	public void firePanicEvent(int code, String msgId) {
-		firePanicEvent(code, msgId, new Object[] { });
-	}
-
-	@Override
-	public void firePanicEvent(int code, String msgId, Object[] args) {
-		if ( started() ) {
-			logger.error("PANIC[" + code + "]: " + msgId, args);
-			dispatcher.firePanic(code, msgId, args);
-			try {
-				stop();
-			} catch ( StarterException e ) {
-				logger.error("Unexpected exception (ignore): ", e);
-			}
-		}
-	}
-
-	@Override
-	public synchronized boolean stopped() {
-		return state == TerminalState.STOPPED;
-	}
-
-	@Override
-	public synchronized boolean connected() {
-		return state == TerminalState.CONNECTED;
-	}
-	
-	@Override
-	public synchronized boolean started() {
-		return state == TerminalState.CONNECTED
-			|| state == TerminalState.STARTED;
-	}
-
-	@Override
-	public synchronized TerminalState getTerminalState() {
-		return state;
-	}
-
-	@Override
-	public synchronized void setTerminalState(TerminalState state) {
-		logger.debug("Change terminal state to {}", state);
-		this.state = state;
-	}
-
-	@Override
-	public Instant getCurrentTime() {
-		return scheduler.getCurrentTime();
-	}
-
-	@Override
-	public EventSystem getEventSystem() {
-		return es;
-	}
-
-	@Override
-	public EditableOrder createOrder() {
-		return orders.createOrder(this);
-	}
-
-	@Override
-	public EventType OnOrderTrade() {
-		return orders.OnOrderTrade();
-	}
-
-	@Override
-	public Order createOrder(Account account, Direction dir, Security security,
-			long qty, double price)
-	{
-		return createOrder(account, dir, security, qty, price, null);
-	}
-
-	@Override
-	public Order createOrder(Account account, Direction dir, Security security,
-			long qty)
-	{
-		return createOrder(account, dir, security, qty, null);
-	}
-	
-	@Override
-	public Order createOrder(Account account, Direction dir, Security security,
-			long qty, double price, OrderActivator activator)
-	{
-		EditableOrder order = createOrder();
-		order.setTime(getCurrentTime());
-		order.setType(OrderType.LIMIT);
-		order.setAccount(account);
-		order.setDirection(dir);
-		order.setSymbol(security.getSymbol());
-		order.setQty(qty);
-		order.setQtyRest(qty);
-		order.setPrice(price);
-		if ( activator != null ) {
-			order.setActivator(activator);
-		}
-		order.resetChanges();
-		orders.fireEvents(order);
-		return order;
-	}
-
-	@Override
-	public Order createOrder(Account account, Direction dir, Security security,
-			long qty, OrderActivator activator)
-	{
-		EditableOrder order = createOrder();
-		order.setTime(getCurrentTime());
-		order.setType(OrderType.MARKET);
-		order.setAccount(account);
-		order.setDirection(dir);
-		order.setSymbol(security.getSymbol());
-		order.setQty(qty);
-		order.setQtyRest(qty);
-		if ( activator != null ) {
-			order.setActivator(activator);
-		}
-		order.resetChanges();
-		orders.fireEvents(order);
-		return order;
-	}
-
-	@Override
-	public void requestSecurity(Symbol symbol) {
+	public Set<Security> getSecurities() {
 		lock.lock();
 		try {
-			if ( ! isSecurityExists(symbol) ) {
-				EditableSecurity security = getEditableSecurity(symbol);
-				dataProvider.subscribeForStateUpdates(security);
-				dataProvider.subscribeForTradeUpdates(security);
-			}
+			return new HashSet<Security>(securities.values());
 		} finally {
 			lock.unlock();
 		}
 	}
 
 	@Override
-	public EventType OnRequestSecurityError() {
-		return dispatcher.OnRequestSecurityError();
+	public Security getSecurity(Symbol symbol) throws SecurityException {
+		lock.lock();
+		try {
+			EditableSecurity security = securities.get(symbol);
+			if ( security == null ) {
+				throw new SecurityNotExistsException(symbol);
+			}
+			return security;
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
-	public void fireSecurityRequestError(Symbol symbol, int errorCode, String errorMsg) {
-		dispatcher.fireSecurityRequestError(symbol, errorCode, errorMsg);
+	public boolean isSecurityExists(Symbol symbol) {
+		lock.lock();
+		try {
+			return securities.containsKey(symbol);
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public int getSecurityCount() {
+		lock.lock();
+		try {
+			return securities.size();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public EditableSecurity getEditableSecurity(Symbol symbol) {
+		lock.lock();
+		try {
+			EditableSecurity security = securities.get(symbol);
+			if ( security == null ) {
+				security = objectFactory.createSecurity(this, symbol);
+				securities.put(symbol, security);
+				security.onAvailable().addAlternateType(onSecurityAvailable);
+				security.onSessionUpdate().addAlternateType(onSecuritySessionUpdate);
+				security.onUpdate().addAlternateType(onSecurityUpdate);
+			}
+			return security;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Set<Portfolio> getPortfolios() {
+		lock.lock();
+		try {
+			return new HashSet<Portfolio>(portfolios.values());
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Portfolio getPortfolio(Account account) throws PortfolioException {
+		lock.lock();
+		try {
+			EditablePortfolio portfolio = portfolios.get(account);
+			if ( portfolio == null ) {
+				throw new PortfolioNotExistsException(account);
+			}
+			return portfolio;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public boolean isPortfolioExists(Account account) {
+		lock.lock();
+		try {
+			return portfolios.containsKey(account);
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public EditablePortfolio getEditablePortfolio(Account account) {
+		lock.lock();
+		try {
+			if ( closed ) {
+				throw new IllegalStateException();
+			}
+			EditablePortfolio portfolio = portfolios.get(account);
+			if ( portfolio == null ) {
+				portfolio = objectFactory.createPortfolio(this, account);
+				portfolios.put(account, portfolio);
+				portfolio.onAvailable().addAlternateType(onPortfolioAvailable);
+				portfolio.onPositionAvailable().addAlternateType(onPositionAvailable);
+				portfolio.onPositionChange().addAlternateType(onPositionChange);
+				portfolio.onPositionCurrentPriceChange().addAlternateType(onPositionCurrentPriceChange);
+				portfolio.onPositionUpdate().addAlternateType(onPositionUpdate);
+				portfolio.onUpdate().addAlternateType(onPortfolioUpdate);
+				dataProvider.subscribeStateUpdates(portfolio);
+			}
+			if ( defaultPortfolio == null ) {
+				defaultPortfolio = portfolio;
+			}
+			return portfolio;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public int getPortfolioCount() {
+		lock.lock();
+		try {
+			return portfolios.size();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public Portfolio getDefaultPortfolio() throws PortfolioException {
+		lock.lock();
+		try {
+			if ( defaultPortfolio == null ) {
+				throw new PortfolioNotExistsException();
+			}
+			return defaultPortfolio;			
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void setDefaultPortfolio(EditablePortfolio portfolio) {
+		lock.lock();
+		try {
+			defaultPortfolio = portfolio;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public boolean isOrderExists(long id) {
+		lock.lock();
+		try {
+			return orders.containsKey(id);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Set<Order> getOrders() {
+		lock.lock();
+		try {
+			return new HashSet<Order>(orders.values());
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Order getOrder(long id) throws OrderException {
+		return getEditableOrder(id);
+	}
+	
+	@Override
+	public EditableOrder getEditableOrder(long id) throws OrderNotExistsException {
+		lock.lock();
+		try {
+			EditableOrder order = orders.get(id);
+			if ( order == null ) {
+				throw new OrderNotExistsException(id);
+			}
+			return order;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public EditableOrder createOrder(Account account, Symbol symbol) {
+		lock.lock();
+		try {
+			if ( closed ) {
+				throw new IllegalStateException();
+			}
+			long orderID = dataProvider.getNextOrderID();
+			EditableOrder order = objectFactory.createOrder(this,
+					account, symbol, orderID);
+			orders.put(orderID, order);
+			updateOrderStatus(order, OrderStatus.PENDING);
+			return order;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public int getOrderCount() {
+		lock.lock();
+		try {
+			return orders.size();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public void placeOrder(Order order) throws OrderException {
+		lock.lock();
+		order.lock();
+		try {
+			if ( closed ) {
+				throw new IllegalStateException();
+			}
+			dataProvider.registerNewOrder(toEditable(order));
+		} finally {
+			order.unlock();
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void cancelOrder(Order order) throws OrderException {
+		lock.lock();
+		order.lock();
+		try {
+			if ( closed ) {
+				throw new IllegalStateException();
+			}
+			dataProvider.cancelOrder(toEditable(order));
+		} finally {
+			order.unlock();
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public Order createOrder(Account account, Symbol symbol, OrderAction action,
+			long qty, double price)
+	{
+		return createOrder(account, symbol, action, OrderType.LIMIT, qty, price,
+				null);
+	}
+
+	@Override
+	public Order createOrder(Account account, Symbol symbol, OrderAction action,
+			long qty)
+	{
+		return createOrder(account, symbol, action, OrderType.MARKET, qty, null,
+				null);
+	}
+
+	@Override
+	public void subscribe(Symbol symbol) {
+		lock.lock();
+		try {
+			if ( ! isSecurityExists(symbol) ) {
+				EditableSecurity security = getEditableSecurity(symbol);
+				dataProvider.subscribeStateUpdates(security);
+				dataProvider.subscribeLevel1Data(security);
+				dataProvider.subscribeLevel2Data(security);
+			}
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public Instant getCurrentTime() {
+		return scheduler.getCurrentTime();
 	}
 
 	@Override
@@ -569,9 +391,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public TaskHandler schedule(Runnable task, Instant firstTime,
-			long period)
-	{
+	public TaskHandler schedule(Runnable task, Instant firstTime, long period) {
 		return scheduler.schedule(task, firstTime, period);
 	}
 
@@ -586,98 +406,22 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public TaskHandler scheduleAtFixedRate(Runnable task,
-			Instant firstTime, long period)
-	{
+	public TaskHandler scheduleAtFixedRate(Runnable task, Instant firstTime, long period) {
 		return scheduler.scheduleAtFixedRate(task, firstTime, period);		
 	}
 
 	@Override
-	public TaskHandler scheduleAtFixedRate(Runnable task, long delay,
-			long period)
-	{
+	public TaskHandler scheduleAtFixedRate(Runnable task, long delay, long period) {
 		return scheduler.scheduleAtFixedRate(task, delay, period);
 	}
 	
 	/**
-	 * Получить планировщик задач.
+	 * Get scheduler.
 	 * <p>
-	 * @return планировщик
+	 * @return scheduler
 	 */
 	public Scheduler getScheduler() {
 		return scheduler;
-	}
-	
-	/** 
-	 * Получить контроллер терминала.
-	 * <p>
-	 * @return контроллер терминала
-	 */
-	public TerminalController getTerminalController() {
-		return controller;
-	}
-	
-	/**
-	 * Получить диспетчер событий терминала.
-	 * <p>
-	 * @return диспетчер событий
-	 */
-	public TerminalEventDispatcher getTerminalEventDispatcher() {
-		return dispatcher;
-	}
-	
-	/**
-	 * Получить хранилище инструментов.
-	 * <p>
-	 * @return хранилище инструментов
-	 */
-	public Securities getSecurityStorage() {
-		return securities;
-	}
-	
-	/**
-	 * Получить хранилище портфелей.
-	 * <p>
-	 * @return хранилище портфелей
-	 */
-	public Portfolios getPortfolioStorage() {
-		return portfolios;
-	}
-	
-	/**
-	 * Получить хранилище заявок.
-	 * <p>
-	 * @return хранилище заявок
-	 */
-	public Orders getOrderStorage() {
-		return orders;
-	}
-
-	@Override
-	public EventType OnReady() {
-		return dispatcher.OnReady();
-	}
-
-	@Override
-	public EventType OnUnready() {
-		return dispatcher.OnUnready();
-	}
-
-	@Override
-	public void fireTerminalReady() {
-		logger.debug("Terminal marked as ready");
-		dispatcher.fireReady();
-	}
-
-	@Override
-	public void fireTerminalUnready() {
-		logger.debug("Terminal marked as unready");
-		dispatcher.fireUnready();
-	}
-
-	@Override
-	public Counter getOrderIdSequence() {
-		return orders.getIdSequence();
 	}
 
 	@Override
@@ -692,7 +436,247 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public void close() {
-		scheduler.close();
+		lock.lock();
+		try {
+			if ( closed ) {
+				return;
+			}
+			if ( started ) {
+				stop();
+			}
+			scheduler.close();
+			for ( EditableOrder order : orders.values() ) {
+				order.close();
+			}
+			orders.clear();
+			for ( EditableSecurity security : securities.values() ) {
+				security.close();
+			}
+			securities.clear();
+			for ( EditablePortfolio portfolio : portfolios.values() ) {
+				portfolio.close();
+			}
+			portfolios.clear();
+			onTerminalReady.removeAlternates();
+			onTerminalReady.removeListeners();
+			onTerminalUnready.removeAlternates();
+			onTerminalUnready.removeListeners();
+		} finally {
+			closed = true;
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public EventType onTerminalReady() {
+		return onTerminalReady;
+	}
+
+	@Override
+	public EventType onTerminalUnready() {
+		return onTerminalUnready;
+	}
+
+	@Override
+	public EventType onOrderAvailable() {
+		return onOrderAvailable;
+	}
+
+	@Override
+	public EventType onOrderCancelFailed() {
+		return onOrderCancelFailed;
+	}
+
+	@Override
+	public EventType onOrderCancelled() {
+		return onOrderCancelled;
+	}
+
+	@Override
+	public EventType onOrderUpdate() {
+		return onOrderUpdate;
+	}
+
+	@Override
+	public EventType onOrderDone() {
+		return onOrderDone;
+	}
+
+	@Override
+	public EventType onOrderFailed() {
+		return onOrderFailed;
+	}
+
+	@Override
+	public EventType onOrderFilled() {
+		return onOrderFilled;
+	}
+
+	@Override
+	public EventType onOrderPartiallyFilled() {
+		return onOrderPartiallyFilled;
+	}
+
+	@Override
+	public EventType onOrderRegistered() {
+		return onOrderRegistered;
+	}
+
+	@Override
+	public EventType onOrderRegisterFailed() {
+		return onOrderRegisterFailed;
+	}
+
+	@Override
+	public EventType onOrderDeal() {
+		return onOrderDeal;
+	}
+
+	@Override
+	public EventType onPortfolioAvailable() {
+		return onPortfolioAvailable;
+	}
+
+	@Override
+	public EventType onPortfolioUpdate() {
+		return onPortfolioUpdate;
+	}
+
+	@Override
+	public EventType onPositionAvailable() {
+		return onPositionAvailable;
+	}
+
+	@Override
+	public EventType onPositionUpdate() {
+		return onPositionUpdate;
+	}
+
+	@Override
+	public EventType onPositionChange() {
+		return onPositionChange;
+	}
+
+	@Override
+	public EventType onPositionCurrentPriceChange() {
+		return onPositionCurrentPriceChange;
+	}
+
+	@Override
+	public EventType onSecurityAvailable() {
+		return onSecurityAvailable;
+	}
+
+	@Override
+	public EventType onSecurityUpdate() {
+		return onSecurityUpdate;
+	}
+
+	@Override
+	public EventType onSecuritySessionUpdate() {
+		return onSecuritySessionUpdate;
+	}
+	
+	public DataProvider getDataProvider() {
+		return dataProvider;
+	}
+	
+	public ObjectFactory getObjectFactory() {
+		return objectFactory;
+	}
+	
+	@Override
+	public boolean isClosed() {
+		lock.lock();
+		try {
+			return closed;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public boolean isStarted() {
+		lock.lock();
+		try {
+			return started;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void start() {
+		lock.lock();
+		try {
+			if ( closed || started ) {
+				throw new IllegalStateException();
+			}
+			started = true;
+			dataProvider.subscribeRemoteOrders(this);
+			queue.enqueue(onTerminalReady, new TerminalEventFactory(this));
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void stop() {
+		lock.lock();
+		try {
+			if ( ! started ) {
+				return;
+			}
+			started = false;
+			dataProvider.unsubscribeRemoteOrders(this);
+			queue.enqueue(onTerminalUnready, new TerminalEventFactory(this));
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	static class TerminalEventFactory implements EventFactory {
+		private final Terminal terminal;
+		
+		TerminalEventFactory(Terminal terminal) {
+			this.terminal = terminal;
+		}
+
+		@Override
+		public Event produceEvent(EventType type) {
+			return new TerminalEvent(type, terminal);
+		}
+		
+	}
+	
+	private void updateOrderStatus(EditableOrder order, OrderStatus status) {
+		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
+		tokens.put(OrderField.STATUS, status);
+		order.update(tokens);
+	}
+	
+	private EditableOrder createOrder(Account account, Symbol symbol,
+			OrderAction action, OrderType type, Long volume, Double price,
+			String comment)
+	{
+		EditableOrder order = createOrder(account, symbol);
+		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
+		tokens.put(OrderField.TYPE, type);
+		tokens.put(OrderField.ACTION, action);
+		tokens.put(OrderField.INITIAL_VOLUME, volume);
+		tokens.put(OrderField.CURRENT_VOLUME, volume);
+		tokens.put(OrderField.PRICE, price);
+		tokens.put(OrderField.COMMENT, comment);
+		order.update(tokens);
+		return order;
+	}
+	
+	private EditableOrder toEditable(Order order) throws OrderException {
+		EditableOrder dummy = orders.get(order.getID());
+		if ( order != dummy ) {
+			throw new OrderOwnershipException();
+		}
+		return dummy;
 	}
 
 }

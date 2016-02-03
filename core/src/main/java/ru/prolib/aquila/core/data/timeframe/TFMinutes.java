@@ -6,10 +6,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
 import org.threeten.extra.Interval;
 
-import ru.prolib.aquila.core.BusinessEntities.TimeUnit;
 import ru.prolib.aquila.core.data.TimeFrame;
 
 /**
@@ -51,7 +51,7 @@ public class TFMinutes implements TimeFrame {
 
 	@Override
 	public TimeUnit getUnit() {
-		return TimeUnit.MINUTE;
+		return TimeUnit.MINUTES;
 	}
 
 	@Override

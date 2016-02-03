@@ -1,451 +1,291 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
-import java.util.*;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.*;
+import ru.prolib.aquila.core.data.Container;
+import ru.prolib.aquila.core.data.ContainerImpl;
+import ru.prolib.aquila.core.data.OrderField;
 
 /**
- * Заявка.
+ * Order.
  */
-public class OrderImpl extends EditableImpl implements EditableOrder {
-	public static final int VERSION = 0x06;
-	private Account account;
-	private Symbol symbol;
-	private Direction direction;
-	private Integer id;
-	private Double price;
-	private Long qty;
-	private Long qtyRest;
-	private OrderStatus status = OrderStatus.PENDING, prevStatus;
-	private OrderType type;
-	private Double execVolume = 0.0d;
-	private Double avgExecPrice = null;
-	private final List<OrderStateHandler> stateHandlers;
-	private final Terminal terminal;
-	private Instant time,lastChangeTime;
-	private final LinkedList<Trade> trades = new LinkedList<Trade>();
-	private final OrderSystemInfo systemInfo = new OrderSystemInfo();
-	private OrderActivator activator;
-	private String comment = "";
-	private final OrderEventDispatcher dispatcher;
+public class OrderImpl extends ContainerImpl implements EditableOrder {
+	private static final int[] TOKENS_FOR_AVAILABILITY = {
+		OrderField.ACTION,
+		OrderField.TYPE,
+		OrderField.STATUS,
+		OrderField.INITIAL_VOLUME,
+		OrderField.CURRENT_VOLUME,
+	};
+
+	private Terminal terminal;
+	private final Account account;
+	private final Symbol symbol;
+	private final long id;
+	private final EventType onCancelFailed, onCancelled, onDone, onFailed,
+		onFilled, onPartiallyFilled, onRegistered, onRegisterFailed, onDeal;
 	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param dispatcher диспетчер событий
-	 * @param stateHandlers набор генераторов событий 
-	 * @param terminal терминал заявки
-	 */
-	public OrderImpl(OrderEventDispatcher dispatcher,
-			List<OrderStateHandler> stateHandlers, Terminal terminal)
+	private static String getID(Terminal terminal, Account account,
+			Symbol symbol, long id)
 	{
-		super();
-		this.dispatcher = dispatcher;
-		this.stateHandlers = stateHandlers;
+		return String.format("%s.%s[%s].ORDER#%d", terminal.getTerminalID(),
+				account, symbol, id);
+	}
+	
+	private static String getID(Terminal terminal, Account account,
+			Symbol symbol, long id, String suffix)
+	{
+		return getID(terminal, account, symbol, id) + "." + suffix;
+	}
+	
+	private EventType newEventType(String suffix) {
+		return new EventTypeImpl(getID(terminal, account, symbol, id, suffix));
+	}
+	
+	public OrderImpl(EditableTerminal terminal, Account account,
+			Symbol symbol, long id, ContainerImpl.Controller controller)
+	{
+		super(terminal.getEventQueue(), getID(terminal, account, symbol, id), controller);
 		this.terminal = terminal;
+		this.account = account;
+		this.symbol = symbol;
+		this.id = id;
+		onCancelFailed = newEventType("CANCEL_FAILED");
+		onCancelled = newEventType("CANCELLED");
+		onDone = newEventType("DONE");
+		onFailed = newEventType("FAILED");
+		onFilled = newEventType("FILLED");
+		onPartiallyFilled = newEventType("PARTIALLY_FILLED");
+		onRegistered = newEventType("REGISTERED");
+		onRegisterFailed = newEventType("REGISTER_FAILED");
+		onDeal = newEventType("DEAL");
 	}
 	
-	/**
-	 * Получить терминал заявки.
-	 * <p>
-	 * @return терминал
-	 */
+	public OrderImpl(EditableTerminal terminal, Account account, Symbol symbol, long id) {
+		this(terminal, account, symbol, id, new OrderController());
+	}
+	
+	@Override
 	public Terminal getTerminal() {
-		return terminal;
-	}
-	
-	/**
-	 * Получить копию списка генераторов событий.
-	 * <p>
-	 * @return список генераторов событий
-	 */
-	public List<OrderStateHandler> getStateHandlers() {
-		return new LinkedList<OrderStateHandler>(stateHandlers);
-	}
-	
-	/**
-	 * Получить диспетчер событий.
-	 * <p>
-	 * @return диспетчер событий
-	 */
-	public OrderEventDispatcher getEventDispatcher() {
-		return dispatcher;
-	}
-
-	@Override
-	public EventType OnRegistered() {
-		return dispatcher.OnRegistered();
-	}
-
-	@Override
-	public EventType OnRegisterFailed() {
-		return dispatcher.OnRegisterFailed();
-	}
-
-	@Override
-	public EventType OnCancelled() {
-		return dispatcher.OnCancelled();
-	}
-
-	@Override
-	public EventType OnCancelFailed() {
-		return dispatcher.OnCancelFailed();
-	}
-
-	@Override
-	public EventType OnFilled() {
-		return dispatcher.OnFilled();
-	}
-
-	@Override
-	public EventType OnPartiallyFilled() {
-		return dispatcher.OnPartiallyFilled();
-	}
-
-	@Override
-	public EventType OnChanged() {
-		return dispatcher.OnChanged();
-	}
-
-	@Override
-	public EventType OnDone() {
-		return dispatcher.OnDone();
+		lock.lock();
+		try {
+			return terminal;
+		} finally {
+			lock.unlock();
+		}
 	}
 	
 	@Override
-	public EventType OnFailed() {
-		return dispatcher.OnFailed();
-	}
-
-	@Override
-	public synchronized Integer getId() {
-		return id;
-	}
-
-	@Override
-	public synchronized Direction getDirection() {
-		return direction;
-	}
-
-	@Override
-	public synchronized OrderType getType() {
-		return type;
-	}
-
-	@Override
-	public Portfolio getPortfolio() throws PortfolioException {
-		return terminal.getPortfolio(getAccount());
-	}
-
-	@Override
-	public synchronized Account getAccount() {
+	public Account getAccount() {
 		return account;
 	}
 
 	@Override
-	public Security getSecurity() throws SecurityException {
-		return terminal.getSecurity(getSymbol());
-	}
-
-	@Override
-	public synchronized OrderStatus getStatus() {
-		return status;
-	}
-
-	@Override
-	public synchronized Long getQty() {
-		return qty;
-	}
-
-	@Override
-	public synchronized Long getQtyRest() {
-		return qtyRest;
-	}
-
-	@Override
-	public synchronized Double getPrice() {
-		return price;
-	}
-
-	@Override
-	public synchronized void setStatus(OrderStatus status) {
-		if ( status != this.status ) {
-			this.prevStatus = this.status;
-			this.status = status;
-			setChanged(EditableOrder.STATUS_CHANGED);
-		}
-	}
-
-	@Override
-	public synchronized void setQtyRest(Long qty) {
-		if ( qty == null ? this.qtyRest != null : ! qty.equals(this.qtyRest) ) {
-			this.qtyRest = qty;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setId(Integer id) {
-		if ( id == null ? this.id != null : ! id.equals(this.id) ) {
-			this.id = id;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setDirection(Direction dir) {
-		if ( dir != this.direction ) {
-			this.direction = dir;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setType(OrderType type) {
-		if ( type != this.type ) {
-			this.type = type;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setAccount(Account account) {
-		if ( account == null ? this.account != null
-				: ! account.equals(this.account) )
-		{
-			this.account = account;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setSymbol(Symbol symbol) {
-		if ( symbol == null ? this.symbol != null : ! symbol.equals(this.symbol) ) {
-			this.symbol = symbol;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setQty(Long qty) {
-		if ( qty == null ? this.qty != null : ! qty.equals(this.qty) ) {
-			this.qty = qty;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void setPrice(Double price) {
-		if ( price == null ? this.price != null : ! price.equals(this.price) ) {
-			this.price = price;
-			setChanged();
-		}
-	}
-
-	@Override
-	public synchronized void fireChangedEvent() {
-		for ( int i = 0; i < stateHandlers.size(); i ++ ) {
-			stateHandlers.get(i).handle(this);
-		}
-	}
-
-	@Override
-	public synchronized Symbol getSymbol() {
+	public Symbol getSymbol() {
 		return symbol;
 	}
 
 	@Override
-	public synchronized Double getExecutedVolume() {
-		return execVolume;
+	public EventType onRegistered() {
+		return onRegistered;
+	}
+
+	@Override
+	public EventType onRegisterFailed() {
+		return onRegisterFailed;
+	}
+
+	@Override
+	public EventType onCancelled() {
+		return onCancelled;
+	}
+
+	@Override
+	public EventType onCancelFailed() {
+		return onCancelFailed;
+	}
+
+	@Override
+	public EventType onFilled() {
+		return onFilled;
+	}
+
+	@Override
+	public EventType onPartiallyFilled() {
+		return onPartiallyFilled;
+	}
+
+	@Override
+	public EventType onDone() {
+		return onDone;
 	}
 	
 	@Override
-	public synchronized Double getAvgExecutedPrice() {
-		return avgExecPrice;
+	public EventType onFailed() {
+		return onFailed;
 	}
 
 	@Override
-	public synchronized void setExecutedVolume(Double value) {
-		if ( value == null ? execVolume != null : ! value.equals(execVolume) ) {
-			execVolume = value;
-			setChanged();
-		}
+	public EventType onDeal() {
+		return onDeal;
+	}
+
+	@Override
+	public long getID() {
+		return id;
+	}
+
+	@Override
+	public OrderAction getAction() {
+		return (OrderAction) getObject(OrderField.ACTION);
+	}
+
+	@Override
+	public OrderType getType() {
+		return (OrderType) getObject(OrderField.TYPE);
+	}
+
+	@Override
+	public OrderStatus getStatus() {
+		return (OrderStatus) getObject(OrderField.STATUS);
+	}
+
+	@Override
+	public String getExternalID() {
+		return getString(OrderField.EXTERNAL_ID);
+	}
+
+	@Override
+	public Long getInitialVolume() {
+		return getLong(OrderField.INITIAL_VOLUME);
+	}
+
+	@Override
+	public Long getCurrentVolume() {
+		return getLong(OrderField.CURRENT_VOLUME);
+	}
+
+	@Override
+	public Double getPrice() {
+		return getDouble(OrderField.PRICE);
+	}
+
+	@Override
+	public Instant getTime() {
+		return getInstant(OrderField.TIME);
+	}
+
+	@Override
+	public Instant getDoneTime() {
+		return getInstant(OrderField.DONE_TIME);
+	}
+
+	@Override
+	public Double getExecutedValue() {
+		return getDouble(OrderField.EXECUTED_VALUE);
+	}
+
+	@Override
+	public String getComment() {
+		return getString(OrderField.COMMENT);
 	}
 	
 	@Override
-	public synchronized void setAvgExecutedPrice(Double value) {
-		if (value == null ? avgExecPrice != null :!value.equals(avgExecPrice)) {
-			avgExecPrice = value;
-			setChanged();
+	public void close() {
+		lock.lock();
+		try {
+			terminal = null;
+			onCancelFailed.removeListeners();
+			onCancelFailed.removeAlternates();
+			onCancelled.removeListeners();
+			onCancelled.removeAlternates();
+			onDeal.removeListeners();
+			onDeal.removeAlternates();
+			onDone.removeListeners();
+			onDone.removeAlternates();
+			onFailed.removeListeners();
+			onFailed.removeAlternates();
+			onFilled.removeListeners();
+			onFilled.removeAlternates();
+			onPartiallyFilled.removeListeners();
+			onPartiallyFilled.removeAlternates();
+			onRegistered.removeListeners();
+			onRegistered.removeAlternates();
+			onRegisterFailed.removeListeners();
+			onRegisterFailed.removeAlternates();
+			super.close();
+		} finally {
+			lock.unlock();
 		}
 	}
+	
+	static class OrderController implements ContainerImpl.Controller {
 
-	@Override
-	public synchronized OrderStatus getPreviousStatus() {
-		return prevStatus;
-	}
-
-	@Override
-	public synchronized Instant getTime() {
-		return time;
-	}
-
-	@Override
-	public synchronized Instant getLastChangeTime() {
-		return lastChangeTime;
-	}
-
-	@Override
-	public synchronized void setTime(Instant value) {
-		if ( value == null ? time != null : ! value.equals(time) ) {
-			time = value;
-			setChanged();
+		@Override
+		public boolean hasMinimalData(Container container) {
+			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
-	}
 
-	@Override
-	public synchronized void setLastChangeTime(Instant value) {
-		if ( value == null ? lastChangeTime != null
-				: ! value.equals(lastChangeTime) )
-		{
-			lastChangeTime = value;
-			setChanged();
+		@Override
+		public void processUpdate(Container container) {
+			processAvailable(container);
 		}
-	}
 
-	@Override
-	public EventType OnTrade() {
-		return dispatcher.OnTrade();
-	}
-
-	@Override
-	public synchronized List<Trade> getTrades() {
-		return trades;
-	}
-
-	@Override
-	public synchronized void addTrade(Trade newTrade) {
-		trades.add(newTrade);
-		Collections.sort(trades);
-		int execQty = 0;
-		double sumByPrice = 0.0d;
-		double sumByVolume = 0.0d;
-		for ( Trade trade : trades ) {
-			synchronized ( trade ) {
-				execQty += trade.getQty();
-				sumByPrice += trade.getPrice() * trade.getQty();
-				sumByVolume += trade.getVolume();
+		@Override
+		public void processAvailable(Container container) {
+			OrderImpl order = (OrderImpl) container;
+			OrderEventFactory factory = new OrderEventFactory(order);
+			if ( order.hasChanged(OrderField.STATUS) ) {
+				OrderStatus status = order.getStatus();				
+				EventType dummy = null;
+				switch ( status ) {
+				case CANCEL_FAILED:
+					dummy = order.onCancelFailed;
+					break;
+				case CANCELLED:
+					dummy = (order.getCurrentVolume() == order.getInitialVolume()
+						? order.onCancelled : order.onPartiallyFilled);
+					break;
+				case FILLED:
+					dummy = order.onFilled;
+					break;
+				case ACTIVE:
+					dummy = order.onRegistered;
+					break;
+				case REJECTED:
+					dummy = order.onRegisterFailed;
+					break;
+				default:
+					break;	
+				}
+				if ( dummy != null ) {
+					order.queue.enqueue(dummy, factory);
+				}
+				if ( status.isError() ) {
+					order.queue.enqueue(order.onFailed, factory);
+				}
+				if ( status.isFinal() ) {
+					order.queue.enqueue(order.onDone, factory);
+				}
 			}
 		}
-		setQtyRest(qty - execQty);
-		setAvgExecutedPrice(sumByPrice / execQty);
-		setExecutedVolume(sumByVolume);
-	}
-
-	@Override
-	public void fireTradeEvent(Trade trade) {
-		dispatcher.fireTrade(this, trade);
-	}
-
-	@Override
-	public void clearAllEventListeners() {
-		dispatcher.removeListeners();
-	}
-
-	@Override
-	public synchronized boolean hasTrade(long tradeId) {
-		for ( Trade trade : trades ) {
-			if ( tradeId == trade.getId() ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public synchronized Instant getLastTradeTime() {
-		return trades.size() == 0 ? null : trades.getLast().getTime();
-	}
-
-	@Override
-	public synchronized Trade getLastTrade() {
-		return trades.size() == 0 ? null : trades.getLast();
+		
 	}
 	
-	@Override
-	public synchronized boolean equals(Object other) {
-		if ( other == this ) {
-			return true;
+	static class OrderEventFactory implements EventFactory {
+		private final Order order;
+		
+		OrderEventFactory(Order order) {
+			super();
+			this.order = order;
 		}
-		if ( other == null || other.getClass() != OrderImpl.class ) {
-			return false;
-		}
-		OrderImpl o = (OrderImpl) other;
-		return new EqualsBuilder()
-			.appendSuper(o.terminal == terminal)
-			.append(o.account, account)
-			.append(o.symbol, symbol)
-			.append(o.direction, direction)
-			.append(o.id, id)
-			.append(o.lastChangeTime, lastChangeTime)
-			.append(o.price, price)
-			.append(o.qty, qty)
-			.append(o.status, status)
-			.append(o.time, time)
-			.append(o.trades, trades)
-			.append(o.type, type)
-			.append(o.isAvailable(), isAvailable())
-			.append(o.avgExecPrice, avgExecPrice)
-			.append(o.execVolume, execVolume)
-			.append(o.qtyRest, qtyRest)
-			.append(o.systemInfo, systemInfo)
-			.append(o.activator, activator)
-			.isEquals();
-	}
-	
-	@Override
-	public OrderSystemInfo getSystemInfo() {
-		return systemInfo;
-	}
 
-	@Override
-	public synchronized OrderActivator getActivator() {
-		return activator;
-	}
-
-	@Override
-	public synchronized void setActivator(OrderActivator value) {
-		if ( value == null ? activator != null : ! value.equals(activator) ) {
-			this.activator = value;
-			setChanged();
+		@Override
+		public Event produceEvent(EventType type) {
+			return new OrderEvent(type, order);
 		}
-	}
-	
-	/**
-	 * Каждая заявка уникальна и ситуации когда у двух разных заявок может
-	 * быть одинаковый хэш-код возникать не должны. В противном случае,
-	 * алгоритмы оперирующие наборами заявок не будут работать корректно.
-	 */
-	@Override
-	public final int hashCode() {
-		return super.hashCode();
-	}
-	
-	@Override
-	public synchronized void setComment(String value) {
-		if ( value == null ? comment != null : ! value.equals(comment) ) {
-			comment = value;
-			setChanged();
-		}
-	}
-	
-	@Override
-	public synchronized String getComment() {
-		return comment;
+		
 	}
 
 }

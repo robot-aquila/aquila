@@ -11,12 +11,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  */
 public class Tick {
 	private final TickType type;
-	private final Instant timestamp;
+	private final long timestamp;
 	private final double price;
 	private final long size;
 	private final double value;
 	
-	private Tick(TickType type, Instant timestamp, double price, long size, double value) {
+	private Tick(TickType type, long timestamp, double price, long size, double value) {
 		super();
 		this.type = type;
 		this.timestamp = timestamp;
@@ -25,29 +25,39 @@ public class Tick {
 		this.value = value;
 	}
 	
-	public static Tick of(TickType type, Instant timestamp, double price,
+	public static Tick of(TickType type, long timestamp, double price,
 			long size, double value)
 	{
 		return new Tick(type, timestamp, price, size, value);
 	}
 	
-	public static Tick of(TickType type, Instant timestamp, double price,
+	public static Tick of(TickType type, double price, long size) {
+		return of(type, 0, price, size, 0);
+	}
+	
+	public static Tick of(TickType type, Instant time, double price,
+			long size, double value)
+	{
+		return new Tick(type, time.toEpochMilli(), price, size, value);
+	}
+	
+	public static Tick of(TickType type, Instant time, double price,
 			long size)
 	{
-		return new Tick(type, timestamp, price, size, 0);
+		return new Tick(type, time.toEpochMilli(), price, size, 0);
 	}
 	
-	public static Tick of(Instant timestamp, double price, long size) {
-		return of(TickType.TICK, timestamp, price, size, 0);
+	public static Tick of(Instant time, double price, long size) {
+		return of(TickType.TRADE, time, price, size, 0);
 	}
 	
-	public static Tick of(Instant timestamp, double price) {
-		return of(TickType.TICK, timestamp, price, 0, 0);
+	public static Tick of(Instant time, double price) {
+		return of(TickType.TRADE, time, price, 0, 0);
 	}
 	
 	@Deprecated
 	public static Tick of(LocalDateTime time, double price, long size) {
-		return of(TickType.TICK, time.toInstant(ZoneOffset.UTC), price, size);
+		return of(TickType.TRADE, time.toInstant(ZoneOffset.UTC), price, size);
 	}
 	
 	@Deprecated
@@ -60,11 +70,20 @@ public class Tick {
 	}
 	
 	/**
-	 * Get time.
+	 * Get time of tick.
 	 * <p>
-	 * @return timestamp
+	 * @return time
 	 */
 	public Instant getTime() {
+		return Instant.ofEpochMilli(timestamp);
+	}
+	
+	/**
+	 * Get timestamp of tick.
+	 * <p>
+	 * @return milliseconds that have elapsed since 1970-01-01T00:00:00Z
+	 */
+	public long getTimestamp() {
 		return timestamp;
 	}
 	
@@ -116,13 +135,9 @@ public class Tick {
 	
 	@Override
 	public String toString() {
-		return type + "["
-			+ (timestamp == null ? "" : timestamp + " ")
-			+ price
+		return type + "[" + getTime() + " " + price
 			+ (size == 0 ? "" : "x" + size)
-			+ (value == 0 ? "" : " " + value)
-			+ "]";
+			+ (value == 0 ? "" : " " + value) + "]";
 	}
-	
 
 }

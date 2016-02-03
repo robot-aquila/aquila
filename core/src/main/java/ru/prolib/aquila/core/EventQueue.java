@@ -39,6 +39,7 @@ public interface EventQueue extends Starter {
 	 * <p>
 	 * @return true если запущен, иначе - false
 	 */
+	@Deprecated
 	public boolean started();
 	
 	/**
@@ -59,6 +60,7 @@ public interface EventQueue extends Starter {
 	 * @return true, если дождалить завершения, иначе false
 	 * @throws InterruptedException - The waiting thread have interrupted
 	 */
+	@Deprecated
 	public boolean join(long timeout) throws InterruptedException;
 	
 	/**
@@ -70,6 +72,7 @@ public interface EventQueue extends Starter {
 	 * <p>
 	 * @throws InterruptedException - The waiting thread have interrupted
 	 */
+	@Deprecated
 	public void join() throws InterruptedException;
 	
 	/**

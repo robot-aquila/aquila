@@ -32,7 +32,7 @@ public class TickTest {
 	@Test
 	public void testOf3IDL() throws Exception {
 		tick = Tick.of(time3, 1828.14d, 1000);
-		assertSame(TickType.TICK, tick.getType());
+		assertSame(TickType.TRADE, tick.getType());
 		assertEquals(time3, tick.getTime());
 		assertEquals(1828.14d, tick.getPrice(), 0.01d);
 		assertEquals(1000.0d, tick.getSize(), 0.01d);
@@ -42,7 +42,7 @@ public class TickTest {
 	@Test
 	public void testOf2TD() throws Exception {
 		tick = Tick.of(time1, 1828.14d);
-		assertSame(TickType.TICK, tick.getType());
+		assertSame(TickType.TRADE, tick.getType());
 		assertEquals(time1.toInstant(ZoneOffset.UTC), tick.getTime());
 		assertEquals(1828.14d, tick.getPrice(), 0.01d);
 		assertEquals(0, tick.getSize());
@@ -52,7 +52,7 @@ public class TickTest {
 	@Test
 	public void testOf2ID() throws Exception {
 		tick = Tick.of(time3, 80.32d);
-		assertSame(TickType.TICK, tick.getType());
+		assertSame(TickType.TRADE, tick.getType());
 		assertEquals(time3, tick.getTime());
 		assertEquals(80.32d, tick.getPrice(), 0.01d);
 		assertEquals(0, tick.getSize());
@@ -62,7 +62,7 @@ public class TickTest {
 	@Test
 	public void testOf3TDL() throws Exception {
 		tick = Tick.of(time1, 256.27d, 100);
-		assertSame(TickType.TICK, tick.getType());
+		assertSame(TickType.TRADE, tick.getType());
 		assertEquals(time1.toInstant(ZoneOffset.UTC), tick.getTime());
 		assertEquals(256.27d, tick.getPrice(), 0.01d);
 		assertEquals(100, tick.getSize());
@@ -90,6 +90,27 @@ public class TickTest {
 	}
 	
 	@Test
+	public void testOfTtLDLD() throws Exception {
+		tick = Tick.of(TickType.TRADE, 1000, 824.15d, 420, 9921.82d);
+		assertSame(TickType.TRADE, tick.getType());
+		assertEquals(1000, tick.getTimestamp());
+		assertEquals(Instant.parse("1970-01-01T00:00:01Z"), tick.getTime());
+		assertEquals(824.15d, tick.getPrice(), 0.01d);
+		assertEquals(420, tick.getSize());
+		assertEquals(9921.82d, tick.getValue(), 0.01d);
+	}
+	
+	@Test
+	public void testOfTlDL() throws Exception {
+		tick = Tick.of(TickType.ASK, 814d, 1000);
+		assertEquals(TickType.ASK, tick.getType());
+		assertEquals(0, tick.getTimestamp());
+		assertEquals(814d, tick.getPrice(), 0.01d);
+		assertEquals(1000, tick.getSize());
+		assertEquals(0.0d, tick.getValue(), 0.01d);
+	}
+	
+	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(tick.equals(tick));
 		assertFalse(tick.equals(null));
@@ -102,8 +123,7 @@ public class TickTest {
 		Variant<TickType> vType = new Variant<TickType>()
 				.add(TickType.ASK)
 				.add(TickType.BID)
-				.add(TickType.TRADE)
-				.add(TickType.TICK);
+				.add(TickType.TRADE);
 		Variant<Instant> vTime = new Variant<Instant>(vType)
 				.add(time3)
 				.add(time1.toInstant(ZoneOffset.UTC))
@@ -130,8 +150,8 @@ public class TickTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertSame(TickType.ASK, found.getType());
-		assertSame(time3, found.getTime());
+		assertEquals(TickType.ASK, found.getType());
+		assertEquals(time3, found.getTime());
 		assertEquals(80.34d, found.getPrice(), 0.001d);
 		assertEquals(100L, found.getSize(), 0.001d);
 		assertEquals(803400.0d, found.getValue(), 0.001d);
@@ -140,10 +160,10 @@ public class TickTest {
 	@Test
 	public void testToString() throws Exception {
 		String expected[] = {
-				"Tick[2013-10-06T15:44:51.123Z 1828.14x1000]",
-				"Ask[2015-08-12T08:15:35.526Z 34.15x100]",
-				"Bid[2015-08-12T08:15:35.526Z 34.15x100 425.95]",
-				"Trade[2015-08-12T08:15:35.526Z 34.15x100 425.95]"
+				"TRADE[2013-10-06T15:44:51.123Z 1828.14x1000]",
+				"ASK[2015-08-12T08:15:35.526Z 34.15x100]",
+				"BID[2015-08-12T08:15:35.526Z 34.15x100 425.95]",
+				"TRADE[2015-08-12T08:15:35.526Z 34.15x100 425.95]"
 		};
 		Tick toTest[] = {
 				tick,

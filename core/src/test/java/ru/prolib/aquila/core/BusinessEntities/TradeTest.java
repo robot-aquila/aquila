@@ -33,7 +33,7 @@ public class TradeTest {
 		trade = new Trade(terminal);
 		trade.setId(105L);
 		trade.setSymbol(symbol);
-		trade.setDirection(Direction.BUY);
+		trade.setDirection(OrderAction.BUY);
 		trade.setTime(Instant.parse("2010-08-01T03:45:15Z"));
 		trade.setPrice(100.00d);
 		trade.setQty(1L);
@@ -61,7 +61,7 @@ public class TradeTest {
 		assertEquals((Long) 105L, trade.getId());
 		assertSame(terminal, trade.getTerminal());
 		assertEquals(symbol, trade.getSymbol());
-		assertSame(Direction.BUY, trade.getDirection());
+		assertSame(OrderAction.BUY, trade.getDirection());
 		assertEquals(Instant.parse("2010-08-01T03:45:15Z"), trade.getTime());
 		assertEquals(100.00d, trade.getPrice(), 0.001d);
 		assertEquals(1L, trade.getQty());
@@ -85,7 +85,7 @@ public class TradeTest {
 	@Test
 	public void testToString() {
 		control.replay();
-		assertEquals("Trade: " + trade.getTime()  + " #105 Buy " +
+		assertEquals("Trade: " + trade.getTime()  + " #105 BUY " +
 				"S:SBER@EQBR:RUB 1x100.0 Vol=200.0", trade.toString());
 	}
 	
@@ -99,10 +99,10 @@ public class TradeTest {
 			.add(null)
 			.add(symbol)
 			.add(control.createMock(Symbol.class));
-		Variant<Direction> vDir = new Variant<Direction>(vSymbol)
+		Variant<OrderAction> vDir = new Variant<OrderAction>(vSymbol)
 			.add(null)
-			.add(Direction.BUY)
-			.add(Direction.SELL);
+			.add(OrderAction.BUY)
+			.add(OrderAction.SELL);
 		Variant<Instant> vTime = new Variant<Instant>(vDir)
 			.add(null)
 			.add(Instant.parse("2010-08-01T03:45:15Z"))
@@ -146,7 +146,7 @@ public class TradeTest {
 		assertEquals(1, foundCnt);
 		assertEquals((Long) 105L, found.getId());
 		assertSame(symbol, found.getSymbol());
-		assertSame(Direction.BUY, found.getDirection());
+		assertSame(OrderAction.BUY, found.getDirection());
 		assertEquals(trade.getTime(), found.getTime());
 		assertEquals(100.00d, found.getPrice(), 0.001d);
 		assertEquals(1L, found.getQty());
@@ -167,7 +167,7 @@ public class TradeTest {
 		int hashCode = new HashCodeBuilder(20121031, 120517)
 			.append(105L)
 			.append(symbol)
-			.append(Direction.BUY)
+			.append(OrderAction.BUY)
 			.append(Instant.parse("2010-08-01T03:45:15Z"))
 			.append(100.00d)
 			.append(1L)

@@ -1,52 +1,50 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
-import java.util.List;
 import ru.prolib.aquila.core.EventType;
 
 /**
- * Базовый интерфейс заявки.
+ * Order interface.
  * <p>
  * 2012-05-30<br>
  * $Id: Order.java 542 2013-02-23 04:15:34Z whirlwind $
  */
 public interface Order {
-	public static final int VERSION = 1;
 	
 	/**
 	 * Получить тип события: в случае провала операции
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnFailed();
+	public EventType onFailed();
 
 	/**
 	 * Получить тип события: заявка зарегистрирована на бирже.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnRegistered();
+	public EventType onRegistered();
 	
 	/**
 	 * Получить тип события: не удалось зарегистрировать заявку.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnRegisterFailed();
+	public EventType onRegisterFailed();
 
 	/**
 	 * Получить тип события: заявка отменена.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnCancelled();
+	public EventType onCancelled();
 	
 	/**
 	 * Получить тип события: не удалось отменить заявку.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnCancelFailed();
+	public EventType onCancelFailed();
 	
 	/**
 	 * Получить тип события: заявка полностью исполнена.
@@ -55,7 +53,7 @@ public interface Order {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnFilled();
+	public EventType onFilled();
 	
 	/**
 	 * Получить тип события: заявка частично исполнена.
@@ -65,17 +63,7 @@ public interface Order {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnPartiallyFilled();
-	
-	/**
-	 * Получить тип события: заявка изменена.
-	 * <p>
-	 * Данное событие возникает каждый раз при изменении внутреннего состояния
-	 * заявки. 
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType OnChanged();
+	public EventType onPartiallyFilled();
 	
 	/**
 	 * Получить тип события: заявка завершена.
@@ -86,7 +74,7 @@ public interface Order {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnDone();
+	public EventType onDone();
 	
 	/**
 	 * Получить тип события: новая сделка по заявке.
@@ -96,109 +84,22 @@ public interface Order {
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType OnTrade();
+	public EventType onDeal();
 
 	/**
-	 * Получить биржевой идентификатор заявки.
+	 * Get order ID.
 	 * <p>
-	 * @return биржевой идентификатор заявки или null, если не определен 
+	 * @return order ID assigned by the system (cannot be zero or undefined)
 	 */
-	public Integer getId();
+	public long getID();
 	
 	/**
-	 * Получить направление заявки.
+	 * Get order external (exchange) ID.
 	 * <p>
-	 * @return направление заявки
+	 * @return order ID
 	 */
-	public Direction getDirection();
-	
-	/**
-	 * Получить тип заявки.
-	 * <p>
-	 * @return тип заявки
-	 */
-	public OrderType getType();
-	
-	/**
-	 * Получить портфель, в рамках которого торгуется данная заявка.
-	 * <p>
-	 * @return портфель
-	 * @throws PortfolioException - TODO: 
-	 */
-	public Portfolio getPortfolio() throws PortfolioException;
-	
-	/**
-	 * Получить торговый счет.
-	 * <p>
-	 * @return торговый счет
-	 */
-	public Account getAccount();
-	
-	/**
-	 * Получить торгуемый инструмент.
-	 * <p>
-	 * @throws SecurityException - TODO:
-	 * @return инструмент
-	 */
-	public Security getSecurity() throws SecurityException;
-	
-	/**
-	 * Получить дескриптор торгуемого инструмента.
-	 * <p>
-	 * @return дескриптор инструмента
-	 */
-	public Symbol getSymbol();
-	
-	/**
-	 * Получить количество заявки.
-	 * <p>
-	 * @return количество заявки
-	 */
-	public Long getQty();
-	
-	/**
-	 * Получить статус заявки.
-	 * <p>
-	 * @return статус заявки
-	 */
-	public OrderStatus getStatus();
-	
-	/**
-	 * Получить неисполненный остаток заявки.
-	 * <p> 
-	 * @return несполненное количество
-	 */
-	public Long getQtyRest();
-	
-	/**
-	 * Получить цену заявки.
-	 * <p>
-	 * @return цена заявки или null, если цена не предусмотрена
-	 */
-	public Double getPrice();
-	
-	/**
-	 * Получить фактическую стоимость исполненной части заявки.
-	 * <p>
-	 * Фактическая стоимость совпадает с суммарным объемом по всем
-	 * сделкам, относящимся к данной заявке. Фактическая стоимость выражается
-	 * в валюте торгового счета. 
-	 * <p>
-	 * @return стоимость исполненной части
-	 */
-	public Double getExecutedVolume();
-	
-	/**
-	 * Получить среднюю цену исполненной части заявки.
-	 * <p>
-	 * В отличии от {@link Order#getExecutedVolume()}, данный метод возвращает
-	 * среднее значение цены, выраженной в единицах цены инструмента. Например,
-	 * для фьючерса на индекс РТС это будет средняя цена в пунктах.
-	 * <p>
-	 * @return средняя цена исполненной части
-	 */
-	public Double getAvgExecutedPrice();
-	
+	public String getExternalID();
+
 	/**
 	 * Получить терминал заявки.
 	 * <p>
@@ -207,73 +108,91 @@ public interface Order {
 	public Terminal getTerminal();
 
 	/**
-	 * Получить время выставления заявки.
+	 * Get order action.
 	 * <p>
-	 * @return время выставления заявки или null, если заявка не выставлена
+	 * @return order action
+	 */
+	public OrderAction getAction();
+	
+	/**
+	 * Get order type.
+	 * <p>
+	 * @return order type
+	 */
+	public OrderType getType();
+	
+	/**
+	 * Get account.
+	 * <p>
+	 * @return account of an order
+	 */
+	public Account getAccount();
+	
+	/**
+	 * Get symbol.
+	 * <p>
+	 * @return symbol of an order
+	 */
+	public Symbol getSymbol();
+	
+	/**
+	 * Get initial volume.
+	 * <p>
+	 * @return order initial volume
+	 */
+	public Long getInitialVolume();
+	
+	/**
+	 * Get current volume.
+	 * <p> 
+	 * @return order current volume
+	 */
+	public Long getCurrentVolume();
+	
+	/**
+	 * Get order status.
+	 * <p>
+	 * @return order status
+	 */
+	public OrderStatus getStatus();
+	
+	/**
+	 * Get price.
+	 * <p>
+	 * @return price specified in the order or null if price is not specified
+	 */
+	public Double getPrice();
+	
+	/**
+	 * Get order placement time.
+	 * <p>
+	 * @return order placement time or null if order is not placed to the market
 	 */
 	public Instant getTime();
 	
 	/**
-	 * Получить время последнего изменения заявки.
+	 * Get order execution or cancellation time.
 	 * <p>
-	 * Подразумевается время фиксации финального статуса заявки (снятие,
-	 * сведение, частичное сведение).
-	 * <p>
-	 * @return время последнего изменения или null, если заявка не в финальном
-	 * статусе
+	 * @return time of finalization or null if the order is not in final status
 	 */
-	public Instant getLastChangeTime();
+	public Instant getDoneTime();	
 	
 	/**
-	 * Получить список сделок заявки.
+	 * Get actual price of executed volume.
 	 * <p>
-	 * Только для лимитных и рыночных заявок. Сделки отсортированы по номерам.
-	 * <p>
-	 * @return список сделок
+	 * @return price of executed volume
 	 */
-	public List<Trade> getTrades();
+	public Double getExecutedValue();
 	
 	/**
-	 * Проверить наличие сделки с указанным номером.
+	 * Get comment.
 	 * <p>
-	 * @param tradeId номер сделки
-	 * @return true - указанная сделка есть в списке сделок заявки, false - нет
-	 */
-	public boolean hasTrade(long tradeId);
-	
-	/**
-	 * Получить последнюю сделку.
-	 * <p>
-	 * @return последняя сделка или null, если нет сделок
-	 */
-	public Trade getLastTrade();
-	
-	/**
-	 * Получить время последней сделки.
-	 * <p>
-	 * @return время последней сделки или null, если нет сделок
-	 */
-	public Instant getLastTradeTime();
-	
-	/**
-	 * Получить служебную информацию заявки.
-	 * <p>
-	 * @return служебная информация
-	 */
-	public OrderSystemInfo getSystemInfo();
-	
-	/**
-	 * Получить контроллер активации заявки.
-	 * <p>
-	 * @return контроллер
-	 */
-	public OrderActivator getActivator();
-	
-	/**
-	 * Получить комментарий заявки.
-	 * <p>
-	 * @return комментарий
+	 * @return order comment
 	 */
 	public String getComment();
+	
+	public void lock();
+	
+	public void unlock();
 	
 }

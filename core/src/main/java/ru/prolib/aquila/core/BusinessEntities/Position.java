@@ -1,116 +1,88 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.data.Container;
 
 /**
- * Интерфейс позиции по инструменту.
+ * Interface of market position.
  * <p>
  * 2012-08-02<br>
  * $Id: Position.java 529 2013-02-19 08:49:04Z whirlwind $
  */
-public interface Position {
-	public static final int VERSION = 1;
+public interface Position extends Container {
 	
 	/**
-	 * Получить торговый счет позиции.
+	 * Get account.
 	 * <p>
-	 * @return торговый счет
+	 * @return account code
 	 */
 	public Account getAccount();
 	
 	/**
-	 * Получить портфель по которому открыта позиция.
+	 * Get symbol.
 	 * <p>
-	 * @return портфель
-	 */
-	public Portfolio getPortfolio();
-	
-	/**
-	 * Получить дескриптор инструмента.
-	 * <p>
-	 * @return дескриптор инструмента
+	 * @return symbol
 	 */
 	public Symbol getSymbol();
-	
+		
 	/**
-	 * Получить инструмент.
+	 * Get terminal.
 	 * <p>
-	 * @return инструмент
-	 */
-	public Security getSecurity();
-	
-	/**
-	 * Получить терминал.
-	 * <p>
-	 * @return терминал
+	 * @return terminal
 	 */
 	public Terminal getTerminal();
+
+	/**
+	 * Get position volume.
+	 * <p>
+	 * @return position volume or null if data not available
+	 */
+	public Long getCurrentVolume();
+
+	/**
+	 * Get current price of position.
+	 * <p>
+	 * @return current price or null if data not available
+	 */
+	public Double getCurrentPrice();
 	
 	/**
-	 * Получить тип события: при изменении позиции.
+	 * Get price of position at session start.
 	 * <p>
-	 * @return тип события
+	 * @return open price of position or null if data not available
 	 */
-	public EventType OnChanged();
+	public Double getOpenPrice();
 	
 	/**
-	 * Получить величину вариационной маржи.
+	 * Get volume of position at session start.
 	 * <p>
-	 * @return вариационная маржа
+	 * @return open volume or null if data not available
 	 */
-	public double getVarMargin();
+	public Long getOpenVolume();
 	
 	/**
-	 * Получить размер позиции на начало сессии.
+	 * Get variation margin.
 	 * <p>
-	 * @return размер позиции
+	 * @return variation margin or null if data not available
 	 */
-	public long getOpenQty();
+	public Double getVariationMargin();
 	
 	/**
-	 * Получить размер позиции, заблокированный под текущие операции.
+	 * When position volume changed.
 	 * <p>
-	 * @return размер позиции
+	 * This event type allow track only changes of position volume. 
+	 * <p>
+	 * @return event type
 	 */
-	public long getLockQty();
+	public EventType onPositionChange();
 	
 	/**
-	 * Получить размер текущей позиции.
+	 * When opened position current price changed.
 	 * <p>
-	 * Суммарная позиция по инструменту.
+	 * This event type allow track only changes of position current price.
 	 * <p>
-	 * @return размер позиции
+	 * @return event type
 	 */
-	public long getCurrQty();
-	
-	/**
-	 * Получить тип позиции.
-	 * <p>
-	 * @return тип позиции
-	 */
-	public PositionType getType();
-	
-	/**
-	 * Получить рыночную стоимость позиции.
-	 * <p>
-	 * Текущая стоимость позиции не может отражать точную стоимость актива,
-	 * так как это можно будет узнать только после продажи. Текущая стоимость
-	 * отражает приблизительную стоимость по текущей рыночной цене. Алгоритм
-	 * расчета рыночной цены так же может различаться в зависимости от специфики
-	 * терминала.
-	 * <p>
-	 * @return рыночная стоимость позиции или null, если стоимость не расчитана
-	 */
-	public Double getMarketValue();
-	
-	/**
-	 * Получить балансовую стоимость позиции.
-	 * <p>
-	 * В зависимости от специфики терминала, балансовая стоимость может отражать
-	 * стоимость позиции на момент открытия сессии или стоимость приобретения. 
-	 * <p>
-	 * @return балансовая стоимость или null, если стоимость не расчитана
-	 */
-	public Double getBookValue();
+	public EventType onCurrentPriceChange();
 
 }
