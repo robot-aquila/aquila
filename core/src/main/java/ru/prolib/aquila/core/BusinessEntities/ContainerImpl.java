@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.EventTypeImpl;
 /**
  * Basic container implementation.
  */
-public class ContainerImpl implements EditableContainer {
+public class ContainerImpl implements UpdatableContainer {
 	protected final Lock lock;
 	protected final EventQueue queue;
 	private final Map<Integer, Object> values;

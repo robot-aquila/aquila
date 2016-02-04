@@ -3,12 +3,15 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityImpl.SecurityController;
-import ru.prolib.aquila.core.data.*;
 
 /**
  * 2012-05-30<br>
@@ -71,9 +74,13 @@ public class SecurityImplTest extends ContainerImplTest {
 		assertSame(terminal, security.getTerminal());
 		assertSame(queue, security.getEventQueue());
 		assertEquals(symbol1, security.getSymbol());
-		String prefix = String.format("%s.S:GAZP@EQBR:RUB.", "foobar");
-		assertEquals(prefix + "SECURITY", security.getContainerID());
-		assertEquals(prefix + "SECURITY.SESSION_UPDATE", security.onSessionUpdate().getId());
+		String prefix = String.format("%s.S:GAZP@EQBR:RUB.SECURITY", "foobar");
+		assertEquals(prefix, security.getContainerID());
+		assertEquals(prefix + ".SESSION_UPDATE", security.onSessionUpdate().getId());
+		assertEquals(prefix + ".BEST_ASK", security.onBestAsk().getId());
+		assertEquals(prefix + ".BEST_BID", security.onBestBid().getId());
+		assertEquals(prefix + ".LAST_TRADE", security.onLastTrade().getId());
+		assertEquals(prefix + ".MARKET_DEPTH_UPDATE", security.onMarketDepthUpdate().getId());
 		assertFalse(security.isAvailable());
 	}
 
@@ -210,13 +217,20 @@ public class SecurityImplTest extends ContainerImplTest {
 	@Test
 	public void testClose() {
 		EventType type = new EventTypeImpl();
-		EventListener listener = new EventListenerStub();
-		security.onAvailable().addListener(listener);
+		security.onAvailable().addListener(listenerStub);
 		security.onAvailable().addAlternateType(type);
-		security.onSessionUpdate().addListener(listener);
+		security.onSessionUpdate().addListener(listenerStub);
 		security.onSessionUpdate().addAlternateType(type);
-		security.onUpdate().addListener(listener);
+		security.onUpdate().addListener(listenerStub);
 		security.onUpdate().addAlternateType(type);
+		security.onBestAsk().addListener(listenerStub);
+		security.onBestAsk().addAlternateType(type);
+		security.onBestBid().addListener(listenerStub);
+		security.onBestBid().addAlternateType(type);
+		security.onLastTrade().addListener(listenerStub);
+		security.onLastTrade().addAlternateType(type);
+		security.onMarketDepthUpdate().addListener(listenerStub);
+		security.onMarketDepthUpdate().addAlternateType(type);
 		
 		security.close();
 		
@@ -226,6 +240,14 @@ public class SecurityImplTest extends ContainerImplTest {
 		assertFalse(security.onSessionUpdate().hasAlternates());
 		assertFalse(security.onUpdate().hasListeners());
 		assertFalse(security.onUpdate().hasAlternates());
+		assertFalse(security.onBestAsk().hasListeners());
+		assertFalse(security.onBestAsk().hasAlternates());
+		assertFalse(security.onBestBid().hasListeners());
+		assertFalse(security.onBestBid().hasAlternates());
+		assertFalse(security.onLastTrade().hasListeners());
+		assertFalse(security.onLastTrade().hasAlternates());
+		assertFalse(security.onMarketDepthUpdate().hasListeners());
+		assertFalse(security.onMarketDepthUpdate().hasAlternates());
 		assertNull(security.getTerminal());
 		assertFalse(security.isAvailable());
 		assertTrue(security.isClosed());
@@ -292,6 +314,211 @@ public class SecurityImplTest extends ContainerImplTest {
 		controller.processAvailable(security);
 		
 		assertEquals(0, listener.getEventCount());
+	}
+	
+	@Test
+	public void testUpdate_Tick_BestAsk() {
+		security.onBestAsk().addSyncListener(listenerStub);
+		assertNull(security.getBestAsk());
+		
+		security.update(Tick.of(TickType.ASK, 80.34d, 15L));
+		
+		Tick expected = Tick.of(TickType.ASK, 80.34d, 15L);
+		assertEquals(expected, security.getBestAsk());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
+		assertTrue(e.isType(security.onBestAsk()));
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getTick());
+	}
+	
+	@Test
+	public void testUpdate_Tick_ResetBestAsk() {
+		security.update(Tick.of(TickType.ASK, 92.13d, 100L));
+		security.onBestAsk().addSyncListener(listenerStub);
+		
+		security.update(Tick.NULL_ASK);
+		
+		assertNull(security.getBestAsk());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
+		assertTrue(e.isType(security.onBestAsk()));
+		assertSame(security, e.getSecurity());
+		assertNull(e.getTick());
+	}
+	
+	@Test
+	public void testUpdate_Tick_BestBid() {
+		security.onBestBid().addSyncListener(listenerStub);
+		assertNull(security.getBestBid());
+		
+		security.update(Tick.of(TickType.BID, 12.48d, 500L));
+		
+		Tick expected = Tick.of(TickType.BID, 12.48d, 500L);
+		assertEquals(expected, security.getBestBid());
+		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
+		assertTrue(e.isType(security.onBestBid()));
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getTick());
+	}
+	
+	@Test
+	public void testUpdate_Tick_ResetBestBid() {
+		security.update(Tick.of(TickType.BID, 52.94d, 1L));
+		security.onBestBid().addSyncListener(listenerStub);
+		
+		security.update(Tick.NULL_BID);
+		
+		assertNull(security.getBestBid());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
+		assertTrue(e.isType(security.onBestBid()));
+		assertSame(security, e.getSecurity());
+		assertNull(e.getTick());
+	}
+	
+	@Test
+	public void testUpdate_Tick_LastTrade() {
+		security.onLastTrade().addSyncListener(listenerStub);
+		assertNull(security.getLastTrade());
+		
+		security.update(Tick.of(TickType.TRADE, 72.15d, 805L));
+		
+		Tick expected = Tick.of(TickType.TRADE, 72.15d, 805L);
+		assertEquals(expected, security.getLastTrade());
+		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
+		assertTrue(e.isType(security.onLastTrade()));
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getTick());
+	}
+	
+	@Test
+	public void testGetMarketDepth_DefaultValue() {
+		MarketDepth md = security.getMarketDepth();
+		
+		assertNotNull(md);
+		assertEquals(symbol1, md.getSymbol());
+		assertEquals(0, md.getTimestamp());
+		assertFalse(md.hasBestAsk());
+		assertFalse(md.hasBestBid());
+	}
+	
+	@Test
+	public void testUpdate_MDUpdate_Refresh() {
+		Instant time = Instant.parse("2016-02-04T17:24:15Z");
+		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
+		MDUpdateImpl update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
+		security.update(update);
+		update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
+		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		
+		security.update(update);
+		
+		List<Tick> expectedAsks = new ArrayList<Tick>();
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.34d, 15));
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.35d, 20));
+		List<Tick> expectedBids = new ArrayList<Tick>();
+		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
+		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time.toEpochMilli());
+		assertEquals(expected, security.getMarketDepth());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getMarketDepth());
+		assertSame(update, e.getUpdateInfo());
+	}
+	
+	@Test
+	public void testUpdate_MDUpdate_Update_Replace() {
+		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
+		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
+		MDUpdateImpl update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.45d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.40d, 150), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.30d, 120), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.00d, 220), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 101.00d, 450), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time1, 100.02d, 800), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time1, 100.01d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time1,  99.98d, 500), MDTransactionType.ADD);
+		security.update(update);
+		
+		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
+		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
+		update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time2, 102.30d, 999), MDTransactionType.REPLACE);
+		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 199), MDTransactionType.REPLACE);
+		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		
+		security.update(update);
+		
+		List<Tick> expectedAsks = new ArrayList<Tick>();
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.00d, 220));
+		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.30d, 999));
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.45d, 100));
+		List<Tick> expectedBids = new ArrayList<Tick>();
+		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
+		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
+		expectedBids.add(Tick.of(TickType.BID, time2,  99.98d, 199));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2.toEpochMilli());
+		assertEquals(expected, security.getMarketDepth());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getMarketDepth());
+		assertSame(update, e.getUpdateInfo());
+	}
+
+	@Test
+	public void testUpdate_MDUpdate_Update_Delete() {
+		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
+		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
+		MDUpdateImpl update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.45d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.40d, 150), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.30d, 120), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.00d, 220), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 101.00d, 450), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time1, 100.02d, 800), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time1, 100.01d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time1,  99.98d, 500), MDTransactionType.ADD);
+		security.update(update);
+		
+		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
+		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
+		update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time2, 102.30d, 0), MDTransactionType.DELETE);
+		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 0), MDTransactionType.DELETE);
+		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		
+		security.update(update);
+		
+		List<Tick> expectedAsks = new ArrayList<Tick>();
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.00d, 220));
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.45d, 100));
+		List<Tick> expectedBids = new ArrayList<Tick>();
+		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
+		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2.toEpochMilli());
+		assertEquals(expected, security.getMarketDepth());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getMarketDepth());
+		assertSame(update, e.getUpdateInfo());
 	}
 
 }

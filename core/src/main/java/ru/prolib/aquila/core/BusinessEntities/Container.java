@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
 import java.util.Set;
@@ -11,29 +11,7 @@ import ru.prolib.aquila.core.EventType;
  * The data container gives an access to a set of values which identified by
  * numeric token ID. Container allows track when and which tokens changed.
  */
-public interface Container {
-	
-	/**
-	 * Get container ID.
-	 * <p>
-	 * @return container ID
-	 */
-	public String getContainerID();
-	
-	/**
-	 * Lock container.
-	 */
-	public void lock();
-	
-	/**
-	 * Unlock container.
-	 */
-	public void unlock();
-	
-	/**
-	 * Close container.
-	 */
-	public void close();
+public interface Container extends AbstractContainer {
 	
 	/**
 	 * When container is available for reading.
@@ -171,6 +149,4 @@ public interface Container {
 	
 	public boolean isAvailable();
 	
-	public boolean isClosed();
-
 }

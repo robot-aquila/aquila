@@ -38,12 +38,12 @@ public class TerminalImplTest {
 		}
 
 		@Override
-		public void subscribeLevel1Data(EditableSecurity security) {
+		public void subscribeLevel1Data(UpdatableTickStreamContainer container) {
 			throw new RuntimeException();
 		}
 
 		@Override
-		public void subscribeLevel2Data(EditableSecurity security) {
+		public void subscribeLevel2Data(UpdatableMarketDepthStreamContainer container) {
 			throw new RuntimeException();
 		}
 

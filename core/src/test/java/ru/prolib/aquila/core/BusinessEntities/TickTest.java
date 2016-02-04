@@ -30,6 +30,23 @@ public class TickTest {
 	}
 	
 	@Test
+	public void testNullValues() {
+		Tick dummy = Tick.NULL_ASK;
+		assertNotNull(dummy);
+		assertEquals(TickType.ASK, dummy.getType());
+		assertEquals(0, dummy.getTimestamp());
+		assertEquals(0d, dummy.getPrice(), 0.1d);
+		assertEquals(0L, dummy.getSize());
+		
+		dummy = Tick.NULL_BID;
+		assertNotNull(dummy);
+		assertEquals(TickType.BID, dummy.getType());
+		assertEquals(0, dummy.getTimestamp());
+		assertEquals(0d, dummy.getPrice(), 0.1d);
+		assertEquals(0L, dummy.getSize());
+	}
+	
+	@Test
 	public void testOf3IDL() throws Exception {
 		tick = Tick.of(time3, 1828.14d, 1000);
 		assertSame(TickType.TRADE, tick.getType());

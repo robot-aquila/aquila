@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.BusinessEntities;
 
 public class OrderField {
 	public static final int TYPE = 1;

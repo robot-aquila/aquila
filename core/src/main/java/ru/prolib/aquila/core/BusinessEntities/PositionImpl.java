@@ -1,9 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.data.Container;
-import ru.prolib.aquila.core.data.ContainerImpl;
-import ru.prolib.aquila.core.data.PositionField;
 
 /**
  * Market position.

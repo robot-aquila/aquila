@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.BusinessEntities;
 
 public class SecurityField {
 	public static final int DISPLAY_NAME = 1;

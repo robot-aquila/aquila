@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.data.Container;
 
 /**
  * Security interface.

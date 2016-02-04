@@ -1,9 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import ru.prolib.aquila.core.CoreException;
+
 /**
  * Базовое исключение редактируемых объектов.
  */
-public class EditableObjectException extends Exception {
+public class EditableObjectException extends CoreException {
 	private static final long serialVersionUID = -5415852538204882248L;
 	
 	public EditableObjectException() {

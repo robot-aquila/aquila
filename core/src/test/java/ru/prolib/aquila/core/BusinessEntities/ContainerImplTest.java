@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;

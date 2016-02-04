@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.data;
+package ru.prolib.aquila.core.BusinessEntities;
 
 public class PositionField {
 	public static final int CURRENT_VOLUME = 1;

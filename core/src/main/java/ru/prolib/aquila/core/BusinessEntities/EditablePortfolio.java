@@ -1,6 +1,5 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import ru.prolib.aquila.core.data.EditableContainer;
 
 /**
  * Portfolio service interface.
@@ -8,7 +7,7 @@ import ru.prolib.aquila.core.data.EditableContainer;
  * 2012-09-05<br>
  * $Id$
  */
-public interface EditablePortfolio extends Portfolio, EditableContainer {
+public interface EditablePortfolio extends Portfolio, UpdatableContainer {
 	
 	/**
 	 * Get managed position.
