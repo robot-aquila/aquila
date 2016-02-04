@@ -40,15 +40,15 @@ public class MOEXUtils {
 		p.setInitialMarginCost(security.getInitialMargin());
 		p.setInitialPrice(security.getInitialPrice());
 		p.setLotSize(security.getLotSize());
-		p.setLowerPriceLimit(security.getMinPrice());
-		p.setUpperPriceLimit(security.getMaxPrice());
-		p.setScale(security.getPrecision());
-		p.setTickCost(security.getMinStepPrice());
-		p.setTickSize(security.getMinStepSize());
+		p.setLowerPriceLimit(security.getLowerPriceLimit());
+		p.setUpperPriceLimit(security.getUpperPriceLimit());
+		p.setScale(security.getScale());
+		p.setTickCost(security.getTickValue());
+		p.setTickSize(security.getTickSize());
 	}
 	
 	public void fillProperties(Security security, SecurityPropertiesEntity p) {
-		p.setCurrencyOfCost(security.getCurrency());
+		p.setCurrencyOfCost(security.getSymbol().getCurrency());
 		p.setDisplayName(security.getDisplayName());
 	}
 	

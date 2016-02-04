@@ -4,15 +4,18 @@ import static org.junit.Assert.*;
 
 import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.SymbolType;
-import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.datatools.storage.model.SecurityPropertiesEntity;
 import ru.prolib.aquila.datatools.storage.model.SecuritySessionPropertiesEntity;
@@ -41,7 +44,9 @@ public class MOEXUtilsTest {
 	@Test
 	public void testFillProperties() throws Exception {
 		SecurityPropertiesEntity p = new SecurityPropertiesEntity();
-		security.setDisplayName("RTS-12.15");
+		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
+		tokens.put(SecurityField.DISPLAY_NAME, "RTS-12.15");
+		security.update(tokens);
 		
 		moexUtils.fillProperties(security, p);
 		
@@ -56,14 +61,16 @@ public class MOEXUtilsTest {
 	@Test
 	public void testFillSessionProperties() throws Exception {
 		SecuritySessionPropertiesEntity p = new SecuritySessionPropertiesEntity();
-		security.setInitialMargin(1215.34d);
-		security.setInitialPrice(86.90d);
-		security.setLotSize(10);
-		security.setMaxPrice(95.0d);
-		security.setMinPrice(75.0d);
-		security.setPrecision(2);
-		security.setMinStepPrice(2.75d);
-		security.setMinStepSize(0.01d);
+		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
+		tokens.put(SecurityField.INITIAL_MARGIN, 1215.34d);
+		tokens.put(SecurityField.INITIAL_PRICE, 86.90d);
+		tokens.put(SecurityField.LOT_SIZE, 10);
+		tokens.put(SecurityField.UPPER_PRICE_LIMIT, 95.0d);
+		tokens.put(SecurityField.LOWER_PRICE_LIMIT, 75.0d);
+		tokens.put(SecurityField.SCALE, 2);
+		tokens.put(SecurityField.TICK_VALUE, 2.75d);
+		tokens.put(SecurityField.TICK_SIZE, 0.01d);
+		security.update(tokens);
 		
 		moexUtils.fillSessionProperties(security, p);
 

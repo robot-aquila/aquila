@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.StarterException;
-import ru.prolib.aquila.core.BusinessEntities.SecurityTradeEvent;
+import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
@@ -50,7 +50,7 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 	public void start() throws StarterException {
 		lock.lock();
 		try {
-			terminal.OnSecurityTrade().addListener(this);
+			terminal.onSecurityLastTrade().addListener(this);
 			scheduleNextMarker();
 		} finally {
 			lock.unlock();
@@ -87,7 +87,7 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 				taskHandler.cancel();
 				taskHandler = null;
 			}
-			terminal.OnSecurityTrade().removeListener(this);
+			terminal.onSecurityLastTrade().removeListener(this);
 			try {
 				database.close();
 				database = null;
@@ -121,12 +121,10 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 
 	@Override
 	public void onEvent(Event event) {
-		SecurityTradeEvent e = (SecurityTradeEvent) event;
-		Trade trade = e.getTrade();
+		SecurityTickEvent e = (SecurityTickEvent) event;
 		lock.lock();
 		try {
-			database.write(trade.getSymbol(), Tick.of(trade.getTime(),
-					trade.getPrice(), trade.getQty()));
+			database.write(e.getSecurity().getSymbol(), e.getTick());
 		} catch (IOException x) {
 			logger.error("Error writing tick: ", x);
 		} finally {
