@@ -147,6 +147,10 @@ public class TerminalImplTest {
 		assertEquals(prefix + "SECURITY_AVAILABLE", terminal.onSecurityAvailable().getId());
 		assertEquals(prefix + "SECURITY_SESSION_UPDATE", terminal.onSecuritySessionUpdate().getId());
 		assertEquals(prefix + "SECURITY_UPDATE", terminal.onSecurityUpdate().getId());
+		assertEquals(prefix + "SECURITY_MARKET_DEPTH_UPDATE", terminal.onSecurityMarketDepthUpdate().getId());
+		assertEquals(prefix + "SECURITY_BEST_ASK", terminal.onSecurityBestAsk().getId());
+		assertEquals(prefix + "SECURITY_BEST_BID", terminal.onSecurityBestBid().getId());
+		assertEquals(prefix + "SECURITY_LAST_TRADE", terminal.onSecurityLastTrade().getId());
 		assertEquals(prefix + "TERMINAL_READY", terminal.onTerminalReady().getId());
 		assertEquals(prefix + "TERMINAL_UNREADY", terminal.onTerminalUnready().getId());
 	}
@@ -160,6 +164,10 @@ public class TerminalImplTest {
 		assertTrue(actual.onAvailable().isAlternateType(terminal.onSecurityAvailable()));
 		assertTrue(actual.onSessionUpdate().isAlternateType(terminal.onSecuritySessionUpdate()));
 		assertTrue(actual.onUpdate().isAlternateType(terminal.onSecurityUpdate()));
+		assertTrue(actual.onBestAsk().isAlternateType(terminal.onSecurityBestAsk()));
+		assertTrue(actual.onBestBid().isAlternateType(terminal.onSecurityBestBid()));
+		assertTrue(actual.onLastTrade().isAlternateType(terminal.onSecurityLastTrade()));
+		assertTrue(actual.onMarketDepthUpdate().isAlternateType(terminal.onSecurityMarketDepthUpdate()));
 	}
 	
 	@Test
@@ -182,6 +190,10 @@ public class TerminalImplTest {
 		assertTrue(actual.onAvailable().isAlternateType(terminal.onSecurityAvailable()));
 		assertTrue(actual.onSessionUpdate().isAlternateType(terminal.onSecuritySessionUpdate()));
 		assertTrue(actual.onUpdate().isAlternateType(terminal.onSecurityUpdate()));
+		assertTrue(actual.onBestAsk().isAlternateType(terminal.onSecurityBestAsk()));
+		assertTrue(actual.onBestBid().isAlternateType(terminal.onSecurityBestBid()));
+		assertTrue(actual.onLastTrade().isAlternateType(terminal.onSecurityLastTrade()));
+		assertTrue(actual.onMarketDepthUpdate().isAlternateType(terminal.onSecurityMarketDepthUpdate()));
 	}
 	
 	@Test
@@ -687,6 +699,54 @@ public class TerminalImplTest {
 		terminal.onTerminalReady().addSyncListener(listener);
 		terminal.onTerminalUnready().addAlternateType(type);
 		terminal.onTerminalUnready().addSyncListener(listener);
+		terminal.onOrderAvailable().addAlternateType(type);
+		terminal.onOrderAvailable().addListener(listener);
+		terminal.onOrderCancelFailed().addAlternateType(type);
+		terminal.onOrderCancelFailed().addListener(listener);
+		terminal.onOrderCancelled().addAlternateType(type);
+		terminal.onOrderCancelled().addListener(listener);
+		terminal.onOrderDeal().addAlternateType(type);
+		terminal.onOrderDeal().addListener(listener);
+		terminal.onOrderDone().addAlternateType(type);
+		terminal.onOrderDone().addListener(listener);
+		terminal.onOrderFailed().addAlternateType(type);
+		terminal.onOrderFailed().addListener(listener);
+		terminal.onOrderFilled().addAlternateType(type);
+		terminal.onOrderFilled().addListener(listener);
+		terminal.onOrderPartiallyFilled().addAlternateType(type);
+		terminal.onOrderPartiallyFilled().addListener(listener);
+		terminal.onOrderRegistered().addAlternateType(type);
+		terminal.onOrderRegistered().addListener(listener);
+		terminal.onOrderRegisterFailed().addAlternateType(type);
+		terminal.onOrderRegisterFailed().addListener(listener);
+		terminal.onOrderUpdate().addAlternateType(type);
+		terminal.onOrderUpdate().addListener(listener);
+		terminal.onPortfolioAvailable().addAlternateType(type);
+		terminal.onPortfolioAvailable().addListener(listener);
+		terminal.onPortfolioUpdate().addAlternateType(type);
+		terminal.onPortfolioUpdate().addListener(listener);
+		terminal.onPositionAvailable().addAlternateType(type);
+		terminal.onPositionAvailable().addListener(listener);
+		terminal.onPositionChange().addAlternateType(type);
+		terminal.onPositionChange().addListener(listener);
+		terminal.onPositionCurrentPriceChange().addAlternateType(type);
+		terminal.onPositionCurrentPriceChange().addListener(listener);
+		terminal.onPositionUpdate().addAlternateType(type);
+		terminal.onPositionUpdate().addListener(listener);
+		terminal.onSecurityAvailable().addAlternateType(type);
+		terminal.onSecurityAvailable().addListener(listener);
+		terminal.onSecuritySessionUpdate().addAlternateType(type);
+		terminal.onSecuritySessionUpdate().addListener(listener);
+		terminal.onSecurityUpdate().addAlternateType(type);
+		terminal.onSecurityUpdate().addListener(listener);
+		terminal.onSecurityMarketDepthUpdate().addAlternateType(type);
+		terminal.onSecurityMarketDepthUpdate().addListener(listener);
+		terminal.onSecurityBestAsk().addAlternateType(type);
+		terminal.onSecurityBestAsk().addListener(listener);
+		terminal.onSecurityBestBid().addAlternateType(type);
+		terminal.onSecurityBestBid().addListener(listener);
+		terminal.onSecurityLastTrade().addAlternateType(type);
+		terminal.onSecurityLastTrade().addListener(listener);
 		
 		terminal.close();
 		
@@ -694,6 +754,54 @@ public class TerminalImplTest {
 		assertFalse(terminal.onTerminalReady().isListener(listener));
 		assertFalse(terminal.onTerminalUnready().isAlternateType(type));
 		assertFalse(terminal.onTerminalUnready().isListener(listener));
+		assertFalse(terminal.onOrderAvailable().hasAlternates());
+		assertFalse(terminal.onOrderAvailable().hasListeners());
+		assertFalse(terminal.onOrderCancelFailed().hasAlternates());
+		assertFalse(terminal.onOrderCancelFailed().hasListeners());
+		assertFalse(terminal.onOrderCancelled().hasAlternates());
+		assertFalse(terminal.onOrderCancelled().hasListeners());
+		assertFalse(terminal.onOrderDeal().hasAlternates());
+		assertFalse(terminal.onOrderDeal().hasListeners());
+		assertFalse(terminal.onOrderDone().hasAlternates());
+		assertFalse(terminal.onOrderDone().hasListeners());
+		assertFalse(terminal.onOrderFailed().hasAlternates());
+		assertFalse(terminal.onOrderFailed().hasListeners());
+		assertFalse(terminal.onOrderFilled().hasAlternates());
+		assertFalse(terminal.onOrderFilled().hasListeners());
+		assertFalse(terminal.onOrderPartiallyFilled().hasAlternates());
+		assertFalse(terminal.onOrderPartiallyFilled().hasListeners());
+		assertFalse(terminal.onOrderRegistered().hasAlternates());
+		assertFalse(terminal.onOrderRegistered().hasListeners());
+		assertFalse(terminal.onOrderRegisterFailed().hasAlternates());
+		assertFalse(terminal.onOrderRegisterFailed().hasListeners());
+		assertFalse(terminal.onOrderUpdate().hasAlternates());
+		assertFalse(terminal.onOrderUpdate().hasListeners());
+		assertFalse(terminal.onPortfolioAvailable().hasAlternates());
+		assertFalse(terminal.onPortfolioAvailable().hasListeners());
+		assertFalse(terminal.onPortfolioUpdate().hasAlternates());
+		assertFalse(terminal.onPortfolioUpdate().hasListeners());
+		assertFalse(terminal.onPositionAvailable().hasAlternates());
+		assertFalse(terminal.onPositionAvailable().hasListeners());
+		assertFalse(terminal.onPositionChange().hasAlternates());
+		assertFalse(terminal.onPositionChange().hasListeners());
+		assertFalse(terminal.onPositionCurrentPriceChange().hasAlternates());
+		assertFalse(terminal.onPositionCurrentPriceChange().hasListeners());
+		assertFalse(terminal.onPositionUpdate().hasAlternates());
+		assertFalse(terminal.onPositionUpdate().hasListeners());
+		assertFalse(terminal.onSecurityAvailable().hasAlternates());
+		assertFalse(terminal.onSecurityAvailable().hasListeners());
+		assertFalse(terminal.onSecuritySessionUpdate().hasAlternates());
+		assertFalse(terminal.onSecuritySessionUpdate().hasListeners());
+		assertFalse(terminal.onSecurityUpdate().hasAlternates());
+		assertFalse(terminal.onSecurityUpdate().hasListeners());
+		assertFalse(terminal.onSecurityMarketDepthUpdate().hasAlternates());
+		assertFalse(terminal.onSecurityMarketDepthUpdate().hasListeners());
+		assertFalse(terminal.onSecurityBestAsk().hasAlternates());
+		assertFalse(terminal.onSecurityBestAsk().hasListeners());
+		assertFalse(terminal.onSecurityBestBid().hasAlternates());
+		assertFalse(terminal.onSecurityBestBid().hasListeners());
+		assertFalse(terminal.onSecurityLastTrade().hasAlternates());
+		assertFalse(terminal.onSecurityLastTrade().hasListeners());
 	}
 	
 	@Test

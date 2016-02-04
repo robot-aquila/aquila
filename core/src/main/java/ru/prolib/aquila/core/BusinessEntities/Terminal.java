@@ -33,6 +33,14 @@ public interface Terminal extends Scheduler {
 	 */
 	public EventType onTerminalUnready();
 	
+	public EventType onSecurityMarketDepthUpdate();
+
+	public EventType onSecurityBestBid();
+	
+	public EventType onSecurityBestAsk();
+	
+	public EventType onSecurityLastTrade();
+	
 	/**
 	 * Создать лимитную заявку.
 	 * <p>

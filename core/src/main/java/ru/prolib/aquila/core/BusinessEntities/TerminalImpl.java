@@ -32,7 +32,8 @@ public class TerminalImpl implements EditableTerminal {
 		onPortfolioUpdate, onPositionAvailable, onPositionChange,
 		onPositionCurrentPriceChange, onPositionUpdate, onSecurityAvailable,
 		onSecuritySessionUpdate, onSecurityUpdate, onTerminalReady,
-		onTerminalUnready;
+		onTerminalUnready, onSecurityMarketDepthUpdate, onSecurityBestAsk,
+		onSecurityBestBid, onSecurityLastTrade;
 	private boolean closed = false;
 	private boolean started = false;
 	
@@ -80,6 +81,10 @@ public class TerminalImpl implements EditableTerminal {
 		onSecurityAvailable = newEventType("SECURITY_AVAILABLE");
 		onSecuritySessionUpdate = newEventType("SECURITY_SESSION_UPDATE");
 		onSecurityUpdate = newEventType("SECURITY_UPDATE");
+		onSecurityMarketDepthUpdate = newEventType("SECURITY_MARKET_DEPTH_UPDATE");
+		onSecurityBestAsk = newEventType("SECURITY_BEST_ASK");
+		onSecurityBestBid = newEventType("SECURITY_BEST_BID");
+		onSecurityLastTrade = newEventType("SECURITY_LAST_TRADE");
 		onTerminalReady = newEventType("TERMINAL_READY");
 		onTerminalUnready = newEventType("TERMINAL_UNREADY");
 	}
@@ -149,6 +154,10 @@ public class TerminalImpl implements EditableTerminal {
 				security.onAvailable().addAlternateType(onSecurityAvailable);
 				security.onSessionUpdate().addAlternateType(onSecuritySessionUpdate);
 				security.onUpdate().addAlternateType(onSecurityUpdate);
+				security.onBestAsk().addAlternateType(onSecurityBestAsk);
+				security.onBestBid().addAlternateType(onSecurityBestBid);
+				security.onLastTrade().addAlternateType(onSecurityLastTrade);
+				security.onMarketDepthUpdate().addAlternateType(onSecurityMarketDepthUpdate);
 			}
 			return security;
 		} finally {
@@ -460,6 +469,54 @@ public class TerminalImpl implements EditableTerminal {
 			onTerminalReady.removeListeners();
 			onTerminalUnready.removeAlternates();
 			onTerminalUnready.removeListeners();
+			onOrderAvailable.removeAlternates();
+			onOrderAvailable.removeListeners();
+			onOrderCancelFailed.removeAlternates();
+			onOrderCancelFailed.removeListeners();
+			onOrderCancelled.removeAlternates();
+			onOrderCancelled.removeListeners();
+			onOrderDeal.removeAlternates();
+			onOrderDeal.removeListeners();
+			onOrderDone.removeAlternates();
+			onOrderDone.removeListeners();
+			onOrderFailed.removeAlternates();
+			onOrderFailed.removeListeners();
+			onOrderFilled.removeAlternates();
+			onOrderFilled.removeListeners();
+			onOrderPartiallyFilled.removeAlternates();
+			onOrderPartiallyFilled.removeListeners();
+			onOrderRegistered.removeAlternates();
+			onOrderRegistered.removeListeners();
+			onOrderRegisterFailed.removeAlternates();
+			onOrderRegisterFailed.removeListeners();
+			onOrderUpdate.removeAlternates();
+			onOrderUpdate.removeListeners();
+			onPortfolioAvailable.removeAlternates();
+			onPortfolioAvailable.removeListeners();
+			onPortfolioUpdate.removeAlternates();
+			onPortfolioUpdate.removeListeners();
+			onPositionAvailable.removeAlternates();
+			onPositionAvailable.removeListeners();
+			onPositionChange.removeAlternates();
+			onPositionChange.removeListeners();
+			onPositionCurrentPriceChange.removeAlternates();
+			onPositionCurrentPriceChange.removeListeners();
+			onPositionUpdate.removeAlternates();
+			onPositionUpdate.removeListeners();
+			onSecurityAvailable.removeAlternates();
+			onSecurityAvailable.removeListeners();
+			onSecuritySessionUpdate.removeAlternates();
+			onSecuritySessionUpdate.removeListeners();
+			onSecurityUpdate.removeAlternates();
+			onSecurityUpdate.removeListeners();
+			onSecurityMarketDepthUpdate.removeAlternates();
+			onSecurityMarketDepthUpdate.removeListeners();
+			onSecurityBestAsk.removeAlternates();
+			onSecurityBestAsk.removeListeners();
+			onSecurityBestBid.removeAlternates();
+			onSecurityBestBid.removeListeners();
+			onSecurityLastTrade.removeAlternates();
+			onSecurityLastTrade.removeListeners();
 		} finally {
 			closed = true;
 			lock.unlock();
@@ -676,6 +733,26 @@ public class TerminalImpl implements EditableTerminal {
 			throw new OrderOwnershipException();
 		}
 		return dummy;
+	}
+
+	@Override
+	public EventType onSecurityMarketDepthUpdate() {
+		return onSecurityMarketDepthUpdate;
+	}
+
+	@Override
+	public EventType onSecurityBestBid() {
+		return onSecurityBestBid;
+	}
+
+	@Override
+	public EventType onSecurityBestAsk() {
+		return onSecurityBestAsk;
+	}
+
+	@Override
+	public EventType onSecurityLastTrade() {
+		return onSecurityLastTrade;
 	}
 
 }
