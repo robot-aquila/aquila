@@ -34,10 +34,10 @@ public class TestStrategy implements EventListener, Starter {
 			subscribeOnSecurityEvents();
 		} else {
 			logger.debug("Security not exists. Wait for availability.");
-			terminal.OnSecurityAvailable().addListener(this);
+			terminal.onSecurityAvailable().addListener(this);
 		}
 		logger.debug("Requesting security: {}", symbol);
-		terminal.requestSecurity(symbol);
+		terminal.subscribe(symbol);
 	}
 
 	public void onTerminalUnready() {
@@ -75,17 +75,17 @@ public class TestStrategy implements EventListener, Starter {
 	@Override
 	public void onEvent(Event event) {
 		logger.debug("onEvent: {}", event);
-		if ( event.isType(terminal.OnSecurityAvailable()) ) {
+		if ( event.isType(terminal.onSecurityAvailable()) ) {
 			SecurityEvent e = (SecurityEvent) event;
 			if ( e.getSecurity().getSymbol().equals(symbol) ) {
 				logger.debug("Wanted security available: {}", symbol);
-				terminal.OnSecurityAvailable().removeListener(this);
+				terminal.onSecurityAvailable().removeListener(this);
 				subscribeOnSecurityEvents();
 			}
-		} else if ( event.isType(terminal.OnReady()) ) {
+		} else if ( event.isType(terminal.onTerminalReady()) ) {
 			onTerminalReady();
 		
-		} else if ( event.isType(terminal.OnUnready()) ) {
+		} else if ( event.isType(terminal.onTerminalUnready()) ) {
 			onTerminalUnready();
 			
 		}
@@ -93,14 +93,14 @@ public class TestStrategy implements EventListener, Starter {
 
 	@Override
 	public void start() throws StarterException {
-		terminal.OnReady().addListener(this);
-		terminal.OnUnready().addListener(this);
+		terminal.onTerminalReady().addListener(this);
+		terminal.onTerminalUnready().addListener(this);
 	}
 
 	@Override
 	public void stop() throws StarterException {
-		terminal.OnReady().removeListener(this);
-		terminal.OnUnready().removeListener(this);
+		terminal.onTerminalReady().removeListener(this);
+		terminal.onTerminalUnready().removeListener(this);
 	}
 
 }

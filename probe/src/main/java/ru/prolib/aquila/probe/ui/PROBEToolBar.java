@@ -71,10 +71,10 @@ public class PROBEToolBar extends JToolBar
 		terminal.OnPause().addListener(this);
 		terminal.OnRun().addListener(this);
 		*/
-		terminal.OnConnected().addListener(this);
-		terminal.OnDisconnected().addListener(this);
-		terminal.OnStarted().addListener(this);
-		terminal.OnStopped().addListener(this);
+		//terminal.OnConnected().addListener(this);
+		//terminal.OnDisconnected().addListener(this);
+		//terminal.OnStarted().addListener(this);
+		//terminal.OnStopped().addListener(this);
 		refreshControls();
 	}
 	

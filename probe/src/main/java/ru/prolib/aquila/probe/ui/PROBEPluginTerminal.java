@@ -52,10 +52,10 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 		menu.addBottomSeparator();
 		cmdConnect = menu.addBottomItem(CONNECT, texts.get(msgID(CONNECT)));
 		cmdDisconnect = menu.addBottomItem(DISCONNECT, texts.get(msgID(DISCONNECT)));
-		terminal.OnStarted().addListener(this);
-		terminal.OnConnected().addListener(this);
-		terminal.OnDisconnected().addListener(this);
-		terminal.OnStopped().addListener(this);
+		//terminal.OnStarted().addListener(this);
+		//terminal.OnConnected().addListener(this);
+		//terminal.OnDisconnected().addListener(this);
+		//terminal.OnStopped().addListener(this);
 		cmdConnect.OnCommand().addListener(this);
 		cmdDisconnect.OnCommand().addListener(this);
 		refreshControls();
@@ -118,15 +118,15 @@ public class PROBEPluginTerminal implements AquilaPluginTerminal,
 	}
 	
 	private void refreshControls() {
-		if ( terminal.connected() ) {
-			setControlsToConnected();
-		} else if ( terminal.started() ) {
-			// started, but not connected = disconnected
-			setControlsToDisconnected();
-		} else {
-			// else - stopped
-			setControlsToDisabled();	
-		}
+		//if ( terminal.connected() ) {
+		//	setControlsToConnected();
+		//} else if ( terminal.started() ) {
+		//	// started, but not connected = disconnected
+		//	setControlsToDisconnected();
+		//} else {
+		//	// else - stopped
+		//	setControlsToDisabled();	
+		//}
 	}
 	
 }
