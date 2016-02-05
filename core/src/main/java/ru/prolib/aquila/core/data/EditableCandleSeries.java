@@ -116,7 +116,7 @@ public interface EditableCandleSeries
 	 * <p>
 	 * Фактически метод смещения ТА на более позднее время (в будущее). При
 	 * запросе на смещение в прошлое возбуждается исключение. Эквивалент вызова
-	 * {@link #aggregate(DateTime, boolean)} с false в качестве второго
+	 * {@link #aggregate(Instant, boolean)} с false в качестве второго
 	 * аргумента.
 	 * <p>
 	 * @param time временная метка

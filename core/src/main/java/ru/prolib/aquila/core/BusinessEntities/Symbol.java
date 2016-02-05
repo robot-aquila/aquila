@@ -44,7 +44,7 @@ import org.apache.commons.lang3.builder.*;
  * S:AAPL
  * AAPL@NASDAQ
  * S:AAPL@:USD
- * </re>
+ * </pre>
  */
 public class Symbol implements Serializable {
 	private static final long serialVersionUID = 1L;
