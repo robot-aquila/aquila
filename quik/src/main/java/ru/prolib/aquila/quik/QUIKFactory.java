@@ -6,7 +6,6 @@ import java.util.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.utils.TerminalReadyIfConnected;
 import ru.prolib.aquila.core.utils.*;
 import ru.prolib.aquila.dde.*;

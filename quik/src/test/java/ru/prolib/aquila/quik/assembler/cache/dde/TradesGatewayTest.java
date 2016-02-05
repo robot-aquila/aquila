@@ -114,7 +114,7 @@ public class TradesGatewayTest {
 		control.replay();
 		
 		Trade expected = new Trade(terminal);
-		expected.setDirection(Direction.SELL);
+		expected.setDirection(OrderAction.SELL);
 		expected.setId(894L);
 		expected.setPrice(45.90d);
 		expected.setQty(1000L);

@@ -51,12 +51,12 @@ public class TradesGateway implements TableGateway {
 		VALUE,
 		MICROSECONDS,
 	};
-	private static final Map<String, Direction> DIR_MAP;
+	private static final Map<String, OrderAction> DIR_MAP;
 	
 	static {
-		DIR_MAP = new Hashtable<String, Direction>();
-		DIR_MAP.put("BUY", Direction.BUY);
-		DIR_MAP.put("SELL", Direction.SELL);
+		DIR_MAP = new Hashtable<String, OrderAction>();
+		DIR_MAP.put("BUY", OrderAction.BUY);
+		DIR_MAP.put("SELL", OrderAction.SELL);
 	}
 	
 	private final RowDataConverter converter;
@@ -114,7 +114,7 @@ public class TradesGateway implements TableGateway {
 				return null;
 			}
 			Trade trade  = new Trade(terminal);
-			trade.setDirection((Direction)
+			trade.setDirection((OrderAction)
 					converter.getStringMappedTo(row, DIR, DIR_MAP));
 			trade.setId(converter.getLong(row, ID));
 			trade.setPrice(converter.getDouble(row, PRICE));

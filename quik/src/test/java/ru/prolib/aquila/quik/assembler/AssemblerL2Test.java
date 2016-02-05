@@ -321,7 +321,7 @@ public class AssemblerL2Test {
 	@Test
 	public void testTryAssemble_Trade_Ok() throws Exception {
 		EditableOrder order = control.createMock(EditableOrder.class);
-		expect(order.getDirection()).andStubReturn(Direction.SELL);
+		expect(order.getDirection()).andStubReturn(OrderAction.SELL);
 		expect(order.getId()).andStubReturn(832);
 		expect(order.getSymbol()).andStubReturn(symbol);
 		
@@ -334,7 +334,7 @@ public class AssemblerL2Test {
 		expect(entry.getValue()).andStubReturn(123400d);
 		
 		Trade expected = new Trade(terminal);
-		expected.setDirection(Direction.SELL);
+		expected.setDirection(OrderAction.SELL);
 		expected.setId(814L);
 		expected.setOrderId(832L);
 		expected.setPrice(12.34d);

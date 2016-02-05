@@ -19,13 +19,13 @@ import ru.prolib.aquila.t2q.T2QException;
  */
 public class PlaceHandler implements QUIKTransactionHandler {
 	private static final Logger logger;
-	private static final Map<Direction, String> dir;
+	private static final Map<OrderAction, String> dir;
 	
 	static {
 		logger = LoggerFactory.getLogger(PlaceHandler.class);
-		dir = new Hashtable<Direction, String>();
-		dir.put(Direction.BUY,  "B");
-		dir.put(Direction.SELL, "S");
+		dir = new Hashtable<OrderAction, String>();
+		dir.put(OrderAction.BUY,  "B");
+		dir.put(OrderAction.SELL, "S");
 	}
 	
 	protected final EditableOrder order;

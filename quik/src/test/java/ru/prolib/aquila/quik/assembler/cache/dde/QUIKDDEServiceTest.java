@@ -9,7 +9,6 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.utils.BasicTerminalBuilder;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.dde.*;
 import ru.prolib.aquila.dde.utils.table.*;

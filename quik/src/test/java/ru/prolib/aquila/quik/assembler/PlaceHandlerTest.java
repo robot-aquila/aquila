@@ -117,7 +117,7 @@ public class PlaceHandlerTest {
 	
 	@Test
 	public void testPlaceOrder_Market() throws Exception {
-		expect(order.getDirection()).andStubReturn(Direction.BUY);
+		expect(order.getDirection()).andStubReturn(OrderAction.BUY);
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
 		expect(order.getComment()).andStubReturn("");
 		String expected = "TRANS_ID=214; ACTION=NEW_ORDER; "
@@ -138,7 +138,7 @@ public class PlaceHandlerTest {
 	
 	@Test
 	public void testPlaceOrder_Limit() throws Exception {
-		expect(order.getDirection()).andStubReturn(Direction.SELL);
+		expect(order.getDirection()).andStubReturn(OrderAction.SELL);
 		expect(order.getType()).andStubReturn(OrderType.LIMIT);
 		expect(order.getPrice()).andStubReturn(14.95d);
 		// will be cut to 20 chars
@@ -165,7 +165,7 @@ public class PlaceHandlerTest {
 	@Test
 	public void testPlaceOrder_SecurityFailed() throws Exception {
 		SecurityException expected = new SecurityException("test"); 
-		expect(order.getDirection()).andStubReturn(Direction.SELL);
+		expect(order.getDirection()).andStubReturn(OrderAction.SELL);
 		expect(order.getType()).andStubReturn(OrderType.LIMIT);
 		expect(order.getPrice()).andStubReturn(14.95d);
 		expect(order.getComment()).andStubReturn("");
@@ -188,7 +188,7 @@ public class PlaceHandlerTest {
 	@Test
 	public void testPlaceOrder_SendFailed() throws Exception {
 		T2QException expected = new T2QException("test"); 
-		expect(order.getDirection()).andStubReturn(Direction.BUY);
+		expect(order.getDirection()).andStubReturn(OrderAction.BUY);
 		expect(order.getType()).andStubReturn(OrderType.MARKET);
 		expect(order.getComment()).andStubReturn("");
 		client.send((String) anyObject());
