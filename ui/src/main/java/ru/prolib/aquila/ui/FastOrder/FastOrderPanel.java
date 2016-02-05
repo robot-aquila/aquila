@@ -73,14 +73,14 @@ public class FastOrderPanel extends JPanel implements Starter {
 		add(button = new JButton("buy"));
 		button.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent arg0) {
-				placeOrder(Direction.BUY);
+				placeOrder(OrderAction.BUY);
 			}
 		});
 		addLabel(" or ", JLabel.CENTER);
 		add(button = new JButton("sell"));
 		button.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent arg0) {
-				placeOrder(Direction.SELL);
+				placeOrder(OrderAction.SELL);
 			}
 		});
 		addLabel(" order");
@@ -115,7 +115,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 	 * <p>
 	 * @param dir направление заявки
 	 */
-	private void placeOrder(Direction dir) {
+	private void placeOrder(OrderAction dir) {
 		Order order; Integer qty; Double slippage; Object value = null;
 		Account account = accountCombo.getSelectedAccount();
 		Security security = securityCombo.getSelectedSecurity();
@@ -144,12 +144,18 @@ public class FastOrderPanel extends JPanel implements Starter {
 			return;
 		}
 
+		Symbol symbol = security.getSymbol();
 		if ( typeCombo.getSelectedType() == OrderType.LIMIT ) {
-			double price = security.getLastPrice() +
-				(dir == Direction.BUY ? slippage : -slippage);
-			order = terminal.createOrder(account, dir, security, qty, price);
+			Tick last = security.getLastTrade();
+			if ( last == null ) {
+				logger.warn("Last trade not available");
+				return;
+			}
+			double price = last.getPrice() +
+				(dir == OrderAction.BUY ? slippage : -slippage);
+			order = terminal.createOrder(account, symbol, dir, qty, price);
 		} else {
-			order = terminal.createOrder(account, dir, security, qty);
+			order = terminal.createOrder(account, symbol, dir, qty);
 		}
 		try {
 			terminal.placeOrder(order);

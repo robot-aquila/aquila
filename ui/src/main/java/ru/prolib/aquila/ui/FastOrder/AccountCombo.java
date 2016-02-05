@@ -13,34 +13,34 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public class AccountCombo extends JComboBox<Account> implements Starter, EventListener {
 	private static final long serialVersionUID = -7501535410571675108L;
-	private final Terminal portfolios;
+	private final Terminal terminal;
 	private final Vector<Portfolio> list = new Vector<Portfolio>();
 
 	public AccountCombo(Terminal portfolios) {
 		super();
-		this.portfolios = portfolios;
+		this.terminal = portfolios;
 	}
 
 	@Override
 	public void onEvent(Event event) {
-		if ( event.isType(portfolios.OnPortfolioAvailable()) ) {
+		if ( event.isType(terminal.onPortfolioAvailable()) ) {
 			addPortfolio(((PortfolioEvent) event).getPortfolio());
 		}
 	}
 
 	@Override
 	public void start() {
-		portfolios.OnPortfolioAvailable().addListener(this);
+		terminal.onPortfolioAvailable().addListener(this);
 		list.clear();
 		removeAllItems();
-		for ( Portfolio portfolio : portfolios.getPortfolios() ) {
+		for ( Portfolio portfolio : terminal.getPortfolios() ) {
 			addPortfolio(portfolio);
 		}
 	}
 
 	@Override
 	public void stop() {
-		portfolios.OnPortfolioAvailable().removeListener(this);
+		terminal.onPortfolioAvailable().removeListener(this);
 	}
 	
 	/**

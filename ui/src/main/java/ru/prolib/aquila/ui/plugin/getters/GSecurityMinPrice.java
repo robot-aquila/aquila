@@ -16,7 +16,7 @@ public class GSecurityMinPrice extends GDouble {
 	@Override
 	public Double get(Object obj) throws ValueException {
 		Security o = (Security) obj;
-		return super.get(o.getMinPrice());
+		return super.get(o.getLowerPriceLimit());
 	}
 	
 }

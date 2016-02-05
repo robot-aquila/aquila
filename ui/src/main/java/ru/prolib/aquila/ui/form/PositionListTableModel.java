@@ -50,13 +50,13 @@ public class PositionListTableModel extends AbstractTableModel implements
 	}
 	
 	private void subscribe(Terminal terminal) {
-		terminal.OnPositionAvailable().addListener(this);
-		terminal.OnPositionChanged().addListener(this);
+		terminal.onPositionAvailable().addListener(this);
+		terminal.onPositionUpdate().addListener(this);
 	}
 	
 	private void unsubscribe(Terminal terminal) {
-		terminal.OnPositionAvailable().removeListener(this);
-		terminal.OnPositionChanged().removeListener(this);
+		terminal.onPositionAvailable().removeListener(this);
+		terminal.onPositionUpdate().removeListener(this);
 	}
 	
 	private void addPositions(Terminal terminal) {
@@ -118,21 +118,21 @@ public class PositionListTableModel extends AbstractTableModel implements
 		} else if ( id == CommonMsg.TERMINAL ) {
 			return "TODO";
 		} else if ( id == CommonMsg.SECURITY ) {			
-			return p.getSecurity().getSymbol();
+			return p.getSymbol();
 		} else if ( id == CommonMsg.VMARGIN ) {
-			return p.getVarMargin();
+			return p.getVariationMargin();
 		} else if ( id == CommonMsg.OPEN_VAL ) {
-			return p.getOpenQty();
+			return p.getOpenVolume();
 		} else if ( id == CommonMsg.LOCKED_VAL ) {
-			return p.getLockQty();
+			return 0;
 		} else if ( id == CommonMsg.CURR_VAL ) {
-			return p.getCurrQty();
+			return p.getCurrentVolume();
 		} else if ( id == CommonMsg.TYPE ) {
-			return p.getType();
+			return null;
 		} else if ( id == CommonMsg.MARKET_VAL ) {
-			return p.getMarketValue();
+			return p.getCurrentPrice();
 		} else if ( id == CommonMsg.BALANCE_VAL ) {
-			return p.getBookValue();
+			return p.getOpenPrice();
 		} else {
 			return null;
 		}
@@ -140,7 +140,7 @@ public class PositionListTableModel extends AbstractTableModel implements
 	
 	private boolean isPositionAvailableEvent(Event event) {
 		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.OnPositionAvailable()) ) {
+			if ( event.isType(terminal.onPositionAvailable()) ) {
 				return true;
 			}
 		}
@@ -149,7 +149,7 @@ public class PositionListTableModel extends AbstractTableModel implements
 	
 	private boolean isPositionChangedEvent(Event event) {
 		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.OnPositionChanged()) ) {
+			if ( event.isType(terminal.onPositionUpdate()) ) {
 				return true;
 			}
 		}

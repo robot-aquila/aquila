@@ -85,7 +85,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 		} else if ( id == CommonMsg.CURRENCY ) {
 			return "TODO";
 		} else if ( id == CommonMsg.CASH ) {
-			return p.getCash();
+			return p.getFreeMargin();
 		} else if ( id == CommonMsg.SUBCODE2 ) {
 			return p.getAccount().getSubCode2();
 		} else if ( id == CommonMsg.SUBCODE ) {
@@ -160,13 +160,13 @@ public class PortfolioListTableModel extends AbstractTableModel
 	}
 	
 	private void subscribe(Terminal terminal) {
-		terminal.OnPortfolioAvailable().addListener(this);
-		terminal.OnPortfolioChanged().addListener(this);
+		terminal.onPortfolioAvailable().addListener(this);
+		terminal.onPortfolioUpdate().addListener(this);
 	}
 	
 	private void unsubscribe(Terminal terminal) {
-		terminal.OnPortfolioAvailable().removeListener(this);
-		terminal.OnPortfolioChanged().removeListener(this);
+		terminal.onPortfolioAvailable().removeListener(this);
+		terminal.onPortfolioUpdate().removeListener(this);
 	}
 	
 	private void addPortfolios(Terminal terminal) {
@@ -216,7 +216,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 	
 	private boolean isPortfolioAvailableEvent(Event event) {
 		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.OnPortfolioAvailable()) ) {
+			if ( event.isType(terminal.onPortfolioAvailable()) ) {
 				return true;
 			}
 		}
@@ -225,7 +225,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 	
 	private boolean isPortfolioChangedEvent(Event event) {
 		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.OnPortfolioChanged()) ) {
+			if ( event.isType(terminal.onPortfolioUpdate()) ) {
 				return true;
 			}
 		}

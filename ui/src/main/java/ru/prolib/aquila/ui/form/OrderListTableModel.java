@@ -92,38 +92,33 @@ public class OrderListTableModel extends AbstractTableModel implements
 		
 		MsgID id = mapIndexToID.get(col);
 		if ( id == CommonMsg.ID ) {
-			return order.getId();
+			return order.getID();
 		} else if ( id == CommonMsg.DIR) {
-			return order.getDirection();
+			return order.getAction();
 		} else if ( id == CommonMsg.TYPE) {
 			return order.getType();
 		} else if ( id == CommonMsg.SECURITY) {
-			try {
-				return order.getSecurity().getSymbol();
-			} catch ( SecurityException e ) {
-				logger.error("Unexpected exception: ", e);
-				return null;
-			}
+			return order.getSymbol();
 		} else if ( id == CommonMsg.QTY) {
-			return order.getQty();
+			return order.getInitialVolume();
 		} else if ( id == CommonMsg.STATUS) {
 			return order.getStatus();
 		} else if ( id == CommonMsg.QTY_REST) {
-			return order.getQtyRest();
+			return order.getCurrentVolume();
 		} else if ( id == CommonMsg.PRICE) {
 			return order.getPrice() == null? 0.0 : order.getPrice();
 		} else if (  id == CommonMsg.EXEC_VOL ) {
-			return order.getExecutedVolume();
+			return order.getExecutedValue();
 		} else if (  id == CommonMsg.ACCOUNT) {
 			return order.getAccount();
 		} else if (  id == CommonMsg.TIME) {
 			return order.getTime();
 		} else if (  id == CommonMsg.CHNG_TIME ) {
-			return order.getLastChangeTime();
+			return null;
 		} else if (  id == CommonMsg.AVG_EXEC_PRICE ) {
-			return order.getAvgExecutedPrice();
+			return null;
 		} else if (  id == CommonMsg.ACTIVATOR ) {
-			return order.getActivator();
+			return null;
 		} else if (  id == CommonMsg.COMMENT ) {
 			return order.getComment();
 		} else {
@@ -132,13 +127,13 @@ public class OrderListTableModel extends AbstractTableModel implements
 	}
 	
 	private void subscribe(Terminal terminal) {
-		terminal.OnOrderAvailable().addListener(this);
-		terminal.OnOrderChanged().addListener(this);		
+		terminal.onOrderAvailable().addListener(this);
+		terminal.onOrderUpdate().addListener(this);		
 	}
 	
 	private void unsubscribe(Terminal terminal) {
-		terminal.OnOrderChanged().removeListener(this);
-		terminal.OnOrderAvailable().removeListener(this);
+		terminal.onOrderUpdate().removeListener(this);
+		terminal.onOrderAvailable().removeListener(this);
 	}
 	
 	private boolean isExists(Order order) {
@@ -159,7 +154,7 @@ public class OrderListTableModel extends AbstractTableModel implements
 	
 	private boolean isOrderAvailableEvent(Event event) {
 		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.OnOrderAvailable()) ) {
+			if ( event.isType(terminal.onOrderAvailable()) ) {
 				return true;
 			}
 		}
@@ -168,7 +163,7 @@ public class OrderListTableModel extends AbstractTableModel implements
 	
 	private boolean isOrderChangedEvent(Event event) {
 		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.OnOrderChanged()) ) {
+			if ( event.isType(terminal.onOrderUpdate()) ) {
 				return true;
 			}
 		}

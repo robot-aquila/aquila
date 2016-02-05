@@ -93,61 +93,45 @@ public class MainFrame extends JFrame implements EventListener, AquilaPlugin, Ac
         statusBar.add(portfolioStatusBar);
         getContentPane().add(statusBar, BorderLayout.SOUTH);
         
-        terminal.OnStarted().addListener(this);
-        terminal.OnStopped().addListener(this);
-		terminal.OnConnected().addListener(this);
-        terminal.OnDisconnected().addListener(this);
-        terminal.OnPortfolioAvailable().addListener(this);
-        terminal.OnPortfolioChanged().addListener(this);
+		terminal.onTerminalReady().addListener(this);
+        terminal.onTerminalUnready().addListener(this);
+        terminal.onPortfolioAvailable().addListener(this);
+        terminal.onPortfolioUpdate().addListener(this);
         portfolioSelector.OnCurrentPortfolioChanged().addListener(this);
 	}
 	
 	public void startTerminal() {
-		try {
-			if( terminal.stopped() ) {
-				terminal.start();
-			}
-		} catch (StarterException e) {
-			logger.error("Terminal start failed: ", e);
+		if( ! terminal.isStarted() ) {
+			terminal.start();
 		}
 	}
 	
 	public void stopTerminal() {
-		try {
-			if( terminal.started() ) {
-				terminal.stop();
-			}
-		} catch (StarterException e) {
-			logger.error("Terminal stop failed: ", e);
+		if( terminal.isStarted() ) {
+			terminal.stop();
 		}
 	}
 
 	@Override
 	public void onEvent(final Event event) {		
-		if ( event.isType(terminal.OnStarted()) ) {
+		if ( event.isType(terminal.onTerminalReady()) ) {
 			cmdStart.setEnabled(false);
 			cmdStop.setEnabled(true);
 			terminalStatusBar.updateTerminalStatus(terminal);
 			
-		} else if ( event.isType(terminal.OnStopped()) ) {
+		} else if ( event.isType(terminal.onTerminalUnready()) ) {
 			cmdStart.setEnabled(true);
 			cmdStop.setEnabled(false);
 			terminalStatusBar.updateTerminalStatus(terminal);
-			
-		} else if ( event.isType(terminal.OnConnected()) ) {
-			terminalStatusBar.updateTerminalStatus(terminal);
-			
-		} else if ( event.isType(terminal.OnDisconnected()) ) {
-			terminalStatusBar.updateTerminalStatus(terminal);
-			
+				
 		} else if ( event.isType(cmdStart.OnCommand()) ) {
 			startTerminal();
 			
 		} else if ( event.isType(cmdStop.OnCommand()) ) {
 			stopTerminal();
 			
-		} else if ( event.isType(terminal.OnPortfolioAvailable())
-				|| event.isType(terminal.OnPortfolioChanged())
+		} else if ( event.isType(terminal.onPortfolioAvailable())
+				|| event.isType(terminal.onPortfolioUpdate())
 				|| event.isType(portfolioSelector.OnCurrentPortfolioChanged()) )
 		{
 			Portfolio p = portfolioSelector.getCurrentPortfolio();

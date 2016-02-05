@@ -164,7 +164,7 @@ public class SecurityListDialog extends JDialog
 	}
 	
 	private void onSelect() {
-		selectedSecurity = tableModel.getSecutity(table.getSelectedRow());
+		selectedSecurity = tableModel.getSecurity(table.getSelectedRow());
 		dispose();
 	}
 	

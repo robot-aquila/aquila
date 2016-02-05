@@ -66,8 +66,8 @@ public class MainFrameTest {
 		fail("TODO: ");
 		EventType onStarted = control.createMock(EventType.class);
 		EventType onStopped = control.createMock(EventType.class);
-		expect(terminal.OnStarted()).andStubReturn(onStarted);
-		expect(terminal.OnStopped()).andStubReturn(onStopped);
+		expect(terminal.onTerminalReady()).andStubReturn(onStarted);
+		expect(terminal.onTerminalUnready()).andStubReturn(onStopped);
 		
 		onStarted.addListener(same(main));
 		onStopped.addListener(same(main));
@@ -104,7 +104,7 @@ public class MainFrameTest {
 		//main.setStatus(status);
 		//main.setTerminal(terminal);
 		
-		expect(terminal.started()).andReturn(false);
+		expect(terminal.isStarted()).andReturn(false);
 		//status.stop();		
 		control.replay();
 		main.stop();
@@ -120,7 +120,7 @@ public class MainFrameTest {
 		//main.setStatus(status);
 		//main.setTerminal(terminal);
 		
-		expect(terminal.started()).andReturn(true);
+		expect(terminal.isStarted()).andReturn(true);
 		terminal.stop();
 		//status.stop();		
 		control.replay();
@@ -138,7 +138,7 @@ public class MainFrameTest {
 		//main.setTerminal(terminal);
 		
 		//status.start();
-		expect(terminal.stopped()).andReturn(false);
+		expect(terminal.isStarted()).andReturn(true);
 		control.replay();
 		main.start();
 		control.verify();
@@ -154,7 +154,7 @@ public class MainFrameTest {
 		//main.setTerminal(terminal);
 		
 		//status.start();
-		expect(terminal.stopped()).andReturn(true);
+		expect(terminal.isStarted()).andReturn(false);
 		terminal.start();
 		control.replay();
 		main.start();

@@ -17,7 +17,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	private static Logger logger = LoggerFactory.getLogger(CurrentPortfolioImpl.class);
 	private final EventType portfolioChanged;
 	private final EventDispatcher dispatcher;
-	private Terminal portfolios;
+	private Terminal terminal;
 	private Portfolio portfolio;
 	private ButtonGroup buttons = new ButtonGroup();
 	private Menu menu;
@@ -25,12 +25,12 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	private Map<EventType, Portfolio> prtList = new HashMap<EventType, Portfolio>();
 	
 	public CurrentPortfolioImpl(
-			Terminal portfolios, EventType portfolioChanged, 
+			Terminal terminal, EventType portfolioChanged, 
 			EventDispatcher dispatcher, Menu menu) 
 	{
 		this.portfolioChanged = portfolioChanged;
 		this.dispatcher = dispatcher;
-		this.portfolios = portfolios;
+		this.terminal = terminal;
 		this.menu = menu;
 	}
 	
@@ -65,7 +65,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	 */
 	@Override
 	public void start() throws StarterException {
-		portfolios.OnPortfolioAvailable().addListener(this);
+		terminal.onPortfolioAvailable().addListener(this);
 	}
 
 	/* (non-Javadoc)
@@ -73,7 +73,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	 */
 	@Override
 	public void stop() throws StarterException {
-		portfolios.OnPortfolioAvailable().removeListener(this);
+		terminal.onPortfolioAvailable().removeListener(this);
 		
 	}
 
@@ -82,7 +82,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	 */
 	@Override
 	public void onEvent(Event event) {
-		if(event.isType(portfolios.OnPortfolioAvailable())) {
+		if(event.isType(terminal.onPortfolioAvailable())) {
 			PortfolioEvent e = (PortfolioEvent) event;
 			try {
 				addMenuItem(e.getPortfolio());
@@ -110,7 +110,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	}
 	
 	public Terminal getPortfolios() {
-		return portfolios;
+		return terminal;
 	}
 	
 	public EventDispatcher getDispatcher() {

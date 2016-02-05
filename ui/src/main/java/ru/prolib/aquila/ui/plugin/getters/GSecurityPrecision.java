@@ -12,6 +12,6 @@ public class GSecurityPrecision extends GInteger {
 	@Override
 	public Integer get(Object obj) throws ValueException {
 		Security o = (Security) obj;
-		return super.get(o.getPrecision());
+		return super.get(o.getScale());
 	}
 }

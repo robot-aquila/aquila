@@ -108,17 +108,17 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 	
 	@Override
 	public void start() throws StarterException {
-		terminal.OnSecurityAvailable()
+		terminal.onSecurityAvailable()
 			.addListener(model.getOnRowAvailableListener());
-		terminal.OnSecurityChanged()
+		terminal.onSecurityUpdate()
 			.addListener(model.getOnRowChangedListener());
 	}
 	
 	@Override
 	public void stop() throws StarterException {
-		terminal.OnSecurityAvailable()
+		terminal.onSecurityAvailable()
 			.removeListener(model.getOnRowAvailableListener());
-		terminal.OnSecurityChanged()
+		terminal.onSecurityUpdate()
 			.removeListener(model.getOnRowChangedListener());
 	}
 

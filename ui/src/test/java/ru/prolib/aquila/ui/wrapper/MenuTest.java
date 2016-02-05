@@ -30,10 +30,10 @@ import ru.prolib.aquila.core.EventSystemImpl;
  * $Id$
  */
 public class MenuTest {
-
-	private static EventSystem eventSystem;
-	private static EventQueue queue;
+	
 	private static IMocksControl control;
+	private EventSystem eventSystem;
+	private EventQueue queue;
 	
 	private JMenu underlying;
 	private Menu menu;
@@ -45,20 +45,19 @@ public class MenuTest {
 	public static void setUpBeforeCLass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();		
-		
-		eventSystem = new EventSystemImpl();
-		queue = eventSystem.getEventQueue();
 	}
+	
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
+		eventSystem = new EventSystemImpl();
+		queue = eventSystem.getEventQueue();
 		
 		underlying = new JMenu();
 		menu = new Menu(underlying, eventSystem);
-		queue.start();
 	}
 
 	/**

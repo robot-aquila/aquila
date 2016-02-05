@@ -56,12 +56,7 @@ public class TerminalStatusBar extends JPanel implements TerminalStatusBarView {
 	@Override
 	public void updateTerminalStatus(final Terminal terminal) {
 		if ( SwingUtilities.isEventDispatchThread() ) {
-			if ( terminal.connected() ) {
-				setConnected();
-			} else {
-				setDisconnected();
-			}
-			if ( terminal.started() ) {
+			if ( terminal.isStarted() ) {
 				setStarted();
 			} else {
 				setStopped();

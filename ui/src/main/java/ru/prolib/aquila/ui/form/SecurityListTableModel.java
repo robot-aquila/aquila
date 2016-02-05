@@ -8,6 +8,7 @@ import java.util.Vector;
 import javax.swing.table.AbstractTableModel;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
@@ -57,17 +58,18 @@ public class SecurityListTableModel extends AbstractTableModel {
 			return null;
 		}
 		Security security = data.get(rowIndex);
+		Symbol symbol = security.getSymbol();
 		MsgID id = mapIndexToID.get(columnIndex); 
 		if ( id == SecurityMsg.NAME ) {
 			return security.getDisplayName();
 		} else if ( id == SecurityMsg.SYMBOL ) {
-			return security.getCode();
+			return symbol.getCode();
 		} else if ( id == SecurityMsg.CLASS ) {
-			return security.getClassCode();
+			return symbol.getExchangeID();
 		} else if ( id == SecurityMsg.TYPE ) {
-			return security.getSymbol().getType();
+			return symbol.getType();
 		} else if ( id == SecurityMsg.CURRENCY ) {
-			return security.getSymbol().getCurrencyCode();
+			return symbol.getCurrencyCode();
 		} else {
 			return null;			
 		}
@@ -116,7 +118,7 @@ public class SecurityListTableModel extends AbstractTableModel {
 	 * @param rowIndex - the row index
 	 * @return security
 	 */
-	public Security getSecutity(int rowIndex) {
+	public Security getSecurity(int rowIndex) {
 		return data.get(rowIndex);
 	}
 

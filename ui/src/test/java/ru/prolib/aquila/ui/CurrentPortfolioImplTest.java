@@ -26,11 +26,10 @@ import ru.prolib.aquila.ui.wrapper.MenuItem;
 public class CurrentPortfolioImplTest {
 
 	private static IMocksControl control;
-	private static EventSystem eventSystem;
-	private static EventQueue queue;
-	
+	private EventSystem eventSystem;
+	private EventQueue queue;
 	private Account acc;
-	private Terminal portfolios;
+	private Terminal terminal;
 	private EventDispatcher dispatcher;
 	private EventType portfolioChanged;
 	private Menu menu;
@@ -43,10 +42,7 @@ public class CurrentPortfolioImplTest {
 	@BeforeClass
 	public static void setUpBeforeCLass() throws Exception {
 		BasicConfigurator.resetConfiguration();
-		BasicConfigurator.configure();		
-		
-		eventSystem = new EventSystemImpl();
-		queue = eventSystem.getEventQueue();
+		BasicConfigurator.configure();				
 	}
 	
 	/**
@@ -55,14 +51,16 @@ public class CurrentPortfolioImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		
+		eventSystem = new EventSystemImpl();
+		queue = eventSystem.getEventQueue();
+
 		dispatcher = eventSystem.createEventDispatcher();
-		portfolios = control.createMock(Terminal.class);
+		terminal = control.createMock(Terminal.class);
 		portfolioChanged = dispatcher.createType();
 		acc = new Account("Foo", "Bar", "Trulala");
 		
 		menu = new Menu(new JMenu(), eventSystem);
-		prt = new CurrentPortfolioImpl(portfolios, portfolioChanged, dispatcher, menu);
+		prt = new CurrentPortfolioImpl(terminal, portfolioChanged, dispatcher, menu);
 		queue.start();
 	}
 
@@ -78,7 +76,7 @@ public class CurrentPortfolioImplTest {
 	@Test
 	public void testStart() throws Exception {
 		EventType onAvailable = control.createMock(EventType.class);
-		expect(portfolios.OnPortfolioAvailable()).andStubReturn(onAvailable);
+		expect(terminal.onPortfolioAvailable()).andStubReturn(onAvailable);
 		onAvailable.addListener((EventListener) prt);
 		control.replay();
 		prt.start();
@@ -88,7 +86,7 @@ public class CurrentPortfolioImplTest {
 	@Test
 	public void testStop() throws Exception {
 		EventType onAvailable = control.createMock(EventType.class);
-		expect(portfolios.OnPortfolioAvailable()).andStubReturn(onAvailable);
+		expect(terminal.onPortfolioAvailable()).andStubReturn(onAvailable);
 		onAvailable.removeListener(prt);
 		control.replay();
 		prt.stop();
@@ -102,7 +100,7 @@ public class CurrentPortfolioImplTest {
 		
 		final CountDownLatch finished = new CountDownLatch(1);
 		
-		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
+		expect(terminal.onPortfolioAvailable()).andReturn(onPortfolioAvailable);
 		expect(portfolio.getAccount()).andReturn(acc);
 		expectLastCall().times(2);
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
@@ -139,7 +137,7 @@ public class CurrentPortfolioImplTest {
 		EventType onPortfolioAvailable = dispatcher.createType();
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
-		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
+		expect(terminal.onPortfolioAvailable()).andReturn(onPortfolioAvailable);
 		expect(portfolio.getAccount()).andReturn(acc);
 		
 		prt.setPortfolio(portfolio);
@@ -171,7 +169,7 @@ public class CurrentPortfolioImplTest {
 	@Test
 	public void testOnEvent_Unhandled() {
 		EventType onPortfolioAvailable = dispatcher.createType();
-		expect(portfolios.OnPortfolioAvailable()).andReturn(onPortfolioAvailable);
+		expect(terminal.onPortfolioAvailable()).andReturn(onPortfolioAvailable);
 		
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
 
@@ -212,7 +210,7 @@ public class CurrentPortfolioImplTest {
 
 	@Test
 	public void testConstructor() {
-		assertEquals(portfolios, prt.getPortfolios());
+		assertEquals(terminal, prt.getPortfolios());
 		assertEquals(dispatcher, prt.getDispatcher());
 		assertEquals(portfolioChanged, prt.OnCurrentPortfolioChanged());
 		assertEquals(menu, prt.getMenu());

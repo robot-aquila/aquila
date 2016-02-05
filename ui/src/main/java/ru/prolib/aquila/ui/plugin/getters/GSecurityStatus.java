@@ -15,7 +15,7 @@ public class GSecurityStatus implements G<SecurityStatus> {
 	@Override
 	public SecurityStatus get(Object obj) {
 		Security sc = (Security) obj;
-		return sc.getStatus();
+		return null;
 	}
 
 }
