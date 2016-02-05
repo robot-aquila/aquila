@@ -2,8 +2,10 @@ package ru.prolib.aquila.core.text;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.ini4j.InvalidFileFormatException;
 import org.ini4j.Options;
@@ -11,55 +13,131 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Text messages facade.
+ * <p>
  * $Id: UiTexts.java 570 2013-03-12 00:03:15Z huan.kaktus $
- *
  */
 public class Messages implements IMessages {
-	private static Logger logger;
+	private static final Logger logger;
+	private static final HashMap<String, ClassLoader> resourceLoaders;
+	private static final File DEFAULT_ROOT = new File("shared", "lang");
+	private static final String DEFAULT_LANG = "en_US";
+	private static final String RESOURCE_EXT = ".ini";
 	
 	static {
 		logger = LoggerFactory.getLogger(Messages.class);
+		resourceLoaders = new HashMap<String, ClassLoader>();
+	}
+
+	/**
+	 * Register resource loader of section messages.
+	 * <p>
+	 * @param sectionId - section ID
+	 * @param classLoader - class loader to load resource file
+	 */
+	public synchronized static
+		void registerLoader(String sectionId, ClassLoader classLoader)
+	{
+		resourceLoaders.put(sectionId, classLoader);
 	}
 	
-	private String defLng = "en_US";
-	private String[] localesPath = {"shared", "lang"};
-	private String dirSeparator = System.getProperty("file.separator");
-	private Map<String, Options> data = new HashMap<String, Options>();
+	/**
+	 * Remove registered resource loader.
+	 * <p>
+	 * @param sectionId - section ID to remove
+	 */
+	public synchronized static void removeLoader(String sectionId) {
+		resourceLoaders.remove(sectionId);
+	}
+	
+	/**
+	 * Remove all registered resource loaders.
+	 */
+	public synchronized static void removeLoaders() {
+		resourceLoaders.clear();
+	}
+	
+	private synchronized static ClassLoader getLoader(String sectionId) {
+		return resourceLoaders.get(sectionId);
+	}
+	
+	private final File root;
+	private final Map<String, Options> data = new HashMap<String, Options>();
 	private String lang;
 	
 	public Messages() {
-		super();		
+		this(DEFAULT_ROOT, DEFAULT_LANG);
 	}
 	
 	public Messages(String lang) {
+		this(DEFAULT_ROOT, lang);
+	}
+	
+	public Messages(File root) {
+		this(root, DEFAULT_LANG);
+	}
+	
+	public Messages(File root, String lang) {
 		super();
-		if(lang != defLng) {
+		this.root = root;
+		if( lang != null && ! lang.equals(DEFAULT_LANG) ) {
 			this.lang = lang;
+		} else {
+			this.lang = DEFAULT_LANG;
 		}
 	}
 	
+	public File getRootFolder() {
+		return root;
+	}
+	
 	public void load() {
-		loadLocale(defLng);
-		if(lang != null) {
+		loadLocale(DEFAULT_LANG);
+		if ( lang != null && ! lang.equals(DEFAULT_LANG) ) {
 			loadLocale(lang);
 		}
 	}
 	
 	private void loadLocale(String lang) {
-		String folderPath = StringUtils.join(localesPath, dirSeparator)+dirSeparator+lang;
-		File folder = new File(folderPath);
+		File folder = new File(root, lang);
+		if ( ! folder.exists() ) {
+			logger.warn("Cannot load messages. Directory not exists: {}", folder);
+			return;
+		}
 		File[] files = folder.listFiles();
 		for(int i = 0; i < files.length; i++) {
-			try {
-				String[] name = StringUtils.split(files[i].getName(), ".");
-				Options section = get(name[0]), loaded = new Options(files[i]);
-				for( String key: loaded.keySet() ) {
-					section.put(key, loaded.get(key));
-				}
-			} catch (InvalidFileFormatException e) {
-				logger.error("Invalid locale file format:{}", e.getMessage());
-			}catch(IOException e) {
-				logger.error(e.getMessage());
+			loadMessages(files[i]);
+		}
+	}
+	
+	private void loadMessages(File file) {
+		try {
+			String[] name = StringUtils.split(file.getName(), ".");
+			mergeToSection(name[0], new Options(file));
+		} catch (InvalidFileFormatException e) {
+			logger.error("Invalid locale file format:{}", e.getMessage());
+		}catch(IOException e) {
+			logger.error(e.getMessage());
+		}		
+	}
+	
+	private void loadMessages(String sectionId, URL url) {
+		try {
+			mergeToSection(sectionId, new Options(url));
+		} catch ( InvalidFileFormatException e ) {
+			logger.error("Invalid locale file format:{}", e.getMessage());
+		}catch(IOException e) {
+			logger.error(e.getMessage());
+		}		
+	}
+	
+	private void mergeToSection(String sectionId, Options loaded) {
+		Options section = data.get(sectionId);
+		if ( section == null ) {
+			data.put(sectionId, loaded);
+		} else {
+			for ( String key : loaded.keySet() ) {
+				section.put(key, loaded.get(key));
 			}
 		}
 	}
@@ -69,26 +147,20 @@ public class Messages implements IMessages {
 	}
 	
 	private Options get(String sectionId) {
-		if(! data.containsKey(sectionId)) {
+		if ( ! data.containsKey(sectionId) ) {
 			data.put(sectionId, new Options());
+			ClassLoader loader = getLoader(sectionId);
+			if ( loader != null ) {
+				File f = new File(root, lang);
+				f = new File(f, sectionId + RESOURCE_EXT);
+				loadMessages(sectionId, loader.getResource(f.getPath().replace('\\', '/')));
+			}
 		}
 		return data.get(sectionId);
 	}
-	
-	public void setLocalesPath(String[] path) {
-		localesPath = path;
-	}
-	
-	public String[] getLocalesPath() {
-		return localesPath;
-	}
-	
+
 	public String getLang() {
 		return lang;
-	}
-	
-	public String getDefLang() {
-		return defLng;
 	}
 
 	@Override
@@ -96,7 +168,7 @@ public class Messages implements IMessages {
 		Options section = get(msgId.getSectionId());
 		String id = msgId.getMessageId();
 		if ( section.containsKey(id) ) {
-			return section.get(id);	
+			return section.get(id);
 		} else {
 			logger.warn("Message not found: {}", msgId.toString());
 			return id;
