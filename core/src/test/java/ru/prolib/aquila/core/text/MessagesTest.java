@@ -56,7 +56,6 @@ public class MessagesTest {
 	@Test
 	public void testLoad_DefaultLocale() {
 		Messages t = new Messages(new File("fixture", "lang"));
-		t.load();
 		assertEquals("Entry one", t.get(new MsgID("FirstTest", "ENT_ONE")));
 		assertEquals("Entry two", t.get(new MsgID("FirstTest", "ENT_TWO")));
 		assertEquals("Entry three", t.get(new MsgID("FirstTest", "ENT_THREE")));
@@ -66,7 +65,6 @@ public class MessagesTest {
 	@Test
 	public void testLoad_RuLocale() {
 		Messages t = new Messages(new File("fixture", "lang"), "ru_RU");
-		t.load();
 		assertEquals("Первая", t.get(new MsgID("FirstTest", "ENT_ONE")));
 		assertEquals("Entry two", t.get(new MsgID("FirstTest", "ENT_TWO")));
 		assertEquals("Третья", t.get(new MsgID("FirstTest", "ENT_THREE")));
@@ -78,7 +76,6 @@ public class MessagesTest {
 	public void testLoad_FromResource() {
 		Messages.registerLoader("ResourceTest", getClass().getClassLoader());
 		Messages messages = new Messages(new File("fixture", "lang"));
-		messages.load();
 		assertEquals("Text 1", messages.get(new MsgID("ResourceTest", "MARKER1")));
 		assertEquals("Text 2", messages.get(new MsgID("ResourceTest", "MARKER2")));
 	}

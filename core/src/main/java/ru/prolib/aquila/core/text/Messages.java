@@ -85,13 +85,14 @@ public class Messages implements IMessages {
 		} else {
 			this.lang = DEFAULT_LANG;
 		}
+		load();
 	}
 	
 	public File getRootFolder() {
 		return root;
 	}
 	
-	public void load() {
+	private void load() {
 		loadLocale(DEFAULT_LANG);
 		if ( lang != null && ! lang.equals(DEFAULT_LANG) ) {
 			loadLocale(lang);
