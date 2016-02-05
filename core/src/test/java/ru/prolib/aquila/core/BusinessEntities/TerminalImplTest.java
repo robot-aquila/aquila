@@ -68,12 +68,12 @@ public class TerminalImplTest {
 		}
 
 		@Override
-		public void subscribeRemoteOrders(EditableTerminal terminal) {
+		public void subscribeRemoteObjects(EditableTerminal terminal) {
 			
 		}
 
 		@Override
-		public void unsubscribeRemoteOrders(EditableTerminal terminal) {
+		public void unsubscribeRemoteObjects(EditableTerminal terminal) {
 			
 		}
 		
@@ -806,7 +806,7 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testStart() throws Exception {
-		dataProviderMock.subscribeRemoteOrders(terminalWithMocks);
+		dataProviderMock.subscribeRemoteObjects(terminalWithMocks);
 		control.replay();
 		final CountDownLatch finished = new CountDownLatch(1);
 		terminalWithMocks.onTerminalReady().addSyncListener(new EventListener() {
@@ -842,11 +842,11 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testStop() throws Exception {
-		dataProviderMock.subscribeRemoteOrders(terminalWithMocks);
+		dataProviderMock.subscribeRemoteObjects(terminalWithMocks);
 		control.replay();
 		terminalWithMocks.start();
 		control.reset();
-		dataProviderMock.unsubscribeRemoteOrders(terminalWithMocks);
+		dataProviderMock.unsubscribeRemoteObjects(terminalWithMocks);
 		control.replay();
 		final CountDownLatch finished = new CountDownLatch(1);
 		terminalWithMocks.onTerminalUnready().addSyncListener(new EventListener() {

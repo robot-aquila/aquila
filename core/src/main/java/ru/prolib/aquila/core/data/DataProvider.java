@@ -17,9 +17,9 @@ public interface DataProvider {
 	
 	public long getNextOrderID();
 	
-	public void subscribeRemoteOrders(EditableTerminal terminal);
+	public void subscribeRemoteObjects(EditableTerminal terminal);
 	
-	public void unsubscribeRemoteOrders(EditableTerminal terminal);
+	public void unsubscribeRemoteObjects(EditableTerminal terminal);
 	
 	public void registerNewOrder(EditableOrder order);
 	

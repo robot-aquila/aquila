@@ -669,7 +669,7 @@ public class TerminalImpl implements EditableTerminal {
 				throw new IllegalStateException();
 			}
 			started = true;
-			dataProvider.subscribeRemoteOrders(this);
+			dataProvider.subscribeRemoteObjects(this);
 			queue.enqueue(onTerminalReady, new TerminalEventFactory(this));
 		} finally {
 			lock.unlock();
@@ -684,7 +684,7 @@ public class TerminalImpl implements EditableTerminal {
 				return;
 			}
 			started = false;
-			dataProvider.unsubscribeRemoteOrders(this);
+			dataProvider.unsubscribeRemoteObjects(this);
 			queue.enqueue(onTerminalUnready, new TerminalEventFactory(this));
 		} finally {
 			lock.unlock();
