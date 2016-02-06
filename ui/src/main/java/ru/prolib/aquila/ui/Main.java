@@ -98,7 +98,7 @@ public class Main implements Runnable {
 		Wini ini = new Wini(new File(MAIN_INI));
 		DOMConfigurator.configure(ini.get(MAIN_SEC, LOGGER));
 
-		locator.getTexts().load();
+		locator.getTexts();
 		starter.add(locator.getEventSystem().getEventQueue());
 		boolean isUiMode = true;
 		

@@ -64,7 +64,7 @@ public class SecurityListDialog extends JDialog
 		table.setFillsViewportHeight(true);
 		setColumnWidth(SecurityMsg.NAME, 160);
 		setColumnWidth(SecurityMsg.SYMBOL, 80);
-		setColumnWidth(SecurityMsg.CLASS, 50);
+		setColumnWidth(SecurityMsg.EXCHANGE, 50);
 		setColumnWidth(SecurityMsg.TYPE, 50);
 		setColumnWidth(SecurityMsg.CURRENCY, 50);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);

@@ -82,11 +82,11 @@ public class UISecuritiesPlugin implements AquilaPlugin {
 		tb = new TableImpl(model, dispatcher, dispatcher.createType());		
 		tb.start();
 		
-		facade.addTab(messages.get(SecurityMsg.SECURITIES_TITLE), panel);
+		facade.addTab(messages.get(SecurityMsg.SECURITIES), panel);
         panel.add(new JScrollPane(tb.getUnderlayed()));
 		
-        String menuID = SecurityMsg.SECURITIES_MENU.toString();
-        facade.getMainMenu().addMenu(menuID, messages.get(SecurityMsg.SECURITIES_MENU));
+        String menuID = SecurityMsg.SECURITIES.toString();
+        facade.getMainMenu().addMenu(menuID, messages.get(SecurityMsg.SECURITIES));
         facade.getMainMenu().getMenu(menuID)
         	.addBottomItem(SecurityMsg.SHOW_SECURITIES.toString(),
         		messages.get(SecurityMsg.SHOW_SECURITIES))
