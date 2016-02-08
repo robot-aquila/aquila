@@ -1,7 +1,13 @@
 package ru.prolib.aquila.ui.form;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.table.AbstractTableModel;
@@ -10,6 +16,7 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
+import ru.prolib.aquila.ui.ITableModel;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 
 /**
@@ -17,33 +24,37 @@ import ru.prolib.aquila.ui.msg.CommonMsg;
  * $Id: PortfoliosTableModel.java 491 2013-02-05 20:31:41Z huan.kaktus $
  */
 public class PortfolioListTableModel extends AbstractTableModel
-	implements EventListener, Starter
+	implements EventListener, ITableModel
 {
 	private static final long serialVersionUID = 1L;
 	private static final List<MsgID> mapIndexToID;
 	
 	static {
 		mapIndexToID = new Vector<MsgID>();
-		mapIndexToID.add(CommonMsg.CODE);
-		mapIndexToID.add(CommonMsg.SUBCODE);
-		mapIndexToID.add(CommonMsg.SUBCODE2);
-		mapIndexToID.add(CommonMsg.CASH);
+		mapIndexToID.add(CommonMsg.ACCOUNT);
 		mapIndexToID.add(CommonMsg.CURRENCY);
 		mapIndexToID.add(CommonMsg.TERMINAL);
+		mapIndexToID.add(CommonMsg.BALANCE);
+		mapIndexToID.add(CommonMsg.EQUITY);
+		mapIndexToID.add(CommonMsg.FREE_MARGIN);
+		mapIndexToID.add(CommonMsg.USED_MARGIN);
+		mapIndexToID.add(CommonMsg.PROFIT_AND_LOSS);
 	}
 	
-	private boolean started = false;
-	private final ReentrantLock lock;
+	private boolean subscribed = false;
+	private final Lock lock;
 	private final IMessages messages;
-	private final List<Terminal> terminals;
+	private final Set<Terminal> terminalSet;
+	private final Map<Portfolio, Integer> portfolioMap;
 	private final List<Portfolio> portfolios;
 	
 	public PortfolioListTableModel(IMessages messages) {
 		super();
 		this.lock = new ReentrantLock();
 		this.messages = messages;
-		this.terminals = new Vector<Terminal>();
-		this.portfolios = new Vector<Portfolio>();
+		this.terminalSet = new HashSet<Terminal>();
+		this.portfolioMap = new HashMap<Portfolio, Integer>();
+		this.portfolios = new ArrayList<Portfolio>();
 	}
 
 	@Override
@@ -51,11 +62,6 @@ public class PortfolioListTableModel extends AbstractTableModel
 		return mapIndexToID.size();
 	}
 	
-	@Override
-	public String getColumnName(int col) {
-		return messages.get(mapIndexToID.get(col));
-	}
-
 	@Override
 	public int getRowCount() {
 		lock.lock();
@@ -81,47 +87,50 @@ public class PortfolioListTableModel extends AbstractTableModel
 		
 		MsgID id = mapIndexToID.get(col);
 		if ( id == CommonMsg.TERMINAL ) {
-			return "TODO";
+			return p.getTerminal().getTerminalID();
 		} else if ( id == CommonMsg.CURRENCY ) {
-			return "TODO";
-		} else if ( id == CommonMsg.CASH ) {
+			return p.getCurrency();
+		} else if ( id == CommonMsg.ACCOUNT ) {
+			return p.getAccount();
+		} else if ( id == CommonMsg.BALANCE ) {
+			return p.getBalance();
+		} else if ( id == CommonMsg.EQUITY ) {
+			return p.getEquity();
+		} else if ( id == CommonMsg.FREE_MARGIN ) {
 			return p.getFreeMargin();
-		} else if ( id == CommonMsg.SUBCODE2 ) {
-			return p.getAccount().getSubCode2();
-		} else if ( id == CommonMsg.SUBCODE ) {
-			return p.getAccount().getSubCode();
-		} else if ( id == CommonMsg.CODE ) {
-			return p.getAccount().getCode();
+		} else if ( id == CommonMsg.USED_MARGIN ) {
+			return p.getUsedMargin();
+		} else if ( id == CommonMsg.PROFIT_AND_LOSS ) {
+			return p.getProfitAndLoss();
 		} else {
 			return null;
 		}
 	}
 
+	/**
+	 * Return column index by ID.
+	 * <p> 
+	 * @param columnId - column ID.
+	 * @return return index of specified column
+	 */
 	@Override
-	public void start() {
-		lock.lock();
-		try {
-			portfolios.clear();
-			for ( Terminal terminal : terminals ) {
-				subscribe(terminal);
-				addPortfolios(terminal);
-			}
-			fireTableDataChanged();
-			started = true;
-		} finally {
-			lock.unlock();
-		}
+	public int getColumnIndex(MsgID columnId) {
+		return mapIndexToID.indexOf(columnId);
 	}
-
+	
 	@Override
-	public void stop() {
+	public String getColumnName(int col) {
+		return messages.get(mapIndexToID.get(col));
+	}
+	
+	/**
+	 * Clear all cached data.
+	 */
+	public void clear() {
 		lock.lock();
 		try {
-			for ( Terminal terminal : terminals ) {
-				unsubscribe(terminal);
-			}
-			portfolios.clear();
-			started = false;
+			stopListeningUpdates();
+			terminalSet.clear();
 		} finally {
 			lock.unlock();
 		}
@@ -135,28 +144,110 @@ public class PortfolioListTableModel extends AbstractTableModel
 	public void add(Terminal terminal) {
 		lock.lock();
 		try {
-			if ( ! isExists(terminal) ) {
-				terminals.add(terminal);
-				if ( started ) {
-					subscribe(terminal);
-					addPortfolios(terminal);
-					fireTableDataChanged();
-				}
+			if ( terminalSet.contains(terminal) ) {
+				return;
 			}
-			
+			terminalSet.add(terminal);
+			if ( subscribed ) {
+				cacheDataAndSubscribeEvents(terminal);
+			}
 		} finally {
 			lock.unlock();
 		}
 	}
+
+
+	@Override
+	public void startListeningUpdates() {
+		lock.lock();
+		try {
+			if ( subscribed ) {
+				return;
+			}
+			for ( Terminal terminal : terminalSet ) {
+				cacheDataAndSubscribeEvents(terminal);
+			}
+			subscribed = true;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void stopListeningUpdates() {
+		lock.lock();
+		try {
+			if ( ! subscribed ) {
+				return;
+			}
+			for ( Terminal terminal : terminalSet ) {
+				terminal.lock();
+				try {
+					unsubscribe(terminal);
+				} finally {
+					terminal.unlock();
+				}
+			}
+			portfolios.clear();
+			portfolioMap.clear();
+			subscribed = false;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void onEvent(Event event) {
+		lock.lock();
+		try {
+			if ( ! subscribed ) {
+				return;
+			}
+			for ( Terminal terminal : terminalSet ) {
+				if ( event.isType(terminal.onPortfolioAvailable()) ) {
+					int firstRow = portfolios.size();
+					Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
+					if ( ! portfolioMap.containsKey(portfolio) ) {
+						portfolios.add(portfolio);
+						portfolioMap.put(portfolio, firstRow);
+						fireTableRowsInserted(firstRow, firstRow);
+					}
+				} else if ( event.isType(terminal.onPortfolioUpdate()) ) {
+					Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
+					Integer row = portfolioMap.get(portfolio);
+					if ( row != null ) {
+						fireTableRowsUpdated(row, row);	
+					}
+				}
+			}
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void close() {
+		clear();
+	}
 	
-	/**
-	 * Return column index by ID.
-	 * <p> 
-	 * @param columnId - column ID.
-	 * @return return index of specified column
-	 */
-	public int getColumnIndex(MsgID columnId) {
-		return mapIndexToID.indexOf(columnId);
+	private void cacheDataAndSubscribeEvents(Terminal terminal) {
+		terminal.lock();
+		try {
+			subscribe(terminal);
+			int countAdded = 0, firstRow = portfolios.size();
+			for ( Portfolio portfolio : terminal.getPortfolios() ) {
+				if ( ! portfolioMap.containsKey(portfolio) ) {
+					portfolios.add(portfolio);
+					portfolioMap.put(portfolio, firstRow + countAdded);
+					countAdded ++;
+				}
+			}
+			if ( countAdded > 0 ) {
+				fireTableRowsInserted(firstRow, firstRow + countAdded - 1);
+			}
+		} finally {
+			terminal.unlock();
+		}
 	}
 	
 	private void subscribe(Terminal terminal) {
@@ -167,69 +258,6 @@ public class PortfolioListTableModel extends AbstractTableModel
 	private void unsubscribe(Terminal terminal) {
 		terminal.onPortfolioAvailable().removeListener(this);
 		terminal.onPortfolioUpdate().removeListener(this);
-	}
-	
-	private void addPortfolios(Terminal terminal) {
-		for ( Portfolio portfolio : terminal.getPortfolios() ) {
-			if ( ! isExists(portfolio) ) {
-				portfolios.add(portfolio);
-			}
-		}
-	}
-	
-	private boolean isExists(Portfolio portfolio) {
-		return portfolios.indexOf(portfolio) >= 0 ? true : false;
-	}
-	
-	private boolean isExists(Terminal terminal) {
-		return terminals.indexOf(terminal) >= 0 ? true : false;
-	}
-
-	@Override
-	public void onEvent(Event event) {
-		lock.lock();
-		try {
-			final PortfolioEvent e = (PortfolioEvent) event;
-			if ( isPortfolioAvailableEvent(event) ) {
-				insertNewRow(e.getPortfolio());
-			} else if ( isPortfolioChangedEvent(event) ) {
-				updateRow(e.getPortfolio());
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	private void updateRow(Portfolio portfolio) {
-		int rowIndex = portfolios.indexOf(portfolio);
-		fireTableRowsUpdated(rowIndex, rowIndex);
-	}
-	
-	private void insertNewRow(Portfolio portfolio) {
-		int rowIndex = portfolios.indexOf(portfolio);
-		if ( ! isExists(portfolio) ) {
-			rowIndex = portfolios.size();
-			portfolios.add(portfolio);
-			fireTableRowsInserted(rowIndex, rowIndex);
-		}
-	}
-	
-	private boolean isPortfolioAvailableEvent(Event event) {
-		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.onPortfolioAvailable()) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private boolean isPortfolioChangedEvent(Event event) {
-		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.onPortfolioUpdate()) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }

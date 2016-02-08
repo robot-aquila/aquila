@@ -1,8 +1,6 @@
 package ru.prolib.aquila.ui.form;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -257,7 +255,7 @@ public class SecurityListTableModel extends AbstractTableModel
 				if ( event.isType(terminal.onSecurityAvailable()) ) {
 					int firstRow = securities.size();
 					Security security = ((SecurityEvent) event).getSecurity();
-					if ( ! securities.contains(security) ) {
+					if ( ! securityMap.containsKey(security) ) {
 						securities.add(security);
 						securityMap.put(security, firstRow);
 						fireTableRowsInserted(firstRow, firstRow);
@@ -305,7 +303,7 @@ public class SecurityListTableModel extends AbstractTableModel
 			subscribe(terminal);
 			int countAdded = 0, firstRow = securities.size();
 			for ( Security security : terminal.getSecurities() ) {
-				if ( ! securities.contains(security) ) {
+				if ( ! securityMap.containsKey(security) ) {
 					securities.add(security);
 					securityMap.put(security, firstRow + countAdded);
 					countAdded ++;

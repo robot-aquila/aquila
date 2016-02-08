@@ -61,7 +61,17 @@ public class CommonMsg {
 	public static final MsgID EXEC_VOL = new MsgID(SECTION_ID, "ID_EXEC_VOL");
 	public static final MsgID AVG_EXEC_PRICE = new MsgID(SECTION_ID, "ID_AVG_EXEC_PRICE");
 	public static final MsgID ACTIVATOR = new MsgID(SECTION_ID, "ID_ACTIVATOR");
-	public static final MsgID COMMENT = new MsgID(SECTION_ID, "ID_COMMENT");
+	public static final MsgID COMMENT = newMsgID("ID_COMMENT");
+	public static final MsgID EQUITY = newMsgID("ID_EQUITY");
+	public static final MsgID FREE_MARGIN = newMsgID("ID_FREE_MARGIN");
+	public static final MsgID USED_MARGIN = newMsgID("ID_USED_MARGIN");
+	public static final MsgID PROFIT_AND_LOSS = newMsgID("ID_PROFIT_AND_LOSS");
+	public static final MsgID ACCOUNTS = newMsgID("ID_ACCOUNTS");
+	public static final MsgID PORTFOLIOS = newMsgID("ID_PORTFOLIOS");
+	public static final MsgID SECURITIES = newMsgID("ID_SECURITIES");
 	
+	private static MsgID newMsgID(String messageID) {
+		return new MsgID(SECTION_ID, messageID);
+	}
 
 }
