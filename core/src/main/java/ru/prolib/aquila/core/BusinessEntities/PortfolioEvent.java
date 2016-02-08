@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.ContainerImpl.ContainerEventImpl;
 
 /**
  * Событие портфеля.
@@ -8,7 +9,7 @@ import ru.prolib.aquila.core.*;
  * 2012-09-05<br>
  * $Id$
  */
-public class PortfolioEvent extends EventImpl {
+public class PortfolioEvent extends ContainerEventImpl {
 	private final Portfolio portfolio;
 
 	/**
@@ -18,7 +19,7 @@ public class PortfolioEvent extends EventImpl {
 	 * @param portfolio портфель
 	 */
 	public PortfolioEvent(EventType type, Portfolio portfolio) {
-		super(type);
+		super(type, portfolio);
 		this.portfolio = portfolio;
 	}
 	

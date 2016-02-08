@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.ContainerImpl.ContainerEventImpl;
 
 /**
  * Событие заявки.
@@ -8,7 +9,7 @@ import ru.prolib.aquila.core.*;
  * 2012-09-25<br>
  * $Id: OrderEvent.java 283 2012-09-26 17:01:17Z whirlwind $
  */
-public class OrderEvent extends EventImpl {
+public class OrderEvent extends ContainerEventImpl {
 	private final Order order;
 
 	/**
@@ -18,7 +19,7 @@ public class OrderEvent extends EventImpl {
 	 * @param order заявка
 	 */
 	public OrderEvent(EventType type, Order order) {
-		super(type);
+		super(type, order);
 		this.order = order;
 	}
 	

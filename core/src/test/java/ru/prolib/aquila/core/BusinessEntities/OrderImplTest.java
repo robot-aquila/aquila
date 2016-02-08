@@ -389,5 +389,44 @@ public class OrderImplTest extends ContainerImplTest {
 		assertOrderEvent(listenerStub.getEvent(0), order.onRegisterFailed());
 		assertOrderEvent(listenerStub.getEvent(1), order.onRegisterFailed());
 	}
+	
+	@Test
+	public void testUpdate_OnAvailable() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onAvailable().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		getMocksControl().replay();
+
+		data.put(12345, 415); // any value
+		order.update(data);
+		
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(order.onAvailable()));
+		assertSame(order, event.getOrder());
+	}
+
+	@Test
+	public void testUpdate_OnUpdateEvent() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onUpdate().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		controllerMock.processUpdate(container);
+		getMocksControl().replay();
+		
+		data.put(12345, 415);
+		order.update(data);
+		data.put(12345, 450);
+		order.update(data);
+
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(order.onUpdate()));
+		assertSame(order, event.getOrder());
+	}
 
 }

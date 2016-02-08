@@ -520,5 +520,44 @@ public class SecurityImplTest extends ContainerImplTest {
 		assertEquals(expected, e.getMarketDepth());
 		assertSame(update, e.getUpdateInfo());
 	}
+	
+	@Test
+	public void testUpdate_OnAvailable() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onAvailable().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		getMocksControl().replay();
+
+		data.put(12345, 415); // any value
+		security.update(data);
+		
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityEvent event = (SecurityEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(security.onAvailable()));
+		assertSame(security, event.getSecurity());
+	}
+	
+	@Test
+	public void testUpdate_OnUpdateEvent() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onUpdate().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		controllerMock.processUpdate(container);
+		getMocksControl().replay();
+		
+		data.put(12345, 415);
+		security.update(data);
+		data.put(12345, 450);
+		security.update(data);
+
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityEvent event = (SecurityEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(security.onUpdate()));
+		assertSame(security, event.getSecurity());
+	}
 
 }

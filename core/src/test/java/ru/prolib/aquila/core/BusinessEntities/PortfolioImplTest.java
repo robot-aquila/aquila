@@ -324,4 +324,43 @@ public class PortfolioImplTest extends ContainerImplTest {
 		// No additional event types. Nothing to do.
 	}
 
+	@Test
+	public void testUpdate_OnAvailable() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onAvailable().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		getMocksControl().replay();
+
+		data.put(12345, 415); // any value
+		portfolio.update(data);
+		
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		PortfolioEvent event = (PortfolioEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(portfolio.onAvailable()));
+		assertSame(portfolio, event.getPortfolio());
+	}
+	
+	@Test
+	public void testUpdate_OnUpdateEvent() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onUpdate().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		controllerMock.processUpdate(container);
+		getMocksControl().replay();
+		
+		data.put(12345, 415);
+		portfolio.update(data);
+		data.put(12345, 450);
+		portfolio.update(data);
+
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		PortfolioEvent event = (PortfolioEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(portfolio.onUpdate()));
+		assertSame(portfolio, event.getPortfolio());
+	}
+
 }

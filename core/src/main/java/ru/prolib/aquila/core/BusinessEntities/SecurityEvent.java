@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.ContainerImpl.ContainerEventImpl;
 
 /**
  * Событие связанное с инструментом торговли.
@@ -8,7 +9,7 @@ import ru.prolib.aquila.core.*;
  * 2012-06-01<br>
  * $Id: SecurityEvent.java 250 2012-08-06 03:14:33Z whirlwind $
  */
-public class SecurityEvent extends EventImpl {
+public class SecurityEvent extends ContainerEventImpl {
 	private final Security security;
 
 	/**
@@ -18,7 +19,7 @@ public class SecurityEvent extends EventImpl {
 	 * @param security экземпляр инструмента
 	 */
 	public SecurityEvent(EventType type, Security security) {
-		super(type);
+		super(type, security);
 		this.security = security;
 	}
 

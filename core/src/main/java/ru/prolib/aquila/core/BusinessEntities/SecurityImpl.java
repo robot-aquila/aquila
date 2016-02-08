@@ -469,4 +469,9 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		}
 	}
 	
+	@Override
+	protected EventFactory createEventFactory() {
+		return new SecurityEventFactory(this);
+	}
+	
 }

@@ -118,6 +118,11 @@ public class PositionImpl extends ContainerImpl implements EditablePosition {
 		}
 	}
 	
+	@Override
+	protected EventFactory createEventFactory() {
+		return new PositionEventFactory(this);
+	}
+	
 	static class PositionController implements ContainerImpl.Controller {
 		
 		@Override

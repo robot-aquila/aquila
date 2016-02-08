@@ -214,6 +214,11 @@ public class PortfolioImpl extends ContainerImpl implements EditablePortfolio {
 		}
 	}
 	
+	@Override
+	protected EventFactory createEventFactory() {
+		return new PortfolioEventFactory(this);
+	}
+	
 	static class PortfolioController implements ContainerImpl.Controller {
 
 		@Override

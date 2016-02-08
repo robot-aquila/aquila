@@ -66,6 +66,10 @@ public class ContainerImplTest {
 		listenerStub.clear();
 	}
 	
+	protected IMocksControl getMocksControl() {
+		return control;
+	}
+	
 	/**
 	 * Override this method to produce container ID.
 	 * <p>

@@ -221,7 +221,7 @@ public class ContainerImpl implements UpdatableContainer {
 				}
 			}
 			if ( updated.size() > 0 ) {
-				EventFactory factory = new ContainerEventFactory(this);
+				EventFactory factory = createEventFactory();
 				if ( available ) {
 					queue.enqueue(onUpdate, factory);
 					controller.processUpdate(this);
@@ -264,6 +264,18 @@ public class ContainerImpl implements UpdatableContainer {
 		} finally {
 			lock.unlock();
 		}
+	}
+	
+	/**
+	 * Create event factory instance.
+	 * <p>
+	 * Override this method to produce specific events. Produced events must be
+	 * derived of {@link ContainerEventImpl} class.
+	 * <p>
+	 * @return event factory
+	 */
+	protected EventFactory createEventFactory() {
+		return new ContainerEventFactory(this);
 	}
 
 	/**
@@ -340,7 +352,7 @@ public class ContainerImpl implements UpdatableContainer {
 		
 	}
 	
-	static class ContainerEventImpl extends EventImpl implements ContainerEvent {
+	protected static class ContainerEventImpl extends EventImpl implements ContainerEvent {
 		private final Container container;
 		
 		ContainerEventImpl(EventType type, Container container) {

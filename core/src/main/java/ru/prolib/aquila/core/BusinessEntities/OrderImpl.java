@@ -217,6 +217,11 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		}
 	}
 	
+	@Override
+	protected EventFactory createEventFactory() {
+		return new OrderEventFactory(this);
+	}
+	
 	static class OrderController implements ContainerImpl.Controller {
 
 		@Override

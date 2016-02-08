@@ -217,5 +217,44 @@ public class PositionImplTest extends ContainerImplTest {
 		assertFalse(position.onUpdate().hasListeners());
 		assertFalse(position.onUpdate().hasAlternates());
 	}
+	
+	@Test
+	public void testUpdate_OnAvailable() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onAvailable().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		getMocksControl().replay();
+
+		data.put(12345, 415); // any value
+		position.update(data);
+		
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		PositionEvent event = (PositionEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(position.onAvailable()));
+		assertSame(position, event.getPosition());
+	}
+	
+	@Test
+	public void testUpdate_OnUpdateEvent() throws Exception {
+		container = produceContainer(controllerMock);
+		container.onUpdate().addSyncListener(listenerStub);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
+		controllerMock.processUpdate(container);
+		getMocksControl().replay();
+		
+		data.put(12345, 415);
+		position.update(data);
+		data.put(12345, 450);
+		position.update(data);
+
+		getMocksControl().verify();
+		assertEquals(1, listenerStub.getEventCount());
+		PositionEvent event = (PositionEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(position.onUpdate()));
+		assertSame(position, event.getPosition());
+	}
 
 }
