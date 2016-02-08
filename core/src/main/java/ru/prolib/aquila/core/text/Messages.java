@@ -127,9 +127,11 @@ public class Messages implements IMessages {
 			mergeToSection(sectionId, new Options(url));
 		} catch ( InvalidFileFormatException e ) {
 			logger.error("Invalid locale file format:{}", e.getMessage());
-		}catch(IOException e) {
+		} catch(IOException e) {
 			logger.error(e.getMessage());
-		}		
+		} catch ( NullPointerException e ) {
+			logger.error("Cannot load resource: " + url, e);
+		}
 	}
 	
 	private void mergeToSection(String sectionId, Options loaded) {
@@ -154,7 +156,13 @@ public class Messages implements IMessages {
 			if ( loader != null ) {
 				File f = new File(root, lang);
 				f = new File(f, sectionId + RESOURCE_EXT);
-				loadMessages(sectionId, loader.getResource(f.getPath().replace('\\', '/')));
+				String path = f.getPath().replace('\\', '/');
+				URL url = loader.getResource(path);
+				if ( url == null ) {
+					logger.error("Cannot obtain resource URL: {}", path);
+				} else {
+					loadMessages(sectionId, url);
+				}
 			}
 		}
 		return data.get(sectionId);
