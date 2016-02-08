@@ -46,7 +46,7 @@ public class SymbolTypeTest {
 	
 	@Test
 	public void testValueOf_Null() throws Exception {
-		assertEquals(SymbolType.UNKNOWN, SymbolType.valueOf(null));
+		assertNull(SymbolType.valueOf(null));
 	}
 
 }
