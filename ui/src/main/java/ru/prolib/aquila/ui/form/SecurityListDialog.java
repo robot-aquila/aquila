@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -18,16 +20,26 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
+import ru.prolib.aquila.ui.TableModelController;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
 
 public class SecurityListDialog extends JDialog
 	implements ActionListener, ListSelectionListener
 {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(SecurityListDialog.class);
+	}
+	
 	/**
 	 * Just show the security table. 
 	 */
@@ -110,6 +122,7 @@ public class SecurityListDialog extends JDialog
 		setTitle(messages.get(type == TYPE_SELECT ?
 				SecurityMsg.SELECT_SECURITY : SecurityMsg.SHOW_SECURITIES));
 		setPreferredSize(new Dimension(800, 600));
+		new TableModelController(tableModel, this);
 	}
 	
 	private void setColumnWidth(MsgID columnId, int width) {

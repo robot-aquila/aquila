@@ -1,9 +1,14 @@
 package ru.prolib.aquila.ui.msg;
 
+import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.core.text.MsgID;
 
 public class CommonMsg {
 	public static final String SECTION_ID = "Common";
+	
+	static {
+		Messages.registerLoader(SECTION_ID, CommonMsg.class.getClassLoader());
+	}
 	
 	public static final MsgID OK = new MsgID(SECTION_ID, "ID_OK");
 	public static final MsgID CANCEL = new MsgID(SECTION_ID, "ID_CANCEL");

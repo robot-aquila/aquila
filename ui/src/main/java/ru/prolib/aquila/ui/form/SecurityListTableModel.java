@@ -3,36 +3,43 @@ package ru.prolib.aquila.ui.form;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.table.AbstractTableModel;
 
+import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
+import ru.prolib.aquila.ui.ITableModel;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
 
-public class SecurityListTableModel extends AbstractTableModel {
+public class SecurityListTableModel extends AbstractTableModel
+	implements ITableModel, EventListener
+{
 	private static final long serialVersionUID = 1L;
 	private static final List<MsgID> mapIndexToID;
-	private static final Comparator<Security> compareSecuritiesByName;
 	
 	static {
-		compareSecuritiesByName = new Comparator<Security>() {
-			@Override public int compare(Security o1, Security o2) {
-				return o1.getDisplayName().compareTo(o2.getDisplayName());
-			}
-		};
 		mapIndexToID = new Vector<MsgID>();
 		mapIndexToID.add(SecurityMsg.NAME);
 		mapIndexToID.add(SecurityMsg.SYMBOL);
 		mapIndexToID.add(SecurityMsg.EXCHANGE);
 		mapIndexToID.add(SecurityMsg.TYPE);
 		mapIndexToID.add(SecurityMsg.CURRENCY);
+		mapIndexToID.add(SecurityMsg.TERMINAL_ID);
 		mapIndexToID.add(SecurityMsg.LOT_SIZE);
 		mapIndexToID.add(SecurityMsg.SCALE);
 		mapIndexToID.add(SecurityMsg.TICK_SIZE);
@@ -53,18 +60,29 @@ public class SecurityListTableModel extends AbstractTableModel {
 		mapIndexToID.add(SecurityMsg.INITIAL_PRICE);
 	}
 	
+	private final Lock lock = new ReentrantLock();
 	private final IMessages messages;
-	private final List<Security> data;
+	private final List<Security> securities;
+	private final Map<Security, Integer> securityMap;
+	private final Set<Terminal> terminalSet;
+	private boolean subscribed = false;
 	
 	public SecurityListTableModel(IMessages messages) {
 		super();
 		this.messages = messages;
-		this.data = new ArrayList<Security>();
+		this.securities = new ArrayList<Security>();
+		this.securityMap = new HashMap<Security, Integer>();
+		this.terminalSet = new HashSet<Terminal>();
 	}
 
 	@Override
 	public int getRowCount() {
-		return data.size();
+		lock.lock();
+		try {
+			return securities.size();
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
@@ -74,11 +92,17 @@ public class SecurityListTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		if ( rowIndex >= data.size() || columnIndex >= mapIndexToID.size() ) {
-			return null;
+		Security security = null;
+		lock.lock();
+		try {
+			if ( rowIndex >= securities.size() || columnIndex >= mapIndexToID.size() ) {
+				return null;
+			}
+			security = securities.get(rowIndex);
+		} finally {
+			lock.unlock();
 		}
 		Tick tick = null;
-		Security security = data.get(rowIndex);
 		Symbol symbol = security.getSymbol();
 		MsgID id = mapIndexToID.get(columnIndex); 
 		if ( id == SecurityMsg.NAME ) {
@@ -132,18 +156,15 @@ public class SecurityListTableModel extends AbstractTableModel {
 		} else if ( id == SecurityMsg.INITIAL_MARGIN ) {
 			return security.getInitialMargin();
 		} else if ( id == SecurityMsg.INITIAL_PRICE ) {
-			return security.getInitialPrice();			
+			return security.getInitialPrice();
+		} else if ( id == SecurityMsg.TERMINAL_ID ) {
+			return security.getTerminal().getTerminalID();
 		} else {
 			return null;			
 		}
 	}
-	
-	/**
-	 * Return column index by ID.
-	 * <p> 
-	 * @param columnId - one of {@link SecurityMsg} constants.
-	 * @return return index of specified column
-	 */
+
+	@Override
 	public int getColumnIndex(MsgID columnId) {
 		return mapIndexToID.indexOf(columnId);
 	}
@@ -157,22 +178,105 @@ public class SecurityListTableModel extends AbstractTableModel {
 	 * Clear all cached data.
 	 */
 	public void clear() {
-		data.clear();
+		lock.lock();
+		try {
+			stopListeningUpdates();
+			terminalSet.clear();
+		} finally {
+			lock.unlock();
+		}
 	}
 	
 	/**
-	 * Add all securities owned to terminal.
+	 * Add terminal to show its securities.
 	 * <p>
-	 * @param terminal - terminal to scan
+	 * @param terminal - terminal to add
 	 */
 	public void add(Terminal terminal) {
-		for ( Security security : terminal.getSecurities() ) {
-			if ( ! data.contains(security) ) {
-				data.add(security);
+		lock.lock();
+		try {
+			if ( terminalSet.contains(terminal) ) {
+				return;
 			}
+			terminalSet.add(terminal);
+			if ( subscribed ) {
+				cacheSecuritiesAndSubscribeEvents(terminal);
+			}
+		} finally {
+			lock.unlock();
+		}		
+	}
+	
+	@Override
+	public void startListeningUpdates() {
+		lock.lock();
+		try {
+			if ( subscribed ) {
+				return;
+			}
+			for ( Terminal terminal : terminalSet ) {
+				cacheSecuritiesAndSubscribeEvents(terminal);
+			}
+			subscribed = true;
+		} finally {
+			lock.unlock();
 		}
-		Collections.sort(data, compareSecuritiesByName);
-		fireTableDataChanged();
+	}
+
+	@Override
+	public void stopListeningUpdates() {
+		lock.lock();
+		try {
+			if ( ! subscribed ) {
+				return;
+			}
+			for ( Terminal terminal : terminalSet ) {
+				terminal.lock();
+				try {
+					unsubscribe(terminal);
+				} finally {
+					terminal.unlock();
+				}
+			}
+			securities.clear();
+			securityMap.clear();
+			subscribed = false;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void onEvent(Event event) {
+		lock.lock();
+		try {
+			if ( ! subscribed  ) {
+				return;
+			}
+			for ( Terminal terminal : terminalSet ) {
+				if ( event.isType(terminal.onSecurityAvailable()) ) {
+					int firstRow = securities.size();
+					Security security = ((SecurityEvent) event).getSecurity();
+					if ( ! securities.contains(security) ) {
+						securities.add(security);
+						securityMap.put(security, firstRow);
+						fireTableRowsInserted(firstRow, firstRow);
+					}
+				} else if ( event.isType(terminal.onSecurityUpdate())
+						|| event.isType(terminal.onSecurityBestAsk())
+						|| event.isType(terminal.onSecurityBestBid())
+						|| event.isType(terminal.onSecurityLastTrade()) )
+				{
+					Security security = ((SecurityEvent) event).getSecurity();
+					Integer row = securityMap.get(security);
+					if ( row != null ) {
+						fireTableRowsUpdated(row, row);	
+					}
+				}
+			}
+		} finally {
+			lock.unlock();
+		}
 	}
 	
 	/**
@@ -182,7 +286,53 @@ public class SecurityListTableModel extends AbstractTableModel {
 	 * @return security
 	 */
 	public Security getSecurity(int rowIndex) {
-		return data.get(rowIndex);
+		lock.lock();
+		try {
+			return securities.get(rowIndex);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void close() {
+		clear();
+	}
+
+	private void cacheSecuritiesAndSubscribeEvents(Terminal terminal) {
+		terminal.lock();
+		try {
+			subscribe(terminal);
+			int countAdded = 0, firstRow = securities.size();
+			for ( Security security : terminal.getSecurities() ) {
+				if ( ! securities.contains(security) ) {
+					securities.add(security);
+					securityMap.put(security, firstRow + countAdded);
+					countAdded ++;
+				}
+			}
+			if ( countAdded > 0 ) {
+				fireTableRowsInserted(firstRow, firstRow + countAdded - 1);
+			}
+		} finally {
+			terminal.unlock();
+		}
+	}
+	
+	private void subscribe(Terminal terminal) {
+		terminal.onSecurityAvailable().addListener(this);
+		terminal.onSecurityUpdate().addListener(this);
+		terminal.onSecurityBestAsk().addListener(this);
+		terminal.onSecurityBestBid().addListener(this);
+		terminal.onSecurityLastTrade().addListener(this);
+	}
+	
+	private void unsubscribe(Terminal terminal) {
+		terminal.onSecurityAvailable().removeListener(this);
+		terminal.onSecurityUpdate().removeListener(this);
+		terminal.onSecurityBestAsk().removeListener(this);
+		terminal.onSecurityBestBid().removeListener(this);
+		terminal.onSecurityLastTrade().removeListener(this);	
 	}
 
 }

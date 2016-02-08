@@ -23,7 +23,7 @@ public class SecurityMsg {
 	public static final MsgID OPEN_PRICE = newMsgID("COL_OPEN_PRICE");
 	public static final MsgID HIGH_PRICE = newMsgID("COL_HIGH_PRICE");
 	public static final MsgID LOW_PRICE = newMsgID("COL_LOW_PRICE");
-	public static final MsgID CLOSE_PRICE = newMsgID("COL_CLOSE");
+	public static final MsgID CLOSE_PRICE = newMsgID("COL_CLOSE_PRICE");
 	public static final MsgID ASK_PRICE = newMsgID("COL_ASK_PRICE");
 	public static final MsgID ASK_SIZE = newMsgID("COL_ASK_SIZE");
 	public static final MsgID BID_PRICE = newMsgID("COL_BID_PRICE");
@@ -33,6 +33,7 @@ public class SecurityMsg {
 	public static final MsgID TICK_VALUE = newMsgID("COL_TICK_VALUE");
 	public static final MsgID INITIAL_PRICE = newMsgID("COL_INITIAL_PRICE");
 	public static final MsgID INITIAL_MARGIN = newMsgID("COL_INITIAL_MARGIN");
+	public static final MsgID TERMINAL_ID = newMsgID("COL_TERMINAL_ID");
 	public static final MsgID SECURITIES = newMsgID("SECURITIES");
 	public static final MsgID SELECT_SECURITY = newMsgID("SELECT_SECURITY");
 	public static final MsgID SHOW_SECURITIES = newMsgID("SHOW_SECURITIES");
