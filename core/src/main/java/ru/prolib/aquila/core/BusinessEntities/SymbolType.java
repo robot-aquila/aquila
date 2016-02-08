@@ -70,6 +70,9 @@ public class SymbolType {
 	}
 	
 	public static SymbolType valueOf(String code) {
+		if ( code == null ) {
+			return UNKNOWN;
+		}
 		return codeToType.get(code);
 	}
 

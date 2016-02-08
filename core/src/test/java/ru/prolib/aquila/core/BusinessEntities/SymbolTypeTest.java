@@ -43,5 +43,10 @@ public class SymbolTypeTest {
 	public void testValueOf() throws Exception {
 		assertSame(SymbolType.FUTURE, SymbolType.valueOf("F"));
 	}
+	
+	@Test
+	public void testValueOf_Null() throws Exception {
+		assertEquals(SymbolType.UNKNOWN, SymbolType.valueOf(null));
+	}
 
 }
