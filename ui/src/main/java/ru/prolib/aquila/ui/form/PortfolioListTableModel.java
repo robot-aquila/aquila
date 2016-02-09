@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import ru.prolib.aquila.core.*;
@@ -36,13 +35,13 @@ public class PortfolioListTableModel extends AbstractTableModel
 		mapIndexToID.add(CommonMsg.TERMINAL);
 		mapIndexToID.add(CommonMsg.BALANCE);
 		mapIndexToID.add(CommonMsg.EQUITY);
+		mapIndexToID.add(CommonMsg.LEVERAGE);
 		mapIndexToID.add(CommonMsg.FREE_MARGIN);
 		mapIndexToID.add(CommonMsg.USED_MARGIN);
 		mapIndexToID.add(CommonMsg.PROFIT_AND_LOSS);
 	}
 	
 	private boolean subscribed = false;
-	private final Lock lock;
 	private final IMessages messages;
 	private final Set<Terminal> terminalSet;
 	private final Map<Portfolio, Integer> portfolioMap;
@@ -50,7 +49,6 @@ public class PortfolioListTableModel extends AbstractTableModel
 	
 	public PortfolioListTableModel(IMessages messages) {
 		super();
-		this.lock = new ReentrantLock();
 		this.messages = messages;
 		this.terminalSet = new HashSet<Terminal>();
 		this.portfolioMap = new HashMap<Portfolio, Integer>();
@@ -64,26 +62,16 @@ public class PortfolioListTableModel extends AbstractTableModel
 	
 	@Override
 	public int getRowCount() {
-		lock.lock();
-		try {
-			return portfolios.size();
-		} finally {
-			lock.unlock();
-		}
+		return portfolios.size();
 	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
 		Portfolio p = null;
-		lock.lock();
-		try {
-			if ( row >= portfolios.size() ) {
-				return null;
-			}
-			p = portfolios.get(row);
-		} finally {
-			lock.unlock();
+		if ( row >= portfolios.size() ) {
+			return null;
 		}
+		p = portfolios.get(row);
 		
 		MsgID id = mapIndexToID.get(col);
 		if ( id == CommonMsg.TERMINAL ) {
@@ -102,6 +90,8 @@ public class PortfolioListTableModel extends AbstractTableModel
 			return p.getUsedMargin();
 		} else if ( id == CommonMsg.PROFIT_AND_LOSS ) {
 			return p.getProfitAndLoss();
+		} else if ( id == CommonMsg.LEVERAGE ) {
+			return p.getLeverage();
 		} else {
 			return null;
 		}
@@ -127,13 +117,9 @@ public class PortfolioListTableModel extends AbstractTableModel
 	 * Clear all cached data.
 	 */
 	public void clear() {
-		lock.lock();
-		try {
-			stopListeningUpdates();
-			terminalSet.clear();
-		} finally {
-			lock.unlock();
-		}
+		stopListeningUpdates();
+		terminalSet.clear();
+		fireTableDataChanged();
 	}
 	
 	/**
@@ -142,92 +128,91 @@ public class PortfolioListTableModel extends AbstractTableModel
 	 * @param terminal - terminal to add
 	 */
 	public void add(Terminal terminal) {
-		lock.lock();
-		try {
-			if ( terminalSet.contains(terminal) ) {
-				return;
-			}
-			terminalSet.add(terminal);
-			if ( subscribed ) {
-				cacheDataAndSubscribeEvents(terminal);
-			}
-		} finally {
-			lock.unlock();
+		if ( terminalSet.contains(terminal) ) {
+			return;
+		}
+		terminalSet.add(terminal);
+		if ( subscribed ) {
+			cacheDataAndSubscribeEvents(terminal);
 		}
 	}
 
 
 	@Override
 	public void startListeningUpdates() {
-		lock.lock();
-		try {
-			if ( subscribed ) {
-				return;
-			}
-			for ( Terminal terminal : terminalSet ) {
-				cacheDataAndSubscribeEvents(terminal);
-			}
-			subscribed = true;
-		} finally {
-			lock.unlock();
+		if ( subscribed ) {
+			return;
 		}
+		for ( Terminal terminal : terminalSet ) {
+			cacheDataAndSubscribeEvents(terminal);
+		}
+		subscribed = true;
 	}
 
 	@Override
 	public void stopListeningUpdates() {
-		lock.lock();
-		try {
-			if ( ! subscribed ) {
-				return;
-			}
-			for ( Terminal terminal : terminalSet ) {
-				terminal.lock();
-				try {
-					unsubscribe(terminal);
-				} finally {
-					terminal.unlock();
-				}
-			}
-			portfolios.clear();
-			portfolioMap.clear();
-			subscribed = false;
-		} finally {
-			lock.unlock();
+		if ( ! subscribed ) {
+			return;
 		}
+		for ( Terminal terminal : terminalSet ) {
+			terminal.lock();
+			try {
+				unsubscribe(terminal);
+			} finally {
+				terminal.unlock();
+			}
+		}
+		portfolios.clear();
+		portfolioMap.clear();
+		subscribed = false;
 	}
 
 	@Override
-	public void onEvent(Event event) {
-		lock.lock();
-		try {
-			if ( ! subscribed ) {
-				return;
+	public void onEvent(final Event event) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				processEvent(event);
 			}
-			for ( Terminal terminal : terminalSet ) {
-				if ( event.isType(terminal.onPortfolioAvailable()) ) {
-					int firstRow = portfolios.size();
-					Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
-					if ( ! portfolioMap.containsKey(portfolio) ) {
-						portfolios.add(portfolio);
-						portfolioMap.put(portfolio, firstRow);
-						fireTableRowsInserted(firstRow, firstRow);
-					}
-				} else if ( event.isType(terminal.onPortfolioUpdate()) ) {
-					Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
-					Integer row = portfolioMap.get(portfolio);
-					if ( row != null ) {
-						fireTableRowsUpdated(row, row);	
-					}
+		});
+	}
+	
+	private void processEvent(Event event) {
+		if ( ! subscribed ) {
+			return;
+		}
+		for ( Terminal terminal : terminalSet ) {
+			if ( event.isType(terminal.onPortfolioAvailable()) ) {
+				int firstRow = portfolios.size();
+				Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
+				if ( ! portfolioMap.containsKey(portfolio) ) {
+					portfolios.add(portfolio);
+					portfolioMap.put(portfolio, firstRow);
+					fireTableRowsInserted(firstRow, firstRow);
+				}
+			} else if ( event.isType(terminal.onPortfolioUpdate()) ) {
+				Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
+				Integer row = portfolioMap.get(portfolio);
+				if ( row != null ) {
+					fireTableRowsUpdated(row, row);	
 				}
 			}
-		} finally {
-			lock.unlock();
 		}
 	}
 
 	@Override
 	public void close() {
 		clear();
+	}
+	
+	/**
+	 * Get portfolio associated with the row.
+	 * <p>
+	 * @param rowIndex - row index
+	 * @return portfolio instance
+	 */
+	public Portfolio getPortfolio(int rowIndex) {
+		return portfolios.get(rowIndex);
 	}
 	
 	private void cacheDataAndSubscribeEvents(Terminal terminal) {

@@ -1,8 +1,11 @@
 package ru.prolib.aquila.ui.form;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -10,238 +13,215 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
+import ru.prolib.aquila.ui.ITableModel;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 
 /**
  * $Id: PositionsTableModel.java 544 2013-02-25 14:31:32Z huan.kaktus $
  */
 public class PositionListTableModel extends AbstractTableModel implements
-		EventListener, Starter 
+		EventListener, ITableModel 
 {
 	private static final long serialVersionUID = 1;
 	private static final List<MsgID> mapIndexToID;
 	
 	static {
-		mapIndexToID = new Vector<MsgID>();
+		mapIndexToID = new ArrayList<MsgID>();
 		mapIndexToID.add(CommonMsg.TERMINAL);
 		mapIndexToID.add(CommonMsg.ACCOUNT);
-		mapIndexToID.add(CommonMsg.SECURITY);
-		mapIndexToID.add(CommonMsg.TYPE);
-		mapIndexToID.add(CommonMsg.CURR_VAL);
-		mapIndexToID.add(CommonMsg.MARKET_VAL);
-		mapIndexToID.add(CommonMsg.LOCKED_VAL);
+		mapIndexToID.add(CommonMsg.SYMBOL);
+		mapIndexToID.add(CommonMsg.CURR_VOL);
+		mapIndexToID.add(CommonMsg.CURR_PR);
+		mapIndexToID.add(CommonMsg.OPEN_VOL);
+		mapIndexToID.add(CommonMsg.OPEN_PR);
 		mapIndexToID.add(CommonMsg.VMARGIN);
-		mapIndexToID.add(CommonMsg.OPEN_VAL);
-		mapIndexToID.add(CommonMsg.BALANCE_VAL);
 	}
 
-	private boolean started = false;
-	private final ReentrantLock lock;
 	private final IMessages messages;
-	private final List<Terminal> terminals;
 	private final List<Position> positions;
+	private final Map<Position, Integer> positionMap;
+	private final Set<Portfolio> portfolioSet;
+	private boolean subscribed = false;
+
 	
 	public PositionListTableModel(IMessages messages) {
 		super();
-		this.lock = new ReentrantLock();
 		this.messages = messages;
-		this.terminals = new Vector<Terminal>();
-		this.positions = new Vector<Position>();
-	}
-	
-	private void subscribe(Terminal terminal) {
-		terminal.onPositionAvailable().addListener(this);
-		terminal.onPositionUpdate().addListener(this);
-	}
-	
-	private void unsubscribe(Terminal terminal) {
-		terminal.onPositionAvailable().removeListener(this);
-		terminal.onPositionUpdate().removeListener(this);
-	}
-	
-	private void addPositions(Terminal terminal) {
-		for ( Portfolio portfolio : terminal.getPortfolios() ) {
-			for ( Position position : portfolio.getPositions() ) {
-				if ( ! isExists(position) ) {
-					positions.add(position);
-				}
-			}
-		}
+		this.positions = new ArrayList<Position>();
+		this.positionMap = new HashMap<Position, Integer>();
+		this.portfolioSet = new HashSet<Portfolio>();
 	}
 	
 	@Override
-	public void start() {
-		lock.lock();
-		try {
-			positions.clear();
-			for ( Terminal terminal : terminals ) {
-				subscribe(terminal);
-				addPositions(terminal);
-			}
-			fireTableDataChanged();
-			started = true;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	public void stop() {
-		lock.lock();
-		try {
-			for ( Terminal terminal : terminals ) {
-				unsubscribe(terminal);
-			}
-			positions.clear();
-			started = false;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	public Object getValueAt(int row, int col) {
-		Position p = null;
-		lock.lock();
-		try {
-			if ( row >= positions.size() ) {
-				return null;
-			}
-			p = positions.get(row);
-		} finally {
-			lock.unlock();
-		} 
-			
-		MsgID id = mapIndexToID.get(col);
-		if ( id == CommonMsg.ACCOUNT ) {
-			return p.getAccount();
-		} else if ( id == CommonMsg.TERMINAL ) {
-			return "TODO";
-		} else if ( id == CommonMsg.SECURITY ) {			
-			return p.getSymbol();
-		} else if ( id == CommonMsg.VMARGIN ) {
-			return p.getVariationMargin();
-		} else if ( id == CommonMsg.OPEN_VAL ) {
-			return p.getOpenVolume();
-		} else if ( id == CommonMsg.LOCKED_VAL ) {
-			return 0;
-		} else if ( id == CommonMsg.CURR_VAL ) {
-			return p.getCurrentVolume();
-		} else if ( id == CommonMsg.TYPE ) {
-			return null;
-		} else if ( id == CommonMsg.MARKET_VAL ) {
-			return p.getCurrentPrice();
-		} else if ( id == CommonMsg.BALANCE_VAL ) {
-			return p.getOpenPrice();
-		} else {
-			return null;
-		}
+	public int getRowCount() {
+		return positions.size();
 	}
 	
-	private boolean isPositionAvailableEvent(Event event) {
-		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.onPositionAvailable()) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private boolean isPositionChangedEvent(Event event) {
-		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.onPositionUpdate()) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public void onEvent(Event event) {
-		lock.lock();
-		try {
-			final PositionEvent e = (PositionEvent) event;
-			if ( isPositionAvailableEvent(event) ) {
-				insertNewRow(e.getPosition());			
-			} else if ( isPositionChangedEvent(event) ) {
-				updateRow(e.getPosition());
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
-
 	@Override
 	public int getColumnCount() {
 		return mapIndexToID.size();
 	}
 	
 	@Override
-	public String getColumnName(int col) {
-		return messages.get(mapIndexToID.get(col));
+	public Object getValueAt(int row, int col) {
+		Position p = null;
+		if ( row >= positions.size() ) {
+			return null;
+		}
+		p = positions.get(row);
+		
+		MsgID id = mapIndexToID.get(col);
+		if ( id == CommonMsg.ACCOUNT ) {
+			return p.getAccount();
+		} else if ( id == CommonMsg.TERMINAL ) {
+			return p.getTerminal().getTerminalID();
+		} else if ( id == CommonMsg.SYMBOL ) {		
+			return p.getSymbol();
+		} else if ( id == CommonMsg.VMARGIN ) {
+			return p.getVariationMargin();
+		} else if ( id == CommonMsg.OPEN_VOL ) {
+			return p.getOpenVolume();
+		} else if ( id == CommonMsg.OPEN_PR ) {
+			return p.getOpenPrice();
+		} else if ( id == CommonMsg.CURR_VOL ) {
+			return p.getCurrentVolume();
+		} else if ( id == CommonMsg.CURR_PR ) {
+			return p.getCurrentPrice();
+		} else {
+			return null;
+		}
 	}
 
 	@Override
-	public int getRowCount() {
-		lock.lock();
-		try { 
-			return positions.size();
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	private void updateRow(Position position) {
-		int rowIndex = positions.indexOf(position);
-		fireTableRowsUpdated(rowIndex, rowIndex);
-	}
-	
-	private void insertNewRow(Position position) {
-		int rowIndex = positions.indexOf(position);
-		if ( ! isExists(position) ) {
-			rowIndex = positions.size();
-			positions.add(position);
-			fireTableRowsInserted(rowIndex, rowIndex);
-		}
-	}
-	
-	private boolean isExists(Position position) {
-		return positions.indexOf(position) >= 0 ? true : false; 
-	}
-	
-	private boolean isExists(Terminal terminal) {
-		return terminals.indexOf(terminal) >= 0 ? true : false;
-	}
-	
-	/**
-	 * Add all positions of terminal.
-	 * <p>
-	 * @param terminal - terminal to add
-	 */
-	public void add(Terminal terminal) {
-		lock.lock();
-		try {
-			if ( ! isExists(terminal) ) {
-				terminals.add(terminal);
-				if ( started ) {
-					subscribe(terminal);
-					addPositions(terminal);
-					fireTableDataChanged();
-				}
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	/**
-	 * Return column index by ID.
-	 * <p> 
-	 * @param columnId - column ID.
-	 * @return return index of specified column
-	 */
 	public int getColumnIndex(MsgID columnId) {
 		return mapIndexToID.indexOf(columnId);
+	}
+
+	@Override
+	public String getColumnName(int col) {
+		return messages.get(mapIndexToID.get(col));
+	}
+	
+	/**
+	 * Clear all cached data.
+	 */
+	public void clear() {
+		stopListeningUpdates();
+		portfolioSet.clear();
+		fireTableDataChanged();
+	}
+	
+	/**
+	 * Add portfolio to show its positions.
+	 * <p>
+	 * @param portfolio - portfolio to add
+	 */
+	public void add(Portfolio portfolio) {
+		if ( portfolioSet.contains(portfolio) ) {
+			return;
+		}
+		portfolioSet.add(portfolio);
+		if ( subscribed ) {
+			cacheDataAndSubscribeEvents(portfolio);
+		}
+	}
+	
+	@Override
+	public void startListeningUpdates() {
+		if ( subscribed ) {
+			return;
+		}
+		for ( Portfolio portfolio : portfolioSet ) {
+			cacheDataAndSubscribeEvents(portfolio);
+		}
+		subscribed = true;
+	}
+
+	@Override
+	public void stopListeningUpdates() {
+		if ( ! subscribed ) {
+			return;
+		}
+		for ( Portfolio portfolio : portfolioSet ) {
+			portfolio.lock();
+			try {
+				unsubscribe(portfolio);
+			} finally {
+				portfolio.unlock();
+			}
+		}
+		positions.clear();
+		positionMap.clear();
+		subscribed = false;
+	}
+
+	@Override
+	public void onEvent(Event event) {
+		if ( ! subscribed ) {
+			return;
+		}
+		for ( Portfolio portfolio : portfolioSet ) {
+			if ( event.isType(portfolio.onPositionAvailable()) ) {
+				int firstRow = positions.size();
+				Position position = ((PositionEvent) event).getPosition();
+				if ( ! positionMap.containsKey(position) ) {
+					positions.add(position);
+					positionMap.put(position, firstRow);
+					fireTableRowsInserted(firstRow, firstRow);
+				}
+			} else if ( event.isType(portfolio.onPositionUpdate()) ) {
+				Position position = ((PositionEvent) event).getPosition();
+				Integer row = positionMap.get(position);
+				if ( row != null ) {
+					fireTableRowsUpdated(row, row);	
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Get position associated with the row.
+	 * <p>
+	 * @param rowIndex - row index
+	 * @return position instance
+	 */
+	public Position getPosition(int rowIndex) {
+		return positions.get(rowIndex);
+	}
+	
+	@Override
+	public void close() {
+		clear();
+	}
+	
+	private void cacheDataAndSubscribeEvents(Portfolio portfolio) {
+		portfolio.lock();
+		try {
+			subscribe(portfolio);
+			int countAdded = 0, firstRow = positions.size();
+			for ( Position position : portfolio.getPositions() ) {
+				if ( ! positionMap.containsKey(position) ) {
+					positions.add(position);
+					positionMap.put(position, firstRow + countAdded);
+					countAdded ++;
+				}
+			}
+			if ( countAdded > 0 ) {
+				fireTableRowsInserted(firstRow, firstRow + countAdded - 1);
+			}
+		} finally {
+			portfolio.unlock();
+		}
+	}
+	
+	private void subscribe(Portfolio portfolio) {
+		portfolio.onPositionAvailable().addListener(this);
+		portfolio.onPositionUpdate().addListener(this);
+	}
+	
+	private void unsubscribe(Portfolio portfolio) {
+		portfolio.onPositionAvailable().removeListener(this);
+		portfolio.onPositionUpdate().removeListener(this);
 	}
 	
 }

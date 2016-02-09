@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import ru.prolib.aquila.core.Event;
@@ -58,7 +57,6 @@ public class SecurityListTableModel extends AbstractTableModel
 		mapIndexToID.add(SecurityMsg.INITIAL_PRICE);
 	}
 	
-	private final Lock lock = new ReentrantLock();
 	private final IMessages messages;
 	private final List<Security> securities;
 	private final Map<Security, Integer> securityMap;
@@ -75,12 +73,7 @@ public class SecurityListTableModel extends AbstractTableModel
 
 	@Override
 	public int getRowCount() {
-		lock.lock();
-		try {
-			return securities.size();
-		} finally {
-			lock.unlock();
-		}
+		return securities.size();
 	}
 
 	@Override
@@ -91,15 +84,10 @@ public class SecurityListTableModel extends AbstractTableModel
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Security security = null;
-		lock.lock();
-		try {
-			if ( rowIndex >= securities.size() || columnIndex >= mapIndexToID.size() ) {
-				return null;
-			}
-			security = securities.get(rowIndex);
-		} finally {
-			lock.unlock();
+		if ( rowIndex >= securities.size() || columnIndex >= mapIndexToID.size() ) {
+			return null;
 		}
+		security = securities.get(rowIndex);
 		Tick tick = null;
 		Symbol symbol = security.getSymbol();
 		MsgID id = mapIndexToID.get(columnIndex); 
@@ -176,13 +164,9 @@ public class SecurityListTableModel extends AbstractTableModel
 	 * Clear all cached data.
 	 */
 	public void clear() {
-		lock.lock();
-		try {
-			stopListeningUpdates();
-			terminalSet.clear();
-		} finally {
-			lock.unlock();
-		}
+		stopListeningUpdates();
+		terminalSet.clear();
+		fireTableDataChanged();
 	}
 	
 	/**
@@ -191,89 +175,78 @@ public class SecurityListTableModel extends AbstractTableModel
 	 * @param terminal - terminal to add
 	 */
 	public void add(Terminal terminal) {
-		lock.lock();
-		try {
-			if ( terminalSet.contains(terminal) ) {
-				return;
-			}
-			terminalSet.add(terminal);
-			if ( subscribed ) {
-				cacheSecuritiesAndSubscribeEvents(terminal);
-			}
-		} finally {
-			lock.unlock();
-		}		
+		if ( terminalSet.contains(terminal) ) {
+			return;
+		}
+		terminalSet.add(terminal);
+		if ( subscribed ) {
+			cacheDataAndSubscribeEvents(terminal);
+		}
 	}
 	
 	@Override
 	public void startListeningUpdates() {
-		lock.lock();
-		try {
-			if ( subscribed ) {
-				return;
-			}
-			for ( Terminal terminal : terminalSet ) {
-				cacheSecuritiesAndSubscribeEvents(terminal);
-			}
-			subscribed = true;
-		} finally {
-			lock.unlock();
+		if ( subscribed ) {
+			return;
 		}
+		for ( Terminal terminal : terminalSet ) {
+			cacheDataAndSubscribeEvents(terminal);
+		}
+		subscribed = true;
 	}
 
 	@Override
 	public void stopListeningUpdates() {
-		lock.lock();
-		try {
-			if ( ! subscribed ) {
-				return;
-			}
-			for ( Terminal terminal : terminalSet ) {
-				terminal.lock();
-				try {
-					unsubscribe(terminal);
-				} finally {
-					terminal.unlock();
-				}
-			}
-			securities.clear();
-			securityMap.clear();
-			subscribed = false;
-		} finally {
-			lock.unlock();
+		if ( ! subscribed ) {
+			return;
 		}
+		for ( Terminal terminal : terminalSet ) {
+			terminal.lock();
+			try {
+				unsubscribe(terminal);
+			} finally {
+				terminal.unlock();
+			}
+		}
+		securities.clear();
+		securityMap.clear();
+		subscribed = false;
 	}
 
 	@Override
-	public void onEvent(Event event) {
-		lock.lock();
-		try {
-			if ( ! subscribed  ) {
-				return;
+	public void onEvent(final Event event) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				processEvent(event);
 			}
-			for ( Terminal terminal : terminalSet ) {
-				if ( event.isType(terminal.onSecurityAvailable()) ) {
-					int firstRow = securities.size();
-					Security security = ((SecurityEvent) event).getSecurity();
-					if ( ! securityMap.containsKey(security) ) {
-						securities.add(security);
-						securityMap.put(security, firstRow);
-						fireTableRowsInserted(firstRow, firstRow);
-					}
-				} else if ( event.isType(terminal.onSecurityUpdate())
-						|| event.isType(terminal.onSecurityBestAsk())
-						|| event.isType(terminal.onSecurityBestBid())
-						|| event.isType(terminal.onSecurityLastTrade()) )
-				{
-					Security security = ((SecurityEvent) event).getSecurity();
-					Integer row = securityMap.get(security);
-					if ( row != null ) {
-						fireTableRowsUpdated(row, row);	
-					}
+		});
+	}
+	
+	private void processEvent(Event event) {
+		if ( ! subscribed  ) {
+			return;
+		}
+		for ( Terminal terminal : terminalSet ) {
+			if ( event.isType(terminal.onSecurityAvailable()) ) {
+				int firstRow = securities.size();
+				Security security = ((SecurityEvent) event).getSecurity();
+				if ( ! securityMap.containsKey(security) ) {
+					securities.add(security);
+					securityMap.put(security, firstRow);
+					fireTableRowsInserted(firstRow, firstRow);
+				}
+			} else if ( event.isType(terminal.onSecurityUpdate())
+					|| event.isType(terminal.onSecurityBestAsk())
+					|| event.isType(terminal.onSecurityBestBid())
+					|| event.isType(terminal.onSecurityLastTrade()) )
+			{
+				Security security = ((SecurityEvent) event).getSecurity();
+				Integer row = securityMap.get(security);
+				if ( row != null ) {
+					fireTableRowsUpdated(row, row);	
 				}
 			}
-		} finally {
-			lock.unlock();
 		}
 	}
 	
@@ -284,12 +257,7 @@ public class SecurityListTableModel extends AbstractTableModel
 	 * @return security
 	 */
 	public Security getSecurity(int rowIndex) {
-		lock.lock();
-		try {
-			return securities.get(rowIndex);
-		} finally {
-			lock.unlock();
-		}
+		return securities.get(rowIndex);
 	}
 
 	@Override
@@ -297,7 +265,7 @@ public class SecurityListTableModel extends AbstractTableModel
 		clear();
 	}
 
-	private void cacheSecuritiesAndSubscribeEvents(Terminal terminal) {
+	private void cacheDataAndSubscribeEvents(Terminal terminal) {
 		terminal.lock();
 		try {
 			subscribe(terminal);
