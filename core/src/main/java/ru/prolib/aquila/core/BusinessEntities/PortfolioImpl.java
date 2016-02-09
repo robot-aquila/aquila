@@ -123,6 +123,11 @@ public class PortfolioImpl extends ContainerImpl implements EditablePortfolio {
 	public String getCurrency() {
 		return getString(PortfolioField.CURRENCY);
 	}
+	
+	@Override
+	public Double getLeverage() {
+		return getDouble(PortfolioField.LEVERAGE);
+	}
 
 	@Override
 	public int getPositionCount() {

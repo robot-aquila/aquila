@@ -90,6 +90,13 @@ public interface Portfolio extends Container {
 	public Double getLiabilities();
 	
 	/**
+	 * Account leverage.
+	 * <p>
+	 * @return account leverage
+	 */
+	public Double getLeverage();
+	
+	/**
 	 * Get account currency.
 	 * <p>
 	 * @return ISO 4217 currency code

@@ -230,6 +230,16 @@ public class PortfolioImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testGetLeverage() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return portfolio.getLeverage();
+			}
+		};
+		testGetter(PortfolioField.LEVERAGE, 4.0d, 2.0d);
+	}
+	
+	@Test
 	public void testGetPositionCount() throws Exception {
 		assertEquals(0, portfolio.getPositionCount());
 		

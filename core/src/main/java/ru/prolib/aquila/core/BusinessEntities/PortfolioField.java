@@ -42,5 +42,9 @@ public class PortfolioField {
 	 * ISO 4217 code of account currency.
 	 */
 	public static final int CURRENCY = 10;
+	/**
+	 * Account leverage.
+	 */
+	public static final int LEVERAGE = 11;
 
 }
