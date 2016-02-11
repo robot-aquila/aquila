@@ -1,8 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.utils.SimpleCounter;
+import ru.prolib.aquila.core.data.DataProvider;
 
 /**
  * The terminal builder.
@@ -18,9 +17,7 @@ public class BasicTerminalBuilder extends TerminalParams {
 	}
 	
 	public TerminalParams buildParams() {
-		TerminalParams params = new TerminalParams();
-		params.setScheduler(getScheduler());
-		return params;
+		return this;
 	}
 	
 	/**
@@ -42,6 +39,21 @@ public class BasicTerminalBuilder extends TerminalParams {
 	 */
 	public BasicTerminalBuilder withScheduler(Scheduler scheduler) {
 		setScheduler(scheduler);
+		return this;
+	}
+	
+	public BasicTerminalBuilder withDataProvider(DataProvider dataProvider) {
+		setDataProvider(dataProvider);
+		return this;
+	}
+	
+	public BasicTerminalBuilder withTerminalID(String terminalID) {
+		setTerminalID(terminalID);
+		return this;
+	}
+	
+	public BasicTerminalBuilder withObjectFactory(ObjectFactory factory) {
+		setObjectFactory(factory);
 		return this;
 	}
 	

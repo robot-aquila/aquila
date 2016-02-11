@@ -15,10 +15,10 @@ import org.junit.*;
  * $Id: EventQueueImplTest.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventQueueImplTest {
-	private static EventSystem eSys;
-	private static EventQueueImpl queue;
-	private static EventDispatcher dispatcher;
-	private static EventType type1,type2,type3;
+	private EventSystem eSys;
+	private EventQueueImpl queue;
+	private EventDispatcher dispatcher;
+	private EventType type1,type2,type3;
 	private EventListenerStub listener1, listener2, listener3;
 
 	@BeforeClass

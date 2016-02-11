@@ -22,6 +22,7 @@ import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.core.data.DataProviderStub;
 
 /**
  * 2012-08-16<br>
@@ -29,52 +30,12 @@ import ru.prolib.aquila.core.data.DataProvider;
  */
 public class TerminalImplTest {
 	
-	static class DataProviderStub implements DataProvider {
+	static class DataProviderStubX extends DataProviderStub {
 		private long nextOrderID = 1000L;
-
-		@Override
-		public void subscribeStateUpdates(EditableSecurity security) {
-			throw new RuntimeException();
-		}
-
-		@Override
-		public void subscribeLevel1Data(UpdatableTickStreamContainer container) {
-			throw new RuntimeException();
-		}
-
-		@Override
-		public void subscribeLevel2Data(UpdatableMarketDepthStreamContainer container) {
-			throw new RuntimeException();
-		}
 
 		@Override
 		public long getNextOrderID() {
 			return nextOrderID ++;
-		}
-
-		@Override
-		public void subscribeStateUpdates(EditablePortfolio portfolio) {
-			
-		}
-
-		@Override
-		public void registerNewOrder(EditableOrder order) {
-			throw new RuntimeException();
-		}
-
-		@Override
-		public void cancelOrder(EditableOrder order) {
-			throw new RuntimeException();
-		}
-
-		@Override
-		public void subscribeRemoteObjects(EditableTerminal terminal) {
-			
-		}
-
-		@Override
-		public void unsubscribeRemoteObjects(EditableTerminal terminal) {
-			
 		}
 		
 	}
@@ -88,7 +49,7 @@ public class TerminalImplTest {
 	private IMocksControl control;
 	private Scheduler schedulerMock;
 	private DataProvider dataProviderMock;
-	private DataProviderStub dataProviderStub;
+	private DataProviderStubX dataProviderStub;
 	private TerminalImpl terminal, terminalWithMocks;
 	
 	@BeforeClass
@@ -103,7 +64,7 @@ public class TerminalImplTest {
 		control = createStrictControl();
 		schedulerMock = control.createMock(Scheduler.class);
 		dataProviderMock = control.createMock(DataProvider.class);
-		dataProviderStub = new DataProviderStub();
+		dataProviderStub = new DataProviderStubX();
 		TerminalParams params = new TerminalParams();
 		params.setTerminalID("DummyTerminal");
 		params.setDataProvider(dataProviderStub);
