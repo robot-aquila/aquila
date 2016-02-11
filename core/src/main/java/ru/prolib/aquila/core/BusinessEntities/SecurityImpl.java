@@ -12,7 +12,8 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		SecurityField.SCALE,
 		SecurityField.LOT_SIZE,
 		SecurityField.TICK_SIZE,
-		SecurityField.TICK_VALUE
+		SecurityField.TICK_VALUE,
+		SecurityField.INITIAL_PRICE
 	};
 	
 	private static final int[] TOKENS_FOR_SESSION_UPDATE = {

@@ -46,18 +46,11 @@ public interface Position extends Container {
 	public Double getCurrentPrice();
 	
 	/**
-	 * Get price of position at session start.
+	 * Get position open price.
 	 * <p>
 	 * @return open price of position or null if data not available
 	 */
 	public Double getOpenPrice();
-	
-	/**
-	 * Get volume of position at session start.
-	 * <p>
-	 * @return open volume or null if data not available
-	 */
-	public Long getOpenVolume();
 	
 	/**
 	 * Get variation margin.

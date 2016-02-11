@@ -94,11 +94,6 @@ public class PositionImpl extends ContainerImpl implements EditablePosition {
 	}
 	
 	@Override
-	public Long getOpenVolume() {
-		return getLong(PositionField.OPEN_VOLUME);
-	}
-
-	@Override
 	public Double getOpenPrice() {
 		return getDouble(PositionField.OPEN_PRICE);
 	}

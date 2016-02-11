@@ -112,16 +112,6 @@ public class PositionImplTest extends ContainerImplTest {
 	}
 	
 	@Test
-	public void testGetOpenVolume() throws Exception {
-		getter = new Getter<Long>() {
-			@Override public Long get() {
-				return position.getOpenVolume();
-			}
-		};
-		testGetter(PositionField.OPEN_VOLUME, 580L, 240L);
-	}
-
-	@Test
 	public void testGetOpenPrice() throws Exception {
 		getter = new Getter<Double>() {
 			@Override public Double get() {

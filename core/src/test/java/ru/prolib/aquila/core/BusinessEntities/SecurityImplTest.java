@@ -264,6 +264,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		data.put(SecurityField.LOT_SIZE, 100);
 		data.put(SecurityField.TICK_SIZE, 5d);
 		data.put(SecurityField.TICK_VALUE, 2.37d);
+		data.put(SecurityField.INITIAL_PRICE, 200.01d);
 		security.update(data);
 		
 		assertTrue(controller.hasMinimalData(security));
