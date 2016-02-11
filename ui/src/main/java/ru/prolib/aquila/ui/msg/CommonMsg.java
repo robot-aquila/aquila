@@ -46,7 +46,6 @@ public class CommonMsg {
 	public static final MsgID MENU_ORDER = newMsgID("MENU_ORDER");
 	public static final MsgID MENU_ORDER_CANCEL = newMsgID("MENU_ORDER_CANCEL");
 	public static final MsgID OK = newMsgID("ID_OK");
-	public static final MsgID OPEN_VOL = newMsgID("ID_OPEN_VOL");
 	public static final MsgID OPEN_PR = newMsgID("ID_OPEN_PR");
 	public static final MsgID ORDERS = newMsgID("ID_ORDERS");
 	public static final MsgID PORTFOLIO = newMsgID("ID_PORTFOLIO");

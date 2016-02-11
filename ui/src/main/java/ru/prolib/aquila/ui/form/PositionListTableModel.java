@@ -32,7 +32,6 @@ public class PositionListTableModel extends AbstractTableModel implements
 		mapIndexToID.add(CommonMsg.SYMBOL);
 		mapIndexToID.add(CommonMsg.CURR_VOL);
 		mapIndexToID.add(CommonMsg.CURR_PR);
-		mapIndexToID.add(CommonMsg.OPEN_VOL);
 		mapIndexToID.add(CommonMsg.OPEN_PR);
 		mapIndexToID.add(CommonMsg.VMARGIN);
 	}
@@ -79,8 +78,6 @@ public class PositionListTableModel extends AbstractTableModel implements
 			return p.getSymbol();
 		} else if ( id == CommonMsg.VMARGIN ) {
 			return p.getVariationMargin();
-		} else if ( id == CommonMsg.OPEN_VOL ) {
-			return p.getOpenVolume();
 		} else if ( id == CommonMsg.OPEN_PR ) {
 			return p.getOpenPrice();
 		} else if ( id == CommonMsg.CURR_VOL ) {
@@ -116,6 +113,9 @@ public class PositionListTableModel extends AbstractTableModel implements
 	 * @param portfolio - portfolio to add
 	 */
 	public void add(Portfolio portfolio) {
+		if ( portfolio == null ) {
+			throw new IllegalArgumentException("Portfolio cannot be null");
+		}
 		if ( portfolioSet.contains(portfolio) ) {
 			return;
 		}

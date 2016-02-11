@@ -127,6 +127,9 @@ public class PortfolioListTableModel extends AbstractTableModel
 	 * @param terminal - terminal to add
 	 */
 	public void add(Terminal terminal) {
+		if ( terminal == null ) {
+			throw new IllegalArgumentException("Terminal cannot be null");
+		}
 		if ( terminalSet.contains(terminal) ) {
 			return;
 		}
