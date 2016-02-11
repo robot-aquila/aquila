@@ -119,7 +119,6 @@ public class PortfolioListTableModel extends AbstractTableModel
 	public void clear() {
 		stopListeningUpdates();
 		terminalSet.clear();
-		fireTableDataChanged();
 	}
 	
 	/**
@@ -164,6 +163,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 		}
 		portfolios.clear();
 		portfolioMap.clear();
+		fireTableDataChanged();
 		subscribed = false;
 	}
 

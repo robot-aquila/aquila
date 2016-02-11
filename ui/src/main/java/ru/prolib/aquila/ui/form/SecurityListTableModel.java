@@ -166,7 +166,6 @@ public class SecurityListTableModel extends AbstractTableModel
 	public void clear() {
 		stopListeningUpdates();
 		terminalSet.clear();
-		fireTableDataChanged();
 	}
 	
 	/**
@@ -210,6 +209,7 @@ public class SecurityListTableModel extends AbstractTableModel
 		}
 		securities.clear();
 		securityMap.clear();
+		fireTableDataChanged();
 		subscribed = false;
 	}
 

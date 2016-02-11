@@ -108,7 +108,6 @@ public class PositionListTableModel extends AbstractTableModel implements
 	public void clear() {
 		stopListeningUpdates();
 		portfolioSet.clear();
-		fireTableDataChanged();
 	}
 	
 	/**
@@ -152,6 +151,7 @@ public class PositionListTableModel extends AbstractTableModel implements
 		}
 		positions.clear();
 		positionMap.clear();
+		fireTableDataChanged();
 		subscribed = false;
 	}
 
