@@ -476,17 +476,20 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testSubscribe() {
+		Capture<Symbol> capturedSymbol1 = newCapture(), capturedSymbol2 = newCapture();
 		Capture<EditableSecurity> captured1 = newCapture(),
 				captured2 = newCapture(), captured3 = newCapture();
 		dataProviderMock.subscribeStateUpdates(capture(captured1));
-		dataProviderMock.subscribeLevel1Data(capture(captured2));
-		dataProviderMock.subscribeLevel2Data(capture(captured3));
+		dataProviderMock.subscribeLevel1Data(capture(capturedSymbol1), capture(captured2));
+		dataProviderMock.subscribeLevel2Data(capture(capturedSymbol2), capture(captured3));
 		control.replay();
 		
 		terminalWithMocks.subscribe(symbol1);
 		terminalWithMocks.subscribe(symbol1); // shouldn't subscribe
 		
 		control.verify();
+		assertEquals(symbol1, capturedSymbol1.getValue());
+		assertEquals(symbol1, capturedSymbol2.getValue());
 		EditableSecurity expected = terminalWithMocks.getEditableSecurity(symbol1);
 		assertSame(expected, captured1.getValue());
 		assertSame(expected, captured2.getValue());

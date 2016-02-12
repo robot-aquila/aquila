@@ -380,8 +380,8 @@ public class TerminalImpl implements EditableTerminal {
 			if ( ! isSecurityExists(symbol) ) {
 				EditableSecurity security = getEditableSecurity(symbol);
 				dataProvider.subscribeStateUpdates(security);
-				dataProvider.subscribeLevel1Data(security);
-				dataProvider.subscribeLevel2Data(security);
+				dataProvider.subscribeLevel1Data(symbol, security);
+				dataProvider.subscribeLevel2Data(symbol, security);
 			}
 		} finally {
 			lock.unlock();

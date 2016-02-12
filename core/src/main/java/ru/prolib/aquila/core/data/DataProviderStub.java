@@ -4,6 +4,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.UpdatableMarketDepthStreamContainer;
 import ru.prolib.aquila.core.BusinessEntities.UpdatableTickStreamContainer;
 
@@ -15,13 +16,12 @@ public class DataProviderStub implements DataProvider {
 	}
 
 	@Override
-	public void subscribeLevel1Data(UpdatableTickStreamContainer container) {
+	public void subscribeLevel1Data(Symbol symbol, UpdatableTickStreamContainer container) {
 
 	}
 
 	@Override
-	public void subscribeLevel2Data(
-			UpdatableMarketDepthStreamContainer container) {
+	public void subscribeLevel2Data(Symbol symbol, UpdatableMarketDepthStreamContainer container) {
 
 	}
 
