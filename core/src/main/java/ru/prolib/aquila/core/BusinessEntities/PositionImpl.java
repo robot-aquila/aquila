@@ -10,7 +10,11 @@ import ru.prolib.aquila.core.*;
  */
 public class PositionImpl extends ContainerImpl implements EditablePosition {
 	private static final int[] TOKENS_FOR_AVAILABILITY = {
-		PositionField.CURRENT_VOLUME
+		PositionField.CURRENT_VOLUME,
+		PositionField.CURRENT_PRICE,
+		PositionField.OPEN_PRICE,
+		PositionField.PROFIT_AND_LOSS,
+		PositionField.USED_MARGIN
 	};
 	
 	private final Symbol symbol;
@@ -79,8 +83,8 @@ public class PositionImpl extends ContainerImpl implements EditablePosition {
 	}
 
 	@Override
-	public Double getVariationMargin() {
-		return getDouble(PositionField.VARIATION_MARGIN);
+	public Double getUsedMargin() {
+		return getDouble(PositionField.USED_MARGIN);
 	}
 
 	@Override
@@ -157,6 +161,11 @@ public class PositionImpl extends ContainerImpl implements EditablePosition {
 			return new PositionEvent(type, position);
 		}
 		
+	}
+
+	@Override
+	public Double getProfitAndLoss() {
+		return getDouble(PositionField.PROFIT_AND_LOSS);
 	}
 
 }

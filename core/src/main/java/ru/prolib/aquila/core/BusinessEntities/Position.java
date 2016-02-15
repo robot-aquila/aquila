@@ -53,11 +53,18 @@ public interface Position extends Container {
 	public Double getOpenPrice();
 	
 	/**
-	 * Get variation margin.
+	 * Get margin.
 	 * <p>
-	 * @return variation margin or null if data not available
+	 * @return margin or null if data not available
 	 */
-	public Double getVariationMargin();
+	public Double getUsedMargin();
+	
+	/**
+	 * Get P&L.
+	 * <p>
+	 * @return profit and loss or null if data not available.
+	 */
+	public Double getProfitAndLoss();
 	
 	/**
 	 * When position volume changed.

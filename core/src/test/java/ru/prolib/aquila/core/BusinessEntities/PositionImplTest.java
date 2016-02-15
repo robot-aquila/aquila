@@ -3,6 +3,9 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -82,13 +85,13 @@ public class PositionImplTest extends ContainerImplTest {
 	}
 	
 	@Test
-	public void testGetVariationMargin() throws Exception {
+	public void testGetUsedMargin() throws Exception {
 		getter = new Getter<Double>() {
 			@Override public Double get() {
-				return position.getVariationMargin();
+				return position.getUsedMargin();
 			}			
 		};
-		testGetter(PositionField.VARIATION_MARGIN, 415.345d, 280.34d);
+		testGetter(PositionField.USED_MARGIN, 415.345d, 280.34d);
 	}
 	
 	@Test
@@ -120,6 +123,16 @@ public class PositionImplTest extends ContainerImplTest {
 		};
 		testGetter(PositionField.OPEN_PRICE, 551.13d, 902.08d);
 	}
+	
+	@Test
+	public void testGetProfitAndLoss() throws Exception {
+		getter = new Getter<Double>() {
+			@Override public Double get() {
+				return position.getProfitAndLoss();
+			}
+		};
+		testGetter(PositionField.PROFIT_AND_LOSS, 421.19d, 534.25d);
+	}
 
 	@Test
 	public void testPositionController_HasMinimalData() {
@@ -127,8 +140,17 @@ public class PositionImplTest extends ContainerImplTest {
 		
 		assertFalse(controller.hasMinimalData(position));
 		
-		data.put(PositionField.CURRENT_VOLUME, 1000L);
-		position.update(data);
+		Map<Integer, Object> minimal = new HashMap<Integer, Object>();
+		minimal.put(PositionField.CURRENT_VOLUME, 1000L);
+		minimal.put(PositionField.CURRENT_PRICE, 2000d);
+		minimal.put(PositionField.OPEN_PRICE, 1800d);
+		minimal.put(PositionField.USED_MARGIN, 200d);
+		minimal.put(PositionField.PROFIT_AND_LOSS, 0d);
+		for ( Map.Entry<Integer, Object> entry : minimal.entrySet() ) {
+			data.put(entry.getKey(), entry.getValue());
+			position.update(data);
+			assertEquals(data.size() == minimal.size(), controller.hasMinimalData(position));
+		}
 		
 		assertTrue(controller.hasMinimalData(position));
 	}
