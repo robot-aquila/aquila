@@ -33,7 +33,8 @@ public class PositionListTableModel extends AbstractTableModel implements
 		mapIndexToID.add(CommonMsg.CURR_VOL);
 		mapIndexToID.add(CommonMsg.CURR_PR);
 		mapIndexToID.add(CommonMsg.OPEN_PR);
-		mapIndexToID.add(CommonMsg.VMARGIN);
+		mapIndexToID.add(CommonMsg.USED_MARGIN);
+		mapIndexToID.add(CommonMsg.PROFIT_AND_LOSS);
 	}
 
 	private final IMessages messages;
@@ -76,14 +77,16 @@ public class PositionListTableModel extends AbstractTableModel implements
 			return p.getTerminal().getTerminalID();
 		} else if ( id == CommonMsg.SYMBOL ) {		
 			return p.getSymbol();
-		} else if ( id == CommonMsg.VMARGIN ) {
-			return p.getVariationMargin();
+		} else if ( id == CommonMsg.USED_MARGIN ) {
+			return p.getUsedMargin();
 		} else if ( id == CommonMsg.OPEN_PR ) {
 			return p.getOpenPrice();
 		} else if ( id == CommonMsg.CURR_VOL ) {
 			return p.getCurrentVolume();
 		} else if ( id == CommonMsg.CURR_PR ) {
 			return p.getCurrentPrice();
+		} else if ( id == CommonMsg.PROFIT_AND_LOSS ) {
+			return p.getProfitAndLoss();
 		} else {
 			return null;
 		}
