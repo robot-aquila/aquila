@@ -810,7 +810,7 @@ public class TerminalImplTest {
 		control.replay();
 		terminalWithMocks.start();
 		control.reset();
-		dataProviderMock.unsubscribeRemoteObjects(terminalWithMocks);
+		dataProviderMock.unsubscribeRemoteObjects();
 		control.replay();
 		final CountDownLatch finished = new CountDownLatch(1);
 		terminalWithMocks.onTerminalUnready().addSyncListener(new EventListener() {
