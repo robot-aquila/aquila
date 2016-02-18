@@ -1,12 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
-
-import java.util.Currency;
-
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.*;
-
 import ru.prolib.aquila.core.utils.Variant;
 
 public class SymbolTest {
@@ -82,6 +78,16 @@ public class SymbolTest {
 		assertNull(symbol.getTypeCode());
 		assertNull(symbol.getExchangeID());
 		assertNull(symbol.getCurrencyCode());
+	}
+	
+	@Test
+	public void testConstruct1_ThrowsAmbiguousToken() throws Exception {
+		try {
+			symbol = new Symbol("A:B:C");
+			fail("Expected exception: " + IllegalArgumentException.class.getSimpleName());
+		} catch ( IllegalArgumentException e ) {
+			assertEquals("Ambiguous token: A:B:C", e.getMessage());
+		}
 	}
 	
 	@Test

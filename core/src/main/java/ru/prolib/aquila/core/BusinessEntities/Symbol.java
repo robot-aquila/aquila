@@ -115,6 +115,9 @@ public class Symbol implements Serializable {
 		boolean valid = false;
 		String tokens[] = StringUtils.splitByWholeSeparatorPreserveAllTokens(symbol, "@");
 		if ( tokens.length == 1 ) {
+			if ( symbol.indexOf(':') >= 0 ) {
+				throw new IllegalArgumentException("Ambiguous token: " + symbol);
+			}
 			setCode(symbol);
 			valid = true;
 		} else if ( tokens.length == 2 ) {
