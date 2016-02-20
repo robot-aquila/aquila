@@ -53,19 +53,7 @@ public class SimpleL1Recorder implements EventListener {
 	}
 	
 	public void close() {
-		lock.lock();
-		try {
-			if ( writer != null ) {
-				try {
-					writer.close();
-				} catch ( IOException e ) {
-					logger.warn("Unexpected exception: ", e);
-				}
-				writer = null;
-			}
-		} finally {
-			lock.unlock();
-		}
+		stopWritingUpdates();
 	}
 	
 	public boolean isStarted() {
@@ -77,7 +65,7 @@ public class SimpleL1Recorder implements EventListener {
 		}
 	}
 	
-	public void startWriteUpdates(File file) throws IOException {
+	public void startWritingUpdates(File file) throws IOException {
 		lock.lock();
 		try {
 			if ( started ) {
@@ -93,14 +81,21 @@ public class SimpleL1Recorder implements EventListener {
 		}
 	}
 	
-	public void stopWriteUpdates() {
+	public void stopWritingUpdates() {
 		lock.lock();
 		try {
 			if ( started ) {
 				terminal.onSecurityBestAsk().removeListener(this);
 				terminal.onSecurityBestBid().removeListener(this);
 				terminal.onSecurityLastTrade().removeListener(this);
-				close();
+				if ( writer != null ) {
+					try {
+						writer.close();
+					} catch ( IOException e ) {
+						logger.warn("Unexpected exception: ", e);
+					}
+					writer = null;
+				}
 				started = false;
 			}
 		} finally {
@@ -119,7 +114,7 @@ public class SimpleL1Recorder implements EventListener {
 			}
 		} catch ( IOException e ) {
 			logger.error("Stop recording: ", e);
-			stopWriteUpdates();
+			stopWritingUpdates();
 		} finally {
 			lock.unlock();
 		}

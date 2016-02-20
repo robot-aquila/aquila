@@ -53,11 +53,11 @@ public class SimpleL1RecorderTest {
 	}
 	
 	@Test
-	public void testStartWriteUpdates() throws Exception {
+	public void testStartWritingUpdates() throws Exception {
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
 		
-		recorder.startWriteUpdates(file);
+		recorder.startWritingUpdates(file);
 		
 		control.verify();
 		assertTrue(recorder.isStarted());
@@ -67,19 +67,19 @@ public class SimpleL1RecorderTest {
 	}
 	
 	@Test (expected=IllegalStateException.class)
-	public void testStartWriteUpdates_ThrowsIfStarted() throws Exception {
+	public void testStartWritingUpdates_ThrowsIfStarted() throws Exception {
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
 		
-		recorder.startWriteUpdates(file);
-		recorder.startWriteUpdates(file);
+		recorder.startWritingUpdates(file);
+		recorder.startWritingUpdates(file);
 	}
 	
 	@Test
 	public void testClose() throws Exception {
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
-		recorder.startWriteUpdates(file);
+		recorder.startWritingUpdates(file);
 		control.reset();
 		writerMock.close();
 		control.replay();
@@ -87,27 +87,31 @@ public class SimpleL1RecorderTest {
 		recorder.close();
 		
 		control.verify();
+		assertFalse(recorder.isStarted());
+		assertFalse(terminal.onSecurityBestAsk().isListener(recorder));
+		assertFalse(terminal.onSecurityBestBid().isListener(recorder));
+		assertFalse(terminal.onSecurityLastTrade().isListener(recorder));
 	}
 	
 	@Test
-	public void testStopWriteUpdates_DoNothingIfNotStarted() throws Exception {
+	public void testStopWritingUpdates_DoNothingIfNotStarted() throws Exception {
 		control.replay();
 		
-		recorder.stopWriteUpdates();
+		recorder.stopWritingUpdates();
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testStopWriteUpdates() throws Exception {
+	public void testStopWritingUpdates() throws Exception {
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
-		recorder.startWriteUpdates(file);
+		recorder.startWritingUpdates(file);
 		control.reset();
 		writerMock.close();
 		control.replay();
 		
-		recorder.stopWriteUpdates();
+		recorder.stopWritingUpdates();
 		
 		control.verify();
 		assertFalse(recorder.isStarted());
@@ -120,7 +124,7 @@ public class SimpleL1RecorderTest {
 	public void testOnEvent() throws Exception {
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
-		recorder.startWriteUpdates(file);
+		recorder.startWritingUpdates(file);
 		control.reset();
 		Symbol expectedSymbol = new Symbol("SBER");
 		Tick expectedTick = Tick.of(TickType.ASK, Instant.now(), 14.95d, 1000L);
@@ -149,7 +153,7 @@ public class SimpleL1RecorderTest {
 	public void testOnEvent_IfWriterThrows() throws Exception {
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
-		recorder.startWriteUpdates(file);
+		recorder.startWritingUpdates(file);
 		control.reset();
 		Symbol expectedSymbol = new Symbol("SBER");
 		Tick expectedTick = Tick.of(TickType.ASK, Instant.now(), 14.95d, 1000L);

@@ -18,6 +18,10 @@ public class SimpleCsvL1UpdateReader implements L1UpdateReader {
 		this.packer = packer;
 	}
 	
+	public SimpleCsvL1UpdateReader(BufferedReader reader) {
+		this(reader, new SimpleCsvL1UpdatePacker());
+	}
+	
 	public SimpleCsvL1UpdateReader(File file) throws FileNotFoundException {
 		this(new BufferedReader(new FileReader(file)), new SimpleCsvL1UpdatePacker());
 	}
