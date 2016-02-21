@@ -60,7 +60,7 @@ public interface Position extends Container {
 	public Double getUsedMargin();
 	
 	/**
-	 * Get P&L.
+	 * Get profit and loss.
 	 * <p>
 	 * @return profit and loss or null if data not available.
 	 */

@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.SimpleEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 
@@ -37,23 +41,52 @@ public class SimpleL1Recorder implements EventListener {
 	
 	private final Terminal terminal;
 	private final Lock lock;
+	private final EventQueue queue;
+	private final EventType onStarted, onStopped;
 	private final WriterFactory writerFactory;
 	private boolean started = false;
 	private L1UpdateWriter writer;
 	
-	public SimpleL1Recorder(Terminal terminal, WriterFactory writerFactory) {
+	public SimpleL1Recorder(EventQueue queue, Terminal terminal, WriterFactory writerFactory) {
 		super();
 		this.lock = new ReentrantLock();
 		this.terminal = terminal;
+		this.queue = queue;
+		this.onStarted = new EventTypeImpl("STARTED");
+		this.onStopped = new EventTypeImpl("STOPPED");
 		this.writerFactory = writerFactory;
 	}
 	
-	public SimpleL1Recorder(Terminal terminal) {
-		this(terminal, new SimpleCsvL1WriterFactory());
+	public SimpleL1Recorder(EventQueue queue, Terminal terminal) {
+		this(queue, terminal, new SimpleCsvL1WriterFactory());
+	}
+	
+	public EventQueue getEventQueue() {
+		return queue;
+	}
+	
+	public Terminal getTerminal() {
+		return terminal;
+	}
+	
+	public WriterFactory getWriterFactory() {
+		return writerFactory;
+	}
+	
+	public EventType onStarted() {
+		return onStarted;
+	}
+	
+	public EventType onStopped() {
+		return onStopped;
 	}
 	
 	public void close() {
 		stopWritingUpdates();
+		onStarted.removeAlternates();
+		onStarted.removeListeners();
+		onStopped.removeAlternates();
+		onStopped.removeListeners();
 	}
 	
 	public boolean isStarted() {
@@ -72,10 +105,12 @@ public class SimpleL1Recorder implements EventListener {
 				throw new IllegalStateException("Already started");
 			}
 			writer = writerFactory.createWriter(file);
-			started = true;
 			terminal.onSecurityBestAsk().addListener(this);
 			terminal.onSecurityBestBid().addListener(this);
 			terminal.onSecurityLastTrade().addListener(this);
+			started = true;
+			queue.enqueue(onStarted, new SimpleEventFactory());
+
 		} finally {
 			lock.unlock();
 		}
@@ -97,6 +132,7 @@ public class SimpleL1Recorder implements EventListener {
 					writer = null;
 				}
 				started = false;
+				queue.enqueue(onStopped, new SimpleEventFactory());
 			}
 		} finally {
 			lock.unlock();

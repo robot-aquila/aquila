@@ -9,10 +9,16 @@ import java.time.Instant;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.EventListenerStub;
+import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
@@ -29,6 +35,8 @@ public class SimpleL1RecorderTest {
 	private L1UpdateWriter writerMock;
 	private SimpleL1Recorder recorder;
 	private File file = new File("foo/bar.csv");
+	private EventQueue queue;
+	private EventListenerStub listenerStub;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -38,24 +46,38 @@ public class SimpleL1RecorderTest {
 
 	@Before
 	public void setUp() throws Exception {
+		queue = new EventQueueImpl();
 		control = createStrictControl();
 		terminal = new BasicTerminalBuilder()
 			.withDataProvider(new DataProviderStub())
 			.buildTerminal();
 		writerFactoryMock = control.createMock(WriterFactory.class);
 		writerMock = control.createMock(L1UpdateWriter.class);
-		recorder = new SimpleL1Recorder(terminal, writerFactoryMock);
+		recorder = new SimpleL1Recorder(queue, terminal, writerFactoryMock);
+		listenerStub = new EventListenerStub();
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		queue.stop();
 	}
 	
 	@Test
 	public void testCtor() throws Exception {
 		assertFalse(recorder.isStarted());
+		assertSame(queue, recorder.getEventQueue());
+		assertSame(terminal, recorder.getTerminal());
+		assertSame(writerFactoryMock, recorder.getWriterFactory());
+		assertEquals("STARTED", recorder.onStarted().getId());
+		assertEquals("STOPPED", recorder.onStopped().getId());
 	}
 	
 	@Test
 	public void testStartWritingUpdates() throws Exception {
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
+		recorder.onStarted().addSyncListener(listenerStub);
+		recorder.onStopped().addSyncListener(listenerStub);
 		
 		recorder.startWritingUpdates(file);
 		
@@ -64,6 +86,8 @@ public class SimpleL1RecorderTest {
 		assertTrue(terminal.onSecurityBestAsk().isListener(recorder));
 		assertTrue(terminal.onSecurityBestBid().isListener(recorder));
 		assertTrue(terminal.onSecurityLastTrade().isListener(recorder));
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(recorder.onStarted()));
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -77,12 +101,17 @@ public class SimpleL1RecorderTest {
 	
 	@Test
 	public void testClose() throws Exception {
+		EventType type = new EventTypeImpl();
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
 		recorder.startWritingUpdates(file);
 		control.reset();
 		writerMock.close();
 		control.replay();
+		recorder.onStarted().addSyncListener(listenerStub);
+		recorder.onStarted().addAlternateType(type);
+		recorder.onStopped().addSyncListener(listenerStub);
+		recorder.onStopped().addAlternateType(type);
 		
 		recorder.close();
 		
@@ -91,6 +120,12 @@ public class SimpleL1RecorderTest {
 		assertFalse(terminal.onSecurityBestAsk().isListener(recorder));
 		assertFalse(terminal.onSecurityBestBid().isListener(recorder));
 		assertFalse(terminal.onSecurityLastTrade().isListener(recorder));
+		assertFalse(recorder.onStarted().isListener(listenerStub));
+		assertFalse(recorder.onStarted().isAlternateType(type));
+		assertFalse(recorder.onStopped().isListener(listenerStub));
+		assertFalse(recorder.onStopped().isAlternateType(type));
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(recorder.onStopped()));
 	}
 	
 	@Test
@@ -104,12 +139,17 @@ public class SimpleL1RecorderTest {
 	
 	@Test
 	public void testStopWritingUpdates() throws Exception {
+		EventType type = new EventTypeImpl();
 		expect(writerFactoryMock.createWriter(file)).andReturn(writerMock);
 		control.replay();
 		recorder.startWritingUpdates(file);
 		control.reset();
 		writerMock.close();
 		control.replay();
+		recorder.onStarted().addSyncListener(listenerStub);
+		recorder.onStarted().addAlternateType(type);
+		recorder.onStopped().addSyncListener(listenerStub);
+		recorder.onStopped().addAlternateType(type);		
 		
 		recorder.stopWritingUpdates();
 		
@@ -118,6 +158,13 @@ public class SimpleL1RecorderTest {
 		assertFalse(terminal.onSecurityBestAsk().isListener(recorder));
 		assertFalse(terminal.onSecurityBestBid().isListener(recorder));
 		assertFalse(terminal.onSecurityLastTrade().isListener(recorder));
+		// Should keep listeners/alternates
+		assertTrue(recorder.onStarted().isListener(listenerStub));
+		assertTrue(recorder.onStarted().isAlternateType(type));
+		assertTrue(recorder.onStopped().isListener(listenerStub));
+		assertTrue(recorder.onStopped().isAlternateType(type));
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(recorder.onStopped()));
 	}
 	
 	@Test
