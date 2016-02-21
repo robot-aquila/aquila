@@ -10,7 +10,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.SimpleEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
@@ -83,6 +86,8 @@ public class SimpleL1Replay {
 	}
 	
 	private final Lock lock;
+	private final EventQueue queue;
+	private final EventType onStarted, onStopped;
 	private final Scheduler scheduler;
 	private final L1UpdateConsumer consumer;
 	private final ReaderFactory readerFactory;
@@ -96,8 +101,9 @@ public class SimpleL1Replay {
 	 */
 	private Duration timeDiff = null;
 	
-	public SimpleL1Replay(Scheduler scheduler, L1UpdateConsumer consumer,
-			ReaderFactory readerFactory, int minQueueSize, int maxQueueSize)
+	public SimpleL1Replay(EventQueue queue, Scheduler scheduler,
+			L1UpdateConsumer consumer, ReaderFactory readerFactory,
+			int minQueueSize, int maxQueueSize)
 	{
 		super();
 		if ( minQueueSize <= 0 ) {
@@ -107,6 +113,9 @@ public class SimpleL1Replay {
 			throw new IllegalArgumentException("Max queue size should be greater than min queue size");
 		}
 		this.lock = new ReentrantLock();
+		this.queue = queue;
+		this.onStarted = new EventTypeImpl("STARTED");
+		this.onStopped = new EventTypeImpl("STOPPED");
 		this.scheduler = scheduler;
 		this.consumer = consumer;
 		this.readerFactory = readerFactory;
@@ -114,14 +123,18 @@ public class SimpleL1Replay {
 		this.maxQueueSize = maxQueueSize;
 	}
 	
-	public SimpleL1Replay(Scheduler scheduler, L1UpdateConsumer consumer,
-			ReaderFactory readerFactory)
+	public SimpleL1Replay(EventQueue queue, Scheduler scheduler,
+			L1UpdateConsumer consumer, ReaderFactory readerFactory)
 	{
-		this(scheduler, consumer, readerFactory, MIN_QUEUE_SIZE, MAX_QUEUE_SIZE);
+		this(queue, scheduler, consumer, readerFactory, MIN_QUEUE_SIZE, MAX_QUEUE_SIZE);
 	}
 	
-	public SimpleL1Replay(Scheduler scheduler, L1UpdateConsumer consumer) {
-		this(scheduler, consumer, new SimpleCsvL1ReaderFactory());
+	public SimpleL1Replay(EventQueue queue, Scheduler scheduler, L1UpdateConsumer consumer) {
+		this(queue, scheduler, consumer, new SimpleCsvL1ReaderFactory());
+	}
+	
+	public EventQueue getEventQueue() {
+		return queue;
 	}
 	
 	public Scheduler getScheduler() {
@@ -144,8 +157,20 @@ public class SimpleL1Replay {
 		return maxQueueSize;
 	}
 	
+	public EventType onStarted() {
+		return onStarted;
+	}
+	
+	public EventType onStopped() {
+		return onStopped;
+	}
+	
 	public void close() {
 		stopReadingUpdates();
+		onStarted.removeListeners();
+		onStarted.removeAlternates();
+		onStopped.removeListeners();
+		onStopped.removeAlternates();
 	}
 	
 	public boolean isStarted() {
@@ -165,6 +190,7 @@ public class SimpleL1Replay {
 			}
 			reader = readerFactory.createReader(file);
 			started = true;
+			queue.enqueue(onStarted, new SimpleEventFactory());
 			sequenceID ++;
 			queued = 0;
 			timeDiff = null;
@@ -192,6 +218,7 @@ public class SimpleL1Replay {
 			if ( started ) {
 				closeReader();
 				started = false;
+				queue.enqueue(onStopped, new SimpleEventFactory());
 			}
 			
 		} finally {

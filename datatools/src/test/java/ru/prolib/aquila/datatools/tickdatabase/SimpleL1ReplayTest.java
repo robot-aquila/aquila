@@ -18,6 +18,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.EventListenerStub;
+import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
@@ -284,12 +289,14 @@ public class SimpleL1ReplayTest {
 	}
 	
 	private IMocksControl control;
+	private EventQueue queue;
 	private ReaderFactory readerFactoryMock;
 	private L1UpdateReaderStub updateReaderStub;
 	private L1UpdateConsumerStub consumerStub;
 	private SchedulerStub schedulerStub;
 	private SimpleL1Replay replay;
 	private File file = new File("foo/bar.csv");
+	private EventListenerStub listenerStub;
 	
 	/**
 	 * Shortcut to create update tick task.
@@ -310,16 +317,19 @@ public class SimpleL1ReplayTest {
 
 	@Before
 	public void setUp() throws Exception {
+		queue = new EventQueueImpl();
 		control = createStrictControl();
 		schedulerStub = new SchedulerStub();
 		consumerStub = new L1UpdateConsumerStub();
 		readerFactoryMock = control.createMock(ReaderFactory.class);
 		updateReaderStub = new L1UpdateReaderStub();
-		replay = new SimpleL1Replay(schedulerStub, consumerStub, readerFactoryMock, 3, 5);
+		replay = new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock, 3, 5);
+		listenerStub = new EventListenerStub();
 	}
 	
 	@After
 	public void tearDown() throws Exception {
+		queue.stop();
 		schedulerStub.close();
 		consumerStub.close();
 		updateReaderStub.close();
@@ -332,51 +342,78 @@ public class SimpleL1ReplayTest {
 	}
 	
 	@Test
-	public void testCtor5() throws Exception {
-		replay = new SimpleL1Replay(schedulerStub, consumerStub, readerFactoryMock, 3, 6);
+	public void testCtor6() throws Exception {
+		replay = new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock, 3, 6);
+		assertSame(queue, replay.getEventQueue());
 		assertSame(schedulerStub, replay.getScheduler());
 		assertSame(consumerStub, replay.getConsumer());
 		assertSame(readerFactoryMock, replay.getReaderFactory());
 		assertEquals(3, replay.getMinQueueSize());
 		assertEquals(6, replay.getMaxQueueSize());
+		assertEquals("STARTED", replay.onStarted().getId());
+		assertEquals("STOPPED", replay.onStopped().getId());
 	}
 	
 	@Test
-	public void testCtor3() throws Exception {
-		replay = new SimpleL1Replay(schedulerStub, consumerStub, readerFactoryMock);
+	public void testCtor4() throws Exception {
+		replay = new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock);
+		assertSame(queue, replay.getEventQueue());
 		assertSame(schedulerStub, replay.getScheduler());
 		assertSame(consumerStub, replay.getConsumer());
 		assertSame(readerFactoryMock, replay.getReaderFactory());
 		assertEquals(100, replay.getMinQueueSize());
 		assertEquals(200, replay.getMaxQueueSize());
+		assertEquals("STARTED", replay.onStarted().getId());
+		assertEquals("STOPPED", replay.onStopped().getId());
 	}
 	
 	@Test
-	public void testCtor2() throws Exception {
-		replay = new SimpleL1Replay(schedulerStub, consumerStub);
+	public void testCtor3() throws Exception {
+		replay = new SimpleL1Replay(queue, schedulerStub, consumerStub);
+		assertSame(queue, replay.getEventQueue());
 		assertSame(schedulerStub, replay.getScheduler());
 		assertSame(consumerStub, replay.getConsumer());
 		assertEquals(SimpleL1Replay.SimpleCsvL1ReaderFactory.class, replay.getReaderFactory().getClass());
 		assertEquals(100, replay.getMinQueueSize());
 		assertEquals(200, replay.getMaxQueueSize());
+		assertEquals("STARTED", replay.onStarted().getId());
+		assertEquals("STOPPED", replay.onStopped().getId());
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
-	public void testCtor5_ThrowsInvalidMinQueueSize() throws Exception {
-		new SimpleL1Replay(schedulerStub, consumerStub, readerFactoryMock, 0, 10);
+	public void testCtor6_ThrowsInvalidMinQueueSize() throws Exception {
+		new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock, 0, 10);
 	}
 
 	@Test (expected=IllegalArgumentException.class)
-	public void testCtor5_ThrowsInvalidMaxQueueSize() throws Exception {
-		new SimpleL1Replay(schedulerStub, consumerStub, readerFactoryMock, 5, 5);
+	public void testCtor6_ThrowsInvalidMaxQueueSize() throws Exception {
+		new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock, 5, 5);
+	}
+	
+	@Test
+	public void testStartReadingUpdates_ThrowsIfStarted() throws Exception {
+		loadUpdates(FIXTURE_UPDATES1, updateReaderStub);
+		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
+		control.replay();
+		replay.startReadingUpdates(file);
+		control.reset();
+		
+		try {
+			replay.startReadingUpdates(file);
+			fail("Expected exception: " + IllegalStateException.class.getSimpleName());
+		} catch ( IllegalStateException e ) {
+			assertEquals("Already started", e.getMessage());
+		}
 	}
 	
 	@Test
 	public void testStartReadingUpdates_InitialLoad() throws Exception {
-		replay = new SimpleL1Replay(schedulerStub, consumerStub, readerFactoryMock, 10, 20);
+		replay = new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock, 10, 20);
 		loadUpdates(FIXTURE_UPDATES1, updateReaderStub);
 		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
 		control.replay();
+		replay.onStarted().addSyncListener(listenerStub);
+		replay.onStopped().addSyncListener(listenerStub);
 		
 		replay.startReadingUpdates(file);
 		
@@ -409,11 +446,14 @@ public class SimpleL1ReplayTest {
 		expected.add(UT("1970-01-01T00:00:00.509Z", list.get(18), 1));
 		expected.add(UT("1970-01-01T00:00:00.509Z", list.get(19), 1));
 		assertEquals(expected, actual);
+		
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(replay.onStarted()));
 	}
 	
 	@Test
 	public void testStartReadingUpdates_EndOfData() throws Exception {
-		replay = new SimpleL1Replay(schedulerStub, consumerStub, readerFactoryMock, 10, 20);
+		replay = new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock, 10, 20);
 		List<L1Update> list = FIXTURE_UPDATES1.subList(0, 10);
 		loadUpdates(list, updateReaderStub);
 		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
@@ -435,25 +475,32 @@ public class SimpleL1ReplayTest {
 		loadUpdates(list, updateReaderStub);
 		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
 		control.replay();
+		replay.onStarted().addSyncListener(listenerStub);
+		replay.onStopped().addSyncListener(listenerStub);
 		
 		replay.startReadingUpdates(file);
 		
 		control.verify();
 		assertTrue(replay.isStarted());
 		assertTrue(updateReaderStub.isClosed());
+		assertTrue(listenerStub.getEvent(0).isType(replay.onStarted()));
 		List<SchedulerTaskStub> scheduled = schedulerStub.getTasks();
 		
 		scheduled.get(0).getRunnable().run();
 		
 		assertTrue(replay.isStarted());
+		assertEquals(1, listenerStub.getEventCount());
 		
 		scheduled.get(1).getRunnable().run();
 		
 		assertTrue(replay.isStarted());
+		assertEquals(1, listenerStub.getEventCount());
 		
 		scheduled.get(2).getRunnable().run();
 		
 		assertFalse(replay.isStarted());
+		assertEquals(2, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(1).isType(replay.onStopped()));
 	}
 	
 	@Test
@@ -536,32 +583,51 @@ public class SimpleL1ReplayTest {
 	
 	@Test
 	public void testClose() throws Exception {
+		EventType type = new EventTypeImpl();
 		loadUpdates(FIXTURE_UPDATES1, updateReaderStub);
 		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
 		control.replay();
 		replay.startReadingUpdates(file);
 		control.reset();
 		assertTrue(replay.isStarted());
+		replay.onStarted().addSyncListener(listenerStub);
+		replay.onStarted().addAlternateType(type);
+		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStopped().addAlternateType(type);
 		
 		replay.close();
 
 		assertTrue(updateReaderStub.isClosed());
 		assertFalse(replay.isStarted());
+		assertFalse(replay.onStarted().isListener(listenerStub));
+		assertFalse(replay.onStarted().isAlternateType(type));
+		assertFalse(replay.onStopped().isListener(listenerStub));
+		assertFalse(replay.onStopped().isAlternateType(type));
 	}
 	
 	@Test
 	public void testStopReadingUpdates() throws Exception {
+		EventType type = new EventTypeImpl();
 		loadUpdates(FIXTURE_UPDATES1, updateReaderStub);
 		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
 		control.replay();
 		replay.startReadingUpdates(file);
 		control.reset();
 		assertTrue(replay.isStarted());
+		replay.onStarted().addSyncListener(listenerStub);
+		replay.onStarted().addAlternateType(type);
+		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStopped().addAlternateType(type);
 		
 		replay.stopReadingUpdates();
 
 		assertTrue(updateReaderStub.isClosed());
 		assertFalse(replay.isStarted());
+		// Shouldn't clear the listeners/alternates
+		assertTrue(replay.onStarted().isListener(listenerStub));
+		assertTrue(replay.onStarted().isAlternateType(type));
+		assertTrue(replay.onStopped().isListener(listenerStub));
+		assertTrue(replay.onStopped().isAlternateType(type));
 	}
 	
 	@Test
