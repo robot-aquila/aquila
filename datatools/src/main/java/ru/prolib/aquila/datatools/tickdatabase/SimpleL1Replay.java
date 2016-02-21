@@ -175,16 +175,22 @@ public class SimpleL1Replay {
 		}
 	}
 	
+	private void closeReader() {
+		if ( reader != null ) {
+			try {
+				reader.close();
+			} catch ( IOException e ) {
+				logger.warn("Error closing reader: ", e);				
+			}
+			reader = null;
+		}
+	}
+	
 	public void stopReadingUpdates() {
 		lock.lock();
 		try {
 			if ( started ) {
-				try {
-					reader.close();
-				} catch ( IOException e ) {
-					logger.warn("Unexpected exception: ", e);
-				}
-				reader = null;
+				closeReader();
 				started = false;
 			}
 			
@@ -197,24 +203,31 @@ public class SimpleL1Replay {
 		if ( queued >= minQueueSize ) {
 			return;
 		}
-		for ( ; queued < maxQueueSize; queued ++ ) {
-			try {
-				if ( reader.nextUpdate() ) {
-					L1Update update = reader.getUpdate();
-					Tick oldTick = update.getTick();
-					Instant newTime = getScheduleTime(update.getSymbol(), oldTick.getTime());
-					scheduler.schedule(new ConsumeTickTask(this,
-						toNewTimeUpdate(update, newTime), sequenceID), newTime);
-					
-				} else {
-					// No more updates. Stop processing current reader.
-					stopReadingUpdates();
-					break;
+		if ( reader != null ) {
+			while ( queued < maxQueueSize ) {
+				try {
+					if ( reader.nextUpdate() ) {
+						L1Update update = reader.getUpdate();
+						Tick oldTick = update.getTick();
+						Instant newTime = getScheduleTime(update.getSymbol(),
+								oldTick.getTime());
+						L1Update newUpdate = toNewTimeUpdate(update, newTime);
+						scheduler.schedule(new ConsumeTickTask(this,
+							newUpdate, sequenceID), newTime);
+						queued ++;
+						
+					} else {
+						closeReader();
+						break;
+					}
+				} catch ( IOException e ) {
+					logger.error("Unexpected error: ", e);
+					closeReader();
 				}
-			} catch ( IOException e ) {
-				logger.error("Unexpected error: ", e);
-				stopReadingUpdates();
 			}
+		}
+		if ( reader == null && queued == 0 ) {
+			stopReadingUpdates();
 		}
 	}
 

@@ -422,9 +422,38 @@ public class SimpleL1ReplayTest {
 		replay.startReadingUpdates(file);
 		
 		control.verify();
-		assertFalse(replay.isStarted());
+		assertTrue(replay.isStarted());
 		assertTrue(updateReaderStub.isClosed());
 		assertEquals(10, schedulerStub.getSize());
+	}
+	
+	@Test
+	public void testStartReadingUpdates_EndOfData_DoNotStopWhenTaskScheduled()
+		throws Exception
+	{
+		List<L1Update> list = FIXTURE_UPDATES1.subList(0, 3);
+		loadUpdates(list, updateReaderStub);
+		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
+		control.replay();
+		
+		replay.startReadingUpdates(file);
+		
+		control.verify();
+		assertTrue(replay.isStarted());
+		assertTrue(updateReaderStub.isClosed());
+		List<SchedulerTaskStub> scheduled = schedulerStub.getTasks();
+		
+		scheduled.get(0).getRunnable().run();
+		
+		assertTrue(replay.isStarted());
+		
+		scheduled.get(1).getRunnable().run();
+		
+		assertTrue(replay.isStarted());
+		
+		scheduled.get(2).getRunnable().run();
+		
+		assertFalse(replay.isStarted());
 	}
 	
 	@Test
