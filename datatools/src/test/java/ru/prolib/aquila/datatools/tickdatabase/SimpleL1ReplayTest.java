@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.easymock.IMocksControl;
@@ -18,12 +20,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
+import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
@@ -525,6 +530,7 @@ public class SimpleL1ReplayTest {
 	
 	@Test
 	public void testConsumeUpdate_FillUpQueue() throws Exception {
+		schedulerStub.setCurrentTime(Instant.parse("2020-01-01T00:00:00Z"));
 		List<L1Update> list = FIXTURE_UPDATES1;
 		loadUpdates(list, updateReaderStub);
 		expect(readerFactoryMock.createReader(file)).andReturn(updateReaderStub);
@@ -545,9 +551,9 @@ public class SimpleL1ReplayTest {
 		
 		List<SchedulerTaskStub> expected = new ArrayList<SchedulerTaskStub>(),
 				actual = schedulerStub.getTasks();
-		expected.add(UT("1970-01-01T00:00:00.069Z", list.get(6), 1));
-		expected.add(UT("1970-01-01T00:00:00.069Z", list.get(7), 1));
-		expected.add(UT("1970-01-01T00:00:00.094Z", list.get(5), 1));
+		expected.add(UT("2020-01-01T00:00:00.069Z", list.get(6), 1));
+		expected.add(UT("2020-01-01T00:00:00.069Z", list.get(7), 1));
+		expected.add(UT("2020-01-01T00:00:00.094Z", list.get(5), 1));
 		assertEquals(expected, actual);
 	}
 	
@@ -641,6 +647,23 @@ public class SimpleL1ReplayTest {
 		task.run();
 		
 		control.verify();
+	}
+	
+	@Test
+	public void test_() throws Exception {
+		CountDownLatch finished = new CountDownLatch(1);
+		replay = new SimpleL1Replay(queue, new SchedulerLocal(), consumerStub);
+		replay.onStopped().addListener(new EventListener() {
+			@Override public void onEvent(Event event) {
+				finished.countDown();
+			}
+		});
+		replay.startReadingUpdates(new File("fixture/SimpleL1Replay.csv"));
+		assertTrue(finished.await(1000, TimeUnit.MILLISECONDS));
+		for ( L1Update update : consumerStub.getConsumedUpdates() ) {
+			System.out.println(update.getSymbol() + ": " + update.getTick());
+		}
+		
 	}
 
 }

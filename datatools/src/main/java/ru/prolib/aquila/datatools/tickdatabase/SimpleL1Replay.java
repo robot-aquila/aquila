@@ -182,7 +182,7 @@ public class SimpleL1Replay {
 		}
 	}
 	
-	public void startReadingUpdates(File file) throws Exception {
+	public void startReadingUpdates(File file) throws IOException {
 		lock.lock();
 		try {
 			if ( started ) {
@@ -294,8 +294,8 @@ public class SimpleL1Replay {
 			timeDiff = Duration.between(updateTime, currentTime);
 			return currentTime;
 		}
-		return updateTime.compareTo(currentTime) < 0
-				? currentTime : updateTime.plus(timeDiff);
+		Instant newTime = updateTime.plus(timeDiff);
+		return newTime.compareTo(currentTime) < 0 ? currentTime : newTime;
 	}
 
 }
