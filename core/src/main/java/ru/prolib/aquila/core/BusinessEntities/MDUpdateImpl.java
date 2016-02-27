@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 public class MDUpdateImpl implements MDUpdate, MDUpdateHeader {
 	private final MDUpdateHeader header;
 	private final List<MDUpdateRecord> records;
@@ -48,6 +50,21 @@ public class MDUpdateImpl implements MDUpdate, MDUpdateHeader {
 		MDUpdateRecord record = new MDUpdateRecordImpl(tick, transactionType);
 		records.add(record);
 		return record;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != MDUpdateImpl.class ) {
+			return false;
+		}
+		MDUpdateImpl o = (MDUpdateImpl) other;
+		return new EqualsBuilder()
+			.append(header, o.header)
+			.append(records, o.records)
+			.isEquals();
 	}
 
 }
