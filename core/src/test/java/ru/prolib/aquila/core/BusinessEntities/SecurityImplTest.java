@@ -405,6 +405,75 @@ public class SecurityImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testUpdate_MDUpdate_RefreshAsk() {
+		Instant time = Instant.parse("2016-03-04T01:27:00Z");
+		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_ASK, time, symbol1);
+		MDUpdateImpl update = new MDUpdateImpl(header);
+		// REFRESH_ASK will reset ask-side but bid-side quotes will be kept
+		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
+		security.update(update);
+		update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
+		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		
+		security.update(update);
+		
+		List<Tick> expectedAsks = new ArrayList<Tick>();
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.34d, 15));
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.35d, 20));
+		List<Tick> expectedBids = new ArrayList<Tick>();
+		expectedBids.add(Tick.of(TickType.BID, time, 100.02d, 800)); // this quote must be kept
+		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
+		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
+		assertEquals(expected, security.getMarketDepth());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getMarketDepth());
+	}
+	
+	@Test
+	public void testUpdate_MDUpdate_RefreshBid() {
+		Instant time = Instant.parse("2016-03-04T01:27:00Z");
+		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_BID, time, symbol1);
+		MDUpdateImpl update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
+		security.update(update);
+		update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
+		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		
+		security.update(update);
+		
+		List<Tick> expectedAsks = new ArrayList<Tick>();
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.34d, 15));
+		expectedAsks.add(Tick.of(TickType.ASK, time, 12.35d, 20));
+		expectedAsks.add(Tick.of(TickType.ASK, time, 102.45d, 100));
+		List<Tick> expectedBids = new ArrayList<Tick>();
+		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
+		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
+		assertEquals(expected, security.getMarketDepth());
+		assertEquals(1, listenerStub.getEventCount());
+		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
+		assertSame(security, e.getSecurity());
+		assertEquals(expected, e.getMarketDepth());
+	}
+	
+	@Test
 	public void testUpdate_MDUpdate_Refresh() {
 		Instant time = Instant.parse("2016-02-04T17:24:15Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
@@ -429,13 +498,12 @@ public class SecurityImplTest extends ContainerImplTest {
 		List<Tick> expectedBids = new ArrayList<Tick>();
 		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
 		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time.toEpochMilli());
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getMarketDepth());
-		assertSame(update, e.getUpdateInfo());
 	}
 	
 	@Test
@@ -472,13 +540,12 @@ public class SecurityImplTest extends ContainerImplTest {
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
 		expectedBids.add(Tick.of(TickType.BID, time2,  99.98d, 199));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2.toEpochMilli());
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getMarketDepth());
-		assertSame(update, e.getUpdateInfo());
 	}
 
 	@Test
@@ -513,13 +580,12 @@ public class SecurityImplTest extends ContainerImplTest {
 		List<Tick> expectedBids = new ArrayList<Tick>();
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2.toEpochMilli());
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getMarketDepth());
-		assertSame(update, e.getUpdateInfo());
 	}
 	
 	@Test

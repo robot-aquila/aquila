@@ -11,14 +11,14 @@ public class MarketDepth {
 	private static final String SEP = "#";
 	private final Symbol symbol;
 	private final List<Tick> asks, bids;
-	private final long timestamp;
+	private final Instant time;
 	
-	public MarketDepth(Symbol symbol, List<Tick> asks, List<Tick> bids, long timestamp) {
+	public MarketDepth(Symbol symbol, List<Tick> asks, List<Tick> bids, Instant time) {
 		super();
 		this.symbol = symbol;
 		this.asks = new ArrayList<Tick>(asks);
 		this.bids = new ArrayList<Tick>(bids);
-		this.timestamp = timestamp;
+		this.time = time;
 	}
 	
 	public Symbol getSymbol() {
@@ -26,7 +26,7 @@ public class MarketDepth {
 	}
 	
 	public long getTimestamp() {
-		return timestamp;
+		return time.toEpochMilli();
 	}
 	
 	public List<Tick> getAsks() {
@@ -129,7 +129,7 @@ public class MarketDepth {
 			.append(symbol, o.symbol)
 			.append(asks, o.asks)
 			.append(bids, o.bids)
-			.append(timestamp, o.timestamp)
+			.append(time, o.time)
 			.isEquals();
 	}
 	
@@ -141,7 +141,7 @@ public class MarketDepth {
 	}
 	
 	public Instant getTime() {
-		return Instant.ofEpochMilli(timestamp);
+		return time;
 	}
 
 }

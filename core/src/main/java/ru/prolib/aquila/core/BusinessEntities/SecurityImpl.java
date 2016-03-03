@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
 import java.util.*;
+
 import ru.prolib.aquila.core.*;
 
 /**
@@ -68,7 +70,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		this.onMarketDepthUpdate = newEventType("MARKET_DEPTH_UPDATE");
 		this.askQuotes = new Vector<Tick>();
 		this.bidQuotes = new Vector<Tick>();
-		this.marketDepth = new MarketDepth(symbol, askQuotes, bidQuotes, 0);
+		this.marketDepth = new MarketDepth(symbol, askQuotes, bidQuotes, Instant.EPOCH);
 	}
 	
 	public SecurityImpl(EditableTerminal terminal, Symbol symbol) {
@@ -316,49 +318,34 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		try {
 			MDUpdateHeader header = update.getHeader();
 			MDUpdateType updateType = header.getType();
-			switch ( updateType ) {
-			case UPDATE:
-				for ( MDUpdateRecord record : update.getRecords() ) {
-					Tick tick = record.getTick();
-					switch ( tick.getType() ) {
-					case ASK:
-						hasAsk = true;
-						break;
-					case BID:
-						hasBid = true;
-						break;
-					default:
-						throw new IllegalArgumentException("Invalid tick type: " + tick.getType());
-					}
-					switch ( record.getTransactionType() ) {
-					case DELETE:
-						removeQuote(tick);
-						break;
-					default:
-						replaceQuote(tick);
-					}
-				}
-				
-				break;
-			case REFRESH:
+			if ( updateType == MDUpdateType.REFRESH || updateType == MDUpdateType.REFRESH_ASK ) {
 				askQuotes.clear();
+				hasAsk = true;
+			}
+			if ( updateType == MDUpdateType.REFRESH || updateType == MDUpdateType.REFRESH_BID ) {
 				bidQuotes.clear();
-				for ( MDUpdateRecord record : update.getRecords() ) {
-					Tick tick = record.getTick();
-					switch ( tick.getType() ) {
-					case ASK:
-						askQuotes.add(tick);
-						hasAsk = true;
-						break;
-					case BID:
-						bidQuotes.add(tick);
-						hasBid = true;
-						break;
-					default:
-						throw new IllegalArgumentException("Invalid tick type: " + tick.getType());
-					}
+				hasBid = true;
+			}
+			
+			for ( MDUpdateRecord record : update.getRecords() ) {
+				Tick tick = record.getTick();
+				switch ( tick.getType() ) {
+				case ASK:
+					hasAsk = true;
+					break;
+				case BID:
+					hasBid = true;
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid tick type: " + tick.getType());
 				}
-				break;
+				switch ( record.getTransactionType() ) {
+				case DELETE:
+					removeQuote(tick);
+					break;
+				default:
+					replaceQuote(tick);
+				}
 			}
 
 			if ( hasAsk || hasBid ) {
@@ -368,10 +355,9 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 				if ( hasBid ) {
 					sortAndDetruncateQuotes(bidQuotes, false);
 				}
-				marketDepth = new MarketDepth(symbol, askQuotes, bidQuotes,
-						header.getTime().toEpochMilli());
+				marketDepth = new MarketDepth(symbol, askQuotes, bidQuotes, header.getTime());
 				queue.enqueue(onMarketDepthUpdate,
-						new SecurityMarketDepthEventFactory(this, marketDepth, update));
+						new SecurityMarketDepthEventFactory(this, marketDepth));
 			}
 		} finally {
 			lock.unlock();
@@ -381,17 +367,15 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	static class SecurityMarketDepthEventFactory implements EventFactory {
 		private final Security security;
 		private final MarketDepth marketDepth;
-		private final MDUpdate update;
 		
-		SecurityMarketDepthEventFactory(Security security, MarketDepth marketDepth, MDUpdate update) {
+		SecurityMarketDepthEventFactory(Security security, MarketDepth marketDepth) {
 			this.security = security;
 			this.marketDepth = marketDepth;
-			this.update = update;
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			return new SecurityMarketDepthEvent(type, security, marketDepth, update);
+			return new SecurityMarketDepthEvent(type, security, marketDepth);
 		}
 		
 	}
