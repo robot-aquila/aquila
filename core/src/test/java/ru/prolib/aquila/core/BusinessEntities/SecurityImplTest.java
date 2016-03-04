@@ -3,9 +3,13 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -49,6 +53,12 @@ public class SecurityImplTest extends ContainerImplTest {
 		expect(terminal.getTerminalID()).andStubReturn("foobar");
 		expect(terminal.getEventQueue()).andStubReturn(queue);
 		control.replay();		
+	}
+	
+	private void setPriceScale(int scale) {
+		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
+		tokens.put(SecurityField.SCALE, 2);
+		security.update(tokens);		
 	}
 	
 	@Override
@@ -406,6 +416,8 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_RefreshAsk() {
+		setPriceScale(2);
+
 		Instant time = Instant.parse("2016-03-04T01:27:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_ASK, time, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
@@ -441,6 +453,8 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_RefreshBid() {
+		setPriceScale(2);
+
 		Instant time = Instant.parse("2016-03-04T01:27:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_BID, time, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
@@ -475,6 +489,8 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_Refresh() {
+		setPriceScale(2);
+
 		Instant time = Instant.parse("2016-02-04T17:24:15Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
@@ -508,6 +524,8 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_Update_Replace() {
+		setPriceScale(2);
+
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
@@ -550,6 +568,8 @@ public class SecurityImplTest extends ContainerImplTest {
 
 	@Test
 	public void testUpdate_MDUpdate_Update_Delete() {
+		setPriceScale(2);
+
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
@@ -586,6 +606,34 @@ public class SecurityImplTest extends ContainerImplTest {
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getMarketDepth());
+	}
+	
+	@Test
+	public void testUpdate_MDUpdate_Update_PriceRouding() {
+		setPriceScale(2);
+
+		Instant time1 = Instant.EPOCH;
+		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
+		MDUpdateImpl update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.30d, 120), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.40d, 150), MDTransactionType.ADD);
+		update.addRecord(Tick.of(TickType.ASK, time1, 102.45d, 100), MDTransactionType.ADD);
+		security.update(update);
+
+		Instant time2 = Instant.EPOCH.plusSeconds(1000);
+		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
+		update = new MDUpdateImpl(header);
+		update.addRecord(Tick.of(TickType.ASK, time2, 102.29651d, 500), MDTransactionType.REPLACE);
+		update.addRecord(Tick.of(TickType.ASK, time2, 102.40561d, 250), MDTransactionType.REPLACE);
+		update.addRecord(Tick.of(TickType.ASK, time2, 102.45021d, 200), MDTransactionType.REPLACE);
+		security.update(update);
+		
+		List<Tick> expectedAsks = new ArrayList<Tick>();
+		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.30d, 500));
+		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
+		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.41d, 250));
+		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.45d, 200));
+		assertEquals(expectedAsks, security.getMarketDepth().getAsks());
 	}
 	
 	@Test

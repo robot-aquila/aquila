@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
 
@@ -424,15 +426,16 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	private void replaceQuote(Tick tick) {
 		removeQuote(tick);
 		List<Tick> target = tick.getType() == TickType.ASK ? askQuotes : bidQuotes;
-		target.add(tick);
+		target.add(tick.withPrice(new BigDecimal(tick.getPrice())
+			.setScale(getScale(), RoundingMode.HALF_UP).doubleValue()));
 	}
 	
 	private List<Integer> findQuoteWithSamePrice(List<Tick> target, Tick expected) {
-		List<Integer> to_remove = new Vector<Integer>();
+		List<Integer> to_remove = new ArrayList<Integer>();
+		double epsilon = Math.pow(10, -getScale() - 1) * 5;
+		double expectedPrice = expected.getPrice();
 		for ( int i = 0; i < target.size(); i ++ ) {
-			Tick other = target.get(i);
-			// TODO: may cause comparison problems
-			if ( other.getPrice() == expected.getPrice() ) {
+			if ( Math.abs(target.get(i).getPrice() - expectedPrice) <= epsilon ) {
 				to_remove.add(i);
 			}
 		}

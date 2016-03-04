@@ -142,5 +142,9 @@ public class Tick {
 			+ (size == 0 ? "" : "x" + size)
 			+ (value == 0 ? "" : " " + value) + "]";
 	}
+	
+	public Tick withPrice(double newPrice) {
+		return Tick.of(type, timestamp, newPrice, size, value);
+	}
 
 }

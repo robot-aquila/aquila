@@ -192,5 +192,16 @@ public class TickTest {
 			assertEquals("At #" + i, expected[i], toTest[i].toString());			
 		}
 	}
+	
+	@Test
+	public void testWithPrice() {
+		Tick tick = Tick.of(TickType.ASK, 100L, 800.240d, 400L, 0.0d);
+		Tick newTick = tick.withPrice(32.48d);
+		assertEquals(TickType.ASK, newTick.getType());
+		assertEquals(100L, newTick.getTimestamp());
+		assertEquals(32.48d, newTick.getPrice(), 0.001d);
+		assertEquals(400L, newTick.getSize());
+		assertEquals(0.0d, newTick.getValue(), 0.001d);
+	}
 
 }
