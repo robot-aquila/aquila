@@ -9,9 +9,9 @@ public interface DataProvider {
 	
 	public void subscribeStateUpdates(EditableSecurity security);
 	
-	public void subscribeLevel1Data(Symbol symbol, UpdatableTickStreamContainer container);
+	public void subscribeLevel1Data(Symbol symbol, L1UpdateConsumer consumer);
 	
-	public void subscribeLevel2Data(Symbol symbol, UpdatableMarketDepthStreamContainer container);
+	public void subscribeLevel2Data(Symbol symbol, MDUpdateConsumer consumer);
 	
 	public void subscribeStateUpdates(EditablePortfolio portfolio);
 	

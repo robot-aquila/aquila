@@ -3,8 +3,6 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,6 +71,10 @@ public class SecurityImplTest extends ContainerImplTest {
 		prepareTerminal();
 		security = new SecurityImpl(terminal, symbol1, controller);
 		return security;
+	}
+	
+	private L1Update toL1Update(Tick tick) {
+		return new L1UpdateImpl(symbol1, tick);
 	}
 	
 	@Test
@@ -332,7 +334,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		security.onBestAsk().addSyncListener(listenerStub);
 		assertNull(security.getBestAsk());
 		
-		security.update(Tick.of(TickType.ASK, 80.34d, 15L));
+		security.consume(toL1Update(Tick.of(TickType.ASK, 80.34d, 15L)));
 		
 		Tick expected = Tick.of(TickType.ASK, 80.34d, 15L);
 		assertEquals(expected, security.getBestAsk());
@@ -345,10 +347,10 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testUpdate_Tick_ResetBestAsk() {
-		security.update(Tick.of(TickType.ASK, 92.13d, 100L));
+		security.consume(toL1Update(Tick.of(TickType.ASK, 92.13d, 100L)));
 		security.onBestAsk().addSyncListener(listenerStub);
 		
-		security.update(Tick.NULL_ASK);
+		security.consume(toL1Update(Tick.NULL_ASK));
 		
 		assertNull(security.getBestAsk());
 		assertEquals(1, listenerStub.getEventCount());
@@ -363,7 +365,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		security.onBestBid().addSyncListener(listenerStub);
 		assertNull(security.getBestBid());
 		
-		security.update(Tick.of(TickType.BID, 12.48d, 500L));
+		security.consume(toL1Update(Tick.of(TickType.BID, 12.48d, 500L)));
 		
 		Tick expected = Tick.of(TickType.BID, 12.48d, 500L);
 		assertEquals(expected, security.getBestBid());
@@ -375,10 +377,10 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testUpdate_Tick_ResetBestBid() {
-		security.update(Tick.of(TickType.BID, 52.94d, 1L));
+		security.consume(toL1Update(Tick.of(TickType.BID, 52.94d, 1L)));
 		security.onBestBid().addSyncListener(listenerStub);
 		
-		security.update(Tick.NULL_BID);
+		security.consume(toL1Update(Tick.NULL_BID));
 		
 		assertNull(security.getBestBid());
 		assertEquals(1, listenerStub.getEventCount());
@@ -393,7 +395,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		security.onLastTrade().addSyncListener(listenerStub);
 		assertNull(security.getLastTrade());
 		
-		security.update(Tick.of(TickType.TRADE, 72.15d, 805L));
+		security.consume(toL1Update(Tick.of(TickType.TRADE, 72.15d, 805L)));
 		
 		Tick expected = Tick.of(TickType.TRADE, 72.15d, 805L);
 		assertEquals(expected, security.getLastTrade());
@@ -424,7 +426,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		// REFRESH_ASK will reset ask-side but bid-side quotes will be kept
 		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
-		security.update(update);
+		security.consume(update);
 		update = new MDUpdateImpl(header);
 		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
@@ -433,7 +435,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
 		security.onMarketDepthUpdate().addSyncListener(listenerStub);
 		
-		security.update(update);
+		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
 		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
@@ -460,7 +462,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		MDUpdateImpl update = new MDUpdateImpl(header);
 		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
-		security.update(update);
+		security.consume(update);
 		update = new MDUpdateImpl(header);
 		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
@@ -469,7 +471,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
 		security.onMarketDepthUpdate().addSyncListener(listenerStub);
 		
-		security.update(update);
+		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
 		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
@@ -496,7 +498,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		MDUpdateImpl update = new MDUpdateImpl(header);
 		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
-		security.update(update);
+		security.consume(update);
 		update = new MDUpdateImpl(header);
 		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
@@ -505,7 +507,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
 		security.onMarketDepthUpdate().addSyncListener(listenerStub);
 		
-		security.update(update);
+		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
 		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
@@ -537,7 +539,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.BID, time1, 100.02d, 800), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time1, 100.01d, 100), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time1,  99.98d, 500), MDTransactionType.ADD);
-		security.update(update);
+		security.consume(update);
 		
 		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
 		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
@@ -546,7 +548,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 199), MDTransactionType.REPLACE);
 		security.onMarketDepthUpdate().addSyncListener(listenerStub);
 		
-		security.update(update);
+		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
 		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
@@ -581,7 +583,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.BID, time1, 100.02d, 800), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time1, 100.01d, 100), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time1,  99.98d, 500), MDTransactionType.ADD);
-		security.update(update);
+		security.consume(update);
 		
 		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
 		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
@@ -590,7 +592,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 0), MDTransactionType.DELETE);
 		security.onMarketDepthUpdate().addSyncListener(listenerStub);
 		
-		security.update(update);
+		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
 		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
@@ -618,7 +620,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time1, 102.30d, 120), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time1, 102.40d, 150), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time1, 102.45d, 100), MDTransactionType.ADD);
-		security.update(update);
+		security.consume(update);
 
 		Instant time2 = Instant.EPOCH.plusSeconds(1000);
 		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
@@ -626,7 +628,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time2, 102.29651d, 500), MDTransactionType.REPLACE);
 		update.addRecord(Tick.of(TickType.ASK, time2, 102.40561d, 250), MDTransactionType.REPLACE);
 		update.addRecord(Tick.of(TickType.ASK, time2, 102.45021d, 200), MDTransactionType.REPLACE);
-		security.update(update);
+		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
 		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.30d, 500));

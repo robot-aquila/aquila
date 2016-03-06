@@ -10,6 +10,8 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.L1Update;
+
 public class SimpleCsvL1UpdateReaderTest {
 	private IMocksControl control;
 	private BufferedReader readerMock;

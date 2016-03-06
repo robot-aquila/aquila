@@ -1,10 +1,7 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 public class L1UpdateImpl implements L1Update {
 	private final Symbol symbol;

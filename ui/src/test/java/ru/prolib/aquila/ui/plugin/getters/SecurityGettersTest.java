@@ -46,9 +46,9 @@ public class SecurityGettersTest {
 		tokens.put(SecurityField.HIGH_PRICE, 18.44d);
 		tokens.put(SecurityField.CLOSE_PRICE, 98.15d);
 		sc.update(tokens);
-		sc.update(Tick.of(TickType.TRADE, 20.44d, 1L));
-		sc.update(Tick.of(TickType.ASK, 12.34d, 1000L));
-		sc.update(Tick.of(TickType.BID, 34.56d, 2000L));
+		sc.consume(new L1UpdateImpl(symbol, Tick.of(TickType.TRADE, 20.44d, 1L)));
+		sc.consume(new L1UpdateImpl(symbol, Tick.of(TickType.ASK, 12.34d, 1000L)));
+		sc.consume(new L1UpdateImpl(symbol, Tick.of(TickType.BID, 34.56d, 2000L)));
 		security = (Object) sc;
 	}
 

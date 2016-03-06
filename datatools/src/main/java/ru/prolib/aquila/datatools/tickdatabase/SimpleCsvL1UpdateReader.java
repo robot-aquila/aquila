@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import ru.prolib.aquila.core.BusinessEntities.L1Update;
+
 public class SimpleCsvL1UpdateReader implements L1UpdateReader {
 	private final BufferedReader reader;
 	private final SimpleCsvL1UpdatePacker packer;

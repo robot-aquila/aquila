@@ -4,9 +4,12 @@ import static org.easymock.EasyMock.*;
 
 import java.io.Writer;
 import java.time.Instant;
+
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
+
+import ru.prolib.aquila.core.BusinessEntities.L1Update;
 
 public class SimpleCsvL1UpdateWriterTest {
 	private IMocksControl control;

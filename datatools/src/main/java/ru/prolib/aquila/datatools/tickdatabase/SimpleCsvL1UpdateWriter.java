@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
 
+import ru.prolib.aquila.core.BusinessEntities.L1Update;
+
 public class SimpleCsvL1UpdateWriter implements L1UpdateWriter {
 	private final Writer writer;
 	private final SimpleCsvL1UpdatePacker packer;

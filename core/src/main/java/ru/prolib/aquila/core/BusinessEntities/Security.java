@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.EventType;
  * 2012-06-11<br>
  * $Id: Security.java 552 2013-03-01 13:35:35Z whirlwind $
  */
-public interface Security extends Container, TickStreamContainer, MarketDepthStreamContainer {
+public interface Security extends Container, L1StreamContainer, MDStreamContainer {
 	
 	/**
 	 * Get terminal.

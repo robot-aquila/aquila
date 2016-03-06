@@ -238,7 +238,8 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	}
 
 	@Override
-	public void update(Tick tick) {
+	public void consume(L1Update update) {
+		Tick tick = update.getTick();
 		lock.lock();
 		try {
 			switch ( tick.getType() ) {
@@ -314,7 +315,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	}
 
 	@Override
-	public void update(MDUpdate update) {
+	public void consume(MDUpdate update) {
 		boolean hasAsk = false, hasBid = false;
 		lock.lock();
 		try {
