@@ -1,7 +1,5 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
 
@@ -36,10 +34,11 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	private final EventType onSessionUpdate, onBestAsk, onBestBid, onLastTrade,
 		onMarketDepthUpdate;
 	private final Symbol symbol;
+	private final DoubleUtils doubleUtils = new DoubleUtils();
 	private Terminal terminal;
 	private Tick bestAsk, bestBid, lastTrade;
-	private MarketDepth marketDepth;
-	private Vector<Tick> askQuotes, bidQuotes;
+	private MarketDepth md;
+	private Vector<Tick> askQuotes, bidQuotes; // do not switch to other type
 	private int marketDepthLevels = 10;
 	
 	private static String getID(Terminal terminal, Symbol symbol, String suffix) {
@@ -72,7 +71,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		this.onMarketDepthUpdate = newEventType("MARKET_DEPTH_UPDATE");
 		this.askQuotes = new Vector<Tick>();
 		this.bidQuotes = new Vector<Tick>();
-		this.marketDepth = new MarketDepth(symbol, askQuotes, bidQuotes, Instant.EPOCH);
+		this.md = new MarketDepth(symbol, askQuotes, bidQuotes, Instant.EPOCH, 0);
 	}
 	
 	public SecurityImpl(EditableTerminal terminal, Symbol symbol) {
@@ -318,6 +317,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	public void consume(MDUpdate update) {
 		boolean hasAsk = false, hasBid = false;
 		lock.lock();
+		doubleUtils.setScale(getScale());
 		try {
 			MDUpdateHeader header = update.getHeader();
 			MDUpdateType updateType = header.getType();
@@ -358,9 +358,8 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 				if ( hasBid ) {
 					sortAndDetruncateQuotes(bidQuotes, false);
 				}
-				marketDepth = new MarketDepth(symbol, askQuotes, bidQuotes, header.getTime());
-				queue.enqueue(onMarketDepthUpdate,
-						new SecurityMarketDepthEventFactory(this, marketDepth));
+				md = new MarketDepth(symbol, askQuotes, bidQuotes, header.getTime(), getScale());
+				queue.enqueue(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
 			}
 		} finally {
 			lock.unlock();
@@ -427,16 +426,14 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	private void replaceQuote(Tick tick) {
 		removeQuote(tick);
 		List<Tick> target = tick.getType() == TickType.ASK ? askQuotes : bidQuotes;
-		target.add(tick.withPrice(new BigDecimal(tick.getPrice())
-			.setScale(getScale(), RoundingMode.HALF_UP).doubleValue()));
+		target.add(tick.withPrice(doubleUtils.round(tick.getPrice())));
 	}
 	
 	private List<Integer> findQuoteWithSamePrice(List<Tick> target, Tick expected) {
 		List<Integer> to_remove = new ArrayList<Integer>();
-		double epsilon = Math.pow(10, -getScale() - 1) * 5;
 		double expectedPrice = expected.getPrice();
 		for ( int i = 0; i < target.size(); i ++ ) {
-			if ( Math.abs(target.get(i).getPrice() - expectedPrice) <= epsilon ) {
+			if ( doubleUtils.isEquals(target.get(i).getPrice(), expectedPrice) ) {
 				to_remove.add(i);
 			}
 		}
@@ -452,7 +449,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	public MarketDepth getMarketDepth() {
 		lock.lock();
 		try {
-			return marketDepth;
+			return md;
 		} finally {
 			lock.unlock();
 		}

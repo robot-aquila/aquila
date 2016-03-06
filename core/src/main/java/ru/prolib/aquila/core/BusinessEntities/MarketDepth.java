@@ -12,13 +12,17 @@ public class MarketDepth {
 	private final Symbol symbol;
 	private final List<Tick> asks, bids;
 	private final Instant time;
+	private final int scale;
+	private final DoubleUtils doubleUtils;
 	
-	public MarketDepth(Symbol symbol, List<Tick> asks, List<Tick> bids, Instant time) {
+	public MarketDepth(Symbol symbol, List<Tick> asks, List<Tick> bids, Instant time, int scale) {
 		super();
 		this.symbol = symbol;
 		this.asks = new ArrayList<Tick>(asks);
 		this.bids = new ArrayList<Tick>(bids);
 		this.time = time;
+		this.scale = scale;
+		this.doubleUtils = new DoubleUtils(scale);
 	}
 	
 	public Symbol getSymbol() {
@@ -94,14 +98,14 @@ public class MarketDepth {
 		return findWithPrice(priceLevel, bids) != null;
 	}
 	
-	public long getBidAtPriceLivel(double priceLevel) {
+	public long getBidAtPriceLevel(double priceLevel) {
 		Tick tick = findWithPrice(priceLevel, bids);
 		return tick == null ? 0 : tick.getSize();
 	}
 	
 	private Tick findWithPrice(double price, List<Tick> ticks) {
 		for ( Tick tick : ticks ) {
-			if ( tick.getPrice() == price ) {
+			if ( doubleUtils.isEquals(tick.getPrice(), price) ) {
 				return tick;
 			}
 		}
@@ -127,17 +131,19 @@ public class MarketDepth {
 		MarketDepth o = (MarketDepth) other;
 		return new EqualsBuilder()
 			.append(symbol, o.symbol)
+			.append(time, o.time)
+			.append(scale, o.scale)
 			.append(asks, o.asks)
 			.append(bids, o.bids)
-			.append(time, o.time)
 			.isEquals();
 	}
 	
 	@Override
 	public String toString() {
 		return "MarketDepth[" + symbol + " at " + getTime() + "\n"
-				+ " ask[" + StringUtils.join(asks, "\n,") + "]\n"
-				+ " bid[" + StringUtils.join(bids, "\n,") + "]";
+				+ " asks[" + StringUtils.join(asks, "\n,") + "]\n"
+				+ " bids[" + StringUtils.join(bids, "\n,")
+				+ " scale=" + scale + "]";
 	}
 	
 	public Instant getTime() {

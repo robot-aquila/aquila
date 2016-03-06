@@ -55,7 +55,7 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	private void setPriceScale(int scale) {
 		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-		tokens.put(SecurityField.SCALE, 2);
+		tokens.put(SecurityField.SCALE, scale);
 		security.update(tokens);		
 	}
 	
@@ -445,7 +445,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		expectedBids.add(Tick.of(TickType.BID, time, 100.02d, 800)); // this quote must be kept
 		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
 		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time, 2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -481,7 +481,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		List<Tick> expectedBids = new ArrayList<Tick>();
 		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
 		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time, 2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -516,7 +516,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		List<Tick> expectedBids = new ArrayList<Tick>();
 		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
 		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time, 2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -560,7 +560,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
 		expectedBids.add(Tick.of(TickType.BID, time2,  99.98d, 199));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2);
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2, 2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -570,7 +570,7 @@ public class SecurityImplTest extends ContainerImplTest {
 
 	@Test
 	public void testUpdate_MDUpdate_Update_Delete() {
-		setPriceScale(2);
+		setPriceScale(4);
 
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
@@ -602,7 +602,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		List<Tick> expectedBids = new ArrayList<Tick>();
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
 		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2);
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2, 4);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
