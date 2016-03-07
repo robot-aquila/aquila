@@ -254,6 +254,7 @@ public class SimpleL1Replay {
 				} catch ( IOException e ) {
 					logger.error("Unexpected error: ", e);
 					closeReader();
+					break;
 				}
 			}
 		}
