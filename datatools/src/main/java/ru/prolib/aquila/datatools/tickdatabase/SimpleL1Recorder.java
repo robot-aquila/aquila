@@ -25,30 +25,15 @@ public class SimpleL1Recorder implements EventListener {
 		logger = LoggerFactory.getLogger(SimpleL1Recorder.class);
 	}
 	
-	public interface WriterFactory {
-		
-		public L1UpdateWriter createWriter(File file) throws IOException;
-		
-	}
-	
-	public static class SimpleCsvL1WriterFactory implements WriterFactory {
-
-		@Override
-		public L1UpdateWriter createWriter(File file) throws IOException {
-			return new SimpleCsvL1UpdateWriter(file);
-		}
-		
-	}
-	
 	private final Terminal terminal;
 	private final Lock lock;
 	private final EventQueue queue;
 	private final EventType onStarted, onStopped;
-	private final WriterFactory writerFactory;
+	private final L1UpdateWriterFactory writerFactory;
 	private boolean started = false;
 	private L1UpdateWriter writer;
 	
-	public SimpleL1Recorder(EventQueue queue, Terminal terminal, WriterFactory writerFactory) {
+	public SimpleL1Recorder(EventQueue queue, Terminal terminal, L1UpdateWriterFactory writerFactory) {
 		super();
 		this.lock = new ReentrantLock();
 		this.terminal = terminal;
@@ -58,8 +43,8 @@ public class SimpleL1Recorder implements EventListener {
 		this.writerFactory = writerFactory;
 	}
 	
-	public SimpleL1Recorder(EventQueue queue, Terminal terminal) {
-		this(queue, terminal, new SimpleCsvL1WriterFactory());
+	public SimpleL1Recorder(EventQueue queue, Terminal terminal, File file) {
+		this(queue, terminal, new SimpleCsvL1UpdateWriterFactory(file));
 	}
 	
 	public EventQueue getEventQueue() {
@@ -70,7 +55,7 @@ public class SimpleL1Recorder implements EventListener {
 		return terminal;
 	}
 	
-	public WriterFactory getWriterFactory() {
+	public L1UpdateWriterFactory getWriterFactory() {
 		return writerFactory;
 	}
 	
@@ -99,13 +84,13 @@ public class SimpleL1Recorder implements EventListener {
 		}
 	}
 	
-	public void startWritingUpdates(File file) throws IOException {
+	public void startWritingUpdates() throws IOException {
 		lock.lock();
 		try {
 			if ( started ) {
 				throw new IllegalStateException("Already started");
 			}
-			writer = writerFactory.createWriter(file);
+			writer = writerFactory.createWriter();
 			terminal.onSecurityBestAsk().addListener(this);
 			terminal.onSecurityBestBid().addListener(this);
 			terminal.onSecurityLastTrade().addListener(this);

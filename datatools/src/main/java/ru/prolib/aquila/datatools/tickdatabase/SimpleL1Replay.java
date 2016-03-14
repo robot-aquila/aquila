@@ -31,21 +31,6 @@ public class SimpleL1Replay {
 		logger = LoggerFactory.getLogger(SimpleL1Replay.class);
 	}
 	
-	public interface ReaderFactory {
-	
-		public L1UpdateReader createReader(File file) throws IOException;
-		
-	}
-	
-	public static class SimpleCsvL1ReaderFactory implements ReaderFactory {
-
-		@Override
-		public L1UpdateReader createReader(File file) throws IOException {
-			return new SimpleCsvL1UpdateReader(file);
-		}
-		
-	}
-	
 	public static class ConsumeTickTask implements Runnable {
 		private final SimpleL1Replay consumer;
 		private final L1Update update;
@@ -94,7 +79,7 @@ public class SimpleL1Replay {
 	private final EventType onStarted, onStopped;
 	private final Scheduler scheduler;
 	private final L1UpdateConsumer consumer;
-	private final ReaderFactory readerFactory;
+	private final L1UpdateReaderFactory readerFactory;
 	private boolean started = false;
 	private L1UpdateReader reader;
 	private long sequenceID = 0;
@@ -106,7 +91,7 @@ public class SimpleL1Replay {
 	private Duration timeDiff = null;
 	
 	public SimpleL1Replay(EventQueue queue, Scheduler scheduler,
-			L1UpdateConsumer consumer, ReaderFactory readerFactory,
+			L1UpdateConsumer consumer, L1UpdateReaderFactory readerFactory,
 			int minQueueSize, int maxQueueSize)
 	{
 		super();
@@ -128,13 +113,13 @@ public class SimpleL1Replay {
 	}
 	
 	public SimpleL1Replay(EventQueue queue, Scheduler scheduler,
-			L1UpdateConsumer consumer, ReaderFactory readerFactory)
+			L1UpdateConsumer consumer, L1UpdateReaderFactory readerFactory)
 	{
 		this(queue, scheduler, consumer, readerFactory, MIN_QUEUE_SIZE, MAX_QUEUE_SIZE);
 	}
 	
-	public SimpleL1Replay(EventQueue queue, Scheduler scheduler, L1UpdateConsumer consumer) {
-		this(queue, scheduler, consumer, new SimpleCsvL1ReaderFactory());
+	public SimpleL1Replay(EventQueue queue, Scheduler scheduler, L1UpdateConsumer consumer, File file) {
+		this(queue, scheduler, consumer, new SimpleCsvL1UpdateReaderFactory(file));
 	}
 	
 	public EventQueue getEventQueue() {
@@ -149,7 +134,7 @@ public class SimpleL1Replay {
 		return consumer;
 	}
 	
-	public ReaderFactory getReaderFactory() {
+	public L1UpdateReaderFactory getReaderFactory() {
 		return readerFactory;
 	}
 	
@@ -186,13 +171,13 @@ public class SimpleL1Replay {
 		}
 	}
 	
-	public void startReadingUpdates(File file) throws IOException {
+	public void startReadingUpdates() throws IOException {
 		lock.lock();
 		try {
 			if ( started ) {
 				throw new IllegalStateException("Already started");
 			}
-			reader = readerFactory.createReader(file);
+			reader = readerFactory.createReader();
 			started = true;
 			queue.enqueue(onStarted, new SimpleEventFactory());
 			sequenceID ++;
