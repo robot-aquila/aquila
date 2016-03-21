@@ -58,6 +58,36 @@ public class Variant<T> {
 		this(null, childNode);
 	}
 	
+	public Variant(T v1) {
+		this((T[]) null);
+		add(v1);
+	}
+	
+	public Variant(T v1, T v2) {
+		this(v1);
+		add(v2);
+	}
+	
+	public Variant(T v1, T v2, T v3) {
+		this(v1, v2);
+		add(v3);
+	}
+	
+	public Variant(Variant<?> childNode, T v1) {
+		this(childNode);
+		add(v1);
+	}
+	
+	public Variant(Variant<?> childNode, T v1, T v2) {
+		this(childNode, v1);
+		add(v2);
+	}
+
+	public Variant(Variant<?> childNode, T v1, T v2, T v3) {
+		this(childNode, v1, v2);
+		add(v3);
+	}
+
 	public Variant<T> add(T variantValue) {
 		values.add(variantValue);
 		return this;
