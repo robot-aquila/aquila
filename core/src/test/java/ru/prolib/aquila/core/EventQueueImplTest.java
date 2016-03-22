@@ -168,6 +168,7 @@ public class EventQueueImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testJoin0_ReturnIfFinished() throws Exception {
 		final CountDownLatch finished = new CountDownLatch(1);
 		type1.addListener(new EventListener() {
@@ -189,6 +190,7 @@ public class EventQueueImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testJoin0_IgnoreInQueueThread() throws Exception {
 		final CountDownLatch finished = new CountDownLatch(1);
 		type1.addListener(new EventListener() {
@@ -209,6 +211,7 @@ public class EventQueueImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testJoin0_ReturnIfQueueStopped() throws Exception {
 		long start = System.currentTimeMillis();
 		queue.join();
@@ -216,6 +219,7 @@ public class EventQueueImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testJoin0_Ok() throws Exception {
 		final CountDownLatch started = new CountDownLatch(1);
 		type1.addListener(new EventListener() {
