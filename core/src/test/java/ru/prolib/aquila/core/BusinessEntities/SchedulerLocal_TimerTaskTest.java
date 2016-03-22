@@ -2,6 +2,11 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.util.Timer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -66,6 +71,32 @@ public class SchedulerLocal_TimerTaskTest {
 	public void testEquals() throws Exception {
 		assertEquals(timerTask1, new SchedulerLocal_TimerTask(runnable1, true));
 		assertNotEquals(timerTask1, timerTask2);
+	}
+	
+	@Test
+	public void testCancelWhenRunningGetStuckBugfix() throws Exception {
+		final CountDownLatch started = new CountDownLatch(1);
+		final CountDownLatch cancelled = new CountDownLatch(1);
+		final CountDownLatch finished = new CountDownLatch(1);
+		final Runnable blocker = new Runnable() {
+			@Override public void run() {
+				started.countDown();
+				try {
+					if ( cancelled.await(500, TimeUnit.MILLISECONDS) ) {
+						finished.countDown();
+					}
+				} catch ( InterruptedException e ) {
+					return;
+				}
+			}
+		};
+		SchedulerLocal_TimerTask dummyTask = new SchedulerLocal_TimerTask(blocker, false);
+		Timer timer = new Timer(true);
+		timer.schedule(dummyTask, 50L);
+		assertTrue(started.await(500L, TimeUnit.MILLISECONDS));
+		dummyTask.cancel();
+		cancelled.countDown();
+		assertTrue(finished.await(500L, TimeUnit.MILLISECONDS));
 	}
 
 }

@@ -16,11 +16,17 @@ class SchedulerLocal_TimerTask extends TimerTask implements TaskHandler {
 	}
 
 	@Override
-	public synchronized void run() {
-		if ( runnable != null ) {
-			runnable.run();
-			if ( runOnce ) {
-				runnable = null;
+	public void run() {
+		Runnable dummy = null;
+		synchronized ( this ) {
+			dummy = runnable;
+		}
+		if ( dummy != null ) {
+			dummy.run();
+			synchronized ( this ) {
+				if ( runOnce ) {
+					runnable = null;
+				}
 			}
 		}
 	}
