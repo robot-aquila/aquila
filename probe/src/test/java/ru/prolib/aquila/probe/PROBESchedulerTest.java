@@ -22,7 +22,7 @@ import ru.prolib.aquila.probe.PROBEScheduler.Task;
 import ru.prolib.aquila.probe.PROBEScheduler.TaskState;
 
 public class PROBESchedulerTest {
-	private static final long MAX_TIME_ERROR_MS = 20;	
+	private static final long MAX_TIME_ERROR_MS = 50;	
 	private PROBEScheduler scheduler;
 	private List<TestTaskResult> results = new Vector<TestTaskResult>();
 	@SuppressWarnings("unused")
