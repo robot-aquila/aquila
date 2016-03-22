@@ -563,6 +563,7 @@ public class PROBESchedulerTest {
 		scheduler.close();
 		
 		assertTrue(signal.await(1000, TimeUnit.MILLISECONDS));
+		Thread.sleep(100L);
 		assertEquals(0, scheduler.countObservers());
 	}
 	
