@@ -41,7 +41,7 @@ public class DataProviderStub implements DataProvider {
 	}
 
 	@Override
-	public void unsubscribeRemoteObjects() {
+	public void unsubscribeRemoteObjects(EditableTerminal terminal) {
 
 	}
 

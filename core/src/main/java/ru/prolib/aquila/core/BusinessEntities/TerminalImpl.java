@@ -684,7 +684,7 @@ public class TerminalImpl implements EditableTerminal {
 				return;
 			}
 			started = false;
-			dataProvider.unsubscribeRemoteObjects();
+			dataProvider.unsubscribeRemoteObjects(this);
 			queue.enqueue(onTerminalUnready, new TerminalEventFactory(this));
 		} finally {
 			lock.unlock();

@@ -19,7 +19,7 @@ public interface DataProvider {
 	
 	public void subscribeRemoteObjects(EditableTerminal terminal);
 	
-	public void unsubscribeRemoteObjects();
+	public void unsubscribeRemoteObjects(EditableTerminal terminal);
 	
 	public void registerNewOrder(EditableOrder order);
 	
