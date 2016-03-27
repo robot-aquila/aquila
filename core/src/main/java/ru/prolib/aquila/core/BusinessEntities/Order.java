@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
+import java.util.List;
+
 import ru.prolib.aquila.core.EventType;
 
 /**
@@ -193,8 +195,20 @@ public interface Order extends Container {
 	 */
 	public String getComment();
 	
-	public void lock();
+	/**
+	 * Get list of order executions.
+	 * <p>
+	 * @return list of executions
+	 */
+	public List<OrderExecution> getExecutions();	
 	
-	public void unlock();
+	/**
+	 * Get order execution by execution ID.
+	 * <p>
+	 * @param executionID - id of an execution
+	 * @return execution instance
+	 * @throws OrderException - execution with such ID not exists
+	 */
+	public OrderExecution getExecution(long executionID) throws OrderException;
 	
 }

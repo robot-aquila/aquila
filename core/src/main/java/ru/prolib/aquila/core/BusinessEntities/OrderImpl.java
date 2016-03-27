@@ -1,11 +1,15 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import ru.prolib.aquila.core.*;
 
 /**
- * Order.
+ * Order model.
  */
 public class OrderImpl extends ContainerImpl implements EditableOrder {
 	private static final int[] TOKENS_FOR_AVAILABILITY = {
@@ -21,7 +25,10 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	private final Symbol symbol;
 	private final long id;
 	private final EventType onCancelFailed, onCancelled, onDone, onFailed,
-		onFilled, onPartiallyFilled, onRegistered, onRegisterFailed, onDeal;
+		onFilled, onPartiallyFilled, onRegistered, onRegisterFailed, onExecution;
+	private boolean statusEventsEnabled = true;
+	private List<OrderExecution> executions = new ArrayList<OrderExecution>();
+	private Map<Long, OrderExecution> executionByID = new HashMap<>();
 	
 	private static String getID(Terminal terminal, Account account,
 			Symbol symbol, long id)
@@ -56,7 +63,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		onPartiallyFilled = newEventType("PARTIALLY_FILLED");
 		onRegistered = newEventType("REGISTERED");
 		onRegisterFailed = newEventType("REGISTER_FAILED");
-		onDeal = newEventType("DEAL");
+		onExecution = newEventType("EXECUTION");
 	}
 	
 	public OrderImpl(EditableTerminal terminal, Account account, Symbol symbol, long id) {
@@ -125,7 +132,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 
 	@Override
 	public EventType onExecution() {
-		return onDeal;
+		return onExecution;
 	}
 
 	@Override
@@ -197,8 +204,8 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 			onCancelFailed.removeAlternates();
 			onCancelled.removeListeners();
 			onCancelled.removeAlternates();
-			onDeal.removeListeners();
-			onDeal.removeAlternates();
+			onExecution.removeListeners();
+			onExecution.removeAlternates();
 			onDone.removeListeners();
 			onDone.removeAlternates();
 			onFailed.removeListeners();
@@ -261,14 +268,16 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 				default:
 					break;	
 				}
-				if ( dummy != null ) {
-					order.queue.enqueue(dummy, factory);
-				}
-				if ( status.isError() ) {
-					order.queue.enqueue(order.onFailed, factory);
-				}
-				if ( status.isFinal() ) {
-					order.queue.enqueue(order.onDone, factory);
+				if ( order.isStatusEventsEnabled() ) {
+					if ( dummy != null ) {
+						order.queue.enqueue(dummy, factory);
+					}
+					if ( status.isError() ) {
+						order.queue.enqueue(order.onFailed, factory);
+					}
+					if ( status.isFinal() ) {
+						order.queue.enqueue(order.onDone, factory);
+					}
 				}
 			}
 		}
@@ -276,7 +285,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 	
 	static class OrderEventFactory implements EventFactory {
-		private final Order order;
+		protected final Order order;
 		
 		OrderEventFactory(Order order) {
 			super();
@@ -288,6 +297,104 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 			return new OrderEvent(type, order);
 		}
 		
+	}
+	
+	static class OrderExecutionEventFactory extends OrderEventFactory {
+		protected final OrderExecution execution;
+		
+		OrderExecutionEventFactory(Order order, OrderExecution execution) {
+			super(order);
+			this.execution = execution;
+		}
+		
+		@Override
+		public Event produceEvent(EventType type) {
+			return new OrderExecutionEvent(type, order, execution);
+		}
+		
+	}
+
+	@Override
+	public List<OrderExecution> getExecutions() {
+		lock.lock();
+		try {
+			return new ArrayList<OrderExecution>(executions);
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	private OrderExecution createExecution(long id, String externalID,
+			Instant time, double price, long volume, double value)
+					throws OrderException
+	{
+		if ( executionByID.containsKey(id) ) {
+			throw new OrderException("Execution already exists: " + id);
+		}
+		OrderExecution exec = new OrderExecutionImpl(terminal, id, externalID,
+				symbol, getAction(), this.id, time, price, volume, value);
+		executionByID.put(id, exec);
+		executions.add(exec);
+		return exec;
+	}
+
+	@Override
+	public void addExecution(long id, String externalID, Instant time,
+			double price, long volume, double value) throws OrderException
+	{
+		lock.lock();
+		try {
+			OrderExecution execution = createExecution(id, externalID, time, price, volume, value);
+			queue.enqueue(onExecution, new OrderExecutionEventFactory(this, execution));
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void loadExecution(long id, String externalID, Instant time,
+			double price, long volume, double value) throws OrderException
+	{
+		lock.lock();
+		try {
+			createExecution(id, externalID, time, price, volume, value);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void enableStatusEvents(boolean enable) {
+		lock.lock();
+		try {
+			statusEventsEnabled = enable;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public boolean isStatusEventsEnabled() {
+		lock.lock();
+		try {
+			return statusEventsEnabled;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public OrderExecution getExecution(long executionID) throws OrderException {
+		lock.lock();
+		try {
+			OrderExecution execution = executionByID.get(executionID);
+			if ( execution == null ) {
+				throw new OrderException("Execution not exists: " + executionID);
+			}
+			return execution;
+		} finally {
+			lock.unlock();
+		}
 	}
 
 }

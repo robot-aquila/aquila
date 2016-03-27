@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -88,7 +90,7 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(prefix, order.getContainerID());
 		assertEquals(prefix + ".CANCEL_FAILED", order.onCancelFailed().getId());
 		assertEquals(prefix + ".CANCELLED", order.onCancelled().getId());
-		assertEquals(prefix + ".DEAL", order.onExecution().getId());
+		assertEquals(prefix + ".EXECUTION", order.onExecution().getId());
 		assertEquals(prefix + ".DONE", order.onDone().getId());
 		assertEquals(prefix + ".FAILED", order.onFailed().getId());
 		assertEquals(prefix + ".FILLED", order.onFilled().getId());
@@ -291,6 +293,19 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testOrderController_CancelFailed_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
+		order.update(data);
+		order.onCancelFailed().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test
 	public void testOrderController_Cancelled() {
 		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
 		order.update(data);
@@ -302,6 +317,19 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(2, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onCancelled());
 		assertOrderEvent(listenerStub.getEvent(1), order.onCancelled());
+	}
+	
+	@Test
+	public void testOrderController_Cancelled_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		order.update(data);
+		order.onCancelled().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
 	}
 	
 	@Test
@@ -319,6 +347,19 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testOrderController_Done_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.FILLED);
+		order.update(data);
+		order.onDone().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test
 	public void testOrderController_Failed() {
 		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
 		order.update(data);
@@ -333,6 +374,19 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testOrderController_Failed_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
+		order.update(data);
+		order.onFailed().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test
 	public void testOrderController_Filled() {
 		data.put(OrderField.STATUS, OrderStatus.FILLED);
 		order.update(data);
@@ -344,6 +398,19 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(2, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onFilled());
 		assertOrderEvent(listenerStub.getEvent(1), order.onFilled());
+	}
+	
+	@Test
+	public void testOrderController_Filled_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.FILLED);
+		order.update(data);
+		order.onFilled().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
 	}
 
 	@Test
@@ -363,6 +430,21 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testOrderController_PartiallyFilled_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		data.put(OrderField.CURRENT_VOLUME, 5L);
+		order.update(data);
+		order.onPartiallyFilled().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test
 	public void testOrderController_Registered() {
 		data.put(OrderField.STATUS, OrderStatus.ACTIVE);
 		order.update(data);
@@ -377,6 +459,19 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testOrderController_Registered_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.ACTIVE);
+		order.update(data);
+		order.onRegistered().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test
 	public void testOrderController_RegisterFailed() {
 		data.put(OrderField.STATUS, OrderStatus.REJECTED);
 		order.update(data);
@@ -388,6 +483,19 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(2, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onRegisterFailed());
 		assertOrderEvent(listenerStub.getEvent(1), order.onRegisterFailed());
+	}
+	
+	@Test
+	public void testOrderController_RegisterFailed_SkipWhenStatusEventsDisabled() throws Exception {
+		order.enableStatusEvents(false);
+		data.put(OrderField.STATUS, OrderStatus.REJECTED);
+		order.update(data);
+		order.onRegisterFailed().addSyncListener(listenerStub);
+		
+		controller.processAvailable(order);
+		controller.processUpdate(order);
+		
+		assertEquals(0, listenerStub.getEventCount());
 	}
 	
 	@Test
@@ -428,5 +536,105 @@ public class OrderImplTest extends ContainerImplTest {
 		assertTrue(event.isType(order.onUpdate()));
 		assertSame(order, event.getOrder());
 	}
+	
+	/**
+	 * Create test execution.
+	 * <p>
+	 * @param id - execution id
+	 * @param externalID - external ID
+	 * @param time - execution time
+	 * @param price - price per unit
+	 * @param volume - executed volume
+	 * @param value - executed value
+	 * @return execution instance
+	 */
+	private OrderExecution newExec(long id, String externalID, Instant time,
+			double price, long volume, double value)
+	{
+		return new OrderExecutionImpl(terminal, id, externalID, symbol,
+			order.getAction(), 240L, time, price, volume, value);
+	}
+	
+	@Test
+	public void testAddExecution() throws Exception {
+		Instant now = Instant.now();
+		data.put(OrderField.ACTION, OrderAction.BUY);
+		order.onExecution().addSyncListener(listenerStub);
+		
+		order.addExecution(100L, "x1", now, 80.0d, 10L, 800.0d);
+		
+		List<OrderExecution> expected = new ArrayList<>();
+		expected.add(newExec(100L, "x1", now, 80.0d, 10L, 800.0d));
+		assertEquals(expected, order.getExecutions());
+		assertEquals(1, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onExecution());
+		assertEquals(expected.get(0), ((OrderExecutionEvent) listenerStub.getEvent(0)).getExecution());
+	}
+	
+	@Test (expected=OrderException.class)
+	public void testAddExecution_ThrowsIfAlreadyExists() throws Exception {
+		Instant now = Instant.now();
+		data.put(OrderField.ACTION, OrderAction.BUY);
+		order.update(data);
+		order.loadExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
+		
+		order.addExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
+	}
+	
+	@Test
+	public void testLoadExecution() throws Exception {
+		data.put(OrderField.ACTION, OrderAction.BUY);
+		order.update(data);
+		Instant now = Instant.now();
+		order.onExecution().addSyncListener(listenerStub);
 
+		order.loadExecution(100L, "foo1", now,				 34.15d, 10L, 341.50d);
+		order.loadExecution(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d);
+		order.loadExecution(102L, "foo3", now.plusMillis(5), 34.43d, 10L, 344.30d);
+		
+		List<OrderExecution> expected = new ArrayList<>();
+		expected.add(newExec(100L, "foo1", now,				  34.15d, 10L, 341.50d));
+		expected.add(newExec(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d));
+		expected.add(newExec(102L, "foo3", now.plusMillis(5), 34.43d, 10L, 344.30d));
+		assertEquals(expected, order.getExecutions());
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test (expected=OrderException.class)
+	public void testLoadExecution_ThrowsIfAlreadyExists() throws Exception {
+		data.put(OrderField.ACTION, OrderAction.BUY);
+		order.update(data);
+		Instant now = Instant.now();
+		order.loadExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
+		
+		order.loadExecution(100L, "foo2", now, 34.25d, 20L, 683.00d);
+	}
+	
+	@Test
+	public void testGetExecution() throws Exception {
+		data.put(OrderField.ACTION, OrderAction.BUY);
+		order.update(data);
+		Instant now = Instant.now();
+		order.loadExecution(100L, "foo1", now,				 34.15d, 10L, 341.50d);
+		order.loadExecution(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d);
+		List<OrderExecution> executions = order.getExecutions();
+		
+		assertSame(executions.get(0), order.getExecution(100L));
+		assertSame(executions.get(1), order.getExecution(101L));
+	}
+	
+	@Test (expected=OrderException.class)
+	public void testGetExecution_ThrowsIfExecutionNotExists() throws Exception {
+		order.getExecution(834L);
+	}
+	
+	@Test
+	public void testEnableStatusEvents() throws Exception {
+		assertTrue(order.isStatusEventsEnabled());
+		order.enableStatusEvents(false);
+		assertFalse(order.isStatusEventsEnabled());
+		order.enableStatusEvents(true);
+		assertTrue(order.isStatusEventsEnabled());
+	}
+	
 }
