@@ -5,7 +5,9 @@ import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -74,6 +76,16 @@ public class OrderImplTest extends ContainerImplTest {
 		OrderEvent e = (OrderEvent) event;
 		assertTrue(e.isType(expectedType));
 		assertSame(order, e.getOrder());
+	}
+	
+	private void makeOrderAvailableWithTrueController() {
+		produceContainer();
+		data.put(OrderField.ACTION, OrderAction.BUY);
+		data.put(OrderField.TYPE, OrderType.LIMIT);
+		data.put(OrderField.STATUS, OrderStatus.PENDING);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		data.put(OrderField.CURRENT_VOLUME, 10L);
+		order.update(data);
 	}
 	
 	@Test
@@ -212,6 +224,16 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
+	public void testGetSystemMessage() throws Exception {
+		getter = new Getter<String>() {
+			@Override public String get() {
+				return order.getSystemMessage();
+			}
+		};
+		testGetter(OrderField.SYSTEM_MESSAGE, "foo", "bar");
+	}
+	
+	@Test
 	public void testClose() {
 		EventType type = new EventTypeImpl();
 		order.onAvailable().addSyncListener(listenerStub);
@@ -294,7 +316,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_CancelFailed_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
 		order.update(data);
 		order.onCancelFailed().addSyncListener(listenerStub);
@@ -321,7 +343,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_Cancelled_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
 		order.update(data);
 		order.onCancelled().addSyncListener(listenerStub);
@@ -348,7 +370,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_Done_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.FILLED);
 		order.update(data);
 		order.onDone().addSyncListener(listenerStub);
@@ -375,7 +397,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_Failed_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
 		order.update(data);
 		order.onFailed().addSyncListener(listenerStub);
@@ -402,7 +424,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_Filled_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.FILLED);
 		order.update(data);
 		order.onFilled().addSyncListener(listenerStub);
@@ -431,7 +453,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_PartiallyFilled_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		data.put(OrderField.CURRENT_VOLUME, 5L);
@@ -460,7 +482,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_Registered_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.ACTIVE);
 		order.update(data);
 		order.onRegistered().addSyncListener(listenerStub);
@@ -487,7 +509,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@Test
 	public void testOrderController_RegisterFailed_SkipWhenStatusEventsDisabled() throws Exception {
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		data.put(OrderField.STATUS, OrderStatus.REJECTED);
 		order.update(data);
 		order.onRegisterFailed().addSyncListener(listenerStub);
@@ -629,12 +651,242 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
-	public void testEnableStatusEvents() throws Exception {
+	public void testSetStatusEventsEnabled() throws Exception {
 		assertTrue(order.isStatusEventsEnabled());
-		order.enableStatusEvents(false);
+		order.setStatusEventsEnabled(false);
 		assertFalse(order.isStatusEventsEnabled());
-		order.enableStatusEvents(true);
+		order.setStatusEventsEnabled(true);
 		assertTrue(order.isStatusEventsEnabled());
 	}
 	
+	@Test
+	public void testGetChangeWhenExecutionAdded() throws Exception {
+		data.put(OrderField.ACTION, OrderAction.SELL);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		order.update(data);
+		Instant now = Instant.now();
+		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		
+		Map<Integer, Object> actual = order.getChangeWhenExecutionAdded();
+		
+		Map<Integer, Object> expected = new HashMap<Integer, Object>();
+		expected.put(OrderField.CURRENT_VOLUME, 3L);
+		expected.put(OrderField.EXECUTED_VALUE, 313.0d);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testGetChangeWhenExecutionAdded_WhenFullyFilled() throws Exception {
+		data.put(OrderField.ACTION, OrderAction.SELL);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		order.update(data);
+		Instant now = Instant.now();
+		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.loadExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
+		
+		Map<Integer, Object> actual = order.getChangeWhenExecutionAdded();
+		
+		Map<Integer, Object> expected = new HashMap<Integer, Object>();
+		expected.put(OrderField.CURRENT_VOLUME, 0L);
+		expected.put(OrderField.EXECUTED_VALUE, 518.0d);
+		expected.put(OrderField.STATUS, OrderStatus.FILLED);
+		expected.put(OrderField.DONE_TIME, now.plusMillis(2));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetChangeWhenCancelled() throws Exception {
+		Instant time = Instant.now();
+		data.put(OrderField.ACTION, OrderAction.SELL);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		data.put(OrderField.CURRENT_VOLUME, 10L);
+		order.update(data);
+		
+		Map<Integer, Object> actual = order.getChangeWhenCancelled(time);
+		
+		Map<Integer, Object> expected = new HashMap<>();
+		expected.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		expected.put(OrderField.DONE_TIME, time);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testGetChangeWhenRejected() throws Exception {
+		Instant time = Instant.now();
+		
+		Map<Integer, Object> actual = order.getChangeWhenRejected(time, "rejected");
+		
+		Map<Integer, Object> expected = new HashMap<>();
+		expected.put(OrderField.STATUS, OrderStatus.REJECTED);
+		expected.put(OrderField.DONE_TIME, time);
+		expected.put(OrderField.SYSTEM_MESSAGE, "rejected");
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetChangeWhenRegistered() throws Exception {
+		
+		Map<Integer, Object> actual = order.getChangeWhenRegistered();
+		
+		Map<Integer, Object> expected = new HashMap<>();
+		expected.put(OrderField.STATUS, OrderStatus.ACTIVE);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testGetChangeWhenCancelFailed() throws Exception {
+		Instant time = Instant.now();
+		
+		Map<Integer, Object> actual = order.getChangeWhenCancelFailed(time, "some error");
+		
+		Map<Integer, Object> expected = new HashMap<>();
+		expected.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
+		expected.put(OrderField.SYSTEM_MESSAGE, "some error");
+		expected.put(OrderField.DONE_TIME, time);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testUpdateWhenExecutionAdded() throws Exception {
+		makeOrderAvailableWithTrueController();
+		Instant now = Instant.now();
+		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onFilled().addSyncListener(listenerStub);
+		order.onDone().addSyncListener(listenerStub);
+
+		order.updateWhenExecutionAdded();
+		
+		assertEquals(3L, (long)order.getCurrentVolume());
+		assertEquals(313.0d, order.getExecutedValue(), 0.01d);
+		assertEquals(OrderStatus.PENDING, order.getStatus()); // not changed
+		assertNull(order.getDoneTime());
+		assertEquals(1, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
+	}
+	
+	@Test
+	public void testUpdateWhenExecutionAdded_WhenFullyFilled() throws Exception {
+		makeOrderAvailableWithTrueController();
+		Instant now = Instant.now();
+		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.loadExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onFilled().addSyncListener(listenerStub);
+		order.onFailed().addSyncListener(listenerStub);
+		order.onDone().addSyncListener(listenerStub);
+		
+		order.updateWhenExecutionAdded();
+
+		assertEquals(0L, (long)order.getCurrentVolume());
+		assertEquals(518.0d, order.getExecutedValue(), 0.01d);
+		assertEquals(OrderStatus.FILLED, order.getStatus());
+		assertEquals(now.plusMillis(2), order.getDoneTime());
+		assertEquals(3, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
+		assertOrderEvent(listenerStub.getEvent(1), order.onFilled());
+		assertOrderEvent(listenerStub.getEvent(2), order.onDone());
+	}
+
+	@Test
+	public void testUpdateWhenCancelled() throws Exception {
+		makeOrderAvailableWithTrueController();
+		Instant now = Instant.now();
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onCancelled().addSyncListener(listenerStub);
+		order.onDone().addSyncListener(listenerStub);
+		
+		order.updateWhenCancelled(now);
+		
+		assertEquals(10L, (long)order.getCurrentVolume());
+		assertEquals(OrderStatus.CANCELLED, order.getStatus());
+		assertEquals(now, order.getDoneTime());
+		assertEquals(3, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
+		assertOrderEvent(listenerStub.getEvent(1), order.onCancelled());
+		assertOrderEvent(listenerStub.getEvent(2), order.onDone());
+	}
+	
+	@Test
+	public void testUpdateWhenCancelled_PartiallyFilled() throws Exception {
+		makeOrderAvailableWithTrueController();
+		Instant now = Instant.now();
+		data.put(OrderField.CURRENT_VOLUME, 5L);
+		order.update(data);
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onCancelled().addSyncListener(listenerStub);
+		order.onPartiallyFilled().addSyncListener(listenerStub);
+		order.onDone().addSyncListener(listenerStub);
+		
+		order.updateWhenCancelled(now.plusMillis(10));
+		
+		assertEquals(5L, (long)order.getCurrentVolume());
+		assertEquals(OrderStatus.CANCELLED, order.getStatus());
+		assertEquals(now.plusMillis(10), order.getDoneTime());
+		assertEquals(3, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
+		assertOrderEvent(listenerStub.getEvent(1), order.onPartiallyFilled());
+		assertOrderEvent(listenerStub.getEvent(2), order.onDone());
+	}
+
+	@Test
+	public void testUpdateWhenRejected() throws Exception {
+		makeOrderAvailableWithTrueController();
+		Instant now = Instant.now();
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onRegisterFailed().addSyncListener(listenerStub);
+		order.onFailed().addSyncListener(listenerStub);
+		order.onDone().addSyncListener(listenerStub);
+		
+		order.updateWhenRejected(now, "insufficient funds");
+		
+		assertEquals(OrderStatus.REJECTED, order.getStatus());
+		assertEquals(now, order.getDoneTime());
+		assertEquals("insufficient funds", order.getSystemMessage());
+		assertEquals(4, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
+		assertOrderEvent(listenerStub.getEvent(1), order.onRegisterFailed());
+		assertOrderEvent(listenerStub.getEvent(2), order.onFailed());
+		assertOrderEvent(listenerStub.getEvent(3), order.onDone());
+	}
+	
+	@Test
+	public void testUpdateWhenRegistered() throws Exception {
+		makeOrderAvailableWithTrueController();
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onRegistered().addSyncListener(listenerStub);
+		
+		order.updateWhenRegistered();
+		
+		assertEquals(OrderStatus.ACTIVE, order.getStatus());
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
+		assertOrderEvent(listenerStub.getEvent(1), order.onRegistered());
+	}
+	
+	@Test
+	public void testUpdateWhenCancelFailed() throws Exception {
+		makeOrderAvailableWithTrueController();
+		Instant time = Instant.parse("2017-01-01T00:00:00Z");
+		order.onUpdate().addSyncListener(listenerStub);
+		order.onCancelFailed().addSyncListener(listenerStub);
+		order.onFailed().addSyncListener(listenerStub);
+		order.onDone().addSyncListener(listenerStub);
+		
+		order.updateWhenCancelFailed(time, "test error");
+
+		assertEquals(OrderStatus.CANCEL_FAILED, order.getStatus());
+		assertEquals("test error", order.getSystemMessage());
+		assertEquals(time, order.getDoneTime());
+		assertEquals(4, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
+		assertOrderEvent(listenerStub.getEvent(1), order.onCancelFailed());
+		assertOrderEvent(listenerStub.getEvent(2), order.onFailed());
+		assertOrderEvent(listenerStub.getEvent(3), order.onDone());
+	}
+
 }

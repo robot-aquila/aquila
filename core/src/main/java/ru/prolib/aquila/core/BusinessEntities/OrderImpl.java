@@ -169,6 +169,11 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	public Long getCurrentVolume() {
 		return getLong(OrderField.CURRENT_VOLUME);
 	}
+	
+	@Override
+	public String getSystemMessage() {
+		return getString(OrderField.SYSTEM_MESSAGE);
+	}
 
 	@Override
 	public Double getPrice() {
@@ -364,7 +369,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 
 	@Override
-	public void enableStatusEvents(boolean enable) {
+	public void setStatusEventsEnabled(boolean enable) {
 		lock.lock();
 		try {
 			statusEventsEnabled = enable;
@@ -395,6 +400,110 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	@Override
+	public Map<Integer, Object> getChangeWhenExecutionAdded() {
+		lock.lock();
+		try {
+			long initialVolume = getInitialVolume(), executedVolume = 0;
+			double executedValue = 0.0d;
+			Instant lastExecutionTime = null;
+			for ( OrderExecution execution : executions ) {
+				executedVolume += execution.getVolume();
+				executedValue += execution.getValue();
+				lastExecutionTime = execution.getTime();
+			}
+			long currentVolume = initialVolume - executedVolume;
+			Map<Integer, Object> tokens = new HashMap<Integer, Object>();
+			tokens.put(OrderField.CURRENT_VOLUME, currentVolume);
+			tokens.put(OrderField.EXECUTED_VALUE, executedValue);
+			if ( currentVolume <= 0L ) {
+				tokens.put(OrderField.STATUS, OrderStatus.FILLED);
+				tokens.put(OrderField.DONE_TIME, lastExecutionTime);
+			}
+			return tokens;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Map<Integer, Object> getChangeWhenCancelled(Instant time) {
+		lock.lock();
+		try {
+			Map<Integer, Object> tokens = new HashMap<>();
+			tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
+			tokens.put(OrderField.DONE_TIME, time);
+			return tokens;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Map<Integer, Object> getChangeWhenRejected(Instant time, String reason) {
+		lock.lock();
+		try {
+			Map<Integer, Object> tokens = new HashMap<>();
+			tokens.put(OrderField.STATUS, OrderStatus.REJECTED);
+			tokens.put(OrderField.DONE_TIME, time);
+			tokens.put(OrderField.SYSTEM_MESSAGE, reason);
+			return tokens;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Map<Integer, Object> getChangeWhenRegistered() {
+		lock.lock();
+		try {
+			Map<Integer, Object> tokens = new HashMap<>();
+			tokens.put(OrderField.STATUS, OrderStatus.ACTIVE);
+			return tokens;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Map<Integer, Object> getChangeWhenCancelFailed(Instant time, String reason) {
+		lock.lock();
+		try {
+			Map<Integer, Object> tokens = new HashMap<>();
+			tokens.put(OrderField.DONE_TIME, time);
+			tokens.put(OrderField.SYSTEM_MESSAGE, reason);
+			tokens.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
+			return tokens;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void updateWhenExecutionAdded() {
+		update(getChangeWhenExecutionAdded());
+	}
+
+	@Override
+	public void updateWhenCancelled(Instant time) {
+		update(getChangeWhenCancelled(time));
+	}
+
+	@Override
+	public void updateWhenRejected(Instant time, String reason) {
+		update(getChangeWhenRejected(time, reason));
+	}
+
+	@Override
+	public void updateWhenRegistered() {
+		update(getChangeWhenRegistered());
+	}
+
+	@Override
+	public void updateWhenCancelFailed(Instant time, String reason) {
+		update(getChangeWhenCancelFailed(time, reason));
 	}
 
 }

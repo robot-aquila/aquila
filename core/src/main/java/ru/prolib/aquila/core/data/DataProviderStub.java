@@ -6,6 +6,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdatableStreamContainer;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdatableStreamContainer;
+import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class DataProviderStub implements DataProvider {
@@ -46,12 +47,12 @@ public class DataProviderStub implements DataProvider {
 	}
 
 	@Override
-	public void registerNewOrder(EditableOrder order) {
+	public void registerNewOrder(EditableOrder order) throws OrderException {
 
 	}
 
 	@Override
-	public void cancelOrder(EditableOrder order) {
+	public void cancelOrder(EditableOrder order) throws OrderException {
 
 	}
 

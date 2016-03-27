@@ -21,8 +21,8 @@ public interface DataProvider {
 	
 	public void unsubscribeRemoteObjects(EditableTerminal terminal);
 	
-	public void registerNewOrder(EditableOrder order);
+	public void registerNewOrder(EditableOrder order) throws OrderException;
 	
-	public void cancelOrder(EditableOrder order);
+	public void cancelOrder(EditableOrder order) throws OrderException;
 
 }

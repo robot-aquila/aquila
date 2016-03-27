@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
+import java.util.Map;
 
 
 /**
@@ -60,7 +61,7 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 * <p>
 	 * @param enable - enable or disable events
 	 */
-	public void enableStatusEvents(boolean enable);
+	public void setStatusEventsEnabled(boolean enable);
 	
 	/**
 	 * Check that the order status events are enabled.
@@ -68,5 +69,45 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 * @return true if events are enable, false otherwise
 	 */
 	public boolean isStatusEventsEnabled();
+	
+	/**
+	 * Calculate changed attributes based on executions.
+	 * <p>
+	 * This method calculates changed attributes based on existing executions.
+	 * In case when all executions gives a total volume greater or equals than
+	 * initial volume then appropriate status change will be added. In this case
+	 * the latest execution time will be used as the order finalization time.
+	 * Returned change have to be applied to the order instance. It is possible
+	 * to add some additional fields to the change before the applying.
+	 * <p>
+	 * @return attributes which should be changed
+	 */
+	public Map<Integer, Object> getChangeWhenExecutionAdded();
+	
+	public Map<Integer, Object> getChangeWhenCancelled(Instant time);
+	
+	public Map<Integer, Object> getChangeWhenRejected(Instant time, String reason);
+	
+	public Map<Integer, Object> getChangeWhenRegistered();
+	
+	public Map<Integer, Object> getChangeWhenCancelFailed(Instant time, String reason);
+	
+	/**
+	 * Calculate and apply changes of attributes based on executions.
+	 * <p>
+	 * This method is a shortcut which allows apply changes obtained by calling
+	 * {@link #getChangeWhenExecutionAdded()} method to the order container.
+	 * Will cause appropriate events. Useful if no additional tokens should be
+	 * added with those changes.
+	 */
+	public void updateWhenExecutionAdded();
+	
+	public void updateWhenCancelled(Instant time);
+	
+	public void updateWhenRejected(Instant time, String reason);
+	
+	public void updateWhenRegistered();
+	
+	public void updateWhenCancelFailed(Instant time, String reason);
 
 }

@@ -211,4 +211,12 @@ public interface Order extends Container {
 	 */
 	public OrderExecution getExecution(long executionID) throws OrderException;
 	
+	/**
+	 * Get system message.
+	 * <p>
+	 * @return get a trading system message associated with the order or null if
+	 * message is not available.
+	 */
+	public String getSystemMessage();
+	
 }

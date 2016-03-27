@@ -12,4 +12,5 @@ public class OrderField {
 	public static final int EXECUTED_VALUE = 9;
 	public static final int EXTERNAL_ID = 10;
 	public static final int COMMENT = 11;
+	public static final int SYSTEM_MESSAGE = 12;
 }
