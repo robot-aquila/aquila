@@ -170,11 +170,6 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	}
 
 	@Override
-	public synchronized void aggregate(Trade trade) throws OutOfDateException {
-		aggregate(trade, false);
-	}
-
-	@Override
 	public synchronized void aggregate(Candle candle) throws ValueException {
 		aggregate(candle, false);
 	}
@@ -218,38 +213,6 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 				Candle current = get();
 				if ( current.getInterval().equals(intr) ) {
 					super.set(current.addTick(tick));
-				} else {
-					super.add(newCandle);
-				}
-			}
-		} catch ( ValueException e ) {
-			poa = prevPOA;
-			throw new RuntimeException("Unexpected exception", e);
-		}
-	}
-
-	@Override
-	public synchronized void aggregate(Trade trade, boolean silent)
-			throws OutOfDateException
-	{
-		Instant time = trade.getTime();
-		if ( poa != null && time.isBefore(poa) ) {
-			if ( silent ) {
-				return;
-			}
-			throw new OutOfDateException(poa, trade);
-		}
-		Interval intr = timeframe.getInterval(time);
-		Candle newCandle = new Candle(intr, trade.getPrice(), trade.getQty());
-		Instant prevPOA = poa;
-		try {
-			poa = time;
-			if ( getLength() == 0 ) {
-				super.add(newCandle);
-			} else {
-				Candle current = get();
-				if ( current.getInterval().equals(intr) ) {
-					super.set(current.addTrade(trade));
 				} else {
 					super.add(newCandle);
 				}

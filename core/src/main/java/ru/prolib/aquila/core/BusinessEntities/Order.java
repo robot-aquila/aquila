@@ -79,12 +79,11 @@ public interface Order extends Container {
 	/**
 	 * Получить тип события: новая сделка по заявке.
 	 * <p>
-	 * Генерируется событие класса {@link OrderTradeEvent}.
-	 * Актуально только для рыночных и лимитных заявок.
+	 * Генерируется событие класса {@link OrderExecutionEvent}.
 	 * <p>
 	 * @return тип события
 	 */
-	public EventType onDeal();
+	public EventType onExecution();
 
 	/**
 	 * Get order ID.
@@ -144,8 +143,11 @@ public interface Order extends Container {
 	
 	/**
 	 * Get current volume.
-	 * <p> 
-	 * @return order current volume
+	 * <p>
+	 * This method returns the volume which have to be executed to fill order completely.
+	 * When this value reaches zero then the order is completely filled.
+	 * <p>
+	 * @return order current (unexecuted) volume
 	 */
 	public Long getCurrentVolume();
 	

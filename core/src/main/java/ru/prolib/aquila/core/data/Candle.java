@@ -4,7 +4,6 @@ import java.time.Instant;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
-import ru.prolib.aquila.core.BusinessEntities.Trade;
 
 /**
  * Представление динамики цены за период.
@@ -115,20 +114,6 @@ public class Candle {
 				candle.low < low ? candle.low : low,
 				candle.close,
 				volume + candle.volume);
-	}
-	
-	/**
-	 * Создать свечу путем добавления сделки к текущей.
-	 * <p>
-	 * @param trade сделка
-	 * @return новая свеча
-	 * @throws OutOfIntervalException время сделки за границей интервала свечи
-	 */
-	public Candle addTrade(Trade trade) throws OutOfIntervalException {
-		if ( ! interval.contains(trade.getTime()) ) {
-			throw new OutOfIntervalException(interval, trade);
-		}
-		return addDeal(trade.getPrice(), trade.getQty());
 	}
 	
 	/**

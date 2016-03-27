@@ -42,29 +42,6 @@ public interface EditableCandleSeries
 		throws OutOfDateException;
 	
 	/**
-	 * Агрегировать сделку.
-	 * <p>
-	 * Строгая агрегация сделки. Выбрасывает исключение при запросе
-	 * агрегирования устаревших данных. Эквивалент вызова
-	 * {@link #aggregate(Trade, boolean)} с false в качестве второго аргумента.
-	 * <p>
-	 * @param trade агрегируемая сделка
-	 * @throws OutOfDateException - If error occured.
-	 */
-	public void aggregate(Trade trade) throws OutOfDateException;
-	
-	/**
-	 * Агрегировать сделку.
-	 * <p>
-	 * @param trade агрегируемая сделка
-	 * @param silent при true сделка датированная ранее ТА будет отброшена,
-	 * при false будет возбуждено исключение
-	 * @throws OutOfDateException - If error occured.
-	 */
-	public void aggregate(Trade trade, boolean silent)
-		throws OutOfDateException;
-	
-	/**
 	 * Агрегировать свечу.
 	 * <p>
 	 * Строгая агрегация свечи. Выбрасывает исключение при запросе агрегирования

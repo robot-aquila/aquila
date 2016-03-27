@@ -8,23 +8,23 @@ import org.junit.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.utils.Variant;
 
-public class OrderTradeEventTest {
+public class OrderExecutionEventTest {
 	private IMocksControl control;
 	private Order o1, o2;
-	private Trade t1, t2;
+	private OrderExecution e1, e2;
 	private EventType type1, type2;
-	private OrderTradeEvent event;
+	private OrderExecutionEvent event;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		o1 = control.createMock(Order.class);
 		o2 = control.createMock(Order.class);
-		t1 = control.createMock(Trade.class);
-		t2 = control.createMock(Trade.class);
+		e1 = control.createMock(OrderExecution.class);
+		e2 = control.createMock(OrderExecution.class);
 		type1 = new EventTypeImpl("type1");
 		type2 = new EventTypeImpl("type2");
-		event = new OrderTradeEvent(type1, o1, t1);
+		event = new OrderExecutionEvent(type1, o1, e1);
 	}
 	
 	@Test
@@ -36,20 +36,14 @@ public class OrderTradeEventTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Variant<EventType> vType = new Variant<EventType>()
-			.add(type1)
-			.add(type2);
-		Variant<Order> vOrder = new Variant<Order>(vType)
-			.add(o1)
-			.add(o2);
-		Variant<Trade> vTrade = new Variant<Trade>(vOrder)
-			.add(t1)
-			.add(t2);
-		Variant<?> iterator = vTrade;
+		Variant<EventType> vType = new Variant<EventType>(type1, type2);
+		Variant<Order> vOrder = new Variant<Order>(vType, o1, o2);
+		Variant<OrderExecution> vExec = new Variant<OrderExecution>(vOrder, e1, e2);
+		Variant<?> iterator = vExec;
 		int foundCnt = 0;
-		OrderTradeEvent x = null, found = null;
+		OrderExecutionEvent x = null, found = null;
 		do {
-			x = new OrderTradeEvent(vType.get(), vOrder.get(), vTrade.get());
+			x = new OrderExecutionEvent(vType.get(), vOrder.get(), vExec.get());
 			if ( event.equals(x) ) {
 				found = x;
 				foundCnt ++;
@@ -58,7 +52,7 @@ public class OrderTradeEventTest {
 		assertEquals(1, foundCnt);
 		assertSame(type1, found.getType());
 		assertSame(o1, found.getOrder());
-		assertSame(t1, found.getTrade());
+		assertSame(e1, found.getExecution());
 	}
 
 }

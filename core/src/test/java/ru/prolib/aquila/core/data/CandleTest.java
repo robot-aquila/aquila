@@ -243,29 +243,6 @@ public class CandleTest {
 	}
 	
 	@Test
-	public void testAddTrade() throws Exception {
-		Trade trade = new Trade(null);
-		trade.setPrice(131.12d);
-		trade.setQty(800L);
-		trade.setTime(Instant.parse("2013-10-05T19:54:59.999Z"));
-		Candle result = c2.addTrade(trade);
-		assertNotNull(result);
-		assertEquals(interval2, result.getInterval());
-		assertEquals(120.05d, result.getOpen(), 0.001d);
-		assertEquals(131.12d, result.getHigh(), 0.001d);
-		assertEquals( 90.55d, result.getLow(), 0.001d);
-		assertEquals(131.12d, result.getClose(), 0.001d);
-		assertEquals(10800L, result.getVolume());
-	}
-	
-	@Test (expected=OutOfIntervalException.class)
-	public void testAddTrade_ThrowsIfOutOfInterval() throws Exception {
-		Trade trade = new Trade(null);
-		trade.setTime(Instant.parse("2013-10-05T19:55:00Z"));
-		c2.addTrade(trade);
-	}
-	
-	@Test
 	public void testAddTick() throws Exception {
 		Tick tick1, tick2;
 		// тик без опционального значения -> объем равен 0

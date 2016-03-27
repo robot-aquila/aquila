@@ -88,7 +88,7 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(prefix, order.getContainerID());
 		assertEquals(prefix + ".CANCEL_FAILED", order.onCancelFailed().getId());
 		assertEquals(prefix + ".CANCELLED", order.onCancelled().getId());
-		assertEquals(prefix + ".DEAL", order.onDeal().getId());
+		assertEquals(prefix + ".DEAL", order.onExecution().getId());
 		assertEquals(prefix + ".DONE", order.onDone().getId());
 		assertEquals(prefix + ".FAILED", order.onFailed().getId());
 		assertEquals(prefix + ".FILLED", order.onFilled().getId());
@@ -218,8 +218,8 @@ public class OrderImplTest extends ContainerImplTest {
 		order.onCancelFailed().addAlternateType(type);
 		order.onCancelled().addSyncListener(listenerStub);
 		order.onCancelled().addAlternateType(type);
-		order.onDeal().addSyncListener(listenerStub);
-		order.onDeal().addAlternateType(type);
+		order.onExecution().addSyncListener(listenerStub);
+		order.onExecution().addAlternateType(type);
 		order.onDone().addSyncListener(listenerStub);
 		order.onDone().addAlternateType(type);
 		order.onFailed().addSyncListener(listenerStub);
@@ -243,8 +243,8 @@ public class OrderImplTest extends ContainerImplTest {
 		assertFalse(order.onCancelFailed().hasAlternates());
 		assertFalse(order.onCancelled().hasListeners());
 		assertFalse(order.onCancelled().hasAlternates());
-		assertFalse(order.onDeal().hasListeners());
-		assertFalse(order.onDeal().hasAlternates());
+		assertFalse(order.onExecution().hasListeners());
+		assertFalse(order.onExecution().hasAlternates());
 		assertFalse(order.onDone().hasListeners());
 		assertFalse(order.onDone().hasAlternates());
 		assertFalse(order.onFailed().hasListeners());

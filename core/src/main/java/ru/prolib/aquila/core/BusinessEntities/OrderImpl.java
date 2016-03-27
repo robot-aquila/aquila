@@ -124,7 +124,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 
 	@Override
-	public EventType onDeal() {
+	public EventType onExecution() {
 		return onDeal;
 	}
 
