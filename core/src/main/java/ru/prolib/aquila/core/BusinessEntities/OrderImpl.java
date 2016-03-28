@@ -402,8 +402,9 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		}
 	}
 
-	@Override
-	public Map<Integer, Object> getChangeWhenExecutionAdded() {
+	private Map<Integer, Object> getChangeByExecutions(Instant newExecTime,
+			long newExecVolume, double newExecValue)
+	{
 		lock.lock();
 		try {
 			long initialVolume = getInitialVolume(), executedVolume = 0;
@@ -413,6 +414,12 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 				executedVolume += execution.getVolume();
 				executedValue += execution.getValue();
 				lastExecutionTime = execution.getTime();
+			}
+			if ( newExecTime != null ) {
+				// The case for prediction of new execution
+				lastExecutionTime = newExecTime;
+				executedVolume += newExecVolume;
+				executedValue += newExecValue;
 			}
 			long currentVolume = initialVolume - executedVolume;
 			Map<Integer, Object> tokens = new HashMap<Integer, Object>();
@@ -426,6 +433,18 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		} finally {
 			lock.unlock();
 		}
+	}
+	
+	@Override
+	public Map<Integer, Object> getChangeWhenExecutionAdded() {
+		return getChangeByExecutions(null, 0L, 0.0d);
+	}
+	
+	@Override
+	public OrderChange getChangeWhenExecutionAdded(Instant executionTime,
+			long executedVolume, double executedValue)
+	{
+		return new OrderChangeImpl(getChangeByExecutions(executionTime, executedVolume, executedValue));
 	}
 
 	@Override

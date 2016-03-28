@@ -84,6 +84,23 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 */
 	public Map<Integer, Object> getChangeWhenExecutionAdded();
 	
+	/**
+	 * Calculate changed attributes after new execution added.
+	 * <p>
+	 * This method allows predict how the order attributes changed if the new
+	 * execution will be added. Note that this information should not be applied
+	 * to the order directly. Use {@link #getChangeWhenExecutionAdded()} or
+	 * {@link #updateWhenExecutionAdded()} to apply changes after adding
+	 * execution.
+	 * <p>
+	 * @param executionTime - time of the execution
+	 * @param executedVolume - executed volume have to be added to existing
+	 * @param executedValue - executed value
+	 * @return attributes which should be changed
+	 */
+	public OrderChange getChangeWhenExecutionAdded(Instant executionTime,
+			long executedVolume, double executedValue);
+	
 	public Map<Integer, Object> getChangeWhenCancelled(Instant time);
 	
 	public Map<Integer, Object> getChangeWhenRejected(Instant time, String reason);

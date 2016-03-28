@@ -660,7 +660,7 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
-	public void testGetChangeWhenExecutionAdded() throws Exception {
+	public void testGetChangeWhenExecutionAdded0() throws Exception {
 		data.put(OrderField.ACTION, OrderAction.SELL);
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		order.update(data);
@@ -675,9 +675,25 @@ public class OrderImplTest extends ContainerImplTest {
 		expected.put(OrderField.EXECUTED_VALUE, 313.0d);
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testGetChangeWhenExecutionAdded3() throws Exception {
+		data.put(OrderField.ACTION, OrderAction.SELL);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		order.update(data);
+		Instant now = Instant.now();
+		order.loadExecution(1005L, "x1", now, 70.10d, 5L, 100.0d);
+
+		OrderChange actual = order.getChangeWhenExecutionAdded(now.plusMillis(1), 2L, 213.0d);
+		
+		assertFalse(actual.isStatusChanged());
+		assertFalse(actual.isFinalized());
+		assertEquals(3L, actual.getCurrentVolume());
+		assertEquals(313.0d, actual.getExecutedValue(), 0.01d);
+	}
 
 	@Test
-	public void testGetChangeWhenExecutionAdded_WhenFullyFilled() throws Exception {
+	public void testGetChangeWhenExecutionAdded0_WhenFullyFilled() throws Exception {
 		data.put(OrderField.ACTION, OrderAction.SELL);
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		order.update(data);
@@ -694,6 +710,25 @@ public class OrderImplTest extends ContainerImplTest {
 		expected.put(OrderField.STATUS, OrderStatus.FILLED);
 		expected.put(OrderField.DONE_TIME, now.plusMillis(2));
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetChangeWhenExecutionAdded3_WhenFullyFilled() throws Exception {
+		data.put(OrderField.ACTION, OrderAction.SELL);
+		data.put(OrderField.INITIAL_VOLUME, 10L);
+		order.update(data);
+		Instant now = Instant.now();
+		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+
+		OrderChange actual = order.getChangeWhenExecutionAdded(now.plusMillis(2), 3L, 205.0d);
+		
+		assertTrue(actual.isStatusChanged());
+		assertTrue(actual.isFinalized());
+		assertEquals(OrderStatus.FILLED, actual.getStatus());
+		assertEquals(now.plusMillis(2), actual.getDoneTime());
+		assertEquals(0L, actual.getCurrentVolume());
+		assertEquals(518.0d, actual.getExecutedValue(), 0.01d);
 	}
 	
 	@Test
