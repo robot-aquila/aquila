@@ -62,6 +62,7 @@ public interface EditableTerminal extends Terminal {
 	 * This method is used to create orders with known order ID (for example
 	 * when it loaded from a database).
 	 * <p>
+	 * @param id - new order ID
 	 * @param account - account
 	 * @param symbol - symbol
 	 * @return new order instance

@@ -10,6 +10,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class DataProviderStub implements DataProvider {
+	private long lastOrderID = 0;
 
 	@Override
 	public void subscribeStateUpdates(EditableSecurity security) {
@@ -33,7 +34,7 @@ public class DataProviderStub implements DataProvider {
 
 	@Override
 	public long getNextOrderID() {
-		return 0;
+		return ++lastOrderID;
 	}
 
 	@Override
