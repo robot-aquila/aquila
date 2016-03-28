@@ -295,7 +295,33 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCreateOrder() throws Exception {
+	public void testCreateOrder3() throws Exception {
+		EditableOrder order = terminal.createOrder(834L, account1, symbol1);
+		
+		assertNotNull(order);
+		assertSame(order, terminal.getOrder(834L));
+		assertEquals(account1, order.getAccount());
+		assertEquals(symbol1, order.getSymbol());
+		assertEquals(834L, order.getID());
+		assertNull(order.getStatus());
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testCreateOrder3_ThrowsIfClosed() throws Exception {
+		terminal.close();
+		
+		terminal.createOrder(800L, account1, symbol1);
+	}
+
+	@Test (expected=IllegalArgumentException.class)
+	public void testCreateOrder3_ThrowsIfIDExists() throws Exception {
+		terminal.createOrder(115L, account1, symbol2);
+		
+		terminal.createOrder(115L, account3, symbol2);
+	}
+	
+	@Test
+	public void testCreateOrder2() throws Exception {
 		EditableOrder order = terminal.createOrder(account3, symbol3);
 		
 		assertNotNull(order);

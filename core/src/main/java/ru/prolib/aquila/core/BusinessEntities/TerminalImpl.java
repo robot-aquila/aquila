@@ -300,16 +300,30 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
-	public EditableOrder createOrder(Account account, Symbol symbol) {
+	public EditableOrder createOrder(long id, Account account, Symbol symbol) {
 		lock.lock();
 		try {
 			if ( closed ) {
 				throw new IllegalStateException();
 			}
-			long orderID = dataProvider.getNextOrderID();
+			if ( orders.containsKey(id) ) {
+				throw new IllegalArgumentException("Order already exists: " + id);
+			}
 			EditableOrder order = objectFactory.createOrder(this,
-					account, symbol, orderID);
-			orders.put(orderID, order);
+					account, symbol, id);
+			orders.put(id, order);
+			return order;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public EditableOrder createOrder(Account account, Symbol symbol) {
+		lock.lock();
+		try {
+			long orderID = dataProvider.getNextOrderID();
+			EditableOrder order = createOrder(orderID, account, symbol);
 			updateOrderStatus(order, OrderStatus.PENDING);
 			return order;
 		} finally {

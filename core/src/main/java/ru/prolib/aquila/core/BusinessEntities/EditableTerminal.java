@@ -55,6 +55,20 @@ public interface EditableTerminal extends Terminal {
 	 */
 	public EditableOrder getEditableOrder(long id)
 		throws OrderNotExistsException;
+	
+	/**
+	 * Create new order instance.
+	 * <p>
+	 * This method is used to create orders with known order ID (for example
+	 * when it loaded from a database).
+	 * <p>
+	 * @param account - account
+	 * @param symbol - symbol
+	 * @return new order instance
+	 * @throws IllegalArgumentException - throws if an order with the specified ID already exists
+	 */
+	public EditableOrder createOrder(long id, Account account, Symbol symbol)
+			throws IllegalArgumentException;
 
 	/**
 	 * Set default portfolio.
