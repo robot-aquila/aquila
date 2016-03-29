@@ -385,16 +385,12 @@ public class TerminalImpl implements EditableTerminal {
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
 			long qty, double price)
 	{
-		return createOrder(account, symbol, action, OrderType.LIMIT, qty, price,
-				null);
+		return createOrder(account, symbol, action, OrderType.LIMIT, qty, price, null);
 	}
 
 	@Override
-	public Order createOrder(Account account, Symbol symbol, OrderAction action,
-			long qty)
-	{
-		return createOrder(account, symbol, action, OrderType.MARKET, qty, null,
-				null);
+	public Order createOrder(Account account, Symbol symbol, OrderAction action, long qty) {
+		return createOrder(account, symbol, action, OrderType.MARKET, qty, null, null);
 	}
 
 	@Override
@@ -747,6 +743,7 @@ public class TerminalImpl implements EditableTerminal {
 		tokens.put(OrderField.CURRENT_VOLUME, volume);
 		tokens.put(OrderField.PRICE, price);
 		tokens.put(OrderField.COMMENT, comment);
+		tokens.put(OrderField.TIME, scheduler.getCurrentTime());
 		order.update(tokens);
 		return order;
 	}

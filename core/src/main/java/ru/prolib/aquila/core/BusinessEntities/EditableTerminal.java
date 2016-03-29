@@ -40,6 +40,10 @@ public interface EditableTerminal extends Terminal {
 	/**
 	 * Create new order instance.
 	 * <p>
+	 * This method creates a new order instance. The new order ID, account and
+	 * symbol will be automatically assigned to the new order. Other order
+	 * properties still unchanged.
+	 * <p>
 	 * @param account - account
 	 * @param symbol - symbol
 	 * @return new order instance
@@ -60,7 +64,9 @@ public interface EditableTerminal extends Terminal {
 	 * Create new order instance.
 	 * <p>
 	 * This method is used to create orders with known order ID (for example
-	 * when it loaded from a database).
+	 * when it loaded from a database). The order ID, account and symbol will be
+	 * automatically assigned to the new order. Other order properties still
+	 * unchanged.
 	 * <p>
 	 * @param id - new order ID
 	 * @param account - account

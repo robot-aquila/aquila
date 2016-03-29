@@ -42,38 +42,36 @@ public interface Terminal extends Scheduler {
 	public EventType onSecurityLastTrade();
 	
 	/**
-	 * Создать лимитную заявку.
+	 * Create limit order.
 	 * <p>
-	 * Данный метод создает лимитную заявку. Новой заявке автоматически
-	 * назначается очередной номер, по которому можно обращаться к заявке
-	 * через терминал. В завершении генерируется событие о доступности новой
-	 * заявки. Для подачи заявки в торговую систему следует использовать
-	 * метод {@link #placeOrder(Order)}.
+	 * This method creates a new limit order. The new order ID and the order
+	 * time will be assigned also as order type, account, symbol, action,
+	 * price, initial and current sizes. Newly created order may be placed to
+	 * market using {@link #placeOrder(Order)} method.
 	 * <p>
-	 * @param account торговый счет
-	 * @param symbol инструмент
-	 * @param action операция (направление заявки)
-	 * @param qty количество
-	 * @param price цена
-	 * @return экземпляр заявки
+	 * @param account - account
+	 * @param symbol - symbol
+	 * @param action - order action
+	 * @param qty - size of order
+	 * @param price - limit price
+	 * @return new order instance
 	 */
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
 			long qty, double price);
 
 	/**
-	 * Создать рыночную заявку.
+	 * Create market order.
 	 * <p>
- 	 * Данный метод создает рыночную заявку. Новой заявке автоматически
-	 * назначается очередной номер, по которому можно обращаться к заявке
-	 * через терминал. В завершении генерируется событие о доступности новой
-	 * заявки. Для подачи заявки в торговую систему следует использовать
-	 * метод {@link #placeOrder(Order)}.
+	 * This method creates a new market order. The new order ID and the order
+	 * time will be assigned also as order type, account, symbol, action,
+	 * initial and current sizes. Newly created order may be placed to market
+	 * using {@link #placeOrder(Order)} method.
 	 * <p>
-	 * @param account торговый счет
-	 * @param symbol инструмент
-	 * @param action операция (направление заявки)
-	 * @param qty количество
-	 * @return экземпляр заявки
+	 * @param account - account
+	 * @param symbol - symbol
+	 * @param action - order action
+	 * @param qty - size of order
+	 * @return new order instance
 	 */
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
 			long qty);

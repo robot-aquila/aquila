@@ -4,6 +4,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -483,9 +484,11 @@ public class TerminalImplTest {
 		dataProviderStub.nextOrderID = 934L;
 		
 		Order order = terminal.createOrder(account1, symbol1, OrderAction.BUY, 20L, 431.15d);
-		
+
 		assertNotNull(order);
+		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
 		assertEquals(934L, order.getID());
+		assertEquals(terminal, order.getTerminal());
 		assertEquals(account1, order.getAccount());
 		assertEquals(symbol1, order.getSymbol());
 		assertEquals(OrderStatus.PENDING, order.getStatus());
@@ -505,7 +508,9 @@ public class TerminalImplTest {
 		Order order = terminal.createOrder(account3, symbol3, OrderAction.SELL, 80L);
 		
 		assertNotNull(order);
+		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
 		assertEquals(714L, order.getID());
+		assertEquals(terminal, order.getTerminal());
 		assertEquals(account3, order.getAccount());
 		assertEquals(symbol3, order.getSymbol());
 		assertEquals(OrderStatus.PENDING, order.getStatus());
