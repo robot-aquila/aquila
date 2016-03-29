@@ -82,6 +82,20 @@ public class TerminalImplTest {
 		terminalWithMocks.close();
 	}
 	
+	private void assertOrderAlternateEventTypes(Order order) {
+		assertTrue(order.onAvailable().isAlternateType(terminal.onOrderAvailable()));
+		assertTrue(order.onCancelFailed().isAlternateType(terminal.onOrderCancelFailed()));
+		assertTrue(order.onCancelled().isAlternateType(terminal.onOrderCancelled()));
+		assertTrue(order.onDone().isAlternateType(terminal.onOrderDone()));
+		assertTrue(order.onExecution().isAlternateType(terminal.onOrderExecution()));
+		assertTrue(order.onFailed().isAlternateType(terminal.onOrderFailed()));
+		assertTrue(order.onFilled().isAlternateType(terminal.onOrderFilled()));
+		assertTrue(order.onPartiallyFilled().isAlternateType(terminal.onOrderPartiallyFilled()));
+		assertTrue(order.onRegistered().isAlternateType(terminal.onOrderRegistered()));
+		assertTrue(order.onRegisterFailed().isAlternateType(terminal.onOrderRegisterFailed()));
+		assertTrue(order.onUpdate().isAlternateType(terminal.onOrderUpdate()));
+	}
+	
 	@Test
 	public void testCtor() {
 		assertNotNull(terminal.getScheduler());
@@ -91,7 +105,7 @@ public class TerminalImplTest {
 		assertEquals(prefix + "ORDER_AVAILABLE", terminal.onOrderAvailable().getId());
 		assertEquals(prefix + "ORDER_CANCEL_FAILED", terminal.onOrderCancelFailed().getId());
 		assertEquals(prefix + "ORDER_CANCELLED", terminal.onOrderCancelled().getId());
-		assertEquals(prefix + "ORDER_DEAL", terminal.onOrderDeal().getId());
+		assertEquals(prefix + "ORDER_DEAL", terminal.onOrderExecution().getId());
 		assertEquals(prefix + "ORDER_DONE", terminal.onOrderDone().getId());
 		assertEquals(prefix + "ORDER_FAILED", terminal.onOrderFailed().getId());
 		assertEquals(prefix + "ORDER_FILLED", terminal.onOrderFilled().getId());
@@ -304,6 +318,7 @@ public class TerminalImplTest {
 		assertEquals(symbol1, order.getSymbol());
 		assertEquals(834L, order.getID());
 		assertNull(order.getStatus());
+		assertOrderAlternateEventTypes(order);
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -330,6 +345,7 @@ public class TerminalImplTest {
 		assertEquals(symbol3, order.getSymbol());
 		assertEquals(OrderStatus.PENDING, order.getStatus());
 		assertSame(order, terminal.getOrder(1000L));
+		assertOrderAlternateEventTypes(order);
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -479,6 +495,7 @@ public class TerminalImplTest {
 		assertEquals(new Long(20L), order.getCurrentVolume());
 		assertEquals(431.15d, order.getPrice(), 0.001d);
 		assertNull(order.getComment());
+		assertOrderAlternateEventTypes(order);
 	}
 	
 	@Test
@@ -498,6 +515,7 @@ public class TerminalImplTest {
 		assertEquals(new Long(80L), order.getCurrentVolume());
 		assertNull(order.getPrice());
 		assertNull(order.getComment());
+		assertOrderAlternateEventTypes(order);
 	}
 	
 	@Test
@@ -695,8 +713,8 @@ public class TerminalImplTest {
 		terminal.onOrderCancelFailed().addListener(listener);
 		terminal.onOrderCancelled().addAlternateType(type);
 		terminal.onOrderCancelled().addListener(listener);
-		terminal.onOrderDeal().addAlternateType(type);
-		terminal.onOrderDeal().addListener(listener);
+		terminal.onOrderExecution().addAlternateType(type);
+		terminal.onOrderExecution().addListener(listener);
 		terminal.onOrderDone().addAlternateType(type);
 		terminal.onOrderDone().addListener(listener);
 		terminal.onOrderFailed().addAlternateType(type);
@@ -750,8 +768,8 @@ public class TerminalImplTest {
 		assertFalse(terminal.onOrderCancelFailed().hasListeners());
 		assertFalse(terminal.onOrderCancelled().hasAlternates());
 		assertFalse(terminal.onOrderCancelled().hasListeners());
-		assertFalse(terminal.onOrderDeal().hasAlternates());
-		assertFalse(terminal.onOrderDeal().hasListeners());
+		assertFalse(terminal.onOrderExecution().hasAlternates());
+		assertFalse(terminal.onOrderExecution().hasListeners());
 		assertFalse(terminal.onOrderDone().hasAlternates());
 		assertFalse(terminal.onOrderDone().hasListeners());
 		assertFalse(terminal.onOrderFailed().hasAlternates());

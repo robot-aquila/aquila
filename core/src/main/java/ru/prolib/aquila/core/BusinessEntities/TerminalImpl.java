@@ -26,7 +26,7 @@ public class TerminalImpl implements EditableTerminal {
 	private final DataProvider dataProvider;
 	private final ObjectFactory objectFactory;
 	private final EventType onOrderAvailable, onOrderCancelFailed,
-		onOrderCancelled, onOrderDeal, onOrderDone, onOrderFailed,
+		onOrderCancelled, onOrderExecution, onOrderDone, onOrderFailed,
 		onOrderFilled, onOrderPartiallyFilled, onOrderRegistered,
 		onOrderRegisterFailed, onOrderUpdate, onPortfolioAvailable,
 		onPortfolioUpdate, onPositionAvailable, onPositionChange,
@@ -64,7 +64,7 @@ public class TerminalImpl implements EditableTerminal {
 		onOrderAvailable = newEventType("ORDER_AVAILABLE");
 		onOrderCancelFailed = newEventType("ORDER_CANCEL_FAILED");
 		onOrderCancelled = newEventType("ORDER_CANCELLED");
-		onOrderDeal = newEventType("ORDER_DEAL");
+		onOrderExecution = newEventType("ORDER_DEAL");
 		onOrderDone = newEventType("ORDER_DONE");
 		onOrderFailed = newEventType("ORDER_FAILED");
 		onOrderFilled = newEventType("ORDER_FILLED");
@@ -309,8 +309,18 @@ public class TerminalImpl implements EditableTerminal {
 			if ( orders.containsKey(id) ) {
 				throw new IllegalArgumentException("Order already exists: " + id);
 			}
-			EditableOrder order = objectFactory.createOrder(this,
-					account, symbol, id);
+			EditableOrder order = objectFactory.createOrder(this, account, symbol, id);
+			order.onAvailable().addAlternateType(onOrderAvailable);
+			order.onCancelFailed().addAlternateType(onOrderCancelFailed);
+			order.onCancelled().addAlternateType(onOrderCancelled);
+			order.onDone().addAlternateType(onOrderDone);
+			order.onExecution().addAlternateType(onOrderExecution);
+			order.onFailed().addAlternateType(onOrderFailed);
+			order.onFilled().addAlternateType(onOrderFilled);
+			order.onPartiallyFilled().addAlternateType(onOrderPartiallyFilled);
+			order.onRegistered().addAlternateType(onOrderRegistered);
+			order.onRegisterFailed().addAlternateType(onOrderRegisterFailed);
+			order.onUpdate().addAlternateType(onOrderUpdate);
 			orders.put(id, order);
 			return order;
 		} finally {
@@ -489,8 +499,8 @@ public class TerminalImpl implements EditableTerminal {
 			onOrderCancelFailed.removeListeners();
 			onOrderCancelled.removeAlternates();
 			onOrderCancelled.removeListeners();
-			onOrderDeal.removeAlternates();
-			onOrderDeal.removeListeners();
+			onOrderExecution.removeAlternates();
+			onOrderExecution.removeListeners();
 			onOrderDone.removeAlternates();
 			onOrderDone.removeListeners();
 			onOrderFailed.removeAlternates();
@@ -598,8 +608,8 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public EventType onOrderDeal() {
-		return onOrderDeal;
+	public EventType onOrderExecution() {
+		return onOrderExecution;
 	}
 
 	@Override
