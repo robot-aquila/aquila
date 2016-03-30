@@ -149,5 +149,9 @@ public class MarketDepth {
 	public Instant getTime() {
 		return time;
 	}
+	
+	public double roundPrice(double x) {
+		return doubleUtils.round(x);
+	}
 
 }
