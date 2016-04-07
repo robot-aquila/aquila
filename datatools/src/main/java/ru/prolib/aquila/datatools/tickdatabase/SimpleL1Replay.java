@@ -249,17 +249,25 @@ public class SimpleL1Replay {
 	}
 
 	public void consumeUpdate(L1Update update, long sequenceID) {
+		L1UpdateConsumer dummy = null;
 		lock.lock();
 		try {
 			if ( sequenceID != this.sequenceID || ! started ) {
 				return; // skip this update
 			}
 			queued --;
-			consumer.consume(update);
-			fillUpQueue();
-			
+			dummy = consumer;			
 		} finally {
 			lock.unlock();
+		}
+		if ( dummy != null ) {
+			dummy.consume(update);
+			lock.lock();
+			try {
+				fillUpQueue();
+			} finally {
+				lock.unlock();
+			}
 		}
 	}
 	
