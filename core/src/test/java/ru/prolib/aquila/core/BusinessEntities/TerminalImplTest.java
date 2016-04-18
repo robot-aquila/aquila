@@ -524,6 +524,29 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testCreateOrder7() throws Exception {
+		dataProviderStub.nextOrderID = 924L;
+		
+		Order order = terminal.createOrder(account3, symbol2, OrderType.MARKET,
+				OrderAction.SELL, 400L, 224.13d, "test order");
+		
+		assertNotNull(order);
+		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
+		assertEquals(924L, order.getID());
+		assertEquals(terminal, order.getTerminal());
+		assertEquals(account3, order.getAccount());
+		assertEquals(symbol2, order.getSymbol());
+		assertEquals(OrderStatus.PENDING, order.getStatus());
+		assertEquals(OrderAction.SELL, order.getAction());
+		assertEquals(OrderType.MARKET, order.getType());
+		assertEquals(new Long(400L), order.getInitialVolume());
+		assertEquals(new Long(400L), order.getCurrentVolume());
+		assertEquals(224.13d, order.getPrice(), 0.01d);
+		assertEquals("test order", order.getComment());
+		assertOrderAlternateEventTypes(order);
+	}
+	
+	@Test
 	public void testSubscribe() {
 		Capture<Symbol> capturedSymbol1 = newCapture(), capturedSymbol2 = newCapture();
 		Capture<EditableSecurity> captured1 = newCapture(),

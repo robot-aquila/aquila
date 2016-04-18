@@ -42,6 +42,26 @@ public interface Terminal extends Scheduler {
 	public EventType onSecurityLastTrade();
 	
 	/**
+	 * Create order of custom type.
+	 * <p>
+	 * The method creates a new custom type order instance. The new order ID and
+	 * the order time will be assigned also as order type, account, symbol,
+	 * action, price, initial and current size. Newly created order should be
+	 * placed to the marked using {@link #placeOrder(Order)} method.
+	 * <p>
+	 * @param account - account
+	 * @param symbol - symbol
+	 * @param type - order type
+	 * @param action - order action
+	 * @param qty - size of order
+	 * @param price - price of order
+	 * @param comment - user comment
+	 * @return new order instance
+	 */
+	public Order createOrder(Account account, Symbol symbol, OrderType type,
+			OrderAction action, long qty, Double price, String comment);
+	
+	/**
 	 * Create limit order.
 	 * <p>
 	 * This method creates a new limit order. The new order ID and the order

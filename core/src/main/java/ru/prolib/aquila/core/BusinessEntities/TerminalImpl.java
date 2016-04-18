@@ -392,6 +392,13 @@ public class TerminalImpl implements EditableTerminal {
 	public Order createOrder(Account account, Symbol symbol, OrderAction action, long qty) {
 		return createOrder(account, symbol, action, OrderType.MARKET, qty, null, null);
 	}
+	
+	@Override
+	public Order createOrder(Account account, Symbol symbol, OrderType type,
+			OrderAction action, long qty, Double price, String comment)
+	{
+		return createOrder(account, symbol, action, type, qty, price, comment);
+	}
 
 	@Override
 	public void subscribe(Symbol symbol) {
