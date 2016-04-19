@@ -25,7 +25,8 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	private final Symbol symbol;
 	private final long id;
 	private final EventType onCancelFailed, onCancelled, onDone, onFailed,
-		onFilled, onPartiallyFilled, onRegistered, onRegisterFailed, onExecution;
+		onFilled, onPartiallyFilled, onRegistered, onRegisterFailed,
+		onExecution, onArchived;
 	private boolean statusEventsEnabled = true;
 	private List<OrderExecution> executions = new ArrayList<OrderExecution>();
 	private Map<Long, OrderExecution> executionByID = new HashMap<>();
@@ -64,6 +65,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		onRegistered = newEventType("REGISTERED");
 		onRegisterFailed = newEventType("REGISTER_FAILED");
 		onExecution = newEventType("EXECUTION");
+		onArchived = newEventType("ARCHIVED");
 	}
 	
 	public OrderImpl(EditableTerminal terminal, Account account, Symbol symbol, long id) {
@@ -133,6 +135,11 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	@Override
 	public EventType onExecution() {
 		return onExecution;
+	}
+	
+	@Override
+	public EventType onArchived() {
+		return onArchived;
 	}
 
 	@Override
@@ -223,6 +230,8 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 			onRegistered.removeAlternates();
 			onRegisterFailed.removeListeners();
 			onRegisterFailed.removeAlternates();
+			onArchived.removeListeners();
+			onArchived.removeAlternates();
 			super.close();
 		} finally {
 			lock.unlock();
@@ -523,6 +532,11 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	@Override
 	public void updateWhenCancelFailed(Instant time, String reason) {
 		update(getChangeWhenCancelFailed(time, reason));
+	}
+	
+	@Override
+	public void fireArchived() {
+		queue.enqueue(onArchived, new OrderEventFactory(this));
 	}
 
 }

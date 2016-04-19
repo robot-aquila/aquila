@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -28,7 +29,8 @@ public class TerminalImpl implements EditableTerminal {
 	private final EventType onOrderAvailable, onOrderCancelFailed,
 		onOrderCancelled, onOrderExecution, onOrderDone, onOrderFailed,
 		onOrderFilled, onOrderPartiallyFilled, onOrderRegistered,
-		onOrderRegisterFailed, onOrderUpdate, onPortfolioAvailable,
+		onOrderRegisterFailed, onOrderUpdate, onOrderArchived,
+		onPortfolioAvailable,
 		onPortfolioUpdate, onPositionAvailable, onPositionChange,
 		onPositionCurrentPriceChange, onPositionUpdate, onSecurityAvailable,
 		onSecuritySessionUpdate, onSecurityUpdate, onTerminalReady,
@@ -72,6 +74,7 @@ public class TerminalImpl implements EditableTerminal {
 		onOrderRegistered = newEventType("ORDER_REGISTERED");
 		onOrderRegisterFailed = newEventType("ORDER_REGISTER_FAILED");
 		onOrderUpdate = newEventType("ORDER_UPDATE");
+		onOrderArchived = newEventType("ORDER_ARCHIVED");
 		onPortfolioAvailable = newEventType("PORTFOLIO_AVAILABLE");
 		onPortfolioUpdate = newEventType("PORTFOLIO_UPDATE");
 		onPositionAvailable = newEventType("POSITION_AVAILABLE");
@@ -321,6 +324,7 @@ public class TerminalImpl implements EditableTerminal {
 			order.onRegistered().addAlternateType(onOrderRegistered);
 			order.onRegisterFailed().addAlternateType(onOrderRegisterFailed);
 			order.onUpdate().addAlternateType(onOrderUpdate);
+			order.onArchived().addAlternateType(onOrderArchived);
 			orders.put(id, order);
 			return order;
 		} finally {
@@ -518,6 +522,8 @@ public class TerminalImpl implements EditableTerminal {
 			onOrderRegisterFailed.removeListeners();
 			onOrderUpdate.removeAlternates();
 			onOrderUpdate.removeListeners();
+			onOrderArchived.removeAlternates();
+			onOrderArchived.removeListeners();
 			onPortfolioAvailable.removeAlternates();
 			onPortfolioAvailable.removeListeners();
 			onPortfolioUpdate.removeAlternates();
@@ -613,6 +619,11 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	public EventType onOrderExecution() {
 		return onOrderExecution;
+	}
+	
+	@Override
+	public EventType onOrderArchived() {
+		return onOrderArchived;
 	}
 
 	@Override
@@ -781,6 +792,25 @@ public class TerminalImpl implements EditableTerminal {
 	@Override
 	public EventType onSecurityLastTrade() {
 		return onSecurityLastTrade;
+	}
+	
+	@Override
+	public void archiveOrders() {
+		lock.lock();
+		try {
+			Iterator<Map.Entry<Long, EditableOrder>> it = orders.entrySet().iterator();
+			while ( it.hasNext() ){
+				Map.Entry<Long, EditableOrder> pair = it.next();
+				EditableOrder order = pair.getValue();
+				if ( order.getStatus().isFinal() ) {
+					order.fireArchived();
+					order.close();
+					it.remove();
+				}
+			}
+		} finally {
+			lock.unlock();
+		}
 	}
 
 }

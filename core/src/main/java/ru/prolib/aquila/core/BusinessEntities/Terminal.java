@@ -216,6 +216,8 @@ public interface Terminal extends Scheduler {
 	 * @return тип события
 	 */
 	public EventType onOrderExecution();
+	
+	public EventType onOrderArchived();
 
 	/**
 	 * Проверить доступность информации о портфеле.

@@ -109,6 +109,7 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(prefix + ".PARTIALLY_FILLED", order.onPartiallyFilled().getId());
 		assertEquals(prefix + ".REGISTERED", order.onRegistered().getId());
 		assertEquals(prefix + ".REGISTER_FAILED", order.onRegisterFailed().getId());
+		assertEquals(prefix + ".ARCHIVED", order.onArchived().getId());
 		assertEquals(240, order.getID());
 	}
 	
@@ -258,6 +259,8 @@ public class OrderImplTest extends ContainerImplTest {
 		order.onRegisterFailed().addAlternateType(type);
 		order.onUpdate().addSyncListener(listenerStub);
 		order.onUpdate().addAlternateType(type);
+		order.onArchived().addSyncListener(listenerStub);
+		order.onArchived().addAlternateType(type);
 		
 		order.close();
 		
@@ -283,6 +286,8 @@ public class OrderImplTest extends ContainerImplTest {
 		assertFalse(order.onRegisterFailed().hasAlternates());
 		assertFalse(order.onUpdate().hasListeners());
 		assertFalse(order.onUpdate().hasAlternates());
+		assertFalse(order.onArchived().hasListeners());
+		assertFalse(order.onArchived().hasAlternates());
 		assertNull(order.getTerminal());
 	}
 	
@@ -922,6 +927,16 @@ public class OrderImplTest extends ContainerImplTest {
 		assertOrderEvent(listenerStub.getEvent(1), order.onCancelFailed());
 		assertOrderEvent(listenerStub.getEvent(2), order.onFailed());
 		assertOrderEvent(listenerStub.getEvent(3), order.onDone());
+	}
+	
+	@Test
+	public void testFireArchived() throws Exception {
+		order.onArchived().addSyncListener(listenerStub);
+		
+		order.fireArchived();
+		
+		assertEquals(1, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onArchived());
 	}
 
 }

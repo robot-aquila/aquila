@@ -47,5 +47,10 @@ public class OrderEvent extends ContainerEventImpl {
 		}
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + "[orderID=" + order.getID() + "]";
+	}
 
 }

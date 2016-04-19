@@ -86,6 +86,13 @@ public interface Order extends Container {
 	 * @return тип события
 	 */
 	public EventType onExecution();
+	
+	/**
+	 * Get event type: when order archived.
+	 * <p>
+	 * @return event type
+	 */
+	public EventType onArchived();
 
 	/**
 	 * Get order ID.

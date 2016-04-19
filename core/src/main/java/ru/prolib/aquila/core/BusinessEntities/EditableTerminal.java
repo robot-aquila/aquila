@@ -84,4 +84,9 @@ public interface EditableTerminal extends Terminal {
 	 */
 	public void setDefaultPortfolio(EditablePortfolio portfolio);
 	
+	/**
+	 * Archive all finalized orders.
+	 */
+	public void archiveOrders();
+	
 }

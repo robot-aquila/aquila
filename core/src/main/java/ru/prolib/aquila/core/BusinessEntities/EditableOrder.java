@@ -126,5 +126,7 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	public void updateWhenRegistered();
 	
 	public void updateWhenCancelFailed(Instant time, String reason);
+	
+	public void fireArchived();
 
 }

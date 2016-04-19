@@ -5,7 +5,9 @@ import static org.junit.Assert.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +54,7 @@ public class TerminalImplTest {
 	private DataProvider dataProviderMock;
 	private DataProviderStubX dataProviderStub;
 	private TerminalImpl terminal, terminalWithMocks;
+	private EventListenerStub listenerStub;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -74,6 +77,7 @@ public class TerminalImplTest {
 		params.setDataProvider(dataProviderMock);
 		params.setScheduler(schedulerMock);
 		terminalWithMocks = new TerminalImpl(params);
+		listenerStub = new EventListenerStub();
 	}
 	
 	@After
@@ -95,6 +99,40 @@ public class TerminalImplTest {
 		assertTrue(order.onRegistered().isAlternateType(terminal.onOrderRegistered()));
 		assertTrue(order.onRegisterFailed().isAlternateType(terminal.onOrderRegisterFailed()));
 		assertTrue(order.onUpdate().isAlternateType(terminal.onOrderUpdate()));
+		assertTrue(order.onArchived().isAlternateType(terminal.onOrderArchived()));
+	}
+	
+	private EditableOrder createTestOrder() {
+		List<Account> accounts = new ArrayList<>();
+		accounts.add(account1);
+		accounts.add(account2);
+		accounts.add(account3);
+		List<Symbol> symbols = new ArrayList<>();
+		symbols.add(symbol1);
+		symbols.add(symbol2);
+		symbols.add(symbol3);
+		List<OrderType> types = new ArrayList<>();
+		types.add(OrderType.LIMIT);
+		types.add(OrderType.MARKET);
+		List<OrderAction> actions = new ArrayList<>();
+		actions.add(OrderAction.BUY);
+		actions.add(OrderAction.SELL);
+		
+		Order order = terminal.createOrder(
+				accounts.get((int)(Math.random() * accounts.size())),
+				symbols.get((int)(Math.random() * symbols.size())),
+				types.get((int)(Math.random() * types.size())),
+				actions.get((int)(Math.random() * actions.size())),
+				(long)(Math.random() * 9000),
+				Math.random() * 9000.0d,
+				null);
+		return (EditableOrder) order;
+	}
+	
+	private void assertOrderEvent(Order expectedOrder, EventType expectedType, Event actual) {
+		OrderEvent e = (OrderEvent) actual;
+		assertSame(expectedOrder, e.getOrder());
+		assertTrue(actual.isType(expectedType));
 	}
 	
 	@Test
@@ -129,6 +167,7 @@ public class TerminalImplTest {
 		assertEquals(prefix + "SECURITY_LAST_TRADE", terminal.onSecurityLastTrade().getId());
 		assertEquals(prefix + "TERMINAL_READY", terminal.onTerminalReady().getId());
 		assertEquals(prefix + "TERMINAL_UNREADY", terminal.onTerminalUnready().getId());
+		assertEquals(prefix + "ORDER_ARCHIVED", terminal.onOrderArchived().getId());
 	}
 
 	@Test
@@ -729,67 +768,68 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testClose_ClearEventListenersAndAlternates() {
-		EventListenerStub listener = new EventListenerStub();
 		EventType type = new EventTypeImpl();
 		terminal.onTerminalReady().addAlternateType(type);
-		terminal.onTerminalReady().addSyncListener(listener);
+		terminal.onTerminalReady().addSyncListener(listenerStub);
 		terminal.onTerminalUnready().addAlternateType(type);
-		terminal.onTerminalUnready().addSyncListener(listener);
+		terminal.onTerminalUnready().addSyncListener(listenerStub);
 		terminal.onOrderAvailable().addAlternateType(type);
-		terminal.onOrderAvailable().addListener(listener);
+		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderCancelFailed().addAlternateType(type);
-		terminal.onOrderCancelFailed().addListener(listener);
+		terminal.onOrderCancelFailed().addListener(listenerStub);
 		terminal.onOrderCancelled().addAlternateType(type);
-		terminal.onOrderCancelled().addListener(listener);
+		terminal.onOrderCancelled().addListener(listenerStub);
 		terminal.onOrderExecution().addAlternateType(type);
-		terminal.onOrderExecution().addListener(listener);
+		terminal.onOrderExecution().addListener(listenerStub);
 		terminal.onOrderDone().addAlternateType(type);
-		terminal.onOrderDone().addListener(listener);
+		terminal.onOrderDone().addListener(listenerStub);
 		terminal.onOrderFailed().addAlternateType(type);
-		terminal.onOrderFailed().addListener(listener);
+		terminal.onOrderFailed().addListener(listenerStub);
 		terminal.onOrderFilled().addAlternateType(type);
-		terminal.onOrderFilled().addListener(listener);
+		terminal.onOrderFilled().addListener(listenerStub);
 		terminal.onOrderPartiallyFilled().addAlternateType(type);
-		terminal.onOrderPartiallyFilled().addListener(listener);
+		terminal.onOrderPartiallyFilled().addListener(listenerStub);
 		terminal.onOrderRegistered().addAlternateType(type);
-		terminal.onOrderRegistered().addListener(listener);
+		terminal.onOrderRegistered().addListener(listenerStub);
 		terminal.onOrderRegisterFailed().addAlternateType(type);
-		terminal.onOrderRegisterFailed().addListener(listener);
+		terminal.onOrderRegisterFailed().addListener(listenerStub);
 		terminal.onOrderUpdate().addAlternateType(type);
-		terminal.onOrderUpdate().addListener(listener);
+		terminal.onOrderUpdate().addListener(listenerStub);
+		terminal.onOrderArchived().addAlternateType(type);
+		terminal.onOrderArchived().addListener(listenerStub);
 		terminal.onPortfolioAvailable().addAlternateType(type);
-		terminal.onPortfolioAvailable().addListener(listener);
+		terminal.onPortfolioAvailable().addListener(listenerStub);
 		terminal.onPortfolioUpdate().addAlternateType(type);
-		terminal.onPortfolioUpdate().addListener(listener);
+		terminal.onPortfolioUpdate().addListener(listenerStub);
 		terminal.onPositionAvailable().addAlternateType(type);
-		terminal.onPositionAvailable().addListener(listener);
+		terminal.onPositionAvailable().addListener(listenerStub);
 		terminal.onPositionChange().addAlternateType(type);
-		terminal.onPositionChange().addListener(listener);
+		terminal.onPositionChange().addListener(listenerStub);
 		terminal.onPositionCurrentPriceChange().addAlternateType(type);
-		terminal.onPositionCurrentPriceChange().addListener(listener);
+		terminal.onPositionCurrentPriceChange().addListener(listenerStub);
 		terminal.onPositionUpdate().addAlternateType(type);
-		terminal.onPositionUpdate().addListener(listener);
+		terminal.onPositionUpdate().addListener(listenerStub);
 		terminal.onSecurityAvailable().addAlternateType(type);
-		terminal.onSecurityAvailable().addListener(listener);
+		terminal.onSecurityAvailable().addListener(listenerStub);
 		terminal.onSecuritySessionUpdate().addAlternateType(type);
-		terminal.onSecuritySessionUpdate().addListener(listener);
+		terminal.onSecuritySessionUpdate().addListener(listenerStub);
 		terminal.onSecurityUpdate().addAlternateType(type);
-		terminal.onSecurityUpdate().addListener(listener);
+		terminal.onSecurityUpdate().addListener(listenerStub);
 		terminal.onSecurityMarketDepthUpdate().addAlternateType(type);
-		terminal.onSecurityMarketDepthUpdate().addListener(listener);
+		terminal.onSecurityMarketDepthUpdate().addListener(listenerStub);
 		terminal.onSecurityBestAsk().addAlternateType(type);
-		terminal.onSecurityBestAsk().addListener(listener);
+		terminal.onSecurityBestAsk().addListener(listenerStub);
 		terminal.onSecurityBestBid().addAlternateType(type);
-		terminal.onSecurityBestBid().addListener(listener);
+		terminal.onSecurityBestBid().addListener(listenerStub);
 		terminal.onSecurityLastTrade().addAlternateType(type);
-		terminal.onSecurityLastTrade().addListener(listener);
+		terminal.onSecurityLastTrade().addListener(listenerStub);
 		
 		terminal.close();
 		
 		assertFalse(terminal.onTerminalReady().isAlternateType(type));
-		assertFalse(terminal.onTerminalReady().isListener(listener));
+		assertFalse(terminal.onTerminalReady().isListener(listenerStub));
 		assertFalse(terminal.onTerminalUnready().isAlternateType(type));
-		assertFalse(terminal.onTerminalUnready().isListener(listener));
+		assertFalse(terminal.onTerminalUnready().isListener(listenerStub));
 		assertFalse(terminal.onOrderAvailable().hasAlternates());
 		assertFalse(terminal.onOrderAvailable().hasListeners());
 		assertFalse(terminal.onOrderCancelFailed().hasAlternates());
@@ -812,6 +852,8 @@ public class TerminalImplTest {
 		assertFalse(terminal.onOrderRegisterFailed().hasListeners());
 		assertFalse(terminal.onOrderUpdate().hasAlternates());
 		assertFalse(terminal.onOrderUpdate().hasListeners());
+		assertFalse(terminal.onOrderArchived().hasAlternates());
+		assertFalse(terminal.onOrderArchived().hasListeners());
 		assertFalse(terminal.onPortfolioAvailable().hasAlternates());
 		assertFalse(terminal.onPortfolioAvailable().hasListeners());
 		assertFalse(terminal.onPortfolioUpdate().hasAlternates());
@@ -911,5 +953,36 @@ public class TerminalImplTest {
 		
 		control.verify();
 	}
-
+	
+	@Test
+	public void testArchiveOrders() {
+		dataProviderStub.nextOrderID = 1000L;
+		EditableOrder order1 = createTestOrder(),
+			order2 = createTestOrder(),
+			order3 = createTestOrder(),
+			order4 = createTestOrder(),
+			order5 = createTestOrder();
+		order2.updateWhenCancelled(Instant.now());
+		order5.updateWhenRejected(Instant.now(), "Test");
+		terminal.onOrderArchived().addSyncListener(listenerStub);
+		
+		terminal.archiveOrders();
+		
+		Set<Order> actual = terminal.getOrders();
+		Set<Order> expected = new HashSet<>();
+		expected.add(order1);
+		expected.add(order3);
+		expected.add(order4);
+		assertEquals(expected, actual);
+		assertFalse(order1.isClosed());
+		assertTrue(order2.isClosed());
+		assertFalse(order3.isClosed());
+		assertFalse(order4.isClosed());
+		assertTrue(order5.isClosed());
+		
+		assertEquals(2, listenerStub.getEventCount());
+		assertOrderEvent(order2, terminal.onOrderArchived(), listenerStub.getEvent(0));
+		assertOrderEvent(order5, terminal.onOrderArchived(), listenerStub.getEvent(1));
+	}
+	
 }

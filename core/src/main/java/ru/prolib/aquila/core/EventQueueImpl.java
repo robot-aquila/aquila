@@ -122,14 +122,14 @@ public class EventQueueImpl implements EventQueue {
 
 	@Override
 	public void join() throws InterruptedException {
-		Thread queueThread = null;
+		//Thread queueThread = null;
 		synchronized ( this ) {
 			if ( ! started() ) return;
 			if ( isDispatchThread() ) {
 				logger.warn("Cannot join() dispatch thread from itself");
 				return;
 			}
-			queueThread = thread;
+			//queueThread = thread;
 		}
 		//queueThread.join();
 	}
