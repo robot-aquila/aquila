@@ -36,12 +36,12 @@ public class UIOrdersPlugin implements AquilaPlugin {
 
 	@Override
 	public void start() throws StarterException {
-		model.start();
+		model.startListeningUpdates();
 	}
 
 	@Override
 	public void stop() throws StarterException {
-		model.stop();
+		model.stopListeningUpdates();
 	}
 
 	@Override

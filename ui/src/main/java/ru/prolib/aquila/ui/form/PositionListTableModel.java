@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import ru.prolib.aquila.core.*;
@@ -43,7 +44,6 @@ public class PositionListTableModel extends AbstractTableModel implements
 	private final Set<Portfolio> portfolioSet;
 	private boolean subscribed = false;
 
-	
 	public PositionListTableModel(IMessages messages) {
 		super();
 		this.messages = messages;
@@ -159,7 +159,16 @@ public class PositionListTableModel extends AbstractTableModel implements
 	}
 
 	@Override
-	public void onEvent(Event event) {
+	public void onEvent(final Event event) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				processEvent(event);
+			}
+		});
+	}
+	
+	private void processEvent(Event event) {
 		if ( ! subscribed ) {
 			return;
 		}

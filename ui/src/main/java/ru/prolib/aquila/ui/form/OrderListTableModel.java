@@ -1,30 +1,30 @@
 package ru.prolib.aquila.ui.form;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.locks.ReentrantLock;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
+import ru.prolib.aquila.ui.ITableModel;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 
 public class OrderListTableModel extends AbstractTableModel implements
-		EventListener, Starter
+		EventListener, ITableModel
 {
-	private static final Logger logger;
 	private static final long serialVersionUID = 1L;
 	private static final List<MsgID> mapIndexToID;
 	
 	static {
-		logger = LoggerFactory.getLogger(OrderListTableModel.class);
 		mapIndexToID = new Vector<MsgID>();
 		mapIndexToID.add(CommonMsg.ID);
 		mapIndexToID.add(CommonMsg.TIME);
@@ -43,25 +43,20 @@ public class OrderListTableModel extends AbstractTableModel implements
 		mapIndexToID.add(CommonMsg.COMMENT);
 	}
 
-	private boolean started = false;
-	private final ReentrantLock lock;
+	private boolean subscribed = false;
 	private final IMessages messages;
-	private final List<Terminal> terminals;
 	private final List<Order> orders;
+	private final Map<Order, Integer> orderMap;
+	private final Set<Terminal> terminalSet;
 	
 	public OrderListTableModel(IMessages messages) {
 		super();
-		this.lock = new ReentrantLock();
 		this.messages = messages;
-		this.terminals = new Vector<Terminal>(); 
-		this.orders = new Vector<Order>();
+		this.orders = new ArrayList<Order>();
+		this.terminalSet = new HashSet<Terminal>(); 
+		this.orderMap = new HashMap<Order, Integer>();
 	}
 	
-	@Override
-	public String getColumnName(int col) {
-		return messages.get(mapIndexToID.get(col));
-	}
-
 	@Override
 	public int getColumnCount() {
 		return mapIndexToID.size();
@@ -69,26 +64,15 @@ public class OrderListTableModel extends AbstractTableModel implements
 
 	@Override
 	public int getRowCount() {
-		lock.lock();
-		try {
-			return orders.size();
-		} finally {
-			lock.unlock();
-		}
+		return orders.size();
 	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		Order order = null;
-		lock.lock();
-		try {
-			if ( row >= orders.size() ) {
-				return null;
-			}
-			order = orders.get(row);
-		} finally {
-			lock.unlock();
+		if ( row >= orders.size() ) {
+			return null;
 		}
+		Order order = orders.get(row);
 		
 		MsgID id = mapIndexToID.get(col);
 		if ( id == CommonMsg.ID ) {
@@ -126,6 +110,138 @@ public class OrderListTableModel extends AbstractTableModel implements
 		}
 	}
 	
+	/**
+	 * Return column index by ID.
+	 * <p> 
+	 * @param columnId - column ID.
+	 * @return return index of specified column
+	 */
+	@Override
+	public int getColumnIndex(MsgID columnId) {
+		return mapIndexToID.indexOf(columnId);
+	}
+
+	@Override
+	public String getColumnName(int col) {
+		return messages.get(mapIndexToID.get(col));
+	}
+
+	public void clear() {
+		stopListeningUpdates();
+		terminalSet.clear();
+	}
+	
+	/**
+	 * Add all orders of terminal.
+	 * <p>
+	 * @param terminal - terminal to add
+	 */
+	public void add(Terminal terminal) {
+		if ( terminal == null ) {
+			throw new IllegalArgumentException("Terminal cannot be null");
+		}
+		if ( terminalSet.contains(terminal) ) {
+			return;
+		}
+		terminalSet.add(terminal);
+		if ( subscribed ) {
+			cacheDataAndSubscribeEvents(terminal);
+		}
+	}
+	
+	@Override
+	public void startListeningUpdates() {
+		if ( subscribed ) {
+			return;
+		}
+		for ( Terminal terminal : terminalSet ) {
+			cacheDataAndSubscribeEvents(terminal);
+		}
+		subscribed = true;
+	}
+
+	@Override
+	public void stopListeningUpdates() {
+		if ( ! subscribed ) {
+			return;
+		}
+		for ( Terminal terminal : terminalSet ) {
+			unsubscribe(terminal);
+		}
+		orders.clear();
+		orderMap.clear();
+		fireTableDataChanged();
+		subscribed = false;
+	}
+
+	@Override
+	public void onEvent(Event event) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				processEvent(event);
+			}
+		});
+	}
+	
+	private void processEvent(Event event) {
+		if ( ! subscribed ) {
+			return;
+		}
+		for ( Terminal terminal : terminalSet ) {
+			if ( event.isType(terminal.onOrderAvailable()) ) {
+				int firstRow = orders.size();
+				Order order = ((OrderEvent) event).getOrder();
+				if ( ! orderMap.containsKey(order) ) {
+					orders.add(order);
+					orderMap.put(order, firstRow);
+					fireTableRowsInserted(firstRow, firstRow);
+				}
+			} else if ( event.isType(terminal.onOrderUpdate()) ) {
+				Order order = ((OrderEvent) event).getOrder();
+				Integer row = orderMap.get(order);
+				if ( row != null ) {
+					fireTableRowsUpdated(row, row);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Get order by its position.
+	 * <p>
+	 * @param rowIndex - row index
+	 * @return order instance or null if no order exists
+	 */
+	public Order getOrder(int rowIndex) {
+		return orders.get(rowIndex);
+	}
+	
+	@Override
+	public void close() {
+		clear();
+	}
+	
+	private void cacheDataAndSubscribeEvents(Terminal terminal) {
+		terminal.lock();
+		try {
+			subscribe(terminal);
+			int countAdded = 0, firstRow = orders.size();
+			for ( Order order : terminal.getOrders() ) {
+				if ( ! orderMap.containsKey(order) ) {
+					orders.add(order);
+					orderMap.put(order, firstRow + countAdded);
+				}
+				countAdded ++;
+			}
+			if ( countAdded > 0 ) {
+				fireTableRowsInserted(firstRow, firstRow + countAdded - 1);
+			}
+		} finally {
+			terminal.unlock();
+		}
+	}
+	
 	private void subscribe(Terminal terminal) {
 		terminal.onOrderAvailable().addListener(this);
 		terminal.onOrderUpdate().addListener(this);		
@@ -136,127 +252,4 @@ public class OrderListTableModel extends AbstractTableModel implements
 		terminal.onOrderAvailable().removeListener(this);
 	}
 	
-	private boolean isExists(Order order) {
-		return orders.contains(order);
-	}
-	
-	private boolean isExists(Terminal terminal) {
-		return terminals.contains(terminal);
-	}
-	
-	private void addOrders(Terminal terminal) {
-		for ( Order order : terminal.getOrders() ) {
-			if ( ! isExists(order) ) {
-				orders.add(order);
-			}
-		}
-	}
-	
-	private boolean isOrderAvailableEvent(Event event) {
-		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.onOrderAvailable()) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private boolean isOrderChangedEvent(Event event) {
-		for ( Terminal terminal : terminals ) {
-			if ( event.isType(terminal.onOrderUpdate()) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private void insertNewRow(Order order) {
-		if ( ! isExists(order) ) {
-			int rowIndex = orders.size();
-			orders.add(order);
-			fireTableRowsInserted(rowIndex, rowIndex);
-		}
-	}
-	
-	private void updateRow(Order order) {
-		int rowIndex = orders.indexOf(order);
-		fireTableRowsUpdated(rowIndex, rowIndex);
-	}
-
-	@Override
-	public void start() {
-		lock.lock();
-		try {
-			orders.clear();
-			for ( Terminal terminal : terminals ) {
-				subscribe(terminal);
-				addOrders(terminal);
-			}
-			fireTableDataChanged();
-			started = true;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	public void stop() {
-		lock.lock();
-		try {
-			for ( Terminal terminal : terminals ) {
-				unsubscribe(terminal);
-			}
-			orders.clear();
-			started = false;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	public void onEvent(Event event) {
-		lock.lock();
-		try {
-			final OrderEvent e = (OrderEvent) event;
-			if ( isOrderAvailableEvent(event) ) {
-				insertNewRow(e.getOrder());			
-			} else if ( isOrderChangedEvent(event) ) {
-				updateRow(e.getOrder());
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	/**
-	 * Add all orders of terminal.
-	 * <p>
-	 * @param terminal - terminal to add
-	 */
-	public void add(Terminal terminal) {
-		lock.lock();
-		try {
-			if ( ! isExists(terminal) ) {
-				terminals.add(terminal);
-				if ( started ) {
-					subscribe(terminal);
-					addOrders(terminal);
-					fireTableDataChanged();
-				}
-			}
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	/**
-	 * Return column index by ID.
-	 * <p> 
-	 * @param columnId - column ID.
-	 * @return return index of specified column
-	 */
-	public int getColumnIndex(MsgID columnId) {
-		return mapIndexToID.indexOf(columnId);
-	}
-
 }
