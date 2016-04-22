@@ -16,7 +16,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * 2012-09-05<br>
  * $Id$
  */
-public class Account {
+public class Account implements Comparable<Account> {
 	/**
 	 * Счет по-умолчанию.
 	 * <p>
@@ -107,6 +107,11 @@ public class Account {
 			.append(subCode)
 			.append(subCode2)
 			.toHashCode();
+	}
+
+	@Override
+	public int compareTo(Account o) {
+		return toString().compareTo(o.toString());
 	}
 
 }

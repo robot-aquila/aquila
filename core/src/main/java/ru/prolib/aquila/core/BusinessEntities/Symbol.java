@@ -46,7 +46,7 @@ import org.apache.commons.lang3.builder.*;
  * S:AAPL@:USD
  * </pre>
  */
-public class Symbol implements Serializable {
+public class Symbol implements Serializable, Comparable<Symbol> {
 	private static final long serialVersionUID = 1L;
 	private String code;
 	private String exchangeID;
@@ -294,6 +294,11 @@ public class Symbol implements Serializable {
 			throw new IllegalArgumentException("Currency code cannot be empty");
 		}
 		this.currencyCode = currencyCode;
+	}
+
+	@Override
+	public int compareTo(Symbol o) {
+		return toString().compareTo(o.toString());
 	}
 
 }
