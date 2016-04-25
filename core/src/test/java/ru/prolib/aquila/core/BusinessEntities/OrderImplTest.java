@@ -144,13 +144,13 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
-	public void testGetDoneTime() throws Exception {
+	public void testGetTimeDone() throws Exception {
 		getter = new Getter<Instant>() {
 			@Override public Instant get() {
-				return order.getDoneTime();
+				return order.getTimeDone();
 			}
 		};
-		testGetter(OrderField.DONE_TIME, Instant.parse("1997-08-19T20:54:15Z"),
+		testGetter(OrderField.TIME_DONE, Instant.parse("1997-08-19T20:54:15Z"),
 				Instant.parse("2045-01-15T00:19:34Z"));
 	}
 
@@ -713,7 +713,7 @@ public class OrderImplTest extends ContainerImplTest {
 		expected.put(OrderField.CURRENT_VOLUME, 0L);
 		expected.put(OrderField.EXECUTED_VALUE, 518.0d);
 		expected.put(OrderField.STATUS, OrderStatus.FILLED);
-		expected.put(OrderField.DONE_TIME, now.plusMillis(2));
+		expected.put(OrderField.TIME_DONE, now.plusMillis(2));
 		assertEquals(expected, actual);
 	}
 	
@@ -748,7 +748,7 @@ public class OrderImplTest extends ContainerImplTest {
 		
 		Map<Integer, Object> expected = new HashMap<>();
 		expected.put(OrderField.STATUS, OrderStatus.CANCELLED);
-		expected.put(OrderField.DONE_TIME, time);
+		expected.put(OrderField.TIME_DONE, time);
 		assertEquals(expected, actual);
 	}
 
@@ -760,7 +760,7 @@ public class OrderImplTest extends ContainerImplTest {
 		
 		Map<Integer, Object> expected = new HashMap<>();
 		expected.put(OrderField.STATUS, OrderStatus.REJECTED);
-		expected.put(OrderField.DONE_TIME, time);
+		expected.put(OrderField.TIME_DONE, time);
 		expected.put(OrderField.SYSTEM_MESSAGE, "rejected");
 		assertEquals(expected, actual);
 	}
@@ -784,7 +784,7 @@ public class OrderImplTest extends ContainerImplTest {
 		Map<Integer, Object> expected = new HashMap<>();
 		expected.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
 		expected.put(OrderField.SYSTEM_MESSAGE, "some error");
-		expected.put(OrderField.DONE_TIME, time);
+		expected.put(OrderField.TIME_DONE, time);
 		assertEquals(expected, actual);
 	}
 
@@ -803,7 +803,7 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(3L, (long)order.getCurrentVolume());
 		assertEquals(313.0d, order.getExecutedValue(), 0.01d);
 		assertEquals(OrderStatus.PENDING, order.getStatus()); // not changed
-		assertNull(order.getDoneTime());
+		assertNull(order.getTimeDone());
 		assertEquals(1, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
 	}
@@ -825,7 +825,7 @@ public class OrderImplTest extends ContainerImplTest {
 		assertEquals(0L, (long)order.getCurrentVolume());
 		assertEquals(518.0d, order.getExecutedValue(), 0.01d);
 		assertEquals(OrderStatus.FILLED, order.getStatus());
-		assertEquals(now.plusMillis(2), order.getDoneTime());
+		assertEquals(now.plusMillis(2), order.getTimeDone());
 		assertEquals(3, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
 		assertOrderEvent(listenerStub.getEvent(1), order.onFilled());
@@ -844,7 +844,7 @@ public class OrderImplTest extends ContainerImplTest {
 		
 		assertEquals(10L, (long)order.getCurrentVolume());
 		assertEquals(OrderStatus.CANCELLED, order.getStatus());
-		assertEquals(now, order.getDoneTime());
+		assertEquals(now, order.getTimeDone());
 		assertEquals(3, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
 		assertOrderEvent(listenerStub.getEvent(1), order.onCancelled());
@@ -866,7 +866,7 @@ public class OrderImplTest extends ContainerImplTest {
 		
 		assertEquals(5L, (long)order.getCurrentVolume());
 		assertEquals(OrderStatus.CANCELLED, order.getStatus());
-		assertEquals(now.plusMillis(10), order.getDoneTime());
+		assertEquals(now.plusMillis(10), order.getTimeDone());
 		assertEquals(3, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
 		assertOrderEvent(listenerStub.getEvent(1), order.onPartiallyFilled());
@@ -885,7 +885,7 @@ public class OrderImplTest extends ContainerImplTest {
 		order.updateWhenRejected(now, "insufficient funds");
 		
 		assertEquals(OrderStatus.REJECTED, order.getStatus());
-		assertEquals(now, order.getDoneTime());
+		assertEquals(now, order.getTimeDone());
 		assertEquals("insufficient funds", order.getSystemMessage());
 		assertEquals(4, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
@@ -921,7 +921,7 @@ public class OrderImplTest extends ContainerImplTest {
 
 		assertEquals(OrderStatus.CANCEL_FAILED, order.getStatus());
 		assertEquals("test error", order.getSystemMessage());
-		assertEquals(time, order.getDoneTime());
+		assertEquals(time, order.getTimeDone());
 		assertEquals(4, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
 		assertOrderEvent(listenerStub.getEvent(1), order.onCancelFailed());

@@ -18,7 +18,7 @@ public class CommonMsg {
 	public static final MsgID BALANCE_VAL = newMsgID("ID_BALANCE_VAL");
 	public static final MsgID CANCEL = newMsgID("ID_CANCEL");
 	public static final MsgID CASH = newMsgID("ID_CASH");
-	public static final MsgID CHNG_TIME = newMsgID("ID_CHNG_TIME");
+	public static final MsgID TIME_DONE = newMsgID("ID_TIME_DONE");
 	public static final MsgID CODE = newMsgID("ID_CODE");
 	public static final MsgID CONNECTED = newMsgID("ID_CONNECTED");
 	public static final MsgID COMMENT = newMsgID("ID_COMMENT");
@@ -26,11 +26,11 @@ public class CommonMsg {
 	public static final MsgID CURR_VOL = newMsgID("ID_CURR_VOL");
 	public static final MsgID CURR_PR = newMsgID("ID_CURR_PR");
 	public static final MsgID CURRENCY = newMsgID("ID_CURRENCY");
-	public static final MsgID DIR = newMsgID("ID_DIR");
+	public static final MsgID ACTION = newMsgID("ID_ACTION");
 	public static final MsgID DISCONNECTED = newMsgID("ID_DISCONNECTED");
 	public static final MsgID DRIVER = newMsgID("ID_DRIVER");
 	public static final MsgID EQUITY = newMsgID("ID_EQUITY");
-	public static final MsgID EXEC_VOL = newMsgID("ID_EXEC_VOL");
+	public static final MsgID EXECUTED_VALUE = newMsgID("ID_EXECUTED_VALUE");
 	public static final MsgID FREE_MARGIN = newMsgID("ID_FREE_MARGIN");
 	public static final MsgID ID = newMsgID("ID_ID");
 	public static final MsgID LEVERAGE = newMsgID("ID_LEVERAGE");
@@ -53,8 +53,8 @@ public class CommonMsg {
 	public static final MsgID PROFIT_AND_LOSS = newMsgID("ID_PROFIT_AND_LOSS");
 	public static final MsgID PORTFOLIOS = newMsgID("ID_PORTFOLIOS");
 	public static final MsgID PRICE = newMsgID("ID_PRICE");	
-	public static final MsgID QTY = newMsgID("ID_QTY");
-	public static final MsgID QTY_REST = newMsgID("ID_QTY_REST");
+	public static final MsgID INITIAL_VOLUME = newMsgID("ID_INITIAL_VOLUME");
+	public static final MsgID CURRENT_VOLUME = newMsgID("ID_CURRENT_VOLUME");
 	public static final MsgID SECURITY = newMsgID("ID_SECURITY");
 	public static final MsgID SECURITIES = newMsgID("ID_SECURITIES");
 	public static final MsgID SELECT = newMsgID("ID_SELECT");
@@ -64,6 +64,7 @@ public class CommonMsg {
 	public static final MsgID SUBCODE = newMsgID("ID_SUBCODE");
 	public static final MsgID SUBCODE2 = newMsgID("ID_SUBCODE2");
 	public static final MsgID SYMBOL = newMsgID("ID_SYMBOL");
+	public static final MsgID SYSTEM_MESSAGE = newMsgID("ID_SYSTEM_MESSAGE");
 	public static final MsgID TERMINAL = newMsgID("ID_TERMINAL");
 	public static final MsgID TIME = newMsgID("ID_TIME");
 	public static final MsgID TITLE_SELECT_PORTFOLIO = newMsgID("ID_SELECT_PORTFOLIO");

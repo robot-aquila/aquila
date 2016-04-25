@@ -186,7 +186,7 @@ public interface Order extends Container {
 	 * <p>
 	 * @return time of finalization or null if the order is not in final status
 	 */
-	public Instant getDoneTime();	
+	public Instant getTimeDone();	
 	
 	/**
 	 * Get actual price of executed volume.

@@ -42,7 +42,7 @@ public class OrderChangeImplTest {
 	@Test
 	public void testGetDoneTime() {
 		Instant time = Instant.now();
-		tokens.put(OrderField.DONE_TIME, time);
+		tokens.put(OrderField.TIME_DONE, time);
 		assertEquals(time, change.getDoneTime());
 	}
 	

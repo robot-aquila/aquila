@@ -28,19 +28,18 @@ public class OrderListTableModel extends AbstractTableModel implements
 		mapIndexToID = new Vector<MsgID>();
 		mapIndexToID.add(CommonMsg.ID);
 		mapIndexToID.add(CommonMsg.TIME);
-		mapIndexToID.add(CommonMsg.CHNG_TIME);
+		mapIndexToID.add(CommonMsg.TIME_DONE);
 		mapIndexToID.add(CommonMsg.ACCOUNT);
-		mapIndexToID.add(CommonMsg.DIR);
-		mapIndexToID.add(CommonMsg.SECURITY);
+		mapIndexToID.add(CommonMsg.ACTION);
+		mapIndexToID.add(CommonMsg.SYMBOL);
 		mapIndexToID.add(CommonMsg.TYPE);
 		mapIndexToID.add(CommonMsg.STATUS);
 		mapIndexToID.add(CommonMsg.PRICE);
-		mapIndexToID.add(CommonMsg.QTY);
-		mapIndexToID.add(CommonMsg.QTY_REST);
-		mapIndexToID.add(CommonMsg.EXEC_VOL);
-		mapIndexToID.add(CommonMsg.AVG_EXEC_PRICE);
-		mapIndexToID.add(CommonMsg.ACTIVATOR);
+		mapIndexToID.add(CommonMsg.INITIAL_VOLUME);
+		mapIndexToID.add(CommonMsg.CURRENT_VOLUME);
+		mapIndexToID.add(CommonMsg.EXECUTED_VALUE);
 		mapIndexToID.add(CommonMsg.COMMENT);
+		mapIndexToID.add(CommonMsg.SYSTEM_MESSAGE);
 	}
 
 	private boolean subscribed = false;
@@ -77,34 +76,32 @@ public class OrderListTableModel extends AbstractTableModel implements
 		MsgID id = mapIndexToID.get(col);
 		if ( id == CommonMsg.ID ) {
 			return order.getID();
-		} else if ( id == CommonMsg.DIR) {
+		} else if ( id == CommonMsg.ACTION) {
 			return order.getAction();
 		} else if ( id == CommonMsg.TYPE) {
 			return order.getType();
-		} else if ( id == CommonMsg.SECURITY) {
+		} else if ( id == CommonMsg.SYMBOL) {
 			return order.getSymbol();
-		} else if ( id == CommonMsg.QTY) {
+		} else if ( id == CommonMsg.INITIAL_VOLUME) {
 			return order.getInitialVolume();
 		} else if ( id == CommonMsg.STATUS) {
 			return order.getStatus();
-		} else if ( id == CommonMsg.QTY_REST) {
+		} else if ( id == CommonMsg.CURRENT_VOLUME) {
 			return order.getCurrentVolume();
 		} else if ( id == CommonMsg.PRICE) {
 			return order.getPrice() == null? 0.0 : order.getPrice();
-		} else if (  id == CommonMsg.EXEC_VOL ) {
+		} else if (  id == CommonMsg.EXECUTED_VALUE ) {
 			return order.getExecutedValue();
 		} else if (  id == CommonMsg.ACCOUNT) {
 			return order.getAccount();
 		} else if (  id == CommonMsg.TIME) {
 			return order.getTime();
-		} else if (  id == CommonMsg.CHNG_TIME ) {
-			return null;
-		} else if (  id == CommonMsg.AVG_EXEC_PRICE ) {
-			return null;
-		} else if (  id == CommonMsg.ACTIVATOR ) {
-			return null;
-		} else if (  id == CommonMsg.COMMENT ) {
-			return order.getComment();
+		} else if (  id == CommonMsg.TIME_DONE ) {
+			return order.getTimeDone();
+		} else if (  id == CommonMsg.SYSTEM_MESSAGE ) {
+			return order.getSystemMessage();
+		} else if ( id == CommonMsg.ACCOUNT ) {
+			return order.getAccount();
 		} else {
 			return null;
 		}

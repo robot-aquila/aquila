@@ -193,8 +193,8 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 
 	@Override
-	public Instant getDoneTime() {
-		return getInstant(OrderField.DONE_TIME);
+	public Instant getTimeDone() {
+		return getInstant(OrderField.TIME_DONE);
 	}
 
 	@Override
@@ -436,7 +436,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 			tokens.put(OrderField.EXECUTED_VALUE, executedValue);
 			if ( currentVolume <= 0L ) {
 				tokens.put(OrderField.STATUS, OrderStatus.FILLED);
-				tokens.put(OrderField.DONE_TIME, lastExecutionTime);
+				tokens.put(OrderField.TIME_DONE, lastExecutionTime);
 			}
 			return tokens;
 		} finally {
@@ -462,7 +462,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		try {
 			Map<Integer, Object> tokens = new HashMap<>();
 			tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
-			tokens.put(OrderField.DONE_TIME, time);
+			tokens.put(OrderField.TIME_DONE, time);
 			return tokens;
 		} finally {
 			lock.unlock();
@@ -475,7 +475,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		try {
 			Map<Integer, Object> tokens = new HashMap<>();
 			tokens.put(OrderField.STATUS, OrderStatus.REJECTED);
-			tokens.put(OrderField.DONE_TIME, time);
+			tokens.put(OrderField.TIME_DONE, time);
 			tokens.put(OrderField.SYSTEM_MESSAGE, reason);
 			return tokens;
 		} finally {
@@ -500,7 +500,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		lock.lock();
 		try {
 			Map<Integer, Object> tokens = new HashMap<>();
-			tokens.put(OrderField.DONE_TIME, time);
+			tokens.put(OrderField.TIME_DONE, time);
 			tokens.put(OrderField.SYSTEM_MESSAGE, reason);
 			tokens.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
 			return tokens;

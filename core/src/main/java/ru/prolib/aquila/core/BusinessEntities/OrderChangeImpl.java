@@ -27,7 +27,7 @@ public class OrderChangeImpl implements OrderChange {
 
 	@Override
 	public Instant getDoneTime() {
-		return (Instant) tokens.get(OrderField.DONE_TIME);
+		return (Instant) tokens.get(OrderField.TIME_DONE);
 	}
 
 	@Override
