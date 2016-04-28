@@ -1,4 +1,8 @@
-﻿
+﻿Содержание:
+- Мультипоточная обработка
+- Новые типы заявок
+- Новый класс заявки
+
 
 --------------------------------------------------------------------------------
 - Мультипоточная обработка
@@ -107,19 +111,73 @@ notifyObservers внутри блокировки также чревато по
 и методами. В этом случае следует использовать метод регистрации нового
 типа с экземпляром в качестве аргумента:
 
-	static class MyOrderType extends OrderType {
-		private final int newProp;
+	static class NewType extends OrderType {
+		public static final NewType FOO;
+		public static final NewType BUZ;
 		
-		protected MyOrderType(String code, int prop) {
+		static {
+			OrderType.registerType(FOO = new NewType("FOO", 100));
+			OrderType.registerType(BUZ = new NewType("BUZ", 200));
+		}
+		
+		private final int myProp;
+
+		protected NewType(String code, int myProp) {
 			super(code);
-			this.newProp = prop;
+			this.myProp = myProp;
 		}
 		
 	}
-	
-	static final MyOrderType FOO = (MyOrderType) OrderType.registerType(new MyOrderType("foo", 100));
 
 Важно учитывать, что регистрация нового типа невозможна в случае дублирования
 идентификатора. 
+
+--------------------------------------------------------------------------------
+- Новый класс заявки
+
+В случае, когда базовой модели заявки недостаточно, класс заявки может быть
+расширен путем наследования:
+
+public class DLOrder extends OrderImpl {
+	int myProperty = 582;
+
+	public DLOrder(EditableTerminal terminal, Account account, Symbol symbol, long id) {
+		super(terminal, account, symbol, id);
+	}
+	
+	public int getMyProperty() {
+		return myProperty;
+	}
+
+}
+
+Для того, что бы использовать указанный класс заявки, следует переопределить фабрику
+объектов:
+
+public class DLObjectFactory extends ObjectFactoryImpl {
+
+	@Override
+	public EditableOrder createOrder(EditableTerminal terminal,
+			Account account, Symbol symbol, long id)
+	{
+		return new DLOrder(terminal, account, symbol, id);
+	}
+	
+}
+
+и использовать ее при инстанцировании терминала. Например следующим образом:
+
+	@Test
+	public void testNewOrderClass() throws Exception {
+		Terminal terminal = new BasicTerminalBuilder()
+			.withDataProvider(new DataProviderStub())
+			.withObjectFactory(new DLObjectFactory())
+			.buildTerminal();
+		
+		DLOrder order = (DLOrder) terminal.createOrder(new Account("foo"),
+				new Symbol("bar"), OrderAction.BUY, 10L, 84d);
+		
+		assertEquals(582, order.getMyProperty());
+	}
 
 --------------------------------------------------------------------------------

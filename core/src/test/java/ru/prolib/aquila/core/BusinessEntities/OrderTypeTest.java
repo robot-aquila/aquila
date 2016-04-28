@@ -12,9 +12,19 @@ import org.junit.*;
 public class OrderTypeTest {
 	
 	static class NewType extends OrderType {
+		public static final NewType FOO;
+		public static final NewType BUZ;
+		
+		static {
+			OrderType.registerType(FOO = new NewType("FOO", 100));
+			OrderType.registerType(BUZ = new NewType("BUZ", 200));
+		}
+		
+		public final int myProp;
 
-		protected NewType(String code) {
+		protected NewType(String code, int myProp) {
 			super(code);
+			this.myProp = myProp;
 		}
 		
 	}
@@ -56,8 +66,8 @@ public class OrderTypeTest {
 	
 	@Test
 	public void testRegisterType1_Obj() throws Exception {
-		NewType type5 = new NewType("Type5");
-		NewType type6 = new NewType("Type6");
+		NewType type5 = new NewType("Type5", 500);
+		NewType type6 = new NewType("Type6", 600);
 		
 		assertSame(type5, OrderType.registerType(type5));
 		assertSame(type6, OrderType.registerType(type6));
@@ -68,8 +78,8 @@ public class OrderTypeTest {
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testRegisterType1_Obj_ThrowsIfAlreadyExists() {
-		OrderType.registerType(new NewType("Type7"));
-		OrderType.registerType(new NewType("Type7"));
+		OrderType.registerType(new NewType("Type7", 700));
+		OrderType.registerType(new NewType("Type7", 800));
 	}
 
 }
