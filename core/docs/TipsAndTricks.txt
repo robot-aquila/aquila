@@ -139,30 +139,38 @@ notifyObservers внутри блокировки также чревато по
 расширен путем наследования:
 
 public class DLOrder extends OrderImpl {
-	int myProperty = 582;
 
 	public DLOrder(EditableTerminal terminal, Account account, Symbol symbol, long id) {
 		super(terminal, account, symbol, id);
 	}
 	
-	public int getMyProperty() {
-		return myProperty;
+	public DLOrder(EditableTerminal terminal, Account account, Symbol symbol,
+			long id, ContainerImpl.Controller controller)
+	{
+		super(terminal, account, symbol, id, controller);
 	}
 
+	public DLOrderState getState() {
+		return (DLOrderState) getObject(DLOrderField.DL_STATE);
+	}
+	
 }
+
+Класс заявки должен иметь как минимум два конструктора, как указанно в примере
+выше.
 
 Для тестирования нового класса заявки можно использовать тест базовой
 реализации:
-
-import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.ContainerImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderImplTest;
 
 public class DLOrderTest extends OrderImplTest {
+	private DLOrder order;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -173,13 +181,35 @@ public class DLOrderTest extends OrderImplTest {
 	public void setUp() throws Exception {
 		super.setUp();
 	}
+	
+	@Override
+	protected ContainerImpl produceContainer() {
+		prepareTerminal();
+		setOrder(order = new DLOrder(terminal, account, symbol, 834));
+		return order;
+	}
+	
+	@Override
+	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+		prepareTerminal();
+		setOrder(order = new DLOrder(terminal, account, symbol, 240, controller));
+		return order;
+	}
 
 	@Test
-	public void testNewMethods() {
-		// TODO:
+	public void testGetState() throws Exception {
+		getter = new Getter<DLOrderState>() {
+			@Override public DLOrderState get() {
+				return order.getState();
+			}
+		};
+		testGetter(DLOrderField.DL_STATE, DLOrderState.NonActive, DLOrderState.Expired);
 	}
 
 }
+
+Не забывайте вызывать метод setOrder(), что бы установить экземпляр заявки для
+тестов базового класса.
 
 Что бы сделать доступным класс теста в pom-файл проекта следует добавить
 зависимость:

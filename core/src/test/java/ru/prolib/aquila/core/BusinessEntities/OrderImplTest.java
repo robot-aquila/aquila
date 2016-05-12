@@ -22,11 +22,11 @@ import ru.prolib.aquila.core.BusinessEntities.OrderImpl.OrderController;
  * $Id: OrderImplTest.java 542 2013-02-23 04:15:34Z whirlwind $
  */
 public class OrderImplTest extends ContainerImplTest {
-	private static Account account = new Account("port#120");
-	private static Symbol symbol = new Symbol("MSFT");
-	private IMocksControl control;
+	protected static Account account = new Account("port#120");
+	protected static Symbol symbol = new Symbol("MSFT");
+	protected IMocksControl control;
 	private OrderImpl order;
-	private EditableTerminal terminal;
+	protected EditableTerminal terminal;
 	private OrderController controller;
 	
 	@BeforeClass
@@ -58,17 +58,21 @@ public class OrderImplTest extends ContainerImplTest {
 		control.replay();		
 	}
 	
+	protected void setOrder(OrderImpl order) {
+		this.order = order;
+	}
+	
 	@Override
 	protected ContainerImpl produceContainer() {
 		prepareTerminal();
-		order = new OrderImpl(terminal, account, symbol, 240);
+		setOrder(order = new OrderImpl(terminal, account, symbol, 240));
 		return order;
 	}
 	
 	@Override
 	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
 		prepareTerminal();
-		order = new OrderImpl(terminal, account, symbol, 240, controller);
+		setOrder(order = new OrderImpl(terminal, account, symbol, 240, controller));
 		return order;
 	}
 	
