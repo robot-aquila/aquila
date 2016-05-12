@@ -151,8 +151,49 @@ public class DLOrder extends OrderImpl {
 
 }
 
-Для того, что бы использовать указанный класс заявки, следует переопределить фабрику
-объектов:
+Для тестирования нового класса заявки можно использовать тест базовой
+реализации:
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import ru.prolib.aquila.core.BusinessEntities.OrderImplTest;
+
+public class DLOrderTest extends OrderImplTest {
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		OrderImplTest.setUpBeforeClass();
+	}
+	
+	@Before
+	public void setUp() throws Exception {
+		super.setUp();
+	}
+
+	@Test
+	public void testNewMethods() {
+		// TODO:
+	}
+
+}
+
+Что бы сделать доступным класс теста в pom-файл проекта следует добавить
+зависимость:
+
+        <dependency>
+        	<groupId>ru.prolib.aquila</groupId>
+        	<artifactId>aquila-core</artifactId>
+        	<version>0.1.43</version>
+        	<type>test-jar</type>
+        	<scope>test</scope>
+        </dependency>
+
+Для того, что бы определить новый класс заявки для терминала, следует
+переопределить фабрику объектов:
 
 public class DLObjectFactory extends ObjectFactoryImpl {
 

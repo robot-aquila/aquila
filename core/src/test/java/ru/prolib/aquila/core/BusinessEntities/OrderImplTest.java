@@ -50,7 +50,7 @@ public class OrderImplTest extends ContainerImplTest {
 		return "foobar.port#120[MSFT].ORDER#240";
 	}
 	
-	private void prepareTerminal() {
+	protected void prepareTerminal() {
 		control = createStrictControl();
 		terminal = control.createMock(EditableTerminal.class);
 		expect(terminal.getTerminalID()).andStubReturn("foobar");
@@ -72,13 +72,13 @@ public class OrderImplTest extends ContainerImplTest {
 		return order;
 	}
 	
-	private void assertOrderEvent(Event event, EventType expectedType) {
+	protected void assertOrderEvent(Event event, EventType expectedType) {
 		OrderEvent e = (OrderEvent) event;
 		assertTrue(e.isType(expectedType));
 		assertSame(order, e.getOrder());
 	}
 	
-	private void makeOrderAvailableWithTrueController() {
+	protected void makeOrderAvailableWithTrueController() {
 		produceContainer();
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		data.put(OrderField.TYPE, OrderType.LIMIT);
@@ -575,7 +575,7 @@ public class OrderImplTest extends ContainerImplTest {
 	 * @param value - executed value
 	 * @return execution instance
 	 */
-	private OrderExecution newExec(long id, String externalID, Instant time,
+	protected OrderExecution newExec(long id, String externalID, Instant time,
 			double price, long volume, double value)
 	{
 		return new OrderExecutionImpl(terminal, id, externalID, symbol,
