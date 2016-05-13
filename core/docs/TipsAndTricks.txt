@@ -185,7 +185,7 @@ public class DLOrderTest extends OrderImplTest {
 	@Override
 	protected ContainerImpl produceContainer() {
 		prepareTerminal();
-		setOrder(order = new DLOrder(terminal, account, symbol, 834));
+		setOrder(order = new DLOrder(terminal, account, symbol, 240));
 		return order;
 	}
 	
