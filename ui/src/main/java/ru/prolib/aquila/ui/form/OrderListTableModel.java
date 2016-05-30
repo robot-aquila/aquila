@@ -3,10 +3,11 @@ package ru.prolib.aquila.ui.form;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
@@ -22,26 +23,34 @@ public class OrderListTableModel extends AbstractTableModel implements
 		EventListener, ITableModel
 {
 	private static final long serialVersionUID = 1L;
-	private static final List<MsgID> mapIndexToID;
+	/**
+	 * Column ID: Order ID.
+	 */
+	public static final int CID_ID = 1;
 	
-	static {
-		mapIndexToID = new Vector<MsgID>();
-		mapIndexToID.add(CommonMsg.ID);
-		mapIndexToID.add(CommonMsg.TIME);
-		mapIndexToID.add(CommonMsg.TIME_DONE);
-		mapIndexToID.add(CommonMsg.ACCOUNT);
-		mapIndexToID.add(CommonMsg.ACTION);
-		mapIndexToID.add(CommonMsg.SYMBOL);
-		mapIndexToID.add(CommonMsg.TYPE);
-		mapIndexToID.add(CommonMsg.STATUS);
-		mapIndexToID.add(CommonMsg.PRICE);
-		mapIndexToID.add(CommonMsg.INITIAL_VOLUME);
-		mapIndexToID.add(CommonMsg.CURRENT_VOLUME);
-		mapIndexToID.add(CommonMsg.EXECUTED_VALUE);
-		mapIndexToID.add(CommonMsg.COMMENT);
-		mapIndexToID.add(CommonMsg.SYSTEM_MESSAGE);
-	}
-
+	/**
+	 * Column ID: Order time.
+	 */
+	public static final int CID_TIME = 2;
+	
+	/**
+	 * Column ID: Order done time.
+	 */
+	public static final int CID_TIME_DONE = 3;
+	public static final int CID_ACCOUNT = 4;
+	public static final int CID_ACTION = 5;
+	public static final int CID_SYMBOL = 6;
+	public static final int CID_TYPE = 7;
+	public static final int CID_STATUS = 8;
+	public static final int CID_PRICE = 9;
+	public static final int CID_INITIAL_VOLUME = 10;
+	public static final int CID_CURRENT_VOLUME = 11;
+	public static final int CID_EXECUTED_VALUE = 12;
+	public static final int CID_COMMENT = 13;
+	public static final int CID_SYSTEM_MESSAGE = 14;
+	
+	private final List<Integer> columnIndexToColumnID;
+	private final Map<Integer, MsgID> columnIDToColumnHeader;
 	private boolean subscribed = false;
 	private final IMessages messages;
 	private final List<Order> orders;
@@ -50,15 +59,55 @@ public class OrderListTableModel extends AbstractTableModel implements
 	
 	public OrderListTableModel(IMessages messages) {
 		super();
+		columnIndexToColumnID = getColumnIDList();
+		columnIDToColumnHeader = getColumnIDToHeaderMap();
 		this.messages = messages;
 		this.orders = new ArrayList<Order>();
 		this.terminalSet = new HashSet<Terminal>(); 
 		this.orderMap = new HashMap<Order, Integer>();
 	}
 	
+	protected List<Integer> getColumnIDList() {
+		List<Integer> cols = new ArrayList<>();
+		cols.add(CID_ID);
+		cols.add(CID_TIME);
+		cols.add(CID_TIME_DONE);
+		cols.add(CID_ACCOUNT);
+		cols.add(CID_ACTION);
+		cols.add(CID_SYMBOL);
+		cols.add(CID_TYPE);
+		cols.add(CID_STATUS);
+		cols.add(CID_PRICE);
+		cols.add(CID_INITIAL_VOLUME);
+		cols.add(CID_CURRENT_VOLUME);
+		cols.add(CID_EXECUTED_VALUE);
+		cols.add(CID_COMMENT);
+		cols.add(CID_SYSTEM_MESSAGE);
+		return cols;
+	}
+
+	protected Map<Integer, MsgID> getColumnIDToHeaderMap() {
+		Map<Integer, MsgID> head = new HashMap<>();
+		head.put(CID_ID, CommonMsg.ID);
+		head.put(CID_TIME, CommonMsg.TIME);
+		head.put(CID_TIME_DONE, CommonMsg.TIME_DONE);
+		head.put(CID_ACCOUNT, CommonMsg.ACCOUNT);
+		head.put(CID_ACTION, CommonMsg.ACTION);
+		head.put(CID_SYMBOL, CommonMsg.SYMBOL);
+		head.put(CID_TYPE, CommonMsg.TYPE);
+		head.put(CID_STATUS, CommonMsg.STATUS);
+		head.put(CID_PRICE, CommonMsg.PRICE);
+		head.put(CID_INITIAL_VOLUME, CommonMsg.INITIAL_VOLUME);
+		head.put(CID_CURRENT_VOLUME, CommonMsg.CURRENT_VOLUME);
+		head.put(CID_EXECUTED_VALUE, CommonMsg.EXECUTED_VALUE);
+		head.put(CID_COMMENT, CommonMsg.COMMENT);
+		head.put(CID_SYSTEM_MESSAGE, CommonMsg.SYSTEM_MESSAGE);
+		return head;
+	}
+	
 	@Override
 	public int getColumnCount() {
-		return mapIndexToID.size();
+		return columnIndexToColumnID.size();
 	}
 
 	@Override
@@ -72,55 +121,45 @@ public class OrderListTableModel extends AbstractTableModel implements
 			return null;
 		}
 		Order order = orders.get(row);
-		
-		MsgID id = mapIndexToID.get(col);
-		if ( id == CommonMsg.ID ) {
-			return order.getID();
-		} else if ( id == CommonMsg.ACTION) {
-			return order.getAction();
-		} else if ( id == CommonMsg.TYPE) {
-			return order.getType();
-		} else if ( id == CommonMsg.SYMBOL) {
-			return order.getSymbol();
-		} else if ( id == CommonMsg.INITIAL_VOLUME) {
-			return order.getInitialVolume();
-		} else if ( id == CommonMsg.STATUS) {
-			return order.getStatus();
-		} else if ( id == CommonMsg.CURRENT_VOLUME) {
-			return order.getCurrentVolume();
-		} else if ( id == CommonMsg.PRICE) {
-			return order.getPrice() == null? 0.0 : order.getPrice();
-		} else if (  id == CommonMsg.EXECUTED_VALUE ) {
-			return order.getExecutedValue();
-		} else if (  id == CommonMsg.ACCOUNT) {
-			return order.getAccount();
-		} else if (  id == CommonMsg.TIME) {
-			return order.getTime();
-		} else if (  id == CommonMsg.TIME_DONE ) {
-			return order.getTimeDone();
-		} else if (  id == CommonMsg.SYSTEM_MESSAGE ) {
-			return order.getSystemMessage();
-		} else if ( id == CommonMsg.ACCOUNT ) {
-			return order.getAccount();
-		} else {
-			return null;
+		switch ( columnIndexToColumnID.get(col) ) {
+		case CID_ID:				return order.getID();
+		case CID_TIME:				return order.getTime();
+		case CID_TIME_DONE:			return order.getTimeDone();
+		case CID_ACCOUNT:			return order.getAccount();
+		case CID_ACTION:			return order.getAction();
+		case CID_SYMBOL:			return order.getSymbol();
+		case CID_TYPE:				return order.getType();
+		case CID_STATUS:			return order.getStatus();
+		case CID_PRICE:				return order.getPrice();
+		case CID_INITIAL_VOLUME:	return order.getInitialVolume();
+		case CID_CURRENT_VOLUME:	return order.getCurrentVolume();
+		case CID_EXECUTED_VALUE:	return order.getExecutedValue();
+		case CID_COMMENT:			return order.getComment();
+		case CID_SYSTEM_MESSAGE:	return order.getSystemMessage();
+		default:					return null;
 		}
 	}
 	
-	/**
-	 * Return column index by ID.
-	 * <p> 
-	 * @param columnId - column ID.
-	 * @return return index of specified column
-	 */
 	@Override
 	public int getColumnIndex(MsgID columnId) {
-		return mapIndexToID.indexOf(columnId);
+		Iterator<Entry<Integer, MsgID>> it = columnIDToColumnHeader.entrySet().iterator();
+		while ( it.hasNext() ) {
+			Entry<Integer, MsgID> pair = it.next();
+			if ( columnId == pair.getValue() ) {
+				return getColumnIndex(pair.getKey());
+			}
+		}
+		return -1;
+	}
+	
+	@Override
+	public int getColumnIndex(int columnID) {
+		return columnIndexToColumnID.indexOf(columnID);
 	}
 
 	@Override
 	public String getColumnName(int col) {
-		return messages.get(mapIndexToID.get(col));
+		return messages.get(columnIDToColumnHeader.get(columnIndexToColumnID.get(col)));
 	}
 
 	public void clear() {

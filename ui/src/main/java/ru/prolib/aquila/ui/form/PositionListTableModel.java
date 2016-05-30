@@ -236,4 +236,9 @@ public class PositionListTableModel extends AbstractTableModel implements
 		portfolio.onPositionUpdate().removeListener(this);
 	}
 	
+	@Override
+	public int getColumnIndex(int columnID) {
+		throw new RuntimeException("Not implemented");
+	}
+	
 }

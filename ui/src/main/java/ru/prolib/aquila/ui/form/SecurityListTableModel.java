@@ -303,5 +303,10 @@ public class SecurityListTableModel extends AbstractTableModel
 		terminal.onSecurityBestBid().removeListener(this);
 		terminal.onSecurityLastTrade().removeListener(this);	
 	}
+	
+	@Override
+	public int getColumnIndex(int columnID) {
+		throw new RuntimeException("Not implemented");
+	}
 
 }

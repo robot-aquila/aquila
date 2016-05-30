@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * 2013-02-10<br>
  * $Id$
  */
+@Deprecated
 public class EventQueueStarter implements Starter {
 	private final EventQueue queue;
 	private final long timeout;

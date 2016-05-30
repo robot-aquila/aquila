@@ -248,4 +248,9 @@ public class PortfolioListTableModel extends AbstractTableModel
 		terminal.onPortfolioUpdate().removeListener(this);
 	}
 
+	@Override
+	public int getColumnIndex(int columnID) {
+		throw new RuntimeException("Not implemented");
+	}
+
 }

@@ -12,7 +12,16 @@ public interface ITableModel extends TableModel {
 	 * @param msgId - message ID.
 	 * @return return index of specified column
 	 */
+	@Deprecated
 	public int getColumnIndex(MsgID msgID);
+	
+	/**
+	 * Return column index by ID.
+	 * <p>
+	 * @param columnID - column ID
+	 * @return index of the specified column
+	 */
+	public int getColumnIndex(int columnID);
 	
 	/**
 	 * Close all used resources and unsubscribe from events.
