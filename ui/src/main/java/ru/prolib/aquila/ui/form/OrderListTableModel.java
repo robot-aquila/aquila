@@ -120,8 +120,11 @@ public class OrderListTableModel extends AbstractTableModel implements
 		if ( row >= orders.size() ) {
 			return null;
 		}
-		Order order = orders.get(row);
-		switch ( columnIndexToColumnID.get(col) ) {
+		return getColumnValue(orders.get(row), columnIndexToColumnID.get(col));
+	}
+	
+	protected Object getColumnValue(Order order, int columnID) {
+		switch ( columnID ) {
 		case CID_ID:				return order.getID();
 		case CID_TIME:				return order.getTime();
 		case CID_TIME_DONE:			return order.getTimeDone();
@@ -137,7 +140,7 @@ public class OrderListTableModel extends AbstractTableModel implements
 		case CID_COMMENT:			return order.getComment();
 		case CID_SYSTEM_MESSAGE:	return order.getSystemMessage();
 		default:					return null;
-		}
+		}		
 	}
 	
 	@Override
