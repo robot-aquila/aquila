@@ -638,78 +638,6 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
-	public void testGetChangeWhenExecutionAdded0() throws Exception {
-		data.put(OrderField.ACTION, OrderAction.SELL);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		order.update(data);
-		Instant now = Instant.now();
-		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
-		
-		Map<Integer, Object> actual = order.getChangeWhenExecutionAdded();
-		
-		Map<Integer, Object> expected = new HashMap<Integer, Object>();
-		expected.put(OrderField.CURRENT_VOLUME, 3L);
-		expected.put(OrderField.EXECUTED_VALUE, 313.0d);
-		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testGetChangeWhenExecutionAdded3() throws Exception {
-		data.put(OrderField.ACTION, OrderAction.SELL);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		order.update(data);
-		Instant now = Instant.now();
-		order.addExecution(1005L, "x1", now, 70.10d, 5L, 100.0d);
-
-		OrderChange actual = order.getChangeWhenExecutionAdded(now.plusMillis(1), 2L, 213.0d);
-		
-		assertFalse(actual.isStatusChanged());
-		assertFalse(actual.isFinalized());
-		assertEquals(3L, actual.getCurrentVolume());
-		assertEquals(313.0d, actual.getExecutedValue(), 0.01d);
-	}
-
-	@Test
-	public void testGetChangeWhenExecutionAdded0_WhenFullyFilled() throws Exception {
-		data.put(OrderField.ACTION, OrderAction.SELL);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		order.update(data);
-		Instant now = Instant.now();
-		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
-		order.addExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
-		
-		Map<Integer, Object> actual = order.getChangeWhenExecutionAdded();
-		
-		Map<Integer, Object> expected = new HashMap<Integer, Object>();
-		expected.put(OrderField.CURRENT_VOLUME, 0L);
-		expected.put(OrderField.EXECUTED_VALUE, 518.0d);
-		expected.put(OrderField.STATUS, OrderStatus.FILLED);
-		expected.put(OrderField.TIME_DONE, now.plusMillis(2));
-		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testGetChangeWhenExecutionAdded3_WhenFullyFilled() throws Exception {
-		data.put(OrderField.ACTION, OrderAction.SELL);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		order.update(data);
-		Instant now = Instant.now();
-		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
-
-		OrderChange actual = order.getChangeWhenExecutionAdded(now.plusMillis(2), 3L, 205.0d);
-		
-		assertTrue(actual.isStatusChanged());
-		assertTrue(actual.isFinalized());
-		assertEquals(OrderStatus.FILLED, actual.getStatus());
-		assertEquals(now.plusMillis(2), actual.getDoneTime());
-		assertEquals(0L, actual.getCurrentVolume());
-		assertEquals(518.0d, actual.getExecutedValue(), 0.01d);
-	}
-	
-	@Test
 	public void testGetChangeWhenCancelled() throws Exception {
 		Instant time = Instant.now();
 		data.put(OrderField.ACTION, OrderAction.SELL);
@@ -759,50 +687,6 @@ public class OrderImplTest extends ContainerImplTest {
 		expected.put(OrderField.SYSTEM_MESSAGE, "some error");
 		expected.put(OrderField.TIME_DONE, time);
 		assertEquals(expected, actual);
-	}
-
-	@Test
-	public void testUpdateWhenExecutionAdded() throws Exception {
-		makeOrderAvailableWithTrueController();
-		Instant now = Instant.now();
-		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
-		order.onUpdate().addSyncListener(listenerStub);
-		order.onFilled().addSyncListener(listenerStub);
-		order.onDone().addSyncListener(listenerStub);
-
-		order.updateWhenExecutionAdded();
-		
-		assertEquals(3L, (long)order.getCurrentVolume());
-		assertEquals(313.0d, order.getExecutedValue(), 0.01d);
-		assertEquals(OrderStatus.PENDING, order.getStatus()); // not changed
-		assertNull(order.getTimeDone());
-		assertEquals(1, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
-	}
-	
-	@Test
-	public void testUpdateWhenExecutionAdded_WhenFullyFilled() throws Exception {
-		makeOrderAvailableWithTrueController();
-		Instant now = Instant.now();
-		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
-		order.addExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
-		order.onUpdate().addSyncListener(listenerStub);
-		order.onFilled().addSyncListener(listenerStub);
-		order.onFailed().addSyncListener(listenerStub);
-		order.onDone().addSyncListener(listenerStub);
-		
-		order.updateWhenExecutionAdded();
-
-		assertEquals(0L, (long)order.getCurrentVolume());
-		assertEquals(518.0d, order.getExecutedValue(), 0.01d);
-		assertEquals(OrderStatus.FILLED, order.getStatus());
-		assertEquals(now.plusMillis(2), order.getTimeDone());
-		assertEquals(3, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
-		assertOrderEvent(listenerStub.getEvent(1), order.onFilled());
-		assertOrderEvent(listenerStub.getEvent(2), order.onDone());
 	}
 
 	@Test

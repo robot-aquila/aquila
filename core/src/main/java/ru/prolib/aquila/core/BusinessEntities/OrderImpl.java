@@ -402,54 +402,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 			lock.unlock();
 		}
 	}
-
-	private Map<Integer, Object> getChangeByExecutions(Instant newExecTime,
-			long newExecVolume, double newExecValue)
-	{
-		lock.lock();
-		try {
-			long initialVolume = getInitialVolume(), executedVolume = 0;
-			double executedValue = 0.0d;
-			Instant lastExecutionTime = null;
-			for ( OrderExecution execution : executions ) {
-				executedVolume += execution.getVolume();
-				executedValue += execution.getValue();
-				lastExecutionTime = execution.getTime();
-			}
-			if ( newExecTime != null ) {
-				// The case for prediction of new execution
-				lastExecutionTime = newExecTime;
-				executedVolume += newExecVolume;
-				executedValue += newExecValue;
-			}
-			long currentVolume = initialVolume - executedVolume;
-			Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-			tokens.put(OrderField.CURRENT_VOLUME, currentVolume);
-			tokens.put(OrderField.EXECUTED_VALUE, executedValue);
-			if ( currentVolume <= 0L ) {
-				tokens.put(OrderField.STATUS, OrderStatus.FILLED);
-				tokens.put(OrderField.TIME_DONE, lastExecutionTime);
-			}
-			return tokens;
-		} finally {
-			lock.unlock();
-		}
-	}
 	
-	@Override
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenExecutionAdded() {
-		return getChangeByExecutions(null, 0L, 0.0d);
-	}
-	
-	@Override
-	@Deprecated
-	public OrderChange getChangeWhenExecutionAdded(Instant executionTime,
-			long executedVolume, double executedValue)
-	{
-		return new OrderChangeImpl(this, getChangeByExecutions(executionTime, executedVolume, executedValue));
-	}
-
 	@Override
 	@Deprecated
 	public Map<Integer, Object> getChangeWhenCancelled(Instant time) {
@@ -505,12 +458,6 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		} finally {
 			lock.unlock();
 		}
-	}
-
-	@Override
-	@Deprecated
-	public void updateWhenExecutionAdded() {
-		update(getChangeWhenExecutionAdded());
 	}
 
 	@Override

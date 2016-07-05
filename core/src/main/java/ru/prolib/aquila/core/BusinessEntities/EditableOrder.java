@@ -64,46 +64,7 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 * @return true if events are enable, false otherwise
 	 */
 	public boolean isStatusEventsEnabled();
-	
-	/**
-	 * Calculate changed attributes based on executions.
-	 * <p>
-	 * This method calculates changed attributes based on existing executions.
-	 * In case when all executions gives a total volume greater or equals than
-	 * initial volume then appropriate status change will be added. In this case
-	 * the latest execution time will be used as the order finalization time.
-	 * Returned change have to be applied to the order instance. It is possible
-	 * to add some additional fields to the change before the applying.
-	 * <p>
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @return attributes which should be changed
-	 */
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenExecutionAdded();
-	
-	/**
-	 * Calculate changed attributes after new execution added.
-	 * <p>
-	 * This method allows predict how the order attributes changed if the new
-	 * execution will be added. Note that this information should not be applied
-	 * to the order directly. Use {@link #getChangeWhenExecutionAdded()} or
-	 * {@link #updateWhenExecutionAdded()} to apply changes after adding
-	 * execution.
-	 * <p>
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @param executionTime - time of the execution
-	 * @param executedVolume - executed volume have to be added to existing
-	 * @param executedValue - executed value
-	 * @return attributes which should be changed
-	 */
-	@Deprecated
-	public OrderChange getChangeWhenExecutionAdded(Instant executionTime,
-			long executedVolume, double executedValue);
-	
+		
 	/**
 	 * This method is deprecated and will be removed. Use {@link OrderChange}
 	 * transaction to change order.
@@ -144,21 +105,7 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 */
 	@Deprecated
 	public Map<Integer, Object> getChangeWhenCancelFailed(Instant time, String reason);
-	
-	/**
-	 * Calculate and apply changes of attributes based on executions.
-	 * <p>
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * This method is a shortcut which allows apply changes obtained by calling
-	 * {@link #getChangeWhenExecutionAdded()} method to the order container.
-	 * Will cause appropriate events. Useful if no additional tokens should be
-	 * added with those changes.
-	 */
-	@Deprecated
-	public void updateWhenExecutionAdded();
-	
+		
 	/**
 	 * This method is deprecated and will be removed. Use {@link OrderChange}
 	 * transaction to change order.
