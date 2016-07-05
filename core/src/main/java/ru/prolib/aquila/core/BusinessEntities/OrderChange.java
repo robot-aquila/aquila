@@ -2,7 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
 
-public interface OrderChange {
+public interface OrderChange extends ContainerTransaction {
 	
 	/**
 	 * Check if order status will be changed.
@@ -45,5 +45,19 @@ public interface OrderChange {
 	 * @return the order executed value after applying this change
 	 */
 	public double getExecutedValue();
+	
+	/**
+	 * Get transaction order.
+	 * <p>
+	 * @return order
+	 */
+	public Order getOrder();
+	
+	/**
+	 * Get transaction execution.
+	 * <p>
+	 * @return new order execution or null if execution is not defined
+	 */
+	public OrderExecution getExecution();
 
 }

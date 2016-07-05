@@ -180,6 +180,16 @@ public class ContainerImpl implements UpdatableContainer {
 			lock.unlock();
 		}
 	}
+	
+	@Override
+	public boolean hasChanged() {
+		lock.lock();
+		try {
+			return updated.size() > 0;
+		} finally {
+			lock.unlock();
+		}
+	}
 
 	@Override
 	public boolean atLeastOneHasChanged(int[] tokens) {

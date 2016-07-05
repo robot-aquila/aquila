@@ -762,6 +762,7 @@ public class TerminalImpl implements EditableTerminal {
 		tokens.put(OrderField.PRICE, price);
 		tokens.put(OrderField.COMMENT, comment);
 		tokens.put(OrderField.TIME, scheduler.getCurrentTime());
+		tokens.put(OrderField.EXECUTED_VALUE, 0.0d);
 		order.update(tokens);
 		return order;
 	}

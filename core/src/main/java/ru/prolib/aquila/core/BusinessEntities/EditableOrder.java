@@ -10,13 +10,10 @@ import java.util.Map;
 public interface EditableOrder extends Order, UpdatableContainer {
 	
 	/**
-	 * Add new order execution.
+	 * Add order execution.
 	 * <p>
-	 * This method is used to add new order execution. It will not update the
-	 * order attributes related to executions but will fire the new
-	 * execution event. Do not use this method to load existing executions.
-	 * Use {@link #loadExecution(long, String, Instant, double, long, double)}
-	 * instead.
+	 * This method is used to add order execution. This is shortcut for the
+	 * {@link #addExecution(OrderExecution)} method.
 	 * <p>
 	 * @param id - ID of execution
 	 * @param externalID - ID of execution assigned by remote trading system
@@ -24,32 +21,30 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 * @param price - price per unit
 	 * @param volume - executed volume
 	 * @param value - value of execution in units of account currency
+	 * @return order execution instance
 	 * @throws OrderException - will thrown if the order already in final state
 	 * or if an execution with the same ID already exists
 	 */
-	public void addExecution(long id, String externalID, Instant time,
+	public OrderExecution addExecution(long id, String externalID, Instant time,
 			double price, long volume, double value)
 					throws OrderException;
-	
+		
 	/**
-	 * Load existing order execution.
+	 * Add order execution.
 	 * <p>
-	 * This method is used to load an existing execution when the order is
-	 * loading from external source. It will not cause any events and does not
-	 * affect the order attributes. All general attributes of the order must be
-	 * loaded before calling this method.
+	 * This method is used to add execution. The execution must have unique
+	 * execution ID. This call will not cause any events and does not affect the
+	 * order attributes. All attributes of the order should be changed
+	 * after loading of the execution. To fire appropriate event tied to the
+	 * execution the {@link #fireExecution(OrderExecution)} method should
+	 * be used.
 	 * <p>
-	 * @param id - ID of execution
-	 * @param externalID - ID of execution assigned by remote trading system
-	 * @param time - time of execution
-	 * @param price - price per unit
-	 * @param volume - executed volume
-	 * @param value - value of execution in units of account currency
+	 * @param execution - execution instance
 	 * @throws OrderException - will thrown if an execution with the same ID already exists
 	 */
-	public void loadExecution(long id, String externalID, Instant time,
-			double price, long volume, double value)
-					throws OrderException;
+	public void addExecution(OrderExecution execution) throws OrderException;
+	
+	public void fireExecution(OrderExecution execution);
 	
 	/**
 	 * Disable or enable order status events.
@@ -80,8 +75,12 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 * Returned change have to be applied to the order instance. It is possible
 	 * to add some additional fields to the change before the applying.
 	 * <p>
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
 	 * @return attributes which should be changed
 	 */
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenExecutionAdded();
 	
 	/**
@@ -93,38 +92,107 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 * {@link #updateWhenExecutionAdded()} to apply changes after adding
 	 * execution.
 	 * <p>
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
 	 * @param executionTime - time of the execution
 	 * @param executedVolume - executed volume have to be added to existing
 	 * @param executedValue - executed value
 	 * @return attributes which should be changed
 	 */
+	@Deprecated
 	public OrderChange getChangeWhenExecutionAdded(Instant executionTime,
 			long executedVolume, double executedValue);
 	
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
+	 * @param time - time
+	 * @return tokens
+	 */
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenCancelled(Instant time);
 	
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
+	 * @param time - time
+	 * @param reason - reason
+	 * @return tokens
+	 */
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenRejected(Instant time, String reason);
 	
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
+	 * @return tokens
+	 */
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenRegistered();
 	
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
+	 * @param time - time
+	 * @param reason - reason
+	 * @return tokens
+	 */
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenCancelFailed(Instant time, String reason);
 	
 	/**
 	 * Calculate and apply changes of attributes based on executions.
+	 * <p>
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
 	 * <p>
 	 * This method is a shortcut which allows apply changes obtained by calling
 	 * {@link #getChangeWhenExecutionAdded()} method to the order container.
 	 * Will cause appropriate events. Useful if no additional tokens should be
 	 * added with those changes.
 	 */
+	@Deprecated
 	public void updateWhenExecutionAdded();
 	
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
+	 * @param time - time
+	 */
+	@Deprecated
 	public void updateWhenCancelled(Instant time);
 	
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
+	 * @param time - time
+	 * @param reason - reason
+	 */
+	@Deprecated
 	public void updateWhenRejected(Instant time, String reason);
 	
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 */
+	@Deprecated
 	public void updateWhenRegistered();
-	
+
+	/**
+	 * This method is deprecated and will be removed. Use {@link OrderChange}
+	 * transaction to change order.
+	 * <p>
+	 * @param time - time
+	 * @param reason - reason
+	 */
+	@Deprecated
 	public void updateWhenCancelFailed(Instant time, String reason);
 	
 	public void fireArchived();

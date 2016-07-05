@@ -137,6 +137,15 @@ public interface Container extends AbstractContainer {
 	public boolean hasChanged(int token);
 	
 	/**
+	 * Test for changes.
+	 * <p>
+	 * Test that container was changed at last update.
+	 * <p>
+	 * @return true if token has changed within current update, false otherwise
+	 */
+	public boolean hasChanged();
+	
+	/**
 	 * Test tokens for changes.
 	 * <p>
 	 * Test those tokens were changed at last update.

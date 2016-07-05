@@ -191,7 +191,7 @@ public interface Order extends Container {
 	/**
 	 * Get actual price of executed volume.
 	 * <p>
-	 * @return price of executed volume
+	 * @return price of executed volume in base or account currency (money)
 	 */
 	public Double getExecutedValue();
 	

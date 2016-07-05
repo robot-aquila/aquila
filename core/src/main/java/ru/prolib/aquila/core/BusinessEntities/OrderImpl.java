@@ -338,40 +338,32 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		}
 	}
 	
-	private OrderExecution createExecution(long id, String externalID,
-			Instant time, double price, long volume, double value)
-					throws OrderException
-	{
-		if ( executionByID.containsKey(id) ) {
-			throw new OrderException("Execution already exists: " + id);
-		}
-		OrderExecution exec = new OrderExecutionImpl(terminal, id, externalID,
-				symbol, getAction(), this.id, time, price, volume, value);
-		executionByID.put(id, exec);
-		executions.add(exec);
-		return exec;
-	}
-
 	@Override
-	public void addExecution(long id, String externalID, Instant time,
-			double price, long volume, double value) throws OrderException
-	{
+	public void addExecution(OrderExecution execution) throws OrderException {
 		lock.lock();
 		try {
-			OrderExecution execution = createExecution(id, externalID, time, price, volume, value);
-			queue.enqueue(onExecution, new OrderExecutionEventFactory(this, execution));
+			long id = execution.getID();
+			if ( executionByID.containsKey(id) ) {
+				throw new OrderException("Execution already exists: " + id);
+			}
+			executionByID.put(id, execution);
+			executions.add(execution);	
 		} finally {
 			lock.unlock();
 		}
 	}
 
 	@Override
-	public void loadExecution(long id, String externalID, Instant time,
+	public OrderExecution addExecution(long id, String externalID, Instant time,
 			double price, long volume, double value) throws OrderException
 	{
 		lock.lock();
 		try {
-			createExecution(id, externalID, time, price, volume, value);
+			OrderExecution execution = new OrderExecutionImpl(terminal, id,
+					externalID, symbol, getAction(), this.id, time, price,
+					volume, value);
+			addExecution(execution);
+			return execution;
 		} finally {
 			lock.unlock();
 		}
@@ -445,18 +437,21 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 	
 	@Override
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenExecutionAdded() {
 		return getChangeByExecutions(null, 0L, 0.0d);
 	}
 	
 	@Override
+	@Deprecated
 	public OrderChange getChangeWhenExecutionAdded(Instant executionTime,
 			long executedVolume, double executedValue)
 	{
-		return new OrderChangeImpl(getChangeByExecutions(executionTime, executedVolume, executedValue));
+		return new OrderChangeImpl(this, getChangeByExecutions(executionTime, executedVolume, executedValue));
 	}
 
 	@Override
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenCancelled(Instant time) {
 		lock.lock();
 		try {
@@ -470,6 +465,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 
 	@Override
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenRejected(Instant time, String reason) {
 		lock.lock();
 		try {
@@ -484,6 +480,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 
 	@Override
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenRegistered() {
 		lock.lock();
 		try {
@@ -496,6 +493,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 
 	@Override
+	@Deprecated
 	public Map<Integer, Object> getChangeWhenCancelFailed(Instant time, String reason) {
 		lock.lock();
 		try {
@@ -510,26 +508,31 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 
 	@Override
+	@Deprecated
 	public void updateWhenExecutionAdded() {
 		update(getChangeWhenExecutionAdded());
 	}
 
 	@Override
+	@Deprecated
 	public void updateWhenCancelled(Instant time) {
 		update(getChangeWhenCancelled(time));
 	}
 
 	@Override
+	@Deprecated
 	public void updateWhenRejected(Instant time, String reason) {
 		update(getChangeWhenRejected(time, reason));
 	}
 
 	@Override
+	@Deprecated
 	public void updateWhenRegistered() {
 		update(getChangeWhenRegistered());
 	}
 
 	@Override
+	@Deprecated
 	public void updateWhenCancelFailed(Instant time, String reason) {
 		update(getChangeWhenCancelFailed(time, reason));
 	}
@@ -537,6 +540,11 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	@Override
 	public void fireArchived() {
 		queue.enqueue(onArchived, new OrderEventFactory(this));
+	}
+
+	@Override
+	public void fireExecution(OrderExecution execution) {
+		queue.enqueue(onExecution, new OrderExecutionEventFactory(this, execution));
 	}
 
 }

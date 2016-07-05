@@ -537,6 +537,7 @@ public class TerminalImplTest {
 		assertEquals(new Long(20L), order.getCurrentVolume());
 		assertEquals(431.15d, order.getPrice(), 0.001d);
 		assertNull(order.getComment());
+		assertEquals(0.0d, order.getExecutedValue(), 0.01d);
 		assertOrderAlternateEventTypes(order);
 	}
 	
@@ -559,6 +560,7 @@ public class TerminalImplTest {
 		assertEquals(new Long(80L), order.getCurrentVolume());
 		assertNull(order.getPrice());
 		assertNull(order.getComment());
+		assertEquals(0.0d, order.getExecutedValue(), 0.01d);
 		assertOrderAlternateEventTypes(order);
 	}
 	
@@ -582,6 +584,7 @@ public class TerminalImplTest {
 		assertEquals(new Long(400L), order.getCurrentVolume());
 		assertEquals(224.13d, order.getPrice(), 0.01d);
 		assertEquals("test order", order.getComment());
+		assertEquals(0.0d, order.getExecutedValue(), 0.01d);
 		assertOrderAlternateEventTypes(order);
 	}
 	

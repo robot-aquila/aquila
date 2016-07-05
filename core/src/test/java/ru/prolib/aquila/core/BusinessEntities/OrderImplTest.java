@@ -587,58 +587,27 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Test
-	public void testAddExecution() throws Exception {
+	public void testAddExecution6() throws Exception {
 		Instant now = Instant.now();
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.onExecution().addSyncListener(listenerStub);
 		
-		order.addExecution(100L, "x1", now, 80.0d, 10L, 800.0d);
+		OrderExecution actual = order.addExecution(100L, "x1", now, 80.0d, 10L, 800.0d);
 		
-		List<OrderExecution> expected = new ArrayList<>();
-		expected.add(newExec(100L, "x1", now, 80.0d, 10L, 800.0d));
-		assertEquals(expected, order.getExecutions());
-		assertEquals(1, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onExecution());
-		assertEquals(expected.get(0), ((OrderExecutionEvent) listenerStub.getEvent(0)).getExecution());
-	}
-	
-	@Test (expected=OrderException.class)
-	public void testAddExecution_ThrowsIfAlreadyExists() throws Exception {
-		Instant now = Instant.now();
-		data.put(OrderField.ACTION, OrderAction.BUY);
-		order.update(data);
-		order.loadExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
-		
-		order.addExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
-	}
-	
-	@Test
-	public void testLoadExecution() throws Exception {
-		data.put(OrderField.ACTION, OrderAction.BUY);
-		order.update(data);
-		Instant now = Instant.now();
-		order.onExecution().addSyncListener(listenerStub);
-
-		order.loadExecution(100L, "foo1", now,				 34.15d, 10L, 341.50d);
-		order.loadExecution(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d);
-		order.loadExecution(102L, "foo3", now.plusMillis(5), 34.43d, 10L, 344.30d);
-		
-		List<OrderExecution> expected = new ArrayList<>();
-		expected.add(newExec(100L, "foo1", now,				  34.15d, 10L, 341.50d));
-		expected.add(newExec(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d));
-		expected.add(newExec(102L, "foo3", now.plusMillis(5), 34.43d, 10L, 344.30d));
-		assertEquals(expected, order.getExecutions());
+		OrderExecution expected = newExec(100L, "x1", now, 80.0d, 10L, 800.0d);
+		assertEquals(expected, actual);
+		assertEquals(expected, order.getExecution(100L));
 		assertEquals(0, listenerStub.getEventCount());
 	}
 	
 	@Test (expected=OrderException.class)
-	public void testLoadExecution_ThrowsIfAlreadyExists() throws Exception {
+	public void testAddExecution6_ThrowsIfAlreadyExists() throws Exception {
+		Instant now = Instant.now();
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.update(data);
-		Instant now = Instant.now();
-		order.loadExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
+		order.addExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
 		
-		order.loadExecution(100L, "foo2", now, 34.25d, 20L, 683.00d);
+		order.addExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
 	}
 	
 	@Test
@@ -646,8 +615,8 @@ public class OrderImplTest extends ContainerImplTest {
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.update(data);
 		Instant now = Instant.now();
-		order.loadExecution(100L, "foo1", now,				 34.15d, 10L, 341.50d);
-		order.loadExecution(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d);
+		order.addExecution(100L, "foo1", now,				 34.15d, 10L, 341.50d);
+		order.addExecution(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d);
 		List<OrderExecution> executions = order.getExecutions();
 		
 		assertSame(executions.get(0), order.getExecution(100L));
@@ -674,8 +643,8 @@ public class OrderImplTest extends ContainerImplTest {
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		order.update(data);
 		Instant now = Instant.now();
-		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
 		
 		Map<Integer, Object> actual = order.getChangeWhenExecutionAdded();
 		
@@ -691,7 +660,7 @@ public class OrderImplTest extends ContainerImplTest {
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		order.update(data);
 		Instant now = Instant.now();
-		order.loadExecution(1005L, "x1", now, 70.10d, 5L, 100.0d);
+		order.addExecution(1005L, "x1", now, 70.10d, 5L, 100.0d);
 
 		OrderChange actual = order.getChangeWhenExecutionAdded(now.plusMillis(1), 2L, 213.0d);
 		
@@ -707,9 +676,9 @@ public class OrderImplTest extends ContainerImplTest {
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		order.update(data);
 		Instant now = Instant.now();
-		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
-		order.loadExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
+		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.addExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
 		
 		Map<Integer, Object> actual = order.getChangeWhenExecutionAdded();
 		
@@ -727,8 +696,8 @@ public class OrderImplTest extends ContainerImplTest {
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		order.update(data);
 		Instant now = Instant.now();
-		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
 
 		OrderChange actual = order.getChangeWhenExecutionAdded(now.plusMillis(2), 3L, 205.0d);
 		
@@ -796,8 +765,8 @@ public class OrderImplTest extends ContainerImplTest {
 	public void testUpdateWhenExecutionAdded() throws Exception {
 		makeOrderAvailableWithTrueController();
 		Instant now = Instant.now();
-		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
 		order.onUpdate().addSyncListener(listenerStub);
 		order.onFilled().addSyncListener(listenerStub);
 		order.onDone().addSyncListener(listenerStub);
@@ -816,9 +785,9 @@ public class OrderImplTest extends ContainerImplTest {
 	public void testUpdateWhenExecutionAdded_WhenFullyFilled() throws Exception {
 		makeOrderAvailableWithTrueController();
 		Instant now = Instant.now();
-		order.loadExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
-		order.loadExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
-		order.loadExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
+		order.addExecution(1005L, "x1", now,				70.10d, 5L, 100.0d);
+		order.addExecution(1006L, "x2", now.plusMillis(1), 70.95d, 2L, 213.00d);
+		order.addExecution(1007L, "x3", now.plusMillis(2), 70.82d, 3L, 205.00d);
 		order.onUpdate().addSyncListener(listenerStub);
 		order.onFilled().addSyncListener(listenerStub);
 		order.onFailed().addSyncListener(listenerStub);
@@ -941,6 +910,57 @@ public class OrderImplTest extends ContainerImplTest {
 		
 		assertEquals(1, listenerStub.getEventCount());
 		assertOrderEvent(listenerStub.getEvent(0), order.onArchived());
+	}
+	
+	@Test
+	public void testAddExecution1() throws Exception {
+		Instant time = Instant.EPOCH;
+		OrderExecution execution = newExec(2005, "foo2005", time, 112.34d, 10L, 1123.40d);
+		order.onExecution().addSyncListener(listenerStub);
+		
+		order.addExecution(execution);
+		
+		assertFalse(order.hasChanged());
+		assertEquals(0, listenerStub.getEventCount());
+		assertEquals(execution, order.getExecution(2005));
+	}
+	
+	@Test (expected=OrderException.class)
+	public void testAddExecution1_ThrowsIfAlreadyExists() throws Exception {
+		Instant time = Instant.EPOCH;
+		
+		order.addExecution(newExec(2008, "x", time, 48.15d, 1L, 48.15d));
+		order.addExecution(newExec(2008, "y", time, 12.78d, 1L, 12.78d));
+	}
+	
+	@Test
+	public void testFireExecutionAdded() throws Exception {
+		Instant time = Instant.now();
+		OrderExecution execution = newExec(512, null, time, 45.14d, 1L, 45.14d);
+		order.onExecution().addSyncListener(listenerStub);
+		
+		order.fireExecution(execution);
+		
+		assertEquals(1, listenerStub.getEventCount());
+		assertOrderEvent(listenerStub.getEvent(0), order.onExecution());
+		assertEquals(execution, ((OrderExecutionEvent) listenerStub.getEvent(0)).getExecution());
+	}
+	
+	@Test
+	public void testGetExecutions() throws Exception {
+		Instant time = Instant.now();
+		OrderExecution exec1 = newExec(501, null, time, 10.00d, 1L, 20.00d);
+		OrderExecution exec2 = newExec(502, null, time, 10.10d, 5L, 40.00d);
+		OrderExecution exec3 = newExec(503, "xo", time, 10.20d, 2L, 50.00d);
+		order.addExecution(exec1);
+		order.addExecution(exec2);
+		order.addExecution(exec3);
+		
+		List<OrderExecution> expected = new ArrayList<>();
+		expected.add(exec1);
+		expected.add(exec2);
+		expected.add(exec3);
+		assertEquals(expected, order.getExecutions());
 	}
 
 }

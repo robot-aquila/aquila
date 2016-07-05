@@ -285,7 +285,7 @@ public class ContainerImplTest {
 	}
 	
 	@Test
-	final public void testContainerImpl_HasChanged() {
+	final public void testContainerImpl_HasChanged1() {
 		container.update(data);
 		
 		assertFalse(container.hasChanged(DOUBLE_CAPITAL));
@@ -311,6 +311,24 @@ public class ContainerImplTest {
 		assertFalse(container.hasChanged(INSTANT_TIME_OF_REG));
 		assertTrue(container.hasChanged(LONG_SECONDS));
 		assertTrue(container.hasChanged(BOOL_ACTIVE));
+	}
+	
+	@Test
+	final public void testContainerImpl_HasChanged0() {
+		assertFalse(container.hasChanged());
+		
+		container.update(data);
+		
+		assertFalse(container.hasChanged());
+		
+		data.put(DOUBLE_CAPITAL, new Double(250.413d));
+		container.update(data);
+		
+		assertTrue(container.hasChanged());
+		
+		container.resetChanges();
+		
+		assertFalse(container.hasChanged());
 	}
 	
 	@Test
