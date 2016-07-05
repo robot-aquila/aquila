@@ -55,5 +55,35 @@ public class OrderTransactionFactory {
 		return createNewExecution(order, executionID, null, 
 			order.getTerminal().getCurrentTime(), price, volume, executedValue);
 	}
+	
+	/**
+	 * Create change of order finalization.
+	 * <p>
+	 * @param order - order
+	 * @param finalStatus - order final status
+	 * @param timeDone - time of finalization
+	 * @param systemMessage - system message
+	 * @return transaction
+	 */
+	public OrderChange createFinalization(EditableOrder order,
+			OrderStatus finalStatus, Instant timeDone, String systemMessage)
+	{
+		Map<Integer, Object> tokens = new HashMap<>();
+		tokens.put(OrderField.STATUS, finalStatus);
+		tokens.put(OrderField.TIME_DONE, timeDone);
+		tokens.put(OrderField.SYSTEM_MESSAGE, systemMessage);
+		return new OrderChangeImpl(order, tokens);
+	}
+	
+	/**
+	 * Create change of order finalization with current time of terminal.
+	 * <p>
+	 * @param order - order
+	 * @param finalStatus - order final status
+	 * @return transaction
+	 */
+	public OrderChange createFinalization(EditableOrder order, OrderStatus finalStatus) {
+		return createFinalization(order, finalStatus, order.getTerminal().getCurrentTime(), null);
+	}
 
 }

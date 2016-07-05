@@ -94,18 +94,7 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 */
 	@Deprecated
 	public Map<Integer, Object> getChangeWhenRegistered();
-	
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @param time - time
-	 * @param reason - reason
-	 * @return tokens
-	 */
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenCancelFailed(Instant time, String reason);
-		
+			
 	/**
 	 * This method is deprecated and will be removed. Use {@link OrderChange}
 	 * transaction to change order.
@@ -131,16 +120,6 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 */
 	@Deprecated
 	public void updateWhenRegistered();
-
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @param time - time
-	 * @param reason - reason
-	 */
-	@Deprecated
-	public void updateWhenCancelFailed(Instant time, String reason);
 	
 	public void fireArchived();
 

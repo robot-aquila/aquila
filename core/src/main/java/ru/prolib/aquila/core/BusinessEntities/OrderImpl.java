@@ -447,21 +447,6 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 
 	@Override
 	@Deprecated
-	public Map<Integer, Object> getChangeWhenCancelFailed(Instant time, String reason) {
-		lock.lock();
-		try {
-			Map<Integer, Object> tokens = new HashMap<>();
-			tokens.put(OrderField.TIME_DONE, time);
-			tokens.put(OrderField.SYSTEM_MESSAGE, reason);
-			tokens.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
-			return tokens;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	@Deprecated
 	public void updateWhenCancelled(Instant time) {
 		update(getChangeWhenCancelled(time));
 	}
@@ -478,12 +463,6 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		update(getChangeWhenRegistered());
 	}
 
-	@Override
-	@Deprecated
-	public void updateWhenCancelFailed(Instant time, String reason) {
-		update(getChangeWhenCancelFailed(time, reason));
-	}
-	
 	@Override
 	public void fireArchived() {
 		queue.enqueue(onArchived, new OrderEventFactory(this));

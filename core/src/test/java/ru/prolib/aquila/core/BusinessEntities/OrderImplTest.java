@@ -677,19 +677,6 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 
 	@Test
-	public void testGetChangeWhenCancelFailed() throws Exception {
-		Instant time = Instant.now();
-		
-		Map<Integer, Object> actual = order.getChangeWhenCancelFailed(time, "some error");
-		
-		Map<Integer, Object> expected = new HashMap<>();
-		expected.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
-		expected.put(OrderField.SYSTEM_MESSAGE, "some error");
-		expected.put(OrderField.TIME_DONE, time);
-		assertEquals(expected, actual);
-	}
-
-	@Test
 	public void testUpdateWhenCancelled() throws Exception {
 		makeOrderAvailableWithTrueController();
 		Instant now = Instant.now();
@@ -764,28 +751,7 @@ public class OrderImplTest extends ContainerImplTest {
 		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
 		assertOrderEvent(listenerStub.getEvent(1), order.onRegistered());
 	}
-	
-	@Test
-	public void testUpdateWhenCancelFailed() throws Exception {
-		makeOrderAvailableWithTrueController();
-		Instant time = Instant.parse("2017-01-01T00:00:00Z");
-		order.onUpdate().addSyncListener(listenerStub);
-		order.onCancelFailed().addSyncListener(listenerStub);
-		order.onFailed().addSyncListener(listenerStub);
-		order.onDone().addSyncListener(listenerStub);
 		
-		order.updateWhenCancelFailed(time, "test error");
-
-		assertEquals(OrderStatus.CANCEL_FAILED, order.getStatus());
-		assertEquals("test error", order.getSystemMessage());
-		assertEquals(time, order.getTimeDone());
-		assertEquals(4, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
-		assertOrderEvent(listenerStub.getEvent(1), order.onCancelFailed());
-		assertOrderEvent(listenerStub.getEvent(2), order.onFailed());
-		assertOrderEvent(listenerStub.getEvent(3), order.onDone());
-	}
-	
 	@Test
 	public void testFireArchived() throws Exception {
 		order.onArchived().addSyncListener(listenerStub);

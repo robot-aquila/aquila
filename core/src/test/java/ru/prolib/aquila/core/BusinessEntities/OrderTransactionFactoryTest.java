@@ -103,5 +103,31 @@ public class OrderTransactionFactoryTest {
 		assertEquals(1215.34d, actualExecution.getValue(), 0.01d);
 		assertEquals(20L, actualExecution.getVolume());
 	}
+	
+	@Test
+	public void testCreateFinalization4() throws Exception {
+		order = (EditableOrder) terminal.createOrder(account, symbol, OrderAction.SELL, 90L);
+
+		Instant time = Instant.parse("2016-07-06T00:00:00Z");
+		Map<Integer, Object> tokens = new HashMap<>();
+		tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		tokens.put(OrderField.TIME_DONE, time);
+		tokens.put(OrderField.SYSTEM_MESSAGE, "Cancelled");
+		OrderChange expected = new OrderChangeImpl(order, tokens);
+		
+		OrderChange actual = factory.createFinalization(order, OrderStatus.CANCELLED, time, "Cancelled");
+
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateFinalization2() throws Exception {
+		order = (EditableOrder) terminal.createOrder(account, symbol, OrderAction.SELL, 90L);
+		
+		OrderChange actual = factory.createFinalization(order, OrderStatus.REJECTED);
+		
+		assertEquals(OrderStatus.REJECTED, actual.getStatus());
+		assertTrue(ChronoUnit.MILLIS.between(terminal.getCurrentTime(), actual.getDoneTime()) < 200L);
+	}
 
 }
