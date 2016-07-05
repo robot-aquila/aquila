@@ -402,66 +402,6 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 			lock.unlock();
 		}
 	}
-	
-	@Override
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenCancelled(Instant time) {
-		lock.lock();
-		try {
-			Map<Integer, Object> tokens = new HashMap<>();
-			tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
-			tokens.put(OrderField.TIME_DONE, time);
-			return tokens;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenRejected(Instant time, String reason) {
-		lock.lock();
-		try {
-			Map<Integer, Object> tokens = new HashMap<>();
-			tokens.put(OrderField.STATUS, OrderStatus.REJECTED);
-			tokens.put(OrderField.TIME_DONE, time);
-			tokens.put(OrderField.SYSTEM_MESSAGE, reason);
-			return tokens;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenRegistered() {
-		lock.lock();
-		try {
-			Map<Integer, Object> tokens = new HashMap<>();
-			tokens.put(OrderField.STATUS, OrderStatus.ACTIVE);
-			return tokens;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	@Deprecated
-	public void updateWhenCancelled(Instant time) {
-		update(getChangeWhenCancelled(time));
-	}
-
-	@Override
-	@Deprecated
-	public void updateWhenRejected(Instant time, String reason) {
-		update(getChangeWhenRejected(time, reason));
-	}
-
-	@Override
-	@Deprecated
-	public void updateWhenRegistered() {
-		update(getChangeWhenRegistered());
-	}
 
 	@Override
 	public void fireArchived() {

@@ -60,4 +60,6 @@ public interface OrderChange extends ContainerTransaction {
 	 */
 	public OrderExecution getExecution();
 
+	public String getSystemMessage();
+	
 }

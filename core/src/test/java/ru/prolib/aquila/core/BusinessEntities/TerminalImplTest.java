@@ -55,6 +55,7 @@ public class TerminalImplTest {
 	private DataProviderStubX dataProviderStub;
 	private TerminalImpl terminal, terminalWithMocks;
 	private EventListenerStub listenerStub;
+	private OrderTransactionFactory orderTransactionFactory;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -78,6 +79,7 @@ public class TerminalImplTest {
 		params.setScheduler(schedulerMock);
 		terminalWithMocks = new TerminalImpl(params);
 		listenerStub = new EventListenerStub();
+		orderTransactionFactory = new OrderTransactionFactory();
 	}
 	
 	@After
@@ -958,15 +960,15 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testArchiveOrders() {
+	public void testArchiveOrders() throws Exception {
 		dataProviderStub.nextOrderID = 1000L;
 		EditableOrder order1 = createTestOrder(),
 			order2 = createTestOrder(),
 			order3 = createTestOrder(),
 			order4 = createTestOrder(),
 			order5 = createTestOrder();
-		order2.updateWhenCancelled(Instant.now());
-		order5.updateWhenRejected(Instant.now(), "Test");
+		orderTransactionFactory.createCancellation(order2).apply();
+		orderTransactionFactory.createRejection(order5, "Test").apply();
 		terminal.onOrderArchived().addSyncListener(listenerStub);
 		
 		terminal.archiveOrders();

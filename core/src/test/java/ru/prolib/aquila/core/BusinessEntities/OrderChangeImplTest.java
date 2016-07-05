@@ -74,6 +74,12 @@ public class OrderChangeImplTest {
 	}
 	
 	@Test
+	public void testGetSystemMessage() {
+		tokens.put(OrderField.SYSTEM_MESSAGE, "foobar");
+		assertEquals("foobar", change.getSystemMessage());
+	}
+	
+	@Test
 	public void testIsApplied() throws Exception {
 		orderMock.update(tokens);
 		control.replay();

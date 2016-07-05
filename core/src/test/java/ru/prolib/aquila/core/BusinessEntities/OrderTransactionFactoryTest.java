@@ -24,7 +24,7 @@ public class OrderTransactionFactoryTest {
 		terminal = new BasicTerminalBuilder()
 			.withDataProvider(new DataProviderStub())
 			.buildTerminal();
-		order = null;
+		order = (EditableOrder) terminal.createOrder(account, symbol, OrderAction.SELL, 90L);
 		factory = new OrderTransactionFactory();
 	}
 	
@@ -106,8 +106,6 @@ public class OrderTransactionFactoryTest {
 	
 	@Test
 	public void testCreateFinalization4() throws Exception {
-		order = (EditableOrder) terminal.createOrder(account, symbol, OrderAction.SELL, 90L);
-
 		Instant time = Instant.parse("2016-07-06T00:00:00Z");
 		Map<Integer, Object> tokens = new HashMap<>();
 		tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
@@ -122,12 +120,52 @@ public class OrderTransactionFactoryTest {
 	
 	@Test
 	public void testCreateFinalization2() throws Exception {
-		order = (EditableOrder) terminal.createOrder(account, symbol, OrderAction.SELL, 90L);
-		
 		OrderChange actual = factory.createFinalization(order, OrderStatus.REJECTED);
 		
 		assertEquals(OrderStatus.REJECTED, actual.getStatus());
 		assertTrue(ChronoUnit.MILLIS.between(terminal.getCurrentTime(), actual.getDoneTime()) < 200L);
 	}
+	
+	@Test
+	public void testCreateCancellation2() throws Exception {
+		Instant time = Instant.parse("2016-07-06T00:00:00Z");
+		Map<Integer, Object> tokens = new HashMap<>();
+		tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		tokens.put(OrderField.TIME_DONE, time);
+		tokens.put(OrderField.SYSTEM_MESSAGE, null);
+		OrderChange expected = new OrderChangeImpl(order, tokens);
+		
+		OrderChange actual = factory.createCancellation(order, time);
 
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testCreateCancellation1() throws Exception {
+		OrderChange actual = factory.createCancellation(order);
+		
+		assertEquals(OrderStatus.CANCELLED, actual.getStatus());
+		assertTrue(ChronoUnit.MILLIS.between(terminal.getCurrentTime(), actual.getDoneTime()) < 200L);
+	}
+
+	@Test
+	public void testCreateRegistration1() throws Exception {
+		Map<Integer, Object> tokens = new HashMap<>();
+		tokens.put(OrderField.STATUS, OrderStatus.ACTIVE);
+		OrderChange expected = new OrderChangeImpl(order, tokens);
+		
+		OrderChange actual = factory.createRegistration(order);
+
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateRejection2() throws Exception {
+		OrderChange actual = factory.createRejection(order, "Rejected");
+		
+		assertEquals(OrderStatus.REJECTED, actual.getStatus());
+		assertTrue(ChronoUnit.MILLIS.between(terminal.getCurrentTime(), actual.getDoneTime()) < 200L);
+		assertEquals("Rejected", actual.getSystemMessage());
+	}
+	
 }

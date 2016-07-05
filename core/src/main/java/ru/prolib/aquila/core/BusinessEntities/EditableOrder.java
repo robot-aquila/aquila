@@ -1,8 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
-import java.util.Map;
-
 
 /**
  * Order service interface.
@@ -64,63 +62,7 @@ public interface EditableOrder extends Order, UpdatableContainer {
 	 * @return true if events are enable, false otherwise
 	 */
 	public boolean isStatusEventsEnabled();
-		
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @param time - time
-	 * @return tokens
-	 */
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenCancelled(Instant time);
-	
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @param time - time
-	 * @param reason - reason
-	 * @return tokens
-	 */
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenRejected(Instant time, String reason);
-	
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @return tokens
-	 */
-	@Deprecated
-	public Map<Integer, Object> getChangeWhenRegistered();
 			
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @param time - time
-	 */
-	@Deprecated
-	public void updateWhenCancelled(Instant time);
-	
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 * <p>
-	 * @param time - time
-	 * @param reason - reason
-	 */
-	@Deprecated
-	public void updateWhenRejected(Instant time, String reason);
-	
-	/**
-	 * This method is deprecated and will be removed. Use {@link OrderChange}
-	 * transaction to change order.
-	 */
-	@Deprecated
-	public void updateWhenRegistered();
-	
 	public void fireArchived();
 
 }

@@ -5,9 +5,7 @@ import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -635,121 +633,6 @@ public class OrderImplTest extends ContainerImplTest {
 		assertFalse(order.isStatusEventsEnabled());
 		order.setStatusEventsEnabled(true);
 		assertTrue(order.isStatusEventsEnabled());
-	}
-	
-	@Test
-	public void testGetChangeWhenCancelled() throws Exception {
-		Instant time = Instant.now();
-		data.put(OrderField.ACTION, OrderAction.SELL);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		data.put(OrderField.CURRENT_VOLUME, 10L);
-		order.update(data);
-		
-		Map<Integer, Object> actual = order.getChangeWhenCancelled(time);
-		
-		Map<Integer, Object> expected = new HashMap<>();
-		expected.put(OrderField.STATUS, OrderStatus.CANCELLED);
-		expected.put(OrderField.TIME_DONE, time);
-		assertEquals(expected, actual);
-	}
-
-	@Test
-	public void testGetChangeWhenRejected() throws Exception {
-		Instant time = Instant.now();
-		
-		Map<Integer, Object> actual = order.getChangeWhenRejected(time, "rejected");
-		
-		Map<Integer, Object> expected = new HashMap<>();
-		expected.put(OrderField.STATUS, OrderStatus.REJECTED);
-		expected.put(OrderField.TIME_DONE, time);
-		expected.put(OrderField.SYSTEM_MESSAGE, "rejected");
-		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testGetChangeWhenRegistered() throws Exception {
-		
-		Map<Integer, Object> actual = order.getChangeWhenRegistered();
-		
-		Map<Integer, Object> expected = new HashMap<>();
-		expected.put(OrderField.STATUS, OrderStatus.ACTIVE);
-		assertEquals(expected, actual);
-	}
-
-	@Test
-	public void testUpdateWhenCancelled() throws Exception {
-		makeOrderAvailableWithTrueController();
-		Instant now = Instant.now();
-		order.onUpdate().addSyncListener(listenerStub);
-		order.onCancelled().addSyncListener(listenerStub);
-		order.onDone().addSyncListener(listenerStub);
-		
-		order.updateWhenCancelled(now);
-		
-		assertEquals(10L, (long)order.getCurrentVolume());
-		assertEquals(OrderStatus.CANCELLED, order.getStatus());
-		assertEquals(now, order.getTimeDone());
-		assertEquals(3, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
-		assertOrderEvent(listenerStub.getEvent(1), order.onCancelled());
-		assertOrderEvent(listenerStub.getEvent(2), order.onDone());
-	}
-	
-	@Test
-	public void testUpdateWhenCancelled_PartiallyFilled() throws Exception {
-		makeOrderAvailableWithTrueController();
-		Instant now = Instant.now();
-		data.put(OrderField.CURRENT_VOLUME, 5L);
-		order.update(data);
-		order.onUpdate().addSyncListener(listenerStub);
-		order.onCancelled().addSyncListener(listenerStub);
-		order.onPartiallyFilled().addSyncListener(listenerStub);
-		order.onDone().addSyncListener(listenerStub);
-		
-		order.updateWhenCancelled(now.plusMillis(10));
-		
-		assertEquals(5L, (long)order.getCurrentVolume());
-		assertEquals(OrderStatus.CANCELLED, order.getStatus());
-		assertEquals(now.plusMillis(10), order.getTimeDone());
-		assertEquals(3, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
-		assertOrderEvent(listenerStub.getEvent(1), order.onPartiallyFilled());
-		assertOrderEvent(listenerStub.getEvent(2), order.onDone());
-	}
-
-	@Test
-	public void testUpdateWhenRejected() throws Exception {
-		makeOrderAvailableWithTrueController();
-		Instant now = Instant.now();
-		order.onUpdate().addSyncListener(listenerStub);
-		order.onRegisterFailed().addSyncListener(listenerStub);
-		order.onFailed().addSyncListener(listenerStub);
-		order.onDone().addSyncListener(listenerStub);
-		
-		order.updateWhenRejected(now, "insufficient funds");
-		
-		assertEquals(OrderStatus.REJECTED, order.getStatus());
-		assertEquals(now, order.getTimeDone());
-		assertEquals("insufficient funds", order.getSystemMessage());
-		assertEquals(4, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
-		assertOrderEvent(listenerStub.getEvent(1), order.onRegisterFailed());
-		assertOrderEvent(listenerStub.getEvent(2), order.onFailed());
-		assertOrderEvent(listenerStub.getEvent(3), order.onDone());
-	}
-	
-	@Test
-	public void testUpdateWhenRegistered() throws Exception {
-		makeOrderAvailableWithTrueController();
-		order.onUpdate().addSyncListener(listenerStub);
-		order.onRegistered().addSyncListener(listenerStub);
-		
-		order.updateWhenRegistered();
-		
-		assertEquals(OrderStatus.ACTIVE, order.getStatus());
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onUpdate());
-		assertOrderEvent(listenerStub.getEvent(1), order.onRegistered());
 	}
 		
 	@Test

@@ -85,5 +85,24 @@ public class OrderTransactionFactory {
 	public OrderChange createFinalization(EditableOrder order, OrderStatus finalStatus) {
 		return createFinalization(order, finalStatus, order.getTerminal().getCurrentTime(), null);
 	}
+	
+	public OrderChange createCancellation(EditableOrder order, Instant timeDone) {
+		return createFinalization(order, OrderStatus.CANCELLED, timeDone, null);
+	}
+	
+	public OrderChange createCancellation(EditableOrder order) {
+		return createFinalization(order, OrderStatus.CANCELLED);
+	}
+	
+	public OrderChange createRegistration(EditableOrder order) {
+		Map<Integer, Object> tokens = new HashMap<>();
+		tokens.put(OrderField.STATUS, OrderStatus.ACTIVE);
+		return new OrderChangeImpl(order, tokens);
+	}
+	
+	public OrderChange createRejection(EditableOrder order, String reason) {
+		return createFinalization(order, OrderStatus.REJECTED,
+				order.getTerminal().getCurrentTime(), reason);
+	}
 
 }

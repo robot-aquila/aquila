@@ -52,6 +52,11 @@ public class OrderChangeImpl implements OrderChange {
 	public double getExecutedValue() {
 		return (double) tokens.get(OrderField.EXECUTED_VALUE);
 	}
+	
+	@Override
+	public String getSystemMessage() {
+		return (String) tokens.get(OrderField.SYSTEM_MESSAGE);
+	}
 
 	@Override
 	public boolean isApplied() {
