@@ -107,9 +107,10 @@ public class ContainerImplTest {
 	 * @param token - token ID
 	 * @param value1 - initial value
 	 * @param value2 - new value
+	 * @param nullValue - null equivalent (should be equals to if no token defined or token value is null)
 	 */
 	protected void testGetter_ChangesPlusEvent(int token,
-			Object value1, Object value2)
+			Object value1, Object value2, Object nullValue)
 	{
 		Object fixture[][] = {
 				// initial value, new value, changed?
@@ -137,8 +138,30 @@ public class ContainerImplTest {
 			boolean changed = (Boolean)fixture[i][2];
 			assertEquals(msg, changed ? 1 : 0, listenerStub.getEventCount());
 			assertEquals(msg, changed, container.hasChanged(token));
-			assertEquals(msg, fixture[i][1], getter.get());
+			Object expectedValue = fixture[i][1];
+			if ( expectedValue == null ) {
+				expectedValue = nullValue;
+			}
+			assertEquals(msg, expectedValue, getter.get());
 		}
+	}
+	
+	/**
+	 * Basic test of getter method.
+	 * <p>
+	 * This method tests getter method, token change status and container update
+	 * event. Uses getter and container instance. Works via
+	 * {@link #testGetter_ChangesPlusEvent(int, Object, Object, Object)}
+	 * with default null-value.
+	 * <p>
+	 * @param token - token ID
+	 * @param value1 - initial value
+	 * @param value2 - new value
+	 */
+	protected void testGetter_ChangesPlusEvent(int token,
+			Object value1, Object value2)
+	{
+		testGetter_ChangesPlusEvent(token, value1, value2, null);
 	}
 	
 	/**
@@ -199,6 +222,23 @@ public class ContainerImplTest {
 		} catch ( ClassCastException e ) { }
 	}
 	
+
+	/**
+	 * Getter method complex test.
+	 * <p>
+	 * @param token - token ID
+	 * @param value1 - initial value
+	 * @param value2 - new value
+	 * @param nullValue - null equivalent (should be equals to if no token defined or token value is null)
+	 */
+	protected void testGetter(int token, Object value1, Object value2, Object nullValue)
+			throws Exception
+	{
+		testGetter_ChangesPlusEvent(token, value1, value2, nullValue);
+		testGetter_Locking(token, value1, value2);
+		testGetter_ClassCastException(token);		
+	}
+	
 	/**
 	 * Getter method complex test.
 	 * <p>
@@ -209,9 +249,7 @@ public class ContainerImplTest {
 	protected void testGetter(int token, Object value1, Object value2)
 			throws Exception
 	{
-		testGetter_ChangesPlusEvent(token, value1, value2);
-		testGetter_Locking(token, value1, value2);
-		testGetter_ClassCastException(token);
+		testGetter(token, value1, value2, null);
 	}
 	
 	@Test
