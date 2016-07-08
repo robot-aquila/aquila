@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
 
 import ru.prolib.aquila.core.EventType;
@@ -157,5 +158,21 @@ public interface Container extends AbstractContainer {
 	public boolean atLeastOneHasChanged(int[] tokens);
 	
 	public boolean isAvailable();
+	
+	/**
+	 * Get content of the container.
+	 * <p>
+	 * @return container content
+	 */
+	public Map<Integer, Object> getContent();
+	
+	/**
+	 * Get updated content.
+	 * <p>
+	 * Get content which was changed at the last update.
+	 * <p>
+	 * @return updated content
+	 */
+	public Map<Integer, Object> getUpdatedContent();
 	
 }

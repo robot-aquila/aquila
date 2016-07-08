@@ -653,5 +653,45 @@ public class ContainerImplTest {
 		
 		container.update(data);
 	}
+	
+	@Test
+	public void testGetContent() throws Exception {
+		data.put(BOOL_ACTIVE, true);
+		data.put(DOUBLE_CAPITAL, 815.32d);
+		data.put(INSTANT_TIME_OF_REG, Instant.EPOCH);
+		data.put(INTEGER_AGE, 25);
+		container.update(data);
+		
+		Map<Integer, Object> actual = container.getContent();
+		
+		Map<Integer, Object> expected = new HashMap<>();
+		expected.put(BOOL_ACTIVE, true);
+		expected.put(DOUBLE_CAPITAL, 815.32d);
+		expected.put(INSTANT_TIME_OF_REG, Instant.EPOCH);
+		expected.put(INTEGER_AGE, 25);
+		assertEquals(expected, actual);
+		assertNotSame(data, actual);
+	}
+	
+	@Test
+	public void testGetUpdatedContent() throws Exception {
+		data.put(BOOL_ACTIVE, true);
+		data.put(DOUBLE_CAPITAL, 815.32d);
+		data.put(INSTANT_TIME_OF_REG, Instant.EPOCH);
+		data.put(INTEGER_AGE, 25);
+		container.update(data);
+		data.clear();
+		data.put(DOUBLE_CAPITAL, 850.69d);
+		data.put(INSTANT_TIME_OF_REG, Instant.parse("2016-07-08T16:19:00Z"));
+		container.update(data);
+		
+		Map<Integer, Object> actual = container.getUpdatedContent();
+
+		Map<Integer, Object> expected = new HashMap<>();
+		expected.put(DOUBLE_CAPITAL, 850.69d);
+		expected.put(INSTANT_TIME_OF_REG, Instant.parse("2016-07-08T16:19:00Z"));
+		assertEquals(expected, actual);
+		assertNotSame(data, actual);
+	}
 
 }

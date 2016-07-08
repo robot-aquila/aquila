@@ -376,5 +376,29 @@ public class ContainerImpl implements UpdatableContainer {
 		}
 		
 	}
+
+	@Override
+	public Map<Integer, Object> getContent() {
+		lock.lock();
+		try {
+			return new HashMap<>(values);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public Map<Integer, Object> getUpdatedContent() {
+		lock.lock();
+		try {
+			Map<Integer, Object> tokens = new HashMap<>();
+			for ( Integer key : updated ) {
+				tokens.put(key, values.get(key));
+			}
+			return tokens;
+		} finally {
+			lock.unlock();
+		}
+	}
 	
 }
