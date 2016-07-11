@@ -132,7 +132,6 @@ public class OrderTransactionFactoryTest {
 		Map<Integer, Object> tokens = new HashMap<>();
 		tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
 		tokens.put(OrderField.TIME_DONE, time);
-		tokens.put(OrderField.SYSTEM_MESSAGE, null);
 		OrderChange expected = new OrderChangeImpl(order, tokens);
 		
 		OrderChange actual = factory.createCancellation(order, time);

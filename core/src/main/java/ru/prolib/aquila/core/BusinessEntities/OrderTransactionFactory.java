@@ -85,13 +85,21 @@ public class OrderTransactionFactory {
 	public OrderChange createFinalization(EditableOrder order, OrderStatus finalStatus) {
 		return createFinalization(order, finalStatus, order.getTerminal().getCurrentTime(), null);
 	}
-	
+
+	protected void onCancellation(EditableOrder order, Map<Integer, Object> tokens) {
+		
+	}
+
 	public OrderChange createCancellation(EditableOrder order, Instant timeDone) {
-		return createFinalization(order, OrderStatus.CANCELLED, timeDone, null);
+		Map<Integer, Object> tokens = new HashMap<>();
+		tokens.put(OrderField.STATUS, OrderStatus.CANCELLED);
+		tokens.put(OrderField.TIME_DONE, timeDone);
+		onCancellation(order, tokens);
+		return new OrderChangeImpl(order, tokens);
 	}
 	
 	public OrderChange createCancellation(EditableOrder order) {
-		return createFinalization(order, OrderStatus.CANCELLED);
+		return createCancellation(order, order.getTerminal().getCurrentTime());
 	}
 	
 	public OrderChange createRegistration(EditableOrder order) {
