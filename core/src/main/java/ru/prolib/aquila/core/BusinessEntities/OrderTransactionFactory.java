@@ -36,6 +36,7 @@ public class OrderTransactionFactory {
 		OrderExecution execution = new OrderExecutionImpl(order.getTerminal(),
 				executionID, externalID, order.getSymbol(), order.getAction(),
 				order.getID(), executionTime, price, volume, executedValue);
+		onNewExecution(order, tokens, execution);
 		return new OrderChangeImpl(order, tokens, execution);
 	}
 	
@@ -72,6 +73,7 @@ public class OrderTransactionFactory {
 		tokens.put(OrderField.STATUS, finalStatus);
 		tokens.put(OrderField.TIME_DONE, timeDone);
 		tokens.put(OrderField.SYSTEM_MESSAGE, systemMessage);
+		onFinalization(order, tokens);
 		return new OrderChangeImpl(order, tokens);
 	}
 	
@@ -84,10 +86,6 @@ public class OrderTransactionFactory {
 	 */
 	public OrderChange createFinalization(EditableOrder order, OrderStatus finalStatus) {
 		return createFinalization(order, finalStatus, order.getTerminal().getCurrentTime(), null);
-	}
-
-	protected void onCancellation(EditableOrder order, Map<Integer, Object> tokens) {
-		
 	}
 
 	public OrderChange createCancellation(EditableOrder order, Instant timeDone) {
@@ -105,12 +103,31 @@ public class OrderTransactionFactory {
 	public OrderChange createRegistration(EditableOrder order) {
 		Map<Integer, Object> tokens = new HashMap<>();
 		tokens.put(OrderField.STATUS, OrderStatus.ACTIVE);
+		onRegistration(order, tokens);
 		return new OrderChangeImpl(order, tokens);
 	}
 	
 	public OrderChange createRejection(EditableOrder order, String reason) {
 		return createFinalization(order, OrderStatus.REJECTED,
 				order.getTerminal().getCurrentTime(), reason);
+	}
+
+	protected void onRegistration(EditableOrder order, Map<Integer, Object> tokens) {
+		
+	}
+	
+	protected void onCancellation(EditableOrder order, Map<Integer, Object> tokens) {
+		
+	}
+	
+	protected void onFinalization(EditableOrder order, Map<Integer, Object> tokens) {
+		
+	}
+	
+	protected void onNewExecution(EditableOrder order,
+			Map<Integer, Object> tokens, OrderExecution execution)
+	{
+		
 	}
 
 }
