@@ -10,5 +10,16 @@ public class SimpleEventFactory implements EventFactory {
 	public Event produceEvent(EventType type) {
 		return new EventImpl(type);
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null | other.getClass() != SimpleEventFactory.class ) {
+			return false;
+		}
+		return true;
+	}
 
 }
