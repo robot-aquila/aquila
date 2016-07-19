@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.finam;
+package ru.prolib.aquila.finam.tools.web;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -6,32 +6,24 @@ import java.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.datatools.finam.downloader.WebForm;
-
-public class TickDataDownloader {
-	public static final int HTMLUNIT_DRIVER = 0;
-	public static final int FIREFOX_DRIVER = 1;
+public class DataExport {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(TickDataDownloader.class);
+		logger = LoggerFactory.getLogger(DataExport.class);
 	}
 	
-	private final int driver;
 	private String market;
 	private String quote;
 	private LocalDate date;
+	private DataExportForm exportForm;
 	
-	public TickDataDownloader(int driver) {
+	public DataExport(DataExportForm exportForm) {
 		super();
-		this.driver = driver;
+		this.exportForm = exportForm;
 		market = "МосБиржа фьючерсы";
 		quote = "RTS";
 		date = LocalDate.now().minusDays(1);
-	}
-	
-	public TickDataDownloader() {
-		this(HTMLUNIT_DRIVER);
 	}
 	
 	/**
@@ -42,7 +34,7 @@ public class TickDataDownloader {
 	 * @param market - the name
 	 * @return this object
 	 */
-	public TickDataDownloader withMarket(String market) {
+	public DataExport withMarket(String market) {
 		this.market = market;
 		return this;
 	}
@@ -55,7 +47,7 @@ public class TickDataDownloader {
 	 * @param quote - the name
 	 * @return this object
 	 */
-	public TickDataDownloader withQuote(String quote) {
+	public DataExport withQuote(String quote) {
 		this.quote = quote;
 		return this;
 	}
@@ -68,7 +60,7 @@ public class TickDataDownloader {
 	 * @param date - the date
 	 * @return this object
 	 */
-	public TickDataDownloader withDate(LocalDate date) {
+	public DataExport withDate(LocalDate date) {
 		this.date = date;
 		return this;
 	}
@@ -79,34 +71,26 @@ public class TickDataDownloader {
 	 * @return the file
 	 * @throws FinamException if error occurred while downloading
 	 */
-	public File download() throws FinamException {
-		WebForm form  = null;
+	public File download() throws DataExportException {
 		String id = String.format("[%s@%s] for %s", quote, market, date);
 		try {
 			logger.debug("Start downloading tick data: {}", id);
-			form = createWebForm();
-			File file = form.selectMarket(market)
+			exportForm.selectMarket(market)
 				.selectQuote(quote)
 				.selectDateTo(date)
 				.selectDateFrom(date)
 				.selectPeriodTick()
-				.selectFileFormat_TimePriceVolId()
-				.download();
-			logger.debug("Tick data {} download finished: {} (size {} bytes)",
-					new Object[] { id, file, file.length() });
-			return file;
-			
+				.selectFileFormat_TimePriceVolId();
+			// TODO: not yet implemented
+			return null;
 		} catch ( Exception e ) {
 			logger.error("Error downloading file: ", e);
-			throw new FinamException("Error downloading file", e);
+			throw new DataExportException("Error downloading file", e);
 		} finally {
-			if ( form != null ) form.close();
+			if ( exportForm != null ) {
+				exportForm.close();
+			}
 		}
-	}
-	
-	protected WebForm createWebForm() {
-		return driver == FIREFOX_DRIVER ? WebForm.createFirefoxDownloader()
-				: WebForm.createHtmlUnitDownloader();
 	}
 
 }

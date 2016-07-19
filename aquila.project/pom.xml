@@ -16,6 +16,7 @@
 		<module>../ui</module>
 		<module>../probe</module>
 		<module>../datatools</module>
+		<module>../finam-tools</module>
 	</modules>
   
 	<dependencies>
