@@ -79,9 +79,9 @@ public class DataExport {
 				.selectQuote(quote)
 				.selectDateTo(date)
 				.selectDateFrom(date)
-				.selectPeriodTick()
+				.selectPeriod_Ticks()
 				.selectFileFormat_TimePriceVolId();
-			// TODO: not yet implemented
+			// TODO: download not yet implemented
 			return null;
 		} catch ( Exception e ) {
 			logger.error("Error downloading file: ", e);

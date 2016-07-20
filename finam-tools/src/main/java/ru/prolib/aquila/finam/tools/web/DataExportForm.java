@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class DataExportForm implements Closeable {
 	
@@ -174,7 +176,7 @@ public class DataExportForm implements Closeable {
 		return this;
 	}
 	
-	public DataExportForm selectPeriod(String periodName) {
+	private DataExportForm selectPeriod(String periodName) {
 		initialRequest();
 		driver.findElement(By.id("issuer-profile-export-first-row"))
 			.findElement(By.className("finam-ui-controls-select"))
@@ -188,11 +190,11 @@ public class DataExportForm implements Closeable {
 		return this;
 	}
 	
-	public DataExportForm selectPeriodTick() {
+	public DataExportForm selectPeriod_Ticks() {
 		return selectPeriod("тики");
 	}
 
-	public DataExportForm selectFileFormat(String formatName) {
+	private DataExportForm selectFileFormat(String formatName) {
 		initialRequest();
 		driver.findElement(By.id("issuer-profile-export-fileformat-row"))
 			.findElement(By.className("finam-ui-controls-select"))
@@ -232,7 +234,7 @@ public class DataExportForm implements Closeable {
 		return selectFileFormat("DATE, TIME, LAST, VOL");
 	}
 	
-	public DataExportForm selectFileExt(String extName) {
+	private DataExportForm selectFileExt(String extName) {
 		initialRequest();
 		driver.findElement(By.id("issuer-profile-export-second-row"))
 			.findElement(By.className("finam-ui-controls-select"))
@@ -246,13 +248,186 @@ public class DataExportForm implements Closeable {
 		return this;
 	}
 	
-	public void selectFileName(String fileName) {
-		WebElement filename = driver.findElement(By.id("issuer-profile-export-file-name"));
-		filename.sendKeys(StringUtils.repeat("\b", 50) + fileName);
+	public DataExportForm selectFileExt_Csv() {
+		return selectFileExt(".csv");
 	}
 	
+	public DataExportForm selectFileExt_Txt() {
+		return selectFileExt(".txt");
+	}
+	
+	private DataExportForm selectDateFormat(String formatName) {
+		initialRequest();
+		driver.findElement(By.id("issuer-profile-export-date-row"))
+			.findElement(By.className("finam-ui-controls-select"))
+			.findElement(By.className("finam-ui-controls-select-arrow"))
+			.click();
+		try {
+			selectLink(getDateFormatSelectorOwner(), formatName);
+		} catch ( DataExportFormException e ) {
+			throw new NoSuchElementException("Cannot set date format: " + formatName, e);
+		}
+		return this;
+	}
+	
+	public DataExportForm selectDateFormat_YYYYMMDD() {
+		return selectDateFormat("ггггммдд");
+	}
+	
+	public DataExportForm selectDateFormat_DDMMYY() {
+		return selectDateFormat("ддммгг");
+	}
+	
+	private DataExportForm selectTimeFormat(String fmtName) {
+		initialRequest();
+		WebElement rowElement = driver.findElement(By.id("issuer-profile-export-date-row"));
+		List<WebElement> elements = rowElement.findElements(By.className("finam-ui-controls-select"));
+		if ( elements.size() < 2 ) {
+			throw new NoSuchElementException("Cannot set time format (selector was not located): " + fmtName);
+		}
+		elements.get(1).findElement(By.className("finam-ui-controls-select-arrow")).click();
+		try {
+			selectLink(getTimeFormatSelectorOwner(), fmtName);
+		} catch ( DataExportFormException e ) {
+			throw new NoSuchElementException("Cannot set time format: " + fmtName, e);
+		}
+		return this;
+	}
+	
+	public DataExportForm selectTimeFormat_HHMMSS() {
+		return selectTimeFormat("ччммсс");
+	}
+	
+	public DataExportForm selectTimeFormat_HHcolMM() {
+		return selectTimeFormat("чч:мм");
+	}
+	
+	private DataExportForm selectFieldSeparator(String sepName) {
+		initialRequest();
+		driver.findElement(By.id("issuer-profile-export-separator-row"))
+			.findElement(By.className("finam-ui-controls-select"))
+			.findElement(By.className("finam-ui-controls-select-arrow"))
+			.click();
+		try {
+			selectLink(getFieldSeparatorSelectorOwner(), sepName);
+		} catch ( DataExportFormException e ) {
+			throw new NoSuchElementException("Cannot set field separator: " + sepName, e);
+		}
+		return this;
+	}
+	
+	public DataExportForm selectFieldSeparator_Comma() {
+		return selectFieldSeparator("запятая (,)");
+	}
+	
+	public DataExportForm selectFieldSeparator_Dot() {
+		return selectFieldSeparator("точка (.)");
+	}
+	
+	private DataExportForm selectDigitSeparator(String sepName) {
+		initialRequest();
+		WebElement rowElement = driver.findElement(By.id("issuer-profile-export-separator-row"));
+		List<WebElement> elements = rowElement.findElements(By.className("finam-ui-controls-select"));
+		if ( elements.size() < 2 ) {
+			throw new NoSuchElementException("Cannot set digit separator (selector was not located): " + sepName);
+		}
+		elements.get(1).findElement(By.className("finam-ui-controls-select-arrow")).click();
+		try {
+			selectLink(getDigitSeparatorSelectorOwner(), sepName);
+		} catch ( DataExportFormException e ) {
+			throw new NoSuchElementException("Cannot set digit separator: " + sepName, e);
+		}
+		return this;
+
+	}
+	
+	public DataExportForm selectDigitSeparator_None() {
+		return selectDigitSeparator("нет");
+	}
+	
+	public DataExportForm selectDigitSeparator_Dot() {
+		return selectDigitSeparator("точка (.)");
+	}
+	
+	public DataExportForm selectDigitSeparator_Comma() {
+		return selectDigitSeparator("запятая (,)");
+	}
+	
+	private DataExportForm fillTextbox(WebElement element, String newText) {
+		initialRequest();
+		String oldText = element.getAttribute("value");
+		element.sendKeys(StringUtils.repeat('\b', oldText.length()));
+		element.sendKeys(newText);
+		return this;
+	}
+	
+	public DataExportForm selectFileName(String fileName) {
+		return fillTextbox(driver.findElement(By.id("issuer-profile-export-file-name")), fileName);
+	}
+	
+	/**
+	 * Select contract name.
+	 * <p>
+	 * Note: the filename will be reset by the form after contract name change.
+	 * Set the contract name before a filename to keep filename unchanged.
+	 * Note2: there is an unknown case when the filename still reset by the form.
+	 * <p>
+	 * @param name - contact name
+	 * @return this
+	 */
+	public DataExportForm selectContractName(String name) {
+		return fillTextbox(driver.findElement(By.id("issuer-profile-export-contract")), name);
+	}
+	
+	private void setCheckboxChecked(WebElement checkBox, boolean enabled) {
+		if ( enabled ) {
+			if ( ! checkBox.isSelected() ) {
+				checkBox.click();
+			}
+		} else {
+			if ( checkBox.isSelected() ) {
+				checkBox.click();
+			}
+		}
+	}
+	
+	private DataExportForm selectCandleTime(boolean start) {
+		initialRequest();
+		setCheckboxChecked(driver.findElement(By.id("MSOR0")), start);
+		setCheckboxChecked(driver.findElement(By.id("MSOR1")), ! start);
+		return this;
+	}
+	
+	public DataExportForm selectCandleTime_StartOfCandle() {
+		return selectCandleTime(true);
+	}
+	
+	public DataExportForm selectCandleTime_EndOfCandle() {
+		return selectCandleTime(false);
+	}
+	
+	public DataExportForm selectMoscowTime(boolean useMoscowTime) {
+		initialRequest();
+		setCheckboxChecked(driver.findElement(By.id("issuer-profile-export-mstime")), useMoscowTime);
+		return this;
+	}
+	
+	public DataExportForm selectAddHeader(boolean add) {
+		initialRequest();
+		setCheckboxChecked(driver.findElement(By.id("at")), add);
+		return this;
+	}
+	
+	public DataExportForm selectFillEmptyPeriods(boolean fill) {
+		initialRequest();
+		setCheckboxChecked(driver.findElement(By.id("fsp")), fill);
+		return this;
+	}
+
 	private void setDate(String inputId, LocalDate date) {
-		driver.findElement(By.id(inputId)).click();
+		WebDriverWait wait = new WebDriverWait(driver, 20);
+		wait.until(ExpectedConditions.elementToBeClickable(By.id(inputId))).click();
+		
 		int year = date.getYear();
 		int month = date.getMonth().getValue() - 1; // Finam bugfix
 		int dayOfMonth = date.getDayOfMonth();
@@ -327,6 +502,22 @@ public class DataExportForm implements Closeable {
 		return getFinamDropDown(3);
 	}
 	
+	private WebElement getDateFormatSelectorOwner() {
+		return getFinamDropDown(4);
+	}
+	
+	private WebElement getTimeFormatSelectorOwner() {
+		return getFinamDropDown(5);
+	}
+
+	private WebElement getFieldSeparatorSelectorOwner() {
+		return getFinamDropDown(6);
+	}
+	
+	private WebElement getDigitSeparatorSelectorOwner() {
+		return getFinamDropDown(7);
+	}
+
 	private WebElement getFileFormatSelectorOwner() {
 		return getFinamDropDown(8);
 	}

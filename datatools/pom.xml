@@ -24,11 +24,11 @@
 			<artifactId>aquila-ui</artifactId>
 			<version>0.1.43</version>
 		</dependency>
-		<dependency>
+		<!-- TODO: to remove??? dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
 			<version>2.53.1</version>
-		</dependency>
+		</dependency -->
 		<dependency>
         	<groupId>org.hsqldb</groupId>
         	<artifactId>hsqldb</artifactId>

@@ -41,30 +41,46 @@ public class DataExportFormTest {
 	@Ignore
 	public void test() throws Exception {
 		WebDriver webDriver = createJBrowserDriver();
-		//WebDriver webDriver = createPhantomJSDriver();
+
+		long dummy = System.currentTimeMillis();
+		List<SelectorOption> markets, quotes;
 		try ( DataExportForm form = new DataExportForm(webDriver) ) {
+			markets = form.getMarketOptions();
 			form.selectMarket("МосБиржа фьючерсы");
-			List<SelectorOption> elements = form.getQuoteOptions();
-			for ( SelectorOption e : elements ) {
-				System.out.println("text=" + e.getText()
-						+ " id=" + e.getID()
-						+ " idx=" + e.getIndex());
-			}
-			form.selectQuote("RTS-9.16(RIU6)");
-			form.selectDate(LocalDate.of(2016,  7,  15));
-			//form.getSubmitButton().click();
+			quotes = form.getQuoteOptions();
+			form.selectQuote("RTS")
+				.selectDate(LocalDate.of(2002,  12,  31))
+				.selectPeriod_Ticks()
+				.selectContractName("boozoo") // see the method notes
+				.selectFileName("zulu.charlie")
+				.selectFileExt_Txt()
+				.selectDateFormat_DDMMYY()
+				.selectTimeFormat_HHcolMM()
+				.selectCandleTime_StartOfCandle()
+				.selectMoscowTime(false)
+				.selectFieldSeparator_Dot()
+				.selectDigitSeparator_Comma()
+				.selectFileFormat_TimePriceVolId()
+				.selectAddHeader(false)
+				.selectFillEmptyPeriods(true);
+
+			System.out.println("URL: " + webDriver.getCurrentUrl());
+			Thread.sleep(15000);
+		}
+		System.out.println("Finished in " + (System.currentTimeMillis() - dummy) + " ms.");
+	}
+	
+	private void dumpOptions(List<SelectorOption> elements) {
+		for ( SelectorOption e : elements ) {
+			System.out.println("text=" + e.getText()
+					+ " id=" + e.getID()
+					+ " idx=" + e.getIndex());
 		}
 	}
 	
 	private WebDriver createJBrowserDriver() {
 		return new JBrowserDriver(Settings.builder().timezone(Timezone.EUROPE_MOSCOW).build());
 	}
-	
-	//private WebDriver createPhantomJSDriver() {
-	//	DesiredCapabilities caps = new DesiredCapabilities();
-	//	caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, "D:/utils/phantomjs/phantomjs.exe");
-	//	return new PhantomJSDriver(caps);
-	//}
 	
 	private WebDriver createFirefoxDriver() {
 		FirefoxProfile profile = new FirefoxProfile();
