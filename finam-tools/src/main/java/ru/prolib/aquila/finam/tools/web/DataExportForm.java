@@ -254,7 +254,7 @@ public class DataExportForm implements Closeable {
 	private void setDate(String inputId, LocalDate date) {
 		driver.findElement(By.id(inputId)).click();
 		int year = date.getYear();
-		int month = date.getMonth().getValue();
+		int month = date.getMonth().getValue() - 1; // Finam bugfix
 		int dayOfMonth = date.getDayOfMonth();
 		WebElement dummy = driver.findElement(By.className("ui-datepicker-year"));
 		try {
