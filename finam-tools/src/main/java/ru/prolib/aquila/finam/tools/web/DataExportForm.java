@@ -338,7 +338,6 @@ public class DataExportForm implements Closeable {
 			throw new NoSuchElementException("Cannot set digit separator: " + sepName, e);
 		}
 		return this;
-
 	}
 	
 	public DataExportForm selectDigitSeparator_None() {

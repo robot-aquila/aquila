@@ -79,7 +79,10 @@ public class DataExportFormTest {
 	}
 	
 	private WebDriver createJBrowserDriver() {
-		return new JBrowserDriver(Settings.builder().timezone(Timezone.EUROPE_MOSCOW).build());
+		return new JBrowserDriver(Settings.builder()
+				.timezone(Timezone.EUROPE_MOSCOW)
+				.ssl("compatible")
+				.build());
 	}
 	
 	private WebDriver createFirefoxDriver() {
