@@ -144,18 +144,6 @@ public class OrderListTableModel extends AbstractTableModel implements
 	}
 	
 	@Override
-	public int getColumnIndex(MsgID columnId) {
-		Iterator<Entry<Integer, MsgID>> it = columnIDToColumnHeader.entrySet().iterator();
-		while ( it.hasNext() ) {
-			Entry<Integer, MsgID> pair = it.next();
-			if ( columnId == pair.getValue() ) {
-				return getColumnIndex(pair.getKey());
-			}
-		}
-		return -1;
-	}
-	
-	@Override
 	public int getColumnIndex(int columnID) {
 		return columnIndexToColumnID.indexOf(columnID);
 	}

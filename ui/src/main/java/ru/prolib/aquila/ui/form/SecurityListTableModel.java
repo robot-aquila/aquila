@@ -149,8 +149,7 @@ public class SecurityListTableModel extends AbstractTableModel
 			return null;			
 		}
 	}
-
-	@Override
+	
 	public int getColumnIndex(MsgID columnId) {
 		return mapIndexToID.indexOf(columnId);
 	}

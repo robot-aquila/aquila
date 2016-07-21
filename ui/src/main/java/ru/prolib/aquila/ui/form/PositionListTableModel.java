@@ -93,11 +93,6 @@ public class PositionListTableModel extends AbstractTableModel implements
 	}
 
 	@Override
-	public int getColumnIndex(MsgID columnId) {
-		return mapIndexToID.indexOf(columnId);
-	}
-
-	@Override
 	public String getColumnName(int col) {
 		return messages.get(mapIndexToID.get(col));
 	}

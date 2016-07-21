@@ -96,17 +96,6 @@ public class PortfolioListTableModel extends AbstractTableModel
 			return null;
 		}
 	}
-
-	/**
-	 * Return column index by ID.
-	 * <p> 
-	 * @param columnId - column ID.
-	 * @return return index of specified column
-	 */
-	@Override
-	public int getColumnIndex(MsgID columnId) {
-		return mapIndexToID.indexOf(columnId);
-	}
 	
 	@Override
 	public String getColumnName(int col) {
