@@ -162,7 +162,11 @@ public class OrderListTableModel extends AbstractTableModel implements
 
 	@Override
 	public String getColumnName(int col) {
-		return messages.get(columnIDToColumnHeader.get(columnIndexToColumnID.get(col)));
+		MsgID id = columnIDToColumnHeader.get(columnIndexToColumnID.get(col));
+		if ( id == null ) {
+			return "NULL_ID#" + col; 
+		}
+		return messages.get(id);
 	}
 
 	public void clear() {
