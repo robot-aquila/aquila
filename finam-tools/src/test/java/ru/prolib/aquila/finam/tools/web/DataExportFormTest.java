@@ -3,6 +3,7 @@ package ru.prolib.aquila.finam.tools.web;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -64,8 +65,11 @@ public class DataExportFormTest {
 				.selectAddHeader(false)
 				.selectFillEmptyPeriods(true);
 
-			System.out.println("URL: " + webDriver.getCurrentUrl());
-			Thread.sleep(15000);
+			System.out.println("ActionURL: " + form.getFormActionURL());
+			URL url = form.getFormActionURL();
+			System.out.println("Host: " + url.getHost());
+			//System.out.println("URL: " + webDriver.getCurrentUrl());
+			//Thread.sleep(15000);
 		}
 		System.out.println("Finished in " + (System.currentTimeMillis() - dummy) + " ms.");
 	}

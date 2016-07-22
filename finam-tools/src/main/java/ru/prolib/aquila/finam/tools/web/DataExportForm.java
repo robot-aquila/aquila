@@ -1,6 +1,8 @@
 package ru.prolib.aquila.finam.tools.web;
 
 import java.io.Closeable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -421,6 +423,16 @@ public class DataExportForm implements Closeable {
 		initialRequest();
 		setCheckboxChecked(driver.findElement(By.id("fsp")), fill);
 		return this;
+	}
+	
+	public URL getFormActionURL() throws MalformedURLException {
+		initialRequest();
+		WebElement form = driver.findElement(By.id("chartform"));
+		String action = form.getAttribute("action");
+		if ( action == null ) {
+			throw new NoSuchElementException("Form action not found");
+		}
+		return new URL(action);
 	}
 
 	private void setDate(String inputId, LocalDate date) {
