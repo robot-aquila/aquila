@@ -21,6 +21,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.finam.tools.web.DataExportForm.SelectorOption;
 
@@ -44,17 +45,15 @@ public class DataExportFormTest {
 	@Test
 	@Ignore
 	public void test_downloader() throws Exception {
-		CloseableHttpClient httpClient = HttpClients.createDefault();
+		DataExportFacade facade = new DataExportFacade();
 		try {
 			DataExportParams params = new DataExportParams()
 				.setDateFrom(LocalDate.of(2016, 7, 15))
 				.setDateTo(LocalDate.of(2016, 7, 15));
 			URI formAction = new URI("http://195.128.78.52/");
-			URI uri = new DataExportFormQueryBuilder().buildQuery(formAction, params);
-			HttpClientFileDownloader downloader = new HttpClientFileDownloader(httpClient);
-			downloader.download(uri, new File("D:/tmp/finam.csv"));
+			facade.download(formAction, params, new File("D:/tmp/finam3.csv"));
 		} finally {
-			httpClient.close();
+			IOUtils.closeQuietly(facade);
 		}
 	}
 

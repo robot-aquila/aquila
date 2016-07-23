@@ -1,9 +1,6 @@
 package ru.prolib.aquila.finam.tools.web;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,52 +22,63 @@ public class HttpClientFileDownloader implements FileDownloader {
 	}
 	
 	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.finam.tools.web.FileDownloader#download(java.net.URI, java.io.File)
+	 * @see ru.prolib.aquila.finam.tools.web.FileDownloader#download(java.net.URI, java.io.OutputStream)
 	 */
 	@Override
-	public void download(URI uri, File target) throws
-		UnexpectedResponse, ClientProtocolException, IOException
-	{
-		CloseableHttpResponse response = httpClient.execute(new HttpGet(uri));
+	public void download(URI uri, OutputStream output) throws DataExportException {
+		CloseableHttpResponse response;
+		try {
+			response = httpClient.execute(new HttpGet(uri));
+		} catch ( ClientProtocolException e ) {
+			throw new DataExportException(ErrorClass.PROTOCOL, "Error executing HTTP-request", e);
+		} catch ( IOException e ) {
+			throw new DataExportException(ErrorClass.IO, "Error execution HTTP-request", e);
+		}
 		try {
 			validateResponse(response);
 			HttpEntity entity = response.getEntity();
-			OutputStream output = new BufferedOutputStream(new FileOutputStream(target));
 			InputStream input = new BufferedInputStream(entity.getContent());
 			try {
 				IOUtils.copy(input, output);
+			} catch ( IOException e ) {
+				throw new DataExportException(ErrorClass.IO, "Error downloading", e);
 			} finally {
-				input.close();
-				output.close();
+				IOUtils.closeQuietly(input);
 			}
+		} catch ( IOException e ) {
+			throw new DataExportException(ErrorClass.IO, "Error obtaining the response content", e);
 		} finally {
-			response.close();
+			IOUtils.closeQuietly(response);
 		}
 	}
 
 	private void validateResponse(CloseableHttpResponse response)
-		throws UnexpectedResponse
+		throws DataExportException
 	{
 		int statusCode = response.getStatusLine().getStatusCode();
 		if ( statusCode != 200 ) {
-			throw new UnexpectedResponse("Unexpected HTTP status code: " + statusCode);
+			throw errRespValid("Unexpected HTTP status code: " + statusCode);
 		}
 		Header header = response.getFirstHeader("content-type");
 		if ( header == null ) {
-			throw new UnexpectedResponse("Header Content-Type not exists");
+			throw errRespValid("Header Content-Type not exists");
 		}
 		String contentType = header.getValue();
 		if ( ! "finam/expotfile".equals(contentType) ) {
-			throw new UnexpectedResponse("Unexpected Content-Type: " + contentType);
+			throw errRespValid("Unexpected Content-Type: " + contentType);
 		}
 		header = response.getFirstHeader("content-disposition");
 		if ( header == null ) {
-			throw new UnexpectedResponse("Header Content-Disposition not exists");
+			throw errRespValid("Header Content-Disposition not exists");
 		}
 		String contentDisposition = header.getValue();
 		if ( ! contentDisposition.startsWith("attachment;") ) {
-			throw new UnexpectedResponse("Unexpected Content-Disposition: " + contentDisposition);
+			throw errRespValid("Unexpected Content-Disposition: " + contentDisposition);
 		}
 	}
 	
+	private DataExportException errRespValid(String msg) throws DataExportException {
+		return new DataExportException(ErrorClass.RESPONSE_VALIDATION, msg);
+	}
+
 }
