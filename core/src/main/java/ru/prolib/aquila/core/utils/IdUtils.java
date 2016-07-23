@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.utils;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -45,9 +46,12 @@ public class IdUtils {
 	 * способствует узнаваемости данных а, также позволяет выполнять обратное
 	 * преобразование из строкового значения в дескриптор инструмента.  
 	 * <p>
+	 * This method is deprecated. Use {@link #getSafeSymbolId(Symbol)}.
+	 * <p>
 	 * @param symbol - symbol info
 	 * @return безопасный строковый идентификатор
 	 */
+	@Deprecated
 	public String getSafeId(Symbol symbol) {
 		String[] chunks = {
 				coder.encode(symbol.getCode()),
@@ -59,12 +63,25 @@ public class IdUtils {
 	}
 	
 	/**
+	 * Get safe symbol identifier.
+	 * <p>
+	 * @param symbol - symbol
+	 * @return A filesystem-safe symbol equivalent.
+	 */
+	public String getSafeSymbolId(Symbol symbol) {
+		return coder.encode(symbol.toString());
+	}
+	
+	/**
 	 * Get safe ID.
+	 * <p>
+	 * This method is deprecated. Use {@link #getSafeFile(Symbol, LocalDate, String)}.
 	 * <p>
 	 * @param symbol - symbol info
 	 * @param date - date
 	 * @return the safe identifier based on arguments
 	 */
+	@Deprecated
 	public String getSafeId(Symbol symbol, LocalDate date) {
 		String[] chunks = {
 				getSafeId(symbol),
@@ -81,6 +98,18 @@ public class IdUtils {
 	 */
 	public String appendSeparator(String str) {
 		return str + SEPARATOR;
+	}
+	
+	/**
+	 * Create a safe filename based on symbol, date and file extension.
+	 * <p>
+	 * @param symbol - the symbol
+	 * @param date - the date
+	 * @param suffix - filename suffix (Note: this component not encoded).
+	 * @return the safe file based on arguments
+	 */
+	public File getSafeFile(Symbol symbol, LocalDate date, String suffix) {
+		return new File(getSafeSymbolId(symbol) + SEPARATOR + dateFormat.format(date) + suffix);
 	}
 
 }

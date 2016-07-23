@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.utils;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.time.LocalDate;
 
 import org.easymock.IMocksControl;
@@ -15,29 +16,31 @@ import ru.prolib.aquila.core.utils.IdUtils;
 public class IdUtilsTest {
 	private IMocksControl control;
 	private StrCoder coder;
-	private IdUtils utils;
+	private IdUtils utilsWithMocks, utils;
 	private Symbol symbol;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		coder = control.createMock(StrCoder.class);
-		utils = new IdUtils(coder);
+		utilsWithMocks = new IdUtils(coder);
+		utils = new IdUtils();
 	}
 	
 	@Test
 	public void testCtor1() throws Exception {
-		assertSame(coder, utils.getStrCoder());
+		assertSame(coder, utilsWithMocks.getStrCoder());
 	}
 	
 	@Test
 	public void testCtor0() throws Exception {
-		utils = new IdUtils();
-		assertNotNull(utils.getStrCoder());
+		utilsWithMocks = new IdUtils();
+		assertNotNull(utilsWithMocks.getStrCoder());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
-	public void testGetSafeId1() throws Exception {
+	public void testGetSafeId1_Symbol() throws Exception {
 		symbol = new Symbol("S:XXX@YYY:GBP");
 		expect(coder.encode("XXX")).andReturn("P1");
 		expect(coder.encode("YYY")).andReturn("P2");
@@ -45,12 +48,13 @@ public class IdUtilsTest {
 		expect(coder.encode("S")).andReturn("P4");
 		control.replay();
 
-		String expected = "P1-P2-P3-P4", actual = utils.getSafeId(symbol);
+		String expected = "P1-P2-P3-P4", actual = utilsWithMocks.getSafeId(symbol);
 		assertEquals(expected, actual);
 		
 		control.verify();
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testGetSafeId2() throws Exception {
 		symbol = new Symbol("F:RTS@ZZZ:USD");
@@ -61,7 +65,7 @@ public class IdUtilsTest {
 		control.replay();
 		
 		String expected = "X1-X2-X3-X4-20120805",
-				actual = utils.getSafeId(symbol, LocalDate.of(2012, 8, 5));
+				actual = utilsWithMocks.getSafeId(symbol, LocalDate.of(2012, 8, 5));
 		assertEquals(expected, actual);
 		
 		control.verify();
@@ -69,7 +73,35 @@ public class IdUtilsTest {
 	
 	@Test
 	public void testAppendSeparator() throws Exception {
-		assertEquals("foo-", utils.appendSeparator("foo"));
+		assertEquals("foo-", utilsWithMocks.appendSeparator("foo"));
+	}
+	
+	@Test
+	public void testGetSafeSymbolId() throws Exception {
+		String expected = "F%3ARTS%40SPBFUT%3AUSD";
+		assertEquals(expected, utils.getSafeSymbolId(new Symbol("F:RTS@SPBFUT:USD")));
+		
+		expected = "RTS%40SPBFUT%3AUSD";
+		assertEquals(expected, utils.getSafeSymbolId(new Symbol("RTS@SPBFUT:USD")));
+		
+		expected = "F%3ARTS%40SPBFUT";
+		assertEquals(expected, utils.getSafeSymbolId(new Symbol("F:RTS@SPBFUT")));
+		
+		expected = "RTS%40SPBFUT";
+		assertEquals(expected, utils.getSafeSymbolId(new Symbol("RTS@SPBFUT")));
+		
+		expected = "RTS";
+		assertEquals(expected, utils.getSafeSymbolId(new Symbol("RTS")));
+	}
+	
+	@Test
+	public void testGetSafeFile3() throws Exception {
+		File expected = new File("F%3ARTS%40SPBFUT%3AUSD-20071015.csv.gz");
+		
+		File actual = utils.getSafeFile(new Symbol("F:RTS@SPBFUT:USD"),
+				LocalDate.of(2007, 10, 15), ".csv.gz");
+		
+		assertEquals(expected, actual);
 	}
 
 }
