@@ -7,7 +7,7 @@ public class DataExportParams {
 	private int finamQuoteId = 17455; // Склеенный фьючерс на индекс РТС
 	private LocalDate dateFrom = LocalDate.now();
 	private LocalDate dateTo = LocalDate.now();
-	private Period period = Period.M5;
+	private Period period = Period.TICKS;
 	private String contractName = "RTS";
 	private String fileName = "RTS";
 	private FileExt fileExt = FileExt.CSV;

@@ -21,7 +21,7 @@ public class DataExportParamsTest {
 		assertEquals(17455, params.getQuoteID());
 		assertEquals(LocalDate.now(), params.getDateFrom());
 		assertEquals(LocalDate.now(), params.getDateTo());
-		assertEquals(Period.M5, params.getPeriod());
+		assertEquals(Period.TICKS, params.getPeriod());
 		assertEquals("RTS", params.getContractName());
 		assertEquals("RTS", params.getFileName());
 		assertEquals(FileExt.CSV, params.getFileExt());

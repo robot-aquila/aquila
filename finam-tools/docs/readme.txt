@@ -1,53 +1,68 @@
-esource interpreted as Document but transferred with MIME type finam/expotfile: "
+п»їРџР°СЂР°РјРµС‚СЂС‹ С„РѕСЂРјС‹
 
-http://195.128.78.52/SPFB.RTS_160714_160714-23.txt?market=14&em=17455&code=SPFB.RTS&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=9&at=1
+market = Р“СЂСѓРїРїР° РґР°РЅРЅС‹С…
+em = Finam ID РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
+code = SPFB.РЎРёРјРІРѕР» РґР»СЏ Р¤РћР РўРЎ РёР»Рё РЎРёРјРІРѕР» РґР»СЏ Р°РєС†РёР№ (РІ СЂРµР°Р»СЊРЅРѕСЃС‚Рё РЅРµ РІР°Р¶РЅРѕ, РЅРё РЅР° С‡С‚Рѕ РЅРµ РІР»РёСЏРµС‚)
+apply = 0 ??? РІСЃРµРіРґР° РЅРѕР»СЊ?
+df = РґРµРЅСЊ РјРµСЃСЏС†Р° СЃ
+mf = РјРµСЃСЏС† СЃ (РЅР°С‡РёРЅР°СЏ СЃ РЅСѓР»СЏ)
+yf = РіРѕРґ СЃ
+from = РґР°С‚Р° СЃ РІ С„РѕСЂРјР°С‚Рµ DD.MM.YYYY
+dt = РґРµРЅСЊ РјРµСЃСЏС†Р° РїРѕ
+mt = РјРµСЃСЏС† РїРѕ (РЅР°С‡РёРЅР°СЏ СЃ РЅСѓР»СЏ)
+yt = РіРѕРґ РїРѕ
+to = РґР°С‚Р° РїРѕ РІ С„РѕСЂРјР°С‚Рµ DD.MM.YYYY
+p = 1 - С‚РёРєРё, 2 - РјРёРЅСѓС‚С‹, 3 - 5РјРёРЅ, 4 - 10РјРёРЅ, 5 - 15РјРёРЅ, 6 - 30РјРёРЅ, 7 - 1С‡Р°СЃ, 8 - 1РґРµРЅСЊ, 9 - 1РЅРµРґРµР»СЏ
+f = РёРјСЏ РІС‹С…РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р° (Р±РµР· СЂР°СЃС€РёСЂРµРЅРёСЏ)
+e = .csv РёР»Рё .txt
+cn = РёРјСЏ РєРѕРЅС‚СЂР°РєС‚Р° (РїСЂРѕРёР·РІРѕР»СЊРЅРѕРµ РїРѕР»Рµ РІ С„РѕСЂРјРµ)
+dtf = С„РѕСЂРјР°С‚ РґР°С‚С‹ 1 - РіРіРіРіРјРјРґРґ, 2 - РіРіРјРјРґРґ, 3 - РґРґРјРјРіРі, 4 - РґРґ/РјРј/РіРі, 5 - РјРј/РґРґ/РіРі
+tmf = С„РѕСЂРјР°С‚ РІСЂРµРјРµРЅРё 1 - С‡С‡РјРјСЃСЃ, 2 - С‡С‡РјРј, 3 - С‡С‡:РјРј:СЃСЃ, 4 - С‡С‡:РјРј
+MSOR= 0 - РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° СЃРІРµС‡Рё, 1 - РѕРєРѕРЅС‡Р°РЅРёСЏ СЃРІРµС‡Рё
+mstimever=0 РІСЂРµРјСЏ РјРѕСЃРєРѕРІСЃРєРѕРµ РІС‹РєР» РёР»Рё mstime=on&mstimever=1 РєРѕРіРґР° РІСЂРµРјСЏ РјРѕСЃРєРѕРІСЃРєРѕРµ РІС‹Р±СЂР°РЅРѕ 
+sep= СЂР°Р·РґРµР»РёС‚РµР»СЊ РїРѕР»РµР№ 1 - Р·Р°РїСЏС‚Р°СЏ, 2 - С‚РѕС‡РєР°, 3 - С‚РѕС‡РєР° СЃ Р·Р°РїСЏС‚РѕР№, 4 - С‚Р°Р±СѓР»СЏС†РёСЏ, 5 - РїСЂРѕР±РµР»
+sep2= СЂР°Р·РґРµР»РёС‚РµР»СЊ СЂР°Р·СЂСЏРґРѕРІ 1 - РЅРµС‚, 2 - С‚РѕС‡РєР°, 3 - Р·Р°РїСЏС‚Р°СЏ, 4 - РїСЂРѕР±РµР», 5 - РєР°РІС‹С‡РєР°
+datf= С„РѕСЂРјР°С‚ СЃС‚СЂРѕРє 
+	// РўРѕР»СЊРєРѕ РґР»СЏ СЃРІРµС‡РµР№
+	1 - TICKER, PER, DATE, TIME, OPEN, HIGH, LOW, CLOSE, VOL
+	2 - TICKER, PER, DATE, TIME, OPEN, HIGH, LOW, CLOSE
+	3 - TICKER, PER, DATE, TIME, CLOSE, VOL
+	4 - TICKER, PER, DATE, TIME, CLOSE
+	5 - DATE, TIME, OPEN, HIGH, LOW, CLOSE, VOL
+	// РўРѕР»СЊРєРѕ РґР»СЏ С‚РёРєРѕРІ
+	6 - TICKER, PER, DATE, TIME, LAST, VOL
+	7 - TICKER, DATE, TIME, LAST, VOL
+	8 - TICKER, DATE, TIME, LAST
+	9 - DATE, TIME, LAST, VOL
+	10 - DATE, TIME, LAST
+	11 - DATE, TIME, LAST, VOL, ID
+at=1 РґРѕР±Р°РІРёС‚СЊ Р·Р°РіРѕР»РѕРІРѕРє С„Р°Р№Р»Р° РёР»Рё РЅРµ РґРѕР±Р°РІР»СЏС‚СЊ РїР°СЂР°РјРµС‚СЂ, РµСЃР»Рё РІС‹РєР»СЋС‡РµРЅРѕ
+fsp=1 Р·Р°РїРѕР»РЅСЏС‚СЊ РїРµСЂРёРѕРґС‹ Р±РµР· СЃРґРµР»РѕРє РёР»Рё РЅРµ РґРѕР±Р°РІР»СЏС‚СЊ РїР°СЂР°РјРµС‚СЂ, РµСЃР»Рё РІС‹РєР»СЋС‡РµРЅРѕ
 
-http://195.128.78.52/APTK_160715_160715.txt?market=1&em=13855&code=APTK&app…&cn=APTK&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=9&at=1
+Request example:
 
-curl "http://195.128.78.52/BANE_160715_160714.txt?market=1&em=81757&code=BANE&apply=0&df=15&mf=6&yf=2016&from=15.07.2016&dt=14&mt=6&yt=2016&to=14.07.2016&p=1&f=BANE_160715_160714&e=.txt&cn=BANE&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=9&at=1" -H "Accept-Encoding: gzip, deflate, lzma, sdch" -H "Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4" -H "Upgrade-Insecure-Requests: 1" -H "User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Referer: http://www.finam.ru/profile/moex-akcii/bashneft-ank-ao/export/?market=1&em=81757&code=BANE&apply=0&df=15&mf=6&yf=2016&from=15.07.2016&dt=14&mt=6&yt=2016&to=14.07.2016&p=1&f=BANE_160715_160714&e=.txt&cn=BANE&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=9&at=1" -H "Connection: keep-alive" --compressed
-
-
-http://195.128.78.52/SPFB.BR-10.16_160715_160713.csv?market=14&em=454403&code=SPFB.BR-10.16&apply=0&df=15&mf=6&yf=2016&from=15.07.2016&dt=13&mt=6&yt=2016&to=13.07.2016&p=1&f=SPFB.BR-10.16_160715_160713&e=.csv&cn=SPFB.BR-10.16&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=9&at=1
-
-http://195.128.78.52/BR-10.16_160715_160713.csv?market=14&em=454403&code=SPFB.BR-10.16&apply=0&df=15&mf=6&yf=2016&from=15.07.2016&dt=13&mt=6&yt=2016&to=13.07.2016&p=1&f=BR-10.16_160715_160713&e=.csv&cn=BR-10.16&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=9&at=1
-
-
-market = Группа данных
-em = Finam ID инструмента
-code = SPFB.Символ для ФОРТС или Символ для акций
-apply = 0 ???
-df = день месяца с
-mf = месяц с (начиная с нуля)
-yf = год с
-from = дата с в формате DD.MM.YYYY
-dt = день месяца по
-mt = месяц по (начиная с нуля)
-yt = год по
-to = дата по в формате DD.MM.YYYY
-p = 1 - тики, 2 - минуты, 3 - 5мин, 4 - 10мин, 5 - 15мин, 6 - 30мин, 7 - 1час, 8 - 1день, 9 - 1неделя
-f = имя выходного файла (без расширения)
-e = .csv или .txt
-cn = имя контракта (произвольное поле в форме)
-dtf = формат даты ??? 1 - ггггммдд, 
-tmf = формат времени ??? 1 - ччммсс
-MSOR= 0 - время начала свечи, 1 - окончания свечи
-mstime=on - время московское/немосковское
-mstimever=1 ???
-sep=1 разделитель полей
-sep2=1 разделитель разрядов
-datf=9 формат строк DATE, TIME, LAST, VOL
-at=1 добавить заголовок файла
-fsp=1 заполнять периоды без сделок
-
-
-
-GET /SPFB.BR-10.16_160715_160713.csv?market=14&em=454403&code=SPFB.BR-10.16&apply=0&df=15&mf=6&yf=2016&from=15.07.2016&dt=13&mt=6&yt=2016&to=13.07.2016&p=1&f=SPFB.BR-10.16_160715_160713&e=.csv&cn=SPFB.BR-10.16&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=9&at=1 HTTP/1.1
+GET /SPFB.RTS-9.16_160701_160701.csv?market=14&em=420493&code=SPFB.RTS-9.16&apply=0&df=1&mf=6&yf=2016&from=01.07.2016&dt=1&mt=6&yt=2016&to=01.07.2016&p=1&f=SPFB.RTS-9.16_160701_160701&e=.csv&cn=SPFB.RTS-9.16&dtf=1&tmf=1&MSOR=0&mstimever=0&sep=1&sep2=1&datf=9&at=1 HTTP/1.1
 Host: 195.128.78.52
 Connection: keep-alive
 Upgrade-Insecure-Requests: 1
 User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-Referer: http://www.finam.ru/profile/mosbirzha-fyuchersy/br-10-16-brv6/export/?market=14&em=454403&code=BRV6&apply=0&df=13&mf=6&yf=2016&from=13.07.2016&dt=13&mt=6&yt=2016&to=13.07.2016&p=1&f=BRV6_160713_160713&e=.csv&cn=BRV6&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=3&sep2=1&datf=9&at=1
+Referer: http://www.finam.ru/profile/mosbirzha-fyuchersy/rts-9-16-riu6/export/?market=14&em=420493&code=RIU6&apply=0&df=1&mf=5&yf=2016&from=01.06.2016&dt=1&mt=5&yt=2016&to=01.06.2016&p=1&f=RIU6_160601_160601&e=.csv&cn=RIU6&dtf=1&tmf=1&MSOR=0&mstimever=0&sep=1&sep2=1&datf=9&at=1
 Accept-Encoding: gzip, deflate, lzma, sdch
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4
+
+Response example:
+
+HTTP/1.1 200 OK
+Cache-Control: private
+Date: Sat, 23 Jul 2016 08:19:51 GMT
+Transfer-Encoding: chunked
+Content-Type: finam/expotfile
+Server: Microsoft-IIS/6.0
+X-Powered-By: ASP.NET
+Content-Disposition: attachment; filename="SPFB.RTS-9.16_160701_160701.csv"
+Content-Encoding: gzip
+Vary: Accept-Encoding
+
+
 
