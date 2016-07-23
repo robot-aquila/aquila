@@ -3,11 +3,14 @@ package ru.prolib.aquila.finam.tools.web;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,6 +39,23 @@ public class DataExportFormTest {
 	@Before
 	public void setUp() throws Exception {
 		
+	}
+	
+	@Test
+	@Ignore
+	public void test_downloader() throws Exception {
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		try {
+			DataExportParams params = new DataExportParams()
+				.setDateFrom(LocalDate.of(2016, 7, 15))
+				.setDateTo(LocalDate.of(2016, 7, 15));
+			URI formAction = new URI("http://195.128.78.52/");
+			URI uri = new DataExportFormQueryBuilder().buildQuery(formAction, params);
+			HttpClientFileDownloader downloader = new HttpClientFileDownloader(httpClient);
+			downloader.download(uri, new File("D:/tmp/finam.csv"));
+		} finally {
+			httpClient.close();
+		}
 	}
 
 	@Test
