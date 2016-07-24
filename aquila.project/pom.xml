@@ -17,6 +17,7 @@
 		<module>../probe</module>
 		<module>../datatools</module>
 		<module>../finam-tools</module>
+		<module>../utils/finexp-quotelist</module>
 	</modules>
   
 	<dependencies>
