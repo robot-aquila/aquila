@@ -9,13 +9,19 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.io.IOUtils;
 
@@ -95,6 +101,10 @@ public class DataExport implements Closeable {
 				.useAddHeader(false)
 				.useFillEmptyPeriods(true)
 				.getFormActionURI();
+		} catch ( DataExportException e ) {
+			throw e;
+		} catch ( Exception e ) {
+			throw unhandled(e);
 		} finally {
 			lock.unlock();
 		}
@@ -113,17 +123,130 @@ public class DataExport implements Closeable {
 		lock.lock();
 		try {
 			return webForm.getFormActionURI();
+		} catch ( DataExportException e ) {
+			throw e;
+		} catch ( Exception e ) {
+			throw unhandled(e);
 		} finally {
 			lock.unlock();
 		}
 	}
-	
+
+	/**
+	 * Get map of available market options.
+	 * <p>
+	 * Note: The call of this method may use several minutes to execute and will
+	 * lock the facade until done.
+	 * <p>
+	 * @return map where key is a market id and value is an option text.
+	 * @throws DataExportException - an error occurred
+	 */
 	public Map<Integer, String> getAvailableMarkets() throws DataExportException {
-		return null;
+		List<NameValuePair> pairs;
+		lock.lock();
+		try {
+			pairs = webForm.getMarketOptions();
+		} catch ( DataExportException e ) {
+			throw e;
+		} catch ( Exception e ) {
+			throw unhandled(e);
+		} finally {
+			lock.unlock();
+		}
+		return toMap(pairs);
 	}
 	
+	/**
+	 * Get map of available quote options of market.
+	 * <p>
+	 * Note: The call of this method may use several minutes to execute and will
+	 * lock the facade until done.
+	 * <p>
+	 * @param marketId - the market id
+	 * @return map where key is a quote id and value is an option text
+	 * @throws DataExportException - an error occurred
+	 */
 	public Map<Integer, String> getAvailableQuotes(int marketId) throws DataExportException {
-		return null;
+		List<NameValuePair> pairs;
+		lock.lock();
+		try {
+			pairs = webForm.selectMarket(marketId).getQuoteOptions();
+		} catch ( DataExportException e ) {
+			throw e;
+		} catch ( Exception e ) {
+			throw unhandled(e);
+		} finally {
+			lock.unlock();
+		}
+		return toMap(pairs);
+	}
+	
+	/**
+	 * Get map of available futures.
+	 * <p>
+	 * The futures data section contains the real futures and some synthetic
+	 * quotes which does not mapped to a real instrument. This method filters
+	 * all quotes of futures market data section and returns only data of
+	 * actually existing futures. For example RTS is a combined synthetic
+	 * instrument and will be skipped. The RTS-12.16(RIZ6) is a real futures and
+	 * will be returned.
+	 * <p>
+	 * Note: The call of this method may use several minutes to execute and will
+	 * lock the facade until done.
+	 * <p>
+	 * @param stripCodes - if true then will strip all codes. For example
+	 * RTS-12.16(RIZ6) will be converted to RTS-12.16.
+	 * @return map where key is a quote id and value is an option text
+	 * @throws DataExportException - an error occurred
+	 */
+	public Map<Integer, String> getTrueFuturesQuotes(boolean stripCodes)
+			throws DataExportException
+	{
+		List<NameValuePair> pairs, result = new ArrayList<>();
+		lock.lock();
+		try {
+			pairs = webForm.selectMarket(14).getQuoteOptions();
+		} catch ( DataExportException e ) {
+			throw e;
+		} catch ( Exception e ) {
+			throw unhandled(e);
+		} finally {
+			lock.unlock();
+		}
+		for ( NameValuePair pair : pairs ) {
+			NameValuePair dummy = splitFuturesCode(pair.getName());
+			if ( dummy != null ) {
+				if ( stripCodes ) {
+					pair = new BasicNameValuePair(dummy.getName(), pair.getValue());
+				}
+				result.add(pair);
+			}
+		}
+		return toMap(result);
+	}
+	
+	/**
+	 * Split a futures code.
+	 * <p>
+	 * For example RTS-12.16(RIZ6) will be converted to a pair where name is
+	 * RTS-12.16 and value is RIZ6
+	 * <p>
+	 * @param text - the full futures name as it used on FIMAN site
+	 * @return the name components or null if the text is not a futures name
+	 */
+	public NameValuePair splitFuturesCode(String text) {
+		if ( ! text.endsWith(")") ) {
+			// Not a futures, combined data or the ticker without a code (but we need it).
+			// Skip such option.
+			return null;
+		}
+		String tokens[] = StringUtils.split(text, '(');
+		if ( tokens.length != 2 ) {
+			// The opening brace was not found. Cannot determine the ticker code.
+			// Skip such option.
+			return null;
+		}
+		return new BasicNameValuePair(tokens[0], tokens[1].substring(0, tokens[1].length() - 1));
 	}
 	
 	/**
@@ -134,8 +257,13 @@ public class DataExport implements Closeable {
 	 * @throws DataExportException - common exception for all error situations
 	 */
 	public void download(URI uri, OutputStream output) throws DataExportException {
-		HttpClientFileDownloader fileDownloader = new HttpClientFileDownloader(httpClient);
-		fileDownloader.download(uri, output);
+		try {
+			new HttpClientFileDownloader(httpClient).download(uri, output);
+		} catch ( DataExportException e ) {
+			throw e;
+		} catch ( Exception e ) {
+			throw unhandled(e);
+		}
 	}
 	
 	/**
@@ -153,6 +281,16 @@ public class DataExport implements Closeable {
 		download(combine(baseUri, params), output);
 	}
 
+	/**
+	 * Download a market data file from FINAM web-site.
+	 * <p>
+	 * @param baseUri - base URI to resolve address of downloading file. It used
+	 * to combine with the query string which was built from the export parameters.
+	 * @param params - the data export parameters
+	 * @param target - the target file. If the filename ends with .gz suffix
+	 * then output will be gzipped.
+	 * @throws DataExportException - common exception for all error situations
+	 */
 	public void download(URI baseUri, DataExportParams params, File target)
 			throws DataExportException
 	{
@@ -172,6 +310,18 @@ public class DataExport implements Closeable {
 		}
 	}
 	
+	/**
+	 * Download a market data file from FINAM web site.
+	 * <p>
+	 * The method uses a FINAM web-form action URI to make a request.
+	 * Note: The call of this method may use several minutes to execute and will
+	 * lock the facade until done.
+	 * <p>
+	 * @param params - the data export parameters
+	 * @param target - the target file. If the filename ends with .gz suffix
+	 * then output will be gzipped.
+	 * @throws DataExportException - common exception for all error situations
+	 */
 	public void download(DataExportParams params, File target)
 			throws DataExportException
 	{
@@ -187,6 +337,24 @@ public class DataExport implements Closeable {
 			throw new DataExportException(ErrorClass.REQUEST_INITIALIZATION,
 					"Error building a query", e);
 		}
+	}
+	
+	private DataExportException unhandled(Throwable t) {
+		return new DataExportException(ErrorClass.WEB_DRIVER, "Unhandled exception", t);
+	}
+	
+	private Map<Integer, String> toMap(List<NameValuePair> pairs) throws DataExportException {	
+		Map<Integer, String> result = new LinkedHashMap<>();
+		for ( NameValuePair dummy : pairs ) {
+			String text = dummy.getName(), id = dummy.getValue();
+			try {
+				result.put(Integer.valueOf(id), text);
+			} catch ( NumberFormatException e ) {
+				throw new DataExportException(ErrorClass.WEB_FORM,
+						"Invalid option [" + text + "] id: " + id);
+			}
+		}
+		return result;
 	}
 	
 }

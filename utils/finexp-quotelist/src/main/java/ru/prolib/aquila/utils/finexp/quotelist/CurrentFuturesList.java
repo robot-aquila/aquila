@@ -1,16 +1,12 @@
 package ru.prolib.aquila.utils.finexp.quotelist;
 
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.io.IOUtils;
 
-import ru.prolib.aquila.finam.tools.web.DataExportForm;
-
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.Timezone;
+import ru.prolib.aquila.finam.tools.web.DataExport;
 
 /**
  * List of current futures.
@@ -19,50 +15,34 @@ import com.machinepublishers.jbrowserdriver.Timezone;
  * available for download thru FINAM web-interface.
  */
 public class CurrentFuturesList {
-	private static final int MARKET = 14;
 	private static final String HEADER = "TICKER,CODE,FINAM_WEB_ID";
 	
 	public static void main(String[] args) {
-		WebDriver webDriver = createDriver();
+		DataExport facade = new DataExport();
 		try {
-			DataExportForm form = new DataExportForm(webDriver);
-			List<NameValuePair> list = form.selectMarket(MARKET).getQuoteOptions();
+			Map<Integer, String> map = facade.getTrueFuturesQuotes(false);
 			System.out.println(HEADER);
-			for ( NameValuePair o : list ) {
-				processOption(o);
+			Iterator<Map.Entry<Integer, String>> it = map.entrySet().iterator();
+			while ( it.hasNext() ) {
+				Map.Entry<Integer, String> dummy = it.next();
+				processOption(dummy.getKey(), facade.splitFuturesCode(dummy.getValue()));
 			}
-			System.exit(0);
+			System.exit(0);			
 		} catch ( Exception e ) {
 			e.printStackTrace(System.err);
 			System.exit(1);
 		} finally {
-			webDriver.close();;
+			IOUtils.closeQuietly(facade);
 		}
 	}
 	
-	private static void processOption(NameValuePair o) {
-		String text = o.getName();
-		if ( ! text.endsWith(")") ) {
-			// Not a futures, combined data or the ticker without a code (but we need it).
-			// Skip such option.
+	private static void processOption(int id, NameValuePair parts) {
+		if ( parts == null ) {
 			return;
 		}
-		String tokens[] = StringUtils.split(text, '(');
-		if ( tokens.length != 2 ) {
-			// The opening brace was not found. Cannot determine the ticker code.
-			// Skip such option.
-			return;
-		}
-		System.out.print(tokens[0] + ",");
-		System.out.print(tokens[1].substring(0, tokens[1].length() - 1) + ",");
-		System.out.println(o.getValue());
-	}
-	
-	private static WebDriver createDriver() {
-		return new JBrowserDriver(Settings.builder()
-				.timezone(Timezone.EUROPE_MOSCOW)
-				.ssl("compatible")
-				.build());
+		System.out.print(parts.getName() + ",");
+		System.out.print(parts.getValue() + ",");
+		System.out.println(id);
 	}
 
 }
