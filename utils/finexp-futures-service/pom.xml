@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.prolib.aquila.utils</groupId>
-	<artifactId>aquila-utils-finexp-quotelist</artifactId>
+	<artifactId>aquila-utils-finexp-futures-service</artifactId>
 	<version>0.0.1</version>
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
@@ -34,19 +34,19 @@
 				</configuration>
 			</plugin>
 			
-			<plugin>
+			<!-- plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.6</version>
 				<configuration>
-					<finalName>finexp-quotelist-${project.version}</finalName>
+					<finalName>finexp-futures-service-${project.version}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 					<archive>
 					  <manifest>
-						<mainClass>ru.prolib.aquila.utils.finexp.quotelist.CurrentFuturesList</mainClass>
+						<mainClass>ru.prolib.aquila.utils.finexp.futures.service.Main</mainClass>
 					  </manifest>
 					</archive>
 				</configuration>
@@ -59,7 +59,7 @@
 					</goals>
 				  </execution>
 				</executions>
-			</plugin>
+			</plugin -->
 			
 		</plugins>
 	</build>

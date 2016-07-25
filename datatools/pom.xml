@@ -6,7 +6,7 @@
 		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
 	  	<version>0.1.43</version>
-	  	<relativePath>../aquila.project/pom.xml</relativePath>
+	  	<relativePath>../pom.xml</relativePath>
 	</parent>
 	<properties>
 		<hibernate.version>3.6.10.Final</hibernate.version>

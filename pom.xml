@@ -12,12 +12,13 @@
 	</properties>
 
 	<modules>
-		<module>../core</module>
-		<module>../ui</module>
-		<module>../probe</module>
-		<module>../datatools</module>
-		<module>../finam-tools</module>
-		<module>../utils/finexp-quotelist</module>
+		<module>core</module>
+		<module>ui</module>
+		<module>probe</module>
+		<module>datatools</module>
+		<module>finam-tools</module>
+		<module>utils/finexp-quotelist</module>
+		<module>utils/finexp-futures-service</module>
 	</modules>
   
 	<dependencies>
@@ -27,9 +28,9 @@
 			<version>3.1</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.threeten</groupId>
-    		<artifactId>threeten-extra</artifactId>
-    		<version>0.9</version>
+    			<groupId>org.threeten</groupId>
+    			<artifactId>threeten-extra</artifactId>
+    			<version>0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -47,10 +48,10 @@
 			<version>2.0</version>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
+            		<groupId>org.springframework</groupId>
+            		<artifactId>spring-context</artifactId>
+            		<version>${spring.version}</version>
+        	</dependency>
 		<dependency>
 			<groupId>org.ini4j</groupId>
 			<artifactId>ini4j</artifactId>
@@ -76,11 +77,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-        </dependency>
+            		<groupId>org.springframework</groupId>
+            		<artifactId>spring-test</artifactId>
+            		<version>${spring.version}</version>
+            		<scope>test</scope>
+        	</dependency>
 		
 	</dependencies>
   
@@ -95,11 +96,11 @@
 				</configuration>
 			</plugin>
   			<plugin>
-        		<artifactId>maven-javadoc-plugin</artifactId>
-        		<version>2.10.1</version>
-        		<configuration>
-        			<show>protected</show>
-        		</configuration>
+        			<artifactId>maven-javadoc-plugin</artifactId>
+        			<version>2.10.1</version>
+        			<configuration>
+        				<show>protected</show>
+        			</configuration>
   			</plugin>
 		</plugins>
 	</build>

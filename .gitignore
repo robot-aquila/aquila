@@ -2,3 +2,5 @@
 *.vpp~*
 *.dia\~
 *.versionsBackup
+.project
+.settings/
