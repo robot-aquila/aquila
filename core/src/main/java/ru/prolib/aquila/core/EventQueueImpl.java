@@ -18,6 +18,7 @@ public class EventQueueImpl implements EventQueue {
 	private final String name;
 	private volatile Thread thread = null;
 	private final LinkedList<Event> cache1, cache2;
+	private boolean deathLogged = false;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -141,7 +142,8 @@ public class EventQueueImpl implements EventQueue {
 	 */
 	@Override
 	public synchronized void enqueue(Event event) {
-		if ( ! started() ) {
+		if ( ! started() && ! deathLogged ) {
+			deathLogged = true;
 			throw new IllegalStateException("Queue not started: " + name);
 		}
 		if ( event == null ) {
@@ -219,7 +221,8 @@ public class EventQueueImpl implements EventQueue {
 				logger.error("Queue thread interrupted: ", e);
 				Thread.currentThread().interrupt();
 			} catch ( Throwable e ) {
-				logger.error("Queue thread exception: {}", e);
+				logger.error("Queue thread exception: ", e);
+				throw e;
 			}
 		}
 		
