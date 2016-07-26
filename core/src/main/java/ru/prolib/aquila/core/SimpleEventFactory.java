@@ -1,6 +1,11 @@
 package ru.prolib.aquila.core;
 
 public class SimpleEventFactory implements EventFactory {
+	private static final SimpleEventFactory instance = new SimpleEventFactory();
+	
+	public static EventFactory getInstance() {
+		return instance;
+	}
 	
 	public SimpleEventFactory() {
 		super();
