@@ -13,8 +13,16 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpClientFileDownloader implements FileDownloader {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(HttpClientFileDownloader.class);
+	}
+	
 	private final CloseableHttpClient httpClient;
 	
 	public HttpClientFileDownloader(CloseableHttpClient httpClient) {
@@ -26,6 +34,7 @@ public class HttpClientFileDownloader implements FileDownloader {
 	 */
 	@Override
 	public void download(URI uri, OutputStream output) throws DataExportException {
+		logger.debug("Downloading: {}", uri);
 		CloseableHttpResponse response;
 		try {
 			response = httpClient.execute(new HttpGet(uri));

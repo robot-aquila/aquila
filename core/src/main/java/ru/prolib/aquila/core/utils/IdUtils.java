@@ -1,6 +1,5 @@
 package ru.prolib.aquila.core.utils;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -108,8 +107,8 @@ public class IdUtils {
 	 * @param suffix - filename suffix (Note: this component not encoded).
 	 * @return the safe file based on arguments
 	 */
-	public File getSafeFile(Symbol symbol, LocalDate date, String suffix) {
-		return new File(getSafeSymbolId(symbol) + SEPARATOR + dateFormat.format(date) + suffix);
+	public String getSafeFilename(Symbol symbol, LocalDate date, String suffix) {
+		return getSafeSymbolId(symbol) + SEPARATOR + dateFormat.format(date) + suffix;
 	}
 
 }

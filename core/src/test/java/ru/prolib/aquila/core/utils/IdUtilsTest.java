@@ -3,7 +3,6 @@ package ru.prolib.aquila.core.utils;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.time.LocalDate;
 
 import org.easymock.IMocksControl;
@@ -95,10 +94,10 @@ public class IdUtilsTest {
 	}
 	
 	@Test
-	public void testGetSafeFile3() throws Exception {
-		File expected = new File("F%3ARTS%40SPBFUT%3AUSD-20071015.csv.gz");
+	public void testGetSafeFilename3() throws Exception {
+		String expected = "F%3ARTS%40SPBFUT%3AUSD-20071015.csv.gz";
 		
-		File actual = utils.getSafeFile(new Symbol("F:RTS@SPBFUT:USD"),
+		String actual = utils.getSafeFilename(new Symbol("F:RTS@SPBFUT:USD"),
 				LocalDate.of(2007, 10, 15), ".csv.gz");
 		
 		assertEquals(expected, actual);
