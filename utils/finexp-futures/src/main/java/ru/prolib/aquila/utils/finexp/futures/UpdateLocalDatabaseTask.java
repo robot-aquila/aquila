@@ -161,7 +161,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 			long pause = random.nextLong(PAUSE_BETWEEN_TASK_MIN, PAUSE_BETWEEN_TASK_MAX + 1);
 			Instant nextUpdateTime = Instant.now().plusSeconds(pause * 60);
 			logger.debug("The next update scheduled: {} minutes ahead at {}",
-					LocalDateTime.ofInstant(nextUpdateTime, ZoneId.systemDefault()));
+					pause, LocalDateTime.ofInstant(nextUpdateTime, ZoneId.systemDefault()));
 			scheduler.schedule(this, nextUpdateTime);
 		}
 		logger.debug("Update finished.");
