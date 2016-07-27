@@ -21,6 +21,7 @@ import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.concurrency.LID;
 
 public class ContainerImplTest {	
 	private static final int STRING_NAME = 1;
@@ -262,6 +263,7 @@ public class ContainerImplTest {
 		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
 		assertFalse(container.isAvailable());
 		assertFalse(container.isClosed());
+		assertTrue(LID.isLastCreatedLID(container.getLID()));
 	}
 	
 	@Test
@@ -274,6 +276,7 @@ public class ContainerImplTest {
 		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
 		assertFalse(container.isAvailable());
 		assertFalse(container.isClosed());
+		assertTrue(LID.isLastCreatedLID(container.getLID()));
 	}
 	
 	@Test

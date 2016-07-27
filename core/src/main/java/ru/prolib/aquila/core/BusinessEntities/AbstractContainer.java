@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-public interface AbstractContainer {
+import ru.prolib.aquila.core.concurrency.Lockable;
+
+public interface AbstractContainer extends Lockable {
 
 	/**
 	 * Get container ID.
@@ -12,11 +14,13 @@ public interface AbstractContainer {
 	/**
 	 * Lock container.
 	 */
+	@Override
 	public void lock();
 	
 	/**
 	 * Unlock container.
 	 */
+	@Override
 	public void unlock();
 	
 	/**

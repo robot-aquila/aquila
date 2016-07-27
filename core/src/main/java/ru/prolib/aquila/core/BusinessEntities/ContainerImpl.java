@@ -14,11 +14,13 @@ import ru.prolib.aquila.core.EventImpl;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.concurrency.LID;
 
 /**
  * Basic container implementation.
  */
 public class ContainerImpl implements UpdatableContainer {
+	private final LID lid;
 	protected final Lock lock;
 	protected final EventQueue queue;
 	private final Map<Integer, Object> values;
@@ -31,6 +33,7 @@ public class ContainerImpl implements UpdatableContainer {
 	
 	public ContainerImpl(EventQueue queue, String id, Controller controller) {
 		super();
+		lid = LID.createInstance();
 		lock = new ReentrantLock();
 		values = new HashMap<Integer, Object>();
 		updated = new HashSet<Integer>();
@@ -399,6 +402,11 @@ public class ContainerImpl implements UpdatableContainer {
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	@Override
+	public LID getLID() {
+		return lid;
 	}
 	
 }
