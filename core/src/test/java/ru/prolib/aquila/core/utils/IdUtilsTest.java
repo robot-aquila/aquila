@@ -94,6 +94,15 @@ public class IdUtilsTest {
 	}
 	
 	@Test
+	public void testToSymbol() throws Exception {
+		assertEquals(new Symbol("F:RTS@SPBFUT:USD"), utils.toSymbol("F%3ARTS%40SPBFUT%3AUSD"));
+		assertEquals(new Symbol("RTS@SPBFUT:USD"), utils.toSymbol("RTS%40SPBFUT%3AUSD"));
+		assertEquals(new Symbol("F:RTS@SPBFUT"), utils.toSymbol("F%3ARTS%40SPBFUT"));
+		assertEquals(new Symbol("RTS@SPBFUT"), utils.toSymbol("RTS%40SPBFUT"));
+		assertEquals(new Symbol("RTS"), utils.toSymbol("RTS"));
+	}
+	
+	@Test
 	public void testGetSafeFilename3() throws Exception {
 		String expected = "F%3ARTS%40SPBFUT%3AUSD-20071015.csv.gz";
 		
@@ -102,5 +111,5 @@ public class IdUtilsTest {
 		
 		assertEquals(expected, actual);
 	}
-
+	
 }

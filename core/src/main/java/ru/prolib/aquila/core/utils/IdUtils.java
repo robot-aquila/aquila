@@ -72,6 +72,17 @@ public class IdUtils {
 	}
 	
 	/**
+	 * Convert safe symbol ID to symbol.
+	 * <p>
+	 * @param safeSymbolId - safe string representation of the symbol
+	 * @return the symbol
+	 * @throws IllegalArgumentException - the argument is not a safe symbol ID
+	 */
+	public Symbol toSymbol(String safeSymbolId) throws IllegalArgumentException {
+		return new Symbol(coder.decode(safeSymbolId));
+	}
+	
+	/**
 	 * Get safe ID.
 	 * <p>
 	 * This method is deprecated. Use {@link #getSafeFile(Symbol, LocalDate, String)}.
