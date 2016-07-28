@@ -15,6 +15,7 @@
 		<module>core</module>
 		<module>ui</module>
 		<module>probe</module>
+		<module>data</module>
 		<module>datatools</module>
 		<module>finam-tools</module>
 		<module>utils/finexp-quotelist</module>
