@@ -292,5 +292,15 @@ public class DataExportTest {
 			assertEquals("byte #" + i, sampleBytes[i], targetBytes[i]);
 		}
 	}
+	
+	@Test
+	public void testDownloadTickData4() throws Exception {
+		File target = File.createTempFile("download-ticks-", ".csv.gz");
+		target.deleteOnExit();
+		
+		facade.downloadTickData(14, 17455, LocalDate.now().minusDays(1), target);
+		
+		assertTrue(target.length() > 0);
+	}
 		
 }

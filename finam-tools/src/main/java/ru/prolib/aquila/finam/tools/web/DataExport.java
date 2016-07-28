@@ -328,6 +328,38 @@ public class DataExport implements Closeable {
 		download(getFormActionURI(), params, target);
 	}
 	
+	/**
+	 * Download a tick data file from FINAM web site.
+	 * <p>
+	 * @param marketId - the market ID
+	 * @param quoteId - the quote ID
+	 * @param date - the date
+	 * @param target - the target file. If the filename ends with .gz suffix
+	 * then output will be gzipped.
+	 * @throws DataExportException - common exception for all error situations
+	 */
+	public void downloadTickData(int marketId, int quoteId, LocalDate date,
+			File target) throws DataExportException
+	{
+		download(new DataExportParams()
+			.setMarketId(marketId)
+			.setQuoteID(quoteId)
+			.setDateFrom(date)
+			.setDateTo(date)
+			.setPeriod(Period.TICKS)
+			.setFileName("dummy-file")
+			.setFileExt(FileExt.CSV)
+			.setDateFormat(DateFormat.YYYYMMDD)
+			.setTimeFormat(TimeFormat.HHMMSS)
+			.setCandleTime(CandleTime.START_OF_CANDLE)
+			.setUseMoscowTime(true)
+			.setFieldSeparator(FieldSeparator.COMMA)
+			.setDigitSeparator(DigitSeparator.NONE)
+			.setDataFormat(DataFormat.DATE_TIME_LAST_VOL)
+			.setAddHeader(true)
+			.setFillEmptyPeriods(false), target);
+	}
+	
 	private URI combine(URI baseUri, DataExportParams params)
 		throws DataExportException
 	{
