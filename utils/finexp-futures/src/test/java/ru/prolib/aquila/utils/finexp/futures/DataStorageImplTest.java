@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.data.storage.DatedSymbol;
 
 public class DataStorageImplTest {
 	private static String FS = File.separator;
@@ -35,12 +36,12 @@ public class DataStorageImplTest {
 	public void testGetSegmentTemporaryFile() throws Exception {
 		File expected = new File("fixture" + FS + "temp" + FS + "B0" + FS + "MSFT"
 				+ FS + "2016" + FS + "07" + FS + "MSFT-20160726.part.csv.gz");
-		assertEquals(expected, storage.getSegmentTemporaryFile(symbol2, LocalDate.of(2016, 7, 26)));
+		assertEquals(expected, storage.getSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2016, 7, 26))));
 	}
 	
 	@Test
 	public void testGetSegmentTemporaryFile_Mkdirs() throws Exception {
-		storage.getSegmentTemporaryFile(symbol2, LocalDate.of(2016, 7, 26));
+		storage.getSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2016, 7, 26)));
 		
 		assertTrue(new File("fixture/temp/B0/MSFT/2016/07").exists());
 	}
@@ -49,7 +50,7 @@ public class DataStorageImplTest {
 	public void testGetSegmentTemporaryFile_ThrowsIfCannotCreateDirs() throws Exception {
 		storage = new DataStorageImpl(new File("fixture/foobar"));
 		
-		storage.getSegmentTemporaryFile(symbol1, LocalDate.of(2016, 7, 26));
+		storage.getSegmentTemporaryFile(new DatedSymbol(symbol1, LocalDate.of(2016, 7, 26)));
 	}
 	
 	@Test
@@ -57,7 +58,7 @@ public class DataStorageImplTest {
 		FileUtils.forceMkdir(new File("fixture/temp/B0/MSFT/2005/12"));
 		new File("fixture/temp/B0/MSFT/2005/12/MSFT-20051201.part.csv.gz").createNewFile();
 		
-		storage.commitSegmentTemporaryFile(symbol2, LocalDate.of(2005, 12, 1));
+		storage.commitSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2005, 12, 1)));
 		
 		assertFalse(new File("fixture/temp/B0/MSFT/2005/12/MSFT-20051201.part.csv.gz").exists());
 		assertTrue(new File("fixture/temp/B0/MSFT/2005/12/MSFT-20051201.csv.gz").exists());
@@ -65,7 +66,7 @@ public class DataStorageImplTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testComminSegmentTemporaryFile_ThrowsIfCannotMove() throws Exception {
-		storage.commitSegmentTemporaryFile(symbol2, LocalDate.of(2005, 12, 1));
+		storage.commitSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2005, 12, 1)));
 	}
 	
 	@Test

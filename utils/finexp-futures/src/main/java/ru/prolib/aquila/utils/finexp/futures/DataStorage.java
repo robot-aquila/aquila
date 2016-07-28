@@ -5,18 +5,19 @@ import java.time.LocalDate;
 import java.util.List;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.data.storage.DatedSymbol;
 
 public interface DataStorage {
 	
 	public List<LocalDate> listExistingSegments(Symbol symbol,
 			LocalDate from, LocalDate to) throws DataStorageException;
 	
-	public File getSegmentTemporaryFile(Symbol symbol, LocalDate date)
+	public File getSegmentTemporaryFile(DatedSymbol descr)
 			throws DataStorageException;
 	
-	public void commitSegmentTemporaryFile(Symbol symbol, LocalDate date)
+	public void commitSegmentTemporaryFile(DatedSymbol descr)
 			throws DataStorageException;
 	
-	public File getSegmentFile(Symbol symbol, LocalDate date);
+	public File getSegmentFile(DatedSymbol descr);
 
 }

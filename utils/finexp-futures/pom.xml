@@ -22,6 +22,11 @@
 			<version>0.1.43</version>
 		</dependency>
 		<dependency>
+			<groupId>ru.prolib.aquila</groupId>
+			<artifactId>aquila-data</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<dependency>
 		    <groupId>ru.prolib.aquila</groupId>
 		    <artifactId>aquila-finam-tools</artifactId>
 		    <version>0.0.1</version>
