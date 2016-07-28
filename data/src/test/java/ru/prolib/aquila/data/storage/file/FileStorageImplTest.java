@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.finexp.futures;
+package ru.prolib.aquila.data.storage.file;
 
 import static org.junit.Assert.*;
 
@@ -13,18 +13,26 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.DatedSymbol;
+import ru.prolib.aquila.data.storage.file.FileStorageImpl;
 
-public class DataStorageImplTest {
+public class FileStorageImplTest {
 	private static String FS = File.separator;
-	private static Symbol symbol1 = new Symbol("RTS-9.16"), symbol2 = new Symbol("MSFT");
-	private DataStorageImpl storage;
+	private static Symbol symbol1 = new Symbol("MSFT");
+	private static LocalDate date1 = LocalDate.of(2016, 7, 26),
+			date2 = LocalDate.of(2005, 12, 1);
+	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
+			descr2 = new DatedSymbol(symbol1, date2);
+	private FilesetInfo filesetInfo;
+	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
 
 	@Before
 	public void setUp() throws Exception {
 		FileUtils.forceMkdir(root);
-		storage = new DataStorageImpl(new File("fixture/temp"));
+		filesetInfo = new FilesetInfoImpl(".csv.gz", ".part.csv.gz");
+		storage = new FileStorageImpl(new File("fixture/temp"), filesetInfo);
 	}
 	
 	@After
@@ -33,45 +41,46 @@ public class DataStorageImplTest {
 	}
 	
 	@Test
-	public void testGetSegmentTemporaryFile() throws Exception {
+	public void testGetTemporarySegmentFile() throws Exception {
 		File expected = new File("fixture" + FS + "temp" + FS + "B0" + FS + "MSFT"
 				+ FS + "2016" + FS + "07" + FS + "MSFT-20160726.part.csv.gz");
-		assertEquals(expected, storage.getSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2016, 7, 26))));
+		
+		assertEquals(expected, storage.getTemporarySegmentFile(descr1));
 	}
 	
 	@Test
-	public void testGetSegmentTemporaryFile_Mkdirs() throws Exception {
-		storage.getSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2016, 7, 26)));
+	public void testGetTemporarySegmentFile_Mkdirs() throws Exception {
+		storage.getTemporarySegmentFile(descr1);
 		
 		assertTrue(new File("fixture/temp/B0/MSFT/2016/07").exists());
 	}
 	
 	@Test (expected=DataStorageException.class)
-	public void testGetSegmentTemporaryFile_ThrowsIfCannotCreateDirs() throws Exception {
-		storage = new DataStorageImpl(new File("fixture/foobar"));
+	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
+		storage = new FileStorageImpl(new File("fixture/dummy"), filesetInfo);
 		
-		storage.getSegmentTemporaryFile(new DatedSymbol(symbol1, LocalDate.of(2016, 7, 26)));
+		storage.getTemporarySegmentFile(descr1);
 	}
 	
 	@Test
-	public void testCommitSegmentTemporaryFile() throws Exception {
+	public void testCommitTemporarySegmentFile() throws Exception {
 		FileUtils.forceMkdir(new File("fixture/temp/B0/MSFT/2005/12"));
 		new File("fixture/temp/B0/MSFT/2005/12/MSFT-20051201.part.csv.gz").createNewFile();
 		
-		storage.commitSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2005, 12, 1)));
+		storage.commitTemporarySegmentFile(descr2);
 		
 		assertFalse(new File("fixture/temp/B0/MSFT/2005/12/MSFT-20051201.part.csv.gz").exists());
 		assertTrue(new File("fixture/temp/B0/MSFT/2005/12/MSFT-20051201.csv.gz").exists());
 	}
 	
 	@Test (expected=DataStorageException.class)
-	public void testComminSegmentTemporaryFile_ThrowsIfCannotMove() throws Exception {
-		storage.commitSegmentTemporaryFile(new DatedSymbol(symbol2, LocalDate.of(2005, 12, 1)));
+	public void testComminTemporarySegmentFile_ThrowsIfCannotMove() throws Exception {
+		storage.commitTemporarySegmentFile(descr2);
 	}
 	
 	@Test
 	public void testListExistingSegments() throws Exception {
-		storage = new DataStorageImpl(new File("fixture"));
+		storage = new FileStorageImpl(new File("fixture"), filesetInfo);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
@@ -87,7 +96,7 @@ public class DataStorageImplTest {
 		expected.add(LocalDate.of(2012, 1, 9));
 		expected.add(LocalDate.of(2012, 1, 10));
 		
-		assertEquals(expected, storage.listExistingSegments(symbol2, from, to));
+		assertEquals(expected, storage.listExistingSegments(symbol1, from, to));
 	}
 
 }

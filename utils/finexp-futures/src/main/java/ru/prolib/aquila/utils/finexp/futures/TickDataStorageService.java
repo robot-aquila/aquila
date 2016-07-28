@@ -4,16 +4,15 @@ import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
+import ru.prolib.aquila.data.storage.file.FileStorage;
+import ru.prolib.aquila.data.storage.file.FileStorageImpl;
+import ru.prolib.aquila.data.storage.file.FilesetInfoImpl;
 
 public class TickDataStorageService {
 	private static final Logger logger;
@@ -37,7 +36,7 @@ public class TickDataStorageService {
 		if ( ! root.isDirectory() ) {
 			CmdLine.printErrorAndExit("The pathname is not a directory: " + root);
 		}
-		final DataStorage storage = new DataStorageImpl(root);
+		final FileStorage storage = new FileStorageImpl(root, new FilesetInfoImpl(".csv.gz", ".part.csv.gz"));
 		final CountDownLatch globalExit = new CountDownLatch(1);
 		final Scheduler scheduler = new SchedulerLocal();
 		Runtime.getRuntime().addShutdownHook(new Thread() {

@@ -20,7 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.DatedSymbol;
+import ru.prolib.aquila.data.storage.file.FileStorage;
 import ru.prolib.aquila.finam.tools.web.DataExport;
 import ru.prolib.aquila.finam.tools.web.DataExportException;
 
@@ -41,16 +43,16 @@ public class UpdateLocalDatabaseTask implements Runnable {
 		logger = LoggerFactory.getLogger(UpdateLocalDatabaseTask.class);
 	}
 	
-	private final DataStorage dataStorage;
+	private final FileStorage fileStorage;
 	private final CountDownLatch globalExit;
 	private final Scheduler scheduler;
 	private final CommandLine cmdLine;
 	
-	public UpdateLocalDatabaseTask(DataStorage dataStorage,
+	public UpdateLocalDatabaseTask(FileStorage fileStorage,
 			CountDownLatch globalExit, Scheduler scheduler,
 			CommandLine cmdLine)
 	{
-		this.dataStorage = dataStorage;
+		this.fileStorage = fileStorage;
 		this.globalExit = globalExit;
 		this.scheduler = scheduler;
 		this.cmdLine = cmdLine;
@@ -86,7 +88,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 
 				// 1) Scan local database for existing data segments from LocalDate - X to LocalDate - 1
 				//		where X is a lookup max depth in days
-				List<LocalDate> existingSegments = dataStorage.listExistingSegments(symbol, startDate, endDate);
+				List<LocalDate> existingSegments = fileStorage.listExistingSegments(symbol, startDate, endDate);
 				// 2) If there are some non-existing segments then download randomly 2-5
 				// data segments starting of earliest date
 				LocalDate current = startDate;
@@ -95,10 +97,10 @@ public class UpdateLocalDatabaseTask implements Runnable {
 					if ( ! existingSegments.contains(current) ) {
 						DatedSymbol descr = new DatedSymbol(symbol, current);
 						logger.debug("Start downloading segment: {}", descr);
-						File tempFile = dataStorage.getSegmentTemporaryFile(descr);
-						File mainFile = dataStorage.getSegmentFile(descr);
+						File tempFile = fileStorage.getTemporarySegmentFile(descr);
+						File mainFile = fileStorage.getSegmentFile(descr);
 						facade.downloadTickData(MARKET_ID, quoteID, current, tempFile);
-						dataStorage.commitSegmentTemporaryFile(descr);
+						fileStorage.commitTemporarySegmentFile(descr);
 						logger.debug("Download finished: {} (size: {})",
 								new Object[] { mainFile, mainFile.length() } ); 
 						

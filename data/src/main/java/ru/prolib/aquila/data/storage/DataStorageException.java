@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.finexp.futures;
+package ru.prolib.aquila.data.storage;
 
 public class DataStorageException extends Exception {
 	private static final long serialVersionUID = 1L;
