@@ -382,22 +382,6 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		
 	}
 	
-	static class TickPriceComparator implements Comparator<Tick> {
-		private final int multiplier;
-		
-		public TickPriceComparator(boolean ascending) {
-			super();
-			this.multiplier = ascending ? 1 : -1;
-		}
-
-		@Override
-		public int compare(Tick a, Tick b) {
-			double ap = a.getPrice(), bp = b.getPrice();
-			return (ap < bp ? -1 : ap == bp ? 0 : 1) * multiplier;
-		}
-
-	}
-	
 	private void sortAndDetruncateQuotes(Vector<Tick> ticks, boolean ascending) {
 		Collections.sort(ticks, new TickPriceComparator(ascending));
 		ticks.setSize(Math.min(marketDepthLevels, ticks.size()));

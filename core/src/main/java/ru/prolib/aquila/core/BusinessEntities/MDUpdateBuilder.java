@@ -43,6 +43,11 @@ public class MDUpdateBuilder {
 		return this;
 	}
 	
+	public MDUpdateBuilder add(Tick tick) {
+		records.add(new MDUpdateRecordImpl(tick, MDTransactionType.ADD));
+		return this;
+	}
+	
 	public MDUpdate buildMDUpdate() {
 		if ( symbol == null ) {
 			throw new IllegalArgumentException("Symbol must be specified");

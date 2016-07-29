@@ -33,5 +33,10 @@ public class MDUpdateRecordImpl implements MDUpdateRecord {
 			.append(transactionType, o.getTransactionType())
 			.isEquals();
 	}
+	
+	@Override
+	public String toString() {
+		return "" + transactionType + "#" + tick;
+	}
 
 }

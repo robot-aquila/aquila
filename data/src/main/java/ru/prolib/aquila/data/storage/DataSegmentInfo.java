@@ -2,6 +2,10 @@ package ru.prolib.aquila.data.storage;
 
 import java.time.Instant;
 
+/**
+ * This class represents a common information about a data segment.
+ * Most attributes are optional and may be undefined.
+ */
 public class DataSegmentInfo {
 	private final String sourceID;
 	private DataSegmentStatus status;

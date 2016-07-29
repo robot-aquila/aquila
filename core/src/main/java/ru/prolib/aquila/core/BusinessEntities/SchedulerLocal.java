@@ -31,6 +31,10 @@ public class SchedulerLocal implements Scheduler {
 		this(new Timer(true));
 	}
 	
+	public SchedulerLocal(String threadID) {
+		this(new Timer(threadID, true));
+	}
+	
 	/**
 	 * Get timer.
 	 * <p>

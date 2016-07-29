@@ -66,5 +66,14 @@ public class MDUpdateImpl implements MDUpdate, MDUpdateHeader {
 			.append(records, o.records)
 			.isEquals();
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "["
+				+ header.getTime() + " "
+				+ header.getType() + " "
+				+ header.getSymbol()
+				+ " " + records + "]";
+	}
 
 }
