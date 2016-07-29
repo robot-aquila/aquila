@@ -20,32 +20,19 @@ import ru.prolib.aquila.data.storage.DatedSymbol;
 public class FileStorageImpl implements FileStorage {
 	private final IdUtils idUtils = new IdUtils();
 	private final FileStorageNamespace namespace;
-	private final FilesetInfo filesetInfo;
+	private final FileSetService fileSetService;
 	
-	public FileStorageImpl(FileStorageNamespace namespace, FilesetInfo filesetInfo) {
+	public FileStorageImpl(FileStorageNamespace namespace, FileSetService fileSetService) {
 		this.namespace = namespace;
-		this.filesetInfo = filesetInfo;
-	}
-	
-	/**
-	 * Create a file storage.
-	 * <p>
-	 * This constructor is used to create a file storage with the
-	 * {@link FileStorageNamespaceV1} implementation of the namespace.
-	 * <p>
-	 * @param root - the root directory
-	 * @param filesetInfo - the fileset info
-	 */
-	public FileStorageImpl(File root, FilesetInfo filesetInfo) {
-		this(new FileStorageNamespaceV1(root), filesetInfo);
+		this.fileSetService = fileSetService;
 	}
 	
 	public FileStorageNamespace getNamespace() {
 		return namespace;
 	}
 	
-	public FilesetInfo getFilesetInfo() {
-		return filesetInfo;
+	public FileSetService getFileSetService() {
+		return fileSetService;
 	}
 
 	@Override
@@ -102,12 +89,12 @@ public class FileStorageImpl implements FileStorage {
 	
 	private String getTemporaryFilename(DatedSymbol descr) {
 		return idUtils.getSafeFilename(descr.getSymbol(), descr.getDate(),
-				filesetInfo.getTemporarySuffix());
+				fileSetService.getTemporarySuffix());
 	}
 	
 	private String getRegularFilename(DatedSymbol descr) {
 		return idUtils.getSafeFilename(descr.getSymbol(), descr.getDate(),
-				filesetInfo.getRegularSuffix());
+				fileSetService.getRegularSuffix());
 	}
 
 }

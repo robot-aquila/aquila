@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.data.storage.file.FileStorage;
-import ru.prolib.aquila.data.storage.file.FileStorageImpl;
-import ru.prolib.aquila.data.storage.file.FilesetInfo;
+import ru.prolib.aquila.finam.tools.storage.file.FINAMFileStorage;
 
 public class TickDataStorageService {
 	private static final Logger logger;
@@ -36,8 +35,7 @@ public class TickDataStorageService {
 		if ( ! root.isDirectory() ) {
 			CmdLine.printErrorAndExit("The pathname is not a directory: " + root);
 		}
-		final FilesetInfo filesetInfo = FilesetInfo.createInstance(".csv.gz", ".part.csv.gz");
-		final FileStorage storage = new FileStorageImpl(root, filesetInfo);
+		final FileStorage storage = FINAMFileStorage.createStorage(root);
 		final CountDownLatch globalExit = new CountDownLatch(1);
 		final Scheduler scheduler = new SchedulerLocal();
 		Runtime.getRuntime().addShutdownHook(new Thread() {

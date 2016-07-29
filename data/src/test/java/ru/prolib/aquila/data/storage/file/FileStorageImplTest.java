@@ -25,19 +25,29 @@ public class FileStorageImplTest {
 			date2 = LocalDate.of(2005, 12, 1);
 	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
 			descr2 = new DatedSymbol(symbol1, date2);
-	private static FilesetInfo filesetInfo;
+	private static FileSetService fileSetService;
+	private FileStorageNamespace namespace;
 	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		filesetInfo = FilesetInfo.createInstance(".csv.gz", ".part.csv.gz");
+		fileSetService = new FileSetService() {
+			@Override public String getRegularSuffix() {
+				return ".csv.gz";
+			}
+
+			@Override public String getTemporarySuffix() {
+				return ".part.csv.gz";
+			}
+		};
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		FileUtils.forceMkdir(root);
-		storage = new FileStorageImpl(new File("fixture/temp"), filesetInfo);
+		namespace = new FileStorageNamespaceV1(root);
+		storage = new FileStorageImpl(namespace, fileSetService);
 	}
 	
 	@After
@@ -62,7 +72,9 @@ public class FileStorageImplTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
-		storage = new FileStorageImpl(new File("fixture/dummy"), filesetInfo);
+		File root = new File("fixture/dummy");
+		namespace = new FileStorageNamespaceV1(root);
+		storage = new FileStorageImpl(namespace, fileSetService);
 		
 		storage.getTemporarySegmentFile(descr1);
 	}
@@ -85,7 +97,9 @@ public class FileStorageImplTest {
 	
 	@Test
 	public void testListExistingSegments() throws Exception {
-		storage = new FileStorageImpl(new File("fixture"), filesetInfo);
+		File root = new File("fixture");
+		namespace = new FileStorageNamespaceV1(root);
+		storage = new FileStorageImpl(namespace, fileSetService);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
