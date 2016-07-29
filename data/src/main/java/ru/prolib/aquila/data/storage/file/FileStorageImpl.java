@@ -19,16 +19,22 @@ import ru.prolib.aquila.data.storage.DatedSymbol;
  */
 public class FileStorageImpl implements FileStorage {
 	private final IdUtils idUtils = new IdUtils();
+	private final String storageID;
 	private final FileStorageNamespace namespace;
 	private final FileSetService fileSetService;
 	
-	public FileStorageImpl(FileStorageNamespace namespace, FileSetService fileSetService) {
+	public FileStorageImpl(FileStorageNamespace namespace, String storageID, FileSetService fileSetService) {
 		this.namespace = namespace;
+		this.storageID = storageID;
 		this.fileSetService = fileSetService;
 	}
 	
 	public FileStorageNamespace getNamespace() {
 		return namespace;
+	}
+	
+	public String getStorageID() {
+		return storageID;
 	}
 	
 	public FileSetService getFileSetService() {

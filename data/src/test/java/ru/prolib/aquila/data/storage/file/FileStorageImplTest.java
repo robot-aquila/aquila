@@ -47,12 +47,19 @@ public class FileStorageImplTest {
 	public void setUp() throws Exception {
 		FileUtils.forceMkdir(root);
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, fileSetService);
+		storage = new FileStorageImpl(namespace, "test", fileSetService);
 	}
 	
 	@After
 	public void tearDown() throws Exception {
 		FileUtils.deleteDirectory(root);
+	}
+	
+	@Test
+	public void testCtor3() throws Exception {
+		assertEquals(namespace, storage.getNamespace());
+		assertEquals("test", storage.getStorageID());
+		assertEquals(fileSetService, storage.getFileSetService());
 	}
 	
 	@Test
@@ -74,7 +81,7 @@ public class FileStorageImplTest {
 	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, fileSetService);
+		storage = new FileStorageImpl(namespace, "foo", fileSetService);
 		
 		storage.getTemporarySegmentFile(descr1);
 	}
@@ -99,7 +106,7 @@ public class FileStorageImplTest {
 	public void testListExistingSegments() throws Exception {
 		File root = new File("fixture");
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, fileSetService);
+		storage = new FileStorageImpl(namespace, "bar", fileSetService);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
