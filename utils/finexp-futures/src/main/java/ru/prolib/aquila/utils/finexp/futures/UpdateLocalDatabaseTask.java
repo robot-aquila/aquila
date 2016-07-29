@@ -82,7 +82,9 @@ public class UpdateLocalDatabaseTask implements Runnable {
 			logger.debug("Selected data period: {} to {}", new Object[] { startDate, endDate });
 			// for each futures:
 			int remainedSymbols = quoteIds.size();
+			boolean lastSymbolHasDownload = false;
 			for ( int i = 0; i < quoteIds.size(); i ++ ) {
+				lastSymbolHasDownload = false;
 				int quoteID = quoteIds.get(i);
 				Symbol symbol = new Symbol(quoteMap.get(quoteID));
 
@@ -93,8 +95,19 @@ public class UpdateLocalDatabaseTask implements Runnable {
 				// data segments starting of earliest date
 				LocalDate current = startDate;
 				int remainedDownloads = random.nextInt(MIN_DOWNLOAD_SEGMENTS, MAX_DOWNLOAD_SEGMENTS + 1);
+				boolean isFirstDownload = true;
 				while ( current.isBefore(today) && remainedDownloads > 0 ) {
 					if ( ! existingSegments.contains(current) ) {
+						if ( ! isFirstDownload ) {
+							long pause = random.nextLong(PAUSE_BETWEEN_DOWNLOAD_MIN, PAUSE_BETWEEN_DOWNLOAD_MAX + 1);
+							logger.debug("Waiting for {} seconds before going next download (remained {}).",
+									new Object[] { pause, remainedDownloads } );
+							if ( globalExit.await(pause, TimeUnit.SECONDS) ) {
+								logger.debug("The global exit signal received.");
+								break;
+							}					
+						}
+						
 						DatedSymbol descr = new DatedSymbol(symbol, current);
 						logger.debug("Start downloading segment: {}", descr);
 						File tempFile = fileStorage.getTemporarySegmentFile(descr);
@@ -105,21 +118,18 @@ public class UpdateLocalDatabaseTask implements Runnable {
 								new Object[] { mainFile, mainFile.length() } ); 
 						
 						remainedDownloads --;
-						if ( remainedDownloads > 0 ) {
-							long pause = random.nextLong(PAUSE_BETWEEN_DOWNLOAD_MIN, PAUSE_BETWEEN_DOWNLOAD_MAX + 1);
-							logger.debug("Waiting for {} seconds before going next download (remained {}).",
-									new Object[] { pause, remainedDownloads } );
-							if ( globalExit.await(pause, TimeUnit.SECONDS) ) {
-								logger.debug("The global exit signal received.");
-								break;
-							}
-						}
+						isFirstDownload = false;
+						lastSymbolHasDownload = true;
 					}
 					current = current.plusDays(1);
 				}
 
-				remainedSymbols --;
-				if ( remainedSymbols > 0 ) {
+				if ( globalExit.getCount() == 0 ) {
+					break;
+				}
+
+				remainedSymbols --;				
+				if ( remainedSymbols > 0 && lastSymbolHasDownload ) {
 					// 3) Wait some random time
 					long pause = random.nextLong(PAUSE_BETWEEN_SYMBOL_MIN, PAUSE_BETWEEN_SYMBOL_MAX + 1);
 					logger.debug("Waiting for {} seconds before going next symbol (remained {}/{})",
