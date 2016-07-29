@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -24,14 +25,18 @@ public class FileStorageImplTest {
 			date2 = LocalDate.of(2005, 12, 1);
 	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
 			descr2 = new DatedSymbol(symbol1, date2);
-	private FilesetInfo filesetInfo;
+	private static FilesetInfo filesetInfo;
 	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		filesetInfo = FilesetInfo.createInstance(".csv.gz", ".part.csv.gz");
+	}
 
 	@Before
 	public void setUp() throws Exception {
 		FileUtils.forceMkdir(root);
-		filesetInfo = new FilesetInfoImpl(".csv.gz", ".part.csv.gz");
 		storage = new FileStorageImpl(new File("fixture/temp"), filesetInfo);
 	}
 	
