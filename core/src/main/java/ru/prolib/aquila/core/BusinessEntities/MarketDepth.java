@@ -142,7 +142,7 @@ public class MarketDepth {
 	public String toString() {
 		return "MarketDepth[" + symbol + " at " + getTime() + "\n"
 				+ " asks[" + StringUtils.join(asks, "\n,") + "]\n"
-				+ " bids[" + StringUtils.join(bids, "\n,")
+				+ " bids[" + StringUtils.join(bids, "\n,") + "]\n"
 				+ " scale=" + scale + "]";
 	}
 	

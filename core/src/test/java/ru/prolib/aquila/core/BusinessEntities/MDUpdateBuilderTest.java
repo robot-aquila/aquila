@@ -113,16 +113,84 @@ public class MDUpdateBuilderTest {
 	@Test
 	public void testAdd1() throws Exception {
 		Instant time = Instant.parse("2016-07-30T02:14:00Z");
-		assertSame(builder, builder.withTime(time)
-				.add(Tick.of(TickType.ASK, 200.0d, 100L))
-				.add(Tick.of(TickType.BID, 250.0d, 200L)));
+		assertSame(builder, builder
+				.add(Tick.of(TickType.ASK, time, 200.0d, 100L))
+				.add(Tick.of(TickType.BID, time, 250.0d, 200L)));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
-		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, Instant.EPOCH, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.ASK, 200.0d, 100L), MDTransactionType.ADD);
-		expected.addRecord(Tick.of(TickType.BID, 250.0d, 200L), MDTransactionType.ADD);
+		expected.addRecord(Tick.of(TickType.ASK, time, 200.0d, 100L), MDTransactionType.ADD);
+		expected.addRecord(Tick.of(TickType.BID, time, 250.0d, 200L), MDTransactionType.ADD);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testReplaceAsk() throws Exception {
+		Instant time = Instant.parse("2016-07-30T03:28:00Z");
+		assertSame(builder, builder.withTime(time)
+				.withType(MDUpdateType.UPDATE)
+				.replaceAsk(200.0d, 100L)
+				.replaceAsk(250.0d, 200L));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.of(TickType.ASK, time, 200.0d, 100L), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.of(TickType.ASK, time, 250.0d, 200L), MDTransactionType.REPLACE);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testReplaceBid() throws Exception {
+		Instant time = Instant.parse("2016-07-30T03:28:00Z");
+		assertSame(builder, builder.withTime(time)
+				.withType(MDUpdateType.UPDATE)
+				.replaceBid(200.0d, 100L)
+				.replaceBid(250.0d, 200L));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.of(TickType.BID, time, 200.0d, 100L), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.of(TickType.BID, time, 250.0d, 200L), MDTransactionType.REPLACE);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testDeleteAsk() throws Exception {
+		Instant time = Instant.parse("2016-07-30T03:28:00Z");
+		assertSame(builder, builder.withTime(time)
+				.withType(MDUpdateType.UPDATE)
+				.deleteAsk(200.0d)
+				.deleteAsk(250.0d));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.of(TickType.ASK, time, 200.0d, 0), MDTransactionType.DELETE);
+		expected.addRecord(Tick.of(TickType.ASK, time, 250.0d, 0), MDTransactionType.DELETE);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testDeleteBid() throws Exception {
+		Instant time = Instant.parse("2016-07-30T03:28:00Z");
+		assertSame(builder, builder.withTime(time)
+				.withType(MDUpdateType.UPDATE)
+				.deleteBid(200.0d)
+				.deleteBid(250.0d));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.of(TickType.BID, time, 200.0d, 0), MDTransactionType.DELETE);
+		expected.addRecord(Tick.of(TickType.BID, time, 250.0d, 0), MDTransactionType.DELETE);
 		assertEquals(expected, actual);
 	}
 

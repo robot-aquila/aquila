@@ -33,21 +33,39 @@ public class MDUpdateBuilder {
 		return this;
 	}
 	
-	public MDUpdateBuilder addAsk(double price, long size) {
-		records.add(new MDUpdateRecordImpl(Tick.of(TickType.ASK, time, price, size), MDTransactionType.ADD));
-		return this;
-	}
-	
-	public MDUpdateBuilder addBid(double price, long size) {
-		records.add(new MDUpdateRecordImpl(Tick.of(TickType.BID, time, price, size), MDTransactionType.ADD));
-		return this;
-	}
-	
 	public MDUpdateBuilder add(Tick tick) {
 		records.add(new MDUpdateRecordImpl(tick, MDTransactionType.ADD));
 		return this;
 	}
 	
+	public MDUpdateBuilder addAsk(double price, long size) {
+		return add(Tick.of(TickType.ASK, time, price, size));
+	}
+	
+	public MDUpdateBuilder addBid(double price, long size) {
+		return add(Tick.of(TickType.BID, time, price, size));
+	}
+	
+	public MDUpdateBuilder replaceAsk(double price, long size) {
+		records.add(new MDUpdateRecordImpl(Tick.of(TickType.ASK, time, price, size), MDTransactionType.REPLACE));
+		return this;
+	}
+
+	public MDUpdateBuilder replaceBid(double price, long size) {
+		records.add(new MDUpdateRecordImpl(Tick.of(TickType.BID, time, price, size), MDTransactionType.REPLACE));
+		return this;
+	}
+
+	public MDUpdateBuilder deleteAsk(double price) {
+		records.add(new MDUpdateRecordImpl(Tick.of(TickType.ASK, time, price, 0), MDTransactionType.DELETE));
+		return this;
+	}
+
+	public MDUpdateBuilder deleteBid(double price) {
+		records.add(new MDUpdateRecordImpl(Tick.of(TickType.BID, time, price, 0), MDTransactionType.DELETE));
+		return this;
+	}
+
 	public MDUpdate buildMDUpdate() {
 		if ( symbol == null ) {
 			throw new IllegalArgumentException("Symbol must be specified");

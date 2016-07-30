@@ -1,8 +1,5 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
-import java.time.Instant;
-import java.util.*;
-
 import ru.prolib.aquila.core.*;
 
 /**
@@ -34,12 +31,9 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	private final EventType onSessionUpdate, onBestAsk, onBestBid, onLastTrade,
 		onMarketDepthUpdate;
 	private final Symbol symbol;
-	private final DoubleUtils doubleUtils = new DoubleUtils();
+	private final MDBuilder marketDepthBuilder;
 	private Terminal terminal;
 	private Tick bestAsk, bestBid, lastTrade;
-	private MarketDepth md;
-	private Vector<Tick> askQuotes, bidQuotes; // do not switch to other type
-	private int marketDepthLevels = 10;
 	
 	private static String getID(Terminal terminal, Symbol symbol, String suffix) {
 		return String.format("%s.%s.%s", terminal.getTerminalID(), symbol, suffix);
@@ -69,9 +63,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		this.onBestBid = newEventType("BEST_BID");
 		this.onLastTrade = newEventType("LAST_TRADE");
 		this.onMarketDepthUpdate = newEventType("MARKET_DEPTH_UPDATE");
-		this.askQuotes = new Vector<Tick>();
-		this.bidQuotes = new Vector<Tick>();
-		this.md = new MarketDepth(symbol, askQuotes, bidQuotes, Instant.EPOCH, 0);
+		this.marketDepthBuilder = new MDBuilder(symbol);
 	}
 	
 	public SecurityImpl(EditableTerminal terminal, Symbol symbol) {
@@ -315,52 +307,12 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 
 	@Override
 	public void consume(MDUpdate update) {
-		boolean hasAsk = false, hasBid = false;
 		lock.lock();
-		doubleUtils.setScale(getScale());
 		try {
-			MDUpdateHeader header = update.getHeader();
-			MDUpdateType updateType = header.getType();
-			if ( updateType == MDUpdateType.REFRESH || updateType == MDUpdateType.REFRESH_ASK ) {
-				askQuotes.clear();
-				hasAsk = true;
-			}
-			if ( updateType == MDUpdateType.REFRESH || updateType == MDUpdateType.REFRESH_BID ) {
-				bidQuotes.clear();
-				hasBid = true;
-			}
-			
-			for ( MDUpdateRecord record : update.getRecords() ) {
-				Tick tick = record.getTick();
-				switch ( tick.getType() ) {
-				case ASK:
-					hasAsk = true;
-					break;
-				case BID:
-					hasBid = true;
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid tick type: " + tick.getType());
-				}
-				switch ( record.getTransactionType() ) {
-				case DELETE:
-					removeQuote(tick);
-					break;
-				default:
-					replaceQuote(tick);
-				}
-			}
-
-			if ( hasAsk || hasBid ) {
-				if ( hasAsk ) {
-					sortAndDetruncateQuotes(askQuotes, true);
-				}
-				if ( hasBid ) {
-					sortAndDetruncateQuotes(bidQuotes, false);
-				}
-				md = new MarketDepth(symbol, askQuotes, bidQuotes, header.getTime(), getScale());
-				queue.enqueue(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
-			}
+			marketDepthBuilder.setPriceScale(getScale());
+			marketDepthBuilder.consume(update);
+			queue.enqueue(onMarketDepthUpdate,
+				new SecurityMarketDepthEventFactory(this, marketDepthBuilder.getMarketDepth()));
 		} finally {
 			lock.unlock();
 		}
@@ -382,48 +334,6 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		
 	}
 	
-	private void sortAndDetruncateQuotes(Vector<Tick> ticks, boolean ascending) {
-		Collections.sort(ticks, new TickPriceComparator(ascending));
-		ticks.setSize(Math.min(marketDepthLevels, ticks.size()));
-	}
-	
-	/**
-	 * Remove tick by price.
-	 * <p>
-	 * @param tick - the tick to remove
-	 * @return true if removed, otherwise false
-	 */
-	private boolean removeQuote(Tick tick) {
-		List<Tick> target = tick.getType() == TickType.ASK ? askQuotes : bidQuotes;
-		List<Integer> to_remove = findQuoteWithSamePrice(target, tick);
-		for ( int i : to_remove ) {
-			target.remove(i);
-		}
-		return to_remove.size() > 0;
-	}
-	
-	/**
-	 * Replace tick by price or add if not exists.
-	 * <p>
-	 * @param tick - the tick to replace
-	 */
-	private void replaceQuote(Tick tick) {
-		removeQuote(tick);
-		List<Tick> target = tick.getType() == TickType.ASK ? askQuotes : bidQuotes;
-		target.add(tick.withPrice(doubleUtils.round(tick.getPrice())));
-	}
-	
-	private List<Integer> findQuoteWithSamePrice(List<Tick> target, Tick expected) {
-		List<Integer> to_remove = new ArrayList<Integer>();
-		double expectedPrice = expected.getPrice();
-		for ( int i = 0; i < target.size(); i ++ ) {
-			if ( doubleUtils.isEquals(target.get(i).getPrice(), expectedPrice) ) {
-				to_remove.add(i);
-			}
-		}
-		return to_remove;
-	}
-
 	@Override
 	public EventType onMarketDepthUpdate() {
 		return onMarketDepthUpdate;
@@ -431,12 +341,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 
 	@Override
 	public MarketDepth getMarketDepth() {
-		lock.lock();
-		try {
-			return md;
-		} finally {
-			lock.unlock();
-		}
+		return marketDepthBuilder.getMarketDepth();
 	}
 	
 	@Override
