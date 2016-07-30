@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -21,6 +23,11 @@ public class L1UpdateImpl implements L1Update {
 	@Override
 	public Tick getTick() {
 		return tick;
+	}
+	
+	@Override
+	public Instant getTime() {
+		return tick.getTime();
 	}
 	
 	@Override

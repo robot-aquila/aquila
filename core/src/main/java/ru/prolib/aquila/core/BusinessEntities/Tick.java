@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 /**
  * Tick data entity.
  */
-public class Tick {
+public class Tick implements Timestamped {
 	public static final Tick NULL_ASK = Tick.of(TickType.ASK, 0, 0);
 	public static final Tick NULL_BID = Tick.of(TickType.BID, 0, 0);
 	
@@ -77,6 +77,7 @@ public class Tick {
 	 * <p>
 	 * @return time
 	 */
+	@Override
 	public Instant getTime() {
 		return Instant.ofEpochMilli(timestamp);
 	}
