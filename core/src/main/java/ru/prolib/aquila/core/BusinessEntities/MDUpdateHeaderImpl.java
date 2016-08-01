@@ -43,5 +43,10 @@ public class MDUpdateHeaderImpl implements MDUpdateHeader {
 			.append(symbol, o.getSymbol())
 			.isEquals();
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + type + " " + symbol + "@" + time + "]";
+	}
 
 }
