@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 
-public interface L1Update extends Timestamped {
+public interface L1Update extends TStamped {
 	
 	public Symbol getSymbol();
 	

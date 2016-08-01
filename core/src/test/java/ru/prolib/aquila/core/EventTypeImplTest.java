@@ -396,7 +396,7 @@ public class EventTypeImplTest {
 	}
 	
 	@Test
-	public void removeAlternates() {
+	public void testRemoveAlternates() {
 		type.addAlternateType(type1);
 		type.addAlternateType(type2);
 		
@@ -418,6 +418,20 @@ public class EventTypeImplTest {
 		type.removeAlternateType(type2);
 		
 		assertEquals(1, type.countAlternates());
+	}
+	
+	@Test
+	public void testRemoveAlternatesAndListeners() {
+		type.addAlternateType(type1);
+		type.addAlternateType(type2);
+		type.addListener(listener1);
+		type.addListener(listener2);
+		type.addSyncListener(listener3);
+		
+		type.removeAlternatesAndListeners();
+		
+		assertEquals(0, type.countAlternates());
+		assertEquals(0, type.countListeners());
 	}
 	
 }

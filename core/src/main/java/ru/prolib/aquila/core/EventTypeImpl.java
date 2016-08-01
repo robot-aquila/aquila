@@ -215,4 +215,10 @@ public class EventTypeImpl implements EventType {
 		return alternates.size();
 	}
 
+	@Override
+	public void removeAlternatesAndListeners() {
+		removeAlternates();
+		removeListeners();
+	}
+
 }

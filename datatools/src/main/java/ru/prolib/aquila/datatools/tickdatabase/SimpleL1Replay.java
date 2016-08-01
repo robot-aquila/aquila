@@ -22,6 +22,10 @@ import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
+/**
+ * This class is deprecated and will be removed.
+ */
+@Deprecated
 public class SimpleL1Replay {
 	private static final int MIN_QUEUE_SIZE = 100;
 	private static final int MAX_QUEUE_SIZE = 200;

@@ -195,4 +195,6 @@ public interface EventType {
 	
 	public int countAlternates();
 	
+	public void removeAlternatesAndListeners();
+	
 }

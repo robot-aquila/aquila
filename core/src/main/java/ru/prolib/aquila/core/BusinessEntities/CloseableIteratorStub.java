@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 public class CloseableIteratorStub<T> implements CloseableIterator<T> {
 	private final List<T> elements;
 	private int current = -1;
+	private boolean closed = false;
 	
 	public CloseableIteratorStub() {
 		this.elements = new ArrayList<>();
@@ -27,9 +28,14 @@ public class CloseableIteratorStub<T> implements CloseableIterator<T> {
 		this.elements.add(element);
 		return this;
 	}
+	
+	public boolean isClosed() {
+		return closed;
+	}
 
 	@Override
 	public void close() throws IOException {
+		closed = true;
 		elements.clear();
 	}
 

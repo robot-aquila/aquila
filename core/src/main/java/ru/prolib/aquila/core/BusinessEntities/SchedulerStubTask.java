@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 /**
  * The task class of the stub scheduler.
  */
-public class SchedulerStubTask implements TaskHandler, Comparable<SchedulerStubTask>, Timestamped {
+public class SchedulerStubTask implements TaskHandler, Comparable<SchedulerStubTask>, TStamped {
 	private final SchedulerTaskType type;
 	private final Instant time;
 	private final Long delay, period;

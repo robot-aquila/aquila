@@ -174,5 +174,18 @@ public class SchedulerStubTest {
 		expected.add(task4);
 		assertEquals(expected, scheduler.getScheduledTasks());
 	}
+	
+	@Test
+	public void testClearScheduledTasks() {
+		scheduler.schedule(runnable, T("2015-01-01T00:00:00Z"));
+		scheduler.schedule(runnable, T("2011-01-01T00:00:00Z"));
+		scheduler.schedule(runnable, T("2001-01-01T00:00:00Z"));
+		scheduler.schedule(runnable, T("2016-07-30T00:00:00Z"));
+		
+		scheduler.clearScheduledTasks();
+		
+		List<TaskHandler> expected = new ArrayList<>();
+		assertEquals(expected, scheduler.getScheduledTasks());
+	}
 
 }

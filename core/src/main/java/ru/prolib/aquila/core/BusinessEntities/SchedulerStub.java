@@ -31,6 +31,10 @@ public class SchedulerStub implements Scheduler {
 		return result;
 	}
 	
+	public void clearScheduledTasks() {
+		tasks.clear();
+	}
+	
 	/**
 	 * Set a time strategy for scheduler's current time.
 	 * <p>
