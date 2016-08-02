@@ -231,8 +231,12 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	@Override
 	public void consume(L1Update update) {
 		Tick tick = update.getTick();
+		boolean hasAsk = false, hasBid = false, hasTrade = false;
 		lock.lock();
 		try {
+			if ( isClosed() ) {
+				return;
+			}
 			switch ( tick.getType() ) {
 			case ASK:
 				if ( tick == Tick.NULL_ASK ) {
@@ -240,7 +244,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 				} else {
 					bestAsk = tick;
 				}
-				queue.enqueue(onBestAsk, new SecurityTickEventFactory(this, bestAsk));
+				hasAsk = true;
 				break;
 			case BID:
 				if ( tick == Tick.NULL_BID ) {
@@ -248,15 +252,24 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 				} else {
 					bestBid = tick;
 				}
-				queue.enqueue(onBestBid, new SecurityTickEventFactory(this, bestBid));
+				hasBid = true;
 				break;
 			case TRADE:
 				lastTrade = tick;
-				queue.enqueue(onLastTrade, new SecurityTickEventFactory(this, lastTrade));
+				hasTrade = true;
 				break;
 			}
 		} finally {
 			lock.unlock();
+		}
+		if ( hasAsk ) {
+			queue.enqueue(onBestAsk, new SecurityTickEventFactory(this, bestAsk));
+		}
+		if ( hasBid ) {
+			queue.enqueue(onBestBid, new SecurityTickEventFactory(this, bestBid));
+		}
+		if ( hasTrade ) {
+			queue.enqueue(onLastTrade, new SecurityTickEventFactory(this, lastTrade));
 		}
 	}
 
@@ -309,13 +322,16 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	public void consume(MDUpdate update) {
 		lock.lock();
 		try {
+			if ( isClosed() ) {
+				return;
+			}
 			marketDepthBuilder.setPriceScale(getScale());
 			marketDepthBuilder.consume(update);
-			queue.enqueue(onMarketDepthUpdate,
-				new SecurityMarketDepthEventFactory(this, marketDepthBuilder.getMarketDepth()));
 		} finally {
 			lock.unlock();
 		}
+		queue.enqueue(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this,
+				marketDepthBuilder.getMarketDepth()));
 	}
 	
 	static class SecurityMarketDepthEventFactory implements EventFactory {
