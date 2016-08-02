@@ -240,7 +240,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 			switch ( tick.getType() ) {
 			case ASK:
 				if ( tick == Tick.NULL_ASK ) {
-					bestAsk = null;
+					bestAsk = tick = null;
 				} else {
 					bestAsk = tick;
 				}
@@ -248,7 +248,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 				break;
 			case BID:
 				if ( tick == Tick.NULL_BID ) {
-					bestBid = null;
+					bestBid = tick = null;
 				} else {
 					bestBid = tick;
 				}
@@ -263,13 +263,13 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 			lock.unlock();
 		}
 		if ( hasAsk ) {
-			queue.enqueue(onBestAsk, new SecurityTickEventFactory(this, bestAsk));
+			queue.enqueue(onBestAsk, new SecurityTickEventFactory(this, tick));
 		}
 		if ( hasBid ) {
-			queue.enqueue(onBestBid, new SecurityTickEventFactory(this, bestBid));
+			queue.enqueue(onBestBid, new SecurityTickEventFactory(this, tick));
 		}
 		if ( hasTrade ) {
-			queue.enqueue(onLastTrade, new SecurityTickEventFactory(this, lastTrade));
+			queue.enqueue(onLastTrade, new SecurityTickEventFactory(this, tick));
 		}
 	}
 
@@ -320,6 +320,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 
 	@Override
 	public void consume(MDUpdate update) {
+		MarketDepth md = null;
 		lock.lock();
 		try {
 			if ( isClosed() ) {
@@ -327,11 +328,11 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 			}
 			marketDepthBuilder.setPriceScale(getScale());
 			marketDepthBuilder.consume(update);
+			md = marketDepthBuilder.getMarketDepth();
 		} finally {
 			lock.unlock();
 		}
-		queue.enqueue(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this,
-				marketDepthBuilder.getMarketDepth()));
+		queue.enqueue(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
 	}
 	
 	static class SecurityMarketDepthEventFactory implements EventFactory {
