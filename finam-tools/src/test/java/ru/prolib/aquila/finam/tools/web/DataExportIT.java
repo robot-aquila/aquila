@@ -35,8 +35,8 @@ import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
 
-@Ignore // Integration test
-public class DataExportTest {
+//@Ignore // Integration test
+public class DataExportIT {
 	private static final File sample = new File("fixture/RTS-140701-140731-W1.txt");
 	
 	private DataExportParams params;
