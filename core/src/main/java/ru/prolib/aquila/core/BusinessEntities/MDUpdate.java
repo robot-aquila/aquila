@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Market depth update record.
  */
-public interface MDUpdate extends TStamped {
+public interface MDUpdate extends TStamped, MDUpdateHeader {
 
 	public MDUpdateHeader getHeader();
 	

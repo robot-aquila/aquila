@@ -7,7 +7,7 @@ import java.util.Vector;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-public class MDUpdateImpl implements MDUpdate, MDUpdateHeader {
+public class MDUpdateImpl implements MDUpdate {
 	private final MDUpdateHeader header;
 	private final List<MDUpdateRecord> records;
 

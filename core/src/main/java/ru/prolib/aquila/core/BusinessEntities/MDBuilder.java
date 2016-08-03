@@ -37,11 +37,10 @@ public class MDBuilder implements MDUpdateConsumer {
 	@Override
 	public void consume(MDUpdate update) {
 		boolean hasAskUpdate = false, hasBidUpdate = false;
-		MDUpdateHeader header = update.getHeader();
-		if ( ! symbol.equals(header.getSymbol()) ) {
-			throw new IllegalArgumentException("Unexpected symbol: " + header.getSymbol());
+		if ( ! symbol.equals(update.getSymbol()) ) {
+			throw new IllegalArgumentException("Unexpected symbol: " + update.getSymbol());
 		}
-		MDUpdateType updateType = header.getType();
+		MDUpdateType updateType = update.getType();
 		if ( updateType == MDUpdateType.REFRESH || updateType == MDUpdateType.REFRESH_ASK ) {
 			askQuotes.clear();
 			hasAskUpdate = true;
@@ -81,8 +80,8 @@ public class MDBuilder implements MDUpdateConsumer {
 				Collections.sort(bidQuotes, TickPriceComparator.BID);
 				bidQuotes.setSize(Math.min(marketDepthLevels, bidQuotes.size()));
 			}
-			md = new MarketDepth(header.getSymbol(), askQuotes, bidQuotes,
-					header.getTime(), doubleUtils.getScale());
+			md = new MarketDepth(update.getSymbol(), askQuotes, bidQuotes,
+					update.getTime(), doubleUtils.getScale());
 		}
 	}
 	
