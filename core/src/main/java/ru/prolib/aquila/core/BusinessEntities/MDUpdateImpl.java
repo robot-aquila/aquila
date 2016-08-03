@@ -76,4 +76,13 @@ public class MDUpdateImpl implements MDUpdate {
 				+ " " + records + "]";
 	}
 
+	@Override
+	public MDUpdate withTime(Instant newTime) {
+		MDUpdateImpl newUpdate = new MDUpdateImpl(new MDUpdateHeaderImpl(getType(), newTime, getSymbol()));
+		for ( MDUpdateRecord record : records ) {
+			newUpdate.addRecord(record.getTick().withTime(newTime), record.getTransactionType());
+		}
+		return newUpdate;
+	}
+
 }

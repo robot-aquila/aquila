@@ -203,5 +203,13 @@ public class TickTest {
 		assertEquals(400L, newTick.getSize());
 		assertEquals(0.0d, newTick.getValue(), 0.001d);
 	}
+	
+	@Test
+	public void testWithTime() {
+		Tick tick = Tick.of(TickType.TRADE, Instant.parse("1980-05-01T00:10:00Z"), 12.34d, 10L, 1d),
+			expected = Tick.of(TickType.TRADE, Instant.parse("2006-07-12T13:48:29Z"), 12.34d, 10L, 1d);
+		
+		assertEquals(expected, tick.withTime(Instant.parse("2006-07-12T13:48:29Z")));
+	}
 
 }

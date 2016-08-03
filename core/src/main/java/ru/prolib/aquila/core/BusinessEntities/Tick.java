@@ -147,5 +147,9 @@ public class Tick implements TStamped {
 	public Tick withPrice(double newPrice) {
 		return Tick.of(type, timestamp, newPrice, size, value);
 	}
+	
+	public Tick withTime(Instant newTime) {
+		return Tick.of(type, newTime, price, size, value);
+	}
 
 }
