@@ -29,45 +29,45 @@ public class DataSourceImplTest {
 	}
 	
 	@Test
-	public void testSubscribe_L1UpdateConsumer() {
-		l1UpdateSourceMock.subscribe(new Symbol("foobar"), l1UpdateConsumerMock);
+	public void testSubscribeL1() {
+		l1UpdateSourceMock.subscribeL1(new Symbol("foobar"), l1UpdateConsumerMock);
 		control.replay();
 		dataSource.setL1UpdateSource(l1UpdateSourceMock);
 		
-		dataSource.subscribe(new Symbol("foobar"), l1UpdateConsumerMock);
+		dataSource.subscribeL1(new Symbol("foobar"), l1UpdateConsumerMock);
 		
 		control.verify();
 	}
 
 	@Test
-	public void testUnsubscribe_L1UpdateConsumer() {
-		l1UpdateSourceMock.unsubscribe(new Symbol("GAZP"), l1UpdateConsumerMock);
+	public void testUnsubscribeL1() {
+		l1UpdateSourceMock.unsubscribeL1(new Symbol("GAZP"), l1UpdateConsumerMock);
 		control.replay();
 		dataSource.setL1UpdateSource(l1UpdateSourceMock);
 		
-		dataSource.unsubscribe(new Symbol("GAZP"), l1UpdateConsumerMock);
+		dataSource.unsubscribeL1(new Symbol("GAZP"), l1UpdateConsumerMock);
 		
 		control.verify();
 	}
 
 	@Test
-	public void testSubscribe_MDUpdateConsumer() {
-		mdUpdateSourceMock.subscribe(new Symbol("AAPL"), mdUpdateConsumerMock);
+	public void testSubscribeMD() {
+		mdUpdateSourceMock.subscribeMD(new Symbol("AAPL"), mdUpdateConsumerMock);
 		control.replay();
 		dataSource.setMDUpdateSource(mdUpdateSourceMock);
 		
-		dataSource.subscribe(new Symbol("AAPL"), mdUpdateConsumerMock);
+		dataSource.subscribeMD(new Symbol("AAPL"), mdUpdateConsumerMock);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testUnsubscribe_MDUpdateConsumer() {
-		mdUpdateSourceMock.unsubscribe(new Symbol("AAPL"), mdUpdateConsumerMock);
+	public void testUnsubscribeMD() {
+		mdUpdateSourceMock.unsubscribeMD(new Symbol("AAPL"), mdUpdateConsumerMock);
 		control.replay();
 		dataSource.setMDUpdateSource(mdUpdateSourceMock);
 		
-		dataSource.unsubscribe(new Symbol("AAPL"), mdUpdateConsumerMock);
+		dataSource.unsubscribeMD(new Symbol("AAPL"), mdUpdateConsumerMock);
 		
 		control.verify();
 	}

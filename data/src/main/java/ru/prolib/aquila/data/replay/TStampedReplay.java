@@ -72,10 +72,10 @@ public class TStampedReplay implements Replay {
 	private final Lock lock;
 	private final EventQueue eventQueue;
 	private final Scheduler scheduler;
-	private final TStampedReplayService service;
 	private final int minQueueSize, maxQueueSize;
 	private final String serviceID;
 	private final EventType onStarted, onStopped;
+	private TStampedReplayService service;
 	private boolean started = false;
 	private CloseableIterator<? extends TStamped> reader;
 	private long sequenceID = 0;
@@ -102,6 +102,39 @@ public class TStampedReplay implements Replay {
 		this.onStopped = new EventTypeImpl(serviceID + ".STOPPED");
 	}
 	
+	public TStampedReplay(EventQueue eventQueue, Scheduler scheduler,
+			String serviceID, int minQueueSize, int maxQueueSize)
+	{
+		this(eventQueue, scheduler, null, serviceID, minQueueSize, maxQueueSize);
+	}
+	
+	/**
+	 * Set service instance.
+	 * <p>
+	 * @param service - the service instance
+	 */
+	public void setService(TStampedReplayService service) {
+		lock.lock();
+		try {
+			this.service = service;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	/**
+	 * Test that replay is ready to start.
+	 * <p>
+	 * @return true if it's ready, false otherwise
+	 */
+	public boolean isReady() {
+		lock.lock();
+		try {
+			return this.service != null;
+		} finally {
+			lock.unlock();
+		}
+	}
 	
 	/**
 	 * Get a service ID string.
@@ -191,6 +224,7 @@ public class TStampedReplay implements Replay {
 				closeReader();
 				started = false;
 				wasStopped = true;
+				logger.debug("{}: Service stopped.", serviceID);
 			}
 		} finally {
 			lock.unlock();

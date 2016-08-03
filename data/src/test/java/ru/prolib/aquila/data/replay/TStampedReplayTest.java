@@ -265,6 +265,7 @@ public class TStampedReplayTest {
 		assertSame(eventQueue, replay.getEventQueue());
 		assertSame(schedulerStub, replay.getScheduler());
 		assertSame(serviceStub, replay.getService());
+		assertEquals("zulu24", replay.getServiceID());
 		assertEquals(3, replay.getMinQueueSize());
 		assertEquals(5, replay.getMaxQueueSize());
 		assertEquals("zulu24.STARTED", replay.onStarted().getId());
@@ -279,6 +280,44 @@ public class TStampedReplayTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testCtor6_ThrowsInvalidMaxQueueSize() throws Exception {
 		new TStampedReplay(eventQueue, schedulerStub, serviceStub, "zulu24", 5, 5).close();
+	}
+	
+	@Test
+	public void testCtor5() {
+		replay = new TStampedReplay(eventQueue, schedulerStub, "foobar", 10, 20);
+		assertSame(eventQueue, replay.getEventQueue());
+		assertSame(schedulerStub, replay.getScheduler());
+		assertNull(replay.getService());
+		assertEquals("foobar", replay.getServiceID());
+		assertEquals(10, replay.getMinQueueSize());
+		assertEquals(20, replay.getMaxQueueSize());
+		assertEquals("foobar.STARTED", replay.onStarted().getId());
+		assertEquals("foobar.STOPPED", replay.onStopped().getId());
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor5_ThrowsInvalidMinQueueSize() throws Exception {
+		new TStampedReplay(eventQueue, schedulerStub, "zulu24", 0, 10).close();
+	}
+
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor5_ThrowsInvalidMaxQueueSize() throws Exception {
+		new TStampedReplay(eventQueue, schedulerStub, "zulu24", 5, 5).close();
+	}
+	
+	@Test
+	public void testSetService() {
+		TStampedReplayService serviceMock = control.createMock(TStampedReplayService.class);
+		replay.setService(serviceMock);
+		
+		assertSame(serviceMock, replay.getService());
+	}
+	
+	@Test
+	public void testIsReady() {
+		assertTrue(replay.isReady());
+		replay.setService(null);
+		assertFalse(replay.isReady());
 	}
 	
 	@Test

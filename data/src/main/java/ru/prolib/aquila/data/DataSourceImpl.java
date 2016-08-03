@@ -24,23 +24,23 @@ public class DataSourceImpl implements DataSource {
 	}
 
 	@Override
-	public synchronized void subscribe(Symbol symbol, L1UpdateConsumer consumer) {
-		l1UpdateSource.subscribe(symbol, consumer);
+	public synchronized void subscribeL1(Symbol symbol, L1UpdateConsumer consumer) {
+		l1UpdateSource.subscribeL1(symbol, consumer);
 	}
 
 	@Override
-	public synchronized void unsubscribe(Symbol symbol, L1UpdateConsumer consumer) {
-		l1UpdateSource.unsubscribe(symbol, consumer);
+	public synchronized void unsubscribeL1(Symbol symbol, L1UpdateConsumer consumer) {
+		l1UpdateSource.unsubscribeL1(symbol, consumer);
 	}
 
 	@Override
-	public synchronized void subscribe(Symbol symbol, MDUpdateConsumer consumer) {
-		mdUpdateSource.subscribe(symbol, consumer);
+	public synchronized void subscribeMD(Symbol symbol, MDUpdateConsumer consumer) {
+		mdUpdateSource.subscribeMD(symbol, consumer);
 	}
 
 	@Override
-	public synchronized void unsubscribe(Symbol symbol, MDUpdateConsumer consumer) {
-		mdUpdateSource.unsubscribe(symbol, consumer);
+	public synchronized void unsubscribeMD(Symbol symbol, MDUpdateConsumer consumer) {
+		mdUpdateSource.unsubscribeMD(symbol, consumer);
 	}
 
 	@Override

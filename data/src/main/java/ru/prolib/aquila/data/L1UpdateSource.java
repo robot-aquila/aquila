@@ -7,8 +7,8 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public interface L1UpdateSource extends Closeable {
 	
-	public void subscribe(Symbol symbol, L1UpdateConsumer consumer);
+	public void subscribeL1(Symbol symbol, L1UpdateConsumer consumer);
 	
-	public void unsubscribe(Symbol symbol, L1UpdateConsumer consumer);
+	public void unsubscribeL1(Symbol symbol, L1UpdateConsumer consumer);
 
 }

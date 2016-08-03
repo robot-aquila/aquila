@@ -10,8 +10,8 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
  */
 public interface MDUpdateSource extends Closeable {
 	
-	public void subscribe(Symbol symbol, MDUpdateConsumer consumer);
+	public void subscribeMD(Symbol symbol, MDUpdateConsumer consumer);
 	
-	public void unsubscribe(Symbol symbol, MDUpdateConsumer consumer);
+	public void unsubscribeMD(Symbol symbol, MDUpdateConsumer consumer);
 
 }
