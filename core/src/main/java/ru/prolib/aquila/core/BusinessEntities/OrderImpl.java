@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.*;
 /**
  * Order model.
  */
-public class OrderImpl extends ContainerImpl implements EditableOrder {
+public class OrderImpl extends ObservableStateContainerImpl implements EditableOrder {
 	private static final int[] TOKENS_FOR_AVAILABILITY = {
 		OrderField.ACTION,
 		OrderField.TYPE,
@@ -49,7 +49,7 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 	}
 	
 	public OrderImpl(EditableTerminal terminal, Account account,
-			Symbol symbol, long id, ContainerImpl.Controller controller)
+			Symbol symbol, long id, ObservableStateContainerImpl.Controller controller)
 	{
 		super(terminal.getEventQueue(), getID(terminal, account, symbol, id), controller);
 		this.terminal = terminal;
@@ -243,20 +243,20 @@ public class OrderImpl extends ContainerImpl implements EditableOrder {
 		return new OrderEventFactory(this);
 	}
 	
-	static class OrderController implements ContainerImpl.Controller {
+	static class OrderController implements ObservableStateContainerImpl.Controller {
 
 		@Override
-		public boolean hasMinimalData(Container container) {
+		public boolean hasMinimalData(ObservableStateContainer container) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(Container container) {
+		public void processUpdate(ObservableStateContainer container) {
 			processAvailable(container);
 		}
 
 		@Override
-		public void processAvailable(Container container) {
+		public void processAvailable(ObservableStateContainer container) {
 			OrderImpl order = (OrderImpl) container;
 			OrderEventFactory factory = new OrderEventFactory(order);
 			if ( order.hasChanged(OrderField.STATUS) ) {

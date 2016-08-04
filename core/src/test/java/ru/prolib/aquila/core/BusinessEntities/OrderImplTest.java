@@ -19,7 +19,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderImpl.OrderController;
  * 2012-09-22<br>
  * $Id: OrderImplTest.java 542 2013-02-23 04:15:34Z whirlwind $
  */
-public class OrderImplTest extends ContainerImplTest {
+public class OrderImplTest extends ObservableStateContainerImplTest {
 	protected static Account account = new Account("port#120");
 	protected static Symbol symbol = new Symbol("MSFT");
 	protected IMocksControl control;
@@ -29,7 +29,7 @@ public class OrderImplTest extends ContainerImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ContainerImplTest.setUpBeforeClass();
+		ObservableStateContainerImplTest.setUpBeforeClass();
 	}
 
 	@Before
@@ -61,14 +61,14 @@ public class OrderImplTest extends ContainerImplTest {
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer() {
+	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
 		setOrder(order = new OrderImpl(terminal, account, symbol, 240));
 		return order;
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
 		prepareTerminal();
 		setOrder(order = new OrderImpl(terminal, account, symbol, 240, controller));
 		return order;

@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.*;
  * 2012-09-05<br>
  * $Id$
  */
-public class PortfolioImpl extends ContainerImpl implements EditablePortfolio {
+public class PortfolioImpl extends ObservableStateContainerImpl implements EditablePortfolio {
 
 	private static final int[] TOKENS_FOR_AVAILABILITY = {
 		PortfolioField.CURRENCY,
@@ -43,7 +43,7 @@ public class PortfolioImpl extends ContainerImpl implements EditablePortfolio {
 	}
 
 	public PortfolioImpl(EditableTerminal terminal, Account account,
-			ContainerImpl.Controller controller)
+			ObservableStateContainerImpl.Controller controller)
 	{
 		super(terminal.getEventQueue(), getID(terminal, account, "PORTFOLIO"), controller);
 		this.terminal = terminal;
@@ -224,20 +224,20 @@ public class PortfolioImpl extends ContainerImpl implements EditablePortfolio {
 		return new PortfolioEventFactory(this);
 	}
 	
-	static class PortfolioController implements ContainerImpl.Controller {
+	static class PortfolioController implements ObservableStateContainerImpl.Controller {
 
 		@Override
-		public boolean hasMinimalData(Container container) {
+		public boolean hasMinimalData(ObservableStateContainer container) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(Container container) {
+		public void processUpdate(ObservableStateContainer container) {
 			
 		}
 
 		@Override
-		public void processAvailable(Container container) {
+		public void processAvailable(ObservableStateContainer container) {
 			
 		}
 		

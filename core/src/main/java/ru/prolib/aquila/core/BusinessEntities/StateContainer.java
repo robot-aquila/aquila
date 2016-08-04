@@ -4,32 +4,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
-import ru.prolib.aquila.core.EventType;
+public interface StateContainer extends AbstractContainer {
 
-/**
- * Observable and thread-safe data container.
- * <p>
- * The data container gives an access to a set of values which identified by
- * numeric token ID. Container allows track when and which tokens changed.
- */
-public interface Container extends AbstractContainer {
-	
-	/**
-	 * When container is available for reading.
-	 * <p>
-	 * @return event type
-	 */
-	public EventType onAvailable();
-
-	/**
-	 * When container updated.
-	 * <p>
-	 * Allows catching events {@link ContainerEvent}.
-	 * <p>
-	 * @return event type
-	 */
-	public EventType onUpdate();
-	
 	/**
 	 * Get string value.
 	 * <p>
@@ -49,7 +25,7 @@ public interface Container extends AbstractContainer {
 	 * @throws ClassCastException - cannot cast token value
 	 */
 	public Integer getInteger(int token);
-	
+
 	/**
 	 * Get long value.
 	 * <p>
@@ -59,7 +35,7 @@ public interface Container extends AbstractContainer {
 	 * @throws ClassCastException - cannot cast token value
 	 */
 	public Long getLong(int token);
-	
+
 	/**
 	 * Get double value.
 	 * <p>
@@ -69,7 +45,7 @@ public interface Container extends AbstractContainer {
 	 * @throws ClassCastException - cannot cast token value
 	 */
 	public Double getDouble(int token);
-	
+
 	/**
 	 * Get boolean value.
 	 * <p>
@@ -79,7 +55,7 @@ public interface Container extends AbstractContainer {
 	 * @throws ClassCastException - cannot cast token value
 	 */
 	public Boolean getBoolean(int token);
-	
+
 	/**
 	 * Get java time value.
 	 * <p>
@@ -89,7 +65,7 @@ public interface Container extends AbstractContainer {
 	 * @throws ClassCastException - cannot cast token value
 	 */
 	public Instant getInstant(int token);
-	
+
 	/**
 	 * Get object value.
 	 * <p>
@@ -98,7 +74,7 @@ public interface Container extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 */
 	public Object getObject(int token);
-	
+
 	/**
 	 * Test that specified tokens are defined.
 	 * <p>
@@ -109,7 +85,7 @@ public interface Container extends AbstractContainer {
 	 * @return true if all tokens has non-null values, false otherwise
 	 */
 	public boolean isDefined(int[] tokens);
-	
+
 	/**
 	 * Test that specified token is defined.
 	 * <p>
@@ -117,7 +93,7 @@ public interface Container extends AbstractContainer {
 	 * @return true if token has non-null value, false otherwise
 	 */
 	public boolean isDefined(int token);
-	
+
 	/**
 	 * Get updated tokens.
 	 * <p>
@@ -126,7 +102,7 @@ public interface Container extends AbstractContainer {
 	 * @return set of updated tokens
 	 */
 	public Set<Integer> getUpdatedTokens();
-	
+
 	/**
 	 * Test token for changes.
 	 * <p>
@@ -136,7 +112,7 @@ public interface Container extends AbstractContainer {
 	 * @return true if token has changed within current update, false otherwise
 	 */
 	public boolean hasChanged(int token);
-	
+
 	/**
 	 * Test for changes.
 	 * <p>
@@ -145,7 +121,7 @@ public interface Container extends AbstractContainer {
 	 * @return true if token has changed within current update, false otherwise
 	 */
 	public boolean hasChanged();
-	
+
 	/**
 	 * Test tokens for changes.
 	 * <p>
@@ -156,16 +132,14 @@ public interface Container extends AbstractContainer {
 	 * current update, false otherwise
 	 */
 	public boolean atLeastOneHasChanged(int[] tokens);
-	
-	public boolean isAvailable();
-	
+
 	/**
 	 * Get content of the container.
 	 * <p>
 	 * @return container content
 	 */
 	public Map<Integer, Object> getContent();
-	
+
 	/**
 	 * Get updated content.
 	 * <p>
@@ -174,5 +148,5 @@ public interface Container extends AbstractContainer {
 	 * @return updated content
 	 */
 	public Map<Integer, Object> getUpdatedContent();
-	
+
 }

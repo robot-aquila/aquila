@@ -23,7 +23,7 @@ import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.concurrency.LID;
 
-public class ContainerImplTest {	
+public class ObservableStateContainerImplTest {	
 	private static final int STRING_NAME = 1;
 	private static final int INTEGER_AGE = 2;
 	private static final int INSTANT_TIME_OF_REG = 3;
@@ -34,11 +34,11 @@ public class ContainerImplTest {
 	public interface Getter<T> { public T get(); }
 	
 	protected EventQueue queue;
-	protected ContainerImpl container;
+	protected ObservableStateContainerImpl container;
 	protected Map<Integer, Object> data;
 	protected Getter<?> getter;
 	protected IMocksControl control;
-	protected ContainerImpl.Controller controllerMock;
+	protected ObservableStateContainerImpl.Controller controllerMock;
 	protected EventListenerStub listenerStub;
 
 	
@@ -51,10 +51,10 @@ public class ContainerImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		controllerMock = control.createMock(ContainerImpl.Controller.class);
+		controllerMock = control.createMock(ObservableStateContainerImpl.Controller.class);
 		data = new HashMap<Integer, Object>();
 		queue = new EventQueueImpl();
-		container = produceContainer(new ContainerImpl.ControllerStub());
+		container = produceContainer(new ObservableStateContainerImpl.ControllerStub());
 		listenerStub = new EventListenerStub();
 	}
 	
@@ -86,8 +86,8 @@ public class ContainerImplTest {
 	 * @param controller - the controller
 	 * @return container instance
 	 */
-	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
-		return new ContainerImpl(queue, getID(), controller);
+	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
+		return new ObservableStateContainerImpl(queue, getID(), controller);
 	}
 
 	/**
@@ -95,8 +95,8 @@ public class ContainerImplTest {
 	 * <p>
 	 * @return container instance
 	 */
-	protected ContainerImpl produceContainer() {
-		return new ContainerImpl(queue, getID());
+	protected ObservableStateContainerImpl produceContainer() {
+		return new ObservableStateContainerImpl(queue, getID());
 	}
 	
 	/**

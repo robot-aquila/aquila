@@ -7,7 +7,7 @@ package ru.prolib.aquila.core.BusinessEntities;
  * 2012-09-05<br>
  * $Id$
  */
-public interface EditablePortfolio extends Portfolio, UpdatableContainer {
+public interface EditablePortfolio extends Portfolio, UpdatableStateContainer {
 	
 	/**
 	 * Get managed position.

@@ -5,7 +5,7 @@ import ru.prolib.aquila.core.*;
 /**
  * Security implementation.
  */
-public class SecurityImpl extends ContainerImpl implements EditableSecurity {
+public class SecurityImpl extends ObservableStateContainerImpl implements EditableSecurity {
 	private static final int[] TOKENS_FOR_AVAILABILITY = {
 		SecurityField.DISPLAY_NAME,
 		SecurityField.SCALE,
@@ -54,7 +54,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	 * @param symbol - the symbol
 	 * @param controller - controller
 	 */
-	public SecurityImpl(EditableTerminal terminal, Symbol symbol, ContainerImpl.Controller controller) {
+	public SecurityImpl(EditableTerminal terminal, Symbol symbol, ObservableStateContainerImpl.Controller controller) {
 		super(terminal.getEventQueue(), getID(terminal, symbol, "SECURITY"), controller);
 		this.terminal = terminal;
 		this.symbol = symbol;
@@ -176,15 +176,15 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		}
 	}
 	
-	static class SecurityController implements ContainerImpl.Controller {
+	static class SecurityController implements ObservableStateContainerImpl.Controller {
 
 		@Override
-		public boolean hasMinimalData(Container container) {
+		public boolean hasMinimalData(ObservableStateContainer container) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(Container container) {
+		public void processUpdate(ObservableStateContainer container) {
 			SecurityImpl security = (SecurityImpl) container;
 			if ( security.atLeastOneHasChanged(TOKENS_FOR_SESSION_UPDATE) ) {
 				SecurityEventFactory factory = new SecurityEventFactory(security);
@@ -193,7 +193,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		}
 
 		@Override
-		public void processAvailable(Container container) {
+		public void processAvailable(ObservableStateContainer container) {
 			
 		}
 		

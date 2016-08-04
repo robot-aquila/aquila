@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.EventType;
  * 2012-05-30<br>
  * $Id: Portfolio.java 388 2012-12-30 12:58:15Z whirlwind $
  */
-public interface Portfolio extends Container {
+public interface Portfolio extends ObservableStateContainer {
 	
 	/**
 	 * Get terminal instance.

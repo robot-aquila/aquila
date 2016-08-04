@@ -16,7 +16,7 @@ import ru.prolib.aquila.core.BusinessEntities.PortfolioImpl.PortfolioController;
 /**
  * 2012-09-06
  */
-public class PortfolioImplTest extends ContainerImplTest {
+public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	private static Account account = new Account("ZUMBA");
 	private IMocksControl control;
 	private EditableTerminal terminal;
@@ -24,7 +24,7 @@ public class PortfolioImplTest extends ContainerImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ContainerImplTest.setUpBeforeClass();
+		ObservableStateContainerImplTest.setUpBeforeClass();
 	}
 	
 	@Before
@@ -51,14 +51,14 @@ public class PortfolioImplTest extends ContainerImplTest {
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer() {
+	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
 		portfolio = new PortfolioImpl(terminal, account);
 		return portfolio;
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
 		prepareTerminal();
 		portfolio = new PortfolioImpl(terminal, account, controller);
 		return portfolio;

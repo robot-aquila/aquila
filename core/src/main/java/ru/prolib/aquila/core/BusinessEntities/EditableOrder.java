@@ -5,7 +5,7 @@ import java.time.Instant;
 /**
  * Order service interface.
  */
-public interface EditableOrder extends Order, UpdatableContainer {
+public interface EditableOrder extends Order, UpdatableStateContainer {
 	
 	/**
 	 * Add order execution.

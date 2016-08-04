@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.*;
  * 2012-08-03<br>
  * $Id: PositionImpl.java 529 2013-02-19 08:49:04Z whirlwind $
  */
-public class PositionImpl extends ContainerImpl implements EditablePosition {
+public class PositionImpl extends ObservableStateContainerImpl implements EditablePosition {
 	private static final int[] TOKENS_FOR_AVAILABILITY = {
 		PositionField.CURRENT_VOLUME,
 		PositionField.CURRENT_PRICE,
@@ -38,7 +38,7 @@ public class PositionImpl extends ContainerImpl implements EditablePosition {
 	}
 
 	public PositionImpl(EditableTerminal terminal, Account account,
-			Symbol symbol, ContainerImpl.Controller controller)
+			Symbol symbol, ObservableStateContainerImpl.Controller controller)
 	{
 		super(terminal.getEventQueue(), getID(terminal, account, symbol, "POSITION"), controller);
 		this.terminal = terminal;
@@ -122,15 +122,15 @@ public class PositionImpl extends ContainerImpl implements EditablePosition {
 		return new PositionEventFactory(this);
 	}
 	
-	static class PositionController implements ContainerImpl.Controller {
+	static class PositionController implements ObservableStateContainerImpl.Controller {
 		
 		@Override
-		public boolean hasMinimalData(Container container) {
+		public boolean hasMinimalData(ObservableStateContainer container) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(Container container) {
+		public void processUpdate(ObservableStateContainer container) {
 			PositionImpl position = (PositionImpl) container;
 			PositionEventFactory factory = new PositionEventFactory(position);
 			if ( position.hasChanged(PositionField.CURRENT_VOLUME) ) {
@@ -142,7 +142,7 @@ public class PositionImpl extends ContainerImpl implements EditablePosition {
 		}
 
 		@Override
-		public void processAvailable(Container container) {
+		public void processAvailable(ObservableStateContainer container) {
 			
 		}
 		

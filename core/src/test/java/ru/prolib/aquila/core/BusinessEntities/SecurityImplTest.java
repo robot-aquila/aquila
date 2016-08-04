@@ -19,7 +19,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityImpl.SecurityController;
  * 2012-05-30<br>
  * $Id: SecurityImplTest.java 552 2013-03-01 13:35:35Z whirlwind $
  */
-public class SecurityImplTest extends ContainerImplTest {
+public class SecurityImplTest extends ObservableStateContainerImplTest {
 	private static Symbol symbol1 = new Symbol("S:GAZP@EQBR:RUB");
 	private IMocksControl control;
 	private EditableTerminal terminal;
@@ -27,7 +27,7 @@ public class SecurityImplTest extends ContainerImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ContainerImplTest.setUpBeforeClass();
+		ObservableStateContainerImplTest.setUpBeforeClass();
 	}
 
 	@Before
@@ -60,14 +60,14 @@ public class SecurityImplTest extends ContainerImplTest {
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer() {
+	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
 		security = new SecurityImpl(terminal, symbol1);
 		return security;
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
 		prepareTerminal();
 		security = new SecurityImpl(terminal, symbol1, controller);
 		return security;

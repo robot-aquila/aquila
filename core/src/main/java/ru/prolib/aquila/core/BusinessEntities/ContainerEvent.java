@@ -12,6 +12,6 @@ public interface ContainerEvent extends Event {
 	 * <p>
 	 * @return container
 	 */
-	public Container getContainer();
+	public ObservableStateContainer getContainer();
 		
 }

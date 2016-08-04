@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.BusinessEntities.PositionImpl.PositionController;
  * 2012-08-03<br>
  * $Id: PositionImplTest.java 529 2013-02-19 08:49:04Z whirlwind $
  */
-public class PositionImplTest extends ContainerImplTest {
+public class PositionImplTest extends ObservableStateContainerImplTest {
 	private static Symbol symbol = new Symbol("S:GAZP@EQBR:RUB");
 	private static Account account = new Account("TST01");
 	private IMocksControl control;
@@ -27,7 +27,7 @@ public class PositionImplTest extends ContainerImplTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		ContainerImplTest.setUpBeforeClass();
+		ObservableStateContainerImplTest.setUpBeforeClass();
 	}
 
 	@Before
@@ -54,14 +54,14 @@ public class PositionImplTest extends ContainerImplTest {
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer() {
+	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
 		position = new PositionImpl(terminal, account, symbol);
 		return position;
 	}
 	
 	@Override
-	protected ContainerImpl produceContainer(ContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
 		prepareTerminal();
 		position = new PositionImpl(terminal, account, symbol, controller);
 		return position;
