@@ -31,7 +31,7 @@ public class SecurityMsg {
 	public static final MsgID LOWER_PRICE = newMsgID("COL_LOWER_PRICE_LIMIT");
 	public static final MsgID UPPER_PRICE = newMsgID("COL_UPPER_PRICE_LIMIT");
 	public static final MsgID TICK_VALUE = newMsgID("COL_TICK_VALUE");
-	public static final MsgID INITIAL_PRICE = newMsgID("COL_INITIAL_PRICE");
+	public static final MsgID SETTLEMENT_PRICE = newMsgID("COL_SETTLEMENT_PRICE");
 	public static final MsgID INITIAL_MARGIN = newMsgID("COL_INITIAL_MARGIN");
 	public static final MsgID TERMINAL_ID = newMsgID("COL_TERMINAL_ID");
 	public static final MsgID SECURITIES = newMsgID("SECURITIES");

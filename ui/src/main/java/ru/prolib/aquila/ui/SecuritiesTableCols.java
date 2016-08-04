@@ -38,7 +38,7 @@ public class SecuritiesTableCols {
 		SecurityMsg.SCALE,
 		SecurityMsg.LOWER_PRICE,
 		SecurityMsg.UPPER_PRICE,
-		SecurityMsg.INITIAL_PRICE,
+		SecurityMsg.SETTLEMENT_PRICE,
 		SecurityMsg.INITIAL_MARGIN
 	};
 	
@@ -69,7 +69,7 @@ public class SecuritiesTableCols {
 		getters.put(SecurityMsg.SCALE, new GSecurityPrecision());
 		getters.put(SecurityMsg.LOWER_PRICE, new GSecurityMinPrice());
 		getters.put(SecurityMsg.UPPER_PRICE, new GSecurityMaxPrice());
-		getters.put(SecurityMsg.INITIAL_PRICE, new GSecurityInitialPrice());
+		getters.put(SecurityMsg.SETTLEMENT_PRICE, new GSecuritySettlementPrice());
 		getters.put(SecurityMsg.INITIAL_MARGIN, new GSecurityInitialMargin());
 		
 		width.put(SecurityMsg.NAME, 200);

@@ -63,7 +63,7 @@ public class MOEXUtilsTest {
 		SecuritySessionPropertiesEntity p = new SecuritySessionPropertiesEntity();
 		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
 		tokens.put(SecurityField.INITIAL_MARGIN, 1215.34d);
-		tokens.put(SecurityField.INITIAL_PRICE, 86.90d);
+		tokens.put(SecurityField.SETTLEMENT_PRICE, 86.90d);
 		tokens.put(SecurityField.LOT_SIZE, 10);
 		tokens.put(SecurityField.UPPER_PRICE_LIMIT, 95.0d);
 		tokens.put(SecurityField.LOWER_PRICE_LIMIT, 75.0d);

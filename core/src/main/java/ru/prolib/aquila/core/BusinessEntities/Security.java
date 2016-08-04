@@ -114,11 +114,11 @@ public interface Security extends Container, L1StreamContainer, MDStreamContaine
 	public Double getLowPrice();
 	
 	/**
-	 * Get initial price.
+	 * Get settlement price.
 	 * <p>
-	 * @return initial price
+	 * @return settlement price
 	 */
-	public Double getInitialPrice();
+	public Double getSettlementPrice();
 	
 	/**
 	 * Get initial margin.

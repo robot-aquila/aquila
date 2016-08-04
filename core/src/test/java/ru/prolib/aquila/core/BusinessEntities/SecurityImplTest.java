@@ -207,13 +207,13 @@ public class SecurityImplTest extends ContainerImplTest {
 	}
 
 	@Test
-	public void testGetInitialPrice() throws Exception {
+	public void testGetSettlementPrice() throws Exception {
 		getter = new Getter<Double>() {
 			@Override public Double get() {
-				return security.getInitialPrice();
+				return security.getSettlementPrice();
 			}
 		};
-		testGetter(SecurityField.INITIAL_PRICE, 215.86d, 114.12d);
+		testGetter(SecurityField.SETTLEMENT_PRICE, 215.86d, 114.12d);
 	}
 
 	@Test
@@ -276,7 +276,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		data.put(SecurityField.LOT_SIZE, 100);
 		data.put(SecurityField.TICK_SIZE, 5d);
 		data.put(SecurityField.TICK_VALUE, 2.37d);
-		data.put(SecurityField.INITIAL_PRICE, 200.01d);
+		data.put(SecurityField.SETTLEMENT_PRICE, 200.01d);
 		security.update(data);
 		
 		assertTrue(controller.hasMinimalData(security));
@@ -289,7 +289,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		data.put(SecurityField.TICK_SIZE, 0.05d);
 		data.put(SecurityField.TICK_VALUE, 0.01d);
 		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
-		data.put(SecurityField.INITIAL_PRICE, 80.93d);
+		data.put(SecurityField.SETTLEMENT_PRICE, 80.93d);
 		data.put(SecurityField.OPEN_PRICE, 79.19d);
 		data.put(SecurityField.HIGH_PRICE, 83.64d);
 		data.put(SecurityField.LOW_PRICE, 79.19d);
@@ -314,7 +314,7 @@ public class SecurityImplTest extends ContainerImplTest {
 		data.put(SecurityField.TICK_SIZE, 0.05d);
 		data.put(SecurityField.TICK_VALUE, 0.01d);
 		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
-		data.put(SecurityField.INITIAL_PRICE, 80.93d);
+		data.put(SecurityField.SETTLEMENT_PRICE, 80.93d);
 		data.put(SecurityField.OPEN_PRICE, 79.19d);
 		data.put(SecurityField.HIGH_PRICE, 83.64d);
 		data.put(SecurityField.LOW_PRICE, 79.19d);

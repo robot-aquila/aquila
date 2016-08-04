@@ -38,7 +38,7 @@ public class MOEXUtils {
 			SecuritySessionPropertiesEntity p)
 	{
 		p.setInitialMarginCost(security.getInitialMargin());
-		p.setInitialPrice(security.getInitialPrice());
+		p.setInitialPrice(security.getSettlementPrice());
 		p.setLotSize(security.getLotSize());
 		p.setLowerPriceLimit(security.getLowerPriceLimit());
 		p.setUpperPriceLimit(security.getUpperPriceLimit());

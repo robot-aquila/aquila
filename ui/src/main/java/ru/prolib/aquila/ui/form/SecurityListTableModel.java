@@ -54,7 +54,7 @@ public class SecurityListTableModel extends AbstractTableModel
 		mapIndexToID.add(SecurityMsg.LOW_PRICE);
 		mapIndexToID.add(SecurityMsg.CLOSE_PRICE);
 		mapIndexToID.add(SecurityMsg.INITIAL_MARGIN);
-		mapIndexToID.add(SecurityMsg.INITIAL_PRICE);
+		mapIndexToID.add(SecurityMsg.SETTLEMENT_PRICE);
 	}
 	
 	private final IMessages messages;
@@ -141,8 +141,8 @@ public class SecurityListTableModel extends AbstractTableModel
 			return security.getClosePrice();
 		} else if ( id == SecurityMsg.INITIAL_MARGIN ) {
 			return security.getInitialMargin();
-		} else if ( id == SecurityMsg.INITIAL_PRICE ) {
-			return security.getInitialPrice();
+		} else if ( id == SecurityMsg.SETTLEMENT_PRICE ) {
+			return security.getSettlementPrice();
 		} else if ( id == SecurityMsg.TERMINAL_ID ) {
 			return security.getTerminal().getTerminalID();
 		} else {

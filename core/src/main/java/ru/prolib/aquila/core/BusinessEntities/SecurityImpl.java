@@ -12,7 +12,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		SecurityField.LOT_SIZE,
 		SecurityField.TICK_SIZE,
 		SecurityField.TICK_VALUE,
-		SecurityField.INITIAL_PRICE
+		SecurityField.SETTLEMENT_PRICE
 	};
 	
 	private static final int[] TOKENS_FOR_SESSION_UPDATE = {
@@ -21,7 +21,7 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 		SecurityField.TICK_SIZE,
 		SecurityField.TICK_VALUE,
 		SecurityField.INITIAL_MARGIN,
-		SecurityField.INITIAL_PRICE,
+		SecurityField.SETTLEMENT_PRICE,
 		SecurityField.OPEN_PRICE,
 		SecurityField.HIGH_PRICE,
 		SecurityField.LOW_PRICE,
@@ -141,8 +141,8 @@ public class SecurityImpl extends ContainerImpl implements EditableSecurity {
 	}
 	
 	@Override
-	public Double getInitialPrice() {
-		return getDouble(SecurityField.INITIAL_PRICE);
+	public Double getSettlementPrice() {
+		return getDouble(SecurityField.SETTLEMENT_PRICE);
 	}
 
 	@Override

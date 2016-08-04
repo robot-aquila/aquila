@@ -7,7 +7,7 @@ public class SecurityField {
 	public static final int TICK_SIZE = 4;
 	public static final int TICK_VALUE = 5;
 	public static final int INITIAL_MARGIN = 6;
-	public static final int INITIAL_PRICE = 7;
+	public static final int SETTLEMENT_PRICE = 7;
 	public static final int LOWER_PRICE_LIMIT = 8;
 	public static final int UPPER_PRICE_LIMIT = 9;
 	public static final int OPEN_PRICE = 10;
