@@ -9,6 +9,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
+import ru.prolib.aquila.web.utils.DataExportException;
+import ru.prolib.aquila.web.utils.ErrorClass;
+
 /**
  * Utility class to search WebElement using one or more subsequent queries.
  */

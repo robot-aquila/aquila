@@ -1,4 +1,4 @@
-package ru.prolib.aquila.web.utils.finam;
+package ru.prolib.aquila.web.utils;
 
 public enum ErrorClass {
 	PROTOCOL,

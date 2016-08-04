@@ -25,6 +25,10 @@ import org.apache.http.message.BasicNameValuePair;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.io.IOUtils;
 
+import ru.prolib.aquila.web.utils.DataExportException;
+import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.httpclient.HttpClientFileDownloader;
+
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
@@ -258,7 +262,8 @@ public class DataExport implements Closeable {
 	 */
 	public void download(URI uri, OutputStream output) throws DataExportException {
 		try {
-			new HttpClientFileDownloader(httpClient).download(uri, output);
+			new HttpClientFileDownloader(httpClient, new FINAMDataExportResponseValidator())
+				.download(uri, output);
 		} catch ( DataExportException e ) {
 			throw e;
 		} catch ( Exception e ) {

@@ -11,6 +11,9 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import ru.prolib.aquila.web.utils.DataExportException;
+import ru.prolib.aquila.web.utils.ErrorClass;
+
 public class DataExportForm {
 	private static final String FINAM_UI_DROPDOWN_LIST = "finam-ui-dropdown-list";
 	private final DataExportFormUtils formUtils = new DataExportFormUtils();

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.web.utils.finam;
+package ru.prolib.aquila.web.utils.httpclient;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,6 +14,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ru.prolib.aquila.web.utils.DataExportException;
+import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.FileDownloader;
 
 public class HttpClientFileDownloader implements FileDownloader {
 	private static final Logger logger;
@@ -24,9 +27,28 @@ public class HttpClientFileDownloader implements FileDownloader {
 	}
 	
 	private final CloseableHttpClient httpClient;
-	
-	public HttpClientFileDownloader(CloseableHttpClient httpClient) {
+	private final ResponseValidator responseValidator;
+
+	/**
+	 * Create downloader.
+	 * <p>
+	 * @param httpClient - http client instance
+	 * @param responseValidator - response validator
+	 */
+	public HttpClientFileDownloader(CloseableHttpClient httpClient,
+			ResponseValidator responseValidator)
+	{
 		this.httpClient = httpClient;
+		this.responseValidator = responseValidator;
+	}
+	
+	/**
+	 * Create downloader with stub response validator.
+	 * <p>
+	 * @param httpClient - http client instance
+	 */
+	public HttpClientFileDownloader(CloseableHttpClient httpClient) {
+		this(httpClient, ResponseValidatorStub.getInstance());
 	}
 	
 	/* (non-Javadoc)
@@ -44,7 +66,7 @@ public class HttpClientFileDownloader implements FileDownloader {
 			throw new DataExportException(ErrorClass.IO, "Error execution HTTP-request", e);
 		}
 		try {
-			validateResponse(response);
+			responseValidator.validateResponse(response);
 			HttpEntity entity = response.getEntity();
 			InputStream input = new BufferedInputStream(entity.getContent());
 			try {
@@ -59,35 +81,6 @@ public class HttpClientFileDownloader implements FileDownloader {
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
-	}
-
-	private void validateResponse(CloseableHttpResponse response)
-		throws DataExportException
-	{
-		int statusCode = response.getStatusLine().getStatusCode();
-		if ( statusCode != 200 ) {
-			throw errRespValid("Unexpected HTTP status code: " + statusCode);
-		}
-		Header header = response.getFirstHeader("content-type");
-		if ( header == null ) {
-			throw errRespValid("Header Content-Type not exists");
-		}
-		String contentType = header.getValue();
-		if ( ! "finam/expotfile".equals(contentType) ) {
-			throw errRespValid("Unexpected Content-Type: " + contentType);
-		}
-		header = response.getFirstHeader("content-disposition");
-		if ( header == null ) {
-			throw errRespValid("Header Content-Disposition not exists");
-		}
-		String contentDisposition = header.getValue();
-		if ( ! contentDisposition.startsWith("attachment;") ) {
-			throw errRespValid("Unexpected Content-Disposition: " + contentDisposition);
-		}
-	}
-	
-	private DataExportException errRespValid(String msg) throws DataExportException {
-		return new DataExportException(ErrorClass.RESPONSE_VALIDATION, msg);
 	}
 
 }
