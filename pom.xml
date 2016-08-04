@@ -17,7 +17,7 @@
 		<module>probe</module>
 		<module>data</module>
 		<module>datatools</module>
-		<module>finam-tools</module>
+		<module>web-utils</module>
 		<module>utils/finexp-quotelist</module>
 		<module>utils/finexp-futures</module>
 	</modules>

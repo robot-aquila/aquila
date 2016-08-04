@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.data.storage.file.FileStorage;
-import ru.prolib.aquila.finam.tools.storage.file.FINAMFileStorage;
+import ru.prolib.aquila.web.utils.finam.FINAMFileStorage;
 
 public class TickDataStorageService {
 	private static final Logger logger;

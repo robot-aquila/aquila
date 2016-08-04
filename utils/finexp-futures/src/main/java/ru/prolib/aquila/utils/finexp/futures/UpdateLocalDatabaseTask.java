@@ -23,8 +23,8 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.DatedSymbol;
 import ru.prolib.aquila.data.storage.file.FileStorage;
-import ru.prolib.aquila.finam.tools.web.DataExport;
-import ru.prolib.aquila.finam.tools.web.DataExportException;
+import ru.prolib.aquila.web.utils.finam.DataExport;
+import ru.prolib.aquila.web.utils.finam.DataExportException;
 
 public class UpdateLocalDatabaseTask implements Runnable {
 	private static final Logger logger;

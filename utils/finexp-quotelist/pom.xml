@@ -18,7 +18,7 @@
 	<dependencies>
 		<dependency>
 		    <groupId>ru.prolib.aquila</groupId>
-		    <artifactId>aquila-finam-tools</artifactId>
+		    <artifactId>aquila-web-utils</artifactId>
 		    <version>0.0.1</version>
 		</dependency>
 	</dependencies>
