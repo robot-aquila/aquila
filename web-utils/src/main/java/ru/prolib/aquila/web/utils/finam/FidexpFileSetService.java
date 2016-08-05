@@ -5,7 +5,7 @@ import ru.prolib.aquila.data.storage.file.FileSetService;
 /**
  * The fileset of daily tick data downloaded from FINAM site.
  */
-public class FINAMFileSetService implements FileSetService {
+public class FidexpFileSetService implements FileSetService {
 
 	@Override
 	public String getRegularSuffix() {

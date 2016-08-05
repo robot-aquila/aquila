@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.openqa.selenium.io.IOUtils;
 
-import ru.prolib.aquila.web.utils.finam.DataExport;
+import ru.prolib.aquila.web.utils.finam.Fidexp;
 
 /**
  * List of current futures.
@@ -18,7 +18,7 @@ public class CurrentFuturesList {
 	private static final String HEADER = "TICKER,CODE,FINAM_WEB_ID";
 	
 	public static void main(String[] args) {
-		DataExport facade = new DataExport();
+		Fidexp facade = new Fidexp();
 		try {
 			Map<Integer, String> map = facade.getTrueFuturesQuotes(false);
 			System.out.println(HEADER);

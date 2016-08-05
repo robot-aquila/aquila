@@ -35,11 +35,11 @@ import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
 
-public class DataExportIT {
+public class FidexpIT {
 	private static final File sample = new File("fixture/RTS-140701-140731-W1.txt");
 	
-	private DataExportParams params;
-	private DataExport facade;
+	private FidexpFormParams params;
+	private Fidexp facade;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -48,25 +48,25 @@ public class DataExportIT {
 
 	@Before
 	public void setUp() throws Exception {
-		params = new DataExportParams()
+		params = new FidexpFormParams()
 			.setMarketId(14)
 			.setQuoteID(17455)
 			.setDateFrom(LocalDate.of(2014, 7, 1))
 			.setDateTo(LocalDate.of(2014, 7, 31))
-			.setPeriod(Period.W1)
+			.setPeriod(FidexpPeriod.W1)
 			.setFileName("SPFB.RTS_140701_140731")
-			.setFileExt(FileExt.TXT)
+			.setFileExt(FidexpFileExt.TXT)
 			.setContractName("SPFB.RTS")
-			.setDateFormat(DateFormat.YYYYMMDD)
-			.setTimeFormat(TimeFormat.HHMMSS)
-			.setCandleTime(CandleTime.END_OF_CANDLE)
+			.setDateFormat(FidexpDateFormat.YYYYMMDD)
+			.setTimeFormat(FidexpTimeFormat.HHMMSS)
+			.setCandleTime(FidexpCandleTime.END_OF_CANDLE)
 			.setUseMoscowTime(true)
-			.setFieldSeparator(FieldSeparator.COMMA)
-			.setDigitSeparator(DigitSeparator.NONE)
-			.setDataFormat(DataFormat.TICKER_PER_DATE_TIME_OPEN_HIGH_LOW_CLOSE_VOL)
+			.setFieldSeparator(FidexpFieldSeparator.COMMA)
+			.setDigitSeparator(FidexpDigitSeparator.NONE)
+			.setDataFormat(FidexpDataFormat.TICKER_PER_DATE_TIME_OPEN_HIGH_LOW_CLOSE_VOL)
 			.setAddHeader(true)
 			.setFillEmptyPeriods(false);
-		facade = new DataExport();
+		facade = new Fidexp();
 	}
 	
 	@After
@@ -127,7 +127,7 @@ public class DataExportIT {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		WebDriver webDriver = createJBrowserDriver();
 		try {
-			try ( DataExport export = new DataExport(httpClient, webDriver) ) {
+			try ( Fidexp export = new Fidexp(httpClient, webDriver) ) {
 				export.testFormIntegrity();
 			}
 		} finally {

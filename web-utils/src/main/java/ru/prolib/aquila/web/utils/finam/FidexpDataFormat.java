@@ -1,6 +1,6 @@
 package ru.prolib.aquila.web.utils.finam;
 
-public enum DataFormat {
+public enum FidexpDataFormat {
 	/**
 	 * value - 1
 	 */

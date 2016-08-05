@@ -6,8 +6,8 @@ import ru.prolib.aquila.data.storage.file.FileStorage;
 import ru.prolib.aquila.data.storage.file.FileStorageImpl;
 import ru.prolib.aquila.data.storage.file.FileStorageNamespaceV1;
 
-public class FINAMFileStorage {
-	private static final FINAMFileSetService fileSetService = new FINAMFileSetService();
+public class FidexpFileStorage {
+	private static final FidexpFileSetService fileSetService = new FidexpFileSetService();
 	private static final String DEFAULT_STORAGE_ID = "FINAM";
 
 	public static FileStorage createStorage(File root) {

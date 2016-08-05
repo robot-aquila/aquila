@@ -36,21 +36,21 @@ import com.machinepublishers.jbrowserdriver.Timezone;
 /**
  * The facade of FINAM data export system.
  */
-public class DataExport implements Closeable {
+public class Fidexp implements Closeable {
 	private final Lock lock = new ReentrantLock();
 	private final CloseableHttpClient httpClient;
 	private final WebDriver webDriver;
-	private final DataExportForm webForm;
+	private final FidexpForm webForm;
 	private boolean closeResources = false;
 	
-	public DataExport(CloseableHttpClient httpClient, WebDriver webDriver) {
+	public Fidexp(CloseableHttpClient httpClient, WebDriver webDriver) {
 		this.httpClient = httpClient;
 		this.webDriver = webDriver;
-		this.webForm = new DataExportForm(webDriver);
+		this.webForm = new FidexpForm(webDriver);
 		closeResources = false;
 	}
 	
-	public DataExport() {
+	public Fidexp() {
 		this(HttpClients.createDefault(), new JBrowserDriver(Settings.builder()
 				.timezone(Timezone.EUROPE_MOSCOW)
 				.ssl("compatible")
@@ -91,17 +91,17 @@ public class DataExport implements Closeable {
 				.selectQuote(17455)
 				.selectDateFrom(LocalDate.now().minusDays(5))
 				.selectDateTo(LocalDate.now())
-				.selectPeriod(Period.H1)
+				.selectPeriod(FidexpPeriod.H1)
 				.selectFilename("zulu-charlie24")
-				.selectFileExt(FileExt.CSV)
+				.selectFileExt(FidexpFileExt.CSV)
 				.selectContractName("RTS")
-				.selectDateFormat(DateFormat.DDslashMMslashYY)
-				.selectTimeFormat(TimeFormat.HHcolonMMcolonSS)
+				.selectDateFormat(FidexpDateFormat.DDslashMMslashYY)
+				.selectTimeFormat(FidexpTimeFormat.HHcolonMMcolonSS)
 				.useCandleStartTime(false)
 				.useMoscowTime(true)
-				.selectFieldSeparator(FieldSeparator.SPACE)
-				.selectDigitSeparator(DigitSeparator.APOSTROPHE)
-				.selectDataFormat(DataFormat.TICKER_PER_DATE_TIME_CLOSE_VOL)
+				.selectFieldSeparator(FidexpFieldSeparator.SPACE)
+				.selectDigitSeparator(FidexpDigitSeparator.APOSTROPHE)
+				.selectDataFormat(FidexpDataFormat.TICKER_PER_DATE_TIME_CLOSE_VOL)
 				.useAddHeader(false)
 				.useFillEmptyPeriods(true)
 				.getFormActionURI();
@@ -262,7 +262,7 @@ public class DataExport implements Closeable {
 	 */
 	public void download(URI uri, OutputStream output) throws DataExportException {
 		try {
-			new HttpClientFileDownloader(httpClient, new FINAMDataExportResponseValidator())
+			new HttpClientFileDownloader(httpClient, new FidexpResponseValidator())
 				.download(uri, output);
 		} catch ( DataExportException e ) {
 			throw e;
@@ -280,7 +280,7 @@ public class DataExport implements Closeable {
 	 * @param output - the output stream to store the downloaded data
 	 * @throws DataExportException - common exception for all error situations
 	 */
-	public void download(URI baseUri, DataExportParams params, OutputStream output)
+	public void download(URI baseUri, FidexpFormParams params, OutputStream output)
 			throws DataExportException
 	{
 		download(combine(baseUri, params), output);
@@ -296,7 +296,7 @@ public class DataExport implements Closeable {
 	 * then output will be gzipped.
 	 * @throws DataExportException - common exception for all error situations
 	 */
-	public void download(URI baseUri, DataExportParams params, File target)
+	public void download(URI baseUri, FidexpFormParams params, File target)
 			throws DataExportException
 	{
 		OutputStream output;
@@ -327,7 +327,7 @@ public class DataExport implements Closeable {
 	 * then output will be gzipped.
 	 * @throws DataExportException - common exception for all error situations
 	 */
-	public void download(DataExportParams params, File target)
+	public void download(FidexpFormParams params, File target)
 			throws DataExportException
 	{
 		download(getFormActionURI(), params, target);
@@ -346,30 +346,30 @@ public class DataExport implements Closeable {
 	public void downloadTickData(int marketId, int quoteId, LocalDate date,
 			File target) throws DataExportException
 	{
-		download(new DataExportParams()
+		download(new FidexpFormParams()
 			.setMarketId(marketId)
 			.setQuoteID(quoteId)
 			.setDateFrom(date)
 			.setDateTo(date)
-			.setPeriod(Period.TICKS)
+			.setPeriod(FidexpPeriod.TICKS)
 			.setFileName("dummy-file")
-			.setFileExt(FileExt.CSV)
-			.setDateFormat(DateFormat.YYYYMMDD)
-			.setTimeFormat(TimeFormat.HHMMSS)
-			.setCandleTime(CandleTime.START_OF_CANDLE)
+			.setFileExt(FidexpFileExt.CSV)
+			.setDateFormat(FidexpDateFormat.YYYYMMDD)
+			.setTimeFormat(FidexpTimeFormat.HHMMSS)
+			.setCandleTime(FidexpCandleTime.START_OF_CANDLE)
 			.setUseMoscowTime(true)
-			.setFieldSeparator(FieldSeparator.COMMA)
-			.setDigitSeparator(DigitSeparator.NONE)
-			.setDataFormat(DataFormat.DATE_TIME_LAST_VOL)
+			.setFieldSeparator(FidexpFieldSeparator.COMMA)
+			.setDigitSeparator(FidexpDigitSeparator.NONE)
+			.setDataFormat(FidexpDataFormat.DATE_TIME_LAST_VOL)
 			.setAddHeader(true)
 			.setFillEmptyPeriods(false), target);
 	}
 	
-	private URI combine(URI baseUri, DataExportParams params)
+	private URI combine(URI baseUri, FidexpFormParams params)
 		throws DataExportException
 	{
 		try {
-			return new DataExportFormQueryBuilder().buildQuery(baseUri, params);
+			return new FidexpFormQueryBuilder().buildQuery(baseUri, params);
 		} catch ( URISyntaxException e ) {
 			throw new DataExportException(ErrorClass.REQUEST_INITIALIZATION,
 					"Error building a query", e);

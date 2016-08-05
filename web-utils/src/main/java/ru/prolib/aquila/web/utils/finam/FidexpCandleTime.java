@@ -1,6 +1,6 @@
 package ru.prolib.aquila.web.utils.finam;
 
-public enum CandleTime {
+public enum FidexpCandleTime {
 	/**
 	 * value - 0
 	 */

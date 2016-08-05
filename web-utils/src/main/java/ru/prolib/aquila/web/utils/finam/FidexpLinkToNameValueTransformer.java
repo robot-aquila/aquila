@@ -6,13 +6,14 @@ import org.openqa.selenium.WebElement;
 
 import ru.prolib.aquila.web.utils.DataExportException;
 import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.WebElementTransformer;
 
 /**
  * Transforms a hyperlink from Data Export Web Form of FINAM site to a name-value pair.
  * The links MUST have the "value" attribute.
  * It MAY not work with hyperlinks from other sites!
  */
-public class FinamLinkToNameValueTransformer implements WebElementTransformer<NameValuePair> {
+public class FidexpLinkToNameValueTransformer implements WebElementTransformer<NameValuePair> {
 
 	@Override
 	public NameValuePair transform(WebElement element) throws DataExportException {

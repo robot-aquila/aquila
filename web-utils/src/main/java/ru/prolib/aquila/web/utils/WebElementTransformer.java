@@ -1,8 +1,6 @@
-package ru.prolib.aquila.web.utils.finam;
+package ru.prolib.aquila.web.utils;
 
 import org.openqa.selenium.WebElement;
-
-import ru.prolib.aquila.web.utils.DataExportException;
 
 public interface WebElementTransformer<T> {
 	

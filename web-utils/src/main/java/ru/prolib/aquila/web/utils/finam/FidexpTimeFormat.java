@@ -1,24 +1,20 @@
 package ru.prolib.aquila.web.utils.finam;
 
-public enum FieldSeparator {
+public enum FidexpTimeFormat {
 	/**
 	 * value - 1
 	 */
-	COMMA,
+	HHMMSS,
 	/**
 	 * value - 2
 	 */
-	FULL_STOP,
+	HHMM,
 	/**
 	 * value - 3
 	 */
-	SEMICOLON,
+	HHcolonMMcolonSS,
 	/**
 	 * value - 4
 	 */
-	TAB,
-	/**
-	 * value - 5
-	 */
-	SPACE
+	HHcolonMM
 }

@@ -13,19 +13,20 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import ru.prolib.aquila.web.utils.DataExportException;
 import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.SearchWebElement;
 
-public class DataExportForm {
+public class FidexpForm {
 	private static final String FINAM_UI_DROPDOWN_LIST = "finam-ui-dropdown-list";
-	private final DataExportFormUtils formUtils = new DataExportFormUtils();
+	private final FidexpFormUtils formUtils = new FidexpFormUtils();
 	private final WebDriver driver;
 	private boolean initialRequestIsMade = false;
 
-	public DataExportForm(WebDriver driver) {
+	public FidexpForm(WebDriver driver) {
 		super();
 		this.driver = driver;
 	}
 	
-	public DataExportForm initialRequest() throws DataExportException {
+	public FidexpForm initialRequest() throws DataExportException {
 		try {
 			if ( initialRequestIsMade == false ) {
 				driver.get("http://www.finam.ru/profile/moex-akcii/gazprom/export/");
@@ -41,7 +42,7 @@ public class DataExportForm {
 		try {
 			return driver.findElement(By.xpath(getSubmitButtonXPath()));
 		} catch ( WebDriverException e ) {
-			throw errWebDriver("Error finding submit button", e);
+			throw errForm("Error finding submit button", e);
 		}
 	}
 	
@@ -61,7 +62,7 @@ public class DataExportForm {
 	public List<NameValuePair> getMarketOptions() throws DataExportException {
 		openMarketSelector();
 		return getMarketSelectorSearch()
-			.transformAllAndClick(By.tagName("a"), new FinamLinkToNameValueTransformer(), 0);
+			.transformAllAndClick(By.tagName("a"), new FidexpLinkToNameValueTransformer(), 0);
 	}
 	
 	/**
@@ -78,7 +79,7 @@ public class DataExportForm {
 	public List<NameValuePair> getQuoteOptions() throws DataExportException {
 		openQuoteSelector();
 		return getQuoteSelectorSearch()
-			.transformAllAndClick(By.tagName("a"), new FinamLinkToNameValueTransformer(), 0);
+			.transformAllAndClick(By.tagName("a"), new FidexpLinkToNameValueTransformer(), 0);
 	}
 	
 	/**
@@ -88,7 +89,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectQuote(String quoteName) throws DataExportException {
+	public FidexpForm selectQuote(String quoteName) throws DataExportException {
 		openQuoteSelector();
 		getQuoteSelectorSearch()
 			.findWithText(By.tagName("a"), quoteName)
@@ -103,7 +104,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectQuote(int quoteId) throws DataExportException {
+	public FidexpForm selectQuote(int quoteId) throws DataExportException {
 		openQuoteSelector();
 		getQuoteSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(quoteId))
@@ -118,7 +119,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectMarket(String marketName) throws DataExportException {
+	public FidexpForm selectMarket(String marketName) throws DataExportException {
 		openMarketSelector();
 		getMarketSelectorSearch()
 			.findWithText(By.tagName("a"), marketName)
@@ -133,7 +134,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectMarket(int marketId) throws DataExportException {
+	public FidexpForm selectMarket(int marketId) throws DataExportException {
 		openMarketSelector();
 		getMarketSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(marketId))
@@ -148,7 +149,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectDateFrom(LocalDate date) throws DataExportException {
+	public FidexpForm selectDateFrom(LocalDate date) throws DataExportException {
 		initialRequest();
 		setDate("issuer-profile-export-from", date);
 		return this;
@@ -161,7 +162,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectDateTo(LocalDate date) throws DataExportException {
+	public FidexpForm selectDateTo(LocalDate date) throws DataExportException {
 		initialRequest();
 		setDate("issuer-profile-export-to", date);
 		return this;
@@ -174,7 +175,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectDate(LocalDate date) throws DataExportException {
+	public FidexpForm selectDate(LocalDate date) throws DataExportException {
 		return selectDateFrom(date)
 				.selectDateTo(date);
 	}
@@ -186,7 +187,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectPeriod(Period period) throws DataExportException {
+	public FidexpForm selectPeriod(FidexpPeriod period) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-first-row"))
@@ -206,7 +207,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectFilename(String fileName) throws DataExportException {
+	public FidexpForm selectFilename(String fileName) throws DataExportException {
 		return fillTextbox(By.id("issuer-profile-export-file-name"), fileName);
 	}
 
@@ -217,7 +218,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectFileExt(FileExt format) throws DataExportException {
+	public FidexpForm selectFileExt(FidexpFileExt format) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-second-row"))
@@ -241,7 +242,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException 
 	 */
-	public DataExportForm selectContractName(String name) throws DataExportException {
+	public FidexpForm selectContractName(String name) throws DataExportException {
 		return fillTextbox(By.id("issuer-profile-export-contract"), name);
 	}
 
@@ -252,7 +253,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectDateFormat(DateFormat format) throws DataExportException {
+	public FidexpForm selectDateFormat(FidexpDateFormat format) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-date-row"))
@@ -272,7 +273,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectTimeFormat(TimeFormat format) throws DataExportException {
+	public FidexpForm selectTimeFormat(FidexpTimeFormat format) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-date-row"))
@@ -292,7 +293,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm useCandleStartTime(boolean use) throws DataExportException {
+	public FidexpForm useCandleStartTime(boolean use) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("MSOR0"))
@@ -310,7 +311,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm useMoscowTime(boolean use) throws DataExportException {
+	public FidexpForm useMoscowTime(boolean use) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-mstime"))
@@ -325,7 +326,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectFieldSeparator(FieldSeparator format) throws DataExportException {
+	public FidexpForm selectFieldSeparator(FidexpFieldSeparator format) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-separator-row"))
@@ -345,7 +346,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectDigitSeparator(DigitSeparator format) throws DataExportException {
+	public FidexpForm selectDigitSeparator(FidexpDigitSeparator format) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-separator-row"))
@@ -368,7 +369,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm selectDataFormat(DataFormat format) throws DataExportException {
+	public FidexpForm selectDataFormat(FidexpDataFormat format) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-fileformat-row"))
@@ -388,7 +389,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm useAddHeader(boolean use) throws DataExportException {
+	public FidexpForm useAddHeader(boolean use) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("at"))
@@ -403,7 +404,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException - an error occurred
 	 */
-	public DataExportForm useFillEmptyPeriods(boolean use) throws DataExportException {
+	public FidexpForm useFillEmptyPeriods(boolean use) throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("fsp"))
@@ -505,7 +506,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException
 	 */
-	protected DataExportForm openMarketSelector() throws DataExportException {
+	protected FidexpForm openMarketSelector() throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-header"))
@@ -527,7 +528,7 @@ public class DataExportForm {
 	 * @return this
 	 * @throws DataExportException
 	 */
-	protected DataExportForm openQuoteSelector() throws DataExportException {
+	protected FidexpForm openQuoteSelector() throws DataExportException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-header"))
@@ -537,7 +538,7 @@ public class DataExportForm {
 		return this;
 	}
 	
-	protected DataExportForm fillTextbox(By by, String newText) throws DataExportException {
+	protected FidexpForm fillTextbox(By by, String newText) throws DataExportException {
 		initialRequest();
 		WebElement element = new SearchWebElement(driver)
 			.find(by)

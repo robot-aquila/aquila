@@ -6,7 +6,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import ru.prolib.aquila.web.utils.InvalidResponseException;
 import ru.prolib.aquila.web.utils.httpclient.ResponseValidator;
 
-public class FINAMDataExportResponseValidator implements ResponseValidator {
+public class FidexpResponseValidator implements ResponseValidator {
 
 	@Override
 	public void validateResponse(CloseableHttpResponse response)

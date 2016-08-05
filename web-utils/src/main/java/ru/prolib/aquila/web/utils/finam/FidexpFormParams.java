@@ -2,22 +2,22 @@ package ru.prolib.aquila.web.utils.finam;
 
 import java.time.LocalDate;
 
-public class DataExportParams {
+public class FidexpFormParams {
 	private int finamMarketId = 14; // Фьючерсы
 	private int finamQuoteId = 17455; // Склеенный фьючерс на индекс РТС
 	private LocalDate dateFrom = LocalDate.now();
 	private LocalDate dateTo = LocalDate.now();
-	private Period period = Period.TICKS;
+	private FidexpPeriod period = FidexpPeriod.TICKS;
 	private String contractName = "RTS";
 	private String fileName = "RTS";
-	private FileExt fileExt = FileExt.CSV;
-	private DateFormat dateFormat = DateFormat.YYYYMMDD;
-	private TimeFormat timeFormat = TimeFormat.HHMMSS;
-	private CandleTime candleTime = CandleTime.START_OF_CANDLE;
+	private FidexpFileExt fileExt = FidexpFileExt.CSV;
+	private FidexpDateFormat dateFormat = FidexpDateFormat.YYYYMMDD;
+	private FidexpTimeFormat timeFormat = FidexpTimeFormat.HHMMSS;
+	private FidexpCandleTime candleTime = FidexpCandleTime.START_OF_CANDLE;
 	private boolean useMoscowTime = true;
-	private FieldSeparator fieldSeparator = FieldSeparator.COMMA;
-	private DigitSeparator digitSeparator = DigitSeparator.NONE;
-	private DataFormat dataFormat = DataFormat.DATE_TIME_LAST_VOL;
+	private FidexpFieldSeparator fieldSeparator = FidexpFieldSeparator.COMMA;
+	private FidexpDigitSeparator digitSeparator = FidexpDigitSeparator.NONE;
+	private FidexpDataFormat dataFormat = FidexpDataFormat.DATE_TIME_LAST_VOL;
 	private boolean addHeader = true;
 	private boolean fillEmptyPeriods = false;
 
@@ -25,7 +25,7 @@ public class DataExportParams {
 		return finamMarketId;
 	}
 	
-	public DataExportParams setMarketId(int marketId) {
+	public FidexpFormParams setMarketId(int marketId) {
 		this.finamMarketId = marketId;
 		return this;
 	}
@@ -42,7 +42,7 @@ public class DataExportParams {
 		return dateTo;
 	}
 	
-	public Period getPeriod() {
+	public FidexpPeriod getPeriod() {
 		return period;
 	}
 	
@@ -54,19 +54,19 @@ public class DataExportParams {
 		return fileName;
 	}
 	
-	public FileExt getFileExt() {
+	public FidexpFileExt getFileExt() {
 		return fileExt;
 	}
 	
-	public DateFormat getDateFormat() {
+	public FidexpDateFormat getDateFormat() {
 		return dateFormat;
 	}
 	
-	public TimeFormat getTimeFormat() {
+	public FidexpTimeFormat getTimeFormat() {
 		return timeFormat;
 	}
 	
-	public CandleTime getCandleTime() {
+	public FidexpCandleTime getCandleTime() {
 		return candleTime;
 	}
 	
@@ -74,15 +74,15 @@ public class DataExportParams {
 		return useMoscowTime;
 	}
 	
-	public FieldSeparator getFieldSeparator() {
+	public FidexpFieldSeparator getFieldSeparator() {
 		return fieldSeparator;
 	}
 	
-	public DigitSeparator getDigitSeparator() {
+	public FidexpDigitSeparator getDigitSeparator() {
 		return digitSeparator;
 	}
 	
-	public DataFormat getDataFormat() {
+	public FidexpDataFormat getDataFormat() {
 		return dataFormat;
 	}
 	
@@ -94,82 +94,82 @@ public class DataExportParams {
 		return fillEmptyPeriods;
 	}
 
-	public DataExportParams setAddHeader(boolean flag) {
+	public FidexpFormParams setAddHeader(boolean flag) {
 		this.addHeader = flag;
 		return this;
 	}
 
-	public DataExportParams setDateFormat(DateFormat format) {
+	public FidexpFormParams setDateFormat(FidexpDateFormat format) {
 		this.dateFormat = format;
 		return this;
 	}
 
-	public DataExportParams setTimeFormat(TimeFormat format) {
+	public FidexpFormParams setTimeFormat(FidexpTimeFormat format) {
 		this.timeFormat = format;
 		return this;
 	}
 
-	public DataExportParams setQuoteID(int id) {
+	public FidexpFormParams setQuoteID(int id) {
 		this.finamQuoteId = id;
 		return this;
 	}
 
-	public DataExportParams setDateFrom(LocalDate date) {
+	public FidexpFormParams setDateFrom(LocalDate date) {
 		this.dateFrom = date;
 		return this;
 	}
 
-	public DataExportParams setDataFormat(DataFormat format) {
+	public FidexpFormParams setDataFormat(FidexpDataFormat format) {
 		this.dataFormat = format;
 		return this;
 	}
 
-	public DataExportParams setUseMoscowTime(boolean flag) {
+	public FidexpFormParams setUseMoscowTime(boolean flag) {
 		this.useMoscowTime = flag;
 		return this;
 	}
 
-	public DataExportParams setDigitSeparator(DigitSeparator separator) {
+	public FidexpFormParams setDigitSeparator(FidexpDigitSeparator separator) {
 		this.digitSeparator = separator;
 		return this;
 	}
 
-	public DataExportParams setFileName(String name) {
+	public FidexpFormParams setFileName(String name) {
 		this.fileName = name;
 		return this;
 	}
 
-	public DataExportParams setFieldSeparator(FieldSeparator separator) {
+	public FidexpFormParams setFieldSeparator(FidexpFieldSeparator separator) {
 		this.fieldSeparator = separator;
 		return this;
 	}
 
-	public DataExportParams setDateTo(LocalDate date) {
+	public FidexpFormParams setDateTo(LocalDate date) {
 		this.dateTo = date;
 		return this;
 	}
 
-	public DataExportParams setContractName(String name) {
+	public FidexpFormParams setContractName(String name) {
 		this.contractName = name;
 		return this;
 	}
 
-	public DataExportParams setCandleTime(CandleTime candleTime) {
+	public FidexpFormParams setCandleTime(FidexpCandleTime candleTime) {
 		this.candleTime = candleTime;
 		return this;
 	}
 
-	public DataExportParams setPeriod(Period period) {
+	public FidexpFormParams setPeriod(FidexpPeriod period) {
 		this.period = period;
 		return this;
 	}
 
-	public DataExportParams setFileExt(FileExt ext) {
+	public FidexpFormParams setFileExt(FidexpFileExt ext) {
 		this.fileExt = ext;
 		return this;
 	}
 
-	public DataExportParams setFillEmptyPeriods(boolean flag) {
+	public FidexpFormParams setFillEmptyPeriods(boolean flag) {
 		this.fillEmptyPeriods = flag;
 		return this;
 	}

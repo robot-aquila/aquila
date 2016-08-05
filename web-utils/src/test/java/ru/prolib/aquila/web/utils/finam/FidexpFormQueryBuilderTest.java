@@ -13,15 +13,15 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DataExportFormQueryBuilderTest {
-	private DataExportFormQueryBuilder builder;
-	private DataExportParams params;
+public class FidexpFormQueryBuilderTest {
+	private FidexpFormQueryBuilder builder;
+	private FidexpFormParams params;
 	private URI formAction;
 
 	@Before
 	public void setUp() throws Exception {
-		builder = new DataExportFormQueryBuilder();
-		params = new DataExportParams();
+		builder = new FidexpFormQueryBuilder();
+		params = new FidexpFormParams();
 		formAction = new URI("https://localhost/somedir/d2/output9.txt");
 	}
 	
@@ -66,22 +66,22 @@ public class DataExportFormQueryBuilderTest {
 	
 	@Test
 	public void testBuildQuery_Period() throws Exception {
-		Map<Period, String> expected = new HashMap<>();
-		expected.put(Period.TICKS, "1");
-		expected.put(Period.M1, "2");
-		expected.put(Period.M5, "3");		
-		expected.put(Period.M10, "4");
-		expected.put(Period.M15, "5");
-		expected.put(Period.M30, "6");
-		expected.put(Period.H1, "7");
-		expected.put(Period.D1, "8");
-		expected.put(Period.W1, "9");
-		expected.put(Period.MONTH, "10");
+		Map<FidexpPeriod, String> expected = new HashMap<>();
+		expected.put(FidexpPeriod.TICKS, "1");
+		expected.put(FidexpPeriod.M1, "2");
+		expected.put(FidexpPeriod.M5, "3");		
+		expected.put(FidexpPeriod.M10, "4");
+		expected.put(FidexpPeriod.M15, "5");
+		expected.put(FidexpPeriod.M30, "6");
+		expected.put(FidexpPeriod.H1, "7");
+		expected.put(FidexpPeriod.D1, "8");
+		expected.put(FidexpPeriod.W1, "9");
+		expected.put(FidexpPeriod.MONTH, "10");
 		
-		assertEquals(expected.size(), Period.values().length);
-		Iterator<Map.Entry<Period, String>> it = expected.entrySet().iterator();
+		assertEquals(expected.size(), FidexpPeriod.values().length);
+		Iterator<Map.Entry<FidexpPeriod, String>> it = expected.entrySet().iterator();
 		while ( it.hasNext() ) {
-			Map.Entry<Period, String> dummy = it.next();
+			Map.Entry<FidexpPeriod, String> dummy = it.next();
 			params.setPeriod(dummy.getKey());
 			assertQueryParam("p", dummy.getValue());
 		}
@@ -89,26 +89,26 @@ public class DataExportFormQueryBuilderTest {
 
 	@Test
 	public void testBuildQuery_FileExt() throws Exception {
-		params.setFileExt(FileExt.CSV);
+		params.setFileExt(FidexpFileExt.CSV);
 		assertQueryParam("e", ".csv");
 		
-		params.setFileExt(FileExt.TXT);
+		params.setFileExt(FidexpFileExt.TXT);
 		assertQueryParam("e", ".txt");
 	}
 	
 	@Test
 	public void testBuildQuery_DateFormat() throws Exception {
-		Map<DateFormat, String> expected = new HashMap<>();
-		expected.put(DateFormat.YYYYMMDD, "1");
-		expected.put(DateFormat.YYMMDD, "2");
-		expected.put(DateFormat.DDMMYY, "3");
-		expected.put(DateFormat.DDslashMMslashYY, "4");
-		expected.put(DateFormat.MMslashDDslashYY, "5");
+		Map<FidexpDateFormat, String> expected = new HashMap<>();
+		expected.put(FidexpDateFormat.YYYYMMDD, "1");
+		expected.put(FidexpDateFormat.YYMMDD, "2");
+		expected.put(FidexpDateFormat.DDMMYY, "3");
+		expected.put(FidexpDateFormat.DDslashMMslashYY, "4");
+		expected.put(FidexpDateFormat.MMslashDDslashYY, "5");
 		
-		assertEquals(expected.size(), DateFormat.values().length);
-		Iterator<Map.Entry<DateFormat, String>> it = expected.entrySet().iterator();
+		assertEquals(expected.size(), FidexpDateFormat.values().length);
+		Iterator<Map.Entry<FidexpDateFormat, String>> it = expected.entrySet().iterator();
 		while ( it.hasNext() ) {
-			Map.Entry<DateFormat, String> dummy = it.next();
+			Map.Entry<FidexpDateFormat, String> dummy = it.next();
 			params.setDateFormat(dummy.getKey());
 			assertQueryParam("dtf", dummy.getValue());
 		}
@@ -116,16 +116,16 @@ public class DataExportFormQueryBuilderTest {
 	
 	@Test
 	public void testBuildQuery_TimeFormat() throws Exception {
-		Map<TimeFormat, String> expected = new HashMap<>();
-		expected.put(TimeFormat.HHMMSS, "1");
-		expected.put(TimeFormat.HHMM, "2");
-		expected.put(TimeFormat.HHcolonMMcolonSS, "3");
-		expected.put(TimeFormat.HHcolonMM, "4");
+		Map<FidexpTimeFormat, String> expected = new HashMap<>();
+		expected.put(FidexpTimeFormat.HHMMSS, "1");
+		expected.put(FidexpTimeFormat.HHMM, "2");
+		expected.put(FidexpTimeFormat.HHcolonMMcolonSS, "3");
+		expected.put(FidexpTimeFormat.HHcolonMM, "4");
 		
-		assertEquals(expected.size(), TimeFormat.values().length);
-		Iterator<Map.Entry<TimeFormat, String>> it = expected.entrySet().iterator();
+		assertEquals(expected.size(), FidexpTimeFormat.values().length);
+		Iterator<Map.Entry<FidexpTimeFormat, String>> it = expected.entrySet().iterator();
 		while ( it.hasNext() ) {
-			Map.Entry<TimeFormat, String> dummy = it.next();
+			Map.Entry<FidexpTimeFormat, String> dummy = it.next();
 			params.setTimeFormat(dummy.getKey());
 			assertQueryParam("tmf", dummy.getValue());
 		}
@@ -133,10 +133,10 @@ public class DataExportFormQueryBuilderTest {
 	
 	@Test
 	public void testBuildQuery_CandleTime() throws Exception {
-		params.setCandleTime(CandleTime.START_OF_CANDLE);
+		params.setCandleTime(FidexpCandleTime.START_OF_CANDLE);
 		assertQueryParam("MSOR", "0");
 		
-		params.setCandleTime(CandleTime.END_OF_CANDLE);
+		params.setCandleTime(FidexpCandleTime.END_OF_CANDLE);
 		assertQueryParam("MSOR", "1");
 	}
 	
@@ -153,17 +153,17 @@ public class DataExportFormQueryBuilderTest {
 	
 	@Test
 	public void testBuildQuery_FieldSeparator() throws Exception {
-		Map<FieldSeparator, String> expected = new HashMap<>();
-		expected.put(FieldSeparator.COMMA, "1");
-		expected.put(FieldSeparator.FULL_STOP, "2");
-		expected.put(FieldSeparator.SEMICOLON, "3");
-		expected.put(FieldSeparator.TAB, "4");
-		expected.put(FieldSeparator.SPACE, "5");
+		Map<FidexpFieldSeparator, String> expected = new HashMap<>();
+		expected.put(FidexpFieldSeparator.COMMA, "1");
+		expected.put(FidexpFieldSeparator.FULL_STOP, "2");
+		expected.put(FidexpFieldSeparator.SEMICOLON, "3");
+		expected.put(FidexpFieldSeparator.TAB, "4");
+		expected.put(FidexpFieldSeparator.SPACE, "5");
 		
-		assertEquals(expected.size(), FieldSeparator.values().length);
-		Iterator<Map.Entry<FieldSeparator, String>> it = expected.entrySet().iterator();
+		assertEquals(expected.size(), FidexpFieldSeparator.values().length);
+		Iterator<Map.Entry<FidexpFieldSeparator, String>> it = expected.entrySet().iterator();
 		while ( it.hasNext() ) {
-			Map.Entry<FieldSeparator, String> dummy = it.next();
+			Map.Entry<FidexpFieldSeparator, String> dummy = it.next();
 			params.setFieldSeparator(dummy.getKey());
 			assertQueryParam("sep", dummy.getValue());
 		}
@@ -171,17 +171,17 @@ public class DataExportFormQueryBuilderTest {
 	
 	@Test
 	public void testBuildQuery_DigitSeparator() throws Exception {
-		Map<DigitSeparator, String> expected = new HashMap<>();
-		expected.put(DigitSeparator.NONE, "1");
-		expected.put(DigitSeparator.FULL_STOP, "2");
-		expected.put(DigitSeparator.COMMA, "3");
-		expected.put(DigitSeparator.SPACE, "4");
-		expected.put(DigitSeparator.APOSTROPHE, "5");
+		Map<FidexpDigitSeparator, String> expected = new HashMap<>();
+		expected.put(FidexpDigitSeparator.NONE, "1");
+		expected.put(FidexpDigitSeparator.FULL_STOP, "2");
+		expected.put(FidexpDigitSeparator.COMMA, "3");
+		expected.put(FidexpDigitSeparator.SPACE, "4");
+		expected.put(FidexpDigitSeparator.APOSTROPHE, "5");
 		
-		assertEquals(expected.size(), DigitSeparator.values().length);
-		Iterator<Map.Entry<DigitSeparator, String>> it = expected.entrySet().iterator();
+		assertEquals(expected.size(), FidexpDigitSeparator.values().length);
+		Iterator<Map.Entry<FidexpDigitSeparator, String>> it = expected.entrySet().iterator();
 		while ( it.hasNext() ) {
-			Map.Entry<DigitSeparator, String> dummy = it.next();
+			Map.Entry<FidexpDigitSeparator, String> dummy = it.next();
 			params.setDigitSeparator(dummy.getKey());
 			assertQueryParam("sep2", dummy.getValue());
 		}
@@ -189,23 +189,23 @@ public class DataExportFormQueryBuilderTest {
 
 	@Test
 	public void testBuildQuery_DataFormat() throws Exception {
-		Map<DataFormat, String> expected = new HashMap<>();
-		expected.put(DataFormat.TICKER_PER_DATE_TIME_OPEN_HIGH_LOW_CLOSE_VOL, "1");
-		expected.put(DataFormat.TICKER_PER_DATE_TIME_OPEN_HIGH_LOW_CLOSE, "2");
-		expected.put(DataFormat.TICKER_PER_DATE_TIME_CLOSE_VOL, "3");
-		expected.put(DataFormat.TICKER_PER_DATE_TIME_CLOSE, "4");
-		expected.put(DataFormat.DATE_TIME_OPEN_HIGH_LOW_CLOSE_VOL, "5");
-		expected.put(DataFormat.TICKER_PER_DATE_TIME_LAST_VOL, "6");
-		expected.put(DataFormat.TICKER_DATE_TIME_LAST_VOL, "7");
-		expected.put(DataFormat.TICKER_DATE_TIME_LAST, "8");
-		expected.put(DataFormat.DATE_TIME_LAST_VOL, "9");
-		expected.put(DataFormat.DATE_TIME_LAST, "10");
-		expected.put(DataFormat.DATE_TIME_LAST_VOL_ID, "11");
+		Map<FidexpDataFormat, String> expected = new HashMap<>();
+		expected.put(FidexpDataFormat.TICKER_PER_DATE_TIME_OPEN_HIGH_LOW_CLOSE_VOL, "1");
+		expected.put(FidexpDataFormat.TICKER_PER_DATE_TIME_OPEN_HIGH_LOW_CLOSE, "2");
+		expected.put(FidexpDataFormat.TICKER_PER_DATE_TIME_CLOSE_VOL, "3");
+		expected.put(FidexpDataFormat.TICKER_PER_DATE_TIME_CLOSE, "4");
+		expected.put(FidexpDataFormat.DATE_TIME_OPEN_HIGH_LOW_CLOSE_VOL, "5");
+		expected.put(FidexpDataFormat.TICKER_PER_DATE_TIME_LAST_VOL, "6");
+		expected.put(FidexpDataFormat.TICKER_DATE_TIME_LAST_VOL, "7");
+		expected.put(FidexpDataFormat.TICKER_DATE_TIME_LAST, "8");
+		expected.put(FidexpDataFormat.DATE_TIME_LAST_VOL, "9");
+		expected.put(FidexpDataFormat.DATE_TIME_LAST, "10");
+		expected.put(FidexpDataFormat.DATE_TIME_LAST_VOL_ID, "11");
 		
-		assertEquals(expected.size(), DataFormat.values().length);
-		Iterator<Map.Entry<DataFormat, String>> it = expected.entrySet().iterator();
+		assertEquals(expected.size(), FidexpDataFormat.values().length);
+		Iterator<Map.Entry<FidexpDataFormat, String>> it = expected.entrySet().iterator();
 		while ( it.hasNext() ) {
-			Map.Entry<DataFormat, String> dummy = it.next();
+			Map.Entry<FidexpDataFormat, String> dummy = it.next();
 			params.setDataFormat(dummy.getKey());
 			assertQueryParam("datf", dummy.getValue());
 		}

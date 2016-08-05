@@ -7,24 +7,24 @@ import java.time.format.DateTimeFormatter;
 
 import org.apache.http.client.utils.URIBuilder;
 
-public class DataExportFormQueryBuilder {
+public class FidexpFormQueryBuilder {
 	private static final DateTimeFormatter dateFormat;
 	
 	static {
 		dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	}
 	
-	private final DataExportFormUtils formUtils;
+	private final FidexpFormUtils formUtils;
 	
-	public DataExportFormQueryBuilder(DataExportFormUtils formUtils) {
+	public FidexpFormQueryBuilder(FidexpFormUtils formUtils) {
 		this.formUtils = formUtils;
 	}
 	
-	public DataExportFormQueryBuilder() {
-		this(new DataExportFormUtils());
+	public FidexpFormQueryBuilder() {
+		this(new FidexpFormUtils());
 	}
 	
-	public URI buildQuery(URI initialURI, DataExportParams params) throws URISyntaxException {
+	public URI buildQuery(URI initialURI, FidexpFormParams params) throws URISyntaxException {
 		LocalDate dateFrom = params.getDateFrom(), dateTo = params.getDateTo();
 		URIBuilder builder = new URIBuilder(initialURI)
 			.clearParameters()

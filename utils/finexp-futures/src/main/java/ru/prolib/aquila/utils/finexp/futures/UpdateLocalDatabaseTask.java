@@ -24,7 +24,7 @@ import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.DatedSymbol;
 import ru.prolib.aquila.data.storage.file.FileStorage;
 import ru.prolib.aquila.web.utils.DataExportException;
-import ru.prolib.aquila.web.utils.finam.DataExport;
+import ru.prolib.aquila.web.utils.finam.Fidexp;
 
 public class UpdateLocalDatabaseTask implements Runnable {
 	private static final Logger logger;
@@ -61,7 +61,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 	@Override
 	public void run() {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
-		DataExport facade = new DataExport();
+		Fidexp facade = new Fidexp();
 		try {
 			logger.debug("Update started.");
 			if ( cmdLine.hasOption(CmdLine.LOPT_SKIP_INTEGRITY_TEST) ) {

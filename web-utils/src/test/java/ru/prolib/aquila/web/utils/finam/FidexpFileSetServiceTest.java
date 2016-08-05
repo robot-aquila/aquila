@@ -5,12 +5,12 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FINAMFileSetServiceTest {
-	private FINAMFileSetService service;
+public class FidexpFileSetServiceTest {
+	private FidexpFileSetService service;
 
 	@Before
 	public void setUp() throws Exception {
-		service = new FINAMFileSetService();
+		service = new FidexpFileSetService();
 	}
 
 	@Test

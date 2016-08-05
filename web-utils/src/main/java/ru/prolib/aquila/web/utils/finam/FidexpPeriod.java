@@ -1,6 +1,6 @@
 package ru.prolib.aquila.web.utils.finam;
 
-public enum Period {
+public enum FidexpPeriod {
 	/**
 	 * value - 1
 	 */

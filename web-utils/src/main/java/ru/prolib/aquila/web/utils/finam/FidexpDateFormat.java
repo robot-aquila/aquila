@@ -1,24 +1,24 @@
 package ru.prolib.aquila.web.utils.finam;
 
-public enum DigitSeparator {
+public enum FidexpDateFormat {
 	/**
 	 * value - 1
 	 */
-	NONE,
+	YYYYMMDD,
 	/**
 	 * value - 2
 	 */
-	FULL_STOP,
+	YYMMDD,
 	/**
 	 * value - 3
 	 */
-	COMMA,
+	DDMMYY,
 	/**
 	 * value - 4
 	 */
-	SPACE,
+	DDslashMMslashYY,
 	/**
 	 * value - 5
 	 */
-	APOSTROPHE
+	MMslashDDslashYY
 }

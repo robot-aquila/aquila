@@ -7,12 +7,12 @@ import java.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DataExportParamsTest {
-	private DataExportParams params;
+public class FidexpFormParamsTest {
+	private FidexpFormParams params;
 
 	@Before
 	public void setUp() throws Exception {
-		params = new DataExportParams();
+		params = new FidexpFormParams();
 	}
 	
 	@Test
@@ -21,17 +21,17 @@ public class DataExportParamsTest {
 		assertEquals(17455, params.getQuoteID());
 		assertEquals(LocalDate.now(), params.getDateFrom());
 		assertEquals(LocalDate.now(), params.getDateTo());
-		assertEquals(Period.TICKS, params.getPeriod());
+		assertEquals(FidexpPeriod.TICKS, params.getPeriod());
 		assertEquals("RTS", params.getContractName());
 		assertEquals("RTS", params.getFileName());
-		assertEquals(FileExt.CSV, params.getFileExt());
-		assertEquals(DateFormat.YYYYMMDD, params.getDateFormat());
-		assertEquals(TimeFormat.HHMMSS, params.getTimeFormat());
-		assertEquals(CandleTime.START_OF_CANDLE, params.getCandleTime());
+		assertEquals(FidexpFileExt.CSV, params.getFileExt());
+		assertEquals(FidexpDateFormat.YYYYMMDD, params.getDateFormat());
+		assertEquals(FidexpTimeFormat.HHMMSS, params.getTimeFormat());
+		assertEquals(FidexpCandleTime.START_OF_CANDLE, params.getCandleTime());
 		assertTrue(params.getUseMoscowTime());
-		assertEquals(FieldSeparator.COMMA, params.getFieldSeparator());
-		assertEquals(DigitSeparator.NONE, params.getDigitSeparator());
-		assertEquals(DataFormat.DATE_TIME_LAST_VOL, params.getDataFormat());
+		assertEquals(FidexpFieldSeparator.COMMA, params.getFieldSeparator());
+		assertEquals(FidexpDigitSeparator.NONE, params.getDigitSeparator());
+		assertEquals(FidexpDataFormat.DATE_TIME_LAST_VOL, params.getDataFormat());
 		assertTrue(params.getAddHeader());
 		assertFalse(params.getFillEmptyPeriods());
 	}
@@ -62,8 +62,8 @@ public class DataExportParamsTest {
 
 	@Test
 	public void testSetPeriod() {
-		assertSame(params, params.setPeriod(Period.M10));
-		assertEquals(Period.M10, params.getPeriod());
+		assertSame(params, params.setPeriod(FidexpPeriod.M10));
+		assertEquals(FidexpPeriod.M10, params.getPeriod());
 	}
 
 	@Test
@@ -80,26 +80,26 @@ public class DataExportParamsTest {
 
 	@Test
 	public void testSetFileExt() {
-		assertSame(params, params.setFileExt(FileExt.TXT));
-		assertEquals(FileExt.TXT, params.getFileExt());
+		assertSame(params, params.setFileExt(FidexpFileExt.TXT));
+		assertEquals(FidexpFileExt.TXT, params.getFileExt());
 	}
 
 	@Test
 	public void testSetDateFormat() {
-		assertSame(params, params.setDateFormat(DateFormat.DDslashMMslashYY));
-		assertEquals(DateFormat.DDslashMMslashYY, params.getDateFormat());
+		assertSame(params, params.setDateFormat(FidexpDateFormat.DDslashMMslashYY));
+		assertEquals(FidexpDateFormat.DDslashMMslashYY, params.getDateFormat());
 	}
 
 	@Test
 	public void testSetTimeFormat() {
-		assertSame(params, params.setTimeFormat(TimeFormat.HHcolonMMcolonSS));
-		assertEquals(TimeFormat.HHcolonMMcolonSS, params.getTimeFormat());
+		assertSame(params, params.setTimeFormat(FidexpTimeFormat.HHcolonMMcolonSS));
+		assertEquals(FidexpTimeFormat.HHcolonMMcolonSS, params.getTimeFormat());
 	}
 
 	@Test
 	public void testSetCandleTime() {
-		assertSame(params, params.setCandleTime(CandleTime.END_OF_CANDLE));
-		assertEquals(CandleTime.END_OF_CANDLE, params.getCandleTime());
+		assertSame(params, params.setCandleTime(FidexpCandleTime.END_OF_CANDLE));
+		assertEquals(FidexpCandleTime.END_OF_CANDLE, params.getCandleTime());
 	}
 
 	@Test
@@ -110,20 +110,20 @@ public class DataExportParamsTest {
 
 	@Test
 	public void testSetFieldSeparator() {
-		assertSame(params, params.setFieldSeparator(FieldSeparator.SPACE));
-		assertEquals(FieldSeparator.SPACE, params.getFieldSeparator());
+		assertSame(params, params.setFieldSeparator(FidexpFieldSeparator.SPACE));
+		assertEquals(FidexpFieldSeparator.SPACE, params.getFieldSeparator());
 	}
 
 	@Test
 	public void testSetDigitSeparator() {
-		assertSame(params, params.setDigitSeparator(DigitSeparator.FULL_STOP));
-		assertEquals(DigitSeparator.FULL_STOP, params.getDigitSeparator());
+		assertSame(params, params.setDigitSeparator(FidexpDigitSeparator.FULL_STOP));
+		assertEquals(FidexpDigitSeparator.FULL_STOP, params.getDigitSeparator());
 	}
 
 	@Test
 	public void testSetDataFormat() {
-		assertSame(params, params.setDataFormat(DataFormat.DATE_TIME_LAST));
-		assertEquals(DataFormat.DATE_TIME_LAST, params.getDataFormat());
+		assertSame(params, params.setDataFormat(FidexpDataFormat.DATE_TIME_LAST));
+		assertEquals(FidexpDataFormat.DATE_TIME_LAST, params.getDataFormat());
 	}
 
 	@Test

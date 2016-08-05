@@ -1,20 +1,24 @@
 package ru.prolib.aquila.web.utils.finam;
 
-public enum TimeFormat {
+public enum FidexpDigitSeparator {
 	/**
 	 * value - 1
 	 */
-	HHMMSS,
+	NONE,
 	/**
 	 * value - 2
 	 */
-	HHMM,
+	FULL_STOP,
 	/**
 	 * value - 3
 	 */
-	HHcolonMMcolonSS,
+	COMMA,
 	/**
 	 * value - 4
 	 */
-	HHcolonMM
+	SPACE,
+	/**
+	 * value - 5
+	 */
+	APOSTROPHE
 }

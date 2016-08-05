@@ -1,6 +1,6 @@
 package ru.prolib.aquila.web.utils.finam;
 
-public enum FileExt {
+public enum FidexpFileExt {
 	TXT,
 	CSV
 }
