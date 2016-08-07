@@ -21,12 +21,12 @@ public class FileStorageImpl implements FileStorage {
 	private final IdUtils idUtils = new IdUtils();
 	private final String storageID;
 	private final FileStorageNamespace namespace;
-	private final FileSetService fileSetService;
+	private final Files files;
 	
-	public FileStorageImpl(FileStorageNamespace namespace, String storageID, FileSetService fileSetService) {
+	public FileStorageImpl(FileStorageNamespace namespace, String storageID, Files files) {
 		this.namespace = namespace;
 		this.storageID = storageID;
-		this.fileSetService = fileSetService;
+		this.files = files;
 	}
 	
 	public FileStorageNamespace getNamespace() {
@@ -37,8 +37,8 @@ public class FileStorageImpl implements FileStorage {
 		return storageID;
 	}
 	
-	public FileSetService getFileSetService() {
-		return fileSetService;
+	public Files getFiles() {
+		return files;
 	}
 
 	@Override
@@ -93,14 +93,32 @@ public class FileStorageImpl implements FileStorage {
 		}
 	}
 	
+	@Override
+	public File getDataFile(Symbol symbol) {
+		return new File(namespace.getDirectory(symbol), getRegularFilename(symbol));
+	}
+
+	@Override
+	public File getDataFileForWriting(Symbol symbol) throws DataStorageException {
+		try {
+			return new File(namespace.getDirectoryForWriting(symbol), getRegularFilename(symbol));
+		} catch ( IOException e ) {
+			throw new DataStorageException("Cannot create directory structure: ", e);
+		}
+	}
+	
 	private String getTemporaryFilename(DatedSymbol descr) {
 		return idUtils.getSafeFilename(descr.getSymbol(), descr.getDate(),
-				fileSetService.getTemporarySuffix());
+				files.getTemporarySuffix());
 	}
 	
 	private String getRegularFilename(DatedSymbol descr) {
 		return idUtils.getSafeFilename(descr.getSymbol(), descr.getDate(),
-				fileSetService.getRegularSuffix());
+				files.getRegularSuffix());
+	}
+	
+	private String getRegularFilename(Symbol symbol) {
+		return idUtils.getSafeFilename(symbol, files.getRegularSuffix());
 	}
 
 }

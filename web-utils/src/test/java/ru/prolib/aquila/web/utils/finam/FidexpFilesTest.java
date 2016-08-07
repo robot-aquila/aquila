@@ -5,18 +5,18 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FidexpFileSetServiceTest {
-	private FidexpFileSetService service;
+public class FidexpFilesTest {
+	private FidexpFiles files;
 
 	@Before
 	public void setUp() throws Exception {
-		service = new FidexpFileSetService();
+		files = new FidexpFiles();
 	}
 
 	@Test
 	public void testGetSuffixes() {
-		assertEquals(".csv.gz", service.getRegularSuffix());
-		assertEquals(".part.csv.gz", service.getTemporarySuffix());
+		assertEquals(".csv.gz", files.getRegularSuffix());
+		assertEquals(".part.csv.gz", files.getTemporarySuffix());
 	}
 
 }

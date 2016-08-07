@@ -1,11 +1,11 @@
 package ru.prolib.aquila.web.utils.finam;
 
-import ru.prolib.aquila.data.storage.file.FileSetService;
+import ru.prolib.aquila.data.storage.file.Files;
 
 /**
- * The fileset of daily tick data downloaded from FINAM site.
+ * The files of daily tick data downloaded from FINAM site.
  */
-public class FidexpFileSetService implements FileSetService {
+public class FidexpFiles implements Files {
 
 	@Override
 	public String getRegularSuffix() {

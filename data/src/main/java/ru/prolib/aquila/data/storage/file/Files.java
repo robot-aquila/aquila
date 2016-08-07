@@ -1,11 +1,11 @@
 package ru.prolib.aquila.data.storage.file;
 
 /**
- * FileSet service.
+ * Files - a service representing a set of files.
  * <p>
  * This class provides an information about files of single set of files.
  */
-public interface FileSetService {
+public interface Files {
 
 	/**
 	 * Get a regular file suffix.

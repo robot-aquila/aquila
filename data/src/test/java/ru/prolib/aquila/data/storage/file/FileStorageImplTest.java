@@ -25,14 +25,14 @@ public class FileStorageImplTest {
 			date2 = LocalDate.of(2005, 12, 1);
 	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
 			descr2 = new DatedSymbol(symbol1, date2);
-	private static FileSetService fileSetService;
+	private static Files files;
 	private FileStorageNamespace namespace;
 	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		fileSetService = new FileSetService() {
+		files = new Files() {
 			@Override public String getRegularSuffix() {
 				return ".csv.gz";
 			}
@@ -47,7 +47,7 @@ public class FileStorageImplTest {
 	public void setUp() throws Exception {
 		FileUtils.forceMkdir(root);
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "test", fileSetService);
+		storage = new FileStorageImpl(namespace, "test", files);
 	}
 	
 	@After
@@ -59,7 +59,15 @@ public class FileStorageImplTest {
 	public void testCtor3() throws Exception {
 		assertEquals(namespace, storage.getNamespace());
 		assertEquals("test", storage.getStorageID());
-		assertEquals(fileSetService, storage.getFileSetService());
+		assertEquals(files, storage.getFiles());
+	}
+	
+	@Test
+	public void testGetSegmentFile() {
+		File expected = new File("fixture" + FS + "temp" + FS + "B0" + FS + "MSFT"
+				+ FS + "2016" + FS + "07" + FS + "MSFT-20160726.csv.gz");
+		
+		assertEquals(expected, storage.getSegmentFile(descr1));
 	}
 	
 	@Test
@@ -81,7 +89,7 @@ public class FileStorageImplTest {
 	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "foo", fileSetService);
+		storage = new FileStorageImpl(namespace, "foo", files);
 		
 		storage.getTemporarySegmentFile(descr1);
 	}
@@ -106,7 +114,7 @@ public class FileStorageImplTest {
 	public void testListExistingSegments() throws Exception {
 		File root = new File("fixture");
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "bar", fileSetService);
+		storage = new FileStorageImpl(namespace, "bar", files);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
@@ -123,6 +131,41 @@ public class FileStorageImplTest {
 		expected.add(LocalDate.of(2012, 1, 10));
 		
 		assertEquals(expected, storage.listExistingSegments(symbol1, from, to));
+	}
+	
+	@Test (expected=DataStorageException.class)
+	public void testGetDataFileForWriting_ThrowsIfCannotCreateDirs() throws Exception {
+		File root = new File("fixture/dummy");
+		namespace = new FileStorageNamespaceV1(root);
+		storage = new FileStorageImpl(namespace, "foo", files);
+		
+		storage.getDataFileForWriting(symbol1);
+	}
+	
+	@Test
+	public void testGetDataFile_Mkdirs() throws Exception {
+		storage.getDataFileForWriting(symbol1);
+		
+		assertTrue(new File("fixture/temp/B0/MSFT").exists());
+	}
+
+	@Test
+	public void testGetDataFileForWriting() throws Exception {
+		File expected = new File("fixture/temp/B0/MSFT/MSFT.csv.gz");
+		
+		File actual = storage.getDataFileForWriting(symbol1);
+		
+		assertEquals(expected, actual);
+		assertTrue(new File("fixture/temp/B0/MSFT").exists());
+	}
+	
+	@Test
+	public void testGetDataFile() throws Exception {
+		File expected = new File("fixture/temp/B0/MSFT/MSFT.csv.gz");
+		
+		File actual = storage.getDataFile(symbol1);
+		
+		assertEquals(expected, actual);
 	}
 
 }
