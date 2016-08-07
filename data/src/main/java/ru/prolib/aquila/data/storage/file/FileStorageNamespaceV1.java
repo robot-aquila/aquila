@@ -25,6 +25,7 @@ import ru.prolib.aquila.data.storage.DatedSymbol;
  * At level 4) two digits of month</br>
  */
 public class FileStorageNamespaceV1 implements FileStorageNamespace {
+	private static final String FS = File.separator;
 	private static final FilenameFilter LEVEL1_FILTER = new FilenameFilter() {
 		@Override public boolean accept(File dir, String name) {
 			return name.length() == 2
@@ -50,18 +51,29 @@ public class FileStorageNamespaceV1 implements FileStorageNamespace {
 
 	@Override
 	public File getDirectory(DatedSymbol descr) {
-		String FS = File.separator;
 		Symbol symbol = descr.getSymbol();
 		LocalDate date = descr.getDate();
-		return new File(root, StringUtils.upperCase(DigestUtils.md5Hex(symbol.toString()).substring(0, 2))
-				+ FS + idUtils.getSafeSymbolId(symbol)
+		return new File(root, level1Directory(symbol)
+				+ FS + level2Directory(symbol)
 				+ FS + String.format("%04d", date.getYear())
 				+ FS + String.format("%02d", date.getMonthValue()));
 	}
-
+	
 	@Override
 	public File getDirectoryForWriting(DatedSymbol descr) throws IOException {
 		File path = getDirectory(descr);
+		FileUtils.forceMkdir(path);
+		return path;
+	}
+
+	@Override
+	public File getDirectory(Symbol symbol) {
+		return new File(root, level1Directory(symbol) + FS + level2Directory(symbol));
+	}
+
+	@Override
+	public File getDirectoryForWriting(Symbol symbol) throws IOException {
+		File path = getDirectory(symbol);
 		FileUtils.forceMkdir(path);
 		return path;
 	}
@@ -82,6 +94,14 @@ public class FileStorageNamespaceV1 implements FileStorageNamespace {
 			new File(root, x).list(leve2Filter);
 		}
 		return symbols;
+	}
+	
+	private String level2Directory(Symbol symbol) {
+		return idUtils.getSafeSymbolId(symbol);
+	}
+	
+	private String level1Directory(Symbol symbol) {
+		return StringUtils.upperCase(DigestUtils.md5Hex(symbol.toString()).substring(0, 2));
 	}
 
 }

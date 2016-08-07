@@ -36,7 +36,7 @@ public class FileStorageNamespaceV1Test {
 	}
 	
 	@Test
-	public void testGetDirectory() {
+	public void testGetDirectory_DatedSymbol() {
 		File expected = new File("fixture" + FS + "storage" + FS + "2C" +
 				FS + "RTS%2D9%2E16" + FS + "1997" + FS + "01");
 		
@@ -44,7 +44,7 @@ public class FileStorageNamespaceV1Test {
 	}
 	
 	@Test
-	public void testGetDirectoryForWriting() throws Exception {
+	public void testGetDirectoryForWriting_DatedSymbol() throws Exception {
 		File expected = new File("fixture" + FS + "storage" + FS + "B0" +
 				FS + "MSFT" + FS + "2016" + FS + "12");
 		
@@ -56,8 +56,31 @@ public class FileStorageNamespaceV1Test {
 	}
 	
 	@Test (expected=IOException.class)
-	public void testGetDirectoryForWriting_ThrowsBadRoot() throws Exception {
+	public void testGetDirectoryForWriting_DatedSymbol_ThrowsBadRoot() throws Exception {
 		fakeNamespace.getDirectoryForWriting(new DatedSymbol(symbol1, date1));
+	}
+	
+	@Test
+	public void testGetDirectory_Symbol() {
+		File expected = new File("fixture" + FS + "storage" + FS + "2C" + FS + "RTS%2D9%2E16");
+		
+		assertEquals(expected, namespace.getDirectory(symbol1));
+	}
+	
+	@Test
+	public void testGetDirectoryForWriting_Symbol() throws Exception {
+		File expected = new File("fixture" + FS + "storage" + FS + "2C" + FS + "RTS%2D9%2E16");
+
+		File actual = namespace.getDirectoryForWriting(symbol1);
+		
+		assertEquals(expected, actual);
+		assertTrue(actual.exists());
+		assertTrue(actual.isDirectory());
+	}
+
+	@Test (expected=IOException.class)
+	public void testGetDirectoryForWriting_Symbol_ThrowsBadRoot() throws Exception {
+		fakeNamespace.getDirectoryForWriting(symbol1);
 	}
 
 	@Test

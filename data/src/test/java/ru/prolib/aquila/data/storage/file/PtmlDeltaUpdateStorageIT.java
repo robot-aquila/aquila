@@ -16,6 +16,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +123,7 @@ public class PtmlDeltaUpdateStorageIT {
 	}
 
 	@Test
+	@Ignore // TODO: Flex, flex, flex
 	public void stress() throws Exception {
 		setUp();
 		for ( int i = 0; i < 100; i ++ ) {
