@@ -121,5 +121,16 @@ public class IdUtils {
 	public String getSafeFilename(Symbol symbol, LocalDate date, String suffix) {
 		return getSafeSymbolId(symbol) + SEPARATOR + dateFormat.format(date) + suffix;
 	}
+	
+	/**
+	 * Create a safe filename based on symbol and file extension.
+	 * <p>
+	 * @param symbol - the symbol
+	 * @param suffix - filename suffix (Note: this component not encoded).
+	 * @return the safe file based on arguments
+	 */
+	public String getSafeFilename(Symbol symbol, String suffix) {
+		return getSafeSymbolId(symbol) + suffix;
+	}
 
 }

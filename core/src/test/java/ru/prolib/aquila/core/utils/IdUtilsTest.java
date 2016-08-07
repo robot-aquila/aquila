@@ -112,4 +112,13 @@ public class IdUtilsTest {
 		assertEquals(expected, actual);
 	}
 	
+	@Test
+	public void testGetSafeFilename2() throws Exception {
+		String expected = "F%3ARTS%40SPBFUT%3AUSD-moex-daily-session.txt";
+		
+		String actual = utils.getSafeFilename(new Symbol("F:RTS@SPBFUT:USD"), "-moex-daily-session.txt");
+		
+		assertEquals(expected, actual);		
+	}
+	
 }
