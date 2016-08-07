@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  * random access files.
  */
 public class FlexInputStream extends InputStream {
+	@SuppressWarnings("unused")
 	private static final Logger logger;
 	
 	static {
@@ -42,21 +43,21 @@ public class FlexInputStream extends InputStream {
 		this.input = input;
 		this.channel = input.getChannel();
 		this.fileLocks = new ArrayList<FileLock>();
-		logger.debug("Channel: {}", channel);
+		//logger.debug("Channel: {}", channel);
 	}
 
 	@Override
 	public int available() throws IOException {
-		logger.debug("-> available");
+		//logger.debug("-> available");
 		checkLockRange();
 		int result = input.available();
-		logger.debug("<- available: return={}", result);
+		//logger.debug("<- available: return={}", result);
 		return result;
 	}
 	
 	@Override
 	public void close() throws IOException {
-		logger.debug("-> close");
+		//logger.debug("-> close");
 		lock.lock();
 		try {
 			for ( int i = fileLocks.size() - 1; i >= 0; i -- ) {
@@ -68,80 +69,105 @@ public class FlexInputStream extends InputStream {
 			lock.unlock();
 		}
 		input.close();
-		logger.debug("<- close");
+		//logger.debug("<- close");
 	}
 	
 	@Override
 	public void mark(int readLimit) {
-		logger.debug("-> mark: readLimit={}", readLimit);
+		//logger.debug("-> mark: readLimit={}", readLimit);
 		input.mark(readLimit);
-		logger.debug("<- mark");
+		//logger.debug("<- mark");
 	}
 	
 	@Override
 	public boolean markSupported() {
-		logger.debug("-> markSupported");
+		//logger.debug("-> markSupported");
 		boolean result = input.markSupported();
-		logger.debug("<- markSupported: return={}", result);
+		//logger.debug("<- markSupported: return={}", result);
 		return result;
 	}
 	
 	@Override
 	public int read() throws IOException {
-		logger.debug("-> read(0)");
+		//logger.debug("-> read(0)");
 		checkLockRange();
-		int result = input.read();
-		logger.debug("<- read(0): return={}", result);
+		int result = 0;
+		FileLock temp = tempLockIfNeeded(1);
+		if ( temp != null ) {
+			try {
+				result = input.read();
+			} finally {
+				temp.release();
+			}
+		} else {
+			result = input.read();
+		}
+		//logger.debug("<- read(0): return={}", result);
 		return result;
 	}
 	
 	@Override
 	public int read(byte[] b) throws IOException {
-		logger.debug("-> read(1): array.length={}", b.length);
+		//logger.debug("-> read(1): array.length={}", b.length);
 		checkLockRange();
-		int result = input.read(b);
-		logger.debug("<- read(1): return={}", result);
+		int result = 0;
+		FileLock temp = tempLockIfNeeded(b.length);
+		if ( temp != null ) {
+			try {
+				result = input.read(b);
+			} finally {
+				temp.release();
+			}
+		} else {
+			result = input.read(b);
+		}
+		//logger.debug("<- read(1): return={}", result);
 		return result;
 	}
 	
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
-		logger.debug("-> read(3): off={}, len={}", off, len);
+		//logger.debug("-> read(3): off={}, len={}", off, len);
 		int result = 0;
 		checkLockRange();
-		long requestedSize = channel.position() + len;
-		if ( requestedSize > currentLockSize ) {
-			long newLockSize = requestedSize - currentLockSize;
-			long newLockPos = currentLockSize;
-			logger.debug("Requested length is more than locked. Making a temporary lock: pos={} size={}...", newLockPos, newLockSize);
-			FileLock tempLock = channel.lock(newLockPos, newLockSize, true);
-			logger.debug("Lock acquired");
+		FileLock temp = tempLockIfNeeded(len);
+		if ( temp != null ) {
 			try {
 				result = input.read(b, off, len);
 			} finally {
-				tempLock.release();
+				temp.release();
 			}
 		} else {
 			result = input.read(b, off, len);
 		}
-		logger.debug("<- read(3): return={}", result);
+		//logger.debug("<- read(3): return={}", result);
 		return result;
 	}
 	
 	@Override
 	public void reset() throws IOException {
-		logger.debug("-> reset");
+		//logger.debug("-> reset");
 		checkLockRange();
 		input.reset();
-		logger.debug("<- reset");
+		//logger.debug("<- reset");
 	}
 	
 	@Override
 	public long skip(long n) throws IOException {
-		logger.debug("skip(1): n={}", n);
+		//logger.debug("skip(1): n={}", n);
 		checkLockRange();
-		long result = input.skip(n);
-		logger.debug("skip(1): return={}", result);
+		long result = 0;
+		FileLock temp = tempLockIfNeeded(n);
+		if ( temp != null ) {
+			try {
+				result = input.skip(n);
+			} finally {
+				temp.release();
+			}
+		} else {
+			result = input.skip(n);
+		}
+		//logger.debug("skip(1): return={}", result);
 		return result;
 	}
 	
@@ -154,11 +180,29 @@ public class FlexInputStream extends InputStream {
 				long newLockSize = currentFileSize - currentLockSize;
 				fileLocks.add(channel.lock(newLockPos, newLockSize, true));
 				currentLockSize = currentFileSize;
-				logger.debug("New segment locked: pos={} size={} total={}",
-					new Object[] { newLockPos, newLockSize, currentLockSize} );
+				//logger.debug("New segment locked: pos={} size={} total={}",
+				//	new Object[] { newLockPos, newLockSize, currentLockSize} );
 			}
 		} finally {
 			lock.unlock();
+		}
+	}
+	
+	/**
+	 * Test condition and create a temporary lock if needed.
+	 * <p>
+	 * @param wantedLength - the length of data to be read of the current file position
+	 * @return file lock if an additional lock is needed or null if no lock required
+	 * @throws IOException - an error occurred
+	 */
+	private FileLock tempLockIfNeeded(long wantedLength) throws IOException {
+		long requestedSize = channel.position() + wantedLength;
+		if ( requestedSize > currentLockSize ) {
+			long newLockSize = requestedSize - currentLockSize;
+			long newLockPos = currentLockSize;
+			return channel.lock(newLockPos, newLockSize, true);
+		} else {
+			return null;
 		}
 	}
 

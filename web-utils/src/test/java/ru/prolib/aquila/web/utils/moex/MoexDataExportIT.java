@@ -59,6 +59,9 @@ public class MoexDataExportIT {
 		return new JBrowserDriver(Settings.builder()
 				.timezone(Timezone.EUROPE_MOSCOW)
 				.ssl("compatible")
+				.blockAds(true)
+				.headless(true)
+				.quickRender(true)
 				.build());
 	}
 	
@@ -107,6 +110,7 @@ public class MoexDataExportIT {
 		logger.debug("Go through {} futures. It may hold up to several minutes.", futures.size());
 		for ( String contractCode : futures.values() ) {
 			contractForm.getInstrumentDescription(contractCode);
+			Thread.sleep(1000);
 		}
 	}	
 

@@ -78,6 +78,9 @@ public class FidexpIT {
 		return new JBrowserDriver(Settings.builder()
 				.timezone(Timezone.EUROPE_MOSCOW)
 				.ssl("compatible")
+				.blockAds(true)
+				.headless(true)
+				.quickRender(true)
 				.build());
 	}
 	

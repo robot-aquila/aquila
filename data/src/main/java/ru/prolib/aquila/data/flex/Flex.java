@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Flex facade.
@@ -11,7 +12,12 @@ import java.io.IOException;
  * To activate Flex features all underlying objects must be created using this facade.
  */
 public class Flex {
+	private static final Flex instance = new Flex();
 	
+	public static synchronized Flex getInstance() {
+		return instance;
+	}
+		
 	/**
 	 * Create file input stream.
 	 * <p>
@@ -19,8 +25,8 @@ public class Flex {
 	 * @return the input stream instance
 	 * @throws IOException - an error occurred
 	 */
-	public FileInputStream createInputStream(File file) throws IOException {
-		return new FileInputStream(file);
+	public InputStream createInputStream(File file) throws IOException {
+		return new FlexInputStream(new FileInputStream(file));
 	}
 	
 	/**

@@ -1,10 +1,12 @@
 package ru.prolib.aquila.data.storage;
 
-public class DataStorageException extends Exception {
+import ru.prolib.aquila.data.DataException;
+
+public class DataStorageException extends DataException {
 	private static final long serialVersionUID = 1L;
 	
 	public DataStorageException() {
-		
+		super();
 	}
 	
 	public DataStorageException(String msg) {
