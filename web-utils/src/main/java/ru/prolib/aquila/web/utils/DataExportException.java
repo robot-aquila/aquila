@@ -1,7 +1,8 @@
 package ru.prolib.aquila.web.utils;
 
+import ru.prolib.aquila.data.DataException;
 
-public class DataExportException extends Exception {
+public class DataExportException extends DataException {
 	private static final long serialVersionUID = 1L;
 	private final ErrorClass errorClass;
 	

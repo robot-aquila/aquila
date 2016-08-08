@@ -31,6 +31,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.io.IOUtils;
 
+import ru.prolib.aquila.web.utils.WebDriverFactory;
+
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
@@ -72,16 +74,6 @@ public class FidexpIT {
 	@After
 	public void tearDown() throws Exception {
 		IOUtils.closeQuietly(facade);
-	}
-	
-	protected WebDriver createJBrowserDriver() {
-		return new JBrowserDriver(Settings.builder()
-				.timezone(Timezone.EUROPE_MOSCOW)
-				.ssl("compatible")
-				.blockAds(true)
-				.headless(true)
-				.quickRender(true)
-				.build());
 	}
 	
 	protected WebDriver createFirefoxDriver() {
@@ -128,7 +120,7 @@ public class FidexpIT {
 	@Test
 	public void testTestFormIntegrity() throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
-		WebDriver webDriver = createJBrowserDriver();
+		WebDriver webDriver = WebDriverFactory.createJBrowserDriver();
 		try {
 			try ( Fidexp export = new Fidexp(httpClient, webDriver) ) {
 				export.testFormIntegrity();

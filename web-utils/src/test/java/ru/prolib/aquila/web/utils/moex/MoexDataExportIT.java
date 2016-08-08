@@ -21,6 +21,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
 
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
@@ -46,23 +47,13 @@ public class MoexDataExportIT {
 
 	@Before
 	public void setUp() throws Exception {
-		webDriver = createJBrowserDriver();
+		webDriver = WebDriverFactory.createJBrowserDriver();
 		contractForm = new MoexContractForm(webDriver);
 	}
 	
 	@After
 	public void tearDown() throws Exception {
 		webDriver.close();
-	}
-
-	protected WebDriver createJBrowserDriver() {
-		return new JBrowserDriver(Settings.builder()
-				.timezone(Timezone.EUROPE_MOSCOW)
-				.ssl("compatible")
-				.blockAds(true)
-				.headless(true)
-				.quickRender(true)
-				.build());
 	}
 	
 	protected WebDriver createFirefoxDriver() {

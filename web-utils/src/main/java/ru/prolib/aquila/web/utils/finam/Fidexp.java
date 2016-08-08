@@ -27,11 +27,8 @@ import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.web.utils.DataExportException;
 import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.httpclient.HttpClientFileDownloader;
-
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.Timezone;
 
 /**
  * The facade of FINAM data export system.
@@ -51,16 +48,11 @@ public class Fidexp implements Closeable {
 	}
 	
 	public Fidexp() {
-		this(HttpClients.createDefault(), new JBrowserDriver(Settings.builder()
-				.timezone(Timezone.EUROPE_MOSCOW)
-				.ssl("compatible")
-				.blockAds(true)
-				.headless(true)
-				.quickRender(true)
-				.build()));
+		this(HttpClients.createDefault(), WebDriverFactory.createJBrowserDriver());
 		closeResources = true;
 	}
 	
+	@Override
 	public void close() {
 		lock.lock();
 		try {
