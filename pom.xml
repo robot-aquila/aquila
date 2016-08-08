@@ -18,6 +18,7 @@
 		<module>data</module>
 		<module>datatools</module>
 		<module>web-utils</module>
+		<module>utils/experimental</module>
 		<module>utils/finexp-quotelist</module>
 		<module>utils/finexp-futures</module>
 	</modules>

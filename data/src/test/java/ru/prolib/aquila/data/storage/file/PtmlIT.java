@@ -25,30 +25,30 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.data.storage.DeltaUpdate;
 import ru.prolib.aquila.data.storage.DeltaUpdateBuilder;
 
-public class PtmlDeltaUpdateStorageIT {
+public class PtmlIT {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(PtmlDeltaUpdateStorageIT.class);
+		logger = LoggerFactory.getLogger(PtmlIT.class);
 	}
 	
 	static class Worker extends Thread {
-		private final PtmlDeltaUpdateStorage storage;
+		private final PtmlFactory ptmlFactory;
 		private final File file;
 		private final List<DeltaUpdate> updates;
 		private final int readFirstAndWait;
 		private final CountDownLatch signal;
 		private boolean hasError = false;
 		
-		Worker(PtmlDeltaUpdateStorage storage, File file, int readFirstAndWait, CountDownLatch signal) {
-			this.storage = storage;
+		Worker(PtmlFactory ptmlFactory, File file, int readFirstAndWait, CountDownLatch signal) {
+			this.ptmlFactory = ptmlFactory;
 			this.file = file;
 			this.readFirstAndWait = readFirstAndWait;
 			this.signal = signal;
 			updates = new ArrayList<>();
 		}
 		
-		Worker(PtmlDeltaUpdateStorage storage, File file) {
+		Worker(PtmlFactory storage, File file) {
 			this(storage, file, 0, null);
 		}
 		
@@ -69,7 +69,7 @@ public class PtmlDeltaUpdateStorageIT {
 		
 		@Override
 		public void run() {
-			try ( CloseableIterator<DeltaUpdate> it = storage.createReader(file) ) {
+			try ( CloseableIterator<DeltaUpdate> it = ptmlFactory.createReader(file) ) {
 				int numRead = 0;
 				boolean wait = false;
 				while ( it.next() ) {
@@ -107,12 +107,12 @@ public class PtmlDeltaUpdateStorageIT {
 		BasicConfigurator.configure();
 	}
 	
-	private PtmlDeltaUpdateStorage storage;
+	private PtmlFactory ptmlFactory;
 	private File file;
 
 	@Before
 	public void setUp() throws Exception {
-		storage = new PtmlDeltaUpdateStorage(new SampleConverter());
+		ptmlFactory = new PtmlFactory(new SampleConverter());
 		file = File.createTempFile("ptml-storage-it-", ".tmp");
 		file.deleteOnExit();
 	}
@@ -160,7 +160,7 @@ public class PtmlDeltaUpdateStorageIT {
 		
 		List<Worker> primaryWorkers = new ArrayList<>();
 		for ( int i = 1; i < 5000; i += 200 ) {
-			Worker thread = new Worker(storage, file, 1, signal);
+			Worker thread = new Worker(ptmlFactory, file, 1, signal);
 			primaryWorkers.add(thread);
 		}
 		for ( Worker thread : primaryWorkers ) {
@@ -177,7 +177,7 @@ public class PtmlDeltaUpdateStorageIT {
 		signal.countDown();
 		cli.exit();
 
-		Worker thread2 = new Worker(storage,file);
+		Worker thread2 = new Worker(ptmlFactory,file);
 		thread2.start();
 		//for ( String dummy : cli.getOutputLines() ) {
 		//	System.out.println("OUT> " + dummy);

@@ -155,11 +155,11 @@ public class PtmlDeltaUpdateStorageCLI {
 
 	}
 	
-	private final PtmlDeltaUpdateStorage storage;
+	private final PtmlFactory ptmlFactory;
 	private DeltaUpdateWriter updateWriter;
 	
 	public PtmlDeltaUpdateStorageCLI() {
-		storage = new PtmlDeltaUpdateStorage(new SampleConverter());		
+		ptmlFactory = new PtmlFactory(new SampleConverter());		
 	}
 	
 	private int run() {
@@ -187,7 +187,7 @@ public class PtmlDeltaUpdateStorageCLI {
 						printError(line, "Writer was not opened");
 					} else if ( buffer.length() > 0 ) {
 						try {
-							DeltaUpdate update = storage.getPacker().toUpdate(buffer.toString());
+							DeltaUpdate update = ptmlFactory.getPacker().toUpdate(buffer.toString());
 							updateWriter.writeUpdate(update);
 							printSuccess(line);
 						} catch ( Exception e ) {
@@ -209,7 +209,7 @@ public class PtmlDeltaUpdateStorageCLI {
 					File file = new File(line.substring(5));
 					try {
 						IOUtils.closeQuietly(updateWriter);
-						updateWriter = storage.createWriter(file);
+						updateWriter = ptmlFactory.createWriter(file);
 						printSuccess(line);
 					} catch ( IOException e ) {
 						printError(line, "Failed  to open a writer", e);

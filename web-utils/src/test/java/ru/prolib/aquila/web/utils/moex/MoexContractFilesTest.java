@@ -6,12 +6,12 @@ import org.junit.Test;
 
 import ru.prolib.aquila.data.storage.file.Files;
 
-public class MoexContractDetailsFilesTest {
+public class MoexContractFilesTest {
 	private Files files;
 
 	@Before
 	public void setUp() throws Exception {
-		files = new MoexContractDetailsFiles();
+		files = new MoexContractFiles();
 	}
 
 	@Test

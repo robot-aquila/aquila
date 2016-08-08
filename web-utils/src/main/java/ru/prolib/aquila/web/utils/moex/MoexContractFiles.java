@@ -2,7 +2,7 @@ package ru.prolib.aquila.web.utils.moex;
 
 import ru.prolib.aquila.data.storage.file.Files;
 
-public class MoexContractDetailsFiles implements Files {
+public class MoexContractFiles implements Files {
 
 	@Override
 	public String getRegularSuffix() {
