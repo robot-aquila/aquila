@@ -2,6 +2,7 @@ package ru.prolib.aquila.web.utils.moex;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -51,6 +52,10 @@ public class Moex implements Closeable {
 			throws DataExportException
 	{
 		return webForm.getInstrumentDescription(symbol.toString());
+	}
+	
+	public List<String> getActiveFuturesList() throws DataExportException {
+		return webForm.getActiveFuturesList();
 	}
 
 }
