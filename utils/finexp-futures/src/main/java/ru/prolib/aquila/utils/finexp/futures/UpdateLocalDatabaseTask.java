@@ -7,8 +7,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,7 @@ import ru.prolib.aquila.data.storage.DatedSymbol;
 import ru.prolib.aquila.data.storage.file.FileStorage;
 import ru.prolib.aquila.web.utils.DataExportException;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
+import ru.prolib.aquila.web.utils.moex.Moex;
 
 public class UpdateLocalDatabaseTask implements Runnable {
 	private static final Logger logger;
@@ -62,6 +65,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 	public void run() {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
 		Fidexp facade = new Fidexp();
+		Moex moex = new Moex();
 		try {
 			logger.debug("Update started.");
 			if ( cmdLine.hasOption(CmdLine.LOPT_SKIP_INTEGRITY_TEST) ) {
@@ -71,7 +75,8 @@ public class UpdateLocalDatabaseTask implements Runnable {
 				facade.testFormIntegrity();
 				logger.debug("Web-interface integrity test passed");
 			}
-			// 1) Get an actual features list
+			// 1) Get an actual futures list
+			Set<String> realFutures = new HashSet<>(moex.getActiveFuturesList());
 			Map<Integer, String> quoteMap = facade.getTrueFuturesQuotes(true);
 			// 2) Shuffle the list randomly
 			List<Integer> quoteIds = new ArrayList<>(quoteMap.keySet());
@@ -86,7 +91,13 @@ public class UpdateLocalDatabaseTask implements Runnable {
 			for ( int i = 0; i < quoteIds.size(); i ++ ) {
 				lastSymbolHasDownload = false;
 				int quoteID = quoteIds.get(i);
-				Symbol symbol = new Symbol(quoteMap.get(quoteID));
+				String ticker = quoteMap.get(quoteID);
+				if ( ! realFutures.contains(ticker) ) {
+					logger.debug("Skip {} because it isn't a real futures.", ticker);
+					continue;
+				}
+				
+				Symbol symbol = new Symbol(ticker);
 
 				// 1) Scan local database for existing data segments from LocalDate - X to LocalDate - 1
 				//		where X is a lookup max depth in days
@@ -152,6 +163,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 			return;
 		} finally {
 			IOUtils.closeQuietly(facade);
+			IOUtils.closeQuietly(moex);
 		}
 
 		if ( globalExit.getCount() > 0 ) {
