@@ -41,7 +41,12 @@ public class Main {
 				CmdLine.printHelp();
 				return 0;
 			}
-			
+			if ( cmd.hasOption(CmdLine.LOPT_LIST_EXPERIMENTS) ) {
+				for ( String experimentID : experiments.keySet() ) {
+					System.out.println(experimentID);
+				}
+				return 0;
+			}
 			if ( ! cmd.hasOption(CmdLine.SOPT_EXPERIMENT) ) {
 				CmdLine.printError("Experiment name must be specified.");
 				return 1;

@@ -18,6 +18,8 @@ public class CmdLine {
 	public static final String LOPT_EXPERIMENT = "experiment";
 	public static final String SOPT_SYMBOL = "s";
 	public static final String LOPT_SYMBOL = "symbol";
+	public static final String SOPT_LIST_EXPERIMENTS = "l";
+	public static final String LOPT_LIST_EXPERIMENTS = "list-experiments";
 	
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -39,6 +41,10 @@ public class CmdLine {
 				.longOpt(LOPT_SYMBOL)
 				.hasArg()
 				.desc("Symbol.")
+				.build());
+		options.addOption(Option.builder(SOPT_LIST_EXPERIMENTS)
+				.longOpt(LOPT_LIST_EXPERIMENTS)
+				.desc("List available experiments.")
 				.build());
 		return options;
 	}
