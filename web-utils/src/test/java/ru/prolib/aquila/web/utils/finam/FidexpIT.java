@@ -26,16 +26,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxBinary;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.web.utils.WebDriverFactory;
-
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.Timezone;
 
 public class FidexpIT {
 	private static final File sample = new File("fixture/RTS-140701-140731-W1.txt");
@@ -74,18 +67,6 @@ public class FidexpIT {
 	@After
 	public void tearDown() throws Exception {
 		IOUtils.closeQuietly(facade);
-	}
-	
-	protected WebDriver createFirefoxDriver() {
-		FirefoxProfile profile = new FirefoxProfile();
-    	// http://browsers.about.com/od/aboutconfigentries/a/browser_download_folderList.htm
-    	profile.setPreference("browser.download.folderList", 2);
-    	profile.setPreference("browser.download.manager.showWhenStarting", false);
-    	profile.setPreference("browser.download.dir", "D:/tmp");
-    	// yes, this error in the finam response
-    	profile.setPreference("browser.helperApps.neverAsk.saveToDisk", "finam/expotfile"); 
-    	File ffBinary = new File("D:/Program Files (x86)/Mozilla Firefox/firefox.exe");
-    	return new FirefoxDriver(new FirefoxBinary(ffBinary), profile);
 	}
 	
 	private LocalDate nextFuturesDate(LocalDate date) {

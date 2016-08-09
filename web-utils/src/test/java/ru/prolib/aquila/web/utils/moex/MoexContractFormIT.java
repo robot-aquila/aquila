@@ -2,11 +2,13 @@ package ru.prolib.aquila.web.utils.moex;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -16,23 +18,19 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxBinary;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.web.utils.DataExportException;
+import ru.prolib.aquila.web.utils.ErrorClass;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
 
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.Timezone;
-
-public class MoexDataExportIT {
+public class MoexContractFormIT {
+	private static final double EXPECTED_AVAILABILITY = 85;
 	private static final org.slf4j.Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(MoexDataExportIT.class);
+		logger = LoggerFactory.getLogger(MoexContractFormIT.class);
 	}
 	
 	private WebDriver webDriver;
@@ -43,11 +41,13 @@ public class MoexDataExportIT {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		Logger.getLogger("org.apache.http").setLevel(Level.ERROR);
+		Logger.getLogger("ru.prolib.aquila.web.utils").setLevel(Level.DEBUG);
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		webDriver = WebDriverFactory.createJBrowserDriver();
+		//webDriver = WebDriverFactory.createFirefoxDriver();
 		contractForm = new MoexContractForm(webDriver);
 	}
 	
@@ -56,12 +56,6 @@ public class MoexDataExportIT {
 		webDriver.close();
 	}
 	
-	protected WebDriver createFirefoxDriver() {
-		FirefoxProfile profile = new FirefoxProfile();
-    	File ffBinary = new File("D:/Program Files (x86)/Mozilla Firefox/firefox.exe");
-    	return new FirefoxDriver(new FirefoxBinary(ffBinary), profile);
-	}
-
 	@Test
 	public void testGetInstrumentDescription() throws Exception {
 		Map<Integer, Object> actual = contractForm.getInstrumentDescription("RTS-6.16");
@@ -94,15 +88,48 @@ public class MoexDataExportIT {
 	
 	@Test
 	public void testGetInstrumentDescription_AvailableContractsConversion() throws Exception {
-		Map<Integer, String> futures;
-		try ( Fidexp finam = new Fidexp() ) {
-			futures = finam.getTrueFuturesQuotes(true);
-		}
+		List<String> futures = contractForm.getActiveFuturesList();
 		logger.debug("Go through {} futures. It may hold up to several minutes.", futures.size());
-		for ( String contractCode : futures.values() ) {
+		int passed = 0;
+		for ( String contractCode : futures ) {
 			contractForm.getInstrumentDescription(contractCode);
 			Thread.sleep(1000);
+			passed ++;
+			if ( passed % 20 == 0 ) {
+				logger.debug("Passed {} of {}", passed, futures.size());
+			}
 		}
-	}	
+	}
+	
+	@Test
+	public void testGetInstrumentDescription_ThrowsIfContractNotFound() throws Exception {
+		try {
+			contractForm.getInstrumentDescription("ZU1201");
+			fail("Expected exception: " + DataExportException.class.getSimpleName());
+		} catch ( DataExportException e ) {
+			assertEquals(ErrorClass.POSSIBLE_LOGIC, e.getErrorClass());
+			assertEquals("Contract not exists or page has changed its structure: ZU1201", e.getMessage());
+		}
+	}
+	
+	@Test
+	public void testGetActiveFuturesList() throws Exception {
+		Set<String> finam_list = null;
+		try ( Fidexp finam = new Fidexp() ) {
+			finam_list = new HashSet<>(finam.getTrueFuturesQuotes(true).values());
+		}
+		
+		Set<String> moex_list = new HashSet<>(contractForm.getActiveFuturesList());
+		
+		Set<String> dummy_list = new HashSet<>(finam_list);
+		dummy_list.removeAll(moex_list);
+		logger.debug("Those elements ({}/{}) are not available via MOEX API: ", dummy_list.size(), finam_list.size());
+		for ( String dummy : dummy_list ) {
+			logger.debug("Not available via MOEX: {}", dummy);
+		}
+		double availability = moex_list.size() * 100 / finam_list.size();
+		logger.debug("Current availability {}% of minimum {}%", availability, EXPECTED_AVAILABILITY);
+		assertTrue("Availability is less than expected", availability >= EXPECTED_AVAILABILITY);
+	}
 
 }
