@@ -47,8 +47,6 @@ public class DataSourceImpl implements DataSource {
 	public synchronized void close() throws IOException {
 		IOUtils.closeQuietly(l1UpdateSource);
 		IOUtils.closeQuietly(mdUpdateSource);
-		l1UpdateSource = null;
-		mdUpdateSource = null;
 	}
 
 }
