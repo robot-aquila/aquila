@@ -9,7 +9,7 @@ import java.util.Vector;
 /**
  * Market depth builder.
  * <p>
- * This class is not a thread-safe.
+ * This class is not thread-safe.
  */
 public class MDBuilder implements MDUpdateConsumer {
 	private final DoubleUtils doubleUtils;
