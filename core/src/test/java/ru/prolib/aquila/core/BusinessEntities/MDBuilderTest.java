@@ -15,8 +15,8 @@ public class MDBuilderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		builder = new MDBuilder(symbol);
-		builder.setPriceScale(2);
+		builder = new MDBuilder(symbol, 2);
+		//builder.setPriceScale(2);
 	}
 
 	@Test

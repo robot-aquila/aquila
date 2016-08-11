@@ -18,12 +18,16 @@ public class MDBuilder implements MDUpdateConsumer {
 	private MarketDepth md;
 	private int marketDepthLevels = 10;
 	
-	public MDBuilder(Symbol symbol) {
+	public MDBuilder(Symbol symbol, int priceScale) {
 		doubleUtils = new DoubleUtils();
 		askQuotes = new Vector<>();
 		bidQuotes = new Vector<>();
 		this.symbol = symbol;
 		md = new MarketDepth(symbol, askQuotes, bidQuotes, Instant.EPOCH, 0);
+	}
+	
+	public MDBuilder(Symbol symbol) {
+		this(symbol, 2);
 	}
 	
 	public void setPriceScale(int scale) {
