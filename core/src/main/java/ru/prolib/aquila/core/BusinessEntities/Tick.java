@@ -68,6 +68,18 @@ public class Tick implements TStamped {
 		return of(time, price, 0);
 	}
 	
+	public static Tick ofAsk(Instant time, double price, long size) {
+		return of(TickType.ASK, time, price, size);
+	}
+	
+	public static Tick ofBid(Instant time, double price, long size) {
+		return of(TickType.BID, time, price, size);
+	}
+	
+	public static Tick ofTrade(Instant time, double price, long size) {
+		return of(TickType.TRADE, time, price, size);
+	}
+	
 	public TickType getType() {
 		return type;
 	}

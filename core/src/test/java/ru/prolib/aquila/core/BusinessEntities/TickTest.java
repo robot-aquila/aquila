@@ -128,6 +128,36 @@ public class TickTest {
 	}
 	
 	@Test
+	public void testOfAskIDL() throws Exception {
+		tick = Tick.ofAsk(time3, 18.34d, 450L);
+		assertEquals(TickType.ASK, tick.getType());
+		assertEquals(time3, tick.getTime());
+		assertEquals(18.34d, tick.getPrice(), 0.001d);
+		assertEquals(450, tick.getSize());
+		assertEquals(0.0d, tick.getValue(), 0.001d);
+	}
+
+	@Test
+	public void testOfBidIDL() throws Exception {
+		tick = Tick.ofBid(time3, 13.50d, 1450L);
+		assertEquals(TickType.BID, tick.getType());
+		assertEquals(time3, tick.getTime());
+		assertEquals(13.50d, tick.getPrice(), 0.001d);
+		assertEquals(1450, tick.getSize());
+		assertEquals(0.0d, tick.getValue(), 0.001d);
+	}
+	
+	@Test
+	public void testOfTradeIDL() throws Exception {
+		tick = Tick.ofTrade(time3, 2.12d, 40L);
+		assertEquals(TickType.TRADE, tick.getType());
+		assertEquals(time3, tick.getTime());
+		assertEquals(2.12d, tick.getPrice(), 0.001d);
+		assertEquals(40, tick.getSize());
+		assertEquals(0.0d, tick.getValue(), 0.001d);
+	}
+
+	@Test
 	public void testEquals_SpecialCases() throws Exception {
 		assertTrue(tick.equals(tick));
 		assertFalse(tick.equals(null));
