@@ -193,5 +193,127 @@ public class MDUpdateBuilderTest {
 		expected.addRecord(Tick.of(TickType.BID, time, 250.0d, 0), MDTransactionType.DELETE);
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testReplaceOrDelete_DeleteWhenZeroSize() throws Exception {
+		Instant time = Instant.parse("2016-08-12T11:55:00Z");
+		assertSame(builder, builder.withTime(time)
+				.withType(MDUpdateType.UPDATE)
+				.replaceOrDelete(Tick.ofAsk(time, 200.15d, 0)));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.ofAsk(time, 200.15, 0), MDTransactionType.DELETE);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testReplaceOrDelete_ReplaceWhenNonZeroSize() throws Exception {
+		Instant time = Instant.parse("2016-08-12T12:00:00Z");
+		assertSame(builder, builder.withTime(time)
+				.withType(MDUpdateType.UPDATE)
+				.replaceOrDelete(Tick.ofBid(time, 113.48d, 200)));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.ofBid(time, 113.48, 200), MDTransactionType.REPLACE);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testWithTime_String() throws Exception {
+		Instant time = Instant.parse("1978-02-15T14:48:20Z");
+		assertSame(builder, builder.withTime("1978-02-15T14:48:20Z"));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testReplace1() throws Exception {
+		Instant time = Instant.parse("2016-07-30T02:14:00Z");
+		assertSame(builder, builder
+				.replace(Tick.ofAsk(time, 200.0d, 100L))
+				.replace(Tick.ofBid(time, 250.0d, 200L)));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, Instant.EPOCH, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.ofAsk(time, 200.0d, 100L), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofBid(time, 250.0d, 200L), MDTransactionType.REPLACE);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testDelete1() throws Exception {
+		Instant time = Instant.parse("2016-07-30T02:14:00Z");
+		assertSame(builder, builder
+				.delete(Tick.ofAsk(time, 200.0d, 100L))
+				.delete(Tick.ofBid(time, 250.0d, 200L)));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, Instant.EPOCH, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.ofAsk(time, 200.0d, 100L), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofBid(time, 250.0d, 200L), MDTransactionType.DELETE);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testWithTypeRefresh() throws Exception {
+		assertSame(builder, builder.withTime(Instant.EPOCH)
+				.withTypeRefresh());
+		
+		MDUpdate actual = builder.buildMDUpdate();
+
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, Instant.EPOCH, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testWithTypeRefreshAsk() throws Exception {
+		assertSame(builder, builder.withTime(Instant.EPOCH)
+				.withTypeRefreshAsk());
+		
+		MDUpdate actual = builder.buildMDUpdate();
+
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_ASK, Instant.EPOCH, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testWithTypeRefreshBid() throws Exception {
+		assertSame(builder, builder.withTime(Instant.EPOCH)
+				.withTypeRefreshBid());
+		
+		MDUpdate actual = builder.buildMDUpdate();
+
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_BID, Instant.EPOCH, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testWithTypeUpdate() throws Exception {
+		assertSame(builder, builder.withTime(Instant.EPOCH)
+				.withTypeUpdate());
+		
+		MDUpdate actual = builder.buildMDUpdate();
+
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, Instant.EPOCH, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		assertEquals(expected, actual);
+	}
 
 }

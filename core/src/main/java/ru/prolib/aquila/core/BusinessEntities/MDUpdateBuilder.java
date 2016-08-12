@@ -23,6 +23,22 @@ public class MDUpdateBuilder {
 		return this;
 	}
 	
+	public MDUpdateBuilder withTypeRefresh() {
+		return withType(MDUpdateType.REFRESH);
+	}
+	
+	public MDUpdateBuilder withTypeUpdate() {
+		return withType(MDUpdateType.UPDATE);
+	}
+	
+	public MDUpdateBuilder withTypeRefreshAsk() {
+		return withType(MDUpdateType.REFRESH_ASK);
+	}
+	
+	public MDUpdateBuilder withTypeRefreshBid() {
+		return withType(MDUpdateType.REFRESH_BID);
+	}
+	
 	public MDUpdateBuilder withSymbol(Symbol symbol) {
 		this.symbol = symbol;
 		return this;
@@ -46,24 +62,42 @@ public class MDUpdateBuilder {
 		return add(Tick.of(TickType.BID, time, price, size));
 	}
 	
-	public MDUpdateBuilder replaceAsk(double price, long size) {
-		records.add(new MDUpdateRecordImpl(Tick.of(TickType.ASK, time, price, size), MDTransactionType.REPLACE));
+	public MDUpdateBuilder replace(Tick tick) {
+		records.add(new MDUpdateRecordImpl(tick, MDTransactionType.REPLACE));
 		return this;
+	}
+	
+	public MDUpdateBuilder replaceAsk(double price, long size) {
+		return replace(Tick.ofAsk(time, price, size));
 	}
 
 	public MDUpdateBuilder replaceBid(double price, long size) {
-		records.add(new MDUpdateRecordImpl(Tick.of(TickType.BID, time, price, size), MDTransactionType.REPLACE));
+		return replace(Tick.ofBid(time, price, size));
+	}
+	
+	public MDUpdateBuilder delete(Tick tick) {
+		records.add(new MDUpdateRecordImpl(tick, MDTransactionType.DELETE));		
 		return this;
 	}
 
 	public MDUpdateBuilder deleteAsk(double price) {
-		records.add(new MDUpdateRecordImpl(Tick.of(TickType.ASK, time, price, 0), MDTransactionType.DELETE));
-		return this;
+		return delete(Tick.ofAsk(time, price, 0));
 	}
 
 	public MDUpdateBuilder deleteBid(double price) {
-		records.add(new MDUpdateRecordImpl(Tick.of(TickType.BID, time, price, 0), MDTransactionType.DELETE));
-		return this;
+		return delete(Tick.ofBid(time, price, 0));
+	}
+	
+	public MDUpdateBuilder replaceOrDelete(Tick tick) {
+		if ( tick.getSize() == 0 ) {
+			return delete(tick);
+		} else {
+			return replace(tick);
+		}
+	}
+	
+	public MDUpdateBuilder withTime(String timeString) {
+		return withTime(Instant.parse(timeString));
 	}
 
 	public MDUpdate buildMDUpdate() {
