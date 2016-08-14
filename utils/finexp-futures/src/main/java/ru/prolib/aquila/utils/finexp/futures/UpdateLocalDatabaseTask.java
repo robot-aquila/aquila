@@ -25,7 +25,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.DatedSymbol;
 import ru.prolib.aquila.data.storage.file.FileStorage;
-import ru.prolib.aquila.web.utils.DataExportException;
+import ru.prolib.aquila.web.utils.WUException;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
 import ru.prolib.aquila.web.utils.moex.Moex;
 
@@ -155,7 +155,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 			logger.warn("The task was interrupted.");
 			Thread.currentThread().interrupt();
 			return;
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			logger.error("Something wrong with the web-interface. We'll try later. ", e);
 		} catch ( DataStorageException e ) {
 			logger.error("The data storage exceptions should be investigated. Initiate global exit.", e);

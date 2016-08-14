@@ -11,8 +11,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import ru.prolib.aquila.web.utils.DataExportException;
-import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.SearchWebElement;
 
 public class FidexpForm {
@@ -26,7 +25,7 @@ public class FidexpForm {
 		this.driver = driver;
 	}
 	
-	public FidexpForm initialRequest() throws DataExportException {
+	public FidexpForm initialRequest() throws WUWebPageException {
 		try {
 			if ( initialRequestIsMade == false ) {
 				driver.get("http://www.finam.ru/profile/moex-akcii/gazprom/export/");
@@ -34,15 +33,15 @@ public class FidexpForm {
 			}
 			return this;
 		} catch ( WebDriverException e ) {
-			throw errWebDriver("Initial request failed", e);
+			throw new WUWebPageException("Initial request failed", e);
 		}
 	}
 	
-	public WebElement getSubmitButton() throws DataExportException {
+	public WebElement getSubmitButton() throws WUWebPageException {
 		try {
 			return driver.findElement(By.xpath(getSubmitButtonXPath()));
 		} catch ( WebDriverException e ) {
-			throw errForm("Error finding submit button", e);
+			throw new WUWebPageException("Error finding submit button", e);
 		}
 	}
 	
@@ -57,9 +56,9 @@ public class FidexpForm {
 	 * clicks on the first available option.
 	 * <p>
 	 * @return the market options
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public List<NameValuePair> getMarketOptions() throws DataExportException {
+	public List<NameValuePair> getMarketOptions() throws WUWebPageException {
 		openMarketSelector();
 		return getMarketSelectorSearch()
 			.transformAllAndClick(By.tagName("a"), new FidexpLinkToNameValueTransformer(), 0);
@@ -74,9 +73,9 @@ public class FidexpForm {
 	 * market.
 	 * <p>
 	 * @return the quote options
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public List<NameValuePair> getQuoteOptions() throws DataExportException {
+	public List<NameValuePair> getQuoteOptions() throws WUWebPageException {
 		openQuoteSelector();
 		return getQuoteSelectorSearch()
 			.transformAllAndClick(By.tagName("a"), new FidexpLinkToNameValueTransformer(), 0);
@@ -87,9 +86,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param quoteName - the name of quote
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectQuote(String quoteName) throws DataExportException {
+	public FidexpForm selectQuote(String quoteName) throws WUWebPageException {
 		openQuoteSelector();
 		getQuoteSelectorSearch()
 			.findWithText(By.tagName("a"), quoteName)
@@ -102,9 +101,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param quoteId - the quote id
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectQuote(int quoteId) throws DataExportException {
+	public FidexpForm selectQuote(int quoteId) throws WUWebPageException {
 		openQuoteSelector();
 		getQuoteSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(quoteId))
@@ -117,9 +116,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param marketName - the name of market
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectMarket(String marketName) throws DataExportException {
+	public FidexpForm selectMarket(String marketName) throws WUWebPageException {
 		openMarketSelector();
 		getMarketSelectorSearch()
 			.findWithText(By.tagName("a"), marketName)
@@ -132,9 +131,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param marketId - the market id
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectMarket(int marketId) throws DataExportException {
+	public FidexpForm selectMarket(int marketId) throws WUWebPageException {
 		openMarketSelector();
 		getMarketSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(marketId))
@@ -147,9 +146,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param date - the date from
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectDateFrom(LocalDate date) throws DataExportException {
+	public FidexpForm selectDateFrom(LocalDate date) throws WUWebPageException {
 		initialRequest();
 		setDate("issuer-profile-export-from", date);
 		return this;
@@ -160,9 +159,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param date - the date to
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectDateTo(LocalDate date) throws DataExportException {
+	public FidexpForm selectDateTo(LocalDate date) throws WUWebPageException {
 		initialRequest();
 		setDate("issuer-profile-export-to", date);
 		return this;
@@ -173,9 +172,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param date - the date
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectDate(LocalDate date) throws DataExportException {
+	public FidexpForm selectDate(LocalDate date) throws WUWebPageException {
 		return selectDateFrom(date)
 				.selectDateTo(date);
 	}
@@ -185,9 +184,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param period - the period
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectPeriod(FidexpPeriod period) throws DataExportException {
+	public FidexpForm selectPeriod(FidexpPeriod period) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-first-row"))
@@ -205,9 +204,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param fileName - the filename
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectFilename(String fileName) throws DataExportException {
+	public FidexpForm selectFilename(String fileName) throws WUWebPageException {
 		return fillTextbox(By.id("issuer-profile-export-file-name"), fileName);
 	}
 
@@ -216,9 +215,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param format - format
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectFileExt(FidexpFileExt format) throws DataExportException {
+	public FidexpForm selectFileExt(FidexpFileExt format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-second-row"))
@@ -240,9 +239,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param name - contact name
 	 * @return this
-	 * @throws DataExportException 
+	 * @throws WUWebPageException 
 	 */
-	public FidexpForm selectContractName(String name) throws DataExportException {
+	public FidexpForm selectContractName(String name) throws WUWebPageException {
 		return fillTextbox(By.id("issuer-profile-export-contract"), name);
 	}
 
@@ -251,9 +250,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param format - format
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectDateFormat(FidexpDateFormat format) throws DataExportException {
+	public FidexpForm selectDateFormat(FidexpDateFormat format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-date-row"))
@@ -271,9 +270,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param format - format
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectTimeFormat(FidexpTimeFormat format) throws DataExportException {
+	public FidexpForm selectTimeFormat(FidexpTimeFormat format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-date-row"))
@@ -291,9 +290,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param use - if true then select start of candle time, otherwise - end of candle
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm useCandleStartTime(boolean use) throws DataExportException {
+	public FidexpForm useCandleStartTime(boolean use) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("MSOR0"))
@@ -309,9 +308,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param use - if true then use that option, otherwise - not use
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm useMoscowTime(boolean use) throws DataExportException {
+	public FidexpForm useMoscowTime(boolean use) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-mstime"))
@@ -324,9 +323,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param format - format
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectFieldSeparator(FidexpFieldSeparator format) throws DataExportException {
+	public FidexpForm selectFieldSeparator(FidexpFieldSeparator format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-separator-row"))
@@ -344,9 +343,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param format - format
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectDigitSeparator(FidexpDigitSeparator format) throws DataExportException {
+	public FidexpForm selectDigitSeparator(FidexpDigitSeparator format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-separator-row"))
@@ -367,9 +366,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param format - data format
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm selectDataFormat(FidexpDataFormat format) throws DataExportException {
+	public FidexpForm selectDataFormat(FidexpDataFormat format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-fileformat-row"))
@@ -387,9 +386,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param use - if true then use that option, otherwise - not use
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm useAddHeader(boolean use) throws DataExportException {
+	public FidexpForm useAddHeader(boolean use) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("at"))
@@ -402,9 +401,9 @@ public class FidexpForm {
 	 * <p>
 	 * @param use - if true then use that option, otherwise - not use
 	 * @return this
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public FidexpForm useFillEmptyPeriods(boolean use) throws DataExportException {
+	public FidexpForm useFillEmptyPeriods(boolean use) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("fsp"))
@@ -416,83 +415,67 @@ public class FidexpForm {
 	 * Get the form action URI.
 	 * <p>
 	 * @return the form action URI
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public URI getFormActionURI() throws DataExportException {
+	public URI getFormActionURI() throws WUWebPageException {
 		initialRequest();
 		String action = new SearchWebElement(driver)
 			.find(By.id("chartform"))
 			.get()
 			.getAttribute("action");
 		if ( action == null ) {
-			throw errForm("Form action not found");
+			throw new WUWebPageException("Form action not found");
 		}
 		try {
 			return new URI(action);
 		} catch ( URISyntaxException e ) {
-			throw errForm("Malformed form action", e);
+			throw new WUWebPageException("Malformed form action", e);
 		}
 	}
 	
-	protected SearchWebElement getMarketSelectorSearch() throws DataExportException {
+	protected SearchWebElement getMarketSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 0);
 	}
 		
-	protected SearchWebElement getQuoteSelectorSearch() throws DataExportException {
+	protected SearchWebElement getQuoteSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 1);
 	}
 	
-	protected SearchWebElement getPeriodSelectorSearch() throws DataExportException {
+	protected SearchWebElement getPeriodSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 2);
 	}
 	
-	protected SearchWebElement getFileExtSelectorSearch() throws DataExportException {
+	protected SearchWebElement getFileExtSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 3);
 	}
 	
-	protected SearchWebElement getDateFormatSelectorSearch() throws DataExportException {
+	protected SearchWebElement getDateFormatSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 4);
 	}
 	
-	protected SearchWebElement getTimeFormatSelectorSearch() throws DataExportException {
+	protected SearchWebElement getTimeFormatSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 5);
 	}
 
-	protected SearchWebElement getFieldSeparatorSelectorSearch() throws DataExportException {
+	protected SearchWebElement getFieldSeparatorSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 6);
 	}
 	
-	protected SearchWebElement getDigitSeparatorSelectorSearch() throws DataExportException {
+	protected SearchWebElement getDigitSeparatorSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 7);
 	}
 
-	protected SearchWebElement getFileFormatSelectorSearch() throws DataExportException {
+	protected SearchWebElement getFileFormatSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 8);
-	}
-	
-	protected DataExportException errWebDriver(String msg, Throwable t) {
-		return new DataExportException(ErrorClass.WEB_DRIVER, msg, t);
-	}
-	
-	protected DataExportException errWebDriver(Throwable t) {
-		return errWebDriver("WebDriver exception", t);
-	}
-	
-	protected DataExportException errForm(String msg, Throwable t) {
-		return new DataExportException(ErrorClass.WEB_FORM, msg, t);
-	}
-	
-	protected DataExportException errForm(String msg) {
-		return new DataExportException(ErrorClass.WEB_FORM, msg);
 	}
 	
 	/**
@@ -504,9 +487,9 @@ public class FidexpForm {
 	 * выбора группы инструментов.
 	 * <p>
 	 * @return this
-	 * @throws DataExportException
+	 * @throws WUWebPageException - an error occurred
 	 */
-	protected FidexpForm openMarketSelector() throws DataExportException {
+	protected FidexpForm openMarketSelector() throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-header"))
@@ -526,9 +509,9 @@ public class FidexpForm {
 	 * раскрытие списка для выбора инструмента.
 	 * <p>
 	 * @return this
-	 * @throws DataExportException
+	 * @throws WUWebPageException - an error occurred
 	 */
-	protected FidexpForm openQuoteSelector() throws DataExportException {
+	protected FidexpForm openQuoteSelector() throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-header"))
@@ -538,7 +521,7 @@ public class FidexpForm {
 		return this;
 	}
 	
-	protected FidexpForm fillTextbox(By by, String newText) throws DataExportException {
+	protected FidexpForm fillTextbox(By by, String newText) throws WUWebPageException {
 		initialRequest();
 		WebElement element = new SearchWebElement(driver)
 			.find(by)
@@ -548,12 +531,12 @@ public class FidexpForm {
 			element.sendKeys(StringUtils.repeat('\b', oldText.length()));
 			element.sendKeys(newText);
 		} else {
-			throw errForm("Element attribute [value] not found: " + by);
+			throw new WUWebPageException("Element attribute [value] not found: " + by);
 		}
 		return this;
 	}
 
-	protected void setDate(String inputId, LocalDate date) throws DataExportException {
+	protected void setDate(String inputId, LocalDate date) throws WUWebPageException {
 		WebDriverWait wait = new WebDriverWait(driver, 20);
 		wait.until(ExpectedConditions.elementToBeClickable(By.id(inputId))).click();
 		
@@ -565,24 +548,24 @@ public class FidexpForm {
 				.find(By.className("ui-datepicker-year"))
 				.findWithAttributeValue(By.tagName("option"), "value", formUtils.toString(year))
 				.click();
-		} catch ( DataExportException e ) {
-			throw errForm("Cannot set year of " + inputId, e);
+		} catch ( WUWebPageException e ) {
+			throw new WUWebPageException("Cannot set year of " + inputId, e);
 		}
 		try {
 			new SearchWebElement(driver)
 				.find(By.className("ui-datepicker-month"))
 				.findWithAttributeValue(By.tagName("option"), "value", formUtils.toString(month))
 				.click();
-		} catch ( DataExportException e ) {
-			throw errForm("Cannot set month of " + inputId, e);
+		} catch ( WUWebPageException e ) {
+			throw new WUWebPageException("Cannot set month of " + inputId, e);
 		}
 		try {
 			new SearchWebElement(driver)
 				.find(By.xpath("//table[@class='ui-datepicker-calendar']/tbody"))
 				.findWithText(By.tagName("a"), formUtils.toString(dayOfMonth))
 				.click();
-		} catch ( DataExportException e ) {
-			throw errForm("Cannot set day of month of " + inputId, e);
+		} catch ( WUWebPageException e ) {
+			throw new WUWebPageException("Cannot set day of month of " + inputId, e);
 		}
 	}
 

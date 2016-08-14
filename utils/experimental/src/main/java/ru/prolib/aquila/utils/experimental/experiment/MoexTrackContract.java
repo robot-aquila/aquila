@@ -23,7 +23,7 @@ import ru.prolib.aquila.data.storage.DeltaUpdate;
 import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
-import ru.prolib.aquila.web.utils.DataExportException;
+import ru.prolib.aquila.web.utils.WUException;
 import ru.prolib.aquila.web.utils.moex.Moex;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 
@@ -102,7 +102,7 @@ public class MoexTrackContract implements Experiment, Runnable {
 				}			
 			}
 			
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			logErrorAndGlobalExit("Data export error: ", e);
 			return;
 		} catch ( IOException e ) {

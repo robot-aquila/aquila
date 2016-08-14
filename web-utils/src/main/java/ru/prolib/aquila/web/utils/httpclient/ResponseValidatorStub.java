@@ -2,7 +2,7 @@ package ru.prolib.aquila.web.utils.httpclient;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 
-import ru.prolib.aquila.web.utils.InvalidResponseException;
+import ru.prolib.aquila.web.utils.WUInvalidResponseException;
 
 public class ResponseValidatorStub implements ResponseValidator {
 	private static final ResponseValidatorStub instance;
@@ -21,7 +21,7 @@ public class ResponseValidatorStub implements ResponseValidator {
 
 	@Override
 	public void validateResponse(CloseableHttpResponse response)
-			throws InvalidResponseException
+			throws WUInvalidResponseException
 	{
 
 	}

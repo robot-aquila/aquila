@@ -2,6 +2,11 @@ package ru.prolib.aquila.web.utils;
 
 import ru.prolib.aquila.data.DataException;
 
+/**
+ * This exception class is deprecated. Use one of {@link WUException}
+ * descendants to replace.
+ */
+@Deprecated
 public class DataExportException extends DataException {
 	private static final long serialVersionUID = 1L;
 	private final ErrorClass errorClass;

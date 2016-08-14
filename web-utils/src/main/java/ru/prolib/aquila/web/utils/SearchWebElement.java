@@ -42,17 +42,33 @@ public class SearchWebElement {
 	 * <p>
 	 * @param by - search criteria
 	 * @return this
-	 * @throws DataExportException - Web driver exception thrown
+	 * @throws WUWebPageException - element not found or web driver exception thrown
 	 */
-	public SearchWebElement find(By by) throws DataExportException {
+	public SearchWebElement find(By by) throws WUWebPageException {
 		try {
 			currentElement = currentElement == null ?
 					driver.findElement(by) : currentElement.findElement(by);
 			return this;
 		} catch ( NoSuchElementException e ) {
-			throw errForm("Element not found: " + by, e);
+			throw new WUWebPageException("Element not found: " + by, e);
 		} catch ( WebDriverException e ) {
-			throw errDriver("WebDriver exception", e);
+			throw new WUWebPageException("WebDriver exception: ", e);
+		}
+	}
+	
+	/**
+	 * Find all elements.
+	 * <p>
+	 * @param by - search criteria
+	 * @return list of elements
+	 * @throws WUWebPageException - Web driver exception thrown
+	 */
+	public List<WebElement> findAll(By by) throws WUWebPageException {
+		try {
+			return currentElement == null ?
+					driver.findElements(by) : currentElement.findElements(by);
+		} catch ( WebDriverException e ) {
+			throw new WUWebPageException("WebDriver exception: ", e);
 		}
 	}
 	
@@ -65,12 +81,12 @@ public class SearchWebElement {
 	 * @param by - search criteria
 	 * @param index - element index
 	 * @return this
-	 * @throws DataExportException - element not found or web driver exception thrown
+	 * @throws WUWebPageException - element not found or web driver exception thrown
 	 */
-	public SearchWebElement find(By by, int index) throws DataExportException {
+	public SearchWebElement find(By by, int index) throws WUWebPageException {
 		List<WebElement> list = findAll(by);
 		if ( index >= list.size() ) {
-			throw errForm("Element [" + index + "] not found: " + by);
+			throw new WUWebPageException("Element [" + index + "] not found: " + by);
 		}
 		currentElement = list.get(index);
 		return this;
@@ -85,10 +101,10 @@ public class SearchWebElement {
 	 * @param attributeName - attribute name
 	 * @param expectedAttributeValue - expected attribute value
 	 * @return this
-	 * @throws DataExportException - element not found or web driver exception thrown
+	 * @throws WUWebPageException - element not found or web driver exception thrown
 	 */
 	public SearchWebElement findWithAttributeValue(By by, String attributeName,
-			String expectedAttributeValue) throws DataExportException
+			String expectedAttributeValue) throws WUWebPageException
 	{
 		for ( WebElement e : findAll(by) ) {
 			String actualValue = e.getAttribute("value");
@@ -97,7 +113,8 @@ public class SearchWebElement {
 				return this;
 			}
 		}
-		throw errForm("Element with [" + attributeName + "=" + expectedAttributeValue + "] not found: " + by);
+		throw new WUWebPageException("Element with [" + attributeName + "=" +
+				expectedAttributeValue + "] not found: " + by);
 	}
 	
 	/**
@@ -109,10 +126,10 @@ public class SearchWebElement {
 	 * @param by - search criteria
 	 * @param expectedText - expected text
 	 * @return this
-	 * @throws DataExportException - element not found or web driver exception thrown
+	 * @throws WUWebPageException - element not found or web driver exception thrown
 	 */
 	public SearchWebElement findWithText(By by, String expectedText)
-			throws DataExportException
+			throws WUWebPageException
 	{
 		for ( WebElement e : findAll(by) ) {
 			String actualText = e.getText();
@@ -121,7 +138,7 @@ public class SearchWebElement {
 				return this;
 			}
 		}
-		throw errForm("Element with text [" + expectedText + "] not found: " + by);
+		throw new WUWebPageException("Element with text [" + expectedText + "] not found: " + by);
 	}
 	
 	/**
@@ -137,14 +154,14 @@ public class SearchWebElement {
 	 * Click on currently selected element.
 	 * <p>
 	 * @return this
-	 * @throws DataExportException - Web driver exception thrown
+	 * @throws WUWebPageException - Web driver exception thrown
 	 */
-	public SearchWebElement click() throws DataExportException {
+	public SearchWebElement click() throws WUWebPageException {
 		try {
 			currentElement.click();
 			return this;
 		} catch ( WebDriverException e ) {
-			throw errDriver(e);
+			throw new WUWebPageException("WebDriver exception: ", e);
 		}
 	}
 	
@@ -153,32 +170,16 @@ public class SearchWebElement {
 	 * <p>
 	 * @param checked - checked or unchecked
 	 * @return this
-	 * @throws DataExportException
+	 * @throws WUWebPageException - Web driver exception thrown
 	 */
-	public SearchWebElement setChecked(boolean checked) throws DataExportException {
+	public SearchWebElement setChecked(boolean checked) throws WUWebPageException {
 		try {
 			if ( checked != currentElement.isSelected() ) {
 				return click();
 			}
 			return this;
 		} catch ( WebDriverException e ) {
-			throw errDriver(e);
-		}
-	}
-	
-	/**
-	 * Find all elements.
-	 * <p>
-	 * @param by - search criteria
-	 * @return list of elements
-	 * @throws DataExportException - Web driver exception thrown
-	 */
-	public List<WebElement> findAll(By by) throws DataExportException {
-		try {
-			return currentElement == null ?
-					driver.findElements(by) : currentElement.findElements(by);
-		} catch ( WebDriverException e ) {
-			throw errDriver(e);
+			throw new WUWebPageException("WebDriver exception: ", e);
 		}
 	}
 	
@@ -188,10 +189,10 @@ public class SearchWebElement {
 	 * @param by - search criteria
 	 * @param transformer - element transformer
 	 * @return list of transformed objects
-	 * @throws DataExportException - Web driver exception thrown
+	 * @throws WUWebPageException - Web driver exception thrown
 	 */
 	public <T> List<T> transformAll(By by, WebElementTransformer<T> transformer)
-			throws DataExportException
+			throws WUWebPageException
 	{
 		List<T> list = new ArrayList<>();
 		for ( WebElement element : findAll(by) ) {
@@ -207,37 +208,21 @@ public class SearchWebElement {
 	 * @param transformer - element transformer
 	 * @param index - element index to click
 	 * @return list of transformed objects
-	 * @throws DataExportException - element not found or web driver exception thrown
+	 * @throws WUWebPageException - element not found or web driver exception thrown
 	 */
 	public <T> List<T> transformAllAndClick(By by, WebElementTransformer<T> transformer, int index)
-			throws DataExportException
+			throws WUWebPageException
 	{
 		List<T> list = new ArrayList<>();
 		List<WebElement> elements = findAll(by);
 		if ( index >= elements.size() ) {
-			throw errForm("Element [" + index + "] not found: " + by);
+			throw new WUWebPageException("Element [" + index + "] not found: " + by);
 		}
 		for ( WebElement element : elements ) {
 			list.add(transformer.transform(element));
 		}
 		elements.get(index).click();
 		return list;
-	}
-	
-	private DataExportException errForm(String msg, Throwable t) {
-		return new DataExportException(ErrorClass.WEB_FORM, msg, t);
-	}
-	
-	private DataExportException errForm(String msg) {
-		return errForm(msg, null);
-	}
-	
-	private DataExportException errDriver(String msg, Throwable t) {
-		return new DataExportException(ErrorClass.WEB_DRIVER, msg, t);
-	}
-	
-	private DataExportException errDriver(Throwable t) {
-		return errDriver("WebDriver exception", t);
 	}
 
 }

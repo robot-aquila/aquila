@@ -20,8 +20,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.web.utils.DataExportException;
-import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
 
@@ -105,9 +104,8 @@ public class MoexContractFormIT {
 	public void testGetInstrumentDescription_ThrowsIfContractNotFound() throws Exception {
 		try {
 			contractForm.getInstrumentDescription("ZU1201");
-			fail("Expected exception: " + DataExportException.class.getSimpleName());
-		} catch ( DataExportException e ) {
-			assertEquals(ErrorClass.POSSIBLE_LOGIC, e.getErrorClass());
+			fail("Expected exception: " + WUWebPageException.class.getSimpleName());
+		} catch ( WUWebPageException e ) {
 			assertEquals("Contract not exists or page has changed its structure: ZU1201", e.getMessage());
 		}
 	}

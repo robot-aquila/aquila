@@ -20,13 +20,13 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.io.IOUtils;
 
-import ru.prolib.aquila.web.utils.DataExportException;
-import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.HttpClientFactory;
+import ru.prolib.aquila.web.utils.WUException;
+import ru.prolib.aquila.web.utils.WUIOException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.httpclient.HttpClientFileDownloader;
 
@@ -34,6 +34,7 @@ import ru.prolib.aquila.web.utils.httpclient.HttpClientFileDownloader;
  * The facade of FINAM data export system.
  */
 public class Fidexp implements Closeable {
+	private static final String UNEXPECTED_EXCEPTION = "Unexpected exception: ";
 	private final Lock lock = new ReentrantLock();
 	private final CloseableHttpClient httpClient;
 	private final WebDriver webDriver;
@@ -48,7 +49,7 @@ public class Fidexp implements Closeable {
 	}
 	
 	public Fidexp() {
-		this(HttpClients.createDefault(), WebDriverFactory.createJBrowserDriver());
+		this(HttpClientFactory.createDefaultClient(), WebDriverFactory.createJBrowserDriver());
 		closeResources = true;
 	}
 	
@@ -74,9 +75,9 @@ public class Fidexp implements Closeable {
 	 * Note: this test may use up to several minutes to pass.
 	 * The call of this method will lock the facade until the test finished.
 	 * <p>
-	 * @throws DataExportException - an error occurred
+	 * @throws WUException - an error occurred
 	 */
-	public void testFormIntegrity() throws DataExportException {
+	public void testFormIntegrity() throws WUException {
 		lock.lock();
 		try {
 			webForm.selectMarket(14)
@@ -97,10 +98,10 @@ public class Fidexp implements Closeable {
 				.useAddHeader(false)
 				.useFillEmptyPeriods(true)
 				.getFormActionURI();
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw unhandled(e);
+			throw new WUException(UNEXPECTED_EXCEPTION, e);
 		} finally {
 			lock.unlock();
 		}
@@ -113,16 +114,16 @@ public class Fidexp implements Closeable {
 	 * lock the facade until done.
 	 * <p>
 	 * @return form action URI currently specified in the web form
-	 * @throws DataExportException - an error occurred
+	 * @throws WUException - an error occurred
 	 */
-	public URI getFormActionURI() throws DataExportException {
+	public URI getFormActionURI() throws WUException {
 		lock.lock();
 		try {
 			return webForm.getFormActionURI();
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw unhandled(e);
+			throw new WUException(UNEXPECTED_EXCEPTION, e);
 		} finally {
 			lock.unlock();
 		}
@@ -135,17 +136,17 @@ public class Fidexp implements Closeable {
 	 * lock the facade until done.
 	 * <p>
 	 * @return map where key is a market id and value is an option text.
-	 * @throws DataExportException - an error occurred
+	 * @throws WUException - an error occurred
 	 */
-	public Map<Integer, String> getAvailableMarkets() throws DataExportException {
+	public Map<Integer, String> getAvailableMarkets() throws WUException {
 		List<NameValuePair> pairs;
 		lock.lock();
 		try {
 			pairs = webForm.getMarketOptions();
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw unhandled(e);
+			throw new WUException(UNEXPECTED_EXCEPTION, e);
 		} finally {
 			lock.unlock();
 		}
@@ -160,17 +161,17 @@ public class Fidexp implements Closeable {
 	 * <p>
 	 * @param marketId - the market id
 	 * @return map where key is a quote id and value is an option text
-	 * @throws DataExportException - an error occurred
+	 * @throws WUException - an error occurred
 	 */
-	public Map<Integer, String> getAvailableQuotes(int marketId) throws DataExportException {
+	public Map<Integer, String> getAvailableQuotes(int marketId) throws WUException {
 		List<NameValuePair> pairs;
 		lock.lock();
 		try {
 			pairs = webForm.selectMarket(marketId).getQuoteOptions();
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw unhandled(e);
+			throw new WUException(UNEXPECTED_EXCEPTION, e);
 		} finally {
 			lock.unlock();
 		}
@@ -193,19 +194,19 @@ public class Fidexp implements Closeable {
 	 * @param stripCodes - if true then will strip all codes. For example
 	 * RTS-12.16(RIZ6) will be converted to RTS-12.16.
 	 * @return map where key is a quote id and value is an option text
-	 * @throws DataExportException - an error occurred
+	 * @throws WUException - an error occurred
 	 */
 	public Map<Integer, String> getTrueFuturesQuotes(boolean stripCodes)
-			throws DataExportException
+			throws WUException
 	{
 		List<NameValuePair> pairs, result = new ArrayList<>();
 		lock.lock();
 		try {
 			pairs = webForm.selectMarket(14).getQuoteOptions();
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw unhandled(e);
+			throw new WUException(UNEXPECTED_EXCEPTION, e);
 		} finally {
 			lock.unlock();
 		}
@@ -250,16 +251,16 @@ public class Fidexp implements Closeable {
 	 * <p>
 	 * @param uri - fully-formed URI to download from. The URI uses "as is". No additional checks performed.
 	 * @param output - the output stream to store the downloaded data
-	 * @throws DataExportException - common exception for all error situations
+	 * @throws WUException - an error occurred
 	 */
-	public void download(URI uri, OutputStream output) throws DataExportException {
+	public void download(URI uri, OutputStream output) throws WUException {
 		try {
 			new HttpClientFileDownloader(httpClient, new FidexpResponseValidator())
 				.download(uri, output);
-		} catch ( DataExportException e ) {
+		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw unhandled(e);
+			throw new WUException(UNEXPECTED_EXCEPTION, e);
 		}
 	}
 	
@@ -270,10 +271,10 @@ public class Fidexp implements Closeable {
 	 * to combine with the query string which was built from the export parameters.
 	 * @param params - the data export parameters
 	 * @param output - the output stream to store the downloaded data
-	 * @throws DataExportException - common exception for all error situations
+	 * @throws WUException - an error occurred
 	 */
 	public void download(URI baseUri, FidexpFormParams params, OutputStream output)
-			throws DataExportException
+			throws WUException
 	{
 		download(combine(baseUri, params), output);
 	}
@@ -286,10 +287,10 @@ public class Fidexp implements Closeable {
 	 * @param params - the data export parameters
 	 * @param target - the target file. If the filename ends with .gz suffix
 	 * then output will be gzipped.
-	 * @throws DataExportException - common exception for all error situations
+	 * @throws WUException - an error occurred
 	 */
 	public void download(URI baseUri, FidexpFormParams params, File target)
-			throws DataExportException
+			throws WUException
 	{
 		OutputStream output;
 		try {
@@ -298,7 +299,7 @@ public class Fidexp implements Closeable {
 				output = new GZIPOutputStream(output);
 			}
 		} catch ( IOException e ) {
-			throw new DataExportException(ErrorClass.IO, "Error creating output stream", e);
+			throw new WUIOException("Error creating output stream", e);
 		}
 		try {
 			download(baseUri, params, output);
@@ -317,11 +318,9 @@ public class Fidexp implements Closeable {
 	 * @param params - the data export parameters
 	 * @param target - the target file. If the filename ends with .gz suffix
 	 * then output will be gzipped.
-	 * @throws DataExportException - common exception for all error situations
+	 * @throws WUException - an error occurred
 	 */
-	public void download(FidexpFormParams params, File target)
-			throws DataExportException
-	{
+	public void download(FidexpFormParams params, File target) throws WUException {
 		download(getFormActionURI(), params, target);
 	}
 	
@@ -333,10 +332,10 @@ public class Fidexp implements Closeable {
 	 * @param date - the date
 	 * @param target - the target file. If the filename ends with .gz suffix
 	 * then output will be gzipped.
-	 * @throws DataExportException - common exception for all error situations
+	 * @throws WUException - an error occurred
 	 */
 	public void downloadTickData(int marketId, int quoteId, LocalDate date,
-			File target) throws DataExportException
+			File target) throws WUException
 	{
 		download(new FidexpFormParams()
 			.setMarketId(marketId)
@@ -357,30 +356,22 @@ public class Fidexp implements Closeable {
 			.setFillEmptyPeriods(false), target);
 	}
 	
-	private URI combine(URI baseUri, FidexpFormParams params)
-		throws DataExportException
-	{
+	private URI combine(URI baseUri, FidexpFormParams params) throws WUException {
 		try {
 			return new FidexpFormQueryBuilder().buildQuery(baseUri, params);
 		} catch ( URISyntaxException e ) {
-			throw new DataExportException(ErrorClass.REQUEST_INITIALIZATION,
-					"Error building a query", e);
+			throw new WUException("Error building a query", e);
 		}
 	}
 	
-	private DataExportException unhandled(Throwable t) {
-		return new DataExportException(ErrorClass.WEB_DRIVER, "Unhandled exception", t);
-	}
-	
-	private Map<Integer, String> toMap(List<NameValuePair> pairs) throws DataExportException {	
+	private Map<Integer, String> toMap(List<NameValuePair> pairs) throws WUException {	
 		Map<Integer, String> result = new LinkedHashMap<>();
 		for ( NameValuePair dummy : pairs ) {
 			String text = dummy.getName(), id = dummy.getValue();
 			try {
 				result.put(Integer.valueOf(id), text);
 			} catch ( NumberFormatException e ) {
-				throw new DataExportException(ErrorClass.WEB_FORM,
-						"Invalid option [" + text + "] id: " + id);
+				throw new WUException("Invalid option [" + text + "] id: " + id);
 			}
 		}
 		return result;

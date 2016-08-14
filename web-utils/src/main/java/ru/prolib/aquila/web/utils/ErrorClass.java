@@ -1,5 +1,6 @@
 package ru.prolib.aquila.web.utils;
 
+@Deprecated
 public enum ErrorClass {
 	PROTOCOL,
 	IO,

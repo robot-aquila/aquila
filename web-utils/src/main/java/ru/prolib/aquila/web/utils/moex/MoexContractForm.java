@@ -12,9 +12,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
-import ru.prolib.aquila.web.utils.DataExportException;
-import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.SearchWebElement;
+import ru.prolib.aquila.web.utils.WUException;
 
 /**
  * Accessing MOEX contract details.
@@ -36,9 +36,9 @@ public class MoexContractForm {
 	 * <p>
 	 * @param contractCode - the contract code
 	 * @return set of fields
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public Map<Integer, Object> getInstrumentDescription(String contractCode) throws DataExportException {
+	public Map<Integer, Object> getInstrumentDescription(String contractCode) throws WUWebPageException {
 		openContractPage(contractCode);
 		List<WebElement> rows = new SearchWebElement(webDriver)
 			.find(By.className("tool_options_table_forts"))
@@ -49,7 +49,7 @@ public class MoexContractForm {
 			List<WebElement> cols = new SearchWebElement(row)
 				.findAll(By.tagName("td"));
 			if ( cols.size() != 2 ) {
-				throw errForm("Wrong number of elements of row #" + i + ":" + cols.size());
+				throw new WUWebPageException("Wrong number of elements of row #" + i + ":" + cols.size());
 			}
 			
 			String contractFieldString = stripHtml(cols.get(0).getText());
@@ -57,9 +57,9 @@ public class MoexContractForm {
 				int contractField = formUtils.toContractField(contractFieldString);
 				Object value = toContractValue(contractField, stripHtml(cols.get(1).getText()));
 				tokens.put(contractField, value);
-			} catch ( DataExportException e ) {
-				throw errForm("Error obtaining contract info: " + contractCode
-						+ " (field: " + contractFieldString + ")", e);
+			} catch ( WUException e ) {
+				throw new WUWebPageException("Error obtaining contract info: " +
+						contractCode + " (field: " + contractFieldString + ")", e);
 			}
 		}
 		return tokens;
@@ -69,9 +69,9 @@ public class MoexContractForm {
 	 * Get list of active futures.
 	 * <p>
 	 * @return list of symbols
-	 * @throws DataExportException - an error occurred
+	 * @throws WUWebPageException - an error occurred
 	 */
-	public List<String> getActiveFuturesList() throws DataExportException {
+	public List<String> getActiveFuturesList() throws WUWebPageException {
 		openDerivativesSearchPage();
 		List<String> list = new ArrayList<>();
 		int currentPage = 1;
@@ -88,7 +88,7 @@ public class MoexContractForm {
 		return list;
 	}
 	
-	private Object toContractValue(int contractField, String stringValue) throws DataExportException {
+	private Object toContractValue(int contractField, String stringValue) throws WUWebPageException {
 		switch ( contractField ) {
 		case MoexContractField.TYPE:
 			return formUtils.toContractType(stringValue);
@@ -126,23 +126,7 @@ public class MoexContractForm {
 		}
 	}
 	
-	protected DataExportException errWebDriver(String msg, Throwable t) {
-		return new DataExportException(ErrorClass.WEB_DRIVER, msg, t);
-	}
-	
-	protected DataExportException errWebDriver(Throwable t) {
-		return errWebDriver("WebDriver exception", t);
-	}
-	
-	protected DataExportException errForm(String msg, Throwable t) {
-		return new DataExportException(ErrorClass.WEB_FORM, msg, t);
-	}
-	
-	protected DataExportException errForm(String msg) {
-		return new DataExportException(ErrorClass.WEB_FORM, msg);
-	}
-	
-	private MoexContractForm openContractPage(String contractCode) throws DataExportException {
+	private MoexContractForm openContractPage(String contractCode) throws WUWebPageException {
 		String uri = "http://moex.com/en/contract.aspx?code=" + contractCode;
 		if ( uri.equals(webDriver.getCurrentUrl()) ) {
 			// We're on the same page
@@ -151,7 +135,7 @@ public class MoexContractForm {
 		try {
 			webDriver.get(uri);
 		} catch ( WebDriverException e ) {
-			throw errWebDriver("Contract page request failed", e);
+			throw new WUWebPageException("Contract page request failed", e);
 		}
 
 		// Additional test for the contract existence.
@@ -161,15 +145,13 @@ public class MoexContractForm {
 				.getText()
 				.trim()) )
 		{
-			throw new DataExportException(ErrorClass.POSSIBLE_LOGIC,
-				"Contract not exists or page has changed its structure: " +
-				contractCode);
+			throw new WUWebPageException("Contract not exists or page has changed its structure: " + contractCode);
 		}
 		closeUserAgreement();
 		return this;		
 	}
 	
-	private MoexContractForm openDerivativesSearchPage() throws DataExportException {
+	private MoexContractForm openDerivativesSearchPage() throws WUWebPageException {
 		String uri = "http://moex.com/en/derivatives/contracts.aspx?p=act";
 		if ( uri.equals(webDriver.getCurrentUrl()) ) {
 			// We're on the same page
@@ -178,7 +160,7 @@ public class MoexContractForm {
 		try {
 			webDriver.get(uri);
 		} catch ( WebDriverException e ) {
-			throw errWebDriver("Search page request failed.", e);
+			throw new WUWebPageException("Search page request failed.", e);
 		}
 		// Additional check that the page is open
 		new SearchWebElement(webDriver)
@@ -191,7 +173,7 @@ public class MoexContractForm {
 		return StringEscapeUtils.unescapeHtml4(html);
 	}
 	
-	private List<String> scanFuturesTableForSymbols() throws DataExportException {
+	private List<String> scanFuturesTableForSymbols() throws WUWebPageException {
 		List<String> list = new ArrayList<>();
 		WebElement table = new SearchWebElement(webDriver)
 			.find(By.xpath("//div[@id='root']/table/tbody/tr[1]/td[2]/table/tbody/tr[2]/td/table/tbody/tr/td[2]/table/tbody/tr[2]/td[2]/table[7]/tbody"))
@@ -209,7 +191,7 @@ public class MoexContractForm {
 						.getText()
 						.trim());
 					
-				} catch ( DataExportException e ) {
+				} catch ( WUWebPageException e ) {
 					System.out.println("Error element: " + row.getText());
 					throw e;
 				}
@@ -218,7 +200,7 @@ public class MoexContractForm {
 		return list;
 	}
 	
-	private WebElement findPaginatorTable(boolean futures) throws DataExportException {
+	private WebElement findPaginatorTable(boolean futures) throws WUWebPageException {
 		String marker = futures ? "Futures" : "Options";
 		for ( WebElement table : new SearchWebElement(webDriver)
 			.findAll(By.tagName("table")) )
@@ -236,10 +218,10 @@ public class MoexContractForm {
 				return pTable;
 			}
 		}
-		throw new DataExportException(ErrorClass.POSSIBLE_LOGIC, "Paginator table was not found");
+		throw new WUWebPageException("Paginator table was not found");
 	}
 	
-	private Map<Integer, WebElement> getPageLinks(boolean futures) throws DataExportException {
+	private Map<Integer, WebElement> getPageLinks(boolean futures) throws WUWebPageException {
 		List<WebElement> children = new SearchWebElement(findPaginatorTable(futures))
 			.find(By.tagName("tr"), 1)
 			.find(By.tagName("td"))
@@ -252,7 +234,7 @@ public class MoexContractForm {
 				int pageNumber = Integer.valueOf(child.getText().trim());
 				pageLinks.put(pageNumber, child);
 			} catch ( NumberFormatException e ) {
-				throw errForm("Bad pagination link detected: ", e);
+				throw new WUWebPageException("Bad pagination link detected: ", e);
 			}
 		}
 		return pageLinks;
@@ -266,7 +248,7 @@ public class MoexContractForm {
 			if ( search.find(By.className("ui-dialog-buttonset")).get().isDisplayed() ) {
 				search.findWithText(By.tagName("button"), "I Agree").click();
 			}
-		} catch ( DataExportException e ) { }
+		} catch ( WUWebPageException e ) { }
 	}
 
 }

@@ -15,9 +15,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.web.utils.DataExportException;
-import ru.prolib.aquila.web.utils.ErrorClass;
 import ru.prolib.aquila.web.utils.FileDownloader;
+import ru.prolib.aquila.web.utils.WUIOException;
+import ru.prolib.aquila.web.utils.WUProtocolException;
 
 public class HttpClientFileDownloader implements FileDownloader {
 	private static final Logger logger;
@@ -55,15 +55,15 @@ public class HttpClientFileDownloader implements FileDownloader {
 	 * @see ru.prolib.aquila.finam.tools.web.FileDownloader#download(java.net.URI, java.io.OutputStream)
 	 */
 	@Override
-	public void download(URI uri, OutputStream output) throws DataExportException {
+	public void download(URI uri, OutputStream output) throws WUIOException {
 		logger.debug("Downloading: {}", uri);
 		CloseableHttpResponse response;
 		try {
 			response = httpClient.execute(new HttpGet(uri));
 		} catch ( ClientProtocolException e ) {
-			throw new DataExportException(ErrorClass.PROTOCOL, "Error executing HTTP-request", e);
+			throw new WUProtocolException("Error executing HTTP-request", e);
 		} catch ( IOException e ) {
-			throw new DataExportException(ErrorClass.IO, "Error execution HTTP-request", e);
+			throw new WUIOException("Error execution HTTP-request", e);
 		}
 		try {
 			responseValidator.validateResponse(response);
@@ -72,12 +72,12 @@ public class HttpClientFileDownloader implements FileDownloader {
 			try {
 				IOUtils.copy(input, output);
 			} catch ( IOException e ) {
-				throw new DataExportException(ErrorClass.IO, "Error downloading", e);
+				throw new WUIOException("Error downloading", e);
 			} finally {
 				IOUtils.closeQuietly(input);
 			}
 		} catch ( IOException e ) {
-			throw new DataExportException(ErrorClass.IO, "Error obtaining the response content", e);
+			throw new WUIOException("Error obtaining the response content", e);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}

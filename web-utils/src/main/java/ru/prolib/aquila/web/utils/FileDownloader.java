@@ -8,7 +8,6 @@ import java.net.URI;
  */
 public interface FileDownloader {
 
-	public void download(URI uri, OutputStream output)
-			throws DataExportException;
+	public void download(URI uri, OutputStream output) throws WUIOException;
 
 }

@@ -9,8 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import ru.prolib.aquila.web.utils.DataExportException;
-import ru.prolib.aquila.web.utils.ErrorClass;
+import ru.prolib.aquila.web.utils.WUWebPageException;
 
 public class MoexContractFormUtils {
 	private static final Map<String, MoexContractType> stringToContractType;
@@ -101,9 +100,9 @@ public class MoexContractFormUtils {
 	 * <p>
 	 * @param id - the string ID
 	 * @return settlement type
-	 * @throws DataExportException - unidentified settlement type ID
+	 * @throws WUWebPageException - unidentified settlement type ID
 	 */
-	public MoexSettlementType toSettlementType(String id) throws DataExportException {
+	public MoexSettlementType toSettlementType(String id) throws WUWebPageException {
 		MoexSettlementType value = stringToSettlementType.get(id);
 		if ( value != null ) {
 			return value;
@@ -116,9 +115,9 @@ public class MoexContractFormUtils {
 	 * <p>
 	 * @param id - the string ID (may be null)
 	 * @return quotation type
-	 * @throws DataExportException - unidentified quotation type ID
+	 * @throws WUWebPageException - unidentified quotation type ID
 	 */
-	public MoexQuotationType toQuotationType(String id) throws DataExportException {
+	public MoexQuotationType toQuotationType(String id) throws WUWebPageException {
 		MoexQuotationType value = stringToQuotationType.get(id);
 		if ( value != null ) {
 			return value;
@@ -131,9 +130,9 @@ public class MoexContractFormUtils {
 	 * <p>
 	 * @param id - the string ID
 	 * @return contract type
-	 * @throws DataExportException - unidentified contract type
+	 * @throws WUWebPageException - unidentified contract type
 	 */
-	public MoexContractType toContractType(String id) throws DataExportException {
+	public MoexContractType toContractType(String id) throws WUWebPageException {
 		MoexContractType value = stringToContractType.get(id);
 		if ( value != null ) {
 			return value;
@@ -146,9 +145,9 @@ public class MoexContractFormUtils {
 	 * <p>
 	 * @param id - string to convert
 	 * @return contract field ID (see {@link MoexContractField}).
-	 * @throws DataExportException - unidentified string ID
+	 * @throws WUWebPageException - unidentified string ID
 	 */
-	public int toContractField(String id) throws DataExportException {
+	public int toContractField(String id) throws WUWebPageException {
 		Integer value = stringToContractField.get(id);
 		if ( value != null ) {
 			return value;
@@ -156,7 +155,7 @@ public class MoexContractFormUtils {
 		throw errForm("Unidentified contract field: [" + id + "]");
 	}
 	
-	public int toInteger(String stringValue) throws DataExportException {
+	public int toInteger(String stringValue) throws WUWebPageException {
 		try {
 			return Integer.valueOf(StringUtils.replace(stringValue, ",", ""));
 		} catch ( NumberFormatException e ) {
@@ -164,7 +163,7 @@ public class MoexContractFormUtils {
 		}
 	}
 	
-	public LocalDate toLocalDate(String stringValue) throws DataExportException {
+	public LocalDate toLocalDate(String stringValue) throws WUWebPageException {
 		try {
 			return LocalDate.parse(stringValue, dateFormat);
 		} catch ( DateTimeParseException e ) {
@@ -172,7 +171,7 @@ public class MoexContractFormUtils {
 		}
 	}
 	
-	public double toDouble(String stringValue) throws DataExportException {
+	public double toDouble(String stringValue) throws WUWebPageException {
 		try {
 			return Double.valueOf(StringUtils.replace(stringValue, ",", ""));
 		} catch ( NumberFormatException e ) {
@@ -180,7 +179,7 @@ public class MoexContractFormUtils {
 		}
 	}
 	
-	public LocalTime toClearingTime(String stringValue) throws DataExportException {
+	public LocalTime toClearingTime(String stringValue) throws WUWebPageException {
 		try {
 			return LocalTime.parse(stringValue.substring(0, 5), clearingTimeFormat);
 		} catch ( DateTimeParseException e ) {
@@ -188,12 +187,12 @@ public class MoexContractFormUtils {
 		}
 	}
 	
-	protected DataExportException errForm(String msg, Throwable t) {
-		return new DataExportException(ErrorClass.WEB_FORM, msg, t);
+	private WUWebPageException errForm(String msg, Throwable t) {
+		return new WUWebPageException(msg, t);
 	}
 	
-	protected DataExportException errForm(String msg) {
-		return new DataExportException(ErrorClass.WEB_FORM, msg);
+	private WUWebPageException errForm(String msg) {
+		return new WUWebPageException(msg);
 	}
 
 }

@@ -4,6 +4,6 @@ import org.openqa.selenium.WebElement;
 
 public interface WebElementTransformer<T> {
 	
-	public T transform(WebElement element) throws DataExportException;
+	public T transform(WebElement element) throws WUWebPageException;
 
 }
