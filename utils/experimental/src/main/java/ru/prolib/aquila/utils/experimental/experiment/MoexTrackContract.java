@@ -4,9 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import ru.prolib.aquila.data.storage.DeltaUpdate;
 import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
-import ru.prolib.aquila.web.utils.WUException;
+import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.moex.Moex;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 
@@ -31,6 +32,7 @@ import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
  * Track the contract info updates at the MOEX site.
  */
 public class MoexTrackContract implements Experiment, Runnable {
+	private static final ZoneId ZONE = ZoneId.of("Europe/Moscow");
 	private static final Logger logger;
 	
 	static {
@@ -102,18 +104,17 @@ public class MoexTrackContract implements Experiment, Runnable {
 				}			
 			}
 			
-		} catch ( WUException e ) {
-			logErrorAndGlobalExit("Data export error: ", e);
+		} catch ( WUWebPageException e ) {
+			logger.warn("Something is wrong with the web-interface. We'll try later.  ", e);
 			return;
 		} catch ( IOException e ) {
 			logErrorAndGlobalExit("IO error: ", e);
 			return;
 		}
 		
-		long pause = ThreadLocalRandom.current().nextLong(3, 9);
-		Instant nextUpdateTime = scheduler.getCurrentTime().plusSeconds(pause * 60);
-		logger.debug("The next update scheduled: {} minutes ahead at {}",
-				pause, LocalDateTime.ofInstant(nextUpdateTime, ZoneId.systemDefault()));
+		Instant nextUpdateTime = getNextUpdateTime();
+		logger.debug("The next update scheduled: {}",
+				LocalDateTime.ofInstant(nextUpdateTime, ZoneId.systemDefault()));
 		scheduler.schedule(this, nextUpdateTime);
 	}
 	
@@ -121,6 +122,38 @@ public class MoexTrackContract implements Experiment, Runnable {
 		logger.error(msg, t);
 		exitCode = 1;
 		globalExit.countDown();
+	}
+	
+	private Instant getNextUpdateTime() {
+		ZonedDateTime current = scheduler.getCurrentTime().atZone(ZONE), next = null;
+		LocalTime time = current.toLocalTime();
+		if ( time.compareTo(LocalTime.of(19, 30)) >= 0 ) {
+			next = current.plusDays(1).withHour(10).withMinute(0);
+			logger.debug("> 19:30 - wait for session open at {}", next);
+			return next.toInstant();
+		} else if ( time.compareTo(LocalTime.of(19, 0)) >= 0 ) {
+			next = current.plusMinutes(1);
+			logger.debug("19:00-19:30 - check for updates every minute, next at {}", next);
+		} else if ( time.compareTo(LocalTime.of(14, 30)) >= 0 ) {
+			next = current.withHour(19).withMinute(0);
+			logger.debug("14:30-19:00 - wait for evening session end at {}", next);
+		} else if ( time.compareTo(LocalTime.of(14, 0)) >= 0 ) {
+			next = current.plusMinutes(1);
+			logger.debug("14:00-14:30 - check for updates every minute, next at {}", next);
+		} else if ( time.compareTo(LocalTime.of(10, 30)) >= 0 ) {
+			next = current.withHour(14).withMinute(0);
+			logger.debug("10:30-14:00 - wait for intraday clearing at {}", next);
+		} else if ( time.compareTo(LocalTime.of(10, 0)) >= 0 ) {
+			next = current.plusMinutes(1);
+			logger.debug("10:00-10:30 - check for updates every minute, next at {}", next);
+		} else if ( time.compareTo(LocalTime.of(10, 0)) < 0 ) {
+			next = current.withHour(10).withMinute(0);
+			logger.debug("< 10:00 - wait for session open at {}", next);
+		} else {
+			next = current.plusHours(1);
+			logger.error("Unknown case at: {}", current);
+		}
+		return next.toInstant();
 	}
 
 }

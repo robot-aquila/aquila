@@ -13,7 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.web.utils.WUException;
+import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 
 public class Moex implements Closeable {
@@ -49,12 +49,12 @@ public class Moex implements Closeable {
 	}
 
 	public Map<Integer, Object> getContractDetails(Symbol symbol)
-			throws WUException
+			throws WUWebPageException
 	{
 		return webForm.getInstrumentDescription(symbol.toString());
 	}
 	
-	public List<String> getActiveFuturesList() throws WUException {
+	public List<String> getActiveFuturesList() throws WUWebPageException {
 		return webForm.getActiveFuturesList();
 	}
 

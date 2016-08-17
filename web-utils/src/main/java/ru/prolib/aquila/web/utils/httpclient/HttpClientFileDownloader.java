@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.web.utils.FileDownloader;
 import ru.prolib.aquila.web.utils.WUIOException;
+import ru.prolib.aquila.web.utils.WUInvalidResponseException;
 import ru.prolib.aquila.web.utils.WUProtocolException;
 
 public class HttpClientFileDownloader implements FileDownloader {
@@ -55,7 +56,9 @@ public class HttpClientFileDownloader implements FileDownloader {
 	 * @see ru.prolib.aquila.finam.tools.web.FileDownloader#download(java.net.URI, java.io.OutputStream)
 	 */
 	@Override
-	public void download(URI uri, OutputStream output) throws WUIOException {
+	public void download(URI uri, OutputStream output)
+			throws WUInvalidResponseException, WUProtocolException, WUIOException
+	{
 		logger.debug("Downloading: {}", uri);
 		CloseableHttpResponse response;
 		try {
