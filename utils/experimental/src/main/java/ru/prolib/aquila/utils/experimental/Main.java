@@ -6,6 +6,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.openqa.selenium.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class Main {
 	
 	private int run(String[] args) {
 		final Scheduler scheduler = new SchedulerLocal();
+		Experiment experiment = null;
 		try {
 			final CommandLine cmd = CmdLine.parse(args);
 			if ( cmd.hasOption(CmdLine.LOPT_HELP) ) {
@@ -63,7 +65,8 @@ public class Main {
 					globalExit.countDown();
 				}
 			});
-			int r = experiments.get(experimentID).run(scheduler, cmd);
+			experiment = experiments.get(experimentID);
+			int r = experiment.run(scheduler, cmd);
 			if ( r == 0 ) {
 				try {
 					globalExit.await();
@@ -77,6 +80,8 @@ public class Main {
 		} catch ( ParseException e ) {
 			logger.error("Command line error: ", e);
 			return 1;
+		} finally {
+			IOUtils.closeQuietly(experiment);
 		}
 	}
 

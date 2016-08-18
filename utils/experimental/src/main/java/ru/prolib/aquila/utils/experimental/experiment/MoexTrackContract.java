@@ -3,52 +3,62 @@ package ru.prolib.aquila.utils.experimental.experiment;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainer;
-import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainerImpl;
-import ru.prolib.aquila.data.DataFormatException;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
-import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
+import ru.prolib.aquila.utils.experimental.experiment.moex.MoexContractUpdateHandler;
+import ru.prolib.aquila.utils.experimental.experiment.moex.MoexContractTrackingSchedule;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.moex.Moex;
+import ru.prolib.aquila.web.utils.moex.MoexContractField;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 
 /**
  * Track the contract info updates at the MOEX site.
  */
 public class MoexTrackContract implements Experiment, Runnable {
-	private static final ZoneId ZONE = ZoneId.of("Europe/Moscow");
+	private static final Set<Integer> EXPECTED_FIELDS_AFTER_MARKET_OPENS;
+	private static final Set<Integer> EXPECTED_FIELDS_AFTER_CLEARING;
 	private static final Logger logger;
 	
 	static {
 		logger = LoggerFactory.getLogger(MoexTrackContract.class);
+		EXPECTED_FIELDS_AFTER_MARKET_OPENS = new HashSet<>();
+		EXPECTED_FIELDS_AFTER_CLEARING = new HashSet<>();
+		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.TICK_VALUE);
+		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.LOWER_PRICE_LIMIT);
+		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.UPPER_PRICE_LIMIT);
+		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.SETTLEMENT_PRICE);
+		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.INITIAL_MARGIN);
 	}
 	
 	private final CountDownLatch globalExit;
+	private final Moex moex;
+	private final MoexContractTrackingSchedule updateSchedule;
 	private Scheduler scheduler;
-	private File root;
 	private MoexContractFileStorage storage;
 	private Symbol symbol;
-	private UpdatableStateContainer container;
 	private int exitCode = 0;
+	/**
+	 * If the handler is defined then we're in the update tracking mode.
+	 */
+	private MoexContractUpdateHandler updateHandler;
 	
 	public MoexTrackContract(CountDownLatch globalExit) {
 		this.globalExit = globalExit;
+		this.moex = new Moex();
+		this.updateSchedule = new MoexContractTrackingSchedule();
 	}
 	
 	@Override
@@ -66,56 +76,83 @@ public class MoexTrackContract implements Experiment, Runnable {
 			return 1;
 		}
 		this.scheduler = scheduler;
-		root = new File(cmd.getOptionValue(CmdLine.LOPT_ROOT));
-		storage = new MoexContractFileStorage(root);
+		storage = new MoexContractFileStorage(new File(cmd.getOptionValue(CmdLine.LOPT_ROOT)));
 		symbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL));
-		container = new UpdatableStateContainerImpl("CONTRACT-" + symbol);
 		run();
 		return 0;
 	}
 	
 	@Override
 	public void run() {
-		boolean isSnapshot = true;
-		try ( CloseableIterator<DeltaUpdate> reader = storage.createReader(symbol) ) {
-			while ( reader.next() ) {
-				container.update(reader.item().getContents());
-				isSnapshot = false;
-			}
-		} catch ( IOException e ) {
-			logErrorAndGlobalExit("IO error: ", e);
-			return;
-		}
+		// Лучше рассматривать задачу, отталкиваясь от того, в каком периоде
+		// времени мы находимся. Возможны два варианта:
+		// 1) Мы в периоде отслеживания обновлений. В этом случае необходимо
+		// открыть хендлер, либо работать с ранее открытым хендлером до тех пор,
+		// пока очередное обновление не будет записано. Если обновление
+		// записано, то закрывает хендлер и решедулим на начало следующего
+		// периода отслеживания. Если обновление не записано, то выполняем
+		// решедулинг на некоторое время вперед.
+		// 2) Мы за пределами периода отслеживания обновлений. Если есть
+		// открытый хендлер, то его безусловно нужно закрыть. Дальше нужно
+		// выполнить решедулинг на начало следующего периода отслеживания
+		// обновлений.
 		
-		try ( Moex moex = new Moex() ) {
-			container.update(moex.getContractDetails(symbol));
-			if ( container.hasChanged() ) {
-				DeltaUpdate update = new DeltaUpdate(scheduler.getCurrentTime(),
-						isSnapshot, container.getUpdatedContent());
-				try ( DeltaUpdateWriter writer = storage.createWriter(symbol) ) {
-					writer.writeUpdate(update);
-					logger.debug("Update written: {}", update);
-				} catch ( DataStorageException e ) {
-					logErrorAndGlobalExit("Data storage error: ", e);
-					return;
-				} catch ( DataFormatException e ) {
-					logErrorAndGlobalExit("Data format error: ", e);
-					return;
-				}			
+		Instant currentTime = scheduler.getCurrentTime();
+		if ( updateSchedule.isTrackingPeriod(currentTime) ) {
+			logger.debug("Inside a tracking period.");
+			if ( updateHandler == null ) {
+				Instant updatePlannedTime = null;
+				Set<Integer> expectedChangedTokens = null;
+				if ( updateSchedule.isMarketOpeningTrackingPeriod(currentTime) ) {
+					updatePlannedTime = updateSchedule.withMarketOpeningTime(currentTime);
+					expectedChangedTokens = EXPECTED_FIELDS_AFTER_MARKET_OPENS;
+				} else if ( updateSchedule.isIntradayClearingTrackingPeriod(currentTime) ) {
+					updatePlannedTime = updateSchedule.withIntradayClearingTime(currentTime);
+					expectedChangedTokens = EXPECTED_FIELDS_AFTER_CLEARING;
+				} else {
+					updatePlannedTime = updateSchedule.withEveningClearingTime(currentTime);
+					expectedChangedTokens = EXPECTED_FIELDS_AFTER_CLEARING;
+				}
+				updateHandler = new MoexContractUpdateHandler(moex, storage,
+						symbol, updatePlannedTime, expectedChangedTokens);
+				logger.debug("Handler created. Update time: {} Expected tokens: {}",
+						updateSchedule.toZDT(updatePlannedTime), expectedChangedTokens);
+			}
+			try {
+				boolean done = updateHandler.execute(); // it may take some time
+				currentTime = scheduler.getCurrentTime();
+				if ( done ) {
+					IOUtils.closeQuietly(updateHandler);
+					reschedule(updateSchedule.getNextTrackingPeriodStart(currentTime));
+					logger.debug("Rescheduled. Handler closed. Next tracking period at: {}",
+							updateSchedule.toZDT(updateSchedule.getNextTrackingPeriodStart(currentTime)));
+				} else {
+					reschedule(updateSchedule.getNextUpdateTime(currentTime));
+					logger.debug("Rescheduled. Update not available. Next update time: {}",
+							updateSchedule.toZDT(updateSchedule.getNextUpdateTime(currentTime)));
+				}
+			} catch ( WUWebPageException e ) {
+				logger.warn("The MOEX site error. We'll try later.", e);				
+			} catch ( DataStorageException e ) {
+				logErrorAndGlobalExit("The task stopped because of local storage error: ", e);
 			}
 			
-		} catch ( WUWebPageException e ) {
-			logger.warn("Something is wrong with the web-interface. We'll try later.  ", e);
-			return;
-		} catch ( IOException e ) {
-			logErrorAndGlobalExit("IO error: ", e);
-			return;
+		} else {
+			logger.debug("Outside a tracking period.");
+			if ( updateHandler != null ) {
+				IOUtils.closeQuietly(updateHandler);
+				updateHandler = null;
+			}
+			reschedule(updateSchedule.getNextTrackingPeriodStart(currentTime));
+			logger.debug("Rescheduled. Next tracking period at: {}",
+					updateSchedule.toZDT(updateSchedule.getNextTrackingPeriodStart(currentTime)));
 		}
-		
-		Instant nextUpdateTime = getNextUpdateTime();
-		logger.debug("The next update scheduled: {}",
-				LocalDateTime.ofInstant(nextUpdateTime, ZoneId.systemDefault()));
-		scheduler.schedule(this, nextUpdateTime);
+	}
+
+	@Override
+	public void close() throws IOException {
+		IOUtils.closeQuietly(updateHandler);
+		IOUtils.closeQuietly(moex);
 	}
 	
 	private void logErrorAndGlobalExit(String msg, Throwable t) {
@@ -124,36 +161,8 @@ public class MoexTrackContract implements Experiment, Runnable {
 		globalExit.countDown();
 	}
 	
-	private Instant getNextUpdateTime() {
-		ZonedDateTime current = scheduler.getCurrentTime().atZone(ZONE), next = null;
-		LocalTime time = current.toLocalTime();
-		if ( time.compareTo(LocalTime.of(19, 30)) >= 0 ) {
-			next = current.plusDays(1).withHour(10).withMinute(0);
-			logger.debug("> 19:30 - wait for session open at {}", next);
-			return next.toInstant();
-		} else if ( time.compareTo(LocalTime.of(19, 0)) >= 0 ) {
-			next = current.plusMinutes(1);
-			logger.debug("19:00-19:30 - check for updates every minute, next at {}", next);
-		} else if ( time.compareTo(LocalTime.of(14, 30)) >= 0 ) {
-			next = current.withHour(19).withMinute(0);
-			logger.debug("14:30-19:00 - wait for evening session end at {}", next);
-		} else if ( time.compareTo(LocalTime.of(14, 0)) >= 0 ) {
-			next = current.plusMinutes(1);
-			logger.debug("14:00-14:30 - check for updates every minute, next at {}", next);
-		} else if ( time.compareTo(LocalTime.of(10, 30)) >= 0 ) {
-			next = current.withHour(14).withMinute(0);
-			logger.debug("10:30-14:00 - wait for intraday clearing at {}", next);
-		} else if ( time.compareTo(LocalTime.of(10, 0)) >= 0 ) {
-			next = current.plusMinutes(1);
-			logger.debug("10:00-10:30 - check for updates every minute, next at {}", next);
-		} else if ( time.compareTo(LocalTime.of(10, 0)) < 0 ) {
-			next = current.withHour(10).withMinute(0);
-			logger.debug("< 10:00 - wait for session open at {}", next);
-		} else {
-			next = current.plusHours(1);
-			logger.error("Unknown case at: {}", current);
-		}
-		return next.toInstant();
+	private void reschedule(Instant at) {
+		scheduler.schedule(this, at);
 	}
 
 }
