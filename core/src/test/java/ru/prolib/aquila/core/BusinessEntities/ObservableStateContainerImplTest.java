@@ -696,5 +696,16 @@ public class ObservableStateContainerImplTest {
 		assertEquals(expected, actual);
 		assertNotSame(data, actual);
 	}
+	
+	@Test
+	public void testHasData() throws Exception {
+		assertFalse(container.hasData());
+
+		data.put(BOOL_ACTIVE, true);
+		container.update(data);
+		container.resetChanges();
+		
+		assertTrue(container.hasData());
+	}
 
 }

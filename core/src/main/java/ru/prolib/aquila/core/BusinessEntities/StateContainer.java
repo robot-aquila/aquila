@@ -148,5 +148,14 @@ public interface StateContainer extends AbstractContainer {
 	 * @return updated content
 	 */
 	public Map<Integer, Object> getUpdatedContent();
+	
+	/**
+	 * Test for data existence.
+	 * <p>
+	 * Test that container has at least one token.
+	 * <p>
+	 * @return true if tokens exists, false otherwise
+	 */
+	public boolean hasData();
 
 }

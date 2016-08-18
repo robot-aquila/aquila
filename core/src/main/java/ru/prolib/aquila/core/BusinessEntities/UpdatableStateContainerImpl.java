@@ -245,4 +245,14 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 		return lid;
 	}
 
+	@Override
+	public boolean hasData() {
+		lock.lock();
+		try {
+			return ! values.isEmpty();
+		} finally {
+			lock.unlock();
+		}
+	}
+
 }
