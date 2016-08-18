@@ -36,5 +36,10 @@ public class DeltaUpdateBuilder {
 	public DeltaUpdate buildUpdate() {
 		return new DeltaUpdate(time, isSnapshot, contents);
 	}
+	
+	public DeltaUpdateBuilder withTokens(Map<Integer, Object> tokens) {
+		contents.putAll(tokens);
+		return this;
+	}
 
 }
