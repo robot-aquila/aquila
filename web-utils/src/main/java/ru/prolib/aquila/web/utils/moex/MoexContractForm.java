@@ -129,8 +129,7 @@ public class MoexContractForm {
 	private MoexContractForm openContractPage(String contractCode) throws WUWebPageException {
 		String uri = "http://moex.com/en/contract.aspx?code=" + contractCode;
 		if ( uri.equals(webDriver.getCurrentUrl()) ) {
-			// We're on the same page
-			return this;
+			// We're on the same page. BUT! It may be a refresh request!
 		}
 		try {
 			webDriver.get(uri);
@@ -154,8 +153,7 @@ public class MoexContractForm {
 	private MoexContractForm openDerivativesSearchPage() throws WUWebPageException {
 		String uri = "http://moex.com/en/derivatives/contracts.aspx?p=act";
 		if ( uri.equals(webDriver.getCurrentUrl()) ) {
-			// We're on the same page
-			return this;
+			// We're on the same page. BUT! It may be a refresh request!
 		}
 		try {
 			webDriver.get(uri);
