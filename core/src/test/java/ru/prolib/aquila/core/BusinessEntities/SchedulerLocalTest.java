@@ -5,9 +5,11 @@ import static org.junit.Assert.*;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.Timer;
+
 import org.easymock.IMocksControl;
 import org.junit.After;
 import org.junit.Before;
@@ -51,7 +53,9 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testGetCurrentTime() throws Exception {
-		assertEquals(Instant.now(), scheduler.getCurrentTime());
+		Instant expected = Instant.now();
+		Instant actual = scheduler.getCurrentTime();
+		assertTrue(ChronoUnit.MILLIS.between(expected, actual) <= 50);
 	}
 	
 	@Test
