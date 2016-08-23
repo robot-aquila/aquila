@@ -13,12 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
-import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
-import ru.prolib.aquila.utils.experimental.experiment.moex.MoexContractUpdateHandler;
+import ru.prolib.aquila.utils.experimental.experiment.moex.MoexAllFuturesUpdateHandler;
 import ru.prolib.aquila.utils.experimental.experiment.moex.MoexContractTrackingSchedule;
+import ru.prolib.aquila.utils.experimental.experiment.moex.UpdateHandler;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.moex.Moex;
 import ru.prolib.aquila.web.utils.moex.MoexContractField;
@@ -36,7 +36,7 @@ public class MoexTrackContract implements Experiment, Runnable {
 		logger = LoggerFactory.getLogger(MoexTrackContract.class);
 		EXPECTED_FIELDS_AFTER_MARKET_OPENS = new HashSet<>();
 		EXPECTED_FIELDS_AFTER_CLEARING = new HashSet<>();
-		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.TICK_VALUE);
+		// Do not add a tick value because it is constant for many contracts
 		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.LOWER_PRICE_LIMIT);
 		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.UPPER_PRICE_LIMIT);
 		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.SETTLEMENT_PRICE);
@@ -48,12 +48,11 @@ public class MoexTrackContract implements Experiment, Runnable {
 	private final MoexContractTrackingSchedule updateSchedule;
 	private Scheduler scheduler;
 	private MoexContractFileStorage storage;
-	private Symbol symbol;
 	private int exitCode = 0;
 	/**
 	 * If the handler is defined then we're in the update tracking mode.
 	 */
-	private MoexContractUpdateHandler updateHandler;
+	private UpdateHandler updateHandler;
 	
 	public MoexTrackContract(CountDownLatch globalExit) {
 		this.globalExit = globalExit;
@@ -71,13 +70,8 @@ public class MoexTrackContract implements Experiment, Runnable {
 		if ( ! CmdLine.testRootDirectory(cmd) ) {
 			return 1;
 		}
-		if ( ! cmd.hasOption(CmdLine.LOPT_SYMBOL) ) {
-			CmdLine.printError("Symbol must be specified.");
-			return 1;
-		}
 		this.scheduler = scheduler;
 		storage = new MoexContractFileStorage(new File(cmd.getOptionValue(CmdLine.LOPT_ROOT)));
-		symbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL));
 		run();
 		return 0;
 	}
@@ -113,8 +107,7 @@ public class MoexTrackContract implements Experiment, Runnable {
 					updatePlannedTime = updateSchedule.withEveningClearingTime(currentTime);
 					expectedChangedTokens = EXPECTED_FIELDS_AFTER_CLEARING;
 				}
-				updateHandler = new MoexContractUpdateHandler(moex, storage,
-						symbol, updatePlannedTime, expectedChangedTokens);
+				updateHandler = createHandler(updatePlannedTime, expectedChangedTokens);
 				logger.debug("Handler created. Update time: {} Expected tokens: {}",
 						updateSchedule.toZDT(updatePlannedTime), expectedChangedTokens);
 			}
@@ -122,9 +115,9 @@ public class MoexTrackContract implements Experiment, Runnable {
 				boolean done = updateHandler.execute(); // it may take some time
 				currentTime = scheduler.getCurrentTime();
 				if ( done ) {
-					IOUtils.closeQuietly(updateHandler);
+					closeHandler();
 					reschedule(updateSchedule.getNextTrackingPeriodStart(currentTime));
-					logger.debug("Rescheduled. Handler closed. Next tracking period at: {}",
+					logger.debug("Rescheduled. Next tracking period at: {}",
 							updateSchedule.toZDT(updateSchedule.getNextTrackingPeriodStart(currentTime)));
 				} else {
 					reschedule(updateSchedule.getNextUpdateTime(currentTime));
@@ -138,11 +131,8 @@ public class MoexTrackContract implements Experiment, Runnable {
 			}
 			
 		} else {
-			logger.debug("Outside a tracking period.");
-			if ( updateHandler != null ) {
-				IOUtils.closeQuietly(updateHandler);
-				updateHandler = null;
-			}
+			logger.debug("Outside of a tracking period.");
+			closeHandler();
 			reschedule(updateSchedule.getNextTrackingPeriodStart(currentTime));
 			logger.debug("Rescheduled. Next tracking period at: {}",
 					updateSchedule.toZDT(updateSchedule.getNextTrackingPeriodStart(currentTime)));
@@ -155,6 +145,14 @@ public class MoexTrackContract implements Experiment, Runnable {
 		IOUtils.closeQuietly(moex);
 	}
 	
+	private void closeHandler() {
+		if ( updateHandler != null ) {
+			IOUtils.closeQuietly(updateHandler);
+			updateHandler = null;
+			logger.debug("Handler closed.");
+		}
+	}
+	
 	private void logErrorAndGlobalExit(String msg, Throwable t) {
 		logger.error(msg, t);
 		exitCode = 1;
@@ -162,7 +160,14 @@ public class MoexTrackContract implements Experiment, Runnable {
 	}
 	
 	private void reschedule(Instant at) {
-		scheduler.schedule(this, at);
+		if ( globalExit.getCount() > 0 ) {
+			scheduler.schedule(this, at);
+		}
+	}
+	
+	private UpdateHandler createHandler(Instant updatePlannedTime, Set<Integer> expectedChangedTokens) {
+		 return new MoexAllFuturesUpdateHandler(globalExit, moex, storage,
+				 updatePlannedTime, expectedChangedTokens);
 	}
 
 }

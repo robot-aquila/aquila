@@ -2,8 +2,12 @@ package ru.prolib.aquila.utils.experimental.experiment.moex;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainer;
 import ru.prolib.aquila.data.storage.DeltaUpdate;
@@ -13,6 +17,11 @@ import ru.prolib.aquila.data.storage.DeltaUpdateBuilder;
  * Accumulator of changes.
  */
 public class ChangesAccumulator {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(ChangesAccumulator.class);
+	}
 	
 	/**
 	 * This is set of tokens which should be changed. The works still in
@@ -53,7 +62,13 @@ public class ChangesAccumulator {
 	 * changed
 	 */
 	public boolean accumulate(Map<Integer, Object> tokens) {
+		logger.debug("Before applying an update the container contains: ");
+		dumpMap(container.getContent());
+		logger.debug("Applying update: ");
+		dumpMap(tokens);
 		container.update(tokens);
+		logger.debug("Updated tokens: {}", container.getUpdatedTokens());
+		logger.debug("Expected to be updated: {}", expectedChangedTokens);
 		actualChangedTokens.addAll(container.getUpdatedTokens());
 		return expectedChangedTokens.isEmpty() ? container.hasChanged() :
 				actualChangedTokens.containsAll(expectedChangedTokens);
@@ -105,5 +120,22 @@ public class ChangesAccumulator {
 	public boolean hasChanges() {
 		return ! actualChangedTokens.isEmpty();
 	}
-	
+
+	private void dumpMap(Map<Integer, Object> map) {
+		Iterator<Map.Entry<Integer, Object>> it = map.entrySet().iterator();
+		while ( it.hasNext() ) {
+			Map.Entry<Integer, Object> pair = it.next();
+			Integer key = pair.getKey();
+			Object value = pair.getValue();
+			String valueString = null;
+			if ( value != null ) {
+				valueString = value.toString();
+				if ( valueString.length() > 80 ) {
+					valueString = valueString.substring(0, 80) + "...";
+				}
+			}
+			logger.debug("{} => [{}]", key, valueString);
+		}
+	}
+
 }

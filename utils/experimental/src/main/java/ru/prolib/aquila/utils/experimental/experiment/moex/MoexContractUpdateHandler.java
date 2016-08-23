@@ -1,6 +1,5 @@
 package ru.prolib.aquila.utils.experimental.experiment.moex;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Set;
@@ -32,7 +31,7 @@ import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
  * (any) attribute was changed. After delta-update is written all subsequent
  * executions has no effect.
  */
-public class MoexContractUpdateHandler implements Closeable {
+public class MoexContractUpdateHandler implements UpdateHandler {
 	private final Moex moex;
 	private final MoexContractFileStorage storage;
 	private final Symbol symbol;
@@ -72,6 +71,7 @@ public class MoexContractUpdateHandler implements Closeable {
 	 * @throws WEWebPageException - the MOEX facade exception. It may point to a
 	 * temporary problem.
 	 */
+	@Override
 	public boolean execute() throws DataStorageException, WUWebPageException {
 		if ( done ) {
 			return true;
