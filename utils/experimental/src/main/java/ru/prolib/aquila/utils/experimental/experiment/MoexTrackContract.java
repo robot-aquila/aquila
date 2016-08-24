@@ -115,7 +115,7 @@ public class MoexTrackContract implements Experiment, Runnable {
 							updateSchedule.toZDT(updateSchedule.getNextTrackingPeriodStart(currentTime)));
 				} else {
 					reschedule(updateSchedule.getNextUpdateTime(currentTime));
-					logger.debug("Rescheduled. Update not available. Next update time: {}",
+					logger.debug("Rescheduled. Next update time: {}",
 							updateSchedule.toZDT(updateSchedule.getNextUpdateTime(currentTime)));
 				}
 			} catch ( WUWebPageException e ) {

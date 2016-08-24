@@ -26,9 +26,9 @@ public class MoexContractTrackingSchedule {
 		CLEARING1_END = LocalTime.of(14,  5);
 		CLEARING2_START = LocalTime.of(18, 45);
 		CLEARING2_END = LocalTime.of(19, 0);
-		TRACKING_PERIOD1 = new LocalTimePeriod(OPENING.plusMinutes(30), OPENING.plusMinutes(60), ZONE);
-		TRACKING_PERIOD2 = new LocalTimePeriod(CLEARING1_END.plusMinutes(30), CLEARING1_END.plusMinutes(60), ZONE);
-		TRACKING_PERIOD3 = new LocalTimePeriod(CLEARING2_END.plusMinutes(30), CLEARING2_END.plusMinutes(60), ZONE);
+		TRACKING_PERIOD1 = new LocalTimePeriod(OPENING.plusMinutes(30), OPENING.plusMinutes(90), ZONE);
+		TRACKING_PERIOD2 = new LocalTimePeriod(CLEARING1_END.plusMinutes(30), CLEARING1_END.plusMinutes(90), ZONE);
+		TRACKING_PERIOD3 = new LocalTimePeriod(CLEARING2_END.plusMinutes(30), CLEARING2_END.plusMinutes(90), ZONE);
 		NEXT_IS_TRACKING_PERIOD1 = new LocalTimePeriod(LocalTime.MIN, TRACKING_PERIOD1.from(), ZONE);
 		NEXT_IS_TRACKING_PERIOD2 = new LocalTimePeriod(TRACKING_PERIOD1.from(), TRACKING_PERIOD2.from(), ZONE);
 		NEXT_IS_TRACKING_PERIOD3 = new LocalTimePeriod(TRACKING_PERIOD2.from(), TRACKING_PERIOD3.from(), ZONE);

@@ -80,14 +80,15 @@ public class MoexAllFuturesUpdateHandler implements UpdateHandler {
 				return false;
 			}
 			MoexContractUpdateHandler handler = handlers.get(symbol);
-			if ( handler.execute() ) {
-				IOUtils.closeQuietly(handler);
-				handlers.remove(symbol);
-				logger.debug("Handler removed: {}", symbol);
-			}
+			handler.execute();
+			IOUtils.closeQuietly(handler);
+			handlers.remove(symbol);
+			logger.debug("Handler removed: {}", symbol);
 		}
 		if ( handlers.size() == 0 ) {
 			done = true;
+		} else {
+			logger.debug("Count of open handlers: {}", handlers.size());
 		}
 		return done;
 	}

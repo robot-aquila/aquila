@@ -24,20 +24,20 @@ public class MoexContractTrackingScheduleTest {
 		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T07:29:59.999Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T07:30:00.000Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T07:45:00.000Z")));
-		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T07:59:59.999Z")));
-		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T08:00:00.000Z")));
+		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T08:29:59.999Z")));
+		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T08:30:00.000Z")));
 		
 		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T11:34:59.999Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T11:35:00.000Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T11:50:00.000Z")));
-		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T12:04:59.999Z")));
-		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T12:05:00.000Z")));
+		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T12:34:59.999Z")));
+		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T12:35:00.000Z")));
 		
 		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T16:29:59.999Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T16:30:00.000Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T16:45:00.000Z")));
-		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T16:59:59.999Z")));
-		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T17:00:00.000Z")));
+		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T17:29:59.999Z")));
+		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T17:30:00.000Z")));
 	}
 
 	@Test
@@ -45,8 +45,8 @@ public class MoexContractTrackingScheduleTest {
 		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T07:29:59.999Z")));
 		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T07:30:00.000Z")));
 		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T07:45:00.000Z")));
-		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T07:59:59.999Z")));
-		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T08:00:00.000Z")));
+		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T08:29:59.999Z")));
+		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T08:30:00.000Z")));
 		
 		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T11:34:59.999Z")));
 		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T11:35:00.000Z")));
@@ -72,8 +72,8 @@ public class MoexContractTrackingScheduleTest {
 		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T11:34:59.999Z")));
 		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T11:35:00.000Z")));
 		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T11:50:00.000Z")));
-		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T12:04:59.999Z")));
-		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T12:05:00.000Z")));
+		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T12:34:59.999Z")));
+		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T12:35:00.000Z")));
 		
 		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T16:29:59.999Z")));
 		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T16:30:00.000Z")));
@@ -99,8 +99,8 @@ public class MoexContractTrackingScheduleTest {
 		assertFalse(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T16:29:59.999Z")));
 		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T16:30:00.000Z")));
 		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T16:45:00.000Z")));
-		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T16:59:59.999Z")));
-		assertFalse(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T17:00:00.000Z")));
+		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T17:29:59.999Z")));
+		assertFalse(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T17:30:00.000Z")));
 	}
 
 	@Test
