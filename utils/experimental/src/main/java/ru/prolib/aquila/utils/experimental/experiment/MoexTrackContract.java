@@ -21,7 +21,6 @@ import ru.prolib.aquila.utils.experimental.experiment.moex.MoexContractTrackingS
 import ru.prolib.aquila.utils.experimental.experiment.moex.UpdateHandler;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.moex.Moex;
-import ru.prolib.aquila.web.utils.moex.MoexContractField;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 
 /**
@@ -36,11 +35,6 @@ public class MoexTrackContract implements Experiment, Runnable {
 		logger = LoggerFactory.getLogger(MoexTrackContract.class);
 		EXPECTED_FIELDS_AFTER_MARKET_OPENS = new HashSet<>();
 		EXPECTED_FIELDS_AFTER_CLEARING = new HashSet<>();
-		// Do not add a tick value because it is constant for many contracts
-		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.LOWER_PRICE_LIMIT);
-		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.UPPER_PRICE_LIMIT);
-		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.SETTLEMENT_PRICE);
-		EXPECTED_FIELDS_AFTER_CLEARING.add(MoexContractField.INITIAL_MARGIN);
 	}
 	
 	private final CountDownLatch globalExit;
