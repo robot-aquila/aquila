@@ -22,6 +22,7 @@ import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
  * WAIT - do nothing (wait for mode change). This is default mode.
  * PULL_AND_RUN - pull a task and run it immediately
  */
+@Deprecated
 public class PROBEScheduler extends Observable implements Scheduler {	
 	private static final Logger logger;
 	
@@ -122,9 +123,8 @@ public class PROBEScheduler extends Observable implements Scheduler {
 							runnable = null;
 						}
 					} catch ( Exception e ) {
-						// TODO: make message more informative
-						Object args[] = { runnable.toString(), e };
-						logger.error("Unhandled exception (Task ID: {}): ", args);
+						// TODO: make the message more informative
+						logger.error("Unhandled exception (Task ID: {}): {}", runnable, e);
 						state = TaskState.ERROR;
 						runnable = null;
 					}
