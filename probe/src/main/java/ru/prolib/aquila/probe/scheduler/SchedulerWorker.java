@@ -24,16 +24,17 @@ public class SchedulerWorker implements Runnable {
 		this(new SchedulerWorkingPass(queue, state), state);
 	}
 	
-	SchedulerWorkingPass getWorkingPass() {
+	public SchedulerWorkingPass getWorkingPass() {
 		return pass;
 	}
 	
-	SchedulerState getSchedulerState() {
+	public SchedulerState getSchedulerState() {
 		return state;
 	}
 	
 	@Override
 	public void run() {
+		logger.debug("Worker thread started");
 		try {
 			while ( ! state.isClosed() ) {
 				pass.execute();
@@ -42,6 +43,7 @@ public class SchedulerWorker implements Runnable {
 			logger.error("Thread interrupted: ", e);
 			Thread.currentThread().interrupt();
 		}
+		logger.debug("Worker thread finished");
 	}
 
 }

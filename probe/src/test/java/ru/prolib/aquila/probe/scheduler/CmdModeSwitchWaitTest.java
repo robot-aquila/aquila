@@ -18,5 +18,13 @@ public class CmdModeSwitchWaitTest {
 		assertEquals(CmdType.MODE_SWITCH, cmd.getType());
 		assertEquals(SchedulerMode.WAIT, cmd.getMode());
 	}
+	
+	@Test
+	public void testEquals() {
+		assertTrue(cmd.equals(cmd));
+		assertTrue(cmd.equals(new CmdModeSwitchWait()));
+		assertFalse(cmd.equals(null));
+		assertFalse(cmd.equals(this));
+	}
 
 }

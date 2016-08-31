@@ -8,6 +8,7 @@ import ru.prolib.aquila.ui.AquilaPlugin;
 import ru.prolib.aquila.ui.AquilaUI;
 import ru.prolib.aquila.ui.ServiceLocator;
 
+@Deprecated
 public class TestStrategyPlugin implements AquilaPlugin {
 	private TestStrategy strategy;
 	

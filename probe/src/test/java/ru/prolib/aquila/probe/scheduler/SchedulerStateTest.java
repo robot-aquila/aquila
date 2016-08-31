@@ -171,6 +171,16 @@ public class SchedulerStateTest {
 	}
 	
 	@Test
+	public void testProcessCommand_SetExecutionSpeed() {
+		control.replay();
+		
+		state.processCommand(new CmdSetExecutionSpeed(2));
+		
+		control.verify();
+		assertEquals(2, state.getExecutionSpeed());
+	}
+	
+	@Test
 	public void testIsClosed() {
 		state.setStatus(SchedulerStatus.PAUSED);
 		control.replay();

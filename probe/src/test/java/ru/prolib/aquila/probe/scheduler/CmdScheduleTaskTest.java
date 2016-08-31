@@ -24,5 +24,14 @@ public class CmdScheduleTaskTest {
 		assertEquals(CmdType.SCHEDULE_TASK, cmd.getType());
 		assertSame(task, cmd.getTask());
 	}
+	
+	@Test
+	public void testEquals() {
+		assertTrue(cmd.equals(cmd));
+		assertTrue(cmd.equals(new CmdScheduleTask(task)));
+		assertFalse(cmd.equals(new CmdScheduleTask(control.createMock(SchedulerTask.class))));
+		assertFalse(cmd.equals(null));
+		assertFalse(cmd.equals(this));
+	}
 
 }

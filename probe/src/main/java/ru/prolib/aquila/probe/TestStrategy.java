@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.data.CandleSeries;
 import ru.prolib.aquila.core.data.timeframe.TFMinutes;
 
+@Deprecated
 public class TestStrategy implements EventListener, Starter {
 	private static final Logger logger;
 	

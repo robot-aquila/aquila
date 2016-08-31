@@ -12,7 +12,7 @@ public class SchedulerState {
 	private Instant currentTime, cutoffTime;
 	private int executionSpeed;
 	
-	public SchedulerState(SchedulerSlots slots) {
+	SchedulerState(SchedulerSlots slots) {
 		this.lock = new ReentrantLock();
 		this.slots = slots;
 		mode = SchedulerMode.WAIT;
@@ -37,7 +37,7 @@ public class SchedulerState {
 		lock.unlock();
 	}
 	
-	public void processCommand(Cmd cmd) {
+	void processCommand(Cmd cmd) {
 		lock.lock();
 		try {
 			if ( isClosed() ) {
@@ -68,6 +68,8 @@ public class SchedulerState {
 			case SCHEDULE_TASK:
 				slots.addTask(((CmdScheduleTask) cmd).getTask());
 				break;
+			case SET_EXECUTION_SPEED:
+				executionSpeed = ((CmdSetExecutionSpeed) cmd).getExecutionSpeed();
 			default:
 			}
 			
@@ -130,7 +132,7 @@ public class SchedulerState {
 		}
 	}
 	
-	public boolean hasSlotForExecution() {
+	boolean hasSlotForExecution() {
 		lock.lock();
 		try {
 			SchedulerSlot slot = getNextSlot();
@@ -143,15 +145,25 @@ public class SchedulerState {
 		}
 	}
 	
-	public SchedulerSlot getNextSlot() {
-		return slots.getNextSlot();
+	SchedulerSlot getNextSlot() {
+		lock.lock();
+		try {
+			return slots.getNextSlot();
+		} finally {
+			lock.unlock();
+		}
 	}
 	
-	public void addTask(SchedulerTask task) {
-		slots.addTask(task);
+	void addTask(SchedulerTask task) {
+		lock.lock();
+		try {
+			slots.addTask(task);
+		} finally {
+			lock.unlock();
+		}
 	}
 	
-	public void switchToWait() {
+	void switchToWait() {
 		lock.lock();
 		try {
 			cutoffTime = null;
@@ -162,7 +174,7 @@ public class SchedulerState {
 		}
 	}
 	
-	public Instant getNextSlotTime() {
+	Instant getNextSlotTime() {
 		SchedulerSlot slot = getNextSlot();
 		return slot == null ? null : slot.getTime();
 	}
@@ -180,7 +192,7 @@ public class SchedulerState {
 	 * or/and mode was changed.
 	 * @throws IllegalStateException - called in wrong mode
 	 */
-	public Instant getNextTargetTime() {
+	Instant getNextTargetTime() {
 		lock.lock();
 		try {
 			switch ( mode ) {

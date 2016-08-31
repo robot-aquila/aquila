@@ -16,11 +16,11 @@ public class SchedulerWorkingPass {
 		this.state = state;
 	}
 	
-	BlockingQueue<Cmd> getCommandQueue() {
+	public BlockingQueue<Cmd> getCommandQueue() {
 		return queue;
 	}
 	
-	SchedulerState getSchedulerState() {
+	public SchedulerState getSchedulerState() {
 		return state;
 	}
 	

@@ -17,5 +17,13 @@ public class CmdCloseTest {
 	public void testCtor() {
 		assertEquals(CmdType.CLOSE, cmd.getType());
 	}
+	
+	@Test
+	public void testEquals() {
+		assertTrue(cmd.equals(cmd));
+		assertTrue(cmd.equals(new CmdClose()));
+		assertFalse(cmd.equals(null));
+		assertFalse(cmd.equals(this));
+	}
 
 }

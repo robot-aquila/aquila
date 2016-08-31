@@ -26,5 +26,10 @@ public enum CmdType {
 	 * Schedule a new task.
 	 */
 	SCHEDULE_TASK,
+	
+	/**
+	 * Set execution speed.
+	 */
+	SET_EXECUTION_SPEED,
 
 }

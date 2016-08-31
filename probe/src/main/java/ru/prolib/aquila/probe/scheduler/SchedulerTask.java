@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -237,6 +238,23 @@ public class SchedulerTask implements TaskHandler, Lockable {
 	@Override
 	public void unlock() {
 		lock.unlock();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != SchedulerTask.class ) {
+			return false;
+		}
+		SchedulerTask o = (SchedulerTask) other;
+		return new EqualsBuilder()
+			.append(nextExecutionTime, o.nextExecutionTime)
+			.append(period, o.period)
+			.append(runnable, o.runnable)
+			.append(state, o.state)
+			.isEquals();
 	}
 	
 }
