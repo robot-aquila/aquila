@@ -95,7 +95,7 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
 		expect(stateMock.getCurrentTime()).andReturn(time);
 		expect(stateMock.hasSlotForExecution()).andReturn(true);
-		expect(stateMock.getNextSlot()).andReturn(slot);
+		expect(stateMock.removeNextSlot()).andReturn(slot);
 		runnable1Mock.run();
 		runnable2Mock.run();
 		runnable3Mock.run();
@@ -118,7 +118,7 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN_CUTOFF);
 		expect(stateMock.getCurrentTime()).andReturn(time);
 		expect(stateMock.hasSlotForExecution()).andReturn(true);
-		expect(stateMock.getNextSlot()).andReturn(slot);
+		expect(stateMock.removeNextSlot()).andReturn(slot);
 		runnable1Mock.run();
 		stateMock.addTask(task);
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN_CUTOFF);
@@ -142,7 +142,7 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN_STEP);
 		expect(stateMock.getCurrentTime()).andReturn(time);
 		expect(stateMock.hasSlotForExecution()).andReturn(true);
-		expect(stateMock.getNextSlot()).andReturn(slot);
+		expect(stateMock.removeNextSlot()).andReturn(slot);
 		runnable1Mock.run();
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN_STEP);
 		stateMock.switchToWait();
@@ -165,7 +165,7 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
 		expect(stateMock.getCurrentTime()).andReturn(time);
 		expect(stateMock.hasSlotForExecution()).andReturn(true);
-		expect(stateMock.getNextSlot()).andReturn(slot);
+		expect(stateMock.removeNextSlot()).andReturn(slot);
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
 		control.replay();
 		

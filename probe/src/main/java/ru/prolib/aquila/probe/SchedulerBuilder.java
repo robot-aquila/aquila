@@ -1,9 +1,9 @@
 package ru.prolib.aquila.probe;
 
+import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.probe.scheduler.Cmd;
 import ru.prolib.aquila.probe.scheduler.SchedulerState;
 import ru.prolib.aquila.probe.scheduler.SchedulerWorker;
@@ -25,6 +25,7 @@ public class SchedulerBuilder {
 	private SchedulerState state;
 	private SchedulerWorker worker;
 	private Thread workerThread;
+	private Instant initialTime;
 	private boolean valid = true;
 	
 	/**
@@ -183,6 +184,15 @@ public class SchedulerBuilder {
 		return this;
 	}
 	
+	public Instant getInitialTime() {
+		return initialTime;
+	}
+	
+	public SchedulerBuilder setInitialTime(Instant time) {
+		this.initialTime = time;
+		return this;
+	}
+	
 	/**
 	 * Build scheduler instance.
 	 * <p>
@@ -194,14 +204,17 @@ public class SchedulerBuilder {
 	 * @return new scheduler instance
 	 * @throws IllegalStateException - this builder already produced a scheduler
 	 */
-	public Scheduler buildScheduler() {
+	public SchedulerImpl buildScheduler() {
 		if ( ! valid ) {
 			throw new IllegalStateException();
 		}
-		Scheduler scheduler = new SchedulerImpl(getCommandQueue(), getState());
+		SchedulerImpl scheduler = new SchedulerImpl(getCommandQueue(), getState());
 		Thread workerThread = getWorkerThread();
 		workerThread.setDaemon(true);
 		workerThread.start();
+		if ( initialTime != null ) {
+			scheduler.setCurrentTime(initialTime);
+		}
 		valid = false;
 		return scheduler;
 	}

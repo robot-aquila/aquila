@@ -1,14 +1,14 @@
 package ru.prolib.aquila.probe.scheduler;
 
 import java.time.Instant;
+import java.util.Observable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SchedulerState {
+public class SchedulerState extends Observable {
 	private final Lock lock;
 	private final SchedulerSlots slots;
 	private SchedulerMode mode;
-	private SchedulerStatus status;
 	private Instant currentTime, cutoffTime;
 	private int executionSpeed;
 	
@@ -16,7 +16,6 @@ public class SchedulerState {
 		this.lock = new ReentrantLock();
 		this.slots = slots;
 		mode = SchedulerMode.WAIT;
-		status = SchedulerStatus.PAUSED;
 		currentTime = Instant.EPOCH;
 		executionSpeed = 0;
 	}
@@ -47,8 +46,9 @@ public class SchedulerState {
 			switch ( cmd.getType() ) {
 			case CLOSE:
 				mode = SchedulerMode.CLOSE;
-				status = SchedulerStatus.CLOSED;
 				cutoffTime = null;
+				setChanged();
+				notifyObservers();
 				break;
 			case MODE_SWITCH:
 				mode = ((CmdModeSwitch) cmd).getMode();
@@ -57,6 +57,8 @@ public class SchedulerState {
 				} else {
 					cutoffTime = null;
 				}
+				setChanged();
+				notifyObservers();
 				break;
 			case SHIFT_FORWARD:
 				slots.clear();
@@ -81,7 +83,7 @@ public class SchedulerState {
 	public boolean isClosed() {
 		lock.lock();
 		try {
-			return status == SchedulerStatus.CLOSED;
+			return mode == SchedulerMode.CLOSE;
 		} finally {
 			lock.unlock();
 		}
@@ -91,15 +93,6 @@ public class SchedulerState {
 		lock.lock();
 		try {
 			return mode;
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	public SchedulerStatus getStatus() {
-		lock.lock();
-		try {
-			return status;
 		} finally {
 			lock.unlock();
 		}
@@ -145,10 +138,19 @@ public class SchedulerState {
 		}
 	}
 	
-	SchedulerSlot getNextSlot() {
+	private SchedulerSlot getNextSlot() {
 		lock.lock();
 		try {
 			return slots.getNextSlot();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	SchedulerSlot removeNextSlot() {
+		lock.lock();
+		try {
+			return slots.removeNextSlot();
 		} finally {
 			lock.unlock();
 		}
@@ -168,7 +170,8 @@ public class SchedulerState {
 		try {
 			cutoffTime = null;
 			mode = SchedulerMode.WAIT;
-			status = SchedulerStatus.PAUSED;
+			setChanged();
+			notifyObservers();
 		} finally {
 			lock.unlock();
 		}
@@ -245,15 +248,6 @@ public class SchedulerState {
 		lock.lock();
 		try {
 			this.cutoffTime = newTime;
-		} finally {
-			lock.unlock();
-		}
-	}
-	
-	void setStatus(SchedulerStatus newStatus) {
-		lock.lock();
-		try {
-			this.status = newStatus;
 		} finally {
 			lock.unlock();
 		}

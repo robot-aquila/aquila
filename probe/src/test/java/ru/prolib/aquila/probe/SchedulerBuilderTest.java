@@ -3,6 +3,7 @@ package ru.prolib.aquila.probe;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -13,10 +14,16 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.probe.SchedulerImpl;
 import ru.prolib.aquila.probe.scheduler.Cmd;
+import ru.prolib.aquila.probe.scheduler.CmdShiftForward;
 import ru.prolib.aquila.probe.scheduler.SchedulerState;
 import ru.prolib.aquila.probe.scheduler.SchedulerWorker;
 
 public class SchedulerBuilderTest {
+	
+	static Instant T(String timeString) {
+		return Instant.parse(timeString);
+	}
+	
 	private IMocksControl control;
 	private BlockingQueue<Cmd> queueMock;
 	private SchedulerState stateMock;
@@ -155,6 +162,31 @@ public class SchedulerBuilderTest {
 		builder.buildScheduler();
 		
 		builder.buildScheduler();
+	}
+	
+	@Test
+	public void testGetInitialTime() {
+		assertNull(builder.getInitialTime());
+		
+		assertSame(builder, builder.setInitialTime(T("2016-08-31T15:40:00Z")));
+		
+		assertEquals(T("2016-08-31T15:40:00Z"), builder.getInitialTime());
+	}
+	
+	@Test
+	public void testBuildScheduler_SetInitialTimeIfDefined() throws Exception {
+		builder.setInitialTime(T("1978-06-02T00:00:00Z"));
+		builder.setWorkerThread(workerThreadMock)
+			.setCommandQueue(queueMock)
+			.setState(stateMock);
+		workerThreadMock.setDaemon(true);
+		workerThreadMock.start();
+		queueMock.put(new CmdShiftForward(T("1978-06-02T00:00:00Z")));
+		control.replay();
+
+		assertNotNull(builder.buildScheduler());
+		
+		control.verify();
 	}
 
 }

@@ -4,6 +4,10 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -15,13 +19,35 @@ public class SchedulerStateTest {
 		return Instant.parse(timeString);
 	}
 	
+	static class WaitForModeChange implements Observer {
+		private final SchedulerMode expectedMode;
+		private final CountDownLatch signal;
+		
+		WaitForModeChange(SchedulerMode expectedMode) {
+			this.expectedMode = expectedMode;
+			this.signal = new CountDownLatch(1);
+		}
+
+		@Override
+		public void update(Observable observable, Object unused) {
+			observable.deleteObserver(this);
+			final SchedulerState state = (SchedulerState) observable;
+			if ( state.getMode() == expectedMode ) {
+				signal.countDown();
+			}
+		}
+		
+	}
+	
 	private IMocksControl control;
+	private Observer observerMock;
 	private SchedulerSlots slotsMock;
 	private SchedulerState state;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
+		observerMock = control.createMock(Observer.class);
 		slotsMock = control.createMock(SchedulerSlots.class);
 		state = new SchedulerState(slotsMock);
 	}
@@ -30,7 +56,6 @@ public class SchedulerStateTest {
 	public void testCtor1() {
 		assertSame(slotsMock, state.getSchedulerSlots());
 		assertEquals(SchedulerMode.WAIT, state.getMode());
-		assertEquals(SchedulerStatus.PAUSED, state.getStatus());
 		assertEquals(Instant.EPOCH, state.getCurrentTime());
 		assertNull(state.getCutoffTime());
 		assertEquals(0, state.getExecutionSpeed());
@@ -41,22 +66,24 @@ public class SchedulerStateTest {
 		state = new SchedulerState();
 		assertNotNull(state.getSchedulerSlots());
 		assertEquals(SchedulerMode.WAIT, state.getMode());
-		assertEquals(SchedulerStatus.PAUSED, state.getStatus());
 		assertEquals(Instant.EPOCH, state.getCurrentTime());
 		assertNull(state.getCutoffTime());
 		assertEquals(0, state.getExecutionSpeed());
 	}
 	
 	@Test
-	public void testProcessCommand_Close() {
+	public void testProcessCommand_Close() throws Exception {
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.CLOSE);
+		state.addObserver(wait);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		control.replay();
+
 		
 		state.processCommand(new CmdClose());
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.CLOSE, state.getMode());
-		assertEquals(SchedulerStatus.CLOSED, state.getStatus());
 		assertNull(state.getCutoffTime());
 	}
 	
@@ -84,55 +111,68 @@ public class SchedulerStateTest {
 	}
 	
 	@Test
-	public void testProcessCommand_ModeSwitch_Run() {
+	public void testProcessCommand_ModeSwitch_Run() throws Exception {
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.RUN);
+		state.addObserver(wait);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		control.replay();
 		
 		state.processCommand(new CmdModeSwitchRun());
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.RUN, state.getMode());
 		assertNull(state.getCutoffTime());
 	}
 	
 	@Test
-	public void testProcessCommand_ModeSwitch_RunCutoff() {
+	public void testProcessCommand_ModeSwitch_RunCutoff() throws Exception {
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.RUN_CUTOFF);
+		state.addObserver(wait);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		control.replay();
 		
 		state.processCommand(new CmdModeSwitchRunCutoff(T("2050-08-01T00:00:00Z")));
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.RUN_CUTOFF, state.getMode());
 		assertEquals(T("2050-08-01T00:00:00Z"), state.getCutoffTime());
 	}
 	
 	@Test
-	public void testProcessCommand_ModeSwitch_RunStep() {
+	public void testProcessCommand_ModeSwitch_RunStep() throws Exception {
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.RUN_STEP);
+		state.addObserver(wait);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		control.replay();
 		
 		state.processCommand(new CmdModeSwitchRunStep());
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.RUN_STEP, state.getMode());
 		assertNull(state.getCutoffTime());
 	}
 	
 	@Test
-	public void testProcessCommand_ModeSwitch_Wait() {
+	public void testProcessCommand_ModeSwitch_Wait() throws Exception {
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		control.replay();
 		
 		state.processCommand(new CmdModeSwitchWait());
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.WAIT, state.getMode());
 		assertNull(state.getCutoffTime());
 	}
 	
 	@Test
 	public void testProcessCommand_ScheduleTask() {
+		state.addObserver(observerMock);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		SchedulerTask taskMock = control.createMock(SchedulerTask.class);
 		slotsMock.addTask(taskMock);
@@ -147,6 +187,7 @@ public class SchedulerStateTest {
 	
 	@Test
 	public void testProcessCommand_ShiftBackward() {
+		state.addObserver(observerMock);
 		state.setCurrentTime(T("2016-01-01T00:00:00Z"));
 		control.replay();
 		
@@ -159,6 +200,7 @@ public class SchedulerStateTest {
 	
 	@Test
 	public void testProcessCommand_ShiftForward() {
+		state.addObserver(observerMock);
 		state.setCurrentTime(T("2016-01-01T00:00:00Z"));
 		slotsMock.clear();
 		control.replay();
@@ -172,6 +214,7 @@ public class SchedulerStateTest {
 	
 	@Test
 	public void testProcessCommand_SetExecutionSpeed() {
+		state.addObserver(observerMock);
 		control.replay();
 		
 		state.processCommand(new CmdSetExecutionSpeed(2));
@@ -182,12 +225,12 @@ public class SchedulerStateTest {
 	
 	@Test
 	public void testIsClosed() {
-		state.setStatus(SchedulerStatus.PAUSED);
+		state.setMode(SchedulerMode.WAIT);
 		control.replay();
 		
 		assertFalse(state.isClosed());
 		
-		state.setStatus(SchedulerStatus.CLOSED);
+		state.setMode(SchedulerMode.CLOSE);
 		
 		assertTrue(state.isClosed());
 		
@@ -238,12 +281,12 @@ public class SchedulerStateTest {
 	}
 	
 	@Test
-	public void testGetNextSlot() {
+	public void testRemoveNextSlot() {
 		SchedulerSlot slot = new SchedulerSlot(T("1978-12-01T13:48:12Z"));
-		expect(slotsMock.getNextSlot()).andReturn(slot);
+		expect(slotsMock.removeNextSlot()).andReturn(slot);
 		control.replay();
 		
-		assertEquals(slot, state.getNextSlot());
+		assertEquals(slot, state.removeNextSlot());
 		
 		control.verify();
 	}
@@ -260,18 +303,19 @@ public class SchedulerStateTest {
 	}
 	
 	@Test
-	public void testSwitchToWait() {
+	public void testSwitchToWait() throws Exception {
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
 		state.setCutoffTime(T("2016-08-31T02:08:46Z"));
 		state.setMode(SchedulerMode.RUN_STEP);
-		state.setStatus(SchedulerStatus.RUNNING);
 		control.replay();
 		
 		state.switchToWait();
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertNull(state.getCutoffTime());
 		assertEquals(SchedulerMode.WAIT, state.getMode());
-		assertEquals(SchedulerStatus.PAUSED, state.getStatus());
 	}
 	
 	@Test
@@ -300,6 +344,7 @@ public class SchedulerStateTest {
 		state.setMode(SchedulerMode.RUN_STEP);
 		SchedulerSlot slot = new SchedulerSlot(T("2016-08-31T02:45:00Z"));
 		expect(slotsMock.getNextSlot()).andReturn(slot);
+		state.addObserver(observerMock);
 		control.replay();
 		
 		assertEquals(T("2016-08-31T02:45:00Z"), state.getNextTargetTime());
@@ -308,45 +353,51 @@ public class SchedulerStateTest {
 	}
 	
 	@Test
-	public void testGetNextTargetTime_RunStep_NoSlot() {
+	public void testGetNextTargetTime_RunStep_NoSlot() throws Exception {
 		state.setMode(SchedulerMode.RUN_STEP);
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
 		expect(slotsMock.getNextSlot()).andReturn(null);
 		control.replay();
 		
 		assertNull(state.getNextTargetTime());
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.WAIT, state.getMode());
-		assertEquals(SchedulerStatus.PAUSED, state.getStatus());
 	}
 	
 	@Test
-	public void testGetNextTargetTime_RunCutoff_CutoffLtCurrent() {
+	public void testGetNextTargetTime_RunCutoff_CutoffLtCurrent() throws Exception {
 		state.setMode(SchedulerMode.RUN_CUTOFF);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		state.setCurrentTime(T("2016-08-31T00:00:01Z"));
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
 		control.replay();
 		
 		assertNull(state.getNextTargetTime());
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.WAIT, state.getMode());
-		assertEquals(SchedulerStatus.PAUSED, state.getStatus());
 		assertNull(state.getCutoffTime());
 	}
 	
 	@Test
-	public void testGetNextTargetTime_RunCutoff_CutoffEqCurrent() {
+	public void testGetNextTargetTime_RunCutoff_CutoffEqCurrent() throws Exception {
 		state.setMode(SchedulerMode.RUN_CUTOFF);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
 		state.setCurrentTime(T("2016-08-31T00:00:00Z"));
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
 		control.replay();
 		
 		assertNull(state.getNextTargetTime());
 		
 		control.verify();
+		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
 		assertEquals(SchedulerMode.WAIT, state.getMode());
-		assertEquals(SchedulerStatus.PAUSED, state.getStatus());
 		assertNull(state.getCutoffTime());
 	}
 	
@@ -356,6 +407,7 @@ public class SchedulerStateTest {
 		state.setCutoffTime(T("2016-08-31T00:00:01Z"));
 		state.setCurrentTime(T("2016-08-31T00:00:00Z"));
 		expect(slotsMock.getNextSlot()).andReturn(null);
+		state.addObserver(observerMock);
 		control.replay();
 		
 		assertEquals(T("2016-08-31T00:00:01Z"), state.getNextTargetTime());
@@ -372,6 +424,7 @@ public class SchedulerStateTest {
 		state.setCutoffTime(T("2016-08-31T00:00:01Z"));
 		state.setCurrentTime(T("2016-08-31T00:00:00Z"));
 		expect(slotsMock.getNextSlot()).andReturn(slot);
+		state.addObserver(observerMock);
 		control.replay();
 		
 		assertEquals(T("2016-08-31T00:00:00.500Z"), state.getNextTargetTime());
@@ -388,6 +441,7 @@ public class SchedulerStateTest {
 		state.setCutoffTime(T("2016-08-31T00:00:01Z"));
 		state.setCurrentTime(T("2016-08-31T00:00:00Z"));
 		expect(slotsMock.getNextSlot()).andReturn(slot);
+		state.addObserver(observerMock);
 		control.replay();
 		
 		assertEquals(T("2016-08-31T00:00:01Z"), state.getNextTargetTime());
@@ -402,6 +456,7 @@ public class SchedulerStateTest {
 		SchedulerSlot slot = new SchedulerSlot(T("1970-08-30T00:00:00Z"));
 		state.setMode(SchedulerMode.RUN);
 		expect(slotsMock.getNextSlot()).andReturn(slot);
+		state.addObserver(observerMock);
 		control.replay();
 		
 		assertEquals(T("1970-08-30T00:00:00Z"), state.getNextTargetTime());
@@ -414,6 +469,7 @@ public class SchedulerStateTest {
 	public void testGetNextTargetTime_Run_NoSlot() {
 		state.setMode(SchedulerMode.RUN);
 		expect(slotsMock.getNextSlot()).andReturn(null);
+		state.addObserver(observerMock);
 		control.replay();
 		
 		assertNull(state.getNextTargetTime());
