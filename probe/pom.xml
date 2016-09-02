@@ -8,6 +8,10 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
+	<properties>
+		<skipITs>true</skipITs>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
@@ -19,35 +23,29 @@
 			<artifactId>aquila-ui</artifactId>
 			<version>0.1.43</version>
 		</dependency>
-		<dependency>
-			<groupId>ru.prolib.aquila</groupId>
-			<artifactId>aquila-datatools</artifactId>
-			<version>0.1.43</version>
-		</dependency>
-		
 	</dependencies>
   
 	<build>
 		<plugins>
+			
 			<plugin>
-        		<artifactId>maven-assembly-plugin</artifactId>
-        		<version>2.2.1</version>
-        		<configuration>
-				<descriptors>
-					<descriptor>src/main/assembly/assembly.xml</descriptor>
-				</descriptors>
-			</configuration>
-			<executions>
-				<execution>
-				    	<phase>package</phase>
-				        <goals>
-				        	<goal>single</goal>
-				    	</goals>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<skipTests>${skipITs}</skipTests>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
-        
-        </plugins>
+			
+		</plugins>
 	</build>
-  
+	
 </project>
