@@ -74,6 +74,11 @@ public class CommonMsg {
 	public static final MsgID USED_MARGIN = newMsgID("ID_USED_MARGIN");
 	public static final MsgID VMARGIN = newMsgID("ID_VMARGIN");
 	
+	// Time selection dialog
+	public static final MsgID TSD_DEFAULT_TITLE = newMsgID("TSD_DEFAULT_TITLE");
+	public static final MsgID TSD_INITIAL_TIME = newMsgID("TSD_INITIAL_TIME");
+	public static final MsgID TSD_SELECTED_TIME = newMsgID("TSD_SELECTED_TIME");
+	
 	private static MsgID newMsgID(String messageID) {
 		return new MsgID(SECTION_ID, messageID);
 	}
