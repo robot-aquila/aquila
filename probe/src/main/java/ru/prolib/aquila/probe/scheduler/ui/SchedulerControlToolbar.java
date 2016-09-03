@@ -9,10 +9,10 @@ import java.util.Observer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
+import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.probe.SchedulerImpl;
@@ -26,27 +26,32 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 	private static final String ACTION_PAUSE = "PAUSE";
 	private static final String ACTION_RUN = "RUN";
 	private static final String ACTION_RUN_TIME = "RUN_TIME";
-	private static final String ACTION_RUN_SEGMENT = "RUN_SEGMENT";
+	private static final String ACTION_RUN_INTERVAL = "RUN_INTERVAL";
 	private static final String ACTION_RUN_STEP = "RUN_STEP";
 	
 	private final IMessages messages;
 	private final SchedulerImpl scheduler;
-	private final JButton btnOptions, btnPause, btnRun, btnRunTime, btnRunSegment, btnRunStep;
+	private final JButton btnOptions, btnPause, btnRun, btnRunTime, btnRunInterval, btnRunStep;
 	private final TimeSelectionDialogView timeSelectionDialog;
+	private final SchedulerOptionsDialogView schedulerOptionsDialog;
+	private SchedulerOptions schedulerOptions;
 	
 	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler) {
 		this.messages = messages;
 		this.scheduler = scheduler;
 		setName(messages.get(ProbeMsg.TOOLBAR_TITLE));
 		timeSelectionDialog = new TimeSelectionDialog(messages);
+		schedulerOptionsDialog = new SchedulerOptionsDialog(messages);
 		btnOptions = createButton("options", ACTION_OPTIONS, ProbeMsg.BTN_TTIP_OPTIONS);
 		btnPause = createButton("pause", ACTION_PAUSE, ProbeMsg.BTN_TTIP_PAUSE);
 		btnRun = createButton("run1", ACTION_RUN, ProbeMsg.BTN_TTIP_RUN);
 		btnRunTime = createButton("run2", ACTION_RUN_TIME, ProbeMsg.BTN_TTIP_RUN_TIME);
-		btnRunSegment = createButton("run3", ACTION_RUN_SEGMENT, ProbeMsg.BTN_TTIP_RUN_SEGMENT);
+		btnRunInterval = createButton("run3", ACTION_RUN_INTERVAL, ProbeMsg.BTN_TTIP_RUN_INTERVAL);
 		btnRunStep = createButton("run4", ACTION_RUN_STEP, ProbeMsg.BTN_TTIP_RUN_STEP);
 		scheduler.getState().addObserver(this);
 		refreshControls();
+		schedulerOptions = new SchedulerOptions();
+		schedulerOptions.setTimeFrame(TimeFrame.M1);
 	}
 	
 	private JButton createButton(String iconName, String actionCommand, MsgID tooltip) {
@@ -69,7 +74,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			btnPause.setEnabled(false);
 			btnRun.setEnabled(true);
 			btnRunTime.setEnabled(true);
-			btnRunSegment.setEnabled(true);
+			btnRunInterval.setEnabled(true);
 			btnRunStep.setEnabled(true);
 			break;
 		case CLOSE:
@@ -77,7 +82,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			btnPause.setEnabled(false);
 			btnRun.setEnabled(false);
 			btnRunTime.setEnabled(false);
-			btnRunSegment.setEnabled(false);
+			btnRunInterval.setEnabled(false);
 			btnRunStep.setEnabled(false);
 			break;
 		case RUN:
@@ -87,7 +92,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			btnPause.setEnabled(true);
 			btnRun.setEnabled(false);
 			btnRunTime.setEnabled(false);
-			btnRunSegment.setEnabled(false);
+			btnRunInterval.setEnabled(false);
 			btnRunStep.setEnabled(false);
 			break;
 		}
@@ -97,10 +102,17 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 	public void actionPerformed(ActionEvent e) {
 		switch ( e.getActionCommand() ) {
 		case ACTION_OPTIONS:
-		case ACTION_RUN_SEGMENT:
-			JOptionPane.showMessageDialog(null, "Not yet implemented");
+			schedulerOptions.setExecutionSpeed(scheduler.getState().getExecutionSpeed());
+			SchedulerOptions o = schedulerOptionsDialog.showDialog(schedulerOptions);
+			if ( o != null ) {
+				schedulerOptions = o;
+				scheduler.setExecutionSpeed(o.getExecutionSpeed());
+			}
 			break;
-			
+		case ACTION_RUN_INTERVAL:
+			scheduler.setModeRun(schedulerOptions.getTimeFrame()
+					.getInterval(scheduler.getCurrentTime()).getEnd());
+			break;
 		case ACTION_RUN_TIME:
 			Instant time = timeSelectionDialog.showDialog(scheduler.getCurrentTime());
 			if ( time != null ) {

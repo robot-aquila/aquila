@@ -37,13 +37,28 @@ public class ProbeMsg {
 	public static final MsgID BTN_TTIP_RUN_TIME = newMsgID("BTN_TTIP_RUN_TIME");
 	
 	/**
-	 * Tooltip of the "run to the end of segment" button.
+	 * Tooltip of the "run to the end of interval" button.
 	 */
-	public static final MsgID BTN_TTIP_RUN_SEGMENT = newMsgID("BTN_TTIP_RUN_SEGMENT");
+	public static final MsgID BTN_TTIP_RUN_INTERVAL = newMsgID("BTN_TTIP_RUN_INTERVAL");
 	
 	/**
 	 * Tooltip of the "run step" button.
 	 */
 	public static final MsgID BTN_TTIP_RUN_STEP = newMsgID("BTN_TTIP_RUN_STEP");
+	
+	public static final MsgID SOD_DIALOG_TITLE = newMsgID("SOD_DIALOG_TITLE");
+	public static final MsgID SOD_EXEC_SPEED = newMsgID("SOD_EXEC_SPEED");
+	public static final MsgID SOD_EXEC_SPEED0 = newMsgID("SOD_EXEC_SPEED0");
+	public static final MsgID SOD_EXEC_SPEED1 = newMsgID("SOD_EXEC_SPEED1");
+	public static final MsgID SOD_EXEC_SPEED2 = newMsgID("SOD_EXEC_SPEED2");
+	public static final MsgID SOD_EXEC_SPEED4 = newMsgID("SOD_EXEC_SPEED4");
+	public static final MsgID SOD_EXEC_SPEED8 = newMsgID("SOD_EXEC_SPEED8");
+	public static final MsgID SOD_INTERVAL = newMsgID("SOD_INTERVAL");
+	public static final MsgID SOD_INTERVAL_1MIN = newMsgID("SOD_INTERVAL_1MIN");
+	public static final MsgID SOD_INTERVAL_5MIN = newMsgID("SOD_INTERVAL_5MIN");
+	public static final MsgID SOD_INTERVAL_10MIN = newMsgID("SOD_INTERVAL_10MIN");
+	public static final MsgID SOD_INTERVAL_15MIN = newMsgID("SOD_INTERVAL_15MIN");
+	public static final MsgID SOD_INTERVAL_30MIN = newMsgID("SOD_INTERVAL_30MIN");
+	public static final MsgID SOD_INTERVAL_1HOUR = newMsgID("SOD_INTERVAL_1HOUR");
 
 }
