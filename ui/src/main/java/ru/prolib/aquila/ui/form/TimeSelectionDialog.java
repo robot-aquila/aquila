@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import javax.swing.JButton;
@@ -42,9 +44,11 @@ public class TimeSelectionDialog extends JDialog implements ActionListener, Time
 	private final JSpinner spinner;
 	private final JLabel lblInitialTimeValue;
 	private final SpinnerDateModel spinnerData;
-	private Instant selectedTime;
+	private final ZoneId zoneId;
+	private Date selectedTime;
 	
-	public TimeSelectionDialog(IMessages messages, MsgID titleID) {
+	public TimeSelectionDialog(IMessages messages, MsgID titleID, ZoneId zoneId) {
+		this.zoneId = zoneId;
 		setResizable(false);
 		setAlwaysOnTop(true);
 		setTitle(messages.get(titleID));
@@ -118,7 +122,17 @@ public class TimeSelectionDialog extends JDialog implements ActionListener, Time
 	}
 	
 	public TimeSelectionDialog(IMessages messages) {
-		this(messages, CommonMsg.TSD_DEFAULT_TITLE);
+		this(messages, CommonMsg.TSD_DEFAULT_TITLE, ZoneId.systemDefault());
+	}
+	
+	@Override
+	public LocalDateTime showDialog(LocalDateTime initialTime) {
+		Instant dummy = showDialog(initialTime.atZone(zoneId).toInstant());
+		if ( dummy != null ) {
+			return LocalDateTime.ofInstant(dummy, zoneId);
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
@@ -129,7 +143,11 @@ public class TimeSelectionDialog extends JDialog implements ActionListener, Time
 		spinner.setValue(j_startTime);
 		spinnerData.setStart(j_startTime);
 		setVisible(true);
-		return selectedTime;
+		if ( selectedTime != null ) {
+			return Instant.ofEpochMilli(selectedTime.getTime());
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -138,8 +156,7 @@ public class TimeSelectionDialog extends JDialog implements ActionListener, Time
 			Date j_selected = (Date) spinner.getValue(),
 					j_start = (Date) spinnerData.getStart();
 			if ( j_selected.compareTo(j_start) > 0 ) {
-				Date j_time = (Date) spinner.getValue();
-				selectedTime = Instant.ofEpochMilli(j_time.getTime());
+				selectedTime = (Date) spinner.getValue();
 			}
 		}
 		setVisible(false);
