@@ -6,7 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class SchedulerWorkingPass {
-	private static final long MIN_DELAY = 10;
+	private static final long MIN_DELAY = 1;
 	private static final long MIN_QUANT = 100;
 	private final BlockingQueue<Cmd> queue;
 	private final SchedulerState state;

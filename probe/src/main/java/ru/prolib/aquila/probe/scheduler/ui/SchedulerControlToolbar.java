@@ -9,8 +9,12 @@ import java.util.Observer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.text.IMessages;
@@ -20,6 +24,7 @@ import ru.prolib.aquila.ui.form.TimeSelectionDialog;
 import ru.prolib.aquila.ui.form.TimeSelectionDialogView;
 
 public class SchedulerControlToolbar extends JToolBar implements ActionListener, Observer {
+	private static final Logger logger;
 	private static final long serialVersionUID = 1L;
 	private static final String ICON_PATH_PREFIX = "shared/images/probe/";
 	private static final String ACTION_OPTIONS = "OPTIONS";
@@ -28,10 +33,16 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 	private static final String ACTION_RUN_TIME = "RUN_TIME";
 	private static final String ACTION_RUN_INTERVAL = "RUN_INTERVAL";
 	private static final String ACTION_RUN_STEP = "RUN_STEP";
+	private static final String ACTION_LIST = "LIST";
+	
+	static {
+		logger = LoggerFactory.getLogger(SchedulerControlToolbar.class);
+	}
 	
 	private final IMessages messages;
 	private final SchedulerImpl scheduler;
-	private final JButton btnOptions, btnPause, btnRun, btnRunTime, btnRunInterval, btnRunStep;
+	private final JButton btnOptions, btnPause, btnRun, btnRunTime,
+		btnRunInterval, btnRunStep, btnList;
 	private final TimeSelectionDialogView timeSelectionDialog;
 	private final SchedulerOptionsDialogView schedulerOptionsDialog;
 	private SchedulerOptions schedulerOptions;
@@ -48,10 +59,13 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 		btnRunTime = createButton("run2", ACTION_RUN_TIME, ProbeMsg.BTN_TTIP_RUN_TIME);
 		btnRunInterval = createButton("run3", ACTION_RUN_INTERVAL, ProbeMsg.BTN_TTIP_RUN_INTERVAL);
 		btnRunStep = createButton("run4", ACTION_RUN_STEP, ProbeMsg.BTN_TTIP_RUN_STEP);
+		btnList = createButton("list", ACTION_LIST, ProbeMsg.BTN_TTIP_LIST);
 		scheduler.getState().addObserver(this);
 		refreshControls();
 		schedulerOptions = new SchedulerOptions();
 		schedulerOptions.setTimeFrame(TimeFrame.M1);
+		
+		add(new SchedulerStatePanel(messages, scheduler.getState()));
 	}
 	
 	private JButton createButton(String iconName, String actionCommand, MsgID tooltip) {
@@ -76,6 +90,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			btnRunTime.setEnabled(true);
 			btnRunInterval.setEnabled(true);
 			btnRunStep.setEnabled(true);
+			btnList.setEnabled(true);
 			break;
 		case CLOSE:
 			btnOptions.setEnabled(false);
@@ -84,6 +99,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			btnRunTime.setEnabled(false);
 			btnRunInterval.setEnabled(false);
 			btnRunStep.setEnabled(false);
+			btnList.setEnabled(false);
 			break;
 		case RUN:
 		case RUN_STEP:
@@ -94,6 +110,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			btnRunTime.setEnabled(false);
 			btnRunInterval.setEnabled(false);
 			btnRunStep.setEnabled(false);
+			btnList.setEnabled(false);
 			break;
 		}
 	}
@@ -107,6 +124,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			if ( o != null ) {
 				schedulerOptions = o;
 				scheduler.setExecutionSpeed(o.getExecutionSpeed());
+				logger.debug("Set execution speed: {}", o.getExecutionSpeed());
 			}
 			break;
 		case ACTION_RUN_INTERVAL:
@@ -128,6 +146,8 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 		case ACTION_RUN_STEP:
 			scheduler.setModeStep();
 			break;
+		case ACTION_LIST:
+			JOptionPane.showMessageDialog(null, "Not yet implemented");
 		}
 	}
 

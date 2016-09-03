@@ -46,6 +46,11 @@ public class ProbeMsg {
 	 */
 	public static final MsgID BTN_TTIP_RUN_STEP = newMsgID("BTN_TTIP_RUN_STEP");
 	
+	/**
+	 * Tooltip of the "view list of scheduled tasks" button.
+	 */
+	public static final MsgID BTN_TTIP_LIST = newMsgID("BTN_TTIP_LIST");
+	
 	public static final MsgID SOD_DIALOG_TITLE = newMsgID("SOD_DIALOG_TITLE");
 	public static final MsgID SOD_EXEC_SPEED = newMsgID("SOD_EXEC_SPEED");
 	public static final MsgID SOD_EXEC_SPEED0 = newMsgID("SOD_EXEC_SPEED0");
@@ -60,5 +65,15 @@ public class ProbeMsg {
 	public static final MsgID SOD_INTERVAL_15MIN = newMsgID("SOD_INTERVAL_15MIN");
 	public static final MsgID SOD_INTERVAL_30MIN = newMsgID("SOD_INTERVAL_30MIN");
 	public static final MsgID SOD_INTERVAL_1HOUR = newMsgID("SOD_INTERVAL_1HOUR");
+	
+	public static final MsgID SSP_CURRENT_TIME = newMsgID("SSP_CURRENT_TIME");
+	public static final MsgID SSP_CURRENT_MODE = newMsgID("SSP_CURRENT_MODE");
+	public static final MsgID SSP_CUTOFF_TIME = newMsgID("SSP_CUTOFF_TIME");
+	public static final MsgID SSP_MODE_CLOSE = newMsgID("SSP_MODE_CLOSE");
+	public static final MsgID SSP_MODE_WAIT = newMsgID("SSP_MODE_WAIT");
+	public static final MsgID SSP_MODE_RUN = newMsgID("SSP_MODE_RUN");
+	public static final MsgID SSP_MODE_STEP = newMsgID("SSP_MODE_STEP");
+	public static final MsgID SSP_MODE_CUTOFF = newMsgID("SSP_MODE_CUTOFF");
+	public static final MsgID SSP_EXEC_SPEED = newMsgID("SSP_EXEC_SPEED");
 
 }

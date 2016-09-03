@@ -304,24 +304,6 @@ public class SchedulerWorkingPassTest {
 	}
 
 	@Test
-	public void testExecute_NoSlot_Speed4_HasTargetTime_TargetDelayLtMinDelay() throws Exception {
-		Instant time = T("2016-08-30T20:29:15Z");
-		expect(queueMock.poll()).andReturn(null);
-		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
-		expect(stateMock.getCurrentTime()).andReturn(time);
-		expect(stateMock.hasSlotForExecution()).andReturn(false);
-		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:29:15.030Z"));
-		expect(stateMock.isModeWait()).andReturn(false);
-		expect(stateMock.getExecutionSpeed()).andReturn(4);
-		stateMock.setCurrentTime(time.plusMillis(30));
-		control.replay();
-		
-		pass.execute();
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testExecute_NoSlot_Speed5_HasTargetTime_TargetDelayEqMinDelay() throws Exception {
 		Instant time = T("2016-08-30T20:29:15Z");
 		expect(queueMock.poll()).andReturn(null);
