@@ -1,5 +1,6 @@
 package ru.prolib.aquila.probe.scheduler;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.BlockingQueue;
@@ -10,10 +11,16 @@ public class SchedulerWorkingPass {
 	private static final long MIN_QUANT = 100;
 	private final BlockingQueue<Cmd> queue;
 	private final SchedulerState state;
+	private final Clock clock;
 	
-	public SchedulerWorkingPass(BlockingQueue<Cmd> queue, SchedulerState state) {
+	public SchedulerWorkingPass(BlockingQueue<Cmd> queue, SchedulerState state, Clock clock) {
 		this.queue = queue;
 		this.state = state;
+		this.clock = clock;
+	}
+	
+	public SchedulerWorkingPass(BlockingQueue<Cmd> queue, SchedulerState state) {
+		this(queue, state, Clock.systemUTC());
 	}
 	
 	public BlockingQueue<Cmd> getCommandQueue() {
@@ -22,6 +29,10 @@ public class SchedulerWorkingPass {
 	
 	public SchedulerState getSchedulerState() {
 		return state;
+	}
+	
+	public Clock getClock() {
+		return clock;
 	}
 	
 	public void execute() throws InterruptedException {
@@ -92,13 +103,18 @@ public class SchedulerWorkingPass {
 		}
 
 		long realtimeDelay = targetDelay / speed;
-		cmd = null;
 		if ( realtimeDelay >= MIN_DELAY ) {
+			long t1 = clock.millis();
 			cmd = queue.poll(realtimeDelay, TimeUnit.MILLISECONDS);
-		}
-		state.setCurrentTime(currentTime.plusMillis(targetDelay));
-		if ( cmd != null ) {
-			state.processCommand(cmd);
+			long t2 = clock.millis();
+			if ( cmd == null ) {
+				state.setCurrentTime(currentTime.plusMillis(targetDelay));				
+			} else {
+				state.setCurrentTime(currentTime.plusMillis((t2 - t1) * speed));
+				state.processCommand(cmd);
+			}
+		} else {
+			state.setCurrentTime(currentTime.plusMillis(targetDelay));
 		}
 	}
 

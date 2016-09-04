@@ -152,14 +152,19 @@ public class SchedulerImplIT {
 	 * @param expectedBaseTime - the base time (start time)
 	 * @param timeSeries - time series
 	 * @param expectedOffset - an expected offset by the previous element (base time at start)  
-	 * @param delta - max allowed error in milliseconds
+	 * @param deltaFactor - 0.0 to 1.0 factor of max allowed error size based of offset in milliseconds
 	 */
 	static void assertTimeCloseToOffset(Instant expectedBaseTime,
-			List<Instant> timeSeries, List<Long> expectedOffset, long delta)
+			List<Instant> timeSeries, List<Long> expectedOffset, double deltaFactor)
 	{
 		for ( int i = 0; i < timeSeries.size(); i ++ ) {
 			Instant actualTime = timeSeries.get(i);
-			Instant expectedTime = expectedBaseTime.plusMillis(expectedOffset.get(i));
+			long offset = expectedOffset.get(i);
+			long delta = (long)(deltaFactor * (double)offset);
+			if ( delta < 20 ) {
+				delta = 20;
+			}
+			Instant expectedTime = expectedBaseTime.plusMillis(offset);
 			assertTimeEquals("At #" + i, expectedTime, actualTime, delta);
 			expectedBaseTime = actualTime;
 		}
@@ -313,7 +318,7 @@ public class SchedulerImplIT {
 		expectedOffset.add( 750L);
 		expectedOffset.add(4000L);
 		expectedOffset.add(2000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 20);
+		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
 	}
 
 	@Test
@@ -342,7 +347,7 @@ public class SchedulerImplIT {
 		expectedOffset.add( 375L);
 		expectedOffset.add(2000L);
 		expectedOffset.add(1000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 20);
+		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
 	}
 	
 	@Test
@@ -365,8 +370,7 @@ public class SchedulerImplIT {
 		scheduler.getState().addObserver(wait);
 		scheduler.setModeWait();
 		assertTrue(wait.signal.await(100L, TimeUnit.MILLISECONDS));
-		// It should be exact 1.5 seconds (by sum of ticks) 
-		assertEquals(T("2016-08-31T00:00:01.500Z"), scheduler.getCurrentTime());
+		assertTimeEquals(T("2016-08-31T00:00:01.500Z"), scheduler.getCurrentTime(), 300);
 		Thread.sleep(500);
 		scheduler.setModeRun();
 		
@@ -380,7 +384,7 @@ public class SchedulerImplIT {
 		// pause 500 ms here
 		expectedOffset.add(4500L);
 		expectedOffset.add(2000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 20);
+		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
 	}
 	
 	@Test
@@ -414,7 +418,7 @@ public class SchedulerImplIT {
 		expectedOffset.add(500L);
 		expectedOffset.add(500L);
 		expectedOffset.add(500L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 20);
+		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
 	}
 	
 	@Test
@@ -446,11 +450,19 @@ public class SchedulerImplIT {
 		scheduler.setModeRun();
 		
 		Thread.sleep(1000);
-		assertTimeEquals(T("2016-08-31T00:00:01Z"), scheduler.getCurrentTime(), 120);
+		Instant expected = T("2016-08-31T00:00:01Z");
+		Instant actual = scheduler.getCurrentTime();
+		assertTimeEquals(expected, actual, 120);
+		
 		Thread.sleep(1000);
-		assertTimeEquals(T("2016-08-31T00:00:02Z"), scheduler.getCurrentTime(), 120);
+		expected = actual.plusSeconds(1);
+		actual = scheduler.getCurrentTime();
+		assertTimeEquals(expected, actual, 120);
+		
 		Thread.sleep(1000);
-		assertTimeEquals(T("2016-08-31T00:00:03Z"), scheduler.getCurrentTime(), 120);
+		expected = actual.plusSeconds(1);
+		actual = scheduler.getCurrentTime();
+		assertTimeEquals(expected, actual, 120);
 	}
 	
 	@Test
@@ -459,11 +471,19 @@ public class SchedulerImplIT {
 		scheduler.setModeRun();
 		
 		Thread.sleep(1000);
-		assertTimeEquals(T("2016-08-31T00:00:02Z"), scheduler.getCurrentTime(), 120);
+		Instant expected = T("2016-08-31T00:00:02Z");
+		Instant actual = scheduler.getCurrentTime();
+		assertTimeEquals(expected, actual, 120);
+		
 		Thread.sleep(1000);
-		assertTimeEquals(T("2016-08-31T00:00:04Z"), scheduler.getCurrentTime(), 120);
+		expected = actual.plusSeconds(2);
+		actual = scheduler.getCurrentTime();
+		assertTimeEquals(expected, actual, 120);
+		
 		Thread.sleep(1000);
-		assertTimeEquals(T("2016-08-31T00:00:06Z"), scheduler.getCurrentTime(), 120);
+		expected = actual.plusSeconds(2);
+		actual = scheduler.getCurrentTime();
+		assertTimeEquals(expected, actual, 120);
 	}
 
 }

@@ -3,6 +3,7 @@ package ru.prolib.aquila.probe.scheduler;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ public class SchedulerWorkingPassTest {
 	private IMocksControl control;
 	private BlockingQueue<Cmd> queueMock;
 	private SchedulerState stateMock;
+	private Clock clockMock;
 	private Cmd cmdMock;
 	private Runnable runnable1Mock, runnable2Mock, runnable3Mock;
 	private SchedulerWorkingPass pass;
@@ -38,17 +40,27 @@ public class SchedulerWorkingPassTest {
 		control = createStrictControl();
 		queueMock = control.createMock(BlockingQueue.class);
 		stateMock = control.createMock(SchedulerState.class);
+		clockMock = control.createMock(Clock.class);
 		cmdMock = control.createMock(Cmd.class);
 		runnable1Mock = control.createMock(Runnable.class);
 		runnable2Mock = control.createMock(Runnable.class);
 		runnable3Mock = control.createMock(Runnable.class);
-		pass = new SchedulerWorkingPass(queueMock, stateMock);
+		pass = new SchedulerWorkingPass(queueMock, stateMock, clockMock);
 	}
 	
 	@Test
 	public void testCtor2() {
+		pass = new SchedulerWorkingPass(queueMock, stateMock);
 		assertSame(queueMock, pass.getCommandQueue());
 		assertSame(stateMock, pass.getSchedulerState());
+		assertNotNull(pass.getClock());
+	}
+	
+	@Test
+	public void testCtor3() {
+		assertSame(queueMock, pass.getCommandQueue());
+		assertSame(stateMock, pass.getSchedulerState());
+		assertEquals(clockMock, pass.getClock());
 	}
 
 	@Test
@@ -244,7 +256,9 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getNextTargetTime()).andReturn(null);
 		expect(stateMock.isModeWait()).andReturn(false);
 		expect(stateMock.getExecutionSpeed()).andReturn(1);
+		expect(clockMock.millis()).andReturn(10L);
 		expect(queueMock.poll(100, TimeUnit.MILLISECONDS)).andReturn(null);
+		expect(clockMock.millis()).andReturn(11L);
 		stateMock.setCurrentTime(time.plusMillis(100));
 		control.replay();
 		
@@ -263,8 +277,10 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getNextTargetTime()).andReturn(null);
 		expect(stateMock.isModeWait()).andReturn(false);
 		expect(stateMock.getExecutionSpeed()).andReturn(1);
+		expect(clockMock.millis()).andReturn(10L);
 		expect(queueMock.poll(100, TimeUnit.MILLISECONDS)).andReturn(cmdMock);
-		stateMock.setCurrentTime(time.plusMillis(100));
+		expect(clockMock.millis()).andReturn(15L);
+		stateMock.setCurrentTime(time.plusMillis(5));
 		stateMock.processCommand(cmdMock);
 		control.replay();
 		
@@ -283,7 +299,9 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:59:59Z"));
 		expect(stateMock.isModeWait()).andReturn(false);
 		expect(stateMock.getExecutionSpeed()).andReturn(2);
+		expect(clockMock.millis()).andReturn(10L);
 		expect(queueMock.poll(50, TimeUnit.MILLISECONDS)).andReturn(null);
+		expect(clockMock.millis()).andReturn(15L);
 		stateMock.setCurrentTime(time.plusMillis(100));
 		control.replay();
 		
@@ -302,7 +320,9 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:29:15.050Z"));
 		expect(stateMock.isModeWait()).andReturn(false);
 		expect(stateMock.getExecutionSpeed()).andReturn(3);
+		expect(clockMock.millis()).andReturn(10L);
 		expect(queueMock.poll(16, TimeUnit.MILLISECONDS)).andReturn(null);
+		expect(clockMock.millis()).andReturn(15L);
 		stateMock.setCurrentTime(time.plusMillis(50));
 		control.replay();
 		
@@ -318,11 +338,96 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
 		expect(stateMock.getCurrentTime()).andReturn(time);
 		expect(stateMock.hasSlotForExecution()).andReturn(false);
+		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:29:15.005Z"));
+		expect(stateMock.isModeWait()).andReturn(false);
+		expect(stateMock.getExecutionSpeed()).andReturn(5);
+		expect(clockMock.millis()).andReturn(10L);
+		expect(queueMock.poll(1, TimeUnit.MILLISECONDS)).andReturn(null);
+		expect(clockMock.millis()).andReturn(15L);
+		stateMock.setCurrentTime(time.plusMillis(5));
+		control.replay();
+		
+		pass.execute();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testExecute_NoSlot_Speed5_HasTargetTime_TargetDelayGtMinDelay() throws Exception {
+		Instant time = T("2016-08-30T20:29:15Z");
+		expect(queueMock.poll()).andReturn(null);
+		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
+		expect(stateMock.getCurrentTime()).andReturn(time);
+		expect(stateMock.hasSlotForExecution()).andReturn(false);
 		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:29:15.050Z"));
 		expect(stateMock.isModeWait()).andReturn(false);
 		expect(stateMock.getExecutionSpeed()).andReturn(5);
+		expect(clockMock.millis()).andReturn(10L);
 		expect(queueMock.poll(10, TimeUnit.MILLISECONDS)).andReturn(null);
+		expect(clockMock.millis()).andReturn(15L);
 		stateMock.setCurrentTime(time.plusMillis(50));
+		control.replay();
+		
+		pass.execute();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testExecute_NoSlot_Speed5_HasTargetTime_TargetDelayLtMinDelay() throws Exception {
+		Instant time = T("2016-08-30T20:29:15Z");
+		expect(queueMock.poll()).andReturn(null);
+		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
+		expect(stateMock.getCurrentTime()).andReturn(time);
+		expect(stateMock.hasSlotForExecution()).andReturn(false);
+		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:29:15.003Z"));
+		expect(stateMock.isModeWait()).andReturn(false);
+		expect(stateMock.getExecutionSpeed()).andReturn(5);
+		stateMock.setCurrentTime(time.plusMillis(3));
+		control.replay();
+		
+		pass.execute();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testExecute_NoSlot_Speed1_HasTargetTime_InterruptedByCommand() throws Exception {
+		Instant time = T("2016-08-30T20:29:15Z");
+		expect(queueMock.poll()).andReturn(null);
+		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
+		expect(stateMock.getCurrentTime()).andReturn(time);
+		expect(stateMock.hasSlotForExecution()).andReturn(false);
+		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:29:15.100Z"));
+		expect(stateMock.isModeWait()).andReturn(false);
+		expect(stateMock.getExecutionSpeed()).andReturn(5);
+		expect(clockMock.millis()).andReturn(10L);
+		expect(queueMock.poll(20, TimeUnit.MILLISECONDS)).andReturn(cmdMock);
+		expect(clockMock.millis()).andReturn(12L);
+		stateMock.setCurrentTime(time.plusMillis(10));
+		stateMock.processCommand(cmdMock);
+		control.replay();
+		
+		pass.execute();
+		
+		control.verify();
+	}
+
+	@Test
+	public void testExecute_NoSlot_Speed5_HasTargetTime_InterruptedByCommand() throws Exception {
+		Instant time = T("2016-08-30T20:29:15Z");
+		expect(queueMock.poll()).andReturn(null);
+		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
+		expect(stateMock.getCurrentTime()).andReturn(time);
+		expect(stateMock.hasSlotForExecution()).andReturn(false);
+		expect(stateMock.getNextTargetTime()).andReturn(T("2016-08-30T20:29:15.050Z"));
+		expect(stateMock.isModeWait()).andReturn(false);
+		expect(stateMock.getExecutionSpeed()).andReturn(1);
+		expect(clockMock.millis()).andReturn(10L);
+		expect(queueMock.poll(50, TimeUnit.MILLISECONDS)).andReturn(cmdMock);
+		expect(clockMock.millis()).andReturn(12L);
+		stateMock.setCurrentTime(time.plusMillis(2));
+		stateMock.processCommand(cmdMock);
 		control.replay();
 		
 		pass.execute();
