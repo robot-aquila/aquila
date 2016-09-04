@@ -173,7 +173,8 @@ public class FidexpIT {
 			LocalDate next = nextFuturesDate(current);
 			expected.add(getFuturesNameWithCode("RTS", "RI", next));
 			expected.add(getFuturesNameWithCode("Si", "Si", next));
-			expected.add(getFuturesNameWithCode("VTBR", "VB", next));
+			expected.add(getFuturesNameWithCode("Eu", "Eu", next));
+			expected.add(getFuturesNameWithCode("GAZR", "GZ", next));
 			expected.add(getFuturesNameWithCode("SBRF", "SR", next));
 			current = current.plusMonths(3);
 		}
@@ -185,7 +186,8 @@ public class FidexpIT {
 		}
 		assertFalse(actual.containsValue("RTS"));
 		assertFalse(actual.containsValue("Si"));
-		assertFalse(actual.containsValue("VTBR"));
+		assertFalse(actual.containsValue("Eu"));
+		assertFalse(actual.containsValue("GAZR"));
 		assertFalse(actual.containsValue("SBRF"));
 	}
 	
@@ -197,7 +199,8 @@ public class FidexpIT {
 			LocalDate next = nextFuturesDate(current);
 			expected.add(getFuturesName("RTS", next));
 			expected.add(getFuturesName("Si", next));
-			expected.add(getFuturesName("VTBR", next));
+			expected.add(getFuturesName("Eu", next));
+			expected.add(getFuturesName("GAZR", next));
 			expected.add(getFuturesName("SBRF", next));
 			current = current.plusMonths(3);
 		}
@@ -209,7 +212,8 @@ public class FidexpIT {
 		}
 		assertFalse(actual.containsValue("RTS"));
 		assertFalse(actual.containsValue("Si"));
-		assertFalse(actual.containsValue("VTBR"));
+		assertFalse(actual.containsValue("Eu"));
+		assertFalse(actual.containsValue("GAZR"));
 		assertFalse(actual.containsValue("SBRF"));
 	}
 
