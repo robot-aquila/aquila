@@ -7,14 +7,22 @@ import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SchedulerWorkingPassTest {
 	
 	static Instant T(String timeString) {
 		return Instant.parse(timeString);
+	}
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
 	}
 	
 	private IMocksControl control;

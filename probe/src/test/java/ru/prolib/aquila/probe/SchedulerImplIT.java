@@ -13,8 +13,10 @@ import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
@@ -203,6 +205,12 @@ public class SchedulerImplIT {
 			result.add(task.realTime);
 		}
 		return result;
+	}
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
 	}
 	
 	private SchedulerImpl scheduler;
