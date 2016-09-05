@@ -75,5 +75,8 @@ public class ProbeMsg {
 	public static final MsgID SSP_MODE_STEP = newMsgID("SSP_MODE_STEP");
 	public static final MsgID SSP_MODE_CUTOFF = newMsgID("SSP_MODE_CUTOFF");
 	public static final MsgID SSP_EXEC_SPEED = newMsgID("SSP_EXEC_SPEED");
+	
+	public static final MsgID STD_DIALOG_TITLE = newMsgID("STD_DIALOG_TITLE");
+	public static final MsgID STD_TREE_ROOT = newMsgID("STD_TREE_ROOT");
 
 }

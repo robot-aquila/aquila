@@ -9,7 +9,6 @@ import java.util.Observer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
@@ -46,6 +45,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 	private final TimeSelectionDialogView timeSelectionDialog;
 	private final SchedulerOptionsDialogView schedulerOptionsDialog;
 	private SchedulerOptions schedulerOptions;
+	private final ScheduledTasksDialogView scheduledTasksDialog;
 	
 	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler) {
 		this.messages = messages;
@@ -53,6 +53,7 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 		setName(messages.get(ProbeMsg.TOOLBAR_TITLE));
 		timeSelectionDialog = new TimeSelectionDialog(messages);
 		schedulerOptionsDialog = new SchedulerOptionsDialog(messages);
+		scheduledTasksDialog = new ScheduledTasksDialog(messages);
 		btnOptions = createButton("options", ACTION_OPTIONS, ProbeMsg.BTN_TTIP_OPTIONS);
 		btnPause = createButton("pause", ACTION_PAUSE, ProbeMsg.BTN_TTIP_PAUSE);
 		btnRun = createButton("run1", ACTION_RUN, ProbeMsg.BTN_TTIP_RUN);
@@ -147,7 +148,8 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 			scheduler.setModeStep();
 			break;
 		case ACTION_LIST:
-			JOptionPane.showMessageDialog(null, "Not yet implemented");
+			scheduledTasksDialog.showDialog(scheduler.getState());
+			break;
 		}
 	}
 
