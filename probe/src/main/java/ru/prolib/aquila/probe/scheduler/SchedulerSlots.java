@@ -3,8 +3,10 @@ package ru.prolib.aquila.probe.scheduler;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 public class SchedulerSlots {
 	private LinkedList<SchedulerSlot> slotList;
@@ -66,6 +68,25 @@ public class SchedulerSlots {
 	public void clear() {
 		slotList.clear();
 		slotMap.clear();
+	}
+	
+	/**
+	 * Get list of time of all existing slots.
+	 * <p>
+	 * @return the set of time instants which have at least one scheduled task.
+	 */
+	public Set<Instant> getTimeOfSlots() {
+		return new HashSet<>(slotMap.keySet());
+	}
+	
+	/**
+	 * Get slot at specified time point.
+	 * <p>
+	 * @param time - the time point to get a slot at
+	 * @return the slot instance or null if no slot at the time point
+	 */
+	public SchedulerSlot getSlot(Instant time) {
+		return slotMap.get(time);
 	}
 	
 	private SchedulerSlot getOrCreateSlot(Instant slotTime) {

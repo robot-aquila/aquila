@@ -6,9 +6,11 @@ import static org.easymock.EasyMock.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -182,6 +184,48 @@ public class SchedulerSlotsTest {
 		
 		assertEquals(new ArrayList<SchedulerSlot>(), actualSlotList);
 		assertEquals(new HashMap<Instant, SchedulerSlot>(), actualSlotMap);
+	}
+	
+	@Test
+	public void testGetTimeOfSlots() {
+		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
+		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
+		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		task1.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
+		task2.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
+		task3.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));
+		slots.addTask(task1);
+		slots.addTask(task2);
+		slots.addTask(task3);
+		
+		Set<Instant> actual = slots.getTimeOfSlots();
+		
+		Set<Instant> expected = new HashSet<>();
+		expected.add(T("2016-08-29T18:25:00Z"));
+		expected.add(T("2016-08-29T18:20:00Z"));
+		expected.add(T("2016-08-29T18:30:00Z"));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetSlot() {
+		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
+		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
+		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		task1.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
+		task2.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
+		task3.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));
+		slots.addTask(task1);
+		slots.addTask(task2);
+		slots.addTask(task3);
+		
+		assertNull(slots.getSlot(T("2016-08-29T18:15:00Z")));
+		SchedulerSlot actual = slots.getSlot(T("2016-08-29T18:25:00Z"));
+		
+		SchedulerSlot expected = new SchedulerSlot(T("2016-08-29T18:25:00Z"))
+			.addTask(task1)
+			.addTask(task2);
+		assertEquals(expected, actual);
 	}
 
 }
