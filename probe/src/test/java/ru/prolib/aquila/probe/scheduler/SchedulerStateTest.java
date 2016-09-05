@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -503,6 +505,33 @@ public class SchedulerStateTest {
 		state.setMode(SchedulerMode.WAIT);
 		
 		assertTrue(state.isModeWait());
+	}
+	
+	@Test
+	public void testGetTimeOfSlots() {
+		Set<Instant> expected = new HashSet<>();
+		expected.add(T("2015-02-13T00:00:00Z"));
+		expected.add(T("2015-02-14T00:00:00Z"));
+		expected.add(T("2015-02-15T00:00:00Z"));
+		expect(slotsMock.getTimeOfSlots()).andReturn(expected);
+		control.replay();
+		
+		assertSame(expected, state.getTimeOfSlots());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetSlot() {
+		SchedulerSlot slot = new SchedulerSlot(T("2016-01-02T00:00:00Z"));
+		expect(slotsMock.getSlot(T("2016-01-02T00:00:00Z"))).andReturn(slot);
+		expect(slotsMock.getSlot(T("2016-01-02T00:00:01Z"))).andReturn(null);
+		control.replay();
+		
+		assertSame(slot, state.getSlot(T("2016-01-02T00:00:00Z")));
+		assertNull(state.getSlot(T("2016-01-02T00:00:01Z")));
+		
+		control.verify();
 	}
 
 }

@@ -2,6 +2,7 @@ package ru.prolib.aquila.probe.scheduler;
 
 import java.time.Instant;
 import java.util.Observable;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -230,6 +231,24 @@ public class SchedulerState extends Observable {
 		lock.lock();
 		try {
 			return mode == SchedulerMode.WAIT;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	public Set<Instant> getTimeOfSlots() {
+		lock.lock();
+		try {
+			return slots.getTimeOfSlots();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	public SchedulerSlot getSlot(Instant time) {
+		lock.lock();
+		try {
+			return slots.getSlot(time);
 		} finally {
 			lock.unlock();
 		}
