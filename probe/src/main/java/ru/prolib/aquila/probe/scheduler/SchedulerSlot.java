@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 public class SchedulerSlot implements Comparable<SchedulerSlot> {
 	private final Instant time;
-	private final List<SchedulerTask> tasks = new ArrayList<>();
+	private final List<SchedulerTaskImpl> tasks = new ArrayList<>();
 	
 	public SchedulerSlot(Instant time) {
 		this.time = time;
@@ -18,7 +18,7 @@ public class SchedulerSlot implements Comparable<SchedulerSlot> {
 		return time;
 	}
 	
-	public List<SchedulerTask> getTasks() {
+	public List<SchedulerTaskImpl> getTasks() {
 		return tasks;
 	}
 	
@@ -27,7 +27,7 @@ public class SchedulerSlot implements Comparable<SchedulerSlot> {
 		return this;
 	}
 	
-	public SchedulerSlot addTask(SchedulerTask task) {
+	public SchedulerSlot addTask(SchedulerTaskImpl task) {
 		tasks.add(task);
 		return this;
 	}

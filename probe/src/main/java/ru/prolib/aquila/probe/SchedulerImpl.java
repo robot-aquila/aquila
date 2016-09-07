@@ -20,7 +20,7 @@ import ru.prolib.aquila.probe.scheduler.CmdScheduleTask;
 import ru.prolib.aquila.probe.scheduler.CmdSetExecutionSpeed;
 import ru.prolib.aquila.probe.scheduler.CmdShiftForward;
 import ru.prolib.aquila.probe.scheduler.SchedulerState;
-import ru.prolib.aquila.probe.scheduler.SchedulerTask;
+import ru.prolib.aquila.probe.scheduler.SchedulerTaskImpl;
 
 public class SchedulerImpl implements Scheduler {
 	private static final Logger logger;
@@ -69,7 +69,7 @@ public class SchedulerImpl implements Scheduler {
 
 	@Override
 	public TaskHandler schedule(Runnable task, Instant time) {
-		SchedulerTask handler = new SchedulerTask(task);
+		SchedulerTaskImpl handler = new SchedulerTaskImpl(task);
 		handler.scheduleForFirstExecution(time);
 		send(new CmdScheduleTask(handler));
 		return handler;
@@ -77,7 +77,7 @@ public class SchedulerImpl implements Scheduler {
 
 	@Override
 	public TaskHandler schedule(Runnable task, Instant firstTime, long period) {
-		SchedulerTask handler = new SchedulerTask(task, period);
+		SchedulerTaskImpl handler = new SchedulerTaskImpl(task, period);
 		handler.scheduleForFirstExecution(firstTime);
 		send(new CmdScheduleTask(handler));
 		return handler;
@@ -86,7 +86,7 @@ public class SchedulerImpl implements Scheduler {
 	@Override
 	public TaskHandler schedule(Runnable task, long delay) {
 		checkClosed();
-		SchedulerTask handler = new SchedulerTask(task);
+		SchedulerTaskImpl handler = new SchedulerTaskImpl(task);
 		handler.scheduleForFirstExecution(getCurrentTime(), delay);
 		send(new CmdScheduleTask(handler));
 		return handler;
@@ -95,7 +95,7 @@ public class SchedulerImpl implements Scheduler {
 	@Override
 	public TaskHandler schedule(Runnable task, long delay, long period) {
 		checkClosed();
-		SchedulerTask handler = new SchedulerTask(task, period);
+		SchedulerTaskImpl handler = new SchedulerTaskImpl(task, period);
 		handler.scheduleForFirstExecution(getCurrentTime(), delay);
 		send(new CmdScheduleTask(handler));
 		return handler;

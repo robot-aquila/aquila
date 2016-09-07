@@ -9,10 +9,10 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SchedulerTaskTest {
+public class SchedulerTaskImplTest {
 	private IMocksControl control;
 	private Runnable runnable1, runnable2;
-	private SchedulerTask task;
+	private SchedulerTaskImpl task;
 
 	@Before
 	public void setUp() throws Exception {
@@ -22,7 +22,7 @@ public class SchedulerTaskTest {
 			@Override public String toString() { return "foobar"; }
 			@Override public void run() { }
 		};
-		task = new SchedulerTask(runnable1, 5000L);
+		task = new SchedulerTaskImpl(runnable1, 5000L);
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class SchedulerTaskTest {
 	
 	@Test
 	public void testCtor1() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		assertEquals(SchedulerTaskState.PENDING, task.getState());
 		assertFalse(task.isPeriodic());
 		assertSame(runnable1, task.getRunnable());
@@ -64,7 +64,7 @@ public class SchedulerTaskTest {
 	
 	@Test (expected=IllegalStateException.class)
 	public void testScheduleForFirstExecution_ThrowsIfError() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		expectLastCall().andThrow(new RuntimeException("Test error"));
@@ -83,7 +83,7 @@ public class SchedulerTaskTest {
 	
 	@Test (expected=IllegalStateException.class)
 	public void testScheduleForFirstExecution_ThrowsIfExecuted() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		control.replay();
@@ -117,7 +117,7 @@ public class SchedulerTaskTest {
 	
 	@Test
 	public void testCancel_SkipIfError() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		expectLastCall().andThrow(new RuntimeException("Test error"));
@@ -131,7 +131,7 @@ public class SchedulerTaskTest {
 	
 	@Test
 	public void testCancel_SkipIfExecuted() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		control.replay();
@@ -144,7 +144,7 @@ public class SchedulerTaskTest {
 	
 	@Test
 	public void testExecute() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 0L);
 		runnable1.run();
 		control.replay();
@@ -172,7 +172,7 @@ public class SchedulerTaskTest {
 	
 	@Test (expected=IllegalStateException.class)
 	public void testExecute_ThrowsIfError() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		expectLastCall().andThrow(new RuntimeException("Test error"));
@@ -184,7 +184,7 @@ public class SchedulerTaskTest {
 	
 	@Test (expected=IllegalStateException.class)
 	public void testExecute_ThrowsIfExecuted() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		control.replay();
@@ -214,7 +214,7 @@ public class SchedulerTaskTest {
 	
 	@Test (expected=IllegalStateException.class)
 	public void testScheduleForNextExecution_ThrowsIfNotPeriodic() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		
 		task.scheduleForNextExecution(Instant.EPOCH.plusSeconds(10));
@@ -227,7 +227,7 @@ public class SchedulerTaskTest {
 	
 	@Test (expected=IllegalStateException.class)
 	public void testScheduleForNextExecution_ThrowsIfError() {
-		task = new SchedulerTask(runnable1);
+		task = new SchedulerTaskImpl(runnable1);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		expectLastCall().andThrow(new RuntimeException("Test error"));
@@ -246,24 +246,24 @@ public class SchedulerTaskTest {
 	
 	@Test
 	public void testToString() {
-		task = new SchedulerTask(runnable2);
+		task = new SchedulerTaskImpl(runnable2);
 		
-		assertEquals("SchedulerTask[PENDING foobar]", task.toString());
+		assertEquals("SchedulerTaskImpl[PENDING foobar]", task.toString());
 	}
 	
 	@Test
 	public void testToString_Scheduled() {
-		task = new SchedulerTask(runnable2, 1500L);
+		task = new SchedulerTaskImpl(runnable2, 1500L);
 		task.scheduleForFirstExecution(Instant.parse("2016-08-25T21:57:41Z"), 10000L);
 		
-		assertEquals("SchedulerTask[2016-08-25T21:57:51Z P:1500 foobar]", task.toString());
+		assertEquals("SchedulerTaskImpl[2016-08-25T21:57:51Z P:1500 foobar]", task.toString());
 	}
 	
 	@Test
 	public void testToString_Periodic() {
-		task = new SchedulerTask(runnable2, 1500L);
+		task = new SchedulerTaskImpl(runnable2, 1500L);
 		
-		assertEquals("SchedulerTask[PENDING P:1500 foobar]", task.toString());
+		assertEquals("SchedulerTaskImpl[PENDING P:1500 foobar]", task.toString());
 	}
 	
 	@Test
@@ -274,26 +274,26 @@ public class SchedulerTaskTest {
 		control.replay();
 		task.execute();
 		
-		assertEquals("SchedulerTask[ERROR P:5000 EasyMock for interface java.lang.Runnable]", task.toString());
+		assertEquals("SchedulerTaskImpl[ERROR P:5000 EasyMock for interface java.lang.Runnable]", task.toString());
 	}
 	
 	@Test
 	public void testToString_Executed() {
-		task = new SchedulerTask(runnable2);
+		task = new SchedulerTaskImpl(runnable2);
 		task.scheduleForFirstExecution(Instant.EPOCH, 1000L);
 		runnable1.run();
 		control.replay();
 		task.execute();
 		
-		assertEquals("SchedulerTask[EXECUTED foobar]", task.toString());
+		assertEquals("SchedulerTaskImpl[EXECUTED foobar]", task.toString());
 	}
 	
 	@Test
 	public void testToString_Cancelled() {
-		task = new SchedulerTask(runnable2);
+		task = new SchedulerTaskImpl(runnable2);
 		task.cancel();
 		
-		assertEquals("SchedulerTask[CANCELLED foobar]", task.toString());
+		assertEquals("SchedulerTaskImpl[CANCELLED foobar]", task.toString());
 	}
 
 

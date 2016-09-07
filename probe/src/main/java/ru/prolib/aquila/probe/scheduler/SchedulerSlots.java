@@ -29,7 +29,7 @@ public class SchedulerSlots {
 	 * @param task - the task to add
 	 * @throws IllegalArgumentException - the task is not scheduled for execution
 	 */
-	public void addTask(SchedulerTask task) {
+	public void addTask(SchedulerTaskImpl task) {
 		Instant slotTime = task.getNextExecutionTime();
 		if ( slotTime == null ) {
 			throw new IllegalArgumentException("Task must be scheduled for execution");

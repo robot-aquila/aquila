@@ -28,14 +28,32 @@ public class ScheduledTasksPanel extends JPanel {
 		timeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 	
+	static class TaskNode extends DefaultMutableTreeNode {
+		private static final long serialVersionUID = 1L;
+		private final String title;
+		
+		public TaskNode(SchedulerTask handler, String title) {
+			super(handler);
+			this.title = title;
+		}
+		
+		@Override
+		public String toString() {
+			return title;
+		}
+		
+	}
+	
 	private final ZoneId zoneId;
 	private final DefaultMutableTreeNode root;
 	private final DefaultTreeModel treeModel;
 	private final JTree tree;
+	private final List<SchedulerTaskFilter> filters;
 	
-	public ScheduledTasksPanel(IMessages messages, ZoneId zoneId) {
+	public ScheduledTasksPanel(IMessages messages, List<SchedulerTaskFilter> filters, ZoneId zoneId) {
 		setLayout(new BorderLayout());
 		this.zoneId = zoneId;
+		this.filters = filters;
 		root = new DefaultMutableTreeNode(messages.get(ProbeMsg.STD_TREE_ROOT));
 		treeModel = new DefaultTreeModel(root);
 		tree = new JTree(treeModel);
@@ -49,17 +67,33 @@ public class ScheduledTasksPanel extends JPanel {
 		Collections.sort(list);
 		for ( Instant time : list ) {
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(time.atZone(zoneId).format(timeFormat));
-			root.add(node);
 			SchedulerSlot slot = state.getSlot(time);
-			for ( SchedulerTask task : slot.getTasks() ) {
-				DefaultMutableTreeNode taskNode = new DefaultMutableTreeNode(task.getRunnable()); 
-				node.add(taskNode);
+			for ( SchedulerTask handler : slot.getTasks() ) {
+				TaskNode handlerNode = getTaskNode(handler);
+				if ( handlerNode != null ) {
+					node.add(handlerNode);
+				}
+			}
+			if ( node.getChildCount() > 0 ) {
+				root.add(node);
 			}
 		}
 		tree.expandRow(0);
 		tree.setRootVisible(false);
 		tree.setShowsRootHandles(true);
 		treeModel.reload(root);
+	}
+	
+	private TaskNode getTaskNode(SchedulerTask handler) {
+		if ( filters == null ) {
+			return new TaskNode(handler, handler.getRunnable().toString());
+		}
+		for ( SchedulerTaskFilter filter : filters ) {
+			if ( filter.isIncluded(handler) ) {
+				return new TaskNode(handler, filter.formatTitle(handler));
+			}
+		}
+		return null;
 	}
 	
 }

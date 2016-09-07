@@ -21,7 +21,7 @@ import ru.prolib.aquila.probe.scheduler.CmdScheduleTask;
 import ru.prolib.aquila.probe.scheduler.CmdSetExecutionSpeed;
 import ru.prolib.aquila.probe.scheduler.CmdShiftForward;
 import ru.prolib.aquila.probe.scheduler.SchedulerState;
-import ru.prolib.aquila.probe.scheduler.SchedulerTask;
+import ru.prolib.aquila.probe.scheduler.SchedulerTaskImpl;
 
 public class SchedulerImplTest {
 	
@@ -95,7 +95,7 @@ public class SchedulerImplTest {
 	
 	@Test
 	public void testSchedule_RI() throws Exception {
-		SchedulerTask expected = new SchedulerTask(runnableMock);
+		SchedulerTaskImpl expected = new SchedulerTaskImpl(runnableMock);
 		expected.scheduleForFirstExecution(T("1998-03-15T00:00:00Z"));
 		queueMock.put(new CmdScheduleTask(expected));
 		control.replay();
@@ -117,7 +117,7 @@ public class SchedulerImplTest {
 
 	@Test
 	public void testSchedule_RIL() throws Exception {
-		SchedulerTask expected = new SchedulerTask(runnableMock, 1000L);
+		SchedulerTaskImpl expected = new SchedulerTaskImpl(runnableMock, 1000L);
 		expected.scheduleForFirstExecution(T("2015-02-14T00:00:00Z"));
 		queueMock.put(new CmdScheduleTask(expected));
 		control.replay();
@@ -139,7 +139,7 @@ public class SchedulerImplTest {
 	
 	@Test
 	public void testSchedule_RL() throws Exception {
-		SchedulerTask expected = new SchedulerTask(runnableMock);
+		SchedulerTaskImpl expected = new SchedulerTaskImpl(runnableMock);
 		expected.scheduleForFirstExecution(T("2024-08-13T00:00:00Z"), 2500L);
 		expect(stateMock.getCurrentTime()).andReturn(T("2024-08-13T00:00:00Z"));
 		queueMock.put(new CmdScheduleTask(expected));
@@ -162,7 +162,7 @@ public class SchedulerImplTest {
 
 	@Test
 	public void testSchedule_RLL() throws Exception {
-		SchedulerTask expected = new SchedulerTask(runnableMock, 5000L);
+		SchedulerTaskImpl expected = new SchedulerTaskImpl(runnableMock, 5000L);
 		expected.scheduleForFirstExecution(T("1345-09-12T00:00:00Z"), 2500L);
 		expect(stateMock.getCurrentTime()).andReturn(T("1345-09-12T00:00:00Z"));
 		queueMock.put(new CmdScheduleTask(expected));
@@ -185,7 +185,7 @@ public class SchedulerImplTest {
 	
 	@Test
 	public void testScheduleAtFixedRate_RIL() throws Exception {
-		SchedulerTask expected = new SchedulerTask(runnableMock, 1000L);
+		SchedulerTaskImpl expected = new SchedulerTaskImpl(runnableMock, 1000L);
 		expected.scheduleForFirstExecution(T("2015-02-14T00:00:00Z"));
 		queueMock.put(new CmdScheduleTask(expected));
 		control.replay();
@@ -207,7 +207,7 @@ public class SchedulerImplTest {
 
 	@Test
 	public void testScheduleAtFixedRate_RLL() throws Exception {
-		SchedulerTask expected = new SchedulerTask(runnableMock, 5000L);
+		SchedulerTaskImpl expected = new SchedulerTaskImpl(runnableMock, 5000L);
 		expected.scheduleForFirstExecution(T("1345-09-12T00:00:00Z"), 2500L);
 		expect(stateMock.getCurrentTime()).andReturn(T("1345-09-12T00:00:00Z"));
 		queueMock.put(new CmdScheduleTask(expected));

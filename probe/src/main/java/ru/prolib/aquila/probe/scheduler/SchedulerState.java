@@ -157,7 +157,7 @@ public class SchedulerState extends Observable {
 		}
 	}
 	
-	void addTask(SchedulerTask task) {
+	void addTask(SchedulerTaskImpl task) {
 		lock.lock();
 		try {
 			slots.addTask(task);

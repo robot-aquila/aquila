@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.time.Instant;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -47,13 +48,15 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 	private SchedulerOptions schedulerOptions;
 	private final ScheduledTasksDialogView scheduledTasksDialog;
 	
-	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler) {
+	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler,
+			List<SchedulerTaskFilter> filters)
+	{
 		this.messages = messages;
 		this.scheduler = scheduler;
 		setName(messages.get(ProbeMsg.TOOLBAR_TITLE));
 		timeSelectionDialog = new TimeSelectionDialog(messages);
 		schedulerOptionsDialog = new SchedulerOptionsDialog(messages);
-		scheduledTasksDialog = new ScheduledTasksDialog(messages);
+		scheduledTasksDialog = new ScheduledTasksDialog(messages, filters);
 		btnOptions = createButton("options", ACTION_OPTIONS, ProbeMsg.BTN_TTIP_OPTIONS);
 		btnPause = createButton("pause", ACTION_PAUSE, ProbeMsg.BTN_TTIP_PAUSE);
 		btnRun = createButton("run1", ACTION_RUN, ProbeMsg.BTN_TTIP_RUN);
@@ -65,8 +68,11 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 		refreshControls();
 		schedulerOptions = new SchedulerOptions();
 		schedulerOptions.setTimeFrame(TimeFrame.M1);
-		
 		add(new SchedulerStatePanel(messages, scheduler.getState()));
+	}
+	
+	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler) {
+		this(messages, scheduler, null);
 	}
 	
 	private JButton createButton(String iconName, String actionCommand, MsgID tooltip) {

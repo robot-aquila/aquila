@@ -41,12 +41,12 @@ public class SchedulerSlotsTest {
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testAddTask_ThrowsIfTaskNotScheduled() {
-		slots.addTask(new SchedulerTask(runnable1Mock));
+		slots.addTask(new SchedulerTaskImpl(runnable1Mock));
 	}
 	
 	@Test
 	public void testAddTask() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:15:00Z"));
 		
 		slots.addTask(task1);
@@ -63,9 +63,9 @@ public class SchedulerSlotsTest {
 	
 	@Test
 	public void testAddTask_DeterminesHeadSlot() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
-		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
-		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
+		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);
+		SchedulerTaskImpl task3 = new SchedulerTaskImpl(runnable3Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
 		task2.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
 		task3.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));
@@ -90,9 +90,9 @@ public class SchedulerSlotsTest {
 	
 	@Test
 	public void testAddTask_AppendToExistingSlot() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
-		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
-		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
+		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);
+		SchedulerTaskImpl task3 = new SchedulerTaskImpl(runnable3Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
 		task2.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
 		task3.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
@@ -116,9 +116,9 @@ public class SchedulerSlotsTest {
 
 	@Test
 	public void testRemoveNextSlot() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
-		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
-		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
+		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);
+		SchedulerTaskImpl task3 = new SchedulerTaskImpl(runnable3Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
 		task2.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
 		task3.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));
@@ -145,9 +145,9 @@ public class SchedulerSlotsTest {
 	
 	@Test
 	public void testRemoveNextSlot_SortsRemainingSlots() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
-		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
-		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
+		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);
+		SchedulerTaskImpl task3 = new SchedulerTaskImpl(runnable3Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
 		task2.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));
 		task3.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
@@ -170,9 +170,9 @@ public class SchedulerSlotsTest {
 	
 	@Test
 	public void testClear() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
-		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
-		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
+		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);
+		SchedulerTaskImpl task3 = new SchedulerTaskImpl(runnable3Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
 		task2.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));
 		task3.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
@@ -188,9 +188,9 @@ public class SchedulerSlotsTest {
 	
 	@Test
 	public void testGetTimeOfSlots() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
-		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
-		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
+		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);
+		SchedulerTaskImpl task3 = new SchedulerTaskImpl(runnable3Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
 		task2.scheduleForFirstExecution(T("2016-08-29T18:20:00Z"));
 		task3.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));
@@ -209,9 +209,9 @@ public class SchedulerSlotsTest {
 	
 	@Test
 	public void testGetSlot() {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock);
-		SchedulerTask task2 = new SchedulerTask(runnable2Mock);
-		SchedulerTask task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
+		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);
+		SchedulerTaskImpl task3 = new SchedulerTaskImpl(runnable3Mock);
 		task1.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
 		task2.scheduleForFirstExecution(T("2016-08-29T18:25:00Z"));
 		task3.scheduleForFirstExecution(T("2016-08-29T18:30:00Z"));

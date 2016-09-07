@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class SchedulerSlotTest {
 	private IMocksControl control;
-	private SchedulerTask task1, task2, task3;
+	private SchedulerTaskImpl task1, task2, task3;
 	private SchedulerSlot slot;
 
 	static Instant T(String timeString) {
@@ -23,15 +23,15 @@ public class SchedulerSlotTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		task1 = control.createMock(SchedulerTask.class);
-		task2 = control.createMock(SchedulerTask.class);
-		task3 = control.createMock(SchedulerTask.class);
+		task1 = control.createMock(SchedulerTaskImpl.class);
+		task2 = control.createMock(SchedulerTaskImpl.class);
+		task3 = control.createMock(SchedulerTaskImpl.class);
 		slot = new SchedulerSlot(T("2016-08-26T15:10:00Z"));
 	}
 
 	@Test
 	public void testCtor() {
-		List<SchedulerTask> expected = new ArrayList<>();
+		List<SchedulerTaskImpl> expected = new ArrayList<>();
 		assertEquals(T("2016-08-26T15:10:00Z"), slot.getTime());
 		assertEquals(expected, slot.getTasks());
 	}
@@ -41,7 +41,7 @@ public class SchedulerSlotTest {
 		assertSame(slot, slot.addTask(task1));
 		assertSame(slot, slot.addTask(task2));
 
-		List<SchedulerTask> expected = new ArrayList<>();
+		List<SchedulerTaskImpl> expected = new ArrayList<>();
 		expected.add(task1);
 		expected.add(task2);
 		assertEquals(expected, slot.getTasks());
@@ -62,7 +62,7 @@ public class SchedulerSlotTest {
 		
 		assertSame(slot, slot.clearTasks());
 		
-		List<SchedulerTask> expected = new ArrayList<>();
+		List<SchedulerTaskImpl> expected = new ArrayList<>();
 		assertEquals(expected, slot.getTasks());
 	}
 	

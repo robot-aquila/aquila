@@ -9,13 +9,13 @@ import org.junit.Test;
 
 public class CmdScheduleTaskTest {
 	private IMocksControl control;
-	private SchedulerTask task;
+	private SchedulerTaskImpl task;
 	private CmdScheduleTask cmd;
 
 	@Before
 	public void setUp() throws Exception {
 		control = EasyMock.createControl();
-		task = control.createMock(SchedulerTask.class);
+		task = control.createMock(SchedulerTaskImpl.class);
 		cmd = new CmdScheduleTask(task);
 	}
 
@@ -29,7 +29,7 @@ public class CmdScheduleTaskTest {
 	public void testEquals() {
 		assertTrue(cmd.equals(cmd));
 		assertTrue(cmd.equals(new CmdScheduleTask(task)));
-		assertFalse(cmd.equals(new CmdScheduleTask(control.createMock(SchedulerTask.class))));
+		assertFalse(cmd.equals(new CmdScheduleTask(control.createMock(SchedulerTaskImpl.class))));
 		assertFalse(cmd.equals(null));
 		assertFalse(cmd.equals(this));
 	}

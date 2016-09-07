@@ -99,7 +99,7 @@ public class SchedulerStateTest {
 				new CmdModeSwitchRunCutoff(T("2016-08-30T00:00:00Z")),
 				new CmdModeSwitchRunStep(),
 				new CmdModeSwitchWait(),
-				new CmdScheduleTask(control.createMock(SchedulerTask.class)),
+				new CmdScheduleTask(control.createMock(SchedulerTaskImpl.class)),
 				new CmdShiftBackward(Instant.EPOCH),
 				new CmdShiftForward(T("2048-01-01T00:00:00Z"))
 		};
@@ -176,7 +176,7 @@ public class SchedulerStateTest {
 	public void testProcessCommand_ScheduleTask() {
 		state.addObserver(observerMock);
 		state.setCutoffTime(T("2016-08-31T00:00:00Z"));
-		SchedulerTask taskMock = control.createMock(SchedulerTask.class);
+		SchedulerTaskImpl taskMock = control.createMock(SchedulerTaskImpl.class);
 		slotsMock.addTask(taskMock);
 		control.replay();
 		
@@ -295,7 +295,7 @@ public class SchedulerStateTest {
 	
 	@Test
 	public void testAddTask() {
-		SchedulerTask taskMock = control.createMock(SchedulerTask.class);
+		SchedulerTaskImpl taskMock = control.createMock(SchedulerTaskImpl.class);
 		slotsMock.addTask(taskMock);
 		control.replay();
 		

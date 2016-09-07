@@ -100,9 +100,9 @@ public class SchedulerWorkingPassTest {
 	
 	@Test
 	public void testExecute_HasSlotForExecution() throws Exception {
-		SchedulerTask task1 = new SchedulerTask(runnable1Mock),
-				task2 = new SchedulerTask(runnable2Mock),
-				task3 = new SchedulerTask(runnable3Mock);
+		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock),
+				task2 = new SchedulerTaskImpl(runnable2Mock),
+				task3 = new SchedulerTaskImpl(runnable3Mock);
 		Instant time = T("2016-08-30T19:54:00Z");
 		task1.scheduleForFirstExecution(time);
 		task2.scheduleForFirstExecution(time);
@@ -129,7 +129,7 @@ public class SchedulerWorkingPassTest {
 	
 	@Test
 	public void testExecute_HasSlotForExecution_ReschedulePeriodic() throws Exception {
-		SchedulerTask task = new SchedulerTask(runnable1Mock, 1000);
+		SchedulerTaskImpl task = new SchedulerTaskImpl(runnable1Mock, 1000);
 		Instant time = T("2016-08-30T20:29:15Z");
 		task.scheduleForFirstExecution(time);
 		SchedulerSlot slot = new SchedulerSlot(time)
@@ -153,7 +153,7 @@ public class SchedulerWorkingPassTest {
 	
 	@Test
 	public void testExecute_HasSlotForExecution_SwitchToWaitInRunStepMode() throws Exception {
-		SchedulerTask task = new SchedulerTask(runnable1Mock);
+		SchedulerTaskImpl task = new SchedulerTaskImpl(runnable1Mock);
 		Instant time = T("2016-08-30T20:29:15Z");
 		task.scheduleForFirstExecution(time);
 		SchedulerSlot slot = new SchedulerSlot(time)
@@ -176,7 +176,7 @@ public class SchedulerWorkingPassTest {
 
 	@Test
 	public void testExecute_HasSlotForExecution_SkipCancelled() throws Exception {
-		SchedulerTask task = new SchedulerTask(runnable1Mock);
+		SchedulerTaskImpl task = new SchedulerTaskImpl(runnable1Mock);
 		Instant time = T("2016-08-30T20:29:15Z");
 		task.cancel();
 		SchedulerSlot slot = new SchedulerSlot(time)

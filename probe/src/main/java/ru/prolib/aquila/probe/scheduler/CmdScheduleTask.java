@@ -3,14 +3,14 @@ package ru.prolib.aquila.probe.scheduler;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 public class CmdScheduleTask extends Cmd {
-	private final SchedulerTask task;
+	private final SchedulerTaskImpl task;
 
-	public CmdScheduleTask(SchedulerTask task) {
+	public CmdScheduleTask(SchedulerTaskImpl task) {
 		super(CmdType.SCHEDULE_TASK);
 		this.task = task;
 	}
 	
-	public SchedulerTask getTask() {
+	public SchedulerTaskImpl getTask() {
 		return task;
 	}
 	
