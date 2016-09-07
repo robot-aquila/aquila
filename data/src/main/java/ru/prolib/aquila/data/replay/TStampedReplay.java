@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,47 +25,6 @@ public class TStampedReplay implements Replay {
 	
 	static {
 		logger = LoggerFactory.getLogger(TStampedReplay.class);
-	}
-	
-	public static class Consume implements Runnable {
-		private final TStampedReplay owner;
-		private final long sequenceID;
-		private final TStamped object;
-		
-		public Consume(TStampedReplay owner, long sequenceID, TStamped object) {
-			this.owner = owner;
-			this.sequenceID = sequenceID;
-			this.object = object;
-		}
-
-		@Override
-		public void run() {
-			owner.consume(sequenceID, object);
-		}
-		
-		@Override
-		public String toString() {
-			return getClass().getSimpleName()
-					+ "[srvID=" + owner.serviceID
-					+ " seqID=" + sequenceID + " " + object + "]"; 
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if ( other == this ) {
-				return true;
-			}
-			if ( other == null || other.getClass() != Consume.class ) {
-				return false;
-			}
-			Consume o = (Consume) other;
-			return new EqualsBuilder()
-				.append(owner, o.owner)
-				.append(sequenceID, o.sequenceID)
-				.append(object, o.object)
-				.isEquals();
-		}
-		
 	}
 	
 	private final Lock lock;
@@ -298,7 +256,7 @@ public class TStampedReplay implements Replay {
 							TStamped object = reader.item();
 							Instant consumptionTime = service.consumptionTime(currentTime, object);
 							object = service.mutate(object, consumptionTime);
-							scheduler.schedule(new Consume(this, sequenceID, object), consumptionTime);
+							scheduler.schedule(new TStampedReplayConsume(this, sequenceID, object), consumptionTime);
 							queued ++;
 						} else {
 							// Do not set a stop flag here because we have to

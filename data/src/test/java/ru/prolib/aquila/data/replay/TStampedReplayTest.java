@@ -215,7 +215,7 @@ public class TStampedReplayTest {
 	 */
 	private SchedulerStubTask newTask(Node node) {
 		return SchedulerStubTask.atTime(node.getTime(),
-			new TStampedReplay.Consume(replay, replay.getSequenceID(), node));
+			new TStampedReplayConsume(replay, replay.getSequenceID(), node));
 	}
 	
 	@Test
@@ -234,11 +234,11 @@ public class TStampedReplayTest {
 	@Test
 	public void test_Consume_Equals() {
 		Node object = newNode("2016-08-01T01:31:00Z", 5);
-		TStampedReplay.Consume consume1 = new TStampedReplay.Consume(replay, 10, object),
-				consume2 = new TStampedReplay.Consume(replay, 10, object),
-				consume3 = new TStampedReplay.Consume(control.createMock(TStampedReplay.class), 10, object),
-				consume4 = new TStampedReplay.Consume(replay, 10, newNode("2000-01-01T00:00:00Z", 5)),
-				consume5 = new TStampedReplay.Consume(replay, 5, object);
+		TStampedReplayConsume consume1 = new TStampedReplayConsume(replay, 10, object),
+				consume2 = new TStampedReplayConsume(replay, 10, object),
+				consume3 = new TStampedReplayConsume(control.createMock(TStampedReplay.class), 10, object),
+				consume4 = new TStampedReplayConsume(replay, 10, newNode("2000-01-01T00:00:00Z", 5)),
+				consume5 = new TStampedReplayConsume(replay, 5, object);
 		assertTrue(consume1.equals(consume2));
 		assertFalse(consume1.equals(consume3));
 		assertFalse(consume1.equals(consume4));
@@ -253,7 +253,7 @@ public class TStampedReplayTest {
 		TStampedReplay replayMock = control.createMock(TStampedReplay.class);
 		replayMock.consume(8, node);
 		control.replay();
-		TStampedReplay.Consume consume = new TStampedReplay.Consume(replayMock, 8, node);
+		TStampedReplayConsume consume = new TStampedReplayConsume(replayMock, 8, node);
 		
 		consume.run();
 		
