@@ -76,6 +76,10 @@ public class SimpleL1Replay {
 				+ "]";
 		}
 		
+		public L1Update getUpdate() {
+			return update;
+		}
+		
 	}
 	
 	private final Lock lock;
