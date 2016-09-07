@@ -61,6 +61,7 @@ public class ScheduledTasksDialog extends JDialog implements ScheduledTasksDialo
 		setPreferredSize(new Dimension(600, 400));
 		getContentPane().add(tasksPanel);
 		pack();
+		setLocationRelativeTo(null);
 	}
 	
 	private void createMenu(List<SchedulerTaskFilter> filters) {

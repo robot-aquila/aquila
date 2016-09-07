@@ -4,7 +4,7 @@ import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.probe.scheduler.SchedulerTask;
 
 /**
- * The filter to show or hide "other" tasks which weren't recognized by other filters.
+ * The filter to show or hide "all" tasks which weren't recognized by other filters.
  */
 public class SchedulerTaskDefaultFilter implements SchedulerTaskFilter {
 	private boolean enabled = true;

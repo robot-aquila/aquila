@@ -145,6 +145,7 @@ public class SchedulerOptionsDialog extends JDialog
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		getRootPane().setDefaultButton(btnOK);
 		pack();
+		setLocationRelativeTo(null);
 	}
 
 	@Override
