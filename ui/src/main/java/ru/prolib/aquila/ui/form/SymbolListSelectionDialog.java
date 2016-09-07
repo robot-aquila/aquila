@@ -45,7 +45,7 @@ public class SymbolListSelectionDialog extends JDialog implements SymbolListSele
 	public SymbolListSelectionDialog(IMessages messages, MsgID title) {
 		this.messages = messages;
 		setResizable(false);
-		setAlwaysOnTop(true);
+		//setAlwaysOnTop(true);
 		setModal(true);
 		setTitle(messages.get(title));
 		setPreferredSize(new Dimension(200, 300));
