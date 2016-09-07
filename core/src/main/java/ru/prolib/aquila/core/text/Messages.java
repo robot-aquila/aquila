@@ -186,6 +186,6 @@ public class Messages implements IMessages {
 
 	@Override
 	public String format(MsgID msgId, Object... args) {
-		return get(msgId);
+		return String.format(get(msgId), args);
 	}
 }
