@@ -79,6 +79,17 @@ public class CommonMsg {
 	public static final MsgID TSD_INITIAL_TIME = newMsgID("TSD_INITIAL_TIME");
 	public static final MsgID TSD_SELECTED_TIME = newMsgID("TSD_SELECTED_TIME");
 	
+	// Symbol list selection dialog
+	public static final MsgID SLD_DEFAULT_TITLE = newMsgID("SLD_DEFAULT_TITLE");
+	public static final MsgID SLD_SELECTED_SYMBOLS = newMsgID("SLD_SELECTED_SYMBOLS");
+	public static final MsgID SLD_ADD_SYMBOL = newMsgID("SLD_ADD_SYMBOL");
+	public static final MsgID SLD_ADD_SYMBOL_TOOLTIP = newMsgID("SLD_ADD_SYMBOL_TOOLTIP");
+	public static final MsgID SLD_REMOVE_SYMBOL = newMsgID("SLD_REMOVE_SYMBOL");
+	public static final MsgID SLD_REMOVE_SYMBOL_TOOLTIP = newMsgID("SLD_REMOVE_SYMBOL_TOOLTIP");
+	public static final MsgID SLD_INPUT_SYMBOL = newMsgID("SLD_INPUT_SYMBOL");
+	public static final MsgID SLD_BAD_INPUT_SYMBOL = newMsgID("SLD_BAD_INPUT_SYMBOL");
+
+	
 	private static MsgID newMsgID(String messageID) {
 		return new MsgID(SECTION_ID, messageID);
 	}
