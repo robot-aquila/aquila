@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
@@ -119,6 +120,15 @@ public class FileStorageImpl implements FileStorage {
 	
 	private String getRegularFilename(Symbol symbol) {
 		return idUtils.getSafeFilename(symbol, files.getRegularSuffix());
+	}
+
+	@Override
+	public Set<Symbol> scanForSymbols() throws DataStorageException {
+		try {
+			return namespace.scanForSymbols();
+		} catch ( IOException e ) {
+			throw new DataStorageException(e);
+		}
 	}
 
 }

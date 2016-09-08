@@ -3,6 +3,7 @@ package ru.prolib.aquila.data.storage.file;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
@@ -71,5 +72,13 @@ public interface FileStorage {
 	 */
 	public void commitTemporarySegmentFile(DatedSymbol descr)
 			throws DataStorageException;
+	
+	/**
+	 * Get list of known symbols.
+	 * <p>
+	 * @return list of known symbols
+	 * @throws DataStorageException - an error occurred
+	 */
+	public Set<Symbol> scanForSymbols() throws DataStorageException;
 
 }

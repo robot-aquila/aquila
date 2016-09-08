@@ -1,13 +1,17 @@
 package ru.prolib.aquila.data.storage.file;
 
 import static org.junit.Assert.*;
+import static org.easymock.EasyMock.*;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.easymock.IMocksControl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -29,6 +33,7 @@ public class FileStorageImplTest {
 	private FileStorageNamespace namespace;
 	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
+	private IMocksControl control;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -45,6 +50,7 @@ public class FileStorageImplTest {
 
 	@Before
 	public void setUp() throws Exception {
+		control = createStrictControl();
 		FileUtils.forceMkdir(root);
 		namespace = new FileStorageNamespaceV1(root);
 		storage = new FileStorageImpl(namespace, "test", files);
@@ -166,6 +172,22 @@ public class FileStorageImplTest {
 		File actual = storage.getDataFile(symbol1);
 		
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testScanForSymbols() throws Exception {
+		Set<Symbol> set = new HashSet<>();
+		set.add(new Symbol("AAPL"));
+		set.add(new Symbol("MSFT"));
+		set.add(new Symbol("GAZP"));
+		FileStorageNamespace namespaceMock = control.createMock(FileStorageNamespace.class);
+		expect(namespaceMock.scanForSymbols()).andReturn(set);
+		control.replay();
+		storage = new FileStorageImpl(namespaceMock, "test", files);
+		
+		assertSame(set, storage.scanForSymbols());
+		
+		control.verify();
 	}
 
 }
