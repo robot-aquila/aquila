@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
-import ru.prolib.aquila.utils.experimental.experiment.MoexTrackContract;
 
 public class Main {
 	private static final Logger logger;
@@ -31,7 +30,7 @@ public class Main {
 	Main() {
 		globalExit = new CountDownLatch(1);
 		experiments = new LinkedHashMap<>();
-		experiments.put("moex_track_contract", new MoexTrackContract(globalExit));
+		//experiments.put("moex_track_contract", new MoexTrackContract(globalExit));
 	}
 	
 	private int run(String[] args) {
