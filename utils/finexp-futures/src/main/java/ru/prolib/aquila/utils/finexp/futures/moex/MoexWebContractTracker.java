@@ -84,23 +84,26 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 				updateHandler = createHandler(updatePlannedTime);
 				logger.debug("Handler created. Update time: {}", updateSchedule.toZDT(updatePlannedTime));
 			}
+			boolean done = false;
 			try {
-				boolean done = updateHandler.execute(); // it may take some time
-				currentTime = scheduler.getCurrentTime();
-				if ( done ) {
-					closeHandler();
-					reschedule(updateSchedule.getNextTrackingPeriodStart(currentTime));
-					logger.debug("Rescheduled. Next tracking period at: {}",
-							updateSchedule.toZDT(updateSchedule.getNextTrackingPeriodStart(currentTime)));
-				} else {
-					reschedule(updateSchedule.getNextUpdateTime(currentTime));
-					logger.debug("Rescheduled. Next update time: {}",
-							updateSchedule.toZDT(updateSchedule.getNextUpdateTime(currentTime)));
-				}
+				done = updateHandler.execute(); // it may take some time
 			} catch ( WUWebPageException e ) {
-				logger.warn("The MOEX site error. We'll try later.", e);				
+				logger.warn("The MOEX site error. We'll try later.", e);
 			} catch ( DataStorageException e ) {
 				logErrorAndGlobalExit("The task stopped because of local storage error: ", e);
+				return;
+			}
+			
+			currentTime = scheduler.getCurrentTime();
+			if ( done ) {
+				closeHandler();
+				reschedule(updateSchedule.getNextTrackingPeriodStart(currentTime));
+				logger.debug("Rescheduled. Next tracking period at: {}",
+						updateSchedule.toZDT(updateSchedule.getNextTrackingPeriodStart(currentTime)));
+			} else {
+				reschedule(updateSchedule.getNextUpdateTime(currentTime));
+				logger.debug("Rescheduled. Next update time: {}",
+						updateSchedule.toZDT(updateSchedule.getNextUpdateTime(currentTime)));
 			}
 			
 		} else {
