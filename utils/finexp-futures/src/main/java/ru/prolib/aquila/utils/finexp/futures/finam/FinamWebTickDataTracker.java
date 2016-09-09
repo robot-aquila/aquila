@@ -1,6 +1,8 @@
-package ru.prolib.aquila.utils.finexp.futures;
+package ru.prolib.aquila.utils.finexp.futures.finam;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,15 +24,18 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.utils.LongTermTask;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.DatedSymbol;
 import ru.prolib.aquila.data.storage.file.FileStorage;
+import ru.prolib.aquila.utils.finexp.futures.CmdLine;
 import ru.prolib.aquila.web.utils.WUException;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
 import ru.prolib.aquila.web.utils.moex.Moex;
 
-public class UpdateLocalDatabaseTask implements Runnable {
+public class FinamWebTickDataTracker implements Runnable, Closeable {
 	private static final Logger logger;
+	private static final String TASK_NAME = "FINAM-WEB-TICK-DATA-TRACKER";
 	private static final int LOOKUP_MAX_DAYS = 30;
 	private static final int MARKET_ID = 14;
 	private static final int MIN_DOWNLOAD_SEGMENTS = 3;
@@ -43,7 +48,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 	private static final long PAUSE_BETWEEN_TASK_MAX = 60 * 12;
 	
 	static {
-		logger = LoggerFactory.getLogger(UpdateLocalDatabaseTask.class);
+		logger = LoggerFactory.getLogger(FinamWebTickDataTracker.class);
 	}
 	
 	private final FileStorage fileStorage;
@@ -51,7 +56,7 @@ public class UpdateLocalDatabaseTask implements Runnable {
 	private final Scheduler scheduler;
 	private final CommandLine cmdLine;
 	
-	public UpdateLocalDatabaseTask(FileStorage fileStorage,
+	public FinamWebTickDataTracker(FileStorage fileStorage,
 			CountDownLatch globalExit, Scheduler scheduler,
 			CommandLine cmdLine)
 	{
@@ -172,9 +177,20 @@ public class UpdateLocalDatabaseTask implements Runnable {
 			Instant nextUpdateTime = scheduler.getCurrentTime().plusSeconds(pause * 60);
 			logger.debug("The next update scheduled: {} minutes ahead at {}",
 					pause, LocalDateTime.ofInstant(nextUpdateTime, ZoneId.systemDefault()));
-			scheduler.schedule(this, nextUpdateTime);
+			reschedule(nextUpdateTime);
 		}
 		logger.debug("Update finished.");
+	}
+
+	@Override
+	public void close() throws IOException {
+		
+	}
+	
+	public void reschedule(Instant at) {
+		if ( globalExit.getCount() > 0 ) {
+			scheduler.schedule(new LongTermTask(this, TASK_NAME), at);
+		}
 	}
 
 }

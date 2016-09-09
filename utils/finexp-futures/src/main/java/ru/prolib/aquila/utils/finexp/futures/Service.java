@@ -1,23 +1,27 @@
 package ru.prolib.aquila.utils.finexp.futures;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.openqa.selenium.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
-import ru.prolib.aquila.data.storage.file.FileStorage;
+import ru.prolib.aquila.utils.finexp.futures.finam.FinamWebTickDataTracker;
+import ru.prolib.aquila.utils.finexp.futures.moex.MoexWebContractTracker;
 import ru.prolib.aquila.web.utils.finam.FidexpFileStorage;
+import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 
-public class TickDataStorageService {
+public class Service {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(TickDataStorageService.class);
+		logger = LoggerFactory.getLogger(Service.class);
 	}
 
 	public static void main(String[] args) throws ParseException {
@@ -35,24 +39,30 @@ public class TickDataStorageService {
 		if ( ! root.isDirectory() ) {
 			CmdLine.printErrorAndExit("The pathname is not a directory: " + root);
 		}
-		final FileStorage storage = FidexpFileStorage.createStorage(root);
+
 		final CountDownLatch globalExit = new CountDownLatch(1);
-		final Scheduler scheduler = new SchedulerLocal();
+		final Scheduler scheduler = new SchedulerLocal("SCHEDULER");
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override public void run() {
 				logger.debug("Initiate shutdown.");
 				globalExit.countDown();
 			}
 		});
-		scheduler.schedule(new UpdateLocalDatabaseTask(storage, globalExit, new SchedulerLocal(), cmd), 1000L);
+		FinamWebTickDataTracker finamService = new FinamWebTickDataTracker(FidexpFileStorage.createStorage(root), globalExit, scheduler, cmd);
+		MoexWebContractTracker moexService = new MoexWebContractTracker(globalExit, scheduler, new MoexContractFileStorage(root)); 
 		try {
+			Instant firstRun = scheduler.getCurrentTime().plusSeconds(5);
+			finamService.reschedule(firstRun);
+			moexService.reschedule(firstRun);
 			globalExit.await();
 		} catch ( InterruptedException e ) {
 			globalExit.countDown();
 			Thread.currentThread().interrupt();
+		} finally {
+			scheduler.close();
+			IOUtils.closeQuietly(finamService);
+			IOUtils.closeQuietly(moexService);
 		}
 	}
-	
-
 
 }
