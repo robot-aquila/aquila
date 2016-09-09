@@ -189,9 +189,7 @@ public class FidexpForm {
 	public FidexpForm selectPeriod(FidexpPeriod period) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
-			.find(By.id("issuer-profile-export-first-row"))
-			.find(By.className("finam-ui-controls-select"))
-			.find(By.className("finam-ui-controls-select-arrow"))
+			.find(By.xpath("//*[@id=\"issuer-profile-export-first-row\"]/td[3]/div"))
 			.click();
 		getPeriodSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(period))
@@ -220,9 +218,7 @@ public class FidexpForm {
 	public FidexpForm selectFileExt(FidexpFileExt format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
-			.find(By.id("issuer-profile-export-second-row"))
-			.find(By.className("finam-ui-controls-select"))
-			.find(By.className("finam-ui-controls-select-arrow"))
+			.find(By.xpath("//*[@id=\"issuer-profile-export-second-row\"]/td[3]/div"))
 			.click();
 		getFileExtSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(format))
@@ -275,9 +271,7 @@ public class FidexpForm {
 	public FidexpForm selectTimeFormat(FidexpTimeFormat format) throws WUWebPageException {
 		initialRequest();
 		new SearchWebElement(driver)
-			.find(By.id("issuer-profile-export-date-row"))
-			.find(By.className("finam-ui-controls-select"), 1)
-			.find(By.className("finam-ui-controls-select-arrow"))
+			.find(By.xpath("//*[@id=\"issuer-profile-export-date-row\"]/td[5]/div"))
 			.click();
 		getTimeFormatSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(format))

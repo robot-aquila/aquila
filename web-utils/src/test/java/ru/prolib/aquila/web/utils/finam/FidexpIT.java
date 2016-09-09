@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,7 +39,8 @@ public class FidexpIT {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
 	}
 
 	@Before

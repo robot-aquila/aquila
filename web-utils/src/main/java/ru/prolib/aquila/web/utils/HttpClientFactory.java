@@ -6,7 +6,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 public class HttpClientFactory {
-	public static final int DEFAULT_TIMEOUT = 15000;
+	public static final int DEFAULT_TIMEOUT = 60000;
 
 	public static CloseableHttpClient createDefaultClient() {
 		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
