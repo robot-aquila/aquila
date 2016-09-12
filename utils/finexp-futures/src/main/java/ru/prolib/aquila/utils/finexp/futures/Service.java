@@ -6,6 +6,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FilenameUtils;
 import org.openqa.selenium.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +41,11 @@ public class Service {
 			CmdLine.printErrorAndExit("The pathname is not a directory: " + root);
 		}
 
+		FilenameUtils.equals("foo", "foo"); // TODO: to remove, the linking test 
+		
 		final CountDownLatch globalExit = new CountDownLatch(1);
 		final Scheduler scheduler = new SchedulerLocal("SCHEDULER");
-		Runtime.getRuntime().addShutdownHook(new Thread() {
+		Runtime.getRuntime().addShutdownHook(new Thread("SHUTDOWN") {
 			@Override public void run() {
 				logger.debug("Initiate shutdown.");
 				globalExit.countDown();

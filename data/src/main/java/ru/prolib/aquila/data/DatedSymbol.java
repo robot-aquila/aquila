@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.storage;
+package ru.prolib.aquila.data;
 
 import java.time.LocalDate;
 

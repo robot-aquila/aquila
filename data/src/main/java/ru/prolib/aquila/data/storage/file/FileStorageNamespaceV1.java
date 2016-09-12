@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.utils.IdUtils;
-import ru.prolib.aquila.data.storage.DatedSymbol;
+import ru.prolib.aquila.data.DatedSymbol;
 
 /**
  * The first version of the file storage namespace.

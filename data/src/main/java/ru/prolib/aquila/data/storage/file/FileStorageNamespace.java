@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.data.storage.DatedSymbol;
+import ru.prolib.aquila.data.DatedSymbol;
 
 public interface FileStorageNamespace {
 	

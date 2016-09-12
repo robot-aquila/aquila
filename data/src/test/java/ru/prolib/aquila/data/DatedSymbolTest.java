@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.storage;
+package ru.prolib.aquila.data;
 
 import static org.junit.Assert.*;
 
@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.data.DatedSymbol;
 
 public class DatedSymbolTest {
 	private static Symbol symbol1 = new Symbol("SBER"), symbol2 = new Symbol("MSFT");

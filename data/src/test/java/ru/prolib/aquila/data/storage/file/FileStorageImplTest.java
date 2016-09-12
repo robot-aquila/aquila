@@ -18,8 +18,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.data.DatedSymbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.DatedSymbol;
 import ru.prolib.aquila.data.storage.file.FileStorageImpl;
 
 public class FileStorageImplTest {

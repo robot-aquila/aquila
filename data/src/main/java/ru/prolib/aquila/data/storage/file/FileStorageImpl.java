@@ -12,8 +12,8 @@ import org.apache.commons.io.FileUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.utils.IdUtils;
+import ru.prolib.aquila.data.DatedSymbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.DatedSymbol;
 
 /**
  * Common file storage implementation.
