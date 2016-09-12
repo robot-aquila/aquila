@@ -7,12 +7,12 @@ import ru.prolib.aquila.data.storage.file.FileStorageImpl;
 import ru.prolib.aquila.data.storage.file.FileStorageNamespaceV1;
 
 public class FidexpFileStorage {
-	private static final FidexpFiles files = new FidexpFiles();
+	private static final FidexpFSService service = new FidexpFSService();
 	private static final String DEFAULT_STORAGE_ID = "FINAM";
 
 	public static FileStorage createStorage(File root) {
 		return new FileStorageImpl(new FileStorageNamespaceV1(root),
-				DEFAULT_STORAGE_ID, files);
+				DEFAULT_STORAGE_ID, service);
 	}
 	
 }

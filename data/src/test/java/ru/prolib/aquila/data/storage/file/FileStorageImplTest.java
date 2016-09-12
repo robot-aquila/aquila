@@ -29,7 +29,7 @@ public class FileStorageImplTest {
 			date2 = LocalDate.of(2005, 12, 1);
 	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
 			descr2 = new DatedSymbol(symbol1, date2);
-	private static Files files;
+	private static FSService serviceStub;
 	private FileStorageNamespace namespace;
 	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
@@ -37,7 +37,7 @@ public class FileStorageImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		files = new Files() {
+		serviceStub = new FSService() {
 			@Override public String getRegularSuffix() {
 				return ".csv.gz";
 			}
@@ -53,7 +53,7 @@ public class FileStorageImplTest {
 		control = createStrictControl();
 		FileUtils.forceMkdir(root);
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "test", files);
+		storage = new FileStorageImpl(namespace, "test", serviceStub);
 	}
 	
 	@After
@@ -65,7 +65,7 @@ public class FileStorageImplTest {
 	public void testCtor3() throws Exception {
 		assertEquals(namespace, storage.getNamespace());
 		assertEquals("test", storage.getStorageID());
-		assertEquals(files, storage.getFiles());
+		assertEquals(serviceStub, storage.getService());
 	}
 	
 	@Test
@@ -95,7 +95,7 @@ public class FileStorageImplTest {
 	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "foo", files);
+		storage = new FileStorageImpl(namespace, "foo", serviceStub);
 		
 		storage.getTemporarySegmentFile(descr1);
 	}
@@ -120,7 +120,7 @@ public class FileStorageImplTest {
 	public void testListExistingSegments() throws Exception {
 		File root = new File("fixture");
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "bar", files);
+		storage = new FileStorageImpl(namespace, "bar", serviceStub);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
@@ -143,7 +143,7 @@ public class FileStorageImplTest {
 	public void testGetDataFileForWriting_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
 		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "foo", files);
+		storage = new FileStorageImpl(namespace, "foo", serviceStub);
 		
 		storage.getDataFileForWriting(symbol1);
 	}
@@ -183,7 +183,7 @@ public class FileStorageImplTest {
 		FileStorageNamespace namespaceMock = control.createMock(FileStorageNamespace.class);
 		expect(namespaceMock.scanForSymbols()).andReturn(set);
 		control.replay();
-		storage = new FileStorageImpl(namespaceMock, "test", files);
+		storage = new FileStorageImpl(namespaceMock, "test", serviceStub);
 		
 		assertSame(set, storage.scanForSymbols());
 		

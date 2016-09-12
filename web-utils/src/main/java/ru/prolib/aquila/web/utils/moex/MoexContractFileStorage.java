@@ -20,7 +20,7 @@ public class MoexContractFileStorage {
 	
 	public MoexContractFileStorage(File root) {
 		fileStorage = new FileStorageImpl(new FileStorageNamespaceV1(root),
-				"MOEX_CONTRACT", new MoexContractFiles());
+				"MOEX_CONTRACT", new MoexContractFSService());
 		ptmlFactory = new PtmlFactory(new MoexContractPtmlConverter());
 	}
 	

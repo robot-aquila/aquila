@@ -1,8 +1,8 @@
 package ru.prolib.aquila.web.utils.moex;
 
-import ru.prolib.aquila.data.storage.file.Files;
+import ru.prolib.aquila.data.storage.file.FSService;
 
-public class MoexContractFiles implements Files {
+public class MoexContractFSService implements FSService {
 
 	@Override
 	public String getRegularSuffix() {

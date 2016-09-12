@@ -1,11 +1,11 @@
 package ru.prolib.aquila.web.utils.finam;
 
-import ru.prolib.aquila.data.storage.file.Files;
+import ru.prolib.aquila.data.storage.file.FSService;
 
 /**
  * The files of daily tick data downloaded from FINAM site.
  */
-public class FidexpFiles implements Files {
+public class FidexpFSService implements FSService {
 
 	@Override
 	public String getRegularSuffix() {
@@ -16,6 +16,5 @@ public class FidexpFiles implements Files {
 	public String getTemporarySuffix() {
 		return ".part.csv.gz";
 	}
-	
 
 }

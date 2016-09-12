@@ -22,12 +22,12 @@ public class FileStorageImpl implements FileStorage {
 	private final IdUtils idUtils = new IdUtils();
 	private final String storageID;
 	private final FileStorageNamespace namespace;
-	private final Files files;
+	private final FSService service;
 	
-	public FileStorageImpl(FileStorageNamespace namespace, String storageID, Files files) {
+	public FileStorageImpl(FileStorageNamespace namespace, String storageID, FSService service) {
 		this.namespace = namespace;
 		this.storageID = storageID;
-		this.files = files;
+		this.service = service;
 	}
 	
 	public FileStorageNamespace getNamespace() {
@@ -38,8 +38,8 @@ public class FileStorageImpl implements FileStorage {
 		return storageID;
 	}
 	
-	public Files getFiles() {
-		return files;
+	public FSService getService() {
+		return service;
 	}
 
 	@Override
@@ -110,16 +110,16 @@ public class FileStorageImpl implements FileStorage {
 	
 	private String getTemporaryFilename(DatedSymbol descr) {
 		return idUtils.getSafeFilename(descr.getSymbol(), descr.getDate(),
-				files.getTemporarySuffix());
+				service.getTemporarySuffix());
 	}
 	
 	private String getRegularFilename(DatedSymbol descr) {
 		return idUtils.getSafeFilename(descr.getSymbol(), descr.getDate(),
-				files.getRegularSuffix());
+				service.getRegularSuffix());
 	}
 	
 	private String getRegularFilename(Symbol symbol) {
-		return idUtils.getSafeFilename(symbol, files.getRegularSuffix());
+		return idUtils.getSafeFilename(symbol, service.getRegularSuffix());
 	}
 
 	@Override
