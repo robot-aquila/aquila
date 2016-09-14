@@ -3,10 +3,8 @@ package ru.prolib.aquila.ui.form;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
@@ -120,7 +118,7 @@ public class OrderListTableModel extends AbstractTableModel implements
 		if ( row >= orders.size() ) {
 			return null;
 		}
-		return getColumnValue(orders.get(row), columnIndexToColumnID.get(col));
+		return getColumnValue(orders.get(row), getColumnID(col));
 	}
 	
 	protected Object getColumnValue(Order order, int columnID) {
@@ -146,6 +144,11 @@ public class OrderListTableModel extends AbstractTableModel implements
 	@Override
 	public int getColumnIndex(int columnID) {
 		return columnIndexToColumnID.indexOf(columnID);
+	}
+	
+	@Override
+	public int getColumnID(int columnIndex) {
+		 return columnIndexToColumnID.get(columnIndex);
 	}
 
 	@Override

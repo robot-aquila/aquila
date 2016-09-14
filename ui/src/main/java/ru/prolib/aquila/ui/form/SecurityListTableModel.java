@@ -155,6 +155,11 @@ public class SecurityListTableModel extends AbstractTableModel
 	}
 	
 	@Override
+	public int getColumnID(int columnIndex) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
 	public String getColumnName(int c) {
 		return messages.get(mapIndexToID.get(c));
 	}

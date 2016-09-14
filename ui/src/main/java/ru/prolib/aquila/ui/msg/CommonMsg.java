@@ -88,6 +88,11 @@ public class CommonMsg {
 	public static final MsgID SLD_REMOVE_SYMBOL_TOOLTIP = newMsgID("SLD_REMOVE_SYMBOL_TOOLTIP");
 	public static final MsgID SLD_INPUT_SYMBOL = newMsgID("SLD_INPUT_SYMBOL");
 	public static final MsgID SLD_BAD_INPUT_SYMBOL = newMsgID("SLD_BAD_INPUT_SYMBOL");
+	
+	// Market depth dialog
+	public static final MsgID MDD_BID_SIZE = newMsgID("MDD_BID_SIZE");
+	public static final MsgID MDD_ASK_SIZE = newMsgID("MDD_ASK_SIZE");
+	public static final MsgID MDD_PRICE = newMsgID("MDD_PRICE");
 
 	
 	private static MsgID newMsgID(String messageID) {

@@ -97,6 +97,11 @@ public class PositionListTableModel extends AbstractTableModel implements
 		return messages.get(mapIndexToID.get(col));
 	}
 	
+	@Override
+	public int getColumnID(int columnIndex) {
+		throw new UnsupportedOperationException();
+	}
+	
 	/**
 	 * Clear all cached data.
 	 */
