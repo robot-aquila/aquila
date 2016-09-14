@@ -195,6 +195,13 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 			lock.unlock();
 		}
 	}
+	
+	@Override
+	public void update(int token, Object value) {
+		Map<Integer, Object> tokens = new HashMap<>();
+		tokens.put(token, value);
+		update(tokens);
+	}
 
 	@Override
 	public void resetChanges() {

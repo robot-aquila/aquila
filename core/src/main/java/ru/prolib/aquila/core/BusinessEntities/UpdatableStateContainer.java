@@ -7,5 +7,7 @@ public interface UpdatableStateContainer extends StateContainer {
 	public void update(Map<Integer, Object> tokens);
 	
 	public void resetChanges();
+	
+	public void update(int token, Object value);
 
 }
