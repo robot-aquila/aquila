@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import ru.prolib.aquila.core.utils.LocalTimePeriod;
+
 public class MoexContractTrackingSchedule {
 	private static final ZoneId ZONE;
 	private static final LocalTime OPENING,

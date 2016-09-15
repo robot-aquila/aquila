@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.finexp.futures.moex.components;
+package ru.prolib.aquila.core.utils;
 
 import java.time.Instant;
 import java.time.LocalTime;
@@ -7,6 +7,9 @@ import java.time.ZonedDateTime;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+/**
+ * An intraday time period.
+ */
 public class LocalTimePeriod {
 	private final LocalTime from, to;
 	private final ZoneId zone;
@@ -72,8 +75,24 @@ public class LocalTimePeriod {
 			.isEquals();
 	}
 	
+	/**
+	 * Convert an instant to a zoned date time according to the period's selected time zone.
+	 * <p>
+	 * @param time - the time
+	 * @return the zoned date time
+	 */
+	public ZonedDateTime toZDT(Instant time) {
+		return ZonedDateTime.ofInstant(time, zone);
+	}
+	
+	/**
+	 * Extract a daytime part of an instant according to the period's selected time zone.
+	 * <p>
+	 * @param time - the time
+	 * @return the local time according to selected time zone
+	 */
 	public LocalTime toZT(Instant time) {
-		return ZonedDateTime.ofInstant(time, zone).toLocalTime();
+		return toZDT(time).toLocalTime();
 	}
 
 }

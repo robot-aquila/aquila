@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.finexp.futures.moex.components;
+package ru.prolib.aquila.core.utils;
 
 import static org.junit.Assert.*;
 
@@ -6,11 +6,12 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.utils.finexp.futures.moex.components.LocalTimePeriod;
+import ru.prolib.aquila.core.utils.LocalTimePeriod;
 
 public class LocalTimePeriodTest {
 	private LocalTime from, to;
@@ -93,5 +94,16 @@ public class LocalTimePeriodTest {
 		assertFalse(period.equals(new LocalTimePeriod(from, to, ZoneOffset.UTC)));
 	}
 
+	@Test
+	public void testToZDT() {
+		ZonedDateTime expected = ZonedDateTime.of(2016, 9, 15, 15, 30, 45, 0, zone);
+		assertEquals(expected, period.toZDT(T("2016-09-15T12:30:45Z")));
+	}
+	
+	@Test
+	public void testToZT() {
+		LocalTime expected = LocalTime.of(15, 30, 45);
+		assertEquals(expected, period.toZT(T("2016-09-15T12:30:45Z")));
+	}
 
 }
