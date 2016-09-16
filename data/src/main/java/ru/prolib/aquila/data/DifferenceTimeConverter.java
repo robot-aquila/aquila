@@ -11,7 +11,7 @@ import java.time.Instant;
  * difference is kept until the {@link #reset()} call.
  */
 public class DifferenceTimeConverter implements TimeConverter {
-	private Duration diff;
+	protected Duration diff;
 
 	@Override
 	public Instant convert(Instant currentTime, Instant sourceTime) {
