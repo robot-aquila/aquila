@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage;
 
 import java.io.Closeable;
 import java.io.IOException;

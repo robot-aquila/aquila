@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
 

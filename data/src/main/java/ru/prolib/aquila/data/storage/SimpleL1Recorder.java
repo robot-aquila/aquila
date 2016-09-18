@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +17,7 @@ import ru.prolib.aquila.core.SimpleEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateImpl;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdateWriterFactory;
 
 public class SimpleL1Recorder implements EventListener {
 	private static final Logger logger;

@@ -1,7 +1,10 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage.file;
 
 import java.io.File;
 import java.io.IOException;
+
+import ru.prolib.aquila.data.storage.L1UpdateWriter;
+import ru.prolib.aquila.data.storage.L1UpdateWriterFactory;
 
 public class SimpleCsvL1UpdateWriterFactory implements L1UpdateWriterFactory {
 	private File file;

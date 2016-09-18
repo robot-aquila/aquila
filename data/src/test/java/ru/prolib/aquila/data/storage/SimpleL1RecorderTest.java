@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
@@ -28,6 +28,9 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.BusinessEntities.TickType;
 import ru.prolib.aquila.core.data.DataProviderStub;
+import ru.prolib.aquila.data.storage.L1UpdateWriter;
+import ru.prolib.aquila.data.storage.SimpleL1Recorder;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdateWriterFactory;
 
 public class SimpleL1RecorderTest {
 	private IMocksControl control;

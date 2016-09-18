@@ -9,6 +9,12 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
  */
 public interface ReaderFactory<T> {
 
-	public CloseableIterator<? extends T> createReader() throws IOException;
+	/**
+	 * Create item reader.
+	 * <p>
+	 * @return the reader instance
+	 * @throws IOException - an error occurred
+	 */
+	public CloseableIterator<T> createReader() throws IOException;
 	
 }

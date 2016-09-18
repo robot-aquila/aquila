@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage.file;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.time.Instant;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
+import ru.prolib.aquila.data.storage.L1UpdateWriter;
 
 public class SimpleCsvL1UpdateWriter implements L1UpdateWriter {
 	private final Writer writer;

@@ -1,6 +1,8 @@
 package ru.prolib.aquila.data;
 
-public class DataException extends Exception {
+import ru.prolib.aquila.core.CoreException;
+
+public class DataException extends CoreException {
 	private static final long serialVersionUID = 1L;
 	
 	public DataException(String msg) {

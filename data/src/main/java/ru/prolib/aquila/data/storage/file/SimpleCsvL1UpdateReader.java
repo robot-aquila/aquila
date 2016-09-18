@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage.file;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,9 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 
-public class SimpleCsvL1UpdateReader implements L1UpdateReader {
+public class SimpleCsvL1UpdateReader implements CloseableIterator<L1Update> {
 	private final BufferedReader reader;
 	private final SimpleCsvL1UpdatePacker packer;
 	private L1Update lastUpdate;
@@ -45,7 +46,7 @@ public class SimpleCsvL1UpdateReader implements L1UpdateReader {
 	}
 
 	@Override
-	public boolean nextUpdate() throws IOException {
+	public boolean next() throws IOException {
 		String line = readLine();
 		if ( line != null ) {
 			try {
@@ -59,7 +60,7 @@ public class SimpleCsvL1UpdateReader implements L1UpdateReader {
 	}
 
 	@Override
-	public L1Update getUpdate() throws IOException {
+	public L1Update item() throws IOException {
 		return lastUpdate;
 	}
 

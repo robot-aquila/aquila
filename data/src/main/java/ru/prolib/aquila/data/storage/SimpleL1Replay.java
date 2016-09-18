@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,12 +15,15 @@ import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.SimpleEventFactory;
+import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateImpl;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
+import ru.prolib.aquila.data.ReaderFactory;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdateReaderFactory;
 
 /**
  * This class is deprecated and will be removed.
@@ -87,9 +90,9 @@ public class SimpleL1Replay {
 	private final EventType onStarted, onStopped;
 	private final Scheduler scheduler;
 	private final L1UpdateConsumer consumer;
-	private final L1UpdateReaderFactory readerFactory;
+	private final ReaderFactory<L1Update> readerFactory;
 	private boolean started = false;
-	private L1UpdateReader reader;
+	private CloseableIterator<L1Update> reader;
 	private long sequenceID = 0;
 	private int queued = 0;
 	private final int minQueueSize, maxQueueSize;
@@ -99,7 +102,7 @@ public class SimpleL1Replay {
 	private Duration timeDiff = null;
 	
 	public SimpleL1Replay(EventQueue queue, Scheduler scheduler,
-			L1UpdateConsumer consumer, L1UpdateReaderFactory readerFactory,
+			L1UpdateConsumer consumer, ReaderFactory<L1Update> readerFactory,
 			int minQueueSize, int maxQueueSize)
 	{
 		super();
@@ -121,7 +124,7 @@ public class SimpleL1Replay {
 	}
 	
 	public SimpleL1Replay(EventQueue queue, Scheduler scheduler,
-			L1UpdateConsumer consumer, L1UpdateReaderFactory readerFactory)
+			L1UpdateConsumer consumer, ReaderFactory<L1Update> readerFactory)
 	{
 		this(queue, scheduler, consumer, readerFactory, MIN_QUEUE_SIZE, MAX_QUEUE_SIZE);
 	}
@@ -142,7 +145,7 @@ public class SimpleL1Replay {
 		return consumer;
 	}
 	
-	public L1UpdateReaderFactory getReaderFactory() {
+	public ReaderFactory<? extends L1Update> getReaderFactory() {
 		return readerFactory;
 	}
 	
@@ -179,13 +182,14 @@ public class SimpleL1Replay {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void startReadingUpdates() throws IOException {
 		lock.lock();
 		try {
 			if ( started ) {
 				throw new IllegalStateException("Already started");
 			}
-			reader = readerFactory.createReader();
+			reader = (CloseableIterator<L1Update>) readerFactory.createReader();
 			started = true;
 			queue.enqueue(onStarted, new SimpleEventFactory());
 			sequenceID ++;
@@ -230,8 +234,8 @@ public class SimpleL1Replay {
 		if ( reader != null ) {
 			while ( queued < maxQueueSize ) {
 				try {
-					if ( reader.nextUpdate() ) {
-						L1Update update = reader.getUpdate();
+					if ( reader.next() ) {
+						L1Update update = reader.item();
 						Tick oldTick = update.getTick();
 						Instant newTime = getScheduleTime(update.getSymbol(),
 								oldTick.getTime());

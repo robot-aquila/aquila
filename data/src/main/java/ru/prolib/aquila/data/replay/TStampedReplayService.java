@@ -5,7 +5,6 @@ import java.time.Instant;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.TStamped;
-import ru.prolib.aquila.data.ReaderFactory;
 
 /**
  * Timestamped objects replay service interface.
@@ -13,7 +12,7 @@ import ru.prolib.aquila.data.ReaderFactory;
  * This interface declares methods which are required to run
  * a {@link ru.prolib.aquila.data.replay.TStampedReplay timestamp}-based replay.
  */
-public interface TStampedReplayService extends ReaderFactory<TStamped> {
+public interface TStampedReplayService {
 	
 	/**
 	 * Create a new reader.
@@ -30,7 +29,6 @@ public interface TStampedReplayService extends ReaderFactory<TStamped> {
 	 * @return reader of set of {@link ru.prolib.aquila.core.BusinessEntities.TStamped timestamped} objects
 	 * @throws IOException - an error occurred
 	 */
-	@Override
 	public CloseableIterator<? extends TStamped> createReader() throws IOException;
 	
 	/**

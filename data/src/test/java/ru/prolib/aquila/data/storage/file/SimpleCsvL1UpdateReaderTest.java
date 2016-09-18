@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage.file;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
@@ -11,6 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1FormatException;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdatePacker;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdateReader;
 
 public class SimpleCsvL1UpdateReaderTest {
 	private IMocksControl control;
@@ -28,7 +31,7 @@ public class SimpleCsvL1UpdateReaderTest {
 	
 	@Test
 	public void testCtor() throws Exception {
-		assertNull(updateReader.getUpdate());
+		assertNull(updateReader.item());
 	}
 	
 	@Test
@@ -42,35 +45,35 @@ public class SimpleCsvL1UpdateReaderTest {
 	}
 	
 	@Test
-	public void testNextUpdate_HasUpdate() throws Exception {
+	public void testNext_HasUpdate() throws Exception {
 		L1Update update = control.createMock(L1Update.class);
 		expect(readerMock.readLine()).andReturn("packed line");
 		expect(packerMock.unpack("packed line")).andReturn(update);
 		control.replay();
 		
-		assertTrue(updateReader.nextUpdate());
+		assertTrue(updateReader.next());
 		
 		control.verify();
-		assertSame(update, updateReader.getUpdate());
+		assertSame(update, updateReader.item());
 	}
 	
 	@Test
-	public void testNextUpdate_NoMoreUpdates() throws Exception {
+	public void testNext_NoMoreUpdates() throws Exception {
 		expect(readerMock.readLine()).andReturn(null);
 		control.replay();
 		
-		assertFalse(updateReader.nextUpdate());
+		assertFalse(updateReader.next());
 		
 		control.verify();
 	}
 
 	@Test (expected=IOException.class)
-	public void testNextUpdate_ThrowsPackerException() throws Exception {
+	public void testNext_ThrowsPackerException() throws Exception {
 		expect(readerMock.readLine()).andReturn("some data");
 		expect(packerMock.unpack("some data")).andThrow(new SimpleCsvL1FormatException("test error"));
 		control.replay();
 		
-		updateReader.nextUpdate();
+		updateReader.next();
 	}
 
 }

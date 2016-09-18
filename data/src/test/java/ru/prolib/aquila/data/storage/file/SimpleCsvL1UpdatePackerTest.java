@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage.file;
 
 import static org.junit.Assert.*;
 
@@ -12,6 +12,8 @@ import ru.prolib.aquila.core.BusinessEntities.L1UpdateImpl;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.BusinessEntities.TickType;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1FormatException;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdatePacker;
 
 public class SimpleCsvL1UpdatePackerTest {
 	private static Symbol symbol1 = new Symbol("F:RTS@SPBFUT:USD");

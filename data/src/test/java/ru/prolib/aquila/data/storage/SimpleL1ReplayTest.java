@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
@@ -28,16 +28,21 @@ import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateImpl;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.TStamped;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.BusinessEntities.TickType;
-import ru.prolib.aquila.datatools.tickdatabase.SimpleL1Replay.ConsumeTickTask;
+import ru.prolib.aquila.data.ReaderFactory;
+import ru.prolib.aquila.data.storage.SimpleL1Replay;
+import ru.prolib.aquila.data.storage.SimpleL1Replay.ConsumeTickTask;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdateReaderFactory;
 
 public class SimpleL1ReplayTest {
 	private static final TickType TRADE = TickType.TRADE;
@@ -92,7 +97,7 @@ public class SimpleL1ReplayTest {
 				Tick.of(type, Instant.parse(timestamp), price, size));
 	}
 	
-	static class L1UpdateReaderStub implements L1UpdateReader, L1UpdateConsumer {
+	static class L1UpdateReaderStub implements CloseableIterator<L1Update>, L1UpdateConsumer {
 		private final ArrayList<L1Update> updates;
 		private boolean closed = false;
 		
@@ -111,12 +116,12 @@ public class SimpleL1ReplayTest {
 		}
 
 		@Override
-		public boolean nextUpdate() throws IOException {
+		public boolean next() throws IOException {
 			return updates.size() > 0;
 		}
 
 		@Override
-		public L1Update getUpdate() throws IOException {
+		public L1Update item() throws IOException {
 			return updates.remove(0);
 		}
 		
@@ -298,7 +303,7 @@ public class SimpleL1ReplayTest {
 	
 	private IMocksControl control;
 	private EventQueue queue;
-	private L1UpdateReaderFactory readerFactoryMock;
+	private ReaderFactory<L1Update> readerFactoryMock;
 	private L1UpdateReaderStub updateReaderStub;
 	private L1UpdateConsumerStub consumerStub;
 	private SchedulerStub schedulerStub;
@@ -329,7 +334,7 @@ public class SimpleL1ReplayTest {
 		control = createStrictControl();
 		schedulerStub = new SchedulerStub();
 		consumerStub = new L1UpdateConsumerStub();
-		readerFactoryMock = control.createMock(L1UpdateReaderFactory.class);
+		readerFactoryMock = control.createMock(ReaderFactory.class);
 		updateReaderStub = new L1UpdateReaderStub();
 		replay = new SimpleL1Replay(queue, schedulerStub, consumerStub, readerFactoryMock, 3, 5);
 		listenerStub = new EventListenerStub();

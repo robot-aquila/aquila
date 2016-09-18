@@ -1,4 +1,4 @@
-package ru.prolib.aquila.datatools.tickdatabase;
+package ru.prolib.aquila.data.storage.file;
 
 import static org.easymock.EasyMock.*;
 
@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdatePacker;
+import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdateWriter;
 
 public class SimpleCsvL1UpdateWriterTest {
 	private IMocksControl control;
