@@ -73,13 +73,13 @@ public class ChangesAccumulator {
 	 * changed
 	 */
 	public boolean accumulate(Map<Integer, Object> tokens) {
-		logger.debug("Before applying an update the container contains: ");
-		dumpMap(container.getContent());
-		logger.debug("Applying update: ");
-		dumpMap(tokens);
+		//logger.debug("Before applying an update the container contains: ");
+		//dumpMap(container.getContent());
+		//logger.debug("Applying update: ");
+		//dumpMap(tokens);
 		container.update(tokens);
-		logger.debug("Updated tokens: {}", container.getUpdatedTokens());
-		logger.debug("Expected to be updated: {}", expectedChangedTokens);
+		//logger.debug("Updated tokens: {}", container.getUpdatedTokens());
+		//logger.debug("Expected to be updated: {}", expectedChangedTokens);
 		actualChangedTokens.addAll(container.getUpdatedTokens());
 		return expectedChangedTokens.isEmpty() ? container.hasChanged() :
 				actualChangedTokens.containsAll(expectedChangedTokens);
@@ -132,7 +132,7 @@ public class ChangesAccumulator {
 		return ! actualChangedTokens.isEmpty();
 	}
 
-	private void dumpMap(Map<Integer, Object> map) {
+	protected void dumpMap(Map<Integer, Object> map) {
 		Iterator<Map.Entry<Integer, Object>> it = map.entrySet().iterator();
 		while ( it.hasNext() ) {
 			Map.Entry<Integer, Object> pair = it.next();

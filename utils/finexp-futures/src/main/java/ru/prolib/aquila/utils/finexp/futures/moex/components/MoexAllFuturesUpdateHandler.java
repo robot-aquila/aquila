@@ -77,7 +77,7 @@ public class MoexAllFuturesUpdateHandler implements UpdateHandler {
 			handler.execute();
 			IOUtils.closeQuietly(handler);
 			handlers.remove(symbol);
-			logger.debug("Handler removed: {}", symbol);
+			logger.debug("Data updated: {}", symbol);
 		}
 		if ( handlers.size() == 0 ) {
 			done = true;
