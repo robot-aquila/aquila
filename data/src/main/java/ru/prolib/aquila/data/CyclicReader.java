@@ -29,6 +29,14 @@ public class CyclicReader<T> implements CloseableIterator<T> {
 		this.factory = factory;
 		this.repeat = repeat;
 	}
+	
+	public ReaderFactory<? extends T> getReaderFactory() {
+		return factory;
+	}
+	
+	public int getRepeat() {
+		return repeat;
+	}
 
 	@Override
 	public void close() throws IOException {

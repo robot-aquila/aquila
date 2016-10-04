@@ -49,9 +49,15 @@ public class CyclicReaderTest {
 	public void tearDown() throws Exception {
 		reader.close();
 	}
+	
+	@Test
+	public void testCtor2() {
+		assertEquals(factory, reader.getReaderFactory());
+		assertEquals(5, reader.getRepeat());
+	}
 
 	@Test (expected=IllegalArgumentException.class)
-	public void testCtor3_ThrowsWhenRepeatLessThanZero() throws Exception {
+	public void testCtor2_ThrowsWhenRepeatLessThanZero() throws Exception {
 		try ( CyclicReader<String> x = new CyclicReader<>(factory, -1) ) { }
 	}
 	
