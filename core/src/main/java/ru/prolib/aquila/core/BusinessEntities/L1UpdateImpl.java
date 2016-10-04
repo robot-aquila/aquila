@@ -49,5 +49,10 @@ public class L1UpdateImpl implements L1Update {
 			.append(tick, o.getTick())
 			.isEquals();
 	}
+	
+	@Override
+	public L1Update withTime(Instant newTime) {
+		return new L1UpdateImpl(symbol, tick.withTime(newTime));
+	}
 
 }
