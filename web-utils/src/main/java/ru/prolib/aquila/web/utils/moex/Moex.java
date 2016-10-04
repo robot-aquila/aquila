@@ -8,11 +8,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.web.utils.HttpClientFactory;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 
@@ -31,7 +31,7 @@ public class Moex implements Closeable {
 	}
 	
 	public Moex() {
-		this(HttpClients.createDefault(), WebDriverFactory.createJBrowserDriver());
+		this(HttpClientFactory.createDefaultClient(), WebDriverFactory.createJBrowserDriver());
 		closeResources = true;
 	}
 

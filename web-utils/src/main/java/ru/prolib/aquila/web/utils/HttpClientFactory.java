@@ -6,20 +6,24 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 public class HttpClientFactory {
-	public static final int DEFAULT_TIMEOUT = 60000;
+	public static final int DEFAULT_TIMEOUT = 180000;
 
 	public static CloseableHttpClient createDefaultClient() {
+		return createDefaultClient(DEFAULT_TIMEOUT);
+	}
+	
+	public static CloseableHttpClient createDefaultClient(int timeout) {
 		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-		connManager.setValidateAfterInactivity(DEFAULT_TIMEOUT);
+		connManager.setValidateAfterInactivity(timeout);
 		RequestConfig defaultRequestConfig = RequestConfig.custom()
-				.setSocketTimeout(DEFAULT_TIMEOUT)
-				.setConnectionRequestTimeout(DEFAULT_TIMEOUT)
-				.setConnectTimeout(DEFAULT_TIMEOUT)
+				.setSocketTimeout(timeout)
+				.setConnectionRequestTimeout(timeout)
+				.setConnectTimeout(timeout)
 				.build();
 		return HttpClients.custom()
 				.setDefaultRequestConfig(defaultRequestConfig)
 				.setConnectionManager(connManager)
-				.build();
+				.build();		
 	}
 
 }

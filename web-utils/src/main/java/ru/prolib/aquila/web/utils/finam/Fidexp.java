@@ -34,6 +34,7 @@ import ru.prolib.aquila.web.utils.httpclient.HttpClientFileDownloader;
  * The facade of FINAM data export system.
  */
 public class Fidexp implements Closeable {
+	private static final int DEFAULT_TIMEOUT = 600000;
 	private static final String UNEXPECTED_EXCEPTION = "Unexpected exception: ";
 	private final Lock lock = new ReentrantLock();
 	private final CloseableHttpClient httpClient;
@@ -49,7 +50,7 @@ public class Fidexp implements Closeable {
 	}
 	
 	public Fidexp() {
-		this(HttpClientFactory.createDefaultClient(), WebDriverFactory.createJBrowserDriver());
+		this(HttpClientFactory.createDefaultClient(DEFAULT_TIMEOUT), WebDriverFactory.createJBrowserDriver());
 		closeResources = true;
 	}
 	
