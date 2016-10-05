@@ -30,6 +30,7 @@ import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.file.FileStorage;
 import ru.prolib.aquila.utils.finexp.futures.CmdLine;
 import ru.prolib.aquila.web.utils.WUException;
+import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
 import ru.prolib.aquila.web.utils.moex.Moex;
 
@@ -80,8 +81,6 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 				facade.testFormIntegrity();
 				logger.debug("Web-interface integrity test passed");
 			}
-			// 1) Get an actual futures list
-			Set<String> realFutures = new HashSet<>(moex.getActiveFuturesList());
 			Map<Integer, String> quoteMap = facade.getTrueFuturesQuotes(true);
 			// 2) Shuffle the list randomly
 			List<Integer> quoteIds = new ArrayList<>(quoteMap.keySet());
@@ -97,8 +96,14 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 				lastSymbolHasDownload = false;
 				int quoteID = quoteIds.get(i);
 				String ticker = quoteMap.get(quoteID);
-				if ( ! realFutures.contains(ticker) ) {
-					logger.debug("Skip {} because it isn't a real futures.", ticker);
+				try {
+					moex.getContractDetails(new Symbol(ticker));
+				} catch ( WUWebPageException e ) {
+					if ( e.getMessage().startsWith("Contract not exists") ) {
+						logger.debug("Skip {} because it isn't a real futures.", ticker);
+					} else {
+						logger.error("Error checking contract existence: ", e);
+					}
 					continue;
 				}
 				
