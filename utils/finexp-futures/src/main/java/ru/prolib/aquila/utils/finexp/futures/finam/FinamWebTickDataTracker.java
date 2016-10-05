@@ -33,6 +33,7 @@ import ru.prolib.aquila.web.utils.WUException;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
 import ru.prolib.aquila.web.utils.moex.Moex;
+import ru.prolib.aquila.web.utils.moex.MoexContractField;
 
 public class FinamWebTickDataTracker implements Runnable, Closeable {
 	private static final Logger logger;
@@ -96,8 +97,9 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 				lastSymbolHasDownload = false;
 				int quoteID = quoteIds.get(i);
 				String ticker = quoteMap.get(quoteID);
+				Map<Integer, Object> contrDetails = null;
 				try {
-					moex.getContractDetails(new Symbol(ticker));
+					contrDetails = moex.getContractDetails(new Symbol(ticker));
 				} catch ( WUWebPageException e ) {
 					if ( e.getMessage().startsWith("Contract not exists") ) {
 						logger.debug("Skip {} because it isn't a real futures.", ticker);
@@ -115,29 +117,33 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 				// 2) If there are some non-existing segments then download randomly 2-5
 				// data segments starting of earliest date
 				LocalDate current = startDate;
+				LocalDate firstTradingDay = (LocalDate) contrDetails.get(MoexContractField.FIRST_TRADING_DAY);
+				LocalDate lastTradingDay = (LocalDate) contrDetails.get(MoexContractField.LAST_TRADING_DAY);
 				int remainedDownloads = random.nextInt(MIN_DOWNLOAD_SEGMENTS, MAX_DOWNLOAD_SEGMENTS + 1);
 				boolean isFirstDownload = true;
 				while ( current.isBefore(today) && remainedDownloads > 0 ) {
+					DatedSymbol descr = new DatedSymbol(symbol, current);
+					if ( lastTradingDay != null && current.isAfter(lastTradingDay) ) {
+						logger.debug("Skip downloading {} because it is after the last trading day {}", descr, lastTradingDay);
+						break;
+					}
+
 					if ( ! existingSegments.contains(current) ) {
+						if ( firstTradingDay != null && current.isBefore(firstTradingDay) ) {
+							logger.debug("Skip downloading {} because it is before the first trading day {}", descr, firstTradingDay);
+							current = firstTradingDay;
+							continue;
+						}
+
 						if ( ! isFirstDownload ) {
 							long pause = random.nextLong(PAUSE_BETWEEN_DOWNLOAD_MIN, PAUSE_BETWEEN_DOWNLOAD_MAX + 1);
-							logger.debug("Waiting for {} seconds before going next download (remained {}).",
-									new Object[] { pause, remainedDownloads } );
+							logger.debug("Waiting for {} seconds before going next download (remained {}).", pause, remainedDownloads);
 							if ( globalExit.await(pause, TimeUnit.SECONDS) ) {
 								logger.debug("The global exit signal received.");
 								break;
-							}					
+							}
 						}
-						
-						DatedSymbol descr = new DatedSymbol(symbol, current);
-						logger.debug("Start downloading segment: {}", descr);
-						File tempFile = fileStorage.getTemporarySegmentFile(descr);
-						File mainFile = fileStorage.getSegmentFile(descr);
-						facade.downloadTickData(MARKET_ID, quoteID, current, tempFile);
-						fileStorage.commitTemporarySegmentFile(descr);
-						logger.debug("Download finished: {} (size: {})",
-								new Object[] { mainFile, mainFile.length() } ); 
-						
+						downloadDataSegment(facade, descr, quoteID);
 						remainedDownloads --;
 						isFirstDownload = false;
 						lastSymbolHasDownload = true;
@@ -196,6 +202,18 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 		if ( globalExit.getCount() > 0 ) {
 			scheduler.schedule(new LongTermTask(this, TASK_NAME), at);
 		}
+	}
+
+	private void downloadDataSegment(Fidexp finam, DatedSymbol descr, int finamQuoteID)
+		throws DataStorageException, WUException
+	{
+		logger.debug("Start downloading segment: {}", descr);
+		File tempFile = fileStorage.getTemporarySegmentFile(descr);
+		File mainFile = fileStorage.getSegmentFile(descr);
+		finam.downloadTickData(MARKET_ID, finamQuoteID, descr.getDate(), tempFile);
+		fileStorage.commitTemporarySegmentFile(descr);
+		logger.debug("Download finished: {} (size: {})",
+				new Object[] { mainFile, mainFile.length() } ); 
 	}
 
 }
