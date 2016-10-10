@@ -175,7 +175,7 @@ public class MarketDepthTableModel extends AbstractTableModel
 
 	@Override
 	public void startListeningUpdates() {
-		if ( subscribed ) {
+		if ( subscribed || security.isClosed() ) {
 			return;
 		}
 		marketDepth = security.getMarketDepth();
@@ -211,7 +211,7 @@ public class MarketDepthTableModel extends AbstractTableModel
 	}
 	
 	void processEvent(Event event) {
-		if ( ! subscribed ) {
+		if ( ! subscribed || security.isClosed() ) {
 			return;
 		}
 		marketDepth = security.getMarketDepth();

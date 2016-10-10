@@ -212,26 +212,16 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 		lock.lock();
 		try {
 			terminal = null;
-			onCancelFailed.removeListeners();
-			onCancelFailed.removeAlternates();
-			onCancelled.removeListeners();
-			onCancelled.removeAlternates();
-			onExecution.removeListeners();
-			onExecution.removeAlternates();
-			onDone.removeListeners();
-			onDone.removeAlternates();
-			onFailed.removeListeners();
-			onFailed.removeAlternates();
-			onFilled.removeListeners();
-			onFilled.removeAlternates();
-			onPartiallyFilled.removeListeners();
-			onPartiallyFilled.removeAlternates();
-			onRegistered.removeListeners();
-			onRegistered.removeAlternates();
-			onRegisterFailed.removeListeners();
-			onRegisterFailed.removeAlternates();
-			onArchived.removeListeners();
-			onArchived.removeAlternates();
+			onCancelFailed.removeAlternatesAndListeners();
+			onCancelled.removeAlternatesAndListeners();
+			onExecution.removeAlternatesAndListeners();
+			onDone.removeAlternatesAndListeners();
+			onFailed.removeAlternatesAndListeners();
+			onFilled.removeAlternatesAndListeners();
+			onPartiallyFilled.removeAlternatesAndListeners();
+			onRegistered.removeAlternatesAndListeners();
+			onRegisterFailed.removeAlternatesAndListeners();
+			onArchived.removeAlternatesAndListeners();
 			super.close();
 		} finally {
 			lock.unlock();
