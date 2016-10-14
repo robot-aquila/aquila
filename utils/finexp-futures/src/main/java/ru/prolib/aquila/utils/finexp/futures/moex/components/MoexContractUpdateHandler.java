@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.time.Instant;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainer;
 import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainerImpl;
 import ru.prolib.aquila.data.DataFormatException;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
 import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.moex.Moex;

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.storage;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
 import java.util.HashMap;

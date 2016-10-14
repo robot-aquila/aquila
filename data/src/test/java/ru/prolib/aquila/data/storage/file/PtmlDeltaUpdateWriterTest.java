@@ -20,7 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.data.storage.DeltaUpdateBuilder;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 
 public class PtmlDeltaUpdateWriterTest {
 	private File file;

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.storage;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-public class DeltaUpdate {
+public class DeltaUpdate implements TStamped {
 	private final Instant updateTime;
 	private final boolean isSnapshot;
 	private final Map<Integer, Object> contents;
@@ -16,8 +16,9 @@ public class DeltaUpdate {
 		this.isSnapshot = isSnapshot;
 		this.contents = new HashMap<>(contents);
 	}
-	
-	public Instant getUpdateTime() {
+
+	@Override
+	public Instant getTime() {
 		return updateTime;
 	}
 	

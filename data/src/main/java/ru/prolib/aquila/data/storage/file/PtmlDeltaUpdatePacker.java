@@ -11,8 +11,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.data.DataFormatException;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
 
 /**
  * Plain-text multiline format of a delta-update.
@@ -44,7 +44,7 @@ public class PtmlDeltaUpdatePacker {
 			StringBuffer buffer = new StringBuffer();
 			buffer.append(update.isSnapshot() ? 1 : 0)
 				.append(ES)
-				.append(update.getUpdateTime().toString())
+				.append(update.getTime().toString())
 				.append(LE);
 			Iterator<Map.Entry<Integer, Object>> it = update.getContents().entrySet().iterator();
 			while ( it.hasNext() ) {

@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.data.DataFormatException;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
 import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
 
 /**

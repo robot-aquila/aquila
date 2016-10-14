@@ -9,9 +9,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainer;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
-import ru.prolib.aquila.data.storage.DeltaUpdateBuilder;
 
 /**
  * Accumulator of changes.

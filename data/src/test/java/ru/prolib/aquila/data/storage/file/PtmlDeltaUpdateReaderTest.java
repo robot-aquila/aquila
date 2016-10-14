@@ -15,8 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.data.storage.DeltaUpdate;
-import ru.prolib.aquila.data.storage.DeltaUpdateBuilder;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 
 public class PtmlDeltaUpdateReaderTest {
 	private File file;

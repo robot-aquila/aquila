@@ -3,6 +3,7 @@ package ru.prolib.aquila.data.storage;
 import java.io.Closeable;
 import java.io.IOException;
 
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.data.DataFormatException;
 
 public interface DeltaUpdateWriter extends Closeable {

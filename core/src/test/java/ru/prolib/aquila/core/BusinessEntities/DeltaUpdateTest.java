@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.storage;
+package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
 
@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 
 public class DeltaUpdateTest {
 	private static Instant time1 = Instant.parse("2016-05-19T00:20:48Z");
@@ -28,11 +30,11 @@ public class DeltaUpdateTest {
 
 	@Test
 	public void testCtor3() {
-		assertEquals(time1, update1.getUpdateTime());
+		assertEquals(time1, update1.getTime());
 		assertTrue(update1.isSnapshot());
 		assertEquals(contents1, update1.getContents());
 		
-		assertEquals(time2, update2.getUpdateTime());
+		assertEquals(time2, update2.getTime());
 		assertFalse(update2.isSnapshot());
 		assertEquals(contents2, update2.getContents());
 	}

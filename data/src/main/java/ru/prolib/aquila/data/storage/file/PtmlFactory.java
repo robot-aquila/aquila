@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.data.flex.Flex;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
 import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
 
 public class PtmlFactory {

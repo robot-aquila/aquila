@@ -11,8 +11,8 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.data.DataFormatException;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
 import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
 
 /**

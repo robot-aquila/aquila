@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
-import ru.prolib.aquila.data.storage.DeltaUpdateBuilder;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 
 public class PtmlIT {
 	private static final Logger logger;

@@ -11,10 +11,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainer;
 import ru.prolib.aquila.core.BusinessEntities.UpdatableStateContainerImpl;
-import ru.prolib.aquila.data.storage.DeltaUpdate;
-import ru.prolib.aquila.data.storage.DeltaUpdateBuilder;
 import ru.prolib.aquila.utils.finexp.futures.moex.components.ChangesAccumulator;
 import ru.prolib.aquila.web.utils.moex.MoexContractField;
 
