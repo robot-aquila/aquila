@@ -261,5 +261,10 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 			lock.unlock();
 		}
 	}
+	
+	@Override
+	public void consume(DeltaUpdate update) {
+		update(update.getContents());
+	}
 
 }

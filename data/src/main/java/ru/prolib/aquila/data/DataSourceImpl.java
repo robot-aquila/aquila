@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -14,6 +15,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 public class DataSourceImpl implements DataSource {
 	private L1UpdateSource l1UpdateSource;
 	private MDUpdateSource mdUpdateSource;
+	private SymbolDeltaUpdateSource securityStateUpdateSource;
 	
 	public synchronized void setL1UpdateSource(L1UpdateSource source) {
 		this.l1UpdateSource = source;
@@ -21,6 +23,10 @@ public class DataSourceImpl implements DataSource {
 	
 	public synchronized void setMDUpdateSource(MDUpdateSource source) {
 		this.mdUpdateSource = source;
+	}
+	
+	public synchronized void setSecurityStateUpdateSource(SymbolDeltaUpdateSource source) {
+		this.securityStateUpdateSource = source;
 	}
 
 	@Override
@@ -42,11 +48,22 @@ public class DataSourceImpl implements DataSource {
 	public synchronized void unsubscribeMD(Symbol symbol, MDUpdateConsumer consumer) {
 		mdUpdateSource.unsubscribeMD(symbol, consumer);
 	}
+	
+	@Override
+	public synchronized void subscribeSymbol(Symbol symbol, DeltaUpdateConsumer consumer) {
+		securityStateUpdateSource.subscribeSymbol(symbol, consumer);
+	}
+	
+	@Override
+	public synchronized void unsubscribeSymbol(Symbol symbol, DeltaUpdateConsumer consumer) {
+		securityStateUpdateSource.unsubscribeSymbol(symbol, consumer);
+	}
 
 	@Override
 	public synchronized void close() throws IOException {
 		IOUtils.closeQuietly(l1UpdateSource);
 		IOUtils.closeQuietly(mdUpdateSource);
+		IOUtils.closeQuietly(securityStateUpdateSource);
 	}
 
 }
