@@ -6,12 +6,12 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 /**
- * The symbol-associated delta-update source.
+ * Symbol state update source interface.
  */
-public interface SymbolDeltaUpdateSource extends Closeable {
+public interface SymbolUpdateSource extends Closeable {
 
 	/**
-	 * Subscribe for delta-updates of specified symbol.
+	 * Subscribe for state updates of specified symbol.
 	 * <p>
 	 * @param symbol - the symbol to subscribe
 	 * @param consumer - consumer instance
@@ -19,7 +19,7 @@ public interface SymbolDeltaUpdateSource extends Closeable {
 	public void subscribeSymbol(Symbol symbol, DeltaUpdateConsumer consumer);
 	
 	/**
-	 * Unsubscribe of delta-updates of specified symbol.
+	 * Unsubscribe of state updates of specified symbol.
 	 * <p>
 	 * @param symbol - the symbol to unsubscribe
 	 * @param consumer - consumer instance

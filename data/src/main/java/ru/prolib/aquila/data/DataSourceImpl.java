@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 public class DataSourceImpl implements DataSource {
 	private L1UpdateSource l1UpdateSource;
 	private MDUpdateSource mdUpdateSource;
-	private SymbolDeltaUpdateSource securityStateUpdateSource;
+	private SymbolUpdateSource symbolUpdateSource;
 	
 	public synchronized void setL1UpdateSource(L1UpdateSource source) {
 		this.l1UpdateSource = source;
@@ -25,8 +25,8 @@ public class DataSourceImpl implements DataSource {
 		this.mdUpdateSource = source;
 	}
 	
-	public synchronized void setSecurityStateUpdateSource(SymbolDeltaUpdateSource source) {
-		this.securityStateUpdateSource = source;
+	public synchronized void setSymbolUpdateSource(SymbolUpdateSource source) {
+		this.symbolUpdateSource = source;
 	}
 
 	@Override
@@ -51,19 +51,19 @@ public class DataSourceImpl implements DataSource {
 	
 	@Override
 	public synchronized void subscribeSymbol(Symbol symbol, DeltaUpdateConsumer consumer) {
-		securityStateUpdateSource.subscribeSymbol(symbol, consumer);
+		symbolUpdateSource.subscribeSymbol(symbol, consumer);
 	}
 	
 	@Override
 	public synchronized void unsubscribeSymbol(Symbol symbol, DeltaUpdateConsumer consumer) {
-		securityStateUpdateSource.unsubscribeSymbol(symbol, consumer);
+		symbolUpdateSource.unsubscribeSymbol(symbol, consumer);
 	}
 
 	@Override
 	public synchronized void close() throws IOException {
 		IOUtils.closeQuietly(l1UpdateSource);
 		IOUtils.closeQuietly(mdUpdateSource);
-		IOUtils.closeQuietly(securityStateUpdateSource);
+		IOUtils.closeQuietly(symbolUpdateSource);
 	}
 
 }

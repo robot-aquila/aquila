@@ -15,7 +15,7 @@ public class DataSourceImplTest {
 	private IMocksControl control;
 	private L1UpdateSource l1UpdateSourceMock;
 	private MDUpdateSource mdUpdateSourceMock;
-	private SymbolDeltaUpdateSource symbolUpdateSourceMock;
+	private SymbolUpdateSource symbolUpdateSourceMock;
 	private L1UpdateConsumer l1UpdateConsumerMock;
 	private MDUpdateConsumer mdUpdateConsumerMock;
 	private DeltaUpdateConsumer symbolUpdateConsumerMock;
@@ -26,7 +26,7 @@ public class DataSourceImplTest {
 		control = createStrictControl();
 		l1UpdateSourceMock = control.createMock(L1UpdateSource.class);
 		mdUpdateSourceMock = control.createMock(MDUpdateSource.class);
-		symbolUpdateSourceMock = control.createMock(SymbolDeltaUpdateSource.class);
+		symbolUpdateSourceMock = control.createMock(SymbolUpdateSource.class);
 		l1UpdateConsumerMock = control.createMock(L1UpdateConsumer.class);
 		mdUpdateConsumerMock = control.createMock(MDUpdateConsumer.class);
 		symbolUpdateConsumerMock = control.createMock(DeltaUpdateConsumer.class);
@@ -81,7 +81,7 @@ public class DataSourceImplTest {
 	public void testSubscribeSymbol() {
 		symbolUpdateSourceMock.subscribeSymbol(new Symbol("MSFT"), symbolUpdateConsumerMock);
 		control.replay();
-		dataSource.setSecurityStateUpdateSource(symbolUpdateSourceMock);
+		dataSource.setSymbolUpdateSource(symbolUpdateSourceMock);
 		
 		dataSource.subscribeSymbol(new Symbol("MSFT"), symbolUpdateConsumerMock);
 		
@@ -92,7 +92,7 @@ public class DataSourceImplTest {
 	public void testUnsubscribeSymbol() {
 		symbolUpdateSourceMock.unsubscribeSymbol(new Symbol("SBER"), symbolUpdateConsumerMock);
 		control.replay();
-		dataSource.setSecurityStateUpdateSource(symbolUpdateSourceMock);
+		dataSource.setSymbolUpdateSource(symbolUpdateSourceMock);
 		
 		dataSource.unsubscribeSymbol(new Symbol("SBER"), symbolUpdateConsumerMock);
 		
@@ -107,7 +107,7 @@ public class DataSourceImplTest {
 		control.replay();
 		dataSource.setL1UpdateSource(l1UpdateSourceMock);
 		dataSource.setMDUpdateSource(mdUpdateSourceMock);
-		dataSource.setSecurityStateUpdateSource(symbolUpdateSourceMock);
+		dataSource.setSymbolUpdateSource(symbolUpdateSourceMock);
 		
 		dataSource.close();
 		
