@@ -59,5 +59,15 @@ public class DoubleUtilsTest {
 		assertEquals(3.16d, utils.round(3.155d), 0.001d);
 		assertEquals(-3.16d, utils.round(-3.155d), 0.001d);
 	}
+	
+	@Test
+	public void testScaleOf() {
+		assertEquals(2, utils.scaleOf(0.05d));
+		assertEquals(2, utils.scaleOf(0.01d));
+		assertEquals(3, utils.scaleOf(0.005d));
+		assertEquals(4, utils.scaleOf(10.1001d));
+		assertEquals(0, utils.scaleOf(10.0d));
+		assertEquals(0, utils.scaleOf(0.0d));
+	}
 
 }

@@ -1,6 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 public class SecurityField {
+	
+	public static int getVersion() {
+		return 1;
+	}
+	
 	public static final int DISPLAY_NAME = 1;
 	public static final int SCALE = 2;
 	public static final int LOT_SIZE = 3;
