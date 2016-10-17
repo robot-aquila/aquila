@@ -30,6 +30,10 @@ public class DeltaUpdate implements TStamped {
 		return contents;
 	}
 	
+	public boolean hasContents() {
+		return contents.size() > 0;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {

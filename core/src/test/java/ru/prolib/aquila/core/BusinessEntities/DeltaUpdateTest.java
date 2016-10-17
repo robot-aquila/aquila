@@ -56,5 +56,12 @@ public class DeltaUpdateTest {
 		assertEquals("DeltaUpdate[2016-05-19T00:20:48Z snapshot {1=foo, 2=bar}]", update1.toString());
 		assertEquals("DeltaUpdate[2010-08-20T10:40:50Z {1=zulu}]", update2.toString());
 	}
+	
+	@Test
+	public void testHasContents() {
+		update2 = new DeltaUpdate(time1, true, new HashMap<>());
+		assertTrue(update1.hasContents());
+		assertFalse(update2.hasContents());
+	}
 
 }

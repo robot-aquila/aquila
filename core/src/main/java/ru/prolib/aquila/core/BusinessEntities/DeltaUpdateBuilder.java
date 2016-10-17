@@ -18,6 +18,11 @@ public class DeltaUpdateBuilder {
 		return this;
 	}
 	
+	public DeltaUpdateBuilder withTime(String timeString) {
+		this.time = Instant.parse(timeString);
+		return this;
+	}
+	
 	public DeltaUpdateBuilder withSnapshot(boolean isSnapshot) {
 		this.isSnapshot = isSnapshot;
 		return this;
@@ -39,6 +44,11 @@ public class DeltaUpdateBuilder {
 	
 	public DeltaUpdateBuilder withTokens(Map<Integer, Object> tokens) {
 		contents.putAll(tokens);
+		return this;
+	}
+	
+	public DeltaUpdateBuilder withTokens(DeltaUpdate update) {
+		contents.putAll(update.getContents());
 		return this;
 	}
 
