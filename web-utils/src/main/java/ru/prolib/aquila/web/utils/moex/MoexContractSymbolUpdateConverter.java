@@ -7,14 +7,14 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.DoubleUtils;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 
-public class MoexContractUpdateConverter {
+public class MoexContractSymbolUpdateConverter {
 	private final DoubleUtils doubleUtils;
 	
-	MoexContractUpdateConverter(DoubleUtils doubleUtils) {
+	MoexContractSymbolUpdateConverter(DoubleUtils doubleUtils) {
 		this.doubleUtils = doubleUtils;
 	}
 	
-	public MoexContractUpdateConverter() {
+	public MoexContractSymbolUpdateConverter() {
 		this(new DoubleUtils());
 	}
 	

@@ -16,16 +16,16 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.DoubleUtils;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 
-public class MoexContractUpdateConverterTest {
+public class MoexContractSymbolUpdateConverterTest {
 	private IMocksControl control;
 	private DoubleUtils doubleUtilsMock;
-	private MoexContractUpdateConverter converter;
+	private MoexContractSymbolUpdateConverter converter;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		doubleUtilsMock = control.createMock(DoubleUtils.class);
-		converter = new MoexContractUpdateConverter(doubleUtilsMock);
+		converter = new MoexContractSymbolUpdateConverter(doubleUtilsMock);
 	}
 
 	@Test
