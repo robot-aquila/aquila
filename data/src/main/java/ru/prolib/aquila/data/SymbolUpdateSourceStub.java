@@ -5,7 +5,7 @@ import java.io.IOException;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class SymbolDeltaUpdateSourceStub implements SymbolUpdateSource {
+public class SymbolUpdateSourceStub implements SymbolUpdateSource {
 
 	@Override
 	public void close() throws IOException {
