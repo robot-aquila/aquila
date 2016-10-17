@@ -35,6 +35,9 @@ public class TimeLimitedDeltaUpdateIterator implements CloseableIterator<DeltaUp
 	public TimeLimitedDeltaUpdateIterator(CloseableIterator<DeltaUpdate> source,
 			Instant startTime, Instant endTime)
 	{
+		if ( endTime != null && ! endTime.isAfter(startTime) ) {
+			throw new IllegalArgumentException("End time should be greater than start time");
+		}
 		this.source = source;
 		this.startTime = startTime;
 		this.endTime = endTime;
@@ -86,7 +89,7 @@ public class TimeLimitedDeltaUpdateIterator implements CloseableIterator<DeltaUp
 					return true;
 				} else {
 					lastUpdate = next;
-					return true;
+					return testLastUpdateIsInPeriod();
 				}
 			}
 		}

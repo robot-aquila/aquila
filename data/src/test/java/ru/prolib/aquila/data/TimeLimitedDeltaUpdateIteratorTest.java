@@ -80,6 +80,18 @@ public class TimeLimitedDeltaUpdateIteratorTest {
 			iterator.close();
 		}
 	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor3_ThrowsIfEndTimeBeforeStartTime() throws Exception {
+		try ( TimeLimitedDeltaUpdateIterator x =
+				new TimeLimitedDeltaUpdateIterator(createReader(), T("2016-10-18T00:00:00Z"), T("2016-10-17T23:59:59.999Z")) ) { }
+	}
+
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor3_ThrowsIfEndTimeEqualsStartTime() throws Exception {
+		try ( TimeLimitedDeltaUpdateIterator x =
+				new TimeLimitedDeltaUpdateIterator(createReader(), T("2016-10-18T00:00:00Z"), T("2016-10-18T00:00:00Z")) ) { }
+	}
 
 	@Test
 	public void testIterate_AllUpdatesBeforeStartTime() throws Exception {
@@ -180,6 +192,19 @@ public class TimeLimitedDeltaUpdateIteratorTest {
 	@Test
 	public void testIterate_EmptySource() throws Exception {
 		iterator = new TimeLimitedDeltaUpdateIterator(createEmptyReader(), T("2016-10-17T02:00:00Z"));
+		List<DeltaUpdate> actual = new ArrayList<>();
+		while ( iterator.next() ) {
+			actual.add(iterator.item());
+		}
+		iterator.close();
+		
+		List<DeltaUpdate> expected = new ArrayList<>();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testIterate_FirstUpdateIsAfterEndTime() throws Exception {
+		iterator = new TimeLimitedDeltaUpdateIterator(createReader(), T("2016-10-10T00:00:00Z"), T("2016-10-11T00:00:00Z"));
 		List<DeltaUpdate> actual = new ArrayList<>();
 		while ( iterator.next() ) {
 			actual.add(iterator.item());
