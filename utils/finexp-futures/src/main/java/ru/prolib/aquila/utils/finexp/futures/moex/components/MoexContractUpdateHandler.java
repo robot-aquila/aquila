@@ -101,7 +101,7 @@ public class MoexContractUpdateHandler implements UpdateHandler {
 		snapshot = true;
 		try ( CloseableIterator<DeltaUpdate> reader = storage.createReader(symbol) ) {
 			while ( reader.next() ) {
-				container.update(reader.item().getContents());
+				container.consume(reader.item());
 				snapshot = false;
 			}
 		} catch ( IOException e ) {
