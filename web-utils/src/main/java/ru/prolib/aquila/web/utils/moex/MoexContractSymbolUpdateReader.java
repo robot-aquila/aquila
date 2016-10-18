@@ -55,7 +55,7 @@ public class MoexContractSymbolUpdateReader implements CloseableIterator<DeltaUp
 			}
 			DeltaUpdate raw = moexContractUpdates.item();
 			DeltaUpdate next = updateConverter.toSymbolUpdate(new DeltaUpdateBuilder()
-				.withSnapshot(true)
+				.withSnapshot(raw.isSnapshot())
 				.withTime(raw.getTime())
 				.withTokens(raw)
 				.buildUpdate());

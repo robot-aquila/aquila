@@ -14,6 +14,11 @@ import ru.prolib.aquila.data.storage.file.FileStorageImpl;
 import ru.prolib.aquila.data.storage.file.FileStorageNamespaceV1;
 import ru.prolib.aquila.data.storage.file.PtmlFactory;
 
+/**
+ * MOEX contract data storage.
+ * <p>
+ * This class to store and read files of delta-updates of MOEX contract changes.
+ */
 public class MoexContractFileStorage {	
 	private final FileStorage fileStorage;
 	private final PtmlFactory ptmlFactory;

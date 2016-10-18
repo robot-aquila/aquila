@@ -129,6 +129,28 @@ public class SchedulerImplIT {
 	}
 	
 	/**
+	 * Assert that two instants are equal with max allowed error.
+	 * <p>
+	 * @param msg - text message
+	 * @param expected - expected instant
+	 * @param actual - actual instant
+	 * @param lowerDelta - this value is used as max allowed error if actual time is before than expected
+	 * @param upperDelta - this value is used as max allowed error if actual time is after than expected
+	 */
+	static void assertTimeEquals(String msg, Instant expected, Instant actual, long lowerDelta, long upperDelta) {
+		long actualDelta = ChronoUnit.MILLIS.between(expected, actual);
+		long delta = upperDelta;
+		if ( actualDelta < 0 ) {
+			delta = lowerDelta;
+		}
+		assertTimeEquals(msg, expected, actual, delta);
+	}
+	
+	static void assertTimeEquals(Instant expected, Instant actual, long lowerDelta, long upperDelta) {
+		assertTimeEquals("", expected, actual, lowerDelta, upperDelta);
+	}
+	
+	/**
 	 * Asserts that all instants of the time series are close to each other.
 	 * <p>
 	 * @param expectedBaseTime - the base time (start time)
@@ -318,7 +340,7 @@ public class SchedulerImplIT {
 		expectedOffset.add( 750L);
 		expectedOffset.add(4000L);
 		expectedOffset.add(2000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
+		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.3d);
 	}
 
 	@Test
@@ -347,7 +369,7 @@ public class SchedulerImplIT {
 		expectedOffset.add( 375L);
 		expectedOffset.add(2000L);
 		expectedOffset.add(1000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
+		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.3d);
 	}
 	
 	@Test
@@ -384,7 +406,7 @@ public class SchedulerImplIT {
 		// pause 500 ms here
 		expectedOffset.add(4500L);
 		expectedOffset.add(2000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
+		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.3d);
 	}
 	
 	@Test
@@ -452,17 +474,17 @@ public class SchedulerImplIT {
 		Thread.sleep(1000);
 		Instant expected = T("2016-08-31T00:00:01Z");
 		Instant actual = scheduler.getCurrentTime();
-		assertTimeEquals(expected, actual, 120);
+		assertTimeEquals(expected, actual, 200, 120);
 		
 		Thread.sleep(1000);
 		expected = actual.plusSeconds(1);
 		actual = scheduler.getCurrentTime();
-		assertTimeEquals(expected, actual, 120);
+		assertTimeEquals(expected, actual, 200, 120);
 		
 		Thread.sleep(1000);
 		expected = actual.plusSeconds(1);
 		actual = scheduler.getCurrentTime();
-		assertTimeEquals(expected, actual, 120);
+		assertTimeEquals(expected, actual, 200, 120);
 	}
 	
 	@Test
@@ -473,17 +495,20 @@ public class SchedulerImplIT {
 		Thread.sleep(1000);
 		Instant expected = T("2016-08-31T00:00:02Z");
 		Instant actual = scheduler.getCurrentTime();
-		assertTimeEquals(expected, actual, 120);
+		// Simulator is slower than real-time due to overhead. With high
+		// probability the actual time will be less than expected. Use the
+		// greater error as lower allowed error.
+		assertTimeEquals(expected, actual, 500, 120); 
 		
 		Thread.sleep(1000);
 		expected = actual.plusSeconds(2);
 		actual = scheduler.getCurrentTime();
-		assertTimeEquals(expected, actual, 120);
+		assertTimeEquals(expected, actual, 500, 120);
 		
 		Thread.sleep(1000);
 		expected = actual.plusSeconds(2);
 		actual = scheduler.getCurrentTime();
-		assertTimeEquals(expected, actual, 120);
+		assertTimeEquals(expected, actual, 500, 120);
 	}
 
 }
