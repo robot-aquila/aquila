@@ -25,7 +25,7 @@ public interface FileStorageNamespace {
 	 * <p>
 	 * This method creates all intermediate directories if necessary.
 	 * <p>
-	 * @param desc - the data segment descriptor
+	 * @param descr - the data segment descriptor
 	 * @return path to a directory associated with the descriptor
 	 * @throws IOException - an error occurred
 	 */

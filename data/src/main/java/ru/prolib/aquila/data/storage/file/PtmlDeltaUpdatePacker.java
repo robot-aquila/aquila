@@ -27,7 +27,6 @@ import ru.prolib.aquila.data.DataFormatException;
  * N1...NX - token of values<br>
  * value1...valueX - URL-encoded string representation of appropriate token values<br>
  * An new line indicates the end of the record.
- * <p>
  */
 public class PtmlDeltaUpdatePacker {
 	private static final String LE = "\n";

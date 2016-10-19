@@ -19,10 +19,10 @@ import ru.prolib.aquila.data.DatedSymbol;
  * The first version of the file storage namespace.
  * <p>
  * Directory structure:<p>
- * At level 1) first two characters of hexMD5 hash on symbol string representation</br>
- * At level 2) safe encoded symbol string representation</br>
- * At level 3) four digits of year</br>
- * At level 4) two digits of month</br>
+ * At level 1) first two characters of hexMD5 hash on symbol string representation<br>
+ * At level 2) safe encoded symbol string representation<br>
+ * At level 3) four digits of year<br>
+ * At level 4) two digits of month<br>
  */
 public class FileStorageNamespaceV1 implements FileStorageNamespace {
 	private static final String FS = File.separator;

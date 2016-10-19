@@ -87,6 +87,16 @@ public class SusHandler implements SusTaskConsumer {
 		}
 	}
 	
+	public void close() {
+		lock.lock();
+		try {
+			finishSequence();
+			consumers.clear();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
 	@Override
 	public void consume(SusTask task) {
 		List<DeltaUpdateConsumer> list = null;
