@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -12,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
+import ru.prolib.aquila.probe.SchedulerBuilder;
+import ru.prolib.aquila.utils.experimental.sst.SecuritySimulationTest;
 
 public class Main {
 	private static final Logger logger;
@@ -30,11 +33,11 @@ public class Main {
 	Main() {
 		globalExit = new CountDownLatch(1);
 		experiments = new LinkedHashMap<>();
-		//experiments.put("moex_track_contract", new MoexTrackContract(globalExit));
+		experiments.put("security_simulation_test", new SecuritySimulationTest());
 	}
 	
 	private int run(String[] args) {
-		final Scheduler scheduler = new SchedulerLocal();
+		Scheduler scheduler = null;
 		Experiment experiment = null;
 		try {
 			final CommandLine cmd = CmdLine.parse(args);
@@ -57,6 +60,19 @@ public class Main {
 				CmdLine.printError("Unknown experiment: " + experimentID);
 				return 1;
 			}
+			if ( cmd.hasOption(CmdLine.SOPT_WITH_PROBE_SCHEDULER)) {
+				Instant startTime = Instant.now();
+				if ( cmd.hasOption(CmdLine.SOPT_PROBE_SCHEDULER_START_TIME) ) {
+					startTime = Instant.parse(cmd.getOptionValue(CmdLine.SOPT_PROBE_SCHEDULER_START_TIME));
+				}
+				scheduler = new SchedulerBuilder()
+					.setInitialTime(startTime)
+					.setName("PROBE-SCHEDULER")
+					.buildScheduler();
+			} else {
+				scheduler = new SchedulerLocal();
+			}
+			
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
 				public void run() {
@@ -65,16 +81,17 @@ public class Main {
 				}
 			});
 			experiment = experiments.get(experimentID);
-			int r = experiment.run(scheduler, cmd);
-			if ( r == 0 ) {
-				try {
-					globalExit.await();
-				} catch ( InterruptedException e ) {
-					globalExit.countDown();
-					Thread.currentThread().interrupt();
-				}
+			int r = experiment.run(scheduler, cmd, globalExit);
+			if ( r != 0 ) {
+				return r;
 			}
-			return r;
+			try {
+				globalExit.await();
+			} catch ( InterruptedException e ) {
+				globalExit.countDown();
+				Thread.currentThread().interrupt();
+			}
+			return experiment.getExitCode();
 			
 		} catch ( ParseException e ) {
 			logger.error("Command line error: ", e);

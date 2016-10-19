@@ -11,15 +11,20 @@ import org.apache.commons.cli.ParseException;
 
 public class CmdLine {
 	public static final String SOPT_ROOT = "r";
-	public static final String LOPT_ROOT = "root-directory";
 	public static final String SOPT_HELP = "h";
-	public static final String LOPT_HELP = "help";
 	public static final String SOPT_EXPERIMENT = "e";
-	public static final String LOPT_EXPERIMENT = "experiment";
 	public static final String SOPT_SYMBOL = "s";
-	public static final String LOPT_SYMBOL = "symbol";
 	public static final String SOPT_LIST_EXPERIMENTS = "l";
+	public static final String SOPT_WITH_PROBE_SCHEDULER = "p";
+	public static final String SOPT_PROBE_SCHEDULER_START_TIME = "t";
+	
+	public static final String LOPT_ROOT = "root-directory";
+	public static final String LOPT_HELP = "help";
+	public static final String LOPT_EXPERIMENT = "experiment";
+	public static final String LOPT_SYMBOL = "symbol";
 	public static final String LOPT_LIST_EXPERIMENTS = "list-experiments";
+	public static final String LOPT_WITH_PROBE_SCHEDULER = "with-probe-scheduler";
+	public static final String LOPT_PROBE_SCHEDULER_START_TIME = "probe-scheduler-start-time";
 	
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -45,6 +50,17 @@ public class CmdLine {
 		options.addOption(Option.builder(SOPT_LIST_EXPERIMENTS)
 				.longOpt(LOPT_LIST_EXPERIMENTS)
 				.desc("List available experiments.")
+				.build());
+		options.addOption(Option.builder(SOPT_WITH_PROBE_SCHEDULER)
+				.longOpt(LOPT_WITH_PROBE_SCHEDULER)
+				.desc("Use PROBE scheduler.")
+				.build());
+		options.addOption(Option.builder(SOPT_PROBE_SCHEDULER_START_TIME)
+				.longOpt(LOPT_PROBE_SCHEDULER_START_TIME)
+				.hasArg()
+				.desc("Set start time of PROBE scheduler. If omitted then"
+					+ " current time will be used. This option has only effect"
+					+ " in combination with --" + LOPT_WITH_PROBE_SCHEDULER + " option.")
 				.build());
 		return options;
 	}
