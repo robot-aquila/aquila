@@ -68,6 +68,7 @@ public class Main {
 				scheduler = new SchedulerBuilder()
 					.setInitialTime(startTime)
 					.setName("PROBE-SCHEDULER")
+					.setExecutionSpeed(1)
 					.buildScheduler();
 			} else {
 				scheduler = new SchedulerLocal();

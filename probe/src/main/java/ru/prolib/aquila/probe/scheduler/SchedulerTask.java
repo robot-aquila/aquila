@@ -17,7 +17,7 @@ public interface SchedulerTask extends TaskHandler, Lockable {
 	/**
 	 * Test that the task is scheduled for execution.
 	 * <p>
-	 * @return
+	 * @return true if the task is scheduled, false otherwise
 	 */
 	public abstract boolean isScheduled();
 

@@ -81,5 +81,8 @@ public class ProbeMsg {
 	public static final MsgID STD_DEFAULT_FILTER = newMsgID("STD_DEFAULT_FILTER");
 	public static final MsgID STD_MENU_FILTERS = newMsgID("STD_MENU_FILTERS");
 	public static final MsgID STD_MENU_FILTER_SETUP = newMsgID("STD_MENU_FILTER_SETUP");
+	
+	public static final MsgID STD_SUS_FILTER_MAIN_MENU = newMsgID("STD_SUS_FILTER_MAIN_MENU");
+	public static final MsgID STD_SUS_FILTER_DIALOG_TITLE = newMsgID("STD_SUS_FILTER_DIALOG_TITLE");
 
 }

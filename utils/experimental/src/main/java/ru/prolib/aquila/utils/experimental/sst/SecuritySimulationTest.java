@@ -34,6 +34,7 @@ import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.probe.SchedulerImpl;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerControlToolbar;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerTaskFilter;
+import ru.prolib.aquila.probe.scheduler.ui.SymbolUpdateTaskFilter;
 import ru.prolib.aquila.ui.TableModelController;
 import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
@@ -95,6 +96,7 @@ public class SecuritySimulationTest implements Experiment {
         mainPanel.add(topPanel, BorderLayout.PAGE_START);
 		if ( scheduler instanceof ru.prolib.aquila.probe.SchedulerImpl ) {
 			List<SchedulerTaskFilter> filters = new ArrayList<>();
+			filters.add(new SymbolUpdateTaskFilter(messages));
 			topPanel.add(new SchedulerControlToolbar(messages, (SchedulerImpl) scheduler, filters));
 		}
 		

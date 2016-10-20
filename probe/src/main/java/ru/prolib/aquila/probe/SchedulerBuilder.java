@@ -27,6 +27,7 @@ public class SchedulerBuilder {
 	private Thread workerThread;
 	private Instant initialTime;
 	private boolean valid = true;
+	private Integer executionSpeed;
 	
 	/**
 	 * Get command queue.
@@ -193,6 +194,15 @@ public class SchedulerBuilder {
 		return this;
 	}
 	
+	public Integer getExecutionSpeed() {
+		return executionSpeed;
+	}
+	
+	public SchedulerBuilder setExecutionSpeed(Integer executionSpeed) {
+		this.executionSpeed = executionSpeed;
+		return this;
+	}
+	
 	/**
 	 * Build scheduler instance.
 	 * <p>
@@ -214,6 +224,9 @@ public class SchedulerBuilder {
 		workerThread.start();
 		if ( initialTime != null ) {
 			scheduler.setCurrentTime(initialTime);
+		}
+		if ( executionSpeed != null ) {
+			scheduler.setExecutionSpeed(executionSpeed);
 		}
 		valid = false;
 		return scheduler;
