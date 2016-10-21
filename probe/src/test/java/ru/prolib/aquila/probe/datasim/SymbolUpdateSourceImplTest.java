@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.replay;
+package ru.prolib.aquila.probe.datasim;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
@@ -12,18 +12,18 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.data.replay.SymbolUpdateSourceImpl;
-import ru.prolib.aquila.data.replay.sus.SusHandler;
-import ru.prolib.aquila.data.replay.sus.SusHandlerFactory;
+import ru.prolib.aquila.probe.datasim.SymbolUpdateSourceImpl;
+import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateHandler;
+import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateHandlerFactory;
 
 public class SymbolUpdateSourceImplTest {
 	private static final Symbol symbol1 = new Symbol("AAPL"),
 			symbol2 = new Symbol("MSFT"),
 			symbol3 = new Symbol("SBER");
 	private IMocksControl control;
-	private Map<Symbol, SusHandler> handlerMap;
-	private SusHandler handlerMock1, handlerMock2, handlerMock3;
-	private SusHandlerFactory handlerFactoryMock;
+	private Map<Symbol, SymbolUpdateHandler> handlerMap;
+	private SymbolUpdateHandler handlerMock1, handlerMock2, handlerMock3;
+	private SymbolUpdateHandlerFactory handlerFactoryMock;
 	private DeltaUpdateConsumer consumerMock;
 	private SymbolUpdateSourceImpl updateSource;
 
@@ -31,10 +31,10 @@ public class SymbolUpdateSourceImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		handlerMap = new LinkedHashMap<>();
-		handlerMock1 = control.createMock(SusHandler.class);
-		handlerMock2 = control.createMock(SusHandler.class);
-		handlerMock3 = control.createMock(SusHandler.class);
-		handlerFactoryMock = control.createMock(SusHandlerFactory.class);
+		handlerMock1 = control.createMock(SymbolUpdateHandler.class);
+		handlerMock2 = control.createMock(SymbolUpdateHandler.class);
+		handlerMock3 = control.createMock(SymbolUpdateHandler.class);
+		handlerFactoryMock = control.createMock(SymbolUpdateHandlerFactory.class);
 		consumerMock = control.createMock(DeltaUpdateConsumer.class);
 		updateSource = new SymbolUpdateSourceImpl(handlerFactoryMock, handlerMap);
 	}

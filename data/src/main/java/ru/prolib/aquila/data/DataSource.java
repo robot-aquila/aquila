@@ -1,7 +1,7 @@
 package ru.prolib.aquila.data;
 
 /**
- * A data source facade interface.
+ * Combined data source facade interface.
  */
 public interface DataSource extends L1UpdateSource, MDUpdateSource, SymbolUpdateSource {
 

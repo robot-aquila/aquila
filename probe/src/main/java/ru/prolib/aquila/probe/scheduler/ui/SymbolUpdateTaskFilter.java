@@ -6,7 +6,7 @@ import java.util.List;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
-import ru.prolib.aquila.data.replay.sus.SusTask;
+import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateTask;
 import ru.prolib.aquila.probe.scheduler.SchedulerTask;
 import ru.prolib.aquila.ui.form.SymbolListSelectionDialog;
 import ru.prolib.aquila.ui.form.SymbolListSelectionDialogView;
@@ -14,8 +14,8 @@ import ru.prolib.aquila.ui.form.SymbolListSelectionDialogView;
 /**
  * Filter on standard symbol update source task.
  * <p>
- * See {@link ru.prolib.aquila.data.replay.SymbolUpdateSourceImpl the data source}
- * and {@link ru.prolib.aquila.data.replay.sus.SusTask its task} classes for
+ * See {@link ru.prolib.aquila.probe.datasim.SymbolUpdateSourceImpl the data source}
+ * and {@link ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateTask its task} classes for
  * more details.
  */
 public class SymbolUpdateTaskFilter implements SchedulerTaskFilter {
@@ -41,13 +41,13 @@ public class SymbolUpdateTaskFilter implements SchedulerTaskFilter {
 		if ( ! enabled ) {
 			return false;
 		}
-		if ( handler.getRunnable().getClass() != SusTask.class ) {
+		if ( handler.getRunnable().getClass() != SymbolUpdateTask.class ) {
 			return false;
 		}
 		if ( filterBySymbol.size() == 0 ) {
 			return true;
 		}
-		SusTask task = (SusTask) handler.getRunnable();
+		SymbolUpdateTask task = (SymbolUpdateTask) handler.getRunnable();
 		if ( filterBySymbol.contains(task.getSymbol()) ) {
 			return true;
 		}
@@ -80,7 +80,7 @@ public class SymbolUpdateTaskFilter implements SchedulerTaskFilter {
 
 	@Override
 	public String formatTitle(SchedulerTask handler) {
-		SusTask task = (SusTask) handler.getRunnable();
+		SymbolUpdateTask task = (SymbolUpdateTask) handler.getRunnable();
 		return "Update " + task.getSymbol() + " " + task.getUpdate().getContents();
 	}
 

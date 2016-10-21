@@ -9,9 +9,9 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.TimeLimitedDeltaUpdateIterator;
-import ru.prolib.aquila.data.replay.sus.SusReaderFactory;
+import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateReaderFactory;
 
-public class MoexSusReaderFactory implements SusReaderFactory {
+public class MoexSymbolUpdateReaderFactory implements SymbolUpdateReaderFactory {
 	private final MoexContractFileStorage fileStorage;
 	
 	/**
@@ -19,7 +19,7 @@ public class MoexSusReaderFactory implements SusReaderFactory {
 	 * <p>
 	 * @param fileStorage - the MOEX contract data storage
 	 */
-	public MoexSusReaderFactory(MoexContractFileStorage fileStorage) {
+	public MoexSymbolUpdateReaderFactory(MoexContractFileStorage fileStorage) {
 		this.fileStorage = fileStorage;
 	}
 	
@@ -29,7 +29,7 @@ public class MoexSusReaderFactory implements SusReaderFactory {
 	 * @param root - the directory which points to the root of MOEX contract
 	 * data storage
 	 */
-	public MoexSusReaderFactory(File root) {
+	public MoexSymbolUpdateReaderFactory(File root) {
 		this(new MoexContractFileStorage(root));
 	}
 	
@@ -39,7 +39,7 @@ public class MoexSusReaderFactory implements SusReaderFactory {
 	 * @param root - the path to the directory which points to the root of MOEX
 	 * contract data storage
 	 */
-	public MoexSusReaderFactory(String root) {
+	public MoexSymbolUpdateReaderFactory(String root) {
 		this(new File(root));
 	}
 

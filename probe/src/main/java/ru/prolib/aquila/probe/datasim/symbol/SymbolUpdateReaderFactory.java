@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.replay.sus;
+package ru.prolib.aquila.probe.datasim.symbol;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
  * updates. Any data storage may be used in combination with the symbol update
  * source classes by implementing this interface.
  */
-public interface SusReaderFactory {
+public interface SymbolUpdateReaderFactory {
 	
 	/**
 	 * Create an update reader.

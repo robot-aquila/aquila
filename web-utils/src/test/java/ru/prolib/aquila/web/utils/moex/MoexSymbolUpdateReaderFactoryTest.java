@@ -15,8 +15,8 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class MoexSusReaderFactoryTest {
-	private MoexSusReaderFactory factory;
+public class MoexSymbolUpdateReaderFactoryTest {
+	private MoexSymbolUpdateReaderFactory factory;
 	
 	private static Instant T(String timeString) {
 		return Instant.parse(timeString);
@@ -24,7 +24,7 @@ public class MoexSusReaderFactoryTest {
 
 	@Before
 	public void setUp() throws Exception {
-		factory = new MoexSusReaderFactory("fixture");
+		factory = new MoexSymbolUpdateReaderFactory("fixture");
 	}
 
 	@Test

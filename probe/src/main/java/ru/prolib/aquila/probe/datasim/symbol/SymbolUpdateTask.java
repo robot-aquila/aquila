@@ -1,17 +1,17 @@
-package ru.prolib.aquila.data.replay.sus;
+package ru.prolib.aquila.probe.datasim.symbol;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class SusTask implements Runnable {
+public class SymbolUpdateTask implements Runnable {
 	private final Symbol symbol;
 	private final DeltaUpdate update;
 	private final int sequenceID;
-	private final SusTaskConsumer consumer;
+	private final SymbolUpdateConsumer consumer;
 	
-	public SusTask(Symbol symbol, DeltaUpdate update, int sequenceID, SusTaskConsumer consumer) {
+	public SymbolUpdateTask(Symbol symbol, DeltaUpdate update, int sequenceID, SymbolUpdateConsumer consumer) {
 		this.symbol = symbol;
 		this.update = update;
 		this.sequenceID = sequenceID;
@@ -20,7 +20,7 @@ public class SusTask implements Runnable {
 
 	@Override
 	public void run() {
-		consumer.consume(this);
+		consumer.consume(symbol, update, sequenceID);
 	}
 	
 	public Symbol getSymbol() {
@@ -35,7 +35,7 @@ public class SusTask implements Runnable {
 		return sequenceID;
 	}
 
-	public SusTaskConsumer getConsumer() {
+	public SymbolUpdateConsumer getConsumer() {
 		return consumer;
 	}
 	
@@ -44,10 +44,10 @@ public class SusTask implements Runnable {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != SusTask.class ) {
+		if ( other == null || other.getClass() != SymbolUpdateTask.class ) {
 			return false;
 		}
-		SusTask o = (SusTask) other;
+		SymbolUpdateTask o = (SymbolUpdateTask) other;
 		return new EqualsBuilder()
 			.append(consumer, o.consumer)
 			.append(sequenceID, o.sequenceID)

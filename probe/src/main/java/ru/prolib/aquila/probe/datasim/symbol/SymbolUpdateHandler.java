@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.replay.sus;
+package ru.prolib.aquila.probe.datasim.symbol;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,22 +16,22 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class SusHandler implements SusTaskConsumer {
+public class SymbolUpdateHandler implements SymbolUpdateConsumer {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SusHandler.class);
+		logger = LoggerFactory.getLogger(SymbolUpdateHandler.class);
 	}
 	
 	private final Lock lock;
 	private final Symbol symbol;
 	private final Scheduler scheduler;
 	private final List<DeltaUpdateConsumer> consumers;
-	private final SusReaderFactory readerFactory;
+	private final SymbolUpdateReaderFactory readerFactory;
 	private int sequenceID = 1;
 	private CloseableIterator<DeltaUpdate> reader;
 	
-	public SusHandler(Symbol symbol, Scheduler scheduler, SusReaderFactory readerFactory) {
+	public SymbolUpdateHandler(Symbol symbol, Scheduler scheduler, SymbolUpdateReaderFactory readerFactory) {
 		this.lock = new ReentrantLock();
 		this.symbol = symbol;
 		this.scheduler = scheduler;
@@ -98,11 +98,11 @@ public class SusHandler implements SusTaskConsumer {
 	}
 	
 	@Override
-	public void consume(SusTask task) {
+	public void consume(Symbol symbol, DeltaUpdate update, int sequenceID) {
 		List<DeltaUpdateConsumer> list = null;
 		lock.lock();
 		try {
-			if ( task.getSequenceID() != sequenceID ) {
+			if ( this.sequenceID != sequenceID ) {
 				return; // skip obsolete task
 			}
 			list = new ArrayList<>(consumers);
@@ -110,7 +110,7 @@ public class SusHandler implements SusTaskConsumer {
 			lock.unlock();
 		}
 		for ( DeltaUpdateConsumer consumer : list ) {
-			consumer.consume(task.getUpdate());
+			consumer.consume(update);
 		}
 		scheduleUpdate();
 	}
@@ -133,7 +133,7 @@ public class SusHandler implements SusTaskConsumer {
 		try {
 			if ( consumers.size() > 0 && reader.next() ) {
 				DeltaUpdate update = reader.item();
-				scheduler.schedule(new SusTask(symbol, update, sequenceID, this),
+				scheduler.schedule(new SymbolUpdateTask(symbol, update, sequenceID, this),
 						update.getTime());
 				return;
 			}

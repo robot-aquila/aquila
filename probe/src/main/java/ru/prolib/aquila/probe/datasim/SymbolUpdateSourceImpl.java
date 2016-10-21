@@ -1,4 +1,4 @@
-package ru.prolib.aquila.data.replay;
+package ru.prolib.aquila.probe.datasim;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,17 +14,17 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.SymbolUpdateSource;
-import ru.prolib.aquila.data.replay.sus.SusHandler;
-import ru.prolib.aquila.data.replay.sus.SusHandlerFactory;
-import ru.prolib.aquila.data.replay.sus.SusReaderFactory;
+import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateHandler;
+import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateHandlerFactory;
+import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateReaderFactory;
 
 /**
- * Standard implementation of update source of symbol state.
+ * The common data source to simulate symbol state updates. 
  * <p>
- * This class is used in combination with the reader factory which should
- * provide access to set of delta-updates associated with the symbol. This class
- * may also be used for managing any symbol-related data streams targeted to one
- * or several delta-update consumers.
+ * The common implementation is an manager which iterates through updates of
+ * symbol and uses scheduler model to execute the state updates. The class is
+ * used in combination with an update reader factory which provides an access to
+ * set of delta-updates associated with the symbol.
  */
 public class SymbolUpdateSourceImpl implements SymbolUpdateSource {
 	private static final Logger logger;
@@ -33,8 +33,8 @@ public class SymbolUpdateSourceImpl implements SymbolUpdateSource {
 		logger = LoggerFactory.getLogger(SymbolUpdateSourceImpl.class);
 	}
 	
-	private final SusHandlerFactory handlerFactory;
-	private final Map<Symbol, SusHandler> handlers;
+	private final SymbolUpdateHandlerFactory handlerFactory;
+	private final Map<Symbol, SymbolUpdateHandler> handlers;
 	private final Lock lock;
 	
 	/**
@@ -46,8 +46,8 @@ public class SymbolUpdateSourceImpl implements SymbolUpdateSource {
 	 * @param handlerFactory - the handler factory
 	 * @param handlers - the handler map
 	 */
-	SymbolUpdateSourceImpl(SusHandlerFactory handlerFactory, Map<Symbol,
-			SusHandler> handlers)
+	SymbolUpdateSourceImpl(SymbolUpdateHandlerFactory handlerFactory, Map<Symbol,
+			SymbolUpdateHandler> handlers)
 	{
 		this.handlerFactory = handlerFactory;
 		this.handlers = handlers;
@@ -62,7 +62,7 @@ public class SymbolUpdateSourceImpl implements SymbolUpdateSource {
 	 * <p>
 	 * @param handlerFactory - the handler factory
 	 */
-	SymbolUpdateSourceImpl(SusHandlerFactory handlerFactory) {
+	SymbolUpdateSourceImpl(SymbolUpdateHandlerFactory handlerFactory) {
 		this(handlerFactory, new HashMap<>());
 	}
 	
@@ -73,17 +73,17 @@ public class SymbolUpdateSourceImpl implements SymbolUpdateSource {
 	 * @param readerFactory - the reader factory which is used to produce an
 	 * iterator through set of delta-updates of specified symbol
 	 */
-	public SymbolUpdateSourceImpl(Scheduler scheduler, SusReaderFactory readerFactory) {
-		this(new SusHandlerFactory(scheduler, readerFactory));
+	public SymbolUpdateSourceImpl(Scheduler scheduler, SymbolUpdateReaderFactory readerFactory) {
+		this(new SymbolUpdateHandlerFactory(scheduler, readerFactory));
 	}
 
 	@Override
 	public void close() {
 		lock.lock();
 		try {
-			Iterator<Map.Entry<Symbol, SusHandler>> it = handlers.entrySet().iterator();
+			Iterator<Map.Entry<Symbol, SymbolUpdateHandler>> it = handlers.entrySet().iterator();
 			while ( it.hasNext() ) {
-				Map.Entry<Symbol, SusHandler> pair = it.next();
+				Map.Entry<Symbol, SymbolUpdateHandler> pair = it.next();
 				pair.getValue().close();
 			}
 			handlers.clear();
@@ -96,7 +96,7 @@ public class SymbolUpdateSourceImpl implements SymbolUpdateSource {
 	public void subscribeSymbol(Symbol symbol, DeltaUpdateConsumer consumer) {
 		lock.lock();
 		try {
-			SusHandler handler = handlers.get(symbol);
+			SymbolUpdateHandler handler = handlers.get(symbol);
 			if ( handler == null ) {
 				handler = handlerFactory.produce(symbol);
 				handlers.put(symbol, handler);
@@ -113,7 +113,7 @@ public class SymbolUpdateSourceImpl implements SymbolUpdateSource {
 	public void unsubscribeSymbol(Symbol symbol, DeltaUpdateConsumer consumer) {
 		lock.lock();
 		try {
-			SusHandler handler = handlers.get(symbol);
+			SymbolUpdateHandler handler = handlers.get(symbol);
 			if ( handler != null ) {
 				handler.unsubscribe(consumer);
 			}

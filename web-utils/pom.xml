@@ -17,8 +17,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
-			<artifactId>aquila-data</artifactId>
-			<version>0.0.1</version>
+			<artifactId>aquila-probe</artifactId>
+			<version>0.1.43</version>
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
