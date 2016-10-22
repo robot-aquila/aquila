@@ -1,7 +1,7 @@
-package ru.prolib.aquila.probe.datasim.symbol;
+package ru.prolib.aquila.probe.datasim.l1;
 
-import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -17,25 +17,21 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
-import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
-import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
-import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
+import ru.prolib.aquila.core.BusinessEntities.L1Update;
+import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
+import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStubTask;
-import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateHandler;
-import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateReaderFactory;
-import ru.prolib.aquila.probe.datasim.symbol.SymbolUpdateTask;
 
-public class SymbolUpdateHandlerTest {
-	private static final Symbol symbol = new Symbol("SBER");
+public class SymbolL1UpdateHandlerTest {
+	private static final Symbol symbol = new Symbol("GAZP");
 	
-	static class UpdateReaderFactoryStub implements SymbolUpdateReaderFactory {
-		private CloseableIterator<DeltaUpdate> predefinedReader;
+	static class UpdateReaderFactoryStub implements SymbolL1UpdateReaderFactory {
+		private CloseableIterator<L1Update> predefinedReader;
 
 		@Override
-		public CloseableIterator<DeltaUpdate>
+		public CloseableIterator<L1Update>
 			createReader(Symbol symbol, Instant startTime) throws IOException {
 			return predefinedReader;
 		}
@@ -54,22 +50,22 @@ public class SymbolUpdateHandlerTest {
 	
 	private IMocksControl control;
 	private SchedulerStub schedulerStub;
-	private SymbolUpdateReaderFactory readerFactoryMock;
+	private SymbolL1UpdateReaderFactory readerFactoryMock;
 	private UpdateReaderFactoryStub readerFactoryStub;
-	private DeltaUpdateConsumer consumerMock1, consumerMock2;
-	private CloseableIterator<DeltaUpdate> readerStub;
-	private SymbolUpdateHandler handler;
+	private L1UpdateConsumer consumerMock1, consumerMock2;
+	private CloseableIterator<L1Update> readerStub;
+	private SymbolL1UpdateHandler handler;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		consumerMock1 = control.createMock(DeltaUpdateConsumer.class);
-		consumerMock2 = control.createMock(DeltaUpdateConsumer.class);
-		readerFactoryMock = control.createMock(SymbolUpdateReaderFactory.class);
+		consumerMock1 = control.createMock(L1UpdateConsumer.class);
+		consumerMock2 = control.createMock(L1UpdateConsumer.class);
+		readerFactoryMock = control.createMock(SymbolL1UpdateReaderFactory.class);
 		schedulerStub = new SchedulerStub();
 		schedulerStub.setFixedTime(T("2016-10-18T02:30:00Z"));
 		readerFactoryStub = new UpdateReaderFactoryStub();
-		handler = new SymbolUpdateHandler(symbol, schedulerStub, readerFactoryStub);
+		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryStub);
 	}
 	
 	@After
@@ -80,14 +76,19 @@ public class SymbolUpdateHandlerTest {
 		}
 	}
 	
+	private List<L1Update> getDefaultInput() {
+		List<L1Update> input = new ArrayList<>();
+		input.add(new L1UpdateBuilder(symbol)
+			.withTime("2016-10-18T10:00:00Z")
+			.withTrade()
+			.withPrice(120.19d)
+			.withSize(800L)
+			.buildL1Update());
+		return input;
+	}
+	
 	private void useDefaultInput() {
-		List<DeltaUpdate> input = new ArrayList<>();
-		input.add(new DeltaUpdateBuilder()
-			.withSnapshot(true)
-			.withTime("2016-10-18T02:30:00Z")
-			.withToken(SecurityField.DISPLAY_NAME, "sbrf")
-			.buildUpdate());
-		readerFactoryStub.predefinedReader = new CloseableIteratorStub<>(input);
+		readerFactoryStub.predefinedReader = new CloseableIteratorStub<>(getDefaultInput());
 	}
 	
 	private void assertHandlerSequenceIsObsolete(int sequenceID) {
@@ -100,24 +101,19 @@ public class SymbolUpdateHandlerTest {
 	
 	@Test
 	public void testSubscribe_ScheduleUpdateAtFirstConsumer() throws Exception {
-		List<DeltaUpdate> input = new ArrayList<>();
-		input.add(new DeltaUpdateBuilder()
-			.withSnapshot(true)
-			.withTime("2016-10-18T02:30:00Z")
-			.withToken(SecurityField.DISPLAY_NAME, "sbrf")
-			.buildUpdate());
+		List<L1Update> input = getDefaultInput();
 		readerStub = new CloseableIteratorStub<>(input);
 		expect(readerFactoryMock.createReader(symbol, T("2016-10-18T02:30:00Z")))
 			.andReturn(readerStub);
 		control.replay();
-		handler = new SymbolUpdateHandler(symbol, schedulerStub, readerFactoryMock);
+		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
 		
 		handler.subscribe(consumerMock1);
 		
 		control.verify();
 		List<SchedulerStubTask> expected = new ArrayList<>();
-		expected.add(SchedulerStubTask.atTime(T("2016-10-18T02:30:00Z"),
-				new SymbolUpdateTask(symbol, input.get(0), 1, handler)));
+		expected.add(SchedulerStubTask.atTime(T("2016-10-18T10:00:00Z"),
+				new SymbolL1UpdateTask(input.get(0), 1, handler)));
 		assertEquals(expected, schedulerStub.getScheduledTasks());
 		assertHandlerSequenceIsStillActive(1);
 	}
@@ -130,18 +126,18 @@ public class SymbolUpdateHandlerTest {
 		handler.subscribe(consumerMock2);
 		handler.subscribe(consumerMock1);
 		
-		SymbolUpdateTask task = (SymbolUpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		consumerMock1.consume(task.getUpdate());
 		consumerMock2.consume(task.getUpdate());
 		control.replay();
-		handler.consume(symbol, task.getUpdate(), 1);
+		handler.consume(task.getUpdate(), 1);
 		control.verify();
 	}
 	
 	@Test
 	public void testSubscribe_FinishSequenceOnError() throws Exception {
 		@SuppressWarnings("unchecked")
-		CloseableIterator<DeltaUpdate> readerMock = control.createMock(CloseableIterator.class);
+		CloseableIterator<L1Update> readerMock = control.createMock(CloseableIterator.class);
 		expect(readerMock.next()).andThrow(new IOException("Test error"));
 		readerMock.close();
 		readerFactoryStub.predefinedReader = readerMock;
@@ -162,10 +158,10 @@ public class SymbolUpdateHandlerTest {
 		handler.unsubscribe(consumerMock1);
 		
 		assertHandlerSequenceIsStillActive(1);
-		SymbolUpdateTask task = (SymbolUpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		consumerMock2.consume(task.getUpdate());
 		control.replay();
-		handler.consume(symbol, task.getUpdate(), 1);
+		handler.consume(task.getUpdate(), 1);
 		control.verify();
 	}
 	
@@ -185,15 +181,16 @@ public class SymbolUpdateHandlerTest {
 	public void testStartNewSequence_IfHasConsumers() throws Exception {
 		useDefaultInput();
 		handler.subscribe(consumerMock1);
-		CloseableIteratorStub<DeltaUpdate> readerStub1 =
-				(CloseableIteratorStub<DeltaUpdate>) readerFactoryStub.predefinedReader;
-		List<DeltaUpdate> input = new ArrayList<>();
-		input.add(new DeltaUpdateBuilder()
-			.withSnapshot(true)
-			.withTime("2016-10-18T04:00:00Z")
-			.withToken(SecurityField.SCALE, 1)
-			.buildUpdate());
-		CloseableIteratorStub<DeltaUpdate> readerStub2 = new CloseableIteratorStub<>(input);
+		CloseableIteratorStub<L1Update> readerStub1 =
+			(CloseableIteratorStub<L1Update>) readerFactoryStub.predefinedReader;
+		List<L1Update> input = new ArrayList<>();
+		input.add(new L1UpdateBuilder(symbol)
+			.withTime("1998-08-13T00:00:00Z")
+			.withTrade()
+			.withPrice(42.12d)
+			.withSize(1000L)
+			.buildL1Update());
+		CloseableIteratorStub<L1Update> readerStub2 = new CloseableIteratorStub<>(input);
 		readerFactoryStub.predefinedReader = readerStub2;
 		schedulerStub.clearScheduledTasks();
 		
@@ -205,15 +202,15 @@ public class SymbolUpdateHandlerTest {
 		assertHandlerSequenceIsStillActive(2);
 		// New sequence task scheduled
 		List<SchedulerStubTask> expected = new ArrayList<>();
-		expected.add(SchedulerStubTask.atTime(T("2016-10-18T04:00:00Z"),
-				new SymbolUpdateTask(symbol, input.get(0), 2, handler)));
+		expected.add(SchedulerStubTask.atTime(T("1998-08-13T00:00:00Z"),
+				new SymbolL1UpdateTask(input.get(0), 2, handler)));
 		assertEquals(expected, schedulerStub.getScheduledTasks());
 	}
 	
 	@Test
 	public void testStartNewSequence_IfNoConsumers() throws Exception {
 		@SuppressWarnings("unchecked")
-		CloseableIterator<DeltaUpdate> readerMock = control.createMock(CloseableIterator.class);
+		CloseableIterator<L1Update> readerMock = control.createMock(CloseableIterator.class);
 		readerFactoryStub.predefinedReader = readerMock;
 		control.replay();
 		
@@ -230,32 +227,34 @@ public class SymbolUpdateHandlerTest {
 	
 	@Test
 	public void testConsume_ScheduleNextUpdate() throws Exception {
-		List<DeltaUpdate> input = new ArrayList<>();
-		input.add(new DeltaUpdateBuilder()
-			.withSnapshot(true)
-			.withTime("2016-10-18T02:30:00Z")
-			.withToken(SecurityField.DISPLAY_NAME, "sbrf")
-			.buildUpdate());
-		input.add(new DeltaUpdateBuilder()
-			.withSnapshot(false)
-			.withTime("2016-10-18T03:00:00Z")
-			.withToken(SecurityField.LOT_SIZE, 10)
-			.buildUpdate());
-		CloseableIteratorStub<DeltaUpdate> readerStub = new CloseableIteratorStub<>(input);
+		List<L1Update> input = new ArrayList<>();
+		input.add(new L1UpdateBuilder(symbol)
+			.withTime("1917-10-01T00:00:00Z")
+			.withTrade()
+			.withPrice(80.01d)
+			.withSize(100L)
+			.buildL1Update());
+		input.add(new L1UpdateBuilder(symbol)
+			.withTime("1918-01-01T00:00:00Z")
+			.withTrade()
+			.withPrice(75.08d)
+			.withSize(200L)
+			.buildL1Update());
+		CloseableIteratorStub<L1Update> readerStub = new CloseableIteratorStub<>(input);
 		expect(readerFactoryMock.createReader(symbol, T("2016-10-18T02:30:00Z")))
 			.andReturn(readerStub);
 		consumerMock1.consume(input.get(0));
 		control.replay();
-		handler = new SymbolUpdateHandler(symbol, schedulerStub, readerFactoryMock);
+		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
 		handler.subscribe(consumerMock1);
-		SymbolUpdateTask task = (SymbolUpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		schedulerStub.clearScheduledTasks();
 		
-		handler.consume(symbol, task.getUpdate(), 1);
+		handler.consume(task.getUpdate(), 1);
 		
 		List<SchedulerStubTask> expected = new ArrayList<>();
-		expected.add(SchedulerStubTask.atTime(T("2016-10-18T03:00:00Z"),
-				new SymbolUpdateTask(symbol, input.get(1), 1, handler)));
+		expected.add(SchedulerStubTask.atTime(T("1918-01-01T00:00:00Z"),
+				new SymbolL1UpdateTask(input.get(1), 1, handler)));
 		assertEquals(expected, schedulerStub.getScheduledTasks());
 		assertFalse(readerStub.isClosed());
 		assertHandlerSequenceIsStillActive(1);
@@ -265,56 +264,58 @@ public class SymbolUpdateHandlerTest {
 	public void testConsume_FinishSequenceIfNoMoreUpdates() throws Exception {
 		useDefaultInput();
 		handler.subscribe(consumerMock1);
-		CloseableIteratorStub<DeltaUpdate> readerStub =
-				(CloseableIteratorStub<DeltaUpdate>) readerFactoryStub.predefinedReader;
-		SymbolUpdateTask task = (SymbolUpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		CloseableIteratorStub<L1Update> readerStub =
+				(CloseableIteratorStub<L1Update>) readerFactoryStub.predefinedReader;
+		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		consumerMock1.consume(task.getUpdate());
 		control.replay();
 		
-		handler.consume(symbol, task.getUpdate(), 1);
+		handler.consume(task.getUpdate(), 1);
 		
 		control.verify();
 		assertTrue(readerStub.isClosed());
 		assertHandlerSequenceIsObsolete(1);
 	}
-
+	
 	@Test
 	public void testConsume_FinishSequenceIfNoConsumers() throws Exception {
-		List<DeltaUpdate> input = new ArrayList<>();
-		input.add(new DeltaUpdateBuilder()
-			.withSnapshot(true)
-			.withTime("2016-10-18T02:30:00Z")
-			.withToken(SecurityField.DISPLAY_NAME, "sbrf")
-			.buildUpdate());
-		input.add(new DeltaUpdateBuilder()
-			.withSnapshot(false)
-			.withTime("2016-10-18T03:00:00Z")
-			.withToken(SecurityField.LOT_SIZE, 10)
-			.buildUpdate());
-		CloseableIteratorStub<DeltaUpdate> readerStub = new CloseableIteratorStub<>(input);
+		List<L1Update> input = new ArrayList<>();
+		input.add(new L1UpdateBuilder(symbol)
+			.withTime("1917-10-01T00:00:00Z")
+			.withTrade()
+			.withPrice(80.01d)
+			.withSize(100L)
+			.buildL1Update());
+		input.add(new L1UpdateBuilder(symbol)
+			.withTime("1918-01-01T00:00:00Z")
+			.withTrade()
+			.withPrice(75.08d)
+			.withSize(200L)
+			.buildL1Update());
+		CloseableIteratorStub<L1Update> readerStub = new CloseableIteratorStub<>(input);
 		expect(readerFactoryMock.createReader(symbol, T("2016-10-18T02:30:00Z")))
 			.andReturn(readerStub);
 		control.replay();
-		handler = new SymbolUpdateHandler(symbol, schedulerStub, readerFactoryMock);
+		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
 		handler.subscribe(consumerMock1);
-		SymbolUpdateTask task = (SymbolUpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		schedulerStub.clearScheduledTasks();
 		handler.unsubscribe(consumerMock1);
 		
-		handler.consume(symbol, task.getUpdate(), 1);
+		handler.consume(task.getUpdate(), 1);
 		
 		List<SchedulerStubTask> expected = new ArrayList<>();
 		assertEquals(expected, schedulerStub.getScheduledTasks());
 		assertTrue(readerStub.isClosed());
 		assertHandlerSequenceIsObsolete(1);
 	}
-	
+
 	@Test
 	public void testClose() throws Exception {
 		useDefaultInput();
 		handler.subscribe(consumerMock1);
-		CloseableIteratorStub<DeltaUpdate> readerStub =
-				(CloseableIteratorStub<DeltaUpdate>) readerFactoryStub.predefinedReader;
+		CloseableIteratorStub<L1Update> readerStub =
+				(CloseableIteratorStub<L1Update>) readerFactoryStub.predefinedReader;
 		schedulerStub.clearScheduledTasks();
 		control.replay();
 		
@@ -325,7 +326,7 @@ public class SymbolUpdateHandlerTest {
 		assertHandlerSequenceIsObsolete(1);
 		control.resetToStrict();
 		@SuppressWarnings("unchecked")
-		CloseableIterator<DeltaUpdate> readerMock = control.createMock(CloseableIterator.class);
+		CloseableIterator<L1Update> readerMock = control.createMock(CloseableIterator.class);
 		readerFactoryStub.predefinedReader = readerMock;
 		control.replay();
 		handler.startNewSequence(); // should not read  updates
