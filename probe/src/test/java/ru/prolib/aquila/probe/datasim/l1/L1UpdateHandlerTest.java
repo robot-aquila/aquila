@@ -24,10 +24,10 @@ import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStubTask;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class SymbolL1UpdateHandlerTest {
+public class L1UpdateHandlerTest {
 	private static final Symbol symbol = new Symbol("GAZP");
 	
-	static class UpdateReaderFactoryStub implements SymbolL1UpdateReaderFactory {
+	static class UpdateReaderFactoryStub implements L1UpdateReaderFactory {
 		private CloseableIterator<L1Update> predefinedReader;
 
 		@Override
@@ -50,22 +50,22 @@ public class SymbolL1UpdateHandlerTest {
 	
 	private IMocksControl control;
 	private SchedulerStub schedulerStub;
-	private SymbolL1UpdateReaderFactory readerFactoryMock;
+	private L1UpdateReaderFactory readerFactoryMock;
 	private UpdateReaderFactoryStub readerFactoryStub;
 	private L1UpdateConsumer consumerMock1, consumerMock2;
 	private CloseableIterator<L1Update> readerStub;
-	private SymbolL1UpdateHandler handler;
+	private L1UpdateHandler handler;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		consumerMock1 = control.createMock(L1UpdateConsumer.class);
 		consumerMock2 = control.createMock(L1UpdateConsumer.class);
-		readerFactoryMock = control.createMock(SymbolL1UpdateReaderFactory.class);
+		readerFactoryMock = control.createMock(L1UpdateReaderFactory.class);
 		schedulerStub = new SchedulerStub();
 		schedulerStub.setFixedTime(T("2016-10-18T02:30:00Z"));
 		readerFactoryStub = new UpdateReaderFactoryStub();
-		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryStub);
+		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryStub);
 	}
 	
 	@After
@@ -106,14 +106,14 @@ public class SymbolL1UpdateHandlerTest {
 		expect(readerFactoryMock.createReader(symbol, T("2016-10-18T02:30:00Z")))
 			.andReturn(readerStub);
 		control.replay();
-		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
+		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
 		
 		handler.subscribe(consumerMock1);
 		
 		control.verify();
 		List<SchedulerStubTask> expected = new ArrayList<>();
 		expected.add(SchedulerStubTask.atTime(T("2016-10-18T10:00:00Z"),
-				new SymbolL1UpdateTask(input.get(0), 1, handler)));
+				new L1UpdateTask(input.get(0), 1, handler)));
 		assertEquals(expected, schedulerStub.getScheduledTasks());
 		assertHandlerSequenceIsStillActive(1);
 	}
@@ -126,7 +126,7 @@ public class SymbolL1UpdateHandlerTest {
 		handler.subscribe(consumerMock2);
 		handler.subscribe(consumerMock1);
 		
-		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		L1UpdateTask task = (L1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		consumerMock1.consume(task.getUpdate());
 		consumerMock2.consume(task.getUpdate());
 		control.replay();
@@ -158,7 +158,7 @@ public class SymbolL1UpdateHandlerTest {
 		handler.unsubscribe(consumerMock1);
 		
 		assertHandlerSequenceIsStillActive(1);
-		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		L1UpdateTask task = (L1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		consumerMock2.consume(task.getUpdate());
 		control.replay();
 		handler.consume(task.getUpdate(), 1);
@@ -203,7 +203,7 @@ public class SymbolL1UpdateHandlerTest {
 		// New sequence task scheduled
 		List<SchedulerStubTask> expected = new ArrayList<>();
 		expected.add(SchedulerStubTask.atTime(T("1998-08-13T00:00:00Z"),
-				new SymbolL1UpdateTask(input.get(0), 2, handler)));
+				new L1UpdateTask(input.get(0), 2, handler)));
 		assertEquals(expected, schedulerStub.getScheduledTasks());
 	}
 	
@@ -245,16 +245,16 @@ public class SymbolL1UpdateHandlerTest {
 			.andReturn(readerStub);
 		consumerMock1.consume(input.get(0));
 		control.replay();
-		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
+		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
 		handler.subscribe(consumerMock1);
-		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		L1UpdateTask task = (L1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		schedulerStub.clearScheduledTasks();
 		
 		handler.consume(task.getUpdate(), 1);
 		
 		List<SchedulerStubTask> expected = new ArrayList<>();
 		expected.add(SchedulerStubTask.atTime(T("1918-01-01T00:00:00Z"),
-				new SymbolL1UpdateTask(input.get(1), 1, handler)));
+				new L1UpdateTask(input.get(1), 1, handler)));
 		assertEquals(expected, schedulerStub.getScheduledTasks());
 		assertFalse(readerStub.isClosed());
 		assertHandlerSequenceIsStillActive(1);
@@ -266,7 +266,7 @@ public class SymbolL1UpdateHandlerTest {
 		handler.subscribe(consumerMock1);
 		CloseableIteratorStub<L1Update> readerStub =
 				(CloseableIteratorStub<L1Update>) readerFactoryStub.predefinedReader;
-		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		L1UpdateTask task = (L1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		consumerMock1.consume(task.getUpdate());
 		control.replay();
 		
@@ -296,9 +296,9 @@ public class SymbolL1UpdateHandlerTest {
 		expect(readerFactoryMock.createReader(symbol, T("2016-10-18T02:30:00Z")))
 			.andReturn(readerStub);
 		control.replay();
-		handler = new SymbolL1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
+		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryMock);
 		handler.subscribe(consumerMock1);
-		SymbolL1UpdateTask task = (SymbolL1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
+		L1UpdateTask task = (L1UpdateTask) schedulerStub.getScheduledTasks().get(0).getRunnable();
 		schedulerStub.clearScheduledTasks();
 		handler.unsubscribe(consumerMock1);
 		

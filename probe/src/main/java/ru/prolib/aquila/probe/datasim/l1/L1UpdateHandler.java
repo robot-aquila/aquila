@@ -16,23 +16,23 @@ import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class SymbolL1UpdateHandler implements SymbolL1UpdateConsumer {
+public class L1UpdateHandler implements L1UpdateConsumerEx {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SymbolL1UpdateHandler.class);
+		logger = LoggerFactory.getLogger(L1UpdateHandler.class);
 	}
 	
 	private final Lock lock;
 	private final Symbol symbol;
 	private final Scheduler scheduler;
 	private final List<L1UpdateConsumer> consumers;
-	private final SymbolL1UpdateReaderFactory readerFactory;
+	private final L1UpdateReaderFactory readerFactory;
 	private int sequenceID = 1;
 	private CloseableIterator<L1Update> reader;
 	
-	public SymbolL1UpdateHandler(Symbol symbol, Scheduler scheduler,
-			SymbolL1UpdateReaderFactory readerFactory)
+	public L1UpdateHandler(Symbol symbol, Scheduler scheduler,
+			L1UpdateReaderFactory readerFactory)
 	{
 		this.lock = new ReentrantLock();
 		this.symbol = symbol;
@@ -135,7 +135,7 @@ public class SymbolL1UpdateHandler implements SymbolL1UpdateConsumer {
 		try {
 			if ( consumers.size() > 0 && reader.next() ) {
 				L1Update update = reader.item();
-				scheduler.schedule(new SymbolL1UpdateTask(update, sequenceID, this),
+				scheduler.schedule(new L1UpdateTask(update, sequenceID, this),
 						update.getTime());
 				return;
 			}

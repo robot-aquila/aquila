@@ -12,30 +12,30 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.probe.datasim.l1.SymbolL1UpdateHandler;
-import ru.prolib.aquila.probe.datasim.l1.SymbolL1UpdateHandlerFactory;
+import ru.prolib.aquila.probe.datasim.l1.L1UpdateHandler;
+import ru.prolib.aquila.probe.datasim.l1.L1UpdateHandlerFactory;
 
-public class SymbolL1UpdateSourceImplTest {
+public class L1UpdateSourceImplTest {
 	private static final Symbol symbol1 = new Symbol("SBER"),
 			symbol2 = new Symbol("GAZP"),
 			symbol3 = new Symbol("AAPL");
 	private IMocksControl control;
-	private Map<Symbol, SymbolL1UpdateHandler> handlerMap;
-	private SymbolL1UpdateHandler handlerMock1, handlerMock2, handlerMock3;
-	private SymbolL1UpdateHandlerFactory handlerFactoryMock;
+	private Map<Symbol, L1UpdateHandler> handlerMap;
+	private L1UpdateHandler handlerMock1, handlerMock2, handlerMock3;
+	private L1UpdateHandlerFactory handlerFactoryMock;
 	private L1UpdateConsumer consumerMock;
-	private SymbolL1UpdateSourceImpl updateSource;
+	private L1UpdateSourceImpl updateSource;
 
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		handlerMap = new LinkedHashMap<>();
-		handlerMock1 = control.createMock(SymbolL1UpdateHandler.class);
-		handlerMock2 = control.createMock(SymbolL1UpdateHandler.class);
-		handlerMock3 = control.createMock(SymbolL1UpdateHandler.class);
-		handlerFactoryMock = control.createMock(SymbolL1UpdateHandlerFactory.class);
+		handlerMock1 = control.createMock(L1UpdateHandler.class);
+		handlerMock2 = control.createMock(L1UpdateHandler.class);
+		handlerMock3 = control.createMock(L1UpdateHandler.class);
+		handlerFactoryMock = control.createMock(L1UpdateHandlerFactory.class);
 		consumerMock = control.createMock(L1UpdateConsumer.class);
-		updateSource = new SymbolL1UpdateSourceImpl(handlerFactoryMock, handlerMap);
+		updateSource = new L1UpdateSourceImpl(handlerFactoryMock, handlerMap);
 	}
 	
 	@Test

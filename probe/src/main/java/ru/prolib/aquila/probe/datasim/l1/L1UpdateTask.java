@@ -5,12 +5,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class SymbolL1UpdateTask implements Runnable {
+public class L1UpdateTask implements Runnable {
 	private final L1Update update;
 	private final int sequenceID;
-	private final SymbolL1UpdateConsumer consumer;
+	private final L1UpdateConsumerEx consumer;
 	
-	public SymbolL1UpdateTask(L1Update update, int sequenceID, SymbolL1UpdateConsumer consumer) {
+	public L1UpdateTask(L1Update update, int sequenceID, L1UpdateConsumerEx consumer) {
 		this.update = update;
 		this.sequenceID = sequenceID;
 		this.consumer = consumer;
@@ -28,7 +28,7 @@ public class SymbolL1UpdateTask implements Runnable {
 		return sequenceID;
 	}
 	
-	public SymbolL1UpdateConsumer getConsumer() {
+	public L1UpdateConsumerEx getConsumer() {
 		return consumer;
 	}
 
@@ -42,10 +42,10 @@ public class SymbolL1UpdateTask implements Runnable {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != SymbolL1UpdateTask.class ) {
+		if ( other == null || other.getClass() != L1UpdateTask.class ) {
 			return false;
 		}
-		SymbolL1UpdateTask o = (SymbolL1UpdateTask) other;
+		L1UpdateTask o = (L1UpdateTask) other;
 		return new EqualsBuilder()
 			.append(o.consumer, consumer)
 			.append(o.sequenceID, sequenceID)

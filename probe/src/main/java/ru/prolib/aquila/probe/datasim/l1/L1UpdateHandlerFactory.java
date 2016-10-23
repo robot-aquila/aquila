@@ -3,12 +3,12 @@ package ru.prolib.aquila.probe.datasim.l1;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class SymbolL1UpdateHandlerFactory {
+public class L1UpdateHandlerFactory {
 	private final Scheduler scheduler;
-	private final SymbolL1UpdateReaderFactory readerFactory;
+	private final L1UpdateReaderFactory readerFactory;
 	
-	public SymbolL1UpdateHandlerFactory(Scheduler scheduler,
-			SymbolL1UpdateReaderFactory readerFactory)
+	public L1UpdateHandlerFactory(Scheduler scheduler,
+			L1UpdateReaderFactory readerFactory)
 	{
 		this.scheduler = scheduler;
 		this.readerFactory = readerFactory;
@@ -20,8 +20,8 @@ public class SymbolL1UpdateHandlerFactory {
 	 * @param symbol - the symbol
 	 * @return the handler
 	 */
-	public SymbolL1UpdateHandler produce(Symbol symbol) {
-		return new SymbolL1UpdateHandler(symbol, scheduler, readerFactory);
+	public L1UpdateHandler produce(Symbol symbol) {
+		return new L1UpdateHandler(symbol, scheduler, readerFactory);
 	}
 
 }

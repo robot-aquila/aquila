@@ -7,7 +7,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public interface SymbolL1UpdateReaderFactory {
+public interface L1UpdateReaderFactory {
 	
 	public CloseableIterator<L1Update>
 		createReader(Symbol symbol, Instant startTime) throws IOException;

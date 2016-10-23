@@ -12,7 +12,7 @@ import ru.prolib.aquila.data.storage.DataStorageException;
 public interface FileStorage {
 	
 	/**
-	 * List existing dated segments between the dates.
+	 * List existing dated segments between two dates.
 	 * <p>
 	 * @param symbol - the symbol to scan
 	 * @param from - date from

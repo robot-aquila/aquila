@@ -13,30 +13,33 @@ import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.L1UpdateSource;
-import ru.prolib.aquila.probe.datasim.l1.SymbolL1UpdateHandler;
-import ru.prolib.aquila.probe.datasim.l1.SymbolL1UpdateHandlerFactory;
-import ru.prolib.aquila.probe.datasim.l1.SymbolL1UpdateReaderFactory;
+import ru.prolib.aquila.probe.datasim.l1.L1UpdateHandler;
+import ru.prolib.aquila.probe.datasim.l1.L1UpdateHandlerFactory;
+import ru.prolib.aquila.probe.datasim.l1.L1UpdateReaderFactory;
 
-public class SymbolL1UpdateSourceImpl implements L1UpdateSource {
+/**
+ * The common data source to simulate L1 data updates.
+ */
+public class L1UpdateSourceImpl implements L1UpdateSource {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SymbolL1UpdateSourceImpl.class);
+		logger = LoggerFactory.getLogger(L1UpdateSourceImpl.class);
 	}
 	
-	private final SymbolL1UpdateHandlerFactory handlerFactory;
-	private final Map<Symbol, SymbolL1UpdateHandler> handlers;
+	private final L1UpdateHandlerFactory handlerFactory;
+	private final Map<Symbol, L1UpdateHandler> handlers;
 	private final Lock lock;
 	
-	SymbolL1UpdateSourceImpl(SymbolL1UpdateHandlerFactory handlerFactory,
-			Map<Symbol, SymbolL1UpdateHandler> handlers)
+	L1UpdateSourceImpl(L1UpdateHandlerFactory handlerFactory,
+			Map<Symbol, L1UpdateHandler> handlers)
 	{
 		this.handlerFactory = handlerFactory;
 		this.handlers = handlers;
 		this.lock = new ReentrantLock();
 	}
 	
-	SymbolL1UpdateSourceImpl(SymbolL1UpdateHandlerFactory handlerFactory) {
+	L1UpdateSourceImpl(L1UpdateHandlerFactory handlerFactory) {
 		this(handlerFactory, new HashMap<>());
 	}
 	
@@ -47,10 +50,10 @@ public class SymbolL1UpdateSourceImpl implements L1UpdateSource {
 	 * @param readerFactory - the reader factory which is used to produce an
 	 * iterator through set of L1 updates of specified symbol
 	 */
-	public SymbolL1UpdateSourceImpl(Scheduler scheduler,
-			SymbolL1UpdateReaderFactory readerFactory)
+	public L1UpdateSourceImpl(Scheduler scheduler,
+			L1UpdateReaderFactory readerFactory)
 	{
-		this(new SymbolL1UpdateHandlerFactory(scheduler, readerFactory));
+		this(new L1UpdateHandlerFactory(scheduler, readerFactory));
 	}
 	
 
@@ -58,7 +61,7 @@ public class SymbolL1UpdateSourceImpl implements L1UpdateSource {
 	public void close() throws IOException {
 		lock.lock();
 		try {
-			for ( SymbolL1UpdateHandler handler : handlers.values() ) {
+			for ( L1UpdateHandler handler : handlers.values() ) {
 				handler.close();
 			}
 			handlers.clear();
@@ -71,7 +74,7 @@ public class SymbolL1UpdateSourceImpl implements L1UpdateSource {
 	public void subscribeL1(Symbol symbol, L1UpdateConsumer consumer) {
 		lock.lock();
 		try {
-			SymbolL1UpdateHandler handler = handlers.get(symbol);
+			L1UpdateHandler handler = handlers.get(symbol);
 			if ( handler == null ) {
 				handler = handlerFactory.produce(symbol);
 				handlers.put(symbol, handler);
@@ -88,7 +91,7 @@ public class SymbolL1UpdateSourceImpl implements L1UpdateSource {
 	public void unsubscribeL1(Symbol symbol, L1UpdateConsumer consumer) {
 		lock.lock();
 		try {
-			SymbolL1UpdateHandler handler = handlers.get(symbol);
+			L1UpdateHandler handler = handlers.get(symbol);
 			if ( handler != null ) {
 				handler.unsubscribe(consumer);
 			}
