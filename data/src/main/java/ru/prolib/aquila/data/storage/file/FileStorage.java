@@ -24,6 +24,18 @@ public interface FileStorage {
 			LocalDate from, LocalDate to) throws DataStorageException;
 	
 	/**
+	 * List existing dated segments starting from the date.
+	 * <p>
+	 * @param symbol - the symbol to scan
+	 * @param from - date from
+	 * @param maxCount - max amount of segments to scan (in order of date)
+	 * @return list of available data segment
+	 * @throws DataStorageException - an error occurred
+	 */
+	public List<LocalDate> listExistingSegments(Symbol symbol,
+			LocalDate from, int maxCount) throws DataStorageException;
+	
+	/**
 	 * Get dated segment file for reading.
 	 * <p>
 	 * @param descr - dated symbol descriptor

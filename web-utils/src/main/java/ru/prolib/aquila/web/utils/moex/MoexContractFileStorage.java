@@ -10,10 +10,9 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.DeltaUpdateWriter;
+import ru.prolib.aquila.data.storage.file.FileConfig;
 import ru.prolib.aquila.data.storage.file.FileStorage;
 import ru.prolib.aquila.data.storage.file.FileStorageImpl;
-import ru.prolib.aquila.data.storage.file.FileStorageNamespace;
-import ru.prolib.aquila.data.storage.file.FileStorageNamespaceV1;
 import ru.prolib.aquila.data.storage.file.PtmlFactory;
 
 /**
@@ -25,14 +24,11 @@ public class MoexContractFileStorage {
 	private static final String STORAGE_ID = "MOEX_CONTRACT";
 	private final FileStorage fileStorage;
 	private final PtmlFactory ptmlFactory;
-	
-	public MoexContractFileStorage(FileStorageNamespace namespace) {
-		fileStorage = new FileStorageImpl(namespace, STORAGE_ID, new MoexContractFSService());
-		ptmlFactory = new PtmlFactory(new MoexContractPtmlConverter());
-	}
-	
+		
 	public MoexContractFileStorage(File root) {
-		this(new FileStorageNamespaceV1(root));
+		fileStorage = new FileStorageImpl(root, STORAGE_ID,
+				new FileConfig("-moex-contract-details-daily.txt", "-moex-contract-details-daily.tmp"));
+		ptmlFactory = new PtmlFactory(new MoexContractPtmlConverter());
 	}
 	
 	/**

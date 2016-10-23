@@ -1,7 +1,6 @@
 package ru.prolib.aquila.data.storage.file;
 
 import static org.junit.Assert.*;
-import static org.easymock.EasyMock.*;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.easymock.IMocksControl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -29,31 +27,19 @@ public class FileStorageImplTest {
 			date2 = LocalDate.of(2005, 12, 1);
 	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
 			descr2 = new DatedSymbol(symbol1, date2);
-	private static FSService serviceStub;
-	private FileStorageNamespace namespace;
+	private static FileConfig serviceStub;
 	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
-	private IMocksControl control;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		serviceStub = new FSService() {
-			@Override public String getRegularSuffix() {
-				return ".csv.gz";
-			}
-
-			@Override public String getTemporarySuffix() {
-				return ".part.csv.gz";
-			}
-		};
+		serviceStub = new FileConfig(".csv.gz", ".part.csv.gz");
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		control = createStrictControl();
 		FileUtils.forceMkdir(root);
-		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "test", serviceStub);
+		storage = new FileStorageImpl(root, "test", serviceStub);
 	}
 	
 	@After
@@ -63,9 +49,9 @@ public class FileStorageImplTest {
 	
 	@Test
 	public void testCtor3() throws Exception {
-		assertEquals(namespace, storage.getNamespace());
+		assertEquals(root, storage.getRoot());
 		assertEquals("test", storage.getStorageID());
-		assertEquals(serviceStub, storage.getService());
+		assertEquals(serviceStub, storage.getConfig());
 	}
 	
 	@Test
@@ -94,8 +80,7 @@ public class FileStorageImplTest {
 	@Test (expected=DataStorageException.class)
 	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
-		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "foo", serviceStub);
+		storage = new FileStorageImpl(root, "foo", serviceStub);
 		
 		storage.getTemporarySegmentFile(descr1);
 	}
@@ -117,10 +102,9 @@ public class FileStorageImplTest {
 	}
 	
 	@Test
-	public void testListExistingSegments() throws Exception {
+	public void testListExistingSegments_SDD() throws Exception {
 		File root = new File("fixture");
-		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "bar", serviceStub);
+		storage = new FileStorageImpl(root, "bar", serviceStub);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
@@ -139,11 +123,15 @@ public class FileStorageImplTest {
 		assertEquals(expected, storage.listExistingSegments(symbol1, from, to));
 	}
 	
+	@Test
+	public void testListExistingSegments_SDI() throws Exception {
+		//fail("TODO: incomplete");
+	}
+	
 	@Test (expected=DataStorageException.class)
 	public void testGetDataFileForWriting_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
-		namespace = new FileStorageNamespaceV1(root);
-		storage = new FileStorageImpl(namespace, "foo", serviceStub);
+		storage = new FileStorageImpl(root, "foo", serviceStub);
 		
 		storage.getDataFileForWriting(symbol1);
 	}
@@ -175,19 +163,23 @@ public class FileStorageImplTest {
 	}
 	
 	@Test
-	public void testScanForSymbols() throws Exception {
-		Set<Symbol> set = new HashSet<>();
-		set.add(new Symbol("AAPL"));
-		set.add(new Symbol("MSFT"));
-		set.add(new Symbol("GAZP"));
-		FileStorageNamespace namespaceMock = control.createMock(FileStorageNamespace.class);
-		expect(namespaceMock.scanForSymbols()).andReturn(set);
-		control.replay();
-		storage = new FileStorageImpl(namespaceMock, "test", serviceStub);
+	public void testScanForSymbols_() throws Exception {
+		new File(root, "zulu").mkdirs(); // must be skipped by L1 filter
+		new File(root, "charlie").mkdirs(); // must be skipped by L1 filter
+		new File(root, "15/RG1EU%2D11%2E16/2016").mkdirs();
+		new File(root, "15/W4EXU%2D9%2E16/2016").mkdirs();
+		new File(root, "84/MTSI%2D12%2E16/2009").mkdirs();
+		new File(root, "84/A@B@C").mkdirs(); // must be skipped by L2 filter
+		new File(root, "C6/RVI%2D8%2E16/2000").mkdirs();
 		
-		assertSame(set, storage.scanForSymbols());
+		Set<Symbol> actual = storage.scanForSymbols();
 		
-		control.verify();
+		Set<Symbol> expected = new HashSet<>();
+		expected.add(new Symbol("RG1EU-11.16"));
+		expected.add(new Symbol("W4EXU-9.16"));
+		expected.add(new Symbol("MTSI-12.16"));
+		expected.add(new Symbol("RVI-8.16"));
+		assertEquals(expected, actual);
 	}
 
 }
