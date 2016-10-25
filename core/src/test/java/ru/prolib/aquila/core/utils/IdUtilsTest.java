@@ -121,4 +121,20 @@ public class IdUtilsTest {
 		assertEquals(expected, actual);		
 	}
 	
+	@Test
+	public void testIsSafeFilename3() throws Exception {
+		symbol = new Symbol("F:RTS@SPBFUT:USD");
+		assertTrue(utils.isSafeFilename3("F%3ARTS%40SPBFUT%3AUSD-20071015.csv.gz", symbol, ".csv.gz"));
+		assertFalse(utils.isSafeFilename3("F%3ARTS%40SPBFUT%3AUSD-2007xx15.csv.gz", symbol, ".csv.gz"));
+	}
+
+	@Test
+	public void testParseSafeFilename3() throws Exception {
+		symbol = new Symbol("F:RTS@SPBFUT:USD");
+		
+		LocalDate actual = utils.parseSafeFilename3("F%3ARTS%40SPBFUT%3AUSD-20071015.csv.gz", symbol, ".csv.gz");
+		
+		assertEquals(LocalDate.of(2007, 10, 15), actual);
+	}
+
 }

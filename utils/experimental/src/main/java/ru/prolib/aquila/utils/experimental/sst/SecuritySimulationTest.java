@@ -31,6 +31,7 @@ import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.probe.SchedulerImpl;
+import ru.prolib.aquila.probe.datasim.L1UpdateSourceImpl;
 import ru.prolib.aquila.probe.datasim.SymbolUpdateSourceImpl;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerControlToolbar;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerTaskFilter;
@@ -39,6 +40,7 @@ import ru.prolib.aquila.ui.TableModelController;
 import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
+import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
 
@@ -123,8 +125,9 @@ public class SecuritySimulationTest implements Experiment {
 	}
 	
 	private DataProvider newDataProvider(Scheduler scheduler, File root) {
-		 return new DataProviderImpl(new SymbolUpdateSourceImpl(scheduler,
-				 new MoexSymbolUpdateReaderFactory(root)));
+		return new DataProviderImpl(
+			new SymbolUpdateSourceImpl(scheduler, new MoexSymbolUpdateReaderFactory(root)),
+			new L1UpdateSourceImpl(scheduler, new FinamL1UpdateReaderFactory(root)));
 	}
 
 }

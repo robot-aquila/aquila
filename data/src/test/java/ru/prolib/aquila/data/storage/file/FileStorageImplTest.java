@@ -27,19 +27,19 @@ public class FileStorageImplTest {
 			date2 = LocalDate.of(2005, 12, 1);
 	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
 			descr2 = new DatedSymbol(symbol1, date2);
-	private static FileConfig serviceStub;
+	private static FileConfig fileConfig;
 	private FileStorageImpl storage;
 	private File root = new File("fixture/temp");
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		serviceStub = new FileConfig(".csv.gz", ".part.csv.gz");
+		fileConfig = new FileConfig(".csv.gz", ".part.csv.gz");
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		FileUtils.forceMkdir(root);
-		storage = new FileStorageImpl(root, "test", serviceStub);
+		storage = new FileStorageImpl(root, "test", fileConfig);
 	}
 	
 	@After
@@ -51,7 +51,7 @@ public class FileStorageImplTest {
 	public void testCtor3() throws Exception {
 		assertEquals(root, storage.getRoot());
 		assertEquals("test", storage.getStorageID());
-		assertEquals(serviceStub, storage.getConfig());
+		assertEquals(fileConfig, storage.getConfig());
 	}
 	
 	@Test
@@ -80,7 +80,7 @@ public class FileStorageImplTest {
 	@Test (expected=DataStorageException.class)
 	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
-		storage = new FileStorageImpl(root, "foo", serviceStub);
+		storage = new FileStorageImpl(root, "foo", fileConfig);
 		
 		storage.getTemporarySegmentFile(descr1);
 	}
@@ -104,7 +104,7 @@ public class FileStorageImplTest {
 	@Test
 	public void testListExistingSegments_SDD() throws Exception {
 		File root = new File("fixture");
-		storage = new FileStorageImpl(root, "bar", serviceStub);
+		storage = new FileStorageImpl(root, "bar", fileConfig);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
@@ -124,14 +124,61 @@ public class FileStorageImplTest {
 	}
 	
 	@Test
-	public void testListExistingSegments_SDI() throws Exception {
-		//fail("TODO: incomplete");
+	public void testListExistingSegments_SDI_EndOfData() throws Exception {
+		File root = new File("fixture");
+		storage = new FileStorageImpl(root, "bar", fileConfig);
+		LocalDate from = LocalDate.of(2008, 12, 10);
+		
+		List<LocalDate> actual = storage.listExistingSegments(symbol1, from, 100);
+		
+		List<LocalDate> expected = new ArrayList<>();
+		expected.add(LocalDate.of(2008, 12, 31));
+		expected.add(LocalDate.of(2009,  9, 20));
+		expected.add(LocalDate.of(2009,  9, 22));
+		expected.add(LocalDate.of(2012,  1,  9));
+		expected.add(LocalDate.of(2012,  1, 10));
+		expected.add(LocalDate.of(2012,  1, 11));
+		expected.add(LocalDate.of(2012,  2,  1));
+		expected.add(LocalDate.of(2013,  5,  1));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testListExistingSegments_SDI_LimitByMaxCount() throws Exception {
+		File root = new File("fixture");
+		storage = new FileStorageImpl(root, "bar", fileConfig);
+		LocalDate from = LocalDate.of(2008, 12, 10);
+		
+		List<LocalDate> actual = storage.listExistingSegments(symbol1, from, 5);
+
+		List<LocalDate> expected = new ArrayList<>();
+		expected.add(LocalDate.of(2008, 12, 31));
+		expected.add(LocalDate.of(2009,  9, 20));
+		expected.add(LocalDate.of(2009,  9, 22));
+		expected.add(LocalDate.of(2012,  1,  9));
+		expected.add(LocalDate.of(2012,  1, 10));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testListExistingSegments_SDI_DateFromInclusive() throws Exception {
+		File root = new File("fixture");
+		storage = new FileStorageImpl(root, "bar", fileConfig);
+		LocalDate from = LocalDate.of(2009, 9, 22);
+		
+		List<LocalDate> actual = storage.listExistingSegments(symbol1, from, 3);
+
+		List<LocalDate> expected = new ArrayList<>();
+		expected.add(LocalDate.of(2009,  9, 22));
+		expected.add(LocalDate.of(2012,  1,  9));
+		expected.add(LocalDate.of(2012,  1, 10));
+		assertEquals(expected, actual);
 	}
 	
 	@Test (expected=DataStorageException.class)
 	public void testGetDataFileForWriting_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
-		storage = new FileStorageImpl(root, "foo", serviceStub);
+		storage = new FileStorageImpl(root, "foo", fileConfig);
 		
 		storage.getDataFileForWriting(symbol1);
 	}

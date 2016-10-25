@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.utils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,7 +86,7 @@ public class IdUtils {
 	/**
 	 * Get safe ID.
 	 * <p>
-	 * This method is deprecated. Use {@link #getSafeFile(Symbol, LocalDate, String)}.
+	 * This method is deprecated. Use {@link #getSafeFilename(Symbol, LocalDate, String)}.
 	 * <p>
 	 * @param symbol - symbol info
 	 * @param date - date
@@ -131,6 +132,48 @@ public class IdUtils {
 	 */
 	public String getSafeFilename(Symbol symbol, String suffix) {
 		return getSafeSymbolId(symbol) + suffix;
+	}
+	
+	/**
+	 * Test that the filename is a data file of specified symbol.
+	 * <p>
+	 * This method is useful to determine filenames which were produced by
+	 * calling the {@link #getSafeFilename(Symbol, LocalDate, String)} method.
+	 * <p>
+	 * @param filename - filename (without path)
+	 * @param symbol - expected symbol
+	 * @param suffix - expected filename suffix
+	 * @return true if the filename is a data file
+	 */
+	public boolean isSafeFilename3(String filename, Symbol symbol, String suffix) {
+		try {
+			parseSafeFilename3(filename, symbol, suffix);
+		} catch ( DateTimeParseException e ) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Parse date of the data segment.
+	 * <p>
+	 * This method is useful to determine date of the data segment which
+	 * filename was produced by calling the
+	 * {@link #getSafeFilename(Symbol, LocalDate, String)}
+	 * method. Expected that the name has already verified by
+	 * {@link #isSafeFilename3(String, Symbol, String)} method. 
+	 * <p>
+	 * @param filename - filename (without path components)
+	 * @param symbol - expected symbol
+	 * @param suffix - expected filename suffix
+	 * @return the date obtained by parsing the filename
+	 * @throws DateTimeParseException - error parsing the date part
+	 */
+	public LocalDate parseSafeFilename3(String filename, Symbol symbol, String suffix) {
+		String symbolPrefix = getSafeSymbolId(symbol);
+		String dummy = filename.substring(symbolPrefix.length() + SEPARATOR.length(),
+				filename.length() - suffix.length());
+		return LocalDate.parse(dummy, dateFormat);
 	}
 
 }

@@ -54,5 +54,10 @@ public class L1UpdateImpl implements L1Update {
 	public L1Update withTime(Instant newTime) {
 		return new L1UpdateImpl(symbol, tick.withTime(newTime));
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + symbol + " " + tick + "]";
+	}
 
 }

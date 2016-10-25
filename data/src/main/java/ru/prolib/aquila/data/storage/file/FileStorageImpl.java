@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -75,9 +76,74 @@ public class FileStorageImpl implements FileStorage {
 	
 	@Override
 	public List<LocalDate> listExistingSegments(Symbol symbol,
-			LocalDate from, int maxCount) throws DataStorageException
+			final LocalDate from, int maxCount) throws DataStorageException
 	{
-		return null;
+		final List<LocalDate> result = new ArrayList<>();
+		File symbolRoot = new File(root, level1Directory(symbol)
+				+ FS + level2Directory(symbol));
+		// 1) Scan for year folders
+		final List<Integer> yearToScan = new ArrayList<>();
+		symbolRoot.list(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				if ( ! isValidYearDir(name) ) {
+					return false;
+				}
+				int year = parseYearDir(name);
+				if ( year < from.getYear() ) {
+					return false;
+				}
+				yearToScan.add(year);
+				return false;
+			}
+		});
+		// 2) For each year scan for month folders
+		for ( final Integer year : yearToScan ) {
+			if ( result.size() >= maxCount ) {
+				break;
+			}
+			final List<Integer> monthToScan = new ArrayList<>();
+			new File(symbolRoot, formatYearDir(year)).list(new FilenameFilter() {
+				@Override
+				public boolean accept(File dir, String name) {
+					if ( ! isValidMonthDir(name) ) {
+						return false;
+					}
+					int month = parseMonthDir(name);
+					if ( year == from.getYear() ) {
+						if ( month < from.getMonthValue() ) {
+							return false;
+						}
+					}
+					monthToScan.add(month);
+					return false;
+				}
+			});
+			// 2.2) Make subscan folder to search for data files
+			for ( Integer month : monthToScan ) {
+				if ( result.size() >= maxCount ) {
+					break;
+				}
+				File monthRoot = new File(symbolRoot, formatYearDir(year) + FS + formatMonthDir(month));
+				if ( monthRoot.isDirectory() ) {
+					monthRoot.list(new FilenameFilter() {
+						@Override
+						public boolean accept(File dir, String name) {
+							LocalDate x = null;
+							try {
+								x = idUtils.parseSafeFilename3(name, symbol, config.getRegularSuffix());
+								if ( ! x.isBefore(from) && result.size() < maxCount ) {
+									result.add(x);
+								}
+							} catch ( DateTimeParseException e ) { }
+							return false;
+						}
+					});
+				}
+			}
+		}
+		Collections.sort(result);
+		return result;
 	}
 
 	@Override
@@ -181,6 +247,58 @@ public class FileStorageImpl implements FileStorage {
 		return new File(root, level1Directory(symbol) + FS + level2Directory(symbol));
 	}
 	
+	private boolean isValidYearDir(String name) {
+		return StringUtils.isNumeric(name);
+	}
+	
+	private String formatYearDir(int year) {
+		return String.format("%04d", year);
+	}
+	
+	/**
+	 * Parses the string representation of a year directory to a year value.
+	 * <p>
+	 * @param name - the name of directory. Expected that the name is already verified.
+	 * @return year value
+	 */
+	private int parseYearDir(String name) {
+		return Integer.valueOf(name.replaceFirst("^0+(?!$)", ""));
+	}
+	
+	private boolean isValidMonthDir(String name) {
+		switch ( name ) {
+		case "01":
+		case "02":
+		case "03":
+		case "04":
+		case "05":
+		case "06":
+		case "07":
+		case "08":
+		case "09":
+		case "10":
+		case "11":
+		case "12":
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+	private String formatMonthDir(int month) {
+		return String.format("%02d", month);
+	}
+	
+	/**
+	 * Parses the string representation of a month directory to a month value.
+	 * <p>
+	 * @param name - the name of directory. Expected that the name is already verified.
+	 * @return month value
+	 */
+	private int parseMonthDir(String name) {
+		return Integer.valueOf(name.replaceFirst("^0+(?!$)", ""));
+	}
+	
 	/**
 	 * Get directory of data files which associated with symbol and date.
 	 * <p>
@@ -195,8 +313,8 @@ public class FileStorageImpl implements FileStorage {
 		LocalDate date = descr.getDate();
 		return new File(root, level1Directory(symbol)
 				+ FS + level2Directory(symbol)
-				+ FS + String.format("%04d", date.getYear())
-				+ FS + String.format("%02d", date.getMonthValue()));
+				+ FS + formatYearDir(date.getYear())
+				+ FS + formatMonthDir(date.getMonthValue()));
 	}
 	
 	/**

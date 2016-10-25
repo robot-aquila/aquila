@@ -9,13 +9,16 @@ import ru.prolib.aquila.core.BusinessEntities.MDUpdatableStreamContainer;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.data.L1UpdateSource;
 import ru.prolib.aquila.data.SymbolUpdateSource;
 
 public class DataProviderImpl implements DataProvider {
 	private final SymbolUpdateSource symbolUpdateSource;
+	private final L1UpdateSource l1UpdateSource;
 	
-	public DataProviderImpl(SymbolUpdateSource symbolUpdateSource) {
+	public DataProviderImpl(SymbolUpdateSource symbolUpdateSource, L1UpdateSource l1UpdateSource) {
 		this.symbolUpdateSource = symbolUpdateSource;
+		this.l1UpdateSource = l1UpdateSource;
 	}
 
 	@Override
@@ -25,7 +28,7 @@ public class DataProviderImpl implements DataProvider {
 
 	@Override
 	public void subscribeLevel1Data(Symbol symbol, L1UpdatableStreamContainer container) {
-
+		l1UpdateSource.subscribeL1(symbol, container);
 	}
 
 	@Override
