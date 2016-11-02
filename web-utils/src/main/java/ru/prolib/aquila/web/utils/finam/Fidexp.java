@@ -50,7 +50,8 @@ public class Fidexp implements Closeable {
 	}
 	
 	public Fidexp() {
-		this(HttpClientFactory.createDefaultClient(DEFAULT_TIMEOUT), WebDriverFactory.createJBrowserDriver());
+		this(HttpClientFactory.createDefaultClient(DEFAULT_TIMEOUT),
+				WebDriverFactory.createJBrowserDriver(DEFAULT_TIMEOUT));
 		closeResources = true;
 	}
 	
