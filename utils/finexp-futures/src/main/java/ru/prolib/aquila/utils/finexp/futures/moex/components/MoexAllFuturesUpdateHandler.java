@@ -94,8 +94,9 @@ public class MoexAllFuturesUpdateHandler implements UpdateHandler {
 			for ( MoexContractUpdateHandler handler : handlers.values() ) {
 				handler.close();
 			}
-			handlers.clear();			
+			handlers.clear();	
 		}
+		IOUtils.closeQuietly(moex);
 	}
 	
 	private MoexContractUpdateHandler createHandler(Symbol symbol) {

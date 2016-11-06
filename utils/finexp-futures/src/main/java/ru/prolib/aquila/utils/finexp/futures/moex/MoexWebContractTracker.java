@@ -28,7 +28,6 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 	}
 	
 	private final CountDownLatch globalExit;
-	private final Moex moex;
 	private final MoexContractTrackingSchedule updateSchedule;
 	private final Scheduler scheduler;
 	private final MoexContractFileStorage storage;
@@ -39,10 +38,9 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 
 	public MoexWebContractTracker(CountDownLatch globalExit,
 			Scheduler scheduler, MoexContractFileStorage storage,
-			Moex moex, MoexContractTrackingSchedule updateSchedule)
+			MoexContractTrackingSchedule updateSchedule)
 	{
 		this.globalExit = globalExit;
-		this.moex = moex;
 		this.updateSchedule = updateSchedule;
 		this.scheduler = scheduler;
 		this.storage = storage;
@@ -51,7 +49,7 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 	public MoexWebContractTracker(CountDownLatch globalExit,
 			Scheduler scheduler, MoexContractFileStorage storage)
 	{
-		this(globalExit, scheduler, storage, new Moex(), new MoexContractTrackingSchedule());
+		this(globalExit, scheduler, storage, new MoexContractTrackingSchedule());
 	}
 
 	@Override
@@ -118,7 +116,6 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 	@Override
 	public void close() throws IOException {
 		IOUtils.closeQuietly(updateHandler);
-		IOUtils.closeQuietly(moex);
 	}
 	
 	private void closeHandler() {
@@ -141,7 +138,7 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 	}
 	
 	private UpdateHandler createHandler(Instant updatePlannedTime) {
-		 return new MoexAllFuturesUpdateHandler(globalExit, moex, storage, updatePlannedTime);
+		 return new MoexAllFuturesUpdateHandler(globalExit, new Moex(), storage, updatePlannedTime);
 	}
 
 }
