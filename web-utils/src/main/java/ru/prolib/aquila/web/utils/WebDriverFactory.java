@@ -12,7 +12,7 @@ import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
 
 public class WebDriverFactory {
-	private static final int DEFAULT_SOCKET_TIMEOUT = 120000;
+	private static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 	
 	public static WebDriver createJBrowserDriver(int socketTimeoutMs) {
 		return new JBrowserDriver(Settings.builder()
@@ -22,6 +22,9 @@ public class WebDriverFactory {
 				.headless(true)
 				.quickRender(true)
 				.socketTimeout(socketTimeoutMs)
+				.connectionReqTimeout(socketTimeoutMs)
+				.connectTimeout(socketTimeoutMs)
+				.maxConnections(128)
 				.build());
 	}
 	
