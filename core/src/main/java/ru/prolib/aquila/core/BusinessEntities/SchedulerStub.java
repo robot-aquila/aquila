@@ -54,6 +54,10 @@ public class SchedulerStub implements Scheduler {
 		setTimeStrategy(new FixedTimeStrategy(timestamp));
 	}
 	
+	public void setFixedTime(String timeString) {
+		setFixedTime(Instant.parse(timeString));
+	}
+	
 	/**
 	 * Set an iterable time strategy for scheduler's current time.
 	 * <p>
