@@ -119,4 +119,9 @@ public class Variant<T> {
 		}
 	}
 	
+	public Variant<T> clear() {
+		values.clear();
+		return this;
+	}
+	
 }
