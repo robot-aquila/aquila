@@ -136,6 +136,16 @@ public class TickTest {
 		assertEquals(450, tick.getSize());
 		assertEquals(0.0d, tick.getValue(), 0.001d);
 	}
+	
+	@Test
+	public void testOfAskDL() throws Exception {
+		tick = Tick.ofAsk(18.29d, 580L);
+		assertEquals(TickType.ASK, tick.getType());
+		assertEquals(Instant.EPOCH, tick.getTime());
+		assertEquals(18.29d, tick.getPrice(), 0.01d);
+		assertEquals(580L, tick.getSize());
+		assertEquals(0d, tick.getValue(), 0.01d);
+	}
 
 	@Test
 	public void testOfBidIDL() throws Exception {
@@ -145,6 +155,16 @@ public class TickTest {
 		assertEquals(13.50d, tick.getPrice(), 0.001d);
 		assertEquals(1450, tick.getSize());
 		assertEquals(0.0d, tick.getValue(), 0.001d);
+	}
+	
+	@Test
+	public void testOfBidDL() throws Exception {
+		tick = Tick.ofBid(115.02d, 120L);
+		assertEquals(TickType.BID, tick.getType());
+		assertEquals(Instant.EPOCH, tick.getTime());
+		assertEquals(115.02d, tick.getPrice(), 0.01d);
+		assertEquals(120L, tick.getSize());
+		assertEquals(0d, tick.getValue(), 0.01d);
 	}
 	
 	@Test
