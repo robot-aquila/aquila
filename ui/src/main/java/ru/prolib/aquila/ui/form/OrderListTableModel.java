@@ -52,7 +52,6 @@ public class OrderListTableModel extends AbstractTableModel implements
 	private boolean subscribed = false;
 	private final IMessages messages;
 	private final List<Order> orders;
-	private final Map<Order, Integer> orderMap;
 	private final Set<Terminal> terminalSet;
 	
 	public OrderListTableModel(IMessages messages) {
@@ -62,7 +61,6 @@ public class OrderListTableModel extends AbstractTableModel implements
 		this.messages = messages;
 		this.orders = new ArrayList<Order>();
 		this.terminalSet = new HashSet<Terminal>(); 
-		this.orderMap = new HashMap<Order, Integer>();
 	}
 	
 	protected List<Integer> getColumnIDList() {
@@ -203,7 +201,6 @@ public class OrderListTableModel extends AbstractTableModel implements
 			unsubscribe(terminal);
 		}
 		orders.clear();
-		orderMap.clear();
 		fireTableDataChanged();
 		subscribed = false;
 	}
@@ -224,18 +221,19 @@ public class OrderListTableModel extends AbstractTableModel implements
 		}
 		for ( Terminal terminal : terminalSet ) {
 			if ( event.isType(terminal.onOrderAvailable()) ) {
-				int firstRow = orders.size();
-				Order order = ((OrderEvent) event).getOrder();
-				if ( ! orderMap.containsKey(order) ) {
-					orders.add(order);
-					orderMap.put(order, firstRow);
-					fireTableRowsInserted(firstRow, firstRow);
+				Integer row = addOrder(((OrderEvent) event).getOrder());
+				if ( row != null ) {
+					fireTableRowsInserted(row, row);
 				}
 			} else if ( event.isType(terminal.onOrderUpdate()) ) {
-				Order order = ((OrderEvent) event).getOrder();
-				Integer row = orderMap.get(order);
+				Integer row = getIndexOfOrder(((OrderEvent) event).getOrder());
 				if ( row != null ) {
 					fireTableRowsUpdated(row, row);
+				}
+			} else if ( event.isType(terminal.onOrderArchived()) ) {
+				Integer row = removeOrder(((OrderEvent) event).getOrder());
+				if ( row != null ) {
+					fireTableRowsDeleted(row, row);
 				}
 			}
 		}
@@ -262,11 +260,9 @@ public class OrderListTableModel extends AbstractTableModel implements
 			subscribe(terminal);
 			int countAdded = 0, firstRow = orders.size();
 			for ( Order order : terminal.getOrders() ) {
-				if ( ! orderMap.containsKey(order) ) {
-					orders.add(order);
-					orderMap.put(order, firstRow + countAdded);
+				if ( addOrder(order) != null ) {
+					countAdded ++;
 				}
-				countAdded ++;
 			}
 			if ( countAdded > 0 ) {
 				fireTableRowsInserted(firstRow, firstRow + countAdded - 1);
@@ -279,11 +275,50 @@ public class OrderListTableModel extends AbstractTableModel implements
 	private void subscribe(Terminal terminal) {
 		terminal.onOrderAvailable().addListener(this);
 		terminal.onOrderUpdate().addListener(this);		
+		terminal.onOrderArchived().addListener(this);
 	}
 	
 	private void unsubscribe(Terminal terminal) {
+		terminal.onOrderArchived().removeListener(this);
 		terminal.onOrderUpdate().removeListener(this);
 		terminal.onOrderAvailable().removeListener(this);
+	}
+	
+	private Integer getIndexOfOrder(Order order) {
+		int index = orders.indexOf(order);
+		return index == -1 ? null : index;
+	}
+	
+	/**
+	 * Add order to local cache.
+	 * <p>
+	 * @param order - the order instance to add
+	 * @return index of order in local cache or null if order was not added
+	 * (in case if it is already in cache)
+	 */
+	private Integer addOrder(Order order) {
+		if ( ! orders.contains(order) ) {
+			orders.add(order);
+			return orders.size() - 1;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Remove order from local cache.
+	 * <p>
+	 * @param order - the order instance to remove
+	 * @return index of removed order of null if order was not found
+	 */
+	private Integer removeOrder(Order order) {
+		Integer row = getIndexOfOrder(order);
+		if ( row != null ) {
+			orders.remove((int) row);
+			return row;
+		} else {
+			return null;
+		}
 	}
 	
 }
