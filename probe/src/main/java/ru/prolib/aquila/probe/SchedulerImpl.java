@@ -8,6 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.BusinessEntities.SPRunnable;
+import ru.prolib.aquila.core.BusinessEntities.SPRunnableTaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.probe.scheduler.Cmd;
@@ -176,6 +178,11 @@ public class SchedulerImpl implements Scheduler {
 			logger.error("Unexpected interruption: ", e);
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	@Override
+	public TaskHandler schedule(SPRunnable task) {
+		return SPRunnableTaskHandler.schedule(this, task);
 	}
 
 }

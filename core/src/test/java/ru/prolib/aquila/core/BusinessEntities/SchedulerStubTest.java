@@ -187,5 +187,39 @@ public class SchedulerStubTest {
 		List<TaskHandler> expected = new ArrayList<>();
 		assertEquals(expected, scheduler.getScheduledTasks());
 	}
+	
+	@Test
+	public void testSchedule_SelfPlanned() {
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		scheduler.setFixedTime("2016-12-02T12:35:00Z");
+		expect(runnableMock.getNextExecutionTime(T("2016-12-02T12:35:00Z")))
+			.andReturn(T("2016-12-02T13:00:00Z"));
+		control.replay();
+		
+		TaskHandler actualHandler = scheduler.schedule(runnableMock);
+		
+		control.verify();
+		SPRunnableTaskHandler expectedHandler = new SPRunnableTaskHandler(scheduler, runnableMock);
+		assertEquals(expectedHandler, actualHandler);
+		List<TaskHandler> expected = new ArrayList<>();
+		expected.add(SchedulerStubTask.atTime(T("2016-12-02T13:00:00Z"), expectedHandler));
+		assertEquals(expected, scheduler.getScheduledTasks());
+	}
+	
+	@Test
+	public void testSchedule_SelfPlanned_CancelledOnStart() {
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		scheduler.setFixedTime("2016-12-02T12:35:00Z");
+		expect(runnableMock.getNextExecutionTime(T("2016-12-02T12:35:00Z"))).andReturn(null);
+		control.replay();
+		
+		TaskHandler actualHandler = scheduler.schedule(runnableMock);
+		
+		control.verify();
+		SPRunnableTaskHandler expectedHandler = new SPRunnableTaskHandler(scheduler, runnableMock);
+		expectedHandler.cancel();
+		assertEquals(expectedHandler, actualHandler);
+		assertEquals(new ArrayList<>(), scheduler.getScheduledTasks());
+	}
 
 }

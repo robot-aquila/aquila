@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.TimerTask;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 /**
  * Wrapper of a scheduler task.
  */
@@ -46,8 +48,10 @@ class SchedulerLocal_TimerTask extends TimerTask implements TaskHandler {
 			return false;
 		}
 		SchedulerLocal_TimerTask other = (SchedulerLocal_TimerTask) o;
-		return other.runOnce == runOnce
-			&& other.runnable == runnable;
+		return new EqualsBuilder()
+			.append(other.runOnce, runOnce)
+			.append(other.runnable, runnable)
+			.isEquals();
 	}
 
 }

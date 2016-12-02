@@ -108,5 +108,14 @@ public interface Scheduler {
      * Close this task scheduler and cancel all related tasks.
      */
     public void close();
+    
+    /**
+     * Schedules self-planned task.
+     * <p>
+     * @param task - task to be scheduled
+     * @return a new task handler
+     * @throws NullPointerException if task is null
+     */
+    public TaskHandler schedule(SPRunnable task);
 
 }

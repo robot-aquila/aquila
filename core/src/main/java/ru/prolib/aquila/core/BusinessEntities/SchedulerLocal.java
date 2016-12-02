@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
 
@@ -22,6 +23,7 @@ public class SchedulerLocal implements Scheduler {
 	}
 	
 	private final Timer timer;
+	private final Clock clock;
 	private final String timerID;
 	private boolean closed;
 	private boolean errorLogged;
@@ -32,23 +34,29 @@ public class SchedulerLocal implements Scheduler {
 	 * For testing purposes only.
 	 * <p>
 	 * @param timer - the timer
+	 * @param clock - the clock
+	 * @param timerID - ID of the timer
 	 */
-	SchedulerLocal(Timer timer) {
+	SchedulerLocal(Timer timer, Clock clock, String timerID) {
 		super();
 		this.timer = timer;
-		this.timerID = "DEFAULT";
+		this.clock = clock;
+		this.timerID = timerID;
+	}
+	
+	SchedulerLocal(Timer timer, Clock clock) {
+		this(timer, clock, "DEFAULT");
 	}
 
 	/**
 	 * Конструктор.
 	 */
 	public SchedulerLocal() {
-		this(new Timer(true));
+		this(new Timer(true), Clock.systemUTC(), "DEFAULT");
 	}
 	
 	public SchedulerLocal(String threadID) {
-		this.timer = new Timer(threadID, true);
-		this.timerID = threadID;
+		this(new Timer(threadID, true), Clock.systemUTC(), threadID);
 	}
 	
 	/**
@@ -64,7 +72,7 @@ public class SchedulerLocal implements Scheduler {
 	
 	@Override
 	public Instant getCurrentTime() {
-		return Instant.now();
+		return clock.instant();
 	}
 	
 	/**
@@ -173,6 +181,11 @@ public class SchedulerLocal implements Scheduler {
 			": Scheduler is closed. Next requests will be silently discarded.");
 		logger.error("Illegal state: ", e);
 		throw e;
+	}
+
+	@Override
+	public TaskHandler schedule(SPRunnable task) {
+		return SPRunnableTaskHandler.schedule(this, task);
 	}
 
 }

@@ -699,6 +699,18 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testSchedule_SelfPlanned() {
+		TaskHandler handlerMock = control.createMock(TaskHandler.class);
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		expect(schedulerMock.schedule(runnableMock)).andReturn(handlerMock);
+		control.replay();
+		
+		assertSame(handlerMock, terminalWithMocks.schedule(runnableMock));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testClose_CloseAllSecurities() {
 		EditableSecurity security1 = terminal.getEditableSecurity(symbol1);
 		EditableSecurity security2 = terminal.getEditableSecurity(symbol2);

@@ -10,6 +10,8 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.SPRunnable;
+import ru.prolib.aquila.core.BusinessEntities.SPRunnableTaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.probe.scheduler.Cmd;
 import ru.prolib.aquila.probe.scheduler.CmdClose;
@@ -329,6 +331,37 @@ public class SchedulerImplTest {
 		scheduler.close();
 		
 		scheduler.setExecutionSpeed(8);
+	}
+	
+	@Test
+	public void testSchedule_SelfPlanned() throws Exception {
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		expect(stateMock.getCurrentTime()).andReturn(T("2016-12-02T13:26:00Z"));
+		expect(runnableMock.getNextExecutionTime(T("2016-12-02T13:26:00Z"))).andReturn(T("2016-12-02T13:30:00Z"));
+		SchedulerTaskImpl expected = new SchedulerTaskImpl(new SPRunnableTaskHandler(scheduler, runnableMock));
+		expected.scheduleForFirstExecution(T("2016-12-02T13:30:00Z"));		
+		queueMock.put(new CmdScheduleTask(expected));
+		control.replay();
+		
+		TaskHandler actual = scheduler.schedule(runnableMock);
+		
+		control.verify();
+		assertEquals(new SPRunnableTaskHandler(scheduler, runnableMock), actual);
+	}
+	
+	@Test
+	public void testSchedule_SelfPlanned_CancelledOnStart() throws Exception {
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		expect(stateMock.getCurrentTime()).andReturn(T("2016-12-02T13:26:00Z"));
+		expect(runnableMock.getNextExecutionTime(T("2016-12-02T13:26:00Z"))).andReturn(null);
+		control.replay();
+		
+		TaskHandler actual = scheduler.schedule(runnableMock);
+		
+		control.verify();
+		SPRunnableTaskHandler expected = new SPRunnableTaskHandler(scheduler, runnableMock);
+		expected.cancel();
+		assertEquals(expected, actual);
 	}
 
 }

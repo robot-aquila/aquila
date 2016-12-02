@@ -454,6 +454,11 @@ public class TerminalImpl implements EditableTerminal {
 		return scheduler.scheduleAtFixedRate(task, delay, period);
 	}
 	
+	@Override
+	public TaskHandler schedule(SPRunnable task) {
+		return scheduler.schedule(task);
+	}
+	
 	/**
 	 * Get scheduler.
 	 * <p>

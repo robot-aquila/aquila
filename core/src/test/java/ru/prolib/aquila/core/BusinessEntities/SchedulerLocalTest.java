@@ -3,16 +3,18 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.Timer;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SchedulerLocalTest {
@@ -22,6 +24,17 @@ public class SchedulerLocalTest {
 	private Instant time;
 	private Calendar calendar;
 	private Timer timer;
+	private Clock clockMock;
+	
+	static Instant T(String timeString) {
+		return Instant.parse(timeString);
+	}
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 	
 	@Before
 	public void setUp() throws Exception {
@@ -33,7 +46,8 @@ public class SchedulerLocalTest {
 		control = createStrictControl();
 		timer = control.createMock(Timer.class);
 		runnable = control.createMock(Runnable.class);
-		scheduler = new SchedulerLocal(timer);
+		clockMock = control.createMock(Clock.class);
+		scheduler = new SchedulerLocal(timer, clockMock);
 	}
 	
 	@After
@@ -53,9 +67,12 @@ public class SchedulerLocalTest {
 	
 	@Test
 	public void testGetCurrentTime() throws Exception {
-		Instant expected = Instant.now();
-		Instant actual = scheduler.getCurrentTime();
-		assertTrue(ChronoUnit.MILLIS.between(expected, actual) <= 50);
+		expect(clockMock.instant()).andReturn(T("2016-12-02T13:02:00Z"));
+		control.replay();
+		
+		assertEquals(T("2016-12-02T13:02:00Z"), scheduler.getCurrentTime());
+		
+		control.verify();
 	}
 	
 	@Test
@@ -141,6 +158,39 @@ public class SchedulerLocalTest {
 		TaskHandler actual = scheduler.scheduleAtFixedRate(runnable, 80L, 94L);
 		
 		control.verify();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testSchedule_SelfPlanned() throws Exception {
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		expect(clockMock.instant()).andReturn(T("2016-12-02T13:03:00Z"));
+		expect(runnableMock.getNextExecutionTime(T("2016-12-02T13:03:00Z"))).andReturn(T("2016-12-02T13:05:00Z"));
+		calendar.set(2016, 11, 2, 13, 5, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		timer.schedule(new SchedulerLocal_TimerTask(new SPRunnableTaskHandler(scheduler, runnableMock), true),
+				calendar.getTime());
+		control.replay();
+		
+		TaskHandler actual = scheduler.schedule(runnableMock);
+		
+		control.verify();
+		SPRunnableTaskHandler expected = new SPRunnableTaskHandler(scheduler, runnableMock);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testSchedule_SelfPlanned_CancelledOnStart() throws Exception {
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		expect(clockMock.instant()).andReturn(T("2016-12-02T13:03:00Z"));
+		expect(runnableMock.getNextExecutionTime(T("2016-12-02T13:03:00Z"))).andReturn(null);
+		control.replay();
+		
+		TaskHandler actual = scheduler.schedule(runnableMock);
+		
+		control.verify();
+		SPRunnableTaskHandler expected = new SPRunnableTaskHandler(scheduler, runnableMock);
+		expected.cancel();
 		assertEquals(expected, actual);
 	}
 	

@@ -31,6 +31,10 @@ public class SchedulerStub implements Scheduler {
 		return result;
 	}
 	
+	public int getNumScheduledTasks() {
+		return tasks.size();
+	}
+	
 	public void clearScheduledTasks() {
 		tasks.clear();
 	}
@@ -116,6 +120,11 @@ public class SchedulerStub implements Scheduler {
 	private SchedulerStubTask add(SchedulerStubTask handler) {
 		tasks.add(handler);
 		return handler;
+	}
+
+	@Override
+	public TaskHandler schedule(SPRunnable task) {
+		return SPRunnableTaskHandler.schedule(this, task);
 	}
 
 }
