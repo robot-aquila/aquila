@@ -366,4 +366,14 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 		return new SecurityEventFactory(this);
 	}
 	
+	@Override
+	public final int hashCode() {
+		return super.hashCode();
+	}
+	
+	@Override
+	public final boolean equals(Object other) {
+		return super.equals(other);
+	}
+	
 }
