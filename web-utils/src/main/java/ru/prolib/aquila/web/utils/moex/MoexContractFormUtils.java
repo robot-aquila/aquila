@@ -32,6 +32,7 @@ public class MoexContractFormUtils {
 		map(MoexQuotationType.POINTS, "points");
 		map(MoexQuotationType.POINTS, "п.");
 		map(MoexQuotationType.POINTS, "points (% from face value)");
+		map(MoexQuotationType.POINTS, "points per 1 metric ton");
 		map(MoexQuotationType.RUR, "RUR");
 		map(MoexQuotationType.RUR_PER_1_CNY, "в российских рублях за 1 юань_RUB per 1 CNY");
 		map(MoexQuotationType.RUR_PER_1_KILO, "RUR per 1 kilo");
