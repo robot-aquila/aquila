@@ -4,3 +4,7 @@
 *.versionsBackup
 .project
 .settings/
+.classpath
+*.iml
+.idea/
+target/

@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.TimestampType;
 import org.hibernate.usertype.UserType;
 
@@ -55,11 +56,11 @@ public class DateTimeType implements UserType {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 			throws HibernateException, SQLException
 	{
 		assert names.length == 1;
-		Date time = (Date) TimestampType.INSTANCE.nullSafeGet(rs, names[0]);
+		Date time = (Date) TimestampType.INSTANCE.nullSafeGet(rs, names[0], session);
 		if ( time == null ) {
 			return null;
 		}
@@ -81,11 +82,11 @@ public class DateTimeType implements UserType {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void nullSafeSet(PreparedStatement st, Object value, int index)
+	public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
 			throws HibernateException, SQLException
 	{
 		if ( value == null ) {
-			TimestampType.INSTANCE.nullSafeSet(st, null, index);
+			TimestampType.INSTANCE.nullSafeSet(st, null, index, session);
 			return;
 		}
 		LocalDateTime javaTime = (LocalDateTime) value;
@@ -100,7 +101,7 @@ public class DateTimeType implements UserType {
 		Date time = cal.getTime();
 		//System.err.println(">>> INFO: java Date is " + time);
 		//System.err.println(">>> INFO: joda DateTime is " + jodaTime);
-		TimestampType.INSTANCE.nullSafeSet(st, time, index);
+		TimestampType.INSTANCE.nullSafeSet(st, time, index, session);
 	}
 
 	@Override

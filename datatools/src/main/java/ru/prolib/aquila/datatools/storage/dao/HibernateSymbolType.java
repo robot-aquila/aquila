@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.Currency;
 
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
@@ -58,15 +59,15 @@ public class HibernateSymbolType implements UserType {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 			throws HibernateException, SQLException
 	{
 		assert names.length == 4;
 		StringType x = StringType.INSTANCE;
-		String code = (String) x.get(rs, names[0]),
-				classCode = (String) x.get(rs, names[1]),
-				currencyCode = (String) x.get(rs, names[2]),
-				typeCode = (String)x.get(rs, names[3]);
+		String code = (String) x.get(rs, names[0], session),
+				classCode = (String) x.get(rs, names[1], session),
+				currencyCode = (String) x.get(rs, names[2], session),
+				typeCode = (String)x.get(rs, names[3], session);
 		if ( code == null ) {
 			throw new HibernateException("Code cannot be null");
 		}
@@ -75,21 +76,21 @@ public class HibernateSymbolType implements UserType {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void nullSafeSet(PreparedStatement st, Object value, int index)
+	public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
 			throws HibernateException, SQLException
 	{
 		StringType x = StringType.INSTANCE;
 		if ( value == null ) {
-			x.set(st, null, index);
-			x.set(st, null, index + 1);
-			x.set(st, null, index + 2);
-			x.set(st, null, index + 3);
+			x.set(st, null, index, session);
+			x.set(st, null, index + 1, session);
+			x.set(st, null, index + 2, session);
+			x.set(st, null, index + 3, session);
 		} else {
 			final Symbol symbol = (Symbol) value;
-			x.set(st, symbol.getCode(), index);
-			x.set(st, symbol.getExchangeID(), index + 1);
-			x.set(st, symbol.getCurrencyCode(), index + 2);
-			x.set(st,  symbol.getTypeCode(), index  +3);
+			x.set(st, symbol.getCode(), index, session);
+			x.set(st, symbol.getExchangeID(), index + 1, session);
+			x.set(st, symbol.getCurrencyCode(), index + 2, session);
+			x.set(st,  symbol.getTypeCode(), index  +3, session);
 		}
 	}
 
