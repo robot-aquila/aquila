@@ -102,6 +102,7 @@ public class TerminalImplTest {
 		assertTrue(order.onRegisterFailed().isAlternateType(terminal.onOrderRegisterFailed()));
 		assertTrue(order.onUpdate().isAlternateType(terminal.onOrderUpdate()));
 		assertTrue(order.onArchived().isAlternateType(terminal.onOrderArchived()));
+		assertTrue(order.onClose().isAlternateType(terminal.onOrderClose()));
 	}
 	
 	private EditableOrder createTestOrder() {
@@ -170,6 +171,10 @@ public class TerminalImplTest {
 		assertEquals(prefix + "TERMINAL_READY", terminal.onTerminalReady().getId());
 		assertEquals(prefix + "TERMINAL_UNREADY", terminal.onTerminalUnready().getId());
 		assertEquals(prefix + "ORDER_ARCHIVED", terminal.onOrderArchived().getId());
+		assertEquals(prefix + "ORDER_CLOSE", terminal.onOrderClose().getId());
+		assertEquals(prefix + "SECURITY_CLOSE", terminal.onSecurityClose().getId());
+		assertEquals(prefix + "POSITION_CLOSE", terminal.onPositionClose().getId());
+		assertEquals(prefix + "PORTFOLIO_CLOSE", terminal.onPortfolioClose().getId());
 	}
 
 	@Test
@@ -185,9 +190,10 @@ public class TerminalImplTest {
 		assertTrue(actual.onBestBid().isAlternateType(terminal.onSecurityBestBid()));
 		assertTrue(actual.onLastTrade().isAlternateType(terminal.onSecurityLastTrade()));
 		assertTrue(actual.onMarketDepthUpdate().isAlternateType(terminal.onSecurityMarketDepthUpdate()));
+		assertTrue(actual.onClose().isAlternateType(terminal.onSecurityClose()));
 	}
 	
-	@Test
+	@Test (expected=IllegalStateException.class)
 	public void testGetEditableSecurity_ThrowsIfClosed() throws Exception {
 		terminal.close();
 		
@@ -211,6 +217,7 @@ public class TerminalImplTest {
 		assertTrue(actual.onBestBid().isAlternateType(terminal.onSecurityBestBid()));
 		assertTrue(actual.onLastTrade().isAlternateType(terminal.onSecurityLastTrade()));
 		assertTrue(actual.onMarketDepthUpdate().isAlternateType(terminal.onSecurityMarketDepthUpdate()));
+		assertTrue(actual.onClose().isAlternateType(terminal.onSecurityClose()));
 	}
 	
 	@Test
@@ -263,6 +270,8 @@ public class TerminalImplTest {
 				.isAlternateType(terminalWithMocks.onPositionCurrentPriceChange()));
 		assertTrue(actual.onPositionUpdate().isAlternateType(terminalWithMocks.onPositionUpdate()));
 		assertTrue(actual.onUpdate().isAlternateType(terminalWithMocks.onPortfolioUpdate()));
+		assertTrue(actual.onClose().isAlternateType(terminalWithMocks.onPortfolioClose()));
+		assertTrue(actual.onPositionClose().isAlternateType(terminalWithMocks.onPositionClose()));
 		assertSame(actual, captured.getValue());
 	}
 	
@@ -289,6 +298,8 @@ public class TerminalImplTest {
 		assertTrue(actual.onPositionCurrentPriceChange().isAlternateType(terminal.onPositionCurrentPriceChange()));
 		assertTrue(actual.onPositionUpdate().isAlternateType(terminal.onPositionUpdate()));
 		assertTrue(actual.onUpdate().isAlternateType(terminal.onPortfolioUpdate()));
+		assertTrue(actual.onClose().isAlternateType(terminal.onPortfolioClose()));
+		assertTrue(actual.onPositionClose().isAlternateType(terminal.onPositionClose()));
 	}
 	
 	@Test
@@ -840,6 +851,15 @@ public class TerminalImplTest {
 		terminal.onSecurityBestBid().addListener(listenerStub);
 		terminal.onSecurityLastTrade().addAlternateType(type);
 		terminal.onSecurityLastTrade().addListener(listenerStub);
+		// those event types shouldn't be cleared
+		terminal.onSecurityClose().addListener(listenerStub);
+		terminal.onSecurityClose().addAlternateType(type);
+		terminal.onOrderClose().addListener(listenerStub);
+		terminal.onOrderClose().addAlternateType(type);
+		terminal.onPortfolioClose().addListener(listenerStub);
+		terminal.onPortfolioClose().addAlternateType(type);
+		terminal.onPositionClose().addListener(listenerStub);
+		terminal.onPositionClose().addAlternateType(type);
 		
 		terminal.close();
 		
@@ -897,6 +917,15 @@ public class TerminalImplTest {
 		assertFalse(terminal.onSecurityBestBid().hasListeners());
 		assertFalse(terminal.onSecurityLastTrade().hasAlternates());
 		assertFalse(terminal.onSecurityLastTrade().hasListeners());
+		// those event types shouldn't be cleared
+		assertTrue(terminal.onSecurityClose().isListener(listenerStub));
+		assertTrue(terminal.onSecurityClose().isAlternateType(type));
+		assertTrue(terminal.onOrderClose().isListener(listenerStub));
+		assertTrue(terminal.onOrderClose().isAlternateType(type));
+		assertTrue(terminal.onPortfolioClose().isListener(listenerStub));
+		assertTrue(terminal.onPortfolioClose().isAlternateType(type));
+		assertTrue(terminal.onPositionClose().isListener(listenerStub));
+		assertTrue(terminal.onPositionClose().isAlternateType(type));
 	}
 	
 	@Test

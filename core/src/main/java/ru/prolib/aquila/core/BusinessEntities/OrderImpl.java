@@ -242,7 +242,9 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 
 		@Override
 		public void processUpdate(ObservableStateContainer container) {
-			processAvailable(container);
+			if ( container.isAvailable() ) {
+				processAvailable(container);
+			}
 		}
 
 		@Override
@@ -250,7 +252,7 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 			OrderImpl order = (OrderImpl) container;
 			OrderEventFactory factory = new OrderEventFactory(order);
 			if ( order.hasChanged(OrderField.STATUS) ) {
-				OrderStatus status = order.getStatus();				
+				OrderStatus status = order.getStatus();	
 				EventType dummy = null;
 				switch ( status ) {
 				case CANCEL_FAILED:

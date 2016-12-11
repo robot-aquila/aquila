@@ -154,4 +154,16 @@ public interface Portfolio extends ObservableStateContainer {
 	 */
 	public EventType onPositionUpdate();
 	
+	/**
+	 * When position object is closed.
+	 * <p>
+	 * Note: That event type does not indicate when the position is closed (i.e.
+	 * when position volume is zero). It indicates when the position instance
+	 * is closed and cannot be used in the future (it will not get updates
+	 * anymore and cannot be obtained via portfolio interface).
+	 * <p>
+	 * @return event type
+	 */
+	public EventType onPositionClose();
+	
 }

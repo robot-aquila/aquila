@@ -38,7 +38,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		super.setUp();
 	}
 	
-	@Test
+	@After
 	public void tearDown() throws Exception {
 		super.tearDown();
 	}
@@ -295,6 +295,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testOrderController_HasMinimalData() throws Exception {
+		produceContainer();
 		assertFalse(controller.hasMinimalData(order));
 		
 		data.put(OrderField.ACTION, OrderAction.BUY);
@@ -306,231 +307,354 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		
 		assertTrue(controller.hasMinimalData(order));
 	}
-
-	@Test
-	public void testOrderController_CancelFailed() {
-		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
-		order.update(data);
-		order.onCancelFailed().addSyncListener(listenerStub);
+	
+	private void testOrderController_ProcessAvailable_Ok(OrderStatus newStatus,
+			EventType type) throws Exception
+	{
+		listenerStub.clear();
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.STATUS, newStatus)
+			.buildUpdate());
+		type.addSyncListener(listenerStub);
 		
 		controller.processAvailable(order);
-		controller.processUpdate(order);
 		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onCancelFailed());
-		assertOrderEvent(listenerStub.getEvent(1), order.onCancelFailed());
+		type.removeListener(listenerStub);
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(type));
+		assertSame(order, ((ContainerEvent)listenerStub.getEvent(0)).getContainer());
 	}
 	
-	@Test
-	public void testOrderController_CancelFailed_SkipWhenStatusEventsDisabled() throws Exception {
+	private void testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus newStatus,
+			EventType type) throws Exception
+	{
+		listenerStub.clear();
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.STATUS, newStatus)
+			.buildUpdate());
+		type.addSyncListener(listenerStub);
 		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
-		order.update(data);
-		order.onCancelFailed().addSyncListener(listenerStub);
 		
 		controller.processAvailable(order);
+		
+		type.removeListener(listenerStub);
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	private void testOrderController_ProcessUpdate_Prepare(OrderStatus newStatus) {
+		listenerStub.clear();
+		DeltaUpdateBuilder builder = new DeltaUpdateBuilder()
+			.withToken(OrderField.STATUS, newStatus)
+			.withToken(OrderField.ACTION, OrderAction.BUY)
+			.withToken(OrderField.TYPE, OrderType.LIMIT);
+		if ( order.getInitialVolume() == null ) {
+			builder.withToken(OrderField.INITIAL_VOLUME, 100L);
+		}
+		if ( order.getCurrentVolume() == null ) {
+			builder.withToken(OrderField.CURRENT_VOLUME, 100L);
+		}
+		order.consume(builder.buildUpdate());
+	}
+	
+	private void testOrderController_ProcessUpdate_Ok(OrderStatus newStatus,
+			EventType type) throws Exception
+	{
+		testOrderController_ProcessUpdate_Prepare(newStatus);
+		type.addSyncListener(listenerStub);
+		
 		controller.processUpdate(order);
 		
+		type.removeListener(listenerStub);
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(type));
+		assertSame(order, ((ContainerEvent)listenerStub.getEvent(0)).getContainer());
+	}
+	
+	private void testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus newStatus,
+			EventType type) throws Exception
+	{
+		listenerStub.clear();
+		assertFalse(order.isAvailable());
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.STATUS, newStatus)
+			.buildUpdate());
+		type.addSyncListener(listenerStub);
+		assertFalse(order.isAvailable());
+		
+		controller.processUpdate(order);
+		
+		type.removeListener(listenerStub);
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	private void testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus newStatus,
+			EventType type) throws Exception
+	{
+		testOrderController_ProcessUpdate_Prepare(newStatus);
+		order.setStatusEventsEnabled(false);
+		type.addSyncListener(listenerStub);
+		
+		controller.processUpdate(order);
+		
+		type.removeListener(listenerStub);
 		assertEquals(0, listenerStub.getEventCount());
 	}
 	
 	@Test
-	public void testOrderController_Cancelled() {
-		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
-		order.update(data);
-		order.onCancelled().addSyncListener(listenerStub);
+	public void testOrderController_ProcessAvailable_Ok() throws Exception {
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.CANCEL_FAILED, order.onCancelFailed());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.CANCELLED, order.onCancelled());
+		tearDown();
 		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onCancelled());
-		assertOrderEvent(listenerStub.getEvent(1), order.onCancelled());
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.FILLED, order.onDone());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.CANCEL_FAILED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.REJECTED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.FILLED, order.onFilled());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.ACTIVE, order.onRegistered());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_Ok(OrderStatus.REJECTED, order.onRegisterFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.INITIAL_VOLUME, 10L)
+			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.buildUpdate());
+		testOrderController_ProcessAvailable_Ok(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
 	
 	@Test
-	public void testOrderController_Cancelled_SkipWhenStatusEventsDisabled() throws Exception {
-		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
-		order.update(data);
-		order.onCancelled().addSyncListener(listenerStub);
+	public void testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled() throws Exception {
+		produceContainer();
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.CANCEL_FAILED, order.onCancelFailed());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.CANCELLED, order.onCancelled());
+		tearDown();
 		
-		assertEquals(0, listenerStub.getEventCount());
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.FILLED, order.onDone());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.CANCEL_FAILED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.REJECTED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();		
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.FILLED, order.onFilled());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.ACTIVE, order.onRegistered());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.REJECTED, order.onRegisterFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.INITIAL_VOLUME, 10L)
+			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.buildUpdate());
+		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
 	
 	@Test
-	public void testOrderController_Done() {
-		data.put(OrderField.STATUS, OrderStatus.FILLED);
-		order.update(data);
-		order.onDone().addSyncListener(listenerStub);
+	public void testOrderController_ProcessUpdate_Ok() throws Exception {
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.CANCEL_FAILED, order.onCancelFailed());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.CANCELLED, order.onCancelled());
+		tearDown();
 		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onDone());
-		assertOrderEvent(listenerStub.getEvent(1), order.onDone());
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.FILLED, order.onDone());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.CANCEL_FAILED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.REJECTED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.FILLED, order.onFilled());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.ACTIVE, order.onRegistered());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_Ok(OrderStatus.REJECTED, order.onRegisterFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.INITIAL_VOLUME, 10L)
+			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.buildUpdate());
+		testOrderController_ProcessUpdate_Ok(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
 	
 	@Test
-	public void testOrderController_Done_SkipWhenStatusEventsDisabled() throws Exception {
-		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.FILLED);
-		order.update(data);
-		order.onDone().addSyncListener(listenerStub);
+	public void testOrderController_ProcessUpdate_SkipIfNotAvailable() throws Exception {
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.CANCEL_FAILED, order.onCancelFailed());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.CANCELLED, order.onCancelled());
+		tearDown();
 		
-		assertEquals(0, listenerStub.getEventCount());
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.FILLED, order.onDone());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.CANCEL_FAILED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.REJECTED, order.onFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.FILLED, order.onFilled());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.ACTIVE, order.onRegistered());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.REJECTED, order.onRegisterFailed());
+		tearDown();
+		
+		setUp();
+		produceContainer();
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.INITIAL_VOLUME, 10L)
+			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.buildUpdate());
+		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
 	
 	@Test
-	public void testOrderController_Failed() {
-		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
-		order.update(data);
-		order.onFailed().addSyncListener(listenerStub);
+	public void testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled() throws Exception {
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.CANCEL_FAILED, order.onCancelFailed());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.CANCELLED, order.onCancelled());
+		tearDown();
 		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onFailed());
-		assertOrderEvent(listenerStub.getEvent(1), order.onFailed());
-	}
-	
-	@Test
-	public void testOrderController_Failed_SkipWhenStatusEventsDisabled() throws Exception {
-		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.CANCEL_FAILED);
-		order.update(data);
-		order.onFailed().addSyncListener(listenerStub);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.FILLED, order.onDone());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.CANCEL_FAILED, order.onFailed());
+		tearDown();
 		
-		assertEquals(0, listenerStub.getEventCount());
-	}
-	
-	@Test
-	public void testOrderController_Filled() {
-		data.put(OrderField.STATUS, OrderStatus.FILLED);
-		order.update(data);
-		order.onFilled().addSyncListener(listenerStub);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.REJECTED, order.onFailed());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.FILLED, order.onFilled());
+		tearDown();
 		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onFilled());
-		assertOrderEvent(listenerStub.getEvent(1), order.onFilled());
-	}
-	
-	@Test
-	public void testOrderController_Filled_SkipWhenStatusEventsDisabled() throws Exception {
-		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.FILLED);
-		order.update(data);
-		order.onFilled().addSyncListener(listenerStub);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.ACTIVE, order.onRegistered());
+		tearDown();
 		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
+		setUp();
+		produceContainer();
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.REJECTED, order.onRegisterFailed());
+		tearDown();
 		
-		assertEquals(0, listenerStub.getEventCount());
-	}
-
-	@Test
-	public void testOrderController_PartiallyFilled() {
-		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		data.put(OrderField.CURRENT_VOLUME, 5L);
-		order.update(data);
-		order.onPartiallyFilled().addSyncListener(listenerStub);
-		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
-		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onPartiallyFilled());
-		assertOrderEvent(listenerStub.getEvent(1), order.onPartiallyFilled());
-	}
-	
-	@Test
-	public void testOrderController_PartiallyFilled_SkipWhenStatusEventsDisabled() throws Exception {
-		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.CANCELLED);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		data.put(OrderField.CURRENT_VOLUME, 5L);
-		order.update(data);
-		order.onPartiallyFilled().addSyncListener(listenerStub);
-		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
-		
-		assertEquals(0, listenerStub.getEventCount());
-	}
-	
-	@Test
-	public void testOrderController_Registered() {
-		data.put(OrderField.STATUS, OrderStatus.ACTIVE);
-		order.update(data);
-		order.onRegistered().addSyncListener(listenerStub);
-		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
-		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onRegistered());
-		assertOrderEvent(listenerStub.getEvent(1), order.onRegistered());
-	}
-	
-	@Test
-	public void testOrderController_Registered_SkipWhenStatusEventsDisabled() throws Exception {
-		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.ACTIVE);
-		order.update(data);
-		order.onRegistered().addSyncListener(listenerStub);
-		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
-		
-		assertEquals(0, listenerStub.getEventCount());
-	}
-	
-	@Test
-	public void testOrderController_RegisterFailed() {
-		data.put(OrderField.STATUS, OrderStatus.REJECTED);
-		order.update(data);
-		order.onRegisterFailed().addSyncListener(listenerStub);
-		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
-		
-		assertEquals(2, listenerStub.getEventCount());
-		assertOrderEvent(listenerStub.getEvent(0), order.onRegisterFailed());
-		assertOrderEvent(listenerStub.getEvent(1), order.onRegisterFailed());
-	}
-	
-	@Test
-	public void testOrderController_RegisterFailed_SkipWhenStatusEventsDisabled() throws Exception {
-		order.setStatusEventsEnabled(false);
-		data.put(OrderField.STATUS, OrderStatus.REJECTED);
-		order.update(data);
-		order.onRegisterFailed().addSyncListener(listenerStub);
-		
-		controller.processAvailable(order);
-		controller.processUpdate(order);
-		
-		assertEquals(0, listenerStub.getEventCount());
+		setUp();
+		produceContainer();
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.INITIAL_VOLUME, 10L)
+			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.buildUpdate());
+		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
 	
 	@Test
 	public void testUpdate_OnAvailable() throws Exception {
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
+		controllerMock.processUpdate(container);
 		expect(controllerMock.hasMinimalData(container)).andReturn(true);
 		controllerMock.processAvailable(container);
 		getMocksControl().replay();
@@ -549,6 +673,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnUpdateEvent() throws Exception {
 		container = produceContainer(controllerMock);
 		container.onUpdate().addSyncListener(listenerStub);
+		controllerMock.processUpdate(container);
 		expect(controllerMock.hasMinimalData(container)).andReturn(true);
 		controllerMock.processAvailable(container);
 		controllerMock.processUpdate(container);
@@ -560,10 +685,11 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		order.update(data);
 
 		getMocksControl().verify();
-		assertEquals(1, listenerStub.getEventCount());
-		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(order.onUpdate()));
-		assertSame(order, event.getOrder());
+		assertEquals(2, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(container.onUpdate()));
+		assertSame(order, ((OrderEvent) listenerStub.getEvent(0)).getOrder());
+		assertTrue(listenerStub.getEvent(1).isType(container.onUpdate()));
+		assertSame(order, ((OrderEvent) listenerStub.getEvent(1)).getOrder());
 	}
 	
 	/**

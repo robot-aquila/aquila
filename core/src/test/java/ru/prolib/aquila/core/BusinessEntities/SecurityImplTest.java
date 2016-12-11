@@ -642,6 +642,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnAvailable() throws Exception {
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
+		controllerMock.processUpdate(container);
 		expect(controllerMock.hasMinimalData(container)).andReturn(true);
 		controllerMock.processAvailable(container);
 		getMocksControl().replay();
@@ -660,6 +661,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnUpdateEvent() throws Exception {
 		container = produceContainer(controllerMock);
 		container.onUpdate().addSyncListener(listenerStub);
+		controllerMock.processUpdate(container);
 		expect(controllerMock.hasMinimalData(container)).andReturn(true);
 		controllerMock.processAvailable(container);
 		controllerMock.processUpdate(container);
@@ -671,10 +673,11 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		security.update(data);
 
 		getMocksControl().verify();
-		assertEquals(1, listenerStub.getEventCount());
-		SecurityEvent event = (SecurityEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(security.onUpdate()));
-		assertSame(security, event.getSecurity());
+		assertEquals(2, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(security.onUpdate()));
+		assertSame(security, ((SecurityEvent) listenerStub.getEvent(0)).getSecurity());
+		assertTrue(listenerStub.getEvent(1).isType(security.onUpdate()));
+		assertSame(security, ((SecurityEvent) listenerStub.getEvent(1)).getSecurity());
 	}
 
 }

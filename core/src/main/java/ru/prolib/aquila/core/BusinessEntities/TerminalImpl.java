@@ -35,7 +35,8 @@ public class TerminalImpl implements EditableTerminal {
 		onPositionCurrentPriceChange, onPositionUpdate, onSecurityAvailable,
 		onSecuritySessionUpdate, onSecurityUpdate, onTerminalReady,
 		onTerminalUnready, onSecurityMarketDepthUpdate, onSecurityBestAsk,
-		onSecurityBestBid, onSecurityLastTrade;
+		onSecurityBestBid, onSecurityLastTrade, onSecurityClose,
+		onOrderClose, onPositionClose, onPortfolioClose;
 	private boolean closed = false;
 	private boolean started = false;
 	
@@ -90,6 +91,10 @@ public class TerminalImpl implements EditableTerminal {
 		onSecurityLastTrade = newEventType("SECURITY_LAST_TRADE");
 		onTerminalReady = newEventType("TERMINAL_READY");
 		onTerminalUnready = newEventType("TERMINAL_UNREADY");
+		onSecurityClose = newEventType("SECURITY_CLOSE");
+		onOrderClose = newEventType("ORDER_CLOSE");
+		onPositionClose = newEventType("POSITION_CLOSE");
+		onPortfolioClose = newEventType("PORTFOLIO_CLOSE");
 	}
 	
 	@Override
@@ -150,6 +155,9 @@ public class TerminalImpl implements EditableTerminal {
 	public EditableSecurity getEditableSecurity(Symbol symbol) {
 		lock.lock();
 		try {
+			if ( closed ) {
+				throw new IllegalStateException();
+			}
 			EditableSecurity security = securities.get(symbol);
 			if ( security == null ) {
 				security = objectFactory.createSecurity(this, symbol);
@@ -161,6 +169,7 @@ public class TerminalImpl implements EditableTerminal {
 				security.onBestBid().addAlternateType(onSecurityBestBid);
 				security.onLastTrade().addAlternateType(onSecurityLastTrade);
 				security.onMarketDepthUpdate().addAlternateType(onSecurityMarketDepthUpdate);
+				security.onClose().addAlternateType(onSecurityClose);
 			}
 			return security;
 		} finally {
@@ -219,6 +228,8 @@ public class TerminalImpl implements EditableTerminal {
 				portfolio.onPositionCurrentPriceChange().addAlternateType(onPositionCurrentPriceChange);
 				portfolio.onPositionUpdate().addAlternateType(onPositionUpdate);
 				portfolio.onUpdate().addAlternateType(onPortfolioUpdate);
+				portfolio.onClose().addAlternateType(onPortfolioClose);
+				portfolio.onPositionClose().addAlternateType(onPositionClose);
 				dataProvider.subscribeStateUpdates(portfolio);
 			}
 			if ( defaultPortfolio == null ) {
@@ -325,6 +336,7 @@ public class TerminalImpl implements EditableTerminal {
 			order.onRegisterFailed().addAlternateType(onOrderRegisterFailed);
 			order.onUpdate().addAlternateType(onOrderUpdate);
 			order.onArchived().addAlternateType(onOrderArchived);
+			order.onClose().addAlternateType(onOrderClose);
 			orders.put(id, order);
 			return order;
 		} finally {
@@ -790,6 +802,26 @@ public class TerminalImpl implements EditableTerminal {
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	@Override
+	public EventType onSecurityClose() {
+		return onSecurityClose;
+	}
+
+	@Override
+	public EventType onOrderClose() {
+		return onOrderClose;
+	}
+
+	@Override
+	public EventType onPortfolioClose() {
+		return onPortfolioClose;
+	}
+
+	@Override
+	public EventType onPositionClose() {
+		return onPositionClose;
 	}
 
 }

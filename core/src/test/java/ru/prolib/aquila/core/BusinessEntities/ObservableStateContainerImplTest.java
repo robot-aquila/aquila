@@ -261,6 +261,7 @@ public class ObservableStateContainerImplTest {
 		assertEquals(getID(), container.getContainerID());
 		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
 		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
+		assertEquals(getID() + ".CLOSE", container.onClose().getId());
 		assertFalse(container.isAvailable());
 		assertFalse(container.isClosed());
 		assertTrue(LID.isLastCreatedLID(container.getLID()));
@@ -274,6 +275,7 @@ public class ObservableStateContainerImplTest {
 		assertEquals(getID(), container.getContainerID());
 		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
 		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
+		assertEquals(getID() + ".CLOSE", container.onClose().getId());
 		assertFalse(container.isAvailable());
 		assertFalse(container.isClosed());
 		assertTrue(LID.isLastCreatedLID(container.getLID()));
@@ -485,21 +487,22 @@ public class ObservableStateContainerImplTest {
 	
 	@Test
 	final public void testContainerImpl_Update_NoChanges() throws Exception {
-		EventListenerStub listener = new EventListenerStub();
-		container.onAvailable().addSyncListener(listener);
-		container.onUpdate().addSyncListener(listener);
+		container.onAvailable().addSyncListener(listenerStub);
+		container.onUpdate().addSyncListener(listenerStub);
+		container.onClose().addSyncListener(listenerStub);
 		
 		container.update(data);
 		
-		assertEquals(0, listener.getEventCount());
+		assertEquals(0, listenerStub.getEventCount());
 	}
 	
 	@Test
 	final public void testContainerImpl_Update_HasNoMinimalData() {
 		container = produceContainer(controllerMock);
-		EventListenerStub listener = new EventListenerStub();
-		container.onAvailable().addSyncListener(listener);
-		container.onUpdate().addSyncListener(listener);
+		container.onAvailable().addSyncListener(listenerStub);
+		container.onUpdate().addSyncListener(listenerStub);
+		container.onClose().addSyncListener(listenerStub);
+		controllerMock.processUpdate(container);
 		expect(controllerMock.hasMinimalData(container)).andReturn(false);
 		control.replay();
 		
@@ -507,107 +510,34 @@ public class ObservableStateContainerImplTest {
 		container.update(data);
 		
 		control.verify();
-		assertEquals(0, listener.getEventCount());
-	}
-	
-	@Test
-	final public void testContainerImpl_Update_AvailableFirstTime() {
-		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
-		container.onUpdate().addSyncListener(listenerStub);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
-		control.replay();
-		
-		data.put(BOOL_ACTIVE, true);
-		container.update(data);
-		
-		control.verify();
-		assertTrue(container.isAvailable());
 		assertEquals(1, listenerStub.getEventCount());
 		ContainerEvent e = (ContainerEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(container.onAvailable()));
+		assertTrue(e.isType(container.onUpdate()));
 		assertSame(container, e.getContainer());
 	}
 	
 	@Test
-	final public void testContainerImpl_Update_AvailableButNoChangesForUpdate() {
+	final public void testContainerImpl_Update_HasMinimalData() {
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
 		container.onUpdate().addSyncListener(listenerStub);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
-		control.replay();
-		
-		data.put(BOOL_ACTIVE, true);
-		container.update(data);
-		container.update(data);
-		
-		control.verify();
-		assertTrue(container.isAvailable());
-		assertEquals(1, listenerStub.getEventCount());
-		ContainerEvent e = (ContainerEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(container.onAvailable()));
-		assertSame(container, e.getContainer());
-	}
-
-	@Test
-	final public void testContainerImpl_Update_AvailableAndUpdate() {
-		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
-		container.onUpdate().addSyncListener(listenerStub);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
+		container.onClose().addSyncListener(listenerStub);
 		controllerMock.processUpdate(container);
+		expect(controllerMock.hasMinimalData(container)).andReturn(true);
+		controllerMock.processAvailable(container);
 		control.replay();
 		
 		data.put(BOOL_ACTIVE, true);
-		container.update(data);
-		data.put(BOOL_ACTIVE, false);
 		container.update(data);
 		
 		control.verify();
 		assertTrue(container.isAvailable());
 		assertEquals(2, listenerStub.getEventCount());
-		ContainerEvent e = (ContainerEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(container.onAvailable()));
-		assertSame(container, e.getContainer());
-		e = (ContainerEvent) listenerStub.getEvent(1);
-		assertTrue(e.isType(container.onUpdate()));
-		assertSame(container, e.getContainer());
+		assertTrue(listenerStub.getEvent(0).isType(container.onUpdate()));
+		assertSame(container, ((ContainerEvent) listenerStub.getEvent(0)).getContainer());
+		assertTrue(listenerStub.getEvent(1).isType(container.onAvailable()));
+		assertSame(container, ((ContainerEvent) listenerStub.getEvent(1)).getContainer());
 	}
-	
-	@Test
-	final public void testContainerImpl_Update_AvailableAnd2Updates() {
-		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
-		container.onUpdate().addSyncListener(listenerStub);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
-		controllerMock.processUpdate(container);
-		controllerMock.processUpdate(container);
-		control.replay();
-		
-		data.put(BOOL_ACTIVE, true);
-		container.update(data);
-		data.put(BOOL_ACTIVE, false);
-		container.update(data);
-		data.put(BOOL_ACTIVE, true);
-		container.update(data);
-		
-		control.verify();
-		assertTrue(container.isAvailable());
-		assertEquals(3, listenerStub.getEventCount());
-		ContainerEvent e = (ContainerEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(container.onAvailable()));
-		assertSame(container, e.getContainer());
-		e = (ContainerEvent) listenerStub.getEvent(1);
-		assertTrue(e.isType(container.onUpdate()));
-		assertSame(container, e.getContainer());
-		e = (ContainerEvent) listenerStub.getEvent(2);
-		assertTrue(e.isType(container.onUpdate()));
-		assertSame(container, e.getContainer());
-	}	
 	
 	@Test
 	final public void testContainerImpl_Close() {
@@ -616,8 +546,8 @@ public class ObservableStateContainerImplTest {
 		container.onUpdate().addAlternateType(type);
 		container.onAvailable().addListener(listenerStub);
 		container.onAvailable().addAlternateType(type);
-		data.put(STRING_NAME, "foobar");
-		container.update(data);
+		container.onClose().addSyncListener(listenerStub);
+		container.onClose().addAlternateType(type);
 		
 		container.close();
 		
@@ -628,7 +558,12 @@ public class ObservableStateContainerImplTest {
 		assertFalse(container.onAvailable().hasListeners());
 		assertFalse(container.onAvailable().hasAlternates());
 		assertFalse(container.isAvailable());
+		assertTrue(container.onClose().isSyncListener(listenerStub));
+		assertTrue(container.onClose().isAlternateType(type));
 		assertTrue(container.isClosed());
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(container.onClose()));
+		assertSame(container, ((ContainerEvent) listenerStub.getEvent(0)).getContainer());
 	}
 	
 	@Test

@@ -24,7 +24,7 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	private final Account account;
 	private EditableTerminal terminal;
 	private final EventType onPositionAvailable, onPositionChange,
-		onPositionCurrentPriceChange, onPositionUpdate;
+		onPositionCurrentPriceChange, onPositionUpdate, onPositionClose;
 	private final Map<Symbol, EditablePosition> positions;
 	
 	private static String getID(Terminal terminal, Account account,
@@ -53,6 +53,7 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 		onPositionChange = newEventType("PORTFOLIO.POSITION_CHANGE");
 		onPositionCurrentPriceChange = newEventType("PORTFOLIO.POSITION_PRICE_CHANGE");
 		onPositionUpdate = newEventType("PORTFOLIO.POSITION_UPDATE");
+		onPositionClose = newEventType("PORTFOLIO.POSITION_CLOSE");
 	}
 	
 	public PortfolioImpl(EditableTerminal terminal, Account account) {
@@ -189,6 +190,7 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 				position.onCurrentPriceChange().addAlternateType(onPositionCurrentPriceChange);
 				position.onPositionChange().addAlternateType(onPositionChange);
 				position.onUpdate().addAlternateType(onPositionUpdate);
+				position.onClose().addAlternateType(onPositionClose);
 			}
 			return position;
 		} finally {
@@ -256,6 +258,11 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 			return new PortfolioEvent(type, portfolio);
 		}
 		
+	}
+
+	@Override
+	public EventType onPositionClose() {
+		return onPositionClose;
 	}
 
 }

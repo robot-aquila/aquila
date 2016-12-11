@@ -41,6 +41,8 @@ public interface Terminal extends Scheduler {
 	
 	public EventType onSecurityLastTrade();
 	
+	public EventType onSecurityClose();
+	
 	/**
 	 * Create order of custom type.
 	 * <p>
@@ -218,6 +220,8 @@ public interface Terminal extends Scheduler {
 	public EventType onOrderExecution();
 	
 	public EventType onOrderArchived();
+	
+	public EventType onOrderClose();
 
 	/**
 	 * Проверить доступность информации о портфеле.
@@ -276,6 +280,8 @@ public interface Terminal extends Scheduler {
 	 */
 	public EventType onPortfolioUpdate();
 	
+	public EventType onPortfolioClose();
+	
 	/**
 	 * Перехватчик событий соответствующего типа от всех портфелей.
 	 * <p>
@@ -293,6 +299,18 @@ public interface Terminal extends Scheduler {
 	public EventType onPositionChange();
 	
 	public EventType onPositionCurrentPriceChange();
+	
+	/**
+	 * When position object is closed.
+	 * <p>
+	 * Note: That event type does not indicate when the position is closed (i.e.
+	 * when position volume is zero). It indicates when the position instance
+	 * is closed and cannot be used in the future (it will not get updates
+	 * anymore and cannot be obtained via terminal interface).
+	 * <p>
+	 * @return event type
+	 */
+	public EventType onPositionClose();
 	
 	/**
 	 * Получить список доступных инструментов

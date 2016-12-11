@@ -81,6 +81,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertEquals(prefix + ".POSITION_CHANGE", portfolio.onPositionChange().getId());
 		assertEquals(prefix + ".POSITION_PRICE_CHANGE", portfolio.onPositionCurrentPriceChange().getId());
 		assertEquals(prefix + ".POSITION_UPDATE", portfolio.onPositionUpdate().getId());
+		assertEquals(prefix + ".POSITION_CLOSE", portfolio.onPositionClose().getId());
 	}
 	
 	@Test
@@ -99,6 +100,8 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		portfolio.onPositionUpdate().addAlternateType(type);
 		portfolio.onUpdate().addListener(listener);
 		portfolio.onUpdate().addAlternateType(type);
+		portfolio.onClose().addSyncListener(listenerStub);
+		portfolio.onClose().addAlternateType(type);
 		
 		portfolio.close();
 		
@@ -115,6 +118,11 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertFalse(portfolio.onPositionUpdate().hasAlternates());
 		assertFalse(portfolio.onUpdate().hasListeners());
 		assertFalse(portfolio.onUpdate().hasAlternates());
+		assertTrue(portfolio.onClose().isAlternateType(type));
+		assertTrue(portfolio.onClose().isListener(listenerStub));
+		assertEquals(1, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(portfolio.onClose()));
+		assertSame(portfolio, ((PortfolioEvent) listenerStub.getEvent(0)).getPortfolio());
 	}
 	
 	@Test
@@ -274,7 +282,8 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertTrue(position.onAvailable().isAlternateType(portfolio.onPositionAvailable()));
 		assertTrue(position.onCurrentPriceChange().isAlternateType(portfolio.onPositionCurrentPriceChange()));
 		assertTrue(position.onPositionChange().isAlternateType(portfolio.onPositionChange()));
-		assertTrue(position.onUpdate().isAlternateType(portfolio.onPositionUpdate()));		
+		assertTrue(position.onUpdate().isAlternateType(portfolio.onPositionUpdate()));
+		assertTrue(position.onClose().isAlternateType(portfolio.onPositionClose()));
 		assertSame(position, portfolio.getPosition(new Symbol("MSFT")));
 	}
 	
@@ -296,7 +305,8 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertTrue(position.onAvailable().isAlternateType(portfolio.onPositionAvailable()));
 		assertTrue(position.onCurrentPriceChange().isAlternateType(portfolio.onPositionCurrentPriceChange()));
 		assertTrue(position.onPositionChange().isAlternateType(portfolio.onPositionChange()));
-		assertTrue(position.onUpdate().isAlternateType(portfolio.onPositionUpdate()));		
+		assertTrue(position.onUpdate().isAlternateType(portfolio.onPositionUpdate()));
+		assertTrue(position.onClose().isAlternateType(portfolio.onPositionClose()));
 		assertSame(position, portfolio.getEditablePosition(new Symbol("MSFT")));
 	}
 	
@@ -338,6 +348,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnAvailable() throws Exception {
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
+		controllerMock.processUpdate(container);
 		expect(controllerMock.hasMinimalData(container)).andReturn(true);
 		controllerMock.processAvailable(container);
 		getMocksControl().replay();
@@ -356,6 +367,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnUpdateEvent() throws Exception {
 		container = produceContainer(controllerMock);
 		container.onUpdate().addSyncListener(listenerStub);
+		controllerMock.processUpdate(container);
 		expect(controllerMock.hasMinimalData(container)).andReturn(true);
 		controllerMock.processAvailable(container);
 		controllerMock.processUpdate(container);
@@ -367,10 +379,11 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		portfolio.update(data);
 
 		getMocksControl().verify();
-		assertEquals(1, listenerStub.getEventCount());
-		PortfolioEvent event = (PortfolioEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(portfolio.onUpdate()));
-		assertSame(portfolio, event.getPortfolio());
+		assertEquals(2, listenerStub.getEventCount());
+		assertTrue(listenerStub.getEvent(0).isType(portfolio.onUpdate()));
+		assertSame(portfolio, ((PortfolioEvent) listenerStub.getEvent(0)).getPortfolio());
+		assertTrue(listenerStub.getEvent(1).isType(portfolio.onUpdate()));
+		assertSame(portfolio, ((PortfolioEvent) listenerStub.getEvent(1)).getPortfolio());
 	}
 
 }

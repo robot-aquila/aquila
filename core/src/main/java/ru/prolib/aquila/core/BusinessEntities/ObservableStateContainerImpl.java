@@ -16,6 +16,7 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	protected final EventQueue queue;
 	private final EventType onUpdate;
 	private final EventType onAvailable;
+	private final EventType onClose;
 	private Controller controller;
 	private boolean available = false;
 	
@@ -24,6 +25,7 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 		this.queue = queue;
 		this.onUpdate = new EventTypeImpl(id + ".UPDATE");
 		this.onAvailable = new EventTypeImpl(id + ".AVAILABLE");
+		this.onClose = new EventTypeImpl(id + ".CLOSE");
 		this.controller = controller;
 	}
 	
@@ -50,6 +52,11 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	}
 	
 	@Override
+	public EventType onClose() {
+		return onClose;
+	}
+	
+	@Override
 	public void close() {
 		lock.lock();
 		try {
@@ -58,6 +65,7 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 			controller = null;
 			onAvailable.removeAlternatesAndListeners();
 			onUpdate.removeAlternatesAndListeners();
+			queue.enqueue(onClose,  createEventFactory());
 		} finally {
 			lock.unlock();
 		}
@@ -80,10 +88,9 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 			super.update(tokens);
 			if ( hasChanged() ) {
 				EventFactory factory = createEventFactory();
-				if ( available ) {
-					queue.enqueue(onUpdate, factory);
-					controller.processUpdate(this);
-				} else if ( controller.hasMinimalData(this) ) {
+				queue.enqueue(onUpdate, factory);
+				controller.processUpdate(this);
+				if ( ! available && controller.hasMinimalData(this) ) {
 					available = true;
 					queue.enqueue(onAvailable, factory);
 					controller.processAvailable(this);

@@ -112,6 +112,8 @@ public interface Scheduler {
     /**
      * Schedules self-planned task.
      * <p>
+     * Do not use that method for long-term tasks.
+     * <p>
      * @param task - task to be scheduled
      * @return a new task handler
      * @throws NullPointerException if task is null
