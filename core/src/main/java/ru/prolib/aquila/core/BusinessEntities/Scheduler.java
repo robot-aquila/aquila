@@ -10,6 +10,10 @@ import java.time.Instant;
  * проблематично. Данный интерфейс повторяет дизайн стандартного планировщика
  * Java, позволяя реализовать произвольное количество имплементаций под
  * различные задачи.
+ * <p>
+ * This interface is based on {@link java.util.Timer} specification. All
+ * requirements for tasks are similar to requirements of {@link java.util.Timer}
+ * tasks.
  */
 public interface Scheduler {
 	
@@ -111,8 +115,6 @@ public interface Scheduler {
     
     /**
      * Schedules self-planned task.
-     * <p>
-     * Do not use that method for long-term tasks.
      * <p>
      * @param task - task to be scheduled
      * @return a new task handler

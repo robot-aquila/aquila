@@ -31,8 +31,18 @@ public class SPRunnableTaskHandler implements Runnable, TaskHandler {
 	@Override
 	public void run() {
 		if ( ! cancelled ) {
-			runnable.run();
-			reschedule();
+			if ( runnable.isLongTermTask() ) {
+				new Thread("LONG-TERM[" + toString() + "]") {
+					@Override
+					public void run() {
+						runnable.run();
+						reschedule();
+					}
+				}.start();
+			} else {
+				runnable.run();
+				reschedule();				
+			}
 		}
 	}
 	
