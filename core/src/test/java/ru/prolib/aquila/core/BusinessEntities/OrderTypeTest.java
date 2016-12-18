@@ -31,14 +31,18 @@ public class OrderTypeTest {
 	
 	@Test
 	public void testConstants() throws Exception {
-		assertEquals("Limit", OrderType.LIMIT.toString());
-		assertEquals("Market", OrderType.MARKET.toString());
+		assertEquals("LMT", OrderType.LMT.toString());
+		assertEquals("MKT", OrderType.MKT.toString());
+		assertEquals("IOC", OrderType.IOC.toString());
+		assertEquals("FOK", OrderType.FOK.toString());
 	}
 	
 	@Test
 	public void testByCode() throws Exception {
-		assertSame(OrderType.LIMIT, OrderType.byCode("Limit"));
-		assertSame(OrderType.MARKET, OrderType.byCode("Market"));
+		assertSame(OrderType.LMT, OrderType.byCode("LMT"));
+		assertSame(OrderType.MKT, OrderType.byCode("MKT"));
+		assertSame(OrderType.IOC, OrderType.byCode("IOC"));
+		assertSame(OrderType.FOK, OrderType.byCode("FOK"));
 	}
 	
 	@Test (expected=IllegalArgumentException.class)

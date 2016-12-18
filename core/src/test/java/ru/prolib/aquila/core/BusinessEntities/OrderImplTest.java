@@ -83,7 +83,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	protected void makeOrderAvailableWithTrueController() {
 		produceContainer();
 		data.put(OrderField.ACTION, OrderAction.BUY);
-		data.put(OrderField.TYPE, OrderType.LIMIT);
+		data.put(OrderField.TYPE, OrderType.LMT);
 		data.put(OrderField.STATUS, OrderStatus.PENDING);
 		data.put(OrderField.INITIAL_VOLUME, 10L);
 		data.put(OrderField.CURRENT_VOLUME, 10L);
@@ -223,7 +223,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 				return order.getType();
 			}
 		};
-		testGetter(OrderField.TYPE, OrderType.LIMIT, OrderType.MARKET);
+		testGetter(OrderField.TYPE, OrderType.LMT, OrderType.MKT);
 	}
 	
 	@Test
@@ -299,7 +299,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		assertFalse(controller.hasMinimalData(order));
 		
 		data.put(OrderField.ACTION, OrderAction.BUY);
-		data.put(OrderField.TYPE, OrderType.LIMIT);
+		data.put(OrderField.TYPE, OrderType.LMT);
 		data.put(OrderField.STATUS, OrderStatus.PENDING);
 		data.put(OrderField.INITIAL_VOLUME, 100L);
 		data.put(OrderField.CURRENT_VOLUME, 50L);
@@ -346,7 +346,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		DeltaUpdateBuilder builder = new DeltaUpdateBuilder()
 			.withToken(OrderField.STATUS, newStatus)
 			.withToken(OrderField.ACTION, OrderAction.BUY)
-			.withToken(OrderField.TYPE, OrderType.LIMIT);
+			.withToken(OrderField.TYPE, OrderType.LMT);
 		if ( order.getInitialVolume() == null ) {
 			builder.withToken(OrderField.INITIAL_VOLUME, 100L);
 		}

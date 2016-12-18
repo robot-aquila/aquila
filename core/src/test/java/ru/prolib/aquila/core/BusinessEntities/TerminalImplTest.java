@@ -115,8 +115,8 @@ public class TerminalImplTest {
 		symbols.add(symbol2);
 		symbols.add(symbol3);
 		List<OrderType> types = new ArrayList<>();
-		types.add(OrderType.LIMIT);
-		types.add(OrderType.MARKET);
+		types.add(OrderType.LMT);
+		types.add(OrderType.MKT);
 		List<OrderAction> actions = new ArrayList<>();
 		actions.add(OrderAction.BUY);
 		actions.add(OrderAction.SELL);
@@ -545,7 +545,7 @@ public class TerminalImplTest {
 		assertEquals(symbol1, order.getSymbol());
 		assertEquals(OrderStatus.PENDING, order.getStatus());
 		assertEquals(OrderAction.BUY, order.getAction());
-		assertEquals(OrderType.LIMIT, order.getType());
+		assertEquals(OrderType.LMT, order.getType());
 		assertEquals(new Long(20L), order.getInitialVolume());
 		assertEquals(new Long(20L), order.getCurrentVolume());
 		assertEquals(431.15d, order.getPrice(), 0.001d);
@@ -568,7 +568,7 @@ public class TerminalImplTest {
 		assertEquals(symbol3, order.getSymbol());
 		assertEquals(OrderStatus.PENDING, order.getStatus());
 		assertEquals(OrderAction.SELL, order.getAction());
-		assertEquals(OrderType.MARKET, order.getType());
+		assertEquals(OrderType.MKT, order.getType());
 		assertEquals(new Long(80L), order.getInitialVolume());
 		assertEquals(new Long(80L), order.getCurrentVolume());
 		assertNull(order.getPrice());
@@ -581,7 +581,7 @@ public class TerminalImplTest {
 	public void testCreateOrder7() throws Exception {
 		dataProviderStub.nextOrderID = 924L;
 		
-		Order order = terminal.createOrder(account3, symbol2, OrderType.MARKET,
+		Order order = terminal.createOrder(account3, symbol2, OrderType.MKT,
 				OrderAction.SELL, 400L, 224.13d, "test order");
 		
 		assertNotNull(order);
@@ -592,7 +592,7 @@ public class TerminalImplTest {
 		assertEquals(symbol2, order.getSymbol());
 		assertEquals(OrderStatus.PENDING, order.getStatus());
 		assertEquals(OrderAction.SELL, order.getAction());
-		assertEquals(OrderType.MARKET, order.getType());
+		assertEquals(OrderType.MKT, order.getType());
 		assertEquals(new Long(400L), order.getInitialVolume());
 		assertEquals(new Long(400L), order.getCurrentVolume());
 		assertEquals(224.13d, order.getPrice(), 0.01d);

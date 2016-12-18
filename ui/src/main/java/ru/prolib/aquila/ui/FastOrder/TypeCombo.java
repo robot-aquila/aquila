@@ -12,8 +12,8 @@ public class TypeCombo extends JComboBox {
 
 	public TypeCombo() {
 		super();
-		addItem(OrderType.LIMIT);
-		addItem(OrderType.MARKET);
+		addItem(OrderType.LMT);
+		addItem(OrderType.MKT);
 	}
 	
 	/**

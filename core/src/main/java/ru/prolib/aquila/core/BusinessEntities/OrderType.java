@@ -41,11 +41,21 @@ public class OrderType {
 	/**
 	 * Limit order.
 	 */
-	public static final OrderType LIMIT = registerType("Limit");
+	public static final OrderType LMT = registerType("LMT");
 	/**
 	 * Market order.
 	 */
-	public static final OrderType MARKET = registerType("Market");
+	public static final OrderType MKT = registerType("MKT");
+	
+	/**
+	 * Immediate or cancel.
+	 */
+	public static final OrderType IOC = registerType("IOC");
+	
+	/**
+	 * Fill or kill.
+	 */
+	public static final OrderType FOK = registerType("FOK");
 	
 	private final String code;
 	

@@ -401,12 +401,12 @@ public class TerminalImpl implements EditableTerminal {
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
 			long qty, double price)
 	{
-		return createOrder(account, symbol, action, OrderType.LIMIT, qty, price, null);
+		return createOrder(account, symbol, action, OrderType.LMT, qty, price, null);
 	}
 
 	@Override
 	public Order createOrder(Account account, Symbol symbol, OrderAction action, long qty) {
-		return createOrder(account, symbol, action, OrderType.MARKET, qty, null, null);
+		return createOrder(account, symbol, action, OrderType.MKT, qty, null, null);
 	}
 	
 	@Override

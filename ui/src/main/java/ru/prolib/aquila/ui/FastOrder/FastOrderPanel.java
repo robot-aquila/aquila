@@ -145,7 +145,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 		}
 
 		Symbol symbol = security.getSymbol();
-		if ( typeCombo.getSelectedType() == OrderType.LIMIT ) {
+		if ( typeCombo.getSelectedType() == OrderType.LMT ) {
 			Tick last = security.getLastTrade();
 			if ( last == null ) {
 				logger.warn("Last trade not available");
