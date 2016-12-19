@@ -74,11 +74,8 @@ public class SecurityListDialog extends JDialog
 		tableModel = new SecurityListTableModel(messages);
 		table = new JTable(tableModel);
 		table.setFillsViewportHeight(true);
-		setColumnWidth(SecurityMsg.NAME, 160);
-		setColumnWidth(SecurityMsg.SYMBOL, 80);
-		setColumnWidth(SecurityMsg.EXCHANGE, 50);
-		setColumnWidth(SecurityMsg.TYPE, 50);
-		setColumnWidth(SecurityMsg.CURRENCY, 50);
+		setColumnWidth(SecurityListTableModel.CID_DISPLAY_NAME, 160);
+		setColumnWidth(SecurityListTableModel.CID_SYMBOL, 80);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 		table.addMouseListener(new MouseAdapter() {
 			@Override
@@ -125,7 +122,7 @@ public class SecurityListDialog extends JDialog
 		new TableModelController(tableModel, this);
 	}
 	
-	private void setColumnWidth(MsgID columnId, int width) {
+	private void setColumnWidth(int columnId, int width) {
 		table.getColumnModel().getColumn(tableModel.getColumnIndex(columnId))
 			.setPreferredWidth(width);
 	}

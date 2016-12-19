@@ -27,36 +27,37 @@ public class SecurityListTableModel extends AbstractTableModel
 	implements ITableModel, EventListener
 {
 	private static final long serialVersionUID = 1L;
-	private static final List<MsgID> mapIndexToID;
+	// primary attributes
+	public static final int CID_DISPLAY_NAME = 1;
+	public static final int CID_SYMBOL = 2;
+	public static final int CID_SYMBOL_CODE = 3;
+	public static final int CID_SYMBOL_EXCHANGE = 4;
+	public static final int CID_SYMBOL_TYPE = 5;
+	public static final int CID_SYMBOL_CURRENCY = 6;
+	public static final int CID_TERMINAL_ID = 7;
+	public static final int CID_LOT_SIZE = 8;
+	public static final int CID_SCALE = 9;
+	// session attributes
+	public static final int CID_TICK_SIZE = 10;
+	public static final int CID_TICK_VALUE = 11;
+	public static final int CID_INITIAL_MARGIN = 12;
+	public static final int CID_SETTLEMENT_PRICE = 13;
+	public static final int CID_LOWER_PRICE_LIMIT = 14;
+	public static final int CID_UPPER_PRICE_LIMIT = 15;
+	// operative attributes
+	public static final int CID_LAST_PRICE = 16;
+	public static final int CID_LAST_SIZE = 17;
+	public static final int CID_ASK_PRICE = 18;
+	public static final int CID_ASK_SIZE = 19;
+	public static final int CID_BID_PRICE = 20;
+	public static final int CID_BID_SIZE = 21;
+	public static final int CID_OPEN_PRICE = 22;
+	public static final int CID_HIGH_PRICE = 23;
+	public static final int CID_LOW_PRICE = 24;
+	public static final int CID_CLOSE_PRICE = 25;
 	
-	static {
-		mapIndexToID = new Vector<MsgID>();
-		mapIndexToID.add(SecurityMsg.NAME);
-		mapIndexToID.add(SecurityMsg.SYMBOL);
-		mapIndexToID.add(SecurityMsg.EXCHANGE);
-		mapIndexToID.add(SecurityMsg.TYPE);
-		mapIndexToID.add(SecurityMsg.CURRENCY);
-		mapIndexToID.add(SecurityMsg.TERMINAL_ID);
-		mapIndexToID.add(SecurityMsg.LOT_SIZE);
-		mapIndexToID.add(SecurityMsg.SCALE);
-		mapIndexToID.add(SecurityMsg.TICK_SIZE);
-		mapIndexToID.add(SecurityMsg.TICK_VALUE);
-		mapIndexToID.add(SecurityMsg.LAST_PRICE);
-		mapIndexToID.add(SecurityMsg.LAST_SIZE);
-		mapIndexToID.add(SecurityMsg.ASK_PRICE);
-		mapIndexToID.add(SecurityMsg.ASK_SIZE);
-		mapIndexToID.add(SecurityMsg.BID_PRICE);
-		mapIndexToID.add(SecurityMsg.BID_SIZE);
-		mapIndexToID.add(SecurityMsg.LOWER_PRICE);
-		mapIndexToID.add(SecurityMsg.UPPER_PRICE);
-		mapIndexToID.add(SecurityMsg.OPEN_PRICE);
-		mapIndexToID.add(SecurityMsg.HIGH_PRICE);
-		mapIndexToID.add(SecurityMsg.LOW_PRICE);
-		mapIndexToID.add(SecurityMsg.CLOSE_PRICE);
-		mapIndexToID.add(SecurityMsg.INITIAL_MARGIN);
-		mapIndexToID.add(SecurityMsg.SETTLEMENT_PRICE);
-	}
-	
+	private final List<Integer> columnIndexToColumnID;
+	private final Map<Integer, MsgID> columnIDToColumnHeader;
 	private final IMessages messages;
 	private final List<Security> securities;
 	private final Map<Security, Integer> securityMap;
@@ -65,10 +66,83 @@ public class SecurityListTableModel extends AbstractTableModel
 	
 	public SecurityListTableModel(IMessages messages) {
 		super();
+		columnIndexToColumnID = getColumnIDList();
+		columnIDToColumnHeader = getColumnIDToHeaderMap();
 		this.messages = messages;
 		this.securities = new ArrayList<Security>();
 		this.securityMap = new HashMap<Security, Integer>();
 		this.terminalSet = new HashSet<Terminal>();
+	}
+	
+	/**
+	 * Get list of columns to display.
+	 * <p>
+	 * Not all security attributes are displayed by default.
+	 * Override this method to add or modify column list. 
+	 * <p>
+	 * @return list of columns
+	 */
+	protected List<Integer> getColumnIDList() {
+		List<Integer> cols = new ArrayList<>();
+		cols.add(CID_DISPLAY_NAME);
+		cols.add(CID_SYMBOL);
+		cols.add(CID_LOT_SIZE);
+		cols.add(CID_SCALE);
+		cols.add(CID_TICK_SIZE);
+		cols.add(CID_TICK_VALUE);
+		cols.add(CID_INITIAL_MARGIN);
+		cols.add(CID_SETTLEMENT_PRICE);
+		cols.add(CID_LOWER_PRICE_LIMIT);
+		cols.add(CID_UPPER_PRICE_LIMIT);
+		cols.add(CID_ASK_PRICE);
+		cols.add(CID_ASK_SIZE);
+		cols.add(CID_BID_PRICE);
+		cols.add(CID_BID_SIZE);
+		cols.add(CID_LAST_PRICE);
+		cols.add(CID_LAST_SIZE);
+		return cols;
+	}
+	
+	/**
+	 * Get map of columns mapped to its titles.
+	 * <p>
+	 * Override this method to add or modify column titles.
+	 * <p>
+	 * @return map of column titles
+	 */
+	protected Map<Integer, MsgID> getColumnIDToHeaderMap() {
+		Map<Integer, MsgID> head = new HashMap<>();
+		head.put(CID_DISPLAY_NAME, SecurityMsg.NAME);
+		head.put(CID_SYMBOL, SecurityMsg.SYMBOL);
+		head.put(CID_SYMBOL_CODE, SecurityMsg.SYMBOL);
+		head.put(CID_SYMBOL_EXCHANGE, SecurityMsg.EXCHANGE);
+		head.put(CID_SYMBOL_TYPE, SecurityMsg.TYPE);
+		head.put(CID_SYMBOL_CURRENCY, SecurityMsg.CURRENCY);
+		head.put(CID_TERMINAL_ID, SecurityMsg.TERMINAL_ID);
+		head.put(CID_LOT_SIZE, SecurityMsg.LOT_SIZE);
+		head.put(CID_SCALE, SecurityMsg.SCALE);
+		head.put(CID_TICK_SIZE, SecurityMsg.TICK_SIZE);
+		head.put(CID_TICK_VALUE, SecurityMsg.TICK_VALUE);
+		head.put(CID_INITIAL_MARGIN, SecurityMsg.INITIAL_MARGIN);
+		head.put(CID_SETTLEMENT_PRICE, SecurityMsg.SETTLEMENT_PRICE);
+		head.put(CID_LOWER_PRICE_LIMIT, SecurityMsg.LOWER_PRICE);
+		head.put(CID_UPPER_PRICE_LIMIT, SecurityMsg.UPPER_PRICE);
+		head.put(CID_LAST_PRICE, SecurityMsg.LAST_PRICE);
+		head.put(CID_LAST_SIZE, SecurityMsg.LAST_SIZE);
+		head.put(CID_ASK_PRICE, SecurityMsg.ASK_PRICE);
+		head.put(CID_ASK_SIZE, SecurityMsg.ASK_SIZE);
+		head.put(CID_BID_PRICE, SecurityMsg.BID_PRICE);
+		head.put(CID_BID_SIZE, SecurityMsg.BID_SIZE);
+		head.put(CID_OPEN_PRICE, SecurityMsg.OPEN_PRICE);
+		head.put(CID_HIGH_PRICE, SecurityMsg.HIGH_PRICE);
+		head.put(CID_LOW_PRICE, SecurityMsg.LOW_PRICE);
+		head.put(CID_CLOSE_PRICE, SecurityMsg.CLOSE_PRICE);
+		return head;
+	}
+	
+	@Override
+	public int getColumnCount() {
+		return columnIndexToColumnID.size();
 	}
 
 	@Override
@@ -77,91 +151,95 @@ public class SecurityListTableModel extends AbstractTableModel
 	}
 
 	@Override
-	public int getColumnCount() {
-		return mapIndexToID.size();
+	public Object getValueAt(int row, int col) {
+		if ( row > securities.size() ) {
+			return null;
+		}
+		return getColumnValue(securities.get(row), getColumnID(col));
+	}
+	
+	protected Object getColumnValue(Security security, int columnID) {
+		Tick tick = null;
+		Symbol symbol = security.getSymbol();
+		switch ( columnID ) {
+		case CID_DISPLAY_NAME:
+			return security.getDisplayName();
+		case CID_SYMBOL:
+			return symbol.toString();
+		case CID_SYMBOL_CODE:
+			return symbol.getCode();
+		case CID_SYMBOL_EXCHANGE:
+			return symbol.getExchangeID();
+		case CID_SYMBOL_TYPE:
+			return symbol.getTypeCode();
+		case CID_SYMBOL_CURRENCY:
+			return symbol.getCurrencyCode();
+		case CID_TERMINAL_ID:
+			return security.getTerminal().getTerminalID();
+		case CID_LOT_SIZE:
+			return security.getLotSize();
+		case CID_SCALE:
+			return security.getScale();
+		case CID_TICK_SIZE:
+			return security.getTickSize();
+		case CID_TICK_VALUE:
+			return security.getTickValue();
+		case CID_INITIAL_MARGIN:
+			return security.getInitialMargin();
+		case CID_SETTLEMENT_PRICE:
+			return security.getSettlementPrice();
+		case CID_LOWER_PRICE_LIMIT:
+			return security.getLowerPriceLimit();
+		case CID_UPPER_PRICE_LIMIT:
+			return security.getUpperPriceLimit();
+		case CID_LAST_PRICE:
+			tick = security.getLastTrade();
+			return tick == null ? null : tick.getPrice();
+		case CID_LAST_SIZE:
+			tick = security.getLastTrade();
+			return tick == null ? null : tick.getSize();
+		case CID_ASK_PRICE:
+			tick = security.getBestAsk();
+			return tick == null ? null : tick.getPrice();
+		case CID_ASK_SIZE:
+			tick = security.getBestAsk();
+			return tick == null ? null : tick.getSize();
+		case CID_BID_PRICE:
+			tick = security.getBestBid();
+			return tick == null ? null : tick.getPrice();
+		case CID_BID_SIZE:
+			tick = security.getBestBid();
+			return tick == null ? null : tick.getSize();
+		case CID_OPEN_PRICE:
+			return security.getOpenPrice();
+		case CID_HIGH_PRICE:
+			return security.getHighPrice();
+		case CID_LOW_PRICE:
+			return security.getLowPrice();
+		case CID_CLOSE_PRICE:
+			return security.getClosePrice();
+		default:
+				return null;
+		}
+	}
+	
+	@Override
+	public int getColumnIndex(int columnID) {
+		return columnIndexToColumnID.indexOf(columnID);
 	}
 
 	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		Security security = null;
-		if ( rowIndex >= securities.size() || columnIndex >= mapIndexToID.size() ) {
-			return null;
-		}
-		security = securities.get(rowIndex);
-		Tick tick = null;
-		Symbol symbol = security.getSymbol();
-		MsgID id = mapIndexToID.get(columnIndex); 
-		if ( id == SecurityMsg.NAME ) {
-			return security.getDisplayName();
-		} else if ( id == SecurityMsg.SYMBOL ) {
-			return symbol.getCode();
-		} else if ( id == SecurityMsg.EXCHANGE ) {
-			return symbol.getExchangeID();
-		} else if ( id == SecurityMsg.TYPE ) {
-			return symbol.getType();
-		} else if ( id == SecurityMsg.CURRENCY ) {
-			return symbol.getCurrencyCode();
-		} else if ( id == SecurityMsg.LOT_SIZE ) {
-			return security.getLotSize();
-		} else if ( id == SecurityMsg.SCALE ) {
-			return security.getScale();
-		} else if ( id == SecurityMsg.TICK_SIZE ) {
-			return security.getTickSize();
-		} else if ( id == SecurityMsg.TICK_VALUE ) {
-			return security.getTickValue();
-		} else if ( id == SecurityMsg.LAST_PRICE ) {
-			tick = security.getLastTrade();
-			return tick == null ? null : tick.getPrice();
-		} else if ( id == SecurityMsg.LAST_SIZE ) {
-			tick = security.getLastTrade();
-			return tick == null ? null : tick.getSize();
-		} else if ( id == SecurityMsg.ASK_PRICE ) {
-			tick = security.getBestAsk();
-			return tick == null ? null : tick.getPrice();
-		} else if ( id == SecurityMsg.ASK_SIZE ) {
-			tick = security.getBestAsk();
-			return tick == null ? null : tick.getSize();
-		} else if ( id == SecurityMsg.BID_PRICE ) {
-			tick = security.getBestBid();
-			return tick == null ? null : tick.getPrice();
-		} else if ( id == SecurityMsg.BID_SIZE ) {
-			tick = security.getBestBid();
-			return tick == null ? null : tick.getSize();
-		} else if ( id == SecurityMsg.LOWER_PRICE ) {
-			return security.getLowerPriceLimit();
-		} else if ( id == SecurityMsg.UPPER_PRICE ) {
-			return security.getUpperPriceLimit();
-		} else if ( id == SecurityMsg.OPEN_PRICE ) {
-			return security.getOpenPrice();
-		} else if ( id == SecurityMsg.HIGH_PRICE ) {
-			return security.getHighPrice();
-		} else if ( id == SecurityMsg.LOW_PRICE ) {
-			return security.getLowPrice();
-		} else if ( id == SecurityMsg.CLOSE_PRICE ) {
-			return security.getClosePrice();
-		} else if ( id == SecurityMsg.INITIAL_MARGIN ) {
-			return security.getInitialMargin();
-		} else if ( id == SecurityMsg.SETTLEMENT_PRICE ) {
-			return security.getSettlementPrice();
-		} else if ( id == SecurityMsg.TERMINAL_ID ) {
-			return security.getTerminal().getTerminalID();
-		} else {
-			return null;			
-		}
-	}
-	
-	public int getColumnIndex(MsgID columnId) {
-		return mapIndexToID.indexOf(columnId);
-	}
-	
-	@Override
 	public int getColumnID(int columnIndex) {
-		throw new UnsupportedOperationException();
+		return columnIndexToColumnID.get(columnIndex);
 	}
 	
 	@Override
-	public String getColumnName(int c) {
-		return messages.get(mapIndexToID.get(c));
+	public String getColumnName(int col) {
+		MsgID id = columnIDToColumnHeader.get(columnIndexToColumnID.get(col));
+		if ( id == null ) {
+			return "NULL_ID#" + col; 
+		}
+		return messages.get(id);
 	}
 	
 	/**
@@ -306,11 +384,6 @@ public class SecurityListTableModel extends AbstractTableModel
 		terminal.onSecurityBestAsk().removeListener(this);
 		terminal.onSecurityBestBid().removeListener(this);
 		terminal.onSecurityLastTrade().removeListener(this);	
-	}
-	
-	@Override
-	public int getColumnIndex(int columnID) {
-		throw new RuntimeException("Not implemented");
 	}
 
 }
