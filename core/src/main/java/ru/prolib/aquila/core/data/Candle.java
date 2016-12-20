@@ -23,7 +23,7 @@ public class Candle {
 	private final double close;
 	private final double high;
 	private final double low;
-	private long volume;
+	private final long volume;
 	
 	/**
 	 * Создать свечу на основании указанных параметров.
