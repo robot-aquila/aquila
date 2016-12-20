@@ -47,7 +47,8 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		implements EditableCandleSeries
 {
 	private final TimeFrame timeframe;
-	private final Series<Double> open, high, low, close, vol;
+	private final Series<Double> open, high, low, close;
+	private final Series<Long> volume;
 	private final Series<Interval> interval;
 	private Instant poa;
 	
@@ -66,7 +67,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 		close = new CandleCloseSeries(this);
 		high = new CandleHighSeries(this);
 		low = new CandleLowSeries(this);
-		vol = new CandleVolumeSeries(this);
+		volume = new CandleVolumeSeries(this);
 		interval = new CandleIntervalSeries(this);
 	}
 
@@ -91,8 +92,8 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	}
 
 	@Override
-	public Series<Double> getVolumeSeries() {
-		return vol;
+	public Series<Long> getVolumeSeries() {
+		return volume;
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import org.threeten.extra.Interval;
  * 2013-03-11<br>
  * $Id: CandleSeries.java 566 2013-03-11 01:52:40Z whirlwind $
  */
+@Deprecated // Use Series<Candle> instead
 public interface CandleSeries extends Series<Candle> {
 	
 	/**
@@ -44,7 +45,7 @@ public interface CandleSeries extends Series<Candle> {
 	 * <p>
 	 * @return ряд
 	 */
-	public Series<Double> getVolumeSeries();
+	public Series<Long> getVolumeSeries();
 	
 	/**
 	 * Получить ряд данных, соответствующий интервалу свечи.

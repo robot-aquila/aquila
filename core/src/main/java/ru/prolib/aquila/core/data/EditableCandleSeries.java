@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * 2013-03-11<br>
  * $Id: EditableCandleSeries.java 566 2013-03-11 01:52:40Z whirlwind $
  */
+@Deprecated
 public interface EditableCandleSeries
 		extends CandleSeries, EditableSeries<Candle>
 {

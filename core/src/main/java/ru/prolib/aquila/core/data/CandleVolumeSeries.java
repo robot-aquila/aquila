@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-public class CandleVolumeSeries implements Series<Double> {
+public class CandleVolumeSeries implements Series<Long> {
 	private final Series<Candle> candles;
 	
 	public CandleVolumeSeries(Series<Candle> candles) {
@@ -14,13 +14,13 @@ public class CandleVolumeSeries implements Series<Double> {
 	}
 
 	@Override
-	public Double get() throws ValueException {
-		return (double)candles.get().getVolume();
+	public Long get() throws ValueException {
+		return candles.get().getVolume();
 	}
 
 	@Override
-	public Double get(int index) throws ValueException {
-		return (double)candles.get(index).getVolume();
+	public Long get(int index) throws ValueException {
+		return candles.get(index).getVolume();
 	}
 
 	@Override

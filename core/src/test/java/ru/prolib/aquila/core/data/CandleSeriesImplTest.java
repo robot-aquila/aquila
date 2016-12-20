@@ -121,11 +121,11 @@ public class CandleSeriesImplTest {
 		series.add(candle1);
 		series.add(candle2);
 		series.add(candle3);
-		Double expected[] = { 39621d, 12279d, 11990d };
-		Series<Double> s = series.getVolumeSeries();
+		long expected[] = { 39621L, 12279L, 11990L };
+		Series<Long> s = series.getVolumeSeries();
 		assertEquals(expected.length, s.getLength());
 		for ( int i = 0; i < expected.length; i ++ ) {
-			assertEquals("At #" + i, expected[i], s.get(i), 0.1d);
+			assertEquals("At #" + i, expected[i], (long) s.get(i));
 		}
 	}
 	

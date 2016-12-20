@@ -43,9 +43,9 @@ public class CandleVolumeSeriesTest {
 	
 	@Test
 	public void testGet1() throws Exception {
-		assertEquals(39621d, series.get(0), 0.1d);
-		assertEquals(12279d, series.get(1), 0.1d);
-		assertEquals(11990d, series.get(2), 0.1d);
+		assertEquals(39621L, (long) series.get(0));
+		assertEquals(12279L, (long) series.get(1));
+		assertEquals(11990L, (long) series.get(2));
 	}
 
 	@Test
