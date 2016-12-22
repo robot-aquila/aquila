@@ -7,7 +7,7 @@ package ru.prolib.aquila.core.data;
  * $Id: TR.java 571 2013-03-12 00:53:34Z whirlwind $
  */
 public class TrueRange implements Series<Double> {
-	private static final Indicators indicators = new Indicators();
+	private static final TAMath indicators = new TAMath();
 	
 	private final Series<Candle> candles;
 	private String id;

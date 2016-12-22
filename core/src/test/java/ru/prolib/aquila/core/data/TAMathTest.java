@@ -10,7 +10,7 @@ import org.threeten.extra.Interval;
  * 2013-03-04<br>
  * $Id: FMathImplTest.java 571 2013-03-12 00:53:34Z whirlwind $
  */
-public class IndicatorsTest {
+public class TAMathTest {
 	
 	/**
 	 * Запись фикстуры для проверки расчета вещественного значения.
@@ -174,14 +174,15 @@ public class IndicatorsTest {
 		};
 	
 	
-	private Indicators indicators;
-	private EditableSeries<Double> series;
+	private TAMath service;
+	private EditableSeries<Double> series1, series2;
 	private EditableSeries<Candle> candles;
 	
 	@Before
 	public void setUp() throws Exception {
-		indicators = new Indicators();
-		series = new SeriesImpl<Double>();
+		service = TAMath.getInstance();
+		series1 = new SeriesImpl<Double>();
+		series2 = new SeriesImpl<Double>();
 		candles = new SeriesImpl<Candle>();
 	}
 	
@@ -192,83 +193,83 @@ public class IndicatorsTest {
 	
 	@Test
 	public void testAbs() throws Exception {
-		assertEquals(123.45d, indicators.abs(123.45d), 0.01d);
-		assertEquals(123.45d, indicators.abs(-123.45d), 0.01d);
-		assertNull(indicators.abs(null));
+		assertEquals(123.45d, service.abs(123.45d), 0.01d);
+		assertEquals(123.45d, service.abs(-123.45d), 0.01d);
+		assertNull(service.abs(null));
 	}
 	
 	@Test
 	public void testMaxVA() throws Exception {
-		assertEquals(180.24, indicators.max(67.4, null, 180.24, null, 159.12), 0.001);
-		assertEquals(12.34, indicators.max(12.34, 12.34, null), 0.001);
-		assertNull(indicators.max((Double) null));
+		assertEquals(180.24, service.max(67.4, null, 180.24, null, 159.12), 0.001);
+		assertEquals(12.34, service.max(12.34, 12.34, null), 0.001);
+		assertNull(service.max((Double) null));
 	}
 	
 	@Test
 	public void testMinVA() throws Exception {
-		assertEquals(67.4, indicators.min(67.4, null, 180.24, null, 159.12), 0.001);
-		assertEquals(12.34, indicators.min(12.34, 12.34, null), 0.001);
-		assertNull(indicators.min((Double) null));
+		assertEquals(67.4, service.min(67.4, null, 180.24, null, 159.12), 0.001);
+		assertEquals(12.34, service.min(12.34, 12.34, null), 0.001);
+		assertNull(service.min((Double) null));
 	}
 	
 	@Test
 	public void testHasNulls() throws Exception {
-		assertFalse(indicators.hasNulls(series, 200));
+		assertFalse(service.hasNulls(series1, 200));
 		
-		assertFalse(indicators.hasNulls(series, 0, 0));
-		assertFalse(indicators.hasNulls(series, 0));
-		series.add(null);
-		series.add(12.34d);
-		series.add(11.62d);
-		assertFalse(indicators.hasNulls(series, 2, 1));
-		assertFalse(indicators.hasNulls(series, 1));
-		assertFalse(indicators.hasNulls(series, 2, 2));
-		assertFalse(indicators.hasNulls(series, 2));
-		assertTrue(indicators.hasNulls(series, 2, 3));
-		assertTrue(indicators.hasNulls(series, 3));
-		assertFalse(indicators.hasNulls(series, -1, 1));
-		assertTrue(indicators.hasNulls(series, -1, 2));
+		assertFalse(service.hasNulls(series1, 0, 0));
+		assertFalse(service.hasNulls(series1, 0));
+		series1.add(null);
+		series1.add(12.34d);
+		series1.add(11.62d);
+		assertFalse(service.hasNulls(series1, 2, 1));
+		assertFalse(service.hasNulls(series1, 1));
+		assertFalse(service.hasNulls(series1, 2, 2));
+		assertFalse(service.hasNulls(series1, 2));
+		assertTrue(service.hasNulls(series1, 2, 3));
+		assertTrue(service.hasNulls(series1, 3));
+		assertFalse(service.hasNulls(series1, -1, 1));
+		assertTrue(service.hasNulls(series1, -1, 2));
 		
-		assertTrue(indicators.hasNulls(series, 200));
+		assertTrue(service.hasNulls(series1, 200));
 	}
 
 	@Test
 	public void testSma() throws Exception {
-		assertNull(indicators.sma(series, 5));
-		assertNull(indicators.sma(series, 0, 5));
+		assertNull(service.sma(series1, 5));
+		assertNull(service.sma(series1, 0, 5));
 		
-		series.add(null);
-		assertNull(indicators.sma(series, 5));
-		assertNull(indicators.sma(series, 0, 5));
+		series1.add(null);
+		assertNull(service.sma(series1, 5));
+		assertNull(service.sma(series1, 0, 5));
 		
-		series.add(10.0d);
-		series.add(20.0d);
-		assertNull(indicators.sma(series, 5));
+		series1.add(10.0d);
+		series1.add(20.0d);
+		assertNull(service.sma(series1, 5));
 		
-		series.add(30.0d);
-		series.add(40.0d);
-		assertNull(indicators.sma(series, 5));
-		assertNull(indicators.sma(series, 1, 5));
+		series1.add(30.0d);
+		series1.add(40.0d);
+		assertNull(service.sma(series1, 5));
+		assertNull(service.sma(series1, 1, 5));
 		
-		series.add(50.00d);
-		assertEquals(30.00d, indicators.sma(series, 5), 0.01d);
-		assertEquals(30.00d, indicators.sma(series, 5, 5), 0.01d);
+		series1.add(50.00d);
+		assertEquals(30.00d, service.sma(series1, 5), 0.01d);
+		assertEquals(30.00d, service.sma(series1, 5, 5), 0.01d);
 		
-		series.add(null);
-		assertEquals(30.00d, indicators.sma(series, -1, 5), 0.01d);
-		assertNull(indicators.sma(series, 5));
-		assertNull(indicators.sma(series, 6, 5));
+		series1.add(null);
+		assertEquals(30.00d, service.sma(series1, -1, 5), 0.01d);
+		assertNull(service.sma(series1, 5));
+		assertNull(service.sma(series1, 6, 5));
 	}
 	
 	@Test
 	public void testVvdpo3_3args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
-			series.add(fix_vv_dpo3[i].value);
+			series1.add(fix_vv_dpo3[i].value);
 		}
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
-			Double dpo = indicators.vvdpo(series, i, 3);
+			Double dpo = service.vvdpo(series1, i, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -282,8 +283,8 @@ public class IndicatorsTest {
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
-			series.add(fr.value);
-			Double dpo = indicators.vvdpo(series, 3);
+			series1.add(fr.value);
+			Double dpo = service.vvdpo(series1, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -295,12 +296,12 @@ public class IndicatorsTest {
 	@Test
 	public void testVvdpo20_3args() throws Exception {
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
-			series.add(fix_vv_dpo20[i].value);
+			series1.add(fix_vv_dpo20[i].value);
 		}
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
-			Double dpo = indicators.vvdpo(series, i, 20);
+			Double dpo = service.vvdpo(series1, i, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -314,8 +315,8 @@ public class IndicatorsTest {
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
-			series.add(fr.value);
-			Double dpo = indicators.vvdpo(series, 20);
+			series1.add(fr.value);
+			Double dpo = service.vvdpo(series1, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
@@ -326,36 +327,36 @@ public class IndicatorsTest {
 	
 	@Test
 	public void testTr() throws Exception {
-		assertNull(indicators.tr(candles));
-		assertNull(indicators.tr(candles, 0));
+		assertNull(service.tr(candles));
+		assertNull(service.tr(candles, 0));
 		
 		candles.add(null);
-		assertNull(indicators.tr(candles));
-		assertNull(indicators.tr(candles, 0));
+		assertNull(service.tr(candles));
+		assertNull(service.tr(candles, 0));
 
 		Instant time = Instant.parse("2013-10-11T11:09:43Z");
 		
 		// H-L
 		candles.add(new Candle(TimeFrame.M5.getInterval(time),
 				0, 48.70, 47.79, 48.16, 0L));
-		assertEquals(0.91, indicators.tr(candles), 0.01d);
-		assertEquals(0.91, indicators.tr(candles, 1), 0.01d);
+		assertEquals(0.91, service.tr(candles), 0.01d);
+		assertEquals(0.91, service.tr(candles, 1), 0.01d);
 		
 		// |H-Cp|
 		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(5 * 60)),
 				0, 49.35, 48.86, 49.32, 0L));
 		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(10 * 60)),
 				0, 49.92, 49.50, 49.91, 0L));
-		assertEquals(0.6, indicators.tr(candles), 0.001);
-		assertEquals(0.6, indicators.tr(candles, 3), 0.001);
+		assertEquals(0.6, service.tr(candles), 0.001);
+		assertEquals(0.6, service.tr(candles, 3), 0.001);
 		
 		// |L-Cp|
 		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(15 * 60)),
 				0, 50.19, 49.87, 50.13, 0L));
 		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(20 * 60)),
 				0, 50.12, 49.20, 49.53, 0L));
-		assertEquals(0.93, indicators.tr(candles), 0.001);
-		assertEquals(0.93, indicators.tr(candles, 5), 0.001);
+		assertEquals(0.93, service.tr(candles), 0.001);
+		assertEquals(0.93, service.tr(candles, 5), 0.001);
 	}
 	
 	@Test
@@ -379,22 +380,22 @@ public class IndicatorsTest {
 				{  1.15d,  1.15d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series.add(fix[i][0]);
+			series1.add(fix[i][0]);
 			Double expect = fix[i][1];
 			String msg = "At #" + i;
 			if ( expect == null ) {
-				assertNull(msg, indicators.max(series, i, period));
-				assertNull(msg, indicators.max(series, period));
+				assertNull(msg, service.max(series1, i, period));
+				assertNull(msg, service.max(series1, period));
 			} else {
-				assertEquals(msg, expect, indicators.max(series, i, period), 0.01d);
-				assertEquals(msg, expect, indicators.max(series, period), 0.01d);
+				assertEquals(msg, expect, service.max(series1, i, period), 0.01d);
+				assertEquals(msg, expect, service.max(series1, period), 0.01d);
 			}
 		}
 		// additional tests
-		assertEquals(17.76d, indicators.max(series, -2, period), 0.01d);
-		assertEquals(18.54d, indicators.max(series, -3, period), 0.01d);
-		assertEquals(18.54d, indicators.max(series, -5, period), 0.01d);
-		assertEquals(16.12d, indicators.max(series, -7, period), 0.01d);
+		assertEquals(17.76d, service.max(series1, -2, period), 0.01d);
+		assertEquals(18.54d, service.max(series1, -3, period), 0.01d);
+		assertEquals(18.54d, service.max(series1, -5, period), 0.01d);
+		assertEquals(16.12d, service.max(series1, -7, period), 0.01d);
 	}
 	
 	@Test
@@ -413,12 +414,12 @@ public class IndicatorsTest {
 				{ 15.12d,  6.18d, 23.17d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series.add(fix[i][0]);
+			series1.add(fix[i][0]);
 			value2.add(fix[i][1]);
 			String msg = "At #" + i;
 			Double expect = fix[i][2];
-			assertEquals(msg, expect, indicators.max(period, series, value2), 0.01d);
-			assertEquals(msg, expect, indicators.max(i, period, value2, series),0.01d);
+			assertEquals(msg, expect, service.max(period, series1, value2), 0.01d);
+			assertEquals(msg, expect, service.max(i, period, value2, series1),0.01d);
 		}
 	}
 	
@@ -443,22 +444,22 @@ public class IndicatorsTest {
 				{  1.15d,  1.15d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series.add(fix[i][0]);
+			series1.add(fix[i][0]);
 			Double expect = fix[i][1];
 			String msg = "At #" + i;
 			if ( expect == null ) {
-				assertNull(msg, indicators.min(series, i, period));
-				assertNull(msg, indicators.min(series, period));
+				assertNull(msg, service.min(series1, i, period));
+				assertNull(msg, service.min(series1, period));
 			} else {
-				assertEquals(msg, expect, indicators.min(series, i, period), 0.01d);
-				assertEquals(msg, expect, indicators.min(series, period), 0.01d);
+				assertEquals(msg, expect, service.min(series1, i, period), 0.01d);
+				assertEquals(msg, expect, service.min(series1, period), 0.01d);
 			}
 		}
 		// additional tests
-		assertEquals(17.76d, indicators.min(series, -2, period), 0.01d);
-		assertEquals(17.76d, indicators.min(series, -3, period), 0.01d);
-		assertEquals(11.92d, indicators.min(series, -5, period), 0.01d);
-		assertEquals(13.21d, indicators.min(series, -7, period), 0.01d);
+		assertEquals(17.76d, service.min(series1, -2, period), 0.01d);
+		assertEquals(17.76d, service.min(series1, -3, period), 0.01d);
+		assertEquals(11.92d, service.min(series1, -5, period), 0.01d);
+		assertEquals(13.21d, service.min(series1, -7, period), 0.01d);
 	}
 	
 	@Test
@@ -477,12 +478,12 @@ public class IndicatorsTest {
 				{ 15.12d,  6.18d,  2.20d },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series.add(fix[i][0]);
+			series1.add(fix[i][0]);
 			value2.add(fix[i][1]);
 			String msg = "At #" + i;
 			Double expect = fix[i][2];
-			assertEquals(msg, expect, indicators.min(period, series, value2), 0.01d);
-			assertEquals(msg, expect, indicators.min(i, period, value2, series),0.01d);
+			assertEquals(msg, expect, service.min(period, series1, value2), 0.01d);
+			assertEquals(msg, expect, service.min(i, period, value2, series1),0.01d);
 		}
 	}
 	
@@ -504,11 +505,11 @@ public class IndicatorsTest {
 			{ -5.33d, true  },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series.add((Double) fix[i][0]);
+			series1.add((Double) fix[i][0]);
 			String msg = "At #" + i;
 			Boolean expect = (Boolean) fix[i][1];
-			assertEquals(msg, expect, indicators.crossUnderZero(series));
-			assertEquals(msg, expect, indicators.crossUnderZero(series, i));
+			assertEquals(msg, expect, service.crossUnderZero(series1));
+			assertEquals(msg, expect, service.crossUnderZero(series1, i));
 		}
 	}
 
@@ -530,11 +531,11 @@ public class IndicatorsTest {
 				{  5.33d, true  },
 			};
 			for ( int i = 0; i < fix.length; i ++ ) {
-				series.add((Double) fix[i][0]);
+				series1.add((Double) fix[i][0]);
 				String msg = "At #" + i;
 				Boolean expect = (Boolean) fix[i][1];
-				assertEquals(msg, expect, indicators.crossOverZero(series));
-				assertEquals(msg, expect, indicators.crossOverZero(series, i));
+				assertEquals(msg, expect, service.crossOverZero(series1));
+				assertEquals(msg, expect, service.crossOverZero(series1, i));
 			}
 
 	}
@@ -542,12 +543,12 @@ public class IndicatorsTest {
 	@Test
 	public void testQema() throws Exception {
 		for ( int i = 0; i < fix_qema5.length; i ++ ) {
-			series.add(fix_qema5[i].value);
+			series1.add(fix_qema5[i].value);
 		}
 		for ( int i = 0; i < fix_qema5.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_qema5[i];
-			Double value = indicators.qema(series, i, 5);
+			Double value = service.qema(series1, i, 5);
 			if ( fr.expected == null ) {
 				assertNull(msg, value);
 			} else {
@@ -560,13 +561,13 @@ public class IndicatorsTest {
 	@Test
 	public void testQema_RevOrder() throws Exception {
 		for ( int i = 0; i < fix_qema5.length; i ++ ) {
-			series.add(fix_qema5[i].value);
+			series1.add(fix_qema5[i].value);
 		}
 		for ( int i = 0; i < fix_qema5.length - 1; i ++ ) {
 			int index = i - fix_qema5.length + 1;
 			String msg = "At #" + index;
 			FR fr = fix_qema5[i];
-			Double value = indicators.qema(series, index, 5);
+			Double value = service.qema(series1, index, 5);
 			if ( fr.expected == null ) {
 				assertNull(msg, value);
 			} else {
@@ -578,17 +579,17 @@ public class IndicatorsTest {
 	
 	@Test
 	public void testQema_NullIfCannotObtainStartValue() throws Exception {
-		series.add(40.27d);
-		series.add(null);
-		series.add(40.92d);
-		series.add(44.33d);
-		series.add(null);
-		series.add(null);
-		series.add(45.02d);
-		series.add(48.13d);
-		for ( int i = 0; i < series.getLength(); i ++ ) {
+		series1.add(40.27d);
+		series1.add(null);
+		series1.add(40.92d);
+		series1.add(44.33d);
+		series1.add(null);
+		series1.add(null);
+		series1.add(45.02d);
+		series1.add(48.13d);
+		for ( int i = 0; i < series1.getLength(); i ++ ) {
 			String msg = "At #" + i;
-			assertNull(msg, indicators.qema(series, i, 3));
+			assertNull(msg, service.qema(series1, i, 3));
 		}
 	}
 	
@@ -610,12 +611,12 @@ public class IndicatorsTest {
 			{  52.18d, 50.836015625d }, // (49.49203125 * 2 + 2 * 52.18) / 4 = 50.836015625
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
-			series.add(fixture[i][0]);
+			series1.add(fixture[i][0]);
 		}
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			String msg = "At #" + i;
 			Double expected = fixture[i][1];
-			Double actual = indicators.qema(series, i, 3);
+			Double actual = service.qema(series1, i, 3);
 			if ( expected == null ) {
 				assertNull(msg, actual);
 			} else {
@@ -627,7 +628,7 @@ public class IndicatorsTest {
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testQema_ThrowsIfPeriodTooLow() throws Exception {
-		indicators.qema(series, 0, 1);
+		service.qema(series1, 0, 1);
 	}
 	
 	/**
@@ -676,7 +677,7 @@ public class IndicatorsTest {
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			String msg = "At #" + i;
 			expected = fixture[i][4];
-			actual = indicators.qatr(candles, i, 5);
+			actual = service.qatr(candles, i, 5);
 			if ( expected == null ) {
 				assertNull(msg, actual);
 			} else {
@@ -684,7 +685,350 @@ public class IndicatorsTest {
 				assertEquals(msg, expected, actual, 0.000001d);
 			}
 		}
-		assertEquals(expected, indicators.qatr(candles, 5), 0.000001d);
+		assertEquals(expected, service.qatr(candles, 5), 0.000001d);
+	}
+	
+	@Test (expected=ValueOutOfRangeException.class)
+	public void testDelta1_ThrowsIfOutOfRange() throws Exception {
+		series1.add(112.34d);
+		series1.add(113.05d);
+		series1.add(111.26d);
+		
+		service.delta(series1, -3);
+	}
+	
+	@Test
+	public void testDelta1() throws Exception {
+		series1.add(112.34d);
+		series1.add(113.05d);
+		series1.add(111.26d);
+		series1.add(null);
+		series1.add(124.15d);
+		series1.add(125.01d);
+		
+		assertEquals( 0.00d, service.delta(series1, 0), 0.001d);
+		assertEquals( 0.71d, service.delta(series1, 1), 0.001d);
+		assertEquals(-1.79d, service.delta(series1, 2), 0.001d);
+		assertNull(service.delta(series1, 3));
+		assertEquals( 0.00d, service.delta(series1, 4), 0.001d);
+		assertEquals( 0.86d, service.delta(series1, 5), 0.001d);
+		
+		assertEquals( 0.00d, service.delta(series1, -1), 0.001d);
+		assertNull(service.delta(series1,  -2));
+		assertEquals(-1.79d, service.delta(series1, -3), 0.001d);
+		assertEquals( 0.71d, service.delta(series1, -4), 0.001d);
+		assertEquals( 0.00d, service.delta(series1, -5), 0.001d);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testAmean1_ThrowsIfEmptySeries() throws Exception {
+		service.amean(series1);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testAmean1_ThrowsIfNotEnoughData() throws Exception {
+		series1.add(null);
+		series1.add(null);
+		series1.add(null);
+		
+		service.amean(series1);
+	}
+	
+	@Test
+	public void testAmean1() throws Exception {
+		series1.add(15.34d);
+		series1.add(null);
+		series1.add(30.29d);
+		series1.add(10.12d);
+		series1.add(null);
+		
+		assertEquals(18.5833d, service.amean(series1), 0.0001d);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testCovariance2_ThrowsIfEmptySeries() throws Exception {
+		service.covariance(series1, series2);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testCovariance2_ThrowsIfDifferentLength() throws Exception {
+		series1.add(2.34d);
+		series1.add(8.01d);
+		series2.add(9.46d);
+		
+		service.covariance(series1, series2);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testCovariance2_ThrowsIfNotEnoughData() throws Exception {
+		series1.add(null);
+		series1.add(null);
+		series1.add(null);
+		series2.add(null);
+		series2.add(null);
+		series2.add(null);
+		
+		service.covariance(series1, series2);
+	}
+	
+	@Test
+	public void testCovariance2() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(4d);
+		series1.add(4d);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(78d);
+		series2.add(82d);
+		
+		assertEquals(4.8333d, service.covariance(series1, series2), 0.0001d);
+	}
+	
+	@Test
+	public void testCovariance2_NullValuesAtSamePos() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(null);
+		series1.add(null);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(null);
+		series2.add(null);
+		series2.add(78d);
+		series2.add(82d);
+		
+		assertEquals(6.6875d, service.covariance(series1, series2), 0.0001d);
+	}
+	
+	@Test
+	public void testCovariance2_NullValueInTheFirstSeries() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(null);
+		series1.add(4d);
+		series1.add(null);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(78d);
+		series2.add(82d);
+
+		assertEquals(3.3750d, service.covariance(series1, series2), 0.0001d);
+	}
+	
+	@Test
+	public void testCovariance2_NullValueInTheSecondSeries() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(4d);
+		series1.add(4d);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(null);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(null);
+		series2.add(82d);
+		
+		assertEquals(0.8750d, service.covariance(series1, series2), 0.0001d);
+	}
+	
+	@Test
+	public void testCovariance2_NullValuesAtDifferentPositions() throws Exception {
+		series1.add(null);
+		series1.add(5d);
+		series1.add(4d);
+		series1.add(null);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(null);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(null);
+		series2.add(82d);
+		
+		assertEquals(2.5000d, service.covariance(series1, series2), 0.0001d);		
+	}
+	
+	@Test
+	public void testCovariance2_TestCase1() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(null);
+		series1.add(4d);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(78d);
+		series2.add(82d);
+		
+		assertEquals(5.08d, service.covariance(series1, series2), 0.01d);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testVariance1_ThrowsIfEmptySeries() throws Exception {
+		service.variance(series1);
 	}
 
+	@Test (expected=ValueException.class)
+	public void testVariance1_ThrowsIfNotEnoughData() throws Exception {
+		series1.add(null);
+		series1.add(null);
+		series1.add(null);
+		
+		service.variance(series1);
+	}
+
+	@Test
+	public void testVariance1() throws Exception {
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(78d);
+		series2.add(82d);
+		
+		assertEquals(34.33d, service.variance(series2), 0.01d);
+	}
+
+	@Test
+	public void testVariance1_NullValues() throws Exception {
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(null);
+		series2.add(83d);
+		series2.add(null);
+		series2.add(82d);
+		
+		assertEquals(26.25d, service.variance(series2), 0.01d);
+	}
+	
+	@Test
+	public void testCorrelation2() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(4d);
+		series1.add(4d);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(78d);
+		series2.add(82d);
+		
+		assertEquals(0.862d, service.correlation(series1, series2), 0.001d);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testCorrelation2_ThrowsIfEmptySeries() throws ValueException {
+		service.correlation(series1, series2);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testCorrelation2_ThrowsIfNotEnoughData() throws ValueException {
+		series1.add(null);
+		series1.add(null);
+		series2.add(null);
+		series2.add(null);
+		
+		service.correlation(series1, series2);
+	}
+	
+	@Test (expected=ValueException.class)
+	public void testCorrelation2_ThrowsIfDifferentLength() throws Exception {
+		series1.add(2.34d);
+		series1.add(8.01d);
+		series2.add(9.46d);
+		
+		service.correlation(series1, series2);
+	}
+	
+	@Test
+	public void testCorrelation2_NullValuesAtSamePos() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(null);
+		series1.add(null);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(null);
+		series2.add(null);
+		series2.add(78d);
+		series2.add(82d);
+		
+		assertEquals(0.9741d, service.correlation(series1, series2), 0.0001d);
+	}
+	
+	@Test
+	public void testCorellation2_NullValueInTheFirstSeries() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(null);
+		series1.add(4d);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(78d);
+		series2.add(82d);
+
+		assertEquals(0.8729d, service.correlation(series1, series2), 0.0001d);
+	}
+	
+	@Test
+	public void testCorrelation2_NullValueInTheSecondSeries() throws Exception {
+		series1.add(3d);
+		series1.add(5d);
+		series1.add(4d);
+		series1.add(4d);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(95d);
+		series2.add(92d);
+		series2.add(null);
+		series2.add(null);
+		series2.add(82d);
+		
+		assertEquals(0.9369d, service.correlation(series1, series2), 0.0001d);
+	}
+	
+	@Test
+	public void testCorellation2_NullValuesAtDifferentPositions() throws Exception {
+		series1.add(null);
+		series1.add(5d);
+		series1.add(4d);
+		series1.add(null);
+		series1.add(2d);
+		series1.add(3d);
+		series2.add(86d);
+		series2.add(null);
+		series2.add(92d);
+		series2.add(83d);
+		series2.add(null);
+		series2.add(82d);
+		
+		assertEquals(1.0d, service.correlation(series1, series2), 0.0001d);		
+	}
+	
 }
