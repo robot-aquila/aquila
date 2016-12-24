@@ -1,0 +1,22 @@
+/* service styles*/
+.chart-vertical-zero-line {
+    -fx-stroke: transparent;
+}
+
+/* user styles */
+.candle-body-bear {
+    -fx-fill: green;
+    -fx-stroke: green;
+    -fx-stroke-width: 2;
+}
+
+.candle-body-bull {
+    -fx-fill: red;
+    -fx-stroke: green;
+    -fx-stroke-width: 2;
+}
+
+.candle-line {
+    -fx-stroke: green;
+    -fx-stroke-width: 2;
+}
