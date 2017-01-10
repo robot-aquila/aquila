@@ -208,6 +208,16 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 	
 	@Override
+	public Long getUserDefinedLong() {
+		return getLong(OrderField.USER_DEFINED_LONG);
+	}
+	
+	@Override
+	public String getUserDefinedString() {
+		return getString(OrderField.USER_DEFINED_STRING);
+	}
+	
+	@Override
 	public void close() {
 		lock.lock();
 		try {

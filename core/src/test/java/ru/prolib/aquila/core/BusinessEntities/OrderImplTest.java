@@ -237,6 +237,27 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	public void testGetUserDefinedLong() throws Exception {
+		getter = new Getter<Long>() {
+			@Override public Long get() {
+				return order.getUserDefinedLong();
+			}
+		};
+		testGetter(OrderField.USER_DEFINED_LONG, 215L, 436L);
+	}
+	
+	@Test
+	public void testGetUserDefinedString() throws Exception {
+		getter = new Getter<String>() {
+			@Override
+			public String get() {
+				return order.getUserDefinedString();
+			}
+		};
+		testGetter(OrderField.USER_DEFINED_STRING, "foo", "bar");
+	}
+	
+	@Test
 	public void testClose() {
 		EventType type = new EventTypeImpl();
 		order.onAvailable().addSyncListener(listenerStub);

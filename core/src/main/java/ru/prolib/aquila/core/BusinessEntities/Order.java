@@ -226,4 +226,18 @@ public interface Order extends ObservableStateContainer {
 	 */
 	public String getSystemMessage();
 	
+	/**
+	 * Get user defined long variable.
+	 * <p>
+	 * @return variable value or null if variable not defined
+	 */
+	public Long getUserDefinedLong();
+	
+	/**
+	 * Get user defined string variable.
+	 * <p>
+	 * @return variable value or null if variable not defined
+	 */
+	public String getUserDefinedString();
+	
 }

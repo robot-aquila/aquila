@@ -13,4 +13,6 @@ public class OrderField {
 	public static final int EXTERNAL_ID = 10;
 	public static final int COMMENT = 11;
 	public static final int SYSTEM_MESSAGE = 12;
+	public static final int USER_DEFINED_LONG = 13;
+	public static final int USER_DEFINED_STRING = 14;
 }
