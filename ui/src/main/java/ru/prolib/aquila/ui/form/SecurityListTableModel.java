@@ -308,27 +308,24 @@ public class SecurityListTableModel extends AbstractTableModel
 	}
 	
 	private void processEvent(Event event) {
-		if ( ! subscribed  ) {
+		if ( ! subscribed ) {
 			return;
 		}
 		for ( Terminal terminal : terminalSet ) {
-			if ( event.isType(terminal.onSecurityAvailable()) ) {
+			if ( event.isType(terminal.onSecurityUpdate())
+			  || event.isType(terminal.onSecurityBestAsk())
+			  || event.isType(terminal.onSecurityBestBid())
+			  || event.isType(terminal.onSecurityLastTrade()))
+			{
 				int firstRow = securities.size();
 				Security security = ((SecurityEvent) event).getSecurity();
-				if ( ! securityMap.containsKey(security) ) {
+				if ( securityMap.containsKey(security) ) {
+					Integer row = securityMap.get(security);
+					fireTableRowsUpdated(row, row);						
+				} else {
 					securities.add(security);
 					securityMap.put(security, firstRow);
 					fireTableRowsInserted(firstRow, firstRow);
-				}
-			} else if ( event.isType(terminal.onSecurityUpdate())
-					|| event.isType(terminal.onSecurityBestAsk())
-					|| event.isType(terminal.onSecurityBestBid())
-					|| event.isType(terminal.onSecurityLastTrade()) )
-			{
-				Security security = ((SecurityEvent) event).getSecurity();
-				Integer row = securityMap.get(security);
-				if ( row != null ) {
-					fireTableRowsUpdated(row, row);	
 				}
 			}
 		}

@@ -46,6 +46,8 @@ public class OrderListTableModel extends AbstractTableModel implements
 	public static final int CID_EXECUTED_VALUE = 12;
 	public static final int CID_COMMENT = 13;
 	public static final int CID_SYSTEM_MESSAGE = 14;
+	public static final int CID_USER_DEFINED_LONG = 15;
+	public static final int CID_USER_DEFINED_STRING = 16;
 	
 	private final List<Integer> columnIndexToColumnID;
 	private final Map<Integer, MsgID> columnIDToColumnHeader;
@@ -98,6 +100,8 @@ public class OrderListTableModel extends AbstractTableModel implements
 		head.put(CID_EXECUTED_VALUE, CommonMsg.EXECUTED_VALUE);
 		head.put(CID_COMMENT, CommonMsg.COMMENT);
 		head.put(CID_SYSTEM_MESSAGE, CommonMsg.SYSTEM_MESSAGE);
+		head.put(CID_USER_DEFINED_LONG, CommonMsg.USER_DEFINED_LONG);
+		head.put(CID_USER_DEFINED_STRING, CommonMsg.USER_DEFINED_STRING);
 		return head;
 	}
 	
@@ -135,6 +139,8 @@ public class OrderListTableModel extends AbstractTableModel implements
 		case CID_EXECUTED_VALUE:	return order.getExecutedValue();
 		case CID_COMMENT:			return order.getComment();
 		case CID_SYSTEM_MESSAGE:	return order.getSystemMessage();
+		case CID_USER_DEFINED_LONG:	return order.getUserDefinedLong();
+		case CID_USER_DEFINED_STRING:	return order.getUserDefinedString();
 		default:					return null;
 		}		
 	}
@@ -220,14 +226,14 @@ public class OrderListTableModel extends AbstractTableModel implements
 			return;
 		}
 		for ( Terminal terminal : terminalSet ) {
-			if ( event.isType(terminal.onOrderAvailable()) ) {
-				Integer row = addOrder(((OrderEvent) event).getOrder());
-				if ( row != null ) {
-					fireTableRowsInserted(row, row);
-				}
-			} else if ( event.isType(terminal.onOrderUpdate()) ) {
+			if ( event.isType(terminal.onOrderUpdate()) ) {
 				Integer row = getIndexOfOrder(((OrderEvent) event).getOrder());
-				if ( row != null ) {
+				if ( row == null ) {
+					row = addOrder(((OrderEvent) event).getOrder());
+					if ( row != null ) {
+						fireTableRowsInserted(row, row);
+					}
+				} else {
 					fireTableRowsUpdated(row, row);
 				}
 			} else if ( event.isType(terminal.onOrderArchived()) ) {

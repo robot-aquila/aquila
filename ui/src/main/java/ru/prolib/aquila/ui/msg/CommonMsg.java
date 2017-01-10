@@ -72,6 +72,8 @@ public class CommonMsg {
 	public static final MsgID TITLE_SELECT_DRIVER = newMsgID("ID_SELECT_DRIVER");
 	public static final MsgID TYPE = newMsgID("ID_TYPE");
 	public static final MsgID USED_MARGIN = newMsgID("ID_USED_MARGIN");
+	public static final MsgID USER_DEFINED_LONG = newMsgID("ID_USER_DEFINED_LONG");
+	public static final MsgID USER_DEFINED_STRING = newMsgID("ID_USER_DEFINED_STRING");
 	public static final MsgID VMARGIN = newMsgID("ID_VMARGIN");
 	
 	// Time selection dialog

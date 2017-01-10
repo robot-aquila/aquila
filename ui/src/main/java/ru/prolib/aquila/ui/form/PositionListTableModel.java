@@ -173,19 +173,16 @@ public class PositionListTableModel extends AbstractTableModel implements
 			return;
 		}
 		for ( Portfolio portfolio : portfolioSet ) {
-			if ( event.isType(portfolio.onPositionAvailable()) ) {
+			if ( event.isType(portfolio.onPositionUpdate()) ) {
 				int firstRow = positions.size();
 				Position position = ((PositionEvent) event).getPosition();
-				if ( ! positionMap.containsKey(position) ) {
+				if ( positionMap.containsKey(position) ) {
+					Integer row = positionMap.get(position);
+					fireTableRowsUpdated(row, row);
+				} else {
 					positions.add(position);
 					positionMap.put(position, firstRow);
 					fireTableRowsInserted(firstRow, firstRow);
-				}
-			} else if ( event.isType(portfolio.onPositionUpdate()) ) {
-				Position position = ((PositionEvent) event).getPosition();
-				Integer row = positionMap.get(position);
-				if ( row != null ) {
-					fireTableRowsUpdated(row, row);	
 				}
 			}
 		}

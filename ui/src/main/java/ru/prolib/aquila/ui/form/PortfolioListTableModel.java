@@ -179,19 +179,16 @@ public class PortfolioListTableModel extends AbstractTableModel
 			return;
 		}
 		for ( Terminal terminal : terminalSet ) {
-			if ( event.isType(terminal.onPortfolioAvailable()) ) {
+			if ( event.isType(terminal.onPortfolioUpdate()) ) {
 				int firstRow = portfolios.size();
 				Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
-				if ( ! portfolioMap.containsKey(portfolio) ) {
+				if ( portfolioMap.containsKey(portfolio) ) {
+					Integer row = portfolioMap.get(portfolio);
+					fireTableRowsUpdated(row, row);
+				} else {					
 					portfolios.add(portfolio);
 					portfolioMap.put(portfolio, firstRow);
 					fireTableRowsInserted(firstRow, firstRow);
-				}
-			} else if ( event.isType(terminal.onPortfolioUpdate()) ) {
-				Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
-				Integer row = portfolioMap.get(portfolio);
-				if ( row != null ) {
-					fireTableRowsUpdated(row, row);	
 				}
 			}
 		}
