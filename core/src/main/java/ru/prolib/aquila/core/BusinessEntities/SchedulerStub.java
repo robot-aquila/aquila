@@ -31,6 +31,14 @@ public class SchedulerStub implements Scheduler {
 		return result;
 	}
 	
+	public SchedulerStubTask getScheduledTask(int index) {
+		return getScheduledTasks().get(index);
+	}
+	
+	public Runnable getScheduledTaskRunnable(int index) {
+		return getScheduledTask(index).getRunnable();
+	}
+	
 	public int getNumScheduledTasks() {
 		return tasks.size();
 	}

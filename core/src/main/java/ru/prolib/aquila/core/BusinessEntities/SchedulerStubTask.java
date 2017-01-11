@@ -192,6 +192,34 @@ public class SchedulerStubTask implements TaskHandler, Comparable<SchedulerStubT
 		return withDelayFixedRate(Instant.parse(scheduledTime), delay, period, runnable);
 	}
 	
+	/**
+	 * Create a task handler of self-planned task scheduled for next execution at specified time.
+	 * <p>
+	 * @param scheduler - scheduler of the task (required to create handler)
+	 * @param scheduledTime - the time of execution
+	 * @param runnable - the runnable instance
+	 * @return the task handler
+	 */
+	public static SchedulerStubTask atTimeSP(Scheduler scheduler,
+			Instant scheduledTime, SPRunnable runnable)
+	{
+		return atTime(scheduledTime, new SPRunnableTaskHandler(scheduler, runnable));
+	}
+	
+	/**
+	 * Create a task handler of self-planned task scheduled for next execution at specified time.
+	 * <p>
+	 * @param scheduler - scheduler of the task (required to create handler)
+	 * @param scheduledTime - the time of execution
+	 * @param runnable - the runnable instance
+	 * @return the task handler
+	 */
+	public static SchedulerStubTask atTimeSP(Scheduler scheduler,
+			String scheduledTime, SPRunnable runnable)
+	{
+		return atTimeSP(scheduler, Instant.parse(scheduledTime), runnable);
+	}
+	
 	public SchedulerStubTask(SchedulerTaskType type, Instant scheduledTime,
 			Long delay, Long period, Runnable runnable)
 	{

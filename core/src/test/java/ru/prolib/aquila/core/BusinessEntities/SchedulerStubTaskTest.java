@@ -66,6 +66,36 @@ public class SchedulerStubTaskTest {
 	}
 	
 	@Test
+	public void testAtTimeSP() {
+		Scheduler schedulerMock = control.createMock(Scheduler.class);
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		
+		task = SchedulerStubTask.atTimeSP(schedulerMock, Instant.parse("2015-01-01T00:00:00Z"), runnableMock);
+		
+		assertEquals(SchedulerTaskType.AT_TIME, task.getType());
+		assertEquals(Instant.parse("2015-01-01T00:00:00Z"), task.getTime());
+		assertNull(task.getDelay());
+		assertNull(task.getPeriod());
+		assertEquals(new SPRunnableTaskHandler(schedulerMock, runnableMock), task.getRunnable());
+		assertFalse(task.isCancelled());
+	}
+	
+	@Test
+	public void testAtTimeSP_TimeString() {
+		Scheduler schedulerMock = control.createMock(Scheduler.class);
+		SPRunnable runnableMock = control.createMock(SPRunnable.class);
+		
+		task = SchedulerStubTask.atTimeSP(schedulerMock, "2017-01-01T00:00:00Z", runnableMock);
+		
+		assertEquals(SchedulerTaskType.AT_TIME, task.getType());
+		assertEquals(Instant.parse("2017-01-01T00:00:00Z"), task.getTime());
+		assertNull(task.getDelay());
+		assertNull(task.getPeriod());
+		assertEquals(new SPRunnableTaskHandler(schedulerMock, runnableMock), task.getRunnable());
+		assertFalse(task.isCancelled());
+	}
+	
+	@Test
 	public void testAtTimePeriodic() {
 		task = SchedulerStubTask.atTimePeriodic(Instant.parse("2015-12-31T00:00:00Z"), 1000L, runnable);
 		

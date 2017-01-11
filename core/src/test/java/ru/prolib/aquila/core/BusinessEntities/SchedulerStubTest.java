@@ -176,6 +176,36 @@ public class SchedulerStubTest {
 	}
 	
 	@Test
+	public void testGetScheduledTask() {
+		TaskHandler task1 = scheduler.schedule(runnable, T("2015-01-01T00:00:00Z")),
+				task2 = scheduler.schedule(runnable, T("2011-01-01T00:00:00Z")),
+				task3 = scheduler.schedule(runnable, T("2001-01-01T00:00:00Z")),
+				task4 = scheduler.schedule(runnable, T("2016-07-30T00:00:00Z"));
+		
+		assertEquals(task3, scheduler.getScheduledTask(0));
+		assertEquals(task2, scheduler.getScheduledTask(1));
+		assertEquals(task1, scheduler.getScheduledTask(2));
+		assertEquals(task4, scheduler.getScheduledTask(3));
+	}
+	
+	@Test
+	public void testGetScheduledTaskRunnable() {
+		Runnable r1 = control.createMock(Runnable.class),
+				r2 = control.createMock(Runnable.class),
+				r3 = control.createMock(Runnable.class),
+				r4 = control.createMock(Runnable.class);
+		scheduler.schedule(r1, T("2015-01-01T00:00:00Z"));
+		scheduler.schedule(r2, T("2011-01-01T00:00:00Z"));
+		scheduler.schedule(r3, T("2001-01-01T00:00:00Z"));
+		scheduler.schedule(r4, T("2016-07-30T00:00:00Z"));
+
+		assertEquals(r3, scheduler.getScheduledTaskRunnable(0));
+		assertEquals(r2, scheduler.getScheduledTaskRunnable(1));
+		assertEquals(r1, scheduler.getScheduledTaskRunnable(2));
+		assertEquals(r4, scheduler.getScheduledTaskRunnable(3));
+	}
+	
+	@Test
 	public void testClearScheduledTasks() {
 		scheduler.schedule(runnable, T("2015-01-01T00:00:00Z"));
 		scheduler.schedule(runnable, T("2011-01-01T00:00:00Z"));
