@@ -15,12 +15,11 @@ public interface ObservableStateContainer extends UpdatableStateContainer {
 	 * <p>
 	 * Container availability is the state when the object contains minimal data
 	 * to make this container available to normal work. The set of required
-	 * tokens depends on container specification. <s>The first update of every
-	 * container is an availability event.</s> Usually  a collection of containers
-	 * forwards all container events to consumer. For such cases the event of
-	 * availability may be used one-time catching of the container when it
-	 * arrived to the environment. See concrete collection to get more details
-	 * about usage of availability events.
+	 * tokens depends on container specification. Usually collection of
+	 * containers forwards all container events to consumer. For such cases the
+	 * event of availability may be used one-time catching of the container when
+	 * it arrived to the environment. See concrete collection to get more
+	 * details about usage of availability events.
 	 * <p>
 	 * @return event type
 	 */

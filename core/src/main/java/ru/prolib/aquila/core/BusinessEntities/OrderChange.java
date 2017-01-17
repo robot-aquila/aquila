@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
 
+@Deprecated
 public interface OrderChange extends ContainerTransaction {
 	
 	/**

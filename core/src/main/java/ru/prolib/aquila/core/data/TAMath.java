@@ -863,6 +863,7 @@ public class TAMath {
 	 * <p>
 	 * @param x - data series
 	 * @return variance value
+	 * @throws ValueException - an error occurred
 	 */
 	public double variance(Series<Double> x) throws ValueException {
 		SN r = _variance(x);

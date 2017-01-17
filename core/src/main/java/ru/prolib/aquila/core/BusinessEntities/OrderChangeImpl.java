@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+@Deprecated
 public class OrderChangeImpl implements OrderChange {
 	private boolean applied = false;
 	private final EditableOrder order;
