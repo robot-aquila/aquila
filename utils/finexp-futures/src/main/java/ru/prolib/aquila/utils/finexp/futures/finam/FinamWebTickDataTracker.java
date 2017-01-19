@@ -98,6 +98,7 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 				int quoteID = quoteIds.get(i);
 				String ticker = quoteMap.get(quoteID);
 				logger.debug("Start processing symbol: {}", ticker);
+				remainedSymbols --;
 				Map<Integer, Object> contrDetails = null;
 				try {
 					contrDetails = moex.getContractDetails(new Symbol(ticker));
@@ -148,6 +149,8 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 						remainedDownloads --;
 						isFirstDownload = false;
 						lastSymbolHasDownload = true;
+					} else {
+						logger.debug("Segment already downloaded: {}", descr);
 					}
 					current = current.plusDays(1);
 				}
@@ -156,8 +159,8 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 					break;
 				}
 
-				logger.debug("End processing symbol: {}", ticker);
-				remainedSymbols --;				
+				logger.debug("End processing symbol: {} (remained {} of {})",
+					new Object[] { ticker, remainedSymbols, quoteIds.size()} );
 				if ( remainedSymbols > 0 && lastSymbolHasDownload ) {
 					// 3) Wait some random time
 					long pause = random.nextLong(PAUSE_BETWEEN_SYMBOL_MIN, PAUSE_BETWEEN_SYMBOL_MAX + 1);
