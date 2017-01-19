@@ -97,6 +97,7 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 				lastSymbolHasDownload = false;
 				int quoteID = quoteIds.get(i);
 				String ticker = quoteMap.get(quoteID);
+				logger.debug("Start processing symbol: {}", ticker);
 				Map<Integer, Object> contrDetails = null;
 				try {
 					contrDetails = moex.getContractDetails(new Symbol(ticker));
@@ -155,6 +156,7 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 					break;
 				}
 
+				logger.debug("End processing symbol: {}", ticker);
 				remainedSymbols --;				
 				if ( remainedSymbols > 0 && lastSymbolHasDownload ) {
 					// 3) Wait some random time
