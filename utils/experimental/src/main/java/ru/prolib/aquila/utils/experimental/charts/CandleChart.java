@@ -1,23 +1,26 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
+import javafx.application.Platform;
 import javafx.beans.NamedArg;
 import javafx.scene.Group;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
+import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.utils.experimental.charts.formatters.DefaultTimeAxisSettings;
+import ru.prolib.aquila.utils.experimental.charts.formatters.TimeAxisSettings;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by TiM on 22.12.2016.
@@ -28,15 +31,16 @@ public class CandleChart extends ScatterChart {
     public static final String NUMBER_OF_POINTS_CHANGE="NUMBER_OF_POINTS_CHANGE";
     private final double MIN_WIDTH = 5;
     private List<Candle> data = new ArrayList<>();
-    private Integer numberOfPoints = 15;
-    private Integer currentPosition = 0;
+    private int numberOfPoints = 15;
+    private int currentPosition = 0;
     private Series candleSeries = new Series();
     private Series highSeries = new Series();
     private Series lowSeries = new Series();
     private final NumberAxis xAxis;
     private final NumberAxis yAxis;
-    private final List<Instant> xValues = new ArrayList<>();
+    private final List<LocalDateTime> xValues = new ArrayList<>();
     private ActionListener actionListener;
+    private TimeAxisSettings timeAxisSettings = new DefaultTimeAxisSettings();
 
     public CandleChart(@NamedArg("xAxis") NumberAxis xAxis, @NamedArg("yAxis") NumberAxis yAxis) {
         super(xAxis, yAxis);
@@ -53,8 +57,12 @@ public class CandleChart extends ScatterChart {
         xAxis.setForceZeroInRange(false);
         xAxis.setTickUnit(1);
         xAxis.setMinorTickVisible(false);
+        xAxis.setMinorTickCount(1);
         xAxis.setTickLabelRotation(-90);
         xAxis.setAutoRanging(false);
+
+        this.setOnMouseClicked(event -> {
+        });
 
         this.setOnScroll(event -> {
             if (event.isControlDown()) {
@@ -70,7 +78,7 @@ public class CandleChart extends ScatterChart {
             public String toString(Number object) {
                 int i = object.intValue();
                 if(i>=0 && i<xValues.size()){
-                    return getTimeText(xValues.get(i));
+                    return getTimeLabelText(xValues.get(i));
                 }
                 return "";
             }
@@ -87,9 +95,38 @@ public class CandleChart extends ScatterChart {
         this.data.addAll(data);
         xValues.clear();
         for(int i=0; i<data.size(); i++){
-            xValues.add(data.get(i).getStartTime());
+            xValues.add(data.get(i).getStartTime().atOffset(ZoneOffset.UTC).toLocalDateTime());
         }
         setCurrentPosition(0);
+    }
+
+    public void addCandle(Candle candle){
+        int idx = data.size()-1;
+        boolean lastCandleDisplayed = currentPosition >= data.size() - numberOfPoints;
+        if(idx<0 || candle.getStartTime().isAfter(data.get(idx).getStartTime())){
+            data.add(candle);
+            xValues.add(candle.getStartTime().atOffset(ZoneOffset.UTC).toLocalDateTime());
+        } else {
+            throw new IllegalArgumentException("We can add candle only to the end.");
+        }
+        if(lastCandleDisplayed){
+            setCurrentPosition(getCurrentPosition()+1);
+        }
+    }
+
+    public void setLastClose(double close){
+        int idx = data.size()-1;
+        boolean lastCandleDisplayed = currentPosition >= data.size() - numberOfPoints;
+        if(idx < 0){
+            throw new IllegalStateException("Empty candle list");
+        }
+        Candle candle = data.get(idx);
+        double high = close>candle.getHigh()?close:candle.getHigh();
+        double low = close<candle.getLow()?close:candle.getLow();
+        data.set(idx, new Candle(candle.getInterval(), candle.getOpen(), high, low, close, candle.getVolume()));
+        if(lastCandleDisplayed){
+            setCurrentPosition(getCurrentPosition());
+        }
     }
 
     public int getCandleDataCount(){
@@ -155,60 +192,69 @@ public class CandleChart extends ScatterChart {
     protected void layoutPlotChildren() {
         getPlotChildren().clear();
         for(int i=0; i<candleSeries.getData().size(); i++){
-            Data item = (Data)candleSeries.getData().get(i);
-            removeDataItemFromDisplay(candleSeries, item);
-            Candle candle = (Candle) item.getExtraValue();
-            double x = getXAxis().getDisplayPosition(getCurrentDisplayedXValue(item));
-            Line line = new Line(x, getY(candle.getHigh()), x, getY(candle.getLow()));
-            line.getStyleClass().add("candle-line");
-
-            double height = Math.abs(getY(candle.getOpen()) - getY(candle.getClose()));
-            if(height==0){
-                height = 1;
-            }
-            double width = getWidth()/candleSeries.getData().size()/4;
-            if(width< MIN_WIDTH){
-                width = MIN_WIDTH;
-            }
-            Rectangle body = new Rectangle(x, getY(candle.getBodyMiddle()), width, height);
-            body.setLayoutX(-width/2);
-            body.setLayoutY(-height/2);
-            if(candle.getOpen()<candle.getClose()){
-                body.getStyleClass().add("candle-body-bull");
-            } else {
-                body.getStyleClass().add("candle-body-bear");
-            }
-
-            Group group = new Group(line, body);
-            item.setNode(group);
-            getPlotChildren().add(group);
+            drawCandle(i);
         }
+        updateStyles();
     }
 
-    private String getTimeText(Instant time) {
+    private void drawCandle(int i){
+        Data item = (Data)candleSeries.getData().get(i);
+        removeDataItemFromDisplay(candleSeries, item);
+        Candle candle = (Candle) item.getExtraValue();
+        double x = getXAxis().getDisplayPosition(getCurrentDisplayedXValue(item));
+        Line line = new Line(x, getY(candle.getHigh()), x, getY(candle.getLow()));
+        line.getStyleClass().add("candle-line");
+
+        double height = Math.abs(getY(candle.getOpen()) - getY(candle.getClose()));
+        if(height==0){
+            height = 1;
+        }
+        double width = getWidth()/candleSeries.getData().size()/4;
+        if(width< MIN_WIDTH){
+            width = MIN_WIDTH;
+        }
+        Rectangle body = new Rectangle(x, getY(candle.getBodyMiddle()), width, height);
+        body.setLayoutX(-width/2);
+        body.setLayoutY(-height/2);
+        if(candle.getOpen()<candle.getClose()){
+            body.getStyleClass().add("candle-body-bull");
+        } else {
+            body.getStyleClass().add("candle-body-bear");
+        }
+
+        Group group = new Group(line, body);
+        item.setNode(group);
+        getPlotChildren().add(group);
+    }
+
+    private void updateStyles() {
+        xAxis.getChildrenUnmodifiable().stream().filter(n->!n.isVisible()).forEach((n)->n.setVisible(true));
+        int[] idx = { 0 };
+        xAxis.getChildrenUnmodifiable().filtered(n-> n instanceof Text).forEach(n ->{
+            int i = xAxis.getTickMarks().get(idx[0]++).getValue().intValue();
+            if(i>=0 && i < xValues.size()){
+                if(timeAxisSettings.isMinorLabel(xValues.get(i))){
+                    n.getStyleClass().add(timeAxisSettings.getMinorLabelStyleClass());
+                } else {
+                    n.getStyleClass().add(timeAxisSettings.getLabelStyleClass());
+                }
+            }
+        });
+    }
+
+    private String getTimeLabelText(LocalDateTime time) {
         if(time==null){
             return "";
         }
-        LocalDateTime d =  time.atOffset(ZoneOffset.UTC).toLocalDateTime();
-        String mon = d.getMonth().getDisplayName(TextStyle.SHORT, Locale.getDefault());
-        if(d.getMinute()==0){
-            if(d.getHour()==0){
-                if(d.getDayOfMonth()==1){
-                    if(d.getDayOfYear()==1){
-                        return "01 "+mon+" "+d.getYear();
-                    } else {
-                        return "01 "+mon;
-                    }
-                } else {
-                    return String.format("%02d %s", d.getDayOfMonth(), mon);
-                }
-            }
-        }
-        return String.format("%02d:%02d", d.getHour(), d.getMinute());
+        return timeAxisSettings.formatDateTime(time);
     }
 
     public void setActionListener(ActionListener actionListener) {
         this.actionListener = actionListener;
+    }
+
+    public void setTimeAxisSettings(TimeAxisSettings timeAxisSettings) {
+        this.timeAxisSettings = timeAxisSettings;
     }
 }
 

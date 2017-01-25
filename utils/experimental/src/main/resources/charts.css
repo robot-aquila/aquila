@@ -7,16 +7,24 @@
 .candle-body-bear {
     -fx-fill: green;
     -fx-stroke: green;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 1;
 }
 
 .candle-body-bull {
     -fx-fill: red;
     -fx-stroke: green;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 1;
 }
 
 .candle-line {
     -fx-stroke: green;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 1;
+}
+
+.major-axis-label {
+ -fx-fill: blue;
+}
+
+.minor-axis-label {
+ -fx-fill: red;
 }

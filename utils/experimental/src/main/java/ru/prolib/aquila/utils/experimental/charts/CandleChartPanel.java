@@ -5,6 +5,7 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.utils.experimental.charts.formatters.TimeAxisSettings;
 
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -25,6 +26,18 @@ public class CandleChartPanel extends JFXPanel {
     public void setCandleData(List<Candle> data){
         Platform.runLater(()-> {
             chart.setCandleData(data);
+        });
+    }
+
+    public void setCandleData(Candle candle){
+        Platform.runLater(()-> {
+            chart.addCandle(candle);
+        });
+    }
+
+    public void setLastClose(double close){
+        Platform.runLater(()-> {
+            chart.setLastClose(close);
         });
     }
 
@@ -64,6 +77,8 @@ public class CandleChartPanel extends JFXPanel {
         chart.setActionListener(actionListener);
     }
 
-
+    public void setTimeAxisSettings(TimeAxisSettings timeAxisSettings) {
+        chart.setTimeAxisSettings(timeAxisSettings);
+    }
 }
 
