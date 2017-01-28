@@ -3,6 +3,8 @@ package ru.prolib.aquila.utils.experimental.charts;
 import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.utils.experimental.charts.formatters.M15TimeAxisSettings;
+import ru.prolib.aquila.utils.experimental.charts.objects.CandleChartObject;
+import ru.prolib.aquila.utils.experimental.charts.objects.CircleChartObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +13,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.List;
@@ -21,10 +27,12 @@ import java.util.List;
 public class TestPanel extends JPanel implements ActionListener {
 
     private JScrollBar scrollBar;
-    private final CandleChartPanel panel;
+    private final ChartPanel panel;
     private AdjustmentListener scrollBarListener;
     private JLabel numberOfPointsLabel;
     private List<Candle> candleData = new ArrayList<>();
+    private CandleChartObject candles;
+    private CircleChartObject circle;
 
     public TestPanel() {
         super();
@@ -72,7 +80,9 @@ public class TestPanel extends JPanel implements ActionListener {
 
         random.addActionListener(e->{
             candleData = getRandomData();
-            panel.setCandleData(candleData);
+
+            candles.setData(candleData);
+
             scrollBar.setVisible(true);
             updateScrollBar();
             topRight.setVisible(true);
@@ -81,9 +91,8 @@ public class TestPanel extends JPanel implements ActionListener {
         });
 
         changeCandle.addActionListener(e->{
-
-            Candle candle = candleData.get(candleData.size()-1);
-            panel.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
+            Candle candle = candles.getLastCandle();
+            candles.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
         });
 
         addCandle.addActionListener(e->{
@@ -95,7 +104,7 @@ public class TestPanel extends JPanel implements ActionListener {
             double low = Math.min(open - getRandom(),close);
             Candle newCandle = new Candle(interval, open, high, low, close, 1L);
             candleData.add(newCandle);
-            panel.setCandleData(newCandle);
+            candles.addCandle(newCandle);
         });
 
         top.add(topLeft, BorderLayout.WEST);
@@ -119,34 +128,44 @@ public class TestPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()){
-            case CandleChart.CURRENT_POSITION_CHANGE:
-                updateScrollBar();
-                scrollBar.removeAdjustmentListener(scrollBarListener);
-                scrollBar.setValue(panel.getCurrentPosition());
-                scrollBar.addAdjustmentListener(scrollBarListener);
+            case Chart.CURRENT_POSITION_CHANGE:
+                if(scrollBar!=null){
+                    scrollBar.removeAdjustmentListener(scrollBarListener);
+                    updateScrollBar();
+                    scrollBar.setValue(panel.getCurrentPosition());
+                    scrollBar.addAdjustmentListener(scrollBarListener);
+                }
                 break;
-            case CandleChart.NUMBER_OF_POINTS_CHANGE:
-                numberOfPointsLabel.setText(panel.getNumberOfPoints().toString());
-                updateScrollBar();
+            case Chart.NUMBER_OF_POINTS_CHANGE:
+                if(scrollBar!=null){
+                    numberOfPointsLabel.setText(panel.getNumberOfPoints().toString());
+                    updateScrollBar();
+                }
                 break;
         }
     }
 
     private void updateScrollBar(){
         scrollBar.setMinimum(0);
-        scrollBar.setMaximum(panel.getCandleDataCount());
+        scrollBar.setMaximum(panel.getXValues().size());
         scrollBar.setVisibleAmount(panel.getNumberOfPoints());
     }
 
-    private CandleChartPanel createChartPanel(){
-        CandleChartPanel panel = new CandleChartPanel();
+    private ChartPanel createChartPanel(){
+        ChartPanel panel = new ChartPanel();
+        candles = new CandleChartObject();
+        panel.addChartObject(candles);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime time = LocalDateTime.parse("2016-12-31 22:00", formatter);
+        panel.addChartObject(new CircleChartObject(time, 1847, 1));
         return panel;
     }
 
     private List<Candle> getRandomData(){
         double previousClose = 1850;
         List<Candle> data = new ArrayList<>();
-        Instant start = Instant.parse("2016-12-31T19:15:00.000Z");
+        Instant start = Instant.parse("2016-12-31T19:00:00.000Z");
         int step = 15;
         for (int i = 0; i < 100; i++) {
             Interval interval = Interval.of(start.plus(step*i, ChronoUnit.MINUTES), start.plus(step*(i+1), ChronoUnit.MINUTES));
@@ -155,7 +174,9 @@ public class TestPanel extends JPanel implements ActionListener {
             double high = Math.max(open + getRandom(),close);
             double low = Math.min(open - getRandom(),close);
             previousClose = close;
-            data.add(new Candle(interval, open, high, low, close, 1L));
+            if(interval.getStart().atOffset(ZoneOffset.UTC).toLocalDateTime().getHour()!=20){
+                data.add(new Candle(interval, open, high, low, close, 1L));
+            }
         }
         return data;
     }

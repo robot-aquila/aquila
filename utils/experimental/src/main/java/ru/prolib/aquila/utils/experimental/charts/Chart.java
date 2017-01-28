@@ -2,38 +2,32 @@ package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
 import javafx.beans.NamedArg;
-import javafx.scene.Group;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
-import javafx.scene.control.Label;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import ru.prolib.aquila.core.data.Candle;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.utils.experimental.charts.formatters.DefaultTimeAxisSettings;
 import ru.prolib.aquila.utils.experimental.charts.formatters.TimeAxisSettings;
+import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by TiM on 22.12.2016.
  */
-public class CandleChart extends ScatterChart {
+public class Chart extends ScatterChart {
 
     public static final String CURRENT_POSITION_CHANGE="CURRENT_POSITION_CHANGE";
     public static final String NUMBER_OF_POINTS_CHANGE="NUMBER_OF_POINTS_CHANGE";
-    private final double MIN_WIDTH = 5;
-    private List<Candle> data = new ArrayList<>();
     private int numberOfPoints = 15;
     private int currentPosition = 0;
-    private Series candleSeries = new Series();
     private Series highSeries = new Series();
     private Series lowSeries = new Series();
     private final NumberAxis xAxis;
@@ -41,14 +35,14 @@ public class CandleChart extends ScatterChart {
     private final List<LocalDateTime> xValues = new ArrayList<>();
     private ActionListener actionListener;
     private TimeAxisSettings timeAxisSettings = new DefaultTimeAxisSettings();
+    private final List<ChartObject> chartObjects = new ArrayList<>();
 
-    public CandleChart(@NamedArg("xAxis") NumberAxis xAxis, @NamedArg("yAxis") NumberAxis yAxis) {
+    public Chart(@NamedArg("xAxis") NumberAxis xAxis, @NamedArg("yAxis") NumberAxis yAxis) {
         super(xAxis, yAxis);
         setAnimated(false);
-        getStylesheets().add(CandleChart.class.getResource("/charts.css").toExternalForm());
+        getStylesheets().add(Chart.class.getResource("/charts.css").toExternalForm());
 
         setLegendVisible(false);
-        getData().add(candleSeries);
         getData().add(highSeries);
         getData().add(lowSeries);
         this.xAxis = xAxis;
@@ -62,6 +56,7 @@ public class CandleChart extends ScatterChart {
         xAxis.setAutoRanging(false);
 
         this.setOnMouseClicked(event -> {
+//            setCurrentPosition(getCurrentPosition()+1);
         });
 
         this.setOnScroll(event -> {
@@ -90,49 +85,6 @@ public class CandleChart extends ScatterChart {
         });
     }
 
-    public void setCandleData(List<Candle> data) {
-        this.data.clear();
-        this.data.addAll(data);
-        xValues.clear();
-        for(int i=0; i<data.size(); i++){
-            xValues.add(data.get(i).getStartTime().atOffset(ZoneOffset.UTC).toLocalDateTime());
-        }
-        setCurrentPosition(0);
-    }
-
-    public void addCandle(Candle candle){
-        int idx = data.size()-1;
-        boolean lastCandleDisplayed = currentPosition >= data.size() - numberOfPoints;
-        if(idx<0 || candle.getStartTime().isAfter(data.get(idx).getStartTime())){
-            data.add(candle);
-            xValues.add(candle.getStartTime().atOffset(ZoneOffset.UTC).toLocalDateTime());
-        } else {
-            throw new IllegalArgumentException("We can add candle only to the end.");
-        }
-        if(lastCandleDisplayed){
-            setCurrentPosition(getCurrentPosition()+1);
-        }
-    }
-
-    public void setLastClose(double close){
-        int idx = data.size()-1;
-        boolean lastCandleDisplayed = currentPosition >= data.size() - numberOfPoints;
-        if(idx < 0){
-            throw new IllegalStateException("Empty candle list");
-        }
-        Candle candle = data.get(idx);
-        double high = close>candle.getHigh()?close:candle.getHigh();
-        double low = close<candle.getLow()?close:candle.getLow();
-        data.set(idx, new Candle(candle.getInterval(), candle.getOpen(), high, low, close, candle.getVolume()));
-        if(lastCandleDisplayed){
-            setCurrentPosition(getCurrentPosition());
-        }
-    }
-
-    public int getCandleDataCount(){
-        return data.size();
-    }
-
     public Integer getCurrentPosition() {
         return currentPosition;
     }
@@ -145,8 +97,8 @@ public class CandleChart extends ScatterChart {
         if (numberOfPoints < 2) {
             numberOfPoints = 2;
         }
-        if (numberOfPoints > data.size()) {
-            numberOfPoints = data.size();
+        if (numberOfPoints > xValues.size()) {
+            numberOfPoints = xValues.size();
         }
         this.numberOfPoints = numberOfPoints;
         if(actionListener!=null){
@@ -156,22 +108,34 @@ public class CandleChart extends ScatterChart {
     }
 
     public void setCurrentPosition(Integer currentPosition) {
-        if (data.size() < numberOfPoints || currentPosition < 0) {
+        updateXValues();
+        if(xValues.size()==0){
+            return;
+        }
+        if (/*xValues.size() < numberOfPoints || */currentPosition < 0) {
             setCurrentPosition(0);
-        } else if (currentPosition > 0 && currentPosition > data.size() - numberOfPoints) {
-            setCurrentPosition(data.size() - numberOfPoints);
+        } else if (currentPosition > 0 && currentPosition > xValues.size() - numberOfPoints) {
+            setCurrentPosition(xValues.size() - numberOfPoints);
         } else {
             this.currentPosition = currentPosition;
-            candleSeries.getData().clear();
+
+            double maxY = 0;
+            double minY = 1e6;
+            for(ChartObject obj: chartObjects){
+                Pair<Double, Double> interval = obj.getYInterval();
+                if(interval.getRight() > maxY){
+                    maxY = interval.getRight();
+                }
+                if(interval.getLeft() < minY){
+                    minY = interval.getLeft();
+                }
+            }
+
             highSeries.getData().clear();
             lowSeries.getData().clear();
-            for (int i = 0; i < numberOfPoints; i++) {
-                Candle candle = data.get(i + currentPosition);
-                int xVal = currentPosition + i;
-                candleSeries.getData().add(new Data<>(xVal, candle.getBodyMiddle(), candle));
-                highSeries.getData().add(new Data<>(xVal, candle.getHigh()));
-                lowSeries.getData().add(new Data<>(xVal, candle.getLow()));
-            }
+            highSeries.getData().add(new Data<>(currentPosition, maxY));
+            lowSeries.getData().add(new Data<>(currentPosition, minY));
+
             xAxis.setLowerBound(currentPosition - 1);
             xAxis.setUpperBound(currentPosition+numberOfPoints);
             if(actionListener!=null){
@@ -180,51 +144,68 @@ public class CandleChart extends ScatterChart {
         }
     }
 
-    @Override
-    protected void dataItemAdded(Series series, int itemIndex, Data item) {
+    public Pair<LocalDateTime, LocalDateTime> getCurrentTimeInterval(){
+        LocalDateTime min = null;
+        LocalDateTime max = null;
+        int cnt = xValues.size();
+        if(cnt > 0){
+            min = xValues.get(currentPosition);
+            if(cnt >= currentPosition + numberOfPoints){
+                max = xValues.get(currentPosition + numberOfPoints - 1);
+            } else {
+                max = xValues.get(cnt - 1);
+            }
+        }
+        return new ImmutablePair<>(min, max);
     }
 
-    private double getY(double chartY) {
+    public boolean isTimeDisplayed(LocalDateTime time){
+        Pair<LocalDateTime, LocalDateTime> displayedInterval = getCurrentTimeInterval();
+        return time.equals(displayedInterval.getLeft())||
+                time.equals(displayedInterval.getRight())||
+                (time.isBefore(displayedInterval.getRight()) && time.isAfter(displayedInterval.getLeft()));
+    }
+
+    public void refresh(){
+        Platform.runLater(()->{
+            setCurrentPosition(getCurrentPosition());
+        });
+    }
+
+    public void refresh(int newCurrentPosition){
+        Platform.runLater(()->{
+            setCurrentPosition(newCurrentPosition);
+        });
+    }
+
+    public double getY(double chartY) {
         return yAxis.getDisplayPosition(chartY);
+    }
+
+    public double getX(double chartX) {
+        return xAxis.getDisplayPosition(chartX);
+    }
+
+    public double getX(LocalDateTime time) {
+        int idx = xValues.indexOf(time);
+        if(idx<0){
+            throw new IllegalArgumentException("Can not find time: "+time.toString());
+        }
+        return xAxis.getDisplayPosition(idx);
+    }
+
+    public double getDistance(double distance){
+        return Math.abs(getY(distance) - getY(0));
     }
 
     @Override
     protected void layoutPlotChildren() {
         getPlotChildren().clear();
-        for(int i=0; i<candleSeries.getData().size(); i++){
-            drawCandle(i);
+
+        for(ChartObject obj: chartObjects){
+            getPlotChildren().addAll(obj.paint());
         }
         updateStyles();
-    }
-
-    private void drawCandle(int i){
-        Data item = (Data)candleSeries.getData().get(i);
-        removeDataItemFromDisplay(candleSeries, item);
-        Candle candle = (Candle) item.getExtraValue();
-        double x = getXAxis().getDisplayPosition(getCurrentDisplayedXValue(item));
-        Line line = new Line(x, getY(candle.getHigh()), x, getY(candle.getLow()));
-        line.getStyleClass().add("candle-line");
-
-        double height = Math.abs(getY(candle.getOpen()) - getY(candle.getClose()));
-        if(height==0){
-            height = 1;
-        }
-        double width = getWidth()/candleSeries.getData().size()/4;
-        if(width< MIN_WIDTH){
-            width = MIN_WIDTH;
-        }
-        Rectangle body = new Rectangle(x, getY(candle.getBodyMiddle()), width, height);
-        body.setLayoutX(-width/2);
-        body.setLayoutY(-height/2);
-        if(candle.getOpen()<candle.getClose()){
-            body.getStyleClass().add("candle-body-bull");
-        } else {
-            body.getStyleClass().add("candle-body-bear");
-        }
-
-        Group group = new Group(line, body);
-        item.setNode(group);
-        getPlotChildren().add(group);
     }
 
     private void updateStyles() {
@@ -255,6 +236,50 @@ public class CandleChart extends ScatterChart {
 
     public void setTimeAxisSettings(TimeAxisSettings timeAxisSettings) {
         this.timeAxisSettings = timeAxisSettings;
+    }
+
+    public ChartObject getChartObject(int i) {
+        return chartObjects.get(i);
+    }
+
+    public void addChartObject(ChartObject object){
+        object.setChart(this);
+        chartObjects.add(object);
+        updateXValues();
+        refresh();
+    }
+
+    public void removeChartObject(ChartObject object){
+        object.setChart(null);
+        chartObjects.remove(object);
+        updateXValues();
+        refresh();
+    }
+
+    public void clearChartObjects(){
+        for(ChartObject object: chartObjects){
+            object.setChart(null);
+        }
+        chartObjects.clear();
+        updateXValues();
+        refresh();
+    }
+
+    public List<LocalDateTime> getXValues() {
+        return xValues;
+    }
+
+    private void updateXValues(){
+        xValues.clear();
+        for(ChartObject obj: chartObjects){
+            List<LocalDateTime> list = obj.getXValues();
+            for(LocalDateTime time: list){
+                if(!xValues.contains(time)){
+                    xValues.add(time);
+                }
+            }
+        }
+        Collections.sort(xValues);
     }
 }
 

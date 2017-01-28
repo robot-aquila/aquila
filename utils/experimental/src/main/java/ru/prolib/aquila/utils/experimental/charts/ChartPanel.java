@@ -4,45 +4,28 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
-import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.utils.experimental.charts.formatters.TimeAxisSettings;
+import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
 
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * Created by TiM on 22.12.2016.
  */
-public class CandleChartPanel extends JFXPanel {
+public class ChartPanel extends JFXPanel {
 
-    private final CandleChart chart;
+    private final Chart chart;
 
-    public CandleChartPanel() {
+    public ChartPanel() {
         super();
-        chart = new CandleChart(new NumberAxis(), new NumberAxis());
+        chart = new Chart(new NumberAxis(), new NumberAxis());
         this.setScene(new Scene(chart));
     }
 
-    public void setCandleData(List<Candle> data){
-        Platform.runLater(()-> {
-            chart.setCandleData(data);
-        });
-    }
-
-    public void setCandleData(Candle candle){
-        Platform.runLater(()-> {
-            chart.addCandle(candle);
-        });
-    }
-
-    public void setLastClose(double close){
-        Platform.runLater(()-> {
-            chart.setLastClose(close);
-        });
-    }
-
-    public int getCandleDataCount(){
-        return chart.getCandleDataCount();
+    public List<LocalDateTime> getXValues(){
+        return chart.getXValues();
     }
 
     public Integer getCurrentPosition() {
@@ -70,6 +53,28 @@ public class CandleChartPanel extends JFXPanel {
     public void setNumberOfPoints(Integer numberOfPoints) {
         Platform.runLater(()->{
             chart.setNumberOfPoints(numberOfPoints);
+        });
+    }
+
+    public ChartObject getChartObject(int i) {
+        return chart.getChartObject(i);
+    }
+
+    public void addChartObject(ChartObject object){
+        Platform.runLater(()->{
+            chart.addChartObject(object);
+        });
+    }
+
+    public void removeChartObject(ChartObject object){
+        Platform.runLater(()->{
+            chart.removeChartObject(object);
+        });
+    }
+
+    public void clearChartObjects(){
+        Platform.runLater(()->{
+            chart.clearChartObjects();
         });
     }
 
