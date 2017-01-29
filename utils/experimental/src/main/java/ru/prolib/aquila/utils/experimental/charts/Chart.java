@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
 import javafx.beans.NamedArg;
+import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.text.Text;
@@ -131,10 +132,7 @@ public class Chart extends ScatterChart {
                 }
             }
 
-            highSeries.getData().clear();
-            lowSeries.getData().clear();
-            highSeries.getData().add(new Data<>(currentPosition, maxY));
-            lowSeries.getData().add(new Data<>(currentPosition, minY));
+            updateYInterval(minY, maxY);
 
             xAxis.setLowerBound(currentPosition - 1);
             xAxis.setUpperBound(currentPosition+numberOfPoints);
@@ -142,6 +140,13 @@ public class Chart extends ScatterChart {
                 actionListener.actionPerformed(new ActionEvent(this, 1, CURRENT_POSITION_CHANGE));
             }
         }
+    }
+
+    public void updateYInterval(double minY, double maxY){
+        highSeries.getData().clear();
+        lowSeries.getData().clear();
+        highSeries.getData().add(new Data<>(currentPosition, maxY));
+        lowSeries.getData().add(new Data<>(currentPosition, minY));
     }
 
     public Pair<LocalDateTime, LocalDateTime> getCurrentTimeInterval(){
@@ -182,10 +187,6 @@ public class Chart extends ScatterChart {
         return yAxis.getDisplayPosition(chartY);
     }
 
-    public double getX(double chartX) {
-        return xAxis.getDisplayPosition(chartX);
-    }
-
     public double getX(LocalDateTime time) {
         int idx = xValues.indexOf(time);
         if(idx<0){
@@ -200,11 +201,35 @@ public class Chart extends ScatterChart {
 
     @Override
     protected void layoutPlotChildren() {
-        getPlotChildren().clear();
+        Pair<LocalDateTime, LocalDateTime> interval = getCurrentTimeInterval();
+        for(int i=getPlotChildren().size()-1; i>=0; i--){
+            Node node = (Node) getPlotChildren().get(i);
+            if(node.getId() == null || node.getId().equals("")){
+                getPlotChildren().remove(node);
+            }
+        }
+//        getPlotChildren().clear();
 
         for(ChartObject obj: chartObjects){
             getPlotChildren().addAll(obj.paint());
         }
+
+        for(int i=getPlotChildren().size()-1; i>=0; i--){
+            Node node = (Node) getPlotChildren().get(i);
+            if(node.getId() != null){
+                String timeStr = node.getId();
+                LocalDateTime time = null;
+                try {
+                    time = LocalDateTime.parse(timeStr);
+                } catch (Exception e){
+
+                }
+                if(time!=null && (time.isBefore(interval.getLeft()) || time.isAfter(interval.getRight()))){
+                    getPlotChildren().remove(node);
+                }
+            }
+        }
+
         updateStyles();
     }
 
@@ -281,5 +306,18 @@ public class Chart extends ScatterChart {
         }
         Collections.sort(xValues);
     }
+
+    public Node getNodeById(String id){
+        for(Object obj: getPlotChildren()) {
+            if (obj instanceof Node) {
+                Node node = (Node) obj;
+                if (id.equals(node.getId())) {
+                    return node;
+                }
+            }
+        }
+        return null;
+    }
+
 }
 

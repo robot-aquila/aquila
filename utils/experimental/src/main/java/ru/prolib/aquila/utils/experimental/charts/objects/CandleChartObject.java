@@ -53,12 +53,11 @@ public class CandleChartObject implements ChartObject{
         for (int i = 0; i < chart.getNumberOfPoints(); i++) {
             if(i < chart.getXValues().size()){
                 int idx = chart.getCurrentPosition() + i;
-                Candle candle = data.get(chart.getXValues().get(idx));
+                LocalDateTime time = chart.getXValues().get(idx);
+                Candle candle = data.get(time);
                 if(candle != null){
-                    double x = chart.getX(idx);
-
-                    Line line = new Line(x, chart.getY(candle.getHigh()), x, chart.getY(candle.getLow()));
-                    line.getStyleClass().add("candle-line");
+                    Node node = chart.getNodeById(time.toString());
+                    double x = chart.getX(time);
 
                     double height = Math.abs(chart.getY(candle.getOpen()) - chart.getY(candle.getClose()));
                     if(height==0){
@@ -69,17 +68,41 @@ public class CandleChartObject implements ChartObject{
                         width = MIN_WIDTH;
                     }
 
-                    Rectangle body = new Rectangle(x, chart.getY(candle.getBodyMiddle()), width, height);
+                    Line line;
+                    Rectangle body;
+                    if(node == null){
+                        line = new Line(x, chart.getY(candle.getHigh()), x, chart.getY(candle.getLow()));
+                        line.getStyleClass().add("candle-line");
+                        body = new Rectangle(x, chart.getY(candle.getBodyMiddle()), width, height);
+                    } else {
+                        line = (Line) ((Group)node).getChildren().get(0);
+                        line.setStartX(x);
+                        line.setEndX(x);
+                        line.setStartY(chart.getY(candle.getHigh()));
+                        line.setEndY(chart.getY(candle.getLow()));
+
+                        body = (Rectangle) ((Group)node).getChildren().get(1);
+                        body.setX(x);
+                        body.setY(chart.getY(candle.getBodyMiddle()));
+                        body.setWidth(width);
+                        body.setHeight(height);
+                    }
+
                     body.setLayoutX(-width/2);
                     body.setLayoutY(-height/2);
+                    body.getStyleClass().clear();
                     if(candle.getOpen()<candle.getClose()){
                         body.getStyleClass().add("candle-body-bull");
                     } else {
                         body.getStyleClass().add("candle-body-bear");
                     }
+                    body.applyCss();
 
-                    Group group = new Group(line, body);
-                    result.add(group);
+                    if(node==null){
+                        Group group = new Group(line, body);
+                        group.setId(time.toString());
+                        result.add(group);
+                    }
                 }
             }
         }
@@ -151,7 +174,8 @@ public class CandleChartObject implements ChartObject{
         double high = close>lastCandle.getHigh()?close:lastCandle.getHigh();
         double low = close<lastCandle.getLow()?close:lastCandle.getLow();
         LocalDateTime lastTime = toLocalDateTime(lastCandle.getStartTime());
-        data.put(lastTime, new Candle(lastCandle.getInterval(), lastCandle.getOpen(), high, low, close, lastCandle.getVolume()));
+        Candle newCandle = new Candle(lastCandle.getInterval(), lastCandle.getOpen(), high, low, close, lastCandle.getVolume());
+        data.put(lastTime, newCandle);
         if(chart.isTimeDisplayed(lastTime)){
             chart.refresh();
         }
