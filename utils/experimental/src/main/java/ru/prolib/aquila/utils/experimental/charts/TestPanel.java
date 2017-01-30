@@ -13,13 +13,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 
 /**
  * Created by TiM on 25.12.2016.
@@ -33,6 +33,15 @@ public class TestPanel extends JPanel implements ActionListener {
     private List<Candle> candleData = new ArrayList<>();
     private CandleChartObject candles;
     private CircleChartObject circle;
+    private boolean replayStarted = false;
+    private Timer replayTimer = new Timer("REPLAY_TIMER", true);
+    private TimerTask replayTask;
+    private int countReplay = 0;
+
+    private final int TICK_DELAY = 200;
+    private final int COUNT_TICK = 20;
+
+
 
     public TestPanel() {
         super();
@@ -91,20 +100,11 @@ public class TestPanel extends JPanel implements ActionListener {
         });
 
         changeCandle.addActionListener(e->{
-            Candle candle = candles.getLastCandle();
-            candles.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
+            changeCandle();
         });
 
         addCandle.addActionListener(e->{
-            Candle candle = candleData.get(candleData.size()-1);
-            Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
-            double open = candle.getClose();
-            double close = getNewValue(open);
-            double high = Math.max(open + getRandom(),close);
-            double low = Math.min(open - getRandom(),close);
-            Candle newCandle = new Candle(interval, open, high, low, close, 1L);
-            candleData.add(newCandle);
-            candles.addCandle(newCandle);
+            addCandle();
         });
 
         top.add(topLeft, BorderLayout.WEST);
@@ -123,6 +123,7 @@ public class TestPanel extends JPanel implements ActionListener {
         scrollBar.addAdjustmentListener(scrollBarListener);
         add(scrollBar, BorderLayout.SOUTH);
         scrollBar.setVisible(false);
+        random.doClick();
     }
 
     @Override
@@ -196,5 +197,70 @@ public class TestPanel extends JPanel implements ActionListener {
         double newValue = 0;
         newValue = Math.random() * 10;
         return newValue;
+    }
+
+    public JMenuBar createMenuBar(){
+        JMenuBar menuBar = new JMenuBar();
+        JMenu main = new JMenu("Main");
+        final JMenuItem miReplay = new JMenuItem("Start replay");
+        miReplay.addActionListener(event->{
+            replayStarted = !replayStarted;
+            miReplay.setText(replayStarted?"Stop replay":"Start replay");
+            if(replayStarted){
+                replayTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        countReplay++;
+                        if(countReplay%COUNT_TICK == 0){
+                            addZeroCandle();
+                        } else {
+                            changeCandle();
+                        }
+                    }
+                };
+                replayTimer.schedule(replayTask, new Date(), TICK_DELAY);
+            } else {
+                if(replayTask!=null){
+                    countReplay = 0;
+                    replayTask.cancel();
+                }
+            }
+        });
+        main.add(miReplay);
+        menuBar.add(main);
+        return menuBar;
+    }
+
+    private void changeCandle(){
+        Candle candle = candles.getLastCandle();
+        candles.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
+    }
+
+    private void addCandle(){
+        Candle candle = candles.getLastCandle();
+        if(candle!=null){
+            Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
+            double open = candle.getClose();
+            double close = getNewValue(open);
+            double high = Math.max(open + getRandom(),close);
+            double low = Math.min(open - getRandom(),close);
+            Candle newCandle = new Candle(interval, open, high, low, close, 1L);
+            candleData.add(newCandle);
+            candles.addCandle(newCandle);
+        }
+    }
+
+    private void addZeroCandle(){
+        Candle candle = candles.getLastCandle();
+        if(candle!=null){
+            Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
+            double open = candle.getClose();
+            double close = open;
+            double high = open;
+            double low = open;
+            Candle newCandle = new Candle(interval, open, high, low, close, 1L);
+            candleData.add(newCandle);
+            candles.addCandle(newCandle);
+        }
     }
 }

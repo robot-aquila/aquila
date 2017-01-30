@@ -10,7 +10,9 @@ public class Main {
     public static void main(String[] args) {
         JFrame frame = new JFrame("TEST");
         frame.setSize(700,500);
-        frame.add(new TestPanel());
+        TestPanel panel = new TestPanel();
+        frame.setJMenuBar(panel.createMenuBar());
+        frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
