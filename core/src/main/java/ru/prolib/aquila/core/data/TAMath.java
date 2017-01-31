@@ -883,6 +883,7 @@ public class TAMath {
 	 * @return correlation coefficient
 	 * @throws ValueException - error accessing or calculating data
 	 */
+	// TODO: something is wrong with naming of functions (variance is average?)
 	public double correlation(Series<Double> x, Series<Double> y) throws ValueException {
 		// This solution will work for series with null values just in one of series. 
 		Series<Double> x_ = new CorrelationHelperSeries(x, y),
