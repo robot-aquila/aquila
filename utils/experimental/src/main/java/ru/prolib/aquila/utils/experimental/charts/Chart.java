@@ -57,6 +57,7 @@ public class Chart extends ScatterChart {
         xAxis.setAutoRanging(false);
 
         this.setOnMouseClicked(event -> {
+//            this.requestChartLayout();
 //            setCurrentPosition(getCurrentPosition()+1);
         });
 
@@ -113,7 +114,7 @@ public class Chart extends ScatterChart {
         if(xValues.size()==0){
             return;
         }
-        if (/*xValues.size() < numberOfPoints || */currentPosition < 0) {
+        if (currentPosition < 0) {
             setCurrentPosition(0);
         } else if (currentPosition > 0 && currentPosition > xValues.size() - numberOfPoints) {
             setCurrentPosition(xValues.size() - numberOfPoints);

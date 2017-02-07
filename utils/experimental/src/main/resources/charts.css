@@ -21,6 +21,16 @@
     -fx-stroke-width: 1;
 }
 
+.ma-7 {
+    -fx-stroke: blue;
+    -fx-stroke-width: 1;
+}
+
+.ma-14 {
+    -fx-stroke: magenta;
+    -fx-stroke-width: 2;
+}
+
 .major-axis-label {
  -fx-fill: blue;
 }

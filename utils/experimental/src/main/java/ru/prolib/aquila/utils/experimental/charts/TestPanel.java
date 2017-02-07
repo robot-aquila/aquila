@@ -1,10 +1,14 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
+import javafx.application.Platform;
 import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.utils.experimental.charts.calculator.MovingAverageCalculator;
+import ru.prolib.aquila.utils.experimental.charts.calculator.TestCalculator;
 import ru.prolib.aquila.utils.experimental.charts.formatters.M15TimeAxisSettings;
 import ru.prolib.aquila.utils.experimental.charts.objects.CandleChartObject;
 import ru.prolib.aquila.utils.experimental.charts.objects.CircleChartObject;
+import ru.prolib.aquila.utils.experimental.charts.objects.IndicatorChartObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +36,7 @@ public class TestPanel extends JPanel implements ActionListener {
     private JLabel numberOfPointsLabel;
     private List<Candle> candleData = new ArrayList<>();
     private CandleChartObject candles;
-    private CircleChartObject circle;
+    private IndicatorChartObject ma7, ma14, highLine;
     private boolean replayStarted = false;
     private Timer replayTimer = new Timer("REPLAY_TIMER", true);
     private TimerTask replayTask;
@@ -91,6 +95,9 @@ public class TestPanel extends JPanel implements ActionListener {
             candleData = getRandomData();
 
             candles.setData(candleData);
+            ma7.setData(candleData);
+            ma14.setData(candleData);
+//            highLine.setData(candleData);
 
             scrollBar.setVisible(true);
             updateScrollBar();
@@ -159,7 +166,21 @@ public class TestPanel extends JPanel implements ActionListener {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime time = LocalDateTime.parse("2016-12-31 22:00", formatter);
+
         panel.addChartObject(new CircleChartObject(time, 1847, 1));
+
+        MovingAverageCalculator ma7Calc = new MovingAverageCalculator(7);
+        ma7 = new IndicatorChartObject(ma7Calc.getId(), ma7Calc);
+        ma7.setStyleClass("ma-7");
+        MovingAverageCalculator ma14Calc = new MovingAverageCalculator(14);
+        ma14 = new IndicatorChartObject(ma14Calc.getId(), ma14Calc);
+        ma14.setStyleClass("ma-14");
+
+//        highLine = new IndicatorChartObject("HL", new TestCalculator());
+        panel.addChartObject(ma7);
+        panel.addChartObject(ma14);
+//        panel.addChartObject(highLine);
+
         return panel;
     }
 
@@ -232,35 +253,50 @@ public class TestPanel extends JPanel implements ActionListener {
     }
 
     private void changeCandle(){
-        Candle candle = candles.getLastCandle();
-        candles.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
+        Platform.runLater(()->{
+            Candle candle = candles.getLastCandle();
+            candles.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
+            List<Candle> data = candles.getData();
+            ma7.setData(data);
+            ma14.setData(data);
+        });
     }
 
     private void addCandle(){
-        Candle candle = candles.getLastCandle();
-        if(candle!=null){
-            Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
-            double open = candle.getClose();
-            double close = getNewValue(open);
-            double high = Math.max(open + getRandom(),close);
-            double low = Math.min(open - getRandom(),close);
-            Candle newCandle = new Candle(interval, open, high, low, close, 1L);
-            candleData.add(newCandle);
-            candles.addCandle(newCandle);
-        }
+        Platform.runLater(()-> {
+            Candle candle = candles.getLastCandle();
+            if (candle != null) {
+                Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
+                double open = candle.getClose();
+                double close = getNewValue(open);
+                double high = Math.max(open + getRandom(), close);
+                double low = Math.min(open - getRandom(), close);
+                Candle newCandle = new Candle(interval, open, high, low, close, 1L);
+                candleData.add(newCandle);
+                candles.addCandle(newCandle);
+                List<Candle> data = candles.getData();
+                ma7.setData(data);
+                ma14.setData(data);
+            }
+        });
     }
 
     private void addZeroCandle(){
-        Candle candle = candles.getLastCandle();
-        if(candle!=null){
-            Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
-            double open = candle.getClose();
-            double close = open;
-            double high = open;
-            double low = open;
-            Candle newCandle = new Candle(interval, open, high, low, close, 1L);
-            candleData.add(newCandle);
-            candles.addCandle(newCandle);
-        }
+        Platform.runLater(()->{
+            Candle candle = candles.getLastCandle();
+            if(candle!=null){
+                Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
+                double open = candle.getClose();
+                double close = open;
+                double high = open;
+                double low = open;
+                Candle newCandle = new Candle(interval, open, high, low, close, 1L);
+                candleData.add(newCandle);
+                candles.addCandle(newCandle);
+                List<Candle> data = candles.getData();
+                ma7.setData(data);
+                ma14.setData(data);
+            }
+        });
     }
 }

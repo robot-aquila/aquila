@@ -9,13 +9,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.utils.experimental.charts.Chart;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.prolib.aquila.utils.experimental.charts.Utils.toLocalDateTime;
 
 /**
  * Created by TiM on 27.01.2017.
@@ -33,6 +34,10 @@ public class CandleChartObject implements ChartObject{
             this.data.put(time, candle);
         }
         this.chart.refresh();
+    }
+
+    public List<Candle> getData(){
+        return data.keySet().stream().sorted().map(key-> data.get(key)).collect(Collectors.toList());
     }
 
     @Override
@@ -130,10 +135,6 @@ public class CandleChartObject implements ChartObject{
             }
         }
         return new ImmutablePair(minY, maxY);
-    }
-
-    private LocalDateTime toLocalDateTime(Instant time){
-        return time.atOffset(ZoneOffset.UTC).toLocalDateTime();
     }
 
     public Candle getLastCandle(){
