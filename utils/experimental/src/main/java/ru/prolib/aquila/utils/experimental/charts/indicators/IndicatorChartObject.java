@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.charts.objects;
+package ru.prolib.aquila.utils.experimental.charts.indicators;
 
 import javafx.scene.Node;
 import javafx.scene.shape.CubicCurveTo;
@@ -9,16 +9,16 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.utils.experimental.charts.Chart;
-import ru.prolib.aquila.utils.experimental.charts.calculator.Calculator;
+import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
 import ru.prolib.aquila.utils.experimental.charts.interpolator.CubicCurveCalc;
 import ru.prolib.aquila.utils.experimental.charts.interpolator.Segment;
+import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.OptionalDouble;
-import java.util.stream.Collectors;
 
 /**
  * Created by TiM on 31.01.2017.
@@ -30,9 +30,10 @@ public class IndicatorChartObject implements ChartObject {
     private final Calculator calculator;
     private final String id;
 
-    public IndicatorChartObject(String id, Calculator calculator) {
-        this.id = id;
-        this.calculator = calculator;
+    public IndicatorChartObject(IndicatorSettings settings) {
+        this.calculator = settings.getCalculator();
+        this.id = calculator.getId();
+        this.styleClass = settings.getStyleClass();
     }
 
     @Override
@@ -47,7 +48,6 @@ public class IndicatorChartObject implements ChartObject {
             result.add(p.getLeft());
         }
         return result;
-//        return data.stream().filter(p->p != null).map(p-> p.getLeft()).collect(Collectors.toList());
     }
 
     @Override
@@ -90,12 +90,12 @@ public class IndicatorChartObject implements ChartObject {
     }
 
     @Override
-    public Pair<Double, Double> getYInterval() {
+    public Pair<Double, Double> getYInterval(List<LocalDateTime> xValues) {
         OptionalDouble maxY = data.stream()
-                .filter(p-> chart.isTimeDisplayed(p.getLeft()))
+                .filter(p-> xValues.contains(p.getLeft()))
                 .mapToDouble(p-> p.getRight()).max();
         OptionalDouble minY = data.stream()
-                .filter(p-> chart.isTimeDisplayed(p.getLeft()))
+                .filter(p-> xValues.contains(p.getLeft()))
                 .mapToDouble(p-> p.getRight()).min();
         return new ImmutablePair<>(minY.orElse(1e6), maxY.orElse(0));
     }
@@ -113,7 +113,7 @@ public class IndicatorChartObject implements ChartObject {
         return styleClass;
     }
 
-    public void setStyleClass(String styleClass) {
-        this.styleClass = styleClass;
+    public String getId() {
+        return id;
     }
 }

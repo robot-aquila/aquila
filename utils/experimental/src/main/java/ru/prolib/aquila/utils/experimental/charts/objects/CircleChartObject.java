@@ -41,16 +41,18 @@ public class CircleChartObject implements ChartObject {
     @Override
     public List<Node> paint() {
         List<Node> result = new ArrayList<>();
-        double y = chart.getY(this.y);
-        double r = chart.getDistance(this.r);
-        Node circle = new Circle(chart.getX(x), y, r);
-        result.add(circle);
+        if(chart.isTimeDisplayed(x)){
+            double y = chart.getY(this.y);
+            double r = chart.getDistance(this.r);
+            Node circle = new Circle(chart.getX(x), y, r);
+            result.add(circle);
+        }
         return result;
     }
 
     @Override
-    public Pair<Double, Double> getYInterval() {
-        if(chart.isTimeDisplayed(x)){
+    public Pair<Double, Double> getYInterval(List<LocalDateTime> xValues) {
+        if(xValues.contains(x)){
             return new ImmutablePair<>(y-r, y+r);
         }
         return new ImmutablePair<>(1e6, 0.);

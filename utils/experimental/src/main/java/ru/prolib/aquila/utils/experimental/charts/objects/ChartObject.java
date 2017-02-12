@@ -18,5 +18,5 @@ public interface ChartObject {
 
     List<Node> paint();
 
-    Pair<Double, Double> getYInterval();
+    Pair<Double, Double> getYInterval(List<LocalDateTime> xValues);
 }

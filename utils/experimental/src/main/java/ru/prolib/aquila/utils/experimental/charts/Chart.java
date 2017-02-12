@@ -1,20 +1,14 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
-import javafx.application.Platform;
 import javafx.beans.NamedArg;
 import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.utils.experimental.charts.formatters.DefaultTimeAxisSettings;
 import ru.prolib.aquila.utils.experimental.charts.formatters.TimeAxisSettings;
-import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,18 +19,12 @@ import java.util.List;
  */
 public class Chart extends ScatterChart {
 
-    public static final String CURRENT_POSITION_CHANGE="CURRENT_POSITION_CHANGE";
-    public static final String NUMBER_OF_POINTS_CHANGE="NUMBER_OF_POINTS_CHANGE";
-    private int numberOfPoints = 15;
-    private int currentPosition = 0;
     private Series highSeries = new Series();
     private Series lowSeries = new Series();
     private final NumberAxis xAxis;
     private final NumberAxis yAxis;
-    private final List<LocalDateTime> xValues = new ArrayList<>();
-    private ActionListener actionListener;
+    private List<LocalDateTime> xValues = Collections.synchronizedList(new ArrayList<>());
     private TimeAxisSettings timeAxisSettings = new DefaultTimeAxisSettings();
-    private final List<ChartObject> chartObjects = new ArrayList<>();
 
     public Chart(@NamedArg("xAxis") NumberAxis xAxis, @NamedArg("yAxis") NumberAxis yAxis) {
         super(xAxis, yAxis);
@@ -56,20 +44,6 @@ public class Chart extends ScatterChart {
         xAxis.setTickLabelRotation(-90);
         xAxis.setAutoRanging(false);
 
-        this.setOnMouseClicked(event -> {
-//            this.requestChartLayout();
-//            setCurrentPosition(getCurrentPosition()+1);
-        });
-
-        this.setOnScroll(event -> {
-            if (event.isControlDown()) {
-                setNumberOfPoints(getNumberOfPoints() - (int) Math.signum(event.getDeltaY()));
-            } else {
-                setCurrentPosition(getCurrentPosition() - (int) Math.signum(event.getDeltaY()));
-            }
-
-        });
-
         xAxis.setTickLabelFormatter(new StringConverter<Number>() {
             @Override
             public String toString(Number object) {
@@ -87,101 +61,26 @@ public class Chart extends ScatterChart {
         });
     }
 
-    public Integer getCurrentPosition() {
-        return currentPosition;
-    }
-
-    public Integer getNumberOfPoints() {
-        return numberOfPoints;
-    }
-
-    public void setNumberOfPoints(Integer numberOfPoints) {
-        if (numberOfPoints < 2) {
-            numberOfPoints = 2;
-        }
-        if (numberOfPoints > xValues.size()) {
-            numberOfPoints = xValues.size();
-        }
-        this.numberOfPoints = numberOfPoints;
-        if(actionListener!=null){
-            actionListener.actionPerformed(new ActionEvent(this, 1, NUMBER_OF_POINTS_CHANGE));
-        }
-        setCurrentPosition(getCurrentPosition());
-    }
-
-    public void setCurrentPosition(Integer currentPosition) {
-        updateXValues();
-        if(xValues.size()==0){
-            return;
-        }
-        if (currentPosition < 0) {
-            setCurrentPosition(0);
-        } else if (currentPosition > 0 && currentPosition > xValues.size() - numberOfPoints) {
-            setCurrentPosition(xValues.size() - numberOfPoints);
-        } else {
-            this.currentPosition = currentPosition;
-
-            double maxY = 0;
-            double minY = 1e6;
-            for(ChartObject obj: chartObjects){
-                Pair<Double, Double> interval = obj.getYInterval();
-                if(interval.getRight() > maxY){
-                    maxY = interval.getRight();
-                }
-                if(interval.getLeft() < minY){
-                    minY = interval.getLeft();
-                }
-            }
-
-            updateYInterval(minY, maxY);
-
-            xAxis.setLowerBound(currentPosition - 1);
-            xAxis.setUpperBound(currentPosition+numberOfPoints);
-            if(actionListener!=null){
-                actionListener.actionPerformed(new ActionEvent(this, 1, CURRENT_POSITION_CHANGE));
-            }
-        }
-    }
-
-    public void updateYInterval(double minY, double maxY){
+    public void setAxisValues(List<LocalDateTime> xValues, double minY, double maxY){
+//        this.xValues = xValues;
+        this.xValues.clear();
+        this.xValues.addAll(xValues);
+        xAxis.setLowerBound(-1);
+        xAxis.setUpperBound(xValues.size());
         highSeries.getData().clear();
         lowSeries.getData().clear();
-        highSeries.getData().add(new Data<>(currentPosition, maxY));
-        lowSeries.getData().add(new Data<>(currentPosition, minY));
-    }
-
-    public Pair<LocalDateTime, LocalDateTime> getCurrentTimeInterval(){
-        LocalDateTime min = null;
-        LocalDateTime max = null;
-        int cnt = xValues.size();
-        if(cnt > 0){
-            min = xValues.get(currentPosition);
-            if(cnt >= currentPosition + numberOfPoints){
-                max = xValues.get(currentPosition + numberOfPoints - 1);
-            } else {
-                max = xValues.get(cnt - 1);
-            }
+        highSeries.getData().add(new Data<>(0, maxY));
+        lowSeries.getData().add(new Data<>(0, minY));
+        List<Number> list = new ArrayList<>();
+        for(int i=0; i<xValues.size(); i++){
+            list.add(i);
         }
-        return new ImmutablePair<>(min, max);
+        xAxis.invalidateRange(list);
+        this.layout();
     }
 
     public boolean isTimeDisplayed(LocalDateTime time){
-        Pair<LocalDateTime, LocalDateTime> displayedInterval = getCurrentTimeInterval();
-        return time.equals(displayedInterval.getLeft())||
-                time.equals(displayedInterval.getRight())||
-                (time.isBefore(displayedInterval.getRight()) && time.isAfter(displayedInterval.getLeft()));
-    }
-
-    public void refresh(){
-        Platform.runLater(()->{
-            setCurrentPosition(getCurrentPosition());
-        });
-    }
-
-    public void refresh(int newCurrentPosition){
-        Platform.runLater(()->{
-            setCurrentPosition(newCurrentPosition);
-        });
+        return xValues.contains(time);
     }
 
     public double getY(double chartY) {
@@ -200,20 +99,15 @@ public class Chart extends ScatterChart {
         return Math.abs(getY(distance) - getY(0));
     }
 
-    @Override
-    protected void layoutPlotChildren() {
-        Pair<LocalDateTime, LocalDateTime> interval = getCurrentTimeInterval();
+    public void updatePlotChildren(List<Node> nodes){
         for(int i=getPlotChildren().size()-1; i>=0; i--){
             Node node = (Node) getPlotChildren().get(i);
             if(node.getId() == null || node.getId().equals("")){
                 getPlotChildren().remove(node);
             }
         }
-//        getPlotChildren().clear();
 
-        for(ChartObject obj: chartObjects){
-            getPlotChildren().addAll(obj.paint());
-        }
+        getPlotChildren().addAll(nodes);
 
         for(int i=getPlotChildren().size()-1; i>=0; i--){
             Node node = (Node) getPlotChildren().get(i);
@@ -225,13 +119,18 @@ public class Chart extends ScatterChart {
                 } catch (Exception e){
 
                 }
-                if(time!=null && (time.isBefore(interval.getLeft()) || time.isAfter(interval.getRight()))){
+                if(time!=null && !isTimeDisplayed(time)){
                     getPlotChildren().remove(node);
                 }
             }
         }
-
         updateStyles();
+        this.layout();
+    }
+
+    @Override
+    protected void layoutPlotChildren() {
+// do nothing
     }
 
     private void updateStyles() {
@@ -256,56 +155,12 @@ public class Chart extends ScatterChart {
         return timeAxisSettings.formatDateTime(time);
     }
 
-    public void setActionListener(ActionListener actionListener) {
-        this.actionListener = actionListener;
-    }
-
     public void setTimeAxisSettings(TimeAxisSettings timeAxisSettings) {
         this.timeAxisSettings = timeAxisSettings;
     }
 
-    public ChartObject getChartObject(int i) {
-        return chartObjects.get(i);
-    }
-
-    public void addChartObject(ChartObject object){
-        object.setChart(this);
-        chartObjects.add(object);
-        updateXValues();
-        refresh();
-    }
-
-    public void removeChartObject(ChartObject object){
-        object.setChart(null);
-        chartObjects.remove(object);
-        updateXValues();
-        refresh();
-    }
-
-    public void clearChartObjects(){
-        for(ChartObject object: chartObjects){
-            object.setChart(null);
-        }
-        chartObjects.clear();
-        updateXValues();
-        refresh();
-    }
-
     public List<LocalDateTime> getXValues() {
         return xValues;
-    }
-
-    private void updateXValues(){
-        xValues.clear();
-        for(ChartObject obj: chartObjects){
-            List<LocalDateTime> list = obj.getXValues();
-            for(LocalDateTime time: list){
-                if(!xValues.contains(time)){
-                    xValues.add(time);
-                }
-            }
-        }
-        Collections.sort(xValues);
     }
 
     public Node getNodeById(String id){

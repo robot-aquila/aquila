@@ -38,3 +38,23 @@
 .minor-axis-label {
  -fx-fill: red;
 }
+
+.line-blue {
+    -fx-stroke: blue;
+    -fx-stroke-width: 1;
+}
+
+.line-magenta {
+    -fx-stroke: magenta;
+    -fx-stroke-width: 2;
+}
+
+.line-red {
+    -fx-stroke: red;
+    -fx-stroke-width: 1;
+}
+
+ .line-green {
+    -fx-stroke: green;
+    -fx-stroke-width: 1;
+}

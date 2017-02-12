@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.charts.calculator;
+package ru.prolib.aquila.utils.experimental.charts.indicators.calculator;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -7,7 +7,6 @@ import ru.prolib.aquila.core.data.Candle;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.prolib.aquila.utils.experimental.charts.Utils.toLocalDateTime;
 

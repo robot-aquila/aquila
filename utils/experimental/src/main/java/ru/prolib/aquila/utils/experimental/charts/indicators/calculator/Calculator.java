@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.charts.calculator;
+package ru.prolib.aquila.utils.experimental.charts.indicators.calculator;
 
 import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Candle;

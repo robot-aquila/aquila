@@ -1,14 +1,18 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
+import javafx.scene.Node;
 import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.utils.experimental.charts.calculator.MovingAverageCalculator;
-import ru.prolib.aquila.utils.experimental.charts.calculator.TestCalculator;
+import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
+import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
 import ru.prolib.aquila.utils.experimental.charts.formatters.M15TimeAxisSettings;
+import ru.prolib.aquila.utils.experimental.charts.indicators.forms.IndicatorParams;
+import ru.prolib.aquila.utils.experimental.charts.indicators.forms.MovingAverageIndicatorParams;
 import ru.prolib.aquila.utils.experimental.charts.objects.CandleChartObject;
+import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
 import ru.prolib.aquila.utils.experimental.charts.objects.CircleChartObject;
-import ru.prolib.aquila.utils.experimental.charts.objects.IndicatorChartObject;
+import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +29,9 @@ import java.util.*;
 import java.util.List;
 import java.util.Timer;
 
+import static ru.prolib.aquila.utils.experimental.charts.ChartPanel.CURRENT_POSITION_CHANGE;
+import static ru.prolib.aquila.utils.experimental.charts.ChartPanel.NUMBER_OF_POINTS_CHANGE;
+
 /**
  * Created by TiM on 25.12.2016.
  */
@@ -36,7 +43,6 @@ public class TestPanel extends JPanel implements ActionListener {
     private JLabel numberOfPointsLabel;
     private List<Candle> candleData = new ArrayList<>();
     private CandleChartObject candles;
-    private IndicatorChartObject ma7, ma14, highLine;
     private boolean replayStarted = false;
     private Timer replayTimer = new Timer("REPLAY_TIMER", true);
     private TimerTask replayTask;
@@ -45,7 +51,28 @@ public class TestPanel extends JPanel implements ActionListener {
     private final int TICK_DELAY = 200;
     private final int COUNT_TICK = 20;
 
+    private List<IndicatorChartObject> indicators = new ArrayList<>();
+    private JMenu indicatorsMenu;
 
+    private class AddIndicatorListener implements ActionListener {
+
+        private final IndicatorParams form;
+
+        public AddIndicatorListener(IndicatorParams form) {
+            this.form = form;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            IndicatorSettings settings = form.showDialog();
+            Calculator calculator = settings.getCalculator();
+            if(settings!=null && findIndicatorById(calculator.getId())==null){
+                indicators.add(new IndicatorChartObject(settings));
+                refreshIndicators();
+                indicatorsMenu.insert(createIndicatorMenuItem(calculator.getId(), calculator.getName()), indicatorsMenu.getItemCount()-2);
+            }
+        }
+    }
 
     public TestPanel() {
         super();
@@ -95,9 +122,9 @@ public class TestPanel extends JPanel implements ActionListener {
             candleData = getRandomData();
 
             candles.setData(candleData);
-            ma7.setData(candleData);
-            ma14.setData(candleData);
-//            highLine.setData(candleData);
+            refreshIndicatorsData();
+            panel.refresh();
+
 
             scrollBar.setVisible(true);
             updateScrollBar();
@@ -117,7 +144,7 @@ public class TestPanel extends JPanel implements ActionListener {
         top.add(topLeft, BorderLayout.WEST);
         top.add(topRight, BorderLayout.EAST);
 
-        add(top, BorderLayout.NORTH);
+//        add(top, BorderLayout.NORTH);
 
         scrollBarListener = new AdjustmentListener() {
             @Override
@@ -129,14 +156,16 @@ public class TestPanel extends JPanel implements ActionListener {
         scrollBar = new JScrollBar(SwingConstants.HORIZONTAL);
         scrollBar.addAdjustmentListener(scrollBarListener);
         add(scrollBar, BorderLayout.SOUTH);
-        scrollBar.setVisible(false);
-        random.doClick();
+//        scrollBar.setVisible(false);
+//        panel.setCurrentPosition(0);
+//        random.doClick();
+        generateRandomData();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()){
-            case Chart.CURRENT_POSITION_CHANGE:
+            case CURRENT_POSITION_CHANGE:
                 if(scrollBar!=null){
                     scrollBar.removeAdjustmentListener(scrollBarListener);
                     updateScrollBar();
@@ -144,7 +173,7 @@ public class TestPanel extends JPanel implements ActionListener {
                     scrollBar.addAdjustmentListener(scrollBarListener);
                 }
                 break;
-            case Chart.NUMBER_OF_POINTS_CHANGE:
+            case NUMBER_OF_POINTS_CHANGE:
                 if(scrollBar!=null){
                     numberOfPointsLabel.setText(panel.getNumberOfPoints().toString());
                     updateScrollBar();
@@ -169,19 +198,15 @@ public class TestPanel extends JPanel implements ActionListener {
 
         panel.addChartObject(new CircleChartObject(time, 1847, 1));
 
-        MovingAverageCalculator ma7Calc = new MovingAverageCalculator(7);
-        ma7 = new IndicatorChartObject(ma7Calc.getId(), ma7Calc);
-        ma7.setStyleClass("ma-7");
-        MovingAverageCalculator ma14Calc = new MovingAverageCalculator(14);
-        ma14 = new IndicatorChartObject(ma14Calc.getId(), ma14Calc);
-        ma14.setStyleClass("ma-14");
-
-//        highLine = new IndicatorChartObject("HL", new TestCalculator());
-        panel.addChartObject(ma7);
-        panel.addChartObject(ma14);
-//        panel.addChartObject(highLine);
-
         return panel;
+    }
+
+    private void generateRandomData(){
+        candleData = getRandomData();
+        candles.setData(candleData);
+        refreshIndicatorsData();
+        panel.refresh();
+        updateScrollBar();
     }
 
     private List<Candle> getRandomData(){
@@ -223,6 +248,11 @@ public class TestPanel extends JPanel implements ActionListener {
     public JMenuBar createMenuBar(){
         JMenuBar menuBar = new JMenuBar();
         JMenu main = new JMenu("Main");
+        JMenuItem random = new JMenuItem("Random data");
+        random.addActionListener(e -> {
+            generateRandomData();
+        });
+        main.add(random);
         final JMenuItem miReplay = new JMenuItem("Start replay");
         miReplay.addActionListener(event->{
             replayStarted = !replayStarted;
@@ -248,8 +278,95 @@ public class TestPanel extends JPanel implements ActionListener {
             }
         });
         main.add(miReplay);
+
+        main.add(new JPopupMenu.Separator());
+
+        final JMenuItem miExit = new JMenuItem("Exit");
+        miExit.addActionListener(event->{
+            System.exit(0);
+        });
+        main.add(miExit);
+
         menuBar.add(main);
+        indicatorsMenu = createIndicatorMenu();
+        menuBar.add(indicatorsMenu);
+
+        JMenu view = new JMenu("View");
+        JMenuItem zoomIn = new JMenuItem("Zoom In");
+        zoomIn.addActionListener(e-> {
+            panel.setNumberOfPoints(panel.getNumberOfPoints()-1);
+        });
+        JMenuItem zoomOut = new JMenuItem("Zoom Out");
+        zoomOut.addActionListener(e->{
+            panel.setNumberOfPoints(panel.getNumberOfPoints()+1);
+        });
+        view.add(zoomIn);
+        view.add(zoomOut);
+        menuBar.add(view);
+
         return menuBar;
+    }
+
+    private JMenu createIndicatorMenu() {
+        JMenu menu = new JMenu("Indicators");
+        JMenu miAdd = new JMenu("Add indicator");
+        JMenuItem miAddMA = new JMenuItem("Moving Average");
+        miAddMA.addActionListener(new AddIndicatorListener(new MovingAverageIndicatorParams()));
+        miAdd.add(miAddMA);
+        menu.add(new JPopupMenu.Separator());
+        menu.add(miAdd);
+        return menu;
+    }
+
+    private IndicatorChartObject findIndicatorById(String id){
+        for(IndicatorChartObject obj: indicators){
+            if(id.equals(obj.getId())){
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    private JMenu createIndicatorMenuItem(final String id, String name) {
+        final JMenu menu = new JMenu(name);
+        JMenuItem miDelete = new JMenuItem("Remove");
+        miDelete.addActionListener(e->{
+            IndicatorChartObject obj = findIndicatorById(id);
+            if(obj!=null){
+                indicators.remove(obj);
+                indicatorsMenu.remove(menu);
+                refreshIndicators();
+            }
+        });
+        menu.add(miDelete);
+        return menu;
+    }
+
+    private void refreshIndicators(){
+        for(int i=panel.getChartObjects().size()-1; i>=0; i--){
+            ChartObject obj = panel.getChartObjects().get(i);
+            if(obj instanceof IndicatorChartObject){
+                if(!indicators.contains(obj)){
+                    panel.getChartObjects().remove(obj);
+                    Node node = panel.getChart().getNodeById(((IndicatorChartObject) obj).getId());
+                    if(node!=null){
+                        node.setId(null);
+                    }
+                }
+            }
+        }
+        for(IndicatorChartObject obj: indicators){
+            panel.addChartObject(obj);
+        }
+        refreshIndicatorsData();
+        panel.refresh();
+    }
+
+    private void refreshIndicatorsData(){
+        for(IndicatorChartObject obj: indicators){
+            obj.setData(candles.getData());
+        }
+        panel.refresh();
     }
 
     private void changeCandle(){
@@ -257,8 +374,10 @@ public class TestPanel extends JPanel implements ActionListener {
             Candle candle = candles.getLastCandle();
             candles.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
             List<Candle> data = candles.getData();
-            ma7.setData(data);
-            ma14.setData(data);
+            refreshIndicatorsData();
+            if(panel.isTimeDisplayed(candle.getStartTime())){
+                panel.refresh();
+            }
         });
     }
 
@@ -275,8 +394,10 @@ public class TestPanel extends JPanel implements ActionListener {
                 candleData.add(newCandle);
                 candles.addCandle(newCandle);
                 List<Candle> data = candles.getData();
-                ma7.setData(data);
-                ma14.setData(data);
+                refreshIndicatorsData();
+                if(panel.isTimeDisplayed(candle.getStartTime())){
+                    panel.setCurrentPosition(panel.getCurrentPosition()+1);
+                }
             }
         });
     }
@@ -294,8 +415,10 @@ public class TestPanel extends JPanel implements ActionListener {
                 candleData.add(newCandle);
                 candles.addCandle(newCandle);
                 List<Candle> data = candles.getData();
-                ma7.setData(data);
-                ma14.setData(data);
+                refreshIndicatorsData();
+                if(panel.isTimeDisplayed(candle.getStartTime())){
+                    panel.setCurrentPosition(panel.getCurrentPosition()+1);
+                }
             }
         });
     }
