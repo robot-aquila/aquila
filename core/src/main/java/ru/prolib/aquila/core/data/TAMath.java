@@ -883,12 +883,13 @@ public class TAMath {
 	 * @return correlation coefficient
 	 * @throws ValueException - error accessing or calculating data
 	 */
-	// TODO: something is wrong with naming of functions (variance is average?)
 	public double correlation(Series<Double> x, Series<Double> y) throws ValueException {
 		// This solution will work for series with null values just in one of series. 
 		Series<Double> x_ = new CorrelationHelperSeries(x, y),
 				y_ = new CorrelationHelperSeries(y, x);
 		SN covxy = _covariance(x_, y_), varx = _variance(x_), vary = _variance(y_);
+		//return covariance(x_,y_) / (Math.sqrt(variance(x_)) * Math.sqrt(variance(y_)));
+		//return covariance(x_,y_) / Math.sqrt(variance(x_) * variance(y_));
 		return covxy.getSum() / Math.sqrt(varx.getSum() * vary.getSum());
 	}
 
