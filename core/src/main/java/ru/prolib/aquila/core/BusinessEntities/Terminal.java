@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.util.Set;
 
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.concurrency.Lockable;
 
 /**
  * Terminal interface.
@@ -10,7 +11,7 @@ import ru.prolib.aquila.core.EventType;
  * 2012-05-30<br>
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public interface Terminal extends Scheduler {
+public interface Terminal extends Scheduler, Lockable {
 	
 	/**
 	 * Get ID of the terminal.

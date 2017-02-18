@@ -24,6 +24,7 @@ import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
@@ -175,6 +176,8 @@ public class TerminalImplTest {
 		assertEquals(prefix + "SECURITY_CLOSE", terminal.onSecurityClose().getId());
 		assertEquals(prefix + "POSITION_CLOSE", terminal.onPositionClose().getId());
 		assertEquals(prefix + "PORTFOLIO_CLOSE", terminal.onPortfolioClose().getId());
+		assertNotNull(terminal.getLID());
+		assertTrue(LID.isLastCreatedLID(terminalWithMocks.getLID()));
 	}
 
 	@Test

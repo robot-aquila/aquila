@@ -10,12 +10,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.DataProvider;
 
 /**
  * Terminal model implementation.
  */
 public class TerminalImpl implements EditableTerminal {
+	private final LID lid;
 	private final Lock lock;
 	private final EventQueue queue;
 	private final Map<Symbol, EditableSecurity> securities;
@@ -55,6 +57,7 @@ public class TerminalImpl implements EditableTerminal {
 	 */
 	public TerminalImpl(TerminalParams params) {
 		super();
+		this.lid = LID.createInstance();
 		this.lock = new ReentrantLock();
 		this.terminalID = params.getTerminalID();
 		this.queue = params.getEventQueue();
@@ -95,6 +98,11 @@ public class TerminalImpl implements EditableTerminal {
 		onOrderClose = newEventType("ORDER_CLOSE");
 		onPositionClose = newEventType("POSITION_CLOSE");
 		onPortfolioClose = newEventType("PORTFOLIO_CLOSE");
+	}
+	
+	@Override
+	public LID getLID() {
+		return lid;
 	}
 	
 	@Override
