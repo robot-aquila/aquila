@@ -85,7 +85,7 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	public void update(Map<Integer, Object> tokens) {
 		lock.lock();
 		try {
-			super.update(tokens);
+			super.update(tokens); // inside the lock is OK in this case
 			if ( hasChanged() ) {
 				EventFactory factory = createEventFactory();
 				queue.enqueue(onUpdate, factory);

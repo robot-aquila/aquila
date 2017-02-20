@@ -24,20 +24,17 @@ public class PositionListTableModel extends AbstractTableModel implements
 		EventListener, ITableModel 
 {
 	private static final long serialVersionUID = 1;
-	private static final List<MsgID> mapIndexToID;
+	public static final int CID_TERMINAL_ID = 1;
+	public static final int CID_ACCOUNT = 2;
+	public static final int CID_SYMBOL = 3;
+	public static final int CID_CURRENT_VOLUME = 4;
+	public static final int CID_CURRENT_PRICE = 5;
+	public static final int CID_OPEN_PRICE = 6;
+	public static final int CID_USED_MARGIN = 7;
+	public static final int CID_PROFIT_AND_LOSS = 8;
 	
-	static {
-		mapIndexToID = new ArrayList<MsgID>();
-		mapIndexToID.add(CommonMsg.TERMINAL);
-		mapIndexToID.add(CommonMsg.ACCOUNT);
-		mapIndexToID.add(CommonMsg.SYMBOL);
-		mapIndexToID.add(CommonMsg.CURR_VOL);
-		mapIndexToID.add(CommonMsg.CURR_PR);
-		mapIndexToID.add(CommonMsg.OPEN_PR);
-		mapIndexToID.add(CommonMsg.USED_MARGIN);
-		mapIndexToID.add(CommonMsg.PROFIT_AND_LOSS);
-	}
-
+	private final List<Integer> columnIndexToColumnID;
+	private final Map<Integer, MsgID> columnIDToColumnHeader;
 	private final IMessages messages;
 	private final List<Position> positions;
 	private final Map<Position, Integer> positionMap;
@@ -46,10 +43,58 @@ public class PositionListTableModel extends AbstractTableModel implements
 
 	public PositionListTableModel(IMessages messages) {
 		super();
+		columnIndexToColumnID = getColumnIDList();
+		columnIDToColumnHeader = getColumnIDToHeaderMap();
 		this.messages = messages;
 		this.positions = new ArrayList<Position>();
 		this.positionMap = new HashMap<Position, Integer>();
 		this.portfolioSet = new HashSet<Portfolio>();
+	}
+
+	/**
+	 * Get list of columns to display.
+	 * <p>
+	 * Not all of attributes are displayed by default.
+	 * Override this method to add or modify column list. 
+	 * <p>
+	 * @return list of columns
+	 */
+	protected List<Integer> getColumnIDList() {
+		List<Integer> cols = new ArrayList<>();
+		cols.add(CID_TERMINAL_ID);
+		cols.add(CID_ACCOUNT);
+		cols.add(CID_SYMBOL);
+		cols.add(CID_CURRENT_VOLUME);
+		cols.add(CID_CURRENT_PRICE);
+		cols.add(CID_OPEN_PRICE);
+		cols.add(CID_USED_MARGIN);
+		cols.add(CID_PROFIT_AND_LOSS);
+		return cols;
+	}
+
+	/**
+	 * Get map of columns mapped to its titles.
+	 * <p>
+	 * Override this method to add or modify column titles.
+	 * <p>
+	 * @return map of column titles
+	 */
+	protected Map<Integer, MsgID> getColumnIDToHeaderMap() {
+		Map<Integer, MsgID> head = new HashMap<>();
+		head.put(CID_TERMINAL_ID, CommonMsg.TERMINAL);
+		head.put(CID_ACCOUNT, CommonMsg.ACCOUNT);
+		head.put(CID_SYMBOL, CommonMsg.SYMBOL);
+		head.put(CID_CURRENT_VOLUME, CommonMsg.CURR_VOL);
+		head.put(CID_CURRENT_PRICE, CommonMsg.CURR_PR);
+		head.put(CID_OPEN_PRICE, CommonMsg.OPEN_PR);
+		head.put(CID_USED_MARGIN, CommonMsg.USED_MARGIN);
+		head.put(CID_PROFIT_AND_LOSS, CommonMsg.PROFIT_AND_LOSS);
+		return head;
+	}
+	
+	@Override
+	public int getColumnCount() {
+		return columnIndexToColumnID.size();
 	}
 	
 	@Override
@@ -57,49 +102,56 @@ public class PositionListTableModel extends AbstractTableModel implements
 		return positions.size();
 	}
 	
-	@Override
-	public int getColumnCount() {
-		return mapIndexToID.size();
-	}
+	
 	
 	@Override
 	public Object getValueAt(int row, int col) {
-		Position p = null;
-		if ( row >= positions.size() ) {
+		if ( row > positions.size() ) {
 			return null;
 		}
-		p = positions.get(row);
-		
-		MsgID id = mapIndexToID.get(col);
-		if ( id == CommonMsg.ACCOUNT ) {
-			return p.getAccount();
-		} else if ( id == CommonMsg.TERMINAL ) {
-			return p.getTerminal().getTerminalID();
-		} else if ( id == CommonMsg.SYMBOL ) {		
-			return p.getSymbol();
-		} else if ( id == CommonMsg.USED_MARGIN ) {
-			return p.getUsedMargin();
-		} else if ( id == CommonMsg.OPEN_PR ) {
-			return p.getOpenPrice();
-		} else if ( id == CommonMsg.CURR_VOL ) {
-			return p.getCurrentVolume();
-		} else if ( id == CommonMsg.CURR_PR ) {
-			return p.getCurrentPrice();
-		} else if ( id == CommonMsg.PROFIT_AND_LOSS ) {
-			return p.getProfitAndLoss();
-		} else {
-			return null;
-		}
+		return getColumnValue(positions.get(row), getColumnID(col));
 	}
-
-	@Override
-	public String getColumnName(int col) {
-		return messages.get(mapIndexToID.get(col));
+	
+	protected Object getColumnValue(Position p, int columnID) {
+		switch ( columnID ) {
+		case CID_ACCOUNT:
+			return p.getAccount();
+		case CID_TERMINAL_ID:
+			return p.getTerminal().getTerminalID();
+		case CID_SYMBOL:		
+			return p.getSymbol().toString();
+		case CID_USED_MARGIN:
+			return p.getUsedMargin();
+		case CID_OPEN_PRICE:
+			return p.getOpenPrice();
+		case CID_CURRENT_VOLUME:
+			return p.getCurrentVolume();
+		case CID_CURRENT_PRICE:
+			return p.getCurrentPrice();
+		case CID_PROFIT_AND_LOSS:
+			return p.getProfitAndLoss();
+		default:
+			return null;
+		}
 	}
 	
 	@Override
+	public int getColumnIndex(int columnID) {
+		return columnIndexToColumnID.indexOf(columnID);
+	}
+
+	@Override
 	public int getColumnID(int columnIndex) {
-		throw new UnsupportedOperationException();
+		return columnIndexToColumnID.get(columnIndex);
+	}
+	
+	@Override
+	public String getColumnName(int col) {
+		MsgID id = columnIDToColumnHeader.get(columnIndexToColumnID.get(col));
+		if ( id == null ) {
+			return "NULL_ID#" + col; 
+		}
+		return messages.get(id);
 	}
 	
 	/**
@@ -125,6 +177,17 @@ public class PositionListTableModel extends AbstractTableModel implements
 		portfolioSet.add(portfolio);
 		if ( subscribed ) {
 			cacheDataAndSubscribeEvents(portfolio);
+		}
+	}
+	
+	/**
+	 * Add all terminal portfolios to show their positions.
+	 * <p>
+	 * @param terminal - terminal to scan for portfolios
+	 */
+	public void add(Terminal terminal) {
+		for ( Portfolio p : terminal.getPortfolios() ) {
+			add(p);
 		}
 	}
 	
@@ -224,18 +287,11 @@ public class PositionListTableModel extends AbstractTableModel implements
 	}
 	
 	private void subscribe(Portfolio portfolio) {
-		portfolio.onPositionAvailable().addListener(this);
 		portfolio.onPositionUpdate().addListener(this);
 	}
 	
 	private void unsubscribe(Portfolio portfolio) {
-		portfolio.onPositionAvailable().removeListener(this);
 		portfolio.onPositionUpdate().removeListener(this);
-	}
-	
-	@Override
-	public int getColumnIndex(int columnID) {
-		throw new RuntimeException("Not implemented");
 	}
 	
 }

@@ -170,10 +170,10 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 			onLastTrade.removeAlternates();
 			onMarketDepthUpdate.removeListeners();
 			onMarketDepthUpdate.removeAlternates();
-			super.close();
 		} finally {
 			lock.unlock();
 		}
+		super.close();
 	}
 	
 	static class SecurityController implements ObservableStateContainerImpl.Controller {

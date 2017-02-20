@@ -367,7 +367,6 @@ public class SecurityListTableModel extends AbstractTableModel
 	}
 	
 	private void subscribe(Terminal terminal) {
-		terminal.onSecurityAvailable().addListener(this);
 		terminal.onSecurityUpdate().addListener(this);
 		terminal.onSecurityBestAsk().addListener(this);
 		terminal.onSecurityBestBid().addListener(this);
@@ -375,7 +374,6 @@ public class SecurityListTableModel extends AbstractTableModel
 	}
 	
 	private void unsubscribe(Terminal terminal) {
-		terminal.onSecurityAvailable().removeListener(this);
 		terminal.onSecurityUpdate().removeListener(this);
 		terminal.onSecurityBestAsk().removeListener(this);
 		terminal.onSecurityBestBid().removeListener(this);

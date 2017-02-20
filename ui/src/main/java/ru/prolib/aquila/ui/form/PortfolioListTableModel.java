@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
@@ -26,85 +25,137 @@ public class PortfolioListTableModel extends AbstractTableModel
 	implements EventListener, ITableModel
 {
 	private static final long serialVersionUID = 1L;
-	private static final List<MsgID> mapIndexToID;
+	public static final int CID_ACCOUNT = 1;
+	public static final int CID_CURRENCY = 2;
+	public static final int CID_TERMINAL_ID = 3;
+	public static final int CID_BALANCE = 4;
+	public static final int CID_EQUITY = 5;
+	public static final int CID_LEVERAGE = 6;
+	public static final int CID_FREE_MARGIN = 7;
+	public static final int CID_USED_MARGIN = 8;
+	public static final int CID_PROFIT_AND_LOSS = 9;
 	
-	static {
-		mapIndexToID = new Vector<MsgID>();
-		mapIndexToID.add(CommonMsg.ACCOUNT);
-		mapIndexToID.add(CommonMsg.CURRENCY);
-		mapIndexToID.add(CommonMsg.TERMINAL);
-		mapIndexToID.add(CommonMsg.BALANCE);
-		mapIndexToID.add(CommonMsg.EQUITY);
-		mapIndexToID.add(CommonMsg.LEVERAGE);
-		mapIndexToID.add(CommonMsg.FREE_MARGIN);
-		mapIndexToID.add(CommonMsg.USED_MARGIN);
-		mapIndexToID.add(CommonMsg.PROFIT_AND_LOSS);
-	}
-	
-	private boolean subscribed = false;
+	private final List<Integer> columnIndexToColumnID;
+	private final Map<Integer, MsgID> columnIDToColumnHeader;
 	private final IMessages messages;
-	private final Set<Terminal> terminalSet;
-	private final Map<Portfolio, Integer> portfolioMap;
 	private final List<Portfolio> portfolios;
+	private final Map<Portfolio, Integer> portfolioMap;
+	private final Set<Terminal> terminalSet;
+	private boolean subscribed = false;
 	
 	public PortfolioListTableModel(IMessages messages) {
-		super();
+		columnIndexToColumnID = getColumnIDList();
+		columnIDToColumnHeader = getColumnIDToHeaderMap();
 		this.messages = messages;
 		this.terminalSet = new HashSet<Terminal>();
 		this.portfolioMap = new HashMap<Portfolio, Integer>();
 		this.portfolios = new ArrayList<Portfolio>();
 	}
+	
+	/**
+	 * Get list of columns to display.
+	 * <p>
+	 * Not all of portfolio attributes are displayed by default.
+	 * Override this method to add or modify column list. 
+	 * <p>
+	 * @return list of columns
+	 */
+	protected List<Integer> getColumnIDList() {
+		List<Integer> cols = new ArrayList<>();
+		cols.add(CID_ACCOUNT);
+		cols.add(CID_CURRENCY);
+		cols.add(CID_TERMINAL_ID);
+		cols.add(CID_BALANCE);
+		cols.add(CID_EQUITY);
+		cols.add(CID_LEVERAGE);
+		cols.add(CID_FREE_MARGIN);
+		cols.add(CID_USED_MARGIN);
+		cols.add(CID_PROFIT_AND_LOSS);
+		return cols;
+	}
+
+	/**
+	 * Get map of columns mapped to its titles.
+	 * <p>
+	 * Override this method to add or modify column titles.
+	 * <p>
+	 * @return map of column titles
+	 */
+	protected Map<Integer, MsgID> getColumnIDToHeaderMap() {
+		Map<Integer, MsgID> head = new HashMap<>();
+		head.put(CID_ACCOUNT, CommonMsg.ACCOUNT);
+		head.put(CID_CURRENCY, CommonMsg.CURRENCY);
+		head.put(CID_TERMINAL_ID, CommonMsg.TERMINAL);
+		head.put(CID_BALANCE, CommonMsg.BALANCE);
+		head.put(CID_EQUITY, CommonMsg.EQUITY);
+		head.put(CID_LEVERAGE, CommonMsg.LEVERAGE);
+		head.put(CID_FREE_MARGIN, CommonMsg.FREE_MARGIN);
+		head.put(CID_USED_MARGIN, CommonMsg.USED_MARGIN);
+		head.put(CID_PROFIT_AND_LOSS, CommonMsg.PROFIT_AND_LOSS);
+		return head;
+	}
+	
 
 	@Override
 	public int getColumnCount() {
-		return mapIndexToID.size();
+		return columnIndexToColumnID.size();
 	}
 	
 	@Override
 	public int getRowCount() {
 		return portfolios.size();
 	}
-
+	
 	@Override
 	public Object getValueAt(int row, int col) {
-		Portfolio p = null;
-		if ( row >= portfolios.size() ) {
+		if ( row > portfolios.size() ) {
 			return null;
 		}
-		p = portfolios.get(row);
-		
-		MsgID id = mapIndexToID.get(col);
-		if ( id == CommonMsg.TERMINAL ) {
+		return getColumnValue(portfolios.get(row), getColumnID(col));
+	}
+	
+	protected Object getColumnValue(Portfolio p, int columnID) {
+		switch ( columnID ) {
+		case CID_TERMINAL_ID:
 			return p.getTerminal().getTerminalID();
-		} else if ( id == CommonMsg.CURRENCY ) {
+		case CID_CURRENCY:
 			return p.getCurrency();
-		} else if ( id == CommonMsg.ACCOUNT ) {
+		case CID_ACCOUNT:
 			return p.getAccount();
-		} else if ( id == CommonMsg.BALANCE ) {
+		case CID_BALANCE:
 			return p.getBalance();
-		} else if ( id == CommonMsg.EQUITY ) {
+		case CID_EQUITY:
 			return p.getEquity();
-		} else if ( id == CommonMsg.FREE_MARGIN ) {
+		case CID_FREE_MARGIN:
 			return p.getFreeMargin();
-		} else if ( id == CommonMsg.USED_MARGIN ) {
+		case CID_USED_MARGIN:
 			return p.getUsedMargin();
-		} else if ( id == CommonMsg.PROFIT_AND_LOSS ) {
+		case CID_PROFIT_AND_LOSS:
 			return p.getProfitAndLoss();
-		} else if ( id == CommonMsg.LEVERAGE ) {
+		case CID_LEVERAGE:
 			return p.getLeverage();
-		} else {
+		default:
 			return null;
 		}
+	}
+	
+	@Override
+	public int getColumnIndex(int columnID) {
+		return columnIndexToColumnID.indexOf(columnID);
+	}
+
+	@Override
+	public int getColumnID(int columnIndex) {
+		return columnIndexToColumnID.get(columnIndex);
 	}
 	
 	@Override
 	public String getColumnName(int col) {
-		return messages.get(mapIndexToID.get(col));
-	}
-	
-	@Override
-	public int getColumnID(int columnIndex) {
-		throw new UnsupportedOperationException();
+		MsgID id = columnIDToColumnHeader.get(columnIndexToColumnID.get(col));
+		if ( id == null ) {
+			return "NULL_ID#" + col; 
+		}
+		return messages.get(id);
 	}
 	
 	/**
@@ -114,7 +165,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 		stopListeningUpdates();
 		terminalSet.clear();
 	}
-	
+
 	/**
 	 * Add all portfolios of terminal.
 	 * <p>
@@ -133,7 +184,6 @@ public class PortfolioListTableModel extends AbstractTableModel
 		}
 	}
 
-
 	@Override
 	public void startListeningUpdates() {
 		if ( subscribed ) {
@@ -144,7 +194,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 		}
 		subscribed = true;
 	}
-
+	
 	@Override
 	public void stopListeningUpdates() {
 		if ( ! subscribed ) {
@@ -163,7 +213,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 		fireTableDataChanged();
 		subscribed = false;
 	}
-
+	
 	@Override
 	public void onEvent(final Event event) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -194,11 +244,6 @@ public class PortfolioListTableModel extends AbstractTableModel
 		}
 	}
 
-	@Override
-	public void close() {
-		clear();
-	}
-	
 	/**
 	 * Get portfolio associated with the row.
 	 * <p>
@@ -207,6 +252,11 @@ public class PortfolioListTableModel extends AbstractTableModel
 	 */
 	public Portfolio getPortfolio(int rowIndex) {
 		return portfolios.get(rowIndex);
+	}
+
+	@Override
+	public void close() {
+		clear();
 	}
 	
 	private void cacheDataAndSubscribeEvents(Terminal terminal) {
@@ -230,18 +280,11 @@ public class PortfolioListTableModel extends AbstractTableModel
 	}
 	
 	private void subscribe(Terminal terminal) {
-		terminal.onPortfolioAvailable().addListener(this);
 		terminal.onPortfolioUpdate().addListener(this);
 	}
 	
 	private void unsubscribe(Terminal terminal) {
-		terminal.onPortfolioAvailable().removeListener(this);
 		terminal.onPortfolioUpdate().removeListener(this);
-	}
-
-	@Override
-	public int getColumnIndex(int columnID) {
-		throw new RuntimeException("Not implemented");
 	}
 
 }

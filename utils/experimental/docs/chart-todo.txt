@@ -1,0 +1,22 @@
+Чарты
+
+Варианты использования:
+
+1) Candlestick chart - базовый график отображает динамику изменения цены в виде OHLC свечей или баров.
+На заднем фоне динамика изменения объема в виде гистограммы (итого - две шкалы Y)
+На переднем фоне различные индикаторы, на базе серии свечей.
+Пиктограммы совершенных сделок, привязаны к барам, но изображение не умещается в границах бара.
+
+2) Equity/Drawdawn - базовый график кривой роста капитала (equity, может уходить в отризательную зону).
+На переднем фоне (area chart) величина просадки капитала.
+На переднем фоне пиктограммы совершенных сделок.
+https://www.evestment.com/wp-content/uploads/2016/10/figure18.png 
+
+3) Correlation
+http://blogs.reuters.com/felix-salmon/files/2011/11/ole2.jpg
+https://retirehappy.ca/wp-content/uploads/correlation_of_TSX_sectors_2011-1024x485.png
+https://www.researchgate.net/profile/Alberto_Clarich/publication/228849970/figure/fig2/AS:300916658982916@1448755530532/Figure-5-Scatter-Matrix-Pearson's-correlation-chart-to-check-the-quality-of-DOE.png
+http://brazilianbubble.com/wp-content/uploads/2012/09/fedex-gdp.gif
+https://www.researchgate.net/profile/Pedram_Masoudi2/publication/261286955/figure/fig3/AS:296919952838662@1447802641459/Fig-6-Correlation-chart-and-histograms-in-Sarvak-Formation-of-F2.png
+
+

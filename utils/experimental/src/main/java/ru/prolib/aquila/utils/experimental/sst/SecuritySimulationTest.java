@@ -22,10 +22,13 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
+import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
@@ -38,6 +41,8 @@ import ru.prolib.aquila.probe.scheduler.ui.SchedulerControlToolbar;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerTaskFilter;
 import ru.prolib.aquila.probe.scheduler.ui.SymbolUpdateTaskFilter;
 import ru.prolib.aquila.ui.TableModelController;
+import ru.prolib.aquila.ui.form.PortfolioListTableModel;
+import ru.prolib.aquila.ui.form.PositionListTableModel;
 import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
@@ -63,11 +68,15 @@ public class SecuritySimulationTest implements Experiment {
 		final File root = new File(cmd.getOptionValue(CmdLine.LOPT_ROOT));
 		
 		// Initialize terminal
-		Terminal terminal = new BasicTerminalBuilder()
+		EditableTerminal terminal = new BasicTerminalBuilder()
 			.withTerminalID("SECURITY_SIMULATION")
 			.withScheduler(scheduler)
 			.withDataProvider(newDataProvider(scheduler, root))
 			.buildTerminal();
+		terminal.getEditablePortfolio(new Account("TEST-ACCOUNT"))
+			.consume(new DeltaUpdateBuilder()
+				.withToken(PortfolioField.BALANCE, 10000.0d)
+				.buildUpdate());
 		Set<Symbol> symbols = null;
 		try {
 			symbols = new MoexContractFileStorage(root).getSymbols();
@@ -113,6 +122,22 @@ public class SecuritySimulationTest implements Experiment {
         table.setRowSorter(new TableRowSorter<SecurityListTableModel>(securityTableModel));
         tabPanel.add("Securities", new JScrollPane(table));
         new TableModelController(securityTableModel, frame);
+        
+        PortfolioListTableModel portfolioTableModel = new PortfolioListTableModel(messages);
+        portfolioTableModel.add(terminal);
+        table = new JTable(portfolioTableModel);
+        table.setShowGrid(true);
+        table.setRowSorter(new TableRowSorter<PortfolioListTableModel>(portfolioTableModel));
+        tabPanel.add("Accounts", new JScrollPane(table));
+        new TableModelController(portfolioTableModel, frame);
+        
+        PositionListTableModel positionTableModel = new PositionListTableModel(messages);
+        positionTableModel.add(terminal);
+        table = new JTable(positionTableModel);
+        table.setShowGrid(true);
+        table.setRowSorter(new TableRowSorter<PositionListTableModel>(positionTableModel));
+        tabPanel.add("Positions", new JScrollPane(table));
+        new TableModelController(positionTableModel, frame);
         
         frame.getContentPane().add(mainPanel);
         frame.setVisible(true);
