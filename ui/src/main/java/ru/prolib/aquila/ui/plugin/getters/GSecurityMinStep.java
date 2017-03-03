@@ -12,6 +12,6 @@ public class GSecurityMinStep extends GDouble {
 	@Override
 	public Double get(Object obj) throws ValueException {
 		Security o = (Security) obj;
-		return super.get(o.getTickSize());
+		return super.get(o.getTickSize().doubleValue());
 	}
 }

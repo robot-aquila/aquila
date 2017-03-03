@@ -24,6 +24,7 @@ import ru.prolib.aquila.ui.wrapper.*;
  * 2013-02-28<br>
  * $Id: UISecuritiesPlugin.java 558 2013-03-04 17:21:48Z whirlwind $
  */
+@Deprecated
 public class UISecuritiesPlugin implements AquilaPlugin {
 	private Terminal terminal;
 	private SecuritiesTableCols cols = new SecuritiesTableCols();

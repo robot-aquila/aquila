@@ -73,6 +73,26 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 */
 	public Object getObject(int token);
+	
+	/**
+	 * Get decimal value.
+	 * <p>
+	 * @param token - token ID
+	 * @return token value or null if token is not available
+	 * @throws IllegalStateException - container is closed or inaccessible
+	 * @throws ClassCastException - cannot cast token value
+	 */
+	public FDecimal getDecimal(int token);
+	
+	/**
+	 * Get money value.
+	 * <p>
+	 * @param token - token ID
+	 * @return token value or null if token is not available
+	 * @throws IllegalStateException - container is closed or inaccessible
+	 * @throws ClassCastException - cannot cast token value
+	 */
+	public FMoney getMoney(int token);
 
 	/**
 	 * Test that specified tokens are defined.

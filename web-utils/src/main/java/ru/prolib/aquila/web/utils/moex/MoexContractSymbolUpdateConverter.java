@@ -4,18 +4,12 @@ import java.util.Map;
 
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
-import ru.prolib.aquila.core.BusinessEntities.DoubleUtils;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 
 public class MoexContractSymbolUpdateConverter {
-	private final DoubleUtils doubleUtils;
-	
-	MoexContractSymbolUpdateConverter(DoubleUtils doubleUtils) {
-		this.doubleUtils = doubleUtils;
-	}
 	
 	public MoexContractSymbolUpdateConverter() {
-		this(new DoubleUtils());
+		
 	}
 	
 	/**
@@ -40,9 +34,7 @@ public class MoexContractSymbolUpdateConverter {
 				builder.withToken(SecurityField.LOT_SIZE, tokens.get(token));
 				break;
 			case MoexContractField.TICK_SIZE:
-				Double value = (Double) tokens.get(token);
-				builder.withToken(SecurityField.TICK_SIZE, value)
-					.withToken(SecurityField.SCALE, doubleUtils.scaleOf(value));
+				builder.withToken(SecurityField.TICK_SIZE, tokens.get(token));
 				break;
 			case MoexContractField.TICK_VALUE:
 				builder.withToken(SecurityField.TICK_VALUE, tokens.get(token));

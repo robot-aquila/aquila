@@ -43,8 +43,8 @@ public class MOEXUtils {
 		p.setLowerPriceLimit(security.getLowerPriceLimit());
 		p.setUpperPriceLimit(security.getUpperPriceLimit());
 		p.setScale(security.getScale());
-		p.setTickCost(security.getTickValue());
-		p.setTickSize(security.getTickSize());
+		p.setTickCost(security.getTickValue().doubleValue());
+		p.setTickSize(security.getTickSize().doubleValue());
 	}
 	
 	public void fillProperties(Security security, SecurityPropertiesEntity p) {

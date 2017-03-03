@@ -17,6 +17,8 @@ import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -92,10 +94,9 @@ public class L1UpdateSourceSATImplTest {
 	public void testSubscribeL1_IfSecurityAvailable() throws Exception {
 		security3.consume(new DeltaUpdateBuilder()
 			.withToken(SecurityField.DISPLAY_NAME, "foo")
-			.withToken(SecurityField.SCALE, 2)
 			.withToken(SecurityField.LOT_SIZE, 1)
-			.withToken(SecurityField.TICK_SIZE, 0.01d)
-			.withToken(SecurityField.TICK_VALUE, 0.01d)
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.withToken(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"))
 			.withToken(SecurityField.SETTLEMENT_PRICE, 100.0d)
 			.buildUpdate());
 		basicSourceMock.subscribeL1(symbol3, security3);

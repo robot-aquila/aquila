@@ -5,9 +5,7 @@ import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.easymock.IMocksControl;
 import org.junit.*;
@@ -53,12 +51,6 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		control.replay();		
 	}
 	
-	private void setPriceScale(int scale) {
-		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-		tokens.put(SecurityField.SCALE, scale);
-		security.update(tokens);		
-	}
-	
 	@Override
 	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
@@ -98,12 +90,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testGetScale() throws Exception {
-		getter = new Getter<Integer>() {
-			@Override public Integer get() {
-				return security.getScale();
-			}
-		};
-		testGetter(SecurityField.SCALE, 2, 4);
+		assertNull(security.getScale());
+		security.update(SecurityField.TICK_SIZE, new FDecimal("0.005"));
+		assertEquals(new Integer(3), security.getScale());
 	}
 	
 	@Test
@@ -138,22 +127,22 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetTickValue() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return security.getTickValue();
 			}
 		};
-		testGetter(SecurityField.TICK_VALUE, 440.09d, 482.15d);
+		testGetter(SecurityField.TICK_VALUE, new FMoney("440.09", "USD"), new FMoney("482.15", "RUB"));
 	}
 	
 	@Test
 	public void testGetTickSize() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
 				return security.getTickSize();
 			}
 		};
-		testGetter(SecurityField.TICK_SIZE, 10.0d, 0.05d);
+		testGetter(SecurityField.TICK_SIZE, new FDecimal("10.0"), new FDecimal("0.05"));
 	}
 	
 	@Test
@@ -272,10 +261,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertFalse(controller.hasMinimalData(security));
 		
 		data.put(SecurityField.DISPLAY_NAME, "GAZP");
-		data.put(SecurityField.SCALE, 2);
 		data.put(SecurityField.LOT_SIZE, 100);
-		data.put(SecurityField.TICK_SIZE, 5d);
-		data.put(SecurityField.TICK_VALUE, 2.37d);
+		data.put(SecurityField.TICK_SIZE, new FDecimal("5.00"));
+		data.put(SecurityField.TICK_VALUE, new FMoney("2.37", "RUB"));
 		data.put(SecurityField.SETTLEMENT_PRICE, 200.01d);
 		security.update(data);
 		
@@ -284,10 +272,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testSecurityController_ProcessUpdate_SessionUpdate() {
-		data.put(SecurityField.SCALE, 10);
 		data.put(SecurityField.LOT_SIZE, 1);
-		data.put(SecurityField.TICK_SIZE, 0.05d);
-		data.put(SecurityField.TICK_VALUE, 0.01d);
+		data.put(SecurityField.TICK_SIZE, new FDecimal("0.05"));
+		data.put(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"));
 		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
 		data.put(SecurityField.SETTLEMENT_PRICE, 80.93d);
 		data.put(SecurityField.OPEN_PRICE, 79.19d);
@@ -309,10 +296,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testSecurityController_ProcessAvailable() {
-		data.put(SecurityField.SCALE, 10);
 		data.put(SecurityField.LOT_SIZE, 1);
-		data.put(SecurityField.TICK_SIZE, 0.05d);
-		data.put(SecurityField.TICK_VALUE, 0.01d);
+		data.put(SecurityField.TICK_SIZE, new FDecimal("0.05"));
+		data.put(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"));
 		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
 		data.put(SecurityField.SETTLEMENT_PRICE, 80.93d);
 		data.put(SecurityField.OPEN_PRICE, 79.19d);
@@ -418,7 +404,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_RefreshAsk() {
-		setPriceScale(2);
+		security.consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.buildUpdate());
 
 		Instant time = Instant.parse("2016-03-04T01:27:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_ASK, time, symbol1);
@@ -455,7 +443,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_RefreshBid() {
-		setPriceScale(2);
+		security.consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.buildUpdate());
 
 		Instant time = Instant.parse("2016-03-04T01:27:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_BID, time, symbol1);
@@ -491,7 +481,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_Refresh() {
-		setPriceScale(2);
+		security.consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.buildUpdate());
 
 		Instant time = Instant.parse("2016-02-04T17:24:15Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
@@ -526,7 +518,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_Update_Replace() {
-		setPriceScale(2);
+		security.consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.buildUpdate());
 
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
@@ -570,7 +564,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testUpdate_MDUpdate_Update_Delete() {
-		setPriceScale(4);
+		security.consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.0001"))
+			.buildUpdate());
 
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
@@ -612,7 +608,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testUpdate_MDUpdate_Update_PriceRouding() {
-		setPriceScale(2);
+		security.consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.buildUpdate());
 
 		Instant time1 = Instant.EPOCH;
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);

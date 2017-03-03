@@ -8,7 +8,6 @@ import ru.prolib.aquila.core.*;
 public class SecurityImpl extends ObservableStateContainerImpl implements EditableSecurity {
 	private static final int[] TOKENS_FOR_AVAILABILITY = {
 		SecurityField.DISPLAY_NAME,
-		SecurityField.SCALE,
 		SecurityField.LOT_SIZE,
 		SecurityField.TICK_SIZE,
 		SecurityField.TICK_VALUE,
@@ -16,7 +15,6 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	};
 	
 	private static final int[] TOKENS_FOR_SESSION_UPDATE = {
-		SecurityField.SCALE,
 		SecurityField.LOT_SIZE,
 		SecurityField.TICK_SIZE,
 		SecurityField.TICK_VALUE,
@@ -96,18 +94,19 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	}
 	
 	@Override
-	public Double getTickValue() {
-		return getDouble(SecurityField.TICK_VALUE);
+	public FMoney getTickValue() {
+		return getMoney(SecurityField.TICK_VALUE);
 	}
 
 	@Override
-	public Double getTickSize() {
-		return getDouble(SecurityField.TICK_SIZE);
+	public FDecimal getTickSize() {
+		return getDecimal(SecurityField.TICK_SIZE);
 	}
 
 	@Override
 	public Integer getScale() {
-		return getInteger(SecurityField.SCALE);
+		FDecimal x = getTickSize();
+		return x == null ? null : x.getScale();
 	}
 	
 	@Override

@@ -55,19 +55,20 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return calculated tick price
 	 */
-	public Double getTickValue();
+	public FMoney getTickValue();
 	
 	/**
 	 * Get tick size.
 	 * <p>
 	 * @return minimal price change
 	 */
-	public Double getTickSize();
+	public FDecimal getTickSize();
 	
 	/**
 	 * Get price scale.
 	 * <p>
 	 * @return number of digits after a decimal point in price values.
+	 * Equivalent of scale obtained from {@link #getTickSize()} value.
 	 */
 	public Integer getScale();
 		

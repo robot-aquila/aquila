@@ -13,6 +13,8 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.SymbolType;
@@ -67,10 +69,11 @@ public class MOEXUtilsTest {
 		tokens.put(SecurityField.LOT_SIZE, 10);
 		tokens.put(SecurityField.UPPER_PRICE_LIMIT, 95.0d);
 		tokens.put(SecurityField.LOWER_PRICE_LIMIT, 75.0d);
-		tokens.put(SecurityField.SCALE, 2);
-		tokens.put(SecurityField.TICK_VALUE, 2.75d);
-		tokens.put(SecurityField.TICK_SIZE, 0.01d);
+		tokens.put(SecurityField.TICK_VALUE, new FMoney("2.75", "RUB"));
+		tokens.put(SecurityField.TICK_SIZE, new FDecimal("0.01"));
 		security.update(tokens);
+		System.out.println(security.getTickSize());
+		System.out.println(security.getTickValue());
 		
 		moexUtils.fillSessionProperties(security, p);
 

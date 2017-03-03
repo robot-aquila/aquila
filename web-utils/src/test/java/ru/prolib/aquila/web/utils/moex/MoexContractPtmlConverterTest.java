@@ -11,6 +11,10 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.data.DataFormatException;
+
 public class MoexContractPtmlConverterTest {
 	private MoexContractPtmlConverter converter;
 
@@ -42,8 +46,8 @@ public class MoexContractPtmlConverterTest {
 		fix.put(MoexContractField.SETTLEMENT_PROC_DESCR, "bla bla bla");
 		fix.put(MoexContractField.SYMBOL, "MSFT");
 		fix.put(MoexContractField.SYMBOL_CODE, "MS01");
-		fix.put(MoexContractField.TICK_SIZE, 0.01d);
-		fix.put(MoexContractField.TICK_VALUE, 2.13d);
+		fix.put(MoexContractField.TICK_SIZE, new FDecimal("0.01"));
+		fix.put(MoexContractField.TICK_VALUE, new FMoney("2.13", "RUB"));
 		fix.put(MoexContractField.TYPE, MoexContractType.FUTURES);
 		fix.put(MoexContractField.UPPER_PRICE_LIMIT, 120.83d);
 		
@@ -140,11 +144,39 @@ public class MoexContractPtmlConverterTest {
 		expected.put(MoexContractField.SETTLEMENT_PROC_DESCR, "bla bla bla");
 		expected.put(MoexContractField.SYMBOL, "MSFT");
 		expected.put(MoexContractField.SYMBOL_CODE, "MS01");
-		expected.put(MoexContractField.TICK_SIZE, 0.01d);
-		expected.put(MoexContractField.TICK_VALUE, 2.13d);
+		expected.put(MoexContractField.TICK_SIZE, new FDecimal("0.01"));
+		expected.put(MoexContractField.TICK_VALUE, new FMoney("2.13", "RUB"));
 		expected.put(MoexContractField.TYPE, MoexContractType.FUTURES);
 		expected.put(MoexContractField.UPPER_PRICE_LIMIT, 120.83d);
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testToObject_TickSizeAndValue_ScientificNotation() throws Exception {
+		assertEquals(new FDecimal("0.0001"), converter.toObject(MoexContractField.TICK_SIZE, "1.0E-4"));
+		assertEquals(new FMoney("0.015", "RUB"), converter.toObject(MoexContractField.TICK_VALUE, "15.0E-3"));
+	}
+	
+	@Test
+	public void testToObject_TickSizeAndValue_TrailingZeroes() throws Exception {
+		assertEquals(new FDecimal("0.01"), converter.toObject(MoexContractField.TICK_SIZE, "0.01000"));
+		assertEquals(new FMoney("0.15", "RUB"), converter.toObject(MoexContractField.TICK_VALUE, "0.1500"));
+	}
+
+	@Test
+	public void testToObject_TickSizeAndValue_NoDecimals() throws Exception {
+		assertEquals(new FDecimal("10"), converter.toObject(MoexContractField.TICK_SIZE, "10.0"));
+		assertEquals(new FMoney("1", "RUB"), converter.toObject(MoexContractField.TICK_VALUE, "1.0000"));
+	}
+
+	@Test (expected=DataFormatException.class)
+	public void testToObject_TickSize_FormatError() throws Exception {
+		converter.toObject(MoexContractField.TICK_SIZE, "foo");
+	}
+
+	@Test (expected=DataFormatException.class)
+	public void testToObject_TickValue_FormatError() throws Exception {
+		converter.toObject(MoexContractField.TICK_VALUE, "bar");
 	}
 
 }

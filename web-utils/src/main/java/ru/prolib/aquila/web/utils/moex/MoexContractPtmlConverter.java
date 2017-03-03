@@ -1,9 +1,14 @@
 package ru.prolib.aquila.web.utils.moex;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
+import org.springframework.util.StringUtils;
+
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.data.DataFormatException;
 import ru.prolib.aquila.data.storage.file.PtmlDeltaUpdateConverter;
 
@@ -84,7 +89,17 @@ public class MoexContractPtmlConverter implements PtmlDeltaUpdateConverter {
 				throw new DataFormatException("Cannot parse date: " + value, e);
 			}
 		case MoexContractField.TICK_SIZE:
+			try {
+				return new FDecimal(removeTrailingZeroes(value));
+			} catch ( NumberFormatException e ) {
+				throw new DataFormatException("Cannot parse tick size: " + value, e);
+			}
 		case MoexContractField.TICK_VALUE:
+			try {
+				return new FMoney(removeTrailingZeroes(value), "RUB");
+			} catch ( NumberFormatException e ) {
+				throw new DataFormatException("Cannot parse tick value: " + value, e);
+			}
 		case MoexContractField.LOWER_PRICE_LIMIT:
 		case MoexContractField.UPPER_PRICE_LIMIT:
 		case MoexContractField.SETTLEMENT_PRICE:
@@ -108,6 +123,14 @@ public class MoexContractPtmlConverter implements PtmlDeltaUpdateConverter {
 		default:
 			throw new DataFormatException("Unknown token: " + token);
 		}
+	}
+	
+	private String removeTrailingZeroes(String doubleValue) {
+		// it may contains a scientific notation
+		doubleValue = new BigDecimal(doubleValue).toString();
+		doubleValue = StringUtils.trimTrailingCharacter(doubleValue, '0');
+		doubleValue = StringUtils.trimTrailingCharacter(doubleValue, '.');
+		return doubleValue;
 	}
 
 }

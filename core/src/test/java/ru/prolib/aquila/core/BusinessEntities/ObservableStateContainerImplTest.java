@@ -486,6 +486,30 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	final public void testContainerImpl_GetDecimal() throws Exception {
+		FDecimal value1 = new FDecimal("12.34"), value2 = new FDecimal("15.04");
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
+				return container.getDecimal(212);
+			}
+		};
+		testGetter_ChangesPlusEvent(212, value1, value2);
+		testGetter_Locking(212, value1, value2);
+	}
+	
+	@Test
+	final public void testContainerImpl_GetMoney() throws Exception {
+		FMoney value1 = new FMoney("32.1", "USD"), value2 = new FMoney("1.24", "RUB");
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
+				return container.getMoney(92);
+			}
+		};
+		testGetter_ChangesPlusEvent(92, value1, value2);
+		testGetter_Locking(92, value1, value2);
+	}
+	
+	@Test
 	final public void testContainerImpl_Update_NoChanges() throws Exception {
 		container.onAvailable().addSyncListener(listenerStub);
 		container.onUpdate().addSyncListener(listenerStub);

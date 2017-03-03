@@ -81,14 +81,14 @@ public class MoexContractField {
 	/**
 	 * Price tick.<br>
 	 * Value: 11<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
 	 */
 	public static final int TICK_SIZE = 11;
 	
 	/**
 	 * Value of price tick, RUB<br>
 	 * Value: 12<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
 	 */
 	public static final int TICK_VALUE = 12;
 	

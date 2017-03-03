@@ -20,6 +20,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStubTask;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
@@ -191,7 +192,7 @@ public class SymbolUpdateHandlerTest {
 		input.add(new DeltaUpdateBuilder()
 			.withSnapshot(true)
 			.withTime("2016-10-18T04:00:00Z")
-			.withToken(SecurityField.SCALE, 1)
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
 			.buildUpdate());
 		CloseableIteratorStub<DeltaUpdate> readerStub2 = new CloseableIteratorStub<>(input);
 		readerFactoryStub.predefinedReader = readerStub2;

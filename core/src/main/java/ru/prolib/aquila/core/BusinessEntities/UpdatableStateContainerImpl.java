@@ -98,6 +98,16 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 	}
 
 	@Override
+	public FDecimal getDecimal(int token) {
+		return (FDecimal) getObject(token);
+	}
+
+	@Override
+	public FMoney getMoney(int token) {
+		return (FMoney) getObject(token);
+	}
+
+	@Override
 	public boolean isDefined(int[] tokens) {
 		lock.lock();
 		try {

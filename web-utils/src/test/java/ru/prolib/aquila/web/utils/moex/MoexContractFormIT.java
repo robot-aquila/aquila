@@ -70,9 +70,9 @@ public class MoexContractFormIT {
 		expected.put(MoexContractField.FIRST_TRADING_DAY, LocalDate.of(2015, 3, 18));
 		expected.put(MoexContractField.LAST_TRADING_DAY, LocalDate.of(2016, 6, 15));
 		expected.put(MoexContractField.DELIVERY, LocalDate.of(2016, 6, 15));
-		expected.put(MoexContractField.FEE, 2.5d);
-		expected.put(MoexContractField.INTRADAY_FEE, 1.25d);
-		expected.put(MoexContractField.NEGOTIATION_FEE, 2.5d);
+		expected.put(MoexContractField.FEE, 2.81d);
+		expected.put(MoexContractField.INTRADAY_FEE, 1.405d);
+		expected.put(MoexContractField.NEGOTIATION_FEE, 2.81d);
 		expected.put(MoexContractField.EXERCISE_FEE, 2.0d);
 		expected.put(MoexContractField.FX_INTRADAY_CLEARING, LocalTime.of(13, 45));
 		expected.put(MoexContractField.FX_EVENING_CLEARING, LocalTime.of(18, 30));

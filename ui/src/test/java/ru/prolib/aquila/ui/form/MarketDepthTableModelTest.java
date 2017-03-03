@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdateType;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
@@ -71,7 +72,7 @@ public class MarketDepthTableModelTest {
 		security = new BasicTerminalBuilder()
 			.buildTerminal()
 			.getEditableSecurity(symbol);
-		security.update(SecurityField.SCALE , 2);
+		security.update(SecurityField.TICK_SIZE, new FDecimal("0.01"));
 		model = new MarketDepthTableModel(messagesMock, security, 5);
 		refreshListener = new FullTableRefreshListener();
 	}
@@ -87,7 +88,7 @@ public class MarketDepthTableModelTest {
 	}
 	
 	private void assignTestMarketDepth() {
-		security.update(SecurityField.SCALE, 4);
+		security.update(SecurityField.TICK_SIZE, new FDecimal("0.0001"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)
@@ -228,7 +229,7 @@ public class MarketDepthTableModelTest {
 	
 	@Test
 	public void testGetValueAt_HasEmptyRows() throws Exception {
-		security.update(SecurityField.SCALE, 3);
+		security.update(SecurityField.TICK_SIZE, new FDecimal("0.001"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)
@@ -261,7 +262,7 @@ public class MarketDepthTableModelTest {
 	
 	@Test
 	public void testGetValueAt_MoreThanMaxDepth() throws Exception {
-		security.update(SecurityField.SCALE, 2);
+		security.update(SecurityField.TICK_SIZE, new FDecimal("0.01"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)

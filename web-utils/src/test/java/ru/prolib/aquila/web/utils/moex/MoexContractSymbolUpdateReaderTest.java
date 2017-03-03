@@ -14,6 +14,8 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.data.storage.file.PtmlFactory;
 
@@ -49,9 +51,8 @@ public class MoexContractSymbolUpdateReaderTest {
 			.withTime("2016-08-23T15:45:00Z")
 			.withToken(SecurityField.DISPLAY_NAME, "Eu-9.16")
 			.withToken(SecurityField.LOT_SIZE, 1000)
-			.withToken(SecurityField.TICK_SIZE, 1.0d)
-			.withToken(SecurityField.SCALE, 0)
-			.withToken(SecurityField.TICK_VALUE, 1.0d)
+			.withToken(SecurityField.TICK_SIZE, new FDecimal("1"))
+			.withToken(SecurityField.TICK_VALUE, new FMoney("1", "RUB"))
 			.withToken(SecurityField.LOWER_PRICE_LIMIT, 70469.0d)
 			.withToken(SecurityField.UPPER_PRICE_LIMIT, 76343.0d)
 			.withToken(SecurityField.SETTLEMENT_PRICE, 73406.0d)

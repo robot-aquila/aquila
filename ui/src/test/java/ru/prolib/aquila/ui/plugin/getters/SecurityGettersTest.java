@@ -34,12 +34,11 @@ public class SecurityGettersTest {
 		symbol = new Symbol("GAZP", "EQBR", "RUR", SymbolType.STOCK);
 		EditableSecurity sc = terminal.getEditableSecurity(symbol);
 		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-		tokens.put(SecurityField.SCALE, 3);
 		tokens.put(SecurityField.LOWER_PRICE_LIMIT, 90.00d);
 		tokens.put(SecurityField.UPPER_PRICE_LIMIT, 130.00d);
 		tokens.put(SecurityField.LOT_SIZE, 1);
-		tokens.put(SecurityField.TICK_VALUE, 290.34d);
-		tokens.put(SecurityField.TICK_SIZE, 1.00d);
+		tokens.put(SecurityField.TICK_VALUE, new FMoney("290.34", "USD"));
+		tokens.put(SecurityField.TICK_SIZE, new FDecimal("1.000"));
 		tokens.put(SecurityField.DISPLAY_NAME, "zulu4");
 		tokens.put(SecurityField.OPEN_PRICE, 13.45d);
 		tokens.put(SecurityField.LOW_PRICE, 24.56d);
