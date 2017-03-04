@@ -37,11 +37,11 @@ public class MOEXUtils {
 	public void fillSessionProperties(Security security,
 			SecuritySessionPropertiesEntity p)
 	{
-		p.setInitialMarginCost(security.getInitialMargin());
-		p.setInitialPrice(security.getSettlementPrice());
+		p.setInitialMarginCost(security.getInitialMargin().doubleValue());
+		p.setInitialPrice(security.getSettlementPrice().doubleValue());
 		p.setLotSize(security.getLotSize());
-		p.setLowerPriceLimit(security.getLowerPriceLimit());
-		p.setUpperPriceLimit(security.getUpperPriceLimit());
+		p.setLowerPriceLimit(security.getLowerPriceLimit().doubleValue());
+		p.setUpperPriceLimit(security.getUpperPriceLimit().doubleValue());
 		p.setScale(security.getScale());
 		p.setTickCost(security.getTickValue().doubleValue());
 		p.setTickSize(security.getTickSize().doubleValue());

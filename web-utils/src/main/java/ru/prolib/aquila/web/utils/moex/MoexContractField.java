@@ -95,56 +95,56 @@ public class MoexContractField {
 	/**
 	 * Lower limit<br>
 	 * Value: 13<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
 	 */
 	public static final int LOWER_PRICE_LIMIT = 13;
 	
 	/**
 	 * Upper limit<br>
 	 * Value: 14<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
 	 */
 	public static final int UPPER_PRICE_LIMIT = 14;
 	
 	/**
 	 * Settlement price of last clearing session<br>
 	 * Value: 15<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
 	 */
 	public static final int SETTLEMENT_PRICE = 15;
 	
 	/**
 	 * Contract buy/sell fee, RUB<br>
 	 * Value: 16<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
 	 */
 	public static final int FEE = 16;
 	
 	/**
 	 * Intraday (scalper) fee, RUB<br>
 	 * Value: 17<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
 	 */
 	public static final int INTRADAY_FEE = 17;
 	
 	/**
 	 * Negotiated trade fee, RUB<br>
 	 * Value: 18<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
 	 */
 	public static final int NEGOTIATION_FEE = 18;
 
 	/**
 	 * Contract exercise fee.<br>
 	 * Value: 19<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
 	 */
 	public static final int EXERCISE_FEE = 19;
 	
 	/**
 	 * Initial Margin (IM, rub)<br>
 	 * Value: 20<br>
-	 * Type: Double<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
 	 */
 	public static final int INITIAL_MARGIN = 20;
 	

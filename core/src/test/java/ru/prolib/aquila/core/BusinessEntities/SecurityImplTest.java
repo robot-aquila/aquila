@@ -107,22 +107,22 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetUpperPriceLimit() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
 				return security.getUpperPriceLimit();
 			}
 		};
-		testGetter(SecurityField.UPPER_PRICE_LIMIT, 137.15d, 158.12d);
+		testGetter(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("137.15"), new FDecimal("158.12"));
 	}
 	
 	@Test
 	public void testGetLowerPriceLimit() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
 				return security.getLowerPriceLimit();
 			}
 		};
-		testGetter(SecurityField.LOWER_PRICE_LIMIT, 119.02d, 118.16d);
+		testGetter(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("119.02"), new FDecimal("118.16"));
 	}
 	
 	@Test
@@ -197,22 +197,23 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testGetSettlementPrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
 				return security.getSettlementPrice();
 			}
 		};
-		testGetter(SecurityField.SETTLEMENT_PRICE, 215.86d, 114.12d);
+		testGetter(SecurityField.SETTLEMENT_PRICE, new FDecimal("215.86"), new FDecimal("114.12"));
 	}
 
 	@Test
 	public void testGetInitialMargin() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return security.getInitialMargin();
 			}
 		};
-		testGetter(SecurityField.INITIAL_MARGIN, 118.99d, 120.01d);
+		testGetter(SecurityField.INITIAL_MARGIN,
+				new FMoney("118.99", "USD"), new FMoney("120.01", "RUB"));
 	}
 	
 	@Test

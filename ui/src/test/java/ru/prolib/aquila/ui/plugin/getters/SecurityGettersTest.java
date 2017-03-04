@@ -34,8 +34,8 @@ public class SecurityGettersTest {
 		symbol = new Symbol("GAZP", "EQBR", "RUR", SymbolType.STOCK);
 		EditableSecurity sc = terminal.getEditableSecurity(symbol);
 		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-		tokens.put(SecurityField.LOWER_PRICE_LIMIT, 90.00d);
-		tokens.put(SecurityField.UPPER_PRICE_LIMIT, 130.00d);
+		tokens.put(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("90"));
+		tokens.put(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("130"));
 		tokens.put(SecurityField.LOT_SIZE, 1);
 		tokens.put(SecurityField.TICK_VALUE, new FMoney("290.34", "USD"));
 		tokens.put(SecurityField.TICK_SIZE, new FDecimal("1.000"));
@@ -92,7 +92,7 @@ public class SecurityGettersTest {
 	public void testPrecision() throws Exception {
 		GSecurityPrecision g = new GSecurityPrecision();
 		IsInstanceOf.instanceOf(GInteger.class).matches(g);
-		assertEquals((Integer) 3, g.get(security));	
+		assertEquals((Integer) 0, g.get(security));	
 	}
 	
 	@Test

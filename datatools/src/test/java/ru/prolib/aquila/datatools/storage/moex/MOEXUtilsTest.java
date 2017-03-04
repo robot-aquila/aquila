@@ -64,11 +64,11 @@ public class MOEXUtilsTest {
 	public void testFillSessionProperties() throws Exception {
 		SecuritySessionPropertiesEntity p = new SecuritySessionPropertiesEntity();
 		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-		tokens.put(SecurityField.INITIAL_MARGIN, 1215.34d);
-		tokens.put(SecurityField.SETTLEMENT_PRICE, 86.90d);
+		tokens.put(SecurityField.INITIAL_MARGIN, new FMoney("1215.34", "RUB"));
+		tokens.put(SecurityField.SETTLEMENT_PRICE, new FDecimal("86.90", 2));
 		tokens.put(SecurityField.LOT_SIZE, 10);
-		tokens.put(SecurityField.UPPER_PRICE_LIMIT, 95.0d);
-		tokens.put(SecurityField.LOWER_PRICE_LIMIT, 75.0d);
+		tokens.put(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("95.0", 2));
+		tokens.put(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("75.0", 2));
 		tokens.put(SecurityField.TICK_VALUE, new FMoney("2.75", "RUB"));
 		tokens.put(SecurityField.TICK_SIZE, new FDecimal("0.01"));
 		security.update(tokens);

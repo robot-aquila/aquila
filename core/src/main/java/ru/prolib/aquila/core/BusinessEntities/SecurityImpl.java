@@ -84,13 +84,13 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	}
 
 	@Override
-	public Double getUpperPriceLimit() {
-		return getDouble(SecurityField.UPPER_PRICE_LIMIT);
+	public FDecimal getUpperPriceLimit() {
+		return getDecimal(SecurityField.UPPER_PRICE_LIMIT);
 	}
 
 	@Override
-	public Double getLowerPriceLimit() {
-		return getDouble(SecurityField.LOWER_PRICE_LIMIT);
+	public FDecimal getLowerPriceLimit() {
+		return getDecimal(SecurityField.LOWER_PRICE_LIMIT);
 	}
 	
 	@Override
@@ -140,13 +140,13 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	}
 	
 	@Override
-	public Double getSettlementPrice() {
-		return getDouble(SecurityField.SETTLEMENT_PRICE);
+	public FDecimal getSettlementPrice() {
+		return getDecimal(SecurityField.SETTLEMENT_PRICE);
 	}
 
 	@Override
-	public Double getInitialMargin() {
-		return getDouble(SecurityField.INITIAL_MARGIN);
+	public FMoney getInitialMargin() {
+		return getMoney(SecurityField.INITIAL_MARGIN);
 	}
 
 	@Override

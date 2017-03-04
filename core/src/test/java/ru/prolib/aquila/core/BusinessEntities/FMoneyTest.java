@@ -66,11 +66,49 @@ public class FMoneyTest {
 	public void testCtor3_SRMS() {
 		FMoney x = new FMoney("22.10", RoundingMode.FLOOR, "JPY");
 		
-		assertEquals(new BigDecimal("22.10"), x.toBigDecimal());
+		assertEquals(new BigDecimal("22.1"), x.toBigDecimal());
 		assertEquals(RoundingMode.FLOOR, x.getRoundingMode());
-		assertEquals(2, x.getScale());
+		assertEquals(1, x.getScale());
 		assertEquals(22.1d, x.doubleValue(), 0.001d);
 		assertEquals("JPY", x.getCurrencyCode());
+	}
+	
+	@Test
+	public void testCtor3_SRMS_ScientificNotation() {
+		FMoney x = new FMoney("1.0E-4", RoundingMode.DOWN, "CAD");
+		
+		assertEquals(new BigDecimal("0.0001"), x.toBigDecimal());
+		assertEquals(RoundingMode.DOWN, x.getRoundingMode());
+		assertEquals(4, x.getScale());
+		assertEquals(0.0001d, x.doubleValue(), 0.000001d);
+		assertEquals("CAD", x.getCurrencyCode());
+	}
+	
+	@Test
+	public void testCtor3_SRMS_TrimTrailingZeroes() {
+		FMoney x = new FMoney("22.050", RoundingMode.HALF_DOWN, "USD");
+		
+		assertEquals(new BigDecimal("22.05"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_DOWN, x.getRoundingMode());
+		assertEquals(2, x.getScale());
+		assertEquals(22.05d, x.doubleValue(), 0.001d);
+		assertEquals("USD", x.getCurrencyCode());
+	}
+
+	@Test
+	public void testCtor3_SRMS_NoDecimals() {
+		FMoney x = new FMoney("22.000", RoundingMode.CEILING, "EUR");
+		
+		assertEquals(new BigDecimal("22"), x.toBigDecimal());
+		assertEquals(RoundingMode.CEILING, x.getRoundingMode());
+		assertEquals(0, x.getScale());
+		assertEquals(22.0d, x.doubleValue(), 0.01d);
+		assertEquals("EUR", x.getCurrencyCode());
+	}
+
+	@Test (expected=NumberFormatException.class)
+	public void testCtor3_SRMS_InvalidFormat() {
+		new FMoney("foo", RoundingMode.CEILING, "USD");
 	}
 
 	@Test
@@ -85,12 +123,126 @@ public class FMoneyTest {
 	}
 	
 	@Test
+	public void testCtor2_SS_ScientificNotation() {
+		FMoney x = new FMoney("-5.34E-2", "RUB");
+		
+		assertEquals(new BigDecimal("-0.0534"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(4, x.getScale());
+		assertEquals(-0.0534d, x.doubleValue(), 0.0001d);
+		assertEquals("RUB", x.getCurrencyCode());
+	}
+	
+	@Test
+	public void testCtor2_SS_TrimTrailingZeroes() {
+		FMoney x = new FMoney("-27.00010", "JPY");
+		
+		assertEquals(new BigDecimal("-27.0001"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(4, x.getScale());
+		assertEquals(-27.0001d, x.doubleValue(), 0.0001d);
+		assertEquals("JPY", x.getCurrencyCode());
+	}
+	
+	@Test
+	public void testCtor2_SS_NoDecimals() {
+		FMoney x = new FMoney("-27.00000", "USD");
+		
+		assertEquals(new BigDecimal("-27"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(0, x.getScale());
+		assertEquals(-27.0d, x.doubleValue(), 0.01d);
+		assertEquals("USD", x.getCurrencyCode());
+	}
+	
+	@Test (expected=NumberFormatException.class)
+	public void testCtor2_SS_InvalidFormat() {
+		new FMoney("foo", "EUR");
+	}
+
+	@Test
+	public void testCtor4_SIRMS() {
+		FMoney x = new FMoney("25.1409", 3, RoundingMode.HALF_UP, "RUB");
+		
+		assertEquals(new BigDecimal("25.141"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(3, x.getScale());
+		assertEquals(25.141d, x.doubleValue(), 0.001d);
+		assertEquals("RUB", x.getCurrencyCode());
+	}
+
+	@Test
+	public void testCtor4_SIRMS_ScientificNotation() {
+		FMoney x = new FMoney("1.234E+2", 0, RoundingMode.HALF_UP, "USD");
+		
+		assertEquals(new BigDecimal("123"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(0, x.getScale());
+		assertEquals(123.0d, x.doubleValue(), 0.01d);
+		assertEquals("USD", x.getCurrencyCode());
+	}
+	
+	@Test
+	public void testCtor4_SIRMS_TrimTrailingZeroes() {
+		FMoney x = new FMoney("115.0200", 3, RoundingMode.CEILING, "EUR");
+		
+		assertEquals(new BigDecimal("115.020"), x.toBigDecimal());
+		assertEquals(RoundingMode.CEILING, x.getRoundingMode());
+		assertEquals(3, x.getScale());
+		assertEquals(115.02d, x.doubleValue(), 0.001d);
+		assertEquals("EUR", x.getCurrencyCode());
+	}
+
+	@Test (expected=NumberFormatException.class)
+	public void testCtor4_SIRMS_InvalidFormat() {
+		new FMoney("foo", 3, RoundingMode.CEILING, "EUR");
+	}
+	
+	@Test
+	public void testCtor3_SIS() {
+		FMoney x = new FMoney("115.256", 2, "USD");
+		
+		assertEquals(new BigDecimal("115.26"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(2, x.getScale());
+		assertEquals(115.26d, x.doubleValue(), 0.001d);
+		assertEquals("USD", x.getCurrencyCode());
+	}
+
+	@Test
+	public void testCtor3_SIS_ScientificNotation() {
+		FMoney x = new FMoney("3.15E2", 1, "JPY");
+		
+		assertEquals(new BigDecimal("315.0"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(1, x.getScale());
+		assertEquals(315.0d, x.doubleValue(), 0.01d);
+		assertEquals("JPY", x.getCurrencyCode());
+	}
+
+	@Test
+	public void testCtor3_SIS_TrimTrailingZeroes() {
+		FMoney x = new FMoney("-2.98900", 4, "RUB");
+		
+		assertEquals(new BigDecimal("-2.9890"), x.toBigDecimal());
+		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
+		assertEquals(4, x.getScale());
+		assertEquals(-2.989d, x.doubleValue(), 0.0001d);
+		assertEquals("RUB", x.getCurrencyCode());
+	}
+
+	@Test (expected=NumberFormatException.class)
+	public void testCtor3_SIS_InvalidFormat() {
+		new FMoney("bar", 2, "RUB");
+	}
+	
+	@Test
 	public void testCtor0() {
 		FMoney x = new FMoney();
 		
-		assertEquals(new BigDecimal("0.00"), x.toBigDecimal());
+		assertEquals(new BigDecimal("0"), x.toBigDecimal());
 		assertEquals(RoundingMode.HALF_UP, x.getRoundingMode());
-		assertEquals(2, x.getScale());
+		assertEquals(0, x.getScale());
 		assertEquals(0.0d, x.doubleValue(), 0.001d);
 		assertEquals("USD", x.getCurrencyCode());		
 	}
@@ -148,5 +300,17 @@ public class FMoneyTest {
 		assertEquals( 1, new FMoney("12.34", "RUR").compareTo(new FMoney("12.34", "CAD")));
 		assertEquals( 0, new FMoney("12.34", "RUR").compareTo(new FDecimal("12.34")));
 	}
+	
+	@Test
+	public void testWithScale1() {
+		FMoney expected = new FMoney("115.2260", 4, RoundingMode.HALF_DOWN, "USD");
+		FMoney actual = new FMoney("115.226", RoundingMode.HALF_DOWN, "USD").withScale(4);
+		assertEquals(expected, actual);
+		
+		expected = new FMoney("115.23", "RUB");
+		actual = new FMoney("115.226", "RUB").withScale(2);
+		assertEquals(expected, actual);
+	}
+
 
 }

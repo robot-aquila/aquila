@@ -47,19 +47,19 @@ public class MoexSymbolUpdateReaderFactoryTest {
 			.withToken(SecurityField.DISPLAY_NAME, "Eu-9.16")
 			.withToken(SecurityField.LOT_SIZE, 1000)
 			.withToken(SecurityField.TICK_SIZE, new FDecimal("1"))
-			.withToken(SecurityField.TICK_VALUE, new FMoney("1", "RUB"))
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, 69895.0d)
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, 75721.0d)
-			.withToken(SecurityField.SETTLEMENT_PRICE, 72808.0d)
-			.withToken(SecurityField.INITIAL_MARGIN, 5826.0d)
+			.withToken(SecurityField.TICK_VALUE, new FMoney("1", 2, "RUB"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("69895"))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("75721"))
+			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("72808"))
+			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5826", 2, "RUB"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-09-13T15:45:00Z")
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, 70424.0d)
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, 76294.0d)
-			.withToken(SecurityField.SETTLEMENT_PRICE, 73359.0d)
-			.withToken(SecurityField.INITIAL_MARGIN, 5870.0d)
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("70424"))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("76294"))
+			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("73359"))
+			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5870", 2, "RUB"))
 			.buildUpdate());
 		assertEquals(expected, actual);
 	}

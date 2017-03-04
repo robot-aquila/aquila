@@ -36,14 +36,14 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return lower price limit
 	 */
-	public Double getLowerPriceLimit();
+	public FDecimal getLowerPriceLimit();
 	
 	/**
 	 * Get upper price limit.
 	 * <p>
 	 * @return upper price limit
 	 */
-	public Double getUpperPriceLimit();
+	public FDecimal getUpperPriceLimit();
 	
 	/**
 	 * Get tick price.
@@ -119,7 +119,7 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return settlement price
 	 */
-	public Double getSettlementPrice();
+	public FDecimal getSettlementPrice();
 	
 	/**
 	 * Get initial margin.
@@ -130,6 +130,6 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return initial margin
 	 */
-	public Double getInitialMargin();
+	public FMoney getInitialMargin();
 	
 }

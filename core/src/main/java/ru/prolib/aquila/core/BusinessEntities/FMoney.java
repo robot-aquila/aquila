@@ -29,7 +29,7 @@ public class FMoney extends FDecimal {
 	}
 	
 	public FMoney(String value, RoundingMode roundingMode, String currency) {
-		super(new BigDecimal(value), roundingMode);
+		super(value, roundingMode);
 		this.currencyCode = currency;
 	}
 	
@@ -38,8 +38,18 @@ public class FMoney extends FDecimal {
 		this.currencyCode = currency;
 	}
 	
+	public FMoney(String value, int scale, RoundingMode roundingMode, String currency) {
+		super(value, scale, roundingMode);
+		this.currencyCode = currency;
+	}
+	
+	public FMoney(String value, int scale, String currency) {
+		super(value, scale);
+		this.currencyCode = currency;
+	}
+	
 	public FMoney() {
-		this("0.00", "USD");
+		this("0", "USD");
 	}
 	
 	public String getCurrencyCode() {
@@ -83,6 +93,11 @@ public class FMoney extends FDecimal {
 			.append(roundingMode, o.roundingMode)
 			.append(currencyCode, o.currencyCode)
 			.isEquals();
+	}
+	
+	@Override
+	public FMoney withScale(int scale) {
+		return new FMoney(value.setScale(scale, roundingMode), roundingMode, currencyCode);
 	}
 
 }
