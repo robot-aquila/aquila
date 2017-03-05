@@ -13,6 +13,7 @@ import ru.prolib.aquila.utils.experimental.charts.objects.CandleChartObject;
 import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
 import ru.prolib.aquila.utils.experimental.charts.objects.CircleChartObject;
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartObject;
+import ru.prolib.aquila.utils.experimental.charts.objects.VolumeChartObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,6 +44,7 @@ public class TestPanel extends JPanel implements ActionListener {
     private JLabel numberOfPointsLabel;
     private List<Candle> candleData = new ArrayList<>();
     private CandleChartObject candles;
+    private VolumeChartObject volumes;
     private boolean replayStarted = false;
     private Timer replayTimer = new Timer("REPLAY_TIMER", true);
     private TimerTask replayTask;
@@ -159,7 +161,10 @@ public class TestPanel extends JPanel implements ActionListener {
 //        scrollBar.setVisible(false);
 //        panel.setCurrentPosition(0);
 //        random.doClick();
-        generateRandomData();
+        Platform.runLater(() -> {
+            generateRandomData();
+        });
+
     }
 
     @Override
@@ -190,13 +195,22 @@ public class TestPanel extends JPanel implements ActionListener {
 
     private ChartPanel createChartPanel(){
         ChartPanel panel = new ChartPanel();
+        panel.addChart("CANDLES");
         candles = new CandleChartObject();
-        panel.addChartObject(candles);
+        panel.addChartObject("CANDLES", candles);
+
+        panel.addChart("VOLUMES");
+        volumes = new VolumeChartObject();
+        panel.addChartObject("VOLUMES", volumes);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime time = LocalDateTime.parse("2016-12-31 22:00", formatter);
 
-        panel.addChartObject(new CircleChartObject(time, 1847, 1));
+        panel.addChartObject("CANDLES", new CircleChartObject(time, 1847, 1));
+
+        panel.getChart("VOLUMES").setPrefHeight(200);
+        panel.getChart("CANDLES").setXAxisVisible(false);
+        panel.getChart("CANDLES").setPrefHeight(1200);
 
         return panel;
     }
@@ -204,6 +218,7 @@ public class TestPanel extends JPanel implements ActionListener {
     private void generateRandomData(){
         candleData = getRandomData();
         candles.setData(candleData);
+        volumes.setData(candleData);
         refreshIndicatorsData();
         panel.refresh();
         updateScrollBar();
@@ -220,9 +235,10 @@ public class TestPanel extends JPanel implements ActionListener {
             double close = getNewValue(open);
             double high = Math.max(open + getRandom(),close);
             double low = Math.min(open - getRandom(),close);
+            long volume = Math.round(Math.random() * 5000);
             previousClose = close;
             if(interval.getStart().atOffset(ZoneOffset.UTC).toLocalDateTime().getHour()!=20){
-                data.add(new Candle(interval, open, high, low, close, 1L));
+                data.add(new Candle(interval, open, high, low, close, volume));
             }
         }
         return data;
@@ -343,12 +359,12 @@ public class TestPanel extends JPanel implements ActionListener {
     }
 
     private void refreshIndicators(){
-        for(int i=panel.getChartObjects().size()-1; i>=0; i--){
-            ChartObject obj = panel.getChartObjects().get(i);
+        for(int i=panel.getChartObjects("CANDLES").size()-1; i>=0; i--){
+            ChartObject obj = panel.getChartObjects("CANDLES").get(i);
             if(obj instanceof IndicatorChartObject){
                 if(!indicators.contains(obj)){
-                    panel.getChartObjects().remove(obj);
-                    Node node = panel.getChart().getNodeById(((IndicatorChartObject) obj).getId());
+                    panel.getChartObjects("CANDLES").remove(obj);
+                    Node node = panel.getChart("CANDLES").getNodeById(((IndicatorChartObject) obj).getId());
                     if(node!=null){
                         node.setId(null);
                     }
@@ -356,7 +372,7 @@ public class TestPanel extends JPanel implements ActionListener {
             }
         }
         for(IndicatorChartObject obj: indicators){
-            panel.addChartObject(obj);
+            panel.addChartObject("CANDLES", obj);
         }
         refreshIndicatorsData();
         panel.refresh();
@@ -366,13 +382,16 @@ public class TestPanel extends JPanel implements ActionListener {
         for(IndicatorChartObject obj: indicators){
             obj.setData(candles.getData());
         }
-        panel.refresh();
+//        panel.refresh();
     }
 
     private void changeCandle(){
         Platform.runLater(()->{
             Candle candle = candles.getLastCandle();
-            candles.setLastClose(candle.getClose()+(Math.random()-0.5)*2);
+            long dV = Math.round(Math.random() * 500);
+            Candle newCandle = new Candle(candle.getInterval(), candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose()+(Math.random()-0.5)*2, candle.getVolume()+ dV);
+            candles.setLastClose(newCandle.getClose(), newCandle.getVolume());
+            volumes.setLastVolume(newCandle);
             List<Candle> data = candles.getData();
             refreshIndicatorsData();
             if(panel.isTimeDisplayed(candle.getStartTime())){
@@ -390,7 +409,8 @@ public class TestPanel extends JPanel implements ActionListener {
                 double close = getNewValue(open);
                 double high = Math.max(open + getRandom(), close);
                 double low = Math.min(open - getRandom(), close);
-                Candle newCandle = new Candle(interval, open, high, low, close, 1L);
+                long volume = Math.round(Math.random() * 5000);
+                Candle newCandle = new Candle(interval, open, high, low, close, volume);
                 candleData.add(newCandle);
                 candles.addCandle(newCandle);
                 List<Candle> data = candles.getData();
@@ -411,7 +431,7 @@ public class TestPanel extends JPanel implements ActionListener {
                 double close = open;
                 double high = open;
                 double low = open;
-                Candle newCandle = new Candle(interval, open, high, low, close, 1L);
+                Candle newCandle = new Candle(interval, open, high, low, close, 0L);
                 candleData.add(newCandle);
                 candles.addCandle(newCandle);
                 List<Candle> data = candles.getData();

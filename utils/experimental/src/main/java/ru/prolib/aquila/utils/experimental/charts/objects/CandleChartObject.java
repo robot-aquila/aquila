@@ -145,7 +145,7 @@ public class CandleChartObject implements ChartObject{
         }
     }
 
-    public void setLastClose(double close){
+    public void setLastClose(double close, long volume){
         Candle lastCandle = getLastCandle();
         if(lastCandle == null){
             throw new IllegalStateException("Empty candle list");
@@ -153,7 +153,7 @@ public class CandleChartObject implements ChartObject{
         double high = close>lastCandle.getHigh()?close:lastCandle.getHigh();
         double low = close<lastCandle.getLow()?close:lastCandle.getLow();
         LocalDateTime lastTime = toLocalDateTime(lastCandle.getStartTime());
-        Candle newCandle = new Candle(lastCandle.getInterval(), lastCandle.getOpen(), high, low, close, lastCandle.getVolume());
+        Candle newCandle = new Candle(lastCandle.getInterval(), lastCandle.getOpen(), high, low, close, volume);
         data.put(lastTime, newCandle);
     }
 
