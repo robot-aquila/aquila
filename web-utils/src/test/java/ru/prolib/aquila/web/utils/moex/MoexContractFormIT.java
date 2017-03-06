@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
@@ -70,10 +71,10 @@ public class MoexContractFormIT {
 		expected.put(MoexContractField.FIRST_TRADING_DAY, LocalDate.of(2015, 3, 18));
 		expected.put(MoexContractField.LAST_TRADING_DAY, LocalDate.of(2016, 6, 15));
 		expected.put(MoexContractField.DELIVERY, LocalDate.of(2016, 6, 15));
-		expected.put(MoexContractField.FEE, 2.81d);
-		expected.put(MoexContractField.INTRADAY_FEE, 1.405d);
-		expected.put(MoexContractField.NEGOTIATION_FEE, 2.81d);
-		expected.put(MoexContractField.EXERCISE_FEE, 2.0d);
+		expected.put(MoexContractField.FEE, new FMoney("2.81", "RUB"));
+		expected.put(MoexContractField.INTRADAY_FEE, new FMoney("1.405", "RUB"));
+		expected.put(MoexContractField.NEGOTIATION_FEE, new FMoney("2.81", "RUB"));
+		expected.put(MoexContractField.EXERCISE_FEE, new FMoney("2.0", "RUB"));
 		expected.put(MoexContractField.FX_INTRADAY_CLEARING, LocalTime.of(13, 45));
 		expected.put(MoexContractField.FX_EVENING_CLEARING, LocalTime.of(18, 30));
 		expected.put(MoexContractField.SETTLEMENT_PROC_DESCR, "Cash settlement. An average "

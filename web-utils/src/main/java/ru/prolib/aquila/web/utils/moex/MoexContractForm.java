@@ -104,16 +104,17 @@ public class MoexContractForm {
 		case MoexContractField.INITIAL_MARGIN_DATE:
 			return formUtils.toLocalDate(stringValue);
 		case MoexContractField.TICK_SIZE:
-		case MoexContractField.TICK_VALUE:
 		case MoexContractField.LOWER_PRICE_LIMIT:
 		case MoexContractField.UPPER_PRICE_LIMIT:
 		case MoexContractField.SETTLEMENT_PRICE:
+			return formUtils.toDecimal(stringValue);
+		case MoexContractField.TICK_VALUE:
 		case MoexContractField.FEE:
 		case MoexContractField.INTRADAY_FEE:
 		case MoexContractField.NEGOTIATION_FEE:
 		case MoexContractField.EXERCISE_FEE:
 		case MoexContractField.INITIAL_MARGIN:
-			return formUtils.toDouble(stringValue);
+			return formUtils.toMoney(stringValue);
 		case MoexContractField.FX_INTRADAY_CLEARING:
 		case MoexContractField.FX_EVENING_CLEARING:
 			return formUtils.toClearingTime(stringValue);

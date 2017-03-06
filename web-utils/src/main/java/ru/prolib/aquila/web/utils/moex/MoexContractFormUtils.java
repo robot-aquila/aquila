@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 
 public class MoexContractFormUtils {
@@ -172,11 +174,36 @@ public class MoexContractFormUtils {
 		}
 	}
 	
+	/**
+	 * This method is deprecated.
+	 * Use {@link #toDecimal(String)} or {@link #toMoney(String)} instead.
+	 * <p>
+	 * @param stringValue - string representation of the double value
+	 * @return double value
+	 * @throws WUWebPageException - an error occurred
+	 */
+	@Deprecated
 	public double toDouble(String stringValue) throws WUWebPageException {
 		try {
 			return Double.valueOf(StringUtils.replace(stringValue, ",", ""));
 		} catch ( NumberFormatException e ) {
 			throw errForm("Cannot convert to double: [" + stringValue + "]", e);
+		}
+	}
+	
+	public FDecimal toDecimal(String stringValue) throws WUWebPageException {
+		try {
+			return new FDecimal(StringUtils.replace(stringValue, ",", ""));
+		} catch ( NumberFormatException e ) {
+			throw errForm("Cannot convert to decimal: [" + stringValue + "]", e);
+		}
+	}
+	
+	public FDecimal toMoney(String stringValue) throws WUWebPageException {
+		try {
+			return new FMoney(StringUtils.replace(stringValue, ",", ""), "RUB");
+		} catch ( NumberFormatException e ) {
+			throw errForm("Cannot convert to money: [" + stringValue + "]", e);
 		}
 	}
 	

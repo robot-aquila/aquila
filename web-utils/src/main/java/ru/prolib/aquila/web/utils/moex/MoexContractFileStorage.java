@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
@@ -21,6 +24,12 @@ import ru.prolib.aquila.data.storage.file.PtmlFactory;
  * This class to store and read files of delta-updates of MOEX contract changes.
  */
 public class MoexContractFileStorage {	
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(MoexContractFileStorage.class);
+	}
+	
 	private static final String STORAGE_ID = "MOEX_CONTRACT";
 	private final FileStorage fileStorage;
 	private final PtmlFactory ptmlFactory;
@@ -52,6 +61,7 @@ public class MoexContractFileStorage {
 			throws IOException
 	{
 		File file = fileStorage.getDataFile(symbol);
+		logger.debug("Opening data file for reading: {}", file);
 		return file.exists() ?
 				ptmlFactory.createReader(file) :
 				new CloseableIteratorStub<DeltaUpdate>();
@@ -69,6 +79,7 @@ public class MoexContractFileStorage {
 			throws IOException, DataStorageException
 	{
 		File file = fileStorage.getDataFileForWriting(symbol);
+		logger.debug("Opening data file for writing: {}", file);
 		return ptmlFactory.createWriter(file);
 	}
 	
