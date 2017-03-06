@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
+import javafx.application.Platform;
 import javafx.beans.NamedArg;
 import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
@@ -25,6 +26,7 @@ public class Chart extends ScatterChart {
     private final NumberAxis yAxis;
     private List<LocalDateTime> xValues = Collections.synchronizedList(new ArrayList<>());
     private TimeAxisSettings timeAxisSettings = new DefaultTimeAxisSettings();
+    private boolean xAxisVisible = true;
 
     public Chart(@NamedArg("xAxis") NumberAxis xAxis, @NamedArg("yAxis") NumberAxis yAxis) {
         super(xAxis, yAxis);
@@ -63,6 +65,7 @@ public class Chart extends ScatterChart {
 
     public void setAxisValues(List<LocalDateTime> xValues, double minY, double maxY){
 //        this.xValues = xValues;
+        yAxis.setPrefWidth(50);
         this.xValues.clear();
         this.xValues.addAll(xValues);
         xAxis.setLowerBound(-1);
@@ -76,6 +79,7 @@ public class Chart extends ScatterChart {
             list.add(i);
         }
         xAxis.invalidateRange(list);
+        xAxis.setTickLabelsVisible(xAxisVisible);
         this.layout();
     }
 
@@ -134,18 +138,20 @@ public class Chart extends ScatterChart {
     }
 
     private void updateStyles() {
-        xAxis.getChildrenUnmodifiable().stream().filter(n->!n.isVisible()).forEach((n)->n.setVisible(true));
-        int[] idx = { 0 };
-        xAxis.getChildrenUnmodifiable().filtered(n-> n instanceof Text).forEach(n ->{
-            int i = xAxis.getTickMarks().get(idx[0]++).getValue().intValue();
-            if(i>=0 && i < xValues.size()){
-                if(timeAxisSettings.isMinorLabel(xValues.get(i))){
-                    n.getStyleClass().add(timeAxisSettings.getMinorLabelStyleClass());
-                } else {
-                    n.getStyleClass().add(timeAxisSettings.getLabelStyleClass());
+        if(xAxisVisible){
+            xAxis.getChildrenUnmodifiable().stream().filter(n->!n.isVisible()).forEach((n)->n.setVisible(true));
+            int[] idx = { 0 };
+            xAxis.getChildrenUnmodifiable().filtered(n-> n instanceof Text).forEach(n ->{
+                int i = xAxis.getTickMarks().get(idx[0]++).getValue().intValue();
+                if(i>=0 && i < xValues.size()){
+                    if(timeAxisSettings.isMinorLabel(xValues.get(i))){
+                        n.getStyleClass().add(timeAxisSettings.getMinorLabelStyleClass());
+                    } else {
+                        n.getStyleClass().add(timeAxisSettings.getLabelStyleClass());
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private String getTimeLabelText(LocalDateTime time) {
@@ -175,5 +181,8 @@ public class Chart extends ScatterChart {
         return null;
     }
 
+    public void setXAxisVisible(boolean xAxisVisible) {
+        this.xAxisVisible = xAxisVisible;
+    }
 }
 

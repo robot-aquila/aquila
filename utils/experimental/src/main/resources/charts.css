@@ -58,3 +58,7 @@
     -fx-stroke: green;
     -fx-stroke-width: 1;
 }
+
+.volume-bar {
+    -fx-fill: linear-gradient(#9d9e9d 0%, #6b6a6b 20%, #343534 80%, #242424 100%);
+}
