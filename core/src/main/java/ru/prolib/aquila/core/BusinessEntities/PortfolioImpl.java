@@ -76,28 +76,28 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	}
 
 	@Override
-	public Double getBalance() {
-		return getDouble(PortfolioField.BALANCE);
+	public FMoney getBalance() {
+		return getMoney(PortfolioField.BALANCE);
 	}
 
 	@Override
-	public Double getEquity() {
-		return getDouble(PortfolioField.EQUITY);
+	public FMoney getEquity() {
+		return getMoney(PortfolioField.EQUITY);
 	}
 
 	@Override
-	public Double getProfitAndLoss() {
-		return getDouble(PortfolioField.PROFIT_AND_LOSS);
+	public FMoney getProfitAndLoss() {
+		return getMoney(PortfolioField.PROFIT_AND_LOSS);
 	}
 
 	@Override
-	public Double getUsedMargin() {
-		return getDouble(PortfolioField.USED_MARGIN);
+	public FMoney getUsedMargin() {
+		return getMoney(PortfolioField.USED_MARGIN);
 	}
 
 	@Override
-	public Double getFreeMargin() {
-		return getDouble(PortfolioField.FREE_MARGIN);
+	public FMoney getFreeMargin() {
+		return getMoney(PortfolioField.FREE_MARGIN);
 	}
 
 	@Override
@@ -111,13 +111,13 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	}
 
 	@Override
-	public Double getAssets() {
-		return getDouble(PortfolioField.ASSETS);
+	public FMoney getAssets() {
+		return getMoney(PortfolioField.ASSETS);
 	}
 
 	@Override
-	public Double getLiabilities() {
-		return getDouble(PortfolioField.LIABILITIES);
+	public FMoney getLiabilities() {
+		return getMoney(PortfolioField.LIABILITIES);
 	}
 
 	@Override

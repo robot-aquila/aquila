@@ -43,28 +43,28 @@ public interface Position extends ObservableStateContainer {
 	 * <p>
 	 * @return current price or null if data not available
 	 */
-	public Double getCurrentPrice();
+	public FDecimal getCurrentPrice();
 	
 	/**
 	 * Get position open price.
 	 * <p>
 	 * @return open price of position or null if data not available
 	 */
-	public Double getOpenPrice();
+	public FDecimal getOpenPrice();
 	
 	/**
 	 * Get margin.
 	 * <p>
 	 * @return margin or null if data not available
 	 */
-	public Double getUsedMargin();
+	public FMoney getUsedMargin();
 	
 	/**
 	 * Get profit and loss.
 	 * <p>
 	 * @return profit and loss or null if data not available.
 	 */
-	public Double getProfitAndLoss();
+	public FMoney getProfitAndLoss();
 	
 	/**
 	 * When position volume changed.
@@ -83,5 +83,14 @@ public interface Position extends ObservableStateContainer {
 	 * @return event type
 	 */
 	public EventType onCurrentPriceChange();
+	
+	/**
+	 * Get a security instance of the position.
+	 * <p>
+	 * @return security instance
+	 * @throws SecurityNotExistsException - if security is not available via terminal
+	 * @throws SecurityException - an error occurred
+	 */
+	public Security getSecurity() throws SecurityException;
 
 }

@@ -183,8 +183,8 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 
 	@Override
-	public Double getPrice() {
-		return getDouble(OrderField.PRICE);
+	public FDecimal getPrice() {
+		return getDecimal(OrderField.PRICE);
 	}
 
 	@Override
@@ -198,8 +198,8 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 
 	@Override
-	public Double getExecutedValue() {
-		return getDouble(OrderField.EXECUTED_VALUE);
+	public FMoney getExecutedValue() {
+		return getMoney(OrderField.EXECUTED_VALUE);
 	}
 
 	@Override
@@ -357,7 +357,7 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 
 	@Override
 	public OrderExecution addExecution(long id, String externalID, Instant time,
-			double price, long volume, double value) throws OrderException
+			FDecimal price, long volume, FMoney value) throws OrderException
 	{
 		lock.lock();
 		try {
@@ -413,6 +413,11 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	@Override
 	public void fireExecution(OrderExecution execution) {
 		queue.enqueue(onExecution, new OrderExecutionEventFactory(this, execution));
+	}
+	
+	@Override
+	public Security getSecurity() throws SecurityException {
+		return terminal.getSecurity(symbol);
 	}
 
 }

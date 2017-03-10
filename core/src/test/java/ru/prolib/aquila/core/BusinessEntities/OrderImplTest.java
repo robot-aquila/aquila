@@ -158,12 +158,13 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testGetExecutedValue() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return order.getExecutedValue();
 			}			
 		};
-		testGetter(OrderField.EXECUTED_VALUE, 14052.13d, 16480.15d);
+		testGetter(OrderField.EXECUTED_VALUE,
+				FMoney.ofRUB2(14052.13), FMoney.ofRUB2(16480.15));
 	}
 	
 	@Test
@@ -188,12 +189,12 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetPrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
 				return order.getPrice();
 			}			
 		};
-		testGetter(OrderField.PRICE, 230.45d, 245.13d);
+		testGetter(OrderField.PRICE, FDecimal.of2(230.45), FDecimal.of2(245.13));
 	}
 	
 	@Test
@@ -725,7 +726,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	 * @return execution instance
 	 */
 	protected OrderExecution newExec(long id, String externalID, Instant time,
-			double price, long volume, double value)
+			FDecimal price, long volume, FMoney value)
 	{
 		return new OrderExecutionImpl(terminal, id, externalID, symbol,
 			order.getAction(), 240L, time, price, volume, value);
@@ -737,9 +738,11 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.onExecution().addSyncListener(listenerStub);
 		
-		OrderExecution actual = order.addExecution(100L, "x1", now, 80.0d, 10L, 800.0d);
+		OrderExecution actual = order.addExecution(100L, "x1", now,
+				FDecimal.of2(80.0), 10L, FMoney.ofRUB2(800.0));
 		
-		OrderExecution expected = newExec(100L, "x1", now, 80.0d, 10L, 800.0d);
+		OrderExecution expected = newExec(100L, "x1", now, FDecimal.of2(80.0),
+				10L, FMoney.ofRUB2(800.0));
 		assertEquals(expected, actual);
 		assertEquals(expected, order.getExecution(100L));
 		assertEquals(0, listenerStub.getEventCount());
@@ -750,9 +753,9 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		Instant now = Instant.now();
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.update(data);
-		order.addExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
+		order.addExecution(100L, "foo1", now, FDecimal.of2(34.15), 10L, FMoney.ofRUB2(341.50));
 		
-		order.addExecution(100L, "foo1", now, 34.15d, 10L, 341.50d);
+		order.addExecution(100L, "foo1", now, FDecimal.of2(34.15), 10L, FMoney.ofRUB2(341.50));
 	}
 	
 	@Test
@@ -760,8 +763,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.update(data);
 		Instant now = Instant.now();
-		order.addExecution(100L, "foo1", now,				 34.15d, 10L, 341.50d);
-		order.addExecution(101L, "foo2", now.plusMillis(1), 34.25d, 20L, 683.00d);
+		order.addExecution(100L, "foo1", now,				FDecimal.of2(34.15), 10L, FMoney.ofRUB2(341.50));
+		order.addExecution(101L, "foo2", now.plusMillis(1), FDecimal.of2(34.25), 20L, FMoney.ofRUB2(683.00));
 		List<OrderExecution> executions = order.getExecutions();
 		
 		assertSame(executions.get(0), order.getExecution(100L));
@@ -795,7 +798,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testAddExecution1() throws Exception {
 		Instant time = Instant.EPOCH;
-		OrderExecution execution = newExec(2005, "foo2005", time, 112.34d, 10L, 1123.40d);
+		OrderExecution execution = newExec(2005, "foo2005", time,
+				FDecimal.of2(112.34), 10L, FMoney.ofRUB2(1123.40));
 		order.onExecution().addSyncListener(listenerStub);
 		
 		order.addExecution(execution);
@@ -809,14 +813,17 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testAddExecution1_ThrowsIfAlreadyExists() throws Exception {
 		Instant time = Instant.EPOCH;
 		
-		order.addExecution(newExec(2008, "x", time, 48.15d, 1L, 48.15d));
-		order.addExecution(newExec(2008, "y", time, 12.78d, 1L, 12.78d));
+		order.addExecution(newExec(2008, "x", time, FDecimal.of2(48.15), 1L,
+				FMoney.ofRUB2(48.15)));
+		order.addExecution(newExec(2008, "y", time, FDecimal.of2(12.78), 1L,
+				FMoney.ofRUB2(12.78)));
 	}
 	
 	@Test
 	public void testFireExecutionAdded() throws Exception {
 		Instant time = Instant.now();
-		OrderExecution execution = newExec(512, null, time, 45.14d, 1L, 45.14d);
+		OrderExecution execution = newExec(512, null, time, FDecimal.of2(45.14),
+				1L, FMoney.ofRUB2(45.14));
 		order.onExecution().addSyncListener(listenerStub);
 		
 		order.fireExecution(execution);
@@ -829,9 +836,12 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testGetExecutions() throws Exception {
 		Instant time = Instant.now();
-		OrderExecution exec1 = newExec(501, null, time, 10.00d, 1L, 20.00d);
-		OrderExecution exec2 = newExec(502, null, time, 10.10d, 5L, 40.00d);
-		OrderExecution exec3 = newExec(503, "xo", time, 10.20d, 2L, 50.00d);
+		OrderExecution exec1 = newExec(501, null, time, FDecimal.of2(10.00), 1L,
+				FMoney.ofRUB2(20.00));
+		OrderExecution exec2 = newExec(502, null, time, FDecimal.of2(10.10), 5L,
+				FMoney.ofRUB2(40.00));
+		OrderExecution exec3 = newExec(503, "xo", time, FDecimal.of2(10.20), 2L,
+				FMoney.ofRUB2(50.00));
 		order.addExecution(exec1);
 		order.addExecution(exec2);
 		order.addExecution(exec3);
@@ -841,6 +851,18 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		expected.add(exec2);
 		expected.add(exec3);
 		assertEquals(expected, order.getExecutions());
+	}
+	
+	@Test
+	public void testGetSecurity() throws Exception {
+		control.resetToStrict();
+		Security securityMock = control.createMock(Security.class);
+		expect(terminal.getSecurity(symbol)).andReturn(securityMock);
+		control.replay();
+		
+		assertSame(securityMock, order.getSecurity());
+		
+		control.verify();
 	}
 
 }

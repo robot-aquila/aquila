@@ -8,9 +8,84 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.util.StringUtils;
 
 public class FDecimal implements Comparable<FDecimal> {
+	public static final int VERSION = 1;
+	public static final FDecimal ZERO0 = FDecimal.of0(0);
+	public static final FDecimal ZERO1 = FDecimal.of1(0);
+	public static final FDecimal ZERO2 = FDecimal.of2(0);
+	public static final FDecimal ZERO3 = FDecimal.of3(0);
+	public static final FDecimal ZERO4 = FDecimal.of4(0);
+	
 	protected final BigDecimal value;
 	protected final RoundingMode roundingMode;
 	
+	public static FDecimal of(String value) {
+		return new FDecimal(value);
+	}
+	
+	public static FDecimal of(String value, int scale) {
+		return new FDecimal(value, scale);
+	}
+	
+	public static FDecimal of(double value, int scale) {
+		return new FDecimal(value, scale);
+	}
+	
+	public static FDecimal of(String value, int scale, RoundingMode rm) {
+		return new FDecimal(value, scale, rm);
+	}
+	
+	public static FDecimal of(BigDecimal value) {
+		return new FDecimal(value);
+	}
+	
+	public static FDecimal of(BigDecimal value, int scale) {
+		return new FDecimal(value).withScale(scale);
+	}
+	
+	public static FDecimal of(BigDecimal value, int scale, RoundingMode rm) {
+		return new FDecimal(value, rm).withScale(scale);
+	}
+	
+	public static FDecimal of0(String value) {
+		return of(value, 0);
+	}
+	
+	public static FDecimal of1(String value) {
+		return of(value, 1);
+	}
+	
+	public static FDecimal of2(String value) {
+		return of(value, 2);
+	}
+	
+	public static FDecimal of3(String value) {
+		return of(value, 3);
+	}
+	
+	public static FDecimal of4(String value) {
+		return of(value, 4);
+	}
+	
+	public static FDecimal of0(double value) {
+		return of(value, 0);
+	}
+	
+	public static FDecimal of1(double value) {
+		return of(value, 1);
+	}
+
+	public static FDecimal of2(double value) {
+		return of(value, 2);
+	}
+
+	public static FDecimal of3(double value) {
+		return of(value, 3);
+	}
+
+	public static FDecimal of4(double value) {
+		return of(value, 4);
+	}
+
 	/**
 	 * Convert double value to big decimal with specified scale.
 	 * <p>
@@ -145,6 +220,57 @@ public class FDecimal implements Comparable<FDecimal> {
 	
 	public FDecimal withScale(int scale) {
 		return new FDecimal(value.setScale(scale, roundingMode), roundingMode);
+	}
+	
+	public FDecimal subtract(FDecimal subtrahend) {
+		return new FDecimal(value.subtract(subtrahend.value), roundingMode);
+	}
+	
+	public FDecimal add(FDecimal augend) {
+		return new FDecimal(value.add(augend.value), roundingMode);
+	}
+	
+	public FDecimal withZero() {
+		return new FDecimal(0, value.scale(), roundingMode);
+	}
+	
+	public FDecimal multiply(FDecimal multiplicand) {
+		return new FDecimal(value.multiply(multiplicand.value)
+			.setScale(Math.max(value.scale(), multiplicand.getScale()), roundingMode), roundingMode);
+	}
+	
+	public FDecimal multiplyExact(FDecimal multiplicand) {
+		return new FDecimal(value.multiply(multiplicand.value), roundingMode);
+	}
+	
+	public FDecimal multiply(Long multiplicand) {
+		return new FDecimal(value.multiply(new BigDecimal(multiplicand)),
+				roundingMode).withScale(getScale());
+	}
+	
+	public FDecimal negate() {
+		return new FDecimal(value.negate(), roundingMode);
+	}
+	
+	public FDecimal divide(FDecimal divisor) {
+		int scale = Math.max(value.scale(), divisor.getScale());
+		return new FDecimal(value.divide(divisor.value, scale, roundingMode), roundingMode);
+	}
+	
+	public FDecimal divide(Long divisor) {
+		return new FDecimal(value.divide(new BigDecimal(divisor), getScale(), roundingMode), roundingMode);
+	}
+	
+	public FDecimal divide(FDecimal divisor, int scale, RoundingMode roundingMode) {
+		return new FDecimal(value.divide(divisor.value, scale, roundingMode), this.roundingMode);
+	}
+	
+	public FDecimal divide(Long divisor, int scale, RoundingMode roundingMode) {
+		return new FDecimal(value.divide(new BigDecimal(divisor), scale, roundingMode), this.roundingMode);
+	}
+	
+	public FDecimal abs() {
+		return new FDecimal(value.abs(), roundingMode);
 	}
 
 }

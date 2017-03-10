@@ -83,8 +83,8 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	}
 
 	@Override
-	public Double getUsedMargin() {
-		return getDouble(PositionField.USED_MARGIN);
+	public FMoney getUsedMargin() {
+		return getMoney(PositionField.USED_MARGIN);
 	}
 
 	@Override
@@ -93,13 +93,13 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	}
 
 	@Override
-	public Double getCurrentPrice() {
-		return getDouble(PositionField.CURRENT_PRICE);
+	public FDecimal getCurrentPrice() {
+		return getDecimal(PositionField.CURRENT_PRICE);
 	}
 	
 	@Override
-	public Double getOpenPrice() {
-		return getDouble(PositionField.OPEN_PRICE);
+	public FDecimal getOpenPrice() {
+		return getDecimal(PositionField.OPEN_PRICE);
 	}
 	
 	@Override
@@ -164,8 +164,13 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	}
 
 	@Override
-	public Double getProfitAndLoss() {
-		return getDouble(PositionField.PROFIT_AND_LOSS);
+	public FMoney getProfitAndLoss() {
+		return getMoney(PositionField.PROFIT_AND_LOSS);
+	}
+
+	@Override
+	public Security getSecurity() throws SecurityException {
+		return terminal.getSecurity(symbol);
 	}
 
 }

@@ -407,7 +407,7 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
-			long qty, double price)
+			long qty, FDecimal price)
 	{
 		return createOrder(account, symbol, action, OrderType.LMT, qty, price, null);
 	}
@@ -419,7 +419,7 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public Order createOrder(Account account, Symbol symbol, OrderType type,
-			OrderAction action, long qty, Double price, String comment)
+			OrderAction action, long qty, FDecimal price, String comment)
 	{
 		return createOrder(account, symbol, action, type, qty, price, comment);
 	}
@@ -748,7 +748,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	private EditableOrder createOrder(Account account, Symbol symbol,
-			OrderAction action, OrderType type, Long volume, Double price,
+			OrderAction action, OrderType type, Long volume, FDecimal price,
 			String comment)
 	{
 		EditableOrder order = createOrder(account, symbol);
@@ -760,7 +760,7 @@ public class TerminalImpl implements EditableTerminal {
 		tokens.put(OrderField.PRICE, price);
 		tokens.put(OrderField.COMMENT, comment);
 		tokens.put(OrderField.TIME, scheduler.getCurrentTime());
-		tokens.put(OrderField.EXECUTED_VALUE, 0.0d);
+		//tokens.put(OrderField.EXECUTED_VALUE, null);
 		order.update(tokens);
 		return order;
 	}

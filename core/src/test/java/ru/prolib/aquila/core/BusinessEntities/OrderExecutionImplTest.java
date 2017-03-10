@@ -24,7 +24,7 @@ public class OrderExecutionImplTest {
 		terminal1 = control.createMock(Terminal.class);
 		execution = new OrderExecutionImpl(terminal1, 1024L, "foo35", symbol1,
 			OrderAction.BUY, 850L, Instant.parse("2012-03-27T00:00:00Z"),
-			36.19d, 10L, 361.9d);
+			FDecimal.of2(36.19), 10L, FMoney.ofRUB2(361.9));
 	}
 	
 	@Test
@@ -36,9 +36,9 @@ public class OrderExecutionImplTest {
 		assertEquals(OrderAction.BUY, execution.getAction());
 		assertEquals(850L, execution.getOrderID());
 		assertEquals(Instant.parse("2012-03-27T00:00:00Z"), execution.getTime());
-		assertEquals(36.19d, execution.getPricePerUnit(), 0.01d);
+		assertEquals(FDecimal.of2(36.19), execution.getPricePerUnit());
 		assertEquals(10L, execution.getVolume());
-		assertEquals(361.9d, execution.getValue(), 0.01d);
+		assertEquals(FMoney.ofRUB2(361.9), execution.getValue());
 	}
 	
 	@Test
@@ -59,9 +59,13 @@ public class OrderExecutionImplTest {
 		Variant<Long> vOrdID = new Variant<Long>(vAct, 850L, 420L);
 		Variant<Instant> vTime = new Variant<Instant>(vOrdID,
 				Instant.parse("2012-03-27T00:00:00Z"), Instant.now());
-		Variant<Double> vPrice = new Variant<Double>(vTime, 36.19d, 45.24d);
+		Variant<FDecimal> vPrice = new Variant<FDecimal>(vTime)
+				.add(FDecimal.of2(36.19))
+				.add(FDecimal.of3(45.24));
 		Variant<Long> vVol = new Variant<Long>(vPrice, 10L, 100L);
-		Variant<Double> vVal = new Variant<Double>(vVol, 361.9d, 440.0d);
+		Variant<FMoney> vVal = new Variant<FMoney>(vVol)
+				.add(FMoney.ofRUB2(361.9))
+				.add(FMoney.ofUSD2(440.0));
 		Variant<?> iterator = vVal;
 		int foundCnt = 0;
 		OrderExecutionImpl found = null, x = null;
@@ -82,9 +86,9 @@ public class OrderExecutionImplTest {
 		assertEquals(OrderAction.BUY, found.getAction());
 		assertEquals(850L, found.getOrderID());
 		assertEquals(Instant.parse("2012-03-27T00:00:00Z"), found.getTime());
-		assertEquals(36.19d, found.getPricePerUnit(), 0.01d);
+		assertEquals(FDecimal.of2(36.19), found.getPricePerUnit());
 		assertEquals(10L, found.getVolume());
-		assertEquals(361.9d, found.getValue(), 0.01d);
+		assertEquals(FMoney.ofRUB2(361.9), found.getValue());
 	}
 
 }

@@ -50,8 +50,8 @@ public class OrderChangeImpl implements OrderChange {
 	}
 
 	@Override
-	public double getExecutedValue() {
-		return (double) tokens.get(OrderField.EXECUTED_VALUE);
+	public FMoney getExecutedValue() {
+		return (FMoney) tokens.get(OrderField.EXECUTED_VALUE);
 	}
 	
 	@Override

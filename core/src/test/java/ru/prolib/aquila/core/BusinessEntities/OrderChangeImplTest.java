@@ -28,7 +28,7 @@ public class OrderChangeImplTest {
 		orderMock = control.createMock(EditableOrder.class);
 		execution = new OrderExecutionImpl(terminalMock, 100L,
 				null, new Symbol("AAPL"), OrderAction.BUY, 800L, Instant.now(),
-				86930d, 1L, 121532.14d);
+				FDecimal.of(86930, 0), 1L, FMoney.ofRUB2(121532.14));
 		tokens = new HashMap<Integer, Object>();
 		change = new OrderChangeImpl(orderMock, tokens);
 		changeWithExecution = new OrderChangeImpl(orderMock, tokens, execution);
@@ -69,8 +69,8 @@ public class OrderChangeImplTest {
 
 	@Test
 	public void testGetExecutedValue() {
-		tokens.put(OrderField.EXECUTED_VALUE, 286.15d);
-		assertEquals(286.15d, change.getExecutedValue(), 0.01d);
+		tokens.put(OrderField.EXECUTED_VALUE, FMoney.ofRUB2(286.15));
+		assertEquals(FMoney.ofRUB2(286.15), change.getExecutedValue());
 	}
 	
 	@Test
@@ -136,10 +136,12 @@ public class OrderChangeImplTest {
 		tokens2.put(OrderField.COMMENT, "zulu34");
 		OrderExecution execution1 = new OrderExecutionImpl(terminalMock, 100L,
 				null, new Symbol("AAPL"), OrderAction.BUY, 800L,
-				execution.getTime(), 86930d, 1L, 121532.14d);
+				execution.getTime(),
+				FDecimal.of(86930, 0), 1L, FMoney.ofRUB2(121532.14));
 		OrderExecution execution2 = new OrderExecutionImpl(terminalMock, 100L,
 				null, new Symbol("MSFT"), OrderAction.BUY, 800L,
-				execution.getTime(), 86930d, 1L, 121532.14d);
+				execution.getTime(),
+				FDecimal.of(86930, 0), 1L, FMoney.ofRUB2(121532.14));
 		Variant<EditableOrder> vOrd = new Variant<EditableOrder>()
 				.add(orderMock)
 				.add(control.createMock(EditableOrder.class));

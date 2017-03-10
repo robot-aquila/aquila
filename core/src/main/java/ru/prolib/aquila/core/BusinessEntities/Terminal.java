@@ -62,7 +62,7 @@ public interface Terminal extends Scheduler, Lockable {
 	 * @return new order instance
 	 */
 	public Order createOrder(Account account, Symbol symbol, OrderType type,
-			OrderAction action, long qty, Double price, String comment);
+			OrderAction action, long qty, FDecimal price, String comment);
 	
 	/**
 	 * Create limit order.
@@ -80,7 +80,7 @@ public interface Terminal extends Scheduler, Lockable {
 	 * @return new order instance
 	 */
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
-			long qty, double price);
+			long qty, FDecimal price);
 
 	/**
 	 * Create market order.

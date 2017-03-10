@@ -151,8 +151,9 @@ public class FastOrderPanel extends JPanel implements Starter {
 				logger.warn("Last trade not available");
 				return;
 			}
-			double price = last.getPrice() +
-				(dir == OrderAction.BUY ? slippage : -slippage);
+			FDecimal price = FDecimal.of(last.getPrice() +
+				(dir == OrderAction.BUY ? slippage : -slippage),
+				security.getScale());
 			order = terminal.createOrder(account, symbol, dir, qty, price);
 		} else {
 			order = terminal.createOrder(account, symbol, dir, qty);

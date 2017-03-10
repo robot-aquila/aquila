@@ -16,11 +16,11 @@ public interface OrderExecution {
 	
 	public OrderAction getAction();
 	
-	public double getPricePerUnit();
+	public FDecimal getPricePerUnit();
 	
 	public long getVolume();
 	
-	public double getValue();
+	public FMoney getValue();
 	
 	public Terminal getTerminal();
 

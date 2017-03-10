@@ -45,7 +45,7 @@ public interface OrderChange extends ContainerTransaction {
 	 * <p>
 	 * @return the order executed value after applying this change
 	 */
-	public double getExecutedValue();
+	public FMoney getExecutedValue();
 	
 	/**
 	 * Get transaction order.

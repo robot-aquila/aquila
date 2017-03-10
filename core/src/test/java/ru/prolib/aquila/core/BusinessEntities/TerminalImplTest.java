@@ -128,7 +128,7 @@ public class TerminalImplTest {
 				types.get((int)(Math.random() * types.size())),
 				actions.get((int)(Math.random() * actions.size())),
 				(long)(Math.random() * 9000),
-				Math.random() * 9000.0d,
+				FDecimal.of2(Math.random() * 9000.0),
 				null);
 		return (EditableOrder) order;
 	}
@@ -538,7 +538,7 @@ public class TerminalImplTest {
 	public void testCreateOrder5() throws Exception {
 		dataProviderStub.nextOrderID = 934L;
 		
-		Order order = terminal.createOrder(account1, symbol1, OrderAction.BUY, 20L, 431.15d);
+		Order order = terminal.createOrder(account1, symbol1, OrderAction.BUY, 20L, FDecimal.of2(431.15));
 
 		assertNotNull(order);
 		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
@@ -551,9 +551,9 @@ public class TerminalImplTest {
 		assertEquals(OrderType.LMT, order.getType());
 		assertEquals(new Long(20L), order.getInitialVolume());
 		assertEquals(new Long(20L), order.getCurrentVolume());
-		assertEquals(431.15d, order.getPrice(), 0.001d);
+		assertEquals(FDecimal.of2(431.15), order.getPrice());
 		assertNull(order.getComment());
-		assertEquals(0.0d, order.getExecutedValue(), 0.01d);
+		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
 	}
 	
@@ -576,7 +576,7 @@ public class TerminalImplTest {
 		assertEquals(new Long(80L), order.getCurrentVolume());
 		assertNull(order.getPrice());
 		assertNull(order.getComment());
-		assertEquals(0.0d, order.getExecutedValue(), 0.01d);
+		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
 	}
 	
@@ -585,7 +585,7 @@ public class TerminalImplTest {
 		dataProviderStub.nextOrderID = 924L;
 		
 		Order order = terminal.createOrder(account3, symbol2, OrderType.MKT,
-				OrderAction.SELL, 400L, 224.13d, "test order");
+				OrderAction.SELL, 400L, FDecimal.of2(224.13), "test order");
 		
 		assertNotNull(order);
 		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
@@ -598,9 +598,9 @@ public class TerminalImplTest {
 		assertEquals(OrderType.MKT, order.getType());
 		assertEquals(new Long(400L), order.getInitialVolume());
 		assertEquals(new Long(400L), order.getCurrentVolume());
-		assertEquals(224.13d, order.getPrice(), 0.01d);
+		assertEquals(FDecimal.of2(224.13), order.getPrice());
 		assertEquals("test order", order.getComment());
-		assertEquals(0.0d, order.getExecutedValue(), 0.01d);
+		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
 	}
 	

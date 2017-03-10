@@ -172,7 +172,7 @@ public interface Order extends ObservableStateContainer {
 	 * <p>
 	 * @return price specified in the order or null if price is not specified
 	 */
-	public Double getPrice();
+	public FDecimal getPrice();
 	
 	/**
 	 * Get order placement time.
@@ -193,7 +193,7 @@ public interface Order extends ObservableStateContainer {
 	 * <p>
 	 * @return price of executed volume in base or account currency (money)
 	 */
-	public Double getExecutedValue();
+	public FMoney getExecutedValue();
 	
 	/**
 	 * Get comment.
@@ -239,5 +239,14 @@ public interface Order extends ObservableStateContainer {
 	 * @return variable value or null if variable not defined
 	 */
 	public String getUserDefinedString();
+	
+	/**
+	 * Get a security instance of the order.
+	 * <p>
+	 * @return security instance
+	 * @throws SecurityNotExistsException - if security is not available via terminal
+	 * @throws SecurityException - an error occurred
+	 */
+	public Security getSecurity() throws SecurityException;
 	
 }

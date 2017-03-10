@@ -22,13 +22,14 @@ public class OrderTransactionFactory {
 	 * @return transaction
 	 */
 	public OrderChange createNewExecution(EditableOrder order, long executionID,
-			String externalID, Instant executionTime, double price, long volume,
-			double executedValue)
+			String externalID, Instant executionTime, FDecimal price, long volume,
+			FMoney executedValue)
 	{
 		long currentVolume = order.getCurrentVolume() - volume;
 		Map<Integer, Object> tokens = new HashMap<>();
 		tokens.put(OrderField.CURRENT_VOLUME, currentVolume);
-		tokens.put(OrderField.EXECUTED_VALUE, order.getExecutedValue() + executedValue);
+		tokens.put(OrderField.EXECUTED_VALUE, order.getExecutedValue() == null ?
+				executedValue : order.getExecutedValue().add(executedValue));
 		if ( currentVolume <= 0L ) {
 			tokens.put(OrderField.STATUS, OrderStatus.FILLED);
 			tokens.put(OrderField.TIME_DONE, executionTime);
@@ -51,7 +52,7 @@ public class OrderTransactionFactory {
 	 * @return transaction
 	 */
 	public OrderChange createNewExecution(EditableOrder order, long executionID,
-			double price, long volume, double executedValue)
+			FDecimal price, long volume, FMoney executedValue)
 	{
 		return createNewExecution(order, executionID, null, 
 			order.getTerminal().getCurrentTime(), price, volume, executedValue);

@@ -18,6 +18,16 @@ public class FDecimalTest {
 	}
 	
 	@Test
+	public void testConstants() {
+		assertEquals(1, FDecimal.VERSION);
+		assertEquals(FDecimal.of0(0), FDecimal.ZERO0);
+		assertEquals(FDecimal.of1(0), FDecimal.ZERO1);
+		assertEquals(FDecimal.of2(0), FDecimal.ZERO2);
+		assertEquals(FDecimal.of3(0), FDecimal.ZERO3);
+		assertEquals(FDecimal.of4(0), FDecimal.ZERO4);
+	}
+	
+	@Test
 	public void testToBigDecimal2_DI() {
 		assertEquals(new BigDecimal("12.05"), FDecimal.toBigDecimal(12.049d, 2));
 		assertEquals(new BigDecimal("12.04"), FDecimal.toBigDecimal(12.044d, 2));
@@ -329,6 +339,240 @@ public class FDecimalTest {
 		expected = new FDecimal("115.23");
 		actual = new FDecimal("115.226").withScale(2);
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testSubtract1() {
+		assertEquals(new FDecimal("115.25", RoundingMode.CEILING),
+			new FDecimal("120.00", 2, RoundingMode.CEILING)
+				.subtract(new FDecimal("4.75")));
+		
+		assertEquals(new FDecimal("12.425", 3, RoundingMode.HALF_UP),
+			new FDecimal("97.925")
+				.subtract(new FDecimal("85.5")));
+		
+		assertEquals(new FDecimal("-12.425", 3, RoundingMode.HALF_DOWN),
+			new FDecimal("-230.1", 1, RoundingMode.HALF_DOWN)
+				.subtract(new FDecimal("-217.675", 3, RoundingMode.FLOOR)));
+	}
+	
+	@Test
+	public void testAdd1() {
+		assertEquals(new FDecimal("265.948", RoundingMode.DOWN),
+			new FDecimal("-262", RoundingMode.DOWN)
+				.add(new FDecimal("527.948")));
+		
+		assertEquals(new FDecimal("97.925", RoundingMode.HALF_UP),
+			new FDecimal("12.425")
+				.add(new FDecimal("85.5")));
+		
+		assertEquals(new FDecimal("-230.100", 3, RoundingMode.HALF_DOWN),
+			new FDecimal("-217.675", RoundingMode.HALF_DOWN)
+				.add(new FDecimal("-12.425", 3, RoundingMode.FLOOR)));
+	}
+	
+	@Test
+	public void testOf_1_S() {
+		assertEquals(new FDecimal("115.40524", 5, RoundingMode.HALF_UP),
+				FDecimal.of("115.40524"));
+	}
+	
+	@Test
+	public void testOf_2_SI() {
+		assertEquals(new FDecimal("25.0", 1, RoundingMode.HALF_UP),
+				FDecimal.of("24.95", 1));
+	}
+	
+	@Test
+	public void testOf_2_DI() {
+		assertEquals(new FDecimal("25.5", 1, RoundingMode.HALF_UP),
+				FDecimal.of(25.492, 1));
+	}
+	
+	@Test
+	public void testOf_3_SIRM() {
+		assertEquals(new FDecimal("25.5", 1, RoundingMode.HALF_DOWN),
+				FDecimal.of("25.55", 1, RoundingMode.HALF_DOWN));
+	}
+	
+	@Test
+	public void testOf_1_BD() {
+		assertEquals(new FDecimal("26.19", 2, RoundingMode.HALF_UP),
+				FDecimal.of(new BigDecimal("26.19")));
+	}
+	
+	@Test
+	public void testOf_2_BDI() {
+		assertEquals(new FDecimal("26.20", 2, RoundingMode.HALF_UP),
+				FDecimal.of(new BigDecimal("26.1972"), 2));
+	}
+	
+	@Test
+	public void testOf_3_BDIRM() {
+		assertEquals(new FDecimal("26.18", 2, RoundingMode.HALF_DOWN),
+				FDecimal.of(new BigDecimal("26.185"), 2, RoundingMode.HALF_DOWN));
+	}
+	
+	@Test
+	public void testOf0_1_S() {
+		assertEquals(new FDecimal(15.0, 0, RoundingMode.HALF_UP),
+				FDecimal.of0("15.46"));
+	}
+	
+	@Test
+	public void testOf1_1_S() {
+		assertEquals(new FDecimal("5.2", 1, RoundingMode.HALF_UP),
+				FDecimal.of1("5.19"));
+	}
+	
+	@Test
+	public void testOf2_1_S() {
+		assertEquals(new FDecimal("5.14", 2, RoundingMode.HALF_UP),
+				FDecimal.of2("5.14301"));
+	}
+	
+	@Test
+	public void testOf3_1_S() {
+		assertEquals(new FDecimal("5.300", 3, RoundingMode.HALF_UP),
+				FDecimal.of3("5.300128"));
+	}
+	
+	@Test
+	public void testOf4_1_S() {
+		assertEquals(new FDecimal("0.0000", 4, RoundingMode.HALF_UP),
+				FDecimal.of4("0"));
+	}
+	
+	@Test
+	public void testOf0_1_D() {
+		assertEquals(new FDecimal(15.0, 0, RoundingMode.HALF_UP),
+				FDecimal.of0(15.45));
+	}
+
+	@Test
+	public void testOf1_1_D() {
+		assertEquals(new FDecimal("5.2", 1, RoundingMode.HALF_UP),
+				FDecimal.of1(5.19));
+	}
+	
+	@Test
+	public void testOf2_1_D() {
+		assertEquals(new FDecimal("5.14", 2, RoundingMode.HALF_UP),
+				FDecimal.of2(5.14301));
+	}
+	
+	@Test
+	public void testOf3_1_D() {
+		assertEquals(new FDecimal("5.300", 3, RoundingMode.HALF_UP),
+				FDecimal.of3(5.300128));
+	}
+	
+	@Test
+	public void testOf4_1_D() {
+		assertEquals(new FDecimal("0.0000", 4, RoundingMode.HALF_UP),
+				FDecimal.of4(0));
+	}
+	
+	@Test
+	public void testWithZero() {
+		assertEquals(new FDecimal("0.0000", 4, RoundingMode.DOWN),
+				new FDecimal("172.9012", RoundingMode.DOWN).withZero());
+	}
+	
+	@Test
+	public void testMultiply1_FDecimal() {
+		assertEquals(new FDecimal(1164.216, 3, RoundingMode.HALF_UP),
+				FDecimal.of3(76.292).multiply(FDecimal.of2(15.26)));
+		
+		assertEquals(new FDecimal(6.79, 2, RoundingMode.CEILING),
+				new FDecimal(26.1, 1, RoundingMode.CEILING)
+					.multiply(FDecimal.of2(0.26)));
+	}
+	
+	@Test
+	public void testMultiplyExact_FDecimal() {
+		assertEquals(new FDecimal(1164.21592, 5, RoundingMode.HALF_UP),
+				FDecimal.of3(76.292).multiplyExact(FDecimal.of2(15.26)));
+		
+		assertEquals(new FDecimal(6.786, 3, RoundingMode.HALF_DOWN),
+				new FDecimal(26.1, 1, RoundingMode.HALF_DOWN)
+					.multiplyExact(FDecimal.of2(0.26)));
+	}
+	
+	@Test
+	public void testMultiply1_Long() {
+		assertEquals(new FDecimal(4194.16, 3, RoundingMode.HALF_UP),
+				FDecimal.of3(524.27).multiply(8L));
+		
+		assertEquals(new FDecimal(25.0, 0, RoundingMode.UNNECESSARY),
+				new FDecimal(5.0, 0, RoundingMode.UNNECESSARY).multiply(5L));
+	}
+	
+	@Test
+	public void testNegate() {
+		assertEquals(new FDecimal(0.0, 5, RoundingMode.HALF_EVEN),
+				new FDecimal(0.0, 5, RoundingMode.HALF_EVEN).negate());
+		
+		assertEquals(new FDecimal(-12.576, 3, RoundingMode.CEILING),
+				new FDecimal(12.576, 3, RoundingMode.CEILING).negate());
+		
+		assertEquals(new FDecimal(35.24, 2, RoundingMode.HALF_UP),
+				new FDecimal(-35.24, 2).negate());
+	}
+	
+	@Test
+	public void testDivide1_FDecimal() {
+		assertEquals(new FDecimal(2.019, 3, RoundingMode.HALF_UP),
+				FDecimal.of3(428.256).divide(FDecimal.of2(212.1)));
+		
+		assertEquals(new FDecimal(9.766, 3, RoundingMode.FLOOR),
+				new FDecimal(12.56, 2, RoundingMode.FLOOR)
+					.divide(FDecimal.of3(1.286)));
+	}
+	
+	@Test
+	public void testDivide1_Long() {
+		assertEquals(new FDecimal(2.020, 3, RoundingMode.HALF_UP),
+				FDecimal.of3(428.256).divide(212L));
+
+		assertEquals(new FDecimal(-11.25, 2, RoundingMode.CEILING),
+				new FDecimal(-56.28, 2, RoundingMode.CEILING).divide(5L));
+	}
+	
+	@Test
+	public void testDivide3_FDecimal() {
+		assertEquals(new FDecimal(9, 0, RoundingMode.HALF_DOWN),
+				new FDecimal(67.5, 1, RoundingMode.HALF_DOWN)
+					.divide(FDecimal.of1(7.5), 0, RoundingMode.UNNECESSARY));
+	}
+	
+	@Test (expected=ArithmeticException.class)
+	public void testDivide3_FDecimal_ThrowsIfScaleIsInsufficient() {
+		new FDecimal(67.6, 1).divide(FDecimal.of1(7.5), 0, RoundingMode.UNNECESSARY);
+	}
+		
+	@Test
+	public void testDivide3_Long() {
+		assertEquals(new FDecimal(24.2, 1, RoundingMode.HALF_DOWN),
+				new FDecimal(169.4, 1, RoundingMode.HALF_DOWN)
+					.divide(7L, 1, RoundingMode.UNNECESSARY));
+	}
+	
+	@Test (expected=ArithmeticException.class)
+	public void testDivide3Long_ThrowsIfScaleIsInsufficient() {
+		new FDecimal(169.4, 1, RoundingMode.HALF_DOWN).divide(7L, 0, RoundingMode.UNNECESSARY);
+	}
+	
+	@Test
+	public void testAbs() {
+		assertEquals(new FDecimal(0.0, 4, RoundingMode.FLOOR),
+				new FDecimal(0.0, 4, RoundingMode.FLOOR).abs());
+		
+		assertEquals(new FDecimal(34.1564, 4, RoundingMode.CEILING),
+				new FDecimal(34.1564, 4, RoundingMode.CEILING).abs());
+
+		assertEquals(new FDecimal(34.1564, 4, RoundingMode.CEILING),
+				new FDecimal(-34.1564, 4, RoundingMode.CEILING).abs());
 	}
 
 }

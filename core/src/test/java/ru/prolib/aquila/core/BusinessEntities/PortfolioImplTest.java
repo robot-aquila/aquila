@@ -139,52 +139,57 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetBalance() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return portfolio.getBalance();
 			}
 		};
-		testGetter(PortfolioField.BALANCE, 40560.28d, 80340.95d);
+		testGetter(PortfolioField.BALANCE,
+				FMoney.ofUSD2(40560.28), FMoney.ofUSD2(80340.95));
 	}
 
 	@Test
 	public void testGetEquity() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return portfolio.getEquity();
 			}
 		};
-		testGetter(PortfolioField.EQUITY, 812.76d, 324.10d);
+		testGetter(PortfolioField.EQUITY,
+				FMoney.ofUSD2(812.76), FMoney.ofUSD2(324.10));
 	}
 	
 	@Test
 	public void testGetProfitAndLoss() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return portfolio.getProfitAndLoss();
 			}
 		};
-		testGetter(PortfolioField.PROFIT_AND_LOSS, 100000.00d, 80000.00d);
+		testGetter(PortfolioField.PROFIT_AND_LOSS,
+				FMoney.ofEUR3(100000.0), FMoney.ofEUR3(80000.0));
 	}
 
 	@Test
 	public void testGetUsedMargin() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return portfolio.getUsedMargin();
 			}
 		};
-		testGetter(PortfolioField.USED_MARGIN, 96283.15d, 94518.22d);
+		testGetter(PortfolioField.USED_MARGIN,
+				FMoney.ofRUB2(96283.15), FMoney.ofRUB2(94518.22));
 	}
 	
 	@Test
 	public void testGetFreeMargin() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return portfolio.getFreeMargin();
 			}
 		};
-		testGetter(PortfolioField.FREE_MARGIN, 4519.72d, 5425.12d);
+		testGetter(PortfolioField.FREE_MARGIN,
+				FMoney.ofUSD2(4519.72), FMoney.ofUSD2(5425.12));
 	}
 
 	@Test
@@ -209,22 +214,24 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testGetAssets() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return portfolio.getAssets();
 			}
 		};
-		testGetter(PortfolioField.ASSETS, 12.34d, 56.78d);
+		testGetter(PortfolioField.ASSETS,
+				FMoney.ofEUR4(12.34), FMoney.ofEUR4(56.78));
 	}
 
 	@Test
 	public void testGetLiabilities() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return portfolio.getLiabilities();
 			}
 		};
-		testGetter(PortfolioField.LIABILITIES, 632.88d, 640.19d);
+		testGetter(PortfolioField.LIABILITIES,
+				FMoney.ofUSD2(632.88), FMoney.ofUSD2(640.19));
 	}
 
 	@Test
@@ -323,13 +330,14 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		
 		assertFalse(controller.hasMinimalData(portfolio));
 		
-		data.put(PortfolioField.CURRENCY, "USD");
-		data.put(PortfolioField.BALANCE, 415.08d);
-		data.put(PortfolioField.EQUITY, 213.34d);
-		data.put(PortfolioField.PROFIT_AND_LOSS, 1.18d);
-		data.put(PortfolioField.USED_MARGIN, 50.72d);
-		data.put(PortfolioField.FREE_MARGIN, 0.52d);
-		portfolio.update(data);
+		portfolio.consume(new DeltaUpdateBuilder()
+			.withToken(PortfolioField.CURRENCY, "USD")
+			.withToken(PortfolioField.BALANCE, FMoney.ofUSD2(415.08))
+			.withToken(PortfolioField.EQUITY, FMoney.ofUSD2(213.34))
+			.withToken(PortfolioField.PROFIT_AND_LOSS, FMoney.ofUSD2(1.18))
+			.withToken(PortfolioField.USED_MARGIN, FMoney.ofUSD2(50.72))
+			.withToken(PortfolioField.FREE_MARGIN, FMoney.ofUSD2(0.52))
+			.buildUpdate());
 		
 		assertTrue(controller.hasMinimalData(portfolio));
 	}

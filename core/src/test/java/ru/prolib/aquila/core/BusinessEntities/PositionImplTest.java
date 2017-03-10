@@ -86,12 +86,13 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetUsedMargin() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return position.getUsedMargin();
 			}			
 		};
-		testGetter(PositionField.USED_MARGIN, 415.345d, 280.34d);
+		testGetter(PositionField.USED_MARGIN,
+				new FMoney("415.345", "RUB"), new FMoney("280.34", "USD"));
 	}
 	
 	@Test
@@ -106,32 +107,35 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetCurrentPrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
 				return position.getCurrentPrice();
 			}
 		};
-		testGetter(PositionField.CURRENT_PRICE, 2014d, 882.15d);
+		testGetter(PositionField.CURRENT_PRICE,
+				new FDecimal("2014"), new FDecimal("882.15"));
 	}
 	
 	@Test
 	public void testGetOpenPrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FDecimal>() {
+			@Override public FDecimal get() {
 				return position.getOpenPrice();
 			}
 		};
-		testGetter(PositionField.OPEN_PRICE, 551.13d, 902.08d);
+		testGetter(PositionField.OPEN_PRICE,
+				new FDecimal("551.13"), new FDecimal("902.08"));
 	}
 	
 	@Test
 	public void testGetProfitAndLoss() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<FMoney>() {
+			@Override public FMoney get() {
 				return position.getProfitAndLoss();
 			}
 		};
-		testGetter(PositionField.PROFIT_AND_LOSS, 421.19d, 534.25d);
+		testGetter(PositionField.PROFIT_AND_LOSS,
+				new FMoney("421.19", "CAD"), new FMoney("534.25", "EUR"));
 	}
 
 	@Test
@@ -142,10 +146,10 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		
 		Map<Integer, Object> minimal = new HashMap<Integer, Object>();
 		minimal.put(PositionField.CURRENT_VOLUME, 1000L);
-		minimal.put(PositionField.CURRENT_PRICE, 2000d);
-		minimal.put(PositionField.OPEN_PRICE, 1800d);
-		minimal.put(PositionField.USED_MARGIN, 200d);
-		minimal.put(PositionField.PROFIT_AND_LOSS, 0d);
+		minimal.put(PositionField.CURRENT_PRICE, new FDecimal("2000", 2));
+		minimal.put(PositionField.OPEN_PRICE, new FDecimal("1800", 2));
+		minimal.put(PositionField.USED_MARGIN, new FMoney("200", 2, "USD"));
+		minimal.put(PositionField.PROFIT_AND_LOSS, new FMoney("0", 2, "USD"));
 		for ( Map.Entry<Integer, Object> entry : minimal.entrySet() ) {
 			data.put(entry.getKey(), entry.getValue());
 			position.update(data);
@@ -174,7 +178,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testPositionController_ProcessUpdate_CurrentPriceChange() {
-		data.put(PositionField.CURRENT_PRICE, 4518.96d);
+		data.put(PositionField.CURRENT_PRICE, new FDecimal("4518.96"));
 		position.update(data);
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
@@ -192,7 +196,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testPositionController_ProcessAvailable() {
 		data.put(PositionField.CURRENT_VOLUME, 200L);
-		data.put(PositionField.CURRENT_PRICE, 4582.13d);
+		data.put(PositionField.CURRENT_PRICE, new FDecimal("4582.13"));
 		position.update(data);
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
@@ -271,6 +275,18 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		assertTrue(listenerStub.getEvent(1).isType(position.onUpdate()));
 		assertSame(position, ((PositionEvent) listenerStub.getEvent(1)).getPosition());
 
+	}
+	
+	@Test
+	public void testGetSecurity() throws Exception {
+		control.resetToStrict();
+		Security securityMock = control.createMock(Security.class);
+		expect(terminal.getSecurity(symbol)).andReturn(securityMock);
+		control.replay();
+		
+		assertSame(securityMock, position.getSecurity());
+		
+		control.verify();
 	}
 
 }

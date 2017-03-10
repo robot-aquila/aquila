@@ -31,35 +31,35 @@ public interface Portfolio extends ObservableStateContainer {
 	 * <p>
 	 * @return account balance or null if data not available
 	 */
-	public Double getBalance();
+	public FMoney getBalance();
 	
 	/**
 	 * Get account equity.
 	 * <p>
 	 * @return account equity or null if data not available
 	 */
-	public Double getEquity();
+	public FMoney getEquity();
 	
 	/**
 	 * Get current profit of an account.
 	 * <p>
 	 * @return current profit or null if data not available
 	 */
-	public Double getProfitAndLoss();
+	public FMoney getProfitAndLoss();
 	
 	/**
 	 * Get the margin is currently used.
 	 * <p>
 	 * @return margin used or null if data not available
 	 */
-	public Double getUsedMargin();
+	public FMoney getUsedMargin();
 	
 	/**
 	 * Get the free margin.
 	 * <p>
 	 * @return free margin  or null if data not available
 	 */
-	public Double getFreeMargin();
+	public FMoney getFreeMargin();
 	
 	/**
 	 * Get the margin call level.
@@ -80,14 +80,14 @@ public interface Portfolio extends ObservableStateContainer {
 	 * <p>
 	 * @return the current assets or null if data not available
 	 */
-	public Double getAssets();
+	public FMoney getAssets();
 	
 	/**
 	 * Get the current liabilities of an account.
 	 * <p>
 	 * @return the current liabilities or null if data not available
 	 */
-	public Double getLiabilities();
+	public FMoney getLiabilities();
 	
 	/**
 	 * Account leverage.
