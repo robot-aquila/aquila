@@ -61,30 +61,81 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 	public String getString(int token) {
 		return (String) getObject(token);
 	}
+	
+	@Override
+	public String getString(int token, String defaultValue) {
+		String x = getString(token);
+		return x == null ? defaultValue : x;
+	}
 
 	@Override
 	public Integer getInteger(int token) {
 		return (Integer) getObject(token);
+	}
+	
+	@Override
+	public Integer getInteger(int token, Integer defaultValue) {
+		Integer x = getInteger(token);
+		return x == null ? defaultValue : x;
+	}
+	
+	@Override
+	public Integer getIntegerOrZero(int token) {
+		return getInteger(token, 0);
 	}
 
 	@Override
 	public Long getLong(int token) {
 		return (Long) getObject(token);
 	}
+	
+	@Override
+	public Long getLong(int token, Long defaultValue) {
+		Long x = getLong(token);
+		return x == null ? defaultValue : x;
+	}
+	
+	@Override
+	public Long getLongOrZero(int token) {
+		return getLong(token, 0L);
+	}
 
 	@Override
 	public Double getDouble(int token) {
 		return (Double) getObject(token);
+	}
+	
+	@Override
+	public Double getDouble(int token, Double defaultValue) {
+		Double x = getDouble(token);
+		return x == null ? defaultValue : x;
+	}
+	
+	@Override
+	public Double getDoubleOrZero(int token) {
+		return getDouble(token, 0.0d);
 	}
 
 	@Override
 	public Boolean getBoolean(int token) {
 		return (Boolean) getObject(token);
 	}
+	
+	@Override
+	public Boolean getBoolean(int token, Boolean defaultValue) {
+		Boolean x = getBoolean(token);
+		return x == null ? defaultValue : x;
+	}
 
 	@Override
 	public Instant getInstant(int token) {
 		return (Instant) getObject(token);
+	}
+	
+	@Override
+	public Instant getInstant(int token, Instant defaultValue) {
+		Instant x = getInstant(token);
+		return x == null ? defaultValue : x;
 	}
 
 	@Override
@@ -96,15 +147,93 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 			lock.unlock();
 		}
 	}
+	
+	@Override
+	public Object getObject(int token, Object defaultValue) {
+		Object x = getObject(token);
+		return x == null ? defaultValue : x;
+	}
 
 	@Override
 	public FDecimal getDecimal(int token) {
 		return (FDecimal) getObject(token);
 	}
+	
+	@Override
+	public FDecimal getDecimal(int token, FDecimal defaultValue) {
+		FDecimal x = getDecimal(token);
+		return x == null ? defaultValue : x;
+	}
+	
+	@Override
+	public FDecimal getDecimalOrZero(int token, int scale) {
+		return getDecimal(token, FDecimal.of(0, scale));
+	}
+	
+	@Override
+	public FDecimal getDecimalOrZero0(int token) {
+		return getDecimalOrZero(token, 0);
+	}
+
+	@Override
+	public FDecimal getDecimalOrZero1(int token) {
+		return getDecimalOrZero(token, 1);
+	}
+
+	@Override
+	public FDecimal getDecimalOrZero2(int token) {
+		return getDecimalOrZero(token, 2);
+	}
+
+	@Override
+	public FDecimal getDecimalOrZero3(int token) {
+		return getDecimalOrZero(token, 3);
+	}
+
+	@Override
+	public FDecimal getDecimalOrZero4(int token) {
+		return getDecimalOrZero(token, 4);
+	}
 
 	@Override
 	public FMoney getMoney(int token) {
 		return (FMoney) getObject(token);
+	}
+	
+	@Override
+	public FMoney getMoney(int token, FMoney defaultValue) {
+		FMoney x = getMoney(token);
+		return x == null ? defaultValue : x;
+	}
+	
+	@Override
+	public FMoney getMoneyOrZero(int token, int scale, String currencyCode) {
+		return getMoney(token, FMoney.of(0, scale, currencyCode));
+	}
+	
+	@Override
+	public FMoney getMoneyOrZero0(int token, String currencyCode) {
+		return getMoneyOrZero(token, 0, currencyCode);
+	}
+
+	@Override
+	public FMoney getMoneyOrZero1(int token, String currencyCode) {
+		return getMoneyOrZero(token, 1, currencyCode);
+	}
+
+	@Override
+	public FMoney getMoneyOrZero2(int token, String currencyCode) {
+		return getMoneyOrZero(token, 2, currencyCode);
+	}
+
+	@Override
+	public FMoney getMoneyOrZero3(int token, String currencyCode) {
+		return getMoneyOrZero(token, 3, currencyCode);
+	}
+
+	@Override
+	public FMoney getMoneyOrZero4(int token, String currencyCode) {
+		return getMoneyOrZero(token, 4, currencyCode);
 	}
 
 	@Override

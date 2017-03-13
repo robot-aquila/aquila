@@ -422,6 +422,15 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	final public void testContainerImpl_GetBoolean2() throws Exception {
+		assertFalse(container.getBoolean(BOOL_ACTIVE, false));
+		
+		container.update(BOOL_ACTIVE, true);
+		
+		assertTrue(container.getBoolean(BOOL_ACTIVE, false));
+	}
+	
+	@Test
 	final public void testContainerImpl_GetDouble() throws Exception {
 		getter = new Getter<Double>() {
 			@Override public Double get() {
@@ -429,6 +438,24 @@ public class ObservableStateContainerImplTest {
 			}
 		};
 		testGetter(DOUBLE_CAPITAL, 345.215d, 44.99d);
+	}
+	
+	@Test
+	final public void testContainerImpl_GetDouble2() throws Exception {
+		assertEquals(815.342d, container.getDouble(DOUBLE_CAPITAL, 815.342d), 0.0001d);
+		
+		container.update(DOUBLE_CAPITAL, 412.48d);
+		
+		assertEquals(412.48d, container.getDouble(DOUBLE_CAPITAL, 815.342d), 0.0001d);
+	}
+	
+	@Test
+	final public void testContainerImpl_GetDoubleOrZero() throws Exception {
+		assertEquals(0.0d, container.getDoubleOrZero(DOUBLE_CAPITAL), 0.001d);
+		
+		container.update(DOUBLE_CAPITAL, 92.44d);
+		
+		assertEquals(92.44d, container.getDoubleOrZero(DOUBLE_CAPITAL), 0.001d);
 	}
 	
 	@Test
@@ -444,6 +471,17 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	final public void testContainerImpl_GetInstant2() throws Exception {
+		Instant dv1 = Instant.parse("1998-08-01T00:00:00Z"),
+				dv2 = Instant.parse("2017-03-13T08:40:00Z");
+		assertEquals(dv1, container.getInstant(INSTANT_TIME_OF_REG, dv1));
+		
+		container.update(INSTANT_TIME_OF_REG, dv2);
+		
+		assertEquals(dv2, container.getInstant(INSTANT_TIME_OF_REG, dv1));
+	}
+	
+	@Test
 	final public void testContainerImpl_GetInteger() throws Exception {
 		getter = new Getter<Integer>() {
 			@Override public Integer get() {
@@ -451,6 +489,25 @@ public class ObservableStateContainerImplTest {
 			}
 		};
 		testGetter(INTEGER_AGE, 80, 921);
+	}
+	
+	@Test
+	final public void testContainerImpl_GetInteger2() throws Exception {
+		Integer iv1 = new Integer(820), iv2 = new Integer(426);
+		assertEquals(iv1, container.getInteger(INTEGER_AGE, iv1));
+		
+		container.update(INTEGER_AGE, iv2);
+		
+		assertEquals(iv2, container.getInteger(INTEGER_AGE, iv1));
+	}
+	
+	@Test
+	final public void testContainerImpl_GetIntegerOrZero() throws Exception {
+		assertEquals(new Integer(0), container.getIntegerOrZero(INTEGER_AGE));
+		
+		container.update(INTEGER_AGE, 25);
+		
+		assertEquals(new Integer(25), container.getIntegerOrZero(INTEGER_AGE));
 	}
 	
 	@Test
@@ -464,6 +521,25 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	final public void testContainerImpl_GetLong2() throws Exception {
+		Long lv1 = new Long(576L), lv2 = new Long(707L);
+		assertEquals(lv1, container.getLong(LONG_SECONDS, lv1));
+		
+		container.update(LONG_SECONDS, lv2);
+		
+		assertEquals(lv2, container.getLong(LONG_SECONDS, lv1));
+	}
+	
+	@Test
+	final public void testContainerImpl_GetLongOrZero() throws Exception {
+		assertEquals(new Long(0L), container.getLongOrZero(LONG_SECONDS));
+		
+		container.update(LONG_SECONDS, 15L);
+		
+		assertEquals(new Long(15L), container.getLongOrZero(LONG_SECONDS));
+	}
+	
+	@Test
 	final public void testContainerImpl_GetString() throws Exception {
 		getter = new Getter<String>() {
 			@Override public String get() {
@@ -471,6 +547,16 @@ public class ObservableStateContainerImplTest {
 			}
 		};
 		testGetter(STRING_NAME, "foo", "bar");
+	}
+	
+	@Test
+	final public void testContainerImpl_GetString2() throws Exception {
+		String sv1 = "foo", sv2 = "bar";
+		assertEquals(sv1, container.getString(STRING_NAME, sv1));
+		
+		container.update(STRING_NAME, sv2);
+		
+		assertEquals(sv2, container.getString(STRING_NAME, sv1));
 	}
 	
 	@Test
@@ -486,6 +572,16 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	final public void testContainerImpl_GetObject2() throws Exception {
+		Object ov1 = new Object(), ov2 = new Object();
+		assertEquals(ov1, container.getObject(888, ov1));
+		
+		container.update(888, ov2);
+		
+		assertEquals(ov2, container.getObject(888, ov1));
+	}
+	
+	@Test
 	final public void testContainerImpl_GetDecimal() throws Exception {
 		FDecimal value1 = new FDecimal("12.34"), value2 = new FDecimal("15.04");
 		getter = new Getter<FDecimal>() {
@@ -498,6 +594,70 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	final public void testContainerImpl_GetDecimal2() throws Exception {
+		FDecimal dv1 = FDecimal.of2(15.96), dv2 = FDecimal.of4(15.0641);
+		assertEquals(dv1, container.getDecimal(54, dv1));
+		
+		container.update(54, dv2);
+		
+		assertEquals(dv2, container.getDecimal(54, dv1));
+	}
+	
+	@Test
+	final public void testContainerImpl_GetDecimalOrZero() throws Exception {
+		assertEquals(FDecimal.ZERO3, container.getDecimalOrZero(52, 3));
+		
+		container.update(52, FDecimal.of3(16.5));
+		
+		assertEquals(FDecimal.of3(16.5), container.getDecimalOrZero(52, 3));
+	}
+	
+	@Test
+	final public void testContainerImpl_GetDecimalOrZero0() throws Exception {
+		assertEquals(FDecimal.ZERO0, container.getDecimalOrZero0(70));
+		
+		container.update(70, FDecimal.of0(26));
+		
+		assertEquals(FDecimal.of0(26), container.getDecimalOrZero0(70));
+	}
+
+	@Test
+	final public void testContainerImpl_GetDecimalOrZero1() throws Exception {
+		assertEquals(FDecimal.ZERO1, container.getDecimalOrZero1(46));
+		
+		container.update(46, FDecimal.of1(426.19));
+		
+		assertEquals(FDecimal.of1(426.19), container.getDecimalOrZero1(46));
+	}
+
+	@Test
+	final public void testContainerImpl_GetDecimalOrZero2() throws Exception {
+		assertEquals(FDecimal.ZERO2, container.getDecimalOrZero2(46));
+		
+		container.update(46, FDecimal.of2(426.19));
+		
+		assertEquals(FDecimal.of2(426.19), container.getDecimalOrZero2(46));
+	}
+
+	@Test
+	final public void testContainerImpl_GetDecimalOrZero3() throws Exception {
+		assertEquals(FDecimal.ZERO3, container.getDecimalOrZero3(19));
+		
+		container.update(19, FDecimal.of3(117.024d));
+		
+		assertEquals(FDecimal.of3(117.024d), container.getDecimalOrZero3(19));
+	}
+
+	@Test
+	final public void testContainerImpl_GetDecimalOrZero4() throws Exception {
+		assertEquals(FDecimal.ZERO4, container.getDecimalOrZero4(5));
+		
+		container.update(5, FDecimal.of4(4.2968d));
+		
+		assertEquals(FDecimal.of4(4.2968d), container.getDecimalOrZero4(5));
+	}
+
+	@Test
 	final public void testContainerImpl_GetMoney() throws Exception {
 		FMoney value1 = new FMoney("32.1", "USD"), value2 = new FMoney("1.24", "RUB");
 		getter = new Getter<FMoney>() {
@@ -509,6 +669,70 @@ public class ObservableStateContainerImplTest {
 		testGetter_Locking(92, value1, value2);
 	}
 	
+	@Test
+	final public void testContainerImpl_GetMoney2() throws Exception {
+		FMoney mv1 = FMoney.ofUSD3(5.92d), mv2 = FMoney.ofRUB2(15.01d);
+		assertEquals(mv1, container.getMoney(15, mv1));
+		
+		container.update(15, mv2);
+		
+		assertEquals(mv2, container.getMoney(15, mv1));
+	}
+	
+	@Test
+	final public void testContainerImpl_GetMoneyOrZero() throws Exception {
+		assertEquals(FMoney.ZERO_USD3, container.getMoneyOrZero(12, 3, FMoney.USD));
+		
+		container.update(12, FMoney.ofEUR4(24.0015d));
+		
+		assertEquals(FMoney.ofEUR4(24.0015), container.getMoneyOrZero(12,  3, FMoney.USD));
+	}
+	
+	@Test
+	final public void testContainerImpl_GetMoneyOrZero0() throws Exception {
+		assertEquals(FMoney.ZERO_EUR0, container.getMoneyOrZero0(4, FMoney.EUR));
+		
+		container.update(4, FMoney.ofEUR(42, 0));
+		
+		assertEquals(FMoney.ofEUR(42, 0), container.getMoneyOrZero0(4, FMoney.EUR));
+	}
+
+	@Test
+	final public void testContainerImpl_GetMoneyOrZero1() throws Exception {
+		assertEquals(FMoney.ZERO_EUR1, container.getMoneyOrZero1(5, FMoney.EUR));
+		
+		container.update(5, FMoney.ofEUR1(12.1));
+		
+		assertEquals(FMoney.ofEUR1(12.1), container.getMoneyOrZero1(5, FMoney.EUR));		
+	}
+
+	@Test
+	final public void testContainerImpl_GetMoneyOrZero2() throws Exception {
+		assertEquals(FMoney.ZERO_USD2, container.getMoneyOrZero2(6, FMoney.USD));
+		
+		container.update(6, FMoney.ofUSD2(0.12));
+		
+		assertEquals(FMoney.ofUSD2(0.12), container.getMoneyOrZero2(6, FMoney.USD));				
+	}
+
+	@Test
+	final public void testContainerImpl_GetMoneyOrZero3() throws Exception {
+		assertEquals(FMoney.ZERO_RUB3, container.getMoneyOrZero3(7, FMoney.RUB));
+		
+		container.update(7, FMoney.ofRUB3(86.901));
+		
+		assertEquals(FMoney.ofRUB3(86.901), container.getMoneyOrZero3(7, FMoney.RUB));						
+	}
+
+	@Test
+	final public void testContainerImpl_GetMoneyOrZero4() throws Exception {
+		assertEquals(FMoney.ZERO_USD4, container.getMoneyOrZero4(8, FMoney.USD));
+		
+		container.update(8, FMoney.ofUSD4(117.0006d));
+		
+		assertEquals(FMoney.ofUSD4(117.0006d), container.getMoneyOrZero4(8, FMoney.USD));								
+	}
+
 	@Test
 	final public void testContainerImpl_Update_NoChanges() throws Exception {
 		container.onAvailable().addSyncListener(listenerStub);
