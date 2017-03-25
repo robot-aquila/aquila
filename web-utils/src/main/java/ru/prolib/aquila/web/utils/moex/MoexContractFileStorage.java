@@ -82,5 +82,18 @@ public class MoexContractFileStorage {
 		logger.debug("Opening data file for writing: {}", file);
 		return ptmlFactory.createWriter(file);
 	}
+
+	/**
+	 * Get filename of symbol data.
+	 * <p>
+	 * This utility method returns a filename of the symbol data. This may
+	 * helpful to access the raw data or to show the path to it.
+	 * <p>
+	 * @param symbol - the symbol
+	 * @return path to data file
+	 */
+	public File getDataFile(Symbol symbol) {
+		return fileStorage.getDataFile(symbol);
+	}
 	
 }

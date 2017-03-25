@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.utils.finexp.futures.finam.FinamWebTickDataTracker;
 import ru.prolib.aquila.utils.finexp.futures.moex.MoexWebContractTracker;
 import ru.prolib.aquila.web.utils.finam.FidexpFileStorage;
@@ -40,8 +41,14 @@ public class Service {
 		if ( ! root.isDirectory() ) {
 			CmdLine.printErrorAndExit("The pathname is not a directory: " + root);
 		}
-
-		FilenameUtils.equals("foo", "foo"); // TODO: to remove, the linking test 
+		
+		MoexContractFileStorage moexStorage = new MoexContractFileStorage(root);
+		if ( cmd.hasOption(CmdLine.LOPT_SHOW_SYMBOL_FILE) ) {
+			Symbol s = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SHOW_SYMBOL_FILE));
+			File file = moexStorage.getDataFile(s);
+			System.out.println(file);
+			System.exit(0);
+		}
 		
 		final CountDownLatch globalExit = new CountDownLatch(1);
 		final Scheduler scheduler = new SchedulerLocal("SCHEDULER");
@@ -52,7 +59,7 @@ public class Service {
 			}
 		});
 		FinamWebTickDataTracker finamService = new FinamWebTickDataTracker(FidexpFileStorage.createStorage(root), globalExit, scheduler, cmd);
-		MoexWebContractTracker moexService = new MoexWebContractTracker(globalExit, scheduler, new MoexContractFileStorage(root)); 
+		MoexWebContractTracker moexService = new MoexWebContractTracker(globalExit, scheduler, moexStorage); 
 		try {
 			Instant firstRun = scheduler.getCurrentTime().plusSeconds(5);
 			finamService.reschedule(firstRun);

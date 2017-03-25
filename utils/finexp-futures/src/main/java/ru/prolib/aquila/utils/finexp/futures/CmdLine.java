@@ -13,6 +13,7 @@ public class CmdLine {
 	public static final String SOPT_HELP = "h";
 	public static final String LOPT_HELP = "help";
 	public static final String LOPT_SKIP_INTEGRITY_TEST = "skip-integrity-test";
+	public static final String LOPT_SHOW_SYMBOL_FILE = "show-symbol-file";
 
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -28,6 +29,13 @@ public class CmdLine {
 		options.addOption(Option.builder()
 				.longOpt(LOPT_SKIP_INTEGRITY_TEST)
 				.desc("Skip an integrity test of the web interface.")
+				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_SHOW_SYMBOL_FILE)
+				.desc("Show path to file of symbol primary data obtained from "
+					+ "MOEX site then exit. The symbol must be provided as "
+					+ "option argument.")
+				.hasArg()
 				.build());
 		return options;
 	}
