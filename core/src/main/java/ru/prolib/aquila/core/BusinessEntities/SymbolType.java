@@ -10,7 +10,7 @@ public class SymbolType {
 	public static final SymbolType UNKNOWN = new SymbolType("U", "Unknown");
 	public static final SymbolType STOCK = new SymbolType("S", "Stock");
 	public static final SymbolType OPTION = new SymbolType("O", "Option");
-	public static final SymbolType FUTURE = new SymbolType("F", "Future");
+	public static final SymbolType FUTURES = new SymbolType("F", "Futures");
 	public static final SymbolType BOND = new SymbolType("B", "Bond");
 	public static final SymbolType CURRENCY = new SymbolType("C", "Currency");
 	
@@ -23,7 +23,7 @@ public class SymbolType {
 		registerType(UNKNOWN);
 		registerType(STOCK);
 		registerType(OPTION);
-		registerType(FUTURE);
+		registerType(FUTURES);
 		registerType(BOND);
 		registerType(CURRENCY);
 	}

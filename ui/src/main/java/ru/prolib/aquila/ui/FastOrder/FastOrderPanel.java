@@ -28,7 +28,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 	static {
 		logger = LoggerFactory.getLogger(FastOrderPanel.class);
 		ACCOUNT_PROTO = new Account("SPBFUT", "SPBFUTXXXXX", "SPBFUTXXXXX__");// "SPBFUT#SPBFUTXXXXX#SPBFUTXXXXX__";
-		SECURITY_PROTO = new Symbol("RIU3", "SPBFUT", ISO4217.USD, SymbolType.FUTURE);// "RIU3@SPBFUT(FUT/USD)__";
+		SECURITY_PROTO = new Symbol("RIU3", "SPBFUT", ISO4217.USD, SymbolType.FUTURES);// "RIU3@SPBFUT(FUT/USD)__";
 	}
 	
 	private final Terminal terminal;

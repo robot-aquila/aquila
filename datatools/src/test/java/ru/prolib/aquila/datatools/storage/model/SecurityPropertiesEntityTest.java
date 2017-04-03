@@ -19,7 +19,7 @@ public class SecurityPropertiesEntityTest {
 
 	@Before
 	public void setUp() throws Exception {
-		symbol = new Symbol("RTS", "SPB", "USD", SymbolType.FUTURE);
+		symbol = new Symbol("RTS", "SPB", "USD", SymbolType.FUTURES);
 		symbolEntity = new SymbolEntity();
 		symbolEntity.setSymbol(symbol);
 		entity = new SecurityPropertiesEntity();

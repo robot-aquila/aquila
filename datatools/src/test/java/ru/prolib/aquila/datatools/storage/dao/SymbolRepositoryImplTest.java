@@ -56,7 +56,7 @@ public class SymbolRepositoryImplTest
 		assertNotNull(x);
 		assertEquals(new Long(1001), x.getId());
 		Symbol expected, actual;
-		expected = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUTURE);
+		expected = new Symbol("RTS-6.15", "SPBFUT", "USD", SymbolType.FUTURES);
 		actual = x.getSymbol();
 		assertEquals(expected, actual);
 	}
@@ -69,7 +69,7 @@ public class SymbolRepositoryImplTest
 	@Test
 	public void testGetBySymbol() {
 		Symbol expected, actual;
-		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUTURE);
+		expected = new Symbol("Si-6.15", "SPBFUT", "RUB", SymbolType.FUTURES);
 		SymbolEntity x = repository.getBySymbol(expected);
 		assertNotNull(x);
 		assertEquals(new Long(1002), x.getId());

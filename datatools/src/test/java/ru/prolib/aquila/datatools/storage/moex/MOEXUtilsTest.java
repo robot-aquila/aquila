@@ -27,7 +27,7 @@ public class MOEXUtilsTest {
 	private static final Symbol symbol1, symbol2, symbol3;
 	
 	static {
-		symbol1 = new Symbol("RTS", "SPBFUT", "USD", SymbolType.FUTURE);
+		symbol1 = new Symbol("RTS", "SPBFUT", "USD", SymbolType.FUTURES);
 		symbol2 = new Symbol("XXX", "SPBFUT", "RUR", SymbolType.OPTION);
 		symbol3 = new Symbol("SPY", "SPBFUT", "USD", SymbolType.STOCK);
 	}

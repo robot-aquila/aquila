@@ -24,13 +24,12 @@ public class SymbolTest {
 	
 	@Test
 	public void testConstruct4_WithCurrency() throws Exception {
-		symbol = new Symbol("ZZZ-12.13", "XYZ",
-				ISO4217.EUR, SymbolType.FUTURE);
+		symbol = new Symbol("ZZZ-12.13", "XYZ", ISO4217.EUR, SymbolType.FUTURES);
 		assertEquals("ZZZ-12.13", symbol.getCode());
 		assertEquals("XYZ", symbol.getExchangeID());
 		assertEquals(ISO4217.EUR, symbol.getCurrency());
 		assertEquals("EUR", symbol.getCurrencyCode());
-		assertEquals(SymbolType.FUTURE, symbol.getType());		
+		assertEquals(SymbolType.FUTURES, symbol.getType());		
 	}
 	
 	@Test
@@ -66,7 +65,7 @@ public class SymbolTest {
 	public void testConstruct1() throws Exception {
 		symbol = new Symbol("F:Si-12.15@SPBFUT:RUR");
 		assertEquals("Si-12.15", symbol.getCode());
-		assertEquals(SymbolType.FUTURE, symbol.getType());
+		assertEquals(SymbolType.FUTURES, symbol.getType());
 		assertEquals("SPBFUT", symbol.getExchangeID());
 		assertEquals(ISO4217.RUR, symbol.getCurrency());
 	}

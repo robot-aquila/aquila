@@ -60,7 +60,7 @@ public class MOEXUtils {
 		if ( dummyTime.compareTo(clearing1) < 0 ) {
 			return dummyDate.atTime(clearing1);
 		}
-		if ( symbol.getType() == SymbolType.FUTURE
+		if ( symbol.getType() == SymbolType.FUTURES
 		  || symbol.getType() == SymbolType.OPTION )
 		{
 			return dummyDate.atTime(clearing2);

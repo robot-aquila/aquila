@@ -42,7 +42,7 @@ public class IOHelperTest {
 	
 	static {
 		root = new File("fixture", "finam-tests");
-		symbol = new Symbol("Si-6.15","SPB","USD",SymbolType.FUTURE);
+		symbol = new Symbol("Si-6.15","SPB","USD",SymbolType.FUTURES);
 		idUtils = new IdUtils();
 	}
 	

@@ -19,7 +19,7 @@ public class SymbolTypeTest {
 		map.put(SymbolType.UNKNOWN,  "U");
 		map.put(SymbolType.STOCK,	 "S");
 		map.put(SymbolType.OPTION,	 "O");
-		map.put(SymbolType.FUTURE,	 "F");
+		map.put(SymbolType.FUTURES,	 "F");
 		map.put(SymbolType.BOND,	 "B");
 		map.put(SymbolType.CURRENCY, "C");
 		Iterator<Entry<SymbolType, String>> it = map.entrySet().iterator();
@@ -34,14 +34,14 @@ public class SymbolTypeTest {
 		assertEquals(0, SymbolType.UNKNOWN.ordinal());
 		assertEquals(1, SymbolType.STOCK.ordinal());
 		assertEquals(2, SymbolType.OPTION.ordinal());
-		assertEquals(3, SymbolType.FUTURE.ordinal());
+		assertEquals(3, SymbolType.FUTURES.ordinal());
 		assertEquals(4, SymbolType.BOND.ordinal());
 		assertEquals(5, SymbolType.CURRENCY.ordinal());
 	}
 	
 	@Test
 	public void testValueOf() throws Exception {
-		assertSame(SymbolType.FUTURE, SymbolType.valueOf("F"));
+		assertSame(SymbolType.FUTURES, SymbolType.valueOf("F"));
 	}
 	
 	@Test

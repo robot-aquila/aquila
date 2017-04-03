@@ -41,7 +41,7 @@ public class MOEXSecurityStorageServiceImplTest
 	private static final Symbol symbol1, symbol2;
 	
 	static {
-		symbol1 = new Symbol("RTS-12.15", "SPBFUT", "USD", SymbolType.FUTURE);
+		symbol1 = new Symbol("RTS-12.15", "SPBFUT", "USD", SymbolType.FUTURES);
 		symbol2 = new Symbol("GAZP", "EQBR", "RUR", SymbolType.STOCK);
 	}
 	

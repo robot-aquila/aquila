@@ -24,8 +24,8 @@ public interface SPRunnable extends Runnable {
 	 * linked with IO or with analysis of huge amount of data then the task
 	 * potentially is a long-term task and should be executed in a separate
 	 * thread. This is a best place to determine this fact because only the task
-	 * implementation should know all about itself. That is not an issue of
-	 * usage of scheduler or the task consumer.
+	 * implementation should know everything about itself. That is not an issue
+	 * of usage of scheduler or the task consumer.
 	 * <p>
 	 * @return true if this task is a long-term task, false otherwise
 	 */

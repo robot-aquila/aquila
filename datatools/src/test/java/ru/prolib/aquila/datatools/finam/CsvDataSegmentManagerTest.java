@@ -49,7 +49,7 @@ public class CsvDataSegmentManagerTest {
 	static {
 		logger = LoggerFactory.getLogger(CsvDataSegmentManagerTest.class);
 		root = new File("fixture", "finam-tests");
-		symbol1 = new Symbol("RTS", "SPB", "USD", SymbolType.FUTURE);
+		symbol1 = new Symbol("RTS", "SPB", "USD", SymbolType.FUTURES);
 	}
 	
 	private Scheduler scheduler;
