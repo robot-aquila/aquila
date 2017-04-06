@@ -288,5 +288,17 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testGetPortfolio() throws Exception {
+		control.resetToStrict();
+		Portfolio portfolioMock = control.createMock(Portfolio.class);
+		expect(terminal.getPortfolio(account)).andReturn(portfolioMock);
+		control.replay();
+		
+		assertSame(portfolioMock, position.getPortfolio());
+		
+		control.verify();
+	}
 
 }

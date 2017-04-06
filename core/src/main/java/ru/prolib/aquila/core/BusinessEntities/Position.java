@@ -85,12 +85,19 @@ public interface Position extends ObservableStateContainer {
 	public EventType onCurrentPriceChange();
 	
 	/**
-	 * Get a security instance of the position.
+	 * Get security instance of the position.
 	 * <p>
 	 * @return security instance
-	 * @throws SecurityNotExistsException - if security is not available via terminal
-	 * @throws SecurityException - an error occurred
+	 * @throws IllegalStateException - security not exists
 	 */
-	public Security getSecurity() throws SecurityException;
+	public Security getSecurity();
+	
+	/**
+	 * Get portfolio instance of the position.
+	 * <p>
+	 * @return portfolio instance
+	 * @throws IllegalStateException - portfolio not exists
+	 */
+	public Portfolio getPortfolio();
 
 }

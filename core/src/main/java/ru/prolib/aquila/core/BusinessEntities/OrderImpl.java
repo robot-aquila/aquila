@@ -416,8 +416,21 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 	
 	@Override
-	public Security getSecurity() throws SecurityException {
-		return terminal.getSecurity(symbol);
+	public Security getSecurity() {
+		try {
+			return terminal.getSecurity(symbol);
+		} catch ( SecurityException e ) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	@Override
+	public Portfolio getPortfolio() {
+		try {
+			return terminal.getPortfolio(account);
+		} catch ( PortfolioException e ) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 }

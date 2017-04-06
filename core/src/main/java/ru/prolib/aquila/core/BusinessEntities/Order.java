@@ -241,12 +241,19 @@ public interface Order extends ObservableStateContainer {
 	public String getUserDefinedString();
 	
 	/**
-	 * Get a security instance of the order.
+	 * Get security instance of the order.
 	 * <p>
 	 * @return security instance
-	 * @throws SecurityNotExistsException - if security is not available via terminal
-	 * @throws SecurityException - an error occurred
+	 * @throws IllegalStateException - security not exists
 	 */
-	public Security getSecurity() throws SecurityException;
+	public Security getSecurity();
+	
+	/**
+	 * Get portfolio instance of the order.
+	 * <p>
+	 * @return portfolio instance
+	 * @throws IllegalStateException - portfolio not exists
+	 */
+	public Portfolio getPortfolio();
 	
 }
