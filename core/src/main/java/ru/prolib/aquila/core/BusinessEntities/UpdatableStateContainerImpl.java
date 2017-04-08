@@ -363,7 +363,7 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 	}
 
 	@Override
-	public Map<Integer, Object> getContent() {
+	public Map<Integer, Object> getContents() {
 		lock.lock();
 		try {
 			return new HashMap<>(values);
@@ -373,7 +373,7 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 	}
 
 	@Override
-	public Map<Integer, Object> getUpdatedContent() {
+	public Map<Integer, Object> getUpdatedContents() {
 		lock.lock();
 		try {
 			Map<Integer, Object> tokens = new HashMap<>();

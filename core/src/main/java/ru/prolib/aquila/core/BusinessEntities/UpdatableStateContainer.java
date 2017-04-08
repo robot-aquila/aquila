@@ -51,12 +51,12 @@ public interface UpdatableStateContainer extends StateContainer, DeltaUpdateCons
 	public boolean atLeastOneHasChanged(int[] tokens);
 
 	/**
-	 * Get updated content.
+	 * Get updated contents.
 	 * <p>
-	 * Get content which was changed at the last update.
+	 * Get contents which was changed at the last update.
 	 * <p>
-	 * @return updated content
+	 * @return updated contents
 	 */
-	public Map<Integer, Object> getUpdatedContent();
+	public Map<Integer, Object> getUpdatedContents();
 
 }

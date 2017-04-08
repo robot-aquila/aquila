@@ -120,7 +120,7 @@ public class TimeLimitedDeltaUpdateIterator implements CloseableIterator<DeltaUp
 		return new DeltaUpdateBuilder()
 			.withSnapshot(true)
 			.withTime(startTime)
-			.withTokens(container.getContent())
+			.withTokens(container.getContents())
 			.buildUpdate();
 	}
 	

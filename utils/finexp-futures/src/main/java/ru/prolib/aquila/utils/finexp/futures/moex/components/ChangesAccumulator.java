@@ -101,7 +101,7 @@ public class ChangesAccumulator {
 			.withSnapshot(snapshot)
 			.withTime(updateTime);
 		if ( snapshot ) {
-			builder.withTokens(container.getContent());
+			builder.withTokens(container.getContents());
 		} else {
 			for ( Integer token : actualChangedTokens ) {
 				builder.withToken(token, container.getObject(token));

@@ -841,14 +841,14 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	public void testGetContent() throws Exception {
+	public void testGetContents() throws Exception {
 		data.put(BOOL_ACTIVE, true);
 		data.put(DOUBLE_CAPITAL, 815.32d);
 		data.put(INSTANT_TIME_OF_REG, Instant.EPOCH);
 		data.put(INTEGER_AGE, 25);
 		container.update(data);
 		
-		Map<Integer, Object> actual = container.getContent();
+		Map<Integer, Object> actual = container.getContents();
 		
 		Map<Integer, Object> expected = new HashMap<>();
 		expected.put(BOOL_ACTIVE, true);
@@ -860,7 +860,7 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	public void testGetUpdatedContent() throws Exception {
+	public void testGetUpdatedContents() throws Exception {
 		data.put(BOOL_ACTIVE, true);
 		data.put(DOUBLE_CAPITAL, 815.32d);
 		data.put(INSTANT_TIME_OF_REG, Instant.EPOCH);
@@ -871,7 +871,7 @@ public class ObservableStateContainerImplTest {
 		data.put(INSTANT_TIME_OF_REG, Instant.parse("2016-07-08T16:19:00Z"));
 		container.update(data);
 		
-		Map<Integer, Object> actual = container.getUpdatedContent();
+		Map<Integer, Object> actual = container.getUpdatedContents();
 
 		Map<Integer, Object> expected = new HashMap<>();
 		expected.put(DOUBLE_CAPITAL, 850.69d);

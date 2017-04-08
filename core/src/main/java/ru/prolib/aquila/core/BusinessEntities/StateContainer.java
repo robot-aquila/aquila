@@ -371,11 +371,11 @@ public interface StateContainer extends AbstractContainer {
 	public boolean isDefined(int token);
 
 	/**
-	 * Get content of the container.
+	 * Get contents of the container.
 	 * <p>
-	 * @return container content
+	 * @return container contents
 	 */
-	public Map<Integer, Object> getContent();
+	public Map<Integer, Object> getContents();
 
 	/**
 	 * Test for data existence.
