@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
-import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.core.BusinessEntities.PortfolioAlreadyExistsException;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
@@ -73,10 +73,14 @@ public class SecuritySimulationTest implements Experiment {
 			.withScheduler(scheduler)
 			.withDataProvider(newDataProvider(scheduler, root))
 			.buildTerminal();
-		terminal.getEditablePortfolio(new Account("TEST-ACCOUNT"))
-			.consume(new DeltaUpdateBuilder()
-				.withToken(PortfolioField.BALANCE, 10000.0d)
-				.buildUpdate());
+		// TODO: fixme
+		//QFortsAccountingService accountingService = new QFortsAccountingService(terminal);
+		//try {
+		//	accountingService.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(10000.0));
+		//} catch ( PortfolioAlreadyExistsException e ) {
+		//	logger.error("Error creating test portfolio: ", e);
+		//	return 1;
+		//}
 		Set<Symbol> symbols = null;
 		try {
 			symbols = new MoexContractFileStorage(root).getSymbols();

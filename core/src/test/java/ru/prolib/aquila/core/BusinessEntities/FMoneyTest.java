@@ -30,16 +30,19 @@ public class FMoneyTest {
 		assertEquals(FMoney.of(0, 2, FMoney.USD), FMoney.ZERO_USD2);
 		assertEquals(FMoney.of(0, 3, FMoney.USD), FMoney.ZERO_USD3);
 		assertEquals(FMoney.of(0, 4, FMoney.USD), FMoney.ZERO_USD4);
+		assertEquals(FMoney.of(0, 5, FMoney.USD), FMoney.ZERO_USD5);
 		assertEquals(FMoney.of(0, 0, FMoney.EUR), FMoney.ZERO_EUR0);
 		assertEquals(FMoney.of(0, 1, FMoney.EUR), FMoney.ZERO_EUR1);
 		assertEquals(FMoney.of(0, 2, FMoney.EUR), FMoney.ZERO_EUR2);
 		assertEquals(FMoney.of(0, 3, FMoney.EUR), FMoney.ZERO_EUR3);
 		assertEquals(FMoney.of(0, 4, FMoney.EUR), FMoney.ZERO_EUR4);
+		assertEquals(FMoney.of(0, 5, FMoney.EUR), FMoney.ZERO_EUR5);
 		assertEquals(FMoney.of(0, 0, FMoney.RUB), FMoney.ZERO_RUB0);
 		assertEquals(FMoney.of(0, 1, FMoney.RUB), FMoney.ZERO_RUB1);
 		assertEquals(FMoney.of(0, 2, FMoney.RUB), FMoney.ZERO_RUB2);
 		assertEquals(FMoney.of(0, 3, FMoney.RUB), FMoney.ZERO_RUB3);
 		assertEquals(FMoney.of(0, 4, FMoney.RUB), FMoney.ZERO_RUB4);
+		assertEquals(FMoney.of(0, 5, FMoney.RUB), FMoney.ZERO_RUB5);
 	}
 	
 	@Test (expected=UnsupportedOperationException.class)
@@ -564,6 +567,12 @@ public class FMoneyTest {
 	}
 
 	@Test
+	public void testOfUSD5_1_S() {
+		assertEquals(new FMoney("12.50513", 5, RoundingMode.HALF_UP, "USD"),
+				FMoney.ofUSD5("12.505126"));
+	}
+
+	@Test
 	public void testOfUSD1_1_D() {
 		assertEquals(new FMoney("12.5", 1, RoundingMode.HALF_UP, "USD"),
 				FMoney.ofUSD1(12.5051));
@@ -586,7 +595,13 @@ public class FMoneyTest {
 		assertEquals(new FMoney("12.5051", 4, RoundingMode.HALF_UP, "USD"),
 				FMoney.ofUSD4(12.505126));
 	}
-	
+
+	@Test
+	public void testOfUSD5_1_D() {
+		assertEquals(new FMoney("12.50513", 5, RoundingMode.HALF_UP, "USD"),
+				FMoney.ofUSD5(12.505126));
+	}
+
 	@Test
 	public void testOfEUR_2_SI() {
 		assertEquals(new FMoney("5.291", 3, RoundingMode.HALF_UP, "EUR"),
@@ -622,6 +637,12 @@ public class FMoneyTest {
 		assertEquals(new FMoney("5.2906", 4, RoundingMode.HALF_UP, "EUR"),
 				FMoney.ofEUR4("5.29062"));
 	}
+	
+	@Test
+	public void testOfEUR5_1_S() {
+		assertEquals(new FMoney("5.29062", 5, RoundingMode.HALF_UP, "EUR"),
+				FMoney.ofEUR5("5.2906215"));
+	}
 
 	@Test
 	public void testOfEUR1_1_D() {
@@ -646,7 +667,13 @@ public class FMoneyTest {
 		assertEquals(new FMoney("5.2906", 4, RoundingMode.HALF_UP, "EUR"),
 				FMoney.ofEUR4(5.29062));
 	}
-	
+
+	@Test
+	public void testOfEUR5_1_D() {
+		assertEquals(new FMoney("5.29062", 5, RoundingMode.HALF_UP, "EUR"),
+				FMoney.ofEUR5(5.2906215));
+	}
+
 	@Test
 	public void testOfRUB_2_SI() {
 		assertEquals(new FMoney("-5.0340", 4, RoundingMode.HALF_UP, "RUB"),
@@ -684,6 +711,12 @@ public class FMoneyTest {
 	}
 
 	@Test
+	public void testOfRUB5_1_S() {
+		assertEquals(new FMoney("-5.03401", 5, RoundingMode.HALF_UP, "RUB"),
+				FMoney.ofRUB5("-5.034011"));
+	}
+
+	@Test
 	public void testOfRUB1_1_D() {
 		assertEquals(new FMoney("-5.0", 1, RoundingMode.HALF_UP, "RUB"),
 				FMoney.ofRUB1(-5.034));
@@ -706,7 +739,13 @@ public class FMoneyTest {
 		assertEquals(new FMoney("-5.0340", 4, RoundingMode.HALF_UP, "RUB"),
 				FMoney.ofRUB4(-5.034));
 	}
-	
+
+	@Test
+	public void testOfRUB5_1_D() {
+		assertEquals(new FMoney("-5.03400", 5, RoundingMode.HALF_UP, "RUB"),
+				FMoney.ofRUB5(-5.034001));
+	}
+
 	@Test
 	public void testWithZero() {
 		assertEquals(new FMoney("0.0000", 4, RoundingMode.DOWN, FMoney.RUB),

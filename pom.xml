@@ -15,6 +15,7 @@
 		<module>core</module>
 		<module>ui</module>
 		<module>probe</module>
+		<module>qforts</module>
 		<module>data</module>
 		<module>datatools</module>
 		<module>web-utils</module>

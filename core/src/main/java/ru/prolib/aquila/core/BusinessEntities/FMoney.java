@@ -18,18 +18,21 @@ public class FMoney extends FDecimal {
 	public static final FMoney ZERO_USD2 = FMoney.ofUSD2(0);
 	public static final FMoney ZERO_USD3 = FMoney.ofUSD3(0);
 	public static final FMoney ZERO_USD4 = FMoney.ofUSD4(0);
+	public static final FMoney ZERO_USD5 = FMoney.ofUSD5(0);
 	
 	public static final FMoney ZERO_EUR0 = FMoney.of(0, 0, EUR);
 	public static final FMoney ZERO_EUR1 = FMoney.ofEUR1(0);
 	public static final FMoney ZERO_EUR2 = FMoney.ofEUR2(0);
 	public static final FMoney ZERO_EUR3 = FMoney.ofEUR3(0);
 	public static final FMoney ZERO_EUR4 = FMoney.ofEUR4(0);
+	public static final FMoney ZERO_EUR5 = FMoney.ofEUR5(0);
 	
 	public static final FMoney ZERO_RUB0 = FMoney.of(0, 0, RUB);
 	public static final FMoney ZERO_RUB1 = FMoney.ofRUB1(0);
 	public static final FMoney ZERO_RUB2 = FMoney.ofRUB2(0);
 	public static final FMoney ZERO_RUB3 = FMoney.ofRUB3(0);
 	public static final FMoney ZERO_RUB4 = FMoney.ofRUB4(0);
+	public static final FMoney ZERO_RUB5 = FMoney.ofRUB5(0);
 	
 	protected final String currencyCode;
 	
@@ -144,7 +147,11 @@ public class FMoney extends FDecimal {
 	public static FMoney ofUSD4(String value) {
 		return ofUSD(value, 4);
 	}
-	
+
+	public static FMoney ofUSD5(String value) {
+		return ofUSD(value, 5);
+	}
+
 	public static FMoney ofUSD1(double value) {
 		return ofUSD(value, 1);
 	}
@@ -159,6 +166,10 @@ public class FMoney extends FDecimal {
 
 	public static FMoney ofUSD4(double value) {
 		return ofUSD(value, 4);
+	}
+
+	public static FMoney ofUSD5(double value) {
+		return ofUSD(value, 5);
 	}
 
 	public static FMoney ofEUR(String value, int scale) {
@@ -185,6 +196,10 @@ public class FMoney extends FDecimal {
 		return ofEUR(value, 4);
 	}
 
+	public static FMoney ofEUR5(String value) {
+		return ofEUR(value, 5);
+	}
+
 	public static FMoney ofEUR1(double value) {
 		return ofEUR(value, 1);
 	}
@@ -199,6 +214,10 @@ public class FMoney extends FDecimal {
 
 	public static FMoney ofEUR4(double value) {
 		return ofEUR(value, 4);
+	}
+
+	public static FMoney ofEUR5(double value) {
+		return ofEUR(value, 5);
 	}
 
 	public static FMoney ofRUB(String value, int scale) {
@@ -225,6 +244,10 @@ public class FMoney extends FDecimal {
 		return ofRUB(value, 4);
 	}
 
+	public static FMoney ofRUB5(String value) {
+		return ofRUB(value, 5);
+	}
+
 	public static FMoney ofRUB1(double value) {
 		return ofRUB(value, 1);
 	}
@@ -240,7 +263,11 @@ public class FMoney extends FDecimal {
 	public static FMoney ofRUB4(double value) {
 		return ofRUB(value, 4);
 	}
-	
+
+	public static FMoney ofRUB5(double value) {
+		return ofRUB(value, 5);
+	}
+
 	private void checkCurrency(FMoney argument) {
 		if ( ! currencyCode.equals(argument.currencyCode) ) {
 			throw new IllegalArgumentException("Currency mismatch: "
