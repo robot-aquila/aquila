@@ -3,4 +3,5 @@
 .classpath
 target/
 *~
+~*
 /target/
