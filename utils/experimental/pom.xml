@@ -65,7 +65,7 @@
 				<version>2.6</version>
 				<configuration>
 					<finalName>experimental-${project.version}</finalName>
-					<appendAssemblyId>false</appendAssemblyId>
+					<appendAssemblyId>true</appendAssemblyId>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
