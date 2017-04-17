@@ -166,4 +166,6 @@ public interface Portfolio extends ObservableStateContainer {
 	 */
 	public EventType onPositionClose();
 	
+	public boolean isPositionExists(Symbol symbol);
+	
 }

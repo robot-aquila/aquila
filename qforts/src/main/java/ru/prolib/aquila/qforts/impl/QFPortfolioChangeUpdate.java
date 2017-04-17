@@ -35,13 +35,21 @@ public class QFPortfolioChangeUpdate {
 		return account;
 	}
 	
-	public QFPositionChangeUpdate getOrCreatePositionChange(Symbol symbol) {
+	public QFPositionChangeUpdate getOrCreatePositionUpdate(Symbol symbol) {
 		QFPositionChangeUpdate x = positions.get(symbol);
 		if ( x == null ) {
 			x = new QFPositionChangeUpdate(account, symbol);
 			positions.put(symbol, x);
 		}
 		return x;
+	}
+	
+	public QFPortfolioChangeUpdate setPositionUpdate(QFPositionChangeUpdate update) {
+		if ( ! account.equals(update.getAccount()) ) {
+			throw new IllegalArgumentException("Unexpected account");
+		}
+		positions.put(update.getSymbol(), update);
+		return this;
 	}
 	
 	public QFPortfolioChangeUpdate setChangeBalance(FMoney value) {

@@ -264,5 +264,15 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	public EventType onPositionClose() {
 		return onPositionClose;
 	}
+	
+	@Override
+	public boolean isPositionExists(Symbol symbol) {
+		lock.lock();
+		try {
+			return positions.containsKey(symbol);
+		} finally {
+			lock.unlock();
+		}
+	}
 
 }

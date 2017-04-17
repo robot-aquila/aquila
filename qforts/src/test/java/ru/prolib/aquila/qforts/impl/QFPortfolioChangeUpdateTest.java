@@ -40,27 +40,44 @@ public class QFPortfolioChangeUpdateTest {
 	}
 	
 	@Test
-	public void testGetOrCreatePositionChange() {
-		QFPositionChangeUpdate dummy = update.getOrCreatePositionChange(symbol1);
+	public void testGetOrCreatePositionUpdate() {
+		QFPositionChangeUpdate dummy = update.getOrCreatePositionUpdate(symbol1);
 		assertNotNull(dummy);
-		assertSame(dummy, update.getOrCreatePositionChange(symbol1));
+		assertSame(dummy, update.getOrCreatePositionUpdate(symbol1));
 		assertEquals(account1, dummy.getAccount());
 		assertEquals(symbol1, dummy.getSymbol());
 	}
 	
 	@Test
+	public void testSetPositionUpdate() {
+		QFPositionChangeUpdate dummy1 = new QFPositionChangeUpdate(account1, symbol1);
+		QFPositionChangeUpdate dummy2 = new QFPositionChangeUpdate(account1, symbol2);
+		
+		assertSame(update, update.setPositionUpdate(dummy1));
+		assertSame(update, update.setPositionUpdate(dummy2));
+		
+		assertEquals(dummy1, update.getPositionUpdate(symbol1));
+		assertEquals(dummy2, update.getPositionUpdate(symbol2));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testSetPositionUpdate_ThrowsIfAccountMismatch() {
+		update.setPositionUpdate(new QFPositionChangeUpdate(account2, symbol1));
+	}
+	
+	@Test
 	public void testGetPositionUpdates() {
 		List<QFPositionChangeUpdate> expected = new ArrayList<>();
-		expected.add(update.getOrCreatePositionChange(symbol1));
-		expected.add(update.getOrCreatePositionChange(symbol2));
-		expected.add(update.getOrCreatePositionChange(symbol3));
+		expected.add(update.getOrCreatePositionUpdate(symbol1));
+		expected.add(update.getOrCreatePositionUpdate(symbol2));
+		expected.add(update.getOrCreatePositionUpdate(symbol3));
 		
 		assertEquals(expected, update.getPositionUpdates());
 	}
 	
 	@Test
 	public void testGetPositionUpdate() {
-		QFPositionChangeUpdate expected = update.getOrCreatePositionChange(symbol2);
+		QFPositionChangeUpdate expected = update.getOrCreatePositionUpdate(symbol2);
 		
 		assertSame(expected, update.getPositionUpdate(symbol2));
 	}
@@ -448,7 +465,7 @@ public class QFPortfolioChangeUpdateTest {
 			.setFinalVarMarginClose(FMoney.ofRUB5(9.46012))
 			.setInitialVarMarginInter(FMoney.ofRUB5(0.01012))
 			.setChangeVarMarginInter(FMoney.ofRUB5(1.0))
-			.getOrCreatePositionChange(symbol1)
+			.getOrCreatePositionUpdate(symbol1)
 				.setChangeCurrentPrice(FDecimal.of2(14.01));
 		
 		String expected = "QFPortfolioChangeUpdate[a=TEST1"
@@ -481,7 +498,7 @@ public class QFPortfolioChangeUpdateTest {
 			.setChangeVarMargin(FMoney.ofRUB2(404.0))
 			.setChangeVarMarginClose(FMoney.ofRUB2(48.0))
 			.setChangeVarMarginInter(FMoney.ofRUB2(2.6))
-			.getOrCreatePositionChange(symbol3)
+			.getOrCreatePositionUpdate(symbol3)
 				.setChangeBalance(FMoney.ofRUB2(81.0));
 		
 		Variant<Account> vAcc = new Variant<>(account1, account2);
@@ -508,7 +525,7 @@ public class QFPortfolioChangeUpdateTest {
 				.setChangeVarMargin(vcVMgn.get())
 				.setChangeVarMarginClose(vcVMgnC.get())
 				.setChangeVarMarginInter(vcVMgnI.get());
-			x.getOrCreatePositionChange(vpSym.get())
+			x.getOrCreatePositionUpdate(vpSym.get())
 				.setChangeBalance(vpcBal.get());
 			if ( update.equals(x) ) {
 				foundCnt ++;

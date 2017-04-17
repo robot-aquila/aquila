@@ -393,5 +393,24 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertTrue(listenerStub.getEvent(1).isType(portfolio.onUpdate()));
 		assertSame(portfolio, ((PortfolioEvent) listenerStub.getEvent(1)).getPortfolio());
 	}
+	
+	@Test
+	public void testIsPositionExists() throws Exception {
+		Symbol symbol1 = new Symbol("SBER"),
+				symbol2 = new Symbol("GAZP");
+		
+		assertFalse(portfolio.isPositionExists(symbol1));
+		assertFalse(portfolio.isPositionExists(symbol2));
+		
+		portfolio.getPosition(symbol1);
+		
+		assertTrue(portfolio.isPositionExists(symbol1));
+		assertFalse(portfolio.isPositionExists(symbol2));
+		
+		portfolio.getPosition(symbol2);
+		
+		assertTrue(portfolio.isPositionExists(symbol1));
+		assertTrue(portfolio.isPositionExists(symbol2));
+	}
 
 }
