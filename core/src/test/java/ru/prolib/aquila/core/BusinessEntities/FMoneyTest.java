@@ -916,4 +916,13 @@ public class FMoneyTest {
 				new FMoney(-34.1564, 4, RoundingMode.CEILING, FMoney.USD).abs());
 	}
 	
+	
+	@Test
+	public void testDoubleValue() {
+		FMoney x = FMoney.of(4.95612, 5, FMoney.RUB);
+		
+		assertEquals(4.95612, x.doubleValue(), 0.000001d);
+	}
+
+	
 }

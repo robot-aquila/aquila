@@ -574,5 +574,12 @@ public class FDecimalTest {
 		assertEquals(new FDecimal(34.1564, 4, RoundingMode.CEILING),
 				new FDecimal(-34.1564, 4, RoundingMode.CEILING).abs());
 	}
+	
+	@Test
+	public void testDoubleValue() {
+		FDecimal x = FDecimal.of(4.95612, 5);
+		
+		assertEquals(4.95612, x.doubleValue(), 0.000001d);
+	}
 
 }
