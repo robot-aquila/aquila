@@ -226,11 +226,11 @@ public class QFObjectRegistryTest {
 			s2o2 = (EditableOrder) terminal.createOrder(account3,
 				symbol2, OrderAction.BUY, 5L, FDecimal.of2(11.05)), 	// -
 			s2o3 = (EditableOrder) terminal.createOrder(account2,
-					symbol2, OrderAction.BUY, 1L, FDecimal.of2(55.00)), // +
+				symbol2, OrderAction.BUY, 1L, FDecimal.of2(55.00)), 	// +
 			s2o4 = (EditableOrder) terminal.createOrder(account1,
-					symbol2, OrderAction.BUY, 5L, FDecimal.of2(55.29)), // +
+				symbol2, OrderAction.BUY, 5L, FDecimal.of2(55.29)), 	// +
 			s2o5 = (EditableOrder) terminal.createOrder(account2,
-					symbol2, OrderAction.BUY, 5L, FDecimal.of2(11.05)); // -
+				symbol2, OrderAction.SELL, 5L, FDecimal.of2(55.01)); 	// -
 		registry.register(s1o1);
 		registry.register(s1o2);
 		registry.register(s1o3);
