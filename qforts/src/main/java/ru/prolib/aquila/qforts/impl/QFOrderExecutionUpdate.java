@@ -216,5 +216,9 @@ public class QFOrderExecutionUpdate {
 			.append(o.initialStatus,	initialStatus)
 			.isEquals();
 	}
+	
+	public long getPositionVolumeChange() {
+		return executionAction == OrderAction.BUY ? executionVolume : -executionVolume;
+	}
 
 }

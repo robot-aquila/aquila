@@ -297,4 +297,17 @@ public class QFOrderExecutionUpdateTest {
 		assertEquals(OrderStatus.ACTIVE, found.getInitialStatus());
 	}
 	
+	@Test
+	public void testGetPositionVolumeChange() {
+		update.setExecutionAction(OrderAction.BUY)
+			.setExecutionVolume(100L);
+		
+		assertEquals(100L, update.getPositionVolumeChange());
+		
+		update.setExecutionAction(OrderAction.SELL)
+			.setExecutionVolume(50L);
+		
+		assertEquals(-50L, update.getPositionVolumeChange());
+	}
+	
 }

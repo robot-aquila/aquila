@@ -1,5 +1,8 @@
 package ru.prolib.aquila.qforts.impl;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
@@ -10,8 +13,14 @@ import ru.prolib.aquila.core.BusinessEntities.OrderExecutionImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderField;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.BusinessEntities.PositionField;
+import ru.prolib.aquila.core.concurrency.Lockable;
+import ru.prolib.aquila.core.concurrency.Multilock;
 
 public class QFAssembler {
+	
+	public Multilock createMultilock(Set<Lockable> objects) {
+		return new Multilock(new ArrayList<>(objects));
+	}
 	
 	public void update(EditableOrder order, QFOrderExecutionUpdate update, long executionID) {
 		OrderExecution execution = new OrderExecutionImpl(order.getTerminal(),

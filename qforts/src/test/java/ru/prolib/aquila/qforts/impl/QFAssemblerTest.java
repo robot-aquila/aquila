@@ -3,10 +3,15 @@ package ru.prolib.aquila.qforts.impl;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.log4j.BasicConfigurator;
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,6 +36,9 @@ import ru.prolib.aquila.core.BusinessEntities.OrderType;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.BusinessEntities.PositionField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.concurrency.Lockable;
+import ru.prolib.aquila.core.concurrency.LockableStub;
+import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
 public class QFAssemblerTest {
@@ -193,6 +201,36 @@ public class QFAssemblerTest {
 			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, FMoney.ofRUB5(1002.0))
 			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, FMoney.ofRUB5(18.9))
 			.buildUpdate().getContents(), portfolio.getPosition(symbol2).getContents());
+	}
+	
+	@Test
+	public void testCreateMultilock() {
+		IMocksControl control = EasyMock.createStrictControl();
+		Lock l1 = control.createMock(Lock.class),
+			l2 = control.createMock(Lock.class),
+			l3 = control.createMock(Lock.class);
+		Lockable stub1 = new LockableStub(l1),
+				stub2 = new LockableStub(l3),
+				stub3 = new LockableStub(l2);
+		Set<Lockable> objects = new HashSet<>();
+		objects.add(stub3);
+		objects.add(stub2);
+		objects.add(stub1);
+		
+		Multilock mlock = service.createMultilock(objects);
+		
+		l1.lock();
+		l3.lock();
+		l2.lock();
+		l2.unlock();
+		l3.unlock();
+		l1.unlock();
+		control.replay();
+
+		mlock.lock();
+		mlock.unlock();
+		
+		control.verify();
 	}
 
 }
