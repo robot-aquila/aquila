@@ -115,17 +115,9 @@ public class Chart extends ScatterChart {
 
         for(int i=getPlotChildren().size()-1; i>=0; i--){
             Node node = (Node) getPlotChildren().get(i);
-            if(node.getId() != null){
-                String timeStr = node.getId();
-                LocalDateTime time = null;
-                try {
-                    time = LocalDateTime.parse(timeStr);
-                } catch (Exception e){
-
-                }
-                if(time!=null && !isTimeDisplayed(time)){
-                    getPlotChildren().remove(node);
-                }
+            LocalDateTime time = getTime(node);
+            if(time != null && !isTimeDisplayed(time)){
+                getPlotChildren().remove(node);
             }
         }
         updateStyles();
@@ -183,6 +175,22 @@ public class Chart extends ScatterChart {
 
     public void setXAxisVisible(boolean xAxisVisible) {
         this.xAxisVisible = xAxisVisible;
+    }
+
+    private LocalDateTime getTime(Node node){
+        String timeStr = node.getId();
+        if(timeStr!=null){
+            int idx = timeStr.indexOf("@");
+            if(idx >= 0){
+                timeStr = timeStr.substring(idx+1);
+            }
+            try {
+                return LocalDateTime.parse(timeStr);
+            } catch (Exception e){
+
+            }
+        }
+        return null;
     }
 }
 

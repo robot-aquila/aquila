@@ -3,17 +3,15 @@ package ru.prolib.aquila.utils.experimental.charts;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import org.threeten.extra.Interval;
+import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.utils.experimental.charts.formatters.M15TimeAxisSettings;
+import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartObject;
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
-import ru.prolib.aquila.utils.experimental.charts.formatters.M15TimeAxisSettings;
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.IndicatorParams;
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.MovingAverageIndicatorParams;
-import ru.prolib.aquila.utils.experimental.charts.objects.CandleChartObject;
-import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
-import ru.prolib.aquila.utils.experimental.charts.objects.CircleChartObject;
-import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartObject;
-import ru.prolib.aquila.utils.experimental.charts.objects.VolumeChartObject;
+import ru.prolib.aquila.utils.experimental.charts.objects.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,6 +42,7 @@ public class TestPanel extends JPanel implements ActionListener {
     private JLabel numberOfPointsLabel;
     private List<Candle> candleData = new ArrayList<>();
     private CandleChartObject candles;
+    private TradeChartObject trades;
     private VolumeChartObject volumes;
     private boolean replayStarted = false;
     private Timer replayTimer = new Timer("REPLAY_TIMER", true);
@@ -135,25 +134,16 @@ public class TestPanel extends JPanel implements ActionListener {
             addCandle.setVisible(true);
         });
 
-        changeCandle.addActionListener(e->{
-            changeCandle();
-        });
+        changeCandle.addActionListener(e-> changeCandle());
 
-        addCandle.addActionListener(e->{
-            addCandle();
-        });
+        addCandle.addActionListener(e-> addCandle());
 
         top.add(topLeft, BorderLayout.WEST);
         top.add(topRight, BorderLayout.EAST);
 
 //        add(top, BorderLayout.NORTH);
 
-        scrollBarListener = new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                panel.setCurrentPosition(e.getValue());
-            }
-        };
+        scrollBarListener = e -> panel.setCurrentPosition(e.getValue());
 
         scrollBar = new JScrollBar(SwingConstants.HORIZONTAL);
         scrollBar.addAdjustmentListener(scrollBarListener);
@@ -161,9 +151,7 @@ public class TestPanel extends JPanel implements ActionListener {
 //        scrollBar.setVisible(false);
 //        panel.setCurrentPosition(0);
 //        random.doClick();
-        Platform.runLater(() -> {
-            generateRandomData();
-        });
+        Platform.runLater(() -> generateRandomData());
 
     }
 
@@ -199,6 +187,9 @@ public class TestPanel extends JPanel implements ActionListener {
         candles = new CandleChartObject();
         panel.addChartObject("CANDLES", candles);
 
+        trades = new TradeChartObject();
+        panel.addChartObject("CANDLES", trades);
+
         panel.addChart("VOLUMES");
         volumes = new VolumeChartObject();
         panel.addChartObject("VOLUMES", volumes);
@@ -218,6 +209,28 @@ public class TestPanel extends JPanel implements ActionListener {
     private void generateRandomData(){
         candleData = getRandomData();
         candles.setData(candleData);
+
+        trades.setXValues(candles.getXValues());
+        trades.setPeriod(candleData.get(0));
+        List<TradeInfo> tradesData = new ArrayList<>();
+        tradesData.add(new TradeInfo(candleData.get(4).getStartTime().plusSeconds(50),
+                OrderAction.SELL,
+                candleData.get(4).getHigh(),
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(4).getStartTime().plus(10, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(4).getLow(),
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(10, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(5).getBodyMiddle(),
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(10, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(5).getBodyMiddle()+0.3,
+                500L));
+        trades.setData(tradesData);
+
         volumes.setData(candleData);
         refreshIndicatorsData();
         panel.refresh();
@@ -265,9 +278,7 @@ public class TestPanel extends JPanel implements ActionListener {
         JMenuBar menuBar = new JMenuBar();
         JMenu main = new JMenu("Main");
         JMenuItem random = new JMenuItem("Random data");
-        random.addActionListener(e -> {
-            generateRandomData();
-        });
+        random.addActionListener(e -> generateRandomData());
         main.add(random);
         final JMenuItem miReplay = new JMenuItem("Start replay");
         miReplay.addActionListener(event->{
@@ -298,9 +309,7 @@ public class TestPanel extends JPanel implements ActionListener {
         main.add(new JPopupMenu.Separator());
 
         final JMenuItem miExit = new JMenuItem("Exit");
-        miExit.addActionListener(event->{
-            System.exit(0);
-        });
+        miExit.addActionListener(event-> System.exit(0));
         main.add(miExit);
 
         menuBar.add(main);
@@ -309,13 +318,9 @@ public class TestPanel extends JPanel implements ActionListener {
 
         JMenu view = new JMenu("View");
         JMenuItem zoomIn = new JMenuItem("Zoom In");
-        zoomIn.addActionListener(e-> {
-            panel.setNumberOfPoints(panel.getNumberOfPoints()-1);
-        });
+        zoomIn.addActionListener(e-> panel.setNumberOfPoints(panel.getNumberOfPoints()-1));
         JMenuItem zoomOut = new JMenuItem("Zoom Out");
-        zoomOut.addActionListener(e->{
-            panel.setNumberOfPoints(panel.getNumberOfPoints()+1);
-        });
+        zoomOut.addActionListener(e-> panel.setNumberOfPoints(panel.getNumberOfPoints()+1));
         view.add(zoomIn);
         view.add(zoomOut);
         menuBar.add(view);

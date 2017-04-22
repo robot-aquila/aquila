@@ -61,4 +61,17 @@
 
 .volume-bar {
     -fx-fill: linear-gradient(#9d9e9d 0%, #6b6a6b 20%, #343534 80%, #242424 100%);
+    -fx-opacity: 0.7;
+}
+
+.trade-buy {
+    -fx-fill: red;
+    -fx-stroke: black;
+    -fx-stroke-width: 1;
+}
+
+.trade-sell {
+    -fx-fill: green;
+    -fx-stroke: black;
+    -fx-stroke-width: 1;
 }
