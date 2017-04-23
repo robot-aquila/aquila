@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.charts.objects;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Tooltip;
 import javafx.scene.shape.Polygon;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -78,6 +79,7 @@ public class TradeChartObject implements ChartObject {
                         arrow.getStyleClass().add(styleClass);
                         group.getChildren().add(arrow);
                     }
+                    Tooltip.install(arrow, getTooltip(tradeInfo));
                 }
                 if(node==null){
                     result.add(group);
@@ -86,6 +88,10 @@ public class TradeChartObject implements ChartObject {
         }
         return result;
 
+    }
+
+    private Tooltip getTooltip(TradeInfo tradeInfo){
+        return new Tooltip(String.format("%s %s @ %.2f x %d", tradeInfo.getAction(), tradeInfo.getSymbol(), tradeInfo.getPrice(), tradeInfo.getVolume()));
     }
 
     @Override
@@ -117,6 +123,10 @@ public class TradeChartObject implements ChartObject {
         }
     }
 
+    public void addXValue(LocalDateTime xValue) {
+        this.xValues.add(xValue);
+    }
+
     public void setPeriod(long period) {
         this.period = period;
     }
@@ -131,14 +141,22 @@ public class TradeChartObject implements ChartObject {
 
     public void setData(List<TradeInfo> tradeInfoList){
         this.data.clear();
+        addData(tradeInfoList);
+    }
+
+    public void addData(List<TradeInfo> tradeInfoList){
         for(TradeInfo t: tradeInfoList){
-            LocalDateTime tradeTime = Utils.toLocalDateTime(t.getTime());
-            for (LocalDateTime xStart : xValues) {
-                LocalDateTime xEnd = xStart.plusSeconds(period);
-                List<TradeInfo> list = data.computeIfAbsent(xStart, k -> new ArrayList<>());
-                if ((tradeTime.isAfter(xStart) && tradeTime.isBefore(xEnd)) || tradeTime.isEqual(xStart)) {
-                    list.add(t);
-                }
+            addData(t);
+        }
+    }
+
+    public void addData(TradeInfo tradeInfo){
+        LocalDateTime tradeTime = Utils.toLocalDateTime(tradeInfo.getTime());
+        for (LocalDateTime xStart : xValues) {
+            LocalDateTime xEnd = xStart.plusSeconds(period);
+            List<TradeInfo> list = data.computeIfAbsent(xStart, k -> new ArrayList<>());
+            if ((tradeTime.isAfter(xStart) && tradeTime.isBefore(xEnd)) || tradeTime.isEqual(xStart)) {
+                list.add(tradeInfo);
             }
         }
     }

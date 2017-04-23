@@ -103,6 +103,10 @@ public class Chart extends ScatterChart {
         return Math.abs(getY(distance) - getY(0));
     }
 
+    public void clearPlotChildren(){
+        getPlotChildren().clear();
+    }
+
     public void updatePlotChildren(List<Node> nodes){
         for(int i=getPlotChildren().size()-1; i>=0; i--){
             Node node = (Node) getPlotChildren().get(i);

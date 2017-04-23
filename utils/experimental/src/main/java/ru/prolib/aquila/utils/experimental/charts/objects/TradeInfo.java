@@ -1,5 +1,7 @@
 package ru.prolib.aquila.utils.experimental.charts.objects;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -67,5 +69,18 @@ public class TradeInfo {
     public TradeInfo withOrderId(Long orderId) {
         this.orderId = orderId;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("time", time)
+                .append("action", action)
+                .append("price", price)
+                .append("volume", volume)
+                .append("symbol", symbol)
+                .append("account", account)
+                .append("orderId", orderId)
+                .toString();
     }
 }

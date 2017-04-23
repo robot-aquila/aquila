@@ -35,6 +35,8 @@ public class ChartPanel extends JFXPanel {
     private int currentPosition = 0;
     private int numberOfPoints = 15;
 
+    private boolean fullRedraw = true;
+
     public ChartPanel() {
         super();
         mainPanel = new VBox();
@@ -138,8 +140,12 @@ public class ChartPanel extends JFXPanel {
             setAxisValues();
             for(String id: charts.keySet()){
                 Chart chart = getChart(id);
+                if(fullRedraw){
+                    chart.clearPlotChildren();
+                }
                 chart.updatePlotChildren(paintChartObjects(id));
             }
+            fullRedraw = false;
         });
     }
 
@@ -230,6 +236,10 @@ public class ChartPanel extends JFXPanel {
             throw new IllegalArgumentException("Unknown chart with id = "+chartId);
         }
         return objects;
+    }
+
+    public void setFullRedraw(boolean fullRedraw) {
+        this.fullRedraw = fullRedraw;
     }
 }
 
