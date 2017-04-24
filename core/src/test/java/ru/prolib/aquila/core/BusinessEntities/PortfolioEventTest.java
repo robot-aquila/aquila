@@ -3,6 +3,9 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.createStrictControl;
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -16,6 +19,7 @@ public class PortfolioEventTest {
 	private IMocksControl control;
 	private EventType eventType1,eventType2;
 	private Portfolio port1,port2;
+	private Set<Integer> tokens1, tokens2;
 	private PortfolioEvent event;
 	
 	@Before
@@ -25,13 +29,19 @@ public class PortfolioEventTest {
 		eventType2 = control.createMock(EventType.class);
 		port1 = control.createMock(Portfolio.class);
 		port2 = control.createMock(Portfolio.class);
+		tokens1 = new HashSet<>();
+		tokens1.add(PortfolioField.BALANCE);
+		tokens2 = new HashSet<>();
+		tokens2.add(PortfolioField.ASSETS);
 		event = new PortfolioEvent(eventType1, port1);
+		event.setUpdatedTokens(tokens1);
 	}
 	
 	@Test
 	public void testAccessors() throws Exception {
 		assertSame(eventType1, event.getType());
 		assertSame(port1, event.getPortfolio());
+		assertEquals(tokens1, event.getUpdatedTokens());
 	}
 	
 	@Test
@@ -55,11 +65,15 @@ public class PortfolioEventTest {
 		PortfolioEvent event3 = new PortfolioEvent(eventType1, port2);
 		PortfolioEvent event4 = new PortfolioEvent(eventType2, port2);
 		PortfolioEvent event5 = new PortfolioEvent(eventType1, port1);
+		event5.setUpdatedTokens(tokens1);
 		
 		assertFalse(event.equals(event2));
 		assertFalse(event.equals(event3));
 		assertFalse(event.equals(event4));
 		assertTrue(event.equals(event5));
+		
+		event5.setUpdatedTokens(tokens2);
+		assertFalse(event.equals(event5));
 	}
 
 }

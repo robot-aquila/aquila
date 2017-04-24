@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.ContainerEventImpl;
 
@@ -43,7 +45,10 @@ public class OrderEvent extends ContainerEventImpl {
 		if ( other.getClass() == this.getClass() ) {
 			OrderEvent o = (OrderEvent) other;
 			return o.getType() == getType()
-				&& o.getOrder() == getOrder();
+				&& o.getOrder() == getOrder()
+				&& new EqualsBuilder()
+					.append(o.getUpdatedTokens(), getUpdatedTokens())
+					.isEquals();
 		}
 		return false;
 	}

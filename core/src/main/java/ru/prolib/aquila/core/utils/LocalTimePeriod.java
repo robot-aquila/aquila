@@ -11,6 +11,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * An intraday time period.
  */
 public class LocalTimePeriod {
+	/**
+	 * End of day marker.
+	 */
+	public static final LocalTime EOD = LocalTime.MIDNIGHT;
 	private final LocalTime from, to;
 	private final ZoneId zone;
 	
@@ -18,11 +22,13 @@ public class LocalTimePeriod {
 	 * Create time period.
 	 * <p>
 	 * @param from - time from (inclusive)
-	 * @param to - time to (exclusive, must be greater that time from)
+	 * @param to - time to (exclusive). Must be greater that time from. Use {@link #EOD} instance to specify period
+	 * up to end of day.
 	 * @param zone - time zone ID
 	 */
 	public LocalTimePeriod(LocalTime from, LocalTime to, ZoneId zone) {
-		if ( to.compareTo(from) <= 0 ) {
+		int x = to.compareTo(from);
+		if ( x == 0 || x < 0 && to != EOD ) {
 			throw new IllegalArgumentException();
 		}
 		this.from = from;
@@ -39,7 +45,7 @@ public class LocalTimePeriod {
 	}
 	
 	public int compareEndTo(Instant time) {
-		return to.compareTo(toZT(time));
+		return to == EOD ? 1 : to.compareTo(toZT(time));
 	}
 	
 	public LocalTime from() {

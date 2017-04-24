@@ -2,6 +2,10 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -16,6 +20,7 @@ public class OrderEventTest {
 	private IMocksControl control;
 	private EventType type1,type2;
 	private Order order1,order2;
+	private Set<Integer> tokens1, tokens2;
 	private OrderEvent event;
 
 	@Before
@@ -25,13 +30,19 @@ public class OrderEventTest {
 		type2 = control.createMock(EventType.class);
 		order1 = control.createMock(Order.class);
 		order2 = control.createMock(Order.class);
+		tokens1 = new HashSet<>();
+		tokens1.add(OrderField.COMMENT);
+		tokens2 = new HashSet<>();
+		tokens2.add(OrderField.CURRENT_VOLUME);
 		event = new OrderEvent(type1, order1);
+		event.setUpdatedTokens(tokens1);
 	}
 	
 	@Test
 	public void testAccessors() throws Exception {
 		assertSame(type1, event.getType());
 		assertSame(order1, event.getOrder());
+		assertEquals(tokens1, event.getUpdatedTokens());
 	}
 	
 	@Test
@@ -43,19 +54,23 @@ public class OrderEventTest {
 			.add(null)
 			.add(order1)
 			.add(order2);
+		Variant<Set<Integer>> vTokens = new Variant<Set<Integer>>(vOrder, tokens1, tokens2, null);
+		Variant<?> iterator = vTokens;
 		int foundCount = 0;
 		OrderEvent foundEvent = null;
 		do {
 			OrderEvent actual = new OrderEvent(vType.get(), vOrder.get());
+			actual.setUpdatedTokens(vTokens.get());
 			if ( event.equals(actual) ) {
 				foundCount ++;
 				foundEvent = actual;
 			}
-		} while ( vOrder.next() );
+		} while ( iterator.next() );
 		assertEquals(1, foundCount);
 		assertNotNull(foundEvent);
 		assertSame(type1, foundEvent.getType());
 		assertSame(order1, foundEvent.getOrder());
+		assertEquals(tokens1, foundEvent.getUpdatedTokens());
 	}
 	
 	@Test

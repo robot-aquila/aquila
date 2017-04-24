@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.ContainerEventImpl;
 
@@ -24,6 +26,22 @@ public class PositionEvent extends ContainerEventImpl {
 	 */
 	public Position getPosition() {
 		return position;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != PositionEvent.class ) {
+			return false;
+		}
+		PositionEvent o = (PositionEvent) other;
+		return o.getType() == getType()
+			&& o.position == position
+			&& new EqualsBuilder()
+				.append(o.getUpdatedTokens(), getUpdatedTokens())
+				.isEquals();
 	}
 
 }

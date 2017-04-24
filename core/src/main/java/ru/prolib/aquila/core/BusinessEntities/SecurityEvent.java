@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.ContainerEventImpl;
 
@@ -43,7 +45,10 @@ public class SecurityEvent extends ContainerEventImpl {
 		if ( other.getClass() == this.getClass() ) {
 			SecurityEvent o = (SecurityEvent)other;
 			return o.getType() == getType()
-				&& o.security == security;
+				&& o.security == security
+				&& new EqualsBuilder()
+					.append(o.getUpdatedTokens(), getUpdatedTokens())
+					.isEquals();
 		}
 		return false;
 	}

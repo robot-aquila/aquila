@@ -105,5 +105,30 @@ public class LocalTimePeriodTest {
 		LocalTime expected = LocalTime.of(15, 30, 45);
 		assertEquals(expected, period.toZT(T("2016-09-15T12:30:45Z")));
 	}
+	
+	@Test
+	public void testEndOfDayAllowedAsPeriodEnd() {
+		period = new LocalTimePeriod(LocalTime.of(23, 50), LocalTime.MIDNIGHT, zone);
+		
+		Instant dummy = ZonedDateTime.of(2017, 4, 24, 0, 0, 0, 0, zone).toInstant();
+		assertEquals( 1, period.compareEndTo(dummy));
+		assertEquals( 1, period.compareStartTo(dummy));
+		assertFalse(period.contains(dummy));
+		
+		dummy = ZonedDateTime.of(2017, 4, 24, 23, 50, 0, 0, zone).toInstant();
+		assertEquals( 1, period.compareEndTo(dummy));
+		assertEquals( 0, period.compareStartTo(dummy));
+		assertTrue(period.contains(dummy));
+		
+		dummy = ZonedDateTime.of(2017, 4, 24, 23, 59, 59, 999, zone).toInstant();
+		assertEquals( 1, period.compareEndTo(dummy));
+		assertEquals(-1, period.compareStartTo(dummy));
+		assertTrue(period.contains(dummy));
+		
+		dummy = ZonedDateTime.of(2017, 4, 25, 0, 0, 0, 0, zone).toInstant();
+		assertEquals( 1, period.compareEndTo(dummy));
+		assertEquals( 1, period.compareStartTo(dummy));
+		assertFalse(period.contains(dummy));
+	}
 
 }

@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventFactory;
@@ -174,32 +176,51 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	
 	static class ContainerEventFactory implements EventFactory {
 		private final ObservableStateContainer container;
+		private final Set<Integer> updatedTokens;
 		
 		ContainerEventFactory(ObservableStateContainer container) {
 			super();
 			this.container = container;
+			this.updatedTokens = new HashSet<>(container.getUpdatedTokens());
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			return new ContainerEventImpl(type, container);
+			ContainerEventImpl e = new ContainerEventImpl(type, container);
+			e.setUpdatedTokens(updatedTokens);
+			return e;
 		}
 		
 	}
 	
 	protected static class ContainerEventImpl extends EventImpl implements ContainerEvent {
 		private final ObservableStateContainer container;
+		private Set<Integer> updatedTokens;
 		
 		ContainerEventImpl(EventType type, ObservableStateContainer container) {
 			super(type);
 			this.container = container;
 		}
-
+		
+		public void setUpdatedTokens(Set<Integer> updatedTokens) {
+			this.updatedTokens = updatedTokens;
+		}
+		
 		@Override
 		public ObservableStateContainer getContainer() {
 			return container;
 		}
-		
+
+		@Override
+		public boolean hasChanged(int token) {
+			return updatedTokens != null && updatedTokens.contains(token);
+		}
+
+		@Override
+		public Set<Integer> getUpdatedTokens() {
+			return updatedTokens;
+		}
+
 	}
 	
 }
