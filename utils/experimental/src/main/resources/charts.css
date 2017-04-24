@@ -5,13 +5,13 @@
 
 /* user styles */
 .candle-body-bear {
-    -fx-fill: green;
+    -fx-fill: red;
     -fx-stroke: green;
     -fx-stroke-width: 1;
 }
 
 .candle-body-bull {
-    -fx-fill: red;
+    -fx-fill: green;
     -fx-stroke: green;
     -fx-stroke-width: 1;
 }
@@ -65,13 +65,19 @@
 }
 
 .trade-buy {
-    -fx-fill: red;
+    -fx-fill: green;
     -fx-stroke: black;
     -fx-stroke-width: 1;
 }
 
 .trade-sell {
-    -fx-fill: green;
+    -fx-fill: red;
+    -fx-stroke: black;
+    -fx-stroke-width: 1;
+}
+
+.trade-remote {
+    -fx-fill: yellow;
     -fx-stroke: black;
     -fx-stroke-width: 1;
 }

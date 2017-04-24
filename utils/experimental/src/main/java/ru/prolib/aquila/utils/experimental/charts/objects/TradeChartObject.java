@@ -91,7 +91,17 @@ public class TradeChartObject implements ChartObject {
     }
 
     private Tooltip getTooltip(TradeInfo tradeInfo){
-        return new Tooltip(String.format("%s %s @ %.2f x %d", tradeInfo.getAction(), tradeInfo.getSymbol(), tradeInfo.getPrice(), tradeInfo.getVolume()));
+        return new Tooltip(String.format("Acc: %s%n" +
+                "Ord#: %d%n" +
+                "Time: %s%n" +
+                "%s %s @ %.2f x %d",
+                tradeInfo.getAccount(),
+                tradeInfo.getOrderId(),
+                tradeInfo.getTime(),
+                tradeInfo.getAction(),
+                tradeInfo.getSymbol(),
+                tradeInfo.getPrice(),
+                tradeInfo.getVolume()));
     }
 
     @Override
