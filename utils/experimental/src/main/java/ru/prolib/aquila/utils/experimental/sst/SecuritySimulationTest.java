@@ -26,7 +26,6 @@ import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.FMoney;
-import ru.prolib.aquila.core.BusinessEntities.PortfolioAlreadyExistsException;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
@@ -40,6 +39,9 @@ import ru.prolib.aquila.probe.datasim.SymbolUpdateSourceImpl;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerControlToolbar;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerTaskFilter;
 import ru.prolib.aquila.probe.scheduler.ui.SymbolUpdateTaskFilter;
+import ru.prolib.aquila.qforts.impl.QFBuilder;
+import ru.prolib.aquila.qforts.impl.QFTransactionException;
+import ru.prolib.aquila.qforts.impl.QFortsEnv;
 import ru.prolib.aquila.ui.TableModelController;
 import ru.prolib.aquila.ui.form.PortfolioListTableModel;
 import ru.prolib.aquila.ui.form.PositionListTableModel;
@@ -56,10 +58,12 @@ public class SecuritySimulationTest implements Experiment {
 	static {
 		logger = LoggerFactory.getLogger(SecuritySimulationTest.class);
 	}
+	
+	private EditableTerminal terminal;
 
 	@Override
 	public void close() throws IOException {
-
+		terminal.stop();
 	}
 
 	@Override
@@ -68,19 +72,19 @@ public class SecuritySimulationTest implements Experiment {
 		final File root = new File(cmd.getOptionValue(CmdLine.LOPT_ROOT));
 		
 		// Initialize terminal
-		EditableTerminal terminal = new BasicTerminalBuilder()
+		QFBuilder qfBuilder = new QFBuilder();
+		terminal = new BasicTerminalBuilder()
 			.withTerminalID("SECURITY_SIMULATION")
 			.withScheduler(scheduler)
-			.withDataProvider(newDataProvider(scheduler, root))
+			.withDataProvider(newDataProvider(scheduler, root, qfBuilder.buildDataProvider()))
 			.buildTerminal();
-		// TODO: fixme
-		//QFortsAccountingService accountingService = new QFortsAccountingService(terminal);
-		//try {
-		//	accountingService.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(10000.0));
-		//} catch ( PortfolioAlreadyExistsException e ) {
-		//	logger.error("Error creating test portfolio: ", e);
-		//	return 1;
-		//}
+		QFortsEnv qfEnv = qfBuilder.buildEnvironment(terminal);
+		try {
+			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(10000.0));
+		} catch ( QFTransactionException e ) {
+			logger.error("Error creating test portfolio: ", e);
+			return 1;
+		}
 		Set<Symbol> symbols = null;
 		try {
 			symbols = new MoexContractFileStorage(root).getSymbols();
@@ -91,6 +95,7 @@ public class SecuritySimulationTest implements Experiment {
 		for ( Symbol symbol : symbols ) {
 			terminal.subscribe(symbol);
 		}
+		terminal.start();
 		
 		// Initialize the main frame
 		JFrame frame = new JFrame();
@@ -154,10 +159,11 @@ public class SecuritySimulationTest implements Experiment {
 		return 0;
 	}
 	
-	private DataProvider newDataProvider(Scheduler scheduler, File root) {
+	private DataProvider newDataProvider(Scheduler scheduler, File root, DataProvider parent) {
 		return new DataProviderImpl(
 			new SymbolUpdateSourceImpl(scheduler, new MoexSymbolUpdateReaderFactory(root)),
-			new L1UpdateSourceSATImpl(new L1UpdateSourceImpl(scheduler, new FinamL1UpdateReaderFactory(root))));
+			new L1UpdateSourceSATImpl(new L1UpdateSourceImpl(scheduler, new FinamL1UpdateReaderFactory(root))),
+			parent);
 	}
 
 }

@@ -107,9 +107,18 @@ public class LocalTimePeriodTest {
 	}
 	
 	@Test
-	public void testEndOfDayAllowedAsPeriodEnd() {
+	public void testEndOfDayAllowedAsPeriodEnd_ByInstance() {
 		period = new LocalTimePeriod(LocalTime.of(23, 50), LocalTime.MIDNIGHT, zone);
-		
+		testEndOfDayAllowedAsPeriodEnd();
+	}
+	
+	@Test
+	public void testEndOfDayAllowedAsPeriodEnd_ByValue() {
+		period = new LocalTimePeriod(LocalTime.of(23, 50), LocalTime.of(0, 0), zone);
+		testEndOfDayAllowedAsPeriodEnd();		
+	}
+	
+	private void testEndOfDayAllowedAsPeriodEnd() {
 		Instant dummy = ZonedDateTime.of(2017, 4, 24, 0, 0, 0, 0, zone).toInstant();
 		assertEquals( 1, period.compareEndTo(dummy));
 		assertEquals( 1, period.compareStartTo(dummy));

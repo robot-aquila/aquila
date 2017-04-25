@@ -22,13 +22,13 @@ public class LocalTimePeriod {
 	 * Create time period.
 	 * <p>
 	 * @param from - time from (inclusive)
-	 * @param to - time to (exclusive). Must be greater that time from. Use {@link #EOD} instance to specify period
-	 * up to end of day.
+	 * @param to - time to (exclusive). Must be greater that time from.
+	 * Use {@link #EOD} instance to specify period up to end of day.
 	 * @param zone - time zone ID
 	 */
 	public LocalTimePeriod(LocalTime from, LocalTime to, ZoneId zone) {
 		int x = to.compareTo(from);
-		if ( x == 0 || x < 0 && to != EOD ) {
+		if ( x == 0 || x < 0 && ! to.equals(EOD) ) {
 			throw new IllegalArgumentException();
 		}
 		this.from = from;
@@ -45,7 +45,7 @@ public class LocalTimePeriod {
 	}
 	
 	public int compareEndTo(Instant time) {
-		return to == EOD ? 1 : to.compareTo(toZT(time));
+		return to.equals(EOD) ? 1 : to.compareTo(toZT(time));
 	}
 	
 	public LocalTime from() {

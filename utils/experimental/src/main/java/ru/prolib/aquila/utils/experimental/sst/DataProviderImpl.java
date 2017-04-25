@@ -15,55 +15,61 @@ import ru.prolib.aquila.data.SymbolUpdateSource;
 public class DataProviderImpl implements DataProvider {
 	private final SymbolUpdateSource symbolUpdateSource;
 	private final L1UpdateSource l1UpdateSource;
+	private final DataProvider parent;
 	
-	public DataProviderImpl(SymbolUpdateSource symbolUpdateSource, L1UpdateSource l1UpdateSource) {
+	public DataProviderImpl(SymbolUpdateSource symbolUpdateSource,
+			L1UpdateSource l1UpdateSource, DataProvider parent)
+	{
 		this.symbolUpdateSource = symbolUpdateSource;
 		this.l1UpdateSource = l1UpdateSource;
+		this.parent = parent;
 	}
 
 	@Override
 	public void subscribeStateUpdates(EditableSecurity security) {
 		symbolUpdateSource.subscribeSymbol(security.getSymbol(), security);
+		parent.subscribeStateUpdates(security);
 	}
 
 	@Override
 	public void subscribeLevel1Data(Symbol symbol, L1UpdatableStreamContainer container) {
 		l1UpdateSource.subscribeL1(symbol, container);
+		parent.subscribeLevel1Data(symbol, container);
 	}
 
 	@Override
 	public void subscribeLevel2Data(Symbol symbol, MDUpdatableStreamContainer container) {
-
+		parent.subscribeLevel2Data(symbol, container);
 	}
 
 	@Override
 	public void subscribeStateUpdates(EditablePortfolio portfolio) {
-
+		parent.subscribeStateUpdates(portfolio);
 	}
 
 	@Override
 	public long getNextOrderID() {
-		return 0;
+		return parent.getNextOrderID();
 	}
 
 	@Override
 	public void subscribeRemoteObjects(EditableTerminal terminal) {
-
+		parent.subscribeRemoteObjects(terminal);
 	}
 
 	@Override
 	public void unsubscribeRemoteObjects(EditableTerminal terminal) {
-
+		parent.unsubscribeRemoteObjects(terminal);
 	}
 
 	@Override
 	public void registerNewOrder(EditableOrder order) throws OrderException {
-
+		parent.registerNewOrder(order);
 	}
 
 	@Override
 	public void cancelOrder(EditableOrder order) throws OrderException {
-
+		parent.cancelOrder(order);
 	}
 
 }
