@@ -143,6 +143,7 @@ public class ChartPanel extends JFXPanel {
                 if(fullRedraw){
                     chart.clearPlotChildren();
                 }
+                chart.clearObjectBounds();
                 chart.updatePlotChildren(paintChartObjects(id));
             }
             fullRedraw = false;

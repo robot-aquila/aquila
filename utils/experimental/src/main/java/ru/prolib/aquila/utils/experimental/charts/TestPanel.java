@@ -225,9 +225,13 @@ public class TestPanel extends JPanel implements ActionListener {
                 OrderAction.BUY,
                 candleData.get(5).getBodyMiddle(),
                 500L));
-        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(10, ChronoUnit.MINUTES),
+        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(11, ChronoUnit.MINUTES),
                 OrderAction.BUY,
-                candleData.get(5).getBodyMiddle()+0.3,
+                candleData.get(5).getBodyMiddle()+1,
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(12, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(5).getBodyMiddle(),
                 500L));
         trades.setData(tradesData);
 

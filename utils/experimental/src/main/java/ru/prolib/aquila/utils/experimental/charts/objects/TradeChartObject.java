@@ -79,7 +79,8 @@ public class TradeChartObject implements ChartObject {
                         arrow.getStyleClass().add(styleClass);
                         group.getChildren().add(arrow);
                     }
-                    Tooltip.install(arrow, getTooltip(tradeInfo));
+//                    Tooltip.install(arrow, getTooltip(tradeInfo));
+                    chart.addObjectBounds(arrow.getBoundsInParent(), getTooltipText(tradeInfo));
                 }
                 if(node==null){
                     result.add(group);
@@ -90,18 +91,19 @@ public class TradeChartObject implements ChartObject {
 
     }
 
-    private Tooltip getTooltip(TradeInfo tradeInfo){
-        return new Tooltip(String.format("Acc: %s%n" +
-                "Ord#: %d%n" +
-                "Time: %s%n" +
-                "%s %s @ %.2f x %d",
+    private String getTooltipText(TradeInfo tradeInfo) {
+        return String.format("%s%n" +
+                "%s %s @ %.2f x %d%n" +
+                "ACCOUNT: %s%n" +
+                "ORDER #: %d",
+                Utils.instantToStr(tradeInfo.getTime()),
+                tradeInfo.getAction(), tradeInfo.getSymbol(), tradeInfo.getPrice(),tradeInfo.getVolume(),
                 tradeInfo.getAccount(),
-                tradeInfo.getOrderId(),
-                tradeInfo.getTime(),
-                tradeInfo.getAction(),
-                tradeInfo.getSymbol(),
-                tradeInfo.getPrice(),
-                tradeInfo.getVolume()));
+                tradeInfo.getOrderId());
+    }
+
+    private Tooltip getTooltip(TradeInfo tradeInfo){
+        return new Tooltip(getTooltipText(tradeInfo));
     }
 
     @Override

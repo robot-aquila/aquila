@@ -81,3 +81,30 @@
     -fx-stroke: black;
     -fx-stroke-width: 1;
 }
+
+.info {
+    -fx-padding: 5;
+    -fx-background-color: burlywood;
+    -fx-font-size: 10px;
+    -fx-font-family: monospace;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-border-color: gray;
+    -fx-border-width: 1;
+}
+
+.price {
+    -fx-padding: 2;
+    -fx-background-color: burlywood;
+    -fx-font-size: 10px;
+    -fx-font-family: monospace;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-border-color: gray;
+    -fx-border-width: 1;
+}
+
+.cursor-line {
+    -fx-stroke: gray;
+    -fx-stroke-width: 1;
+}

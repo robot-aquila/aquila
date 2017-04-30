@@ -1,8 +1,6 @@
 package ru.prolib.aquila.utils.experimental.charts.objects;
 
-import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -11,7 +9,6 @@ import ru.prolib.aquila.utils.experimental.charts.Chart;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ru.prolib.aquila.utils.experimental.charts.Utils.toLocalDateTime;
 
@@ -80,7 +77,7 @@ public class VolumeChartObject implements ChartObject{
                 body.getStyleClass().clear();
                 body.getStyleClass().add("volume-bar");
                 body.applyCss();
-
+                chart.addObjectBounds(body.getBoundsInParent(), getTooltipText(volume));
                 if(node==null){
                     body.setId(time.toString());
                     result.add(body);
@@ -113,6 +110,10 @@ public class VolumeChartObject implements ChartObject{
     public void setLastVolume(Candle candle){
         LocalDateTime lastTime = toLocalDateTime(candle.getStartTime());
         data.put(lastTime, candle.getVolume());
+    }
+
+    private String getTooltipText(long volume) {
+        return String.format("VOLUME: %d", volume);
     }
 
 }

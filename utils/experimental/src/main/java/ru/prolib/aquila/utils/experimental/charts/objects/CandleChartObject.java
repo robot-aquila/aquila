@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.utils.experimental.charts.Chart;
+import ru.prolib.aquila.utils.experimental.charts.Utils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -96,6 +97,7 @@ public class CandleChartObject implements ChartObject{
                     body.getStyleClass().add("candle-body-bear");
                 }
                 body.applyCss();
+                chart.addObjectBounds(body.getBoundsInParent(), getTooltipText(candle));
 
                 if(node==null){
                     Group group = new Group(line, body);
@@ -157,4 +159,17 @@ public class CandleChartObject implements ChartObject{
         data.put(lastTime, newCandle);
     }
 
+    private String getTooltipText(Candle candle) {
+        return String.format(
+                "%s%n"+
+                "OPEN: %8.2f%n" +
+                "HIGH: %8.2f%n" +
+                "LOW:  %8.2f%n" +
+                "CLOSE:%8.2f",
+                Utils.instantToStr(candle.getStartTime()),
+                candle.getOpen(),
+                candle.getHigh(),
+                candle.getLow(),
+                candle.getClose());
+    }
 }
