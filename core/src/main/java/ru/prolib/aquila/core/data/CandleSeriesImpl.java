@@ -43,6 +43,7 @@ import ru.prolib.aquila.core.BusinessEntities.Trade;
  * 2013-03-11<br>
  * $Id: CandleSeriesImpl.java 566 2013-03-11 01:52:40Z whirlwind $
  */
+@Deprecated
 public class CandleSeriesImpl extends SeriesImpl<Candle>
 		implements EditableCandleSeries
 {

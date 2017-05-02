@@ -613,7 +613,7 @@ public class TAMath {
 	 * @param period период скользящей средней
 	 * @return значение скользящей средней или null, если не удалось расчитать
 	 * @throws ValueException - error accessing data
-	 * @throws IllegalArgumentException - period too low
+	 * @throws IllegalArgumentException - period too short
 	 */
 	public Double qema(Series<Double> value, int index, int period)
 			throws ValueException, IllegalArgumentException
@@ -691,7 +691,7 @@ public class TAMath {
 	 * @param period - ATR period
 	 * @return ATR value
 	 * @throws ValueException - error accessing data
-	 * @throws IllegalArgumentException - period too low
+	 * @throws IllegalArgumentException - period too short
 	 */
 	public Double qatr(Series<Candle> candles, int index, int period)
 		throws ValueException
@@ -727,7 +727,7 @@ public class TAMath {
 	 * @param period - ATR period
 	 * @return ATR value
 	 * @throws ValueException - error accessing data
-	 * @throws IllegalArgumentException - period too low
+	 * @throws IllegalArgumentException - period too short
 	 */
 	public Double qatr(Series<Candle> candles, int period)
 		throws ValueException
