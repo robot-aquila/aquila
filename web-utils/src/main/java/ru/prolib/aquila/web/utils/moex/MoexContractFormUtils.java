@@ -47,6 +47,8 @@ public class MoexContractFormUtils {
 		map(MoexQuotationType.USD_PER_1_BARREL, "USD per 1 barrel");
 		map(MoexQuotationType.USD_PER_1_EUR, "US dollar per 1 euro");
 		map(MoexQuotationType.USD_PER_1_TROY_OUNCE, "USD per 1 troy ounce");
+		map(MoexQuotationType.RUB_PER_1_KILO, "RUB per 1 kilo");
+		map(MoexQuotationType.RUB_PER_LOT, "RUB per lot");
 		
 		stringToSettlementType = new HashMap<>();
 		map(MoexSettlementType.CASH_SETTLED, "Cash-Settled");

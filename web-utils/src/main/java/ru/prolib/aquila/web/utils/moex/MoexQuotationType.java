@@ -84,5 +84,15 @@ public enum MoexQuotationType {
 	/**
 	 * "в турецких лирах за 1 долл. США_TRY per 1 USD"
 	 */
-	TRY_PER_1_USD
+	TRY_PER_1_USD,
+	
+	/**
+	 * RUB per 1 kilo
+	 */	
+	RUB_PER_1_KILO,
+	
+	/**
+	 *  RUB per lot
+	 */
+	RUB_PER_LOT
 }

@@ -71,9 +71,9 @@ public class MoexContractFormIT {
 		expected.put(MoexContractField.FIRST_TRADING_DAY, LocalDate.of(2015, 3, 18));
 		expected.put(MoexContractField.LAST_TRADING_DAY, LocalDate.of(2016, 6, 15));
 		expected.put(MoexContractField.DELIVERY, LocalDate.of(2016, 6, 15));
-		expected.put(MoexContractField.FEE, new FMoney("2.81", "RUB"));
-		expected.put(MoexContractField.INTRADAY_FEE, new FMoney("1.405", "RUB"));
-		expected.put(MoexContractField.NEGOTIATION_FEE, new FMoney("2.81", "RUB"));
+		expected.put(MoexContractField.FEE, new FMoney("2.51", "RUB"));
+		expected.put(MoexContractField.INTRADAY_FEE, new FMoney("1.255", "RUB"));
+		expected.put(MoexContractField.NEGOTIATION_FEE, new FMoney("2.51", "RUB"));
 		expected.put(MoexContractField.EXERCISE_FEE, new FMoney("2.0", "RUB"));
 		expected.put(MoexContractField.FX_INTRADAY_CLEARING, LocalTime.of(13, 45));
 		expected.put(MoexContractField.FX_EVENING_CLEARING, LocalTime.of(18, 30));
