@@ -88,14 +88,24 @@ public class SMStateMachine_WordsExample1Test {
 	
 	@Before
 	public void setUp() throws Exception {
-		transitions = new HashMap<KW<SMExit>, SMState>();
 		words = new Words();
+		/*
+		transitions = new HashMap<KW<SMExit>, SMState>();
 		StartingWord sStartingWord = new StartingWord(words);
 		Word sWord = new Word(words);
 		transitions.put(new KW<SMExit>(sStartingWord.onWordStarted), sWord);
 		transitions.put(new KW<SMExit>(sWord.onWordEnd), sStartingWord);
 		transitions.put(new KW<SMExit>(sWord.onClauseEnd), SMState.FINAL);
 		automat = new SMStateMachine(sStartingWord, transitions);
+		*/
+		automat = new SMBuilder()
+				.addState(new StartingWord(words), "StartingWord")
+				.addState(new Word(words),			"Word")
+				.setInitialState("StartingWord")
+				.addTrans("StartingWord",	"WordStarted",	"Word")
+				.addTrans("Word", 			"WordEnd",		"StartingWord")
+				.addTransFinal("Word",		"CauseEnd")
+				.build();
 	}
 
 	@Test
