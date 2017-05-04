@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.charts.objects;
+package ru.prolib.aquila.utils.experimental.charts.layers;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

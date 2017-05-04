@@ -2,7 +2,7 @@ package ru.prolib.aquila.utils.experimental.charts.indicators.forms;
 
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
-import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.MovingAverageCalculator;
+import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.QEMACalculator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +11,7 @@ import java.text.NumberFormat;
 /**
  * Created by TiM on 12.02.2017.
  */
-public class MovingAverageIndicatorParams extends IndicatorParams {
+public class QEMAIndicatorParams extends IndicatorParams {
 
     private JFormattedTextField periodField;
     JComboBox<String> stylesField;
@@ -20,7 +20,7 @@ public class MovingAverageIndicatorParams extends IndicatorParams {
     @Override
     protected IndicatorSettings createSettings() {
         if(period>0){
-            Calculator calculator = new MovingAverageCalculator(period);
+            Calculator calculator = new QEMACalculator(period);
             String styleClass = stylesField.getSelectedItem().toString();
             return new IndicatorSettings(calculator, styleClass);
         }
@@ -61,6 +61,6 @@ public class MovingAverageIndicatorParams extends IndicatorParams {
 
     @Override
     protected String getCaption() {
-        return "Add Moving Average";
+        return "Add QEMA";
     }
 }

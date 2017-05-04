@@ -7,52 +7,42 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.utils.experimental.charts.Chart;
+import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
 import ru.prolib.aquila.utils.experimental.charts.interpolator.CubicCurveCalc;
 import ru.prolib.aquila.utils.experimental.charts.interpolator.Segment;
-import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
+import ru.prolib.aquila.utils.experimental.charts.layers.AbstractChartLayer;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.OptionalDouble;
 
 /**
  * Created by TiM on 31.01.2017.
  */
-public class IndicatorChartObject implements ChartObject {
-    private Chart chart;
-    private List<Pair<LocalDateTime, Double>> data = Collections.synchronizedList(new ArrayList<>());
+public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
     private String styleClass;
     private final Calculator calculator;
     private final String id;
 
-    public IndicatorChartObject(IndicatorSettings settings) {
+    public IndicatorChartLayer(IndicatorSettings settings) {
         this.calculator = settings.getCalculator();
         this.id = calculator.getId();
         this.styleClass = settings.getStyleClass();
     }
 
     @Override
-    public void setChart(Chart chart) {
-        this.chart = chart;
-    }
-
-    @Override
-    public List<LocalDateTime> getXValues() {
-        List<LocalDateTime> result = new ArrayList<>();
-        for(Pair<LocalDateTime, Double> p: data){
-            result.add(p.getLeft());
-        }
-        return result;
+    public void setData(Series<Double> data) {
+        this.data = calculator.calculate(data);
     }
 
     @Override
     public List<Node> paint() {
         List<Node> result = new ArrayList<>();
+        if(this.categories==null){
+            return result;
+        }
         Node node = chart.getNodeById(id);
         Path path;
         if(node!=null && node instanceof Path){
@@ -65,8 +55,20 @@ public class IndicatorChartObject implements ChartObject {
         }
         path.toFront();
         List<Pair<Double, Double>> points = new ArrayList<>();
-        data.stream().filter(v-> chart.isTimeDisplayed(v.getLeft()))
-                .forEach(v-> points.add(new ImmutablePair(chart.getX(v.getLeft()), chart.getY(v.getRight()))));
+        for(int i=0; i<categories.getLength(); i++){
+            Instant c = null;
+            Double v = null;
+            try {
+                c = categories.get(i);
+                v = data.get(i);
+            } catch (ValueException e) {
+                e.printStackTrace();
+            }
+            if(v!=null && chart.isCategoryDisplayed(c)){
+                points.add(new ImmutablePair(chart.getCoordByCategory(c), chart.getCoordByVal(v)));
+            }
+        }
+
         List<Segment> segments = CubicCurveCalc.calc(points);
 
         for(Segment s: segments){
@@ -90,23 +92,13 @@ public class IndicatorChartObject implements ChartObject {
     }
 
     @Override
-    public Pair<Double, Double> getYInterval(List<LocalDateTime> xValues) {
-        OptionalDouble maxY = data.stream()
-                .filter(p-> xValues.contains(p.getLeft()))
-                .mapToDouble(p-> p.getRight()).max();
-        OptionalDouble minY = data.stream()
-                .filter(p-> xValues.contains(p.getLeft()))
-                .mapToDouble(p-> p.getRight()).min();
-        return new ImmutablePair<>(minY.orElse(1e6), maxY.orElse(0));
+    protected double getMaxValue(Double value) {
+        return value;
     }
 
-    public List<Pair<LocalDateTime, Double>> getData() {
-        return data;
-    }
-
-    public void setData(List<Candle> data) {
-        this.data.clear();
-        this.data.addAll(calculator.calculate(data));
+    @Override
+    protected double getMinValue(Double value) {
+        return value;
     }
 
     public String getStyleClass() {

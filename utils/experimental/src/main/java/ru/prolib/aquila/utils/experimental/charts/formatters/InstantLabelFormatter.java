@@ -1,12 +1,15 @@
 package ru.prolib.aquila.utils.experimental.charts.formatters;
 
+import ru.prolib.aquila.utils.experimental.charts.Utils;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
  * Created by TiM on 23.01.2017.
  */
-public class DefaultTimeAxisSettings implements TimeAxisSettings {
+public class InstantLabelFormatter implements CategoriesLabelFormatter<Instant> {
 
     protected DateTimeFormatter yearLabelFormatter = DateTimeFormatter.ofPattern(getYearLabelFormat());
     protected DateTimeFormatter monthLabelFormatter = DateTimeFormatter.ofPattern(getMonthLabelFormat());
@@ -15,38 +18,32 @@ public class DefaultTimeAxisSettings implements TimeAxisSettings {
     protected DateTimeFormatter labelFormatter = DateTimeFormatter.ofPattern(getLabelFormat());
     protected DateTimeFormatter minorLabelFormatter = DateTimeFormatter.ofPattern(getMinorLabelFormat());
 
-    @Override
     public String getYearLabelFormat() {
         return "YYYY ";
     }
 
-    @Override
     public String getMonthLabelFormat() {
         return "MM.YY";
     }
 
-    @Override
     public String getDayLabelFormat() {
         return "dd.MM";
     }
 
-    @Override
     public String getHourLabelFormat() {
         return "HH:mm";
     }
 
-    @Override
     public String getLabelFormat() {
         return "HH:mm";
     }
 
-    @Override
     public String getMinorLabelFormat() {
         return "HH:mm";
     }
 
     @Override
-    public boolean isMinorLabel(LocalDateTime time) {
+    public boolean isMinorLabel(Instant x) {
         return false;
     }
 
@@ -61,9 +58,10 @@ public class DefaultTimeAxisSettings implements TimeAxisSettings {
     }
 
     @Override
-    public String formatDateTime(LocalDateTime dateTime) {
+    public String format(Instant x) {
+        LocalDateTime dateTime = Utils.toLocalDateTime(x);
         DateTimeFormatter formatter = labelFormatter;
-        if (isMinorLabel(dateTime)){
+        if (isMinorLabel(x)){
             formatter = minorLabelFormatter;
         } else {
             if(dateTime.getDayOfYear()==1 && dateTime.getDayOfMonth()==1 && dateTime.getHour()==0 && dateTime.getMinute()==0 && !"".equals(getYearLabelFormat())){
@@ -77,5 +75,10 @@ public class DefaultTimeAxisSettings implements TimeAxisSettings {
             }
         }
         return formatter.format(dateTime);
+    }
+
+    @Override
+    public Instant parse(String str) {
+        return Instant.parse(str);
     }
 }

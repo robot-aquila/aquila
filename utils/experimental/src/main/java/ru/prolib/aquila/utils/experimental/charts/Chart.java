@@ -9,16 +9,14 @@ import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import ru.prolib.aquila.utils.experimental.charts.formatters.DefaultTimeAxisSettings;
-import ru.prolib.aquila.utils.experimental.charts.formatters.TimeAxisSettings;
+import ru.prolib.aquila.utils.experimental.charts.formatters.CategoriesLabelFormatter;
 
-import java.time.LocalDateTime;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,15 +25,15 @@ import java.util.stream.Collectors;
 /**
  * Created by TiM on 22.12.2016.
  */
-public class Chart extends ScatterChart {
+public class Chart<T> extends ScatterChart {
 
     private Series highSeries = new Series();
     private Series lowSeries = new Series();
     private final NumberAxis xAxis;
     private final NumberAxis yAxis;
-    private List<LocalDateTime> xValues = Collections.synchronizedList(new ArrayList<>());
-    private TimeAxisSettings timeAxisSettings = new DefaultTimeAxisSettings();
-    private boolean xAxisVisible = true;
+    private List<T> categories = Collections.synchronizedList(new ArrayList<>());
+    private CategoriesLabelFormatter<T> categoriesLabelFormatter;
+    private boolean categoriesAxisVisible = true;
 
     private Group gInfo, gPrice;
     private Label lblInfo, lblPrice;
@@ -70,8 +68,8 @@ public class Chart extends ScatterChart {
             @Override
             public String toString(Number object) {
                 int i = object.intValue();
-                if(i>=0 && i<xValues.size()){
-                    return getTimeLabelText(xValues.get(i));
+                if(i>=0 && i< categories.size()){
+                    return getCategoriesLabelText(categories.get(i));
                 }
                 return "";
             }
@@ -82,9 +80,11 @@ public class Chart extends ScatterChart {
             }
         });
         setOnMouseMoved(e->{
-            lastMouseX = e.getX();
-            lastMouseY = e.getY();
-            mouseMoved();
+            synchronized (this){
+                lastMouseX = e.getX();
+                lastMouseY = e.getY();
+                mouseMoved();
+            }
         });
 
         lblPrice = new Label("");
@@ -94,43 +94,43 @@ public class Chart extends ScatterChart {
         lblPrice.toFront();
     }
 
-    public void setAxisValues(List<LocalDateTime> xValues, double minY, double maxY){
+    public void setAxisValues(List<T> categories, double minValue, double maxValue){
         yAxis.setPrefWidth(50);
-        this.xValues.clear();
-        this.xValues.addAll(xValues);
+        this.categories.clear();
+        this.categories.addAll(categories);
         xAxis.setLowerBound(-1);
-        xAxis.setUpperBound(xValues.size());
+        xAxis.setUpperBound(categories.size());
         highSeries.getData().clear();
         lowSeries.getData().clear();
-        highSeries.getData().add(new Data<>(0, maxY));
-        lowSeries.getData().add(new Data<>(0, minY));
+        highSeries.getData().add(new Data<>(0, maxValue));
+        lowSeries.getData().add(new Data<>(0, minValue));
         List<Number> list = new ArrayList<>();
-        for(int i=0; i<xValues.size(); i++){
+        for(int i=0; i<categories.size(); i++){
             list.add(i);
         }
         xAxis.invalidateRange(list);
-        xAxis.setTickLabelsVisible(xAxisVisible);
+        xAxis.setTickLabelsVisible(categoriesAxisVisible);
         this.layout();
     }
 
-    public boolean isTimeDisplayed(LocalDateTime time){
-        return xValues.contains(time);
+    public boolean isCategoryDisplayed(T x){
+        return categories.contains(x);
     }
 
-    public double getY(double chartY) {
-        return yAxis.getDisplayPosition(chartY);
+    public double getCoordByVal(double chartValue) {
+        return yAxis.getDisplayPosition(chartValue);
     }
 
-    public double getX(LocalDateTime time) {
-        int idx = xValues.indexOf(time);
+    public double getCoordByCategory(T category) {
+        int idx = categories.indexOf(category);
         if(idx<0){
-            throw new IllegalArgumentException("Can not find time: "+time.toString());
+            throw new IllegalArgumentException("Can not find category: "+category.toString());
         }
         return xAxis.getDisplayPosition(idx);
     }
 
     public double getDistance(double distance){
-        return Math.abs(getY(distance) - getY(0));
+        return Math.abs(getCoordByVal(distance) - getCoordByVal(0));
     }
 
     public void clearPlotChildren(){
@@ -149,8 +149,8 @@ public class Chart extends ScatterChart {
 
         for(int i=getPlotChildren().size()-1; i>=0; i--){
             Node node = (Node) getPlotChildren().get(i);
-            LocalDateTime time = getTime(node);
-            if(time != null && !isTimeDisplayed(time)){
+            T x = getCategory(node);
+            if(x != null && !isCategoryDisplayed(x)){
                 getPlotChildren().remove(node);
             }
         }
@@ -178,35 +178,38 @@ public class Chart extends ScatterChart {
     }
 
     private void updateStyles() {
-        if(xAxisVisible){
+        if(categoriesAxisVisible){
             xAxis.getChildrenUnmodifiable().stream().filter(n->!n.isVisible()).forEach((n)->n.setVisible(true));
             int[] idx = { 0 };
             xAxis.getChildrenUnmodifiable().filtered(n-> n instanceof Text).forEach(n ->{
                 int i = xAxis.getTickMarks().get(idx[0]++).getValue().intValue();
-                if(i>=0 && i < xValues.size()){
-                    if(timeAxisSettings.isMinorLabel(xValues.get(i))){
-                        n.getStyleClass().add(timeAxisSettings.getMinorLabelStyleClass());
+                if(i>=0 && i < categories.size()){
+                    if(categoriesLabelFormatter.isMinorLabel(categories.get(i))){
+                        n.getStyleClass().add(categoriesLabelFormatter.getMinorLabelStyleClass());
                     } else {
-                        n.getStyleClass().add(timeAxisSettings.getLabelStyleClass());
+                        n.getStyleClass().add(categoriesLabelFormatter.getLabelStyleClass());
                     }
                 }
             });
         }
     }
 
-    private String getTimeLabelText(LocalDateTime time) {
-        if(time==null){
+    private String getCategoriesLabelText(T x) {
+        if(x==null){
             return "";
         }
-        return timeAxisSettings.formatDateTime(time);
+        if(categoriesLabelFormatter ==null){
+            return x.toString();
+        }
+        return categoriesLabelFormatter.format(x);
     }
 
-    public void setTimeAxisSettings(TimeAxisSettings timeAxisSettings) {
-        this.timeAxisSettings = timeAxisSettings;
+    public void setCategoriesLabelFormatter(CategoriesLabelFormatter<T> categoriesLabelFormatter) {
+        this.categoriesLabelFormatter = categoriesLabelFormatter;
     }
 
-    public List<LocalDateTime> getXValues() {
-        return xValues;
+    public List<T> getCategories() {
+        return categories;
     }
 
     public Node getNodeById(String id){
@@ -221,8 +224,8 @@ public class Chart extends ScatterChart {
         return null;
     }
 
-    public void setXAxisVisible(boolean xAxisVisible) {
-        this.xAxisVisible = xAxisVisible;
+    public void setCategoriesAxisVisible(boolean visible) {
+        this.categoriesAxisVisible = visible;
     }
 
     public void clearObjectBounds(){
@@ -233,15 +236,15 @@ public class Chart extends ScatterChart {
         textByObjectBounds.add(new ImmutablePair<>(bounds, text));
     }
 
-    private LocalDateTime getTime(Node node){
-        String timeStr = node.getId();
-        if(timeStr!=null){
-            int idx = timeStr.indexOf("@");
+    private T getCategory(Node node){
+        String str = node.getId();
+        if(str!=null){
+            int idx = str.indexOf("@");
             if(idx >= 0){
-                timeStr = timeStr.substring(idx+1);
+                str = str.substring(idx+1);
             }
             try {
-                return LocalDateTime.parse(timeStr);
+                return categoriesLabelFormatter.parse(str);
             } catch (Exception e){
 
             }
@@ -273,6 +276,7 @@ public class Chart extends ScatterChart {
 
     private void mouseMoved(){
         Point2D point = plotArea.sceneToLocal(localToScene(lastMouseX, lastMouseY));
+//        System.out.println(lastMouseY);
         double maxX = getXAxis().getWidth();
         double maxY = getYAxis().getHeight();
         if(point.getX()<0 || point.getY()<0 || point.getX()>maxX || point.getY()>maxY){
@@ -281,7 +285,6 @@ public class Chart extends ScatterChart {
             horizontalLine.setVisible(false);
             verticalLine.setVisible(false);
         } else {
-//            getScene().setCursor(Cursor.CROSSHAIR);
             getScene().setCursor(cursor);
 //            gInfo.setVisible(true);
             horizontalLine.setVisible(true);

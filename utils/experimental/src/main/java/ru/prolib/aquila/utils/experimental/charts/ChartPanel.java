@@ -8,30 +8,29 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.tuple.Pair;
-import ru.prolib.aquila.utils.experimental.charts.formatters.TimeAxisSettings;
-import ru.prolib.aquila.utils.experimental.charts.objects.ChartObject;
+import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.utils.experimental.charts.formatters.CategoriesLabelFormatter;
+import ru.prolib.aquila.utils.experimental.charts.layers.ChartLayer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
  * Created by TiM on 22.12.2016.
  */
-public class ChartPanel extends JFXPanel {
+public class ChartPanel<T> extends JFXPanel {
 
     public static final String CURRENT_POSITION_CHANGE="CURRENT_POSITION_CHANGE";
     public static final String NUMBER_OF_POINTS_CHANGE="NUMBER_OF_POINTS_CHANGE";
     private ActionListener actionListener;
 
-//    private final Chart chart;
     private final VBox mainPanel;
     private final HashMap<String, Chart> charts = new LinkedHashMap<>();
-    private final HashMap<String, List<ChartObject>> chartObjects = new HashMap<>();
-    private final List<LocalDateTime> xValues = new ArrayList<>();
-    private TimeAxisSettings timeAxisSettings;
+    private final HashMap<String, List<ChartLayer>> chartLayers = new HashMap<>();
+    private final List<T> categories = new ArrayList<>();
+    private CategoriesLabelFormatter<T> categoriesLabelFormatter;
     private int currentPosition = 0;
     private int numberOfPoints = 15;
 
@@ -49,7 +48,7 @@ public class ChartPanel extends JFXPanel {
     }
 
     public void addChart(String id){
-        Chart chart = new Chart(new NumberAxis(), new NumberAxis());
+        Chart<T> chart = new Chart<T>(new NumberAxis(), new NumberAxis());
         chart.setOnMouseClicked(event->{
 
         });
@@ -60,9 +59,9 @@ public class ChartPanel extends JFXPanel {
                 setCurrentPosition(getCurrentPosition() - (int) Math.signum(event.getDeltaY()));
             }
         });
-        chart.setTimeAxisSettings(timeAxisSettings);
+        chart.setCategoriesLabelFormatter(categoriesLabelFormatter);
         charts.put(id, chart);
-        chartObjects.put(id, new ArrayList<>());
+        chartLayers.put(id, new ArrayList<>());
 
         Platform.runLater(()->{
             mainPanel.getChildren().add(chart);
@@ -72,8 +71,8 @@ public class ChartPanel extends JFXPanel {
         });
     }
 
-    public List<LocalDateTime> getXValues(){
-        return xValues;
+    public List<T> getCategories(){
+        return categories;
     }
 
     public Integer getCurrentPosition() {
@@ -81,14 +80,14 @@ public class ChartPanel extends JFXPanel {
     }
 
     public void setCurrentPosition(int currentPosition) {
-        updateXValues();
-        if(xValues.size()==0){
+        updateCategories();
+        if(categories.size()==0){
             return;
         }
         if (currentPosition < 0) {
             setCurrentPosition(0);
-        } else if (currentPosition > 0 && currentPosition > xValues.size() - numberOfPoints) {
-            setCurrentPosition(xValues.size() - numberOfPoints);
+        } else if (currentPosition > 0 && currentPosition > categories.size() - numberOfPoints) {
+            setCurrentPosition(categories.size() - numberOfPoints);
         } else {
             this.currentPosition = currentPosition;
             refresh();
@@ -106,8 +105,8 @@ public class ChartPanel extends JFXPanel {
         if (numberOfPoints < 2) {
             numberOfPoints = 2;
         }
-        if (numberOfPoints > xValues.size()) {
-            numberOfPoints = xValues.size();
+        if (numberOfPoints > categories.size()) {
+            numberOfPoints = categories.size();
         }
         this.numberOfPoints = numberOfPoints;
         if(actionListener!=null){
@@ -150,74 +149,79 @@ public class ChartPanel extends JFXPanel {
         });
     }
 
-    public void addChartObject(String chartId, ChartObject object){
+    public void addChartLayer(String chartId, ChartLayer object){
         object.setChart(getChart(chartId));
-        getChartObjects(chartId).add(object);
+        getChartLayers(chartId).add(object);
     }
 
     public void setActionListener(ActionListener actionListener) {
         this.actionListener = actionListener;
     }
 
-    public void setTimeAxisSettings(TimeAxisSettings timeAxisSettings) {
-        this.timeAxisSettings = timeAxisSettings;
+    public void setCategoriesLabelFormatter(CategoriesLabelFormatter formatter) {
+        this.categoriesLabelFormatter = formatter;
         for(Chart chart: charts.values()){
-            chart.setTimeAxisSettings(timeAxisSettings);
+            chart.setCategoriesLabelFormatter(formatter);
         }
     }
 
-    public boolean isTimeDisplayed(LocalDateTime time){
+    public boolean isCategoryDisplayed(T category){
         for(Chart chart: charts.values()){
-            if(chart.isTimeDisplayed(time)){
+            if(chart.isCategoryDisplayed(category)){
                 return true;
             }
         }
         return false;
     }
 
-    public boolean isTimeDisplayed(Instant time){
-        return isTimeDisplayed(Utils.toLocalDateTime(time));
-    }
+    private void updateCategories(){
+        Set<T> set = new TreeSet<>();
 
-    private void updateXValues(){
-        Set<LocalDateTime> set = new TreeSet<>();
-
-        xValues.clear();
-        for(List<ChartObject> objects: chartObjects.values()){
-            for(ChartObject obj: objects){
-                set.addAll(obj.getXValues());
+        categories.clear();
+        for(List<ChartLayer> objects: chartLayers.values()){
+            for(ChartLayer obj: objects){
+                Series<T> c = obj.getCategories();
+                for(int i=0; i< c.getLength(); i++){
+                    try {
+                        set.add(c.get(i));
+                    } catch (ValueException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
-        xValues.addAll(set);
+        categories.addAll(set);
     }
 
     private void setAxisValues(){
-        List<LocalDateTime> xValuesToDisplay = new ArrayList<>();
-        int cnt = Math.min(currentPosition + numberOfPoints, xValues.size());
+        List<T> categoriesToDisplay = new ArrayList<>();
+        int cnt = Math.min(currentPosition + numberOfPoints, categories.size());
         for(int i=currentPosition; i<cnt; i++){
-            xValuesToDisplay.add(xValues.get(i));
+            categoriesToDisplay.add(categories.get(i));
         }
 
         for(String id: charts.keySet()){
             Chart chart = getChart(id);
             double maxY = 0;
             double minY = 1e6;
-            for(ChartObject obj: getChartObjects(id)){
-                Pair<Double, Double> interval = obj.getYInterval(xValuesToDisplay);
-                if(interval.getRight() > maxY){
-                    maxY = interval.getRight();
-                }
-                if(interval.getLeft() < minY){
-                    minY = interval.getLeft();
+            for(ChartLayer obj: getChartLayers(id)){
+                Pair<Double, Double> interval = obj.getValuesInterval(categoriesToDisplay);
+                if(interval!=null){
+                    if(interval.getRight()!=null && interval.getRight() > maxY){
+                        maxY = interval.getRight();
+                    }
+                    if(interval.getLeft()!=null && interval.getLeft() < minY){
+                        minY = interval.getLeft();
+                    }
                 }
             }
-            chart.setAxisValues(xValuesToDisplay, minY, maxY);
+            chart.setAxisValues(categoriesToDisplay, minY, maxY);
         }
     }
 
     private List<Node> paintChartObjects(String id){
         List<Node> result = new ArrayList<>();
-        for(ChartObject obj: getChartObjects(id)){
+        for(ChartLayer obj: getChartLayers(id)){
             result.addAll(obj.paint());
         }
         return result;
@@ -231,8 +235,8 @@ public class ChartPanel extends JFXPanel {
         return chart;
     }
 
-    public List<ChartObject> getChartObjects(String chartId) {
-        List<ChartObject> objects = chartObjects.get(chartId);
+    public List<ChartLayer> getChartLayers(String chartId) {
+        List<ChartLayer> objects = chartLayers.get(chartId);
         if(objects==null){
             throw new IllegalArgumentException("Unknown chart with id = "+chartId);
         }
