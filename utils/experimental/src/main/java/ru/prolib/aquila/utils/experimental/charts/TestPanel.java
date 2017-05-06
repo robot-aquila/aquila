@@ -1,7 +1,9 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.control.ScrollBar;
 import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.utils.experimental.charts.formatters.InstantLabelFormatter;
@@ -10,7 +12,9 @@ import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.IndicatorParams;
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.QEMAIndicatorParams;
-import ru.prolib.aquila.utils.experimental.charts.layers.*;
+import ru.prolib.aquila.utils.experimental.charts.layers.CandleChartLayer;
+import ru.prolib.aquila.utils.experimental.charts.layers.ChartLayer;
+import ru.prolib.aquila.utils.experimental.charts.layers.VolumeChartLayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,13 +27,10 @@ import java.util.*;
 import java.util.List;
 import java.util.Timer;
 
-import static ru.prolib.aquila.utils.experimental.charts.ChartPanel.CURRENT_POSITION_CHANGE;
-import static ru.prolib.aquila.utils.experimental.charts.ChartPanel.NUMBER_OF_POINTS_CHANGE;
-
 /**
  * Created by TiM on 25.12.2016.
  */
-public class TestPanel extends JPanel implements ActionListener {
+public class TestPanel extends JPanel {
 
     private JScrollBar scrollBar;
     private final ChartPanel<Instant> panel;
@@ -75,46 +76,26 @@ public class TestPanel extends JPanel implements ActionListener {
         super();
         setLayout(new BorderLayout());
         panel = createChartPanel();
-        panel.setActionListener(this);
         panel.setCategoriesLabelFormatter(new InstantLabelFormatter());
+
+        ScrollBar sb = new ScrollBar();
+        sb.setOrientation(Orientation.HORIZONTAL);
+        sb.setPrefHeight(20);
+        panel.setScrollbar(sb);
+
 //        panel.setTimeAxisSettings(new M15TimeAxisSettings());
 //        panel.getChart("VOLUMES").setTimeAxisSettings(new DefaultTimeAxisSettings());
 //        panel.getChart("VOLUMES").getXAxis().setSide(Side.TOP);
 
         add(panel, BorderLayout.CENTER);
 
-        scrollBarListener = e -> panel.setCurrentPosition(e.getValue());
-
-        scrollBar = new JScrollBar(SwingConstants.HORIZONTAL);
-        scrollBar.addAdjustmentListener(scrollBarListener);
-        add(scrollBar, BorderLayout.SOUTH);
-        Platform.runLater(() -> generateRandomData());
-
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        switch (e.getActionCommand()){
-            case CURRENT_POSITION_CHANGE:
-                if(scrollBar!=null){
-                    scrollBar.removeAdjustmentListener(scrollBarListener);
-                    updateScrollBar();
-                    scrollBar.setValue(panel.getCurrentPosition());
-                    scrollBar.addAdjustmentListener(scrollBarListener);
-                }
-                break;
-            case NUMBER_OF_POINTS_CHANGE:
-                if(scrollBar!=null){
-                    updateScrollBar();
-                }
-                break;
-        }
-    }
-
-    private void updateScrollBar(){
-        scrollBar.setMinimum(0);
-        scrollBar.setMaximum(panel.getCategories().size());
-        scrollBar.setVisibleAmount(panel.getNumberOfPoints());
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                generateRandomData();
+                panel.setCurrentPosition(candleData.getLength());
+            }
+        });
     }
 
     private ChartPanel createChartPanel(){
@@ -176,7 +157,6 @@ public class TestPanel extends JPanel implements ActionListener {
 
         refreshIndicatorsData();
         panel.refresh();
-        updateScrollBar();
     }
 
     private SeriesImpl<Candle> getRandomData(){
@@ -184,7 +164,7 @@ public class TestPanel extends JPanel implements ActionListener {
         SeriesImpl<Candle> data = new SeriesImpl<>();
         Instant start = Instant.parse("2016-12-31T19:00:00.000Z");
         int step = 15;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             Interval interval = Interval.of(start.plus(step*i, ChronoUnit.MINUTES), start.plus(step*(i+1), ChronoUnit.MINUTES));
             double open = previousClose;
             double close = getNewValue(open);

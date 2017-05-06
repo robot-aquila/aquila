@@ -1,10 +1,15 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +31,7 @@ public class ChartPanel<T> extends JFXPanel {
     public static final String NUMBER_OF_POINTS_CHANGE="NUMBER_OF_POINTS_CHANGE";
     private ActionListener actionListener;
 
+    private final BorderPane borderPane;
     private final VBox mainPanel;
     private final HashMap<String, Chart> charts = new LinkedHashMap<>();
     private final HashMap<String, List<ChartLayer>> chartLayers = new HashMap<>();
@@ -33,14 +39,17 @@ public class ChartPanel<T> extends JFXPanel {
     private CategoriesLabelFormatter<T> categoriesLabelFormatter;
     private int currentPosition = 0;
     private int numberOfPoints = 15;
+    private ScrollBar scrollBar;
+    private ChangeListener<Number> scrollBarListener;
 
     private boolean fullRedraw = true;
 
     public ChartPanel() {
         super();
         mainPanel = new VBox();
+        borderPane = new BorderPane(mainPanel);
 
-        this.setScene(new Scene(mainPanel));
+        this.setScene(new Scene(borderPane));
 
         this.getScene().widthProperty().addListener((observableValue, oldSceneWidth, newSceneWidth) -> refresh());
         this.getScene().heightProperty().addListener((observableValue, oldSceneHeight, newSceneHeight) -> refresh());
@@ -91,6 +100,7 @@ public class ChartPanel<T> extends JFXPanel {
         } else {
             this.currentPosition = currentPosition;
             refresh();
+            updateScrollbarAndSetValue();
             if(actionListener!=null){
                 actionListener.actionPerformed(new ActionEvent(this, 1, CURRENT_POSITION_CHANGE));
             }
@@ -109,6 +119,7 @@ public class ChartPanel<T> extends JFXPanel {
             numberOfPoints = categories.size();
         }
         this.numberOfPoints = numberOfPoints;
+        updateScrollbar();
         if(actionListener!=null){
             actionListener.actionPerformed(new ActionEvent(this, 1, NUMBER_OF_POINTS_CHANGE));
         }
@@ -245,6 +256,55 @@ public class ChartPanel<T> extends JFXPanel {
 
     public void setFullRedraw(boolean fullRedraw) {
         this.fullRedraw = fullRedraw;
+    }
+
+    public void setScrollbar(ScrollBar scrollbar){
+        if(this.scrollBar==null){
+            this.scrollBar = scrollbar;
+            scrollBarListener = new ChangeListener<Number>(){
+                @Override
+                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                    int position = (int)Math.round(newValue.doubleValue());
+                    setCurrentPosition(position);
+                }
+            };
+
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    if(scrollbar.getOrientation().equals(Orientation.HORIZONTAL)){
+                        borderPane.setBottom(scrollbar);
+                    } else {
+                        borderPane.setRight(scrollbar);
+                    }
+                    updateScrollbar();
+                    scrollbar.valueProperty().addListener(scrollBarListener);
+                }
+            });
+        } else {
+            throw new IllegalStateException("Scrollbar already attached");
+        }
+    }
+
+    private void updateScrollbar(){
+        if(scrollBar!=null){
+            scrollBar.setMin(0);
+            double max = getCategories().size() - getNumberOfPoints();
+            double vis = getNumberOfPoints() * max / getCategories().size();
+            scrollBar.setMax(max);
+            scrollBar.setVisibleAmount(vis);
+            scrollBar.setUnitIncrement(1);
+            scrollBar.setBlockIncrement(getNumberOfPoints());
+        }
+    }
+
+    private void updateScrollbarAndSetValue(){
+        if(scrollBar!=null){
+            scrollBar.valueProperty().removeListener(scrollBarListener);
+            updateScrollbar();
+            scrollBar.setValue(getCurrentPosition());
+            scrollBar.valueProperty().addListener(scrollBarListener);
+        }
     }
 }
 
