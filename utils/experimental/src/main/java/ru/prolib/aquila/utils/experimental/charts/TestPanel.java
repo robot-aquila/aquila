@@ -78,9 +78,11 @@ public class TestPanel extends JPanel {
         panel = createChartPanel();
         panel.setCategoriesLabelFormatter(new InstantLabelFormatter());
 
-        ScrollBar sb = new ScrollBar();
-        sb.setOrientation(Orientation.HORIZONTAL);
-        sb.setPrefHeight(20);
+//        ScrollBar sb = new ScrollBar();
+//        sb.setOrientation(Orientation.HORIZONTAL);
+//        sb.setPrefHeight(20);
+
+        JScrollBar sb = new JScrollBar(JScrollBar.HORIZONTAL);
         panel.setScrollbar(sb);
 
 //        panel.setTimeAxisSettings(new M15TimeAxisSettings());
@@ -164,7 +166,7 @@ public class TestPanel extends JPanel {
         SeriesImpl<Candle> data = new SeriesImpl<>();
         Instant start = Instant.parse("2016-12-31T19:00:00.000Z");
         int step = 15;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 150; i++) {
             Interval interval = Interval.of(start.plus(step*i, ChronoUnit.MINUTES), start.plus(step*(i+1), ChronoUnit.MINUTES));
             double open = previousClose;
             double close = getNewValue(open);
