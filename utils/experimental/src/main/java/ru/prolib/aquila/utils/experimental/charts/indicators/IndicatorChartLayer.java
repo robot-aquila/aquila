@@ -105,6 +105,10 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
         return styleClass;
     }
 
+    public void setStyleClass(String styleClass) {
+        this.styleClass = styleClass;
+    }
+
     public String getId() {
         return id;
     }

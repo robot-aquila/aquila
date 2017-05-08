@@ -33,7 +33,6 @@ public class ChartPanel<T> extends JPanel {
     public static final String NUMBER_OF_POINTS_CHANGE = "NUMBER_OF_POINTS_CHANGE";
     private ActionListener actionListener;
 
-    private final BorderPane borderPane;
     private final JFXPanel rootFxPanel;
     private final VBox mainPanel;
     private final HashMap<String, Chart> charts = new LinkedHashMap<>();
@@ -52,10 +51,9 @@ public class ChartPanel<T> extends JPanel {
         setLayout(new BorderLayout());
         rootFxPanel = new JFXPanel();
         mainPanel = new VBox();
-        borderPane = new BorderPane(mainPanel);
         add(rootFxPanel, BorderLayout.CENTER);
 
-        rootFxPanel.setScene(new Scene(borderPane));
+        rootFxPanel.setScene(new Scene(mainPanel));
 
         rootFxPanel.getScene().widthProperty().addListener((observableValue, oldSceneWidth, newSceneWidth) -> refresh());
         rootFxPanel.getScene().heightProperty().addListener((observableValue, oldSceneHeight, newSceneHeight) -> refresh());
