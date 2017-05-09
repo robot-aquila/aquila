@@ -17,6 +17,14 @@ public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSer
 		this.onSet = new EventTypeImpl(series.getId() + ".SET");
 		this.onAdd = new EventTypeImpl(series.getId() + ".ADD");
 	}
+	
+	EventQueue getEventQueue() {
+		return queue;
+	}
+	
+	EditableSeries<T> getUnderlyingSeries() {
+		return series;
+	}
 
 	@Override
 	public String getId() {
@@ -40,14 +48,22 @@ public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSer
 
 	@Override
 	public void set(T value) throws ValueException {
-		series.set(value);
-		queue.enqueue(onSet, new SeriesEventFactory(getLength() - 1, value));
+		int index = -1;
+		synchronized ( series ) {
+			series.set(value);
+			index = getLength() - 1;
+		}
+		queue.enqueue(onSet, new SeriesEventFactory(index, value));
 	}
 
 	@Override
 	public void add(T value) throws ValueException {
-		series.add(value);
-		queue.enqueue(onAdd, new SeriesEventFactory(getLength() - 1, value));
+		int index = -1;
+		synchronized ( series ) {
+			series.add(value);
+			index = getLength() - 1;
+		}
+		queue.enqueue(onAdd, new SeriesEventFactory(index, value));
 	}
 
 	@Override

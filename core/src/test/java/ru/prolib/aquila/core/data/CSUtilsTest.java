@@ -1,17 +1,25 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
+import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
 
+import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 import org.threeten.extra.Interval;
 
+import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 public class CSUtilsTest {
+	private IMocksControl control;
 	private SeriesImpl<Candle> series;
+	private EditableTerminal terminal;
 	private CSUtils utils;
 	
 	static Instant T(String timeString) {
@@ -20,8 +28,12 @@ public class CSUtilsTest {
 
 	@Before
 	public void setUp() throws Exception {
+		control = createStrictControl();
 		series = new SeriesImpl<>();
 		utils = new CSUtils();
+		terminal = new BasicTerminalBuilder()
+				.withDataProvider(new DataProviderStub())
+				.buildTerminal();
 	}
 
 	@Test
@@ -72,6 +84,62 @@ public class CSUtilsTest {
 		expectedInt = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
 		expected = new Candle(expectedInt, 100.02d, 500L);
 		assertEquals(expected, series.get(0));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testCreateFiller3_SecTfOs() {
+		Security security = terminal.getEditableSecurity(new Symbol("SBER"));
+		ObservableSeriesImpl<Candle> series = control.createMock(ObservableSeriesImpl.class);
+		
+		CSFiller actual = utils.createFiller(security, TimeFrame.M15, series);
+		
+		CSFiller expected = new CSLastTradeFiller(security, TimeFrame.M15, series, utils);
+		assertEquals(expected, actual);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testCreateFiller4_TrmSymTfOs() throws Exception {
+		Symbol symbol = new Symbol("GAZP");
+		terminal.getEditableSecurity(symbol);		
+		ObservableSeriesImpl<Candle> series = control.createMock(ObservableSeriesImpl.class);
+		
+		CSFiller actual = utils.createFiller(terminal, symbol, TimeFrame.M5, series);
+		
+		CSFiller expected = new CSLastTradeFiller(terminal.getSecurity(symbol), TimeFrame.M5, series, utils);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateFiller3_TrmSymTf() throws Exception {
+		Symbol symbol = new Symbol("LKOH");
+		terminal.getEditableSecurity(symbol);		
+		
+		CSFiller actual = utils.createFiller(terminal, symbol, TimeFrame.M10);
+		
+		assertNotNull(actual.getSeries());
+		CSFiller expected = new CSLastTradeFiller(terminal.getSecurity(symbol), TimeFrame.M10,
+				(ObservableSeriesImpl<Candle>) actual.getSeries(), utils);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateCandleSeries1_Que() {
+		ObservableSeriesImpl<Candle> actual = utils.createCandleSeries(terminal.getEventQueue());
+		
+		assertNotNull(actual);
+		assertNotNull(actual.getUnderlyingSeries());
+		assertSame(terminal.getEventQueue(), actual.getEventQueue());
+	}
+	
+	@Test
+	public void testCreateCandleSeries1_Trm() {
+		ObservableSeriesImpl<Candle> actual = utils.createCandleSeries(terminal);
+		
+		assertNotNull(actual);
+		assertNotNull(actual.getUnderlyingSeries());
+		assertSame(terminal.getEventQueue(), actual.getEventQueue());
 	}
 
 }

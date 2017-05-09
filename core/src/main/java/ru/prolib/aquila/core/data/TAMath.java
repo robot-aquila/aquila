@@ -892,5 +892,46 @@ public class TAMath {
 		//return covariance(x_,y_) / Math.sqrt(variance(x_) * variance(y_));
 		return covxy.getSum() / Math.sqrt(varx.getSum() * vary.getSum());
 	}
+	
+	private int _cross(Series<Double> x, Series<Double> y, int index) {
+		if ( x.getLength() < 2 ) {
+			return 0;
+		}
+		try {
+			Double x1 = x.get(index - 1), x2 = x.get(index),
+				y1 = y.get(index - 1), y2 = y.get(index);
+			if ( x1 == null || x2 == null || y1 == null || y2 == null ) {
+				return 0;
+			}
+			int d1 = x1 > y1 ? 1 : -1, d2 = x2 > y2 ? 1 : -1;
+			return d1 == d2 ? 0 : d2;
+		} catch ( ValueException e ) {
+			throw new IllegalStateException("Unexpected exception", e);
+		}
+	}
+	
+	/**
+	 * Check that x crosses under y at the specified index.
+	 * <p>
+	 * @param x - first series
+	 * @param y - second series
+	 * @param index - index to detect crossing
+	 * @return true if x crosses y, false otherwise
+	 */
+	public boolean crossUnder(Series<Double> x, Series<Double> y, int index) {
+		return _cross(x, y, index) == -1;
+	}
+	
+	/**
+	 * Check that x crosses over y at the specified index.
+	 * <p>
+	 * @param x - first series
+	 * @param y - second series
+	 * @param index - index to detect crossing
+	 * @return true if x crosses y, false otherwise
+	 */
+	public boolean crossOver(Series<Double> x, Series<Double> y, int index) {
+		return _cross(x, y, index) == 1;
+	}
 
 }

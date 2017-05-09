@@ -1031,4 +1031,81 @@ public class TAMathTest {
 		assertEquals(1.0d, service.correlation(series1, series2), 0.0001d);		
 	}
 	
+	/**
+	 * Запись фикстуры для проверки пересечений.
+	 */
+	static class FR2 {
+		private final Double x, y;
+		private final boolean expected;
+		
+		FR2(Double x, Double y, boolean expected) {
+			this.x = x;
+			this.y = y;
+			this.expected = expected;
+		}
+		
+	}
+	
+	@Test
+	public void testCrossUnder() throws Exception {
+		FR2 fix[] = {
+			new FR2(45.0, 20.0, false),
+			new FR2(15.0, 22.0, true),
+			new FR2(25.0, 23.0, false),
+			new FR2(null, 30.0, false),
+			new FR2(24.0, 31.0, false),
+			new FR2(20.0, 24.0, false),
+			new FR2(45.0, 20.0, false),
+			new FR2(15.0, null, false),
+			new FR2(12.0, 15.0, false),
+			new FR2(null, null, false),
+			new FR2(null, null, false),
+			new FR2(null, 10.0, false),
+			new FR2(null, 12.0, false),
+			new FR2(12.0, null, false),
+			new FR2(10.0, null, false),
+			new FR2(10.0, 20.0, false),
+			new FR2( 9.0, 22.0, false),
+			new FR2(20.0, 10.0, false),
+			new FR2(10.0, 20.0, true),
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			FR2 f = fix[i];
+			series1.add(f.x);
+			series2.add(f.y);
+			assertEquals("At #" + i, f.expected, service.crossUnder(series1, series2, i));
+		}
+	}
+	
+	@Test
+	public void testCrossOver() throws Exception {
+		FR2 fix[] = {
+			new FR2(20.0, 45.0, false),
+			new FR2(22.0, 15.0, true),
+			new FR2(23.0, 25.0, false),
+			new FR2(30.0, null, false),
+			new FR2(31.0, 24.0, false),
+			new FR2(24.0, 20.0, false),
+			new FR2(20.0, 45.0, false),
+			new FR2(null, 15.0, false),
+			new FR2(15.0, 12.0, false),
+			new FR2(null, null, false),
+			new FR2(null, null, false),
+			new FR2(10.0, null, false),
+			new FR2(12.0, null, false),
+			new FR2(null, 12.0, false),
+			new FR2(null, 10.0, false),
+			new FR2(20.0, 10.0, false),
+			new FR2(22.0,  9.0, false),
+			new FR2(10.0, 20.0, false),
+			new FR2(20.0, 10.0, true),
+		};
+		for ( int i = 0; i < fix.length; i ++ ) {
+			FR2 f = fix[i];
+			series1.add(f.x);
+			series2.add(f.y);
+			assertEquals("At #" + i, f.expected, service.crossOver(series1, series2, i));
+		}
+	}
+	
 }

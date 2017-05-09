@@ -1,5 +1,11 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 /**
@@ -35,6 +41,34 @@ public class CSUtils {
 					lastTrade.getPrice(), lastTrade.getSize()));
 			return true;
 		}
+	}
+	
+	public CSFiller createFiller(Security security, TimeFrame tf,
+			ObservableSeriesImpl<Candle> candles)
+	{
+		return new CSLastTradeFiller(security, tf, candles, this);
+	}
+	
+	public CSFiller createFiller(Terminal terminal, Symbol symbol, TimeFrame tf,
+			ObservableSeriesImpl<Candle> candles)
+	{
+		try {
+			return createFiller(terminal.getSecurity(symbol), tf, candles);
+		} catch ( SecurityException e ) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	public CSFiller createFiller(Terminal terminal, Symbol symbol, TimeFrame tf) {
+		return createFiller(terminal, symbol, tf, createCandleSeries(terminal));
+	}
+	
+	public ObservableSeriesImpl<Candle> createCandleSeries(EventQueue queue) {
+		return new ObservableSeriesImpl<Candle>(queue, new SeriesImpl<>());
+	}
+	
+	public ObservableSeriesImpl<Candle> createCandleSeries(Terminal terminal) {
+		return createCandleSeries(((EditableTerminal) terminal).getEventQueue());
 	}
 
 }
