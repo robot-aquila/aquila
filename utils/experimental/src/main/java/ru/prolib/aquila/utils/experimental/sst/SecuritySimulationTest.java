@@ -192,14 +192,6 @@ public class SecuritySimulationTest implements Experiment {
         chartPanel.addSmoothLine(rData.getMAShort()).setStyleClass("line-magenta");
         chartPanel.addSmoothLine(rData.getMALong()).setStyleClass("line-blue");
         tabPanel.addTab("Strategy", chartPanel);
-        rData.getCandleSeries().onAdd().addListener(new EventListener() {
-
-			@Override
-			public void onEvent(Event event) {
-				logger.debug("Candle added: {}", event);
-			}
-        	
-        });
         
         frame.getContentPane().add(mainPanel);
         frame.setVisible(true);
