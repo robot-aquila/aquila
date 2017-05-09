@@ -22,6 +22,8 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
@@ -29,6 +31,8 @@ import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.core.sm.SMBuilder;
+import ru.prolib.aquila.core.sm.SMStateMachine;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.data.storage.DataStorageException;
@@ -48,6 +52,13 @@ import ru.prolib.aquila.ui.form.PositionListTableModel;
 import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
+import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
+import ru.prolib.aquila.utils.experimental.sst.robot.Const;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotData;
+import ru.prolib.aquila.utils.experimental.sst.robot.SInit;
+import ru.prolib.aquila.utils.experimental.sst.robot.SWaitSig;
+import ru.prolib.aquila.utils.experimental.sst.robot.Signal;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
@@ -60,9 +71,14 @@ public class SecuritySimulationTest implements Experiment {
 	}
 	
 	private EditableTerminal terminal;
+	private Signal signal;
 
 	@Override
 	public void close() throws IOException {
+		if ( signal != null ) {
+			signal.fireBreak();
+			signal = null;
+		}
 		terminal.stop();
 	}
 
@@ -96,6 +112,30 @@ public class SecuritySimulationTest implements Experiment {
 			terminal.subscribe(symbol);
 		}
 		terminal.start();
+		
+		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
+		logger.debug("Selected strategy symbol: {}", rSymbol);
+		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.25d);
+		signal = new Signal(terminal.getEventQueue());
+		RobotData rData = new RobotData(terminal, rConfig, signal);
+		SMStateMachine automat = new SMBuilder()
+				.addState(new SInit(rData), Const.S_INIT)
+				.addState(new SWaitSig(rData), Const.S_WAIT_SIG)
+				.setInitialState(Const.S_INIT)
+				.addTrans(Const.S_INIT, SInit.EOK, Const.S_WAIT_SIG)
+				.addTransFinal(Const.S_INIT, SInit.EBR)
+				.addTransFinal(Const.S_INIT, SInit.EER)
+				.addTransFinal(Const.S_WAIT_SIG, SWaitSig.EOK)
+				.addTransFinal(Const.S_WAIT_SIG, SWaitSig.EBR)
+				.addTransFinal(Const.S_WAIT_SIG, SWaitSig.EER)
+				.build();
+		automat.setDebug(true);
+		try {
+			automat.start();
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
+			return 2;
+		}
 		
 		// Initialize the main frame
 		JFrame frame = new JFrame();
@@ -147,6 +187,19 @@ public class SecuritySimulationTest implements Experiment {
         table.setRowSorter(new TableRowSorter<PositionListTableModel>(positionTableModel));
         tabPanel.add("Positions", new JScrollPane(table));
         new TableModelController(positionTableModel, frame);
+        
+        CBFXChartPanel chartPanel = new CBFXChartPanel(rData.getCandleSeries());
+        chartPanel.addSmoothLine(rData.getMAShort()).setStyleClass("line-magenta");
+        chartPanel.addSmoothLine(rData.getMALong()).setStyleClass("line-blue");
+        tabPanel.addTab("Strategy", chartPanel);
+        rData.getCandleSeries().onAdd().addListener(new EventListener() {
+
+			@Override
+			public void onEvent(Event event) {
+				logger.debug("Candle added: {}", event);
+			}
+        	
+        });
         
         frame.getContentPane().add(mainPanel);
         frame.setVisible(true);

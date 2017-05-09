@@ -64,14 +64,18 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
 
     @Override
     public void onEvent(Event event) {
+    	// А зачем тут onSet обрабатывается?
         if(event.isType(candleData.onAdd()) || event.isType(candleData.onSet())){
             Platform.runLater(()->{
-                Instant lastChartCategory = getCategories().get(getCategories().size()-1);
-                if(lastChartCategory!=null){
-                    if(isCategoryDisplayed(lastChartCategory)){
-                        setCurrentPosition(getCurrentPosition()+1);
-                    }
-                }
+            	int dummy = getCategories().size()-1;
+            	if ( dummy >= 0 ) {
+	                Instant lastChartCategory = getCategories().get(dummy);
+	                if(lastChartCategory!=null){
+	                    if(isCategoryDisplayed(lastChartCategory)){
+	                        setCurrentPosition(getCurrentPosition()+1);
+	                    }
+	                }
+            	}
             });
         }
     }
