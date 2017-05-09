@@ -172,6 +172,7 @@ public class QFAssemblerTest {
 		service.update(portfolio, update);
 		
 		assertEquals(new DeltaUpdateBuilder()
+			.withToken(PortfolioField.CURRENCY, FMoney.RUB)
 			.withToken(PortfolioField.BALANCE, FMoney.ofRUB2(10000.0))
 			.withToken(PortfolioField.EQUITY, FMoney.ofRUB2(8000.0))
 			.withToken(PortfolioField.FREE_MARGIN, FMoney.ofRUB2(2000.0))
