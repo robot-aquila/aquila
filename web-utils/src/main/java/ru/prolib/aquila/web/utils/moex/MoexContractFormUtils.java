@@ -60,7 +60,7 @@ public class MoexContractFormUtils {
 		mapContract(MoexContractField.CONTRACT_DESCR, "Contract Description");
 		mapContract(MoexContractField.TYPE, "Type");
 		mapContract(MoexContractField.SETTLEMENT, "Settlement");
-		mapContract(MoexContractField.LOT_SIZE, "Сontract size");
+		mapContract(MoexContractField.LOT_SIZE, "Сontract size (lot)");
 		mapContract(MoexContractField.QUOTATION, "Quotation");
 		mapContract(MoexContractField.FIRST_TRADING_DAY, "First Trading Day");
 		mapContract(MoexContractField.LAST_TRADING_DAY, "Last Trading Day");
