@@ -23,6 +23,7 @@ import java.awt.event.AdjustmentListener;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by TiM on 22.12.2016.
@@ -130,18 +131,18 @@ public class ChartPanel<T> extends JPanel {
         setCurrentPosition(currentPosition);
     }
 
-    boolean started = false;
+    AtomicBoolean started = new AtomicBoolean(false);
     Timer timerUpdate = new Timer();
 
     public void refresh() {
 //        System.out.println("REFRESH NEEDED");
-        if (!started) {
-            started = true;
+        if (!started.get()) {
+            started.set(true);
             TimerTask timerUpdateTask = new TimerTask() {
                 @Override
                 public void run() {
 //                    System.out.println("REFRESH PROCESSING");
-                    started = false;
+                    started.set(false);
                     _refresh();
                 }
             };

@@ -68,14 +68,13 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
         if(event.isType(candleData.onAdd()) || event.isType(candleData.onSet())){
             Platform.runLater(()->{
             	int dummy = getCategories().size()-1;
+                Instant lastChartCategory = null;
             	if ( dummy >= 0 ) {
-	                Instant lastChartCategory = getCategories().get(dummy);
-	                if(lastChartCategory!=null){
-	                    if(isCategoryDisplayed(lastChartCategory)){
-	                        setCurrentPosition(getCurrentPosition()+1);
-	                    }
-	                }
+	                lastChartCategory = getCategories().get(dummy);
             	}
+                if(dummy < 0 || (lastChartCategory!=null && isCategoryDisplayed(lastChartCategory))){
+                    setCurrentPosition(getCurrentPosition()+1);
+                }
             });
         }
     }

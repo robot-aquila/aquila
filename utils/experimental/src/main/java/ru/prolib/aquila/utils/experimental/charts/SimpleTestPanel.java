@@ -20,14 +20,8 @@ import ru.prolib.aquila.utils.experimental.charts.layers.VolumeChartLayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentListener;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.List;
-import java.util.Timer;
 
 /**
  * Created by TiM on 25.12.2016.
@@ -36,6 +30,8 @@ public class SimpleTestPanel extends JPanel {
 
     private final CBFXChartPanel panel;
     private ObservableSeries<Candle> candleData;
+    private final Instant start = Instant.parse("2016-12-31T19:00:00.000Z");
+    private final int step = 15;
 
     public SimpleTestPanel() {
         super();
@@ -58,9 +54,7 @@ public class SimpleTestPanel extends JPanel {
     private SeriesImpl<Candle> getRandomData(){
         double previousClose = 1850;
         SeriesImpl<Candle> data = new SeriesImpl<>();
-        Instant start = Instant.parse("2016-12-31T19:00:00.000Z");
-        int step = 15;
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 0; i++) {
             Interval interval = Interval.of(start.plus(step*i, ChronoUnit.MINUTES), start.plus(step*(i+1), ChronoUnit.MINUTES));
             double open = previousClose;
             double close = getNewValue(open);
@@ -95,48 +89,52 @@ public class SimpleTestPanel extends JPanel {
     }
 
     private void changeCandle(){
-        Platform.runLater(()->{
-            Candle candle = null;
+        Candle candle = null;
+        try {
+            candle = candleData.get();
+        } catch (ValueException e) {
+            e.printStackTrace();
+        }
+        if(candle!=null){
+            long vol = candle.getVolume() + Math.round(Math.random() * 500);
+            double close = candle.getClose() + (Math.random()-0.5)*2;
+            double high = close>candle.getHigh()?close:candle.getHigh();
+            double low = close<candle.getLow()?close:candle.getLow();
+            Candle newCandle = new Candle(candle.getInterval(), candle.getOpen(), high, low, close, vol);
             try {
-                candle = candleData.get();
+                ((EditableSeries)candleData).set(newCandle);
             } catch (ValueException e) {
                 e.printStackTrace();
             }
-            if(candle!=null){
-                long vol = candle.getVolume() + Math.round(Math.random() * 500);
-                double close = candle.getClose() + (Math.random()-0.5)*2;
-                double high = close>candle.getHigh()?close:candle.getHigh();
-                double low = close<candle.getLow()?close:candle.getLow();
-                Candle newCandle = new Candle(candle.getInterval(), candle.getOpen(), high, low, close, vol);
-                try {
-                    ((EditableSeries)candleData).set(newCandle);
-                } catch (ValueException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        }
     }
 
     private void addZeroCandle(){
         Platform.runLater(()->{
             Candle candle = null;
+            double lastClose;
+            Interval interval;
             try {
                 candle = candleData.get();
             } catch (ValueException e) {
                 e.printStackTrace();
             }
-            if(candle!=null){
-                Interval interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
-                double open = candle.getClose();
-                double close = open;
-                double high = open;
-                double low = open;
-                Candle newCandle = new Candle(interval, open, high, low, close, 0L);
-                try {
-                    ((EditableSeries)candleData).add(newCandle);
-                } catch (ValueException e) {
-                    e.printStackTrace();
-                }
+            if(candle!=null) {
+                lastClose = candle.getClose();
+                interval = Interval.of(candle.getEndTime(), candle.getEndTime().plus(candle.getInterval().toDuration().getSeconds(), ChronoUnit.SECONDS));
+            } else {
+                lastClose = getRandom();
+                interval = Interval.of(start, start.plus(step, ChronoUnit.MINUTES));
+            }
+            double open = lastClose;
+            double close = open;
+            double high = open;
+            double low = open;
+            Candle newCandle = new Candle(interval, open, high, low, close, 0L);
+            try {
+                ((EditableSeries)candleData).add(newCandle);
+            } catch (ValueException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -150,6 +148,26 @@ public class SimpleTestPanel extends JPanel {
         JMenuItem add = new JMenuItem("Add zero candle");
         add.addActionListener(e -> addZeroCandle());
         main.add(add);
+        JMenuItem start = new JMenuItem("Start change");
+        start.addActionListener(e -> {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("Start change");
+                    for(int i=0; i<10; i++){
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                        changeCandle();
+                    }
+                    System.out.println("Stop change");
+                }
+            }).start();
+
+        });
+        main.add(start);
         menuBar.add(main);
         return menuBar;
     }
