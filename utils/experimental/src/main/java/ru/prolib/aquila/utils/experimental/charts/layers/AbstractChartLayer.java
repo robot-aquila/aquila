@@ -52,23 +52,29 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
         if(data==null){
             return null;
         }
-        for(int i=0; i<data.getLength(); i++){
+        for(int i=0; i<categories.getLength(); i++){
             TCategories category = null;
             TValues value = null;
             try {
                 category = categories.get(i);
-                value = data.get(i);
             } catch (ValueException e) {
                 e.printStackTrace();
             }
-            if(displayCategories.contains(category) && value!=null){
-                double y = getMaxValue(value);
-                if(maxY==null || y>maxY){
-                    maxY = y;
+            if(displayCategories.contains(category)){
+                try {
+                    value = data.get(i);
+                } catch (ValueException e) {
+                    value = null;
                 }
-                y = getMinValue(value);
-                if(minY==null || y<minY){
-                    minY = y;
+                if(value!=null){
+                    double y = getMaxValue(value);
+                    if(maxY==null || y>maxY){
+                        maxY = y;
+                    }
+                    y = getMinValue(value);
+                    if(minY==null || y<minY){
+                        minY = y;
+                    }
                 }
             }
         }

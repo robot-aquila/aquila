@@ -38,7 +38,8 @@ public class ChartPanel<T> extends JPanel {
     private final VBox mainPanel;
     private final HashMap<String, Chart> charts = new LinkedHashMap<>();
     private final HashMap<String, List<ChartLayer>> chartLayers = new HashMap<>();
-    private final List<T> categories = new ArrayList<>();
+//    private final List<T> categories = new ArrayList<>();
+    private final Vector<T> categories = new Vector<>();
     private CategoriesLabelFormatter<T> categoriesLabelFormatter;
     private int currentPosition = 0;
     private int numberOfPoints = 15;
@@ -93,7 +94,7 @@ public class ChartPanel<T> extends JPanel {
         return currentPosition;
     }
 
-    public void setCurrentPosition(int currentPosition) {
+    public synchronized void setCurrentPosition(int currentPosition) {
         updateCategories();
         if (categories.size() == 0) {
             return;
@@ -150,7 +151,7 @@ public class ChartPanel<T> extends JPanel {
         }
     }
 
-    private void _refresh() {
+    private synchronized void _refresh() {
         Platform.runLater(() -> {
             setAxisValues();
             for (String id : charts.keySet()) {
@@ -190,7 +191,7 @@ public class ChartPanel<T> extends JPanel {
         return false;
     }
 
-    private void updateCategories() {
+    private synchronized void updateCategories() {
         Set<T> set = new TreeSet<>();
 
         categories.clear();

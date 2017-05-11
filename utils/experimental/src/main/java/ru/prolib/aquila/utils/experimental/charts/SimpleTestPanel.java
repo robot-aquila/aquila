@@ -41,9 +41,11 @@ public class SimpleTestPanel extends JPanel {
         Series<Double> candleCloseData = new CandleCloseSeries(candleData);
         Series<Double> qema7 = new QEMA("QEMA_7", candleCloseData, 7);
         Series<Double> qema14 = new QEMA("QEMA_14", candleCloseData, 14);
+        Series<Double> h = new CandleHighSeries(candleData);
 
         /* три строчки */
         panel = new CBFXChartPanel(candleData);
+//        panel.addSmoothLine(h).setStyleClass("line-magenta");
         panel.addSmoothLine(qema7).setStyleClass("line-magenta");
         panel.addSmoothLine(qema14).setStyleClass("line-blue");
 
@@ -54,7 +56,7 @@ public class SimpleTestPanel extends JPanel {
     private SeriesImpl<Candle> getRandomData(){
         double previousClose = 1850;
         SeriesImpl<Candle> data = new SeriesImpl<>();
-        for (int i = 0; i < 0; i++) {
+        for (int i = 0; i < 5*24*60; i++) {
             Interval interval = Interval.of(start.plus(step*i, ChronoUnit.MINUTES), start.plus(step*(i+1), ChronoUnit.MINUTES));
             double open = previousClose;
             double close = getNewValue(open);

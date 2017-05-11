@@ -60,12 +60,18 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
             Double v = null;
             try {
                 c = categories.get(i);
-                v = data.get(i);
             } catch (ValueException e) {
                 e.printStackTrace();
             }
-            if(v!=null && chart.isCategoryDisplayed(c)){
-                points.add(new ImmutablePair(chart.getCoordByCategory(c), chart.getCoordByVal(v)));
+            if(chart.isCategoryDisplayed(c)){
+                try {
+                    v = data.get(i);
+                } catch (ValueException e) {
+                    e.printStackTrace();
+                }
+                if(v!=null){
+                    points.add(new ImmutablePair(chart.getCoordByCategory(c), chart.getCoordByVal(v)));
+                }
             }
         }
 
