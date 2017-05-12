@@ -7,6 +7,7 @@ import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CandleCloseSeries;
 import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.core.data.SeriesEvent;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.ta.QEMA;
@@ -51,15 +52,17 @@ public class SignalProvider {
 		}
 
 		@Override
-		public void onEvent(Event event) {
-			int index = candles.getLength() - 2;
+		public void onEvent(Event evt) {
+			@SuppressWarnings("unchecked")
+			SeriesEvent<Candle> event = (SeriesEvent<Candle>) evt;
+			int index = event.getIndex() - 1;
 			try {
 				if ( math.crossOver(maShort, maLong, index) ) {
-					Candle c = candles.get(-1);
+					Candle c = candles.get(index);
 					signal.fireBullish(c.getStartTime(), c.getClose());
 				} else
 				if ( math.crossUnder(maShort, maLong, index) ) {
-					Candle c = candles.get(-1);
+					Candle c = candles.get(index);
 					signal.fireBearish(c.getStartTime(), c.getClose());
 				}
 			} catch ( ValueException e ) {

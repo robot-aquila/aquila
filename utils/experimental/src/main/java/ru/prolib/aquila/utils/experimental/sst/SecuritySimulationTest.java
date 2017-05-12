@@ -47,6 +47,7 @@ import ru.prolib.aquila.qforts.impl.QFBuilder;
 import ru.prolib.aquila.qforts.impl.QFTransactionException;
 import ru.prolib.aquila.qforts.impl.QFortsEnv;
 import ru.prolib.aquila.ui.TableModelController;
+import ru.prolib.aquila.ui.form.OrderListTableModel;
 import ru.prolib.aquila.ui.form.PortfolioListTableModel;
 import ru.prolib.aquila.ui.form.PositionListTableModel;
 import ru.prolib.aquila.ui.form.SecurityListTableModel;
@@ -57,7 +58,8 @@ import ru.prolib.aquila.utils.experimental.sst.robot.Const;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotData;
 import ru.prolib.aquila.utils.experimental.sst.robot.SInit;
-import ru.prolib.aquila.utils.experimental.sst.robot.SWaitSig;
+import ru.prolib.aquila.utils.experimental.sst.robot.SOpenLong;
+import ru.prolib.aquila.utils.experimental.sst.robot.SBullWaitSig;
 import ru.prolib.aquila.utils.experimental.sst.robot.Signal;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
@@ -96,7 +98,7 @@ public class SecuritySimulationTest implements Experiment {
 			.buildTerminal();
 		QFortsEnv qfEnv = qfBuilder.buildEnvironment(terminal);
 		try {
-			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(10000.0));
+			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(300000.0));
 		} catch ( QFTransactionException e ) {
 			logger.error("Error creating test portfolio: ", e);
 			return 1;
@@ -115,19 +117,24 @@ public class SecuritySimulationTest implements Experiment {
 		
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
 		logger.debug("Selected strategy symbol: {}", rSymbol);
-		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.25d);
+		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.5d);
 		signal = new Signal(terminal.getEventQueue());
 		RobotData rData = new RobotData(terminal, rConfig, signal);
 		SMStateMachine automat = new SMBuilder()
 				.addState(new SInit(rData), Const.S_INIT)
-				.addState(new SWaitSig(rData), Const.S_WAIT_SIG)
+				.addState(new SBullWaitSig(rData), Const.S_WAIT_SIG)
+				.addState(new SOpenLong(rData), Const.S_OPEN)
 				.setInitialState(Const.S_INIT)
 				.addTrans(Const.S_INIT, SInit.EOK, Const.S_WAIT_SIG)
 				.addTransFinal(Const.S_INIT, SInit.EBR)
 				.addTransFinal(Const.S_INIT, SInit.EER)
-				.addTransFinal(Const.S_WAIT_SIG, SWaitSig.EOK)
-				.addTransFinal(Const.S_WAIT_SIG, SWaitSig.EBR)
-				.addTransFinal(Const.S_WAIT_SIG, SWaitSig.EER)
+				.addTrans(Const.S_WAIT_SIG, SBullWaitSig.EOPN, Const.S_OPEN)
+				.addTrans(Const.S_WAIT_SIG, SBullWaitSig.ECLS, Const.S_WAIT_SIG) // TODO: 
+				.addTransFinal(Const.S_WAIT_SIG, SBullWaitSig.EBR)
+				.addTransFinal(Const.S_WAIT_SIG, SBullWaitSig.EER)
+				.addTransFinal(Const.S_OPEN, SOpenLong.EOK)
+				.addTransFinal(Const.S_OPEN, SOpenLong.EBR)
+				.addTransFinal(Const.S_OPEN, SOpenLong.EER)
 				.build();
 		automat.setDebug(true);
 		try {
@@ -171,6 +178,14 @@ public class SecuritySimulationTest implements Experiment {
         table.setRowSorter(new TableRowSorter<SecurityListTableModel>(securityTableModel));
         tabPanel.add("Securities", new JScrollPane(table));
         new TableModelController(securityTableModel, frame);
+        
+        OrderListTableModel orderTableModel = new OrderListTableModel(messages);
+        orderTableModel.add(terminal);
+        table = new JTable(orderTableModel);
+        table.setShowGrid(true);
+        table.setRowSorter(new TableRowSorter<>(orderTableModel));
+        tabPanel.add("Orders", new JScrollPane(table));
+        new TableModelController(orderTableModel, frame);
         
         PortfolioListTableModel portfolioTableModel = new PortfolioListTableModel(messages);
         portfolioTableModel.add(terminal);

@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.SimpleEventFactory;
 
-public class Signal {
+public class Signal {	
 	private final EventQueue queue;
 	private final EventType onBullish, onBearish, onBreak;
 

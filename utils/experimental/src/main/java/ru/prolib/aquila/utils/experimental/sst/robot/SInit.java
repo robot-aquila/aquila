@@ -1,26 +1,21 @@
 package ru.prolib.aquila.utils.experimental.sst.robot;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.data.CSUtils;
 import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.sm.SMExit;
 import ru.prolib.aquila.core.sm.SMInput;
+import ru.prolib.aquila.core.sm.SMInputAction;
 import ru.prolib.aquila.core.sm.SMTriggerOnEvent;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-public class SInit extends BasicState {
-	private static final Logger logger;
-	
-	static {
-		logger = LoggerFactory.getLogger(SInit.class);
-	}
+public class SInit extends BasicState implements SMInputAction {
+	public static final String EOK = Const.E_OK;
 	
 	private final SMInput in;
 	
 	public SInit(RobotData data) {
 		super(data);
+		registerExit(EOK);
 		in = registerInput(this);
 	}
 	
@@ -53,22 +48,14 @@ public class SInit extends BasicState {
 	}
 	
 	private boolean objectsAvailable() {
-		boolean se = false, sa = false, ae = false, aa = false;
-		se = data.getTerminal().isSecurityExists(data.getSymbol());
-		ae = data.getTerminal().isPortfolioExists(data.getAccount());
 		try {
-	
-			if ( se ) {
-				sa = data.getTerminal().getSecurity(data.getSymbol()).isAvailable();
-			}
-			if ( ae ) {
-				aa = data.getTerminal().getPortfolio(data.getAccount()).isAvailable();
-			}
+			return data.getTerminal().isSecurityExists(data.getSymbol())
+				&& data.getTerminal().isPortfolioExists(data.getAccount())
+				&& data.getTerminal().getSecurity(data.getSymbol()).isAvailable()
+				&& data.getTerminal().getPortfolio(data.getAccount()).isAvailable();
 		} catch ( Exception e ) {
 			throw new IllegalStateException("Unexpected exception: ", e);
 		}
-		logger.debug("state flags: se=" + se + " sa=" + sa + " ae=" + ae + " aa=" + aa);
-		return se & sa && ae && aa;
 	}
 
 }
