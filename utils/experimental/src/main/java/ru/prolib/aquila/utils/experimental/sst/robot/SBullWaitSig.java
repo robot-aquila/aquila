@@ -34,9 +34,7 @@ public class SBullWaitSig extends BasicState implements SMExitAction {
 
 	@Override
 	public void exit() {
-		try {
-			logger.debug(": " + data.getCandleSeries().get(-1));
-		} catch ( Exception e ) { }
+
 	}
 
 }

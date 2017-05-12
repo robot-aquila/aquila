@@ -14,5 +14,9 @@ public class CalcUtils {
 	public FDecimal getSafe(FDecimal x) {
 		return x == null ? FDecimal.ZERO0 : x; 
 	}
+	
+	public long getSafe(Long x) {
+		return x == null ? 0L : x;
+	}
 
 }

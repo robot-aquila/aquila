@@ -13,51 +13,45 @@ import ru.prolib.aquila.core.sm.SMExit;
 import ru.prolib.aquila.core.sm.SMExitAction;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-public class SOpenLong extends BasicState implements SMExitAction {
+public class SCloseLong extends BasicState implements SMExitAction {
 	public static final String EOK = Const.E_OK;
-	public static final String ECLS = Const.S_CLOSE;
+	public static final String EOPN = Const.S_OPEN;
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SOpenLong.class);
+		logger = LoggerFactory.getLogger(SCloseLong.class);
 	}
-
-	private Order order;
 	
-	public SOpenLong(RobotData data) {
+	private Order order;
+
+	public SCloseLong(RobotData data) {
 		super(data);
 		registerExit(EOK);
-		registerExit(ECLS);
+		registerExit(EOPN);
 		setExitAction(this);
 	}
-	
+
 	@Override
 	public SMExit enter(SMTriggerRegistry triggers) {
 		super.enter(triggers);
 		Security security = data.getSecurity();
-		FDecimal price = security.getUpperPriceLimit();
+		FDecimal price = security.getLowerPriceLimit();
 		if ( price == null ) {
-			logger.error("Upper price limit not defined");
+			logger.error("Lower price limit not defined");
 			return getExit(EER);
 		}
 		Portfolio portfolio = data.getPortfolio();
 		CalcUtils cu = new CalcUtils();
-		long contracts = (long)portfolio.getEquity()
-				.multiply(FDecimal.of2(data.getConfig().getShare()))
-				.subtract(cu.getSafe(portfolio.getPosition(data.getSymbol()).getCurrentPrice()))
-				.divide(cu.getLastPrice(security))
-				.withScale(0)
-				.doubleValue();
-		logger.debug("Contracts: {}", contracts);
-		if ( contracts == 0 ) {
+		long contracts = cu.getSafe(portfolio.getPosition(data.getSymbol()).getCurrentVolume());
+		if ( contracts <= 0L ) {
 			return getExit(EOK);
 		}
 		order = data.getTerminal().createOrder(data.getAccount(), data.getSymbol(),
-				OrderAction.BUY, contracts, price);
+				OrderAction.SELL, contracts, price);
 		triggers.add(newExitOnEvent(order.onFailed(), EER));
 		triggers.add(newExitOnEvent(order.onFilled(), EOK));
 		triggers.add(newExitOnEvent(order.onCancelled(), EOK));
-		triggers.add(newExitOnEvent(data.getSignal().onBearish(), ECLS));
+		triggers.add(newExitOnEvent(data.getSignal().onBullish(), EOPN));
 		try {
 			data.getTerminal().placeOrder(order);
 		} catch ( OrderException e ) {
@@ -76,7 +70,7 @@ public class SOpenLong extends BasicState implements SMExitAction {
 				logger.error("Cancel failed: ", e);
 			}
 		}
-		order = null;
+		order = null;		
 	}
 
 }

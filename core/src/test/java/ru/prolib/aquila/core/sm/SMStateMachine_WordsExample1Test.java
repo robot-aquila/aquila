@@ -104,7 +104,7 @@ public class SMStateMachine_WordsExample1Test {
 				.setInitialState("StartingWord")
 				.addTrans("StartingWord",	"WordStarted",	"Word")
 				.addTrans("Word", 			"WordEnd",		"StartingWord")
-				.addTransFinal("Word",		"CauseEnd")
+				.addFinal("Word",		"CauseEnd")
 				.build();
 	}
 

@@ -50,7 +50,7 @@ public class SMBuilder {
 	 * @param srcExit - exit ID of state from
 	 * @return this
 	 */
-	public SMBuilder addTransFinal(String srcState, String srcExit) {
+	public SMBuilder addFinal(String srcState, String srcExit) {
 		transitions.put(new KW<SMExit>(getState(srcState).getExit(srcExit)), SMState.FINAL);
 		return this;
 	}

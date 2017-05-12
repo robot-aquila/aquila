@@ -22,8 +22,6 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
@@ -31,8 +29,6 @@ import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.core.sm.SMBuilder;
-import ru.prolib.aquila.core.sm.SMStateMachine;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.data.storage.DataStorageException;
@@ -54,12 +50,9 @@ import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
 import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
-import ru.prolib.aquila.utils.experimental.sst.robot.Const;
+import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.utils.experimental.sst.robot.RobotData;
-import ru.prolib.aquila.utils.experimental.sst.robot.SInit;
-import ru.prolib.aquila.utils.experimental.sst.robot.SOpenLong;
-import ru.prolib.aquila.utils.experimental.sst.robot.SBullWaitSig;
 import ru.prolib.aquila.utils.experimental.sst.robot.Signal;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
@@ -118,27 +111,11 @@ public class SecuritySimulationTest implements Experiment {
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
 		logger.debug("Selected strategy symbol: {}", rSymbol);
 		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.5d);
-		signal = new Signal(terminal.getEventQueue());
-		RobotData rData = new RobotData(terminal, rConfig, signal);
-		SMStateMachine automat = new SMBuilder()
-				.addState(new SInit(rData), Const.S_INIT)
-				.addState(new SBullWaitSig(rData), Const.S_WAIT_SIG)
-				.addState(new SOpenLong(rData), Const.S_OPEN)
-				.setInitialState(Const.S_INIT)
-				.addTrans(Const.S_INIT, SInit.EOK, Const.S_WAIT_SIG)
-				.addTransFinal(Const.S_INIT, SInit.EBR)
-				.addTransFinal(Const.S_INIT, SInit.EER)
-				.addTrans(Const.S_WAIT_SIG, SBullWaitSig.EOPN, Const.S_OPEN)
-				.addTrans(Const.S_WAIT_SIG, SBullWaitSig.ECLS, Const.S_WAIT_SIG) // TODO: 
-				.addTransFinal(Const.S_WAIT_SIG, SBullWaitSig.EBR)
-				.addTransFinal(Const.S_WAIT_SIG, SBullWaitSig.EER)
-				.addTransFinal(Const.S_OPEN, SOpenLong.EOK)
-				.addTransFinal(Const.S_OPEN, SOpenLong.EBR)
-				.addTransFinal(Const.S_OPEN, SOpenLong.EER)
-				.build();
-		automat.setDebug(true);
+		Robot robot = new RobotBuilder(terminal).buildBullDummy(rConfig);
+		robot.getAutomat().setDebug(true);
+		signal = robot.getData().getSignal();
 		try {
-			automat.start();
+			robot.getAutomat().start();
 		} catch ( Exception e ) {
 			logger.error("Unexpected exception: ", e);
 			return 2;
@@ -203,9 +180,9 @@ public class SecuritySimulationTest implements Experiment {
         tabPanel.add("Positions", new JScrollPane(table));
         new TableModelController(positionTableModel, frame);
         
-        CBFXChartPanel chartPanel = new CBFXChartPanel(rData.getCandleSeries());
-        chartPanel.addSmoothLine(rData.getMAShort()).setStyleClass("line-magenta");
-        chartPanel.addSmoothLine(rData.getMALong()).setStyleClass("line-blue");
+        CBFXChartPanel chartPanel = new CBFXChartPanel(robot.getData().getCandleSeries());
+        chartPanel.addSmoothLine(robot.getData().getMAShort()).setStyleClass("line-magenta");
+        chartPanel.addSmoothLine(robot.getData().getMALong()).setStyleClass("line-blue");
         tabPanel.addTab("Strategy", chartPanel);
         
         frame.getContentPane().add(mainPanel);

@@ -46,7 +46,8 @@ public class SchedulerWorkingPass {
 		case CLOSE:
 			return;
 		case WAIT:
-			state.processCommand(queue.take());
+			cmd = queue.take();
+			state.processCommand(cmd);
 			return;
 		case RUN_STEP:
 		case RUN_CUTOFF:
