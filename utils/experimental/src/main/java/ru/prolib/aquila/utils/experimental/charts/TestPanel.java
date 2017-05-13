@@ -5,6 +5,7 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollBar;
 import org.threeten.extra.Interval;
+import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.utils.experimental.charts.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartLayer;
@@ -12,9 +13,8 @@ import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.IndicatorParams;
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.QEMAIndicatorParams;
-import ru.prolib.aquila.utils.experimental.charts.layers.CandleChartLayer;
-import ru.prolib.aquila.utils.experimental.charts.layers.ChartLayer;
-import ru.prolib.aquila.utils.experimental.charts.layers.VolumeChartLayer;
+import ru.prolib.aquila.utils.experimental.charts.layers.*;
+import ru.prolib.aquila.utils.experimental.charts.series.TradeInfoSeries;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,7 +39,7 @@ public class TestPanel extends JPanel {
     private Series<Long> volumeData;
     private Series<Instant> categoriesData;
     private CandleChartLayer candles;
-//    private TradeChartObject trades;
+    private TradeChartLayer trades;
     private VolumeChartLayer volumes;
     private boolean replayStarted = false;
     private Timer replayTimer = new Timer("REPLAY_TIMER", true);
@@ -94,7 +94,11 @@ public class TestPanel extends JPanel {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                generateRandomData();
+                try {
+                    generateRandomData();
+                } catch (ValueException e) {
+                    e.printStackTrace();
+                }
                 panel.setCurrentPosition(candleData.getLength());
             }
         });
@@ -106,8 +110,8 @@ public class TestPanel extends JPanel {
         candles = new CandleChartLayer();
         panel.addChartLayer("CANDLES", candles);
 
-//        trades = new TradeChartObject();
-//        panel.addChartLayer("CANDLES", trades);
+        trades = new TradeChartLayer();
+        panel.addChartLayer("CANDLES", trades);
 
         panel.addChart("VOLUMES");
         volumes = new VolumeChartLayer();
@@ -121,7 +125,7 @@ public class TestPanel extends JPanel {
         return panel;
     }
 
-    private void generateRandomData(){
+    private void generateRandomData() throws ValueException {
         candleData = getRandomData();
         volumeData = new CandleVolumeSeries(candleData);
         categoriesData = new CandleStartTimeSeries(candleData);
@@ -132,29 +136,29 @@ public class TestPanel extends JPanel {
 
 //        trades.setXValues(candles.getCategories());
 //        trades.setPeriod(candleData.get(0));
-//        List<TradeInfo> tradesData = new ArrayList<>();
-//        tradesData.add(new TradeInfo(candleData.get(4).getStartTime().plusSeconds(50),
-//                OrderAction.SELL,
-//                candleData.get(4).getHigh(),
-//                500L));
-//        tradesData.add(new TradeInfo(candleData.get(4).getStartTime().plus(10, ChronoUnit.MINUTES),
-//                OrderAction.BUY,
-//                candleData.get(4).getLow(),
-//                500L));
-//        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(10, ChronoUnit.MINUTES),
-//                OrderAction.BUY,
-//                candleData.get(5).getBodyMiddle(),
-//                500L));
-//        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(11, ChronoUnit.MINUTES),
-//                OrderAction.BUY,
-//                candleData.get(5).getBodyMiddle()+1,
-//                500L));
-//        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(12, ChronoUnit.MINUTES),
-//                OrderAction.BUY,
-//                candleData.get(5).getBodyMiddle(),
-//                500L));
-//        trades.setData(tradesData);
-//
+        List<TradeInfo> tradesData = new ArrayList<>();
+        tradesData.add(new TradeInfo(candleData.get(4).getStartTime().plusSeconds(50),
+                OrderAction.SELL,
+                candleData.get(4).getHigh(),
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(4).getStartTime().plus(10, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(4).getLow(),
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(10, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(5).getBodyMiddle(),
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(11, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(5).getBodyMiddle()+1,
+                500L));
+        tradesData.add(new TradeInfo(candleData.get(5).getStartTime().plus(12, ChronoUnit.MINUTES),
+                OrderAction.BUY,
+                candleData.get(5).getBodyMiddle(),
+                500L));
+        trades.setData(new TradeInfoSeries("TRADE_INFO", TimeFrame.M15, tradesData));
+
 //        volumes.setData(candleData);
 
         refreshIndicatorsData();
@@ -204,7 +208,13 @@ public class TestPanel extends JPanel {
         JMenuBar menuBar = new JMenuBar();
         JMenu main = new JMenu("Main");
         JMenuItem random = new JMenuItem("Random data");
-        random.addActionListener(e -> generateRandomData());
+        random.addActionListener(e -> {
+            try {
+                generateRandomData();
+            } catch (ValueException e1) {
+                e1.printStackTrace();
+            }
+        });
         main.add(random);
         final JMenuItem miReplay = new JMenuItem("Start replay");
         miReplay.addActionListener(event->{
