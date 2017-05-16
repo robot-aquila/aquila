@@ -11,8 +11,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.ListenOnce;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
@@ -20,6 +18,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
+import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProviderStub;
@@ -85,9 +84,7 @@ public class L1UpdateSourceSATImplTest {
 		
 		control.verify();
 		assertTrue(pending.contains(security2));
-		EventListener actual = security2.onAvailable().getAsyncListeners().get(0);
-		ListenOnce expected = new ListenOnce(security2.onAvailable(), source);
-		assertEquals(expected, actual);
+		assertTrue(security2.onAvailable().isSyncListener(source));
 	}
 	
 	@Test
@@ -136,6 +133,20 @@ public class L1UpdateSourceSATImplTest {
 		
 		control.verify();
 		assertEquals(new HashSet<>(), pending);
+	}
+	
+	@Test
+	public void testOnEvent_() throws Exception {
+		pending.add(security2);
+		security2.onAvailable().addSyncListener(source);
+		basicSourceMock.subscribeL1(symbol2, security2);
+		control.replay();
+		
+		source.onEvent(new SecurityEvent(security2.onAvailable(), security2));
+		
+		control.verify();
+		assertFalse(pending.contains(security2));
+		assertFalse(security2.onAvailable().isListener(source));
 	}
 
 }

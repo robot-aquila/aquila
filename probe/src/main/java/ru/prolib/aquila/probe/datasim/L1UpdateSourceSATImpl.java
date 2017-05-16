@@ -75,7 +75,7 @@ public class L1UpdateSourceSATImpl implements L1UpdateSource, EventListener, Loc
 		x.lock();
 		try {
 			if ( ! security.isAvailable() ) {
-				security.onAvailable().listenOnce(this);
+				security.onAvailable().addSyncListener(this);
 				pending.add(security);
 				return;
 			}
@@ -111,6 +111,7 @@ public class L1UpdateSourceSATImpl implements L1UpdateSource, EventListener, Loc
 			if ( event.isType(security.onAvailable()) ) {
 				Multilock x = new Multilock(security, this);
 				x.lock();
+				security.onAvailable().removeListener(this);
 				try {
 					if ( ! pending.remove(security) ) {
 						// It isn't a pending subscription. Nothing to do.
