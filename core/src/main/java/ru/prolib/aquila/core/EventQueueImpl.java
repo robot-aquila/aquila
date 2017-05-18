@@ -2,6 +2,9 @@ package ru.prolib.aquila.core;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +20,10 @@ public class EventQueueImpl implements EventQueue {
 	private final BlockingQueue<Event> queue;
 	private final String name;
 	private volatile Thread thread = null;
-	private final LinkedList<Event> cache1, cache2;
+	private final LinkedList<Event> cache1;
 	private boolean deathLogged = false;
+	private final Lock queueLock = new ReentrantLock();
+	private boolean queueProcessing = false;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -34,7 +39,6 @@ public class EventQueueImpl implements EventQueue {
 		this.name = threadName;
 		queue = new LinkedBlockingQueue<Event>();
 		cache1 = new LinkedList<Event>();
-		cache2 = new LinkedList<Event>();
 		startWorker();
 	}
 	
@@ -141,44 +145,71 @@ public class EventQueueImpl implements EventQueue {
 	 * @throws IllegalStateException поток обработки не запущен
 	 */
 	@Override
-	public synchronized void enqueue(Event event) {
-		if ( ! started() && ! deathLogged ) {
-			deathLogged = true;
-			throw new IllegalStateException("Queue not started: " + name);
-		}
+	public void enqueue(Event event) {
 		if ( event == null ) {
 			throw new NullPointerException("The event cannot be null");
 		}
+		synchronized ( this ) {
+			if ( ! started() && ! deathLogged ) {
+				deathLogged = true;
+				throw new IllegalStateException("Queue not started: " + name);
+			}
+		}
+		
 		// Кэшированние событий используется для соблюдения требования
 		// диспетчеризации событий в порядке их поступления. Если этого не
 		// сделать, то при генерации событий из обработчика другого события
 		// нарушение неизбежно.
-		cache1.add(event);
-		if ( cache1.size() == 1 ) {
-			List<EventListener> listeners;
-			// Только в этом случае мы можем начинать диспетчеризацию.
-			// Более одного элемента в кэше означает, что выше по стеку
-			// очередь уже обрабатывается.
-			do {
-				event = cache1.getFirst(); // Сразу удалять нельзя!
-				listeners = event.getType().getSyncListeners();
-				for ( EventListener listener : listeners ) {
-					try {
-						listener.onEvent(event);
-					} catch ( Throwable e ) {
-						logger.error("Unhandled exception: ", e);
-					}
-				}
-				cache2.add(cache1.pollFirst());
-			} while ( cache1.size() > 0 );
-			while ( cache2.size() > 0 ) {
+		
+		queueLock.lock();
+		try {
+			cache1.add(event);
+			if ( queueProcessing ) {
+				return;
+			}
+			queueProcessing = true;
+		} finally {
+			queueLock.unlock();
+		}
+
+		LinkedList<Event> cache2 = new LinkedList<>();
+		for ( ;; ) {
+			queueLock.lock();
+			try {
+				cache2.add(event = cache1.pollFirst());
+			} finally {
+				queueLock.unlock();
+			}
+			for ( EventListener listener : event.getType().getSyncListeners() ) {
 				try {
-					queue.put(cache2.pollFirst());
+					listener.onEvent(event);
+				} catch ( Throwable e ) {
+					logger.error("Unhandled exception: ", e);
+				}
+			}
+			queueLock.lock();
+			try {
+				if ( cache1.size() == 0 ) {
+					break;
+				}
+			} finally {
+				queueLock.unlock();
+			}
+		}
+		
+		queueLock.lock();
+		try {
+			for ( Event x : cache2 ) {
+				try {
+					queue.put(x);
 				} catch ( InterruptedException e ) {
 					Thread.currentThread().interrupt();
 					logger.error("Thread interrupted: ", e);
-				}				
+				}
 			}
+			queueProcessing = false;
+		} finally {
+			queueLock.unlock();
 		}
 
 	}
@@ -229,7 +260,7 @@ public class EventQueueImpl implements EventQueue {
 	}
 
 	@Override
-	public synchronized void enqueue(EventType type, EventFactory factory) {
+	public void enqueue(EventType type, EventFactory factory) {
 		if ( type.hasAlternates() ) {
 			Set<EventType> alternates = new HashSet<EventType>();
 			alternates.add(type);
