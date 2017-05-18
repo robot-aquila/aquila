@@ -260,6 +260,19 @@ public class OrderListTableModel extends AbstractTableModel implements
 		clear();
 	}
 	
+	@Override
+	public Class<?> getColumnClass(int col) {
+		switch ( getColumnID(col) ) {
+		case CID_PRICE:
+		case CID_EXECUTED_VALUE:
+		case CID_INITIAL_VOLUME:
+		case CID_CURRENT_VOLUME:
+			return Number.class;
+		default:
+			return super.getColumnClass(col);
+		}
+	}
+	
 	private void cacheDataAndSubscribeEvents(Terminal terminal) {
 		terminal.lock();
 		try {

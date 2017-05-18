@@ -259,6 +259,20 @@ public class PortfolioListTableModel extends AbstractTableModel
 		clear();
 	}
 	
+	@Override
+	public Class<?> getColumnClass(int col) {
+		switch ( getColumnID(col) ) {
+		case CID_BALANCE:
+		case CID_EQUITY:
+		case CID_FREE_MARGIN:
+		case CID_USED_MARGIN:
+		case CID_PROFIT_AND_LOSS:
+			return Number.class;
+		default:
+			return super.getColumnClass(col);
+		}
+	}
+	
 	private void cacheDataAndSubscribeEvents(Terminal terminal) {
 		terminal.lock();
 		try {

@@ -266,6 +266,20 @@ public class PositionListTableModel extends AbstractTableModel implements
 		clear();
 	}
 	
+	@Override
+	public Class<?> getColumnClass(int col) {
+		switch ( getColumnID(col) ) {
+		case CID_CURRENT_VOLUME:
+		case CID_CURRENT_PRICE:
+		case CID_OPEN_PRICE:
+		case CID_USED_MARGIN:
+		case CID_PROFIT_AND_LOSS:
+			return Number.class;
+		default:
+			return super.getColumnClass(col);
+		}
+	}
+	
 	private void cacheDataAndSubscribeEvents(Portfolio portfolio) {
 		portfolio.lock();
 		try {
