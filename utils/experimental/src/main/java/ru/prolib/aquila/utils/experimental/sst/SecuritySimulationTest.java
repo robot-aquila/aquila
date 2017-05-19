@@ -22,6 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
@@ -42,6 +43,8 @@ import ru.prolib.aquila.probe.scheduler.ui.SymbolUpdateTaskFilter;
 import ru.prolib.aquila.qforts.impl.QFBuilder;
 import ru.prolib.aquila.qforts.impl.QFTransactionException;
 import ru.prolib.aquila.qforts.impl.QFortsEnv;
+import ru.prolib.aquila.qforts.ui.QFPortfolioListTableModel;
+import ru.prolib.aquila.qforts.ui.QFPositionListTableModel;
 import ru.prolib.aquila.ui.TableModelController;
 import ru.prolib.aquila.ui.form.OrderListTableModel;
 import ru.prolib.aquila.ui.form.PortfolioListTableModel;
@@ -89,6 +92,7 @@ public class SecuritySimulationTest implements Experiment {
 			.withScheduler(scheduler)
 			.withDataProvider(newDataProvider(scheduler, root, qfBuilder.buildDataProvider()))
 			.buildTerminal();
+		((EventQueueImpl) terminal.getEventQueue()).forceSync(true);
 		QFortsEnv qfEnv = qfBuilder.buildEnvironment(terminal);
 		try {
 			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(300000.0));
@@ -164,7 +168,7 @@ public class SecuritySimulationTest implements Experiment {
         tabPanel.add("Orders", new JScrollPane(table));
         new TableModelController(orderTableModel, frame);
         
-        PortfolioListTableModel portfolioTableModel = new PortfolioListTableModel(messages);
+        QFPortfolioListTableModel portfolioTableModel = new QFPortfolioListTableModel(messages);
         portfolioTableModel.add(terminal);
         table = new JTable(portfolioTableModel);
         table.setShowGrid(true);
@@ -172,7 +176,7 @@ public class SecuritySimulationTest implements Experiment {
         tabPanel.add("Accounts", new JScrollPane(table));
         new TableModelController(portfolioTableModel, frame);
         
-        PositionListTableModel positionTableModel = new PositionListTableModel(messages);
+        QFPositionListTableModel positionTableModel = new QFPositionListTableModel(messages);
         positionTableModel.add(terminal);
         table = new JTable(positionTableModel);
         table.setShowGrid(true);
