@@ -23,7 +23,7 @@ public class EventQueueImpl implements EventQueue {
 	private final LinkedList<Event> cache1;
 	private boolean deathLogged = false;
 	private final Lock queueLock = new ReentrantLock();
-	private boolean queueProcessing = false;
+	private boolean queueProcessing = false, forceSync = false;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -149,7 +149,9 @@ public class EventQueueImpl implements EventQueue {
 		if ( event == null ) {
 			throw new NullPointerException("The event cannot be null");
 		}
+		boolean fsync;
 		synchronized ( this ) {
+			fsync = forceSync;
 			if ( ! started() && ! deathLogged ) {
 				deathLogged = true;
 				throw new IllegalStateException("Queue not started: " + name);
@@ -173,6 +175,7 @@ public class EventQueueImpl implements EventQueue {
 		}
 
 		LinkedList<Event> cache2 = new LinkedList<>();
+		List<EventListener> listeners;
 		for ( ;; ) {
 			queueLock.lock();
 			try {
@@ -180,7 +183,13 @@ public class EventQueueImpl implements EventQueue {
 			} finally {
 				queueLock.unlock();
 			}
-			for ( EventListener listener : event.getType().getSyncListeners() ) {
+			
+			listeners = event.getType().getSyncListeners();
+			if ( fsync ) {
+				listeners.addAll(event.getType().getAsyncListeners());
+			}
+			
+			for ( EventListener listener : listeners ) {
 				try {
 					listener.onEvent(event);
 				} catch ( Throwable e ) {
@@ -199,12 +208,14 @@ public class EventQueueImpl implements EventQueue {
 		
 		queueLock.lock();
 		try {
-			for ( Event x : cache2 ) {
-				try {
-					queue.put(x);
-				} catch ( InterruptedException e ) {
-					Thread.currentThread().interrupt();
-					logger.error("Thread interrupted: ", e);
+			if ( ! fsync ) {
+				for ( Event x : cache2 ) {
+					try {
+						queue.put(x);
+					} catch ( InterruptedException e ) {
+						Thread.currentThread().interrupt();
+						logger.error("Thread interrupted: ", e);
+					}
 				}
 			}
 			queueProcessing = false;
@@ -282,6 +293,8 @@ public class EventQueueImpl implements EventQueue {
 		}
 	}
 	
-	
+	public synchronized void forceSync(boolean forceSync) {
+		this.forceSync = forceSync;
+	}
 
 }
