@@ -15,10 +15,10 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>ru.prolib.aquila</groupId>
-			<artifactId>aquila-core</artifactId>
-			<version>0.1.43</version>
-		</dependency>
+            <groupId>ru.prolib.aquila</groupId>
+            <artifactId>aquila-ui</artifactId>
+            <version>0.1.43</version>
+        </dependency>
 	</dependencies>
   
 	<build>
