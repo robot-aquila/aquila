@@ -95,22 +95,24 @@ public class ChartPanel<T> extends JPanel {
     }
 
     public synchronized void setCurrentPosition(int currentPosition) {
-        updateCategories();
-        if (categories.size() == 0) {
-            return;
-        }
-        if (currentPosition < 0) {
-            setCurrentPosition(0);
-        } else if (currentPosition > 0 && currentPosition > categories.size() - numberOfPoints) {
-            setCurrentPosition(categories.size() - numberOfPoints);
-        } else {
-            this.currentPosition = currentPosition;
-            refresh();
-            updateScrollbarAndSetValue();
-            if (actionListener != null) {
-                actionListener.actionPerformed(new ActionEvent(this, 1, CURRENT_POSITION_CHANGE));
+        Platform.runLater(() -> {
+            updateCategories();
+            if (categories.size() == 0) {
+                return;
             }
-        }
+            if (currentPosition < 0) {
+                setCurrentPosition(0);
+            } else if (currentPosition > 0 && currentPosition > categories.size() - numberOfPoints) {
+                setCurrentPosition(categories.size() - numberOfPoints);
+            } else {
+                this.currentPosition = currentPosition;
+                refresh();
+                updateScrollbarAndSetValue();
+                if (actionListener != null) {
+                    actionListener.actionPerformed(new ActionEvent(this, 1, CURRENT_POSITION_CHANGE));
+                }
+            }
+        });
     }
 
     public Integer getNumberOfPoints() {
