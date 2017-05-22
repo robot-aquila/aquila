@@ -12,7 +12,7 @@ public class RobotBuilder {
 	}
 	
 	public Robot buildBullDummy(RobotConfig config) {
-		Signal signal = new Signal(terminal.getEventQueue());
+		MarketSignal signal = new MarketSignal(terminal.getEventQueue(), "BullDummy");
 		RobotData rData = new RobotData(terminal, config, signal);
 		SMStateMachine automat = new SMBuilder()
 				.addState(new SInit(rData), 		Const.S_INIT)

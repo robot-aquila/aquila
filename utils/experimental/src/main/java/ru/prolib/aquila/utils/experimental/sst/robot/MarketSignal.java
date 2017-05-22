@@ -7,17 +7,19 @@ import ru.prolib.aquila.core.EventFactory;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
-import ru.prolib.aquila.core.SimpleEventFactory;
 
-public class Signal {	
-	private final EventQueue queue;
-	private final EventType onBullish, onBearish, onBreak;
+public class MarketSignal extends BreakSignal {
+	protected final EventType onBullish, onBearish;
 
-	public Signal(EventQueue queue) {
-		this.queue = queue;
-		this.onBullish = new EventTypeImpl("BULLISH");
-		this.onBearish = new EventTypeImpl("BEARISH");
-		this.onBreak = new EventTypeImpl("BREAK");
+	public MarketSignal(EventQueue queue, String id) {
+		super(queue, id);
+		this.onBullish = new EventTypeImpl(id + ".BULLISH");
+		this.onBearish = new EventTypeImpl(id + ".BEARISH");
+		
+	}
+	
+	public MarketSignal(EventQueue queue) {
+		this(queue, DEFAULT_ID);
 	}
 	
 	public EventType onBullish() {
@@ -28,20 +30,12 @@ public class Signal {
 		return onBearish;
 	}
 	
-	public EventType onBreak() {
-		return onBreak;
-	}
-	
 	public void fireBullish(Instant time, Double price) {
 		queue.enqueue(onBullish, new SignalEventFactory(time, price));
 	}
 	
 	public void fireBearish(Instant time, Double price) {
 		queue.enqueue(onBearish, new SignalEventFactory(time, price));
-	}
-	
-	public void fireBreak() {
-		queue.enqueue(onBreak, SimpleEventFactory.getInstance());
 	}
 	
 	static class SignalEventFactory implements EventFactory {

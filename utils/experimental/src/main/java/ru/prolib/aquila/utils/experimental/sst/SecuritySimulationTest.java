@@ -56,7 +56,7 @@ import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.utils.experimental.sst.robot.Signal;
+import ru.prolib.aquila.utils.experimental.sst.robot.MarketSignal;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
@@ -69,7 +69,7 @@ public class SecuritySimulationTest implements Experiment {
 	}
 	
 	private EditableTerminal terminal;
-	private Signal signal;
+	private MarketSignal signal;
 
 	@Override
 	public void close() throws IOException {

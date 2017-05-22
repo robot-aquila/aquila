@@ -67,8 +67,16 @@ public class CSUtils {
 		return new ObservableSeriesImpl<Candle>(queue, new SeriesImpl<>());
 	}
 	
+	public ObservableSeriesImpl<Candle> createCandleSeries(EventQueue queue, String id) {
+		return new ObservableSeriesImpl<Candle>(queue, new SeriesImpl<>(id));
+	}
+	
 	public ObservableSeriesImpl<Candle> createCandleSeries(Terminal terminal) {
 		return createCandleSeries(((EditableTerminal) terminal).getEventQueue());
+	}
+	
+	public ObservableSeriesImpl<Candle> createCandleSeries(Terminal terminal, String id) {
+		return createCandleSeries(((EditableTerminal) terminal).getEventQueue(), id);
 	}
 
 }

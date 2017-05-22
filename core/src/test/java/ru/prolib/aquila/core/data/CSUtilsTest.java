@@ -131,6 +131,17 @@ public class CSUtilsTest {
 		assertNotNull(actual);
 		assertNotNull(actual.getUnderlyingSeries());
 		assertSame(terminal.getEventQueue(), actual.getEventQueue());
+		assertEquals(Series.DEFAULT_ID, actual.getId());
+	}
+	
+	@Test
+	public void testCreateCandleSeries2_QueStr() {
+		ObservableSeriesImpl<Candle> actual = utils.createCandleSeries(terminal.getEventQueue(), "foobar");
+		
+		assertNotNull(actual);
+		assertNotNull(actual.getUnderlyingSeries());
+		assertSame(terminal.getEventQueue(), actual.getEventQueue());
+		assertEquals("foobar", actual.getId());
 	}
 	
 	@Test
@@ -140,6 +151,17 @@ public class CSUtilsTest {
 		assertNotNull(actual);
 		assertNotNull(actual.getUnderlyingSeries());
 		assertSame(terminal.getEventQueue(), actual.getEventQueue());
+		assertEquals(Series.DEFAULT_ID, actual.getId());
+	}
+	
+	@Test
+	public void testCreateCandleSeris2_TrmStr() {
+		ObservableSeriesImpl<Candle> actual = utils.createCandleSeries(terminal, "zulu");
+		
+		assertNotNull(actual);
+		assertNotNull(actual.getUnderlyingSeries());
+		assertSame(terminal.getEventQueue(), actual.getEventQueue());
+		assertEquals("zulu", actual.getId());		
 	}
 
 }

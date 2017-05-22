@@ -15,20 +15,20 @@ import ru.prolib.aquila.core.data.CSUtils;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.ObservableSeriesImpl;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.utils.experimental.sst.robot.SignalProvider.CrossingMovingAverages;
+import ru.prolib.aquila.utils.experimental.sst.robot.sp.SPCrossingMovingAverages;
 
 public class RobotData {
 	private final EditableTerminal terminal;
 	private final RobotConfig config;
 	private final ObservableSeriesImpl<Candle> candles;
-	private final CrossingMovingAverages sigProv;
+	private final SPCrossingMovingAverages sigProv;
 	private CSFiller csFiller;
 	
-	public RobotData(EditableTerminal terminal, RobotConfig config, Signal signal) {
+	public RobotData(EditableTerminal terminal, RobotConfig config, MarketSignal signal) {
 		this.terminal = terminal;
 		this.config = config;
 		this.candles = new CSUtils().createCandleSeries(terminal);
-		this.sigProv = new SignalProvider(terminal.getEventQueue()).crossingMAs(candles, 7, 14, signal);
+		this.sigProv = new SignalProviderFactory(terminal.getEventQueue()).crossingMAs(candles, 7, 14, signal);
 	}
 	
 	public Terminal getTerminal() {
@@ -92,11 +92,11 @@ public class RobotData {
 		return candles;
 	}
 	
-	public CrossingMovingAverages getSignalProvider() {
+	public SPCrossingMovingAverages getSignalProvider() {
 		return sigProv;
 	}
 	
-	public Signal getSignal() {
+	public MarketSignal getSignal() {
 		return sigProv.getSignal();
 	}
 
