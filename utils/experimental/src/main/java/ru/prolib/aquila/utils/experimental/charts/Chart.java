@@ -179,7 +179,7 @@ public class Chart<T> extends ScatterChart {
 
     private void updateStyles() {
         if(categoriesAxisVisible){
-            xAxis.getChildrenUnmodifiable().stream().filter(n->!n.isVisible()).forEach((n)->n.setVisible(true));
+//            xAxis.getChildrenUnmodifiable().stream().filter(n->!n.isVisible()).forEach((n)->n.setVisible(true));
             int[] idx = { 0 };
             xAxis.getChildrenUnmodifiable().filtered(n-> n instanceof Text).forEach(n ->{
                 int i = xAxis.getTickMarks().get(idx[0]++).getValue().intValue();
