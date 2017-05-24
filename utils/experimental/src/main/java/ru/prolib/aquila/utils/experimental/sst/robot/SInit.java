@@ -1,7 +1,5 @@
 package ru.prolib.aquila.utils.experimental.sst.robot;
 
-import ru.prolib.aquila.core.data.CSUtils;
-import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.sm.SMExit;
 import ru.prolib.aquila.core.sm.SMInput;
 import ru.prolib.aquila.core.sm.SMInputAction;
@@ -25,7 +23,6 @@ public class SInit extends BasicState implements SMInputAction {
 		triggers.add(new SMTriggerOnEvent(data.getTerminal().onSecurityAvailable(), in));
 		triggers.add(new SMTriggerOnEvent(data.getTerminal().onPortfolioAvailable(), in));
 		if ( objectsAvailable() ) {
-			createIndicators();
 			return getExit(EOK);
 		}
 		return null;
@@ -34,19 +31,11 @@ public class SInit extends BasicState implements SMInputAction {
 	@Override
 	public SMExit input(Object data) {
 		if ( objectsAvailable() ) {
-			createIndicators();
 			return getExit(EOK);
 		}
 		return null;
 	}
 
-	private void createIndicators() {
-		data.setCSFiller(new CSUtils().createFiller(data.getTerminal(), data.getSymbol(),
-				TimeFrame.M1, data.getCandleSeries()));
-		data.getCSFiller().start();
-		data.getSignalProvider().start();
-	}
-	
 	private boolean objectsAvailable() {
 		try {
 			return data.getTerminal().isSecurityExists(data.getSymbol())

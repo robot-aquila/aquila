@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.sst.robot;
+package ru.prolib.aquila.utils.experimental.sst.msig;
 
 import java.time.Instant;
 
@@ -31,25 +31,25 @@ public class MarketSignal extends BreakSignal {
 	}
 	
 	public void fireBullish(Instant time, Double price) {
-		queue.enqueue(onBullish, new SignalEventFactory(time, price));
+		queue.enqueue(onBullish, new MarketSignalEventFactory(time, price));
 	}
 	
 	public void fireBearish(Instant time, Double price) {
-		queue.enqueue(onBearish, new SignalEventFactory(time, price));
+		queue.enqueue(onBearish, new MarketSignalEventFactory(time, price));
 	}
 	
-	static class SignalEventFactory implements EventFactory {
+	static class MarketSignalEventFactory implements EventFactory {
 		private final Instant time;
 		private final Double price;
 		
-		public SignalEventFactory(Instant time, Double price) {
+		public MarketSignalEventFactory(Instant time, Double price) {
 			this.time = time;
 			this.price = price;
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			return new SignalEvent(type, time, price);
+			return new MarketSignalEvent(type, time, price);
 		}
 		
 	}

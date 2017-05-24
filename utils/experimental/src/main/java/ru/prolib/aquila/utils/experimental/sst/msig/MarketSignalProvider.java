@@ -1,6 +1,6 @@
-package ru.prolib.aquila.utils.experimental.sst.robot;
+package ru.prolib.aquila.utils.experimental.sst.msig;
 
-public interface SignalProvider {
+public interface MarketSignalProvider {
 
 	public MarketSignal getSignal();
 	

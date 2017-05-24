@@ -22,6 +22,8 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
@@ -30,6 +32,8 @@ import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.data.storage.DataStorageException;
@@ -53,10 +57,16 @@ import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
 import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
+import ru.prolib.aquila.utils.experimental.sst.cs.CSDataProvider;
+import ru.prolib.aquila.utils.experimental.sst.cs.CSDataProviderImpl;
+import ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice;
+import ru.prolib.aquila.utils.experimental.sst.cs.msig.CMASignalBuilder;
+import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
+import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistry;
+import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistryImpl;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.utils.experimental.sst.robot.MarketSignal;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
@@ -70,12 +80,18 @@ public class SecuritySimulationTest implements Experiment {
 	
 	private EditableTerminal terminal;
 	private MarketSignal signal;
+	private CSDataProvider csDataProvider;
+	private final MarketSignalRegistry msigRegistry = new MarketSignalRegistryImpl();
 
 	@Override
 	public void close() throws IOException {
 		if ( signal != null ) {
 			signal.fireBreak();
 			signal = null;
+		}
+		if ( csDataProvider != null ) {
+			csDataProvider.stop();
+			csDataProvider = null;
 		}
 		terminal.stop();
 	}
@@ -112,10 +128,17 @@ public class SecuritySimulationTest implements Experiment {
 		}
 		terminal.start();
 		
+		csDataProvider = new CSDataProviderImpl(terminal);
+		csDataProvider.start();		
+		
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
 		logger.debug("Selected strategy symbol: {}", rSymbol);
-		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.5d);
-		Robot robot = new RobotBuilder(terminal).buildBullDummy(rConfig);
+		String signalID = rSymbol + "_CMA(7, 14)";
+		msigRegistry.register(new CMASignalBuilder(terminal.getEventQueue(),
+			csDataProvider, rSymbol, TimeFrame.M1, 7, 14), signalID);
+		
+		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.5d, signalID);
+		Robot robot = new RobotBuilder(terminal, msigRegistry).buildBullDummy(rConfig);
 		robot.getAutomat().setDebug(true);
 		signal = robot.getData().getSignal();
 		try {
@@ -184,9 +207,12 @@ public class SecuritySimulationTest implements Experiment {
         tabPanel.add("Positions", new JScrollPane(table));
         new TableModelController(positionTableModel, frame);
         
-        CBFXChartPanel chartPanel = new CBFXChartPanel(robot.getData().getCandleSeries());
-        chartPanel.addSmoothLine(robot.getData().getMAShort()).setStyleClass("line-magenta");
-        chartPanel.addSmoothLine(robot.getData().getMALong()).setStyleClass("line-blue");
+        CSDataSlice dataSlice = csDataProvider.getSlice(rSymbol, TimeFrame.M1);
+        CBFXChartPanel chartPanel = new CBFXChartPanel(dataSlice.getCandleSeries());
+        for ( Series<Double> x : dataSlice.getIndicators() ) {
+        	logger.debug("added indicator: {}", x.getId());
+        	chartPanel.addSmoothLine(x).setStyleClass("line-blue");
+        }
         tabPanel.addTab("Strategy", chartPanel);
         
         frame.getContentPane().add(mainPanel);

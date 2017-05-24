@@ -10,25 +10,20 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.core.data.CSFiller;
 import ru.prolib.aquila.core.data.CSUtils;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.ObservableSeriesImpl;
-import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.utils.experimental.sst.robot.sp.SPCrossingMovingAverages;
+import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
 
 public class RobotData {
 	private final EditableTerminal terminal;
 	private final RobotConfig config;
-	private final ObservableSeriesImpl<Candle> candles;
-	private final SPCrossingMovingAverages sigProv;
-	private CSFiller csFiller;
+	private final MarketSignal signal;
 	
 	public RobotData(EditableTerminal terminal, RobotConfig config, MarketSignal signal) {
 		this.terminal = terminal;
 		this.config = config;
-		this.candles = new CSUtils().createCandleSeries(terminal);
-		this.sigProv = new SignalProviderFactory(terminal.getEventQueue()).crossingMAs(candles, 7, 14, signal);
+		this.signal = signal;
 	}
 	
 	public Terminal getTerminal() {
@@ -71,33 +66,8 @@ public class RobotData {
 		return config.getAccount();
 	}
 	
-	public RobotData setCSFiller(CSFiller filler) {
-		this.csFiller = filler;
-		return this;
-	}
-	
-	public CSFiller getCSFiller() {
-		return csFiller;
-	}
-	
-	public Series<Double> getMALong() {
-		return sigProv.getMALong();
-	}
-	
-	public Series<Double> getMAShort() {
-		return sigProv.getMAShort();
-	}
-	
-	public ObservableSeriesImpl<Candle> getCandleSeries() {
-		return candles;
-	}
-	
-	public SPCrossingMovingAverages getSignalProvider() {
-		return sigProv;
-	}
-	
 	public MarketSignal getSignal() {
-		return sigProv.getSignal();
+		return signal;
 	}
 
 }

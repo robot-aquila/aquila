@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.sst.robot;
+package ru.prolib.aquila.utils.experimental.sst.msig;
 
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;

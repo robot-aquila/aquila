@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.sst.robot.sp;
+package ru.prolib.aquila.utils.experimental.sst.msig.sp;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
@@ -8,16 +8,19 @@ import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.SeriesEvent;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.ValueException;
-import ru.prolib.aquila.utils.experimental.sst.robot.MarketSignal;
-import ru.prolib.aquila.utils.experimental.sst.robot.SignalProvider;
+import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
+import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalProvider;
 
-public class SPCrossingMovingAverages implements EventListener, SignalProvider {
+/**
+ * Crossing moving averages.
+ */
+public class CMASignalProvider implements EventListener, MarketSignalProvider {
 	private final ObservableSeries<Candle> candles;
 	private final Series<Double> maShort, maLong;
 	private final MarketSignal signal;
 	private final TAMath math;
 	
-	public SPCrossingMovingAverages(ObservableSeries<Candle> candles,
+	public CMASignalProvider(ObservableSeries<Candle> candles,
 			Series<Double> maShort, Series<Double> maLong, 
 			MarketSignal signal, TAMath math)
 	{

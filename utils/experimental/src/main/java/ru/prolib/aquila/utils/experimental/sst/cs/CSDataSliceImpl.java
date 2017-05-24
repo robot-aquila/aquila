@@ -15,7 +15,6 @@ import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.core.data.ObservableSeriesImpl;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.TimeFrame;
-import ru.prolib.aquila.core.data.ta.QEMA;
 
 public class CSDataSliceImpl implements CSDataSlice {
 	private final Symbol symbol;
@@ -103,23 +102,14 @@ public class CSDataSliceImpl implements CSDataSlice {
 		indicators.put(id, series);
 	}
 	
-	/* (non-Javadoc)
-	 * @see ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice#getQEMA(int)
-	 */
-	@Override
-	public synchronized Series<Double> getQEMA(int period) {
-		String id = "QEMA(" + period + ")";
-		Series<Double> r = indicators.get(id);
-		if ( r == null ) {
-			r = new QEMA(id, closeSeries, period);
-			addIndicator(r);
-		}
-		return r;
-	}
-	
 	@Override
 	public synchronized Collection<Series<Double>> getIndicators() {
 		return indicatorsRO;
+	}
+
+	@Override
+	public synchronized boolean hasIndicator(String id) {
+		return indicators.containsKey(id);
 	}
 
 }

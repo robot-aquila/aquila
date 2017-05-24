@@ -21,8 +21,8 @@ public interface CSDataSlice {
 	Series<Double> getIndicator(String id);
 
 	void addIndicator(Series<Double> series);
-
-	Series<Double> getQEMA(int period);
+	
+	boolean hasIndicator(String id);
 	
 	Collection<Series<Double>> getIndicators();
 

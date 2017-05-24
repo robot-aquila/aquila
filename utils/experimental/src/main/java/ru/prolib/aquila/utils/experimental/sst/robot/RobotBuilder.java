@@ -3,17 +3,19 @@ package ru.prolib.aquila.utils.experimental.sst.robot;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.sm.SMBuilder;
 import ru.prolib.aquila.core.sm.SMStateMachine;
+import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistry;
 
 public class RobotBuilder {
 	private final EditableTerminal terminal;
+	private final MarketSignalRegistry msigRegistry;
 	
-	public RobotBuilder(EditableTerminal terminal) {
+	public RobotBuilder(EditableTerminal terminal, MarketSignalRegistry msigRegistry) {
 		this.terminal = terminal;
+		this.msigRegistry = msigRegistry;
 	}
 	
 	public Robot buildBullDummy(RobotConfig config) {
-		MarketSignal signal = new MarketSignal(terminal.getEventQueue(), "BullDummy");
-		RobotData rData = new RobotData(terminal, config, signal);
+		RobotData rData = new RobotData(terminal, config, msigRegistry.getSignal(config.getSignalID()));
 		SMStateMachine automat = new SMBuilder()
 				.addState(new SInit(rData), 		Const.S_INIT)
 				.addState(new SBullWaitSig(rData), 	Const.S_WAIT_SIG)
