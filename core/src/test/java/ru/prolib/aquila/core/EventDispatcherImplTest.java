@@ -59,7 +59,7 @@ public class EventDispatcherImplTest {
 	@Test
 	public void testDispatch() throws Exception {
 		Event event = new EventImpl(type1);
-		queue.enqueue(same(event));
+		queue.enqueue(type1, new EventDispatcherImpl.EnqueueNewSigAdapter(event));
 		control.replay();
 		
 		dispatcher.dispatch(event);

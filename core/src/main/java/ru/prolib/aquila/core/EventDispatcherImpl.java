@@ -77,7 +77,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 
 	@Override
 	public void dispatch(Event event) {
-		queue.enqueue(event);
+		queue.enqueue(event.getType(), new EnqueueNewSigAdapter(event));
 	}
 
 	@Override
@@ -103,6 +103,35 @@ public class EventDispatcherImpl implements EventDispatcher {
 	@Override
 	public EventType createSyncType(String typeId) {
 		return new EventTypeImpl(getId() + "." + typeId, true);
+	}
+	
+	static class EnqueueNewSigAdapter implements EventFactory {
+		private final Event event;
+		
+		EnqueueNewSigAdapter(Event event) {
+			this.event = event;
+		}
+
+		@Override
+		public Event produceEvent(EventType type) {
+			if ( event.isType(type) ) {
+				return event;
+			}
+			throw new IllegalArgumentException("Modern consumer is incompatible with deprecated producer");
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != EnqueueNewSigAdapter.class ) {
+				return false;
+			}
+			EnqueueNewSigAdapter o = (EnqueueNewSigAdapter) other;
+			return o.event == event;
+		}
+		
 	}
 
 }
