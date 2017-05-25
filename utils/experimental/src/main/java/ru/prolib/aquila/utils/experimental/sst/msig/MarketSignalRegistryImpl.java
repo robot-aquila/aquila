@@ -5,7 +5,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MarketSignalRegistryImpl implements MarketSignalRegistry {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(MarketSignalRegistryImpl.class);
+	}
+	
 	private final Map<String, MarketSignalProvider> providers;
 	
 	public MarketSignalRegistryImpl() {
@@ -22,6 +31,7 @@ public class MarketSignalRegistryImpl implements MarketSignalRegistry {
 			}
 			p = builder.build(signalID);
 			providers.put(signalID, p);
+			logger.debug("Signal registered: {}",signalID);
 		}
 		p.start();
 	}

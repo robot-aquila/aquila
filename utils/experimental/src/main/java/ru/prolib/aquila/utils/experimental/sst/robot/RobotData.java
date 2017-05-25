@@ -10,9 +10,6 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.core.data.CSUtils;
-import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.ObservableSeriesImpl;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
 
 public class RobotData {
