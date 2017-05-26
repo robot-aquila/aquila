@@ -20,6 +20,7 @@ import java.util.List;
 public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
 
     private final double MIN_WIDTH = 5;
+    private final double WIDTH_RATIO = 1.7;
 
     @Override
     public void setData(Series<Candle> data) {
@@ -47,7 +48,7 @@ public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
                 if(height==0){
                     height = 1;
                 }
-                double width = chart.getWidth()/cnt/4;
+                double width = chart.getWidth()/cnt/ WIDTH_RATIO;
                 if(width< MIN_WIDTH){
                     width = MIN_WIDTH;
                 }

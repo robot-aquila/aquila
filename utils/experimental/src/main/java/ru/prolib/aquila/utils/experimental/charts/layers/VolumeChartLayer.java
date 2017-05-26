@@ -14,6 +14,7 @@ import java.util.List;
 public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
 
     private final double MIN_WIDTH = 5;
+    private final double WIDTH_RATIO = 1.7;
 
     @Override
     public List<Node> paint() {
@@ -36,7 +37,7 @@ public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
                 if(height==0){
                     height = 1;
                 }
-                double width = chart.getWidth()/cnt/4;
+                double width = chart.getWidth()/cnt/WIDTH_RATIO;
                 if(width< MIN_WIDTH){
                     width = MIN_WIDTH;
                 }

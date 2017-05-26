@@ -42,7 +42,7 @@ public class ChartPanel<T> extends JPanel {
     private final Vector<T> categories = new Vector<>();
     private CategoriesLabelFormatter<T> categoriesLabelFormatter;
     private int currentPosition = 0;
-    private int numberOfPoints = 15;
+    private int numberOfPoints = 30;
     private JScrollBar scrollBar;
     private AdjustmentListener scrollBarListener;
 
