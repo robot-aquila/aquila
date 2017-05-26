@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 
 import ru.prolib.aquila.core.*;
@@ -259,20 +259,22 @@ public class OrderListTableModel extends AbstractTableModel implements
 	public void close() {
 		clear();
 	}
-	
+
 	@Override
 	public Class<?> getColumnClass(int col) {
-		switch ( getColumnID(col) ) {
-		case CID_PRICE:
-		case CID_EXECUTED_VALUE:
-		case CID_INITIAL_VOLUME:
-		case CID_CURRENT_VOLUME:
-			return Number.class;
-		default:
-			return super.getColumnClass(col);
+		switch (getColumnID(col)) {
+			case CID_PRICE:
+			case CID_EXECUTED_VALUE:
+				return FDecimal.class;
+			case CID_ID:
+			case CID_INITIAL_VOLUME:
+			case CID_CURRENT_VOLUME:
+				return Long.class;
+			default:
+				return super.getColumnClass(col);
 		}
 	}
-	
+
 	private void cacheDataAndSubscribeEvents(Terminal terminal) {
 		terminal.lock();
 		try {
