@@ -16,6 +16,9 @@ public class Const {
 	 */
 	public static final String E_BREAK = "BR";
 	
+	public static final String E_OPEN = "OPN";
+	public static final String E_CLOSE = "CLS";
+	
 	/**
 	 * Initial state ID.
 	 */

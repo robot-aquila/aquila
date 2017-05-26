@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
 public class SCloseLong extends BasicState implements SMExitAction {
 	public static final String EOK = Const.E_OK;
-	public static final String EOPN = Const.S_OPEN;
+	public static final String EOPN = Const.E_OPEN;
 	private static final Logger logger;
 	
 	static {
