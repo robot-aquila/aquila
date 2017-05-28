@@ -7,8 +7,8 @@ import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.Utils;
-import ru.prolib.aquila.utils.experimental.charts.series.TradeInfoSeries;
-import ru.prolib.aquila.utils.experimental.charts.series.TradeInfoTimeSeries;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListTimeSeries;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class TradeChartLayer extends AbstractChartLayer<Instant, List<TradeInfo>
     @Override
     public void setData(Series<List<TradeInfo>> data) {
         super.setData(data);
-        setCategories(new TradeInfoTimeSeries(data));
+        setCategories(new StampedListTimeSeries((StampedListSeries<TradeInfo>) data));
     }
 
     @Override

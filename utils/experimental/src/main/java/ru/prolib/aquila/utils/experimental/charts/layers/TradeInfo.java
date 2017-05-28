@@ -5,13 +5,14 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.TStamped;
 
 import java.time.Instant;
 
 /**
  * Created by TiM on 19.04.2017.
  */
-public class TradeInfo {
+public class TradeInfo implements TStamped {
     private final Instant time;
     private final OrderAction action;
     private final double price;

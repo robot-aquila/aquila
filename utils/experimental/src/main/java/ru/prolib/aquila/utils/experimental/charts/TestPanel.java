@@ -1,11 +1,11 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
-import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.ScrollBar;
 import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
+import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.utils.experimental.charts.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartLayer;
@@ -14,7 +14,7 @@ import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculat
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.IndicatorParams;
 import ru.prolib.aquila.utils.experimental.charts.indicators.forms.QEMAIndicatorParams;
 import ru.prolib.aquila.utils.experimental.charts.layers.*;
-import ru.prolib.aquila.utils.experimental.charts.series.TradeInfoSeries;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,6 +45,8 @@ public class TestPanel extends JPanel {
     private Timer replayTimer = new Timer("REPLAY_TIMER", true);
     private TimerTask replayTask;
     private int countReplay = 0;
+    private EventQueue eventQueue = new EventQueueImpl();
+    private StampedListSeries<TradeInfo> tradeSeries;
 
     private final int TICK_DELAY = 200;
     private final int COUNT_TICK = 20;
@@ -157,7 +159,9 @@ public class TestPanel extends JPanel {
                 OrderAction.BUY,
                 candleData.get(5).getBodyMiddle(),
                 500L));
-        trades.setData(new TradeInfoSeries("TRADE_INFO", TimeFrame.M15, tradesData));
+        tradeSeries = new StampedListSeries<TradeInfo>("TRADE_INFO", TimeFrame.M15, eventQueue, tradesData);
+        tradeSeries.onAdd().addListener(event -> panel.refresh());
+        trades.setData(tradeSeries);
 
 //        volumes.setData(candleData);
 
@@ -241,6 +245,19 @@ public class TestPanel extends JPanel {
             }
         });
         main.add(miReplay);
+
+        final JMenuItem miAddTrade = new JMenuItem("Add trade");
+        miAddTrade.addActionListener(e -> {
+            try {
+                tradeSeries.add(new TradeInfo(candleData.get(10).getStartTime().plus(12, ChronoUnit.MINUTES),
+                        OrderAction.SELL,
+                        candleData.get(10).getBodyMiddle(),
+                        500L));
+            } catch (ValueException e1) {
+                e1.printStackTrace();
+            }
+        });
+        main.add(miAddTrade);
 
         main.add(new JPopupMenu.Separator());
 

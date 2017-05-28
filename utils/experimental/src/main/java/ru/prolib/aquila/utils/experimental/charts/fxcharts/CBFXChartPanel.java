@@ -10,6 +10,11 @@ import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartLayer
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
 import ru.prolib.aquila.utils.experimental.charts.layers.CandleChartLayer;
+import ru.prolib.aquila.utils.experimental.charts.layers.TradeChartLayer;
+import ru.prolib.aquila.utils.experimental.charts.layers.TradeInfo;
+import ru.prolib.aquila.utils.experimental.charts.layers.VolumeChartLayer;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListTimeSeries;
 
 import javax.swing.*;
 import java.time.Instant;
@@ -23,6 +28,9 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
     private CandleChartLayer candles;
     private List<IndicatorChartLayer> indicators = new ArrayList<>();
     private ObservableSeries<Candle>  candleData;
+    private VolumeChartLayer volumes;
+    private TradeChartLayer trades;
+    private StampedListSeries<TradeInfo> tradesData;
 
     public CBFXChartPanel(ObservableSeries<Candle> candleData) {
         setScrollbar(new JScrollBar(JScrollBar.HORIZONTAL));
@@ -62,6 +70,34 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
         return indicator;
     }
 
+    public void addVolumes(){
+        if(volumes!=null){
+            throw new IllegalStateException("Volumes chart is already added");
+        }
+        addChart("VOLUMES");
+        volumes = new VolumeChartLayer();
+        addChartLayer("VOLUMES", volumes);
+        getChart("VOLUMES").setPrefHeight(200);
+        getChart("CANDLES").setPrefHeight(1200);
+        volumes.setData(new CandleVolumeSeries(candleData));
+        volumes.setCategories(new CandleStartTimeSeries(candleData));
+    }
+
+    public void addTrades(){
+        trades = new TradeChartLayer();
+        addChartLayer("CANDLES", trades);
+    }
+
+    public void setTradesData(StampedListSeries<TradeInfo> data){
+        if(tradesData!=null){
+            tradesData.onAdd().removeListeners();
+        }
+        tradesData = data;
+        trades.setData(tradesData);
+        trades.setCategories(new StampedListTimeSeries(tradesData));
+        tradesData.onAdd().addListener(this);
+    }
+
     @Override
     public void onEvent(Event event) {
     	// А зачем тут onSet обрабатывается?
@@ -76,6 +112,9 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
                     setCurrentPosition(getCurrentPosition()+1);
                 }
             });
+        }
+        if(event.isType(tradesData.onAdd())){
+            refresh();
         }
     }
 }

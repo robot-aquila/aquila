@@ -65,13 +65,13 @@
 }
 
 .trade-buy {
-    -fx-fill: green;
+    -fx-fill: #BAF300;
     -fx-stroke: black;
     -fx-stroke-width: 1;
 }
 
 .trade-sell {
-    -fx-fill: red;
+    -fx-fill: PINK;
     -fx-stroke: black;
     -fx-stroke-width: 1;
 }

@@ -1,22 +1,15 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
-import javafx.scene.Node;
 import org.threeten.extra.Interval;
+import ru.prolib.aquila.core.BusinessEntities.OrderAction;
+import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.ta.QEMA;
-import ru.prolib.aquila.utils.experimental.charts.ChartPanel;
-import ru.prolib.aquila.utils.experimental.charts.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
-import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartLayer;
-import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
-import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
-import ru.prolib.aquila.utils.experimental.charts.indicators.forms.IndicatorParams;
-import ru.prolib.aquila.utils.experimental.charts.indicators.forms.QEMAIndicatorParams;
-import ru.prolib.aquila.utils.experimental.charts.layers.CandleChartLayer;
-import ru.prolib.aquila.utils.experimental.charts.layers.ChartLayer;
-import ru.prolib.aquila.utils.experimental.charts.layers.VolumeChartLayer;
+import ru.prolib.aquila.utils.experimental.charts.layers.TradeInfo;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +23,7 @@ public class SimpleTestPanel extends JPanel {
 
     private final CBFXChartPanel panel;
     private ObservableSeries<Candle> candleData;
+    private StampedListSeries<TradeInfo> tradesData;
     private final Instant start = Instant.parse("2016-12-31T19:00:00.000Z");
     private final int step = 15;
 
@@ -37,17 +31,22 @@ public class SimpleTestPanel extends JPanel {
         super();
         setLayout(new BorderLayout());
 
-        candleData = new ObservableSeriesImpl<Candle>(new EventQueueImpl(), getRandomData());
+        EventQueue eventQueue = new EventQueueImpl();
+        candleData = new ObservableSeriesImpl<Candle>(eventQueue, getRandomData());
         Series<Double> candleCloseData = new CandleCloseSeries(candleData);
         Series<Double> qema7 = new QEMA("QEMA_7", candleCloseData, 7);
         Series<Double> qema14 = new QEMA("QEMA_14", candleCloseData, 14);
         Series<Double> h = new CandleHighSeries(candleData);
+        tradesData = new StampedListSeries<TradeInfo>("TRADES", TimeFrame.M15, eventQueue);
 
         /* три строчки */
         panel = new CBFXChartPanel(candleData);
 //        panel.addSmoothLine(h).setStyleClass("line-magenta");
         panel.addSmoothLine(qema7).setStyleClass("line-magenta");
         panel.addSmoothLine(qema14).setStyleClass("line-blue");
+        panel.addVolumes();
+        panel.addTrades();
+        panel.setTradesData(tradesData);
 
         add(panel, BorderLayout.CENTER);
     }
@@ -56,7 +55,7 @@ public class SimpleTestPanel extends JPanel {
     private SeriesImpl<Candle> getRandomData(){
         double previousClose = 1850;
         SeriesImpl<Candle> data = new SeriesImpl<>();
-        for (int i = 0; i < 5*24*60; i++) {
+        for (int i = 0; i < 500; i++) {
             Interval interval = Interval.of(start.plus(step*i, ChronoUnit.MINUTES), start.plus(step*(i+1), ChronoUnit.MINUTES));
             double open = previousClose;
             double close = getNewValue(open);
@@ -170,6 +169,20 @@ public class SimpleTestPanel extends JPanel {
 
         });
         main.add(start);
+
+        final JMenuItem miAddTrade = new JMenuItem("Add trade");
+        miAddTrade.addActionListener(e -> {
+            try {
+                tradesData.add(new TradeInfo(candleData.get(10).getStartTime().plus(12, ChronoUnit.MINUTES),
+                        OrderAction.SELL,
+                        candleData.get(10).getBodyMiddle(),
+                        500L));
+            } catch (ValueException e1) {
+                e1.printStackTrace();
+            }
+        });
+        main.add(miAddTrade);
+
         menuBar.add(main);
         return menuBar;
     }
