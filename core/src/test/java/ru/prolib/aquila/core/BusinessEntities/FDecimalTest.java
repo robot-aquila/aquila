@@ -582,4 +582,24 @@ public class FDecimalTest {
 		assertEquals(4.95612, x.doubleValue(), 0.000001d);
 	}
 
+	@Test
+	public void testIntValue() {
+		FDecimal x = FDecimal.of(4.95612, 5);
+
+		assertEquals(4, x.intValue());
+	}
+
+	@Test
+	public void testLongValue() {
+		FDecimal x = FDecimal.of(4.95612, 5);
+
+		assertEquals(4L, x.longValue());
+	}
+
+	@Test
+	public void testFloatValue() {
+		FDecimal x = FDecimal.of(4.95612, 5);
+
+		assertEquals(4.95612f, x.floatValue(), 0.000001d);
+	}
 }

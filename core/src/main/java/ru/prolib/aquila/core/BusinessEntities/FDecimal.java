@@ -7,7 +7,7 @@ import java.util.Locale;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.util.StringUtils;
 
-public class FDecimal implements Comparable<FDecimal> {
+public class FDecimal extends Number implements Comparable<FDecimal> {
 	public static final int VERSION = 1;
 	public static final FDecimal ZERO0 = FDecimal.of0(0);
 	public static final FDecimal ZERO1 = FDecimal.of1(0);
@@ -173,7 +173,7 @@ public class FDecimal implements Comparable<FDecimal> {
 	public FDecimal(){
 		this("0.00");
 	}
-	
+
 	public int getScale() {
 		return value.scale();
 	}
@@ -273,4 +273,18 @@ public class FDecimal implements Comparable<FDecimal> {
 		return new FDecimal(value.abs(), roundingMode);
 	}
 
+	@Override
+	public int intValue() {
+		return value.intValue();
+	}
+
+	@Override
+	public long longValue() {
+		return value.longValue();
+	}
+
+	@Override
+	public float floatValue() {
+		return value.floatValue();
+	}
 }
