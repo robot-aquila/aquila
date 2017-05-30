@@ -32,20 +32,57 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
     private TradeChartLayer trades;
     private StampedListSeries<TradeInfo> tradesData;
 
-    public CBFXChartPanel(ObservableSeries<Candle> candleData) {
+    public CBFXChartPanel() {
         setScrollbar(new JScrollBar(JScrollBar.HORIZONTAL));
-        this.candleData = candleData;
         addChart("CANDLES");
         candles = new CandleChartLayer();
         addChartLayer("CANDLES", candles);
-        candles.setData(candleData);
         setCategoriesLabelFormatter(new InstantLabelFormatter());
-        candleData.onAdd().addListener(this);
-        candleData.onSet().addListener(this);
+    }
+
+    public CBFXChartPanel(ObservableSeries<Candle> candleData) {
+        this();
+        setCandleData(candleData);
+    }
+
+    public void setCandleData(ObservableSeries<Candle> data){
+        if(candleData!=null){
+            candleData.onAdd().removeListener(this);
+            candleData.onSet().removeListener(this);
+        }
+        indicators.clear();
+
+        candleData = data;
+        candles.setData(candleData);
+        if(candleData!=null){
+            candleData.onAdd().addListener(this);
+            candleData.onSet().addListener(this);
+        }
+        if(volumes!=null){
+            volumes.setData(new CandleVolumeSeries(candleData));
+            volumes.setCategories(new CandleStartTimeSeries(candleData));
+        }
+        setFullRedraw(true);
         setCurrentPosition(candleData.getLength());
     }
 
+    @Override
+    public void clearData(){
+        if(candleData!=null){
+            candleData.onAdd().removeListener(this);
+            candleData.onSet().removeListener(this);
+        }
+        candleData = null;
+        removeIndicators("CANDLES");
+        super.clearData();
+        indicators.clear();
+        setCurrentPosition(0);
+    }
+
     public IndicatorChartLayer addSmoothLine(Series<Double> data){
+        if(candleData==null){
+            throw new IllegalStateException("Candle data not set");
+        }
         IndicatorSettings indicatorSettings = new IndicatorSettings(new Calculator() {
             @Override
             public String getId() {
@@ -79,8 +116,10 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
         addChartLayer("VOLUMES", volumes);
         getChart("VOLUMES").setPrefHeight(200);
         getChart("CANDLES").setPrefHeight(1200);
-        volumes.setData(new CandleVolumeSeries(candleData));
-        volumes.setCategories(new CandleStartTimeSeries(candleData));
+        if(candleData!=null){
+            volumes.setData(new CandleVolumeSeries(candleData));
+            volumes.setCategories(new CandleStartTimeSeries(candleData));
+        }
     }
 
     public void addTrades(){
@@ -101,7 +140,7 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
     @Override
     public void onEvent(Event event) {
     	// А зачем тут onSet обрабатывается?
-        if(event.isType(candleData.onAdd()) || event.isType(candleData.onSet())){
+        if(candleData!=null && (event.isType(candleData.onAdd()) || event.isType(candleData.onSet()))){
             Platform.runLater(()->{
             	int dummy = getCategories().size()-1;
                 Instant lastChartCategory = null;
@@ -113,7 +152,7 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
                 }
             });
         }
-        if(event.isType(tradesData.onAdd())){
+        if(tradesData!=null && event.isType(tradesData.onAdd())){
             refresh();
         }
     }

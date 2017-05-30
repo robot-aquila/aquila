@@ -22,6 +22,8 @@ public interface ChartLayer<TCategories, TValues> {
 
     Series<TValues> getData();
 
+    void clearData();
+
     List<Node> paint();
 
     Pair<Double, Double> getValuesInterval(List<TCategories> displayCategories);

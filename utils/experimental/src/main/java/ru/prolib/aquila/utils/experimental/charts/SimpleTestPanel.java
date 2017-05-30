@@ -2,9 +2,9 @@ package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
 import org.threeten.extra.Interval;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.ta.QEMA;
 import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
@@ -41,7 +41,6 @@ public class SimpleTestPanel extends JPanel {
 
         /* три строчки */
         panel = new CBFXChartPanel(candleData);
-//        panel.addSmoothLine(h).setStyleClass("line-magenta");
         panel.addSmoothLine(qema7).setStyleClass("line-magenta");
         panel.addSmoothLine(qema14).setStyleClass("line-blue");
         panel.addVolumes();

@@ -75,7 +75,7 @@ public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
 
     @Override
     protected double getMinValue(Long value) {
-        return value.doubleValue();
+        return 0d;
     }
 
     @Override

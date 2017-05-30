@@ -4,6 +4,7 @@ import javafx.scene.Node;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.core.data.SeriesImpl;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.Chart;
 
@@ -40,6 +41,12 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
     @Override
     public Series<TValues> getData() {
         return data;
+    }
+
+    @Override
+    public void clearData() {
+        this.data = new SeriesImpl<>();
+        this.categories = new SeriesImpl<>();
     }
 
     @Override

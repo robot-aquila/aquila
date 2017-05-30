@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.formatters.CategoriesLabelFormatter;
+import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartLayer;
 import ru.prolib.aquila.utils.experimental.charts.layers.ChartLayer;
 
 import javax.swing.*;
@@ -134,6 +135,24 @@ public class ChartPanel<T> extends JPanel {
         setCurrentPosition(currentPosition);
     }
 
+    public void clearData(){
+        for (List<ChartLayer> layers : chartLayers.values()) {
+            for (ChartLayer layer : layers) {
+                layer.clearData();
+            }
+        }
+    }
+
+    public void removeIndicators(String chartId){
+        for(int i=getChartLayers(chartId).size()-1; i>=0; i--){
+            ChartLayer chartLayer = getChartLayers(chartId).get(i);
+            if(chartLayer instanceof IndicatorChartLayer){
+                getChartLayers(chartId).remove(i);
+            }
+        }
+        setFullRedraw(true);
+    }
+
     AtomicBoolean started = new AtomicBoolean(false);
     Timer timerUpdate = new Timer();
 
@@ -200,11 +219,13 @@ public class ChartPanel<T> extends JPanel {
         for (List<ChartLayer> objects : chartLayers.values()) {
             for (ChartLayer obj : objects) {
                 Series<T> c = obj.getCategories();
-                for (int i = 0; i < c.getLength(); i++) {
-                    try {
-                        set.add(c.get(i));
-                    } catch (ValueException e) {
-                        e.printStackTrace();
+                if(c!=null){
+                    for (int i = 0; i < c.getLength(); i++) {
+                        try {
+                            set.add(c.get(i));
+                        } catch (ValueException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
