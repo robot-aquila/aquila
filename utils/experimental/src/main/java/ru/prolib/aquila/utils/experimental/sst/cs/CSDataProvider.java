@@ -14,5 +14,9 @@ public interface CSDataProvider {
 	void start();
 	
 	void stop();
+	
+	Collection<Symbol> getSymbols();
+	
+	Collection<TimeFrame> getTimeFrames(Symbol symbol);
 
 }

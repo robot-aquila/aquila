@@ -3,6 +3,7 @@ package ru.prolib.aquila.utils.experimental.sst.cs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +112,16 @@ public class CSDataProviderImpl implements CSDataProvider, EventListener {
 		node.filler = csUtils.createFiller(terminal, slice.getSymbol(),
 				slice.getTF(), slice.getCandleSeries_());
 		node.filler.start();
+	}
+
+	@Override
+	public synchronized Collection<Symbol> getSymbols() {
+		return new HashSet<>(nodes.keySet());
+	}
+
+	@Override
+	public Collection<TimeFrame> getTimeFrames(Symbol symbol) {
+		return getNodes(symbol).keySet();
 	}
 
 }
