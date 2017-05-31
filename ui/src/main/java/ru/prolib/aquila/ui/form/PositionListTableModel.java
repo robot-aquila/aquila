@@ -270,11 +270,13 @@ public class PositionListTableModel extends AbstractTableModel implements
 	public Class<?> getColumnClass(int col) {
 		switch ( getColumnID(col) ) {
 		case CID_CURRENT_VOLUME:
+			return Long.class;
 		case CID_CURRENT_PRICE:
 		case CID_OPEN_PRICE:
+			return FDecimal.class;
 		case CID_USED_MARGIN:
 		case CID_PROFIT_AND_LOSS:
-			return Number.class;
+			return FMoney.class;
 		default:
 			return super.getColumnClass(col);
 		}

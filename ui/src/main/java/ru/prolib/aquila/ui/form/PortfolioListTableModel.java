@@ -267,7 +267,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 		case CID_FREE_MARGIN:
 		case CID_USED_MARGIN:
 		case CID_PROFIT_AND_LOSS:
-			return Number.class;
+			return FMoney.class;
 		default:
 			return super.getColumnClass(col);
 		}

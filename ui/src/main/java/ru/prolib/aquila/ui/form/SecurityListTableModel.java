@@ -10,13 +10,9 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
+import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
-import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.ui.ITableModel;
@@ -351,23 +347,27 @@ public class SecurityListTableModel extends AbstractTableModel
 		switch ( getColumnID(col) ) {
 		case CID_LOT_SIZE:
 		case CID_SCALE:
-		case CID_TICK_SIZE:
+			return Integer.class;
 		case CID_TICK_VALUE:
 		case CID_INITIAL_MARGIN:
+			return FMoney.class;
+		case CID_TICK_SIZE:
 		case CID_SETTLEMENT_PRICE:
 		case CID_LOWER_PRICE_LIMIT:
 		case CID_UPPER_PRICE_LIMIT:
-		case CID_LAST_PRICE:
+			return FDecimal.class;
 		case CID_LAST_SIZE:
-		case CID_ASK_PRICE:
 		case CID_ASK_SIZE:
-		case CID_BID_PRICE:
 		case CID_BID_SIZE:
+			return Long.class;
+		case CID_LAST_PRICE:
+		case CID_ASK_PRICE:
+		case CID_BID_PRICE:
 		case CID_OPEN_PRICE:
 		case CID_HIGH_PRICE:
 		case CID_LOW_PRICE:
 		case CID_CLOSE_PRICE:
-			return Number.class;
+			return Double.class;
 		default:
 			return super.getColumnClass(col);
 		}

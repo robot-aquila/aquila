@@ -3,6 +3,7 @@ package ru.prolib.aquila.qforts.ui;
 import java.util.List;
 import java.util.Map;
 
+import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
@@ -57,7 +58,7 @@ public class QFPortfolioListTableModel extends PortfolioListTableModel {
 		case CID_VMARGIN:
 		case CID_VMARGIN_INTER:
 		case CID_VMARGIN_CLOSE:
-			return Number.class;
+			return FMoney.class;
 		default:
 			return super.getColumnClass(col);
 		}
