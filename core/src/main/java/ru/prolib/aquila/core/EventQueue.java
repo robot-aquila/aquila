@@ -13,17 +13,6 @@ package ru.prolib.aquila.core;
 public interface EventQueue extends Starter {
 	
 	/**
-	 * Enqueue event.
-	 * <p>
-	 * Do not use this method. Use {@link #enqueue(EventType, EventFactory)}
-	 * instead. This method will be marked as private in the future.
-	 * <p>
-	 * @param event - event to dispatch
-	 */
-	@Deprecated
-	public void enqueue(Event event);
-	
-	/**
 	 * Enqueue event created by factory.
 	 * <p>
 	 * This method is used to enqueue events created by factory for the

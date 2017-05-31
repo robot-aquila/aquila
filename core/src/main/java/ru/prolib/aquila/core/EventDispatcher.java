@@ -6,14 +6,23 @@ package ru.prolib.aquila.core;
  * 2012-04-09<br>
  * $Id: EventDispatcher.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public interface EventDispatcher {
+public interface EventDispatcher extends EventProducer {
 	
 	/**
 	 * Отправить событие
 	 * <p>
 	 * @param event событие
 	 */
+	@Deprecated
 	public void dispatch(Event event);
+	
+	/**
+	 * Dispatch event.
+	 * <p>
+	 * @param type - event type
+	 * @param factory - event factory
+	 */
+	void dispatch(EventType type, EventFactory factory);
 	
 	/**
 	 * Завершить работу

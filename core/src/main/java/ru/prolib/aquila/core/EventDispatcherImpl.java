@@ -1,5 +1,9 @@
 package ru.prolib.aquila.core;
 
+import java.util.LinkedList;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 /**
  * Диспетчер событий. 
  * <p>
@@ -14,6 +18,8 @@ public class EventDispatcherImpl implements EventDispatcher {
 	
 	private final EventQueue queue;
 	private final String id;
+	private final LinkedList<CachedEvent> cache;
+	private boolean suppressMode = false;
 	
 	/**
 	 * Получить текущий идентификатор для автоназначения.
@@ -22,6 +28,13 @@ public class EventDispatcherImpl implements EventDispatcher {
 	 */
 	public static synchronized int getAutoId() {
 		return autoId;
+	}
+	
+	
+	EventDispatcherImpl(EventQueue queue, String id, LinkedList<CachedEvent> eventCache) {
+		this.queue = queue;
+		this.id = id;
+		this.cache = eventCache;
 	}
 	
 	/**
@@ -43,12 +56,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 	 * @param id идентификатор диспетчера (фактически владельца)
 	 */
 	public EventDispatcherImpl(EventQueue queue, String id) {
-		super();
-		if ( queue == null ) {
-			throw new NullPointerException("Queue cannot be null");
-		}
-		this.queue = queue;
-		this.id = id;
+		this(queue, id, new LinkedList<>());
 	}
 	
 	@Override
@@ -77,7 +85,16 @@ public class EventDispatcherImpl implements EventDispatcher {
 
 	@Override
 	public void dispatch(Event event) {
-		queue.enqueue(event.getType(), new EnqueueNewSigAdapter(event));
+		dispatch(event.getType(), new EnqueueNewSigAdapter(event));
+	}
+	
+	@Override
+	public synchronized void dispatch(EventType type, EventFactory factory) {
+		if ( suppressMode ) {
+			cache.add(new CachedEvent(type, factory));
+		} else {
+			queue.enqueue(type, factory);
+		}
 	}
 
 	@Override
@@ -103,6 +120,45 @@ public class EventDispatcherImpl implements EventDispatcher {
 	@Override
 	public EventType createSyncType(String typeId) {
 		return new EventTypeImpl(getId() + "." + typeId, true);
+	}
+
+	@Override
+	public synchronized void suppressEvents() {
+		suppressMode = true;
+	}
+
+	@Override
+	public synchronized void restoreEvents() {
+		for ( CachedEvent x : cache ) {
+			queue.enqueue(x.type, x.factory);
+		}
+		suppressMode = false;
+	}
+	
+	static class CachedEvent {
+		private final EventType type;
+		private final EventFactory factory;
+		
+		CachedEvent(EventType type, EventFactory factory) {
+			this.type = type;
+			this.factory = factory;
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != CachedEvent.class ) {
+				return false;
+			}
+			CachedEvent o = (CachedEvent) other;
+			return new EqualsBuilder()
+					.append(type,  o.type)
+					.append(factory, o.factory)
+					.isEquals();
+		}
+		
 	}
 	
 	static class EnqueueNewSigAdapter implements EventFactory {

@@ -144,8 +144,7 @@ public class EventQueueImpl implements EventQueue {
 	 * <p>
 	 * @throws IllegalStateException поток обработки не запущен
 	 */
-	@Override
-	public void enqueue(Event event) {
+	private void enqueue(Event event) {
 		if ( event == null ) {
 			throw new NullPointerException("The event cannot be null");
 		}

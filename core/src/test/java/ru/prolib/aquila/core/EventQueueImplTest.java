@@ -62,14 +62,8 @@ public class EventQueueImplTest {
 		assertTrue(queue.join(1000));
 	}
 	
-	@Test (expected=NullPointerException.class)
-	public void testEnqueue_ThrowsIfEventIsNull() throws Exception {
-		queue.start();
-		queue.enqueue(null);
-	}
-	
 	@Test
-	public void testEnqueue_AddListenerAfterEnqueue() throws Exception {
+	public void testEnqueue2_AddListenerAfterEnqueue() throws Exception {
 		// Добавление наблюдателя после помещения события в очередь
 		// учитывается при непосредственно отправке события.
 		final CountDownLatch finished = new CountDownLatch(3);
@@ -92,22 +86,22 @@ public class EventQueueImplTest {
 			}
 		});
 		queue.start();
-		queue.enqueue(new EventImpl(type2));
-		queue.enqueue(new EventImpl(type1));
+		queue.enqueue(type2, SimpleEventFactory.getInstance());
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		queue.stop();
 	}
 	
 	private static int counter = 0; 
 	@Test
-	public void testEnqueueL_FromQueueThread() throws Exception {
+	public void testEnqueue2_FromQueueThread() throws Exception {
 		// Тест трансляции события из потока диспетчеризации.
 		type1.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
 				counter ++;
 				if ( counter <= 10 ) {
-					queue.enqueue(new EventImpl(type1));
+					queue.enqueue(type1, SimpleEventFactory.getInstance());
 				} else {
 					queue.stop();
 				}
@@ -115,7 +109,7 @@ public class EventQueueImplTest {
 		});
 		counter = 0;
 		queue.start();
-		queue.enqueue(new EventImpl(type1));
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(queue.join(1000));
 	}
 	
@@ -126,7 +120,6 @@ public class EventQueueImplTest {
 	
 	@Test
 	public void testJoin1_TrueIfFinished() throws Exception {
-		final Event event = new EventImpl(type1);
 		type1.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
@@ -140,7 +133,7 @@ public class EventQueueImplTest {
 			}
 		});
 		queue.start();
-		queue.enqueue(event);
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(queue.join(100));
 		assertFalse(queue.started());
 	}
@@ -148,7 +141,6 @@ public class EventQueueImplTest {
 	@Test
 	public void testJoin1_IgnoreInQueueThread() throws Exception {
 		final CountDownLatch exit = new CountDownLatch(1);
-		final Event event = new EventImpl(type1);
 		type1.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
@@ -162,7 +154,7 @@ public class EventQueueImplTest {
 			}
 		});
 		queue.start();
-		queue.enqueue(event);
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(exit.await(100, TimeUnit.MILLISECONDS));
 		queue.stop();
 	}
@@ -183,7 +175,7 @@ public class EventQueueImplTest {
 			}
 		});
 		queue.start();
-		queue.enqueue(new EventImpl(type1));
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		queue.join();
 		assertFalse(queue.started());
@@ -206,7 +198,7 @@ public class EventQueueImplTest {
 			}
 		});
 		queue.start();
-		queue.enqueue(new EventImpl(type1));
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(50, TimeUnit.MILLISECONDS));
 	}
 	
@@ -236,7 +228,7 @@ public class EventQueueImplTest {
 			}
 		});
 		queue.start();
-		queue.enqueue(new EventImpl(type1));
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		started.countDown();
 		queue.join();
 		assertTrue(queue.started());
@@ -261,25 +253,25 @@ public class EventQueueImplTest {
 		expected.add("T1L1");
 		expected.add("T2L1s");
 		expected.add("T4L1");
-		final EventType type3 = dispatcher.createSyncType(),
-				type4 = dispatcher.createType();
+		final EventType type3 = new EventTypeImpl(true),
+				type4 = new EventTypeImpl();
 		final CountDownLatch finished = new CountDownLatch(1);
 		type1.addListener(new EventListener() { 				// #3
 			@Override public void onEvent(Event event) {
 				actual.add("T1L1");
-				dispatcher.dispatch(new EventImpl(type2));
+				queue.enqueue(type2, SimpleEventFactory.getInstance());
 			}
 		});
 		type1.addSyncListener(new EventListener() {  			// #1
 			@Override public void onEvent(Event event) {
 				actual.add("T1L2s");
-				dispatcher.dispatch(new EventImpl(type3));
+				queue.enqueue(type3, SimpleEventFactory.getInstance());
 			}
 		});
-		type2.addSyncListener(new EventListener() {
+		type2.addSyncListener(new EventListener() {				// #4
 			@Override public void onEvent(Event event) {
 				actual.add("T2L1s");
-				dispatcher.dispatch(new EventImpl(type4));		// #4 
+				queue.enqueue(type4, SimpleEventFactory.getInstance());
 			}
 		});
 		type3.addSyncListener(new EventListener() {
@@ -295,7 +287,7 @@ public class EventQueueImplTest {
 		});
 		
 		queue.start();
-		queue.enqueue(new EventImpl(type1));
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		queue.stop();
 		queue.join(100);
