@@ -25,6 +25,9 @@ import java.util.List;
  * Created by TiM on 08.05.2017.
  */
 public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener {
+    private static final int FIRST_CHART_PREF_HEIGHT = 1200;
+    private static final int OTHER_CHART_PREF_HEIGHT = 200;
+
     private CandleChartLayer candles;
     private List<IndicatorChartLayer> indicators = new ArrayList<>();
     private ObservableSeries<Candle>  candleData;
@@ -80,9 +83,20 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
     }
 
     public IndicatorChartLayer addSmoothLine(Series<Double> data){
+        return addSmoothLine("CANDLES", data);
+    }
+
+    public IndicatorChartLayer addSmoothLine(String chartId, Series<Double> data){
         if(candleData==null){
             throw new IllegalStateException("Candle data not set");
         }
+        try {
+            getChart(chartId);
+        } catch (IllegalArgumentException e){
+            addChart(chartId);
+            getChart(chartId).setPrefHeight(OTHER_CHART_PREF_HEIGHT);
+        }
+
         IndicatorSettings indicatorSettings = new IndicatorSettings(new Calculator() {
             @Override
             public String getId() {
@@ -103,7 +117,7 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
         indicator.setCategories(new CandleStartTimeSeries(candleData));
         indicator.setData(data);
         indicators.add(indicator);
-        addChartLayer("CANDLES", indicator);
+        addChartLayer(chartId, indicator);
         return indicator;
     }
 
@@ -114,8 +128,8 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
         addChart("VOLUMES");
         volumes = new VolumeChartLayer();
         addChartLayer("VOLUMES", volumes);
-        getChart("VOLUMES").setPrefHeight(200);
-        getChart("CANDLES").setPrefHeight(1200);
+        getChart("VOLUMES").setPrefHeight(OTHER_CHART_PREF_HEIGHT);
+        getChart("CANDLES").setPrefHeight(FIRST_CHART_PREF_HEIGHT);
         if(candleData!=null){
             volumes.setData(new CandleVolumeSeries(candleData));
             volumes.setCategories(new CandleStartTimeSeries(candleData));
