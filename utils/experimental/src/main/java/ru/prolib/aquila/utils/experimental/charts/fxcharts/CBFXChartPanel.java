@@ -9,6 +9,9 @@ import ru.prolib.aquila.utils.experimental.charts.formatters.InstantLabelFormatt
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorChartLayer;
 import ru.prolib.aquila.utils.experimental.charts.indicators.IndicatorSettings;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
+import ru.prolib.aquila.utils.experimental.charts.interpolator.LineRenderer;
+import ru.prolib.aquila.utils.experimental.charts.interpolator.PolyLineRenderer;
+import ru.prolib.aquila.utils.experimental.charts.interpolator.SmoothLineRenderer;
 import ru.prolib.aquila.utils.experimental.charts.layers.CandleChartLayer;
 import ru.prolib.aquila.utils.experimental.charts.layers.TradeChartLayer;
 import ru.prolib.aquila.utils.experimental.charts.layers.TradeInfo;
@@ -87,6 +90,18 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
     }
 
     public IndicatorChartLayer addSmoothLine(String chartId, Series<Double> data){
+        return addLine(chartId, data, new SmoothLineRenderer());
+    }
+
+    public IndicatorChartLayer addPolyLine(Series<Double> data){
+        return addPolyLine("CANDLES", data);
+    }
+
+    public IndicatorChartLayer addPolyLine(String chartId, Series<Double> data){
+        return addLine(chartId, data, new PolyLineRenderer());
+    }
+
+    private IndicatorChartLayer addLine(String chartId, Series<Double> data, LineRenderer lineRenderer){
         if(candleData==null){
             throw new IllegalStateException("Candle data not set");
         }
@@ -116,6 +131,7 @@ public class CBFXChartPanel extends ChartPanel<Instant> implements EventListener
         IndicatorChartLayer indicator = new IndicatorChartLayer(indicatorSettings);
         indicator.setCategories(new CandleStartTimeSeries(candleData));
         indicator.setData(data);
+        indicator.setLineRenderer(lineRenderer);
         indicators.add(indicator);
         addChartLayer(chartId, indicator);
         return indicator;

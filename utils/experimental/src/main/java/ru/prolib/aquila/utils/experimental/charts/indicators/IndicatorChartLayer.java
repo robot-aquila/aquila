@@ -1,17 +1,16 @@
 package ru.prolib.aquila.utils.experimental.charts.indicators;
 
 import javafx.scene.Node;
-import javafx.scene.shape.CubicCurveTo;
-import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
-import javafx.scene.shape.PathElement;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
 import ru.prolib.aquila.utils.experimental.charts.interpolator.CubicCurveCalc;
+import ru.prolib.aquila.utils.experimental.charts.interpolator.LineRenderer;
 import ru.prolib.aquila.utils.experimental.charts.interpolator.Segment;
+import ru.prolib.aquila.utils.experimental.charts.interpolator.SmoothLineRenderer;
 import ru.prolib.aquila.utils.experimental.charts.layers.AbstractChartLayer;
 
 import java.time.Instant;
@@ -25,6 +24,7 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
     private String styleClass;
     private final Calculator calculator;
     private final String id;
+    private LineRenderer lineRenderer = new SmoothLineRenderer();
 
     public IndicatorChartLayer(IndicatorSettings settings) {
         this.calculator = settings.getCalculator();
@@ -77,16 +77,7 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
 
         List<Segment> segments = CubicCurveCalc.calc(points);
 
-        for(Segment s: segments){
-            PathElement element;
-            if(path.getElements().size()==0){
-                element = new MoveTo(s.getX1(), s.getY1());
-                path.getElements().add(element);
-            }
-            element = new CubicCurveTo(s.getXc1(), s.getYc1(),
-                    s.getXc2(), s.getYc2(), s.getX2(), s.getY2());
-            path.getElements().add(element);
-        }
+        lineRenderer.renderLine(path, segments);
 
         if(styleClass !=null){
             path.getStyleClass().clear();
@@ -95,6 +86,10 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
         }
 
         return result;
+    }
+
+    public void setLineRenderer(LineRenderer lineRenderer) {
+        this.lineRenderer = lineRenderer;
     }
 
     @Override

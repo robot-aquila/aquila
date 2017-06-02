@@ -50,9 +50,9 @@ public class SimpleTestPanel extends JPanel {
         panel.addTrades();
         panel.setTradesData(tradesData);
 
-        panel.addSmoothLine(new HIGH("HIGH_20", candleData, 20)).setStyleClass("line-green");
-        panel.addSmoothLine(new LOW("LOW_20", candleData, 20)).setStyleClass("line-red");
-        panel.addSmoothLine("QATR", new QATR("QATR_20", candleData, 20));
+        panel.addPolyLine(new HIGH("HIGH_20", candleData, 20)).setStyleClass("line-green");
+        panel.addPolyLine(new LOW("LOW_20", candleData, 20)).setStyleClass("line-red");
+        panel.addPolyLine("QATR", new QATR("QATR_20", candleData, 20));
 
 
         add(panel, BorderLayout.CENTER);
