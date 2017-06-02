@@ -11,9 +11,12 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderImpl.OrderController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 
 /**
  * 2012-09-22<br>
@@ -68,9 +71,18 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Override
-	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
 		setOrder(order = new OrderImpl(terminal, account, symbol, 240, controller));
+		return order;
+	}
+	
+	@Override
+	protected ObservableStateContainerImpl produceContainer(EventDispatcher eventDispatcher,
+			OSCController controller)
+	{
+		prepareTerminal();
+		setOrder(order = new OrderImpl(terminal, account, symbol, 240, eventDispatcher, controller));
 		return order;
 	}
 	
@@ -95,9 +107,9 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		order = new OrderImpl(terminal, account, symbol, 240);
 		assertEquals(OrderController.class, order.getController().getClass());
 		assertNotNull(order.getTerminal());
-		assertNotNull(order.getEventQueue());
+		assertNotNull(order.getEventDispatcher());
 		assertSame(terminal, order.getTerminal());
-		assertSame(queue, order.getEventQueue());
+		assertSame(queue, ((EventDispatcherImpl) order.getEventDispatcher()).getEventQueue());
 		assertEquals(account, order.getAccount());
 		assertEquals(symbol, order.getSymbol());
 		String prefix = getID();

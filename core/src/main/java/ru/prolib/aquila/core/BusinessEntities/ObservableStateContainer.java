@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import ru.prolib.aquila.core.EventProducer;
 import ru.prolib.aquila.core.EventType;
 
 /**
@@ -8,7 +9,7 @@ import ru.prolib.aquila.core.EventType;
  * The data container gives an access to a set of values which identified by
  * numeric token ID. Container allows track when and which tokens changed.
  */
-public interface ObservableStateContainer extends UpdatableStateContainer {
+public interface ObservableStateContainer extends UpdatableStateContainer, EventProducer {
 	
 	/**
 	 * When container is available for reading.

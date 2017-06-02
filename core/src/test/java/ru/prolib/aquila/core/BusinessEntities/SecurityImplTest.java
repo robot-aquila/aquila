@@ -12,6 +12,8 @@ import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityImpl.SecurityController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
 
 /**
  * 2012-05-30<br>
@@ -59,9 +61,23 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Override
-	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
 		security = new SecurityImpl(terminal, symbol1, controller);
+		return security;
+	}
+	
+	@Override
+	protected ObservableStateContainerImpl produceContainer(EventDispatcher eventDispatcher,
+			OSCController controller)
+	{
+		prepareTerminal();
+		security = new SecurityImpl(new SecurityParamsBuilder()
+				.withTerminal(terminal)
+				.withSymbol(symbol1)
+				.withEventDispatcher(eventDispatcher)
+				.withController(controller)
+				.buildParams());
 		return security;
 	}
 	
@@ -74,9 +90,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		security = new SecurityImpl(terminal, symbol1);
 		assertEquals(SecurityController.class, security.getController().getClass());
 		assertNotNull(security.getTerminal());
-		assertNotNull(security.getEventQueue());
+		assertNotNull(security.getEventDispatcher());
 		assertSame(terminal, security.getTerminal());
-		assertSame(queue, security.getEventQueue());
+		assertSame(queue, ((EventDispatcherImpl)security.getEventDispatcher()).getEventQueue());
 		assertEquals(symbol1, security.getSymbol());
 		String prefix = String.format("%s.S:GAZP@EQBR:RUB.SECURITY", "foobar");
 		assertEquals(prefix, security.getContainerID());

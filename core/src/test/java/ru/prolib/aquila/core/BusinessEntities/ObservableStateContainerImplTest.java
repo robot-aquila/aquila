@@ -17,10 +17,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
 import ru.prolib.aquila.core.concurrency.LID;
 
 public class ObservableStateContainerImplTest {	
@@ -38,7 +42,8 @@ public class ObservableStateContainerImplTest {
 	protected Map<Integer, Object> data;
 	protected Getter<?> getter;
 	protected IMocksControl control;
-	protected ObservableStateContainerImpl.Controller controllerMock;
+	protected OSCController controllerMock;
+	protected EventDispatcher eventDispatcherMock;
 	protected EventListenerStub listenerStub;
 
 	
@@ -51,15 +56,17 @@ public class ObservableStateContainerImplTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		controllerMock = control.createMock(ObservableStateContainerImpl.Controller.class);
+		controllerMock = control.createMock(OSCController.class);
+		eventDispatcherMock = control.createMock(EventDispatcher.class);
 		data = new HashMap<Integer, Object>();
 		queue = new EventQueueImpl();
-		container = produceContainer(new ObservableStateContainerImpl.ControllerStub());
+		container = produceContainer(new OSCControllerStub());
 		listenerStub = new EventListenerStub();
 	}
 	
 	@After
 	public void tearDown() throws Exception {
+		control.resetToNice();
 		data.clear();
 		container.close();
 		queue.stop();
@@ -86,7 +93,10 @@ public class ObservableStateContainerImplTest {
 	 * @param controller - the controller
 	 * @return container instance
 	 */
-	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
+		if ( this.getClass() != ObservableStateContainerImplTest.class ) {
+			throw new IllegalStateException("produceContainer(ObservableStateContainerImpl.Controller) must be implemented for class: " + getClass());
+		}
 		return new ObservableStateContainerImpl(queue, getID(), controller);
 	}
 
@@ -96,7 +106,26 @@ public class ObservableStateContainerImplTest {
 	 * @return container instance
 	 */
 	protected ObservableStateContainerImpl produceContainer() {
+		if ( this.getClass() != ObservableStateContainerImplTest.class ) {
+			throw new IllegalStateException("produceContainer() must be implemented for class: " + getClass());
+		}
 		return new ObservableStateContainerImpl(queue, getID());
+	}
+	
+	/**
+	 * Override this method to produce container with the specified objects.
+	 * <p>
+	 * @param eventDispatcher - the event dispatcher
+	 * @param controller - the controller
+	 * @return container instance
+	 */
+	protected ObservableStateContainerImpl produceContainer(EventDispatcher eventDispatcher,
+			OSCController controller)
+	{
+		if ( this.getClass() != ObservableStateContainerImplTest.class ) {
+			throw new IllegalStateException("produceContainer(EventDispatcher, ObservableStateContainerImpl.Controller) must be implemented for class: " + getClass());
+		}
+		return new ObservableStateContainerImpl(eventDispatcher, getID(), controller);
 	}
 	
 	/**
@@ -254,9 +283,10 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	final public void testContainerImpl_Ctor4() {
+	final public void testContainerImpl_Ctor3() {
 		container = produceContainer(controllerMock);
-		assertSame(queue, container.getEventQueue());
+		EventDispatcherImpl dispatcher = (EventDispatcherImpl) container.getEventDispatcher();
+		assertSame(queue, dispatcher.getEventQueue());
 		assertSame(controllerMock, container.getController());
 		assertEquals(getID(), container.getContainerID());
 		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
@@ -268,10 +298,25 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	final public void testContainerImpl_Ctor3() {
+	final public void testContainerImpl_Ctor2() {
 		container = produceContainer();
-		assertSame(queue, container.getEventQueue());
+		EventDispatcherImpl dispatcher = (EventDispatcherImpl) container.getEventDispatcher();
+		assertSame(queue, dispatcher.getEventQueue());
 		assertNotNull(container.getController());
+		assertEquals(getID(), container.getContainerID());
+		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
+		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
+		assertEquals(getID() + ".CLOSE", container.onClose().getId());
+		assertFalse(container.isAvailable());
+		assertFalse(container.isClosed());
+		assertTrue(LID.isLastCreatedLID(container.getLID()));
+	}
+	
+	@Test
+	final public void testContainerImpl_Ctor3_WithDispatcher() {
+		container = produceContainer(eventDispatcherMock, controllerMock);
+		assertSame(eventDispatcherMock, container.getEventDispatcher());
+		assertSame(controllerMock, container.getController());
 		assertEquals(getID(), container.getContainerID());
 		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
 		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
@@ -841,7 +886,7 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	public void testGetContents() throws Exception {
+	public void testContainerImpl_GetContents() throws Exception {
 		data.put(BOOL_ACTIVE, true);
 		data.put(DOUBLE_CAPITAL, 815.32d);
 		data.put(INSTANT_TIME_OF_REG, Instant.EPOCH);
@@ -860,7 +905,7 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	public void testGetUpdatedContents() throws Exception {
+	public void testContainerImpl_GetUpdatedContents() throws Exception {
 		data.put(BOOL_ACTIVE, true);
 		data.put(DOUBLE_CAPITAL, 815.32d);
 		data.put(INSTANT_TIME_OF_REG, Instant.EPOCH);
@@ -881,7 +926,7 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	public void testHasData() throws Exception {
+	public void testContainerImpl_HasData() throws Exception {
 		assertFalse(container.hasData());
 
 		data.put(BOOL_ACTIVE, true);
@@ -889,6 +934,28 @@ public class ObservableStateContainerImplTest {
 		container.resetChanges();
 		
 		assertTrue(container.hasData());
+	}
+	
+	@Test
+	public void testContainerImpl_SuppressEvents() {
+		container = produceContainer(eventDispatcherMock, controllerMock);
+		eventDispatcherMock.suppressEvents();
+		control.replay();
+		
+		container.suppressEvents();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testContainerImpl_RestoreEvents() {
+		container = produceContainer(eventDispatcherMock, controllerMock);
+		eventDispatcherMock.restoreEvents();
+		control.replay();
+		
+		container.restoreEvents();
+		
+		control.verify();
 	}
 
 }

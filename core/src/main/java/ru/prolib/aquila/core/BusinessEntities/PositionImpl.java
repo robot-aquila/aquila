@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParams;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParamsBuilder;
 
 /**
  * Market position.
@@ -22,32 +25,42 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	private Terminal terminal;
 	private final EventType onPositionChange, onCurrentPriceChange;
 	
-	private static String getID(Terminal terminal, Account account,
-			Symbol symbol, String suffix)
-	{
-		return String.format("%s.%s[%s].%s", terminal.getTerminalID(),
-				account, symbol, suffix);
-	}
-	
-	private String getID(String suffix) {
-		return getID(terminal, account, symbol, suffix);
-	}
-	
-	private EventType newEventType(String suffix) {
-		return new EventTypeImpl(getID(suffix));
+	public PositionImpl(PositionParams params) {
+		super(params);
+		this.terminal = params.getTerminal();
+		this.account = params.getAccount();
+		this.symbol = params.getSymbol();
+		final String pfx = params.getID() + ".";
+		this.onPositionChange = new EventTypeImpl(pfx + "POSITION_CHANGE");
+		this.onCurrentPriceChange = new EventTypeImpl(pfx + "CURRENT_PRICE_CHANGE");
 	}
 
-	public PositionImpl(EditableTerminal terminal, Account account,
-			Symbol symbol, ObservableStateContainerImpl.Controller controller)
+	@Deprecated
+	public PositionImpl(EditableTerminal terminal, Account account, Symbol symbol,
+		EventDispatcher eventDispatcher, OSCController controller)
 	{
-		super(terminal.getEventQueue(), getID(terminal, account, symbol, "POSITION"), controller);
-		this.terminal = terminal;
-		this.account = account;
-		this.symbol = symbol;
-		this.onPositionChange = newEventType("POSITION.POSITION_CHANGE");
-		this.onCurrentPriceChange = newEventType("POSITION.CURRENT_PRICE_CHANGE");
+		this(new PositionParamsBuilder(terminal.getEventQueue())
+				.withTerminal(terminal)
+				.withEventDispatcher(eventDispatcher)
+				.withController(controller)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.buildParams());
+	}
+
+	@Deprecated
+	public PositionImpl(EditableTerminal terminal, Account account, Symbol symbol,
+			OSCController controller)
+	{
+		this(new PositionParamsBuilder(terminal.getEventQueue())
+				.withTerminal(terminal)
+				.withController(controller)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.buildParams());
 	}
 	
+	@Deprecated
 	public PositionImpl(EditableTerminal terminal, Account account, Symbol symbol) {
 		this(terminal, account, symbol, new PositionController());
 	}
@@ -122,7 +135,7 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 		return new PositionEventFactory(this);
 	}
 	
-	static class PositionController implements ObservableStateContainerImpl.Controller {
+	public static class PositionController implements OSCController {
 		
 		@Override
 		public boolean hasMinimalData(ObservableStateContainer container) {
@@ -134,10 +147,10 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 			PositionImpl position = (PositionImpl) container;
 			PositionEventFactory factory = new PositionEventFactory(position);
 			if ( position.hasChanged(PositionField.CURRENT_VOLUME) ) {
-				position.queue.enqueue(position.onPositionChange, factory);
+				position.dispatcher.dispatch(position.onPositionChange, factory);
 			}
 			if ( position.hasChanged(PositionField.CURRENT_PRICE) ) {
-				position.queue.enqueue(position.onCurrentPriceChange, factory);					
+				position.dispatcher.dispatch(position.onCurrentPriceChange, factory);					
 			}
 		}
 

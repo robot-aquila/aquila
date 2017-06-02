@@ -7,6 +7,8 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.DataProvider;
@@ -17,6 +19,7 @@ public class TerminalParamsTest {
 	private DataProvider dataProvider;
 	private ObjectFactory objectFactory;
 	private EventQueue queue;
+	private EventDispatcher dispatcherMock;
 	private TerminalParams params;
 
 	@Before
@@ -25,6 +28,7 @@ public class TerminalParamsTest {
 		scheduler = control.createMock(Scheduler.class);
 		dataProvider = control.createMock(DataProvider.class);
 		objectFactory = control.createMock(ObjectFactory.class);
+		dispatcherMock = control.createMock(EventDispatcher.class);
 		queue = new EventQueueImpl();
 		params = new TerminalParams();
 	}
@@ -36,12 +40,14 @@ public class TerminalParamsTest {
 		params.setDataProvider(dataProvider);
 		params.setTerminalID("DummyTerminal");
 		params.setObjectFactory(objectFactory);
+		params.setEventDispatcher(dispatcherMock);
 		
 		assertSame(scheduler, params.getScheduler());
 		assertSame(queue, params.getEventQueue());
 		assertSame(dataProvider, params.getDataProvider());
 		assertEquals("DummyTerminal", params.getTerminalID());
 		assertSame(objectFactory, params.getObjectFactory());
+		assertSame(dispatcherMock, params.getEventDispatcher());
 	}
 	
 	@Test
@@ -73,6 +79,16 @@ public class TerminalParamsTest {
 		
 		assertEquals(expected1, params.getTerminalID());
 		assertEquals(expected2, params.getTerminalID());
+	}
+	
+	@Test
+	public void testGetEventDispatcher_DefaultInstance() throws Exception {
+		params.setEventQueue(queue);
+		
+		EventDispatcherImpl dispatcher = (EventDispatcherImpl) params.getEventDispatcher();
+		
+		assertNotNull(dispatcher);
+		assertSame(queue, dispatcher.getEventQueue());
 	}
 
 }

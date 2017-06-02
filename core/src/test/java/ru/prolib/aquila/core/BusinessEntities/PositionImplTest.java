@@ -9,10 +9,14 @@ import java.util.Map;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.PositionImpl.PositionController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParamsBuilder;
 
 /**
  * 2012-08-03<br>
@@ -61,9 +65,24 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Override
-	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
 		position = new PositionImpl(terminal, account, symbol, controller);
+		return position;
+	}
+	
+	@Override
+	protected ObservableStateContainerImpl produceContainer(EventDispatcher eventDispatcher,
+			OSCController controller)
+	{
+		prepareTerminal();
+		position = new PositionImpl(new PositionParamsBuilder()
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withEventDispatcher(eventDispatcher)
+				.withController(controller)
+				.buildParams());
 		return position;
 	}
 	
@@ -72,9 +91,9 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		position = new PositionImpl(terminal, account, symbol);
 		assertEquals(PositionController.class, position.getController().getClass());
 		assertNotNull(position.getTerminal());
-		assertNotNull(position.getEventQueue());
+		assertNotNull(position.getEventDispatcher());
 		assertSame(terminal, position.getTerminal());
-		assertSame(queue, position.getEventQueue());
+		assertSame(queue, ((EventDispatcherImpl)position.getEventDispatcher()).getEventQueue());
 		assertEquals(account, position.getAccount());
 		assertEquals(symbol, position.getSymbol());
 		String prefix = String.format("%s.TST01[S:GAZP@EQBR:RUB].", terminal.getTerminalID());

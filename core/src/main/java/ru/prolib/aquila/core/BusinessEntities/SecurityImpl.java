@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParams;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
 
 /**
  * Security implementation.
@@ -33,16 +36,17 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	private Terminal terminal;
 	private Tick bestAsk, bestBid, lastTrade;
 	
-	private static String getID(Terminal terminal, Symbol symbol, String suffix) {
-		return String.format("%s.%s.%s", terminal.getTerminalID(), symbol, suffix);
-	}
-	
-	private String getID(String suffix) {
-		return getID(terminal, symbol, suffix);
-	}
-	
-	private EventType newEventType(String suffix) {
-		return new EventTypeImpl(getID("SECURITY." + suffix));
+	public SecurityImpl(SecurityParams params) {
+		super(params);
+		this.terminal = params.getTerminal();
+		this.symbol = params.getSymbol();
+		final String pfx = params.getID() + ".";
+		this.onSessionUpdate = new EventTypeImpl(pfx + "SESSION_UPDATE");
+		this.onBestAsk = new EventTypeImpl(pfx + "BEST_ASK");
+		this.onBestBid = new EventTypeImpl(pfx + "BEST_BID");
+		this.onLastTrade = new EventTypeImpl(pfx + "LAST_TRADE");
+		this.onMarketDepthUpdate = new EventTypeImpl(pfx + "MARKET_DEPTH_UPDATE");
+		this.marketDepthBuilder = new MDBuilder(symbol);
 	}
 	
 	/**
@@ -52,18 +56,16 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	 * @param symbol - the symbol
 	 * @param controller - controller
 	 */
-	public SecurityImpl(EditableTerminal terminal, Symbol symbol, ObservableStateContainerImpl.Controller controller) {
-		super(terminal.getEventQueue(), getID(terminal, symbol, "SECURITY"), controller);
-		this.terminal = terminal;
-		this.symbol = symbol;
-		this.onSessionUpdate = newEventType("SESSION_UPDATE");
-		this.onBestAsk = newEventType("BEST_ASK");
-		this.onBestBid = newEventType("BEST_BID");
-		this.onLastTrade = newEventType("LAST_TRADE");
-		this.onMarketDepthUpdate = newEventType("MARKET_DEPTH_UPDATE");
-		this.marketDepthBuilder = new MDBuilder(symbol);
+	@Deprecated
+	public SecurityImpl(EditableTerminal terminal, Symbol symbol, OSCController controller) {
+		this(new SecurityParamsBuilder(terminal.getEventQueue())
+				.withTerminal(terminal)
+				.withSymbol(symbol)
+				.withController(controller)
+				.buildParams());
 	}
 	
+	@Deprecated
 	public SecurityImpl(EditableTerminal terminal, Symbol symbol) {
 		this(terminal, symbol, new SecurityController());
 	}
@@ -175,7 +177,7 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 		super.close();
 	}
 	
-	static class SecurityController implements ObservableStateContainerImpl.Controller {
+	public static class SecurityController implements OSCController {
 
 		@Override
 		public boolean hasMinimalData(ObservableStateContainer container) {
@@ -187,7 +189,7 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 			SecurityImpl security = (SecurityImpl) container;
 			if ( security.atLeastOneHasChanged(TOKENS_FOR_SESSION_UPDATE) ) {
 				SecurityEventFactory factory = new SecurityEventFactory(security);
-				security.queue.enqueue(security.onSessionUpdate, factory);
+				security.dispatcher.dispatch(security.onSessionUpdate, factory);
 			}
 		}
 
@@ -262,13 +264,13 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 			lock.unlock();
 		}
 		if ( hasAsk ) {
-			queue.enqueue(onBestAsk, new SecurityTickEventFactory(this, tick));
+			dispatcher.dispatch(onBestAsk, new SecurityTickEventFactory(this, tick));
 		}
 		if ( hasBid ) {
-			queue.enqueue(onBestBid, new SecurityTickEventFactory(this, tick));
+			dispatcher.dispatch(onBestBid, new SecurityTickEventFactory(this, tick));
 		}
 		if ( hasTrade ) {
-			queue.enqueue(onLastTrade, new SecurityTickEventFactory(this, tick));
+			dispatcher.dispatch(onLastTrade, new SecurityTickEventFactory(this, tick));
 		}
 	}
 
@@ -331,7 +333,7 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 		} finally {
 			lock.unlock();
 		}
-		queue.enqueue(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
+		dispatcher.dispatch(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
 	}
 	
 	static class SecurityMarketDepthEventFactory implements EventFactory {

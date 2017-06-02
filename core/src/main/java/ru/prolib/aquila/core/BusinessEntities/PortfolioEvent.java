@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.ContainerEventImpl;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
 
 /**
  * Событие портфеля.
@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.Conta
  * 2012-09-05<br>
  * $Id$
  */
-public class PortfolioEvent extends ContainerEventImpl {
+public class PortfolioEvent extends OSCEventImpl {
 	private final Portfolio portfolio;
 
 	/**

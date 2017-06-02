@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParams;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParamsBuilder;
 
 /**
  * Order model.
@@ -31,43 +34,53 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	private List<OrderExecution> executions = new ArrayList<OrderExecution>();
 	private Map<Long, OrderExecution> executionByID = new HashMap<>();
 	
-	private static String getID(Terminal terminal, Account account,
-			Symbol symbol, long id)
+	public OrderImpl(OrderParams params) {
+		super(params);
+		this.terminal = params.getTerminal();
+		this.account = params.getAccount();
+		this.symbol = params.getSymbol();
+		this.id = params.getOrderID();
+		final String pfx = params.getID() + ".";
+		onCancelFailed = new EventTypeImpl(pfx + "CANCEL_FAILED");
+		onCancelled = new EventTypeImpl(pfx + "CANCELLED");
+		onDone = new EventTypeImpl(pfx + "DONE");
+		onFailed = new EventTypeImpl(pfx + "FAILED");
+		onFilled = new EventTypeImpl(pfx + "FILLED");
+		onPartiallyFilled = new EventTypeImpl(pfx + "PARTIALLY_FILLED");
+		onRegistered = new EventTypeImpl(pfx + "REGISTERED");
+		onRegisterFailed = new EventTypeImpl(pfx + "REGISTER_FAILED");
+		onExecution = new EventTypeImpl(pfx + "EXECUTION");
+		onArchived = new EventTypeImpl(pfx + "ARCHIVED");		
+	}
+	
+	@Deprecated
+	public OrderImpl(EditableTerminal terminal, Account account, Symbol symbol, long id,
+		EventDispatcher eventDispatcher, OSCController controller)
 	{
-		return String.format("%s.%s[%s].ORDER#%d", terminal.getTerminalID(),
-				account, symbol, id);
+		this(new OrderParamsBuilder()
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withOrderID(id)
+				.withEventDispatcher(eventDispatcher)
+				.withController(controller)
+				.buildParams());
 	}
 	
-	private static String getID(Terminal terminal, Account account,
-			Symbol symbol, long id, String suffix)
+	@Deprecated
+	public OrderImpl(EditableTerminal terminal, Account account, Symbol symbol, long id,
+			OSCController controller)
 	{
-		return getID(terminal, account, symbol, id) + "." + suffix;
+		this(new OrderParamsBuilder(terminal.getEventQueue())
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withOrderID(id)
+				.withController(controller)
+				.buildParams());
 	}
 	
-	private EventType newEventType(String suffix) {
-		return new EventTypeImpl(getID(terminal, account, symbol, id, suffix));
-	}
-	
-	public OrderImpl(EditableTerminal terminal, Account account,
-			Symbol symbol, long id, ObservableStateContainerImpl.Controller controller)
-	{
-		super(terminal.getEventQueue(), getID(terminal, account, symbol, id), controller);
-		this.terminal = terminal;
-		this.account = account;
-		this.symbol = symbol;
-		this.id = id;
-		onCancelFailed = newEventType("CANCEL_FAILED");
-		onCancelled = newEventType("CANCELLED");
-		onDone = newEventType("DONE");
-		onFailed = newEventType("FAILED");
-		onFilled = newEventType("FILLED");
-		onPartiallyFilled = newEventType("PARTIALLY_FILLED");
-		onRegistered = newEventType("REGISTERED");
-		onRegisterFailed = newEventType("REGISTER_FAILED");
-		onExecution = newEventType("EXECUTION");
-		onArchived = newEventType("ARCHIVED");
-	}
-	
+	@Deprecated
 	public OrderImpl(EditableTerminal terminal, Account account, Symbol symbol, long id) {
 		this(terminal, account, symbol, id, new OrderController());
 	}
@@ -243,7 +256,7 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 		return new OrderEventFactory(this);
 	}
 	
-	static class OrderController implements ObservableStateContainerImpl.Controller {
+	public static class OrderController implements OSCController {
 
 		@Override
 		public boolean hasMinimalData(ObservableStateContainer container) {
@@ -286,13 +299,13 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 				}
 				if ( order.isStatusEventsEnabled() ) {
 					if ( dummy != null ) {
-						order.queue.enqueue(dummy, factory);
+						order.dispatcher.dispatch(dummy, factory);
 					}
 					if ( status.isError() ) {
-						order.queue.enqueue(order.onFailed, factory);
+						order.dispatcher.dispatch(order.onFailed, factory);
 					}
 					if ( status.isFinal() ) {
-						order.queue.enqueue(order.onDone, factory);
+						order.dispatcher.dispatch(order.onDone, factory);
 					}
 				}
 			}
@@ -407,12 +420,12 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 
 	@Override
 	public void fireArchived() {
-		queue.enqueue(onArchived, new OrderEventFactory(this));
+		dispatcher.dispatch(onArchived, new OrderEventFactory(this));
 	}
 
 	@Override
 	public void fireExecution(OrderExecution execution) {
-		queue.enqueue(onExecution, new OrderExecutionEventFactory(this, execution));
+		dispatcher.dispatch(onExecution, new OrderExecutionEventFactory(this, execution));
 	}
 	
 	@Override

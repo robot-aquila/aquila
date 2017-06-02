@@ -3,6 +3,9 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.util.*;
 
 import ru.prolib.aquila.core.*;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParams;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
 
 /**
  * Interface of editable portfolio.
@@ -27,35 +30,31 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 		onPositionCurrentPriceChange, onPositionUpdate, onPositionClose;
 	private final Map<Symbol, EditablePosition> positions;
 	
-	private static String getID(Terminal terminal, Account account,
-			String suffix)
-	{
-		return String.format("%s.%s.%s", terminal.getTerminalID(),
-				account, suffix);	
-	}
-	
-	private String getID(String suffix) {
-		return getID(terminal, account, suffix);
-	}
-	
-	private EventType newEventType(String suffix) {
-		return new EventTypeImpl(getID(suffix));
+	public PortfolioImpl(PortfolioParams params) {
+		super(params);
+		this.terminal = (EditableTerminal) params.getTerminal();
+		this.account = params.getAccount();
+		positions = new HashMap<Symbol, EditablePosition>();
+		final String pfx = params.getID() + ".";
+		onPositionAvailable = new EventTypeImpl(pfx + "POSITION_AVAILABLE");
+		onPositionChange = new EventTypeImpl(pfx + "POSITION_CHANGE");
+		onPositionCurrentPriceChange = new EventTypeImpl(pfx + "POSITION_PRICE_CHANGE");
+		onPositionUpdate = new EventTypeImpl(pfx + "POSITION_UPDATE");
+		onPositionClose = new EventTypeImpl(pfx + "POSITION_CLOSE");
 	}
 
+	@Deprecated
 	public PortfolioImpl(EditableTerminal terminal, Account account,
-			ObservableStateContainerImpl.Controller controller)
+			OSCController controller)
 	{
-		super(terminal.getEventQueue(), getID(terminal, account, "PORTFOLIO"), controller);
-		this.terminal = terminal;
-		this.account = account;
-		positions = new HashMap<Symbol, EditablePosition>();
-		onPositionAvailable = newEventType("PORTFOLIO.POSITION_AVAILABLE");
-		onPositionChange = newEventType("PORTFOLIO.POSITION_CHANGE");
-		onPositionCurrentPriceChange = newEventType("PORTFOLIO.POSITION_PRICE_CHANGE");
-		onPositionUpdate = newEventType("PORTFOLIO.POSITION_UPDATE");
-		onPositionClose = newEventType("PORTFOLIO.POSITION_CLOSE");
+		this(new PortfolioParamsBuilder(terminal.getEventQueue())
+				.withAccount(account)
+				.withTerminal(terminal)
+				.withController(controller)
+				.buildParams());
 	}
 	
+	@Deprecated
 	public PortfolioImpl(EditableTerminal terminal, Account account) {
 		this(terminal, account, new PortfolioController());
 	}
@@ -226,7 +225,7 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 		return new PortfolioEventFactory(this);
 	}
 	
-	static class PortfolioController implements ObservableStateContainerImpl.Controller {
+	public static class PortfolioController implements OSCController {
 
 		@Override
 		public boolean hasMinimalData(ObservableStateContainer container) {

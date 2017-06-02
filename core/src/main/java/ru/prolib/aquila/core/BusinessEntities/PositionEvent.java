@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.ContainerEventImpl;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
 
 /**
  * Event related to market position.
@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.Conta
  * 2012-08-03<br>
  * $Id: PositionEvent.java 529 2013-02-19 08:49:04Z whirlwind $
  */
-public class PositionEvent extends ContainerEventImpl {
+public class PositionEvent extends OSCEventImpl {
 	private final Position position;
 
 	public PositionEvent(EventType type, Position position) {

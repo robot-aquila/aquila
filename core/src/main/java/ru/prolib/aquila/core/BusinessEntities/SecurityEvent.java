@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.ContainerEventImpl;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
 
 /**
  * Событие связанное с инструментом торговли.
@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.Conta
  * 2012-06-01<br>
  * $Id: SecurityEvent.java 250 2012-08-06 03:14:33Z whirlwind $
  */
-public class SecurityEvent extends ContainerEventImpl {
+public class SecurityEvent extends OSCEventImpl {
 	private final Security security;
 
 	/**

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.DataProvider;
@@ -18,6 +20,7 @@ public class TerminalParams {
 	private String terminalID;
 	private DataProvider dataProvider;
 	private ObjectFactory objectFactory;
+	private EventDispatcher eventDispatcher;
 	
 	public static synchronized int getCurrentGeneratedNumber() {
 		return lastAssignedNum;
@@ -60,6 +63,13 @@ public class TerminalParams {
 		return objectFactory;
 	}
 	
+	public EventDispatcher getEventDispatcher() {
+		if ( eventDispatcher == null ) {
+			eventDispatcher = new EventDispatcherImpl(getEventQueue());
+		}
+		return eventDispatcher;
+	}
+	
 	public void setScheduler(Scheduler scheduler) {
 		this.scheduler = scheduler;
 	}
@@ -78,6 +88,10 @@ public class TerminalParams {
 	
 	public void setEventQueue(EventQueue queue) {
 		this.eventQueue = queue;
+	}
+	
+	public void setEventDispatcher(EventDispatcher dispatcher) {
+		this.eventDispatcher = dispatcher;
 	}
 
 }

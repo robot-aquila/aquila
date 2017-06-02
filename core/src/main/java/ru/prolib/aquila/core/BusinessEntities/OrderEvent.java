@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
-import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.ContainerEventImpl;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
 
 /**
  * Событие заявки.
@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImpl.Conta
  * 2012-09-25<br>
  * $Id: OrderEvent.java 283 2012-09-26 17:01:17Z whirlwind $
  */
-public class OrderEvent extends ContainerEventImpl {
+public class OrderEvent extends OSCEventImpl {
 	private final Order order;
 
 	/**

@@ -8,10 +8,14 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.EventDispatcher;
+import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioImpl.PortfolioController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
 
 /**
  * 2012-09-06
@@ -58,9 +62,24 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Override
-	protected ObservableStateContainerImpl produceContainer(ObservableStateContainerImpl.Controller controller) {
+	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
 		portfolio = new PortfolioImpl(terminal, account, controller);
+		return portfolio;
+	}
+	
+	@Override
+	protected ObservableStateContainerImpl produceContainer(EventDispatcher eventDispatcher,
+			OSCController controller)
+	{
+		prepareTerminal();
+		portfolio = new PortfolioImpl(new PortfolioParamsBuilder()
+				.withID(getID())
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withEventDispatcher(eventDispatcher)
+				.withController(controller)
+				.buildParams());
 		return portfolio;
 	}
 	
@@ -69,9 +88,9 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		portfolio = new PortfolioImpl(terminal, account);
 		assertEquals(PortfolioController.class, portfolio.getController().getClass());
 		assertNotNull(portfolio.getTerminal());
-		assertNotNull(portfolio.getEventQueue());
+		assertNotNull(portfolio.getEventDispatcher());
 		assertSame(terminal, portfolio.getTerminal());
-		assertSame(queue, portfolio.getEventQueue());
+		assertSame(queue, ((EventDispatcherImpl)portfolio.getEventDispatcher()).getEventQueue());
 		assertEquals(account, portfolio.getAccount());
 		String prefix = String.format("%s.ZUMBA.PORTFOLIO", terminal.getTerminalID());
 		assertEquals(prefix, portfolio.getContainerID());

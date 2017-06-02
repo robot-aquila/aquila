@@ -20,6 +20,7 @@ public class TerminalImpl implements EditableTerminal {
 	private final LID lid;
 	private final Lock lock;
 	private final EventQueue queue;
+	private final EventDispatcher dispatcher;
 	private final Map<Symbol, EditableSecurity> securities;
 	private final Map<Account, EditablePortfolio> portfolios;
 	private EditablePortfolio defaultPortfolio;
@@ -61,6 +62,7 @@ public class TerminalImpl implements EditableTerminal {
 		this.lock = new ReentrantLock();
 		this.terminalID = params.getTerminalID();
 		this.queue = params.getEventQueue();
+		this.dispatcher = params.getEventDispatcher();
 		this.scheduler = params.getScheduler();
 		this.objectFactory = params.getObjectFactory();
 		this.dataProvider = params.getDataProvider();
@@ -706,7 +708,7 @@ public class TerminalImpl implements EditableTerminal {
 			}
 			started = true;
 			dataProvider.subscribeRemoteObjects(this);
-			queue.enqueue(onTerminalReady, new TerminalEventFactory(this));
+			dispatcher.dispatch(onTerminalReady, new TerminalEventFactory(this));
 		} finally {
 			lock.unlock();
 		}
@@ -721,7 +723,7 @@ public class TerminalImpl implements EditableTerminal {
 			}
 			started = false;
 			dataProvider.unsubscribeRemoteObjects(this);
-			queue.enqueue(onTerminalUnready, new TerminalEventFactory(this));
+			dispatcher.dispatch(onTerminalUnready, new TerminalEventFactory(this));
 		} finally {
 			lock.unlock();
 		}
