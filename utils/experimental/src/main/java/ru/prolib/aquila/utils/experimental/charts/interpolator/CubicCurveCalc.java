@@ -38,7 +38,7 @@ public class CubicCurveCalc {
                 y2 = points.get(i).getRight();
                 x3 = points.get(i+1).getLeft();
                 y3 = points.get(i+1).getRight();
-                if((y1<y2 && y3<y2)||(y1>y2 && y3>y2)){
+                if((y1<=y2 && y3<=y2)||(y1>=y2 && y3>=y2)){
                     tgA.add(0.);
                 } else {
                     tgA.add(((y1-y2)/(x2-x1) + (y2-y3)/(x3-x2))/2);

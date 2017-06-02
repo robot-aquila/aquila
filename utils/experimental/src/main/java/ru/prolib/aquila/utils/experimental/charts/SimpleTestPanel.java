@@ -6,6 +6,9 @@ import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.data.ta.HIGH;
+import ru.prolib.aquila.core.data.ta.LOW;
+import ru.prolib.aquila.core.data.ta.QATR;
 import ru.prolib.aquila.core.data.ta.QEMA;
 import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
 import ru.prolib.aquila.utils.experimental.charts.layers.TradeInfo;
@@ -46,6 +49,11 @@ public class SimpleTestPanel extends JPanel {
         panel.addVolumes();
         panel.addTrades();
         panel.setTradesData(tradesData);
+
+        panel.addSmoothLine(new HIGH("HIGH_20", candleData, 20)).setStyleClass("line-green");
+        panel.addSmoothLine(new LOW("LOW_20", candleData, 20)).setStyleClass("line-red");
+        panel.addSmoothLine("QATR", new QATR("QATR_20", candleData, 20));
+
 
         add(panel, BorderLayout.CENTER);
     }

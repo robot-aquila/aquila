@@ -33,11 +33,14 @@ public class LOW implements Series<Double> {
 
 	@Override
 	public Double get() throws ValueException {
-		return math.min(source, getLength() - 2, period);
+		return get(getLength() - 1);
 	}
 
 	@Override
 	public Double get(int index) throws ValueException {
+		if(index< period){
+			return null;
+		}
 		return math.min(source, index-1, period);
 	}
 
