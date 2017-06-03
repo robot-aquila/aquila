@@ -85,7 +85,7 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
                 }
             }
         }
-        return new ImmutablePair(minY, maxY);
+        return new ImmutablePair<>(minY, maxY);
     }
 
     protected TValues getByCategory(TCategories category) throws ValueException {

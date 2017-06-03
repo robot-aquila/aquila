@@ -13,7 +13,8 @@ import java.util.List;
 public class SmoothLineRenderer implements LineRenderer{
 
     @Override
-    public void renderLine(Path path, List<Segment> segments) {
+    public void renderLine(Path path, List<Point> points) {
+        List<Segment> segments = CubicCurveCalc.calc(points);
         for(Segment s: segments){
             PathElement element;
             if(path.getElements().size()==0){

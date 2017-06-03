@@ -2,15 +2,10 @@ package ru.prolib.aquila.utils.experimental.charts.indicators;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Path;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.indicators.calculator.Calculator;
-import ru.prolib.aquila.utils.experimental.charts.interpolator.CubicCurveCalc;
-import ru.prolib.aquila.utils.experimental.charts.interpolator.LineRenderer;
-import ru.prolib.aquila.utils.experimental.charts.interpolator.Segment;
-import ru.prolib.aquila.utils.experimental.charts.interpolator.SmoothLineRenderer;
+import ru.prolib.aquila.utils.experimental.charts.interpolator.*;
 import ru.prolib.aquila.utils.experimental.charts.layers.AbstractChartLayer;
 
 import java.time.Instant;
@@ -54,7 +49,7 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
             result.add(path);
         }
         path.toFront();
-        List<Pair<Double, Double>> points = new ArrayList<>();
+        List<Point> points = new ArrayList<>();
         for(int i=0; i<categories.getLength(); i++){
             Instant c = null;
             Double v = null;
@@ -70,14 +65,12 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
                     e.printStackTrace();
                 }
                 if(v!=null){
-                    points.add(new ImmutablePair(chart.getCoordByCategory(c), chart.getCoordByVal(v)));
+                    points.add(new Point(chart.getCoordByCategory(c), chart.getCoordByVal(v)));
                 }
             }
         }
 
-        List<Segment> segments = CubicCurveCalc.calc(points);
-
-        lineRenderer.renderLine(path, segments);
+        lineRenderer.renderLine(path, points);
 
         if(styleClass !=null){
             path.getStyleClass().clear();
