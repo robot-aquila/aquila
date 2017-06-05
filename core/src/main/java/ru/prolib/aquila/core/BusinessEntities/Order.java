@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.EventType;
  * 2012-05-30<br>
  * $Id: Order.java 542 2013-02-23 04:15:34Z whirlwind $
  */
-public interface Order extends ObservableStateContainer {
+public interface Order extends ObservableStateContainer, BusinessEntity {
 	
 	/**
 	 * Получить тип события: в случае провала операции

@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.EventType;
  * 2012-08-02<br>
  * $Id: Position.java 529 2013-02-19 08:49:04Z whirlwind $
  */
-public interface Position extends ObservableStateContainer {
+public interface Position extends ObservableStateContainer, BusinessEntity {
 	
 	/**
 	 * Get account.

@@ -834,4 +834,14 @@ public class TerminalImpl implements EditableTerminal {
 		return onPositionClose;
 	}
 
+	@Override
+	public void suppressEvents() {
+		dispatcher.suppressEvents();
+	}
+
+	@Override
+	public void restoreEvents() {
+		dispatcher.restoreEvents();
+	}
+
 }

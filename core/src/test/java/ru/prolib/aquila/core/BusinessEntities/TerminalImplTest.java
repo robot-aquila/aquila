@@ -20,6 +20,7 @@ import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
@@ -1032,6 +1033,36 @@ public class TerminalImplTest {
 		assertEquals(2, listenerStub.getEventCount());
 		assertOrderEvent(order2, terminal.onOrderArchived(), listenerStub.getEvent(0));
 		assertOrderEvent(order5, terminal.onOrderArchived(), listenerStub.getEvent(1));
+	}
+	
+	@Test
+	public void testSuppressEvents() {
+		EventDispatcher dispatcherMock = control.createMock(EventDispatcher.class);
+		TerminalParams params = new TerminalParams();
+		params.setDataProvider(new DataProviderStub());
+		params.setEventDispatcher(dispatcherMock);
+		terminal = new TerminalImpl(params);
+		dispatcherMock.suppressEvents();
+		control.replay();
+		
+		terminal.suppressEvents();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testRestoreEvents() {
+		EventDispatcher dispatcherMock = control.createMock(EventDispatcher.class);
+		TerminalParams params = new TerminalParams();
+		params.setDataProvider(new DataProviderStub());
+		params.setEventDispatcher(dispatcherMock);
+		terminal = new TerminalImpl(params);
+		dispatcherMock.restoreEvents();
+		control.replay();
+		
+		terminal.restoreEvents();
+		
+		control.verify();
 	}
 	
 }

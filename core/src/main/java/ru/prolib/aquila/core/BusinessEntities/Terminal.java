@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.concurrency.Lockable;
  * 2012-05-30<br>
  * $Id: Terminal.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public interface Terminal extends Scheduler, Lockable {
+public interface Terminal extends Scheduler, BusinessEntity {
 	
 	/**
 	 * Get ID of the terminal.

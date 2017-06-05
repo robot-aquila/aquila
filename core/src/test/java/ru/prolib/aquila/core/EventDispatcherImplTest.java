@@ -153,5 +153,26 @@ public class EventDispatcherImplTest {
 		assertEquals("TD.bar", actual.getId());
 		assertTrue(actual.isOnlySyncMode());
 	}
+	
+	@Test
+	public void testSuppressAndRestoreEvents_SequentialCalls() {
+		dispatcher.suppressEvents();
+		dispatcher.suppressEvents();
+		control.replay();
+
+		dispatcher.dispatch(type1, SimpleEventFactory.getInstance());
+		
+		dispatcher.restoreEvents();
+		control.verify();
+		control.resetToStrict();
+		queue.enqueue(type1, SimpleEventFactory.getInstance());
+		queue.enqueue(type2, SimpleEventFactory.getInstance());
+		control.replay();
+		dispatcher.restoreEvents();
+
+		dispatcher.dispatch(type2, SimpleEventFactory.getInstance());
+
+		control.verify();
+	}
 
 }

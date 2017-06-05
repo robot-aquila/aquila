@@ -19,7 +19,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 	private final EventQueue queue;
 	private final String id;
 	private final LinkedList<CachedEvent> cache;
-	private boolean suppressMode = false;
+	private int suppressCount = 0;
 	
 	/**
 	 * Получить текущий идентификатор для автоназначения.
@@ -90,7 +90,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 	
 	@Override
 	public synchronized void dispatch(EventType type, EventFactory factory) {
-		if ( suppressMode ) {
+		if ( suppressCount > 0 ) {
 			cache.add(new CachedEvent(type, factory));
 		} else {
 			queue.enqueue(type, factory);
@@ -124,15 +124,20 @@ public class EventDispatcherImpl implements EventDispatcher {
 
 	@Override
 	public synchronized void suppressEvents() {
-		suppressMode = true;
+		suppressCount ++;
 	}
 
 	@Override
 	public synchronized void restoreEvents() {
+		if ( suppressCount > 0 ) {
+			suppressCount --;
+			if ( suppressCount > 0 ) {
+				return;
+			}
+		}
 		for ( CachedEvent x : cache ) {
 			queue.enqueue(x.type, x.factory);
 		}
-		suppressMode = false;
 	}
 	
 	static class CachedEvent {
