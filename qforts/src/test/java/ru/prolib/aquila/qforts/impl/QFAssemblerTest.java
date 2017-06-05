@@ -3,27 +3,29 @@ package ru.prolib.aquila.qforts.impl;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 import org.apache.log4j.BasicConfigurator;
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.EventProducer;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.EventSuppressor;
 import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
@@ -33,11 +35,12 @@ import ru.prolib.aquila.core.BusinessEntities.OrderExecutionImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderField;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.OrderType;
+import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.BusinessEntities.PositionField;
+import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.concurrency.Lockable;
-import ru.prolib.aquila.core.concurrency.LockableStub;
 import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
@@ -206,32 +209,29 @@ public class QFAssemblerTest {
 	
 	@Test
 	public void testCreateMultilock() {
-		IMocksControl control = EasyMock.createStrictControl();
-		Lock l1 = control.createMock(Lock.class),
-			l2 = control.createMock(Lock.class),
-			l3 = control.createMock(Lock.class);
-		Lockable stub1 = new LockableStub(l1),
-				stub2 = new LockableStub(l3),
-				stub3 = new LockableStub(l2);
-		Set<Lockable> objects = new HashSet<>();
-		objects.add(stub3);
-		objects.add(stub2);
-		objects.add(stub1);
+		Portfolio portfolio = terminal.getEditablePortfolio(account1);
+		Security security1 = terminal.getEditableSecurity(symbol1),
+				 security2 = terminal.getEditableSecurity(symbol2);
+		Set<BusinessEntity> objects = new HashSet<>();
+		objects.add(security1);
+		objects.add(security2);
+		objects.add(portfolio);
 		
-		Multilock mlock = service.createMultilock(objects);
+		Lockable actual = service.createMultilock(objects);
 		
-		l1.lock();
-		l3.lock();
-		l2.lock();
-		l2.unlock();
-		l3.unlock();
-		l1.unlock();
-		control.replay();
-
-		mlock.lock();
-		mlock.unlock();
-		
-		control.verify();
+		assertNotNull(actual);
+		Multilock lock = (Multilock) actual;
+		List<Lockable> actualObjects = lock.getObjects();
+		Set<EventProducer> dummy = new HashSet<>();
+		dummy.add(security1);
+		dummy.add(security2);
+		dummy.add(portfolio);		
+		List<Lockable> expectedObjects = new ArrayList<>();
+		expectedObjects.add(portfolio);
+		expectedObjects.add(security1);
+		expectedObjects.add(security2);
+		expectedObjects.add(new EventSuppressor(actualObjects.get(3).getLID(), dummy));
+		assertEquals(expectedObjects, lock.getObjects());
 	}
 
 }

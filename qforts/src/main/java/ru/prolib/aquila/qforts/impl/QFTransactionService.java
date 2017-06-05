@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.FDecimal;
@@ -12,7 +13,6 @@ import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Position;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.concurrency.Lockable;
-import ru.prolib.aquila.core.concurrency.Multilock;
 
 public class QFTransactionService {
 	private final QFObjectRegistry registry;
@@ -36,9 +36,9 @@ public class QFTransactionService {
 	}
 	
 	public void registerOrder(EditableOrder order) throws QFTransactionException {
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(order);
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( registry.isRegistered(order) ) {
@@ -53,9 +53,9 @@ public class QFTransactionService {
 	}
 
 	public void cancelOrder(EditableOrder order) throws QFTransactionException {
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(order);
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(order) ) {
@@ -70,9 +70,9 @@ public class QFTransactionService {
 	}
 	
 	public void rejectOrder(EditableOrder order, String reason) throws QFTransactionException {
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(order);
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(order) ) {
@@ -91,12 +91,12 @@ public class QFTransactionService {
 	{
 		EditablePortfolio portfolio = (EditablePortfolio) order.getPortfolio();
 		Security security = order.getSecurity();
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(order);
 		lockable.add(security);
 		lockable.add(portfolio);
 		lockable.add(portfolio.getPosition(order.getSymbol()));
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(order) ) {
@@ -121,14 +121,14 @@ public class QFTransactionService {
 	}
 	
 	public void updateByMarket(EditablePortfolio portfolio) throws QFTransactionException {
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(portfolio);
 		for ( Position x : portfolio.getPositions() ) {
 			// TODO: that is unsafe. number of position may be changed during this operation.
 			lockable.add(x);
 			lockable.add(x.getSecurity());
 		}
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
@@ -142,9 +142,9 @@ public class QFTransactionService {
 	}
 	
 	public void changeBalance(EditablePortfolio portfolio, FMoney value) throws QFTransactionException {
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(portfolio);
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
@@ -162,11 +162,11 @@ public class QFTransactionService {
 		if ( ! portfolio.isPositionExists(security.getSymbol()) ) {
 			return;
 		}
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(portfolio);
 		lockable.add(security);
 		lockable.add(portfolio.getPosition(security.getSymbol()));
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
@@ -180,14 +180,14 @@ public class QFTransactionService {
 	}
 	
 	public void midClearing(EditablePortfolio portfolio) throws QFTransactionException {
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(portfolio);
 		for ( Position x : portfolio.getPositions() ) {
 			// TODO: that is unsafe. number of position may be changed during this operation.
 			lockable.add(x);
 			lockable.add(x.getSecurity());
 		}
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
@@ -201,14 +201,14 @@ public class QFTransactionService {
 	}
 	
 	public void clearing(EditablePortfolio portfolio) throws QFTransactionException {
-		Set<Lockable> lockable = new HashSet<>();
+		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(portfolio);
 		for ( Position x : portfolio.getPositions() ) {
 			// TODO: that is unsafe. number of position may be changed during this operation.
 			lockable.add(x);
 			lockable.add(x.getSecurity());
 		}
-		Multilock lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {

@@ -1,12 +1,14 @@
 package ru.prolib.aquila.qforts.impl;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
+import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
+import ru.prolib.aquila.core.BusinessEntities.EventSuppressor;
 import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.OrderExecution;
@@ -19,8 +21,10 @@ import ru.prolib.aquila.core.concurrency.Multilock;
 
 public class QFAssembler {
 	
-	public Multilock createMultilock(Set<Lockable> objects) {
-		return new Multilock(new ArrayList<>(objects));
+	public Lockable createMultilock(Set<BusinessEntity> objects) {
+		Set<Lockable> list = new HashSet<>(objects);
+		list.add(new EventSuppressor(objects));
+		return new Multilock(list);
 	}
 	
 	public void update(EditableOrder order, QFOrderExecutionUpdate update, long executionID) {
