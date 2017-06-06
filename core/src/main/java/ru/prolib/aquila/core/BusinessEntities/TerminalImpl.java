@@ -836,12 +836,22 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	public void suppressEvents() {
-		dispatcher.suppressEvents();
+		lock.lock();
+		try {
+			dispatcher.suppressEvents();
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
 	public void restoreEvents() {
-		dispatcher.restoreEvents();
+		lock.lock();
+		try {
+			dispatcher.restoreEvents();
+		} finally {
+			lock.unlock();
+		}
 	}
 
 }
