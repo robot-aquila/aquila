@@ -108,3 +108,13 @@
     -fx-stroke: gray;
     -fx-stroke-width: 1;
 }
+
+.cursor-rectangle {
+    -fx-fill: #dedede;
+    -fx-opacity: 0.7;
+}
+
+.selection-rectangle {
+    -fx-fill: #bebebe;
+    -fx-opacity: 0.7;
+}

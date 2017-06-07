@@ -34,6 +34,7 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
 
     @Override
     public List<Node> paint() {
+        currentTooltips.clear();
         List<Node> result = new ArrayList<>();
         if(this.categories==null){
             return result;
@@ -66,6 +67,7 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
                 }
                 if(v!=null){
                     points.add(new Point(chart.getCoordByCategory(c), chart.getCoordByVal(v)));
+                    currentTooltips.put(c, createTooltipText(v));
                 }
             }
         }
@@ -105,5 +107,10 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
 
     public String getId() {
         return id;
+    }
+
+    @Override
+    protected String createTooltipText(Double value) {
+        return String.format("%s: %.2f", getId(), value);
     }
 }

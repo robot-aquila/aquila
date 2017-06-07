@@ -11,8 +11,6 @@ import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.Utils;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by TiM on 27.01.2017.
@@ -29,69 +27,52 @@ public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
     }
 
     @Override
-    public List<Node> paint() {
-        List<Node> result = new ArrayList<>();
+    public Node paintNode(Instant time, Candle candle, Node node) {
         int cnt = chart.getCategories().size();
-        for (int i = 0; i < cnt; i++) {
-            Instant time = chart.getCategories().get(i);
-            Candle candle = null;
-            try {
-                candle = getByCategory(time);
-            } catch (ValueException e) {
-                e.printStackTrace();
-            }
-            if(candle != null){
-                Node node = chart.getNodeById(getIdByCategory(time));
-                double x = chart.getCoordByCategory(time);
+        double x = chart.getCoordByCategory(time);
 
-                double height = Math.abs(chart.getCoordByVal(candle.getOpen()) - chart.getCoordByVal(candle.getClose()));
-                if(height==0){
-                    height = 1;
-                }
-                double width = chart.getWidth()/cnt/ WIDTH_RATIO;
-                if(width< MIN_WIDTH){
-                    width = MIN_WIDTH;
-                }
-
-                Line line;
-                Rectangle body;
-                if(node == null){
-                    line = new Line(x, chart.getCoordByVal(candle.getHigh()), x, chart.getCoordByVal(candle.getLow()));
-                    line.getStyleClass().add("candle-line");
-                    body = new Rectangle(x, chart.getCoordByVal(candle.getBodyMiddle()), width, height);
-                } else {
-                    line = (Line) ((Group)node).getChildren().get(0);
-                    line.setStartX(x);
-                    line.setEndX(x);
-                    line.setStartY(chart.getCoordByVal(candle.getHigh()));
-                    line.setEndY(chart.getCoordByVal(candle.getLow()));
-
-                    body = (Rectangle) ((Group)node).getChildren().get(1);
-                    body.setX(x);
-                    body.setY(chart.getCoordByVal(candle.getBodyMiddle()));
-                    body.setWidth(width);
-                    body.setHeight(height);
-                }
-
-                body.setLayoutX(-width/2);
-                body.setLayoutY(-height/2);
-                body.getStyleClass().clear();
-                if(candle.getOpen()<candle.getClose()){
-                    body.getStyleClass().add("candle-body-bull");
-                } else {
-                    body.getStyleClass().add("candle-body-bear");
-                }
-                body.applyCss();
-                chart.addObjectBounds(body.getBoundsInParent(), getTooltipText(candle));
-
-                if(node==null){
-                    Group group = new Group(line, body);
-                    group.setId(getIdByCategory(time));
-                    result.add(group);
-                }
-            }
+        double height = Math.abs(chart.getCoordByVal(candle.getOpen()) - chart.getCoordByVal(candle.getClose()));
+        if(height==0){
+            height = 1;
         }
-        return result;
+        double width = chart.getWidth()/cnt/ WIDTH_RATIO;
+        if(width< MIN_WIDTH){
+            width = MIN_WIDTH;
+        }
+
+        Line line;
+        Rectangle body;
+        if(node == null){
+            line = new Line(x, chart.getCoordByVal(candle.getHigh()), x, chart.getCoordByVal(candle.getLow()));
+            line.getStyleClass().add("candle-line");
+            body = new Rectangle(x, chart.getCoordByVal(candle.getBodyMiddle()), width, height);
+        } else {
+            line = (Line) ((Group)node).getChildren().get(0);
+            line.setStartX(x);
+            line.setEndX(x);
+            line.setStartY(chart.getCoordByVal(candle.getHigh()));
+            line.setEndY(chart.getCoordByVal(candle.getLow()));
+
+            body = (Rectangle) ((Group)node).getChildren().get(1);
+            body.setX(x);
+            body.setY(chart.getCoordByVal(candle.getBodyMiddle()));
+            body.setWidth(width);
+            body.setHeight(height);
+        }
+
+        body.setLayoutX(-width/2);
+        body.setLayoutY(-height/2);
+        body.getStyleClass().clear();
+        if(candle.getOpen()<candle.getClose()){
+            body.getStyleClass().add("candle-body-bull");
+        } else {
+            body.getStyleClass().add("candle-body-bear");
+        }
+        body.applyCss();
+        if(node==null){
+            return new Group(line, body);
+        }
+        return null;
     }
 
     @Override
@@ -109,7 +90,7 @@ public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
         return "CANDLE";
     }
 
-    private String getTooltipText(Candle candle) {
+    protected String createTooltipText(Candle candle) {
         return String.format(
                 "%s%n"+
                 "OPEN: %8.2f%n" +

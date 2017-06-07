@@ -27,4 +27,6 @@ public interface ChartLayer<TCategories, TValues> {
     List<Node> paint();
 
     Pair<Double, Double> getValuesInterval(List<TCategories> displayCategories);
+
+    String getTooltip(TCategories category);
 }

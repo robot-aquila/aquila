@@ -1,7 +1,6 @@
 package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.beans.NamedArg;
-import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -10,22 +9,21 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.utils.experimental.charts.formatters.CategoriesLabelFormatter;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by TiM on 22.12.2016.
  */
 public class Chart<T> extends ScatterChart {
+
+    private static final int Y_AXIS_PREF_WIDTH = 50;
 
     private Series highSeries = new Series();
     private Series lowSeries = new Series();
@@ -35,21 +33,19 @@ public class Chart<T> extends ScatterChart {
     private CategoriesLabelFormatter<T> categoriesLabelFormatter;
     private boolean categoriesAxisVisible = true;
 
-    private Group gInfo, gPrice;
-    private Label lblInfo, lblPrice;
+    private Group gPrice;
+    private Label lblPrice;
     private Group plotArea;
-    private Line verticalLine, horizontalLine;
-    private double lastMouseX, lastMouseY;
-    private final Cursor cursor;
-
-    private final List<Pair<Bounds, String>> textByObjectBounds;
+    private Line horizontalLine;
+    private Rectangle cursorRect, selectionRect;
+    private T selection;
 
     public Chart(@NamedArg("xAxis") NumberAxis xAxis, @NamedArg("yAxis") NumberAxis yAxis) {
         super(xAxis, yAxis);
         setAnimated(false);
         getStylesheets().add(Chart.class.getResource("/charts.css").toExternalForm());
-        cursor = Cursor.cursor(Chart.class.getResource("/transparent_cursor.png").toExternalForm());
-        textByObjectBounds = new ArrayList<>();
+//        cursor = Cursor.cursor(Chart.class.getResource("/transparent_cursor.png").toExternalForm());
+//        setCursor(Cursor.HAND);
 
         setLegendVisible(false);
         getData().add(highSeries);
@@ -79,13 +75,6 @@ public class Chart<T> extends ScatterChart {
                 return null;
             }
         });
-        setOnMouseMoved(e->{
-            synchronized (this){
-                lastMouseX = e.getX();
-                lastMouseY = e.getY();
-                mouseMoved();
-            }
-        });
 
         lblPrice = new Label("");
         lblPrice.getStyleClass().add("price");
@@ -95,7 +84,7 @@ public class Chart<T> extends ScatterChart {
     }
 
     public void setAxisValues(List<T> categories, double minValue, double maxValue){
-        yAxis.setPrefWidth(50);
+        yAxis.setPrefWidth(Y_AXIS_PREF_WIDTH);
         this.categories.clear();
         this.categories.addAll(categories);
         xAxis.setLowerBound(-1);
@@ -121,7 +110,7 @@ public class Chart<T> extends ScatterChart {
         return yAxis.getDisplayPosition(chartValue);
     }
 
-    public double getCoordByCategory(T category) {
+    public double getCoordByCategory(T category) throws IllegalArgumentException {
         int idx = categories.indexOf(category);
         if(idx<0){
             throw new IllegalArgumentException("Can not find category: "+category.toString());
@@ -135,6 +124,9 @@ public class Chart<T> extends ScatterChart {
 
     public void clearPlotChildren(){
         getPlotChildren().clear();
+        horizontalLine = null;
+        cursorRect = null;
+        selectionRect = null;
     }
 
     public void updatePlotChildren(List<Node> nodes){
@@ -154,22 +146,112 @@ public class Chart<T> extends ScatterChart {
                 getPlotChildren().remove(node);
             }
         }
-        lblInfo = new Label("");
-        lblInfo.getStyleClass().add("info");
-        gInfo = new Group(lblInfo);
-        getPlotChildren().add(gInfo);
-        lblInfo.toFront();
 
-        verticalLine = new Line(0,0,0,100);
-        verticalLine.getStyleClass().add("cursor-line");
-        horizontalLine = new Line(0,0,100,0);
-        horizontalLine.getStyleClass().add("cursor-line");
-        getPlotChildren().addAll(verticalLine, horizontalLine);
+        if(horizontalLine==null){
+            horizontalLine = new Line(0,0,100,0);
+            horizontalLine.getStyleClass().add("cursor-line");
+            horizontalLine.setId("HORIZONTAL_LINE");
+            cursorRect = new Rectangle(0,0,0,0);
+            cursorRect.getStyleClass().add("cursor-rectangle");
+            cursorRect.setId("CURSOR_RECT");
+            selectionRect = new Rectangle(0,0,0,0);
+            selectionRect.getStyleClass().add("selection-rectangle");
+            selectionRect.setId("SELECTION_RECT");
+            getPlotChildren().addAll(horizontalLine, cursorRect, selectionRect);
+        }
 
         updateStyles();
         this.layout();
         plotArea = getPlotArea();
-        mouseMoved();
+//        System.out.println(lastMouseX + " " + this.getId());
+//        javafx.event.Event.fireEvent(this, new MouseEvent(MouseEvent.MOUSE_MOVED, lastMouseX, 0, 0,0, MouseButton.NONE, 0, false, false, false, false, false, false, false, false, false, false, null ));
+//        mouseMoved();
+    }
+
+    public void mouseMoved(Chart source, double sceneX, double sceneY){
+        if(plotArea==null){
+            return;
+        }
+        Point2D point = plotArea.sceneToLocal(sceneX, sceneY);
+        double maxX = getXAxis().getWidth();
+        double maxY = getYAxis().getHeight();
+        if(this == source){
+            if(point.getX()<0 || point.getY()<0 || point.getX()>maxX || point.getY()>maxY){
+                horizontalLine.setVisible(false);
+                gPrice.setVisible(false);
+            } else {
+                horizontalLine.setVisible(true);
+                horizontalLine.setStartX(0);
+                horizontalLine.setStartY(point.getY());
+                horizontalLine.setEndX(maxX);
+                horizontalLine.setEndY(point.getY());
+                if(point.getY() >= 0 && point.getY() <= maxY){
+                    lblPrice.setText(String.format("%.2f", yAxis.getValueForDisplay(point.getY()).doubleValue()));
+                    gPrice.setVisible(true);
+                    gPrice.setLayoutX(-gPrice.getBoundsInLocal().getWidth());
+                    gPrice.setTranslateY(point.getY());
+                    gPrice.setTranslateX(getYAxis().getBoundsInLocal().getMaxX());
+                } else {
+                    gPrice.setVisible(false);
+                }
+            }
+        } else {
+            horizontalLine.setVisible(false);
+            gPrice.setVisible(false);
+        }
+        setCursorRectPosition(getCategoryByCoord(point.getX()));
+        setSelection(selection);
+    }
+
+    public void setCursorRectPosition(T category){
+        setRectPosition(category, cursorRect);
+    }
+
+    public T getCategoryBySceneX(double sceneX){
+        if(plotArea==null){
+            return null;
+        }
+        Point2D point = plotArea.sceneToLocal(sceneX, 0);
+        try {
+            return getCategoryByCoord(point.getX());
+        } catch (IllegalArgumentException e){
+            return null;
+        }
+    }
+
+    public T setSelection(double sceneX){
+        T category = getCategoryBySceneX(sceneX);
+        setSelection(category);
+        return category;
+    }
+
+    public void setSelection(T category){
+        setRectPosition(category, selectionRect);
+        selection = category;
+    }
+
+    private void setRectPosition(T category, Rectangle rect){
+        if(rect!=null){
+            if(categories.size()>0 && category!=null ){
+                rect.setVisible(true);
+                double x;
+                try {
+                    x = getCoordByCategory(category);
+                } catch (IllegalArgumentException e){
+                    rect.setVisible(false);
+                    return;
+                }
+                double width = getCoordByCategory(categories.get(0));
+                double maxY = getYAxis().getHeight();
+                rect.setX(x - width/2);
+                rect.setY(0);
+                rect.setWidth(width);
+                rect.setHeight(maxY);
+                rect.toBack();
+            } else {
+                rect.setVisible(false);
+            }
+        }
     }
 
     @Override
@@ -192,6 +274,19 @@ public class Chart<T> extends ScatterChart {
                 }
             });
         }
+    }
+
+    private T getCategoryByCoord(double x){
+        if(categories.size()>0){
+            double width = getCoordByCategory(categories.get(0));
+            for(int i=0; i<categories.size(); i++){
+                double xCat = getCoordByCategory(categories.get(i));
+                if(x > xCat-width/2 && x <= xCat+width/2){
+                    return categories.get(i);
+                }
+            }
+        }
+        return null;
     }
 
     private String getCategoriesLabelText(T x) {
@@ -226,14 +321,6 @@ public class Chart<T> extends ScatterChart {
 
     public void setCategoriesAxisVisible(boolean visible) {
         this.categoriesAxisVisible = visible;
-    }
-
-    public void clearObjectBounds(){
-        textByObjectBounds.clear();
-    }
-
-    public void addObjectBounds(Bounds bounds, String text){
-        textByObjectBounds.add(new ImmutablePair<>(bounds, text));
     }
 
     private T getCategory(Node node){
@@ -272,71 +359,6 @@ public class Chart<T> extends ScatterChart {
             }
         }
         return null;
-    }
-
-    private void mouseMoved(){
-        Point2D point = plotArea.sceneToLocal(localToScene(lastMouseX, lastMouseY));
-//        System.out.println(lastMouseY);
-        double maxX = getXAxis().getWidth();
-        double maxY = getYAxis().getHeight();
-        if(point.getX()<0 || point.getY()<0 || point.getX()>maxX || point.getY()>maxY){
-            getScene().setCursor(Cursor.DEFAULT);
-            gInfo.setVisible(false);
-            horizontalLine.setVisible(false);
-            verticalLine.setVisible(false);
-        } else {
-            getScene().setCursor(cursor);
-//            gInfo.setVisible(true);
-            horizontalLine.setVisible(true);
-            verticalLine.setVisible(true);
-            String tooltipText = getTooltipText(point);
-            if(tooltipText==null || tooltipText.equals("")){
-                gInfo.setVisible(false);
-            } else {
-                lblInfo.setText(getTooltipText(point));
-                double infoWidth = gInfo.getBoundsInLocal().getWidth();
-                double infoHeight = gInfo.getBoundsInLocal().getHeight();
-                if(point.getX()+ infoWidth > maxX){
-                    gInfo.setTranslateX(point.getX()-5);
-                    gInfo.setLayoutX(-infoWidth);
-                } else {
-                    gInfo.setTranslateX(point.getX()+5);
-                    gInfo.setLayoutX(0);
-                }
-                if(point.getY()+ infoHeight > maxY){
-                    gInfo.setTranslateY(point.getY()-5);
-                    gInfo.setLayoutY(-infoHeight);
-                } else {
-                    gInfo.setTranslateY(point.getY()+5);
-                    gInfo.setLayoutY(0);
-                }
-                gInfo.setVisible(true);
-            }
-        }
-        verticalLine.setStartX(point.getX());
-        verticalLine.setStartY(0);
-        verticalLine.setEndX(point.getX());
-        verticalLine.setEndY(maxY);
-        horizontalLine.setStartX(0);
-        horizontalLine.setStartY(point.getY());
-        horizontalLine.setEndX(maxX);
-        horizontalLine.setEndY(point.getY());
-        if(point.getY() >= 0 && point.getY() <= maxY){
-            lblPrice.setText(String.format("%.2f", yAxis.getValueForDisplay(point.getY()).doubleValue()));
-            gPrice.setVisible(true);
-            gPrice.setLayoutX(-gPrice.getBoundsInLocal().getWidth());
-            gPrice.setTranslateY(point.getY());
-            gPrice.setTranslateX(getYAxis().getBoundsInLocal().getMaxX());
-        } else {
-            gPrice.setVisible(false);
-        }
-    }
-
-    private String getTooltipText(Point2D point) {
-        return textByObjectBounds.stream().filter(e -> e.getLeft().contains(point))
-                .map(e -> e.getValue())
-                .sorted()
-                .collect(Collectors.joining("\n-------------------\n"));
     }
 }
 

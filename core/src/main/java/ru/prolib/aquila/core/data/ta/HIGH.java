@@ -41,7 +41,7 @@ public class HIGH implements Series<Double> {
 		if(index< period){
 			return null;
 		}
-		return math.max(source, index-1, period);
+		return math.max(source, index, period);
 	}
 
 	@Override

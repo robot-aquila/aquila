@@ -5,13 +5,11 @@ import javafx.scene.Node;
 import javafx.scene.shape.Polygon;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.Utils;
 import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
 import ru.prolib.aquila.utils.experimental.charts.series.StampedListTimeSeries;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,58 +28,39 @@ public class TradeChartLayer extends AbstractChartLayer<Instant, List<TradeInfo>
     }
 
     @Override
-    public List<Node> paint() {
-        List<Node> result = new ArrayList<>();
-        if(getCategories()!=null) {
-            int cnt = getCategories().getLength();
-            for (int i = 0; i < cnt; i++) {
-                Instant time = null;
-                List<TradeInfo> tradeInfoList = null;
-                try {
-                    time = getCategories().get(i);
-                    tradeInfoList = data.get(i);
-                } catch (ValueException e) {
-                    e.printStackTrace();
+    public Node paintNode(Instant time, List<TradeInfo> tradeInfoList, Node node) {
+        if(tradeInfoList.size()>0){
+            Group group = (Group)node;
+            if(group==null){
+                group = new Group();
+                group.setId(buildId(time));
+            }
+            double x = chart.getCoordByCategory(time);
+            for (int j=0; j<tradeInfoList.size(); j++){
+                TradeInfo tradeInfo = tradeInfoList.get(j);
+                double y = chart.getCoordByVal(tradeInfo.getPrice());
+                double y2;
+                String styleClass;
+                if(tradeInfo.getAction().equals(OrderAction.BUY)){
+                    y2 = y + HEIGHT;
+                    styleClass = "trade-buy";
+                } else {
+                    y2 = y - HEIGHT;
+                    styleClass = "trade-sell";
                 }
-
-                if(time!=null && tradeInfoList != null && tradeInfoList.size()>0 && chart.isCategoryDisplayed(time)){
-                    Node node = chart.getNodeById(buildId(time));
-                    Group group = (Group)node;
-                    if(group==null){
-                        group = new Group();
-                        group.setId(buildId(time));
-                    }
-                    double x = chart.getCoordByCategory(time);
-                    for (int j=0; j<tradeInfoList.size(); j++){
-                        TradeInfo tradeInfo = tradeInfoList.get(j);
-                        double y = chart.getCoordByVal(tradeInfo.getPrice());
-                        double y2;
-                        String styleClass;
-                        if(tradeInfo.getAction().equals(OrderAction.BUY)){
-                            y2 = y + HEIGHT;
-                            styleClass = "trade-buy";
-                        } else {
-                            y2 = y - HEIGHT;
-                            styleClass = "trade-sell";
-                        }
-                        Polygon arrow = null;
-                        if(j<group.getChildren().size()){
-                            arrow = (Polygon) group.getChildren().get(j);
-                            arrow.getPoints().setAll(x, y, x-WIDTH/2, y2, x+WIDTH/2, y2);
-                        } else {
-                            arrow = new Polygon(x, y, x-WIDTH/2, y2, x+WIDTH/2, y2);
-                            arrow.getStyleClass().add(styleClass);
-                            group.getChildren().add(arrow);
-                        }
-                        chart.addObjectBounds(arrow.getBoundsInParent(), getTooltipText(tradeInfo));
-                    }
-                    if(node==null){
-                        result.add(group);
-                    }
+                Polygon arrow = null;
+                if(j<group.getChildren().size()){
+                    arrow = (Polygon) group.getChildren().get(j);
+                    arrow.getPoints().setAll(x, y, x-WIDTH/2, y2, x+WIDTH/2, y2);
+                } else {
+                    arrow = new Polygon(x, y, x-WIDTH/2, y2, x+WIDTH/2, y2);
+                    arrow.getStyleClass().add(styleClass);
+                    group.getChildren().add(arrow);
                 }
             }
+            return group;
         }
-        return result;
+        return null;
     }
 
     @Override
@@ -94,7 +73,17 @@ public class TradeChartLayer extends AbstractChartLayer<Instant, List<TradeInfo>
         return value.stream().mapToDouble(ti-> ti.getPrice()).min().orElse(1e6);
     }
 
-    private String getTooltipText(TradeInfo tradeInfo) {
+    @Override
+    protected String createTooltipText(List<TradeInfo> value) {
+        StringBuilder sb = new StringBuilder("Orders:\n");
+        for(TradeInfo ti: value){
+            sb.append(ti.getOrderId());
+            sb.append(";\n");
+        }
+        return sb.toString();
+    }
+
+    private String createTooltipText(TradeInfo tradeInfo) {
         return String.format("%s%n" +
                 "%s %s @ %.2f x %d%n" +
                 "ACCOUNT: %s%n" +

@@ -8,7 +8,10 @@ import ru.prolib.aquila.core.data.SeriesImpl;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.charts.Chart;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by TiM on 02.05.2017.
@@ -17,6 +20,7 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
     protected Chart<TCategories> chart;
     protected Series<TCategories> categories;
     protected Series<TValues> data;
+    protected Map<TCategories, String> currentTooltips = new ConcurrentHashMap<>();
 
     @Override
     public void setChart(Chart<TCategories> chart) {
@@ -50,7 +54,35 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
     }
 
     @Override
-    public abstract List<Node> paint();
+    public List<Node> paint(){
+        currentTooltips.clear();
+        List<Node> result = new ArrayList<>();
+        int cnt = chart.getCategories().size();
+        for (int i = 0; i < cnt; i++) {
+            TCategories category = chart.getCategories().get(i);
+            TValues value = null;
+            try {
+                value = getByCategory(category);
+            } catch (ValueException e) {
+                e.printStackTrace();
+            }
+            if(category!=null && value != null && chart.isCategoryDisplayed(category)){
+                currentTooltips.put(category, createTooltipText(value));
+                Node node = chart.getNodeById(getIdByCategory(category));
+                Node resultNode = paintNode(category, value, node);
+                if(node==null && resultNode!=null){
+                    resultNode.setId(getIdByCategory(category));
+                    result.add(resultNode);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String getTooltip(TCategories category){
+        return currentTooltips.get(category);
+    }
 
     @Override
     public Pair<Double, Double> getValuesInterval(List<TCategories> displayCategories) {
@@ -108,5 +140,10 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
     protected abstract double getMaxValue(TValues value);
     protected abstract double getMinValue(TValues value);
 
+    protected abstract String createTooltipText(TValues value);
 
+
+    public Node paintNode(TCategories category, TValues value, Node node){
+        return null;
+    }
 }

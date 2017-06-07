@@ -2,10 +2,14 @@ package ru.prolib.aquila.utils.experimental.charts;
 
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,19 +21,18 @@ import ru.prolib.aquila.utils.experimental.charts.layers.ChartLayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
+import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * Created by TiM on 22.12.2016.
  */
-public class ChartPanel<T> extends JPanel {
+public class ChartPanel<T> extends JPanel implements EventHandler<Event> {
 
     public static final String CURRENT_POSITION_CHANGE = "CURRENT_POSITION_CHANGE";
     public static final String NUMBER_OF_POINTS_CHANGE = "NUMBER_OF_POINTS_CHANGE";
@@ -37,55 +40,100 @@ public class ChartPanel<T> extends JPanel {
 
     private final JFXPanel rootFxPanel;
     private final VBox mainPanel;
-    private final HashMap<String, Chart> charts = new LinkedHashMap<>();
-    private final HashMap<String, List<ChartLayer>> chartLayers = new HashMap<>();
-//    private final List<T> categories = new ArrayList<>();
+    private final HashMap<String, Chart<T>> charts = new LinkedHashMap<>();
+    private final Map<String, List<ChartLayer>> chartLayers = new ConcurrentHashMap<>();
     private final Vector<T> categories = new Vector<>();
     private CategoriesLabelFormatter<T> categoriesLabelFormatter;
     private int currentPosition = 0;
-    private int numberOfPoints = 30;
+    private int numberOfPoints = 120;
     private JScrollBar scrollBar;
     private AdjustmentListener scrollBarListener;
+    private JTextArea infoText;
+
+    private TooltipForm tooltipForm;
+    private Rectangle screen;
+
+    private final JPanel rootPanel;
 
     private boolean fullRedraw = true;
 
+    private T selection;
+    private Chart<T> lastActiveChart;
+    private double lastMouseX, lastMouseY;
+
     public ChartPanel() {
         super();
+        screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         setLayout(new BorderLayout());
+        rootPanel = new JPanel(new BorderLayout());
         rootFxPanel = new JFXPanel();
         mainPanel = new VBox();
-        add(rootFxPanel, BorderLayout.CENTER);
+        rootPanel.add(rootFxPanel, BorderLayout.CENTER);
+        add(rootPanel, BorderLayout.CENTER);
 
         rootFxPanel.setScene(new Scene(mainPanel));
 
         rootFxPanel.getScene().widthProperty().addListener((observableValue, oldSceneWidth, newSceneWidth) -> refresh());
         rootFxPanel.getScene().heightProperty().addListener((observableValue, oldSceneHeight, newSceneHeight) -> refresh());
 
+        tooltipForm = new TooltipForm();
+//        tooltipForm.setPreferredSize(new Dimension(200, 200));
     }
 
     public void addChart(String id) {
         Chart<T> chart = new Chart<T>(new NumberAxis(), new NumberAxis());
-        chart.setOnMouseClicked(event -> {
+        chart.setId(id);
 
-        });
-        chart.setOnScroll(event -> {
-            if (event.isControlDown()) {
-                setNumberOfPoints(getNumberOfPoints() - (int) Math.signum(event.getDeltaY()));
-            } else {
-                setCurrentPosition(getCurrentPosition() - (int) Math.signum(event.getDeltaY()));
-            }
-        });
+//        chart.setOnMouseClicked(this::handle);
+        chart.setOnScroll(this::handle);
+        chart.setOnMouseMoved(this::handle);
+        chart.setOnMouseExited(this::handle);
         chart.setCategoriesLabelFormatter(categoriesLabelFormatter);
         charts.put(id, chart);
-        chartLayers.put(id, new ArrayList<>());
+        chartLayers.put(id, new Vector<>());
 
         Platform.runLater(() -> {
             mainPanel.getChildren().add(chart);
             if (charts.size() == 1) {
                 VBox.setVgrow(chart, Priority.ALWAYS);
             }
+            int i=0;
+            for(Chart c: charts.values()){
+                if(i<charts.size()-1){
+                    c.setCategoriesAxisVisible(false);
+                }
+                i++;
+            }
         });
     }
+
+    @Override
+    public void handle(Event event) {
+        if(event instanceof ScrollEvent){
+            ScrollEvent e = (ScrollEvent) event;
+            if (e.isControlDown()) {
+                setNumberOfPoints(getNumberOfPoints() - (int) Math.signum(e.getDeltaY()));
+            } else {
+                setCurrentPosition(getCurrentPosition() - (int) Math.signum(e.getDeltaY()));
+            }
+        } else if(event instanceof MouseEvent) {
+            MouseEvent e = (MouseEvent) event;
+            if(event.getEventType().equals(MouseEvent.MOUSE_CLICKED)){
+                for (Chart<T> c : charts.values()) {
+                    selection = c.setSelection(e.getSceneX());
+                }
+            } else if(event.getEventType().equals(MouseEvent.MOUSE_MOVED)){
+                lastActiveChart = (Chart)event.getSource();
+                lastMouseX = e.getSceneX();
+                lastMouseY = e.getSceneY();
+                mouseMoved();
+            } else if(event.getEventType().equals(MouseEvent.MOUSE_EXITED)){
+                lastActiveChart = null;
+                mouseMoved();
+            }
+        }
+    }
+
 
     public List<T> getCategories() {
         return categories;
@@ -180,10 +228,10 @@ public class ChartPanel<T> extends JPanel {
                 if (fullRedraw) {
                     chart.clearPlotChildren();
                 }
-                chart.clearObjectBounds();
                 chart.updatePlotChildren(paintChartObjects(id));
             }
             fullRedraw = false;
+            mouseMoved();
         });
     }
 
@@ -216,7 +264,9 @@ public class ChartPanel<T> extends JPanel {
         Set<T> set = new TreeSet<>();
 
         categories.clear();
-        for (List<ChartLayer> objects : chartLayers.values()) {
+        for (List<ChartLayer> objects_ : chartLayers.values()) {
+            List<ChartLayer> objects = objects_.stream().collect(Collectors.toList());
+
             for (ChartLayer obj : objects) {
                 Series<T> c = obj.getCategories();
                 if(c!=null){
@@ -300,9 +350,9 @@ public class ChartPanel<T> extends JPanel {
                 @Override
                 public void run() {
                     if (scrollbar.getOrientation() == JScrollBar.HORIZONTAL) {
-                        add(scrollbar, BorderLayout.SOUTH);
+                        rootPanel.add(scrollbar, BorderLayout.SOUTH);
                     } else {
-                        add(scrollbar, BorderLayout.EAST);
+                        rootPanel.add(scrollbar, BorderLayout.EAST);
                     }
                     updateScrollbar();
                     scrollbar.addAdjustmentListener(scrollBarListener);
@@ -327,6 +377,60 @@ public class ChartPanel<T> extends JPanel {
             updateScrollbar();
             scrollBar.setValue(getCurrentPosition());
             scrollBar.addAdjustmentListener(scrollBarListener);
+        }
+    }
+
+    private void setCursorRectPosition(T category){
+        for(Chart<T> c: charts.values()){
+            c.setCursorRectPosition(category);
+        }
+    }
+
+    private void mouseMoved(){
+        for(Chart c: charts.values()){
+            c.mouseMoved(lastActiveChart, lastMouseX, lastMouseY);
+        }
+        if(lastActiveChart==null) {
+            tooltipForm.setVisible(false);
+        } else {
+            T category = lastActiveChart.getCategoryBySceneX(lastMouseX);
+            if(category==null){
+                tooltipForm.setVisible(false);
+            } else {
+                Point2D point = lastActiveChart.localToScreen(lastActiveChart.sceneToLocal(lastMouseX, lastMouseY));
+//                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                int x = (int)point.getX();
+                int y = (int)point.getY();
+                if(x + tooltipForm.getWidth() <= screen.getMaxX()){
+                    x = x+10;
+                } else {
+                    x = x - tooltipForm.getWidth()-10;
+                }
+                if(y + tooltipForm.getHeight() <= screen.getMaxY()){
+                    y = y+10;
+                } else {
+                    y = y - tooltipForm.getHeight()-10;
+                }
+                tooltipForm.setLocation(x, y);
+                StringBuilder sb = new StringBuilder();
+                for(List<ChartLayer> layers: chartLayers.values()){
+                    for(ChartLayer layer: layers){
+                        String txt = layer.getTooltip(category);
+                        if(txt!=null){
+                            if(sb.length()!=0){
+                                sb.append("\n----------\n");
+                            }
+                            sb.append(txt);
+                        }
+                    }
+                }
+                String txt = sb.toString();
+                txt = txt.replace("\n----------\n", "<hr>").replace("\n", "<br>");
+                tooltipForm.setText("<html>"+txt+"</html>");
+//                tooltipForm.setText(sb.toString());
+                tooltipForm.setVisible(true);
+//                System.out.println(category);
+            }
         }
     }
 }

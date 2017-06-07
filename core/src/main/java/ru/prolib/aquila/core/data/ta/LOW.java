@@ -41,7 +41,7 @@ public class LOW implements Series<Double> {
 		if(index< period){
 			return null;
 		}
-		return math.min(source, index-1, period);
+		return math.min(source, index, period);
 	}
 
 	@Override

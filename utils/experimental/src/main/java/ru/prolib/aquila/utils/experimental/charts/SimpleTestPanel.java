@@ -150,6 +150,11 @@ public class SimpleTestPanel extends JPanel {
     public JMenuBar createMenuBar(){
         JMenuBar menuBar = new JMenuBar();
         JMenu main = new JMenu("Main");
+        JMenuItem refresh = new JMenuItem("Refresh");
+        refresh.addActionListener(e -> {
+            panel.setFullRedraw(true);
+            this.panel.refresh();});
+        main.add(refresh);
         JMenuItem change = new JMenuItem("Change last candle");
         change.addActionListener(e -> changeCandle());
         main.add(change);
@@ -162,9 +167,9 @@ public class SimpleTestPanel extends JPanel {
                 @Override
                 public void run() {
                     System.out.println("Start change");
-                    for(int i=0; i<10; i++){
+                    for(int i=0; i<1000; i++){
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(10);
                         } catch (InterruptedException e1) {
                             e1.printStackTrace();
                         }
