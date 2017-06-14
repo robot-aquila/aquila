@@ -77,6 +77,7 @@ public class OrderParamsImpl extends OSCParamsImpl implements OrderParams {
 				.append(this.id, o.id)
 				.append(this.orderID, o.orderID)
 				.append(this.symbol, o.symbol)
+				.append(this.lock, o.lock)
 				.appendSuper(this.terminal == o.terminal)
 				.isEquals();
 	}

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 
+import java.util.concurrent.locks.Lock;
+
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Account;
@@ -38,6 +40,12 @@ public class PositionParamsBuilder extends OSCParamsBuilder {
 	@Override
 	public PositionParamsBuilder withController(OSCController controller) {
 		super.withController(controller);
+		return this;
+	}
+	
+	@Override
+	public PositionParamsBuilder withLock(Lock lock) {
+		super.withLock(lock);
 		return this;
 	}
 	

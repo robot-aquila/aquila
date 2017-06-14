@@ -5,7 +5,6 @@ import java.util.*;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParams;
-import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
 
 /**
  * Interface of editable portfolio.
@@ -29,11 +28,13 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	private final EventType onPositionAvailable, onPositionChange,
 		onPositionCurrentPriceChange, onPositionUpdate, onPositionClose;
 	private final Map<Symbol, EditablePosition> positions;
+	private final ObjectFactory objectFactory;
 	
 	public PortfolioImpl(PortfolioParams params) {
 		super(params);
 		this.terminal = (EditableTerminal) params.getTerminal();
 		this.account = params.getAccount();
+		this.objectFactory = params.getObjectFactory();
 		positions = new HashMap<Symbol, EditablePosition>();
 		final String pfx = params.getID() + ".";
 		onPositionAvailable = new EventTypeImpl(pfx + "POSITION_AVAILABLE");
@@ -41,22 +42,6 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 		onPositionCurrentPriceChange = new EventTypeImpl(pfx + "POSITION_PRICE_CHANGE");
 		onPositionUpdate = new EventTypeImpl(pfx + "POSITION_UPDATE");
 		onPositionClose = new EventTypeImpl(pfx + "POSITION_CLOSE");
-	}
-
-	@Deprecated
-	public PortfolioImpl(EditableTerminal terminal, Account account,
-			OSCController controller)
-	{
-		this(new PortfolioParamsBuilder(terminal.getEventQueue())
-				.withAccount(account)
-				.withTerminal(terminal)
-				.withController(controller)
-				.buildParams());
-	}
-	
-	@Deprecated
-	public PortfolioImpl(EditableTerminal terminal, Account account) {
-		this(terminal, account, new PortfolioController());
 	}
 	
 	@Override
@@ -183,7 +168,7 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 			}
 			EditablePosition position = positions.get(symbol);
 			if ( position == null ) {
-				position = new PositionImpl(terminal, account, symbol);
+				position = objectFactory.createPosition(terminal, account, symbol);
 				positions.put(symbol, position);
 				position.onAvailable().addAlternateType(onPositionAvailable);
 				position.onCurrentPriceChange().addAlternateType(onPositionCurrentPriceChange);

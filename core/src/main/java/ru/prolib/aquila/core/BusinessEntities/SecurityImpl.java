@@ -260,17 +260,17 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 				hasTrade = true;
 				break;
 			}
+			if ( hasAsk ) {
+				dispatcher.dispatch(onBestAsk, new SecurityTickEventFactory(this, tick));
+			}
+			if ( hasBid ) {
+				dispatcher.dispatch(onBestBid, new SecurityTickEventFactory(this, tick));
+			}
+			if ( hasTrade ) {
+				dispatcher.dispatch(onLastTrade, new SecurityTickEventFactory(this, tick));
+			}
 		} finally {
 			lock.unlock();
-		}
-		if ( hasAsk ) {
-			dispatcher.dispatch(onBestAsk, new SecurityTickEventFactory(this, tick));
-		}
-		if ( hasBid ) {
-			dispatcher.dispatch(onBestBid, new SecurityTickEventFactory(this, tick));
-		}
-		if ( hasTrade ) {
-			dispatcher.dispatch(onLastTrade, new SecurityTickEventFactory(this, tick));
 		}
 	}
 
@@ -330,10 +330,10 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 			marketDepthBuilder.setPriceScale(getScale());
 			marketDepthBuilder.consume(update);
 			md = marketDepthBuilder.getMarketDepth();
+			dispatcher.dispatch(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
 		} finally {
 			lock.unlock();
 		}
-		dispatcher.dispatch(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
 	}
 	
 	static class SecurityMarketDepthEventFactory implements EventFactory {

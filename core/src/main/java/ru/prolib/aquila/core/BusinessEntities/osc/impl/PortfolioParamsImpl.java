@@ -3,12 +3,14 @@ package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.ObjectFactory;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsImpl;
 
 public class PortfolioParamsImpl extends OSCParamsImpl implements PortfolioParams {
 	protected Terminal terminal;
 	protected Account account;
+	protected ObjectFactory objectFactory;
 
 	@Override
 	public Terminal getTerminal() {
@@ -25,6 +27,14 @@ public class PortfolioParamsImpl extends OSCParamsImpl implements PortfolioParam
 		}
 		return account;
 	}
+	
+	@Override
+	public ObjectFactory getObjectFactory() {
+		if ( objectFactory == null ) {
+			throw new IllegalStateException("Undefined object factory");
+		}
+		return objectFactory;
+	}
 
 	public void setTerminal(Terminal terminal) {
 		this.terminal = terminal;
@@ -32,6 +42,10 @@ public class PortfolioParamsImpl extends OSCParamsImpl implements PortfolioParam
 	
 	public void setAccount(Account account) {
 		this.account = account;
+	}
+	
+	public void setObjectFactory(ObjectFactory factory) {
+		this.objectFactory = factory;
 	}
 	
 	@Override
@@ -48,6 +62,8 @@ public class PortfolioParamsImpl extends OSCParamsImpl implements PortfolioParam
 				.append(this.controller, o.controller)
 				.append(this.dispatcher, o.dispatcher)
 				.append(this.id, o.id)
+				.append(this.lock, o.lock)
+				.append(this.objectFactory, o.objectFactory)
 				.appendSuper(this.terminal == o.terminal)
 				.isEquals();
 	}

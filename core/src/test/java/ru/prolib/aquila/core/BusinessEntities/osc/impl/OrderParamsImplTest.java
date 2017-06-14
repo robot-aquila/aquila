@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 
 import static org.junit.Assert.*;
+
+import java.util.concurrent.locks.Lock;
+
 import static org.easymock.EasyMock.*;
 
 import org.easymock.IMocksControl;
@@ -22,6 +25,7 @@ public class OrderParamsImplTest {
 	private Terminal terminalMock1, terminalMock2;
 	private EventDispatcher dispatcherMock1, dispatcherMock2;
 	private OSCController controllerMock1, controllerMock2;
+	private Lock lockMock1, lockMock2;
 	private OrderParamsImpl params;
 	
 	@BeforeClass
@@ -41,6 +45,8 @@ public class OrderParamsImplTest {
 		dispatcherMock2 = control.createMock(EventDispatcher.class);
 		controllerMock1 = control.createMock(OSCController.class);
 		controllerMock2 = control.createMock(OSCController.class);
+		lockMock1 = control.createMock(Lock.class);
+		lockMock2 = control.createMock(Lock.class);
 		params = new OrderParamsImpl();
 	}
 	
@@ -53,6 +59,7 @@ public class OrderParamsImplTest {
 		params.setOrderID(286L);
 		params.setSymbol(symbol1);
 		params.setTerminal(terminalMock1);
+		params.setLock(lockMock1);
 		
 		assertEquals(account1, params.getAccount());
 		assertSame(controllerMock1, params.getController());
@@ -61,6 +68,7 @@ public class OrderParamsImplTest {
 		assertEquals(286L, params.getOrderID());
 		assertEquals(symbol1, params.getSymbol());
 		assertSame(terminalMock1, params.getTerminal());
+		assertSame(lockMock1, params.getLock());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -76,6 +84,11 @@ public class OrderParamsImplTest {
 	@Test (expected=IllegalStateException.class)
 	public void testGetController_ThrowsUndefined() {
 		params.getController();
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testGetLock_ThrowsUndefined() {
+		params.getLock();
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -114,6 +127,7 @@ public class OrderParamsImplTest {
 		params.setOrderID(286L);
 		params.setSymbol(symbol1);
 		params.setTerminal(terminalMock1);
+		params.setLock(lockMock1);
 
 		Variant<Account> vAcc = new Variant<>(account1, account2);
 		Variant<OSCController> vCtrl = new Variant<>(vAcc, controllerMock1, controllerMock2);
@@ -122,7 +136,8 @@ public class OrderParamsImplTest {
 		Variant<Long> vOrdID = new Variant<>(vID, 286L, 512L);
 		Variant<Symbol> vSym = new Variant<>(vOrdID, symbol1, symbol2);
 		Variant<Terminal> vTerm = new Variant<>(vSym, terminalMock1, terminalMock2);
-		Variant<?> iterator = vTerm;
+		Variant<Lock> vLock = new Variant<>(vTerm, lockMock1, lockMock2);
+		Variant<?> iterator = vLock;
 		int foundCnt = 0;
 		OrderParamsImpl x, found = null;
 		do {
@@ -134,6 +149,7 @@ public class OrderParamsImplTest {
 			x.setOrderID(vOrdID.get());
 			x.setSymbol(vSym.get());
 			x.setTerminal(vTerm.get());
+			x.setLock(vLock.get());
 			if ( params.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -147,6 +163,7 @@ public class OrderParamsImplTest {
 		assertEquals(286L, found.getOrderID());
 		assertEquals(symbol1, found.getSymbol());
 		assertSame(terminalMock1, found.getTerminal());
+		assertSame(lockMock1, found.getLock());
 	}
 
 }

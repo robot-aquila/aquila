@@ -1,8 +1,12 @@
 package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 
+import java.util.concurrent.locks.Lock;
+
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.ObjectFactory;
+import ru.prolib.aquila.core.BusinessEntities.ObjectFactoryImpl;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioImpl;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
@@ -12,6 +16,7 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsImpl;
 public class PortfolioParamsBuilder extends OSCParamsBuilder {
 	protected Terminal terminal;
 	protected Account account;
+	protected ObjectFactory objectFactory;
 	
 	public PortfolioParamsBuilder(EventQueue queue) {
 		super(queue);
@@ -39,6 +44,12 @@ public class PortfolioParamsBuilder extends OSCParamsBuilder {
 		return this;
 	}
 	
+	@Override
+	public PortfolioParamsBuilder withLock(Lock lock) {
+		super.withLock(lock);
+		return this;
+	}
+	
 	public PortfolioParamsBuilder withTerminal(Terminal terminal) {
 		this.terminal = terminal;
 		return this;
@@ -46,6 +57,11 @@ public class PortfolioParamsBuilder extends OSCParamsBuilder {
 	
 	public PortfolioParamsBuilder withAccount(Account account) {
 		this.account = account;
+		return this;
+	}
+	
+	public PortfolioParamsBuilder withObjectFactory(ObjectFactory factory) {
+		this.objectFactory = factory;
 		return this;
 	}
 	
@@ -67,6 +83,13 @@ public class PortfolioParamsBuilder extends OSCParamsBuilder {
 		}
 		return account;
 	}
+	
+	protected ObjectFactory getObjectFactory() {
+		if ( objectFactory == null ) {
+			return getDefaultObjectFactory();
+		}
+		return objectFactory;
+	}
 
 	@Override
 	protected String getDefaultID() {
@@ -78,11 +101,16 @@ public class PortfolioParamsBuilder extends OSCParamsBuilder {
 		return new PortfolioImpl.PortfolioController();
 	}
 	
+	protected ObjectFactory getDefaultObjectFactory() {
+		return new ObjectFactoryImpl();
+	}
+	
 	@Override
 	protected OSCParamsImpl createParams() {
 		PortfolioParamsImpl params = new PortfolioParamsImpl();
 		params.setTerminal(getTerminal());
 		params.setAccount(getAccount());
+		params.setObjectFactory(getObjectFactory());
 		return params;
 	}
 	

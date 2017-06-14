@@ -63,6 +63,7 @@ public class PositionParamsImpl extends OSCParamsImpl implements PositionParams 
 				.append(this.dispatcher, o.dispatcher)
 				.append(this.id, o.id)
 				.append(this.symbol, o.symbol)
+				.append(this.lock, o.lock)
 				.appendSuper(this.terminal == o.terminal)
 				.isEquals();
 	}

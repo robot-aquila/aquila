@@ -420,12 +420,22 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 
 	@Override
 	public void fireArchived() {
-		dispatcher.dispatch(onArchived, new OrderEventFactory(this));
+		lock.lock();
+		try {
+			dispatcher.dispatch(onArchived, new OrderEventFactory(this));
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
 	public void fireExecution(OrderExecution execution) {
-		dispatcher.dispatch(onExecution, new OrderExecutionEventFactory(this, execution));
+		lock.lock();
+		try {
+			dispatcher.dispatch(onExecution, new OrderExecutionEventFactory(this, execution));
+		} finally {
+			lock.unlock();
+		}
 	}
 	
 	@Override

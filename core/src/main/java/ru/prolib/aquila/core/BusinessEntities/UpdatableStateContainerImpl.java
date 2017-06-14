@@ -20,14 +20,17 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 	private final Set<Integer> updated;
 	private final String id;
 	private boolean closed = false;
-
-	public UpdatableStateContainerImpl(String id) {
-		super();
+	
+	public UpdatableStateContainerImpl(String id, Lock lock) {
+		this.id = id;
+		this.lock = lock;
 		this.lid = LID.createInstance();
-		this.lock = new ReentrantLock();
 		this.values = new HashMap<Integer, Object>();
 		this.updated = new HashSet<Integer>();
-		this.id = id;
+	}
+
+	public UpdatableStateContainerImpl(String id) {
+		this(id, new ReentrantLock());
 	}
 
 	@Override

@@ -1,5 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities.osc;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventQueue;
@@ -9,6 +12,7 @@ public class OSCParamsBuilder {
 	private String id;
 	private EventDispatcher dispatcher;
 	private OSCController controller;
+	private Lock lock;
 	
 	public OSCParamsBuilder(EventQueue queue) {
 		this.queue = queue;
@@ -33,11 +37,17 @@ public class OSCParamsBuilder {
 		return this;
 	}
 	
+	public OSCParamsBuilder withLock(Lock lock) {
+		this.lock = lock;
+		return this;
+	}
+	
 	public OSCParams buildParams() {
 		OSCParamsImpl params = createParams();
 		params.setController(getController());
 		params.setEventDispatcher(getEventDispatcher());
 		params.setID(getID());
+		params.setLock(getLock());
 		return params;
 	}
 	
@@ -66,6 +76,13 @@ public class OSCParamsBuilder {
 		return controller;
 	}
 	
+	protected Lock getLock() {
+		if ( lock == null ) {
+			return getDefaultLock();
+		}
+		return lock;
+	}
+	
 	/**
 	 * Override this method to build default container ID.
 	 * <p>
@@ -82,6 +99,10 @@ public class OSCParamsBuilder {
 	 */
 	protected OSCController getDefaultController() {
 		return new OSCControllerStub();
+	}
+	
+	protected Lock getDefaultLock() {
+		return new ReentrantLock();
 	}
 	
 	/**

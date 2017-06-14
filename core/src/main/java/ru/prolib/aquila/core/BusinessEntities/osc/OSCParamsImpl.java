@@ -1,11 +1,14 @@
 package ru.prolib.aquila.core.BusinessEntities.osc;
 
+import java.util.concurrent.locks.Lock;
+
 import ru.prolib.aquila.core.EventDispatcher;
 
 public class OSCParamsImpl implements OSCParams {
 	protected String id;
 	protected EventDispatcher dispatcher;
 	protected OSCController controller;
+	protected Lock lock;
 	
 	@Override
 	public String getID() {
@@ -31,6 +34,14 @@ public class OSCParamsImpl implements OSCParams {
 		return controller;
 	}
 	
+	@Override
+	public Lock getLock() {
+		if ( lock == null ) {
+			throw new IllegalStateException("Undefined lock");
+		}
+		return lock;
+	}
+	
 	public void setID(String id) {
 		this.id = id;
 	}
@@ -41,6 +52,10 @@ public class OSCParamsImpl implements OSCParams {
 	
 	public void setController(OSCController controller) {
 		this.controller = controller;
+	}
+	
+	public void setLock(Lock lock) {
+		this.lock = lock;
 	}
 
 }

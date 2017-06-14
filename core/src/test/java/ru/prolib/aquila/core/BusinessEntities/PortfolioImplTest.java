@@ -5,7 +5,6 @@ import static org.easymock.EasyMock.*;
 
 import java.util.*;
 
-import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.EventDispatcher;
@@ -16,13 +15,13 @@ import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioImpl.PortfolioController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
+import ru.prolib.aquila.core.data.DataProviderStub;
 
 /**
  * 2012-09-06
  */
 public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	private static Account account = new Account("ZUMBA");
-	private IMocksControl control;
 	private EditableTerminal terminal;
 	private PortfolioImpl portfolio;
 	
@@ -47,24 +46,31 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	private void prepareTerminal() {
-		control = createStrictControl();
-		terminal = control.createMock(EditableTerminal.class);
-		expect(terminal.getTerminalID()).andStubReturn("Terminal#1");
-		expect(terminal.getEventQueue()).andStubReturn(queue);
-		control.replay();		
+		terminal = new BasicTerminalBuilder()
+				.withTerminalID("Terminal#1")
+				.withEventQueue(queue)
+				.withDataProvider(new DataProviderStub())
+				.buildTerminal();
 	}
 	
 	@Override
 	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
-		portfolio = new PortfolioImpl(terminal, account);
+		portfolio = new PortfolioImpl(new PortfolioParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.buildParams());
 		return portfolio;
 	}
 	
 	@Override
 	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
-		portfolio = new PortfolioImpl(terminal, account, controller);
+		portfolio = new PortfolioImpl(new PortfolioParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withController(controller)
+				.buildParams());
 		return portfolio;
 	}
 	
@@ -73,8 +79,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 			OSCController controller)
 	{
 		prepareTerminal();
-		portfolio = new PortfolioImpl(new PortfolioParamsBuilder()
-				.withID(getID())
+		portfolio = new PortfolioImpl(new PortfolioParamsBuilder(queue)
 				.withTerminal(terminal)
 				.withAccount(account)
 				.withEventDispatcher(eventDispatcher)
@@ -85,7 +90,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testCtor_DefaultController() throws Exception {
-		portfolio = new PortfolioImpl(terminal, account);
+		produceContainer();
 		assertEquals(PortfolioController.class, portfolio.getController().getClass());
 		assertNotNull(portfolio.getTerminal());
 		assertNotNull(portfolio.getEventDispatcher());

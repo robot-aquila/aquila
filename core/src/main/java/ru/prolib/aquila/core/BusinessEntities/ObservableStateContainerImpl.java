@@ -27,7 +27,7 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	private boolean available = false;
 	
 	public ObservableStateContainerImpl(OSCParams params) {
-		super(params.getID());
+		super(params.getID(), params.getLock());
 		this.dispatcher = params.getEventDispatcher();
 		this.controller = params.getController();
 		final String id = params.getID();

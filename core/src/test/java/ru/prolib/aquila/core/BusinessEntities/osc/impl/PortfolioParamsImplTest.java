@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 import static org.easymock.EasyMock.createStrictControl;
 import static org.junit.Assert.*;
 
+import java.util.concurrent.locks.Lock;
+
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -10,6 +12,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.ObjectFactory;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.utils.Variant;
@@ -20,6 +23,8 @@ public class PortfolioParamsImplTest {
 	private Terminal terminalMock1, terminalMock2;
 	private EventDispatcher dispatcherMock1, dispatcherMock2;
 	private OSCController controllerMock1, controllerMock2;
+	private Lock lockMock1, lockMock2;
+	private ObjectFactory factoryMock1, factoryMock2;
 	private PortfolioParamsImpl params;
 	
 	@BeforeClass
@@ -37,6 +42,10 @@ public class PortfolioParamsImplTest {
 		dispatcherMock2 = control.createMock(EventDispatcher.class);
 		controllerMock1 = control.createMock(OSCController.class);
 		controllerMock2 = control.createMock(OSCController.class);
+		lockMock1 = control.createMock(Lock.class);
+		lockMock2 = control.createMock(Lock.class);
+		factoryMock1 = control.createMock(ObjectFactory.class);
+		factoryMock2 = control.createMock(ObjectFactory.class);
 		params = new PortfolioParamsImpl();
 	}
 	
@@ -47,12 +56,16 @@ public class PortfolioParamsImplTest {
 		params.setEventDispatcher(dispatcherMock1);
 		params.setID("foobar");
 		params.setTerminal(terminalMock1);
+		params.setLock(lockMock1);
+		params.setObjectFactory(factoryMock1);
 		
 		assertEquals(account1, params.getAccount());
 		assertSame(controllerMock1, params.getController());
 		assertSame(dispatcherMock1, params.getEventDispatcher());
 		assertEquals("foobar", params.getID());
 		assertSame(terminalMock1, params.getTerminal());
+		assertSame(lockMock1, params.getLock());
+		assertSame(factoryMock1, params.getObjectFactory());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -71,6 +84,11 @@ public class PortfolioParamsImplTest {
 	}
 	
 	@Test (expected=IllegalStateException.class)
+	public void testGetLock_ThrowsUndefined() {
+		params.getLock();
+	}
+	
+	@Test (expected=IllegalStateException.class)
 	public void testGetTerminal_ThrowsUndefined() {
 		params.getTerminal();
 	}
@@ -78,6 +96,11 @@ public class PortfolioParamsImplTest {
 	@Test (expected=IllegalStateException.class)
 	public void testGetAccount_ThrowsUndefined() {
 		params.getAccount();
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testGetObjectFactory() {
+		params.getObjectFactory();
 	}
 
 	@Test
@@ -94,13 +117,17 @@ public class PortfolioParamsImplTest {
 		params.setEventDispatcher(dispatcherMock1);
 		params.setID("foobar");
 		params.setTerminal(terminalMock1);
+		params.setLock(lockMock1);
+		params.setObjectFactory(factoryMock1);
 
 		Variant<Account> vAcc = new Variant<>(account1, account2);
 		Variant<OSCController> vCtrl = new Variant<>(vAcc, controllerMock1, controllerMock2);
 		Variant<EventDispatcher> vDisp = new Variant<>(vCtrl, dispatcherMock1, dispatcherMock2);
 		Variant<String> vID = new Variant<>(vDisp, "foobar", "zulu24");
 		Variant<Terminal> vTerm = new Variant<>(vID, terminalMock1, terminalMock2);
-		Variant<?> iterator = vTerm;
+		Variant<Lock> vLock = new Variant<>(vTerm, lockMock1, lockMock2);
+		Variant<ObjectFactory> vObjF = new Variant<>(vLock, factoryMock1, factoryMock2);
+		Variant<?> iterator = vObjF;
 		int foundCnt = 0;
 		PortfolioParamsImpl x, found = null;
 		do {
@@ -110,6 +137,8 @@ public class PortfolioParamsImplTest {
 			x.setEventDispatcher(vDisp.get());
 			x.setID(vID.get());
 			x.setTerminal(vTerm.get());
+			x.setLock(vLock.get());
+			x.setObjectFactory(vObjF.get());
 			if ( params.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -121,6 +150,8 @@ public class PortfolioParamsImplTest {
 		assertSame(dispatcherMock1, found.getEventDispatcher());
 		assertEquals("foobar", found.getID());
 		assertSame(terminalMock1, found.getTerminal());
+		assertSame(lockMock1, found.getLock());
+		assertSame(factoryMock1, found.getObjectFactory());
 	}
 
 }

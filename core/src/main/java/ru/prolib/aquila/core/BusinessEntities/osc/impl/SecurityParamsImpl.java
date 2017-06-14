@@ -48,6 +48,7 @@ public class SecurityParamsImpl extends OSCParamsImpl implements SecurityParams 
 				.append(o.dispatcher, dispatcher)
 				.append(o.id, id)
 				.append(o.symbol, symbol)
+				.append(o.lock, lock)
 				.appendSuper(o.terminal == terminal)
 				.isEquals();
 	}
