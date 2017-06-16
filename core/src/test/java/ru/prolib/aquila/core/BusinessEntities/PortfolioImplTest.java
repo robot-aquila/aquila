@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.*;
 
@@ -15,6 +17,8 @@ import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioImpl.PortfolioController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
+import ru.prolib.aquila.core.concurrency.Lockable;
+import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
 /**
@@ -435,6 +439,437 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		
 		assertTrue(portfolio.isPositionExists(symbol1));
 		assertTrue(portfolio.isPositionExists(symbol2));
+	}
+
+	// ------------------------------------------------------------------------
+	// Тесты блокировки методов добавления новых позиций в портфель.
+	//
+	// Термины:
+	// КСЗНП - Критическая секция запрета новых позиций;
+	// БП - блокирующий поток - поток, который блокирует КСЗНП;
+	// КП - конкурирующий поток - поток, который вызывает методы, приводящие к
+	// созданию новых экземпляров позиций.
+	// 
+	// Case1 - БП успевает блокировать до обращения КП. КП дожидаются снятия
+	// блокировки, после чего действия КП приводят к созданию новых позиций.
+	//
+	// Case2 - БП пытается заблокировать в тот момент, когда выполняется
+	// обращение к методу, порождающему новую позицию. Действия КП приводят
+	// к созданию новых позиций, которые доступны после блокировки объекта БП.
+	//
+	// Case3 - Два БП последовательно пытаются запретить новые позиции.
+	// Второй БП должен ждать окончания запрета в методе запрета.
+	//
+	// Case4 - БП пытается захватить блокировку дважды. Это может
+	// свидетельствовать о некорректности алгоритма (какая-то сложная логика
+	// размазана между захватом и освобождением лока). В этом случае должно
+	// выбрасываться исключение с освобождением лока.
+	//
+	// Case5 - БП после захвата блокировки пытается выполнить действия, которые
+	// приведут (могут привести) к созданию новой позиции. Данное поведение
+	// потенциально опасно по причинам аналогичным Case4. В таком случае должно
+	// выбрасываться исключение. При этом, блокировка должна сниматься
+	// автоматически!
+	//
+	// Case6 - Типовой случай использования блокировки добавления новых позиций
+	// - БП блокирует создание позиций с целью создания мультлока на портфель и
+	// инструменты позиции. После захвата мультилока, БП снимает блокировку на
+	// добавление позиций. При этом, КП спускается до обычного лока и находится
+	// в этом состоянии до освобождения объекта БП.
+	//
+	// Case7 - КП захватывает основной лок, но не успевает зайти в метод,
+	// ограниченный КСЗНП. БП устанавливает запрет новых позиций и пытается
+	// получить список позиций. Не должен возникнуть дедлок.
+	//
+	// Case9 - Снять блокировку может только тот поток, который выполнил
+	// блокировку. Если это условие не выполняется, значит поток предпринявший
+	// такую попытку не пытался получить лок на КСЗНП. Иначе он бы находился
+	// именно там в ожидании снятия блокировки.
+	//
+	// Вопросы: ---
+	// 
+	
+	@Test
+	public void testLockNewPositions_Case1() throws Exception {
+		produceContainer();
+		final Symbol symbol = new Symbol("SBER");
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(3);
+		Thread bt = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lockNewPositions();
+				try {
+					started.countDown();
+					Thread.sleep(100L);
+					portfolio.update(PortfolioField.BALANCE, FMoney.ofRUB2(1500.0));
+					if ( ! portfolio.isPositionExists(symbol) ) {
+						successPoints.countDown();
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				} finally {
+					portfolio.unlockNewPositions();
+				}
+			}
+		};
+		Thread ct = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1L, TimeUnit.SECONDS) ) {
+						if ( ! FMoney.ofRUB2(1500.0).equals(portfolio.getBalance()) ) {
+							successPoints.countDown();
+						}
+						portfolio.getPosition(symbol);
+						if ( FMoney.ofRUB2(1500.0).equals(portfolio.getBalance()) ) {
+							successPoints.countDown();
+						}
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		ct.start();
+		bt.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+	}
+	
+	@Test
+	public void testLockNewPositions_Case2() throws Exception {
+		final Symbol symbol = new Symbol("SBER");
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(4); 
+		ObjectFactory objectFactory = new ObjectFactoryImpl() {
+			@Override
+			public EditablePosition createPosition(EditableTerminal terminal, Account account, Symbol symbol) {
+				try {
+					started.countDown();
+					Thread.sleep(100L);
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+				return new ObjectFactoryImpl().createPosition(terminal, account, symbol);
+			}
+		};
+		portfolio = new PortfolioImpl(new PortfolioParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withObjectFactory(objectFactory)
+				.buildParams());
+		Thread bt = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( ! portfolio.isPositionExists(symbol) ) {
+						successPoints.countDown();
+					}
+					if ( started.await(1, TimeUnit.SECONDS) ) {
+						portfolio.lockNewPositions();
+						portfolio.lock();
+						try {
+							if ( portfolio.isPositionExists(symbol) ) {
+								successPoints.countDown();
+							}
+							portfolio.update(PortfolioField.BALANCE, FMoney.ofRUB2(10000.0));
+						} finally {
+							portfolio.unlock();
+							portfolio.unlockNewPositions();
+						}
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		Thread ct = new Thread() {
+			@Override
+			public void run() {
+				if ( ! FMoney.ofRUB2(10000.0).equals(portfolio.getBalance()) ) {
+					successPoints.countDown();
+				}
+				portfolio.lock();
+				try {
+					portfolio.getPosition(symbol);
+					if ( ! FMoney.ofRUB2(10000.0).equals(portfolio.getBalance()) ) {
+						successPoints.countDown();
+					}
+				} finally {
+					portfolio.unlock();
+				}
+			}
+		};
+		ct.start();
+		bt.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+	}
+	
+	@Test
+	public void testLockNewPositions_Case3() throws Exception {
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(2);
+		Thread bt1 = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lockNewPositions();
+				try {
+					started.countDown();
+					Thread.sleep(100L);
+					successPoints.countDown();
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				} finally {
+					portfolio.unlockNewPositions();
+				}
+			}
+		};
+		Thread bt2 = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1L, TimeUnit.SECONDS) ) {
+						portfolio.lockNewPositions();
+						try {
+							successPoints.countDown();
+						} finally {
+							portfolio.unlockNewPositions();
+						}
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		bt2.start();
+		bt1.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+	}
+	
+	@Test
+	public void testLockNewPositions_Case4() throws Exception {
+		final Symbol symbol = new Symbol("AAPL");
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(2);
+		Thread bt = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lockNewPositions();
+				started.countDown();
+				try {
+					portfolio.lockNewPositions();
+				} catch ( IllegalStateException e ) {
+					//System.err.println(e.getMessage());
+					successPoints.countDown();
+				}
+				// No explicit unlock needed.
+				// The second call must release lock.
+			}
+		};
+		Thread ct = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1L, TimeUnit.SECONDS) ) {
+						portfolio.getPosition(symbol);
+						successPoints.countDown();
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		ct.start();
+		bt.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+	}
+	
+	@Test
+	public void testLockNewPositions_Case5() throws Exception {
+		final Symbol symbol = new Symbol("AAPL");
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(2);
+		Thread bt = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lockNewPositions();
+				started.countDown();
+				try {
+					portfolio.getPosition(symbol);
+				} catch ( IllegalStateException e ) {
+					//System.err.println(e.getMessage());
+					successPoints.countDown();
+				}
+				// No explicit unlock needed.
+				// The second call must release lock.
+			}
+		};
+		Thread ct = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1L, TimeUnit.SECONDS) ) {
+						portfolio.getPosition(symbol);
+						successPoints.countDown();
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		ct.start();
+		bt.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+	}
+	
+	// Case6 - Типовой случай использования блокировки добавления новых позиций
+	// - БП блокирует создание позиций с целью создания мультлока на портфель и
+	// инструменты позиции. После захвата мультилока, БП снимает блокировку на
+	// добавление позиций. При этом, КП спускается до обычного лока и находится
+	// в этом состоянии до освобождения объекта БП.
+	@Test
+	public void testLockNewPositions_Case6() throws Exception {
+		final Symbol symbol1 = new Symbol("AAPL"),
+				symbol2 = new Symbol("MSFT"),
+				symbol3 = new Symbol("SBER");
+		terminal.getEditableSecurity(symbol1);
+		terminal.getEditableSecurity(symbol2);
+		terminal.getEditableSecurity(symbol3);
+		portfolio.getPosition(symbol1);
+		portfolio.getPosition(symbol2);
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(3);
+		Thread bt = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lockNewPositions();
+				started.countDown();
+				try {
+					Thread.sleep(100L);
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+					portfolio.unlockNewPositions();
+					return;
+				}
+				Set<Lockable> lockable = new HashSet<>();
+				lockable.add(portfolio);
+				for ( Position p : portfolio.getPositions() ) {
+					lockable.add(p.getSecurity());
+				}
+				if ( lockable.size() == 3 ) {
+					successPoints.countDown();
+				}
+				Lockable z = new Multilock(lockable);
+				z.lock();
+				try {
+					portfolio.unlockNewPositions();
+					successPoints.countDown();
+				} finally {
+					z.unlock();
+				}
+			}
+		};
+		Thread ct = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1L, TimeUnit.SECONDS) ) {
+						portfolio.getPosition(symbol3);
+						successPoints.countDown();
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		ct.start();
+		bt.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+	}
+
+	@Test
+	public void testLockNewPositions_Case7() throws Exception {
+		final Symbol symbol = new Symbol("SBER");
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(2); 
+		Thread ct = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lock();
+				try {
+					started.countDown();
+					Thread.sleep(100L);
+					portfolio.getPosition(symbol);
+					successPoints.countDown();
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				} finally {
+					portfolio.unlock();
+				}
+			}
+		};
+		Thread bt = new Thread() {
+			@Override
+			public void run() {
+				try {
+					started.await(1, TimeUnit.SECONDS);
+					portfolio.lockNewPositions();
+					try {
+						if ( portfolio.isPositionExists(symbol) ) {
+							successPoints.countDown();
+						}
+					} finally {
+						portfolio.unlockNewPositions();
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		ct.start();
+		bt.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+	}
+
+	@Test
+	public void testLockNewPositions_Case9() throws Exception {
+		final CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(2); 
+		Thread bt1 = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lockNewPositions();
+				try {
+					started.countDown();
+					Thread.sleep(100L);
+					successPoints.countDown();
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				} finally {
+					portfolio.unlockNewPositions();
+				}
+			}
+		};
+		Thread bt2 = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1L, TimeUnit.SECONDS) ) {
+						try {
+							portfolio.unlockNewPositions();
+						} catch ( IllegalStateException e ) {
+							//System.err.println(e.getMessage());
+							successPoints.countDown();
+						}
+					}
+				} catch ( Exception e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		bt1.start();
+		bt2.start();
+		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
 	}
 
 }

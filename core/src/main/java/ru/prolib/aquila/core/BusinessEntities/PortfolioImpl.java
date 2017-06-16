@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.util.*;
+import java.util.concurrent.locks.Condition;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
@@ -29,9 +30,12 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 		onPositionCurrentPriceChange, onPositionUpdate, onPositionClose;
 	private final Map<Symbol, EditablePosition> positions;
 	private final ObjectFactory objectFactory;
+	private final Condition newPosLocked;
+	private long newPosLockedTID;
 	
 	public PortfolioImpl(PortfolioParams params) {
 		super(params);
+		this.newPosLocked = lock.newCondition();
 		this.terminal = (EditableTerminal) params.getTerminal();
 		this.account = params.getAccount();
 		this.objectFactory = params.getObjectFactory();
@@ -163,6 +167,18 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	public EditablePosition getEditablePosition(Symbol symbol) {
 		lock.lock();
 		try {
+			while ( newPosLockedTID != 0L ) {
+				if ( newPosLockedTID == Thread.currentThread().getId() ) {
+					unlockNewPositions();
+					throw new IllegalStateException("New positions are locked by this thread");
+				}
+				newPosLocked.await();
+				// TODO: Здесь можно написать более надежно. Например, если
+				// блокирующий поток был прибит, то текущая реализация будет
+				// висеть вечно. Можно переписать на await с аргументами и
+				// периодически проверять, жив ли блокирующий поток. Если нет,
+				// то снимать блокировку здесь.
+			}
 			if ( terminal == null ) {
 				throw new IllegalStateException("Portfolio closed");
 			}
@@ -177,6 +193,9 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 				position.onClose().addAlternateType(onPositionClose);
 			}
 			return position;
+		} catch ( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException("Unexpected interruption: ", e);
 		} finally {
 			lock.unlock();
 		}
@@ -254,6 +273,41 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 		lock.lock();
 		try {
 			return positions.containsKey(symbol);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void lockNewPositions() {
+		lock.lock();
+		try {
+			long curTID = Thread.currentThread().getId();
+			while ( newPosLockedTID != 0L ) {
+				if ( newPosLockedTID == curTID ) {
+					unlockNewPositions();
+					throw new IllegalStateException("New positions already locked by this thread");
+				}
+				newPosLocked.await();
+			}
+			newPosLockedTID = curTID;
+		} catch ( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException("Unexpected interruption: ", e);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void unlockNewPositions() {
+		lock.lock();
+		try {
+			if ( newPosLockedTID != Thread.currentThread().getId() ) {
+				throw new IllegalStateException("New positions locked by another thread");
+			}
+			newPosLockedTID = 0L;
+			newPosLocked.signalAll();
 		} finally {
 			lock.unlock();
 		}
