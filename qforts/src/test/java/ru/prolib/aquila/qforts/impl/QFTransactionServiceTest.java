@@ -17,7 +17,6 @@ import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
-import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.FDecimal;
@@ -179,12 +178,10 @@ public class QFTransactionServiceTest {
 		seqExecutionID.set(1000L);
 		EditableOrder order = terminal.createOrder(account, symbol1);
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
-		EditablePosition position = portfolio.getEditablePosition(symbol1);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(order);
 		expectedLockable.add(portfolio);
-		expectedLockable.add(position);
 		expectedLockable.add(security);
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -213,12 +210,10 @@ public class QFTransactionServiceTest {
 		seqExecutionID.set(1050L);
 		EditableOrder order = terminal.createOrder(account, symbol1);
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
-		EditablePosition position = portfolio.getEditablePosition(symbol1);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(order);
 		expectedLockable.add(portfolio);
-		expectedLockable.add(position);
 		expectedLockable.add(security);
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -246,12 +241,10 @@ public class QFTransactionServiceTest {
 	public void testExecuteOrder_ThrowsIfNotRegistered() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
-		EditablePosition position = portfolio.getEditablePosition(symbol1);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(order);
 		expectedLockable.add(portfolio);
-		expectedLockable.add(position);
 		expectedLockable.add(security);
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -269,12 +262,10 @@ public class QFTransactionServiceTest {
 		seqExecutionID.set(1050L);
 		EditableOrder order = terminal.createOrder(account, symbol1);
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
-		EditablePosition position = portfolio.getEditablePosition(symbol1);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(order);
 		expectedLockable.add(portfolio);
-		expectedLockable.add(position);
 		expectedLockable.add(security);
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -303,7 +294,7 @@ public class QFTransactionServiceTest {
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(order);
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol1));
+		//expectedLockable.add(portfolio.getEditablePosition(symbol1));
 		expectedLockable.add(security);
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -331,11 +322,11 @@ public class QFTransactionServiceTest {
 	@Test
 	public void testUpdateByMarket() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		portfolio.getEditablePosition(symbol1);
+		portfolio.getEditablePosition(symbol2);
+		portfolio.getEditablePosition(symbol3);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol1));
-		expectedLockable.add(portfolio.getEditablePosition(symbol2));
-		expectedLockable.add(portfolio.getEditablePosition(symbol3));
 		expectedLockable.add(terminal.getEditableSecurity(symbol1));
 		expectedLockable.add(terminal.getEditableSecurity(symbol2));
 		expectedLockable.add(terminal.getEditableSecurity(symbol3));
@@ -356,9 +347,9 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testUpdateByMarket_ThrowsIfNotRegistered() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		portfolio.getEditablePosition(symbol1);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol1));
 		expectedLockable.add(terminal.getEditableSecurity(symbol1));
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -406,9 +397,9 @@ public class QFTransactionServiceTest {
 	public void testUpdateMargin() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
+		portfolio.getEditablePosition(symbol1);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol1));
 		expectedLockable.add(security);
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -427,10 +418,10 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testUpdateMargin_ThrowsIfNotRegistered() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		portfolio.getEditablePosition(symbol1);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol1));
 		expectedLockable.add(security);
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -454,11 +445,11 @@ public class QFTransactionServiceTest {
 	@Test
 	public void testMidClearing() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		portfolio.getEditablePosition(symbol1);
+		portfolio.getEditablePosition(symbol2);
+		portfolio.getEditablePosition(symbol3);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol1));
-		expectedLockable.add(portfolio.getEditablePosition(symbol2));
-		expectedLockable.add(portfolio.getEditablePosition(symbol3));
 		expectedLockable.add(terminal.getEditableSecurity(symbol1));
 		expectedLockable.add(terminal.getEditableSecurity(symbol2));
 		expectedLockable.add(terminal.getEditableSecurity(symbol3));
@@ -479,9 +470,9 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testMidClearing_ThrowsIfNotRegistered() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		portfolio.getEditablePosition(symbol3);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol3));
 		expectedLockable.add(terminal.getEditableSecurity(symbol3));
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();
@@ -497,11 +488,11 @@ public class QFTransactionServiceTest {
 	@Test
 	public void testClearing() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		portfolio.getEditablePosition(symbol1);
+		portfolio.getEditablePosition(symbol2);
+		portfolio.getEditablePosition(symbol3);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol1));
-		expectedLockable.add(portfolio.getEditablePosition(symbol2));
-		expectedLockable.add(portfolio.getEditablePosition(symbol3));
 		expectedLockable.add(terminal.getEditableSecurity(symbol1));
 		expectedLockable.add(terminal.getEditableSecurity(symbol2));
 		expectedLockable.add(terminal.getEditableSecurity(symbol3));
@@ -522,9 +513,9 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testClearing_ThrowsIfNotRegistered() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		portfolio.getEditablePosition(symbol3);
 		Set<BusinessEntity> expectedLockable = new HashSet<>();
 		expectedLockable.add(portfolio);
-		expectedLockable.add(portfolio.getEditablePosition(symbol3));
 		expectedLockable.add(terminal.getEditableSecurity(symbol3));
 		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
 		multilockMock.lock();

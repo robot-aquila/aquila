@@ -95,7 +95,6 @@ public class QFTransactionService {
 		lockable.add(order);
 		lockable.add(security);
 		lockable.add(portfolio);
-		lockable.add(portfolio.getPosition(order.getSymbol()));
 		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
@@ -121,15 +120,19 @@ public class QFTransactionService {
 	}
 	
 	public void updateByMarket(EditablePortfolio portfolio) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(portfolio);
-		for ( Position x : portfolio.getPositions() ) {
-			// TODO: that is unsafe. number of position may be changed during this operation.
-			lockable.add(x);
-			lockable.add(x.getSecurity());
+		Lockable lock = null;
+		portfolio.lockNewPositions();
+		try {
+			Set<BusinessEntity> lockable = new HashSet<>();
+			lockable.add(portfolio);
+			for ( Position x : portfolio.getPositions() ) {
+				lockable.add(x.getSecurity());
+			}
+			lock = assembler.createMultilock(lockable);
+			lock.lock();
+		} finally {
+			portfolio.unlockNewPositions();
 		}
-		Lockable lock = assembler.createMultilock(lockable);
-		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
 				throw new QFTransactionException("Portfolio not registered: " + portfolio.getAccount());
@@ -162,10 +165,10 @@ public class QFTransactionService {
 		if ( ! portfolio.isPositionExists(security.getSymbol()) ) {
 			return;
 		}
+		// Locking new positions isn't needed.
 		Set<BusinessEntity> lockable = new HashSet<>();
 		lockable.add(portfolio);
 		lockable.add(security);
-		lockable.add(portfolio.getPosition(security.getSymbol()));
 		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
@@ -180,15 +183,19 @@ public class QFTransactionService {
 	}
 	
 	public void midClearing(EditablePortfolio portfolio) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(portfolio);
-		for ( Position x : portfolio.getPositions() ) {
-			// TODO: that is unsafe. number of position may be changed during this operation.
-			lockable.add(x);
-			lockable.add(x.getSecurity());
+		Lockable lock = null;
+		portfolio.lockNewPositions();
+		try {
+			Set<BusinessEntity> lockable = new HashSet<>();
+			lockable.add(portfolio);
+			for ( Position x : portfolio.getPositions() ) {
+				lockable.add(x.getSecurity());
+			}
+			lock = assembler.createMultilock(lockable);
+			lock.lock();
+		} finally {
+			portfolio.unlockNewPositions();
 		}
-		Lockable lock = assembler.createMultilock(lockable);
-		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
 				throw new QFTransactionException("Portfolio not registered: " + portfolio.getAccount());
@@ -201,15 +208,19 @@ public class QFTransactionService {
 	}
 	
 	public void clearing(EditablePortfolio portfolio) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(portfolio);
-		for ( Position x : portfolio.getPositions() ) {
-			// TODO: that is unsafe. number of position may be changed during this operation.
-			lockable.add(x);
-			lockable.add(x.getSecurity());
+		Lockable lock = null;
+		portfolio.lockNewPositions();
+		try {
+			Set<BusinessEntity> lockable = new HashSet<>();
+			lockable.add(portfolio);
+			for ( Position x : portfolio.getPositions() ) {
+				lockable.add(x.getSecurity());
+			}
+			lock = assembler.createMultilock(lockable);
+			lock.lock();
+		} finally {
+			portfolio.unlockNewPositions();
 		}
-		Lockable lock = assembler.createMultilock(lockable);
-		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
 				throw new QFTransactionException("Portfolio not registered: " + portfolio.getAccount());
