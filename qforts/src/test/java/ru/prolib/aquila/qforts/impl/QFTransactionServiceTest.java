@@ -64,6 +64,10 @@ public class QFTransactionServiceTest {
 		seqExecutionID = new AtomicLong();
 		service = new QFTransactionService(registryMock, seqExecutionID,
 				calculatorMock, assemblerMock, validatorMock);
+		terminal.getEditablePortfolio(account);
+		terminal.getEditableSecurity(symbol1);
+		terminal.getEditableSecurity(symbol2);
+		terminal.getEditableSecurity(symbol3);
 	}
 	
 	@Test

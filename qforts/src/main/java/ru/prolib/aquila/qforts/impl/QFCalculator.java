@@ -130,7 +130,7 @@ public class QFCalculator {
 			.setExecutionOrderID(order.getID())
 			.setExecutionPrice(price)
 			.setExecutionSymbol(order.getSymbol())
-			.setExecutionTime(order.getTerminal().getCurrentTime())
+			.setExecutionTime(order.getTerminal().getCurrentTime()) // No prob with concurrency
 			.setExecutionValue(update.getChangeExecutedValue().abs())
 			.setExecutionVolume(volume);
 		if ( update.getFinalCurrentVolume() <= 0L ) {
@@ -148,7 +148,7 @@ public class QFCalculator {
 			.setFinalStatus(status)
 			.setSystemMessage(systemMessage);
 		if ( status.isFinal() ) {
-			update.setFinalizationTime(order.getTerminal().getCurrentTime());
+			update.setFinalizationTime(order.getTerminal().getCurrentTime()); // No prob with concurrency
 		}
 		return update;
 	}

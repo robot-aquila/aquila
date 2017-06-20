@@ -53,6 +53,12 @@ public class QFObjectRegistryTest {
 		terminal = new BasicTerminalBuilder()
 			.withDataProvider(new DataProviderStub())
 			.buildTerminal();
+		terminal.getEditableSecurity(symbol1);
+		terminal.getEditableSecurity(symbol2);
+		terminal.getEditableSecurity(symbol3);
+		terminal.getEditablePortfolio(account1);
+		terminal.getEditablePortfolio(account2);
+		terminal.getEditablePortfolio(account3);
 	}
 	
 	@Test

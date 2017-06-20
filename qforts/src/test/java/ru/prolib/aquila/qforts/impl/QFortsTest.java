@@ -48,6 +48,10 @@ public class QFortsTest {
 				.withDataProvider(new DataProviderStub())
 				.buildTerminal();
 		service = new QForts(registryMock, transactionsMock);
+		terminal.getEditableSecurity(symbol1);
+		terminal.getEditablePortfolio(account1);
+		terminal.getEditablePortfolio(account2);
+		terminal.getEditablePortfolio(account3);
 	}
 	
 	@Test

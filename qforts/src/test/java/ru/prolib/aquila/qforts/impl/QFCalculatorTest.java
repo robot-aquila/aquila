@@ -67,6 +67,9 @@ public class QFCalculatorTest {
 			.buildUpdate());
 		security1 = terminal.getEditableSecurity(symbol1);
 		security3 = terminal.getEditableSecurity(symbol3);
+		terminal.getEditableSecurity(symbol2);
+		terminal.getEditableSecurity(symbol4);
+		terminal.getEditablePortfolio(account1);
 	}
 	
 	@Test

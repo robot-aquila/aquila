@@ -71,6 +71,8 @@ public class QFAssemblerTest {
 			.buildTerminal();
 		portfolio = terminal.getEditablePortfolio(account1);
 		service = new QFAssembler();
+		terminal.getEditableSecurity(symbol1);
+		terminal.getEditableSecurity(symbol2);
 	}
 	
 	@Test
