@@ -6,7 +6,6 @@ import static org.easymock.EasyMock.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.EventDispatcher;
@@ -17,6 +16,7 @@ import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.PositionImpl.PositionController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParamsBuilder;
+import ru.prolib.aquila.core.data.DataProviderStub;
 
 /**
  * 2012-08-03<br>
@@ -25,7 +25,6 @@ import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParamsBuilder;
 public class PositionImplTest extends ObservableStateContainerImplTest {
 	private static Symbol symbol = new Symbol("S:GAZP@EQBR:RUB");
 	private static Account account = new Account("TST01");
-	private IMocksControl control;
 	private EditableTerminal terminal;
 	private PositionImpl position;
 
@@ -50,24 +49,35 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	private void prepareTerminal() {
-		control = createStrictControl();
-		terminal = control.createMock(EditableTerminal.class);
-		expect(terminal.getTerminalID()).andStubReturn("foobar");
-		expect(terminal.getEventQueue()).andStubReturn(queue);
-		control.replay();		
+		terminal = new BasicTerminalBuilder()
+				.withDataProvider(new DataProviderStub())
+				.withTerminalID("foobar")
+				.withEventQueue(queue)
+				.buildTerminal();
+		terminal.getEditableSecurity(symbol);
+		terminal.getEditablePortfolio(account);	
 	}
 	
 	@Override
 	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
-		position = new PositionImpl(terminal, account, symbol);
+		position = new PositionImpl(new PositionParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.buildParams());
 		return position;
 	}
 	
 	@Override
 	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
-		position = new PositionImpl(terminal, account, symbol, controller);
+		position = new PositionImpl(new PositionParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withController(controller)
+				.buildParams());
 		return position;
 	}
 	
@@ -88,7 +98,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testCtor_DefaultController() {
-		position = new PositionImpl(terminal, account, symbol);
+		produceContainer();
 		assertEquals(PositionController.class, position.getController().getClass());
 		assertNotNull(position.getTerminal());
 		assertNotNull(position.getEventDispatcher());
@@ -295,28 +305,25 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		assertSame(position, ((PositionEvent) listenerStub.getEvent(1)).getPosition());
 
 	}
-	
+		
 	@Test
-	public void testGetSecurity() throws Exception {
-		control.resetToStrict();
-		Security securityMock = control.createMock(Security.class);
-		expect(terminal.getSecurity(symbol)).andReturn(securityMock);
+	public void testGettersOfRelatedObjects() throws Exception {
+		Terminal terminalMock = control.createMock(Terminal.class);
 		control.replay();
+		Security expectedSecurity = terminal.getSecurity(symbol);
+		Portfolio expectedPortfolio = terminal.getPortfolio(account);
 		
-		assertSame(securityMock, position.getSecurity());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetPortfolio() throws Exception {
-		control.resetToStrict();
-		Portfolio portfolioMock = control.createMock(Portfolio.class);
-		expect(terminal.getPortfolio(account)).andReturn(portfolioMock);
-		control.replay();
-		
-		assertSame(portfolioMock, position.getPortfolio());
-		
+		position = new PositionImpl(new PositionParamsBuilder(queue)
+				.withTerminal(terminalMock)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withSecurity(expectedSecurity)
+				.withPortfolio(expectedPortfolio)
+				.withID("zxy")
+				.buildParams());
+		assertSame(expectedSecurity, position.getSecurity());
+		assertSame(expectedPortfolio, position.getPortfolio());
+
 		control.verify();
 	}
 

@@ -48,7 +48,11 @@ public class ObjectFactoryImplTest {
 	
 	@Test
 	public void testCreateOrder() {
+		terminal.getEditableSecurity(symbol);
+		terminal.getEditablePortfolio(account);
+		
 		EditableOrder order = factory.createOrder(terminal, account, symbol, 800L);
+		
 		assertNotNull(order);
 		assertEquals(account, order.getAccount());
 		assertEquals(symbol, order.getSymbol());
@@ -58,6 +62,8 @@ public class ObjectFactoryImplTest {
 	
 	@Test
 	public void testCreatePosition() throws Exception {
+		terminal.getEditableSecurity(symbol);
+		
 		PositionImpl position = (PositionImpl) factory.createPosition(terminal, account, symbol);
 		assertNotNull(position);
 		assertEquals(account, position.getAccount());

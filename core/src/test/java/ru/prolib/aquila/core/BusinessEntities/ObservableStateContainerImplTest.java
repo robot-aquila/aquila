@@ -957,5 +957,16 @@ public class ObservableStateContainerImplTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testContainerImpl_PurgeEvents() {
+		container = produceContainer(eventDispatcherMock, controllerMock);
+		eventDispatcherMock.purgeEvents();
+		control.replay();
+		
+		container.purgeEvents();
+		
+		control.verify();
+	}
 
 }

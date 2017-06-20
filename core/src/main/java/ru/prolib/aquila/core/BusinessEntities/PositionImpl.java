@@ -3,7 +3,6 @@ package ru.prolib.aquila.core.BusinessEntities;
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParams;
-import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParamsBuilder;
 
 /**
  * Market position.
@@ -24,10 +23,14 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	private final Account account;
 	private Terminal terminal;
 	private final EventType onPositionChange, onCurrentPriceChange;
+	private final Security security;
+	private final Portfolio portfolio;
 	
 	public PositionImpl(PositionParams params) {
 		super(params);
 		this.terminal = params.getTerminal();
+		this.security = params.getSecurity();
+		this.portfolio = params.getPortfolio();
 		this.account = params.getAccount();
 		this.symbol = params.getSymbol();
 		final String pfx = params.getID() + ".";
@@ -35,36 +38,6 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 		this.onCurrentPriceChange = new EventTypeImpl(pfx + "CURRENT_PRICE_CHANGE");
 	}
 
-	@Deprecated
-	public PositionImpl(EditableTerminal terminal, Account account, Symbol symbol,
-		EventDispatcher eventDispatcher, OSCController controller)
-	{
-		this(new PositionParamsBuilder(terminal.getEventQueue())
-				.withTerminal(terminal)
-				.withEventDispatcher(eventDispatcher)
-				.withController(controller)
-				.withAccount(account)
-				.withSymbol(symbol)
-				.buildParams());
-	}
-
-	@Deprecated
-	public PositionImpl(EditableTerminal terminal, Account account, Symbol symbol,
-			OSCController controller)
-	{
-		this(new PositionParamsBuilder(terminal.getEventQueue())
-				.withTerminal(terminal)
-				.withController(controller)
-				.withAccount(account)
-				.withSymbol(symbol)
-				.buildParams());
-	}
-	
-	@Deprecated
-	public PositionImpl(EditableTerminal terminal, Account account, Symbol symbol) {
-		this(terminal, account, symbol, new PositionController());
-	}
-	
 	@Override
 	public Terminal getTerminal() {
 		lock.lock();
@@ -183,20 +156,12 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 
 	@Override
 	public Security getSecurity() {
-		try {
-			return terminal.getSecurity(symbol);
-		} catch ( SecurityException e ) {
-			throw new IllegalStateException(e);
-		}
+		return security;
 	}
 	
 	@Override
 	public Portfolio getPortfolio() {
-		try {
-			return terminal.getPortfolio(account);
-		} catch ( PortfolioException e ) {
-			throw new IllegalStateException(e);
-		}
+		return portfolio;
 	}
 
 }

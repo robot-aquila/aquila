@@ -68,7 +68,7 @@ public class SMTriggerOnEventTest {
 	public void testActivate_SkipIfActive() throws Exception {
 		type = control.createMock(EventType.class);
 		trigger = new SMTriggerOnEvent(type);
-		type.addSyncListener(same(trigger));
+		type.addListener(same(trigger));
 		control.replay();
 		
 		trigger.activate(registry);
@@ -81,7 +81,7 @@ public class SMTriggerOnEventTest {
 	public void testDeactivate() throws Exception {
 		type = control.createMock(EventType.class);
 		trigger = new SMTriggerOnEvent(type);
-		type.addSyncListener(same(trigger));
+		type.addListener(same(trigger));
 		type.removeListener(same(trigger));
 		control.replay();
 		

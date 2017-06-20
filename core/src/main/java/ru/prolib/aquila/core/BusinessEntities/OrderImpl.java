@@ -26,6 +26,9 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	private Terminal terminal;
 	private final Account account;
 	private final Symbol symbol;
+	private final Security security;
+	private final Portfolio portfolio;
+	private final Position position;
 	private final long id;
 	private final EventType onCancelFailed, onCancelled, onDone, onFailed,
 		onFilled, onPartiallyFilled, onRegistered, onRegisterFailed,
@@ -37,6 +40,9 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	public OrderImpl(OrderParams params) {
 		super(params);
 		this.terminal = params.getTerminal();
+		this.security = params.getSecurity();
+		this.portfolio = params.getPortfolio();
+		this.position = params.getPosition();
 		this.account = params.getAccount();
 		this.symbol = params.getSymbol();
 		this.id = params.getOrderID();
@@ -51,20 +57,6 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 		onRegisterFailed = new EventTypeImpl(pfx + "REGISTER_FAILED");
 		onExecution = new EventTypeImpl(pfx + "EXECUTION");
 		onArchived = new EventTypeImpl(pfx + "ARCHIVED");		
-	}
-	
-	@Deprecated
-	public OrderImpl(EditableTerminal terminal, Account account, Symbol symbol, long id,
-		EventDispatcher eventDispatcher, OSCController controller)
-	{
-		this(new OrderParamsBuilder()
-				.withTerminal(terminal)
-				.withAccount(account)
-				.withSymbol(symbol)
-				.withOrderID(id)
-				.withEventDispatcher(eventDispatcher)
-				.withController(controller)
-				.buildParams());
 	}
 	
 	@Deprecated
@@ -440,20 +432,17 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	
 	@Override
 	public Security getSecurity() {
-		try {
-			return terminal.getSecurity(symbol);
-		} catch ( SecurityException e ) {
-			throw new IllegalStateException(e);
-		}
+		return security;
 	}
 	
 	@Override
 	public Portfolio getPortfolio() {
-		try {
-			return terminal.getPortfolio(account);
-		} catch ( PortfolioException e ) {
-			throw new IllegalStateException(e);
-		}
+		return portfolio;
+	}
+	
+	@Override
+	public Position getPosition() {
+		return position;
 	}
 
 }

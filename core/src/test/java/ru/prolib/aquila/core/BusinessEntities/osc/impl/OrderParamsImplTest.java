@@ -13,6 +13,9 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.Portfolio;
+import ru.prolib.aquila.core.BusinessEntities.Position;
+import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
@@ -26,6 +29,9 @@ public class OrderParamsImplTest {
 	private EventDispatcher dispatcherMock1, dispatcherMock2;
 	private OSCController controllerMock1, controllerMock2;
 	private Lock lockMock1, lockMock2;
+	private Security securityMock1, securityMock2;
+	private Portfolio portfolioMock1, portfolioMock2;
+	private Position positionMock1, positionMock2;
 	private OrderParamsImpl params;
 	
 	@BeforeClass
@@ -47,6 +53,12 @@ public class OrderParamsImplTest {
 		controllerMock2 = control.createMock(OSCController.class);
 		lockMock1 = control.createMock(Lock.class);
 		lockMock2 = control.createMock(Lock.class);
+		securityMock1 = control.createMock(Security.class);
+		securityMock2 = control.createMock(Security.class);
+		portfolioMock1 = control.createMock(Portfolio.class);
+		portfolioMock2 = control.createMock(Portfolio.class);
+		positionMock1 = control.createMock(Position.class);
+		positionMock2 = control.createMock(Position.class);
 		params = new OrderParamsImpl();
 	}
 	
@@ -60,6 +72,9 @@ public class OrderParamsImplTest {
 		params.setSymbol(symbol1);
 		params.setTerminal(terminalMock1);
 		params.setLock(lockMock1);
+		params.setSecurity(securityMock1);
+		params.setPortfolio(portfolioMock1);
+		params.setPosition(positionMock1);
 		
 		assertEquals(account1, params.getAccount());
 		assertSame(controllerMock1, params.getController());
@@ -69,6 +84,9 @@ public class OrderParamsImplTest {
 		assertEquals(symbol1, params.getSymbol());
 		assertSame(terminalMock1, params.getTerminal());
 		assertSame(lockMock1, params.getLock());
+		assertSame(securityMock1, params.getSecurity());
+		assertSame(portfolioMock1, params.getPortfolio());
+		assertSame(positionMock1, params.getPosition());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -111,6 +129,21 @@ public class OrderParamsImplTest {
 		params.getOrderID();
 	}
 	
+	@Test (expected=IllegalStateException.class)
+	public void testGetSecurity_ThrowsUndefined() {
+		params.getSecurity();
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testGetPortfolio_ThrowsUndefined() {
+		params.getPortfolio();
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testGetPosition_ThrowsUndefined() {
+		params.getPosition();
+	}
+	
 	@Test
 	public void testEquals_SpecialCases() {
 		assertTrue(params.equals(params));
@@ -128,6 +161,9 @@ public class OrderParamsImplTest {
 		params.setSymbol(symbol1);
 		params.setTerminal(terminalMock1);
 		params.setLock(lockMock1);
+		params.setSecurity(securityMock1);
+		params.setPortfolio(portfolioMock1);
+		params.setPosition(positionMock1);
 
 		Variant<Account> vAcc = new Variant<>(account1, account2);
 		Variant<OSCController> vCtrl = new Variant<>(vAcc, controllerMock1, controllerMock2);
@@ -137,7 +173,10 @@ public class OrderParamsImplTest {
 		Variant<Symbol> vSym = new Variant<>(vOrdID, symbol1, symbol2);
 		Variant<Terminal> vTerm = new Variant<>(vSym, terminalMock1, terminalMock2);
 		Variant<Lock> vLock = new Variant<>(vTerm, lockMock1, lockMock2);
-		Variant<?> iterator = vLock;
+		Variant<Security> vSec = new Variant<>(vLock, securityMock1, securityMock2);
+		Variant<Portfolio> vPrt = new Variant<>(vSec, portfolioMock1, portfolioMock2);
+		Variant<Position> vPos = new Variant<>(vPrt, positionMock1, positionMock2);
+		Variant<?> iterator = vPos;
 		int foundCnt = 0;
 		OrderParamsImpl x, found = null;
 		do {
@@ -150,6 +189,9 @@ public class OrderParamsImplTest {
 			x.setSymbol(vSym.get());
 			x.setTerminal(vTerm.get());
 			x.setLock(vLock.get());
+			x.setSecurity(vSec.get());
+			x.setPortfolio(vPrt.get());
+			x.setPosition(vPos.get());
 			if ( params.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -164,6 +206,9 @@ public class OrderParamsImplTest {
 		assertEquals(symbol1, found.getSymbol());
 		assertSame(terminalMock1, found.getTerminal());
 		assertSame(lockMock1, found.getLock());
+		assertSame(securityMock1, found.getSecurity());
+		assertSame(portfolioMock1, found.getPortfolio());
+		assertSame(positionMock1, found.getPosition());
 	}
 
 }

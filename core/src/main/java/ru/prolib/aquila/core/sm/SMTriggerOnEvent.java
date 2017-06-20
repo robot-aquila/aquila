@@ -56,7 +56,7 @@ public class SMTriggerOnEvent implements SMTrigger, EventListener {
 	public synchronized void activate(SMTriggerRegistry registry) {
 		if ( proxy == null ) {
 			proxy = registry;
-			eventType.addSyncListener(this);
+			eventType.addListener(this);
 		}
 	}
 

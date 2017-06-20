@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.Portfolio;
+import ru.prolib.aquila.core.BusinessEntities.Position;
+import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParams;
@@ -14,5 +17,11 @@ public interface OrderParams extends OSCParams {
 	Symbol getSymbol();
 	
 	long getOrderID();
+	
+	Security getSecurity();
+	
+	Portfolio getPortfolio();
+	
+	Position getPosition();
 	
 }

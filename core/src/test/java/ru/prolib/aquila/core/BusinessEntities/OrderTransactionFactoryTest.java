@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.data.DataProviderStub;
 public class OrderTransactionFactoryTest {
 	private static Account account = new Account("DL-01");
 	private static Symbol symbol = new Symbol("SBRF");
-	private Terminal terminal;
+	private EditableTerminal terminal;
 	private EditableOrder order;
 	private OrderTransactionFactory factory;
 
@@ -24,6 +24,8 @@ public class OrderTransactionFactoryTest {
 		terminal = new BasicTerminalBuilder()
 			.withDataProvider(new DataProviderStub())
 			.buildTerminal();
+		terminal.getEditableSecurity(symbol);
+		terminal.getEditablePortfolio(account);
 		order = (EditableOrder) terminal.createOrder(account, symbol, OrderAction.SELL, 90L);
 		factory = new OrderTransactionFactory();
 	}

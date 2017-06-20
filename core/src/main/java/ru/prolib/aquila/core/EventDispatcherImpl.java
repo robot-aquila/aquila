@@ -140,6 +140,14 @@ public class EventDispatcherImpl implements EventDispatcher {
 		}
 	}
 	
+	@Override
+	public synchronized void purgeEvents() {
+		if ( suppressCount > 0 ) {
+			suppressCount --;
+			cache.clear();
+		}
+	}
+	
 	static class CachedEvent {
 		private final EventType type;
 		private final EventFactory factory;

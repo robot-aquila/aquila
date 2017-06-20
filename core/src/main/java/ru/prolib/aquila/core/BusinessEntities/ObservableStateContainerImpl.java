@@ -142,6 +142,16 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 			lock.unlock();
 		}
 	}
+	
+	@Override
+	public void purgeEvents() {
+		lock.lock();
+		try {
+			dispatcher.purgeEvents();
+		} finally {
+			lock.unlock();
+		}
+	}
 
 	/**
 	 * Create event factory instance.

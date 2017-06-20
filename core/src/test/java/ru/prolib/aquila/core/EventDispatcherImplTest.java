@@ -112,6 +112,22 @@ public class EventDispatcherImplTest {
 	}
 	
 	@Test
+	public void testPurgeEvents() throws Exception {
+		dispatcher.suppressEvents();
+		dispatcher.dispatch(type1, SimpleEventFactory.getInstance());
+		dispatcher.dispatch(type2, SimpleEventFactory.getInstance());
+		queue.enqueue(type3, SimpleEventFactory.getInstance());
+		control.replay();
+		assertEquals(2, cacheStub.size());
+		
+		dispatcher.purgeEvents();
+		
+		assertEquals(0, cacheStub.size());
+		dispatcher.dispatch(type3, SimpleEventFactory.getInstance());
+		control.verify();
+	}
+	
+	@Test
 	public void testClose() throws Exception {
 		control.replay();
 		

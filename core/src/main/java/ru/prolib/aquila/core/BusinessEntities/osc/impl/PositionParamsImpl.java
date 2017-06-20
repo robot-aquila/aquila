@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.Portfolio;
+import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsImpl;
@@ -11,6 +13,8 @@ public class PositionParamsImpl extends OSCParamsImpl implements PositionParams 
 	protected Terminal terminal;
 	protected Account account;
 	protected Symbol symbol;
+	protected Security security;
+	protected Portfolio portfolio;
 	
 	@Override
 	public Terminal getTerminal() {
@@ -36,6 +40,22 @@ public class PositionParamsImpl extends OSCParamsImpl implements PositionParams 
 		return symbol;
 	}
 	
+	@Override
+	public Security getSecurity() {
+		if ( security == null ) {
+			throw new IllegalStateException("Undefined security");
+		}
+		return security;
+	}
+	
+	@Override
+	public Portfolio getPortfolio() {
+		if ( portfolio == null ) {
+			throw new IllegalStateException("Undefined portfolio");
+		}
+		return portfolio;
+	}
+	
 	public void setTerminal(Terminal terminal) {
 		this.terminal = terminal;
 	}
@@ -46,6 +66,14 @@ public class PositionParamsImpl extends OSCParamsImpl implements PositionParams 
 
 	public void setSymbol(Symbol symbol) {
 		this.symbol = symbol;
+	}
+	
+	public void setSecurity(Security security) {
+		this.security = security;
+	}
+	
+	public void setPortfolio(Portfolio portfolio) {
+		this.portfolio = portfolio;
 	}
 	
 	@Override
@@ -65,6 +93,8 @@ public class PositionParamsImpl extends OSCParamsImpl implements PositionParams 
 				.append(this.symbol, o.symbol)
 				.append(this.lock, o.lock)
 				.appendSuper(this.terminal == o.terminal)
+				.append(this.security, o.security)
+				.append(this.portfolio, o.portfolio)
 				.isEquals();
 	}
 

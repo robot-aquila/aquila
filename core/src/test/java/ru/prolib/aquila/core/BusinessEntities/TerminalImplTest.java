@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.easymock.Capture;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -25,7 +25,9 @@ import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
-import ru.prolib.aquila.core.concurrency.LID;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParamsBuilder;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
 import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
@@ -55,6 +57,7 @@ public class TerminalImplTest {
 	private Scheduler schedulerMock;
 	private DataProvider dataProviderMock;
 	private DataProviderStubX dataProviderStub;
+	private ObjectFactory objectFactoryMock;
 	private TerminalImpl terminal, terminalWithMocks;
 	private EventListenerStub listenerStub;
 	private OrderTransactionFactory orderTransactionFactory;
@@ -72,6 +75,7 @@ public class TerminalImplTest {
 		schedulerMock = control.createMock(Scheduler.class);
 		dataProviderMock = control.createMock(DataProvider.class);
 		dataProviderStub = new DataProviderStubX();
+		objectFactoryMock = control.createMock(ObjectFactory.class);
 		TerminalParams params = new TerminalParams();
 		params.setTerminalID("DummyTerminal");
 		params.setDataProvider(dataProviderStub);
@@ -79,9 +83,17 @@ public class TerminalImplTest {
 		params = new TerminalParams();
 		params.setDataProvider(dataProviderMock);
 		params.setScheduler(schedulerMock);
+		params.setObjectFactory(objectFactoryMock);
 		terminalWithMocks = new TerminalImpl(params);
 		listenerStub = new EventListenerStub();
 		orderTransactionFactory = new OrderTransactionFactory();
+		
+		terminal.getEditableSecurity(symbol1);
+		terminal.getEditableSecurity(symbol2);
+		terminal.getEditableSecurity(symbol3);
+		terminal.getEditablePortfolio(account1);
+		terminal.getEditablePortfolio(account2);
+		terminal.getEditablePortfolio(account3);
 	}
 	
 	@After
@@ -178,7 +190,7 @@ public class TerminalImplTest {
 		assertEquals(prefix + "POSITION_CLOSE", terminal.onPositionClose().getId());
 		assertEquals(prefix + "PORTFOLIO_CLOSE", terminal.onPortfolioClose().getId());
 		assertNotNull(terminal.getLID());
-		assertTrue(LID.isLastCreatedLID(terminalWithMocks.getLID()));
+		//assertTrue(LID.isLastCreatedLID(terminalWithMocks.getLID()));
 	}
 
 	@Test
@@ -206,7 +218,7 @@ public class TerminalImplTest {
 
 	@Test (expected=SecurityNotExistsException.class)
 	public void testGetSecurity_ThrowsIfNotExists() throws Exception {
-		terminal.getSecurity(symbol1);
+		terminal.getSecurity(new Symbol("ZAAREE"));
 	}
 
 	@Test
@@ -236,30 +248,36 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testGetSecurityCount() {
-		assertEquals(0, terminal.getSecurityCount());
+		assertEquals(3, terminal.getSecurityCount());
 		
-		terminal.getEditableSecurity(symbol1);
+		terminal.getEditableSecurity(new Symbol("ZAMBI-1"));
 		
-		assertEquals(1, terminal.getSecurityCount());
+		assertEquals(4, terminal.getSecurityCount());
 		
-		terminal.getEditableSecurity(symbol2);
+		terminal.getEditableSecurity(new Symbol("ZAMBI-2"));
 		
-		assertEquals(2, terminal.getSecurityCount());
+		assertEquals(5, terminal.getSecurityCount());
 	}
 	
 	@Test
 	public void testIsSecurityExists() {
-		assertFalse(terminal.isSecurityExists(symbol1));
+		Symbol symbol = new Symbol("foo-bar");
+		assertFalse(terminal.isSecurityExists(symbol));
 		
-		terminal.getEditableSecurity(symbol1);
+		terminal.getEditableSecurity(symbol);
 		
-		assertTrue(terminal.isSecurityExists(symbol1));
+		assertTrue(terminal.isSecurityExists(symbol));
 	}
 	
 	@Test
 	public void testGetEditablePortfolio() throws Exception {
-		Capture<EditablePortfolio> captured = newCapture();
-		dataProviderMock.subscribeStateUpdates(capture(captured));
+		EditablePortfolio portfolioStub =
+			new PortfolioImpl(new PortfolioParamsBuilder(terminalWithMocks.getEventQueue())
+				.withTerminal(terminalWithMocks)
+				.withAccount(account1)
+				.buildParams());
+		expect(objectFactoryMock.createPortfolio(terminalWithMocks, account1)).andReturn(portfolioStub);
+		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		control.replay();
 		
 		EditablePortfolio actual = terminalWithMocks.getEditablePortfolio(account1);
@@ -276,7 +294,7 @@ public class TerminalImplTest {
 		assertTrue(actual.onUpdate().isAlternateType(terminalWithMocks.onPortfolioUpdate()));
 		assertTrue(actual.onClose().isAlternateType(terminalWithMocks.onPortfolioClose()));
 		assertTrue(actual.onPositionClose().isAlternateType(terminalWithMocks.onPositionClose()));
-		assertSame(actual, captured.getValue());
+		assertSame(portfolioStub, actual);
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -288,7 +306,7 @@ public class TerminalImplTest {
 	
 	@Test (expected=PortfolioNotExistsException.class)
 	public void testGetPortfolio_ThrowsIfNotExists() throws Exception {
-		terminal.getPortfolio(account2);
+		terminal.getPortfolio(new Account("ZYXEL-412"));
 	}
 	
 	@Test
@@ -318,28 +336,29 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testIsPortfolioExists() {
-		assertFalse(terminal.isPortfolioExists(account1));
+		Account account = new Account("xxx");
+		assertFalse(terminal.isPortfolioExists(account));
 		
-		terminal.getEditablePortfolio(account1);
+		terminal.getEditablePortfolio(account);
 		
-		assertTrue(terminal.isPortfolioExists(account1));
+		assertTrue(terminal.isPortfolioExists(account));
 	}
 	
 	@Test
 	public void testGetPortfolioCount() {
-		assertEquals(0, terminal.getPortfolioCount());
-		
-		terminal.getEditablePortfolio(account1);
-		
-		assertEquals(1, terminal.getPortfolioCount());
-		
-		terminal.getEditablePortfolio(account2);
-		
-		assertEquals(2, terminal.getPortfolioCount());
-		
-		terminal.getEditablePortfolio(account3);
-		
 		assertEquals(3, terminal.getPortfolioCount());
+		
+		terminal.getEditablePortfolio(new Account("ZEBRA-1"));
+		
+		assertEquals(4, terminal.getPortfolioCount());
+		
+		terminal.getEditablePortfolio(new Account("ZEBRA-2"));
+		
+		assertEquals(5, terminal.getPortfolioCount());
+		
+		terminal.getEditablePortfolio(new Account("ZEBRA-3"));
+		
+		assertEquals(6, terminal.getPortfolioCount());
 	}
 	
 	@Test
@@ -351,9 +370,10 @@ public class TerminalImplTest {
 	
 	@Test (expected=PortfolioNotExistsException.class)
 	public void testGetDefaultPortfolio_ThrowsIfNotDefined() throws Exception {
+		terminal.setDefaultPortfolio(null);
+		
 		terminal.getDefaultPortfolio();
 	}
-	
 	
 	@Test
 	public void testSetDefaultPortfolio() throws Exception {
@@ -376,6 +396,48 @@ public class TerminalImplTest {
 		assertEquals(834L, order.getID());
 		assertNull(order.getStatus());
 		assertOrderAlternateEventTypes(order);
+	}
+	
+	@Test
+	public void testCreateOrder3_LocksPortfolioOnCreate() throws Exception {
+		CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(2);
+		final Portfolio portfolio = terminal.getPortfolio(account1);
+		AtomicInteger lastID = new AtomicInteger(0);
+		Thread t1 = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lock();
+				try {
+					started.countDown();
+					Thread.sleep(100L);
+					lastID.set(1);
+					successPoints.countDown();
+				} catch ( InterruptedException e ) {
+					e.printStackTrace(System.err);
+				} finally {
+					portfolio.unlock();
+				}
+			}
+		};
+		Thread t2 = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1, TimeUnit.SECONDS) ) {
+						terminal.createOrder(834L, account1, symbol1);
+						lastID.set(2);
+						successPoints.countDown();
+					}
+				} catch ( InterruptedException e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		t2.start();
+		t1.start();
+		assertTrue(successPoints.await(1, TimeUnit.SECONDS));
+		assertEquals(2, lastID.get());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -406,10 +468,62 @@ public class TerminalImplTest {
 	}
 	
 	@Test (expected=IllegalStateException.class)
-	public void testCreateOrder_ThrowsIfClosed() throws Exception {
+	public void testCreateOrder2_ThrowsIfClosed() throws Exception {
 		terminal.close();
 		
 		terminal.createOrder(account3, symbol3);
+	}
+	
+	@Test
+	public void testCreateOrder2_LocksPortfolioOnCreate() throws Exception {
+		CountDownLatch started = new CountDownLatch(1),
+				successPoints = new CountDownLatch(2);
+		final Portfolio portfolio = terminal.getPortfolio(account3);
+		AtomicInteger lastID = new AtomicInteger(0);
+		Thread t1 = new Thread() {
+			@Override
+			public void run() {
+				portfolio.lock();
+				try {
+					started.countDown();
+					Thread.sleep(100L);
+					lastID.set(1);
+					successPoints.countDown();
+				} catch ( InterruptedException e ) {
+					e.printStackTrace(System.err);
+				} finally {
+					portfolio.unlock();
+				}
+			}
+		};
+		Thread t2 = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if ( started.await(1, TimeUnit.SECONDS) ) {
+						terminal.createOrder(account3, symbol3);
+						lastID.set(2);
+						successPoints.countDown();
+					}
+				} catch ( InterruptedException e ) {
+					e.printStackTrace(System.err);
+				}
+			}
+		};
+		t2.start();
+		t1.start();
+		assertTrue(successPoints.await(1, TimeUnit.SECONDS));
+		assertEquals(2, lastID.get());
+	}
+	
+	@Test
+	public void testCreateOrder2_NoEventsProduced() throws Exception {
+		terminal.onOrderAvailable().addSyncListener(listenerStub);
+		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		
+		terminal.createOrder(account3, symbol3);
+		
+		assertEquals(0, listenerStub.getEventCount());
 	}
 	
 	@Test
@@ -469,15 +583,33 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testPlaceOrder() throws Exception {
+		EditablePortfolio portfolioStub =
+			new PortfolioImpl(new PortfolioParamsBuilder(terminalWithMocks.getEventQueue())
+				.withTerminal(terminalWithMocks)
+				.withAccount(account3)
+				.withObjectFactory(new ObjectFactoryImpl())
+				.buildParams());
+		EditableOrder orderStub =
+			new OrderImpl(new OrderParamsBuilder(terminalWithMocks.getEventQueue())
+				.withTerminal(terminalWithMocks)
+				.withAccount(account3)
+				.withSymbol(symbol3)
+				.withSecurity(terminal.getEditableSecurity(symbol3))
+				.withPortfolio(terminal.getEditablePortfolio(account3))
+				.withOrderID(834L)
+				.buildParams());
+		expect(objectFactoryMock.createPortfolio(terminalWithMocks, account3)).andReturn(portfolioStub);
+		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		expect(dataProviderMock.getNextOrderID()).andReturn(834L);
+		expect(objectFactoryMock.createOrder(terminalWithMocks, account3, symbol3, 834L)).andReturn(orderStub);
 		control.replay();
-		EditableOrder order = (EditableOrder)
-				terminalWithMocks.createOrder(account3, symbol3);
+		terminalWithMocks.getEditablePortfolio(account3);
+		terminalWithMocks.createOrder(account3, symbol3);
 		control.reset();
-		dataProviderMock.registerNewOrder(same(order));
+		dataProviderMock.registerNewOrder(same(orderStub));
 		control.replay();
 		
-		terminalWithMocks.placeOrder(order);
+		terminalWithMocks.placeOrder(orderStub);
 		
 		control.verify();
 	}
@@ -501,15 +633,32 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testCancelOrder() throws Exception {
+		EditablePortfolio portfolioStub =
+			new PortfolioImpl(new PortfolioParamsBuilder(terminalWithMocks.getEventQueue())
+				.withTerminal(terminalWithMocks)
+				.withAccount(account1)
+				.withObjectFactory(new ObjectFactoryImpl())
+				.buildParams());
+		EditableOrder orderStub = new OrderImpl(new OrderParamsBuilder(terminalWithMocks.getEventQueue())
+				.withTerminal(terminalWithMocks)
+				.withAccount(account1)
+				.withSymbol(symbol1)
+				.withSecurity(terminal.getEditableSecurity(symbol1))
+				.withPortfolio(terminal.getEditablePortfolio(account1))
+				.withOrderID(1028L)
+				.buildParams());
+		expect(objectFactoryMock.createPortfolio(terminalWithMocks, account1)).andReturn(portfolioStub);
+		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		expect(dataProviderMock.getNextOrderID()).andReturn(1028L);
+		expect(objectFactoryMock.createOrder(terminalWithMocks, account1, symbol1, 1028L)).andReturn(orderStub);
 		control.replay();
-		EditableOrder order = (EditableOrder)
-				terminalWithMocks.createOrder(account1, symbol1);
+		terminalWithMocks.getEditablePortfolio(account1);
+		terminalWithMocks.createOrder(account1, symbol1);
 		control.reset();
-		dataProviderMock.cancelOrder(same(order));
+		dataProviderMock.cancelOrder(same(orderStub));
 		control.replay();
 		
-		terminalWithMocks.cancelOrder(order);
+		terminalWithMocks.cancelOrder(orderStub);
 		
 		control.verify();
 	}
@@ -559,6 +708,17 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testCreateOrder5_NoEventsProduced() throws Exception {
+		dataProviderStub.nextOrderID = 934L;
+		terminal.onOrderAvailable().addSyncListener(listenerStub);
+		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		
+		terminal.createOrder(account1, symbol1, OrderAction.BUY, 20L, FDecimal.of2(431.15));
+		
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test
 	public void testCreateOrder4() throws Exception {
 		dataProviderStub.nextOrderID = 714L;
 		
@@ -579,6 +739,17 @@ public class TerminalImplTest {
 		assertNull(order.getComment());
 		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
+	}
+	
+	@Test
+	public void testCreateOrder4_NoEventsProduced() throws Exception {
+		dataProviderStub.nextOrderID = 714L;
+		terminal.onOrderAvailable().addSyncListener(listenerStub);
+		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		
+		terminal.createOrder(account3, symbol3, OrderAction.SELL, 80L);
+		
+		assertEquals(0, listenerStub.getEventCount());
 	}
 	
 	@Test
@@ -606,25 +777,34 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testCreateOrder7_NoEventsProduced() throws Exception {
+		dataProviderStub.nextOrderID = 555L;
+		terminal.onOrderAvailable().addSyncListener(listenerStub);
+		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		
+		terminal.createOrder(account3, symbol2, OrderType.MKT,
+				OrderAction.SELL, 400L, FDecimal.of2(224.13), "test order");
+
+		assertEquals(0, listenerStub.getEventCount());
+	}
+	
+	@Test
 	public void testSubscribe() {
-		Capture<Symbol> capturedSymbol1 = newCapture(), capturedSymbol2 = newCapture();
-		Capture<EditableSecurity> captured1 = newCapture(),
-				captured2 = newCapture(), captured3 = newCapture();
-		dataProviderMock.subscribeStateUpdates(capture(captured1));
-		dataProviderMock.subscribeLevel1Data(capture(capturedSymbol1), capture(captured2));
-		dataProviderMock.subscribeLevel2Data(capture(capturedSymbol2), capture(captured3));
+		EditableSecurity securityStub =
+			new SecurityImpl(new SecurityParamsBuilder(terminalWithMocks.getEventQueue())
+				.withTerminal(terminalWithMocks)
+				.withSymbol(symbol1)
+				.buildParams());
+		expect(objectFactoryMock.createSecurity(terminalWithMocks, symbol1)).andReturn(securityStub);
+		dataProviderMock.subscribeStateUpdates(securityStub);
+		dataProviderMock.subscribeLevel1Data(symbol1, securityStub);
+		dataProviderMock.subscribeLevel2Data(symbol1, securityStub);
 		control.replay();
 		
 		terminalWithMocks.subscribe(symbol1);
 		terminalWithMocks.subscribe(symbol1); // shouldn't subscribe
 		
 		control.verify();
-		assertEquals(symbol1, capturedSymbol1.getValue());
-		assertEquals(symbol1, capturedSymbol2.getValue());
-		EditableSecurity expected = terminalWithMocks.getEditableSecurity(symbol1);
-		assertSame(expected, captured1.getValue());
-		assertSame(expected, captured2.getValue());
-		assertSame(expected, captured3.getValue());
 	}
 	
 	@Test
@@ -1061,6 +1241,21 @@ public class TerminalImplTest {
 		control.replay();
 		
 		terminal.restoreEvents();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testPurgeEvents() {
+		EventDispatcher dispatcherMock = control.createMock(EventDispatcher.class);
+		TerminalParams params = new TerminalParams();
+		params.setDataProvider(new DataProviderStub());
+		params.setEventDispatcher(dispatcherMock);
+		terminal = new TerminalImpl(params);
+		dispatcherMock.purgeEvents();
+		control.replay();
+		
+		terminal.purgeEvents();
 		
 		control.verify();
 	}

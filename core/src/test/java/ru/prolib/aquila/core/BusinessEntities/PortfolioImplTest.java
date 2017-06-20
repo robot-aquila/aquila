@@ -55,6 +55,11 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 				.withEventQueue(queue)
 				.withDataProvider(new DataProviderStub())
 				.buildTerminal();
+		terminal.getEditableSecurity(new Symbol("SBER"));
+		terminal.getEditableSecurity(new Symbol("GAZP"));
+		terminal.getEditableSecurity(new Symbol("AAPL"));
+		terminal.getEditableSecurity(new Symbol("MSFT"));
+		terminal.getEditableSecurity(new Symbol("SPY"));
 	}
 	
 	@Override

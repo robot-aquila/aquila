@@ -3,12 +3,18 @@ package ru.prolib.aquila.core.BusinessEntities.osc.impl;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.Portfolio;
+import ru.prolib.aquila.core.BusinessEntities.Position;
+import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsImpl;
 
 public class OrderParamsImpl extends OSCParamsImpl implements OrderParams {
 	protected Terminal terminal;
+	protected Security security;
+	protected Portfolio portfolio;
+	protected Position position;
 	protected Account account;
 	protected Symbol symbol;
 	protected Long orderID;
@@ -45,6 +51,30 @@ public class OrderParamsImpl extends OSCParamsImpl implements OrderParams {
 		return orderID;
 	}
 	
+	@Override
+	public Security getSecurity() {
+		if ( security == null ) {
+			throw new IllegalStateException("Undefinied security");
+		}
+		return security;
+	}
+	
+	@Override
+	public Portfolio getPortfolio() {
+		if ( portfolio == null ) {
+			throw new IllegalStateException("Undefined portfolio");
+		}
+		return portfolio;
+	}
+	
+	@Override
+	public Position getPosition() {
+		if ( position == null ) {
+			throw new IllegalStateException("Undefined position");
+		}
+		return position;
+	}
+	
 	public void setTerminal(Terminal terminal) {
 		this.terminal = terminal;
 	}
@@ -59,6 +89,18 @@ public class OrderParamsImpl extends OSCParamsImpl implements OrderParams {
 	
 	public void setOrderID(Long orderID) {
 		this.orderID = orderID;
+	}
+	
+	public void setSecurity(Security security) {
+		this.security = security;
+	}
+	
+	public void setPortfolio(Portfolio portfolio) {
+		this.portfolio = portfolio;
+	}
+	
+	public void setPosition(Position position) {
+		this.position = position;
 	}
 	
 	@Override
@@ -78,6 +120,9 @@ public class OrderParamsImpl extends OSCParamsImpl implements OrderParams {
 				.append(this.orderID, o.orderID)
 				.append(this.symbol, o.symbol)
 				.append(this.lock, o.lock)
+				.append(this.portfolio, o.portfolio)
+				.append(this.position, o.position)
+				.append(this.security, o.security)
 				.appendSuper(this.terminal == o.terminal)
 				.isEquals();
 	}

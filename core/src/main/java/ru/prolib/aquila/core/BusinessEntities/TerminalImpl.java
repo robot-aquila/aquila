@@ -11,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.concurrency.LID;
+import ru.prolib.aquila.core.concurrency.Lockable;
+import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.DataProvider;
 
 /**
@@ -322,10 +324,25 @@ public class TerminalImpl implements EditableTerminal {
 			lock.unlock();
 		}
 	}
+
+	/**
+	 * Create strict lock on terminal and portfolio.
+	 * <p>
+	 * @param account - portfolio to lock
+	 * @return lockable object
+	 */
+	private Lockable createLock(Account account) {
+		try {
+			return new Multilock(this, getPortfolio(account));
+		} catch ( PortfolioException e ) {
+			throw new IllegalStateException("Error accessing portfolio", e);
+		}
+	}
 	
 	@Override
 	public EditableOrder createOrder(long id, Account account, Symbol symbol) {
-		lock.lock();
+		Lockable xLock = createLock(account);
+		xLock.lock();
 		try {
 			if ( closed ) {
 				throw new IllegalStateException();
@@ -350,20 +367,23 @@ public class TerminalImpl implements EditableTerminal {
 			orders.put(id, order);
 			return order;
 		} finally {
-			lock.unlock();
+			xLock.unlock();
 		}
 	}
 	
 	@Override
 	public EditableOrder createOrder(Account account, Symbol symbol) {
-		lock.lock();
+		Lockable xLock = createLock(account);
+		xLock.lock();
 		try {
 			long orderID = dataProvider.getNextOrderID();
 			EditableOrder order = createOrder(orderID, account, symbol);
+			order.suppressEvents();
 			updateOrderStatus(order, OrderStatus.PENDING);
+			order.purgeEvents();
 			return order;
 		} finally {
-			lock.unlock();
+			xLock.unlock();
 		}
 	}
 	
@@ -379,31 +399,29 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public void placeOrder(Order order) throws OrderException {
-		lock.lock();
-		order.lock();
+		Lockable xLock = new Multilock(this, order);
+		xLock.lock();
 		try {
 			if ( closed ) {
 				throw new IllegalStateException();
 			}
 			dataProvider.registerNewOrder(toEditable(order));
 		} finally {
-			order.unlock();
-			lock.unlock();
+			xLock.unlock();
 		}
 	}
 
 	@Override
 	public void cancelOrder(Order order) throws OrderException {
-		lock.lock();
-		order.lock();
+		Lockable xLock = new Multilock(this, order);
+		xLock.lock();
 		try {
 			if ( closed ) {
 				throw new IllegalStateException();
 			}
 			dataProvider.cancelOrder(toEditable(order));
 		} finally {
-			order.unlock();
-			lock.unlock();
+			xLock.unlock();
 		}
 	}
 	
@@ -754,16 +772,22 @@ public class TerminalImpl implements EditableTerminal {
 			String comment)
 	{
 		EditableOrder order = createOrder(account, symbol);
-		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-		tokens.put(OrderField.TYPE, type);
-		tokens.put(OrderField.ACTION, action);
-		tokens.put(OrderField.INITIAL_VOLUME, volume);
-		tokens.put(OrderField.CURRENT_VOLUME, volume);
-		tokens.put(OrderField.PRICE, price);
-		tokens.put(OrderField.COMMENT, comment);
-		tokens.put(OrderField.TIME, scheduler.getCurrentTime());
-		//tokens.put(OrderField.EXECUTED_VALUE, null);
-		order.update(tokens);
+		order.lock();
+		try {
+			order.suppressEvents();
+			order.consume(new DeltaUpdateBuilder()
+				.withToken(OrderField.TYPE, type)
+				.withToken(OrderField.ACTION, action)
+				.withToken(OrderField.INITIAL_VOLUME, volume)
+				.withToken(OrderField.CURRENT_VOLUME, volume)
+				.withToken(OrderField.PRICE, price)
+				.withToken(OrderField.COMMENT, comment)
+				.withToken(OrderField.TIME, scheduler.getCurrentTime())
+				.buildUpdate());
+			order.purgeEvents();
+		} finally {
+			order.unlock();
+		}
 		return order;
 	}
 	
@@ -849,6 +873,16 @@ public class TerminalImpl implements EditableTerminal {
 		lock.lock();
 		try {
 			dispatcher.restoreEvents();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public void purgeEvents() {
+		lock.lock();
+		try {
+			dispatcher.purgeEvents();
 		} finally {
 			lock.unlock();
 		}

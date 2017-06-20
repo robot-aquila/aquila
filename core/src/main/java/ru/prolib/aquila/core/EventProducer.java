@@ -17,5 +17,13 @@ public interface EventProducer {
 	 * Following events will be fired immediately after they are enqueued.
 	 */
 	void restoreEvents();
+	
+	/**
+	 * Purge events.
+	 * <p>
+	 * Purge all events suppressed by previous {@link #suppressEvents()} call.
+	 * Following events will be fired immediately after they are enqueued.
+	 */
+	void purgeEvents();
 
 }

@@ -256,4 +256,6 @@ public interface Order extends ObservableStateContainer, BusinessEntity {
 	 */
 	public Portfolio getPortfolio();
 	
+	public Position getPosition();
+	
 }

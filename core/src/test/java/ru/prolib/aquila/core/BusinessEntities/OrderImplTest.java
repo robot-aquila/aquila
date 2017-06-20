@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.Event;
@@ -17,6 +16,8 @@ import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.OrderImpl.OrderController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParamsBuilder;
+import ru.prolib.aquila.core.data.DataProviderStub;
 
 /**
  * 2012-09-22<br>
@@ -25,7 +26,6 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 public class OrderImplTest extends ObservableStateContainerImplTest {
 	protected static Account account = new Account("port#120");
 	protected static Symbol symbol = new Symbol("MSFT");
-	protected IMocksControl control;
 	private OrderImpl order;
 	protected EditableTerminal terminal;
 	private OrderController controller;
@@ -52,11 +52,13 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	protected void prepareTerminal() {
-		control = createStrictControl();
-		terminal = control.createMock(EditableTerminal.class);
-		expect(terminal.getTerminalID()).andStubReturn("foobar");
-		expect(terminal.getEventQueue()).andStubReturn(queue);
-		control.replay();		
+		terminal = new BasicTerminalBuilder()
+				.withDataProvider(new DataProviderStub())
+				.withTerminalID("foobar")
+				.withEventQueue(queue)
+				.buildTerminal();
+		terminal.getEditableSecurity(symbol);
+		terminal.getEditablePortfolio(account);
 	}
 	
 	protected void setOrder(OrderImpl order) {
@@ -66,14 +68,25 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	@Override
 	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
-		setOrder(order = new OrderImpl(terminal, account, symbol, 240));
+		setOrder(order = new OrderImpl(new OrderParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withOrderID(240L)
+				.buildParams()));
 		return order;
 	}
 	
 	@Override
 	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
-		setOrder(order = new OrderImpl(terminal, account, symbol, 240, controller));
+		setOrder(order = new OrderImpl(new OrderParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withOrderID(240L)
+				.withController(controller)
+				.buildParams()));
 		return order;
 	}
 	
@@ -82,7 +95,14 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 			OSCController controller)
 	{
 		prepareTerminal();
-		setOrder(order = new OrderImpl(terminal, account, symbol, 240, eventDispatcher, controller));
+		setOrder(order = new OrderImpl(new OrderParamsBuilder(queue)
+				.withTerminal(terminal)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withOrderID(240L)
+				.withController(controller)
+				.withEventDispatcher(eventDispatcher)
+				.buildParams()));
 		return order;
 	}
 	
@@ -104,7 +124,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testCtor_DefaultContainer() throws Exception {
-		order = new OrderImpl(terminal, account, symbol, 240);
+		produceContainer();
 		assertEquals(OrderController.class, order.getController().getClass());
 		assertNotNull(order.getTerminal());
 		assertNotNull(order.getEventDispatcher());
@@ -866,25 +886,26 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	public void testGetSecurity() throws Exception {
-		control.resetToStrict();
-		Security securityMock = control.createMock(Security.class);
-		expect(terminal.getSecurity(symbol)).andReturn(securityMock);
+	public void testGettersOfRelatedObjects() throws Exception {
+		Terminal terminalMock = control.createMock(Terminal.class);
 		control.replay();
-		
-		assertSame(securityMock, order.getSecurity());
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testGetPortfolio() throws Exception {
-		control.resetToStrict();
-		Portfolio portfolioMock = control.createMock(Portfolio.class);
-		expect(terminal.getPortfolio(account)).andReturn(portfolioMock);
-		control.replay();
-		
-		assertSame(portfolioMock, order.getPortfolio());
+		Security expectedSecurity = terminal.getSecurity(symbol);
+		Portfolio expectedPortfolio = terminal.getPortfolio(account);
+		Position expectedPosition = expectedPortfolio.getPosition(symbol);
+		order = new OrderImpl(new OrderParamsBuilder(queue)
+				.withTerminal(terminalMock)
+				.withAccount(account)
+				.withSymbol(symbol)
+				.withOrderID(240L)
+				.withSecurity(expectedSecurity)
+				.withPortfolio(expectedPortfolio)
+				.withPosition(expectedPosition)
+				.withID("zxy")
+				.buildParams());
+
+		assertSame(expectedSecurity, order.getSecurity());
+		assertSame(expectedPortfolio, order.getPortfolio());
+		assertSame(expectedPosition, order.getPosition());
 		
 		control.verify();
 	}
