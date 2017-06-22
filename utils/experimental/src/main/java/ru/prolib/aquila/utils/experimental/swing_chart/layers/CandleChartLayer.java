@@ -1,0 +1,80 @@
+package ru.prolib.aquila.utils.experimental.swing_chart.layers;
+
+import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleStartTimeSeries;
+import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.utils.experimental.charts.Utils;
+import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+
+import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.time.Instant;
+
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.*;
+
+/**
+ * Created by TiM on 13.06.2017.
+ */
+public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
+
+    public CandleChartLayer(String id) {
+        super(id);
+    }
+
+    @Override
+    public void setData(Series<Candle> data) {
+        super.setData(data);
+        setCategories(new CandleStartTimeSeries(data));
+    }
+
+    @Override
+    protected void paintObject(Instant category, Candle value, CoordConverter<Instant> converter) {
+        Color color = value.getOpen()>value.getClose()?COLOR_BEAR:COLOR_BULL;
+        Double step = converter.getStepX();
+        double x = converter.getX(category);
+        double yOpen = converter.getY(value.getOpen());
+        double yClose = converter.getY(value.getClose());
+        double y = yOpen < yClose ? yOpen : yClose;
+        double height = Math.abs(yOpen - yClose);
+        double yHigh = converter.getY(value.getHigh());
+        double yLow = converter.getY(value.getLow());
+
+        converter.getGraphics().setColor(COLOR_BULL);
+        Shape line = new Line2D.Double(x, yLow, x, yHigh);
+        converter.getGraphics().draw(line);
+
+        double width = step*CANDLE_WIDTH_RATIO;
+        width= width<CANDLE_MIN_WIDTH?CANDLE_MIN_WIDTH:width;
+        Shape body = new Rectangle2D.Double(x-width/2, y, width, height);
+        converter.getGraphics().setColor(color);
+        converter.getGraphics().fill(body);
+        converter.getGraphics().setColor(COLOR_BULL);
+        converter.getGraphics().draw(body);
+    }
+
+    @Override
+    protected double getMaxValue(Candle value) {
+        return value.getHigh();
+    }
+
+    @Override
+    protected double getMinValue(Candle value) {
+        return value.getLow();
+    }
+
+    @Override
+    protected String createTooltipText(Candle value) {
+        return String.format(
+                "%s%n"+
+                        "OPEN: %8.2f%n" +
+                        "HIGH: %8.2f%n" +
+                        "LOW:  %8.2f%n" +
+                        "CLOSE:%8.2f",
+                Utils.instantToStr(value.getStartTime()),
+                value.getOpen(),
+                value.getHigh(),
+                value.getLow(),
+                value.getClose());
+    }
+}

@@ -13,18 +13,22 @@ import ru.prolib.aquila.core.data.ta.QEMA;
 import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
 import ru.prolib.aquila.utils.experimental.charts.layers.TradeInfo;
 import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
+import ru.prolib.aquila.utils.experimental.swing_chart.CBSwingChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.COLOR_BEAR;
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.COLOR_BULL;
+
 /**
  * Created by TiM on 25.12.2016.
  */
 public class SimpleTestPanel extends JPanel {
 
-    private final CBFXChartPanel panel;
+    private final CBSwingChartPanel panel;
     private ObservableSeries<Candle> candleData;
     private StampedListSeries<TradeInfo> tradesData;
     private final Instant start = Instant.parse("2016-12-31T19:00:00.000Z");
@@ -43,19 +47,25 @@ public class SimpleTestPanel extends JPanel {
         tradesData = new StampedListSeries<TradeInfo>("TRADES", TimeFrame.M15, eventQueue);
 
         /* три строчки */
-        panel = new CBFXChartPanel(candleData);
-        panel.addSmoothLine(qema7).setStyleClass("line-magenta");
-        panel.addSmoothLine(qema14).setStyleClass("line-blue");
+        panel = new CBSwingChartPanel(candleData);
+        panel.addSmoothLine(qema7).setColor(Color.BLUE);
+        panel.addSmoothLine(qema14).setColor(Color.MAGENTA);
         panel.addVolumes();
-        panel.addTrades();
-        panel.setTradesData(tradesData);
+//        panel.addTrades();
+//        panel.setTradesData(tradesData);
 
-        panel.addPolyLine(new HIGH("HIGH_20", candleData, 20)).setStyleClass("line-green");
-        panel.addPolyLine(new LOW("LOW_20", candleData, 20)).setStyleClass("line-red");
+        panel.addPolyLine(new HIGH("HIGH_20", candleData, 20)).setColor(COLOR_BULL);
+        panel.addPolyLine(new LOW("LOW_20", candleData, 20)).setColor(COLOR_BEAR);
         panel.addPolyLine("QATR", new QATR("QATR_20", candleData, 20));
 
-
         add(panel, BorderLayout.CENTER);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                panel.setCurrentPosition(candleData.getLength());
+            }
+        });
+
     }
 
     /* генерация данных, изменение и добавление данных в candleData, меню для тестирования изменения данных */
@@ -118,7 +128,6 @@ public class SimpleTestPanel extends JPanel {
     }
 
     private void addZeroCandle(){
-        Platform.runLater(()->{
             Candle candle = null;
             double lastClose;
             Interval interval;
@@ -144,7 +153,6 @@ public class SimpleTestPanel extends JPanel {
             } catch (ValueException e) {
                 e.printStackTrace();
             }
-        });
     }
 
     public JMenuBar createMenuBar(){
@@ -152,8 +160,7 @@ public class SimpleTestPanel extends JPanel {
         JMenu main = new JMenu("Main");
         JMenuItem refresh = new JMenuItem("Refresh");
         refresh.addActionListener(e -> {
-            panel.setFullRedraw(true);
-            this.panel.refresh();});
+            this.panel.repaint();});
         main.add(refresh);
         JMenuItem change = new JMenuItem("Change last candle");
         change.addActionListener(e -> changeCandle());

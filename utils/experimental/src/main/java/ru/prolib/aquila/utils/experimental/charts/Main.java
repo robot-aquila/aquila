@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("TEST");
-        frame.setSize(700,500);
+        frame.setSize(1000,900);
 //        TestPanel panel = new TestPanel();
         SimpleTestPanel panel = new SimpleTestPanel();
         frame.setJMenuBar(panel.createMenuBar());
