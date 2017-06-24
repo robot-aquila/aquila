@@ -22,6 +22,10 @@ public class ChartConstants {
     public static final double CANDLE_WIDTH_RATIO = 0.8;
 
     public static final int INDICATOR_LINE_WIDTH = 2;
+    public static final int CANDLE_LINE_WIDTH = 2;
 
+    public static final Color TRADE_BUY_COLOR = new Color(186, 243, 0);
+    public static final Color TRADE_SELL_COLOR = Color.PINK;
+    public static final Color TRADE_LINE_COLOR = Color.BLACK;
 
 }

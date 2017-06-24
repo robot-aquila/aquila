@@ -61,7 +61,7 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
 
     @Override
     public void paint(CoordConverter<TCategories> converter){
-        Color bakColor = converter.getGraphics().getColor();
+        Graphics2D g = (Graphics2D) converter.getGraphics().create();
         currentTooltips.clear();
         int cnt = converter.getCategories().size();
         for (int i = 0; i < cnt; i++) {
@@ -74,10 +74,9 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
             }
             if(category!=null && value != null && converter.isCategoryDisplayed(category)){
                 currentTooltips.put(category, createTooltipText(value));
-                paintObject(category, value, converter);
+                paintObject(category, value, converter, g);
             }
         }
-        converter.getGraphics().setColor(bakColor);
     }
 
     @Override
@@ -130,7 +129,7 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
         return null;
     }
 
-    protected abstract void paintObject(TCategories category, TValues value, CoordConverter<TCategories> converter);
+    protected abstract void paintObject(TCategories category, TValues value, CoordConverter<TCategories> converter, Graphics2D g);
 
     protected abstract double getMaxValue(TValues value);
     protected abstract double getMinValue(TValues value);

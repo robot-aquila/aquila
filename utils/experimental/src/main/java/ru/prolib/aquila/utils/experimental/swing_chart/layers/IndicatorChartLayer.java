@@ -26,7 +26,7 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
     }
 
     @Override
-    protected void paintObject(Instant category, Double value, CoordConverter<Instant> converter) {
+    protected void paintObject(Instant category, Double value, CoordConverter<Instant> converter, Graphics2D g) {
         //Nothing
     }
 

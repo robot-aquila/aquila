@@ -51,8 +51,8 @@ public class SimpleTestPanel extends JPanel {
         panel.addSmoothLine(qema7).setColor(Color.BLUE);
         panel.addSmoothLine(qema14).setColor(Color.MAGENTA);
         panel.addVolumes();
-//        panel.addTrades();
-//        panel.setTradesData(tradesData);
+        panel.addTrades();
+        panel.setTradesData(tradesData);
 
         panel.addPolyLine(new HIGH("HIGH_20", candleData, 20)).setColor(COLOR_BULL);
         panel.addPolyLine(new LOW("LOW_20", candleData, 20)).setColor(COLOR_BEAR);
@@ -195,6 +195,18 @@ public class SimpleTestPanel extends JPanel {
                 tradesData.add(new TradeInfo(candleData.get(10).getStartTime().plus(12, ChronoUnit.MINUTES),
                         OrderAction.SELL,
                         candleData.get(10).getBodyMiddle(),
+                        500L));
+                tradesData.add(new TradeInfo(candleData.get(11).getStartTime().plus(12, ChronoUnit.MINUTES),
+                        OrderAction.BUY,
+                        candleData.get(11).getBodyMiddle(),
+                        500L));
+                tradesData.add(new TradeInfo(candleData.get(12).getStartTime().plus(12, ChronoUnit.MINUTES),
+                        OrderAction.SELL,
+                        candleData.get(12).getBodyMiddle(),
+                        500L));
+                tradesData.add(new TradeInfo(candleData.get(13).getStartTime().plus(12, ChronoUnit.MINUTES),
+                        OrderAction.BUY,
+                        candleData.get(13).getBodyMiddle(),
                         500L));
             } catch (ValueException e1) {
                 e1.printStackTrace();

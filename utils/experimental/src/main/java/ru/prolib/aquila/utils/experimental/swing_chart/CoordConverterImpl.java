@@ -45,10 +45,10 @@ public class CoordConverterImpl<TCategories> implements CoordConverter<TCategori
 
     @Override
     public Double getY(Double value) {
-        if(value >= yRangeInfo.getMinValue() && value <= yRangeInfo.getMaxValue()){
+//        if(value >= yRangeInfo.getMinValue() && value <= yRangeInfo.getMaxValue()){
             return plotBounds.getMaxY() - (value-yRangeInfo.getMinValue())*getCoeffY();
-        }
-        return null;
+//        }
+//        return null;
     }
 
     @Override
@@ -80,6 +80,7 @@ public class CoordConverterImpl<TCategories> implements CoordConverter<TCategori
         return graphics;
     }
 
+    @Override
     public RangeInfo getYRangeInfo() {
         return yRangeInfo;
     }

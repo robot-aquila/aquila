@@ -21,7 +21,7 @@ public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
     }
 
     @Override
-    protected void paintObject(Instant category, Long value, CoordConverter<Instant> converter) {
+    protected void paintObject(Instant category, Long value, CoordConverter<Instant> converter, Graphics2D g) {
         int cnt = converter.getCategories().size();
         double x = converter.getX(category);
         double y = converter.getY(Double.valueOf(value));
@@ -31,8 +31,8 @@ public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
         }
         double width = converter.getStepX()*CANDLE_WIDTH_RATIO;
         width= width<CANDLE_MIN_WIDTH?CANDLE_MIN_WIDTH:width;
-        converter.getGraphics().setColor(color);
-        converter.getGraphics().fill(new Rectangle2D.Double(x - width/2, y, width, height));
+        g.setColor(color);
+        g.fill(new Rectangle2D.Double(x - width/2, y, width, height));
     }
 
     @Override

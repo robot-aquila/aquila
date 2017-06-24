@@ -17,6 +17,7 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.*;
  * Created by TiM on 13.06.2017.
  */
 public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
+    private Stroke stroke = new BasicStroke(CANDLE_LINE_WIDTH);
 
     public CandleChartLayer(String id) {
         super(id);
@@ -29,7 +30,7 @@ public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
     }
 
     @Override
-    protected void paintObject(Instant category, Candle value, CoordConverter<Instant> converter) {
+    protected void paintObject(Instant category, Candle value, CoordConverter<Instant> converter, Graphics2D g) {
         Color color = value.getOpen()>value.getClose()?COLOR_BEAR:COLOR_BULL;
         Double step = converter.getStepX();
         double x = converter.getX(category);
@@ -40,17 +41,18 @@ public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
         double yHigh = converter.getY(value.getHigh());
         double yLow = converter.getY(value.getLow());
 
-        converter.getGraphics().setColor(COLOR_BULL);
+        g.setColor(COLOR_BULL);
+        g.setStroke(stroke);
         Shape line = new Line2D.Double(x, yLow, x, yHigh);
-        converter.getGraphics().draw(line);
+        g.draw(line);
 
         double width = step*CANDLE_WIDTH_RATIO;
         width= width<CANDLE_MIN_WIDTH?CANDLE_MIN_WIDTH:width;
         Shape body = new Rectangle2D.Double(x-width/2, y, width, height);
-        converter.getGraphics().setColor(color);
-        converter.getGraphics().fill(body);
-        converter.getGraphics().setColor(COLOR_BULL);
-        converter.getGraphics().draw(body);
+        g.setColor(color);
+        g.fill(body);
+        g.setColor(COLOR_BULL);
+        g.draw(body);
     }
 
     @Override

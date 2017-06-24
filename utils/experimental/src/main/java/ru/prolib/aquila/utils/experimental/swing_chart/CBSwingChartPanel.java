@@ -3,6 +3,10 @@ package ru.prolib.aquila.utils.experimental.swing_chart;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.utils.experimental.charts.layers.TradeInfo;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
+import ru.prolib.aquila.utils.experimental.charts.series.StampedListTimeSeries;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DoubleLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.LineRenderer;
@@ -10,6 +14,7 @@ import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.PolyLineRend
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.CandleChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.IndicatorChartLayer;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.VolumeChartLayer;
 
 import javax.swing.*;
@@ -27,6 +32,11 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
     private ObservableSeries<Candle>  candleData;
     private VolumeChartLayer volumes;
     private LabelFormatter labelFormatter = new InstantLabelFormatter();
+    private LabelFormatter doubleLabelFormatter = new DoubleLabelFormatter();
+
+    private TradeChartLayer trades;
+    private StampedListSeries<TradeInfo> tradesData;
+
 
     public CBSwingChartPanel() {
         Chart chart = addChart("CANDLES", 600);
@@ -74,7 +84,7 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
         int i=0;
         for(Chart c: charts.values()){
             if(i==0){
-                c.getTopAxis().setLabelOrientation(SwingConstants.VERTICAL);
+                c.getTopAxis().setLabelOrientation(SwingConstants.HORIZONTAL);
                 c.getTopAxis().setLabelFormatter(labelFormatter);
                 c.getTopAxis().setShowLabels(true);
                 c.getBottomAxis().setShowLabels(false);
@@ -87,7 +97,9 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
                 c.getBottomAxis().setShowLabels(false);
             }
             c.getLeftAxis().setShowLabels(true);
+            c.getLeftAxis().setLabelFormatter(doubleLabelFormatter);
             c.getRightAxis().setShowLabels(true);
+            c.getRightAxis().setLabelFormatter(doubleLabelFormatter);
             i++;
         }
     }
@@ -146,20 +158,23 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
         }
     }
 
-//    public void addTrades(){
-//        trades = new TradeChartLayer();
-//        addChartLayer("CANDLES", trades);
-//    }
-//
-//    public void setTradesData(StampedListSeries<TradeInfo> data){
-//        if(tradesData!=null){
-//            tradesData.onAdd().removeListeners();
-//        }
-//        tradesData = data;
-//        trades.setData(tradesData);
-//        trades.setCategories(new StampedListTimeSeries(tradesData));
-//        tradesData.onAdd().addListener(this);
-//    }
+    public void addTrades(){
+        trades = new TradeChartLayer("TRADES");
+        Chart chart = getChart("CANDLES");
+        if(chart!=null){
+            chart.addLayer(trades);
+        }
+    }
+
+    public void setTradesData(StampedListSeries<TradeInfo> data){
+        if(tradesData!=null){
+            tradesData.onAdd().removeListeners();
+        }
+        tradesData = data;
+        trades.setData(tradesData);
+        trades.setCategories(new StampedListTimeSeries(tradesData));
+        tradesData.onAdd().addListener(this);
+    }
 
     @Override
     public void onEvent(Event event) {
@@ -170,11 +185,15 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
                 lastChartCategory = getCategories().get(dummy);
             }
             if(dummy < 0 || (lastChartCategory!=null && isCategoryDisplayed(lastChartCategory))){
-                setCurrentPosition(getCurrentPosition()+1);
+                setCurrentPosition(getCurrentPosition()+1, event.isType(candleData.onAdd()));
+                return;
+            }
+            if(event.isType(candleData.onAdd())){
+                updateScrollbar(getCategories().size()+1);
             }
         }
-//        if(tradesData!=null && event.isType(tradesData.onAdd())){
-//            refresh();
-//        }
+        if(tradesData!=null && event.isType(tradesData.onAdd())){
+            setCurrentPosition(getCurrentPosition());
+        }
     }
 }

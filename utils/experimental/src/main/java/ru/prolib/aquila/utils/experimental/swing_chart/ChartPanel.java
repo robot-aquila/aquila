@@ -74,12 +74,16 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
     }
 
     public void setCurrentPosition(int position){
+        setCurrentPosition(position, false);
+    }
+
+    public void setCurrentPosition(int position, boolean newCategoryAdded){
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 if(position < 0){
                     currentPosition.set(0);
-                } else if(categories.size()>0 && position > categories.size()-getNumberOfPoints()){
+                } else if(!newCategoryAdded && categories.size()>0 && position > categories.size()-getNumberOfPoints()){
                     currentPosition.set(categories.size()-getNumberOfPoints());
                 } else {
                     currentPosition.set(position);
@@ -201,12 +205,16 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         }
     }
 
-    private void updateScrollbar() {
+    protected void updateScrollbar(int countCategories){
         if (scrollBar != null) {
             scrollBar.setMinimum(0);
-            scrollBar.setMaximum(categories.size());
+            scrollBar.setMaximum(countCategories);
             scrollBar.setVisibleAmount(getNumberOfPoints());
         }
+    }
+
+    private void updateScrollbar() {
+        updateScrollbar(categories.size());
     }
 
     private void updateScrollbarAndSetValue() {
