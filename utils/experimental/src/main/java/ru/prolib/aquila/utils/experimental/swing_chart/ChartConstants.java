@@ -28,4 +28,6 @@ public class ChartConstants {
     public static final Color TRADE_SELL_COLOR = Color.PINK;
     public static final Color TRADE_LINE_COLOR = Color.BLACK;
 
+    public static final int TOOLTIP_MARGIN = 10;
+
 }

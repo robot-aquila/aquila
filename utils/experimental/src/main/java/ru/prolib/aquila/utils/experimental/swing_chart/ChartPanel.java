@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.swing_chart;
 
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.utils.experimental.charts.TooltipForm;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.ChartLayer;
 
 import javax.swing.*;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.OTHER_CHARTS_HEIGHT;
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TOOLTIP_MARGIN;
 
 /**
  * Created by TiM on 18.06.2017.
@@ -28,6 +30,8 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
     protected JScrollBar scrollBar;
     protected AdjustmentListener scrollBarListener;
     protected int lastX, lastY;
+    protected TooltipForm tooltipForm;
+    private Rectangle screen;
 
     public ChartPanel() {
         super();
@@ -44,6 +48,8 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         };
         scrollBar.addAdjustmentListener(scrollBarListener);
         add(scrollBar, BorderLayout.SOUTH);
+        tooltipForm = new TooltipForm();
+        screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
     }
 
     public Chart addChart(String id){
@@ -66,6 +72,12 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         mainPanel.add(chart);
         chart.addMouseWheelListener(this);
         chart.addMouseMotionListener(this);
+        chart.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                tooltipForm.setVisible(false);
+            }
+        });
         return chart;
     }
 
@@ -91,6 +103,7 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
                 updateCategories();
                 repaintCharts();
                 updateScrollbarAndSetValue();
+                updateTooltipText();
             }
         });
     }
@@ -141,6 +154,29 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         setLastX(e.getX());
         setLastY(e.getY());
         repaintCharts();
+
+        Chart<TCategories> chart = (Chart) e.getSource();
+        TCategories category = chart.getLastCategory();
+        if(category==null){
+            tooltipForm.setVisible(false);
+        } else {
+            updateTooltipText(category);
+            Point point = chart.getLocationOnScreen();
+            int x = point.x + lastX;
+            int y = point.y + lastY;
+            if(x + tooltipForm.getWidth() <= screen.getMaxX()){
+                x = x+TOOLTIP_MARGIN;
+            } else {
+                x = x - tooltipForm.getWidth()-TOOLTIP_MARGIN;
+            }
+            if(y + tooltipForm.getHeight() <= screen.getMaxY()){
+                y = y+TOOLTIP_MARGIN;
+            } else {
+                y = y - tooltipForm.getHeight()-TOOLTIP_MARGIN;
+            }
+            tooltipForm.setLocation(x, y);
+            tooltipForm.setVisible(true);
+        }
     }
 
     public int getLastX() {
@@ -173,6 +209,39 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
 
     protected boolean isCategoryDisplayed(TCategories category){
         return displayedCategories.contains(category);
+    }
+
+    private void updateTooltipText(){
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                for(Chart<TCategories> c: charts.values()){
+                    TCategories category = c.getLastCategory();
+                    if(category!=null){
+                        updateTooltipText(category);
+                    }
+                    return;
+                }
+            }
+        });
+    }
+
+    private void updateTooltipText(TCategories category){
+        StringBuilder sb = new StringBuilder();
+        for(Chart<TCategories> c: charts.values()){
+            for(ChartLayer<TCategories, ?> l: c.getLayers()){
+                String txt = l.getTooltip(category);
+                if(txt!=null){
+                    if(sb.length()!=0){
+                        sb.append("\n----------\n");
+                    }
+                    sb.append(txt);
+                }
+            }
+        }
+        String txt = sb.toString();
+        txt = txt.replace("\n----------\n", "<hr>").replace("\n", "<br>");
+        tooltipForm.setText("<html>"+txt+"</html>");
     }
 
     private void updateCategories() {

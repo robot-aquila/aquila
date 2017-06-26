@@ -32,6 +32,7 @@ public class Chart<TCategories> extends JPanel {
     private final RangeCalculator rangeCalculator;
 
     private int lastX, lastY;
+    private TCategories lastCategory;
 
     public Chart(List<TCategories> categories) {
         super();
@@ -119,6 +120,10 @@ public class Chart<TCategories> extends JPanel {
         this.lastY = lastY;
     }
 
+    public TCategories getLastCategory() {
+        return lastCategory;
+    }
+
     private Pair<Double, Double> getValuesInterval(){
         double maxY = 0;
         double minY = 1e6;
@@ -139,9 +144,9 @@ public class Chart<TCategories> extends JPanel {
     private void drawSelection(CoordConverter<TCategories> coordConverter){
         Graphics2D g = (Graphics2D) coordConverter.getGraphics().create();
         try {
-            TCategories category = coordConverter.getCategory(lastX);
-            if(category!=null){
-                double x = coordConverter.getX(category);
+            lastCategory = coordConverter.getCategory(lastX);
+            if(lastCategory!=null){
+                double x = coordConverter.getX(lastCategory);
                 double width = coordConverter.getStepX();
                 g.setColor(SELECTION_COLOR);
                 g.fill(new Rectangle2D.Double(x-width/2, coordConverter.getPlotBounds().getMinY(), width, coordConverter.getPlotBounds().getHeight()));
