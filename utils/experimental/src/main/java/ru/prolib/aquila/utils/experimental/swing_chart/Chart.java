@@ -53,6 +53,10 @@ public class Chart<TCategories> extends JPanel {
         });
     }
 
+    public void dropLayer(ChartLayer<TCategories, ?> layer){
+        layers.remove(layer);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

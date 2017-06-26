@@ -76,6 +76,11 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
         }
         candleData = null;
         super.clearData();
+        for(IndicatorChartLayer l: indicators){
+            for(Chart c: charts.values()){
+                c.dropLayer(l);
+            }
+        }
         indicators.clear();
         setCurrentPosition(0);
     }
