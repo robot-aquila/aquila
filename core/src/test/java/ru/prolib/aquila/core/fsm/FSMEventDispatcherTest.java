@@ -23,7 +23,6 @@ public class FSMEventDispatcherTest {
 	@Before
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
-		es.getEventQueue().start();
 		control = createStrictControl();
 		actor = control.createMock(FSMStateActor.class);
 		dispatcher = new FSMEventDispatcher(es.getEventQueue(), actor, "bar");
@@ -31,7 +30,7 @@ public class FSMEventDispatcherTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		es.getEventQueue().stop();
+		
 	}
 	
 	@Test

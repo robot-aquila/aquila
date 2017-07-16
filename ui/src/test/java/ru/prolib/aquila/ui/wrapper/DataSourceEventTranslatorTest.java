@@ -50,13 +50,11 @@ public class DataSourceEventTranslatorTest {
 		onOccur = dispatcher.createType();
 		
 		evt = new DataSourceEventTranslator(dispatcher, onOccur);
-		queue.start();
 	}
 	
 	@After
 	public void tearDown() throws Exception {
-		queue.stop();
-		assertTrue(queue.join(1000));
+		
 	}
 	
 	@Test

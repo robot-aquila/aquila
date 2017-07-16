@@ -545,16 +545,20 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	public void testLockNewPositions_Case2() throws Exception {
 		final Symbol symbol = new Symbol("SBER");
 		final CountDownLatch started = new CountDownLatch(1),
-				successPoints = new CountDownLatch(4); 
+				successPoints = new CountDownLatch(4);
+		final List<String> log = new Vector<>();
 		ObjectFactory objectFactory = new ObjectFactoryImpl() {
 			@Override
 			public EditablePosition createPosition(EditableTerminal terminal, Account account, Symbol symbol) {
 				try {
+					log.add("OF: enter");
 					started.countDown();
+					log.add("OF: sleep");
 					Thread.sleep(100L);
 				} catch ( Exception e ) {
 					e.printStackTrace(System.err);
 				}
+				log.add("OF: exit");
 				return new ObjectFactoryImpl().createPosition(terminal, account, symbol);
 			}
 		};
@@ -567,18 +571,31 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 			@Override
 			public void run() {
 				try {
-					if ( ! portfolio.isPositionExists(symbol) ) {
+					log.add("BT: enter");
+					// Здесь нельзя проверять наличие позиции!
+					// Поскольку КП захватывает лок на портфель, мы не можем добавить
+					// дополнительный сигнал для метода createPosition фабрики, чтобы
+					// пройти эту проверку. Мы можем либо добавить сигнал, либо
+					// надеяться, что проверка пройдет до того, как КП захватит лок
+					// в методе getEditablePosition. А это - ненадежный тест.
+					//if ( ! portfolio.isPositionExists(symbol) ) {
+					//	log.add("BT: position not exists");
 						successPoints.countDown();
-					}
+					//}
 					if ( started.await(1, TimeUnit.SECONDS) ) {
+						log.add("BT: lock new positions...");
 						portfolio.lockNewPositions();
+						log.add("BT: lock portfolio...");
 						portfolio.lock();
 						try {
 							if ( portfolio.isPositionExists(symbol) ) {
+								log.add("BT: position exists");
 								successPoints.countDown();
 							}
+							log.add("BT: update portfolio");
 							portfolio.update(PortfolioField.BALANCE, FMoney.ofRUB2(10000.0));
 						} finally {
+							log.add("BT: unlock portfolio and new positions");
 							portfolio.unlock();
 							portfolio.unlockNewPositions();
 						}
@@ -591,23 +608,34 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		Thread ct = new Thread() {
 			@Override
 			public void run() {
+				log.add("CT: enter");
 				if ( ! FMoney.ofRUB2(10000.0).equals(portfolio.getBalance()) ) {
+					log.add("CT: portfolio isn't updated");
 					successPoints.countDown();
 				}
+				log.add("CT: lock portfolio...");
 				portfolio.lock();
 				try {
+					log.add("CT: create position");
 					portfolio.getPosition(symbol);
 					if ( ! FMoney.ofRUB2(10000.0).equals(portfolio.getBalance()) ) {
+						log.add("CT: portfolio isn't updated");
 						successPoints.countDown();
 					}
 				} finally {
+					log.add("CT: unlock portfolio");
 					portfolio.unlock();
 				}
 			}
 		};
 		ct.start();
 		bt.start();
-		assertTrue(successPoints.await(1L, TimeUnit.SECONDS));
+		boolean r = successPoints.await(2L, TimeUnit.SECONDS);
+		//System.err.println(getClass().getSimpleName() + "#testLockNewPositions_Case2 log:");
+		//for ( String x : log ) {
+		//	System.err.println(x);
+		//}
+		assertTrue("Timeout", r);
 	}
 	
 	@Test

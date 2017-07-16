@@ -260,6 +260,7 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 				hasTrade = true;
 				break;
 			}
+			// TODO: move outside lock?
 			if ( hasAsk ) {
 				dispatcher.dispatch(onBestAsk, new SecurityTickEventFactory(this, tick));
 			}

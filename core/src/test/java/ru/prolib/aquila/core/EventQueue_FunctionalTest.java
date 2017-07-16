@@ -127,14 +127,11 @@ public class EventQueue_FunctionalTest {
 		expected.add(eX);
 		expected.add(e3_b);
 
-		queue.start();
 		for ( int i = 0; i < fire.size(); i ++ ) {
 			dispatcher.dispatch(fire.get(i));
 			assertTrue(fire.get(i).finished.await(100, TimeUnit.MILLISECONDS));
 		}
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
-		queue.stop();
-		assertTrue(queue.join(100L));
 		
 		assertEquals(expected, listener.events);
 	}

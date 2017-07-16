@@ -106,7 +106,6 @@ public class SecuritySimulationTest implements Experiment {
 			.withScheduler(scheduler)
 			.withDataProvider(newDataProvider(scheduler, root, qfBuilder.buildDataProvider()))
 			.buildTerminal();
-		((EventQueueImpl) terminal.getEventQueue()).forceSync(true);
 		QFortsEnv qfEnv = qfBuilder.buildEnvironment(terminal);
 		try {
 			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(300000.0));

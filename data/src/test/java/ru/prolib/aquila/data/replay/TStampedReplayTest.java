@@ -194,7 +194,6 @@ public class TStampedReplayTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		eventQueue.stop();
 	}
 	
 	private CloseableIteratorStub<Node> newReaderResponse(List<Node> nodes) {

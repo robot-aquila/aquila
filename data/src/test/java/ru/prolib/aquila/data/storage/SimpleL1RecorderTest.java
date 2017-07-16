@@ -63,7 +63,7 @@ public class SimpleL1RecorderTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		queue.stop();
+		
 	}
 	
 	@Test

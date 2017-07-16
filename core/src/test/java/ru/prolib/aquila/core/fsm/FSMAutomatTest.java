@@ -235,7 +235,6 @@ public class FSMAutomatTest {
 	@Before
 	public void setUp() throws Exception {
 		es = new EventSystemImpl();
-		es.getEventQueue().start();
 		automat = new FSMAutomat();
 		charDispatcher = es.createEventDispatcher();
 		onChar = charDispatcher.createSyncType();
@@ -248,7 +247,7 @@ public class FSMAutomatTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		es.getEventQueue().stop();
+		
 	}
 	
 	@Test

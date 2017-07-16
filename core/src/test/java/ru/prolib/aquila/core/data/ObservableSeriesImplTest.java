@@ -26,7 +26,7 @@ public class ObservableSeriesImplTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		queue.stop();
+		
 	}
 	
 	@Test

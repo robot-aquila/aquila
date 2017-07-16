@@ -87,7 +87,6 @@ public class SMStateMachine_TriggersExampleTest {
 	public void setUp() throws Exception {
 		events = new LinkedList<Event>();
 		es = new EventSystemImpl();
-		es.getEventQueue().start();
 		dispatcher = es.createEventDispatcher();
 		s1exit = dispatcher.createSyncType("s1exit");
 		s1skip = dispatcher.createSyncType("s1skip");
@@ -104,7 +103,7 @@ public class SMStateMachine_TriggersExampleTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		es.getEventQueue().stop();
+		
 	}
 	
 	@Test

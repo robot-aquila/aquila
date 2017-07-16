@@ -69,7 +69,6 @@ public class ObservableStateContainerImplTest {
 		control.resetToNice();
 		data.clear();
 		container.close();
-		queue.stop();
 		getter = null;
 		listenerStub.clear();
 	}

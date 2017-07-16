@@ -65,8 +65,7 @@ public class MenuTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-		queue.stop();
-		assertTrue(queue.join(1000));
+		
 	}
 
 	/**

@@ -10,7 +10,7 @@ package ru.prolib.aquila.core;
  * 2012-04-09<br>
  * $Id: EventQueue.java 327 2012-12-05 19:58:26Z whirlwind $
  */
-public interface EventQueue extends Starter {
+public interface EventQueue {
 	
 	/**
 	 * Enqueue event created by factory.
@@ -22,48 +22,7 @@ public interface EventQueue extends Starter {
 	 * @param factory - event factory
 	 */
 	public void enqueue(EventType type, EventFactory factory);
-	
-	/**
-	 * Проверить запущен-ли поток диспетчеризации событий.
-	 * <p>
-	 * @return true если запущен, иначе - false
-	 */
-	@Deprecated
-	public boolean started();
-	
-	/**
-	 * Проверить является-ли текущий поток является потоком очереди событий.
-	 * <p>  
-	 * @return true - текущий поток обрабатывает очередь событий, false - иначе 
-	 */
-	public boolean isDispatchThread();
-	
-	/**
-	 * Ожидать завершения потока обработки очереди событий.
-	 * <p>
-	 * Если поток обработки очереди событий выполняется, то блокирует текущий
-	 * поток до момента завершения потока очереди. Если вызов осуществлен из
-	 * потока очереди, то осуществляет немедленный возврат. 
-	 * <p>
-	 * @param timeout таймаут в миллисекундах значение &gt; 0
-	 * @return true, если дождалить завершения, иначе false
-	 * @throws InterruptedException - The waiting thread have interrupted
-	 */
-	@Deprecated
-	public boolean join(long timeout) throws InterruptedException;
-	
-	/**
-	 * Ожидать завершения потока обработки очереди событий.
-	 * <p>
-	 * Если поток обработки очереди событий выполняется, то блокирует текущий
-	 * поток до момента завершения потока очереди. Если вызов осуществлен из
-	 * потока очереди, то осуществляет немедленный возврат. 
-	 * <p>
-	 * @throws InterruptedException - The waiting thread have interrupted
-	 */
-	@Deprecated
-	public void join() throws InterruptedException;
-	
+		
 	/**
 	 * Получить идентификатор очереди.
 	 * <p>

@@ -61,7 +61,6 @@ public class CurrentPortfolioImplTest {
 		
 		menu = new Menu(new JMenu(), eventSystem);
 		prt = new CurrentPortfolioImpl(terminal, portfolioChanged, dispatcher, menu);
-		queue.start();
 	}
 
 	/**
@@ -69,8 +68,6 @@ public class CurrentPortfolioImplTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-		queue.stop();
-		assertTrue(queue.join(1000));
 	}
 	
 	@Test
