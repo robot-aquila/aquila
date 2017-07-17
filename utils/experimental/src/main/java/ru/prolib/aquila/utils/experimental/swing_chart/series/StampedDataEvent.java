@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.charts.series;
+package ru.prolib.aquila.utils.experimental.swing_chart.series;
 
 import ru.prolib.aquila.core.BusinessEntities.TStamped;
 import ru.prolib.aquila.core.EventImpl;

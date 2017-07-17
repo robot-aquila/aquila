@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.charts;
+package ru.prolib.aquila.utils.experimental.swing_chart;
 
 
 import javax.swing.*;
