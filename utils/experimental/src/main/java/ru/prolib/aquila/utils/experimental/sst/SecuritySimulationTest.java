@@ -54,7 +54,7 @@ import ru.prolib.aquila.ui.form.PositionListTableModel;
 import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
-import ru.prolib.aquila.utils.experimental.charts.fxcharts.CBFXChartPanel;
+import ru.prolib.aquila.utils.experimental.swing_chart.CBSwingChartPanel;
 import ru.prolib.aquila.utils.experimental.sst.cs.CSDataProvider;
 import ru.prolib.aquila.utils.experimental.sst.cs.CSDataProviderImpl;
 import ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice;
@@ -205,10 +205,9 @@ public class SecuritySimulationTest implements Experiment {
         new TableModelController(positionTableModel, frame);
         
         CSDataSlice dataSlice = csDataProvider.getSlice(rSymbol, TimeFrame.M1);
-        CBFXChartPanel chartPanel = new CBFXChartPanel(dataSlice.getCandleSeries());
+        CBSwingChartPanel chartPanel = new CBSwingChartPanel(dataSlice.getCandleSeries());
         for ( Series<Double> x : dataSlice.getIndicators() ) {
         	logger.debug("added indicator: {}", x.getId());
-        	chartPanel.addSmoothLine(x).setStyleClass("line-blue");
         }
         tabPanel.addTab("Strategy", chartPanel);
         

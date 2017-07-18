@@ -2,7 +2,6 @@ package ru.prolib.aquila.utils.experimental.swing_chart;
 
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
-import ru.prolib.aquila.utils.experimental.charts.TooltipForm;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.ChartLayer;
 
 import javax.swing.*;

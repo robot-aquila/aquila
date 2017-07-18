@@ -2,11 +2,10 @@ package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.utils.experimental.charts.Utils;
-import ru.prolib.aquila.utils.experimental.charts.layers.TradeInfo;
-import ru.prolib.aquila.utils.experimental.charts.series.StampedListSeries;
-import ru.prolib.aquila.utils.experimental.charts.series.StampedListTimeSeries;
+import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListSeries;
+import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListTimeSeries;
 
 import java.awt.*;
 import java.time.Instant;

@@ -1,6 +1,6 @@
 package ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters;
 
-import ru.prolib.aquila.utils.experimental.charts.Utils;
+import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

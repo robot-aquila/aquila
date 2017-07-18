@@ -3,7 +3,7 @@ package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CandleStartTimeSeries;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.utils.experimental.charts.Utils;
+import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
 
 import java.awt.*;
