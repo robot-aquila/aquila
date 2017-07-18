@@ -90,6 +90,7 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	
 	@Override
 	public void close() {
+		super.close();
 		lock.lock();
 		try {
 			terminal = null;
@@ -97,7 +98,6 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 			onCurrentPriceChange.removeAlternates();
 			onPositionChange.removeListeners();
 			onPositionChange.removeAlternates();
-			super.close();
 		} finally {
 			lock.unlock();
 		}

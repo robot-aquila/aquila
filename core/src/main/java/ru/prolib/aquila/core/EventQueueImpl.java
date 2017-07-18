@@ -18,10 +18,11 @@ public class EventQueueImpl implements EventQueue {
 	private static final Logger logger;
 	private final BlockingQueue<Event> queue;
 	private final String name;
-	private volatile Thread thread = null;
+	private final Thread thread;
 	private final LinkedList<Event> cache1;
 	private final Lock queueLock = new ReentrantLock();
 	private boolean queueProcessing = false;
+	private final int maxSize = 1024;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -37,7 +38,9 @@ public class EventQueueImpl implements EventQueue {
 		this.name = threadName;
 		queue = new LinkedBlockingQueue<Event>();
 		cache1 = new LinkedList<Event>();
-		startWorker();
+		thread = new Thread(new QueueWorker(queue), name);
+		thread.setDaemon(true);
+		thread.start();
 	}
 	
 	/**
@@ -45,12 +48,6 @@ public class EventQueueImpl implements EventQueue {
 	 */
 	public EventQueueImpl() {
 		this("EVNT");
-	}
-	
-	private void startWorker() {
-		thread = new Thread(new QueueWorker(queue), name);
-		thread.setDaemon(true);
-		thread.start();
 	}
 
 	@Override
@@ -112,16 +109,27 @@ public class EventQueueImpl implements EventQueue {
 			}
 		}
 		
+		for ( Event x : cache2 ) {
+			try {
+				if ( queue.size() >= maxSize ) {
+					logger.warn("Queue is slow");
+					// Wait if this thread is not a worker thread.
+					if ( Thread.currentThread() != thread ) {
+						int expSize = (int)(maxSize * 0.4); // wait for 60% free size
+						logger.debug("Isn't worker thread. Wait until queue has free space. Limit: {} pcs.", expSize);
+						do {
+							Thread.sleep(50L);
+						} while ( queue.size() >= expSize );
+					}
+				}
+				queue.put(x);
+			} catch ( InterruptedException e ) {
+				Thread.currentThread().interrupt();
+				logger.error("Thread interrupted: ", e);
+			}
+		}
 		queueLock.lock();
 		try {
-			for ( Event x : cache2 ) {
-				try {
-					queue.put(x);
-				} catch ( InterruptedException e ) {
-					Thread.currentThread().interrupt();
-					logger.error("Thread interrupted: ", e);
-				}
-			}
 			queueProcessing = false;
 		} finally {
 			queueLock.unlock();

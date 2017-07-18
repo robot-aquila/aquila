@@ -37,7 +37,7 @@ public class QFCalculatorTest {
 	private SchedulerStub schedulerStub;
 	private QFCalculator service;
 	private EditableTerminal terminal;
-	private EditableSecurity security1, security3;
+	private EditableSecurity security1;
 	
 	Instant T(String timeString) {
 		return Instant.parse(timeString);
@@ -66,7 +66,7 @@ public class QFCalculatorTest {
 			.withToken(PortfolioField.BALANCE, FMoney.ofRUB2(100000.0))
 			.buildUpdate());
 		security1 = terminal.getEditableSecurity(symbol1);
-		security3 = terminal.getEditableSecurity(symbol3);
+		terminal.getEditableSecurity(symbol3);
 		terminal.getEditableSecurity(symbol2);
 		terminal.getEditableSecurity(symbol4);
 		terminal.getEditablePortfolio(account1);
@@ -220,7 +220,7 @@ public class QFCalculatorTest {
 		expect(utilsMock.refreshByCurrentState(p.getPosition(symbol3))).andReturn(puStub);
 		control.replay();
 		
-		QFPortfolioChangeUpdate actual = service.updateMargin(p, security3);
+		QFPortfolioChangeUpdate actual = service.updateMargin(p.getPosition(symbol3));
 		
 		control.verify();
 		QFPortfolioChangeUpdate expected = new QFPortfolioChangeUpdate(account1)
@@ -262,7 +262,7 @@ public class QFCalculatorTest {
 			.buildUpdate());
 		control.replay();
 		
-		QFPortfolioChangeUpdate actual = service.updateMargin(p, security3);
+		QFPortfolioChangeUpdate actual = service.updateMargin(p.getPosition(symbol3));
 
 		control.verify();
 		QFPortfolioChangeUpdate expected = new QFPortfolioChangeUpdate(account1)
@@ -283,46 +283,6 @@ public class QFCalculatorTest {
 			.setFinalEquity(FMoney.ofRUB2(10750))
 			.setFinalFreeMargin(FMoney.ofRUB2(10500.0));
 		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testUpdateMargin_WhenPositionNotExists() {
-		EditablePortfolio p = terminal.getEditablePortfolio(account1);
-		p.consume(new DeltaUpdateBuilder()
-			.withToken(PortfolioField.BALANCE, FMoney.ofRUB2(10000.0))
-			.withToken(PortfolioField.EQUITY, FMoney.ofRUB2(5000.0))
-			.withToken(PortfolioField.FREE_MARGIN, FMoney.ofRUB2(4500.0))
-			.withToken(PortfolioField.PROFIT_AND_LOSS, FMoney.ofRUB2(750.0))
-			.withToken(PortfolioField.USED_MARGIN, FMoney.ofRUB2(250.0))
-			.withToken(QFPortfolioField.QF_VAR_MARGIN, FMoney.ofRUB5(10.9))
-			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE, FMoney.ofRUB5(500.0))
-			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER, FMoney.ofRUB5(190.0))
-			.buildUpdate());
-		control.replay();
-		
-		QFPortfolioChangeUpdate actual = service.updateMargin(p, security3);
-
-		control.verify();
-		QFPortfolioChangeUpdate expected = new QFPortfolioChangeUpdate(account1)
-			.setInitialBalance(FMoney.ofRUB2(10000.0))
-			.setInitialEquity(FMoney.ofRUB2(5000.0))
-			.setInitialFreeMargin(FMoney.ofRUB2(4500.0))
-			.setInitialProfitAndLoss(FMoney.ofRUB2(750.0))
-			.setInitialUsedMargin(FMoney.ofRUB2(250.0))
-			.setInitialVarMargin(FMoney.ofRUB5(10.9))
-			.setInitialVarMarginClose(FMoney.ofRUB5(500.0))
-			.setInitialVarMarginInter(FMoney.ofRUB5(190.0))
-			.setChangeBalance(FMoney.ZERO_RUB2)
-			.setChangeUsedMargin(FMoney.ZERO_RUB2)
-			.setChangeVarMargin(FMoney.ZERO_RUB5)
-			.setChangeProfitAndLoss(FMoney.ZERO_RUB2)
-			.setChangeVarMarginClose(FMoney.ZERO_RUB5)
-			.setChangeVarMarginInter(FMoney.ZERO_RUB5)
-			.setFinalEquity(FMoney.ofRUB2(10750))
-			.setFinalFreeMargin(FMoney.ofRUB2(10500.0));
-		assertEquals(expected, actual);
-		// Must not create position instance!
-		assertFalse(p.isPositionExists(symbol3));
 	}
 	
 	@Test

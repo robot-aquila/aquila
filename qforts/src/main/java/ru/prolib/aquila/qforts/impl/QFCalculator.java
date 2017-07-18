@@ -78,26 +78,21 @@ public class QFCalculator {
 		return updateEquityAndFreeMargin(update);
 	}
 	
-	public QFPortfolioChangeUpdate updateMargin(Portfolio portfolio,
-			Security security)
-	{
-		QFPortfolioChangeUpdate update = new QFPortfolioChangeUpdate(portfolio.getAccount())
+	public QFPortfolioChangeUpdate updateMargin(Position position) {
+		QFPortfolioChangeUpdate update = new QFPortfolioChangeUpdate(position.getAccount())
 			.setChangeBalance(FMoney.ZERO_RUB2)
 			.setChangeProfitAndLoss(FMoney.ZERO_RUB2)
 			.setChangeUsedMargin(FMoney.ZERO_RUB2)
 			.setChangeVarMargin(FMoney.ZERO_RUB5)
 			.setChangeVarMarginClose(FMoney.ZERO_RUB5)
 			.setChangeVarMarginInter(FMoney.ZERO_RUB5);
-		setInitialValues(portfolio, update);
-		if ( portfolio.isPositionExists(security.getSymbol()) ) {
-			Position pos = portfolio.getPosition(security.getSymbol());
-			if ( pos.getLongOrZero(PositionField.CURRENT_VOLUME) != 0L ) {
-				QFPositionChangeUpdate pu = utils.refreshByCurrentState(pos);
-				update.setPositionUpdate(pu)
-					.setChangeUsedMargin(pu.getChangeUsedMargin())
-					.setChangeVarMargin(pu.getChangeVarMargin())
-					.setChangeProfitAndLoss(pu.getChangeProfitAndLoss());
-			}
+		setInitialValues(position.getPortfolio(), update);
+		if ( position.getLongOrZero(PositionField.CURRENT_VOLUME) != 0L ) {
+			QFPositionChangeUpdate pu = utils.refreshByCurrentState(position);
+			update.setPositionUpdate(pu)
+				.setChangeUsedMargin(pu.getChangeUsedMargin())
+				.setChangeVarMargin(pu.getChangeVarMargin())
+				.setChangeProfitAndLoss(pu.getChangeProfitAndLoss());
 		}
 		return updateEquityAndFreeMargin(update);
 	}

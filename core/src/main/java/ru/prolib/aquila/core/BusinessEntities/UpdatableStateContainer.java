@@ -5,8 +5,19 @@ import java.util.Set;
 
 public interface UpdatableStateContainer extends StateContainer, DeltaUpdateConsumer {
 	
+	/**
+	 * Update container with the specified tokens.
+	 * <p>
+	 * @param tokens - set of tokens
+	 */
 	public void update(Map<Integer, Object> tokens);
 
+	/**
+	 * Update container with the specified token.
+	 * <p>
+	 * @param token - token
+	 * @param value - value
+	 */
 	public void update(int token, Object value);
 	
 	public void resetChanges();

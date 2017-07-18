@@ -167,20 +167,22 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	public EditablePosition getEditablePosition(Symbol symbol) {
 		lock.lock();
 		try {
-			while ( newPosLockedTID != 0L ) {
-				if ( newPosLockedTID == Thread.currentThread().getId() ) {
-					unlockNewPositions();
-					throw new IllegalStateException("New positions are locked by this thread");
-				}
-				newPosLocked.await();
-				// TODO: Здесь можно написать более надежно. Например, если
-				// блокирующий поток был прибит, то текущая реализация будет
-				// висеть вечно. Можно переписать на await с аргументами и
-				// периодически проверять, жив ли блокирующий поток. Если нет,
-				// то снимать блокировку здесь.
-			}
 			if ( terminal == null ) {
 				throw new IllegalStateException("Portfolio closed");
+			}
+			if ( ! positions.containsKey(symbol) ) {
+				while ( newPosLockedTID != 0L ) {
+					if ( newPosLockedTID == Thread.currentThread().getId() ) {
+						unlockNewPositions();
+						throw new IllegalStateException("New positions are locked by this thread");
+					}
+					newPosLocked.await();
+					// TODO: Здесь можно написать более надежно. Например, если
+					// блокирующий поток был прибит, то текущая реализация будет
+					// висеть вечно. Можно переписать на await с аргументами и
+					// периодически проверять, жив ли блокирующий поток. Если нет,
+					// то снимать блокировку здесь.
+				}
 			}
 			EditablePosition position = positions.get(symbol);
 			if ( position == null ) {
@@ -203,6 +205,8 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	
 	@Override
 	public void close() {
+		super.close();
+		List<EditablePosition> list = new LinkedList<>();
 		lock.lock();
 		try {
 			terminal = null;
@@ -214,13 +218,15 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 			onPositionCurrentPriceChange.removeAlternates();
 			onPositionUpdate.removeListeners();
 			onPositionUpdate.removeAlternates();
-			super.close();
 			for ( EditablePosition position : positions.values() ) {
-				position.close();
+				list.add(position);
 			}
 			positions.clear();
 		} finally {
 			lock.unlock();
+		}
+		for ( EditablePosition position : list ) {
+			position.close();
 		}
 	}
 	

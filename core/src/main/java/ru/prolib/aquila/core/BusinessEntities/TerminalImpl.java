@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -373,13 +375,13 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public EditableOrder createOrder(Account account, Symbol symbol) {
+		long orderID = dataProvider.getNextOrderID();
 		Lockable xLock = createLock(account);
 		xLock.lock();
 		try {
-			long orderID = dataProvider.getNextOrderID();
 			EditableOrder order = createOrder(orderID, account, symbol);
 			order.suppressEvents();
-			updateOrderStatus(order, OrderStatus.PENDING);
+			order.update(OrderField.STATUS, OrderStatus.PENDING);
 			order.purgeEvents();
 			return order;
 		} finally {
@@ -399,30 +401,18 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public void placeOrder(Order order) throws OrderException {
-		Lockable xLock = new Multilock(this, order);
-		xLock.lock();
-		try {
-			if ( closed ) {
-				throw new IllegalStateException();
-			}
-			dataProvider.registerNewOrder(toEditable(order));
-		} finally {
-			xLock.unlock();
+		if ( isClosed() ) {
+			throw new IllegalStateException();
 		}
+		dataProvider.registerNewOrder(toEditable(order));
 	}
 
 	@Override
 	public void cancelOrder(Order order) throws OrderException {
-		Lockable xLock = new Multilock(this, order);
-		xLock.lock();
-		try {
-			if ( closed ) {
-				throw new IllegalStateException();
-			}
-			dataProvider.cancelOrder(toEditable(order));
-		} finally {
-			xLock.unlock();
+		if ( isClosed() ) {
+			throw new IllegalStateException();
 		}
+		dataProvider.cancelOrder(toEditable(order));
 	}
 	
 	@Override
@@ -446,16 +436,19 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	public void subscribe(Symbol symbol) {
+		EditableSecurity security = null;
 		lock.lock();
 		try {
 			if ( ! isSecurityExists(symbol) ) {
-				EditableSecurity security = getEditableSecurity(symbol);
-				dataProvider.subscribeStateUpdates(security);
-				dataProvider.subscribeLevel1Data(symbol, security);
-				dataProvider.subscribeLevel2Data(symbol, security);
+				security = getEditableSecurity(symbol);
 			}
 		} finally {
 			lock.unlock();
+		}
+		if ( security != null ) {
+			dataProvider.subscribeStateUpdates(security);
+			dataProvider.subscribeLevel1Data(symbol, security);
+			dataProvider.subscribeLevel2Data(symbol, security);
 		}
 	}
 	
@@ -520,25 +513,26 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public void close() {
+		List<EditableOrder> orderToClose = new LinkedList<>();
+		List<EditableSecurity> securityToClose = new LinkedList<>();
+		List<EditablePortfolio> portfolioToClose = new LinkedList<>();
+		stop();
 		lock.lock();
 		try {
 			if ( closed ) {
 				return;
 			}
-			if ( started ) {
-				stop();
-			}
 			scheduler.close();
 			for ( EditableOrder order : orders.values() ) {
-				order.close();
+				orderToClose.add(order);
 			}
 			orders.clear();
 			for ( EditableSecurity security : securities.values() ) {
-				security.close();
+				securityToClose.add(security);
 			}
 			securities.clear();
 			for ( EditablePortfolio portfolio : portfolios.values() ) {
-				portfolio.close();
+				portfolioToClose.add(portfolio);
 			}
 			portfolios.clear();
 			onTerminalReady.removeAlternatesAndListeners();
@@ -571,6 +565,16 @@ public class TerminalImpl implements EditableTerminal {
 		} finally {
 			closed = true;
 			lock.unlock();
+		}
+		
+		for ( EditableOrder order : orderToClose ) {
+			order.close();
+		}
+		for ( EditablePortfolio portfolio : portfolioToClose ) {
+			portfolio.close();
+		}
+		for ( EditableSecurity security : securityToClose ) {
+			security.close();			
 		}
 	}
 	
@@ -725,11 +729,11 @@ public class TerminalImpl implements EditableTerminal {
 				throw new IllegalStateException();
 			}
 			started = true;
-			dataProvider.subscribeRemoteObjects(this);
-			dispatcher.dispatch(onTerminalReady, new TerminalEventFactory(this));
 		} finally {
 			lock.unlock();
 		}
+		dataProvider.subscribeRemoteObjects(this);
+		dispatcher.dispatch(onTerminalReady, new TerminalEventFactory(this));
 	}
 
 	@Override
@@ -740,11 +744,11 @@ public class TerminalImpl implements EditableTerminal {
 				return;
 			}
 			started = false;
-			dataProvider.unsubscribeRemoteObjects(this);
-			dispatcher.dispatch(onTerminalUnready, new TerminalEventFactory(this));
 		} finally {
 			lock.unlock();
 		}
+		dataProvider.unsubscribeRemoteObjects(this);
+		dispatcher.dispatch(onTerminalUnready, new TerminalEventFactory(this));
 	}
 	
 	static class TerminalEventFactory implements EventFactory {
@@ -759,12 +763,6 @@ public class TerminalImpl implements EditableTerminal {
 			return new TerminalEvent(type, terminal);
 		}
 		
-	}
-	
-	private void updateOrderStatus(EditableOrder order, OrderStatus status) {
-		Map<Integer, Object> tokens = new HashMap<Integer, Object>();
-		tokens.put(OrderField.STATUS, status);
-		order.update(tokens);
 	}
 	
 	private EditableOrder createOrder(Account account, Symbol symbol,
@@ -821,20 +819,25 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public void archiveOrders() {
+		List<EditableOrder> list = new LinkedList<>();
 		lock.lock();
 		try {
 			Iterator<Map.Entry<Long, EditableOrder>> it = orders.entrySet().iterator();
+			orders.entrySet().size();
 			while ( it.hasNext() ){
 				Map.Entry<Long, EditableOrder> pair = it.next();
 				EditableOrder order = pair.getValue();
 				if ( order.getStatus().isFinal() ) {
-					order.fireArchived();
-					order.close();
+					list.add(order);
 					it.remove();
 				}
 			}
 		} finally {
 			lock.unlock();
+		}
+		for ( EditableOrder order : list ) {
+			order.fireArchived();
+			order.close();
 		}
 	}
 
@@ -860,32 +863,17 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	public void suppressEvents() {
-		lock.lock();
-		try {
-			dispatcher.suppressEvents();
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.suppressEvents();
 	}
 
 	@Override
 	public void restoreEvents() {
-		lock.lock();
-		try {
-			dispatcher.restoreEvents();
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.restoreEvents();
 	}
 	
 	@Override
 	public void purgeEvents() {
-		lock.lock();
-		try {
-			dispatcher.purgeEvents();
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.purgeEvents();
 	}
 
 }

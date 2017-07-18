@@ -165,8 +165,8 @@ public class ObservableStateContainerImplTest {
 			container.onUpdate().removeListener(listenerStub);
 			container.onAvailable().removeListener(listenerStub);
 			boolean changed = (Boolean)fixture[i][2];
-			assertEquals(msg, changed ? 1 : 0, listenerStub.getEventCount());
 			assertEquals(msg, changed, container.hasChanged(token));
+			assertEquals(msg, changed ? 1 : 0, listenerStub.getEventCount());
 			Object expectedValue = fixture[i][1];
 			if ( expectedValue == null ) {
 				expectedValue = nullValue;

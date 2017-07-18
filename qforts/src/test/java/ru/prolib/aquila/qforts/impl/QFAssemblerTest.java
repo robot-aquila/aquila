@@ -3,9 +3,7 @@ package ru.prolib.aquila.qforts.impl;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +15,6 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventProducer;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
@@ -40,7 +37,6 @@ import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.BusinessEntities.PositionField;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.concurrency.Lockable;
 import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
@@ -219,21 +215,11 @@ public class QFAssemblerTest {
 		objects.add(security2);
 		objects.add(portfolio);
 		
-		Lockable actual = service.createMultilock(objects);
+		EventSuppressor actual = (EventSuppressor) service.createMultilock(objects);
 		
-		assertNotNull(actual);
-		Multilock lock = (Multilock) actual;
-		List<Lockable> actualObjects = lock.getObjects();
-		Set<EventProducer> dummy = new HashSet<>();
-		dummy.add(security1);
-		dummy.add(security2);
-		dummy.add(portfolio);		
-		List<Lockable> expectedObjects = new ArrayList<>();
-		expectedObjects.add(portfolio);
-		expectedObjects.add(security1);
-		expectedObjects.add(security2);
-		expectedObjects.add(new EventSuppressor(actualObjects.get(3).getLID(), dummy));
-		assertEquals(expectedObjects, lock.getObjects());
+		Multilock mlock = new Multilock(actual.getMultilock().getLID(), objects);
+		EventSuppressor expected = new EventSuppressor(actual.getLID(), objects, mlock);
+		assertEquals(expected, actual);
 	}
 
 }

@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
@@ -89,12 +91,14 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 	
 	@Override
-	public synchronized void dispatch(EventType type, EventFactory factory) {
-		if ( suppressCount > 0 ) {
-			cache.add(new CachedEvent(type, factory));
-		} else {
-			queue.enqueue(type, factory);
+	public void dispatch(EventType type, EventFactory factory) {
+		synchronized ( this ) {
+			if ( suppressCount > 0 ) {
+				cache.add(new CachedEvent(type, factory));
+				return;
+			}
 		}
+		queue.enqueue(type, factory);
 	}
 
 	@Override
@@ -128,14 +132,23 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public synchronized void restoreEvents() {
-		if ( suppressCount > 0 ) {
-			suppressCount --;
+	public void restoreEvents() {
+		List<CachedEvent> list = null;
+		synchronized ( this ) {
 			if ( suppressCount > 0 ) {
+				suppressCount --;
+				if ( suppressCount > 0 ) {
+					return;
+				}
+			}
+			if ( cache.size() == 0 ) {
 				return;
+			} else {
+				list = new ArrayList<>(cache);
+				cache.clear();
 			}
 		}
-		for ( CachedEvent x : cache ) {
+		for ( CachedEvent x : list ) {
 			queue.enqueue(x.type, x.factory);
 		}
 	}
@@ -144,8 +157,11 @@ public class EventDispatcherImpl implements EventDispatcher {
 	public synchronized void purgeEvents() {
 		if ( suppressCount > 0 ) {
 			suppressCount --;
-			cache.clear();
+			if ( suppressCount > 0 ) {
+				return;
+			}
 		}
+		cache.clear();
 	}
 	
 	static class CachedEvent {

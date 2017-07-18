@@ -224,6 +224,7 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	
 	@Override
 	public void close() {
+		super.close();
 		lock.lock();
 		try {
 			terminal = null;
@@ -237,7 +238,6 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 			onRegistered.removeAlternatesAndListeners();
 			onRegisterFailed.removeAlternatesAndListeners();
 			onArchived.removeAlternatesAndListeners();
-			super.close();
 		} finally {
 			lock.unlock();
 		}
@@ -412,22 +412,12 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 
 	@Override
 	public void fireArchived() {
-		lock.lock();
-		try {
-			dispatcher.dispatch(onArchived, new OrderEventFactory(this));
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.dispatch(onArchived, new OrderEventFactory(this));
 	}
 
 	@Override
 	public void fireExecution(OrderExecution execution) {
-		lock.lock();
-		try {
-			dispatcher.dispatch(onExecution, new OrderExecutionEventFactory(this, execution));
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.dispatch(onExecution, new OrderExecutionEventFactory(this, execution));
 	}
 	
 	@Override

@@ -17,6 +17,9 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsBuilder;
 
 /**
  * Observable state container implementation.
+ * <p>
+ * <b>Note:</b> If you want to override any update/consume methods use suppress/restore calls on event dispatcher
+ * around the lock section.
  */
 public class ObservableStateContainerImpl extends UpdatableStateContainerImpl implements ObservableStateContainer {
 	protected final EventDispatcher dispatcher;
@@ -87,10 +90,10 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 			controller = null;
 			onAvailable.removeAlternatesAndListeners();
 			onUpdate.removeAlternatesAndListeners();
-			dispatcher.dispatch(onClose, createEventFactory());
 		} finally {
 			lock.unlock();
 		}
+		dispatcher.dispatch(onClose, createEventFactory());
 	}
 	
 	@Override
@@ -102,9 +105,10 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 			lock.unlock();
 		}
 	}
-	
+
 	@Override
 	public void update(Map<Integer, Object> tokens) {
+		dispatcher.suppressEvents();
 		lock.lock();
 		try {
 			super.update(tokens); // inside the lock is OK in this case
@@ -120,37 +124,23 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 			}
 		} finally {
 			lock.unlock();
+			dispatcher.restoreEvents();
 		}
 	}
 	
 	@Override
 	public void suppressEvents() {
-		lock.lock();
-		try {
-			dispatcher.suppressEvents();
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.suppressEvents();
 	}
 
 	@Override
 	public void restoreEvents() {
-		lock.lock();
-		try {
-			dispatcher.restoreEvents();
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.restoreEvents();
 	}
 	
 	@Override
 	public void purgeEvents() {
-		lock.lock();
-		try {
-			dispatcher.purgeEvents();
-		} finally {
-			lock.unlock();
-		}
+		dispatcher.purgeEvents();
 	}
 
 	/**

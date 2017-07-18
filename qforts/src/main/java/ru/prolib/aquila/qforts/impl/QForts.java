@@ -4,10 +4,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
+import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class QForts {
 	private final QFObjectRegistry registry;
@@ -70,8 +72,20 @@ public class QForts {
 	}
 	
 	public void updateMargin(Security security) throws QFTransactionException {
+		final Symbol symbol = security.getSymbol();
 		for ( EditablePortfolio portfolio : registry.getPortfolioList() ) {
-			transactions.updateMargin(portfolio, security);
+			EditablePosition position = null;
+			portfolio.lock();
+			try {
+				if ( portfolio.isPositionExists(symbol) ) {
+					position = portfolio.getEditablePosition(symbol);
+				}
+			} finally {
+				portfolio.unlock();
+			}
+			if ( position != null ) {
+				transactions.updateMargin(position);
+			}
 		}
 	}
 	

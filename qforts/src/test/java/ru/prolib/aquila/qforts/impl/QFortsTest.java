@@ -185,14 +185,15 @@ public class QFortsTest {
 			portfolio1 = terminal.getEditablePortfolio(account1),
 			portfolio2 = terminal.getEditablePortfolio(account2),
 			portfolio3 = terminal.getEditablePortfolio(account3);
+		portfolio1.getEditablePosition(symbol1);
+		portfolio3.getEditablePosition(symbol1);
 		List<EditablePortfolio> expectedPortfolios = new ArrayList<>();
 		expectedPortfolios.add(portfolio1);
 		expectedPortfolios.add(portfolio2);
 		expectedPortfolios.add(portfolio3);
 		expect(registryMock.getPortfolioList()).andReturn(expectedPortfolios);
-		transactionsMock.updateMargin(portfolio1, security);
-		transactionsMock.updateMargin(portfolio2, security);
-		transactionsMock.updateMargin(portfolio3, security);
+		transactionsMock.updateMargin(portfolio1.getEditablePosition(symbol1));
+		transactionsMock.updateMargin(portfolio3.getEditablePosition(symbol1));
 		control.replay();
 		
 		service.updateMargin(security);

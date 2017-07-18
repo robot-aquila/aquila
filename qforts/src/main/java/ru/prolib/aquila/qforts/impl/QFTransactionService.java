@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
+import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
@@ -95,6 +96,7 @@ public class QFTransactionService {
 		lockable.add(order);
 		lockable.add(security);
 		lockable.add(portfolio);
+		lockable.add(order.getPosition());
 		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
@@ -127,6 +129,7 @@ public class QFTransactionService {
 			lockable.add(portfolio);
 			for ( Position x : portfolio.getPositions() ) {
 				lockable.add(x.getSecurity());
+				lockable.add(x);
 			}
 			lock = assembler.createMultilock(lockable);
 			lock.lock();
@@ -161,22 +164,16 @@ public class QFTransactionService {
 		}
 	}
 	
-	public void updateMargin(EditablePortfolio portfolio, Security security) throws QFTransactionException {
-		if ( ! portfolio.isPositionExists(security.getSymbol()) ) {
-			return;
-		}
-		// Locking new positions isn't needed.
+	public void updateMargin(EditablePosition position) throws QFTransactionException {
 		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(portfolio);
-		lockable.add(security);
+		lockable.add(position);
+		lockable.add(position.getPortfolio());
+		lockable.add(position.getSecurity());
 		Lockable lock = assembler.createMultilock(lockable);
 		lock.lock();
 		try {
-			if ( ! registry.isRegistered(portfolio) ) {
-				throw new QFTransactionException("Portfolio not registered: " + portfolio.getAccount());
-			}
-			QFPortfolioChangeUpdate update = calculator.updateMargin(portfolio, security);
-			assembler.update(portfolio, update);
+			QFPortfolioChangeUpdate update = calculator.updateMargin(position);
+			assembler.update((EditablePortfolio) position.getPortfolio(), update);
 		} finally {
 			lock.unlock();
 		}
@@ -190,6 +187,7 @@ public class QFTransactionService {
 			lockable.add(portfolio);
 			for ( Position x : portfolio.getPositions() ) {
 				lockable.add(x.getSecurity());
+				lockable.add(x);
 			}
 			lock = assembler.createMultilock(lockable);
 			lock.lock();
@@ -215,6 +213,7 @@ public class QFTransactionService {
 			lockable.add(portfolio);
 			for ( Position x : portfolio.getPositions() ) {
 				lockable.add(x.getSecurity());
+				lockable.add(x);
 			}
 			lock = assembler.createMultilock(lockable);
 			lock.lock();

@@ -109,6 +109,7 @@ public class EventDispatcherImplTest {
 		dispatcher.dispatch(type3, SimpleEventFactory.getInstance());
 		
 		control.verify();
+		assertEquals(0, cacheStub.size());
 	}
 	
 	@Test
