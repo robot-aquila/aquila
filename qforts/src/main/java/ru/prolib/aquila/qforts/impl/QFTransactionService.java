@@ -1,10 +1,7 @@
 package ru.prolib.aquila.qforts.impl;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
@@ -14,6 +11,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Position;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.concurrency.Lockable;
+import ru.prolib.aquila.core.concurrency.MultilockBuilderBE;
 
 public class QFTransactionService {
 	private final QFObjectRegistry registry;
@@ -37,9 +35,7 @@ public class QFTransactionService {
 	}
 	
 	public void registerOrder(EditableOrder order) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(order);
-		Lockable lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(new MultilockBuilderBE().add(order));
 		lock.lock();
 		try {
 			if ( registry.isRegistered(order) ) {
@@ -54,9 +50,7 @@ public class QFTransactionService {
 	}
 
 	public void cancelOrder(EditableOrder order) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(order);
-		Lockable lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(new MultilockBuilderBE().add(order));
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(order) ) {
@@ -71,9 +65,7 @@ public class QFTransactionService {
 	}
 	
 	public void rejectOrder(EditableOrder order, String reason) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(order);
-		Lockable lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(new MultilockBuilderBE().add(order));
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(order) ) {
@@ -92,12 +84,11 @@ public class QFTransactionService {
 	{
 		EditablePortfolio portfolio = (EditablePortfolio) order.getPortfolio();
 		Security security = order.getSecurity();
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(order);
-		lockable.add(security);
-		lockable.add(portfolio);
-		lockable.add(order.getPosition());
-		Lockable lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(new MultilockBuilderBE()
+				.add(order)
+				.add(security)
+				.add(portfolio)
+				.add(order.getPosition()));
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(order) ) {
@@ -125,13 +116,11 @@ public class QFTransactionService {
 		Lockable lock = null;
 		portfolio.lockNewPositions();
 		try {
-			Set<BusinessEntity> lockable = new HashSet<>();
-			lockable.add(portfolio);
+			MultilockBuilderBE builder = new MultilockBuilderBE().add(portfolio);
 			for ( Position x : portfolio.getPositions() ) {
-				lockable.add(x.getSecurity());
-				lockable.add(x);
+				builder.add(x.getSecurity()).add(x);
 			}
-			lock = assembler.createMultilock(lockable);
+			lock = assembler.createMultilock(builder);
 			lock.lock();
 		} finally {
 			portfolio.unlockNewPositions();
@@ -148,9 +137,7 @@ public class QFTransactionService {
 	}
 	
 	public void changeBalance(EditablePortfolio portfolio, FMoney value) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(portfolio);
-		Lockable lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(new MultilockBuilderBE().add(portfolio));
 		lock.lock();
 		try {
 			if ( ! registry.isRegistered(portfolio) ) {
@@ -165,11 +152,10 @@ public class QFTransactionService {
 	}
 	
 	public void updateMargin(EditablePosition position) throws QFTransactionException {
-		Set<BusinessEntity> lockable = new HashSet<>();
-		lockable.add(position);
-		lockable.add(position.getPortfolio());
-		lockable.add(position.getSecurity());
-		Lockable lock = assembler.createMultilock(lockable);
+		Lockable lock = assembler.createMultilock(new MultilockBuilderBE()
+				.add(position)
+				.add(position.getPortfolio())
+				.add(position.getSecurity()));
 		lock.lock();
 		try {
 			QFPortfolioChangeUpdate update = calculator.updateMargin(position);
@@ -183,13 +169,11 @@ public class QFTransactionService {
 		Lockable lock = null;
 		portfolio.lockNewPositions();
 		try {
-			Set<BusinessEntity> lockable = new HashSet<>();
-			lockable.add(portfolio);
+			MultilockBuilderBE builder = new MultilockBuilderBE().add(portfolio);
 			for ( Position x : portfolio.getPositions() ) {
-				lockable.add(x.getSecurity());
-				lockable.add(x);
+				builder.add(x.getSecurity()).add(x);
 			}
-			lock = assembler.createMultilock(lockable);
+			lock = assembler.createMultilock(builder);
 			lock.lock();
 		} finally {
 			portfolio.unlockNewPositions();
@@ -209,13 +193,11 @@ public class QFTransactionService {
 		Lockable lock = null;
 		portfolio.lockNewPositions();
 		try {
-			Set<BusinessEntity> lockable = new HashSet<>();
-			lockable.add(portfolio);
+			MultilockBuilderBE builder = new MultilockBuilderBE().add(portfolio);
 			for ( Position x : portfolio.getPositions() ) {
-				lockable.add(x.getSecurity());
-				lockable.add(x);
+				builder.add(x.getSecurity()).add(x);
 			}
-			lock = assembler.createMultilock(lockable);
+			lock = assembler.createMultilock(builder);
 			lock.lock();
 		} finally {
 			portfolio.unlockNewPositions();

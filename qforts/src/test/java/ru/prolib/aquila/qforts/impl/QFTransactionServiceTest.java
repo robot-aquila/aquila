@@ -1,7 +1,5 @@
 package ru.prolib.aquila.qforts.impl;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.easymock.EasyMock.*;
@@ -14,7 +12,6 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
-import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
@@ -75,9 +72,8 @@ public class QFTransactionServiceTest {
 	@Test
 	public void testRegisterOrder() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(order);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(false);
 		QFOrderStatusUpdate updateMock = control.createMock(QFOrderStatusUpdate.class);
@@ -95,9 +91,8 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testRegisterOrder_ThrowsIfRegistered() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(order);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		multilockMock.unlock();
@@ -109,9 +104,8 @@ public class QFTransactionServiceTest {
 	@Test
 	public void testCancelOrder() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(order);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderStatusUpdate updateMock = control.createMock(QFOrderStatusUpdate.class);
@@ -129,9 +123,8 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testCancelOrder_ThrowsIfNotRegistered() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(order);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(false);
 		multilockMock.unlock();
@@ -145,9 +138,8 @@ public class QFTransactionServiceTest {
 	@Test
 	public void testRejectOrder() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(order);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderStatusUpdate updateMock = control.createMock(QFOrderStatusUpdate.class);
@@ -166,9 +158,8 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testRejectOrder_ThrowsIfNotRegistered() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(order);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(false);
 		multilockMock.unlock();
@@ -189,8 +180,7 @@ public class QFTransactionServiceTest {
 				.add(order)
 				.add(order.getPortfolio())
 				.add(order.getPosition())
-				.add(order.getSecurity())
-				.getObjects())).andReturn(multilockMock);
+				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
@@ -222,8 +212,7 @@ public class QFTransactionServiceTest {
 				.add(order)
 				.add(order.getPortfolio())
 				.add(order.getPosition())
-				.add(order.getSecurity())
-				.getObjects())).andReturn(multilockMock);
+				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
@@ -252,8 +241,7 @@ public class QFTransactionServiceTest {
 				.add(order)
 				.add(order.getPortfolio())
 				.add(order.getPosition())
-				.add(order.getSecurity())
-				.getObjects())).andReturn(multilockMock);
+				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(false);
 		multilockMock.unlock();
@@ -274,8 +262,7 @@ public class QFTransactionServiceTest {
 				.add(order)
 				.add(order.getPortfolio())
 				.add(order.getPosition())
-				.add(order.getSecurity())
-				.getObjects())).andReturn(multilockMock);
+				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
@@ -303,8 +290,7 @@ public class QFTransactionServiceTest {
 				.add(order)
 				.add(order.getPortfolio())
 				.add(order.getPosition())
-				.add(order.getSecurity())
-				.getObjects())).andReturn(multilockMock);
+				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
@@ -337,8 +323,7 @@ public class QFTransactionServiceTest {
 				.add(portfolio.getEditablePosition(symbol3))
 				.add(terminal.getEditableSecurity(symbol1))
 				.add(terminal.getEditableSecurity(symbol2))
-				.add(terminal.getEditableSecurity(symbol3))
-				.getObjects())).andReturn(multilockMock);
+				.add(terminal.getEditableSecurity(symbol3)))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(true);
 		QFPortfolioChangeUpdate updateMock = control.createMock(QFPortfolioChangeUpdate.class);
@@ -358,8 +343,7 @@ public class QFTransactionServiceTest {
 		expect(assemblerMock.createMultilock(new MultilockBuilderBE()
 				.add(portfolio)
 				.add(portfolio.getEditablePosition(symbol1))
-				.add(terminal.getEditableSecurity(symbol1))
-				.getObjects())).andReturn(multilockMock);
+				.add(terminal.getEditableSecurity(symbol1)))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(false);
 		multilockMock.unlock();
@@ -371,9 +355,8 @@ public class QFTransactionServiceTest {
 	@Test
 	public void testChangeBalance() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(portfolio);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(portfolio)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(true);
 		QFPortfolioChangeUpdate updateMock = control.createMock(QFPortfolioChangeUpdate.class);
@@ -390,9 +373,8 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testChangeBalance_ThrowsIfNotRegistered() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
-		Set<BusinessEntity> expectedLockable = new HashSet<>();
-		expectedLockable.add(portfolio);
-		expect(assemblerMock.createMultilock(expectedLockable)).andReturn(multilockMock);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(portfolio)))
+			.andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(false);
 		multilockMock.unlock();
@@ -409,8 +391,7 @@ public class QFTransactionServiceTest {
 		expect(assemblerMock.createMultilock(new MultilockBuilderBE()
 				.add(position)
 				.add(portfolio)
-				.add(security)
-				.getObjects())).andReturn(multilockMock);
+				.add(security))).andReturn(multilockMock);
 		multilockMock.lock();
 		QFPortfolioChangeUpdate updateMock = control.createMock(QFPortfolioChangeUpdate.class);
 		expect(calculatorMock.updateMargin(position)).andReturn(updateMock);
@@ -433,8 +414,7 @@ public class QFTransactionServiceTest {
 				.add(portfolio.getPosition(symbol2))
 				.add(terminal.getSecurity(symbol2))
 				.add(portfolio.getPosition(symbol3))
-				.add(terminal.getSecurity(symbol3))
-				.getObjects())).andReturn(multilockMock);
+				.add(terminal.getSecurity(symbol3)))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(true);
 		QFPortfolioChangeUpdate updateMock = control.createMock(QFPortfolioChangeUpdate.class);
@@ -454,8 +434,7 @@ public class QFTransactionServiceTest {
 		expect(assemblerMock.createMultilock(new MultilockBuilderBE()
 				.add(portfolio)
 				.add(portfolio.getEditablePosition(symbol3))
-				.add(terminal.getEditableSecurity(symbol3))
-				.getObjects())).andReturn(multilockMock);
+				.add(terminal.getEditableSecurity(symbol3)))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(false);
 		multilockMock.unlock();
@@ -476,8 +455,7 @@ public class QFTransactionServiceTest {
 				.add(portfolio.getEditablePosition(symbol3))
 				.add(terminal.getEditableSecurity(symbol1))
 				.add(terminal.getEditableSecurity(symbol2))
-				.add(terminal.getEditableSecurity(symbol3))
-				.getObjects())).andReturn(multilockMock);
+				.add(terminal.getEditableSecurity(symbol3)))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(true);
 		QFPortfolioChangeUpdate updateMock = control.createMock(QFPortfolioChangeUpdate.class);
@@ -497,8 +475,7 @@ public class QFTransactionServiceTest {
 		expect(assemblerMock.createMultilock(new MultilockBuilderBE()
 				.add(portfolio)
 				.add(portfolio.getEditablePosition(symbol3))
-				.add(terminal.getEditableSecurity(symbol3))
-				.getObjects())).andReturn(multilockMock);
+				.add(terminal.getEditableSecurity(symbol3)))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(false);
 		multilockMock.unlock();

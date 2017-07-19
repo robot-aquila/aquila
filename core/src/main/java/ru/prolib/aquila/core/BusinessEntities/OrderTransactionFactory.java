@@ -7,6 +7,7 @@ import java.util.Map;
 /**
  * The factory of order common transactions.
  */
+@Deprecated
 public class OrderTransactionFactory {
 	
 	/**

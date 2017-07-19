@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.BusinessEntities;
+package ru.prolib.aquila.core.concurrency;
 
 import static org.junit.Assert.*;
 
@@ -11,6 +11,8 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
+import ru.prolib.aquila.core.concurrency.EventSuppressor;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.concurrency.Lockable;
 import ru.prolib.aquila.core.utils.Variant;

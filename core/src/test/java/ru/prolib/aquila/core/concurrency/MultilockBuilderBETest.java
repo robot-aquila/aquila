@@ -2,7 +2,9 @@ package ru.prolib.aquila.core.concurrency;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -43,17 +45,35 @@ public class MultilockBuilderBETest {
 	}
 	
 	@Test
-	public void testBuildMultilock() {
+	public void testAddAll() {
+		builder.add(entityStub1);
+		List<BusinessEntity> x = new ArrayList<>();
+		x.add(entityStub2);
+		x.add(entityStub3);
+		
+		assertSame(builder, builder.addAll(x));
+
+		Set<BusinessEntity> expected = new HashSet<>();
+		expected.add(entityStub1);
+		expected.add(entityStub2);
+		expected.add(entityStub3);
+		assertEquals(expected, builder.getObjects());
+	}
+	
+	@Test
+	public void testBuildLock() {
 		builder.add(entityStub1)
 			.add(entityStub2)
 			.add(entityStub3);
 		
-		Multilock actual = builder.buildMultilock();
+		EventSuppressor actual = (EventSuppressor) builder.buildLock();
+		
 		Set<BusinessEntity> dummy = new HashSet<>();
 		dummy.add(entityStub1);
 		dummy.add(entityStub2);
 		dummy.add(entityStub3);
-		Multilock expected = new Multilock(actual.getLID(), dummy);		
+		Multilock x = new Multilock(actual.getMultilock().getLID(), dummy);
+		EventSuppressor expected = new EventSuppressor(actual.getLID(), dummy, x);
 		assertEquals(expected, actual);
 	}
 	

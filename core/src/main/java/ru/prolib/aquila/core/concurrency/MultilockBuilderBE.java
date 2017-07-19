@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.concurrency;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,12 +20,17 @@ public class MultilockBuilderBE {
 		return this;
 	}
 	
+	public MultilockBuilderBE addAll(Collection<? extends BusinessEntity> collection) {
+		objects.addAll(collection);
+		return this;
+	}
+	
 	public Set<BusinessEntity> getObjects() {
 		return objects;
 	}
 	
-	public Multilock buildMultilock() {
-		return new Multilock(objects);
+	public Lockable buildLock() {
+		return new EventSuppressor(objects);
 	}
 	
 	public boolean equals(Object other) {

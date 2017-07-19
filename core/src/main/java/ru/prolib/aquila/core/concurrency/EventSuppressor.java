@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.BusinessEntities;
+package ru.prolib.aquila.core.concurrency;
 
 import java.util.Collections;
 import java.util.Set;
@@ -6,9 +6,7 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.EventProducer;
-import ru.prolib.aquila.core.concurrency.LID;
-import ru.prolib.aquila.core.concurrency.Lockable;
-import ru.prolib.aquila.core.concurrency.Multilock;
+import ru.prolib.aquila.core.BusinessEntities.BusinessEntity;
 
 public class EventSuppressor implements Lockable {
 	private final LID lid;
