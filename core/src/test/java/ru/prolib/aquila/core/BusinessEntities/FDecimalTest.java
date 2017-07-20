@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -602,4 +603,15 @@ public class FDecimalTest {
 
 		assertEquals(4.95612f, x.floatValue(), 0.000001d);
 	}
+	
+	@Test
+	public void testHashCode() {
+		FDecimal x = FDecimal.of("77.12", 2, RoundingMode.CEILING);
+		
+		assertEquals(new HashCodeBuilder(21, 479)
+				.append(new BigDecimal("77.12"))
+				.append(RoundingMode.CEILING)
+				.toHashCode(), x.hashCode());
+	}
+	
 }

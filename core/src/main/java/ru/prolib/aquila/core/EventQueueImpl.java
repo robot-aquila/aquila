@@ -22,7 +22,7 @@ public class EventQueueImpl implements EventQueue {
 	private final LinkedList<Event> cache1;
 	private final Lock queueLock = new ReentrantLock();
 	private boolean queueProcessing = false;
-	private final int maxSize = 1024;
+	private final int maxSize = 5120;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
@@ -112,7 +112,7 @@ public class EventQueueImpl implements EventQueue {
 		for ( Event x : cache2 ) {
 			try {
 				if ( queue.size() >= maxSize ) {
-					logger.warn("Queue is slow");
+					logger.warn("Queue is slow: {}", name);
 					// Wait if this thread is not a worker thread.
 					if ( Thread.currentThread() != thread ) {
 						int expSize = (int)(maxSize * 0.4); // wait for 60% free size

@@ -5,9 +5,11 @@ import java.math.RoundingMode;
 import java.util.Locale;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.util.StringUtils;
 
 public class FDecimal extends Number implements Comparable<FDecimal> {
+	private static final long serialVersionUID = 1L;
 	public static final int VERSION = 1;
 	public static final FDecimal ZERO0 = FDecimal.of0(0);
 	public static final FDecimal ZERO1 = FDecimal.of1(0);
@@ -208,6 +210,14 @@ public class FDecimal extends Number implements Comparable<FDecimal> {
 			.append(value, o.value)
 			.append(roundingMode, o.roundingMode)
 			.isEquals();
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(21, 479)
+				.append(value)
+				.append(roundingMode)
+				.toHashCode();
 	}
 
 	@Override

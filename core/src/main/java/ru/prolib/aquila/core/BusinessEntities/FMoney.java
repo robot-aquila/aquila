@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class FMoney extends FDecimal {
+	private static final long serialVersionUID = 1L;
 	public static final int VERSION = 1;
 	public static final String USD = "USD";
 	public static final String EUR = "EUR";
@@ -472,6 +474,15 @@ public class FMoney extends FDecimal {
 	public FMoney abs() {
 		FDecimal x = super.abs();
 		return new FMoney(x.value, x.roundingMode, currencyCode);
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(97, 499)
+				.append(value)
+				.append(roundingMode)
+				.append(currencyCode)
+				.toHashCode();
 	}
 
 }

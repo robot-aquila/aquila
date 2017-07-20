@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -922,6 +923,17 @@ public class FMoneyTest {
 		FMoney x = FMoney.of(4.95612, 5, FMoney.RUB);
 		
 		assertEquals(4.95612, x.doubleValue(), 0.000001d);
+	}
+	
+	@Test
+	public void testHashCode() {
+		FMoney x = new FMoney(new BigDecimal("4.95612"), RoundingMode.DOWN, FMoney.RUB);
+		
+		assertEquals(new HashCodeBuilder(97, 499)
+				.append(new BigDecimal("4.95612"))
+				.append(RoundingMode.DOWN)
+				.append(FMoney.RUB)
+				.toHashCode(), x.hashCode());
 	}
 
 	
