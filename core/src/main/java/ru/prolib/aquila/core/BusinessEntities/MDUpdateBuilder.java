@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 public class MDUpdateBuilder {
 	private MDUpdateType type = MDUpdateType.REFRESH;
 	private Symbol symbol;
@@ -109,6 +111,29 @@ public class MDUpdateBuilder {
 			update.addRecord(r.getTick(), r.getTransactionType());
 		}
 		return update;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != MDUpdateBuilder.class ) {
+			return false;
+		}
+		MDUpdateBuilder o = (MDUpdateBuilder) other;
+		return new EqualsBuilder()
+				.append(o.records, records)
+				.append(o.symbol, symbol)
+				.append(o.time, time)
+				.append(o.type, type)
+				.isEquals();
+	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[symbol=" + symbol + " time=" + time
+				+ " type=" + type + " " + records + "]";
 	}
 	
 }
