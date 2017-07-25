@@ -184,18 +184,23 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
     @Override
     public void onEvent(Event event) {
         if(candleData!=null && (event.isType(candleData.onAdd()) || event.isType(candleData.onSet()))){
-            int dummy = getCategories().size()-1;
-            Instant lastChartCategory = null;
-            if ( dummy >= 0 ) {
-                lastChartCategory = getCategories().get(dummy);
-            }
-            if(dummy < 0 || (lastChartCategory!=null && isCategoryDisplayed(lastChartCategory))){
-                setCurrentPosition(getCurrentPosition()+1, event.isType(candleData.onAdd()));
-                return;
-            }
-            if(event.isType(candleData.onAdd())){
-                updateScrollbar(getCategories().size()+1);
-            }
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    int dummy = getCategories().size()-1;
+                    Instant lastChartCategory = null;
+                    if ( dummy >= 0 ) {
+                        lastChartCategory = getCategories().get(dummy);
+                    }
+                    if(dummy < 0 || (lastChartCategory!=null && isCategoryDisplayed(lastChartCategory))){
+                        setCurrentPosition(getCurrentPosition()+1, event.isType(candleData.onAdd()));
+                        return;
+                    }
+                    if(event.isType(candleData.onAdd())){
+                        updateScrollbar(getCategories().size()+1);
+                    }
+                }
+            });
         }
         if(tradesData!=null && event.isType(tradesData.onAdd())){
             setCurrentPosition(getCurrentPosition());
