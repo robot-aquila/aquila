@@ -88,18 +88,18 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
     private void updateLabelsConfig(){
         int i=0;
         for(Chart c: charts.values()){
+            c.getTopAxis().setShowLabels(false);
+            c.getBottomAxis().setShowLabels(false);
             if(i==0){
                 c.getTopAxis().setLabelOrientation(SwingConstants.HORIZONTAL);
                 c.getTopAxis().setLabelFormatter(labelFormatter);
                 c.getTopAxis().setShowLabels(true);
                 c.getBottomAxis().setShowLabels(false);
-            } else if(i==charts.size()-1){
+            }
+            if(i==charts.size()-1){
                 c.getBottomAxis().setLabelOrientation(SwingConstants.VERTICAL);
                 c.getBottomAxis().setLabelFormatter(labelFormatter);
                 c.getBottomAxis().setShowLabels(true);
-            } else {
-                c.getTopAxis().setShowLabels(false);
-                c.getBottomAxis().setShowLabels(false);
             }
             c.getLeftAxis().setShowLabels(true);
             c.getLeftAxis().setLabelFormatter(doubleLabelFormatter);
@@ -145,7 +145,12 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
 
     @Override
     public Chart addChart(String id) {
-        Chart chart = super.addChart(id);
+        return addChart(id, null);
+    }
+
+    @Override
+    public Chart addChart(String id, Integer height) throws IllegalArgumentException {
+        Chart chart = super.addChart(id, height);
         updateLabelsConfig();
         return chart;
     }
