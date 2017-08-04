@@ -25,6 +25,7 @@ import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParamsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
@@ -67,6 +68,10 @@ public class TerminalImplTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.ERROR);
+	}
+	
+	protected static Instant T(String timeString) {
+		return Instant.parse(timeString);
 	}
 
 	@Before
@@ -588,6 +593,7 @@ public class TerminalImplTest {
 				.withTerminal(terminalWithMocks)
 				.withAccount(account3)
 				.withObjectFactory(new ObjectFactoryImpl())
+				.withController(new OSCControllerStub())
 				.buildParams());
 		EditableOrder orderStub =
 			new OrderImpl(new OrderParamsBuilder(terminalWithMocks.getEventQueue())
@@ -602,6 +608,7 @@ public class TerminalImplTest {
 		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		expect(dataProviderMock.getNextOrderID()).andReturn(834L);
 		expect(objectFactoryMock.createOrder(terminalWithMocks, account3, symbol3, 834L)).andReturn(orderStub);
+		expect(schedulerMock.getCurrentTime()).andStubReturn(T("2017-08-04T21:30:00Z"));
 		control.replay();
 		terminalWithMocks.getEditablePortfolio(account3);
 		terminalWithMocks.createOrder(account3, symbol3);
@@ -638,6 +645,7 @@ public class TerminalImplTest {
 				.withTerminal(terminalWithMocks)
 				.withAccount(account1)
 				.withObjectFactory(new ObjectFactoryImpl())
+				.withController(new OSCControllerStub())
 				.buildParams());
 		EditableOrder orderStub = new OrderImpl(new OrderParamsBuilder(terminalWithMocks.getEventQueue())
 				.withTerminal(terminalWithMocks)
@@ -651,6 +659,7 @@ public class TerminalImplTest {
 		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		expect(dataProviderMock.getNextOrderID()).andReturn(1028L);
 		expect(objectFactoryMock.createOrder(terminalWithMocks, account1, symbol1, 1028L)).andReturn(orderStub);
+		expect(schedulerMock.getCurrentTime()).andStubReturn(T("2017-08-04T21:40:00Z"));
 		control.replay();
 		terminalWithMocks.getEditablePortfolio(account1);
 		terminalWithMocks.createOrder(account1, symbol1);

@@ -279,8 +279,8 @@ public class QFReactorTest {
 		expect(registryMock.isRegistered(security)).andStubReturn(false);
 		control.replay();
 		
-		reactor.onEvent(new SecurityEvent(terminal.onSecurityUpdate(), security));
-		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security, Tick.NULL_ASK));
+		reactor.onEvent(new SecurityEvent(terminal.onSecurityUpdate(), security, null));
+		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security, null, Tick.NULL_ASK));
 		
 		control.verify();
 	}
@@ -292,7 +292,7 @@ public class QFReactorTest {
 		control.replay();
 		
 		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security,
-				Tick.ofTrade(T("2017-04-25T11:25:00Z"), 54.02d, 2500L)));
+				null, Tick.ofTrade(T("2017-04-25T11:25:00Z"), 54.02d, 2500L)));
 		
 		control.verify();
 	}
@@ -300,7 +300,7 @@ public class QFReactorTest {
 	@Test
 	public void testOnEvent_InitialMarginUpdate_SkipIfNotUpdated() throws Exception {
 		expect(registryMock.isRegistered(security)).andReturn(true);
-		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security);
+		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
 		Set<Integer> updatedTokens = new HashSet<>();
 		updatedTokens.add(SecurityField.SETTLEMENT_PRICE);
 		control.replay();
@@ -320,7 +320,7 @@ public class QFReactorTest {
 	private void testOnEvent_InitialMarginUpdate_AllowedPeriod(int periodID) throws Exception {
 		setUp();
 		expect(registryMock.isRegistered(security)).andReturn(true);
-		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security);
+		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
 		Set<Integer> updatedTokens = new HashSet<>();
 		updatedTokens.add(SecurityField.INITIAL_MARGIN);
 		e.setUpdatedTokens(updatedTokens);
@@ -351,7 +351,7 @@ public class QFReactorTest {
 	private void testOnEvent_InitialMarginUpdate_DisallowedPeriod(int periodID) throws Exception {
 		setUp();
 		expect(registryMock.isRegistered(security)).andReturn(true);
-		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security);
+		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
 		Set<Integer> updatedTokens = new HashSet<>();
 		updatedTokens.add(SecurityField.INITIAL_MARGIN);
 		e.setUpdatedTokens(updatedTokens);

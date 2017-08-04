@@ -3,6 +3,7 @@ package ru.prolib.aquila.ui;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -96,7 +97,8 @@ public class CurrentPortfolioImplTest {
 		final Portfolio portfolio = control.createMock(Portfolio.class);
 		
 		final CountDownLatch finished = new CountDownLatch(1);
-		
+
+		expect(terminal.getCurrentTime()).andStubReturn(Instant.EPOCH);
 		expect(terminal.onPortfolioAvailable()).andReturn(onPortfolioAvailable);
 		expect(portfolio.getAccount()).andReturn(acc);
 		expectLastCall().times(2);
@@ -112,7 +114,7 @@ public class CurrentPortfolioImplTest {
 		});
 		control.replay();
 		
-		prt.onEvent(new PortfolioEvent(onPortfolioAvailable, portfolio));
+		prt.onEvent(new PortfolioEvent(onPortfolioAvailable, portfolio, null));
 		
 		control.verify();
 		assertEquals(portfolio, prt.getCurrentPortfolio());
@@ -148,7 +150,7 @@ public class CurrentPortfolioImplTest {
 		});
 		control.replay();
 		
-		prt.onEvent(new PortfolioEvent(onPortfolioAvailable, portfolio));
+		prt.onEvent(new PortfolioEvent(onPortfolioAvailable, portfolio, null));
 		
 		control.verify();
 		
@@ -187,7 +189,8 @@ public class CurrentPortfolioImplTest {
 	public void testSetCurrentPortfolio() throws Exception {
 		final Portfolio portfolio = control.createMock(Portfolio.class);		
 		final CountDownLatch finished = new CountDownLatch(1);
-		final PortfolioEvent expected = new PortfolioEvent(portfolioChanged, portfolio);
+		final PortfolioEvent expected = new PortfolioEvent(portfolioChanged, portfolio, Instant.EPOCH);
+		expect(terminal.getCurrentTime()).andStubReturn(Instant.EPOCH);
 		expect(portfolio.getAccount()).andReturn(acc);
 		prt.OnCurrentPortfolioChanged().addListener(new EventListener() {
 

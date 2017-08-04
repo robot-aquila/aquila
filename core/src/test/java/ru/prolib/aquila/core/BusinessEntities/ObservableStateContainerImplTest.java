@@ -17,14 +17,17 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsBuilder;
 import ru.prolib.aquila.core.concurrency.LID;
 
 public class ObservableStateContainerImplTest {	
@@ -73,8 +76,37 @@ public class ObservableStateContainerImplTest {
 		listenerStub.clear();
 	}
 	
+	protected static Instant T(String timeString) {
+		return Instant.parse(timeString);
+	}
+	
 	protected IMocksControl getMocksControl() {
 		return control;
+	}
+	
+	protected void assertContainerEvent(Event actualEvent, EventType expectedType,
+			ObservableStateContainer expectedContainer,
+			Instant expectedTime, Integer... expectedUpdatedTokens)
+	{
+		Set<Integer> expectedTokens = new HashSet<>();
+		for ( Integer x : expectedUpdatedTokens ) {
+			expectedTokens.add(x);
+		}
+		ContainerEvent e = (ContainerEvent) actualEvent;
+		assertTrue(e.isType(expectedType));
+		assertSame(expectedContainer, e.getContainer());
+		assertEquals(expectedTime, e.getTime());
+		assertEquals(expectedTokens, e.getUpdatedTokens());
+	}
+	
+	protected void assertContainerEventWUT(Event actualEvent, EventType expectedType,
+			ObservableStateContainer expectedContainer, Instant expectedTime)
+	{
+		ContainerEvent e = (ContainerEvent) actualEvent;
+		assertTrue(e.isType(expectedType));
+		assertSame(expectedContainer, e.getContainer());
+		assertEquals(expectedTime, e.getTime());
+		//assertNull(e.getUpdatedTokens());
 	}
 	
 	/**
@@ -96,7 +128,10 @@ public class ObservableStateContainerImplTest {
 		if ( this.getClass() != ObservableStateContainerImplTest.class ) {
 			throw new IllegalStateException("produceContainer(ObservableStateContainerImpl.Controller) must be implemented for class: " + getClass());
 		}
-		return new ObservableStateContainerImpl(queue, getID(), controller);
+		return new ObservableStateContainerImpl(new OSCParamsBuilder(queue)
+				.withID(getID())
+				.withController(controller)
+				.buildParams());
 	}
 
 	/**
@@ -108,7 +143,9 @@ public class ObservableStateContainerImplTest {
 		if ( this.getClass() != ObservableStateContainerImplTest.class ) {
 			throw new IllegalStateException("produceContainer() must be implemented for class: " + getClass());
 		}
-		return new ObservableStateContainerImpl(queue, getID());
+		return new ObservableStateContainerImpl(new OSCParamsBuilder(queue)
+				.withID(getID())
+				.buildParams());
 	}
 	
 	/**
@@ -124,7 +161,11 @@ public class ObservableStateContainerImplTest {
 		if ( this.getClass() != ObservableStateContainerImplTest.class ) {
 			throw new IllegalStateException("produceContainer(EventDispatcher, ObservableStateContainerImpl.Controller) must be implemented for class: " + getClass());
 		}
-		return new ObservableStateContainerImpl(eventDispatcher, getID(), controller);
+		return new ObservableStateContainerImpl(new OSCParamsBuilder()
+				.withEventDispatcher(eventDispatcher)
+				.withID(getID())
+				.withController(controller)
+				.buildParams());
 	}
 	
 	/**
@@ -282,40 +323,11 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	final public void testContainerImpl_Ctor3() {
-		container = produceContainer(controllerMock);
-		EventDispatcherImpl dispatcher = (EventDispatcherImpl) container.getEventDispatcher();
-		assertSame(queue, dispatcher.getEventQueue());
-		assertSame(controllerMock, container.getController());
-		assertEquals(getID(), container.getContainerID());
-		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
-		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
-		assertEquals(getID() + ".CLOSE", container.onClose().getId());
-		assertFalse(container.isAvailable());
-		assertFalse(container.isClosed());
-		assertTrue(LID.isLastCreatedLID(container.getLID()));
-	}
-	
-	@Test
-	final public void testContainerImpl_Ctor2() {
+	final public void testContainerImpl_Ctor1() {
 		container = produceContainer();
 		EventDispatcherImpl dispatcher = (EventDispatcherImpl) container.getEventDispatcher();
 		assertSame(queue, dispatcher.getEventQueue());
 		assertNotNull(container.getController());
-		assertEquals(getID(), container.getContainerID());
-		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
-		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
-		assertEquals(getID() + ".CLOSE", container.onClose().getId());
-		assertFalse(container.isAvailable());
-		assertFalse(container.isClosed());
-		assertTrue(LID.isLastCreatedLID(container.getLID()));
-	}
-	
-	@Test
-	final public void testContainerImpl_Ctor3_WithDispatcher() {
-		container = produceContainer(eventDispatcherMock, controllerMock);
-		assertSame(eventDispatcherMock, container.getEventDispatcher());
-		assertSame(controllerMock, container.getController());
 		assertEquals(getID(), container.getContainerID());
 		assertEquals(getID() + ".UPDATE", container.onUpdate().getId());
 		assertEquals(getID() + ".AVAILABLE", container.onAvailable().getId());
@@ -790,12 +802,14 @@ public class ObservableStateContainerImplTest {
 	
 	@Test
 	final public void testContainerImpl_Update_HasNoMinimalData() {
+		Instant time = T("2017-08-04T01:45:00Z");
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
 		container.onUpdate().addSyncListener(listenerStub);
 		container.onClose().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(false);
+		expect(controllerMock.getCurrentTime(container)).andReturn(time);
+		controllerMock.processUpdate(container, time);
+		expect(controllerMock.hasMinimalData(container, time)).andReturn(false);
 		control.replay();
 		
 		data.put(BOOL_ACTIVE, true);
@@ -803,20 +817,20 @@ public class ObservableStateContainerImplTest {
 		
 		control.verify();
 		assertEquals(1, listenerStub.getEventCount());
-		ContainerEvent e = (ContainerEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(container.onUpdate()));
-		assertSame(container, e.getContainer());
+		assertContainerEvent(listenerStub.getEvent(0), container.onUpdate(), container, time, BOOL_ACTIVE);
 	}
 	
 	@Test
 	final public void testContainerImpl_Update_HasMinimalData() {
+		Instant time = T("2017-08-04T01:55:00Z");
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
 		container.onUpdate().addSyncListener(listenerStub);
 		container.onClose().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
+		expect(controllerMock.getCurrentTime(container)).andReturn(time);
+		controllerMock.processUpdate(container, time);
+		expect(controllerMock.hasMinimalData(container, time)).andReturn(true);
+		controllerMock.processAvailable(container, time);
 		control.replay();
 		
 		data.put(BOOL_ACTIVE, true);
@@ -825,10 +839,8 @@ public class ObservableStateContainerImplTest {
 		control.verify();
 		assertTrue(container.isAvailable());
 		assertEquals(2, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(container.onUpdate()));
-		assertSame(container, ((ContainerEvent) listenerStub.getEvent(0)).getContainer());
-		assertTrue(listenerStub.getEvent(1).isType(container.onAvailable()));
-		assertSame(container, ((ContainerEvent) listenerStub.getEvent(1)).getContainer());
+		assertContainerEvent(listenerStub.getEvent(0), container.onUpdate(), container, time, BOOL_ACTIVE);
+		assertContainerEvent(listenerStub.getEvent(1), container.onAvailable(), container, time, BOOL_ACTIVE);
 	}
 	
 	@Test
@@ -856,6 +868,7 @@ public class ObservableStateContainerImplTest {
 		assertEquals(1, listenerStub.getEventCount());
 		assertTrue(listenerStub.getEvent(0).isType(container.onClose()));
 		assertSame(container, ((ContainerEvent) listenerStub.getEvent(0)).getContainer());
+		assertNotNull(((ContainerEvent) listenerStub.getEvent(0)).getTime());
 	}
 	
 	@Test
@@ -937,7 +950,7 @@ public class ObservableStateContainerImplTest {
 	
 	@Test
 	public void testContainerImpl_SuppressEvents() {
-		container = produceContainer(eventDispatcherMock, controllerMock);
+		container = produceContainer(eventDispatcherMock, new OSCControllerStub());
 		eventDispatcherMock.suppressEvents();
 		control.replay();
 		
@@ -948,7 +961,7 @@ public class ObservableStateContainerImplTest {
 	
 	@Test
 	public void testContainerImpl_RestoreEvents() {
-		container = produceContainer(eventDispatcherMock, controllerMock);
+		container = produceContainer(eventDispatcherMock, new OSCControllerStub());
 		eventDispatcherMock.restoreEvents();
 		control.replay();
 		
@@ -959,7 +972,7 @@ public class ObservableStateContainerImplTest {
 	
 	@Test
 	public void testContainerImpl_PurgeEvents() {
-		container = produceContainer(eventDispatcherMock, controllerMock);
+		container = produceContainer(eventDispatcherMock, new OSCControllerStub());
 		eventDispatcherMock.purgeEvents();
 		control.replay();
 		

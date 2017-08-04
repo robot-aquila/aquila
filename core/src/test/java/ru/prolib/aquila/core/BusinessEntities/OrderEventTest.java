@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public class OrderEventTest {
 	private EventType type1,type2;
 	private Order order1,order2;
 	private Set<Integer> tokens1, tokens2;
+	private Instant time1, time2;
 	private OrderEvent event;
 
 	@Before
@@ -34,7 +36,9 @@ public class OrderEventTest {
 		tokens1.add(OrderField.COMMENT);
 		tokens2 = new HashSet<>();
 		tokens2.add(OrderField.CURRENT_VOLUME);
-		event = new OrderEvent(type1, order1);
+		time1 = Instant.parse("2017-08-04T02:10:00Z");
+		time2 = Instant.parse("2017-01-01T00:00:00Z");
+		event = new OrderEvent(type1, order1, time1);
 		event.setUpdatedTokens(tokens1);
 	}
 	
@@ -43,6 +47,7 @@ public class OrderEventTest {
 		assertSame(type1, event.getType());
 		assertSame(order1, event.getOrder());
 		assertEquals(tokens1, event.getUpdatedTokens());
+		assertEquals(time1, event.getTime());
 	}
 	
 	@Test
@@ -55,11 +60,12 @@ public class OrderEventTest {
 			.add(order1)
 			.add(order2);
 		Variant<Set<Integer>> vTokens = new Variant<Set<Integer>>(vOrder, tokens1, tokens2, null);
-		Variant<?> iterator = vTokens;
+		Variant<Instant> vTime = new Variant<>(vTokens, time1, time2);
+		Variant<?> iterator = vTime;
 		int foundCount = 0;
 		OrderEvent foundEvent = null;
 		do {
-			OrderEvent actual = new OrderEvent(vType.get(), vOrder.get());
+			OrderEvent actual = new OrderEvent(vType.get(), vOrder.get(), vTime.get());
 			actual.setUpdatedTokens(vTokens.get());
 			if ( event.equals(actual) ) {
 				foundCount ++;
@@ -70,6 +76,7 @@ public class OrderEventTest {
 		assertNotNull(foundEvent);
 		assertSame(type1, foundEvent.getType());
 		assertSame(order1, foundEvent.getOrder());
+		assertEquals(time1, foundEvent.getTime());
 		assertEquals(tokens1, foundEvent.getUpdatedTokens());
 	}
 	

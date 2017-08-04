@@ -1,6 +1,9 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
+
+import java.time.Instant;
+
 import static org.easymock.EasyMock.*;
 
 import org.easymock.IMocksControl;
@@ -16,6 +19,7 @@ public class SecurityTickEventTest {
 	private IMocksControl control;
 	private EditableSecurity security;
 	private EventType eventType;
+	private Instant time;
 	private Tick tick;
 	private SecurityTickEvent event;
 
@@ -24,14 +28,16 @@ public class SecurityTickEventTest {
 		control = createStrictControl();
 		security = control.createMock(EditableSecurity.class);
 		eventType = new EventTypeImpl();
+		time = Instant.parse("2017-08-04T20:55:00Z");
 		tick = Tick.of(TickType.TRADE, 315.0d, 1000);
-		event = new SecurityTickEvent(eventType, security, tick);
+		event = new SecurityTickEvent(eventType, security, time, tick);
 	}
 	
 	@Test
 	public void testAccessors() throws Exception {
 		assertSame(eventType, event.getType());
 		assertSame(security, event.getSecurity());
+		assertEquals(time, event.getTime());
 		assertSame(tick, event.getTick());
 	}
 	

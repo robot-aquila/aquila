@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +26,10 @@ import ru.prolib.aquila.core.data.DataProviderStub;
 public class PositionImplTest extends ObservableStateContainerImplTest {
 	private static Symbol symbol = new Symbol("S:GAZP@EQBR:RUB");
 	private static Account account = new Account("TST01");
+	private SchedulerStub schedulerStub;
 	private EditableTerminal terminal;
 	private PositionImpl position;
+	private PositionController controller;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -35,6 +38,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 
 	@Before
 	public void setUp() throws Exception {
+		controller = new PositionController();
 		super.setUp();
 	}
 	
@@ -49,10 +53,12 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	private void prepareTerminal() {
+		schedulerStub = new SchedulerStub();
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())
 				.withTerminalID("foobar")
 				.withEventQueue(queue)
+				.withScheduler(schedulerStub)
 				.buildTerminal();
 		terminal.getEditableSecurity(symbol);
 		terminal.getEditablePortfolio(account);	
@@ -169,9 +175,9 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testPositionController_HasMinimalData() {
-		PositionController controller = new PositionController();
+		Instant time = T("2017-08-04T17:49:00Z");
 		
-		assertFalse(controller.hasMinimalData(position));
+		assertFalse(controller.hasMinimalData(position, time));
 		
 		Map<Integer, Object> minimal = new HashMap<Integer, Object>();
 		minimal.put(PositionField.CURRENT_VOLUME, 1000L);
@@ -182,44 +188,42 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		for ( Map.Entry<Integer, Object> entry : minimal.entrySet() ) {
 			data.put(entry.getKey(), entry.getValue());
 			position.update(data);
-			assertEquals(data.size() == minimal.size(), controller.hasMinimalData(position));
+			assertEquals(data.size() == minimal.size(), controller.hasMinimalData(position, time));
 		}
 		
-		assertTrue(controller.hasMinimalData(position));
+		assertTrue(controller.hasMinimalData(position, time));
 	}
 
 	@Test
 	public void testPositionController_ProcessUpdate_PositionChange() {
-		data.put(PositionField.CURRENT_VOLUME, 200L);
-		position.update(data);
+		Instant time = T("2017-08-04T17:50:00Z");
+		position.update(PositionField.CURRENT_VOLUME, 200L);
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
 		position.onPositionChange().addSyncListener(listener);
 		position.onCurrentPriceChange().addSyncListener(listener);
 		
-		controller.processUpdate(position);
+		controller.processUpdate(position, time);
 		
 		assertEquals(1, listener.getEventCount());
-		PositionEvent e = (PositionEvent) listener.getEvent(0);
-		assertTrue(e.isType(position.onPositionChange()));
-		assertSame(position, e.getPosition());
+		assertContainerEvent(listener.getEvent(0), position.onPositionChange(),
+				position, time, PositionField.CURRENT_VOLUME);
 	}
 	
 	@Test
 	public void testPositionController_ProcessUpdate_CurrentPriceChange() {
-		data.put(PositionField.CURRENT_PRICE, new FDecimal("4518.96"));
-		position.update(data);
+		Instant time = T("2017-08-04T17:54:00Z");
+		position.update(PositionField.CURRENT_PRICE, new FDecimal("4518.96"));
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
 		position.onPositionChange().addSyncListener(listener);
 		position.onCurrentPriceChange().addSyncListener(listener);
 		
-		controller.processUpdate(position);
+		controller.processUpdate(position, time);
 		
 		assertEquals(1, listener.getEventCount());
-		PositionEvent e = (PositionEvent) listener.getEvent(0);
-		assertTrue(e.isType(position.onCurrentPriceChange()));
-		assertSame(position, e.getPosition());
+		assertContainerEvent(listener.getEvent(0), position.onCurrentPriceChange(),
+				position, time, PositionField.CURRENT_PRICE);
 	}
 
 	@Test
@@ -232,14 +236,31 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		position.onPositionChange().addSyncListener(listener);
 		position.onCurrentPriceChange().addSyncListener(listener);
 		
-		controller.processAvailable(position);
+		controller.processAvailable(position, T("2017-08-04T17:48:00Z"));
 		
 		// Shouldn't fire anything
 		assertEquals(0, listener.getEventCount());
 	}
 	
 	@Test
+	public void testPositionController_GetCurrentTime_IfNotClosed() {
+		schedulerStub.setFixedTime("2017-08-04T02:35:00Z");
+		
+		assertEquals(T("2017-08-04T02:35:00Z"), controller.getCurrentTime(position));
+	}
+
+	@Test
+	public void testPositionController_GetCurrentTime_IfClosed() {
+		position.close();
+		
+		assertNull(controller.getCurrentTime(position));
+	}
+	
+	@Test
 	public void testClose() {
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T18:18:00Z");
+		position.onClose().addSyncListener(listenerStub);
 		EventType type = new EventTypeImpl();
 		position.onAvailable().addListener(new EventListenerStub());
 		position.onAvailable().addAlternateType(type);
@@ -261,49 +282,48 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		assertFalse(position.onPositionChange().hasAlternates());
 		assertFalse(position.onUpdate().hasListeners());
 		assertFalse(position.onUpdate().hasAlternates());
+		assertEquals(1, listenerStub.getEventCount());
+		assertContainerEventWUT(listenerStub.getEvent(0), position.onClose(), position, T("2017-08-04T18:18:00Z"));
 	}
 	
 	@Test
 	public void testUpdate_OnAvailable() throws Exception {
+		Instant time = T("2017-08-04T17:57:00Z");
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
+		expect(controllerMock.getCurrentTime(position)).andReturn(time);
+		controllerMock.processUpdate(position, time);
+		expect(controllerMock.hasMinimalData(position, time)).andReturn(true);
+		controllerMock.processAvailable(position, time);
 		getMocksControl().replay();
 
-		data.put(12345, 415); // any value
-		position.update(data);
+		position.update(12345, 415); // any value
 		
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
-		PositionEvent event = (PositionEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(position.onAvailable()));
-		assertSame(position, event.getPosition());
+		assertContainerEvent(listenerStub.getEvent(0), position.onAvailable(), position, time, 12345);
 	}
 	
 	@Test
 	public void testUpdate_OnUpdateEvent() throws Exception {
+		Instant time1 = T("2017-08-04T17:58:00Z"), time2 = T("2017-08-04T17:59:00Z");
 		container = produceContainer(controllerMock);
 		container.onUpdate().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
-		controllerMock.processUpdate(container);
+		expect(controllerMock.getCurrentTime(position)).andReturn(time1);
+		controllerMock.processUpdate(position, time1);
+		expect(controllerMock.hasMinimalData(position, time1)).andReturn(true);
+		controllerMock.processAvailable(position, time1);
+		expect(controllerMock.getCurrentTime(position)).andReturn(time2);
+		controllerMock.processUpdate(position, time2);
 		getMocksControl().replay();
 		
-		data.put(12345, 415);
-		position.update(data);
-		data.put(12345, 450);
-		position.update(data);
+		position.update(12345, 415);
+		position.update(12345, 450);
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(position.onUpdate()));
-		assertSame(position, ((PositionEvent) listenerStub.getEvent(0)).getPosition());
-		assertTrue(listenerStub.getEvent(1).isType(position.onUpdate()));
-		assertSame(position, ((PositionEvent) listenerStub.getEvent(1)).getPosition());
-
+		assertContainerEvent(listenerStub.getEvent(0), position.onUpdate(), position, time1, 12345);
+		assertContainerEvent(listenerStub.getEvent(1), position.onUpdate(), position, time2, 12345);
 	}
 		
 	@Test

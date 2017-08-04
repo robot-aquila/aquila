@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
@@ -19,9 +21,10 @@ public class SecurityEvent extends OSCEventImpl {
 	 * <p>
 	 * @param type тип события
 	 * @param security экземпляр инструмента
+	 * @param time - time of event
 	 */
-	public SecurityEvent(EventType type, Security security) {
-		super(type, security);
+	public SecurityEvent(EventType type, Security security, Instant time) {
+		super(type, security, time);
 		this.security = security;
 	}
 
@@ -47,6 +50,7 @@ public class SecurityEvent extends OSCEventImpl {
 			return o.getType() == getType()
 				&& o.security == security
 				&& new EqualsBuilder()
+					.append(o.getTime(), getTime())
 					.append(o.getUpdatedTokens(), getUpdatedTokens())
 					.isEquals();
 		}

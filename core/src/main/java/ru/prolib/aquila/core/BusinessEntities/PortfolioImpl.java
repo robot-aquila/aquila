@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 
@@ -231,40 +232,52 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	}
 	
 	@Override
-	protected EventFactory createEventFactory() {
-		return new PortfolioEventFactory(this);
+	protected EventFactory createEventFactory(Instant time) {
+		return new PortfolioEventFactory(this, time);
 	}
 	
 	public static class PortfolioController implements OSCController {
 
 		@Override
-		public boolean hasMinimalData(ObservableStateContainer container) {
+		public boolean hasMinimalData(ObservableStateContainer container, Instant time) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(ObservableStateContainer container) {
+		public void processUpdate(ObservableStateContainer container, Instant time) {
 			
 		}
 
 		@Override
-		public void processAvailable(ObservableStateContainer container) {
+		public void processAvailable(ObservableStateContainer container, Instant time) {
 			
+		}
+
+		@Override
+		public Instant getCurrentTime(ObservableStateContainer container) {
+			PortfolioImpl p = (PortfolioImpl) container;
+			return p.isClosed() ? null : p.getTerminal().getCurrentTime();
 		}
 		
 	}
 	
 	static class PortfolioEventFactory implements EventFactory {
 		private final Portfolio portfolio;
-		
-		PortfolioEventFactory(Portfolio portfolio) {
+		protected final Instant time;
+		protected final Set<Integer> updatedTokens;
+
+		PortfolioEventFactory(Portfolio portfolio, Instant time) {
 			super();
 			this.portfolio = portfolio;
+			this.time = time;
+			this.updatedTokens = portfolio.getUpdatedTokens();
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			return new PortfolioEvent(type, portfolio);
+			PortfolioEvent e = new PortfolioEvent(type, portfolio, time);
+			e.setUpdatedTokens(updatedTokens);
+			return e;
 		}
 		
 	}

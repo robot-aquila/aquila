@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.EventType;
@@ -10,8 +12,8 @@ import ru.prolib.aquila.core.EventType;
 public class OrderExecutionEvent extends OrderEvent {
 	private final OrderExecution execution;
 
-	public OrderExecutionEvent(EventType type, Order order, OrderExecution execution) {
-		super(type, order);
+	public OrderExecutionEvent(EventType type, Order order, Instant time, OrderExecution execution) {
+		super(type, order, time);
 		this.execution = execution;
 	}
 	
@@ -34,6 +36,7 @@ public class OrderExecutionEvent extends OrderEvent {
 		return new EqualsBuilder()
 			.append(getType(), o.getType())
 			.append(getOrder(), o.getOrder())
+			.append(getTime(), o.getTime())
 			.append(execution, o.execution)
 			.isEquals();
 	}

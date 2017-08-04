@@ -27,6 +27,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	protected static Account account = new Account("port#120");
 	protected static Symbol symbol = new Symbol("MSFT");
 	private OrderImpl order;
+	private SchedulerStub schedulerStub;
 	protected EditableTerminal terminal;
 	private OrderController controller;
 	
@@ -52,10 +53,12 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	protected void prepareTerminal() {
+		schedulerStub = new SchedulerStub();
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())
 				.withTerminalID("foobar")
 				.withEventQueue(queue)
+				.withScheduler(schedulerStub)
 				.buildTerminal();
 		terminal.getEditableSecurity(symbol);
 		terminal.getEditablePortfolio(account);
@@ -292,6 +295,9 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testClose() {
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T18:16:00Z");
+		order.onClose().addSyncListener(listenerStub);
 		EventType type = new EventTypeImpl();
 		order.onAvailable().addSyncListener(listenerStub);
 		order.onAvailable().addAlternateType(type);
@@ -345,12 +351,15 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		assertFalse(order.onArchived().hasListeners());
 		assertFalse(order.onArchived().hasAlternates());
 		assertNull(order.getTerminal());
+		assertEquals(1, listenerStub.getEventCount());
+		assertContainerEventWUT(listenerStub.getEvent(0), order.onClose(), order, T("2017-08-04T18:16:00Z"));
 	}
 	
 	@Test
 	public void testOrderController_HasMinimalData() throws Exception {
+		Instant time = Instant.EPOCH;
 		produceContainer();
-		assertFalse(controller.hasMinimalData(order));
+		assertFalse(controller.hasMinimalData(order, time));
 		
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		data.put(OrderField.TYPE, OrderType.LMT);
@@ -359,24 +368,24 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		data.put(OrderField.CURRENT_VOLUME, 50L);
 		order.update(data);
 		
-		assertTrue(controller.hasMinimalData(order));
+		assertTrue(controller.hasMinimalData(order, time));
 	}
 	
 	private void testOrderController_ProcessAvailable_Ok(OrderStatus newStatus,
 			EventType type) throws Exception
 	{
+		Instant time = T("2017-08-04T02:40:00Z");
 		listenerStub.clear();
 		order.consume(new DeltaUpdateBuilder()
 			.withToken(OrderField.STATUS, newStatus)
 			.buildUpdate());
 		type.addSyncListener(listenerStub);
 		
-		controller.processAvailable(order);
+		controller.processAvailable(order, time);
 		
 		type.removeListener(listenerStub);
 		assertEquals(1, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(type));
-		assertSame(order, ((ContainerEvent)listenerStub.getEvent(0)).getContainer());
+		assertContainerEvent(listenerStub.getEvent(0), type, order, time, OrderField.STATUS);
 	}
 	
 	private void testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus newStatus,
@@ -389,7 +398,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		type.addSyncListener(listenerStub);
 		order.setStatusEventsEnabled(false);
 		
-		controller.processAvailable(order);
+		controller.processAvailable(order, Instant.EPOCH);
 		
 		type.removeListener(listenerStub);
 		assertEquals(0, listenerStub.getEventCount());
@@ -413,15 +422,15 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	private void testOrderController_ProcessUpdate_Ok(OrderStatus newStatus,
 			EventType type) throws Exception
 	{
+		Instant time = T("2017-08-04T02:45:30Z");
 		testOrderController_ProcessUpdate_Prepare(newStatus);
 		type.addSyncListener(listenerStub);
 		
-		controller.processUpdate(order);
+		controller.processUpdate(order, time);
 		
 		type.removeListener(listenerStub);
 		assertEquals(1, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(type));
-		assertSame(order, ((ContainerEvent)listenerStub.getEvent(0)).getContainer());
+		assertContainerEventWUT(listenerStub.getEvent(0), type, order, time);
 	}
 	
 	private void testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus newStatus,
@@ -435,7 +444,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		type.addSyncListener(listenerStub);
 		assertFalse(order.isAvailable());
 		
-		controller.processUpdate(order);
+		controller.processUpdate(order, T("2017-08-04T02:45:00Z"));
 		
 		type.removeListener(listenerStub);
 		assertEquals(0, listenerStub.getEventCount());
@@ -448,7 +457,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		order.setStatusEventsEnabled(false);
 		type.addSyncListener(listenerStub);
 		
-		controller.processUpdate(order);
+		controller.processUpdate(order, T("2017-08-04T02:50:00Z"));
 		
 		type.removeListener(listenerStub);
 		assertEquals(0, listenerStub.getEventCount());
@@ -703,14 +712,30 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 			.buildUpdate());
 		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
+
+	@Test
+	public void testOrderController_GetCurrentTime_IfNotClosed() {
+		schedulerStub.setFixedTime("2017-08-04T02:35:00Z");
+		
+		assertEquals(T("2017-08-04T02:35:00Z"), controller.getCurrentTime(order));
+	}
+
+	@Test
+	public void testOrderController_GetCurrentTime_IfClosed() {
+		order.close();
+		
+		assertNull(controller.getCurrentTime(order));
+	}
 	
 	@Test
 	public void testUpdate_OnAvailable() throws Exception {
+		Instant time = T("2017-08-04T02:50:15Z");
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
+		expect(controllerMock.getCurrentTime(order)).andReturn(time);
+		controllerMock.processUpdate(order, time);
+		expect(controllerMock.hasMinimalData(order, time)).andReturn(true);
+		controllerMock.processAvailable(order, time);
 		getMocksControl().replay();
 
 		data.put(12345, 415); // any value
@@ -718,19 +743,20 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
-		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(order.onAvailable()));
-		assertSame(order, event.getOrder());
+		assertContainerEvent(listenerStub.getEvent(0), order.onAvailable(), order, time, 12345);
 	}
 
 	@Test
 	public void testUpdate_OnUpdateEvent() throws Exception {
+		Instant time1 = T("2017-08-04T02:55:00Z"), time2 = T("2017-08-04T02:55:10Z");
 		container = produceContainer(controllerMock);
 		container.onUpdate().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
-		controllerMock.processUpdate(container);
+		expect(controllerMock.getCurrentTime(order)).andReturn(time1);
+		controllerMock.processUpdate(order, time1);
+		expect(controllerMock.hasMinimalData(order, time1)).andReturn(true);
+		controllerMock.processAvailable(order, time1);
+		expect(controllerMock.getCurrentTime(order)).andReturn(time2);
+		controllerMock.processUpdate(order, time2);
 		getMocksControl().replay();
 		
 		data.put(12345, 415);
@@ -740,10 +766,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(container.onUpdate()));
-		assertSame(order, ((OrderEvent) listenerStub.getEvent(0)).getOrder());
-		assertTrue(listenerStub.getEvent(1).isType(container.onUpdate()));
-		assertSame(order, ((OrderEvent) listenerStub.getEvent(1)).getOrder());
+		assertContainerEvent(listenerStub.getEvent(0), order.onUpdate(), order, time1, 12345);
+		assertContainerEvent(listenerStub.getEvent(1), order.onUpdate(), order, time2, 12345);
 	}
 	
 	/**

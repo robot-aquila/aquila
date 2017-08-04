@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,8 @@ import ru.prolib.aquila.core.data.DataProviderStub;
 public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	private static Account account = new Account("ZUMBA");
 	private EditableTerminal terminal;
+	private SchedulerStub schedulerStub;
+	private PortfolioController controller;
 	private PortfolioImpl portfolio;
 	
 	@BeforeClass
@@ -36,6 +39,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		controller = new PortfolioController();
 		super.setUp();
 	}
 
@@ -50,10 +54,12 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	private void prepareTerminal() {
+		schedulerStub = new SchedulerStub();
 		terminal = new BasicTerminalBuilder()
 				.withTerminalID("Terminal#1")
 				.withEventQueue(queue)
 				.withDataProvider(new DataProviderStub())
+				.withScheduler(schedulerStub)
 				.buildTerminal();
 		terminal.getEditableSecurity(new Symbol("SBER"));
 		terminal.getEditableSecurity(new Symbol("GAZP"));
@@ -119,6 +125,8 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testClose() throws Exception {
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T18:15:00Z");
 		EventListenerStub listener = new EventListenerStub();
 		EventType type = new EventTypeImpl();
 		portfolio.onAvailable().addListener(listener);
@@ -154,8 +162,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertTrue(portfolio.onClose().isAlternateType(type));
 		assertTrue(portfolio.onClose().isListener(listenerStub));
 		assertEquals(1, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(portfolio.onClose()));
-		assertSame(portfolio, ((PortfolioEvent) listenerStub.getEvent(0)).getPortfolio());
+		assertContainerEventWUT(listenerStub.getEvent(0), portfolio.onClose(), portfolio, T("2017-08-04T18:15:00Z"));
 	}
 	
 	@Test
@@ -359,9 +366,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testPortfolioController_HasMinimalData() {
-		PortfolioController controller = new PortfolioController();
-		
-		assertFalse(controller.hasMinimalData(portfolio));
+		assertFalse(controller.hasMinimalData(portfolio, null));
 		
 		portfolio.consume(new DeltaUpdateBuilder()
 			.withToken(PortfolioField.CURRENCY, "USD")
@@ -372,7 +377,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 			.withToken(PortfolioField.FREE_MARGIN, FMoney.ofUSD2(0.52))
 			.buildUpdate());
 		
-		assertTrue(controller.hasMinimalData(portfolio));
+		assertTrue(controller.hasMinimalData(portfolio, null));
 	}
 	
 	@Test
@@ -384,47 +389,60 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	public void testPortfolioController_ProcessUpdate() {
 		// No additional event types. Nothing to do.
 	}
+	
+	@Test
+	public void testPortfolioController_GetCurrentTime_IfNotClosed() {
+		schedulerStub.setFixedTime("2017-08-04T18:07:00Z");
+		
+		assertEquals(T("2017-08-04T18:07:00Z"), controller.getCurrentTime(portfolio));
+	}
+	
+	@Test
+	public void testPortfolioController_GetCurrentTime_IfClosed() {
+		schedulerStub.setFixedTime("2017-08-04T18:07:00Z");
+		portfolio.close();
+		
+		assertNull(controller.getCurrentTime(portfolio));
+	}
 
 	@Test
 	public void testUpdate_OnAvailable() throws Exception {
+		Instant time = T("2017-08-04T18:25:00Z");
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
+		expect(controllerMock.getCurrentTime(portfolio)).andReturn(time);
+		controllerMock.processUpdate(portfolio, time);
+		expect(controllerMock.hasMinimalData(portfolio, time)).andReturn(true);
+		controllerMock.processAvailable(portfolio, time);
 		getMocksControl().replay();
 
-		data.put(12345, 415); // any value
-		portfolio.update(data);
+		portfolio.update(12345, 415); // any value
 		
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
-		PortfolioEvent event = (PortfolioEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(portfolio.onAvailable()));
-		assertSame(portfolio, event.getPortfolio());
+		assertContainerEvent(listenerStub.getEvent(0), portfolio.onAvailable(), portfolio, time, 12345);
 	}
 	
 	@Test
 	public void testUpdate_OnUpdateEvent() throws Exception {
+		Instant time1 = T("2017-08-04T18:28:00Z"), time2 = T("2017-08-04T18:29:00Z");
 		container = produceContainer(controllerMock);
 		container.onUpdate().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
-		controllerMock.processUpdate(container);
+		expect(controllerMock.getCurrentTime(portfolio)).andReturn(time1);
+		controllerMock.processUpdate(portfolio, time1);
+		expect(controllerMock.hasMinimalData(portfolio, time1)).andReturn(true);
+		controllerMock.processAvailable(portfolio, time1);
+		expect(controllerMock.getCurrentTime(portfolio)).andReturn(time2);
+		controllerMock.processUpdate(portfolio, time2);
 		getMocksControl().replay();
 		
-		data.put(12345, 415);
-		portfolio.update(data);
-		data.put(12345, 450);
-		portfolio.update(data);
+		portfolio.update(12345, 415);
+		portfolio.update(12345, 450);
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(portfolio.onUpdate()));
-		assertSame(portfolio, ((PortfolioEvent) listenerStub.getEvent(0)).getPortfolio());
-		assertTrue(listenerStub.getEvent(1).isType(portfolio.onUpdate()));
-		assertSame(portfolio, ((PortfolioEvent) listenerStub.getEvent(1)).getPortfolio());
+		assertContainerEvent(listenerStub.getEvent(0), portfolio.onUpdate(), portfolio, time1, 12345);
+		assertContainerEvent(listenerStub.getEvent(1), portfolio.onUpdate(), portfolio, time2, 12345);
 	}
 	
 	@Test

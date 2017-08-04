@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ public class PositionEventTest {
 	private IMocksControl control;
 	private EventType eventType1, eventType2;
 	private Position position1, position2;
+	private Instant time1, time2;
 	private Set<Integer> tokens1, tokens2;
 	private PositionEvent event;
 
@@ -29,11 +31,12 @@ public class PositionEventTest {
 		eventType2 = control.createMock(EventType.class);
 		position1 = control.createMock(Position.class);
 		position2 = control.createMock(Position.class);
+		time1 = Instant.parse("2017-08-04T17:40:00Z");
 		tokens1 = new HashSet<>();
 		tokens1.add(PositionField.CURRENT_VOLUME);
 		tokens2 = new HashSet<>();
 		tokens2.add(PositionField.PROFIT_AND_LOSS);
-		event = new PositionEvent(eventType1, position1);
+		event = new PositionEvent(eventType1, position1, time1);
 		event.setUpdatedTokens(tokens1);
 	}
 	
@@ -61,12 +64,13 @@ public class PositionEventTest {
 	
 	@Test
 	public void testEquals_Ok() throws Exception {
-		PositionEvent event2 = new PositionEvent(eventType2, position1);
-		PositionEvent event3 = new PositionEvent(eventType1, position2);
-		PositionEvent event4 = new PositionEvent(eventType2, position2);
-		PositionEvent event5 = new PositionEvent(eventType1, position1);
+		PositionEvent event2 = new PositionEvent(eventType2, position1, time1);
+		PositionEvent event3 = new PositionEvent(eventType1, position2, time1);
+		PositionEvent event4 = new PositionEvent(eventType2, position2, time1);
+		PositionEvent event5 = new PositionEvent(eventType1, position1, time1);
 		event5.setUpdatedTokens(tokens1);
 		
+		assertFalse(event.equals(new PositionEvent(eventType1, position1, time2)));
 		assertFalse(event.equals(event2));
 		assertFalse(event.equals(event3));
 		assertFalse(event.equals(event4));

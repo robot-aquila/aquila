@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.sst;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -70,6 +71,7 @@ import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
 
 public class SecuritySimulationTest implements Experiment {
+	private static final Color[] indicatorColors = {Color.BLUE, Color.MAGENTA, Color.RED, Color.GREEN};
 	private static final Logger logger;
 	
 	static {
@@ -206,9 +208,13 @@ public class SecuritySimulationTest implements Experiment {
         
         CSDataSlice dataSlice = csDataProvider.getSlice(rSymbol, TimeFrame.M1);
         CBSwingChartPanel chartPanel = new CBSwingChartPanel(dataSlice.getCandleSeries());
+        int i = 0;
         for ( Series<Double> x : dataSlice.getIndicators() ) {
+        	chartPanel.addSmoothLine(x).setColor(indicatorColors[i%4]);
+            i++;
         	logger.debug("added indicator: {}", x.getId());
         }
+        chartPanel.addVolumes();
         tabPanel.addTab("Strategy", chartPanel);
         
         frame.getContentPane().add(mainPanel);

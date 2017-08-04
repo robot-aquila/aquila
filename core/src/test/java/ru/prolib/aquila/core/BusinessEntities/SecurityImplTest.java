@@ -7,13 +7,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.easymock.IMocksControl;
 import org.junit.*;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.SecurityImpl.SecurityController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
+import ru.prolib.aquila.core.data.DataProviderStub;
 
 /**
  * 2012-05-30<br>
@@ -21,7 +21,8 @@ import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
  */
 public class SecurityImplTest extends ObservableStateContainerImplTest {
 	private static Symbol symbol1 = new Symbol("S:GAZP@EQBR:RUB");
-	private IMocksControl control;
+	private SchedulerStub schedulerStub;
+	private SecurityController controller;
 	private EditableTerminal terminal;
 	private SecurityImpl security;
 	
@@ -32,6 +33,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 
 	@Before
 	public void setUp() throws Exception {
+		controller = new SecurityController();
 		super.setUp();
 	}
 	
@@ -46,24 +48,33 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	private void prepareTerminal() {
-		control = createStrictControl();
-		terminal = control.createMock(EditableTerminal.class);
-		expect(terminal.getTerminalID()).andStubReturn("foobar");
-		expect(terminal.getEventQueue()).andStubReturn(queue);
-		control.replay();		
+		schedulerStub = new SchedulerStub();
+		terminal = new BasicTerminalBuilder()
+				.withDataProvider(new DataProviderStub())
+				.withTerminalID("foobar")
+				.withEventQueue(queue)
+				.withScheduler(schedulerStub)
+				.buildTerminal();
 	}
 	
 	@Override
 	protected ObservableStateContainerImpl produceContainer() {
 		prepareTerminal();
-		security = new SecurityImpl(terminal, symbol1);
+		security = new SecurityImpl(new SecurityParamsBuilder(queue)
+				.withSymbol(symbol1)
+				.withTerminal(terminal)
+				.buildParams());
 		return security;
 	}
 	
 	@Override
 	protected ObservableStateContainerImpl produceContainer(OSCController controller) {
 		prepareTerminal();
-		security = new SecurityImpl(terminal, symbol1, controller);
+		security = new SecurityImpl(new SecurityParamsBuilder(queue)
+				.withSymbol(symbol1)
+				.withTerminal(terminal)
+				.withController(controller)
+				.buildParams());
 		return security;
 	}
 	
@@ -87,8 +98,8 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testCtor_DefaultController() throws Exception {
-		security = new SecurityImpl(terminal, symbol1);
-		assertEquals(SecurityController.class, security.getController().getClass());
+		produceContainer(controller);
+		assertSame(controller, security.getController());
 		assertNotNull(security.getTerminal());
 		assertNotNull(security.getEventDispatcher());
 		assertSame(terminal, security.getTerminal());
@@ -275,7 +286,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testSecurityController_HasMinimalData() throws Exception {
 		SecurityController controller = new SecurityController();
 		
-		assertFalse(controller.hasMinimalData(security));
+		assertFalse(controller.hasMinimalData(security, null));
 		
 		data.put(SecurityField.DISPLAY_NAME, "GAZP");
 		data.put(SecurityField.LOT_SIZE, 100);
@@ -284,11 +295,12 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.SETTLEMENT_PRICE, 200.01d);
 		security.update(data);
 		
-		assertTrue(controller.hasMinimalData(security));
+		assertTrue(controller.hasMinimalData(security, null));
 	}
 	
 	@Test
 	public void testSecurityController_ProcessUpdate_SessionUpdate() {
+		Instant time = T("2017-08-04T19:51:00Z");
 		data.put(SecurityField.LOT_SIZE, 1);
 		data.put(SecurityField.TICK_SIZE, new FDecimal("0.05"));
 		data.put(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"));
@@ -299,20 +311,27 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.LOW_PRICE, 79.19d);
 		data.put(SecurityField.CLOSE_PRICE, 79.18d);
 		security.update(data);
-		SecurityController controller = new SecurityController();
 		EventListenerStub listener = new EventListenerStub();
 		security.onSessionUpdate().addSyncListener(listener);
 		
-		controller.processUpdate(security);
+		controller.processUpdate(security, time);
 		
 		assertEquals(1, listener.getEventCount());
-		SecurityEvent e = (SecurityEvent) listener.getEvent(0);
-		assertTrue(e.isType(security.onSessionUpdate()));
-		assertSame(security, e.getSecurity());
+		assertContainerEvent((SecurityEvent) listener.getEvent(0), security.onSessionUpdate(), security, time,
+				SecurityField.LOT_SIZE,
+				SecurityField.TICK_SIZE,
+				SecurityField.TICK_VALUE,
+				SecurityField.INITIAL_MARGIN,
+				SecurityField.SETTLEMENT_PRICE,
+				SecurityField.OPEN_PRICE,
+				SecurityField.HIGH_PRICE,
+				SecurityField.LOW_PRICE,
+				SecurityField.CLOSE_PRICE);
 	}
 
 	@Test
 	public void testSecurityController_ProcessAvailable() {
+		Instant time = T("2017-08-04T19:55:00Z");
 		data.put(SecurityField.LOT_SIZE, 1);
 		data.put(SecurityField.TICK_SIZE, new FDecimal("0.05"));
 		data.put(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"));
@@ -323,34 +342,37 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.LOW_PRICE, 79.19d);
 		data.put(SecurityField.CLOSE_PRICE, 79.18d);
 		security.update(data);
-		SecurityController controller = new SecurityController();
 		EventListenerStub listener = new EventListenerStub();
 		security.onSessionUpdate().addSyncListener(listener);
 		
-		controller.processAvailable(security);
+		controller.processAvailable(security, time);
 		
 		assertEquals(0, listener.getEventCount());
 	}
 	
 	@Test
 	public void testUpdate_Tick_BestAsk() {
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T21:05:00Z");
 		security.onBestAsk().addSyncListener(listenerStub);
 		assertNull(security.getBestAsk());
 		
-		security.consume(toL1Update(Tick.of(TickType.ASK, 80.34d, 15L)));
+		security.consume(toL1Update(Tick.ofAsk(T("1996-12-04T00:15:00Z"), 80.34d, 15L)));
 		
-		Tick expected = Tick.of(TickType.ASK, 80.34d, 15L);
+		Tick expected = Tick.ofAsk(T("1996-12-04T00:15:00Z"), 80.34d, 15L);
 		assertEquals(expected, security.getBestAsk());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(security.onBestAsk()));
+		assertContainerEventWUT(e, security.onBestAsk(), security, T("2017-08-04T21:05:00Z"));
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getTick());
 	}
 	
 	@Test
 	public void testUpdate_Tick_ResetBestAsk() {
-		security.consume(toL1Update(Tick.of(TickType.ASK, 92.13d, 100L)));
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T20:03:00Z");
+		security.consume(toL1Update(Tick.ofAsk(T("2003-01-01T00:00:00Z"), 92.13d, 100L)));
 		security.onBestAsk().addSyncListener(listenerStub);
 		
 		security.consume(toL1Update(Tick.NULL_ASK));
@@ -358,29 +380,33 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertNull(security.getBestAsk());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(security.onBestAsk()));
+		assertContainerEventWUT(e, security.onBestAsk(), security, T("2017-08-04T20:03:00Z"));
 		assertSame(security, e.getSecurity());
 		assertNull(e.getTick());
 	}
 	
 	@Test
 	public void testUpdate_Tick_BestBid() {
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T21:10:00Z");
 		security.onBestBid().addSyncListener(listenerStub);
 		assertNull(security.getBestBid());
 		
-		security.consume(toL1Update(Tick.of(TickType.BID, 12.48d, 500L)));
+		security.consume(toL1Update(Tick.ofBid(T("2010-09-11T03:15:25Z"), 12.48d, 500L)));
 		
-		Tick expected = Tick.of(TickType.BID, 12.48d, 500L);
+		Tick expected = Tick.ofBid(T("2010-09-11T03:15:25Z"), 12.48d, 500L);
 		assertEquals(expected, security.getBestBid());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(security.onBestBid()));
+		assertContainerEventWUT(e, security.onBestBid(), security, T("2017-08-04T21:10:00Z"));
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getTick());
 	}
 	
 	@Test
 	public void testUpdate_Tick_ResetBestBid() {
-		security.consume(toL1Update(Tick.of(TickType.BID, 52.94d, 1L)));
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T20:03:00Z");
+		security.consume(toL1Update(Tick.ofBid(T("1992-07-24T15:45:00Z"), 52.94d, 1L)));
 		security.onBestBid().addSyncListener(listenerStub);
 		
 		security.consume(toL1Update(Tick.NULL_BID));
@@ -388,22 +414,24 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertNull(security.getBestBid());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(security.onBestBid()));
+		assertContainerEventWUT(e, security.onBestBid(), security, T("2017-08-04T20:03:00Z"));
 		assertSame(security, e.getSecurity());
 		assertNull(e.getTick());
 	}
 	
 	@Test
 	public void testUpdate_Tick_LastTrade() {
+		produceContainer(controller);
+		schedulerStub.setFixedTime("2017-08-04T21:10:00Z");
 		security.onLastTrade().addSyncListener(listenerStub);
 		assertNull(security.getLastTrade());
 		
-		security.consume(toL1Update(Tick.of(TickType.TRADE, 72.15d, 805L)));
+		security.consume(toL1Update(Tick.ofTrade(T("1978-02-01T05:12:15Z"), 72.15d, 805L)));
 		
-		Tick expected = Tick.of(TickType.TRADE, 72.15d, 805L);
+		Tick expected = Tick.ofTrade(T("1978-02-01T05:12:15Z"), 72.15d, 805L);
 		assertEquals(expected, security.getLastTrade());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertTrue(e.isType(security.onLastTrade()));
+		assertContainerEventWUT(e, security.onLastTrade(), security, T("2017-08-04T21:10:00Z"));
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getTick());
 	}
@@ -654,12 +682,29 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	public void testSecurityController_GetCurrentTime_IfClosed() {
+		schedulerStub.setFixedTime("2017-08-04T20:00:00Z");
+		security.close();
+		
+		assertNull(controller.getCurrentTime(security));
+	}
+	
+	@Test
+	public void testSecurityController_GetCurrentTime_IfNotClosed() {
+		schedulerStub.setFixedTime("2017-08-04T20:00:00Z");
+		
+		assertEquals(T("2017-08-04T20:00:00Z"), controller.getCurrentTime(security));
+	}
+	
+	@Test
 	public void testUpdate_OnAvailable() throws Exception {
+		Instant time = T("2017-08-04T20:01:00Z");
 		container = produceContainer(controllerMock);
 		container.onAvailable().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
+		expect(controllerMock.getCurrentTime(security)).andReturn(time);
+		controllerMock.processUpdate(security, time);
+		expect(controllerMock.hasMinimalData(security, time)).andReturn(true);
+		controllerMock.processAvailable(security, time);
 		getMocksControl().replay();
 
 		data.put(12345, 415); // any value
@@ -667,32 +712,30 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
-		SecurityEvent event = (SecurityEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(security.onAvailable()));
-		assertSame(security, event.getSecurity());
+		assertContainerEventWUT((SecurityEvent) listenerStub.getEvent(0),
+				security.onAvailable(), security, time);
 	}
 	
 	@Test
 	public void testUpdate_OnUpdateEvent() throws Exception {
+		Instant time1 = T("2017-08-04T21:15:00Z"), time2 = T("2017-08-04T21:20:00Z");
 		container = produceContainer(controllerMock);
 		container.onUpdate().addSyncListener(listenerStub);
-		controllerMock.processUpdate(container);
-		expect(controllerMock.hasMinimalData(container)).andReturn(true);
-		controllerMock.processAvailable(container);
-		controllerMock.processUpdate(container);
+		expect(controllerMock.getCurrentTime(security)).andReturn(time1);
+		controllerMock.processUpdate(security, time1);
+		expect(controllerMock.hasMinimalData(security, time1)).andReturn(true);
+		controllerMock.processAvailable(security, time1);
+		expect(controllerMock.getCurrentTime(security)).andReturn(time2);
+		controllerMock.processUpdate(security, time2);
 		getMocksControl().replay();
 		
-		data.put(12345, 415);
-		security.update(data);
-		data.put(12345, 450);
-		security.update(data);
+		security.update(12345, 415);
+		security.update(12345, 450);
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertTrue(listenerStub.getEvent(0).isType(security.onUpdate()));
-		assertSame(security, ((SecurityEvent) listenerStub.getEvent(0)).getSecurity());
-		assertTrue(listenerStub.getEvent(1).isType(security.onUpdate()));
-		assertSame(security, ((SecurityEvent) listenerStub.getEvent(1)).getSecurity());
+		assertContainerEvent(listenerStub.getEvent(0), security.onUpdate(), security, time1, 12345);
+		assertContainerEvent(listenerStub.getEvent(1), security.onUpdate(), security, time2, 12345);
 	}
 
 }

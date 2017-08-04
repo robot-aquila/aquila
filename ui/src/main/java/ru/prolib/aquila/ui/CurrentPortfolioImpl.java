@@ -57,7 +57,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	}
 	
 	private void fireCurrentPortfolioChangedEvent() {
-		dispatcher.dispatch(new PortfolioEvent(portfolioChanged, portfolio));
+		dispatcher.dispatch(new PortfolioEvent(portfolioChanged, portfolio, terminal.getCurrentTime()));
 	}
 
 	/* (non-Javadoc)

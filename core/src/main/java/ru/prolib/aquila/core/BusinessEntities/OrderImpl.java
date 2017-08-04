@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
@@ -244,28 +245,32 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 	
 	@Override
-	protected EventFactory createEventFactory() {
-		return new OrderEventFactory(this);
+	protected EventFactory createEventFactory(Instant time) {
+		return new OrderEventFactory(this, time);
+	}
+	
+	protected EventFactory createExecutionEventFactory(Instant time, OrderExecution execution) {
+		return new OrderExecutionEventFactory(this, time, execution);
 	}
 	
 	public static class OrderController implements OSCController {
 
 		@Override
-		public boolean hasMinimalData(ObservableStateContainer container) {
+		public boolean hasMinimalData(ObservableStateContainer container, Instant time) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(ObservableStateContainer container) {
+		public void processUpdate(ObservableStateContainer container, Instant time) {
 			if ( container.isAvailable() ) {
-				processAvailable(container);
+				processAvailable(container, time);
 			}
 		}
 
 		@Override
-		public void processAvailable(ObservableStateContainer container) {
+		public void processAvailable(ObservableStateContainer container, Instant time) {
 			OrderImpl order = (OrderImpl) container;
-			OrderEventFactory factory = new OrderEventFactory(order);
+			EventFactory factory = order.createEventFactory(time);
 			if ( order.hasChanged(OrderField.STATUS) ) {
 				OrderStatus status = order.getStatus();	
 				EventType dummy = null;
@@ -302,20 +307,32 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 				}
 			}
 		}
+
+		@Override
+		public Instant getCurrentTime(ObservableStateContainer container) {
+			OrderImpl o = (OrderImpl) container;
+			return o.isClosed() ? null : o.getTerminal().getCurrentTime();
+		}
 		
 	}
 	
 	static class OrderEventFactory implements EventFactory {
 		protected final Order order;
+		protected final Instant time;
+		protected final Set<Integer> updatedTokens;
 		
-		OrderEventFactory(Order order) {
+		OrderEventFactory(Order order, Instant time) {
 			super();
 			this.order = order;
+			this.time = time;
+			this.updatedTokens = order.getUpdatedTokens();
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			return new OrderEvent(type, order);
+			OrderEvent e = new OrderEvent(type, order, time);
+			e.setUpdatedTokens(updatedTokens);
+			return e;
 		}
 		
 	}
@@ -323,14 +340,14 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	static class OrderExecutionEventFactory extends OrderEventFactory {
 		protected final OrderExecution execution;
 		
-		OrderExecutionEventFactory(Order order, OrderExecution execution) {
-			super(order);
+		OrderExecutionEventFactory(Order order, Instant time, OrderExecution execution) {
+			super(order, time);
 			this.execution = execution;
 		}
 		
 		@Override
 		public Event produceEvent(EventType type) {
-			return new OrderExecutionEvent(type, order, execution);
+			return new OrderExecutionEvent(type, order, time, execution);
 		}
 		
 	}
@@ -412,12 +429,13 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 
 	@Override
 	public void fireArchived() {
-		dispatcher.dispatch(onArchived, new OrderEventFactory(this));
+		dispatcher.dispatch(onArchived, createEventFactory(getController().getCurrentTime(this)));
 	}
 
 	@Override
 	public void fireExecution(OrderExecution execution) {
-		dispatcher.dispatch(onExecution, new OrderExecutionEventFactory(this, execution));
+		dispatcher.dispatch(onExecution,
+				createExecutionEventFactory(getController().getCurrentTime(this), execution));
 	}
 	
 	@Override

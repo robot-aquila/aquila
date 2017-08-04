@@ -197,7 +197,7 @@ public class SimpleL1RecorderTest {
 		control.replay();
 		
 		recorder.onEvent(new SecurityTickEvent(terminal.onSecurityBestAsk(),
-				terminal.getEditableSecurity(expectedSymbol), expectedTick));
+				terminal.getEditableSecurity(expectedSymbol), null, expectedTick));
 		
 		control.verify();
 	}
@@ -207,7 +207,7 @@ public class SimpleL1RecorderTest {
 		control.replay();
 		
 		recorder.onEvent(new SecurityTickEvent(terminal.onSecurityBestAsk(),
-				terminal.getEditableSecurity(new Symbol("GAZP")),
+				terminal.getEditableSecurity(new Symbol("GAZP")), null,
 				Tick.of(TickType.ASK, Instant.now(), 14.38d, 85L)));
 		
 		control.verify();
@@ -228,7 +228,8 @@ public class SimpleL1RecorderTest {
 		control.replay();
 
 		recorder.onEvent(new SecurityTickEvent(terminal.onSecurityBestAsk(),
-				terminal.getEditableSecurity(expectedSymbol), expectedTick));
+				terminal.getEditableSecurity(expectedSymbol), null,
+				expectedTick));
 		
 		control.verify();
 		assertFalse(recorder.isStarted());

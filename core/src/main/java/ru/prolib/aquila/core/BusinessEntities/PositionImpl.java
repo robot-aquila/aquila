@@ -1,5 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+import java.util.Set;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParams;
@@ -104,21 +107,21 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	}
 	
 	@Override
-	protected EventFactory createEventFactory() {
-		return new PositionEventFactory(this);
+	protected EventFactory createEventFactory(Instant time) {
+		return new PositionEventFactory(this, time);
 	}
 	
 	public static class PositionController implements OSCController {
 		
 		@Override
-		public boolean hasMinimalData(ObservableStateContainer container) {
+		public boolean hasMinimalData(ObservableStateContainer container, Instant time) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(ObservableStateContainer container) {
+		public void processUpdate(ObservableStateContainer container, Instant time) {
 			PositionImpl position = (PositionImpl) container;
-			PositionEventFactory factory = new PositionEventFactory(position);
+			EventFactory factory = position.createEventFactory(time);
 			if ( position.hasChanged(PositionField.CURRENT_VOLUME) ) {
 				position.dispatcher.dispatch(position.onPositionChange, factory);
 			}
@@ -128,23 +131,35 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 		}
 
 		@Override
-		public void processAvailable(ObservableStateContainer container) {
+		public void processAvailable(ObservableStateContainer container, Instant time) {
 			
+		}
+
+		@Override
+		public Instant getCurrentTime(ObservableStateContainer container) {
+			PositionImpl p = (PositionImpl) container;
+			return p.isClosed() ? null : p.getTerminal().getCurrentTime();
 		}
 		
 	}
 	
 	static class PositionEventFactory implements EventFactory {
 		private final Position position;
+		private final Instant time;
+		private final Set<Integer> updatedTokens;
 		
-		PositionEventFactory(Position position) {
+		PositionEventFactory(Position position, Instant time) {
 			super();
 			this.position = position;
+			this.time = time;
+			this.updatedTokens = position.getUpdatedTokens();
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			return new PositionEvent(type, position);
+			PositionEvent e = new PositionEvent(type, position, time);
+			e.setUpdatedTokens(updatedTokens);
+			return e;
 		}
 		
 	}

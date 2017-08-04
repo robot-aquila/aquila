@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
@@ -15,13 +17,14 @@ public class OrderEvent extends OSCEventImpl {
 	private final Order order;
 
 	/**
-	 * Создать событие.
+	 * Constructor.
 	 * <p>
-	 * @param type тип события
-	 * @param order заявка
+	 * @param type - type of event
+	 * @param order - the order
+	 * @param time - time of event
 	 */
-	public OrderEvent(EventType type, Order order) {
-		super(type, order);
+	public OrderEvent(EventType type, Order order, Instant time) {
+		super(type, order, time);
 		this.order = order;
 	}
 	
@@ -48,6 +51,7 @@ public class OrderEvent extends OSCEventImpl {
 				&& o.getOrder() == getOrder()
 				&& new EqualsBuilder()
 					.append(o.getUpdatedTokens(), getUpdatedTokens())
+					.append(o.getTime(), getTime())
 					.isEquals();
 		}
 		return false;

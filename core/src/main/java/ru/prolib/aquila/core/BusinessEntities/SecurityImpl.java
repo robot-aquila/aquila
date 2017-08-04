@@ -1,9 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+import java.util.Set;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParams;
-import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
 
 /**
  * Security implementation.
@@ -48,28 +50,7 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 		this.onMarketDepthUpdate = new EventTypeImpl(pfx + "MARKET_DEPTH_UPDATE");
 		this.marketDepthBuilder = new MDBuilder(symbol);
 	}
-	
-	/**
-	 * Constructor.
-	 * <p>
-	 * @param terminal - owner terminal instance
-	 * @param symbol - the symbol
-	 * @param controller - controller
-	 */
-	@Deprecated
-	public SecurityImpl(EditableTerminal terminal, Symbol symbol, OSCController controller) {
-		this(new SecurityParamsBuilder(terminal.getEventQueue())
-				.withTerminal(terminal)
-				.withSymbol(symbol)
-				.withController(controller)
-				.buildParams());
-	}
-	
-	@Deprecated
-	public SecurityImpl(EditableTerminal terminal, Symbol symbol) {
-		this(terminal, symbol, new SecurityController());
-	}
-
+		
 	@Override
 	public Terminal getTerminal() {
 		lock.lock();
@@ -180,51 +161,82 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	public static class SecurityController implements OSCController {
 
 		@Override
-		public boolean hasMinimalData(ObservableStateContainer container) {
+		public boolean hasMinimalData(ObservableStateContainer container, Instant time) {
 			return container.isDefined(TOKENS_FOR_AVAILABILITY);
 		}
 
 		@Override
-		public void processUpdate(ObservableStateContainer container) {
+		public void processUpdate(ObservableStateContainer container, Instant time) {
 			SecurityImpl security = (SecurityImpl) container;
 			if ( security.atLeastOneHasChanged(TOKENS_FOR_SESSION_UPDATE) ) {
-				SecurityEventFactory factory = new SecurityEventFactory(security);
-				security.dispatcher.dispatch(security.onSessionUpdate, factory);
+				security.dispatcher.dispatch(security.onSessionUpdate, security.createEventFactory(time));
 			}
 		}
 
 		@Override
-		public void processAvailable(ObservableStateContainer container) {
+		public void processAvailable(ObservableStateContainer container, Instant time) {
 			
+		}
+
+		@Override
+		public Instant getCurrentTime(ObservableStateContainer container) {
+			SecurityImpl s = (SecurityImpl) container;
+			return s.isClosed() ? null : s.getTerminal().getCurrentTime();
 		}
 		
 	}
 
 	static class SecurityEventFactory implements EventFactory {
-		final Security object;
+		private final Security object;
+		private final Instant time;
+		private final Set<Integer> updatedTokens;
 		
-		SecurityEventFactory(Security object) {
+		SecurityEventFactory(Security object, Instant time) {
 			this.object = object;
+			this.time = time;
+			this.updatedTokens = object.getUpdatedTokens();
 		}
 		
 		@Override
 		public Event produceEvent(EventType type) {
-			return new SecurityEvent(type, object);
+			SecurityEvent e = new SecurityEvent(type, object, time);
+			e.setUpdatedTokens(updatedTokens);
+			return e;
 		}
 	}
 	
 	static class SecurityTickEventFactory implements EventFactory {
-		final Security object;
-		final Tick tick;
+		private final Security object;
+		private final Instant time;
+		private final Tick tick;
 		
-		SecurityTickEventFactory(Security object, Tick tick) {
+		SecurityTickEventFactory(Security object, Instant time, Tick tick) {
 			this.object = object;
+			this.time = time;
 			this.tick = tick;
 		}
 		
 		@Override
 		public Event produceEvent(EventType type) {
-			return new SecurityTickEvent(type, object, tick);
+			return new SecurityTickEvent(type, object, time, tick);
+		}
+		
+	}
+	
+	static class SecurityMarketDepthEventFactory implements EventFactory {
+		private final Security security;
+		private final Instant time;
+		private final MarketDepth marketDepth;
+		
+		SecurityMarketDepthEventFactory(Security security, Instant time, MarketDepth marketDepth) {
+			this.security = security;
+			this.time = time;
+			this.marketDepth = marketDepth;
+		}
+
+		@Override
+		public Event produceEvent(EventType type) {
+			return new SecurityMarketDepthEvent(type, security, time, marketDepth);
 		}
 		
 	}
@@ -232,12 +244,14 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	@Override
 	public void consume(L1Update update) {
 		Tick tick = update.getTick();
-		boolean hasAsk = false, hasBid = false, hasTrade = false;
+		Instant time;
+		EventType eventType;
 		lock.lock();
 		try {
 			if ( isClosed() ) {
 				return;
 			}
+			time = getController().getCurrentTime(this);
 			switch ( tick.getType() ) {
 			case ASK:
 				if ( tick == Tick.NULL_ASK ) {
@@ -245,7 +259,7 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 				} else {
 					bestAsk = tick;
 				}
-				hasAsk = true;
+				eventType = onBestAsk;
 				break;
 			case BID:
 				if ( tick == Tick.NULL_BID ) {
@@ -253,25 +267,19 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 				} else {
 					bestBid = tick;
 				}
-				hasBid = true;
+				eventType = onBestBid;
 				break;
 			case TRADE:
 				lastTrade = tick;
-				hasTrade = true;
+				eventType = onLastTrade;
 				break;
+			default:
+				throw new IllegalArgumentException("Unknown tick type: " + tick);	
 			}
 		} finally {
 			lock.unlock();
 		}
-		if ( hasAsk ) {
-			dispatcher.dispatch(onBestAsk, new SecurityTickEventFactory(this, tick));
-		}
-		if ( hasBid ) {
-			dispatcher.dispatch(onBestBid, new SecurityTickEventFactory(this, tick));
-		}
-		if ( hasTrade ) {
-			dispatcher.dispatch(onLastTrade, new SecurityTickEventFactory(this, tick));
-		}
+		dispatcher.dispatch(eventType, createTickEventFactory(time, tick));
 	}
 
 	@Override
@@ -321,35 +329,21 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 
 	@Override
 	public void consume(MDUpdate update) {
+		Instant time;
 		MarketDepth md = null;
 		lock.lock();
 		try {
 			if ( isClosed() ) {
 				return;
 			}
+			time = getController().getCurrentTime(this);
 			marketDepthBuilder.setPriceScale(getScale());
 			marketDepthBuilder.consume(update);
 			md = marketDepthBuilder.getMarketDepth();
 		} finally {
 			lock.unlock();
 		}
-		dispatcher.dispatch(onMarketDepthUpdate, new SecurityMarketDepthEventFactory(this, md));
-	}
-	
-	static class SecurityMarketDepthEventFactory implements EventFactory {
-		private final Security security;
-		private final MarketDepth marketDepth;
-		
-		SecurityMarketDepthEventFactory(Security security, MarketDepth marketDepth) {
-			this.security = security;
-			this.marketDepth = marketDepth;
-		}
-
-		@Override
-		public Event produceEvent(EventType type) {
-			return new SecurityMarketDepthEvent(type, security, marketDepth);
-		}
-		
+		dispatcher.dispatch(onMarketDepthUpdate, createMDEventFactory(time, md));
 	}
 	
 	@Override
@@ -363,8 +357,32 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	}
 	
 	@Override
-	protected EventFactory createEventFactory() {
-		return new SecurityEventFactory(this);
+	protected EventFactory createEventFactory(Instant time) {
+		return new SecurityEventFactory(this, time);
+	}
+	
+	/**
+	 * Create an event factory instance to produce Depth of Market update events.
+	 * <p>
+	 * Override this method to produce specific events.
+	 * <p>
+	 * @param time - time of event
+	 * @param md - depth of market
+	 * @return event factory
+	 */
+	protected EventFactory createMDEventFactory(Instant time, MarketDepth md) {
+		return new SecurityMarketDepthEventFactory(this, time, md);
+	}
+	
+	/**
+	 * Create an event factory to produce tick data events.
+	 * <p>
+	 * @param time - time of event
+	 * @param tick - tick data
+	 * @return event factory
+	 */
+	protected EventFactory createTickEventFactory(Instant time, Tick tick) {
+		return new SecurityTickEventFactory(this, time, tick);
 	}
 	
 	@Override

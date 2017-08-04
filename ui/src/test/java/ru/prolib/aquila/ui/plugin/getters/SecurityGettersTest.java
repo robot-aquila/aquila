@@ -63,7 +63,7 @@ public class SecurityGettersTest {
 		GSecurity g = new GSecurity();
 		IsInstanceOf.instanceOf(G.class).matches(g);		
 		SecurityEvent e = new SecurityEvent(
-				control.createMock(EventType.class), (Security) security);
+				control.createMock(EventType.class), (Security) security, null);
 		assertEquals(security, g.get(e));
 	}
 	

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
@@ -14,8 +16,8 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
 public class PositionEvent extends OSCEventImpl {
 	private final Position position;
 
-	public PositionEvent(EventType type, Position position) {
-		super(type, position);
+	public PositionEvent(EventType type, Position position, Instant time) {
+		super(type, position, time);
 		this.position = position;
 	}
 	
@@ -40,6 +42,7 @@ public class PositionEvent extends OSCEventImpl {
 		return o.getType() == getType()
 			&& o.position == position
 			&& new EqualsBuilder()
+				.append(o.getTime(), getTime())
 				.append(o.getUpdatedTokens(), getUpdatedTokens())
 				.isEquals();
 	}

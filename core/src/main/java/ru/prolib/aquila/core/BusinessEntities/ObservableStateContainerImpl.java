@@ -1,19 +1,16 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
 import java.util.Map;
 
 import ru.prolib.aquila.core.EventDispatcher;
-import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventFactory;
-import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
-import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParams;
-import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsBuilder;
 
 /**
  * Observable state container implementation.
@@ -37,25 +34,6 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 		this.onUpdate = new EventTypeImpl(id + ".UPDATE");
 		this.onAvailable = new EventTypeImpl(id + ".AVAILABLE");
 		this.onClose = new EventTypeImpl(id + ".CLOSE");
-	}
-	
-	@Deprecated
-	public ObservableStateContainerImpl(EventDispatcher dispatcher, String id, OSCController controller) {
-		this(new OSCParamsBuilder()
-				.withEventDispatcher(dispatcher)
-				.withID(id)
-				.withController(controller)
-				.buildParams());
-	}
-	
-	@Deprecated
-	public ObservableStateContainerImpl(EventQueue queue, String id, OSCController controller) {
-		this(new EventDispatcherImpl(queue, id), id, controller);
-	}
-	
-	@Deprecated
-	public ObservableStateContainerImpl(EventQueue queue, String id) {
-		this(queue, id, new OSCControllerStub());
 	}
 	
 	final public OSCController getController() {
@@ -83,8 +61,13 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	
 	@Override
 	public void close() {
+		Instant time;
 		lock.lock();
 		try {
+			if ( isClosed() ) {
+				return;
+			}
+			time = controller.getCurrentTime(this);
 			super.close();
 			available = false;
 			controller = null;
@@ -93,7 +76,7 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 		} finally {
 			lock.unlock();
 		}
-		dispatcher.dispatch(onClose, createEventFactory());
+		dispatcher.dispatch(onClose, createEventFactory(time));
 	}
 	
 	@Override
@@ -113,13 +96,14 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 		try {
 			super.update(tokens); // inside the lock is OK in this case
 			if ( hasChanged() ) {
-				EventFactory factory = createEventFactory();
+				Instant time = controller.getCurrentTime(this);
+				EventFactory factory = createEventFactory(time);
 				dispatcher.dispatch(onUpdate, factory);
-				controller.processUpdate(this);
-				if ( ! available && controller.hasMinimalData(this) ) {
+				controller.processUpdate(this, time);
+				if ( ! available && controller.hasMinimalData(this, time) ) {
 					available = true;
 					dispatcher.dispatch(onAvailable, factory);
-					controller.processAvailable(this);
+					controller.processAvailable(this, time);
 				}
 			}
 		} finally {
@@ -149,10 +133,11 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	 * Override this method to produce specific events. Produced events must be
 	 * derived of {@link OSCEventImpl} class.
 	 * <p>
+	 * @param time - time of event
 	 * @return event factory
 	 */
-	protected EventFactory createEventFactory() {
-		return new OSCEventFactory(this);
+	protected EventFactory createEventFactory(Instant time) {
+		return new OSCEventFactory(this, time);
 	}
 
 }

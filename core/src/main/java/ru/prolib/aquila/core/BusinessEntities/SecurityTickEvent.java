@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import ru.prolib.aquila.core.*;
 
 /**
@@ -12,14 +14,15 @@ public class SecurityTickEvent extends SecurityEvent {
 	private final Tick tick;
 
 	/**
-	 * Создать событие
+	 * Constructor.
 	 * <p>
-	 * @param type тип события
-	 * @param security инструмент
-	 * @param tick тик данных
+	 * @param type - event type
+	 * @param security - the security instance
+	 * @param time - time of event
+	 * @param tick - data tick
 	 */
-	public SecurityTickEvent(EventType type, Security security, Tick tick) {
-		super(type, security);
+	public SecurityTickEvent(EventType type, Security security, Instant time, Tick tick) {
+		super(type, security, time);
 		this.tick = tick;
 	}
 

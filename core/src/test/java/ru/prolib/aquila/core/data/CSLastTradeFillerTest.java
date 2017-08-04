@@ -98,23 +98,25 @@ public class CSLastTradeFillerTest {
 	
 	@Test
 	public void testOnEvent() throws Exception {
+		Instant time = Instant.parse("2017-08-04T21:20:00Z");
 		Tick trade = Tick.ofTrade(Instant.EPOCH, 24.15d, 100L);
 		filler.start();
 		expect(utilsMock.aggregate(same(series1), eq(TimeFrame.M1), eq(trade)))
 			.andReturn(true);
 		control.replay();
 		
-		filler.onEvent(new SecurityTickEvent(security1.onLastTrade(), security1, trade));
+		filler.onEvent(new SecurityTickEvent(security1.onLastTrade(), security1, time, trade));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testOnEvent_SkipIfNotStarted() {
+		Instant time = Instant.parse("2017-08-04T21:20:00Z");
 		control.replay();
 		
-		filler.onEvent(new SecurityTickEvent(security1.onLastTrade(),
-				security1, Tick.ofTrade(Instant.EPOCH, 24.15d, 100L)));
+		Tick trade = Tick.ofTrade(Instant.EPOCH, 24.15d, 100L);
+		filler.onEvent(new SecurityTickEvent(security1.onLastTrade(), security1, time, trade));
 		
 		control.verify();
 	}

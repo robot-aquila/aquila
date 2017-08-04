@@ -142,7 +142,7 @@ public class L1UpdateSourceSATImplTest {
 		basicSourceMock.subscribeL1(symbol2, security2);
 		control.replay();
 		
-		source.onEvent(new SecurityEvent(security2.onAvailable(), security2));
+		source.onEvent(new SecurityEvent(security2.onAvailable(), security2, null)); // TODO:
 		
 		control.verify();
 		assertFalse(pending.contains(security2));

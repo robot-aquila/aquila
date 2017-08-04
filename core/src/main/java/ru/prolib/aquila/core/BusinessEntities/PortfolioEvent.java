@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.*;
@@ -19,9 +21,10 @@ public class PortfolioEvent extends OSCEventImpl {
 	 * <p>
 	 * @param type экземпляр типа
 	 * @param portfolio портфель
+	 * @param time - time of event
 	 */
-	public PortfolioEvent(EventType type, Portfolio portfolio) {
-		super(type, portfolio);
+	public PortfolioEvent(EventType type, Portfolio portfolio, Instant time) {
+		super(type, portfolio, time);
 		this.portfolio = portfolio;
 	}
 	
@@ -47,6 +50,7 @@ public class PortfolioEvent extends OSCEventImpl {
 			return o.getType() == getType()
 				&& o.getPortfolio() == getPortfolio()
 				&& new EqualsBuilder()
+					.append(o.getTime(), getTime())
 					.append(o.getUpdatedTokens(), getUpdatedTokens())
 					.isEquals();
 		}

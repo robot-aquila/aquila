@@ -1,11 +1,21 @@
 package ru.prolib.aquila.core.BusinessEntities.osc;
 
+import java.time.Instant;
+
 import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainer;
 
 /**
- * Controller interface of container.
+ * Controller interface of observable state container.
  */
 public interface OSCController {
+	
+	/**
+	 * Get current time for the container.
+	 * <p>
+	 * @param container - the container
+	 * @return current time
+	 */
+	public Instant getCurrentTime(ObservableStateContainer container);
 	
 	/**
 	 * Check that container contains minimum required data.
@@ -16,9 +26,10 @@ public interface OSCController {
 	 * on container contents. 
 	 * <p>
 	 * @param container - the container
+	 * @param time - current time
 	 * @return true if minimum requirements are met, false otherwise
 	 */
-	public boolean hasMinimalData(ObservableStateContainer container);
+	public boolean hasMinimalData(ObservableStateContainer container, Instant time);
 	
 	/**
 	 * Perform additional update processing.
@@ -27,8 +38,9 @@ public interface OSCController {
 	 * should override this method to implement additional events.
 	 * <p>
 	 * @param container - the container
+	 * @param time - current time
 	 */
-	public void processUpdate(ObservableStateContainer container);
+	public void processUpdate(ObservableStateContainer container, Instant time);
 	
 	/**
 	 * Perform availability status switching.
@@ -37,7 +49,8 @@ public interface OSCController {
 	 * should override this method to implement additional events.
 	 * <p>
 	 * @param container - the container
+	 * @param time - current time
 	 */
-	public void processAvailable(ObservableStateContainer container);
+	public void processAvailable(ObservableStateContainer container, Instant time);
 	
 }
