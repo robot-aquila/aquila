@@ -2,6 +2,8 @@ package ru.prolib.aquila.data;
 
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
+
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,6 +112,18 @@ public class DataSourceImplTest {
 		dataSource.setSymbolUpdateSource(symbolUpdateSourceMock);
 		
 		dataSource.close();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSetStartTimeL1() {
+		Instant t = Instant.parse("2017-08-06T18:55:00Z");
+		l1UpdateSourceMock.setStartTimeL1(new Symbol("GAZP"), t);
+		control.replay();
+		dataSource.setL1UpdateSource(l1UpdateSourceMock);
+		
+		dataSource.setStartTimeL1(new Symbol("GAZP"), t);
 		
 		control.verify();
 	}

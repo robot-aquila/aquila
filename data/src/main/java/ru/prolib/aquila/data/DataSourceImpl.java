@@ -1,6 +1,7 @@
 package ru.prolib.aquila.data;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import org.apache.commons.io.IOUtils;
 
@@ -64,6 +65,11 @@ public class DataSourceImpl implements DataSource {
 		IOUtils.closeQuietly(l1UpdateSource);
 		IOUtils.closeQuietly(mdUpdateSource);
 		IOUtils.closeQuietly(symbolUpdateSource);
+	}
+
+	@Override
+	public synchronized void setStartTimeL1(Symbol symbol, Instant time) {
+		l1UpdateSource.setStartTimeL1(symbol, time);
 	}
 
 }

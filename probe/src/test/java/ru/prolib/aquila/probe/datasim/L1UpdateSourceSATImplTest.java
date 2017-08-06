@@ -3,6 +3,7 @@ package ru.prolib.aquila.probe.datasim;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -84,7 +85,7 @@ public class L1UpdateSourceSATImplTest {
 		
 		control.verify();
 		assertTrue(pending.contains(security2));
-		assertTrue(security2.onAvailable().isSyncListener(source));
+		assertTrue(security2.onAvailable().isAsyncListener(source));
 	}
 	
 	@Test
@@ -137,16 +138,23 @@ public class L1UpdateSourceSATImplTest {
 	
 	@Test
 	public void testOnEvent_() throws Exception {
+		Instant t = Instant.parse("2017-08-06T19:50:00Z");
 		pending.add(security2);
 		security2.onAvailable().addSyncListener(source);
+		basicSourceMock.setStartTimeL1(symbol2, t);
 		basicSourceMock.subscribeL1(symbol2, security2);
 		control.replay();
 		
-		source.onEvent(new SecurityEvent(security2.onAvailable(), security2, null)); // TODO:
+		source.onEvent(new SecurityEvent(security2.onAvailable(), security2, t));
 		
 		control.verify();
 		assertFalse(pending.contains(security2));
 		assertFalse(security2.onAvailable().isListener(source));
+	}
+	
+	@Test (expected=UnsupportedOperationException.class)
+	public void testSetStartTimeL1() throws Exception {
+		source.setStartTimeL1(symbol1, Instant.EPOCH);
 	}
 
 }

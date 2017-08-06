@@ -1,6 +1,7 @@
 package ru.prolib.aquila.probe.datasim;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -55,7 +56,6 @@ public class L1UpdateSourceImpl implements L1UpdateSource {
 	{
 		this(new L1UpdateHandlerFactory(scheduler, readerFactory));
 	}
-	
 
 	@Override
 	public void close() throws IOException {
@@ -72,6 +72,24 @@ public class L1UpdateSourceImpl implements L1UpdateSource {
 
 	@Override
 	public void subscribeL1(Symbol symbol, L1UpdateConsumer consumer) {
+		try {
+			getHandler(symbol).subscribe(consumer);
+		} catch ( IOException e ) {
+			logger.error("Error subscription symbol: {}", symbol, e);
+		}
+	}
+
+	@Override
+	public void unsubscribeL1(Symbol symbol, L1UpdateConsumer consumer) {
+		getHandler(symbol).unsubscribe(consumer);
+	}
+
+	@Override
+	public void setStartTimeL1(Symbol symbol, Instant time) {
+		getHandler(symbol).setStartTime(time);
+	}
+	
+	private L1UpdateHandler getHandler(Symbol symbol) {
 		lock.lock();
 		try {
 			L1UpdateHandler handler = handlers.get(symbol);
@@ -79,22 +97,7 @@ public class L1UpdateSourceImpl implements L1UpdateSource {
 				handler = handlerFactory.produce(symbol);
 				handlers.put(symbol, handler);
 			}
-			handler.subscribe(consumer);
-		} catch ( IOException e ) {
-			logger.error("Error subscription symbol: {}", symbol, e);
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	public void unsubscribeL1(Symbol symbol, L1UpdateConsumer consumer) {
-		lock.lock();
-		try {
-			L1UpdateHandler handler = handlers.get(symbol);
-			if ( handler != null ) {
-				handler.unsubscribe(consumer);
-			}
+			return handler;
 		} finally {
 			lock.unlock();
 		}

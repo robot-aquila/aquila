@@ -3,6 +3,7 @@ package ru.prolib.aquila.probe.datasim;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -89,10 +90,26 @@ public class L1UpdateSourceImplTest {
 	}
 
 	@Test
-	public void testUnsubscribeL1_NonExistingHandler() throws Exception {
+	public void testSetStartTime_NewHandler() throws Exception {
+		Instant t = Instant.parse("2017-08-06T19:45:00Z");
+		expect(handlerFactoryMock.produce(symbol1)).andReturn(handlerMock1);
+		handlerMock1.setStartTime(t);
 		control.replay();
 		
-		updateSource.unsubscribeL1(symbol1, consumerMock);
+		updateSource.setStartTimeL1(symbol1, t);
+		
+		control.verify();
+		assertSame(handlerMock1, handlerMap.get(symbol1));
+	}
+	
+	@Test
+	public void testSetStartTime_ExistingHandler() throws Exception {
+		Instant t = Instant.parse("2017-08-06T19:46:00Z");
+		handlerMap.put(symbol1, handlerMock1);
+		handlerMock1.setStartTime(t);
+		control.replay();
+		
+		updateSource.setStartTimeL1(symbol1, t);
 		
 		control.verify();
 	}

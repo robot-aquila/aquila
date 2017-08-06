@@ -29,6 +29,11 @@ public class L1AbstractReplayServiceTest {
 		public CloseableIterator<? extends TStamped> createReader() {
 			throw new UnsupportedOperationException();
 		}
+
+		@Override
+		public void setStartTimeL1(Symbol symbol, Instant time) {
+			throw new UnsupportedOperationException();
+		}
 		
 	}
 	

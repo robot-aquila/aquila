@@ -1,8 +1,11 @@
 package ru.prolib.aquila.probe.datasim.l1;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,19 +29,26 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 	private final Lock lock;
 	private final Symbol symbol;
 	private final Scheduler scheduler;
-	private final List<L1UpdateConsumer> consumers;
+	private final Set<L1UpdateConsumer> consumers;
 	private final L1UpdateReaderFactory readerFactory;
 	private int sequenceID = 1;
 	private CloseableIterator<L1Update> reader;
+	private Instant startTime;
 	
-	public L1UpdateHandler(Symbol symbol, Scheduler scheduler,
-			L1UpdateReaderFactory readerFactory)
+	L1UpdateHandler(Symbol symbol, Scheduler scheduler,
+			L1UpdateReaderFactory readerFactory, Set<L1UpdateConsumer> consumers)
 	{
 		this.lock = new ReentrantLock();
 		this.symbol = symbol;
 		this.scheduler = scheduler;
-		this.consumers = new ArrayList<>();
 		this.readerFactory = readerFactory;
+		this.consumers = consumers;
+	}
+	
+	public L1UpdateHandler(Symbol symbol, Scheduler scheduler,
+			L1UpdateReaderFactory readerFactory)
+	{
+		this(symbol, scheduler, readerFactory, new HashSet<>());
 	}
 	
 	int getCurrentSequenceID() {
@@ -81,7 +91,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		try {
 			finishSequence();
 			if ( consumers.size() > 0 ) {
-				reader = readerFactory.createReader(symbol, scheduler.getCurrentTime());
+				reader = readerFactory.createReader(symbol, getStartTime());
 				scheduleUpdate();
 			}
 		} finally {
@@ -117,6 +127,20 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		scheduleUpdate();
 	}
 	
+	/**
+	 * Set start time of reading data.
+	 * <p>
+	 * @param time - start time of data
+	 */
+	public void setStartTime(Instant time) {
+		lock.lock();
+		try {
+			startTime = time;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
 	private void finishSequence() {
 		lock.lock();
 		try {
@@ -146,5 +170,9 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		}
 		finishSequence();
 	}
-
+	
+	private Instant getStartTime() {
+		return startTime == null ? scheduler.getCurrentTime() : startTime;
+	}
+	
 }

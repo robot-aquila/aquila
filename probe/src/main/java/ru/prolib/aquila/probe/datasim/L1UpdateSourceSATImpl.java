@@ -1,5 +1,6 @@
 package ru.prolib.aquila.probe.datasim;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -75,7 +76,7 @@ public class L1UpdateSourceSATImpl implements L1UpdateSource, EventListener, Loc
 		x.lock();
 		try {
 			if ( ! security.isAvailable() ) {
-				security.onAvailable().addSyncListener(this);
+				security.onAvailable().addListener(this);
 				pending.add(security);
 				return;
 			}
@@ -107,8 +108,9 @@ public class L1UpdateSourceSATImpl implements L1UpdateSource, EventListener, Loc
 	@Override
 	public void onEvent(Event event) {
 		if ( (event instanceof SecurityEvent) ) {
-			Security security = ((SecurityEvent) event).getSecurity();
-			if ( event.isType(security.onAvailable()) ) {
+			SecurityEvent e = (SecurityEvent) event;
+			Security security = e.getSecurity();
+			if ( e.isType(security.onAvailable()) ) {
 				Multilock x = new Multilock(security, this);
 				x.lock();
 				security.onAvailable().removeListener(this);
@@ -120,9 +122,15 @@ public class L1UpdateSourceSATImpl implements L1UpdateSource, EventListener, Loc
 				} finally {
 					x.unlock();
 				}
+				basicSource.setStartTimeL1(security.getSymbol(), e.getTime());
 				basicSource.subscribeL1(security.getSymbol(), (EditableSecurity) security);
 			}
 		}
+	}
+	
+	@Override
+	public void setStartTimeL1(Symbol symbol, Instant time) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

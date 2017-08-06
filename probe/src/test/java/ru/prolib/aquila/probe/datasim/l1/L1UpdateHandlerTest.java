@@ -6,7 +6,9 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
@@ -55,6 +57,7 @@ public class L1UpdateHandlerTest {
 	private L1UpdateConsumer consumerMock1, consumerMock2;
 	private CloseableIterator<L1Update> readerStub;
 	private L1UpdateHandler handler;
+	private Set<L1UpdateConsumer> consumersStub;
 
 	@Before
 	public void setUp() throws Exception {
@@ -65,7 +68,8 @@ public class L1UpdateHandlerTest {
 		schedulerStub = new SchedulerStub();
 		schedulerStub.setFixedTime(T("2016-10-18T02:30:00Z"));
 		readerFactoryStub = new UpdateReaderFactoryStub();
-		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryStub);
+		consumersStub = new LinkedHashSet<>();
+		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryStub, consumersStub);
 	}
 	
 	@After
@@ -330,6 +334,34 @@ public class L1UpdateHandlerTest {
 		readerFactoryStub.predefinedReader = readerMock;
 		control.replay();
 		handler.startNewSequence(); // should not read  updates
+		control.verify();
+	}
+	
+	@Test
+	public void testSetStartTime_AffectsSubscribe() throws Exception {
+		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryMock, consumersStub);
+		handler.setStartTime(T("2017-08-06T19:30:00Z"));
+		expect(readerFactoryMock.createReader(symbol, T("2017-08-06T19:30:00Z")))
+			.andReturn(new CloseableIteratorStub<>());
+		control.replay();
+
+		handler.subscribe(consumerMock1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSetStartTime_AffectsStartNewSequence() throws Exception {
+		handler = new L1UpdateHandler(symbol, schedulerStub, readerFactoryMock, consumersStub);
+		handler.setStartTime(T("2017-08-06T19:30:00Z"));
+		consumersStub.add(consumerMock1);
+
+		expect(readerFactoryMock.createReader(symbol, T("2017-08-06T19:30:00Z")))
+		.andReturn(new CloseableIteratorStub<>());
+		control.replay();
+	
+		handler.startNewSequence();
+		
 		control.verify();
 	}
 
