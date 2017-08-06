@@ -227,12 +227,13 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public EditablePortfolio getEditablePortfolio(Account account) {
+		EditablePortfolio portfolio = null;
 		lock.lock();
 		try {
 			if ( closed ) {
 				throw new IllegalStateException();
 			}
-			EditablePortfolio portfolio = portfolios.get(account);
+			portfolio = portfolios.get(account);
 			if ( portfolio == null ) {
 				portfolio = objectFactory.createPortfolio(this, account);
 				portfolios.put(account, portfolio);
@@ -244,15 +245,15 @@ public class TerminalImpl implements EditableTerminal {
 				portfolio.onUpdate().addAlternateType(onPortfolioUpdate);
 				portfolio.onClose().addAlternateType(onPortfolioClose);
 				portfolio.onPositionClose().addAlternateType(onPositionClose);
-				dataProvider.subscribeStateUpdates(portfolio);
 			}
 			if ( defaultPortfolio == null ) {
 				defaultPortfolio = portfolio;
 			}
-			return portfolio;
 		} finally {
 			lock.unlock();
 		}
+		dataProvider.subscribeStateUpdates(portfolio);
+		return portfolio;
 	}
 	
 	@Override

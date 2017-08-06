@@ -61,7 +61,6 @@ public class TerminalImplTest {
 	private ObjectFactory objectFactoryMock;
 	private TerminalImpl terminal, terminalWithMocks;
 	private EventListenerStub listenerStub;
-	private OrderTransactionFactory orderTransactionFactory;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -91,7 +90,6 @@ public class TerminalImplTest {
 		params.setObjectFactory(objectFactoryMock);
 		terminalWithMocks = new TerminalImpl(params);
 		listenerStub = new EventListenerStub();
-		orderTransactionFactory = new OrderTransactionFactory();
 		
 		terminal.getEditableSecurity(symbol1);
 		terminal.getEditableSecurity(symbol2);
@@ -1201,8 +1199,15 @@ public class TerminalImplTest {
 			order3 = createTestOrder(),
 			order4 = createTestOrder(),
 			order5 = createTestOrder();
-		orderTransactionFactory.createCancellation(order2).apply();
-		orderTransactionFactory.createRejection(order5, "Test").apply();
+		order2.consume(new DeltaUpdateBuilder()
+				.withToken(OrderField.STATUS, OrderStatus.CANCELLED)
+				.withToken(OrderField.TIME_DONE, T("2017-08-06T22:20:00Z"))
+				.buildUpdate());
+		order5.consume(new DeltaUpdateBuilder()
+				.withToken(OrderField.STATUS, OrderStatus.REJECTED)
+				.withToken(OrderField.TIME_DONE, T("2017-08-06T22:20:00Z"))
+				.withToken(OrderField.SYSTEM_MESSAGE, "Test Operation")
+				.buildUpdate());
 		terminal.onOrderArchived().addSyncListener(listenerStub);
 		
 		terminal.archiveOrders();
