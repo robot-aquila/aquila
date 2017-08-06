@@ -733,6 +733,10 @@ public class TerminalImpl implements EditableTerminal {
 		} finally {
 			lock.unlock();
 		}
+		// It's OK to call start or/and stop consecutively.
+		// Just one first call will delegate to data provider.
+		// To call start or/and stop in proper sequence the
+		// onTerminalReady/onTerminalUnready should be analyzed.
 		dataProvider.subscribeRemoteObjects(this);
 		dispatcher.dispatch(onTerminalReady, new TerminalEventFactory(this));
 	}

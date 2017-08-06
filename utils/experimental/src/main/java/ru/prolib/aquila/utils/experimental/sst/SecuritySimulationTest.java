@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,8 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
@@ -122,9 +125,20 @@ public class SecuritySimulationTest implements Experiment {
 			logger.error("Error reading symbol list: ", e);
 			return 1;
 		}
-		for ( Symbol symbol : symbols ) {
-			terminal.subscribe(symbol);
-		}
+		//for ( Symbol symbol : symbols ) {
+		//	terminal.subscribe(symbol);
+		//}
+		final Set<Symbol> symbols_dup = symbols;
+		terminal.onTerminalReady().addListener(new EventListener() {
+			@Override
+			public void onEvent(Event event) {
+				Instant t = terminal.getCurrentTime();
+				logger.debug("Terminal ready at {}", t);
+				for ( Symbol s : symbols_dup ) {
+					terminal.subscribe(s);
+				}
+			}
+		});
 		terminal.start();
 		
 		csDataProvider = new CSDataProviderImpl(terminal);
