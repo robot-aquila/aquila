@@ -33,30 +33,12 @@ public class EventTypeImplTest {
 		type = new EventTypeImpl();
 		assertEquals("EvtType" + autoId, type.getId());
 		assertEquals(autoId + 1, EventTypeImpl.getAutoId());
-		assertFalse(type.isOnlySyncMode());
 	}
 	
 	@Test
 	public void testConstruct1_S() throws Exception {
 		type = new EventTypeImpl("MyType");
 		assertEquals("MyType", type.getId());
-		assertFalse(type.isOnlySyncMode());
-	}
-	
-	@Test
-	public void testConstruct1_B() throws Exception {
-		int autoId = EventTypeImpl.getAutoId();
-		type = new EventTypeImpl(true);
-		assertEquals("EvtType" + autoId, type.getId());
-		assertEquals(autoId + 1, EventTypeImpl.getAutoId());
-		assertTrue(type.isOnlySyncMode());
-	}
-	
-	@Test
-	public void testConstruct2() throws Exception {
-		type = new EventTypeImpl("Zulu", true);
-		assertEquals("Zulu", type.getId());
-		assertTrue(type.isOnlySyncMode());
 	}
 	
 	@Test
@@ -66,7 +48,7 @@ public class EventTypeImplTest {
 	
 	@Test
 	public void testAddListener() throws Exception {
-		List<EventListener> expected = new Vector<EventListener>();
+		Set<EventListener> expected = new HashSet<>();
 		expected.add(listener1);
 		expected.add(listener2);
 		expected.add(listener3);
@@ -74,86 +56,26 @@ public class EventTypeImplTest {
 		type.addListener(listener1);
 		type.addListener(listener2);
 		type.addListener(listener3);
-		assertEquals(expected, type.getAsyncListeners());
-		assertEquals(new Vector<EventListener>(), type.getSyncListeners());
+		assertEquals(expected, type.getListeners());
 	}
 	
 	@Test
-	public void testAddListener_OnlySyncMode() throws Exception {
-		List<EventListener> expected = new Vector<EventListener>();
-		expected.add(listener1);
-		expected.add(listener2);
-		
-		type = new EventTypeImpl(true);
-		type.addListener(listener1);
-		type.addListener(listener2);
-		
-		assertEquals(new Vector<EventListener>(), type.getAsyncListeners());
-		assertEquals(expected, type.getSyncListeners());
-	}
-	
-	@Test
-	public void testAddListener_MoveSyncToAsync() throws Exception {
-		type.addSyncListener(listener1);
-		assertTrue(type.isSyncListener(listener1));
-		type.addListener(listener1);
-		assertFalse(type.isSyncListener(listener1));
-		assertTrue(type.isAsyncListener(listener1));
-	}
-	
-	@Test
-	public void testAddSyncListener() throws Exception {
-		type.addSyncListener(listener2);
-		type.addSyncListener(listener3);
-		type.addListener(listener1);
-		
-		Vector<EventListener> expected = new Vector<EventListener>();
-		expected.add(listener2);
-		expected.add(listener3);
-		
-		assertEquals(expected, type.getSyncListeners());
-	}
-	
-	@Test
-	public void testAddSyncListener_MoveAsyncToSync() throws Exception {
-		type.addListener(listener1);
-		assertTrue(type.isAsyncListener(listener1));
-		type.addSyncListener(listener1);
-		assertFalse(type.isAsyncListener(listener1));
-		assertTrue(type.isSyncListener(listener1));
-	}
-	
-	@Test
-	public void testRemoveListener_Async() throws Exception {
+	public void testRemoveListener() throws Exception {
 		type.addListener(listener1);
 		type.addListener(listener2);
 		type.addListener(listener3);
-		List<EventListener> expected = new Vector<EventListener>();
+		Set<EventListener> expected = new HashSet<>();
 		expected.add(listener3);
 		
 		type.removeListener(listener1);
 		type.removeListener(listener2);
 		
-		assertEquals(expected, type.getAsyncListeners());
-	}
-	
-	@Test
-	public void testRemoveListener_Sync() throws Exception {
-		type.addSyncListener(listener1);
-		type.addSyncListener(listener2);
-		type.addSyncListener(listener3);
-		List<EventListener> expected = new Vector<EventListener>();
-		expected.add(listener3);
-		
-		type.removeListener(listener1);
-		type.removeListener(listener2);
-		
-		assertEquals(expected, type.getSyncListeners());
+		assertEquals(expected, type.getListeners());
 	}
 	
 	@Test
 	public void testIsListener() throws Exception {
-		type.addSyncListener(listener1);
+		type.addListener(listener1);
 		type.addListener(listener2);
 		type.addListener(listener3);
 		type.removeListener(listener3);
@@ -161,22 +83,6 @@ public class EventTypeImplTest {
 		assertTrue(type.isListener(listener1));
 		assertTrue(type.isListener(listener2));
 		assertFalse(type.isListener(listener3));
-	}
-	
-	@Test
-	public void testIsAsyncListener() throws Exception {
-		type.addListener(listener1);
-		type.addSyncListener(listener2);
-		assertTrue(type.isAsyncListener(listener1));
-		assertFalse(type.isAsyncListener(listener2));
-	}
-	
-	@Test
-	public void testIsSyncListener() throws Exception {
-		type.addListener(listener1);
-		type.addSyncListener(listener2);
-		assertFalse(type.isSyncListener(listener1));
-		assertTrue(type.isSyncListener(listener2));
 	}
 	
 	@Test
@@ -191,7 +97,6 @@ public class EventTypeImplTest {
 	public void testRemoveListeners() throws Exception {
 		type.addListener(listener1);
 		type.addListener(listener2);
-		type.addSyncListener(listener3);
 		
 		type.removeListeners();
 		
@@ -204,68 +109,34 @@ public class EventTypeImplTest {
 		assertEquals(1, type.countListeners());
 		type.addListener(listener2);
 		assertEquals(2, type.countListeners());
-		type.addSyncListener(listener3);
+		type.addListener(listener3);
 		assertEquals(3, type.countListeners());
 	}
-
+	
 	@Test
-	public void testGetAsyncListeners() throws Exception {
+	public void testGetListeners() throws Exception {
 		type.addListener(listener1);
 		type.addListener(listener2);
-		type.addSyncListener(listener3);
-		List<EventListener> expected = new Vector<EventListener>();
+		Set<EventListener> expected = new HashSet<>();
 		expected.add(listener1);
 		expected.add(listener2);
 		
-		assertEquals(expected, type.getAsyncListeners());
+		assertEquals(expected, type.getListeners());
 	}
 	
 	@Test
-	public void testGetSyncListeners() throws Exception {
-		type.addSyncListener(listener1);
-		type.addSyncListener(listener2);
-		type.addListener(listener3);
-		List<EventListener> expected = new Vector<EventListener>();
-		expected.add(listener1);
-		expected.add(listener2);
-		
-		assertEquals(expected, type.getSyncListeners());
-	}
-	
-	@Test
-	public void testAsyncListeners_SpecialCases() throws Exception {
+	public void testListeners_SpecialCases() throws Exception {
 		testListeners_SpecialCases(new HelperProxy() {
 			@Override public void addListener(EventListener listener) {
 				type.addListener(listener);
 			}
 
-			@Override public List<EventListener> getListeners() {
-				return type.getAsyncListeners();
+			@Override public Set<EventListener> getListeners() {
+				return type.getListeners();
 			}
 
 			@Override public boolean isListener(EventListener listener) {
-				return type.isAsyncListener(listener);
-			}
-
-			@Override public void removeListener(EventListener listener) {
-				type.removeListener(listener);
-			}
-		});
-	}
-
-	@Test
-	public void testSyncListeners_SpecialCases() throws Exception {
-		testListeners_SpecialCases(new HelperProxy() {
-			@Override public void addListener(EventListener listener) {
-				type.addSyncListener(listener);
-			}
-
-			@Override public List<EventListener> getListeners() {
-				return type.getSyncListeners();
-			}
-
-			@Override public boolean isListener(EventListener listener) {
-				return type.isSyncListener(listener);
+				return type.isListener(listener);
 			}
 
 			@Override public void removeListener(EventListener listener) {
@@ -288,7 +159,7 @@ public class EventTypeImplTest {
 	 */
 	interface HelperProxy {
 		public void addListener(EventListener listener);
-		public List<EventListener> getListeners();
+		public Set<EventListener> getListeners();
 		public boolean isListener(EventListener listener);
 		public void removeListener(EventListener listener);
 	}
@@ -305,9 +176,9 @@ public class EventTypeImplTest {
 		assertTrue(proxy.isListener(listener1));
 		assertFalse(proxy.isListener(listener2));
 		assertFalse(proxy.isListener(listener3));
-		List<EventListener> list = proxy.getListeners();
+		Set<EventListener> list = proxy.getListeners();
 		assertEquals(1, list.size());
-		assertSame(listener1, list.get(0));
+		assertTrue(list.contains(listener1));
 		
 		proxy.addListener(listener2);
 		assertTrue(proxy.isListener(listener1));
@@ -315,8 +186,8 @@ public class EventTypeImplTest {
 		assertFalse(proxy.isListener(listener3));
 		list = proxy.getListeners();
 		assertEquals(2, list.size());
-		assertSame(listener1, list.get(0));
-		assertSame(listener2, list.get(1));
+		assertTrue(list.contains(listener1));
+		assertTrue(list.contains(listener2));
 
 		proxy.addListener(listener3);
 		assertTrue(proxy.isListener(listener1));
@@ -324,9 +195,9 @@ public class EventTypeImplTest {
 		assertTrue(proxy.isListener(listener3));
 		list = proxy.getListeners();
 		assertEquals(3, list.size());
-		assertSame(listener1, list.get(0));
-		assertSame(listener2, list.get(1));
-		assertSame(listener3, list.get(2));
+		assertTrue(list.contains(listener1));
+		assertTrue(list.contains(listener2));
+		assertTrue(list.contains(listener3));
 		
 		proxy.removeListener(listener1);
 		assertFalse(proxy.isListener(listener1));
@@ -334,8 +205,8 @@ public class EventTypeImplTest {
 		assertTrue(proxy.isListener(listener3));
 		list = proxy.getListeners();
 		assertEquals(2, list.size());
-		assertSame(listener2, list.get(0));
-		assertSame(listener3, list.get(1));
+		assertTrue(list.contains(listener2));
+		assertTrue(list.contains(listener3));
 	}
 	
 	@Test
@@ -385,7 +256,7 @@ public class EventTypeImplTest {
 		
 		assertTrue(type.hasListeners());
 		
-		type.addSyncListener(listener2);
+		type.addListener(listener2);
 		type.removeListener(listener1);
 		
 		assertTrue(type.hasListeners());
@@ -426,7 +297,7 @@ public class EventTypeImplTest {
 		type.addAlternateType(type2);
 		type.addListener(listener1);
 		type.addListener(listener2);
-		type.addSyncListener(listener3);
+		type.addListener(listener3);
 		
 		type.removeAlternatesAndListeners();
 		

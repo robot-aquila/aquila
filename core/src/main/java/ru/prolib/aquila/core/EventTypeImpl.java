@@ -11,8 +11,7 @@ public class EventTypeImpl implements EventType {
 	public static final String AUTO_ID_PREFIX = "EvtType";
 	private static int autoId = 1;
 	private final String id;
-	private final List<EventListener> asyncListeners, syncListeners;
-	private final boolean onlySync;
+	private final Set<EventListener> listeners;
 	private final Set<EventType> alternates;
 	
 	/**
@@ -49,33 +48,9 @@ public class EventTypeImpl implements EventType {
 	 * @param id идентификатор типа события
 	 */
 	public EventTypeImpl(String id) {
-		this(id, false);
-	}
-	
-	/**
-	 * Создать тип события.
-	 * <p>
-	 * Создается объект с идентификатором по умолчанию. Идентификатор
-	 * формируется по шаблону {@link #AUTO_ID_PREFIX} + autoId
-	 * <p>
-	 * @param onlySync разрешить только синхронную трансляцию
-	 */
-	public EventTypeImpl(boolean onlySync) {
-		this(nextId(), onlySync);
-	}
-	
-	/**
-	 * Создать тип события.
-	 * <p>
-	 * @param id идентификатор типа события
-	 * @param onlySync разрешить только синхронную трансляцию
-	 */
-	public EventTypeImpl(String id, boolean onlySync) {
 		this.id = id;
-		this.onlySync = onlySync;
-		asyncListeners = new ArrayList<EventListener>();
-		syncListeners = new ArrayList<EventListener>();
-		alternates = new HashSet<EventType>();
+		listeners = new HashSet<>();
+		alternates = new HashSet<>();
 	}
 	
 	@Override
@@ -90,25 +65,17 @@ public class EventTypeImpl implements EventType {
 	
 	@Override
 	public synchronized void addListener(EventListener listener) {
-		if ( onlySync ) {
-			addSyncListener(listener);
-		} else {
-			syncListeners.remove(listener);
-			if ( ! isAsyncListener(listener) ) {
-				asyncListeners.add(listener);
-			}			
-		}
+		listeners.add(listener);
 	}
 	
 	@Override
 	public synchronized void removeListener(EventListener listener) {
-		asyncListeners.remove(listener);
-		syncListeners.remove(listener);
+		listeners.remove(listener);
 	}
 
 	@Override
 	public synchronized boolean isListener(EventListener listener) {
-		return isAsyncListener(listener) || isSyncListener(listener);
+		return listeners.contains(listener);
 	}
 	
 	@Override
@@ -120,56 +87,17 @@ public class EventTypeImpl implements EventType {
 
 	@Override
 	public synchronized void removeListeners() {
-		asyncListeners.clear();
-		syncListeners.clear();
+		listeners.clear();
 	}
 
 	@Override
 	public synchronized int countListeners() {
-		return asyncListeners.size() + syncListeners.size();
+		return listeners.size();
 	}
 
 	@Override
-	public synchronized List<EventListener> getAsyncListeners() {
-		return new ArrayList<EventListener>(asyncListeners);
-	}
-
-	@Override
-	public synchronized List<EventListener> getSyncListeners() {
-		return new ArrayList<EventListener>(syncListeners);
-	}
-
-	@Override
-	public synchronized boolean isSyncListener(EventListener listener) {
-		for ( EventListener l : syncListeners ) {
-			if ( listener == l ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public synchronized boolean isAsyncListener(EventListener listener) {
-		for ( EventListener l : asyncListeners ) {
-			if ( listener == l ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public synchronized void addSyncListener(EventListener listener) {
-		asyncListeners.remove(listener);
-		if ( ! isSyncListener(listener) ) {
-			syncListeners.add(listener);
-		}
-	}
-
-	@Override
-	public boolean isOnlySyncMode() {
-		return onlySync;
+	public synchronized Set<EventListener> getListeners() {
+		return new HashSet<>(listeners);
 	}
 
 	@Override

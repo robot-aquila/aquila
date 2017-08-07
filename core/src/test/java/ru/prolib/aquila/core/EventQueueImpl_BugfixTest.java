@@ -111,7 +111,7 @@ java.lang.Thread.run(Unknown Source)
 				queueAcquired = new CountDownLatch(1);
 		final Lock sharedObject = new ReentrantLock();
 		final EventType signal1 = new EventTypeImpl(), signal2 = new EventTypeImpl();
-		signal1.addSyncListener(new EventListener() {
+		signal1.addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
 				queueAcquired.countDown();

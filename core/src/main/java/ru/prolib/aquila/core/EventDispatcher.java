@@ -7,15 +7,7 @@ package ru.prolib.aquila.core;
  * $Id: EventDispatcher.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public interface EventDispatcher extends EventProducer {
-	
-	/**
-	 * Отправить событие
-	 * <p>
-	 * @param event событие
-	 */
-	@Deprecated
-	public void dispatch(Event event);
-	
+		
 	/**
 	 * Dispatch event.
 	 * <p>
@@ -59,17 +51,6 @@ public interface EventDispatcher extends EventProducer {
 	public EventType createType();
 	
 	/**
-	 * Создать тип события с синхронной доставкой.
-	 * <p>
-	 * Создает тип события с идентификатором по-умолчанию. Созданный тип
-	 * допускает только синхронную доставку событий независимо от желания
-	 * подписчика.
-	 * <p>
-	 * @return тип события
-	 */
-	public EventType createSyncType();
-	
-	/**
 	 * Создать тип события.
 	 * <p>
 	 * Создает тип события с указанным идентификатором.
@@ -78,17 +59,5 @@ public interface EventDispatcher extends EventProducer {
 	 * @return тип события
 	 */
 	public EventType createType(String typeId);
-	
-	/**
-	 * Создать тип события с синхронной доставкой.
-	 * <p>
-	 * Создает тип события с указанным идентификатором. Созданный тип
-	 * допускающий только синхронную доставку событий независимо от желания
-	 * подписчика.
-	 * <p>
-	 * @param typeId идентификатор типа события
-	 * @return тип события
-	 */
-	public EventType createSyncType(String typeId);
 
 }

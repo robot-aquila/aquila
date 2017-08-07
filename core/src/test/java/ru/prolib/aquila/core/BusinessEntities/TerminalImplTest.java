@@ -521,8 +521,8 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testCreateOrder2_NoEventsProduced() throws Exception {
-		terminal.onOrderAvailable().addSyncListener(listenerStub);
-		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		terminal.onOrderAvailable().addListener(listenerStub);
+		terminal.onOrderUpdate().addListener(listenerStub);
 		
 		terminal.createOrder(account3, symbol3);
 		
@@ -717,8 +717,8 @@ public class TerminalImplTest {
 	@Test
 	public void testCreateOrder5_NoEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 934L;
-		terminal.onOrderAvailable().addSyncListener(listenerStub);
-		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		terminal.onOrderAvailable().addListener(listenerStub);
+		terminal.onOrderUpdate().addListener(listenerStub);
 		
 		terminal.createOrder(account1, symbol1, OrderAction.BUY, 20L, FDecimal.of2(431.15));
 		
@@ -751,8 +751,8 @@ public class TerminalImplTest {
 	@Test
 	public void testCreateOrder4_NoEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 714L;
-		terminal.onOrderAvailable().addSyncListener(listenerStub);
-		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		terminal.onOrderAvailable().addListener(listenerStub);
+		terminal.onOrderUpdate().addListener(listenerStub);
 		
 		terminal.createOrder(account3, symbol3, OrderAction.SELL, 80L);
 		
@@ -786,8 +786,8 @@ public class TerminalImplTest {
 	@Test
 	public void testCreateOrder7_NoEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 555L;
-		terminal.onOrderAvailable().addSyncListener(listenerStub);
-		terminal.onOrderUpdate().addSyncListener(listenerStub);
+		terminal.onOrderAvailable().addListener(listenerStub);
+		terminal.onOrderUpdate().addListener(listenerStub);
 		
 		terminal.createOrder(account3, symbol2, OrderType.MKT,
 				OrderAction.SELL, 400L, FDecimal.of2(224.13), "test order");
@@ -989,9 +989,9 @@ public class TerminalImplTest {
 	public void testClose_ClearEventListenersAndAlternates() {
 		EventType type = new EventTypeImpl();
 		terminal.onTerminalReady().addAlternateType(type);
-		terminal.onTerminalReady().addSyncListener(listenerStub);
+		terminal.onTerminalReady().addListener(listenerStub);
 		terminal.onTerminalUnready().addAlternateType(type);
-		terminal.onTerminalUnready().addSyncListener(listenerStub);
+		terminal.onTerminalUnready().addListener(listenerStub);
 		terminal.onOrderAvailable().addAlternateType(type);
 		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderCancelFailed().addAlternateType(type);
@@ -1124,7 +1124,7 @@ public class TerminalImplTest {
 		dataProviderMock.subscribeRemoteObjects(terminalWithMocks);
 		control.replay();
 		final CountDownLatch finished = new CountDownLatch(1);
-		terminalWithMocks.onTerminalReady().addSyncListener(new EventListener() {
+		terminalWithMocks.onTerminalReady().addListener(new EventListener() {
 			@Override public void onEvent(Event event) {
 				assertTrue(event.isType(terminalWithMocks.onTerminalReady()));
 				TerminalEvent e = (TerminalEvent) event;
@@ -1164,7 +1164,7 @@ public class TerminalImplTest {
 		dataProviderMock.unsubscribeRemoteObjects(terminalWithMocks);
 		control.replay();
 		final CountDownLatch finished = new CountDownLatch(1);
-		terminalWithMocks.onTerminalUnready().addSyncListener(new EventListener() {
+		terminalWithMocks.onTerminalUnready().addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
 				assertTrue(event.isType(terminalWithMocks.onTerminalUnready()));
@@ -1208,7 +1208,7 @@ public class TerminalImplTest {
 				.withToken(OrderField.TIME_DONE, T("2017-08-06T22:20:00Z"))
 				.withToken(OrderField.SYSTEM_MESSAGE, "Test Operation")
 				.buildUpdate());
-		terminal.onOrderArchived().addSyncListener(listenerStub);
+		terminal.onOrderArchived().addListener(listenerStub);
 		
 		terminal.archiveOrders();
 		

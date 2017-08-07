@@ -2,8 +2,6 @@ package ru.prolib.aquila.core;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +17,6 @@ public class EventQueueImpl implements EventQueue {
 	private final BlockingQueue<Event> queue;
 	private final String name;
 	private final Thread thread;
-	private final LinkedList<Event> cache1;
-	private final Lock queueLock = new ReentrantLock();
-	private boolean queueProcessing = false;
 	private final int maxSize = 5120;
 	
 	static {
@@ -37,7 +32,6 @@ public class EventQueueImpl implements EventQueue {
 		super();
 		this.name = threadName;
 		queue = new LinkedBlockingQueue<Event>();
-		cache1 = new LinkedList<Event>();
 		thread = new Thread(new QueueWorker(queue), name);
 		thread.setDaemon(true);
 		thread.start();
@@ -65,76 +59,23 @@ public class EventQueueImpl implements EventQueue {
 			throw new NullPointerException("The event cannot be null");
 		}
 		
-		// Кэшированние событий используется для соблюдения требования
-		// диспетчеризации событий в порядке их поступления. Если этого не
-		// сделать, то при генерации событий из обработчика другого события
-		// нарушение неизбежно.
-		
-		queueLock.lock();
 		try {
-			cache1.add(event);
-			if ( queueProcessing ) {
-				return;
-			}
-			queueProcessing = true;
-		} finally {
-			queueLock.unlock();
-		}
-
-		LinkedList<Event> cache2 = new LinkedList<>();
-		List<EventListener> listeners;
-		for ( ;; ) {
-			queueLock.lock();
-			try {
-				cache2.add(event = cache1.pollFirst());
-			} finally {
-				queueLock.unlock();
-			}
-			
-			listeners = event.getType().getSyncListeners();
-			for ( EventListener listener : listeners ) {
-				try {
-					listener.onEvent(event);
-				} catch ( Throwable e ) {
-					logger.error("Unhandled exception: ", e);
+			if ( queue.size() >= maxSize ) {
+				logger.warn("Queue is slow: {}", name);
+				// Wait if this thread is not a worker thread.
+				if ( Thread.currentThread() != thread ) {
+					int expSize = (int)(maxSize * 0.4); // wait for 60% free size
+					logger.debug("Isn't worker thread. Wait until queue has free space. Limit: {} pcs.", expSize);
+					do {
+						Thread.sleep(50L);
+					} while ( queue.size() >= expSize );
 				}
 			}
-			queueLock.lock();
-			try {
-				if ( cache1.size() == 0 ) {
-					break;
-				}
-			} finally {
-				queueLock.unlock();
-			}
+			queue.put(event);
+		} catch ( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			logger.error("Thread interrupted: ", e);
 		}
-		
-		for ( Event x : cache2 ) {
-			try {
-				if ( queue.size() >= maxSize ) {
-					logger.warn("Queue is slow: {}", name);
-					// Wait if this thread is not a worker thread.
-					if ( Thread.currentThread() != thread ) {
-						int expSize = (int)(maxSize * 0.4); // wait for 60% free size
-						logger.debug("Isn't worker thread. Wait until queue has free space. Limit: {} pcs.", expSize);
-						do {
-							Thread.sleep(50L);
-						} while ( queue.size() >= expSize );
-					}
-				}
-				queue.put(x);
-			} catch ( InterruptedException e ) {
-				Thread.currentThread().interrupt();
-				logger.error("Thread interrupted: ", e);
-			}
-		}
-		queueLock.lock();
-		try {
-			queueProcessing = false;
-		} finally {
-			queueLock.unlock();
-		}
-
 	}
 	
 	/**
@@ -157,10 +98,8 @@ public class EventQueueImpl implements EventQueue {
 		public void run() {
 			try {
 				Event event;
-				List<EventListener> listeners;
 				while ( (event = queue.take()) != null ) {
-					listeners = event.getType().getAsyncListeners();
-					for ( EventListener listener : listeners ) {
+					for ( EventListener listener : event.getType().getListeners() ) {
 						try {
 							listener.onEvent(event);
 						} catch ( Exception ex ) {

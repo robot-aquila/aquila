@@ -19,9 +19,9 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.TestEventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
@@ -185,7 +185,7 @@ public class TStampedReplayTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		eventQueue = new EventQueueImpl();
+		eventQueue = new TestEventQueueImpl();
 		schedulerStub = new SchedulerStub();
 		serviceStub = new NodeReplayService();
 		listenerStub = new EventListenerStub();
@@ -323,8 +323,8 @@ public class TStampedReplayTest {
 	public void testStart_QueueFullyFilled() throws Exception {
 		newReaderResponse(FIXTURE);
 		schedulerStub.setFixedTime(Instant.EPOCH.plusMillis(922L));
-		replay.onStarted().addSyncListener(listenerStub);
-		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStarted().addListener(listenerStub);
+		replay.onStopped().addListener(listenerStub);
 		
 		replay.start();
 
@@ -381,7 +381,7 @@ public class TStampedReplayTest {
 		newReaderResponse(FIXTURE);
 		schedulerStub.setFixedTime(Instant.EPOCH.plusMillis(922L));
 		replay.start();
-		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStopped().addListener(listenerStub);
 		Node node = newNode("2017-12-31T00:00:00Z", 9);
 		
 		replay.consume(replay.getSequenceID(), node);
@@ -399,7 +399,7 @@ public class TStampedReplayTest {
 		newReaderResponse(FIXTURE);
 		schedulerStub.setFixedTime(Instant.EPOCH.plusMillis(922L));
 		replay.start();
-		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStopped().addListener(listenerStub);
 		
 		List<SchedulerStubTask> scheduled = schedulerStub.getScheduledTasks();
 		schedulerStub.clearScheduledTasks();
@@ -430,7 +430,7 @@ public class TStampedReplayTest {
 		CloseableIteratorStub<Node> it = newReaderResponse(FIXTURE.subList(0, 7));
 		schedulerStub.setFixedTime(Instant.EPOCH.plusMillis(922));
 		replay.start();
-		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStopped().addListener(listenerStub);
 
 		List<SchedulerStubTask> scheduled = schedulerStub.getScheduledTasks();
 		schedulerStub.clearScheduledTasks();
@@ -454,7 +454,7 @@ public class TStampedReplayTest {
 		newReaderResponse(FIXTURE.subList(0, 3));
 		schedulerStub.setFixedTime(Instant.EPOCH.plusMillis(922));
 		replay.start();
-		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStopped().addListener(listenerStub);
 
 		List<SchedulerStubTask> scheduled = schedulerStub.getScheduledTasks();
 		scheduled.get(0).getRunnable().run();
@@ -512,7 +512,7 @@ public class TStampedReplayTest {
 	public void testStop() throws Exception {
 		CloseableIteratorStub<Node> it = newReaderResponse(FIXTURE);
 		replay.start();
-		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStopped().addListener(listenerStub);
 		
 		replay.stop();
 		
@@ -529,8 +529,8 @@ public class TStampedReplayTest {
 		replay.start();
 		replay.onStarted().addAlternateType(type);
 		replay.onStopped().addAlternateType(type);
-		replay.onStarted().addSyncListener(listenerStub);
-		replay.onStopped().addSyncListener(listenerStub);
+		replay.onStarted().addListener(listenerStub);
+		replay.onStopped().addListener(listenerStub);
 
 		replay.close();
 		

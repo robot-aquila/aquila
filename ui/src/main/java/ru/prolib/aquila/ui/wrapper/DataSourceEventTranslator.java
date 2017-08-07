@@ -32,7 +32,21 @@ public class DataSourceEventTranslator implements EventListener {
 	}
 	
 	private void fireOnEventOccur(Event source) {
-		dispatcher.dispatch(new EventTranslatorEvent(onEventOccur, source));
+		dispatcher.dispatch(onEventOccur, new EFactory(source));
+	}
+	
+	static class EFactory implements EventFactory {
+		private final Event source;
+		
+		EFactory(Event source) {
+			this.source = source;
+		}
+
+		@Override
+		public Event produceEvent(EventType type) {
+			return new EventTranslatorEvent(type, source);
+		}
+		
 	}
 
 }

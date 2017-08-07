@@ -260,7 +260,7 @@ public class Menu {
 		item.getUnderlyingObject().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispatcher.dispatch(new EventImpl(eventType));
+				dispatcher.dispatch(eventType, SimpleEventFactory.getInstance());
 			}
 		});
 		childItem.put(id, item);

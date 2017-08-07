@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.TestEventQueueImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
@@ -50,7 +50,7 @@ public class SimpleL1RecorderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new EventQueueImpl();
+		queue = new TestEventQueueImpl();
 		control = createStrictControl();
 		terminal = new BasicTerminalBuilder()
 			.withDataProvider(new DataProviderStub())
@@ -93,8 +93,8 @@ public class SimpleL1RecorderTest {
 	public void testStartWritingUpdates() throws Exception {
 		expect(writerFactoryMock.createWriter()).andReturn(writerMock);
 		control.replay();
-		recorder.onStarted().addSyncListener(listenerStub);
-		recorder.onStopped().addSyncListener(listenerStub);
+		recorder.onStarted().addListener(listenerStub);
+		recorder.onStopped().addListener(listenerStub);
 		
 		recorder.startWritingUpdates();
 		
@@ -125,9 +125,9 @@ public class SimpleL1RecorderTest {
 		control.reset();
 		writerMock.close();
 		control.replay();
-		recorder.onStarted().addSyncListener(listenerStub);
+		recorder.onStarted().addListener(listenerStub);
 		recorder.onStarted().addAlternateType(type);
-		recorder.onStopped().addSyncListener(listenerStub);
+		recorder.onStopped().addListener(listenerStub);
 		recorder.onStopped().addAlternateType(type);
 		
 		recorder.close();
@@ -163,9 +163,9 @@ public class SimpleL1RecorderTest {
 		control.reset();
 		writerMock.close();
 		control.replay();
-		recorder.onStarted().addSyncListener(listenerStub);
+		recorder.onStarted().addListener(listenerStub);
 		recorder.onStarted().addAlternateType(type);
-		recorder.onStopped().addSyncListener(listenerStub);
+		recorder.onStopped().addListener(listenerStub);
 		recorder.onStopped().addAlternateType(type);		
 		
 		recorder.stopWritingUpdates();

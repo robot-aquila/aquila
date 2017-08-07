@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 /**
  * Тест выполняет проверку общих требований к реализациям очереди событий.
  */
@@ -46,6 +48,21 @@ public class EventQueue_FunctionalTest {
 			return id;
 		}
 		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != ActiveEvent.class ) {
+				return false;
+			}
+			ActiveEvent o = (ActiveEvent) other;
+			return new EqualsBuilder()
+					.append(getType(), o.getType())
+					.append(id, o.id)
+					.isEquals();
+		}
+		
 	}
 	
 	/**
@@ -65,6 +82,29 @@ public class EventQueue_FunctionalTest {
 		
 	}
 	
+	static class AEFactory implements EventFactory {
+		private final String id;
+		private final Runnable r;
+		private CountDownLatch finished;
+		
+		AEFactory(String id, Runnable r) {
+			this.id = id;
+			this.r = r;
+		}
+		
+		AEFactory(String id) {
+			this(id, null);
+		}
+
+		@Override
+		public Event produceEvent(EventType type) {
+			ActiveEvent e = new ActiveEvent(type, id, r);
+			finished = e.finished;
+			return e;
+		}
+		
+	}
+	
 	/**
 	 * Проверить соответствие последовательности поступления событий
 	 * последовательности их обработки.
@@ -80,55 +120,48 @@ public class EventQueue_FunctionalTest {
 		
 		type.addListener(listener);
 		
-		final Event eX = new ActiveEvent(type, "eX");
-		final ActiveEvent e1 = new ActiveEvent(type, "e1");
-		final ActiveEvent e1_a = new ActiveEvent(type, "e1_a");
-		final ActiveEvent e2 = new ActiveEvent(type, "e2", new Runnable() {
-			@Override
-			public void run() {
-				dispatcher.dispatch(e1_a);
-			}
-		});
-		final ActiveEvent e3 = new ActiveEvent(type, "e3");
-		final ActiveEvent e3_b = new ActiveEvent(type, "e3_b", new Runnable() {
-			@Override
-			public void run() {
-				finished.countDown();
-			}
-		});
-		final ActiveEvent e3_a = new ActiveEvent(type, "e3_a", new Runnable() {
-			@Override
-			public void run() {
-				dispatcher.dispatch(e3_b);
-			}
-		});
-		final ActiveEvent e4 = new ActiveEvent(type, "e4", new Runnable() {
-			@Override
-			public void run() {
-				dispatcher.dispatch(e3_a);
-				dispatcher.dispatch(eX);
-			}
-		});
-
-		
-		List<ActiveEvent> fire = new LinkedList<ActiveEvent>();
-		fire.add(e1);
-		fire.add(e2);
-		fire.add(e3); 
-		fire.add(e4);
+		Runnable
+			r_e3_b = new Runnable() {
+				@Override public void run() {
+					finished.countDown();
+				}
+			},
+			r_e2 = new Runnable() {
+				@Override public void run() {
+					dispatcher.dispatch(type, new AEFactory("e1_a"));
+				}
+			},
+			r_e3_a = new Runnable() {
+				@Override
+				public void run() {
+					dispatcher.dispatch(type, new AEFactory("e3_b", r_e3_b));
+				}
+			},
+			r_e4 = new Runnable() {
+				@Override
+				public void run() {
+					dispatcher.dispatch(type, new AEFactory("e3_a", r_e3_a));
+					dispatcher.dispatch(type, new AEFactory("eX"));
+				}
+			};
+		List<AEFactory> fire = new ArrayList<>();
+		fire.add(new AEFactory("e1"));
+		fire.add(new AEFactory("e2", r_e2));
+		fire.add(new AEFactory("e3"));
+		fire.add(new AEFactory("e4", r_e4));
 		
 		List<Event> expected = new LinkedList<Event>();
-		expected.add(e1);
-		expected.add(e2);
-		expected.add(e1_a);
-		expected.add(e3);
-		expected.add(e4);
-		expected.add(e3_a);
-		expected.add(eX);
-		expected.add(e3_b);
+		expected.add(new ActiveEvent(type, "e1"));
+		expected.add(new ActiveEvent(type, "e2"));
+		expected.add(new ActiveEvent(type, "e1_a"));
+		expected.add(new ActiveEvent(type, "e3"));
+		expected.add(new ActiveEvent(type, "e4"));
+		expected.add(new ActiveEvent(type, "e3_a"));
+		expected.add(new ActiveEvent(type, "eX"));
+		expected.add(new ActiveEvent(type, "e3_b"));
 
 		for ( int i = 0; i < fire.size(); i ++ ) {
-			dispatcher.dispatch(fire.get(i));
+			dispatcher.dispatch(type, fire.get(i));
 			assertTrue(fire.get(i).finished.await(100, TimeUnit.MILLISECONDS));
 		}
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));

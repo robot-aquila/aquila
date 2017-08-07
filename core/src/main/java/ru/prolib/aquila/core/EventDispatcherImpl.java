@@ -86,11 +86,6 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 
 	@Override
-	public void dispatch(Event event) {
-		dispatch(event.getType(), new EnqueueNewSigAdapter(event));
-	}
-	
-	@Override
 	public void dispatch(EventType type, EventFactory factory) {
 		synchronized ( this ) {
 			if ( suppressCount > 0 ) {
@@ -114,16 +109,6 @@ public class EventDispatcherImpl implements EventDispatcher {
 	@Override
 	public EventType createType(String typeId) {
 		return new EventTypeImpl(getId() + "." + typeId);
-	}
-
-	@Override
-	public EventType createSyncType() {
-		return new EventTypeImpl(getId() + "." + EventTypeImpl.nextId(), true);
-	}
-
-	@Override
-	public EventType createSyncType(String typeId) {
-		return new EventTypeImpl(getId() + "." + typeId, true);
 	}
 
 	@Override
@@ -190,33 +175,4 @@ public class EventDispatcherImpl implements EventDispatcher {
 		
 	}
 	
-	static class EnqueueNewSigAdapter implements EventFactory {
-		private final Event event;
-		
-		EnqueueNewSigAdapter(Event event) {
-			this.event = event;
-		}
-
-		@Override
-		public Event produceEvent(EventType type) {
-			if ( event.isType(type) ) {
-				return event;
-			}
-			throw new IllegalArgumentException("Modern consumer is incompatible with deprecated producer");
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if ( other == this ) {
-				return true;
-			}
-			if ( other == null || other.getClass() != EnqueueNewSigAdapter.class ) {
-				return false;
-			}
-			EnqueueNewSigAdapter o = (EnqueueNewSigAdapter) other;
-			return o.event == event;
-		}
-		
-	}
-
 }

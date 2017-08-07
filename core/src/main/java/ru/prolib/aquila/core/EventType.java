@@ -1,6 +1,5 @@
 package ru.prolib.aquila.core;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,25 +36,6 @@ public interface EventType {
 	 * @param listener получатель
 	 */
 	public void addListener(EventListener listener);
-	
-	/**
-	 * Подписаться на событие.
-	 * <p>
-	 * <b>DO NOT USE THIS METHOD IF YOU DON'T UNDERSTAND HOW IT WORKS!</b>
-	 * <p>
-	 * Подписывает на получение событий в синхронном режиме. События будут
-	 * транслироваться том же потоке, в котором были сгенерированы. Иначе
-	 * говоря, этот тип подписки обеспечивает максимально быструю доставку
-	 * событий. Но такой способ может негативно повлиять на работу поставщика
-	 * событий.
-	 * <p>
-	 * Если указанный получатель ранее был подписан на события в асинхронном
-	 * режиме, повторная подписка с помощью этого метода переведет его в режим
-	 * синхронного получения событий.
-	 * <p>
-	 * @param listener - The event listener.
-	 */
-	public void addSyncListener(EventListener listener);
 
 	/**
 	 * Отписаться от события.
@@ -87,29 +67,6 @@ public interface EventType {
 	public EventListener listenOnce(EventListener listener);
 	
 	/**
-	 * Проверить принадлежность к синхронным получателям.
-	 * <p>
-	 * @param listener получатель
-	 * @return true - если это синхронный получатель событий, false - иначе
-	 */
-	public boolean isSyncListener(EventListener listener);
-	
-	/**
-	 * Проверить принадлежность к асинхронным получателям.
-	 * <p>
-	 * @param listener получатель
-	 * @return true - если это асинхронный получатель событий, false - иначе 
-	 */
-	public boolean isAsyncListener(EventListener listener);
-	
-	/**
-	 * Проверить режим только синхронной трансляции.
-	 * <p>
-	 * @return true - если разрешена только синхронная трансляция событий 
-	 */
-	public boolean isOnlySyncMode();
-	
-	/**
 	 * Очистить списки получателей.
 	 */
 	public void removeListeners();
@@ -122,18 +79,11 @@ public interface EventType {
 	public int countListeners();
 	
 	/**
-	 * Получить список асинхронных получателей.
+	 * Get listeners.
 	 * <p>
-	 * @return дубликат списка асинхронных получателей
+	 * @return set of listeners
 	 */
-	public List<EventListener> getAsyncListeners();
-	
-	/**
-	 * Получить список синхронных получателей.
-	 * <p>
-	 * @return дубликат списка синхронных получателей
-	 */
-	public List<EventListener> getSyncListeners();
+	public Set<EventListener> getListeners();
 	
 	/**
 	 * Add an alternate type.

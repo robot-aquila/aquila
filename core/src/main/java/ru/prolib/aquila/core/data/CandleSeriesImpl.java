@@ -8,7 +8,6 @@ import java.time.ZoneOffset;
 import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.Tick;
-import ru.prolib.aquila.core.BusinessEntities.Trade;
 
 /**
  * Ряд свечей.

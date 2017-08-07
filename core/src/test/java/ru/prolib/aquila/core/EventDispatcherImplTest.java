@@ -60,17 +60,6 @@ public class EventDispatcherImplTest {
 	}
 	
 	@Test
-	public void testDispatch1() throws Exception {
-		Event event = new EventImpl(type1);
-		queue.enqueue(type1, new EventDispatcherImpl.EnqueueNewSigAdapter(event));
-		control.replay();
-		
-		dispatcher.dispatch(event);
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testDispatch2() throws Exception {
 		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		control.replay();
@@ -143,16 +132,6 @@ public class EventDispatcherImplTest {
 		EventType actual = dispatcher.createType();
 		assertNotNull(actual);
 		assertEquals(expectedId, actual.getId());
-		assertFalse(actual.isOnlySyncMode());
-	}
-	
-	@Test
-	public void testCreateSyncType0() throws Exception {
-		String expectedId = "TD.EvtType" + EventTypeImpl.getAutoId();
-		EventType actual = dispatcher.createSyncType();
-		assertNotNull(actual);
-		assertEquals(expectedId, actual.getId());
-		assertTrue(actual.isOnlySyncMode());
 	}
 
 	@Test
@@ -160,15 +139,6 @@ public class EventDispatcherImplTest {
 		EventType actual = dispatcher.createType("foo");
 		assertNotNull(actual);
 		assertEquals("TD.foo", actual.getId());
-		assertFalse(actual.isOnlySyncMode());
-	}
-	
-	@Test
-	public void testCreateSyncType1() throws Exception {
-		EventType actual = dispatcher.createSyncType("bar");
-		assertNotNull(actual);
-		assertEquals("TD.bar", actual.getId());
-		assertTrue(actual.isOnlySyncMode());
 	}
 	
 	@Test

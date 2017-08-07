@@ -85,7 +85,7 @@ public class L1UpdateSourceSATImplTest {
 		
 		control.verify();
 		assertTrue(pending.contains(security2));
-		assertTrue(security2.onAvailable().isAsyncListener(source));
+		assertTrue(security2.onAvailable().isListener(source));
 	}
 	
 	@Test
@@ -140,7 +140,7 @@ public class L1UpdateSourceSATImplTest {
 	public void testOnEvent_() throws Exception {
 		Instant t = Instant.parse("2017-08-06T19:50:00Z");
 		pending.add(security2);
-		security2.onAvailable().addSyncListener(source);
+		security2.onAvailable().addListener(source);
 		basicSourceMock.setStartTimeL1(symbol2, t);
 		basicSourceMock.subscribeL1(symbol2, security2);
 		control.replay();

@@ -297,31 +297,31 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testClose() {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T18:16:00Z");
-		order.onClose().addSyncListener(listenerStub);
+		order.onClose().addListener(listenerStub);
 		EventType type = new EventTypeImpl();
-		order.onAvailable().addSyncListener(listenerStub);
+		order.onAvailable().addListener(listenerStub);
 		order.onAvailable().addAlternateType(type);
-		order.onCancelFailed().addSyncListener(listenerStub);
+		order.onCancelFailed().addListener(listenerStub);
 		order.onCancelFailed().addAlternateType(type);
-		order.onCancelled().addSyncListener(listenerStub);
+		order.onCancelled().addListener(listenerStub);
 		order.onCancelled().addAlternateType(type);
-		order.onExecution().addSyncListener(listenerStub);
+		order.onExecution().addListener(listenerStub);
 		order.onExecution().addAlternateType(type);
-		order.onDone().addSyncListener(listenerStub);
+		order.onDone().addListener(listenerStub);
 		order.onDone().addAlternateType(type);
-		order.onFailed().addSyncListener(listenerStub);
+		order.onFailed().addListener(listenerStub);
 		order.onFailed().addAlternateType(type);
-		order.onFilled().addSyncListener(listenerStub);
+		order.onFilled().addListener(listenerStub);
 		order.onFilled().addAlternateType(type);
-		order.onPartiallyFilled().addSyncListener(listenerStub);
+		order.onPartiallyFilled().addListener(listenerStub);
 		order.onPartiallyFilled().addAlternateType(type);
-		order.onRegistered().addSyncListener(listenerStub);
+		order.onRegistered().addListener(listenerStub);
 		order.onRegistered().addAlternateType(type);
-		order.onRegisterFailed().addSyncListener(listenerStub);
+		order.onRegisterFailed().addListener(listenerStub);
 		order.onRegisterFailed().addAlternateType(type);
-		order.onUpdate().addSyncListener(listenerStub);
+		order.onUpdate().addListener(listenerStub);
 		order.onUpdate().addAlternateType(type);
-		order.onArchived().addSyncListener(listenerStub);
+		order.onArchived().addListener(listenerStub);
 		order.onArchived().addAlternateType(type);
 		
 		order.close();
@@ -379,7 +379,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		order.consume(new DeltaUpdateBuilder()
 			.withToken(OrderField.STATUS, newStatus)
 			.buildUpdate());
-		type.addSyncListener(listenerStub);
+		type.addListener(listenerStub);
 		
 		controller.processAvailable(order, time);
 		
@@ -395,7 +395,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		order.consume(new DeltaUpdateBuilder()
 			.withToken(OrderField.STATUS, newStatus)
 			.buildUpdate());
-		type.addSyncListener(listenerStub);
+		type.addListener(listenerStub);
 		order.setStatusEventsEnabled(false);
 		
 		controller.processAvailable(order, Instant.EPOCH);
@@ -424,7 +424,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	{
 		Instant time = T("2017-08-04T02:45:30Z");
 		testOrderController_ProcessUpdate_Prepare(newStatus);
-		type.addSyncListener(listenerStub);
+		type.addListener(listenerStub);
 		
 		controller.processUpdate(order, time);
 		
@@ -441,7 +441,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		order.consume(new DeltaUpdateBuilder()
 			.withToken(OrderField.STATUS, newStatus)
 			.buildUpdate());
-		type.addSyncListener(listenerStub);
+		type.addListener(listenerStub);
 		assertFalse(order.isAvailable());
 		
 		controller.processUpdate(order, T("2017-08-04T02:45:00Z"));
@@ -455,7 +455,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	{
 		testOrderController_ProcessUpdate_Prepare(newStatus);
 		order.setStatusEventsEnabled(false);
-		type.addSyncListener(listenerStub);
+		type.addListener(listenerStub);
 		
 		controller.processUpdate(order, T("2017-08-04T02:50:00Z"));
 		
@@ -731,7 +731,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnAvailable() throws Exception {
 		Instant time = T("2017-08-04T02:50:15Z");
 		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
+		container.onAvailable().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(order)).andReturn(time);
 		controllerMock.processUpdate(order, time);
 		expect(controllerMock.hasMinimalData(order, time)).andReturn(true);
@@ -750,7 +750,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnUpdateEvent() throws Exception {
 		Instant time1 = T("2017-08-04T02:55:00Z"), time2 = T("2017-08-04T02:55:10Z");
 		container = produceContainer(controllerMock);
-		container.onUpdate().addSyncListener(listenerStub);
+		container.onUpdate().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(order)).andReturn(time1);
 		controllerMock.processUpdate(order, time1);
 		expect(controllerMock.hasMinimalData(order, time1)).andReturn(true);
@@ -792,7 +792,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testAddExecution6() throws Exception {
 		Instant now = Instant.now();
 		data.put(OrderField.ACTION, OrderAction.BUY);
-		order.onExecution().addSyncListener(listenerStub);
+		order.onExecution().addListener(listenerStub);
 		
 		OrderExecution actual = order.addExecution(100L, "x1", now,
 				FDecimal.of2(80.0), 10L, FMoney.ofRUB2(800.0));
@@ -843,7 +843,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		
 	@Test
 	public void testFireArchived() throws Exception {
-		order.onArchived().addSyncListener(listenerStub);
+		order.onArchived().addListener(listenerStub);
 		
 		order.fireArchived();
 		
@@ -856,7 +856,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		Instant time = Instant.EPOCH;
 		OrderExecution execution = newExec(2005, "foo2005", time,
 				FDecimal.of2(112.34), 10L, FMoney.ofRUB2(1123.40));
-		order.onExecution().addSyncListener(listenerStub);
+		order.onExecution().addListener(listenerStub);
 		
 		order.addExecution(execution);
 		
@@ -880,7 +880,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		Instant time = Instant.now();
 		OrderExecution execution = newExec(512, null, time, FDecimal.of2(45.14),
 				1L, FMoney.ofRUB2(45.14));
-		order.onExecution().addSyncListener(listenerStub);
+		order.onExecution().addListener(listenerStub);
 		
 		order.fireExecution(execution);
 		

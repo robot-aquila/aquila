@@ -200,8 +200,8 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		position.update(PositionField.CURRENT_VOLUME, 200L);
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
-		position.onPositionChange().addSyncListener(listener);
-		position.onCurrentPriceChange().addSyncListener(listener);
+		position.onPositionChange().addListener(listener);
+		position.onCurrentPriceChange().addListener(listener);
 		
 		controller.processUpdate(position, time);
 		
@@ -216,8 +216,8 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		position.update(PositionField.CURRENT_PRICE, new FDecimal("4518.96"));
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
-		position.onPositionChange().addSyncListener(listener);
-		position.onCurrentPriceChange().addSyncListener(listener);
+		position.onPositionChange().addListener(listener);
+		position.onCurrentPriceChange().addListener(listener);
 		
 		controller.processUpdate(position, time);
 		
@@ -233,8 +233,8 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		position.update(data);
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
-		position.onPositionChange().addSyncListener(listener);
-		position.onCurrentPriceChange().addSyncListener(listener);
+		position.onPositionChange().addListener(listener);
+		position.onCurrentPriceChange().addListener(listener);
 		
 		controller.processAvailable(position, T("2017-08-04T17:48:00Z"));
 		
@@ -260,7 +260,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	public void testClose() {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T18:18:00Z");
-		position.onClose().addSyncListener(listenerStub);
+		position.onClose().addListener(listenerStub);
 		EventType type = new EventTypeImpl();
 		position.onAvailable().addListener(new EventListenerStub());
 		position.onAvailable().addAlternateType(type);
@@ -290,7 +290,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnAvailable() throws Exception {
 		Instant time = T("2017-08-04T17:57:00Z");
 		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
+		container.onAvailable().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(position)).andReturn(time);
 		controllerMock.processUpdate(position, time);
 		expect(controllerMock.hasMinimalData(position, time)).andReturn(true);
@@ -308,7 +308,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnUpdateEvent() throws Exception {
 		Instant time1 = T("2017-08-04T17:58:00Z"), time2 = T("2017-08-04T17:59:00Z");
 		container = produceContainer(controllerMock);
-		container.onUpdate().addSyncListener(listenerStub);
+		container.onUpdate().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(position)).andReturn(time1);
 		controllerMock.processUpdate(position, time1);
 		expect(controllerMock.hasMinimalData(position, time1)).andReturn(true);

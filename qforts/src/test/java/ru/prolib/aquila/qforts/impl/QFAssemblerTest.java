@@ -88,7 +88,7 @@ public class QFAssemblerTest {
 				T("2017-04-18T08:33:00.001Z"), FDecimal.of2(15.36),
 				10L, FMoney.ofRUB2(30.70));
 		CountDownLatch testPassed = new CountDownLatch(1);
-		order.onExecution().addSyncListener(new EventListener() {
+		order.onExecution().addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
 				assertEquals(expectedExec, ((OrderExecutionEvent) event).getExecution());

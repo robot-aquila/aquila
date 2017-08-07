@@ -5,7 +5,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.TStamped;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.TestEventQueueImpl;
 import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -39,7 +39,7 @@ public class StampedListSeriesTest {
 
     @Before
     public void setUp() throws Exception {
-        series = new StampedListSeries<>("STAMPED", TimeFrame.M1, new EventQueueImpl());
+        series = new StampedListSeries<>("STAMPED", TimeFrame.M1, new TestEventQueueImpl());
         t1 = Instant.parse("2017-05-13T02:50:10Z");
         t2 = Instant.parse("2017-05-13T02:50:20Z");
         t3 = Instant.parse("2017-05-13T02:50:30Z");
@@ -74,8 +74,9 @@ public class StampedListSeriesTest {
     @Test
     public void testAdd_fireEvent() throws Exception {
         final List<TStampedStub> result = new ArrayList<>();
-        series.onAdd().addSyncListener(new EventListener() {
-            @Override
+        series.onAdd().addListener(new EventListener() {
+            @SuppressWarnings("unchecked")
+			@Override
             public void onEvent(Event event) {
                 result.add(((StampedDataEvent<TStampedStub>)event).getData());
             }
@@ -98,7 +99,7 @@ public class StampedListSeriesTest {
 
     @Test
     public void testCreateFromArray() throws Exception {
-        StampedListSeries<TStampedStub> series = new StampedListSeries<>("TRADE_INFO", TimeFrame.M1, new EventQueueImpl(), list);
+        StampedListSeries<TStampedStub> series = new StampedListSeries<>("TRADE_INFO", TimeFrame.M1, new TestEventQueueImpl(), list);
 
         assertEquals(2, series.getLength());
         assertEquals(3, series.get(0).size());

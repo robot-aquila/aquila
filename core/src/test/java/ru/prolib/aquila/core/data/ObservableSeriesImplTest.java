@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.TestEventQueueImpl;
 
 public class ObservableSeriesImplTest {
 	private EventQueue queue;
@@ -18,7 +18,7 @@ public class ObservableSeriesImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new EventQueueImpl();
+		queue = new TestEventQueueImpl();
 		listenerStub = new EventListenerStub();
 		source = new SeriesImpl<>("foo");
 		series = new ObservableSeriesImpl<>(queue, source);
@@ -74,8 +74,8 @@ public class ObservableSeriesImplTest {
 		source.add(25.04d);
 		source.add(17.02d);
 		source.add(95.12d);
-		series.onAdd().addSyncListener(listenerStub);
-		series.onSet().addSyncListener(listenerStub);
+		series.onAdd().addListener(listenerStub);
+		series.onSet().addListener(listenerStub);
 		
 		series.set(86.19d);
 		
@@ -87,8 +87,8 @@ public class ObservableSeriesImplTest {
 	@Test
 	public void testAdd() throws Exception {
 		source.add(25.04d);
-		series.onAdd().addSyncListener(listenerStub);
-		series.onSet().addSyncListener(listenerStub);
+		series.onAdd().addListener(listenerStub);
+		series.onSet().addListener(listenerStub);
 
 		series.add(42.14d);
 		

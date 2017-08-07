@@ -141,7 +141,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		portfolio.onPositionUpdate().addAlternateType(type);
 		portfolio.onUpdate().addListener(listener);
 		portfolio.onUpdate().addAlternateType(type);
-		portfolio.onClose().addSyncListener(listenerStub);
+		portfolio.onClose().addListener(listenerStub);
 		portfolio.onClose().addAlternateType(type);
 		
 		portfolio.close();
@@ -409,7 +409,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnAvailable() throws Exception {
 		Instant time = T("2017-08-04T18:25:00Z");
 		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
+		container.onAvailable().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(portfolio)).andReturn(time);
 		controllerMock.processUpdate(portfolio, time);
 		expect(controllerMock.hasMinimalData(portfolio, time)).andReturn(true);
@@ -427,7 +427,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnUpdateEvent() throws Exception {
 		Instant time1 = T("2017-08-04T18:28:00Z"), time2 = T("2017-08-04T18:29:00Z");
 		container = produceContainer(controllerMock);
-		container.onUpdate().addSyncListener(listenerStub);
+		container.onUpdate().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(portfolio)).andReturn(time1);
 		controllerMock.processUpdate(portfolio, time1);
 		expect(controllerMock.hasMinimalData(portfolio, time1)).andReturn(true);

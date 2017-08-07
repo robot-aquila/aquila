@@ -22,9 +22,9 @@ import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.TestEventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsBuilder;
@@ -62,7 +62,7 @@ public class ObservableStateContainerImplTest {
 		controllerMock = control.createMock(OSCController.class);
 		eventDispatcherMock = control.createMock(EventDispatcher.class);
 		data = new HashMap<Integer, Object>();
-		queue = new EventQueueImpl();
+		queue = new TestEventQueueImpl();
 		container = produceContainer(new OSCControllerStub());
 		listenerStub = new EventListenerStub();
 	}
@@ -198,8 +198,8 @@ public class ObservableStateContainerImplTest {
 			data.put(token, fixture[i][0]);
 			container.update(data);
 			container.resetChanges();
-			container.onAvailable().addSyncListener(listenerStub);
-			container.onUpdate().addSyncListener(listenerStub);
+			container.onAvailable().addListener(listenerStub);
+			container.onUpdate().addListener(listenerStub);
 			data.clear();
 			data.put(token, fixture[i][1]);
 			container.update(data);
@@ -791,9 +791,9 @@ public class ObservableStateContainerImplTest {
 
 	@Test
 	final public void testContainerImpl_Update_NoChanges() throws Exception {
-		container.onAvailable().addSyncListener(listenerStub);
-		container.onUpdate().addSyncListener(listenerStub);
-		container.onClose().addSyncListener(listenerStub);
+		container.onAvailable().addListener(listenerStub);
+		container.onUpdate().addListener(listenerStub);
+		container.onClose().addListener(listenerStub);
 		
 		container.update(data);
 		
@@ -804,9 +804,9 @@ public class ObservableStateContainerImplTest {
 	final public void testContainerImpl_Update_HasNoMinimalData() {
 		Instant time = T("2017-08-04T01:45:00Z");
 		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
-		container.onUpdate().addSyncListener(listenerStub);
-		container.onClose().addSyncListener(listenerStub);
+		container.onAvailable().addListener(listenerStub);
+		container.onUpdate().addListener(listenerStub);
+		container.onClose().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(container)).andReturn(time);
 		controllerMock.processUpdate(container, time);
 		expect(controllerMock.hasMinimalData(container, time)).andReturn(false);
@@ -824,9 +824,9 @@ public class ObservableStateContainerImplTest {
 	final public void testContainerImpl_Update_HasMinimalData() {
 		Instant time = T("2017-08-04T01:55:00Z");
 		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
-		container.onUpdate().addSyncListener(listenerStub);
-		container.onClose().addSyncListener(listenerStub);
+		container.onAvailable().addListener(listenerStub);
+		container.onUpdate().addListener(listenerStub);
+		container.onClose().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(container)).andReturn(time);
 		controllerMock.processUpdate(container, time);
 		expect(controllerMock.hasMinimalData(container, time)).andReturn(true);
@@ -850,7 +850,7 @@ public class ObservableStateContainerImplTest {
 		container.onUpdate().addAlternateType(type);
 		container.onAvailable().addListener(listenerStub);
 		container.onAvailable().addAlternateType(type);
-		container.onClose().addSyncListener(listenerStub);
+		container.onClose().addListener(listenerStub);
 		container.onClose().addAlternateType(type);
 		
 		container.close();
@@ -862,7 +862,7 @@ public class ObservableStateContainerImplTest {
 		assertFalse(container.onAvailable().hasListeners());
 		assertFalse(container.onAvailable().hasAlternates());
 		assertFalse(container.isAvailable());
-		assertTrue(container.onClose().isSyncListener(listenerStub));
+		assertTrue(container.onClose().isListener(listenerStub));
 		assertTrue(container.onClose().isAlternateType(type));
 		assertTrue(container.isClosed());
 		assertEquals(1, listenerStub.getEventCount());

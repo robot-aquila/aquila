@@ -1,5 +1,6 @@
 package ru.prolib.aquila.ui;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +58,7 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 	}
 	
 	private void fireCurrentPortfolioChangedEvent() {
-		dispatcher.dispatch(new PortfolioEvent(portfolioChanged, portfolio, terminal.getCurrentTime()));
+		dispatcher.dispatch(portfolioChanged, new EFactory(portfolio, terminal.getCurrentTime()));
 	}
 
 	/* (non-Javadoc)
@@ -137,4 +138,20 @@ public class CurrentPortfolioImpl implements CurrentPortfolio {
 		return buttons;
 	}
 
+	static class EFactory implements EventFactory {
+		private final Portfolio portfolio;
+		private final Instant time;
+		
+		public EFactory(Portfolio portfolio, Instant time) {
+			this.portfolio = portfolio;
+			this.time = time;
+		}
+
+		@Override
+		public Event produceEvent(EventType type) {
+			return new PortfolioEvent(type, portfolio, time);
+		}
+		
+	}
+	
 }

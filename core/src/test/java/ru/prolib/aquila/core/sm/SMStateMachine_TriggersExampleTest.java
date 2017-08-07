@@ -88,10 +88,10 @@ public class SMStateMachine_TriggersExampleTest {
 		events = new LinkedList<Event>();
 		es = new EventSystemImpl();
 		dispatcher = es.createEventDispatcher();
-		s1exit = dispatcher.createSyncType("s1exit");
-		s1skip = dispatcher.createSyncType("s1skip");
-		s2back = dispatcher.createSyncType("s2back");
-		s2exit = dispatcher.createSyncType("s2exit");
+		s1exit = dispatcher.createType("s1exit");
+		s1skip = dispatcher.createType("s1skip");
+		s2back = dispatcher.createType("s2back");
+		s2exit = dispatcher.createType("s2exit");
 		SMState s1 = new State1(), s2 = new State2();
 		transitions = new HashMap<KW<SMExit>, SMState>();
 		transitions.put(new KW<SMExit>(s1.getExit("EXIT")), s2);
@@ -121,8 +121,9 @@ public class SMStateMachine_TriggersExampleTest {
 				s2exit
 		};
 		for ( EventType t: src ) {
-			dispatcher.dispatch(new EventImpl(t));
+			dispatcher.dispatch(t, SimpleEventFactory.getInstance());
 		}
+		Thread.sleep(1000L);
 		assertTrue(automat.started());
 		assertTrue(automat.finished());
 		assertSame(SMState.FINAL, automat.getCurrentState());

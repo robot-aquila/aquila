@@ -95,7 +95,7 @@ public class TableImpl implements Table {
 	}
 	
 	private void fireOnRowSelected() {
-		dispatcher.dispatch(new EventImpl(onRowSelected));
+		dispatcher.dispatch(onRowSelected, SimpleEventFactory.getInstance());
 	}
 
 	/* (non-Javadoc)

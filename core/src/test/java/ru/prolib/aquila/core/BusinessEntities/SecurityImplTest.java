@@ -312,7 +312,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.CLOSE_PRICE, 79.18d);
 		security.update(data);
 		EventListenerStub listener = new EventListenerStub();
-		security.onSessionUpdate().addSyncListener(listener);
+		security.onSessionUpdate().addListener(listener);
 		
 		controller.processUpdate(security, time);
 		
@@ -343,7 +343,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.CLOSE_PRICE, 79.18d);
 		security.update(data);
 		EventListenerStub listener = new EventListenerStub();
-		security.onSessionUpdate().addSyncListener(listener);
+		security.onSessionUpdate().addListener(listener);
 		
 		controller.processAvailable(security, time);
 		
@@ -354,7 +354,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_Tick_BestAsk() {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T21:05:00Z");
-		security.onBestAsk().addSyncListener(listenerStub);
+		security.onBestAsk().addListener(listenerStub);
 		assertNull(security.getBestAsk());
 		
 		security.consume(toL1Update(Tick.ofAsk(T("1996-12-04T00:15:00Z"), 80.34d, 15L)));
@@ -373,7 +373,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T20:03:00Z");
 		security.consume(toL1Update(Tick.ofAsk(T("2003-01-01T00:00:00Z"), 92.13d, 100L)));
-		security.onBestAsk().addSyncListener(listenerStub);
+		security.onBestAsk().addListener(listenerStub);
 		
 		security.consume(toL1Update(Tick.NULL_ASK));
 		
@@ -389,7 +389,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_Tick_BestBid() {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T21:10:00Z");
-		security.onBestBid().addSyncListener(listenerStub);
+		security.onBestBid().addListener(listenerStub);
 		assertNull(security.getBestBid());
 		
 		security.consume(toL1Update(Tick.ofBid(T("2010-09-11T03:15:25Z"), 12.48d, 500L)));
@@ -407,7 +407,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T20:03:00Z");
 		security.consume(toL1Update(Tick.ofBid(T("1992-07-24T15:45:00Z"), 52.94d, 1L)));
-		security.onBestBid().addSyncListener(listenerStub);
+		security.onBestBid().addListener(listenerStub);
 		
 		security.consume(toL1Update(Tick.NULL_BID));
 		
@@ -423,7 +423,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_Tick_LastTrade() {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T21:10:00Z");
-		security.onLastTrade().addSyncListener(listenerStub);
+		security.onLastTrade().addListener(listenerStub);
 		assertNull(security.getLastTrade());
 		
 		security.consume(toL1Update(Tick.ofTrade(T("1978-02-01T05:12:15Z"), 72.15d, 805L)));
@@ -466,7 +466,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
-		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
@@ -504,7 +504,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
-		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
@@ -542,7 +542,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
 		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
-		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
@@ -585,7 +585,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		update = new MDUpdateImpl(header);
 		update.addRecord(Tick.of(TickType.ASK, time2, 102.30d, 999), MDTransactionType.REPLACE);
 		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 199), MDTransactionType.REPLACE);
-		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
@@ -631,7 +631,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		update = new MDUpdateImpl(header);
 		update.addRecord(Tick.of(TickType.ASK, time2, 102.30d, 0), MDTransactionType.DELETE);
 		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 0), MDTransactionType.DELETE);
-		security.onMarketDepthUpdate().addSyncListener(listenerStub);
+		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
@@ -700,7 +700,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnAvailable() throws Exception {
 		Instant time = T("2017-08-04T20:01:00Z");
 		container = produceContainer(controllerMock);
-		container.onAvailable().addSyncListener(listenerStub);
+		container.onAvailable().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(security)).andReturn(time);
 		controllerMock.processUpdate(security, time);
 		expect(controllerMock.hasMinimalData(security, time)).andReturn(true);
@@ -720,7 +720,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_OnUpdateEvent() throws Exception {
 		Instant time1 = T("2017-08-04T21:15:00Z"), time2 = T("2017-08-04T21:20:00Z");
 		container = produceContainer(controllerMock);
-		container.onUpdate().addSyncListener(listenerStub);
+		container.onUpdate().addListener(listenerStub);
 		expect(controllerMock.getCurrentTime(security)).andReturn(time1);
 		controllerMock.processUpdate(security, time1);
 		expect(controllerMock.hasMinimalData(security, time1)).andReturn(true);
