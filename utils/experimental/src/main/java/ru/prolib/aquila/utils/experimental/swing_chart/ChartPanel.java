@@ -5,6 +5,7 @@ import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.ChartLayer;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -31,6 +32,7 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
     protected int lastX, lastY;
     protected TooltipForm tooltipForm;
     private Rectangle screen;
+    private final Timer updateTooltipTextTimer;
 
     public ChartPanel() {
         super();
@@ -49,6 +51,14 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         add(scrollBar, BorderLayout.SOUTH);
         tooltipForm = new TooltipForm();
         screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+
+        updateTooltipTextTimer = new Timer(500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateTooltipText_();
+            }
+        });
+        updateTooltipTextTimer.setRepeats(false);
     }
 
     public Chart addChart(String id){
@@ -211,6 +221,12 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
     }
 
     private void updateTooltipText(){
+        if(!updateTooltipTextTimer.isRunning()){
+            updateTooltipTextTimer.start();
+        }
+    }
+
+    private void updateTooltipText_(){
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
