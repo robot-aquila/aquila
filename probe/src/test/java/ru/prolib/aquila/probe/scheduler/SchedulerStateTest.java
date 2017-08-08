@@ -5,6 +5,7 @@ import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -14,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
+
+import ru.prolib.aquila.probe.ThreadSynchronizer;
 
 public class SchedulerStateTest {
 	
@@ -45,17 +48,22 @@ public class SchedulerStateTest {
 	private Observer observerMock;
 	private SchedulerSlots slotsMock;
 	private SchedulerState state;
-
+	private Set<ThreadSynchronizer> synchronizers;
+	private ThreadSynchronizer synchronizerMock1, synchronizerMock2;
+	
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		observerMock = control.createMock(Observer.class);
 		slotsMock = control.createMock(SchedulerSlots.class);
-		state = new SchedulerState(slotsMock);
+		synchronizerMock1 = control.createMock(ThreadSynchronizer.class);
+		synchronizerMock2 = control.createMock(ThreadSynchronizer.class);
+		synchronizers = new LinkedHashSet<>();
+		state = new SchedulerState(slotsMock, synchronizers);
 	}
 	
 	@Test
-	public void testCtor1() {
+	public void testCtor2() {
 		assertSame(slotsMock, state.getSchedulerSlots());
 		assertEquals(SchedulerMode.WAIT, state.getMode());
 		assertEquals(Instant.EPOCH, state.getCurrentTime());
@@ -532,6 +540,75 @@ public class SchedulerStateTest {
 		assertNull(state.getSlot(T("2016-01-02T00:00:01Z")));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testBeforeExecution() {
+		synchronizers.add(synchronizerMock1);
+		synchronizers.add(synchronizerMock2);
+		Instant t = T("2017-08-07T03:35:00Z");
+		synchronizerMock1.beforeExecution(t);
+		synchronizerMock2.beforeExecution(t);
+		control.replay();
+		
+		state.beforeExecution(t);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testAfterExecution() {
+		synchronizers.add(synchronizerMock1);
+		synchronizers.add(synchronizerMock2);
+		Instant t = T("2017-08-07T03:30:00Z");
+		synchronizerMock1.afterExecution(t);
+		synchronizerMock2.afterExecution(t);
+		control.replay();
+		
+		state.afterExecution(t);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void waitForThread() throws Exception {
+		synchronizers.add(synchronizerMock1);
+		synchronizers.add(synchronizerMock2);
+		Instant t = T("2017-08-07T03:30:00Z");
+		synchronizerMock1.waitForThread(t);
+		synchronizerMock2.waitForThread(t);
+		control.replay();
+		
+		state.waitForThread(t);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testAddSynchronizer() {
+		state.addSynchronizer(synchronizerMock1);
+		state.addSynchronizer(synchronizerMock2);
+		
+		Set<ThreadSynchronizer> expected = new LinkedHashSet<>();
+		expected.add(synchronizerMock1);
+		expected.add(synchronizerMock2);
+		assertEquals(expected, synchronizers);
+	}
+	
+	@Test
+	public void testRemoveSynchronizer() {
+		synchronizers.add(synchronizerMock1);
+		synchronizers.add(synchronizerMock2);
+		
+		state.removeSynchronizer(synchronizerMock1);
+		
+		assertFalse(synchronizers.contains(synchronizerMock1));
+		assertTrue(synchronizers.contains(synchronizerMock2));
+		
+		state.removeSynchronizer(synchronizerMock2);
+		
+		assertFalse(synchronizers.contains(synchronizerMock1));
+		assertFalse(synchronizers.contains(synchronizerMock2));
 	}
 
 }

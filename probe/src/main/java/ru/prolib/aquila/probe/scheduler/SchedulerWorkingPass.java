@@ -59,6 +59,7 @@ public class SchedulerWorkingPass {
 		Instant currentTime = state.getCurrentTime();
 		if ( state.hasSlotForExecution() ) {
 			SchedulerSlot slot = state.removeNextSlot();
+			state.beforeExecution(currentTime);
 			for ( SchedulerTaskImpl task : slot.getTasks() ) {
 				if ( task.isScheduled() ) {
 					task.execute();
@@ -70,6 +71,8 @@ public class SchedulerWorkingPass {
 				}
 			}
 			slot.clearTasks();
+			state.afterExecution(currentTime);
+			state.waitForThread(currentTime);
 			if ( state.getMode() == SchedulerMode.RUN_STEP ) {
 				state.switchToWait();
 			}

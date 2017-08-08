@@ -164,6 +164,14 @@ public class SchedulerImpl implements Scheduler {
 		send(new CmdSetExecutionSpeed(speed));
 	}
 	
+	public void addSynchronizer(ThreadSynchronizer synchronizer) {
+		state.addSynchronizer(synchronizer);
+	}
+	
+	public void removeSynchronizer(ThreadSynchronizer synchronizer) {
+		state.removeSynchronizer(synchronizer);
+	}
+	
 	private void checkClosed() {
 		if ( isClosed() ) {
 			throw new IllegalStateException("Scheduler closed");

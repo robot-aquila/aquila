@@ -364,4 +364,26 @@ public class SchedulerImplTest {
 		assertEquals(expected, actual);
 	}
 
+	@Test
+	public void testAddSynchronizer() {
+		ThreadSynchronizer synchronizerMock = control.createMock(ThreadSynchronizer.class);
+		stateMock.addSynchronizer(synchronizerMock);
+		control.replay();
+		
+		scheduler.addSynchronizer(synchronizerMock);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testRemoveSynchronizer() {
+		ThreadSynchronizer synchronizerMock = control.createMock(ThreadSynchronizer.class);
+		stateMock.removeSynchronizer(synchronizerMock);
+		control.replay();
+		
+		scheduler.removeSynchronizer(synchronizerMock);
+		
+		control.verify();
+	}
+	
 }

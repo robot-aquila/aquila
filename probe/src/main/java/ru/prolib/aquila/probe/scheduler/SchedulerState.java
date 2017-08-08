@@ -1,28 +1,35 @@
 package ru.prolib.aquila.probe.scheduler;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SchedulerState extends Observable {
+import ru.prolib.aquila.probe.ThreadSynchronizer;
+
+public class SchedulerState extends Observable implements ThreadSynchronizer {
 	private final Lock lock;
 	private final SchedulerSlots slots;
+	private final Set<ThreadSynchronizer> synchronizers;
 	private SchedulerMode mode;
 	private Instant currentTime, cutoffTime;
 	private int executionSpeed;
 	
-	SchedulerState(SchedulerSlots slots) {
+	SchedulerState(SchedulerSlots slots, Set<ThreadSynchronizer> synchronizers) {
 		this.lock = new ReentrantLock();
 		this.slots = slots;
+		this.synchronizers = synchronizers;
 		mode = SchedulerMode.WAIT;
 		currentTime = Instant.EPOCH;
 		executionSpeed = 0;
 	}
 	
 	public SchedulerState() {
-		this(new SchedulerSlots());
+		this(new SchedulerSlots(), new HashSet<>());
 	}
 	
 	SchedulerSlots getSchedulerSlots() {
@@ -278,6 +285,66 @@ public class SchedulerState extends Observable {
 			this.mode = newMode;
 		} finally {
 			lock.unlock();
+		}
+	}
+	
+	public void addSynchronizer(ThreadSynchronizer synchronizer) {
+		lock.lock();
+		try {
+			synchronizers.add(synchronizer);
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	public void removeSynchronizer(ThreadSynchronizer synchronizer) {
+		lock.lock();
+		try {
+			synchronizers.remove(synchronizer);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void beforeExecution(Instant currentTime) {
+		List<ThreadSynchronizer> x;
+		lock.lock();
+		try {
+			x = new ArrayList<>(synchronizers);
+		} finally {
+			lock.unlock();
+		}
+		for ( ThreadSynchronizer s : x ) {
+			s.beforeExecution(currentTime);
+		}
+	}
+
+	@Override
+	public void afterExecution(Instant currentTime) {
+		List<ThreadSynchronizer> x;
+		lock.lock();
+		try {
+			x = new ArrayList<>(synchronizers);
+		} finally {
+			lock.unlock();
+		}
+		for ( ThreadSynchronizer s : x ) {
+			s.afterExecution(currentTime);
+		}
+	}
+
+	@Override
+	public void waitForThread(Instant currentTime) throws InterruptedException {
+		List<ThreadSynchronizer> x;
+		lock.lock();
+		try {
+			x = new ArrayList<>(synchronizers);
+		} finally {
+			lock.unlock();
+		}
+		for ( ThreadSynchronizer s : x ) {
+			s.waitForThread(currentTime);
 		}
 	}
 

@@ -46,6 +46,7 @@ import ru.prolib.aquila.probe.datasim.SymbolUpdateSourceImpl;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerControlToolbar;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerTaskFilter;
 import ru.prolib.aquila.probe.scheduler.ui.SymbolUpdateTaskFilter;
+import ru.prolib.aquila.probe.scheduler.utils.EventQueueSynchronizer;
 import ru.prolib.aquila.qforts.impl.QFBuilder;
 import ru.prolib.aquila.qforts.impl.QFTransactionException;
 import ru.prolib.aquila.qforts.impl.QFortsEnv;
@@ -111,6 +112,10 @@ public class SecuritySimulationTest implements Experiment {
 			.withScheduler(scheduler)
 			.withDataProvider(newDataProvider(scheduler, root, qfBuilder.buildDataProvider()))
 			.buildTerminal();
+		if ( scheduler.getClass() == SchedulerImpl.class ) {
+			SchedulerImpl s = (SchedulerImpl) scheduler;
+			s.addSynchronizer(new EventQueueSynchronizer(terminal.getEventQueue()));
+		}
 		QFortsEnv qfEnv = qfBuilder.buildEnvironment(terminal);
 		try {
 			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(300000.0));
