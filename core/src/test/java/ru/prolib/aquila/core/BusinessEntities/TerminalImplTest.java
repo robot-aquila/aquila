@@ -25,6 +25,7 @@ import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventListenerStub;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.TestEventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParamsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
@@ -83,6 +84,7 @@ public class TerminalImplTest {
 		TerminalParams params = new TerminalParams();
 		params.setTerminalID("DummyTerminal");
 		params.setDataProvider(dataProviderStub);
+		params.setEventQueue(new TestEventQueueImpl());
 		terminal = new TerminalImpl(params);
 		params = new TerminalParams();
 		params.setDataProvider(dataProviderMock);
