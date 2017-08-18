@@ -17,6 +17,7 @@ public class SmoothLineRenderer implements LineRenderer {
         for(Segment s: segments){
             if(i==0){
                 path.moveTo(s.getX1(), s.getY1());
+                path.curveTo(s.getXc1(), s.getYc1(), s.getXc2(), s.getYc2(), s.getX2(), s.getY2());
             } else {
                 path.curveTo(s.getXc1(), s.getYc1(), s.getXc2(), s.getYc2(), s.getX2(), s.getY2());
             }
