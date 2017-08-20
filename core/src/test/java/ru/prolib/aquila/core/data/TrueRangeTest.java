@@ -1,8 +1,14 @@
 package ru.prolib.aquila.core.data;
 
+import static org.easymock.EasyMock.createStrictControl;
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.*;
 import java.time.Instant;
+
+import org.easymock.IMocksControl;
 import org.junit.*;
+
+import ru.prolib.aquila.core.concurrency.LID;
 
 /**
  * 2013-03-12<br>
@@ -17,11 +23,16 @@ public class TrueRangeTest {
 		{ 50.19d, 49.87d, 50.13d, 0.32d },// HL=0.32 HCp=0.28 LCp=0.04: TR=0.32
 		{ 50.12d, 49.20d, 49.53d, 0.93d },
 	};
+	
+	private IMocksControl control;
+	private Series<Candle> candlesMock;
 	private EditableCandleSeries source;
 	private TrueRange indicator;
 
 	@Before
 	public void setUp() throws Exception {
+		control = createStrictControl();
+		candlesMock = control.createMock(Series.class);
 		source = new CandleSeriesImpl(TimeFrame.M1);
 		indicator = new TrueRange("foo", source);
 	}
@@ -50,5 +61,39 @@ public class TrueRangeTest {
 		}
 		assertEquals(fixture.length, indicator.getLength());
 	}
+	
+	@Test
+	public void testGetLID() {
+		LID lidStub = LID.createInstance();
+		expect(candlesMock.getLID()).andReturn(lidStub);
+		control.replay();
+		
+		indicator = new TrueRange(candlesMock);
+		assertSame(lidStub, indicator.getLID());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testLock() {
+		candlesMock.lock();
+		control.replay();
+		
+		indicator = new TrueRange(candlesMock);
+		indicator.lock();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUnlock() {
+		candlesMock.unlock();
+		control.replay();
+		
+		indicator = new TrueRange(candlesMock);
+		indicator.unlock();
+		
+		control.verify();
+	}	
 
 }

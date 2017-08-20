@@ -5,6 +5,7 @@ import ru.prolib.aquila.core.EventFactory;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.concurrency.LID;
 
 public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSeries<T> {
 	protected final EventQueue queue;
@@ -49,9 +50,12 @@ public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSer
 	@Override
 	public void set(T value) throws ValueException {
 		int index = -1;
-		synchronized ( series ) {
+		lock();
+		try {
 			series.set(value);
 			index = getLength() - 1;
+		} finally {
+			unlock();
 		}
 		queue.enqueue(onSet, new SeriesEventFactory(index, value));
 	}
@@ -59,9 +63,12 @@ public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSer
 	@Override
 	public void add(T value) throws ValueException {
 		int index = -1;
-		synchronized ( series ) {
+		lock();
+		try {
 			series.add(value);
 			index = getLength() - 1;
+		} finally {
+			unlock();
 		}
 		queue.enqueue(onAdd, new SeriesEventFactory(index, value));
 	}
@@ -96,6 +103,21 @@ public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSer
 			return new SeriesEvent(type, index, value);
 		}
 		
+	}
+
+	@Override
+	public LID getLID() {
+		return series.getLID();
+	}
+
+	@Override
+	public void lock() {
+		series.lock();
+	}
+
+	@Override
+	public void unlock() {
+		series.unlock();
 	}
 
 }

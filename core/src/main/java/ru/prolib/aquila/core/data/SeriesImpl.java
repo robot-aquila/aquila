@@ -2,6 +2,10 @@ package ru.prolib.aquila.core.data;
 
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import ru.prolib.aquila.core.concurrency.LID;
 
 /**
  * Ряд значений неопределенного типа.
@@ -24,6 +28,8 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	private final String id;
 	private final int limit;
 	private final List<T> history = new Vector<T>();
+	private final LID lid;
+	private final Lock lock = new ReentrantLock();
 	
 	/**
 	 * Реальный индекс первого элемента в хранилище.
@@ -68,6 +74,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 		}
 		id = valueId;
 		limit = storageLimit;
+		lid = LID.createInstance();
 	}
 
 	/**
@@ -95,53 +102,77 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	}
 	
 	@Override
-	public synchronized void add(T value) throws ValueException {
-		history.add(value);
-		if ( limit > 0 ) {
-			if ( history.size() >= limit * 2 ) {
-				history.subList(0, limit).clear();
-				offset += limit;
+	public void add(T value) throws ValueException {
+		lock();
+		try {
+			history.add(value);
+			if ( limit > 0 ) {
+				if ( history.size() >= limit * 2 ) {
+					history.subList(0, limit).clear();
+					offset += limit;
+				}
 			}
+		} finally {
+			unlock();
 		}
 	}
 
 	@Override
-	public synchronized T get() throws ValueException {
+	public T get() throws ValueException {
+		lock();
 		try {
 			return history.get(history.size() - 1);
 		} catch ( ArrayIndexOutOfBoundsException e ) {
 			throw new ValueNotExistsException();
+		} finally {
+			unlock();
 		}
 	}
 
 	@Override
-	public synchronized T get(int index) throws ValueException {
+	public T get(int index) throws ValueException {
+		lock();
 		try {
 			return history.get(normalizeIndex(index));
 		} catch ( IndexOutOfBoundsException e ) {
 			throw new ValueOutOfRangeException(e);
+		} finally {
+			unlock();
 		}
 	}
 
 	@Override
-	public synchronized int getLength() {
-		return history.size() + offset;
+	public int getLength() {
+		lock();
+		try {
+			return history.size() + offset;
+		} finally {
+			unlock();
+		}
 	}
 	
 	@Override
-	public synchronized void set(T value) throws ValueException {
-		int index = history.size() - 1;
+	public void set(T value) throws ValueException {
+		lock();
 		try {
+			int index = history.size() - 1;
 			history.set(index, value);
 		} catch ( ArrayIndexOutOfBoundsException e ) {
 			throw new ValueNotExistsException();
+		} finally {
+			unlock();
 		}
 	}
 
 	@Override
-	public synchronized void clear() {
-		history.clear();
-		offset = 0;
+	public void clear() {
+		lock();
+		try {
+			history.clear();
+			offset = 0;
+		} finally {
+			unlock();
+		}
 	}
 
 	/**
@@ -168,6 +199,21 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 			throw new ValueOutOfDateException();
 		}
 		return index;
+	}
+
+	@Override
+	public LID getLID() {
+		return lid;
+	}
+
+	@Override
+	public void lock() {
+		lock.lock();
+	}
+
+	@Override
+	public void unlock() {
+		lock.unlock();
 	}
 
 }

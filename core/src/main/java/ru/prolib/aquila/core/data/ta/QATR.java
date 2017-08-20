@@ -1,12 +1,13 @@
 package ru.prolib.aquila.core.data.ta;
 
+import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.ValueException;
 
 /**
- * Объектно-ориентированная обертка функции {@link TAMath#qema(Series, int, int)}.
+ * Объектно-ориентированная обертка функции {@link TAMath#qatr(Series, int, int)}.
  */
 public class QATR implements Series<Double> {
 	private final String id;
@@ -47,6 +48,21 @@ public class QATR implements Series<Double> {
 	@Override
 	public int getLength() {
 		return source.getLength();
+	}
+
+	@Override
+	public LID getLID() {
+		return source.getLID();
+	}
+
+	@Override
+	public void lock() {
+		source.lock();
+	}
+
+	@Override
+	public void unlock() {
+		source.unlock();
 	}
 
 }

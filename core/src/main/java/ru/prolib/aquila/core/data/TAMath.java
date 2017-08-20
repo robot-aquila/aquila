@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+import ru.prolib.aquila.core.concurrency.LID;
+
 /**
  * Common TA functions.
  * <p>
@@ -81,6 +83,21 @@ public class TAMath {
 		@Override
 		public int getLength() {
 			return x.getLength();
+		}
+
+		@Override
+		public LID getLID() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void lock() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void unlock() {
+			throw new UnsupportedOperationException();			
 		}
 		
 	}

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.concurrency.LID;
+
 public class CandleVolumeSeries implements Series<Long> {
 	private final Series<Candle> candles;
 	
@@ -26,6 +28,21 @@ public class CandleVolumeSeries implements Series<Long> {
 	@Override
 	public int getLength() {
 		return candles.getLength();
+	}
+
+	@Override
+	public LID getLID() {
+		return candles.getLID();
+	}
+
+	@Override
+	public void lock() {
+		candles.lock();
+	}
+
+	@Override
+	public void unlock() {
+		candles.unlock();
 	}
 
 }

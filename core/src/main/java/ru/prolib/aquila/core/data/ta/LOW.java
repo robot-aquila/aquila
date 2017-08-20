@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data.ta;
 
+import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.*;
 
 /**
@@ -47,6 +48,21 @@ public class LOW implements Series<Double> {
 	@Override
 	public int getLength() {
 		return source.getLength();
+	}
+
+	@Override
+	public LID getLID() {
+		return source.getLID();
+	}
+
+	@Override
+	public void lock() {
+		source.lock();
+	}
+
+	@Override
+	public void unlock() {
+		source.unlock();
 	}
 
 }

@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.swing_chart.series;
 
 import ru.prolib.aquila.core.BusinessEntities.TStamped;
+import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 
@@ -49,4 +50,19 @@ public class StampedListTimeSeries implements Series<Instant> {
             throw new ValueException("List is empty");
         }
     }
+
+	@Override
+	public LID getLID() {
+		return series.getLID();
+	}
+
+	@Override
+	public void lock() {
+		series.lock();
+	}
+
+	@Override
+	public void unlock() {
+		series.unlock();
+	}
 }

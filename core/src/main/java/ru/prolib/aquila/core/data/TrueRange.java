@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.concurrency.LID;
+
 /**
  * True Range (TR).
  * <p>
@@ -40,6 +42,21 @@ public class TrueRange implements Series<Double> {
 	@Override
 	public int getLength() {
 		return candles.getLength();
+	}
+
+	@Override
+	public LID getLID() {
+		return candles.getLID();
+	}
+
+	@Override
+	public void lock() {
+		candles.lock();
+	}
+
+	@Override
+	public void unlock() {
+		candles.unlock();
 	}
 
 }

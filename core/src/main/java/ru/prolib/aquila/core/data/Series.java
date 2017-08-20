@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.concurrency.Lockable;
 import ru.prolib.aquila.core.data.ValueException;
 
 /**
@@ -17,7 +18,7 @@ import ru.prolib.aquila.core.data.ValueException;
  * 2012-04-17<br>
  * $Id: Series.java 565 2013-03-10 19:32:12Z whirlwind $
  */
-public interface Series<T> {
+public interface Series<T> extends Lockable {
 	
 	/**
 	 * Идентификатор значения по-умолчанию.
@@ -32,15 +33,15 @@ public interface Series<T> {
 	public String getId();
 
 	/**
-	 * Получить текущее значение.
+	 * Get last value.
 	 * <p>
-	 * @return текущее значение
-	 * @throws ValueNotExistsException нет ни одного значения в истории
+	 * @return last (current) value
+	 * @throws ValueNotExistsException if value not available
 	 */
 	public T get() throws ValueException;
 
 	/**
-	 * Получить значение по индексу.
+	 * Get value by index.
 	 * <p>
 	 * @param index Индекс значения на шкале времени. 0 - самое первое в
 	 * хранимой истории значение. Отрицательные индексы используются для

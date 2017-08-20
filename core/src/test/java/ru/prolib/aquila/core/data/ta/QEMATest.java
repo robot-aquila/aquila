@@ -1,18 +1,28 @@
 package ru.prolib.aquila.core.data.ta;
 
+import static org.easymock.EasyMock.createStrictControl;
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.*;
 
+import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.concurrency.LID;
+import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.SeriesImpl;
 
 public class QEMATest {
+	private IMocksControl control;
+	private Series<Double> sourceMock;
 	private SeriesImpl<Double> source;
 	private QEMA series;
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
+		control = createStrictControl();
+		sourceMock = control.createMock(Series.class);
 		source = new SeriesImpl<>();
 		series = new QEMA("foo", source, 4);
 		source.add(5d);
@@ -47,5 +57,39 @@ public class QEMATest {
 	public void testGetLength() {
 		assertEquals(6, series.getLength());
 	}
+	
+	@Test
+	public void testGetLID() {
+		LID lidStub = LID.createInstance();
+		expect(sourceMock.getLID()).andReturn(lidStub);
+		control.replay();
+		
+		series = new QEMA("foo", sourceMock, 4);
+		assertSame(lidStub, series.getLID());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testLock() {
+		sourceMock.lock();
+		control.replay();
+		
+		series = new QEMA("foo", sourceMock, 4);
+		series.lock();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUnlock() {
+		sourceMock.unlock();
+		control.replay();
+		
+		series = new QEMA("foo", sourceMock, 4);
+		series.unlock();
+		
+		control.verify();
+	}	
 
 }

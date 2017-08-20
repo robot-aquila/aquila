@@ -1,27 +1,36 @@
 package ru.prolib.aquila.core.data;
 
+import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 import org.threeten.extra.Interval;
 
+import ru.prolib.aquila.core.concurrency.LID;
+
 import java.time.Instant;
 
+import static org.easymock.EasyMock.createStrictControl;
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.*;
 
 /**
  * Created by TiM on 04.05.2017.
  */
 public class CandleStartTimeSeriesTest {
-
+	private IMocksControl control;
+	private Series<Candle> candlesMock;
     private SeriesImpl<Candle> candles;
     private Instant time1, time2, time3;
     private Interval int1, int2, int3;
     private Candle candle1, candle2, candle3;
     private CandleStartTimeSeries series;
 
-    @Before
+    @SuppressWarnings("unchecked")
+	@Before
     public void setUp() throws Exception {
-        candles = new SeriesImpl("CANDLES");
+		control = createStrictControl();
+		candlesMock = control.createMock(Series.class);
+        candles = new SeriesImpl<Candle>("CANDLES");
         time1 = Instant.parse("2017-05-04T11:00:00Z");
         time2 = time1.plusSeconds(5 * 60);
         time3 = time2.plusSeconds(5 * 60);
@@ -58,5 +67,39 @@ public class CandleStartTimeSeriesTest {
     public void testGetLength() throws Exception {
         assertEquals(3, series.getLength());
     }
+
+	@Test
+	public void testGetLID() {
+		LID lidStub = LID.createInstance();
+		expect(candlesMock.getLID()).andReturn(lidStub);
+		control.replay();
+		
+		series = new CandleStartTimeSeries(candlesMock);
+		assertSame(lidStub, series.getLID());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testLock() {
+		candlesMock.lock();
+		control.replay();
+		
+		series = new CandleStartTimeSeries(candlesMock);
+		series.lock();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUnlock() {
+		candlesMock.unlock();
+		control.replay();
+		
+		series = new CandleStartTimeSeries(candlesMock);
+		series.unlock();
+		
+		control.verify();
+	}	
 
 }

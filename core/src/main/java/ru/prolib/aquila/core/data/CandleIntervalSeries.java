@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import org.threeten.extra.Interval;
 
+import ru.prolib.aquila.core.concurrency.LID;
+
 /**
  * Ряд временных интервалов.
  * <p>
@@ -36,6 +38,21 @@ public class CandleIntervalSeries implements Series<Interval> {
 	@Override
 	public int getLength() {
 		return candles.getLength();
+	}
+
+	@Override
+	public LID getLID() {
+		return candles.getLID();
+	}
+
+	@Override
+	public void lock() {
+		candles.lock();
+	}
+
+	@Override
+	public void unlock() {
+		candles.unlock();
 	}
 
 }

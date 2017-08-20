@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.data;
 import static org.junit.Assert.*;
 import org.junit.*;
 
+import ru.prolib.aquila.core.concurrency.LID;
+
 
 
 /**
@@ -42,6 +44,7 @@ public class SeriesImplTest {
 		val2 = new SeriesImpl<Integer>();
 		assertEquals(Series.DEFAULT_ID, val2.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, val2.getStorageLimit());
+		assertTrue(LID.isLastCreatedLID(val2.getLID()));
 	}
 
 	@Test
