@@ -42,4 +42,8 @@ public abstract class Axis<T> {
     public void setLabelFormatter(LabelFormatter labelFormatter) {
         this.labelFormatter = labelFormatter;
     }
+
+    public LabelFormatter getLabelFormatter() {
+        return labelFormatter;
+    }
 }

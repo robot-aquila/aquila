@@ -102,9 +102,8 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
                 c.getBottomAxis().setShowLabels(true);
             }
             c.getLeftAxis().setShowLabels(true);
-            c.getLeftAxis().setLabelFormatter(doubleLabelFormatter);
             c.getRightAxis().setShowLabels(true);
-            c.getRightAxis().setLabelFormatter(doubleLabelFormatter);
+            c.setValuesLabelFormatter(doubleLabelFormatter);
             i++;
         }
     }
@@ -160,6 +159,9 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
             throw new IllegalStateException("Volumes chart is already added");
         }
         Chart chart = addChart("VOLUMES");
+        DoubleLabelFormatter formatter = new DoubleLabelFormatter();
+        formatter.setPrecision(0);
+        chart.setValuesLabelFormatter(formatter);
         volumes = new VolumeChartLayer("VOLUMES");
         chart.addLayer(volumes);
         if(candleData!=null){

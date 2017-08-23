@@ -6,4 +6,5 @@ package ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters;
 public interface LabelFormatter<T> {
     String format(T x);
     T parse(String str);
+    Integer getPrecision();
 }

@@ -7,10 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.Axis;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.CategoryAxis;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.ValueAxis;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeCalculator;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeCalculatorImpl;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeInfo;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.*;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.ChartLayer;
 
 import javax.swing.*;
@@ -34,13 +31,16 @@ public class Chart<TCategories> extends JPanel {
     private int lastX, lastY;
     private TCategories lastCategory;
 
+    private LabelFormatter<TCategories> categoriesLabelFormatter = new DefaultLabelFormatter<TCategories>();
+    private LabelFormatter valuesLabelFormatter = new DefaultLabelFormatter();
+
     public Chart(List<TCategories> categories) {
         super();
         this.categories = categories;
-        topAxis = new CategoryAxis<>(SwingConstants.TOP, this.categories, new DefaultLabelFormatter());
-        bottomAxis = new CategoryAxis<>(SwingConstants.BOTTOM, this.categories, new DefaultLabelFormatter());
-        leftAxis = new ValueAxis<TCategories>(SwingConstants.LEFT);
-        rightAxis = new ValueAxis<TCategories>(SwingConstants.RIGHT);
+        topAxis = new CategoryAxis<>(SwingConstants.TOP, this.categories, categoriesLabelFormatter);
+        bottomAxis = new CategoryAxis<>(SwingConstants.BOTTOM, this.categories, categoriesLabelFormatter);
+        leftAxis = new ValueAxis<TCategories>(SwingConstants.LEFT, valuesLabelFormatter);
+        rightAxis = new ValueAxis<TCategories>(SwingConstants.RIGHT, valuesLabelFormatter);
         rangeCalculator = new RangeCalculatorImpl();
     }
 
@@ -74,7 +74,7 @@ public class Chart<TCategories> extends JPanel {
                 g2.getClipBounds().getHeight()-2*MARGIN - topMargin - bottomMargin);
 
         Pair<Double, Double> valuesInterval = getValuesInterval();
-        RangeInfo ri = rangeCalculator.autoRange(valuesInterval.getLeft(), valuesInterval.getRight(), drawArea.getHeight(), Y_AXIS_MIN_STEP);
+        RangeInfo ri = rangeCalculator.autoRange(valuesInterval.getLeft(), valuesInterval.getRight(), drawArea.getHeight(), Y_AXIS_MIN_STEP, valuesLabelFormatter.getPrecision());
         CoordConverter<TCategories> coordConverter = new CoordConverterImpl<TCategories>(categories, g2, drawArea, ri);
 
         topAxis.paint(coordConverter);
@@ -126,6 +126,26 @@ public class Chart<TCategories> extends JPanel {
 
     public TCategories getLastCategory() {
         return lastCategory;
+    }
+
+    public LabelFormatter<TCategories> getCategoriesLabelFormatter() {
+        return categoriesLabelFormatter;
+    }
+
+    public void setCategoriesLabelFormatter(LabelFormatter<TCategories> categoriesLabelFormatter) {
+        this.categoriesLabelFormatter = categoriesLabelFormatter;
+        topAxis.setLabelFormatter(categoriesLabelFormatter);
+        bottomAxis.setLabelFormatter(categoriesLabelFormatter);
+    }
+
+    public LabelFormatter getValuesLabelFormatter() {
+        return valuesLabelFormatter;
+    }
+
+    public void setValuesLabelFormatter(LabelFormatter valuesLabelFormatter) {
+        this.valuesLabelFormatter = valuesLabelFormatter;
+        leftAxis.setLabelFormatter(valuesLabelFormatter);
+        rightAxis.setLabelFormatter(valuesLabelFormatter);
     }
 
     private Pair<Double, Double> getValuesInterval(){

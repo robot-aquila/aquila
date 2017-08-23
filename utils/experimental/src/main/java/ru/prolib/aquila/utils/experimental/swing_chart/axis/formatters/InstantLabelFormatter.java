@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * Created by TiM on 23.01.2017.
  */
-public class InstantLabelFormatter implements LabelFormatter<Instant> {
+public class InstantLabelFormatter extends DefaultLabelFormatter<Instant> {
 
     protected DateTimeFormatter yearLabelFormatter = DateTimeFormatter.ofPattern(getYearLabelFormat());
     protected DateTimeFormatter monthLabelFormatter = DateTimeFormatter.ofPattern(getMonthLabelFormat());

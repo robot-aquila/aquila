@@ -5,4 +5,5 @@ package ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters;
  */
 public interface RangeCalculator {
     RangeInfo autoRange(double minValue, double maxValue, double length, double minStep);
+    RangeInfo autoRange(double minValue, double maxValue, double length, double minStep, Integer precision);
 }
