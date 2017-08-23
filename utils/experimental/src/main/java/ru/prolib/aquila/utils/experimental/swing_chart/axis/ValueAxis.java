@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.swing_chart.axis;
 
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeInfo;
 
 import javax.swing.*;
@@ -14,8 +15,9 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.Y_A
  */
 public class ValueAxis<T> extends Axis<T> {
 
-    public ValueAxis(int position) {
+    public ValueAxis(int position, LabelFormatter labelFormatter) {
         super(position);
+        this.labelFormatter = labelFormatter;
     }
 
     public double getSize(){

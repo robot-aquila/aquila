@@ -7,6 +7,15 @@ public class RangeCalculatorImpl implements RangeCalculator {
 
     @Override
     public RangeInfo autoRange(double minValue, double maxValue, double length, double minStep) {
+        return autoRange(minValue, maxValue, length, minStep, null);
+    }
+
+    @Override
+    public RangeInfo autoRange(double minValue, double maxValue, double length, double minStep, Integer precision) {
+        double minValueStep = 0;
+        if(precision!=null){
+            minValueStep = Math.pow(10d, -precision);
+        }
         // calculate the number of tick-marks we can fit in the given length
         int numOfTickMarks = (int)Math.floor(length/minStep);
         // can never have less than 2 tick marks one for each end
@@ -37,9 +46,8 @@ public class RangeCalculatorImpl implements RangeCalculator {
         double maxRounded = 0;
         int count = 0;
         double reqLength = Double.MAX_VALUE;
-        String formatter = "0.00000000";
         // loop till we find a set of ticks that fit length and result in a total of less than 20 tick marks
-        while (reqLength > length || count > 20) {
+        while (reqLength > length || count > 20 || tickUnitRounded < minValueStep) {
             int exp = (int)Math.floor(Math.log10(tickUnit));
             final double mant = tickUnit / Math.pow(10, exp);
             double ratio = mant;
@@ -47,22 +55,7 @@ public class RangeCalculatorImpl implements RangeCalculator {
                 exp++;
                 ratio = 1;
             } else if (mant > 1d) {
-                ratio = mant > 2.5 ? 5 : 2.5;
-            }
-            if (exp > 1) {
-                formatter = "#,##0";
-            } else if (exp == 1) {
-                formatter = "0";
-            } else {
-                final boolean ratioHasFrac = Math.rint(ratio) != ratio;
-                final StringBuilder formatterB = new StringBuilder("0");
-                int n = ratioHasFrac ? Math.abs(exp) + 1 : Math.abs(exp);
-                if (n > 0) formatterB.append(".");
-                for (int i = 0; i < n; ++i) {
-                    formatterB.append("0");
-                }
-                formatter = formatterB.toString();
-
+                ratio = mant > 2 ? 5 : 2;
             }
             tickUnitRounded = ratio * Math.pow(10, exp);
             // move min and max to nearest tick mark
@@ -91,7 +84,7 @@ public class RangeCalculatorImpl implements RangeCalculator {
             if (numOfTickMarks == 2 && reqLength > length) {
                 break;
             }
-            if (reqLength > length || count > 20) tickUnit *= 2; // This is just for the while loop, if there are still too many ticks
+            if (reqLength > length || count > 20 || tickUnit < minValueStep) tickUnit *= 2; // This is just for the while loop, if there are still too many ticks
         }
         double step = (maxRounded - minRounded)==0?length:tickUnitRounded*length/(maxRounded - minRounded);
         return new RangeInfo(minRounded, maxRounded, tickUnitRounded, step);

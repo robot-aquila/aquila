@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.swing_chart;
 
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DoubleLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.PolyLineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
@@ -85,6 +86,7 @@ public class Main {
 
         chartPanel.getChart("CANDLES").getLeftAxis().setShowLabels(true);
         chartPanel.getChart("CANDLES").getRightAxis().setShowLabels(true);
+        chartPanel.getChart("CANDLES").setValuesLabelFormatter(new DoubleLabelFormatter());
 //        chartPanel.getChart("VOLUMES").getLeftAxis().setShowLabels(true);
 //        chartPanel.getChart("VOLUMES").getRightAxis().setShowLabels(true);
 //        chartPanel.getChart("CANDLES3").getLeftAxis().setShowLabels(true);

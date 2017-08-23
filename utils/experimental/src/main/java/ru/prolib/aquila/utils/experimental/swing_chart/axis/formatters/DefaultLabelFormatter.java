@@ -3,14 +3,19 @@ package ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters;
 /**
  * Created by TiM on 19.06.2017.
  */
-public class DefaultLabelFormatter implements LabelFormatter<Object> {
+public class DefaultLabelFormatter<T> implements LabelFormatter<T> {
     @Override
-    public String format(Object x) {
+    public String format(T x) {
         return x.toString();
     }
 
     @Override
-    public Object parse(String str) {
+    public T parse(String str) {
+        return null;
+    }
+
+    @Override
+    public Integer getPrecision() {
         return null;
     }
 }
