@@ -51,7 +51,9 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
                     } catch (ValueException e) {
                         e.printStackTrace();
                     }
-                    if(v!=null){
+                    if(v==null) {
+                        points.add(null);
+                    } else {
                         points.add(new Point(converter.getX(c), converter.getY(v)));
                         currentTooltips.put(c, createTooltipText(v));
                     }

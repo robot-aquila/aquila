@@ -60,15 +60,31 @@ public class Main {
         IndicatorChartLayer highLayer = new IndicatorChartLayer("High");
         highLayer.setColor(Color.BLUE);
         highLayer.setCategories(new CandleStartTimeSeries(series));
-        highLayer.setData(new CandleHighSeries(series));
+        highLayer.setData(new CandleHighSeries(series){
+            @Override
+            public Double get(int index) throws ValueException {
+                if(index%10==0){
+                    return  null;
+                }
+                return super.get(index);
+            }
+        });
         chartPanel.getChart("CANDLES").addLayer(highLayer);
 
-        IndicatorChartLayer lowLayer = new IndicatorChartLayer("High");
+        IndicatorChartLayer lowLayer = new IndicatorChartLayer("Low");
         lowLayer.setColor(Color.BLUE);
         lowLayer.setCategories(new CandleStartTimeSeries(series));
-        lowLayer.setData(new CandleLowSeries(series));
-        lowLayer.setLineRenderer(new SmoothLineRenderer());
-//        chartPanel.getChart("CANDLES").addLayer(lowLayer);
+        lowLayer.setData(new CandleLowSeries(series){
+            @Override
+            public Double get(int index) throws ValueException {
+                if(index%5==0){
+                    return  null;
+                }
+                return super.get(index);
+            }
+        });
+        lowLayer.setLineRenderer(new PolyLineRenderer());
+        chartPanel.getChart("CANDLES").addLayer(lowLayer);
 
         VolumeChartLayer volumes = new VolumeChartLayer("VOLUMES");
         volumes.setCategories(new CandleStartTimeSeries(series));

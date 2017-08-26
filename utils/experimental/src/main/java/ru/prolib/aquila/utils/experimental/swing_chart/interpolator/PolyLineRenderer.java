@@ -1,10 +1,5 @@
 package ru.prolib.aquila.utils.experimental.swing_chart.interpolator;
 
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.PathElement;
-
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.util.List;
@@ -16,15 +11,22 @@ public class PolyLineRenderer implements LineRenderer {
 
     @Override
     public Shape renderLine(List<Point> points) {
+        boolean needMove = true;
         Path2D path = new Path2D.Double();
-        int i=0;
-        for(Point p: points){
-            if(i==0){
-                path.moveTo(p.getX(), p.getY());
-            } else {
-                path.lineTo(p.getX(), p.getY());
+        if(points.size()>0){
+            for(int i=0; i<points.size(); i++){
+                Point p = points.get(i);
+                if(p==null){
+                    needMove = true;
+                } else {
+                    if(needMove){
+                        path.moveTo(p.getX(), p.getY());
+                        needMove = false;
+                    } else {
+                        path.lineTo(p.getX(), p.getY());
+                    }
+                }
             }
-            i++;
         }
         return path;
     }

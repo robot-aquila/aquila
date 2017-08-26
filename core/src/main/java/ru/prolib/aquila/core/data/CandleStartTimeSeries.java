@@ -2,14 +2,10 @@ package ru.prolib.aquila.core.data;
 
 import java.time.Instant;
 
-import ru.prolib.aquila.core.concurrency.LID;
-
-public class CandleStartTimeSeries implements Series<Instant> {
-	private final Series<Candle> candles;
+public class CandleStartTimeSeries extends CandlePartSeries<Instant> {
 
 	public CandleStartTimeSeries(Series<Candle> candles) {
-		super();
-		this.candles = candles;
+		super(candles);
 	}
 
 	@Override
@@ -18,33 +14,7 @@ public class CandleStartTimeSeries implements Series<Instant> {
 	}
 
 	@Override
-	public Instant get() throws ValueException {
-		return candles.get().getStartTime();
+	protected Instant getPart(Candle candle) {
+		return candle.getStartTime();
 	}
-
-	@Override
-	public Instant get(int index) throws ValueException {
-		return candles.get(index).getStartTime();
-	}
-
-	@Override
-	public int getLength() {
-		return candles.getLength();
-	}
-
-	@Override
-	public LID getLID() {
-		return candles.getLID();
-	}
-
-	@Override
-	public void lock() {
-		candles.lock();
-	}
-
-	@Override
-	public void unlock() {
-		candles.unlock();
-	}
-
 }
