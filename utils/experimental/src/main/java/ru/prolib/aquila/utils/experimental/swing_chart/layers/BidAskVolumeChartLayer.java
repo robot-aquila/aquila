@@ -6,26 +6,30 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.time.Instant;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.CANDLE_MIN_WIDTH;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.CANDLE_WIDTH_RATIO;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.VOLUME_COLOR;
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.*;
 
 /**
  * Created by TiM on 27.01.2017.
  */
-public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
+public class BidAskVolumeChartLayer extends AbstractChartLayer<Instant, Long> {
 
-    private Color color = VOLUME_COLOR;
+    public static final int TYPE_BID = 1;
+    public static final int TYPE_ASK = -1;
 
-    public VolumeChartLayer(String id) {
+    private Color color;
+    private final int type;
+
+    public BidAskVolumeChartLayer(String id, int type) {
         super(id);
+        this.type = type;
+        color = type==TYPE_BID?BID_VOLUME_COLOR:ASK_VOLUME_COLOR;
     }
 
     @Override
     protected void paintObject(Instant category, Long value, CoordConverter<Instant> converter, Graphics2D g) {
         int cnt = converter.getCategories().size();
         double x = converter.getX(category);
-        double y = converter.getY(Double.valueOf(value));
+        double y = converter.getY(Double.valueOf(type * value));
         double height = Math.abs(y - converter.getY(0d));
         if(height==0){
             height = 1;
@@ -33,29 +37,21 @@ public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
         double width = converter.getStepX()*CANDLE_WIDTH_RATIO;
         width= width<CANDLE_MIN_WIDTH?CANDLE_MIN_WIDTH:width;
         g.setColor(color);
-        g.fill(new Rectangle2D.Double(x - width/2, y, width, height));
+        g.fill(new Rectangle2D.Double(x - width/2, type==TYPE_BID?y:y-height, width, height));
     }
 
     @Override
     protected double getMaxValue(Long value) {
-        return value.doubleValue();
+        return type==TYPE_BID?value.doubleValue():0d;
     }
 
     @Override
     protected double getMinValue(Long value) {
-        return 0d;
+        return type==TYPE_BID?0d:-value.doubleValue();
     }
 
     @Override
     protected String createTooltipText(Long volume) {
-        return String.format("VOLUME: %d", volume);
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
+        return String.format("%s VOLUME: %d", type==TYPE_BID?"BID":"ASK", volume);
     }
 }

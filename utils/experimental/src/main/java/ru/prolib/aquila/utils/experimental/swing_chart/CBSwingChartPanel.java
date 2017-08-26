@@ -3,17 +3,13 @@ package ru.prolib.aquila.utils.experimental.swing_chart;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfo;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.*;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DoubleLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.LineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.PolyLineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.CandleChartLayer;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.IndicatorChartLayer;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeChartLayer;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.VolumeChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListSeries;
 import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListTimeSeries;
 
@@ -31,6 +27,8 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
     private List<IndicatorChartLayer> indicators = new ArrayList<>();
     private ObservableSeries<Candle>  candleData;
     private VolumeChartLayer volumes;
+    private BidAskVolumeChartLayer bidVolumes, askVolumes;
+    private ObservableSeries<Long> bidData, askData;
     private LabelFormatter labelFormatter = new InstantLabelFormatter();
     private LabelFormatter doubleLabelFormatter = new DoubleLabelFormatter();
 
@@ -69,12 +67,51 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
         setCurrentPosition(candleData.getLength());
     }
 
+    public void setBidAskVolumeData(Series<Instant> categories, ObservableSeries<Long> bidData, ObservableSeries<Long> askData){
+        if(this.bidData!=null){
+            this.bidData.onAdd().removeListener(this);
+            this.bidData.onSet().removeListener(this);
+        }
+        if(this.askData!=null){
+            this.askData.onAdd().removeListener(this);
+            this.askData.onSet().removeListener(this);
+        }
+
+        this.bidData = bidData;
+        this.askData = askData;
+
+        bidVolumes.setData(bidData);
+        bidVolumes.setCategories(categories);
+        askVolumes.setData(askData);
+        askVolumes.setCategories(categories);
+
+        if(this.bidData!=null){
+            this.bidData.onAdd().addListener(this);
+            this.bidData.onSet().addListener(this);
+        }
+        if(askData!=null){
+            this.askData.onAdd().addListener(this);
+            this.askData.onSet().addListener(this);
+        }
+        setCurrentPosition(candleData.getLength());
+    }
+
     public void clearData(){
         if(candleData!=null){
             candleData.onAdd().removeListener(this);
             candleData.onSet().removeListener(this);
         }
         candleData = null;
+        if(bidData!=null){
+            bidData.onAdd().removeListener(this);
+            bidData.onSet().removeListener(this);
+        }
+        if(askData!=null){
+            askData.onAdd().removeListener(this);
+            askData.onSet().removeListener(this);
+        }
+        bidData = null;
+        askData = null;
         super.clearData();
         for(IndicatorChartLayer l: indicators){
             for(Chart c: charts.values()){
@@ -168,6 +205,22 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
             volumes.setData(new CandleVolumeSeries(candleData));
             volumes.setCategories(new CandleStartTimeSeries(candleData));
         }
+    }
+
+    public void addBidAskVolumes(){
+        if(bidVolumes!=null || askVolumes!=null){
+            throw new IllegalStateException("Bid/Ask Volumes chart is already added");
+        }
+        Chart chart = addChart("BID_ASK_VOLUMES");
+        DoubleLabelFormatter formatter = new DoubleLabelFormatter();
+        formatter.setPrecision(0);
+        chart.setValuesLabelFormatter(formatter);
+
+        bidVolumes = new BidAskVolumeChartLayer("BID_VOLUMES", BidAskVolumeChartLayer.TYPE_BID);
+        chart.addLayer(bidVolumes);
+
+        askVolumes = new BidAskVolumeChartLayer("ASK_VOLUMES", BidAskVolumeChartLayer.TYPE_ASK);
+        chart.addLayer(askVolumes);
     }
 
     public void addTrades(){
