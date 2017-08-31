@@ -22,11 +22,13 @@ public class AskMaxVolumeSeriesByBestAsk extends FillBySecurityEvent<Long> {
 	protected void processEvent(Event event) {
 		if ( event.isType(security.onBestAsk()) ) {
 			Tick tick = ((SecurityTickEvent) event).getTick();
-			Instant time = tick.getTime();
-			long newVal = tick.getSize();
-			Long curVal = series.get(time);
-			if ( curVal == null || newVal > curVal ) {
-				series.set(time, newVal);
+			if ( tick != null && tick != Tick.NULL_ASK ) {
+				Instant time = tick.getTime();
+				long newVal = tick.getSize();
+				Long curVal = series.get(time);
+				if ( curVal == null || newVal > curVal ) {
+					series.set(time, newVal);
+				}
 			}
 		}
 	}
