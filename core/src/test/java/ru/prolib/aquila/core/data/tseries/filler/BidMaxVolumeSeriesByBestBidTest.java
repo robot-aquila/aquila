@@ -225,5 +225,29 @@ public class BidMaxVolumeSeriesByBestBidTest {
 		assertEquals(1, series.getLength());
 		assertEquals(2000L, (long)series.get(T("2017-08-31T00:00:00Z")));
 	}
+	
+	@Test
+	public void testOnEvent_OnBestBid_SkipIfTickIsNull() {
+		EditableSecurity security = terminal.getEditableSecurity(symbol1);
+		SecurityTickEvent e = new SecurityTickEvent(security.onBestBid(), security, Instant.EPOCH, null);
+		filler.setSecurity(security);
+		filler.setStarted(true);
+
+		filler.onEvent(e);
+		
+		assertEquals(0, series.getLength());
+	}
+	
+	@Test
+	public void testOnEvent_OnBestBid_SkipIfTickIsNullBid() {
+		EditableSecurity security = terminal.getEditableSecurity(symbol1);
+		SecurityTickEvent e = new SecurityTickEvent(security.onBestBid(), security, Instant.EPOCH, Tick.NULL_BID);
+		filler.setSecurity(security);
+		filler.setStarted(true);
+
+		filler.onEvent(e);
+		
+		assertEquals(0, series.getLength());
+	}
 
 }

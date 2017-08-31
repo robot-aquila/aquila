@@ -171,7 +171,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 	}
 
 	@Test
-	public void testOnEvent_OnBestBid_SkipIfNotStarted() {
+	public void testOnEvent_OnBestAsk_SkipIfNotStarted() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
 		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, tick);
@@ -183,7 +183,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 	}
 	
 	@Test
-	public void testOnEvent_OnBestBid() {
+	public void testOnEvent_OnBestAsk() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
 		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, tick);
@@ -197,7 +197,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 	}
 	
 	@Test
-	public void testOnEvent_OnBestBid_NewMax() {
+	public void testOnEvent_OnBestAsk_NewMax() {
 		series.set(T("2017-08-31T00:00:00Z"), 1000L);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
@@ -212,7 +212,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 	}
 
 	@Test
-	public void testOnEvent_OnBestBid_OldMax() {
+	public void testOnEvent_OnBestAsk_OldMax() {
 		series.set(T("2017-08-31T00:00:00Z"), 2000L);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
@@ -224,6 +224,30 @@ public class AskMaxVolumeSeriesByBestAskTest {
 		
 		assertEquals(1, series.getLength());
 		assertEquals(2000L, (long)series.get(T("2017-08-31T00:00:00Z")));
+	}
+	
+	@Test
+	public void testOnEvent_OnBestAsk_SkipIfTickIsNull() {
+		EditableSecurity security = terminal.getEditableSecurity(symbol1);
+		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, null);
+		filler.setSecurity(security);
+		filler.setStarted(true);
+
+		filler.onEvent(e);
+		
+		assertEquals(0, series.getLength());
+	}
+	
+	@Test
+	public void testOnEvent_OnBestAsk_SkipIfTickIsNullAsk() {
+		EditableSecurity security = terminal.getEditableSecurity(symbol1);
+		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, Tick.NULL_ASK);
+		filler.setSecurity(security);
+		filler.setStarted(true);
+
+		filler.onEvent(e);
+		
+		assertEquals(0, series.getLength());
 	}
 
 }
