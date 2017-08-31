@@ -46,7 +46,7 @@ public class CMASignalBuilder implements MarketSignalBuilder {
 				ind.getQEMA(slice, shortPeriod),
 				ind.getQEMA(slice, longPeriod),
 				new MarketSignal(queue, signalID),
-				TAMath.getInstance()); 
+				TAMath.getInstance());
 	}
 
 }

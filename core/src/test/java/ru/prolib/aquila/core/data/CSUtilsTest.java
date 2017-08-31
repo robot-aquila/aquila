@@ -19,6 +19,7 @@ import ru.prolib.aquila.core.BusinessEntities.Tick;
 public class CSUtilsTest {
 	private IMocksControl control;
 	private SeriesImpl<Candle> series;
+	private TSeriesImpl<Candle> tseries;
 	private EditableTerminal terminal;
 	private CSUtils utils;
 	
@@ -30,6 +31,7 @@ public class CSUtilsTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		series = new SeriesImpl<>();
+		tseries = new TSeriesImpl<>(TimeFrame.M5);
 		utils = new CSUtils();
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())
@@ -86,6 +88,59 @@ public class CSUtilsTest {
 		assertEquals(expected, series.get(0));
 	}
 	
+	@Test
+	public void testAggregate2_FirstCandle() throws Exception {
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:36:53Z"), 86.12d, 1000L));
+
+		Interval interval = Interval.of(T("2017-05-02T11:35:00Z"), T("2017-05-02T11:40:00Z"));
+		Candle expected = new Candle(interval, 86.12d, 1000L);
+		assertEquals(1, tseries.getLength());
+		assertEquals(expected, tseries.get());
+	}
+
+	@Test
+	public void testAggregate2_AppendToLastCandle() throws Exception {
+		Interval interval = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
+		tseries.set(interval.getStart(), new Candle(interval, 100.02d, 500L));
+		
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:52:00Z"), 98.13d, 100L));
+		
+		Candle expected = new Candle(interval, 100.02d, 100.02d, 98.13d, 98.13d, 600L);
+		assertEquals(1, tseries.getLength());
+		assertEquals(expected, tseries.get());
+	}
+	
+	@Test
+	public void testAggregate2_PastTick() throws Exception {
+		Interval interval1 = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
+		tseries.set(interval1.getStart(), new Candle(interval1, 100.02d, 500L));
+		
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:49:59Z"), 98.13d, 100L));
+		
+		Interval interval2 = Interval.of(T("2017-05-02T11:45:00Z"), T("2017-05-02T11:50:00Z"));
+		Candle expected1 = new Candle(interval2, 98.13d, 100L),
+				expected2 = new Candle(interval1, 100.02, 500L);
+
+		assertEquals(2, tseries.getLength());
+		assertEquals(expected1, tseries.get(0));
+		assertEquals(expected2, tseries.get(1));
+	}
+	
+	@Test
+	public void testAggregate2_NewCandle() throws Exception {
+		Interval interval1 = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
+		tseries.set(interval1.getStart(), new Candle(interval1, 100.02d, 500L));
+
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:56:02Z"), 98.13d, 100L));
+
+		Interval interval2 = Interval.of(T("2017-05-02T11:55:00Z"), T("2017-05-02T12:00:00Z"));
+		Candle expected2 = new Candle(interval2, 98.13d, 100L),
+				expected1 = new Candle(interval1, 100.02d, 500L);
+		assertEquals(2, tseries.getLength());
+		assertEquals(expected1, tseries.get(0));
+		assertEquals(expected2, tseries.get(1));
+	}
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCreateFiller3_SecTfOs() {

@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.threeten.extra.Interval;
@@ -88,6 +89,13 @@ public class TFDaysTest {
 		assertTrue(d1.equals(new TFDays(1)));
 		assertFalse(d1.equals(d7));
 		assertFalse(d1.equals(null));
+	}
+	
+	@Test
+	public void testHashCode() {
+		assertEquals(new HashCodeBuilder(9921, 57015).append(1).toHashCode(), d1.hashCode());
+		assertEquals(new HashCodeBuilder(9921, 57015).append(7).toHashCode(), d7.hashCode());
+		assertEquals(new HashCodeBuilder(9921, 57015).append(21).toHashCode(), d21.hashCode());
 	}
 
 }

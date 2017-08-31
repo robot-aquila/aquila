@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.data;
 
+import java.time.Instant;
+
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Security;
@@ -25,7 +27,8 @@ public class CSUtils {
 	public boolean aggregate(EditableSeries<Candle> series, TimeFrame tf, Tick lastTrade)
 			throws ValueException
 	{
-		synchronized ( series ) {
+		series.lock();
+		try {
 			if ( series.getLength() > 0 ) {
 				Candle lastCandle = series.get();
 				if ( lastCandle.getInterval().contains(lastTrade.getTime()) ) {
@@ -40,6 +43,34 @@ public class CSUtils {
 			series.add(new Candle(tf.getInterval(lastTrade.getTime()),
 					lastTrade.getPrice(), lastTrade.getSize()));
 			return true;
+		} finally {
+			series.unlock();
+		}
+	}
+	
+	/**
+	 * Aggregate a trade to candle series.
+	 * <p>
+	 * @param series - target series
+	 * @param lastTrade - tick trade info
+	 * @throws ValueException an error occurred
+	 */
+	public void aggregate(EditableTSeries<Candle> series, Tick lastTrade)
+			throws ValueException
+	{
+		series.lock();
+		try {
+			Instant time = lastTrade.getTime();
+			Candle candle = series.get(time);
+			if ( candle == null ) {
+				candle = new Candle(series.getTimeFrame().getInterval(time),
+						lastTrade.getPrice(), lastTrade.getSize());
+			} else {
+				candle = candle.addTick(lastTrade);
+			}
+			series.set(time, candle);
+		} finally {
+			series.unlock();
 		}
 	}
 	

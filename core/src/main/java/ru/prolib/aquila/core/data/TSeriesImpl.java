@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import java.time.Instant;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
 
@@ -88,6 +90,22 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 	@Override
 	public void clear() {
 		storage.clear();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != TSeriesImpl.class ) {
+			return false;
+		}
+		TSeriesImpl<?> o = (TSeriesImpl<?>) other;
+		return new EqualsBuilder()
+				.append(id, o.id)
+				.append(seriesID, o.seriesID)
+				.append(storage, o.storage)
+				.isEquals();
 	}
 
 }

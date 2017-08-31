@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.data.TimeFrame;
@@ -69,6 +70,11 @@ public class TFMinutes implements TimeFrame {
 		}
 		TFMinutes o = (TFMinutes) other;
 		return o.length == length;
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(859, 175).append(length).toHashCode();
 	}
 
 }

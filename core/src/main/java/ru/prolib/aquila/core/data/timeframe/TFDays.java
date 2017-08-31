@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.data.TimeFrame;
@@ -55,6 +56,11 @@ public class TFDays implements TimeFrame {
 		}
 		TFDays o = (TFDays) other;
 		return o.length == length;
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(9921, 57015).append(length).toHashCode();
 	}
 
 }

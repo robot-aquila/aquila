@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.*;
 import org.threeten.extra.Interval;
 
@@ -162,6 +163,15 @@ public class TFMinutesTest {
 		assertFalse(m1.equals(m5));
 		assertFalse(m1.equals(null));
 		assertFalse(m1.equals(this));
+	}
+	
+	@Test
+	public void testHashCode() throws Exception {
+		assertEquals(new HashCodeBuilder(859, 175).append(1).toHashCode(), m1.hashCode());
+		assertEquals(new HashCodeBuilder(859, 175).append(5).toHashCode(), m5.hashCode());
+		assertEquals(new HashCodeBuilder(859, 175).append(7).toHashCode(), m7.hashCode());
+		assertEquals(new HashCodeBuilder(859, 175).append(15).toHashCode(), m15.hashCode());
+		assertEquals(new HashCodeBuilder(859, 175).append(241).toHashCode(), m241.hashCode());
 	}
 
 }

@@ -13,6 +13,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
 import ru.prolib.aquila.core.data.tseries.TSeriesUpdateImpl;
+import ru.prolib.aquila.core.utils.Variant;
 
 public class TSeriesImplTest {
 	
@@ -141,6 +142,38 @@ public class TSeriesImplTest {
 		series.clear();
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testEquals_SpecialCases() {
+		assertTrue(series.equals(series));
+		assertFalse(series.equals(null));
+		assertFalse(series.equals(this));
+	}
+	
+	@Test
+	public void testEquals() {
+		TSeriesNodeStorage storageMock2 = control.createMock(TSeriesNodeStorage.class);
+		Variant<String> vId = new Variant<>("foo", "bar");
+		Variant<TSeriesNodeStorage> vStorage = new Variant<>(vId, storageMock, storageMock2);
+		Variant<Integer> vSeriesId = new Variant<>(vStorage, 1, 5);
+		Variant<?> iterator = vSeriesId;
+		int foundCnt = 0;
+		TSeriesImpl<Integer> x, found = null;
+		do {
+			control.reset();
+			expect(vStorage.get().registerSeries()).andStubReturn(vSeriesId.get());
+			control.replay();
+			x = new TSeriesImpl<>(vId.get(), vStorage.get());
+			if ( series.equals(x) ) {
+				foundCnt ++;
+				found = x;
+			}
+		} while ( iterator.next() );
+		assertEquals(1, foundCnt);
+		assertEquals("foo", found.getId());
+		assertEquals(1, found.getSeriesID());
+		assertSame(storageMock, found.getStorage());
 	}
 
 }

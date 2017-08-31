@@ -4,7 +4,7 @@ import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.*;
 
 /**
- * Объектно-ориентированная обертка функции {@link TAMath#qema(Series, int, int)}.
+ * Объектно-ориентированная обертка функции {@link TAMath#max(Series, int, int)}.
  */
 public class HIGH implements Series<Double> {
 	private final String id;
