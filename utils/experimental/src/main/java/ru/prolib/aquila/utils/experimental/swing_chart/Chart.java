@@ -9,6 +9,7 @@ import ru.prolib.aquila.utils.experimental.swing_chart.axis.CategoryAxis;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.ValueAxis;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.*;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.ChartLayer;
+import ru.prolib.aquila.utils.experimental.swing_chart.settings.ChartSettingsButton;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,8 +35,14 @@ public class Chart<TCategories> extends JPanel {
     private LabelFormatter<TCategories> categoriesLabelFormatter = new DefaultLabelFormatter<TCategories>();
     private LabelFormatter valuesLabelFormatter = new DefaultLabelFormatter();
 
+    private Double minValueInterval;
+    private Double maxValueInterval;
+
+    private ChartSettingsButton settingsButton;
+
     public Chart(List<TCategories> categories) {
         super();
+//        settingsButton = new ChartSettingsButton(this);
         this.categories = categories;
         topAxis = new CategoryAxis<>(SwingConstants.TOP, this.categories, categoriesLabelFormatter);
         bottomAxis = new CategoryAxis<>(SwingConstants.BOTTOM, this.categories, categoriesLabelFormatter);
@@ -83,8 +90,12 @@ public class Chart<TCategories> extends JPanel {
         rightAxis.paint(coordConverter);
         drawGridLines(coordConverter);
         drawSelection(coordConverter);
+        g2.clip(coordConverter.getPlotBounds());
         for(ChartLayer layer: layers){
             layer.paint(coordConverter);
+        }
+        if(settingsButton!=null){
+            settingsButton.paint(g2, coordConverter.getPlotBounds());
         }
     }
 
@@ -148,7 +159,18 @@ public class Chart<TCategories> extends JPanel {
         rightAxis.setLabelFormatter(valuesLabelFormatter);
     }
 
+    public void setMinValueInterval(Double minValueInterval) {
+        this.minValueInterval = minValueInterval;
+    }
+
+    public void setMaxValueInterval(Double maxValueInterval) {
+        this.maxValueInterval = maxValueInterval;
+    }
+
     private Pair<Double, Double> getValuesInterval(){
+        if(minValueInterval!=null && maxValueInterval!=null){
+            return new ImmutablePair<>(minValueInterval, maxValueInterval);
+        }
         double maxY = 0;
         double minY = 1e6;
         for (ChartLayer layer : layers) {
@@ -162,7 +184,7 @@ public class Chart<TCategories> extends JPanel {
                 }
             }
         }
-        return new ImmutablePair<>(minY, maxY);
+        return new ImmutablePair<>(minValueInterval==null?minY:minValueInterval, maxValueInterval==null?maxY:maxValueInterval);
     }
 
     private void drawSelection(CoordConverter<TCategories> coordConverter){

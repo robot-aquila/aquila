@@ -27,7 +27,9 @@ public class Main {
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ChartPanel<Instant> chartPanel = new ChartPanel<>();
         chartPanel.setPreferredSize(new Dimension(1230, 900));
-        chartPanel.addChart("CANDLES");
+        Chart chart = chartPanel.addChart("CANDLES");
+//        chart.setMinValueInterval(120d);
+//        chart.setMaxValueInterval(115d);
         DoubleLabelFormatter dlf = new DoubleLabelFormatter();
         dlf.setPrecision(0);
         chartPanel.addChart("VOLUMES", 200).setValuesLabelFormatter(dlf);
