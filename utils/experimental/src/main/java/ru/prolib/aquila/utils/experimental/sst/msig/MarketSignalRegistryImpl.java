@@ -31,9 +31,22 @@ public class MarketSignalRegistryImpl implements MarketSignalRegistry {
 			}
 			p = builder.build(signalID);
 			providers.put(signalID, p);
-			logger.debug("Signal registered: {}",signalID);
+			logger.debug("Signal registered: {}", signalID);
 		}
 		p.start();
+	}
+	
+	@Override
+	public void register(MarketSignalProvider provider) {
+		synchronized ( this ) {
+			String signalID = provider.getSignal().getID();
+			if ( providers.containsKey(signalID) ) {
+				throw new IllegalArgumentException("Signal already exists: " + signalID);
+			}
+			providers.put(signalID, provider);
+			logger.debug("Signal registered: {}", signalID);
+		}
+		provider.start();
 	}
 
 	@Override

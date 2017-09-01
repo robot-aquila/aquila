@@ -4,6 +4,8 @@ public interface MarketSignalRegistry {
 	
 	void register(MarketSignalBuilder builder, String signalID);
 	
+	void register(MarketSignalProvider provider);
+	
 	MarketSignal getSignal(String id);
 	
 	void close();
