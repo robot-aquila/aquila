@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.data.TSeriesUpdate;
 import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.data.ValueOutOfRangeException;
 
-public class TSeriesNodeStorageTest {
+public class TSeriesNodeStorageImplTest {
 	
 	static Instant T(String timeString) {
 		return Instant.parse(timeString);
@@ -28,7 +28,7 @@ public class TSeriesNodeStorageTest {
 	private List<TSeriesNode> nodeList, expectedNodeList;
 	private Map<Instant, TSeriesNode> nodeMap, expectedNodeMap;
 	private TSeriesNode node1, node2, node3;
-	private TSeriesNodeStorage storage;
+	private TSeriesNodeStorageImpl storage;
 
 	@Before
 	public void setUp() throws Exception {
@@ -43,7 +43,7 @@ public class TSeriesNodeStorageTest {
 		expectedNodeList = new ArrayList<>();
 		nodeMap = new LinkedHashMap<>();
 		expectedNodeMap = new LinkedHashMap<>();
-		storage = new TSeriesNodeStorage(timeFrame, nodeList, nodeMap);
+		storage = new TSeriesNodeStorageImpl(timeFrame, nodeList, nodeMap);
 	}
 	
 	@Test
@@ -62,7 +62,7 @@ public class TSeriesNodeStorageTest {
 		nodeMap.put(interval1.getStart(), node1);
 		storage.setLastNode(node1);
 		
-		TSeriesUpdate actual = storage.set(T("2017-08-21T22:53:17Z"), 0, 860);
+		TSeriesUpdate actual = storage.setValue(T("2017-08-21T22:53:17Z"), 0, 860);
 		
 		TSeriesUpdate expected = new TSeriesUpdateImpl(interval1)
 				.setNewNode(false)
@@ -80,7 +80,7 @@ public class TSeriesNodeStorageTest {
 	
 	@Test
 	public void testSet_NewNode_FirstNode() {
-		TSeriesUpdate actual = storage.set(T("2017-08-21T22:53:17Z"), 0, 860);
+		TSeriesUpdate actual = storage.setValue(T("2017-08-21T22:53:17Z"), 0, 860);
 		
 		TSeriesUpdate expected = new TSeriesUpdateImpl(interval1)
 				.setNewNode()
@@ -99,10 +99,10 @@ public class TSeriesNodeStorageTest {
 	
 	@Test
 	public void testSet_NewNode_NewLastNode() {
-		storage.set(node1.getIntervalStart(), 0, 500);
-		storage.set(node2.getIntervalStart(), 0, 510);
+		storage.setValue(node1.getIntervalStart(), 0, 500);
+		storage.setValue(node2.getIntervalStart(), 0, 510);
 		
-		TSeriesUpdate actual = storage.set(T("2017-08-21T23:01:58Z"), 0, 206);
+		TSeriesUpdate actual = storage.setValue(T("2017-08-21T23:01:58Z"), 0, 206);
 		
 		TSeriesUpdate expected = new TSeriesUpdateImpl(interval3)
 				.setNewNode()
@@ -129,10 +129,10 @@ public class TSeriesNodeStorageTest {
 	
 	@Test
 	public void testSet_NewNode_InsertNode() {
-		storage.set(node1.getIntervalStart(), 5, 15);
-		storage.set(node3.getIntervalStart(), 5, 35);
+		storage.setValue(node1.getIntervalStart(), 5, 15);
+		storage.setValue(node3.getIntervalStart(), 5, 35);
 		
-		TSeriesUpdate actual = storage.set(T("2017-08-21T22:57:17Z"), 5, 25);
+		TSeriesUpdate actual = storage.setValue(T("2017-08-21T22:57:17Z"), 5, 25);
 		
 		TSeriesUpdate expected = new TSeriesUpdateImpl(interval2)
 				.setNewNode()
@@ -159,10 +159,10 @@ public class TSeriesNodeStorageTest {
 	
 	@Test
 	public void testSet_NewNode_InsertFirstNode() {
-		storage.set(node2.getIntervalStart(), 8, 200);
-		storage.set(node3.getIntervalStart(), 8, 300);
+		storage.setValue(node2.getIntervalStart(), 8, 200);
+		storage.setValue(node3.getIntervalStart(), 8, 300);
 		
-		TSeriesUpdate actual = storage.set(T("2017-08-21T22:51:00Z"), 8, 100);
+		TSeriesUpdate actual = storage.setValue(T("2017-08-21T22:51:00Z"), 8, 100);
 		
 		TSeriesUpdate expected = new TSeriesUpdateImpl(interval1)
 				.setNewNode()
@@ -189,80 +189,80 @@ public class TSeriesNodeStorageTest {
 	
 	@Test
 	public void testGet2_TI_ExistingNode() {
-		storage.set(T("2017-08-21T22:52:00Z"), 8, 255);
+		storage.setValue(T("2017-08-21T22:52:00Z"), 8, 255);
 		
-		assertEquals(255, storage.get(T("2017-08-21T22:52:00Z"), 8));
-		assertEquals(255, storage.get(T("2017-08-21T22:50:00Z"), 8));
-		assertEquals(255, storage.get(T("2017-08-21T22:54:59Z"), 8));
+		assertEquals(255, storage.getValue(T("2017-08-21T22:52:00Z"), 8));
+		assertEquals(255, storage.getValue(T("2017-08-21T22:50:00Z"), 8));
+		assertEquals(255, storage.getValue(T("2017-08-21T22:54:59Z"), 8));
 	}
 	
 	@Test
 	public void testGet2_TI_NonExistingNode() {
-		storage.set(interval1.getStart(), 8, 12);
-		storage.set(interval3.getStart(), 8, 19);
+		storage.setValue(interval1.getStart(), 8, 12);
+		storage.setValue(interval3.getStart(), 8, 19);
 		
-		assertNull(storage.get(T("2017-08-21T22:57:00Z"), 8));
-		assertNull(storage.get(T("2017-08-21T22:55:00Z"), 8));
-		assertNull(storage.get(T("2017-08-21T22:59:59Z"), 8));
+		assertNull(storage.getValue(T("2017-08-21T22:57:00Z"), 8));
+		assertNull(storage.getValue(T("2017-08-21T22:55:00Z"), 8));
+		assertNull(storage.getValue(T("2017-08-21T22:59:59Z"), 8));
 	}
 	
 	@Test
 	public void testGet2_II_Positive_Ok() throws Exception {
-		storage.set(interval1.getStart(), 8, 12);
-		storage.set(interval2.getStart(), 5, 24);
-		storage.set(interval3.getStart(), 8, 19);
+		storage.setValue(interval1.getStart(), 8, 12);
+		storage.setValue(interval2.getStart(), 5, 24);
+		storage.setValue(interval3.getStart(), 8, 19);
 		
-		assertEquals(12, storage.get(0, 8));
-		assertEquals(24, storage.get(1, 5));
-		assertEquals(19, storage.get(2, 8));
+		assertEquals(12, storage.getValue(0, 8));
+		assertEquals(24, storage.getValue(1, 5));
+		assertEquals(19, storage.getValue(2, 8));
 	}
 	
 	@Test (expected=ValueOutOfRangeException.class)
 	public void testGet2_II_Positive_ThrowsOutOfRange() throws Exception {
-		storage.set(interval1.getStart(), 8, 12);
-		storage.set(interval2.getStart(), 5, 24);
-		storage.set(interval3.getStart(), 8, 19);
+		storage.setValue(interval1.getStart(), 8, 12);
+		storage.setValue(interval2.getStart(), 5, 24);
+		storage.setValue(interval3.getStart(), 8, 19);
 
-		storage.get(3, 8);
+		storage.getValue(3, 8);
 	}
 	
 	@Test
 	public void testGet2_II_Negative_Ok() throws Exception {
-		storage.set(interval1.getStart(), 8, 12);
-		storage.set(interval2.getStart(), 8, 24);
-		storage.set(interval3.getStart(), 8, 19);
+		storage.setValue(interval1.getStart(), 8, 12);
+		storage.setValue(interval2.getStart(), 8, 24);
+		storage.setValue(interval3.getStart(), 8, 19);
 
-		assertEquals(24, storage.get(-1, 8));
-		assertEquals(12, storage.get(-2, 8));
+		assertEquals(24, storage.getValue(-1, 8));
+		assertEquals(12, storage.getValue(-2, 8));
 	}
 	
 	@Test (expected=ValueOutOfRangeException.class)
 	public void testGet2_II_Negative_ThrowsOutOfRange() throws Exception {
-		storage.set(interval1.getStart(), 8, 12);
-		storage.set(interval2.getStart(), 8, 24);
-		storage.set(interval3.getStart(), 8, 19);
+		storage.setValue(interval1.getStart(), 8, 12);
+		storage.setValue(interval2.getStart(), 8, 24);
+		storage.setValue(interval3.getStart(), 8, 19);
 
-		storage.get(-3, 8);
+		storage.getValue(-3, 8);
 	}
 	
 	@Test
 	public void testGet1_Ok() throws Exception {
-		storage.set(interval1.getStart(), 8, 12);
+		storage.setValue(interval1.getStart(), 8, 12);
 		
-		assertEquals(12, storage.get(8));
+		assertEquals(12, storage.getValue(8));
 	}
 	
 	@Test
 	public void testGet1_NullIfNoValue() throws Exception {
-		assertNull(storage.get(0));
-		assertNull(storage.get(8));
+		assertNull(storage.getValue(0));
+		assertNull(storage.getValue(8));
 	}
 	
 	@Test
 	public void testClear() {
-		storage.set(interval1.getStart(), 1, 10);
-		storage.set(interval2.getStart(), 1, 20);
-		storage.set(interval3.getStart(), 1, 30);
+		storage.setValue(interval1.getStart(), 1, 10);
+		storage.setValue(interval2.getStart(), 1, 20);
+		storage.setValue(interval3.getStart(), 1, 30);
 		
 		storage.clear();
 		
@@ -274,12 +274,70 @@ public class TSeriesNodeStorageTest {
 	@Test
 	public void testGetLength() {
 		assertEquals(0, storage.getLength());
-		storage.set(interval1.getStart(), 1, 10);
+		storage.setValue(interval1.getStart(), 1, 10);
 		assertEquals(1, storage.getLength());
-		storage.set(interval2.getStart(), 1, 20);
+		storage.setValue(interval2.getStart(), 1, 20);
 		assertEquals(2, storage.getLength());
-		storage.set(interval3.getStart(), 1, 30);
+		storage.setValue(interval3.getStart(), 1, 30);
 		assertEquals(3, storage.getLength());
 	}
+	
+	@Test
+	public void testGetIntervalStart_Negative_Ok() throws Exception {
+		storage.setValue(T("2017-08-21T22:50:18Z"), 8, 12);
+		storage.setValue(T("2017-08-21T22:57:28Z"), 5, 24);
+		storage.setValue(T("2017-08-21T23:02:35Z"), 8, 19);
 
+		assertEquals(T("2017-08-21T22:50:00Z"), storage.getIntervalStart(-2));
+		assertEquals(T("2017-08-21T22:55:00Z"), storage.getIntervalStart(-1));		
+	}
+	
+	@Test (expected=ValueOutOfRangeException.class)
+	public void testGetIntervalStart_Negative_ThrowsOutOfRange() throws Exception {
+		storage.setValue(T("2017-08-21T22:50:18Z"), 8, 12);
+		storage.setValue(T("2017-08-21T22:57:28Z"), 5, 24);
+		storage.setValue(T("2017-08-21T23:02:35Z"), 8, 19);
+
+		storage.getIntervalStart(-3);
+	}
+	
+	@Test
+	public void testGetIntervalStart_Positive_Ok() throws Exception {
+		storage.setValue(T("2017-08-21T22:50:18Z"), 8, 12);
+		storage.setValue(T("2017-08-21T22:57:28Z"), 5, 24);
+		storage.setValue(T("2017-08-21T23:02:35Z"), 8, 19);
+
+		assertEquals(T("2017-08-21T22:50:00Z"), storage.getIntervalStart(0));
+		assertEquals(T("2017-08-21T22:55:00Z"), storage.getIntervalStart(1));
+		assertEquals(T("2017-08-21T23:00:00Z"), storage.getIntervalStart(2));
+	}
+	
+	@Test (expected=ValueOutOfRangeException.class)
+	public void testGetIntervalStart_Positive_ThrowsOutOfRange() throws Exception {
+		storage.setValue(T("2017-08-21T22:50:18Z"), 8, 12);
+		storage.setValue(T("2017-08-21T22:57:28Z"), 5, 24);
+		storage.setValue(T("2017-08-21T23:02:35Z"), 8, 19);
+
+		storage.getIntervalStart(3);
+	}
+	
+	@Test
+	public void testGetIntervalIndex() {
+		storage.setValue(T("2017-08-21T22:50:18Z"), 8, 12);
+		storage.setValue(T("2017-08-21T22:57:28Z"), 5, 24);
+		storage.setValue(T("2017-08-21T23:02:35Z"), 8, 19);
+
+		assertEquals(-1, storage.getIntervalIndex(T("2017-08-21T22:45:00Z")));
+		assertEquals( 0, storage.getIntervalIndex(T("2017-08-21T22:50:18Z")));
+		assertEquals( 0, storage.getIntervalIndex(T("2017-08-21T22:50:00Z")));
+		assertEquals( 0, storage.getIntervalIndex(T("2017-08-21T22:54:59Z")));
+		assertEquals( 1, storage.getIntervalIndex(T("2017-08-21T22:57:28Z")));
+		assertEquals( 1, storage.getIntervalIndex(T("2017-08-21T22:55:00Z")));
+		assertEquals( 1, storage.getIntervalIndex(T("2017-08-21T22:59:59.999Z")));
+		assertEquals( 2, storage.getIntervalIndex(T("2017-08-21T23:02:35Z")));
+		assertEquals( 2, storage.getIntervalIndex(T("2017-08-21T23:00:00Z")));
+		assertEquals( 2, storage.getIntervalIndex(T("2017-08-21T23:04:59Z")));
+		assertEquals(-1, storage.getIntervalIndex(T("2017-08-21T23:05:00Z")));
+	}
+	
 }

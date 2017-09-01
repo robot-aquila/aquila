@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.time.Instant;
 
 import static org.easymock.EasyMock.*;
-import static ru.prolib.aquila.core.data.ObservableTSeriesImpl.TSeriesUpdateEventFactory;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -15,6 +14,7 @@ import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.concurrency.LID;
+import ru.prolib.aquila.core.data.tseries.TSeriesUpdateEventFactory;
 import ru.prolib.aquila.core.data.tseries.TSeriesUpdateImpl;
 import ru.prolib.aquila.core.utils.Variant;
 

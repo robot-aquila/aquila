@@ -44,7 +44,7 @@ public class TSeriesImplTest {
 	
 	@Test
 	public void testGet1_T() {
-		expect(storageMock.get(T("2017-08-22T00:00:00Z"), 1)).andReturn(86);
+		expect(storageMock.getValue(T("2017-08-22T00:00:00Z"), 1)).andReturn(86);
 		control.replay();
 		
 		assertEquals(86, (int) series.get(T("2017-08-22T00:00:00Z")));
@@ -64,7 +64,7 @@ public class TSeriesImplTest {
 	
 	@Test
 	public void get0() {
-		expect(storageMock.get(1)).andReturn(856);
+		expect(storageMock.getValue(1)).andReturn(856);
 		control.replay();
 		
 		assertEquals(856, (int) series.get());
@@ -74,7 +74,7 @@ public class TSeriesImplTest {
 	
 	@Test
 	public void testGet1_I() throws Exception {
-		expect(storageMock.get(-25, 1)).andReturn(102);
+		expect(storageMock.getValue(-25, 1)).andReturn(102);
 		control.replay();
 		
 		assertEquals(102, (int) series.get(-25));
@@ -126,7 +126,7 @@ public class TSeriesImplTest {
 	@Test
 	public void testSet() {
 		TSeriesUpdate update = new TSeriesUpdateImpl(null);
-		expect(storageMock.set(T("2012-01-01T00:00:05Z"), 1, 202)).andReturn(update);
+		expect(storageMock.setValue(T("2012-01-01T00:00:05Z"), 1, 202)).andReturn(update);
 		control.replay();
 		
 		assertSame(update, series.set(T("2012-01-01T00:00:05Z"), 202));

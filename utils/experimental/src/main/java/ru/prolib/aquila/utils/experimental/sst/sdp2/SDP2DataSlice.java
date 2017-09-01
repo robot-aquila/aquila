@@ -1,5 +1,7 @@
 package ru.prolib.aquila.utils.experimental.sst.sdp2;
 
+import java.time.Instant;
+
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.ObservableTSeries;
@@ -28,6 +30,13 @@ public interface SDP2DataSlice<K extends SDP2Key> {
 	 * @return timeframe
 	 */
 	TimeFrame getTimeFrame();
+	
+	/**
+	 * Get series of start time of existing slice intervals.
+	 * <p>
+	 * @return series
+	 */
+	ObservableTSeries<Instant> getIntervalStartSeries();
 	
 	/**
 	 * Get observable series by ID.

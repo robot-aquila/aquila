@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
+import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageImpl;
 
 public class TSeriesImpl<T> implements EditableTSeries<T> {
 	private final String id;
@@ -19,7 +20,7 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 	}
 	
 	public TSeriesImpl(String id, TimeFrame timeFrame) {
-		this(id, new TSeriesNodeStorage(timeFrame));
+		this(id, new TSeriesNodeStorageImpl(timeFrame));
 	}
 	
 	public TSeriesImpl(TimeFrame timeFrame) {
@@ -37,7 +38,7 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public T get(Instant time) {
-		return (T) storage.get(time, seriesID);
+		return (T) storage.getValue(time, seriesID);
 	}
 
 	@Override
@@ -53,13 +54,13 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public T get() {
-		return (T) storage.get(seriesID);
+		return (T) storage.getValue(seriesID);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public T get(int index) throws ValueException {
-		return (T) storage.get(index, seriesID);
+		return (T) storage.getValue(index, seriesID);
 	}
 
 	@Override
@@ -84,7 +85,7 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 
 	@Override
 	public TSeriesUpdate set(Instant time, T value) {
-		return storage.set(time, seriesID, value);
+		return storage.setValue(time, seriesID, value);
 	}
 
 	@Override

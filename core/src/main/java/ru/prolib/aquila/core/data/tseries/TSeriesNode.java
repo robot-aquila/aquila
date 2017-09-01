@@ -9,6 +9,7 @@ import org.threeten.extra.Interval;
 public class TSeriesNode {
 	private final ArrayList<Object> values;
 	private final Interval interval;
+	private final Instant intervalStart;
 	private int nodeIndex;
 	
 	/**
@@ -19,6 +20,7 @@ public class TSeriesNode {
 	 */
 	TSeriesNode(Interval interval, ArrayList<Object> values) {
 		this.interval = interval;
+		this.intervalStart = interval.getStart();
 		this.nodeIndex = -1;
 		this.values = values;
 	}
@@ -62,7 +64,7 @@ public class TSeriesNode {
 	}
 	
 	public Instant getIntervalStart() {
-		return interval.getStart();
+		return intervalStart;
 	}
 	
 	@Override

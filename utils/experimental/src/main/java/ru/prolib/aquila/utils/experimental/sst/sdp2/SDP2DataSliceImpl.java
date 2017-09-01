@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.sst.sdp2;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
 import ru.prolib.aquila.core.data.TimeFrame;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
+import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageImpl;
+import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageKeys;
 
 public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	
@@ -60,7 +63,7 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	private final K key;
 	private final EventQueue queue;
 	private final Map<String, Entry> entries;
-	private final TSeriesNodeStorage storage;
+	private final TSeriesNodeStorageKeys storage;
 	
 	/**
 	 * Service constructor.
@@ -69,9 +72,9 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	 * @param key - key of the slice
 	 * @param queue - event queue to build observable series
 	 * @param entries - map of series
-	 * @param storage - common node storage
+	 * @param storage - node storage
 	 */
-	SDP2DataSliceImpl(K key, EventQueue queue, TSeriesNodeStorage storage,
+	SDP2DataSliceImpl(K key, EventQueue queue, TSeriesNodeStorageKeys storage,
 			Map<String, Entry> entries)
 	{
 		this.key = key;
@@ -81,7 +84,7 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	}
 	
 	public SDP2DataSliceImpl(K key, EventQueue queue) {
-		this(key, queue, new TSeriesNodeStorage(key.getTimeFrame()), new HashMap<>());
+		this(key, queue, new TSeriesNodeStorageKeys(queue, new TSeriesNodeStorageImpl(key.getTimeFrame())), new HashMap<>());
 	}
 	
 	@Override
@@ -104,6 +107,13 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	}
 	
 	public TSeriesNodeStorage getStorage() {
+		return storage;
+	}
+	
+	@Override
+	public synchronized
+		ObservableTSeries<Instant> getIntervalStartSeries()
+	{
 		return storage;
 	}
 	

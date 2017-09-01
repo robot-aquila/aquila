@@ -4,13 +4,11 @@ import java.time.Instant;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventFactory;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.concurrency.LID;
-import ru.prolib.aquila.core.data.tseries.TSeriesEventImpl;
+import ru.prolib.aquila.core.data.tseries.TSeriesUpdateEventFactory;
 
 public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableTSeries<T> {
 	protected final EventQueue queue;
@@ -108,35 +106,6 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 				.append(queue, o.queue)
 				.append(series, o.series)
 				.isEquals();
-	}
-	
-	public static class TSeriesUpdateEventFactory implements EventFactory {
-		private final TSeriesUpdate update;
-		
-		public TSeriesUpdateEventFactory(TSeriesUpdate update) {
-			this.update = update;
-		}
-
-		@SuppressWarnings("rawtypes")
-		@Override
-		public Event produceEvent(EventType type) {
-			return new TSeriesEventImpl(type, update);
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if ( other == this ) {
-				return true;
-			}
-			if ( other == null || other.getClass() != TSeriesUpdateEventFactory.class ) {
-				return false;
-			}
-			TSeriesUpdateEventFactory o = (TSeriesUpdateEventFactory) other;
-			return new EqualsBuilder()
-					.append(update, o.update)
-					.isEquals();
-		}
-		
 	}
 
 }

@@ -16,12 +16,12 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.ObservableTSeriesImpl;
 import ru.prolib.aquila.core.data.TimeFrame;
-import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
+import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageKeys;
 
 public class SDP2DataSliceImplTest {
 	private IMocksControl control;
 	private EventQueue queueMock;
-	private TSeriesNodeStorage storageMock;
+	private TSeriesNodeStorageKeys storageMock;
 	private EditableTSeries<?> seriesMock1, seriesMock2;
 	private ObservableTSeriesImpl<?> obsSeriesMock;
 	private Symbol symbol;
@@ -32,7 +32,7 @@ public class SDP2DataSliceImplTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		queueMock = control.createMock(EventQueue.class);
-		storageMock = control.createMock(TSeriesNodeStorage.class);
+		storageMock = control.createMock(TSeriesNodeStorageKeys.class);
 		seriesMock1 = control.createMock(EditableTSeries.class);
 		seriesMock2 = control.createMock(EditableTSeries.class);
 		obsSeriesMock = control.createMock(ObservableTSeriesImpl.class);
@@ -49,6 +49,7 @@ public class SDP2DataSliceImplTest {
 		assertSame(TimeFrame.M5, slice.getTimeFrame());
 		assertSame(queueMock, slice.getEventQueue());
 		assertSame(storageMock, slice.getStorage());
+		assertSame(storageMock, slice.getIntervalStartSeries());
 	}
 	
 	@Test
