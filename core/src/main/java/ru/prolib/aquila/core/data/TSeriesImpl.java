@@ -109,4 +109,9 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 				.isEquals();
 	}
 
+	@Override
+	public int toIndex(Instant time) {
+		return storage.getIntervalIndex(time);
+	}
+
 }

@@ -293,4 +293,14 @@ public class TSeriesNodeStorageKeysTest {
 		control.verify();
 	}
 
+	@Test
+	public void testToIndex() {
+		expect(storageMock.getIntervalIndex(T("2017-09-01T11:10:33Z"))).andReturn(1700);
+		control.replay();
+		
+		assertEquals(1700, service.toIndex(T("2017-09-01T11:10:33Z")));
+		
+		control.verify();		
+	}
+	
 }

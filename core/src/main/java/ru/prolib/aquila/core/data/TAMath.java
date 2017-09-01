@@ -404,7 +404,27 @@ public class TAMath {
 		}
 		return max;
 	}
-
+	
+	public Long maxL(Series<Long> value, int index, int period)
+		throws ValueException
+	{
+		Long max = null;
+		index = makeIndexPositive(value, index);
+		int start = getStartIndex(index, period);
+		if ( start < 0 ) {
+			start = 0;
+		}
+		for ( ; start <= index; start ++ ) {
+			Long cur = value.get(start);
+			if ( cur != null ) {
+				if ( max == null || cur.compareTo(max) > 0 ) {
+					max = cur;
+				}
+			}
+		}
+		return max;
+	}
+	
 	/**
 	 * Получить максимальное значение за период.
 	 * <p>
@@ -417,6 +437,10 @@ public class TAMath {
 	 */
 	public Double max(Series<Double> value, int period) throws ValueException {
 		return max(value, getLastIndex(value), period);
+	}
+
+	public Long maxL(Series<Long> value, int period) throws ValueException {
+		return maxL(value, getLastIndex(value), period);
 	}
 
 	/**

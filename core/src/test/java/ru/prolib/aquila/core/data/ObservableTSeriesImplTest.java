@@ -214,5 +214,15 @@ public class ObservableTSeriesImplTest {
 		assertSame(queueMock1, found.getEventQueue());
 		assertSame(underlyingSeriesMock1, found.getUnderlyingSeries());
 	}
+	
+	@Test
+	public void testToIndex() {
+		expect(underlyingSeriesMock1.toIndex(T("2017-09-01T07:12:00Z"))).andReturn(500);
+		control.replay();
+		
+		assertEquals(500, series.toIndex(T("2017-09-01T07:12:00Z")));
+		
+		control.verify();
+	}
 
 }

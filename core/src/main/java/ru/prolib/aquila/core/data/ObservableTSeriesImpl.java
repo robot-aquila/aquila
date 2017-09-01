@@ -108,4 +108,9 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 				.isEquals();
 	}
 
+	@Override
+	public int toIndex(Instant time) {
+		return series.toIndex(time);
+	}
+
 }

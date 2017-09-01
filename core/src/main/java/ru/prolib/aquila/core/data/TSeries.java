@@ -12,5 +12,7 @@ public interface TSeries<T> extends Series<T> {
 	T get(Instant time);
 
 	TimeFrame getTimeFrame();
+	
+	int toIndex(Instant time);
 
 }

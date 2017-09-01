@@ -19,22 +19,22 @@ import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageKeys;
 public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	
 	static class Entry {
-		private final EditableTSeries<?> editable;
+		private final TSeries<?> readable;
 		private final ObservableTSeries<?> observable;
 		
 		Entry(ObservableTSeriesImpl<?> series) {
-			this.editable = series;
+			this.readable = series;
 			this.observable = series;
 		}
 		
-		Entry(EditableTSeries<?> series) {
-			this.editable = series;
+		Entry(TSeries<?> series) {
+			this.readable = series;
 			this.observable = null;
 		}
 		
 		@SuppressWarnings("unchecked")
-		public <T> EditableTSeries<T> getEditableSeries() {
-			return (EditableTSeries<T>) editable;
+		public <T> TSeries<T> getReadableSeries() {
+			return (TSeries<T>) readable;
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -55,7 +55,7 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 				return false;
 			}
 			Entry o = (Entry) other;
-			return o.editable == editable && o.observable == observable;
+			return o.readable == readable && o.observable == observable;
 		}
 		
 	}
@@ -126,18 +126,19 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 		if ( entry != null ) {
 			throw new IllegalStateException("Series already exists: " + seriesID);
 		}
+		EditableTSeries<T> series = null;
 		if ( observable ) {
-			entry = new Entry(new ObservableTSeriesImpl<T>(queue, new TSeriesImpl<T>(seriesID, storage)));
+			series = new ObservableTSeriesImpl<T>(queue, new TSeriesImpl<T>(seriesID, storage));
+			entry = new Entry((ObservableTSeriesImpl<T>) series); // force ctor
 		} else {
-			entry = new Entry(new TSeriesImpl<T>(seriesID, storage));
+			entry = new Entry(series = new TSeriesImpl<T>(seriesID, storage));
 		}
 		entries.put(seriesID, entry);
-		return entry.getEditableSeries();
+		return series;
 	}
 	
 	@Override
-	public synchronized <T>
-		void registerRawSeries(EditableTSeries<T> series)
+	public synchronized <T> void registerRawSeries(TSeries<T> series)
 			throws IllegalStateException
 	{
 		String seriesID = series.getId();
@@ -172,7 +173,7 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 		if ( entry == null ) {
 			throw new IllegalStateException("Series not exists: " + seriesID);
 		}
-		return entry.getEditableSeries();
+		return entry.getReadableSeries();
 	}
 
 	@Override

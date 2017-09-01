@@ -175,5 +175,15 @@ public class TSeriesImplTest {
 		assertEquals(1, found.getSeriesID());
 		assertSame(storageMock, found.getStorage());
 	}
+	
+	@Test
+	public void testToIndex() {
+		expect(storageMock.getIntervalIndex(T("2017-09-01T07:10:00Z"))).andReturn(820);
+		control.replay();
+		
+		assertEquals(820, series.toIndex(T("2017-09-01T07:10:00Z")));
+		
+		control.verify();
+	}
 
 }

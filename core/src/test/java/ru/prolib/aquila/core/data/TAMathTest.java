@@ -424,6 +424,83 @@ public class TAMathTest {
 	}
 	
 	@Test
+	public void testMaxL3_SII() throws Exception {
+		int period = 3;
+		Long fix[][] = {
+				// value, expected max
+				{  19L,   19L },
+				{  15L,   19L },
+				{  11L,   19L },
+				{  21L,   21L },
+				{ null,   21L },
+				{  16L,   21L },
+				{  13L,   16L },
+				{  11L,   16L },
+				{  18L,   18L },
+				{  17L,   18L },
+				{ null,   18L },
+				{ null,   17L },
+				{ null,  null },
+				{   1L,    1L },
+		};
+		SeriesImpl<Long> series = new SeriesImpl<>();
+		for ( int i = 0; i < fix.length; i ++ ) {
+			series.add(fix[i][0]);
+		}
+		
+		for ( int i = 0; i < fix.length; i ++ ) {
+			Long expected = fix[i][1];
+			String msg = "At #" + i;
+			if ( expected == null ) {
+				assertNull(msg, service.maxL(series, i, period));
+			} else {
+				assertEquals(msg, expected, service.maxL(series, i, period));
+			}
+		}
+		
+		// Negative index test
+		assertNull(service.maxL(series, -1, period));
+		assertEquals((Long) 17L, service.maxL(series, -2, period));
+		assertEquals((Long) 18L, service.maxL(series, -3, period));
+		assertEquals((Long) 18L, service.maxL(series, -4, period));
+		assertEquals((Long) 18L, service.maxL(series, -5, period));
+		assertEquals((Long) 16L, service.maxL(series, -6, period));
+	}
+	
+	@Test
+	public void testMaxL2_SI() throws Exception {
+		int period = 3;
+		Long fix[][] = {
+				// value, expected max
+				{  19L,   19L },
+				{  15L,   19L },
+				{  11L,   19L },
+				{  21L,   21L },
+				{ null,   21L },
+				{  16L,   21L },
+				{  13L,   16L },
+				{  11L,   16L },
+				{  18L,   18L },
+				{  17L,   18L },
+				{ null,   18L },
+				{ null,   17L },
+				{ null,  null },
+				{   1L,    1L },
+		};
+		SeriesImpl<Long> series = new SeriesImpl<>();
+		for ( int i = 0; i < fix.length; i ++ ) {
+			series.add(fix[i][0]);
+			Long expected = fix[i][1];
+			String msg = "At #" + i;
+			if ( expected == null ) {
+				assertNull(msg, service.maxL(series, period));
+			} else {
+				assertEquals(msg, expected, service.maxL(series, period));
+			}
+		}
+	}
+	
+	@Test
 	public void testMin23() throws Exception {
 		int period = 3;
 		Double fix[][] = {

@@ -89,6 +89,6 @@ public interface SDP2DataSlice<K extends SDP2Key> {
 	 * @param series - the series instance. This series may be not related to common storage.
 	 * @throws IllegalStateException if series already exists
 	 */
-	<T> void registerRawSeries(EditableTSeries<T> series);
+	<T> void registerRawSeries(TSeries<T> series);
 
 }
