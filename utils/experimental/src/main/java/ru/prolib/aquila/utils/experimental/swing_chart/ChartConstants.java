@@ -31,6 +31,7 @@ public class ChartConstants {
     public static final Color VOLUME_COLOR = Color.gray;
     public static final Color BID_VOLUME_COLOR = new Color(0, 128, 0);
     public static final Color ASK_VOLUME_COLOR = Color.RED;
+    public static int BID_ASK_VOLUME_CHARTS_HEIGHT = 250;
 
     public static final int TOOLTIP_MARGIN = 10;
 

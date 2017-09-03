@@ -26,7 +26,7 @@ public class Main {
         JFrame main = new JFrame("test");
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ChartPanel<Instant> chartPanel = new ChartPanel<>();
-        chartPanel.setPreferredSize(new Dimension(1230, 900));
+        chartPanel.getRootPanel().setPreferredSize(new Dimension(1230, 900));
         Chart chart = chartPanel.addChart("CANDLES");
 //        chart.setMinValueInterval(120d);
 //        chart.setMaxValueInterval(115d);
@@ -36,7 +36,7 @@ public class Main {
 //        chartPanel.addChart("CANDLES3", 200);
         chartPanel.addChart("BID_ASK_VOLUMES", 200).setValuesLabelFormatter(dlf);
 
-        main.getContentPane().add(chartPanel);
+        main.getContentPane().add(chartPanel.getRootPanel());
         main.pack();
         main.setVisible(true);
 

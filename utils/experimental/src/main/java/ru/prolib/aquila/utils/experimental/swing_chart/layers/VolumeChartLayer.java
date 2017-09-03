@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorage;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -19,6 +20,10 @@ public class VolumeChartLayer extends AbstractChartLayer<Instant, Long> {
 
     public VolumeChartLayer(String id) {
         super(id);
+    }
+
+    public VolumeChartLayer(String id, ChartLayerDataStorage<Instant, Long> storage) {
+        super(id, storage);
     }
 
     @Override

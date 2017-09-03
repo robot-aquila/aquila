@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Created by TiM on 10.06.2017.
  */
-public class Chart<TCategories> extends JPanel {
+public class Chart<TCategories> {
 
     private final List<ChartLayer<TCategories, ?>> layers = new ArrayList<>();
     private final List<TCategories> categories;
@@ -39,6 +39,17 @@ public class Chart<TCategories> extends JPanel {
     private Double maxValueInterval;
 
     private ChartSettingsButton settingsButton;
+    private final JPanel rootPanel = new JPanel(){
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Chart.this.paintComponent(g);
+        }
+    };
+
+    public JPanel getRootPanel() {
+        return rootPanel;
+    }
 
     public Chart(List<TCategories> categories) {
         super();
@@ -64,9 +75,7 @@ public class Chart<TCategories> extends JPanel {
         layers.remove(layer);
     }
 
-    @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         RenderingHints rh = new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setRenderingHints(rh);

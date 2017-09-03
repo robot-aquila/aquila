@@ -6,6 +6,7 @@ import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.LineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.Point;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorage;
 
 import java.awt.*;
 import java.time.Instant;
@@ -25,6 +26,10 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
         super(id);
     }
 
+    public IndicatorChartLayer(String id, ChartLayerDataStorage<Instant, Double> storage) {
+        super(id, storage);
+    }
+
     @Override
     protected void paintObject(Instant category, Double value, CoordConverter<Instant> converter, Graphics2D g) {
         //Nothing
@@ -32,22 +37,28 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
 
     @Override
     public void paint(CoordConverter<Instant> converter) {
+        if(storage.getCategories()==null || storage.getData()==null){
+            return;
+        }
+
         Graphics2D g = (Graphics2D) converter.getGraphics().create();
         try {
             g.setColor(color);
             g.setStroke(new BasicStroke(INDICATOR_LINE_WIDTH));
             List<Point> points = new ArrayList<>();
-            for(int i=0; i<categories.getLength(); i++){
+            storage.getCategories().lock();
+            storage.getData().lock();
+            for(int i=0; i<storage.getCategories().getLength(); i++){
                 Instant c = null;
                 Double v = null;
                 try {
-                    c = categories.get(i);
+                    c = storage.getCategories().get(i);
                 } catch (ValueException e) {
                     e.printStackTrace();
                 }
                 if(converter.isCategoryDisplayed(c)){
                     try {
-                        v = data.get(i);
+                        v = storage.getData().get(i);
                     } catch (ValueException e) {
                         e.printStackTrace();
                     }
@@ -62,6 +73,8 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Double> {
             g.draw(lineRenderer.renderLine(points));
         } finally {
             g.dispose();
+            storage.getCategories().unlock();
+            storage.getData().unlock();
         }
     }
 

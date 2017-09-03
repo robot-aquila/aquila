@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorage;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -21,6 +22,12 @@ public class BidAskVolumeChartLayer extends AbstractChartLayer<Instant, Long> {
 
     public BidAskVolumeChartLayer(String id, int type) {
         super(id);
+        this.type = type;
+        color = type==TYPE_BID?BID_VOLUME_COLOR:ASK_VOLUME_COLOR;
+    }
+
+    public BidAskVolumeChartLayer(String id, ChartLayerDataStorage<Instant, Long> storage, int type) {
+        super(id, storage);
         this.type = type;
         color = type==TYPE_BID?BID_VOLUME_COLOR:ASK_VOLUME_COLOR;
     }

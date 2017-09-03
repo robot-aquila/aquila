@@ -5,6 +5,8 @@ import ru.prolib.aquila.core.data.CandleStartTimeSeries;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorage;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorageTSeries;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
@@ -23,10 +25,17 @@ public class CandleChartLayer extends AbstractChartLayer<Instant, Candle> {
         super(id);
     }
 
+    public CandleChartLayer(String id, ChartLayerDataStorage<Instant, Candle> storage) {
+        super(id, storage);
+    }
+
     @Override
     public void setData(Series<Candle> data) {
         super.setData(data);
-        setCategories(new CandleStartTimeSeries(data));
+            //TODO переделать
+        if(!(storage instanceof ChartLayerDataStorageTSeries)){
+            setCategories(new CandleStartTimeSeries(data));
+        }
     }
 
     @Override

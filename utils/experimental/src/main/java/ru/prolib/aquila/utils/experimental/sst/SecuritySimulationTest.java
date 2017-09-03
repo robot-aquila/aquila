@@ -234,7 +234,7 @@ public class SecuritySimulationTest implements Experiment {
         	logger.debug("added indicator: {}", x.getId());
         }
         chartPanel.addVolumes();
-        tabPanel.addTab("Strategy", chartPanel);
+        tabPanel.addTab("Strategy", chartPanel.getRootPanel());
         
         frame.getContentPane().add(mainPanel);
         frame.setVisible(true);

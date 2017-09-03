@@ -2,6 +2,8 @@ package ru.prolib.aquila.utils.experimental.swing_chart;
 
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.ChartLayer;
 
 import javax.swing.*;
@@ -18,7 +20,7 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TOO
 /**
  * Created by TiM on 18.06.2017.
  */
-public class ChartPanel<TCategories> extends JPanel implements MouseWheelListener, MouseMotionListener {
+public class ChartPanel<TCategories> implements MouseWheelListener, MouseMotionListener {
 
     protected Map<String, Chart<TCategories>> charts = new LinkedHashMap<>();
     protected final List<TCategories> categories = new ArrayList<>();
@@ -33,13 +35,15 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
     protected TooltipForm tooltipForm;
     private Rectangle screen;
     private final Timer updateTooltipTextTimer;
+    private final HashMap<JPanel, Chart> chartByPanel = new HashMap<>();
+    private final JPanel rootPanel;
 
     public ChartPanel() {
         super();
-        setLayout(new BorderLayout());
+        rootPanel = new JPanel(new BorderLayout());
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS) );
-        add(mainPanel, BorderLayout.CENTER);
+        rootPanel.add(mainPanel, BorderLayout.CENTER);
         scrollBar = new JScrollBar(JScrollBar.HORIZONTAL);
         scrollBarListener = new AdjustmentListener() {
             @Override
@@ -48,7 +52,7 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
             }
         };
         scrollBar.addAdjustmentListener(scrollBarListener);
-        add(scrollBar, BorderLayout.SOUTH);
+        rootPanel.add(scrollBar, BorderLayout.SOUTH);
         tooltipForm = new TooltipForm();
         screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
 
@@ -61,7 +65,11 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         updateTooltipTextTimer.setRepeats(false);
     }
 
-    public Chart addChart(String id){
+    public JPanel getRootPanel() {
+        return rootPanel;
+    }
+
+    public Chart<TCategories> addChart(String id){
         return addChart(id, null);
     }
 
@@ -71,22 +79,25 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         }
         Chart<TCategories> chart = new Chart<>(displayedCategories);
         if(charts.size()==0) {
-            chart.setPreferredSize(new Dimension(getWidth(), getHeight()));
+            chart.getRootPanel().setPreferredSize(new Dimension(rootPanel.getWidth(), rootPanel.getHeight()));
         } else {
-            chart.setMaximumSize(new Dimension(2000, height==null?OTHER_CHARTS_HEIGHT:height));
-            chart.setMinimumSize(new Dimension(100, height==null?OTHER_CHARTS_HEIGHT:height));
-            chart.setPreferredSize(new Dimension(getWidth(), height==null?OTHER_CHARTS_HEIGHT:height));
+            chart.getRootPanel().setMaximumSize(new Dimension(2000, height==null?OTHER_CHARTS_HEIGHT:height));
+            chart.getRootPanel().setMinimumSize(new Dimension(100, height==null?OTHER_CHARTS_HEIGHT:height));
+            chart.getRootPanel().setPreferredSize(new Dimension(rootPanel.getWidth(), height==null?OTHER_CHARTS_HEIGHT:height));
         }
         charts.put(id, chart);
-        mainPanel.add(chart);
-        chart.addMouseWheelListener(this);
-        chart.addMouseMotionListener(this);
-        chart.addMouseListener(new MouseAdapter() {
+        mainPanel.add(chart.getRootPanel());
+        chart.getRootPanel().addMouseWheelListener(this);
+        chart.getRootPanel().addMouseMotionListener(this);
+        chart.getRootPanel().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseExited(MouseEvent e) {
                 tooltipForm.setVisible(false);
             }
         });
+        chartByPanel.put(chart.getRootPanel(), chart);
+        getRootPanel().validate();
+        getRootPanel().repaint();
         return chart;
     }
 
@@ -164,27 +175,29 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         setLastY(e.getY());
         repaintCharts();
 
-        Chart<TCategories> chart = (Chart) e.getSource();
-        TCategories category = chart.getLastCategory();
-        if(category==null){
-            tooltipForm.setVisible(false);
-        } else {
-            updateTooltipText(category);
-            Point point = chart.getLocationOnScreen();
-            int x = point.x + lastX;
-            int y = point.y + lastY;
-            if(x + tooltipForm.getWidth() <= screen.getMaxX()){
-                x = x+TOOLTIP_MARGIN;
+        Chart<TCategories> chart = chartByPanel.get(e.getSource());
+        if(chart!=null){
+            TCategories category = chart.getLastCategory();
+            if(category==null){
+                tooltipForm.setVisible(false);
             } else {
-                x = x - tooltipForm.getWidth()-TOOLTIP_MARGIN;
+                updateTooltipText(category);
+                Point point = chart.getRootPanel().getLocationOnScreen();
+                int x = point.x + lastX;
+                int y = point.y + lastY;
+                if(x + tooltipForm.getWidth() <= screen.getMaxX()){
+                    x = x+TOOLTIP_MARGIN;
+                } else {
+                    x = x - tooltipForm.getWidth()-TOOLTIP_MARGIN;
+                }
+                if(y + tooltipForm.getHeight() <= screen.getMaxY()){
+                    y = y+TOOLTIP_MARGIN;
+                } else {
+                    y = y - tooltipForm.getHeight()-TOOLTIP_MARGIN;
+                }
+                tooltipForm.setLocation(x, y);
+                tooltipForm.setVisible(true);
             }
-            if(y + tooltipForm.getHeight() <= screen.getMaxY()){
-                y = y+TOOLTIP_MARGIN;
-            } else {
-                y = y - tooltipForm.getHeight()-TOOLTIP_MARGIN;
-            }
-            tooltipForm.setLocation(x, y);
-            tooltipForm.setVisible(true);
         }
     }
 
@@ -259,7 +272,7 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
         tooltipForm.setText("<html>"+txt+"</html>");
     }
 
-    private void updateCategories() {
+    protected void updateCategories() {
         if(!SwingUtilities.isEventDispatchThread()){
             throw new IllegalStateException("It should be called from AWT Event queue thread");
         }
@@ -313,8 +326,33 @@ public class ChartPanel<TCategories> extends JPanel implements MouseWheelListene
     private void repaintCharts(){
         if(charts!=null){
             for(Chart chart: charts.values()){
-                chart.repaint();
+                chart.getRootPanel().repaint();
             }
+        }
+    }
+
+    protected void updateLabelsConfig(LabelFormatter categoryLabelFormatter, LabelFormatter valueLabelFormatter){
+        int i=0;
+        for(Chart c: charts.values()){
+            c.getTopAxis().setShowLabels(false);
+            c.getBottomAxis().setShowLabels(false);
+            if(i==0){
+                c.getTopAxis().setLabelOrientation(SwingConstants.HORIZONTAL);
+                c.getTopAxis().setLabelFormatter(categoryLabelFormatter);
+                c.getTopAxis().setShowLabels(true);
+                c.getBottomAxis().setShowLabels(false);
+            }
+            if(i==charts.size()-1){
+                c.getBottomAxis().setLabelOrientation(SwingConstants.VERTICAL);
+                c.getBottomAxis().setLabelFormatter(categoryLabelFormatter);
+                c.getBottomAxis().setShowLabels(true);
+            }
+            c.getLeftAxis().setShowLabels(true);
+            c.getRightAxis().setShowLabels(true);
+            if(c.getValuesLabelFormatter().getClass().equals(DefaultLabelFormatter.class)){
+                c.setValuesLabelFormatter(valueLabelFormatter);
+            }
+            i++;
         }
     }
 }

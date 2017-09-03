@@ -4,6 +4,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorage;
 import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListSeries;
 import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListTimeSeries;
 
@@ -25,6 +26,10 @@ public class TradeChartLayer extends AbstractChartLayer<Instant, List<TradeInfo>
 
     public TradeChartLayer(String id) {
         super(id);
+    }
+
+    public TradeChartLayer(String id, ChartLayerDataStorage<Instant, List<TradeInfo>> storage) {
+        super(id, storage);
     }
 
     @Override

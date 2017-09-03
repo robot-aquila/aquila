@@ -3,9 +3,10 @@ package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.core.data.SeriesImpl;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorage;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorageImpl;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -17,12 +18,17 @@ import java.util.Map;
  */
 public abstract class AbstractChartLayer<TCategories, TValues> implements ChartLayer<TCategories, TValues> {
     protected String id;
-    protected Series<TCategories> categories;
-    protected Series<TValues> data;
+    protected final ChartLayerDataStorage<TCategories, TValues> storage;
     protected Map<TCategories, String> currentTooltips = new HashMap<>();
 
     public AbstractChartLayer(String id) {
         this.id = id;
+        storage = new ChartLayerDataStorageImpl<TCategories, TValues>();
+    }
+
+    public AbstractChartLayer(String id, ChartLayerDataStorage<TCategories, TValues> storage) {
+        this.id = id;
+        this.storage = storage;
     }
 
     @Override
@@ -32,17 +38,17 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
 
     @Override
     public void setCategories(Series<TCategories> categories) {
-        this.categories = categories;
+        storage.setCategories(categories);
     }
 
     @Override
     public Series<TCategories> getCategories() {
-        return categories;
+        return storage.getCategories();
     }
 
     @Override
     public void setData(Series<TValues> data) {
-        this.data = data;
+        storage.setData(data);
         if(this.id == null || "".equals(this.id)){
             this.id = data.getId();
         }
@@ -50,13 +56,12 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
 
     @Override
     public Series<TValues> getData() {
-        return data;
+        return storage.getData();
     }
 
     @Override
     public void clearData() {
-        this.data = new SeriesImpl<>();
-        this.categories = new SeriesImpl<>();
+        storage.clearData();
     }
 
     @Override
@@ -83,34 +88,42 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
     public Pair<Double, Double> getValuesInterval(List<TCategories> displayCategories) {
         Double minY = null;
         Double maxY = null;
-        if(data==null){
+        if(storage.getData()==null){
             return null;
         }
-        for(int i=0; i<categories.getLength(); i++){
-            TCategories category = null;
-            TValues value = null;
-            try {
-                category = categories.get(i);
-            } catch (ValueException e) {
-                e.printStackTrace();
-            }
-            if(displayCategories.contains(category)){
+        try {
+            storage.getCategories().lock();
+            storage.getData().lock();
+
+            for(int i=0; i<storage.getCategories().getLength(); i++){
+                TCategories category = null;
+                TValues value = null;
                 try {
-                    value = data.get(i);
+                    category = storage.getCategories().get(i);
                 } catch (ValueException e) {
-                    value = null;
+                    e.printStackTrace();
                 }
-                if(value!=null){
-                    double y = getMaxValue(value);
-                    if(maxY==null || y>maxY){
-                        maxY = y;
+                if(displayCategories.contains(category)){
+                    try {
+                        value = storage.getData().get(i);
+                    } catch (ValueException e) {
+                        value = null;
                     }
-                    y = getMinValue(value);
-                    if(minY==null || y<minY){
-                        minY = y;
+                    if(value!=null){
+                        double y = getMaxValue(value);
+                        if(maxY==null || y>maxY){
+                            maxY = y;
+                        }
+                        y = getMinValue(value);
+                        if(minY==null || y<minY){
+                            minY = y;
+                        }
                     }
                 }
             }
+        } finally {
+            storage.getCategories().unlock();
+            storage.getData().unlock();
         }
         return new ImmutablePair<>(minY, maxY);
     }
@@ -121,12 +134,7 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
     }
 
     protected TValues getByCategory(TCategories category) throws ValueException {
-        for(int i=0; i<categories.getLength(); i++){
-            if(category.equals(categories.get(i))){
-                return data.get(i);
-            }
-        }
-        return null;
+        return storage.getByCategory(category);
     }
 
     protected abstract void paintObject(TCategories category, TValues value, CoordConverter<TCategories> converter, Graphics2D g);
