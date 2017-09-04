@@ -46,7 +46,7 @@ public class Chart<TCategories> {
             Chart.this.paintComponent(g);
         }
     };
-    private String caption = "";
+    private List<Overlay> overlays = new ArrayList<>();
 
     public JPanel getRootPanel() {
         return rootPanel;
@@ -54,7 +54,7 @@ public class Chart<TCategories> {
 
     public Chart(List<TCategories> categories) {
         super();
-        settingsButton = new ChartSettingsButton(this.getRootPanel());
+//        settingsButton = new ChartSettingsButton(this.getRootPanel());
         this.categories = categories;
         topAxis = new CategoryAxis<>(SwingConstants.TOP, this.categories, categoriesLabelFormatter);
         bottomAxis = new CategoryAxis<>(SwingConstants.BOTTOM, this.categories, categoriesLabelFormatter);
@@ -82,10 +82,9 @@ public class Chart<TCategories> {
         g2.setRenderingHints(rh);
         double leftMargin = leftAxis.getSize();
         double rightMargin = rightAxis.getSize();
-        double topMargin = topAxis.getSize(g2)+LABEL_INDENT + CHART_CAPTION_SIZE;
+        double topMargin = topAxis.getSize(g2)+LABEL_INDENT;
         double bottomMargin = bottomAxis.getSize(g2)+LABEL_INDENT;
 
-        drawCaption(g, leftMargin);
         if(settingsButton!=null){
             settingsButton.paint(g2, g2.getClipBounds().getWidth() - rightMargin);
         }
@@ -109,6 +108,7 @@ public class Chart<TCategories> {
         for(ChartLayer layer: layers){
             layer.paint(coordConverter);
         }
+        drawOverlays(coordConverter);
     }
 
     public List<ChartLayer<TCategories, ?>> getLayers() {
@@ -179,8 +179,8 @@ public class Chart<TCategories> {
         this.maxValueInterval = maxValueInterval;
     }
 
-    public void setCaption(String caption) {
-        this.caption = caption;
+    public List<Overlay> getOverlays() {
+        return overlays;
     }
 
     private Pair<Double, Double> getValuesInterval(){
@@ -241,13 +241,21 @@ public class Chart<TCategories> {
         }
     }
 
-    private void drawCaption(Graphics g, double leftMargin){
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setColor(CHART_CAPTION_BGCOLOR);
-        g2.fillRect(0, 0, new Double(g2.getClipBounds().getWidth()).intValue(), CHART_CAPTION_SIZE);
-        g2.setColor(CHART_CAPTION_COLOR);
-        g2.setFont(new Font("default", Font.BOLD, CHART_CAPTION_FONT_SIZE));
-        double height = g2.getFontMetrics().getStringBounds(caption, g2).getHeight();
-        g2.drawString(caption, new Double(MARGIN+leftMargin).intValue(), new Double(CHART_CAPTION_SIZE/2+height/2).intValue());
+    private void drawOverlays(CoordConverter converter){
+        Graphics2D g2 = (Graphics2D) converter.getGraphics().create();
+        g2.setColor(CHART_OVERLAY_COLOR);
+        g2.setFont(new Font("default", Font.BOLD, CHART_OVERLAY_FONT_SIZE));
+        int height = (int) Math.round(g2.getFontMetrics().getStringBounds("A", g2).getHeight());
+        for(Overlay o: overlays){
+            int x = new Double(converter.getPlotBounds().getMinX()).intValue() + LABEL_INDENT;
+            int y = 0;
+            if(o.getY()>=0){
+                y = new Double(converter.getPlotBounds().getMinY()).intValue() + LABEL_INDENT + height;
+            } else {
+                y = new Double(converter.getPlotBounds().getMaxY()).intValue() - LABEL_INDENT;
+            }
+
+            g2.drawString(o.getText(), x, y + o.getY());
+        }
     }
 }

@@ -8,8 +8,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.CHART_CAPTION_SIZE;
-
 /**
  * Created by TiM on 31.08.2017.
  */
@@ -50,7 +48,7 @@ public class ChartSettingsButton {
     }
 
     public void paint(Graphics2D g2, double x){
-        y = CHART_CAPTION_SIZE/2 - SIZE/2;
+        y = SIZE/2;
         this.x = new Double(x).intValue() - SIZE;
         g2.drawImage(isActive()?activeIcon:icon, this.x, y, SIZE, SIZE, parent);
     }

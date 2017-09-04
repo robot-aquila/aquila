@@ -42,6 +42,8 @@ public class SDP2ChartPanel extends ChartPanel<Instant> implements EventListener
         super();
         candleLayer = new CandleChartLayer("CANDLES", new ChartLayerDataStorageTSeries<>());
         addLayer("CANDLES", candleDataId, candleLayer, false);
+        Chart chart = getChart("CANDLES");
+        chart.getOverlays().add(new Overlay("Price", 0));
     }
 
     @Override
@@ -68,6 +70,7 @@ public class SDP2ChartPanel extends ChartPanel<Instant> implements EventListener
         formatter.setPrecision(0);
         chart.setValuesLabelFormatter(formatter);
         ChartLayer layer = new VolumeChartLayer("VOLUMES", new ChartLayerDataStorageTSeries<>());
+        chart.getOverlays().add(new Overlay("Volume", 0));
         return addLayer("VOLUMES", dataId, layer, false);
     }
 
@@ -89,6 +92,8 @@ public class SDP2ChartPanel extends ChartPanel<Instant> implements EventListener
         layer = new BidAskVolumeChartLayer("ASK_VOLUMES", new ChartLayerDataStorageTSeries<>(), BidAskVolumeChartLayer.TYPE_ASK);
         layer.setFixCenter(fixCenter);
         addLayer("BID_ASK_VOLUMES", askVolumeDataId, layer, false);
+        chart.getOverlays().add(new Overlay("Bid volume", 0));
+        chart.getOverlays().add(new Overlay("Ask volume", -1));
     }
 
     private IndicatorChartLayer addLine(String chartId, String dataId, LineRenderer lineRenderer){
@@ -124,24 +129,26 @@ public class SDP2ChartPanel extends ChartPanel<Instant> implements EventListener
         if(!SwingUtilities.isEventDispatchThread()){
             throw new IllegalStateException("It should be called from AWT Event queue thread");
         }
-        categoriesSeries.lock();
-        try {
-            categories.clear();
+        if (categoriesSeries!=null){
+            categoriesSeries.lock();
+            try {
+                categories.clear();
 
-            for(int i=0; i<categoriesSeries.getLength(); i++) {
-                try {
-                    categories.add(categoriesSeries.get(i));
-                } catch (ValueException e) {
-                    e.printStackTrace();
+                for(int i=0; i<categoriesSeries.getLength(); i++) {
+                    try {
+                        categories.add(categoriesSeries.get(i));
+                    } catch (ValueException e) {
+                        e.printStackTrace();
+                    }
                 }
+            } finally {
+                categoriesSeries.unlock();
             }
-        } finally {
-            categoriesSeries.unlock();
-        }
-        displayedCategories.clear();
-        for(int i=0; i<categories.size(); i++){
-            if(i >= getCurrentPosition() && i < getCurrentPosition() + getNumberOfPoints()){
-                displayedCategories.add(categories.get(i));
+            displayedCategories.clear();
+            for(int i=0; i<categories.size(); i++){
+                if(i >= getCurrentPosition() && i < getCurrentPosition() + getNumberOfPoints()){
+                    displayedCategories.add(categories.get(i));
+                }
             }
         }
     }

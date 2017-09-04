@@ -9,10 +9,8 @@ public class ChartConstants {
     public static final int MARGIN = 10;
     public static int OTHER_CHARTS_HEIGHT = 150;
 
-    public static final int CHART_CAPTION_SIZE = 25;
-    public static final Color CHART_CAPTION_BGCOLOR = new Color(220, 220, 220);
-    public static final Color CHART_CAPTION_COLOR = new Color(0, 82, 155);;
-    public static final int CHART_CAPTION_FONT_SIZE = 14;
+    public static final Color CHART_OVERLAY_COLOR = new Color(0, 82, 155);;
+    public static final int CHART_OVERLAY_FONT_SIZE = 14;
 
     public static final int Y_AXIS_WIDTH = 50;
     public static final int Y_AXIS_MIN_STEP = 30;
