@@ -6,6 +6,7 @@ import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.core.data.TSeriesEvent;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataSlice;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.AbsDoubleLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DoubleLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
@@ -71,16 +72,22 @@ public class SDP2ChartPanel extends ChartPanel<Instant> implements EventListener
     }
 
     public void addBidAskVolumes(String bidVolumeDataId, String askVolumeDataId){
+        addBidAskVolumes(bidVolumeDataId, askVolumeDataId, true);
+    }
+
+    public void addBidAskVolumes(String bidVolumeDataId, String askVolumeDataId, boolean fixCenter){
         if(getChart("BID_ASK_VOLUMES") != null){
             throw new IllegalStateException("Bid/Ask Volumes chart is already added");
         }
         Chart chart = addChart("BID_ASK_VOLUMES", BID_ASK_VOLUME_CHARTS_HEIGHT);
-        DoubleLabelFormatter formatter = new DoubleLabelFormatter();
+        DoubleLabelFormatter formatter = new AbsDoubleLabelFormatter();
         formatter.setPrecision(0);
         chart.setValuesLabelFormatter(formatter);
-        ChartLayer layer = new BidAskVolumeChartLayer("BID_VOLUMES", new ChartLayerDataStorageTSeries<>(), BidAskVolumeChartLayer.TYPE_BID);
+        BidAskVolumeChartLayer layer = new BidAskVolumeChartLayer("BID_VOLUMES", new ChartLayerDataStorageTSeries<>(), BidAskVolumeChartLayer.TYPE_BID);
+        layer.setFixCenter(fixCenter);
         addLayer("BID_ASK_VOLUMES", bidVolumeDataId, layer, false);
         layer = new BidAskVolumeChartLayer("ASK_VOLUMES", new ChartLayerDataStorageTSeries<>(), BidAskVolumeChartLayer.TYPE_ASK);
+        layer.setFixCenter(fixCenter);
         addLayer("BID_ASK_VOLUMES", askVolumeDataId, layer, false);
     }
 

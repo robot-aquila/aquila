@@ -19,6 +19,7 @@ public class BidAskVolumeChartLayer extends AbstractChartLayer<Instant, Long> {
 
     private Color color;
     private final int type;
+    private boolean fixCenter = true;
 
     public BidAskVolumeChartLayer(String id, int type) {
         super(id);
@@ -30,6 +31,10 @@ public class BidAskVolumeChartLayer extends AbstractChartLayer<Instant, Long> {
         super(id, storage);
         this.type = type;
         color = type==TYPE_BID?BID_VOLUME_COLOR:ASK_VOLUME_COLOR;
+    }
+
+    public void setFixCenter(boolean fixCenter) {
+        this.fixCenter = fixCenter;
     }
 
     @Override
@@ -49,11 +54,17 @@ public class BidAskVolumeChartLayer extends AbstractChartLayer<Instant, Long> {
 
     @Override
     protected double getMaxValue(Long value) {
+        if(fixCenter){
+            return value.doubleValue();
+        }
         return type==TYPE_BID?value.doubleValue():0d;
     }
 
     @Override
     protected double getMinValue(Long value) {
+        if(fixCenter){
+            return -value.doubleValue();
+        }
         return type==TYPE_BID?0d:-value.doubleValue();
     }
 

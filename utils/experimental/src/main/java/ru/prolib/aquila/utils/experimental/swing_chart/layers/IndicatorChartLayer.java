@@ -104,7 +104,7 @@ public class IndicatorChartLayer extends AbstractChartLayer<Instant, Number> {
 
     @Override
     protected String createTooltipText(Number value) {
-        return String.format("%s: %.2f", getId(), value);
+        return String.format("%s: %.2f", getId(), value == null ? null : value.doubleValue() * sign);
     }
 
     public IndicatorChartLayer withColor(Color color) {
