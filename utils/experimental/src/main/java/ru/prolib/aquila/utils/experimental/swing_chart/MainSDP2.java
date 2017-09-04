@@ -37,6 +37,8 @@ public class MainSDP2 {
         SDP2DataSlice<SDP2Key> slice = new SDP2DataSliceImpl(new SDP2Key(TimeFrame.M1, new Symbol("AAPL")), new EventQueueImpl());
         final EditableTSeries<Candle> series = slice.createSeries("OHLC", true);
         EditableTSeries<Long> volumeSeries = slice.createSeries("VOLUME", false);
+        EditableTSeries<Long> bidVolumeSeries = slice.createSeries("BID_VOLUME", false);
+        EditableTSeries<Long> askVolumeSeries = slice.createSeries("ASK_VOLUME", false);
         EditableTSeries<Double> highSeries = slice.createSeries("HIGH", false);
         Instant time = Instant.parse("2017-06-13T06:00:00Z");
         double prevClose = 120d;
@@ -47,13 +49,15 @@ public class MainSDP2 {
                 highSeries.set(time, candle.getHigh());
             }
             volumeSeries.set(time, new Double(Math.random()*1000).longValue());
+            bidVolumeSeries.set(time, new Double(Math.random()*1000).longValue());
+            askVolumeSeries.set(time, new Double(Math.random()*1000).longValue());
             time = time.plusSeconds(60);
             prevClose = candle.getClose();
         }
 
 
         chartPanel.addVolumes("VOLUME");
-        chartPanel.addBidAskVolumes("VOLUME", "VOLUME");
+        chartPanel.addBidAskVolumes("BID_VOLUME", "ASK_VOLUME");
         chartPanel.addSmoothLine("CANDLES", "HIGH").setColor(Color.BLUE);
         chartPanel.setDataSlice(slice);
         chartPanel.setCurrentPosition(0);
