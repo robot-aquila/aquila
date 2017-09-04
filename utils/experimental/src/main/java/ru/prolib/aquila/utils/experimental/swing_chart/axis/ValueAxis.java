@@ -32,7 +32,7 @@ public class ValueAxis<T> extends Axis<T> {
                 FontMetrics metrics = g.getFontMetrics(font);
                 g.setFont(font);
                 RangeInfo ri = cc.getYRangeInfo();
-                for(Double yVal=ri.getMinValue(); yVal<ri.getMaxValue()+ri.getStepValue(); yVal+=ri.getStepValue()){
+                for(Double yVal=ri.getMinValue(); yVal<=ri.getMaxValue()+1e-6; yVal+=ri.getStepValue()){
                     String label = labelFormatter.format(yVal);
                     float width = metrics.stringWidth(label);
                     float height = metrics.getHeight();

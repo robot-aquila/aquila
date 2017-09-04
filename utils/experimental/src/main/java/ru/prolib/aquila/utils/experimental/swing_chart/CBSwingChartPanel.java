@@ -122,23 +122,23 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
         setCurrentPosition(0);
     }
 
-    public IndicatorChartLayer addSmoothLine(Series<Double> data){
+    public IndicatorChartLayer addSmoothLine(Series<Number> data){
         return addSmoothLine("CANDLES", data);
     }
 
-    public IndicatorChartLayer addSmoothLine(String chartId, Series<Double> data){
+    public IndicatorChartLayer addSmoothLine(String chartId, Series<Number> data){
         return addLine(chartId, data, new SmoothLineRenderer());
     }
 
-    public IndicatorChartLayer addPolyLine(Series<Double> data){
+    public IndicatorChartLayer addPolyLine(Series<Number> data){
         return addPolyLine("CANDLES", data);
     }
 
-    public IndicatorChartLayer addPolyLine(String chartId, Series<Double> data){
+    public IndicatorChartLayer addPolyLine(String chartId, Series<Number> data){
         return addLine(chartId, data, new PolyLineRenderer());
     }
 
-    private IndicatorChartLayer addLine(String chartId, Series<Double> data, LineRenderer lineRenderer){
+    private IndicatorChartLayer addLine(String chartId, Series<Number> data, LineRenderer lineRenderer){
         Chart chart;
         if(candleData==null){
             throw new IllegalStateException("Candle data not set");

@@ -2,6 +2,8 @@ package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import ru.prolib.aquila.core.concurrency.Lockable;
+import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
@@ -9,9 +11,8 @@ import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDat
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorageImpl;
 
 import java.awt.*;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by TiM on 13.06.2017.
@@ -91,10 +92,12 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
         if(storage.getData()==null){
             return null;
         }
+        Set<Lockable> locks = new HashSet<>();
+        locks.add(storage.getCategories());
+        locks.add(storage.getData());
+        Multilock lock = new Multilock(locks);
+        lock.lock();
         try {
-            storage.getCategories().lock();
-            storage.getData().lock();
-
             for(int i=0; i<storage.getCategories().getLength(); i++){
                 TCategories category = null;
                 TValues value = null;
@@ -122,8 +125,7 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
                 }
             }
         } finally {
-            storage.getCategories().unlock();
-            storage.getData().unlock();
+            lock.unlock();
         }
         return new ImmutablePair<>(minY, maxY);
     }

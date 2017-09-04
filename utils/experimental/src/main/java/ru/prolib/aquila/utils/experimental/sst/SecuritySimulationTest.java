@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
@@ -70,6 +69,7 @@ import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistryImpl;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
+import ru.prolib.aquila.utils.experimental.swing_chart.series.DoubleToNumberSeries;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
@@ -229,7 +229,7 @@ public class SecuritySimulationTest implements Experiment {
         CBSwingChartPanel chartPanel = new CBSwingChartPanel(dataSlice.getCandleSeries());
         int i = 0;
         for ( Series<Double> x : dataSlice.getIndicators() ) {
-        	chartPanel.addSmoothLine(x).setColor(indicatorColors[i%4]);
+        	chartPanel.addSmoothLine(new DoubleToNumberSeries(x)).withColor(indicatorColors[i%4]);
             i++;
         	logger.debug("added indicator: {}", x.getId());
         }

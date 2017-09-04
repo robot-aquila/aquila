@@ -4,11 +4,11 @@ import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DoubleLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.PolyLineRenderer;
-import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.BidAskVolumeChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.CandleChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.IndicatorChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.VolumeChartLayer;
+import ru.prolib.aquila.utils.experimental.swing_chart.series.DoubleToNumberSeries;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,9 +60,9 @@ public class Main {
 //        chartPanel.getChart("CANDLES3").addLayer(layer);
 
         IndicatorChartLayer highLayer = new IndicatorChartLayer("High");
-        highLayer.setColor(Color.BLUE);
+        highLayer.withColor(Color.BLUE);
         highLayer.setCategories(new CandleStartTimeSeries(series));
-        highLayer.setData(new CandleHighSeries(series){
+        highLayer.setData(new DoubleToNumberSeries(new CandleHighSeries(series){
             @Override
             public Double get(int index) throws ValueException {
                 if(index%10==0){
@@ -70,13 +70,13 @@ public class Main {
                 }
                 return super.get(index);
             }
-        });
+        }));
         chartPanel.getChart("CANDLES").addLayer(highLayer);
 
         IndicatorChartLayer lowLayer = new IndicatorChartLayer("Low");
-        lowLayer.setColor(Color.BLUE);
+        lowLayer.withColor(Color.BLUE);
         lowLayer.setCategories(new CandleStartTimeSeries(series));
-        lowLayer.setData(new CandleLowSeries(series){
+        lowLayer.setData(new DoubleToNumberSeries(new CandleLowSeries(series){
             @Override
             public Double get(int index) throws ValueException {
                 if(index%5==0){
@@ -84,7 +84,7 @@ public class Main {
                 }
                 return super.get(index);
             }
-        });
+        }));
         lowLayer.setLineRenderer(new PolyLineRenderer());
         chartPanel.getChart("CANDLES").addLayer(lowLayer);
 

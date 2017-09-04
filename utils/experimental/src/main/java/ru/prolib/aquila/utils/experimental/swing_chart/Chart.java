@@ -46,6 +46,7 @@ public class Chart<TCategories> {
             Chart.this.paintComponent(g);
         }
     };
+    private String caption = "";
 
     public JPanel getRootPanel() {
         return rootPanel;
@@ -53,7 +54,7 @@ public class Chart<TCategories> {
 
     public Chart(List<TCategories> categories) {
         super();
-//        settingsButton = new ChartSettingsButton(this);
+        settingsButton = new ChartSettingsButton(this.getRootPanel());
         this.categories = categories;
         topAxis = new CategoryAxis<>(SwingConstants.TOP, this.categories, categoriesLabelFormatter);
         bottomAxis = new CategoryAxis<>(SwingConstants.BOTTOM, this.categories, categoriesLabelFormatter);
@@ -81,8 +82,13 @@ public class Chart<TCategories> {
         g2.setRenderingHints(rh);
         double leftMargin = leftAxis.getSize();
         double rightMargin = rightAxis.getSize();
-        double topMargin = topAxis.getSize(g2)+LABEL_INDENT;
+        double topMargin = topAxis.getSize(g2)+LABEL_INDENT + CHART_CAPTION_SIZE;
         double bottomMargin = bottomAxis.getSize(g2)+LABEL_INDENT;
+
+        drawCaption(g, leftMargin);
+        if(settingsButton!=null){
+            settingsButton.paint(g2, g2.getClipBounds().getWidth() - rightMargin);
+        }
 
         Rectangle2D drawArea = new Rectangle2D.Double(MARGIN+leftMargin,
                 MARGIN+topMargin,
@@ -102,9 +108,6 @@ public class Chart<TCategories> {
         g2.clip(coordConverter.getPlotBounds());
         for(ChartLayer layer: layers){
             layer.paint(coordConverter);
-        }
-        if(settingsButton!=null){
-            settingsButton.paint(g2, coordConverter.getPlotBounds());
         }
     }
 
@@ -176,6 +179,10 @@ public class Chart<TCategories> {
         this.maxValueInterval = maxValueInterval;
     }
 
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
     private Pair<Double, Double> getValuesInterval(){
         if(minValueInterval!=null && maxValueInterval!=null){
             return new ImmutablePair<>(minValueInterval, maxValueInterval);
@@ -223,7 +230,7 @@ public class Chart<TCategories> {
                 }
             }
             RangeInfo ri = coordConverter.getYRangeInfo();
-            for(double yVal=ri.getMinValue(); yVal<ri.getMaxValue()+ri.getStepValue(); yVal+=ri.getStepValue()){
+            for(double yVal=ri.getMinValue(); yVal<ri.getMaxValue(); yVal+=ri.getStepValue()){
                 Double y = coordConverter.getY(yVal);
                 if(y!=null){
                     g.draw(new Line2D.Double(coordConverter.getPlotBounds().getMinX(), y, coordConverter.getPlotBounds().getMaxX(), y));
@@ -232,5 +239,15 @@ public class Chart<TCategories> {
         } finally {
             g.dispose();
         }
+    }
+
+    private void drawCaption(Graphics g, double leftMargin){
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setColor(CHART_CAPTION_BGCOLOR);
+        g2.fillRect(0, 0, new Double(g2.getClipBounds().getWidth()).intValue(), CHART_CAPTION_SIZE);
+        g2.setColor(CHART_CAPTION_COLOR);
+        g2.setFont(new Font("default", Font.BOLD, CHART_CAPTION_FONT_SIZE));
+        double height = g2.getFontMetrics().getStringBounds(caption, g2).getHeight();
+        g2.drawString(caption, new Double(MARGIN+leftMargin).intValue(), new Double(CHART_CAPTION_SIZE/2+height/2).intValue());
     }
 }

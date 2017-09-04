@@ -3,7 +3,6 @@ package ru.prolib.aquila.utils.experimental.swing_chart;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.ObservableTSeries;
-import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.TSeriesEvent;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataSlice;
@@ -18,8 +17,10 @@ import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDat
 
 import javax.swing.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.BID_ASK_VOLUME_CHARTS_HEIGHT;
 
@@ -116,8 +117,8 @@ public class SDP2ChartPanel extends ChartPanel<Instant> implements EventListener
         if(!SwingUtilities.isEventDispatchThread()){
             throw new IllegalStateException("It should be called from AWT Event queue thread");
         }
+        categoriesSeries.lock();
         try {
-            categoriesSeries.lock();
             categories.clear();
 
             for(int i=0; i<categoriesSeries.getLength(); i++) {

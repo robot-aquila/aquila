@@ -39,6 +39,7 @@ public class MainSDP2 {
         EditableTSeries<Long> volumeSeries = slice.createSeries("VOLUME", false);
         EditableTSeries<Long> bidVolumeSeries = slice.createSeries("BID_VOLUME", false);
         EditableTSeries<Long> askVolumeSeries = slice.createSeries("ASK_VOLUME", false);
+        EditableTSeries<Long> longLineSeries = slice.createSeries("LONG_LINE", false);
         EditableTSeries<Double> highSeries = slice.createSeries("HIGH", false);
         Instant time = Instant.parse("2017-06-13T06:00:00Z");
         double prevClose = 120d;
@@ -51,6 +52,7 @@ public class MainSDP2 {
             volumeSeries.set(time, new Double(Math.random()*1000).longValue());
             bidVolumeSeries.set(time, new Double(Math.random()*1000).longValue());
             askVolumeSeries.set(time, new Double(Math.random()*1000).longValue());
+            longLineSeries.set(time, new Double(Math.random()*1000).longValue());
             time = time.plusSeconds(60);
             prevClose = candle.getClose();
         }
@@ -58,9 +60,13 @@ public class MainSDP2 {
 
         chartPanel.addVolumes("VOLUME");
         chartPanel.addBidAskVolumes("BID_VOLUME", "ASK_VOLUME");
-        chartPanel.addSmoothLine("CANDLES", "HIGH").setColor(Color.BLUE);
+        chartPanel.addSmoothLine("CANDLES", "HIGH").withColor(Color.BLUE);
+        chartPanel.addPolyLine("BID_ASK_VOLUMES", "LONG_LINE").withColor(Color.GREEN).withInvertValues(true);
         chartPanel.setDataSlice(slice);
         chartPanel.setCurrentPosition(0);
+        chartPanel.getChart("CANDLES").setCaption("Candles");
+        chartPanel.getChart("VOLUMES").setCaption("Volume");
+        chartPanel.getChart("BID_ASK_VOLUMES").setCaption("Bid/Ask Volume");
 
         chartPanel.getChart("CANDLES").getRootPanel().addMouseListener(new MouseAdapter() {
             @Override
@@ -109,7 +115,7 @@ public class MainSDP2 {
     }
 
     private static Candle randomCandle(Instant time, double prevClose){
-        double var = 1;
+        double var = 0.01;
         double close = prevClose + (random.nextBoolean()?1:-1) * random.nextDouble()*var;
         double high = Math.max(prevClose, close) + random.nextDouble()*var;
         double low = Math.min(prevClose, close) - random.nextDouble()*var;
