@@ -7,16 +7,14 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * Created by TiM on 20.06.2017.
  */
 public class RangeInfo {
-    private final double minValue;
-    private final double maxValue;
-    private final double stepValue;
-    private final double step;
+    private final double minValue, maxValue, stepValue, firstValue, lastValue;
 
-    public RangeInfo(double minValue, double maxValue, double stepValue, double step) {
+    public RangeInfo(double minValue, double maxValue, double stepValue, double firstValue, double lastValue) {
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.stepValue = stepValue;
-        this.step = step;
+        this.firstValue = firstValue;
+        this.lastValue = lastValue;
     }
 
     public double getMinValue() {
@@ -31,8 +29,12 @@ public class RangeInfo {
         return stepValue;
     }
 
-    public double getStep() {
-        return step;
+    public double getFirstValue() {
+        return firstValue;
+    }
+
+    public double getLastValue() {
+        return lastValue;
     }
 
     @Override
@@ -41,7 +43,8 @@ public class RangeInfo {
                 .append("minValue", minValue)
                 .append("maxValue", maxValue)
                 .append("stepValue", stepValue)
-                .append("step", step)
+                .append("firstValue", firstValue)
+                .append("lastValue", lastValue)
                 .toString();
     }
 }

@@ -32,7 +32,7 @@ public class CoordConverterImplTest {
 
         graphics = EasyMock.createMock(Graphics2D.class);
         plotBounds = new Rectangle(50, 50, 500, 300);
-        converter = new CoordConverterImpl<Instant>(categories, graphics, plotBounds, new RangeInfo(50, 52, 10, 10));
+        converter = new CoordConverterImpl<Instant>(categories, graphics, plotBounds, new RangeInfo(50, 52, 10, 50, 52));
     }
 
     @Test

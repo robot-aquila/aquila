@@ -17,6 +17,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Created by TiM on 10.06.2017.
@@ -46,7 +47,7 @@ public class Chart<TCategories> {
             Chart.this.paintComponent(g);
         }
     };
-    private List<Overlay> overlays = new ArrayList<>();
+    private List<Overlay> overlays = new Vector<>();
 
     public JPanel getRootPanel() {
         return rootPanel;
@@ -86,13 +87,13 @@ public class Chart<TCategories> {
         double bottomMargin = bottomAxis.getSize(g2)+LABEL_INDENT;
 
         if(settingsButton!=null){
-            settingsButton.paint(g2, g2.getClipBounds().getWidth() - rightMargin);
+            settingsButton.paint(g2, getRootPanel().getWidth() - rightMargin);
         }
 
         Rectangle2D drawArea = new Rectangle2D.Double(MARGIN+leftMargin,
                 MARGIN+topMargin,
-                g2.getClipBounds().getWidth()-2*MARGIN-leftMargin-rightMargin,
-                g2.getClipBounds().getHeight()-2*MARGIN - topMargin - bottomMargin);
+                getRootPanel().getWidth()-2*MARGIN-leftMargin-rightMargin,
+                getRootPanel().getHeight()-2*MARGIN - topMargin - bottomMargin);
 
         Pair<Double, Double> valuesInterval = getValuesInterval();
         RangeInfo ri = rangeCalculator.autoRange(valuesInterval.getLeft(), valuesInterval.getRight(), drawArea.getHeight(), Y_AXIS_MIN_STEP, valuesLabelFormatter.getPrecision());
@@ -230,7 +231,7 @@ public class Chart<TCategories> {
                 }
             }
             RangeInfo ri = coordConverter.getYRangeInfo();
-            for(double yVal=ri.getMinValue(); yVal<ri.getMaxValue(); yVal+=ri.getStepValue()){
+            for(double yVal=ri.getFirstValue(); yVal<=ri.getLastValue()+(1e-6); yVal+=ri.getStepValue()){
                 Double y = coordConverter.getY(yVal);
                 if(y!=null){
                     g.draw(new Line2D.Double(coordConverter.getPlotBounds().getMinX(), y, coordConverter.getPlotBounds().getMaxX(), y));
