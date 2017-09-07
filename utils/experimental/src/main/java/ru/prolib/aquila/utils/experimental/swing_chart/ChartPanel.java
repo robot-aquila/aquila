@@ -33,9 +33,11 @@ public class ChartPanel<TCategories> implements MouseWheelListener, MouseMotionL
     protected AdjustmentListener scrollBarListener;
     protected int lastX, lastY;
     protected TooltipForm tooltipForm;
+    protected LabelFormatter categoryLabelFormatter = new DefaultLabelFormatter();
+    protected LabelFormatter valueLabelFormatter = new DefaultLabelFormatter();
     private Rectangle screen;
     private final Timer updateTooltipTextTimer;
-    private final HashMap<JPanel, Chart> chartByPanel = new HashMap<>();
+    private final HashMap<JPanel, Chart<TCategories>> chartByPanel = new HashMap<>();
     private final JPanel rootPanel;
 
     public ChartPanel() {
@@ -73,7 +75,7 @@ public class ChartPanel<TCategories> implements MouseWheelListener, MouseMotionL
         return addChart(id, null);
     }
 
-    public Chart addChart(String id, Integer height) throws IllegalArgumentException {
+    public Chart<TCategories> addChart(String id, Integer height) throws IllegalArgumentException {
         if(charts.containsKey(id)){
             throw new IllegalArgumentException("Chart with id='"+id+"' already added");
         }
@@ -95,6 +97,7 @@ public class ChartPanel<TCategories> implements MouseWheelListener, MouseMotionL
                 tooltipForm.setVisible(false);
             }
         });
+        updateLabelsConfig();
         chartByPanel.put(chart.getRootPanel(), chart);
         getRootPanel().validate();
         getRootPanel().repaint();
@@ -103,6 +106,28 @@ public class ChartPanel<TCategories> implements MouseWheelListener, MouseMotionL
 
     public Chart<TCategories> getChart(String id){
         return charts.get(id);
+    }
+
+    public ChartLayer<TCategories, ?> addLayer(String chartId, ChartLayer<TCategories, ?> layer){
+        Chart<TCategories> chart = getChart(chartId);
+        if (chart == null) {
+            chart = addChart(chartId);
+        }
+        ChartLayer<TCategories, ?> l = chart.getLayer(layer.getId());
+        if(l!=null){
+            throw new IllegalArgumentException(String.format("Layer with id=%s already exists", layer.getId()));
+        }
+        chart.addLayer(layer);
+        return layer;
+    }
+
+    public ChartLayer<TCategories, ?> getLayer(String chartId, String layerId) {
+        Chart<TCategories> chart = getChart(chartId);
+        ChartLayer<TCategories, ?> layer = null;
+        if(chart!=null){
+            return chart.getLayer(layerId);
+        }
+        return null;
     }
 
     public void setCurrentPosition(int position){
@@ -331,7 +356,7 @@ public class ChartPanel<TCategories> implements MouseWheelListener, MouseMotionL
         }
     }
 
-    protected void updateLabelsConfig(LabelFormatter categoryLabelFormatter, LabelFormatter valueLabelFormatter){
+    protected void updateLabelsConfig(){
         int i=0;
         for(Chart c: charts.values()){
             c.getTopAxis().setShowLabels(false);

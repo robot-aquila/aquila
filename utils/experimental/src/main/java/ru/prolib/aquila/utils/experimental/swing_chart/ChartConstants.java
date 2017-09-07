@@ -9,7 +9,7 @@ public class ChartConstants {
     public static final int MARGIN = 10;
     public static int OTHER_CHARTS_HEIGHT = 150;
 
-    public static final Color CHART_OVERLAY_COLOR = new Color(0, 82, 155);;
+    public static final Color CHART_OVERLAY_COLOR = new Color(0, 82, 155);
     public static final int CHART_OVERLAY_FONT_SIZE = 14;
 
     public static final int Y_AXIS_WIDTH = 50;
@@ -31,9 +31,9 @@ public class ChartConstants {
     public static final Color TRADE_SELL_COLOR = Color.PINK;
     public static final Color TRADE_LINE_COLOR = Color.BLACK;
 
-    public static final Color VOLUME_COLOR = Color.gray;
-    public static final Color BID_VOLUME_COLOR = new Color(0, 128, 0);
-    public static final Color ASK_VOLUME_COLOR = Color.RED;
+    public static final Color BAR_COLOR = Color.gray;
+    public static final Color TOP_BAR_COLOR = new Color(0, 128, 0);
+    public static final Color BOTTOM_BAR_COLOR = Color.RED;
     public static int BID_ASK_VOLUME_CHARTS_HEIGHT = 250;
 
     public static final int TOOLTIP_MARGIN = 10;

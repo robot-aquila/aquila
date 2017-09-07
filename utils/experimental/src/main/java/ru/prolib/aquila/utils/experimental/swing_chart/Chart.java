@@ -33,7 +33,7 @@ public class Chart<TCategories> {
     private int lastX, lastY;
     private TCategories lastCategory;
 
-    private LabelFormatter<TCategories> categoriesLabelFormatter = new DefaultLabelFormatter<TCategories>();
+    private LabelFormatter<TCategories> categoriesLabelFormatter = new DefaultLabelFormatter<>();
     private LabelFormatter valuesLabelFormatter = new DefaultLabelFormatter();
 
     private Double minValueInterval;
@@ -59,9 +59,19 @@ public class Chart<TCategories> {
         this.categories = categories;
         topAxis = new CategoryAxis<>(SwingConstants.TOP, this.categories, categoriesLabelFormatter);
         bottomAxis = new CategoryAxis<>(SwingConstants.BOTTOM, this.categories, categoriesLabelFormatter);
-        leftAxis = new ValueAxis<TCategories>(SwingConstants.LEFT, valuesLabelFormatter);
-        rightAxis = new ValueAxis<TCategories>(SwingConstants.RIGHT, valuesLabelFormatter);
+        leftAxis = new ValueAxis<>(SwingConstants.LEFT, valuesLabelFormatter);
+        rightAxis = new ValueAxis<>(SwingConstants.RIGHT, valuesLabelFormatter);
         rangeCalculator = new RangeCalculatorImpl();
+    }
+
+    public ChartLayer<TCategories, ?> getLayer(String id){
+        List<ChartLayer<TCategories, ?>> list = getLayers();
+        for(ChartLayer<TCategories, ?> l: list){
+            if(l.getId().equals(id)){
+                return l;
+            }
+        }
+        return null;
     }
 
     public void addLayer(ChartLayer<TCategories, ?> layer){
@@ -69,6 +79,7 @@ public class Chart<TCategories> {
             @Override
             public void run() {
                 layers.add(layer);
+                layer.setLabelFormatter(valuesLabelFormatter);
             }
         });
     }
@@ -97,7 +108,7 @@ public class Chart<TCategories> {
 
         Pair<Double, Double> valuesInterval = getValuesInterval();
         RangeInfo ri = rangeCalculator.autoRange(valuesInterval.getLeft(), valuesInterval.getRight(), drawArea.getHeight(), Y_AXIS_MIN_STEP, valuesLabelFormatter.getPrecision());
-        CoordConverter<TCategories> coordConverter = new CoordConverterImpl<TCategories>(categories, g2, drawArea, ri);
+        CoordConverter<TCategories> coordConverter = new CoordConverterImpl<>(categories, g2, drawArea, ri);
 
         topAxis.paint(coordConverter);
         bottomAxis.paint(coordConverter);
@@ -106,7 +117,7 @@ public class Chart<TCategories> {
         drawGridLines(coordConverter);
         drawSelection(coordConverter);
         g2.clip(coordConverter.getPlotBounds());
-        for(ChartLayer layer: layers){
+        for(ChartLayer<TCategories, ?> layer: layers){
             layer.paint(coordConverter);
         }
         drawOverlays(coordConverter);
@@ -170,6 +181,9 @@ public class Chart<TCategories> {
         this.valuesLabelFormatter = valuesLabelFormatter;
         leftAxis.setLabelFormatter(valuesLabelFormatter);
         rightAxis.setLabelFormatter(valuesLabelFormatter);
+        for(ChartLayer<TCategories, ?> l: getLayers()){
+            l.setLabelFormatter(valuesLabelFormatter);
+        }
     }
 
     public void setMinValueInterval(Double minValueInterval) {
@@ -190,7 +204,7 @@ public class Chart<TCategories> {
         }
         double maxY = 0;
         double minY = 1e6;
-        for (ChartLayer layer : layers) {
+        for (ChartLayer<TCategories, ?> layer : layers) {
             Pair<Double, Double> interval = layer.getValuesInterval(categories);
             if (interval != null) {
                 if (interval.getRight() != null && interval.getRight() > maxY) {
@@ -219,7 +233,7 @@ public class Chart<TCategories> {
         }
     }
 
-    private void drawGridLines(CoordConverter coordConverter){
+    private void drawGridLines(CoordConverter<TCategories> coordConverter){
         Graphics2D g = (Graphics2D) coordConverter.getGraphics().create();
         try {
             g.setColor(GRID_LINES_COLOR);
@@ -249,7 +263,7 @@ public class Chart<TCategories> {
         int height = (int) Math.round(g2.getFontMetrics().getStringBounds("A", g2).getHeight());
         for(Overlay o: overlays){
             int x = new Double(converter.getPlotBounds().getMinX()).intValue() + LABEL_INDENT;
-            int y = 0;
+            int y;
             if(o.getY()>=0){
                 y = new Double(converter.getPlotBounds().getMinY()).intValue() + LABEL_INDENT + height;
             } else {

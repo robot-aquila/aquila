@@ -6,25 +6,25 @@ import java.text.ParseException;
 /**
  * Created by TiM on 25.06.2017.
  */
-public class DoubleLabelFormatter extends DefaultLabelFormatter<Double> {
+public class NumberLabelFormatter extends DefaultLabelFormatter<Number> {
     private int precision = 2;
     private final DecimalFormat formatter;
 
-    public DoubleLabelFormatter() {
+    public NumberLabelFormatter() {
         formatter = new DecimalFormat();
         formatter.setGroupingUsed(false);
-        setPrecision(precision);
+        withPrecision(precision);
     }
 
     @Override
-    public String format(Double x) {
-        return formatter.format(x);
+    public String format(Number x) {
+        return x==null?"":formatter.format(x);
     }
 
     @Override
-    public Double parse(String str) {
+    public Number parse(String str) {
         try {
-            return (Double) formatter.parse(str);
+            return formatter.parse(str);
         } catch (ParseException e) {
             return null;
         }
@@ -35,9 +35,10 @@ public class DoubleLabelFormatter extends DefaultLabelFormatter<Double> {
         return precision;
     }
 
-    public void setPrecision(int precision) {
+    public NumberLabelFormatter withPrecision(int precision) {
         this.precision = precision;
         formatter.setMaximumFractionDigits(precision);
         formatter.setMinimumFractionDigits(precision);
+        return this;
     }
 }

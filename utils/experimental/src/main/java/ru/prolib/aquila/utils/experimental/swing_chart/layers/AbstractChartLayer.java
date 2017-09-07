@@ -7,6 +7,8 @@ import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorage;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.data.ChartLayerDataStorageImpl;
 
@@ -21,10 +23,11 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
     protected String id;
     protected final ChartLayerDataStorage<TCategories, TValues> storage;
     protected Map<TCategories, String> currentTooltips = new HashMap<>();
+    protected LabelFormatter<TValues> labelFormatter = new DefaultLabelFormatter<>();
 
     public AbstractChartLayer(String id) {
         this.id = id;
-        storage = new ChartLayerDataStorageImpl<TCategories, TValues>();
+        storage = new ChartLayerDataStorageImpl<>();
     }
 
     public AbstractChartLayer(String id, ChartLayerDataStorage<TCategories, TValues> storage) {
@@ -100,7 +103,7 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
         try {
             for(int i=0; i<storage.getCategories().getLength(); i++){
                 TCategories category = null;
-                TValues value = null;
+                TValues value;
                 try {
                     category = storage.getCategories().get(i);
                 } catch (ValueException e) {
@@ -135,14 +138,28 @@ public abstract class AbstractChartLayer<TCategories, TValues> implements ChartL
         return currentTooltips.get(category);
     }
 
+    @Override
+    public LabelFormatter<TValues> getLabelFormatter() {
+        return labelFormatter;
+    }
+
+    @Override
+    public void setLabelFormatter(LabelFormatter<TValues> labelFormatter) {
+        this.labelFormatter = labelFormatter;
+    }
+
     protected TValues getByCategory(TCategories category) throws ValueException {
         return storage.getByCategory(category);
     }
+
+    protected String createTooltipText(TValues value) {
+        return String.format("%s: %s", getId(), labelFormatter.format(value));
+    }
+
 
     protected abstract void paintObject(TCategories category, TValues value, CoordConverter<TCategories> converter, Graphics2D g);
 
     protected abstract double getMaxValue(TValues value);
     protected abstract double getMinValue(TValues value);
 
-    protected abstract String createTooltipText(TValues value);
 }

@@ -6,7 +6,7 @@ package ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters;
 public class DefaultLabelFormatter<T> implements LabelFormatter<T> {
     @Override
     public String format(T x) {
-        return x.toString();
+        return x==null?"":x.toString();
     }
 
     @Override

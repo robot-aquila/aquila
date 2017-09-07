@@ -4,12 +4,13 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.*;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DoubleLabelFormatter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.LineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.PolyLineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
+import ru.prolib.aquila.utils.experimental.swing_chart.series.LongToNumberSeries;
 import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListSeries;
 import ru.prolib.aquila.utils.experimental.swing_chart.series.StampedListTimeSeries;
 
@@ -26,18 +27,19 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
     private CandleChartLayer candles;
     private List<IndicatorChartLayer> indicators = new ArrayList<>();
     private ObservableSeries<Candle>  candleData;
-    private VolumeChartLayer volumes;
+    private BarChartLayer volumes;
     private BidAskVolumeChartLayer bidVolumes, askVolumes;
     private ObservableSeries<Long> bidData, askData;
-    private LabelFormatter labelFormatter = new InstantLabelFormatter();
-    private LabelFormatter doubleLabelFormatter = new DoubleLabelFormatter();
 
     private TradeChartLayer trades;
     private StampedListSeries<TradeInfo> tradesData;
 
 
     public CBSwingChartPanel() {
-        Chart chart = addChart("CANDLES", 600);
+        super();
+        categoryLabelFormatter = new InstantLabelFormatter();
+        valueLabelFormatter = new NumberLabelFormatter();
+        Chart<Instant> chart = addChart("CANDLES", 600);
         candles = new CandleChartLayer("CANDLES");
         chart.addLayer(candles);
     }
@@ -61,7 +63,7 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
             candleData.onSet().addListener(this);
         }
         if(volumes!=null){
-            volumes.setData(new CandleVolumeSeries(candleData));
+            volumes.setData(new LongToNumberSeries(new CandleVolumeSeries(candleData)));
             volumes.setCategories(new CandleStartTimeSeries(candleData));
         }
         setCurrentPosition(candleData.getLength());
@@ -114,7 +116,7 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
         askData = null;
         super.clearData();
         for(IndicatorChartLayer l: indicators){
-            for(Chart c: charts.values()){
+            for(Chart<Instant> c: charts.values()){
                 c.dropLayer(l);
             }
         }
@@ -139,7 +141,7 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
     }
 
     private IndicatorChartLayer addLine(String chartId, Series<Number> data, LineRenderer lineRenderer){
-        Chart chart;
+        Chart<Instant> chart;
         if(candleData==null){
             throw new IllegalStateException("Candle data not set");
         }
@@ -157,29 +159,22 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
     }
 
     @Override
-    public Chart addChart(String id) {
+    public Chart<Instant> addChart(String id) {
         return addChart(id, null);
-    }
-
-    @Override
-    public Chart addChart(String id, Integer height) throws IllegalArgumentException {
-        Chart chart = super.addChart(id, height);
-        updateLabelsConfig(labelFormatter, doubleLabelFormatter);
-        return chart;
     }
 
     public void addVolumes(){
         if(volumes!=null){
             throw new IllegalStateException("Volumes chart is already added");
         }
-        Chart chart = addChart("VOLUMES");
-        DoubleLabelFormatter formatter = new DoubleLabelFormatter();
-        formatter.setPrecision(0);
+        Chart<Instant> chart = addChart("VOLUMES");
+        NumberLabelFormatter formatter = new NumberLabelFormatter();
+        formatter.withPrecision(0);
         chart.setValuesLabelFormatter(formatter);
-        volumes = new VolumeChartLayer("VOLUMES");
+        volumes = new BarChartLayer("VOLUMES");
         chart.addLayer(volumes);
         if(candleData!=null){
-            volumes.setData(new CandleVolumeSeries(candleData));
+            volumes.setData(new LongToNumberSeries(new CandleVolumeSeries(candleData)));
             volumes.setCategories(new CandleStartTimeSeries(candleData));
         }
     }
@@ -188,9 +183,9 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
         if(bidVolumes!=null || askVolumes!=null){
             throw new IllegalStateException("Bid/Ask Volumes chart is already added");
         }
-        Chart chart = addChart("BID_ASK_VOLUMES");
-        DoubleLabelFormatter formatter = new DoubleLabelFormatter();
-        formatter.setPrecision(0);
+        Chart<Instant> chart = addChart("BID_ASK_VOLUMES");
+        NumberLabelFormatter formatter = new NumberLabelFormatter();
+        formatter.withPrecision(0);
         chart.setValuesLabelFormatter(formatter);
 
         bidVolumes = new BidAskVolumeChartLayer("BID_VOLUMES", BidAskVolumeChartLayer.TYPE_BID);
@@ -202,7 +197,7 @@ public class CBSwingChartPanel extends ChartPanel<Instant> implements EventListe
 
     public void addTrades(){
         trades = new TradeChartLayer("TRADES");
-        Chart chart = getChart("CANDLES");
+        Chart<Instant> chart = getChart("CANDLES");
         if(chart!=null){
             chart.addLayer(trades);
         }

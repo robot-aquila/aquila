@@ -1,14 +1,15 @@
 package ru.prolib.aquila.utils.experimental.swing_chart;
 
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DoubleLabelFormatter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.PolyLineRenderer;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.BarChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.BidAskVolumeChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.CandleChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.IndicatorChartLayer;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.VolumeChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.series.DoubleToNumberSeries;
+import ru.prolib.aquila.utils.experimental.swing_chart.series.LongToNumberSeries;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,8 +31,8 @@ public class Main {
         Chart chart = chartPanel.addChart("CANDLES");
 //        chart.setMinValueInterval(120d);
 //        chart.setMaxValueInterval(115d);
-        DoubleLabelFormatter dlf = new DoubleLabelFormatter();
-        dlf.setPrecision(0);
+        NumberLabelFormatter dlf = new NumberLabelFormatter();
+        dlf.withPrecision(0);
         chartPanel.addChart("VOLUMES", 200).setValuesLabelFormatter(dlf);
 //        chartPanel.addChart("CANDLES3", 200);
         chartPanel.addChart("BID_ASK_VOLUMES", 200).setValuesLabelFormatter(dlf);
@@ -88,9 +89,9 @@ public class Main {
         lowLayer.setLineRenderer(new PolyLineRenderer());
         chartPanel.getChart("CANDLES").addLayer(lowLayer);
 
-        VolumeChartLayer volumes = new VolumeChartLayer("VOLUMES");
+        BarChartLayer volumes = new BarChartLayer("VOLUMES");
         volumes.setCategories(new CandleStartTimeSeries(series));
-        volumes.setData(new CandleVolumeSeries(series));
+        volumes.setData(new LongToNumberSeries(new CandleVolumeSeries(series)));
         chartPanel.getChart("VOLUMES").addLayer(volumes);
 
         BidAskVolumeChartLayer bidVolumes = new BidAskVolumeChartLayer("BID_VOLUMES", BidAskVolumeChartLayer.TYPE_BID);
@@ -117,7 +118,7 @@ public class Main {
 
         chartPanel.getChart("CANDLES").getLeftAxis().setShowLabels(true);
         chartPanel.getChart("CANDLES").getRightAxis().setShowLabels(true);
-        chartPanel.getChart("CANDLES").setValuesLabelFormatter(new DoubleLabelFormatter());
+        chartPanel.getChart("CANDLES").setValuesLabelFormatter(new NumberLabelFormatter());
         chartPanel.getChart("VOLUMES").getLeftAxis().setShowLabels(true);
         chartPanel.getChart("VOLUMES").getRightAxis().setShowLabels(true);
         chartPanel.getChart("BID_ASK_VOLUMES").getLeftAxis().setShowLabels(true);

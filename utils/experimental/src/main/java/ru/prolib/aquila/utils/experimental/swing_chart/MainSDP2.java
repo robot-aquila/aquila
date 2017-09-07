@@ -64,12 +64,12 @@ public class MainSDP2 {
         chartPanel.addPolyLine("BID_ASK_VOLUMES", "LONG_LINE").withColor(Color.GREEN).withInvertValues(true);
         chartPanel.setDataSlice(slice);
         chartPanel.setCurrentPosition(0);
-        chartPanel.getChart("CANDLES").getOverlays().add(new Overlay("Price", 0));
-        chartPanel.getChart("VOLUMES").getOverlays().add(new Overlay("Volume", 0));
+        chartPanel.getChart("CANDLES").getOverlays().add(new StaticOverlay("Price", 0));
+        chartPanel.getChart("VOLUMES").getOverlays().add(new StaticOverlay("Volume", 0));
 
         Chart chart = chartPanel.getChart("BID_ASK_VOLUMES");
-        chart.getOverlays().add(new Overlay("Bid volume", 0));
-        chart.getOverlays().add(new Overlay("Ask volume", -1));
+        chart.getOverlays().add(new StaticOverlay("Bid volume", 0));
+        chart.getOverlays().add(new StaticOverlay("Ask volume", -1));
 
         chartPanel.getChart("CANDLES").getRootPanel().addMouseListener(new MouseAdapter() {
             @Override

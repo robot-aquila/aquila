@@ -3,6 +3,7 @@ package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.utils.experimental.swing_chart.CoordConverter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public interface ChartLayer<TCategories, TValues> {
 
-    public String getId();
+    String getId();
 
     void setCategories(Series<TCategories> categories);
 
@@ -29,5 +30,8 @@ public interface ChartLayer<TCategories, TValues> {
 
     String getTooltip(TCategories category);
 
+    LabelFormatter<TValues> getLabelFormatter();
+
+    void setLabelFormatter(LabelFormatter<TValues> labelFormatter);
 
 }
