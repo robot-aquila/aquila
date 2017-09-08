@@ -4,6 +4,8 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.*;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+
+import ru.prolib.aquila.utils.experimental.chart.ChartOverlay;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.Axis;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.CategoryAxis;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.ValueAxis;
@@ -47,7 +49,7 @@ public class Chart<TCategories> {
             Chart.this.paintComponent(g);
         }
     };
-    private List<Overlay> overlays = new Vector<>();
+    private List<ChartOverlay> overlays = new Vector<>();
 
     public JPanel getRootPanel() {
         return rootPanel;
@@ -194,7 +196,7 @@ public class Chart<TCategories> {
         this.maxValueInterval = maxValueInterval;
     }
 
-    public List<Overlay> getOverlays() {
+    public List<ChartOverlay> getOverlays() {
         return overlays;
     }
 
@@ -261,7 +263,7 @@ public class Chart<TCategories> {
         g2.setColor(CHART_OVERLAY_COLOR);
         g2.setFont(new Font("default", Font.BOLD, CHART_OVERLAY_FONT_SIZE));
         int height = (int) Math.round(g2.getFontMetrics().getStringBounds("A", g2).getHeight());
-        for(Overlay o: overlays){
+        for(ChartOverlay o: overlays){
             int x = new Double(converter.getPlotBounds().getMinX()).intValue() + LABEL_INDENT;
             int y;
             if(o.getY()>=0){
