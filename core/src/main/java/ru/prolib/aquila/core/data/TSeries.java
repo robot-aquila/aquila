@@ -7,12 +7,8 @@ import java.time.Instant;
  * <p>
  * @param <T> - value type
  */
-public interface TSeries<T> extends Series<T> {
-
-	T get(Instant time);
+public interface TSeries<T> extends KSeries<Instant, T> {
 
 	TimeFrame getTimeFrame();
 	
-	int toIndex(Instant time);
-
 }

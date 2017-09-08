@@ -1,7 +1,7 @@
 package ru.prolib.aquila.core.data;
 
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 
 import org.threeten.extra.Interval;
 
@@ -69,7 +69,7 @@ public interface TimeFrame {
 	 * <p>
 	 * @return временная единица
 	 */
-	public TimeUnit getUnit();
+	public ChronoUnit getUnit();
 	
 	/**
 	 * Получить длину интервала.

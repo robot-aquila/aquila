@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.data.timeframe;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.*;
@@ -32,11 +32,11 @@ public class TFMinutesTest {
 	
 	@Test
 	public void testGetUnit() throws Exception {
-		assertEquals(TimeUnit.MINUTES, m1.getUnit());
-		assertEquals(TimeUnit.MINUTES, m5.getUnit());
-		assertEquals(TimeUnit.MINUTES, m7.getUnit());
-		assertEquals(TimeUnit.MINUTES, m15.getUnit());
-		assertEquals(TimeUnit.MINUTES, m241.getUnit());
+		assertEquals(ChronoUnit.MINUTES, m1.getUnit());
+		assertEquals(ChronoUnit.MINUTES, m5.getUnit());
+		assertEquals(ChronoUnit.MINUTES, m7.getUnit());
+		assertEquals(ChronoUnit.MINUTES, m15.getUnit());
+		assertEquals(ChronoUnit.MINUTES, m241.getUnit());
 	}
 	
 	@Test
@@ -172,6 +172,15 @@ public class TFMinutesTest {
 		assertEquals(new HashCodeBuilder(859, 175).append(7).toHashCode(), m7.hashCode());
 		assertEquals(new HashCodeBuilder(859, 175).append(15).toHashCode(), m15.hashCode());
 		assertEquals(new HashCodeBuilder(859, 175).append(241).toHashCode(), m241.hashCode());
+	}
+	
+	@Test
+	public void testToString() {
+		assertEquals("M1", m1.toString());
+		assertEquals("M5", m5.toString());
+		assertEquals("M7", m7.toString());
+		assertEquals("M15", m15.toString());
+		assertEquals("M241", m241.toString());
 	}
 
 }

@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.threeten.extra.Interval;
@@ -51,8 +50,8 @@ public class TFMinutes implements TimeFrame {
 	}
 
 	@Override
-	public TimeUnit getUnit() {
-		return TimeUnit.MINUTES;
+	public ChronoUnit getUnit() {
+		return ChronoUnit.MINUTES;
 	}
 
 	@Override
@@ -75,6 +74,11 @@ public class TFMinutes implements TimeFrame {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(859, 175).append(length).toHashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "M" + length;
 	}
 
 }

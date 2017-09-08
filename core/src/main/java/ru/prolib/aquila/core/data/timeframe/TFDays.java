@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.data.timeframe;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.threeten.extra.Interval;
@@ -37,8 +37,8 @@ public class TFDays implements TimeFrame {
 	}
 
 	@Override
-	public TimeUnit getUnit() {
-		return TimeUnit.DAYS;
+	public ChronoUnit getUnit() {
+		return ChronoUnit.DAYS;
 	}
 
 	@Override
@@ -61,6 +61,11 @@ public class TFDays implements TimeFrame {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(9921, 57015).append(length).toHashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "D" + length;
 	}
 
 }

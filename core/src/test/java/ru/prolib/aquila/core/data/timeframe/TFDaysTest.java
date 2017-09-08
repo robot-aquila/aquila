@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.data.timeframe;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Before;
@@ -29,9 +29,9 @@ public class TFDaysTest {
 	
 	@Test
 	public void testGetUnit() {
-		assertEquals(TimeUnit.DAYS, d1.getUnit());
-		assertEquals(TimeUnit.DAYS, d7.getUnit());
-		assertEquals(TimeUnit.DAYS, d21.getUnit());
+		assertEquals(ChronoUnit.DAYS, d1.getUnit());
+		assertEquals(ChronoUnit.DAYS, d7.getUnit());
+		assertEquals(ChronoUnit.DAYS, d21.getUnit());
 	}
 	
 	@Test
@@ -96,6 +96,13 @@ public class TFDaysTest {
 		assertEquals(new HashCodeBuilder(9921, 57015).append(1).toHashCode(), d1.hashCode());
 		assertEquals(new HashCodeBuilder(9921, 57015).append(7).toHashCode(), d7.hashCode());
 		assertEquals(new HashCodeBuilder(9921, 57015).append(21).toHashCode(), d21.hashCode());
+	}
+	
+	@Test
+	public void testToString() {
+		assertEquals("D1", d1.toString());
+		assertEquals("D7", d7.toString());
+		assertEquals("D21", d21.toString());
 	}
 
 }
