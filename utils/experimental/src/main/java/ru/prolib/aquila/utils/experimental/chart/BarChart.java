@@ -22,10 +22,10 @@ public interface BarChart<TCategory> {
     BarChartLayer<TCategory> addLayer(BarChartLayer<TCategory> layer);
     BarChartLayer<TCategory> addSmoothLine(String layerId);
     BarChartLayer<TCategory> addPolyLine(String layerId);
-    BarChartLayer<TCategory> addHystogram(String layerId);
+    BarChartLayer<TCategory> addHistogram(String layerId);
     BarChartLayer<TCategory> addSmoothLine(Series<? extends Number> series);
     BarChartLayer<TCategory> addPolyLine(Series<? extends Number> series);
-    BarChartLayer<TCategory> addHystogram(Series<? extends Number> series);
+    BarChartLayer<TCategory> addHistogram(Series<? extends Number> series);
     BarChart<TCategory> dropLayer(String id);
 
     /**
