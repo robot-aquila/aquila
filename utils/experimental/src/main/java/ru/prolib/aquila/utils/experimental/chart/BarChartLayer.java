@@ -11,6 +11,7 @@ public interface BarChartLayer<TCategory> {
 	
 	String getId();
 	
+	BarChartLayer<TCategory> setCategories(Series<TCategory> series);
 	BarChartLayer<TCategory> setData(Series<?> series);
 
 	/**
@@ -55,6 +56,6 @@ public interface BarChartLayer<TCategory> {
 	 * <p>
 	 * @param context - visualization context. Context is implementation depended.
 	 */
-	void paint(BarChartVisualizationContext<TCategory> context);
+	void paint(BarChartVisualizationContext context);
 
 }
