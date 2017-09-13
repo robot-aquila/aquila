@@ -5,14 +5,11 @@ import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
-import java.util.Vector;
 
 import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
 
@@ -21,13 +18,12 @@ import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
  */
 public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarChartLayer<TCategory> {
     protected String id;
-    protected Series<?> data;
+    protected Series<TValue> data;
     protected HashMap<Integer, Color> colors = new HashMap<>();
     protected boolean visible = true;
-//    protected final ChartLayerDataStorage<TCategories, TValues> storage;
-    protected List<String> currentTooltips = new Vector<>();
+    protected List<String> tooltips;
 
-    public AbstractBarChartLayer(Series<?> data) {
+    public AbstractBarChartLayer(Series<TValue> data) {
         this.data = data;
         this.id = data.getId();
     }
@@ -43,17 +39,17 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
             return;
         }
         Graphics2D g = (Graphics2D) getGraphics(vc).create();
-        currentTooltips.clear();
+        tooltips.clear();
         data.lock();
         try {
             int first = vc.getFirstVisibleCategoryIndex();
             for (int i = 0; i < vc.getNumberOfVisibleCategories(); i++) {
-                TValue value = (TValue) data.get(first + i);
+                TValue value = data.get(first + i);
                 if(value!=null){
                     paintObject(i, value, vc, g);
-                    currentTooltips.add(createTooltipText(value, vc.getValuesLabelFormatter()));
+                    tooltips.add(createTooltipText(value, vc.getValuesLabelFormatter()));
                 } else {
-                    currentTooltips.add(null);
+                    tooltips.add(null);
                 }
             }
         } catch (ValueException e) {
@@ -76,7 +72,7 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
             for(int i=first; i< first + number; i++){
                 TValue value = null;
                 try {
-                    value = (TValue) data.get(i);
+                    value = data.get(i);
                 } catch (ValueException e) {
                     value = null;
                 }
@@ -117,12 +113,8 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
         return this;
     }
 
-    @Override
-    public String getTooltipText(int categoryIdx) {
-        if(categoryIdx>=0 && categoryIdx < currentTooltips.size()){
-            return currentTooltips.get(categoryIdx);
-        }
-        return null;
+    public void setTooltips(List<String> tooltips) {
+        this.tooltips = tooltips;
     }
 
     protected String createTooltipText(TValue value, LabelFormatter labelFormatter) {

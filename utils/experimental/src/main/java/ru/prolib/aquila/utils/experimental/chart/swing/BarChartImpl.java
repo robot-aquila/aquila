@@ -8,6 +8,7 @@ import ru.prolib.aquila.utils.experimental.chart.swing.axis.BarChartAxisH;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.BarChartAxisV;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.CategoriesLabelProvider;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.ValuesLabelProvider;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.AbstractBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.IndicatorBarChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.StaticOverlay;
@@ -19,7 +20,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -43,6 +46,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     private AtomicInteger lastX, lastY, lastCategoryIdx;
     protected Double minValue = null;
     protected Double maxValue = null;
+    private Map<String, List<String>> tooltips;
 
 
     public BarChartImpl(List<TCategory> categories) {
@@ -121,6 +125,11 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
 
     @Override
     public BarChartLayer<TCategory> addLayer(BarChartLayer<TCategory> layer) {
+        if(layer instanceof AbstractBarChartLayer){
+            List<String> list = new Vector<String>();
+            tooltips.put(layer.getId(), list);
+            ((AbstractBarChartLayer) layer).setTooltips(list);
+        }
         layers.add(layer);
         return layer;
     }
@@ -208,6 +217,10 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         this.lastX = lastX;
         this.lastY = lastY;
         this.lastCategoryIdx = lastCategoryIdx;
+    }
+
+    public void setTooltips(HashMap<String, List<String>> tooltips) {
+        this.tooltips = tooltips;
     }
 
     protected void paintComponent(Graphics g) {
