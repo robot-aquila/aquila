@@ -9,7 +9,8 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.DatedSymbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 
-public interface FileStorage {
+@Deprecated
+public interface SymbolFileStorage {
 	
 	/**
 	 * List existing dated segments between two dates.

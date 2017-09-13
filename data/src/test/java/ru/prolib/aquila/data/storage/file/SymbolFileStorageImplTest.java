@@ -18,9 +18,9 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.DatedSymbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.file.FileStorageImpl;
+import ru.prolib.aquila.data.storage.file.SymbolFileStorageImpl;
 
-public class FileStorageImplTest {
+public class SymbolFileStorageImplTest {
 	private static String FS = File.separator;
 	private static Symbol symbol1 = new Symbol("MSFT");
 	private static LocalDate date1 = LocalDate.of(2016, 7, 26),
@@ -28,7 +28,7 @@ public class FileStorageImplTest {
 	private static DatedSymbol descr1 = new DatedSymbol(symbol1, date1),
 			descr2 = new DatedSymbol(symbol1, date2);
 	private static FileConfig fileConfig;
-	private FileStorageImpl storage;
+	private SymbolFileStorageImpl storage;
 	private File root = new File("fixture/temp");
 	
 	@BeforeClass
@@ -39,7 +39,7 @@ public class FileStorageImplTest {
 	@Before
 	public void setUp() throws Exception {
 		FileUtils.forceMkdir(root);
-		storage = new FileStorageImpl(root, "test", fileConfig);
+		storage = new SymbolFileStorageImpl(root, "test", fileConfig);
 	}
 	
 	@After
@@ -80,7 +80,7 @@ public class FileStorageImplTest {
 	@Test (expected=DataStorageException.class)
 	public void testGetTemporarySegmentFile_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
-		storage = new FileStorageImpl(root, "foo", fileConfig);
+		storage = new SymbolFileStorageImpl(root, "foo", fileConfig);
 		
 		storage.getTemporarySegmentFile(descr1);
 	}
@@ -104,7 +104,7 @@ public class FileStorageImplTest {
 	@Test
 	public void testListExistingSegments_SDD() throws Exception {
 		File root = new File("fixture");
-		storage = new FileStorageImpl(root, "bar", fileConfig);
+		storage = new SymbolFileStorageImpl(root, "bar", fileConfig);
 		LocalDate from = LocalDate.of(2006, 6, 14);
 		LocalDate to = LocalDate.of(2012, 1, 10);		
 		List<LocalDate> expected = new ArrayList<>();
@@ -126,7 +126,7 @@ public class FileStorageImplTest {
 	@Test
 	public void testListExistingSegments_SDI_EndOfData() throws Exception {
 		File root = new File("fixture");
-		storage = new FileStorageImpl(root, "bar", fileConfig);
+		storage = new SymbolFileStorageImpl(root, "bar", fileConfig);
 		LocalDate from = LocalDate.of(2008, 12, 10);
 		
 		List<LocalDate> actual = storage.listExistingSegments(symbol1, from, 100);
@@ -146,7 +146,7 @@ public class FileStorageImplTest {
 	@Test
 	public void testListExistingSegments_SDI_LimitByMaxCount() throws Exception {
 		File root = new File("fixture");
-		storage = new FileStorageImpl(root, "bar", fileConfig);
+		storage = new SymbolFileStorageImpl(root, "bar", fileConfig);
 		LocalDate from = LocalDate.of(2008, 12, 10);
 		
 		List<LocalDate> actual = storage.listExistingSegments(symbol1, from, 5);
@@ -163,7 +163,7 @@ public class FileStorageImplTest {
 	@Test
 	public void testListExistingSegments_SDI_DateFromInclusive() throws Exception {
 		File root = new File("fixture");
-		storage = new FileStorageImpl(root, "bar", fileConfig);
+		storage = new SymbolFileStorageImpl(root, "bar", fileConfig);
 		LocalDate from = LocalDate.of(2009, 9, 22);
 		
 		List<LocalDate> actual = storage.listExistingSegments(symbol1, from, 3);
@@ -178,7 +178,7 @@ public class FileStorageImplTest {
 	@Test (expected=DataStorageException.class)
 	public void testGetDataFileForWriting_ThrowsIfCannotCreateDirs() throws Exception {
 		File root = new File("fixture/dummy");
-		storage = new FileStorageImpl(root, "foo", fileConfig);
+		storage = new SymbolFileStorageImpl(root, "foo", fileConfig);
 		
 		storage.getDataFileForWriting(symbol1);
 	}

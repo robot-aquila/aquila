@@ -27,6 +27,13 @@ public class IdUtilsTest {
 	}
 	
 	@Test
+	public void testGetInstance() {
+		IdUtils instance = IdUtils.getInstance();
+		assertNotNull(instance);
+		assertSame(instance, IdUtils.getInstance());
+	}
+	
+	@Test
 	public void testCtor1() throws Exception {
 		assertSame(coder, utilsWithMocks.getStrCoder());
 	}

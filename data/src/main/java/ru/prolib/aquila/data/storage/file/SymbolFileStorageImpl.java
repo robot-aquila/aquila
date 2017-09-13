@@ -23,7 +23,8 @@ import ru.prolib.aquila.data.storage.DataStorageException;
 /**
  * Common file storage implementation.
  */
-public class FileStorageImpl implements FileStorage {
+@Deprecated
+public class SymbolFileStorageImpl implements SymbolFileStorage {
 	private static final String FS = File.separator;
 	private static final FilenameFilter LEVEL1_FILTER = new FilenameFilter() {
 		@Override public boolean accept(File dir, String name) {
@@ -38,7 +39,7 @@ public class FileStorageImpl implements FileStorage {
 	private final FileConfig config;
 	private final File root;
 	
-	public FileStorageImpl(File root, String storageID, FileConfig config) {
+	public SymbolFileStorageImpl(File root, String storageID, FileConfig config) {
 		this.root = root;
 		this.storageID = storageID;
 		this.config = config;

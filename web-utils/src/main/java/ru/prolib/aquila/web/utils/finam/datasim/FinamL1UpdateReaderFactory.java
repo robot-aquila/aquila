@@ -7,14 +7,14 @@ import java.time.Instant;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.data.storage.file.FileStorage;
+import ru.prolib.aquila.data.storage.file.SymbolFileStorage;
 import ru.prolib.aquila.probe.datasim.l1.L1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.finam.FidexpFileStorage;
 
 public class FinamL1UpdateReaderFactory implements L1UpdateReaderFactory {
-	private final FileStorage storage;
+	private final SymbolFileStorage storage;
 	
-	public FinamL1UpdateReaderFactory(FileStorage storage) {
+	public FinamL1UpdateReaderFactory(SymbolFileStorage storage) {
 		this.storage = storage;
 	}
 	

@@ -5,6 +5,15 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 public class StrCoder {
+	private static final StrCoder instance;
+	
+	static {
+		instance = new StrCoder();
+	}
+	
+	public static StrCoder getInstance() {
+		return instance;
+	}
 	
 	public StrCoder() {
 		super();

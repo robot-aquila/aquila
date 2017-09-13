@@ -9,11 +9,17 @@ import org.apache.commons.lang3.StringUtils;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class IdUtils {
-	private static final String SEPARATOR = "-";
+	public static final String SEPARATOR = "-";
 	private static final DateTimeFormatter dateFormat;
+	private static final IdUtils instance;
 	
 	static {
 		dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
+		instance = new IdUtils();
+	}
+	
+	public static IdUtils getInstance() {
+		return instance;
 	}
 
 	private final StrCoder coder;

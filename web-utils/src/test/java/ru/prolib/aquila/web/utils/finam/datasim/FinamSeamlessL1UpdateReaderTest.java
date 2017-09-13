@@ -15,12 +15,12 @@ import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.file.FileConfig;
-import ru.prolib.aquila.data.storage.file.FileStorage;
-import ru.prolib.aquila.data.storage.file.FileStorageImpl;
+import ru.prolib.aquila.data.storage.file.SymbolFileStorage;
+import ru.prolib.aquila.data.storage.file.SymbolFileStorageImpl;
 
 public class FinamSeamlessL1UpdateReaderTest {
 	private static final Symbol symbol = new Symbol("BR-3.17");
-	private FileStorage storage;
+	private SymbolFileStorage storage;
 	private FinamSeamlessL1UpdateReader reader;
 	
 	static Instant T(String timeString) {
@@ -29,7 +29,7 @@ public class FinamSeamlessL1UpdateReaderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		storage = new FileStorageImpl(new File("fixture"), "TEST", new FileConfig(".csv.gz", null));
+		storage = new SymbolFileStorageImpl(new File("fixture"), "TEST", new FileConfig(".csv.gz", null));
 	}
 	
 	@Test

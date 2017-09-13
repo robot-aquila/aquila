@@ -27,7 +27,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.utils.LongTermTask;
 import ru.prolib.aquila.data.DatedSymbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.file.FileStorage;
+import ru.prolib.aquila.data.storage.file.SymbolFileStorage;
 import ru.prolib.aquila.utils.finexp.futures.CmdLine;
 import ru.prolib.aquila.web.utils.WUException;
 import ru.prolib.aquila.web.utils.WUWebPageException;
@@ -53,12 +53,12 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 		logger = LoggerFactory.getLogger(FinamWebTickDataTracker.class);
 	}
 	
-	private final FileStorage fileStorage;
+	private final SymbolFileStorage fileStorage;
 	private final CountDownLatch globalExit;
 	private final Scheduler scheduler;
 	private final CommandLine cmdLine;
 	
-	public FinamWebTickDataTracker(FileStorage fileStorage,
+	public FinamWebTickDataTracker(SymbolFileStorage fileStorage,
 			CountDownLatch globalExit, Scheduler scheduler,
 			CommandLine cmdLine)
 	{

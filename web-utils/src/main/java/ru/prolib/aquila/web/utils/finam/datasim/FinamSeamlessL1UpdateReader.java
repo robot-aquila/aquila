@@ -15,17 +15,17 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.DatedSymbol;
 import ru.prolib.aquila.data.TimeLimitedL1UpdateIterator;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.file.FileStorage;
+import ru.prolib.aquila.data.storage.file.SymbolFileStorage;
 
 public class FinamSeamlessL1UpdateReader implements CloseableIterator<L1Update> {
-	private final FileStorage storage;
+	private final SymbolFileStorage storage;
 	private final Symbol symbol;
 	private final Instant startTime;
 	private LocalDate lastDate;
 	private CloseableIterator<L1Update> reader;
 	private boolean closed = false;
 	
-	public FinamSeamlessL1UpdateReader(FileStorage storage, Symbol symbol, Instant startTime) {
+	public FinamSeamlessL1UpdateReader(SymbolFileStorage storage, Symbol symbol, Instant startTime) {
 		this.storage = storage;
 		this.symbol = symbol;
 		this.startTime = startTime;

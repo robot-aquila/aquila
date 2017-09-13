@@ -11,6 +11,13 @@ public class StrCoderTest {
 	public void setUp() throws Exception {
 		encoder = new StrCoder();
 	}
+	
+	@Test
+	public void testGetInstance() {
+		StrCoder instance = StrCoder.getInstance();
+		assertNotNull(instance);
+		assertSame(instance, StrCoder.getInstance());
+	}
 
 	@Test
 	public void testEncode() throws Exception {
