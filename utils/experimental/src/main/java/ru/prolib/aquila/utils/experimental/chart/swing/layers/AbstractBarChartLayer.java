@@ -1,36 +1,35 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
 import org.apache.commons.lang3.Range;
-import ru.prolib.aquila.core.concurrency.Lockable;
-import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.chart.swing.BarChartVisualizationContextImpl;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Vector;
 
 import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
 
 /**
  * Created by TiM on 13.06.2017.
  */
-public abstract class AbstractBarChartLayer<TCategory> implements BarChartLayer<TCategory> {
+public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarChartLayer<TCategory> {
     protected String id;
-    protected Series<TCategory> categories;
     protected Series<?> data;
     protected HashMap<Integer, Color> colors = new HashMap<>();
     protected boolean visible = true;
 //    protected final ChartLayerDataStorage<TCategories, TValues> storage;
-//    protected Map<TCategories, String> currentTooltips = new HashMap<>();
-//    protected LabelFormatter<TValues> labelFormatter = new DefaultLabelFormatter<>();
+    protected List<String> currentTooltips = new Vector<>();
 
-    public AbstractBarChartLayer(String id) {
-        this.id = id;
+    public AbstractBarChartLayer(Series<?> data) {
+        this.data = data;
+        this.id = data.getId();
     }
 
     @Override
@@ -39,40 +38,29 @@ public abstract class AbstractBarChartLayer<TCategory> implements BarChartLayer<
     }
 
     @Override
-    public BarChartLayer<TCategory> setCategories(Series<TCategory> categories) {
-        this.categories = categories;
-        return this;
-    }
-
-    @Override
-    public BarChartLayer<TCategory> setData(Series<?> data) {
-        this.data = data;
-        if(this.id == null || "".equals(this.id)){
-            this.id = data.getId();
-        }
-        return this;
-    }
-
-    @Override
     public void paint(BarChartVisualizationContext vc){
         if(!visible){
             return;
         }
         Graphics2D g = (Graphics2D) getGraphics(vc).create();
-//        currentTooltips.clear();
-        Lockable lock = lockSeries();
+        currentTooltips.clear();
+        data.lock();
         try {
             int first = vc.getFirstVisibleCategoryIndex();
             for (int i = 0; i < vc.getNumberOfVisibleCategories(); i++) {
-                Object value = data.get(first + i);
+                TValue value = (TValue) data.get(first + i);
                 if(value!=null){
                     paintObject(i, value, vc, g);
+                    currentTooltips.add(createTooltipText(value, vc.getValuesLabelFormatter()));
+                } else {
+                    currentTooltips.add(null);
                 }
             }
         } catch (ValueException e) {
             e.printStackTrace();
         } finally {
-            lock.unlock();
+            data.unlock();
+            g.dispose();
         }
     }
 
@@ -83,12 +71,12 @@ public abstract class AbstractBarChartLayer<TCategory> implements BarChartLayer<
         if (!visible || data == null) {
             return null;
         }
-        Lockable lock = lockSeries();
+        data.lock();
         try {
             for(int i=first; i< first + number; i++){
-                Object value = null;
+                TValue value = null;
                 try {
-                    value = data.get(i);
+                    value = (TValue) data.get(i);
                 } catch (ValueException e) {
                     value = null;
                 }
@@ -104,9 +92,12 @@ public abstract class AbstractBarChartLayer<TCategory> implements BarChartLayer<
                 }
             }
         } finally {
-            lock.unlock();
+            data.unlock();
         }
-        return Range.between(minY, maxY);
+        if(minY!=null && maxY!=null){
+            return Range.between(minY, maxY);
+        }
+        return null;
     }
 
     @Override
@@ -126,27 +117,32 @@ public abstract class AbstractBarChartLayer<TCategory> implements BarChartLayer<
         return this;
     }
 
-    //    @Override
-//    public String getTooltip(TCategories category) {
-//        return currentTooltips.get(category);
-//    }
-//
-//    protected String createTooltipText(TValues value) {
-//        return String.format("%s: %s", getId(), labelFormatter.format(value));
-//    }
-
-
-    protected abstract void paintObject(int categoryIdx, Object value, BarChartVisualizationContext context, Graphics2D g);
-
-    protected abstract double getMaxValue(Object value);
-    protected abstract double getMinValue(Object value);
-
-    protected Lockable lockSeries(){
-        Set<Lockable> locks = new HashSet<>();
-        locks.add(categories);
-        locks.add(data);
-        Multilock lock = new Multilock(locks);
-        lock.lock();
-        return lock;
+    @Override
+    public String getTooltipText(int categoryIdx) {
+        if(categoryIdx>=0 && categoryIdx < currentTooltips.size()){
+            return currentTooltips.get(categoryIdx);
+        }
+        return null;
     }
+
+    protected String createTooltipText(TValue value, LabelFormatter labelFormatter) {
+        return String.format("%s: %s", getId(), labelFormatter.format(value));
+    }
+
+    protected double getMaxValue(TValue value){
+        if(value instanceof Number){
+            return ((Number) value).doubleValue();
+        }
+        return 0;
+    }
+
+    protected  double getMinValue(TValue value){
+        if(value instanceof Number){
+            return ((Number) value).doubleValue();
+        }
+        return 0;
+    }
+
+    protected abstract void paintObject(int categoryIdx, TValue value, BarChartVisualizationContext context, Graphics2D g);
+
 }

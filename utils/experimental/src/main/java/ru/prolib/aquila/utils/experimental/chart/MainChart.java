@@ -5,17 +5,14 @@ import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.tseries.*;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
-import ru.prolib.aquila.utils.experimental.swing_chart.StaticOverlay;
-import ru.prolib.aquila.utils.experimental.swing_chart.TSeriesChartPanel;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayerInv;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.AbsNumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.series.ToNumberTSeries;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.Instant;
 import java.util.Random;
 
@@ -30,10 +27,10 @@ public class MainChart {
     private static TSeriesNodeStorageKeys categoriesSeries;
     private static EditableTSeries<Candle> candles;
     private static ObservableTSeries<Candle> candlesObs;
-    private static TSeries<Number> volumes;
+    private static CandleVolumeTSeries volumes;
     private static EditableTSeries<Number> bidVolumes;
     private static EditableTSeries<Number> askVolumes;
-    private static TSeries<Number> closes;
+    private static CandleCloseTSeries closes;
     private static EventQueue eventQueue;
 
     private static BarChartPanel<Instant> chartPanel;
@@ -51,12 +48,31 @@ public class MainChart {
         main.pack();
         main.setVisible(true);
 
-
-        BarChart<Instant> chart = chartPanel.addChart("VOLUME");
-        chartPanel.getChart("VOLUME").setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(0));
-        chart.addHistogram(bidVolumes).setColor(BAR_COLOR);
+        BarChart<Instant> chart = chartPanel.addChart("CANDLES")
+                .setHeight(600)
+                .setValuesLabelFormatter(new NumberLabelFormatter())
+                .addStaticOverlay("Price",0);
         chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+        chart.addLayer(new CandleBarChartLayer<>(candles));
+
+        chart.addSmoothLine(new CandleCloseTSeries("Close", candles)).setColor(Color.BLUE);
+
+        chart = chartPanel.addChart("VOLUME");
+        chartPanel.getChart("VOLUME").setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(0));
+        chart.addHistogram(volumes).setColor(BAR_COLOR);
+        chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
+        chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+
+        chart = chartPanel.addChart("BID_ASK_VOLUME");
+        chartPanel.getChart("BID_ASK_VOLUME").setValuesLabelFormatter(new AbsNumberLabelFormatter().withPrecision(0));
+        chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
+        chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+        chart.addHistogram(bidVolumes).setColor(Color.GREEN);
+
+        HistogramBarChartLayerInv layer = new HistogramBarChartLayerInv(askVolumes);
+        chart.addLayer(layer).setColor(Color.RED);
+
         chartPanel.setCategories(categoriesSeries);
 
 //        chartPanel.addCandles("CANDLES", "CANDLES").setData(candles);
@@ -75,6 +91,7 @@ public class MainChart {
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Ask Volume", -1));
 
         chartPanel.setVisibleArea(0, 40);
+
 //        chartPanel.addObservableSeries(candlesObs);
 
         addMouseClickListener();
@@ -142,8 +159,8 @@ public class MainChart {
         categoriesSeries = new TSeriesNodeStorageKeys(eventQueue, storage);
         candles = new TSeriesImpl<>("CANDLES", storage);
         candlesObs = new ObservableTSeriesImpl<>(eventQueue, candles);
-        volumes = new ToNumberTSeries(new CandleVolumeTSeries("Volume", candles));
-        closes = new ToNumberTSeries(new CandleCloseTSeries("Close", candles));
+        volumes = new CandleVolumeTSeries("Volume", candles);
+        closes = new CandleCloseTSeries("Close", candles);
         bidVolumes = new TSeriesImpl<>("Bid volumes", storage);
         askVolumes = new TSeriesImpl<>("Ask volumes", storage);
 

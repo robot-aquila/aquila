@@ -4,16 +4,11 @@ import java.awt.Color;
 
 import org.apache.commons.lang3.Range;
 
-import ru.prolib.aquila.core.data.Series;
-
 public interface BarChartLayer<TCategory> {
 	public static final int DEFAULT_COLOR = 0;
 	
 	String getId();
 	
-	BarChartLayer<TCategory> setCategories(Series<TCategory> series);
-	BarChartLayer<TCategory> setData(Series<?> series);
-
 	/**
 	 * Determine min/max values for the specified interval.
 	 * <p>
@@ -57,5 +52,7 @@ public interface BarChartLayer<TCategory> {
 	 * @param context - visualization context. Context is implementation depended.
 	 */
 	void paint(BarChartVisualizationContext context);
+
+	String getTooltipText(int categoryIdx);
 
 }

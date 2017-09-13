@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing;
 
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeInfo;
 
 import java.awt.*;
@@ -14,13 +15,15 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
     private final Graphics2D graphics;
     private final Rectangle plotBounds;
     private final RangeInfo yRangeInfo;
+    private final LabelFormatter<?> valuesLabelFormatter;
 
-    public BarChartVisualizationContextImpl(int first, int number, Graphics2D graphics, Rectangle plotBounds, RangeInfo yRangeInfo) {
+    public BarChartVisualizationContextImpl(int first, int number, Graphics2D graphics, Rectangle plotBounds, RangeInfo yRangeInfo, LabelFormatter<?> valuesLabelFormatter) {
         this.first = first;
         this.number = number;
         this.graphics = graphics;
         this.plotBounds = plotBounds;
         this.yRangeInfo = yRangeInfo;
+        this.valuesLabelFormatter = valuesLabelFormatter;
     }
 
     @Override
@@ -90,6 +93,11 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
 
     public Graphics2D getGraphics() {
         return graphics;
+    }
+
+    @Override
+    public LabelFormatter<?> getValuesLabelFormatter() {
+        return valuesLabelFormatter;
     }
 
     private double getCoeffY(){

@@ -3,6 +3,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.*;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.CursorLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.TooltipForm;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
@@ -17,6 +18,7 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.OTHER_CHARTS_HEIGHT;
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TOOLTIP_MARGIN;
 
 /**
  * Created by TiM on 08.09.2017.
@@ -33,7 +35,8 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     protected JPanel mainPanel;
     protected JScrollBar scrollBar;
     protected AdjustmentListener scrollBarListener;
-    protected int lastX, lastY;
+//    protected int lastX, lastY;
+    protected AtomicInteger lastX, lastY, lastCategoryIdx;
     protected TooltipForm tooltipForm;
     protected LabelFormatter categoryLabelFormatter = new DefaultLabelFormatter();
     protected LabelFormatter valueLabelFormatter = new DefaultLabelFormatter();
@@ -43,6 +46,9 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     private final JPanel rootPanel;
 
     public BarChartPanelImpl(ChartOrientation orientation) {
+        lastX = new AtomicInteger();
+        lastY = new AtomicInteger();
+        lastCategoryIdx = new AtomicInteger();
         this.orientation = orientation;
         rootPanel = new JPanel(new BorderLayout());
         mainPanel = new JPanel();
@@ -84,11 +90,13 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
             throw new IllegalArgumentException("Chart with id='"+id+"' already added");
         }
         BarChartImpl<TCategory> chart = new BarChartImpl<>(displayedCategories);
+        chart.setMouseVariables(lastX, lastY, lastCategoryIdx);
         if(charts.size()==0) {
             chart.setHeight(rootPanel.getHeight());
         } else {
             chart.setHeight(OTHER_CHARTS_HEIGHT);
         }
+        chart.addLayer(new CursorLayer(lastX));
         mainPanel.add(chart.getRootPanel());
         charts.put(id, chart);
         chart.getRootPanel().addMouseWheelListener(this);
@@ -137,7 +145,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                 updateCategories();
                 paint();
                 updateScrollbarAndSetValue();
-//                updateTooltipText();
+                updateTooltipText();
             }
         });
     }
@@ -155,11 +163,6 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     @Override
     public void setCategories(Series<TCategory> categories) {
         this.categories = categories;
-        for(BarChart<TCategory> chart: charts.values()){
-            for(BarChartLayer<TCategory> layer: chart.getLayers()){
-                layer.setCategories(this.categories);
-            }
-        }
     }
 
     @Override
@@ -171,8 +174,39 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         }
     }
 
-
     private void updateTooltipText_(){
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                updateTooltipText();
+            }
+        });
+    }
+
+    private void updateTooltipText() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                StringBuilder sb = new StringBuilder();
+                int idx = lastCategoryIdx.get();
+                if (idx >= 0 && idx < numberOfVisibleCategories.get()) {
+                    for (BarChart<TCategory> c : charts.values()) {
+                        for (BarChartLayer<TCategory> l : c.getLayers()) {
+                            String txt = l.getTooltipText(idx);
+                            if (txt != null) {
+                                if (sb.length() != 0) {
+                                    sb.append("\n----------\n");
+                                }
+                                sb.append(txt);
+                            }
+                        }
+                    }
+                    String txt = sb.toString();
+                    txt = txt.replace("\n----------\n", "<hr>").replace("\n", "<br>");
+                    tooltipForm.setText("<html>" + txt + "</html>");
+                }
+            }
+        });
     }
 
     @Override
@@ -198,30 +232,27 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         setLastY(e.getY());
         paint();
 
-//        Chart<TCategories> chart = chartByPanel.get(e.getSource());
-//        if(chart!=null){
-//            TCategories category = chart.getLastCategory();
-//            if(category==null){
-//                tooltipForm.setVisible(false);
-//            } else {
-//                updateTooltipText(category);
-//                Point point = chart.getRootPanel().getLocationOnScreen();
-//                int x = point.x + lastX;
-//                int y = point.y + lastY;
-//                if(x + tooltipForm.getWidth() <= screen.getMaxX()){
-//                    x = x+TOOLTIP_MARGIN;
-//                } else {
-//                    x = x - tooltipForm.getWidth()-TOOLTIP_MARGIN;
-//                }
-//                if(y + tooltipForm.getHeight() <= screen.getMaxY()){
-//                    y = y+TOOLTIP_MARGIN;
-//                } else {
-//                    y = y - tooltipForm.getHeight()-TOOLTIP_MARGIN;
-//                }
-//                tooltipForm.setLocation(x, y);
-//                tooltipForm.setVisible(true);
-//            }
-//        }
+        int categoryIdx = lastCategoryIdx.get();
+        if(categoryIdx < 0 || categoryIdx >= numberOfVisibleCategories.get()){
+            tooltipForm.setVisible(false);
+        } else {
+            updateTooltipText();
+            Point point = ((JPanel)e.getSource()).getLocationOnScreen();
+            int x = point.x + lastX.get();
+            int y = point.y + lastY.get();
+            if(x + tooltipForm.getWidth() <= screen.getMaxX()){
+                x = x+TOOLTIP_MARGIN;
+            } else {
+                x = x - tooltipForm.getWidth()-TOOLTIP_MARGIN;
+            }
+            if(y + tooltipForm.getHeight() <= screen.getMaxY()){
+                y = y+TOOLTIP_MARGIN;
+            } else {
+                y = y - tooltipForm.getHeight()-TOOLTIP_MARGIN;
+            }
+            tooltipForm.setLocation(x, y);
+            tooltipForm.setVisible(true);
+        }
     }
 
     protected void updateLabelsConfig(){
@@ -230,12 +261,10 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
             c.getTopAxis().setVisible(false);
             c.getBottomAxis().setVisible(false);
             if(i==0){
-                c.getTopAxis().setLabelFormatter(categoryLabelFormatter);
                 c.getTopAxis().setVisible(true);
                 c.getBottomAxis().setVisible(false);
             }
             if(i==charts.size()-1){
-                c.getBottomAxis().setLabelFormatter(categoryLabelFormatter);
                 c.getBottomAxis().setVisible(true);
             }
             c.getLeftAxis().setVisible(true);
@@ -269,14 +298,11 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     }
 
     protected void setLastX(int lastX) {
-        this.lastX = lastX;
-        for(BarChart c: charts.values()){
-            c.setLastX(lastX);
-        }
+        this.lastX.set(lastX);
     }
 
     protected void setLastY(int lastY) {
-        this.lastY = lastY;
+        this.lastY.set(lastY);
     }
 
     protected void updateScrollbar(int countCategories){

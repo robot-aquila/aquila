@@ -28,20 +28,25 @@ public class BarChartAxisV extends AbstractBarChartAxis {
         if(!isVisible()){
             return;
         }
-        Graphics2D g = getGraphics(context);
-        FontMetrics metrics = g.getFontMetrics(LABEL_FONT);
-        for (int i=0; i<labelProvider.getLength(); i++) {
-            String label = labelProvider.getLabel(i, labelFormatter);
-            int width = metrics.stringWidth(labelProvider.getLabel(i, labelFormatter));
-            int height = metrics.getHeight();
-            int y = Math.round(labelProvider.getCanvasY(i) + height/4f);
-            int x;
-            if(position == POSITION_LEFT){
-                x = context.getPlotBounds().getX() - LABEL_INDENT - width;
-            } else {
-                x = context.getPlotBounds().getX() + context.getPlotBounds().getWidth() + LABEL_INDENT;
+        Graphics2D g = (Graphics2D) getGraphics(context).create();
+        try {
+            g.setFont(LABEL_FONT);
+            FontMetrics metrics = g.getFontMetrics(LABEL_FONT);
+            for (int i=0; i<labelProvider.getLength(); i++) {
+                String label = labelProvider.getLabel(i, labelFormatter);
+                int width = metrics.stringWidth(labelProvider.getLabel(i, labelFormatter));
+                int height = metrics.getHeight();
+                int y = Math.round(labelProvider.getCanvasY(i) + height/4f);
+                int x;
+                if(position == POSITION_LEFT){
+                    x = context.getPlotBounds().getX() - LABEL_INDENT - width;
+                } else {
+                    x = context.getPlotBounds().getX() + context.getPlotBounds().getWidth() + LABEL_INDENT;
+                }
+                g.drawString(label, (int)x, (int)y);
             }
-            g.drawString(label, (int)x, (int)y);
+        } finally {
+            g.dispose();
         }
     }
 }

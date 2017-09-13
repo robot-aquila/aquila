@@ -14,9 +14,6 @@ public interface BarChart<TCategory> {
 	BarChart<TCategory> setHeight(int points);
 	int getHeight();
 
-	BarChart<TCategory> setLastX(int lastX);
-	BarChart<TCategory> setLastY(int lastY);
-
 	BarChartAxis getTopAxis();
 	BarChartAxis getLeftAxis();
 	BarChartAxis getRightAxis();
@@ -25,9 +22,6 @@ public interface BarChart<TCategory> {
     List<BarChartLayer<TCategory>> getLayers();
     BarChartLayer<TCategory> getLayer(String id);
     BarChartLayer<TCategory> addLayer(BarChartLayer<TCategory> layer);
-    BarChartLayer<TCategory> addSmoothLine(String layerId);
-    BarChartLayer<TCategory> addPolyLine(String layerId);
-    BarChartLayer<TCategory> addHistogram(String layerId);
     BarChartLayer<TCategory> addSmoothLine(Series<? extends Number> series);
     BarChartLayer<TCategory> addPolyLine(Series<? extends Number> series);
     BarChartLayer<TCategory> addHistogram(Series<? extends Number> series);

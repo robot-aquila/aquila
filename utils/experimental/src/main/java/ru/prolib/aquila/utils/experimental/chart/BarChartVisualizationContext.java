@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeInfo;
 
 public interface BarChartVisualizationContext {
@@ -29,5 +30,7 @@ public interface BarChartVisualizationContext {
 	RangeInfo getRangeInfo();
 
 	Rectangle getPlotBounds();
+
+	LabelFormatter getValuesLabelFormatter();
 	
 }
