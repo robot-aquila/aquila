@@ -14,7 +14,7 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.CAN
  */
 public class HistogramBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, Number> {
 
-    public HistogramBarChartLayer(Series<?> data) {
+    public HistogramBarChartLayer(Series<Number> data) {
         super(data);
     }
 

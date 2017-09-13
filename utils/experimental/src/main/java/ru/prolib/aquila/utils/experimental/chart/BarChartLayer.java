@@ -53,6 +53,4 @@ public interface BarChartLayer<TCategory> {
 	 */
 	void paint(BarChartVisualizationContext context);
 
-	String getTooltipText(int categoryIdx);
-
 }

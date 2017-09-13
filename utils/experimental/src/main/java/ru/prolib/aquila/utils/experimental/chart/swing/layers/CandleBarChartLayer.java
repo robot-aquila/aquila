@@ -19,7 +19,7 @@ public class CandleBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
 
     private Stroke stroke = new BasicStroke(CANDLE_LINE_WIDTH);
 
-    public CandleBarChartLayer(Series<?> data) {
+    public CandleBarChartLayer(Series<Candle> data) {
         super(data);
     }
 

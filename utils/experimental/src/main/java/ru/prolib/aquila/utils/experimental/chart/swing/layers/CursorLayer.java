@@ -66,9 +66,4 @@ public class CursorLayer implements BarChartLayer {
         }
 
     }
-
-    @Override
-    public String getTooltipText(int categoryIdx) {
-        return null;
-    }
 }

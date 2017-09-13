@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.OTHER_CHARTS_HEIGHT;
@@ -35,8 +36,8 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     protected JPanel mainPanel;
     protected JScrollBar scrollBar;
     protected AdjustmentListener scrollBarListener;
-//    protected int lastX, lastY;
     protected AtomicInteger lastX, lastY, lastCategoryIdx;
+    protected Map<String, Map<String, List<String>>> tooltips;
     protected TooltipForm tooltipForm;
     protected LabelFormatter categoryLabelFormatter = new DefaultLabelFormatter();
     protected LabelFormatter valueLabelFormatter = new DefaultLabelFormatter();
@@ -49,6 +50,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         lastX = new AtomicInteger();
         lastY = new AtomicInteger();
         lastCategoryIdx = new AtomicInteger();
+        tooltips = new HashMap<>();
         this.orientation = orientation;
         rootPanel = new JPanel(new BorderLayout());
         mainPanel = new JPanel();
@@ -91,6 +93,9 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         }
         BarChartImpl<TCategory> chart = new BarChartImpl<>(displayedCategories);
         chart.setMouseVariables(lastX, lastY, lastCategoryIdx);
+        HashMap<String, List<String>> map = new HashMap<>();
+        tooltips.put(id, map);
+        chart.setTooltips(map);
         if(charts.size()==0) {
             chart.setHeight(rootPanel.getHeight());
         } else {
@@ -190,9 +195,9 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                 StringBuilder sb = new StringBuilder();
                 int idx = lastCategoryIdx.get();
                 if (idx >= 0 && idx < numberOfVisibleCategories.get()) {
-                    for (BarChart<TCategory> c : charts.values()) {
-                        for (BarChartLayer<TCategory> l : c.getLayers()) {
-                            String txt = l.getTooltipText(idx);
+                    for (String chartId : charts.keySet()) {
+                        for (BarChartLayer<TCategory> l : charts.get(chartId).getLayers()) {
+                            String txt = getTooltipText(chartId, l.getId(), idx);
                             if (txt != null) {
                                 if (sb.length() != 0) {
                                     sb.append("\n----------\n");
@@ -207,6 +212,14 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                 }
             }
         });
+    }
+
+    private String getTooltipText(String chartId, String layerId, int categoryIdx){
+        List<String> list = tooltips.get(chartId).get(layerId);
+        if(list!=null){
+            return list.get(categoryIdx);
+        }
+        return null;
     }
 
     @Override

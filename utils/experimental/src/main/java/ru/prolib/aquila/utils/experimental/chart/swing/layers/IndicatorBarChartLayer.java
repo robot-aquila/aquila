@@ -20,7 +20,7 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
 
     private final LineRenderer renderer;
 
-    public IndicatorBarChartLayer(Series<?> data, LineRenderer renderer) {
+    public IndicatorBarChartLayer(Series<Number> data, LineRenderer renderer) {
         super(data);
         this.renderer = renderer;
     }
@@ -45,17 +45,17 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
             for(int i=0; i<context.getNumberOfVisibleCategories(); i++){
                 Double v = null;
                 try {
-                    Number n = (Number) data.get(i + context.getFirstVisibleCategoryIndex());
+                    Number n = data.get(i + context.getFirstVisibleCategoryIndex());
                     v = n==null?null:n.doubleValue();
                 } catch (ValueException e) {
                     e.printStackTrace();
                 }
                 if(v==null) {
                     points.add(null);
-                    currentTooltips.add(null);
+                    tooltips.add(null);
                 } else {
                     points.add(new Point(context.toCanvasX(i), context.toCanvasY(v)));
-                    currentTooltips.add(createTooltipText(v, context.getValuesLabelFormatter()));
+                    tooltips.add(createTooltipText(v, context.getValuesLabelFormatter()));
                 }
             }
             g.draw(renderer.renderLine(points));
