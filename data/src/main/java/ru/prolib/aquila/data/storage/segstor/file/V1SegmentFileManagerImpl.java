@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.utils.StrCoder;
+import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.segstor.SymbolAnnual;
 import ru.prolib.aquila.data.storage.segstor.SymbolDaily;
 import ru.prolib.aquila.data.storage.segstor.SymbolMonthly;
@@ -76,7 +77,7 @@ public class V1SegmentFileManagerImpl implements SegmentFileManager {
 		for ( Integer year : scanner.getFoundYears() ) {
 			result.add(new SymbolAnnual(criteria, year));
 		}
-		return result;
+		return result; // The result already sorted by scanner
 	}
 
 	@Override
@@ -87,7 +88,7 @@ public class V1SegmentFileManagerImpl implements SegmentFileManager {
 		for ( Integer month : scanner.getFoundMonths() ) {
 			result.add(new SymbolMonthly(criteria.getSymbol(), criteria.getPoint().getYear(), month));
 		}
-		return result;
+		return result; // The result already sorted by scanner
 	}
 
 	@Override
@@ -135,21 +136,151 @@ public class V1SegmentFileManagerImpl implements SegmentFileManager {
 	public List<SymbolAnnual> scanForAnnualSegments(Symbol criteria, String suffix) {
 		L3YearFileFilter scanner = new L3YearFileFilter(criteria, suffix);
 		getDirectory(criteria).list(scanner);
-		return scanner.getFoundSegments();
+		return scanner.getFoundSegments(); // The result already sorted by scanner
 	}
 
 	@Override
 	public List<SymbolMonthly> scanForMonthlySegments(SymbolAnnual criteria, String suffix) {
 		L4MonthFileFilter scanner = new L4MonthFileFilter(criteria, suffix);
 		getDirectory(criteria).list(scanner);
-		return scanner.getFoundSegments();
+		return scanner.getFoundSegments(); // The result already sorted by scanner
 	}
 
 	@Override
 	public List<SymbolDaily> scanForDailySegments(SymbolMonthly criteria, String suffix) {
 		L5DayFileFilter scanner = new L5DayFileFilter(criteria, suffix);
 		getDirectory(criteria).list(scanner);
-		return scanner.getFoundSegments();
+		return scanner.getFoundSegments(); // The result already sorted by scanner
+	}
+	
+	@Override
+	public boolean hasAnnualSegments(Symbol criteria, String suffix) {
+		return scanForAnnualSegments(criteria, suffix).size() > 0;
+	}
+	
+	@Override
+	public boolean hasMonthlySegments(Symbol criteria, String suffix) {
+		for ( SymbolAnnual dir : scanForYearDirectories(criteria) ) {
+			if ( scanForMonthlySegments(dir, suffix).size() > 0 ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean hasDailySegments(Symbol criteria, String suffix) {
+		L3YearDirFilter yearScanner = new L3YearDirFilter();
+		getDirectory(criteria).list(yearScanner);
+		for ( int year : yearScanner.getFoundYears() ) {
+			L4MonthDirFilter monthScanner = new L4MonthDirFilter();
+			getDirectory(new SymbolAnnual(criteria, year)).list(monthScanner);
+			for ( int month : monthScanner.getFoundMonths() ) {
+				if ( scanForDailySegments(new SymbolMonthly(criteria, year, month), suffix).size() > 0 ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public SymbolAnnual getFirstAnnualSegment(Symbol criteria, String suffix)
+			throws DataStorageException
+	{
+		List<SymbolAnnual> list = scanForAnnualSegments(criteria, suffix);
+		if ( list.size() == 0 ) {
+			throw new DataStorageException("No segments found");
+		}
+		return list.get(0);
+	}
+	
+	@Override
+	public SymbolMonthly getFirstMonthlySegment(Symbol criteria, String suffix)
+			throws DataStorageException
+	{
+		List<SymbolAnnual> years = scanForYearDirectories(criteria);
+		if ( years.size() == 0 ) {
+			throw new DataStorageException("No segments found");
+		}
+		for ( SymbolAnnual year : years ) {
+			List<SymbolMonthly> list = scanForMonthlySegments(year, suffix);
+			if ( list.size() > 0 ) {
+				return list.get(0);
+			}
+		}
+		throw new DataStorageException("No segments found");
+	}
+	
+	@Override
+	public SymbolDaily getFirstDailySegment(Symbol criteria, String suffix)
+			throws DataStorageException
+	{
+		List<SymbolAnnual> years = scanForYearDirectories(criteria);
+		if ( years.size() == 0 ) {
+			throw new DataStorageException("No segments found");
+		}
+		for ( SymbolAnnual year : years ) {
+			List<SymbolMonthly> months = scanForMonthDirectories(year);
+			for ( SymbolMonthly month : months ) {
+				List<SymbolDaily> list = scanForDailySegments(month, suffix);
+				if ( list.size() > 0 ) {
+					return list.get(0);
+				}
+			}			
+		}
+		throw new DataStorageException("No segments found");
+	}
+	
+	@Override
+	public SymbolAnnual getLastAnnualSegment(Symbol criteria, String suffix)
+			throws DataStorageException
+	{
+		List<SymbolAnnual> list = scanForAnnualSegments(criteria, suffix);
+		if ( list.size() == 0 ) {
+			throw new DataStorageException("No segments found");
+		}
+		return list.get(list.size() - 1);
+	}
+	
+	@Override
+	public SymbolMonthly getLastMonthlySegment(Symbol criteria, String suffix)
+			throws DataStorageException
+	{
+		List<SymbolAnnual> years = scanForYearDirectories(criteria);
+		if ( years.size() == 0 ) {
+			throw new DataStorageException("No segments found");
+		}
+		for ( int i = years.size() - 1; i >= 0; i -- ) {
+			SymbolAnnual year = years.get(i);
+			List<SymbolMonthly> list = scanForMonthlySegments(year, suffix);
+			if ( list.size() > 0 ) {
+				return list.get(list.size() - 1);
+			}
+		}
+		throw new DataStorageException("No segments found");
+	}
+	
+	@Override
+	public SymbolDaily getLastDailySegment(Symbol criteria, String suffix)
+			throws DataStorageException
+	{
+		List<SymbolAnnual> years = scanForYearDirectories(criteria);
+		if ( years.size() == 0 ) {
+			throw new DataStorageException("No segments found");
+		}
+		for ( int iy = years.size() - 1; iy >= 0; iy -- ) {
+			SymbolAnnual year = years.get(iy);
+			List<SymbolMonthly> months = scanForMonthDirectories(year);
+			for ( int im = months.size() - 1; im >= 0; im -- ) {
+				SymbolMonthly month = months.get(im);
+				List<SymbolDaily> list = scanForDailySegments(month, suffix);
+				if ( list.size() > 0 ) {
+					return list.get(list.size() - 1);
+				}
+			}
+		}
+		throw new DataStorageException("No segments found");
 	}
 	
 	private String getDirectoryL1(Symbol symbol) {
