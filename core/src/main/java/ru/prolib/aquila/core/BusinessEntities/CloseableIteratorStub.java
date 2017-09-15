@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 public class CloseableIteratorStub<T> implements CloseableIterator<T> {
 	private final List<T> elements;
 	private int current = -1;
@@ -51,6 +53,22 @@ public class CloseableIteratorStub<T> implements CloseableIterator<T> {
 		} catch ( IndexOutOfBoundsException e ) {
 			throw new NoSuchElementException();
 		}
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != CloseableIteratorStub.class ) {
+			return false;
+		}
+		CloseableIteratorStub<?> o = (CloseableIteratorStub<?>) other;
+		return new EqualsBuilder()
+				.append(o.closed, closed)
+				.append(o.current, current)
+				.append(o.elements, elements)
+				.isEquals();
 	}
 
 }

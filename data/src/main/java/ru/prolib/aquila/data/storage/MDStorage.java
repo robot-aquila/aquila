@@ -17,13 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
  * @param <DataType> - type of value
  */
 public interface MDStorage<KeyType, DataType> {
-
-	/**
-	 * Get all available keys.
-	 * <p>
-	 * @return set of keys available
-	 * @throws DataStorageException an error occurred
-	 */
+	
 	Set<KeyType> getKeys() throws DataStorageException;
 	
 	/**
@@ -41,7 +35,7 @@ public interface MDStorage<KeyType, DataType> {
 	 * <p>
 	 * @param key - the key
 	 * @param from - read values from this time inclusive
-	 * @return the reader which allow read all available values sorted by time of occurrence
+	 * @return the reader which allow read values sorted by time of occurrence
 	 * @throws DataStorageException an error occurred
 	 */
 	CloseableIterator<DataType> createReaderFrom(KeyType key, Instant from)
@@ -53,7 +47,7 @@ public interface MDStorage<KeyType, DataType> {
 	 * @param key - the key
 	 * @param from - read values from this time inclusive
 	 * @param count - maximum amount of values to read from
-	 * @return the reader which allow read all available values sorted by time of occurrence
+	 * @return the reader which allow read values sorted by time of occurrence
 	 * @throws DataStorageException an error occurred
 	 */
 	CloseableIterator<DataType> createReader(KeyType key, Instant from, int count)
@@ -65,7 +59,7 @@ public interface MDStorage<KeyType, DataType> {
 	 * @param key - the key
 	 * @param from - read values from this time inclusive
 	 * @param to - stop reading when this time is reached (excluding this time).
-	 * @return the reader which allow read all available values sorted by time of occurrence
+	 * @return the reader which allow read values sorted by time of occurrence
 	 * @throws DataStorageException an error occurred
 	 */
 	CloseableIterator<DataType> createReader(KeyType key, Instant from, Instant to)
@@ -74,11 +68,14 @@ public interface MDStorage<KeyType, DataType> {
 	/**
 	 * Get reader of values limited with max amount and the end time.
 	 * <p>
+	 * This method is try to load specified amount of last values.
+	 * Note that the result set may be less than expected and may be finished
+	 * with value dated by any time before specified time.
+	 * <p>
 	 * @param key - the key
-	 * @param count - how many values should be read past of end time, i.g. number
-	 * of last elements before specified time to.
+	 * @param count - maximum amount of values to load.
 	 * @param to - stop reading when this time is reached (excluding this time)
-	 * @return the reader which allow read all available values sorted by time of occurrence
+	 * @return the reader which allow read values sorted by time of occurrence
 	 * @throws DataStorageException an error occurred
 	 */
 	CloseableIterator<DataType> createReader(KeyType key, int count, Instant to)
