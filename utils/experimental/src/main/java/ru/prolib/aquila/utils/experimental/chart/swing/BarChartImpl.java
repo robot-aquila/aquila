@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.*;
@@ -35,7 +36,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
 
     private final JPanel rootPanel;
     private final List<TCategory> categories;
-    private final List<BarChartLayer<TCategory>> layers = new Vector<>();
+    private final List<BarChartLayer<TCategory>> layers = new CopyOnWriteArrayList<>();
     private int firstVisibleCategoryIndex, numberOfVisibleCategories;
     private int height;
     private ChartOrientation chartOrientation;

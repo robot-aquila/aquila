@@ -4,6 +4,8 @@ import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.tseries.*;
+import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
+import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelHandler;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayerInv;
@@ -13,6 +15,8 @@ import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLab
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.Instant;
 import java.util.Random;
 
@@ -91,58 +95,61 @@ public class MainChart {
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Ask Volume", -1));
 
         chartPanel.setVisibleArea(0, 40);
+        BarChartPanelHandler<Instant> handler = new BarChartPanelHandler<>(chartPanel, candlesObs);
+        handler.subscribe();
 
 //        chartPanel.addObservableSeries(candlesObs);
+        MainChart.chartPanel = chartPanel;
 
         addMouseClickListener();
     }
 
     private static void addMouseClickListener() {
-//        chartPanel.getChart("CANDLES").getRootPanel().addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                if(e.getButton()==1){
-//                    final Instant time = Instant.parse("2017-06-13T06:11:00Z");
-//                    final Candle candle = candles.get(time);
-//                    new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            for(int i=0; i<100; i++){
-////                                System.out.println(LocalDateTime.now());
-//                                ((EditableTSeries)candlesObs).set(time, randomCandle(time, candle.getOpen()));
-//                                try {
-//                                    Thread.sleep(100);
-//                                } catch (InterruptedException e1) {
-//                                    e1.printStackTrace();
-//                                }
-//                            }
-//                        }
-//                    }).start();
-//                }
-//                else {
-//                    new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                Candle candle = candles.get();
-//                                for (int i = 0; i < 100; i++) {
-//                                    Instant time = candle.getStartTime().plusSeconds(60 * (i + 1));
-//                                    candle = randomCandle(time, candle.getClose());
-//                                    ((EditableTSeries)candlesObs).set(time, candle);
-//                                    try {
-//                                        Thread.sleep(100);
-//                                    } catch (InterruptedException e1) {
-//                                        e1.printStackTrace();
-//                                    }
-//                                }
-//                            } catch (ValueException e1) {
-//                                e1.printStackTrace();
-//                            }
-//                        }
-//                    }).start();
-//                }
-//            }
-//        });
+        ((BarChartImpl)chartPanel.getChart("CANDLES")).getRootPanel().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(e.getButton()==1){
+                    final Instant time = Instant.parse("2017-06-13T06:11:00Z");
+                    final Candle candle = candles.get(time);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(int i=0; i<100; i++){
+//                                System.out.println(LocalDateTime.now());
+                                ((EditableTSeries)candlesObs).set(time, randomCandle(time, candle.getOpen()));
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e1) {
+                                    e1.printStackTrace();
+                                }
+                            }
+                        }
+                    }).start();
+                }
+                else {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Candle candle = candles.get();
+                                for (int i = 0; i < 100; i++) {
+                                    Instant time = candle.getStartTime().plusSeconds(60 * (i + 1));
+                                    candle = randomCandle(time, candle.getClose());
+                                    ((EditableTSeries)candlesObs).set(time, candle);
+                                    try {
+                                        Thread.sleep(100);
+                                    } catch (InterruptedException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
+                            } catch (ValueException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        });
     }
 
     private static Candle randomCandle(Instant time, double prevClose){
@@ -176,7 +183,20 @@ public class MainChart {
             time = time.plusSeconds(60);
             prevClose = candle.getClose();
         }
+//        Candle[] arr = {
+//                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-12-31T10:00:00Z")), 150.0, 152.0, 148.0, 151.0, 1000),
+//                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-10-01T12:01:00Z")), 143.0, 145.0, 140.0, 142.0, 5000),
+//                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-10-01T12:02:00Z")), 142.0, 149.0, 141.0, 145.0, 1500),
+//                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-10-01T12:03:00Z")), 145.0, 152.0, 145.0, 150.0, 1700),
+//                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-09-15T18:01:00Z")), 150.0, 156.0, 150.0, 155.0, 1700),
+//                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-09-15T18:02:00Z")), 155.0, 155.0, 149.0, 151.0, 1800),
+//                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-09-15T18:03:00Z")), 151.0, 152.0, 145.0, 148.0, 1900),
+//        };
+//
+//        for(int i = 0; i<arr.length; i++){
+//            candles.set(arr[i].getStartTime(), arr[i]);
+//        }
 
-
+        System.out.println(candles.getLength());
     }
 }
