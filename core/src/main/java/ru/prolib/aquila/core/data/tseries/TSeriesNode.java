@@ -83,4 +83,9 @@ public class TSeriesNode {
 				.isEquals();
 	}
 	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + interval + " #" + nodeIndex + " " + values + "]";
+	}
+	
 }

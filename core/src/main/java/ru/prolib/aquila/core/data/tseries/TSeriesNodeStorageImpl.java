@@ -273,6 +273,7 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 					// Индекс нового узла равен индексу текущего + 1.
 					node.setNodeIndex(x.getNodeIndex() + 1);
 					nodeList.add(node.getNodeIndex(), node);
+					break;
 				}
 			}
 			// case 6

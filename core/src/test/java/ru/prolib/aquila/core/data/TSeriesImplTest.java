@@ -2,13 +2,17 @@ package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.easymock.EasyMock.*;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
@@ -19,6 +23,10 @@ public class TSeriesImplTest {
 	
 	Instant T(String timeString) {
 		return Instant.parse(timeString);
+	}
+	
+	Interval IM1(String timeString) {
+		return Interval.of(T(timeString), Duration.ofMinutes(1));
 	}
 	
 	private IMocksControl control;
@@ -184,6 +192,37 @@ public class TSeriesImplTest {
 		assertEquals(820, series.toIndex(T("2017-09-01T07:10:00Z")));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testBugCase1() throws Exception {
+		List<Candle> fixture = new ArrayList<>();
+		fixture.add(new Candle(IM1("2017-12-31T10:00:00Z"), 150, 152, 148, 151, 1000)); // #0
+		fixture.add(new Candle(IM1("2017-10-01T12:01:00Z"), 143, 145, 140, 142, 5000)); // #1
+		fixture.add(new Candle(IM1("2017-10-01T12:02:00Z"), 142, 149, 141, 145, 1500)); // #2
+		fixture.add(new Candle(IM1("2017-10-01T12:03:00Z"), 145, 152, 145, 150, 1700)); // #3
+		fixture.add(new Candle(IM1("2017-09-15T18:01:00Z"), 150, 156, 150, 155, 1700)); // #4
+		fixture.add(new Candle(IM1("2017-09-15T18:02:00Z"), 155, 155, 149, 151, 1800)); // #5
+		fixture.add(new Candle(IM1("2017-09-15T18:03:00Z"), 151, 152, 145, 148, 1900)); // #6
+		
+		TSeriesImpl<Candle> series = new TSeriesImpl<>(TimeFrame.M1);
+		for ( Candle x : fixture ) {
+			series.set(x.getStartTime(), x);	
+		}
+		
+		List<Candle> expected = new ArrayList<>(), actual = new ArrayList<>();
+		expected.add(fixture.get(4));
+		expected.add(fixture.get(5));
+		expected.add(fixture.get(6));
+		expected.add(fixture.get(1));
+		expected.add(fixture.get(2));
+		expected.add(fixture.get(3));
+		expected.add(fixture.get(0));
+		
+		for ( int i = 0; i < series.getLength(); i ++ ) {
+			actual.add(series.get(i));
+		}
+		assertEquals(expected, actual);
 	}
 
 }

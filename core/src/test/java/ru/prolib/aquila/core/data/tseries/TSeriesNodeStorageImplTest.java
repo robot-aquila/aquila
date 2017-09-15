@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.data.tseries;
 
 import static org.junit.Assert.*;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -21,6 +22,10 @@ public class TSeriesNodeStorageImplTest {
 	
 	static Instant T(String timeString) {
 		return Instant.parse(timeString);
+	}
+	
+	static Interval IM1(String timeString) {
+		return Interval.of(T(timeString), Duration.ofMinutes(1));
 	}
 	
 	private Interval interval1, interval2, interval3;
@@ -155,6 +160,46 @@ public class TSeriesNodeStorageImplTest {
 		expectedNodeMap.put(node3.getIntervalStart(), node3);
 		assertEquals(expectedNodeMap, nodeMap);
 		assertEquals(node3, storage.getLastNode());
+	}
+	
+	@Test
+	public void testSet_NewNode_InsertNodeBugFix_LostBreakOnInsert() throws Exception {
+		storage = new TSeriesNodeStorageImpl(TimeFrame.M1, nodeList, nodeMap);
+		storage.setValue(T("2017-12-31T10:00:00Z"), 3, 100);
+		storage.setValue(T("2017-10-01T12:01:00Z"), 3, 101);
+		storage.setValue(T("2017-10-01T12:02:00Z"), 3, 102);
+		storage.setValue(T("2017-10-01T12:03:00Z"), 3, 103);
+		storage.setValue(T("2017-09-15T18:01:00Z"), 3, 104);
+		storage.setValue(T("2017-09-15T18:02:00Z"), 3, 105);
+		storage.setValue(T("2017-09-15T18:03:00Z"), 3, 106);
+		
+		assertEquals(7, nodeList.size());
+		assertEquals(7, nodeMap.size());
+		TSeriesNode node;
+		List<TSeriesNode> expected = new ArrayList<>();
+		expected.add(node = new TSeriesNode(IM1("2017-09-15T18:01:00Z")));
+		node.setNodeIndex(0);
+		node.set(3, 104);
+		expected.add(node = new TSeriesNode(IM1("2017-09-15T18:02:00Z")));
+		node.setNodeIndex(1);
+		node.set(3, 105);
+		expected.add(node = new TSeriesNode(IM1("2017-09-15T18:03:00Z")));
+		node.setNodeIndex(2);
+		node.set(3, 106);
+		expected.add(node = new TSeriesNode(IM1("2017-10-01T12:01:00Z")));
+		node.setNodeIndex(3);
+		node.set(3, 101);
+		expected.add(node = new TSeriesNode(IM1("2017-10-01T12:02:00Z")));
+		node.setNodeIndex(4);
+		node.set(3, 102);
+		expected.add(node = new TSeriesNode(IM1("2017-10-01T12:03:00Z")));
+		node.setNodeIndex(5);
+		node.set(3, 103);
+		expected.add(node = new TSeriesNode(IM1("2017-12-31T10:00:00Z")));
+		node.setNodeIndex(6);
+		node.set(3, 100);
+		assertEquals(expected, nodeList);
+		assertEquals(expected.get(6), storage.getLastNode());
 	}
 	
 	@Test
