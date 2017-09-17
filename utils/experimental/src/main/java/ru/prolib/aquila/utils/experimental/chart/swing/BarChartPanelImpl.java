@@ -18,6 +18,7 @@ import java.util.Vector;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.INITIAL_NUMBER_OF_VISIBLE_CATEGORIES;
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.OTHER_CHARTS_HEIGHT;
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TOOLTIP_MARGIN;
 
@@ -30,7 +31,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     protected Map<String, BarChart<TCategory>> charts = new LinkedHashMap<>();
     protected final java.util.List<TCategory> displayedCategories = new Vector<>();
     protected AtomicInteger firstVisibleCategoryIndex = new AtomicInteger(0);
-    protected AtomicInteger numberOfVisibleCategories = new AtomicInteger(40);
+    protected AtomicInteger numberOfVisibleCategories = new AtomicInteger(INITIAL_NUMBER_OF_VISIBLE_CATEGORIES);
     protected Series<TCategory> categories;
 
     protected JPanel mainPanel;
@@ -101,7 +102,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         } else {
             chart.setHeight(OTHER_CHARTS_HEIGHT);
         }
-        chart.addLayer(new CursorLayer(lastX));
+        chart.addLayer(new CursorLayer(lastX), true);
         mainPanel.add(chart.getRootPanel());
         charts.put(id, chart);
         chart.getRootPanel().addMouseWheelListener(this);
@@ -129,18 +130,18 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         int size = categories.getLength();
         if(number<2){
             number = 2;
-        } else if(number > size){
-            number = size;
         }
+
         this.numberOfVisibleCategories.set(number);
 
-        if(first < 0){
-            firstVisibleCategoryIndex.set(0);
-        } else if(size>0 && first > size-getNumberOfVisibleCategories()){
-            firstVisibleCategoryIndex.set(size-getNumberOfVisibleCategories());
-        } else {
-            firstVisibleCategoryIndex.set(first);
+        if(size>0 && first > size-getNumberOfVisibleCategories()) {
+            first = size-getNumberOfVisibleCategories();
         }
+        if(first < 0){
+            first = 0;
+        }
+        firstVisibleCategoryIndex.set(first);
+
         for(BarChart<TCategory> c: charts.values()){
             c.setVisibleArea(firstVisibleCategoryIndex.get(), numberOfVisibleCategories.get());
         }
@@ -207,8 +208,13 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                         }
                     }
                     String txt = sb.toString();
-                    txt = txt.replace("\n----------\n", "<hr>").replace("\n", "<br>");
-                    tooltipForm.setText("<html>" + txt + "</html>");
+                    if(txt.equals("")){
+                        tooltipForm.setVisible(false);
+                    } else {
+                        txt = txt.replace("\n----------\n", "<hr>").replace("\n", "<br>");
+                        tooltipForm.setText("<html>" + txt + "</html>");
+                        tooltipForm.setVisible(true);
+                    }
                 }
             }
         });
@@ -216,7 +222,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
 
     private String getTooltipText(String chartId, String layerId, int categoryIdx){
         List<String> list = tooltips.get(chartId).get(layerId);
-        if(list!=null){
+        if(list!=null && categoryIdx<list.size()){
             return list.get(categoryIdx);
         }
         return null;
@@ -264,7 +270,6 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                 y = y - tooltipForm.getHeight()-TOOLTIP_MARGIN;
             }
             tooltipForm.setLocation(x, y);
-            tooltipForm.setVisible(true);
         }
     }
 

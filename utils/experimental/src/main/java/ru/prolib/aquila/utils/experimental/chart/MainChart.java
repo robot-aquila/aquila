@@ -1,6 +1,5 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
-import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
@@ -9,11 +8,13 @@ import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelHandler;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayerInv;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.IndicatorBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradesBarChartLayer;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.AbsNumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
+import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfo;
 
 import javax.swing.*;
@@ -21,7 +22,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
 
@@ -81,8 +81,11 @@ public class MainChart {
         chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.addHistogram(bidVolumes).setColor(Color.GREEN);
 
-        HistogramBarChartLayerInv layer = new HistogramBarChartLayerInv(askVolumes);
+        HistogramBarChartLayer layer = new HistogramBarChartLayer(askVolumes, -1);
         chart.addLayer(layer).setColor(Color.RED);
+
+        IndicatorBarChartLayer<Instant> askLine = new IndicatorBarChartLayer<Instant>(askVolumes, new SmoothLineRenderer(), -1);
+        chart.addLayer(askLine).setColor(Color.BLUE);
 
         chartPanel.setCategories(categoriesSeries);
 
@@ -101,7 +104,7 @@ public class MainChart {
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Bid Volume", 0));
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Ask Volume", -1));
 
-        chartPanel.setVisibleArea(0, 40);
+        chartPanel.setVisibleArea(0, chartPanel.getNumberOfVisibleCategories());
         BarChartPanelHandler<Instant> handler = new BarChartPanelHandler<>(chartPanel, candlesObs);
         handler.subscribe();
 
@@ -132,8 +135,7 @@ public class MainChart {
                             }
                         }
                     }).start();
-                }
-                else {
+                } else {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -181,30 +183,31 @@ public class MainChart {
 
         Instant time = Instant.parse("2017-06-13T06:00:00Z");
         double prevClose = 120d;
-        for(int j=0; j<40; j++){
+        for(int j=0; j<100; j++){
             Candle candle = randomCandle(time, prevClose);
             if(j%7!=3){
                 candles.set(time, candle);
             }
             bidVolumes.set(time, j*10);
-            askVolumes.set(time, Math.random()*1000);
+            double v = Math.random()*1000;
+            askVolumes.set(time, v);
             time = time.plusSeconds(60);
             prevClose = candle.getClose();
         }
 
-        List<TradeInfo> list = new ArrayList<>();
-        Instant t = Instant.parse("2017-06-13T06:05:00Z");
-        list.add(new TradeInfo(t.plusSeconds(10), OrderAction.BUY, candles.get(t).getHigh(), 1000L).withOrderId(1L));
-        list.add(new TradeInfo(t.plusSeconds(20), OrderAction.BUY, candles.get(t).getLow(), 1000L).withOrderId(2L));
-        list.add(new TradeInfo(t.plusSeconds(30), OrderAction.SELL, candles.get(t).getBodyMiddle(), 1000L).withOrderId(3L));
-        trades.set(t, list);
-
-        list = new ArrayList<>();
-        t = Instant.parse("2017-06-13T06:20:00Z");
-        list.add(new TradeInfo(t.plusSeconds(10), OrderAction.BUY, candles.get(t).getHigh(), 1000L).withOrderId(4L));
-        list.add(new TradeInfo(t.plusSeconds(20), OrderAction.BUY, candles.get(t).getLow(), 1000L).withOrderId(5L));
-        list.add(new TradeInfo(t.plusSeconds(30), OrderAction.SELL, candles.get(t).getBodyMiddle(), 1000L).withOrderId(6L));
-        trades.set(t, list);
+//        List<TradeInfo> list = new ArrayList<>();
+//        Instant t = Instant.parse("2017-06-13T06:05:00Z");
+//        list.add(new TradeInfo(t.plusSeconds(10), OrderAction.BUY, candles.get(t).getHigh(), 1000L).withOrderId(1L));
+//        list.add(new TradeInfo(t.plusSeconds(20), OrderAction.BUY, candles.get(t).getLow(), 1000L).withOrderId(2L));
+//        list.add(new TradeInfo(t.plusSeconds(30), OrderAction.SELL, candles.get(t).getBodyMiddle(), 1000L).withOrderId(3L));
+//        trades.set(t, list);
+//
+//        list = new ArrayList<>();
+//        t = Instant.parse("2017-06-13T06:20:00Z");
+//        list.add(new TradeInfo(t.plusSeconds(10), OrderAction.BUY, candles.get(t).getHigh(), 1000L).withOrderId(4L));
+//        list.add(new TradeInfo(t.plusSeconds(20), OrderAction.BUY, candles.get(t).getLow(), 1000L).withOrderId(5L));
+//        list.add(new TradeInfo(t.plusSeconds(30), OrderAction.SELL, candles.get(t).getBodyMiddle(), 1000L).withOrderId(6L));
+//        trades.set(t, list);
 
 //        Candle[] arr = {
 //                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-12-31T10:00:00Z")), 150.0, 152.0, 148.0, 151.0, 1000),

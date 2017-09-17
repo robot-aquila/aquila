@@ -43,13 +43,16 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
         data.lock();
         try {
             int first = vc.getFirstVisibleCategoryIndex();
-            for (int i = 0; i < vc.getNumberOfVisibleCategories(); i++) {
-                TValue value = data.get(first + i);
-                if(value!=null){
-                    paintObject(i, value, vc, g);
-                    tooltips.add(createTooltipText(value, vc.getValuesLabelFormatter()));
-                } else {
-                    tooltips.add(null);
+            int dataLength = data.getLength();
+            for (int i = 0; i < vc.getNumberOfVisibleCategories() && first+i < dataLength; i++) {
+                if(first + i < dataLength){
+                    TValue value = data.get(first + i);
+                    if(value!=null){
+                        paintObject(i, value, vc, g);
+                        tooltips.add(createTooltipText(value, vc.getValuesLabelFormatter()));
+                    } else {
+                        tooltips.add(null);
+                    }
                 }
             }
         } catch (ValueException e) {

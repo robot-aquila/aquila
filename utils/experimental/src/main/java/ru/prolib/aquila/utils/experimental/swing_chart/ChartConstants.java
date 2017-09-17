@@ -9,6 +9,8 @@ public class ChartConstants {
     public static final int MARGIN = 10;
     public static int OTHER_CHARTS_HEIGHT = 150;
 
+    public static int INITIAL_NUMBER_OF_VISIBLE_CATEGORIES = 40;
+
     public static final Color CHART_OVERLAY_COLOR = new Color(0, 82, 155);
     public static final int CHART_OVERLAY_FONT_SIZE = 14;
 

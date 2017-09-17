@@ -18,11 +18,18 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.IND
  */
 public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, Number> {
 
+    protected int sign = 1;
+
     private final LineRenderer renderer;
 
     public IndicatorBarChartLayer(Series<Number> data, LineRenderer renderer) {
         super(data);
         this.renderer = renderer;
+    }
+
+    public IndicatorBarChartLayer(Series<Number> data, LineRenderer renderer, int sign) {
+        this(data, renderer);
+        this.sign = sign;
     }
 
     @Override
@@ -37,15 +44,19 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
         }
 
         Graphics2D g = (Graphics2D) getGraphics(context).create();
+        tooltips.clear();
         data.lock();
         try {
             g.setColor(colors.get(0));
             g.setStroke(new BasicStroke(INDICATOR_LINE_WIDTH));
             List<Point> points = new ArrayList<>();
-            for(int i=0; i<context.getNumberOfVisibleCategories(); i++){
+            int first = context.getFirstVisibleCategoryIndex();
+            int dataLength = data.getLength();
+
+            for(int i=0; i<context.getNumberOfVisibleCategories() && first+i < dataLength; i++){
                 Double v = null;
                 try {
-                    Number n = data.get(i + context.getFirstVisibleCategoryIndex());
+                    Number n = data.get(i + first);
                     v = n==null?null:n.doubleValue();
                 } catch (ValueException e) {
                     e.printStackTrace();
@@ -54,6 +65,7 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
                     points.add(null);
                     tooltips.add(null);
                 } else {
+                    v = v * sign;
                     points.add(new Point(context.toCanvasX(i), context.toCanvasY(v)));
                     tooltips.add(createTooltipText(v, context.getValuesLabelFormatter()));
                 }
@@ -63,5 +75,15 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
             g.dispose();
             data.unlock();
         }
+    }
+
+    @Override
+    protected double getMaxValue(Number number) {
+        return sign*number.doubleValue();
+    }
+
+    @Override
+    protected double getMinValue(Number number) {
+        return sign*number.doubleValue();
     }
 }

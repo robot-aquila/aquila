@@ -20,10 +20,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,6 +46,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     protected Double minValue = null;
     protected Double maxValue = null;
     private Map<String, List<String>> tooltips;
+    private Set<String> systemLayers = new HashSet<>();
 
 
     public BarChartImpl(List<TCategory> categories) {
@@ -126,12 +125,19 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
 
     @Override
     public BarChartLayer<TCategory> addLayer(BarChartLayer<TCategory> layer) {
+        return addLayer(layer, false);
+    }
+
+    public BarChartLayer<TCategory> addLayer(BarChartLayer<TCategory> layer, boolean isSystem) {
         if(layer instanceof AbstractBarChartLayer){
             List<String> list = new Vector<String>();
             tooltips.put(layer.getId(), list);
             ((AbstractBarChartLayer) layer).setTooltips(list);
         }
         layers.add(layer);
+        if(isSystem){
+            systemLayers.add(layer.getId());
+        }
         return layer;
     }
 
@@ -158,9 +164,11 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
 
     @Override
     public BarChart<TCategory> dropLayer(String id) {
-        BarChartLayer<TCategory> layer = getLayer(id);
-        if(layer != null) {
-            layers.remove(layer);
+        if(!systemLayers.contains(id)){
+            BarChartLayer<TCategory> layer = getLayer(id);
+            if(layer != null) {
+                layers.remove(layer);
+            }
         }
         return this;
     }
