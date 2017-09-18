@@ -14,7 +14,6 @@ import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradesBarChartLaye
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.AbsNumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfo;
 
 import javax.swing.*;
@@ -79,13 +78,17 @@ public class MainChart {
         chartPanel.getChart("BID_ASK_VOLUME").setValuesLabelFormatter(new AbsNumberLabelFormatter().withPrecision(0));
         chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
-        chart.addHistogram(bidVolumes).setColor(Color.GREEN);
+        chart.addHistogram(bidVolumes)
+                .setColor(Color.GREEN)
+                .setParam(HistogramBarChartLayer.ZERO_LINE_ON_CENTER_PARAM, true);
+        chart.addHistogram(askVolumes)
+                .setColor(Color.RED)
+                .setParam(HistogramBarChartLayer.INVERT_VALUES_PARAM, true)
+                .setParam(HistogramBarChartLayer.ZERO_LINE_ON_CENTER_PARAM, true);
 
-        HistogramBarChartLayer layer = new HistogramBarChartLayer(askVolumes, -1);
-        chart.addLayer(layer).setColor(Color.RED);
-
-        IndicatorBarChartLayer<Instant> askLine = new IndicatorBarChartLayer<Instant>(askVolumes, new SmoothLineRenderer(), -1);
-        chart.addLayer(askLine).setColor(Color.BLUE);
+        chart.addSmoothLine(askVolumes)
+                .setColor(Color.BLUE)
+                .setParam(IndicatorBarChartLayer.INVERT_VALUES_PARAM, true);
 
         chartPanel.setCategories(categoriesSeries);
 

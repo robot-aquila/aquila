@@ -10,6 +10,7 @@ import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelForm
 import java.awt.*;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Map;
 
 import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
 
@@ -17,9 +18,12 @@ import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
  * Created by TiM on 13.06.2017.
  */
 public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarChartLayer<TCategory> {
+
+    protected final HashMap<Integer, Color> colors = new HashMap<>();
+    protected final Map<Integer, Object> params = new HashMap<>();
+
     protected String id;
     protected Series<TValue> data;
-    protected HashMap<Integer, Color> colors = new HashMap<>();
     protected boolean visible = true;
     protected List<String> tooltips;
 
@@ -108,6 +112,12 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
     @Override
     public BarChartLayer<TCategory> setColor(Color color) {
         return setColor(0, color);
+    }
+
+    @Override
+    public BarChartLayer<TCategory> setParam(int paramId, Object value) {
+        params.put(paramId, value);
+        return this;
     }
 
     @Override

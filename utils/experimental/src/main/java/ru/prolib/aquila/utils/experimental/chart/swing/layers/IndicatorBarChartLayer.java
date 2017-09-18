@@ -17,19 +17,16 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.IND
  * Created by TiM on 13.09.2017.
  */
 public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, Number> {
-
-    protected int sign = 1;
+    public static final int INVERT_VALUES_PARAM = 0;
+    public static final int ZERO_LINE_ON_CENTER_PARAM = 1;
 
     private final LineRenderer renderer;
 
     public IndicatorBarChartLayer(Series<Number> data, LineRenderer renderer) {
         super(data);
         this.renderer = renderer;
-    }
-
-    public IndicatorBarChartLayer(Series<Number> data, LineRenderer renderer, int sign) {
-        this(data, renderer);
-        this.sign = sign;
+        setParam(INVERT_VALUES_PARAM, false);
+        setParam(ZERO_LINE_ON_CENTER_PARAM, false);
     }
 
     @Override
@@ -65,7 +62,7 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
                     points.add(null);
                     tooltips.add(null);
                 } else {
-                    v = v * sign;
+                    v = v * getSign();
                     points.add(new Point(context.toCanvasX(i), context.toCanvasY(v)));
                     tooltips.add(createTooltipText(v, context.getValuesLabelFormatter()));
                 }
@@ -78,12 +75,26 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
     }
 
     @Override
-    protected double getMaxValue(Number number) {
-        return sign*number.doubleValue();
+    protected double getMaxValue(Number value) {
+        if(zeroOnCenter()){
+            return Math.abs(value.doubleValue());
+        }
+        return getSign()*value.doubleValue();
     }
 
     @Override
-    protected double getMinValue(Number number) {
-        return sign*number.doubleValue();
+    protected double getMinValue(Number value) {
+        if(zeroOnCenter()){
+            return -Math.abs(value.doubleValue());
+        }
+        return getSign()*value.doubleValue();
+    }
+
+    private int getSign(){
+        return params.get(INVERT_VALUES_PARAM).equals(true)?-1:1;
+    }
+
+    private boolean zeroOnCenter(){
+        return (boolean) params.get(ZERO_LINE_ON_CENTER_PARAM);
     }
 }

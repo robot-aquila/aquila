@@ -66,4 +66,9 @@ public class CursorLayer implements BarChartLayer {
         }
 
     }
+
+    @Override
+    public BarChartLayer setParam(int paramId, Object value) {
+        return this;
+    }
 }

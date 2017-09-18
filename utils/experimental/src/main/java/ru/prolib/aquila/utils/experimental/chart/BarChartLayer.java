@@ -45,7 +45,16 @@ public interface BarChartLayer<TCategory> {
 	 * @throws IllegalArgumentException if unsupported color ID specified
 	 */
 	BarChartLayer<TCategory> setColor(int colorId, Color color);
-	
+
+	/**
+	 * Set layer param.
+	 * <p>
+	 * @param paramId - param ID depends on layer implementation. See layer info for details.
+	 * @param value - value
+	 * @return this
+	 */
+	BarChartLayer<TCategory> setParam(int paramId, Object value);
+
 	/**
 	 * Paint layer.
 	 * <p>
