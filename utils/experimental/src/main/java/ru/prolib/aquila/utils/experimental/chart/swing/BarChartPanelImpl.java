@@ -126,28 +126,30 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     }
 
     @Override
-    public void setVisibleArea(int first, int number) {
-        int size = categories.getLength();
-        if(number<2){
-            number = 2;
-        }
-
-        this.numberOfVisibleCategories.set(number);
-
-        if(size>0 && first > size-getNumberOfVisibleCategories()) {
-            first = size-getNumberOfVisibleCategories();
-        }
-        if(first < 0){
-            first = 0;
-        }
-        firstVisibleCategoryIndex.set(first);
-
-        for(BarChart<TCategory> c: charts.values()){
-            c.setVisibleArea(firstVisibleCategoryIndex.get(), numberOfVisibleCategories.get());
-        }
+    public void setVisibleArea(final int first, final int number) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                int size = categories.getLength();
+                int num = number;
+                int fst = first;
+                if(num<2){
+                    num = 2;
+                }
+
+                BarChartPanelImpl.this.numberOfVisibleCategories.set(num);
+
+                if(size>0 && fst > size-getNumberOfVisibleCategories()) {
+                    fst = size-getNumberOfVisibleCategories();
+                }
+                if(fst < 0){
+                    fst = 0;
+                }
+                firstVisibleCategoryIndex.set(fst);
+
+                for(BarChart<TCategory> c: charts.values()){
+                    c.setVisibleArea(firstVisibleCategoryIndex.get(), numberOfVisibleCategories.get());
+                }
                 updateCategories();
                 paint();
                 updateScrollbarAndSetValue();

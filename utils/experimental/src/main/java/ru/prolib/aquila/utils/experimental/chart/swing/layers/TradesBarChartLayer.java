@@ -6,9 +6,9 @@ import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
 import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
 import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfo;
+import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfoList;
 
 import java.awt.*;
-import java.util.List;
 
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TRADE_BUY_COLOR;
 import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TRADE_LINE_COLOR;
@@ -17,7 +17,7 @@ import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TRA
 /**
  * Created by TiM on 16.09.2017.
  */
-public class TradesBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, List<TradeInfo>> {
+public class TradesBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, TradeInfoList> {
 
     public static int LINE_COLOR = 0;
     public static int BUY_COLOR = 1;
@@ -26,7 +26,7 @@ public class TradesBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
     private final int HEIGHT = 10;
     private final int WIDTH = 20;
 
-    public TradesBarChartLayer(Series<List<TradeInfo>> data) {
+    public TradesBarChartLayer(Series<TradeInfoList> data) {
         super(data);
         colors.put(LINE_COLOR, TRADE_LINE_COLOR);
         colors.put(BUY_COLOR, TRADE_BUY_COLOR);
@@ -34,8 +34,9 @@ public class TradesBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
     }
 
     @Override
-    protected void paintObject(int categoryIdx, List<TradeInfo> tradeInfoList, BarChartVisualizationContext context, Graphics2D g) {
-        if(tradeInfoList!=null && tradeInfoList.size()>0){
+    protected void paintObject(int categoryIdx, TradeInfoList tradeInfoList, BarChartVisualizationContext context, Graphics2D g) {
+        if(tradeInfoList!=null) {
+            tradeInfoList = new TradeInfoList(tradeInfoList);
             Color color = colors.get(LINE_COLOR);
             int x = context.toCanvasX(categoryIdx);
             for (int j=0; j<tradeInfoList.size(); j++){
@@ -61,19 +62,21 @@ public class TradesBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
     }
 
     @Override
-    protected double getMaxValue(List<TradeInfo> value) {
-        return value.stream().mapToDouble(ti-> ti.getPrice()).max().orElse(0d);
+    protected double getMaxValue(TradeInfoList value) {
+        return value.getMaxValue();
     }
 
     @Override
-    protected double getMinValue(List<TradeInfo> value) {
-        return value.stream().mapToDouble(ti-> ti.getPrice()).min().orElse(1e6);
+    protected double getMinValue(TradeInfoList value) {
+        return value.getMinValue();
     }
 
     @Override
-    protected String createTooltipText(List<TradeInfo> value, LabelFormatter labelFormatter) {
+    protected String createTooltipText(TradeInfoList value, LabelFormatter labelFormatter) {
         StringBuilder sb = new StringBuilder("Orders:\n");
-        for(TradeInfo ti: value){
+        value = new TradeInfoList(value);
+        for(int i=0; i< value.size(); i++){
+            TradeInfo ti = value.get(i);
             sb.append(ti.getOrderId());
             sb.append(";\n");
         }
