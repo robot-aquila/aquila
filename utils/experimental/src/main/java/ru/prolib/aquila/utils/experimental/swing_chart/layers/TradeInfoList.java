@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.swing_chart.layers;
 
+import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.concurrency.Lockable;
 
@@ -22,12 +23,15 @@ public class TradeInfoList implements Lockable {
         lid = LID.createInstance();
     }
 
-    public TradeInfoList(TradeInfoList list){
+    public TradeInfoList(TradeInfoList tradeInfoList, List<Account> accounts){
         this();
-        if(list!=null){
-            this.data.addAll(list.data);
-            this.minValue = list.minValue;
-            this.maxValue = list.maxValue;
+        if(tradeInfoList!=null){
+            List<TradeInfo> list = new ArrayList<>(tradeInfoList.data);
+            for(TradeInfo ti: list){
+                if(accounts==null || accounts.contains(ti.getAccount())){
+                    add(ti);
+                }
+            }
         }
     }
 

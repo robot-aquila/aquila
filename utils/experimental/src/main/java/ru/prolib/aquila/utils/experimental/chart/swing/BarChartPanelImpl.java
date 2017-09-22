@@ -47,6 +47,8 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     private final HashMap<JPanel, BarChart<TCategory>> chartByPanel = new HashMap<>();
     private final JPanel rootPanel;
 
+    private boolean showTooltipForm = false;
+
     public BarChartPanelImpl(ChartOrientation orientation) {
         lastX = new AtomicInteger();
         lastY = new AtomicInteger();
@@ -111,6 +113,13 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
             @Override
             public void mouseExited(MouseEvent e) {
                 tooltipForm.setVisible(false);
+                showTooltipForm = false;
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                tooltipForm.setVisible(true);
+                showTooltipForm = true;
             }
         });
         updateLabelsConfig();
@@ -215,7 +224,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                     } else {
                         txt = txt.replace("\n----------\n", "<hr>").replace("\n", "<br>");
                         tooltipForm.setText("<html>" + txt + "</html>");
-                        tooltipForm.setVisible(true);
+                        tooltipForm.setVisible(true && showTooltipForm);
                     }
                 }
             }
