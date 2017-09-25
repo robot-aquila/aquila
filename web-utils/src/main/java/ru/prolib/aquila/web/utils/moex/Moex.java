@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.io.IOUtils;
+import org.openqa.selenium.WebDriverException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.web.utils.HttpClientFactory;
@@ -17,6 +20,13 @@ import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 
 public class Moex implements Closeable {
+	@SuppressWarnings("unused")
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(Moex.class);
+	}
+	
 	private final Lock lock = new ReentrantLock();
 	private final CloseableHttpClient httpClient;
 	private final WebDriver webDriver;
@@ -41,7 +51,11 @@ public class Moex implements Closeable {
 		try {
 			if ( closeResources ) {
 				IOUtils.closeQuietly(httpClient);
-				webDriver.close();
+				try {
+					webDriver.close();
+				} catch ( WebDriverException e ) {
+					// JBrowserDrive bug when closing
+				}
 			}
 		} finally {
 			lock.unlock();

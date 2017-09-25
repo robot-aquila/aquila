@@ -1,16 +1,19 @@
 package ru.prolib.aquila.web.utils.moex;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.SearchWebElement;
@@ -40,12 +43,18 @@ public class MoexContractForm {
 	 */
 	public Map<Integer, Object> getInstrumentDescription(String contractCode) throws WUWebPageException {
 		openContractPage(contractCode);
+		new WebDriverWait(webDriver, 10).until(ExpectedConditions.and(
+			ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[. = 'Instrument description']")),
+			ExpectedConditions.visibilityOfElementLocated(By.className("tool_options_table_forts"))
+		));
+		
 		List<WebElement> rows = new SearchWebElement(webDriver)
 			.find(By.className("tool_options_table_forts"))
 			.findAll(By.tagName("tr"));
 		Map<Integer, Object> tokens = new LinkedHashMap<>();
 		for ( int i = 0; i < rows.size(); i ++ ) {
 			WebElement row = rows.get(i);
+
 			List<WebElement> cols = new SearchWebElement(row)
 				.findAll(By.tagName("td"));
 			if ( cols.size() != 2 ) {
@@ -59,7 +68,10 @@ public class MoexContractForm {
 				tokens.put(contractField, value);
 			} catch ( WUException e ) {
 				throw new WUWebPageException("Error obtaining contract info: " +
-						contractCode + " (field: " + contractFieldString + ")", e);
+						contractCode + " (field: " + contractFieldString
+							+ ", row: " + i
+							+ ", rowText: " + row.getText()
+							+ ")", e);
 			}
 		}
 		return tokens;
@@ -72,19 +84,26 @@ public class MoexContractForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public List<String> getActiveFuturesList() throws WUWebPageException {
-		openDerivativesSearchPage();
 		List<String> list = new ArrayList<>();
-		int currentPage = 1;
-		for (;;) {
-			list.addAll(scanFuturesTableForSymbols());
-			currentPage ++;
-			Map<Integer, WebElement> pageLinks = getPageLinks(true);
-			if ( ! pageLinks.containsKey(currentPage) ) {
-				break;
-			} else {
-				pageLinks.get(currentPage).click();
-			}
+		openDerivativesSearchPage();
+		list.addAll(dump(scanFuturesTableForSymbols()));
+		Paginator paginator = getFuturesTablePaginator();
+		int totalPages = paginator.getNumberOfPages();
+		for ( int i = 1; i < totalPages; i ++ ) {
+			openDerivativesSearchPage();
+			paginator = getFuturesTablePaginator();
+			paginator.click(i);
+			paginator.waitForStale();
+			list.addAll(dump(scanFuturesTableForSymbols()));
 		}
+		return list;
+	}
+	
+	private List<String> dump(List<String> list) {
+		//System.out.println("MoexContractForm#dump");
+		//for ( String x : list ) {
+		//	System.out.println("Found symbol: " + x);
+		//}
 		return list;
 	}
 	
@@ -162,8 +181,12 @@ public class MoexContractForm {
 			throw new WUWebPageException("Search page request failed.", e);
 		}
 		// Additional check that the page is open
-		new SearchWebElement(webDriver)
-			.findWithText(By.className("h1header"), "Search by contracts");
+		WebElement x = new SearchWebElement(webDriver)
+			.findWithText(By.tagName("h1"), "Search by contracts")
+			.get();
+		if ( ! x.isDisplayed() ) {
+			
+		}
 		closeUserAgreement();
 		return this;
 	}
@@ -173,10 +196,8 @@ public class MoexContractForm {
 	}
 	
 	private List<String> scanFuturesTableForSymbols() throws WUWebPageException {
+		WebElement table = findFuturesTable();
 		List<String> list = new ArrayList<>();
-		WebElement table = new SearchWebElement(webDriver)
-			.find(By.xpath("//div[@id='root']/table/tbody/tr[1]/td[2]/table/tbody/tr[2]/td/table/tbody/tr/td[2]/table/tbody/tr[2]/td[2]/table[7]/tbody"))
-			.get();
 		boolean skipHeader = true;
 		for ( WebElement row : new SearchWebElement(table).findAll(By.tagName("tr")) ) {
 			if ( skipHeader ) {
@@ -199,55 +220,192 @@ public class MoexContractForm {
 		return list;
 	}
 	
-	private WebElement findPaginatorTable(boolean futures) throws WUWebPageException {
-		String marker = futures ? "Futures" : "Options";
-		for ( WebElement table : new SearchWebElement(webDriver)
-			.findAll(By.tagName("table")) )
-		{
-			List<WebElement> cells = new SearchWebElement(table).findAll(By.tagName("td"));
-			if ( cells.size() == 2 && marker.equals(cells.get(0).getText().trim())
-					&& cells.get(1).getText().startsWith("Number of records: ") )
-			{
-				WebElement pTable = new SearchWebElement(table)
-					.find(By.xpath("following-sibling::table[1]"))
-					.get();
-				// Additional test of the pagination table structure.
-				new SearchWebElement(pTable)
-					.findWithText(By.tagName("span"), "Pages:");
-				return pTable;
-			}
-		}
-		throw new WUWebPageException("Paginator table was not found");
-	}
-	
-	private Map<Integer, WebElement> getPageLinks(boolean futures) throws WUWebPageException {
-		List<WebElement> children = new SearchWebElement(findPaginatorTable(futures))
-			.find(By.tagName("tr"), 1)
-			.find(By.tagName("td"))
-			.findAll(By.xpath("*"));
-		Map<Integer, WebElement> pageLinks = new HashMap<>();
-		for ( int i = 1; i < children.size(); i ++ ) {
-			WebElement child = children.get(i);
-			//boolean isCurrentPage = "span".equals(child.getTagName()) ? true : false;
-			try {
-				int pageNumber = Integer.valueOf(child.getText().trim());
-				pageLinks.put(pageNumber, child);
-			} catch ( NumberFormatException e ) {
-				throw new WUWebPageException("Bad pagination link detected: ", e);
-			}
-		}
-		return pageLinks;
-	}
-	
 	private void closeUserAgreement() {
 		try {
-			// Check if the Exchange User Agreement window is popped up
-			// and click on the I Agree button if so
-			SearchWebElement search = new SearchWebElement(webDriver);
-			if ( search.find(By.className("ui-dialog-buttonset")).get().isDisplayed() ) {
-				search.findWithText(By.tagName("button"), "I Agree").click();
+			String searchText = "BEFORE YOU START USING THE WEBSITE, PLEASE READ THIS AGREEMENT CAREFULLY";
+			new WebDriverWait(webDriver, 10).until(ExpectedConditions.and(
+				ExpectedConditions.elementToBeClickable(By.xpath("//*[. = 'I Do Not Agree']")),
+				ExpectedConditions.elementToBeClickable(By.xpath("//*[. = 'I Agree']")),
+				ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[normalize-space(.) = '" + searchText + "']"))
+			));
+			new SearchWebElement(webDriver)
+				.find(By.xpath("//*[. = 'I Agree']"))
+				.get()
+				.click();
+		} catch ( Exception e ) {
+			// timeout, do nothing
+		}
+	}
+	
+	/**
+	 * Найти все пагинаторы на странице.
+	 * <p>
+	 * Что бы максимально отвязаться от возможных изменений, следует привязываться
+	 * к таким признакам, вероятность изменения которых крайне мала. Про пагинатор
+	 * известно, что это набор элементов, который начинается с элемента, содержащего
+	 * строку "Pages:" и за которым следуют несколько элементов типа span, div, a,
+	 * содержимое которых увеличивающиеся номера страниц начиная с 1. Таким образом,
+	 * можно найти элемент с текстом "Pages:" и от его родителя просмотреть всех
+	 * детей, пропуская самый первый элемент. Если в результате этого перебора
+	 * получим последовательность увеличивающихся на 1 целочисленных значений от 1
+	 * до N, значит родительский элемент это пагинатор.
+	 * <p>
+	 * <b>Примечание:</b> Вышеописанный вариант сработает, только если Pages
+	 * находится на одном уровне с номерами страниц. В прошлой версии оно было
+	 * в таблице - ее еще как то можно разобрать. Если надабовляют других спанов
+	 * и дивов с разными уровнями вложенности, то сложнее.
+	 * <p>
+	 * @return список всех найденных пагинаторов
+	 * @throws WUWebPageException произошла ошибка при поиске
+	 */
+	private List<Paginator> findPaginators() throws WUWebPageException {
+		List<Paginator> paginators = new ArrayList<>();
+		for ( WebElement parent : new SearchWebElement(webDriver)
+				.findAll(By.xpath("//*[. = 'Pages:']/parent::*")) )
+		{
+			boolean containsNonNumericReference = false;
+			List<WebElement> children = new SearchWebElement(parent).findAll(By.xpath(".//*"));
+			List<PageReference> pages = new ArrayList<>();
+			for ( int i = 1; i < children.size(); i ++ ) {
+				WebElement child = children.get(i);
+				String t = child.getText();
+				if ( t.length() == 0 || ! StringUtils.isNumeric(t) ) {
+					containsNonNumericReference = true;
+					break;
+				}
+				pages.add(new PageReference(Integer.parseInt(t), child));
 			}
-		} catch ( WUWebPageException e ) { }
+			if ( containsNonNumericReference ) {
+				continue;
+			}
+			int numberOfInactiveLinks = 0;
+			boolean incorrectPageOrder = false;
+			for ( int i = 0; i < pages.size(); i ++ ) {
+				PageReference p = pages.get(i);
+				if ( p.getPageNumber() != i + 1 ) {
+					incorrectPageOrder = true;
+					break;
+				}
+				if ( ! p.isLink() ) {
+					numberOfInactiveLinks ++;
+				}
+			}
+			if ( incorrectPageOrder || numberOfInactiveLinks != 1 ) {
+				continue;
+			}
+			paginators.add(new Paginator(pages));
+		}
+		return paginators;
+	}
+	
+	/**
+	 * Ярлык для получения пагинатора страниц таблицы фьючерсов.
+	 * <p>
+	 * Известно, что на первой странице всего 4 пагинатора: по два на фьючерсы и опционы.
+	 * Просто возвращаем первый найденный пагинатор. А если не найдено, то кидаем исключение.
+	 * <p>
+	 * @return пагинатор таблицы фьючерсов
+	 * @throws WUWebPageException не удалось найти пагинатор или другая ошибка
+	 */
+	private Paginator getFuturesTablePaginator() throws WUWebPageException {
+		List<Paginator> paginators = findPaginators();
+		if ( paginators.size() == 0 ) {
+			throw new WUWebPageException("Futures table paginator not found");
+		}
+		return paginators.get(0);
+	}
+
+	/**
+	 * Найти таблицу фьючерсов.
+	 * <p>
+	 * Что бы максимально отвязаться от возможных изменений, следует привязываться
+	 * к таким элементам, вероятность изменения которых крайне мала. Это можно
+	 * сказать про заголовки таблицы фьючерсов. Заголовки таблиц фтючерсов и опционов
+	 * различаются так, что перепутать их невозможно. Исходя из вышесказанного,
+	 * ищем таблицу, в которой первая строка содержит следующие заголовки:
+	 * <li>0 - игнорировать</li>
+     * <li>1 - Symbol</li>
+	 * <li>2 - Description</li>
+	 * <li>3 - Last trading day</li>
+	 * <li>4 - Delivery</li>
+	 * <li>5 - Trade results</li>
+	 * В итоге требования минимальны: это должна быть таблица, ее первая строка должна
+	 * содержать указанные заголовки.
+	 * @return веб-элемент таблицы фьючерсов
+	 * @throws WUWebPageException - не удалось найти таблицу фьючерсов или другая ошибка
+	 */
+	private WebElement findFuturesTable() throws WUWebPageException {
+		for ( WebElement table : new SearchWebElement(webDriver).findAll(By.tagName("table")) ) {
+			try {
+				WebElement row = new SearchWebElement(table).find(By.tagName("tr"), 0).get();
+				List<WebElement> cols = new SearchWebElement(row).findAll(By.tagName("th"));
+				if ( cols.size() == 6
+					&& "Symbol".equals(cols.get(1).getText())
+					&& "Description".equals(cols.get(2).getText())
+					&& "Last trading day".equals(cols.get(3).getText())
+					&& "Delivery".equals(cols.get(4).getText())
+					&& "Trade results".equals(cols.get(5).getText()) )
+				{
+					return table;
+				}
+			} catch ( WUWebPageException e ) {
+				// the table without rows. just ignore this table
+			}
+		}
+		throw new WUWebPageException("Futures table was not found");
+	}
+	
+	class PageReference {
+		private final int pageNumber;
+		private final WebElement element;
+		
+		PageReference(int pageNumber, WebElement element) {
+			this.pageNumber = pageNumber;
+			this.element = element;
+		}
+		
+		public int getPageNumber() {
+			return pageNumber;
+		}
+		
+		public boolean isLink() {
+			return "a".equals(element.getTagName());
+		}
+		
+		public void click() throws WUWebPageException {
+			if ( ! isLink() ) {
+				throw new WUWebPageException("Cannot click on inactive page: " + pageNumber);
+			}
+			element.click();
+		}
+		
+	}
+	
+	class Paginator {
+		private final List<PageReference> pages;
+		
+		Paginator(List<PageReference> pages) {
+			this.pages = new ArrayList<>(pages);
+		}
+		
+		public void click(int pageNumber) throws WUWebPageException {
+			pages.get(pageNumber).click();
+		}
+		
+		public int getNumberOfPages() {
+			return pages.size();
+		}
+		
+		public boolean waitForStale() {
+			ExpectedCondition<?> cond[] = new ExpectedCondition[pages.size()];
+			for ( int i = 0; i < pages.size(); i ++ ) {
+				PageReference p = pages.get(i);
+				cond[i] = ExpectedConditions.stalenessOf(p.element);
+			}
+			new WebDriverWait(webDriver, 10).until(ExpectedConditions.or(cond));
+			return true;
+		}
+		
 	}
 
 }

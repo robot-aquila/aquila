@@ -7,7 +7,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.openqa.selenium.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;

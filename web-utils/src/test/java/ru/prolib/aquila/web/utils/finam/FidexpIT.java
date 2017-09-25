@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -27,7 +28,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.io.IOUtils;
 
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 
@@ -110,7 +110,12 @@ public class FidexpIT {
 			}
 		} finally {
 			IOUtils.closeQuietly(httpClient);
-			webDriver.close();
+			try {
+				webDriver.close();
+			} catch ( Exception e ) {
+				// JBrowserDriver bug when closing
+				e.printStackTrace(System.err);
+			}
 		}
 	}
 	
@@ -217,6 +222,16 @@ public class FidexpIT {
 		assertFalse(actual.containsValue("Eu"));
 		assertFalse(actual.containsValue("GAZR"));
 		assertFalse(actual.containsValue("SBRF"));
+	}
+	
+	@Test
+	public void testGetTrueFuturesQuotes_SkipCombined() throws Exception {
+		Map<Integer, String> actual = facade.getTrueFuturesQuotes(true);
+		
+		// Check that combined tickers like RTS-12.17-3.18, Si-12.17-3.18 were skipped
+		for ( String symbol : actual.values() ) {
+			assertEquals("Unexpected symbol: " + symbol, 1, StringUtils.countMatches(symbol, "-"));
+		}
 	}
 
 	@Test

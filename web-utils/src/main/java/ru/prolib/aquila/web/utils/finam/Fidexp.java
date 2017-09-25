@@ -17,12 +17,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.io.IOUtils;
+import org.openqa.selenium.WebDriverException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.web.utils.HttpClientFactory;
 import ru.prolib.aquila.web.utils.WUException;
@@ -36,6 +39,13 @@ import ru.prolib.aquila.web.utils.httpclient.HttpClientFileDownloader;
 public class Fidexp implements Closeable {
 	private static final int DEFAULT_TIMEOUT = 600000;
 	private static final String UNEXPECTED_EXCEPTION = "Unexpected exception: ";
+	@SuppressWarnings("unused")
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(Fidexp.class);
+	}
+	
 	private final Lock lock = new ReentrantLock();
 	private final CloseableHttpClient httpClient;
 	private final WebDriver webDriver;
@@ -61,7 +71,11 @@ public class Fidexp implements Closeable {
 		try {
 			if ( closeResources ) {
 				IOUtils.closeQuietly(httpClient);
-				webDriver.close();
+				try {
+					webDriver.close();
+				} catch ( WebDriverException e ) {
+					// JBrowserDrive bug when closing
+				}
 			}
 		} finally {
 			lock.unlock();
@@ -243,6 +257,11 @@ public class Fidexp implements Closeable {
 		if ( tokens.length != 2 ) {
 			// The opening brace was not found. Cannot determine the ticker code.
 			// Skip such option.
+			return null;
+		}
+		if ( StringUtils.countMatches(tokens[0], "-") != 1 ) {
+			// It's something like RTS-12.17-3.18 or Si-12.17-3.18
+			// Just skip
 			return null;
 		}
 		return new BasicNameValuePair(tokens[0], tokens[1].substring(0, tokens[1].length() - 1));

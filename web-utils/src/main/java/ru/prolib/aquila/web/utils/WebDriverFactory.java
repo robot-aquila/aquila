@@ -1,11 +1,8 @@
 package ru.prolib.aquila.web.utils;
 
-import java.io.File;
-
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
@@ -25,6 +22,8 @@ public class WebDriverFactory {
 				.connectionReqTimeout(socketTimeoutMs)
 				.connectTimeout(socketTimeoutMs)
 				.maxConnections(128)
+				.javascript(true)
+				.logJavascript(true)
 				.build());
 	}
 	
@@ -33,9 +32,19 @@ public class WebDriverFactory {
 	}
 	
 	public static WebDriver createFirefoxDriver() {
-		FirefoxProfile profile = new FirefoxProfile();
-    	File ffBinary = new File("D:/Program Files (x86)/Mozilla Firefox/firefox.exe");
-    	return new FirefoxDriver(new FirefoxBinary(ffBinary), profile);
+		// Note: path to geckodriver executable must be in PATH
+		// Note: path to firefox executable must be in PATH
+		return new FirefoxDriver();
+		
+		// Deprecated approach
+    	//File ffBinary = new File("D:/Program Files (x86)/Mozilla Firefox/firefox.exe");
+    	//return new FirefoxDriver(new FirefoxBinary(ffBinary), profile);
+	}
+	
+	public static WebDriver createHtmlUnitDriver() {
+		HtmlUnitDriver driver = new HtmlUnitDriver();
+		driver.setJavascriptEnabled(true);
+		return driver;
 	}
 
 }

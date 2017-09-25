@@ -3,7 +3,7 @@ package ru.prolib.aquila.web.utils.moex;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import org.openqa.selenium.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
