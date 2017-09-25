@@ -7,6 +7,7 @@ import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
@@ -15,6 +16,12 @@ public class SchedulerLocal_TimerTaskTest {
 	private Runnable runnable1, runnable2;
 
 	private SchedulerLocal_TimerTask timerTask1, timerTask2;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -48,6 +55,17 @@ public class SchedulerLocal_TimerTaskTest {
 		timerTask2.run();
 		
 		control.verify();	
+	}
+	
+	@Test
+	public void testRun_CatchUnhandledException() throws Exception {
+		runnable2.run();
+		expectLastCall().andThrow(new NullPointerException("Critical error must not stop the scheduler"));
+		control.replay();
+		
+		timerTask2.run();
+		
+		control.verify();
 	}
 	
 	@Test

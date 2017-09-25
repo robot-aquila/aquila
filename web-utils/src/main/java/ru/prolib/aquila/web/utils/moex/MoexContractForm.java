@@ -59,7 +59,7 @@ public class MoexContractForm {
 			));
 		} catch ( TimeoutException e ) {
 			logger.error("Timeout exception: ", e);
-			throw new WUWebPageException(e);
+			// Just give it another chance...
 		}
 		
 		List<WebElement> rows = new SearchWebElement(webDriver)
@@ -248,6 +248,7 @@ public class MoexContractForm {
 				.click();
 		} catch ( Exception e ) {
 			// timeout, do nothing
+			logger.error("Timeout exception: ", e);
 		}
 	}
 	
@@ -410,14 +411,17 @@ public class MoexContractForm {
 			return pages.size();
 		}
 		
-		public boolean waitForStale() {
+		public void waitForStale() {
 			ExpectedCondition<?> cond[] = new ExpectedCondition[pages.size()];
 			for ( int i = 0; i < pages.size(); i ++ ) {
 				PageReference p = pages.get(i);
 				cond[i] = ExpectedConditions.stalenessOf(p.element);
 			}
-			new WebDriverWait(webDriver, 10).until(ExpectedConditions.or(cond));
-			return true;
+			try {
+				new WebDriverWait(webDriver, 10).until(ExpectedConditions.or(cond));
+			} catch ( TimeoutException e ) {
+				logger.error("Timeout exception: ", e);
+			}
 		}
 		
 	}

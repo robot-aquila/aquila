@@ -3,11 +3,19 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.util.TimerTask;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper of a scheduler task.
  */
 class SchedulerLocal_TimerTask extends TimerTask implements TaskHandler {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(SchedulerLocal_TimerTask.class);
+	}
+	
 	private final boolean runOnce;
 	private Runnable runnable;
 	
@@ -24,7 +32,11 @@ class SchedulerLocal_TimerTask extends TimerTask implements TaskHandler {
 			dummy = runnable;
 		}
 		if ( dummy != null ) {
-			dummy.run();
+			try {
+				dummy.run();
+			} catch ( Exception e ) {
+				logger.error("Unhandled exception: ", e);
+			}
 			synchronized ( this ) {
 				if ( runOnce ) {
 					runnable = null;

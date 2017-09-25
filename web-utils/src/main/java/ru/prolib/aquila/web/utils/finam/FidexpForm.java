@@ -10,12 +10,21 @@ import org.apache.http.NameValuePair;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.SearchWebElement;
 
 public class FidexpForm {
 	private static final String FINAM_UI_DROPDOWN_LIST = "finam-ui-dropdown-list";
+	@SuppressWarnings("unused")
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(FidexpForm.class);
+	}
+	
 	private final FidexpFormUtils formUtils = new FidexpFormUtils();
 	private final WebDriver driver;
 	private boolean initialRequestIsMade = false;
@@ -531,8 +540,12 @@ public class FidexpForm {
 	}
 
 	protected void setDate(String inputId, LocalDate date) throws WUWebPageException {
-		WebDriverWait wait = new WebDriverWait(driver, 20);
-		wait.until(ExpectedConditions.elementToBeClickable(By.id(inputId))).click();
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 20);
+			wait.until(ExpectedConditions.elementToBeClickable(By.id(inputId))).click();
+		} catch ( TimeoutException e ) {
+			throw new WUWebPageException("Timeout exception: ", e);
+		}
 		
 		int year = date.getYear();
 		int month = date.getMonth().getValue() - 1; // FINAM bugfix
