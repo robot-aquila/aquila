@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
-	  	<version>0.1.43</version>
+	  	<version>0.1.44</version>
 	  	<relativePath>../pom.xml</relativePath>
 	</parent>
 	<properties>
@@ -17,18 +17,13 @@
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-core</artifactId>
-			<version>0.1.43</version>
+			<version>0.1.44</version>
 		</dependency>
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-ui</artifactId>
-			<version>0.1.43</version>
+			<version>0.1.44</version>
 		</dependency>
-		<!-- TODO: to remove??? dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-java</artifactId>
-			<version>2.53.1</version>
-		</dependency -->
 		<dependency>
         	<groupId>org.hsqldb</groupId>
         	<artifactId>hsqldb</artifactId>

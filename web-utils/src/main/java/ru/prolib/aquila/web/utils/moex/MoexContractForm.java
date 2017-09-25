@@ -8,12 +8,15 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.SearchWebElement;
@@ -25,6 +28,12 @@ import ru.prolib.aquila.web.utils.WUException;
  * @see http://moex.com/en/contract.aspx?code=S where S is a contract name
  */
 public class MoexContractForm {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(MoexContractForm.class);
+	}
+	
 	private final WebDriver webDriver;
 	private final MoexContractFormUtils formUtils = new MoexContractFormUtils();
 	
@@ -43,10 +52,15 @@ public class MoexContractForm {
 	 */
 	public Map<Integer, Object> getInstrumentDescription(String contractCode) throws WUWebPageException {
 		openContractPage(contractCode);
-		new WebDriverWait(webDriver, 10).until(ExpectedConditions.and(
-			ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[. = 'Instrument description']")),
-			ExpectedConditions.visibilityOfElementLocated(By.className("tool_options_table_forts"))
-		));
+		try {
+			new WebDriverWait(webDriver, 20).until(ExpectedConditions.and(
+				ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[. = 'Instrument description']")),
+				ExpectedConditions.visibilityOfElementLocated(By.className("tool_options_table_forts"))
+			));
+		} catch ( TimeoutException e ) {
+			logger.error("Timeout exception: ", e);
+			throw new WUWebPageException(e);
+		}
 		
 		List<WebElement> rows = new SearchWebElement(webDriver)
 			.find(By.className("tool_options_table_forts"))

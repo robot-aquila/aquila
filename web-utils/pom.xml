@@ -3,11 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.prolib.aquila</groupId>
 	<artifactId>aquila-web-utils</artifactId>
-	<version>0.0.1</version>
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
-	  	<version>0.1.43</version>
+	  	<version>0.1.44</version>
 	  	<relativePath>../pom.xml</relativePath>
 	</parent>
 	
@@ -19,7 +18,7 @@
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-probe</artifactId>
-			<version>0.1.43</version>
+			<version>0.1.44</version>
 		</dependency>
 
 		<dependency>
