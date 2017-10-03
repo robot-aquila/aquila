@@ -32,9 +32,11 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.data.tseries.CandleCloseTSeries;
+import ru.prolib.aquila.core.data.tseries.CandleVolumeTSeries;
+import ru.prolib.aquila.core.data.tseries.QEMATSeries;
+import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesByLastTrade;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.data.storage.DataStorageException;
@@ -58,25 +60,35 @@ import ru.prolib.aquila.ui.form.PositionListTableModel;
 import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
-import ru.prolib.aquila.utils.experimental.swing_chart.CBSwingChartPanel;
-import ru.prolib.aquila.utils.experimental.sst.cs.CSDataProvider;
-import ru.prolib.aquila.utils.experimental.sst.cs.CSDataProviderImpl;
-import ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice;
-import ru.prolib.aquila.utils.experimental.sst.cs.msig.CMASignalBuilder;
+import ru.prolib.aquila.utils.experimental.chart.BarChart;
+import ru.prolib.aquila.utils.experimental.chart.ChartOrientation;
+import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelHandler;
+import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLayer;
+import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
+import ru.prolib.aquila.utils.experimental.sst.sdp2.*;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistry;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistryImpl;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.utils.experimental.swing_chart.series.DoubleToNumberSeries;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
+import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
 
+import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.BAR_COLOR;
+
 public class SecuritySimulationTest implements Experiment {
-	private static final Color[] indicatorColors = {Color.BLUE, Color.MAGENTA, Color.RED, Color.GREEN};
 	private static final Logger logger;
+
+	private static final String CANDLE_SERIES = "OHLC";
+	private static final String QEMA7_CANDLE_CLOSE_SERIES = "QEMA(Close,7)";
+	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
+	private static final String CANDLE_VOLUME_SERIES = "Volume";
+	private BarChartPanelHandler chartPanelHandler;
 	
 	static {
 		logger = LoggerFactory.getLogger(SecuritySimulationTest.class);
@@ -84,7 +96,7 @@ public class SecuritySimulationTest implements Experiment {
 	
 	private EditableTerminal terminal;
 	private MarketSignal signal;
-	private CSDataProvider csDataProvider;
+	private SDP2DataProvider<SDP2Key> sdp2DataProvider;
 	private final MarketSignalRegistry msigRegistry = new MarketSignalRegistryImpl();
 
 	@Override
@@ -93,9 +105,9 @@ public class SecuritySimulationTest implements Experiment {
 			signal.fireBreak();
 			signal = null;
 		}
-		if ( csDataProvider != null ) {
-			csDataProvider.stop();
-			csDataProvider = null;
+		if ( sdp2DataProvider != null ) {
+//			sdp2DataProvider.stop();
+			sdp2DataProvider = null;
 		}
 		terminal.stop();
 	}
@@ -146,15 +158,31 @@ public class SecuritySimulationTest implements Experiment {
 		});
 		terminal.start();
 		
-		csDataProvider = new CSDataProviderImpl(terminal);
-		csDataProvider.start();		
-		
+		sdp2DataProvider = new SDP2DataProviderImpl<SDP2Key>(new SDP2DataSliceFactoryImpl<>(terminal.getEventQueue()));
+
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
 		logger.debug("Selected strategy symbol: {}", rSymbol);
+		TimeFrame tf = TimeFrame.M1;
+		SDP2DataSlice<SDP2Key> slice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
 		String signalID = rSymbol + "_CMA(7, 14)";
-		msigRegistry.register(new CMASignalBuilder(terminal.getEventQueue(),
-			csDataProvider, rSymbol, TimeFrame.M1, 7, 14), signalID);
-		
+
+		EditableTSeries<Candle> candleSeries = slice.createSeries(CANDLE_SERIES, true);
+		TSeries<Double> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, new CandleCloseTSeries(candleSeries), 7);
+		TSeries<Double> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, new CandleCloseTSeries(candleSeries), 14);
+		TSeries<Long> volumeSeries = new CandleVolumeTSeries(CANDLE_VOLUME_SERIES, candleSeries);
+		slice.registerRawSeries(qema7Series);
+		slice.registerRawSeries(qema14Series);
+		slice.registerRawSeries(volumeSeries);
+
+		new CandleSeriesByLastTrade(candleSeries, terminal, rSymbol).start();
+
+		msigRegistry.register(new CMASignalProviderTS(
+				slice.getObservableSeries(CANDLE_SERIES),
+				slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES),
+				slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES),
+				terminal.getEventQueue(), signalID));
+
+
 		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.5d, signalID);
 		Robot robot = new RobotBuilder(terminal, msigRegistry).buildBullDummy(rConfig);
 		robot.getAutomat().setDebug(true);
@@ -225,15 +253,8 @@ public class SecuritySimulationTest implements Experiment {
         tabPanel.add("Positions", new JScrollPane(table));
         new TableModelController(positionTableModel, frame);
         
-        CSDataSlice dataSlice = csDataProvider.getSlice(rSymbol, TimeFrame.M1);
-        CBSwingChartPanel chartPanel = new CBSwingChartPanel(dataSlice.getCandleSeries());
-        int i = 0;
-        for ( Series<Double> x : dataSlice.getIndicators() ) {
-        	chartPanel.addSmoothLine(new DoubleToNumberSeries(x)).withColor(indicatorColors[i%4]);
-            i++;
-        	logger.debug("added indicator: {}", x.getId());
-        }
-        chartPanel.addVolumes();
+        SDP2DataSlice<SDP2Key> dataSlice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
+        BarChartPanelImpl<Instant> chartPanel = createChartPanel(dataSlice);
         tabPanel.addTab("Strategy", chartPanel.getRootPanel());
         
         frame.getContentPane().add(mainPanel);
@@ -252,6 +273,33 @@ public class SecuritySimulationTest implements Experiment {
 			new SymbolUpdateSourceImpl(scheduler, new MoexSymbolUpdateReaderFactory(root)),
 			new L1UpdateSourceSATImpl(new L1UpdateSourceImpl(scheduler, new FinamL1UpdateReaderFactory(root))),
 			parent);
+	}
+
+	private BarChartPanelImpl<Instant> createChartPanel(SDP2DataSlice<SDP2Key> slice){
+		BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(ChartOrientation.HORIZONTAL);
+		BarChart<Instant> chart = chartPanel.addChart("CANDLES")
+				.setHeight(600)
+				.setValuesLabelFormatter(new NumberLabelFormatter())
+				.addStaticOverlay("Price", 0);
+		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
+		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+		chart.addLayer(new CandleBarChartLayer<>(slice.getSeries(CANDLE_SERIES)));
+		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
+		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
+
+		chart = chartPanel.addChart("VOLUMES")
+				.setHeight(200)
+				.setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(0))
+				.addStaticOverlay("Volume", 0);
+		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
+		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES)).setColor(BAR_COLOR);
+
+		chartPanel.setCategories(slice.getIntervalStartSeries());
+		chartPanelHandler = new BarChartPanelHandler<>(chartPanel, slice.getIntervalStartSeries());
+		chartPanelHandler.subscribe();
+
+		return chartPanel;
 	}
 
 }
