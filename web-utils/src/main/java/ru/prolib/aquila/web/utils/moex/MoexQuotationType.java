@@ -1,5 +1,6 @@
 package ru.prolib.aquila.web.utils.moex;
 
+@Deprecated
 public enum MoexQuotationType {
 	/**
 	 * null (if not exists)

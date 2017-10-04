@@ -40,15 +40,15 @@ public class MoexContractPtmlConverterTest {
 		fix.put(MoexContractField.LOT_SIZE, 10);
 		fix.put(MoexContractField.LOWER_PRICE_LIMIT, 95.14d);
 		fix.put(MoexContractField.NEGOTIATION_FEE, 1.02d);
-		fix.put(MoexContractField.QUOTATION, MoexQuotationType.POINTS);
-		fix.put(MoexContractField.SETTLEMENT, MoexSettlementType.DELIVERABLE);
+		fix.put(MoexContractField.QUOTATION, "POINTS");
+		fix.put(MoexContractField.SETTLEMENT, "DELIVERABLE");
 		fix.put(MoexContractField.SETTLEMENT_PRICE, 1248.05d);
 		fix.put(MoexContractField.SETTLEMENT_PROC_DESCR, "bla bla bla");
 		fix.put(MoexContractField.SYMBOL, "MSFT");
 		fix.put(MoexContractField.SYMBOL_CODE, "MS01");
 		fix.put(MoexContractField.TICK_SIZE, new FDecimal("0.01"));
 		fix.put(MoexContractField.TICK_VALUE, new FMoney("2.13", "RUB"));
-		fix.put(MoexContractField.TYPE, MoexContractType.FUTURES);
+		fix.put(MoexContractField.TYPE, "FUTURES");
 		fix.put(MoexContractField.UPPER_PRICE_LIMIT, 120.83d);
 		
 		Map<Integer, String> actual = new HashMap<>();
@@ -138,15 +138,15 @@ public class MoexContractPtmlConverterTest {
 		expected.put(MoexContractField.LOT_SIZE, 10);
 		expected.put(MoexContractField.LOWER_PRICE_LIMIT, new FDecimal("95.14"));
 		expected.put(MoexContractField.NEGOTIATION_FEE, new FMoney("1.02", "RUB"));
-		expected.put(MoexContractField.QUOTATION, MoexQuotationType.POINTS);
-		expected.put(MoexContractField.SETTLEMENT, MoexSettlementType.DELIVERABLE);
+		expected.put(MoexContractField.QUOTATION, "POINTS");
+		expected.put(MoexContractField.SETTLEMENT, "DELIVERABLE");
 		expected.put(MoexContractField.SETTLEMENT_PRICE, new FDecimal("1248.05"));
 		expected.put(MoexContractField.SETTLEMENT_PROC_DESCR, "bla bla bla");
 		expected.put(MoexContractField.SYMBOL, "MSFT");
 		expected.put(MoexContractField.SYMBOL_CODE, "MS01");
 		expected.put(MoexContractField.TICK_SIZE, new FDecimal("0.01"));
 		expected.put(MoexContractField.TICK_VALUE, new FMoney("2.13", "RUB"));
-		expected.put(MoexContractField.TYPE, MoexContractType.FUTURES);
+		expected.put(MoexContractField.TYPE, "FUTURES");
 		expected.put(MoexContractField.UPPER_PRICE_LIMIT, new FDecimal("120.83"));
 		assertEquals(expected, actual);
 	}

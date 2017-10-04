@@ -23,23 +23,26 @@ public class MoexContractTrackingScheduleTest {
 	
 	@Test
 	public void testIsTrackingPeriod() {
+		// 10:30-13:55 MSK
 		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T07:29:59.999Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T07:30:00.000Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T07:45:00.000Z")));
-		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T09:29:59.999Z")));
-		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T09:30:00.000Z")));
+		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T10:54:59.999Z")));
+		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T10:55:00.000Z")));
 		
+		// 14:35-18:40 MSK
 		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T11:34:59.999Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T11:35:00.000Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T11:50:00.000Z")));
-		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T13:34:59.999Z")));
-		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T13:35:00.000Z")));
+		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T15:39:59.999Z")));
+		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T15:40:00.000Z")));
 		
+		// 19:30-23:45 MSK
 		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T16:29:59.999Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T16:30:00.000Z")));
 		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T16:45:00.000Z")));
-		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T18:29:59.999Z")));
-		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T18:30:00.000Z")));
+		assertTrue(schedule.isTrackingPeriod(T("2016-08-15T20:44:59.999Z")));
+		assertFalse(schedule.isTrackingPeriod(T("2016-08-15T20:45:00.000Z")));
 	}
 
 	@Test
@@ -47,8 +50,8 @@ public class MoexContractTrackingScheduleTest {
 		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T07:29:59.999Z")));
 		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T07:30:00.000Z")));
 		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T07:45:00.000Z")));
-		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T09:29:59.999Z")));
-		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T09:30:00.000Z")));
+		assertTrue(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T10:54:59.999Z")));
+		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T10:55:00.000Z")));
 		
 		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T11:34:59.999Z")));
 		assertFalse(schedule.isMarketOpeningTrackingPeriod(T("2016-08-15T11:35:00.000Z")));
@@ -74,8 +77,8 @@ public class MoexContractTrackingScheduleTest {
 		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T11:34:59.999Z")));
 		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T11:35:00.000Z")));
 		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T11:50:00.000Z")));
-		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T13:34:59.999Z")));
-		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T13:35:00.000Z")));
+		assertTrue(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T15:39:59.999Z")));
+		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T15:40:00.000Z")));
 		
 		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T16:29:59.999Z")));
 		assertFalse(schedule.isIntradayClearingTrackingPeriod(T("2016-08-15T16:30:00.000Z")));
@@ -101,8 +104,8 @@ public class MoexContractTrackingScheduleTest {
 		assertFalse(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T16:29:59.999Z")));
 		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T16:30:00.000Z")));
 		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T16:45:00.000Z")));
-		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T18:29:59.999Z")));
-		assertFalse(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T18:30:00.000Z")));
+		assertTrue(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T20:44:59.999Z")));
+		assertFalse(schedule.isEveningClearingTrackingPeriod(T("2016-08-15T20:45:00.000Z")));
 	}
 
 	@Test

@@ -78,10 +78,10 @@ public class MoexContractFormIT {
 		expected.put(MoexContractField.SYMBOL, "RTS-6.16");
 		expected.put(MoexContractField.SYMBOL_CODE, "RIM6");
 		expected.put(MoexContractField.CONTRACT_DESCR, "RTS Index Futures");
-		expected.put(MoexContractField.TYPE, MoexContractType.FUTURES);
-		expected.put(MoexContractField.SETTLEMENT, MoexSettlementType.CASH_SETTLED);
+		expected.put(MoexContractField.TYPE, "Futures");
+		expected.put(MoexContractField.SETTLEMENT, "Cash-Settled");
 		expected.put(MoexContractField.LOT_SIZE, 1);
-		expected.put(MoexContractField.QUOTATION, MoexQuotationType.POINTS);
+		expected.put(MoexContractField.QUOTATION, "points");
 		expected.put(MoexContractField.FIRST_TRADING_DAY, LocalDate.of(2015, 3, 18));
 		expected.put(MoexContractField.LAST_TRADING_DAY, LocalDate.of(2016, 6, 15));
 		expected.put(MoexContractField.DELIVERY, LocalDate.of(2016, 6, 15));

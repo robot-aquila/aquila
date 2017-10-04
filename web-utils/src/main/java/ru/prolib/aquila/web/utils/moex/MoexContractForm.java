@@ -29,6 +29,7 @@ import ru.prolib.aquila.web.utils.WUException;
  */
 public class MoexContractForm {
 	private static final Logger logger;
+	private static final long WEB_DRIVER_WAIT_SECONDS = 45;
 	
 	static {
 		logger = LoggerFactory.getLogger(MoexContractForm.class);
@@ -53,13 +54,12 @@ public class MoexContractForm {
 	public Map<Integer, Object> getInstrumentDescription(String contractCode) throws WUWebPageException {
 		openContractPage(contractCode);
 		try {
-			new WebDriverWait(webDriver, 20).until(ExpectedConditions.and(
+			new WebDriverWait(webDriver, WEB_DRIVER_WAIT_SECONDS).until(ExpectedConditions.and(
 				ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[. = 'Instrument description']")),
 				ExpectedConditions.visibilityOfElementLocated(By.className("tool_options_table_forts"))
 			));
 		} catch ( TimeoutException e ) {
-			logger.error("Timeout exception: ", e);
-			// Just give it another chance...
+			throw new WUWebPageException("Timeout: ", e);
 		}
 		
 		List<WebElement> rows = new SearchWebElement(webDriver)
@@ -123,14 +123,12 @@ public class MoexContractForm {
 	
 	private Object toContractValue(int contractField, String stringValue) throws WUWebPageException {
 		switch ( contractField ) {
-		case MoexContractField.TYPE:
-			return formUtils.toContractType(stringValue);
 		case MoexContractField.SETTLEMENT:
-			return formUtils.toSettlementType(stringValue);
+		case MoexContractField.QUOTATION:
+		case MoexContractField.TYPE:
+			return stringValue;
 		case MoexContractField.LOT_SIZE:
 			return formUtils.toInteger(stringValue);
-		case MoexContractField.QUOTATION:
-			return formUtils.toQuotationType(stringValue);
 		case MoexContractField.FIRST_TRADING_DAY:
 		case MoexContractField.LAST_TRADING_DAY:
 		case MoexContractField.DELIVERY:
@@ -237,7 +235,7 @@ public class MoexContractForm {
 	private void closeUserAgreement() {
 		try {
 			String searchText = "BEFORE YOU START USING THE WEBSITE, PLEASE READ THIS AGREEMENT CAREFULLY";
-			new WebDriverWait(webDriver, 10).until(ExpectedConditions.and(
+			new WebDriverWait(webDriver, WEB_DRIVER_WAIT_SECONDS).until(ExpectedConditions.and(
 				ExpectedConditions.elementToBeClickable(By.xpath("//*[. = 'I Do Not Agree']")),
 				ExpectedConditions.elementToBeClickable(By.xpath("//*[. = 'I Agree']")),
 				ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[normalize-space(.) = '" + searchText + "']"))
@@ -418,7 +416,7 @@ public class MoexContractForm {
 				cond[i] = ExpectedConditions.stalenessOf(p.element);
 			}
 			try {
-				new WebDriverWait(webDriver, 10).until(ExpectedConditions.or(cond));
+				new WebDriverWait(webDriver, WEB_DRIVER_WAIT_SECONDS).until(ExpectedConditions.or(cond));
 			} catch ( TimeoutException e ) {
 				logger.error("Timeout exception: ", e);
 			}

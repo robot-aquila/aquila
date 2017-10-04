@@ -51,30 +51,15 @@ public class MoexContractPtmlConverter implements PtmlDeltaUpdateConverter {
 		case MoexContractField.SYMBOL_CODE:
 		case MoexContractField.CONTRACT_DESCR:
 		case MoexContractField.SETTLEMENT_PROC_DESCR:
-			return value;
 		case MoexContractField.TYPE:
-			try {
-				return MoexContractType.valueOf(value);
-			} catch ( IllegalArgumentException e ) {
-				throw new DataFormatException("Cannot identify contract type: " + value, e);
-			}
 		case MoexContractField.SETTLEMENT:
-			try {
-				return MoexSettlementType.valueOf(value);
-			} catch ( IllegalArgumentException e ) {
-				throw new DataFormatException("Cannot identify settlement type: " + value, e);
-			}
+		case MoexContractField.QUOTATION:
+			return value;
 		case MoexContractField.LOT_SIZE:
 			try {
 				return Integer.valueOf(value);
 			} catch ( NumberFormatException e ) {
 				throw new DataFormatException("Cannot parse integer: " + value, e);
-			}
-		case MoexContractField.QUOTATION:
-			try {
-				return MoexQuotationType.valueOf(value);
-			} catch ( IllegalArgumentException e ) {
-				throw new DataFormatException("Cannot identify quotation type: " + value, e);
 			}
 		case MoexContractField.FIRST_TRADING_DAY:
 		case MoexContractField.LAST_TRADING_DAY:
