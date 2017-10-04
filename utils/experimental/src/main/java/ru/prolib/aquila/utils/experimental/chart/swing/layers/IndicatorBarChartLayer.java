@@ -3,15 +3,15 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.LineRenderer;
-import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.Point;
+import ru.prolib.aquila.utils.experimental.chart.interpolator.LineRenderer;
+import ru.prolib.aquila.utils.experimental.chart.interpolator.Point;
 
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
 
 import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.INDICATOR_LINE_WIDTH;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.INDICATOR_LINE_WIDTH;
 
 /**
  * Created by TiM on 13.09.2017.

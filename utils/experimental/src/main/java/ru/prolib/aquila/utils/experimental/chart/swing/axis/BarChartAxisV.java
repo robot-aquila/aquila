@@ -6,8 +6,8 @@ import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import java.awt.*;
 
 import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.LABEL_FONT;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.LABEL_INDENT;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.LABEL_FONT;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.LABEL_INDENT;
 
 /**
  * Created by TiM on 12.09.2017.

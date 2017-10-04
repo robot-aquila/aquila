@@ -2,8 +2,8 @@ package ru.prolib.aquila.utils.experimental.chart.swing;
 
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeInfo;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.RangeInfo;
 
 import java.awt.*;
 

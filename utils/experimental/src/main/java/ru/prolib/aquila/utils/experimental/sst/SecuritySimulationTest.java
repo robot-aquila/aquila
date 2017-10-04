@@ -73,13 +73,13 @@ import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistryImpl;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.BAR_COLOR;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.BAR_COLOR;
 
 public class SecuritySimulationTest implements Experiment {
 	private static final Logger logger;

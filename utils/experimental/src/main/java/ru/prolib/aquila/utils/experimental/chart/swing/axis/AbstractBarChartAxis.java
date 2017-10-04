@@ -3,8 +3,8 @@ package ru.prolib.aquila.utils.experimental.chart.swing.axis;
 import ru.prolib.aquila.utils.experimental.chart.BarChartAxis;
 import ru.prolib.aquila.utils.experimental.chart.AxisLabelProvider;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.DefaultLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 /**
  * Created by TiM on 12.09.2017.

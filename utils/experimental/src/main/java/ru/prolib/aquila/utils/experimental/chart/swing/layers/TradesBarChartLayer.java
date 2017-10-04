@@ -7,17 +7,15 @@ import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfo;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfoList;
+import ru.prolib.aquila.utils.experimental.chart.Utils;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 import java.awt.*;
 import java.util.List;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TRADE_BUY_COLOR;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TRADE_LINE_COLOR;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TRADE_SELL_COLOR;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TRADE_BUY_COLOR;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TRADE_LINE_COLOR;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TRADE_SELL_COLOR;
 
 /**
  * Created by TiM on 16.09.2017.

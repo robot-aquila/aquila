@@ -1,6 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 /**
  * Created by TiM on 12.09.2017.

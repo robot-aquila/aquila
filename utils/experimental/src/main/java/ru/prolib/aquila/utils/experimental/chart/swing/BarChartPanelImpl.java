@@ -4,9 +4,9 @@ import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.CursorLayer;
-import ru.prolib.aquila.utils.experimental.swing_chart.TooltipForm;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.DefaultLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.TooltipForm;
+import ru.prolib.aquila.utils.experimental.chart.formatters.DefaultLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,9 +18,9 @@ import java.util.Vector;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.INITIAL_NUMBER_OF_VISIBLE_CATEGORIES;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.OTHER_CHARTS_HEIGHT;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.TOOLTIP_MARGIN;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.INITIAL_NUMBER_OF_VISIBLE_CATEGORIES;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.OTHER_CHARTS_HEIGHT;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TOOLTIP_MARGIN;
 
 /**
  * Created by TiM on 08.09.2017.

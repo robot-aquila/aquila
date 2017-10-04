@@ -3,14 +3,13 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 import org.apache.commons.lang3.Range;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.chart.swing.Utils;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.SELECTION_COLOR;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.SELECTION_COLOR;
 
 /**
  * Created by TiM on 13.09.2017.

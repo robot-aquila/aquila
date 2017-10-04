@@ -1,7 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.RangeInfo;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.RangeInfo;
 
 public interface BarChartVisualizationContext {
 

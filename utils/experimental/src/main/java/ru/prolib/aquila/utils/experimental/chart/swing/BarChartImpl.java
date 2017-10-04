@@ -11,10 +11,10 @@ import ru.prolib.aquila.utils.experimental.chart.swing.axis.ValuesLabelProvider;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.AbstractBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.IndicatorBarChartLayer;
-import ru.prolib.aquila.utils.experimental.swing_chart.StaticOverlay;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.*;
-import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.PolyLineRenderer;
-import ru.prolib.aquila.utils.experimental.swing_chart.interpolator.SmoothLineRenderer;
+import ru.prolib.aquila.utils.experimental.chart.StaticOverlay;
+import ru.prolib.aquila.utils.experimental.chart.formatters.*;
+import ru.prolib.aquila.utils.experimental.chart.interpolator.PolyLineRenderer;
+import ru.prolib.aquila.utils.experimental.chart.interpolator.SmoothLineRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.*;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.*;
 
 /**
  * Created by TiM on 09.09.2017.

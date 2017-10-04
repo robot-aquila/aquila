@@ -5,7 +5,7 @@ import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 import java.awt.*;
 import java.util.List;

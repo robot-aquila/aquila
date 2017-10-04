@@ -3,14 +3,14 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.swing_chart.Utils;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.Utils;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.*;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.*;
 
 /**
  * Created by TiM on 13.09.2017.

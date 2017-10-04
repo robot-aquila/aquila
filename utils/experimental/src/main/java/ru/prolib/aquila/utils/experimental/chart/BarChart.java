@@ -3,7 +3,7 @@ package ru.prolib.aquila.utils.experimental.chart;
 import java.util.List;
 
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 /**
  * Created by TiM on 08.09.2017.

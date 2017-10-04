@@ -6,8 +6,8 @@ import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.CANDLE_MIN_WIDTH;
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.CANDLE_WIDTH_RATIO;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.CANDLE_MIN_WIDTH;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.CANDLE_WIDTH_RATIO;
 
 /**
  * Created by TiM on 13.09.2017.

@@ -12,11 +12,11 @@ import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLaye
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.IndicatorBarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradesBarChartLayer;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.AbsNumberLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.InstantLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.axis.formatters.NumberLabelFormatter;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfo;
-import ru.prolib.aquila.utils.experimental.swing_chart.layers.TradeInfoList;
+import ru.prolib.aquila.utils.experimental.chart.formatters.AbsNumberLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradeInfo;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradeInfoList;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,9 +24,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.Instant;
 import java.util.Random;
-import java.util.List;
 
-import static ru.prolib.aquila.utils.experimental.swing_chart.ChartConstants.BAR_COLOR;
+import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.BAR_COLOR;
 
 /**
  * Created by TiM on 10.06.2017.
