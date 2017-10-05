@@ -65,6 +65,7 @@ import ru.prolib.aquila.utils.experimental.chart.ChartOrientation;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelHandler;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.CurrentValueLayer;
 import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.*;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
@@ -85,6 +86,7 @@ public class SecuritySimulationTest implements Experiment {
 	private static final Logger logger;
 
 	private static final String CANDLE_SERIES = "OHLC";
+	private static final String CANDLE_CLOSE_SERIES = "CLOSE";
 	private static final String QEMA7_CANDLE_CLOSE_SERIES = "QEMA(Close,7)";
 	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
 	private static final String CANDLE_VOLUME_SERIES = "Volume";
@@ -167,9 +169,11 @@ public class SecuritySimulationTest implements Experiment {
 		String signalID = rSymbol + "_CMA(7, 14)";
 
 		EditableTSeries<Candle> candleSeries = slice.createSeries(CANDLE_SERIES, true);
-		TSeries<Double> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, new CandleCloseTSeries(candleSeries), 7);
-		TSeries<Double> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, new CandleCloseTSeries(candleSeries), 14);
+		TSeries<Double> closeSeries = new CandleCloseTSeries(CANDLE_CLOSE_SERIES, candleSeries);
+		TSeries<Double> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7);
+		TSeries<Double> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14);
 		TSeries<Long> volumeSeries = new CandleVolumeTSeries(CANDLE_VOLUME_SERIES, candleSeries);
+		slice.registerRawSeries(closeSeries);
 		slice.registerRawSeries(qema7Series);
 		slice.registerRawSeries(qema14Series);
 		slice.registerRawSeries(volumeSeries);
@@ -286,6 +290,7 @@ public class SecuritySimulationTest implements Experiment {
 		chart.addLayer(new CandleBarChartLayer<>(slice.getSeries(CANDLE_SERIES)));
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
+		chart.addLayer(new CurrentValueLayer<>(slice.getSeries(CANDLE_CLOSE_SERIES)));
 
 		chart = chartPanel.addChart("VOLUMES")
 				.setHeight(200)

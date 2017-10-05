@@ -8,15 +8,10 @@ import ru.prolib.aquila.core.data.tseries.*;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelHandler;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.HistogramBarChartLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.IndicatorBarChartLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradesBarChartLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.*;
 import ru.prolib.aquila.utils.experimental.chart.formatters.AbsNumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradeInfo;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.TradeInfoList;
 
 import javax.swing.*;
 import java.awt.*;
@@ -66,6 +61,7 @@ public class MainChart {
         chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.addLayer(new CandleBarChartLayer<>(candles));
         chart.addLayer(new TradesBarChartLayer<Instant>(trades).setColor(TradesBarChartLayer.SELL_COLOR, Color.BLUE));
+        chart.addLayer(new CurrentValueLayer<>(closes));
 
         chart.addSmoothLine(new CandleCloseTSeries("Close", candles)).setColor(Color.BLUE);
 

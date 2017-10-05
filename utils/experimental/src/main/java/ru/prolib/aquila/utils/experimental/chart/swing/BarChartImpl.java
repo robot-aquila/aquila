@@ -260,7 +260,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         rightAxis.paint(vc, vlp);
 
         drawGridLines(vc);
-        g2.clip(new Rectangle2D.Double(vc.getPlotBounds().getX(), vc.getPlotBounds().getY(), vc.getPlotBounds().getWidth(), vc.getPlotBounds().getHeight()));
+        g2.clip(new Rectangle2D.Double(g2.getClipBounds().getMinX(), vc.getPlotBounds().getY(), g2.getClipBounds().getWidth(), vc.getPlotBounds().getHeight()));
         for(BarChartLayer<TCategory> layer: layers){
             layer.paint(vc);
         }

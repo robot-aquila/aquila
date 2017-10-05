@@ -40,9 +40,9 @@ public class BarChartPanelHandler<TCategory> implements EventListener {
                     chartPanel.setVisibleArea(from, chartPanel.getNumberOfVisibleCategories()); // we need update Scrollbar
                 }
             } else {
-                if(changedIdx >= from && changedIdx <= to){ // changed item displayed
-                    chartPanel.setVisibleArea(from, chartPanel.getNumberOfVisibleCategories());
-                }
+//                if(changedIdx >= from && changedIdx <= to){ // changed item displayed
+                    chartPanel.setVisibleArea(from, chartPanel.getNumberOfVisibleCategories()); // we need update current value layer always
+//                }
             }
         }
 
