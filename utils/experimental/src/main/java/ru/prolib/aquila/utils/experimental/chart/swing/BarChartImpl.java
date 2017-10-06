@@ -295,7 +295,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
             g.setColor(GRID_LINES_COLOR);
             Rectangle2D plotBounds = new Rectangle2D.Double(vc.getPlotBounds().getX(), vc.getPlotBounds().getY(), vc.getPlotBounds().getWidth(), vc.getPlotBounds().getHeight());
             g.draw(plotBounds);
-            for(int i=0; i<=numberOfVisibleCategories; i++){
+            for(int i=0; i<numberOfVisibleCategories; i++){
                 int x = vc.toCanvasX(i);
                 g.draw(new Line2D.Double(x, plotBounds.getMinY(), x, plotBounds.getMaxY()));
             }

@@ -53,12 +53,12 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
 
     @Override
     public int toCategoryIdx(int canvasX, int canvasY) {
-        return (int) Math.round ((canvasX - plotBounds.getX())/getStepX() - 1);
+        return (int) Math.round ((canvasX - plotBounds.getX())/getStepX() - 0.5);
     }
 
     @Override
     public int toCanvasX(int displayedCategoryIdx) {
-        return (int) Math.round(plotBounds.getX() + getStepX()*(displayedCategoryIdx+1));
+        return (int) Math.round(plotBounds.getX() + getStepX()*(displayedCategoryIdx + 0.5));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
 
     @Override
     public double getStepX() {
-        return plotBounds.getWidth()/(number+1d);
+        return plotBounds.getWidth()/(number+1e-6);
     }
 
     @Override
