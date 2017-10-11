@@ -41,7 +41,7 @@ public class ChartConstants {
     public static final int TOOLTIP_MARGIN = 10;
 
     public static final Color CURRENT_VALUE_TEXT_COLOR = Color.BLUE;
-    public static final Color CURRENT_VALUE_BG_COLOR = SELECTION_COLOR;
+    public static final Color CURRENT_VALUE_BG_COLOR = new Color(192,192,192,255);
     public static final Color CURRENT_VALUE_LINE_COLOR = SELECTION_COLOR;
     public static final int CURRENT_VALUE_LINE_WIDTH = 2;
 }
