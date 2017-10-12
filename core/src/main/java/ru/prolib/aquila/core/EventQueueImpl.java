@@ -60,17 +60,17 @@ public class EventQueueImpl implements EventQueue {
 		}
 		
 		try {
-			if ( queue.size() >= maxSize ) {
-				logger.warn("Queue is slow: {}", name);
-				// Wait if this thread is not a worker thread.
-				if ( Thread.currentThread() != thread ) {
-					int expSize = (int)(maxSize * 0.4); // wait for 60% free size
-					logger.debug("Isn't worker thread. Wait until queue has free space. Limit: {} pcs.", expSize);
-					do {
-						Thread.sleep(50L);
-					} while ( queue.size() >= expSize );
-				}
-			}
+			//if ( queue.size() >= maxSize ) {
+			//	logger.warn("Queue is slow: {}", name);
+			//	// Wait if this thread is not a worker thread.
+			//	if ( Thread.currentThread() != thread ) {
+			//		int expSize = (int)(maxSize * 0.4); // wait for 60% free size
+			//		logger.debug("Isn't worker thread. Wait until queue has free space. Limit: {} pcs.", expSize);
+			//		do {
+			//			Thread.sleep(50L);
+			//		} while ( queue.size() >= expSize );
+			//	}
+			//}
 			queue.put(event);
 		} catch ( InterruptedException e ) {
 			Thread.currentThread().interrupt();
