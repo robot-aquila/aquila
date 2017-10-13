@@ -14,131 +14,164 @@ import org.slf4j.LoggerFactory;
  */
 public class EventQueueImpl implements EventQueue {
 	private static final Logger logger;
-	private final BlockingQueue<Event> queue;
-	private final String name;
-	private final Thread thread;
-	private final int maxSize = 5120;
+	private static int queueLastIndex;
 	
 	static {
 		logger = LoggerFactory.getLogger(EventQueueImpl.class);
 	}
 	
+	private static String getNextQueueName() {
+		queueLastIndex ++;
+		return "EQUE-" + queueLastIndex;
+	}
+
+	private final BlockingQueue<EventDispatchingRequest> queue;
+	private final String queueName;
+	private final Thread dispatcherThread;
+
 	/**
-	 * Создать очередь событий.
+	 * Constructor.
 	 * <p>
-	 * @param threadName наименование потока диспетчера очереди событий
+	 * @param queueName - the name of queue (used to identify threads)
+	 * @param numOfWorkerThreads - number of threads to event delivery
 	 */
-	public EventQueueImpl(String threadName) {
-		super();
-		this.name = threadName;
-		queue = new LinkedBlockingQueue<Event>();
-		thread = new Thread(new QueueWorker(queue), name);
-		thread.setDaemon(true);
-		thread.start();
+	public EventQueueImpl(String queueName, int numOfWorkerThreads) {
+		this.queueName = queueName;
+		this.queue = new LinkedBlockingQueue<EventDispatchingRequest>();
+		this.dispatcherThread = new DispatcherThread(queueName, numOfWorkerThreads, queue);
+		this.dispatcherThread.start();
+	}
+	
+	public EventQueueImpl(String queueName) {
+		this(queueName, 4);
 	}
 	
 	/**
-	 * Создать очередь событий.
+	 * Default constructor.
 	 */
 	public EventQueueImpl() {
-		this("EVNT");
+		this(getNextQueueName());
 	}
 
 	@Override
 	public String getId() {
-		return name;
-	}
-	
-	/**
-	 * Поставить событие в очередь на обработку.
-	 * <p>
-	 * @throws IllegalStateException поток обработки не запущен
-	 */
-	private void enqueue(Event event) {
-		if ( event == null ) {
-			throw new NullPointerException("The event cannot be null");
-		}
-		
-		try {
-			//if ( queue.size() >= maxSize ) {
-			//	logger.warn("Queue is slow: {}", name);
-			//	// Wait if this thread is not a worker thread.
-			//	if ( Thread.currentThread() != thread ) {
-			//		int expSize = (int)(maxSize * 0.4); // wait for 60% free size
-			//		logger.debug("Isn't worker thread. Wait until queue has free space. Limit: {} pcs.", expSize);
-			//		do {
-			//			Thread.sleep(50L);
-			//		} while ( queue.size() >= expSize );
-			//	}
-			//}
-			queue.put(event);
-		} catch ( InterruptedException e ) {
-			Thread.currentThread().interrupt();
-			logger.error("Thread interrupted: ", e);
-		}
-	}
-	
-	/**
-	 * Реализация диспетчеризации событий из очереди.
-	 */
-	static private class QueueWorker implements Runnable {
-		private final BlockingQueue<Event> queue;
-		
-		/**
-		 * Конструктор
-		 * <p>
-		 * @param queue очередь событий
-		 */
-		public QueueWorker(BlockingQueue<Event> queue) {
-			super();
-			this.queue = queue;
-		}
-
-		@Override
-		public void run() {
-			try {
-				Event event;
-				while ( (event = queue.take()) != null ) {
-					for ( EventListener listener : event.getType().getListeners() ) {
-						try {
-							listener.onEvent(event);
-						} catch ( Exception ex ) {
-							logger.error("Unhandled exception: ", ex);
-						}
-					}
-				}
-			} catch ( InterruptedException e ) {
-				logger.error("Queue thread interrupted: ", e);
-				Thread.currentThread().interrupt();
-			} catch ( Throwable e ) {
-				logger.error("Queue thread exception: ", e);
-				throw e;
-			}
-		}
-		
-	}
+		return queueName;
+	}		
 
 	@Override
 	public void enqueue(EventType type, EventFactory factory) {
-		if ( type.hasAlternates() ) {
-			Set<EventType> alternates = new HashSet<EventType>();
-			alternates.add(type);
-			fillUniqueAlternates(alternates, type);
-			for ( EventType alternate : alternates ) {
-				enqueue(factory.produceEvent(alternate));
-			}
-		} else {
-			enqueue(factory.produceEvent(type));	
+		try {
+			queue.put(new EventDispatchingRequest(type, factory));
+		} catch ( InterruptedException e ) {
+			Thread.currentThread().interrupt();
+			logger.error("Interrupted: ", e);
 		}
 	}
 	
-	private void fillUniqueAlternates(Set<EventType> alternates, EventType type) {
-		for ( EventType alternate : type.getAlternateTypes() ) {
-			if ( ! alternates.contains(alternate) ) {
-				alternates.add(alternate);
-				fillUniqueAlternates(alternates, alternate);
+	static class EventDispatchingRequest {
+		private final EventType type;
+		private final EventFactory factory;
+		
+		public EventDispatchingRequest(EventType type, EventFactory factory) {
+			this.type = type;
+			this.factory = factory;
+		}
+	}
+	
+	static class WorkerThreadFactory implements ThreadFactory {
+		private int threadLastIndex = 0;
+		private final String namePrefix;
+		
+		public WorkerThreadFactory(String namePrefix) {
+			this.namePrefix = namePrefix;
+		}
+
+		@Override
+		public synchronized Thread newThread(Runnable r) {
+			threadLastIndex ++;
+			Thread t = new Thread(r, namePrefix + ".WORKER-" + threadLastIndex);
+			t.setDaemon(true);
+			return t;
+		}
+		
+	}
+	
+	static class DeliveryEventTask implements Callable<Object> {
+		private final Event event;
+		private final EventListener listener;
+		
+		public DeliveryEventTask(Event event, EventListener listener) {
+			this.event = event;
+			this.listener = listener;
+		}
+
+		@Override
+		public Object call() throws Exception {
+			try {
+				//logger.debug("Dispatch event {} to listener {}", event, listener);
+				listener.onEvent(event);
+			} catch ( Throwable t ) {
+				logger.error("Unhandled exception: ", t);
+			}
+			return null;
+		}
+		
+	}
+	
+	static class DispatcherThread extends Thread {
+		private final BlockingQueue<EventDispatchingRequest> queue;
+		private final ExecutorService deliveryService;
+		
+		public DispatcherThread(String queueName, int numOfWorkerThreads,
+				BlockingQueue<EventDispatchingRequest> queue)
+		{
+			super(queueName + ".DISPATCHER");
+			setDaemon(true);
+			this.queue = queue;
+			this.deliveryService = Executors.newFixedThreadPool(numOfWorkerThreads,
+					new WorkerThreadFactory(queueName));
+		}
+		
+		@Override
+		public void run() {
+			try {
+				EventDispatchingRequest request;
+				while ( (request = queue.take()) != null ) {
+					for ( Future<Object> x : deliveryService.invokeAll(buildTaskList(request)) ) {
+						x.get();
+					}
+				}
+			} catch ( InterruptedException e ) {
+				logger.error("Interrupted: ", e);
+				Thread.currentThread().interrupt();
+			} catch ( Throwable e ) {
+				logger.error("Unexpected exception: ", e);
 			}
 		}
+		
+		private List<DeliveryEventTask> buildTaskList(EventDispatchingRequest request) {
+			List<DeliveryEventTask> list = new LinkedList<>();
+			Set<EventType> allTypes = new HashSet<>();
+			for ( EventType type : getAllUniqueTypes(allTypes, request.type) ) {
+				Event event = request.factory.produceEvent(type);
+				for ( EventListener listener : type.getListeners() ) {
+					list.add(new DeliveryEventTask(event, listener));
+				}
+			}
+			return list;
+		}
+		
+		
+		private Set<EventType> getAllUniqueTypes(Set<EventType> allTypes, EventType startType) {
+			allTypes.add(startType);
+			for ( EventType alternate : startType.getAlternateTypes() ) {
+				if ( ! allTypes.contains(alternate) ) {
+					getAllUniqueTypes(allTypes, alternate);
+				}
+			}
+			return allTypes;
+		}
+		
 	}
 
 }

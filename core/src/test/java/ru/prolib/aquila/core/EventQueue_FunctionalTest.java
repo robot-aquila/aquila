@@ -21,16 +21,17 @@ public class EventQueue_FunctionalTest {
 	static class ActiveEvent extends EventImpl {
 		private final Runnable action;
 		private final String id;
-		private final CountDownLatch finished = new CountDownLatch(1);
+		private final CountDownLatch finished;
 
-		public ActiveEvent(EventType type, String id) {
-			this(type, id, null);
+		public ActiveEvent(EventType type, String id, CountDownLatch finished) {
+			this(type, id, null, finished);
 		}
 		
-		public ActiveEvent(EventType type, String id, Runnable action) {
+		public ActiveEvent(EventType type, String id, Runnable action, CountDownLatch finished) {
 			super(type);
 			this.action = action;
 			this.id = id;
+			this.finished = finished;
 		}
 		
 		public void activate() {
@@ -85,7 +86,7 @@ public class EventQueue_FunctionalTest {
 	static class AEFactory implements EventFactory {
 		private final String id;
 		private final Runnable r;
-		private CountDownLatch finished;
+		private CountDownLatch finished = new CountDownLatch(1);
 		
 		AEFactory(String id, Runnable r) {
 			this.id = id;
@@ -97,10 +98,8 @@ public class EventQueue_FunctionalTest {
 		}
 
 		@Override
-		public Event produceEvent(EventType type) {
-			ActiveEvent e = new ActiveEvent(type, id, r);
-			finished = e.finished;
-			return e;
+		public synchronized Event produceEvent(EventType type) {
+			return new ActiveEvent(type, id, r, finished);
 		}
 		
 	}
@@ -151,14 +150,14 @@ public class EventQueue_FunctionalTest {
 		fire.add(new AEFactory("e4", r_e4));
 		
 		List<Event> expected = new LinkedList<Event>();
-		expected.add(new ActiveEvent(type, "e1"));
-		expected.add(new ActiveEvent(type, "e2"));
-		expected.add(new ActiveEvent(type, "e1_a"));
-		expected.add(new ActiveEvent(type, "e3"));
-		expected.add(new ActiveEvent(type, "e4"));
-		expected.add(new ActiveEvent(type, "e3_a"));
-		expected.add(new ActiveEvent(type, "eX"));
-		expected.add(new ActiveEvent(type, "e3_b"));
+		expected.add(new ActiveEvent(type, "e1", null));
+		expected.add(new ActiveEvent(type, "e2", null));
+		expected.add(new ActiveEvent(type, "e1_a", null));
+		expected.add(new ActiveEvent(type, "e3", null));
+		expected.add(new ActiveEvent(type, "e4", null));
+		expected.add(new ActiveEvent(type, "e3_a", null));
+		expected.add(new ActiveEvent(type, "eX", null));
+		expected.add(new ActiveEvent(type, "e3_b", null));
 
 		for ( int i = 0; i < fire.size(); i ++ ) {
 			dispatcher.dispatch(type, fire.get(i));
