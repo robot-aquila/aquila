@@ -24,14 +24,10 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
-import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
-import ru.prolib.aquila.core.BusinessEntities.Scheduler;
-import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.tseries.CandleCloseTSeries;
 import ru.prolib.aquila.core.data.tseries.CandleVolumeTSeries;
@@ -281,9 +277,19 @@ public class SecuritySimulationTest implements Experiment {
 
 	private BarChartPanelImpl<Instant> createChartPanel(SDP2DataSlice<SDP2Key> slice){
 		BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(ChartOrientation.HORIZONTAL);
+		Security security = null;
+		try {
+			security = terminal.getSecurity(slice.getSymbol());
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
+		int precision = 2;
+		if(security!=null && security.getScale()!=null) {
+			precision = security.getScale();
+		}
 		BarChart<Instant> chart = chartPanel.addChart("CANDLES")
 				.setHeight(600)
-				.setValuesLabelFormatter(new NumberLabelFormatter())
+				.setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(precision))
 				.addStaticOverlay("Price", 0);
 		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
 		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());

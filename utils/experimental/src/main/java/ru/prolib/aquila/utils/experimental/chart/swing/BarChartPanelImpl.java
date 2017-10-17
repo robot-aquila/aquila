@@ -46,6 +46,8 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     private final Timer updateTooltipTextTimer;
     private final HashMap<JPanel, BarChart<TCategory>> chartByPanel = new HashMap<>();
     private final JPanel rootPanel;
+    private Timer timerRefresh;
+    private int timerRefreshDelay = 50;
 
     private boolean showTooltipForm = false;
 
@@ -156,15 +158,31 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                 }
                 firstVisibleCategoryIndex.set(fst);
 
-                for(BarChart<TCategory> c: charts.values()){
-                    c.setVisibleArea(firstVisibleCategoryIndex.get(), numberOfVisibleCategories.get());
+                if(timerRefresh ==null){
+                    timerRefresh = new Timer(timerRefreshDelay, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            setVisibleArea_(first, number);
+                        }
+                    });
                 }
-                updateCategories();
-                paint();
-                updateScrollbarAndSetValue();
-                updateTooltipText();
+                if(!timerRefresh.isRunning()){
+                    timerRefresh.start();
+                }
             }
         });
+    }
+
+    private void setVisibleArea_(final int first, final int number) {
+        timerRefresh.stop();
+
+        for(BarChart<TCategory> c: charts.values()){
+            c.setVisibleArea(firstVisibleCategoryIndex.get(), numberOfVisibleCategories.get());
+        }
+        updateCategories();
+        paint();
+        updateScrollbarAndSetValue();
+        updateTooltipText();
     }
 
     @Override
