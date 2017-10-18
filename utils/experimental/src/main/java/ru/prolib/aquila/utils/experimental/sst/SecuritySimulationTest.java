@@ -199,6 +199,7 @@ public class SecuritySimulationTest implements Experiment {
 					public void run() {
 						BarChartPanelImpl<Instant> chartPanel = createChartPanel(slice);
 				        tabPanel.addTab("Strategy", chartPanel.getRootPanel());
+				        chartPanel.setVisibleArea(candleSeries.getLength(), chartPanel.getNumberOfVisibleCategories());
 					}
 				});
 			}
