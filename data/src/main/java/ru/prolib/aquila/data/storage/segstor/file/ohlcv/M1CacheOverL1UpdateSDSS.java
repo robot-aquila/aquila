@@ -20,13 +20,23 @@ import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
 import ru.prolib.aquila.data.storage.segstor.file.SegmentFileInfo;
 import ru.prolib.aquila.data.storage.segstor.file.SegmentFileManager;
 
-public class CacheM1SegmentStorageImpl implements SymbolDailySegmentStorage<Candle> {
+/**
+ * Basic OHLCV cache based on L1 data storage.
+ * <p>
+ * This storage transparently builds OHLCV data using underlying Level-1 market
+ * data. This low-level cache uses data of trades of day to combine data in one
+ * minute bars which contain open, high, low, close prices and total bar traded
+ * volume. All bars for each day will be cached to a file to speed-up further
+ * operations. This low-level cache may used to build OHLCV caches for bars of
+ * higher intervals.
+ */
+public class M1CacheOverL1UpdateSDSS implements SymbolDailySegmentStorage<Candle> {
 	public static final String FILE_SUFFIX = "-OHLCV-M1.cache";
 	private final CacheUtils utils;
 	private final SymbolDailySegmentStorage<L1Update> sourceSegments;
 	private final SegmentFileManager cacheManager;
 	
-	public CacheM1SegmentStorageImpl(SymbolDailySegmentStorage<L1Update> sourceSegments,
+	public M1CacheOverL1UpdateSDSS(SymbolDailySegmentStorage<L1Update> sourceSegments,
 			SegmentFileManager cacheManager, CacheUtils utils)
 	{
 		this.sourceSegments = sourceSegments;
@@ -34,7 +44,7 @@ public class CacheM1SegmentStorageImpl implements SymbolDailySegmentStorage<Cand
 		this.utils = utils;
 	}
 	
-	public CacheM1SegmentStorageImpl(SymbolDailySegmentStorage<L1Update> sourceSegments,
+	public M1CacheOverL1UpdateSDSS(SymbolDailySegmentStorage<L1Update> sourceSegments,
 			SegmentFileManager cacheManager)
 	{
 		this(sourceSegments, cacheManager, CacheUtils.getInstance());

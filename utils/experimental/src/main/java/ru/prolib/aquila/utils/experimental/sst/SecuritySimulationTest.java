@@ -42,7 +42,7 @@ import ru.prolib.aquila.data.storage.MDStorage;
 import ru.prolib.aquila.data.storage.ohlcv.M1StorageImpl;
 import ru.prolib.aquila.data.storage.segstor.file.SegmentFileManager;
 import ru.prolib.aquila.data.storage.segstor.file.V1SegmentFileManagerImpl;
-import ru.prolib.aquila.data.storage.segstor.file.ohlcv.CacheM1SegmentStorageImpl;
+import ru.prolib.aquila.data.storage.segstor.file.ohlcv.M1CacheOverL1UpdateSDSS;
 import ru.prolib.aquila.probe.SchedulerImpl;
 import ru.prolib.aquila.probe.datasim.L1UpdateSourceImpl;
 import ru.prolib.aquila.probe.datasim.L1UpdateSourceSATImpl;
@@ -341,7 +341,7 @@ public class SecuritySimulationTest implements Experiment {
 		File cacheDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "aquila-ohlcv-cache");
 		cacheDir.mkdirs();
 		SegmentFileManager cacheManager = new V1SegmentFileManagerImpl(cacheDir);
-		return new M1StorageImpl(new CacheM1SegmentStorageImpl(new FinamL1UpdateSegmentStorage(root),
+		return new M1StorageImpl(new M1CacheOverL1UpdateSDSS(new FinamL1UpdateSegmentStorage(root),
 				cacheManager), ZoneId.of("Europe/Moscow"));
 	}
 

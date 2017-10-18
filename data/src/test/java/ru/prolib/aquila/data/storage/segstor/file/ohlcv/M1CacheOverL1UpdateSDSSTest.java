@@ -32,7 +32,7 @@ import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
 import ru.prolib.aquila.data.storage.segstor.file.SegmentFileInfoImpl;
 import ru.prolib.aquila.data.storage.segstor.file.SegmentFileManager;
 
-public class CacheM1SegmentStorageImplTest {
+public class M1CacheOverL1UpdateSDSSTest {
 	private static final Symbol symbol1, symbol2, symbol3;
 	
 	static {
@@ -45,7 +45,7 @@ public class CacheM1SegmentStorageImplTest {
 	private SymbolDailySegmentStorage<L1Update> sourceStorageMock;
 	private SegmentFileManager cacheManagerMock;
 	private CacheUtils utilsMock;
-	private CacheM1SegmentStorageImpl storage;
+	private M1CacheOverL1UpdateSDSS storage;
 	private DatePoint point1, point2;
 
 	@SuppressWarnings("unchecked")
@@ -55,7 +55,7 @@ public class CacheM1SegmentStorageImplTest {
 		sourceStorageMock = control.createMock(SymbolDailySegmentStorage.class);
 		cacheManagerMock = control.createMock(SegmentFileManager.class);
 		utilsMock = control.createMock(CacheUtils.class);
-		storage = new CacheM1SegmentStorageImpl(sourceStorageMock, cacheManagerMock, utilsMock);
+		storage = new M1CacheOverL1UpdateSDSS(sourceStorageMock, cacheManagerMock, utilsMock);
 		point1 = new DatePoint(2009, 1, 1);
 		point2 = new DatePoint(2015, 12, 31);
 	}
