@@ -33,6 +33,12 @@ public class CacheM1SegmentStorageImpl implements SymbolDailySegmentStorage<Cand
 		this.cacheManager = cacheManager;
 		this.utils = utils;
 	}
+	
+	public CacheM1SegmentStorageImpl(SymbolDailySegmentStorage<L1Update> sourceSegments,
+			SegmentFileManager cacheManager)
+	{
+		this(sourceSegments, cacheManager, CacheUtils.getInstance());
+	}
 
 	@Override
 	public Set<Symbol> listSymbols() {

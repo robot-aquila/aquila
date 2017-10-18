@@ -54,6 +54,7 @@ public class CacheUtils {
 	 * @throws IOException an error occurred
 	 */
 	public Writer createWriter(File file) throws IOException {
+		file.getParentFile().mkdirs();
 		return new CacheSegmentWriter(new File(file.getPath() + TEMP_SUFFIX), file);
 	}
 	

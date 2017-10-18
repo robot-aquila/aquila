@@ -66,6 +66,8 @@ public class CacheUtilsTest {
 	
 	@Test
 	public void testCreateWriter() throws Exception {
+		File temporary = new File("fixture/temp/foo/bar/test.file.temp");
+		File committed = new File("fixture/temp/foo/bar/test.file");
 		CacheSegmentWriter writer = (CacheSegmentWriter) utils.createWriter(committed);
 		
 		assertNotNull(writer);

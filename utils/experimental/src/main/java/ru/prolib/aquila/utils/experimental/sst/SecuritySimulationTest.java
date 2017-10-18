@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.cli.CommandLine;
@@ -36,6 +38,11 @@ import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesByLastTrade;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.data.storage.DataStorageException;
+import ru.prolib.aquila.data.storage.MDStorage;
+import ru.prolib.aquila.data.storage.ohlcv.M1StorageImpl;
+import ru.prolib.aquila.data.storage.segstor.file.SegmentFileManager;
+import ru.prolib.aquila.data.storage.segstor.file.V1SegmentFileManagerImpl;
+import ru.prolib.aquila.data.storage.segstor.file.ohlcv.CacheM1SegmentStorageImpl;
 import ru.prolib.aquila.probe.SchedulerImpl;
 import ru.prolib.aquila.probe.datasim.L1UpdateSourceImpl;
 import ru.prolib.aquila.probe.datasim.L1UpdateSourceSATImpl;
@@ -73,6 +80,7 @@ import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
 import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
+import ru.prolib.aquila.web.utils.finam.segstor.FinamL1UpdateSegmentStorage;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
 
@@ -86,12 +94,13 @@ public class SecuritySimulationTest implements Experiment {
 	private static final String QEMA7_CANDLE_CLOSE_SERIES = "QEMA(Close,7)";
 	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
 	private static final String CANDLE_VOLUME_SERIES = "Volume";
-	private BarChartPanelHandler chartPanelHandler;
+	private BarChartPanelHandler<?> chartPanelHandler;
 	
 	static {
 		logger = LoggerFactory.getLogger(SecuritySimulationTest.class);
 	}
 	
+	private JTabbedPane tabPanel;
 	private EditableTerminal terminal;
 	private MarketSignal signal;
 	private SDP2DataProvider<SDP2Key> sdp2DataProvider;
@@ -159,12 +168,21 @@ public class SecuritySimulationTest implements Experiment {
 		sdp2DataProvider = new SDP2DataProviderImpl<SDP2Key>(new SDP2DataSliceFactoryImpl<>(terminal.getEventQueue()));
 
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
-		logger.debug("Selected strategy symbol: {}", rSymbol);
 		TimeFrame tf = TimeFrame.M1;
-		SDP2DataSlice<SDP2Key> slice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
+		logger.debug("Selected strategy symbol: {}", rSymbol);
+		final SDP2DataSlice<SDP2Key> slice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
 		String signalID = rSymbol + "_CMA(7, 14)";
 
 		EditableTSeries<Candle> candleSeries = slice.createSeries(CANDLE_SERIES, true);
+		MDStorage<TFSymbol, Candle> mds = createMDStorage(root);
+		try ( CloseableIterator<Candle> it = mds.createReader(new TFSymbol(rSymbol, tf), 15, scheduler.getCurrentTime()) ) {
+			while ( it.next() ) {
+				candleSeries.set(it.item().getStartTime(), it.item());
+			}
+		} catch ( Exception e ) {
+			logger.error("Error loading history: ", e);
+		}
+		
 		TSeries<Double> closeSeries = new CandleCloseTSeries(CANDLE_CLOSE_SERIES, candleSeries);
 		TSeries<Double> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7);
 		TSeries<Double> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14);
@@ -173,6 +191,19 @@ public class SecuritySimulationTest implements Experiment {
 		slice.registerRawSeries(qema7Series);
 		slice.registerRawSeries(qema14Series);
 		slice.registerRawSeries(volumeSeries);
+		terminal.onSecurityAvailable().listenOnce(new EventListener() {
+			@Override
+			public void onEvent(Event event) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						BarChartPanelImpl<Instant> chartPanel = createChartPanel(slice);
+				        tabPanel.addTab("Strategy", chartPanel.getRootPanel());
+					}
+				});
+			}
+		});
+
 
 		new CandleSeriesByLastTrade(candleSeries, terminal, rSymbol).start();
 
@@ -218,7 +249,7 @@ public class SecuritySimulationTest implements Experiment {
 			topPanel.add(new SchedulerControlToolbar(messages, (SchedulerImpl) scheduler, filters));
 		}
 		
-		JTabbedPane tabPanel = new JTabbedPane();
+		tabPanel = new JTabbedPane();
         mainPanel.add(tabPanel, BorderLayout.CENTER);
         
         SecurityListTableModel securityTableModel = new SecurityListTableModel(messages);
@@ -253,10 +284,6 @@ public class SecuritySimulationTest implements Experiment {
         tabPanel.add("Positions", new JScrollPane(table));
         new TableModelController(positionTableModel, frame);
         
-        SDP2DataSlice<SDP2Key> dataSlice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
-        BarChartPanelImpl<Instant> chartPanel = createChartPanel(dataSlice);
-        tabPanel.addTab("Strategy", chartPanel.getRootPanel());
-        
         frame.getContentPane().add(mainPanel);
         frame.setVisible(true);
         
@@ -277,15 +304,12 @@ public class SecuritySimulationTest implements Experiment {
 
 	private BarChartPanelImpl<Instant> createChartPanel(SDP2DataSlice<SDP2Key> slice){
 		BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(ChartOrientation.HORIZONTAL);
-		Security security = null;
+		Integer precision = null;
 		try {
-			security = terminal.getSecurity(slice.getSymbol());
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		}
-		int precision = 2;
-		if(security!=null && security.getScale()!=null) {
-			precision = security.getScale();
+			precision = terminal.getSecurity(slice.getSymbol()).getScale();
+		} catch ( SecurityException e ) {
+			logger.error("Unexpected exception: ", e);
+			precision = 0;
 		}
 		BarChart<Instant> chart = chartPanel.addChart("CANDLES")
 				.setHeight(600)
@@ -311,6 +335,14 @@ public class SecuritySimulationTest implements Experiment {
 		chartPanelHandler.subscribe();
 
 		return chartPanel;
+	}
+	
+	private MDStorage<TFSymbol, Candle> createMDStorage(File root) {
+		File cacheDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "aquila-ohlcv-cache");
+		cacheDir.mkdirs();
+		SegmentFileManager cacheManager = new V1SegmentFileManagerImpl(cacheDir);
+		return new M1StorageImpl(new CacheM1SegmentStorageImpl(new FinamL1UpdateSegmentStorage(root),
+				cacheManager), ZoneId.of("Europe/Moscow"));
 	}
 
 }

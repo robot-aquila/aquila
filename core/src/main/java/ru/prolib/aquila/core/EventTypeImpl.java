@@ -120,7 +120,7 @@ public class EventTypeImpl implements EventType {
 
 	@Override
 	public synchronized Set<EventType> getAlternateTypes() {
-		return alternates;
+		return new HashSet<>(alternates);
 	}
 
 	@Override

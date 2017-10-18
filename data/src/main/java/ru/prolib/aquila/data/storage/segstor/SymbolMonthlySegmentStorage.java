@@ -7,6 +7,14 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 
+/**
+ * Storage of symbol data grouped by months.
+ * <p>
+ * This interface represents a storage which stores segments of symbol data.
+ * Each segment associated with symbol and month of year.
+ * <p>
+ * @param <T> - type of stored data
+ */
 public interface SymbolMonthlySegmentStorage<T> {
 
 	/**
