@@ -7,7 +7,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,10 +38,6 @@ import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.MDStorage;
-import ru.prolib.aquila.data.storage.ohlcv.M1StorageImpl;
-import ru.prolib.aquila.data.storage.segstor.file.SegmentFileManager;
-import ru.prolib.aquila.data.storage.segstor.file.V1SegmentFileManagerImpl;
-import ru.prolib.aquila.data.storage.segstor.file.ohlcv.M1CacheOverL1UpdateSDSS;
 import ru.prolib.aquila.probe.SchedulerImpl;
 import ru.prolib.aquila.probe.datasim.L1UpdateSourceImpl;
 import ru.prolib.aquila.probe.datasim.L1UpdateSourceSATImpl;
@@ -79,8 +74,8 @@ import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
 import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
+import ru.prolib.aquila.web.utils.finam.data.FinamData;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
-import ru.prolib.aquila.web.utils.finam.segstor.FinamL1UpdateSegmentStorage;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
 
@@ -168,13 +163,22 @@ public class SecuritySimulationTest implements Experiment {
 		sdp2DataProvider = new SDP2DataProviderImpl<SDP2Key>(new SDP2DataSliceFactoryImpl<>(terminal.getEventQueue()));
 
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
-		TimeFrame tf = TimeFrame.M1;
+		TimeFrame tf = CmdLine.getTimeFrame(cmd);
 		logger.debug("Selected strategy symbol: {}", rSymbol);
+		logger.debug("Selected timeframe: {}", tf);
 		final SDP2DataSlice<SDP2Key> slice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
 		String signalID = rSymbol + "_CMA(7, 14)";
 
 		EditableTSeries<Candle> candleSeries = slice.createSeries(CANDLE_SERIES, true);
-		MDStorage<TFSymbol, Candle> mds = createMDStorage(root);
+		MDStorage<TFSymbol, Candle> mds = null;
+		try {
+			mds = new FinamData().createCachingOHLCV(root,
+				new File(System.getProperty("java.io.tmpdir") + File.separator + "aquila-ohlcv-cache"));
+		} catch ( DataStorageException e ) {
+			logger.error("Creating storage of historical data failed: ", e);
+			return 1;
+		}
+		
 		try ( CloseableIterator<Candle> it = mds.createReader(new TFSymbol(rSymbol, tf), 15, scheduler.getCurrentTime()) ) {
 			while ( it.next() ) {
 				candleSeries.set(it.item().getStartTime(), it.item());
@@ -199,6 +203,7 @@ public class SecuritySimulationTest implements Experiment {
 					public void run() {
 						BarChartPanelImpl<Instant> chartPanel = createChartPanel(slice);
 				        tabPanel.addTab("Strategy", chartPanel.getRootPanel());
+				        chartPanel.paint();
 					}
 				});
 			}
@@ -337,12 +342,4 @@ public class SecuritySimulationTest implements Experiment {
 		return chartPanel;
 	}
 	
-	private MDStorage<TFSymbol, Candle> createMDStorage(File root) {
-		File cacheDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "aquila-ohlcv-cache");
-		cacheDir.mkdirs();
-		SegmentFileManager cacheManager = new V1SegmentFileManagerImpl(cacheDir);
-		return new M1StorageImpl(new M1CacheOverL1UpdateSDSS(new FinamL1UpdateSegmentStorage(root),
-				cacheManager), ZoneId.of("Europe/Moscow"));
-	}
-
 }

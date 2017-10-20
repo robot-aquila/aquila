@@ -1,7 +1,5 @@
 package ru.prolib.aquila.core.data;
 
-import java.time.Instant;
-
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Security;
@@ -9,6 +7,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
+import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesTickAggregator;
 
 /**
  * Candle series utilities.
@@ -51,27 +50,19 @@ public class CSUtils {
 	/**
 	 * Aggregate a trade to candle series.
 	 * <p>
+	 * Deprecated method. Use
+	 * {@link ru.prolib.aquila.core.data.tseries.filler.CandleSeriesTickAggregator CandleSeriesTickAggregator}
+	 * instead.
+	 * <p>
 	 * @param series - target series
 	 * @param lastTrade - tick trade info
 	 * @throws ValueException an error occurred
 	 */
+	@Deprecated
 	public void aggregate(EditableTSeries<Candle> series, Tick lastTrade)
 			throws ValueException
 	{
-		series.lock();
-		try {
-			Instant time = lastTrade.getTime();
-			Candle candle = series.get(time);
-			if ( candle == null ) {
-				candle = new Candle(series.getTimeFrame().getInterval(time),
-						lastTrade.getPrice(), lastTrade.getSize());
-			} else {
-				candle = candle.addTick(lastTrade);
-			}
-			series.set(time, candle);
-		} finally {
-			series.unlock();
-		}
+		CandleSeriesTickAggregator.getInstance().aggregate(series, lastTrade);
 	}
 	
 	public CSFiller createFiller(Security security, TimeFrame tf,

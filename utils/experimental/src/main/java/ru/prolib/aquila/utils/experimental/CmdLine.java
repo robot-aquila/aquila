@@ -9,6 +9,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.timeframe.TFMinutes;
+
 public class CmdLine {
 	public static final String SOPT_ROOT = "r";
 	public static final String SOPT_HELP = "h";
@@ -25,6 +28,7 @@ public class CmdLine {
 	public static final String LOPT_LIST_EXPERIMENTS = "list-experiments";
 	public static final String LOPT_WITH_PROBE_SCHEDULER = "with-probe-scheduler";
 	public static final String LOPT_PROBE_SCHEDULER_START_TIME = "probe-scheduler-start-time";
+	public static final String LOPT_TIMEFRAME = "timeframe";
 	
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -62,6 +66,14 @@ public class CmdLine {
 					+ " current time will be used. This option has only effect"
 					+ " in combination with --" + LOPT_WITH_PROBE_SCHEDULER + " option.")
 				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_TIMEFRAME)
+				.hasArg()
+				.desc("Specify a timeframe by template TN where T is a chrono unit"
+					+ " (M - minutes, H - hours, D - days), N - is length of interval"
+					+ " in chrono units. For example: M1 - 1 minute interval, H4 - 4"
+					+ " hours interval.")
+				.build());
 		return options;
 	}
 	
@@ -95,6 +107,26 @@ public class CmdLine {
 			return false;
 		}
 		return true;
+	}
+	
+	public static TimeFrame getTimeFrame(CommandLine cmd) {
+		String x = cmd.getOptionValue(CmdLine.LOPT_TIMEFRAME, "M1");
+		String u = x.substring(0, 1).toLowerCase();
+		String n = x.substring(1);
+		if ( n.length() > 0 ) {
+			try {
+				int p = Integer.parseInt(n);
+				switch ( u ) {
+				case "m":
+					return new TFMinutes(p);
+				case "h": // TODO: 
+				case "d": // TODO:
+				default:
+					break;	
+				}	
+			} catch ( NumberFormatException e ) { }	
+		}
+		throw new IllegalArgumentException("Unsupported timeframe: " + x);
 	}
 
 }
