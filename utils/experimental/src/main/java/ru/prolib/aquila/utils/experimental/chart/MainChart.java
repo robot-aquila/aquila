@@ -105,7 +105,7 @@ public class MainChart {
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Ask Volume", -1));
 
         chartPanel.setVisibleArea(0, chartPanel.getNumberOfVisibleCategories());
-        BarChartPanelHandler<Instant> handler = new BarChartPanelHandler<>(chartPanel, candlesObs);
+        BarChartPanelHandler handler = new BarChartPanelHandler(candlesObs, chartPanel.getViewport());
         handler.subscribe();
 
 //        chartPanel.addObservableSeries(candlesObs);

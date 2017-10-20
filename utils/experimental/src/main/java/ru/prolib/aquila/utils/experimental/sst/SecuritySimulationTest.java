@@ -89,7 +89,7 @@ public class SecuritySimulationTest implements Experiment {
 	private static final String QEMA7_CANDLE_CLOSE_SERIES = "QEMA(Close,7)";
 	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
 	private static final String CANDLE_VOLUME_SERIES = "Volume";
-	private BarChartPanelHandler<?> chartPanelHandler;
+	private BarChartPanelHandler chartPanelHandler;
 	
 	static {
 		logger = LoggerFactory.getLogger(SecuritySimulationTest.class);
@@ -204,7 +204,6 @@ public class SecuritySimulationTest implements Experiment {
 						BarChartPanelImpl<Instant> chartPanel = createChartPanel(slice);
 				        tabPanel.addTab("Strategy", chartPanel.getRootPanel());
 				        chartPanel.setVisibleArea(candleSeries.getLength(), chartPanel.getNumberOfVisibleCategories());
-				        chartPanel.paint();
 					}
 				});
 			}
@@ -337,7 +336,7 @@ public class SecuritySimulationTest implements Experiment {
 		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES)).setColor(BAR_COLOR);
 
 		chartPanel.setCategories(slice.getIntervalStartSeries());
-		chartPanelHandler = new BarChartPanelHandler<>(chartPanel, slice.getIntervalStartSeries());
+		chartPanelHandler = new BarChartPanelHandler(slice.getIntervalStartSeries(), chartPanel.getViewport());
 		chartPanelHandler.subscribe();
 
 		return chartPanel;

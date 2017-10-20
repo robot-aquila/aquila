@@ -4,18 +4,17 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.core.data.TSeriesEvent;
-import ru.prolib.aquila.utils.experimental.chart.BarChartPanel;
 
 /**
  * Created by TiM on 15.09.2017.
  */
-public class BarChartPanelHandler<TCategory> implements EventListener {
-    private final BarChartPanel<TCategory> chartPanel;
+public class BarChartPanelHandler implements EventListener {
     private final ObservableTSeries<?> series;
+    private final BarChartPanelViewport viewport;
 
-    public BarChartPanelHandler(BarChartPanel<TCategory> chartPanel, ObservableTSeries<?> series) {
-        this.chartPanel = chartPanel;
+    public BarChartPanelHandler(ObservableTSeries<?> series, BarChartPanelViewport viewport) {
         this.series = series;
+        this.viewport = viewport;
     }
 
     public void subscribe(){
@@ -30,21 +29,13 @@ public class BarChartPanelHandler<TCategory> implements EventListener {
     public void onEvent(Event event) {
         if(event.isType(series.onUpdate()) && event instanceof TSeriesEvent){
             TSeriesEvent e = (TSeriesEvent) event;
-            int from = chartPanel.getFirstVisibleCategory();
-            int to = from + chartPanel.getNumberOfVisibleCategories() -1;
-            int changedIdx = e.getIndex();
-            if(e.isNewInterval()){
-                if(series.getLength()-2 == to) { // last item displayed
-                    chartPanel.setVisibleArea(from+1, chartPanel.getNumberOfVisibleCategories());
-                } else {
-                    chartPanel.setVisibleArea(from, chartPanel.getNumberOfVisibleCategories()); // we need update Scrollbar
-                }
+            int from;
+            if(viewport.getAutoScroll()){
+                from = Integer.MAX_VALUE;
             } else {
-//                if(changedIdx >= from && changedIdx <= to){ // changed item displayed
-                    chartPanel.setVisibleArea(from, chartPanel.getNumberOfVisibleCategories()); // we need update current value layer always
-//                }
+                from = viewport.getFirstVisibleCategory();
             }
+            viewport.setFirstVisibleCategory(from);
         }
-
     }
 }
