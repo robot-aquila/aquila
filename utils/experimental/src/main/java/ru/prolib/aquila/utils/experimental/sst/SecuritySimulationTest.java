@@ -162,55 +162,46 @@ public class SecuritySimulationTest implements Experiment {
 		
 		sdp2DataProvider = new SDP2DataProviderImpl<SDP2Key>(new SDP2DataSliceFactoryImpl<>(terminal.getEventQueue()));
 
+		final List<SDP2DataSlice<SDP2Key>> slices = new ArrayList<>();
+
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
 		TimeFrame tf = CmdLine.getTimeFrame(cmd);
 		logger.debug("Selected strategy symbol: {}", rSymbol);
 		logger.debug("Selected timeframe: {}", tf);
 		final SDP2DataSlice<SDP2Key> slice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
 		String signalID = rSymbol + "_CMA(7, 14)";
+		int i = createSeriesBySlice(slice, root, scheduler);
+		if(i!=0){
+			return i;
+		}
+		slices.add(slice);
 
-		EditableTSeries<Candle> candleSeries = slice.createSeries(CANDLE_SERIES, true);
-		MDStorage<TFSymbol, Candle> mds = null;
-		try {
-			mds = new FinamData().createCachingOHLCV(root,
-				new File(System.getProperty("java.io.tmpdir") + File.separator + "aquila-ohlcv-cache"));
-		} catch ( DataStorageException e ) {
-			logger.error("Creating storage of historical data failed: ", e);
-			return 1;
-		}
-		
-		try ( CloseableIterator<Candle> it = mds.createReader(new TFSymbol(rSymbol, tf), 15, scheduler.getCurrentTime()) ) {
-			while ( it.next() ) {
-				candleSeries.set(it.item().getStartTime(), it.item());
+		// Additional timeframes
+		TimeFrame[] timeFrames = {TimeFrame.M5, TimeFrame.M15, TimeFrame.M60};
+		for(TimeFrame timeFrame: timeFrames){
+			final SDP2DataSlice<SDP2Key> tempSlice = sdp2DataProvider.getSlice(new SDP2Key(timeFrame, rSymbol));
+			i = createSeriesBySlice(tempSlice, root, scheduler);
+			if(i!=0){
+				return i;
 			}
-		} catch ( Exception e ) {
-			logger.error("Error loading history: ", e);
+			slices.add(tempSlice);
 		}
-		
-		TSeries<Double> closeSeries = new CandleCloseTSeries(CANDLE_CLOSE_SERIES, candleSeries);
-		TSeries<Double> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7);
-		TSeries<Double> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14);
-		TSeries<Long> volumeSeries = new CandleVolumeTSeries(CANDLE_VOLUME_SERIES, candleSeries);
-		slice.registerRawSeries(closeSeries);
-		slice.registerRawSeries(qema7Series);
-		slice.registerRawSeries(qema14Series);
-		slice.registerRawSeries(volumeSeries);
+
 		terminal.onSecurityAvailable().listenOnce(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						BarChartPanelImpl<Instant> chartPanel = createChartPanel(slice);
-				        tabPanel.addTab("Strategy", chartPanel.getRootPanel());
-				        chartPanel.setVisibleArea(candleSeries.getLength(), chartPanel.getNumberOfVisibleCategories());
+						for(SDP2DataSlice<SDP2Key> s: slices){
+							BarChartPanelImpl<Instant> chartPanel = createChartPanel(s);
+							tabPanel.addTab("Strategy "+s.getTimeFrame(), chartPanel.getRootPanel());
+							chartPanel.setVisibleArea(0, chartPanel.getNumberOfVisibleCategories());
+						}
 					}
 				});
 			}
 		});
-
-
-		new CandleSeriesByLastTrade(candleSeries, terminal, rSymbol).start();
 
 		msigRegistry.register(new CMASignalProviderTS(
 				slice.getObservableSeries(CANDLE_SERIES),
@@ -229,7 +220,7 @@ public class SecuritySimulationTest implements Experiment {
 			logger.error("Unexpected exception: ", e);
 			return 2;
 		}
-		
+
 		// Initialize the main frame
 		JFrame frame = new JFrame();
 		frame.addWindowListener(new WindowAdapter() {
@@ -241,11 +232,11 @@ public class SecuritySimulationTest implements Experiment {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setSize(800,  600);
 		frame.setTitle("Security simulation test");
-		
+
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         mainPanel.setLayout(new BorderLayout());
-        
+
         JPanel topPanel = new JPanel();
         mainPanel.add(topPanel, BorderLayout.PAGE_START);
 		if ( scheduler instanceof ru.prolib.aquila.probe.SchedulerImpl ) {
@@ -253,10 +244,10 @@ public class SecuritySimulationTest implements Experiment {
 			filters.add(new SymbolUpdateTaskFilter(messages));
 			topPanel.add(new SchedulerControlToolbar(messages, (SchedulerImpl) scheduler, filters));
 		}
-		
+
 		tabPanel = new JTabbedPane();
         mainPanel.add(tabPanel, BorderLayout.CENTER);
-        
+
         SecurityListTableModel securityTableModel = new SecurityListTableModel(messages);
         securityTableModel.add(terminal);
         JTable table = new JTable(securityTableModel);
@@ -264,7 +255,7 @@ public class SecuritySimulationTest implements Experiment {
         table.setRowSorter(new TableRowSorter<SecurityListTableModel>(securityTableModel));
         tabPanel.add("Securities", new JScrollPane(table));
         new TableModelController(securityTableModel, frame);
-        
+
         OrderListTableModel orderTableModel = new OrderListTableModel(messages);
         orderTableModel.add(terminal);
         table = new JTable(orderTableModel);
@@ -272,7 +263,7 @@ public class SecuritySimulationTest implements Experiment {
         table.setRowSorter(new TableRowSorter<>(orderTableModel));
         tabPanel.add("Orders", new JScrollPane(table));
         new TableModelController(orderTableModel, frame);
-        
+
         QFPortfolioListTableModel portfolioTableModel = new QFPortfolioListTableModel(messages);
         portfolioTableModel.add(terminal);
         table = new JTable(portfolioTableModel);
@@ -280,7 +271,7 @@ public class SecuritySimulationTest implements Experiment {
         table.setRowSorter(new TableRowSorter<PortfolioListTableModel>(portfolioTableModel));
         tabPanel.add("Accounts", new JScrollPane(table));
         new TableModelController(portfolioTableModel, frame);
-        
+
         QFPositionListTableModel positionTableModel = new QFPositionListTableModel(messages);
         positionTableModel.add(terminal);
         table = new JTable(positionTableModel);
@@ -288,10 +279,10 @@ public class SecuritySimulationTest implements Experiment {
         table.setRowSorter(new TableRowSorter<PositionListTableModel>(positionTableModel));
         tabPanel.add("Positions", new JScrollPane(table));
         new TableModelController(positionTableModel, frame);
-        
+
         frame.getContentPane().add(mainPanel);
         frame.setVisible(true);
-        
+
 		return 0;
 	}
 
@@ -299,7 +290,7 @@ public class SecuritySimulationTest implements Experiment {
 	public int getExitCode() {
 		return 0;
 	}
-	
+
 	private DataProvider newDataProvider(Scheduler scheduler, File root, DataProvider parent) {
 		return new DataProviderImpl(
 			new SymbolUpdateSourceImpl(scheduler, new MoexSymbolUpdateReaderFactory(root)),
@@ -341,5 +332,36 @@ public class SecuritySimulationTest implements Experiment {
 
 		return chartPanel;
 	}
-	
+
+	private int createSeriesBySlice(SDP2DataSlice<SDP2Key> slice, File root, Scheduler scheduler){
+		EditableTSeries<Candle> candleSeries = slice.createSeries(CANDLE_SERIES, true);
+		MDStorage<TFSymbol, Candle> mds = null;
+		try {
+			mds = new FinamData().createCachingOHLCV(root,
+					new File(System.getProperty("java.io.tmpdir") + File.separator + "aquila-ohlcv-cache"));
+		} catch ( DataStorageException e ) {
+			logger.error("Creating storage of historical data failed: ", e);
+			return 1;
+		}
+
+		try ( CloseableIterator<Candle> it = mds.createReader(new TFSymbol(slice.getSymbol(), slice.getTimeFrame()), 15, scheduler.getCurrentTime()) ) {
+			while ( it.next() ) {
+				candleSeries.set(it.item().getStartTime(), it.item());
+			}
+		} catch ( Exception e ) {
+			logger.error("Error loading history: ", e);
+		}
+
+		TSeries<Double> closeSeries = new CandleCloseTSeries(CANDLE_CLOSE_SERIES, candleSeries);
+		TSeries<Double> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7);
+		TSeries<Double> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14);
+		TSeries<Long> volumeSeries = new CandleVolumeTSeries(CANDLE_VOLUME_SERIES, candleSeries);
+		slice.registerRawSeries(closeSeries);
+		slice.registerRawSeries(qema7Series);
+		slice.registerRawSeries(qema14Series);
+		slice.registerRawSeries(volumeSeries);
+
+		new CandleSeriesByLastTrade(candleSeries, terminal, slice.getSymbol()).start();
+		return 0;
+	}
 }

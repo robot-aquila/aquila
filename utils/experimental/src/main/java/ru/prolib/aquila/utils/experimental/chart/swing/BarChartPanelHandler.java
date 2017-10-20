@@ -31,7 +31,8 @@ public class BarChartPanelHandler implements EventListener {
             TSeriesEvent e = (TSeriesEvent) event;
             int from;
             if(viewport.getAutoScroll()){
-                from = Integer.MAX_VALUE;
+                int cnt = series.getLength();
+                from = cnt < viewport.getNumberOfVisibleCategories()?0:cnt - viewport.getNumberOfVisibleCategories();
             } else {
                 from = viewport.getFirstVisibleCategory();
             }
