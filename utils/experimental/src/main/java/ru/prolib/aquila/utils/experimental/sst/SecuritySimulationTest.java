@@ -1,7 +1,6 @@
 package ru.prolib.aquila.utils.experimental.sst;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -193,11 +192,13 @@ public class SecuritySimulationTest implements Experiment {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
+						JPanel chartRoot = new JPanel(new GridLayout(2, 2));
 						for(SDP2DataSlice<SDP2Key> s: slices){
 							BarChartPanelImpl<Instant> chartPanel = createChartPanel(s);
-							tabPanel.addTab("Strategy "+s.getTimeFrame(), chartPanel.getRootPanel());
+							chartRoot.add(chartPanel.getRootPanel());
 							chartPanel.setVisibleArea(0, chartPanel.getNumberOfVisibleCategories());
 						}
+						tabPanel.addTab("Strategy", chartRoot);
 					}
 				});
 			}
@@ -310,7 +311,7 @@ public class SecuritySimulationTest implements Experiment {
 		BarChart<Instant> chart = chartPanel.addChart("CANDLES")
 				.setHeight(600)
 				.setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(precision))
-				.addStaticOverlay("Price", 0);
+				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame(), 0);
 		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
 		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
 		chart.addLayer(new CandleBarChartLayer<>(slice.getSeries(CANDLE_SERIES)));
