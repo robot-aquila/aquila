@@ -6,7 +6,7 @@ import java.util.Set;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TFSymbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.MDStorage;
 
@@ -24,7 +24,7 @@ public class OHLCVStorageImpl implements MDStorage<TFSymbol, Candle> {
 
 	@Override
 	public Set<TFSymbol> getKeys() throws DataStorageException {
-		return registry.getStorage(TimeFrame.M1).getKeys();
+		return registry.getStorage(ZTFrame.M1).getKeys();
 	}
 
 	@Override

@@ -10,9 +10,9 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
  */
 public class TFSymbol {
 	private final Symbol symbol;
-	private final TimeFrame timeFrame;
+	private final ZTFrame timeFrame;
 	
-	public TFSymbol(Symbol symbol, TimeFrame timeFrame) {
+	public TFSymbol(Symbol symbol, ZTFrame timeFrame) {
 		this.symbol = symbol;
 		this.timeFrame = timeFrame;
 	}
@@ -21,7 +21,7 @@ public class TFSymbol {
 		return symbol;
 	}
 	
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return timeFrame;
 	}
 	

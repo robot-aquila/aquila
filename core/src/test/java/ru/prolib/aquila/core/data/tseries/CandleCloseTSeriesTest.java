@@ -14,7 +14,7 @@ import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CandleCloseTSeriesTest {
 	
@@ -37,7 +37,7 @@ public class CandleCloseTSeriesTest {
 		interval1 = Interval.of(T("2017-09-01T06:20:00Z"), duration);
 		interval2 = Interval.of(T("2017-09-01T06:25:00Z"), duration);
 		interval3 = Interval.of(T("2017-09-01T06:30:00Z"), duration);
-		candles = new TSeriesImpl<>(TimeFrame.M5);
+		candles = new TSeriesImpl<>(ZTFrame.M5);
 		series = new CandleCloseTSeries("CLOSE", candles);
 	}
 	
@@ -146,7 +146,7 @@ public class CandleCloseTSeriesTest {
 
 	@Test
 	public void testGetTimeFrame() {
-		assertEquals(TimeFrame.M5, series.getTimeFrame());
+		assertEquals(ZTFrame.M5, series.getTimeFrame());
 	}
 	
 	@Test

@@ -13,7 +13,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.TSeries;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class QEMATSeriesTest {
 	
@@ -154,10 +154,10 @@ public class QEMATSeriesTest {
 	
 	@Test
 	public void testGetTimeFrame() {
-		expect(sourceMock.getTimeFrame()).andReturn(TimeFrame.M15);
+		expect(sourceMock.getTimeFrame()).andReturn(ZTFrame.M15);
 		control.replay();
 		
-		assertEquals(TimeFrame.M15, series.getTimeFrame());
+		assertEquals(ZTFrame.M15, series.getTimeFrame());
 		
 		control.verify();
 	}

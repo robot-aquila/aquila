@@ -23,7 +23,7 @@ public class CSUtils {
 	 * @return true if the data was aggregated, false otherwise
 	 * @throws ValueException - an error occurred
 	 */
-	public boolean aggregate(EditableSeries<Candle> series, TimeFrame tf, Tick lastTrade)
+	public boolean aggregate(EditableSeries<Candle> series, ZTFrame tf, Tick lastTrade)
 			throws ValueException
 	{
 		series.lock();
@@ -65,13 +65,13 @@ public class CSUtils {
 		CandleSeriesTickAggregator.getInstance().aggregate(series, lastTrade);
 	}
 	
-	public CSFiller createFiller(Security security, TimeFrame tf,
+	public CSFiller createFiller(Security security, ZTFrame tf,
 			ObservableSeriesImpl<Candle> candles)
 	{
 		return new CSLastTradeFiller(security, tf, candles, this);
 	}
 	
-	public CSFiller createFiller(Terminal terminal, Symbol symbol, TimeFrame tf,
+	public CSFiller createFiller(Terminal terminal, Symbol symbol, ZTFrame tf,
 			ObservableSeriesImpl<Candle> candles)
 	{
 		try {
@@ -81,7 +81,7 @@ public class CSUtils {
 		}
 	}
 	
-	public CSFiller createFiller(Terminal terminal, Symbol symbol, TimeFrame tf) {
+	public CSFiller createFiller(Terminal terminal, Symbol symbol, ZTFrame tf) {
 		return createFiller(terminal, symbol, tf, createCandleSeries(terminal));
 	}
 	

@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.time.Instant;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +42,11 @@ public class FinalL1UpdateSegmentStorageTest {
 	@Before
 	public void setUp() throws Exception {
 		storage = new FinamL1UpdateSegmentStorage(root);
+	}
+	
+	@Test
+	public void testGetZoneID() {
+		assertEquals(ZoneId.of("Europe/Moscow"), storage.getZoneID());
 	}
 	
 	@Test

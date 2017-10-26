@@ -33,7 +33,7 @@ public class TrueRangeTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		candlesMock = control.createMock(Series.class);
-		source = new CandleSeriesImpl(TimeFrame.M1);
+		source = new CandleSeriesImpl(ZTFrame.M1);
 		indicator = new TrueRange("foo", source);
 	}
 	
@@ -51,7 +51,7 @@ public class TrueRangeTest {
 	@Test
 	public void testGet() throws Exception {
 		Instant time = Instant.parse("2013-10-11T11:12:34Z");
-		TimeFrame tf = source.getTimeFrame();
+		ZTFrame tf = source.getTimeFrame();
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			source.add(new Candle(tf.getInterval(time.plusSeconds(i * 60)), 0d,
 					fixture[i][0], fixture[i][1], fixture[i][2], 0));

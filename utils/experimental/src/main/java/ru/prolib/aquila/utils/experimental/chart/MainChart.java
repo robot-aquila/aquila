@@ -166,12 +166,12 @@ public class MainChart {
         double close = prevClose + (random.nextBoolean()?1:-1) * random.nextDouble()*var;
         double high = Math.max(prevClose, close) + random.nextDouble()*var;
         double low = Math.min(prevClose, close) - random.nextDouble()*var;
-        return new Candle(TimeFrame.M1.getInterval(time), prevClose, high, low, close, random.nextInt(5000));
+        return new Candle(ZTFrame.M1.getInterval(time), prevClose, high, low, close, random.nextInt(5000));
     }
 
     private static void createTestSeries(){
         eventQueue = new EventQueueImpl();
-        TSeriesNodeStorage storage = new TSeriesNodeStorageImpl(TimeFrame.M1);
+        TSeriesNodeStorage storage = new TSeriesNodeStorageImpl(ZTFrame.M1);
         categoriesSeries = new TSeriesNodeStorageKeys(eventQueue, storage);
         candles = new TSeriesImpl<>("CANDLES", storage);
         candlesObs = new ObservableTSeriesImpl<>(eventQueue, candles);

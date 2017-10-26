@@ -5,7 +5,7 @@ import java.time.Instant;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TSeries;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 
 public class CandleCloseTSeries implements TSeries<Double> {
@@ -69,7 +69,7 @@ public class CandleCloseTSeries implements TSeries<Double> {
 	}
 
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return candles.getTimeFrame();
 	}
 

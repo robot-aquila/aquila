@@ -3,7 +3,7 @@ package ru.prolib.aquila.utils.experimental.sst.cs.msig;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.TAMath;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.utils.experimental.sst.cs.CSDataProvider;
 import ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice;
 import ru.prolib.aquila.utils.experimental.sst.cs.CSIndicatorManager;
@@ -16,11 +16,11 @@ public class CMASignalBuilder implements MarketSignalBuilder {
 	private final EventQueue queue;
 	private final CSDataProvider dataProvider;
 	private final Symbol symbol;
-	private final TimeFrame tf;
+	private final ZTFrame tf;
 	private final int shortPeriod, longPeriod;
 	
 	public CMASignalBuilder(EventQueue queue, CSDataProvider dataProvider,
-			Symbol symbol, TimeFrame tf, int shortPeriod, int longPeriod,
+			Symbol symbol, ZTFrame tf, int shortPeriod, int longPeriod,
 			CSIndicatorManager ind)
 	{
 		this.ind = ind;
@@ -33,7 +33,7 @@ public class CMASignalBuilder implements MarketSignalBuilder {
 	}
 	
 	public CMASignalBuilder(EventQueue queue, CSDataProvider dataProvider,
-			Symbol symbol, TimeFrame tf, int shortPeriod, int longPeriod)
+			Symbol symbol, ZTFrame tf, int shortPeriod, int longPeriod)
 	{
 		this(queue, dataProvider, symbol, tf, shortPeriod, longPeriod,
 				CSIndicatorManager.getInstance());

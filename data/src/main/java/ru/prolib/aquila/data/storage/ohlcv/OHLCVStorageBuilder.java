@@ -1,7 +1,6 @@
 package ru.prolib.aquila.data.storage.ohlcv;
 
 import java.io.File;
-import java.time.ZoneId;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.data.Candle;
@@ -24,7 +23,7 @@ public class OHLCVStorageBuilder {
 	
 	public MDStorage<TFSymbol, Candle>
 		createCachingStorage(SymbolDailySegmentStorage<L1Update> tradesStorage,
-				SegmentFileManager cacheManager, ZoneId zoneID)
+				SegmentFileManager cacheManager)
 			throws DataStorageException
 	{
 		return new OHLCVStorageImpl(
@@ -32,8 +31,7 @@ public class OHLCVStorageBuilder {
 				new OHLCVStorageFactoryImpl(
 					new SegmentStorageRegistryImpl(
 						new SegmentStorageFactoryImpl(tradesStorage, cacheManager)
-					),
-					zoneID
+					)
 				)
 			)
 		);
@@ -49,18 +47,15 @@ public class OHLCVStorageBuilder {
 	 * @param tradesStorage - underlying storage containing trades which will
 	 * be used to build aggregated OHLCV data
 	 * @param cacheRootDir - the cache root directory is used to save cache files
-	 * @param zoneID - zone ID to convert UTC time to date of storage files
 	 * @return OHLCV data storage
 	 * @throws DataStorageException if an error occurred
 	 */
 	public MDStorage<TFSymbol, Candle>
 		createCachingStorage(SymbolDailySegmentStorage<L1Update> tradesStorage,
-				File cacheRootDir, ZoneId zoneID)
+				File cacheRootDir)
 			throws DataStorageException
 	{
-		return createCachingStorage(tradesStorage,
-			new V1SegmentFileManagerImpl(cacheRootDir),
-			zoneID);
+		return createCachingStorage(tradesStorage, new V1SegmentFileManagerImpl(cacheRootDir));
 	}
 
 }

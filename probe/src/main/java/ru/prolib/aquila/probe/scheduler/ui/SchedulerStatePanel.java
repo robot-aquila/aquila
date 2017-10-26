@@ -108,10 +108,6 @@ public class SchedulerStatePanel extends JPanel implements ActionListener {
 		timer.start();
 	}
 	
-	public SchedulerStatePanel(IMessages messages, SchedulerState state) {
-		this(messages, state, ZoneId.systemDefault());
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		refreshControls();

@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.DataProviderStub;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class BidMaxVolumeSeriesByBestBidTest {
 	private static final Symbol symbol1 = new Symbol("AAPL"), symbol2 = new Symbol("SBER");
@@ -32,7 +32,7 @@ public class BidMaxVolumeSeriesByBestBidTest {
 
 	@Before
 	public void setUp() throws Exception {
-		series = new TSeriesImpl<>(TimeFrame.M5);
+		series = new TSeriesImpl<>(ZTFrame.M5);
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())
 				.buildTerminal();

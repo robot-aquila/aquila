@@ -3,7 +3,7 @@ package ru.prolib.aquila.utils.experimental.sst.sdp2;
 import java.util.Collection;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public interface SDP2DataProvider<T extends SDP2Key> {
 	
@@ -52,13 +52,13 @@ public interface SDP2DataProvider<T extends SDP2Key> {
 	 * @param symbol - symbol
 	 * @return collection of timeframes
 	 */
-	Collection<TimeFrame> getTimeFrames(Symbol symbol);
+	Collection<ZTFrame> getTimeFrames(Symbol symbol);
 	
 	/**
 	 * Get timeframes of all available slices not tied to symbol.
 	 * <p>
 	 * @return collection of timeframes
 	 */
-	Collection<TimeFrame> getTimeFramesWoSymbol();
+	Collection<ZTFrame> getTimeFramesWoSymbol();
 
 }

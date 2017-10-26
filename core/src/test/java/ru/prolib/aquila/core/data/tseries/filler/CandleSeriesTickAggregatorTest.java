@@ -11,7 +11,7 @@ import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CandleSeriesTickAggregatorTest {
 	
@@ -24,7 +24,7 @@ public class CandleSeriesTickAggregatorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		series = new TSeriesImpl<>(TimeFrame.M5);
+		series = new TSeriesImpl<>(ZTFrame.M5);
 		aggregator = CandleSeriesTickAggregator.getInstance();
 	}
 

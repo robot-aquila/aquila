@@ -11,14 +11,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.TFrame;
+import ru.prolib.aquila.core.data.timeframe.TFMinutes;
 import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
 
 public class SegmentStorageRegistryImplTest {
 	private IMocksControl control;
 	private SymbolDailySegmentStorage<Candle> sdssMock1, sdssMock2;
 	private SegmentStorageFactory sdssFactoryMock;
-	private Map<TimeFrame, SymbolDailySegmentStorage<Candle>> sdssRegistryStub;
+	private Map<TFrame, SymbolDailySegmentStorage<Candle>> sdssRegistryStub;
 	private SegmentStorageRegistryImpl registry;
 
 	@SuppressWarnings("unchecked")
@@ -34,22 +35,22 @@ public class SegmentStorageRegistryImplTest {
 	
 	@Test
 	public void testGetSDSS_ExistsingStorage() throws Exception {
-		sdssRegistryStub.put(TimeFrame.M1, sdssMock2);
+		sdssRegistryStub.put(new TFMinutes(1), sdssMock2);
 		
-		SymbolDailySegmentStorage<Candle> actual = registry.getSDSS(TimeFrame.M1);
+		SymbolDailySegmentStorage<Candle> actual = registry.getSDSS(new TFMinutes(1));
 		
 		assertSame(sdssMock2, actual);
 	}
 
 	@Test
 	public void testGetSDSS_NewStorage() throws Exception {
-		expect(sdssFactoryMock.createSDSS(TimeFrame.M10)).andReturn(sdssMock1);
+		expect(sdssFactoryMock.createSDSS(new TFMinutes(10))).andReturn(sdssMock1);
 		control.replay();
 		
-		SymbolDailySegmentStorage<Candle> actual = registry.getSDSS(TimeFrame.M10);
+		SymbolDailySegmentStorage<Candle> actual = registry.getSDSS(new TFMinutes(10));
 		
 		assertSame(sdssMock1, actual);
-		assertSame(sdssMock1, sdssRegistryStub.get(TimeFrame.M10));
+		assertSame(sdssMock1, sdssRegistryStub.get(new TFMinutes(10)));
 	}
 
 }

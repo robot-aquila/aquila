@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.TSeries;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 
 public class QEMATSeries implements TSeries<Double> {
@@ -110,7 +110,7 @@ public class QEMATSeries implements TSeries<Double> {
 	}
 
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return source.getTimeFrame();
 	}
 

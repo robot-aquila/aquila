@@ -46,13 +46,13 @@ public class CSLastTradeFillerTest {
 				.buildTerminal();
 		security1 = terminal.getEditableSecurity(symbol1);
 		security2 = terminal.getEditableSecurity(symbol2);
-		filler = new CSLastTradeFiller(security1, TimeFrame.M1, series1, utilsMock);
+		filler = new CSLastTradeFiller(security1, ZTFrame.M1, series1, utilsMock);
 	}
 	
 	@Test
 	public void testCtor() {
 		assertSame(security1, filler.getSecurity());
-		assertEquals(TimeFrame.M1, filler.getTF());
+		assertEquals(ZTFrame.M1, filler.getTF());
 		assertSame(series1, filler.getSeries());
 		assertSame(utilsMock, filler.getUtils());
 	}
@@ -101,7 +101,7 @@ public class CSLastTradeFillerTest {
 		Instant time = Instant.parse("2017-08-04T21:20:00Z");
 		Tick trade = Tick.ofTrade(Instant.EPOCH, 24.15d, 100L);
 		filler.start();
-		expect(utilsMock.aggregate(same(series1), eq(TimeFrame.M1), eq(trade)))
+		expect(utilsMock.aggregate(same(series1), eq(ZTFrame.M1), eq(trade)))
 			.andReturn(true);
 		control.replay();
 		
@@ -132,7 +132,7 @@ public class CSLastTradeFillerTest {
 	public void testEquals() {
 		filler.start();
 		Variant<Security> vSec = new Variant<>(security1, security2);
-		Variant<TimeFrame> vTF = new Variant<>(vSec, TimeFrame.M1, TimeFrame.M10);
+		Variant<ZTFrame> vTF = new Variant<>(vSec, ZTFrame.M1, ZTFrame.M10);
 		Variant<ObservableSeriesImpl<Candle>> vSer = new Variant<>(vTF, series1, series2);
 		Variant<CSUtils> vUt = new Variant<>(vSer, utilsMock, control.createMock(CSUtils.class));
 		Variant<Boolean> vStart = new Variant<>(vUt, true, false);
@@ -151,7 +151,7 @@ public class CSLastTradeFillerTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertSame(security1, found.getSecurity());
-		assertEquals(TimeFrame.M1, found.getTF());
+		assertEquals(ZTFrame.M1, found.getTF());
 		assertSame(series1, found.getSeries());
 		assertSame(utilsMock, found.getUtils());
 		assertTrue(found.isStarted());

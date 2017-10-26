@@ -30,7 +30,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesL1UpdateAggregator;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.CacheHeader;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.CacheHeaderImpl;
@@ -288,7 +288,7 @@ public class CacheUtilsTest {
 				interval2 = Interval.of(T("2017-09-12T13:13:00Z"), Duration.ofMinutes(1)),
 				interval3 = Interval.of(T("2017-09-12T13:15:00Z"), Duration.ofMinutes(1)),
 				interval4 = Interval.of(T("2017-09-12T13:17:00Z"), Duration.ofMinutes(1));
-		TSeriesImpl<Candle> series = new TSeriesImpl<Candle>(TimeFrame.M1);
+		TSeriesImpl<Candle> series = new TSeriesImpl<Candle>(ZTFrame.M1);
 		series.set(interval1.getStart(), new Candle(interval1, 100d, 102d,  98d,  99d, 1000L));
 		series.set(interval2.getStart(), new Candle(interval2,  99d, 105d,  99d, 105d, 2000L));
 		series.set(interval3.getStart(), new Candle(interval3, 105d, 107d, 101d, 101d, 3000L));
@@ -310,7 +310,7 @@ public class CacheUtilsTest {
 				interval2 = Interval.of(T("2017-09-12T13:13:00Z"), Duration.ofMinutes(1)),
 				interval3 = Interval.of(T("2017-09-12T13:15:00Z"), Duration.ofMinutes(1)),
 				interval4 = Interval.of(T("2017-09-12T13:17:00Z"), Duration.ofMinutes(1));
-		TSeriesImpl<Candle> series = new TSeriesImpl<Candle>(TimeFrame.M1);
+		TSeriesImpl<Candle> series = new TSeriesImpl<Candle>(ZTFrame.M1);
 		series.set(interval1.getStart(), new Candle(interval1, 100d, 102d,  98d,  99d, 1000L));
 		series.set(interval2.getStart(), new Candle(interval2,  99d, 105d,  99d, 105d, 2000L));
 		series.set(interval3.getStart(), new Candle(interval3, 105d, 107d, 101d, 101d, 3000L));
@@ -337,7 +337,7 @@ public class CacheUtilsTest {
 				+ "2017-09-12T13:15:00Z,105.0,107.0,101.0,101.0,3000\n"
 				+ "2017-09-12T13:17:00Z,101.0,112.0,100.0,108.0,4000\n"));
 		
-		CloseableIterator<Candle> iterator = utils.createIterator(reader, TimeFrame.M1);
+		CloseableIterator<Candle> iterator = utils.createIterator(reader, ZTFrame.M1);
 
 		List<Candle> actual = new ArrayList<>(), expected = new ArrayList<>();
 		Interval interval1 = Interval.of(T("2017-09-12T13:12:00Z"), Duration.ofMinutes(1)),
@@ -360,7 +360,7 @@ public class CacheUtilsTest {
 		Candle expected = new Candle(interval1, 100.0d, 102.14d, 95.01d, 101.15d, 1500L);
 		
 		String line = "2015-05-12T13:45:24Z,100.0,102.14,95.01,101.15,1500";
-		Candle actual = utils.parseOHLCVv1(line, TimeFrame.M1);
+		Candle actual = utils.parseOHLCVv1(line, ZTFrame.M1);
 
 		assertEquals(expected, actual);
 	}
@@ -370,7 +370,7 @@ public class CacheUtilsTest {
 		String line = "foo,bar";
 		
 		try {
-			utils.parseOHLCVv1(line, TimeFrame.M1);
+			utils.parseOHLCVv1(line, ZTFrame.M1);
 			fail("Expected exception: " + IOException.class.getSimpleName());
 		} catch ( IOException e ) {
 			assertEquals("Number of fields mismatch: expected 6 but 2", e.getMessage());
@@ -382,7 +382,7 @@ public class CacheUtilsTest {
 		String line = "foobar,100.0,102.14,95.01,101.15,1500";
 
 		try {
-			utils.parseOHLCVv1(line, TimeFrame.M1);
+			utils.parseOHLCVv1(line, ZTFrame.M1);
 			fail("Expected exception: " + IOException.class.getSimpleName());
 		} catch ( IOException e ) {
 			assertEquals("Bad time format: foobar", e.getMessage());
@@ -394,7 +394,7 @@ public class CacheUtilsTest {
 		String line = "2015-05-12T13:45:24Z,foo,102.14,95.01,101.15,1500";
 		
 		try {
-			utils.parseOHLCVv1(line, TimeFrame.M1);
+			utils.parseOHLCVv1(line, ZTFrame.M1);
 			fail("Expected exception: " + IOException.class.getSimpleName());
 		} catch ( IOException e ) {
 			assertEquals("Bad open price format: foo", e.getMessage());
@@ -406,7 +406,7 @@ public class CacheUtilsTest {
 		String line = "2015-05-12T13:45:24Z,100.0,foo,95.01,101.15,1500";
 		
 		try {
-			utils.parseOHLCVv1(line, TimeFrame.M1);
+			utils.parseOHLCVv1(line, ZTFrame.M1);
 			fail("Expected exception: " + IOException.class.getSimpleName());
 		} catch ( IOException e ) {
 			assertEquals("Bad high price format: foo", e.getMessage());
@@ -418,7 +418,7 @@ public class CacheUtilsTest {
 		String line = "2015-05-12T13:45:24Z,100.0,102.14,foo,101.15,1500";
 		
 		try {
-			utils.parseOHLCVv1(line, TimeFrame.M1);
+			utils.parseOHLCVv1(line, ZTFrame.M1);
 			fail("Expected exception: " + IOException.class.getSimpleName());
 		} catch ( IOException e ) {
 			assertEquals("Bad low price format: foo", e.getMessage());
@@ -430,7 +430,7 @@ public class CacheUtilsTest {
 		String line = "2015-05-12T13:45:24Z,100.0,102.14,95.01,foo,1500";
 		
 		try {
-			utils.parseOHLCVv1(line, TimeFrame.M1);
+			utils.parseOHLCVv1(line, ZTFrame.M1);
 			fail("Expected exception: " + IOException.class.getSimpleName());
 		} catch ( IOException e ) {
 			assertEquals("Bad close price format: foo", e.getMessage());
@@ -442,7 +442,7 @@ public class CacheUtilsTest {
 		String line = "2015-05-12T13:45:24Z,100.0,102.14,95.01,101.15,foo";
 		
 		try {
-			utils.parseOHLCVv1(line, TimeFrame.M1);
+			utils.parseOHLCVv1(line, ZTFrame.M1);
 			fail("Expected exception: " + IOException.class.getSimpleName());
 		} catch ( IOException e ) {
 			assertEquals("Bad volume format: foo", e.getMessage());
@@ -464,7 +464,7 @@ public class CacheUtilsTest {
 		fixture.add(builder.withTime("2017-09-12T16:44:30Z").withPrice(101).withSize(100).buildL1Update());
 		CloseableIterator<L1Update> source = new CloseableIteratorStub<>(fixture);
 		
-		EditableTSeries<Candle> series = utils.buildUsingSourceData(source, TimeFrame.M5,
+		EditableTSeries<Candle> series = utils.buildUsingSourceData(source, ZTFrame.M5,
 				CandleSeriesL1UpdateAggregator.getInstance());
 		
 		assertNotNull(series);

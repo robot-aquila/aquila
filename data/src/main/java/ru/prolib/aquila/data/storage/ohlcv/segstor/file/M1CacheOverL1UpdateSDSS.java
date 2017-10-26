@@ -1,7 +1,7 @@
 package ru.prolib.aquila.data.storage.ohlcv.segstor.file;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.timeframe.TFMinutes;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesL1UpdateAggregator;
 import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
 import ru.prolib.aquila.data.storage.segstor.file.SegmentFileManager;
@@ -22,7 +22,7 @@ public class M1CacheOverL1UpdateSDSS extends IntradayCacheOverSDSS<L1Update> {
 	public M1CacheOverL1UpdateSDSS(SymbolDailySegmentStorage<L1Update> sourceSegments,
 			SegmentFileManager cacheManager, CacheUtils utils)
 	{
-		super(TimeFrame.M1, sourceSegments,
+		super(new TFMinutes(1), sourceSegments,
 			CandleSeriesL1UpdateAggregator.getInstance(), cacheManager, utils);
 	}
 	

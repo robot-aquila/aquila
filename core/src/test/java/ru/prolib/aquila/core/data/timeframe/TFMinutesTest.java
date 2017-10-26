@@ -2,185 +2,79 @@ package ru.prolib.aquila.core.data.timeframe;
 
 import static org.junit.Assert.*;
 
-import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.junit.*;
-import org.threeten.extra.Interval;
+import org.junit.Before;
+import org.junit.Test;
 
 public class TFMinutesTest {
-	private TFMinutes m1, m5, m7, m15, m241;
+	private ZoneId UTC, MSK;
+	private TFMinutes M1, M5, M7;
 
 	@Before
 	public void setUp() throws Exception {
-		m1 = new TFMinutes(1);
-		m5 = new TFMinutes(5);
-		m7 = new TFMinutes(7); // нестандарт
-		m15 = new TFMinutes(15);
-		m241 = new TFMinutes(241); // нестандарт
+		UTC = ZoneId.of("UTC");
+		MSK = ZoneId.of("Europe/Moscow");
+		M1 = new TFMinutes(1);
+		M5 = new TFMinutes(5);
+		M7 = new TFMinutes(7);
 	}
 	
 	@Test
-	public void testIsIntraday() throws Exception {
-		assertTrue(m1.isIntraday());
-		assertTrue(m5.isIntraday());
-		assertTrue(m7.isIntraday());
-		assertTrue(m15.isIntraday());
-		assertTrue(m241.isIntraday());
+	public void testGetLength() {
+		assertEquals(1, M1.getLength());
+		assertEquals(5, M5.getLength());
+		assertEquals(7, M7.getLength());
 	}
 	
 	@Test
-	public void testGetUnit() throws Exception {
-		assertEquals(ChronoUnit.MINUTES, m1.getUnit());
-		assertEquals(ChronoUnit.MINUTES, m5.getUnit());
-		assertEquals(ChronoUnit.MINUTES, m7.getUnit());
-		assertEquals(ChronoUnit.MINUTES, m15.getUnit());
-		assertEquals(ChronoUnit.MINUTES, m241.getUnit());
+	public void testGetUnit() {
+		assertEquals(ChronoUnit.MINUTES, M1.getUnit());
+		assertEquals(ChronoUnit.MINUTES, M5.getUnit());
+		assertEquals(ChronoUnit.MINUTES, M7.getUnit());
 	}
 	
 	@Test
-	public void testGetLength() throws Exception {
-		assertEquals(1, m1.getLength());
-		assertEquals(5, m5.getLength());
-		assertEquals(7, m7.getLength());
-		assertEquals(15, m15.getLength());
-		assertEquals(241, m241.getLength());
+	public void testIsIntraday() {
+		assertTrue(M1.isIntraday());
+		assertTrue(M5.isIntraday());
+		assertTrue(M7.isIntraday());
 	}
 	
 	@Test
-	public void testGetInterval_m1() throws Exception {
-		Instant fix[][] = {
-			// timestamp, from, to
-			{	Instant.parse("2013-10-06T20:22:05.015Z"),
-				Instant.parse("2013-10-06T20:22:00.000Z"),
-				Instant.parse("2013-10-06T20:23:00.000Z") },
-			{	Instant.parse("2013-10-06T23:57:19.213Z"),
-				Instant.parse("2013-10-06T23:57:00.000Z"),
-				Instant.parse("2013-10-06T23:58:00.000Z") },
-			{	Instant.parse("2013-10-06T23:59:34.117Z"),
-				Instant.parse("2013-10-06T23:59:00.000Z"),
-				Instant.parse("2013-10-07T00:00:00.000Z") },
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			Interval expected = Interval.of(fix[i][1], fix[i][2]);
-			assertEquals(msg, expected, m1.getInterval(fix[i][0]));
-		}
+	public void testToTZFrame() {
+		assertEquals(new ZTFMinutes(1, MSK), M1.toZTFrame(MSK));
+		assertEquals(new ZTFMinutes(5, UTC), M5.toZTFrame(UTC));
+		assertEquals(new ZTFMinutes(7, MSK), M7.toZTFrame(MSK));
 	}
 	
 	@Test
-	public void testGetInterval_m5() throws Exception {
-		Instant fix[][] = {
-			// timestamp, from, to
-			{	Instant.parse("2013-10-06T20:22:05.015Z"),
-				Instant.parse("2013-10-06T20:20:00.000Z"),
-				Instant.parse("2013-10-06T20:25:00.000Z") },
-			{	Instant.parse("2013-10-06T23:57:19.213Z"),
-				Instant.parse("2013-10-06T23:55:00.000Z"),
-				Instant.parse("2013-10-07T00:00:00.000Z") },
-			{	Instant.parse("2013-10-06T23:59:34.117Z"),
-				Instant.parse("2013-10-06T23:55:00.000Z"),
-				Instant.parse("2013-10-07T00:00:00.000Z") },
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			Interval expected = Interval.of(fix[i][1], fix[i][2]);
-			assertEquals(msg, expected, m5.getInterval(fix[i][0]));
-		}
+	public void testEquals_SpecialCases() {
+		assertTrue(M7.equals(M7));
+		assertFalse(M7.equals(null));
+		assertFalse(M7.equals(this));
 	}
 	
 	@Test
-	public void testGetInterval_m7() throws Exception {
-		Instant fix[][] = {
-			// timestamp, from, to
-			{	Instant.parse("2013-10-06T00:01:14.715Z"),
-				Instant.parse("2013-10-06T00:00:00.000Z"),
-				Instant.parse("2013-10-06T00:07:00.000Z") },
-			{	Instant.parse("2013-10-06T00:07:00.000Z"),
-				Instant.parse("2013-10-06T00:07:00.000Z"),
-				Instant.parse("2013-10-06T00:14:00.000Z") },
-			{	Instant.parse("2013-10-06T23:51:02.472Z"),
-				Instant.parse("2013-10-06T23:48:00.000Z"),
-				Instant.parse("2013-10-06T23:55:00.000Z") },
-			{	Instant.parse("2013-10-06T23:55:13.024Z"),
-				Instant.parse("2013-10-06T23:55:00.000Z"),
-				Instant.parse("2013-10-07T00:00:00.000Z") },
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			Interval expected = Interval.of(fix[i][1], fix[i][2]);
-			assertEquals(msg, expected, m7.getInterval(fix[i][0]));
-		}
-	}
-
-	@Test
-	public void testGetInterval_m15() throws Exception {
-		Instant fix[][] = {
-			// timestamp, from, to
-			{	Instant.parse("2013-10-06T00:01:14.715Z"),
-				Instant.parse("2013-10-06T00:00:00.000Z"),
-				Instant.parse("2013-10-06T00:15:00.000Z") },
-			{	Instant.parse("2013-10-06T00:07:00.000Z"),
-				Instant.parse("2013-10-06T00:00:00.000Z"),
-				Instant.parse("2013-10-06T00:15:00.000Z") },
-			{	Instant.parse("2013-10-06T23:51:02.472Z"),
-				Instant.parse("2013-10-06T23:45:00.000Z"),
-				Instant.parse("2013-10-07T00:00:00.000Z") },
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			Interval expected = Interval.of(fix[i][1], fix[i][2]);
-			assertEquals(msg, expected, m15.getInterval(fix[i][0]));
-		}
-	}
-	
-	@Test
-	public void testGetInterval_m241() throws Exception {
-		Instant fix[][] = {
-			// timestamp, from, to
-			{	Instant.parse("2013-10-06T00:01:14.715Z"),
-				Instant.parse("2013-10-06T00:00:00.000Z"),
-				Instant.parse("2013-10-06T04:01:00.000Z") },
-			{	Instant.parse("2013-10-06T15:27:13.028Z"),
-				Instant.parse("2013-10-06T12:03:00.000Z"),
-				Instant.parse("2013-10-06T16:04:00.000Z") }, 
-			{	Instant.parse("2013-10-06T23:15:08.182Z"),
-				Instant.parse("2013-10-06T20:05:00.000Z"),
-				Instant.parse("2013-10-07T00:00:00.000Z") },
-		};
-		for ( int i = 0; i < fix.length; i ++ ) {
-			String msg = "At #" + i;
-			Interval expected = Interval.of(fix[i][1], fix[i][2]);
-			assertEquals(msg, expected, m241.getInterval(fix[i][0]));
-		}
-	}
-	
-	@Test
-	public void testEquals() throws Exception {
-		assertTrue(m1.equals(m1));
-		assertTrue(m1.equals(new TFMinutes(1)));
-		assertFalse(m1.equals(m5));
-		assertFalse(m1.equals(null));
-		assertFalse(m1.equals(this));
-	}
-	
-	@Test
-	public void testHashCode() throws Exception {
-		assertEquals(new HashCodeBuilder(859, 175).append(1).toHashCode(), m1.hashCode());
-		assertEquals(new HashCodeBuilder(859, 175).append(5).toHashCode(), m5.hashCode());
-		assertEquals(new HashCodeBuilder(859, 175).append(7).toHashCode(), m7.hashCode());
-		assertEquals(new HashCodeBuilder(859, 175).append(15).toHashCode(), m15.hashCode());
-		assertEquals(new HashCodeBuilder(859, 175).append(241).toHashCode(), m241.hashCode());
+	public void testEquals() {
+		assertTrue(M7.equals(new TFMinutes(7)));
+		assertFalse(M7.equals(M5));
 	}
 	
 	@Test
 	public void testToString() {
-		assertEquals("M1", m1.toString());
-		assertEquals("M5", m5.toString());
-		assertEquals("M7", m7.toString());
-		assertEquals("M15", m15.toString());
-		assertEquals("M241", m241.toString());
+		assertEquals("M1", M1.toString());
+		assertEquals("M5", M5.toString());
+		assertEquals("M7", M7.toString());
+	}
+
+	@Test
+	public void testHashCode() {
+		assertEquals(new HashCodeBuilder(4856141, 13219).append(1).toHashCode(), M1.hashCode());
+		assertEquals(new HashCodeBuilder(4856141, 13219).append(5).toHashCode(), M5.hashCode());
+		assertEquals(new HashCodeBuilder(4856141, 13219).append(7).toHashCode(), M7.hashCode());
 	}
 
 }

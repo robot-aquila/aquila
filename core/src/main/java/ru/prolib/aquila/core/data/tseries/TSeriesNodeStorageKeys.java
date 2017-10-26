@@ -12,7 +12,7 @@ import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.TSeriesUpdate;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 
 public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeriesNodeStorage {
@@ -61,7 +61,7 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 	}
 
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return storage.getTimeFrame();
 	}
 

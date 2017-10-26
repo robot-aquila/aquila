@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.ObservableTSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageKeys;
 
 public class SDP2DataSliceImplTest {
@@ -38,15 +38,15 @@ public class SDP2DataSliceImplTest {
 		obsSeriesMock = control.createMock(ObservableTSeriesImpl.class);
 		symbol = new Symbol("GAZP");
 		entriesStub = new LinkedHashMap<>();
-		slice = new SDP2DataSliceImpl<>(new SDP2Key(TimeFrame.M5, symbol),
+		slice = new SDP2DataSliceImpl<>(new SDP2Key(ZTFrame.M5, symbol),
 				queueMock, storageMock, entriesStub);
 	}
 	
 	@Test
 	public void testCtor() {
-		assertEquals(new SDP2Key(TimeFrame.M5, symbol), slice.getKey());
+		assertEquals(new SDP2Key(ZTFrame.M5, symbol), slice.getKey());
 		assertEquals(symbol, slice.getSymbol());
-		assertSame(TimeFrame.M5, slice.getTimeFrame());
+		assertSame(ZTFrame.M5, slice.getTimeFrame());
 		assertSame(queueMock, slice.getEventQueue());
 		assertSame(storageMock, slice.getStorage());
 		assertSame(storageMock, slice.getIntervalStartSeries());

@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.ZoneId;
 import java.util.Vector;
 
 import javax.swing.Box;
@@ -16,7 +17,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
+import ru.prolib.aquila.core.data.timeframe.ZTFHours;
+import ru.prolib.aquila.core.data.timeframe.ZTFMinutes;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.ui.msg.CommonMsg;
@@ -43,11 +46,11 @@ public class SchedulerOptionsDialog extends JDialog
 	}
 	
 	static class TimeFrameItem {
-		private final TimeFrame timeFrame;
+		private final ZTFrame timeFrame;
 		private final MsgID msgID;
 		private String text;
 		
-		TimeFrameItem(TimeFrame timeFrame, MsgID msgID) {
+		TimeFrameItem(ZTFrame timeFrame, MsgID msgID) {
 			this.timeFrame = timeFrame;
 			this.msgID = msgID;
 		}
@@ -63,7 +66,6 @@ public class SchedulerOptionsDialog extends JDialog
 	private static final String ACTION_CANCEL = "CANCEL";
 	private static final String ACTION_OK = "OK";
 	private static final Vector<ExecutionSpeedItem> EXEC_SPEED;
-	private static final Vector<TimeFrameItem> TIME_FRAME;
 	
 	static {
 		{
@@ -75,30 +77,31 @@ public class SchedulerOptionsDialog extends JDialog
 			list.add(new ExecutionSpeedItem(8, ProbeMsg.SOD_EXEC_SPEED8));			
 			EXEC_SPEED = list;
 		}
-		{
-			Vector<TimeFrameItem> list = new Vector<>();
-			list.add(new TimeFrameItem(TimeFrame.M1, ProbeMsg.SOD_INTERVAL_1MIN));
-			list.add(new TimeFrameItem(TimeFrame.M5, ProbeMsg.SOD_INTERVAL_5MIN));
-			list.add(new TimeFrameItem(TimeFrame.M10, ProbeMsg.SOD_INTERVAL_10MIN));
-			list.add(new TimeFrameItem(TimeFrame.M15, ProbeMsg.SOD_INTERVAL_15MIN));
-			list.add(new TimeFrameItem(TimeFrame.M30, ProbeMsg.SOD_INTERVAL_30MIN));
-			list.add(new TimeFrameItem(TimeFrame.M60, ProbeMsg.SOD_INTERVAL_1HOUR));	
-			TIME_FRAME = list;
-		}
 	};
 	
 	private final JPanel contentPanel = new JPanel();
 	private final JComboBox<ExecutionSpeedItem> cmbExecSpeed;
 	private final JComboBox<TimeFrameItem >cmbTimeFrame;
 	private final JButton btnOK, btnCancel;
+	private final Vector<TimeFrameItem> tframeOptions;
 	private SchedulerOptions selectedOptions;
 	
-	public SchedulerOptionsDialog(IMessages messages) {
+	public SchedulerOptionsDialog(IMessages messages, ZoneId zoneID) {
 		setResizable(false);
 		setAlwaysOnTop(true);
 		setTitle(messages.get(ProbeMsg.SOD_DIALOG_TITLE));
 		setModal(true);
-
+		{
+			Vector<TimeFrameItem> list = new Vector<>();
+			list.add(new TimeFrameItem(new ZTFMinutes( 1, zoneID), ProbeMsg.SOD_INTERVAL_1MIN));
+			list.add(new TimeFrameItem(new ZTFMinutes( 5, zoneID), ProbeMsg.SOD_INTERVAL_5MIN));
+			list.add(new TimeFrameItem(new ZTFMinutes(10, zoneID), ProbeMsg.SOD_INTERVAL_10MIN));
+			list.add(new TimeFrameItem(new ZTFMinutes(15, zoneID), ProbeMsg.SOD_INTERVAL_15MIN));
+			list.add(new TimeFrameItem(new ZTFMinutes(30, zoneID), ProbeMsg.SOD_INTERVAL_30MIN));
+			list.add(new TimeFrameItem(new ZTFHours(1, zoneID), ProbeMsg.SOD_INTERVAL_1HOUR));	
+			tframeOptions = list;
+		}
+		
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
@@ -121,10 +124,10 @@ public class SchedulerOptionsDialog extends JDialog
 			panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
 			panel.add(new JLabel(messages.get(ProbeMsg.SOD_INTERVAL)));
 			panel.add(Box.createRigidArea(new Dimension(10, 0)));
-			for ( TimeFrameItem item : TIME_FRAME ) {
+			for ( TimeFrameItem item : tframeOptions ) {
 				item.text = messages.get(item.msgID);
 			}
-			cmbTimeFrame = new JComboBox<>(TIME_FRAME);
+			cmbTimeFrame = new JComboBox<>(tframeOptions);
 			panel.add(cmbTimeFrame);
 			contentPanel.add(panel);
 		}
@@ -161,9 +164,9 @@ public class SchedulerOptionsDialog extends JDialog
 				cmbExecSpeed.setSelectedIndex(0);
 			}
 		}
-		TimeFrame expectedTimeFrame = initialOptions.getTimeFrame();
-		for ( int i = 0; i < TIME_FRAME.size(); i ++ ) {
-			TimeFrameItem item = TIME_FRAME.get(i);
+		ZTFrame expectedTimeFrame = initialOptions.getTimeFrame();
+		for ( int i = 0; i < tframeOptions.size(); i ++ ) {
+			TimeFrameItem item = tframeOptions.get(i);
 			if ( item.timeFrame == expectedTimeFrame ) {
 				cmbTimeFrame.setSelectedIndex(i);
 			}

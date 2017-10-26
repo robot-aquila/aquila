@@ -22,7 +22,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TFSymbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.DailySegmentsCombiner;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.IntradayMDStorageOverSDSS;
@@ -38,9 +38,9 @@ public class IntradayMDStorageOverSDSSTest {
 		symbol2 = new Symbol("AAPL"),
 		symbol3 = new Symbol("GAZP");
 	private static final TFSymbol
-		tsymbol1 = new TFSymbol(symbol1, TimeFrame.M1),
-		tsymbol2 = new TFSymbol(symbol2, TimeFrame.M1),
-		tsymbol3 = new TFSymbol(symbol3, TimeFrame.M1);
+		tsymbol1 = new TFSymbol(symbol1, ZTFrame.M1),
+		tsymbol2 = new TFSymbol(symbol2, ZTFrame.M1),
+		tsymbol3 = new TFSymbol(symbol3, ZTFrame.M1);
 	
 	static Instant T(String timeString) {
 		return Instant.parse(timeString);
@@ -56,6 +56,7 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	private IMocksControl control;
 	private SymbolDailySegmentStorage<Candle> segstorMock;
+	private ZoneId segstorZoneId;
 	private List<Candle> fixture;
 	private CloseableIteratorStub<Candle> iteratorStub1, iteratorStub2, iteratorStub3;
 	private IntradayMDStorageOverSDSS storage;
@@ -65,7 +66,8 @@ public class IntradayMDStorageOverSDSSTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		segstorMock = control.createMock(SymbolDailySegmentStorage.class);
-		storage = new IntradayMDStorageOverSDSS(segstorMock, ZoneId.of("Europe/Moscow"), TimeFrame.M1);
+		segstorZoneId = ZoneId.of("Europe/Moscow");
+		storage = new IntradayMDStorageOverSDSS(segstorMock, ZTFrame.M1);
 		iteratorStub1 = new CloseableIteratorStub<>();
 		iteratorStub2 = new CloseableIteratorStub<>();
 		iteratorStub3 = new CloseableIteratorStub<>();
@@ -74,7 +76,7 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testCtor_ThrowsIfNotIntraday() throws Exception {
-		storage = new IntradayMDStorageOverSDSS(segstorMock, ZoneId.of("Europe/Moscow"), TimeFrame.D1);
+		storage = new IntradayMDStorageOverSDSS(segstorMock, ZTFrame.D1);
 	}
 	
 	@Test
@@ -125,11 +127,12 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testCreateReader_1K_ThrowsIfTimeFrameUnsupported() throws Exception {
-		storage.createReader(new TFSymbol(symbol1, TimeFrame.M10));
+		storage.createReader(new TFSymbol(symbol1, ZTFrame.M10));
 	}
 	
 	@Test
 	public void testCreateReaderFrom_2KT() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
 		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
@@ -148,6 +151,7 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test
 	public void testCreateReaderFrom_2KT_IfNoSegmentsFound() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		expect(segstorMock.listDailySegments(symbol1, new DatePoint(2017, 9, 15)))
 			.andReturn(new ArrayList<>());
 		control.replay();
@@ -161,11 +165,12 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testCreateReaderFrom_2KT_ThrowsIfTimeFrameUnsupported() throws Exception {
-		storage.createReaderFrom(new TFSymbol(symbol1, TimeFrame.M15), Instant.now());
+		storage.createReaderFrom(new TFSymbol(symbol1, ZTFrame.M15), Instant.now());
 	}
 	
 	@Test
 	public void testCreateReader_3KTI() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
 		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
@@ -184,6 +189,7 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test
 	public void testCreateReader_3KTI_IfNoSegmentsFound() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		expect(segstorMock.listDailySegments(symbol1, new DatePoint(2017, 9, 14))).andReturn(new ArrayList<>());
 		control.replay();
 		CloseableIterator<Candle> actual, expected = new CloseableIteratorStub<>();
@@ -196,11 +202,12 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testCreateReader_3KTI_ThrowsIfTimeFrameUnsupported() throws Exception {
-		storage.createReader(new TFSymbol(symbol1, TimeFrame.D1), T("2017-09-14T20:00:00Z"), 25);
+		storage.createReader(new TFSymbol(symbol1, ZTFrame.D1), T("2017-09-14T20:00:00Z"), 25);
 	}
 	
 	@Test
 	public void testCreateReader_3KTT() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
 		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
@@ -220,6 +227,7 @@ public class IntradayMDStorageOverSDSSTest {
 
 	@Test
 	public void testCreateReader_3KTT_IfNoSegmentsFound() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		expect(segstorMock.listDailySegments(symbol1, new DatePoint(2017, 9, 15),
 				new DatePoint(2018, 5, 10))).andReturn(new ArrayList<>());
 		control.replay();
@@ -233,7 +241,7 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testCreateReader_3KTT_ThrowsIfTimeFrameUnsupported() throws Exception {
-		storage.createReader(new TFSymbol(symbol1, TimeFrame.D1),
+		storage.createReader(new TFSymbol(symbol1, ZTFrame.D1),
 				T("2017-09-14T21:05:00Z"), T("2018-05-10T18:56:00Z"));
 	}
 	
@@ -255,6 +263,7 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test
 	public void testCreateReader_3KIT_IfNoSegmentsAfterSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
 		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
@@ -279,6 +288,7 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test
 	public void testCreateReader_3KIT_IfHasSegmentsAfterSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
 		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
@@ -303,6 +313,7 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test
 	public void testCreateReader_3KIT_IfLastAvailableSegmentBeforeSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
 		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
@@ -326,6 +337,7 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test
 	public void testCreateReader_3KIT_IfNotEnoughValuesBeforeSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
 		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
@@ -348,6 +360,7 @@ public class IntradayMDStorageOverSDSSTest {
 
 	@Test
 	public void testCreateReader_3KIT_IfNoSegmentsFound() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		expect(segstorMock.listDailySegments(symbol1)).andReturn(new ArrayList<>());
 		control.replay();
 		CloseableIterator<Candle> actual, expected = new CloseableIteratorStub<>();
@@ -360,7 +373,7 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testCreateReader_3KIT_ThrowsIfTimeFrameUnsupported() throws Exception {
-		storage.createReader(new TFSymbol(symbol1, TimeFrame.M2), 5, T("2017-10-01T12:02:00Z"));
+		storage.createReader(new TFSymbol(symbol1, ZTFrame.M2), 5, T("2017-10-01T12:02:00Z"));
 	}
 	
 	@Test
@@ -395,7 +408,7 @@ public class IntradayMDStorageOverSDSSTest {
 	
 	@Test (expected=DataStorageException.class)
 	public void testCreateReaderTo_2KT_ThrowsIfTimeFrameUnsupported() throws Exception {
-		storage.createReaderTo(new TFSymbol(symbol1, TimeFrame.M30), T("2017-09-14T21:05:00Z"));
+		storage.createReaderTo(new TFSymbol(symbol1, ZTFrame.M30), T("2017-09-14T21:05:00Z"));
 	}
 
 }

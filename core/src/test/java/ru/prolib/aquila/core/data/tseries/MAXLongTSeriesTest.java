@@ -12,7 +12,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.TSeries;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class MAXLongTSeriesTest {
 	
@@ -152,10 +152,10 @@ public class MAXLongTSeriesTest {
 	
 	@Test
 	public void testGetTimeFrame() {
-		expect(sourceMock.getTimeFrame()).andReturn(TimeFrame.M10);
+		expect(sourceMock.getTimeFrame()).andReturn(ZTFrame.M10);
 		control.replay();
 		
-		assertEquals(TimeFrame.M10, series.getTimeFrame());
+		assertEquals(ZTFrame.M10, series.getTimeFrame());
 		
 		control.verify();
 	}

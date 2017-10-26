@@ -7,12 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class SDP2KeyTest {
 	private static Symbol symbol1 = new Symbol("AAPL"), symbol2 = new Symbol("MSFT");
-	private static TimeFrame tframe1 = TimeFrame.M1, tframe2 = TimeFrame.M15;
+	private static ZTFrame tframe1 = ZTFrame.M1, tframe2 = ZTFrame.M15;
 	private SDP2Key key;
 
 	@Before
@@ -52,7 +52,7 @@ public class SDP2KeyTest {
 	
 	@Test
 	public void testEquals() {
-		Variant<TimeFrame> vTF = new Variant<>(tframe1, tframe2);
+		Variant<ZTFrame> vTF = new Variant<>(tframe1, tframe2);
 		Variant<Symbol> vSym = new Variant<>(vTF, symbol1, symbol2);
 		Variant<?> iterator = vSym;
 		int foundCnt = 0;

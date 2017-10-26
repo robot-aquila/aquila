@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.Writer;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.EditableTSeries;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesAggregator;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.CacheHeaderImpl;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.CacheUtils;
@@ -58,7 +59,7 @@ public class Seg2SegCacheOverSDSSTestHelper<RecordType> {
 	private final SymbolDailySegmentStorage<Candle> storage;
 	private final SegmentFileManager cacheManagerMock;
 	private final CacheUtils utilsMock;
-	private final TimeFrame tframe;
+	private final ZTFrame tframe;
 	private final CandleSeriesAggregator<RecordType> aggregator;
 	private final String cacheFileSuffix;
 	
@@ -78,7 +79,8 @@ public class Seg2SegCacheOverSDSSTestHelper<RecordType> {
 			SymbolDailySegmentStorage<RecordType> sourceStorageMock,
 			SegmentFileManager cacheManagerMock,
 			CacheUtils utilsMock,
-			TimeFrame tframe,
+			ZTFrame tframe,
+			String cacheFileSuffix,
 			CandleSeriesAggregator<RecordType> aggregator)
 	{
 		this.control = control;	
@@ -88,7 +90,17 @@ public class Seg2SegCacheOverSDSSTestHelper<RecordType> {
 		this.utilsMock = utilsMock;
 		this.tframe = tframe;
 		this.aggregator = aggregator;
-		this.cacheFileSuffix = "-OHLCV-" + tframe + ".cache";
+		this.cacheFileSuffix = cacheFileSuffix;
+	}
+	
+	public void testGetZoneID() {
+		ZoneId zone = ZoneId.of("Europe/Moscow");
+		expect(sourceStorageMock.getZoneID()).andReturn(zone);
+		control.replay();
+		
+		assertEquals(zone, storage.getZoneID());
+		
+		control.verify();
 	}
 	
 	public void testListSymbols() {

@@ -6,13 +6,13 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public interface CSDataSlice {
 
 	Symbol getSymbol();
 
-	TimeFrame getTF();
+	ZTFrame getTF();
 
 	ObservableSeries<Candle> getCandleSeries();
 

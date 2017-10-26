@@ -3,7 +3,6 @@ package ru.prolib.aquila.core.BusinessEntities;
 import java.util.Set;
 
 import ru.prolib.aquila.core.EventType;
-import ru.prolib.aquila.core.concurrency.Lockable;
 
 /**
  * Terminal interface.

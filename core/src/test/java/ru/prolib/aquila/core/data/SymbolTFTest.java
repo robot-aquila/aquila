@@ -17,13 +17,13 @@ public class SymbolTFTest {
 
 	@Before
 	public void setUp() throws Exception {
-		key = new TFSymbol(symbol1, TimeFrame.M10);
+		key = new TFSymbol(symbol1, ZTFrame.M10);
 	}
 	
 	@Test
 	public void testCtor2() {
 		assertEquals(symbol1, key.getSymbol());
-		assertEquals(TimeFrame.M10, key.getTimeFrame());
+		assertEquals(ZTFrame.M10, key.getTimeFrame());
 	}
 	
 	@Test
@@ -36,7 +36,7 @@ public class SymbolTFTest {
 	@Test
 	public void testEquals() {
 		Variant<Symbol> vSym = new Variant<>(symbol1, symbol2);
-		Variant<TimeFrame> vTF = new Variant<>(vSym, TimeFrame.M10, TimeFrame.D1);
+		Variant<ZTFrame> vTF = new Variant<>(vSym, ZTFrame.M10, ZTFrame.D1);
 		Variant<?> iterator = vTF;
 		int foundCnt = 0;
 		TFSymbol x, found = null;
@@ -49,20 +49,20 @@ public class SymbolTFTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertEquals(symbol1, found.getSymbol());
-		assertEquals(TimeFrame.M10, found.getTimeFrame());
+		assertEquals(ZTFrame.M10, found.getTimeFrame());
 	}
 	
 	@Test
 	public void testHashCode() {
 		assertEquals(new HashCodeBuilder(648271, 715)
 				.append(symbol1)
-				.append(TimeFrame.M10)
+				.append(ZTFrame.M10)
 				.toHashCode(), key.hashCode());
 	}
 	
 	@Test
 	public void testToString() {
-		assertEquals("AAPL[M10]", key.toString());
+		assertEquals("AAPL[M10[UTC]]", key.toString());
 	}
 
 }

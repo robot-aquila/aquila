@@ -18,7 +18,7 @@ import ru.prolib.aquila.core.data.CloseableIteratorOfSeries;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesAggregator;
 import ru.prolib.aquila.data.storage.segstor.SegmentMetaData;
@@ -181,7 +181,7 @@ public class CacheUtils {
 		}
 	}
 	
-	public Candle parseOHLCVv1(String line, TimeFrame tframe) throws IOException {
+	public Candle parseOHLCVv1(String line, ZTFrame tframe) throws IOException {
 		String chunks[] = StringUtils.splitByWholeSeparatorPreserveAllTokens(line, FS);
 		if ( chunks.length != 6 ) {
 			throw new IOException("Number of fields mismatch: expected 6 but " + chunks.length);
@@ -226,12 +226,12 @@ public class CacheUtils {
 		return new CloseableIteratorOfSeries<>(series);
 	}
 	
-	public CloseableIterator<Candle> createIterator(BufferedReader reader, TimeFrame tframe) {
+	public CloseableIterator<Candle> createIterator(BufferedReader reader, ZTFrame tframe) {
 		return new CacheSegmentReader(reader, tframe, this);
 	}
 	
 	public <T> EditableTSeries<Candle>
-		buildUsingSourceData(CloseableIterator<T> source, TimeFrame tframe,
+		buildUsingSourceData(CloseableIterator<T> source, ZTFrame tframe,
 			CandleSeriesAggregator<T> aggregator) throws Exception
 	{
 		TSeriesImpl<Candle> series = new TSeriesImpl<>(tframe);

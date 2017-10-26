@@ -10,7 +10,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CandleBuilder;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CandleSeriesCandleAggregatorTest {
 	
@@ -23,14 +23,14 @@ public class CandleSeriesCandleAggregatorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		series = new TSeriesImpl<>(TimeFrame.M5);
+		series = new TSeriesImpl<>(ZTFrame.M5);
 		aggregator = CandleSeriesCandleAggregator.getInstance();
 	}
 	
 	@Test
 	public void testAggregate_FirstCandle() throws Exception {
 		aggregator.aggregate(series, new CandleBuilder()
-				.withTimeFrame(TimeFrame.M1)
+				.withTimeFrame(ZTFrame.M1)
 				.withTime("2017-05-02T11:36:53Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.15d)
@@ -40,7 +40,7 @@ public class CandleSeriesCandleAggregatorTest {
 				.buildCandle());
 		
 		Candle expected = new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:35:00Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.15d)
@@ -55,7 +55,7 @@ public class CandleSeriesCandleAggregatorTest {
 	@Test
 	public void testAggregate_AppendToLastCandle() throws Exception {
 		series.set(T("2017-05-02T11:35:00Z"), new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:35:00Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.15d)
@@ -64,7 +64,7 @@ public class CandleSeriesCandleAggregatorTest {
 				.withVolume(1000L)
 				.buildCandle());
 		aggregator.aggregate(series, new CandleBuilder()
-				.withTimeFrame(TimeFrame.M2)
+				.withTimeFrame(ZTFrame.M2)
 				.withTime("2017-05-02T11:38:14Z")
 				.withOpenPrice(89.75d)
 				.withHighPrice(89.75d)
@@ -74,7 +74,7 @@ public class CandleSeriesCandleAggregatorTest {
 				.buildCandle());
 		
 		Candle expected = new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:35:00Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.75d)
@@ -89,7 +89,7 @@ public class CandleSeriesCandleAggregatorTest {
 	@Test
 	public void testAggregate_PastData() throws Exception {
 		series.set(T("2017-05-02T11:35:00Z"), new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:35:00Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.15d)
@@ -98,7 +98,7 @@ public class CandleSeriesCandleAggregatorTest {
 				.withVolume(1000L)
 				.buildCandle());
 		aggregator.aggregate(series, new CandleBuilder()
-				.withTimeFrame(TimeFrame.M2)
+				.withTimeFrame(ZTFrame.M2)
 				.withTime("2017-05-02T11:31:55Z")
 				.withOpenPrice(73.12d)
 				.withHighPrice(74.05d)
@@ -109,7 +109,7 @@ public class CandleSeriesCandleAggregatorTest {
 		
 		assertEquals(2, series.getLength());
 		assertEquals(new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:31:55Z")
 				.withOpenPrice(73.12d)
 				.withHighPrice(74.05d)
@@ -118,7 +118,7 @@ public class CandleSeriesCandleAggregatorTest {
 				.withVolume(1500L)
 				.buildCandle(), series.get(0));
 		assertEquals(new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:35:00Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.15d)
@@ -131,7 +131,7 @@ public class CandleSeriesCandleAggregatorTest {
 	@Test
 	public void testAggregate_NewCandle() throws Exception {
 		series.set(T("2017-05-02T11:35:00Z"), new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:35:00Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.15d)
@@ -140,7 +140,7 @@ public class CandleSeriesCandleAggregatorTest {
 				.withVolume(1000L)
 				.buildCandle());
 		aggregator.aggregate(series, new CandleBuilder()
-				.withTimeFrame(TimeFrame.M2)
+				.withTimeFrame(ZTFrame.M2)
 				.withTime("2017-05-02T11:44:26Z")
 				.withOpenPrice(73.12d)
 				.withHighPrice(74.05d)
@@ -151,7 +151,7 @@ public class CandleSeriesCandleAggregatorTest {
 		
 		assertEquals(2, series.getLength());
 		assertEquals(new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:35:00Z")
 				.withOpenPrice(86.12d)
 				.withHighPrice(89.15d)
@@ -160,7 +160,7 @@ public class CandleSeriesCandleAggregatorTest {
 				.withVolume(1000L)
 				.buildCandle(), series.get(0));
 		assertEquals(new CandleBuilder()
-				.withTimeFrame(TimeFrame.M5)
+				.withTimeFrame(ZTFrame.M5)
 				.withTime("2017-05-02T11:40:55Z")
 				.withOpenPrice(73.12d)
 				.withHighPrice(74.05d)

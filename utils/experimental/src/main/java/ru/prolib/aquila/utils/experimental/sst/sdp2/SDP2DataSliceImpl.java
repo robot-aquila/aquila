@@ -11,7 +11,7 @@ import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.core.data.ObservableTSeriesImpl;
 import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageImpl;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorageKeys;
@@ -98,7 +98,7 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	}
 
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return key.getTimeFrame();
 	}
 	

@@ -17,12 +17,11 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
-import ru.prolib.aquila.core.data.CSUtils;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.DataProviderStub;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CandleSeriesByLastTradeTest {
 	private static final Symbol symbol1 = new Symbol("AAPL"), symbol2 = new Symbol("SBER");
@@ -32,20 +31,21 @@ public class CandleSeriesByLastTradeTest {
 	}
 	
 	private IMocksControl control;
-	private CSUtils utilsMock;
+	private CandleSeriesAggregator<Tick> aggregatorMock;
 	private EditableTSeries<Candle> series;
 	private EditableTerminal terminal;
 	private CandleSeriesByLastTrade filler;
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		utilsMock = control.createMock(CSUtils.class);
-		series = new TSeriesImpl<Candle>(TimeFrame.M1);
+		aggregatorMock = control.createMock(CandleSeriesAggregator.class);
+		series = new TSeriesImpl<Candle>(ZTFrame.M1);
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())
 				.buildTerminal();
-		filler = new CandleSeriesByLastTrade(series, terminal, symbol1, utilsMock);
+		filler = new CandleSeriesByLastTrade(series, terminal, symbol1, aggregatorMock);
 	}
 	
 	@Test
@@ -199,7 +199,7 @@ public class CandleSeriesByLastTradeTest {
 		SecurityTickEvent e = new SecurityTickEvent(security.onLastTrade(), security, Instant.EPOCH, trade);
 		filler.setStarted(true);
 		filler.setSecurity(security);
-		utilsMock.aggregate(series, trade);
+		aggregatorMock.aggregate(series, trade);
 		control.replay();
 		
 		filler.onEvent(e);

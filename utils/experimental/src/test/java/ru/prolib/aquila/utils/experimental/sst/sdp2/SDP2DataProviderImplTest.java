@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class SDP2DataProviderImplTest {
 	private static final Symbol symbol1 = new Symbol("MSFT"), symbol2 = new Symbol("AAPL");
@@ -62,18 +62,18 @@ public class SDP2DataProviderImplTest {
 	
 	@Test
 	public void testGetSlice_ExistingSlice() {
-		slicesStub.put(new SDP2Key(TimeFrame.M15, symbol1), sliceMock1);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol2), sliceMock2);
-		slicesStub.put(new SDP2Key(TimeFrame.M1), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock3);
 		
-		assertSame(sliceMock1, provider.getSlice(new SDP2Key(TimeFrame.M15, symbol1)));
-		assertSame(sliceMock2, provider.getSlice(new SDP2Key(TimeFrame.M10, symbol2)));
-		assertSame(sliceMock3, provider.getSlice(new SDP2Key(TimeFrame.M1)));
+		assertSame(sliceMock1, provider.getSlice(new SDP2Key(ZTFrame.M15, symbol1)));
+		assertSame(sliceMock2, provider.getSlice(new SDP2Key(ZTFrame.M10, symbol2)));
+		assertSame(sliceMock3, provider.getSlice(new SDP2Key(ZTFrame.M1)));
 	}
 	
 	@Test
 	public void testGetSlice_NewSlice() {
-		SDP2Key key = new SDP2Key(TimeFrame.D1, symbol2);
+		SDP2Key key = new SDP2Key(ZTFrame.D1, symbol2);
 		expect(factoryMock1.produce(key)).andReturn(sliceMock1);
 		control.replay();
 		
@@ -85,10 +85,10 @@ public class SDP2DataProviderImplTest {
 	
 	@Test
 	public void testGetSlices1_Symbol() {
-		slicesStub.put(new SDP2Key(TimeFrame.M15, symbol1), sliceMock1);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol2), sliceMock2);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol1), sliceMock3);
-		slicesStub.put(new SDP2Key(TimeFrame.M1), sliceMock4);
+		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol1), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
 		
 		List<SDP2DataSlice<SDP2Key>> expected = new ArrayList<>();
 		expected.add(sliceMock1);
@@ -98,10 +98,10 @@ public class SDP2DataProviderImplTest {
 	
 	@Test
 	public void testGetSlicesWoSymbol() {
-		slicesStub.put(new SDP2Key(TimeFrame.M15, symbol1), sliceMock1);
-		slicesStub.put(new SDP2Key(TimeFrame.M10), sliceMock2);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol1), sliceMock3);
-		slicesStub.put(new SDP2Key(TimeFrame.M1), sliceMock4);
+		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
+		slicesStub.put(new SDP2Key(ZTFrame.M10), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol1), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
 		
 		List<SDP2DataSlice<SDP2Key>> expected = new ArrayList<>();
 		expected.add(sliceMock2);
@@ -111,10 +111,10 @@ public class SDP2DataProviderImplTest {
 	
 	@Test
 	public void testGetSlices() {
-		slicesStub.put(new SDP2Key(TimeFrame.M15, symbol1), sliceMock1);
-		slicesStub.put(new SDP2Key(TimeFrame.M10), sliceMock2);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol1), sliceMock3);
-		slicesStub.put(new SDP2Key(TimeFrame.M1), sliceMock4);
+		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
+		slicesStub.put(new SDP2Key(ZTFrame.M10), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol1), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
 		
 		List<SDP2DataSlice<SDP2Key>> expected = new ArrayList<>();
 		expected.add(sliceMock1);
@@ -126,10 +126,10 @@ public class SDP2DataProviderImplTest {
 	
 	@Test
 	public void testGetSymbols() {
-		slicesStub.put(new SDP2Key(TimeFrame.M15, symbol1), sliceMock1);
-		slicesStub.put(new SDP2Key(TimeFrame.M10), sliceMock2);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol2), sliceMock3);
-		slicesStub.put(new SDP2Key(TimeFrame.M1), sliceMock4);
+		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
+		slicesStub.put(new SDP2Key(ZTFrame.M10), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
 
 		Set<Symbol> expected = new HashSet<>();
 		expected.add(symbol1);
@@ -139,27 +139,27 @@ public class SDP2DataProviderImplTest {
 	
 	@Test
 	public void testGetTimeFrames() {
-		slicesStub.put(new SDP2Key(TimeFrame.M15, symbol1), sliceMock1);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol2), sliceMock2);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol1), sliceMock3);
-		slicesStub.put(new SDP2Key(TimeFrame.M1), sliceMock4);
+		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol1), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
 
-		Set<TimeFrame> expected = new HashSet<>();
-		expected.add(TimeFrame.M15);
-		expected.add(TimeFrame.M10);
+		Set<ZTFrame> expected = new HashSet<>();
+		expected.add(ZTFrame.M15);
+		expected.add(ZTFrame.M10);
 		assertEquals(expected, provider.getTimeFrames(symbol1));
 	}
 
 	@Test
 	public void testGetTimeFramesWoSymbol() {
-		slicesStub.put(new SDP2Key(TimeFrame.M15, symbol1), sliceMock1);
-		slicesStub.put(new SDP2Key(TimeFrame.M10), sliceMock2);
-		slicesStub.put(new SDP2Key(TimeFrame.M10, symbol2), sliceMock3);
-		slicesStub.put(new SDP2Key(TimeFrame.M1), sliceMock4);
+		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
+		slicesStub.put(new SDP2Key(ZTFrame.M10), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
 		
-		Set<TimeFrame> expected = new HashSet<>();
-		expected.add(TimeFrame.M10);
-		expected.add(TimeFrame.M1);
+		Set<ZTFrame> expected = new HashSet<>();
+		expected.add(ZTFrame.M10);
+		expected.add(ZTFrame.M1);
 		assertEquals(expected, provider.getTimeFramesWoSymbol());
 	}
 

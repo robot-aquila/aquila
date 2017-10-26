@@ -6,7 +6,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.core.data.TSeries;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public interface SDP2DataSlice<K extends SDP2Key> {
 	
@@ -29,7 +29,7 @@ public interface SDP2DataSlice<K extends SDP2Key> {
 	 * <p>
 	 * @return timeframe
 	 */
-	TimeFrame getTimeFrame();
+	ZTFrame getTimeFrame();
 	
 	/**
 	 * Get series of start time of existing slice intervals.

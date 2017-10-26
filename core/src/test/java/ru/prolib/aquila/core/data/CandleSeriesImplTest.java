@@ -23,13 +23,13 @@ public class CandleSeriesImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		series = new CandleSeriesImpl(TimeFrame.M5, "foo", 512);
+		series = new CandleSeriesImpl(ZTFrame.M5, "foo", 512);
 		time1 = Instant.parse("2013-10-07T11:00:00Z");
 		time2 = time1.plusSeconds(5 * 60);
 		time3 = time2.plusSeconds(5 * 60);
-		int1 = TimeFrame.M5.getInterval(time1);
-		int2 = TimeFrame.M5.getInterval(time2);
-		int3 = TimeFrame.M5.getInterval(time3);
+		int1 = ZTFrame.M5.getInterval(time1);
+		int2 = ZTFrame.M5.getInterval(time2);
+		int3 = ZTFrame.M5.getInterval(time3);
 		candle1 = new Candle(int1, 144440d, 144440d, 143130d, 143210d, 39621L);
 		candle2 = new Candle(int2, 143230d, 143390d, 143100d, 143290d, 12279L);
 		candle3 = new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L);
@@ -42,26 +42,26 @@ public class CandleSeriesImplTest {
 	
 	@Test
 	public void testConstruct1() throws Exception {
-		series = new CandleSeriesImpl(TimeFrame.M15);
+		series = new CandleSeriesImpl(ZTFrame.M15);
 		assertEquals(Series.DEFAULT_ID, series.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, series.getStorageLimit());
-		assertEquals(TimeFrame.M15, series.getTimeFrame());
+		assertEquals(ZTFrame.M15, series.getTimeFrame());
 	}
 	
 	@Test
 	public void testConstruct2() throws Exception {
-		series = new CandleSeriesImpl(TimeFrame.M1, "zulu24");
+		series = new CandleSeriesImpl(ZTFrame.M1, "zulu24");
 		assertEquals("zulu24", series.getId());
 		assertEquals(SeriesImpl.STORAGE_NOT_LIMITED, series.getStorageLimit());
-		assertEquals(TimeFrame.M1, series.getTimeFrame());
+		assertEquals(ZTFrame.M1, series.getTimeFrame());
 	}
 	
 	@Test
 	public void testConstruct3() throws Exception {
-		series = new CandleSeriesImpl(TimeFrame.M10, "zulu24", 128);
+		series = new CandleSeriesImpl(ZTFrame.M10, "zulu24", 128);
 		assertEquals("zulu24", series.getId());
 		assertEquals(128, series.getStorageLimit());
-		assertEquals(TimeFrame.M10, series.getTimeFrame());
+		assertEquals(ZTFrame.M10, series.getTimeFrame());
 	}
 	
 	@Test
@@ -173,7 +173,7 @@ public class CandleSeriesImplTest {
 	
 	@Test (expected=OutOfIntervalException.class)
 	public void testAdd_ThrowsIfTimeframeMismatch() throws Exception {
-		series.add(new Candle(TimeFrame.M3.getInterval(time1),0d,0d,0d,0d,0L));
+		series.add(new Candle(ZTFrame.M3.getInterval(time1),0d,0d,0d,0d,0L));
 	}
 	
 	@Test
@@ -193,7 +193,7 @@ public class CandleSeriesImplTest {
 	
 	@Test (expected=OutOfIntervalException.class)
 	public void testSet_ThrowsIfIntervalMismatch() throws Exception {
-		Candle bad = new Candle(TimeFrame.M10.getInterval(time1),
+		Candle bad = new Candle(ZTFrame.M10.getInterval(time1),
 				145000d, 145200d, 144950d, 144980d, 41924L);
 		series.add(candle1);
 		series.set(bad);
@@ -365,31 +365,31 @@ public class CandleSeriesImplTest {
 	{
 		Candle input[] = {
 			// candle 1
-			new Candle(TimeFrame.M2.getInterval(time1.plusSeconds(60 * 1)),
+			new Candle(ZTFrame.M2.getInterval(time1.plusSeconds(60 * 1)),
 					144440d, 144440d, 144390d, 144400d,     1L),
-			new Candle(TimeFrame.M1.getInterval(time1.plusSeconds(60 * 2)),
+			new Candle(ZTFrame.M1.getInterval(time1.plusSeconds(60 * 2)),
 					144410d, 144420d, 143130d, 143200d,    20L),
-			new Candle(TimeFrame.M1.getInterval(time1.plusSeconds(60 * 4)),
+			new Candle(ZTFrame.M1.getInterval(time1.plusSeconds(60 * 4)),
 					143190d, 144050d, 143280d, 143290d, 39600L),
 			
 			// candle 2
-			new Candle(TimeFrame.M1.getInterval(time2),
+			new Candle(ZTFrame.M1.getInterval(time2),
 					143230d, 143240d, 143230d, 143240d,     9L),
-			new Candle(TimeFrame.M1.getInterval(time2.plusSeconds(60 * 2)),
+			new Candle(ZTFrame.M1.getInterval(time2.plusSeconds(60 * 2)),
 					143240d, 143300d, 143240d, 143290d,    70L),
-			new Candle(TimeFrame.M1.getInterval(time2.plusSeconds(60 * 3)),
+			new Candle(ZTFrame.M1.getInterval(time2.plusSeconds(60 * 3)),
 					143300d, 143390d, 143290d, 143390d,   200L),
-			new Candle(TimeFrame.M1.getInterval(time2.plusSeconds(60 * 4)),
+			new Candle(ZTFrame.M1.getInterval(time2.plusSeconds(60 * 4)),
 					143320d, 143330d, 143240d, 143290d, 12000L),
 			
 			// candle3
-			new Candle(TimeFrame.M1.getInterval(time3),
+			new Candle(ZTFrame.M1.getInterval(time3),
 					143210d, 143280d, 143200d, 143280d,    90L),
-			new Candle(TimeFrame.M1.getInterval(time3.plusSeconds(60 * 1)),
+			new Candle(ZTFrame.M1.getInterval(time3.plusSeconds(60 * 1)),
 					143220d, 143260d, 143110d, 143110d,   900L),
-			new Candle(TimeFrame.M1.getInterval(time3.plusSeconds(60 * 2)),
+			new Candle(ZTFrame.M1.getInterval(time3.plusSeconds(60 * 2)),
 					143270d, 143320d, 143240d, 143320d,  1000L),
-			new Candle(TimeFrame.M1.getInterval(time3.plusSeconds(60 * 3)),
+			new Candle(ZTFrame.M1.getInterval(time3.plusSeconds(60 * 3)),
 					143300d, 143310d, 143200d, 143190d, 10000L),
 		};
 		Candle candle[] = {
@@ -513,7 +513,7 @@ public class CandleSeriesImplTest {
 	public void testAggregateCandle2_Strict_ThrowsIfBiggerTF()
 		throws Exception
 	{
-		series.aggregate(new Candle(TimeFrame.M10.getInterval(time1),
+		series.aggregate(new Candle(ZTFrame.M10.getInterval(time1),
 				143200d, 143290d, 143190d, 143250d, 1L), false);
 	}
 	
@@ -521,7 +521,7 @@ public class CandleSeriesImplTest {
 	public void testAggregateCandle2_Silent_ThrowsIfBiggerTF()
 		throws Exception
 	{
-		series.aggregate(new Candle(TimeFrame.M10.getInterval(time1),
+		series.aggregate(new Candle(ZTFrame.M10.getInterval(time1),
 				143200d, 143290d, 143190d, 143250d, 1L), true);
 	}
 	
@@ -529,7 +529,7 @@ public class CandleSeriesImplTest {
 	public void testAggregateCandle1_ThrowsIfBiggerTF()
 		throws Exception
 	{
-		series.aggregate(new Candle(TimeFrame.M10.getInterval(time1),
+		series.aggregate(new Candle(ZTFrame.M10.getInterval(time1),
 				143200d, 143290d, 143190d, 143250d, 1L));
 	}
 	
@@ -545,9 +545,9 @@ public class CandleSeriesImplTest {
 	{
 		Instant time = Instant.parse("2013-10-09T00:00:00Z");
 		Candle c1, c2;
-		c1 = new Candle(TimeFrame.M3.getInterval(time),
+		c1 = new Candle(ZTFrame.M3.getInterval(time),
 				146110d, 146110d, 145910d, 145930d, 1L);
-		c2 = new Candle(TimeFrame.M3.getInterval(c1.getEndTime()),
+		c2 = new Candle(ZTFrame.M3.getInterval(c1.getEndTime()),
 				145940d, 145960d, 145820d, 145910d, 1L);
 		
 		action.aggregate(c1);
@@ -673,7 +673,7 @@ public class CandleSeriesImplTest {
 		
 		Instant prev = LocalDateTime.ofInstant(candle1.getStartTime(),
 				ZoneOffset.UTC).minusDays(1).toInstant(ZoneOffset.UTC);
-		TimeFrame t = TimeFrame.M5;
+		ZTFrame t = ZTFrame.M5;
 		Candle candle0 = new Candle(t.getInterval(prev), 0d, 0d, 0d, 0d, 0L);
 		series.add(candle0);
 		

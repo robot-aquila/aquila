@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental;
 
 import java.io.File;
+import java.time.ZoneId;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -9,8 +10,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import ru.prolib.aquila.core.data.TimeFrame;
-import ru.prolib.aquila.core.data.timeframe.TFMinutes;
+import ru.prolib.aquila.core.data.ZTFrame;
+import ru.prolib.aquila.core.data.timeframe.ZTFMinutes;
 
 public class CmdLine {
 	public static final String SOPT_ROOT = "r";
@@ -109,7 +110,7 @@ public class CmdLine {
 		return true;
 	}
 	
-	public static TimeFrame getTimeFrame(CommandLine cmd) {
+	public static ZTFrame getTimeFrame(CommandLine cmd, ZoneId zoneID) {
 		String x = cmd.getOptionValue(CmdLine.LOPT_TIMEFRAME, "M1");
 		String u = x.substring(0, 1).toLowerCase();
 		String n = x.substring(1);
@@ -118,7 +119,7 @@ public class CmdLine {
 				int p = Integer.parseInt(n);
 				switch ( u ) {
 				case "m":
-					return new TFMinutes(p);
+					return new ZTFMinutes(p, zoneID);
 				case "h": // TODO: 
 				case "d": // TODO:
 				default:

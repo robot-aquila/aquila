@@ -6,17 +6,17 @@ import java.util.NoSuchElementException;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CacheSegmentReader implements CloseableIterator<Candle> {
 	private final BufferedReader reader;
-	private final TimeFrame timeFrame;
+	private final ZTFrame timeFrame;
 	private final CacheUtils utils;
 	private Candle lastValue;
 	private long lastNumber = -1;
 	private boolean closed = false;
 	
-	public CacheSegmentReader(BufferedReader reader, TimeFrame timeFrame, CacheUtils utils) {
+	public CacheSegmentReader(BufferedReader reader, ZTFrame timeFrame, CacheUtils utils) {
 		this.reader = reader;
 		this.timeFrame = timeFrame;
 		this.utils = utils;

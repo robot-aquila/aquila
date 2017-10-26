@@ -62,10 +62,10 @@ public class ObservableTSeriesImplTest {
 	
 	@Test
 	public void testGetTimeFrame() {
-		expect(underlyingSeriesMock1.getTimeFrame()).andReturn(TimeFrame.M15);
+		expect(underlyingSeriesMock1.getTimeFrame()).andReturn(ZTFrame.M15);
 		control.replay();
 		
-		assertEquals(TimeFrame.M15, series.getTimeFrame());
+		assertEquals(ZTFrame.M15, series.getTimeFrame());
 		
 		control.verify();
 	}

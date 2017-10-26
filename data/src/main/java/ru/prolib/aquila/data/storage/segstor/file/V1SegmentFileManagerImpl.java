@@ -2,6 +2,8 @@ package ru.prolib.aquila.data.storage.segstor.file;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -93,26 +95,26 @@ public class V1SegmentFileManagerImpl implements SegmentFileManager {
 
 	@Override
 	public SegmentFileInfo getFileInfo(Symbol criteria, String suffix) {
-		return new SegmentFileInfoImpl()
-				.setFullPath(getDirectory(criteria), getBaseName(criteria), suffix);
+		return new SegmentFileInfoImpl().setFullPath(getDirectory(criteria),
+				getBaseName(criteria), encodeSuffix(suffix));
 	}
 
 	@Override
 	public SegmentFileInfoImpl getFileInfo(SymbolDaily criteria, String suffix) {
-		return new SegmentFileInfoImpl()
-				.setFullPath(getDirectory(criteria.toMonthly()), getBaseName(criteria), suffix);
+		return new SegmentFileInfoImpl().setFullPath(getDirectory(criteria.toMonthly()),
+				getBaseName(criteria), encodeSuffix(suffix));
 	}
 
 	@Override
 	public SegmentFileInfo getFileInfo(SymbolMonthly criteria, String suffix) {
-		return new SegmentFileInfoImpl()
-				.setFullPath(getDirectory(criteria.toAnnual()), getBaseName(criteria), suffix);
+		return new SegmentFileInfoImpl().setFullPath(getDirectory(criteria.toAnnual()),
+				getBaseName(criteria), encodeSuffix(suffix));
 	}
 
 	@Override
 	public SegmentFileInfo getFileInfo(SymbolAnnual criteria, String suffix) {
-		return new SegmentFileInfoImpl()
-				.setFullPath(getDirectory(criteria.getSymbol()), getBaseName(criteria), suffix);
+		return new SegmentFileInfoImpl().setFullPath(getDirectory(criteria.getSymbol()),
+				getBaseName(criteria), encodeSuffix(suffix));
 	}
 	
 	@Override
@@ -134,21 +136,21 @@ public class V1SegmentFileManagerImpl implements SegmentFileManager {
 
 	@Override
 	public List<SymbolAnnual> scanForAnnualSegments(Symbol criteria, String suffix) {
-		L3YearFileFilter scanner = new L3YearFileFilter(criteria, suffix);
+		L3YearFileFilter scanner = new L3YearFileFilter(criteria, encodeSuffix(suffix));
 		getDirectory(criteria).list(scanner);
 		return scanner.getFoundSegments(); // The result already sorted by scanner
 	}
 
 	@Override
 	public List<SymbolMonthly> scanForMonthlySegments(SymbolAnnual criteria, String suffix) {
-		L4MonthFileFilter scanner = new L4MonthFileFilter(criteria, suffix);
+		L4MonthFileFilter scanner = new L4MonthFileFilter(criteria, encodeSuffix(suffix));
 		getDirectory(criteria).list(scanner);
 		return scanner.getFoundSegments(); // The result already sorted by scanner
 	}
 
 	@Override
 	public List<SymbolDaily> scanForDailySegments(SymbolMonthly criteria, String suffix) {
-		L5DayFileFilter scanner = new L5DayFileFilter(criteria, suffix);
+		L5DayFileFilter scanner = new L5DayFileFilter(criteria, encodeSuffix(suffix));
 		getDirectory(criteria).list(scanner);
 		return scanner.getFoundSegments(); // The result already sorted by scanner
 	}
@@ -328,4 +330,15 @@ public class V1SegmentFileManagerImpl implements SegmentFileManager {
 				+ "-"
 				+ criteria.getPoint().getYear();
 	}
+	
+	private String encodeSuffix(String suffix) {
+		try {
+			suffix = URLEncoder.encode(suffix, "UTF-8")
+					.replace("*", "%2A");
+			return suffix;
+		} catch ( UnsupportedEncodingException e ) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 }

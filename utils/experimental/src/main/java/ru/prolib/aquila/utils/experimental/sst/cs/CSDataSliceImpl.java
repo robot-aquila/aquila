@@ -14,17 +14,17 @@ import ru.prolib.aquila.core.data.CandleCloseSeries;
 import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.core.data.ObservableSeriesImpl;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CSDataSliceImpl implements CSDataSlice {
 	private final Symbol symbol;
-	private final TimeFrame tf;
+	private final ZTFrame tf;
 	private final ObservableSeriesImpl<Candle> candleSeries;
 	private final CandleCloseSeries closeSeries;
 	private final Map<String, Series<Double>> indicators;
 	private final Collection<Series<Double>> indicatorsRO;
 	
-	public CSDataSliceImpl(Symbol symbol, TimeFrame tf, ObservableSeriesImpl<Candle> candleSeries) {
+	public CSDataSliceImpl(Symbol symbol, ZTFrame tf, ObservableSeriesImpl<Candle> candleSeries) {
 		this.symbol = symbol;
 		this.tf = tf;
 		this.candleSeries = candleSeries;
@@ -33,11 +33,11 @@ public class CSDataSliceImpl implements CSDataSlice {
 		this.indicatorsRO = Collections.unmodifiableCollection(indicators.values());
 	}
 	
-	public CSDataSliceImpl(Symbol symbol, TimeFrame tf, EventQueue queue) {
+	public CSDataSliceImpl(Symbol symbol, ZTFrame tf, EventQueue queue) {
 		this(symbol, tf, new CSUtils().createCandleSeries(queue, "OHLC"));
 	}
 	
-	public CSDataSliceImpl(Symbol symbol, TimeFrame tf, Terminal terminal) {
+	public CSDataSliceImpl(Symbol symbol, ZTFrame tf, Terminal terminal) {
 		this(symbol, tf, new CSUtils().createCandleSeries(terminal, "OHLC"));
 	}
 	
@@ -57,7 +57,7 @@ public class CSDataSliceImpl implements CSDataSlice {
 	 * @see ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice#getTF()
 	 */
 	@Override
-	public TimeFrame getTF() {
+	public ZTFrame getTF() {
 		return tf;
 	}
 	

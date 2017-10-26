@@ -9,6 +9,6 @@ import java.time.Instant;
  */
 public interface TSeries<T> extends KSeries<Instant, T> {
 
-	TimeFrame getTimeFrame();
+	ZTFrame getTimeFrame();
 	
 }

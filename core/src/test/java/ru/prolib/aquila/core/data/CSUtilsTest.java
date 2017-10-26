@@ -31,7 +31,7 @@ public class CSUtilsTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		series = new SeriesImpl<>();
-		tseries = new TSeriesImpl<>(TimeFrame.M5);
+		tseries = new TSeriesImpl<>(ZTFrame.M5);
 		utils = new CSUtils();
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())
@@ -40,7 +40,7 @@ public class CSUtilsTest {
 
 	@Test
 	public void testAggregate3_Tick_FirstCandle() throws Exception {
-		assertTrue(utils.aggregate(series, TimeFrame.M5, Tick.ofTrade(T("2017-05-02T11:36:53Z"), 86.12d, 1000L)));
+		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:36:53Z"), 86.12d, 1000L)));
 
 		Interval expectedInt = Interval.of(T("2017-05-02T11:35:00Z"), T("2017-05-02T11:40:00Z"));
 		Candle expected = new Candle(expectedInt, 86.12d, 1000L);
@@ -53,7 +53,7 @@ public class CSUtilsTest {
 		Interval expectedInt = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
 		series.add(new Candle(expectedInt, 100.02d, 500L));
 		
-		assertTrue(utils.aggregate(series, TimeFrame.M5, Tick.ofTrade(T("2017-05-02T11:52:00Z"), 98.13d, 100L)));
+		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:52:00Z"), 98.13d, 100L)));
 		
 		Candle expected = new Candle(expectedInt, 100.02d, 100.02d, 98.13d, 98.13d, 600L);
 		assertEquals(1, series.getLength());
@@ -65,7 +65,7 @@ public class CSUtilsTest {
 		Interval expectedInt = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
 		series.add(new Candle(expectedInt, 100.02d, 500L));
 		
-		assertFalse(utils.aggregate(series, TimeFrame.M15, Tick.ofTrade(T("2017-05-02T11:49:59Z"), 98.13d, 100L)));
+		assertFalse(utils.aggregate(series, ZTFrame.M15, Tick.ofTrade(T("2017-05-02T11:49:59Z"), 98.13d, 100L)));
 		
 		Candle expected = new Candle(expectedInt, 100.02, 500L);
 		assertEquals(1, series.getLength());
@@ -76,7 +76,7 @@ public class CSUtilsTest {
 	public void testAggregate3_Tick_NewCandle() throws Exception {
 		series.add(new Candle(Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z")), 100.02d, 500L));
 
-		assertTrue(utils.aggregate(series, TimeFrame.M5, Tick.ofTrade(T("2017-05-02T11:56:02Z"), 98.13d, 100L)));
+		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:56:02Z"), 98.13d, 100L)));
 
 		assertEquals(2, series.getLength());
 		Interval expectedInt = Interval.of(T("2017-05-02T11:55:00Z"), T("2017-05-02T12:00:00Z"));
@@ -147,9 +147,9 @@ public class CSUtilsTest {
 		Security security = terminal.getEditableSecurity(new Symbol("SBER"));
 		ObservableSeriesImpl<Candle> series = control.createMock(ObservableSeriesImpl.class);
 		
-		CSFiller actual = utils.createFiller(security, TimeFrame.M15, series);
+		CSFiller actual = utils.createFiller(security, ZTFrame.M15, series);
 		
-		CSFiller expected = new CSLastTradeFiller(security, TimeFrame.M15, series, utils);
+		CSFiller expected = new CSLastTradeFiller(security, ZTFrame.M15, series, utils);
 		assertEquals(expected, actual);
 	}
 	
@@ -160,9 +160,9 @@ public class CSUtilsTest {
 		terminal.getEditableSecurity(symbol);		
 		ObservableSeriesImpl<Candle> series = control.createMock(ObservableSeriesImpl.class);
 		
-		CSFiller actual = utils.createFiller(terminal, symbol, TimeFrame.M5, series);
+		CSFiller actual = utils.createFiller(terminal, symbol, ZTFrame.M5, series);
 		
-		CSFiller expected = new CSLastTradeFiller(terminal.getSecurity(symbol), TimeFrame.M5, series, utils);
+		CSFiller expected = new CSLastTradeFiller(terminal.getSecurity(symbol), ZTFrame.M5, series, utils);
 		assertEquals(expected, actual);
 	}
 	
@@ -171,10 +171,10 @@ public class CSUtilsTest {
 		Symbol symbol = new Symbol("LKOH");
 		terminal.getEditableSecurity(symbol);		
 		
-		CSFiller actual = utils.createFiller(terminal, symbol, TimeFrame.M10);
+		CSFiller actual = utils.createFiller(terminal, symbol, ZTFrame.M10);
 		
 		assertNotNull(actual.getSeries());
-		CSFiller expected = new CSLastTradeFiller(terminal.getSecurity(symbol), TimeFrame.M10,
+		CSFiller expected = new CSLastTradeFiller(terminal.getSecurity(symbol), ZTFrame.M10,
 				(ObservableSeriesImpl<Candle>) actual.getSeries(), utils);
 		assertEquals(expected, actual);
 	}

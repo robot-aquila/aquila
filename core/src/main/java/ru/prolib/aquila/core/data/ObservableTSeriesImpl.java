@@ -35,7 +35,7 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 	}
 
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return series.getTimeFrame();
 	}
 

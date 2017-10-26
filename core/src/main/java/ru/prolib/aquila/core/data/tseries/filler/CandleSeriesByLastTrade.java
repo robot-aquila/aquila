@@ -8,7 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
-import ru.prolib.aquila.core.data.CSUtils;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.ValueException;
@@ -20,7 +20,7 @@ public class CandleSeriesByLastTrade extends FillBySecurityEvent<Candle> {
 		logger = LoggerFactory.getLogger(CandleSeriesByLastTrade.class);
 	}
 	
-	private final CSUtils utils;
+	private final CandleSeriesAggregator<Tick> aggregator;
 
 	/**
 	 * Service constructor. For testing purposes only.
@@ -28,19 +28,19 @@ public class CandleSeriesByLastTrade extends FillBySecurityEvent<Candle> {
 	 * @param series - target series
 	 * @param terminal - source terminal
 	 * @param symbol - symbol to build candle series based on its last trades
-	 * @param utils - candle series utils
+	 * @param aggregator - tick aggregator
 	 */
 	CandleSeriesByLastTrade(EditableTSeries<Candle> series,
-			Terminal terminal, Symbol symbol, CSUtils utils)
+			Terminal terminal, Symbol symbol, CandleSeriesAggregator<Tick> aggregator)
 	{
 		super(series, terminal, symbol);
-		this.utils = utils;
+		this.aggregator = aggregator;
 	}
 	
 	public CandleSeriesByLastTrade(EditableTSeries<Candle> series,
 			Terminal terminal, Symbol symbol)
 	{
-		this(series, terminal, symbol, new CSUtils());
+		this(series, terminal, symbol, CandleSeriesTickAggregator.getInstance());
 	}
 	
 	@Override
@@ -58,7 +58,7 @@ public class CandleSeriesByLastTrade extends FillBySecurityEvent<Candle> {
 		if ( event.isType(security.onLastTrade()) ) {
 			SecurityTickEvent e = (SecurityTickEvent) event;
 			try {
-				utils.aggregate(series, e.getTick());
+				aggregator.aggregate(series, e.getTick());
 			} catch ( ValueException exception ) {
 				logger.error("Unexpected exception: ", e);
 			}

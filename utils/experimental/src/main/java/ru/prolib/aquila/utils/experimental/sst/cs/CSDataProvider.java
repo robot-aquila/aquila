@@ -3,11 +3,11 @@ package ru.prolib.aquila.utils.experimental.sst.cs;
 import java.util.Collection;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public interface CSDataProvider {
 	
-	CSDataSlice getSlice(Symbol symbol, TimeFrame tf);
+	CSDataSlice getSlice(Symbol symbol, ZTFrame tf);
 	
 	Collection<CSDataSlice> getSlices(Symbol symbol);
 	
@@ -17,6 +17,6 @@ public interface CSDataProvider {
 	
 	Collection<Symbol> getSymbols();
 	
-	Collection<TimeFrame> getTimeFrames(Symbol symbol);
+	Collection<ZTFrame> getTimeFrames(Symbol symbol);
 
 }

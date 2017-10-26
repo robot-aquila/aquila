@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,8 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.*;
+import ru.prolib.aquila.core.data.timeframe.ZTFHours;
+import ru.prolib.aquila.core.data.timeframe.ZTFMinutes;
 import ru.prolib.aquila.core.data.tseries.CandleCloseTSeries;
 import ru.prolib.aquila.core.data.tseries.CandleVolumeTSeries;
 import ru.prolib.aquila.core.data.tseries.QEMATSeries;
@@ -88,6 +91,7 @@ public class SecuritySimulationTest implements Experiment {
 	private static final String QEMA7_CANDLE_CLOSE_SERIES = "QEMA(Close,7)";
 	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
 	private static final String CANDLE_VOLUME_SERIES = "Volume";
+	private static final ZoneId ZONE_ID = ZoneId.of("Europe/Moscow");
 	private BarChartPanelHandler chartPanelHandler;
 	
 	static {
@@ -164,7 +168,7 @@ public class SecuritySimulationTest implements Experiment {
 		final List<SDP2DataSlice<SDP2Key>> slices = new ArrayList<>();
 
 		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
-		TimeFrame tf = CmdLine.getTimeFrame(cmd);
+		ZTFrame tf = CmdLine.getTimeFrame(cmd,ZONE_ID);
 		logger.debug("Selected strategy symbol: {}", rSymbol);
 		logger.debug("Selected timeframe: {}", tf);
 		final SDP2DataSlice<SDP2Key> slice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
@@ -176,8 +180,12 @@ public class SecuritySimulationTest implements Experiment {
 		slices.add(slice);
 
 		// Additional timeframes
-		TimeFrame[] timeFrames = {TimeFrame.M5, TimeFrame.M15, TimeFrame.M60};
-		for(TimeFrame timeFrame: timeFrames){
+		ZTFrame[] timeFrames = {
+				new ZTFMinutes(5, ZONE_ID),
+				new ZTFMinutes(15, ZONE_ID),
+				new ZTFHours(1, ZONE_ID),
+		};
+		for(ZTFrame timeFrame: timeFrames){
 			final SDP2DataSlice<SDP2Key> tempSlice = sdp2DataProvider.getSlice(new SDP2Key(timeFrame, rSymbol));
 			i = createSeriesBySlice(tempSlice, root, scheduler);
 			if(i!=0){
@@ -243,7 +251,7 @@ public class SecuritySimulationTest implements Experiment {
 		if ( scheduler instanceof ru.prolib.aquila.probe.SchedulerImpl ) {
 			List<SchedulerTaskFilter> filters = new ArrayList<>();
 			filters.add(new SymbolUpdateTaskFilter(messages));
-			topPanel.add(new SchedulerControlToolbar(messages, (SchedulerImpl) scheduler, filters));
+			topPanel.add(new SchedulerControlToolbar(messages, (SchedulerImpl) scheduler, ZONE_ID, filters));
 		}
 
 		tabPanel = new JTabbedPane();

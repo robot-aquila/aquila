@@ -46,21 +46,21 @@ import ru.prolib.aquila.core.BusinessEntities.Tick;
 public class CandleSeriesImpl extends SeriesImpl<Candle>
 		implements EditableCandleSeries
 {
-	private final TimeFrame timeframe;
+	private final ZTFrame timeframe;
 	private final Series<Double> open, high, low, close;
 	private final Series<Long> volume;
 	private final Series<Interval> interval;
 	private Instant poa;
 	
-	public CandleSeriesImpl(TimeFrame timeframe) {
+	public CandleSeriesImpl(ZTFrame timeframe) {
 		this(timeframe, Series.DEFAULT_ID);
 	}
 	
-	public CandleSeriesImpl(TimeFrame timeframe, String valueId) {
+	public CandleSeriesImpl(ZTFrame timeframe, String valueId) {
 		this(timeframe, valueId, SeriesImpl.STORAGE_NOT_LIMITED);
 	}
 	
-	public CandleSeriesImpl(TimeFrame timeframe, String id, int storageLimit) {
+	public CandleSeriesImpl(ZTFrame timeframe, String id, int storageLimit) {
 		super(id, storageLimit);
 		this.timeframe = timeframe;
 		open = new CandleOpenSeries(this);
@@ -188,7 +188,7 @@ public class CandleSeriesImpl extends SeriesImpl<Candle>
 	}
 
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return timeframe;
 	}
 

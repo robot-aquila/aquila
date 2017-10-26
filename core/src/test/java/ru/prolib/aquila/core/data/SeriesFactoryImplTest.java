@@ -56,27 +56,27 @@ public class SeriesFactoryImplTest {
 	@Test
 	public void testCreateCandle() throws Exception {
 		CandleSeriesImpl
-		series = (CandleSeriesImpl) factory1.createCandle(TimeFrame.M1);
+		series = (CandleSeriesImpl) factory1.createCandle(ZTFrame.M1);
 		assertNotNull(series);
-		assertEquals(TimeFrame.M1, series.getTimeFrame());
+		assertEquals(ZTFrame.M1, series.getTimeFrame());
 		assertEquals(Series.DEFAULT_ID, series.getId());
 		assertEquals(0, series.getStorageLimit());
 		
-		series = (CandleSeriesImpl) factory1.createCandle(TimeFrame.M5, "zulu");
+		series = (CandleSeriesImpl) factory1.createCandle(ZTFrame.M5, "zulu");
 		assertNotNull(series);
-		assertEquals(TimeFrame.M5, series.getTimeFrame());
+		assertEquals(ZTFrame.M5, series.getTimeFrame());
 		assertEquals("zulu", series.getId());
 		assertEquals(0, series.getStorageLimit());
 		
-		series = (CandleSeriesImpl) factory2.createCandle(TimeFrame.M10);
+		series = (CandleSeriesImpl) factory2.createCandle(ZTFrame.M10);
 		assertNotNull(series);
-		assertEquals(TimeFrame.M10, series.getTimeFrame());
+		assertEquals(ZTFrame.M10, series.getTimeFrame());
 		assertEquals(Series.DEFAULT_ID, series.getId());
 		assertEquals(128, series.getStorageLimit());
 		
-		series = (CandleSeriesImpl) factory2.createCandle(TimeFrame.M15, "pimba");
+		series = (CandleSeriesImpl) factory2.createCandle(ZTFrame.M15, "pimba");
 		assertNotNull(series);
-		assertEquals(TimeFrame.M15, series.getTimeFrame());
+		assertEquals(ZTFrame.M15, series.getTimeFrame());
 		assertEquals("pimba", series.getId());
 		assertEquals(128, series.getStorageLimit());
 	}

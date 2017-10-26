@@ -23,7 +23,7 @@ public class CandleBuilderTest {
 	
 	@Test
 	public void testBuildCandle() {
-		assertSame(builder, builder.withTimeFrame(TimeFrame.M15));
+		assertSame(builder, builder.withTimeFrame(ZTFrame.M15));
 		assertSame(builder, builder.withTime(T("2017-10-19T13:00:00Z")));
 		assertSame(builder, builder.withOpenPrice(215.02d));
 		assertSame(builder, builder.withHighPrice(219.86d));
@@ -41,7 +41,7 @@ public class CandleBuilderTest {
 	@Test
 	public void testBuildCandle_WithTimeString() {
 		assertSame(builder, builder.withTime("2017-10-19T13:00:00Z"));
-		builder.withTimeFrame(TimeFrame.M15)
+		builder.withTimeFrame(ZTFrame.M15)
 			.withOpenPrice(215.02d)
 			.withHighPrice(219.86d)
 			.withLowPrice(211.73d)

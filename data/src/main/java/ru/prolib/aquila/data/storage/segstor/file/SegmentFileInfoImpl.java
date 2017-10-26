@@ -89,5 +89,14 @@ public class SegmentFileInfoImpl implements SegmentFileInfo {
 				.append(o.suffix, suffix)
 				.isEquals();
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[path=" + getFullPath()
+			+ " dir=" + getDirectory()
+			+ " name=" + getBaseName()
+			+ " suffix=" + getNameSuffix()
+			+ "]";
+	}
 
 }

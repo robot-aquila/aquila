@@ -19,11 +19,11 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 		this.seriesID = storage.registerSeries();
 	}
 	
-	public TSeriesImpl(String id, TimeFrame timeFrame) {
+	public TSeriesImpl(String id, ZTFrame timeFrame) {
 		this(id, new TSeriesNodeStorageImpl(timeFrame));
 	}
 	
-	public TSeriesImpl(TimeFrame timeFrame) {
+	public TSeriesImpl(ZTFrame timeFrame) {
 		this(Series.DEFAULT_ID, timeFrame);
 	}
 	
@@ -42,7 +42,7 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 	}
 
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return storage.getTimeFrame();
 	}
 

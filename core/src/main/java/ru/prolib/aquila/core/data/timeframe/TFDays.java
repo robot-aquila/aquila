@@ -1,34 +1,17 @@
 package ru.prolib.aquila.core.data.timeframe;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.threeten.extra.Interval;
 
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
-/**
- * Daily timeframe.
- */
-public class TFDays implements TimeFrame {
-	private final int length;
+public class TFDays extends AbstractTFrame {
 	
 	public TFDays(int length) {
-		super();
-		this.length = length;
-	}
-
-	@Override
-	public Interval getInterval(Instant timestamp) {
-		LocalDateTime time = LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC);
-		int segmentIndex = (time.getDayOfYear() - 1) / length;
-		int firstDayOffset = segmentIndex * length; 
-		LocalDateTime firstDay = LocalDateTime.of(time.getYear(), 1, 1, 0, 0, 0, 0);
-		return Interval.of(firstDay.plusDays(firstDayOffset).toInstant(ZoneOffset.UTC),
-				firstDay.plusDays(firstDayOffset + length).toInstant(ZoneOffset.UTC));
+		super(length, ChronoUnit.DAYS);
 	}
 
 	@Override
@@ -37,13 +20,18 @@ public class TFDays implements TimeFrame {
 	}
 
 	@Override
-	public ChronoUnit getUnit() {
-		return ChronoUnit.DAYS;
+	public ZTFrame toZTFrame(ZoneId zoneID) {
+		return new ZTFDays(length, zoneID);
 	}
-
+	
 	@Override
-	public int getLength() {
-		return length;
+	public String toString() {
+		return "D" + length;
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(1839115, 19013).append(length).toHashCode();
 	}
 	
 	@Override
@@ -55,17 +43,9 @@ public class TFDays implements TimeFrame {
 			return false;
 		}
 		TFDays o = (TFDays) other;
-		return o.length == length;
-	}
-	
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(9921, 57015).append(length).toHashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return "D" + length;
+		return new EqualsBuilder()
+				.append(o.length, length)
+				.isEquals();
 	}
 
 }

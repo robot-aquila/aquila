@@ -1,20 +1,12 @@
 package ru.prolib.aquila.data.storage.segstor;
 
 import java.util.List;
-import java.util.Set;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 
-public interface SymbolAnnualSegmentStorage<T> {
-
-	/**
-	 * Get available symbols.
-	 * <p>
-	 * @return symbols
-	 */
-	Set<Symbol> listSymbols();
+public interface SymbolAnnualSegmentStorage<T> extends SymbolSegmentStorageCommon {
 
 	boolean isExists(SymbolAnnual segment);
 

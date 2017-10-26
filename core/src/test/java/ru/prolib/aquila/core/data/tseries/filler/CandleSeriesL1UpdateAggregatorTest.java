@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CandleSeriesL1UpdateAggregatorTest {
 	private static final Symbol symbol = new Symbol("SPY");
@@ -28,7 +28,7 @@ public class CandleSeriesL1UpdateAggregatorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		series = new TSeriesImpl<>(TimeFrame.M5);
+		series = new TSeriesImpl<>(ZTFrame.M5);
 		aggregator = CandleSeriesL1UpdateAggregator.getInstance();
 		builder = new L1UpdateBuilder(symbol).withTrade();
 	}

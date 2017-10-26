@@ -12,14 +12,14 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TFSymbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.MDStorage;
 
 public class OHLCVStorageRegistryImplTest {
 	private IMocksControl control;
 	private OHLCVStorageFactory factoryMock;
 	private MDStorage<TFSymbol, Candle> storageMock1, storageMock2;
-	private Map<TimeFrame, MDStorage<TFSymbol, Candle>> registryStub;
+	private Map<ZTFrame, MDStorage<TFSymbol, Candle>> registryStub;
 	private OHLCVStorageRegistryImpl registry;
 
 	@SuppressWarnings("unchecked")
@@ -35,23 +35,23 @@ public class OHLCVStorageRegistryImplTest {
 	
 	@Test
 	public void testGetStorage_ExistingInstance() throws Exception {
-		registryStub.put(TimeFrame.D1, storageMock2);
+		registryStub.put(ZTFrame.D1, storageMock2);
 		
-		MDStorage<TFSymbol, Candle> actual = registry.getStorage(TimeFrame.D1);
+		MDStorage<TFSymbol, Candle> actual = registry.getStorage(ZTFrame.D1);
 		
 		assertSame(storageMock2, actual);
 	}
 
 	@Test
 	public void testGetStorage_NewInstance() throws Exception {
-		expect(factoryMock.createStorage(TimeFrame.M3)).andReturn(storageMock1);
+		expect(factoryMock.createStorage(ZTFrame.M3)).andReturn(storageMock1);
 		control.replay();
 		
-		MDStorage<TFSymbol, Candle> actual = registry.getStorage(TimeFrame.M3);
+		MDStorage<TFSymbol, Candle> actual = registry.getStorage(ZTFrame.M3);
 		
 		control.verify();
 		assertSame(storageMock1, actual);
-		assertSame(storageMock1, registryStub.get(TimeFrame.M3));
+		assertSame(storageMock1, registryStub.get(ZTFrame.M3));
 	}
 
 }

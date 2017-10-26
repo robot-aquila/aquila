@@ -17,7 +17,7 @@ public interface CSFiller {
 	 * <p>
 	 * @return selected time frame
 	 */
-	public TimeFrame getTF();
+	public ZTFrame getTF();
 	
 	/**
 	 * Start gathering candles.

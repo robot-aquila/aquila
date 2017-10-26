@@ -14,7 +14,7 @@ import org.threeten.extra.Interval;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TSeriesUpdate;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class TSeriesNodeStorageKeysTest {
 	
@@ -100,10 +100,10 @@ public class TSeriesNodeStorageKeysTest {
 	
 	@Test
 	public void testGetTimeFrame() {
-		expect(storageMock.getTimeFrame()).andReturn(TimeFrame.D1);
+		expect(storageMock.getTimeFrame()).andReturn(ZTFrame.D1);
 		control.replay();
 		
-		assertSame(TimeFrame.D1, service.getTimeFrame());
+		assertSame(ZTFrame.D1, service.getTimeFrame());
 		
 		control.verify();
 	}

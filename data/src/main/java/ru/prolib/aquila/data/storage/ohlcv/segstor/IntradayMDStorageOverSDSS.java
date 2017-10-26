@@ -2,7 +2,6 @@ package ru.prolib.aquila.data.storage.ohlcv.segstor;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -16,7 +15,7 @@ import ru.prolib.aquila.core.data.CloseableIteratorOfSeries;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.data.TSeriesImpl;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.MDStorage;
 import ru.prolib.aquila.data.storage.ohlcv.utils.LimitedAmountIterator;
@@ -30,27 +29,21 @@ import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
  */
 public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 	private final SymbolDailySegmentStorage<Candle> segstor;
-	private final ZoneId zoneID;
-	private final TimeFrame tframe;
+	private final ZTFrame tframe;
 	
 	/**
 	 * Constructor.
 	 * <p>
-	 * @param segstor - OHLCV data segment storage. The data containing in the
-	 * storage must be of same timeframe that passed to this constructor.  
-	 * @param zoneID - zone ID of segment date. The zone will be used to
-	 * convert from instant time to segment date. In other words - segment
-	 * storage contains files and directories regarding to this time zone.
+	 * @param segstor - OHLCV data segment storage
 	 * @param tframe - timeframe of OHLCV data
 	 */
 	public IntradayMDStorageOverSDSS(SymbolDailySegmentStorage<Candle> segstor,
-			ZoneId zoneID, TimeFrame tframe)
+			ZTFrame tframe)
 	{
 		if ( ! tframe.isIntraday() ) {
 			throw new IllegalArgumentException("Expected timeframe must be intraday but: " + tframe);
 		}
 		this.segstor = segstor;
-		this.zoneID = zoneID;
 		this.tframe = tframe;
 	}
 	
@@ -58,11 +51,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 		return segstor;
 	}
 	
-	public ZoneId getZoneID() {
-		return zoneID;
-	}
-	
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return tframe;
 	}
 	
@@ -88,7 +77,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
-		LocalDate dateFrom = from.atZone(zoneID).toLocalDate();
+		LocalDate dateFrom = from.atZone(segstor.getZoneID()).toLocalDate();
 		List<SymbolDaily> segments = segstor.listDailySegments(key.getSymbol(),
 				new DatePoint(dateFrom.getYear(), dateFrom.getMonthValue(), dateFrom.getDayOfMonth()));
 		return segments.size() > 0 ?
@@ -101,7 +90,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
-		LocalDate dateFrom = from.atZone(zoneID).toLocalDate();
+		LocalDate dateFrom = from.atZone(segstor.getZoneID()).toLocalDate();
 		List<SymbolDaily> segments = segstor.listDailySegments(key.getSymbol(),
 				new DatePoint(dateFrom.getYear(), dateFrom.getMonthValue(), dateFrom.getDayOfMonth()));
 		return segments.size() > 0 ? new LimitedAmountIterator(new PreciseTimeLimitsIterator(
@@ -114,8 +103,8 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
-		LocalDate dateFrom = from.atZone(zoneID).toLocalDate();
-		LocalDate dateTo = to.atZone(zoneID).toLocalDate();
+		LocalDate dateFrom = from.atZone(segstor.getZoneID()).toLocalDate();
+		LocalDate dateTo = to.atZone(segstor.getZoneID()).toLocalDate();
 		List<SymbolDaily> segments = segstor.listDailySegments(key.getSymbol(),
 				new DatePoint(dateFrom.getYear(), dateFrom.getMonthValue(), dateFrom.getDayOfMonth()),
 				new DatePoint(dateTo.getYear(), dateTo.getMonthValue(), dateTo.getDayOfMonth()));
@@ -129,7 +118,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
-		LocalDate dateTo = to.atZone(zoneID).toLocalDate();
+		LocalDate dateTo = to.atZone(segstor.getZoneID()).toLocalDate();
 		SymbolDaily lastSegment = new SymbolDaily(key.getSymbol(), dateTo.getYear(),
 				dateTo.getMonthValue(), dateTo.getDayOfMonth());
 		LinkedList<SymbolDaily> segments = new LinkedList<>();
@@ -185,7 +174,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 	}
 	
 	private void validateTimeFrame(TFSymbol key) throws DataStorageException {
-		TimeFrame t = key.getTimeFrame();
+		ZTFrame t = key.getTimeFrame();
 		if ( ! tframe.equals(t) ) {
 			throw new DataStorageException("Unexpected timeframe: " + t);
 		}

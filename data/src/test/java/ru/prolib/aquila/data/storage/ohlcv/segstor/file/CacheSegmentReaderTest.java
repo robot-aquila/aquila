@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.CacheSegmentReader;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.CacheUtils;
 
@@ -40,7 +40,7 @@ public class CacheSegmentReaderTest {
 				+ "2017-01-01T10:01:00Z,115.63,117.92,113.14,114.0,5500\n"
 				+ "2017-01-01T10:05:00Z,107.13,108.01,105.0,106.0,2300\n"));
 		utils = CacheUtils.getInstance();
-		iterator = new CacheSegmentReader(readerStub, TimeFrame.M1, utils);
+		iterator = new CacheSegmentReader(readerStub, ZTFrame.M1, utils);
 	}
 	
 	@Test

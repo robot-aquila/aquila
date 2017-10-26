@@ -1,13 +1,16 @@
 package ru.prolib.aquila.data.storage.ohlcv.segstor.file;
 
-import static org.easymock.EasyMock.createStrictControl;
+import static org.easymock.EasyMock.*;
+
+import java.time.ZoneId;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
+import ru.prolib.aquila.core.data.timeframe.TFMinutes;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesCandleAggregator;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.IntradayCacheOverSDSS;
 import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
@@ -28,12 +31,21 @@ public class IntradayCacheOverSDSSTest {
 		sourceStorageMock = control.createMock(SymbolDailySegmentStorage.class);
 		cacheManagerMock = control.createMock(SegmentFileManager.class);
 		utilsMock = control.createMock(CacheUtils.class);
-		storage = new IntradayCacheOverSDSS<>(TimeFrame.M5, sourceStorageMock, 
+		expect(sourceStorageMock.getZoneID()).andStubReturn(ZoneId.of("UTC"));
+		control.replay();
+		storage = new IntradayCacheOverSDSS<>(new TFMinutes(5), sourceStorageMock, 
 				CandleSeriesCandleAggregator.getInstance(),
 				cacheManagerMock, utilsMock);
+		control.resetToStrict();
 		testHelper = new Seg2SegCacheOverSDSSTestHelper<>(storage, control,
-				sourceStorageMock, cacheManagerMock, utilsMock, TimeFrame.M5,
+				sourceStorageMock, cacheManagerMock, utilsMock, ZTFrame.M5,
+				"-OHLCV-M5.cache",
 				CandleSeriesCandleAggregator.getInstance());
+	}
+	
+	@Test
+	public void testGetZoneID() {
+		testHelper.testGetZoneID();
 	}
 	
 	@Test

@@ -18,11 +18,11 @@ public class CSLastTradeFiller implements CSFiller, EventListener {
 	
 	private final CSUtils utils;
 	private final Security security;
-	private final TimeFrame tf;
+	private final ZTFrame tf;
 	private final ObservableSeriesImpl<Candle> series;
 	private boolean started;
 	
-	public CSLastTradeFiller(Security security, TimeFrame tf,
+	public CSLastTradeFiller(Security security, ZTFrame tf,
 			ObservableSeriesImpl<Candle> series, CSUtils utils)
 	{
 		this.utils = utils;
@@ -45,7 +45,7 @@ public class CSLastTradeFiller implements CSFiller, EventListener {
 	}
 
 	@Override
-	public TimeFrame getTF() {
+	public ZTFrame getTF() {
 		return tf;
 	}
 

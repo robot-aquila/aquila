@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.CSFiller;
 import ru.prolib.aquila.core.data.CSUtils;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class CSDataProviderImpl implements CSDataProvider, EventListener {
 	
@@ -30,7 +30,7 @@ public class CSDataProviderImpl implements CSDataProvider, EventListener {
 
 	private final CSUtils csUtils;
 	private final Terminal terminal;
-	private final Map<Symbol, Map<TimeFrame, Node>> nodes;
+	private final Map<Symbol, Map<ZTFrame, Node>> nodes;
 
 	public CSDataProviderImpl(Terminal terminal) {
 		this.csUtils = new CSUtils();
@@ -39,7 +39,7 @@ public class CSDataProviderImpl implements CSDataProvider, EventListener {
 	}
 
 	@Override
-	public CSDataSlice getSlice(Symbol symbol, TimeFrame tf) {
+	public CSDataSlice getSlice(Symbol symbol, ZTFrame tf) {
 		Node node = getNode(symbol, tf);
 		synchronized ( node ) {
 			if ( node.filler == null ) {
@@ -88,8 +88,8 @@ public class CSDataProviderImpl implements CSDataProvider, EventListener {
 		}
 	}
 	
-	private synchronized Map<TimeFrame, Node> getNodes(Symbol symbol) {
-		Map<TimeFrame, Node> x = nodes.get(symbol);
+	private synchronized Map<ZTFrame, Node> getNodes(Symbol symbol) {
+		Map<ZTFrame, Node> x = nodes.get(symbol);
 		if ( x == null ) {
 			x = new HashMap<>();
 			nodes.put(symbol, x);
@@ -97,8 +97,8 @@ public class CSDataProviderImpl implements CSDataProvider, EventListener {
 		return x;
 	}
 	
-	private synchronized Node getNode(Symbol symbol, TimeFrame tf) {
-		Map<TimeFrame, Node> nodes = getNodes(symbol);
+	private synchronized Node getNode(Symbol symbol, ZTFrame tf) {
+		Map<ZTFrame, Node> nodes = getNodes(symbol);
 		Node x = nodes.get(tf);
 		if ( x == null ) {
 			x = new Node(new CSDataSliceImpl(symbol, tf, terminal));
@@ -120,7 +120,7 @@ public class CSDataProviderImpl implements CSDataProvider, EventListener {
 	}
 
 	@Override
-	public Collection<TimeFrame> getTimeFrames(Symbol symbol) {
+	public Collection<ZTFrame> getTimeFrames(Symbol symbol) {
 		return getNodes(symbol).keySet();
 	}
 

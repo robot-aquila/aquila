@@ -1,7 +1,6 @@
 package ru.prolib.aquila.data.storage.segstor;
 
 import java.util.List;
-import java.util.Set;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -15,14 +14,7 @@ import ru.prolib.aquila.data.storage.DataStorageException;
  * <p>
  * @param <T> - type of stored data
  */
-public interface SymbolMonthlySegmentStorage<T> {
-
-	/**
-	 * Get available symbols.
-	 * <p>
-	 * @return symbols
-	 */
-	Set<Symbol> listSymbols();
+public interface SymbolMonthlySegmentStorage<T> extends SymbolSegmentStorageCommon {
 
 	boolean isExists(SymbolMonthly segment);
 

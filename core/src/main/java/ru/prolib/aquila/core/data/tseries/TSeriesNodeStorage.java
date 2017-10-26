@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import ru.prolib.aquila.core.concurrency.Lockable;
 import ru.prolib.aquila.core.data.TSeriesUpdate;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.ValueOutOfRangeException;
 
@@ -15,7 +15,7 @@ public interface TSeriesNodeStorage extends Lockable {
 	 * <p>
 	 * @return timeframe of the series
 	 */
-	TimeFrame getTimeFrame();
+	ZTFrame getTimeFrame();
 
 	/**
 	 * Register new series.

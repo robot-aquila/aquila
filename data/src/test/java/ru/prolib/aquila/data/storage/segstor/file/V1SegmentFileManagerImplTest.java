@@ -136,14 +136,38 @@ public class V1SegmentFileManagerImplTest {
 	}
 	
 	@Test
+	public void testGetFileInfo_Symbol_SafeSuffixEncoding() {
+		SegmentFileInfo actual = service.getFileInfo(symbol1, "-[EUR/MSK].dat+\\");
+		
+		SegmentFileInfo expected = new SegmentFileInfoImpl()
+			.setFullPath(new File(root, "15/RG1EU%2D11%2E16"), "RG1EU%2D11%2E16", "-%5BEUR%2FMSK%5D.dat%2B%5C");
+		assertEquals(expected, actual);
+		assertEquals(new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-%5BEUR%2FMSK%5D.dat%2B%5C"),
+				actual.getFullPath());
+	}
+	
+	@Test
 	public void testGetFileInfo_Daily() {
-		SegmentFileInfo actual = service.getFileInfo(new SymbolDaily(symbol1, 2010, 11, 1),  "-data.bin");
+		SegmentFileInfo actual = service.getFileInfo(new SymbolDaily(symbol1, 2010, 11, 1), "-data.bin");
 		
 		SegmentFileInfo expected = new SegmentFileInfoImpl()
 			.setFullPath(new File(root, "15/RG1EU%2D11%2E16/2010/11"),
 					"RG1EU%2D11%2E16-20101101", "-data.bin");
 		assertEquals(expected, actual);
 		assertEquals(new File(root, "15/RG1EU%2D11%2E16/2010/11/RG1EU%2D11%2E16-20101101-data.bin"),
+				actual.getFullPath());
+	}
+	
+	@Test
+	public void testGetFileInfo_Daily_SafeSuffixEnconding() {
+		SegmentFileInfo actual = service.getFileInfo(new SymbolDaily(symbol1, 2010, 11, 1), "-[EUR/MSK].dat+\\");
+
+		SegmentFileInfo expected = new SegmentFileInfoImpl()
+			.setFullPath(new File(root, "15/RG1EU%2D11%2E16/2010/11"),
+				"RG1EU%2D11%2E16-20101101", "-%5BEUR%2FMSK%5D.dat%2B%5C");
+			assertEquals(expected, actual);
+			assertEquals(new File(root,
+				"15/RG1EU%2D11%2E16/2010/11/RG1EU%2D11%2E16-20101101-%5BEUR%2FMSK%5D.dat%2B%5C"),
 				actual.getFullPath());
 	}
 	
@@ -160,6 +184,19 @@ public class V1SegmentFileManagerImplTest {
 	}
 	
 	@Test
+	public void testGetFileInfo_Monthly_SafeSuffixEncoding() {
+		SegmentFileInfo actual = service.getFileInfo(new SymbolMonthly(symbol1, 1992, 1), "-[EUR/MSK].dat+\\");
+		
+		SegmentFileInfo expected = new SegmentFileInfoImpl()
+			.setFullPath(new File(root, "15/RG1EU%2D11%2E16/1992"),
+				"RG1EU%2D11%2E16-199201", "-%5BEUR%2FMSK%5D.dat%2B%5C");
+		assertEquals(expected, actual);
+		assertEquals(new File(root,
+			"15/RG1EU%2D11%2E16/1992/RG1EU%2D11%2E16-199201-%5BEUR%2FMSK%5D.dat%2B%5C"),
+			actual.getFullPath());
+	}
+	
+	@Test
 	public void testGetFileInfo_Annual() {
 		SegmentFileInfo actual = service.getFileInfo(new SymbolAnnual(symbol1, 1997), "-alf.dat");
 		
@@ -167,6 +204,17 @@ public class V1SegmentFileManagerImplTest {
 			.setFullPath(new File(root, "15/RG1EU%2D11%2E16"), "RG1EU%2D11%2E16-1997", "-alf.dat");
 		assertEquals(expected, actual);
 		assertEquals(new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-1997-alf.dat"),
+				actual.getFullPath());
+	}
+	
+	@Test
+	public void testGetFileInfo_Annual_SafeSuffixEncoding() {
+		SegmentFileInfo actual = service.getFileInfo(new SymbolAnnual(symbol1, 1997), "-[EUR/MSK].dat+\\");
+		
+		SegmentFileInfo expected = new SegmentFileInfoImpl()
+			.setFullPath(new File(root, "15/RG1EU%2D11%2E16"), "RG1EU%2D11%2E16-1997", "-%5BEUR%2FMSK%5D.dat%2B%5C");
+		assertEquals(expected, actual);
+		assertEquals(new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-1997-%5BEUR%2FMSK%5D.dat%2B%5C"),
 				actual.getFullPath());
 	}
 	
@@ -190,6 +238,14 @@ public class V1SegmentFileManagerImplTest {
 	}
 	
 	@Test
+	public void testHasSymbolSegment_SafeSuffixEncoding() throws Exception {
+		new File(root, "84/MTSI%2D12%2E16").mkdirs();
+		new File(root, "84/MTSI%2D12%2E16/MTSI%2D12%2E16-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+
+		assertTrue(service.hasSymbolSegment(symbol3, "-[EUR/MSK].dat+\\"));
+	}
+	
+	@Test
 	public void testScanForSymbolSegments() throws Exception {
 		new File(root, "84/MTSI%2D12%2E16").mkdirs();
 		new File(root, "84/MTSI%2D12%2E16/2016").mkdirs();
@@ -210,6 +266,21 @@ public class V1SegmentFileManagerImplTest {
 		
 		expected.clear();
 		expected.add(symbol3);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testScanForSymbolSegments_SafeSuffixEncoding() throws Exception {
+		new File(root, "84/MTSI%2D12%2E16").mkdirs();
+		new File(root, "84/MTSI%2D12%2E16/MTSI%2D12%2E16-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/W4EXU%2D9%2E16").mkdirs();
+		new File(root, "15/W4EXU%2D9%2E16/W4EXU%2D9%2E16-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		List<Symbol> actual, expected = new ArrayList<>();
+		
+		actual = service.scanForSymbolSegments("-[EUR/MSK].dat+\\");
+		
+		expected.add(symbol3); // MTSI
+		expected.add(symbol2); // W4EXU
 		assertEquals(expected, actual);
 	}
 	
@@ -244,6 +315,23 @@ public class V1SegmentFileManagerImplTest {
 	}
 	
 	@Test
+	public void testScanForAnnualSegments_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2001-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2002-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2006-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		List<SymbolAnnual> actual, expected = new ArrayList<>();
+		
+		actual = service.scanForAnnualSegments(symbol1, "-[EUR/MSK].dat+\\");
+		
+		expected.clear();
+		expected.add(new SymbolAnnual(symbol1, 2001));
+		expected.add(new SymbolAnnual(symbol1, 2002));
+		expected.add(new SymbolAnnual(symbol1, 2006));
+		assertEquals(expected, actual);
+	}
+
+	@Test
 	public void testScanForMonthlySegments() throws Exception {
 		new File(root, "15/RG1EU%2D11%2E16/2010").mkdirs(); // symbol1
 		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201001-best.dat").createNewFile();
@@ -272,6 +360,25 @@ public class V1SegmentFileManagerImplTest {
 		expected.add(new SymbolMonthly(symbol1, 2010,  6));
 		expected.add(new SymbolMonthly(symbol1, 2010,  7));
 		expected.add(new SymbolMonthly(symbol1, 2010,  9));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testScanForMonthlySegments_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201001-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201002-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201006-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201012-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		List<SymbolMonthly> actual, expected = new ArrayList<>();
+		
+		actual = service.scanForMonthlySegments(new SymbolAnnual(symbol1, 2010), "-[EUR/MSK].dat+\\");
+		
+		expected.clear();
+		expected.add(new SymbolMonthly(symbol1, 2010,  1));
+		expected.add(new SymbolMonthly(symbol1, 2010,  2));
+		expected.add(new SymbolMonthly(symbol1, 2010,  6));
+		expected.add(new SymbolMonthly(symbol1, 2010, 12));
 		assertEquals(expected, actual);
 	}
 	
@@ -315,6 +422,31 @@ public class V1SegmentFileManagerImplTest {
 		expected.add(new SymbolDaily(symbol1, 2010, 6, 11));
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	public void testScanForDailySegments_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010/06").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100601-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100602-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100603-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100607-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100611-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100629-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100630-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		List<SymbolDaily> actual, expected = new ArrayList<>();
+		
+		actual = service.scanForDailySegments(new SymbolMonthly(symbol1, 2010, 6), "-[EUR/MSK].dat+\\");
+		
+		expected.clear();
+		expected.add(new SymbolDaily(symbol1, 2010, 6, 1));
+		expected.add(new SymbolDaily(symbol1, 2010, 6, 2));
+		expected.add(new SymbolDaily(symbol1, 2010, 6, 3));
+		expected.add(new SymbolDaily(symbol1, 2010, 6, 7));
+		expected.add(new SymbolDaily(symbol1, 2010, 6, 11));
+		expected.add(new SymbolDaily(symbol1, 2010, 6, 29));
+		expected.add(new SymbolDaily(symbol1, 2010, 6, 30));
+		assertEquals(expected, actual);
+	}
 	
 	@Test
 	public void testHasAnnualSegments() throws Exception {
@@ -336,6 +468,14 @@ public class V1SegmentFileManagerImplTest {
 	}
 	
 	@Test
+	public void testHasAnnualSegments_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2001-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+
+		assertTrue(service.hasAnnualSegments(symbol1, "-[EUR/MSK].dat+\\"));
+	}
+	
+	@Test
 	public void testHasMonthlySegments() throws Exception {
 		new File(root, "15/RG1EU%2D11%2E16/2010").mkdirs(); // symbol1
 		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201001-best.dat").createNewFile();
@@ -353,6 +493,14 @@ public class V1SegmentFileManagerImplTest {
 		assertFalse(service.hasMonthlySegments(symbol2, "-best.dat"));
 		assertFalse(service.hasMonthlySegments(symbol2, "-test.dat"));
 		assertFalse(service.hasMonthlySegments(symbol2, "-boom.dat"));
+	}
+	
+	@Test
+	public void testHasMonthlySegments_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201001-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+
+		assertTrue(service.hasMonthlySegments(symbol1, "-[EUR/MSK].dat+\\"));
 	}
 	
 	@Test
@@ -382,6 +530,15 @@ public class V1SegmentFileManagerImplTest {
 	}
 	
 	@Test
+	public void testHasDailySegments_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010/06").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100601-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+	
+		assertTrue(service.hasDailySegments(symbol1, "-[EUR/MSK].dat+\\"));
+		assertFalse(service.hasDailySegments(symbol1, "-[EUR/MSK].dat-\\"));
+	}
+	
+	@Test
 	public void testGetFirstAnnualSegment() throws Exception {
 		new File(root, "15/RG1EU%2D11%2E16").mkdirs(); // symbol1
 		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2009-test.dat").createNewFile();
@@ -399,6 +556,17 @@ public class V1SegmentFileManagerImplTest {
 	@Test (expected=DataStorageException.class)
 	public void testGetFirstAnnualSegment_ThrowsIfNoSegmentsFound() throws Exception {
 		service.getFirstAnnualSegment(symbol1, "-test.dat");
+	}
+	
+	@Test
+	public void testGetFirstAnnualSegment_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2009-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2006-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2007-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2001-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+
+		assertEquals(new SymbolAnnual(symbol1, 2001), service.getFirstAnnualSegment(symbol1, "-[EUR/MSK].dat+\\"));
 	}
 
 	@Test
@@ -434,6 +602,17 @@ public class V1SegmentFileManagerImplTest {
 		assertEquals(new SymbolMonthly(symbol1, 2010, 2), service.getFirstMonthlySegment(symbol1, "-test.dat"));
 	}
 
+	@Test
+	public void testGetFirstMonthlySegment_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201007-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201002-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201006-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		
+		assertEquals(new SymbolMonthly(symbol1, 2010, 2),
+				service.getFirstMonthlySegment(symbol1, "-[EUR/MSK].dat+\\"));
+	}
+	
 	@Test
 	public void testGetFirstDailySegment() throws Exception {
 		new File(root, "15/RG1EU%2D11%2E16/2005/01").mkdirs(); // symbol1
@@ -483,6 +662,15 @@ public class V1SegmentFileManagerImplTest {
 		
 		assertEquals(new SymbolDaily(symbol1, 2010, 9, 25), service.getFirstDailySegment(symbol1, "-my.dat"));
 	}
+	
+	@Test
+	public void testGetFirstDailySegment_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010/09").mkdirs();
+		new File(root, "15/RG1EU%2D11%2E16/2010/09/RG1EU%2D11%2E16-20100925-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		
+		assertEquals(new SymbolDaily(symbol1, 2010, 9, 25),
+				service.getFirstDailySegment(symbol1, "-[EUR/MSK].dat+\\"));
+	}
 
 	@Test
 	public void testGetLastAnnualSegment() throws Exception {
@@ -502,6 +690,17 @@ public class V1SegmentFileManagerImplTest {
 	@Test (expected=DataStorageException.class)
 	public void testGetLastAnnualSegment_ThrowsIfNoSegmentsFound() throws Exception {
 		service.getLastAnnualSegment(symbol1, "-test.dat");
+	}
+	
+	@Test
+	public void testGetLastAnnualSegment_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16").mkdirs(); // symbol1
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2009-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2007-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2001-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		new File(root, "15/RG1EU%2D11%2E16/RG1EU%2D11%2E16-2006-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+
+		assertEquals(new SymbolAnnual(symbol1, 2009), service.getLastAnnualSegment(symbol1, "-[EUR/MSK].dat+\\"));
 	}
 	
 	@Test
@@ -533,6 +732,15 @@ public class V1SegmentFileManagerImplTest {
 		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201007-test.dat").createNewFile();
 
 		assertEquals(new SymbolMonthly(symbol1, 2010, 7), service.getLastMonthlySegment(symbol1, "-test.dat"));
+	}
+	
+	@Test
+	public void testGetLastMonthlySegment_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010").mkdirs();
+		new File(root, "15/RG1EU%2D11%2E16/2010/RG1EU%2D11%2E16-201007-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		
+		assertEquals(new SymbolMonthly(symbol1, 2010, 7),
+				service.getLastMonthlySegment(symbol1, "-[EUR/MSK].dat+\\"));
 	}
 
 	@Test
@@ -583,6 +791,15 @@ public class V1SegmentFileManagerImplTest {
 		new File(root, "15/RG1EU%2D11%2E16/2010/09").mkdirs();
 		
 		assertEquals(new SymbolDaily(symbol1, 2010, 6, 11), service.getLastDailySegment(symbol1, "-my.dat"));
+	}
+	
+	@Test
+	public void testGetLastDailySegment_SafeSuffixEncoding() throws Exception {
+		new File(root, "15/RG1EU%2D11%2E16/2010/06").mkdirs();
+		new File(root, "15/RG1EU%2D11%2E16/2010/06/RG1EU%2D11%2E16-20100611-%5BEUR%2FMSK%5D.dat%2B%5C").createNewFile();
+		
+		assertEquals(new SymbolDaily(symbol1, 2010, 6, 11),
+				service.getLastDailySegment(symbol1, "-[EUR/MSK].dat+\\"));
 	}
 
 }

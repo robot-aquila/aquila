@@ -1,7 +1,6 @@
 package ru.prolib.aquila.data.storage.segstor;
 
 import java.util.List;
-import java.util.Set;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -12,15 +11,8 @@ import ru.prolib.aquila.data.storage.DataStorageException;
  * <p>
  * @param <T> - type of stored data (record data type)
  */
-public interface SymbolDailySegmentStorage<T> {
+public interface SymbolDailySegmentStorage<T> extends SymbolSegmentStorageCommon {
 	
-	/**
-	 * Get available symbols.
-	 * <p>
-	 * @return symbols
-	 */
-	Set<Symbol> listSymbols();
-
 	/**
 	 * Check that the specified segment is exists.
 	 * <p>
@@ -114,5 +106,5 @@ public interface SymbolDailySegmentStorage<T> {
 	 * @throws DataStorageException if an error occurred
 	 */
 	CloseableIterator<T> createReader(SymbolDaily segment) throws DataStorageException;
-
+	
 }

@@ -15,7 +15,7 @@ import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TSeriesUpdate;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueOutOfRangeException;
 
 public class TSeriesNodeStorageImplTest {
@@ -29,7 +29,7 @@ public class TSeriesNodeStorageImplTest {
 	}
 	
 	private Interval interval1, interval2, interval3;
-	private TimeFrame timeFrame;
+	private ZTFrame timeFrame;
 	private List<TSeriesNode> nodeList, expectedNodeList;
 	private Map<Instant, TSeriesNode> nodeMap, expectedNodeMap;
 	private TSeriesNode node1, node2, node3;
@@ -43,7 +43,7 @@ public class TSeriesNodeStorageImplTest {
 		node1 = new TSeriesNode(interval1);
 		node2 = new TSeriesNode(interval2);
 		node3 = new TSeriesNode(interval3);
-		timeFrame = TimeFrame.M5;
+		timeFrame = ZTFrame.M5;
 		nodeList = new ArrayList<>();
 		expectedNodeList = new ArrayList<>();
 		nodeMap = new LinkedHashMap<>();
@@ -53,7 +53,7 @@ public class TSeriesNodeStorageImplTest {
 	
 	@Test
 	public void testCtor() {
-		assertSame(TimeFrame.M5, storage.getTimeFrame());
+		assertSame(ZTFrame.M5, storage.getTimeFrame());
 		assertTrue(LID.isLastCreatedLID(storage.getLID()));
 		assertEquals(0, storage.registerSeries());
 		assertEquals(1, storage.registerSeries());
@@ -164,7 +164,7 @@ public class TSeriesNodeStorageImplTest {
 	
 	@Test
 	public void testSet_NewNode_InsertNodeBugFix_LostBreakOnInsert() throws Exception {
-		storage = new TSeriesNodeStorageImpl(TimeFrame.M1, nodeList, nodeMap);
+		storage = new TSeriesNodeStorageImpl(ZTFrame.M1, nodeList, nodeMap);
 		storage.setValue(T("2017-12-31T10:00:00Z"), 3, 100);
 		storage.setValue(T("2017-10-01T12:01:00Z"), 3, 101);
 		storage.setValue(T("2017-10-01T12:02:00Z"), 3, 102);

@@ -10,7 +10,7 @@ import java.util.Set;
 
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 /**
  * Data provider organizes an access to series data using of data slices.
@@ -103,8 +103,8 @@ public class SDP2DataProviderImpl<T extends SDP2Key> implements SDP2DataProvider
 	}
 
 	@Override
-	public synchronized Collection<TimeFrame> getTimeFrames(Symbol symbol) {
-		Set<TimeFrame> result = new HashSet<>();
+	public synchronized Collection<ZTFrame> getTimeFrames(Symbol symbol) {
+		Set<ZTFrame> result = new HashSet<>();
 		for ( T x : slices.keySet() ) {
 			if ( symbol.equals(x.getSymbol()) ) {
 				result.add(x.getTimeFrame());
@@ -114,8 +114,8 @@ public class SDP2DataProviderImpl<T extends SDP2Key> implements SDP2DataProvider
 	}
 
 	@Override
-	public synchronized Collection<TimeFrame> getTimeFramesWoSymbol() {
-		Set<TimeFrame> result = new HashSet<>();
+	public synchronized Collection<ZTFrame> getTimeFramesWoSymbol() {
+		Set<ZTFrame> result = new HashSet<>();
 		for ( T x : slices.keySet() ) {
 			if ( x.getSymbol() == null ) {
 				result.add(x.getTimeFrame());

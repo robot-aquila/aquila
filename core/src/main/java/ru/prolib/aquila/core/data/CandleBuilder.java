@@ -3,12 +3,12 @@ package ru.prolib.aquila.core.data;
 import java.time.Instant;
 
 public class CandleBuilder {
-	private TimeFrame timeFrame;
+	private ZTFrame timeFrame;
 	private Instant time;
 	private Double open, high, low, close;
 	private Long volume;
 	
-	public CandleBuilder withTimeFrame(TimeFrame timeFrame) {
+	public CandleBuilder withTimeFrame(ZTFrame timeFrame) {
 		this.timeFrame = timeFrame;
 		return this;
 	}

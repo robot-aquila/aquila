@@ -72,7 +72,7 @@ public class SeriesFactoryImpl implements SeriesFactory {
 	}
 
 	@Override
-	public EditableCandleSeries createCandle(TimeFrame tf, String id) {
+	public EditableCandleSeries createCandle(ZTFrame tf, String id) {
 		return new CandleSeriesImpl(tf, id, limit);
 	}
 
@@ -94,7 +94,7 @@ public class SeriesFactoryImpl implements SeriesFactory {
 	}
 
 	@Override
-	public EditableCandleSeries createCandle(TimeFrame tf) {
+	public EditableCandleSeries createCandle(ZTFrame tf) {
 		return createCandle(tf, Series.DEFAULT_ID);
 	}
 

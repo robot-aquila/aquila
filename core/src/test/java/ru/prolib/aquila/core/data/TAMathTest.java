@@ -337,23 +337,23 @@ public class TAMathTest {
 		Instant time = Instant.parse("2013-10-11T11:09:43Z");
 		
 		// H-L
-		candles.add(new Candle(TimeFrame.M5.getInterval(time),
+		candles.add(new Candle(ZTFrame.M5.getInterval(time),
 				0, 48.70, 47.79, 48.16, 0L));
 		assertEquals(0.91, service.tr(candles), 0.01d);
 		assertEquals(0.91, service.tr(candles, 1), 0.01d);
 		
 		// |H-Cp|
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(5 * 60)),
+		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(5 * 60)),
 				0, 49.35, 48.86, 49.32, 0L));
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(10 * 60)),
+		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(10 * 60)),
 				0, 49.92, 49.50, 49.91, 0L));
 		assertEquals(0.6, service.tr(candles), 0.001);
 		assertEquals(0.6, service.tr(candles, 3), 0.001);
 		
 		// |L-Cp|
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(15 * 60)),
+		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(15 * 60)),
 				0, 50.19, 49.87, 50.13, 0L));
-		candles.add(new Candle(TimeFrame.M5.getInterval(time.plusSeconds(20 * 60)),
+		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(20 * 60)),
 				0, 50.12, 49.20, 49.53, 0L));
 		assertEquals(0.93, service.tr(candles), 0.001);
 		assertEquals(0.93, service.tr(candles, 5), 0.001);

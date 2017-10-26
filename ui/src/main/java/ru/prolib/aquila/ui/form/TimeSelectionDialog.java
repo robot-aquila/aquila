@@ -121,8 +121,8 @@ public class TimeSelectionDialog extends JDialog implements ActionListener, Time
 		pack();
 	}
 	
-	public TimeSelectionDialog(IMessages messages) {
-		this(messages, CommonMsg.TSD_DEFAULT_TITLE, ZoneId.systemDefault());
+	public TimeSelectionDialog(IMessages messages, ZoneId zoneID) {
+		this(messages, CommonMsg.TSD_DEFAULT_TITLE, zoneID);
 	}
 	
 	@Override

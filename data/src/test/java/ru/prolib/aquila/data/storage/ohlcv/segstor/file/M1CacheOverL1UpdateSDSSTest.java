@@ -2,12 +2,14 @@ package ru.prolib.aquila.data.storage.ohlcv.segstor.file;
 
 import static org.easymock.EasyMock.*;
 
+import java.time.ZoneId;
+
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.timeframe.ZTFMinutes;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesL1UpdateAggregator;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.CacheUtils;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.file.M1CacheOverL1UpdateSDSS;
@@ -29,9 +31,14 @@ public class M1CacheOverL1UpdateSDSSTest {
 		sourceStorageMock = control.createMock(SymbolDailySegmentStorage.class);
 		cacheManagerMock = control.createMock(SegmentFileManager.class);
 		utilsMock = control.createMock(CacheUtils.class);
+		expect(sourceStorageMock.getZoneID()).andStubReturn(ZoneId.of("Europe/Moscow"));
+		control.replay();
 		storage = new M1CacheOverL1UpdateSDSS(sourceStorageMock, cacheManagerMock, utilsMock);
+		control.resetToStrict();
 		testHelper = new Seg2SegCacheOverSDSSTestHelper<>(storage, control,
-				sourceStorageMock, cacheManagerMock, utilsMock, TimeFrame.M1,
+				sourceStorageMock, cacheManagerMock, utilsMock,
+				new ZTFMinutes(1, ZoneId.of("Europe/Moscow")),
+				"-OHLCV-M1.cache",
 				CandleSeriesL1UpdateAggregator.getInstance());
 	}
 	

@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class SDP2DataSliceFactoryImplTest {
 	private IMocksControl control;
@@ -25,11 +25,11 @@ public class SDP2DataSliceFactoryImplTest {
 	@Test
 	public void testProduce() {
 		SDP2DataSliceImpl<SDP2Key> slice = (SDP2DataSliceImpl<SDP2Key>)
-				factory.produce(new SDP2Key(TimeFrame.M10));
+				factory.produce(new SDP2Key(ZTFrame.M10));
 		
 		assertNotNull(slice);
 		assertSame(queueMock, slice.getEventQueue());
-		assertEquals(new SDP2Key(TimeFrame.M10), slice.getKey());
+		assertEquals(new SDP2Key(ZTFrame.M10), slice.getKey());
 	}
 
 }

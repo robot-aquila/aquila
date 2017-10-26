@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TFSymbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.MDStorage;
 
 public class OHLCVStorageImplTest {
@@ -25,9 +25,9 @@ public class OHLCVStorageImplTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		key1 = new TFSymbol(new Symbol("SPY"), TimeFrame.M30);
-		key2 = new TFSymbol(new Symbol("XXL"), TimeFrame.M1);
-		key3 = new TFSymbol(new Symbol("BAR"), TimeFrame.D1);
+		key1 = new TFSymbol(new Symbol("SPY"), ZTFrame.M30);
+		key2 = new TFSymbol(new Symbol("XXL"), ZTFrame.M1);
+		key3 = new TFSymbol(new Symbol("BAR"), ZTFrame.D1);
 	}
 	
 	static Instant T(String timeString) {
@@ -56,7 +56,7 @@ public class OHLCVStorageImplTest {
 		keys.add(key1);
 		keys.add(key2);
 		keys.add(key3);
-		expect(registryMock.getStorage(TimeFrame.M1)).andReturn(storageMock);
+		expect(registryMock.getStorage(ZTFrame.M1)).andReturn(storageMock);
 		expect(storageMock.getKeys()).andReturn(keys);
 		control.replay();
 		
@@ -68,7 +68,7 @@ public class OHLCVStorageImplTest {
 	
 	@Test
 	public void testCreateReader_1K() throws Exception {
-		expect(registryMock.getStorage(TimeFrame.M30)).andReturn(storageMock);
+		expect(registryMock.getStorage(ZTFrame.M30)).andReturn(storageMock);
 		expect(storageMock.createReader(key1)).andReturn(iteratorMock);
 		control.replay();
 		
@@ -80,7 +80,7 @@ public class OHLCVStorageImplTest {
 
 	@Test
 	public void testCreateReaderFrom_2KT() throws Exception {
-		expect(registryMock.getStorage(TimeFrame.D1)).andReturn(storageMock);
+		expect(registryMock.getStorage(ZTFrame.D1)).andReturn(storageMock);
 		expect(storageMock.createReaderFrom(key3, T("2017-10-20T18:20:00Z")))
 			.andReturn(iteratorMock);
 		control.replay();
@@ -93,7 +93,7 @@ public class OHLCVStorageImplTest {
 	
 	@Test
 	public void testCreateReader_3KTI() throws Exception {
-		expect(registryMock.getStorage(TimeFrame.M30)).andReturn(storageMock);
+		expect(registryMock.getStorage(ZTFrame.M30)).andReturn(storageMock);
 		expect(storageMock.createReader(key1, T("2017-10-20T18:15:00Z"), 25))
 			.andReturn(iteratorMock);
 		control.replay();
@@ -106,7 +106,7 @@ public class OHLCVStorageImplTest {
 	
 	@Test
 	public void testCreateReader_3KTT() throws Exception {
-		expect(registryMock.getStorage(TimeFrame.M1)).andReturn(storageMock);
+		expect(registryMock.getStorage(ZTFrame.M1)).andReturn(storageMock);
 		expect(storageMock.createReader(key2, T("2017-10-20T18:00:00Z"), T("2017-10-20T18:15:00Z")))
 			.andReturn(iteratorMock);
 		control.replay();
@@ -120,7 +120,7 @@ public class OHLCVStorageImplTest {
 	
 	@Test
 	public void testCreateReader_3KIT() throws Exception {
-		expect(registryMock.getStorage(TimeFrame.M30)).andReturn(storageMock);
+		expect(registryMock.getStorage(ZTFrame.M30)).andReturn(storageMock);
 		expect(storageMock.createReader(key1, 10, T("2017-10-20T18:13:00Z")))
 			.andReturn(iteratorMock);
 		control.replay();
@@ -133,7 +133,7 @@ public class OHLCVStorageImplTest {
 	
 	@Test
 	public void testCreateReaderTo_2KT() throws Exception {
-		expect(registryMock.getStorage(TimeFrame.D1)).andReturn(storageMock);
+		expect(registryMock.getStorage(ZTFrame.D1)).andReturn(storageMock);
 		expect(storageMock.createReaderTo(key3, T("2017-10-20T18:20:00Z")))
 			.andReturn(iteratorMock);
 		control.replay();

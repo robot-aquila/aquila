@@ -1,7 +1,6 @@
 package ru.prolib.aquila.web.utils.finam.data;
 
 import java.io.File;
-import java.time.ZoneId;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.data.Candle;
@@ -40,8 +39,7 @@ public class FinamData {
 			throws DataStorageException
 	{
 		cacheRootDir.mkdirs();
-		return new OHLCVStorageBuilder().createCachingStorage(createSDSS(dataRootDir),
-				cacheRootDir, ZoneId.of("Europe/Moscow"));
+		return new OHLCVStorageBuilder().createCachingStorage(createSDSS(dataRootDir), cacheRootDir);
 	}
 
 }

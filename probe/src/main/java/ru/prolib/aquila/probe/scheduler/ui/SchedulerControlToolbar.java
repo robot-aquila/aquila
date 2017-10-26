@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -16,7 +17,7 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.timeframe.ZTFMinutes;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.probe.SchedulerImpl;
@@ -49,13 +50,13 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 	private final ScheduledTasksDialogView scheduledTasksDialog;
 	
 	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler,
-			List<SchedulerTaskFilter> filters)
+			ZoneId zoneID, List<SchedulerTaskFilter> filters)
 	{
 		this.messages = messages;
 		this.scheduler = scheduler;
 		setName(messages.get(ProbeMsg.TOOLBAR_TITLE));
-		timeSelectionDialog = new TimeSelectionDialog(messages);
-		schedulerOptionsDialog = new SchedulerOptionsDialog(messages);
+		timeSelectionDialog = new TimeSelectionDialog(messages, zoneID);
+		schedulerOptionsDialog = new SchedulerOptionsDialog(messages, zoneID);
 		scheduledTasksDialog = new ScheduledTasksDialog(messages, filters);
 		btnOptions = createButton("options", ACTION_OPTIONS, ProbeMsg.BTN_TTIP_OPTIONS);
 		btnPause = createButton("pause", ACTION_PAUSE, ProbeMsg.BTN_TTIP_PAUSE);
@@ -67,12 +68,16 @@ public class SchedulerControlToolbar extends JToolBar implements ActionListener,
 		scheduler.getState().addObserver(this);
 		refreshControls();
 		schedulerOptions = new SchedulerOptions();
-		schedulerOptions.setTimeFrame(TimeFrame.M1);
-		add(new SchedulerStatePanel(messages, scheduler.getState()));
+		schedulerOptions.setTimeFrame(new ZTFMinutes(1, zoneID));
+		add(new SchedulerStatePanel(messages, scheduler.getState(), zoneID));
+	}
+	
+	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler, ZoneId zoneID) {
+		this(messages, scheduler, zoneID, null);
 	}
 	
 	public SchedulerControlToolbar(IMessages messages, SchedulerImpl scheduler) {
-		this(messages, scheduler, null);
+		this(messages, scheduler, ZoneId.systemDefault());
 	}
 	
 	private JButton createButton(String iconName, String actionCommand, MsgID tooltip) {

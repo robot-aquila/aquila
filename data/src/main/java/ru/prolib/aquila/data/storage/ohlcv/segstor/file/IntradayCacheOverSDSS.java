@@ -2,6 +2,7 @@ package ru.prolib.aquila.data.storage.ohlcv.segstor.file;
 
 import java.io.BufferedReader;
 import java.io.Writer;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
@@ -9,7 +10,8 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.EditableTSeries;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.TFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesAggregator;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.segstor.DatePoint;
@@ -33,7 +35,7 @@ import ru.prolib.aquila.data.storage.segstor.file.SegmentFileManager;
  */
 public class IntradayCacheOverSDSS<RecordType> implements SymbolDailySegmentStorage<Candle> {
 	private final String fileSuffix;
-	private final TimeFrame tframe;
+	private final ZTFrame tframe;
 	private final SymbolDailySegmentStorage<RecordType> sourceSegments;
 	private final SegmentFileManager cacheManager;
 	private final CacheUtils utils;
@@ -42,25 +44,25 @@ public class IntradayCacheOverSDSS<RecordType> implements SymbolDailySegmentStor
 	/**
 	 * Constructor.
 	 * <p>
-	 * @param timeFrame - time frame of OHLCV data
+	 * @param tframe - time frame of this OHLCV data storage
 	 * @param sourceSegments - source data segments (M1 for example)
 	 * @param cacheManager - manager of cache files
 	 * @param utils - cache utilities
 	 */
-	public IntradayCacheOverSDSS(TimeFrame timeFrame,
+	public IntradayCacheOverSDSS(TFrame tframe,
 			SymbolDailySegmentStorage<RecordType> sourceSegments,
 			CandleSeriesAggregator<RecordType> aggregator,
 			SegmentFileManager cacheManager, CacheUtils utils)
 	{
-		this.fileSuffix = "-OHLCV-" + timeFrame + ".cache";
-		this.tframe = timeFrame;
+		this.fileSuffix = "-OHLCV-" + tframe + ".cache";
+		this.tframe = tframe.toZTFrame(sourceSegments.getZoneID());
 		this.aggregator = aggregator;
 		this.sourceSegments = sourceSegments;
 		this.cacheManager = cacheManager;
 		this.utils = utils;
 	}
 	
-	public IntradayCacheOverSDSS(TimeFrame tframe,
+	public IntradayCacheOverSDSS(TFrame tframe,
 			SymbolDailySegmentStorage<RecordType> sourceSegments,
 			CandleSeriesAggregator<RecordType> aggregator,
 			SegmentFileManager cacheManager)
@@ -81,12 +83,17 @@ public class IntradayCacheOverSDSS<RecordType> implements SymbolDailySegmentStor
 	}
 	
 	/**
-	 * Get timeframe of the cache.
+	 * Get time frame of the cache.
 	 * <p>
-	 * @return timeframe
+	 * @return time frame
 	 */
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return tframe;
+	}
+	
+	@Override
+	public ZoneId getZoneID() {
+		return sourceSegments.getZoneID();
 	}
 	
 	@Override

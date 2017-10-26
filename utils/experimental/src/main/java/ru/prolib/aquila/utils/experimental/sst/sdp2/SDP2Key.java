@@ -4,13 +4,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class SDP2Key {
-	private final TimeFrame timeFrame;
+	private final ZTFrame timeFrame;
 	private final Symbol symbol;
 	
-	public SDP2Key(TimeFrame timeFrame, Symbol symbol) {
+	public SDP2Key(ZTFrame timeFrame, Symbol symbol) {
 		if ( timeFrame == null ) {
 			throw new NullPointerException("Timeframe cannot be null");
 		}
@@ -18,11 +18,11 @@ public class SDP2Key {
 		this.symbol = symbol;
 	}
 
-	public SDP2Key(TimeFrame timeFrame) {
+	public SDP2Key(ZTFrame timeFrame) {
 		this(timeFrame, null);
 	}
 	
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return timeFrame;
 	}
 	

@@ -1,10 +1,10 @@
 package ru.prolib.aquila.probe.scheduler.ui;
 
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
 public class SchedulerOptions {
 	private int executionSpeed;
-	private TimeFrame timeFrame = TimeFrame.M1;
+	private ZTFrame timeFrame;
 	
 	public void setExecutionSpeed(int speed) {
 		this.executionSpeed = speed; 
@@ -14,11 +14,11 @@ public class SchedulerOptions {
 		return executionSpeed;
 	}
 	
-	public void setTimeFrame(TimeFrame timeFrame) {
+	public void setTimeFrame(ZTFrame timeFrame) {
 		this.timeFrame = timeFrame;
 	}
 	
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return timeFrame;
 	}
 	

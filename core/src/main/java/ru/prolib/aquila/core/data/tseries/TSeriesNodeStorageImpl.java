@@ -12,7 +12,7 @@ import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TSeriesUpdate;
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.ValueOutOfRangeException;
 
@@ -21,11 +21,11 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 	private final Lock lock;
 	private final List<TSeriesNode> nodeList;
 	private final Map<Instant, TSeriesNode> nodeMap;
-	private final TimeFrame timeFrame;
+	private final ZTFrame timeFrame;
 	private int lastSeriesID;
 	private TSeriesNode lastNode;
 	
-	TSeriesNodeStorageImpl(TimeFrame timeFrame, List<TSeriesNode> nodeList,
+	TSeriesNodeStorageImpl(ZTFrame timeFrame, List<TSeriesNode> nodeList,
 			Map<Instant, TSeriesNode> nodeMap)
 	{
 		this.lid = LID.createInstance();
@@ -36,7 +36,7 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 		this.lastSeriesID = -1;
 	}
 	
-	public TSeriesNodeStorageImpl(TimeFrame timeFrame) {
+	public TSeriesNodeStorageImpl(ZTFrame timeFrame) {
 		this(timeFrame, new ArrayList<>(), new HashMap<>());
 	}
 
@@ -68,7 +68,7 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 	 * @see ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage#getTimeFrame()
 	 */
 	@Override
-	public TimeFrame getTimeFrame() {
+	public ZTFrame getTimeFrame() {
 		return timeFrame;
 	}
 	

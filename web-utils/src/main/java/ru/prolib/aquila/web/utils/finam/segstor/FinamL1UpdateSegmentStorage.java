@@ -3,6 +3,7 @@ package ru.prolib.aquila.web.utils.finam.segstor;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,9 +32,11 @@ import ru.prolib.aquila.web.utils.finam.datasim.FinamCsvL1UpdateReader;
 public class FinamL1UpdateSegmentStorage implements SymbolDailySegmentStorage<L1Update> {
 	private final SegmentFileManager segmentManager;
 	private final String suffix = ".csv.gz";
+	private final ZoneId zoneID;
 	
 	public FinamL1UpdateSegmentStorage(SegmentFileManager segmentManager) {
 		this.segmentManager = segmentManager;
+		this.zoneID = ZoneId.of("Europe/Moscow");
 	}
 	
 	public FinamL1UpdateSegmentStorage(File root) {
@@ -161,6 +164,11 @@ public class FinamL1UpdateSegmentStorage implements SymbolDailySegmentStorage<L1
 		} catch ( IOException e ) {
 			throw new SymbolDailySegmentNotExistsException(segment, e);
 		}
+	}
+
+	@Override
+	public ZoneId getZoneID() {
+		return zoneID;
 	}
 
 }

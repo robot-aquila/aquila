@@ -1,47 +1,17 @@
 package ru.prolib.aquila.core.data.timeframe;
 
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.threeten.extra.Interval;
 
-import ru.prolib.aquila.core.data.TimeFrame;
+import ru.prolib.aquila.core.data.ZTFrame;
 
-/**
- * Минутный таймфрейм.
- */
-public class TFMinutes implements TimeFrame {
-	private final int length;
+public class TFMinutes extends AbstractTFrame {
 	
-	/**
-	 * Конструктор.
-	 * <p>
-	 * @param length период интервала в минутах.
-	 */
 	public TFMinutes(int length) {
-		super();
-		this.length = length;
-	}
-
-	@Override
-	public Interval getInterval(Instant timestamp) {
-		LocalDateTime time = LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC);
-		long secondOfDay = ChronoUnit.MINUTES.between(LocalTime.MIDNIGHT,
-				time.toLocalTime()) / length * length * 60;
-		LocalDateTime from = LocalDateTime.of(time.toLocalDate(),
-				LocalTime.ofSecondOfDay(secondOfDay));
-		LocalDateTime to = from.plusMinutes(length);
-		if ( to.toLocalDate().isAfter(from.toLocalDate()) ) {
-			// Конец периода указывает на дату следующего дня.
-			// В таком случае конец интервала выравнивается по началу след. дня.
-			to = LocalDateTime.of(from.toLocalDate().plusDays(1), LocalTime.MIDNIGHT);
-		}
-		return Interval.of(from.toInstant(ZoneOffset.UTC), to.toInstant(ZoneOffset.UTC));
+		super(length, ChronoUnit.MINUTES);
 	}
 
 	@Override
@@ -50,13 +20,18 @@ public class TFMinutes implements TimeFrame {
 	}
 
 	@Override
-	public ChronoUnit getUnit() {
-		return ChronoUnit.MINUTES;
+	public ZTFrame toZTFrame(ZoneId zoneID) {
+		return new ZTFMinutes(length, zoneID);
 	}
-
+	
 	@Override
-	public int getLength() {
-		return length;
+	public String toString() {
+		return "M" + length;
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(4856141, 13219).append(length).toHashCode();
 	}
 	
 	@Override
@@ -68,17 +43,9 @@ public class TFMinutes implements TimeFrame {
 			return false;
 		}
 		TFMinutes o = (TFMinutes) other;
-		return o.length == length;
-	}
-	
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(859, 175).append(length).toHashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return "M" + length;
+		return new EqualsBuilder()
+				.append(o.length, length)
+				.isEquals();
 	}
 
 }

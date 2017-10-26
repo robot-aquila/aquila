@@ -62,10 +62,10 @@ public class TSeriesImplTest {
 	
 	@Test
 	public void testGetTimeFrame() {
-		expect(storageMock.getTimeFrame()).andReturn(TimeFrame.M1);
+		expect(storageMock.getTimeFrame()).andReturn(ZTFrame.M1);
 		control.replay();
 		
-		assertEquals(TimeFrame.M1, series.getTimeFrame());
+		assertEquals(ZTFrame.M1, series.getTimeFrame());
 		
 		control.verify();
 	}
@@ -205,7 +205,7 @@ public class TSeriesImplTest {
 		fixture.add(new Candle(IM1("2017-09-15T18:02:00Z"), 155, 155, 149, 151, 1800)); // #5
 		fixture.add(new Candle(IM1("2017-09-15T18:03:00Z"), 151, 152, 145, 148, 1900)); // #6
 		
-		TSeriesImpl<Candle> series = new TSeriesImpl<>(TimeFrame.M1);
+		TSeriesImpl<Candle> series = new TSeriesImpl<>(ZTFrame.M1);
 		for ( Candle x : fixture ) {
 			series.set(x.getStartTime(), x);	
 		}
