@@ -319,7 +319,7 @@ public class SecuritySimulationTest implements Experiment {
 		BarChart<Instant> chart = chartPanel.addChart("CANDLES")
 				.setHeight(600)
 				.setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(precision))
-				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame(), 0);
+				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0);
 		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
 		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
 		chart.addLayer(new CandleBarChartLayer<>(slice.getSeries(CANDLE_SERIES)));
