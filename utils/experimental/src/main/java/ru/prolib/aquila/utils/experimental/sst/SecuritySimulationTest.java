@@ -320,9 +320,9 @@ public class SecuritySimulationTest implements Experiment {
 				.setHeight(600)
 				.setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(precision))
 				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0);
-		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
-		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
-		chart.addLayer(new CandleBarChartLayer<>(slice.getSeries(CANDLE_SERIES)));
+		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
+		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
+		chart.addLayer(new CandleBarChartLayer<>(slice.getSeries(CANDLE_SERIES), ZONE_ID));
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
 		chart.addLayer(new CurrentValueLayer<>(slice.getSeries(CANDLE_CLOSE_SERIES)));
@@ -331,8 +331,8 @@ public class SecuritySimulationTest implements Experiment {
 				.setHeight(200)
 				.setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(0))
 				.addStaticOverlay("Volume", 0);
-		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
-		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+		chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
+		chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
 		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES)).setColor(BAR_COLOR);
 
 		chartPanel.setCategories(slice.getIntervalStartSeries());

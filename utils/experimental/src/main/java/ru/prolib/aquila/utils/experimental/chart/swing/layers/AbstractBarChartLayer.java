@@ -8,6 +8,7 @@ import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 import java.awt.*;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,8 @@ import static ru.prolib.aquila.utils.experimental.chart.swing.Utils.getGraphics;
  * Created by TiM on 13.06.2017.
  */
 public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarChartLayer<TCategory> {
+
+    protected static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     protected final HashMap<Integer, Color> colors = new HashMap<>();
     protected final Map<Integer, Object> params = new HashMap<>();

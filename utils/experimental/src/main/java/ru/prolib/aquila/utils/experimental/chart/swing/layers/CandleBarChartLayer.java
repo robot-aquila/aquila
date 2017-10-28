@@ -3,12 +3,12 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.chart.Utils;
 import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.time.ZoneId;
 
 import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.*;
 
@@ -18,9 +18,16 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.*;
 public class CandleBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, Candle> {
 
     private Stroke stroke = new BasicStroke(CANDLE_LINE_WIDTH);
+    private final ZoneId zoneId;
 
     public CandleBarChartLayer(Series<Candle> data) {
         super(data);
+        zoneId = ZoneId.systemDefault();
+    }
+
+    public CandleBarChartLayer(Series<Candle> data, ZoneId zoneId) {
+        super(data);
+        this.zoneId = zoneId;
     }
 
     @Override
@@ -67,7 +74,7 @@ public class CandleBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
                         "HIGH: %8.2f%n" +
                         "LOW:  %8.2f%n" +
                         "CLOSE:%8.2f",
-                Utils.instantToStr(value.getStartTime()),
+                dateTimeFormatter.format(value.getStartTime().atZone(zoneId).toLocalDateTime()),
                 value.getOpen(),
                 value.getHigh(),
                 value.getLow(),

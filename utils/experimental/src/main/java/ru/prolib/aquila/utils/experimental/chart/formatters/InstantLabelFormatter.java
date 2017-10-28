@@ -1,9 +1,8 @@
 package ru.prolib.aquila.utils.experimental.chart.formatters;
 
-import ru.prolib.aquila.utils.experimental.chart.Utils;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -11,12 +10,22 @@ import java.time.format.DateTimeFormatter;
  */
 public class InstantLabelFormatter extends DefaultLabelFormatter<Instant> {
 
+    private final ZoneId zoneId;
+
     protected DateTimeFormatter yearLabelFormatter = DateTimeFormatter.ofPattern(getYearLabelFormat());
     protected DateTimeFormatter monthLabelFormatter = DateTimeFormatter.ofPattern(getMonthLabelFormat());
     protected DateTimeFormatter dayLabelFormatter = DateTimeFormatter.ofPattern(getDayLabelFormat());
     protected DateTimeFormatter hourLabelFormatter = DateTimeFormatter.ofPattern(getHourLabelFormat());
     protected DateTimeFormatter labelFormatter = DateTimeFormatter.ofPattern(getLabelFormat());
     protected DateTimeFormatter minorLabelFormatter = DateTimeFormatter.ofPattern(getMinorLabelFormat());
+
+    public InstantLabelFormatter() {
+        zoneId = ZoneId.systemDefault();
+    }
+
+    public InstantLabelFormatter(ZoneId zoneId) {
+        this.zoneId = zoneId;
+    }
 
     public String getYearLabelFormat() {
         return "YYYY ";
@@ -44,7 +53,7 @@ public class InstantLabelFormatter extends DefaultLabelFormatter<Instant> {
 
     @Override
     public String format(Instant x) {
-        LocalDateTime dateTime = Utils.toLocalDateTime(x);
+        LocalDateTime dateTime = x.atZone(zoneId).toLocalDateTime();
         DateTimeFormatter formatter = labelFormatter;
         if(dateTime.getDayOfYear()==1 && dateTime.getDayOfMonth()==1 && dateTime.getHour()==0 && dateTime.getMinute()==0 && !"".equals(getYearLabelFormat())){
             formatter = yearLabelFormatter;

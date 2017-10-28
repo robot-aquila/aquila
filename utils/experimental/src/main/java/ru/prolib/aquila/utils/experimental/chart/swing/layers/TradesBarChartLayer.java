@@ -7,7 +7,6 @@ import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
-import ru.prolib.aquila.utils.experimental.chart.Utils;
 import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
 import java.awt.*;
@@ -139,16 +138,5 @@ public class TradesBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
             accounts = (List<Account>) value;
         }
         return this;
-    }
-
-    private String createTooltipText(TradeInfo tradeInfo) {
-        return String.format("%s%n" +
-                        "%s %s @ %.2f x %d%n" +
-                        "ACCOUNT: %s%n" +
-                        "ORDER #: %d",
-                Utils.instantToStr(tradeInfo.getTime()),
-                tradeInfo.getAction(), tradeInfo.getSymbol(), tradeInfo.getPrice(),tradeInfo.getVolume(),
-                tradeInfo.getAccount(),
-                tradeInfo.getOrderId());
     }
 }
