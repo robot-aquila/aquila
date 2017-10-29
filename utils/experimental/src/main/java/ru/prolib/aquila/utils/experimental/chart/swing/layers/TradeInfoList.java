@@ -53,6 +53,24 @@ public class TradeInfoList implements Lockable {
         return data.get(index);
     }
 
+    public void removeByOrderId(Long orderId){
+        for(int i=data.size()-1; i>=0; i--){
+            TradeInfo ti = data.get(i);
+            if(orderId!=null && orderId.equals(ti.getOrderId())){
+                data.remove(ti);
+            }
+        }
+    }
+
+    public boolean containsOrder(Long orderId){
+        for(TradeInfo ti: data){
+            if(ti.getOrderId()!=null && ti.getOrderId().equals(orderId)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public LID getLID() {
         return lid;

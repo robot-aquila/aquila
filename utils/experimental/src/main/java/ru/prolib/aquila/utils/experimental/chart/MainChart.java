@@ -35,6 +35,7 @@ public class MainChart {
     private static EditableTSeries<Number> bidVolumes;
     private static EditableTSeries<Number> askVolumes;
     private static EditableTSeries<TradeInfoList> trades;
+    private static EditableTSeries<TradeInfoList> openOrders;
     private static CandleCloseTSeries closes;
     private static EventQueue eventQueue;
 
@@ -61,6 +62,7 @@ public class MainChart {
         chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.addLayer(new CandleBarChartLayer<>(candles));
         chart.addLayer(new TradesBarChartLayer<Instant>(trades).setColor(TradesBarChartLayer.SELL_COLOR, Color.BLUE));
+        chart.addLayer(new OpenOrdersLayer<>(openOrders));
         chart.addLayer(new CurrentValueLayer<>(closes));
 
         chart.addSmoothLine(new CandleCloseTSeries("Close", candles)).setColor(Color.BLUE);
@@ -180,6 +182,8 @@ public class MainChart {
         bidVolumes = new TSeriesImpl<>("Bid volumes", storage);
         askVolumes = new TSeriesImpl<>("Ask volumes", storage);
         trades = new TSeriesImpl<>("Trades", storage);
+        openOrders = new TSeriesImpl<>("OpenOrders", storage);
+
 
         Instant time = Instant.parse("2017-06-13T06:00:00Z");
         double prevClose = 120d;
@@ -208,6 +212,14 @@ public class MainChart {
         list.add(new TradeInfo(t.plusSeconds(20), OrderAction.BUY, candles.get(t).getLow(), 1000L).withOrderId(5L));
         list.add(new TradeInfo(t.plusSeconds(30), OrderAction.SELL, candles.get(t).getBodyMiddle(), 1000L).withOrderId(6L));
         trades.set(t, list);
+
+        list = new TradeInfoList();
+        t = Instant.parse("2017-06-13T06:40:00Z");
+        list.add(new TradeInfo(t.plusSeconds(10), OrderAction.BUY, candles.get(t).getHigh(), 1000L));
+        list.add(new TradeInfo(t.plusSeconds(20), OrderAction.BUY, candles.get(t).getOpen(), 1000L));
+        list.add(new TradeInfo(t.plusSeconds(30), OrderAction.SELL, candles.get(t).getClose(), 1000L));
+        list.add(new TradeInfo(t.plusSeconds(40), OrderAction.SELL, candles.get(t).getLow(), 1000L));
+        openOrders.set(t, list);
 
 //        Candle[] arr = {
 //                new Candle(TimeFrame.M1.getInterval(Instant.parse("2017-12-31T10:00:00Z")), 150.0, 152.0, 148.0, 151.0, 1000),
