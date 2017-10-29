@@ -26,11 +26,16 @@ public class TradeInfoList implements Lockable {
     public TradeInfoList(TradeInfoList tradeInfoList, List<Account> accounts){
         this();
         if(tradeInfoList!=null){
-            List<TradeInfo> list = new ArrayList<>(tradeInfoList.data);
-            for(TradeInfo ti: list){
-                if(accounts==null || accounts.contains(ti.getAccount())){
-                    add(ti);
+            tradeInfoList.lock();
+            try {
+                List<TradeInfo> list = new ArrayList<>(tradeInfoList.data);
+                for(TradeInfo ti: list){
+                    if(accounts==null || accounts.contains(ti.getAccount())){
+                        add(ti);
+                    }
                 }
+            } finally {
+                tradeInfoList.unlock();
             }
         }
     }
@@ -60,6 +65,7 @@ public class TradeInfoList implements Lockable {
                 data.remove(ti);
             }
         }
+        recalcValuesInterval();
     }
 
     public boolean containsOrder(Long orderId){
@@ -92,5 +98,21 @@ public class TradeInfoList implements Lockable {
 
     public Double getMinValue() {
         return minValue;
+    }
+
+    private void recalcValuesInterval(){
+        if(data.size()==0){
+            minValue = null;
+            maxValue = null;
+            return;
+        }
+        for(TradeInfo tradeInfo: data){
+            if(maxValue==null || tradeInfo.getPrice()>maxValue){
+                maxValue = tradeInfo.getPrice();
+            }
+            if(maxValue==null || tradeInfo.getPrice()>maxValue){
+                maxValue = tradeInfo.getPrice();
+            }
+        }
     }
 }
