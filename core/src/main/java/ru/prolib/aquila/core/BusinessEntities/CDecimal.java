@@ -44,5 +44,7 @@ public interface CDecimal extends Comparable<CDecimal> {
 	CDecimal withZero();
 	CDecimal withUnit(String unit);
 	BigDecimal toBigDecimal();
+	CDecimal max(CDecimal other);
+	CDecimal min(CDecimal other);
 	
 }

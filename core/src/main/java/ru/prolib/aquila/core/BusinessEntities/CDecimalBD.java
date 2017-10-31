@@ -155,6 +155,16 @@ public class CDecimalBD extends CDecimalAbstract {
 		return value;
 	}
 	
+	@Override
+	public CDecimal max(CDecimal other) {
+		return compareTo(other) >= 0 ? this : other;
+	}
+	
+	@Override
+	public CDecimal min(CDecimal other) {
+		return compareTo(other) <= 0 ? this : other;
+	}
+	
 	private String checkUnit(CDecimal other) {
 		String unit1 = this.unit, unit2 = other.getUnit();
 		if ( unit1 == null ) {

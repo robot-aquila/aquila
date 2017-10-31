@@ -520,5 +520,51 @@ public class CDecimalBDTest {
 		
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testMax() {
+		CDecimal x1 = new CDecimalBD("410.46"),
+				x2 = new CDecimalBD("410.45");
+		
+		assertSame(x1, x1.max(x2));
+		
+		x1 = new CDecimalBD("410.46", "USD");
+		x2 = new CDecimalBD("410.45", "EUR");
+		
+		assertSame(x1, x1.max(x2));
+		
+		x1 = new CDecimalBD("410.46", "USD");
+		x2 = new CDecimalBD("410.46", "USD");
+		
+		assertSame(x1, x1.max(x2));
+		
+		x1 = new CDecimalBD("410.46", "EUR");
+		x2 = new CDecimalBD("410.46", "USD");
+		
+		assertSame(x2, x1.max(x2));
+	}
+	
+	@Test
+	public void testMin() {
+		CDecimal x1 = new CDecimalBD("410.46"),
+				x2 = new CDecimalBD("410.45");
+		
+		assertSame(x2, x1.min(x2));
+		
+		x1 = new CDecimalBD("410.46", "USD");
+		x2 = new CDecimalBD("410.45", "EUR");
+		
+		assertSame(x2, x1.min(x2));
+		
+		x1 = new CDecimalBD("410.46", "USD");
+		x2 = new CDecimalBD("410.46", "USD");
+		
+		assertSame(x1, x1.min(x2));
+		
+		x1 = new CDecimalBD("410.46", "EUR");
+		x2 = new CDecimalBD("410.46", "USD");
+		
+		assertSame(x1, x1.min(x2));
+	}
 
 }
