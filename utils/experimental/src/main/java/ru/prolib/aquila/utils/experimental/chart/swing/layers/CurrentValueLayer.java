@@ -42,12 +42,17 @@ public class CurrentValueLayer<TCategory> implements BarChartLayer<TCategory> {
 
     @Override
     public String getId() {
-        return "CURRENT_VALUE_"+ data.getId();
+        return "Current value: "+ data.getId();
     }
 
     @Override
     public Range<Double> getValueRange(int first, int number) {
         return null;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return visible;
     }
 
     @Override
@@ -112,6 +117,14 @@ public class CurrentValueLayer<TCategory> implements BarChartLayer<TCategory> {
         int height = g.getFontMetrics().getHeight();
         int width = g.getFontMetrics().stringWidth(text);
         g.setColor(colors.get(COLOR_BG));
+        int yMax = context.toCanvasY(context.getMinVisibleValue());
+        int yMin = context.toCanvasY(context.getMaxVisibleValue());
+        if(y < yMin + height/2){
+            y = yMin + height/2;
+        }
+        if(y > yMax - height/2){
+            y = yMax - height/2;
+        }
         g.fillRoundRect(x, y - height/2, width+2*R, height, R, R);
         g.setColor(colors.get(COLOR_TEXT));
         g.drawString(text, x + R, y + height/4f);

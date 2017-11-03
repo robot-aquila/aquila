@@ -117,50 +117,50 @@ public class MainChart {
     }
 
     private static void addMouseClickListener() {
-        ((BarChartImpl)chartPanel.getChart("CANDLES")).getRootPanel().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if(e.getButton()==1){
-                    final Instant time = Instant.parse("2017-06-13T06:11:00Z");
-                    final Candle candle = candles.get(time);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            for(int i=0; i<100; i++){
-//                                System.out.println(LocalDateTime.now());
-                                ((EditableTSeries)candlesObs).set(time, randomCandle(time, candle.getOpen()));
-                                try {
-                                    Thread.sleep(100);
-                                } catch (InterruptedException e1) {
-                                    e1.printStackTrace();
-                                }
-                            }
-                        }
-                    }).start();
-                } else {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Candle candle = candles.get();
-                                for (int i = 0; i < 100; i++) {
-                                    Instant time = candle.getStartTime().plusSeconds(60 * (i + 1));
-                                    candle = randomCandle(time, candle.getClose());
-                                    ((EditableTSeries)candlesObs).set(time, candle);
-                                    try {
-                                        Thread.sleep(100);
-                                    } catch (InterruptedException e1) {
-                                        e1.printStackTrace();
-                                    }
-                                }
-                            } catch (ValueException e1) {
-                                e1.printStackTrace();
-                            }
-                        }
-                    }).start();
-                }
-            }
-        });
+//        ((BarChartImpl)chartPanel.getChart("CANDLES")).getRootPanel().addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                if(e.getButton()==1){
+//                    final Instant time = Instant.parse("2017-06-13T06:11:00Z");
+//                    final Candle candle = candles.get(time);
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            for(int i=0; i<100; i++){
+////                                System.out.println(LocalDateTime.now());
+//                                ((EditableTSeries)candlesObs).set(time, randomCandle(time, candle.getOpen()));
+//                                try {
+//                                    Thread.sleep(100);
+//                                } catch (InterruptedException e1) {
+//                                    e1.printStackTrace();
+//                                }
+//                            }
+//                        }
+//                    }).start();
+//                } else {
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                Candle candle = candles.get();
+//                                for (int i = 0; i < 100; i++) {
+//                                    Instant time = candle.getStartTime().plusSeconds(60 * (i + 1));
+//                                    candle = randomCandle(time, candle.getClose());
+//                                    ((EditableTSeries)candlesObs).set(time, candle);
+//                                    try {
+//                                        Thread.sleep(100);
+//                                    } catch (InterruptedException e1) {
+//                                        e1.printStackTrace();
+//                                    }
+//                                }
+//                            } catch (ValueException e1) {
+//                                e1.printStackTrace();
+//                            }
+//                        }
+//                    }).start();
+//                }
+//            }
+//        });
     }
 
     private static Candle randomCandle(Instant time, double prevClose){

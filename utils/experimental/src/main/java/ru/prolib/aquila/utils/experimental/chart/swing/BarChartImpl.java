@@ -15,8 +15,13 @@ import ru.prolib.aquila.utils.experimental.chart.StaticOverlay;
 import ru.prolib.aquila.utils.experimental.chart.formatters.*;
 import ru.prolib.aquila.utils.experimental.chart.interpolator.PolyLineRenderer;
 import ru.prolib.aquila.utils.experimental.chart.interpolator.SmoothLineRenderer;
+import ru.prolib.aquila.utils.experimental.chart.swing.settings.ChartSettings;
+import ru.prolib.aquila.utils.experimental.chart.swing.settings.ChartSettingsButton;
+import ru.prolib.aquila.utils.experimental.chart.swing.settings.ChartSettingsPopup;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -43,10 +48,12 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     private List<ChartOverlay> overlays = new Vector<>();
     private final RangeCalculator rangeCalculator;
     private AtomicInteger lastX, lastY, lastCategoryIdx;
-    protected Double minValue = null;
-    protected Double maxValue = null;
     private Map<String, List<String>> tooltips;
     private Set<String> systemLayers = new HashSet<>();
+    private ChartSettingsButton chartSettingsButton;
+    private final ChartSettings<TCategory> settings;
+    private final ChartSettingsPopup settingsPopup;
+
 
 
     public BarChartImpl(List<TCategory> categories) {
@@ -64,6 +71,25 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         bottomAxis = new BarChartAxisH(BarChartAxisH.POSITION_BOTTOM);
         leftAxis = new BarChartAxisV(BarChartAxisV.POSITION_LEFT);
         rightAxis = new BarChartAxisV(BarChartAxisV.POSITION_RIGHT);
+        settings = new ChartSettings<>(layers);
+        settingsPopup = new ChartSettingsPopup(settings);
+        settingsPopup.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                paint();
+            }
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+
+            }
+        });
+        chartSettingsButton = new ChartSettingsButton(getRootPanel(), settingsPopup);
     }
 
     public JPanel getRootPanel() {
@@ -182,8 +208,8 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
 
     @Override
     public BarChart<TCategory> setValuesInterval(Double minValue, Double maxValue) {
-        this.minValue = minValue;
-        this.maxValue = maxValue;
+        settings.setMinValue(minValue);
+        settings.setMaxValue(maxValue);
         return this;
     }
 
@@ -252,7 +278,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         RangeInfo ri = rangeCalculator.autoRange(valuesRange.getMinimum(), valuesRange.getMaximum(), drawArea.getHeight(), Y_AXIS_MIN_STEP, valuesLabelFormatter.getPrecision());
         BarChartVisualizationContextImpl vc = new BarChartVisualizationContextImpl(firstVisibleCategoryIndex, numberOfVisibleCategories, g2, drawArea, ri, valuesLabelFormatter);
 
-        CategoriesLabelProvider<TCategory> clp = new CategoriesLabelProvider<TCategory>(categories, vc);
+        CategoriesLabelProvider<TCategory> clp = new CategoriesLabelProvider<>(categories, vc);
         ValuesLabelProvider vlp = new ValuesLabelProvider(vc);
         topAxis.paint(vc, clp);
         bottomAxis.paint(vc, clp);
@@ -267,9 +293,14 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         drawOverlays(vc);
 
         lastCategoryIdx.set(vc.toCategoryIdx(lastX.get(), lastY.get()));
+
+        g2.setClip(0, 0, getRootPanel().getWidth(), getRootPanel().getHeight());
+        chartSettingsButton.paint(g2, getRootPanel().getWidth());
     }
 
     private Range<Double> getValueRange(){
+        Double minValue = settings.getMinValue();
+        Double maxValue = settings.getMaxValue();
         if(minValue!=null && maxValue!=null){
             return Range.between(minValue, maxValue);
         }
@@ -313,7 +344,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         Graphics2D g2 = (Graphics2D) vc.getGraphics().create();
         g2.setColor(CHART_OVERLAY_COLOR);
         g2.setFont(new Font("default", Font.BOLD, CHART_OVERLAY_FONT_SIZE));
-        int height = (int) Math.round(g2.getFontMetrics().getHeight());
+        int height = Math.round(g2.getFontMetrics().getHeight());
         for(ChartOverlay o: overlays){
             int x = vc.getPlotBounds().getX() + LABEL_INDENT;
             int y;

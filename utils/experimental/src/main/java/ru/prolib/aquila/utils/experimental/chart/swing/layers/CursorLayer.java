@@ -24,12 +24,17 @@ public class CursorLayer implements BarChartLayer {
 
     @Override
     public String getId() {
-        return "CURSOR";
+        return "___CURSOR";
     }
 
     @Override
     public Range<Double> getValueRange(int first, int number) {
         return null;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return false;
     }
 
     @Override

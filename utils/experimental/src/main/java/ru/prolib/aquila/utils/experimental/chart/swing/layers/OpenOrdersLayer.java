@@ -52,6 +52,11 @@ public class OpenOrdersLayer<TCategory> implements BarChartLayer<TCategory> {
     }
 
     @Override
+    public boolean isVisible() {
+        return visible;
+    }
+
+    @Override
     public BarChartLayer<TCategory> setVisible(boolean visible) {
         this.visible = visible;
         return this;

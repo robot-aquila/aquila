@@ -36,7 +36,7 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
 
     @Override
     public void paint(BarChartVisualizationContext context) {
-        if(data==null){
+        if(data==null || !visible){
             return;
         }
 

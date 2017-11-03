@@ -14,7 +14,7 @@ public class ChartConstants {
     public static final Color CHART_OVERLAY_COLOR = new Color(0, 82, 155);
     public static final int CHART_OVERLAY_FONT_SIZE = 14;
 
-    public static final int Y_AXIS_WIDTH = 50;
+    public static final int Y_AXIS_WIDTH = 60;
     public static final int Y_AXIS_MIN_STEP = 30;
     public static final Font LABEL_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 10);
     public static final int LABEL_INDENT = 5;

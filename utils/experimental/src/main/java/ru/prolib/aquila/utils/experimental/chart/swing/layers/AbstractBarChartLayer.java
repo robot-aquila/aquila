@@ -107,6 +107,11 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
     }
 
     @Override
+    public boolean isVisible() {
+        return visible;
+    }
+
+    @Override
     public BarChartLayer<TCategory> setVisible(boolean visible) {
         this.visible = visible;
         return this;

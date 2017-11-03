@@ -18,6 +18,8 @@ public interface BarChartLayer<TCategory> {
 	 */
 	Range<Double> getValueRange(int first, int number);
 
+	boolean isVisible();
+
 	/**
 	 * Show or hide layer.
 	 * <p>
