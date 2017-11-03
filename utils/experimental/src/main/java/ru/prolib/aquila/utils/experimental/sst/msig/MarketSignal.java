@@ -61,7 +61,7 @@ public class MarketSignal extends BreakSignal {
 	private void fire(EventType type, Instant time, Double price, Long size) {
 		EventFactory eventFactory = new MarketSignalEventFactory(time, price, size);
 		lastEvent = (MarketSignalEvent) eventFactory.produceEvent(type);
-		queue.enqueue(onBullish, eventFactory);
+		queue.enqueue(type, eventFactory);
 	}
 	
 	static class MarketSignalEventFactory implements EventFactory {
