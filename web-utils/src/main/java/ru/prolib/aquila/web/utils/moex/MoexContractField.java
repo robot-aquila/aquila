@@ -32,28 +32,28 @@ public class MoexContractField {
 	/**
 	 * Type<br>
 	 * Value: 4<br>
-	 * Type: {@link MoexContractType}<br>
+	 * Type: String<br>
 	 */
 	public static final int TYPE = 4;
 	
 	/**
 	 * Settlement<br>
 	 * Value: 5<br>
-	 * Type: {@link MoexSettlementType}<br>
+	 * Type: String<br>
 	 */
 	public static final int SETTLEMENT = 5;
 	
 	/**
 	 * Contract size<br>
 	 * Value: 6<br>
-	 * Type: int<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int LOT_SIZE = 6;
 	
 	/**
 	 * Quotation<br>
 	 * Value: 7<br>
-	 * Type: {@link MoexQuotationType}<br>
+	 * Type: String<br>
 	 */
 	public static final int QUOTATION = 7;
 	
@@ -81,70 +81,70 @@ public class MoexContractField {
 	/**
 	 * Price tick.<br>
 	 * Value: 11<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int TICK_SIZE = 11;
 	
 	/**
 	 * Value of price tick, RUB<br>
 	 * Value: 12<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int TICK_VALUE = 12;
 	
 	/**
 	 * Lower limit<br>
 	 * Value: 13<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int LOWER_PRICE_LIMIT = 13;
 	
 	/**
 	 * Upper limit<br>
 	 * Value: 14<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int UPPER_PRICE_LIMIT = 14;
 	
 	/**
 	 * Settlement price of last clearing session<br>
 	 * Value: 15<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int SETTLEMENT_PRICE = 15;
 	
 	/**
 	 * Contract buy/sell fee, RUB<br>
 	 * Value: 16<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int FEE = 16;
 	
 	/**
 	 * Intraday (scalper) fee, RUB<br>
 	 * Value: 17<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int INTRADAY_FEE = 17;
 	
 	/**
 	 * Negotiated trade fee, RUB<br>
 	 * Value: 18<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int NEGOTIATION_FEE = 18;
 
 	/**
 	 * Contract exercise fee.<br>
 	 * Value: 19<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int EXERCISE_FEE = 19;
 	
 	/**
 	 * Initial Margin (IM, rub)<br>
 	 * Value: 20<br>
-	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney}<br>
+	 * Type: {@link ru.prolib.aquila.core.BusinessEntities.CDecimal CDecimal}<br>
 	 */
 	public static final int INITIAL_MARGIN = 20;
 	

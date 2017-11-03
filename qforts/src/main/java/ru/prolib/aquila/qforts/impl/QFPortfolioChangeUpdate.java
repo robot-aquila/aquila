@@ -8,27 +8,28 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.utils.FMValueTriplet;
+import ru.prolib.aquila.core.utils.CDValueTriplet;
 
 public class QFPortfolioChangeUpdate {
+	private static final String RUB = "RUB";
 	protected final Account account;
 	protected final Map<Symbol, QFPositionChangeUpdate> positions;
-	protected final FMValueTriplet balance, equity, freeMargin, profitAndLoss,
+	protected final CDValueTriplet balance, equity, freeMargin, profitAndLoss,
 		usedMargin, varMargin, varMarginClose, varMarginInter;
 	
 	public QFPortfolioChangeUpdate(Account account) {
 		this.account = account;
 		positions = new LinkedHashMap<>();
-		balance = new FMValueTriplet();
-		equity = new FMValueTriplet();
-		freeMargin = new FMValueTriplet();
-		profitAndLoss = new FMValueTriplet();
-		usedMargin = new FMValueTriplet();
-		varMargin = new FMValueTriplet();
-		varMarginClose = new FMValueTriplet();
-		varMarginInter = new FMValueTriplet();
+		balance = new CDValueTriplet(2, RUB);
+		equity = new CDValueTriplet(2, RUB);
+		freeMargin = new CDValueTriplet(2, RUB);
+		profitAndLoss = new CDValueTriplet(2, RUB);
+		usedMargin = new CDValueTriplet(2, RUB);
+		varMargin = new CDValueTriplet(5, RUB);
+		varMarginClose = new CDValueTriplet(5, RUB);
+		varMarginInter = new CDValueTriplet(5, RUB);
 	}
 	
 	public Account getAccount() {
@@ -52,122 +53,122 @@ public class QFPortfolioChangeUpdate {
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeBalance(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeBalance(CDecimal value) {
 		balance.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeEquity(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeEquity(CDecimal value) {
 		equity.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeFreeMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeFreeMargin(CDecimal value) {
 		freeMargin.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeProfitAndLoss(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeProfitAndLoss(CDecimal value) {
 		profitAndLoss.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeUsedMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeUsedMargin(CDecimal value) {
 		usedMargin.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeVarMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeVarMargin(CDecimal value) {
 		varMargin.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeVarMarginClose(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeVarMarginClose(CDecimal value) {
 		varMarginClose.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setChangeVarMarginInter(FMoney value) {
+	public QFPortfolioChangeUpdate setChangeVarMarginInter(CDecimal value) {
 		varMarginInter.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialBalance(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialBalance(CDecimal value) {
 		balance.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialEquity(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialEquity(CDecimal value) {
 		equity.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialFreeMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialFreeMargin(CDecimal value) {
 		freeMargin.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialProfitAndLoss(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialProfitAndLoss(CDecimal value) {
 		profitAndLoss.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialUsedMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialUsedMargin(CDecimal value) {
 		usedMargin.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialVarMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialVarMargin(CDecimal value) {
 		varMargin.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialVarMarginClose(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialVarMarginClose(CDecimal value) {
 		varMarginClose.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setInitialVarMarginInter(FMoney value) {
+	public QFPortfolioChangeUpdate setInitialVarMarginInter(CDecimal value) {
 		varMarginInter.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalBalance(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalBalance(CDecimal value) {
 		balance.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalEquity(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalEquity(CDecimal value) {
 		equity.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalFreeMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalFreeMargin(CDecimal value) {
 		freeMargin.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalProfitAndLoss(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalProfitAndLoss(CDecimal value) {
 		profitAndLoss.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalUsedMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalUsedMargin(CDecimal value) {
 		usedMargin.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalVarMargin(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalVarMargin(CDecimal value) {
 		varMargin.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalVarMarginClose(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalVarMarginClose(CDecimal value) {
 		varMarginClose.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPortfolioChangeUpdate setFinalVarMarginInter(FMoney value) {
+	public QFPortfolioChangeUpdate setFinalVarMarginInter(CDecimal value) {
 		varMarginInter.setFinalValue(value);
 		return this;
 	}
@@ -184,99 +185,99 @@ public class QFPortfolioChangeUpdate {
 		return x;
 	}
 	
-	public FMoney getChangeBalance() {
+	public CDecimal getChangeBalance() {
 		return balance.getChangeValue();
 	}
 	
-	public FMoney getChangeEquity() {
+	public CDecimal getChangeEquity() {
 		return equity.getChangeValue();
 	}
 	
-	public FMoney getChangeFreeMargin() {
+	public CDecimal getChangeFreeMargin() {
 		return freeMargin.getChangeValue();
 	}
 	
-	public FMoney getChangeProfitAndLoss() {
+	public CDecimal getChangeProfitAndLoss() {
 		return profitAndLoss.getChangeValue();
 	}
 	
-	public FMoney getChangeUsedMargin() {
+	public CDecimal getChangeUsedMargin() {
 		return usedMargin.getChangeValue();
 	}
 	
-	public FMoney getChangeVarMargin() {
+	public CDecimal getChangeVarMargin() {
 		return varMargin.getChangeValue();
 	}
 	
-	public FMoney getChangeVarMarginClose() {
+	public CDecimal getChangeVarMarginClose() {
 		return varMarginClose.getChangeValue();
 	}
 	
-	public FMoney getChangeVarMarginInter() {
+	public CDecimal getChangeVarMarginInter() {
 		return varMarginInter.getChangeValue();
 	}
 	
-	public FMoney getInitialBalance() {
+	public CDecimal getInitialBalance() {
 		return balance.getInitialValue();
 	}
 	
-	public FMoney getInitialEquity() {
+	public CDecimal getInitialEquity() {
 		return equity.getInitialValue();
 	}
 	
-	public FMoney getInitialFreeMargin() {
+	public CDecimal getInitialFreeMargin() {
 		return freeMargin.getInitialValue();
 	}
 	
-	public FMoney getInitialProfitAndLoss() {
+	public CDecimal getInitialProfitAndLoss() {
 		return profitAndLoss.getInitialValue();
 	}
 	
-	public FMoney getInitialUsedMargin() {
+	public CDecimal getInitialUsedMargin() {
 		return usedMargin.getInitialValue();
 	}
 	
-	public FMoney getInitialVarMargin() {
+	public CDecimal getInitialVarMargin() {
 		return varMargin.getInitialValue();
 	}
 	
-	public FMoney getInitialVarMarginClose() {
+	public CDecimal getInitialVarMarginClose() {
 		return varMarginClose.getInitialValue();
 	}
 	
-	public FMoney getInitialVarMarginInter() {
+	public CDecimal getInitialVarMarginInter() {
 		return varMarginInter.getInitialValue();
 	}
 	
-	public FMoney getFinalBalance() {
+	public CDecimal getFinalBalance() {
 		return balance.getFinalValue();
 	}
 	
-	public FMoney getFinalEquity() {
+	public CDecimal getFinalEquity() {
 		return equity.getFinalValue();
 	}
 	
-	public FMoney getFinalFreeMargin() {
+	public CDecimal getFinalFreeMargin() {
 		return freeMargin.getFinalValue();
 	}
 	
-	public FMoney getFinalProfitAndLoss() {
+	public CDecimal getFinalProfitAndLoss() {
 		return profitAndLoss.getFinalValue();
 	}
 	
-	public FMoney getFinalUsedMargin() {
+	public CDecimal getFinalUsedMargin() {
 		return usedMargin.getFinalValue();
 	}
 	
-	public FMoney getFinalVarMargin() {
+	public CDecimal getFinalVarMargin() {
 		return varMargin.getFinalValue();
 	}
 	
-	public FMoney getFinalVarMarginClose() {
+	public CDecimal getFinalVarMarginClose() {
 		return varMarginClose.getFinalValue();
 	}
 	
-	public FMoney getFinalVarMarginInter() {
+	public CDecimal getFinalVarMarginInter() {
 		return varMarginInter.getFinalValue();
 	}
 	

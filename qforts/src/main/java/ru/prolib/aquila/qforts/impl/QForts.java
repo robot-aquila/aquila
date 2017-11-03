@@ -2,16 +2,17 @@ package ru.prolib.aquila.qforts.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class QForts {
+	private static final CDecimal ZERO = CDecimalBD.ZERO;
 	private final QFObjectRegistry registry;
 	private final QFTransactionService transactions;
 	
@@ -40,26 +41,26 @@ public class QForts {
 		transactions.cancelOrder(order);
 	}
 	
-	public void changeBalance(EditablePortfolio portfolio, FMoney value)
+	public void changeBalance(EditablePortfolio portfolio, CDecimal value)
 			throws QFTransactionException
 	{
 		transactions.changeBalance(portfolio, value);
 	}
 	
-	public void handleOrders(Security security, long availableVolume, FDecimal price)
+	public void handleOrders(Security security, CDecimal availableVolume, CDecimal price)
 			throws QFTransactionException
 	{
 		for ( EditableOrder order : registry.getOrderList(security.getSymbol(), price) ) {
-			long volume = Math.min(availableVolume, order.getCurrentVolume());
-			if ( volume > 0L ) {
+			CDecimal volume = availableVolume.min(order.getCurrentVolume());
+			if ( volume.compareTo(ZERO) > 0 ) {
 				try {
 					transactions.executeOrder(order, volume, price);
 				} catch ( QFValidationException e ) {
 					transactions.rejectOrder(order, e.getMessage());
 				}
 			}
-			availableVolume -= volume;
-			if ( availableVolume <= 0L ) {
+			availableVolume = availableVolume.subtract(volume);
+			if ( availableVolume.compareTo(ZERO) <= 0 ) {
 				break;
 			}
 		}

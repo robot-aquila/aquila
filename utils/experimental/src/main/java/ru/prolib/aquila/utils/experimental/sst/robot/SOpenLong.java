@@ -3,7 +3,8 @@ package ru.prolib.aquila.utils.experimental.sst.robot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.Order;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
@@ -35,21 +36,21 @@ public class SOpenLong extends BasicState implements SMExitAction {
 	public SMExit enter(SMTriggerRegistry triggers) {
 		super.enter(triggers);
 		Security security = data.getSecurity();
-		FDecimal price = security.getUpperPriceLimit();
+		CDecimal price = security.getUpperPriceLimit();
 		if ( price == null ) {
 			logger.error("Upper price limit not defined");
 			return getExit(EER);
 		}
 		Portfolio portfolio = data.getPortfolio();
 		CalcUtils cu = new CalcUtils();
-		long contracts = (long)portfolio.getEquity()
-				.multiply(FDecimal.of2(data.getConfig().getShare()))
+		CDecimal contracts = portfolio.getEquity()
+				.toAbstract()
+				.multiply(CDecimalBD.of(Double.toString(data.getConfig().getShare())))
 				.subtract(cu.getSafe(portfolio.getPosition(data.getSymbol()).getCurrentPrice()))
 				.divide(cu.getLastPrice(security))
-				.withScale(0)
-				.doubleValue();
+				.withScale(0);
 		logger.debug("Contracts: {}", contracts);
-		if ( contracts == 0 ) {
+		if ( contracts.compareTo(CDecimalBD.ZERO) == 0 ) {
 			return getExit(EOK);
 		}
 		order = data.getTerminal().createOrder(data.getAccount(), data.getSymbol(),

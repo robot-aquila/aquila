@@ -21,6 +21,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdateBuilder;
@@ -88,7 +89,7 @@ public class MarketDepthTableModelTest {
 	}
 	
 	private void assignTestMarketDepth() {
-		security.update(SecurityField.TICK_SIZE, new FDecimal("0.0001"));
+		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.0001"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)
@@ -229,7 +230,7 @@ public class MarketDepthTableModelTest {
 	
 	@Test
 	public void testGetValueAt_HasEmptyRows() throws Exception {
-		security.update(SecurityField.TICK_SIZE, new FDecimal("0.001"));
+		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.001"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)
@@ -262,7 +263,7 @@ public class MarketDepthTableModelTest {
 	
 	@Test
 	public void testGetValueAt_MoreThanMaxDepth() throws Exception {
-		security.update(SecurityField.TICK_SIZE, new FDecimal("0.01"));
+		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)

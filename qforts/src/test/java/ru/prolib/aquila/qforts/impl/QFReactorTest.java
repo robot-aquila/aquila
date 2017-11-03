@@ -17,11 +17,11 @@ import org.junit.Test;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
@@ -67,7 +67,7 @@ public class QFReactorTest {
 			.withScheduler(schedulerStub)
 			.buildTerminal();
 		security = terminal.getEditableSecurity(symbol);
-		security.update(SecurityField.TICK_SIZE, FDecimal.of2(0.01));
+		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"));
 		reactor = new QFReactor(facadeMock, registryMock, scheduleMock, seqOrderID);
 	}
 	
@@ -288,7 +288,7 @@ public class QFReactorTest {
 	@Test
 	public void testOnEvent_SecurityLastTrade() throws Exception {
 		expect(registryMock.isRegistered(security)).andReturn(true);
-		facadeMock.handleOrders(security, 2500L, FDecimal.of2(54.02));
+		facadeMock.handleOrders(security, CDecimalBD.of(2500L), CDecimalBD.of("54.02"));
 		control.replay();
 		
 		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security,

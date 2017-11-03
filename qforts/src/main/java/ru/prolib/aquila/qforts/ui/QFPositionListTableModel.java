@@ -3,7 +3,7 @@ package ru.prolib.aquila.qforts.ui;
 import java.util.List;
 import java.util.Map;
 
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Position;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.MsgID;
@@ -42,11 +42,11 @@ public class QFPositionListTableModel extends PositionListTableModel {
 	protected Object getColumnValue(Position p, int columnID) {
 		switch ( columnID ) {
 		case CID_VMARGIN:
-			return p.getMoney(QFPositionField.QF_VAR_MARGIN);
+			return p.getCDecimal(QFPositionField.QF_VAR_MARGIN);
 		case CID_VMARGIN_INTER:
-			return p.getMoney(QFPositionField.QF_VAR_MARGIN_INTER);
+			return p.getCDecimal(QFPositionField.QF_VAR_MARGIN_INTER);
 		case CID_VMARGIN_CLOSE:
-			return p.getMoney(QFPositionField.QF_VAR_MARGIN_CLOSE);
+			return p.getCDecimal(QFPositionField.QF_VAR_MARGIN_CLOSE);
 		default:
 			return super.getColumnValue(p, columnID);
 		}
@@ -58,7 +58,7 @@ public class QFPositionListTableModel extends PositionListTableModel {
 		case CID_VMARGIN:
 		case CID_VMARGIN_INTER:
 		case CID_VMARGIN_CLOSE:
-			return FMoney.class;
+			return CDecimal.class;
 		default:
 			return super.getColumnClass(col);
 		}

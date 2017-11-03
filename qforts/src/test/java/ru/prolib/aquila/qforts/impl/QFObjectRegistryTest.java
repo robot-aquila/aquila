@@ -14,11 +14,11 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProviderStub;
@@ -100,11 +100,20 @@ public class QFObjectRegistryTest {
 	@Test
 	public void testIsRegistered_Order() {
 		EditableOrder o1 = (EditableOrder) terminal.createOrder(account1,
-				symbol1, OrderAction.BUY, 1L, FDecimal.of2(115.04)),
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04")),
 			o2 = (EditableOrder) terminal.createOrder(account2,
-				symbol2, OrderAction.BUY, 1L, FDecimal.of2(86.19)),
+				symbol2,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("86.19")),
 			o3 = (EditableOrder) terminal.createOrder(account3,
-				symbol3, OrderAction.SELL, 1L, FDecimal.of2(70.56));
+				symbol3,
+				OrderAction.SELL,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("70.56"));
 		
 		assertFalse(registry.isRegistered(o1));
 		assertFalse(registry.isRegistered(o2));
@@ -156,15 +165,30 @@ public class QFObjectRegistryTest {
 	@Test
 	public void testRegister_Order() {
 		EditableOrder s1o1 = (EditableOrder) terminal.createOrder(account1,
-				symbol1, OrderAction.BUY, 1L, FDecimal.of2(115.04)),
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04")),
 			s1o2 = (EditableOrder) terminal.createOrder(account2,
-				symbol1, OrderAction.BUY, 100L, FDecimal.of2(86.19)),
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(100L),
+				CDecimalBD.of("86.19")),
 			s1o3 = (EditableOrder) terminal.createOrder(account3,
-				symbol1, OrderAction.SELL, 10L, FDecimal.of2(70.56)),
+				symbol1,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("70.56")),
 			s2o1 = (EditableOrder) terminal.createOrder(account1,
-				symbol2, OrderAction.SELL, 10L, FDecimal.of2(23.96)),
+				symbol2,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("23.96")),
 			s2o2 = (EditableOrder) terminal.createOrder(account3,
-				symbol2, OrderAction.BUY, 5L, FDecimal.of2(11.05));
+				symbol2,
+				OrderAction.BUY,
+				CDecimalBD.of(5L),
+				CDecimalBD.of("11.05"));
 		
 		registry.register(s1o1);
 		registry.register(s1o2);
@@ -222,21 +246,45 @@ public class QFObjectRegistryTest {
 	@Test
 	public void testGetOrderList() {
 		EditableOrder s1o1 = (EditableOrder) terminal.createOrder(account1,
-				symbol1, OrderAction.BUY, 1L, FDecimal.of2(115.04)),
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04")),
 			s1o2 = (EditableOrder) terminal.createOrder(account2,
-				symbol1, OrderAction.BUY, 100L, FDecimal.of2(86.19)),
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(100L),
+				CDecimalBD.of("86.19")),
 			s1o3 = (EditableOrder) terminal.createOrder(account3,
-				symbol1, OrderAction.SELL, 10L, FDecimal.of2(70.56)),
+				symbol1,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("70.56")),
 			s2o1 = (EditableOrder) terminal.createOrder(account1,
-				symbol2, OrderAction.SELL, 10L, FDecimal.of2(23.96)),	// +
+				symbol2,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("23.96")),	// +
 			s2o2 = (EditableOrder) terminal.createOrder(account3,
-				symbol2, OrderAction.BUY, 5L, FDecimal.of2(11.05)), 	// -
+				symbol2,
+				OrderAction.BUY,
+				CDecimalBD.of(5L),
+				CDecimalBD.of("11.05")), 	// -
 			s2o3 = (EditableOrder) terminal.createOrder(account2,
-				symbol2, OrderAction.BUY, 1L, FDecimal.of2(55.00)), 	// +
+				symbol2,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("55.00")), 	// +
 			s2o4 = (EditableOrder) terminal.createOrder(account1,
-				symbol2, OrderAction.BUY, 5L, FDecimal.of2(55.29)), 	// +
+				symbol2,
+				OrderAction.BUY,
+				CDecimalBD.of(5L),
+				CDecimalBD.of("55.29")), 	// +
 			s2o5 = (EditableOrder) terminal.createOrder(account2,
-				symbol2, OrderAction.SELL, 5L, FDecimal.of2(55.01)); 	// -
+				symbol2,
+				OrderAction.SELL,
+				CDecimalBD.of(5L),
+				CDecimalBD.of("55.01")); 	// -
 		registry.register(s1o1);
 		registry.register(s1o2);
 		registry.register(s1o3);
@@ -246,7 +294,7 @@ public class QFObjectRegistryTest {
 		registry.register(s2o4);
 		registry.register(s2o5);
 			
-		List<EditableOrder> actual = registry.getOrderList(symbol2, FDecimal.of2(55.0));
+		List<EditableOrder> actual = registry.getOrderList(symbol2, CDecimalBD.of("55.00"));
 		
 		List<EditableOrder> expected = new ArrayList<>();
 		expected.add(s2o1);
@@ -258,15 +306,30 @@ public class QFObjectRegistryTest {
 	@Test
 	public void testPurgeOrder() {
 		EditableOrder s1o1 = (EditableOrder) terminal.createOrder(account1,
-				symbol1, OrderAction.BUY, 1L, FDecimal.of2(115.04)),
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04")),
 			s1o2 = (EditableOrder) terminal.createOrder(account2,
-				symbol1, OrderAction.BUY, 100L, FDecimal.of2(86.19)),
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(100L),
+				CDecimalBD.of("86.19")),
 			s1o3 = (EditableOrder) terminal.createOrder(account3,
-				symbol1, OrderAction.SELL, 10L, FDecimal.of2(70.56)),
+				symbol1,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("70.56")),
 			s2o1 = (EditableOrder) terminal.createOrder(account1,
-				symbol2, OrderAction.SELL, 10L, FDecimal.of2(23.96)),
+				symbol2,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("23.96")),
 			s2o2 = (EditableOrder) terminal.createOrder(account3,
-				symbol2, OrderAction.BUY, 5L, FDecimal.of2(11.05));
+				symbol2,
+				OrderAction.BUY,
+				CDecimalBD.of(5L),
+				CDecimalBD.of("11.05"));
 		orders.put(symbol1, new LinkedHashSet<>());
 		orders.get(symbol1).add(s1o1);
 		orders.get(symbol1).add(s1o2);

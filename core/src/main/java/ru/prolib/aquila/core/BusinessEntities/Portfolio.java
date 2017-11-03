@@ -31,70 +31,70 @@ public interface Portfolio extends ObservableStateContainer, BusinessEntity {
 	 * <p>
 	 * @return account balance or null if data not available
 	 */
-	public FMoney getBalance();
+	public CDecimal getBalance();
 	
 	/**
 	 * Get account equity.
 	 * <p>
 	 * @return account equity or null if data not available
 	 */
-	public FMoney getEquity();
+	public CDecimal getEquity();
 	
 	/**
 	 * Get current profit of an account.
 	 * <p>
 	 * @return current profit or null if data not available
 	 */
-	public FMoney getProfitAndLoss();
+	public CDecimal getProfitAndLoss();
 	
 	/**
 	 * Get the margin is currently used.
 	 * <p>
 	 * @return margin used or null if data not available
 	 */
-	public FMoney getUsedMargin();
+	public CDecimal getUsedMargin();
 	
 	/**
 	 * Get the free margin.
 	 * <p>
 	 * @return free margin  or null if data not available
 	 */
-	public FMoney getFreeMargin();
+	public CDecimal getFreeMargin();
 	
 	/**
 	 * Get the margin call level.
 	 * <p>
 	 * @return margin call level or null if data not available
 	 */
-	public Double getMarginCallLevel();
+	public CDecimal getMarginCallLevel();
 	
 	/**
 	 * Get the margin stop out level.
 	 * <p>
 	 * @return stop out level or null if data not available
 	 */
-	public Double getMarginStopOutLevel();
+	public CDecimal getMarginStopOutLevel();
 	
 	/**
 	 * Get the current assets of an account.
 	 * <p>
 	 * @return the current assets or null if data not available
 	 */
-	public FMoney getAssets();
+	public CDecimal getAssets();
 	
 	/**
 	 * Get the current liabilities of an account.
 	 * <p>
 	 * @return the current liabilities or null if data not available
 	 */
-	public FMoney getLiabilities();
+	public CDecimal getLiabilities();
 	
 	/**
 	 * Account leverage.
 	 * <p>
 	 * @return account leverage
 	 */
-	public Double getLeverage();
+	public CDecimal getLeverage();
 	
 	/**
 	 * Get account currency.

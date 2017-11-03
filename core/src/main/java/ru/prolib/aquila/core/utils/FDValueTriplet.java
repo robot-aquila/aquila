@@ -8,6 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.FDecimal;
  * Same as {@link BDValueTriplet} but for
  * {@link ru.prolib.aquila.core.BusinessEntities.FDecimal FDecimal} value class. 
  */
+@Deprecated
 public class FDValueTriplet {
 	private FDecimal initialValue, finalValue, changeValue;
 	

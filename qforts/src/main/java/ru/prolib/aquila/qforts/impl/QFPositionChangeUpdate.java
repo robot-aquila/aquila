@@ -3,33 +3,30 @@ package ru.prolib.aquila.qforts.impl;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.utils.FDValueTriplet;
-import ru.prolib.aquila.core.utils.FMValueTriplet;
-import ru.prolib.aquila.core.utils.LValueTriplet;
+import ru.prolib.aquila.core.utils.CDValueTriplet;
 
 public class QFPositionChangeUpdate {
+	private static final String RUB = "RUB";
 	protected final Account account;
 	protected final Symbol symbol;
-	protected final FDValueTriplet currentPrice, openPrice;
-	protected final FMValueTriplet profitAndLoss, usedMargin, varMargin,
-		varMarginClose, varMarginInter, accountBalance;
-	protected final LValueTriplet volume;
+	protected final CDValueTriplet currentPrice, openPrice, profitAndLoss,
+		usedMargin, varMargin, varMarginClose, varMarginInter, accountBalance,
+		volume;
 	
 	public QFPositionChangeUpdate(Account account, Symbol symbol) {
 		this.account = account;
 		this.symbol = symbol;
-		currentPrice = new FDValueTriplet();
-		openPrice = new FDValueTriplet();
-		profitAndLoss = new FMValueTriplet();
-		usedMargin = new FMValueTriplet();
-		varMargin = new FMValueTriplet();
-		varMarginClose = new FMValueTriplet();
-		varMarginInter = new FMValueTriplet();
-		accountBalance = new FMValueTriplet();
-		volume = new LValueTriplet();
+		currentPrice = new CDValueTriplet();
+		openPrice = new CDValueTriplet();
+		profitAndLoss = new CDValueTriplet(2, RUB);
+		usedMargin = new CDValueTriplet(2, RUB);
+		varMargin = new CDValueTriplet(5, RUB);
+		varMarginClose = new CDValueTriplet(5, RUB);
+		varMarginInter = new CDValueTriplet(5, RUB);
+		accountBalance = new CDValueTriplet(2, RUB);
+		volume = new CDValueTriplet(0);
 	}
 	
 	public Account getAccount() {
@@ -40,238 +37,238 @@ public class QFPositionChangeUpdate {
 		return symbol;
 	}
 	
-	public QFPositionChangeUpdate setChangeBalance(FMoney value) {
+	public QFPositionChangeUpdate setChangeBalance(CDecimal value) {
 		accountBalance.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeCurrentPrice(FDecimal value) {
+	public QFPositionChangeUpdate setChangeCurrentPrice(CDecimal value) {
 		currentPrice.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeOpenPrice(FDecimal value) {
+	public QFPositionChangeUpdate setChangeOpenPrice(CDecimal value) {
 		openPrice.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeProfitAndLoss(FMoney value) {
+	public QFPositionChangeUpdate setChangeProfitAndLoss(CDecimal value) {
 		profitAndLoss.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeUsedMargin(FMoney value) {
+	public QFPositionChangeUpdate setChangeUsedMargin(CDecimal value) {
 		usedMargin.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeVarMargin(FMoney value) {
+	public QFPositionChangeUpdate setChangeVarMargin(CDecimal value) {
 		varMargin.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeVarMarginClose(FMoney value) {
+	public QFPositionChangeUpdate setChangeVarMarginClose(CDecimal value) {
 		varMarginClose.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeVarMarginInter(FMoney value) {
+	public QFPositionChangeUpdate setChangeVarMarginInter(CDecimal value) {
 		varMarginInter.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setChangeVolume(long value) {
+	public QFPositionChangeUpdate setChangeVolume(CDecimal value) {
 		volume.setChangeValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialBalance(FMoney value) {
+	public QFPositionChangeUpdate setInitialBalance(CDecimal value) {
 		accountBalance.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialCurrentPrice(FDecimal value) {
+	public QFPositionChangeUpdate setInitialCurrentPrice(CDecimal value) {
 		currentPrice.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialOpenPrice(FDecimal value) {
+	public QFPositionChangeUpdate setInitialOpenPrice(CDecimal value) {
 		openPrice.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialProfitAndLoss(FMoney value) {
+	public QFPositionChangeUpdate setInitialProfitAndLoss(CDecimal value) {
 		profitAndLoss.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialUsedMargin(FMoney value) {
+	public QFPositionChangeUpdate setInitialUsedMargin(CDecimal value) {
 		usedMargin.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialVarMargin(FMoney value) {
+	public QFPositionChangeUpdate setInitialVarMargin(CDecimal value) {
 		varMargin.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialVarMarginClose(FMoney value) {
+	public QFPositionChangeUpdate setInitialVarMarginClose(CDecimal value) {
 		varMarginClose.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialVarMarginInter(FMoney value) {
+	public QFPositionChangeUpdate setInitialVarMarginInter(CDecimal value) {
 		varMarginInter.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setInitialVolume(long value) {
+	public QFPositionChangeUpdate setInitialVolume(CDecimal value) {
 		volume.setInitialValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalBalance(FMoney value) {
+	public QFPositionChangeUpdate setFinalBalance(CDecimal value) {
 		accountBalance.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalCurrentPrice(FDecimal value) {
+	public QFPositionChangeUpdate setFinalCurrentPrice(CDecimal value) {
 		currentPrice.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalOpenPrice(FDecimal value) {
+	public QFPositionChangeUpdate setFinalOpenPrice(CDecimal value) {
 		openPrice.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalProfitAndLoss(FMoney value) {
+	public QFPositionChangeUpdate setFinalProfitAndLoss(CDecimal value) {
 		profitAndLoss.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalUsedMargin(FMoney value) {
+	public QFPositionChangeUpdate setFinalUsedMargin(CDecimal value) {
 		usedMargin.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalVarMargin(FMoney value) {
+	public QFPositionChangeUpdate setFinalVarMargin(CDecimal value) {
 		varMargin.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalVarMarginClose(FMoney value) {
+	public QFPositionChangeUpdate setFinalVarMarginClose(CDecimal value) {
 		varMarginClose.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalVarMarginInter(FMoney value) {
+	public QFPositionChangeUpdate setFinalVarMarginInter(CDecimal value) {
 		varMarginInter.setFinalValue(value);
 		return this;
 	}
 	
-	public QFPositionChangeUpdate setFinalVolume(long value) {
+	public QFPositionChangeUpdate setFinalVolume(CDecimal value) {
 		volume.setFinalValue(value);
 		return this;
 	}
 	
-	public FMoney getChangeBalance() {
+	public CDecimal getChangeBalance() {
 		return accountBalance.getChangeValue();
 	}
 	
-	public FDecimal getChangeCurrentPrice() {
+	public CDecimal getChangeCurrentPrice() {
 		return currentPrice.getChangeValue();
 	}
 	
-	public FDecimal getChangeOpenPrice() {
+	public CDecimal getChangeOpenPrice() {
 		return openPrice.getChangeValue();
 	}
 	
-	public FMoney getChangeProfitAndLoss() {
+	public CDecimal getChangeProfitAndLoss() {
 		return profitAndLoss.getChangeValue();
 	}
 	
-	public FMoney getChangeUsedMargin() {
+	public CDecimal getChangeUsedMargin() {
 		return usedMargin.getChangeValue();
 	}
 	
-	public FMoney getChangeVarMargin() {
+	public CDecimal getChangeVarMargin() {
 		return varMargin.getChangeValue();
 	}
 	
-	public FMoney getChangeVarMarginClose() {
+	public CDecimal getChangeVarMarginClose() {
 		return varMarginClose.getChangeValue();
 	}
 	
-	public FMoney getChangeVarMarginInter() {
+	public CDecimal getChangeVarMarginInter() {
 		return varMarginInter.getChangeValue();
 	}
 	
-	public long getChangeVolume() {
+	public CDecimal getChangeVolume() {
 		return volume.getChangeValue();
 	}
 	
-	public FDecimal getInitialCurrentPrice() {
+	public CDecimal getInitialCurrentPrice() {
 		return currentPrice.getInitialValue();
 	}
 	
-	public FDecimal getInitialOpenPrice() {
+	public CDecimal getInitialOpenPrice() {
 		return openPrice.getInitialValue();
 	}
 	
-	public FMoney getInitialProfitAndLoss() {
+	public CDecimal getInitialProfitAndLoss() {
 		return profitAndLoss.getInitialValue();
 	}
 	
-	public FMoney getInitialUsedMargin() {
+	public CDecimal getInitialUsedMargin() {
 		return usedMargin.getInitialValue();
 	}
 	
-	public FMoney getInitialVarMargin() {
+	public CDecimal getInitialVarMargin() {
 		return varMargin.getInitialValue();
 	}
 	
-	public FMoney getInitialVarMarginClose() {
+	public CDecimal getInitialVarMarginClose() {
 		return varMarginClose.getInitialValue();
 	}
 	
-	public FMoney getInitialVarMarginInter() {
+	public CDecimal getInitialVarMarginInter() {
 		return varMarginInter.getInitialValue();
 	}
 	
-	public long getInitialVolume() {
+	public CDecimal getInitialVolume() {
 		return volume.getInitialValue();
 	}
 
-	public FDecimal getFinalCurrentPrice() {
+	public CDecimal getFinalCurrentPrice() {
 		return currentPrice.getFinalValue();
 	}
 	
-	public FDecimal getFinalOpenPrice() {
+	public CDecimal getFinalOpenPrice() {
 		return openPrice.getFinalValue();
 	}
 	
-	public FMoney getFinalProfitAndLoss() {
+	public CDecimal getFinalProfitAndLoss() {
 		return profitAndLoss.getFinalValue();
 	}
 	
-	public FMoney getFinalUsedMargin() {
+	public CDecimal getFinalUsedMargin() {
 		return usedMargin.getFinalValue();
 	}
 	
-	public FMoney getFinalVarMargin() {
+	public CDecimal getFinalVarMargin() {
 		return varMargin.getFinalValue();
 	}
 	
-	public FMoney getFinalVarMarginClose() {
+	public CDecimal getFinalVarMarginClose() {
 		return varMarginClose.getFinalValue();
 	}
 	
-	public FMoney getFinalVarMarginInter() {
+	public CDecimal getFinalVarMarginInter() {
 		return varMarginInter.getFinalValue();
 	}
 	
-	public long getFinalVolume() {
+	public CDecimal getFinalVolume() {
 		return volume.getFinalValue();
 	}
 	

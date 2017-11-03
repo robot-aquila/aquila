@@ -120,8 +120,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		data.put(OrderField.TYPE, OrderType.LMT);
 		data.put(OrderField.STATUS, OrderStatus.PENDING);
-		data.put(OrderField.INITIAL_VOLUME, 10L);
-		data.put(OrderField.CURRENT_VOLUME, 10L);
+		data.put(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L));
+		data.put(OrderField.CURRENT_VOLUME, CDecimalBD.of(10L));
 		order.update(data);
 	}
 	
@@ -172,12 +172,12 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetCurrentVolume() throws Exception {
-		getter = new Getter<Long>() {
-			@Override public Long get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return order.getCurrentVolume();
 			}			
 		};
-		testGetter(OrderField.CURRENT_VOLUME, 214L, 178L);
+		testGetter(OrderField.CURRENT_VOLUME, CDecimalBD.of(214L), CDecimalBD.of(178L));
 	}
 	
 	@Test
@@ -193,13 +193,13 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testGetExecutedValue() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return order.getExecutedValue();
 			}			
 		};
 		testGetter(OrderField.EXECUTED_VALUE,
-				FMoney.ofRUB2(14052.13), FMoney.ofRUB2(16480.15));
+				CDecimalBD.of("14052.13", "RUB"), CDecimalBD.of("16480.15", "RUB"));
 	}
 	
 	@Test
@@ -214,22 +214,22 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetInitialVolume() throws Exception {
-		getter = new Getter<Long>() {
-			@Override public Long get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return order.getInitialVolume();
 			}			
 		};
-		testGetter(OrderField.INITIAL_VOLUME, 1000L, 450L);
+		testGetter(OrderField.INITIAL_VOLUME, CDecimalBD.of(1000L), CDecimalBD.of(450L));
 	}
 	
 	@Test
 	public void testGetPrice() throws Exception {
-		getter = new Getter<FDecimal>() {
-			@Override public FDecimal get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return order.getPrice();
 			}			
 		};
-		testGetter(OrderField.PRICE, FDecimal.of2(230.45), FDecimal.of2(245.13));
+		testGetter(OrderField.PRICE, CDecimalBD.of("230.45"), CDecimalBD.of("245.13"));
 	}
 	
 	@Test
@@ -364,8 +364,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		data.put(OrderField.TYPE, OrderType.LMT);
 		data.put(OrderField.STATUS, OrderStatus.PENDING);
-		data.put(OrderField.INITIAL_VOLUME, 100L);
-		data.put(OrderField.CURRENT_VOLUME, 50L);
+		data.put(OrderField.INITIAL_VOLUME, CDecimalBD.of(100L));
+		data.put(OrderField.CURRENT_VOLUME, CDecimalBD.of(50L));
 		order.update(data);
 		
 		assertTrue(controller.hasMinimalData(order, time));
@@ -411,10 +411,10 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 			.withToken(OrderField.ACTION, OrderAction.BUY)
 			.withToken(OrderField.TYPE, OrderType.LMT);
 		if ( order.getInitialVolume() == null ) {
-			builder.withToken(OrderField.INITIAL_VOLUME, 100L);
+			builder.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(100L));
 		}
 		if ( order.getCurrentVolume() == null ) {
-			builder.withToken(OrderField.CURRENT_VOLUME, 100L);
+			builder.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(100L));
 		}
 		order.consume(builder.buildUpdate());
 	}
@@ -507,8 +507,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		setUp();
 		produceContainer();
 		order.consume(new DeltaUpdateBuilder()
-			.withToken(OrderField.INITIAL_VOLUME, 10L)
-			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
+			.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(5L))
 			.buildUpdate());
 		testOrderController_ProcessAvailable_Ok(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
@@ -557,8 +557,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		setUp();
 		produceContainer();
 		order.consume(new DeltaUpdateBuilder()
-			.withToken(OrderField.INITIAL_VOLUME, 10L)
-			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
+			.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(5L))
 			.buildUpdate());
 		testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
@@ -607,8 +607,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		setUp();
 		produceContainer();
 		order.consume(new DeltaUpdateBuilder()
-			.withToken(OrderField.INITIAL_VOLUME, 10L)
-			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
+			.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(5L))
 			.buildUpdate());
 		testOrderController_ProcessUpdate_Ok(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
@@ -657,8 +657,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		setUp();
 		produceContainer();
 		order.consume(new DeltaUpdateBuilder()
-			.withToken(OrderField.INITIAL_VOLUME, 10L)
-			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
+			.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(5L))
 			.buildUpdate());
 		testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
@@ -707,8 +707,8 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		setUp();
 		produceContainer();
 		order.consume(new DeltaUpdateBuilder()
-			.withToken(OrderField.INITIAL_VOLUME, 10L)
-			.withToken(OrderField.CURRENT_VOLUME, 5L)
+			.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
+			.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(5L))
 			.buildUpdate());
 		testOrderController_ProcessUpdate_SkipIfStatusEventsDisabled(OrderStatus.CANCELLED, order.onPartiallyFilled());
 	}
@@ -782,7 +782,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	 * @return execution instance
 	 */
 	protected OrderExecution newExec(long id, String externalID, Instant time,
-			FDecimal price, long volume, FMoney value)
+			CDecimal price, CDecimal volume, CDecimal value)
 	{
 		return new OrderExecutionImpl(terminal, id, externalID, symbol,
 			order.getAction(), 240L, time, price, volume, value);
@@ -795,10 +795,14 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		order.onExecution().addListener(listenerStub);
 		
 		OrderExecution actual = order.addExecution(100L, "x1", now,
-				FDecimal.of2(80.0), 10L, FMoney.ofRUB2(800.0));
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of(10L),
+				CDecimalBD.of("800.00", "RUB"));
 		
-		OrderExecution expected = newExec(100L, "x1", now, FDecimal.of2(80.0),
-				10L, FMoney.ofRUB2(800.0));
+		OrderExecution expected = newExec(100L, "x1", now,
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of(10L),
+				CDecimalBD.of("800.00", "RUB"));
 		assertEquals(expected, actual);
 		assertEquals(expected, order.getExecution(100L));
 		assertEquals(0, listenerStub.getEventCount());
@@ -809,9 +813,13 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		Instant now = Instant.now();
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.update(data);
-		order.addExecution(100L, "foo1", now, FDecimal.of2(34.15), 10L, FMoney.ofRUB2(341.50));
+		order.addExecution(100L, "foo1", now, CDecimalBD.of("34.15"),
+				CDecimalBD.of(10L),
+				CDecimalBD.of("341.50", "RUB"));
 		
-		order.addExecution(100L, "foo1", now, FDecimal.of2(34.15), 10L, FMoney.ofRUB2(341.50));
+		order.addExecution(100L, "foo1", now, CDecimalBD.of("34.15"),
+				CDecimalBD.of(10L),
+				CDecimalBD.of("341.50", "RUB"));
 	}
 	
 	@Test
@@ -819,8 +827,12 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		data.put(OrderField.ACTION, OrderAction.BUY);
 		order.update(data);
 		Instant now = Instant.now();
-		order.addExecution(100L, "foo1", now,				FDecimal.of2(34.15), 10L, FMoney.ofRUB2(341.50));
-		order.addExecution(101L, "foo2", now.plusMillis(1), FDecimal.of2(34.25), 20L, FMoney.ofRUB2(683.00));
+		order.addExecution(100L, "foo1", now, CDecimalBD.of("34.15"),
+				CDecimalBD.of(10L),
+				CDecimalBD.of("341.50", "RUB"));
+		order.addExecution(101L, "foo2", now.plusMillis(1), CDecimalBD.of("34.25"),
+				CDecimalBD.of(20L),
+				CDecimalBD.of("683.00", "RUB"));
 		List<OrderExecution> executions = order.getExecutions();
 		
 		assertSame(executions.get(0), order.getExecution(100L));
@@ -855,7 +867,9 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testAddExecution1() throws Exception {
 		Instant time = Instant.EPOCH;
 		OrderExecution execution = newExec(2005, "foo2005", time,
-				FDecimal.of2(112.34), 10L, FMoney.ofRUB2(1123.40));
+				CDecimalBD.of("112.34"),
+				CDecimalBD.of(10L),
+				CDecimalBD.of("1123.40", "RUB"));
 		order.onExecution().addListener(listenerStub);
 		
 		order.addExecution(execution);
@@ -869,17 +883,20 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	public void testAddExecution1_ThrowsIfAlreadyExists() throws Exception {
 		Instant time = Instant.EPOCH;
 		
-		order.addExecution(newExec(2008, "x", time, FDecimal.of2(48.15), 1L,
-				FMoney.ofRUB2(48.15)));
-		order.addExecution(newExec(2008, "y", time, FDecimal.of2(12.78), 1L,
-				FMoney.ofRUB2(12.78)));
+		order.addExecution(newExec(2008, "x", time, CDecimalBD.of("48.15"),
+				CDecimalBD.of(1L),
+				CDecimalBD.of("48.15", "RUB")));
+		order.addExecution(newExec(2008, "y", time, CDecimalBD.of("12.78"),
+				CDecimalBD.of(1L),
+				CDecimalBD.of("12.78", "RUB")));
 	}
 	
 	@Test
 	public void testFireExecutionAdded() throws Exception {
 		Instant time = Instant.now();
-		OrderExecution execution = newExec(512, null, time, FDecimal.of2(45.14),
-				1L, FMoney.ofRUB2(45.14));
+		OrderExecution execution = newExec(512, null, time, CDecimalBD.of("45.14"),
+				CDecimalBD.of(1L),
+				CDecimalBD.of("45.14", "RUB"));
 		order.onExecution().addListener(listenerStub);
 		
 		order.fireExecution(execution);
@@ -892,12 +909,15 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testGetExecutions() throws Exception {
 		Instant time = Instant.now();
-		OrderExecution exec1 = newExec(501, null, time, FDecimal.of2(10.00), 1L,
-				FMoney.ofRUB2(20.00));
-		OrderExecution exec2 = newExec(502, null, time, FDecimal.of2(10.10), 5L,
-				FMoney.ofRUB2(40.00));
-		OrderExecution exec3 = newExec(503, "xo", time, FDecimal.of2(10.20), 2L,
-				FMoney.ofRUB2(50.00));
+		OrderExecution exec1 = newExec(501, null, time, CDecimalBD.of("10.00"),
+				CDecimalBD.of(1L),
+				CDecimalBD.of("20.00", "RUB"));
+		OrderExecution exec2 = newExec(502, null, time, CDecimalBD.of("10.10"),
+				CDecimalBD.of(5L),
+				CDecimalBD.of("40.00", "RUB"));
+		OrderExecution exec3 = newExec(503, "xo", time, CDecimalBD.of("10.20"),
+				CDecimalBD.of(2L),
+				CDecimalBD.of("50.00", "RUB"));
 		order.addExecution(exec1);
 		order.addExecution(exec2);
 		order.addExecution(exec3);

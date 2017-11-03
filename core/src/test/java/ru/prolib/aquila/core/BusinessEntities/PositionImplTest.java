@@ -121,56 +121,57 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetUsedMargin() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return position.getUsedMargin();
 			}			
 		};
 		testGetter(PositionField.USED_MARGIN,
-				new FMoney("415.345", "RUB"), new FMoney("280.34", "USD"));
+				CDecimalBD.ofRUB2("415.34"), CDecimalBD.ofUSD2("280.34"));
 	}
 	
 	@Test
 	public void testGetCurrentVolume() throws Exception {
-		getter = new Getter<Long>() {
-			@Override public Long get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return position.getCurrentVolume();
 			}
 		};
-		testGetter(PositionField.CURRENT_VOLUME, 4000L, 8270L);
+		testGetter(PositionField.CURRENT_VOLUME,
+				CDecimalBD.of(4000L), CDecimalBD.of(8270L));
 	}
 	
 	@Test
 	public void testGetCurrentPrice() throws Exception {
-		getter = new Getter<FDecimal>() {
-			@Override public FDecimal get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return position.getCurrentPrice();
 			}
 		};
 		testGetter(PositionField.CURRENT_PRICE,
-				new FDecimal("2014"), new FDecimal("882.15"));
+				CDecimalBD.of("2014.00"), CDecimalBD.of("882.15"));
 	}
 	
 	@Test
 	public void testGetOpenPrice() throws Exception {
-		getter = new Getter<FDecimal>() {
-			@Override public FDecimal get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return position.getOpenPrice();
 			}
 		};
 		testGetter(PositionField.OPEN_PRICE,
-				new FDecimal("551.13"), new FDecimal("902.08"));
+				CDecimalBD.of("551.13"), CDecimalBD.of("902.08"));
 	}
 	
 	@Test
 	public void testGetProfitAndLoss() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return position.getProfitAndLoss();
 			}
 		};
 		testGetter(PositionField.PROFIT_AND_LOSS,
-				new FMoney("421.19", "CAD"), new FMoney("534.25", "EUR"));
+				CDecimalBD.ofUSD2("421.19"), CDecimalBD.ofRUB2("534.25"));
 	}
 
 	@Test
@@ -180,11 +181,11 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		assertFalse(controller.hasMinimalData(position, time));
 		
 		Map<Integer, Object> minimal = new HashMap<Integer, Object>();
-		minimal.put(PositionField.CURRENT_VOLUME, 1000L);
-		minimal.put(PositionField.CURRENT_PRICE, new FDecimal("2000", 2));
-		minimal.put(PositionField.OPEN_PRICE, new FDecimal("1800", 2));
-		minimal.put(PositionField.USED_MARGIN, new FMoney("200", 2, "USD"));
-		minimal.put(PositionField.PROFIT_AND_LOSS, new FMoney("0", 2, "USD"));
+		minimal.put(PositionField.CURRENT_VOLUME, CDecimalBD.of(1000L));
+		minimal.put(PositionField.CURRENT_PRICE, CDecimalBD.of("2000.00"));
+		minimal.put(PositionField.OPEN_PRICE, CDecimalBD.of("1800.00"));
+		minimal.put(PositionField.USED_MARGIN, CDecimalBD.ofUSD2("200.00"));
+		minimal.put(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofUSD2("0.00"));
 		for ( Map.Entry<Integer, Object> entry : minimal.entrySet() ) {
 			data.put(entry.getKey(), entry.getValue());
 			position.update(data);
@@ -197,7 +198,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testPositionController_ProcessUpdate_PositionChange() {
 		Instant time = T("2017-08-04T17:50:00Z");
-		position.update(PositionField.CURRENT_VOLUME, 200L);
+		position.update(PositionField.CURRENT_VOLUME, CDecimalBD.of(200L));
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
 		position.onPositionChange().addListener(listener);
@@ -213,7 +214,7 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testPositionController_ProcessUpdate_CurrentPriceChange() {
 		Instant time = T("2017-08-04T17:54:00Z");
-		position.update(PositionField.CURRENT_PRICE, new FDecimal("4518.96"));
+		position.update(PositionField.CURRENT_PRICE, CDecimalBD.of("4518.96"));
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();
 		position.onPositionChange().addListener(listener);
@@ -228,8 +229,8 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 
 	@Test
 	public void testPositionController_ProcessAvailable() {
-		data.put(PositionField.CURRENT_VOLUME, 200L);
-		data.put(PositionField.CURRENT_PRICE, new FDecimal("4582.13"));
+		data.put(PositionField.CURRENT_VOLUME, CDecimalBD.of(200L));
+		data.put(PositionField.CURRENT_PRICE, CDecimalBD.of("4582.13"));
 		position.update(data);
 		PositionController controller = new PositionController();
 		EventListenerStub listener = new EventListenerStub();

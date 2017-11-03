@@ -2,11 +2,10 @@ package ru.prolib.aquila.qforts.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Position;
 import ru.prolib.aquila.core.BusinessEntities.Security;
@@ -79,7 +78,7 @@ public class QFTransactionService {
 		}
 	}
 	
-	public void executeOrder(EditableOrder order, long volume, FDecimal price)
+	public void executeOrder(EditableOrder order, CDecimal volume, CDecimal price)
 			throws QFTransactionException
 	{
 		EditablePortfolio portfolio = (EditablePortfolio) order.getPortfolio();
@@ -136,7 +135,7 @@ public class QFTransactionService {
 		}
 	}
 	
-	public void changeBalance(EditablePortfolio portfolio, FMoney value) throws QFTransactionException {
+	public void changeBalance(EditablePortfolio portfolio, CDecimal value) throws QFTransactionException {
 		Lockable lock = assembler.createMultilock(new MultilockBuilderBE().add(portfolio));
 		lock.lock();
 		try {

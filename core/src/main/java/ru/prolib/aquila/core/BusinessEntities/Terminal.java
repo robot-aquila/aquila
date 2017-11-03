@@ -61,7 +61,7 @@ public interface Terminal extends Scheduler, BusinessEntity {
 	 * @return new order instance
 	 */
 	public Order createOrder(Account account, Symbol symbol, OrderType type,
-			OrderAction action, long qty, FDecimal price, String comment);
+			OrderAction action, CDecimal qty, CDecimal price, String comment);
 	
 	/**
 	 * Create limit order.
@@ -79,7 +79,7 @@ public interface Terminal extends Scheduler, BusinessEntity {
 	 * @return new order instance
 	 */
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
-			long qty, FDecimal price);
+			CDecimal qty, CDecimal price);
 
 	/**
 	 * Create market order.
@@ -96,7 +96,7 @@ public interface Terminal extends Scheduler, BusinessEntity {
 	 * @return new order instance
 	 */
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
-			long qty);
+			CDecimal qty);
 		
 	/**
 	 * Subscribe for security data.

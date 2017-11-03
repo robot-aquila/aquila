@@ -29,21 +29,21 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return lot size
 	 */
-	public Integer getLotSize();
+	public CDecimal getLotSize();
 
 	/**
 	 * Get lower price limit.
 	 * <p>
 	 * @return lower price limit
 	 */
-	public FDecimal getLowerPriceLimit();
+	public CDecimal getLowerPriceLimit();
 	
 	/**
 	 * Get upper price limit.
 	 * <p>
 	 * @return upper price limit
 	 */
-	public FDecimal getUpperPriceLimit();
+	public CDecimal getUpperPriceLimit();
 	
 	/**
 	 * Get tick price.
@@ -55,14 +55,14 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return calculated tick price
 	 */
-	public FMoney getTickValue();
+	public CDecimal getTickValue();
 	
 	/**
 	 * Get tick size.
 	 * <p>
 	 * @return minimal price change
 	 */
-	public FDecimal getTickSize();
+	public CDecimal getTickSize();
 	
 	/**
 	 * Get price scale.
@@ -91,35 +91,35 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return цена открытия
 	 */
-	public Double getOpenPrice();
+	public CDecimal getOpenPrice();
 	
 	/**
 	 * Получить цену закрытия предыдущей сессии.
 	 * <p>
 	 * @return цена закрытия
 	 */
-	public Double getClosePrice();
+	public CDecimal getClosePrice();
 	
 	/**
 	 * Получить максимальную цену за сессию.
 	 * <p>
 	 * @return максимальная цена
 	 */
-	public Double getHighPrice();
+	public CDecimal getHighPrice();
 	
 	/**
 	 * Получить минимальную цену за сессию.
 	 * <p>
 	 * @return минимальная цена
 	 */
-	public Double getLowPrice();
+	public CDecimal getLowPrice();
 	
 	/**
 	 * Get settlement price.
 	 * <p>
 	 * @return settlement price
 	 */
-	public FDecimal getSettlementPrice();
+	public CDecimal getSettlementPrice();
 	
 	/**
 	 * Get initial margin.
@@ -130,6 +130,6 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * <p>
 	 * @return initial margin
 	 */
-	public FMoney getInitialMargin();
+	public CDecimal getInitialMargin();
 	
 }

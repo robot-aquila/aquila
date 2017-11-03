@@ -174,13 +174,13 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 
 	@Override
-	public Long getInitialVolume() {
-		return getLong(OrderField.INITIAL_VOLUME);
+	public CDecimal getInitialVolume() {
+		return getCDecimal(OrderField.INITIAL_VOLUME);
 	}
 
 	@Override
-	public Long getCurrentVolume() {
-		return getLong(OrderField.CURRENT_VOLUME);
+	public CDecimal getCurrentVolume() {
+		return getCDecimal(OrderField.CURRENT_VOLUME);
 	}
 	
 	@Override
@@ -189,8 +189,8 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 
 	@Override
-	public FDecimal getPrice() {
-		return getDecimal(OrderField.PRICE);
+	public CDecimal getPrice() {
+		return getCDecimal(OrderField.PRICE);
 	}
 
 	@Override
@@ -204,8 +204,8 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	}
 
 	@Override
-	public FMoney getExecutedValue() {
-		return getMoney(OrderField.EXECUTED_VALUE);
+	public CDecimal getExecutedValue() {
+		return getCDecimal(OrderField.EXECUTED_VALUE);
 	}
 
 	@Override
@@ -279,8 +279,14 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 					dummy = order.onCancelFailed;
 					break;
 				case CANCELLED:
-					dummy = (order.getCurrentVolume() == order.getInitialVolume()
-						? order.onCancelled : order.onPartiallyFilled);
+					CDecimal iv = order.getInitialVolume(), cv = order.getCurrentVolume();
+					if ( iv != null ) {
+						dummy = iv.compareTo(cv) == 0 ? order.onCancelled : order.onPartiallyFilled;
+					} else if ( cv != null ) {
+						dummy = cv.compareTo(iv) == 0 ? order.onCancelled : order.onPartiallyFilled;
+					} else {
+						dummy = order.onCancelled;
+					}
 					break;
 				case FILLED:
 					dummy = order.onFilled;
@@ -379,7 +385,7 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 
 	@Override
 	public OrderExecution addExecution(long id, String externalID, Instant time,
-			FDecimal price, long volume, FMoney value) throws OrderException
+			CDecimal price, CDecimal volume, CDecimal value) throws OrderException
 	{
 		lock.lock();
 		try {

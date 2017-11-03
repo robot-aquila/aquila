@@ -11,11 +11,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.data.storage.file.PtmlFactory;
 
@@ -50,53 +49,53 @@ public class MoexContractSymbolUpdateReaderTest {
 			.withSnapshot(true)
 			.withTime("2016-08-23T15:45:00Z")
 			.withToken(SecurityField.DISPLAY_NAME, "Eu-9.16")
-			.withToken(SecurityField.LOT_SIZE, 1000)
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("1"))
-			.withToken(SecurityField.TICK_VALUE, new FMoney("1", 2, "RUB"))
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("70469"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("76343"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("73406"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5874", 2, "RUB"))
+			.withToken(SecurityField.LOT_SIZE, CDecimalBD.of(1000L))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of(1L))
+			.withToken(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("1"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(70469L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(76343L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(73406L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5874"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-08-24T11:00:00Z")
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("70533"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("76411"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("73472"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5878", 2, "RUB"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(70533L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(76411L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(73472L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5878"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-08-25T15:45:00Z")
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("70454"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("76326"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("73390"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5872", 2, "RUB"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(70454L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(76326L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(73390L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5872"))
 			.buildUpdate());		
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-08-26T11:00:00Z")
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("70650"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("76538"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("73594"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5888", 2, "RUB"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(70650L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(76538L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(73594L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5888"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-08-26T15:45:00Z")
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("69895"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("75721"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("72808"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5826", 2, "RUB"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(69895L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(75721L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(72808L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5826"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-09-13T15:45:00Z")
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("70424"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("76294"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("73359"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5870", 2, "RUB"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(70424L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(76294L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(73359L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5870"))
 			.buildUpdate());
 		assertEquals(expected, actual);
 	}

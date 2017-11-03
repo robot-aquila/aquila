@@ -156,6 +156,17 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 		Object x = getObject(token);
 		return x == null ? defaultValue : x;
 	}
+	
+	@Override
+	public CDecimal getCDecimal(int token) {
+		return getCDecimal(token, null);
+	}
+	
+	@Override
+	public CDecimal getCDecimal(int token, CDecimal defaultValue) {
+		CDecimal x = (CDecimal) getObject(token);
+		return x == null ? defaultValue : x;
+	}
 
 	@Override
 	public FDecimal getDecimal(int token) {

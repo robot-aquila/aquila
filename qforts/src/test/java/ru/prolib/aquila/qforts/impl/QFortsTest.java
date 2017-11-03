@@ -12,12 +12,11 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProviderStub;
@@ -101,10 +100,10 @@ public class QFortsTest {
 	@Test
 	public void testChangeBalance() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account1);
-		transactionsMock.changeBalance(portfolio, FMoney.ofRUB2(520.0));
+		transactionsMock.changeBalance(portfolio, CDecimalBD.ofRUB2("520"));
 		control.replay();
 		
-		service.changeBalance(portfolio, FMoney.ofRUB2(520.0));
+		service.changeBalance(portfolio, CDecimalBD.ofRUB2("520"));
 		
 		control.verify();
 	}
@@ -112,22 +111,22 @@ public class QFortsTest {
 	@Test
 	public void testHandleOrders() throws Exception {
 		EditableOrder
-			order1 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, 10L),
-			order2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, 5L),
-			order3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, 20L),
-			order4 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, 25L);
+			order1 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(10L)),
+			order2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, CDecimalBD.of(5L)),
+			order3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(20L)),
+			order4 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(25L));
 		List<EditableOrder> expectedOrders = new ArrayList<>();
 		expectedOrders.add(order1);
 		expectedOrders.add(order2);
 		expectedOrders.add(order3);
 		expectedOrders.add(order4);
-		expect(registryMock.getOrderList(symbol1, FDecimal.of2(54.26))).andReturn(expectedOrders);
-		transactionsMock.executeOrder(order1, 10L, FDecimal.of2(54.26));
-		transactionsMock.executeOrder(order2,  5L, FDecimal.of2(54.26));
-		transactionsMock.executeOrder(order3,  3L, FDecimal.of2(54.26));
+		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(expectedOrders);
+		transactionsMock.executeOrder(order1, CDecimalBD.of(10L), CDecimalBD.of("54.26"));
+		transactionsMock.executeOrder(order2,  CDecimalBD.of(5L), CDecimalBD.of("54.26"));
+		transactionsMock.executeOrder(order3,  CDecimalBD.of(3L), CDecimalBD.of("54.26"));
 		control.replay();
 		
-		service.handleOrders(terminal.getEditableSecurity(symbol1), 18L, FDecimal.of2(54.26));
+		service.handleOrders(terminal.getEditableSecurity(symbol1), CDecimalBD.of(18L), CDecimalBD.of("54.26"));
 		
 		control.verify();
 	}
@@ -135,24 +134,24 @@ public class QFortsTest {
 	@Test
 	public void testHandleOrders_RejectOnFailure() throws Exception {
 		EditableOrder
-			order1 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, 10L),
-			order2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, 5L),
-			order3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, 20L),
-			order4 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, 25L);
+			order1 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(10L)),
+			order2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, CDecimalBD.of(5L)),
+			order3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(20L)),
+			order4 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(25L));
 		List<EditableOrder> expectedOrders = new ArrayList<>();
 		expectedOrders.add(order1);
 		expectedOrders.add(order2);
 		expectedOrders.add(order3);
 		expectedOrders.add(order4);
-		expect(registryMock.getOrderList(symbol1, FDecimal.of2(54.26))).andReturn(expectedOrders);
-		transactionsMock.executeOrder(order1, 10L, FDecimal.of2(54.26));
-		transactionsMock.executeOrder(order2,  5L, FDecimal.of2(54.26));
+		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(expectedOrders);
+		transactionsMock.executeOrder(order1, CDecimalBD.of(10L), CDecimalBD.of("54.26"));
+		transactionsMock.executeOrder(order2,  CDecimalBD.of(5L), CDecimalBD.of("54.26"));
 		expectLastCall().andThrow(new QFValidationException("Test error", QFResult.INSUFFICIENT_FUNDS));
 		transactionsMock.rejectOrder(order2, "Test error");
-		transactionsMock.executeOrder(order3,  3L, FDecimal.of2(54.26));
+		transactionsMock.executeOrder(order3,  CDecimalBD.of(3L), CDecimalBD.of("54.26"));
 		control.replay();
 		
-		service.handleOrders(terminal.getEditableSecurity(symbol1), 18L, FDecimal.of2(54.26));
+		service.handleOrders(terminal.getEditableSecurity(symbol1), CDecimalBD.of(18L), CDecimalBD.of("54.26"));
 		
 		control.verify();
 	}

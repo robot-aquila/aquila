@@ -37,9 +37,9 @@ public class PortfolioStatusBar extends JPanel implements PortfolioStatusBarView
 	public void updateDisplayData(final Portfolio portfolio) {
 		if ( SwingUtilities.isEventDispatchThread() ) {
 			accountVal.setValue(String.format("%-40s", portfolio.getAccount()));
-			cashVal.setValue(portfolio.getFreeMargin().toStringWithCurrency());
-			balanceVal.setValue(portfolio.getBalance().toStringWithCurrency());
-			varMargin.setValue(portfolio.getProfitAndLoss().toStringWithCurrency());
+			cashVal.setValue(portfolio.getFreeMargin().toString());
+			balanceVal.setValue(portfolio.getBalance().toString());
+			varMargin.setValue(portfolio.getProfitAndLoss().toString());
 		} else {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override public void run() {

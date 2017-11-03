@@ -13,11 +13,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
@@ -92,10 +91,10 @@ public class L1UpdateSourceSATImplTest {
 	public void testSubscribeL1_IfSecurityAvailable() throws Exception {
 		security3.consume(new DeltaUpdateBuilder()
 			.withToken(SecurityField.DISPLAY_NAME, "foo")
-			.withToken(SecurityField.LOT_SIZE, 1)
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
-			.withToken(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, 100.0d)
+			.withToken(SecurityField.LOT_SIZE, CDecimalBD.of(1L))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"))
+			.withToken(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("0.01"))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.ofRUB2("100"))
 			.buildUpdate());
 		basicSourceMock.subscribeL1(symbol3, security3);
 		control.replay();

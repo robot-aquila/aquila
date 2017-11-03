@@ -168,7 +168,7 @@ public class Main implements Runnable {
 	}
 	
 	private void addCommonPlugins() {
-		addPlugin(new ru.prolib.aquila.ui.plugin.UISecuritiesPlugin());
+		//addPlugin(new ru.prolib.aquila.ui.plugin.UISecuritiesPlugin());
 		addPlugin(new ru.prolib.aquila.ui.plugin.UIPositionsPlugin());
 		addPlugin(new ru.prolib.aquila.ui.plugin.UIOrdersPlugin());
 	}

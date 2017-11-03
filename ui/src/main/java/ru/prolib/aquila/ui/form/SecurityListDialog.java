@@ -5,8 +5,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -20,13 +18,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.text.IMessages;
-import ru.prolib.aquila.core.text.MsgID;
 import ru.prolib.aquila.ui.TableModelController;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
@@ -34,10 +28,10 @@ import ru.prolib.aquila.ui.msg.SecurityMsg;
 public class SecurityListDialog extends JDialog
 	implements ActionListener, ListSelectionListener
 {
-	private static final Logger logger;
+	//private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SecurityListDialog.class);
+		//logger = LoggerFactory.getLogger(SecurityListDialog.class);
 	}
 	
 	/**

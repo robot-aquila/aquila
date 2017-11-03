@@ -23,7 +23,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
@@ -72,24 +72,31 @@ public class MoexContractFormIT {
 	
 	@Test
 	public void testGetInstrumentDescription() throws Exception {
-		Map<Integer, Object> actual = contractForm.getInstrumentDescription("RTS-6.16");
+		Map<Integer, Object> actual = contractForm.getInstrumentDescription("RTS-12.17");
 		
 		Map<Integer, Object> expected = new LinkedHashMap<>();
-		expected.put(MoexContractField.SYMBOL, "RTS-6.16");
-		expected.put(MoexContractField.SYMBOL_CODE, "RIM6");
+		expected.put(MoexContractField.SYMBOL, "RTS-12.17");
+		expected.put(MoexContractField.SYMBOL_CODE, "RIZ7");
 		expected.put(MoexContractField.CONTRACT_DESCR, "RTS Index Futures");
 		expected.put(MoexContractField.TYPE, "Futures");
 		expected.put(MoexContractField.SETTLEMENT, "Cash-Settled");
-		expected.put(MoexContractField.LOT_SIZE, 1);
+		expected.put(MoexContractField.LOT_SIZE, CDecimalBD.of(1L));
 		expected.put(MoexContractField.QUOTATION, "points");
-		expected.put(MoexContractField.FIRST_TRADING_DAY, LocalDate.of(2015, 3, 18));
-		expected.put(MoexContractField.LAST_TRADING_DAY, LocalDate.of(2016, 6, 15));
-		expected.put(MoexContractField.DELIVERY, LocalDate.of(2016, 6, 15));
-		// Those fields are not available for archived contracts
-		//expected.put(MoexContractField.FEE, new FMoney("2.51", "RUB"));
-		//expected.put(MoexContractField.INTRADAY_FEE, new FMoney("1.255", "RUB"));
-		//expected.put(MoexContractField.NEGOTIATION_FEE, new FMoney("2.51", "RUB"));
-		expected.put(MoexContractField.EXERCISE_FEE, new FMoney("2.0", "RUB"));
+		expected.put(MoexContractField.FIRST_TRADING_DAY, LocalDate.of(2015, 12, 25));
+		expected.put(MoexContractField.LAST_TRADING_DAY, LocalDate.of(2017, 12, 21));
+		expected.put(MoexContractField.DELIVERY, LocalDate.of(2017, 12, 21));
+		// Some fields are not available for archived contracts
+		expected.put(MoexContractField.TICK_SIZE, CDecimalBD.of(10L));
+		expected.put(MoexContractField.TICK_VALUE, CDecimalBD.ofRUB5("11.67354"));
+		expected.put(MoexContractField.LOWER_PRICE_LIMIT, CDecimalBD.of("106710"));
+		expected.put(MoexContractField.UPPER_PRICE_LIMIT, CDecimalBD.of("116770"));
+		expected.put(MoexContractField.SETTLEMENT_PRICE, CDecimalBD.of("111740"));
+		expected.put(MoexContractField.FEE, CDecimalBD.ofRUB2("2.61"));
+		expected.put(MoexContractField.INTRADAY_FEE, CDecimalBD.of("1.305", "RUB"));
+		expected.put(MoexContractField.NEGOTIATION_FEE, CDecimalBD.ofRUB2("2.61"));
+		expected.put(MoexContractField.EXERCISE_FEE, CDecimalBD.of("2", "RUB"));
+		expected.put(MoexContractField.INITIAL_MARGIN, CDecimalBD.of("13153.5", "RUB"));
+		expected.put(MoexContractField.INITIAL_MARGIN_DATE, LocalDate.of(2017, 11, 2));
 		expected.put(MoexContractField.FX_INTRADAY_CLEARING, LocalTime.of(13, 45));
 		expected.put(MoexContractField.FX_EVENING_CLEARING, LocalTime.of(18, 30));
 		expected.put(MoexContractField.SETTLEMENT_PROC_DESCR, "Cash settlement. An average "

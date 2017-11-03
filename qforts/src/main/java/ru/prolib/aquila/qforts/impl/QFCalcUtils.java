@@ -2,8 +2,8 @@ package ru.prolib.aquila.qforts.impl;
 
 import java.math.RoundingMode;
 
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.Position;
 import ru.prolib.aquila.core.BusinessEntities.PositionField;
 import ru.prolib.aquila.core.BusinessEntities.Security;
@@ -11,115 +11,122 @@ import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 public class QFCalcUtils {
 	
-	private FDecimal getCurrentPrice(Security security) {
+	private CDecimal getCurrentPrice(Security security) {
+		// TODO: Refactor me after Tick refactoring
 		Tick x = security.getLastTrade();
 		if ( x == null ) {
 			return security.getSettlementPrice();
 		}
-		return FDecimal.of(x.getPrice(), security.getScale());
+		return new CDecimalBD(Double.toString(x.getPrice())).withScale(security.getScale());
 	}
 	
-	private FDecimal getCurrentPrice(Security security, long volume) {
+	private CDecimal getCurrentPrice(Security security, CDecimal volume) {
 		return getCurrentPrice(security).multiply(volume);
 	}
 	
-	private FMoney getUsedMargin(Security security, long volume) {
+	private CDecimal getUsedMargin(Security security, CDecimal volume) {
 		return security.getInitialMargin().multiply(volume).abs();
 	}
 	
-	private FMoney priceToMoney(Security security, FDecimal price) {
-		return security.getTickValue().multiply(price.divide(security
-				.getTickSize(), 0, RoundingMode.UNNECESSARY));
+	private CDecimal priceToMoney(Security security, CDecimal price) {
+		return security.getTickValue()
+			.multiply(price.divide(security.getTickSize())
+				.withScale(0, RoundingMode.UNNECESSARY));
 	}
 	
-	public FMoney priceToMoney(Security security, long volume, FDecimal price) {
+	public CDecimal priceToMoney(Security security, CDecimal volume, CDecimal price) {
 		return priceToMoney(security, price.multiply(volume));
 	}
 	
-	private FMoney getVarMargin(Security security, FDecimal fCurPr, FDecimal fOpnPr) {
+	private CDecimal getVarMargin(Security security, CDecimal fCurPr, CDecimal fOpnPr) {
 		return priceToMoney(security, fCurPr.subtract(fOpnPr)).withScale(5);
 	}
 	
-	private FMoney getVarMargin(Security security, QFPositionChangeUpdate update) {
+	private CDecimal getVarMargin(Security security, QFPositionChangeUpdate update) {
 		return getVarMargin(security, update.getFinalCurrentPrice(), update.getFinalOpenPrice());
 	}
 	
-	private FMoney getProfitAndLoss(FMoney fVarMgn, FMoney fVarMgnC, FMoney fVarMgnI) {
+	private CDecimal getProfitAndLoss(CDecimal fVarMgn, CDecimal fVarMgnC, CDecimal fVarMgnI) {
 		return fVarMgn.add(fVarMgnC).add(fVarMgnI).withScale(2);
 	}
 	
-	private FMoney getProfitAndLoss(QFPositionChangeUpdate update) {
+	private CDecimal getProfitAndLoss(QFPositionChangeUpdate update) {
 		return getProfitAndLoss(update.getFinalVarMargin(),
 				update.getFinalVarMarginClose(),
 				update.getFinalVarMarginInter());
 	}
 	
 	public QFPositionChangeUpdate
-		changePosition(Position position, long volume, FDecimal price)
+		changePosition(Position position, CDecimal volume, CDecimal price)
 	{
-		if ( volume == 0L ) {
+		if ( volume.compareTo(CDecimalBD.ZERO) == 0 ) {
 			throw new IllegalArgumentException("Volume cannot be zero");
 		}
 		Security security = position.getSecurity();
-		int pvScale = security.getScale();
-		long
-			iCurVol = position.getLongOrZero(PositionField.CURRENT_VOLUME),
-			fCurVol = 0L;
-		FDecimal
-			iOpnPr = position.getDecimalOrZero(PositionField.OPEN_PRICE, pvScale),
-			fOpnPr = FDecimal.of(0.0, pvScale),
-			iCurPr = position.getDecimalOrZero(PositionField.CURRENT_PRICE, pvScale),
-			fCurPr = FDecimal.of(0.0, pvScale);
-		FMoney
-			iPL = position.getMoneyOrZero2(PositionField.PROFIT_AND_LOSS, FMoney.RUB),
-			fPL = FMoney.ZERO_RUB2,
-			iUsMgn = position.getMoneyOrZero2(PositionField.USED_MARGIN, FMoney.RUB),
-			fUsMgn = FMoney.ZERO_RUB2,
-			iVarMgn = position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN, 5, FMoney.RUB),
-			fVarMgn = FMoney.ZERO_RUB5,
-			iVarMgnC = position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_CLOSE, 5, FMoney.RUB).withScale(5),
+		CDecimal zero = CDecimalBD.ZERO,
+			zeroPrice = zero.withScale(security.getScale()),
+			zeroMoney2 = CDecimalBD.ZERO_RUB2,
+			zeroMoney5 = CDecimalBD.ZERO_RUB5;
+		CDecimal
+			iCurVol = position.getCurrentVolume(),
+			fCurVol = zero,
+			iOpnPr = position.getOpenPrice(),
+			fOpnPr = zeroPrice,
+			iCurPr = position.getCurrentPrice(),
+			fCurPr = zeroPrice,
+			iPL = position.getProfitAndLoss(),
+			fPL = zeroMoney2,
+			iUsMgn = position.getUsedMargin(),
+			fUsMgn = zeroMoney2,
+			iVarMgn = position.getCDecimal(QFPositionField.QF_VAR_MARGIN, zeroMoney5),
+			fVarMgn = zeroMoney5,
+			iVarMgnC = position.getCDecimal(QFPositionField.QF_VAR_MARGIN_CLOSE, zeroMoney5),
 			fVarMgnC = iVarMgnC,
-			iVarMgnI = position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_INTER, 5, FMoney.RUB).withScale(5),
+			iVarMgnI = position.getCDecimal(QFPositionField.QF_VAR_MARGIN_INTER, zeroMoney5),
 			fVarMgnI = iVarMgnI;
-		
-		if ( iCurVol == 0L ) {
+		if ( iCurVol == null ) iCurVol = zero;
+		if ( iOpnPr == null ) iOpnPr = zeroPrice;
+		if ( iCurPr == null ) iCurPr = zeroPrice;
+		if ( iPL == null ) iPL = zeroMoney2;
+		if ( iUsMgn == null ) iUsMgn = zeroMoney2;		
+		if ( iCurVol.compareTo(zero) == 0 ) {
 			// open long/short position
 			fCurVol = volume;
 			fOpnPr = price.multiply(volume);
 			
-		} else if ( (iCurVol > 0 && volume < 0)
-				 || (iCurVol < 0 && volume > 0) )
+		} else if ( (iCurVol.compareTo(zero) > 0 && volume.compareTo(zero) < 0)
+				 || (iCurVol.compareTo(zero) < 0 && volume.compareTo(zero) > 0) )
 		{
-			if ( iCurVol == -volume ) {
+			if ( iCurVol == volume.negate() ) {
 				// close long/short position
 				fVarMgnC = iVarMgnC.add(priceToMoney(security, price.multiply(iCurVol)
 						.subtract(iOpnPr))).withScale(5);
-				fCurVol = 0L;
-				fOpnPr = FDecimal.of(0.0, pvScale);
+				fCurVol = zero;
+				fOpnPr = zeroPrice;
 				
-			} else if ( Math.abs(iCurVol) < Math.abs(volume) ) {
+			} else if ( iCurVol.abs().compareTo(volume.abs()) < 0 ) {
 				// swap long/short position
 				fVarMgnC = iVarMgnC.add(priceToMoney(security, price.multiply(iCurVol)
 						.subtract(iOpnPr))).withScale(5);
-				long V_r = iCurVol + volume;
+				CDecimal V_r = iCurVol.add(volume);
 				fCurVol = V_r;
 				fOpnPr = price.multiply(V_r);
 				
 			} else {
 				// decrease long/short position
-				FDecimal OP_avg = iOpnPr.divide(iCurVol)
+				CDecimal OP_avg = iOpnPr.divide(iCurVol)
 						.divide(security.getTickSize())
 						.withScale(0)
 						.multiply(security.getTickSize());
-				fCurVol = iCurVol + volume;
+				fCurVol = iCurVol.add(volume);
 				fOpnPr = iOpnPr.add(OP_avg.multiply(volume));
-				fVarMgnC = iVarMgnC.add(priceToMoney(security, price.multiply(-volume)
-						.subtract(OP_avg.multiply(-volume))));
+				fVarMgnC = iVarMgnC.add(priceToMoney(security, price.multiply(volume.negate())
+						.subtract(OP_avg.multiply(volume.negate()))));
 				
 			}
 		} else {
 			// increase long/short position
-			fCurVol = iCurVol + volume;
+			fCurVol = iCurVol.add(volume);
 			fOpnPr = iOpnPr.add(price.multiply(volume));
 			
 		}
@@ -129,7 +136,7 @@ public class QFCalcUtils {
 		fVarMgn = getVarMargin(security, fCurPr, fOpnPr);
 		fPL = getProfitAndLoss(fVarMgn, fVarMgnC, fVarMgnI);
 		return new QFPositionChangeUpdate(position.getAccount(), position.getSymbol())
-			.setChangeBalance(FMoney.ZERO_RUB2)
+			.setChangeBalance(zeroMoney2)
 			.setInitialCurrentPrice(iCurPr)
 			.setInitialOpenPrice(iOpnPr)
 			.setInitialProfitAndLoss(iPL)
@@ -156,21 +163,24 @@ public class QFCalcUtils {
 	 * calculate position current price.
 	 * @return calculated changes
 	 */
-	public QFPositionChangeUpdate refreshByCurrentState(Position position, FDecimal currentPrice) {
+	public QFPositionChangeUpdate refreshByCurrentState(Position position, CDecimal currentPrice) {
 		Security security = position.getSecurity();
-		int pvScale = security.getScale();
-		long volume;
+		CDecimal zero = CDecimalBD.ZERO,
+				zeroPrice = zero.withScale(security.getScale()),
+				zeroMoney2 = CDecimalBD.ZERO_RUB2,
+				zeroMoney5 = CDecimalBD.ZERO_RUB5;
+		CDecimal volume;
 		QFPositionChangeUpdate update =
 			new QFPositionChangeUpdate(position.getAccount(), position.getSymbol())
-			.setChangeBalance(FMoney.ZERO_RUB2)
-			.setInitialCurrentPrice(position.getDecimalOrZero(PositionField.CURRENT_PRICE, pvScale))
-			.setInitialOpenPrice(position.getDecimalOrZero(PositionField.OPEN_PRICE, pvScale))
-			.setInitialProfitAndLoss(position.getMoneyOrZero2(PositionField.PROFIT_AND_LOSS, FMoney.RUB))
-			.setInitialUsedMargin(position.getMoneyOrZero2(PositionField.USED_MARGIN, FMoney.RUB))
-			.setInitialVarMargin(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN, 5, FMoney.RUB))
-			.setInitialVarMarginClose(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_CLOSE, 5, FMoney.RUB))
-			.setInitialVarMarginInter(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_INTER, 5, FMoney.RUB))
-			.setInitialVolume(volume = position.getLongOrZero(PositionField.CURRENT_VOLUME));
+			.setChangeBalance(zeroMoney2)
+			.setInitialCurrentPrice(position.getCDecimal(PositionField.CURRENT_PRICE, zeroPrice))
+			.setInitialOpenPrice(position.getCDecimal(PositionField.OPEN_PRICE, zeroPrice))
+			.setInitialProfitAndLoss(position.getCDecimal(PositionField.PROFIT_AND_LOSS, zeroMoney2))
+			.setInitialUsedMargin(position.getCDecimal(PositionField.USED_MARGIN, zeroMoney2))
+			.setInitialVarMargin(position.getCDecimal(QFPositionField.QF_VAR_MARGIN, zeroMoney5))
+			.setInitialVarMarginClose(position.getCDecimal(QFPositionField.QF_VAR_MARGIN_CLOSE, zeroMoney5))
+			.setInitialVarMarginInter(position.getCDecimal(QFPositionField.QF_VAR_MARGIN_INTER, zeroMoney5))
+			.setInitialVolume(volume = position.getCDecimal(PositionField.CURRENT_VOLUME, zero));
 		update.setFinalOpenPrice(update.getInitialOpenPrice())
 			.setFinalVarMarginClose(update.getInitialVarMarginClose())
 			.setFinalVarMarginInter(update.getInitialVarMarginInter())
@@ -194,27 +204,30 @@ public class QFCalcUtils {
 	
 	public QFPositionChangeUpdate midClearing(Position position) {
 		Security security = position.getSecurity();
-		int pvScale = security.getScale();
-		long volume;
+		CDecimal zero = CDecimalBD.ZERO,
+				zeroPrice = zero.withScale(security.getScale()),
+				zeroMoney2 = CDecimalBD.ZERO_RUB2,
+				zeroMoney5 = CDecimalBD.ZERO_RUB5;
+		CDecimal volume;
 		QFPositionChangeUpdate update =
 			new QFPositionChangeUpdate(position.getAccount(), position.getSymbol())
-			.setChangeBalance(FMoney.ZERO_RUB2)
-			.setChangeVolume(0L)
-			.setInitialCurrentPrice(position.getDecimalOrZero(PositionField.CURRENT_PRICE, pvScale))
-			.setInitialOpenPrice(position.getDecimalOrZero(PositionField.OPEN_PRICE, pvScale))
-			.setInitialProfitAndLoss(position.getMoneyOrZero2(PositionField.PROFIT_AND_LOSS, FMoney.RUB))
-			.setInitialUsedMargin(position.getMoneyOrZero2(PositionField.USED_MARGIN, FMoney.RUB))
-			.setInitialVarMargin(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN, 5, FMoney.RUB))
-			.setInitialVarMarginClose(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_CLOSE, 5, FMoney.RUB))
-			.setInitialVarMarginInter(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_INTER, 5, FMoney.RUB))
-			.setInitialVolume(volume = position.getLongOrZero(PositionField.CURRENT_VOLUME));
-		FDecimal curPr = security.getSettlementPrice().multiply(volume);
-		FMoney varMgn = getVarMargin(security, curPr, update.getInitialOpenPrice());
+			.setChangeBalance(zeroMoney2)
+			.setChangeVolume(zero)
+			.setInitialCurrentPrice(position.getCDecimal(PositionField.CURRENT_PRICE, zeroPrice))
+			.setInitialOpenPrice(position.getCDecimal(PositionField.OPEN_PRICE, zeroPrice))
+			.setInitialProfitAndLoss(position.getCDecimal(PositionField.PROFIT_AND_LOSS, zeroMoney2))
+			.setInitialUsedMargin(position.getCDecimal(PositionField.USED_MARGIN, zeroMoney2))
+			.setInitialVarMargin(position.getCDecimal(QFPositionField.QF_VAR_MARGIN, zeroMoney5))
+			.setInitialVarMarginClose(position.getCDecimal(QFPositionField.QF_VAR_MARGIN_CLOSE, zeroMoney5))
+			.setInitialVarMarginInter(position.getCDecimal(QFPositionField.QF_VAR_MARGIN_INTER, zeroMoney5))
+			.setInitialVolume(volume = position.getCDecimal(PositionField.CURRENT_VOLUME, zero));
+		CDecimal curPr = security.getSettlementPrice().multiply(volume);
+		CDecimal varMgn = getVarMargin(security, curPr, update.getInitialOpenPrice());
 		update.setFinalCurrentPrice(curPr)
 			.setFinalOpenPrice(curPr)
 			.setFinalVarMarginInter(varMgn.add(update.getInitialVarMarginClose()))
-			.setFinalVarMargin(FMoney.ZERO_RUB5)
-			.setFinalVarMarginClose(FMoney.ZERO_RUB5);
+			.setFinalVarMargin(zeroMoney5)
+			.setFinalVarMarginClose(zeroMoney5);
 		update.setFinalUsedMargin(getUsedMargin(security, volume));
 		update.setFinalProfitAndLoss(getProfitAndLoss(update));
 		return update;
@@ -222,30 +235,33 @@ public class QFCalcUtils {
 	
 	public QFPositionChangeUpdate clearing(Position position) {
 		Security security = position.getSecurity();
-		int pvScale = security.getScale();
-		long volume;
+		CDecimal zero = CDecimalBD.ZERO,
+				zeroPrice = zero.withScale(security.getScale()),
+				zeroMoney2 = CDecimalBD.ZERO_RUB2,
+				zeroMoney5 = CDecimalBD.ZERO_RUB5;
+		CDecimal volume;
 		QFPositionChangeUpdate update =
 			new QFPositionChangeUpdate(position.getAccount(), position.getSymbol())
-			.setChangeVolume(0L)
-			.setInitialCurrentPrice(position.getDecimalOrZero(PositionField.CURRENT_PRICE, pvScale))
-			.setInitialOpenPrice(position.getDecimalOrZero(PositionField.OPEN_PRICE, pvScale))
-			.setInitialProfitAndLoss(position.getMoneyOrZero2(PositionField.PROFIT_AND_LOSS, FMoney.RUB))
-			.setInitialUsedMargin(position.getMoneyOrZero2(PositionField.USED_MARGIN, FMoney.RUB))
-			.setInitialVarMargin(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN, 5, FMoney.RUB))
-			.setInitialVarMarginClose(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_CLOSE, 5, FMoney.RUB))
-			.setInitialVarMarginInter(position.getMoneyOrZero(QFPositionField.QF_VAR_MARGIN_INTER, 5, FMoney.RUB))
-			.setInitialVolume(volume = position.getLongOrZero(PositionField.CURRENT_VOLUME));
-		FDecimal curPr = security.getSettlementPrice().multiply(volume);
-		FMoney cBal = getVarMargin(security, curPr, update.getInitialOpenPrice())
+			.setChangeVolume(zero)
+			.setInitialCurrentPrice(position.getCDecimal(PositionField.CURRENT_PRICE, zeroPrice))
+			.setInitialOpenPrice(position.getCDecimal(PositionField.OPEN_PRICE, zeroPrice))
+			.setInitialProfitAndLoss(position.getCDecimal(PositionField.PROFIT_AND_LOSS, zeroMoney2))
+			.setInitialUsedMargin(position.getCDecimal(PositionField.USED_MARGIN, zeroMoney2))
+			.setInitialVarMargin(position.getCDecimal(QFPositionField.QF_VAR_MARGIN, zeroMoney5))
+			.setInitialVarMarginClose(position.getCDecimal(QFPositionField.QF_VAR_MARGIN_CLOSE, zeroMoney5))
+			.setInitialVarMarginInter(position.getCDecimal(QFPositionField.QF_VAR_MARGIN_INTER, zeroMoney5))
+			.setInitialVolume(volume = position.getCDecimal(PositionField.CURRENT_VOLUME, zero));
+		CDecimal curPr = security.getSettlementPrice().multiply(volume);
+		CDecimal cBal = getVarMargin(security, curPr, update.getInitialOpenPrice())
 				.add(update.getInitialVarMarginClose())
 				.add(update.getInitialVarMarginInter())
 				.withScale(2);
 		update.setChangeBalance(cBal);
 		update.setFinalCurrentPrice(curPr)
 			.setFinalOpenPrice(curPr)
-			.setFinalVarMarginInter(FMoney.ZERO_RUB5)
-			.setFinalVarMargin(FMoney.ZERO_RUB5)
-			.setFinalVarMarginClose(FMoney.ZERO_RUB5);
+			.setFinalVarMarginInter(zeroMoney5)
+			.setFinalVarMargin(zeroMoney5)
+			.setFinalVarMarginClose(zeroMoney5);
 		update.setFinalUsedMargin(getUsedMargin(security, volume));
 		update.setFinalProfitAndLoss(getProfitAndLoss(update));
 		return update;

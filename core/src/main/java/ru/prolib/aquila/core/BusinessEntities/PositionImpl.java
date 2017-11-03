@@ -72,23 +72,23 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	}
 
 	@Override
-	public FMoney getUsedMargin() {
-		return getMoney(PositionField.USED_MARGIN);
+	public CDecimal getUsedMargin() {
+		return getCDecimal(PositionField.USED_MARGIN);
 	}
 
 	@Override
-	public Long getCurrentVolume() {
-		return getLong(PositionField.CURRENT_VOLUME);
+	public CDecimal getCurrentVolume() {
+		return getCDecimal(PositionField.CURRENT_VOLUME);
 	}
 
 	@Override
-	public FDecimal getCurrentPrice() {
-		return getDecimal(PositionField.CURRENT_PRICE);
+	public CDecimal getCurrentPrice() {
+		return getCDecimal(PositionField.CURRENT_PRICE);
 	}
 	
 	@Override
-	public FDecimal getOpenPrice() {
-		return getDecimal(PositionField.OPEN_PRICE);
+	public CDecimal getOpenPrice() {
+		return getCDecimal(PositionField.OPEN_PRICE);
 	}
 	
 	@Override
@@ -165,8 +165,8 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	}
 
 	@Override
-	public FMoney getProfitAndLoss() {
-		return getMoney(PositionField.PROFIT_AND_LOSS);
+	public CDecimal getProfitAndLoss() {
+		return getCDecimal(PositionField.PROFIT_AND_LOSS);
 	}
 
 	@Override

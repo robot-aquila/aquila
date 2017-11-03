@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.FMoney;
  * Same as {@link BDValueTriplet} but for
  * {@link ru.prolib.aquila.core.BusinessEntities.FMoney FMoney} value class. 
  */
+@Deprecated
 public class FMValueTriplet {
 	private FMoney initialValue, finalValue, changeValue;
 	

@@ -62,33 +62,33 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	}
 	
 	@Override
-	public Integer getLotSize() {
-		return getInteger(SecurityField.LOT_SIZE);
+	public CDecimal getLotSize() {
+		return getCDecimal(SecurityField.LOT_SIZE);
 	}
 
 	@Override
-	public FDecimal getUpperPriceLimit() {
-		return getDecimal(SecurityField.UPPER_PRICE_LIMIT);
+	public CDecimal getUpperPriceLimit() {
+		return getCDecimal(SecurityField.UPPER_PRICE_LIMIT);
 	}
 
 	@Override
-	public FDecimal getLowerPriceLimit() {
-		return getDecimal(SecurityField.LOWER_PRICE_LIMIT);
+	public CDecimal getLowerPriceLimit() {
+		return getCDecimal(SecurityField.LOWER_PRICE_LIMIT);
 	}
 	
 	@Override
-	public FMoney getTickValue() {
-		return getMoney(SecurityField.TICK_VALUE);
+	public CDecimal getTickValue() {
+		return getCDecimal(SecurityField.TICK_VALUE);
 	}
 
 	@Override
-	public FDecimal getTickSize() {
-		return getDecimal(SecurityField.TICK_SIZE);
+	public CDecimal getTickSize() {
+		return getCDecimal(SecurityField.TICK_SIZE);
 	}
 
 	@Override
 	public Integer getScale() {
-		FDecimal x = getTickSize();
+		CDecimal x = getTickSize();
 		return x == null ? null : x.getScale();
 	}
 	
@@ -103,33 +103,33 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	}
 	
 	@Override
-	public Double getOpenPrice() {
-		return getDouble(SecurityField.OPEN_PRICE);
+	public CDecimal getOpenPrice() {
+		return getCDecimal(SecurityField.OPEN_PRICE);
 	}
 
 	@Override
-	public Double getClosePrice() {
-		return getDouble(SecurityField.CLOSE_PRICE);
+	public CDecimal getClosePrice() {
+		return getCDecimal(SecurityField.CLOSE_PRICE);
 	}
 
 	@Override
-	public Double getHighPrice() {
-		return getDouble(SecurityField.HIGH_PRICE);
+	public CDecimal getHighPrice() {
+		return getCDecimal(SecurityField.HIGH_PRICE);
 	}
 
 	@Override
-	public Double getLowPrice() {
-		return getDouble(SecurityField.LOW_PRICE);
+	public CDecimal getLowPrice() {
+		return getCDecimal(SecurityField.LOW_PRICE);
 	}
 	
 	@Override
-	public FDecimal getSettlementPrice() {
-		return getDecimal(SecurityField.SETTLEMENT_PRICE);
+	public CDecimal getSettlementPrice() {
+		return getCDecimal(SecurityField.SETTLEMENT_PRICE);
 	}
 
 	@Override
-	public FMoney getInitialMargin() {
-		return getMoney(SecurityField.INITIAL_MARGIN);
+	public CDecimal getInitialMargin() {
+		return getCDecimal(SecurityField.INITIAL_MARGIN);
 	}
 
 	@Override

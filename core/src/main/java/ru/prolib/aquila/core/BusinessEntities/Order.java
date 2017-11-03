@@ -148,7 +148,7 @@ public interface Order extends ObservableStateContainer, BusinessEntity {
 	 * <p>
 	 * @return order initial volume
 	 */
-	public Long getInitialVolume();
+	public CDecimal getInitialVolume();
 	
 	/**
 	 * Get current volume.
@@ -158,7 +158,7 @@ public interface Order extends ObservableStateContainer, BusinessEntity {
 	 * <p>
 	 * @return order current (unexecuted) volume
 	 */
-	public Long getCurrentVolume();
+	public CDecimal getCurrentVolume();
 	
 	/**
 	 * Get order status.
@@ -172,7 +172,7 @@ public interface Order extends ObservableStateContainer, BusinessEntity {
 	 * <p>
 	 * @return price specified in the order or null if price is not specified
 	 */
-	public FDecimal getPrice();
+	public CDecimal getPrice();
 	
 	/**
 	 * Get order placement time.
@@ -193,7 +193,7 @@ public interface Order extends ObservableStateContainer, BusinessEntity {
 	 * <p>
 	 * @return price of executed volume in base or account currency (money)
 	 */
-	public FMoney getExecutedValue();
+	public CDecimal getExecutedValue();
 	
 	/**
 	 * Get comment.

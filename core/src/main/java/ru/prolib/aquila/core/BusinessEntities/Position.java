@@ -36,35 +36,35 @@ public interface Position extends ObservableStateContainer, BusinessEntity {
 	 * <p>
 	 * @return position volume or null if data not available
 	 */
-	public Long getCurrentVolume();
+	public CDecimal getCurrentVolume();
 
 	/**
 	 * Get current price of position.
 	 * <p>
 	 * @return current price or null if data not available
 	 */
-	public FDecimal getCurrentPrice();
+	public CDecimal getCurrentPrice();
 	
 	/**
 	 * Get position open price.
 	 * <p>
 	 * @return open price of position or null if data not available
 	 */
-	public FDecimal getOpenPrice();
+	public CDecimal getOpenPrice();
 	
 	/**
 	 * Get margin.
 	 * <p>
 	 * @return margin or null if data not available
 	 */
-	public FMoney getUsedMargin();
+	public CDecimal getUsedMargin();
 	
 	/**
 	 * Get profit and loss.
 	 * <p>
 	 * @return profit and loss or null if data not available.
 	 */
-	public FMoney getProfitAndLoss();
+	public CDecimal getProfitAndLoss();
 	
 	/**
 	 * When position volume changed.

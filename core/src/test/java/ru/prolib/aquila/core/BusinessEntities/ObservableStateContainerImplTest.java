@@ -638,6 +638,29 @@ public class ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	public void testContainerImpl_GetCDecimal() throws Exception {
+		CDecimal value1 = CDecimalBD.of("24.19"), value2 = CDecimalBD.of(200L);
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
+				return container.getCDecimal(524);
+			}
+		};
+		testGetter_ChangesPlusEvent(524, value1, value2);
+		testGetter_Locking(524, value1, value2);
+	}
+	
+	@Test
+	public void testContainerImpl_GetCDecimal2() throws Exception {
+		CDecimal value1 = CDecimalBD.of("24.19"), value2 = CDecimalBD.of(200L);
+		
+		assertEquals(value1, container.getCDecimal(505, value1));
+		
+		container.update(505, value2);
+		
+		assertEquals(value2, container.getCDecimal(505, value1));
+	}
+	
+	@Test
 	final public void testContainerImpl_GetDecimal() throws Exception {
 		FDecimal value1 = new FDecimal("12.34"), value2 = new FDecimal("15.04");
 		getter = new Getter<FDecimal>() {

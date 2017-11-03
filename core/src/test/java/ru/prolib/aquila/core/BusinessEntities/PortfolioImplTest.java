@@ -179,99 +179,99 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetBalance() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getBalance();
 			}
 		};
 		testGetter(PortfolioField.BALANCE,
-				FMoney.ofUSD2(40560.28), FMoney.ofUSD2(80340.95));
+				CDecimalBD.ofUSD2("40560.28"), CDecimalBD.ofUSD2("80340.95"));
 	}
 
 	@Test
 	public void testGetEquity() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getEquity();
 			}
 		};
 		testGetter(PortfolioField.EQUITY,
-				FMoney.ofUSD2(812.76), FMoney.ofUSD2(324.10));
+				CDecimalBD.ofUSD2("812.76"), CDecimalBD.ofUSD2("324.10"));
 	}
 	
 	@Test
 	public void testGetProfitAndLoss() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getProfitAndLoss();
 			}
 		};
 		testGetter(PortfolioField.PROFIT_AND_LOSS,
-				FMoney.ofEUR3(100000.0), FMoney.ofEUR3(80000.0));
+				CDecimalBD.ofRUB2("100000.00"), CDecimalBD.ofRUB2("80000.00"));
 	}
 
 	@Test
 	public void testGetUsedMargin() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getUsedMargin();
 			}
 		};
 		testGetter(PortfolioField.USED_MARGIN,
-				FMoney.ofRUB2(96283.15), FMoney.ofRUB2(94518.22));
+				CDecimalBD.ofRUB2("96283.15"), CDecimalBD.ofRUB2("94518.22"));
 	}
 	
 	@Test
 	public void testGetFreeMargin() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getFreeMargin();
 			}
 		};
 		testGetter(PortfolioField.FREE_MARGIN,
-				FMoney.ofUSD2(4519.72), FMoney.ofUSD2(5425.12));
+				CDecimalBD.ofUSD2("4519.72"), CDecimalBD.ofUSD2("5425.12"));
 	}
 
 	@Test
 	public void testGetMarginCallLevel() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getMarginCallLevel();
 			}
 		};
-		testGetter(PortfolioField.MARGIN_CALL_AT, 0.30d, 0.25d);
+		testGetter(PortfolioField.MARGIN_CALL_AT, CDecimalBD.of("0.30"), CDecimalBD.of("0.25"));
 	}
 	
 	@Test
 	public void testGetMarginStopOutLevel() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getMarginStopOutLevel();
 			}
 		};
-		testGetter(PortfolioField.MARGIN_STOP_OUT_AT, 0.50d, 0.75d);
+		testGetter(PortfolioField.MARGIN_STOP_OUT_AT, CDecimalBD.of("0.50"), CDecimalBD.of("0.75"));
 	}
 
 	@Test
 	public void testGetAssets() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getAssets();
 			}
 		};
 		testGetter(PortfolioField.ASSETS,
-				FMoney.ofEUR4(12.34), FMoney.ofEUR4(56.78));
+				CDecimalBD.ofUSD2("12.34"), CDecimalBD.ofUSD2("56.78"));
 	}
 
 	@Test
 	public void testGetLiabilities() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getLiabilities();
 			}
 		};
 		testGetter(PortfolioField.LIABILITIES,
-				FMoney.ofUSD2(632.88), FMoney.ofUSD2(640.19));
+				CDecimalBD.ofUSD2("632.88"), CDecimalBD.ofUSD2("640.19"));
 	}
 
 	@Test
@@ -286,12 +286,12 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetLeverage() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return portfolio.getLeverage();
 			}
 		};
-		testGetter(PortfolioField.LEVERAGE, 4.0d, 2.0d);
+		testGetter(PortfolioField.LEVERAGE, CDecimalBD.of("4.0"), CDecimalBD.of("2.0"));
 	}
 	
 	@Test
@@ -370,11 +370,11 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		
 		portfolio.consume(new DeltaUpdateBuilder()
 			.withToken(PortfolioField.CURRENCY, "USD")
-			.withToken(PortfolioField.BALANCE, FMoney.ofUSD2(415.08))
-			.withToken(PortfolioField.EQUITY, FMoney.ofUSD2(213.34))
-			.withToken(PortfolioField.PROFIT_AND_LOSS, FMoney.ofUSD2(1.18))
-			.withToken(PortfolioField.USED_MARGIN, FMoney.ofUSD2(50.72))
-			.withToken(PortfolioField.FREE_MARGIN, FMoney.ofUSD2(0.52))
+			.withToken(PortfolioField.BALANCE, CDecimalBD.ofUSD2("415.08"))
+			.withToken(PortfolioField.EQUITY, CDecimalBD.ofUSD2("213.34"))
+			.withToken(PortfolioField.PROFIT_AND_LOSS, CDecimalBD.ofUSD2("1.18"))
+			.withToken(PortfolioField.USED_MARGIN, CDecimalBD.ofUSD2("50.72"))
+			.withToken(PortfolioField.FREE_MARGIN, CDecimalBD.ofUSD2("0.52"))
 			.buildUpdate());
 		
 		assertTrue(controller.hasMinimalData(portfolio, null));
@@ -525,7 +525,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 				try {
 					started.countDown();
 					Thread.sleep(100L);
-					portfolio.update(PortfolioField.BALANCE, FMoney.ofRUB2(1500.0));
+					portfolio.update(PortfolioField.BALANCE, CDecimalBD.ofRUB2("1500"));
 					if ( ! portfolio.isPositionExists(symbol) ) {
 						successPoints.countDown();
 					}
@@ -541,11 +541,11 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 			public void run() {
 				try {
 					if ( started.await(1L, TimeUnit.SECONDS) ) {
-						if ( ! FMoney.ofRUB2(1500.0).equals(portfolio.getBalance()) ) {
+						if ( ! CDecimalBD.ofRUB2("1500").equals(portfolio.getBalance()) ) {
 							successPoints.countDown();
 						}
 						portfolio.getPosition(symbol);
-						if ( FMoney.ofRUB2(1500.0).equals(portfolio.getBalance()) ) {
+						if ( CDecimalBD.ofRUB2("1500").equals(portfolio.getBalance()) ) {
 							successPoints.countDown();
 						}
 					}
@@ -611,7 +611,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 								successPoints.countDown();
 							}
 							log.add("BT: update portfolio");
-							portfolio.update(PortfolioField.BALANCE, FMoney.ofRUB2(10000.0));
+							portfolio.update(PortfolioField.BALANCE, CDecimalBD.ofRUB2("10000"));
 						} finally {
 							log.add("BT: unlock portfolio and new positions");
 							portfolio.unlock();
@@ -627,7 +627,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 			@Override
 			public void run() {
 				log.add("CT: enter");
-				if ( ! FMoney.ofRUB2(10000.0).equals(portfolio.getBalance()) ) {
+				if ( ! CDecimalBD.ofRUB2("10000").equals(portfolio.getBalance()) ) {
 					log.add("CT: portfolio isn't updated");
 					successPoints.countDown();
 				}
@@ -636,7 +636,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 				try {
 					log.add("CT: create position");
 					portfolio.getPosition(symbol);
-					if ( ! FMoney.ofRUB2(10000.0).equals(portfolio.getBalance()) ) {
+					if ( ! CDecimalBD.ofRUB2("10000").equals(portfolio.getBalance()) ) {
 						log.add("CT: portfolio isn't updated");
 						successPoints.countDown();
 					}

@@ -265,10 +265,10 @@ public class OrderListTableModel extends AbstractTableModel implements
 		switch (getColumnID(col)) {
 			case CID_PRICE:
 			case CID_EXECUTED_VALUE:
-				return FMoney.class;
-			case CID_ID:
 			case CID_INITIAL_VOLUME:
 			case CID_CURRENT_VOLUME:
+				return CDecimal.class;
+			case CID_ID:
 				return Long.class;
 			default:
 				return super.getColumnClass(col);

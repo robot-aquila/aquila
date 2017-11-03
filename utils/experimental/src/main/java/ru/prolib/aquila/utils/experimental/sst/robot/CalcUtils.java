@@ -1,22 +1,19 @@
 package ru.prolib.aquila.utils.experimental.sst.robot;
 
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 public class CalcUtils {
 	
-	public FDecimal getLastPrice(Security security) {
+	public CDecimal getLastPrice(Security security) {
 		Tick dummy = security.getLastTrade();
-		return FDecimal.of(dummy.getPrice(), security.getScale());
+		return CDecimalBD.of(Double.toString(dummy.getPrice())).withScale(security.getScale());
 	}
 	
-	public FDecimal getSafe(FDecimal x) {
-		return x == null ? FDecimal.ZERO0 : x; 
+	public CDecimal getSafe(CDecimal x) {
+		return x == null ? CDecimalBD.ZERO : x; 
 	}
 	
-	public long getSafe(Long x) {
-		return x == null ? 0L : x;
-	}
-
 }

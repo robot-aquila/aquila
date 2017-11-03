@@ -418,19 +418,19 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
-			long qty, FDecimal price)
+			CDecimal qty, CDecimal price)
 	{
 		return createOrder(account, symbol, action, OrderType.LMT, qty, price, null);
 	}
 
 	@Override
-	public Order createOrder(Account account, Symbol symbol, OrderAction action, long qty) {
+	public Order createOrder(Account account, Symbol symbol, OrderAction action, CDecimal qty) {
 		return createOrder(account, symbol, action, OrderType.MKT, qty, null, null);
 	}
 	
 	@Override
 	public Order createOrder(Account account, Symbol symbol, OrderType type,
-			OrderAction action, long qty, FDecimal price, String comment)
+			OrderAction action, CDecimal qty, CDecimal price, String comment)
 	{
 		return createOrder(account, symbol, action, type, qty, price, comment);
 	}
@@ -771,7 +771,7 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	private EditableOrder createOrder(Account account, Symbol symbol,
-			OrderAction action, OrderType type, Long volume, FDecimal price,
+			OrderAction action, OrderType type, CDecimal volume, CDecimal price,
 			String comment)
 	{
 		EditableOrder order = createOrder(account, symbol);

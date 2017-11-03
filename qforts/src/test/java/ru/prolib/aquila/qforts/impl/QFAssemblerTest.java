@@ -15,12 +15,11 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.OrderExecution;
 import ru.prolib.aquila.core.BusinessEntities.OrderExecutionEvent;
@@ -70,23 +69,28 @@ public class QFAssemblerTest {
 	@Test
 	public void testUpdate_Order_OEU() throws Exception {
 		EditableOrder order = (EditableOrder) terminal.createOrder(account1,
-				symbol1, OrderAction.SELL, 10L, FDecimal.of2(15.34));
+				symbol1,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("15.34"));
 		QFOrderExecutionUpdate update = new QFOrderExecutionUpdate()
-			.setFinalCurrentVolume(0L)
-			.setFinalExecutedValue(FMoney.ofRUB2(30.68))
+			.setFinalCurrentVolume(CDecimalBD.of(0L))
+			.setFinalExecutedValue(CDecimalBD.ofRUB2("30.68"))
 			.setFinalizationTime(T("2017-04-18T08:33:00Z"))
 			.setFinalStatus(OrderStatus.FILLED)
 			.setExecutionAction(OrderAction.SELL)
 			.setExecutionOrderID(4429L)
-			.setExecutionPrice(FDecimal.of2(15.36))
+			.setExecutionPrice(CDecimalBD.of("15.36"))
 			.setExecutionSymbol(symbol1)
 			.setExecutionTime(T("2017-04-18T08:33:00.001Z"))
-			.setExecutionValue(FMoney.ofRUB2(30.70))
-			.setExecutionVolume(10L);
+			.setExecutionValue(CDecimalBD.ofRUB2("30.70"))
+			.setExecutionVolume(CDecimalBD.of(10L));
 		OrderExecution expectedExec = new OrderExecutionImpl(terminal, 240L,
 				null, symbol1, OrderAction.SELL, 4429L,
-				T("2017-04-18T08:33:00.001Z"), FDecimal.of2(15.36),
-				10L, FMoney.ofRUB2(30.70));
+				T("2017-04-18T08:33:00.001Z"),
+				CDecimalBD.of("15.36"),
+				CDecimalBD.of(10L),
+				CDecimalBD.ofRUB2("30.70"));
 		CountDownLatch testPassed = new CountDownLatch(1);
 		order.onExecution().addListener(new EventListener() {
 			@Override
@@ -94,10 +98,10 @@ public class QFAssemblerTest {
 				assertEquals(expectedExec, ((OrderExecutionEvent) event).getExecution());
 				assertEquals(new DeltaUpdateBuilder()
 					.withToken(OrderField.ACTION, OrderAction.SELL)
-					.withToken(OrderField.CURRENT_VOLUME, 0L)
-					.withToken(OrderField.EXECUTED_VALUE, FMoney.ofRUB2(30.68))
-					.withToken(OrderField.INITIAL_VOLUME, 10L)
-					.withToken(OrderField.PRICE, FDecimal.of2(15.34))
+					.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(0L))
+					.withToken(OrderField.EXECUTED_VALUE, CDecimalBD.ofRUB2("30.68"))
+					.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
+					.withToken(OrderField.PRICE, CDecimalBD.of("15.34"))
 					.withToken(OrderField.STATUS, OrderStatus.FILLED)
 					.withToken(OrderField.TIME, order.getTime())
 					.withToken(OrderField.TIME_DONE, T("2017-04-18T08:33:00Z"))
@@ -115,7 +119,10 @@ public class QFAssemblerTest {
 	@Test
 	public void testUpdate_Order_OSU() {
 		EditableOrder order = (EditableOrder) terminal.createOrder(account1,
-				symbol1, OrderAction.SELL, 10L, FDecimal.of2(15.34));
+				symbol1,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("15.34"));
 		QFOrderStatusUpdate update = new QFOrderStatusUpdate()
 			.setFinalizationTime(T("2017-04-18T09:30:00Z"))
 			.setFinalStatus(OrderStatus.REJECTED)
@@ -125,9 +132,9 @@ public class QFAssemblerTest {
 		
 		assertEquals(new DeltaUpdateBuilder()
 			.withToken(OrderField.ACTION, OrderAction.SELL)
-			.withToken(OrderField.CURRENT_VOLUME, 10L)
-			.withToken(OrderField.INITIAL_VOLUME, 10L)
-			.withToken(OrderField.PRICE, FDecimal.of2(15.34))
+			.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(10L))
+			.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
+			.withToken(OrderField.PRICE, CDecimalBD.of("15.34"))
 			.withToken(OrderField.STATUS, OrderStatus.REJECTED)
 			.withToken(OrderField.TIME, order.getTime())
 			.withToken(OrderField.TIME_DONE, T("2017-04-18T09:30:00Z"))
@@ -139,65 +146,65 @@ public class QFAssemblerTest {
 	@Test
 	public void testUpdate_Portfolio_PCU() {
 		QFPortfolioChangeUpdate update = new QFPortfolioChangeUpdate(account1)
-			.setFinalBalance(FMoney.ofRUB2(10000.0))
-			.setFinalEquity(FMoney.ofRUB2(8000.0))
-			.setFinalFreeMargin(FMoney.ofRUB2(2000.0))
-			.setFinalProfitAndLoss(FMoney.ofRUB2(-200.0))
-			.setFinalUsedMargin(FMoney.ofRUB2(150.0))
-			.setFinalVarMargin(FMoney.ofRUB5(98.25412))
-			.setFinalVarMarginClose(FMoney.ofRUB5(1.09882))
-			.setFinalVarMarginInter(FMoney.ofRUB5(5.88721));
+			.setFinalBalance(CDecimalBD.ofRUB2("10000"))
+			.setFinalEquity(CDecimalBD.ofRUB2("8000"))
+			.setFinalFreeMargin(CDecimalBD.ofRUB2("2000"))
+			.setFinalProfitAndLoss(CDecimalBD.ofRUB2("-200"))
+			.setFinalUsedMargin(CDecimalBD.ofRUB2("150"))
+			.setFinalVarMargin(CDecimalBD.ofRUB5("98.25412"))
+			.setFinalVarMarginClose(CDecimalBD.ofRUB5("1.09882"))
+			.setFinalVarMarginInter(CDecimalBD.ofRUB5("5.88721"));
 		update.getOrCreatePositionUpdate(symbol1)
-			.setFinalCurrentPrice(FDecimal.of2(100.15))
-			.setFinalOpenPrice(FDecimal.of2(94.12))
-			.setFinalProfitAndLoss(FMoney.ofRUB2(156.12))
-			.setFinalUsedMargin(FMoney.ofRUB2(65.02))
-			.setFinalVarMargin(FMoney.ofRUB5(-632.0))
-			.setFinalVarMarginClose(FMoney.ofRUB5(-20.0))
-			.setFinalVarMarginInter(FMoney.ofRUB5(118.1))
-			.setFinalVolume(1L);
+			.setFinalCurrentPrice(CDecimalBD.of("100.15"))
+			.setFinalOpenPrice(CDecimalBD.of("94.12"))
+			.setFinalProfitAndLoss(CDecimalBD.ofRUB2("156.12"))
+			.setFinalUsedMargin(CDecimalBD.ofRUB2("65.02"))
+			.setFinalVarMargin(CDecimalBD.ofRUB5("-632"))
+			.setFinalVarMarginClose(CDecimalBD.ofRUB5("-20"))
+			.setFinalVarMarginInter(CDecimalBD.ofRUB5("118.1"))
+			.setFinalVolume(CDecimalBD.of(1L));
 		update.getOrCreatePositionUpdate(symbol2)
-			.setFinalCurrentPrice(FDecimal.of2(12.82))
-			.setFinalOpenPrice(FDecimal.of2(532.81))
-			.setFinalProfitAndLoss(FMoney.ofRUB2(11.02))
-			.setFinalUsedMargin(FMoney.ofRUB2(4.1))
-			.setFinalVarMargin(FMoney.ofRUB5(-9.0))
-			.setFinalVarMarginClose(FMoney.ofRUB5(1002.0))
-			.setFinalVarMarginInter(FMoney.ofRUB5(18.9))
-			.setFinalVolume(10L);
+			.setFinalCurrentPrice(CDecimalBD.of("12.82"))
+			.setFinalOpenPrice(CDecimalBD.of("532.81"))
+			.setFinalProfitAndLoss(CDecimalBD.ofRUB2("11.02"))
+			.setFinalUsedMargin(CDecimalBD.ofRUB2("4.1"))
+			.setFinalVarMargin(CDecimalBD.ofRUB5("-9"))
+			.setFinalVarMarginClose(CDecimalBD.ofRUB5("1002"))
+			.setFinalVarMarginInter(CDecimalBD.ofRUB5("18.9"))
+			.setFinalVolume(CDecimalBD.of(10L));
 		
 		service.update(portfolio, update);
 		
 		assertEquals(new DeltaUpdateBuilder()
-			.withToken(PortfolioField.CURRENCY, FMoney.RUB)
-			.withToken(PortfolioField.BALANCE, FMoney.ofRUB2(10000.0))
-			.withToken(PortfolioField.EQUITY, FMoney.ofRUB2(8000.0))
-			.withToken(PortfolioField.FREE_MARGIN, FMoney.ofRUB2(2000.0))
-			.withToken(PortfolioField.PROFIT_AND_LOSS, FMoney.ofRUB2(-200.0))
-			.withToken(PortfolioField.USED_MARGIN, FMoney.ofRUB2(150.0))
-			.withToken(QFPortfolioField.QF_VAR_MARGIN, FMoney.ofRUB5(98.25412))
-			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE, FMoney.ofRUB5(1.09882))
-			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER, FMoney.ofRUB5(5.88721))
+			.withToken(PortfolioField.CURRENCY, "RUB")
+			.withToken(PortfolioField.BALANCE, CDecimalBD.ofRUB2("10000"))
+			.withToken(PortfolioField.EQUITY, CDecimalBD.ofRUB2("8000"))
+			.withToken(PortfolioField.FREE_MARGIN, CDecimalBD.ofRUB2("2000"))
+			.withToken(PortfolioField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("-200"))
+			.withToken(PortfolioField.USED_MARGIN, CDecimalBD.ofRUB2("150"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("98.25412"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("1.09882"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("5.88721"))
 			.buildUpdate().getContents(), portfolio.getContents());
 		assertEquals(new DeltaUpdateBuilder()
-			.withToken(PositionField.CURRENT_PRICE, FDecimal.of2(100.15))
-			.withToken(PositionField.CURRENT_VOLUME, 1L)
-			.withToken(PositionField.OPEN_PRICE, FDecimal.of2(94.12))
-			.withToken(PositionField.PROFIT_AND_LOSS, FMoney.ofRUB2(156.12))
-			.withToken(PositionField.USED_MARGIN, FMoney.ofRUB2(65.02))
-			.withToken(QFPositionField.QF_VAR_MARGIN, FMoney.ofRUB5(-632.0))
-			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, FMoney.ofRUB5(-20.0))
-			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, FMoney.ofRUB5(118.1))
+			.withToken(PositionField.CURRENT_PRICE, CDecimalBD.of("100.15"))
+			.withToken(PositionField.CURRENT_VOLUME, CDecimalBD.of(1L))
+			.withToken(PositionField.OPEN_PRICE, CDecimalBD.of("94.12"))
+			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("156.12"))
+			.withToken(PositionField.USED_MARGIN, CDecimalBD.ofRUB2("65.02"))
+			.withToken(QFPositionField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("-632"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("-20"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("118.1"))
 			.buildUpdate().getContents(), portfolio.getPosition(symbol1).getContents());
 		assertEquals(new DeltaUpdateBuilder()
-			.withToken(PositionField.CURRENT_PRICE, FDecimal.of2(12.82))
-			.withToken(PositionField.CURRENT_VOLUME, 10L)
-			.withToken(PositionField.OPEN_PRICE, FDecimal.of2(532.81))
-			.withToken(PositionField.PROFIT_AND_LOSS, FMoney.ofRUB2(11.02))
-			.withToken(PositionField.USED_MARGIN, FMoney.ofRUB2(4.1))
-			.withToken(QFPositionField.QF_VAR_MARGIN, FMoney.ofRUB5(-9.0))
-			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, FMoney.ofRUB5(1002.0))
-			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, FMoney.ofRUB5(18.9))
+			.withToken(PositionField.CURRENT_PRICE, CDecimalBD.of("12.82"))
+			.withToken(PositionField.CURRENT_VOLUME, CDecimalBD.of(10L))
+			.withToken(PositionField.OPEN_PRICE, CDecimalBD.of("532.81"))
+			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("11.02"))
+			.withToken(PositionField.USED_MARGIN, CDecimalBD.ofRUB2("4.1"))
+			.withToken(QFPositionField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("-9"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("1002"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("18.9"))
 			.buildUpdate().getContents(), portfolio.getPosition(symbol2).getContents());
 	}
 	

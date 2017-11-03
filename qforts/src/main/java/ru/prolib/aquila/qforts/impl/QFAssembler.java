@@ -4,7 +4,6 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.OrderExecution;
 import ru.prolib.aquila.core.BusinessEntities.OrderExecutionImpl;
@@ -66,7 +65,7 @@ public class QFAssembler {
 			update(portfolio.getEditablePosition(pu.getSymbol()), pu);
 		}
 		portfolio.consume(new DeltaUpdateBuilder()
-			.withToken(PortfolioField.CURRENCY, FMoney.RUB)
+			.withToken(PortfolioField.CURRENCY, update.getFinalBalance().getUnit())
 			.withToken(PortfolioField.BALANCE, update.getFinalBalance())
 			.withToken(PortfolioField.EQUITY, update.getFinalEquity())
 			.withToken(PortfolioField.FREE_MARGIN, update.getFinalFreeMargin())

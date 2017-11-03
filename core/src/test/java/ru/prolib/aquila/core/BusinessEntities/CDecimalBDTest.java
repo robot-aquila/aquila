@@ -19,6 +19,85 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
+	public void testConstants() {
+		assertEquals("RUB", CDecimalBD.RUB);
+		assertEquals("USD", CDecimalBD.USD);
+		assertEquals("EUR", CDecimalBD.EUR);
+		assertEquals("CAD", CDecimalBD.CAD);
+		
+		assertEquals(new CDecimalBD("0"), CDecimalBD.ZERO);
+		
+		assertEquals(new CDecimalBD("0.00",		CDecimalBD.RUB), CDecimalBD.ZERO_RUB2);
+		assertEquals(new CDecimalBD("0.00000",	CDecimalBD.RUB), CDecimalBD.ZERO_RUB5);
+		assertEquals(new CDecimalBD("0.00",		CDecimalBD.USD), CDecimalBD.ZERO_USD2);
+		assertEquals(new CDecimalBD("0.00000",	CDecimalBD.USD), CDecimalBD.ZERO_USD5);
+	}
+	
+	@Test
+	public void testOf3_SSRM() {
+		CDecimal expected = new CDecimalBD("12.82", "RUB", RoundingMode.DOWN);
+		CDecimal actual = CDecimalBD.of("12.82", "RUB", RoundingMode.DOWN);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testOf2_SS() {
+		CDecimal expected = new CDecimalBD("25.115", "USD", RoundingMode.HALF_UP);
+		CDecimal actual = CDecimalBD.of("25.115", "USD");
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testOf1_S() {
+		CDecimal expected = new CDecimalBD("25.115", null, RoundingMode.HALF_UP);
+		CDecimal actual = CDecimalBD.of("25.115");
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testOf1_L() {
+		CDecimal expected = new CDecimalBD("100", null, RoundingMode.HALF_UP);
+		CDecimal actual = CDecimalBD.of(100L);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testOfRUB2_S() {
+		CDecimal expected = new CDecimalBD("100.15", "RUB");
+		CDecimal actual = CDecimalBD.ofRUB2("100.15000");
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testOfRUB5_S() {
+		CDecimal expected = new CDecimalBD("1.15851", "RUB");
+		CDecimal actual = CDecimalBD.ofRUB5("1.15851000");
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testOfUSD2_S() {
+		CDecimal expected = new CDecimalBD("6.78", "USD");
+		CDecimal actual = CDecimalBD.ofUSD2("6.78000");
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testOfUSD5_S() {
+		CDecimal expected = new CDecimalBD("2.15000", "USD");
+		CDecimal actual = CDecimalBD.ofUSD5("2.15");
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
 	public void testCtor3_BD() {
 		CDecimalBD x = new CDecimalBD(new BigDecimal("12.350"), "USD", RoundingMode.CEILING);
 		
@@ -166,6 +245,19 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
+	public void testWithScale2() {
+		CDecimal expected = new CDecimalBD("12.381", "CAD", RoundingMode.FLOOR);
+		CDecimal actual = new CDecimalBD("12.380564", "CAD", RoundingMode.FLOOR)
+				.withScale(3, RoundingMode.HALF_UP);
+		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=ArithmeticException.class)
+	public void testWithScale2_SpecialCase_ThrowsIfUnableToScale() {
+		new CDecimalBD("12.380564").withScale(3, RoundingMode.UNNECESSARY);
+	}
+	
+	@Test
 	public void testWithZero() {
 		assertEquals(new CDecimalBD("0.000", "EUR", RoundingMode.FLOOR),
 				new CDecimalBD("56.721", "EUR", RoundingMode.FLOOR).withZero());
@@ -178,7 +270,7 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
-	public void testAdd_AA() {
+	public void testAdd_CD_AA() {
 		CDecimal expected = new CDecimalBD("24.956", null, RoundingMode.UNNECESSARY);
 		CDecimal actual = new CDecimalBD("20.0", null, RoundingMode.UNNECESSARY)
 				.add(new CDecimalBD("4.956", null, RoundingMode.DOWN));
@@ -186,26 +278,18 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testAdd_AU() {
-		CDecimal expected = new CDecimalBD("120.506", "USD", RoundingMode.UP);
-		CDecimal actual = new CDecimalBD("20.006", null, RoundingMode.UP)
-				.add(new CDecimalBD("100.5", "USD", RoundingMode.HALF_UP));
-		
-		assertEquals(expected, actual);
+	@Test (expected=IllegalArgumentException.class)
+	public void testAdd_CD_AU_Throws() {
+		new CDecimalBD("20.006").add(new CDecimalBD("100.5", "USD"));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testAdd_CD_UA_Throws() {
+		new CDecimalBD("540.400", "RUB").add(new CDecimalBD("-0.190"));
 	}
 	
 	@Test
-	public void testAdd_UA() {
-		CDecimal expected = new CDecimalBD("540.210", "RUB", RoundingMode.HALF_DOWN);
-		CDecimal actual = new CDecimalBD("540.400", "RUB", RoundingMode.HALF_DOWN)
-				.add(new CDecimalBD("-0.190"));
-		
-		assertEquals(expected, actual);
-	}
-	
-	@Test
-	public void testAdd_UU() {
+	public void testAdd_CD_UU() {
 		CDecimal expected = new CDecimalBD("-200.00", "EUR", RoundingMode.FLOOR);
 		CDecimal actual = new CDecimalBD("0.00", "EUR", RoundingMode.FLOOR)
 				.add(new CDecimalBD("-200", "EUR", RoundingMode.HALF_DOWN));
@@ -214,16 +298,21 @@ public class CDecimalBDTest {
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
-	public void testAdd_UU_ThrowsIfUnitMismatch() {
+	public void testAdd_CD_UU_ThrowsIfUnitMismatch() {
 		new CDecimalBD("100.0", "EUR").add(new CDecimalBD("100", "RUB"));
 	}
 	
 	@Test
-	public void testAdd_L() {
-		CDecimal expected = new CDecimalBD("-256.345", "USD", RoundingMode.CEILING);
-		CDecimal actual = new CDecimalBD("-260.345", "USD", RoundingMode.CEILING).add(4L);
+	public void testAdd_L_AA() {
+		CDecimal expected = new CDecimalBD("-256.345", null, RoundingMode.CEILING);
+		CDecimal actual = new CDecimalBD("-260.345", null, RoundingMode.CEILING).add(4L);
 		
 		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testAdd_L_UA_Throws() {
+		CDecimalBD.ofRUB2("17.24").add(100L);
 	}
 	
 	@Test
@@ -245,13 +334,9 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testDivide_CD_AU() {
-		CDecimal expected = new CDecimalBD("-24.9010", "USD", RoundingMode.HALF_DOWN);
-		CDecimal actual = new CDecimalBD("-12.4505", null, RoundingMode.HALF_DOWN)
-				.divide(new CDecimalBD("0.5", "USD", RoundingMode.HALF_UP));
-		
-		assertEquals(expected, actual);
+	@Test (expected=IllegalArgumentException.class)
+	public void testDivide_CD_AU_Throws() {
+		CDecimalBD.of("-12.4505").divide(CDecimalBD.ofUSD2("0.5"));
 	}
 	
 	@Test
@@ -265,7 +350,7 @@ public class CDecimalBDTest {
 	
 	@Test
 	public void testDivide_CD_UU() {
-		CDecimal expected = new CDecimalBD("76.000", "EUR", RoundingMode.HALF_DOWN);
+		CDecimal expected = new CDecimalBD("76.000", null, RoundingMode.HALF_DOWN);
 		CDecimal actual = new CDecimalBD("1847.565", "EUR", RoundingMode.HALF_DOWN)
 				.divide(new CDecimalBD("24.31", "EUR", RoundingMode.HALF_UP));
 		
@@ -287,10 +372,18 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
-	public void testDivide_L() {
+	public void testDivide_L_U() {
 		CDecimal expected = new CDecimalBD("0.77", "RUB", RoundingMode.FLOOR);
 		CDecimal actual = new CDecimalBD("188.58", "RUB", RoundingMode.FLOOR)
 				.divide(242L);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testDivide_L_A() {
+		CDecimal expected = CDecimalBD.of(10L);
+		CDecimal actual = CDecimalBD.of(200L).divide(20L);
 		
 		assertEquals(expected, actual);
 	}
@@ -312,13 +405,9 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testDivideExact_CD_AU() {
-		CDecimal expected = new CDecimalBD("0.915", "EUR", RoundingMode.HALF_UP);
-		CDecimal actual = new CDecimalBD("3.66", null, RoundingMode.HALF_UP)
-				.divideExact(new CDecimalBD("4", "EUR", RoundingMode.DOWN), 3);
-		
-		assertEquals(expected, actual);
+	@Test (expected=IllegalArgumentException.class)
+	public void testDivideExact_CD_AU_Throws() {
+		CDecimalBD.of("3.66").divideExact(CDecimalBD.ofUSD2("4"), 3);
 	}
 	
 	@Test
@@ -332,7 +421,7 @@ public class CDecimalBDTest {
 	
 	@Test
 	public void testDivideExact_CD_UU() {
-		CDecimal expected = new CDecimalBD("0.915", "USD", RoundingMode.HALF_UP);
+		CDecimal expected = new CDecimalBD("0.915", null, RoundingMode.HALF_UP);
 		CDecimal actual = new CDecimalBD("3.66", "USD", RoundingMode.HALF_UP)
 				.divideExact(new CDecimalBD("4", "USD", RoundingMode.DOWN), 3);
 		
@@ -355,10 +444,10 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
-	public void testDivideExact_L() {
-		CDecimal expected = new CDecimalBD("0.915", "EUR", RoundingMode.HALF_UP);
+	public void testDivideExact_L_A() {
+		CDecimal expected = new CDecimalBD("0.9150", "EUR", RoundingMode.HALF_UP);
 		CDecimal actual = new CDecimalBD("3.66", "EUR", RoundingMode.HALF_UP)
-				.divideExact(4L, 3);
+				.divideExact(4L, 4);
 		
 		assertEquals(expected, actual);
 	}
@@ -372,6 +461,14 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
+	public void testDivideExact_L_U() {
+		CDecimal expected = CDecimalBD.ofRUB5("25");
+		CDecimal actual = CDecimalBD.ofRUB2("100").divideExact(4L, 5);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
 	public void testMultiply_CD_AA() {
 		CDecimal expected = new CDecimalBD("-8.14", null, RoundingMode.FLOOR);
 		CDecimal actual = new CDecimalBD("14.27", null, RoundingMode.FLOOR)
@@ -380,8 +477,8 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testMultiply_CD_AU() {
+	@Test (expected=IllegalArgumentException.class)
+	public void testMultiply_CD_AU_Throws() {
 		CDecimal expected = new CDecimalBD("-8.13", "CAD", RoundingMode.HALF_UP);
 		CDecimal actual = new CDecimalBD("14.27", null, RoundingMode.HALF_UP)
 				.multiply(new CDecimalBD("-0.57", "CAD", RoundingMode.FLOOR));
@@ -398,13 +495,9 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testMultiply_CD_UU() {
-		CDecimal expected = new CDecimalBD("10647.277", "EUR", RoundingMode.FLOOR);
-		CDecimal actual = new CDecimalBD("-928.11", "EUR", RoundingMode.FLOOR)
-				.multiply(new CDecimalBD("-11.472", "EUR", RoundingMode.HALF_DOWN));
-		
-		assertEquals(expected, actual);
+	@Test (expected=IllegalArgumentException.class)
+	public void testMultiply_CD_UU_Throws() {
+		CDecimalBD.ofUSD2("-928.11").multiply(CDecimalBD.ofRUB2("-11.47"));
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -413,10 +506,18 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
-	public void testMultiple_L() {
+	public void testMultiple_L_U() {
 		CDecimal expected = new CDecimalBD("24.290", "CAD", RoundingMode.HALF_UP);
 		CDecimal actual = new CDecimalBD("2.429", "CAD", RoundingMode.HALF_UP)
 				.multiply(10L);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testMultiply_L_A() {
+		CDecimal expected = CDecimalBD.of(400L);
+		CDecimal actual = CDecimalBD.of(100L).multiply(4L);
 		
 		assertEquals(expected, actual);
 	}
@@ -439,13 +540,9 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 
-	@Test
-	public void testMultiplyExact_CD_AU() {
-		CDecimal expected = new CDecimalBD("-516.29497905", "CAD", RoundingMode.HALF_UP);
-		CDecimal actual = new CDecimalBD("9.215", null, RoundingMode.HALF_UP)
-				.multiplyExact(new CDecimalBD("-56.02767", "CAD", RoundingMode.DOWN));
-		
-		assertEquals(expected, actual);
+	@Test (expected=IllegalArgumentException.class)
+	public void testMultiplyExact_CD_AU_Throws() {
+		CDecimalBD.of("9.215").multiplyExact(CDecimalBD.ofUSD5("-56.02767"));
 	}
 	
 	@Test
@@ -457,13 +554,9 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testMultiplyExact_CD_UU() {
-		CDecimal expected = new CDecimalBD("-516.29497905", "CAD", RoundingMode.HALF_UP);
-		CDecimal actual = new CDecimalBD("9.215", "CAD", RoundingMode.HALF_UP)
-				.multiplyExact(new CDecimalBD("-56.02767", "CAD", RoundingMode.DOWN));
-		
-		assertEquals(expected, actual);
+	@Test (expected=IllegalArgumentException.class)
+	public void testMultiplyExact_CD_UU_Throws() {
+		CDecimalBD.ofUSD5("9.215").multiplyExact(CDecimalBD.ofUSD5("-56.02767"));
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -481,22 +574,15 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
-	@Test
-	public void testSubtract_CD_AU() {
-		CDecimal expected = new CDecimalBD("-313.996", "USD", RoundingMode.DOWN);
-		CDecimal actual = new CDecimalBD("-223.1", null, RoundingMode.DOWN)
-				.subtract(new CDecimalBD("90.896", "USD", RoundingMode.HALF_UP));
-		
-		assertEquals(expected, actual);
+	@Test (expected=IllegalArgumentException.class)
+	public void testSubtract_CD_AU_Throws() {
+		CDecimalBD.of("-223.1").subtract(CDecimalBD.ofUSD5("90.896"));
 	}
 	
-	@Test
-	public void testSubtract_CD_UA() {
-		CDecimal expected = new CDecimalBD("-313.996", "EUR", RoundingMode.DOWN);
-		CDecimal actual = new CDecimalBD("-223.1", "EUR", RoundingMode.DOWN)
-				.subtract(new CDecimalBD("90.896", null, RoundingMode.HALF_UP));
-		
-		assertEquals(expected, actual);	}
+	@Test (expected=IllegalArgumentException.class)
+	public void testSubtract_CD_UA_Throws() {
+		CDecimalBD.ofRUB2("-223.1").subtract(CDecimalBD.of("90.896"));
+	}
 	
 	@Test
 	public void testSubtract_CD_UU() {
@@ -510,15 +596,6 @@ public class CDecimalBDTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testSubtract_CD_UU_ThrowsIfUnitMismatch() {
 		new CDecimalBD("-223.1", "RUB").subtract(new CDecimalBD("90.896", "USD"));
-	}
-	
-	@Test
-	public void testSubtract_L() {
-		CDecimal expected = new CDecimalBD("410.46", "EUR", RoundingMode.CEILING);
-		CDecimal actual = new CDecimalBD("450.46", "EUR", RoundingMode.CEILING)
-				.subtract(40L);
-		
-		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -565,6 +642,31 @@ public class CDecimalBDTest {
 		x2 = new CDecimalBD("410.46", "USD");
 		
 		assertSame(x1, x1.min(x2));
+	}
+	
+	@Test
+	public void testToAbstract() {
+		assertEquals(CDecimalBD.of("24.92"), CDecimalBD.ofRUB2("24.92").toAbstract());
+		assertEquals(CDecimalBD.of("24.92"), CDecimalBD.of("24.92").toAbstract());
+	}
+	
+	@Test
+	public void testIsAbstract() {
+		assertTrue(CDecimalBD.of(12L).isAbstract());
+		assertFalse(CDecimalBD.ofRUB2("15").isAbstract());
+	}
+	
+	@Test
+	public void testIsSameUnitAs() {
+		CDecimal x1 = CDecimalBD.ofRUB2("26.19"),
+				x2 = CDecimalBD.ofRUB5("24.99512"),
+				x3 = CDecimalBD.ofUSD2("100"),
+				x4 = CDecimalBD.of(200L),
+				x5 = CDecimalBD.of(300L);
+		assertTrue(x1.isSameUnitAs(x2));
+		assertFalse(x1.isSameUnitAs(x3));
+		assertTrue(x4.isSameUnitAs(x5));
+		assertFalse(x5.isSameUnitAs(x3));
 	}
 
 }

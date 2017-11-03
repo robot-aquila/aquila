@@ -118,58 +118,62 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testGetScale() throws Exception {
 		assertNull(security.getScale());
-		security.update(SecurityField.TICK_SIZE, new FDecimal("0.005"));
+		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.005"));
 		assertEquals(new Integer(3), security.getScale());
 	}
 	
 	@Test
 	public void testGetLotSize() throws Exception {
-		getter = new Getter<Integer>() {
-			@Override public Integer get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getLotSize();
 			}	
 		};
-		testGetter(SecurityField.LOT_SIZE, 10, 1);
+		testGetter(SecurityField.LOT_SIZE, CDecimalBD.of(10L), CDecimalBD.of(1L));
 	}
 	
 	@Test
 	public void testGetUpperPriceLimit() throws Exception {
-		getter = new Getter<FDecimal>() {
-			@Override public FDecimal get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getUpperPriceLimit();
 			}
 		};
-		testGetter(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("137.15"), new FDecimal("158.12"));
+		testGetter(SecurityField.UPPER_PRICE_LIMIT,
+				CDecimalBD.of("137.15"), CDecimalBD.of("158.12"));
 	}
 	
 	@Test
 	public void testGetLowerPriceLimit() throws Exception {
-		getter = new Getter<FDecimal>() {
-			@Override public FDecimal get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getLowerPriceLimit();
 			}
 		};
-		testGetter(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("119.02"), new FDecimal("118.16"));
+		testGetter(SecurityField.LOWER_PRICE_LIMIT,
+				CDecimalBD.of("119.02"), CDecimalBD.of("118.16"));
 	}
 	
 	@Test
 	public void testGetTickValue() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getTickValue();
 			}
 		};
-		testGetter(SecurityField.TICK_VALUE, new FMoney("440.09", "USD"), new FMoney("482.15", "RUB"));
+		testGetter(SecurityField.TICK_VALUE,
+				CDecimalBD.ofUSD2("440.09"), CDecimalBD.ofRUB2("482.15"));
 	}
 	
 	@Test
 	public void testGetTickSize() throws Exception {
-		getter = new Getter<FDecimal>() {
-			@Override public FDecimal get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getTickSize();
 			}
 		};
-		testGetter(SecurityField.TICK_SIZE, new FDecimal("10.0"), new FDecimal("0.05"));
+		testGetter(SecurityField.TICK_SIZE,
+				CDecimalBD.of("10.0"), CDecimalBD.of("0.05"));
 	}
 	
 	@Test
@@ -184,63 +188,68 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	
 	@Test
 	public void testGetOpenPrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getOpenPrice();
 			}
 		};
-		testGetter(SecurityField.OPEN_PRICE, 321.19d, 280.04d);
+		testGetter(SecurityField.OPEN_PRICE,
+				CDecimalBD.of("321.19"), CDecimalBD.of("280.04"));
 	}
 	
 	@Test
 	public void testGetClosePrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getClosePrice();
 			}
 		};
-		testGetter(SecurityField.CLOSE_PRICE, 10.03d, 12.34d);
+		testGetter(SecurityField.CLOSE_PRICE,
+				CDecimalBD.of("10.03"), CDecimalBD.of("12.34"));
 	}
 	
 	@Test
 	public void testGetLowPrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getLowPrice();
 			}
 		};
-		testGetter(SecurityField.LOW_PRICE, 8.02d, 15.87d);
+		testGetter(SecurityField.LOW_PRICE,
+				CDecimalBD.of("8.02"), CDecimalBD.of("15.87"));
 	}
 
 	@Test
 	public void testGetHighPrice() throws Exception {
-		getter = new Getter<Double>() {
-			@Override public Double get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getHighPrice();
 			}
 		};
-		testGetter(SecurityField.HIGH_PRICE, 4586.13d, 7002.17d);
+		testGetter(SecurityField.HIGH_PRICE,
+				CDecimalBD.of("4586.13"), CDecimalBD.of("7002.17"));
 	}
 
 	@Test
 	public void testGetSettlementPrice() throws Exception {
-		getter = new Getter<FDecimal>() {
-			@Override public FDecimal get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getSettlementPrice();
 			}
 		};
-		testGetter(SecurityField.SETTLEMENT_PRICE, new FDecimal("215.86"), new FDecimal("114.12"));
+		testGetter(SecurityField.SETTLEMENT_PRICE,
+				CDecimalBD.of("215.86"), CDecimalBD.of("114.12"));
 	}
 
 	@Test
 	public void testGetInitialMargin() throws Exception {
-		getter = new Getter<FMoney>() {
-			@Override public FMoney get() {
+		getter = new Getter<CDecimal>() {
+			@Override public CDecimal get() {
 				return security.getInitialMargin();
 			}
 		};
 		testGetter(SecurityField.INITIAL_MARGIN,
-				new FMoney("118.99", "USD"), new FMoney("120.01", "RUB"));
+				CDecimalBD.ofUSD2("118.99"), CDecimalBD.ofRUB2("120.01"));
 	}
 	
 	@Test
@@ -289,10 +298,10 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertFalse(controller.hasMinimalData(security, null));
 		
 		data.put(SecurityField.DISPLAY_NAME, "GAZP");
-		data.put(SecurityField.LOT_SIZE, 100);
-		data.put(SecurityField.TICK_SIZE, new FDecimal("5.00"));
-		data.put(SecurityField.TICK_VALUE, new FMoney("2.37", "RUB"));
-		data.put(SecurityField.SETTLEMENT_PRICE, 200.01d);
+		data.put(SecurityField.LOT_SIZE, CDecimalBD.of(100L));
+		data.put(SecurityField.TICK_SIZE, CDecimalBD.of("5.00"));
+		data.put(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("2.37"));
+		data.put(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("200.01"));
 		security.update(data);
 		
 		assertTrue(controller.hasMinimalData(security, null));
@@ -301,15 +310,15 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testSecurityController_ProcessUpdate_SessionUpdate() {
 		Instant time = T("2017-08-04T19:51:00Z");
-		data.put(SecurityField.LOT_SIZE, 1);
-		data.put(SecurityField.TICK_SIZE, new FDecimal("0.05"));
-		data.put(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"));
-		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
-		data.put(SecurityField.SETTLEMENT_PRICE, 80.93d);
-		data.put(SecurityField.OPEN_PRICE, 79.19d);
-		data.put(SecurityField.HIGH_PRICE, 83.64d);
-		data.put(SecurityField.LOW_PRICE, 79.19d);
-		data.put(SecurityField.CLOSE_PRICE, 79.18d);
+		data.put(SecurityField.LOT_SIZE, CDecimalBD.of(1L));
+		data.put(SecurityField.TICK_SIZE, CDecimalBD.of("0.05"));
+		data.put(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("0.01"));
+		data.put(SecurityField.INITIAL_MARGIN, CDecimalBD.of("2034.17"));
+		data.put(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("80.93"));
+		data.put(SecurityField.OPEN_PRICE, CDecimalBD.of("79.19"));
+		data.put(SecurityField.HIGH_PRICE, CDecimalBD.of("83.64"));
+		data.put(SecurityField.LOW_PRICE, CDecimalBD.of("79.19"));
+		data.put(SecurityField.CLOSE_PRICE, CDecimalBD.of("79.18"));
 		security.update(data);
 		EventListenerStub listener = new EventListenerStub();
 		security.onSessionUpdate().addListener(listener);
@@ -332,15 +341,15 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testSecurityController_ProcessAvailable() {
 		Instant time = T("2017-08-04T19:55:00Z");
-		data.put(SecurityField.LOT_SIZE, 1);
-		data.put(SecurityField.TICK_SIZE, new FDecimal("0.05"));
-		data.put(SecurityField.TICK_VALUE, new FMoney("0.01", "RUB"));
-		data.put(SecurityField.INITIAL_MARGIN, 2034.17d);
-		data.put(SecurityField.SETTLEMENT_PRICE, 80.93d);
-		data.put(SecurityField.OPEN_PRICE, 79.19d);
-		data.put(SecurityField.HIGH_PRICE, 83.64d);
-		data.put(SecurityField.LOW_PRICE, 79.19d);
-		data.put(SecurityField.CLOSE_PRICE, 79.18d);
+		data.put(SecurityField.LOT_SIZE, CDecimalBD.of(1L));
+		data.put(SecurityField.TICK_SIZE, CDecimalBD.of("0.05"));
+		data.put(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("0.01"));
+		data.put(SecurityField.INITIAL_MARGIN, CDecimalBD.of("2034.17"));
+		data.put(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("80.93"));
+		data.put(SecurityField.OPEN_PRICE, CDecimalBD.of("79.19"));
+		data.put(SecurityField.HIGH_PRICE, CDecimalBD.of("83.64"));
+		data.put(SecurityField.LOW_PRICE, CDecimalBD.of("79.19"));
+		data.put(SecurityField.CLOSE_PRICE, CDecimalBD.of("79.18"));
 		security.update(data);
 		EventListenerStub listener = new EventListenerStub();
 		security.onSessionUpdate().addListener(listener);
@@ -450,7 +459,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testUpdate_MDUpdate_RefreshAsk() {
 		security.consume(new DeltaUpdateBuilder()
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"))
 			.buildUpdate());
 
 		Instant time = Instant.parse("2016-03-04T01:27:00Z");
@@ -489,7 +498,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testUpdate_MDUpdate_RefreshBid() {
 		security.consume(new DeltaUpdateBuilder()
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"))
 			.buildUpdate());
 
 		Instant time = Instant.parse("2016-03-04T01:27:00Z");
@@ -527,7 +536,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testUpdate_MDUpdate_Refresh() {
 		security.consume(new DeltaUpdateBuilder()
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"))
 			.buildUpdate());
 
 		Instant time = Instant.parse("2016-02-04T17:24:15Z");
@@ -564,7 +573,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testUpdate_MDUpdate_Update_Replace() {
 		security.consume(new DeltaUpdateBuilder()
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"))
 			.buildUpdate());
 
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
@@ -610,7 +619,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testUpdate_MDUpdate_Update_Delete() {
 		security.consume(new DeltaUpdateBuilder()
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.0001"))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.0001"))
 			.buildUpdate());
 
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
@@ -654,7 +663,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	@Test
 	public void testUpdate_MDUpdate_Update_PriceRouding() {
 		security.consume(new DeltaUpdateBuilder()
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"))
 			.buildUpdate());
 
 		Instant time1 = Instant.EPOCH;

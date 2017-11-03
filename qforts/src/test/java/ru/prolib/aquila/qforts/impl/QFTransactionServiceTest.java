@@ -12,13 +12,12 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -185,11 +184,12 @@ public class QFTransactionServiceTest {
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
 				.setExecutionAction(OrderAction.BUY)
-				.setExecutionVolume(10L)
+				.setExecutionVolume(CDecimalBD.of(10L))
 				.setFinalStatus(OrderStatus.ACTIVE);
-		expect(calculatorMock.executeOrder(order, 10L, FDecimal.of2(100.05))).andReturn(oeuStub);
+		expect(calculatorMock.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05")))
+			.andReturn(oeuStub);
 		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
-		expect(calculatorMock.changePosition(portfolio, security, 10L, FDecimal.of2(100.05)))
+		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(10L), CDecimalBD.of("100.05")))
 			.andReturn(pcuMock);
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.OK);
 		assemblerMock.update(order, oeuStub, 1001L);
@@ -197,7 +197,7 @@ public class QFTransactionServiceTest {
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, 10L, FDecimal.of2(100.05));
+		service.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05"));
 		
 		control.verify();
 	}
@@ -217,11 +217,12 @@ public class QFTransactionServiceTest {
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
 				.setExecutionAction(OrderAction.SELL)
-				.setExecutionVolume(20L)
+				.setExecutionVolume(CDecimalBD.of(20L))
 				.setFinalStatus(OrderStatus.ACTIVE);
-		expect(calculatorMock.executeOrder(order, 20L, FDecimal.of2(92.14))).andReturn(oeuStub);
+		expect(calculatorMock.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14")))
+			.andReturn(oeuStub);
 		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
-		expect(calculatorMock.changePosition(portfolio, security, -20L, FDecimal.of2(92.14)))
+		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(-20L), CDecimalBD.of("92.14")))
 			.andReturn(pcuMock);
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.OK);
 		assemblerMock.update(order, oeuStub, 1051L);
@@ -229,7 +230,7 @@ public class QFTransactionServiceTest {
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, 20L, FDecimal.of2(92.14));
+		service.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14"));
 		
 		control.verify();
 	}
@@ -247,7 +248,7 @@ public class QFTransactionServiceTest {
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, 10L, FDecimal.of2(100.05));
+		service.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05"));
 		
 		control.verify();
 	}
@@ -267,17 +268,18 @@ public class QFTransactionServiceTest {
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
 				.setExecutionAction(OrderAction.SELL)
-				.setExecutionVolume(20L)
+				.setExecutionVolume(CDecimalBD.of(20L))
 				.setFinalStatus(OrderStatus.ACTIVE);
-		expect(calculatorMock.executeOrder(order, 20L, FDecimal.of2(92.14))).andReturn(oeuStub);
+		expect(calculatorMock.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14")))
+			.andReturn(oeuStub);
 		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
-		expect(calculatorMock.changePosition(portfolio, security, -20L, FDecimal.of2(92.14)))
+		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(-20L), CDecimalBD.of("92.14")))
 			.andReturn(pcuMock);
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.INSUFFICIENT_FUNDS);
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, 20L, FDecimal.of2(92.14));
+		service.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14"));
 	}
 	
 	@Test
@@ -295,11 +297,12 @@ public class QFTransactionServiceTest {
 		expect(registryMock.isRegistered(order)).andReturn(true);
 		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
 				.setExecutionAction(OrderAction.SELL)
-				.setExecutionVolume(5L)
+				.setExecutionVolume(CDecimalBD.of(5L))
 				.setFinalStatus(OrderStatus.FILLED);
-		expect(calculatorMock.executeOrder(order, 5L, FDecimal.of2(100.05))).andReturn(oeuStub);
+		expect(calculatorMock.executeOrder(order, CDecimalBD.of(5L), CDecimalBD.of("100.05")))
+			.andReturn(oeuStub);
 		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
-		expect(calculatorMock.changePosition(portfolio, security, -5L, FDecimal.of2(100.05)))
+		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(-5L), CDecimalBD.of("100.05")))
 			.andReturn(pcuMock);
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.OK);
 		assemblerMock.update(order, oeuStub, 1006L);
@@ -308,7 +311,7 @@ public class QFTransactionServiceTest {
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, 5L, FDecimal.of2(100.05));
+		service.executeOrder(order, CDecimalBD.of(5L), CDecimalBD.of("100.05"));
 		
 		control.verify();
 	}
@@ -360,12 +363,12 @@ public class QFTransactionServiceTest {
 		multilockMock.lock();
 		expect(registryMock.isRegistered(portfolio)).andReturn(true);
 		QFPortfolioChangeUpdate updateMock = control.createMock(QFPortfolioChangeUpdate.class);
-		expect(calculatorMock.changeBalance(portfolio, FMoney.ofRUB2(-1000.0))).andReturn(updateMock);
+		expect(calculatorMock.changeBalance(portfolio, CDecimalBD.ofRUB2("-1000"))).andReturn(updateMock);
 		assemblerMock.update(portfolio, updateMock);
 		multilockMock.unlock();
 		control.replay();
 		
-		service.changeBalance(portfolio, FMoney.ofRUB2(-1000.0));
+		service.changeBalance(portfolio, CDecimalBD.ofRUB2("-1000"));
 		
 		control.verify();
 	}
@@ -380,7 +383,7 @@ public class QFTransactionServiceTest {
 		multilockMock.unlock();
 		control.replay();
 		
-		service.changeBalance(portfolio, FMoney.ofRUB2(-1000.0));
+		service.changeBalance(portfolio, CDecimalBD.ofRUB2("-1000"));
 	}
 	
 	@Test

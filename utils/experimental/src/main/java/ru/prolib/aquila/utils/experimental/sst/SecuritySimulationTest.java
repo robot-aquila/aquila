@@ -135,7 +135,7 @@ public class SecuritySimulationTest implements Experiment {
 		}
 		QFortsEnv qfEnv = qfBuilder.buildEnvironment(terminal);
 		try {
-			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), FMoney.ofRUB2(300000.0));
+			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), CDecimalBD.ofRUB2("300000"));
 		} catch ( QFTransactionException e ) {
 			logger.error("Error creating test portfolio: ", e);
 			return 1;

@@ -145,8 +145,8 @@ public class TerminalImplTest {
 				symbols.get((int)(Math.random() * symbols.size())),
 				types.get((int)(Math.random() * types.size())),
 				actions.get((int)(Math.random() * actions.size())),
-				(long)(Math.random() * 9000),
-				FDecimal.of2(Math.random() * 9000.0),
+				CDecimalBD.of((long)(Math.random() * 9000)),
+				CDecimalBD.of((long)(Math.random() * 9000.0)),
 				null);
 		return (EditableOrder) order;
 	}
@@ -697,7 +697,11 @@ public class TerminalImplTest {
 	public void testCreateOrder5() throws Exception {
 		dataProviderStub.nextOrderID = 934L;
 		
-		Order order = terminal.createOrder(account1, symbol1, OrderAction.BUY, 20L, FDecimal.of2(431.15));
+		Order order = terminal.createOrder(account1,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(20L),
+				CDecimalBD.of("431.15"));
 
 		assertNotNull(order);
 		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
@@ -708,9 +712,9 @@ public class TerminalImplTest {
 		assertEquals(OrderStatus.PENDING, order.getStatus());
 		assertEquals(OrderAction.BUY, order.getAction());
 		assertEquals(OrderType.LMT, order.getType());
-		assertEquals(new Long(20L), order.getInitialVolume());
-		assertEquals(new Long(20L), order.getCurrentVolume());
-		assertEquals(FDecimal.of2(431.15), order.getPrice());
+		assertEquals(CDecimalBD.of(20L), order.getInitialVolume());
+		assertEquals(CDecimalBD.of(20L), order.getCurrentVolume());
+		assertEquals(CDecimalBD.of("431.15"), order.getPrice());
 		assertNull(order.getComment());
 		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
@@ -722,7 +726,11 @@ public class TerminalImplTest {
 		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderUpdate().addListener(listenerStub);
 		
-		terminal.createOrder(account1, symbol1, OrderAction.BUY, 20L, FDecimal.of2(431.15));
+		terminal.createOrder(account1,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(20L),
+				CDecimalBD.of("431.15"));
 		
 		assertEquals(0, listenerStub.getEventCount());
 	}
@@ -731,7 +739,10 @@ public class TerminalImplTest {
 	public void testCreateOrder4() throws Exception {
 		dataProviderStub.nextOrderID = 714L;
 		
-		Order order = terminal.createOrder(account3, symbol3, OrderAction.SELL, 80L);
+		Order order = terminal.createOrder(account3,
+				symbol3,
+				OrderAction.SELL,
+				CDecimalBD.of(80L));
 		
 		assertNotNull(order);
 		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
@@ -742,8 +753,8 @@ public class TerminalImplTest {
 		assertEquals(OrderStatus.PENDING, order.getStatus());
 		assertEquals(OrderAction.SELL, order.getAction());
 		assertEquals(OrderType.MKT, order.getType());
-		assertEquals(new Long(80L), order.getInitialVolume());
-		assertEquals(new Long(80L), order.getCurrentVolume());
+		assertEquals(CDecimalBD.of(80L), order.getInitialVolume());
+		assertEquals(CDecimalBD.of(80L), order.getCurrentVolume());
 		assertNull(order.getPrice());
 		assertNull(order.getComment());
 		assertNull(order.getExecutedValue());
@@ -756,7 +767,10 @@ public class TerminalImplTest {
 		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderUpdate().addListener(listenerStub);
 		
-		terminal.createOrder(account3, symbol3, OrderAction.SELL, 80L);
+		terminal.createOrder(account3,
+				symbol3,
+				OrderAction.SELL,
+				CDecimalBD.of(80L));
 		
 		assertEquals(0, listenerStub.getEventCount());
 	}
@@ -765,8 +779,13 @@ public class TerminalImplTest {
 	public void testCreateOrder7() throws Exception {
 		dataProviderStub.nextOrderID = 924L;
 		
-		Order order = terminal.createOrder(account3, symbol2, OrderType.MKT,
-				OrderAction.SELL, 400L, FDecimal.of2(224.13), "test order");
+		Order order = terminal.createOrder(account3,
+				symbol2,
+				OrderType.MKT,
+				OrderAction.SELL,
+				CDecimalBD.of(400L),
+				CDecimalBD.of("224.13"),
+				"test order");
 		
 		assertNotNull(order);
 		assertTrue(Math.abs(ChronoUnit.MILLIS.between(order.getTime(), terminal.getCurrentTime())) < 100);
@@ -777,9 +796,9 @@ public class TerminalImplTest {
 		assertEquals(OrderStatus.PENDING, order.getStatus());
 		assertEquals(OrderAction.SELL, order.getAction());
 		assertEquals(OrderType.MKT, order.getType());
-		assertEquals(new Long(400L), order.getInitialVolume());
-		assertEquals(new Long(400L), order.getCurrentVolume());
-		assertEquals(FDecimal.of2(224.13), order.getPrice());
+		assertEquals(CDecimalBD.of(400L), order.getInitialVolume());
+		assertEquals(CDecimalBD.of(400L), order.getCurrentVolume());
+		assertEquals(CDecimalBD.of("224.13"), order.getPrice());
 		assertEquals("test order", order.getComment());
 		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
@@ -791,8 +810,13 @@ public class TerminalImplTest {
 		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderUpdate().addListener(listenerStub);
 		
-		terminal.createOrder(account3, symbol2, OrderType.MKT,
-				OrderAction.SELL, 400L, FDecimal.of2(224.13), "test order");
+		terminal.createOrder(account3,
+				symbol2,
+				OrderType.MKT,
+				OrderAction.SELL,
+				CDecimalBD.of(400L),
+				CDecimalBD.of("224.13"),
+				"test order");
 
 		assertEquals(0, listenerStub.getEventCount());
 	}

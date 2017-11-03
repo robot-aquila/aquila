@@ -3,7 +3,8 @@ package ru.prolib.aquila.utils.experimental.sst.robot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.Order;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
@@ -35,15 +36,15 @@ public class SCloseLong extends BasicState implements SMExitAction {
 	public SMExit enter(SMTriggerRegistry triggers) {
 		super.enter(triggers);
 		Security security = data.getSecurity();
-		FDecimal price = security.getLowerPriceLimit();
+		CDecimal price = security.getLowerPriceLimit();
 		if ( price == null ) {
 			logger.error("Lower price limit not defined");
 			return getExit(EER);
 		}
 		Portfolio portfolio = data.getPortfolio();
 		CalcUtils cu = new CalcUtils();
-		long contracts = cu.getSafe(portfolio.getPosition(data.getSymbol()).getCurrentVolume());
-		if ( contracts <= 0L ) {
+		CDecimal contracts = cu.getSafe(portfolio.getPosition(data.getSymbol()).getCurrentVolume());
+		if ( contracts.compareTo(CDecimalBD.ZERO) <= 0 ) {
 			return getExit(EOK);
 		}
 		order = data.getTerminal().createOrder(data.getAccount(), data.getSymbol(),

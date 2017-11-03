@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.web.utils.WUWebPageException;
+import ru.prolib.aquila.data.DataFormatException;
 import ru.prolib.aquila.web.utils.SearchWebElement;
 import ru.prolib.aquila.web.utils.WUException;
 
@@ -29,7 +30,7 @@ import ru.prolib.aquila.web.utils.WUException;
  */
 public class MoexContractForm {
 	private static final Logger logger;
-	private static final long WEB_DRIVER_WAIT_SECONDS = 45;
+	private static final long WEB_DRIVER_WAIT_SECONDS = 60;
 	
 	static {
 		logger = LoggerFactory.getLogger(MoexContractForm.class);
@@ -37,6 +38,7 @@ public class MoexContractForm {
 	
 	private final WebDriver webDriver;
 	private final MoexContractFormUtils formUtils = new MoexContractFormUtils();
+	private final MoexContractPtmlConverter ptmlConverter = new MoexContractPtmlConverter();
 	
 	public MoexContractForm(WebDriver webDriver) {
 		this.webDriver = webDriver;
@@ -122,13 +124,13 @@ public class MoexContractForm {
 	}
 	
 	private Object toContractValue(int contractField, String stringValue) throws WUWebPageException {
+		try {
+			return ptmlConverter.toObject(contractField, stringValue);
+		} catch ( DataFormatException e ) {
+			throw new WUWebPageException("Convertation failed: ", e);
+		}
+		/*
 		switch ( contractField ) {
-		case MoexContractField.SETTLEMENT:
-		case MoexContractField.QUOTATION:
-		case MoexContractField.TYPE:
-			return stringValue;
-		case MoexContractField.LOT_SIZE:
-			return formUtils.toInteger(stringValue);
 		case MoexContractField.FIRST_TRADING_DAY:
 		case MoexContractField.LAST_TRADING_DAY:
 		case MoexContractField.DELIVERY:
@@ -138,6 +140,7 @@ public class MoexContractForm {
 		case MoexContractField.LOWER_PRICE_LIMIT:
 		case MoexContractField.UPPER_PRICE_LIMIT:
 		case MoexContractField.SETTLEMENT_PRICE:
+		case MoexContractField.LOT_SIZE:
 			return formUtils.toDecimal(stringValue);
 		case MoexContractField.TICK_VALUE:
 		case MoexContractField.FEE:
@@ -153,9 +156,13 @@ public class MoexContractForm {
 		case MoexContractField.SYMBOL:
 		case MoexContractField.SYMBOL_CODE:
 		case MoexContractField.CONTRACT_DESCR:
+		case MoexContractField.SETTLEMENT:
+		case MoexContractField.QUOTATION:
+		case MoexContractField.TYPE:
 		default:
 			return stringValue;
 		}
+		*/
 	}
 	
 	private MoexContractForm openContractPage(String contractCode) throws WUWebPageException {

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.qforts.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -8,11 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdatableStreamContainer;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdatableStreamContainer;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
@@ -102,11 +104,11 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 				break;
 			case MID_CLEARING:
 				facade.midClearing();
-				//logger.debug("[I] Clearing finished @" + currentTime);
+				logger.debug("[I] Clearing finished @" + currentTime);
 				break;
 			case CLEARING:
 				facade.clearing();
-				//logger.debug("[M] Clearing finished @" + currentTime);
+				logger.debug("[M] Clearing finished @" + currentTime);
 				break;
 			}
 		} catch ( QFTransactionException e ) {
@@ -219,8 +221,10 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private void onSecurityTradeEvent(SecurityTickEvent event) {
 		Tick tick = event.getTick();
 		try {
-			facade.handleOrders(event.getSecurity(), tick.getSize(),
-				FDecimal.of(tick.getPrice(), event.getSecurity().getScale()));
+			// TODO: refactor me
+			facade.handleOrders(event.getSecurity(), CDecimalBD.of(tick.getSize()),
+				new CDecimalBD(new BigDecimal(Double.toString(tick.getPrice()))
+						.setScale(event.getSecurity().getScale(), RoundingMode.HALF_UP)));
 		} catch ( QFTransactionException e ) {
 			logger.error("Unexpected exception: ", e);
 		}

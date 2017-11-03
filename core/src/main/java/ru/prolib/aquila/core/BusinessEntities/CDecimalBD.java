@@ -7,6 +7,48 @@ import java.math.RoundingMode;
  * Consistent decimal based on {@link java.math.BigDecimal BigDecimal}.
  */
 public class CDecimalBD extends CDecimalAbstract {
+	public static final String RUB = "RUB";
+	public static final String USD = "USD";
+	public static final String EUR = "EUR";
+	public static final String CAD = "CAD";
+	public static final CDecimal ZERO = of("0");
+	public static final CDecimal ZERO_RUB2 = ofRUB2("0");
+	public static final CDecimal ZERO_RUB5 = ofRUB5("0");
+	public static final CDecimal ZERO_USD2 = ofUSD2("0");
+	public static final CDecimal ZERO_USD5 = ofUSD5("0");
+	
+	public static CDecimal of(String value, String unit, RoundingMode roundingMode) {
+		return new CDecimalBD(value, unit, roundingMode);
+	}
+	
+	public static CDecimal of(String value, String unit) {
+		return of(value, unit, RoundingMode.HALF_UP);
+	}
+	
+	public static CDecimal of(String value) {
+		return of(value, null);
+	}
+	
+	public static CDecimal of(Long value) {
+		return new CDecimalBD(new BigDecimal(value));
+	}
+	
+	public static CDecimal ofRUB2(String value) {
+		return of(value, RUB).withScale(2, RoundingMode.UNNECESSARY);
+	}
+	
+	public static CDecimal ofRUB5(String value) {
+		return of(value, RUB).withScale(5, RoundingMode.UNNECESSARY);
+	}
+	
+	public static CDecimal ofUSD2(String value) {
+		return of(value, USD).withScale(2, RoundingMode.UNNECESSARY);
+	}
+	
+	public static CDecimal ofUSD5(String value) {
+		return of(value, USD).withScale(5, RoundingMode.UNNECESSARY);
+	}
+	
 	private final BigDecimal value;
 	private final RoundingMode roundingMode;
 	private final String unit;
@@ -59,22 +101,35 @@ public class CDecimalBD extends CDecimalAbstract {
 
 	@Override
 	public CDecimal add(CDecimal augend) {
-		return new CDecimalBD(value.add(augend.toBigDecimal()),
-				checkUnit(augend),
-				roundingMode);
+		if ( ! isSameUnitAs(augend) ) {
+			throwMustBeOfSameUnit(augend);
+		}
+		return new CDecimalBD(value.add(augend.toBigDecimal()), unit, roundingMode);
 	}
 	
 	@Override
 	public CDecimal add(Long augend) {
+		if ( ! isAbstract() ) {
+			throwMustBeAbstract();
+		}
 		return new CDecimalBD(value.add(new BigDecimal(augend)), unit, roundingMode);
 	}
 
 	@Override
 	public CDecimal divide(CDecimal divisor) {
+		int scale = Math.max(value.scale(), divisor.getScale());
+		String unit = null;
+		if ( ! isSameUnitAs(divisor) ) {
+			if ( divisor.isAbstract() ) {
+				unit = getUnit();
+			} else {
+				// this is abstract and divisor is not or unit mismatch
+				throwMustBeOfSameUnit(divisor);
+			}
+		}
 		return new CDecimalBD(value.divide(divisor.toBigDecimal(),
-				Math.max(value.scale(), divisor.getScale()),
-				roundingMode),
-			checkUnit(divisor), roundingMode);
+				scale,
+				roundingMode), unit, roundingMode);
 	}
 
 	@Override
@@ -86,9 +141,18 @@ public class CDecimalBD extends CDecimalAbstract {
 
 	@Override
 	public CDecimal divideExact(CDecimal divisor, int scale) {
-		return new CDecimalBD(value.divide(divisor.toBigDecimal(), scale, roundingMode),
-				checkUnit(divisor),
-				roundingMode);
+		String unit = null;
+		if ( ! isSameUnitAs(divisor) ) {
+			if ( divisor.isAbstract() ) {
+				unit = getUnit();
+			} else {
+				// this is abstract and divisor is not or unit mismatch
+				throwMustBeOfSameUnit(divisor);
+			}
+		}
+		return new CDecimalBD(value.divide(divisor.toBigDecimal(),
+				scale,
+				roundingMode), unit, roundingMode);
 	}
 
 	@Override
@@ -99,22 +163,29 @@ public class CDecimalBD extends CDecimalAbstract {
 	}
 
 	@Override
-	public CDecimal multiply(CDecimal multiplicand) {
-		return new CDecimalBD(value.multiply(multiplicand.toBigDecimal())
-					.setScale(Math.max(value.scale(), multiplicand.getScale()), roundingMode),
-				checkUnit(multiplicand),
-				roundingMode);
+	public CDecimal multiply(CDecimal multiplier) {
+		int scale = Math.max(value.scale(), multiplier.getScale());
+		if ( ! multiplier.isAbstract() ) {
+			throwMustBeAbstract(multiplier);
+		}
+		return new CDecimalBD(value.multiply(multiplier.toBigDecimal())
+				.setScale(scale, roundingMode),
+			unit,
+			roundingMode);
 	}
 
 	@Override
-	public CDecimal multiply(Long multiplicand) {
-		return new CDecimalBD(value.multiply(new BigDecimal(multiplicand)), unit, roundingMode);
+	public CDecimal multiply(Long multiplier) {
+		return new CDecimalBD(value.multiply(new BigDecimal(multiplier)), unit, roundingMode);
 	}
 
 	@Override
-	public CDecimal multiplyExact(CDecimal multiplicand) {
-		return new CDecimalBD(value.multiply(multiplicand.toBigDecimal()),
-				checkUnit(multiplicand),
+	public CDecimal multiplyExact(CDecimal multiplier) {
+		if ( ! multiplier.isAbstract() ) {
+			throwMustBeAbstract(multiplier);
+		}
+		return new CDecimalBD(value.multiply(multiplier.toBigDecimal()),
+				unit,
 				roundingMode);
 	}
 	
@@ -125,19 +196,22 @@ public class CDecimalBD extends CDecimalAbstract {
 
 	@Override
 	public CDecimal subtract(CDecimal subtrahend) {
+		if ( ! isSameUnitAs(subtrahend) ) {
+			this.throwMustBeOfSameUnit(subtrahend);
+		}
 		return new CDecimalBD(value.subtract(subtrahend.toBigDecimal()),
-				checkUnit(subtrahend),
+				unit,
 				roundingMode);
-	}
-
-	@Override
-	public CDecimal subtract(Long subtrahend) {
-		return new CDecimalBD(value.subtract(new BigDecimal(subtrahend)), unit, roundingMode);
 	}
 
 	@Override
 	public CDecimal withScale(int scale) {
 		return new CDecimalBD(value.setScale(scale, roundingMode), unit, roundingMode);
+	}
+	
+	@Override
+	public CDecimal withScale(int scale, RoundingMode roundingMode) {
+		return new CDecimalBD(value.setScale(scale, roundingMode), unit, this.roundingMode);
 	}
 
 	@Override
@@ -165,14 +239,37 @@ public class CDecimalBD extends CDecimalAbstract {
 		return compareTo(other) <= 0 ? this : other;
 	}
 	
-	private String checkUnit(CDecimal other) {
-		String unit1 = this.unit, unit2 = other.getUnit();
-		if ( unit1 == null ) {
-			unit1 = unit2;
-		} else if ( unit2 != null && ! unit2.equals(unit1) ) {
-			throw new IllegalArgumentException("Inconsistent operands: the first one is " + unit1 + " but second is " + unit2);
+	@Override
+	public CDecimal toAbstract() {
+		return unit == null ? this : new CDecimalBD(value, null, roundingMode);
+	}
+	
+	@Override
+	public boolean isAbstract() {
+		return unit == null;
+	}
+	
+	@Override
+	public boolean isSameUnitAs(CDecimal other) {
+		if ( unit == null ) {
+			return other.getUnit() == null;
 		}
-		return unit1;
+		return unit.equals(other.getUnit());
+	}
+	
+	private void throwMustBeOfSameUnit(CDecimal other) {
+		String unit1 = this.unit, unit2 = other.getUnit();
+		throw new IllegalArgumentException("Inconsistent values. The first one is in "
+				+ unit1 + " second is in " + unit2);
+	}
+	
+	private void throwMustBeAbstract() {
+		throw new IllegalStateException("This value expected to be abstract but is in " + unit);
+	}
+	
+	private void throwMustBeAbstract(CDecimal other) {
+		throw new IllegalArgumentException("Operand expected to be abstract but is in "
+				+ other.getUnit());
 	}
 
 }

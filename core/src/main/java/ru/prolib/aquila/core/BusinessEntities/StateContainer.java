@@ -189,6 +189,28 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	public CDecimal getCDecimal(int token);
+	
+	/**
+	 * Get decimal value.
+	 * <p>
+	 * @param token - token ID
+	 * @param defaultValue - default value
+	 * @return token value or default value if token is not available
+	 * @throws IllegalStateException - container is closed or inaccessible
+	 * @throws ClassCastException - cannot cast token value
+	 */
+	public CDecimal getCDecimal(int token, CDecimal defaultValue);
+	
+	/**
+	 * Get decimal value.
+	 * <p>
+	 * @param token - token ID
+	 * @return token value or null if token is not available
+	 * @throws IllegalStateException - container is closed or inaccessible
+	 * @throws ClassCastException - cannot cast token value
+	 */
+	@Deprecated
 	public FDecimal getDecimal(int token);
 	
 	/**
@@ -200,6 +222,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FDecimal getDecimal(int token, FDecimal defaultValue);
 	
 	/**
@@ -211,6 +234,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FDecimal getDecimalOrZero(int token, int scale);
 	
 	/**
@@ -221,6 +245,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FDecimal getDecimalOrZero0(int token);
 	
 	/**
@@ -231,6 +256,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FDecimal getDecimalOrZero1(int token);
 	
 	/**
@@ -241,6 +267,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FDecimal getDecimalOrZero2(int token);
 	
 	/**
@@ -251,6 +278,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FDecimal getDecimalOrZero3(int token);
 	
 	/**
@@ -261,6 +289,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FDecimal getDecimalOrZero4(int token);
 	
 	/**
@@ -271,6 +300,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoney(int token);
 	
 	/**
@@ -282,6 +312,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoney(int token, FMoney defaultValue);
 	
 	/**
@@ -294,6 +325,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoneyOrZero(int token, int scale, String currencyCode);
 	
 	/**
@@ -305,6 +337,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoneyOrZero0(int token, String currencyCode);
 	
 	/**
@@ -316,6 +349,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoneyOrZero1(int token, String currencyCode);
 	
 	/**
@@ -327,6 +361,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoneyOrZero2(int token, String currencyCode);
 	
 	/**
@@ -338,6 +373,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoneyOrZero3(int token, String currencyCode);
 	
 	/**
@@ -349,6 +385,7 @@ public interface StateContainer extends AbstractContainer {
 	 * @throws IllegalStateException - container is closed or inaccessible
 	 * @throws ClassCastException - cannot cast token value
 	 */
+	@Deprecated
 	public FMoney getMoneyOrZero4(int token, String currencyCode);
 
 	/**

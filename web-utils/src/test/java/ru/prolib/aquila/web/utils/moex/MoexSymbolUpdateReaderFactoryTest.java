@@ -9,11 +9,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
@@ -45,21 +44,21 @@ public class MoexSymbolUpdateReaderFactoryTest {
 			.withSnapshot(true)
 			.withTime("2016-08-26T15:45:00.001Z")
 			.withToken(SecurityField.DISPLAY_NAME, "Eu-9.16")
-			.withToken(SecurityField.LOT_SIZE, 1000)
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("1"))
-			.withToken(SecurityField.TICK_VALUE, new FMoney("1", 2, "RUB"))
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("69895"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("75721"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("72808"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5826", 2, "RUB"))
+			.withToken(SecurityField.LOT_SIZE, CDecimalBD.of(1000L))
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of(1L))
+			.withToken(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("1"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(69895L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(75721L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(72808L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5826"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-09-13T15:45:00Z")
-			.withToken(SecurityField.LOWER_PRICE_LIMIT, new FDecimal("70424"))
-			.withToken(SecurityField.UPPER_PRICE_LIMIT, new FDecimal("76294"))
-			.withToken(SecurityField.SETTLEMENT_PRICE, new FDecimal("73359"))
-			.withToken(SecurityField.INITIAL_MARGIN, new FMoney("5870", 2, "RUB"))
+			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of(70424L))
+			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(76294L))
+			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(73359L))
+			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5870"))
 			.buildUpdate());
 		assertEquals(expected, actual);
 	}

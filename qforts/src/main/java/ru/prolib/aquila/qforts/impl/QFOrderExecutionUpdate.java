@@ -4,48 +4,44 @@ import java.time.Instant;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
-import ru.prolib.aquila.core.BusinessEntities.FMoney;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.utils.FMValueTriplet;
-import ru.prolib.aquila.core.utils.LValueTriplet;
+import ru.prolib.aquila.core.utils.CDValueTriplet;
 
 public class QFOrderExecutionUpdate {
-	protected final LValueTriplet currentVolume;
-	protected final FMValueTriplet executedValue;
+	private static final String RUB = "RUB";
+	protected final CDValueTriplet currentVolume, executedValue;
 	protected OrderAction executionAction;
 	protected long executionOrderID;
-	protected FDecimal executionPrice;
+	protected CDecimal executionPrice, executionVolume, executionValue;
 	protected Symbol executionSymbol;
 	protected Instant executionTime;
-	protected long executionVolume;
-	protected FMoney executionValue;
 	protected Instant finalizationTime;
 	protected OrderStatus finalStatus, initialStatus;
 	
 	public QFOrderExecutionUpdate() {
-		currentVolume = new LValueTriplet();
-		executedValue = new FMValueTriplet();
+		currentVolume = new CDValueTriplet(0);
+		executedValue = new CDValueTriplet(2, RUB);
 	}
 	
-	public QFOrderExecutionUpdate setChangeCurrentVolume(long value) {
+	public QFOrderExecutionUpdate setChangeCurrentVolume(CDecimal value) {
 		currentVolume.setChangeValue(value);
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setChangeExecutedValue(FMoney value) {
+	public QFOrderExecutionUpdate setChangeExecutedValue(CDecimal value) {
 		executedValue.setChangeValue(value);
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setFinalCurrentVolume(long value) {
+	public QFOrderExecutionUpdate setFinalCurrentVolume(CDecimal value) {
 		currentVolume.setFinalValue(value);
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setFinalExecutedValue(FMoney value) {
+	public QFOrderExecutionUpdate setFinalExecutedValue(CDecimal value) {
 		executedValue.setFinalValue(value);
 		return this;
 	}
@@ -60,12 +56,12 @@ public class QFOrderExecutionUpdate {
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setInitialCurrentVolume(long value) {
+	public QFOrderExecutionUpdate setInitialCurrentVolume(CDecimal value) {
 		currentVolume.setInitialValue(value);
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setInitialExecutedValue(FMoney value) {
+	public QFOrderExecutionUpdate setInitialExecutedValue(CDecimal value) {
 		executedValue.setInitialValue(value);
 		return this;
 	}
@@ -95,34 +91,34 @@ public class QFOrderExecutionUpdate {
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setExecutionPrice(FDecimal value) {
+	public QFOrderExecutionUpdate setExecutionPrice(CDecimal value) {
 		executionPrice = value;
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setExecutionVolume(long value) {
+	public QFOrderExecutionUpdate setExecutionVolume(CDecimal value) {
 		executionVolume = value;
 		return this;
 	}
 	
-	public QFOrderExecutionUpdate setExecutionValue(FMoney value) {
+	public QFOrderExecutionUpdate setExecutionValue(CDecimal value) {
 		executionValue = value;
 		return this;
 	}
 	
-	public long getChangeCurrentVolume() {
+	public CDecimal getChangeCurrentVolume() {
 		return currentVolume.getChangeValue();
 	}
 	
-	public FMoney getChangeExecutedValue() {
+	public CDecimal getChangeExecutedValue() {
 		return executedValue.getChangeValue();
 	}
 	
-	public long getInitialCurrentVolume() {
+	public CDecimal getInitialCurrentVolume() {
 		return currentVolume.getInitialValue();
 	}
 	
-	public FMoney getInitialExecutedValue() {
+	public CDecimal getInitialExecutedValue() {
 		return executedValue.getInitialValue();
 	}
 	
@@ -130,11 +126,11 @@ public class QFOrderExecutionUpdate {
 		return initialStatus;
 	}
 	
-	public long getFinalCurrentVolume() {
+	public CDecimal getFinalCurrentVolume() {
 		return currentVolume.getFinalValue();
 	}
 	
-	public FMoney getFinalExecutedValue() {
+	public CDecimal getFinalExecutedValue() {
 		return executedValue.getFinalValue();
 	}
 	
@@ -162,15 +158,15 @@ public class QFOrderExecutionUpdate {
 		return executionTime;
 	}
 	
-	public FDecimal getExecutionPrice() {
+	public CDecimal getExecutionPrice() {
 		return executionPrice;
 	}
 	
-	public long getExecutionVolume() {
+	public CDecimal getExecutionVolume() {
 		return executionVolume;
 	}
 	
-	public FMoney getExecutionValue() {
+	public CDecimal getExecutionValue() {
 		return executionValue;
 	}
 	
@@ -217,8 +213,8 @@ public class QFOrderExecutionUpdate {
 			.isEquals();
 	}
 	
-	public long getPositionVolumeChange() {
-		return executionAction == OrderAction.BUY ? executionVolume : -executionVolume;
+	public CDecimal getPositionVolumeChange() {
+		return executionAction == OrderAction.BUY ? executionVolume : executionVolume.negate();
 	}
 
 }

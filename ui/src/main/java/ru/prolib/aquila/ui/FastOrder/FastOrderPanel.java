@@ -3,6 +3,7 @@ package ru.prolib.aquila.ui.FastOrder;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -18,7 +19,10 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * Панель быстрого выставления заявок.
  * <p>
  * Account: [^] Security: [^] Type: [^] Qty: [ ] Slippage: [ ] Place [ BUY ] or [ SELL ] order 
+ * <p>
+ * NOTE: Untested!
  */
+@Deprecated
 public class FastOrderPanel extends JPanel implements Starter {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger;
@@ -116,7 +120,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 	 * @param dir направление заявки
 	 */
 	private void placeOrder(OrderAction dir) {
-		Order order; Integer qty; Double slippage; Object value = null;
+		Order order; CDecimal qty; Double slippage; Object value = null;
 		Account account = accountCombo.getSelectedAccount();
 		Security security = securityCombo.getSelectedSecurity();
 		if ( account == null ) {
@@ -129,7 +133,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 		}
 		try {
 			value = qtyField.getValue();
-			qty = ((Number) value).intValue();
+			qty = CDecimalBD.of(((Number) value).longValue());
 		} catch ( Exception e ) {
 			Object args[] = { value, e };
 			logger.warn("Bad order qty value: {}", args);
@@ -151,9 +155,9 @@ public class FastOrderPanel extends JPanel implements Starter {
 				logger.warn("Last trade not available");
 				return;
 			}
-			FDecimal price = FDecimal.of(last.getPrice() +
-				(dir == OrderAction.BUY ? slippage : -slippage),
-				security.getScale());
+			CDecimal price = CDecimalBD.of(Double.toString(last.getPrice() +
+				(dir == OrderAction.BUY ? slippage : -slippage)))
+					.withScale(security.getScale(), RoundingMode.HALF_UP);
 			order = terminal.createOrder(account, symbol, dir, qty, price);
 		} else {
 			order = terminal.createOrder(account, symbol, dir, qty);

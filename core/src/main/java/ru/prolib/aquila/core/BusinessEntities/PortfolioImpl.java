@@ -65,48 +65,48 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	}
 
 	@Override
-	public FMoney getBalance() {
-		return getMoney(PortfolioField.BALANCE);
+	public CDecimal getBalance() {
+		return getCDecimal(PortfolioField.BALANCE);
 	}
 
 	@Override
-	public FMoney getEquity() {
-		return getMoney(PortfolioField.EQUITY);
+	public CDecimal getEquity() {
+		return getCDecimal(PortfolioField.EQUITY);
 	}
 
 	@Override
-	public FMoney getProfitAndLoss() {
-		return getMoney(PortfolioField.PROFIT_AND_LOSS);
+	public CDecimal getProfitAndLoss() {
+		return getCDecimal(PortfolioField.PROFIT_AND_LOSS);
 	}
 
 	@Override
-	public FMoney getUsedMargin() {
-		return getMoney(PortfolioField.USED_MARGIN);
+	public CDecimal getUsedMargin() {
+		return getCDecimal(PortfolioField.USED_MARGIN);
 	}
 
 	@Override
-	public FMoney getFreeMargin() {
-		return getMoney(PortfolioField.FREE_MARGIN);
+	public CDecimal getFreeMargin() {
+		return getCDecimal(PortfolioField.FREE_MARGIN);
 	}
 
 	@Override
-	public Double getMarginCallLevel() {
-		return getDouble(PortfolioField.MARGIN_CALL_AT);
+	public CDecimal getMarginCallLevel() {
+		return getCDecimal(PortfolioField.MARGIN_CALL_AT);
 	}
 
 	@Override
-	public Double getMarginStopOutLevel() {
-		return getDouble(PortfolioField.MARGIN_STOP_OUT_AT);
+	public CDecimal getMarginStopOutLevel() {
+		return getCDecimal(PortfolioField.MARGIN_STOP_OUT_AT);
 	}
 
 	@Override
-	public FMoney getAssets() {
-		return getMoney(PortfolioField.ASSETS);
+	public CDecimal getAssets() {
+		return getCDecimal(PortfolioField.ASSETS);
 	}
 
 	@Override
-	public FMoney getLiabilities() {
-		return getMoney(PortfolioField.LIABILITIES);
+	public CDecimal getLiabilities() {
+		return getCDecimal(PortfolioField.LIABILITIES);
 	}
 
 	@Override
@@ -115,8 +115,8 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	}
 	
 	@Override
-	public Double getLeverage() {
-		return getDouble(PortfolioField.LEVERAGE);
+	public CDecimal getLeverage() {
+		return getCDecimal(PortfolioField.LEVERAGE);
 	}
 
 	@Override

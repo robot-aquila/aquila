@@ -24,7 +24,9 @@ public class OrderExecutionImplTest {
 		terminal1 = control.createMock(Terminal.class);
 		execution = new OrderExecutionImpl(terminal1, 1024L, "foo35", symbol1,
 			OrderAction.BUY, 850L, Instant.parse("2012-03-27T00:00:00Z"),
-			FDecimal.of2(36.19), 10L, FMoney.ofRUB2(361.9));
+			CDecimalBD.of("36.19"),
+			CDecimalBD.of("10"),
+			CDecimalBD.of("361.90", "RUB"));
 	}
 	
 	@Test
@@ -36,9 +38,9 @@ public class OrderExecutionImplTest {
 		assertEquals(OrderAction.BUY, execution.getAction());
 		assertEquals(850L, execution.getOrderID());
 		assertEquals(Instant.parse("2012-03-27T00:00:00Z"), execution.getTime());
-		assertEquals(FDecimal.of2(36.19), execution.getPricePerUnit());
-		assertEquals(10L, execution.getVolume());
-		assertEquals(FMoney.ofRUB2(361.9), execution.getValue());
+		assertEquals(CDecimalBD.of("36.19"), execution.getPricePerUnit());
+		assertEquals(CDecimalBD.of("10"), execution.getVolume());
+		assertEquals(CDecimalBD.of("361.90", "RUB"), execution.getValue());
 	}
 	
 	@Test
@@ -59,13 +61,15 @@ public class OrderExecutionImplTest {
 		Variant<Long> vOrdID = new Variant<Long>(vAct, 850L, 420L);
 		Variant<Instant> vTime = new Variant<Instant>(vOrdID,
 				Instant.parse("2012-03-27T00:00:00Z"), Instant.now());
-		Variant<FDecimal> vPrice = new Variant<FDecimal>(vTime)
-				.add(FDecimal.of2(36.19))
-				.add(FDecimal.of3(45.24));
-		Variant<Long> vVol = new Variant<Long>(vPrice, 10L, 100L);
-		Variant<FMoney> vVal = new Variant<FMoney>(vVol)
-				.add(FMoney.ofRUB2(361.9))
-				.add(FMoney.ofUSD2(440.0));
+		Variant<CDecimal> vPrice = new Variant<CDecimal>(vTime)
+				.add(CDecimalBD.of("36.19"))
+				.add(CDecimalBD.of("45.24"));
+		Variant<CDecimal> vVol = new Variant<CDecimal>(vPrice)
+				.add(CDecimalBD.of("10"))
+				.add(CDecimalBD.of("100"));
+		Variant<CDecimal> vVal = new Variant<CDecimal>(vVol)
+				.add(CDecimalBD.of("361.90", "RUB"))
+				.add(CDecimalBD.of("440.00", "USD"));
 		Variant<?> iterator = vVal;
 		int foundCnt = 0;
 		OrderExecutionImpl found = null, x = null;
@@ -86,9 +90,9 @@ public class OrderExecutionImplTest {
 		assertEquals(OrderAction.BUY, found.getAction());
 		assertEquals(850L, found.getOrderID());
 		assertEquals(Instant.parse("2012-03-27T00:00:00Z"), found.getTime());
-		assertEquals(FDecimal.of2(36.19), found.getPricePerUnit());
-		assertEquals(10L, found.getVolume());
-		assertEquals(FMoney.ofRUB2(361.9), found.getValue());
+		assertEquals(CDecimalBD.of("36.19"), found.getPricePerUnit());
+		assertEquals(CDecimalBD.of("10"), found.getVolume());
+		assertEquals(CDecimalBD.of("361.90", "RUB"), found.getValue());
 	}
 
 }

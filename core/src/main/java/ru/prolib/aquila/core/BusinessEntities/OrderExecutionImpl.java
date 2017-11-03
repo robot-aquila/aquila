@@ -12,13 +12,13 @@ public class OrderExecutionImpl implements OrderExecution {
 	private final OrderAction action;
 	private final long orderID;
 	private final Instant time;
-	private final FDecimal price;
-	private final long volume;
-	private final FMoney value;
+	private final CDecimal price;
+	private final CDecimal volume;
+	private final CDecimal value;
 	
 	public OrderExecutionImpl(Terminal terminal, long id, String externalID,
 			Symbol symbol, OrderAction action, long orderID, Instant time,
-			FDecimal price, long volume, FMoney value)
+			CDecimal price, CDecimal volume, CDecimal value)
 	{
 		this.terminal = terminal;
 		this.id = id;
@@ -63,17 +63,17 @@ public class OrderExecutionImpl implements OrderExecution {
 	}
 
 	@Override
-	public FDecimal getPricePerUnit() {
+	public CDecimal getPricePerUnit() {
 		return price;
 	}
 
 	@Override
-	public long getVolume() {
+	public CDecimal getVolume() {
 		return volume;
 	}
 
 	@Override
-	public FMoney getValue() {
+	public CDecimal getValue() {
 		return value;
 	}
 

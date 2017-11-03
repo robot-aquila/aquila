@@ -5,10 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Order;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
@@ -71,7 +71,7 @@ public class QFObjectRegistry {
 		return new ArrayList<>(portfolios);
 	}
 	
-	public synchronized List<EditableOrder> getOrderList(Symbol symbol, FDecimal price) {
+	public synchronized List<EditableOrder> getOrderList(Symbol symbol, CDecimal price) {
 		List<EditableOrder> result = new ArrayList<>();
 		LinkedHashSet<EditableOrder> dummy = orders.get(symbol);
 		if ( dummy != null ) {

@@ -24,7 +24,7 @@ public interface EditableOrder extends Order, UpdatableStateContainer {
 	 * or if an execution with the same ID already exists
 	 */
 	public OrderExecution addExecution(long id, String externalID, Instant time,
-			FDecimal price, long volume, FMoney value)
+			CDecimal price, CDecimal volume, CDecimal value)
 					throws OrderException;
 		
 	/**
