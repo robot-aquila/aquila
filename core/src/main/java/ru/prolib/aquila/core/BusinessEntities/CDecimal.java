@@ -86,6 +86,25 @@ public interface CDecimal extends Comparable<CDecimal> {
 	CDecimal divideExact(CDecimal divisor, int scale);
 	
 	/**
+	 * Get result of dividing this by divisor exact to specified scale and
+	 * rounding mode.
+	 * <p>
+	 * @param divisor - value by which this value is to be divided. If divisor
+	 * of same unit as this then the result is abstract. If divisor is abstract
+	 * and this is not abstract then the result is of same unit as this. If
+	 * both are abstract the the result is also abstract.  If divisor is not
+	 * abstract and this is abstract then exception will be thrown.
+	 * @param scale - scale to round the result
+	 * @param roundingMode -  rounding mode to round the result. It will be
+	 * used to round the result of this operation but the result will be
+	 * created with rounding mode of this object.
+	 * @return this / divisor
+	 * @throws IllegalArgumentException - non-abstract divisor when this is
+	 * abstract
+	 */
+	CDecimal divideExact(CDecimal divisor, int scale, RoundingMode roundingMode);
+	
+	/**
 	 * Get result of dividing this value by abstract divisor exact to specified
 	 * scale.
 	 * <p>
@@ -139,5 +158,13 @@ public interface CDecimal extends Comparable<CDecimal> {
 	CDecimal toAbstract();
 	boolean isAbstract();
 	boolean isSameUnitAs(CDecimal other);
+	
+	/**
+	 * Check that other value is not null and return it or use this as default.
+	 * <p>
+	 * @param other - value to check
+	 * @return this value if other is null, otherwise return other value 
+	 */
+	CDecimal whenNull(CDecimal other);
 	
 }

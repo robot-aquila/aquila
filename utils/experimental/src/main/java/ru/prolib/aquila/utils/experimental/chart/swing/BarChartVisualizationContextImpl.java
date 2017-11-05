@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart.swing;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
@@ -65,10 +66,20 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
     public int toCanvasX(double value) {
         return 0;
     }
+    
+    @Override
+    public int toCanvasX(CDecimal value) {
+    	throw new UnsupportedOperationException("Not yet implemented");
+    }
 
     @Override
     public int toCanvasY(double value) {
         return (int) Math.round(plotBounds.getY() + plotBounds.getHeight() - (value-yRangeInfo.getMinValue())*getCoeffY());
+    }
+    
+    @Override
+    public int toCanvasY(CDecimal value) {
+    	throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

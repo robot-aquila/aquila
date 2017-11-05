@@ -17,7 +17,7 @@ public class QFCalcUtils {
 		if ( x == null ) {
 			return security.getSettlementPrice();
 		}
-		return new CDecimalBD(Double.toString(x.getPrice())).withScale(security.getScale());
+		return Tick.getPrice(x, security.getScale());
 	}
 	
 	private CDecimal getCurrentPrice(Security security, CDecimal volume) {

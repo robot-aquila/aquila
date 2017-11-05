@@ -8,8 +8,7 @@ import ru.prolib.aquila.core.BusinessEntities.Tick;
 public class CalcUtils {
 	
 	public CDecimal getLastPrice(Security security) {
-		Tick dummy = security.getLastTrade();
-		return CDecimalBD.of(Double.toString(dummy.getPrice())).withScale(security.getScale());
+		return Tick.getPrice(security.getLastTrade(), security.getScale());
 	}
 	
 	public CDecimal getSafe(CDecimal x) {

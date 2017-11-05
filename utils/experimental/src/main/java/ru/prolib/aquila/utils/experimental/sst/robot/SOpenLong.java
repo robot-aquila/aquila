@@ -10,6 +10,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.sm.SMExit;
 import ru.prolib.aquila.core.sm.SMExitAction;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
@@ -45,7 +46,7 @@ public class SOpenLong extends BasicState implements SMExitAction {
 		CalcUtils cu = new CalcUtils();
 		CDecimal contracts = portfolio.getEquity()
 				.toAbstract()
-				.multiply(CDecimalBD.of(Double.toString(data.getConfig().getShare())))
+				.multiply(Tick.getPrice(data.getConfig().getShare(), 5))
 				.subtract(cu.getSafe(portfolio.getPosition(data.getSymbol()).getCurrentPrice()))
 				.divide(cu.getLastPrice(security))
 				.withScale(0);

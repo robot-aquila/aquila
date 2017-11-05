@@ -3,7 +3,6 @@ package ru.prolib.aquila.ui.FastOrder;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -120,7 +119,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 	 * @param dir направление заявки
 	 */
 	private void placeOrder(OrderAction dir) {
-		Order order; CDecimal qty; Double slippage; Object value = null;
+		Order order; CDecimal qty; CDecimal slippage; Object value = null;
 		Account account = accountCombo.getSelectedAccount();
 		Security security = securityCombo.getSelectedSecurity();
 		if ( account == null ) {
@@ -141,7 +140,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 		}
 		try {
 			value = slippageField.getValue();
-			slippage = ((Number) value).doubleValue();
+			slippage = Tick.getPrice(((Number) value).doubleValue(), security.getScale());
 		} catch ( Exception e ) {
 			Object args[] = { value, e };
 			logger.warn("Bad order slippage value: {}", args);
@@ -155,9 +154,12 @@ public class FastOrderPanel extends JPanel implements Starter {
 				logger.warn("Last trade not available");
 				return;
 			}
-			CDecimal price = CDecimalBD.of(Double.toString(last.getPrice() +
-				(dir == OrderAction.BUY ? slippage : -slippage)))
-					.withScale(security.getScale(), RoundingMode.HALF_UP);
+			CDecimal price = Tick.getPrice(last, security.getScale());
+			if ( dir == OrderAction.BUY ) {
+				price = price.add(slippage);
+			} else {
+				price = price.subtract(slippage);
+			}
 			order = terminal.createOrder(account, symbol, dir, qty, price);
 		} else {
 			order = terminal.createOrder(account, symbol, dir, qty);

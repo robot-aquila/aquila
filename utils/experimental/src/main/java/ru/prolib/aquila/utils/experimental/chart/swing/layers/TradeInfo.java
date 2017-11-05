@@ -3,6 +3,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.TStamped;
@@ -15,14 +16,13 @@ import java.time.Instant;
 public class TradeInfo implements TStamped {
     private final Instant time;
     private final OrderAction action;
-    private final double price;
-    private final long volume;
+    private final CDecimal price, volume;
 
     private Symbol symbol;
     private Account account;
     private Long orderId;
 
-    public TradeInfo(Instant time, OrderAction action, double price, long volume) {
+    public TradeInfo(Instant time, OrderAction action, CDecimal price, CDecimal volume) {
         this.time = time;
         this.action = action;
         this.price = price;
@@ -37,11 +37,11 @@ public class TradeInfo implements TStamped {
         return action;
     }
 
-    public double getPrice() {
+    public CDecimal getPrice() {
         return price;
     }
 
-    public long getVolume() {
+    public CDecimal getVolume() {
         return volume;
     }
 

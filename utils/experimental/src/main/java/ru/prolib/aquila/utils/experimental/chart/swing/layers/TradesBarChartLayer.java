@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
 import org.apache.commons.lang3.Range;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
@@ -108,12 +109,16 @@ public class TradesBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
 
     @Override
     protected double getMaxValue(TradeInfoList value) {
-        return value.getMaxValue();
+    	// TODO: fixme
+    	CDecimal x = value.getMaxValue();
+        return x == null ? 0d : x.toBigDecimal().doubleValue();
     }
 
     @Override
     protected double getMinValue(TradeInfoList value) {
-        return value.getMinValue();
+    	// TODO: fixme
+    	CDecimal x = value.getMinValue();
+        return x == null ? 0d : x.toBigDecimal().doubleValue();
     }
 
     @Override

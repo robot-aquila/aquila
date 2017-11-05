@@ -435,12 +435,63 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
-	public void testDivideExact_CD_Period() {
+	public void testDivideExact_CD_Periodic() {
 		CDecimal expected = new CDecimalBD("33.3333333");
 		CDecimal actual = new CDecimalBD("100")
 				.divideExact(new CDecimalBD("3"), 7);
 		
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testDivideExact3_CD_AA() {
+		CDecimal expected = CDecimalBD.of("15.218", null, RoundingMode.HALF_EVEN);
+		CDecimal actual = CDecimalBD.of("61.17636", null, RoundingMode.HALF_EVEN)
+				.divideExact(CDecimalBD.of("4.02"), 3, RoundingMode.UNNECESSARY);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testDivideExact3_CD_AU_Throws() {
+		CDecimalBD.of("115.08").divideExact(CDecimalBD.ofUSD2("89"), 10, RoundingMode.HALF_UP);
+	}
+	
+	@Test
+	public void testDivideExact3_CD_Periodic() {
+		CDecimal expected = CDecimalBD.of("42.66666", null, RoundingMode.HALF_DOWN);
+		CDecimal actual = new CDecimalBD("128", null, RoundingMode.HALF_DOWN)
+				.divideExact(CDecimalBD.of(3L), 5, RoundingMode.FLOOR);
+
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testDivideExact3_CD_UA() {
+		CDecimal expected = CDecimalBD.of("-1.05087", "RUB", RoundingMode.HALF_UP);
+		CDecimal actual = CDecimalBD.ofRUB5("8.407")
+				.divideExact(CDecimalBD.of("-8"), 5, RoundingMode.HALF_DOWN);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testDivideExact3_CD_UU() {
+		CDecimal expected = CDecimalBD.ofRUB5("-1.05088");
+		CDecimal actual = CDecimalBD.ofRUB5("8.407")
+				.divideExact(CDecimalBD.of("-8"), 5, RoundingMode.HALF_UP);
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testDivideExact3_CD_UU_ThrowsIfUnitMismatch() {
+		CDecimalBD.ofRUB5("8.407").divideExact(CDecimalBD.ofUSD2("-8"), 5, RoundingMode.HALF_DOWN);
+	}
+	
+	@Test (expected=ArithmeticException.class)
+	public void testDivideExact3_CD_ThrowsRoundingError() {
+		CDecimalBD.of("100.01").divideExact(CDecimalBD.of(10L), 2, RoundingMode.UNNECESSARY);
 	}
 	
 	@Test
@@ -667,6 +718,14 @@ public class CDecimalBDTest {
 		assertFalse(x1.isSameUnitAs(x3));
 		assertTrue(x4.isSameUnitAs(x5));
 		assertFalse(x5.isSameUnitAs(x3));
+	}
+	
+	@Test
+	public void testWhenNull() {
+		CDecimal x1 = CDecimalBD.ofRUB2("100"),
+				x2 = CDecimalBD.ofUSD2("200");
+		assertSame(x1, x1.whenNull(null));
+		assertSame(x2, x1.whenNull(x2));
 	}
 
 }

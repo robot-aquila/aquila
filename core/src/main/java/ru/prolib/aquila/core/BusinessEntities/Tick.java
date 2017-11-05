@@ -27,6 +27,26 @@ public class Tick implements TStamped {
 		this.size = size;
 		this.value = value;
 	}
+
+	@Deprecated
+	public static CDecimal getPrice(double price, int scale) {
+		return CDecimalBD.of(Double.toString(price)).withScale(scale);
+	}
+	
+	@Deprecated
+	public static CDecimal getSize(long size) {
+		return CDecimalBD.of(size);
+	}
+
+	@Deprecated
+	public static CDecimal getPrice(Tick tick, int scale) {
+		return getPrice(tick.price, scale);
+	}
+	
+	@Deprecated
+	public static CDecimal getSize(Tick tick) {
+		return getSize(tick.size);
+	}
 	
 	public static Tick of(TickType type, long timestamp, double price,
 			long size, double value)

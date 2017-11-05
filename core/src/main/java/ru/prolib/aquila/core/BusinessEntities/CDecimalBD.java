@@ -154,6 +154,21 @@ public class CDecimalBD extends CDecimalAbstract {
 				scale,
 				roundingMode), unit, roundingMode);
 	}
+	
+	@Override
+	public CDecimal divideExact(CDecimal divisor, int scale, RoundingMode roundingMode) {
+		String unit = null;
+		if ( ! isSameUnitAs(divisor) ) {
+			if ( divisor.isAbstract() ) {
+				unit = getUnit();
+			} else {
+				throwMustBeOfSameUnit(divisor);
+			}
+		}
+		return new CDecimalBD(value.divide(divisor.toBigDecimal(), scale, roundingMode),
+				unit,
+				getRoundingMode());
+	}
 
 	@Override
 	public CDecimal divideExact(Long divisor, int scale) {
@@ -255,6 +270,11 @@ public class CDecimalBD extends CDecimalAbstract {
 			return other.getUnit() == null;
 		}
 		return unit.equals(other.getUnit());
+	}
+	
+	@Override
+	public CDecimal whenNull(CDecimal other) {
+		return other == null ? this : other;
 	}
 	
 	private void throwMustBeOfSameUnit(CDecimal other) {

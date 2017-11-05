@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.concurrency.Lockable;
 
@@ -16,8 +17,8 @@ public class TradeInfoList implements Lockable {
     private final List<TradeInfo> data = new ArrayList<>();
     private final LID lid;
     private final Lock lock = new ReentrantLock();
-    private Double minValue = null;
-    private Double maxValue = null;
+    private CDecimal minValue = null;
+    private CDecimal maxValue = null;
 
     public TradeInfoList() {
         lid = LID.createInstance();
@@ -45,12 +46,7 @@ public class TradeInfoList implements Lockable {
     }
 
     public boolean add(TradeInfo tradeInfo) {
-        if(minValue==null || tradeInfo.getPrice()<minValue){
-            minValue = tradeInfo.getPrice();
-        }
-        if(maxValue==null || tradeInfo.getPrice()>maxValue){
-            maxValue = tradeInfo.getPrice();
-        }
+    	recalcValuesInterval(tradeInfo.getPrice());
         return data.add(tradeInfo);
     }
 
@@ -92,11 +88,11 @@ public class TradeInfoList implements Lockable {
         lock.unlock();
     }
 
-    public Double getMaxValue(){
+    public CDecimal getMaxValue(){
         return maxValue;
     }
 
-    public Double getMinValue() {
+    public CDecimal getMinValue() {
         return minValue;
     }
 
@@ -107,12 +103,17 @@ public class TradeInfoList implements Lockable {
             return;
         }
         for(TradeInfo tradeInfo: data){
-            if(maxValue==null || tradeInfo.getPrice()>maxValue){
-                maxValue = tradeInfo.getPrice();
-            }
-            if(maxValue==null || tradeInfo.getPrice()>maxValue){
-                maxValue = tradeInfo.getPrice();
-            }
+        	recalcValuesInterval(tradeInfo.getPrice());
         }
     }
+    
+    private void recalcValuesInterval(CDecimal value) {
+        if( minValue == null || value.compareTo(minValue) < 0 ){
+            minValue = value;
+        }
+        if( maxValue == null || value.compareTo(maxValue) > 0 ){
+            maxValue = value;
+        }
+    }
+    
 }

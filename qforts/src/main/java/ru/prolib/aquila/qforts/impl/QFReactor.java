@@ -1,7 +1,5 @@
 package ru.prolib.aquila.qforts.impl;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -10,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
@@ -222,9 +219,9 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		Tick tick = event.getTick();
 		try {
 			// TODO: refactor me
-			facade.handleOrders(event.getSecurity(), CDecimalBD.of(tick.getSize()),
-				new CDecimalBD(new BigDecimal(Double.toString(tick.getPrice()))
-						.setScale(event.getSecurity().getScale(), RoundingMode.HALF_UP)));
+			facade.handleOrders(event.getSecurity(),
+					Tick.getSize(tick),
+					Tick.getPrice(tick, event.getSecurity().getScale()));
 		} catch ( QFTransactionException e ) {
 			logger.error("Unexpected exception: ", e);
 		}
