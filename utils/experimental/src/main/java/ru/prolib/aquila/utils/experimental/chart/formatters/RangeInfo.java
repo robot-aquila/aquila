@@ -2,12 +2,21 @@ package ru.prolib.aquila.utils.experimental.chart.formatters;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 
 /**
  * Created by TiM on 20.06.2017.
  */
 public class RangeInfo {
     private final double minValue, maxValue, stepValue, firstValue, lastValue;
+
+    public RangeInfo(CDecimal minValue, CDecimal maxValue, CDecimal stepValue, CDecimal firstValue, CDecimal lastValue) {
+        this.minValue = minValue.toBigDecimal().doubleValue();
+        this.maxValue = maxValue.toBigDecimal().doubleValue();
+        this.stepValue = stepValue.toBigDecimal().doubleValue();
+        this.firstValue = firstValue.toBigDecimal().doubleValue();
+        this.lastValue = lastValue.toBigDecimal().doubleValue();
+    }
 
     public RangeInfo(double minValue, double maxValue, double stepValue, double firstValue, double lastValue) {
         this.minValue = minValue;

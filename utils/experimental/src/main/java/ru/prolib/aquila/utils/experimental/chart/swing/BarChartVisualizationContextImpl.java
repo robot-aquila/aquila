@@ -69,7 +69,7 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
     
     @Override
     public int toCanvasX(CDecimal value) {
-    	throw new UnsupportedOperationException("Not yet implemented");
+    	return toCanvasX(value.toBigDecimal().doubleValue());
     }
 
     @Override
@@ -79,7 +79,7 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
     
     @Override
     public int toCanvasY(CDecimal value) {
-    	throw new UnsupportedOperationException("Not yet implemented");
+    	return toCanvasY(value.toBigDecimal().doubleValue());
     }
 
     @Override
@@ -112,6 +112,7 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
     }
 
     private double getCoeffY(){
+//        return CDecimalBD.of("1").divideExact(yRangeInfo.getMaxValue().subtract(yRangeInfo.getMinValue()), 18).multiply((long)plotBounds.getHeight());
         return (plotBounds.getHeight())/(yRangeInfo.getMaxValue() - yRangeInfo.getMinValue());
     }
 }

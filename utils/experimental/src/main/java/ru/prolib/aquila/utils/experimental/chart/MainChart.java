@@ -201,7 +201,7 @@ public class MainChart {
             prevClose = candle.getClose();
         }
 
-        int scale = 2; // TODO: fixme
+        int scale = 18; // TODO: fixme
         TradeInfoList list = new TradeInfoList();
         Instant t = Instant.parse("2017-06-13T06:05:00Z");
         list.add(new TradeInfo(t.plusSeconds(10),

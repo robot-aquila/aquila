@@ -304,18 +304,28 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         if(minValue!=null && maxValue!=null){
             return Range.between(minValue, maxValue);
         }
-        double maxY = 0;
-        double minY = 1e6;
+        Double maxY = null;
+        Double minY = null;
         for (BarChartLayer<TCategory> layer : layers) {
             Range<Double> range = layer.getValueRange(firstVisibleCategoryIndex, numberOfVisibleCategories);
             if (range != null) {
-                if (range.getMaximum() != null && range.getMaximum() > maxY) {
-                    maxY = range.getMaximum();
+                if (range.getMaximum() != null) {
+                    if(maxY==null || range.getMaximum() > maxY) {
+                        maxY = range.getMaximum();
+                    }
                 }
-                if (range.getMinimum() != null && range.getMinimum() < minY) {
-                    minY = range.getMinimum();
+                if (range.getMinimum() != null) {
+                    if(minY==null ||  range.getMinimum() < minY){
+                        minY = range.getMinimum();
+                    }
                 }
             }
+        }
+        if(minY == null){
+            minY = 0d;
+        }
+        if(maxY == null){
+            maxY = 1e6;
         }
         return Range.between(minValue==null?minY:minValue, maxValue==null?maxY:maxValue);
     }
