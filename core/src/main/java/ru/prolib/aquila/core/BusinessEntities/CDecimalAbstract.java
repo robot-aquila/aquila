@@ -38,7 +38,6 @@ abstract public class CDecimalAbstract implements CDecimal {
 		return new CompareToBuilder()
 				.append(toBigDecimal(), other.toBigDecimal())
 				.append(getUnit(), other.getUnit())
-				.append(getRoundingMode(), other.getRoundingMode())
 				.toComparison();
 	}
 
