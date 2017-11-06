@@ -97,6 +97,16 @@ public class CDecimalBDTest {
 		assertEquals(expected, actual);
 	}
 	
+	@Test (expected=NullPointerException.class)
+	public void testCtor3_BD_ThrowsNPEIfValueIsNull() {
+		new CDecimalBD((BigDecimal)null, "USD", RoundingMode.HALF_UP);
+	}
+	
+	@Test (expected=NullPointerException.class)
+	public void testCtor3_BD_ThrowsNPEIfRoundingModeIsNull() {
+		new CDecimalBD(new BigDecimal("0.01"), "USD", null);
+	}
+	
 	@Test
 	public void testCtor3_BD() {
 		CDecimalBD x = new CDecimalBD(new BigDecimal("12.350"), "USD", RoundingMode.CEILING);

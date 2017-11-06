@@ -23,7 +23,6 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdateType;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
@@ -73,7 +72,7 @@ public class MarketDepthTableModelTest {
 		security = new BasicTerminalBuilder()
 			.buildTerminal()
 			.getEditableSecurity(symbol);
-		security.update(SecurityField.TICK_SIZE, new FDecimal("0.01"));
+		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"));
 		model = new MarketDepthTableModel(messagesMock, security, 5);
 		refreshListener = new FullTableRefreshListener();
 	}

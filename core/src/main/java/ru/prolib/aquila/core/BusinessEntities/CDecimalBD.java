@@ -54,6 +54,12 @@ public class CDecimalBD extends CDecimalAbstract {
 	private final String unit;
 	
 	public CDecimalBD(BigDecimal value, String unit, RoundingMode roundingMode) {
+		if ( value == null ) {
+			throw new NullPointerException("Value cannot be null");
+		}
+		if ( roundingMode == null ) {
+			throw new NullPointerException("Rounding mode cannot be null");
+		}
 		this.value = value;
 		this.unit = unit;
 		this.roundingMode = roundingMode;

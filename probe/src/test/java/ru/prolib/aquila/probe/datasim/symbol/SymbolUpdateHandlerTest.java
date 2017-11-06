@@ -20,7 +20,6 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdate;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateConsumer;
-import ru.prolib.aquila.core.BusinessEntities.FDecimal;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStubTask;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
@@ -192,7 +191,7 @@ public class SymbolUpdateHandlerTest {
 		input.add(new DeltaUpdateBuilder()
 			.withSnapshot(true)
 			.withTime("2016-10-18T04:00:00Z")
-			.withToken(SecurityField.TICK_SIZE, new FDecimal("0.01"))
+			.withToken(1028, "foobar")
 			.buildUpdate());
 		CloseableIteratorStub<DeltaUpdate> readerStub2 = new CloseableIteratorStub<>(input);
 		readerFactoryStub.predefinedReader = readerStub2;
@@ -235,12 +234,12 @@ public class SymbolUpdateHandlerTest {
 		input.add(new DeltaUpdateBuilder()
 			.withSnapshot(true)
 			.withTime("2016-10-18T02:30:00Z")
-			.withToken(SecurityField.DISPLAY_NAME, "sbrf")
+			.withToken(1028, "sbrf")
 			.buildUpdate());
 		input.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
 			.withTime("2016-10-18T03:00:00Z")
-			.withToken(SecurityField.LOT_SIZE, 10)
+			.withToken(1029, 10)
 			.buildUpdate());
 		CloseableIteratorStub<DeltaUpdate> readerStub = new CloseableIteratorStub<>(input);
 		expect(readerFactoryMock.createReader(symbol, T("2016-10-18T02:30:00Z")))
