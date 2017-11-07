@@ -221,37 +221,49 @@ public class MainChart {
         list = new TradeInfoList();
         t = Instant.parse("2017-06-13T06:20:00Z");
         list.add(new TradeInfo(t.plusSeconds(10),
-        		OrderAction.BUY,
+        		OrderAction.SELL,
         		Tick.getPrice(candles.get(t).getHigh(), scale),
         		CDecimalBD.of(1000L)).withOrderId(4L));
         list.add(new TradeInfo(t.plusSeconds(20),
-        		OrderAction.BUY,
+        		OrderAction.SELL,
         		Tick.getPrice(candles.get(t).getLow(), scale),
         		CDecimalBD.of(1000L)).withOrderId(5L));
         list.add(new TradeInfo(t.plusSeconds(30),
+        		OrderAction.BUY,
+        		Tick.getPrice(candles.get(t).getBodyMiddle(), scale),
+        		CDecimalBD.of(1000L)).withOrderId(6L));
+        list.add(new TradeInfo(t.plusSeconds(40),
         		OrderAction.SELL,
         		Tick.getPrice(candles.get(t).getBodyMiddle(), scale),
         		CDecimalBD.of(1000L)).withOrderId(6L));
+        list.add(new TradeInfo(t.plusSeconds(50),
+        		OrderAction.BUY,
+        		Tick.getPrice(candles.get(t).getBodyMiddle(), scale),
+        		CDecimalBD.of(1000L)).withOrderId(6L));
+        list.add(new TradeInfo(t.plusSeconds(51),
+                OrderAction.BUY,
+                Tick.getPrice(candles.get(t).getLow(), scale),
+                CDecimalBD.of(1000L)).withOrderId(5L));
         trades.set(t, list);
-
-        list = new TradeInfoList();
-        t = Instant.parse("2017-06-13T06:40:00Z");
-        list.add(new TradeInfo(t.plusSeconds(10),
-        		OrderAction.BUY,
-        		Tick.getPrice(candles.get(t).getHigh(), scale),
-        		CDecimalBD.of(1000L)));
-        list.add(new TradeInfo(t.plusSeconds(20),
-        		OrderAction.BUY,
-        		Tick.getPrice(candles.get(t).getOpen(), scale),
-        		CDecimalBD.of(1000L)));
-        list.add(new TradeInfo(t.plusSeconds(30),
-        		OrderAction.SELL,
-        		Tick.getPrice(candles.get(t).getClose(), scale),
-        		CDecimalBD.of(1000L)));
-        list.add(new TradeInfo(t.plusSeconds(40),
-        		OrderAction.SELL,
-        		Tick.getPrice(candles.get(t).getLow(), scale),
-        		CDecimalBD.of(1000L)));
+//
+//        list = new TradeInfoList();
+//        t = Instant.parse("2017-06-13T06:40:00Z");
+//        list.add(new TradeInfo(t.plusSeconds(10),
+//        		OrderAction.BUY,
+//        		Tick.getPrice(candles.get(t).getHigh(), scale),
+//        		CDecimalBD.of(1000L)));
+//        list.add(new TradeInfo(t.plusSeconds(20),
+//        		OrderAction.BUY,
+//        		Tick.getPrice(candles.get(t).getOpen(), scale),
+//        		CDecimalBD.of(1000L)));
+//        list.add(new TradeInfo(t.plusSeconds(30),
+//        		OrderAction.SELL,
+//        		Tick.getPrice(candles.get(t).getClose(), scale),
+//        		CDecimalBD.of(1000L)));
+//        list.add(new TradeInfo(t.plusSeconds(40),
+//        		OrderAction.SELL,
+//        		Tick.getPrice(candles.get(t).getLow(), scale),
+//        		CDecimalBD.of(1000L)));
         openOrders.set(t, list);
 
 //        Candle[] arr = {

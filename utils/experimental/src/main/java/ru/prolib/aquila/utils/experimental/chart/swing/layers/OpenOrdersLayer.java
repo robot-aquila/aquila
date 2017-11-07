@@ -31,7 +31,6 @@ public class OpenOrdersLayer<TCategory> implements BarChartLayer<TCategory> {
     protected final Map<Integer, Object> params = new HashMap<>();
 
     private boolean visible = true;
-    private Stroke stroke = new BasicStroke(LINE_WIDTH_PARAM);
     private List<Account> accounts;
 
     public OpenOrdersLayer(Series<TradeInfoList> data) {
@@ -110,19 +109,40 @@ public class OpenOrdersLayer<TCategory> implements BarChartLayer<TCategory> {
         if(value == null){
             return;
         }
+        Set<Integer> yValuesBuy = new HashSet<>();
+        Set<Integer> yValuesSell = new HashSet<>();
+        Set<Integer> yDashed = new HashSet<>();
         value = new TradeInfoList(value, accounts);
         int xStartLine = context.getPlotBounds().getX();
         int xEndLine = xStartLine + context.getPlotBounds().getWidth();
 
-        g.setStroke(new BasicStroke((Float) params.get(LINE_WIDTH_PARAM)));
+        float lineWidth = (Float) params.get(LINE_WIDTH_PARAM);
+        Stroke stroke = new BasicStroke(lineWidth);
+        float[] dashedPattern = {40f, 40f};
+        Stroke dashedStroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT,
+                BasicStroke.JOIN_MITER, 1.0f, dashedPattern, 0.0f);
         for(int i=0; i<value.size(); i++){
             TradeInfo ti = value.get(i);
+            int y = context.toCanvasY(ti.getPrice());
+            if(yDashed.contains(y)){
+                continue;
+            }
+            g.setStroke(stroke);
             if(OrderAction.BUY.equals(ti.getAction())){
                 g.setColor(colors.get(BUY_COLOR));
+                if(yValuesSell.contains(y)){
+                    g.setStroke(dashedStroke);
+                    yDashed.add(y);
+                }
+                yValuesBuy.add(y);
             } else {
                 g.setColor(colors.get(SELL_COLOR));
+                if(yValuesBuy.contains(y)){
+                    g.setStroke(dashedStroke);
+                    yDashed.add(y);
+                }
+                yValuesSell.add(y);
             }
-            int y = context.toCanvasY(ti.getPrice());
             g.drawLine(xStartLine, y, xEndLine, y);
         }
     }
