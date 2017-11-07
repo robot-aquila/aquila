@@ -29,13 +29,13 @@ public class Tick implements TStamped {
 	}
 
 	@Deprecated
-	public static CDecimal getPrice(double price, int scale) {
-		return CDecimalBD.of(Double.toString(price)).withScale(scale);
+	public static CDecimal getPrice(Double price, int scale) {
+		return price==null?null:CDecimalBD.of(Double.toString(price)).withScale(scale);
 	}
 	
 	@Deprecated
-	public static CDecimal getSize(long size) {
-		return CDecimalBD.of(size);
+	public static CDecimal getSize(Long size) {
+		return size==null?null:CDecimalBD.of(size);
 	}
 
 	@Deprecated
