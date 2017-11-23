@@ -8,33 +8,54 @@ import java.time.Instant;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
-import org.threeten.extra.Interval;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.concurrency.LID;
 
 public class CandleHighSeriesTest {
 	private IMocksControl control;
 	private Series<Candle> candlesMock;
-	private EditableCandleSeries candles;
+	private SeriesImpl<Candle> candles;
 	private Instant time1, time2, time3;
-	private Interval int1, int2, int3;
 	private Candle candle1, candle2, candle3;
 	private CandleHighSeries series;
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		candlesMock = control.createMock(Series.class);
-		candles = new CandleSeriesImpl(ZTFrame.M5, "foo");
+		candles = new SeriesImpl<Candle>("foo");
 		time1 = Instant.parse("2013-10-07T11:00:00Z");
 		time2 = time1.plusSeconds(5 * 60);
 		time3 = time2.plusSeconds(5 * 60);
-		int1 = ZTFrame.M5.getInterval(time1);
-		int2 = ZTFrame.M5.getInterval(time2);
-		int3 = ZTFrame.M5.getInterval(time3);
-		candle1 = new Candle(int1, 144440d, 144440d, 143130d, 143210d, 39621L);
-		candle2 = new Candle(int2, 143230d, 143390d, 143100d, 143290d, 12279L);
-		candle3 = new Candle(int3, 143280d, 143320d, 143110d, 143190d, 11990L);
+		candle1 = new CandleBuilder()
+				.withTime(time1)
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.of("144440"))
+				.withHighPrice(CDecimalBD.of("144440"))
+				.withLowPrice(CDecimalBD.of("143130"))
+				.withClosePrice(CDecimalBD.of("143210"))
+				.withVolume(CDecimalBD.of(39621L))
+				.buildCandle();
+		candle2 = new CandleBuilder()
+				.withTime(time2)
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.of("143230"))
+				.withHighPrice(CDecimalBD.of("143390"))
+				.withLowPrice(CDecimalBD.of("143100"))
+				.withClosePrice(CDecimalBD.of("143290"))
+				.withVolume(CDecimalBD.of(12279L))
+				.buildCandle();
+		candle3 = new CandleBuilder()
+				.withTime(time3)
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.of("143280"))
+				.withHighPrice(CDecimalBD.of("143320"))
+				.withLowPrice(CDecimalBD.of("143110"))
+				.withClosePrice(CDecimalBD.of("143190"))
+				.withVolume(CDecimalBD.of(11990L))
+				.buildCandle();
 		candles.add(candle1);
 		candles.add(candle2);
 		candles.add(candle3);
@@ -48,14 +69,14 @@ public class CandleHighSeriesTest {
 	
 	@Test
 	public void testGet0() throws Exception {
-		assertEquals(143320d, series.get(), 0.1d);
+		assertEquals(CDecimalBD.of("143320"), series.get());
 	}
 	
 	@Test
 	public void testGet1() throws Exception {
-		assertEquals(144440d, series.get(0), 0.1d);
-		assertEquals(143390d, series.get(1), 0.1d);
-		assertEquals(143320d, series.get(2), 0.1d);
+		assertEquals(CDecimalBD.of("144440"), series.get(0));
+		assertEquals(CDecimalBD.of("143390"), series.get(1));
+		assertEquals(CDecimalBD.of("143320"), series.get(2));
 	}
 
 	@Test

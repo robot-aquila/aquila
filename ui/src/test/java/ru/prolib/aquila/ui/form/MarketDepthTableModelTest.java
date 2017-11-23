@@ -21,6 +21,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.MDUpdateBuilder;
@@ -72,28 +73,33 @@ public class MarketDepthTableModelTest {
 		security = new BasicTerminalBuilder()
 			.buildTerminal()
 			.getEditableSecurity(symbol);
-		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"));
 		model = new MarketDepthTableModel(messagesMock, security, 5);
 		refreshListener = new FullTableRefreshListener();
 	}
 	
 	private void assertRowEquals(int rowIndex, Long bid, String price, Long ask) {
-		BigDecimal p = null;
+		CDecimal p = null, a = null, b = null;
 		if ( price != null ) {
-			p = new BigDecimal(price);
+			p = CDecimalBD.of(price);
 		}
-		assertEquals(bid, model.getValueAt(rowIndex, 0));
-		assertEquals(p, model.getValueAt(rowIndex, 1));
-		assertEquals(ask, model.getValueAt(rowIndex, 2));
+		if( bid != null ) {
+			b = CDecimalBD.of(bid);
+		}
+		if ( ask != null ) {
+			a = CDecimalBD.of(ask);
+		}
+		String msg = "At#" + rowIndex;
+		assertEquals(msg, b, model.getValueAt(rowIndex, 0));
+		assertEquals(msg, p, model.getValueAt(rowIndex, 1));
+		assertEquals(msg, a, model.getValueAt(rowIndex, 2));
 	}
 	
 	private void assignTestMarketDepth() {
-		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.0001"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)
-			.addAsk(101.85, 2878)
-			.addAsk(101.84, 3497)
+			.addAsk("101.85", 2878L)
+			.addAsk("101.84", 3497L)
 			.buildMDUpdate());
 	}
 
@@ -179,8 +185,8 @@ public class MarketDepthTableModelTest {
 		assertRowEquals(0,  null,       null,  null);
 		assertRowEquals(1,  null,       null,  null);
 		assertRowEquals(2,  null,       null,  null);
-		assertRowEquals(3,  null, "101.8500", 2878L);
-		assertRowEquals(4,  null, "101.8400", 3497L);
+		assertRowEquals(3,  null,   "101.85", 2878L);
+		assertRowEquals(4,  null,   "101.84", 3497L);
 		assertRowEquals(5,  null,       null,  null);
 		assertRowEquals(6,  null,       null,  null);
 		assertRowEquals(7,  null,       null,  null);
@@ -229,18 +235,17 @@ public class MarketDepthTableModelTest {
 	
 	@Test
 	public void testGetValueAt_HasEmptyRows() throws Exception {
-		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.001"));
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)
-			.addAsk(101.85, 2878)
-			.addAsk(101.84, 3497)
-			.addAsk(101.83, 1704)
-			.addAsk(101.82,  750)
-			.addBid(101.80, 2293)
-			.addBid(101.79, 1475)
-			.addBid(101.78, 2130)
-			.addBid(101.77, 3513)
+			.addAsk("101.85", 2878L)
+			.addAsk("101.84", 3497L)
+			.addAsk("101.83", 1704L)
+			.addAsk("101.82",  750L)
+			.addBid("101.80", 2293L)
+			.addBid("101.79", 1475L)
+			.addBid("101.78", 2130L)
+			.addBid("101.77", 3513L)
 			.buildMDUpdate());
 		model.startListeningUpdates();
 		model.addTableModelListener(refreshListener);
@@ -249,14 +254,14 @@ public class MarketDepthTableModelTest {
 		
 		assertTrue(refreshListener.signal.await(1, TimeUnit.SECONDS));
 		assertRowEquals(0,  null,      null,  null);
-		assertRowEquals(1,  null, "101.850", 2878L);
-		assertRowEquals(2,  null, "101.840", 3497L);
-		assertRowEquals(3,  null, "101.830", 1704L);
-		assertRowEquals(4,  null, "101.820",  750L);
-		assertRowEquals(5, 2293L, "101.800",  null);
-		assertRowEquals(6, 1475L, "101.790",  null);
-		assertRowEquals(7, 2130L, "101.780",  null);
-		assertRowEquals(8, 3513L, "101.770",  null);
+		assertRowEquals(1,  null,  "101.85", 2878L);
+		assertRowEquals(2,  null,  "101.84", 3497L);
+		assertRowEquals(3,  null,  "101.83", 1704L);
+		assertRowEquals(4,  null,  "101.82",  750L);
+		assertRowEquals(5, 2293L,  "101.80",  null);
+		assertRowEquals(6, 1475L,  "101.79",  null);
+		assertRowEquals(7, 2130L,  "101.78",  null);
+		assertRowEquals(8, 3513L,  "101.77",  null);
 		assertRowEquals(9,  null,      null,  null);
 	}
 	
@@ -266,18 +271,18 @@ public class MarketDepthTableModelTest {
 		security.consume(new MDUpdateBuilder(symbol)
 			.withTime("2016-09-12T00:00:00Z")
 			.withType(MDUpdateType.REFRESH)
-			.addAsk(101.87, 1200)
-			.addAsk(101.86, 1000)
-			.addAsk(101.85, 2878)
-			.addAsk(101.84, 3497)
-			.addAsk(101.83, 1704)
-			.addAsk(101.82,  750)
-			.addBid(101.80, 2293)
-			.addBid(101.79, 1475)
-			.addBid(101.78, 2130)
-			.addBid(101.77, 3513)
-			.addBid(101.76, 2500)
-			.addBid(101.75, 1300)
+			.addAsk("101.87", 1200L)
+			.addAsk("101.86", 1000L)
+			.addAsk("101.85", 2878L)
+			.addAsk("101.84", 3497L)
+			.addAsk("101.83", 1704L)
+			.addAsk("101.82",  750L)
+			.addBid("101.80", 2293L)
+			.addBid("101.79", 1475L)
+			.addBid("101.78", 2130L)
+			.addBid("101.77", 3513L)
+			.addBid("101.76", 2500L)
+			.addBid("101.75", 1300L)
 			.buildMDUpdate());
 		model.startListeningUpdates();
 		model.addTableModelListener(refreshListener);

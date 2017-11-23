@@ -11,6 +11,7 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
@@ -35,20 +36,20 @@ public class SimpleCsvL1UpdateReaderFactoryTest {
 		expected.add(new L1UpdateBuilder(new Symbol("GILD"))
 			.withBid()
 			.withTime("2016-03-07T17:25:01.122Z")
-			.withPrice(89.43d)
-			.withSize(100)
+			.withPrice(CDecimalBD.of("89.43"))
+			.withSize(CDecimalBD.of(100L))
 			.buildL1Update());
 		expected.add(new L1UpdateBuilder(new Symbol("MSFT"))
 			.withAsk()
 			.withTime("2016-03-07T17:25:01.122Z")
-			.withPrice(89.44d)
-			.withSize(400)
+			.withPrice(CDecimalBD.of("89.44"))
+			.withSize(CDecimalBD.of(400L))
 			.buildL1Update());
 		expected.add(new L1UpdateBuilder(new Symbol("TWTR"))
 			.withTrade()
 			.withTime("2016-03-07T17:25:01.103Z")
-			.withPrice(19.56d)
-			.withSize(100)
+			.withPrice(CDecimalBD.of("19.56"))
+			.withSize(CDecimalBD.of(100L))
 			.buildL1Update());
 		
 		List<L1Update> actual = new ArrayList<>();

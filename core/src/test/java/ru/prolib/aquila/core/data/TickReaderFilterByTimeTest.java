@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
+
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 @SuppressWarnings({"unchecked","rawtypes"})
@@ -23,8 +25,8 @@ public class TickReaderFilterByTimeTest {
 		iterator = new TickReaderFilterByTime(decorated, startTime);
 	}
 	
-	private Tick newTick(String time, double price, long size) {
-		return Tick.of(Instant.parse(time), price, size);
+	private Tick newTick(String time, String price, long size) {
+		return Tick.of(Instant.parse(time), CDecimalBD.of(price), CDecimalBD.of(size));
 	}
 	
 	@Test
@@ -42,12 +44,12 @@ public class TickReaderFilterByTimeTest {
 		List<Tick> expected = new Vector<Tick>(),
 				actual = new Vector<Tick>(),
 				list = new Vector<Tick>();
-		list.add(newTick("2014-10-28T15:24:19.000Z", 1.23d, 100));
-		list.add(newTick("2014-10-29T00:00:00.000Z", 1.30d, 115));
-		list.add(newTick("2014-10-30T07:58:17.999Z", 1.31d, 300));
-		list.add(newTick("2014-10-30T07:58:18.000Z", 1.29d, 200));
-		list.add(newTick("2014-10-30T14:28:29.175Z", 1.32d, 800));
-		list.add(newTick("2015-01-01T00:00:00.000Z", 1.19d,  10));
+		list.add(newTick("2014-10-28T15:24:19.000Z", "1.23", 100L));
+		list.add(newTick("2014-10-29T00:00:00.000Z", "1.30", 115L));
+		list.add(newTick("2014-10-30T07:58:17.999Z", "1.31", 300L));
+		list.add(newTick("2014-10-30T07:58:18.000Z", "1.29", 200L));
+		list.add(newTick("2014-10-30T14:28:29.175Z", "1.32", 800L));
+		list.add(newTick("2015-01-01T00:00:00.000Z", "1.19",  10L));
 		expected.add(list.get(3));
 		expected.add(list.get(4));
 		expected.add(list.get(5));

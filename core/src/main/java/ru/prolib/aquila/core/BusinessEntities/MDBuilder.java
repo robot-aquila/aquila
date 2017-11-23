@@ -12,26 +12,16 @@ import java.util.Vector;
  * This class is not thread-safe.
  */
 public class MDBuilder implements MDUpdateConsumer {
-	private final DoubleUtils doubleUtils;
 	private final Vector<Tick> askQuotes, bidQuotes; // do not switch to other type
 	private final Symbol symbol;
 	private MarketDepth md;
 	private int marketDepthLevels = 10;
 	
-	public MDBuilder(Symbol symbol, int priceScale) {
-		doubleUtils = new DoubleUtils();
+	public MDBuilder(Symbol symbol) {
 		askQuotes = new Vector<>();
 		bidQuotes = new Vector<>();
 		this.symbol = symbol;
-		md = new MarketDepth(symbol, askQuotes, bidQuotes, Instant.EPOCH, 0);
-	}
-	
-	public MDBuilder(Symbol symbol) {
-		this(symbol, 2);
-	}
-	
-	public void setPriceScale(int scale) {
-		doubleUtils.setScale(scale);
+		md = new MarketDepth(symbol, askQuotes, bidQuotes, Instant.EPOCH);
 	}
 	
 	public MarketDepth getMarketDepth() {
@@ -84,8 +74,7 @@ public class MDBuilder implements MDUpdateConsumer {
 				Collections.sort(bidQuotes, TickPriceComparator.BID);
 				bidQuotes.setSize(Math.min(marketDepthLevels, bidQuotes.size()));
 			}
-			md = new MarketDepth(update.getSymbol(), askQuotes, bidQuotes,
-					update.getTime(), doubleUtils.getScale());
+			md = new MarketDepth(update.getSymbol(), askQuotes, bidQuotes, update.getTime());
 		}
 	}
 	
@@ -112,14 +101,14 @@ public class MDBuilder implements MDUpdateConsumer {
 	private void replaceQuote(Tick tick) {
 		removeQuote(tick);
 		List<Tick> target = tick.getType() == TickType.ASK ? askQuotes : bidQuotes;
-		target.add(tick.withPrice(doubleUtils.round(tick.getPrice())));
+		target.add(tick.withPrice(tick.getPrice()));
 	}
 
 	private List<Integer> findQuoteWithSamePrice(List<Tick> target, Tick expected) {
 		List<Integer> to_remove = new ArrayList<Integer>();
-		double expectedPrice = expected.getPrice();
+		CDecimal expectedPrice = expected.getPrice();
 		for ( int i = 0; i < target.size(); i ++ ) {
-			if ( doubleUtils.isEquals(target.get(i).getPrice(), expectedPrice) ) {
+			if ( target.get(i).getPrice().compareTo(expectedPrice) == 0 ) {
 				to_remove.add(i);
 			}
 		}

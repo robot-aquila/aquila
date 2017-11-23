@@ -62,7 +62,7 @@ public class L1AbstractReplayServiceTest {
 	public void testConsumptionTime() {
 		L1Update object = new L1UpdateBuilder(symbol1)
 			.withAsk()
-			.withPrice(12.48d)
+			.withPrice("12.48")
 			.withSize(120L)
 			.withTime("2016-10-04T07:44:39Z")
 			.buildL1Update();
@@ -80,7 +80,7 @@ public class L1AbstractReplayServiceTest {
 	public void testMutate() {
 		L1Update object = new L1UpdateBuilder(symbol1)
 			.withAsk()
-			.withPrice(12.48d)
+			.withPrice("12.48")
 			.withSize(120L)
 			.withTime("2016-10-04T07:44:39Z")
 			.buildL1Update();
@@ -91,7 +91,7 @@ public class L1AbstractReplayServiceTest {
 		control.verify();
 		L1Update expected = new L1UpdateBuilder(symbol1)
 			.withAsk()
-			.withPrice(12.48d)
+			.withPrice("12.48")
 			.withSize(120L)
 			.withTime("1978-06-15T13:49:26Z")
 			.buildL1Update();
@@ -108,7 +108,7 @@ public class L1AbstractReplayServiceTest {
 		abstractService.subscribeL1(symbol1, consumer3);
 		L1Update object = new L1UpdateBuilder(symbol1)
 			.withAsk()
-			.withPrice(12.48d)
+			.withPrice("12.48")
 			.withSize(120L)
 			.withTime("2016-10-04T07:44:39Z")
 			.buildL1Update();
@@ -130,7 +130,7 @@ public class L1AbstractReplayServiceTest {
 		abstractService.subscribeL1(symbol1, consumer2);
 		L1Update object = new L1UpdateBuilder(symbol1)
 			.withAsk()
-			.withPrice(12.48d)
+			.withPrice("12.48")
 			.withSize(120L)
 			.withTime("2016-10-04T07:44:39Z")
 			.buildL1Update();
@@ -152,7 +152,7 @@ public class L1AbstractReplayServiceTest {
 		abstractService.subscribeL1(symbol1, consumer2);
 		L1Update object = new L1UpdateBuilder(symbol1)
 			.withAsk()
-			.withPrice(12.48d)
+			.withPrice("12.48")
 			.withSize(120L)
 			.withTime("2016-10-04T07:44:39Z")
 			.buildL1Update();

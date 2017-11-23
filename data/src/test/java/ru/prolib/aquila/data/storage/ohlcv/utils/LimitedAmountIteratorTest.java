@@ -5,7 +5,6 @@ import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +14,12 @@ import org.easymock.IMocksControl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleBuilder;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.data.storage.ohlcv.utils.LimitedAmountIterator;
 
@@ -29,22 +29,19 @@ public class LimitedAmountIteratorTest {
 		return Instant.parse(timeString);
 	}
 	
-	static Interval IM1(String timeString) {
-		return Interval.of(T(timeString), Duration.ofMinutes(1));
-	}
-	
 	private static List<Candle> fixture;
 	
 	static {
+		CandleBuilder cb = new CandleBuilder().withTimeFrame(ZTFrame.M1);
 		fixture = new ArrayList<>();
-		fixture.add(new Candle(IM1("2017-09-15T03:48:00Z"), 150, 158, 149, 152, 1000));
-		fixture.add(new Candle(IM1("2017-09-15T03:49:00Z"), 152, 153, 145, 148, 2000));
-		fixture.add(new Candle(IM1("2017-09-15T03:50:00Z"), 148, 149, 145, 147, 3500));
-		fixture.add(new Candle(IM1("2017-09-15T03:51:00Z"), 147, 149, 141, 142, 1250));
-		fixture.add(new Candle(IM1("2017-09-15T03:52:00Z"), 142, 145, 142, 143, 1720));
-		fixture.add(new Candle(IM1("2017-09-15T03:53:00Z"), 143, 149, 142, 148, 2100));
-		fixture.add(new Candle(IM1("2017-09-15T03:54:00Z"), 148, 152, 147, 147, 1500));
-		fixture.add(new Candle(IM1("2017-09-15T03:55:00Z"), 147, 151, 145, 151, 4200));
+		fixture.add(cb.buildCandle("2017-09-15T03:48:00Z", 150, 158, 149, 152, 1000));
+		fixture.add(cb.buildCandle("2017-09-15T03:49:00Z", 152, 153, 145, 148, 2000));
+		fixture.add(cb.buildCandle("2017-09-15T03:50:00Z", 148, 149, 145, 147, 3500));
+		fixture.add(cb.buildCandle("2017-09-15T03:51:00Z", 147, 149, 141, 142, 1250));
+		fixture.add(cb.buildCandle("2017-09-15T03:52:00Z", 142, 145, 142, 143, 1720));
+		fixture.add(cb.buildCandle("2017-09-15T03:53:00Z", 143, 149, 142, 148, 2100));
+		fixture.add(cb.buildCandle("2017-09-15T03:54:00Z", 148, 152, 147, 147, 1500));
+		fixture.add(cb.buildCandle("2017-09-15T03:55:00Z", 147, 151, 145, 151, 4200));
 	}
 	
 	private IMocksControl control;

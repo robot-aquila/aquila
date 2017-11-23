@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data.ta;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.Series;
@@ -9,7 +10,7 @@ import ru.prolib.aquila.core.data.ValueException;
 /**
  * Объектно-ориентированная обертка функции {@link TAMath#qatr(Series, int, int)}.
  */
-public class QATR implements Series<Double> {
+public class QATR implements Series<CDecimal> {
 	private final String id;
 	private final Series<Candle> source;
 	private final int period;
@@ -36,12 +37,12 @@ public class QATR implements Series<Double> {
 	}
 
 	@Override
-	public Double get() throws ValueException {
+	public CDecimal get() throws ValueException {
 		return math.qatr(source, getLength() - 1, period);
 	}
 
 	@Override
-	public Double get(int index) throws ValueException {
+	public CDecimal get(int index) throws ValueException {
 		return math.qatr(source, index, period);
 	}
 

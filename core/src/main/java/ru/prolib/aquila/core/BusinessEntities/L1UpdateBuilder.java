@@ -6,8 +6,8 @@ public class L1UpdateBuilder {
 	private Instant time = Instant.EPOCH;
 	private TickType type = TickType.TRADE;
 	private Symbol symbol;
-	private double price;
-	private long size;
+	private CDecimal price = CDecimalBD.ZERO;
+	private CDecimal size = CDecimalBD.ZERO;
 	
 	public L1UpdateBuilder(Symbol symbol) {
 		this.symbol = symbol;
@@ -48,14 +48,30 @@ public class L1UpdateBuilder {
 		return withType(TickType.TRADE);
 	}
 	
-	public L1UpdateBuilder withPrice(double price) {
+	public L1UpdateBuilder withPrice(CDecimal price) {
 		this.price = price;
 		return this;
 	}
 	
-	public L1UpdateBuilder withSize(long size) {
+	public L1UpdateBuilder withPrice(String price) {
+		return withPrice(CDecimalBD.of(price));
+	}
+	
+	public L1UpdateBuilder withPrice(long price) {
+		return withPrice(CDecimalBD.of(price));
+	}
+	
+	public L1UpdateBuilder withSize(CDecimal size) {
 		this.size = size;
 		return this;
+	}
+	
+	public L1UpdateBuilder withSize(String size) {
+		return withSize(CDecimalBD.of(size));
+	}
+	
+	public L1UpdateBuilder withSize(long size) {
+		return withSize(CDecimalBD.of(size));
 	}
 	
 	public L1UpdateBuilder fromTick(Tick source) {

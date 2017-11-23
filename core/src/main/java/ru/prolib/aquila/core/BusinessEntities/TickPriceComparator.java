@@ -21,8 +21,15 @@ public class TickPriceComparator implements Comparator<Tick> {
 
 	@Override
 	public int compare(Tick a, Tick b) {
-		double ap = a.getPrice(), bp = b.getPrice();
-		return (ap < bp ? -1 : ap == bp ? 0 : 1) * multiplier;
+		CDecimal ap = a.getPrice(), bp = b.getPrice();
+		int r = ap.compareTo(bp);
+		if ( r == 0 ) {
+			return 0;
+		} else if ( r < 0 ) {
+			return -1 * multiplier;
+		} else {
+			return 1 * multiplier;
+		}
 	}
 
 }

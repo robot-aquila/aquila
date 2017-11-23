@@ -22,16 +22,16 @@ public class MDUpdateImplTest {
 			time4 = Instant.parse("2015-03-24T10:40:01Z");
 		MDUpdateImpl source, expected;
 		source = new MDUpdateImpl(new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, new Symbol("GAZP")));
-		source.addRecord(Tick.of(TickType.ASK, time2, 12.34d, 100), MDTransactionType.ADD);
-		source.addRecord(Tick.of(TickType.BID, time3, 14.29d, 800), MDTransactionType.ADD);
-		source.addRecord(Tick.of(TickType.ASK, time2, 12.35d, 200), MDTransactionType.REPLACE);
+		source.addRecord(Tick.ofAsk(time2, CDecimalBD.of("12.34"), CDecimalBD.of(100L)), MDTransactionType.ADD);
+		source.addRecord(Tick.ofBid(time3, CDecimalBD.of("14.29"), CDecimalBD.of(800L)), MDTransactionType.ADD);
+		source.addRecord(Tick.ofAsk(time2, CDecimalBD.of("12.35"), CDecimalBD.of(200L)), MDTransactionType.REPLACE);
 		
 		MDUpdate actual = source.withTime(time4);
 		
 		expected = new MDUpdateImpl(new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time4, new Symbol("GAZP")));
-		expected.addRecord(Tick.of(TickType.ASK, time4, 12.34d, 100), MDTransactionType.ADD);
-		expected.addRecord(Tick.of(TickType.BID, time4, 14.29d, 800), MDTransactionType.ADD);
-		expected.addRecord(Tick.of(TickType.ASK, time4, 12.35d, 200), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofAsk(time4, CDecimalBD.of("12.34"), CDecimalBD.of(100L)), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofBid(time4, CDecimalBD.of("14.29"), CDecimalBD.of(800L)), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofAsk(time4, CDecimalBD.of("12.35"), CDecimalBD.of(200L)), MDTransactionType.REPLACE);
 		assertEquals(expected, actual);
 	}
 

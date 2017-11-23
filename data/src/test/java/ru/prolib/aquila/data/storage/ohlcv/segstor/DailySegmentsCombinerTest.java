@@ -3,8 +3,6 @@ package ru.prolib.aquila.data.storage.ohlcv.segstor;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -14,12 +12,13 @@ import static org.easymock.EasyMock.*;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
-import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleBuilder;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.data.storage.ohlcv.segstor.DailySegmentsCombiner;
 import ru.prolib.aquila.data.storage.segstor.SymbolDaily;
@@ -29,14 +28,6 @@ public class DailySegmentsCombinerTest {
 	private static final Symbol
 		symbol1 = new Symbol("AAPL"),
 		symbol2 = new Symbol("MSFT");
-	
-	static Instant T(String timeString) {
-		return Instant.parse(timeString);
-	}
-	
-	static Interval IM1(String timeString) {
-		return Interval.of(T(timeString), Duration.ofMinutes(1));
-	}
 	
 	private IMocksControl control;
 	private SymbolDailySegmentStorage<Candle> segstorMock1, segstorMock2;
@@ -63,14 +54,78 @@ public class DailySegmentsCombinerTest {
 		segments1.add(new SymbolDaily(symbol1, 2013, 12,  1));
 		iterator = new DailySegmentsCombiner(segstorMock1, segments1);
 		List<Candle> fixture = new ArrayList<>();
-		fixture.add(new Candle(IM1("2010-05-15T10:00:00Z"), 150, 155, 149, 152, 1000));
-		fixture.add(new Candle(IM1("2010-05-15T11:17:00Z"), 158, 159, 152, 155, 2000));
-		fixture.add(new Candle(IM1("2010-05-15T15:30:00Z"), 154, 155, 151, 151, 1500));
-		fixture.add(new Candle(IM1("2010-07-12T12:38:00Z"), 140, 148, 140, 143, 2200));
-		fixture.add(new Candle(IM1("2010-07-12T12:39:00Z"), 143, 145, 142, 142, 1000));
-		fixture.add(new Candle(IM1("2010-07-12T12:40:00Z"), 142, 143, 138, 140, 3200));
-		fixture.add(new Candle(IM1("2013-12-01T20:15:00Z"), 133, 137, 133, 135, 1400));
-		fixture.add(new Candle(IM1("2013-12-01T23:19:00Z"), 128, 128, 127, 127, 1000));
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2010-05-15T10:00:00Z")
+				.withOpenPrice(150L)
+				.withHighPrice(155L)
+				.withLowPrice(149L)
+				.withClosePrice(152L)
+				.withVolume(1000L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2010-05-15T11:17:00Z")
+				.withOpenPrice(158L)
+				.withHighPrice(159L)
+				.withLowPrice(152L)
+				.withClosePrice(155L)
+				.withVolume(2000L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2010-05-15T15:30:00Z")
+				.withOpenPrice(154L)
+				.withHighPrice(155L)
+				.withLowPrice(151L)
+				.withClosePrice(151L)
+				.withVolume(1500L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2010-07-12T12:38:00Z")
+				.withOpenPrice(140L)
+				.withHighPrice(148L)
+				.withLowPrice(140L)
+				.withClosePrice(143L)
+				.withVolume(2200L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2010-07-12T12:39:00Z")
+				.withOpenPrice(143L)
+				.withHighPrice(145L)
+				.withLowPrice(142L)
+				.withClosePrice(142L)
+				.withVolume(1000L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2010-07-12T12:40:00Z")
+				.withOpenPrice(142L)
+				.withHighPrice(143L)
+				.withLowPrice(138L)
+				.withClosePrice(140L)
+				.withVolume(3200L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2013-12-01T20:15:00Z")
+				.withOpenPrice(133L)
+				.withHighPrice(137L)
+				.withLowPrice(133L)
+				.withClosePrice(135L)
+				.withVolume(1400L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2013-12-01T23:19:00Z")
+				.withOpenPrice(128L)
+				.withHighPrice(128L)
+				.withLowPrice(127L)
+				.withClosePrice(127L)
+				.withVolume(1000L)
+				.buildCandle());
 		expect(segstorMock1.createReader(new SymbolDaily(symbol1, 2010,  5, 15)))
 			.andReturn(new CloseableIteratorStub<>(fixture.subList(0, 3)));
 		expect(segstorMock1.createReader(new SymbolDaily(symbol1, 2010,  7, 12)))

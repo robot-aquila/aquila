@@ -12,17 +12,13 @@ public class MarketDepth {
 	private final Symbol symbol;
 	private final List<Tick> asks, bids;
 	private final Instant time;
-	private final int scale;
-	private final DoubleUtils doubleUtils;
 	
-	public MarketDepth(Symbol symbol, List<Tick> asks, List<Tick> bids, Instant time, int scale) {
+	public MarketDepth(Symbol symbol, List<Tick> asks, List<Tick> bids, Instant time) {
 		super();
 		this.symbol = symbol;
 		this.asks = new ArrayList<Tick>(asks);
 		this.bids = new ArrayList<Tick>(bids);
 		this.time = time;
-		this.scale = scale;
-		this.doubleUtils = new DoubleUtils(scale);
 	}
 	
 	public Symbol getSymbol() {
@@ -85,27 +81,27 @@ public class MarketDepth {
 		throw new MarketDepthException("No bid available: " + symbol + SEP + recordOffset);
 	}
 	
-	public boolean hasAskAtPriceLevel(double priceLevel) {
+	public boolean hasAskAtPriceLevel(CDecimal priceLevel) {
 		return findWithPrice(priceLevel, asks) != null;
 	}
 	
-	public long getAskAtPriceLevel(double priceLevel) {
+	public CDecimal getAskAtPriceLevel(CDecimal priceLevel) {
 		Tick tick = findWithPrice(priceLevel, asks);
-		return tick == null ? 0 : tick.getSize();
+		return tick == null ? CDecimalBD.ZERO : tick.getSize();
 	}
 	
-	public boolean hasBidAtPriceLevel(double priceLevel) {
+	public boolean hasBidAtPriceLevel(CDecimal priceLevel) {
 		return findWithPrice(priceLevel, bids) != null;
 	}
 	
-	public long getBidAtPriceLevel(double priceLevel) {
+	public CDecimal getBidAtPriceLevel(CDecimal priceLevel) {
 		Tick tick = findWithPrice(priceLevel, bids);
-		return tick == null ? 0 : tick.getSize();
+		return tick == null ? CDecimalBD.ZERO : tick.getSize();
 	}
 	
-	private Tick findWithPrice(double price, List<Tick> ticks) {
+	private Tick findWithPrice(CDecimal price, List<Tick> ticks) {
 		for ( Tick tick : ticks ) {
-			if ( doubleUtils.isEquals(tick.getPrice(), price) ) {
+			if ( price.compareTo(tick.getPrice()) == 0 ) {
 				return tick;
 			}
 		}
@@ -132,7 +128,6 @@ public class MarketDepth {
 		return new EqualsBuilder()
 			.append(symbol, o.symbol)
 			.append(time, o.time)
-			.append(scale, o.scale)
 			.append(asks, o.asks)
 			.append(bids, o.bids)
 			.isEquals();
@@ -143,15 +138,11 @@ public class MarketDepth {
 		return "MarketDepth[" + symbol + " at " + getTime() + "\n"
 				+ " asks[" + StringUtils.join(asks, "\n,") + "]\n"
 				+ " bids[" + StringUtils.join(bids, "\n,") + "]\n"
-				+ " scale=" + scale + "]";
+				+ "]";
 	}
 	
 	public Instant getTime() {
 		return time;
-	}
-	
-	public double roundPrice(double x) {
-		return doubleUtils.round(x);
 	}
 
 }

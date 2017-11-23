@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
@@ -26,7 +28,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 		return Instant.parse(timeString);
 	}
 	
-	private EditableTSeries<Long> series;
+	private EditableTSeries<CDecimal> series;
 	private EditableTerminal terminal;
 	private AskMaxVolumeSeriesByBestAsk filler;
 
@@ -173,7 +175,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 	@Test
 	public void testOnEvent_OnBestAsk_SkipIfNotStarted() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
-		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
+		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), CDecimalBD.of(120L), CDecimalBD.of(1200L));
 		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, tick);
 		filler.setStarted(false);
 		
@@ -185,7 +187,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 	@Test
 	public void testOnEvent_OnBestAsk() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
-		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
+		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), CDecimalBD.of(120L), CDecimalBD.of(1200L));
 		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, tick);
 		filler.setSecurity(security);
 		filler.setStarted(true);
@@ -193,14 +195,14 @@ public class AskMaxVolumeSeriesByBestAskTest {
 		filler.onEvent(e);
 		
 		assertEquals(1, series.getLength());
-		assertEquals(1200L, (long)series.get(T("2017-08-31T00:00:00Z")));
+		assertEquals(CDecimalBD.of(1200L), series.get(T("2017-08-31T00:00:00Z")));
 	}
 	
 	@Test
 	public void testOnEvent_OnBestAsk_NewMax() {
-		series.set(T("2017-08-31T00:00:00Z"), 1000L);
+		series.set(T("2017-08-31T00:00:00Z"), CDecimalBD.of(1000L));
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
-		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
+		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), CDecimalBD.of(120L), CDecimalBD.of(1200L));
 		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, tick);
 		filler.setSecurity(security);
 		filler.setStarted(true);
@@ -208,14 +210,14 @@ public class AskMaxVolumeSeriesByBestAskTest {
 		filler.onEvent(e);
 		
 		assertEquals(1, series.getLength());
-		assertEquals(1200L, (long)series.get(T("2017-08-31T00:00:00Z")));
+		assertEquals(CDecimalBD.of(1200L), series.get(T("2017-08-31T00:00:00Z")));
 	}
 
 	@Test
 	public void testOnEvent_OnBestAsk_OldMax() {
-		series.set(T("2017-08-31T00:00:00Z"), 2000L);
+		series.set(T("2017-08-31T00:00:00Z"), CDecimalBD.of(2000L));
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
-		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), 120.0d, 1200L);
+		Tick tick = Tick.ofAsk(T("2017-08-31T00:00:00Z"), CDecimalBD.of(120L), CDecimalBD.of(1200L));
 		SecurityTickEvent e = new SecurityTickEvent(security.onBestAsk(), security, Instant.EPOCH, tick);
 		filler.setSecurity(security);
 		filler.setStarted(true);
@@ -223,7 +225,7 @@ public class AskMaxVolumeSeriesByBestAskTest {
 		filler.onEvent(e);
 		
 		assertEquals(1, series.getLength());
-		assertEquals(2000L, (long)series.get(T("2017-08-31T00:00:00Z")));
+		assertEquals(CDecimalBD.of(2000L), series.get(T("2017-08-31T00:00:00Z")));
 	}
 	
 	@Test

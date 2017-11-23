@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.threeten.extra.Interval;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -36,12 +37,12 @@ public class CandleSeriesL1UpdateAggregatorTest {
 	@Test
 	public void testAggregate_FirstCandle() throws Exception {
 		aggregator.aggregate(series, builder.withTime("2017-05-02T11:36:53Z")
-				.withPrice(86.12d)
-				.withSize(1000L)
+				.withPrice(CDecimalBD.of("86.12"))
+				.withSize(CDecimalBD.of(1000L))
 				.buildL1Update());
 
 		Interval interval = Interval.of(T("2017-05-02T11:35:00Z"), T("2017-05-02T11:40:00Z"));
-		Candle expected = new Candle(interval, 86.12d, 1000L);
+		Candle expected = new Candle(interval, CDecimalBD.of("86.12"), CDecimalBD.of(1000L));
 		assertEquals(1, series.getLength());
 		assertEquals(expected, series.get());
 	}
@@ -49,14 +50,19 @@ public class CandleSeriesL1UpdateAggregatorTest {
 	@Test
 	public void testAggregate_AppendToLastCandle() throws Exception {
 		Interval interval = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		series.set(interval.getStart(), new Candle(interval, 100.02d, 500L));
+		series.set(interval.getStart(), new Candle(interval, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 		
 		aggregator.aggregate(series, builder.withTime("2017-05-02T11:52:00Z")
-				.withPrice(98.13d)
-				.withSize(100L)
+				.withPrice(CDecimalBD.of("98.13"))
+				.withSize(CDecimalBD.of(100L))
 				.buildL1Update());
 		
-		Candle expected = new Candle(interval, 100.02d, 100.02d, 98.13d, 98.13d, 600L);
+		Candle expected = new Candle(interval,
+				CDecimalBD.of("100.02"),
+				CDecimalBD.of("100.02"),
+				CDecimalBD.of("98.13"),
+				CDecimalBD.of("98.13"),
+				CDecimalBD.of(600L));
 		assertEquals(1, series.getLength());
 		assertEquals(expected, series.get());
 	}
@@ -64,16 +70,16 @@ public class CandleSeriesL1UpdateAggregatorTest {
 	@Test
 	public void testAggregate_PastData() throws Exception {
 		Interval interval1 = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		series.set(interval1.getStart(), new Candle(interval1, 100.02d, 500L));
+		series.set(interval1.getStart(), new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 		
 		aggregator.aggregate(series, builder.withTime("2017-05-02T11:49:59Z")
-				.withPrice(98.13d)
-				.withSize(100L)
+				.withPrice(CDecimalBD.of("98.13"))
+				.withSize(CDecimalBD.of(100L))
 				.buildL1Update());
 		
 		Interval interval2 = Interval.of(T("2017-05-02T11:45:00Z"), T("2017-05-02T11:50:00Z"));
-		Candle expected1 = new Candle(interval2, 98.13d, 100L),
-				expected2 = new Candle(interval1, 100.02, 500L);
+		Candle expected1 = new Candle(interval2, CDecimalBD.of("98.13"), CDecimalBD.of(100L)),
+				expected2 = new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L));
 
 		assertEquals(2, series.getLength());
 		assertEquals(expected1, series.get(0));
@@ -83,16 +89,16 @@ public class CandleSeriesL1UpdateAggregatorTest {
 	@Test
 	public void testAggregate_NewCandle() throws Exception {
 		Interval interval1 = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		series.set(interval1.getStart(), new Candle(interval1, 100.02d, 500L));
+		series.set(interval1.getStart(), new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 
 		aggregator.aggregate(series, builder.withTime("2017-05-02T11:56:02Z")
-				.withPrice(98.13d)
-				.withSize(100L)
+				.withPrice(CDecimalBD.of("98.13"))
+				.withSize(CDecimalBD.of(100L))
 				.buildL1Update());
 
 		Interval interval2 = Interval.of(T("2017-05-02T11:55:00Z"), T("2017-05-02T12:00:00Z"));
-		Candle expected2 = new Candle(interval2, 98.13d, 100L),
-				expected1 = new Candle(interval1, 100.02d, 500L);
+		Candle expected2 = new Candle(interval2, CDecimalBD.of("98.13"), CDecimalBD.of(100L)),
+				expected1 = new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L));
 		assertEquals(2, series.getLength());
 		assertEquals(expected1, series.get(0));
 		assertEquals(expected2, series.get(1));

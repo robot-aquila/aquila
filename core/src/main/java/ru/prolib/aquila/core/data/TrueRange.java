@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 
 /**
@@ -8,7 +9,7 @@ import ru.prolib.aquila.core.concurrency.LID;
  * 2013-03-12<br>
  * $Id: TR.java 571 2013-03-12 00:53:34Z whirlwind $
  */
-public class TrueRange implements Series<Double> {
+public class TrueRange implements Series<CDecimal> {
 	private static final TAMath indicators = new TAMath();
 	
 	private final Series<Candle> candles;
@@ -30,12 +31,12 @@ public class TrueRange implements Series<Double> {
 	}
 
 	@Override
-	public Double get() throws ValueException {
+	public CDecimal get() throws ValueException {
 		return indicators.tr(candles);
 	}
 
 	@Override
-	public Double get(int index) throws ValueException {
+	public CDecimal get(int index) throws ValueException {
 		return indicators.tr(candles, index);
 	}
 

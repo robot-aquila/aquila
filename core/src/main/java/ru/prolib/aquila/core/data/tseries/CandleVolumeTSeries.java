@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.data.tseries;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TSeries;
@@ -8,7 +9,7 @@ import ru.prolib.aquila.core.data.ValueException;
 
 import java.time.Instant;
 
-public class CandleVolumeTSeries implements TSeries<Long> {
+public class CandleVolumeTSeries implements TSeries<CDecimal> {
 	private final String id;
 	private final TSeries<Candle> candles;
 
@@ -31,13 +32,13 @@ public class CandleVolumeTSeries implements TSeries<Long> {
 	}
 
 	@Override
-	public Long get() throws ValueException {
+	public CDecimal get() throws ValueException {
 		Candle candle = candles.get();
 		return candle == null ? null : candle.getVolume();
 	}
 
 	@Override
-	public Long get(int index) throws ValueException {
+	public CDecimal get(int index) throws ValueException {
 		Candle candle = candles.get(index);
 		return candle == null ? null : candle.getVolume();
 	}
@@ -63,7 +64,7 @@ public class CandleVolumeTSeries implements TSeries<Long> {
 	}
 
 	@Override
-	public Long get(Instant time) {
+	public CDecimal get(Instant time) {
 		Candle candle = candles.get(time);
 		return candle == null ? null : candle.getVolume();
 	}

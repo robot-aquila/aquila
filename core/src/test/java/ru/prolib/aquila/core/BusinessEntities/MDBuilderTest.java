@@ -15,8 +15,7 @@ public class MDBuilderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		builder = new MDBuilder(symbol, 2);
-		//builder.setPriceScale(2);
+		builder = new MDBuilder(symbol);
 	}
 
 	@Test
@@ -25,27 +24,27 @@ public class MDBuilderTest {
 		builder.consume(new MDUpdateBuilder(symbol)
 			.withType(MDUpdateType.REFRESH)
 			.withTime(time)
-			.addBid(100.02d, 800)
-			.addBid(102.45d, 100)
+			.addBid(CDecimalBD.of("100.02"), CDecimalBD.of(800L))
+			.addBid(CDecimalBD.of("102.45"), CDecimalBD.of(100L))
 			.buildMDUpdate());
 		builder.consume(new MDUpdateBuilder(symbol)
 			.withType(MDUpdateType.REFRESH)
 			.withTime(time)
-			.addAsk(12.35d, 20)
-			.addBid(12.28d, 30)
-			.addAsk(12.33d, 10)
-			.addBid(12.30d, 10)
-			.addAsk(12.34d, 15)
+			.addAsk(CDecimalBD.of("12.35"), CDecimalBD.of(20L))
+			.addBid(CDecimalBD.of("12.28"), CDecimalBD.of(30L))
+			.addAsk(CDecimalBD.of("12.33"), CDecimalBD.of(10L))
+			.addBid(CDecimalBD.of("12.30"), CDecimalBD.of(10L))
+			.addAsk(CDecimalBD.of("12.34"), CDecimalBD.of(15L))
 			.buildMDUpdate());
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.34d, 15));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.35d, 20));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.33"), CDecimalBD.of(10L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.34"), CDecimalBD.of(15L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.35"), CDecimalBD.of(20L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
-		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol, expectedAsks, expectedBids, time, 2);
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.30"), CDecimalBD.of(10L)));
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.28"), CDecimalBD.of(30L)));
+		MarketDepth expected = new MarketDepth(symbol, expectedAsks, expectedBids, time);
 		assertEquals(expected, builder.getMarketDepth());
 	}
 
@@ -54,98 +53,95 @@ public class MDBuilderTest {
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		builder.consume(new MDUpdateBuilder(symbol)
 			.withTime(time1)
-			.addAsk(102.45d, 100)
-			.addAsk(102.40d, 150)
-			.addAsk(102.30d, 120)
-			.addAsk(102.00d, 220)
-			.addAsk(101.00d, 450)
-			.addBid(100.02d, 800)
-			.addBid(100.01d, 100)
-			.addBid( 99.98d, 500)
+			.addAsk(CDecimalBD.of("102.45"), CDecimalBD.of(100L))
+			.addAsk(CDecimalBD.of("102.40"), CDecimalBD.of(150L))
+			.addAsk(CDecimalBD.of("102.30"), CDecimalBD.of(120L))
+			.addAsk(CDecimalBD.of("102.00"), CDecimalBD.of(220L))
+			.addAsk(CDecimalBD.of("101.00"), CDecimalBD.of(450L))
+			.addBid(CDecimalBD.of("100.02"), CDecimalBD.of(800L))
+			.addBid(CDecimalBD.of("100.01"), CDecimalBD.of(100L))
+			.addBid(CDecimalBD.of( "99.98"), CDecimalBD.of(500L))
 			.buildMDUpdate());
 		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
 		builder.consume(new MDUpdateBuilder(symbol)
 			.withTime(time2)
 			.withType(MDUpdateType.UPDATE)
-			.replaceAsk(102.30d, 999)
-			.replaceBid(99.98d, 199)
+			.replaceAsk(CDecimalBD.of("102.30"), CDecimalBD.of(999L))
+			.replaceBid(CDecimalBD.of( "99.98"), CDecimalBD.of(199L))
 			.buildMDUpdate());
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.00d, 220));
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.30d, 999));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.45d, 100));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("101.00"), CDecimalBD.of(450L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.00"), CDecimalBD.of(220L)));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.30"), CDecimalBD.of(999L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(100L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
-		expectedBids.add(Tick.of(TickType.BID, time2,  99.98d, 199));
-		MarketDepth expected = new MarketDepth(symbol, expectedAsks, expectedBids, time2, 2);
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.02"), CDecimalBD.of(800L)));
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.01"), CDecimalBD.of(100L)));
+		expectedBids.add(Tick.ofBid(time2, CDecimalBD.of( "99.98"), CDecimalBD.of(199L)));
+		MarketDepth expected = new MarketDepth(symbol, expectedAsks, expectedBids, time2);
 		assertEquals(expected, builder.getMarketDepth());
 	}
 	
 	@Test
 	public void testUpdate_Delete() {
-		builder.setPriceScale(4);
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		builder.consume(new MDUpdateBuilder(symbol)
 			.withTime(time1)
-			.addAsk(102.45d, 100)
-			.addAsk(102.40d, 150)
-			.addAsk(102.30d, 120)
-			.addAsk(102.00d, 220)
-			.addAsk(101.00d, 450)
-			.addBid(100.02d, 800)
-			.addBid(100.01d, 100)
-			.addBid( 99.98d, 500)
+			.addAsk(CDecimalBD.of("102.45"), CDecimalBD.of(100L))
+			.addAsk(CDecimalBD.of("102.40"), CDecimalBD.of(150L))
+			.addAsk(CDecimalBD.of("102.30"), CDecimalBD.of(120L))
+			.addAsk(CDecimalBD.of("102.00"), CDecimalBD.of(220L))
+			.addAsk(CDecimalBD.of("101.00"), CDecimalBD.of(450L))
+			.addBid(CDecimalBD.of("100.02"), CDecimalBD.of(800L))
+			.addBid(CDecimalBD.of("100.01"), CDecimalBD.of(100L))
+			.addBid(CDecimalBD.of( "99.98"), CDecimalBD.of(500L))
 			.buildMDUpdate());
 		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
 		builder.consume(new MDUpdateBuilder(symbol)
 			.withTime(time2)
 			.withType(MDUpdateType.UPDATE)
-			.deleteAsk(102.30d)
-			.deleteBid( 99.98d)
+			.deleteAsk(CDecimalBD.of("102.30"))
+			.deleteBid(CDecimalBD.of( "99.98"))
 			.buildMDUpdate());
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.00d, 220));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.45d, 100));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("101.00"), CDecimalBD.of(450L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.00"), CDecimalBD.of(220L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(100L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
-		MarketDepth expected = new MarketDepth(symbol, expectedAsks, expectedBids, time2, 4);
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.02"), CDecimalBD.of(800L)));
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.01"), CDecimalBD.of(100L)));
+		MarketDepth expected = new MarketDepth(symbol, expectedAsks, expectedBids, time2);
 		assertEquals(expected, builder.getMarketDepth());
 	}
 	
 	@Test
-	public void testUpdate_PriceRouding() {
-		builder.setPriceScale(2);
-
+	public void testUpdate() {
 		Instant time1 = Instant.EPOCH;
 		builder.consume(new MDUpdateBuilder(symbol)
 			.withTime(time1)
-			.addAsk(102.30d, 120)
-			.addAsk(102.40d, 150)
-			.addAsk(102.45d, 100)
+			.addAsk(CDecimalBD.of("102.30"), CDecimalBD.of(120L))
+			.addAsk(CDecimalBD.of("102.40"), CDecimalBD.of(150L))
+			.addAsk(CDecimalBD.of("102.45"), CDecimalBD.of(100L))
 			.buildMDUpdate());
 
 		Instant time2 = Instant.EPOCH.plusSeconds(1000);
 		builder.consume(new MDUpdateBuilder(symbol)
 				.withTime(time2)
 				.withType(MDUpdateType.UPDATE)
-				.replaceAsk(102.29651d, 500)
-				.replaceAsk(102.40561d, 250)
-				.replaceAsk(102.45021d, 200)
+				.replaceAsk(CDecimalBD.of("102.30"), CDecimalBD.of(500L))
+				.replaceAsk(CDecimalBD.of("102.41"), CDecimalBD.of(250L))
+				.replaceAsk(CDecimalBD.of("102.45"), CDecimalBD.of(200L))
 				.buildMDUpdate());
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.30d, 500));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.41d, 250));
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.45d, 200));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.30"), CDecimalBD.of(500L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.41"), CDecimalBD.of(250L)));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.45"), CDecimalBD.of(200L)));
 		assertEquals(expectedAsks, builder.getMarketDepth().getAsks());
 	}
 	

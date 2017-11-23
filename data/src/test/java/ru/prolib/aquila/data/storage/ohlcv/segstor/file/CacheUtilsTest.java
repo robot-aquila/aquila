@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
@@ -28,6 +26,7 @@ import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleBuilder;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
 import ru.prolib.aquila.core.data.ZTFrame;
@@ -284,37 +283,101 @@ public class CacheUtilsTest {
 	@Test
 	public void testWriteSeries() throws Exception {
 		String LS = System.lineSeparator();
-		Interval interval1 = Interval.of(T("2017-09-12T13:12:00Z"), Duration.ofMinutes(1)),
-				interval2 = Interval.of(T("2017-09-12T13:13:00Z"), Duration.ofMinutes(1)),
-				interval3 = Interval.of(T("2017-09-12T13:15:00Z"), Duration.ofMinutes(1)),
-				interval4 = Interval.of(T("2017-09-12T13:17:00Z"), Duration.ofMinutes(1));
+		Candle candle1 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:12:00Z")
+				.withOpenPrice(100L)
+				.withHighPrice(102L)
+				.withLowPrice(98L)
+				.withClosePrice(99L)
+				.withVolume(1000L)
+				.buildCandle(),
+			candle2 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:13:00Z")
+				.withOpenPrice(99L)
+				.withHighPrice(105L)
+				.withLowPrice(99L)
+				.withClosePrice(105L)
+				.withVolume(2000L)
+				.buildCandle(),
+			candle3 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:15:00Z")
+				.withOpenPrice(105L)
+				.withHighPrice(107L)
+				.withLowPrice(101L)
+				.withClosePrice(101L)
+				.withVolume(3000L)
+				.buildCandle(),
+			candle4 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:17:00Z")
+				.withOpenPrice("101.548")
+				.withHighPrice(112L)
+				.withLowPrice(100L)
+				.withClosePrice(108L)
+				.withVolume(4000L)
+				.buildCandle();
 		TSeriesImpl<Candle> series = new TSeriesImpl<Candle>(ZTFrame.M1);
-		series.set(interval1.getStart(), new Candle(interval1, 100d, 102d,  98d,  99d, 1000L));
-		series.set(interval2.getStart(), new Candle(interval2,  99d, 105d,  99d, 105d, 2000L));
-		series.set(interval3.getStart(), new Candle(interval3, 105d, 107d, 101d, 101d, 3000L));
-		series.set(interval4.getStart(), new Candle(interval4, 101d, 112d, 100d, 108d, 4000L));
+		series.set(candle1.getStartTime(), candle1);
+		series.set(candle2.getStartTime(), candle2);
+		series.set(candle3.getStartTime(), candle3);
+		series.set(candle4.getStartTime(), candle4);
 		StringWriter writer = new StringWriter();
 		
 		utils.writeSeries(writer, series);
 		
-		String expected = "2017-09-12T13:12:00Z,100.0,102.0,98.0,99.0,1000" + LS
-				+ "2017-09-12T13:13:00Z,99.0,105.0,99.0,105.0,2000" + LS
-				+ "2017-09-12T13:15:00Z,105.0,107.0,101.0,101.0,3000" + LS
-				+ "2017-09-12T13:17:00Z,101.0,112.0,100.0,108.0,4000" + LS;
+		String expected = "2017-09-12T13:12:00Z,100,102,98,99,1000" + LS
+				+ "2017-09-12T13:13:00Z,99,105,99,105,2000" + LS
+				+ "2017-09-12T13:15:00Z,105,107,101,101,3000" + LS
+				+ "2017-09-12T13:17:00Z,101.548,112,100,108,4000" + LS;
 		assertEquals(expected, writer.toString());
 	}
 	
 	@Test
 	public void testCreateIterator_1S() throws Exception {
-		Interval interval1 = Interval.of(T("2017-09-12T13:12:00Z"), Duration.ofMinutes(1)),
-				interval2 = Interval.of(T("2017-09-12T13:13:00Z"), Duration.ofMinutes(1)),
-				interval3 = Interval.of(T("2017-09-12T13:15:00Z"), Duration.ofMinutes(1)),
-				interval4 = Interval.of(T("2017-09-12T13:17:00Z"), Duration.ofMinutes(1));
+		Candle candle1 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:12:00Z")
+				.withOpenPrice(100L)
+				.withHighPrice(102L)
+				.withLowPrice(98L)
+				.withClosePrice(99L)
+				.withVolume(1000L)
+				.buildCandle(),
+			candle2 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:13:00Z")
+				.withOpenPrice(99L)
+				.withHighPrice(105L)
+				.withLowPrice(99L)
+				.withClosePrice(105L)
+				.withVolume(2000L)
+				.buildCandle(),
+			candle3 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:15:00Z")
+				.withOpenPrice(105L)
+				.withHighPrice(107L)
+				.withLowPrice(101L)
+				.withClosePrice(101L)
+				.withVolume(3000L)
+				.buildCandle(),
+			candle4 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:17:00Z")
+				.withOpenPrice(101L)
+				.withHighPrice(112L)
+				.withLowPrice(100L)
+				.withClosePrice(108L)
+				.withVolume(4000L)
+				.buildCandle();
 		TSeriesImpl<Candle> series = new TSeriesImpl<Candle>(ZTFrame.M1);
-		series.set(interval1.getStart(), new Candle(interval1, 100d, 102d,  98d,  99d, 1000L));
-		series.set(interval2.getStart(), new Candle(interval2,  99d, 105d,  99d, 105d, 2000L));
-		series.set(interval3.getStart(), new Candle(interval3, 105d, 107d, 101d, 101d, 3000L));
-		series.set(interval4.getStart(), new Candle(interval4, 101d, 112d, 100d, 108d, 4000L));
+		series.set(candle1.getStartTime(), candle1);
+		series.set(candle2.getStartTime(), candle2);
+		series.set(candle3.getStartTime(), candle3);
+		series.set(candle4.getStartTime(), candle4);
 		
 		CloseableIterator<Candle> iterator = utils.createIterator(series);
 		
@@ -332,22 +395,54 @@ public class CacheUtilsTest {
 	@Test
 	public void testCreateIterator_1R() throws Exception {
 		BufferedReader reader = new BufferedReader(new StringReader(
-				  "2017-09-12T13:12:00Z,100.0,102.0,98.0,99.0,1000\n"
-				+ "2017-09-12T13:13:00Z,99.0,105.0,99.0,105.0,2000\n"
-				+ "2017-09-12T13:15:00Z,105.0,107.0,101.0,101.0,3000\n"
-				+ "2017-09-12T13:17:00Z,101.0,112.0,100.0,108.0,4000\n"));
+				  "2017-09-12T13:12:00Z,100,102,98,99,1000\n"
+				+ "2017-09-12T13:13:00Z,99,105,99,105,2000\n"
+				+ "2017-09-12T13:15:00Z,105,107,101,101,3000\n"
+				+ "2017-09-12T13:17:00Z,101.12,112.4597,100,108,4000\n"));
 		
 		CloseableIterator<Candle> iterator = utils.createIterator(reader, ZTFrame.M1);
 
 		List<Candle> actual = new ArrayList<>(), expected = new ArrayList<>();
-		Interval interval1 = Interval.of(T("2017-09-12T13:12:00Z"), Duration.ofMinutes(1)),
-				interval2 = Interval.of(T("2017-09-12T13:13:00Z"), Duration.ofMinutes(1)),
-				interval3 = Interval.of(T("2017-09-12T13:15:00Z"), Duration.ofMinutes(1)),
-				interval4 = Interval.of(T("2017-09-12T13:17:00Z"), Duration.ofMinutes(1));
-		expected.add(new Candle(interval1, 100d, 102d,  98d,  99d, 1000L));
-		expected.add(new Candle(interval2,  99d, 105d,  99d, 105d, 2000L));
-		expected.add(new Candle(interval3, 105d, 107d, 101d, 101d, 3000L));
-		expected.add(new Candle(interval4, 101d, 112d, 100d, 108d, 4000L));
+		Candle candle1 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:12:00Z")
+				.withOpenPrice(100L)
+				.withHighPrice(102L)
+				.withLowPrice(98L)
+				.withClosePrice(99L)
+				.withVolume(1000L)
+				.buildCandle(),
+			candle2 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:13:00Z")
+				.withOpenPrice(99L)
+				.withHighPrice(105L)
+				.withLowPrice(99L)
+				.withClosePrice(105L)
+				.withVolume(2000L)
+				.buildCandle(),
+			candle3 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:15:00Z")
+				.withOpenPrice(105L)
+				.withHighPrice(107L)
+				.withLowPrice(101L)
+				.withClosePrice(101L)
+				.withVolume(3000L)
+				.buildCandle(),
+			candle4 = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2017-09-12T13:17:00Z")
+				.withOpenPrice("101.12")
+				.withHighPrice("112.4597")
+				.withLowPrice(100L)
+				.withClosePrice(108L)
+				.withVolume(4000L)
+				.buildCandle();
+		expected.add(candle1);
+		expected.add(candle2);
+		expected.add(candle3);
+		expected.add(candle4);
 		while ( iterator.next() ) {
 			actual.add(iterator.item());
 		}
@@ -356,10 +451,16 @@ public class CacheUtilsTest {
 	
 	@Test
 	public void testParseOHLCVv1() throws Exception {
-		Interval interval1 = Interval.of(T("2015-05-12T13:45:00Z"), Duration.ofMinutes(1));
-		Candle expected = new Candle(interval1, 100.0d, 102.14d, 95.01d, 101.15d, 1500L);
-		
-		String line = "2015-05-12T13:45:24Z,100.0,102.14,95.01,101.15,1500";
+		Candle expected = new CandleBuilder()
+				.withTimeFrame(ZTFrame.M1)
+				.withTime("2015-05-12T13:45:00Z")
+				.withOpenPrice("100.05")
+				.withHighPrice("102.14")
+				.withLowPrice("95.01")
+				.withClosePrice("101.15")
+				.withVolume(1500L)
+				.buildCandle();
+		String line = "2015-05-12T13:45:24Z,100.05,102.14,95.01,101.15,1500";
 		Candle actual = utils.parseOHLCVv1(line, ZTFrame.M1);
 
 		assertEquals(expected, actual);
@@ -468,11 +569,34 @@ public class CacheUtilsTest {
 				CandleSeriesL1UpdateAggregator.getInstance());
 		
 		assertNotNull(series);
-		Duration d = Duration.ofMinutes(5);
 		List<Candle> expected = new ArrayList<>();
-		expected.add(new Candle(Interval.of(T("2017-09-12T16:25:00Z"), d), 105, 105, 102, 103, 410));
-		expected.add(new Candle(Interval.of(T("2017-09-12T16:30:00Z"), d), 108, 110, 105, 105, 705));
-		expected.add(new Candle(Interval.of(T("2017-09-12T16:40:00Z"), d), 102, 103, 101, 101, 820));
+		expected.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M5)
+				.withTime("2017-09-12T16:25:00Z")
+				.withOpenPrice(105L)
+				.withHighPrice(105L)
+				.withLowPrice(102L)
+				.withClosePrice(103L)
+				.withVolume(410L)
+				.buildCandle());
+		expected.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M5)
+				.withTime("2017-09-12T16:30:00Z")
+				.withOpenPrice(108L)
+				.withHighPrice(110L)
+				.withLowPrice(105L)
+				.withClosePrice(105L)
+				.withVolume(705L)
+				.buildCandle());
+		expected.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M5)
+				.withTime("2017-09-12T16:40:00Z")
+				.withOpenPrice(102L)
+				.withHighPrice(103L)
+				.withLowPrice(101L)
+				.withClosePrice(101L)
+				.withVolume(820L)
+				.buildCandle());
 		assertEquals(expected.size(), series.getLength());
 		for ( int i = 0; i < expected.size(); i ++ ) {
 			assertEquals("At#" + i, expected.get(i), series.get(i));

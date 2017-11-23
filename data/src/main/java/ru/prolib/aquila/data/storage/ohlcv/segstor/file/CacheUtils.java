@@ -12,6 +12,8 @@ import java.time.format.DateTimeParseException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CloseableIteratorOfSeries;
@@ -187,35 +189,34 @@ public class CacheUtils {
 			throw new IOException("Number of fields mismatch: expected 6 but " + chunks.length);
 		}
 		Instant time;
-		Double open, high, low, close;
-		Long volume;
+		CDecimal open, high, low, close, volume;
 		try {
 			time = Instant.parse(chunks[0]);
 		} catch ( DateTimeParseException e ) {
 			throw new IOException("Bad time format: " + chunks[0], e);
 		}
 		try {
-			open = Double.parseDouble(chunks[1]);
+			open = CDecimalBD.of(chunks[1]);
 		} catch ( NumberFormatException e ) {
 			throw new IOException("Bad open price format: " + chunks[1], e);
 		}
 		try {
-			high = Double.parseDouble(chunks[2]);
+			high = CDecimalBD.of(chunks[2]);
 		} catch ( NumberFormatException e ) {
 			throw new IOException("Bad high price format: " + chunks[2], e);
 		}
 		try {
-			low  = Double.parseDouble(chunks[3]);
+			low  = CDecimalBD.of(chunks[3]);
 		} catch ( NumberFormatException e ) {
 			throw new IOException("Bad low price format: " + chunks[3], e);
 		}
 		try {
-			close = Double.parseDouble(chunks[4]);
+			close = CDecimalBD.of(chunks[4]);
 		} catch ( NumberFormatException e ) {
 			throw new IOException("Bad close price format: " + chunks[4], e);
 		}
 		try {
-			volume = Long.parseUnsignedLong(chunks[5]);
+			volume = CDecimalBD.of(chunks[5]);
 		} catch ( NumberFormatException e ) {
 			throw new IOException("Bad volume format: " + chunks[5], e);
 		}

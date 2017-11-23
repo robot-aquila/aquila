@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.data;
 import java.time.Instant;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.threeten.extra.Interval;
+
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 /**
@@ -17,13 +19,9 @@ public class Candle {
 	 * Экземпляр свечи, использующийся для индикации конца последовательности.
 	 * Содержимое этой свечи не должно использоваться в качестве данных.
 	 */
-	public static final Candle END = new Candle(null,0,0,0,0,0);
+	public static final Candle END = new Candle(null, null, null, null, null, null);
 	private final Interval interval;
-	private final double open;
-	private final double close;
-	private final double high;
-	private final double low;
-	private final long volume;
+	private final CDecimal open, close, high, low, volume;
 	
 	/**
 	 * Создать свечу на основании указанных параметров.
@@ -35,8 +33,8 @@ public class Candle {
 	 * @param close цена закрытия
 	 * @param volume объем
 	 */
-	public Candle(Interval interval, double open, double high, double low,
-			double close, long volume)
+	public Candle(Interval interval, CDecimal open, CDecimal high, CDecimal low,
+			CDecimal close, CDecimal volume)
 	{
 		super();
 		this.interval = interval;
@@ -64,7 +62,7 @@ public class Candle {
 	 * @param price цена (используется для всех компонентов цены свечи)
 	 * @param volume объем
 	 */
-	public Candle(Interval interval, double price, long volume) {
+	public Candle(Interval interval, CDecimal price, CDecimal volume) {
 		this(interval, price, price, price, price, volume);
 	}
 	
@@ -80,12 +78,12 @@ public class Candle {
 	 * @param volume объем сделки
 	 * @return новая свеча
 	 */
-	public Candle addDeal(double price, long volume) {
+	public Candle addDeal(CDecimal price, CDecimal volume) {
 		return new Candle(interval, open,
-				price > high ? price : high,
-				price < low ? price : low,
+				price.max(high),
+				price.min(low),
 				price,
-				this.volume + volume);
+				this.volume.add(volume));
 	}
 	
 	/**
@@ -110,10 +108,10 @@ public class Candle {
 			throw new OutOfIntervalException(interval, candle);
 		}
 		return new Candle(interval, open,
-				candle.high > high ? candle.high : high,
-				candle.low < low ? candle.low : low,
+				high.max(candle.high),
+				low.min(candle.low),
 				candle.close,
-				volume + candle.volume);
+				volume.add(candle.volume));
 	}
 	
 	/**
@@ -159,8 +157,8 @@ public class Candle {
 	 * <p>
 	 * @return высота свечи
 	 */
-	public double getBody() {
-		return Math.abs(open - close);
+	public CDecimal getBody() {
+		return open.subtract(close).abs();
 	}
 	
 	/**
@@ -170,8 +168,8 @@ public class Candle {
 	 * <p>
 	 * @return высота свечи
 	 */
-	public double getHeight() {
-		return high - low;
+	public CDecimal getHeight() {
+		return high.subtract(low);
 	}
 	
 	/**
@@ -180,7 +178,7 @@ public class Candle {
 	 * @return true если свечка бычья (рост цены)
 	 */
 	public boolean isBullish() {
-		return close > open;
+		return close.compareTo(open) > 0;
 	}
 	
 	/**
@@ -189,7 +187,7 @@ public class Candle {
 	 * @return true если свечка медвежья (снижение цены)
 	 */
 	public boolean isBearish() {
-		return close < open;
+		return close.compareTo(open) < 0;
 	}
 	
 	/**
@@ -203,7 +201,7 @@ public class Candle {
 	 * <p>
 	 * @return цена
 	 */
-	public double getBodyMiddleOrCloseIfBullish() {
+	public CDecimal getBodyMiddleOrCloseIfBullish() {
 		return isBullish() ? close : getBodyMiddle();
 	}
 	
@@ -218,7 +216,7 @@ public class Candle {
 	 * <p>
 	 * @return цена
 	 */
-	public double getBodyMiddleOrCloseIfBearish() {
+	public CDecimal getBodyMiddleOrCloseIfBearish() {
 		return isBearish() ? close : getBodyMiddle();
 	}
 	
@@ -229,8 +227,8 @@ public class Candle {
 	 * <p>
 	 * @return цена
 	 */
-	public double getBodyMiddle() {
-		return (open + close) / 2;
+	public CDecimal getBodyMiddle() {
+		return open.add(close).divide(2L);
 	}
 	
 	/**
@@ -247,7 +245,7 @@ public class Candle {
 	 * <p>
 	 * @return цена открытия
 	 */
-	public double getOpen() {
+	public CDecimal getOpen() {
 		return open;
 	}
 	
@@ -256,7 +254,7 @@ public class Candle {
 	 * <p>
 	 * @return цена закрытия
 	 */
-	public double getClose() {
+	public CDecimal getClose() {
 		return close;
 	}
 	
@@ -265,7 +263,7 @@ public class Candle {
 	 * <p>
 	 * @return максимальная цена
 	 */
-	public double getHigh() {
+	public CDecimal getHigh() {
 		return high;
 	}
 	
@@ -274,7 +272,7 @@ public class Candle {
 	 * <p>
 	 * @return минимальная цена
 	 */
-	public double getLow() {
+	public CDecimal getLow() {
 		return low;
 	}
 	
@@ -283,7 +281,7 @@ public class Candle {
 	 * <p>
 	 * @return объем сделок
 	 */
-	public long getVolume() {
+	public CDecimal getVolume() {
 		return volume;
 	}
 	
@@ -322,8 +320,8 @@ public class Candle {
 	 * <p>
 	 * @return высота тени
 	 */
-	public double getTopShadow() {
-		return high - (isBullish() ? close : open);
+	public CDecimal getTopShadow() {
+		return high.subtract(isBullish() ? close : open);
 	}
 	
 	/**
@@ -331,8 +329,8 @@ public class Candle {
 	 * <p>
 	 * @return высота тени
 	 */
-	public double getBottomShadow() {
-		return (isBearish() ? close : open) - low;
+	public CDecimal getBottomShadow() {
+		return (isBearish() ? close : open).subtract(low);
 	}
 	
 }

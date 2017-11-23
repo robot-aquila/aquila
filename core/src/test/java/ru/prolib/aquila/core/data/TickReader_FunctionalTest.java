@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.data;
 import static org.junit.Assert.*;
 import java.time.Instant;
 import java.util.Vector;
+
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 /**
@@ -13,15 +15,15 @@ public class TickReader_FunctionalTest {
 	private final Vector<Tick> expected = new Vector<Tick>();
 	
 	public TickReader_FunctionalTest() {
-		expected.add(Tick.of(Instant.parse("2014-06-18T09:59:59Z"), 144.79d, 250));
-		expected.add(Tick.of(Instant.parse("2014-06-18T09:59:59Z"), 144.79d,   5));
-		expected.add(Tick.of(Instant.parse("2014-06-18T09:59:59Z"), 144.79d,  10));
-		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:00Z"), 144.98d,   1));
-		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:00Z"), 144.80d, 500));
-		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:01Z"), 144.70d, 300));
-		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:01Z"), 144.70d,   1));
-		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:02Z"), 144.64d,  80));
-		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:02Z"), 144.70d,   3));
+		expected.add(Tick.of(Instant.parse("2014-06-18T09:59:59Z"), CDecimalBD.of("144.79"), CDecimalBD.of(250L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T09:59:59Z"), CDecimalBD.of("144.79"),   CDecimalBD.of(5L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T09:59:59Z"), CDecimalBD.of("144.79"),  CDecimalBD.of(10L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:00Z"), CDecimalBD.of("144.98"),   CDecimalBD.of(1L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:00Z"), CDecimalBD.of("144.80"), CDecimalBD.of(500L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:01Z"), CDecimalBD.of("144.70"), CDecimalBD.of(300L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:01Z"), CDecimalBD.of("144.70"),   CDecimalBD.of(1L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:02Z"), CDecimalBD.of("144.64"),  CDecimalBD.of(80L)));
+		expected.add(Tick.of(Instant.parse("2014-06-18T10:00:02Z"), CDecimalBD.of("144.70"),   CDecimalBD.of(3L)));
 	}
 	
 	/**

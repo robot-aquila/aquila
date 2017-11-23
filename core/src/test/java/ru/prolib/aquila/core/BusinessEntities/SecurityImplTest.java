@@ -366,9 +366,13 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		security.onBestAsk().addListener(listenerStub);
 		assertNull(security.getBestAsk());
 		
-		security.consume(toL1Update(Tick.ofAsk(T("1996-12-04T00:15:00Z"), 80.34d, 15L)));
+		security.consume(toL1Update(Tick.ofAsk(T("1996-12-04T00:15:00Z"),
+				CDecimalBD.of("80.34"),
+				CDecimalBD.of(15L))));
 		
-		Tick expected = Tick.ofAsk(T("1996-12-04T00:15:00Z"), 80.34d, 15L);
+		Tick expected = Tick.ofAsk(T("1996-12-04T00:15:00Z"),
+				CDecimalBD.of("80.34"),
+				CDecimalBD.of(15L));
 		assertEquals(expected, security.getBestAsk());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
@@ -381,7 +385,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_Tick_ResetBestAsk() {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T20:03:00Z");
-		security.consume(toL1Update(Tick.ofAsk(T("2003-01-01T00:00:00Z"), 92.13d, 100L)));
+		security.consume(toL1Update(Tick.ofAsk(T("2003-01-01T00:00:00Z"),
+				CDecimalBD.of("92.13"),
+				CDecimalBD.of(100L))));
 		security.onBestAsk().addListener(listenerStub);
 		
 		security.consume(toL1Update(Tick.NULL_ASK));
@@ -401,9 +407,13 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		security.onBestBid().addListener(listenerStub);
 		assertNull(security.getBestBid());
 		
-		security.consume(toL1Update(Tick.ofBid(T("2010-09-11T03:15:25Z"), 12.48d, 500L)));
+		security.consume(toL1Update(Tick.ofBid(T("2010-09-11T03:15:25Z"),
+				CDecimalBD.of("12.48"),
+				CDecimalBD.of(500L))));
 		
-		Tick expected = Tick.ofBid(T("2010-09-11T03:15:25Z"), 12.48d, 500L);
+		Tick expected = Tick.ofBid(T("2010-09-11T03:15:25Z"),
+				CDecimalBD.of("12.48"),
+				CDecimalBD.of(500L));
 		assertEquals(expected, security.getBestBid());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
 		assertContainerEventWUT(e, security.onBestBid(), security, T("2017-08-04T21:10:00Z"));
@@ -415,7 +425,9 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	public void testUpdate_Tick_ResetBestBid() {
 		produceContainer(controller);
 		schedulerStub.setFixedTime("2017-08-04T20:03:00Z");
-		security.consume(toL1Update(Tick.ofBid(T("1992-07-24T15:45:00Z"), 52.94d, 1L)));
+		security.consume(toL1Update(Tick.ofBid(T("1992-07-24T15:45:00Z"),
+				CDecimalBD.of("52.94"),
+				CDecimalBD.of(1L))));
 		security.onBestBid().addListener(listenerStub);
 		
 		security.consume(toL1Update(Tick.NULL_BID));
@@ -435,9 +447,13 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		security.onLastTrade().addListener(listenerStub);
 		assertNull(security.getLastTrade());
 		
-		security.consume(toL1Update(Tick.ofTrade(T("1978-02-01T05:12:15Z"), 72.15d, 805L)));
+		security.consume(toL1Update(Tick.ofTrade(T("1978-02-01T05:12:15Z"),
+				CDecimalBD.of("72.15"),
+				CDecimalBD.of(805L))));
 		
-		Tick expected = Tick.ofTrade(T("1978-02-01T05:12:15Z"), 72.15d, 805L);
+		Tick expected = Tick.ofTrade(T("1978-02-01T05:12:15Z"),
+				CDecimalBD.of("72.15"),
+				CDecimalBD.of(805L));
 		assertEquals(expected, security.getLastTrade());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
 		assertContainerEventWUT(e, security.onLastTrade(), security, T("2017-08-04T21:10:00Z"));
@@ -466,28 +482,28 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_ASK, time, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
 		// REFRESH_ASK will reset ask-side but bid-side quotes will be kept
-		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("100.02"), CDecimalBD.of(800L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("102.45"), CDecimalBD.of(100L)), MDTransactionType.ADD);
 		security.consume(update);
 		update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.35"), CDecimalBD.of(20L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("12.28"), CDecimalBD.of(30L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.33"), CDecimalBD.of(10L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("12.30"), CDecimalBD.of(10L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.34"), CDecimalBD.of(15L)), MDTransactionType.ADD);
 		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.34d, 15));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.35d, 20));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.33"), CDecimalBD.of(10L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.34"), CDecimalBD.of(15L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.35"), CDecimalBD.of(20L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time, 100.02d, 800)); // this quote must be kept
-		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
-		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time, 2);
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("100.02"), CDecimalBD.of(800L))); // this quote must be kept
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.30"), CDecimalBD.of(10L)));
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.28"), CDecimalBD.of(30L)));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -504,28 +520,28 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		Instant time = Instant.parse("2016-03-04T01:27:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH_BID, time, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("100.02"), CDecimalBD.of(800L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("102.45"), CDecimalBD.of(100L)), MDTransactionType.ADD);
 		security.consume(update);
 		update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.35"), CDecimalBD.of(20L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("12.28"), CDecimalBD.of(30L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.33"), CDecimalBD.of(10L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("12.30"), CDecimalBD.of(10L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.34"), CDecimalBD.of(15L)), MDTransactionType.ADD);
 		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.34d, 15));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.35d, 20));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 102.45d, 100));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.33"), CDecimalBD.of(10L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.34"), CDecimalBD.of(15L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.35"), CDecimalBD.of(20L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("102.45"), CDecimalBD.of(100L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
-		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time, 2);
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.30"), CDecimalBD.of(10L)));
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.28"), CDecimalBD.of(30L)));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -542,27 +558,27 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		Instant time = Instant.parse("2016-02-04T17:24:15Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.BID, time, 100.02d, 800), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 102.45d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("100.02"), CDecimalBD.of(800L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("102.45"), CDecimalBD.of(100L)), MDTransactionType.ADD);
 		security.consume(update);
 		update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.35d, 20), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time, 12.28d, 30), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.33d, 10), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time, 12.30d, 10), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time, 12.34d, 15), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.35"), CDecimalBD.of(20L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("12.28"), CDecimalBD.of(30L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.33"), CDecimalBD.of(10L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time, CDecimalBD.of("12.30"), CDecimalBD.of(10L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time, CDecimalBD.of("12.34"), CDecimalBD.of(15L)), MDTransactionType.ADD);
 		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.33d, 10));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.34d, 15));
-		expectedAsks.add(Tick.of(TickType.ASK, time, 12.35d, 20));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.33"), CDecimalBD.of(10L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.34"), CDecimalBD.of(15L)));
+		expectedAsks.add(Tick.ofAsk(time, CDecimalBD.of("12.35"), CDecimalBD.of(20L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time, 12.30d, 10));
-		expectedBids.add(Tick.of(TickType.BID, time, 12.28d, 30));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time, 2);
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.30"), CDecimalBD.of(10L)));
+		expectedBids.add(Tick.ofBid(time, CDecimalBD.of("12.28"), CDecimalBD.of(30L)));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -579,36 +595,36 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.45d, 100), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.40d, 150), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.30d, 120), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.00d, 220), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 101.00d, 450), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time1, 100.02d, 800), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time1, 100.01d, 100), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time1,  99.98d, 500), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(100L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.30"), CDecimalBD.of(120L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.00"), CDecimalBD.of(220L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("101.00"), CDecimalBD.of(450L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time1, CDecimalBD.of("100.02"), CDecimalBD.of(800L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time1, CDecimalBD.of("100.01"), CDecimalBD.of(100L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time1, CDecimalBD.of( "99.98"), CDecimalBD.of(500L)), MDTransactionType.ADD);
 		security.consume(update);
 		
 		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
 		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
 		update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time2, 102.30d, 999), MDTransactionType.REPLACE);
-		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 199), MDTransactionType.REPLACE);
+		update.addRecord(Tick.ofAsk(time2, CDecimalBD.of("102.30"), CDecimalBD.of(999L)), MDTransactionType.REPLACE);
+		update.addRecord(Tick.ofBid(time2, CDecimalBD.of( "99.98"), CDecimalBD.of(199L)), MDTransactionType.REPLACE);
 		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.00d, 220));
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.30d, 999));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.45d, 100));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("101.00"), CDecimalBD.of(450L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.00"), CDecimalBD.of(220L)));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.30"), CDecimalBD.of(999L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(100L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
-		expectedBids.add(Tick.of(TickType.BID, time2,  99.98d, 199));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2, 2);
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.02"), CDecimalBD.of(800L)));
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.01"), CDecimalBD.of(100L)));
+		expectedBids.add(Tick.ofBid(time2, CDecimalBD.of( "99.98"), CDecimalBD.of(199L)));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -625,34 +641,34 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		Instant time1 = Instant.parse("2016-02-04T18:23:00Z");
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.45d, 100), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.40d, 150), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.30d, 120), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.00d, 220), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 101.00d, 450), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time1, 100.02d, 800), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time1, 100.01d, 100), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.BID, time1,  99.98d, 500), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(100L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.30"), CDecimalBD.of(120L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.00"), CDecimalBD.of(220L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("101.00"), CDecimalBD.of(450L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time1, CDecimalBD.of("100.02"), CDecimalBD.of(800L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time1, CDecimalBD.of("100.01"), CDecimalBD.of(100L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofBid(time1, CDecimalBD.of( "99.98"), CDecimalBD.of(500L)), MDTransactionType.ADD);
 		security.consume(update);
 		
 		Instant time2 = Instant.parse("2016-02-04T19:23:48Z");
 		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
 		update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time2, 102.30d, 0), MDTransactionType.DELETE);
-		update.addRecord(Tick.of(TickType.BID, time2,  99.98d, 0), MDTransactionType.DELETE);
+		update.addRecord(Tick.ofAsk(time2, CDecimalBD.of("102.30"), CDecimalBD.of(0L)), MDTransactionType.DELETE);
+		update.addRecord(Tick.ofBid(time2, CDecimalBD.of( "99.98"), CDecimalBD.of(0L)), MDTransactionType.DELETE);
 		security.onMarketDepthUpdate().addListener(listenerStub);
 		
 		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 101.00d, 450));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.00d, 220));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.45d, 100));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("101.00"), CDecimalBD.of(450L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.00"), CDecimalBD.of(220L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(100L)));
 		List<Tick> expectedBids = new ArrayList<Tick>();
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.02d, 800));
-		expectedBids.add(Tick.of(TickType.BID, time1, 100.01d, 100));
-		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2, 4);
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.02"), CDecimalBD.of(800L)));
+		expectedBids.add(Tick.ofBid(time1, CDecimalBD.of("100.01"), CDecimalBD.of(100L)));
+		MarketDepth expected = new MarketDepth(symbol1, expectedAsks, expectedBids, time2);
 		assertEquals(expected, security.getMarketDepth());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityMarketDepthEvent e = (SecurityMarketDepthEvent) listenerStub.getEvent(0);
@@ -661,7 +677,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Test
-	public void testUpdate_MDUpdate_Update_PriceRouding() {
+	public void testUpdate_MDUpdate_Update_PriceRounding() {
 		security.consume(new DeltaUpdateBuilder()
 			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"))
 			.buildUpdate());
@@ -669,24 +685,24 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		Instant time1 = Instant.EPOCH;
 		MDUpdateHeader header = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time1, symbol1);
 		MDUpdateImpl update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.30d, 120), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.40d, 150), MDTransactionType.ADD);
-		update.addRecord(Tick.of(TickType.ASK, time1, 102.45d, 100), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.30"), CDecimalBD.of(120L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.40"), CDecimalBD.of(150L)), MDTransactionType.ADD);
+		update.addRecord(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(200L)), MDTransactionType.ADD);
 		security.consume(update);
 
 		Instant time2 = Instant.EPOCH.plusSeconds(1000);
 		header = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time2, symbol1);
 		update = new MDUpdateImpl(header);
-		update.addRecord(Tick.of(TickType.ASK, time2, 102.29651d, 500), MDTransactionType.REPLACE);
-		update.addRecord(Tick.of(TickType.ASK, time2, 102.40561d, 250), MDTransactionType.REPLACE);
-		update.addRecord(Tick.of(TickType.ASK, time2, 102.45021d, 200), MDTransactionType.REPLACE);
+		update.addRecord(Tick.ofAsk(time2, CDecimalBD.of("102.30"), CDecimalBD.of(500L)), MDTransactionType.REPLACE);
+		update.addRecord(Tick.ofAsk(time2, CDecimalBD.of("102.40"), CDecimalBD.of(250L)), MDTransactionType.REPLACE);
+		update.addRecord(Tick.ofAsk(time2, CDecimalBD.of("102.41"), CDecimalBD.of(220L)), MDTransactionType.REPLACE);
 		security.consume(update);
 		
 		List<Tick> expectedAsks = new ArrayList<Tick>();
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.30d, 500));
-		expectedAsks.add(Tick.of(TickType.ASK, time1, 102.40d, 150));
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.41d, 250));
-		expectedAsks.add(Tick.of(TickType.ASK, time2, 102.45d, 200));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.30"), CDecimalBD.of(500L)));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.40"), CDecimalBD.of(250L)));
+		expectedAsks.add(Tick.ofAsk(time2, CDecimalBD.of("102.41"), CDecimalBD.of(220L)));
+		expectedAsks.add(Tick.ofAsk(time1, CDecimalBD.of("102.45"), CDecimalBD.of(200L)));
 		assertEquals(expectedAsks, security.getMarketDepth().getAsks());
 	}
 	

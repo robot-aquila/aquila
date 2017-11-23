@@ -16,48 +16,46 @@ public class MarketDepthTest {
 	public void setUp() throws Exception {
 		Instant time = Instant.now();
 		List<Tick> asks = new ArrayList<Tick>();
-		asks.add(Tick.of(TickType.ASK, time, 200.45d, 100L));
-		asks.add(Tick.of(TickType.ASK, time, 200.40d, 200L));
-		asks.add(Tick.of(TickType.ASK, time, 200.35d, 500L));
-		asks.add(Tick.of(TickType.ASK, time, 200.30d, 300L));
+		asks.add(Tick.ofAsk(time, CDecimalBD.of("200.45"), CDecimalBD.of(100L)));
+		asks.add(Tick.ofAsk(time, CDecimalBD.of("200.40"), CDecimalBD.of(200L)));
+		asks.add(Tick.ofAsk(time, CDecimalBD.of("200.35"), CDecimalBD.of(500L)));
+		asks.add(Tick.ofAsk(time, CDecimalBD.of("200.30"), CDecimalBD.of(300L)));
 		List<Tick> bids = new ArrayList<Tick>();
-		bids.add(Tick.of(TickType.BID, time, 201.10d, 200L));
-		bids.add(Tick.of(TickType.BID, time, 201.20d, 400L));
-		bids.add(Tick.of(TickType.BID, time, 201.30d, 600L));
-		bids.add(Tick.of(TickType.BID, time, 201.40d, 800L));
-		md = new MarketDepth(new Symbol("foo"), asks, bids, time, 2);
+		bids.add(Tick.ofBid(time, CDecimalBD.of("201.10"), CDecimalBD.of(200L)));
+		bids.add(Tick.ofBid(time, CDecimalBD.of("201.20"), CDecimalBD.of(400L)));
+		bids.add(Tick.ofBid(time, CDecimalBD.of("201.30"), CDecimalBD.of(600L)));
+		bids.add(Tick.ofBid(time, CDecimalBD.of("201.40"), CDecimalBD.of(800L)));
+		md = new MarketDepth(new Symbol("foo"), asks, bids, time);
 	}
 	
 	@Test
-	public void testHasAskAtPriceLevel_WellRounded() {
-		assertFalse(md.hasAskAtPriceLevel(200.4565d));
-		assertTrue(md.hasAskAtPriceLevel(200.4545d));
-		assertFalse(md.hasAskAtPriceLevel(200.4555d));
+	public void testHasAskAtPriceLevel() {
+		assertFalse(md.hasAskAtPriceLevel(CDecimalBD.of("200.29")));
+		assertTrue(md.hasAskAtPriceLevel(CDecimalBD.of("200.45")));
+		assertFalse(md.hasAskAtPriceLevel(CDecimalBD.of("200.46")));
 	}
 	
 	@Test
-	public void testGetAskAtPriceLevel_WellRounded() {
-		assertEquals(100L, md.getAskAtPriceLevel(200.4545d));
-		assertEquals(0L, md.getAskAtPriceLevel(814.02d));
-		assertEquals(200L, md.getAskAtPriceLevel(200.40d));
-		assertEquals(200L, md.getAskAtPriceLevel(200.401234d));
-		assertEquals(0L, md.getAskAtPriceLevel(200.40541d));
+	public void testGetAskAtPriceLevel() {
+		assertEquals(CDecimalBD.of(100L), md.getAskAtPriceLevel(CDecimalBD.of("200.45")));
+		assertEquals(CDecimalBD.of(0L),   md.getAskAtPriceLevel(CDecimalBD.of("814.02")));
+		assertEquals(CDecimalBD.of(200L), md.getAskAtPriceLevel(CDecimalBD.of("200.40")));
+		assertEquals(CDecimalBD.of(0L),   md.getAskAtPriceLevel(CDecimalBD.of("200.40241")));
 	}
 	
 	@Test
-	public void testHasBidAtPriceLevel_WellRounded() {
-		assertFalse(md.hasBidAtPriceLevel(201.11d));
-		assertTrue(md.hasBidAtPriceLevel(201.10123d));
-		assertTrue(md.hasBidAtPriceLevel(201.10456d));
-		assertFalse(md.hasBidAtPriceLevel(201.10542d));
+	public void testHasBidAtPriceLevel() {
+		assertFalse(md.hasBidAtPriceLevel(CDecimalBD.of("201.11")));
+		assertFalse(md.hasBidAtPriceLevel(CDecimalBD.of("201.1012")));
+		assertTrue(md.hasBidAtPriceLevel(CDecimalBD.of("201.10")));
+		assertTrue(md.hasBidAtPriceLevel(CDecimalBD.of("201.20")));
 	}
 	
 	@Test
-	public void testGetBidAtPriceLevel_WellRounded() {
-		assertEquals(0L, md.getBidAtPriceLevel(201.11d));
-		assertEquals(200L, md.getBidAtPriceLevel(201.10123d));
-		assertEquals(200L, md.getBidAtPriceLevel(201.10456d));
-		assertEquals(0L, md.getBidAtPriceLevel(201.10542d));
+	public void testGetBidAtPriceLevel() {
+		assertEquals(CDecimalBD.of(0L)  , md.getBidAtPriceLevel(CDecimalBD.of("201.11")));
+		assertEquals(CDecimalBD.of(200L), md.getBidAtPriceLevel(CDecimalBD.of("201.10")));
+		assertEquals(CDecimalBD.of(0L),   md.getBidAtPriceLevel(CDecimalBD.of("201.11")));
 	}
 
 }

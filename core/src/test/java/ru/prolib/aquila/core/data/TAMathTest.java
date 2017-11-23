@@ -1,10 +1,11 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
-import java.time.Duration;
 import java.time.Instant;
 import org.junit.*;
-import org.threeten.extra.Interval;
+
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 
 /**
  * 2013-03-04<br>
@@ -16,13 +17,21 @@ public class TAMathTest {
 	 * Запись фикстуры для проверки расчета вещественного значения.
 	 */
 	public static class FR {
-		private final Double value;
-		private final Double expected;
+		private final CDecimal value;
+		private final CDecimal expected;
 		
-		public FR(Double value, Double expected) {
+		public FR(String value, String expected) {
 			super();
-			this.value = value;
-			this.expected = expected;
+			if ( value == null ) {
+				this.value = null;
+			} else {
+				this.value = CDecimalBD.of(value);
+			}
+			if ( expected == null ) {
+				this.expected = null;
+			} else {
+				this.expected = CDecimalBD.of(expected);
+			}
 		}
 	}
 
@@ -32,157 +41,157 @@ public class TAMathTest {
 		 */
 		fix_vv_dpo3[] = {
 			// SPY (S & P 500 SPDR) daily from 1997-06-06
-			new FR(86.3800d,  null),	// 1997-06-06
-			new FR(86.8100d,  null),	// 1997-06-09
-			new FR(87.0800d,  null),	// 1997-06-10
-			new FR(87.2800d,  null),	// 1997-06-11
-			new FR(88.9700d,  null),	// 1997-06-12
-			new FR(89.7200d,  2.9633d),	// 1997-06-13
-			new FR(89.7500d,  2.6933d),	// 1997-06-16
-			new FR(89.6300d,  1.8533d),	// 1997-06-17
-			new FR(89.3100d,  0.6533d),	// 1997-06-18
-			new FR(90.2300d,  0.7500d),	// 1997-06-19
-			new FR(89.5800d, -0.1200d),	// 1997-06-20
-			new FR(87.4100d, -2.1533d),	// 1997-06-23
-			new FR(89.6300d, -0.0933d),	// 1997-06-24
-			new FR(89.0000d, -0.7067d),	// 1997-06-25
-			new FR(88.5600d, -0.5133d),	// 1997-06-26
-			new FR(88.9100d,  0.0367d),	// 1997-06-27
-			new FR(88.3100d, -0.3700d),	// 1997-06-30
-			new FR(89.3400d,  0.2767d),	// 1997-07-01
-			new FR(90.8100d,  1.9867d),	// 1997-07-02
-			new FR(92.0600d,  3.4667d),	// 1997-07-03
-			new FR(91.1300d,  2.2767d),	// 1997-07-07
-			new FR(92.0800d,  2.5933d),	// 1997-07-08
-			new FR(91.0600d,  0.3233d),	// 1997-07-09
+			new FR("86.3800",  null),	// 1997-06-06
+			new FR("86.8100",  null),	// 1997-06-09
+			new FR("87.0800",  null),	// 1997-06-10
+			new FR("87.2800",  null),	// 1997-06-11
+			new FR("88.9700",  null),	// 1997-06-12
+			new FR("89.7200",  "2.9633"),	// 1997-06-13
+			new FR("89.7500",  "2.6933"),	// 1997-06-16
+			new FR("89.6300",  "1.8533"),	// 1997-06-17
+			new FR("89.3100",  "0.6533"),	// 1997-06-18
+			new FR("90.2300",  "0.7500"),	// 1997-06-19
+			new FR("89.5800", "-0.1200"),	// 1997-06-20
+			new FR("87.4100", "-2.1533"),	// 1997-06-23
+			new FR("89.6300", "-0.0933"),	// 1997-06-24
+			new FR("89.0000", "-0.7067"),	// 1997-06-25
+			new FR("88.5600", "-0.5133"),	// 1997-06-26
+			new FR("88.9100",  "0.0367"),	// 1997-06-27
+			new FR("88.3100", "-0.3700"),	// 1997-06-30
+			new FR("89.3400",  "0.2767"),	// 1997-07-01
+			new FR("90.8100",  "1.9867"),	// 1997-07-02
+			new FR("92.0600",  "3.4667"),	// 1997-07-03
+			new FR("91.1300",  "2.2767"),	// 1997-07-07
+			new FR("92.0800",  "2.5933"),	// 1997-07-08
+			new FR("91.0600",  "0.3233"),	// 1997-07-09
 		},
 		/**
 		 * Фикстура теста VectorVest DPO(20)
 		 */
 		fix_vv_dpo20[] = {
 			// SPY (S & P 500 SPDR) minutes from 2013-09-03 09:30:00
-			new FR(165.3869d,  null),	// 2013-09-03 09:30:00
-			new FR(165.4000d,  null),	// 2013-09-03 09:31:00
-			new FR(165.4600d,  null),	// 2013-09-03 09:32:00
-			new FR(165.5100d,  null),	// 2013-09-03 09:33:00
-			new FR(165.4400d,  null),	// 2013-09-03 09:34:00
-			new FR(165.5500d,  null),	// 2013-09-03 09:35:00
-			new FR(165.4800d,  null),	// 2013-09-03 09:36:00
-			new FR(165.5061d,  null),	// 2013-09-03 09:37:00
-			new FR(165.4500d,  null),	// 2013-09-03 09:38:00
-			new FR(165.4300d,  null),	// 2013-09-03 09:39:00
-			new FR(165.4500d,  null),	// 2013-09-03 09:40:00
-			new FR(165.3701d,  null),	// 2013-09-03 09:41:00
-			new FR(165.3800d,  null),	// 2013-09-03 09:42:00
-			new FR(165.3600d,  null),	// 2013-09-03 09:43:00
-			new FR(165.3400d,  null),	// 2013-09-03 09:44:00
-			new FR(165.3650d,  null),	// 2013-09-03 09:45:00
-			new FR(165.3200d,  null),	// 2013-09-03 09:46:00
-			new FR(165.3000d,  null),	// 2013-09-03 09:47:00
-			new FR(165.3300d,  null),	// 2013-09-03 09:48:00
-			new FR(165.3100d,  null),	// 2013-09-03 09:49:00
-			new FR(165.3500d,  null),	// 2013-09-03 09:50:00
-			new FR(165.2900d,  null),	// 2013-09-03 09:51:00
-			new FR(165.3500d,  null),	// 2013-09-03 09:52:00
-			new FR(165.3050d,  null),	// 2013-09-03 09:53:00
-			new FR(165.2200d,  null),	// 2013-09-03 09:54:00
-			new FR(165.3700d,  null),	// 2013-09-03 09:55:00
-			new FR(165.3650d,  null),	// 2013-09-03 09:56:00
-			new FR(165.3500d,  null),	// 2013-09-03 09:57:00
-			new FR(165.1900d,  null),	// 2013-09-03 09:58:00
-			new FR(165.2600d,  null),	// 2013-09-03 09:59:00
-			new FR(165.1600d, -0.2469d),	// 2013-09-03 10:00:00
-			new FR(165.0950d, -0.3101d),	// 2013-09-03 10:01:00
-			new FR(165.1600d, -0.2396d),	// 2013-09-03 10:02:00
-			new FR(165.2300d, -0.1641d),	// 2013-09-03 10:03:00
-			new FR(165.2300d, -0.1538d),	// 2013-09-03 10:04:00
-			new FR(165.1800d, -0.1928d),	// 2013-09-03 10:05:00
-			new FR(165.2700d, -0.0938d),	// 2013-09-03 10:06:00
-			new FR(165.2400d, -0.1181d),	// 2013-09-03 10:07:00
-			new FR(165.2100d, -0.1403d),	// 2013-09-03 10:08:00
-			new FR(165.2300d, -0.1073d),	// 2013-09-03 10:09:00
-			new FR(165.3800d,  0.0512d),	// 2013-09-03 10:10:00
-			new FR(165.3400d,  0.0257d),	// 2013-09-03 10:11:00
-			new FR(165.4300d,  0.1295d),	// 2013-09-03 10:12:00
-			new FR(165.3700d,  0.0805d),	// 2013-09-03 10:13:00
-			new FR(165.3300d,  0.0470d),	// 2013-09-03 10:14:00
-			new FR(165.3000d,  0.0225d),	// 2013-09-03 10:15:00
-			new FR(165.1700d, -0.0983d),	// 2013-09-03 10:16:00
-			new FR(165.1800d, -0.0858d),	// 2013-09-03 10:17:00
-			new FR(165.1200d, -0.1428d),	// 2013-09-03 10:18:00
-			new FR(165.1200d, -0.1368d),	// 2013-09-03 10:19:00
-			new FR(165.0500d, -0.2028d),	// 2013-09-03 10:20:00
-			new FR(165.0800d, -0.1743d),	// 2013-09-03 10:21:00
-			new FR(165.0350d, -0.2218d),	// 2013-09-03 10:22:00
-			new FR(164.9900d, -0.2708d),	// 2013-09-03 10:23:00
-			new FR(165.0401d, -0.2239d),	// 2013-09-03 10:24:00
-			new FR(165.1000d, -0.1695d),	// 2013-09-03 10:25:00
-			new FR(165.1500d, -0.1160d),	// 2013-09-03 10:26:00
-			new FR(165.0700d, -0.1863d),	// 2013-09-03 10:27:00
-			new FR(165.0940d, -0.1538d),	// 2013-09-03 10:28:00
-			new FR(165.1300d, -0.1143d),	// 2013-09-03 10:29:00
-			new FR(165.0800d, -0.1573d),	// 2013-09-03 10:30:00
-			new FR(165.1500d, -0.0818d),	// 2013-09-03 10:31:00
-			new FR(165.2200d, -0.0110d),	// 2013-09-03 10:32:00
-			new FR(165.1900d, -0.0348d),	// 2013-09-03 10:33:00
-			new FR(165.1900d, -0.0228d),	// 2013-09-03 10:34:00
-			new FR(165.1700d, -0.0333d),	// 2013-09-03 10:35:00
-			new FR(165.1600d, -0.0393d),	// 2013-09-03 10:36:00
-			new FR(165.2345d,  0.0412d),	// 2013-09-03 10:37:00
-			new FR(165.2050d,  0.0202d),	// 2013-09-03 10:38:00
+			new FR("165.3869",  null),	// 2013-09-03 09:30:00
+			new FR("165.4000",  null),	// 2013-09-03 09:31:00
+			new FR("165.4600",  null),	// 2013-09-03 09:32:00
+			new FR("165.5100",  null),	// 2013-09-03 09:33:00
+			new FR("165.4400",  null),	// 2013-09-03 09:34:00
+			new FR("165.5500",  null),	// 2013-09-03 09:35:00
+			new FR("165.4800",  null),	// 2013-09-03 09:36:00
+			new FR("165.5061",  null),	// 2013-09-03 09:37:00
+			new FR("165.4500",  null),	// 2013-09-03 09:38:00
+			new FR("165.4300",  null),	// 2013-09-03 09:39:00
+			new FR("165.4500",  null),	// 2013-09-03 09:40:00
+			new FR("165.3701",  null),	// 2013-09-03 09:41:00
+			new FR("165.3800",  null),	// 2013-09-03 09:42:00
+			new FR("165.3600",  null),	// 2013-09-03 09:43:00
+			new FR("165.3400",  null),	// 2013-09-03 09:44:00
+			new FR("165.3650",  null),	// 2013-09-03 09:45:00
+			new FR("165.3200",  null),	// 2013-09-03 09:46:00
+			new FR("165.3000",  null),	// 2013-09-03 09:47:00
+			new FR("165.3300",  null),	// 2013-09-03 09:48:00
+			new FR("165.3100",  null),	// 2013-09-03 09:49:00
+			new FR("165.3500",  null),	// 2013-09-03 09:50:00
+			new FR("165.2900",  null),	// 2013-09-03 09:51:00
+			new FR("165.3500",  null),	// 2013-09-03 09:52:00
+			new FR("165.3050",  null),	// 2013-09-03 09:53:00
+			new FR("165.2200",  null),	// 2013-09-03 09:54:00
+			new FR("165.3700",  null),	// 2013-09-03 09:55:00
+			new FR("165.3650",  null),	// 2013-09-03 09:56:00
+			new FR("165.3500",  null),	// 2013-09-03 09:57:00
+			new FR("165.1900",  null),	// 2013-09-03 09:58:00
+			new FR("165.2600",  null),	// 2013-09-03 09:59:00
+			new FR("165.1600", "-0.2469"),	// 2013-09-03 10:00:00
+			new FR("165.0950", "-0.3101"),	// 2013-09-03 10:01:00
+			new FR("165.1600", "-0.2396"),	// 2013-09-03 10:02:00
+			new FR("165.2300", "-0.1641"),	// 2013-09-03 10:03:00
+			new FR("165.2300", "-0.1538"),	// 2013-09-03 10:04:00
+			new FR("165.1800", "-0.1928"),	// 2013-09-03 10:05:00
+			new FR("165.2700", "-0.0938"),	// 2013-09-03 10:06:00
+			new FR("165.2400", "-0.1181"),	// 2013-09-03 10:07:00
+			new FR("165.2100", "-0.1403"),	// 2013-09-03 10:08:00
+			new FR("165.2300", "-0.1073"),	// 2013-09-03 10:09:00
+			new FR("165.3800",  "0.0512"),	// 2013-09-03 10:10:00
+			new FR("165.3400",  "0.0257"),	// 2013-09-03 10:11:00
+			new FR("165.4300",  "0.1295"),	// 2013-09-03 10:12:00
+			new FR("165.3700",  "0.0805"),	// 2013-09-03 10:13:00
+			new FR("165.3300",  "0.0470"),	// 2013-09-03 10:14:00
+			new FR("165.3000",  "0.0225"),	// 2013-09-03 10:15:00
+			new FR("165.1700", "-0.0983"),	// 2013-09-03 10:16:00
+			new FR("165.1800", "-0.0858"),	// 2013-09-03 10:17:00
+			new FR("165.1200", "-0.1428"),	// 2013-09-03 10:18:00
+			new FR("165.1200", "-0.1368"),	// 2013-09-03 10:19:00
+			new FR("165.0500", "-0.2028"),	// 2013-09-03 10:20:00
+			new FR("165.0800", "-0.1743"),	// 2013-09-03 10:21:00
+			new FR("165.0350", "-0.2218"),	// 2013-09-03 10:22:00
+			new FR("164.9900", "-0.2708"),	// 2013-09-03 10:23:00
+			new FR("165.0401", "-0.2239"),	// 2013-09-03 10:24:00
+			new FR("165.1000", "-0.1695"),	// 2013-09-03 10:25:00
+			new FR("165.1500", "-0.1160"),	// 2013-09-03 10:26:00
+			new FR("165.0700", "-0.1863"),	// 2013-09-03 10:27:00
+			new FR("165.0940", "-0.1538"),	// 2013-09-03 10:28:00
+			new FR("165.1300", "-0.1143"),	// 2013-09-03 10:29:00
+			new FR("165.0800", "-0.1573"),	// 2013-09-03 10:30:00
+			new FR("165.1500", "-0.0818"),	// 2013-09-03 10:31:00
+			new FR("165.2200", "-0.0110"),	// 2013-09-03 10:32:00
+			new FR("165.1900", "-0.0348"),	// 2013-09-03 10:33:00
+			new FR("165.1900", "-0.0228"),	// 2013-09-03 10:34:00
+			new FR("165.1700", "-0.0333"),	// 2013-09-03 10:35:00
+			new FR("165.1600", "-0.0393"),	// 2013-09-03 10:36:00
+			new FR("165.2345",  "0.0412"),	// 2013-09-03 10:37:00
+			new FR("165.2050",  "0.0202"),	// 2013-09-03 10:38:00
 		},
 		/**
 		 * Фикстура теста Quik EMA(5)
 		 */
 		fix_qema5[] = {
 			// RIU5, 2015-07-31, m15, close
-			new FR(85990.000000, null), //09:15
-			new FR(85190.000000, null), //10:00
-			new FR(85290.000000, null), //10:15
-			new FR(84980.000000, null), //10:30
-			new FR(85260.000000, 85339.506173), //10:45
-			new FR(85120.000000, 85266.337449),
-			new FR(84730.000000, 85087.558299),
-			new FR(84890.000000, 85021.705533),
-			new FR(84900.000000, 84981.137022),
-			new FR(85120.000000, 85027.424681),
-			new FR(85150.000000, 85068.283121),
-			new FR(84950.000000, 85028.855414),
-			new FR(85010.000000, 85022.570276),
-			new FR(85150.000000, 85065.046851),//13:00
-			new FR(85150.000000, 85093.364567),//13:15
-			new FR(84940.000000, 85042.243045),
-			new FR(84900.000000, 84994.828696),
-			new FR(84440.000000, 84809.885798),
-			new FR(84200.000000, 84606.590532),
-			new FR(84230.000000, 84481.060355),
-			new FR(84180.000000, 84380.706903),
-			new FR(84430.000000, 84397.137935),
-			new FR(84230.000000, 84341.425290),
-			new FR(84850.000000, 84510.950193),
-			new FR(84740.000000, 84587.300129),
-			new FR(85230.000000, 84801.533419),
-			new FR(85770.000000, 85124.355613),
-			new FR(85480.000000, 85242.903742),
-			new FR(86130.000000, 85538.602495),
-			new FR(85720.000000, 85599.068330),
-			new FR(85840.000000, 85679.378886),
-			new FR(85830.000000, 85729.585924),
-			new FR(85690.000000, 85716.390616),//17:45
-			new FR(85670.000000, 85700.927077),//18:00
-			new FR(85850.000000, 85750.618052),//18:15
+			new FR("85990.000000", null), //09:15
+			new FR("85190.000000", null), //10:00
+			new FR("85290.000000", null), //10:15
+			new FR("84980.000000", null), //10:30
+			new FR("85260.000000", "85339.506173"), //10:45
+			new FR("85120.000000", "85266.337449"),
+			new FR("84730.000000", "85087.558299"),
+			new FR("84890.000000", "85021.705533"),
+			new FR("84900.000000", "84981.137022"),
+			new FR("85120.000000", "85027.424681"),
+			new FR("85150.000000", "85068.283121"),
+			new FR("84950.000000", "85028.855414"),
+			new FR("85010.000000", "85022.570276"),
+			new FR("85150.000000", "85065.046851"),//13:00
+			new FR("85150.000000", "85093.364567"),//13:15
+			new FR("84940.000000", "85042.243045"),
+			new FR("84900.000000", "84994.828697"), // x!
+			new FR("84440.000000", "84809.885798"),
+			new FR("84200.000000", "84606.590532"),
+			new FR("84230.000000", "84481.060355"),
+			new FR("84180.000000", "84380.706903"),
+			new FR("84430.000000", "84397.137935"),
+			new FR("84230.000000", "84341.425290"),
+			new FR("84850.000000", "84510.950193"),
+			new FR("84740.000000", "84587.300129"),
+			new FR("85230.000000", "84801.533419"),
+			new FR("85770.000000", "85124.355613"),
+			new FR("85480.000000", "85242.903742"),
+			new FR("86130.000000", "85538.602495"),
+			new FR("85720.000000", "85599.068330"),
+			new FR("85840.000000", "85679.378887"), // x!
+			new FR("85830.000000", "85729.585925"), // x!
+			new FR("85690.000000", "85716.390617"),//17:45, x! + 0.000001
+			new FR("85670.000000", "85700.927078"),//18:00, x! + 0.000001
+			new FR("85850.000000", "85750.618052"),//18:15
 		};
 	
 	
 	private TAMath service;
-	private EditableSeries<Double> series1, series2;
+	private EditableSeries<CDecimal> series1, series2;
 	private EditableSeries<Candle> candles;
 	
 	@Before
 	public void setUp() throws Exception {
 		service = TAMath.getInstance();
-		series1 = new SeriesImpl<Double>();
-		series2 = new SeriesImpl<Double>();
+		series1 = new SeriesImpl<>();
+		series2 = new SeriesImpl<>();
 		candles = new SeriesImpl<Candle>();
 	}
 	
@@ -193,23 +202,45 @@ public class TAMathTest {
 	
 	@Test
 	public void testAbs() throws Exception {
-		assertEquals(123.45d, service.abs(123.45d), 0.01d);
-		assertEquals(123.45d, service.abs(-123.45d), 0.01d);
+		CDecimal expected = CDecimalBD.of("123.45");
+		assertEquals(expected, service.abs(CDecimalBD.of("123.45")));
+		assertEquals(expected, service.abs(CDecimalBD.of("-123.45")));
 		assertNull(service.abs(null));
 	}
 	
 	@Test
 	public void testMaxVA() throws Exception {
-		assertEquals(180.24, service.max(67.4, null, 180.24, null, 159.12), 0.001);
-		assertEquals(12.34, service.max(12.34, 12.34, null), 0.001);
-		assertNull(service.max((Double) null));
+		CDecimal expected = CDecimalBD.of("180.24");
+		CDecimal actual = service.max(CDecimalBD.of("67.4"),
+				null,
+				CDecimalBD.of("180.24"),
+				null,
+				CDecimalBD.of("159.12"));
+		assertEquals(expected, actual);
+		
+		expected = CDecimalBD.of("12.34");
+		actual = service.max(CDecimalBD.of("12.34"), CDecimalBD.of("12.34"), null);
+		assertEquals(expected, actual);
+		
+		assertNull(service.max((CDecimal) null));
 	}
 	
 	@Test
 	public void testMinVA() throws Exception {
-		assertEquals(67.4, service.min(67.4, null, 180.24, null, 159.12), 0.001);
-		assertEquals(12.34, service.min(12.34, 12.34, null), 0.001);
-		assertNull(service.min((Double) null));
+		CDecimal expected = CDecimalBD.of("67.4");
+		CDecimal actual = service.min(
+				CDecimalBD.of("67.4"),
+				null,
+				CDecimalBD.of("180.24"),
+				null,
+				CDecimalBD.of("159.12"));
+		assertEquals(expected, actual);
+		
+		expected = CDecimalBD.of("12.34");
+		actual = service.min(CDecimalBD.of("12.34"), CDecimalBD.of("12.34"), null);
+		assertEquals(expected, actual);
+		
+		assertNull(service.min((CDecimal) null));
 	}
 	
 	@Test
@@ -219,8 +250,8 @@ public class TAMathTest {
 		assertFalse(service.hasNulls(series1, 0, 0));
 		assertFalse(service.hasNulls(series1, 0));
 		series1.add(null);
-		series1.add(12.34d);
-		series1.add(11.62d);
+		series1.add(CDecimalBD.of("12.34"));
+		series1.add(CDecimalBD.of("11.62"));
 		assertFalse(service.hasNulls(series1, 2, 1));
 		assertFalse(service.hasNulls(series1, 1));
 		assertFalse(service.hasNulls(series1, 2, 2));
@@ -242,21 +273,21 @@ public class TAMathTest {
 		assertNull(service.sma(series1, 5));
 		assertNull(service.sma(series1, 0, 5));
 		
-		series1.add(10.0d);
-		series1.add(20.0d);
+		series1.add(CDecimalBD.of("10.00"));
+		series1.add(CDecimalBD.of("20.00"));
 		assertNull(service.sma(series1, 5));
 		
-		series1.add(30.0d);
-		series1.add(40.0d);
+		series1.add(CDecimalBD.of("30.00"));
+		series1.add(CDecimalBD.of("40.00"));
 		assertNull(service.sma(series1, 5));
 		assertNull(service.sma(series1, 1, 5));
 		
-		series1.add(50.00d);
-		assertEquals(30.00d, service.sma(series1, 5), 0.01d);
-		assertEquals(30.00d, service.sma(series1, 5, 5), 0.01d);
+		series1.add(CDecimalBD.of("50.00"));
+		assertEquals(CDecimalBD.of("30.00"), service.sma(series1, 5));
+		assertEquals(CDecimalBD.of("30.00"), service.sma(series1, 5, 5));
 		
 		series1.add(null);
-		assertEquals(30.00d, service.sma(series1, -1, 5), 0.01d);
+		assertEquals(CDecimalBD.of("30.00"), service.sma(series1, -1, 5));
 		assertNull(service.sma(series1, 5));
 		assertNull(service.sma(series1, 6, 5));
 	}
@@ -269,11 +300,11 @@ public class TAMathTest {
 		for ( int i = 0; i < fix_vv_dpo3.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
-			Double dpo = service.vvdpo(series1, i, 3);
+			CDecimal dpo = service.vvdpo(series1, i, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
-				assertEquals(msg, fr.expected, dpo, 0.0001d);
+				assertEquals(msg, fr.expected, dpo);
 			}
 		}
 	}
@@ -284,11 +315,11 @@ public class TAMathTest {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo3[i];
 			series1.add(fr.value);
-			Double dpo = service.vvdpo(series1, 3);
+			CDecimal dpo = service.vvdpo(series1, 3);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
-				assertEquals(msg, fr.expected, dpo, 0.0001d);
+				assertEquals(msg, fr.expected, dpo);
 			}
 		}
 	}
@@ -301,11 +332,11 @@ public class TAMathTest {
 		for ( int i = 0; i < fix_vv_dpo20.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
-			Double dpo = service.vvdpo(series1, i, 20);
+			CDecimal dpo = service.vvdpo(series1, i, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
-				assertEquals(msg, fr.expected, dpo, 0.0001d);
+				assertEquals(msg, fr.expected, dpo);
 			}
 		}
 	}
@@ -316,11 +347,11 @@ public class TAMathTest {
 			String msg = "At #" + i;
 			FR fr = fix_vv_dpo20[i];
 			series1.add(fr.value);
-			Double dpo = service.vvdpo(series1, 20);
+			CDecimal dpo = service.vvdpo(series1, 20);
 			if ( fr.expected == null ) {
 				assertNull(msg, dpo);
 			} else {
-				assertEquals(msg, fr.expected, dpo, 0.0001d);
+				assertEquals(msg, fr.expected, dpo);
 			}
 		}
 	}
@@ -337,89 +368,124 @@ public class TAMathTest {
 		Instant time = Instant.parse("2013-10-11T11:09:43Z");
 		
 		// H-L
-		candles.add(new Candle(ZTFrame.M5.getInterval(time),
-				0, 48.70, 47.79, 48.16, 0L));
-		assertEquals(0.91, service.tr(candles), 0.01d);
-		assertEquals(0.91, service.tr(candles, 1), 0.01d);
+		candles.add(new CandleBuilder()
+				.withTime(time)
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.ZERO)
+				.withHighPrice(CDecimalBD.of("48.70"))
+				.withLowPrice(CDecimalBD.of("47.79"))
+				.withClosePrice(CDecimalBD.of("48.16"))
+				.withVolume(CDecimalBD.ZERO)
+				.buildCandle());
+		assertEquals(CDecimalBD.of("0.91"), service.tr(candles));
+		assertEquals(CDecimalBD.of("0.91"), service.tr(candles, 1));
 		
 		// |H-Cp|
-		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(5 * 60)),
-				0, 49.35, 48.86, 49.32, 0L));
-		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(10 * 60)),
-				0, 49.92, 49.50, 49.91, 0L));
-		assertEquals(0.6, service.tr(candles), 0.001);
-		assertEquals(0.6, service.tr(candles, 3), 0.001);
+		candles.add(new CandleBuilder()
+				.withTime(time.plusSeconds(5 * 60))
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.ZERO)
+				.withHighPrice(CDecimalBD.of("49.35"))
+				.withLowPrice(CDecimalBD.of("48.86"))
+				.withClosePrice(CDecimalBD.of("49.32"))
+				.withVolume(CDecimalBD.ZERO)
+				.buildCandle());
+		candles.add(new CandleBuilder()
+				.withTime(time.plusSeconds(10 * 60))
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.ZERO)
+				.withHighPrice(CDecimalBD.of("49.92"))
+				.withLowPrice(CDecimalBD.of("49.50"))
+				.withClosePrice(CDecimalBD.of("49.91"))
+				.withVolume(CDecimalBD.ZERO)
+				.buildCandle());
+		assertEquals(CDecimalBD.of("0.60"), service.tr(candles));
+		assertEquals(CDecimalBD.of("0.60"), service.tr(candles, 3));
 		
 		// |L-Cp|
-		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(15 * 60)),
-				0, 50.19, 49.87, 50.13, 0L));
-		candles.add(new Candle(ZTFrame.M5.getInterval(time.plusSeconds(20 * 60)),
-				0, 50.12, 49.20, 49.53, 0L));
-		assertEquals(0.93, service.tr(candles), 0.001);
-		assertEquals(0.93, service.tr(candles, 5), 0.001);
+		candles.add(new CandleBuilder()
+				.withTime(time.plusSeconds(15 * 60))
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.ZERO)
+				.withHighPrice(CDecimalBD.of("50.19"))
+				.withLowPrice(CDecimalBD.of("49.87"))
+				.withClosePrice(CDecimalBD.of("50.13"))
+				.withVolume(CDecimalBD.ZERO)
+				.buildCandle());
+		candles.add(new CandleBuilder()
+				.withTime(time.plusSeconds(20 * 60))
+				.withTimeFrame(ZTFrame.M5)
+				.withOpenPrice(CDecimalBD.ZERO)
+				.withHighPrice(CDecimalBD.of("50.12"))
+				.withLowPrice(CDecimalBD.of("49.20"))
+				.withClosePrice(CDecimalBD.of("49.53"))
+				.withVolume(CDecimalBD.ZERO)
+				.buildCandle());
+		assertEquals(CDecimalBD.of("0.93"), service.tr(candles));
+		assertEquals(CDecimalBD.of("0.93"), service.tr(candles, 5));
 	}
 	
 	@Test
 	public void testMax23() throws Exception {
 		int period = 3;
-		Double fix[][] = {
+		FR fix[] = {
 				// value, max
-				{ 19.29d, 19.29d },
-				{ 15.44d, 19.29d },
-				{ 11.86d, 19.29d },
-				{ 21.15d, 21.15d },
-				{ null,   21.15d },
-				{ 16.12d, 21.15d },
-				{ 13.21d, 16.12d },
-				{ 11.92d, 16.12d },
-				{ 18.54d, 18.54d },
-				{ 17.76d, 18.54d },
-				{ null,   18.54d },
-				{ null,   17.76d },
-				{ null,   null   },
-				{  1.15d,  1.15d },
+				new FR("19.29", "19.29"),
+				new FR("15.44", "19.29"),
+				new FR("11.86", "19.29"),
+				new FR("21.15", "21.15"),
+				new FR(null, 	"21.15"),
+				new FR("16.12", "21.15"),
+				new FR("13.21", "16.12"),
+				new FR("11.92", "16.12"),
+				new FR("18.54", "18.54"),
+				new FR("17.76", "18.54"),
+				new FR(null, 	"18.54"),
+				new FR(null, 	"17.76"),
+				new FR(null, 	null),
+				new FR("1.15",  "1.15"),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series1.add(fix[i][0]);
-			Double expect = fix[i][1];
+			series1.add(fix[i].value);
+			CDecimal expect = fix[i].expected;
 			String msg = "At #" + i;
 			if ( expect == null ) {
 				assertNull(msg, service.max(series1, i, period));
 				assertNull(msg, service.max(series1, period));
 			} else {
-				assertEquals(msg, expect, service.max(series1, i, period), 0.01d);
-				assertEquals(msg, expect, service.max(series1, period), 0.01d);
+				assertEquals(msg, expect, service.max(series1, i, period));
+				assertEquals(msg, expect, service.max(series1, period));
 			}
 		}
 		// additional tests
-		assertEquals(17.76d, service.max(series1, -2, period), 0.01d);
-		assertEquals(18.54d, service.max(series1, -3, period), 0.01d);
-		assertEquals(18.54d, service.max(series1, -5, period), 0.01d);
-		assertEquals(16.12d, service.max(series1, -7, period), 0.01d);
+		assertEquals(CDecimalBD.of("17.76"), service.max(series1, -2, period));
+		assertEquals(CDecimalBD.of("18.54"), service.max(series1, -3, period));
+		assertEquals(CDecimalBD.of("18.54"), service.max(series1, -5, period));
+		assertEquals(CDecimalBD.of("16.12"), service.max(series1, -7, period));
 	}
 	
 	@Test
 	public void testMaxVA23() throws Exception {
 		int period = 4;
-		EditableSeries<Double> value2 = new SeriesImpl<Double>();
-		Double fix[][] = {
+		EditableSeries<CDecimal> value2 = new SeriesImpl<>();
+		CDecimal fix[][] = {
 				// value, value2, max
-				{ 19.29d, null,   19.29d },
-				{ 11.19d, 21.15d, 21.15d },
-				{ null,   null,   21.15d },
-				{ 23.74d, 23.70d, 23.74d },
-				{ 13.17d,  2.20d, 23.74d },
-				{ 23.17d, 16.20d, 23.74d },
-				{ 18.25d, 16.21d, 23.74d },
-				{ 15.12d,  6.18d, 23.17d },
+				{ CDecimalBD.of("19.29"), null,   				  CDecimalBD.of("19.29") },
+				{ CDecimalBD.of("11.19"), CDecimalBD.of("21.15"), CDecimalBD.of("21.15") },
+				{ null,   				  null,   				  CDecimalBD.of("21.15") },
+				{ CDecimalBD.of("23.74"), CDecimalBD.of("23.70"), CDecimalBD.of("23.74") },
+				{ CDecimalBD.of("13.17"), CDecimalBD.of( "2.20"), CDecimalBD.of("23.74") },
+				{ CDecimalBD.of("23.17"), CDecimalBD.of("16.20"), CDecimalBD.of("23.74") },
+				{ CDecimalBD.of("18.25"), CDecimalBD.of("16.21"), CDecimalBD.of("23.74") },
+				{ CDecimalBD.of("15.12"), CDecimalBD.of( "6.18"), CDecimalBD.of("23.17") },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			series1.add(fix[i][0]);
 			value2.add(fix[i][1]);
 			String msg = "At #" + i;
-			Double expect = fix[i][2];
-			assertEquals(msg, expect, service.max(period, series1, value2), 0.01d);
-			assertEquals(msg, expect, service.max(i, period, value2, series1),0.01d);
+			CDecimal expect = fix[i][2];
+			assertEquals(msg, expect, service.max(period, series1, value2));
+			assertEquals(msg, expect, service.max(i, period, value2, series1));
 		}
 	}
 	
@@ -503,64 +569,72 @@ public class TAMathTest {
 	@Test
 	public void testMin23() throws Exception {
 		int period = 3;
-		Double fix[][] = {
+		FR fix[] = {
 				// value, min
-				{ 19.29d, 19.29d },
-				{ 15.44d, 15.44d },
-				{ 11.86d, 11.86d },
-				{ 21.15d, 11.86d },
-				{ null,   11.86d },
-				{ 16.12d, 16.12d },
-				{ 13.21d, 13.21d },
-				{ 11.92d, 11.92d },
-				{ 18.54d, 11.92d },
-				{ 17.76d, 11.92d },
-				{ null,   17.76d },
-				{ null,   17.76d },
-				{ null,   null   },
-				{  1.15d,  1.15d },
+				new FR("19.29", "19.29"),
+				new FR("15.44", "15.44"),
+				new FR("11.86", "11.86"),
+				new FR("21.15", "11.86"),
+				new FR(null,    "11.86"),
+				new FR("16.12", "16.12"),
+				new FR("13.21", "13.21"),
+				new FR("11.92", "11.92"),
+				new FR("18.54", "11.92"),
+				new FR("17.76", "11.92"),
+				new FR(null,    "17.76"),
+				new FR(null,    "17.76"),
+				new FR(null,    null),
+				new FR("1.15",  "1.15"),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series1.add(fix[i][0]);
-			Double expect = fix[i][1];
+			series1.add(fix[i].value);
+			CDecimal expect = fix[i].expected;
 			String msg = "At #" + i;
 			if ( expect == null ) {
 				assertNull(msg, service.min(series1, i, period));
 				assertNull(msg, service.min(series1, period));
 			} else {
-				assertEquals(msg, expect, service.min(series1, i, period), 0.01d);
-				assertEquals(msg, expect, service.min(series1, period), 0.01d);
+				assertEquals(msg, expect, service.min(series1, i, period));
+				assertEquals(msg, expect, service.min(series1, period));
 			}
 		}
 		// additional tests
-		assertEquals(17.76d, service.min(series1, -2, period), 0.01d);
-		assertEquals(17.76d, service.min(series1, -3, period), 0.01d);
-		assertEquals(11.92d, service.min(series1, -5, period), 0.01d);
-		assertEquals(13.21d, service.min(series1, -7, period), 0.01d);
+		assertEquals(CDecimalBD.of("17.76"), service.min(series1, -2, period));
+		assertEquals(CDecimalBD.of("17.76"), service.min(series1, -3, period));
+		assertEquals(CDecimalBD.of("11.92"), service.min(series1, -5, period));
+		assertEquals(CDecimalBD.of("13.21"), service.min(series1, -7, period));
 	}
 	
 	@Test
 	public void testMinVA23() throws Exception {
 		int period = 4;
-		EditableSeries<Double> value2 = new SeriesImpl<Double>();
-		Double fix[][] = {
+		EditableSeries<CDecimal> value2 = new SeriesImpl<>();
+		String fix[][] = {
 				// value, value2, min
-				{ 19.29d, null,   19.29d },
-				{ 11.19d, 21.15d, 11.19d },
-				{ null,   null,   11.19d },
-				{ 23.74d, 23.70d, 11.19d },
-				{ 13.17d,  2.20d,  2.20d },
-				{ 23.17d, 16.20d,  2.20d },
-				{ 18.25d, 16.21d,  2.20d },
-				{ 15.12d,  6.18d,  2.20d },
+				{ "19.29", null,    "19.29" },
+				{ "11.19", "21.15", "11.19" },
+				{ null,    null,    "11.19" },
+				{ "23.74", "23.70", "11.19" },
+				{ "13.17",  "2.20",  "2.20" },
+				{ "23.17", "16.20",  "2.20" },
+				{ "18.25", "16.21",  "2.20" },
+				{ "15.12",  "6.18",  "2.20" },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series1.add(fix[i][0]);
-			value2.add(fix[i][1]);
+			if ( fix[i][0] == null ) {
+				series1.add(null);
+			} else {
+				series1.add(CDecimalBD.of(fix[i][0]));
+			}
+			if ( fix[i][1] == null ) {
+				value2.add(null);
+			} else {
+				value2.add(CDecimalBD.of(fix[i][1]));
+			}
 			String msg = "At #" + i;
-			Double expect = fix[i][2];
-			assertEquals(msg, expect, service.min(period, series1, value2), 0.01d);
-			assertEquals(msg, expect, service.min(i, period, value2, series1),0.01d);
+			CDecimal expect = CDecimalBD.of(fix[i][2]);
+			assertEquals(msg, expect, service.min(period, series1, value2));
+			assertEquals(msg, expect, service.min(i, period, value2, series1));
 		}
 	}
 	
@@ -568,21 +642,21 @@ public class TAMathTest {
 	public void testCrossUnderZero() throws Exception {
 		Object fix[][] = {
 			// value, cross?
-			{ 19.29d, false },
-			{ 20.15d, false },
-			{ -1.12d, true  },
-			{ -5.29d, false },
-			{ 10.74d, false },
+			{ CDecimalBD.of("19.29"), false },
+			{ CDecimalBD.of("20.15"), false },
+			{ CDecimalBD.of("-1.12"), true  },
+			{ CDecimalBD.of("-5.29"), false },
+			{ CDecimalBD.of("10.74"), false },
 			{ null,   false },
-			{  1.15d, false },
+			{  CDecimalBD.of("1.15"), false },
 			{ null,   false },
 			{ null,   false },
-			{ -5.33d, false },
-			{  5.33d, false },
-			{ -5.33d, true  },
+			{ CDecimalBD.of("-5.33"), false },
+			{  CDecimalBD.of("5.33"), false },
+			{ CDecimalBD.of("-5.33"), true  },
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
-			series1.add((Double) fix[i][0]);
+			series1.add((CDecimal) fix[i][0]);
 			String msg = "At #" + i;
 			Boolean expect = (Boolean) fix[i][1];
 			assertEquals(msg, expect, service.crossUnderZero(series1));
@@ -594,21 +668,21 @@ public class TAMathTest {
 	public void testCrossOverZero() throws Exception {
 		Object fix[][] = {
 				// value, cross?
-				{ -9.29d, false },
-				{ -0.15d, false },
-				{  1.12d, true  },
-				{  5.29d, false },
-				{ 10.74d, false },
+				{ CDecimalBD.of("-9.29"), false },
+				{ CDecimalBD.of("-0.15"), false },
+				{  CDecimalBD.of("1.12"), true  },
+				{  CDecimalBD.of("5.29"), false },
+				{ CDecimalBD.of("10.74"), false },
 				{ null,   false },
-				{  1.15d, false },
+				{  CDecimalBD.of("1.15"), false },
 				{ null,   false },
 				{ null,   false },
-				{  5.33d, false },
-				{ -5.33d, false },
-				{  5.33d, true  },
+				{  CDecimalBD.of("5.33"), false },
+				{ CDecimalBD.of("-5.33"), false },
+				{  CDecimalBD.of("5.33"), true  },
 			};
 			for ( int i = 0; i < fix.length; i ++ ) {
-				series1.add((Double) fix[i][0]);
+				series1.add((CDecimal) fix[i][0]);
 				String msg = "At #" + i;
 				Boolean expect = (Boolean) fix[i][1];
 				assertEquals(msg, expect, service.crossOverZero(series1));
@@ -625,12 +699,12 @@ public class TAMathTest {
 		for ( int i = 0; i < fix_qema5.length; i ++ ) {
 			String msg = "At #" + i;
 			FR fr = fix_qema5[i];
-			Double value = service.qema(series1, i, 5);
+			CDecimal value = service.qema(series1, i, 5);
 			if ( fr.expected == null ) {
 				assertNull(msg, value);
 			} else {
 				assertNotNull(msg, value);
-				assertEquals(msg, fr.expected, value, 0.000001d);
+				assertEquals(msg, fr.expected, value);
 			}
 		}
 	}
@@ -644,26 +718,26 @@ public class TAMathTest {
 			int index = i - fix_qema5.length + 1;
 			String msg = "At #" + index;
 			FR fr = fix_qema5[i];
-			Double value = service.qema(series1, index, 5);
+			CDecimal value = service.qema(series1, index, 5);
 			if ( fr.expected == null ) {
 				assertNull(msg, value);
 			} else {
 				assertNotNull(msg, value);
-				assertEquals(msg, fr.expected, value, 0.000001d);
+				assertEquals(msg, fr.expected, value);
 			}
 		}
 	}
 	
 	@Test
 	public void testQema_NullIfCannotObtainStartValue() throws Exception {
-		series1.add(40.27d);
+		series1.add(CDecimalBD.of("40.27"));
 		series1.add(null);
-		series1.add(40.92d);
-		series1.add(44.33d);
+		series1.add(CDecimalBD.of("40.92"));
+		series1.add(CDecimalBD.of("44.33"));
 		series1.add(null);
 		series1.add(null);
-		series1.add(45.02d);
-		series1.add(48.13d);
+		series1.add(CDecimalBD.of("45.02"));
+		series1.add(CDecimalBD.of("48.13"));
 		for ( int i = 0; i < series1.getLength(); i ++ ) {
 			String msg = "At #" + i;
 			assertNull(msg, service.qema(series1, i, 3));
@@ -672,33 +746,34 @@ public class TAMathTest {
 	
 	@Test
 	public void testQema_WithNullsButOk() throws Exception {
-		Double fixture[][] = {
+		FR fixture[] = {
 			//  value, expected MA
-			{  40.27d,          null },
-			{    null,          null },
-			{  40.92d,	        null }, //  40.9200
-			{  44.33d,          null }, // (40.9200 * 2 + 2 * 44.33) / 4 = 42.625
-			{  53.50d,          null }, // (42.6250 * 2 + 2 * 53.50) / 4 = 48.0625
-			{  52.13d, 50.096250000d }, // (48.0625 * 2 + 2 * 52.13) / 4 = 50.09625
-			{  45.02d, 47.558125000d }, // (50.09625 * 2 + 2 * 45.02) / 4 = 47.558125
-			{    null, 47.558125000d },
-			{    null, 47.558125000d },
-			{  48.13d, 47.844062500d }, // (47.558125 * 2 + 2 * 48.13) / 4 = 47.8440625
-			{  51.14d, 49.492031250d }, // (47.8440625 * 2 + 2 * 51.14) / 4 = 49.49203125
-			{  52.18d, 50.836015625d }, // (49.49203125 * 2 + 2 * 52.18) / 4 = 50.836015625
+			new FR("40.27",          null),
+			new FR(null,          	 null ),
+			new FR("40.92",	         null), //  40.9200
+			new FR("44.33",          null), // (40.9200 * 2 + 2 * 44.33) / 4 = 42.625
+			new FR("53.50",          null), // (42.6250 * 2 + 2 * 53.50) / 4 = 48.0625
+			new FR("52.13", "50.096250000"), // (48.0625 * 2 + 2 * 52.13) / 4 = 50.09625
+			new FR("45.02", "47.558125000"), // (50.09625 * 2 + 2 * 45.02) / 4 = 47.558125
+			new FR(null, 	"47.558125000"),
+			new FR(null, 	"47.558125000"),
+			new FR("48.13", "47.844062500"), // (47.558125 * 2 + 2 * 48.13) / 4 = 47.8440625
+			new FR("51.14", "49.492031250"), // (47.8440625 * 2 + 2 * 51.14) / 4 = 49.49203125
+			new FR("52.18", "50.836015625"), // (49.49203125 * 2 + 2 * 52.18) / 4 = 50.836015625
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
-			series1.add(fixture[i][0]);
+			CDecimal x = fixture[i].value;
+			series1.add(x == null ? null : x.withScale(9));
 		}
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			String msg = "At #" + i;
-			Double expected = fixture[i][1];
-			Double actual = service.qema(series1, i, 3);
+			CDecimal expected = fixture[i].expected;
+			CDecimal actual = service.qema(series1, i, 3);
 			if ( expected == null ) {
 				assertNull(msg, actual);
 			} else {
 				assertNotNull(msg + " expected: " + expected + " but null", actual);
-				assertEquals(msg, expected, actual, 0.0001d);
+				assertEquals(msg, expected, actual);
 			}
 		}
 	}
@@ -711,95 +786,105 @@ public class TAMathTest {
 	/**
 	 * Фикстура теста Quik ATR(5)
 	 */
-	static Double fix_qatr5[][] = {
+	static String fix_qatr5[][] = {
 		// RIU5, 2015-08-06, h1
 		// open, high,low,close, expected ATR
-		{82960d,82960d,82960d,82960d, null},
-		{82840d,83700d,82840d,83380d, null},
-		{83390d,83490d,83110d,83310d, null},
-		{83280d,83310d,83140d,83220d, null},
-		{83200d,83200d,82610d,82660d, 404.000000d},
-		{82640d,83090d,82480d,82880d, 445.200000d},
-		{82890d,83140d,82830d,83040d, 418.160000d},
-		{82970d,82990d,82550d,82720d, 432.528000d},
-		{82730d,82950d,82660d,82790d, 404.022400d},
-		{82760d,82860d,82610d,82700d, 373.217920d},
-		{82690d,82920d,82620d,82770d, 358.574336d},
-		{82780d,82850d,82640d,82670d, 328.859469d},
-		{82660d,82740d,82530d,82700d, 305.087575d},
-		{82680d,82830d,82590d,82710d, 292.070060d},
-		{82720d,82780d,82610d,82700d, 267.656048d},
-		{82690d,82760d,82080d,82190d, 350.124838d},
-		{82190d,82250d,81680d,81860d, 394.099871d},
-		{81830d,81970d,81630d,81770d, 383.279897d},
-		{81790d,82120d,81760d,82090d, 378.623917d},
-		{82060d,82260d,81830d,82050d, 388.899134d},
-		{82020d,82190d,81770d,81810d, 395.119307d},
+		{"82960","82960","82960","82960", null},
+		{"82840","83700","82840","83380", null},
+		{"83390","83490","83110","83310", null},
+		{"83280","83310","83140","83220", null},
+		{"83200","83200","82610","82660", "404.000000"},
+		{"82640","83090","82480","82880", "445.200000"},
+		{"82890","83140","82830","83040", "418.160000"},
+		{"82970","82990","82550","82720", "432.528000"},
+		{"82730","82950","82660","82790", "404.022400"},
+		{"82760","82860","82610","82700", "373.217920"},
+		{"82690","82920","82620","82770", "358.574336"},
+		{"82780","82850","82640","82670", "328.859469"},
+		{"82660","82740","82530","82700", "305.087575"},
+		{"82680","82830","82590","82710", "292.070060"},
+		{"82720","82780","82610","82700", "267.656048"},
+		{"82690","82760","82080","82190", "350.124838"},
+		{"82190","82250","81680","81860", "394.099870"}, //x! -0.000001
+		{"81830","81970","81630","81770", "383.279896"}, //x! -0.000001
+		{"81790","82120","81760","82090", "378.623917"},
+		{"82060","82260","81830","82050", "388.899134"},
+		{"82020","82190","81770","81810", "395.119307"},
 	};
 	
-	private void fillCandlesQatr5() throws Exception {
-		Double fixture[][] = fix_qatr5;
-		Interval interval = Interval.of(Instant.now(), Duration.ZERO);
+	private void fillCandlesQatr5(int scale) throws Exception {
+		String fixture[][] = fix_qatr5;
 		for ( int i = 0; i < fixture.length; i ++ ) {
-			candles.add(new Candle(interval, fixture[i][0], fixture[i][1],
-					fixture[i][2], fixture[i][3], 0l));
+			candles.add(new CandleBuilder()
+					.withTime(Instant.now())
+					.withTimeFrame(ZTFrame.M5)
+					.withOpenPrice(CDecimalBD.of(fixture[i][0]).withScale(scale))
+					.withHighPrice(CDecimalBD.of(fixture[i][1]).withScale(scale))
+					.withLowPrice(CDecimalBD.of(fixture[i][2]).withScale(scale))
+					.withClosePrice(CDecimalBD.of(fixture[i][3]).withScale(scale))
+					.withVolume(CDecimalBD.of(1L))
+					.buildCandle());
 		}
 	}
 	
 	@Test
 	public void testQatr() throws Exception {
-		fillCandlesQatr5();
-		Double fixture[][] = fix_qatr5;
-		Double expected = null, actual = null;
+		fillCandlesQatr5(6);
+		String fixture[][] = fix_qatr5;
+		CDecimal expected = null, actual = null;
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			String msg = "At #" + i;
-			expected = fixture[i][4];
+			if ( fixture[i][4] == null ) {
+				expected = null;
+			} else {
+				expected = CDecimalBD.of(fixture[i][4]);
+			}
 			actual = service.qatr(candles, i, 5);
 			if ( expected == null ) {
 				assertNull(msg, actual);
 			} else {
 				assertNotNull(msg + " expected: " + expected + " but null", actual);
-				assertEquals(msg, expected, actual, 0.000001d);
+				assertEquals(msg, expected, actual);
 			}
 		}
-		assertEquals(expected, service.qatr(candles, 5), 0.000001d);
+		assertEquals(expected, service.qatr(candles, 5));
 	}
 	
 	@Test (expected=ValueOutOfRangeException.class)
 	public void testDelta1_ThrowsIfOutOfRange() throws Exception {
-		series1.add(112.34d);
-		series1.add(113.05d);
-		series1.add(111.26d);
+		series1.add(CDecimalBD.of("112.34"));
+		series1.add(CDecimalBD.of("113.05"));
+		series1.add(CDecimalBD.of("111.26"));
 		
 		service.delta(series1, -3);
 	}
 	
 	@Test
 	public void testDelta1() throws Exception {
-		series1.add(112.34d);
-		series1.add(113.05d);
-		series1.add(111.26d);
+		series1.add(CDecimalBD.of("112.34"));
+		series1.add(CDecimalBD.of("113.05"));
+		series1.add(CDecimalBD.of("111.26"));
 		series1.add(null);
-		series1.add(124.15d);
-		series1.add(125.01d);
+		series1.add(CDecimalBD.of("124.15"));
+		series1.add(CDecimalBD.of("125.01"));
 		
-		assertEquals( 0.00d, service.delta(series1, 0), 0.001d);
-		assertEquals( 0.71d, service.delta(series1, 1), 0.001d);
-		assertEquals(-1.79d, service.delta(series1, 2), 0.001d);
+		assertEquals(CDecimalBD.ZERO, service.delta(series1, 0));
+		assertEquals(CDecimalBD.of("0.71"), service.delta(series1, 1));
+		assertEquals(CDecimalBD.of("-1.79"), service.delta(series1, 2));
 		assertNull(service.delta(series1, 3));
-		assertEquals( 0.00d, service.delta(series1, 4), 0.001d);
-		assertEquals( 0.86d, service.delta(series1, 5), 0.001d);
+		assertEquals(CDecimalBD.ZERO, service.delta(series1, 4));
+		assertEquals(CDecimalBD.of("0.86"), service.delta(series1, 5));
 		
-		assertEquals( 0.00d, service.delta(series1, -1), 0.001d);
+		assertEquals(CDecimalBD.ZERO, service.delta(series1, -1));
 		assertNull(service.delta(series1,  -2));
-		assertEquals(-1.79d, service.delta(series1, -3), 0.001d);
-		assertEquals( 0.71d, service.delta(series1, -4), 0.001d);
-		assertEquals( 0.00d, service.delta(series1, -5), 0.001d);
+		assertEquals(CDecimalBD.of("-1.79"), service.delta(series1, -3));
+		assertEquals(CDecimalBD.of("0.71"), service.delta(series1, -4));
+		assertEquals(CDecimalBD.ZERO, service.delta(series1, -5));
 	}
 	
 	@Test (expected=ValueException.class)
 	public void testAmean1_ThrowsIfEmptySeries() throws Exception {
-		service.amean(series1);
+		service.amean(series1, 4);
 	}
 	
 	@Test (expected=ValueException.class)
@@ -808,32 +893,32 @@ public class TAMathTest {
 		series1.add(null);
 		series1.add(null);
 		
-		service.amean(series1);
+		service.amean(series1, 4);
 	}
 	
 	@Test
-	public void testAmean1() throws Exception {
-		series1.add(15.34d);
+	public void testAmean2() throws Exception {
+		series1.add(CDecimalBD.of("15.34"));
 		series1.add(null);
-		series1.add(30.29d);
-		series1.add(10.12d);
+		series1.add(CDecimalBD.of("30.29"));
+		series1.add(CDecimalBD.of("10.12"));
 		series1.add(null);
 		
-		assertEquals(18.5833d, service.amean(series1), 0.0001d);
+		assertEquals(CDecimalBD.of("18.5833"), service.amean(series1, 4));
 	}
 	
 	@Test (expected=ValueException.class)
-	public void testCovariance2_ThrowsIfEmptySeries() throws Exception {
-		service.covariance(series1, series2);
+	public void testCovariance3_ThrowsIfEmptySeries() throws Exception {
+		service.covariance(series1, series2, 4);
 	}
 	
 	@Test (expected=ValueException.class)
-	public void testCovariance2_ThrowsIfDifferentLength() throws Exception {
-		series1.add(2.34d);
-		series1.add(8.01d);
-		series2.add(9.46d);
+	public void testCovariance3_ThrowsIfDifferentLength() throws Exception {
+		series1.add(CDecimalBD.of("2.34"));
+		series1.add(CDecimalBD.of("8.01"));
+		series2.add(CDecimalBD.of("9.46"));
 		
-		service.covariance(series1, series2);
+		service.covariance(series1, series2, 4);
 	}
 	
 	@Test (expected=ValueException.class)
@@ -845,279 +930,301 @@ public class TAMathTest {
 		series2.add(null);
 		series2.add(null);
 		
-		service.covariance(series1, series2);
+		service.covariance(series1, series2, 4);
 	}
 	
 	@Test
-	public void testCovariance2() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
-		series1.add(4d);
-		series1.add(4d);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
-		series2.add(92d);
-		series2.add(83d);
-		series2.add(78d);
-		series2.add(82d);
+	public void testCovariance3() throws Exception {
+		series1.add(CDecimalBD.of(3L));
+		series1.add(CDecimalBD.of(5L));
+		series1.add(CDecimalBD.of(4L));
+		series1.add(CDecimalBD.of(4L));
+		series1.add(CDecimalBD.of(2L));
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
+		series2.add(CDecimalBD.of(95L));
+		series2.add(CDecimalBD.of(92L));
+		series2.add(CDecimalBD.of(83L));
+		series2.add(CDecimalBD.of(78L));
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(4.8333d, service.covariance(series1, series2), 0.0001d);
+		assertEquals(CDecimalBD.of("4.8333"), service.covariance(series1, series2, 4));
 	}
 	
 	@Test
-	public void testCovariance2_NullValuesAtSamePos() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
+	public void testCovariance3_NullValuesAtSamePos() throws Exception {
+		series1.add(CDecimalBD.of(3L));
+		series1.add(CDecimalBD.of(5L));
 		series1.add(null);
 		series1.add(null);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
+		series1.add(CDecimalBD.of(2L));
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
+		series2.add(CDecimalBD.of(95L));
 		series2.add(null);
 		series2.add(null);
-		series2.add(78d);
-		series2.add(82d);
+		series2.add(CDecimalBD.of(78L));
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(6.6875d, service.covariance(series1, series2), 0.0001d);
+		assertEquals(CDecimalBD.of("6.6875"), service.covariance(series1, series2, 4));
 	}
 	
 	@Test
-	public void testCovariance2_NullValueInTheFirstSeries() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
+	public void testCovariance3_NullValueInTheFirstSeries() throws Exception {
+		series1.add(CDecimalBD.of(3L));
+		series1.add(CDecimalBD.of(5L));
 		series1.add(null);
-		series1.add(4d);
+		series1.add(CDecimalBD.of(4L));
 		series1.add(null);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
-		series2.add(92d);
-		series2.add(83d);
-		series2.add(78d);
-		series2.add(82d);
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
+		series2.add(CDecimalBD.of(95L));
+		series2.add(CDecimalBD.of(92L));
+		series2.add(CDecimalBD.of(83L));
+		series2.add(CDecimalBD.of(78L));
+		series2.add(CDecimalBD.of(82L));
 
-		assertEquals(3.3750d, service.covariance(series1, series2), 0.0001d);
+		assertEquals(CDecimalBD.of("3.3750"), service.covariance(series1, series2, 4));
 	}
 	
 	@Test
 	public void testCovariance2_NullValueInTheSecondSeries() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
-		series1.add(4d);
-		series1.add(4d);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
+		series1.add(CDecimalBD.of(3L));
+		series1.add(CDecimalBD.of(5L));
+		series1.add(CDecimalBD.of(4L));
+		series1.add(CDecimalBD.of(4L));
+		series1.add(CDecimalBD.of(2L));
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
 		series2.add(null);
-		series2.add(92d);
-		series2.add(83d);
+		series2.add(CDecimalBD.of(92L));
+		series2.add(CDecimalBD.of(83L));
 		series2.add(null);
-		series2.add(82d);
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(0.8750d, service.covariance(series1, series2), 0.0001d);
+		assertEquals(CDecimalBD.of("0.8750"), service.covariance(series1, series2, 4));
 	}
 	
 	@Test
-	public void testCovariance2_NullValuesAtDifferentPositions() throws Exception {
+	public void testCovariance3_NullValuesAtDifferentPositions() throws Exception {
 		series1.add(null);
-		series1.add(5d);
-		series1.add(4d);
+		series1.add(CDecimalBD.of(5L));
+		series1.add(CDecimalBD.of(4L));
 		series1.add(null);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
+		series1.add(CDecimalBD.of(2L));
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
 		series2.add(null);
-		series2.add(92d);
-		series2.add(83d);
+		series2.add(CDecimalBD.of(92L));
+		series2.add(CDecimalBD.of(83L));
 		series2.add(null);
-		series2.add(82d);
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(2.5000d, service.covariance(series1, series2), 0.0001d);		
+		assertEquals(CDecimalBD.of("2.5000"), service.covariance(series1, series2, 4));		
 	}
 	
 	@Test
-	public void testCovariance2_TestCase1() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
+	public void testCovariance3_TestCase1() throws Exception {
+		series1.add(CDecimalBD.of(3L));
+		series1.add(CDecimalBD.of(5L));
 		series1.add(null);
-		series1.add(4d);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
-		series2.add(92d);
-		series2.add(83d);
-		series2.add(78d);
-		series2.add(82d);
+		series1.add(CDecimalBD.of(4L));
+		series1.add(CDecimalBD.of(2L));
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
+		series2.add(CDecimalBD.of(95L));
+		series2.add(CDecimalBD.of(92L));
+		series2.add(CDecimalBD.of(83L));
+		series2.add(CDecimalBD.of(78L));
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(5.08d, service.covariance(series1, series2), 0.01d);
+		assertEquals(CDecimalBD.of("5.08"), service.covariance(series1, series2, 2));
 	}
 	
 	@Test (expected=ValueException.class)
-	public void testVariance1_ThrowsIfEmptySeries() throws Exception {
-		service.variance(series1);
+	public void testVariance2_ThrowsIfEmptySeries() throws Exception {
+		service.variance(series1, 4);
 	}
 
 	@Test (expected=ValueException.class)
-	public void testVariance1_ThrowsIfNotEnoughData() throws Exception {
+	public void testVariance2_ThrowsIfNotEnoughData() throws Exception {
 		series1.add(null);
 		series1.add(null);
 		series1.add(null);
 		
-		service.variance(series1);
+		service.variance(series1, 4);
 	}
 
 	@Test
-	public void testVariance1() throws Exception {
-		series2.add(86d);
-		series2.add(95d);
-		series2.add(92d);
-		series2.add(83d);
-		series2.add(78d);
-		series2.add(82d);
+	public void testVariance2() throws Exception {
+		series2.add(CDecimalBD.of(86L));
+		series2.add(CDecimalBD.of(95L));
+		series2.add(CDecimalBD.of(92L));
+		series2.add(CDecimalBD.of(83L));
+		series2.add(CDecimalBD.of(78L));
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(34.33d, service.variance(series2), 0.01d);
+		assertEquals(CDecimalBD.of("34.33"), service.variance(series2, 2));
 	}
 
 	@Test
-	public void testVariance1_NullValues() throws Exception {
-		series2.add(86d);
-		series2.add(95d);
+	public void testVariance2_NullValues() throws Exception {
+		series2.add(CDecimalBD.of(86L));
+		series2.add(CDecimalBD.of(95L));
 		series2.add(null);
-		series2.add(83d);
+		series2.add(CDecimalBD.of(83L));
 		series2.add(null);
-		series2.add(82d);
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(26.25d, service.variance(series2), 0.01d);
+		assertEquals(CDecimalBD.of("26.25"), service.variance(series2, 2));
 	}
 	
 	@Test
-	public void testCorrelation2() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
-		series1.add(4d);
-		series1.add(4d);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
-		series2.add(92d);
-		series2.add(83d);
-		series2.add(78d);
-		series2.add(82d);
+	public void testCorrelation3() throws Exception {
+		series1.add(CDecimalBD.of("3.0000"));
+		series1.add(CDecimalBD.of("5.0000"));
+		series1.add(CDecimalBD.of("4.0000"));
+		series1.add(CDecimalBD.of("4.0000"));
+		series1.add(CDecimalBD.of("2.0000"));
+		series1.add(CDecimalBD.of("3.0000"));
+		series2.add(CDecimalBD.of("86.0000"));
+		series2.add(CDecimalBD.of("95.0000"));
+		series2.add(CDecimalBD.of("92.0000"));
+		series2.add(CDecimalBD.of("83.0000"));
+		series2.add(CDecimalBD.of("78.0000"));
+		series2.add(CDecimalBD.of("82.0000"));
 		
-		assertEquals(0.862d, service.correlation(series1, series2), 0.001d);
+		assertEquals(CDecimalBD.of("0.862"), service.correlation(series1, series2, 3));
 	}
 	
 	@Test (expected=ValueException.class)
-	public void testCorrelation2_ThrowsIfEmptySeries() throws ValueException {
-		service.correlation(series1, series2);
+	public void testCorrelation3_ThrowsIfEmptySeries() throws ValueException {
+		service.correlation(series1, series2, 3);
 	}
 	
 	@Test (expected=ValueException.class)
-	public void testCorrelation2_ThrowsIfNotEnoughData() throws ValueException {
+	public void testCorrelation3_ThrowsIfNotEnoughData() throws ValueException {
 		series1.add(null);
 		series1.add(null);
 		series2.add(null);
 		series2.add(null);
 		
-		service.correlation(series1, series2);
+		service.correlation(series1, series2, 3);
 	}
 	
 	@Test (expected=ValueException.class)
-	public void testCorrelation2_ThrowsIfDifferentLength() throws Exception {
-		series1.add(2.34d);
-		series1.add(8.01d);
-		series2.add(9.46d);
+	public void testCorrelation3_ThrowsIfDifferentLength() throws Exception {
+		series1.add(CDecimalBD.of("2.34"));
+		series1.add(CDecimalBD.of("8.01"));
+		series2.add(CDecimalBD.of("9.46"));
 		
-		service.correlation(series1, series2);
+		service.correlation(series1, series2, 3);
 	}
 	
 	@Test
-	public void testCorrelation2_NullValuesAtSamePos() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
+	public void testCorrelation3_NullValuesAtSamePos() throws Exception {
+		series1.add(CDecimalBD.of("3"));
+		series1.add(CDecimalBD.of("5"));
 		series1.add(null);
 		series1.add(null);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
+		series1.add(CDecimalBD.of("2"));
+		series1.add(CDecimalBD.of("3"));
+		series2.add(CDecimalBD.of("86"));
+		series2.add(CDecimalBD.of("95"));
 		series2.add(null);
 		series2.add(null);
-		series2.add(78d);
-		series2.add(82d);
+		series2.add(CDecimalBD.of("78"));
+		series2.add(CDecimalBD.of("82"));
 		
-		assertEquals(0.9741d, service.correlation(series1, series2), 0.0001d);
+		assertEquals(CDecimalBD.of("0.9741"), service.correlation(series1, series2, 4));
 	}
 	
 	@Test
-	public void testCorellation2_NullValueInTheFirstSeries() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
+	public void testCorellation3_NullValueInTheFirstSeries() throws Exception {
+		series1.add(CDecimalBD.of("3"));
+		series1.add(CDecimalBD.of("5"));
 		series1.add(null);
-		series1.add(4d);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
-		series2.add(92d);
-		series2.add(83d);
-		series2.add(78d);
-		series2.add(82d);
+		series1.add(CDecimalBD.of("4"));
+		series1.add(CDecimalBD.of("2"));
+		series1.add(CDecimalBD.of("3"));
+		series2.add(CDecimalBD.of("86"));
+		series2.add(CDecimalBD.of("95"));
+		series2.add(CDecimalBD.of("92"));
+		series2.add(CDecimalBD.of("83"));
+		series2.add(CDecimalBD.of("78"));
+		series2.add(CDecimalBD.of("82"));
 
-		assertEquals(0.8729d, service.correlation(series1, series2), 0.0001d);
+		assertEquals(CDecimalBD.of("0.8730"), service.correlation(series1, series2, 4));
 	}
 	
 	@Test
-	public void testCorrelation2_NullValueInTheSecondSeries() throws Exception {
-		series1.add(3d);
-		series1.add(5d);
-		series1.add(4d);
-		series1.add(4d);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
-		series2.add(95d);
-		series2.add(92d);
+	public void testCorrelation3_NullValueInTheSecondSeries() throws Exception {
+		series1.add(CDecimalBD.of(3L));
+		series1.add(CDecimalBD.of(5L));
+		series1.add(CDecimalBD.of(4L));
+		series1.add(CDecimalBD.of(4L));
+		series1.add(CDecimalBD.of(2L));
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
+		series2.add(CDecimalBD.of(95L));
+		series2.add(CDecimalBD.of(92L));
 		series2.add(null);
 		series2.add(null);
-		series2.add(82d);
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(0.9369d, service.correlation(series1, series2), 0.0001d);
+		assertEquals(CDecimalBD.of("0.9370"), service.correlation(series1, series2, 4));
 	}
 	
 	@Test
-	public void testCorellation2_NullValuesAtDifferentPositions() throws Exception {
+	public void testCorellation3_NullValuesAtDifferentPositions() throws Exception {
 		series1.add(null);
-		series1.add(5d);
-		series1.add(4d);
+		series1.add(CDecimalBD.of(5L));
+		series1.add(CDecimalBD.of(4L));
 		series1.add(null);
-		series1.add(2d);
-		series1.add(3d);
-		series2.add(86d);
+		series1.add(CDecimalBD.of(2L));
+		series1.add(CDecimalBD.of(3L));
+		series2.add(CDecimalBD.of(86L));
 		series2.add(null);
-		series2.add(92d);
-		series2.add(83d);
+		series2.add(CDecimalBD.of(92L));
+		series2.add(CDecimalBD.of(83L));
 		series2.add(null);
-		series2.add(82d);
+		series2.add(CDecimalBD.of(82L));
 		
-		assertEquals(1.0d, service.correlation(series1, series2), 0.0001d);		
+		assertEquals(CDecimalBD.of(1L), service.correlation(series1, series2, 0));		
 	}
 	
 	/**
 	 * Запись фикстуры для проверки пересечений.
 	 */
 	static class FR2 {
-		private final Double x, y;
+		private final CDecimal x, y;
 		private final boolean expected;
 		
-		FR2(Double x, Double y, boolean expected) {
-			this.x = x;
-			this.y = y;
+		FR2(String x, String y, boolean expected) {
+			if ( x == null ) {
+				this.x = null;
+			} else {
+				this.x = CDecimalBD.of(x);
+			}
+			if ( y == null ) {
+				this.y = null;
+			} else {
+				this.y = CDecimalBD.of(y);
+			}
+			this.expected = expected;
+		}
+		
+		FR2(Long x, Long y, boolean expected) {
+			if ( x == null ) {
+				this.x = null;
+			} else {
+				this.x = CDecimalBD.of(x);
+			}
+			if ( y == null ) {
+				this.y = null;
+			} else {
+				this.y = CDecimalBD.of(y);
+			}
 			this.expected = expected;
 		}
 		
@@ -1126,25 +1233,25 @@ public class TAMathTest {
 	@Test
 	public void testCrossUnder() throws Exception {
 		FR2 fix[] = {
-			new FR2(45.0, 20.0, false),
-			new FR2(15.0, 22.0, true),
-			new FR2(25.0, 23.0, false),
-			new FR2(null, 30.0, false),
-			new FR2(24.0, 31.0, false),
-			new FR2(20.0, 24.0, false),
-			new FR2(45.0, 20.0, false),
-			new FR2(15.0, null, false),
-			new FR2(12.0, 15.0, false),
-			new FR2(null, null, false),
-			new FR2(null, null, false),
-			new FR2(null, 10.0, false),
-			new FR2(null, 12.0, false),
-			new FR2(12.0, null, false),
-			new FR2(10.0, null, false),
-			new FR2(10.0, 20.0, false),
-			new FR2( 9.0, 22.0, false),
-			new FR2(20.0, 10.0, false),
-			new FR2(10.0, 20.0, true),
+			new FR2(45L, 20L, false),
+			new FR2(15L, 22L, true),
+			new FR2(25L, 23L, false),
+			new FR2(null, 30L, false),
+			new FR2(24L, 31L, false),
+			new FR2(20L, 24L, false),
+			new FR2(45L, 20L, false),
+			new FR2(15L, null, false),
+			new FR2(12L, 15L, false),
+			new FR2((Long)null, null, false),
+			new FR2((Long)null, null, false),
+			new FR2(null, 10L, false),
+			new FR2(null, 12L, false),
+			new FR2(12L, null, false),
+			new FR2(10L, null, false),
+			new FR2(10L, 20L, false),
+			new FR2( 9L, 22L, false),
+			new FR2(20L, 10L, false),
+			new FR2(10L, 20L, true),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			FR2 f = fix[i];
@@ -1157,25 +1264,25 @@ public class TAMathTest {
 	@Test
 	public void testCrossOver() throws Exception {
 		FR2 fix[] = {
-			new FR2(20.0, 45.0, false),
-			new FR2(22.0, 15.0, true),
-			new FR2(23.0, 25.0, false),
-			new FR2(30.0, null, false),
-			new FR2(31.0, 24.0, false),
-			new FR2(24.0, 20.0, false),
-			new FR2(20.0, 45.0, false),
-			new FR2(null, 15.0, false),
-			new FR2(15.0, 12.0, false),
-			new FR2(null, null, false),
-			new FR2(null, null, false),
-			new FR2(10.0, null, false),
-			new FR2(12.0, null, false),
-			new FR2(null, 12.0, false),
-			new FR2(null, 10.0, false),
-			new FR2(20.0, 10.0, false),
-			new FR2(22.0,  9.0, false),
-			new FR2(10.0, 20.0, false),
-			new FR2(20.0, 10.0, true),
+			new FR2(20L, 45L, false),
+			new FR2(22L, 15L, true),
+			new FR2(23L, 25L, false),
+			new FR2(30L, null, false),
+			new FR2(31L, 24L, false),
+			new FR2(24L, 20L, false),
+			new FR2(20L, 45L, false),
+			new FR2(null, 15L, false),
+			new FR2(15L, 12L, false),
+			new FR2((Long)null, null, false),
+			new FR2((Long)null, null, false),
+			new FR2(10L, null, false),
+			new FR2(12L, null, false),
+			new FR2(null, 12L, false),
+			new FR2(null, 10L, false),
+			new FR2(20L, 10L, false),
+			new FR2(22L,  9L, false),
+			new FR2(10L, 20L, false),
+			new FR2(20L, 10L, true),
 		};
 		for ( int i = 0; i < fix.length; i ++ ) {
 			FR2 f = fix[i];

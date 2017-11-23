@@ -79,34 +79,66 @@ public class MDUpdateBuilderTest {
 	}
 	
 	@Test
-	public void testAddAsk2() throws Exception {
+	public void testAddAsk2_DD() throws Exception {
 		Instant time = Instant.parse("2016-07-09T20:24:30Z");
 		assertSame(builder, builder.withTime(time)
-				.addAsk(120.01d, 1000L)
-				.addAsk(120.05d, 2000L));
+				.addAsk(CDecimalBD.of("120.01"), CDecimalBD.of(1000L))
+				.addAsk(CDecimalBD.of("120.05"), CDecimalBD.of(2000L)));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.ASK, time, 120.01d, 1000L), MDTransactionType.ADD);
-		expected.addRecord(Tick.of(TickType.ASK, time, 120.05d, 2000L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofAsk(time, "120.01", 1000L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofAsk(time, "120.05", 2000L), MDTransactionType.ADD);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testAddAsk2_SL() throws Exception {
+		Instant time = Instant.parse("2016-07-09T20:24:30Z");
+		assertSame(builder, builder.withTime(time)
+				.addAsk("120.01", 1000L)
+				.addAsk("120.05", 2000L));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.ofAsk(time, "120.01", 1000L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofAsk(time, "120.05", 2000L), MDTransactionType.ADD);
 		assertEquals(expected, actual);
 	}
 
 	@Test
-	public void testAddBid2() throws Exception {
+	public void testAddBid2_DD() throws Exception {
 		Instant time = Instant.parse("2016-07-09T20:26:45Z");
 		assertSame(builder, builder.withTime(time)
-				.addBid(150.38d, 800L)
-				.addBid(151.02d, 400L));
+				.addBid(CDecimalBD.of("150.38"), CDecimalBD.of(800L))
+				.addBid(CDecimalBD.of("151.02"), CDecimalBD.of(400L)));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.BID, time, 150.38d, 800L), MDTransactionType.ADD);
-		expected.addRecord(Tick.of(TickType.BID, time, 151.02d, 400L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofBid(time, "150.38", 800L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofBid(time, "151.02", 400L), MDTransactionType.ADD);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testAddBid2_SL() throws Exception {
+		Instant time = Instant.parse("2016-07-09T20:26:45Z");
+		assertSame(builder, builder.withTime(time)
+				.addBid("150.38", 800L)
+				.addBid("151.02", 400L));
+		
+		MDUpdate actual = builder.buildMDUpdate();
+		
+		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, time, symbol1);
+		expected = new MDUpdateImpl(expectedHeader);
+		expected.addRecord(Tick.ofBid(time, "150.38", 800L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofBid(time, "151.02", 400L), MDTransactionType.ADD);
 		assertEquals(expected, actual);
 	}
 	
@@ -114,15 +146,15 @@ public class MDUpdateBuilderTest {
 	public void testAdd1() throws Exception {
 		Instant time = Instant.parse("2016-07-30T02:14:00Z");
 		assertSame(builder, builder
-				.add(Tick.of(TickType.ASK, time, 200.0d, 100L))
-				.add(Tick.of(TickType.BID, time, 250.0d, 200L)));
+				.add(Tick.ofAsk(time, "200.00", 100L))
+				.add(Tick.ofBid(time, "250.00", 200L)));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, Instant.EPOCH, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.ASK, time, 200.0d, 100L), MDTransactionType.ADD);
-		expected.addRecord(Tick.of(TickType.BID, time, 250.0d, 200L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofAsk(time, "200.00", 100L), MDTransactionType.ADD);
+		expected.addRecord(Tick.ofBid(time, "250.00", 200L), MDTransactionType.ADD);
 		assertEquals(expected, actual);
 	}
 	
@@ -131,15 +163,15 @@ public class MDUpdateBuilderTest {
 		Instant time = Instant.parse("2016-07-30T03:28:00Z");
 		assertSame(builder, builder.withTime(time)
 				.withType(MDUpdateType.UPDATE)
-				.replaceAsk(200.0d, 100L)
-				.replaceAsk(250.0d, 200L));
+				.replaceAsk(CDecimalBD.of("200.00"), CDecimalBD.of(100L))
+				.replaceAsk(CDecimalBD.of("250.00"), CDecimalBD.of(200L)));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.ASK, time, 200.0d, 100L), MDTransactionType.REPLACE);
-		expected.addRecord(Tick.of(TickType.ASK, time, 250.0d, 200L), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofAsk(time, "200.00", 100L), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofAsk(time, "250.00", 200L), MDTransactionType.REPLACE);
 		assertEquals(expected, actual);
 	}
 	
@@ -148,15 +180,15 @@ public class MDUpdateBuilderTest {
 		Instant time = Instant.parse("2016-07-30T03:28:00Z");
 		assertSame(builder, builder.withTime(time)
 				.withType(MDUpdateType.UPDATE)
-				.replaceBid(200.0d, 100L)
-				.replaceBid(250.0d, 200L));
+				.replaceBid(CDecimalBD.of("200.00"), CDecimalBD.of(100L))
+				.replaceBid(CDecimalBD.of("250.00"), CDecimalBD.of(200L)));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.BID, time, 200.0d, 100L), MDTransactionType.REPLACE);
-		expected.addRecord(Tick.of(TickType.BID, time, 250.0d, 200L), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofBid(time, CDecimalBD.of("200.00"), CDecimalBD.of(100L)), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofBid(time, CDecimalBD.of("250.00"), CDecimalBD.of(200L)), MDTransactionType.REPLACE);
 		assertEquals(expected, actual);
 	}
 
@@ -165,15 +197,15 @@ public class MDUpdateBuilderTest {
 		Instant time = Instant.parse("2016-07-30T03:28:00Z");
 		assertSame(builder, builder.withTime(time)
 				.withType(MDUpdateType.UPDATE)
-				.deleteAsk(200.0d)
-				.deleteAsk(250.0d));
+				.deleteAsk(CDecimalBD.of("200.00"))
+				.deleteAsk(CDecimalBD.of("250.00")));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.ASK, time, 200.0d, 0), MDTransactionType.DELETE);
-		expected.addRecord(Tick.of(TickType.ASK, time, 250.0d, 0), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofAsk(time, CDecimalBD.of("200.00"), CDecimalBD.ZERO), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofAsk(time, CDecimalBD.of("250.00"), CDecimalBD.ZERO), MDTransactionType.DELETE);
 		assertEquals(expected, actual);
 	}
 	
@@ -182,15 +214,15 @@ public class MDUpdateBuilderTest {
 		Instant time = Instant.parse("2016-07-30T03:28:00Z");
 		assertSame(builder, builder.withTime(time)
 				.withType(MDUpdateType.UPDATE)
-				.deleteBid(200.0d)
-				.deleteBid(250.0d));
+				.deleteBid(CDecimalBD.of("200.00"))
+				.deleteBid(CDecimalBD.of("250.00")));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.of(TickType.BID, time, 200.0d, 0), MDTransactionType.DELETE);
-		expected.addRecord(Tick.of(TickType.BID, time, 250.0d, 0), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofBid(time, CDecimalBD.of("200.00"), CDecimalBD.ZERO), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofBid(time, CDecimalBD.of("250.00"), CDecimalBD.ZERO), MDTransactionType.DELETE);
 		assertEquals(expected, actual);
 	}
 	
@@ -199,13 +231,13 @@ public class MDUpdateBuilderTest {
 		Instant time = Instant.parse("2016-08-12T11:55:00Z");
 		assertSame(builder, builder.withTime(time)
 				.withType(MDUpdateType.UPDATE)
-				.replaceOrDelete(Tick.ofAsk(time, 200.15d, 0)));
+				.replaceOrDelete(Tick.ofAsk(time, CDecimalBD.of("200.15"), CDecimalBD.ZERO)));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.ofAsk(time, 200.15, 0), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofAsk(time, CDecimalBD.of("200.15"), CDecimalBD.ZERO), MDTransactionType.DELETE);
 		assertEquals(expected, actual);
 	}
 	
@@ -214,13 +246,13 @@ public class MDUpdateBuilderTest {
 		Instant time = Instant.parse("2016-08-12T12:00:00Z");
 		assertSame(builder, builder.withTime(time)
 				.withType(MDUpdateType.UPDATE)
-				.replaceOrDelete(Tick.ofBid(time, 113.48d, 200)));
+				.replaceOrDelete(Tick.ofBid(time, CDecimalBD.of("113.48"), CDecimalBD.of(200L))));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.UPDATE, time, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.ofBid(time, 113.48, 200), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofBid(time, CDecimalBD.of("113.48"), CDecimalBD.of(200L)), MDTransactionType.REPLACE);
 		assertEquals(expected, actual);
 	}
 	
@@ -240,15 +272,15 @@ public class MDUpdateBuilderTest {
 	public void testReplace1() throws Exception {
 		Instant time = Instant.parse("2016-07-30T02:14:00Z");
 		assertSame(builder, builder
-				.replace(Tick.ofAsk(time, 200.0d, 100L))
-				.replace(Tick.ofBid(time, 250.0d, 200L)));
+				.replace(Tick.ofAsk(time, CDecimalBD.of("200.00"), CDecimalBD.of(100L)))
+				.replace(Tick.ofBid(time, CDecimalBD.of("250.00"), CDecimalBD.of(200L))));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, Instant.EPOCH, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.ofAsk(time, 200.0d, 100L), MDTransactionType.REPLACE);
-		expected.addRecord(Tick.ofBid(time, 250.0d, 200L), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofAsk(time, CDecimalBD.of("200.00"), CDecimalBD.of(100L)), MDTransactionType.REPLACE);
+		expected.addRecord(Tick.ofBid(time, CDecimalBD.of("250.00"), CDecimalBD.of(200L)), MDTransactionType.REPLACE);
 		assertEquals(expected, actual);
 	}
 	
@@ -256,15 +288,15 @@ public class MDUpdateBuilderTest {
 	public void testDelete1() throws Exception {
 		Instant time = Instant.parse("2016-07-30T02:14:00Z");
 		assertSame(builder, builder
-				.delete(Tick.ofAsk(time, 200.0d, 100L))
-				.delete(Tick.ofBid(time, 250.0d, 200L)));
+				.delete(Tick.ofAsk(time, CDecimalBD.of("200.00"), CDecimalBD.of(100L)))
+				.delete(Tick.ofBid(time, CDecimalBD.of("250.00"), CDecimalBD.of(200L))));
 		
 		MDUpdate actual = builder.buildMDUpdate();
 		
 		expectedHeader = new MDUpdateHeaderImpl(MDUpdateType.REFRESH, Instant.EPOCH, symbol1);
 		expected = new MDUpdateImpl(expectedHeader);
-		expected.addRecord(Tick.ofAsk(time, 200.0d, 100L), MDTransactionType.DELETE);
-		expected.addRecord(Tick.ofBid(time, 250.0d, 200L), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofAsk(time, CDecimalBD.of("200.00"), CDecimalBD.of(100L)), MDTransactionType.DELETE);
+		expected.addRecord(Tick.ofBid(time, CDecimalBD.of("250.00"), CDecimalBD.of(200L)), MDTransactionType.DELETE);
 		assertEquals(expected, actual);
 	}
 	

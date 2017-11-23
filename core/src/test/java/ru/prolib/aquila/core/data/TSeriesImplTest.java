@@ -197,13 +197,69 @@ public class TSeriesImplTest {
 	@Test
 	public void testBugCase1() throws Exception {
 		List<Candle> fixture = new ArrayList<>();
-		fixture.add(new Candle(IM1("2017-12-31T10:00:00Z"), 150, 152, 148, 151, 1000)); // #0
-		fixture.add(new Candle(IM1("2017-10-01T12:01:00Z"), 143, 145, 140, 142, 5000)); // #1
-		fixture.add(new Candle(IM1("2017-10-01T12:02:00Z"), 142, 149, 141, 145, 1500)); // #2
-		fixture.add(new Candle(IM1("2017-10-01T12:03:00Z"), 145, 152, 145, 150, 1700)); // #3
-		fixture.add(new Candle(IM1("2017-09-15T18:01:00Z"), 150, 156, 150, 155, 1700)); // #4
-		fixture.add(new Candle(IM1("2017-09-15T18:02:00Z"), 155, 155, 149, 151, 1800)); // #5
-		fixture.add(new Candle(IM1("2017-09-15T18:03:00Z"), 151, 152, 145, 148, 1900)); // #6
+		fixture.add(new CandleBuilder()
+				.withTime("2017-12-31T10:00:00Z")
+				.withTimeFrame(ZTFrame.M1)
+				.withOpenPrice(150L)
+				.withHighPrice(152L)
+				.withLowPrice(148L)
+				.withClosePrice(151L)
+				.withVolume(1000L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTime("2017-10-01T12:01:00Z")
+				.withTimeFrame(ZTFrame.M1)
+				.withOpenPrice(143L)
+				.withHighPrice(145L)
+				.withLowPrice(140L)
+				.withClosePrice(142L)
+				.withVolume(5000L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTime("2017-10-01T12:02:00Z")
+				.withTimeFrame(ZTFrame.M1)
+				.withOpenPrice(142L)
+				.withHighPrice(149L)
+				.withLowPrice(141L)
+				.withClosePrice(145L)
+				.withVolume(1500L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTime("2017-10-01T12:03:00Z")
+				.withTimeFrame(ZTFrame.M1)
+				.withOpenPrice(145L)
+				.withHighPrice(152L)
+				.withLowPrice(145L)
+				.withClosePrice(159L)
+				.withVolume(1700L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTime("2017-09-15T18:01:00Z")
+				.withTimeFrame(ZTFrame.M1)
+				.withOpenPrice(150L)
+				.withHighPrice(156L)
+				.withLowPrice(150L)
+				.withClosePrice(155L)
+				.withVolume(1700L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTime("2017-09-15T18:02:00Z")
+				.withTimeFrame(ZTFrame.M1)
+				.withOpenPrice(155L)
+				.withHighPrice(155L)
+				.withLowPrice(149L)
+				.withClosePrice(151L)
+				.withVolume(1800L)
+				.buildCandle());
+		fixture.add(new CandleBuilder()
+				.withTime("2017-09-15T18:03:00Z")
+				.withTimeFrame(ZTFrame.M1)
+				.withOpenPrice(151L)
+				.withHighPrice(152L)
+				.withLowPrice(145L)
+				.withClosePrice(148L)
+				.withVolume(1900L)
+				.buildCandle());
 		
 		TSeriesImpl<Candle> series = new TSeriesImpl<>(ZTFrame.M1);
 		for ( Candle x : fixture ) {

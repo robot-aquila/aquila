@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
@@ -183,7 +184,7 @@ public class CandleSeriesByLastTradeTest {
 	public void testOnEvent_OnLastTrade_SkipIfNotStarted() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		SecurityTickEvent e = new SecurityTickEvent(security.onLastTrade(), security,
-				Instant.EPOCH, Tick.ofTrade(T("2017-08-31T00:00:00Z"), 100.0d, 1000L));
+				Instant.EPOCH, Tick.ofTrade(T("2017-08-31T00:00:00Z"), CDecimalBD.of(100L), CDecimalBD.of(1000L)));
 		filler.setStarted(false);
 		control.replay();
 		
@@ -195,7 +196,7 @@ public class CandleSeriesByLastTradeTest {
 	@Test
 	public void testOnEvent_OnLastTrade() throws Exception {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
-		Tick trade = Tick.ofTrade(T("2017-08-31T00:00:00Z"), 100.0d, 1000L);
+		Tick trade = Tick.ofTrade(T("2017-08-31T00:00:00Z"), CDecimalBD.of(100L), CDecimalBD.of(1000L));
 		SecurityTickEvent e = new SecurityTickEvent(security.onLastTrade(), security, Instant.EPOCH, trade);
 		filler.setStarted(true);
 		filler.setSecurity(security);

@@ -1,7 +1,6 @@
 package ru.prolib.aquila.ui.form;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +43,7 @@ public class MarketDepthTableModel extends AbstractTableModel
 	private final int maxDepth;
 	private boolean subscribed = false;
 	private MarketDepth marketDepth;
-	private int priceScale;
+	//private int priceScale;
 	
 	public MarketDepthTableModel(IMessages messages, Security security, int maxDepth) {
 		this.messages = messages;
@@ -144,7 +143,7 @@ public class MarketDepthTableModel extends AbstractTableModel
 				case CID_ASK_SIZE:
 					return marketDepth.getAskAtOffset(quoteOffset).getSize();
 				case CID_PRICE:
-					return toPrice(marketDepth.getAskAtOffset(quoteOffset).getPrice());
+					return marketDepth.getAskAtOffset(quoteOffset).getPrice();
 				case CID_BID_SIZE:
 				default:
 					break;
@@ -158,7 +157,7 @@ public class MarketDepthTableModel extends AbstractTableModel
 				case CID_BID_SIZE:
 					return marketDepth.getBidAtOffset(quoteOffset).getSize();
 				case CID_PRICE:
-					return toPrice(marketDepth.getBidAtOffset(quoteOffset).getPrice());
+					return marketDepth.getBidAtOffset(quoteOffset).getPrice();
 				case CID_ASK_SIZE:
 				default:
 					break;
@@ -179,7 +178,7 @@ public class MarketDepthTableModel extends AbstractTableModel
 			return;
 		}
 		marketDepth = security.getMarketDepth();
-		priceScale = security.getScale();
+		//priceScale = security.getScale();
 		security.onMarketDepthUpdate().addListener(this);
 		subscribed = true;
 		fireTableDataChanged();
@@ -215,12 +214,12 @@ public class MarketDepthTableModel extends AbstractTableModel
 			return;
 		}
 		marketDepth = security.getMarketDepth();
-		priceScale = security.getScale();
+		//priceScale = security.getScale();
 		fireTableDataChanged();
 	}
 	
-	private BigDecimal toPrice(double price) {
-		return new BigDecimal(price).setScale(priceScale, RoundingMode.HALF_UP);
-	}
+	//private BigDecimal toPrice(double price) {
+	//	return new BigDecimal(price).setScale(priceScale, RoundingMode.HALF_UP);
+	//}
 
 }

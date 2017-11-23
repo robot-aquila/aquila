@@ -1,8 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
@@ -10,19 +8,30 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * Tick data entity.
  */
 public class Tick implements TStamped {
-	public static final Tick NULL_ASK = Tick.of(TickType.ASK, 0, 0);
-	public static final Tick NULL_BID = Tick.of(TickType.BID, 0, 0);
+	@Deprecated
+	public static final Tick NULL_ASK = Tick.of(TickType.ASK, CDecimalBD.ZERO, CDecimalBD.ZERO);
+	@Deprecated
+	public static final Tick NULL_BID = Tick.of(TickType.BID, CDecimalBD.ZERO, CDecimalBD.ZERO);
 	
 	private final TickType type;
-	private final long timestamp;
-	private final double price;
-	private final long size;
-	private final double value;
+	private final Instant time;
+	private final CDecimal price;
+	private final CDecimal size;
+	private final CDecimal value;
 	
-	private Tick(TickType type, long timestamp, double price, long size, double value) {
+	/**
+	 * Constructor.
+	 * <p>
+	 * @param type - tick type
+	 * @param time - time of tick
+	 * @param price - price
+	 * @param size - size of tick
+	 * @param value - tick value (for example in account currency)
+	 */
+	public Tick(TickType type, Instant time, CDecimal price, CDecimal size, CDecimal value) {
 		super();
 		this.type = type;
-		this.timestamp = timestamp;
+		this.time = time;
 		this.price = price;
 		this.size = size;
 		this.value = value;
@@ -40,71 +49,67 @@ public class Tick implements TStamped {
 
 	@Deprecated
 	public static CDecimal getPrice(Tick tick, int scale) {
-		return getPrice(tick.price, scale);
+		return tick.price;
 	}
 	
 	@Deprecated
 	public static CDecimal getSize(Tick tick) {
-		return getSize(tick.size);
+		return tick.size;
 	}
 	
-	public static Tick of(TickType type, long timestamp, double price,
-			long size, double value)
+	public static Tick of(TickType type, Instant time, CDecimal price,
+			CDecimal size, CDecimal value)
 	{
-		return new Tick(type, timestamp, price, size, value);
+		return new Tick(type, time, price, size, value);
 	}
 	
-	public static Tick of(TickType type, double price, long size) {
-		return of(type, 0, price, size, 0);
+	public static Tick of(TickType type, CDecimal price, CDecimal size) {
+		return of(type, Instant.EPOCH, price, size, CDecimalBD.ZERO);
 	}
 	
-	public static Tick of(TickType type, Instant time, double price,
-			long size, double value)
+	public static Tick of(TickType type, Instant time, CDecimal price,
+			CDecimal size)
 	{
-		return new Tick(type, time.toEpochMilli(), price, size, value);
+		return new Tick(type, time, price, size, CDecimalBD.ZERO);
 	}
 	
-	public static Tick of(TickType type, Instant time, double price,
-			long size)
-	{
-		return new Tick(type, time.toEpochMilli(), price, size, 0);
+	public static Tick of(Instant time, CDecimal price, CDecimal size) {
+		return of(TickType.TRADE, time, price, size, CDecimalBD.ZERO);
 	}
 	
-	public static Tick of(Instant time, double price, long size) {
-		return of(TickType.TRADE, time, price, size, 0);
+	public static Tick of(Instant time, CDecimal price) {
+		return of(TickType.TRADE, time, price, CDecimalBD.ZERO, CDecimalBD.ZERO);
 	}
 	
-	public static Tick of(Instant time, double price) {
-		return of(TickType.TRADE, time, price, 0, 0);
+	public static Tick of(TickType type, Instant time, String price, long size) {
+		return of(type, time, CDecimalBD.of(price), CDecimalBD.of(size));
 	}
 	
-	@Deprecated
-	public static Tick of(LocalDateTime time, double price, long size) {
-		return of(TickType.TRADE, time.toInstant(ZoneOffset.UTC), price, size);
-	}
-	
-	@Deprecated
-	public static Tick of(LocalDateTime time, double price) {
-		return of(time, price, 0);
-	}
-	
-	public static Tick ofAsk(Instant time, double price, long size) {
+	public static Tick ofAsk(Instant time, CDecimal price, CDecimal size) {
 		return of(TickType.ASK, time, price, size);
 	}
 	
-	public static Tick ofAsk(double price, long size) {
+	public static Tick ofAsk(CDecimal price, CDecimal size) {
 		return ofAsk(Instant.EPOCH, price, size);
 	}
 	
-	public static Tick ofBid(Instant time, double price, long size) {
+	public static Tick ofAsk(Instant time, String price, long size) {
+		return of(TickType.ASK, time, price, size);
+	}
+	
+	public static Tick ofBid(Instant time, CDecimal price, CDecimal size) {
 		return of(TickType.BID, time, price, size);
 	}
 	
-	public static Tick ofBid(double price, long size) {
+	public static Tick ofBid(CDecimal price, CDecimal size) {
 		return ofBid(Instant.EPOCH, price, size);
 	}
 	
-	public static Tick ofTrade(Instant time, double price, long size) {
+	public static Tick ofBid(Instant time, String price, long size) {
+		return of(TickType.BID, time, price, size);
+	}
+	
+	public static Tick ofTrade(Instant time, CDecimal price, CDecimal size) {
 		return of(TickType.TRADE, time, price, size);
 	}
 	
@@ -119,16 +124,7 @@ public class Tick implements TStamped {
 	 */
 	@Override
 	public Instant getTime() {
-		return Instant.ofEpochMilli(timestamp);
-	}
-	
-	/**
-	 * Get timestamp of tick.
-	 * <p>
-	 * @return milliseconds that have elapsed since 1970-01-01T00:00:00Z
-	 */
-	public long getTimestamp() {
-		return timestamp;
+		return time;
 	}
 	
 	/**
@@ -136,7 +132,7 @@ public class Tick implements TStamped {
 	 * <p>
 	 * @return price
 	 */
-	public double getPrice() {
+	public CDecimal getPrice() {
 		return price;
 	}
 	
@@ -145,7 +141,7 @@ public class Tick implements TStamped {
 	 * <p>
 	 * @return size
 	 */
-	public long getSize() {
+	public CDecimal getSize() {
 		return size;
 	}
 	
@@ -154,7 +150,7 @@ public class Tick implements TStamped {
 	 * <p>
 	 * @return value
 	 */
-	public double getValue() {
+	public CDecimal getValue() {
 		return value;
 	}
 	
@@ -166,7 +162,7 @@ public class Tick implements TStamped {
 		if ( other != null && other.getClass() == Tick.class ) {
 			Tick o = (Tick) other;
 			return new EqualsBuilder()
-				.append(timestamp, o.timestamp)
+				.append(time, o.time)
 				.append(price, o.price)
 				.append(size, o.size)
 				.append(value, o.value)
@@ -180,12 +176,12 @@ public class Tick implements TStamped {
 	@Override
 	public String toString() {
 		return type + "[" + getTime() + " " + price
-			+ (size == 0 ? "" : "x" + size)
-			+ (value == 0 ? "" : " " + value) + "]";
+			+ (size == null ? "" : "x" + size)
+			+ (value == null ? "" : " " + value) + "]";
 	}
 	
-	public Tick withPrice(double newPrice) {
-		return Tick.of(type, timestamp, newPrice, size, value);
+	public Tick withPrice(CDecimal newPrice) {
+		return Tick.of(type, time, newPrice, size, value);
 	}
 	
 	public Tick withTime(Instant newTime) {

@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesTickAggregator;
 /**
  * Candle series utilities.
  */
+@Deprecated
 public class CSUtils {
 	
 	/**

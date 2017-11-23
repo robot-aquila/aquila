@@ -21,6 +21,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIteratorStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleBuilder;
 import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.DataStorageException;
@@ -246,15 +247,16 @@ public class IntradayMDStorageOverSDSSTest {
 	}
 	
 	private void testCreateReader_3KIT_FillStubIterators() {
-		fixture.add(new Candle(IM1("2017-09-15T18:01:00Z"), 150, 156, 150, 155, 1700));
-		fixture.add(new Candle(IM1("2017-09-15T18:02:00Z"), 155, 155, 149, 151, 1800));
-		fixture.add(new Candle(IM1("2017-09-15T18:03:00Z"), 151, 152, 145, 148, 1900));
-		fixture.add(new Candle(IM1("2017-10-01T12:01:00Z"), 143, 145, 140, 142, 5000));
-		fixture.add(new Candle(IM1("2017-10-01T12:02:00Z"), 142, 149, 141, 145, 1500));
-		fixture.add(new Candle(IM1("2017-10-01T12:03:00Z"), 145, 152, 145, 150, 1700));
-		fixture.add(new Candle(IM1("2017-12-31T10:00:00Z"), 150, 152, 148, 151, 1000));
-		fixture.add(new Candle(IM1("2017-12-31T10:01:00Z"), 151, 156, 150, 155, 2000));
-		fixture.add(new Candle(IM1("2017-12-31T10:02:00Z"), 155, 158, 152, 156, 3000));
+		CandleBuilder cb = new CandleBuilder().withTimeFrame(ZTFrame.M1);
+		fixture.add(cb.buildCandle("2017-09-15T18:01:00Z", 150, 156, 150, 155, 1700));
+		fixture.add(cb.buildCandle("2017-09-15T18:02:00Z", 155, 155, 149, 151, 1800));
+		fixture.add(cb.buildCandle("2017-09-15T18:03:00Z", 151, 152, 145, 148, 1900));
+		fixture.add(cb.buildCandle("2017-10-01T12:01:00Z", 143, 145, 140, 142, 5000));
+		fixture.add(cb.buildCandle("2017-10-01T12:02:00Z", 142, 149, 141, 145, 1500));
+		fixture.add(cb.buildCandle("2017-10-01T12:03:00Z", 145, 152, 145, 150, 1700));
+		fixture.add(cb.buildCandle("2017-12-31T10:00:00Z", 150, 152, 148, 151, 1000));
+		fixture.add(cb.buildCandle("2017-12-31T10:01:00Z", 151, 156, 150, 155, 2000));
+		fixture.add(cb.buildCandle("2017-12-31T10:02:00Z", 155, 158, 152, 156, 3000));
 		iteratorStub1 = new CloseableIteratorStub<>(fixture.subList(0, 3));
 		iteratorStub2 = new CloseableIteratorStub<>(fixture.subList(3, 6));
 		iteratorStub3 = new CloseableIteratorStub<>(fixture.subList(6, 9));

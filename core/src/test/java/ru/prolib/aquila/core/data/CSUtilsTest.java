@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -40,10 +41,11 @@ public class CSUtilsTest {
 
 	@Test
 	public void testAggregate3_Tick_FirstCandle() throws Exception {
-		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:36:53Z"), 86.12d, 1000L)));
+		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:36:53Z"),
+				CDecimalBD.of("86.12"), CDecimalBD.of(1000L))));
 
 		Interval expectedInt = Interval.of(T("2017-05-02T11:35:00Z"), T("2017-05-02T11:40:00Z"));
-		Candle expected = new Candle(expectedInt, 86.12d, 1000L);
+		Candle expected = new Candle(expectedInt, CDecimalBD.of("86.12"), CDecimalBD.of(1000L));
 		assertEquals(1, series.getLength());
 		assertEquals(expected, series.get());
 	}
@@ -51,11 +53,17 @@ public class CSUtilsTest {
 	@Test
 	public void testAggregate3_Tick_AppendToLastCandle() throws Exception {
 		Interval expectedInt = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		series.add(new Candle(expectedInt, 100.02d, 500L));
+		series.add(new Candle(expectedInt, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 		
-		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:52:00Z"), 98.13d, 100L)));
+		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:52:00Z"),
+				CDecimalBD.of("98.13"), CDecimalBD.of(100L))));
 		
-		Candle expected = new Candle(expectedInt, 100.02d, 100.02d, 98.13d, 98.13d, 600L);
+		Candle expected = new Candle(expectedInt,
+				CDecimalBD.of("100.02"),
+				CDecimalBD.of("100.02"),
+				CDecimalBD.of("98.13"),
+				CDecimalBD.of("98.13"),
+				CDecimalBD.of(600L));
 		assertEquals(1, series.getLength());
 		assertEquals(expected, series.get());
 	}
@@ -63,37 +71,41 @@ public class CSUtilsTest {
 	@Test
 	public void testAggregate3_Tick_PastTick() throws Exception {
 		Interval expectedInt = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		series.add(new Candle(expectedInt, 100.02d, 500L));
+		series.add(new Candle(expectedInt, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 		
-		assertFalse(utils.aggregate(series, ZTFrame.M15, Tick.ofTrade(T("2017-05-02T11:49:59Z"), 98.13d, 100L)));
+		assertFalse(utils.aggregate(series, ZTFrame.M15, Tick.ofTrade(T("2017-05-02T11:49:59Z"),
+				CDecimalBD.of("98.13"), CDecimalBD.of(100L))));
 		
-		Candle expected = new Candle(expectedInt, 100.02, 500L);
+		Candle expected = new Candle(expectedInt, CDecimalBD.of("100.02"), CDecimalBD.of(500L));
 		assertEquals(1, series.getLength());
 		assertEquals(expected, series.get());
 	}
 	
 	@Test
 	public void testAggregate3_Tick_NewCandle() throws Exception {
-		series.add(new Candle(Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z")), 100.02d, 500L));
+		series.add(new Candle(Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z")),
+				CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 
-		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:56:02Z"), 98.13d, 100L)));
+		assertTrue(utils.aggregate(series, ZTFrame.M5, Tick.ofTrade(T("2017-05-02T11:56:02Z"),
+				CDecimalBD.of("98.13"), CDecimalBD.of(100L))));
 
 		assertEquals(2, series.getLength());
 		Interval expectedInt = Interval.of(T("2017-05-02T11:55:00Z"), T("2017-05-02T12:00:00Z"));
-		Candle expected = new Candle(expectedInt, 98.13d, 100L);
+		Candle expected = new Candle(expectedInt, CDecimalBD.of("98.13"), CDecimalBD.of(100L));
 		assertEquals(expected, series.get());
 		
 		expectedInt = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		expected = new Candle(expectedInt, 100.02d, 500L);
+		expected = new Candle(expectedInt, CDecimalBD.of("100.02"), CDecimalBD.of(500L));
 		assertEquals(expected, series.get(0));
 	}
 	
 	@Test
 	public void testAggregate2_FirstCandle() throws Exception {
-		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:36:53Z"), 86.12d, 1000L));
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:36:53Z"),
+				CDecimalBD.of("86.12"), CDecimalBD.of(1000L)));
 
 		Interval interval = Interval.of(T("2017-05-02T11:35:00Z"), T("2017-05-02T11:40:00Z"));
-		Candle expected = new Candle(interval, 86.12d, 1000L);
+		Candle expected = new Candle(interval, CDecimalBD.of("86.12"), CDecimalBD.of(1000L));
 		assertEquals(1, tseries.getLength());
 		assertEquals(expected, tseries.get());
 	}
@@ -101,11 +113,16 @@ public class CSUtilsTest {
 	@Test
 	public void testAggregate2_AppendToLastCandle() throws Exception {
 		Interval interval = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		tseries.set(interval.getStart(), new Candle(interval, 100.02d, 500L));
+		tseries.set(interval.getStart(), new Candle(interval, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 		
-		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:52:00Z"), 98.13d, 100L));
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:52:00Z"), CDecimalBD.of("98.13"), CDecimalBD.of(100L)));
 		
-		Candle expected = new Candle(interval, 100.02d, 100.02d, 98.13d, 98.13d, 600L);
+		Candle expected = new Candle(interval,
+				CDecimalBD.of("100.02"),
+				CDecimalBD.of("100.02"),
+				CDecimalBD.of("98.13"),
+				CDecimalBD.of("98.13"),
+				CDecimalBD.of(600L));
 		assertEquals(1, tseries.getLength());
 		assertEquals(expected, tseries.get());
 	}
@@ -113,13 +130,13 @@ public class CSUtilsTest {
 	@Test
 	public void testAggregate2_PastTick() throws Exception {
 		Interval interval1 = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		tseries.set(interval1.getStart(), new Candle(interval1, 100.02d, 500L));
+		tseries.set(interval1.getStart(), new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 		
-		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:49:59Z"), 98.13d, 100L));
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:49:59Z"), CDecimalBD.of("98.13"), CDecimalBD.of(100L)));
 		
 		Interval interval2 = Interval.of(T("2017-05-02T11:45:00Z"), T("2017-05-02T11:50:00Z"));
-		Candle expected1 = new Candle(interval2, 98.13d, 100L),
-				expected2 = new Candle(interval1, 100.02, 500L);
+		Candle expected1 = new Candle(interval2, CDecimalBD.of("98.13"), CDecimalBD.of(100L)),
+				expected2 = new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L));
 
 		assertEquals(2, tseries.getLength());
 		assertEquals(expected1, tseries.get(0));
@@ -129,13 +146,13 @@ public class CSUtilsTest {
 	@Test
 	public void testAggregate2_NewCandle() throws Exception {
 		Interval interval1 = Interval.of(T("2017-05-02T11:50:00Z"), T("2017-05-02T11:55:00Z"));
-		tseries.set(interval1.getStart(), new Candle(interval1, 100.02d, 500L));
+		tseries.set(interval1.getStart(), new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L)));
 
-		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:56:02Z"), 98.13d, 100L));
+		utils.aggregate(tseries, Tick.ofTrade(T("2017-05-02T11:56:02Z"), CDecimalBD.of("98.13"), CDecimalBD.of(100L)));
 
 		Interval interval2 = Interval.of(T("2017-05-02T11:55:00Z"), T("2017-05-02T12:00:00Z"));
-		Candle expected2 = new Candle(interval2, 98.13d, 100L),
-				expected1 = new Candle(interval1, 100.02d, 500L);
+		Candle expected2 = new Candle(interval2, CDecimalBD.of("98.13"), CDecimalBD.of(100L)),
+				expected1 = new Candle(interval1, CDecimalBD.of("100.02"), CDecimalBD.of(500L));
 		assertEquals(2, tseries.getLength());
 		assertEquals(expected1, tseries.get(0));
 		assertEquals(expected2, tseries.get(1));

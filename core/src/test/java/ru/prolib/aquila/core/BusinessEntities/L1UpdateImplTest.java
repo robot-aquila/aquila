@@ -24,13 +24,13 @@ public class L1UpdateImplTest {
 	public void setUp() throws Exception {
 		symbol1 = new Symbol("GAZP");
 		symbol2 = new Symbol("SBER");
-		update = new L1UpdateImpl(symbol1, Tick.of(T("2016-02-18T10:10:00Z"), 14.45d));
+		update = new L1UpdateImpl(symbol1, Tick.of(T("2016-02-18T10:10:00Z"), CDecimalBD.of("14.45")));
 	}
 
 	@Test
 	public void testCtor() {
 		assertEquals(symbol1, update.getSymbol());
-		assertEquals(Tick.of(T("2016-02-18T10:10:00Z"), 14.45d), update.getTick());
+		assertEquals(Tick.of(T("2016-02-18T10:10:00Z"), CDecimalBD.of("14.45")), update.getTick());
 	}
 	
 	@Test
@@ -42,8 +42,8 @@ public class L1UpdateImplTest {
 	
 	@Test
 	public void testEquals() {
-		Tick tick1 = Tick.of(T("2016-02-18T10:10:00Z"), 14.45d);
-		Tick tick2 = Tick.of(T("1998-11-15T00:20:15Z"), 16.78d);
+		Tick tick1 = Tick.of(T("2016-02-18T10:10:00Z"), CDecimalBD.of("14.45"));
+		Tick tick2 = Tick.of(T("1998-11-15T00:20:15Z"), CDecimalBD.of("16.78"));
 		L1Update update1 = new L1UpdateImpl(symbol1, tick1),
 				update2 = new L1UpdateImpl(symbol2, tick1),
 				update3 = new L1UpdateImpl(symbol1, tick2),
@@ -59,7 +59,7 @@ public class L1UpdateImplTest {
 		L1Update actual = update.withTime(T("1978-06-02T00:00:00Z"));
 		
 		assertNotNull(actual);
-		L1Update expected = new L1UpdateImpl(symbol1, Tick.of(T("1978-06-02T00:00:00Z"), 14.45d));
+		L1Update expected = new L1UpdateImpl(symbol1, Tick.of(T("1978-06-02T00:00:00Z"), CDecimalBD.of("14.45")));
 		assertEquals(expected, actual);
 	}
 

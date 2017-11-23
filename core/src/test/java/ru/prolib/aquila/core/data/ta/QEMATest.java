@@ -8,14 +8,16 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.SeriesImpl;
 
 public class QEMATest {
 	private IMocksControl control;
-	private Series<Double> sourceMock;
-	private SeriesImpl<Double> source;
+	private Series<CDecimal> sourceMock;
+	private SeriesImpl<CDecimal> source;
 	private QEMA series;
 
 	@SuppressWarnings("unchecked")
@@ -25,12 +27,12 @@ public class QEMATest {
 		sourceMock = control.createMock(Series.class);
 		source = new SeriesImpl<>();
 		series = new QEMA("foo", source, 4);
-		source.add(5d);
-		source.add(2d);
-		source.add(7d);
-		source.add(3d);
-		source.add(8d);
-		source.add(1d);
+		source.add(CDecimalBD.of("5.00000"));
+		source.add(CDecimalBD.of("2.00000"));
+		source.add(CDecimalBD.of("7.00000"));
+		source.add(CDecimalBD.of("3.00000"));
+		source.add(CDecimalBD.of("8.00000"));
+		source.add(CDecimalBD.of("1.00000"));
 	}
 	
 	@Test
@@ -40,7 +42,7 @@ public class QEMATest {
 	
 	@Test
 	public void testGet() throws Exception {
-		assertEquals(3.84928d, series.get(), 0.000001d);
+		assertEquals(CDecimalBD.of("3.84928"), series.get());
 	}
 	
 	@Test
@@ -48,9 +50,9 @@ public class QEMATest {
 		assertEquals(null, series.get(0));
 		assertEquals(null, series.get(1));
 		assertEquals(null, series.get(2));
-		assertEquals(4.248d,   series.get(3), 0.000001d);
-		assertEquals(5.7488d,  series.get(4), 0.000001d);
-		assertEquals(3.84928d, series.get(5), 0.000001d);
+		assertEquals(CDecimalBD.of("4.24800"), series.get(3));
+		assertEquals(CDecimalBD.of("5.74880"), series.get(4));
+		assertEquals(CDecimalBD.of("3.84928"), series.get(5));
 	}
 
 	@Test

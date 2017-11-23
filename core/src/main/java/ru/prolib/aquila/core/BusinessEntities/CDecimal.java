@@ -167,4 +167,8 @@ public interface CDecimal extends Comparable<CDecimal> {
 	 */
 	CDecimal whenNull(CDecimal other);
 	
+	CDecimal sqrt(int scale);
+	
+	CDecimal pow(int n);
+
 }

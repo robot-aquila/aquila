@@ -20,6 +20,11 @@ import ru.prolib.aquila.core.utils.Variant;
  * $Id: CandleTest.java 566 2013-03-11 01:52:40Z whirlwind $
  */
 public class CandleTest {
+	
+	static Instant T(String timeString) {
+		return Instant.parse(timeString);
+	}
+	
 	private LocalDateTime from, to;
 	private Interval interval1, interval2; 
 	private Candle c1, c2;
@@ -38,88 +43,123 @@ public class CandleTest {
 				to.toInstant(ZoneOffset.UTC));
 		interval2 = Interval.of(LocalDateTime.of(2013, 10, 5, 19, 50, 0)
 				.toInstant(ZoneOffset.UTC), Duration.of(5,  ChronoUnit.MINUTES));
-		c2 = new Candle(interval2, 120.05d, 130.00d, 90.55d, 125.15d, 10000L);
+		c2 = new Candle(interval2,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("130.00"),
+				CDecimalBD.of("90.55"),
+				CDecimalBD.of("125.15"),
+				CDecimalBD.of(10000L));
 	}
 	
 	@Test
 	public void testGetStartTime() throws Exception {
-		assertEquals(Instant.parse("2013-10-05T19:50:00Z"), c2.getStartTime());
+		assertEquals(T("2013-10-05T19:50:00Z"), c2.getStartTime());
 	}
 	
 	@Test
 	public void testGetEndTime() throws Exception {
-		assertEquals(Instant.parse("2013-10-05T19:55:00Z"), c2.getEndTime());
+		assertEquals(T("2013-10-05T19:55:00Z"), c2.getEndTime());
 	}
 	
 	@Test
 	public void testConstruct6() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 130.00d, 90.55d, 125.15d, 10000L);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("130.00"),
+				CDecimalBD.of("90.55"),
+				CDecimalBD.of("125.15"),
+				CDecimalBD.of(10000L));
 		assertEquals(interval1, c1.getInterval());
-		assertEquals(120.05d, c1.getOpen(), 0.001d);
-		assertEquals(130.00d, c1.getHigh(), 0.001d);
-		assertEquals( 90.55d, c1.getLow(),  0.001d);
-		assertEquals(125.15d, c1.getClose(),0.001d);
-		assertEquals(10000L,  c1.getVolume());
+		assertEquals(CDecimalBD.of("120.05"), c1.getOpen());
+		assertEquals(CDecimalBD.of("130.00"), c1.getHigh());
+		assertEquals(CDecimalBD.of("90.55"),  c1.getLow());
+		assertEquals(CDecimalBD.of("125.15"), c1.getClose());
+		assertEquals(CDecimalBD.of(10000L),   c1.getVolume());
 	}
 	
 	@Test
 	public void testConstruct1() throws Exception {
 		c1 = new Candle(c2);
 		assertEquals(interval2, c1.getInterval());
-		assertEquals(120.05d, c1.getOpen(), 0.001d);
-		assertEquals(130.00d, c1.getHigh(), 0.001d);
-		assertEquals( 90.55d, c1.getLow(),  0.001d);
-		assertEquals(125.15d, c1.getClose(),0.001d);
-		assertEquals(10000L,  c1.getVolume());
+		assertEquals(CDecimalBD.of("120.05"), c1.getOpen());
+		assertEquals(CDecimalBD.of("130.00"), c1.getHigh());
+		assertEquals(CDecimalBD.of("90.55"),  c1.getLow());
+		assertEquals(CDecimalBD.of("125.15"), c1.getClose());
+		assertEquals(CDecimalBD.of(10000L),   c1.getVolume());
 	}
 	
 	@Test
 	public void testConstruct2() throws Exception {
-		c1 = new Candle(interval1, 120.5d, 1000L);
+		c1 = new Candle(interval1, CDecimalBD.of("120.50"), CDecimalBD.of(1000L));
 		assertEquals(interval1, c1.getInterval());
-		assertEquals(120.5d, c1.getOpen(), 0.001d);
-		assertEquals(120.5d, c1.getHigh(), 0.001d);
-		assertEquals(120.5d, c1.getLow(),  0.001d);
-		assertEquals(120.5d, c1.getClose(),0.001d);
-		assertEquals(1000L,  c1.getVolume());
+		assertEquals(CDecimalBD.of("120.50"), c1.getOpen());
+		assertEquals(CDecimalBD.of("120.50"), c1.getHigh());
+		assertEquals(CDecimalBD.of("120.50"), c1.getLow());
+		assertEquals(CDecimalBD.of("120.50"), c1.getClose());
+		assertEquals(CDecimalBD.of(1000L),  c1.getVolume());
 	}
 	
 	@Test
 	public void testAddDeal2() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 130.00d, 90.55d, 125.15d, 10000L);
-		c2 = c1.addDeal(132.25d, 1L);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("130.00"),
+				CDecimalBD.of("90.55"),
+				CDecimalBD.of("125.15"),
+				CDecimalBD.of(10000L));
+		c2 = c1.addDeal(CDecimalBD.of("132.25"), CDecimalBD.of(1L));
 		assertNotNull(c2);
 		assertNotSame(c1, c2);
 		assertEquals(interval1, c2.getInterval());
-		assertEquals(120.05d, c2.getOpen(), 0.001d);
-		assertEquals(132.25d, c2.getHigh(), 0.001d);
-		assertEquals( 90.55d, c2.getLow(),  0.001d);
-		assertEquals(132.25d, c2.getClose(),0.001d);
-		assertEquals(10001L,  c2.getVolume());
+		assertEquals(CDecimalBD.of("120.05"), c2.getOpen());
+		assertEquals(CDecimalBD.of("132.25"), c2.getHigh());
+		assertEquals(CDecimalBD.of("90.55"),  c2.getLow());
+		assertEquals(CDecimalBD.of("132.25"), c2.getClose());
+		assertEquals(CDecimalBD.of(10001L),   c2.getVolume());
 	}
 	
 	@Test
 	public void testAddCandle() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 130.00d, 80.55d, 125.15d, 10000L);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("130.00"),
+				CDecimalBD.of("80.55"),
+				CDecimalBD.of("125.15"),
+				CDecimalBD.of(10000L));
 		interval2 = Interval.of(LocalDateTime.of(2013, 10, 5, 19, 44, 0, 0)
 				.toInstant(ZoneOffset.UTC), Duration.of(1, ChronoUnit.MINUTES));
-		c2 = new Candle(interval2, 140.05d, 150.00d, 90.55d, 128.00d,   100L);
+		c2 = new Candle(interval2,
+				CDecimalBD.of("140.05"),
+				CDecimalBD.of("150.00"),
+				CDecimalBD.of("90.55"),
+				CDecimalBD.of("128.00"),
+				CDecimalBD.of(100L));
 		Candle c3 = c1.addCandle(c2);
 		assertNotNull(c3);
 		assertNotSame(c1, c3);
 		assertNotSame(c2, c3);
 		assertEquals(interval1, c3.getInterval());
-		assertEquals(120.05d, c3.getOpen(), 0.001d);
-		assertEquals(150.00d, c3.getHigh(), 0.001d);
-		assertEquals( 80.55d, c3.getLow(),  0.001d);
-		assertEquals(128.00d, c3.getClose(),0.001d);
-		assertEquals(10100L,  c3.getVolume());
+		assertEquals(CDecimalBD.of("120.05"), c3.getOpen());
+		assertEquals(CDecimalBD.of("150.00"), c3.getHigh());
+		assertEquals(CDecimalBD.of("80.55"), c3.getLow());
+		assertEquals(CDecimalBD.of("128.00"), c3.getClose());
+		assertEquals(CDecimalBD.of(10100L),  c3.getVolume());
 	}
 	
 	@Test (expected=OutOfIntervalException.class)
 	public void testAddCandle_ThrowsIfOutOfInterval() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 130.00d, 80.55d, 125.15d, 10000L);
-		c2 = new Candle(interval2, 140.05d, 150.00d, 90.55d, 128.00d,   100L);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("130.00"),
+				CDecimalBD.of("80.55"),
+				CDecimalBD.of("125.15"),
+				CDecimalBD.of(10000L));
+		c2 = new Candle(interval2,
+				CDecimalBD.of("140.05"),
+				CDecimalBD.of("150.00"),
+				CDecimalBD.of("90.55"),
+				CDecimalBD.of("128.00"),
+				CDecimalBD.of(100L));
 		c1.addCandle(c2);
 	}
 	
@@ -128,21 +168,21 @@ public class CandleTest {
 		Variant<Interval> vInt = new Variant<Interval>()
 			.add(interval2)
 			.add(interval1);
-		Variant<Double> vOpen = new Variant<Double>(vInt)
-			.add(120.05d)
-			.add(300.01d);
-		Variant<Double> vHigh = new Variant<Double>(vOpen)
-			.add(130.00d)
-			.add(320.00d);
-		Variant<Double> vLow = new Variant<Double>(vHigh)
-			.add(90.55d)
-			.add(290.05d);
-		Variant<Double> vClose = new Variant<Double>(vLow)
-			.add(125.15d)
-			.add(298.15d);
-		Variant<Long> vVol = new Variant<Long>(vClose)
-			.add(10000L)
-			.add(500L);
+		Variant<CDecimal> vOpen = new Variant<CDecimal>(vInt)
+				.add(CDecimalBD.of("120.05"))
+				.add(CDecimalBD.of("300.01")),
+			vHigh = new Variant<CDecimal>(vOpen)
+				.add(CDecimalBD.of("130.00"))
+				.add(CDecimalBD.of("320.00")),
+			vLow = new Variant<CDecimal>(vHigh)
+				.add(CDecimalBD.of("90.55"))
+				.add(CDecimalBD.of("290.05")),
+			vClose = new Variant<CDecimal>(vLow)
+				.add(CDecimalBD.of("125.15"))
+				.add(CDecimalBD.of("298.15")),
+			vVol = new Variant<CDecimal>(vClose)
+				.add(CDecimalBD.of(10000L))
+				.add(CDecimalBD.of(500L));
 		Variant<?> iterator = vVol;
 		Candle x, found = null;
 		int foundCnt = 0;
@@ -157,11 +197,11 @@ public class CandleTest {
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
 		assertEquals(interval2, found.getInterval());
-		assertEquals(120.05d, found.getOpen(), 0.001d);
-		assertEquals(130.00d, found.getHigh(), 0.001d);
-		assertEquals( 90.55d, found.getLow(),  0.001d);
-		assertEquals(125.15d, found.getClose(),0.001d);
-		assertEquals(10000L, found.getVolume());
+		assertEquals(CDecimalBD.of("120.05"), found.getOpen());
+		assertEquals(CDecimalBD.of("130.00"), found.getHigh());
+		assertEquals(CDecimalBD.of("90.55"), found.getLow());
+		assertEquals(CDecimalBD.of("125.15"), found.getClose());
+		assertEquals(CDecimalBD.of(10000L), found.getVolume());
 	}
 	
 	@Test
@@ -173,95 +213,176 @@ public class CandleTest {
 	
 	@Test
 	public void testGetBody() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
-		assertEquals(34.63d, c1.getBody(), 0.001d);
-		assertEquals(1.17d, c2.getBody(), 0.001d);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
+		assertEquals(CDecimalBD.of("34.63"), c1.getBody());
+		assertEquals(CDecimalBD.of("1.17"), c2.getBody());
 	}
 	
 	@Test
 	public void testGetBodyMiddle() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
-		assertEquals(102.735d, c1.getBodyMiddle(), 0.0001d);
-		assertEquals(96.735d, c2.getBodyMiddle(), 0.0001d);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
+		assertEquals(CDecimalBD.of("102.74"), c1.getBodyMiddle());
+		assertEquals(CDecimalBD.of("96.74"), c2.getBodyMiddle());
 	}
 	
 	@Test
 	public void testGetBodyMiddleOrCloseIfBullish() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
-		assertEquals(102.735d, c1.getBodyMiddleOrCloseIfBullish(), 0.0001d);
-		assertEquals(97.32d, c2.getBodyMiddleOrCloseIfBullish(), 0.0001d);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
+		assertEquals(CDecimalBD.of("102.74"), c1.getBodyMiddleOrCloseIfBullish());
+		assertEquals(CDecimalBD.of("97.32"), c2.getBodyMiddleOrCloseIfBullish());
 	}
 	
 	@Test
 	public void testGetBodyMiddleOrCloseIfBearish() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
-		assertEquals(85.42d, c1.getBodyMiddleOrCloseIfBearish(), 0.0001d);
-		assertEquals(96.735d, c2.getBodyMiddleOrCloseIfBearish(), 0.0001d);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
+		assertEquals(CDecimalBD.of("85.42"), c1.getBodyMiddleOrCloseIfBearish());
+		assertEquals(CDecimalBD.of("96.74"), c2.getBodyMiddleOrCloseIfBearish());
 	}
 	
 	@Test
 	public void testIsBullish() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
 		assertFalse(c1.isBullish());
 		assertTrue(c2.isBullish());
 	}
 	
 	@Test
 	public void testIsBearish() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
 		assertTrue(c1.isBearish());
 		assertFalse(c2.isBearish());
 	}
 	
 	@Test
 	public void testGetTopShadow() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
-		assertEquals(79.95d, c1.getTopShadow(), 0.001d);
-		assertEquals(0.68d, c2.getTopShadow(), 0.001d);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
+		assertEquals(CDecimalBD.of("79.95"), c1.getTopShadow());
+		assertEquals(CDecimalBD.of("0.68"), c2.getTopShadow());
 	}
 	
 	@Test
 	public void testGetBottomShadow() throws Exception {
-		c1 = new Candle(interval1, 120.05d, 200d, 80d, 85.42d, 1L);
-		c2 = new Candle(interval1, 96.15d, 98d, 90d, 97.32d, 1L);
-		assertEquals(5.42d, c1.getBottomShadow(), 0.0001d);
-		assertEquals(6.15d, c2.getBottomShadow(), 0.0001d);
+		c1 = new Candle(interval1,
+				CDecimalBD.of("120.05"),
+				CDecimalBD.of("200.00"),
+				CDecimalBD.of("80.00"),
+				CDecimalBD.of("85.42"),
+				CDecimalBD.of(1L));
+		c2 = new Candle(interval1,
+				CDecimalBD.of("96.15"),
+				CDecimalBD.of("98.00"),
+				CDecimalBD.of("90.00"),
+				CDecimalBD.of("97.32"),
+				CDecimalBD.of(1L));
+		assertEquals(CDecimalBD.of("5.42"), c1.getBottomShadow());
+		assertEquals(CDecimalBD.of("6.15"), c2.getBottomShadow());
 	}
 	
 	@Test
 	public void testToString() throws Exception {
 		String expected = "Candle[T=" + interval2.getStart() + " PT5M, " +
-				"O=120.05, H=130.0, L=90.55, C=125.15, V=10000]";
+				"O=120.05, H=130.00, L=90.55, C=125.15, V=10000]";
 		assertEquals(expected, c2.toString());
 	}
 	
 	@Test
 	public void testAddTick() throws Exception {
 		Tick tick1, tick2;
+		// TODO: Это все еще актуально?
 		// тик без опционального значения -> объем равен 0
-		tick1 = Tick.of(Instant.parse("2013-10-05T19:50:02Z"), 131.12d, 0);
-		// тип раньше предыдущего, но в рамках интервала это игнорируется
-		tick2 = Tick.of(Instant.parse("2013-10-05T19:50:01Z"), 90.12d, 2);
+		tick1 = Tick.of(T("2013-10-05T19:50:02Z"), CDecimalBD.of("131.12"), CDecimalBD.of(0L));
+		// тиr раньше предыдущего, но в рамках интервала это игнорируется
+		tick2 = Tick.of(T("2013-10-05T19:50:01Z"), CDecimalBD.of("90.12"), CDecimalBD.of(2L));
 		Candle result = c2.addTick(tick1).addTick(tick2);
 		assertNotNull(result);
 		assertEquals(interval2, result.getInterval());
-		assertEquals(120.05d, result.getOpen(), 0.001d);
-		assertEquals(131.12d, result.getHigh(), 0.001d);
-		assertEquals( 90.12d, result.getLow(), 0.001d);
-		assertEquals( 90.12d, result.getClose(), 0.001d);
-		assertEquals(10002L, result.getVolume());
+		assertEquals(CDecimalBD.of("120.05"), result.getOpen());
+		assertEquals(CDecimalBD.of("131.12"), result.getHigh());
+		assertEquals(CDecimalBD.of("90.12"), result.getLow());
+		assertEquals(CDecimalBD.of("90.12"), result.getClose());
+		assertEquals(CDecimalBD.of(10002L), result.getVolume());
 	}
 	
 	@Test (expected=OutOfIntervalException.class)
 	public void testAddTick_ThrowsIfOutOfInterval() throws Exception {
-		c2.addTick(Tick.of(Instant.parse("2013-10-05T19:55:00Z"), 180d, 10));
+		c2.addTick(Tick.of(T("2013-10-05T19:55:00Z"), CDecimalBD.of("180.00"), CDecimalBD.of(10L)));
 	}
 
 }

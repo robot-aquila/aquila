@@ -7,11 +7,11 @@ import java.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateImpl;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
-import ru.prolib.aquila.core.BusinessEntities.TickType;
 import ru.prolib.aquila.data.storage.file.SimpleCsvL1FormatException;
 import ru.prolib.aquila.data.storage.file.SimpleCsvL1UpdatePacker;
 
@@ -19,6 +19,10 @@ public class SimpleCsvL1UpdatePackerTest {
 	private static Symbol symbol1 = new Symbol("F:RTS@SPBFUT:USD");
 	private static Symbol symbol2 = new Symbol("S:AAPL@TX:USD");
 	private SimpleCsvL1UpdatePacker packer;
+	
+	static Instant T(String timeString) {
+		return Instant.parse(timeString);
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -28,16 +32,16 @@ public class SimpleCsvL1UpdatePackerTest {
 	@Test
 	public void testPack() throws Exception {
 		L1Update
-			update1 = new L1UpdateImpl(symbol1, Tick.of(TickType.ASK,
-				Instant.parse("2015-02-10T23:49:59.445Z"), 123400.0d, 100L)),
-			update2 = new L1UpdateImpl(symbol2, Tick.of(TickType.BID,
-				Instant.parse("2016-01-01T00:00:00.012Z"), 78.13d, 5L)),
-			update3 = new L1UpdateImpl(symbol1, Tick.of(TickType.TRADE,
-				Instant.parse("2016-02-18T11:31:15Z"), 132200.0d, 250L));
+			update1 = new L1UpdateImpl(symbol1, Tick.ofAsk(T("2015-02-10T23:49:59.445Z"),
+					CDecimalBD.of("123400.00"), CDecimalBD.of(100L))),
+			update2 = new L1UpdateImpl(symbol2, Tick.ofBid(T("2016-01-01T00:00:00.012Z"),
+					CDecimalBD.of("78.13"), CDecimalBD.of(5L))),
+			update3 = new L1UpdateImpl(symbol1, Tick.ofTrade(T("2016-02-18T11:31:15Z"),
+					CDecimalBD.of("132200.00"), CDecimalBD.of(250L)));
 		String
-			expected1 = "A,F:RTS@SPBFUT:USD,2015-02-10T23:49:59.445Z,123400.0,100",
+			expected1 = "A,F:RTS@SPBFUT:USD,2015-02-10T23:49:59.445Z,123400.00,100",
 			expected2 = "B,S:AAPL@TX:USD,2016-01-01T00:00:00.012Z,78.13,5",
-			expected3 = "T,F:RTS@SPBFUT:USD,2016-02-18T11:31:15Z,132200.0,250";
+			expected3 = "T,F:RTS@SPBFUT:USD,2016-02-18T11:31:15Z,132200.00,250";
 		
 		assertEquals(expected1, packer.pack(update1));
 		assertEquals(expected2, packer.pack(update2));
@@ -77,16 +81,16 @@ public class SimpleCsvL1UpdatePackerTest {
 	@Test
 	public void testUnpack() throws Exception {
 		String
-			record1 = "A,F:RTS@SPBFUT:USD,2015-02-10T23:49:59.445Z,123400.0,100",
+			record1 = "A,F:RTS@SPBFUT:USD,2015-02-10T23:49:59.445Z,123400.00,100",
 			record2 = "B,S:AAPL@TX:USD,2016-01-01T00:00:00.012Z,78.13,5",
-			record3 = "T,F:RTS@SPBFUT:USD,2016-02-18T11:31:15Z,132200.0,250";
+			record3 = "T,F:RTS@SPBFUT:USD,2016-02-18T11:31:15Z,132200.00,250";
 		L1Update
-			expected1 = new L1UpdateImpl(symbol1, Tick.of(TickType.ASK,
-				Instant.parse("2015-02-10T23:49:59.445Z"), 123400.0d, 100L)),
-			expected2 = new L1UpdateImpl(symbol2, Tick.of(TickType.BID,
-				Instant.parse("2016-01-01T00:00:00.012Z"), 78.13d, 5L)),
-			expected3 = new L1UpdateImpl(symbol1, Tick.of(TickType.TRADE,
-				Instant.parse("2016-02-18T11:31:15Z"), 132200.0d, 250L));
+			expected1 = new L1UpdateImpl(symbol1, Tick.ofAsk(T("2015-02-10T23:49:59.445Z"),
+					CDecimalBD.of("123400.00"), CDecimalBD.of(100L))),
+			expected2 = new L1UpdateImpl(symbol2, Tick.ofBid(T("2016-01-01T00:00:00.012Z"),
+					CDecimalBD.of("78.13"), CDecimalBD.of(5L))),
+			expected3 = new L1UpdateImpl(symbol1, Tick.ofTrade(T("2016-02-18T11:31:15Z"),
+					CDecimalBD.of("132200.00"), CDecimalBD.of(250L)));
 		
 		assertEquals(expected1, packer.unpack(record1));
 		assertEquals(expected2, packer.unpack(record2));

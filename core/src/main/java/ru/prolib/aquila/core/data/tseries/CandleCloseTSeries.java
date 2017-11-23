@@ -2,13 +2,14 @@ package ru.prolib.aquila.core.data.tseries;
 
 import java.time.Instant;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 
-public class CandleCloseTSeries implements TSeries<Double> {
+public class CandleCloseTSeries implements TSeries<CDecimal> {
 	private final String id;
 	private final TSeries<Candle> candles;
 	
@@ -31,13 +32,13 @@ public class CandleCloseTSeries implements TSeries<Double> {
 	}
 
 	@Override
-	public Double get() throws ValueException {
+	public CDecimal get() throws ValueException {
 		Candle candle = candles.get();
 		return candle == null ? null : candle.getClose();
 	}
 
 	@Override
-	public Double get(int index) throws ValueException {
+	public CDecimal get(int index) throws ValueException {
 		Candle candle = candles.get(index);
 		return candle == null ? null : candle.getClose();
 	}
@@ -63,7 +64,7 @@ public class CandleCloseTSeries implements TSeries<Double> {
 	}
 
 	@Override
-	public Double get(Instant time) {
+	public CDecimal get(Instant time) {
 		Candle candle = candles.get(time);
 		return candle == null ? null : candle.getClose();
 	}

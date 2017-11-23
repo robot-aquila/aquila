@@ -337,7 +337,6 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 				return;
 			}
 			time = getController().getCurrentTime(this);
-			marketDepthBuilder.setPriceScale(getScale());
 			marketDepthBuilder.consume(update);
 			md = marketDepthBuilder.getMarketDepth();
 		} finally {

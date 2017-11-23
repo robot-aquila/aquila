@@ -56,12 +56,20 @@ public class MDUpdateBuilder {
 		return this;
 	}
 	
-	public MDUpdateBuilder addAsk(double price, long size) {
-		return add(Tick.of(TickType.ASK, time, price, size));
+	public MDUpdateBuilder addAsk(CDecimal price, CDecimal size) {
+		return add(Tick.ofAsk(time, price, size));
 	}
 	
-	public MDUpdateBuilder addBid(double price, long size) {
-		return add(Tick.of(TickType.BID, time, price, size));
+	public MDUpdateBuilder addAsk(String price, long size) {
+		return addAsk(CDecimalBD.of(price), CDecimalBD.of(size));
+	}
+	
+	public MDUpdateBuilder addBid(CDecimal price, CDecimal size) {
+		return add(Tick.ofBid(time, price, size));
+	}
+	
+	public MDUpdateBuilder addBid(String price, long size) {
+		return addBid(CDecimalBD.of(price), CDecimalBD.of(size));
 	}
 	
 	public MDUpdateBuilder replace(Tick tick) {
@@ -69,11 +77,11 @@ public class MDUpdateBuilder {
 		return this;
 	}
 	
-	public MDUpdateBuilder replaceAsk(double price, long size) {
+	public MDUpdateBuilder replaceAsk(CDecimal price, CDecimal size) {
 		return replace(Tick.ofAsk(time, price, size));
 	}
 
-	public MDUpdateBuilder replaceBid(double price, long size) {
+	public MDUpdateBuilder replaceBid(CDecimal price, CDecimal size) {
 		return replace(Tick.ofBid(time, price, size));
 	}
 	
@@ -82,16 +90,16 @@ public class MDUpdateBuilder {
 		return this;
 	}
 
-	public MDUpdateBuilder deleteAsk(double price) {
-		return delete(Tick.ofAsk(time, price, 0));
+	public MDUpdateBuilder deleteAsk(CDecimal price) {
+		return delete(Tick.ofAsk(time, price, CDecimalBD.ZERO));
 	}
 
-	public MDUpdateBuilder deleteBid(double price) {
-		return delete(Tick.ofBid(time, price, 0));
+	public MDUpdateBuilder deleteBid(CDecimal price) {
+		return delete(Tick.ofBid(time, price, CDecimalBD.ZERO));
 	}
 	
 	public MDUpdateBuilder replaceOrDelete(Tick tick) {
-		if ( tick.getSize() == 0 ) {
+		if ( CDecimalBD.ZERO.compareTo(tick.getSize()) == 0 ) {
 			return delete(tick);
 		} else {
 			return replace(tick);

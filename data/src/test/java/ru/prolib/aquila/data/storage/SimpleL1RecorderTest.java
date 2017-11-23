@@ -20,13 +20,13 @@ import ru.prolib.aquila.core.TestEventQueueImpl;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateImpl;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
-import ru.prolib.aquila.core.BusinessEntities.TickType;
 import ru.prolib.aquila.core.data.DataProviderStub;
 import ru.prolib.aquila.data.storage.L1UpdateWriter;
 import ru.prolib.aquila.data.storage.SimpleL1Recorder;
@@ -191,7 +191,9 @@ public class SimpleL1RecorderTest {
 		recorder.startWritingUpdates();
 		control.reset();
 		Symbol expectedSymbol = new Symbol("SBER");
-		Tick expectedTick = Tick.of(TickType.ASK, Instant.now(), 14.95d, 1000L);
+		Tick expectedTick = Tick.ofAsk(Instant.now(),
+				CDecimalBD.of("14.95"),
+				CDecimalBD.of(1000L));
 		L1Update expected = new L1UpdateImpl(expectedSymbol, expectedTick);
 		writerMock.writeUpdate(expected);
 		control.replay();
@@ -208,7 +210,7 @@ public class SimpleL1RecorderTest {
 		
 		recorder.onEvent(new SecurityTickEvent(terminal.onSecurityBestAsk(),
 				terminal.getEditableSecurity(new Symbol("GAZP")), null,
-				Tick.of(TickType.ASK, Instant.now(), 14.38d, 85L)));
+				Tick.ofAsk(Instant.now(), CDecimalBD.of("14.38"), CDecimalBD.of(85L))));
 		
 		control.verify();
 	}
@@ -220,7 +222,7 @@ public class SimpleL1RecorderTest {
 		recorder.startWritingUpdates();
 		control.reset();
 		Symbol expectedSymbol = new Symbol("SBER");
-		Tick expectedTick = Tick.of(TickType.ASK, Instant.now(), 14.95d, 1000L);
+		Tick expectedTick = Tick.ofAsk(Instant.now(), CDecimalBD.of("14.95"), CDecimalBD.of(1000L));
 		L1Update expected = new L1UpdateImpl(expectedSymbol, expectedTick);
 		writerMock.writeUpdate(expected);
 		expectLastCall().andThrow(new IOException("test error"));

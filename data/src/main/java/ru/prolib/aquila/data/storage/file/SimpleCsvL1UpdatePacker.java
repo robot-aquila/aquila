@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateImpl;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -61,15 +63,15 @@ public class SimpleCsvL1UpdatePacker {
 		} catch ( DateTimeParseException e ) {
 			throw new SimpleCsvL1FormatException("Invalid timestamp format: " + tokens[2], e);
 		}
-		Double price = null;
+		CDecimal price = null;
 		try {
-			price = Double.valueOf(tokens[3]);
+			price = CDecimalBD.of(tokens[3]);
 		} catch ( NumberFormatException e ) {
 			throw new SimpleCsvL1FormatException("Invalid price format: " + tokens[3], e);
 		}
-		Long size = null;
+		CDecimal size = null;
 		try {
-			size = Long.valueOf(tokens[4]);
+			size = CDecimalBD.of(tokens[4]);
 		} catch ( NumberFormatException e ) {
 			throw new SimpleCsvL1FormatException("Invalid size format: " + tokens[4], e);
 		}

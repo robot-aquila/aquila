@@ -737,5 +737,22 @@ public class CDecimalBDTest {
 		assertSame(x1, x1.whenNull(null));
 		assertSame(x2, x1.whenNull(x2));
 	}
+	
+	@Test
+	public void testSqrt_I() {
+		assertEquals(CDecimalBD.of(2L), CDecimalBD.of(4L).sqrt(0));
+		assertEquals(CDecimalBD.of("2.00"), CDecimalBD.of(4L).sqrt(2));
+		assertEquals(CDecimalBD.of("269.577237"), CDecimalBD.of("72671.886655").sqrt(6));
+		assertEquals(CDecimalBD.of("269.57723690"), CDecimalBD.of("72671.886655").sqrt(8));
+		assertEquals(CDecimalBD.of("2.0000", "USD", RoundingMode.CEILING),
+				CDecimalBD.of("4", "USD", RoundingMode.CEILING).sqrt(4));
+	}
+	
+	@Test
+	public void testPow_I() {
+		assertEquals(CDecimalBD.of(4L), CDecimalBD.of(2L).pow(2));
+		assertEquals(CDecimalBD.of("10000000000000", "RUB", RoundingMode.UNNECESSARY),
+				CDecimalBD.of("10", "RUB", RoundingMode.UNNECESSARY).pow(13));
+	}
 
 }

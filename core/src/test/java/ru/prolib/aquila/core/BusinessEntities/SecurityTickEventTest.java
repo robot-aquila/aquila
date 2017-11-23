@@ -29,7 +29,7 @@ public class SecurityTickEventTest {
 		security = control.createMock(EditableSecurity.class);
 		eventType = new EventTypeImpl();
 		time = Instant.parse("2017-08-04T20:55:00Z");
-		tick = Tick.of(TickType.TRADE, 315.0d, 1000);
+		tick = Tick.of(TickType.TRADE, CDecimalBD.of("315.00"), CDecimalBD.of(1000L));
 		event = new SecurityTickEvent(eventType, security, time, tick);
 	}
 	

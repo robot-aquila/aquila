@@ -1,6 +1,8 @@
 package ru.prolib.aquila.core.data;
 
-public class CandleVolumeSeries extends CandlePartSeries<Long> {
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+
+public class CandleVolumeSeries extends CandlePartSeries<CDecimal> {
 
 	public CandleVolumeSeries(Series<Candle> candles) {
 		super(candles);
@@ -12,7 +14,7 @@ public class CandleVolumeSeries extends CandlePartSeries<Long> {
 	}
 
 	@Override
-	protected Long getPart(Candle candle) {
+	protected CDecimal getPart(Candle candle) {
 		return candle.getVolume();
 	}
 }

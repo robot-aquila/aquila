@@ -5,13 +5,14 @@ import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.core.data.ValueException;
 
-public class QEMATSeries implements TSeries<Double> {
+public class QEMATSeries implements TSeries<CDecimal> {
 	private static final Logger logger;
 	
 	static {
@@ -19,22 +20,22 @@ public class QEMATSeries implements TSeries<Double> {
 	}
 	
 	private final String id;
-	private final TSeries<Double> source;
+	private final TSeries<CDecimal> source;
 	private final int period;
 	private final TAMath math;
 	
-	public QEMATSeries(String id, TSeries<Double> source, int period, TAMath math) {
+	public QEMATSeries(String id, TSeries<CDecimal> source, int period, TAMath math) {
 		this.id = id;
 		this.source = source;
 		this.period = period;
 		this.math = math;
 	}
 	
-	public QEMATSeries(String id, TSeries<Double> source, int period) {
+	public QEMATSeries(String id, TSeries<CDecimal> source, int period) {
 		this(id, source, period, TAMath.getInstance());
 	}
 	
-	public QEMATSeries(TSeries<Double> source, int period) {
+	public QEMATSeries(TSeries<CDecimal> source, int period) {
 		this(TSeries.DEFAULT_ID, source, period);
 	}
 
@@ -43,7 +44,7 @@ public class QEMATSeries implements TSeries<Double> {
 		return id;
 	}
 	
-	public TSeries<Double> getSource() {
+	public TSeries<CDecimal> getSource() {
 		return source;
 	}
 	
@@ -56,7 +57,7 @@ public class QEMATSeries implements TSeries<Double> {
 	}
 
 	@Override
-	public Double get() throws ValueException {
+	public CDecimal get() throws ValueException {
 		lock();
 		try {
 			return math.qema(source, getLength() - 1, period);
@@ -66,7 +67,7 @@ public class QEMATSeries implements TSeries<Double> {
 	}
 
 	@Override
-	public Double get(int index) throws ValueException {
+	public CDecimal get(int index) throws ValueException {
 		lock();
 		try {
 			return math.qema(source, index, period);
@@ -96,7 +97,7 @@ public class QEMATSeries implements TSeries<Double> {
 	}
 
 	@Override
-	public Double get(Instant time) {
+	public CDecimal get(Instant time) {
 		lock();
 		try {
 			int r = source.toIndex(time);

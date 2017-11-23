@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
+
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 
 public class SimpleIteratorTest {
@@ -21,13 +23,13 @@ public class SimpleIteratorTest {
 	 */
 	public List<Tick> getExpectedAsList() throws Exception {
 		List<Tick> ticks = new LinkedList<Tick>();
-		ticks.add(Tick.of(time("2014-06-18T09:59:59Z"), 144.79, 250));
-		ticks.add(Tick.of(time("2014-06-18T18:34:20Z"), 148.79,   5));
-		ticks.add(Tick.of(time("2014-06-18T18:44:15Z"), 141.79,  10));
-		ticks.add(Tick.of(time("2014-06-19T10:00:00Z"), 154.98,   1));
-		ticks.add(Tick.of(time("2014-06-19T15:00:00Z"), 154.80, 500));
-		ticks.add(Tick.of(time("2014-06-25T10:00:01Z"), 148.70, 300));
-		ticks.add(Tick.of(time("2014-06-25T10:00:02Z"), 147.70,   1));
+		ticks.add(Tick.of(time("2014-06-18T09:59:59Z"), CDecimalBD.of("144.79"), CDecimalBD.of(250L)));
+		ticks.add(Tick.of(time("2014-06-18T18:34:20Z"), CDecimalBD.of("148.79"), CDecimalBD.of(5L)));
+		ticks.add(Tick.of(time("2014-06-18T18:44:15Z"), CDecimalBD.of("141.79"), CDecimalBD.of(10L)));
+		ticks.add(Tick.of(time("2014-06-19T10:00:00Z"), CDecimalBD.of("154.98"), CDecimalBD.of(1L)));
+		ticks.add(Tick.of(time("2014-06-19T15:00:00Z"), CDecimalBD.of("154.80"), CDecimalBD.of(500L)));
+		ticks.add(Tick.of(time("2014-06-25T10:00:01Z"), CDecimalBD.of("148.70"), CDecimalBD.of(300L)));
+		ticks.add(Tick.of(time("2014-06-25T10:00:02Z"), CDecimalBD.of("147.70"), CDecimalBD.of(1L)));
 		return ticks;
 	}
 	

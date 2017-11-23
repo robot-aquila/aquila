@@ -1,14 +1,15 @@
 package ru.prolib.aquila.core.data.ta;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.*;
 
 /**
  * Объектно-ориентированная обертка функции {@link TAMath#min(Series, int, int)}.
  */
-public class LOW implements Series<Double> {
+public class LOW implements Series<CDecimal> {
 	private final String id;
-	private final Series<Double> source;
+	private final Series<CDecimal> source;
 	private final int period;
 	private final TAMath math;
 
@@ -33,12 +34,12 @@ public class LOW implements Series<Double> {
 	}
 
 	@Override
-	public Double get() throws ValueException {
+	public CDecimal get() throws ValueException {
 		return get(getLength() - 1);
 	}
 
 	@Override
-	public Double get(int index) throws ValueException {
+	public CDecimal get(int index) throws ValueException {
 		if(index< period){
 			return null;
 		}

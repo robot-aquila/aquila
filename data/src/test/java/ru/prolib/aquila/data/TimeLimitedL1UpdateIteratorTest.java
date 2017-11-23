@@ -26,31 +26,31 @@ public class TimeLimitedL1UpdateIteratorTest {
 		FIXTURE.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-01-01T00:00:00Z")
 			.withTrade()
-			.withPrice(12.34d)
+			.withPrice("12.34")
 			.withSize(100L)
 			.buildL1Update());
 		FIXTURE.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-03-01T00:00:00Z")
 			.withAsk()
-			.withPrice(12.50d)
+			.withPrice("12.50")
 			.withSize(200L)
 			.buildL1Update());
 		FIXTURE.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-03-01T00:00:10Z")
 			.withBid()
-			.withPrice(12.01d)
+			.withPrice("12.01")
 			.withSize(150L)
 			.buildL1Update());
 		FIXTURE.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-03-05T00:00:00Z")
 			.withTrade()
-			.withPrice(12.50d)
+			.withPrice("12.50")
 			.withSize(300L)
 			.buildL1Update());
 		FIXTURE.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-05-01T00:00:00Z")
 			.withTrade()
-			.withPrice(13.01d)
+			.withPrice("13.01")
 			.withSize(350L)
 			.buildL1Update());
 	}

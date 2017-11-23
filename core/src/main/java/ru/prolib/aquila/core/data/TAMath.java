@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.data;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.concurrency.LID;
 
 /**
@@ -16,15 +18,15 @@ public class TAMath {
 	 * This class is used to pass result of some math functions.
 	 */
 	static class SN {
-		private final double sum;
+		private final CDecimal sum;
 		private final int num;
 		
-		SN(double sum, int num) {
+		SN(CDecimal sum, int num) {
 			this.sum = sum;
 			this.num = num;
 		}
 		
-		public double getSum() {
+		public CDecimal getSum() {
 			return sum;
 		}
 		
@@ -56,10 +58,10 @@ public class TAMath {
 	 * same position in the second series. If so then null value will be
 	 * returned independently of value from primary series.
 	 */
-	static class CorrelationHelperSeries implements Series<Double> {
-		private final Series<Double> x, y;
+	static class CorrelationHelperSeries implements Series<CDecimal> {
+		private final Series<CDecimal> x, y;
 		
-		CorrelationHelperSeries(Series<Double> x, Series<Double> y) {
+		CorrelationHelperSeries(Series<CDecimal> x, Series<CDecimal> y) {
 			this.x = x;
 			this.y = y;
 		}
@@ -70,13 +72,13 @@ public class TAMath {
 		}
 
 		@Override
-		public Double get() throws ValueException {
+		public CDecimal get() throws ValueException {
 			return get(x.getLength() - 1);
 		}
 
 		@Override
-		public Double get(int index) throws ValueException {
-			Double cx = x.get(index), cy = y.get(index);
+		public CDecimal get(int index) throws ValueException {
+			CDecimal cx = x.get(index), cy = y.get(index);
 			return cx != null && cy != null ? cx : null;
 		}
 
@@ -114,9 +116,9 @@ public class TAMath {
 	 * @param values значения
 	 * @return максимальное значение или null, если не удалось расчитать
 	 */
-	public Double max(Double... values) {
-		Double max = null;
-		for ( Double c : values ) {
+	public CDecimal max(CDecimal... values) {
+		CDecimal max = null;
+		for ( CDecimal c : values ) {
 			if ( c != null && (max == null || c.compareTo(max) > 0) ) {
 				max = c;
 			}
@@ -130,9 +132,9 @@ public class TAMath {
 	 * @param values значения
 	 * @return минимальное значение или null, если не удалось расчитать
 	 */
-	public Double min(Double... values) {
-		Double min = null;
-		for ( Double c : values ) {
+	public CDecimal min(CDecimal... values) {
+		CDecimal min = null;
+		for ( CDecimal c : values ) {
 			if ( c != null && (min == null || c.compareTo(min) < 0) ) {
 				min = c;
 			}
@@ -146,8 +148,8 @@ public class TAMath {
 	 * @param val - value
 	 * @return абсолютное значение
 	 */
-	public Double abs(Double val) {
-		return val == null ? null : Math.abs(val);
+	public CDecimal abs(CDecimal val) {
+		return val == null ? null : val.abs();
 	}
 
 	/**
@@ -200,7 +202,7 @@ public class TAMath {
 	 * @return значение скользящей средней или null, если не удалось расчитать
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double sma(Series<Double> value, int period) throws ValueException {
+	public CDecimal sma(Series<CDecimal> value, int period) throws ValueException {
 		return sma(value, getLastIndex(value), period);
 	}
 
@@ -217,7 +219,7 @@ public class TAMath {
 	 * @return значение скользящей средней или null, если не удалось расчитать
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double sma(Series<Double> value, int index, int period)
+	public CDecimal sma(Series<CDecimal> value, int index, int period)
 			throws ValueException
 	{
 		if ( value.getLength() == 0 ) {
@@ -231,11 +233,11 @@ public class TAMath {
 		if ( start < 0 ) {
 			return null; // недостаточно элементов в базе расчета
 		}
-		Double sum = 0.0d;
+		CDecimal sum = CDecimalBD.ZERO;
 		for ( ; start <= index; start ++ ) {
-			sum += value.get(start);
+			sum = sum.add(value.get(start));
 		}
-		return sum / period;
+		return sum.divide(CDecimalBD.of((long)period));
 	}
 	
 	/**
@@ -249,7 +251,7 @@ public class TAMath {
 	 * @throws ValueException - ошибка доступа к данным
 	 * @return значение DPO или null, если расчитать не удалось
 	 */
-	public Double vvdpo(Series<Double> close, int index, int period)
+	public CDecimal vvdpo(Series<CDecimal> close, int index, int period)
 			throws ValueException
 	{
 		if ( close.getLength() == 0 ) {
@@ -257,15 +259,15 @@ public class TAMath {
 		}
 		
 		int usePeriod = (int) Math.round(period / 2d + 1d);
-		Double price = close.get(index);
+		CDecimal price = close.get(index);
 		int useIndex = index - usePeriod;
 		if ( useIndex < 0 ) {
 			return null;
 		}
 		
-		Double sma = sma(close, useIndex, period);
+		CDecimal sma = sma(close, useIndex, period);
 		if ( price != null && sma != null ) {
-			return price - sma;
+			return price.subtract(sma);
 		} else {
 			return null;
 		}
@@ -325,7 +327,7 @@ public class TAMath {
 	 * @return TR или null, если расчитать не удалось
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double tr(Series<Candle> value, int index) throws ValueException {
+	public CDecimal tr(Series<Candle> value, int index) throws ValueException {
 		if ( value.getLength() == 0 ) {
 			return null;
 		}
@@ -342,8 +344,8 @@ public class TAMath {
 			return curr.getHeight();
 		}
 		return max(curr.getHeight(),
-				abs(curr.getHigh() - prev.getClose()),
-				abs(curr.getLow() - prev.getClose()));
+				abs(curr.getHigh().subtract(prev.getClose())),
+				abs(curr.getLow().subtract(prev.getClose())));
 	}
 
 	/**
@@ -353,7 +355,7 @@ public class TAMath {
 	 * @return TR или null, если расчитать не удалось
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double tr(Series<Candle> value) throws ValueException {
+	public CDecimal tr(Series<Candle> value) throws ValueException {
 		return tr(value, getLastIndex(value));
 	}
 
@@ -367,7 +369,7 @@ public class TAMath {
 	 * @throws ValueException - ошибка доступа к данным
 	 * @return значение DPO или null, если расчитать не удалось
 	 */
-	public Double vvdpo(Series<Double> close, int period) throws ValueException {
+	public CDecimal vvdpo(Series<CDecimal> close, int period) throws ValueException {
 		return vvdpo(close, getLastIndex(close), period);
 	}
 
@@ -380,7 +382,7 @@ public class TAMath {
 	 * @return значение максимума или null, если не удалось расчитать
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double max(Series<Double> value, int index, int period)
+	public CDecimal max(Series<CDecimal> value, int index, int period)
 			throws ValueException
 	{
 		if ( value.getLength() == 0 ) {
@@ -391,9 +393,9 @@ public class TAMath {
 		if ( start < 0 ) {
 			start = 0;
 		}
-		Double max = null;
+		CDecimal max = null;
 		for ( ; start <= index; start ++ ) {
-			Double cur = value.get(start);
+			CDecimal cur = value.get(start);
 			if ( cur != null ) {
 				if ( max == null ) {
 					max = cur;
@@ -435,7 +437,7 @@ public class TAMath {
 	 * @return значение максимума или null, если не удалось расчитать
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double max(Series<Double> value, int period) throws ValueException {
+	public CDecimal max(Series<CDecimal> value, int period) throws ValueException {
 		return max(value, getLastIndex(value), period);
 	}
 
@@ -452,7 +454,7 @@ public class TAMath {
 	 * @throws ValueException - ошибка доступа к данным
 	 */
 	@SafeVarargs
-	public final Double max(int period, Series<Double>... values)
+	public final CDecimal max(int period, Series<CDecimal>... values)
 			throws ValueException
 	{
 		if ( values.length == 0 ) {
@@ -474,10 +476,10 @@ public class TAMath {
 	 * @throws ValueException - ошибка доступа к данным
 	 */
 	@SafeVarargs
-	public final Double max(int index, int period, Series<Double>... values)
+	public final CDecimal max(int index, int period, Series<CDecimal>... values)
 			throws ValueException
 	{
-		Double max[] = new Double[values.length];
+		CDecimal max[] = new CDecimal[values.length];
 		for ( int i = 0; i < values.length; i ++ ) {
 			max[i] = max(values[i], index, period);
 		}
@@ -493,7 +495,7 @@ public class TAMath {
 	 * @return значение минимума или null, если не удалось расчитать
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double min(Series<Double> value, int index, int period)
+	public CDecimal min(Series<CDecimal> value, int index, int period)
 			throws ValueException
 	{
 		if ( value.getLength() == 0 ) {
@@ -504,9 +506,9 @@ public class TAMath {
 		if ( start < 0 ) {
 			start = 0;
 		}
-		Double min = null;
+		CDecimal min = null;
 		for ( ; start <= index; start ++ ) {
-			Double cur = value.get(start);
+			CDecimal cur = value.get(start);
 			if ( cur != null ) {
 				if ( min == null ) {
 					min = cur;
@@ -526,7 +528,7 @@ public class TAMath {
 	 * @return значение минимума или null, если не удалось расчитать
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public Double min(Series<Double> value, int period) throws ValueException {
+	public CDecimal min(Series<CDecimal> value, int period) throws ValueException {
 		return min(value, getLastIndex(value), period);
 	}
 
@@ -539,7 +541,7 @@ public class TAMath {
 	 * @throws ValueException - ошибка доступа к данным
 	 */
 	@SafeVarargs
-	public final Double min(int period, Series<Double>... values)
+	public final CDecimal min(int period, Series<CDecimal>... values)
 			throws ValueException
 	{
 		if ( values.length == 0 ) {
@@ -558,10 +560,10 @@ public class TAMath {
 	 * @throws ValueException - ошибка доступа к данным
 	 */
 	@SafeVarargs
-	public final Double min(int index, int period, Series<Double>... values)
+	public final CDecimal min(int index, int period, Series<CDecimal>... values)
 			throws ValueException
 	{
-		Double min[] = new Double[values.length];
+		CDecimal min[] = new CDecimal[values.length];
 		for ( int i = 0; i < values.length; i ++ ) {
 			min[i] = min(values[i], index, period);
 		}
@@ -576,7 +578,7 @@ public class TAMath {
 	 * @return true - есть пересечение нуля сверху-вниз, false - нет пересечения
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public boolean crossUnderZero(Series<Double> value, int index)
+	public boolean crossUnderZero(Series<CDecimal> value, int index)
 			throws ValueException
 	{
 		if ( value.getLength() < 2 ) {
@@ -586,10 +588,10 @@ public class TAMath {
 		if ( index - 1 < 0 ) {
 			return false;
 		}
-		Double prev = value.get(index - 1);
-		Double curr = value.get(index);
+		CDecimal prev = value.get(index - 1);
+		CDecimal curr = value.get(index);
 		return prev != null && curr != null
-			&& prev.compareTo(0d) > 0 && curr.compareTo(0d) < 0;
+			&& prev.compareTo(CDecimalBD.ZERO) > 0 && curr.compareTo(CDecimalBD.ZERO) < 0;
 	}
 
 	/**
@@ -599,7 +601,7 @@ public class TAMath {
 	 * @return true - есть пересечение нуля сверху-вниз, false - нет пересечения
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public boolean crossUnderZero(Series<Double> value) throws ValueException {
+	public boolean crossUnderZero(Series<CDecimal> value) throws ValueException {
 		return crossUnderZero(value, getLastIndex(value));
 	}
 
@@ -611,7 +613,7 @@ public class TAMath {
 	 * @return true - есть пересечение нуля снизу-вверх, false - нет пересечения
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public boolean crossOverZero(Series<Double> value, int index)
+	public boolean crossOverZero(Series<CDecimal> value, int index)
 			throws ValueException
 	{
 		if ( value.getLength() < 2 ) {
@@ -621,10 +623,10 @@ public class TAMath {
 		if ( index - 1 < 0 ) {
 			return false;
 		}
-		Double prev = value.get(index - 1);
-		Double curr = value.get(index);
+		CDecimal prev = value.get(index - 1);
+		CDecimal curr = value.get(index);
 		return prev != null && curr != null
-			&& prev.compareTo(0d) < 0 && curr.compareTo(0d) > 0;
+			&& prev.compareTo(CDecimalBD.ZERO) < 0 && curr.compareTo(CDecimalBD.ZERO) > 0;
 	}
 
 	/**
@@ -634,7 +636,7 @@ public class TAMath {
 	 * @return true - есть пересечение нуля снизу-вверх, false - нет пересечения
 	 * @throws ValueException - ошибка доступа к данным
 	 */
-	public boolean crossOverZero(Series<Double> value) throws ValueException {
+	public boolean crossOverZero(Series<CDecimal> value) throws ValueException {
 		return crossOverZero(value, getLastIndex(value));
 	}
 	
@@ -656,7 +658,7 @@ public class TAMath {
 	 * @throws ValueException - error accessing data
 	 * @throws IllegalArgumentException - period too short
 	 */
-	public Double qema(Series<Double> value, int index, int period)
+	public CDecimal qema(Series<CDecimal> value, int index, int period)
 			throws ValueException, IllegalArgumentException
 	{
 		if ( period < 2 ) {
@@ -675,9 +677,10 @@ public class TAMath {
 		// рассчитать начальное значение EMA:
 		// NOTE: Варианты типа Min(start, period * X) дают результат,
 		// который не соответствует результату рассчетов в QUIK.
-		int pos = index - start,
-			period_minus1 = period - 1, period_plus1 = period + 1;
-		Double prev = null, curr, result = null;
+		int pos = index - start;
+		CDecimal prev = null, curr, result = null,
+				d_period_minus1 = CDecimalBD.of((long)(period - 1)),
+				d_period_plus1 = CDecimalBD.of((long)(period + 1));
 		// Ожидаем последовательность длинной period, которая не содержит null
 		for ( ; pos < index; pos ++ ) {
 			prev = qemaFirst(value, pos, period);
@@ -693,31 +696,36 @@ public class TAMath {
 			curr = value.get(pos);
 			if ( curr != null ) {
 				// TODO: check for null
-				result = (prev * period_minus1 + 2 * curr) / period_plus1;
+				result = prev.multiply(d_period_minus1)
+						.add(curr.multiply(2L))
+						.divide(d_period_plus1);
 				prev = result;
 			}
 		}
 		return result;
 	}
 	
-	private Double qemaFirst(Series<Double> value, int index, int period)
+	private CDecimal qemaFirst(Series<CDecimal> value, int index, int period)
 		throws ValueException
 	{
 		int start = getStartIndex(index, period);
 		if ( start < 0 ) {
 			return null;
 		}
-		Double prev = value.get(start), curr = null;
+		CDecimal prev = value.get(start), curr = null;
 		if ( prev == null ) {
 			return null;
 		}
-		int period_minus1 = period - 1, period_plus1 = period + 1;
+		CDecimal d_period_minus1 = CDecimalBD.of((long)(period - 1)),
+				d_period_plus1 = CDecimalBD.of((long)(period+ 1));
 		for ( int i = start + 1; i <= index; i ++ ) {
 			curr = value.get(i);
 			if ( curr == null ) {
 				return null;
 			}
-			prev = (prev * period_minus1 + 2 * curr) / period_plus1;
+			prev = prev.multiply(d_period_minus1)
+					.add(curr.multiply(2L))
+					.divide(d_period_plus1);
 		}
 		return prev;
 	}
@@ -734,7 +742,7 @@ public class TAMath {
 	 * @throws ValueException - error accessing data
 	 * @throws IllegalArgumentException - period too short
 	 */
-	public Double qatr(Series<Candle> candles, int index, int period)
+	public CDecimal qatr(Series<Candle> candles, int index, int period)
 		throws ValueException
 	{
 		if ( period < 2 ) {
@@ -742,19 +750,23 @@ public class TAMath {
 		}
 		index = makeIndexPositive(candles, index);
 		int start = getStartIndex(index, period), period_minus1 = period - 1;
+		CDecimal d_period_minus1 = CDecimalBD.of((long)period_minus1);
+		CDecimal d_period = CDecimalBD.of((long)period);
 		if ( start < 0 ) {
 			return null;
 		}
-		Double prev = 0d;
+		CDecimal prev = CDecimalBD.ZERO;
 		for ( int i = 0; i < period; i ++ ) {
-			prev += tr(candles, i);
+			prev = prev.add(tr(candles, i));
 		}
-		prev /= period;
+		prev = prev.divide(d_period);
 		if ( index == period_minus1 ) {
 			return prev;
 		}
 		for ( int i = period; i <= index; i ++ ) {
-			prev = (prev * period_minus1 + tr(candles, i)) / period;
+			prev = prev.multiply(d_period_minus1)
+					.add(tr(candles, i))
+					.divide(d_period);
 		}
 		return prev;
 	}
@@ -770,7 +782,7 @@ public class TAMath {
 	 * @throws ValueException - error accessing data
 	 * @throws IllegalArgumentException - period too short
 	 */
-	public Double qatr(Series<Candle> candles, int period)
+	public CDecimal qatr(Series<Candle> candles, int period)
 		throws ValueException
 	{
 		return qatr(candles, candles.getLength() - 1, period);
@@ -786,31 +798,31 @@ public class TAMath {
 	 * @throws ValueOutOfRangeException - index out of range
 	 * @throws ValueException - error accessing data
 	 */
-	public Double delta(Series<Double> series, int index) throws ValueException {
+	public CDecimal delta(Series<CDecimal> series, int index) throws ValueException {
 		index = makeIndexPositive(series, index);
 		if ( index < 0 ) {
 			throw new ValueOutOfRangeException();
 		}
 		if ( index == 0 ) {
-			return 0d;
+			return CDecimalBD.ZERO;
 		}
-		Double curr = series.get(index), prev = series.get(index - 1);
+		CDecimal curr = series.get(index), prev = series.get(index - 1);
 		if ( curr == null ) {
 			return null;
 		}
 		if ( prev == null ) {
-			return 0d;
+			return CDecimalBD.ZERO;
 		}
-		return curr - prev;
+		return curr.subtract(prev);
 	}
 	
-	private SN _amean(Series<Double> x) throws ValueException {
+	private SN _amean(Series<CDecimal> x) throws ValueException {
 		int length = x.getLength(), numx = 0;
-		double sumx = 0d;
+		CDecimal sumx = CDecimalBD.ZERO;
 		for ( int i = 0; i < length; i ++ ) {
-			Double cx = x.get(i);
+			CDecimal cx = x.get(i);
 			if ( cx != null ) {
-				sumx += cx;
+				sumx = sumx.add(cx);
 				numx ++;
 			}
 		}
@@ -830,29 +842,31 @@ public class TAMath {
 	 * exception will be thrown.
 	 * <p>
 	 * @param x - data series
+	 * @param scale - desired result scale
 	 * @return arithmetic mean value
 	 * @throws ValueException - error accessing data or series does not contain
 	 * non-null elements
 	 */
-	public double amean(Series<Double> x) throws ValueException {
+	public CDecimal amean(Series<CDecimal> x, int scale) throws ValueException {
 		SN r = _amean(x);
-		return r.getSum() / r.getNum();
+		return r.getSum().divideExact((long)r.getNum(), scale);
 	}
 	
-	private SN _covariance(Series<Double> x, Series<Double> y) throws ValueException {
-		double ameanx = amean(x), ameany = amean(y), sum = 0;
+	private SN _covariance(Series<CDecimal> x, Series<CDecimal> y, int scale) throws ValueException {
+		CDecimal ameanx = amean(x, scale), ameany = amean(y, scale), sum = CDecimalBD.ZERO;
 		int length = x.getLength(), num = 0;
 		if ( y.getLength() != length ) {
 			throw new ValueException("The series must have the same length");
 		}
 		for ( int i = 0; i < length; i ++ ) {
-			Double cx = x.get(i), cy = y.get(i);
+			CDecimal cx = x.get(i), cy = y.get(i);
 			if ( cx != null || cy != null ) {
 				if ( cx != null && cy != null ) {
 					num ++;
 				}
-				sum += (cx == null ? 0 : cx - ameanx)
-					 * (cy == null ? 0 : cy - ameany);
+				CDecimal cx_ = cx == null ? CDecimalBD.ZERO : cx.subtract(ameanx);
+				CDecimal cy_ = cy == null ? CDecimalBD.ZERO : cy.subtract(ameany);
+				sum = sum.add(cx_.multiply(cy_));
 			}
 		}
 		if ( num == 0 ) {
@@ -874,23 +888,25 @@ public class TAMath {
 	 * <p>
 	 * @param x - the first data series 
 	 * @param y - the second data series
+	 * @param scale - desired result scale
 	 * @return covariance value
 	 * @throws ValueException - error accessing data, series does not contain
 	 * non-null elements or series contain different amount of elements
 	 */
-	public double covariance(Series<Double> x, Series<Double> y) throws ValueException {
-		SN r = _covariance(x, y);
-		return r.getSum() / r.getNum();
+	public CDecimal covariance(Series<CDecimal> x, Series<CDecimal> y, int scale) throws ValueException {
+		SN r = _covariance(x, y, scale);
+		return r.getSum().divideExact((long)r.getNum(), scale);
 	}
 	
-	private SN _variance(Series<Double> x) throws ValueException {
-		double ameanx = amean(x), sum = 0;
+	private SN _variance(Series<CDecimal> x, int scale) throws ValueException {
+		CDecimal ameanx = amean(x, scale), sum = CDecimalBD.ZERO;
 		int length = x.getLength(), num = 0;
 		for ( int i = 0; i < length; i ++ ) {
-			Double cx = x.get(i);
+			CDecimal cx = x.get(i);
 			if ( cx != null ) {
 				num ++;
-				sum += Math.pow(cx - ameanx, 2);
+				CDecimal x_ = cx.subtract(ameanx);
+				sum = sum.add(x_.multiply(x_));
 			}
 		}
 		if ( num == 0 ) {
@@ -903,12 +919,13 @@ public class TAMath {
 	 * Get variance based on series of data.
 	 * <p>
 	 * @param x - data series
+	 * @param scale - desired result scale
 	 * @return variance value
 	 * @throws ValueException - an error occurred
 	 */
-	public double variance(Series<Double> x) throws ValueException {
-		SN r = _variance(x);
-		return r.getSum() / r.getNum();
+	public CDecimal variance(Series<CDecimal> x, int scale) throws ValueException {
+		SN r = _variance(x, scale);
+		return r.getSum().divideExact((long)r.getNum(), scale);
 	}
 	
 	/**
@@ -920,31 +937,33 @@ public class TAMath {
 	 * it will be considered as null values in both series.
 	 * <p>
 	 * @param x - the first data series
-	 * @param y - the second data sereis
+	 * @param y - the second data series
+	 * @param scale - desired precision of a result
 	 * @return correlation coefficient
 	 * @throws ValueException - error accessing or calculating data
 	 */
-	public double correlation(Series<Double> x, Series<Double> y) throws ValueException {
+	public CDecimal correlation(Series<CDecimal> x, Series<CDecimal> y, int scale) throws ValueException {
 		// This solution will work for series with null values just in one of series. 
-		Series<Double> x_ = new CorrelationHelperSeries(x, y),
+		Series<CDecimal> x_ = new CorrelationHelperSeries(x, y),
 				y_ = new CorrelationHelperSeries(y, x);
-		SN covxy = _covariance(x_, y_), varx = _variance(x_), vary = _variance(y_);
+		SN covxy = _covariance(x_, y_, scale), varx = _variance(x_, scale), vary = _variance(y_, scale);
 		//return covariance(x_,y_) / (Math.sqrt(variance(x_)) * Math.sqrt(variance(y_)));
 		//return covariance(x_,y_) / Math.sqrt(variance(x_) * variance(y_));
-		return covxy.getSum() / Math.sqrt(varx.getSum() * vary.getSum());
+		CDecimal sqrt_ = varx.getSum().multiply(vary.getSum()).sqrt(scale);
+		return covxy.getSum().divideExact(sqrt_, scale);
 	}
 	
-	private int _cross(Series<Double> x, Series<Double> y, int index) {
+	private int _cross(Series<CDecimal> x, Series<CDecimal> y, int index) {
 		if ( x.getLength() < 2 ) {
 			return 0;
 		}
 		try {
-			Double x1 = x.get(index - 1), x2 = x.get(index),
+			CDecimal x1 = x.get(index - 1), x2 = x.get(index),
 				y1 = y.get(index - 1), y2 = y.get(index);
 			if ( x1 == null || x2 == null || y1 == null || y2 == null ) {
 				return 0;
 			}
-			int d1 = x1 > y1 ? 1 : -1, d2 = x2 > y2 ? 1 : -1;
+			int d1 = x1.compareTo(y1) > 0 ? 1 : -1, d2 = x2.compareTo(y2) > 0 ? 1 : -1;
 			return d1 == d2 ? 0 : d2;
 		} catch ( ValueException e ) {
 			throw new IllegalStateException("Unexpected exception", e);
@@ -959,7 +978,7 @@ public class TAMath {
 	 * @param index - index to detect crossing
 	 * @return true if x crosses y, false otherwise
 	 */
-	public boolean crossUnder(Series<Double> x, Series<Double> y, int index) {
+	public boolean crossUnder(Series<CDecimal> x, Series<CDecimal> y, int index) {
 		return _cross(x, y, index) == -1;
 	}
 	
@@ -971,7 +990,7 @@ public class TAMath {
 	 * @param index - index to detect crossing
 	 * @return true if x crosses y, false otherwise
 	 */
-	public boolean crossOver(Series<Double> x, Series<Double> y, int index) {
+	public boolean crossOver(Series<CDecimal> x, Series<CDecimal> y, int index) {
 		return _cross(x, y, index) == 1;
 	}
 

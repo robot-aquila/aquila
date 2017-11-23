@@ -10,6 +10,8 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.TSeries;
@@ -22,7 +24,7 @@ public class QEMATSeriesTest {
 	}
 	
 	private IMocksControl control;
-	private TSeries<Double> sourceMock;
+	private TSeries<CDecimal> sourceMock;
 	private TAMath mathMock;
 	private QEMATSeries series;
 
@@ -65,11 +67,11 @@ public class QEMATSeriesTest {
 	public void testGet0() throws Exception {
 		sourceMock.lock();
 		expect(sourceMock.getLength()).andReturn(35);
-		expect(mathMock.qema(sourceMock, 34, 7)).andReturn(12.34d);
+		expect(mathMock.qema(sourceMock, 34, 7)).andReturn(CDecimalBD.of("12.34"));
 		sourceMock.unlock();
 		control.replay();
 		
-		assertEquals(12.34d, series.get(), 0.001d);
+		assertEquals(CDecimalBD.of("12.34"), series.get());
 		
 		control.verify();
 	}
@@ -77,11 +79,11 @@ public class QEMATSeriesTest {
 	@Test
 	public void testGet1_I() throws Exception {
 		sourceMock.lock();
-		expect(mathMock.qema(sourceMock, 85, 7)).andReturn(86.12d);
+		expect(mathMock.qema(sourceMock, 85, 7)).andReturn(CDecimalBD.of("86.12"));
 		sourceMock.unlock();
 		control.replay();
 		
-		assertEquals(86.12d, series.get(85), 0.001d);
+		assertEquals(CDecimalBD.of("86.12"), series.get(85));
 		
 		control.verify();
 	}
@@ -131,11 +133,11 @@ public class QEMATSeriesTest {
 	public void testGet1_T_IfIntervalExists() throws Exception {
 		sourceMock.lock();
 		expect(sourceMock.toIndex(T("2017-09-01T07:34:00Z"))).andReturn(25);
-		expect(mathMock.qema(sourceMock, 25, 7)).andReturn(41.12d);
+		expect(mathMock.qema(sourceMock, 25, 7)).andReturn(CDecimalBD.of("41.12"));
 		sourceMock.unlock();
 		control.replay();
 		
-		assertEquals(41.12d, series.get(T("2017-09-01T07:34:00Z")), 0.001d);
+		assertEquals(CDecimalBD.of("41.12"), series.get(T("2017-09-01T07:34:00Z")));
 		
 		control.verify();
 	}

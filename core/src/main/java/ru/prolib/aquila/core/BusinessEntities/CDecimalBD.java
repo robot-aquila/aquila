@@ -283,6 +283,26 @@ public class CDecimalBD extends CDecimalAbstract {
 		return other == null ? this : other;
 	}
 	
+	@Override
+	public CDecimal sqrt(int scale) {
+		BigDecimal two = new BigDecimal(2L);
+		BigDecimal a = value;
+		BigDecimal x0 = BigDecimal.ZERO;
+		BigDecimal x1 = value.divide(two, RoundingMode.FLOOR);
+		while ( ! x0.equals(x1) ) {
+			x0 = x1;
+			x1 = a.divide(x0, scale, RoundingMode.HALF_UP)
+					.add(x0)
+					.divide(two, scale, RoundingMode.HALF_UP);
+		}
+		return new CDecimalBD(x1, unit, roundingMode);
+	}
+	
+	@Override
+	public CDecimal pow(int n) {
+		return new CDecimalBD(value.pow(n), unit, roundingMode);
+	}
+	
 	private void throwMustBeOfSameUnit(CDecimal other) {
 		String unit1 = this.unit, unit2 = other.getUnit();
 		throw new IllegalArgumentException("Inconsistent values. The first one is in "

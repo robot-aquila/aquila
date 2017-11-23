@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
@@ -99,7 +100,7 @@ public class CSLastTradeFillerTest {
 	@Test
 	public void testOnEvent() throws Exception {
 		Instant time = Instant.parse("2017-08-04T21:20:00Z");
-		Tick trade = Tick.ofTrade(Instant.EPOCH, 24.15d, 100L);
+		Tick trade = Tick.ofTrade(Instant.EPOCH, CDecimalBD.of("24.15"), CDecimalBD.of(100L));
 		filler.start();
 		expect(utilsMock.aggregate(same(series1), eq(ZTFrame.M1), eq(trade)))
 			.andReturn(true);
@@ -115,7 +116,7 @@ public class CSLastTradeFillerTest {
 		Instant time = Instant.parse("2017-08-04T21:20:00Z");
 		control.replay();
 		
-		Tick trade = Tick.ofTrade(Instant.EPOCH, 24.15d, 100L);
+		Tick trade = Tick.ofTrade(Instant.EPOCH, CDecimalBD.of("24.15"), CDecimalBD.of(100L));
 		filler.onEvent(new SecurityTickEvent(security1.onLastTrade(), security1, time, trade));
 		
 		control.verify();
