@@ -19,6 +19,7 @@ import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.utils.PriceScaleDBImpl;
 import ru.prolib.aquila.data.storage.segstor.DatePoint;
 import ru.prolib.aquila.data.storage.segstor.MonthPoint;
 import ru.prolib.aquila.data.storage.segstor.SegmentMetaData;
@@ -37,11 +38,15 @@ public class FinalL1UpdateSegmentStorageTest {
 		root = new File("fixture");
 	}
 	
+	private PriceScaleDBImpl scaleDB;
 	private FinamL1UpdateSegmentStorage storage;
 
 	@Before
 	public void setUp() throws Exception {
-		storage = new FinamL1UpdateSegmentStorage(root);
+		scaleDB = new PriceScaleDBImpl();
+		scaleDB.setScale(symbol2, 2);
+		scaleDB.setScale(symbol3, 0);
+		storage = new FinamL1UpdateSegmentStorage(root, scaleDB);
 	}
 	
 	@Test
@@ -206,15 +211,15 @@ public class FinalL1UpdateSegmentStorageTest {
 	public void testCreateReader() throws Exception {
 		L1UpdateBuilder builder = new L1UpdateBuilder(symbol2).withTrade();
 		List<L1Update> expected = new ArrayList<>();
-		expected.add(builder.withPrice(52.16)
+		expected.add(builder.withPrice("52.16")
 				.withTime("2016-10-04T07:43:10Z")
 				.withSize(1L)
 				.buildL1Update());
-		expected.add(builder.withPrice(52.82)
+		expected.add(builder.withPrice("52.82")
 				.withTime("2016-10-04T13:13:05Z")
 				.withSize(1L)
 				.buildL1Update());
-		expected.add(builder.withPrice(52.97)
+		expected.add(builder.withPrice("52.97")
 				.withTime("2016-10-04T13:25:12Z")
 				.withSize(5L)
 				.buildL1Update());

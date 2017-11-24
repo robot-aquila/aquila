@@ -12,6 +12,7 @@ import java.util.Set;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.utils.PriceScaleDB;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.segstor.DatePoint;
 import ru.prolib.aquila.data.storage.segstor.MonthPoint;
@@ -33,14 +34,16 @@ public class FinamL1UpdateSegmentStorage implements SymbolDailySegmentStorage<L1
 	private final SegmentFileManager segmentManager;
 	private final String suffix = ".csv.gz";
 	private final ZoneId zoneID;
+	private final PriceScaleDB scaleDB;
 	
-	public FinamL1UpdateSegmentStorage(SegmentFileManager segmentManager) {
+	public FinamL1UpdateSegmentStorage(SegmentFileManager segmentManager, PriceScaleDB scaleDB) {
 		this.segmentManager = segmentManager;
 		this.zoneID = ZoneId.of("Europe/Moscow");
+		this.scaleDB = scaleDB;
 	}
 	
-	public FinamL1UpdateSegmentStorage(File root) {
-		this(new V1SegmentFileManagerImpl(root));
+	public FinamL1UpdateSegmentStorage(File root, PriceScaleDB scaleDB) {
+		this(new V1SegmentFileManagerImpl(root), scaleDB);
 	}
 
 	@Override
@@ -151,7 +154,7 @@ public class FinamL1UpdateSegmentStorage implements SymbolDailySegmentStorage<L1
 		if ( ! fi.getFullPath().exists() ) {
 			throw new SymbolDailySegmentNotExistsException(segment);
 		}
-		return new FinamL1UpdateSegmentMetaData(fi.getFullPath(), segment.getSymbol());
+		return new FinamL1UpdateSegmentMetaData(fi.getFullPath(), segment.getSymbol(), scaleDB);
 	}
 
 	@Override
@@ -160,7 +163,8 @@ public class FinamL1UpdateSegmentStorage implements SymbolDailySegmentStorage<L1
 	{
 		try {
 			return new FinamCsvL1UpdateReader(segment.getSymbol(),
-					segmentManager.getFileInfo(segment, suffix).getFullPath());
+					segmentManager.getFileInfo(segment, suffix).getFullPath(),
+					scaleDB.getScale(segment.getSymbol()));
 		} catch ( IOException e ) {
 			throw new SymbolDailySegmentNotExistsException(segment, e);
 		}

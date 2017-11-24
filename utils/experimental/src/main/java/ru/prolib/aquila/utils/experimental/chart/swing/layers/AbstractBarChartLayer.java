@@ -1,6 +1,8 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
 import org.apache.commons.lang3.Range;
+
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
@@ -149,7 +151,7 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
         return 0;
     }
 
-    protected  double getMinValue(TValue value){
+    protected double getMinValue(TValue value){
         if(value instanceof Number){
             return ((Number) value).doubleValue();
         }

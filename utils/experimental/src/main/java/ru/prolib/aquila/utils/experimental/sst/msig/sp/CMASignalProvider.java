@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.sst.msig.sp;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.core.data.Series;
@@ -16,12 +17,12 @@ import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalProvider;
  */
 public class CMASignalProvider implements EventListener, MarketSignalProvider {
 	private final ObservableSeries<Candle> candles;
-	private final Series<Double> maShort, maLong;
+	private final Series<CDecimal> maShort, maLong;
 	private final MarketSignal signal;
 	private final TAMath math;
 	
 	public CMASignalProvider(ObservableSeries<Candle> candles,
-			Series<Double> maShort, Series<Double> maLong, 
+			Series<CDecimal> maShort, Series<CDecimal> maLong, 
 			MarketSignal signal, TAMath math)
 	{
 		this.candles = candles;
@@ -31,11 +32,11 @@ public class CMASignalProvider implements EventListener, MarketSignalProvider {
 		this.math = math;
 	}
 	
-	public Series<Double> getMALong() {
+	public Series<CDecimal> getMALong() {
 		return maLong;
 	}
 	
-	public Series<Double> getMAShort() {
+	public Series<CDecimal> getMAShort() {
 		return maShort;
 	}
 	

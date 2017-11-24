@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.sst.cs;
 
 import java.util.Collection;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.ObservableSeries;
@@ -16,14 +17,14 @@ public interface CSDataSlice {
 
 	ObservableSeries<Candle> getCandleSeries();
 
-	Series<Double> getCandleCloseSeries();
+	Series<CDecimal> getCandleCloseSeries();
 
-	Series<Double> getIndicator(String id);
+	Series<CDecimal> getIndicator(String id);
 
-	void addIndicator(Series<Double> series);
+	void addIndicator(Series<CDecimal> series);
 	
 	boolean hasIndicator(String id);
 	
-	Collection<Series<Double>> getIndicators();
+	Collection<Series<CDecimal>> getIndicators();
 
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.CSUtils;
@@ -21,8 +22,8 @@ public class CSDataSliceImpl implements CSDataSlice {
 	private final ZTFrame tf;
 	private final ObservableSeriesImpl<Candle> candleSeries;
 	private final CandleCloseSeries closeSeries;
-	private final Map<String, Series<Double>> indicators;
-	private final Collection<Series<Double>> indicatorsRO;
+	private final Map<String, Series<CDecimal>> indicators;
+	private final Collection<Series<CDecimal>> indicatorsRO;
 	
 	public CSDataSliceImpl(Symbol symbol, ZTFrame tf, ObservableSeriesImpl<Candle> candleSeries) {
 		this.symbol = symbol;
@@ -73,7 +74,7 @@ public class CSDataSliceImpl implements CSDataSlice {
 	 * @see ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice#getCandleCloseSeries()
 	 */
 	@Override
-	public Series<Double> getCandleCloseSeries() {
+	public Series<CDecimal> getCandleCloseSeries() {
 		return closeSeries;
 	}
 	
@@ -81,8 +82,8 @@ public class CSDataSliceImpl implements CSDataSlice {
 	 * @see ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice#getIndicator(java.lang.String)
 	 */
 	@Override
-	public synchronized Series<Double> getIndicator(String id) {
-		Series<Double> r = indicators.get(id);
+	public synchronized Series<CDecimal> getIndicator(String id) {
+		Series<CDecimal> r = indicators.get(id);
 		if ( r == null ) {
 			throw new IllegalArgumentException("Indicator not found: " + id);
 		}
@@ -93,9 +94,9 @@ public class CSDataSliceImpl implements CSDataSlice {
 	 * @see ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice#addIndicator(ru.prolib.aquila.core.data.Series)
 	 */
 	@Override
-	public synchronized void addIndicator(Series<Double> series) {
+	public synchronized void addIndicator(Series<CDecimal> series) {
 		String id = series.getId();
-		Series<Double> r = indicators.get(id);
+		Series<CDecimal> r = indicators.get(id);
 		if ( r != null ) {
 			throw new IllegalArgumentException("Indicator already exists: " + id);
 		}
@@ -103,7 +104,7 @@ public class CSDataSliceImpl implements CSDataSlice {
 	}
 	
 	@Override
-	public synchronized Collection<Series<Double>> getIndicators() {
+	public synchronized Collection<Series<CDecimal>> getIndicators() {
 		return indicatorsRO;
 	}
 

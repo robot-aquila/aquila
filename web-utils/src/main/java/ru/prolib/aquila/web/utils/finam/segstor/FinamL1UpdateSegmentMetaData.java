@@ -14,16 +14,19 @@ import org.apache.commons.lang.StringUtils;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.utils.PriceScaleDB;
 import ru.prolib.aquila.data.storage.segstor.SegmentMetaData;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamCsvL1UpdateReader;
 
 public class FinamL1UpdateSegmentMetaData implements SegmentMetaData {
 	private final File file;
 	private final Symbol symbol;
+	private final PriceScaleDB scaleDB;
 	
-	public FinamL1UpdateSegmentMetaData(File file, Symbol symbol) {
+	public FinamL1UpdateSegmentMetaData(File file, Symbol symbol, PriceScaleDB scaleDB) {
 		this.file = file;
 		this.symbol = symbol;
+		this.scaleDB = scaleDB;
 	}
 
 	@Override
@@ -53,7 +56,9 @@ public class FinamL1UpdateSegmentMetaData implements SegmentMetaData {
 
 	@Override
 	public long getNumberOfElements() {
-		try ( CloseableIterator<L1Update> it = new FinamCsvL1UpdateReader(symbol, file) ) {
+		try ( CloseableIterator<L1Update> it =
+				new FinamCsvL1UpdateReader(symbol, file, scaleDB.getScale(symbol)) )
+		{
 			long n = 0L;
 			while ( it.next() ) {
 				n ++;

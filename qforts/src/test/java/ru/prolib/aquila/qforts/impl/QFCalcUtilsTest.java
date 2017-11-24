@@ -98,7 +98,7 @@ public class QFCalcUtilsTest {
 		// should use the last price instead of settlement price
 		terminal.getEditableSecurity(symbol).consume(new L1UpdateBuilder(symbol)
 			.withTrade()
-			.withPrice(49.02)
+			.withPrice("49.02")
 			.withSize(1L)
 			.buildL1Update());
 		
@@ -461,7 +461,7 @@ public class QFCalcUtilsTest {
 			.buildUpdate());
 		terminal.getEditableSecurity(symbol).consume(new L1UpdateBuilder(symbol)
 			.withTrade()
-			.withPrice(51.16)
+			.withPrice("51.16")
 			.withSize(100L)
 			.buildL1Update());
 		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()
@@ -506,7 +506,7 @@ public class QFCalcUtilsTest {
 			.buildUpdate());
 		terminal.getEditableSecurity(symbol).consume(new L1UpdateBuilder(symbol)
 			.withTrade()
-			.withPrice(51.16)
+			.withPrice("51.16")
 			.withSize(100L)
 			.buildL1Update());
 		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()
@@ -552,7 +552,7 @@ public class QFCalcUtilsTest {
 		// Last price will not used
 		terminal.getEditableSecurity(symbol).consume(new L1UpdateBuilder(symbol)
 			.withTrade()
-			.withPrice(49.07)
+			.withPrice("49.07")
 			.withSize(1000L)
 			.buildL1Update());
 		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()
@@ -599,7 +599,7 @@ public class QFCalcUtilsTest {
 		// Last price will not used
 		terminal.getEditableSecurity(symbol).consume(new L1UpdateBuilder(symbol)
 			.withTrade()
-			.withPrice(49.07)
+			.withPrice("49.07")
 			.withSize(1000L)
 			.buildL1Update());
 		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()

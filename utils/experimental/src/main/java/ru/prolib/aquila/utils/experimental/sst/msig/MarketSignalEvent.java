@@ -4,13 +4,13 @@ import java.time.Instant;
 
 import ru.prolib.aquila.core.EventImpl;
 import ru.prolib.aquila.core.EventType;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 
 public class MarketSignalEvent extends EventImpl {
 	private final Instant time;
-	private final Double price;
-	private final Long size;
+	private final CDecimal price, size;
 
-	public MarketSignalEvent(EventType type, Instant time, Double price, Long size) {
+	public MarketSignalEvent(EventType type, Instant time, CDecimal price, CDecimal size) {
 		super(type);
 		this.time = time;
 		this.price = price;
@@ -21,11 +21,11 @@ public class MarketSignalEvent extends EventImpl {
 		return time;
 	}
 	
-	public Double getPrice() {
+	public CDecimal getPrice() {
 		return price;
 	}
 	
-	public Long getSize() {
+	public CDecimal getSize() {
 		return size;
 	}
 	

@@ -292,7 +292,7 @@ public class QFReactorTest {
 		control.replay();
 		
 		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security,
-				null, Tick.ofTrade(T("2017-04-25T11:25:00Z"), 54.02d, 2500L)));
+				null, Tick.ofTrade(T("2017-04-25T11:25:00Z"), CDecimalBD.of("54.02"), CDecimalBD.of(2500L))));
 		
 		control.verify();
 	}

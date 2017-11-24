@@ -21,14 +21,18 @@ public class FinamSeamlessL1UpdateReader implements CloseableIterator<L1Update> 
 	private final SymbolFileStorage storage;
 	private final Symbol symbol;
 	private final Instant startTime;
+	private final int priceScale;
 	private LocalDate lastDate;
 	private CloseableIterator<L1Update> reader;
 	private boolean closed = false;
 	
-	public FinamSeamlessL1UpdateReader(SymbolFileStorage storage, Symbol symbol, Instant startTime) {
+	public FinamSeamlessL1UpdateReader(SymbolFileStorage storage,
+			Symbol symbol, Instant startTime, int priceScale)
+	{
 		this.storage = storage;
 		this.symbol = symbol;
 		this.startTime = startTime;
+		this.priceScale = priceScale;
 	}
 
 	@Override
@@ -78,6 +82,7 @@ public class FinamSeamlessL1UpdateReader implements CloseableIterator<L1Update> 
 		LocalDate requestDate = lastDate;
 		boolean useLimit = false;
 		if ( requestDate == null ) {
+			// TODO: is this correct or just working thanks MICEX working hours?
 			requestDate = startTime.atZone(ZoneOffset.UTC).toLocalDate();
 			useLimit = true;
 		} else {
@@ -94,7 +99,8 @@ public class FinamSeamlessL1UpdateReader implements CloseableIterator<L1Update> 
 		}
 		lastDate = list.get(0);
 		reader = new FinamCsvL1UpdateReader(symbol,
-				storage.getSegmentFile(new DatedSymbol(symbol, lastDate)));
+				storage.getSegmentFile(new DatedSymbol(symbol, lastDate)),
+				priceScale);
 		if ( useLimit ) {
 			reader = new TimeLimitedL1UpdateIterator(reader, startTime);
 		}

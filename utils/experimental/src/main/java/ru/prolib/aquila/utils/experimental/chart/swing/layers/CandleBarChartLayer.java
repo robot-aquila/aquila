@@ -32,7 +32,7 @@ public class CandleBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
 
     @Override
     protected void paintObject(int categoryIdx, Candle value, BarChartVisualizationContext context, Graphics2D g) {
-        Color color = value.getOpen()>value.getClose()?COLOR_BEAR:COLOR_BULL;
+        Color color = value.isBearish()?COLOR_BEAR:COLOR_BULL;
         Double step = context.getStepX();
         double x = context.toCanvasX(categoryIdx);
         double yOpen = context.toCanvasY(value.getOpen());
@@ -58,12 +58,12 @@ public class CandleBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
 
     @Override
     protected double getMaxValue(Candle candle) {
-        return candle.getHigh();
+        return candle.getHigh().toBigDecimal().doubleValue();
     }
 
     @Override
     protected double getMinValue(Candle candle) {
-        return candle.getLow();
+        return candle.getLow().toBigDecimal().doubleValue();
     }
 
     @Override

@@ -85,7 +85,7 @@ public class L1UpdateHandlerTest {
 		input.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-10-18T10:00:00Z")
 			.withTrade()
-			.withPrice(120.19d)
+			.withPrice("120.19")
 			.withSize(800L)
 			.buildL1Update());
 		return input;
@@ -191,7 +191,7 @@ public class L1UpdateHandlerTest {
 		input.add(new L1UpdateBuilder(symbol)
 			.withTime("1998-08-13T00:00:00Z")
 			.withTrade()
-			.withPrice(42.12d)
+			.withPrice("42.12")
 			.withSize(1000L)
 			.buildL1Update());
 		CloseableIteratorStub<L1Update> readerStub2 = new CloseableIteratorStub<>(input);
@@ -235,13 +235,13 @@ public class L1UpdateHandlerTest {
 		input.add(new L1UpdateBuilder(symbol)
 			.withTime("1917-10-01T00:00:00Z")
 			.withTrade()
-			.withPrice(80.01d)
+			.withPrice("80.01")
 			.withSize(100L)
 			.buildL1Update());
 		input.add(new L1UpdateBuilder(symbol)
 			.withTime("1918-01-01T00:00:00Z")
 			.withTrade()
-			.withPrice(75.08d)
+			.withPrice("75.08")
 			.withSize(200L)
 			.buildL1Update());
 		CloseableIteratorStub<L1Update> readerStub = new CloseableIteratorStub<>(input);
@@ -287,13 +287,13 @@ public class L1UpdateHandlerTest {
 		input.add(new L1UpdateBuilder(symbol)
 			.withTime("1917-10-01T00:00:00Z")
 			.withTrade()
-			.withPrice(80.01d)
+			.withPrice("80.01")
 			.withSize(100L)
 			.buildL1Update());
 		input.add(new L1UpdateBuilder(symbol)
 			.withTime("1918-01-01T00:00:00Z")
 			.withTrade()
-			.withPrice(75.08d)
+			.withPrice("75.08")
 			.withSize(200L)
 			.buildL1Update());
 		CloseableIteratorStub<L1Update> readerStub = new CloseableIteratorStub<>(input);

@@ -33,7 +33,7 @@ public class FinamCsvL1UpdateReaderTest {
 	
 	@Test
 	public void testClose() throws Exception {
-		reader = new FinamCsvL1UpdateReader(symbol, csvReaderMock);
+		reader = new FinamCsvL1UpdateReader(symbol, csvReaderMock, 2);
 		csvReaderMock.close();
 		control.replay();
 		
@@ -46,46 +46,46 @@ public class FinamCsvL1UpdateReaderTest {
 	@Test
 	public void testIterate() throws Exception {
 		List<L1Update> actual = new ArrayList<>();
-		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz");
+		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz", 2);
 		while ( reader.next() ) {
 			actual.add(reader.item());
 		}
 		
 		List<L1Update> expected = new ArrayList<>();
 		expected.add(new L1UpdateBuilder(symbol)
-				.withTime("2016-10-17T10:39:31Z")
-				.withTrade()
-				.withPrice(53.67d)
-				.withSize(1)
-				.buildL1Update());
+			.withTime("2016-10-17T10:39:31Z")
+			.withTrade()
+			.withPrice("53.67")
+			.withSize(1)
+			.buildL1Update());
 		expected.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-10-17T11:09:44Z")
 			.withTrade()
-			.withPrice(53.75d)
+			.withPrice("53.75")
 			.withSize(1)
 			.buildL1Update());
 		expected.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-10-17T13:10:52Z")
 			.withTrade()
-			.withPrice(53.41d)
+			.withPrice("53.41")
 			.withSize(1)
 			.buildL1Update());
 		expected.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-10-17T13:17:10Z")
 			.withTrade()
-			.withPrice(53.52d)
+			.withPrice("53.52")
 			.withSize(1)
 			.buildL1Update());
 		expected.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-10-17T13:45:45Z")
 			.withTrade()
-			.withPrice(53.13d)
+			.withPrice("53.13")
 			.withSize(1)
 			.buildL1Update());
 		expected.add(new L1UpdateBuilder(symbol)
 			.withTime("2016-10-17T16:52:22Z")
 			.withTrade()
-			.withPrice(53.25d)
+			.withPrice("53.25")
 			.withSize(1)
 			.buildL1Update());
 		assertEquals(expected, actual);
@@ -94,7 +94,7 @@ public class FinamCsvL1UpdateReaderTest {
 	@Test
 	public void testIterate_EmptyFile() throws Exception {
 		List<L1Update> actual = new ArrayList<>();
-		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161016-empty.csv.gz");
+		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161016-empty.csv.gz", 2);
 		while ( reader.next() ) {
 			actual.add(reader.item());
 		}
@@ -105,7 +105,7 @@ public class FinamCsvL1UpdateReaderTest {
 	
 	@Test (expected=IOException.class)
 	public void testNext_ThrowsIfClosed() throws Exception {
-		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz");
+		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz", 2);
 		reader.close();
 		
 		reader.next();
@@ -113,14 +113,14 @@ public class FinamCsvL1UpdateReaderTest {
 	
 	@Test (expected=NoSuchElementException.class)
 	public void testItem_ThrowsIfNoElement() throws Exception {
-		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz");
+		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz", 2);
 		
 		reader.item();
 	}
 	
 	@Test (expected=IOException.class)
 	public void testItem_ThrowsIfClosed() throws Exception {
-		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz");
+		reader = new FinamCsvL1UpdateReader(symbol, "fixture/br-3.17-20161017.csv.gz", 2);
 		reader.close();
 		
 		reader.item();		

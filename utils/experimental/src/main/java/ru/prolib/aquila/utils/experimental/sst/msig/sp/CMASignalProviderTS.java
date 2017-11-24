@@ -5,6 +5,7 @@ import java.time.Instant;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.ObservableTSeries;
@@ -17,13 +18,13 @@ import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalProvider;
 
 public class CMASignalProviderTS implements EventListener, MarketSignalProvider {
 	private final ObservableTSeries<Candle> candles;
-	private final TSeries<Double> maShort, maLong;
+	private final TSeries<CDecimal> maShort, maLong;
 	private final MarketSignal signal;
 	private final TAMath math;
 	private Instant lastUpdatedInterval;
 	
-	public CMASignalProviderTS(ObservableTSeries<Candle> candles, TSeries<Double> maShort,
-			TSeries<Double> maLong, MarketSignal signal, TAMath math)
+	public CMASignalProviderTS(ObservableTSeries<Candle> candles, TSeries<CDecimal> maShort,
+			TSeries<CDecimal> maLong, MarketSignal signal, TAMath math)
 	{
 		this.candles = candles;
 		this.maShort = maShort;
@@ -32,14 +33,14 @@ public class CMASignalProviderTS implements EventListener, MarketSignalProvider 
 		this.math = math;
 	}
 	
-	public CMASignalProviderTS(ObservableTSeries<Candle> candles, TSeries<Double> maShort,
-			TSeries<Double> maLong, MarketSignal signal)
+	public CMASignalProviderTS(ObservableTSeries<Candle> candles, TSeries<CDecimal> maShort,
+			TSeries<CDecimal> maLong, MarketSignal signal)
 	{
 		this(candles, maShort, maLong, signal, TAMath.getInstance());
 	}
 	
-	public CMASignalProviderTS(ObservableTSeries<Candle> candles, TSeries<Double> maShort,
-			TSeries<Double> maLong, EventQueue queue, String signalID)
+	public CMASignalProviderTS(ObservableTSeries<Candle> candles, TSeries<CDecimal> maShort,
+			TSeries<CDecimal> maLong, EventQueue queue, String signalID)
 	{
 		this(candles, maShort, maLong, new MarketSignal(queue, signalID));
 	}
@@ -48,11 +49,11 @@ public class CMASignalProviderTS implements EventListener, MarketSignalProvider 
 		return candles;
 	}
 	
-	public TSeries<Double> getMAShort() {
+	public TSeries<CDecimal> getMAShort() {
 		return maShort;
 	}
 	
-	public TSeries<Double> getMALong() {
+	public TSeries<CDecimal> getMALong() {
 		return maLong;
 	}
 	

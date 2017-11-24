@@ -16,6 +16,7 @@ import java.util.zip.GZIPInputStream;
 
 import com.csvreader.CsvReader;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.CloseableIterator;
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
@@ -23,6 +24,9 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 /**
  * Read the data of a single CSV file stored in FINAM export format.
+ * <p>
+ * We need to know a price scale when create because FINAM
+ * format does not contain such information.
  */
 public class FinamCsvL1UpdateReader implements CloseableIterator<L1Update> {
 	private static final ZoneId ZONE = ZoneId.of("Europe/Moscow");
@@ -39,25 +43,27 @@ public class FinamCsvL1UpdateReader implements CloseableIterator<L1Update> {
 	
 	private final CsvReader csvReader;
 	private final Symbol symbol;
+	private final int priceScale;
 	private boolean closed = false;
 	private boolean firstRecord = true;
 	private L1Update lastUpdate;
 	
-	public FinamCsvL1UpdateReader(Symbol symbol, CsvReader csvReader) {
+	public FinamCsvL1UpdateReader(Symbol symbol, CsvReader csvReader, int priceScale) {
 		this.symbol = symbol;
 		this.csvReader = csvReader;
+		this.priceScale = priceScale;
 	}
 	
-	public FinamCsvL1UpdateReader(Symbol symbol, InputStream inputStream) {
-		this(symbol, new CsvReader(new InputStreamReader(inputStream)));
+	public FinamCsvL1UpdateReader(Symbol symbol, InputStream inputStream, int priceScale) {
+		this(symbol, new CsvReader(new InputStreamReader(inputStream)), priceScale);
 	}
 	
-	public FinamCsvL1UpdateReader(Symbol symbol, File file) throws IOException {
-		this(symbol, new GZIPInputStream(new BufferedInputStream(new FileInputStream(file))));
+	public FinamCsvL1UpdateReader(Symbol symbol, File file, int priceScale) throws IOException {
+		this(symbol, new GZIPInputStream(new BufferedInputStream(new FileInputStream(file))), priceScale);
 	}
 	
-	public FinamCsvL1UpdateReader(Symbol symbol, String file) throws IOException {
-		this(symbol, new File(file));
+	public FinamCsvL1UpdateReader(Symbol symbol, String file, int priceScale) throws IOException {
+		this(symbol, new File(file), priceScale);
 	}
 
 	@Override
@@ -84,7 +90,8 @@ public class FinamCsvL1UpdateReader implements CloseableIterator<L1Update> {
 		LocalDate date = LocalDate.parse(csvReader.get(HDR_DATE), dateFmt);
 		LocalTime time = LocalTime.parse(csvReader.get(HDR_TIME), timeFmt);
 		builder.withTime(ZonedDateTime.of(date, time, ZONE).toInstant())
-			.withPrice(Double.valueOf(csvReader.get(HDR_PRICE)))
+			// TODO: replace me on something more faster
+			.withPrice(CDecimalBD.of(csvReader.get(HDR_PRICE)).withScale(priceScale))
 			.withSize(Long.valueOf(csvReader.get(HDR_SIZE)));
 		lastUpdate = builder.buildL1Update();
 		return true;
