@@ -7,7 +7,7 @@ import ru.prolib.aquila.core.data.Series;
  */
 public interface BarChartPanel<TCategory> {
 	
-	ChartOrientation getOrientation();
+	BarChartOrientation getOrientation();
 	
     BarChart<TCategory> addChart(String id);
     BarChart<TCategory> getChart(String id);

@@ -1,7 +1,9 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.utils.experimental.chart.BarChartOrientation;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
@@ -32,15 +34,20 @@ public class CandleBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
 
     @Override
     protected void paintObject(int categoryIdx, Candle value, BarChartVisualizationContext context, Graphics2D g) {
-        Color color = value.isBearish()?COLOR_BEAR:COLOR_BULL;
-        Double step = context.getStepX();
-        double x = context.toCanvasX(categoryIdx);
-        double yOpen = context.toCanvasY(value.getOpen());
-        double yClose = context.toCanvasY(value.getClose());
-        double y = yOpen < yClose ? yOpen : yClose;
-        double height = Math.abs(yOpen - yClose);
-        double yHigh = context.toCanvasY(value.getHigh());
-        double yLow = context.toCanvasY(value.getLow());
+        Color color = value.isBearish() ? COLOR_BEAR : COLOR_BULL;
+        int barWidth = context.getBarWidthPx();
+        BarChartOrientation orientation = context.getOrientation();
+        if ( orientation != BarChartOrientation.LEFT_TO_RIGHT ) {
+        	throw new IllegalArgumentException("Unsupported orientation: " + orientation);
+        }
+        
+        int x = context.toDisplayBarStart(categoryIdx);
+        int yOpen = context.toDisplay(value.getOpen());
+        int yClose = context.toDisplay(value.getClose());
+        int y = yOpen < yClose ? yOpen : yClose;
+        int height = Math.abs(yOpen - yClose);
+        int yHigh = context.toDisplay(value.getHigh());
+        int yLow = context.toDisplay(value.getLow());
 
         g.setColor(COLOR_BULL);
         g.setStroke(stroke);
@@ -57,13 +64,13 @@ public class CandleBarChartLayer<TCategory> extends AbstractBarChartLayer<TCateg
     }
 
     @Override
-    protected double getMaxValue(Candle candle) {
-        return candle.getHigh().toBigDecimal().doubleValue();
+    protected CDecimal getMaxValue(Candle candle) {
+        return candle.getHigh();
     }
 
     @Override
-    protected double getMinValue(Candle candle) {
-        return candle.getLow().toBigDecimal().doubleValue();
+    protected CDecimal getMinValue(Candle candle) {
+        return candle.getLow();
     }
 
     @Override

@@ -1,6 +1,8 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
 import org.apache.commons.lang3.Range;
+
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
@@ -24,7 +26,7 @@ public class CurrentValueLayer<TCategory> implements BarChartLayer<TCategory> {
 
     public static int PARAM_SHOW_LINE = 0;
 
-    private final Series<? extends Number> data;
+    private final Series<CDecimal> data;
     protected final Map<Integer, Color> colors = new HashMap<>();
     protected final Map<Integer, Object> params = new HashMap<>();
 
@@ -32,7 +34,7 @@ public class CurrentValueLayer<TCategory> implements BarChartLayer<TCategory> {
     private Stroke stroke = new BasicStroke(CURRENT_VALUE_LINE_WIDTH);
     private static final int R = 5;
 
-    public CurrentValueLayer(Series<? extends Number> data) {
+    public CurrentValueLayer(Series<CDecimal> data) {
         this.data = data;
         setColor(COLOR_TEXT, CURRENT_VALUE_TEXT_COLOR);
         setColor(COLOR_BG, CURRENT_VALUE_BG_COLOR);
@@ -46,7 +48,7 @@ public class CurrentValueLayer<TCategory> implements BarChartLayer<TCategory> {
     }
 
     @Override
-    public Range<Double> getValueRange(int first, int number) {
+    public Range<CDecimal> getValueRange(int first, int number) {
         return null;
     }
 
@@ -86,7 +88,7 @@ public class CurrentValueLayer<TCategory> implements BarChartLayer<TCategory> {
         Graphics2D g = (Graphics2D) getGraphics(context).create();
         data.lock();
         try {
-            Number value = null;
+            CDecimal value = null;
             int i = data.getLength() - 1;
             while (value == null && i >= 0){
                 value = data.get(i--);
@@ -102,8 +104,8 @@ public class CurrentValueLayer<TCategory> implements BarChartLayer<TCategory> {
         }
     }
 
-    protected void paint(BarChartVisualizationContext context, Graphics2D g, Number value){
-        int xStartLine = context.getPlotBounds().getX();
+    protected void paint(BarChartVisualizationContext context, Graphics2D g, CDecimal value){
+        int xStartLine = context.getPlotBounds().getUpperLeftX();
         int xEndLine = xStartLine + context.getPlotBounds().getWidth();
         int x = xEndLine + LABEL_INDENT;
         int y = context.toCanvasY(value.doubleValue());

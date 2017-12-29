@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.settings;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
 
 import java.util.List;
@@ -8,27 +9,27 @@ import java.util.List;
  * Created by TiM on 02.11.2017.
  */
 public class ChartSettings<TCategory> {
-    private Double minValue = null;
-    private Double maxValue = null;
+    private CDecimal minValue = null;
+    private CDecimal maxValue = null;
     private final List<BarChartLayer<TCategory>> layers;
 
     public ChartSettings(List<BarChartLayer<TCategory>> layers) {
         this.layers = layers;
     }
 
-    public Double getMinValue() {
+    public CDecimal getMinValue() {
         return minValue;
     }
 
-    public void setMinValue(Double minValue) {
+    public void setMinValue(CDecimal minValue) {
         this.minValue = minValue;
     }
 
-    public Double getMaxValue() {
+    public CDecimal getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(Double maxValue) {
+    public void setMaxValue(CDecimal maxValue) {
         this.maxValue = maxValue;
     }
 

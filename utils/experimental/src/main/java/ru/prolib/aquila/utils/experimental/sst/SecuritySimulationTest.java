@@ -61,7 +61,7 @@ import ru.prolib.aquila.ui.form.SecurityListTableModel;
 import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
 import ru.prolib.aquila.utils.experimental.chart.BarChart;
-import ru.prolib.aquila.utils.experimental.chart.ChartOrientation;
+import ru.prolib.aquila.utils.experimental.chart.BarChartOrientation;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelHandler;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.CandleBarChartLayer;
@@ -308,7 +308,7 @@ public class SecuritySimulationTest implements Experiment {
 	}
 
 	private BarChartPanelImpl<Instant> createChartPanel(SDP2DataSlice<SDP2Key> slice){
-		BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(ChartOrientation.HORIZONTAL);
+		BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(BarChartOrientation.LEFT_TO_RIGHT);
 		Integer precision = null;
 		try {
 			precision = terminal.getSecurity(slice.getSymbol()).getScale();

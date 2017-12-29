@@ -50,7 +50,7 @@ public class MainChart {
 
         JFrame main = new JFrame("test");
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(ChartOrientation.HORIZONTAL);
+        BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(BarChartOrientation.LEFT_TO_RIGHT);
         chartPanel.getRootPanel().setPreferredSize(new Dimension(1230, 900));
         main.getContentPane().add(chartPanel.getRootPanel());
         main.pack();

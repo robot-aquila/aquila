@@ -23,7 +23,17 @@ public class ChartConstants {
 
     public static final Color COLOR_BULL = new Color(0, 128, 0);
     public static final Color COLOR_BEAR = Color.RED;
+    
+    /**
+     * Not used. To remove?
+     */
+    @Deprecated
     public static final double CANDLE_MIN_WIDTH = 5d;
+    
+    /**
+     * Not used. To remove?
+     */
+    @Deprecated
     public static final double CANDLE_WIDTH_RATIO = 0.8;
 
     public static final int INDICATOR_LINE_WIDTH = 2;

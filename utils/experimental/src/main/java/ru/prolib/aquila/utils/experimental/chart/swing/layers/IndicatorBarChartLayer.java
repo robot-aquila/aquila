@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
@@ -16,13 +17,13 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.INDICATOR
 /**
  * Created by TiM on 13.09.2017.
  */
-public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, Number> {
+public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, CDecimal> {
     public static final int INVERT_VALUES_PARAM = 0;
     public static final int ZERO_LINE_ON_CENTER_PARAM = 1;
 
     private final LineRenderer renderer;
 
-    public IndicatorBarChartLayer(Series<Number> data, LineRenderer renderer) {
+    public IndicatorBarChartLayer(Series<CDecimal> data, LineRenderer renderer) {
         super(data);
         this.renderer = renderer;
         setParam(INVERT_VALUES_PARAM, false);
@@ -30,7 +31,7 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
     }
 
     @Override
-    protected void paintObject(int categoryIdx, Number number, BarChartVisualizationContext context, Graphics2D g) {
+    protected void paintObject(int categoryIdx, CDecimal number, BarChartVisualizationContext context, Graphics2D g) {
 
     }
 
@@ -51,18 +52,17 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
             int dataLength = data.getLength();
 
             for(int i=0; i<context.getNumberOfVisibleCategories() && first+i < dataLength; i++){
-                Double v = null;
+                CDecimal v = null;
                 try {
-                    Number n = data.get(i + first);
-                    v = n==null?null:n.doubleValue();
+                    v = data.get(i + first);
                 } catch (ValueException e) {
                     e.printStackTrace();
                 }
-                if(v==null) {
+                if( v==null ) {
                     points.add(null);
                     tooltips.add(null);
                 } else {
-                    v = v * getSign();
+                    v = v.multiply((long) getSign());
                     points.add(new Point(context.toCanvasX(i), context.toCanvasY(v)));
                     tooltips.add(createTooltipText(v, context.getValuesLabelFormatter()));
                 }
@@ -75,19 +75,23 @@ public class IndicatorBarChartLayer<TCategory> extends AbstractBarChartLayer<TCa
     }
 
     @Override
-    protected double getMaxValue(Number value) {
+    protected CDecimal getMaxValue(CDecimal value) {
         if(zeroOnCenter()){
-            return Math.abs(value.doubleValue());
+        	return value.abs();
+            //return Math.abs(value.doubleValue());
         }
-        return getSign()*value.doubleValue();
+        return value.multiply((long) getSign());
+        //return getSign()*value.doubleValue();
     }
 
     @Override
-    protected double getMinValue(Number value) {
+    protected CDecimal getMinValue(CDecimal value) {
         if(zeroOnCenter()){
-            return -Math.abs(value.doubleValue());
+        	return value.abs().negate();
+            //return -Math.abs(value.doubleValue());
         }
-        return getSign()*value.doubleValue();
+        return value.multiply((long) getSign());
+        //return getSign()*value.doubleValue();
     }
 
     private int getSign(){

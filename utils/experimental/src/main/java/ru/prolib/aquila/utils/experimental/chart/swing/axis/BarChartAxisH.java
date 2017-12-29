@@ -1,7 +1,12 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.axis;
 
 import ru.prolib.aquila.utils.experimental.chart.AxisLabelProvider;
+import ru.prolib.aquila.utils.experimental.chart.BarChartViewport;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
+import ru.prolib.aquila.utils.experimental.chart.ChartLayout;
+import ru.prolib.aquila.utils.experimental.chart.Point2D;
+import ru.prolib.aquila.utils.experimental.chart.Rectangle;
+import ru.prolib.aquila.utils.experimental.chart.swing.GraphicsProvider;
 
 import java.awt.*;
 
@@ -18,9 +23,11 @@ public class BarChartAxisH<TCategory> extends AbstractBarChartAxis {
     public static int POSITION_BOTTOM = 1;
 
     private final int position;
+    private final GraphicsProvider graphicsProvider;
 
-    public BarChartAxisH(int position) {
+    public BarChartAxisH(int position, GraphicsProvider graphicsProvider) {
         this.position = position;
+        this.graphicsProvider = graphicsProvider;
     }
 
     @Override
@@ -39,7 +46,7 @@ public class BarChartAxisH<TCategory> extends AbstractBarChartAxis {
                 if (width > maxWidth) {
                     maxWidth = width;
                 }
-            }
+            }	
 
             int scaleCoeff = (int) Math.floor(maxWidth * 2 / context.getStepX()) + 1;
 
@@ -51,9 +58,9 @@ public class BarChartAxisH<TCategory> extends AbstractBarChartAxis {
                     float height = metrics.getHeight();
                     float y = 0;
                     if (position == POSITION_TOP) {
-                        y = context.getPlotBounds().getY() - LABEL_INDENT;
+                        y = context.getPlotBounds().getUpperLeftY() - LABEL_INDENT;
                     } else {
-                        y = context.getPlotBounds().getY() + context.getPlotBounds().getHeight() + LABEL_INDENT + height;
+                        y = context.getPlotBounds().getUpperLeftY() + context.getPlotBounds().getHeight() + LABEL_INDENT + height;
                     }
                     g.drawString(label, x - width / 2, y);
                 }
@@ -62,4 +69,18 @@ public class BarChartAxisH<TCategory> extends AbstractBarChartAxis {
             g.dispose();
         }
     }
+
+	@Override
+	public Rectangle getPaintArea(BarChartViewport viewport, ChartLayout layout) {
+		if ( ! isVisible() ) {
+			return null;
+		}
+		Rectangle root = layout.getRoot();
+		int width = root.getWidth();
+		int height = graphicsProvider.getGraphics()
+				.getFontMetrics(LABEL_FONT).getHeight() + LABEL_INDENT;
+		int y = position == POSITION_BOTTOM ? 0 : root.getHeight() - height;
+		return new Rectangle(new Point2D(0, y), width, height, root);
+	}
+
 }

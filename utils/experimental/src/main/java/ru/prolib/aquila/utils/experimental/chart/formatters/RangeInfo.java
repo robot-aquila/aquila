@@ -7,6 +7,7 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 /**
  * Created by TiM on 20.06.2017.
  */
+@Deprecated
 public class RangeInfo {
     private final double minValue, maxValue, stepValue, firstValue, lastValue;
 
@@ -26,23 +27,23 @@ public class RangeInfo {
         this.lastValue = lastValue;
     }
 
-    public double getMinValue() {
+    public CDecimal getMinValue() {
         return minValue;
     }
 
-    public double getMaxValue() {
+    public CDecimal getMaxValue() {
         return maxValue;
     }
 
-    public double getStepValue() {
+    public CDecimal getStepValue() {
         return stepValue;
     }
 
-    public double getFirstValue() {
+    public CDecimal getFirstValue() {
         return firstValue;
     }
 
-    public double getLastValue() {
+    public CDecimal getLastValue() {
         return lastValue;
     }
 

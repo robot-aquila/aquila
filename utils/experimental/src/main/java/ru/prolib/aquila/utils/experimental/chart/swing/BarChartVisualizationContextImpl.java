@@ -38,7 +38,7 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
     }
 
     @Override
-    public double getMinVisibleValue() {
+    public CDecimal getMinVisibleValue() {
         return yRangeInfo.getMinValue();
     }
 
@@ -49,17 +49,17 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
 
     @Override
     public double toValue(int canvasX, int canvasY) {
-        return (plotBounds.getY() + plotBounds.getHeight() - canvasY)/getCoeffY() + yRangeInfo.getMinValue();
+        return (plotBounds.getUpperLeftY() + plotBounds.getHeight() - canvasY)/getCoeffY() + yRangeInfo.getMinValue();
     }
 
     @Override
     public int toCategoryIdx(int canvasX, int canvasY) {
-        return (int) Math.round ((canvasX - plotBounds.getX())/getStepX() - 0.5);
+        return (int) Math.round ((canvasX - plotBounds.getUpperLeftX())/getStepX() - 0.5);
     }
 
     @Override
     public int toCanvasX(int displayedCategoryIdx) {
-        return (int) Math.round(plotBounds.getX() + getStepX()*(displayedCategoryIdx + 0.5));
+        return (int) Math.round(plotBounds.getUpperLeftX() + getStepX()*(displayedCategoryIdx + 0.5));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class BarChartVisualizationContextImpl implements BarChartVisualizationCo
 
     @Override
     public int toCanvasY(double value) {
-        return (int) Math.round(plotBounds.getY() + plotBounds.getHeight() - (value-yRangeInfo.getMinValue())*getCoeffY());
+        return (int) Math.round(plotBounds.getUpperLeftY() + plotBounds.getHeight() - (value-yRangeInfo.getMinValue())*getCoeffY());
     }
     
     @Override

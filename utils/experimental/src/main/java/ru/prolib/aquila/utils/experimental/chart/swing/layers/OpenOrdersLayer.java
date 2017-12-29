@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
 import org.apache.commons.lang3.Range;
 import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
@@ -46,7 +47,7 @@ public class OpenOrdersLayer<TCategory> implements BarChartLayer<TCategory> {
     }
 
     @Override
-    public Range<Double> getValueRange(int first, int number) {
+    public Range<CDecimal> getValueRange(int first, int number) {
         return null;
     }
 
@@ -113,7 +114,7 @@ public class OpenOrdersLayer<TCategory> implements BarChartLayer<TCategory> {
         Set<Integer> yValuesSell = new HashSet<>();
         Set<Integer> yDashed = new HashSet<>();
         value = new TradeInfoList(value, accounts);
-        int xStartLine = context.getPlotBounds().getX();
+        int xStartLine = context.getPlotBounds().getUpperLeftX();
         int xEndLine = xStartLine + context.getPlotBounds().getWidth();
 
         float lineWidth = (Float) params.get(LINE_WIDTH_PARAM);

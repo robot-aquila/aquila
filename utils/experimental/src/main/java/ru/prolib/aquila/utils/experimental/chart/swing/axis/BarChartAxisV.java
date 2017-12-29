@@ -39,9 +39,9 @@ public class BarChartAxisV extends AbstractBarChartAxis {
                 int y = Math.round(labelProvider.getCanvasY(i) + height/4f);
                 int x;
                 if(position == POSITION_LEFT){
-                    x = context.getPlotBounds().getX() - LABEL_INDENT - width;
+                    x = context.getPlotBounds().getUpperLeftX() - LABEL_INDENT - width;
                 } else {
-                    x = context.getPlotBounds().getX() + context.getPlotBounds().getWidth() + LABEL_INDENT;
+                    x = context.getPlotBounds().getUpperLeftX() + context.getPlotBounds().getWidth() + LABEL_INDENT;
                 }
                 g.drawString(label, (int)x, (int)y);
             }

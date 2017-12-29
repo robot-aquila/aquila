@@ -2,7 +2,8 @@ package ru.prolib.aquila.utils.experimental.chart;
 
 import java.awt.Color;
 
-import org.apache.commons.lang3.Range;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.utils.Range;
 
 public interface BarChartLayer<TCategory> {
 	public static final int DEFAULT_COLOR = 0;
@@ -14,9 +15,10 @@ public interface BarChartLayer<TCategory> {
 	 * <p>
 	 * @param first - index of first element in series to start ranging of
 	 * @param number - number of elements to scan
-	 * @return max and min values for the specified interval
+	 * @return max and min values for the specified interval. Both values must be
+	 * of maximum possible scale.
 	 */
-	Range<Double> getValueRange(int first, int number);
+	Range<CDecimal> getValueRange(int first, int number);
 
 	boolean isVisible();
 

@@ -63,7 +63,7 @@ public class CursorLayer implements BarChartLayer {
                 double x = context.toCanvasX(lastCategoryIdx);
                 double width = context.getStepX();
                 g.setColor(SELECTION_COLOR);
-                g.fill(new Rectangle2D.Double(x-width/2, context.getPlotBounds().getY(), width, context.getPlotBounds().getHeight()));
+                g.fill(new Rectangle2D.Double(x-width/2, context.getPlotBounds().getUpperLeftY(), width, context.getPlotBounds().getHeight()));
             }
         } finally {
             g.dispose();

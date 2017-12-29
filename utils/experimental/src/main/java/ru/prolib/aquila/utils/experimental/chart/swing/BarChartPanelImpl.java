@@ -26,7 +26,7 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TOOLTIP_M
  * Created by TiM on 08.09.2017.
  */
 public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, MouseWheelListener, MouseMotionListener {
-    private final ChartOrientation orientation;
+    private final BarChartOrientation orientation;
 
     protected Map<String, BarChart<TCategory>> charts = new LinkedHashMap<>();
     protected final java.util.List<TCategory> displayedCategories = new Vector<>();
@@ -50,7 +50,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
 
     private boolean showTooltipForm = false;
 
-    public BarChartPanelImpl(ChartOrientation orientation) {
+    public BarChartPanelImpl(BarChartOrientation orientation) {
         viewport = new BarChartPanelViewport();
         final Icon autoScrollTrue = new ImageIcon(getClass().getClassLoader().getResource("locked.png"));
         final Icon autoScrollFalse = new ImageIcon(getClass().getClassLoader().getResource("unlocked.png"));
@@ -106,7 +106,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     }
 
     @Override
-    public ChartOrientation getOrientation() {
+    public BarChartOrientation getOrientation() {
         return orientation;
     }
 
@@ -179,6 +179,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     @Override
     public void paint() {
         if(charts!=null){
+        	// TODO: Prepare painting all charts. Precalculate optimal axis width, etc.
             for(BarChart<TCategory> chart: charts.values()){
                 chart.paint();
             }

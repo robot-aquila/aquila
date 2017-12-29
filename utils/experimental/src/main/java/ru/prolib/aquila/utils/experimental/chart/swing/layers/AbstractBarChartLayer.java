@@ -3,6 +3,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 import org.apache.commons.lang3.Range;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
@@ -73,10 +74,10 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
     }
 
     @Override
-    public Range<Double> getValueRange(int first, int number) {
-        Double minY = null;
-        Double maxY = null;
-        if (!visible || data == null) {
+    public Range<CDecimal> getValueRange(int first, int number) {
+        CDecimal minY = CDecimalBD.ZERO;
+        CDecimal maxY = CDecimalBD.ZERO;
+        if ( ! visible || data == null ) {
             return null;
         }
         data.lock();
@@ -89,14 +90,9 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
                     value = null;
                 }
                 if(value!=null){
-                    double y = getMaxValue(value);
-                    if(maxY==null || y>maxY){
-                        maxY = y;
-                    }
-                    y = getMinValue(value);
-                    if(minY==null || y<minY){
-                        minY = y;
-                    }
+                    CDecimal y = getMaxValue(value);
+                    minY = minY.min(y);
+                    maxY = maxY.max(y);
                 }
             }
         } finally {
@@ -144,20 +140,21 @@ public abstract class AbstractBarChartLayer<TCategory, TValue> implements BarCha
         return String.format("%s: %s", getId(), labelFormatter.format(value));
     }
 
-    protected double getMaxValue(TValue value){
+    abstract protected CDecimal getMaxValue(TValue value);/*{
         if(value instanceof Number){
             return ((Number) value).doubleValue();
         }
         return 0;
-    }
+    }*/
 
-    protected double getMinValue(TValue value){
+    abstract protected CDecimal getMinValue(TValue value);/*{
         if(value instanceof Number){
             return ((Number) value).doubleValue();
         }
         return 0;
-    }
+    }*/
 
-    protected abstract void paintObject(int categoryIdx, TValue value, BarChartVisualizationContext context, Graphics2D g);
+    protected abstract void paintObject(int categoryIdx, TValue value,
+    		BarChartVisualizationContext context, Graphics2D g);
 
 }

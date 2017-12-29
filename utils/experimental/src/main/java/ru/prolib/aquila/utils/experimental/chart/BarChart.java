@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart;
 
 import java.util.List;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
@@ -10,7 +11,7 @@ import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
  */
 public interface BarChart<TCategory> {
 
-	ChartOrientation getOrientation();
+	BarChartOrientation getOrientation();
 	BarChart<TCategory> setHeight(int points);
 	int getHeight();
 
@@ -22,9 +23,9 @@ public interface BarChart<TCategory> {
     List<BarChartLayer<TCategory>> getLayers();
     BarChartLayer<TCategory> getLayer(String id);
     BarChartLayer<TCategory> addLayer(BarChartLayer<TCategory> layer);
-    BarChartLayer<TCategory> addSmoothLine(Series<? extends Number> series);
-    BarChartLayer<TCategory> addPolyLine(Series<? extends Number> series);
-    BarChartLayer<TCategory> addHistogram(Series<? extends Number> series);
+    BarChartLayer<TCategory> addSmoothLine(Series<CDecimal> series);
+    BarChartLayer<TCategory> addPolyLine(Series<CDecimal> series);
+    BarChartLayer<TCategory> addHistogram(Series<CDecimal> series);
     BarChart<TCategory> dropLayer(String id);
 
     /**
@@ -43,7 +44,7 @@ public interface BarChart<TCategory> {
      * @param maxValue - max visible value, null if not set
      * @return this object
      */
-    BarChart<TCategory> setValuesInterval(Double minValue, Double maxValue);
+    BarChart<TCategory> setValuesInterval(CDecimal minValue, CDecimal maxValue);
 
     List<ChartOverlay> getOverlays();
     BarChart<TCategory> addStaticOverlay(String text, int y);

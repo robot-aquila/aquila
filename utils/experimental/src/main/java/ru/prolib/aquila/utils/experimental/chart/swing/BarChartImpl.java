@@ -1,9 +1,12 @@
 package ru.prolib.aquila.utils.experimental.chart.swing;
 
-import org.apache.commons.lang3.Range;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.data.Series;
+import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
+import ru.prolib.aquila.utils.experimental.chart.swing.axis.AbstractBarChartAxis;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.BarChartAxisH;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.BarChartAxisV;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.CategoriesLabelProvider;
@@ -42,8 +45,9 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     private final List<BarChartLayer<TCategory>> layers = new CopyOnWriteArrayList<>();
     private int firstVisibleCategoryIndex, numberOfVisibleCategories;
     private int height;
-    private ChartOrientation chartOrientation;
-    private BarChartAxis topAxis, bottomAxis, leftAxis, rightAxis;
+    private BarChartOrientation chartOrientation;
+    private final GraphicsProvider graphicsProvider;
+    private AbstractBarChartAxis topAxis, bottomAxis, leftAxis, rightAxis;
     private LabelFormatter valuesLabelFormatter = new DefaultLabelFormatter();
     private List<ChartOverlay> overlays = new Vector<>();
     private final RangeCalculator rangeCalculator;
@@ -53,7 +57,8 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     private ChartSettingsButton chartSettingsButton;
     private final ChartSettings<TCategory> settings;
     private final ChartSettingsPopup settingsPopup;
-
+    private final BarChartValueAxisDriver valueAxisDriver;
+    private final BarChartCategoryAxisDriver categoryAxisDriver;
 
 
     public BarChartImpl(List<TCategory> categories) {
@@ -67,8 +72,9 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
 
         };
         rangeCalculator = new RangeCalculatorImpl();
-        topAxis = new BarChartAxisH(BarChartAxisH.POSITION_TOP);
-        bottomAxis = new BarChartAxisH(BarChartAxisH.POSITION_BOTTOM);
+        graphicsProvider = new GraphicsProvider();
+        topAxis = new BarChartAxisH<TCategory>(BarChartAxisH.POSITION_TOP, graphicsProvider);
+        bottomAxis = new BarChartAxisH<TCategory>(BarChartAxisH.POSITION_BOTTOM, graphicsProvider);
         leftAxis = new BarChartAxisV(BarChartAxisV.POSITION_LEFT);
         rightAxis = new BarChartAxisV(BarChartAxisV.POSITION_RIGHT);
         settings = new ChartSettings<>(layers);
@@ -97,7 +103,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     }
 
     @Override
-    public ChartOrientation getOrientation() {
+    public BarChartOrientation getOrientation() {
         return chartOrientation;
     }
 
@@ -168,21 +174,21 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     }
 
     @Override
-    public BarChartLayer<TCategory> addSmoothLine(Series<? extends Number> series) {
+    public BarChartLayer<TCategory> addSmoothLine(Series<CDecimal> series) {
         IndicatorBarChartLayer layer = new IndicatorBarChartLayer(series, new SmoothLineRenderer());
         addLayer(layer);
         return layer;
     }
 
     @Override
-    public BarChartLayer<TCategory> addPolyLine(Series<? extends Number> series) {
+    public BarChartLayer<TCategory> addPolyLine(Series<CDecimal> series) {
         IndicatorBarChartLayer layer = new IndicatorBarChartLayer(series, new PolyLineRenderer());
         addLayer(layer);
         return layer;
     }
 
     @Override
-    public BarChartLayer<TCategory> addHistogram(Series<? extends Number> series) {
+    public BarChartLayer<TCategory> addHistogram(Series<CDecimal> series) {
         HistogramBarChartLayer layer = new HistogramBarChartLayer(series);
         addLayer(layer);
         return layer;
@@ -207,7 +213,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
     }
 
     @Override
-    public BarChart<TCategory> setValuesInterval(Double minValue, Double maxValue) {
+    public BarChart<TCategory> setValuesInterval(CDecimal minValue, CDecimal maxValue) {
         settings.setMinValue(minValue);
         settings.setMaxValue(maxValue);
         return this;
@@ -260,33 +266,58 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
 
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        RenderingHints rh = new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        RenderingHints rh = new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING,
+        		RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setRenderingHints(rh);
+        graphicsProvider.setGraphics(g2);
+        
+        Rectangle rootRect = new Rectangle(new Point2D(0, getRootPanel().getHeight() - 1),
+        		getRootPanel().getWidth(), getRootPanel().getHeight());
+        ChartLayout layout = new ChartLayout(rootRect);
+        BarChartViewport viewport = new BarChartViewportImpl();
+        viewport.setVisibleCategories(firstVisibleCategoryIndex, numberOfVisibleCategories);
+        viewport.setVisibleValueRange(getValueRange());
+        // TODO: set preferred value range
+        valueAxisDriver.updateViewport(viewport);
+        categoryAxisDriver.updateViewport(viewport);
+        
+        layout.setTopAxis(topAxis.getPaintArea(viewport, layout));
+        layout.setBottomAxis(bottomAxis.getPaintArea(viewport, layout));
+        layout.setLeftAxis(leftAxis.getPaintArea(viewport, layout));
+        layout.setRightAxis(rightAxis.getPaintArea(viewport, layout));
+        layout.autoPlotArea();
+        valueAxisDriver.updateLayout(layout);
+        categoryAxisDriver.updateLayout(layout);
 
-        int leftMargin = leftAxis.isVisible()?Y_AXIS_WIDTH:0;
-        int rightMargin = rightAxis.isVisible()?Y_AXIS_WIDTH:0;
-        int labelHeight = g.getFontMetrics(LABEL_FONT).getHeight();
-        int topMargin = (topAxis.isVisible() ? labelHeight : 0) + LABEL_INDENT;
-        int bottomMargin = (bottomAxis.isVisible() ? labelHeight : 0) + LABEL_INDENT;
-
-        Rectangle drawArea = new Rectangle(MARGIN+leftMargin,
-                MARGIN+topMargin,
-                getRootPanel().getWidth()-2*MARGIN-leftMargin-rightMargin,
-                getRootPanel().getHeight()-2*MARGIN - topMargin - bottomMargin);
-
-        Range<Double> valuesRange = getValueRange();
-        RangeInfo ri = rangeCalculator.autoRange(valuesRange.getMinimum(), valuesRange.getMaximum(), drawArea.getHeight(), Y_AXIS_MIN_STEP, valuesLabelFormatter.getPrecision());
-        BarChartVisualizationContextImpl vc = new BarChartVisualizationContextImpl(firstVisibleCategoryIndex, numberOfVisibleCategories, g2, drawArea, ri, valuesLabelFormatter);
+        RangeInfo ri = rangeCalculator.autoRange(valuesRange.getMinimum(),
+        		valuesRange.getMaximum(),
+        		drawArea.getHeight(),
+        		Y_AXIS_MIN_STEP,
+        		valuesLabelFormatter.getPrecision());
+        BarChartVisualizationContextImpl vc = new BarChartVisualizationContextImpl(firstVisibleCategoryIndex,
+        		numberOfVisibleCategories,
+        		g2,
+        		drawArea,
+        		ri,
+        		valuesLabelFormatter);
 
         CategoriesLabelProvider<TCategory> clp = new CategoriesLabelProvider<>(categories, vc);
         ValuesLabelProvider vlp = new ValuesLabelProvider(vc);
-        topAxis.paint(vc, clp);
-        bottomAxis.paint(vc, clp);
-        leftAxis.paint(vc, vlp);
-        rightAxis.paint(vc, vlp);
+        if ( layout.getTopAxis() != null ) {
+        	topAxis.paint(vc, clp);
+        }
+        if ( layout.getBottomAxis() != null ) {
+        	bottomAxis.paint(vc, clp);
+        }
+        if ( layout.getLeftAxis() != null ) {
+        	leftAxis.paint(vc, vlp);
+        }
+        if ( layout.getRightAxis() != null ) {
+        	rightAxis.paint(vc, vlp);
+        }
 
         drawGridLines(vc);
-        g2.clip(new Rectangle2D.Double(g2.getClipBounds().getMinX(), vc.getPlotBounds().getY(), g2.getClipBounds().getWidth(), vc.getPlotBounds().getHeight()));
+        g2.clip(new Rectangle2D.Double(g2.getClipBounds().getMinX(), vc.getPlotBounds().getUpperLeftY(), g2.getClipBounds().getWidth(), vc.getPlotBounds().getHeight()));
         for(BarChartLayer<TCategory> layer: layers){
             layer.paint(vc);
         }
@@ -298,40 +329,32 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         chartSettingsButton.paint(g2, getRootPanel().getWidth());
     }
 
-    private Range<Double> getValueRange(){
-        Double minValue = settings.getMinValue();
-        Double maxValue = settings.getMaxValue();
-        if(minValue!=null && maxValue!=null){
-            return Range.between(minValue, maxValue);
-        }
-        Double maxY = null;
-        Double minY = null;
+    private Range<CDecimal> getValueRange() {
+    	// TODO: replace to Range
+        //CDecimal minValueLimit = settings.getMinValue();
+        //CDecimal maxValueLimit = settings.getMaxValue();
+        //if( minValueLimit != null && maxValueLimit != null){
+        //    return new Range<>(minValueLimit, maxValueLimit);
+        //}
+        Range <CDecimal> x, range = null;
         for (BarChartLayer<TCategory> layer : layers) {
-            Range<Double> range = layer.getValueRange(firstVisibleCategoryIndex, numberOfVisibleCategories);
-            if (range != null) {
-                if (range.getMaximum() != null) {
-                    if(maxY==null || range.getMaximum() > maxY) {
-                        maxY = range.getMaximum();
-                    }
-                }
-                if (range.getMinimum() != null) {
-                    if(minY==null ||  range.getMinimum() < minY){
-                        minY = range.getMinimum();
-                    }
-                }
+            x = layer.getValueRange(firstVisibleCategoryIndex, numberOfVisibleCategories);
+            if ( range == null ) {
+            	range = x;
+            } else {
+            	range = range.extend(x);
             }
         }
-        if(minY == null){
-            minY = 0d;
+        if ( range != null ) {
+        	return range;
         }
-        if(maxY == null){
-            maxY = 1e6;
-        }
-        return Range.between(minValue==null?minY:minValue, maxValue==null?maxY:maxValue);
+        return new Range<>(CDecimalBD.ZERO, CDecimalBD.of(1000000L));
     }
 
     private void drawGridLines(BarChartVisualizationContextImpl vc){
-        Graphics2D g = (Graphics2D) vc.getGraphics().create();
+    	// TODO: fixme
+    	/*
+    	Graphics2D g = (Graphics2D) vc.getGraphics().create();
         try {
             g.setColor(GRID_LINES_COLOR);
             Rectangle2D plotBounds = new Rectangle2D.Double(vc.getPlotBounds().getX(), vc.getPlotBounds().getY(), vc.getPlotBounds().getWidth(), vc.getPlotBounds().getHeight());
@@ -348,6 +371,7 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         } finally {
             g.dispose();
         }
+        */
     }
 
     private void drawOverlays(BarChartVisualizationContextImpl vc){
@@ -356,12 +380,12 @@ public class BarChartImpl<TCategory> implements BarChart<TCategory> {
         g2.setFont(new Font("default", Font.BOLD, CHART_OVERLAY_FONT_SIZE));
         int height = Math.round(g2.getFontMetrics().getHeight());
         for(ChartOverlay o: overlays){
-            int x = vc.getPlotBounds().getX() + LABEL_INDENT;
+            int x = vc.getPlotBounds().getUpperLeftX() + LABEL_INDENT;
             int y;
             if(o.getY()>=0){
-                y = vc.getPlotBounds().getY() + LABEL_INDENT + height;
+                y = vc.getPlotBounds().getUpperLeftY() + LABEL_INDENT + height;
             } else {
-                y = vc.getPlotBounds().getY()+vc.getPlotBounds().getHeight() - LABEL_INDENT;
+                y = vc.getPlotBounds().getUpperLeftY()+vc.getPlotBounds().getHeight() - LABEL_INDENT;
             }
             g2.drawString(o.getText(), x, y + o.getY());
         }

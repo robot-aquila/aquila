@@ -1,8 +1,12 @@
 package ru.prolib.aquila.utils.experimental.chart.formatters;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.utils.experimental.chart.ValueAxisSetup;
+
 /**
  * Created by TiM on 20.06.2017.
  */
+@Deprecated
 public class RangeCalculatorImpl implements RangeCalculator {
 
     @Override
@@ -55,4 +59,5 @@ public class RangeCalculatorImpl implements RangeCalculator {
 
         return new RangeInfo(minValue, maxValue, stepValue, firstVal, lastVal);
     }
+    
 }

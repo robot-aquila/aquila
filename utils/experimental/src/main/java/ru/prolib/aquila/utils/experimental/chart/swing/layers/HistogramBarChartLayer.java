@@ -1,5 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layers;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 
@@ -12,37 +14,42 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.CANDLE_WI
 /**
  * Created by TiM on 13.09.2017.
  */
-public class HistogramBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, Number> {
+public class HistogramBarChartLayer<TCategory> extends AbstractBarChartLayer<TCategory, CDecimal> {
     public static final int INVERT_VALUES_PARAM = 0;
     public static final int ZERO_LINE_ON_CENTER_PARAM = 1;
 
-    public HistogramBarChartLayer(Series<Number> data) {
+    public HistogramBarChartLayer(Series<CDecimal> data) {
         super(data);
         setParam(INVERT_VALUES_PARAM, false);
         setParam(ZERO_LINE_ON_CENTER_PARAM, false);
     }
 
     @Override
-    protected double getMinValue(Number value) {
+    protected CDecimal getMinValue(CDecimal value) {
         if(zeroOnCenter()){
-            return -Math.abs(value.doubleValue());
+        	return value.abs().negate();
+            //return -Math.abs(value.doubleValue());
         }
-        return getSign() > 0 ? 0 : getSign() * value.doubleValue();
+        return getSign() > 0 ? CDecimalBD.ZERO : value.multiply((long) getSign());
+        //return getSign() > 0 ? 0 : getSign() * value.doubleValue();
     }
 
     @Override
-    protected double getMaxValue(Number value) {
+    protected CDecimal getMaxValue(CDecimal value) {
         if(zeroOnCenter()){
-            return Math.abs(value.doubleValue());
+        	return value.abs();
+            //return Math.abs(value.doubleValue());
         }
-        return getSign() > 0 ? getSign() * value.doubleValue() : 0;
+        return getSign() > 0 ? value.multiply((long) getSign()) : CDecimalBD.ZERO;
+        //return getSign() > 0 ? getSign() * value.doubleValue() : 0;
     }
 
     @Override
-    protected void paintObject(int categoryIdx, Number value, BarChartVisualizationContext context, Graphics2D g) {
+    protected void paintObject(int categoryIdx, CDecimal value, BarChartVisualizationContext context, Graphics2D g) {
         int cnt = context.getNumberOfVisibleCategories();
         int x = context.toCanvasX(categoryIdx);
-        int y = context.toCanvasY(value.doubleValue() * getSign());
+        int y = context.toCanvasX(value.multiply((long) getSign()));
+        //int y = context.toCanvasY(value.doubleValue() * getSign());
         double height = Math.abs(y - context.toCanvasY(0d));
         if(height==0){
             height = 1;

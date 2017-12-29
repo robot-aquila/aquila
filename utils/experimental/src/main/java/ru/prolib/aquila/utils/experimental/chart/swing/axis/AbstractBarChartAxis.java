@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.axis;
 
 import ru.prolib.aquila.utils.experimental.chart.BarChartAxis;
+
 import ru.prolib.aquila.utils.experimental.chart.AxisLabelProvider;
 import ru.prolib.aquila.utils.experimental.chart.BarChartVisualizationContext;
 import ru.prolib.aquila.utils.experimental.chart.formatters.DefaultLabelFormatter;
@@ -38,4 +39,5 @@ public abstract class AbstractBarChartAxis implements BarChartAxis {
 
     @Override
     public abstract void paint(BarChartVisualizationContext context, AxisLabelProvider labelProvider);
+    
 }
