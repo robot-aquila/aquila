@@ -97,15 +97,15 @@ public class ChartLayout {
 			leftX = leftAxis.getRightX() + 1;
 		}
 		if ( topAxis != null ) {
-			upperY = topAxis.getLowerY() - 1;
+			upperY = topAxis.getLowerY() + 1;
 		}
 		if ( rightAxis != null ) {
 			rightX = rightAxis.getLeftX() - 1;
 		}
 		if ( bottomAxis != null ) {
-			lowerY = bottomAxis.getUpperY() + 1;
+			lowerY = bottomAxis.getUpperY() - 1;
 		}
-		plot = new Rectangle(new Point2D(leftX, upperY), rightX - leftX + 1, upperY - lowerY + 1);
+		plot = new Rectangle(new Point2D(leftX, upperY), rightX - leftX + 1, lowerY - upperY + 1, root);
 	}
 
 }

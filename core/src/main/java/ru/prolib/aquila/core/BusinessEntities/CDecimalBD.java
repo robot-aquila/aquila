@@ -257,6 +257,9 @@ public class CDecimalBD extends CDecimalAbstract {
 	
 	@Override
 	public CDecimal min(CDecimal other) {
+		if ( other == null ) {
+			return this;
+		}
 		return compareTo(other) <= 0 ? this : other;
 	}
 	

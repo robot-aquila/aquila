@@ -57,5 +57,10 @@ public class Range<T extends Comparable<T>> {
 				.append(o.max, max)
 				.isEquals();
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + min + "-" + max + "]";
+	}
 
 }

@@ -706,6 +706,13 @@ public class CDecimalBDTest {
 	}
 	
 	@Test
+	public void testMin_CompareWithNull() {
+		CDecimal x1 = new CDecimalBD("410.46");
+		
+		assertSame(x1, x1.min(null));
+	}
+	
+	@Test
 	public void testToAbstract() {
 		assertEquals(CDecimalBD.of("24.92"), CDecimalBD.ofRUB2("24.92").toAbstract());
 		assertEquals(CDecimalBD.of("24.92"), CDecimalBD.of("24.92").toAbstract());
@@ -754,5 +761,5 @@ public class CDecimalBDTest {
 		assertEquals(CDecimalBD.of("10000000000000", "RUB", RoundingMode.UNNECESSARY),
 				CDecimalBD.of("10", "RUB", RoundingMode.UNNECESSARY).pow(13));
 	}
-
+	
 }

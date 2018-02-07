@@ -1,7 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart.formatters;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
-import ru.prolib.aquila.utils.experimental.chart.ValueAxisSetup;
 
 /**
  * Created by TiM on 20.06.2017.

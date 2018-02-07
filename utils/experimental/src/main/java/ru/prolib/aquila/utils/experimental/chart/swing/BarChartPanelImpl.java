@@ -3,8 +3,10 @@ package ru.prolib.aquila.utils.experimental.chart.swing;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.*;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.CursorLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartCursorLayer;
 import ru.prolib.aquila.utils.experimental.chart.TooltipForm;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
 import ru.prolib.aquila.utils.experimental.chart.formatters.DefaultLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
 
@@ -25,13 +27,12 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TOOLTIP_M
 /**
  * Created by TiM on 08.09.2017.
  */
-public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, MouseWheelListener, MouseMotionListener {
+public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, MouseMotionListener {
     private final BarChartOrientation orientation;
 
-    protected Map<String, BarChart<TCategory>> charts = new LinkedHashMap<>();
-    protected final java.util.List<TCategory> displayedCategories = new Vector<>();
-    protected final BarChartPanelViewport viewport;
-    protected Series<TCategory> categories;
+    protected Map<String, BarChart> charts = new LinkedHashMap<>();
+    protected final java.util.List displayedCategories = new Vector<>();
+    protected final CategoryAxisViewport viewport;
 
     protected JPanel mainPanel;
     protected JScrollBar scrollBar;
@@ -42,8 +43,8 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     protected LabelFormatter categoryLabelFormatter = new DefaultLabelFormatter();
     protected LabelFormatter valueLabelFormatter = new DefaultLabelFormatter();
     private java.awt.Rectangle screen;
-    private final Timer updateTooltipTextTimer;
-    private final HashMap<JPanel, BarChart<TCategory>> chartByPanel = new HashMap<>();
+    //private final Timer updateTooltipTextTimer;
+    private final HashMap<JPanel, BarChart> chartByPanel = new HashMap<>();
     private final JPanel rootPanel;
     private Timer timerRefresh;
     private int timerRefreshDelay = 50;
@@ -51,7 +52,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     private boolean showTooltipForm = false;
 
     public BarChartPanelImpl(BarChartOrientation orientation) {
-        viewport = new BarChartPanelViewport();
+        viewport = new CategoryAxisViewportImpl();
         final Icon autoScrollTrue = new ImageIcon(getClass().getClassLoader().getResource("locked.png"));
         final Icon autoScrollFalse = new ImageIcon(getClass().getClassLoader().getResource("unlocked.png"));
         lastX = new AtomicInteger();
@@ -59,19 +60,42 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         lastCategoryIdx = new AtomicInteger();
         tooltips = new HashMap<>();
         this.orientation = orientation;
-        rootPanel = new JPanel(new BorderLayout());
+        rootPanel = new JPanel(new BorderLayout()) {
+        	private boolean init = false;
+        	
+        	@Override
+        	protected void paintComponent(Graphics g) {
+        		System.out.println("DBG: BarChartPanelImpl#paintComponent called");
+        		super.paintComponent(g);
+        		BarChartPanelImpl.this.paintComponent(g);
+        	}
+        	
+        	@Override
+        	protected void paintChildren(Graphics g) {
+        		System.out.println("DBG: BarChartPanelImpl#parentChildren called");
+        		super.paintChildren(g);
+        		System.out.println("DBG: BarChartPanelImpl#parentChildren exiting");
+        		if ( init == false ) {
+        			System.out.println("DBG: BarChartPanelImpl#paintChildren initialization done. Repaint.");
+        			init = true;
+        			repaint();
+        		}
+        	}
+        };
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS) );
         rootPanel.add(mainPanel, BorderLayout.CENTER);
 
-        createRefreshTimer();
+        // TODO: remove me
+        //createRefreshTimer();
 
         JPanel scrollBarPanel = new JPanel(new BorderLayout());
         scrollBar = new JScrollBar(JScrollBar.HORIZONTAL);
         scrollBarListener = new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
-                setVisibleArea(e.getValue(), viewport.getNumberOfVisibleCategories());
+            	// TODO: Использовать драйвер основного чарта
+                //setVisibleArea(e.getValue(), viewport.getNumberOfCategories());
             }
         };
         scrollBar.addAdjustmentListener(scrollBarListener);
@@ -81,8 +105,9 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         autoScrollButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                viewport.setAutoScroll(!viewport.getAutoScroll());
-                autoScrollButton.setIcon(viewport.getAutoScroll()?autoScrollTrue:autoScrollFalse);
+            	// TODO: Исправить автоскролл. Должен работать через обозреватель основной серии?
+                //viewport.setAutoScroll(!viewport.getAutoScroll());
+                //autoScrollButton.setIcon(viewport.getAutoScroll()?autoScrollTrue:autoScrollFalse);
             }
         });
         autoScrollButton.setPreferredSize(new Dimension(20, 20));
@@ -92,13 +117,14 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         tooltipForm = new TooltipForm();
         screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
 
-        updateTooltipTextTimer = new Timer(500, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateTooltipText_();
-            }
-        });
-        updateTooltipTextTimer.setRepeats(false);
+        // TODO: Выпили меня
+        //updateTooltipTextTimer = new Timer(500, new ActionListener() {
+        //    @Override
+        //    public void actionPerformed(ActionEvent e) {
+        //        updateTooltipText_();
+        //    }
+        //});
+        //updateTooltipTextTimer.setRepeats(false);
     }
 
     public JPanel getRootPanel() {
@@ -111,11 +137,11 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     }
 
     @Override
-    public BarChart<TCategory> addChart(String id) {
+    public BarChart addChart(String id) {
         if(charts.containsKey(id)){
             throw new IllegalArgumentException("Chart with id='"+id+"' already added");
         }
-        BarChartImpl<TCategory> chart = new BarChartImpl<>(displayedCategories);
+        BarChartImpl chart = new BarChartImpl(viewport);
         chart.setMouseVariables(lastX, lastY, lastCategoryIdx);
         HashMap<String, List<String>> map = new HashMap<>();
         tooltips.put(id, map);
@@ -125,7 +151,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         } else {
             chart.setHeight(OTHER_CHARTS_HEIGHT);
         }
-        chart.addLayer(new CursorLayer(lastX), true);
+        chart.addLayer(new BarChartCursorLayer(lastX), true);
         mainPanel.add(chart.getRootPanel());
         charts.put(id, chart);
         chart.getRootPanel().addMouseWheelListener(this);
@@ -151,45 +177,25 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
     }
 
     @Override
-    public BarChart<TCategory> getChart(String id) {
+    public BarChart getChart(String id) {
         return charts.get(id);
     }
 
     @Override
-    public void setVisibleArea(final int first, final int number) {
-        viewport.setNumberOfVisibleCategories(number);
-        viewport.setFirstVisibleCategory(first);
+    public CategoryAxisViewport getCategoryAxisViewport() {
+    	return viewport;
     }
+    
+	@Override
+	public void paint() {
+		// TODO: move to paintComponent?
+		// TODO: Prepare painting all charts. Precalculate optimal axis width, etc.
+		for( BarChart chart: charts.values() ) {
+		    chart.paint();
+		}
+	}
 
-    @Override
-    public int getFirstVisibleCategory() {
-        return viewport.getFirstVisibleCategory();
-    }
-
-    @Override
-    public int getNumberOfVisibleCategories() {
-        return viewport.getNumberOfVisibleCategories();
-    }
-
-    @Override
-    public void setCategories(Series<TCategory> categories) {
-        this.categories = categories;
-    }
-
-    @Override
-    public void paint() {
-        if(charts!=null){
-        	// TODO: Prepare painting all charts. Precalculate optimal axis width, etc.
-            for(BarChart<TCategory> chart: charts.values()){
-                chart.paint();
-            }
-        }
-    }
-
-    public BarChartPanelViewport getViewport() {
-        return viewport;
-    }
-
+    /*
     private void updateTooltipText_(){
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -199,6 +205,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         });
     }
 
+    
     private void updateTooltipText() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -207,7 +214,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                 int idx = lastCategoryIdx.get();
                 if (idx >= 0 && idx < viewport.getNumberOfVisibleCategories()) {
                     for (String chartId : charts.keySet()) {
-                        for (BarChartLayer<TCategory> l : charts.get(chartId).getLayers()) {
+                        for (BarChartLayer l : charts.get(chartId).getLayers()) {
                             String txt = getTooltipText(chartId, l.getId(), idx);
                             if (txt != null) {
                                 if (sb.length() != 0) {
@@ -237,9 +244,11 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         }
         return null;
     }
+    */
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+    	/*
         int first = getFirstVisibleCategory();
         int number = getNumberOfVisibleCategories();
         if(e.isControlDown()){
@@ -248,6 +257,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
             first += e.getWheelRotation();
         }
         setVisibleArea(first, number);
+        */
     }
 
     @Override
@@ -257,6 +267,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
 
     @Override
     public void mouseMoved(MouseEvent e) {
+    	/*
         setLastX(e.getX());
         setLastY(e.getY());
         paint();
@@ -281,9 +292,11 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
             }
             tooltipForm.setLocation(x, y);
         }
+        */
     }
 
     protected void updateLabelsConfig(){
+    	/*
         int i=0;
         for(BarChart c: charts.values()){
             c.getTopAxis().setVisible(false);
@@ -297,32 +310,12 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
             }
             c.getLeftAxis().setVisible(true);
             c.getRightAxis().setVisible(true);
-            if(c.getValuesLabelFormatter().getClass().equals(DefaultLabelFormatter.class)){
-                c.setValuesLabelFormatter(valueLabelFormatter);
-            }
+            //if(c.getValuesLabelFormatter().getClass().equals(DefaultLabelFormatter.class)){
+            //    c.setValuesLabelFormatter(valueLabelFormatter);
+            //}
             i++;
         }
-    }
-
-    protected void updateCategories() {
-        if(!SwingUtilities.isEventDispatchThread()){
-            throw new IllegalStateException("It should be called from AWT Event queue thread");
-        }
-        if (categories!=null){
-            categories.lock();
-            try {
-                displayedCategories.clear();
-                for(int i=0; i<categories.getLength(); i++){
-                    if(i >= getFirstVisibleCategory() && i < getFirstVisibleCategory() + getNumberOfVisibleCategories()){
-                        displayedCategories.add(categories.get(i));
-                    }
-                }
-            } catch (ValueException e) {
-                e.printStackTrace();
-            } finally {
-                categories.unlock();
-            }
-        }
+        */
     }
 
     protected void setLastX(int lastX) {
@@ -337,27 +330,46 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
         if (scrollBar != null) {
             scrollBar.setMinimum(0);
             scrollBar.setMaximum(countCategories);
-            scrollBar.setVisibleAmount(getNumberOfVisibleCategories());
+            // TODO: Исправить скроллбар. Должен использовать драйвер категорий основного чарта.
+            //scrollBar.setVisibleAmount(getNumberOfVisibleCategories());
         }
     }
 
     private void updateScrollbar() {
-        updateScrollbar(categories.getLength());
+    	// TODO: Исправить скроллбар
+        //updateScrollbar(categories.getLength());
     }
 
     private void updateScrollbarAndSetValue() {
         if (scrollBar != null) {
             scrollBar.removeAdjustmentListener(scrollBarListener);
             updateScrollbar();
-            scrollBar.setValue(getFirstVisibleCategory());
+            // TODO: Исправить скроллбар
+            //scrollBar.setValue(getFirstVisibleCategory());
             scrollBar.addAdjustmentListener(scrollBarListener);
         }
     }
+	
+	protected void paintComponent(Graphics g) {
+		System.out.println("DBG: BarChartPanelImpl width " + mainPanel.getWidth());
+	}
 
+    /*
     private void createRefreshTimer() {
         timerRefresh = new Timer(timerRefreshDelay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+            	// TODO:
+            	//viewport.setCategoryRangeByFirstAndNumber(0, categories.getLength());
+            	SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						paint();
+					}            		
+            	});
+            	
+            	// TODO: Выпили меня
+            	
                 if(viewport.isChanged()){
                     int size = categories.getLength();
                     int num = viewport.getNumberOfVisibleCategories();
@@ -377,7 +389,7 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                     viewport.setFirstVisibleCategory(fst);
 
 
-                    for(BarChart<TCategory> c: charts.values()){
+                    for(BarChart c: charts.values()){
                         c.setVisibleArea(viewport.getFirstVisibleCategory(), viewport.getNumberOfVisibleCategories());
                     }
                     updateCategories();
@@ -386,8 +398,11 @@ public class BarChartPanelImpl<TCategory> implements BarChartPanel<TCategory>, M
                     updateTooltipText();
                     viewport.setChanged(false);
                 }
+                
             }
         });
         timerRefresh.start();
     }
+    */
+	
 }

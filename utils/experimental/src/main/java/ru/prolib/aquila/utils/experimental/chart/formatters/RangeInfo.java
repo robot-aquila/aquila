@@ -27,23 +27,23 @@ public class RangeInfo {
         this.lastValue = lastValue;
     }
 
-    public CDecimal getMinValue() {
+    public double getMinValue() {
         return minValue;
     }
 
-    public CDecimal getMaxValue() {
+    public double getMaxValue() {
         return maxValue;
     }
 
-    public CDecimal getStepValue() {
+    public double getStepValue() {
         return stepValue;
     }
 
-    public CDecimal getFirstValue() {
+    public double getFirstValue() {
         return firstValue;
     }
 
-    public CDecimal getLastValue() {
+    public double getLastValue() {
         return lastValue;
     }
 

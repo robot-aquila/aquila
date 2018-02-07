@@ -11,12 +11,12 @@ public class ChartLayoutTest {
 
 	@Before
 	public void setUp() throws Exception {
-		root = new Rectangle(new Point2D(0, 799), 1000, 800);
-		top = new Rectangle(new Point2D(0, 799), 1000, 20, root);
-		bottom = new Rectangle(new Point2D(0, 19), 1000, 20, root);
-		left = new Rectangle(new Point2D(0, 779), 40, 760, root);
-		right = new Rectangle(new Point2D(960, 779), 40, 760, root);
-		plot = new Rectangle(new Point2D(20, 799), 920, 779, root);
+		root = new Rectangle(Point2D.ZERO, 1000, 800);
+		top = new Rectangle(Point2D.ZERO, 1000, 20, root);
+		bottom = new Rectangle(new Point2D(0, 780), 1000, 20, root);
+		left = new Rectangle(new Point2D(0, 20), 40, 760, root);
+		right = new Rectangle(new Point2D(960, 20), 40, 760, root);
+		plot = new Rectangle(new Point2D(40, 20), 920, 779, root);
 		layout = new ChartLayout(root);
 	}
 
@@ -49,31 +49,31 @@ public class ChartLayoutTest {
 		// ---------
 		layout.autoPlotArea();
 		
-		Rectangle expected = new Rectangle(new Point2D(0, 799), 1000, 800);
+		Rectangle expected = new Rectangle(Point2D.ZERO, 1000, 800, root);
 		assertEquals(expected, layout.getPlotArea());
 		
 		layout.setTopAxis(top);
 		layout.autoPlotArea();
 		
-		expected = new Rectangle(new Point2D(0, 779), 1000, 780);
+		expected = new Rectangle(new Point2D(0, 20), 1000, 780, root);
 		assertEquals(expected, layout.getPlotArea());
 		
 		layout.setBottomAxis(bottom);
 		layout.autoPlotArea();
 		
-		expected = new Rectangle(new Point2D(0, 779), 1000, 760);
+		expected = new Rectangle(new Point2D(0, 20), 1000, 760, root);
 		assertEquals(expected, layout.getPlotArea());
 		
 		layout.setLeftAxis(left);
 		layout.autoPlotArea();
 		
-		expected = new Rectangle(new Point2D(40, 779), 960, 760);
+		expected = new Rectangle(new Point2D(40, 20), 960, 760, root);
 		assertEquals(expected, layout.getPlotArea());
 		
 		layout.setRightAxis(right);
 		layout.autoPlotArea();
 		
-		expected = new Rectangle(new Point2D(40, 779), 920, 760);
+		expected = new Rectangle(new Point2D(40, 20), 920, 760, root);
 		assertEquals(expected, layout.getPlotArea());
 	}
 	
@@ -90,35 +90,35 @@ public class ChartLayoutTest {
 		// ---------
 		layout.autoPlotArea();
 
-		Rectangle expected = new Rectangle(new Point2D(0, 799), 1000, 800);
+		Rectangle expected = new Rectangle(new Point2D(0, 0), 1000, 800, root);
 		assertEquals(expected, layout.getPlotArea());
 		
-		left = new Rectangle(new Point2D(0, 799), 40, 1000);
+		left = new Rectangle(Point2D.ZERO, 40, 1000, root);
 		layout.setLeftAxis(left);
 		layout.autoPlotArea();
 		
-		expected = new Rectangle(new Point2D(40, 799), 960, 800);
+		expected = new Rectangle(new Point2D(40, 0), 960, 800, root);
 		assertEquals(expected, layout.getPlotArea());
 		
-		right = new Rectangle(new Point2D(960, 799), 40, 1000);
+		right = new Rectangle(new Point2D(960, 0), 40, 1000, root);
 		layout.setRightAxis(right);
 		layout.autoPlotArea();
 		
-		expected = new Rectangle(new Point2D(40, 799), 920, 800);
+		expected = new Rectangle(new Point2D(40, 0), 920, 800, root);
 		assertEquals(expected, layout.getPlotArea());
 		
-		top = new Rectangle(new Point2D(40, 799), 920, 20);
+		top = new Rectangle(new Point2D(40, 0), 920, 20, root);
 		layout.setTopAxis(top);
 		layout.autoPlotArea();
 		
-		expected = new Rectangle(new Point2D(40, 779), 920, 780);
+		expected = new Rectangle(new Point2D(40, 20), 920, 780, root);
 		assertEquals(expected, layout.getPlotArea());
 		
-		bottom = new Rectangle(new Point2D(40, 19), 920, 20);
+		bottom = new Rectangle(new Point2D(40, 780), 920, 20, root);
 		layout.setBottomAxis(bottom);
 		layout.autoPlotArea();
 
-		expected = new Rectangle(new Point2D(40, 779), 920, 760);
+		expected = new Rectangle(new Point2D(40, 20), 920, 760, root);
 		assertEquals(expected, layout.getPlotArea());
 	}
 

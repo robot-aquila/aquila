@@ -3,7 +3,11 @@ package ru.prolib.aquila.utils.experimental.chart;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
- * Created by TiM on 11.09.2017.
+ * Class of 2D rectangle.
+ * <p>
+ * This class describes a rectangle in 2D space. The class is intended to
+ * represent rectangle on 2D display with standard orientation when zero point
+ * is upper-left corner of display.
  */
 public class Rectangle {
 	private final Point2D upperLeft, lowerRight;
@@ -15,7 +19,7 @@ public class Rectangle {
     		throw new IllegalArgumentException();
     	}
     	this.upperLeft = upperLeft;
-    	this.lowerRight = new Point2D(upperLeft.getX() + width - 1, upperLeft.getY() - height + 1);
+    	this.lowerRight = new Point2D(upperLeft.getX() + width - 1, upperLeft.getY() + height - 1);
         this.width = width;
         this.height = height;
         this.parent = parent;
@@ -84,7 +88,7 @@ public class Rectangle {
     		+ ",y=" + upperLeft.getY()
     		+ ",w=" + width
     		+ ",h=" + height
-    		+ (parent != null ? ",w/parent" : "")
+    		+ (parent != null ? ",p=" + parent : "")
     		+ "]";
     }
 

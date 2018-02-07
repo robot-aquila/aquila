@@ -8,12 +8,12 @@ import java.util.List;
 /**
  * Created by TiM on 02.11.2017.
  */
-public class ChartSettings<TCategory> {
+public class ChartSettings {
     private CDecimal minValue = null;
     private CDecimal maxValue = null;
-    private final List<BarChartLayer<TCategory>> layers;
+    private final List<BarChartLayer> layers;
 
-    public ChartSettings(List<BarChartLayer<TCategory>> layers) {
+    public ChartSettings(List<BarChartLayer> layers) {
         this.layers = layers;
     }
 
@@ -33,7 +33,7 @@ public class ChartSettings<TCategory> {
         this.maxValue = maxValue;
     }
 
-    public List<BarChartLayer<TCategory>> getLayers() {
+    public List<BarChartLayer> getLayers() {
         return layers;
     }
 }

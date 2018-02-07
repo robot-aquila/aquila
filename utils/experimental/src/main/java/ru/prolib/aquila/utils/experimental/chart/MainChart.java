@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
@@ -8,18 +9,19 @@ import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.tseries.*;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
-import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelHandler;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.*;
 import ru.prolib.aquila.utils.experimental.chart.formatters.AbsNumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.handler.BarChartPanelHandler;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Random;
 
 import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.BAR_COLOR;
@@ -34,14 +36,14 @@ public class MainChart {
     private static EditableTSeries<Candle> candles;
     private static ObservableTSeries<Candle> candlesObs;
     private static CandleVolumeTSeries volumes;
-    private static EditableTSeries<Number> bidVolumes;
-    private static EditableTSeries<Number> askVolumes;
+    private static EditableTSeries<CDecimal> bidVolumes;
+    private static EditableTSeries<CDecimal> askVolumes;
     private static EditableTSeries<TradeInfoList> trades;
     private static EditableTSeries<TradeInfoList> openOrders;
     private static CandleCloseTSeries closes;
     private static EventQueue eventQueue;
 
-    private static BarChartPanel<Instant> chartPanel;
+    private static BarChartPanel chartPanel;
 
 
     public static void main(String[] args){
@@ -50,48 +52,46 @@ public class MainChart {
 
         JFrame main = new JFrame("test");
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        BarChartPanelImpl<Instant> chartPanel = new BarChartPanelImpl<>(BarChartOrientation.LEFT_TO_RIGHT);
+        BarChartPanelImpl chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
         chartPanel.getRootPanel().setPreferredSize(new Dimension(1230, 900));
         main.getContentPane().add(chartPanel.getRootPanel());
         main.pack();
         main.setVisible(true);
 
-        BarChart<Instant> chart = chartPanel.addChart("CANDLES")
+        BarChart chart = chartPanel.addChart("CANDLES")
                 .setHeight(600)
-                .setValuesLabelFormatter(new NumberLabelFormatter())
+                //.setValuesLabelFormatter(new NumberLabelFormatter())
                 .addStaticOverlay("Price",0);
-        chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
-        chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
-        chart.addLayer(new CandleBarChartLayer<>(candles));
-        chart.addLayer(new TradesBarChartLayer<Instant>(trades).setColor(TradesBarChartLayer.SELL_COLOR, Color.BLUE));
-        chart.addLayer(new OpenOrdersLayer<>(openOrders));
-        chart.addLayer(new CurrentValueLayer<>(closes));
+        //chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
+        //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+        chart.addLayer(new BarChartCandlestickLayer(candles));
+        chart.addLayer(new BarChartTradesLayer(trades).setColor(BarChartTradesLayer.SELL_COLOR, Color.BLUE));
+        chart.addLayer(new BarChartOpenOrdersLayer(openOrders));
+        chart.addLayer(new BarChartCurrentValueLayer(closes));
 
         chart.addSmoothLine(new CandleCloseTSeries("Close", candles)).setColor(Color.BLUE);
 
         chart = chartPanel.addChart("VOLUME");
-        chartPanel.getChart("VOLUME").setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(0));
+        //chartPanel.getChart("VOLUME").setValuesLabelFormatter(new NumberLabelFormatter().withPrecision(0));
         chart.addHistogram(volumes).setColor(BAR_COLOR);
-        chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
-        chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+        //chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
+        //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
 
         chart = chartPanel.addChart("BID_ASK_VOLUME");
-        chartPanel.getChart("BID_ASK_VOLUME").setValuesLabelFormatter(new AbsNumberLabelFormatter().withPrecision(0));
-        chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
-        chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
+        //chartPanel.getChart("BID_ASK_VOLUME").setValuesLabelFormatter(new AbsNumberLabelFormatter().withPrecision(0));
+        //chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
+        //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.addHistogram(bidVolumes)
                 .setColor(Color.GREEN)
-                .setParam(HistogramBarChartLayer.ZERO_LINE_ON_CENTER_PARAM, true);
+                .setParam(BarChartHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
         chart.addHistogram(askVolumes)
                 .setColor(Color.RED)
-                .setParam(HistogramBarChartLayer.INVERT_VALUES_PARAM, true)
-                .setParam(HistogramBarChartLayer.ZERO_LINE_ON_CENTER_PARAM, true);
+                .setParam(BarChartHistogramLayer.INVERT_VALUES_PARAM, true)
+                .setParam(BarChartHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
 
         chart.addSmoothLine(askVolumes)
                 .setColor(Color.BLUE)
-                .setParam(IndicatorBarChartLayer.INVERT_VALUES_PARAM, true);
-
-        chartPanel.setCategories(categoriesSeries);
+                .setParam(BarChartIndicatorLayer.INVERT_VALUES_PARAM, true);
 
 //        chartPanel.addCandles("CANDLES", "CANDLES").setData(candles);
 //        chartPanel.addBars("VOLUME", "VOLUME").setData(volumes);
@@ -108,9 +108,12 @@ public class MainChart {
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Bid Volume", 0));
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Ask Volume", -1));
 
-        chartPanel.setVisibleArea(0, chartPanel.getNumberOfVisibleCategories());
-        BarChartPanelHandler handler = new BarChartPanelHandler(candlesObs, chartPanel.getViewport());
-        handler.subscribe();
+        // TODO: use category data provider
+        chartPanel.getCategoryAxisViewport().setCategoryRangeByFirstAndNumber(0, categoriesSeries.getLength());
+        // TODO: fixme
+        //BarChartPanelHandler handler = new BarChartPanelHandler(candlesObs, chartPanel.getViewport());
+        //handler.subscribe();
+        // TODO: add refresh by time
 
 //        chartPanel.addObservableSeries(candlesObs);
         MainChart.chartPanel = chartPanel;
@@ -170,7 +173,14 @@ public class MainChart {
         double close = prevClose + (random.nextBoolean()?1:-1) * random.nextDouble()*var;
         double high = Math.max(prevClose, close) + random.nextDouble()*var;
         double low = Math.min(prevClose, close) - random.nextDouble()*var;
-        return new Candle(ZTFrame.M1.getInterval(time), prevClose, high, low, close, random.nextInt(5000));
+        String fmt = "%.2f";
+        Locale loc = Locale.ENGLISH;
+        return new Candle(ZTFrame.M1.getInterval(time),
+        		CDecimalBD.of(String.format(loc, fmt, prevClose)),
+        		CDecimalBD.of(String.format(loc, fmt, high)),
+        		CDecimalBD.of(String.format(loc, fmt, low)),
+        		CDecimalBD.of(String.format(loc, fmt, close)),
+        		CDecimalBD.of((long) random.nextInt(5000)));
     }
 
     private static void createTestSeries(){
@@ -194,11 +204,11 @@ public class MainChart {
             if(j%7!=3){
                 candles.set(time, candle);
             }
-            bidVolumes.set(time, j*10);
+            bidVolumes.set(time, CDecimalBD.of((long) j*10));
             double v = Math.random()*1000;
-            askVolumes.set(time, v);
+            askVolumes.set(time, CDecimalBD.of((long) v));
             time = time.plusSeconds(60);
-            prevClose = candle.getClose();
+            prevClose = candle.getClose().toBigDecimal().doubleValue();
         }
 
         int scale = 18; // TODO: fixme
@@ -206,15 +216,15 @@ public class MainChart {
         Instant t = Instant.parse("2017-06-13T06:05:00Z");
         list.add(new TradeInfo(t.plusSeconds(10),
         		OrderAction.BUY,
-        		Tick.getPrice(candles.get(t).getHigh(), scale),
+        		candles.get(t).getHigh(),
         		CDecimalBD.of(1000L)).withOrderId(1L));
         list.add(new TradeInfo(t.plusSeconds(20),
         		OrderAction.BUY,
-        		Tick.getPrice(candles.get(t).getLow(), scale),
+        		candles.get(t).getLow(),
         		CDecimalBD.of(1000L)).withOrderId(2L));
         list.add(new TradeInfo(t.plusSeconds(30),
         		OrderAction.SELL,
-        		Tick.getPrice(candles.get(t).getBodyMiddle(), scale),
+        		candles.get(t).getBodyMiddle(),
         		CDecimalBD.of(1000L)).withOrderId(3L));
         trades.set(t, list);
 
@@ -222,27 +232,27 @@ public class MainChart {
         t = Instant.parse("2017-06-13T06:20:00Z");
         list.add(new TradeInfo(t.plusSeconds(10),
         		OrderAction.SELL,
-        		Tick.getPrice(candles.get(t).getHigh(), scale),
+        		candles.get(t).getHigh(),
         		CDecimalBD.of(1000L)).withOrderId(4L));
         list.add(new TradeInfo(t.plusSeconds(20),
         		OrderAction.SELL,
-        		Tick.getPrice(candles.get(t).getLow(), scale),
+        		candles.get(t).getLow(),
         		CDecimalBD.of(1000L)).withOrderId(5L));
         list.add(new TradeInfo(t.plusSeconds(30),
         		OrderAction.BUY,
-        		Tick.getPrice(candles.get(t).getBodyMiddle(), scale),
+        		candles.get(t).getBodyMiddle(),
         		CDecimalBD.of(1000L)).withOrderId(6L));
         list.add(new TradeInfo(t.plusSeconds(40),
         		OrderAction.SELL,
-        		Tick.getPrice(candles.get(t).getBodyMiddle(), scale),
+        		candles.get(t).getBodyMiddle(),
         		CDecimalBD.of(1000L)).withOrderId(6L));
         list.add(new TradeInfo(t.plusSeconds(50),
         		OrderAction.BUY,
-        		Tick.getPrice(candles.get(t).getBodyMiddle(), scale),
+        		candles.get(t).getBodyMiddle(),
         		CDecimalBD.of(1000L)).withOrderId(6L));
         list.add(new TradeInfo(t.plusSeconds(51),
                 OrderAction.BUY,
-                Tick.getPrice(candles.get(t).getLow(), scale),
+                candles.get(t).getLow(),
                 CDecimalBD.of(1000L)).withOrderId(5L));
         trades.set(t, list);
 //

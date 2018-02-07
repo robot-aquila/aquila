@@ -17,6 +17,7 @@ public class ChartConstants {
     public static final int Y_AXIS_WIDTH = 60;
     public static final int Y_AXIS_MIN_STEP = 30;
     public static final Font LABEL_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 10);
+    @Deprecated
     public static final int LABEL_INDENT = 5;
     public static final Color GRID_LINES_COLOR = Color.LIGHT_GRAY;
     public static final Color SELECTION_COLOR = new Color(192,192,192,128);

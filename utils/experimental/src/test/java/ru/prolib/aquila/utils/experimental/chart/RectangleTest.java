@@ -21,9 +21,9 @@ public class RectangleTest {
 		assertEquals(new Point2D(10, 20), rect.getUpperLeft());
 		assertEquals(10, rect.getLeftX());
 		assertEquals(20, rect.getUpperY());
-		assertEquals(new Point2D(12, 16), rect.getLowerRight());
+		assertEquals(new Point2D(12, 24), rect.getLowerRight());
 		assertEquals(12, rect.getRightX());
-		assertEquals(16, rect.getLowerY());
+		assertEquals(24, rect.getLowerY());
 		assertEquals(3, rect.getWidth());
 		assertEquals(5, rect.getHeight());
 		assertNull(rect.getParent());
@@ -35,9 +35,9 @@ public class RectangleTest {
 		assertEquals(new Point2D(5, 15), rect.getUpperLeft());
 		assertEquals( 5, rect.getLeftX());
 		assertEquals(15, rect.getUpperY());
-		assertEquals(new Point2D(104, -64), rect.getLowerRight());
+		assertEquals(new Point2D(104, 94), rect.getLowerRight());
 		assertEquals(104, rect.getRightX());
-		assertEquals( -64, rect.getLowerY());
+		assertEquals( 94, rect.getLowerY());
 		assertEquals(100, rect.getWidth());
 		assertEquals( 80, rect.getHeight());
 		assertSame(parent, rect.getParent());
@@ -102,7 +102,7 @@ public class RectangleTest {
 	@Test
 	public void testToString() {
 		rect = new Rectangle(new Point2D(5, 15), 100, 80, parent);
-		String expected = "Rectangle[x=5,y=15,w=100,h=80,w/parent]";
+		String expected = "Rectangle[x=5,y=15,w=100,h=80,p=Rectangle[x=0,y=180,w=200,h=150]]";
 		assertEquals(expected, rect.toString());
 		expected = "Rectangle[x=0,y=180,w=200,h=150]";
 		assertEquals(expected, parent.toString());

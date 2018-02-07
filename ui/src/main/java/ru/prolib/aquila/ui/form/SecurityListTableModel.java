@@ -358,15 +358,13 @@ public class SecurityListTableModel extends AbstractTableModel
 		case CID_HIGH_PRICE:
 		case CID_LOW_PRICE:
 		case CID_CLOSE_PRICE:
-			return CDecimal.class;
 		case CID_LAST_SIZE:
 		case CID_ASK_SIZE:
 		case CID_BID_SIZE:
-			return Long.class;
 		case CID_LAST_PRICE:
 		case CID_ASK_PRICE:
 		case CID_BID_PRICE:
-			return Double.class;
+			return CDecimal.class;
 		default:
 			return super.getColumnClass(col);
 		}

@@ -24,10 +24,10 @@ public class ChartSettingsPopup extends JPopupMenu implements ActionListener {
     private static DecimalFormat df = new DecimalFormat("0.#############", new DecimalFormatSymbols(Locale.US));
     private JButton btOk, btCancel;
     private JTextField minVal, maxVal;
-    private final ChartSettings<?> settings;
-    private final Map<BarChartLayer<?>, JCheckBox> checkBoxMap = new HashMap<>();
+    private final ChartSettings settings;
+    private final Map<BarChartLayer, JCheckBox> checkBoxMap = new HashMap<>();
 
-    public ChartSettingsPopup(ChartSettings<?> settings) {
+    public ChartSettingsPopup(ChartSettings settings) {
         this.settings = settings;
 
         final JPanel valuesIntervalForm = createValuesIntervalForm();
@@ -49,7 +49,7 @@ public class ChartSettingsPopup extends JPopupMenu implements ActionListener {
 
                 JPanel items = new JPanel();
                 items.setLayout(new BoxLayout(items, BoxLayout.Y_AXIS));
-                for (BarChartLayer<?> layer : settings.getLayers()) {
+                for (BarChartLayer layer : settings.getLayers()) {
                     if (!layer.getId().startsWith("___")) {
                         JCheckBox cb = new JCheckBox(layer.getId(), layer.isVisible());
                         checkBoxMap.put(layer, cb);
@@ -85,11 +85,13 @@ public class ChartSettingsPopup extends JPopupMenu implements ActionListener {
     }
 
     private void save(){
-        for(BarChartLayer<?> layer: checkBoxMap.keySet()){
+        for(BarChartLayer layer: checkBoxMap.keySet()){
             layer.setVisible(checkBoxMap.get(layer).isSelected());
         }
-        settings.setMinValue(parseDouble(minVal.getText()));
-        settings.setMaxValue(parseDouble(maxVal.getText()));
+        throw new UnsupportedOperationException();
+        // TODO: fixme
+        //settings.setMinValue(parseDouble(minVal.getText()));
+        //settings.setMaxValue(parseDouble(maxVal.getText()));
     }
 
     private JPanel createButtons() {

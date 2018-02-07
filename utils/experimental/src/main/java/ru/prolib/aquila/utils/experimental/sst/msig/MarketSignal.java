@@ -65,7 +65,7 @@ public class MarketSignal extends BreakSignal {
 	}
 	
 	private void fire(EventType type, Instant time, CDecimal price, Long size) {
-		fire(type, time, price, CDecimalBD.of(size));
+		fire(type, time, price, size == null ? null : CDecimalBD.of(size));
 	}
 	
 	private void fire(EventType type, Instant time, CDecimal price, CDecimal size) {

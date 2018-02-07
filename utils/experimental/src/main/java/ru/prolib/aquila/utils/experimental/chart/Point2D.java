@@ -2,6 +2,12 @@ package ru.prolib.aquila.utils.experimental.chart;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+/**
+ * 2D-point of display.
+ * <p>
+ * This class represents a point on standard oriented display when zero
+ * position at the upper-left corner.
+ */
 public class Point2D {
 	public static final Point2D ZERO = new Point2D(0, 0);
 	

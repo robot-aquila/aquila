@@ -5,7 +5,7 @@ import java.awt.Color;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.utils.Range;
 
-public interface BarChartLayer<TCategory> {
+public interface BarChartLayer extends ChartElement {
 	public static final int DEFAULT_COLOR = 0;
 	
 	String getId();
@@ -19,16 +19,6 @@ public interface BarChartLayer<TCategory> {
 	 * of maximum possible scale.
 	 */
 	Range<CDecimal> getValueRange(int first, int number);
-
-	boolean isVisible();
-
-	/**
-	 * Show or hide layer.
-	 * <p>
-	 * @param visible - visible flag
-	 * @return this object
-	 */
-	BarChartLayer<TCategory> setVisible(boolean visible);
 	
 	/**
 	 * Set primary layer color.
@@ -38,7 +28,7 @@ public interface BarChartLayer<TCategory> {
 	 * @param color - color
 	 * @return this
 	 */
-	BarChartLayer<TCategory> setColor(Color color);
+	BarChartLayer setColor(Color color);
 
 	/**
 	 * Set layer color.
@@ -48,7 +38,7 @@ public interface BarChartLayer<TCategory> {
 	 * @return this
 	 * @throws IllegalArgumentException if unsupported color ID specified
 	 */
-	BarChartLayer<TCategory> setColor(int colorId, Color color);
+	BarChartLayer setColor(int colorId, Color color);
 
 	/**
 	 * Set layer param.
@@ -57,13 +47,16 @@ public interface BarChartLayer<TCategory> {
 	 * @param value - value
 	 * @return this
 	 */
-	BarChartLayer<TCategory> setParam(int paramId, Object value);
+	BarChartLayer setParam(int paramId, Object value);
 
 	/**
 	 * Paint layer.
 	 * <p>
-	 * @param context - visualization context. Context is implementation depended.
+	 * @param context - display context
+	 * @param deviceArg - painting device (depends on drawing method)
 	 */
-	void paint(BarChartVisualizationContext context);
+	void paint(BCDisplayContext context, Object device);
+	
+	Color getColor(int colorId);
 
 }
