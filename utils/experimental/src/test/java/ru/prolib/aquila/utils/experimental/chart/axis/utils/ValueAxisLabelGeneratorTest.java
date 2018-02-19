@@ -21,17 +21,19 @@ import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisViewportImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.ValueAxisLabelGenerator;
 
 public class ValueAxisLabelGeneratorTest {
+	private ValueAxisDriver driver;
+	private ValueAxisViewport viewport;
 	private ValueAxisLabelGenerator generator;
 
 	@Before
 	public void setUp() throws Exception {
 		generator = ValueAxisLabelGenerator.getInstance();
+		driver = new ValueAxisDriverImpl("foo", AxisDirection.UP);
+		viewport = new ValueAxisViewportImpl();
 	}
 
 	@Test
 	public void testGetLabelValues_BasicCase_MultX2() {
-		ValueAxisDriver driver = new ValueAxisDriverImpl(AxisDirection.UP);
-		ValueAxisViewport viewport = new ValueAxisViewportImpl();
 		viewport.setValueRange(new Range<>(of("146.35"), of("246.36")));
 		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
 		
@@ -58,8 +60,6 @@ public class ValueAxisLabelGeneratorTest {
 		// tick size=0.01
 		// range=141.75-142.32
 		// expected labels: from 141.75 to 142.30 with step 0.05
-		ValueAxisDriver driver = new ValueAxisDriverImpl(AxisDirection.UP);
-		ValueAxisViewport viewport = new ValueAxisViewportImpl();
 		viewport.setValueRange(new Range<>(of("141.75"), of("142.32")));
 		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
 		
@@ -83,8 +83,6 @@ public class ValueAxisLabelGeneratorTest {
 	
 	@Test
 	public void testGetLabelValues_BaseCase3_MultX1() {
-		ValueAxisDriver driver = new ValueAxisDriverImpl(AxisDirection.UP);
-		ValueAxisViewport viewport = new ValueAxisViewportImpl();
 		viewport.setValueRange(new Range<>(of("32.75"), of("32.76")));
 		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
 		
@@ -98,8 +96,6 @@ public class ValueAxisLabelGeneratorTest {
 	
 	@Test
 	public void testGetLabelValues_BaseCase4_MultX10() {
-		ValueAxisDriver driver = new ValueAxisDriverImpl(AxisDirection.UP);
-		ValueAxisViewport viewport = new ValueAxisViewportImpl();
 		viewport.setValueRange(new Range<>(of("100.02"), of("643.17")));
 		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
 		
@@ -116,8 +112,6 @@ public class ValueAxisLabelGeneratorTest {
 	
 	@Test
 	public void testGetLabelValues_TickSize0_25() {
-		ValueAxisDriver driver = new ValueAxisDriverImpl(AxisDirection.UP);
-		ValueAxisViewport viewport = new ValueAxisViewportImpl();
 		viewport.setValueRange(new Range<>(of("100.02"), of("104.83")));
 		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
 		
@@ -138,8 +132,6 @@ public class ValueAxisLabelGeneratorTest {
 	
 	@Test
 	public void testGetLabelValues_TickSize10() {
-		ValueAxisDriver driver = new ValueAxisDriverImpl(AxisDirection.UP);
-		ValueAxisViewport viewport = new ValueAxisViewportImpl();
 		viewport.setValueRange(new Range<>(of("124230"), of("124770")));
 		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
 		
@@ -158,6 +150,11 @@ public class ValueAxisLabelGeneratorTest {
 		expected.add(of("124700"));
 		expected.add(of("124750"));
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetLabelValues_CaseWhenCannotDetermineStepSize() {
+		fail("Not yet implemented");
 	}
 
 }

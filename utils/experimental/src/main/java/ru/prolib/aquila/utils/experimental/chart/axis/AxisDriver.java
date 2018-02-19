@@ -1,13 +1,13 @@
 package ru.prolib.aquila.utils.experimental.chart.axis;
 
-public interface AxisDriver {
+public interface AxisDriver extends RulerRendererRegistry {
 	
 	/**
-	 * Set axis direction.
+	 * Get symbolic ID of the axis.
 	 * <p>
-	 * @param dir - new axis direction
+	 * @return axis ID
 	 */
-	void setAxisDirection(AxisDirection dir);
+	String getID();
 	
 	/**
 	 * Get axis direction.
@@ -15,5 +15,5 @@ public interface AxisDriver {
 	 * @return axis direction
 	 */
 	AxisDirection getAxisDirection();
-
+	
 }

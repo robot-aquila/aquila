@@ -1,7 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * 1-dimensional segment.
@@ -41,6 +40,17 @@ public class Segment1D {
 		return start + length - 1;
 	}
 	
+	/**
+	 * Test that this segment contains all points of other segment.
+	 * <p>
+	 * @param other - segment that expected to be contained in 
+	 * @return true if other segment is a part of this segment, false otherwise
+	 */
+	public boolean contains(Segment1D other) {
+		int c1 = getStart(), c2 = getEnd(), oc1 = other.getStart(), oc2 = other.getEnd();
+		return oc1 >= c1 && oc1 <= c2 && oc2 >= c1 && oc2 <= c2;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {
@@ -58,10 +68,8 @@ public class Segment1D {
 	
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-				.append("start", start)
-				.append("length", length)
-				.toString();
+		return getClass().getSimpleName() + "[start=" + start
+				+ ", length=" + length + "]";
 	}
 
 }

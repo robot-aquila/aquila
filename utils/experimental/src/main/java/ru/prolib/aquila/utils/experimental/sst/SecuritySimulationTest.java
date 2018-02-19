@@ -64,12 +64,18 @@ import ru.prolib.aquila.utils.experimental.Experiment;
 import ru.prolib.aquila.utils.experimental.chart.BarChart;
 import ru.prolib.aquila.utils.experimental.chart.BarChartOrientation;
 import ru.prolib.aquila.utils.experimental.chart.BarChartPanel;
-import ru.prolib.aquila.utils.experimental.chart.axis.AxisPosition;
+import ru.prolib.aquila.utils.experimental.chart.ChartSpaceManager;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
+import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.TimeCategoryDataProvider;
 import ru.prolib.aquila.utils.experimental.chart.axis.TimeCategoryDataProviderImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
+import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
-import ru.prolib.aquila.utils.experimental.chart.swing.axis.TimeAxisRendererImpl;
+import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
+import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartCandlestickLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartCurrentValueLayer;
 import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
@@ -214,12 +220,13 @@ public class SecuritySimulationTest implements Experiment {
 					public void run() {
 						//JPanel chartRoot = new JPanel(new GridLayout(2, 2));
 						JPanel chartRoot = new JPanel(new GridLayout(1, 1));
-						for(SDP2DataSlice<SDP2Key> s: slices){
-							BarChartPanelImpl chartPanel = createChartPanel(s);
+						for(SDP2DataSlice<SDP2Key> slice : slices){
+							BarChartPanelImpl chartPanel = createChartPanel(slice, s);
 							chartRoot.add(chartPanel.getRootPanel());
 							CategoryAxisViewport viewport = chartPanel.getCategoryAxisViewport(); 
-							viewport.setPreferredNumberOfBars(100);
-							viewport.setCategoryRangeByFirstAndNumber(0, s.getIntervalStartSeries().getLength());
+							viewport.setPreferredNumberOfBars(50);
+							viewport.setCategoryRangeByFirstAndNumber(0,
+									slice.getIntervalStartSeries().getLength());
 						}
 						tabPanel.addTab("Strategy", chartRoot);
 					}
@@ -323,31 +330,40 @@ public class SecuritySimulationTest implements Experiment {
 			parent);
 	}
 
-	private BarChartPanelImpl createChartPanel(SDP2DataSlice<SDP2Key> slice){
+	private BarChartPanelImpl createChartPanel(SDP2DataSlice<SDP2Key> slice,
+											   Security security)
+	{
 		TimeCategoryDataProvider categoriesProvider =
 				new TimeCategoryDataProviderImpl(slice.getIntervalStartSeries());
 
 		BarChartPanelImpl chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
-		BarChart chart = chartPanel.addChart("CANDLES")
+		BarChartImpl chart = (BarChartImpl) chartPanel.addChart("CANDLES")
 				.setHeight(600)
-				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0)
-				.setCategoryAxisRenderer(new TimeAxisRendererImpl(AxisPosition.TOP, categoriesProvider))
-				.setCategoryAxisRenderer(new TimeAxisRendererImpl(AxisPosition.BOTTOM, categoriesProvider));
+				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0);
+		// Setup category axis ruler renderers
+		CategoryAxisDriver cad = chart.getCategoryAxisDriver();
+		SWTimeAxisRulerRenderer tar = new SWTimeAxisRulerRenderer("TIME");
+		tar.setCategories(slice.getIntervalStartSeries());
+		cad.registerRenderer(tar);
+		ChartSpaceManager vsm = chart.getVerticalSpaceManager();
+		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME", false), true);
+		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME",  true), true);
 		
-		//chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
-		//chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
+		// Setup value axis ruler renderers
+		ValueAxisDriver vad = chart.getValueAxisDriver();
+		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(security.getTickSize());
+		ChartSpaceManager hsm = chart.getHorizontalSpaceManager();
+		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL", false), true);
+		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL",  true), true);
+		
 		chart.addLayer(new BarChartCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
 		chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES)));
 
-		chart = chartPanel.addChart("VOLUMES")
+		chart = (BarChartImpl) chartPanel.addChart("VOLUMES")
 				.setHeight(200)
-				.addStaticOverlay("Volume", 0)
-				.setCategoryAxisRenderer(new TimeAxisRendererImpl(AxisPosition.TOP, categoriesProvider))
-				.setCategoryAxisRenderer(new TimeAxisRendererImpl(AxisPosition.BOTTOM, categoriesProvider));
-		//chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
-		//chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter(ZONE_ID));
+				.addStaticOverlay("Volume", 0);
 		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES)).setColor(BAR_COLOR);
 
 		chartPanelHandler = new BarChartPanelHandler(slice.getIntervalStartSeries(), chartPanel);

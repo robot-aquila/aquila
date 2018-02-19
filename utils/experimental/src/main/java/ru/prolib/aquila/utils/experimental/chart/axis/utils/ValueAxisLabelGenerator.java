@@ -48,6 +48,7 @@ public class ValueAxisLabelGenerator {
 				 numberOfSteps --;
 			 }
 		}
+		// TODO: case when stepSize is null
 		List<CDecimal> result = new ArrayList<>();
 		CDecimal currValue = mapper.getMinValue()
 				.divideExact(stepSize, 0, RoundingMode.CEILING)

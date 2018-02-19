@@ -72,9 +72,9 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
         	
         	@Override
         	protected void paintChildren(Graphics g) {
-        		System.out.println("DBG: BarChartPanelImpl#parentChildren called");
+        		System.out.println("DBG: BarChartPanelImpl#paintChildren called");
         		super.paintChildren(g);
-        		System.out.println("DBG: BarChartPanelImpl#parentChildren exiting");
+        		System.out.println("DBG: BarChartPanelImpl#paintChildren exiting");
         		if ( init == false ) {
         			System.out.println("DBG: BarChartPanelImpl#paintChildren initialization done. Repaint.");
         			init = true;

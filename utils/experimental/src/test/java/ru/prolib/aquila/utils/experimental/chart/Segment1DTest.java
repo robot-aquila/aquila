@@ -48,5 +48,22 @@ public class Segment1DTest {
 		assertEquals(5, found.getStart());
 		assertEquals(20, found.getLength());
 	}
+	
+	@Test
+	public void testToString() {
+		String expected = "Segment1D[start=5, length=20]";
+		assertEquals(expected, segment.toString());
+	}
+	
+	@Test
+	public void testContains() {
+		assertTrue(segment.contains(segment));
+		assertTrue(segment.contains(new Segment1D(5, 1)));
+		assertTrue(segment.contains(new Segment1D(19, 1)));
+		assertTrue(segment.contains(new Segment1D(10, 5)));
+		assertFalse(segment.contains(new Segment1D(0, 40)));
+		assertFalse(segment.contains(new Segment1D(5, 25)));
+		assertFalse(segment.contains(new Segment1D(1, 20)));
+	}
 
 }

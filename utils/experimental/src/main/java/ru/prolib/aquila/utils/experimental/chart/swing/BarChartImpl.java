@@ -1,26 +1,31 @@
 package ru.prolib.aquila.utils.experimental.chart.swing;
 
+import static java.awt.RenderingHints.*;
+
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
-import ru.prolib.aquila.utils.experimental.chart.swing.axis.ValueAxisRendererImpl;
-import ru.prolib.aquila.utils.experimental.chart.swing.axis.AxisRendererStub;
+import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartHistogramLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartIndicatorLayer;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
-import ru.prolib.aquila.utils.experimental.chart.axis.AxisPosition;
-import ru.prolib.aquila.utils.experimental.chart.axis.AxisRenderer;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerSpace;
+import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriverImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisViewportImpl;
 import ru.prolib.aquila.utils.experimental.chart.interpolator.PolyLineRenderer;
@@ -55,11 +60,9 @@ public class BarChartImpl implements BarChart {
 	private BarChartOrientation chartOrientation;
 	private final CategoryAxisViewport categoryAxisViewport;
 	private final CategoryAxisDriver categoryAxisDriver;
-	private AxisRenderer categoryAxisRendererLT, categoryAxisRendererRB;
 	private final ValueAxisViewport valueAxisViewport;
 	private final ValueAxisDriver valueAxisDriver;
-	private AxisRenderer valueAxisRendererLT, valueAxisRendererRB;
-
+	private final ChartSpaceManager horizontalSpaceManager, verticalSpaceManager;
 
 	public BarChartImpl(CategoryAxisViewport categoryAxisViewport) {
 		rootPanel = new JPanel(){
@@ -72,13 +75,16 @@ public class BarChartImpl implements BarChart {
 			
 		};
 		this.categoryAxisViewport = categoryAxisViewport;
-		categoryAxisDriver = new CategoryAxisDriverImpl(AxisDirection.RIGHT);
-		setCategoryAxisRenderer(new AxisRendererStub(AxisPosition.TOP));
-		setCategoryAxisRenderer(new AxisRendererStub(AxisPosition.BOTTOM));
+		categoryAxisDriver = new CategoryAxisDriverImpl("CATEGORY", AxisDirection.RIGHT);
+		verticalSpaceManager = ChartSpaceManagerImpl.ofVerticalSpace();
+		verticalSpaceManager.registerAxis(categoryAxisDriver);
+		
 		valueAxisViewport = new ValueAxisViewportImpl();
-		valueAxisDriver = new ValueAxisDriverImpl(AxisDirection.UP);
-		setValueAxisRenderer(new ValueAxisRendererImpl(AxisPosition.LEFT));
-		setValueAxisRenderer(new ValueAxisRendererImpl(AxisPosition.RIGHT));
+		valueAxisDriver = new ValueAxisDriverImpl("VALUE", AxisDirection.UP);
+		valueAxisDriver.registerRenderer(new SWValueAxisRulerRenderer("LABEL"));
+		horizontalSpaceManager = ChartSpaceManagerImpl.ofHorizontalSpace();
+		horizontalSpaceManager.registerAxis(valueAxisDriver);
+		
 		settings = new ChartSettings(layers);
 		settingsPopup = new ChartSettingsPopup(settings);
 		settingsPopup.addPopupMenuListener(new PopupMenuListener() {
@@ -108,6 +114,14 @@ public class BarChartImpl implements BarChart {
 		return rootPanel;
 	}
 	
+	public ChartSpaceManager getHorizontalSpaceManager() {
+		return horizontalSpaceManager;
+	}
+	
+	public ChartSpaceManager getVerticalSpaceManager() {
+		return verticalSpaceManager;
+	}
+	
 	@Override
 	public BarChartOrientation getOrientation() {
 		return chartOrientation;
@@ -133,58 +147,6 @@ public class BarChartImpl implements BarChart {
 	@Override
 	public int getHeight() {
 		return height;
-	}
-	
-	@Override
-	public ChartElement getTopAxis() {
-		return categoryAxisRendererLT;
-	}
-	
-	@Override
-	public ChartElement getLeftAxis() {
-		return valueAxisRendererLT;
-	}
-	
-	@Override
-	public ChartElement getRightAxis() {
-		return valueAxisRendererRB;
-	}
-	
-	@Override
-	public ChartElement getBottomAxis() {
-		return categoryAxisRendererRB;
-	}
-	
-	@Override
-	public BarChart setCategoryAxisRenderer(AxisRenderer renderer) {
-		switch ( renderer.getAxisPosition() ) {
-		case TOP:
-			categoryAxisRendererLT = renderer;
-			break;
-		case BOTTOM:
-			categoryAxisRendererRB = renderer;
-			break;
-		case LEFT:
-		case RIGHT:
-			throw new IllegalStateException("Unsupported axis position: " + renderer.getAxisPosition());
-		}
-		return this;
-	}
-	
-	@Override
-	public BarChart setValueAxisRenderer(AxisRenderer renderer) {
-		switch ( renderer.getAxisPosition() ) {
-		case LEFT:
-			valueAxisRendererLT = renderer;
-			break;
-		case RIGHT:
-			valueAxisRendererRB = renderer;
-			break;
-		case TOP:
-		case BOTTOM:
-			throw new IllegalStateException("Unsupported axis position: " + renderer.getAxisPosition());
-		}
-		return this;
 	}
 	
 	@Override
@@ -305,50 +267,72 @@ public class BarChartImpl implements BarChart {
 	}
 	
 	protected void paintComponent(Graphics g) {
+		Point2D point;
 		System.out.println("DBG: BarChartImpl width " + getRootPanel().getWidth());
 		Graphics2D graphics = (Graphics2D) g;
-		RenderingHints rh = new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		graphics.setRenderingHints(rh);
+		graphics.setRenderingHints(new RenderingHints(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON));
 		
 		// Setup layout
-		Rectangle rootRect = new Rectangle(Point2D.ZERO,
-				getRootPanel().getWidth(), getRootPanel().getHeight());
+		Rectangle rootRect = new Rectangle(Point2D.ZERO, getRootPanel().getWidth(), getRootPanel().getHeight());
 		ChartLayout layout = new ChartLayout(rootRect);
-		
-		// TODO: primary axis is horizontal, make it possible adjust automatically
-		layout.setTopAxis(categoryAxisRendererLT.getPaintArea(layout, graphics));
-		layout.setBottomAxis(categoryAxisRendererRB.getPaintArea(layout, graphics));
-		layout.setLeftAxis(valueAxisRendererLT.getPaintArea(layout, graphics));
-		layout.setRightAxis(valueAxisRendererRB.getPaintArea(layout, graphics));
-		layout.autoPlotArea();
+				
+		int displayWidth = getRootPanel().getWidth(),
+			displayHeight = getRootPanel().getHeight();
+		ChartSpaceLayout xLayout, yLayout;
+		xLayout = horizontalSpaceManager.prepareLayout(new Segment1D(0, displayWidth),
+				// no more than 50% of data space width for rulers
+				displayWidth / 2, graphics);
+		yLayout = verticalSpaceManager.prepareLayout(new Segment1D(0, displayHeight),
+				displayHeight / 2, graphics);
+		Segment1D dsX = xLayout.getDataSpace(), dsY = yLayout.getDataSpace();
+		point = new Point2D(dsX.getStart(), dsY.getStart());
+		layout.setPlotArea(new Rectangle(point, dsX.getLength(), dsY.getLength()));
 
-		Rectangle plot = layout.getPlotArea();
-		CategoryAxisDisplayMapper categoryAxisMapper = categoryAxisDriver.createMapper(
-				new Segment1D(plot.getLeftX(), plot.getWidth()), categoryAxisViewport);
-		valueAxisViewport.setValueRange(getValueRange(
-				categoryAxisMapper.getFirstVisibleCategory(),
-				categoryAxisMapper.getNumberOfVisibleCategories()));
-		ValueAxisDisplayMapper valueAxisMapper = valueAxisDriver.createMapper(
-				new Segment1D(plot.getUpperY(), plot.getHeight()), valueAxisViewport);
-		BCDisplayContext context = new BCDisplayContextImpl(categoryAxisMapper,
-				valueAxisMapper, layout);
+		CategoryAxisDisplayMapper cam = categoryAxisDriver.createMapper(dsX, categoryAxisViewport);
+		Range<CDecimal> vr = getValueRange(cam.getFirstVisibleCategory(), cam.getNumberOfVisibleCategories());
+		valueAxisViewport.setValueRange(vr);
+		ValueAxisDisplayMapper vam = valueAxisDriver.createMapper(dsY, valueAxisViewport);
+		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, layout);
+
+		RulerPosition rpos;
+		// TODO: replace string to special axisID+rendererID key
+		ValueAxisRulerRenderer var;
+		Map<String, PreparedRuler> preparedRulers = new HashMap<>();
+		for ( ChartRulerSpace dummy : xLayout.getRulers() ) {
+			ChartRulerID rulerID = dummy.getRulerID();
+			Segment1D rulerSpace = dummy.getSpace();
+			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
+			if ( preparedRuler == null ) {
+				var = (ValueAxisRulerRenderer) valueAxisDriver.getRenderer(rulerID.getRendererID());
+				preparedRuler = var.prepareRuler(vam, graphics);
+				preparedRulers.put(rulerID.getRendererID(), preparedRuler);
+			}
+			rpos = rulerID.isLowerPosition() ? RulerPosition.LEFT : RulerPosition.RIGHT;
+			point = new Point2D(rulerSpace.getStart(), vam.getPlotStart());
+			preparedRuler.drawRuler(rpos, new Rectangle(point, rulerSpace.getLength(), vam.getPlotSize()), graphics);
+		}
 		
-		if ( layout.getTopAxis() != null ) {
-			categoryAxisRendererLT.paint(context, graphics);
+		CategoryAxisRulerRenderer car;
+		preparedRulers.clear();
+		for ( ChartRulerSpace dummy : yLayout.getRulers() ) {
+			ChartRulerID rulerID = dummy.getRulerID();
+			Segment1D rulerSpace = dummy.getSpace();
+			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
+			if ( preparedRuler == null ) {
+				 car = (CategoryAxisRulerRenderer) categoryAxisDriver.getRenderer(rulerID.getRendererID());
+				 preparedRuler = car.prepareRuler(cam, graphics);
+				 preparedRulers.put(rulerID.getRendererID(), preparedRuler);
+			}
+			rpos = rulerID.isLowerPosition() ? RulerPosition.TOP : RulerPosition.BOTTOM;
+			point = new Point2D(cam.getPlotStart(), rulerSpace.getStart());
+			preparedRuler.drawRuler(rpos, new Rectangle(point, cam.getPlotSize(), rulerSpace.getLength()), graphics);
 		}
-		if ( layout.getBottomAxis() != null ) {
-			categoryAxisRendererRB.paint(context, graphics);
-		}
-		if ( layout.getLeftAxis() != null ) {
-			valueAxisRendererLT.paint(context, graphics);
-		}
-		if ( layout.getRightAxis() != null ) {
-			valueAxisRendererRB.paint(context, graphics);
-		}
+		
+		// TODO: draw grid lines
+		//valueAxisRuler.drawGrid(plot, graphics);
 
 		drawGridLines();
-		// TODO: set clip
+		// TODO: set clip???
 		//g2.clip(new Rectangle2D.Double(g2.getClipBounds().getMinX(),
 		//		vc.getPlotBounds().getUpperLeftY(),
 		//		g2.getClipBounds().getWidth(),

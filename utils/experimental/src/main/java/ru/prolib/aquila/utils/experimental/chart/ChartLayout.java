@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
+@Deprecated
 public class ChartLayout {
 	private Rectangle root, topAxis, bottomAxis, leftAxis, rightAxis, plot;
 	

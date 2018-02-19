@@ -1,6 +1,13 @@
 package ru.prolib.aquila.utils.experimental.chart.axis;
 
-public interface RulerBuilder {
+public interface RulerRenderer {
+	
+	/**
+	 * Get symbolic renderer ID.
+	 * <p>
+	 * @return renderer ID
+	 */
+	String getID();
 	
 	int getMaxLabelWidth(Object device);
 	

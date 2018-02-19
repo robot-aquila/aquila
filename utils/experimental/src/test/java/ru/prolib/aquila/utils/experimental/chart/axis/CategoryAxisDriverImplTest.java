@@ -2,6 +2,12 @@ package ru.prolib.aquila.utils.experimental.chart.axis;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.easymock.EasyMock.*;
+
+import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,29 +15,73 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 
 public class CategoryAxisDriverImplTest {
+	private IMocksControl control;
+	private RulerRendererRegistry rulerRenderersMock;
+	private RulerRenderer rendererMock1, rendererMock2;
 	private CategoryAxisDriverImpl driver;
 	private CategoryAxisViewport viewport;
 
 	@Before
 	public void setUp() throws Exception {
-		driver = new CategoryAxisDriverImpl(AxisDirection.RIGHT);
+		control = createStrictControl();
+		rulerRenderersMock = control.createMock(RulerRendererRegistry.class);
+		rendererMock1 = control.createMock(RulerRenderer.class);
+		rendererMock2 = control.createMock(RulerRenderer.class);
+		driver = new CategoryAxisDriverImpl("TIME", AxisDirection.RIGHT, rulerRenderersMock);
 		viewport = new CategoryAxisViewportImpl();
 		viewport.setCategoryRangeByFirstAndNumber(4, 3);
 	}
 	
 	@Test
 	public void testCtor() {
+		assertEquals("TIME", driver.getID());
 		assertEquals(AxisDirection.RIGHT, driver.getAxisDirection());
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testCtor_WhenDirectionIsUp() {
-		new CategoryAxisDriverImpl(AxisDirection.UP);
+		new CategoryAxisDriverImpl("TIME", AxisDirection.UP);
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
-	public void testSetAxisDirection_WhenDirectionIsUp() {
-		driver.setAxisDirection(AxisDirection.UP);
+	@Test
+	public void testRegisterRenderer() {
+		rulerRenderersMock.registerRenderer(rendererMock1);
+		control.replay();
+		
+		driver.registerRenderer(rendererMock1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetRenderer() {
+		expect(rulerRenderersMock.getRenderer("foo")).andReturn(rendererMock1);
+		expect(rulerRenderersMock.getRenderer("bar")).andReturn(rendererMock2);
+		control.replay();
+		
+		assertSame(rendererMock1, driver.getRenderer("foo"));
+		assertSame(rendererMock2, driver.getRenderer("bar"));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetRendererIDs() {
+		List<String> result = new ArrayList<>();
+		result.add("foo");
+		result.add("bar");
+		result.add("buz");
+		expect(rulerRenderersMock.getRendererIDs()).andReturn(result);
+		control.replay();
+		
+		List<String> actual = driver.getRendererIDs();
+		
+		control.verify();
+		List<String> expected = new ArrayList<>();
+		expected.add("foo");
+		expected.add("bar");
+		expected.add("buz");
+		assertEquals(expected, actual);
 	}
 	
 	@Test

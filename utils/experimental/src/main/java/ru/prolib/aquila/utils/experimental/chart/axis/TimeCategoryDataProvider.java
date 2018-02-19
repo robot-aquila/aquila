@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import ru.prolib.aquila.core.data.TSeries;
 
+@Deprecated
 public interface TimeCategoryDataProvider {
 
 	TSeries<Instant> getCategories();

@@ -5,24 +5,22 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 
-public class ValueAxisDriverImpl implements ValueAxisDriver {
-	private AxisDirection dir;
+public class ValueAxisDriverImpl extends AxisDriverImpl implements ValueAxisDriver {
 	
-	public ValueAxisDriverImpl(AxisDirection dir) {
-		setAxisDirection(dir);
-	}
-	
-	@Override
-	public synchronized void setAxisDirection(AxisDirection dir) {
+	public ValueAxisDriverImpl(String id,
+							   AxisDirection dir,
+							   RulerRendererRegistry rulerRegistry)
+	{
+		super(id, dir, rulerRegistry);
 		if ( dir != AxisDirection.UP ) {
 			throw new IllegalArgumentException("Unsupported axis direction: " + dir);
 		}
-		this.dir = dir;
 	}
-
-	@Override
-	public synchronized AxisDirection getAxisDirection() {
-		return dir;
+	
+	public ValueAxisDriverImpl(String id,
+							   AxisDirection dir)
+	{
+		this(id, dir, new RulerRendererRegistryImpl());
 	}
 
 	@Override
