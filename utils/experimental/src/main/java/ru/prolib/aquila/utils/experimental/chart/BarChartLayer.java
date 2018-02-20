@@ -58,5 +58,7 @@ public interface BarChartLayer extends ChartElement {
 	void paint(BCDisplayContext context, Object device);
 	
 	Color getColor(int colorId);
+	Color getColor();
+	Object getParam(int paramId);
 
 }

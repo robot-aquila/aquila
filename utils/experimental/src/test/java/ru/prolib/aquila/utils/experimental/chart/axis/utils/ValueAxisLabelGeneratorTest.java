@@ -154,7 +154,14 @@ public class ValueAxisLabelGeneratorTest {
 	
 	@Test
 	public void testGetLabelValues_CaseWhenCannotDetermineStepSize() {
-		fail("Not yet implemented");
+		// Этот кейс возможен, когда размер области рисования меньше размера метки
+		viewport.setValueRange(new Range<>(of(250L), of(300L)));
+		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 10), viewport);
+		
+		List<CDecimal> actual = generator.getLabelValues(mapper, of(10L), 12);
+		
+		List<CDecimal> expected = new ArrayList<>();
+		assertEquals(expected, actual);
 	}
 
 }

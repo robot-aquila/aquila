@@ -209,19 +209,89 @@ public class ChartSpaceManagerImplTest {
 		service.setRulerDisplayPriority(rulerID, 100);
 	}
 	
-	@Test
+	@Test (expected=IllegalArgumentException.class)
 	public void testPrepareLayout3SSD_ThrowsIfDataSpaceOutOfDisplay() {
-		fail();
+		service.prepareLayout(new Segment1D(100, 200), new Segment1D(50, 100), deviceStub);
 	}
 	
 	@Test
 	public void testPrepareLayout3SSD_AllRulersVisible_DefaultOrder() {
-		fail();
+		service.registerAxis(axisDriver1);
+		service.registerAxis(axisDriver2);
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE1", false), true);
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE1", true),  true);
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE2", false), true);
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE2", true),  true);
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE3", false), true);
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE3", true),  true);
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE4", false), true);
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE4", true),  true);
+		Segment1D dataSpace = new Segment1D(250, 550);
+		
+		ChartSpaceLayout actual = service.prepareLayout(new Segment1D(0, 1000), dataSpace, deviceStub);
+		
+		// 200px at left, 200px at right
+		List<ChartRulerSpace> expectedRulers = new ArrayList<>();
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("foo", "VALUE1", false),
+											   new Segment1D(220, 30)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("foo", "VALUE1", true),
+											   new Segment1D(800, 30)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("foo", "VALUE2", false),
+											   new Segment1D(180, 40)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("foo", "VALUE2", true),
+											   new Segment1D(830, 40)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("bar", "VALUE3", false),
+											   new Segment1D(155, 25)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("bar", "VALUE3", true),
+											   new Segment1D(870, 25)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("bar", "VALUE4", false),
+											   new Segment1D(120, 35)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("bar", "VALUE4", true),
+											   new Segment1D(895, 35)));
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(dataSpace, expectedRulers);
+		assertEquals(expected, actual);
 	}
 	
 	@Test
 	public void testPrepareLayout3SSD_NotEnoughSpace_CutoffRulersWithLowPriority() {
-		fail();
+		service.registerAxis(axisDriver1);
+		service.registerAxis(axisDriver2);
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE1", false), true); // L-30
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE1", true),  true); // U-30
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE2", false), true); // L-40
+		service.setRulerVisibility(new ChartRulerID("foo", "VALUE2", true),  true); // U-40
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE3", false), true); // L-25
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE3", true),  true); // U-25
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE4", false), true); // L-35
+		service.setRulerVisibility(new ChartRulerID("bar", "VALUE4", true),  true); // U-35
+		service.setRulerDisplayPriority(new ChartRulerID("foo", "VALUE1", false), 4); // L+30=
+		service.setRulerDisplayPriority(new ChartRulerID("foo", "VALUE1",  true), 7); // U+30=130R (start skipping)
+		service.setRulerDisplayPriority(new ChartRulerID("foo", "VALUE2", false), 1); // L+40= 65L
+		service.setRulerDisplayPriority(new ChartRulerID("foo", "VALUE2",  true), 6); // U+40=100R
+		service.setRulerDisplayPriority(new ChartRulerID("bar", "VALUE3", false), 0); // L+25= 25L
+		service.setRulerDisplayPriority(new ChartRulerID("bar", "VALUE3",  true), 3); // U+25= 25R
+		service.setRulerDisplayPriority(new ChartRulerID("bar", "VALUE4", false), 2); // L+35=100L (start skipping)
+		service.setRulerDisplayPriority(new ChartRulerID("bar", "VALUE4",  true), 5); // U+35= 60R
+		Segment1D dataSpace = new Segment1D(250, 550);
+		// all rulers use 130px length at left and at right
+		// limit rulers space at left to 90px, at right to 110px
+		// layout: free space|fv2-40|bv3-25|data space|bv3-25|bv4-35|fv2-40|free space
+		
+		ChartSpaceLayout actual = service.prepareLayout(new Segment1D(160, 750), dataSpace, deviceStub);
+		
+		List<ChartRulerSpace> expectedRulers = new ArrayList<>();
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("bar", "VALUE3", false),
+											   new Segment1D(225, 25)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("foo", "VALUE2", false),
+				   							   new Segment1D(185, 40)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("bar", "VALUE3", true),
+				   							   new Segment1D(800, 25)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("bar", "VALUE4", true),
+				   							   new Segment1D(825, 35)));
+		expectedRulers.add(new ChartRulerSpace(new ChartRulerID("foo", "VALUE2", true),
+				   							   new Segment1D(860, 40)));
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(dataSpace, expectedRulers);
+		assertEquals(expected, actual);
 	}
 
 	@Test

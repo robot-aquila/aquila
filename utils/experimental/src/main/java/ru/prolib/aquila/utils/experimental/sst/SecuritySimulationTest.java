@@ -76,8 +76,8 @@ import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartCandlestickLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartCurrentValueLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.BCCandlestickLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartCurrentValueLayer;
 import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.*;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
@@ -337,14 +337,15 @@ public class SecuritySimulationTest implements Experiment {
 				new TimeCategoryDataProviderImpl(slice.getIntervalStartSeries());
 
 		BarChartPanelImpl chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
-		BarChartImpl chart = (BarChartImpl) chartPanel.addChart("CANDLES")
-				.setHeight(600)
-				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0);
 		// Setup category axis ruler renderers
-		CategoryAxisDriver cad = chart.getCategoryAxisDriver();
+		CategoryAxisDriver cad = chartPanel.getCategoryAxisDriver();
 		SWTimeAxisRulerRenderer tar = new SWTimeAxisRulerRenderer("TIME");
 		tar.setCategories(slice.getIntervalStartSeries());
 		cad.registerRenderer(tar);
+		
+		BarChartImpl chart = (BarChartImpl) chartPanel.addChart("CANDLES")
+				.setHeight(600)
+				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0);
 		ChartSpaceManager vsm = chart.getVerticalSpaceManager();
 		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME", false), true);
 		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME",  true), true);
@@ -356,7 +357,7 @@ public class SecuritySimulationTest implements Experiment {
 		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL", false), true);
 		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL",  true), true);
 		
-		chart.addLayer(new BarChartCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
+		chart.addLayer(new BCCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
 		chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES)));
@@ -364,7 +365,7 @@ public class SecuritySimulationTest implements Experiment {
 		chart = (BarChartImpl) chartPanel.addChart("VOLUMES")
 				.setHeight(200)
 				.addStaticOverlay("Volume", 0);
-		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES)).setColor(BAR_COLOR);
+		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES));
 
 		chartPanelHandler = new BarChartPanelHandler(slice.getIntervalStartSeries(), chartPanel);
 		chartPanelHandler.subscribe();

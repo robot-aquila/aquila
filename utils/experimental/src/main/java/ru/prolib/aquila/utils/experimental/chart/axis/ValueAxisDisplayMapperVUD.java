@@ -10,6 +10,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.utils.Range;
+import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 
 /**
  * The mapper to display value axis which points up. This implementation is for
@@ -43,6 +44,11 @@ public class ValueAxisDisplayMapperVUD implements ValueAxisDisplayMapper {
 	@Override
 	public int getPlotSize() {
 		return height;
+	}
+	
+	@Override
+	public Segment1D getPlot() {
+		return new Segment1D(y, height);
 	}
 	
 	@Override

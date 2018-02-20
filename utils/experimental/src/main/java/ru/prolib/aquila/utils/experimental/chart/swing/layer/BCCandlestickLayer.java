@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layers;
+package ru.prolib.aquila.utils.experimental.chart.swing.layer;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Candle;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by TiM on 13.09.2017.
  */
-public class BarChartCandlestickLayer extends BarChartAbstractLayer {
+public class BCCandlestickLayer extends BarChartAbstractLayer {
 	public static final int BULLISH_BODY_COLOR = 1;
 	public static final int BULLISH_SHADOW_COLOR = 2;
 	public static final int BEARISH_BODY_COLOR = 3;
@@ -28,12 +28,12 @@ public class BarChartCandlestickLayer extends BarChartAbstractLayer {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(BarChartCandlestickLayer.class);
+		logger = LoggerFactory.getLogger(BCCandlestickLayer.class);
 	}
 	
 	private final Series<Candle> series;
 
-	public BarChartCandlestickLayer(Series<Candle> series) {
+	public BCCandlestickLayer(Series<Candle> series) {
 		super(series.getId());
 		this.series = series;
 		setColor(BULLISH_BODY_COLOR,	new Color(  0, 128, 0));
@@ -86,6 +86,9 @@ public class BarChartCandlestickLayer extends BarChartAbstractLayer {
 				} catch ( ValueException e ) {
 					logger.error("Error accessing candle: ", e);
 					continue;
+				}
+				if ( candle == null ) {
+					continue; // TODO: test this case
 				}
 				Color bodyColor = null, shadowColor = null;
 				if ( candle.isBullish() ) {

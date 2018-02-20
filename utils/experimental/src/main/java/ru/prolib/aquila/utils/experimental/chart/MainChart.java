@@ -10,7 +10,7 @@ import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.tseries.*;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.*;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.*;
 import ru.prolib.aquila.utils.experimental.chart.formatters.AbsNumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
@@ -64,7 +64,7 @@ public class MainChart {
                 .addStaticOverlay("Price",0);
         //chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
         //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
-        chart.addLayer(new BarChartCandlestickLayer(candles));
+        chart.addLayer(new BCCandlestickLayer(candles));
         chart.addLayer(new BarChartTradesLayer(trades).setColor(BarChartTradesLayer.SELL_COLOR, Color.BLUE));
         chart.addLayer(new BarChartOpenOrdersLayer(openOrders));
         chart.addLayer(new BarChartCurrentValueLayer(closes));
@@ -82,12 +82,12 @@ public class MainChart {
         //chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
         //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.addHistogram(bidVolumes)
-                .setColor(Color.GREEN)
-                .setParam(BarChartHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
+                .setColor(Color.GREEN);
+                // TODO: fixme .setParam(BCHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
         chart.addHistogram(askVolumes)
                 .setColor(Color.RED)
-                .setParam(BarChartHistogramLayer.INVERT_VALUES_PARAM, true)
-                .setParam(BarChartHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
+                .setParam(BCHistogramLayer.NEGATE_VALUES_PARAM, true);
+                // TODO: fixme .setParam(BCHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
 
         chart.addSmoothLine(askVolumes)
                 .setColor(Color.BLUE)

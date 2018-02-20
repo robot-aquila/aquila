@@ -272,9 +272,30 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		if ( ! displaySpace.contains(dataSpace) ) {
 			throw new IllegalArgumentException("Data space is out of display space");
 		}
-		
-		// TODO Auto-generated method stub
-		return null;
+		ChartRulerID rulerID = null;
+		int lowerRulersFreeLength = dataSpace.getStart() - displaySpace.getStart(),
+			upperRulersFreeLength = displaySpace.getEnd() - dataSpace.getEnd();
+		List<RulerEntry> includedEntries = new ArrayList<>();
+		for ( RulerEntry e : buildEntries() ) {
+			rulerID = e.getRulerID();
+			AxisDriver driver = drivers.get(rulerID.getAxisID());
+			RulerRenderer renderer = driver.getRenderer(rulerID.getRendererID());
+			int rulerLength = labelSizeStrategy.getLabelMaxSize(renderer, device);
+			if ( rulerID.isLowerPosition() ) {
+				if ( rulerLength > lowerRulersFreeLength ) {
+					continue;
+				}
+				lowerRulersFreeLength -= rulerLength;
+			} else {
+				if ( rulerLength > upperRulersFreeLength ) {
+					continue;
+				}
+				upperRulersFreeLength -= rulerLength;
+			}
+			e.setLength(rulerLength);
+			includedEntries.add(e);
+		}
+		return toLayout(dataSpace.getStart(), dataSpace.getEnd() + 1, dataSpace, includedEntries);
 	}
 
 	@Override
@@ -306,19 +327,7 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		}
 		int cL = displaySpace.getStart() + lowerRulersLength;
 		int cU = displaySpace.getEnd() - upperRulersLength + 1;
-		Segment1D dataSpace = new Segment1D(cL, cU - cL);
-		List<ChartRulerSpace> resultRulers = new ArrayList<>();
-		for ( RulerEntry e : includedEntries ) {
-			rulerID = e.getRulerID();
-			if ( rulerID.isLowerPosition() ) {
-				cL -= e.getLength();
-				resultRulers.add(new ChartRulerSpace(rulerID, new Segment1D(cL, e.getLength())));
-			} else {
-				resultRulers.add(new ChartRulerSpace(rulerID, new Segment1D(cU, e.getLength())));
-				cU += e.getLength();
-			}
-		}
-		return new ChartSpaceLayoutImpl(dataSpace, resultRulers);
+		return toLayout(cL, cU, new Segment1D(cL, cU - cL), includedEntries);
 	}
 	
 	private void checkExistence(ChartRulerID rulerID) {
@@ -363,6 +372,21 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		}
 		Collections.sort(entries);
 		return entries;
+	}
+	
+	private ChartSpaceLayout toLayout(int cL, int cU, Segment1D dataSpace, List<RulerEntry> includedEntries) {
+		List<ChartRulerSpace> resultRulers = new ArrayList<>();
+		for ( RulerEntry e : includedEntries ) {
+			ChartRulerID rulerID = e.getRulerID();
+			if ( rulerID.isLowerPosition() ) {
+				cL -= e.getLength();
+				resultRulers.add(new ChartRulerSpace(rulerID, new Segment1D(cL, e.getLength())));
+			} else {
+				resultRulers.add(new ChartRulerSpace(rulerID, new Segment1D(cU, e.getLength())));
+				cU += e.getLength();
+			}
+		}
+		return new ChartSpaceLayoutImpl(dataSpace, resultRulers);
 	}
 
 }

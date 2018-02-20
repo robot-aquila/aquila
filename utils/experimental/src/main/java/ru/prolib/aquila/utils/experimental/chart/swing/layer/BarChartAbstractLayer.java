@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layers;
+package ru.prolib.aquila.utils.experimental.chart.swing.layer;
 
 import ru.prolib.aquila.utils.experimental.chart.BCDisplayContext;
 import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
@@ -42,6 +42,16 @@ public abstract class BarChartAbstractLayer implements BarChartLayer {
 	@Override
 	public Color getColor(int colorId) {
 		return colors.get(colorId);
+	}
+	
+	@Override
+	public Color getColor() {
+		return getColor(DEFAULT_COLOR);
+	}
+	
+	@Override
+	public Object getParam(int paramId) {
+		return params.get(paramId);
 	}
 
 	@Override

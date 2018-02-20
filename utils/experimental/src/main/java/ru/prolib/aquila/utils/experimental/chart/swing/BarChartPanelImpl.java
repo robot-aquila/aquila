@@ -1,14 +1,14 @@
 package ru.prolib.aquila.utils.experimental.chart.swing;
 
-import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.utils.experimental.chart.*;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartCursorLayer;
 import ru.prolib.aquila.utils.experimental.chart.TooltipForm;
+import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxyImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
-import ru.prolib.aquila.utils.experimental.chart.formatters.DefaultLabelFormatter;
-import ru.prolib.aquila.utils.experimental.chart.formatters.LabelFormatter;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartCursorLayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,31 +28,32 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TOOLTIP_M
  * Created by TiM on 08.09.2017.
  */
 public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, MouseMotionListener {
-    private final BarChartOrientation orientation;
+	private final BarChartOrientation orientation;
+	protected Map<String, BarChart> charts = new LinkedHashMap<>();
+	protected final CategoryAxisViewport cav;
+	protected final CategoryAxisDriver cad;
+	protected final CategoryAxisDriverProxyImpl cadProxy;
 
-    protected Map<String, BarChart> charts = new LinkedHashMap<>();
-    protected final java.util.List displayedCategories = new Vector<>();
-    protected final CategoryAxisViewport viewport;
-
-    protected JPanel mainPanel;
-    protected JScrollBar scrollBar;
-    protected AdjustmentListener scrollBarListener;
-    protected AtomicInteger lastX, lastY, lastCategoryIdx;
-    protected Map<String, Map<String, List<String>>> tooltips;
-    protected TooltipForm tooltipForm;
-    protected LabelFormatter categoryLabelFormatter = new DefaultLabelFormatter();
-    protected LabelFormatter valueLabelFormatter = new DefaultLabelFormatter();
-    private java.awt.Rectangle screen;
-    //private final Timer updateTooltipTextTimer;
-    private final HashMap<JPanel, BarChart> chartByPanel = new HashMap<>();
-    private final JPanel rootPanel;
-    private Timer timerRefresh;
-    private int timerRefreshDelay = 50;
-
-    private boolean showTooltipForm = false;
+	protected JPanel mainPanel;
+	protected JScrollBar scrollBar;
+	protected AdjustmentListener scrollBarListener;
+	protected AtomicInteger lastX, lastY, lastCategoryIdx;
+	protected Map<String, Map<String, List<String>>> tooltips;
+	protected TooltipForm tooltipForm;
+	private java.awt.Rectangle screen;
+	//private final Timer updateTooltipTextTimer;
+	private final HashMap<JPanel, BarChart> chartByPanel = new HashMap<>();
+	private final JPanel rootPanel;
+	private Timer timerRefresh;
+	private int timerRefreshDelay = 50;
+	
+	private boolean showTooltipForm = false;
 
     public BarChartPanelImpl(BarChartOrientation orientation) {
-        viewport = new CategoryAxisViewportImpl();
+        cav = new CategoryAxisViewportImpl();
+        cad = new CategoryAxisDriverImpl("CATEGORY", AxisDirection.RIGHT);
+        cadProxy = new CategoryAxisDriverProxyImpl(cad);
+        
         final Icon autoScrollTrue = new ImageIcon(getClass().getClassLoader().getResource("locked.png"));
         final Icon autoScrollFalse = new ImageIcon(getClass().getClassLoader().getResource("unlocked.png"));
         lastX = new AtomicInteger();
@@ -73,6 +74,7 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
         	@Override
         	protected void paintChildren(Graphics g) {
         		System.out.println("DBG: BarChartPanelImpl#paintChildren called");
+        		BarChartPanelImpl.this.beforePaintChildren(g);
         		super.paintChildren(g);
         		System.out.println("DBG: BarChartPanelImpl#paintChildren exiting");
         		if ( init == false ) {
@@ -141,7 +143,7 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
         if(charts.containsKey(id)){
             throw new IllegalArgumentException("Chart with id='"+id+"' already added");
         }
-        BarChartImpl chart = new BarChartImpl(viewport);
+        BarChartImpl chart = new BarChartImpl(cadProxy);
         chart.setMouseVariables(lastX, lastY, lastCategoryIdx);
         HashMap<String, List<String>> map = new HashMap<>();
         tooltips.put(id, map);
@@ -183,7 +185,12 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
 
     @Override
     public CategoryAxisViewport getCategoryAxisViewport() {
-    	return viewport;
+    	return cav;
+    }
+    
+    @Override
+    public CategoryAxisDriver getCategoryAxisDriver() {
+    	return cad;
     }
     
 	@Override
@@ -352,6 +359,28 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
 	
 	protected void paintComponent(Graphics g) {
 		System.out.println("DBG: BarChartPanelImpl width " + mainPanel.getWidth());
+	}
+	
+	protected void beforePaintChildren(Graphics graphics) {
+		if ( cad.getAxisDirection().isVertical() ) {
+			throw new UnsupportedOperationException("Orientation not supported");
+		}
+		
+		Segment1D displaySpace = new Segment1D(0, mainPanel.getWidth());
+		int rulersMaxSpace = displaySpace.getLength() / 2;
+		ChartSpaceLayout bestLayout = null;
+		for ( BarChart chart : charts.values() ) {
+			ChartSpaceLayout layout = chart.getHorizontalSpaceManager()
+					.prepareLayout(displaySpace, rulersMaxSpace, graphics);
+			// TODO: To make a better approach
+			if ( bestLayout == null
+			  || bestLayout.getDataSpace().getLength() > layout.getDataSpace().getLength() )
+			{
+				bestLayout = layout;
+			}
+		}
+		Segment1D dataSpace = bestLayout == null ? displaySpace : bestLayout.getDataSpace();
+		cadProxy.setCurrentMapper(cad.createMapper(dataSpace, cav));
 	}
 
     /*

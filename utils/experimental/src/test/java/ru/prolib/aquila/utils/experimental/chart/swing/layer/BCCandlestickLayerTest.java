@@ -5,10 +5,15 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class BarChartHistogramLayerTest {
+public class BCCandlestickLayerTest {
 
 	@Before
 	public void setUp() throws Exception {
+	}
+	
+	@Test
+	public void testPaintLayer_NullValues() {
+		fail("Not yet implemented");
 	}
 
 	@Test

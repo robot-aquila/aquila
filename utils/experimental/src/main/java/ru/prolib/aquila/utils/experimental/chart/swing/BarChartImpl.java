@@ -9,16 +9,13 @@ import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartHistogramLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layers.BarChartIndicatorLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.BCHistogramLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartIndicatorLayer;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxy;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisRulerRenderer;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerSpace;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
@@ -58,13 +55,12 @@ public class BarChartImpl implements BarChart {
 	private final ChartSettingsPopup settingsPopup;
 	
 	private BarChartOrientation chartOrientation;
-	private final CategoryAxisViewport categoryAxisViewport;
-	private final CategoryAxisDriver categoryAxisDriver;
-	private final ValueAxisViewport valueAxisViewport;
-	private final ValueAxisDriver valueAxisDriver;
+	private final CategoryAxisDriverProxy cadProxy;
+	private final ValueAxisViewport vav;
+	private final ValueAxisDriver vad;
 	private final ChartSpaceManager horizontalSpaceManager, verticalSpaceManager;
 
-	public BarChartImpl(CategoryAxisViewport categoryAxisViewport) {
+	public BarChartImpl(CategoryAxisDriverProxy driverProxy) {
 		rootPanel = new JPanel(){
 			@Override
 			protected void paintComponent(Graphics g) {
@@ -74,16 +70,15 @@ public class BarChartImpl implements BarChart {
 			}
 			
 		};
-		this.categoryAxisViewport = categoryAxisViewport;
-		categoryAxisDriver = new CategoryAxisDriverImpl("CATEGORY", AxisDirection.RIGHT);
 		verticalSpaceManager = ChartSpaceManagerImpl.ofVerticalSpace();
-		verticalSpaceManager.registerAxis(categoryAxisDriver);
+		cadProxy = driverProxy;
+		cadProxy.registerForRulers(verticalSpaceManager);
 		
-		valueAxisViewport = new ValueAxisViewportImpl();
-		valueAxisDriver = new ValueAxisDriverImpl("VALUE", AxisDirection.UP);
-		valueAxisDriver.registerRenderer(new SWValueAxisRulerRenderer("LABEL"));
+		vav = new ValueAxisViewportImpl();
+		vad = new ValueAxisDriverImpl("VALUE", AxisDirection.UP);
+		vad.registerRenderer(new SWValueAxisRulerRenderer("LABEL"));
 		horizontalSpaceManager = ChartSpaceManagerImpl.ofHorizontalSpace();
-		horizontalSpaceManager.registerAxis(valueAxisDriver);
+		horizontalSpaceManager.registerAxis(vad);
 		
 		settings = new ChartSettings(layers);
 		settingsPopup = new ChartSettingsPopup(settings);
@@ -106,18 +101,16 @@ public class BarChartImpl implements BarChart {
 		chartSettingsButton = new ChartSettingsButton(getRootPanel(), settingsPopup);
 	}
 	
-	public BarChartImpl() {
-		this(new CategoryAxisViewportImpl());
-	}
-	
 	public JPanel getRootPanel() {
 		return rootPanel;
 	}
 	
+	@Override
 	public ChartSpaceManager getHorizontalSpaceManager() {
 		return horizontalSpaceManager;
 	}
 	
+	@Override
 	public ChartSpaceManager getVerticalSpaceManager() {
 		return verticalSpaceManager;
 	}
@@ -129,12 +122,12 @@ public class BarChartImpl implements BarChart {
 	
 	@Override
 	public ValueAxisDriver getValueAxisDriver() {
-		return valueAxisDriver;
+		return vad;
 	}
 	
 	@Override
-	public CategoryAxisDriver getCategoryAxisDriver() {
-		return categoryAxisDriver;
+	public CategoryAxisDriverProxy getCategoryAxisDriver() {
+		return cadProxy;
 	}
 
 	@Override
@@ -198,7 +191,7 @@ public class BarChartImpl implements BarChart {
 	
 	@Override
 	public BarChartLayer addHistogram(Series<CDecimal> series) {
-		BarChartHistogramLayer layer = new BarChartHistogramLayer(series);
+		BCHistogramLayer layer = new BCHistogramLayer(series);
 		addLayer(layer);
 		return layer;
 	}
@@ -211,18 +204,6 @@ public class BarChartImpl implements BarChart {
 				layers.remove(layer);
 			}
 		}
-		return this;
-	}
-	
-	@Override
-	public BarChart setVisibleArea(int first, int number) {
-		categoryAxisViewport.setCategoryRangeByFirstAndNumber(first, number);
-		return this;
-	}
-	
-	@Override
-	public BarChart setValuesInterval(CDecimal minValue, CDecimal maxValue) {
-		// TODO: set preferred value
 		return this;
 	}
 	
@@ -275,23 +256,21 @@ public class BarChartImpl implements BarChart {
 		// Setup layout
 		Rectangle rootRect = new Rectangle(Point2D.ZERO, getRootPanel().getWidth(), getRootPanel().getHeight());
 		ChartLayout layout = new ChartLayout(rootRect);
-				
-		int displayWidth = getRootPanel().getWidth(),
-			displayHeight = getRootPanel().getHeight();
+
+		CategoryAxisDisplayMapper cam = cadProxy.getCurrentMapper();
+		int dh = getRootPanel().getHeight(),
+			dw = getRootPanel().getWidth();
 		ChartSpaceLayout xLayout, yLayout;
-		xLayout = horizontalSpaceManager.prepareLayout(new Segment1D(0, displayWidth),
-				// no more than 50% of data space width for rulers
-				displayWidth / 2, graphics);
-		yLayout = verticalSpaceManager.prepareLayout(new Segment1D(0, displayHeight),
-				displayHeight / 2, graphics);
+		xLayout = horizontalSpaceManager.prepareLayout(new Segment1D(0, dw), cam.getPlot(), graphics);
+		// no more than 50% of data space width for rulers
+		yLayout = verticalSpaceManager.prepareLayout(new Segment1D(0, dh), dh / 2, graphics);
 		Segment1D dsX = xLayout.getDataSpace(), dsY = yLayout.getDataSpace();
 		point = new Point2D(dsX.getStart(), dsY.getStart());
 		layout.setPlotArea(new Rectangle(point, dsX.getLength(), dsY.getLength()));
 
-		CategoryAxisDisplayMapper cam = categoryAxisDriver.createMapper(dsX, categoryAxisViewport);
 		Range<CDecimal> vr = getValueRange(cam.getFirstVisibleCategory(), cam.getNumberOfVisibleCategories());
-		valueAxisViewport.setValueRange(vr);
-		ValueAxisDisplayMapper vam = valueAxisDriver.createMapper(dsY, valueAxisViewport);
+		vav.setValueRange(vr);
+		ValueAxisDisplayMapper vam = vad.createMapper(dsY, vav);
 		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, layout);
 
 		RulerPosition rpos;
@@ -303,7 +282,7 @@ public class BarChartImpl implements BarChart {
 			Segment1D rulerSpace = dummy.getSpace();
 			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
 			if ( preparedRuler == null ) {
-				var = (ValueAxisRulerRenderer) valueAxisDriver.getRenderer(rulerID.getRendererID());
+				var = (ValueAxisRulerRenderer) vad.getRenderer(rulerID.getRendererID());
 				preparedRuler = var.prepareRuler(vam, graphics);
 				preparedRulers.put(rulerID.getRendererID(), preparedRuler);
 			}
@@ -319,7 +298,7 @@ public class BarChartImpl implements BarChart {
 			Segment1D rulerSpace = dummy.getSpace();
 			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
 			if ( preparedRuler == null ) {
-				 car = (CategoryAxisRulerRenderer) categoryAxisDriver.getRenderer(rulerID.getRendererID());
+				 car = cadProxy.getRulerRenderer(rulerID.getRendererID());
 				 preparedRuler = car.prepareRuler(cam, graphics);
 				 preparedRulers.put(rulerID.getRendererID(), preparedRuler);
 			}

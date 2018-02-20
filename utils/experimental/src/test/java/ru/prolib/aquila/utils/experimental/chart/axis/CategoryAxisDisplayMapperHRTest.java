@@ -40,6 +40,7 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(10, mapper.getNumberOfVisibleCategories());
 		assertEquals(5, mapper.getPlotStart());
 		assertEquals(44, mapper.getPlotSize());
+		assertEquals(new Segment1D(5, 44), mapper.getPlot());
 		
 		assertEquals(new Segment1D( 5, 4), mapper.toDisplay(0));
 		assertEquals(new Segment1D( 9, 5), mapper.toDisplay(1));
@@ -66,6 +67,7 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(8, mapper.getNumberOfVisibleCategories());
 		assertEquals(5, mapper.getPlotStart());
 		assertEquals(44, mapper.getPlotSize());
+		assertEquals(new Segment1D(5, 44), mapper.getPlot());
 		
 		assertEquals(new Segment1D(14, 4), mapper.toDisplay(0));
 		assertEquals(new Segment1D(18, 4), mapper.toDisplay(1));
@@ -90,6 +92,7 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(10, mapper.getNumberOfVisibleCategories());
 		assertEquals(10, mapper.getPlotStart());
 		assertEquals(44, mapper.getPlotSize());
+		assertEquals(new Segment1D(10, 44), mapper.getPlot());
 
 		assertEquals(new Segment1D(10, 4), mapper.toDisplay(2));
 		assertEquals(new Segment1D(14, 5), mapper.toDisplay(3));
@@ -110,6 +113,7 @@ public class CategoryAxisDisplayMapperHRTest {
 		mapper = new CategoryAxisDisplayMapperHR(5, 0, 10, of(1L));
 		assertEquals(5, mapper.getPlotStart());
 		assertEquals(10, mapper.getPlotSize());
+		assertEquals(new Segment1D(5, 10), mapper.getPlot());
 		
 		assertEquals(new Segment1D( 5, 1), mapper.toDisplay(0));
 		assertEquals(new Segment1D( 6, 1), mapper.toDisplay(1));

@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 
 /**
@@ -13,6 +14,7 @@ public interface BarChartPanel {
     BarChart getChart(String id);
     
     CategoryAxisViewport getCategoryAxisViewport();
+    CategoryAxisDriver getCategoryAxisDriver();
 
     void paint();
 }

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layers;
+package ru.prolib.aquila.utils.experimental.chart.swing.layer;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

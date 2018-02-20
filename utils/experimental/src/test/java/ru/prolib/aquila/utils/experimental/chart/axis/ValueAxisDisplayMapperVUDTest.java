@@ -10,6 +10,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 
 public class ValueAxisDisplayMapperVUDTest {
 	private ValueAxisDisplayMapperVUD mapper;
@@ -34,6 +35,7 @@ public class ValueAxisDisplayMapperVUDTest {
 		mapper = new ValueAxisDisplayMapperVUD(2, 6, new Range<>(of(0L), of(2L)));
 		assertEquals(2, mapper.getPlotStart());
 		assertEquals(6, mapper.getPlotSize());
+		assertEquals(new Segment1D(2, 6), mapper.getPlot());
 		assertEquals(new Range<CDecimal>(of(0L), of(2L)), mapper.getValueRange());
 		assertEquals(AxisDirection.UP, mapper.getAxisDirection());
 	}
@@ -71,6 +73,7 @@ public class ValueAxisDisplayMapperVUDTest {
 		assertEquals(new Range<>(of("100.5"), of("145.15")), mapper.getValueRange());
 		assertEquals( 10, mapper.getPlotStart());
 		assertEquals(200, mapper.getPlotSize());
+		assertEquals(new Segment1D(10, 200), mapper.getPlot());
 		assertEquals(of("4.4568869"), mapper.getRatio()); // 4.4568868980963045912653975363942
 		
 		assertEquals(209, mapper.toDisplay(of("100.5")));
@@ -102,6 +105,7 @@ public class ValueAxisDisplayMapperVUDTest {
 		assertEquals(of("97.42"), mapper.getMaxValue()); // height 49.207
 		assertEquals(45, mapper.getPlotStart());
 		assertEquals(55, mapper.getPlotSize());
+		assertEquals(new Segment1D(45, 55), mapper.getPlot());
 		assertEquals(of("1.09740485"), mapper.getRatio()); // 1,097404840774686528339463897413
 
 		assertEquals( 99, mapper.toDisplay(of("48.213")));
@@ -125,6 +129,7 @@ public class ValueAxisDisplayMapperVUDTest {
 		assertEquals(of(450L), mapper.getMaxValue()); // height 360
 		assertEquals(100, mapper.getPlotStart());
 		assertEquals(400, mapper.getPlotSize());
+		assertEquals(new Segment1D(100, 400), mapper.getPlot());
 		assertEquals(of("1.10834"), mapper.getRatio());
 
 		assertEquals(499, mapper.toDisplay(of( 90L)));

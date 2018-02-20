@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layers;
+package ru.prolib.aquila.utils.experimental.chart.swing.layer;
 
 import java.awt.Graphics2D;
 

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.axis;
 
+import ru.prolib.aquila.utils.experimental.chart.Segment1D;
+
 public interface AxisDisplayMapper {
 	
 	/**
@@ -28,5 +30,7 @@ public interface AxisDisplayMapper {
 	 * @return size of plot
 	 */
 	int getPlotSize();
+	
+	Segment1D getPlot();
 
 }

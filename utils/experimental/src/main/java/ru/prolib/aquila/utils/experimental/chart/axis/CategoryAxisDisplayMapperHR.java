@@ -121,6 +121,11 @@ public class CategoryAxisDisplayMapperHR implements CategoryAxisDisplayMapper {
 	public int getPlotSize() {
 		return getSegmentOfBar(numberOfBars - 1).getEnd() - getPlotStart() + 1;
 	}
+	
+	@Override
+	public Segment1D getPlot() {
+		return new Segment1D(getPlotStart(), getPlotSize());
+	}
 
 	private Segment1D getSegmentOfBar(long index) {
 		CDecimal barStart = barWidth.multiply(index);

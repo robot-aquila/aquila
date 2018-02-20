@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layers;
+package ru.prolib.aquila.utils.experimental.chart.swing.layer;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;

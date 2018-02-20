@@ -48,15 +48,16 @@ public class ValueAxisLabelGenerator {
 				 numberOfSteps --;
 			 }
 		}
-		// TODO: case when stepSize is null
 		List<CDecimal> result = new ArrayList<>();
-		CDecimal currValue = mapper.getMinValue()
-				.divideExact(stepSize, 0, RoundingMode.CEILING)
-				.multiply(stepSize)
-				.withScale(scale);
-		while ( currValue.compareTo(mapper.getMaxValue()) <= 0 ) {
-			result.add(currValue);
-			currValue = currValue.add(stepSize);
+		if ( stepSize != null ) {
+			CDecimal currValue = mapper.getMinValue()
+					.divideExact(stepSize, 0, RoundingMode.CEILING)
+					.multiply(stepSize)
+					.withScale(scale);
+			while ( currValue.compareTo(mapper.getMaxValue()) <= 0 ) {
+				result.add(currValue);
+				currValue = currValue.add(stepSize);
+			}
 		}
 		return result;
 	}
