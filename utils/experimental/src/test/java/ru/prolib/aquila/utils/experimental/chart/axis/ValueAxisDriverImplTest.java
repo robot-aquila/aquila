@@ -99,8 +99,17 @@ public class ValueAxisDriverImplTest {
 
 		ValueAxisDisplayMapper actual = driver.createMapper(new Segment1D(10, 80), viewport);
 		
-		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUD(10, 80,
-				new Range<>(of(10L), of(20L)));
+		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUD(10, 80, new Range<>(of(10L), of(20L)));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateMapper_BugTest1_WhenDisplayHeightEqToRange() {
+		viewport.setValueRange(new Range<>(of(64615L), of(64916L)));
+		
+		ValueAxisDisplayMapper actual = driver.createMapper(new Segment1D(0, 301), viewport);
+		
+		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUV(0, 301, new Range<>(of(64615L), of(64916L)));
 		assertEquals(expected, actual);
 	}
 	

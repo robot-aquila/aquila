@@ -34,6 +34,7 @@ public interface BarChart {
 	BarChart addStaticOverlay(String text, int y);
 	BarChart addOverlay(ChartOverlay overlay);
 	
+	@Deprecated // TODO: to remove
 	void paint();
 	ChartSpaceManager getHorizontalSpaceManager();
 	ChartSpaceManager getVerticalSpaceManager();

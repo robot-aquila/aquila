@@ -52,21 +52,19 @@ public class CategoryAxisViewportImpl implements CategoryAxisViewport {
 	}
 	
 	@Override
-	public synchronized boolean equals(Object other) {
+	public boolean equals(Object other) {
 		if ( other == this ) {
 			return true;
 		}
 		if ( other == null || other.getClass() != CategoryAxisViewportImpl.class ) {
 			return false;
 		}
-		CategoryAxisViewportImpl o = (CategoryAxisViewportImpl) other;
-		synchronized ( o ) {
-			return new EqualsBuilder()
-					.append(o.first, first)
-					.append(o.last, last)
-					.append(o.preferredNumberOfBars, preferredNumberOfBars)
-					.isEquals();
-		}
+	CategoryAxisViewportImpl o = (CategoryAxisViewportImpl) other;
+		return new EqualsBuilder()
+				.append(o.getFirstCategory(), getFirstCategory())
+				.append(o.getLastCategory(), getLastCategory())
+				.append(o.getPreferredNumberOfBars(), getPreferredNumberOfBars())
+				.isEquals();
 	}
 
 }

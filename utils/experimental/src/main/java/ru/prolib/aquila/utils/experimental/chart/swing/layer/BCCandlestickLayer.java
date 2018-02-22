@@ -79,8 +79,8 @@ public class BCCandlestickLayer extends BarChartAbstractLayer {
 		}
 		series.lock();
 		try {
-			int n = cMapper.getNumberOfVisibleCategories();
-			for ( int i = cMapper.getFirstVisibleCategory(); i < n; i ++ ) {
+			int last = cMapper.getLastVisibleCategory();
+			for ( int i = cMapper.getFirstVisibleCategory(); i <= last; i ++ ) {
 				try {
 					candle = series.get(i);
 				} catch ( ValueException e ) {

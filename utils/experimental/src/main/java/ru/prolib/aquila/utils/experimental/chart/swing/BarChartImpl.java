@@ -64,7 +64,7 @@ public class BarChartImpl implements BarChart {
 		rootPanel = new JPanel(){
 			@Override
 			protected void paintComponent(Graphics g) {
-				System.out.println("DBG: BarChartImpl#paintComponent called");
+				//System.out.println("DBG: BarChartImpl#paintComponent called");
 			    super.paintComponent(g);
 			    BarChartImpl.this.paintComponent(g);
 			}
@@ -226,6 +226,7 @@ public class BarChartImpl implements BarChart {
 	
 	@Override
 	public void paint() {
+		System.out.println("DBG: BarChartImpl#paint called");
 		if ( ! SwingUtilities.isEventDispatchThread() ) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
@@ -249,7 +250,7 @@ public class BarChartImpl implements BarChart {
 	
 	protected void paintComponent(Graphics g) {
 		Point2D point;
-		System.out.println("DBG: BarChartImpl width " + getRootPanel().getWidth());
+		//System.out.println("DBG: BarChartImpl width " + getRootPanel().getWidth());
 		Graphics2D graphics = (Graphics2D) g;
 		graphics.setRenderingHints(new RenderingHints(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON));
 		

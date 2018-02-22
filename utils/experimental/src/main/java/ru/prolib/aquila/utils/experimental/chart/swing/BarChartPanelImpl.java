@@ -1,8 +1,11 @@
 package ru.prolib.aquila.utils.experimental.chart.swing;
 
+import ru.prolib.aquila.core.data.ObservableTSeries;
+import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.TooltipForm;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxyImpl;
@@ -33,6 +36,7 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
 	protected final CategoryAxisViewport cav;
 	protected final CategoryAxisDriver cad;
 	protected final CategoryAxisDriverProxyImpl cadProxy;
+	private final ScrollBarController scrollBarController;
 
 	protected JPanel mainPanel;
 	protected JScrollBar scrollBar;
@@ -53,9 +57,8 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
         cav = new CategoryAxisViewportImpl();
         cad = new CategoryAxisDriverImpl("CATEGORY", AxisDirection.RIGHT);
         cadProxy = new CategoryAxisDriverProxyImpl(cad);
+        scrollBarController = new ScrollBarController();
         
-        final Icon autoScrollTrue = new ImageIcon(getClass().getClassLoader().getResource("locked.png"));
-        final Icon autoScrollFalse = new ImageIcon(getClass().getClassLoader().getResource("unlocked.png"));
         lastX = new AtomicInteger();
         lastY = new AtomicInteger();
         lastCategoryIdx = new AtomicInteger();
@@ -66,19 +69,19 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
         	
         	@Override
         	protected void paintComponent(Graphics g) {
-        		System.out.println("DBG: BarChartPanelImpl#paintComponent called");
+        		//System.out.println("DBG: BarChartPanelImpl#paintComponent called");
         		super.paintComponent(g);
         		BarChartPanelImpl.this.paintComponent(g);
         	}
         	
         	@Override
         	protected void paintChildren(Graphics g) {
-        		System.out.println("DBG: BarChartPanelImpl#paintChildren called");
+        		//System.out.println("DBG: BarChartPanelImpl#paintChildren called");
         		BarChartPanelImpl.this.beforePaintChildren(g);
         		super.paintChildren(g);
-        		System.out.println("DBG: BarChartPanelImpl#paintChildren exiting");
+        		//System.out.println("DBG: BarChartPanelImpl#paintChildren exiting");
         		if ( init == false ) {
-        			System.out.println("DBG: BarChartPanelImpl#paintChildren initialization done. Repaint.");
+        			//System.out.println("DBG: BarChartPanelImpl#paintChildren initialization done. Repaint.");
         			init = true;
         			repaint();
         		}
@@ -91,30 +94,16 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
         // TODO: remove me
         //createRefreshTimer();
 
-        JPanel scrollBarPanel = new JPanel(new BorderLayout());
+        AutoScrollButton autoScrollButton = new AutoScrollButton();
         scrollBar = new JScrollBar(JScrollBar.HORIZONTAL);
-        scrollBarListener = new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-            	// TODO: Использовать драйвер основного чарта
-                //setVisibleArea(e.getValue(), viewport.getNumberOfCategories());
-            }
-        };
-        scrollBar.addAdjustmentListener(scrollBarListener);
+        JPanel scrollBarPanel = new JPanel(new BorderLayout());
         scrollBarPanel.add(scrollBar, BorderLayout.CENTER);
-        final JButton autoScrollButton = new JButton(autoScrollTrue);
-        autoScrollButton.setToolTipText("Autoscroll On/Off");
-        autoScrollButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	// TODO: Исправить автоскролл. Должен работать через обозреватель основной серии?
-                //viewport.setAutoScroll(!viewport.getAutoScroll());
-                //autoScrollButton.setIcon(viewport.getAutoScroll()?autoScrollTrue:autoScrollFalse);
-            }
-        });
-        autoScrollButton.setPreferredSize(new Dimension(20, 20));
         scrollBarPanel.add(autoScrollButton, BorderLayout.EAST);
         rootPanel.add(scrollBarPanel, BorderLayout.SOUTH);
+        scrollBarController.setScrollBar(scrollBar);
+        scrollBarController.setAutoScrollButton(autoScrollButton);
+        scrollBarController.setViewport(cav);
+        scrollBarController.setRootPanel(rootPanel);
 
         tooltipForm = new TooltipForm();
         screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -132,6 +121,11 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
     public JPanel getRootPanel() {
         return rootPanel;
     }
+    
+	@Override
+	public void setCategories(ObservableTSeries<?> categories) {
+		scrollBarController.setCategories(categories);
+	}
 
     @Override
     public BarChartOrientation getOrientation() {
@@ -195,11 +189,7 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
     
 	@Override
 	public void paint() {
-		// TODO: move to paintComponent?
-		// TODO: Prepare painting all charts. Precalculate optimal axis width, etc.
-		for( BarChart chart: charts.values() ) {
-		    chart.paint();
-		}
+		getRootPanel().repaint();
 	}
 
     /*
@@ -332,41 +322,18 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
     protected void setLastY(int lastY) {
         this.lastY.set(lastY);
     }
-
-    protected void updateScrollbar(int countCategories){
-        if (scrollBar != null) {
-            scrollBar.setMinimum(0);
-            scrollBar.setMaximum(countCategories);
-            // TODO: Исправить скроллбар. Должен использовать драйвер категорий основного чарта.
-            //scrollBar.setVisibleAmount(getNumberOfVisibleCategories());
-        }
-    }
-
-    private void updateScrollbar() {
-    	// TODO: Исправить скроллбар
-        //updateScrollbar(categories.getLength());
-    }
-
-    private void updateScrollbarAndSetValue() {
-        if (scrollBar != null) {
-            scrollBar.removeAdjustmentListener(scrollBarListener);
-            updateScrollbar();
-            // TODO: Исправить скроллбар
-            //scrollBar.setValue(getFirstVisibleCategory());
-            scrollBar.addAdjustmentListener(scrollBarListener);
-        }
-    }
 	
 	protected void paintComponent(Graphics g) {
-		System.out.println("DBG: BarChartPanelImpl width " + mainPanel.getWidth());
+		//System.out.println("DBG: BarChartPanelImpl width " + mainPanel.getWidth());
 	}
 	
 	protected void beforePaintChildren(Graphics graphics) {
+		//System.out.println("DBG: BarChartPanelImpl#beforePaintChildren");
 		if ( cad.getAxisDirection().isVertical() ) {
 			throw new UnsupportedOperationException("Orientation not supported");
 		}
 		
-		Segment1D displaySpace = new Segment1D(0, mainPanel.getWidth());
+		Segment1D displaySpace = new Segment1D(0, getRootPanel().getWidth());
 		int rulersMaxSpace = displaySpace.getLength() / 2;
 		ChartSpaceLayout bestLayout = null;
 		for ( BarChart chart : charts.values() ) {
@@ -380,58 +347,10 @@ public class BarChartPanelImpl implements BarChartPanel, MouseWheelListener, Mou
 			}
 		}
 		Segment1D dataSpace = bestLayout == null ? displaySpace : bestLayout.getDataSpace();
-		cadProxy.setCurrentMapper(cad.createMapper(dataSpace, cav));
+		CategoryAxisDisplayMapper cam = cad.createMapper(dataSpace, cav);
+		cadProxy.setCurrentMapper(cam);
+		scrollBarController.setDisplayMapper(cam);
+		//System.out.println("DBG: ParChartPanelImpl#beforePaintChildren dataSpace=" + dataSpace);
 	}
 
-    /*
-    private void createRefreshTimer() {
-        timerRefresh = new Timer(timerRefreshDelay, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	// TODO:
-            	//viewport.setCategoryRangeByFirstAndNumber(0, categories.getLength());
-            	SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						paint();
-					}            		
-            	});
-            	
-            	// TODO: Выпили меня
-            	
-                if(viewport.isChanged()){
-                    int size = categories.getLength();
-                    int num = viewport.getNumberOfVisibleCategories();
-                    int fst = viewport.getFirstVisibleCategory();
-                    if(num<2){
-                        num = 2;
-                    }
-
-                    viewport.setNumberOfVisibleCategories(num);
-
-                    if(size>0 && fst > size-getNumberOfVisibleCategories()) {
-                        fst = size-getNumberOfVisibleCategories();
-                    }
-                    if(fst < 0){
-                        fst = 0;
-                    }
-                    viewport.setFirstVisibleCategory(fst);
-
-
-                    for(BarChart c: charts.values()){
-                        c.setVisibleArea(viewport.getFirstVisibleCategory(), viewport.getNumberOfVisibleCategories());
-                    }
-                    updateCategories();
-                    paint();
-                    updateScrollbarAndSetValue();
-                    updateTooltipText();
-                    viewport.setChanged(false);
-                }
-                
-            }
-        });
-        timerRefresh.start();
-    }
-    */
-	
 }

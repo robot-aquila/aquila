@@ -14,7 +14,6 @@ import ru.prolib.aquila.utils.experimental.chart.swing.layer.*;
 import ru.prolib.aquila.utils.experimental.chart.formatters.AbsNumberLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
-import ru.prolib.aquila.utils.experimental.chart.handler.BarChartPanelHandler;
 
 import javax.swing.*;
 import java.awt.*;

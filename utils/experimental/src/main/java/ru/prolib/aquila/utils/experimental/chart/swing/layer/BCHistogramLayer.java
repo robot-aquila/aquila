@@ -45,8 +45,8 @@ public class BCHistogramLayer extends BarChartCDecimalSeriesLayer {
 		graphics.setColor(getColor());
 		series.lock();
 		try {
-			int n = cMapper.getNumberOfVisibleCategories();
-			for ( int i = cMapper.getFirstVisibleCategory(); i < n; i ++ ) {
+			int last = cMapper.getLastVisibleCategory();
+			for ( int i = cMapper.getFirstVisibleCategory(); i <= last; i ++ ) {
 				try {
 					value = series.get(i);
 				} catch ( ValueException e ) {

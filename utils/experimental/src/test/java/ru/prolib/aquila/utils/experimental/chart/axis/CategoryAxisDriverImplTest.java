@@ -145,4 +145,25 @@ public class CategoryAxisDriverImplTest {
 		assertEquals(expected, actual);
 		assertEquals(69, expected.getLastVisibleCategory());
 	}
+	
+	@Test
+	public void testCreateMapper_Right_SpecialCase1() {
+		// Если рассчитывать вьюпорт по последней категории и указывать количество видимых элементов,
+		// равное количеству элементов последовательности, при наличии настройки предпочитаемого
+		// количества видимых баров, график уезжает влево, а справа остается пустота, когда
+		// количество элементов последовательности превышает предпочитаемое количество видимых
+		// баров. Проверим, что причина не здесь.
+		viewport.setCategoryRangeByLastAndNumber(54, 55);
+		viewport.setPreferredNumberOfBars(50);
+		
+		CategoryAxisDisplayMapper actual = driver.createMapper(new Segment1D(77, 615), viewport);
+		
+		assertEquals( 5, actual.getFirstVisibleCategory());
+		assertEquals(54, actual.getLastVisibleCategory());
+		assertEquals(50, actual.getNumberOfVisibleCategories());
+		assertEquals(50, actual.getNumberOfVisibleBars());
+		assertEquals(new Segment1D( 77, 12), actual.toDisplay( 5));
+		assertEquals(new Segment1D(680, 12), actual.toDisplay(54));
+	}
+	
 }

@@ -28,7 +28,7 @@ public class ValueAxisViewportImpl implements ValueAxisViewport {
 		}
 		ValueAxisViewportImpl o = (ValueAxisViewportImpl) other;
 		return new EqualsBuilder()
-				.append(o.valueRange, valueRange)
+				.append(o.getValueRange(), getValueRange())
 				.isEquals();
 	}
 

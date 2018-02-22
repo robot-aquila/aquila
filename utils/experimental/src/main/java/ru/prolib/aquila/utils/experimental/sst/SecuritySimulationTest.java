@@ -88,7 +88,6 @@ import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
 import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
 import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
-import ru.prolib.aquila.utils.experimental.chart.handler.BarChartPanelHandler;
 import ru.prolib.aquila.web.utils.finam.data.FinamData;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
@@ -105,7 +104,6 @@ public class SecuritySimulationTest implements Experiment {
 	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
 	private static final String CANDLE_VOLUME_SERIES = "Volume";
 	private static final ZoneId ZONE_ID = ZoneId.of("Europe/Moscow");
-	private BarChartPanelHandler chartPanelHandler;
 	
 	static {
 		logger = LoggerFactory.getLogger(SecuritySimulationTest.class);
@@ -221,12 +219,13 @@ public class SecuritySimulationTest implements Experiment {
 						//JPanel chartRoot = new JPanel(new GridLayout(2, 2));
 						JPanel chartRoot = new JPanel(new GridLayout(1, 1));
 						for(SDP2DataSlice<SDP2Key> slice : slices){
+							ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();
 							BarChartPanelImpl chartPanel = createChartPanel(slice, s);
+							chartPanel.setCategories(categories);
 							chartRoot.add(chartPanel.getRootPanel());
 							CategoryAxisViewport viewport = chartPanel.getCategoryAxisViewport(); 
 							viewport.setPreferredNumberOfBars(50);
-							viewport.setCategoryRangeByFirstAndNumber(0,
-									slice.getIntervalStartSeries().getLength());
+							viewport.setCategoryRangeByFirstAndNumber(0, categories.getLength());
 						}
 						tabPanel.addTab("Strategy", chartRoot);
 					}
@@ -366,9 +365,6 @@ public class SecuritySimulationTest implements Experiment {
 				.setHeight(200)
 				.addStaticOverlay("Volume", 0);
 		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES));
-
-		chartPanelHandler = new BarChartPanelHandler(slice.getIntervalStartSeries(), chartPanel);
-		chartPanelHandler.subscribe();
 
 		return chartPanel;
 	}
