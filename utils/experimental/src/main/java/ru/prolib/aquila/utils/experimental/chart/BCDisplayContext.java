@@ -10,6 +10,6 @@ public interface BCDisplayContext {
 
 	CategoryAxisDisplayMapper getCategoryAxisMapper();
 	ValueAxisDisplayMapper getValueAxisMapper();
-	ChartLayout getChartLayout();
+	Rectangle getPlotArea();
 	
 }

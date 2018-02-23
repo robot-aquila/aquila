@@ -134,6 +134,15 @@ public class SWTimeAxisRulerRendererTest {
 		assertSame(SW2MTFAdapterImpl.getInstance(), service.getMTFAdapter());
 		assertSame(LABEL_FONT, service.getLabelFont());
 	}
+	
+	@Test
+	public void testCtor2() {
+		service = new SWTimeAxisRulerRenderer("zulu24", categories);
+		assertEquals("zulu24", service.getID());
+		assertSame(SW2MTFAdapterImpl.getInstance(), service.getMTFAdapter());
+		assertSame(LABEL_FONT, service.getLabelFont());
+		assertEquals(categories, service.getCategories());
+	}
 
 	@Test
 	public void testSetLabelFont() {

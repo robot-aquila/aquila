@@ -6,15 +6,15 @@ import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 public class BCDisplayContextImpl implements BCDisplayContext {
 	private final CategoryAxisDisplayMapper categoryAxisMapper;
 	private final ValueAxisDisplayMapper valueAxisMapper;
-	private final ChartLayout layout;
+	private final Rectangle plot;
 	
 	public BCDisplayContextImpl(CategoryAxisDisplayMapper categoryAxisMapper,
 								ValueAxisDisplayMapper valueAxisMapper,
-								ChartLayout layout)
+								Rectangle plot)
 	{
 		this.categoryAxisMapper = categoryAxisMapper;
 		this.valueAxisMapper = valueAxisMapper;
-		this.layout = layout;
+		this.plot = plot;
 	}
 
 	@Override
@@ -28,8 +28,8 @@ public class BCDisplayContextImpl implements BCDisplayContext {
 	}
 	
 	@Override
-	public ChartLayout getChartLayout() {
-		return layout;
+	public Rectangle getPlotArea() {
+		return plot;
 	}
 
 }

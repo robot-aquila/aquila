@@ -4,7 +4,6 @@ import java.util.List;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Series;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxy;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 
@@ -13,7 +12,6 @@ import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
  */
 public interface BarChart {
 	
-	BarChartOrientation getOrientation();
 	@Deprecated
 	BarChart setHeight(int points);
 	@Deprecated
@@ -34,8 +32,6 @@ public interface BarChart {
 	BarChart addStaticOverlay(String text, int y);
 	BarChart addOverlay(ChartOverlay overlay);
 	
-	@Deprecated // TODO: to remove
-	void paint();
 	ChartSpaceManager getHorizontalSpaceManager();
 	ChartSpaceManager getVerticalSpaceManager();
 	

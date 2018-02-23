@@ -80,6 +80,11 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 	public SWTimeAxisRulerRenderer(String id) {
 		this(id, SW2MTFAdapterImpl.getInstance(), LABEL_FONT);
 	}
+	
+	public SWTimeAxisRulerRenderer(String id, TSeries<Instant> categories) {
+		this(id);
+		this.categories = categories;
+	}
 
 	@Override
 	public String getID() {

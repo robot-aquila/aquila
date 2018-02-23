@@ -9,8 +9,6 @@ import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
  */
 public interface BarChartPanel {
 	
-	BarChartOrientation getOrientation();
-	
     BarChart addChart(String id);
     BarChart getChart(String id);
     

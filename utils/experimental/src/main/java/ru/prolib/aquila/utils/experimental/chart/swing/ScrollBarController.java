@@ -16,11 +16,18 @@ import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 
+/**
+ * Scrolling controller of the bar chart panel.
+ * <p>
+ * Performs following control:<br>
+ * <li>Chart scrolling and scroll bar handling based on a shared axis viewport state</li>
+ * <li>Automatic repainting based on timer and updates coming from categories</li>
+ */
 public class ScrollBarController implements AdjustmentListener, ActionListener, EventListener {
 	private final Timer timer;
 	private JPanel rootPanel;
 	private JScrollBar scrollBar;
-	private AutoScrollButton autoScrollButton;
+	private JCompAutoScrollButton autoScrollButton;
 	private ObservableTSeries<?> categories;
 	private CategoryAxisDisplayMapper mapper;
 	private CategoryAxisViewport viewport;
@@ -64,7 +71,7 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 		adjustScrollBar();
 	}
 	
-	public synchronized void setAutoScrollButton(AutoScrollButton autoScrollButton) {
+	public synchronized void setAutoScrollButton(JCompAutoScrollButton autoScrollButton) {
 		if ( this.autoScrollButton != null ) {
 			this.autoScrollButton.removeActionListener(this);
 		}

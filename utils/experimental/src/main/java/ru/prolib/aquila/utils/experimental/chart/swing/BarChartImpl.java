@@ -2,6 +2,12 @@ package ru.prolib.aquila.utils.experimental.chart.swing;
 
 import static java.awt.RenderingHints.*;
 
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+
+import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.data.Series;
@@ -31,19 +37,29 @@ import ru.prolib.aquila.utils.experimental.chart.swing.settings.ChartSettings;
 import ru.prolib.aquila.utils.experimental.chart.swing.settings.ChartSettingsButton;
 import ru.prolib.aquila.utils.experimental.chart.swing.settings.ChartSettingsPopup;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import java.awt.*;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by TiM on 09.09.2017.
  */
-public class BarChartImpl implements BarChart {
-	private final JPanel rootPanel;
+public class BarChartImpl implements BarChart, EventListener {
+	private final JCompBarChart chartPanel;
+	private final CategoryAxisDriverProxy cadProxy;
+	private final ValueAxisViewport vav;
+	private final ValueAxisDriver vad;
+	private final ChartSpaceManager horizontalSpaceManager, verticalSpaceManager;
+	
+	// TODO: refactor me
 	private final List<BarChartLayer> layers = new Vector<>();
 	private List<ChartOverlay> overlays = new Vector<>();
 	private int height;
@@ -53,23 +69,11 @@ public class BarChartImpl implements BarChart {
 	private ChartSettingsButton chartSettingsButton;
 	private final ChartSettings settings;
 	private final ChartSettingsPopup settingsPopup;
-	
-	private BarChartOrientation chartOrientation;
-	private final CategoryAxisDriverProxy cadProxy;
-	private final ValueAxisViewport vav;
-	private final ValueAxisDriver vad;
-	private final ChartSpaceManager horizontalSpaceManager, verticalSpaceManager;
 
 	public BarChartImpl(CategoryAxisDriverProxy driverProxy) {
-		rootPanel = new JPanel(){
-			@Override
-			protected void paintComponent(Graphics g) {
-				//System.out.println("DBG: BarChartImpl#paintComponent called");
-			    super.paintComponent(g);
-			    BarChartImpl.this.paintComponent(g);
-			}
-			
-		};
+		chartPanel = new JCompBarChart();
+		chartPanel.onPaint().addListener(this);
+		
 		verticalSpaceManager = ChartSpaceManagerImpl.ofVerticalSpace();
 		cadProxy = driverProxy;
 		cadProxy.registerForRulers(verticalSpaceManager);
@@ -79,7 +83,8 @@ public class BarChartImpl implements BarChart {
 		vad.registerRenderer(new SWValueAxisRulerRenderer("LABEL"));
 		horizontalSpaceManager = ChartSpaceManagerImpl.ofHorizontalSpace();
 		horizontalSpaceManager.registerAxis(vad);
-		
+	
+		// TODO: fix me
 		settings = new ChartSettings(layers);
 		settingsPopup = new ChartSettingsPopup(settings);
 		settingsPopup.addPopupMenuListener(new PopupMenuListener() {
@@ -90,7 +95,8 @@ public class BarChartImpl implements BarChart {
 			
 			@Override
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-				paint();
+				// TODO: wtf?
+				//paint();
 			}
 			
 			@Override
@@ -98,11 +104,11 @@ public class BarChartImpl implements BarChart {
 			
 			}
 		});
-		chartSettingsButton = new ChartSettingsButton(getRootPanel(), settingsPopup);
+		chartSettingsButton = new ChartSettingsButton(chartPanel, settingsPopup);
 	}
 	
-	public JPanel getRootPanel() {
-		return rootPanel;
+	public JCompBarChart getChartPanel() {
+		return chartPanel;
 	}
 	
 	@Override
@@ -113,11 +119,6 @@ public class BarChartImpl implements BarChart {
 	@Override
 	public ChartSpaceManager getVerticalSpaceManager() {
 		return verticalSpaceManager;
-	}
-	
-	@Override
-	public BarChartOrientation getOrientation() {
-		return chartOrientation;
 	}
 	
 	@Override
@@ -132,7 +133,7 @@ public class BarChartImpl implements BarChart {
 
 	@Override
 	public BarChart setHeight(int points) {
-		rootPanel.setPreferredSize(new Dimension(rootPanel.getWidth(), points));
+		chartPanel.setPreferredSize(new Dimension(chartPanel.getWidth(), points));
 		this.height = points;
 		return this;
 	}
@@ -224,20 +225,6 @@ public class BarChartImpl implements BarChart {
 		return this;
 	}
 	
-	@Override
-	public void paint() {
-		System.out.println("DBG: BarChartImpl#paint called");
-		if ( ! SwingUtilities.isEventDispatchThread() ) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					paint();
-				}
-			});
-		}
-		rootPanel.repaint();
-	}
-
 	public void setMouseVariables(AtomicInteger lastX, AtomicInteger lastY, AtomicInteger lastCategoryIdx) {
 		this.lastX = lastX;
 		this.lastY = lastY;
@@ -248,31 +235,32 @@ public class BarChartImpl implements BarChart {
 		this.tooltips = tooltips;
 	}
 	
-	protected void paintComponent(Graphics g) {
+	@Override
+	public void onEvent(Event event) {
+		if ( ! event.isType(chartPanel.onPaint()) ) {
+			return;
+		}
+		PaintEvent e = (PaintEvent) event;
+		Graphics2D graphics = e.getGraphics();
+		JComponent component = e.getComponent();
 		Point2D point;
-		//System.out.println("DBG: BarChartImpl width " + getRootPanel().getWidth());
-		Graphics2D graphics = (Graphics2D) g;
 		graphics.setRenderingHints(new RenderingHints(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON));
 		
-		// Setup layout
-		Rectangle rootRect = new Rectangle(Point2D.ZERO, getRootPanel().getWidth(), getRootPanel().getHeight());
-		ChartLayout layout = new ChartLayout(rootRect);
-
+		Rectangle rootRect = new Rectangle(Point2D.ZERO, component.getWidth(), component.getHeight());
 		CategoryAxisDisplayMapper cam = cadProxy.getCurrentMapper();
-		int dh = getRootPanel().getHeight(),
-			dw = getRootPanel().getWidth();
+		int dh = rootRect.getHeight(), dw = rootRect.getWidth();
 		ChartSpaceLayout xLayout, yLayout;
 		xLayout = horizontalSpaceManager.prepareLayout(new Segment1D(0, dw), cam.getPlot(), graphics);
 		// no more than 50% of data space width for rulers
 		yLayout = verticalSpaceManager.prepareLayout(new Segment1D(0, dh), dh / 2, graphics);
 		Segment1D dsX = xLayout.getDataSpace(), dsY = yLayout.getDataSpace();
 		point = new Point2D(dsX.getStart(), dsY.getStart());
-		layout.setPlotArea(new Rectangle(point, dsX.getLength(), dsY.getLength()));
+		Rectangle plot = new Rectangle(point, dsX.getLength(), dsY.getLength());
 
 		Range<CDecimal> vr = getValueRange(cam.getFirstVisibleCategory(), cam.getNumberOfVisibleCategories());
 		vav.setValueRange(vr);
 		ValueAxisDisplayMapper vam = vad.createMapper(dsY, vav);
-		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, layout);
+		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, plot);
 
 		RulerPosition rpos;
 		// TODO: replace string to special axisID+rendererID key
@@ -325,8 +313,9 @@ public class BarChartImpl implements BarChart {
 		// what's this?
 		//lastCategoryIdx.set(vc.toCategoryIdx(lastX.get(), lastY.get()));
 		
-		graphics.setClip(0, 0, getRootPanel().getWidth(), getRootPanel().getHeight());
-		chartSettingsButton.paint(graphics, getRootPanel().getWidth());
+		// TODO: fix me
+		graphics.setClip(0, 0, rootRect.getWidth(), rootRect.getHeight());
+		chartSettingsButton.paint(graphics, rootRect.getWidth());
 	}
 	
 	private Range<CDecimal> getValueRange(int first, int num) {

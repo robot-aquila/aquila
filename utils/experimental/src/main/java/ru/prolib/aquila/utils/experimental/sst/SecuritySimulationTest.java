@@ -26,12 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
-import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.data.timeframe.ZTFHours;
-import ru.prolib.aquila.core.data.timeframe.ZTFMinutes;
 import ru.prolib.aquila.core.data.tseries.CandleCloseTSeries;
 import ru.prolib.aquila.core.data.tseries.CandleVolumeTSeries;
 import ru.prolib.aquila.core.data.tseries.QEMATSeries;
@@ -65,14 +62,10 @@ import ru.prolib.aquila.utils.experimental.chart.BarChart;
 import ru.prolib.aquila.utils.experimental.chart.BarChartOrientation;
 import ru.prolib.aquila.utils.experimental.chart.BarChartPanel;
 import ru.prolib.aquila.utils.experimental.chart.ChartSpaceManager;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
-import ru.prolib.aquila.utils.experimental.chart.axis.TimeCategoryDataProvider;
-import ru.prolib.aquila.utils.experimental.chart.axis.TimeCategoryDataProviderImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
-import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
@@ -86,14 +79,10 @@ import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistryImpl;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.utils.experimental.chart.formatters.InstantLabelFormatter;
-import ru.prolib.aquila.utils.experimental.chart.formatters.NumberLabelFormatter;
 import ru.prolib.aquila.web.utils.finam.data.FinamData;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
-
-import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.BAR_COLOR;
 
 public class SecuritySimulationTest implements Experiment {
 	private static final Logger logger;
@@ -220,7 +209,7 @@ public class SecuritySimulationTest implements Experiment {
 						JPanel chartRoot = new JPanel(new GridLayout(1, 1));
 						for(SDP2DataSlice<SDP2Key> slice : slices){
 							ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();
-							BarChartPanelImpl chartPanel = createChartPanel(slice, s);
+							BarChartPanelImpl chartPanel = (BarChartPanelImpl) createChartPanel(slice, s);
 							chartPanel.setCategories(categories);
 							chartRoot.add(chartPanel.getRootPanel());
 							CategoryAxisViewport viewport = chartPanel.getCategoryAxisViewport(); 
@@ -329,20 +318,17 @@ public class SecuritySimulationTest implements Experiment {
 			parent);
 	}
 
-	private BarChartPanelImpl createChartPanel(SDP2DataSlice<SDP2Key> slice,
+	private BarChartPanel createChartPanel(SDP2DataSlice<SDP2Key> slice,
 											   Security security)
 	{
-		TimeCategoryDataProvider categoriesProvider =
-				new TimeCategoryDataProviderImpl(slice.getIntervalStartSeries());
+		ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();
 
-		BarChartPanelImpl chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
+		BarChartPanel chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
 		// Setup category axis ruler renderers
 		CategoryAxisDriver cad = chartPanel.getCategoryAxisDriver();
-		SWTimeAxisRulerRenderer tar = new SWTimeAxisRulerRenderer("TIME");
-		tar.setCategories(slice.getIntervalStartSeries());
-		cad.registerRenderer(tar);
+		cad.registerRenderer(new SWTimeAxisRulerRenderer("TIME", categories));
 		
-		BarChartImpl chart = (BarChartImpl) chartPanel.addChart("CANDLES")
+		BarChart chart = chartPanel.addChart("CANDLES")
 				.setHeight(600)
 				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0);
 		ChartSpaceManager vsm = chart.getVerticalSpaceManager();
@@ -361,10 +347,19 @@ public class SecuritySimulationTest implements Experiment {
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
 		chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES)));
 
-		chart = (BarChartImpl) chartPanel.addChart("VOLUMES")
+		chart = chartPanel.addChart("VOLUMES")
 				.setHeight(200)
 				.addStaticOverlay("Volume", 0);
 		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES));
+		vsm = chart.getVerticalSpaceManager();
+		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME", false), false);
+		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME",  true), true);
+		
+		vad = chart.getValueAxisDriver();
+		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(CDecimalBD.of(1L));
+		hsm = chart.getHorizontalSpaceManager();
+		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL", false), true);
+		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL",  true), true);
 
 		return chartPanel;
 	}
