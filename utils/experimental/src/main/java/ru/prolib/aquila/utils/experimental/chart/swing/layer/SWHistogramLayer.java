@@ -17,15 +17,15 @@ import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 
-public class BCHistogramLayer extends BarChartCDecimalSeriesLayer {
+public class SWHistogramLayer extends BarChartCDecimalSeriesLayer {
 	public static final int NEGATE_VALUES_PARAM = 0;
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(BCHistogramLayer.class);
+		logger = LoggerFactory.getLogger(SWHistogramLayer.class);
 	}
 	
-	public BCHistogramLayer(Series<CDecimal> data) {
+	public SWHistogramLayer(Series<CDecimal> data) {
 		super(data);
 		setParam(NEGATE_VALUES_PARAM, false);
 		setColor(Color.GRAY);
@@ -54,10 +54,10 @@ public class BCHistogramLayer extends BarChartCDecimalSeriesLayer {
 					continue;
 				}
 				if ( value == null ) {
-					continue; // TODO: test this case
+					continue;
 				}
 				if ( negate ) {
-					value = value.negate(); // TODO: test this case
+					value = value.negate();
 				}
 				Segment1D barSegment = cMapper.toDisplay(i);
 				int upY = vMapper.toDisplay(value.max(CDecimalBD.ZERO)),
@@ -66,7 +66,7 @@ public class BCHistogramLayer extends BarChartCDecimalSeriesLayer {
 					int leftX = barSegment.getStart(),
 						width = barSegment.getLength() - 1,
 						height = dnY - upY + 1;
-					graphics.fillRect(leftX, upY, width, height); // TODO: test this case
+					graphics.fillRect(leftX, upY, width, height);
 				} else {
 					int x = barSegment.getStart();
 					graphics.drawLine(x, upY, x, dnY); // TODO: test this case

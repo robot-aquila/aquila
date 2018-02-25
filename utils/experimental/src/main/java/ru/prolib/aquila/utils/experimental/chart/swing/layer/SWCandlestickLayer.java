@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by TiM on 13.09.2017.
  */
-public class BCCandlestickLayer extends BarChartAbstractLayer {
+public class SWCandlestickLayer extends BarChartAbstractLayer {
 	public static final int BULLISH_BODY_COLOR = 1;
 	public static final int BULLISH_SHADOW_COLOR = 2;
 	public static final int BEARISH_BODY_COLOR = 3;
@@ -28,12 +28,12 @@ public class BCCandlestickLayer extends BarChartAbstractLayer {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(BCCandlestickLayer.class);
+		logger = LoggerFactory.getLogger(SWCandlestickLayer.class);
 	}
 	
 	private final Series<Candle> series;
 
-	public BCCandlestickLayer(Series<Candle> series) {
+	public SWCandlestickLayer(Series<Candle> series) {
 		super(series.getId());
 		this.series = series;
 		setColor(BULLISH_BODY_COLOR,	new Color(  0, 128, 0));

@@ -113,4 +113,24 @@ public class ValueAxisDriverImplTest {
 		assertEquals(expected, actual);
 	}
 	
+	@Test
+	public void testCreateMapper_BugTest2_WhenDisplayHeightGtRangeToLt1() {
+		viewport.setValueRange(new Range<>(of("64777.9"), of(65140L))); // 362,1
+		
+		ValueAxisDisplayMapper actual = driver.createMapper(new Segment1D(0, 363), viewport);
+		
+		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUD(0, 363, new Range<>(of("64777.9"), of(65140L)));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateMapper_BugTest3_WhenDisplayHeightEqRange() {
+		viewport.setValueRange(new Range<>(of(100L), of(200L)));
+		
+		ValueAxisDisplayMapper actual = driver.createMapper(new Segment1D(50, 100), viewport);
+		
+		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUV(50, 100, new Range<>(of(100L), of(200L)));
+		assertEquals(expected, actual);
+	}
+	
 }

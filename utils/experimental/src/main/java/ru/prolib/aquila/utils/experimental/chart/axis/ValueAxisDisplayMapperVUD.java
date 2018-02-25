@@ -27,13 +27,15 @@ public class ValueAxisDisplayMapperVUD implements ValueAxisDisplayMapper {
 		this.y = y;
 		this.height = height;
 		this.scale = Math.max(valueRange.getMin().getScale(), valueRange.getMax().getScale());
-		this.ratio = of((long) height - 1) // <-- important to get valid ratio!
-				.divideExact(valueRange.getMax().subtract(valueRange.getMin()),
-						BASE_SCALE + scale, RoundingMode.CEILING);
-		if ( ratio.compareTo(CDecimalBD.of(1L)) < 0 ) {
+		CDecimal dh = of((long) height);
+		CDecimal vr = valueRange.getMax().subtract(valueRange.getMin());
+		if ( vr.compareTo(dh) > 0 ) {
 			throw new IllegalArgumentException("Display height " + height
-					+ " is too small for " + valueRange + ": ratio=" + ratio);
+					+ " is too small for " + valueRange);
 		}
+		CDecimal ratioPerPixel = vr.divideExact(dh, BASE_SCALE + scale, RoundingMode.HALF_UP);
+		vr = vr.add(ratioPerPixel);
+		this.ratio = dh.divideExact(vr, BASE_SCALE + scale, RoundingMode.DOWN);
 	}
 	
 	@Override

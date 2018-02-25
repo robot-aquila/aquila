@@ -1,5 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.axis;
 
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.of;
+
 import java.math.RoundingMode;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -25,8 +27,9 @@ public class ValueAxisDisplayMapperVUV implements ValueAxisDisplayMapper {
 		this.y = y;
 		this.height = height;
 		this.scale = Math.max(valueRange.getMin().getScale(), valueRange.getMax().getScale());
-		this.ratio = valueRange.getMax().subtract(valueRange.getMin())
-				.divideExact(CDecimalBD.of((long)height), BASE_SCALE + scale, RoundingMode.CEILING);
+		CDecimal dh = of((long) height);
+		CDecimal vr = valueRange.getMax().subtract(valueRange.getMin());
+		this.ratio = vr.divideExact(dh, BASE_SCALE + scale, RoundingMode.CEILING);
 		if ( ratio.compareTo(CDecimalBD.of(1L)) < 0 ) {
 			throw new IllegalArgumentException("Range " + valueRange
 					+ " is to short for height " + height + ": ratio=" + ratio);
@@ -78,7 +81,8 @@ public class ValueAxisDisplayMapperVUV implements ValueAxisDisplayMapper {
 				.divide(ratio)
 				.toBigDecimal()
 				.intValue();
-		return y + height - 1 - offset;
+		int r = y + height - 1 - offset;
+		return r < y ? y : r;
 	}
 
 	@Override

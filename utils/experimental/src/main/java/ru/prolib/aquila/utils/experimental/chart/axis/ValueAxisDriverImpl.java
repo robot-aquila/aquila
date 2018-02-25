@@ -35,8 +35,6 @@ public class ValueAxisDriverImpl extends AxisDriverImpl implements ValueAxisDriv
 		int height = segment.getLength();
 		CDecimal vdiff = vRange.getMax().subtract(vRange.getMin());
 		CDecimal ddiff = CDecimalBD.of((long) height);
-		// It is IMPORTANT here to use >= operator because VUD implementation
-		// substracts one pixel from height to get correct ratio
 		if ( vdiff.compareTo(ddiff) >= 0 ) {
 			return new ValueAxisDisplayMapperVUV(y, height, vRange);
 		} else {

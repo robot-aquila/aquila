@@ -146,10 +146,8 @@ public class ValueAxisDisplayMapperVUVTest {
 	
 	@Test
 	public void testEquals() {
-		mapper = new ValueAxisDisplayMapperVUV(45, 223,
-				new Range<>(of("250.13"), of("492.01")));
-		Variant<Integer> vY = new Variant<>(45, 40),
-				vH = new Variant<>(vY, 223, 205);
+		mapper = new ValueAxisDisplayMapperVUV(45, 223, new Range<>(of("250.13"), of("492.01")));
+		Variant<Integer> vY = new Variant<>(45, 40), vH = new Variant<>(vY, 223, 205);
 		Variant<Range<CDecimal>> vRng = new Variant<>(vH);
 		vRng.add(new Range<>(of("250.13"), of("492.01")));
 		vRng.add(new Range<>(of("200.00"), of("800.00")));
@@ -167,6 +165,144 @@ public class ValueAxisDisplayMapperVUVTest {
 		assertEquals(45, found.getPlotStart());
 		assertEquals(223, found.getPlotSize());
 		assertEquals(new Range<>(of("250.13"), of("492.01")), found.getValueRange());
+	}
+	
+	@Test
+	public void testConvertation_TestIncorrectCoordForNegativeRange() {
+		// 4 units per 1 pixel
+		mapper = new ValueAxisDisplayMapperVUV(5, 10, new Range<>(of(-50L), of(0L)));
+		
+		assertEquals( 5, mapper.toDisplay(of(  0L)));
+		assertEquals( 5, mapper.toDisplay(of(- 1L)));
+		assertEquals( 5, mapper.toDisplay(of(- 2L)));
+		assertEquals( 5, mapper.toDisplay(of(- 3L)));
+		assertEquals( 5, mapper.toDisplay(of(- 4L)));
+		assertEquals( 5, mapper.toDisplay(of(- 5L)));
+		assertEquals( 6, mapper.toDisplay(of(- 6L)));
+		assertEquals( 6, mapper.toDisplay(of(- 7L)));
+		assertEquals( 6, mapper.toDisplay(of(- 8L)));
+		assertEquals( 6, mapper.toDisplay(of(- 9L)));
+		assertEquals( 6, mapper.toDisplay(of(-10L)));
+		assertEquals( 7, mapper.toDisplay(of(-11L)));
+		assertEquals( 7, mapper.toDisplay(of(-12L)));
+		assertEquals( 7, mapper.toDisplay(of(-13L)));
+		assertEquals( 7, mapper.toDisplay(of(-14L)));
+		assertEquals( 7, mapper.toDisplay(of(-15L)));
+		assertEquals( 8, mapper.toDisplay(of(-16L)));
+		assertEquals( 8, mapper.toDisplay(of(-17L)));
+		assertEquals( 8, mapper.toDisplay(of(-18L)));
+		assertEquals( 8, mapper.toDisplay(of(-19L)));
+		assertEquals( 8, mapper.toDisplay(of(-20L)));
+		assertEquals( 9, mapper.toDisplay(of(-21L)));
+		assertEquals( 9, mapper.toDisplay(of(-22L)));
+		assertEquals( 9, mapper.toDisplay(of(-23L)));
+		assertEquals( 9, mapper.toDisplay(of(-24L)));
+		assertEquals( 9, mapper.toDisplay(of(-25L)));
+		assertEquals(10, mapper.toDisplay(of(-26L)));
+		assertEquals(10, mapper.toDisplay(of(-27L)));
+		assertEquals(10, mapper.toDisplay(of(-28L)));
+		assertEquals(10, mapper.toDisplay(of(-29L)));
+		assertEquals(10, mapper.toDisplay(of(-30L)));
+		assertEquals(11, mapper.toDisplay(of(-31L)));
+		assertEquals(11, mapper.toDisplay(of(-32L)));
+		assertEquals(11, mapper.toDisplay(of(-33L)));
+		assertEquals(11, mapper.toDisplay(of(-34L)));
+		assertEquals(11, mapper.toDisplay(of(-35L)));
+		assertEquals(12, mapper.toDisplay(of(-36L)));
+		assertEquals(12, mapper.toDisplay(of(-37L)));
+		assertEquals(12, mapper.toDisplay(of(-38L)));
+		assertEquals(12, mapper.toDisplay(of(-39L)));
+		assertEquals(12, mapper.toDisplay(of(-40L)));
+		assertEquals(13, mapper.toDisplay(of(-41L)));
+		assertEquals(13, mapper.toDisplay(of(-42L)));
+		assertEquals(13, mapper.toDisplay(of(-43L)));
+		assertEquals(13, mapper.toDisplay(of(-44L)));
+		assertEquals(13, mapper.toDisplay(of(-45L)));
+		assertEquals(14, mapper.toDisplay(of(-46L)));
+		assertEquals(14, mapper.toDisplay(of(-47L)));
+		assertEquals(14, mapper.toDisplay(of(-48L)));
+		assertEquals(14, mapper.toDisplay(of(-49L)));
+		assertEquals(14, mapper.toDisplay(of(-50L)));
+		
+		assertEquals(of( -5L), mapper.toValue( 5));
+		assertEquals(of(-10L), mapper.toValue( 6));
+		assertEquals(of(-15L), mapper.toValue( 7));
+		assertEquals(of(-20L), mapper.toValue( 8));
+		assertEquals(of(-25L), mapper.toValue( 9));
+		assertEquals(of(-30L), mapper.toValue(10));
+		assertEquals(of(-35L), mapper.toValue(11));
+		assertEquals(of(-40L), mapper.toValue(12));
+		assertEquals(of(-45L), mapper.toValue(13));
+		assertEquals(of(-50L), mapper.toValue(14));
+	}
+	
+	@Test
+	public void testConvertation_TestIncorrectCoordForPositiveRange() {
+		// 4 units per 1 pixel
+		mapper = new ValueAxisDisplayMapperVUV(5, 10, new Range<>(of(0L), of(50L)));
+		
+		assertEquals(14, mapper.toDisplay(of( 0L)));
+		assertEquals(14, mapper.toDisplay(of( 1L)));
+		assertEquals(14, mapper.toDisplay(of( 2L)));
+		assertEquals(14, mapper.toDisplay(of( 3L)));
+		assertEquals(14, mapper.toDisplay(of( 4L)));
+		assertEquals(13, mapper.toDisplay(of( 5L)));
+		assertEquals(13, mapper.toDisplay(of( 6L)));
+		assertEquals(13, mapper.toDisplay(of( 7L)));
+		assertEquals(13, mapper.toDisplay(of( 8L)));
+		assertEquals(13, mapper.toDisplay(of( 9L)));
+		assertEquals(12, mapper.toDisplay(of(10L)));
+		assertEquals(12, mapper.toDisplay(of(11L)));
+		assertEquals(12, mapper.toDisplay(of(12L)));
+		assertEquals(12, mapper.toDisplay(of(13L)));
+		assertEquals(12, mapper.toDisplay(of(14L)));
+		assertEquals(11, mapper.toDisplay(of(15L)));
+		assertEquals(11, mapper.toDisplay(of(16L)));
+		assertEquals(11, mapper.toDisplay(of(17L)));
+		assertEquals(11, mapper.toDisplay(of(18L)));
+		assertEquals(11, mapper.toDisplay(of(19L)));
+		assertEquals(10, mapper.toDisplay(of(20L)));
+		assertEquals(10, mapper.toDisplay(of(21L)));
+		assertEquals(10, mapper.toDisplay(of(22L)));
+		assertEquals(10, mapper.toDisplay(of(23L)));
+		assertEquals(10, mapper.toDisplay(of(24L)));
+		assertEquals( 9, mapper.toDisplay(of(25L)));
+		assertEquals( 9, mapper.toDisplay(of(26L)));
+		assertEquals( 9, mapper.toDisplay(of(27L)));
+		assertEquals( 9, mapper.toDisplay(of(28L)));
+		assertEquals( 9, mapper.toDisplay(of(29L)));
+		assertEquals( 8, mapper.toDisplay(of(30L)));
+		assertEquals( 8, mapper.toDisplay(of(31L)));
+		assertEquals( 8, mapper.toDisplay(of(32L)));
+		assertEquals( 8, mapper.toDisplay(of(33L)));
+		assertEquals( 8, mapper.toDisplay(of(34L)));
+		assertEquals( 7, mapper.toDisplay(of(35L)));
+		assertEquals( 7, mapper.toDisplay(of(36L)));
+		assertEquals( 7, mapper.toDisplay(of(37L)));
+		assertEquals( 7, mapper.toDisplay(of(38L)));
+		assertEquals( 7, mapper.toDisplay(of(39L)));
+		assertEquals( 6, mapper.toDisplay(of(40L)));
+		assertEquals( 6, mapper.toDisplay(of(41L)));
+		assertEquals( 6, mapper.toDisplay(of(42L)));
+		assertEquals( 6, mapper.toDisplay(of(43L)));
+		assertEquals( 6, mapper.toDisplay(of(44L)));
+		assertEquals( 5, mapper.toDisplay(of(45L)));
+		assertEquals( 5, mapper.toDisplay(of(46L)));
+		assertEquals( 5, mapper.toDisplay(of(47L)));
+		assertEquals( 5, mapper.toDisplay(of(48L)));
+		assertEquals( 5, mapper.toDisplay(of(49L)));
+		assertEquals( 5, mapper.toDisplay(of(50L)));
+		
+		assertEquals(of( 0L), mapper.toValue(14));
+		assertEquals(of( 5L), mapper.toValue(13));
+		assertEquals(of(10L), mapper.toValue(12));
+		assertEquals(of(15L), mapper.toValue(11));
+		assertEquals(of(20L), mapper.toValue(10));
+		assertEquals(of(25L), mapper.toValue( 9));
+		assertEquals(of(30L), mapper.toValue( 8));
+		assertEquals(of(35L), mapper.toValue( 7));
+		assertEquals(of(40L), mapper.toValue( 6));
+		assertEquals(of(45L), mapper.toValue( 5));
 	}
 
 }

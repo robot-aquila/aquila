@@ -60,7 +60,7 @@ public class MainChart {
                 .addStaticOverlay("Price",0);
         //chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
         //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
-        chart.addLayer(new BCCandlestickLayer(candles));
+        chart.addLayer(new SWCandlestickLayer(candles));
         chart.addLayer(new BarChartTradesLayer(trades).setColor(BarChartTradesLayer.SELL_COLOR, Color.BLUE));
         chart.addLayer(new BarChartOpenOrdersLayer(openOrders));
         chart.addLayer(new BarChartCurrentValueLayer(closes));
@@ -82,7 +82,7 @@ public class MainChart {
                 // TODO: fixme .setParam(BCHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
         chart.addHistogram(askVolumes)
                 .setColor(Color.RED)
-                .setParam(BCHistogramLayer.NEGATE_VALUES_PARAM, true);
+                .setParam(SWHistogramLayer.NEGATE_VALUES_PARAM, true);
                 // TODO: fixme .setParam(BCHistogramLayer.ZERO_LINE_ON_CENTER_PARAM, true);
 
         chart.addSmoothLine(askVolumes)

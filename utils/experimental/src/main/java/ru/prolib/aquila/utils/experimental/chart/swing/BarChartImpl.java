@@ -15,7 +15,7 @@ import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.BCHistogramLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWHistogramLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartIndicatorLayer;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
@@ -192,7 +192,7 @@ public class BarChartImpl implements BarChart, EventListener {
 	
 	@Override
 	public BarChartLayer addHistogram(Series<CDecimal> series) {
-		BCHistogramLayer layer = new BCHistogramLayer(series);
+		SWHistogramLayer layer = new SWHistogramLayer(series);
 		addLayer(layer);
 		return layer;
 	}

@@ -69,7 +69,8 @@ import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.BCCandlestickLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWCandlestickLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWHistogramLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartCurrentValueLayer;
 import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.*;
@@ -342,7 +343,7 @@ public class SecuritySimulationTest implements Experiment {
 		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL", false), true);
 		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL",  true), true);
 		
-		chart.addLayer(new BCCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
+		chart.addLayer(new SWCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
 		chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES)));
