@@ -350,6 +350,7 @@ public class SecuritySimulationTest implements Experiment {
 
 		chart = chartPanel.addChart("VOLUMES")
 				.setHeight(200)
+				//.setZeroAtCenter(true)
 				.addStaticOverlay("Volume", 0);
 		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES));
 		vsm = chart.getVerticalSpaceManager();

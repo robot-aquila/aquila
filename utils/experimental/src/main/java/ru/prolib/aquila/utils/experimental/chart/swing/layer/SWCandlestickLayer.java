@@ -88,7 +88,7 @@ public class SWCandlestickLayer extends BarChartAbstractLayer {
 					continue;
 				}
 				if ( candle == null ) {
-					continue; // TODO: test this case
+					continue;
 				}
 				Color bodyColor = null, shadowColor = null;
 				if ( candle.isBullish() ) {

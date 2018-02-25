@@ -58,6 +58,7 @@ public class BarChartImpl implements BarChart, EventListener {
 	private final ValueAxisViewport vav;
 	private final ValueAxisDriver vad;
 	private final ChartSpaceManager horizontalSpaceManager, verticalSpaceManager;
+	private boolean zeroAtCenter;
 	
 	// TODO: refactor me
 	private final List<BarChartLayer> layers = new Vector<>();
@@ -318,6 +319,12 @@ public class BarChartImpl implements BarChart, EventListener {
 		chartSettingsButton.paint(graphics, rootRect.getWidth());
 	}
 	
+	@Override
+	public synchronized BarChart setZeroAtCenter(boolean zeroAtCenter) {
+		this.zeroAtCenter = zeroAtCenter;
+		return this;
+	}
+	
 	private Range<CDecimal> getValueRange(int first, int num) {
 		Range <CDecimal> x, range = null;
 		for ( BarChartLayer layer : layers ) {
@@ -328,10 +335,16 @@ public class BarChartImpl implements BarChart, EventListener {
 				range = range.extend(x);
 			}
 		}
-		if ( range != null ) {
-			return range;
+		if ( range == null ) {
+			range = new Range<>(CDecimalBD.ZERO, CDecimalBD.of(1000000L));
 		}
-		return new Range<>(CDecimalBD.ZERO, CDecimalBD.of(1000000L));
+		synchronized ( this ) {
+			if ( zeroAtCenter ) {
+				CDecimal absMax = range.getMin().abs().max(range.getMax().abs());
+				range = new Range<>(absMax.negate(), absMax);
+			}
+		}
+		return range;
 	}
 	
 	private void drawGridLines(){
