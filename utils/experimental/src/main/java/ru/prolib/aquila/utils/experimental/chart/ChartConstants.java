@@ -37,7 +37,9 @@ public class ChartConstants {
     @Deprecated
     public static final double CANDLE_WIDTH_RATIO = 0.8;
 
+    @Deprecated
     public static final int INDICATOR_LINE_WIDTH = 2;
+    @Deprecated
     public static final int CANDLE_LINE_WIDTH = 2;
 
     public static final Color TRADE_BUY_COLOR = new Color(186, 243, 0);

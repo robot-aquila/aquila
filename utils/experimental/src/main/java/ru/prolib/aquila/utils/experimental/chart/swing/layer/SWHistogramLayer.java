@@ -37,7 +37,7 @@ public class SWHistogramLayer extends BarChartCDecimalSeriesLayer {
 		ValueAxisDisplayMapper vMapper = context.getValueAxisMapper();
 		AxisDirection dir = cMapper.getAxisDirection();
 		if ( dir.isVertical() ) {
-			logger.warn("Axis direction now unsupported: " + dir);
+			logger.warn("Axis direction is not unsupported: " + dir);
 			return;
 		}
 		boolean negate = isNegateValues();

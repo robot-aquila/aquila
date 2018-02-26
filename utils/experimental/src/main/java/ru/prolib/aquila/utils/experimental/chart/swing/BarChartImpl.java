@@ -4,7 +4,6 @@ import static java.awt.RenderingHints.*;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
@@ -16,7 +15,7 @@ import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWHistogramLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartIndicatorLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWIndicatorLayer;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
@@ -179,14 +178,14 @@ public class BarChartImpl implements BarChart, EventListener {
 	
 	@Override
 	public BarChartLayer addSmoothLine(Series<CDecimal> series) {
-		BarChartIndicatorLayer layer = new BarChartIndicatorLayer(series, new SmoothLineRenderer());
+		SWIndicatorLayer layer = new SWIndicatorLayer(series, new SmoothLineRenderer());
 		addLayer(layer);
 		return layer;
 	}
 	
 	@Override
 	public BarChartLayer addPolyLine(Series<CDecimal> series) {
-		BarChartIndicatorLayer layer = new BarChartIndicatorLayer(series, new PolyLineRenderer());
+		SWIndicatorLayer layer = new SWIndicatorLayer(series, new PolyLineRenderer());
 		addLayer(layer);
 		return layer;
 	}
@@ -245,7 +244,8 @@ public class BarChartImpl implements BarChart, EventListener {
 		Graphics2D graphics = e.getGraphics();
 		JComponent component = e.getComponent();
 		Point2D point;
-		graphics.setRenderingHints(new RenderingHints(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON));
+		graphics.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON);
+		graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 		
 		Rectangle rootRect = new Rectangle(Point2D.ZERO, component.getWidth(), component.getHeight());
 		CategoryAxisDisplayMapper cam = cadProxy.getCurrentMapper();

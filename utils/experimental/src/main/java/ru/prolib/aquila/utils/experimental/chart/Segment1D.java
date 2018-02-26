@@ -41,6 +41,15 @@ public class Segment1D {
 	}
 	
 	/**
+	 * Get midpoint of segment.
+	 * <p>
+	 * @return coordinate of midpoint
+	 */
+	public int getMidpoint() {
+		return start + length / 2;
+	}
+	
+	/**
 	 * Test that this segment contains all points of other segment.
 	 * <p>
 	 * @param other - segment that expected to be contained in 

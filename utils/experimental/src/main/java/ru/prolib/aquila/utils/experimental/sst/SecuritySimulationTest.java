@@ -71,6 +71,7 @@ import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRende
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWCandlestickLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWHistogramLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWIndicatorLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartCurrentValueLayer;
 import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.*;

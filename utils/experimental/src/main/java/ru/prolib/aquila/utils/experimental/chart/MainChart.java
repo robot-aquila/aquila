@@ -87,7 +87,7 @@ public class MainChart {
 
         chart.addSmoothLine(askVolumes)
                 .setColor(Color.BLUE)
-                .setParam(BarChartIndicatorLayer.INVERT_VALUES_PARAM, true);
+                .setParam(SWIndicatorLayer.NEGATE_VALUES_PARAM, true);
 
 //        chartPanel.addCandles("CANDLES", "CANDLES").setData(candles);
 //        chartPanel.addBars("VOLUME", "VOLUME").setData(volumes);

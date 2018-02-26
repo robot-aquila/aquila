@@ -21,6 +21,13 @@ public class Segment1DTest {
 		assertEquals(5, segment.getStart());
 		assertEquals(20, segment.getLength());
 		assertEquals(24, segment.getEnd());
+		assertEquals(15, segment.getMidpoint());
+	}
+	
+	@Test
+	public void testGetMidpoint() {
+		segment = new Segment1D(10, 29);
+		assertEquals(24, segment.getMidpoint());
 	}
 
 	@Test
