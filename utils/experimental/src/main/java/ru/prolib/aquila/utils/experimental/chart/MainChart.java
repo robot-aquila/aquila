@@ -62,7 +62,7 @@ public class MainChart {
         //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.addLayer(new SWCandlestickLayer(candles));
         chart.addLayer(new BarChartTradesLayer(trades).setColor(BarChartTradesLayer.SELL_COLOR, Color.BLUE));
-        chart.addLayer(new BarChartOpenOrdersLayer(openOrders));
+        //chart.addLayer(new SWActiveLimitOrdersLayer(openOrders)); // TODO: fix me
         chart.addLayer(new BarChartCurrentValueLayer(closes));
 
         chart.addSmoothLine(new CandleCloseTSeries("Close", candles)).setColor(Color.BLUE);

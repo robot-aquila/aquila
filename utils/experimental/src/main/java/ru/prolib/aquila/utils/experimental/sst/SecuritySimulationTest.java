@@ -70,9 +70,10 @@ import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWCandlestickLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWHistogramLayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWIndicatorLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.ALODataProviderImpl;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.ALOValidatorImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartCurrentValueLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWALOLayer;
 import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.*;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
@@ -324,6 +325,7 @@ public class SecuritySimulationTest implements Experiment {
 											   Security security)
 	{
 		ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();
+		Symbol symbol = slice.getSymbol();
 
 		BarChartPanel chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
 		// Setup category axis ruler renderers
@@ -332,7 +334,7 @@ public class SecuritySimulationTest implements Experiment {
 		
 		BarChart chart = chartPanel.addChart("CANDLES")
 				.setHeight(600)
-				.addStaticOverlay(slice.getSymbol()+", "+slice.getTimeFrame().toTFrame().toString(), 0);
+				.addStaticOverlay(symbol + ", " + slice.getTimeFrame().toTFrame(), 0);
 		ChartSpaceManager vsm = chart.getVerticalSpaceManager();
 		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME", false), true);
 		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME",  true), true);
@@ -348,7 +350,10 @@ public class SecuritySimulationTest implements Experiment {
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
 		chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES)));
-
+		// Add active orders layer
+		chart.addLayer(new SWALOLayer("ACTIVE_ORDERS",
+				new ALODataProviderImpl(new ALOValidatorImpl(symbol), security.getTerminal())));
+		
 		chart = chartPanel.addChart("VOLUMES")
 				.setHeight(200)
 				//.setZeroAtCenter(true)
