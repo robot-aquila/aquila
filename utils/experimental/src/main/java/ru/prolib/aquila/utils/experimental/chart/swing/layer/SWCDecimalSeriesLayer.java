@@ -5,10 +5,10 @@ import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Range;
 
-abstract public class BarChartCDecimalSeriesLayer extends BarChartAbstractLayer {
+abstract public class SWCDecimalSeriesLayer extends SWAbstractLayer {
 	protected Series<CDecimal> series;
 
-	public BarChartCDecimalSeriesLayer(Series<CDecimal> series) {
+	public SWCDecimalSeriesLayer(Series<CDecimal> series) {
 		super(series.getId());
 		this.series = series;
 	}

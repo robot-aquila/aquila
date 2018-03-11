@@ -7,7 +7,7 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class BarChartAbstractLayer implements BarChartLayer {
+public abstract class SWAbstractLayer implements BarChartLayer {
 	//protected static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	protected final HashMap<Integer, Color> colors = new HashMap<>();
 	protected final Map<Integer, Object> params = new HashMap<>();
@@ -15,7 +15,7 @@ public abstract class BarChartAbstractLayer implements BarChartLayer {
 	protected boolean visible = true;
 	//protected List<String> tooltips;
 
-	public BarChartAbstractLayer(String layerID) {
+	public SWAbstractLayer(String layerID) {
 		this.id = layerID;
 	}
 

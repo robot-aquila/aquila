@@ -61,7 +61,7 @@ public class MainChart {
         //chart.getTopAxis().setLabelFormatter(new InstantLabelFormatter());
         //chart.getBottomAxis().setLabelFormatter(new InstantLabelFormatter());
         chart.addLayer(new SWCandlestickLayer(candles));
-        chart.addLayer(new BarChartTradesLayer(trades).setColor(BarChartTradesLayer.SELL_COLOR, Color.BLUE));
+        //chart.addLayer(new SWOELayer(trades).setColor(SWOELayer.COLOR_ARROW_DOWN, Color.BLUE)); // TODO: fix me
         //chart.addLayer(new SWActiveLimitOrdersLayer(openOrders)); // TODO: fix me
         chart.addLayer(new BarChartCurrentValueLayer(closes));
 

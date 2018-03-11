@@ -70,9 +70,12 @@ import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWCandlestickLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWOELayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.ALODataProviderImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.ALOValidatorImpl;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartCurrentValueLayer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.OEDataProviderImpl;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.OEEntrySet;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.OEValidatorImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWALOLayer;
 import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.*;
@@ -95,6 +98,7 @@ public class SecuritySimulationTest implements Experiment {
 	private static final String QEMA7_CANDLE_CLOSE_SERIES = "QEMA(Close,7)";
 	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
 	private static final String CANDLE_VOLUME_SERIES = "Volume";
+	private static final String ORDER_EXECUTION_SERIES = "ORDER_EXECUTIONS";
 	private static final ZoneId ZONE_ID = ZoneId.of("Europe/Moscow");
 	
 	static {
@@ -216,7 +220,7 @@ public class SecuritySimulationTest implements Experiment {
 							chartPanel.setCategories(categories);
 							chartRoot.add(chartPanel.getRootPanel());
 							CategoryAxisViewport viewport = chartPanel.getCategoryAxisViewport(); 
-							viewport.setPreferredNumberOfBars(50);
+							viewport.setPreferredNumberOfBars(100);
 							viewport.setCategoryRangeByFirstAndNumber(0, categories.getLength());
 						}
 						tabPanel.addTab("Strategy", chartRoot);
@@ -349,10 +353,11 @@ public class SecuritySimulationTest implements Experiment {
 		chart.addLayer(new SWCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
 		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
-		chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES)));
+		//chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES))); // TODO: fix me
 		// Add active orders layer
 		chart.addLayer(new SWALOLayer("ACTIVE_ORDERS",
 				new ALODataProviderImpl(new ALOValidatorImpl(symbol), security.getTerminal())));
+		chart.addLayer(new SWOELayer(slice.getSeries(ORDER_EXECUTION_SERIES)));
 		
 		chart = chartPanel.addChart("VOLUMES")
 				.setHeight(200)
@@ -400,6 +405,8 @@ public class SecuritySimulationTest implements Experiment {
 		slice.registerRawSeries(qema7Series);
 		slice.registerRawSeries(qema14Series);
 		slice.registerRawSeries(volumeSeries);
+		EditableTSeries<OEEntrySet> executions = slice.createSeries(ORDER_EXECUTION_SERIES, false);
+		new OEDataProviderImpl(executions, new OEValidatorImpl(slice.getSymbol()), terminal);
 
 		new CandleSeriesByLastTrade(candleSeries, terminal, slice.getSymbol()).start();
 		return 0;

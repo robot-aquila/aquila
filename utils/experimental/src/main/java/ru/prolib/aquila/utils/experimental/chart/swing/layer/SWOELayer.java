@@ -1,56 +1,137 @@
 package ru.prolib.aquila.utils.experimental.chart.swing.layer;
 
-import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
-import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
-import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.utils.experimental.chart.BCDisplayContext;
-import ru.prolib.aquila.utils.experimental.chart.BarChartLayer;
+import ru.prolib.aquila.utils.experimental.chart.Polygon2D;
+import ru.prolib.aquila.utils.experimental.chart.Segment1D;
+import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
+import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 
 import java.awt.*;
-import java.util.List;
 
-import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TRADE_BUY_COLOR;
-import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TRADE_LINE_COLOR;
-import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.TRADE_SELL_COLOR;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Created by TiM on 16.09.2017.
+ * Order executions layer.
+ * <p>
+ * This class is SWING implementation of a layer to highlight all order executions.
  */
-public class BarChartTradesLayer extends BarChartAbstractLayer {
+public class SWOELayer extends SWAbstractLayer {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(SWOELayer.class);
+	}
 
-    public static final int ACCOUNTS_PARAM = 0;
-
-    public static final int LINE_COLOR = 0;
-    public static final int BUY_COLOR = 1;
-    public static final int SELL_COLOR = -1;
-
-    private final int HEIGHT = 10;
-    private final int WIDTH = 20;
-
-    private List<Account> accounts;
-    private Series<TradeInfoList> data;
-
-    public BarChartTradesLayer(Series<TradeInfoList> data) {
-        super(data.getId());
-        this.data = data;
-        colors.put(LINE_COLOR, TRADE_LINE_COLOR);
-        colors.put(BUY_COLOR, TRADE_BUY_COLOR);
-        colors.put(SELL_COLOR, TRADE_SELL_COLOR);
-    }
+	public static final int COLOR_ARROW_BORDER = 0;
+	public static final int COLOR_ARROW_UP  = 1;
+	public static final int COLOR_ARROW_DOWN = 2;
+	
+	/**
+	 * Width of arrow basis in pixels.<br>
+	 * Type: int<br>
+	 * Default: 20
+	 */
+	public static final int PARAM_ARROW_WIDTH = 0;
+	
+	/**
+	 * Height of arrow in pixels.<br>
+	 * Type: int<br>
+	 * Default: 10
+	 */
+	public static final int PARAM_ARROW_HEIGHT = 1;
+	
+	private Series<OEEntrySet> entries;
+	
+	public SWOELayer(Series<OEEntrySet> entries) {
+		super(entries.getId());
+		this.entries = entries;
+		setColor(COLOR_ARROW_BORDER, Color.BLACK);
+		setColor(COLOR_ARROW_UP,	 new Color(186, 243, 0));
+		setColor(COLOR_ARROW_DOWN,	 Color.PINK);
+		setParam(PARAM_ARROW_WIDTH,	 20);
+		setParam(PARAM_ARROW_HEIGHT, 10);
+	}
     
-    @Override
-    public Range<CDecimal> getValueRange(int first, int number) {
-    	// TODO: fixme, I have this range
-    	return null;
-    }
+	@Override
+	public Range<CDecimal> getValueRange(int first, int number) {
+		Range<CDecimal> vr = null, cvr;
+		OEEntrySet eset;
+		entries.lock();
+		try {
+			for ( int i = 0; i < number; i ++ ) {
+				try {
+					eset = entries.get(first + i);
+				} catch ( ValueException e ) {
+					logger.error("Error accessing value: ", e);
+					continue;
+				}
+				if ( eset == null ) {
+					continue;
+				}
+				cvr = new Range<>(eset.getMinPrice(), eset.getMaxPrice());
+				vr = cvr.extend(vr);
+			}
+		} finally {
+			entries.unlock();
+		}
+		return vr;
+	}
     
     @Override
     protected void paintLayer(BCDisplayContext context, Graphics2D graphics) {
-    	
+		CategoryAxisDisplayMapper cMapper = context.getCategoryAxisMapper();
+		ValueAxisDisplayMapper vMapper = context.getValueAxisMapper();
+		if ( cMapper.getAxisDirection().isVertical() ) {
+			logger.warn("Axis direction now unsupported: " + cMapper.getAxisDirection());
+			return;
+		}
+		Color clrBody, clrBorder = getColor(COLOR_ARROW_BORDER),
+			  clrBodyB = getColor(COLOR_ARROW_UP), clrBodyS = getColor(COLOR_ARROW_DOWN);
+		int arrHalfWidth = (int) getParam(PARAM_ARROW_WIDTH) / 2, arrHeight = (int) getParam(PARAM_ARROW_HEIGHT); 
+		entries.lock();
+		try {
+			int last = cMapper.getLastVisibleCategory(), y1, y2;
+			OEEntrySet eset;
+			Segment1D barSegment;
+			for ( int i = cMapper.getFirstVisibleCategory(); i <= last; i ++ ) {
+				try {
+					eset = entries.get(i);
+				} catch ( ValueException e ) {
+					logger.error("Error accessing data: ", e);
+					continue;
+				}
+				if ( eset == null ) {
+					continue;
+				}
+				barSegment = cMapper.toDisplay(i);
+				int xc = barSegment.getMidpoint();
+				for ( OEEntry entry : eset.getEntries() ) {
+					y1 = vMapper.toDisplay(entry.getPrice());
+					if ( entry.isBuy() ) {
+						clrBody = clrBodyB;
+						y2 = y1 + arrHeight;
+					} else {
+						clrBody = clrBodyS;
+						y2 = y1 - arrHeight;
+					}
+					Polygon2D poly = new Polygon2D()
+						.addPointEx(xc, y1)
+						.addPointEx(xc - arrHalfWidth, y2)
+						.addPointEx(xc + arrHalfWidth, y2);
+					graphics.setColor(clrBody);
+					graphics.fillPolygon(poly);
+					graphics.setColor(clrBorder);
+					graphics.drawPolygon(poly);
+				}
+			}
+		} finally {
+			entries.unlock();
+		}
     }
 
     /*

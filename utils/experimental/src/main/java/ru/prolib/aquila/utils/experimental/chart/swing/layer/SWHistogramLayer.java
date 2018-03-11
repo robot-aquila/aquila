@@ -17,7 +17,7 @@ import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 
-public class SWHistogramLayer extends BarChartCDecimalSeriesLayer {
+public class SWHistogramLayer extends SWCDecimalSeriesLayer {
 	public static final int NEGATE_VALUES_PARAM = 0;
 	private static final Logger logger;
 	

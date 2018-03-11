@@ -42,8 +42,11 @@ public class ChartConstants {
     @Deprecated
     public static final int CANDLE_LINE_WIDTH = 2;
 
+    @Deprecated
     public static final Color TRADE_BUY_COLOR = new Color(186, 243, 0);
+    @Deprecated
     public static final Color TRADE_SELL_COLOR = Color.PINK;
+    @Deprecated
     public static final Color TRADE_LINE_COLOR = Color.BLACK;
 
     public static final Color BAR_COLOR = Color.gray;

@@ -19,7 +19,7 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.*;
  */
 // TODO: it's ruler's function
 @Deprecated
-public class BarChartCurrentValueLayer extends BarChartCDecimalSeriesLayer {
+public class BarChartCurrentValueLayer extends SWCDecimalSeriesLayer {
 	public static final int COLOR_TEXT = 0;
 	public static final int COLOR_BG = 1;
 	public static final int COLOR_LINE = 2;

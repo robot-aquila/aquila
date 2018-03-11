@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by TiM on 19.09.2017.
  */
+@Deprecated
 public class TradeInfoList implements Lockable {
     private final List<TradeInfo> data = new ArrayList<>();
     private final LID lid;

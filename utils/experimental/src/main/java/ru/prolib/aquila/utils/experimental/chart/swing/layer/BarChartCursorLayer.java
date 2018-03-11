@@ -14,7 +14,8 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.SELECTION
 /**
  * Created by TiM on 13.09.2017.
  */
-public class BarChartCursorLayer extends BarChartAbstractLayer {
+@Deprecated
+public class BarChartCursorLayer extends SWAbstractLayer {
 	private Color color = SELECTION_COLOR;
 
 	public BarChartCursorLayer(AtomicInteger coord) {

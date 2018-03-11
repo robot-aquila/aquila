@@ -13,6 +13,7 @@ import java.time.Instant;
 /**
  * Created by TiM on 19.04.2017.
  */
+@Deprecated
 public class TradeInfo implements TStamped {
     private final Instant time;
     private final OrderAction action;

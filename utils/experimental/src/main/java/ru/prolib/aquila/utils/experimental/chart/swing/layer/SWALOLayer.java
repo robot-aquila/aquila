@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * This class is SWING implementation of a layer to highlight price level
  * of active orders (or any volumes to buy or to sell).
  */
-public class SWALOLayer extends BarChartAbstractLayer {
+public class SWALOLayer extends SWAbstractLayer {
 	private static final Logger logger;
 	
 	static {

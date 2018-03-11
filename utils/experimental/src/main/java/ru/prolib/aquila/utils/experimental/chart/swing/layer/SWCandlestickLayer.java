@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by TiM on 13.09.2017.
  */
-public class SWCandlestickLayer extends BarChartAbstractLayer {
+public class SWCandlestickLayer extends SWAbstractLayer {
 	public static final int BULLISH_BODY_COLOR = 1;
 	public static final int BULLISH_SHADOW_COLOR = 2;
 	public static final int BEARISH_BODY_COLOR = 3;

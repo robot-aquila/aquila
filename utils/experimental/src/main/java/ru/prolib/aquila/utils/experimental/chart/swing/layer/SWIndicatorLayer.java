@@ -21,7 +21,7 @@ import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.interpolator.LineRenderer;
 import ru.prolib.aquila.utils.experimental.chart.interpolator.Point;
 
-public class SWIndicatorLayer extends BarChartCDecimalSeriesLayer {
+public class SWIndicatorLayer extends SWCDecimalSeriesLayer {
 	private static final Logger logger;
 	
 	static {
@@ -77,10 +77,10 @@ public class SWIndicatorLayer extends BarChartCDecimalSeriesLayer {
 					continue;
 				}
 				if ( value == null ) {
-					points.add(null); // TODO: test me
+					points.add(null);
 				} else {
 					if ( negate ) {
-						value = value.negate(); // TODO: test me
+						value = value.negate();
 					}
 					Segment1D barSegment = cMapper.toDisplay(i);
 					int y = vMapper.toDisplay(value);
