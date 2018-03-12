@@ -27,7 +27,6 @@ public class SWOELayer extends SWAbstractLayer {
 		logger = LoggerFactory.getLogger(SWOELayer.class);
 	}
 
-	public static final int COLOR_ARROW_BORDER = 0;
 	public static final int COLOR_ARROW_UP  = 1;
 	public static final int COLOR_ARROW_DOWN = 2;
 	
@@ -50,8 +49,7 @@ public class SWOELayer extends SWAbstractLayer {
 	public SWOELayer(Series<OEEntrySet> entries) {
 		super(entries.getId());
 		this.entries = entries;
-		setColor(COLOR_ARROW_BORDER, Color.BLACK);
-		setColor(COLOR_ARROW_UP,	 new Color(186, 243, 0));
+		setColor(COLOR_ARROW_UP,	 Color.GREEN);
 		setColor(COLOR_ARROW_DOWN,	 Color.PINK);
 		setParam(PARAM_ARROW_WIDTH,	 20);
 		setParam(PARAM_ARROW_HEIGHT, 10);
@@ -90,8 +88,7 @@ public class SWOELayer extends SWAbstractLayer {
 			logger.warn("Axis direction now unsupported: " + cMapper.getAxisDirection());
 			return;
 		}
-		Color clrBody, clrBorder = getColor(COLOR_ARROW_BORDER),
-			  clrBodyB = getColor(COLOR_ARROW_UP), clrBodyS = getColor(COLOR_ARROW_DOWN);
+		Color clrBody, clrBodyB = getColor(COLOR_ARROW_UP), clrBodyS = getColor(COLOR_ARROW_DOWN);
 		int arrHalfWidth = (int) getParam(PARAM_ARROW_WIDTH) / 2, arrHeight = (int) getParam(PARAM_ARROW_HEIGHT); 
 		entries.lock();
 		try {
@@ -125,8 +122,6 @@ public class SWOELayer extends SWAbstractLayer {
 						.addPointEx(xc + arrHalfWidth, y2);
 					graphics.setColor(clrBody);
 					graphics.fillPolygon(poly);
-					graphics.setColor(clrBorder);
-					graphics.drawPolygon(poly);
 				}
 			}
 		} finally {

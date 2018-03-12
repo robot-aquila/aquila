@@ -40,8 +40,7 @@ public class SWOELayerTest {
 	
 	@Test
 	public void testCtor() {
-		assertEquals(Color.BLACK, service.getColor(SWOELayer.COLOR_ARROW_BORDER));
-		assertEquals(new Color(186, 243, 0), service.getColor(SWOELayer.COLOR_ARROW_UP));
+		assertEquals(Color.GREEN, service.getColor(SWOELayer.COLOR_ARROW_UP));
 		assertEquals(Color.PINK, service.getColor(SWOELayer.COLOR_ARROW_DOWN));
 		assertEquals(20, service.getParam(SWOELayer.PARAM_ARROW_WIDTH));
 		assertEquals(10, service.getParam(SWOELayer.PARAM_ARROW_HEIGHT));
@@ -76,9 +75,7 @@ public class SWOELayerTest {
 	
 	@Test
 	public void testPaint() throws Exception {
-		Color cBorder = service.getColor(SWOELayer.COLOR_ARROW_BORDER),
-				cUp = service.getColor(SWOELayer.COLOR_ARROW_UP),
-				cDn = service.getColor(SWOELayer.COLOR_ARROW_DOWN);
+		Color cUp = service.getColor(SWOELayer.COLOR_ARROW_UP), cDn = service.getColor(SWOELayer.COLOR_ARROW_DOWN);
 		entries.add(new OEEntrySetImpl().addEntry( true, of("12.94")));
 		entries.add(null);
 		entries.add(new OEEntrySetImpl().addEntry(false, of("10.74")).addEntry( true, of("11.55")));
@@ -97,15 +94,11 @@ public class SWOELayerTest {
 		Polygon2D poly = new Polygon2D().addPointEx(15, 100).addPointEx( 5,  90).addPointEx(25,  90);
 		graphicsMock.setColor(cDn);
 		graphicsMock.fillPolygon(poly);
-		graphicsMock.setColor(cBorder);
-		graphicsMock.drawPolygon(poly);
 		// set#2, entry#1
 		expect(vMapperMock.toDisplay(of("11.55"))).andReturn(85);
 		poly = new Polygon2D().addPointEx(15, 85).addPointEx( 5, 95).addPointEx(25, 95);
 		graphicsMock.setColor(cUp);
 		graphicsMock.fillPolygon(poly);
-		graphicsMock.setColor(cBorder);
-		graphicsMock.drawPolygon(poly);
 		// set#4
 		expect(cMapperMock.toDisplay(4)).andReturn(new Segment1D(30, 10));
 		// set#4, entry#0
@@ -113,15 +106,11 @@ public class SWOELayerTest {
 		poly = new Polygon2D().addPointEx(35, 70).addPointEx(25, 80).addPointEx(45, 80);
 		graphicsMock.setColor(cUp);
 		graphicsMock.fillPolygon(poly);
-		graphicsMock.setColor(cBorder);
-		graphicsMock.drawPolygon(poly);
 		// set#4, entry#1
 		expect(vMapperMock.toDisplay(of("10.50"))).andReturn(110);
 		poly = new Polygon2D().addPointEx(35, 110).addPointEx(25, 100).addPointEx(45, 100);
 		graphicsMock.setColor(cDn);
 		graphicsMock.fillPolygon(poly);
-		graphicsMock.setColor(cBorder);
-		graphicsMock.drawPolygon(poly);
 		control.replay();
 		Rectangle rootRect = new Rectangle(Point2D.ZERO, 200, 120);
 		BCDisplayContext context = new BCDisplayContextImpl(cMapperMock, vMapperMock, rootRect);
