@@ -1,8 +1,11 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Simple stub implementation of set of price levels.
+ */
 public class ALODataProviderStub implements ALODataProvider {
 	private final List<ALOData> data;
 	

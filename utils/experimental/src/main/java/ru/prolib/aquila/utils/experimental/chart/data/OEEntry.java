@@ -1,9 +1,9 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 
 /**
- * Order execution entry.
+ * Single descriptor of order execution.
  */
 public interface OEEntry {
 	

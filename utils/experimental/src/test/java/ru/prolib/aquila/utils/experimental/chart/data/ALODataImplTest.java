@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import static org.junit.Assert.*;
 import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.of;
@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.utils.Variant;
+import ru.prolib.aquila.utils.experimental.chart.data.ALODataImpl;
 
 public class ALODataImplTest {
 	private ALODataImpl service;

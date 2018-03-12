@@ -23,6 +23,8 @@ import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
+import ru.prolib.aquila.utils.experimental.chart.data.OEEntrySet;
+import ru.prolib.aquila.utils.experimental.chart.data.OEEntrySetImpl;
 
 public class SWOELayerTest {
 	private IMocksControl control;

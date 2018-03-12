@@ -9,6 +9,8 @@ import ru.prolib.aquila.utils.experimental.chart.Polygon2D;
 import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
+import ru.prolib.aquila.utils.experimental.chart.data.OEEntry;
+import ru.prolib.aquila.utils.experimental.chart.data.OEEntrySet;
 
 import java.awt.*;
 

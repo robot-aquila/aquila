@@ -1,9 +1,10 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 
 /**
  * The data of active limit orders.
+ * Used to describe volumes associated with price level.
  */
 public interface ALOData {
 	

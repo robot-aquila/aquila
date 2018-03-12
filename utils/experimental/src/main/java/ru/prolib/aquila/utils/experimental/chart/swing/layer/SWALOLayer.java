@@ -5,6 +5,8 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.utils.experimental.chart.BCDisplayContext;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
+import ru.prolib.aquila.utils.experimental.chart.data.ALOData;
+import ru.prolib.aquila.utils.experimental.chart.data.ALODataProvider;
 
 import java.awt.*;
 

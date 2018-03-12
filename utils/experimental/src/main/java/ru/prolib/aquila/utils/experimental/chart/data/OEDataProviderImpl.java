@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +11,9 @@ import ru.prolib.aquila.core.BusinessEntities.OrderExecutionEvent;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.EditableTSeries;
 
+/**
+ * Typical order execuions data provider based on appropriate terminal events.
+ */
 public class OEDataProviderImpl implements EventListener {
 	private final EditableTSeries<OEEntrySet> entries;
 	private final Set<Terminal> terminals;

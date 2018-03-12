@@ -1,9 +1,12 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import java.util.Collection;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 
+/**
+ * Set of descriptors of order executions.
+ */
 public interface OEEntrySet {
 	
 	CDecimal getMinPrice();

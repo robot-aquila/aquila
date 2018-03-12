@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import java.util.ArrayList;
 import java.util.Collection;

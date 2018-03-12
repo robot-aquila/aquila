@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import static org.junit.Assert.*;
 import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.of;
@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+
+import ru.prolib.aquila.utils.experimental.chart.data.ALOData;
+import ru.prolib.aquila.utils.experimental.chart.data.ALODataImpl;
+import ru.prolib.aquila.utils.experimental.chart.data.ALODataProviderStub;
 
 public class ALODataProviderStubTest {
 

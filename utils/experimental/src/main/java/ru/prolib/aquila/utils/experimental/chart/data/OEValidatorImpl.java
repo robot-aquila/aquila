@@ -1,30 +1,27 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
-import ru.prolib.aquila.core.BusinessEntities.Order;
-import ru.prolib.aquila.core.BusinessEntities.OrderType;
+import ru.prolib.aquila.core.BusinessEntities.OrderException;
+import ru.prolib.aquila.core.BusinessEntities.OrderExecution;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-/**
- * Typical active limit order validator with supporting filter by symbol and account.
- */
-public class ALOValidatorImpl implements ALOValidator {
+public class OEValidatorImpl implements OEValidator {
 	private final Set<Symbol> filterBySymbol;
 	private final Set<Account> filterByAccount;
-	
-	ALOValidatorImpl(Set<Symbol> filterBySymbol, Set<Account> filterByAccount) {
+
+	OEValidatorImpl(Set<Symbol> filterBySymbol, Set<Account> filterByAccount) {
 		this.filterBySymbol = filterBySymbol;
 		this.filterByAccount = filterByAccount;
 	}
 	
-	public ALOValidatorImpl() {
+	public OEValidatorImpl() {
 		this(new HashSet<>(), new HashSet<>());
 	}
 	
-	public ALOValidatorImpl(Symbol symbol) {
+	public OEValidatorImpl(Symbol symbol) {
 		this();
 		addFilterBySymbol(symbol);
 	}
@@ -62,15 +59,21 @@ public class ALOValidatorImpl implements ALOValidator {
 	}
 
 	@Override
-	public synchronized boolean isValid(Order order) {
-		if ( order.getType() != OrderType.LMT || ! order.getStatus().isActive() ) {
-			return false;
+	public synchronized boolean isValid(OrderExecution execution) {
+		if ( filterBySymbol.size() > 0 ) {
+			if ( ! filterBySymbol.contains(execution.getSymbol()) ) {
+				return false;
+			}
 		}
-		if ( filterBySymbol.size() > 0 && ! filterBySymbol.contains(order.getSymbol()) ) {
-			return false;
-		}
-		if ( filterByAccount.size() > 0 && ! filterByAccount.contains(order.getAccount()) ) {
-			return false;
+		if ( filterByAccount.size() > 0 ) {
+			try {
+				Account account = execution.getTerminal().getOrder(execution.getOrderID()).getAccount();
+				if ( ! filterByAccount.contains(account) ) {
+					return false;
+				}
+			} catch ( OrderException e ) {
+				throw new IllegalStateException("Unable obtain order account", e);
+			}
 		}
 		return true;
 	}

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.chart.swing.layer;
+package ru.prolib.aquila.utils.experimental.chart.data;
 
 import static org.junit.Assert.*;
 import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.of;
@@ -20,6 +20,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderField;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProviderStub;
+import ru.prolib.aquila.utils.experimental.chart.data.ALOValidatorImpl;
 
 public class ALOValidatorImplTest {
 	private static Symbol symbol1, symbol2, symbol3;

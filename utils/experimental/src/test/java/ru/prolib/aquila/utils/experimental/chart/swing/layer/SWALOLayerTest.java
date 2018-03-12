@@ -24,6 +24,9 @@ import ru.prolib.aquila.utils.experimental.chart.Point2D;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
+import ru.prolib.aquila.utils.experimental.chart.data.ALOData;
+import ru.prolib.aquila.utils.experimental.chart.data.ALODataImpl;
+import ru.prolib.aquila.utils.experimental.chart.data.ALODataProvider;
 
 public class SWALOLayerTest {
 	private IMocksControl control;
