@@ -196,7 +196,7 @@ public class SW2MTFAdapterImpl implements SW2MTFAdapter {
 	}
 
 	@Override
-	public synchronized MTFLabelMapper getLabelMapper(CategoryAxisDisplayMapper mapper,
+	public MTFLabelMapper getLabelMapper(CategoryAxisDisplayMapper mapper,
 													  ZTFrame tframe,
 													  SWLabelDimensions labelDimensions)
 	{

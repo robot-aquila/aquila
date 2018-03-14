@@ -23,8 +23,9 @@ import ru.prolib.aquila.utils.experimental.chart.Point2D;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriverImpl;
@@ -143,6 +144,7 @@ public class SWValueAxisRulerRendererTest {
 		labels.add(new RLabel(of("10.00"), "10.00", 119));
 		labels.add(new RLabel(of("15.00"), "15.00",  59));
 		labels.add(new RLabel(of("20.00"), "20.00",   0));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.UP);
 		expect(graphicsMock.getFontMetrics(fontMock)).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(19);
 		graphicsMock.setFont(fontMock);
@@ -156,8 +158,9 @@ public class SWValueAxisRulerRendererTest {
 		expect(fontMetricsMock.stringWidth("20.00")).andReturn(22);
 		graphicsMock.drawString("20.00", 12,   9);
 		control.replay();
+		RulerSetup setup = new RulerSetup(new RulerID("foo", "bar", false));
 		
-		service.drawRuler(RulerPosition.LEFT, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 		
 		control.verify();
 	}
@@ -169,6 +172,7 @@ public class SWValueAxisRulerRendererTest {
 		labels.add(new RLabel(of("10.00"), "10.00", 119));
 		labels.add(new RLabel(of("15.00"), "15.00",  59));
 		labels.add(new RLabel(of("20.00"), "20.00",   0));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.UP);
 		expect(graphicsMock.getFontMetrics(fontMock)).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(19);
 		graphicsMock.setFont(fontMock);
@@ -179,8 +183,9 @@ public class SWValueAxisRulerRendererTest {
 		graphicsMock.drawLine(280,   0,  282,   0);
 		graphicsMock.drawString("20.00", 285,   9);
 		control.replay();
+		RulerSetup setup = new RulerSetup(new RulerID("foo", "bar", true));
 		
-		service.drawRuler(RulerPosition.RIGHT, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 		
 		control.verify();
 	}
@@ -192,9 +197,11 @@ public class SWValueAxisRulerRendererTest {
 		labels.add(new RLabel(of("10.00"), "10.00", -1));
 		labels.add(new RLabel(of("15.00"), "15.00", -1));
 		labels.add(new RLabel(of("20.00"), "20.00", -1));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
 		control.replay();
+		RulerSetup setup = new RulerSetup(new RulerID("foo", "bar", false));
 		
-		service.drawRuler(RulerPosition.TOP, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 	}
 	
 	@Test (expected=UnsupportedOperationException.class)
@@ -204,9 +211,11 @@ public class SWValueAxisRulerRendererTest {
 		labels.add(new RLabel(of("10.00"), "10.00", -1));
 		labels.add(new RLabel(of("15.00"), "15.00", -1));
 		labels.add(new RLabel(of("20.00"), "20.00", -1));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
 		control.replay();
+		RulerSetup setup = new RulerSetup(new RulerID("foo", "bar", true));
 		
-		service.drawRuler(RulerPosition.BOTTOM, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 	}
 	
 	@Test
@@ -238,6 +247,14 @@ public class SWValueAxisRulerRendererTest {
 		control.replay();
 		
 		service.drawGridLines(plot, graphicsMock, mapperMock, labels);
+	}
+	
+	@Test
+	public void testCreateRulerSetup() {
+		RulerID rulerID = new RulerID("alpha", "beta", false);
+		RulerSetup expected = new RulerSetup(rulerID);
+		
+		assertEquals(expected, service.createRulerSetup(rulerID));
 	}
 
 }

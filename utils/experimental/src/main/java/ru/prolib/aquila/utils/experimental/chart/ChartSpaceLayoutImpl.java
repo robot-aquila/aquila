@@ -5,16 +5,16 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerSpace;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 
 public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 	private static final Segment1D ZERO_SEGMENT = new Segment1D(0, 0);
 	private final Segment1D dataSpace;
-	private final List<ChartRulerSpace> rulers;
+	private final List<RulerSpace> rulers;
 	
 	public ChartSpaceLayoutImpl(Segment1D dataSpace,
-								List<ChartRulerSpace> rulerSpaces)
+								List<RulerSpace> rulerSpaces)
 	{
 		this.dataSpace = dataSpace;
 		this.rulers = rulerSpaces;
@@ -23,8 +23,8 @@ public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 	@Override
 	public Segment1D getLowerRulersTotalSpace() {
 		Integer c1 = null, c2 = null;
-		for ( ChartRulerSpace s : rulers ) {
-			ChartRulerID id = s.getRulerID();
+		for ( RulerSpace s : rulers ) {
+			RulerID id = s.getRulerID();
 			if ( id.isLowerPosition() ) {
 				Segment1D segment = s.getSpace();
 				if ( c1 == null ) {
@@ -45,8 +45,8 @@ public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 	@Override
 	public Segment1D getUpperRulersTotalSpace() {
 		Integer c1 = null, c2 = null;
-		for ( ChartRulerSpace s : rulers ) {
-			ChartRulerID id = s.getRulerID();
+		for ( RulerSpace s : rulers ) {
+			RulerID id = s.getRulerID();
 			if ( id.isUpperPosition() ) {
 				Segment1D segment = s.getSpace();
 				if ( c1 == null ) {
@@ -70,7 +70,7 @@ public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 	}
 
 	@Override
-	public List<ChartRulerSpace> getRulers() {
+	public List<RulerSpace> getRulers() {
 		return rulers;
 	}
 	

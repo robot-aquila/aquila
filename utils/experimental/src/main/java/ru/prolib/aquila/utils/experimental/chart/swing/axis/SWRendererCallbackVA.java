@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.util.List;
 
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
 
@@ -14,7 +14,7 @@ import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
  */
 public interface SWRendererCallbackVA {
 	
-	void drawRuler(RulerPosition position,
+	void drawRuler(RulerSetup setup,
 				   	Rectangle target,
 				   	Graphics2D graphics,
 				   	ValueAxisDisplayMapper mapper,

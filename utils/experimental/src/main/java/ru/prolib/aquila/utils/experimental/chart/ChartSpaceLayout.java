@@ -2,7 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart;
 
 import java.util.List;
 
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerSpace;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 
 /**
  * Разметка пространства графика.
@@ -40,6 +40,6 @@ public interface ChartSpaceLayout {
 	 * <p>
 	 * @return параметры всех линеек, подлежащих отображению
 	 */
-	List<ChartRulerSpace> getRulers();
+	List<RulerSpace> getRulers();
 
 }

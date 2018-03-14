@@ -12,5 +12,7 @@ public interface RulerRenderer {
 	int getMaxLabelWidth(Object device);
 	
 	int getMaxLabelHeight(Object device);
+	
+	RulerSetup createRulerSetup(RulerID rulerID);
 
 }

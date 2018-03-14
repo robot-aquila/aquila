@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
 
 /**
@@ -49,8 +49,8 @@ public class SWPreparedRulerCA implements PreparedRuler {
 	}
 
 	@Override
-	public void drawRuler(RulerPosition position, Rectangle target, Object device) {
-		renderer.drawRuler(position,
+	public void drawRuler(RulerSetup setup, Rectangle target, Object device) {
+		renderer.drawRuler(setup,
 						target,
 						(Graphics2D) device,
 						mapper,

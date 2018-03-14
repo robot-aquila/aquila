@@ -16,11 +16,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * где ось X направлена слева-направо, область отображения низшей позиции будет
  * находиться левее графика, а высшей - справа от него.
  */
-public class ChartRulerID {
+public class RulerID {
 	private final String axisID, rendererID;
 	private final boolean isUpperPos;
 	
-	public ChartRulerID(String axisID, String rendererID, boolean isUpperPos) {
+	public RulerID(String axisID, String rendererID, boolean isUpperPos) {
 		this.axisID = axisID;
 		this.rendererID = rendererID;
 		this.isUpperPos = isUpperPos;
@@ -47,10 +47,10 @@ public class ChartRulerID {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != ChartRulerID.class ) {
+		if ( other == null || other.getClass() != RulerID.class ) {
 			return false;
 		}
-		ChartRulerID o = (ChartRulerID) other;
+		RulerID o = (RulerID) other;
 		return new EqualsBuilder()
 				.append(o.isUpperPos, isUpperPos)
 				.append(o.axisID, axisID)

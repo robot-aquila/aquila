@@ -31,7 +31,7 @@ import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabel;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabelMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabelMapperImpl;
@@ -369,10 +369,11 @@ public class SWTimeAxisRulerRendererTest {
 		labels.add(new RLabel(5,  "9h", 45));
 		labels.add(new RLabel(7, ":55", 65));
 		labels.add(new RLabel(9, "10h", 85));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
 		graphicsMock.setFont(fontMock);
 		expect(graphicsMock.getFontMetrics()).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(12);
-		graphicsMock.drawLine(40, 100, 239, 100);
+		graphicsMock.drawLine(40, 100, 239, 100); // inner line
 		graphicsMock.drawLine(45, 100,  45, 119);
 		graphicsMock.drawString("9h",   47, 112);
 		graphicsMock.drawLine(65, 100,  65, 119);
@@ -380,8 +381,11 @@ public class SWTimeAxisRulerRendererTest {
 		graphicsMock.drawLine(85, 100,  85, 119);
 		graphicsMock.drawString("10h",  87, 112);
 		control.replay();
+		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", true))
+				.setShowInnerLine(true)
+				.setShowOuterLine(false);
 		
-		service.drawRuler(RulerPosition.BOTTOM, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 		
 		control.verify();
 	}
@@ -393,9 +397,11 @@ public class SWTimeAxisRulerRendererTest {
 		labels.add(new RLabel(5,  "9h", 45));
 		labels.add(new RLabel(7, ":55", 65));
 		labels.add(new RLabel(9, "10h", 85));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.UP);
 		control.replay();
+		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", false));
 		
-		service.drawRuler(RulerPosition.LEFT, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 	}
 	
 	@Test (expected=UnsupportedOperationException.class)
@@ -405,9 +411,11 @@ public class SWTimeAxisRulerRendererTest {
 		labels.add(new RLabel(5,  "9h", 45));
 		labels.add(new RLabel(7, ":55", 65));
 		labels.add(new RLabel(9, "10h", 85));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.UP);
 		control.replay();
+		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", true));
 		
-		service.drawRuler(RulerPosition.RIGHT, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 	}
 	
 	@Test
@@ -417,9 +425,10 @@ public class SWTimeAxisRulerRendererTest {
 		labels.add(new RLabel(5,  "9h", 45));
 		labels.add(new RLabel(7, ":55", 65));
 		labels.add(new RLabel(9, "10h", 85));
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
 		graphicsMock.setFont(fontMock);
 		expect(graphicsMock.getFontMetrics()).andReturn(fontMetricsMock);
-		graphicsMock.drawLine(30, 24, 429, 24);
+		graphicsMock.drawLine(30,  0, 429,  0); // outer line
 		graphicsMock.drawLine(45,  0,  45, 24);
 		graphicsMock.drawString("9h",  47, 22);
 		graphicsMock.drawLine(65,  0,  65, 24);
@@ -427,8 +436,11 @@ public class SWTimeAxisRulerRendererTest {
 		graphicsMock.drawLine(85,  0,  85, 24);
 		graphicsMock.drawString("10h", 87, 22);
 		control.replay();
+		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", false))
+				.setShowInnerLine(false)
+				.setShowOuterLine(true);
 		
-		service.drawRuler(RulerPosition.TOP, target, graphicsMock, mapperMock, labels, fontMock);
+		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
 		
 		control.verify();
 	}
@@ -462,6 +474,14 @@ public class SWTimeAxisRulerRendererTest {
 		control.replay();
 		
 		service.drawGridLines(plot, graphicsMock, mapperMock, labels);
+	}
+	
+	@Test
+	public void testCreateRulerSetup() {
+		RulerID rulerID = new RulerID("foo", "bar", true);
+		SWTimeAxisRulerSetup expected = new SWTimeAxisRulerSetup(rulerID);
+		
+		assertEquals(expected, service.createRulerSetup(rulerID));
 	}
 	
 }

@@ -64,7 +64,7 @@ import ru.prolib.aquila.utils.experimental.chart.BarChartPanel;
 import ru.prolib.aquila.utils.experimental.chart.ChartSpaceManager;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.data.ALODataProviderImpl;
 import ru.prolib.aquila.utils.experimental.chart.data.ALOValidatorImpl;
@@ -73,6 +73,7 @@ import ru.prolib.aquila.utils.experimental.chart.data.OEEntrySet;
 import ru.prolib.aquila.utils.experimental.chart.data.OEValidatorImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
+import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWCandlestickLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWOELayer;
@@ -214,7 +215,7 @@ public class SecuritySimulationTest implements Experiment {
 					public void run() {
 						//JPanel chartRoot = new JPanel(new GridLayout(2, 2));
 						JPanel chartRoot = new JPanel(new GridLayout(1, 1));
-						for(SDP2DataSlice<SDP2Key> slice : slices){
+						for(SDP2DataSlice<SDP2Key> slice : slices) {
 							ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();
 							BarChartPanelImpl chartPanel = (BarChartPanelImpl) createChartPanel(slice, s);
 							chartPanel.setCategories(categories);
@@ -340,15 +341,20 @@ public class SecuritySimulationTest implements Experiment {
 				.setHeight(600)
 				.addStaticOverlay(symbol + ", " + slice.getTimeFrame().toTFrame(), 0);
 		ChartSpaceManager vsm = chart.getVerticalSpaceManager();
-		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME", false), true);
-		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME",  true), true);
+		// TODO: add date ruler to top
+		((SWTimeAxisRulerSetup) vsm.getLowerRulerSetup("CATEGORY", "TIME"))
+			.setVisible(true)
+			.setShowInnerLine(true)
+			.setShowOuterLine(false);
+		((SWTimeAxisRulerSetup) vsm.getUpperRulerSetup("CATEGORY", "TIME"))
+			.setVisible(false);
 		
 		// Setup value axis ruler renderers
 		ValueAxisDriver vad = chart.getValueAxisDriver();
 		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(security.getTickSize());
 		ChartSpaceManager hsm = chart.getHorizontalSpaceManager();
-		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL", false), true);
-		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL",  true), true);
+		hsm.getUpperRulerSetup("VALUE", "LABEL").setVisible(true);
+		hsm.getLowerRulerSetup("VALUE", "LABEL").setVisible(true);
 		
 		chart.addLayer(new SWCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
 		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
@@ -365,14 +371,23 @@ public class SecuritySimulationTest implements Experiment {
 				.addStaticOverlay("Volume", 0);
 		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES));
 		vsm = chart.getVerticalSpaceManager();
-		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME", false), false);
-		vsm.setRulerVisibility(new ChartRulerID("CATEGORY", "TIME",  true), true);
+		((SWTimeAxisRulerSetup) vsm.getLowerRulerSetup("CATEGORY", "TIME"))
+			.setVisible(true)
+			.setDisplayPriority(20) // hide this first
+			.setShowInnerLine(true)
+			.setShowOuterLine(true);
+		((SWTimeAxisRulerSetup) vsm.getUpperRulerSetup("CATEGORY", "TIME"))
+			.setVisible(true)
+			.setDisplayPriority(10)
+			.setShowInnerLine(true)
+			.setShowOuterLine(false);
+		// TODO: add date ruler to borrom
 		
 		vad = chart.getValueAxisDriver();
 		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(CDecimalBD.of(1L));
 		hsm = chart.getHorizontalSpaceManager();
-		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL", false), true);
-		hsm.setRulerVisibility(new ChartRulerID("VALUE", "LABEL",  true), true);
+		hsm.setRulerVisibility(new RulerID("VALUE", "LABEL", false), true);
+		hsm.setRulerVisibility(new RulerID("VALUE", "LABEL",  true), true);
 
 		return chartPanel;
 	}

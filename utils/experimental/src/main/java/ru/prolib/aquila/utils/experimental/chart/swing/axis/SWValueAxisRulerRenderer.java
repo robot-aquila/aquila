@@ -12,8 +12,9 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
@@ -44,19 +45,19 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 		return labelGenerator;
 	}
 	
-	public synchronized CDecimal getTickSize() {
+	public CDecimal getTickSize() {
 		return tickSize;
 	}
 	
-	public synchronized void setTickSize(CDecimal tickSize) {
+	public void setTickSize(CDecimal tickSize) {
 		this.tickSize = tickSize;
 	}
 	
-	public synchronized Font getLabelFont() {
+	public Font getLabelFont() {
 		return labelFont;
 	}
 	
-	public synchronized void setLabelFont(Font labelFont) {
+	public void setLabelFont(Font labelFont) {
 		this.labelFont = labelFont;
 	}
 
@@ -66,18 +67,18 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 	}
 
 	@Override
-	public synchronized int getMaxLabelWidth(Object device) {
+	public int getMaxLabelWidth(Object device) {
 		// TODO: to use label formatter
 		return ((Graphics2D) device).getFontMetrics(labelFont).stringWidth("000000000000") + 5;
 	}
 
 	@Override
-	public synchronized int getMaxLabelHeight(Object device) {
+	public int getMaxLabelHeight(Object device) {
 		return ((Graphics2D) device).getFontMetrics(labelFont).getHeight() + 5;
 	}
 
 	@Override
-	public synchronized PreparedRuler prepareRuler(ValueAxisDisplayMapper mapper,
+	public PreparedRuler prepareRuler(ValueAxisDisplayMapper mapper,
 			Object device)
 	{
 		AxisDirection dir = mapper.getAxisDirection();
@@ -97,25 +98,21 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 	}
 	
 	@Override
-	public void drawRuler(RulerPosition position,
+	public void drawRuler(RulerSetup setup,
 						  Rectangle target,
 						  Graphics2D graphics,
 						  ValueAxisDisplayMapper mapper,
 						  List<RLabel> labels,
 						  Font labelFont)
 	{
-		switch ( position ) {
-		case LEFT:
-		case RIGHT:
-			break;
-		default:
-			throw new UnsupportedOperationException("Ruler position is not supported: " + position);	
+		AxisDirection dir = mapper.getAxisDirection();
+		if ( dir.isHorizontal() ) {
+			throw new UnsupportedOperationException("Axis direction is not supported: " + dir);	
 		}
 		FontMetrics fontMetrics = graphics.getFontMetrics(labelFont);
 		int textHalfHeight = fontMetrics.getAscent() / 2;
 		graphics.setFont(labelFont);
-		switch ( position ) {
-		case LEFT:
+		if ( setup.getRulerID().isLowerPosition() ) {
 			for ( RLabel label : labels ) {
 				int x = target.getRightX();
 				int y = label.getCoord();
@@ -125,8 +122,7 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 				y += textHalfHeight;
 				graphics.drawString(label.getText(), x, y);
 			}
-			break;
-		case RIGHT:
+		} else {
 			for ( RLabel label : labels ) {
 				int x = target.getLeftX();
 				int y = label.getCoord();
@@ -135,9 +131,6 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 				y += textHalfHeight;
 				graphics.drawString(label.getText(), x, y);
 			}
-		case TOP:
-		case BOTTOM:
-		default:
 		}
 	}
 	
@@ -155,6 +148,11 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 		for ( RLabel label : labels ) {
 			graphics.drawLine(x1, label.getCoord(), x2, label.getCoord());
 		}
+	}
+
+	@Override
+	public RulerSetup createRulerSetup(RulerID rulerID) {
+		return new RulerSetup(rulerID);
 	}
 
 }

@@ -10,13 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.utils.Variant;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerSpace;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 
 public class ChartSpaceLayoutImplTest {
 	private Segment1D dataSpace1, dataSpace2;
-	private ChartRulerSpace ruler1, ruler2, ruler3, ruler4, ruler5, ruler6;
-	private List<ChartRulerSpace> rulers1, rulers2;
+	private RulerSpace ruler1, ruler2, ruler3, ruler4, ruler5, ruler6;
+	private List<RulerSpace> rulers1, rulers2;
 	private ChartSpaceLayoutImpl service;
 
 	@Before
@@ -27,11 +27,11 @@ public class ChartSpaceLayoutImplTest {
 		// there are two rulers of categories axis: date which is outer
 		// and time which is inner, next to data area.
 		// Initially, display segment shifted 5 pixels right
-		ruler1 = new ChartRulerSpace(new ChartRulerID("AXIS", "DATE", false), new Segment1D(  5, 15));
-		ruler2 = new ChartRulerSpace(new ChartRulerID("AXIS", "TIME", false), new Segment1D( 20, 12));
+		ruler1 = new RulerSpace(new RulerID("AXIS", "DATE", false), new Segment1D(  5, 15));
+		ruler2 = new RulerSpace(new RulerID("AXIS", "TIME", false), new Segment1D( 20, 12));
 		dataSpace1 = new Segment1D(32, 100);
-		ruler3 = new ChartRulerSpace(new ChartRulerID("AXIS", "TIME", true),  new Segment1D(132, 12));
-		ruler4 = new ChartRulerSpace(new ChartRulerID("AXIS", "DATE", true),  new Segment1D(144, 15));
+		ruler3 = new RulerSpace(new RulerID("AXIS", "TIME", true),  new Segment1D(132, 12));
+		ruler4 = new RulerSpace(new RulerID("AXIS", "DATE", true),  new Segment1D(144, 15));
 		rulers1 = new ArrayList<>();
 		rulers1.add(ruler1);
 		rulers1.add(ruler2);
@@ -39,9 +39,9 @@ public class ChartSpaceLayoutImplTest {
 		rulers1.add(ruler4);
 		service = new ChartSpaceLayoutImpl(dataSpace1, rulers1);
 		// Data for additional tests
-		ruler5 = new ChartRulerSpace(new ChartRulerID("foo", "bar", false), new Segment1D( 0, 10));
+		ruler5 = new RulerSpace(new RulerID("foo", "bar", false), new Segment1D( 0, 10));
 		dataSpace2 = new Segment1D(10, 50);
-		ruler6 = new ChartRulerSpace(new ChartRulerID("foo", "bar", true),  new Segment1D(60, 10));
+		ruler6 = new RulerSpace(new RulerID("foo", "bar", true),  new Segment1D(60, 10));
 		rulers2 = new ArrayList<>();
 		rulers2.add(ruler5);
 		rulers2.add(ruler6);
@@ -97,9 +97,9 @@ public class ChartSpaceLayoutImplTest {
 	
 	@Test
 	public void testGetRulers() {
-		List<ChartRulerSpace> actual = service.getRulers();
+		List<RulerSpace> actual = service.getRulers();
 		
-		List<ChartRulerSpace> expected = new ArrayList<>();
+		List<RulerSpace> expected = new ArrayList<>();
 		expected.add(ruler1);
 		expected.add(ruler2);
 		expected.add(ruler3);
@@ -117,7 +117,7 @@ public class ChartSpaceLayoutImplTest {
 	@Test
 	public void testEquals() {
 		Variant<Segment1D> vDS = new Variant<>(dataSpace1, dataSpace2);
-		Variant<List<ChartRulerSpace>> vRulers = new Variant<>(vDS);
+		Variant<List<RulerSpace>> vRulers = new Variant<>(vDS);
 		vRulers.add(rulers1);
 		vRulers.add(rulers2);
 		Variant<?> iterator = vRulers;

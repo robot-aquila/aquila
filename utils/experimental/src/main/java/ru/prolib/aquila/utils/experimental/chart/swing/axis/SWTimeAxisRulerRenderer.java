@@ -19,7 +19,8 @@ import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabel;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabelGenerator;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabelMapper;
@@ -95,19 +96,19 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 		return adapter;
 	}
 	
-	public synchronized Font getLabelFont() {
+	public Font getLabelFont() {
 		return labelFont;
 	}
 	
-	public synchronized void setLabelFont(Font labelFont) {
+	public void setLabelFont(Font labelFont) {
 		this.labelFont = labelFont;
 	}
 	
-	public synchronized TSeries<Instant> getCategories() {
+	public TSeries<Instant> getCategories() {
 		return categories;
 	}
 	
-	public synchronized void setCategories(TSeries<Instant> categories) {
+	public void setCategories(TSeries<Instant> categories) {
 		this.categories = categories;
 	}
 	
@@ -120,18 +121,18 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 	}
 
 	@Override
-	public synchronized int getMaxLabelWidth(Object device) {
+	public int getMaxLabelWidth(Object device) {
 		return getLabelWidth(MTFLabelGenerator.getLargestLabelTemplate(),
 				((Graphics2D) device).getFontMetrics(labelFont));
 	}
 	
 	@Override
-	public synchronized int getMaxLabelHeight(Object device) {
+	public int getMaxLabelHeight(Object device) {
 		return getLabelHeight("X", ((Graphics2D) device).getFontMetrics(labelFont));
 	}
 
 	@Override
-	public synchronized PreparedRuler prepareRuler(CategoryAxisDisplayMapper mapper, Object device) {
+	public PreparedRuler prepareRuler(CategoryAxisDisplayMapper mapper, Object device) {
 		Graphics2D graphics = (Graphics2D) device;
 		AxisDirection dir = mapper.getAxisDirection();
 		if ( dir.isVertical() ) {
@@ -176,46 +177,48 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 	}
 
 	@Override
-	public void drawRuler(RulerPosition position,
+	public void drawRuler(RulerSetup s,
 						Rectangle target,
 						Graphics2D graphics,
 						CategoryAxisDisplayMapper mapper,
 						List<RLabel> labels,
 						Font labelFont)
 	{
-		switch ( position ) {
-		case TOP:
-		case BOTTOM:
-			break;
-		default:
-			throw new UnsupportedOperationException("Ruler position is not supported: " + position); 
+		SWTimeAxisRulerSetup setup = (SWTimeAxisRulerSetup) s;
+		AxisDirection dir = mapper.getAxisDirection();
+		if ( dir.isVertical() ) {
+			throw new UnsupportedOperationException("Axis direction is not supported: " + dir); 
 		}
 		graphics.setFont(labelFont);
 		FontMetrics fontMetrics = graphics.getFontMetrics();
 		int y, x;
-		switch ( position ) {
-		case TOP:
+		if ( setup.getRulerID().isLowerPosition() ) {
 			y = target.getLowerY();
-			graphics.drawLine(target.getLeftX(), y, target.getRightX(), y);
+			if ( setup.isShowInnerLine() ) {
+				graphics.drawLine(target.getLeftX(), y, target.getRightX(), y);
+			}
+			if ( setup.isShowOuterLine() ) {
+				graphics.drawLine(target.getLeftX(), target.getUpperY(), target.getRightX(), target.getUpperY());
+			}
 			for ( RLabel label : labels ) {
 				x = label.getCoord();
 				graphics.drawLine(x, target.getUpperY(), x, target.getLowerY());
 				graphics.drawString(label.getText(), x + 2, y - 2);
 			}
-			break;
-		case BOTTOM:
+		} else {
 			y = target.getUpperY();
 			int textY = fontMetrics.getAscent() + y;
-			graphics.drawLine(target.getLeftX(), y, target.getRightX(), y);
+			if ( setup.isShowInnerLine() ) {
+				graphics.drawLine(target.getLeftX(), y, target.getRightX(), y);
+			}
+			if ( setup.isShowOuterLine() ) {
+				graphics.drawLine(target.getLeftX(), target.getLowerY(), target.getRightX(), target.getLowerY());
+			}
 			for ( RLabel label : labels ) {
 				x = label.getCoord();
 				graphics.drawLine(x, target.getUpperY(), x, target.getLowerY());
 				graphics.drawString(label.getText(), x + 2, textY);
 			}
-			break;
-		case LEFT:
-		case RIGHT:
-		default:
 		}
 	}
 
@@ -234,6 +237,11 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 			int x = label.getCoord();
 			graphics.drawLine(x, y1, x, y2);
 		}
+	}
+
+	@Override
+	public RulerSetup createRulerSetup(RulerID rulerID) {
+		return new SWTimeAxisRulerSetup(rulerID);
 	}
 
 }

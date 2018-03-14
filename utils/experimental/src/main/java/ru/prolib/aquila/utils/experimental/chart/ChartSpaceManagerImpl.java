@@ -12,68 +12,15 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDriver;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerSpace;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerRenderer;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 
 public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	
-	static class RulerSetup {
-		private boolean visible = true;
-		private int priority = 0;
-		
-		public RulerSetup(boolean visible, int priority) {
-			this.visible = visible;
-			this.priority = priority;
-		}
-		
-		public RulerSetup() {
-			this(true, 0);
-		}
-		
-		public void setVisible(boolean visible) {
-			this.visible = visible;
-		}
-		
-		public boolean isVisible() {
-			return visible;
-		}
-		
-		public void setPriority(int priority) {
-			this.priority = priority;
-		}
-		
-		public int getPriority() {
-			return priority;
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if ( other == this ) {
-				return true;
-			}
-			if ( other == null || other.getClass() != RulerSetup.class ) {
-				return false;
-			}
-			RulerSetup o = (RulerSetup) other;
-			return new EqualsBuilder()
-					.append(o.priority, priority)
-					.append(o.visible, visible)
-					.isEquals();
-		}
-		
-		@Override
-		public String toString() {
-			return new ToStringBuilder(this)
-					.append("visible", visible)
-					.append("priority", priority)
-					.toString();
-		}
-
-	}
-	
 	static class RulerEntry implements Comparable<RulerEntry> {
-		private final ChartRulerID rulerID;
+		private final RulerID rulerID;
 		private final int rulerPriority;
 		private final int axisPriority;
 		private final int rendererPriority;
@@ -85,7 +32,7 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		 */
 		private int rulerLength;
 		
-		public RulerEntry(ChartRulerID rulerID,
+		public RulerEntry(RulerID rulerID,
 						  int rulerPriority,
 						  int axisPriority,
 						  int rendererPriority)
@@ -105,7 +52,7 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 			return rulerLength;
 		}
 		
-		public ChartRulerID getRulerID() {
+		public RulerID getRulerID() {
 			return rulerID;
 		}
 
@@ -207,11 +154,11 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	
 	private final LabelSizeStrategy labelSizeStrategy;
 	private final LinkedHashMap<String, AxisDriver> drivers;
-	private final HashMap<ChartRulerID, RulerSetup> rulerSetups;
+	private final HashMap<RulerID, RulerSetup> rulerSetups;
 	
 	ChartSpaceManagerImpl(LabelSizeStrategy labelSizeStrategy,
 						  LinkedHashMap<String, AxisDriver> drivers,
-						  HashMap<ChartRulerID, RulerSetup> rulerSetups)
+						  HashMap<RulerID, RulerSetup> rulerSetups)
 	{
 		this.labelSizeStrategy = labelSizeStrategy;
 		this.drivers = drivers;
@@ -231,7 +178,7 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	}
 
 	@Override
-	public synchronized void registerAxis(AxisDriver driver) {
+	public void registerAxis(AxisDriver driver) {
 		String axisID = driver.getID();
 		if ( drivers.containsKey(axisID) ) {
 			throw new IllegalArgumentException("Axis already registered: " + axisID);
@@ -243,36 +190,24 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	}
 
 	@Override
-	public synchronized void setRulerVisibility(ChartRulerID rulerID, boolean visible) {
-		checkExistence(rulerID);
-		RulerSetup setup = rulerSetups.get(rulerID);
-		if ( setup == null ) {
-			setup = new RulerSetup();
-			rulerSetups.put(rulerID, setup);
-		}
-		setup.setVisible(visible);
+	public void setRulerVisibility(RulerID rulerID, boolean visible) {
+		getRulerSetup(rulerID).setVisible(visible);
 	}
 
 	@Override
-	public synchronized void setRulerDisplayPriority(ChartRulerID rulerID, int priority) {
-		checkExistence(rulerID);
-		RulerSetup setup = rulerSetups.get(rulerID);
-		if ( setup == null ) {
-			setup = new RulerSetup();
-			rulerSetups.put(rulerID, setup);
-		}
-		setup.setPriority(priority);
+	public void setRulerDisplayPriority(RulerID rulerID, int priority) {
+		getRulerSetup(rulerID).setDisplayPriority(priority);
 	}
 
 	@Override
-	public synchronized ChartSpaceLayout prepareLayout(Segment1D displaySpace,
+	public ChartSpaceLayout prepareLayout(Segment1D displaySpace,
 													   Segment1D dataSpace,
 													   Object device)
 	{
 		if ( ! displaySpace.contains(dataSpace) ) {
 			throw new IllegalArgumentException("Data space is out of display space");
 		}
-		ChartRulerID rulerID = null;
+		RulerID rulerID = null;
 		int lowerRulersFreeLength = dataSpace.getStart() - displaySpace.getStart(),
 			upperRulersFreeLength = displaySpace.getEnd() - dataSpace.getEnd();
 		List<RulerEntry> includedEntries = new ArrayList<>();
@@ -299,14 +234,14 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	}
 
 	@Override
-	public synchronized ChartSpaceLayout prepareLayout(Segment1D displaySpace,
+	public ChartSpaceLayout prepareLayout(Segment1D displaySpace,
 													   int rulersMaxSpace,
 													   Object device)
 	{
 		if ( rulersMaxSpace > displaySpace.getLength() ) {
 			throw new IllegalArgumentException("Space reserved for rulers is greater than display space");
 		}
-		ChartRulerID rulerID = null;
+		RulerID rulerID = null;
 		int lowerRulersLength = 0, upperRulersLength = 0;
 		List<RulerEntry> includedEntries = new ArrayList<>();
 		for ( RulerEntry e : buildEntries() ) {
@@ -330,19 +265,36 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		return toLayout(cL, cU, new Segment1D(cL, cU - cL), includedEntries);
 	}
 	
-	private void checkExistence(ChartRulerID rulerID) {
+	@Override
+	public RulerSetup getRulerSetup(RulerID rulerID) {
+		RulerSetup setup = rulerSetups.get(rulerID);
+		if ( setup == null ) {
+			setup = getRenderer(rulerID).createRulerSetup(rulerID);
+			rulerSetups.put(rulerID, setup);
+		}
+		return setup;
+	}
+
+	@Override
+	public RulerSetup getUpperRulerSetup(String axisID, String rendererID) {
+		return getRulerSetup(new RulerID(axisID, rendererID, true));
+	}
+
+	@Override
+	public RulerSetup getLowerRulerSetup(String axisID, String rendererID) {
+		return getRulerSetup(new RulerID(axisID, rendererID, false));
+	}
+	
+	private RulerRenderer getRenderer(RulerID rulerID) {
 		AxisDriver driver = drivers.get(rulerID.getAxisID());
 		if ( driver == null ) {
 			throw new IllegalArgumentException("Axis not exists: " + rulerID);
 		}
-		List<String> renderers = driver.getRendererIDs();
-		if ( ! renderers.contains(rulerID.getRendererID()) ) {
-			throw new IllegalArgumentException("Renderer not exists: " + rulerID);
-		}
+		return driver.getRenderer(rulerID.getRendererID());
 	}
 	
 	private List<RulerEntry> buildEntries() {
-		ChartRulerID rulerID;
+		RulerID rulerID;
 		RulerSetup setup = null;
 		List<RulerEntry> entries = new ArrayList<>();
 		List<String> axisIDs = new ArrayList<>(drivers.keySet());
@@ -352,19 +304,19 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 			List<String> rendererIDs = new ArrayList<>(driver.getRendererIDs());
 			for ( int rendererPrio = 0; rendererPrio < rendererIDs.size(); rendererPrio ++ ) {
 				String rendererID = rendererIDs.get(rendererPrio);
-				rulerID = new ChartRulerID(axisID, rendererID, false);
+				rulerID = new RulerID(axisID, rendererID, false);
 				setup = rulerSetups.get(rulerID);
 				if ( setup != null && setup.isVisible() ) {
 					entries.add(new RulerEntry(rulerID,
-											   setup.getPriority(),
+											   setup.getDisplayPriority(),
 											   axisPrio,
 											   rendererPrio));
 				}
-				rulerID = new ChartRulerID(axisID, rendererID, true);
+				rulerID = new RulerID(axisID, rendererID, true);
 				setup = rulerSetups.get(rulerID);
 				if ( setup != null && setup.isVisible() ) {
 					entries.add(new RulerEntry(rulerID,
-											   setup.getPriority(),
+											   setup.getDisplayPriority(),
 											   axisPrio,
 											   rendererPrio));
 				}
@@ -375,14 +327,14 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	}
 	
 	private ChartSpaceLayout toLayout(int cL, int cU, Segment1D dataSpace, List<RulerEntry> includedEntries) {
-		List<ChartRulerSpace> resultRulers = new ArrayList<>();
+		List<RulerSpace> resultRulers = new ArrayList<>();
 		for ( RulerEntry e : includedEntries ) {
-			ChartRulerID rulerID = e.getRulerID();
+			RulerID rulerID = e.getRulerID();
 			if ( rulerID.isLowerPosition() ) {
 				cL -= e.getLength();
-				resultRulers.add(new ChartRulerSpace(rulerID, new Segment1D(cL, e.getLength())));
+				resultRulers.add(new RulerSpace(rulerID, new Segment1D(cL, e.getLength())));
 			} else {
-				resultRulers.add(new ChartRulerSpace(rulerID, new Segment1D(cU, e.getLength())));
+				resultRulers.add(new RulerSpace(rulerID, new Segment1D(cU, e.getLength())));
 				cU += e.getLength();
 			}
 		}

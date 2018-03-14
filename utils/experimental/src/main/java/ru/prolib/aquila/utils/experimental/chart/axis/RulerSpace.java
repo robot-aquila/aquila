@@ -15,16 +15,16 @@ import ru.prolib.aquila.utils.experimental.chart.Segment1D;
  * ось проецируется на экран горизонтально, дескриптор описывает координату Y и
  * высоту области отображения линейки. 
  */
-public class ChartRulerSpace {
-	private final ChartRulerID rulerID;
+public class RulerSpace {
+	private final RulerID rulerID;
 	private final Segment1D space;
 	
-	public ChartRulerSpace(ChartRulerID rulerID, Segment1D space) {
+	public RulerSpace(RulerID rulerID, Segment1D space) {
 		this.rulerID = rulerID;
 		this.space = space;
 	}
 	
-	public ChartRulerID getRulerID() {
+	public RulerID getRulerID() {
 		return rulerID;
 	}
 	
@@ -37,10 +37,10 @@ public class ChartRulerSpace {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != ChartRulerSpace.class ) {
+		if ( other == null || other.getClass() != RulerSpace.class ) {
 			return false;
 		}
-		ChartRulerSpace o = (ChartRulerSpace) other;
+		RulerSpace o = (RulerSpace) other;
 		return new EqualsBuilder()
 				.append(o.rulerID, rulerID)
 				.append(o.space, space)

@@ -16,7 +16,8 @@ import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.utils.experimental.chart.Point2D;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWPreparedRulerCA;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWRendererCallbackCA;
@@ -28,6 +29,8 @@ public class SWPreparedRulerCATest {
 	private Font fontMock1, fontMock2;
 	private List<RLabel> labels1, labels2;
 	private Graphics2D graphicsMock;
+	private RulerID rulerID;
+	private RulerSetup rulerSetup;
 	private SWPreparedRulerCA ruler;
 
 	@Before
@@ -47,6 +50,8 @@ public class SWPreparedRulerCATest {
 		labels2 = new ArrayList<>();
 		labels2.add(new RLabel(0, "12h", 15));
 		labels2.add(new RLabel(1, "13h", 30));
+		rulerID = new RulerID("foo", "bar", true);
+		rulerSetup = new RulerSetup(rulerID);
 		ruler = new SWPreparedRulerCA(rendererMock1,
 									mapperMock1,
 									labels1,
@@ -56,7 +61,7 @@ public class SWPreparedRulerCATest {
 	@Test
 	public void testDrawRuler() {
 		Rectangle target = new Rectangle(Point2D.ZERO, 40, 50);
-		rendererMock1.drawRuler(RulerPosition.BOTTOM,
+		rendererMock1.drawRuler(rulerSetup,
 								target,
 								graphicsMock,
 								mapperMock1,
@@ -64,7 +69,7 @@ public class SWPreparedRulerCATest {
 								fontMock1);
 		control.replay();
 		
-		ruler.drawRuler(RulerPosition.BOTTOM, target, graphicsMock);
+		ruler.drawRuler(rulerSetup, target, graphicsMock);
 		
 		control.verify();
 	}

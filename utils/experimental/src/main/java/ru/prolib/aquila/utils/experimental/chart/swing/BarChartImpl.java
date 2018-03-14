@@ -17,12 +17,11 @@ import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRend
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWHistogramLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWIndicatorLayer;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerPosition;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxy;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisRulerRenderer;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerID;
-import ru.prolib.aquila.utils.experimental.chart.axis.ChartRulerSpace;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
@@ -243,7 +242,7 @@ public class BarChartImpl implements BarChart, EventListener {
 		PaintEvent e = (PaintEvent) event;
 		Graphics2D graphics = e.getGraphics();
 		JComponent component = e.getComponent();
-		Point2D point;
+		//Point2D point;
 		graphics.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON);
 		graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 		
@@ -255,46 +254,43 @@ public class BarChartImpl implements BarChart, EventListener {
 		// no more than 50% of data space width for rulers
 		yLayout = verticalSpaceManager.prepareLayout(new Segment1D(0, dh), dh / 2, graphics);
 		Segment1D dsX = xLayout.getDataSpace(), dsY = yLayout.getDataSpace();
-		point = new Point2D(dsX.getStart(), dsY.getStart());
-		Rectangle plot = new Rectangle(point, dsX.getLength(), dsY.getLength());
+		Rectangle plot = new Rectangle(new Point2D(dsX.getStart(), dsY.getStart()), dsX.getLength(), dsY.getLength());
 
 		Range<CDecimal> vr = getValueRange(cam.getFirstVisibleCategory(), cam.getNumberOfVisibleCategories());
 		vav.setValueRange(vr);
 		ValueAxisDisplayMapper vam = vad.createMapper(dsY, vav);
 		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, plot);
 
-		RulerPosition rpos;
-		// TODO: replace string to special axisID+rendererID key
+		Rectangle rect;
+		// TODO: replace string to RendererID key
 		ValueAxisRulerRenderer var;
 		Map<String, PreparedRuler> preparedRulers = new HashMap<>();
-		for ( ChartRulerSpace dummy : xLayout.getRulers() ) {
-			ChartRulerID rulerID = dummy.getRulerID();
-			Segment1D rulerSpace = dummy.getSpace();
+		for ( RulerSpace dummy : xLayout.getRulers() ) {
+			RulerID rulerID = dummy.getRulerID();
+			Segment1D rs = dummy.getSpace();
 			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
 			if ( preparedRuler == null ) {
 				var = (ValueAxisRulerRenderer) vad.getRenderer(rulerID.getRendererID());
 				preparedRuler = var.prepareRuler(vam, graphics);
 				preparedRulers.put(rulerID.getRendererID(), preparedRuler);
 			}
-			rpos = rulerID.isLowerPosition() ? RulerPosition.LEFT : RulerPosition.RIGHT;
-			point = new Point2D(rulerSpace.getStart(), vam.getPlotStart());
-			preparedRuler.drawRuler(rpos, new Rectangle(point, rulerSpace.getLength(), vam.getPlotSize()), graphics);
+			rect = new Rectangle(new Point2D(rs.getStart(), vam.getPlotStart()), rs.getLength(), vam.getPlotSize());
+			preparedRuler.drawRuler(horizontalSpaceManager.getRulerSetup(rulerID), rect, graphics);
 		}
 		
 		CategoryAxisRulerRenderer car;
 		preparedRulers.clear();
-		for ( ChartRulerSpace dummy : yLayout.getRulers() ) {
-			ChartRulerID rulerID = dummy.getRulerID();
-			Segment1D rulerSpace = dummy.getSpace();
+		for ( RulerSpace dummy : yLayout.getRulers() ) {
+			RulerID rulerID = dummy.getRulerID();
+			Segment1D rs = dummy.getSpace();
 			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
 			if ( preparedRuler == null ) {
 				 car = cadProxy.getRulerRenderer(rulerID.getRendererID());
 				 preparedRuler = car.prepareRuler(cam, graphics);
 				 preparedRulers.put(rulerID.getRendererID(), preparedRuler);
 			}
-			rpos = rulerID.isLowerPosition() ? RulerPosition.TOP : RulerPosition.BOTTOM;
-			point = new Point2D(cam.getPlotStart(), rulerSpace.getStart());
-			preparedRuler.drawRuler(rpos, new Rectangle(point, cam.getPlotSize(), rulerSpace.getLength()), graphics);
+			rect = new Rectangle(new Point2D(cam.getPlotStart(), rs.getStart()), cam.getPlotSize(), rs.getLength());
+			preparedRuler.drawRuler(verticalSpaceManager.getRulerSetup(rulerID), rect, graphics);
 		}
 		
 		// TODO: draw grid lines

@@ -8,12 +8,12 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.utils.Variant;
 
-public class ChartRulerIDTest {
-	private ChartRulerID service;
+public class RulerIDTest {
+	private RulerID service;
 
 	@Before
 	public void setUp() throws Exception {
-		service = new ChartRulerID("VALUE", "LABEL", false);
+		service = new RulerID("VALUE", "LABEL", false);
 	}
 	
 	@Test
@@ -38,9 +38,9 @@ public class ChartRulerIDTest {
 		Variant<Boolean> vIsUp = new Variant<>(vRndID, false, true);
 		Variant<?> iterator = vIsUp;
 		int foundCnt = 0;
-		ChartRulerID x, found = null;
+		RulerID x, found = null;
 		do {
-			x = new ChartRulerID(vAxID.get(), vRndID.get(), vIsUp.get());
+			x = new RulerID(vAxID.get(), vRndID.get(), vIsUp.get());
 			if ( service.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -55,7 +55,7 @@ public class ChartRulerIDTest {
 
 	@Test
 	public void testToString() {
-		String expected = "ChartRulerID[axisID=VALUE, rendererID=LABEL, isUpper=false]";
+		String expected = "RulerID[axisID=VALUE, rendererID=LABEL, isUpper=false]";
 		assertEquals(expected, service.toString());
 	}
 	
