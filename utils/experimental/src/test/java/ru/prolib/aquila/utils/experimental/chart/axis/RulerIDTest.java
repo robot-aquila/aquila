@@ -9,15 +9,28 @@ import org.junit.Test;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class RulerIDTest {
+	private RulerRendererID rendererID1;
 	private RulerID service;
 
 	@Before
 	public void setUp() throws Exception {
-		service = new RulerID("VALUE", "LABEL", false);
+		rendererID1 = new RulerRendererID("VALUE", "LABEL");
+		service = new RulerID(rendererID1, false);
 	}
 	
 	@Test
-	public void testCtor() {
+	public void testCtor3() {
+		service = new RulerID("foo", "bar", true);
+		assertEquals(new RulerRendererID("foo", "bar"), service.getRulerRendererID());
+		assertEquals("foo", service.getAxisID());
+		assertEquals("bar", service.getRendererID());
+		assertFalse(service.isLowerPosition());
+		assertTrue(service.isUpperPosition());
+	}
+	
+	@Test
+	public void testCtor2() {
+		assertEquals(rendererID1, service.getRulerRendererID());
 		assertEquals("VALUE", service.getAxisID());
 		assertEquals("LABEL", service.getRendererID());
 		assertTrue(service.isLowerPosition());
@@ -47,23 +60,21 @@ public class RulerIDTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals("VALUE", found.getAxisID());
-		assertEquals("LABEL", found.getRendererID());
+		assertEquals(new RulerRendererID("VALUE", "LABEL"), found.getRulerRendererID());
 		assertTrue(found.isLowerPosition());
 		assertFalse(found.isUpperPosition());
 	}
 
 	@Test
 	public void testToString() {
-		String expected = "RulerID[axisID=VALUE, rendererID=LABEL, isUpper=false]";
+		String expected = "RulerID[rulerRendererID=RulerRendererID[axisID=VALUE,rendererID=LABEL],isUpper=false]";
 		assertEquals(expected, service.toString());
 	}
 	
 	@Test
 	public void testHashCode() {
 		int expected = new HashCodeBuilder(83921, 1412117)
-				.append("VALUE")
-				.append("LABEL")
+				.append(new RulerRendererID("VALUE", "LABEL"))
 				.append(false)
 				.toHashCode();
 		assertEquals(expected, service.hashCode());

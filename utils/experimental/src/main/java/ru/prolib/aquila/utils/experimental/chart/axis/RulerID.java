@@ -2,6 +2,8 @@ package ru.prolib.aquila.utils.experimental.chart.axis;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Complete key which identifies ruler inside the chart space.
@@ -17,21 +19,28 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * находиться левее графика, а высшей - справа от него.
  */
 public class RulerID {
-	private final String axisID, rendererID;
+	private final RulerRendererID rulerRendererID;
 	private final boolean isUpperPos;
 	
-	public RulerID(String axisID, String rendererID, boolean isUpperPos) {
-		this.axisID = axisID;
-		this.rendererID = rendererID;
+	public RulerID(RulerRendererID rulerRendererID, boolean isUpperPos) {
+		this.rulerRendererID = rulerRendererID;
 		this.isUpperPos = isUpperPos;
 	}
 	
+	public RulerID(String axisID, String rulerRendererID, boolean isUpperPos) {
+		this(new RulerRendererID(axisID, rulerRendererID), isUpperPos);
+	}
+	
+	public RulerRendererID getRulerRendererID() {
+		return rulerRendererID;
+	}
+	
 	public String getAxisID() {
-		return axisID;
+		return rulerRendererID.getAxisID();
 	}
 	
 	public String getRendererID() {
-		return rendererID;
+		return rulerRendererID.getRendererID();
 	}
 	
 	public boolean isUpperPosition() {
@@ -53,24 +62,22 @@ public class RulerID {
 		RulerID o = (RulerID) other;
 		return new EqualsBuilder()
 				.append(o.isUpperPos, isUpperPos)
-				.append(o.axisID, axisID)
-				.append(o.rendererID, rendererID)
+				.append(o.rulerRendererID, rulerRendererID)
 				.isEquals();
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[axisID=" + axisID
-				+ ", rendererID=" + rendererID
-				+ ", isUpper=" + isUpperPos
-				+ "]";
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("rulerRendererID", rulerRendererID)
+				.append("isUpper", isUpperPos)
+				.toString();
 	}
 	
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(83921, 1412117)
-				.append(axisID)
-				.append(rendererID)
+				.append(rulerRendererID)
 				.append(isUpperPos)
 				.toHashCode();
 	}

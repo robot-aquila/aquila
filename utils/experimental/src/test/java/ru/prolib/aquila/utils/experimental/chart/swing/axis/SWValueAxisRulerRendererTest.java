@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.LABEL_FONT;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -23,8 +24,10 @@ import ru.prolib.aquila.utils.experimental.chart.Point2D;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
@@ -148,6 +151,7 @@ public class SWValueAxisRulerRendererTest {
 		expect(graphicsMock.getFontMetrics(fontMock)).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(19);
 		graphicsMock.setFont(fontMock);
+		graphicsMock.setColor(Color.BLACK);
 		graphicsMock.drawLine(37, 119, 39, 119);
 		expect(fontMetricsMock.stringWidth("10.00")).andReturn(22);
 		graphicsMock.drawString("10.00", 12, 128);
@@ -176,6 +180,7 @@ public class SWValueAxisRulerRendererTest {
 		expect(graphicsMock.getFontMetrics(fontMock)).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(19);
 		graphicsMock.setFont(fontMock);
+		graphicsMock.setColor(Color.BLACK);
 		graphicsMock.drawLine(280, 119,  282, 119);
 		graphicsMock.drawString("10.00", 285, 128);
 		graphicsMock.drawLine(280,  59,  282,  59);
@@ -220,24 +225,27 @@ public class SWValueAxisRulerRendererTest {
 	
 	@Test
 	public void testDrawGridLines_VerticalRuler() {
+		GridLinesSetup setup = new GridLinesSetup(new RulerRendererID("foo", "bar"));
 		Rectangle plot = new Rectangle(new Point2D(40, 20), 240, 80);
 		List<RLabel> labels = new ArrayList<>();
 		labels.add(new RLabel(of("10.00"), "10.00", 119));
 		labels.add(new RLabel(of("15.00"), "15.00",  59));
 		labels.add(new RLabel(of("20.00"), "20.00",   0));
 		expect(mapperMock.getAxisDirection()).andStubReturn(AxisDirection.UP);
+		graphicsMock.setColor(Color.GRAY);
 		graphicsMock.drawLine(40, 119, 279, 119);
 		graphicsMock.drawLine(40,  59, 279,  59);
 		graphicsMock.drawLine(40,   0, 279,   0);
 		control.replay();
 		
-		service.drawGridLines(plot, graphicsMock, mapperMock, labels);
+		service.drawGridLines(setup, plot, graphicsMock, mapperMock, labels);
 		
 		control.verify();
 	}
 
 	@Test (expected=UnsupportedOperationException.class)
 	public void testDrawGridLines_HorizontalRuler_NotImplemented() {
+		GridLinesSetup setup = new GridLinesSetup(new RulerRendererID("foo", "bar"));
 		Rectangle plot = new Rectangle(new Point2D(40, 20), 240, 80);		
 		List<RLabel> labels = new ArrayList<>();
 		labels.add(new RLabel(of("10.00"), "10.00", -1));
@@ -246,7 +254,7 @@ public class SWValueAxisRulerRendererTest {
 		expect(mapperMock.getAxisDirection()).andStubReturn(AxisDirection.RIGHT);
 		control.replay();
 		
-		service.drawGridLines(plot, graphicsMock, mapperMock, labels);
+		service.drawGridLines(setup, plot, graphicsMock, mapperMock, labels);
 	}
 	
 	@Test
@@ -255,6 +263,14 @@ public class SWValueAxisRulerRendererTest {
 		RulerSetup expected = new RulerSetup(rulerID);
 		
 		assertEquals(expected, service.createRulerSetup(rulerID));
+	}
+	
+	@Test
+	public void testCreateGridLinesSetup() {
+		RulerRendererID rendererID = new RulerRendererID("zulu", "charlie");
+		GridLinesSetup expected = new GridLinesSetup(rendererID);
+		
+		assertEquals(expected, service.createGridLinesSetup(rendererID));
 	}
 
 }

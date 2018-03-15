@@ -2,17 +2,18 @@ package ru.prolib.aquila.utils.experimental.chart.axis;
 
 import static org.junit.Assert.*;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.utils.Variant;
 
-public class RendererIDTest {
-	private RendererID service;
+public class RulerRendererIDTest {
+	private RulerRendererID service;
 
 	@Before
 	public void setUp() throws Exception {
-		service = new RendererID("foo", "bar");
+		service = new RulerRendererID("foo", "bar");
 	}
 	
 	@Test
@@ -34,9 +35,9 @@ public class RendererIDTest {
 		Variant<String> vRID = new Variant<>(vAID, "bar", "charlie");
 		Variant<?> iterator = vRID;
 		int foundCnt = 0;
-		RendererID x, found = null;
+		RulerRendererID x, found = null;
 		do {
-			x = new RendererID(vAID.get(), vRID.get());
+			x = new RulerRendererID(vAID.get(), vRID.get());
 			if ( service.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -49,8 +50,17 @@ public class RendererIDTest {
 
 	@Test
 	public void testToString() {
-		String expected = "RendererID[axisID=foo,rendererID=bar]";
+		String expected = "RulerRendererID[axisID=foo,rendererID=bar]";
 		assertEquals(expected, service.toString());
+	}
+	
+	@Test
+	public void testHashCode() {
+		int expected = new HashCodeBuilder(998271, 117)
+				.append("foo")
+				.append("bar")
+				.toHashCode();
+		assertEquals(expected, service.hashCode());
 	}
 
 }

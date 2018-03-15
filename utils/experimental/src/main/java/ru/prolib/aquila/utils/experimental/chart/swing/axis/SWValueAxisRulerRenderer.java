@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing.axis;
 
 import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.LABEL_FONT;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -12,8 +13,10 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisRulerRenderer;
@@ -112,6 +115,7 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 		FontMetrics fontMetrics = graphics.getFontMetrics(labelFont);
 		int textHalfHeight = fontMetrics.getAscent() / 2;
 		graphics.setFont(labelFont);
+		graphics.setColor(Color.BLACK);
 		if ( setup.getRulerID().isLowerPosition() ) {
 			for ( RLabel label : labels ) {
 				int x = target.getRightX();
@@ -135,16 +139,18 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 	}
 	
 	@Override
-	public void drawGridLines(Rectangle plot,
+	public void drawGridLines(GridLinesSetup setup,
+							Rectangle plot,
 							Graphics2D graphics,
 							ValueAxisDisplayMapper mapper,
 							List<RLabel> labels)
 	{
-		AxisDirection dir = mapper.getAxisDirection(); 
+		AxisDirection dir = mapper.getAxisDirection();
 		if ( dir.isHorizontal() ) {
 			throw new UnsupportedOperationException("Axis direction is not supported: " + dir);
 		}
 		int x1 = plot.getLeftX(), x2 = plot.getRightX();
+		graphics.setColor(Color.GRAY);
 		for ( RLabel label : labels ) {
 			graphics.drawLine(x1, label.getCoord(), x2, label.getCoord());
 		}
@@ -153,6 +159,11 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 	@Override
 	public RulerSetup createRulerSetup(RulerID rulerID) {
 		return new RulerSetup(rulerID);
+	}
+
+	@Override
+	public GridLinesSetup createGridLinesSetup(RulerRendererID rendererID) {
+		return new GridLinesSetup(rendererID);
 	}
 
 }

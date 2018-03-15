@@ -10,8 +10,11 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDriver;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerRenderer;
@@ -97,7 +100,7 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		
 		@Override
 		public String toString() {
-			return new ToStringBuilder(this)
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 					.append("rulerID", rulerID)
 					.append("rulerPrio", rulerPriority)
 					.append("axisPrio", axisPriority)
@@ -107,6 +110,75 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 					.toString();
 		}
 		
+	}
+	
+	static class GridLinesEntry implements Comparable<GridLinesEntry> {
+		private final GridLinesSetup setup;
+		private final int displayPriority;
+		private final int axisPriority;
+		private final int rendererPriority;
+		
+		public GridLinesEntry(GridLinesSetup setup,
+							  int displayPriority,
+							  int axisPriority,
+							  int rendererPriority)
+		{
+			this.setup = setup;
+			this.displayPriority = displayPriority;
+			this.axisPriority = axisPriority;
+			this.rendererPriority = rendererPriority;			
+		}
+		
+		public GridLinesSetup getSetup() {
+			return setup;
+		}
+
+		@Override
+		public int compareTo(GridLinesEntry rhs) {
+			return new CompareToBuilder()
+					.append(displayPriority, rhs.displayPriority)
+					.append(axisPriority, rhs.axisPriority)
+					.append(rendererPriority, rhs.rendererPriority)
+					.toComparison();
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != GridLinesEntry.class ) {
+				return false;
+			}
+			GridLinesEntry o = (GridLinesEntry) other;
+			return new EqualsBuilder()
+					.append(o.setup, setup)
+					.append(o.displayPriority, displayPriority)
+					.append(o.axisPriority, axisPriority)
+					.append(o.rendererPriority, rendererPriority)
+					.isEquals();
+		}
+		
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(112121219, 7752173)
+					.append(setup)
+					.append(displayPriority)
+					.append(axisPriority)
+					.append(rendererPriority)
+					.toHashCode();
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("setup", setup)
+					.append("displayPrio", displayPriority)
+					.append("axisPrio", axisPriority)
+					.append("rendererPrio", rendererPriority)
+					.toString();
+		}
+
 	}
 	
 	interface LabelSizeStrategy {
@@ -155,25 +227,30 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	private final LabelSizeStrategy labelSizeStrategy;
 	private final LinkedHashMap<String, AxisDriver> drivers;
 	private final HashMap<RulerID, RulerSetup> rulerSetups;
+	private final HashMap<RulerRendererID, GridLinesSetup> gridLinesSetups;
 	
 	ChartSpaceManagerImpl(LabelSizeStrategy labelSizeStrategy,
 						  LinkedHashMap<String, AxisDriver> drivers,
-						  HashMap<RulerID, RulerSetup> rulerSetups)
+						  HashMap<RulerID, RulerSetup> rulerSetups,
+						  HashMap<RulerRendererID, GridLinesSetup> gridLinesSetups)
 	{
 		this.labelSizeStrategy = labelSizeStrategy;
 		this.drivers = drivers;
 		this.rulerSetups = rulerSetups;
+		this.gridLinesSetups = gridLinesSetups;
 	}
 	
 	public static ChartSpaceManager ofHorizontalSpace() {
 		return new ChartSpaceManagerImpl(new HorizontalLabelSize(),
 										 new LinkedHashMap<>(),
+										 new HashMap<>(),
 										 new HashMap<>());
 	}
 	
 	public static ChartSpaceManager ofVerticalSpace() {
 		return new ChartSpaceManagerImpl(new VerticalLabelSize(),
 										 new LinkedHashMap<>(),
+										 new HashMap<>(),
 										 new HashMap<>());
 	}
 
@@ -210,8 +287,8 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		RulerID rulerID = null;
 		int lowerRulersFreeLength = dataSpace.getStart() - displaySpace.getStart(),
 			upperRulersFreeLength = displaySpace.getEnd() - dataSpace.getEnd();
-		List<RulerEntry> includedEntries = new ArrayList<>();
-		for ( RulerEntry e : buildEntries() ) {
+		List<RulerEntry> includedRulers = new ArrayList<>();
+		for ( RulerEntry e : buildRulerEntries() ) {
 			rulerID = e.getRulerID();
 			AxisDriver driver = drivers.get(rulerID.getAxisID());
 			RulerRenderer renderer = driver.getRenderer(rulerID.getRendererID());
@@ -228,9 +305,9 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 				upperRulersFreeLength -= rulerLength;
 			}
 			e.setLength(rulerLength);
-			includedEntries.add(e);
+			includedRulers.add(e);
 		}
-		return toLayout(dataSpace.getStart(), dataSpace.getEnd() + 1, dataSpace, includedEntries);
+		return toLayout(dataSpace.getStart(), dataSpace.getEnd() + 1, dataSpace, includedRulers, buildGLEntries());
 	}
 
 	@Override
@@ -243,8 +320,8 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		}
 		RulerID rulerID = null;
 		int lowerRulersLength = 0, upperRulersLength = 0;
-		List<RulerEntry> includedEntries = new ArrayList<>();
-		for ( RulerEntry e : buildEntries() ) {
+		List<RulerEntry> includedRulers = new ArrayList<>();
+		for ( RulerEntry e : buildRulerEntries() ) {
 			rulerID = e.getRulerID();
 			AxisDriver driver = drivers.get(rulerID.getAxisID());
 			RulerRenderer renderer = driver.getRenderer(rulerID.getRendererID());
@@ -253,7 +330,7 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 				break;
 			}
 			e.setLength(rulerLength);
-			includedEntries.add(e);
+			includedRulers.add(e);
 			if ( rulerID.isLowerPosition() ) {
 				lowerRulersLength += rulerLength;
 			} else {
@@ -262,7 +339,7 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		}
 		int cL = displaySpace.getStart() + lowerRulersLength;
 		int cU = displaySpace.getEnd() - upperRulersLength + 1;
-		return toLayout(cL, cU, new Segment1D(cL, cU - cL), includedEntries);
+		return toLayout(cL, cU, new Segment1D(cL, cU - cL), includedRulers, buildGLEntries());
 	}
 	
 	@Override
@@ -284,16 +361,39 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 	public RulerSetup getLowerRulerSetup(String axisID, String rendererID) {
 		return getRulerSetup(new RulerID(axisID, rendererID, false));
 	}
-	
-	private RulerRenderer getRenderer(RulerID rulerID) {
-		AxisDriver driver = drivers.get(rulerID.getAxisID());
-		if ( driver == null ) {
-			throw new IllegalArgumentException("Axis not exists: " + rulerID);
+
+	@Override
+	public GridLinesSetup getGridLinesSetup(RulerRendererID rendererID) {
+		GridLinesSetup setup = gridLinesSetups.get(rendererID);
+		if ( setup == null ) {
+			setup = getRenderer(rendererID).createGridLinesSetup(rendererID);
+			gridLinesSetups.put(rendererID, setup);
 		}
-		return driver.getRenderer(rulerID.getRendererID());
+		return setup;
+	}
+
+	@Override
+	public GridLinesSetup getGridLinesSetup(String axisID, String rendererID) {
+		return getGridLinesSetup(new RulerRendererID(axisID, rendererID));
 	}
 	
-	private List<RulerEntry> buildEntries() {
+	private RulerRenderer getRenderer(RulerID rulerID) {
+		return getRenderer(rulerID.getAxisID(), rulerID.getRendererID());
+	}
+	
+	private RulerRenderer getRenderer(RulerRendererID rendererID) {
+		return getRenderer(rendererID.getAxisID(), rendererID.getRendererID());
+	}
+	
+	private RulerRenderer getRenderer(String axisID, String rendererID) {
+		AxisDriver driver = drivers.get(axisID);
+		if ( driver == null ) {
+			throw new IllegalArgumentException("Axis not exists: " + axisID);
+		}
+		return driver.getRenderer(rendererID);
+	}
+	
+	private List<RulerEntry> buildRulerEntries() {
 		RulerID rulerID;
 		RulerSetup setup = null;
 		List<RulerEntry> entries = new ArrayList<>();
@@ -326,9 +426,34 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 		return entries;
 	}
 	
-	private ChartSpaceLayout toLayout(int cL, int cU, Segment1D dataSpace, List<RulerEntry> includedEntries) {
+	private List<GridLinesEntry> buildGLEntries() {
+		List<GridLinesEntry> entries = new ArrayList<>();
+		List<String> axisIDs = new ArrayList<>(drivers.keySet());
+		for ( int axisPrio = 0; axisPrio < axisIDs.size(); axisPrio ++ ) {
+			String axisID = axisIDs.get(axisPrio);
+			AxisDriver driver = drivers.get(axisID);
+			List<String> rendererIDs = new ArrayList<>(driver.getRendererIDs());
+			for ( int rendererPrio = 0; rendererPrio < rendererIDs.size(); rendererPrio ++ ) {
+				String rendererID = rendererIDs.get(rendererPrio);
+				RulerRendererID rrid = new RulerRendererID(axisID, rendererID);
+				GridLinesSetup setup = gridLinesSetups.get(rrid);
+				if ( setup != null && setup.isVisible() ) {
+					entries.add(new GridLinesEntry(setup, setup.getDisplayPriority(), axisPrio, rendererPrio));
+				}
+			}
+		}
+		Collections.sort(entries);
+		return entries;
+	}
+	
+	private ChartSpaceLayout toLayout(int cL,
+									  int cU,
+									  Segment1D dataSpace,
+									  List<RulerEntry> includedRulers,
+									  List<GridLinesEntry> includedGridLines)
+	{
 		List<RulerSpace> resultRulers = new ArrayList<>();
-		for ( RulerEntry e : includedEntries ) {
+		for ( RulerEntry e : includedRulers ) {
 			RulerID rulerID = e.getRulerID();
 			if ( rulerID.isLowerPosition() ) {
 				cL -= e.getLength();
@@ -338,7 +463,11 @@ public class ChartSpaceManagerImpl implements ChartSpaceManager {
 				cU += e.getLength();
 			}
 		}
-		return new ChartSpaceLayoutImpl(dataSpace, resultRulers);
+		List<GridLinesSetup> resultGridLines = new ArrayList<>();
+		for ( GridLinesEntry e : includedGridLines ) {
+			resultGridLines.add(e.getSetup());
+		}
+		return new ChartSpaceLayoutImpl(dataSpace, resultRulers, resultGridLines);
 	}
 
 }

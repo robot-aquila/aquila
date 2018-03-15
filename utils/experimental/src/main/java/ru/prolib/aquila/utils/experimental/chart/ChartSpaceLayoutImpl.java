@@ -4,26 +4,31 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 
 public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 	private static final Segment1D ZERO_SEGMENT = new Segment1D(0, 0);
 	private final Segment1D dataSpace;
-	private final List<RulerSpace> rulers;
+	private final List<RulerSpace> listRulers;
+	private final List<GridLinesSetup> listGridLinesSetup;
 	
 	public ChartSpaceLayoutImpl(Segment1D dataSpace,
-								List<RulerSpace> rulerSpaces)
+								List<RulerSpace> listRulers,
+								List<GridLinesSetup> listGridLinesSetup)
 	{
 		this.dataSpace = dataSpace;
-		this.rulers = rulerSpaces;
+		this.listRulers = listRulers;
+		this.listGridLinesSetup = listGridLinesSetup;
 	}
 
 	@Override
 	public Segment1D getLowerRulersTotalSpace() {
 		Integer c1 = null, c2 = null;
-		for ( RulerSpace s : rulers ) {
+		for ( RulerSpace s : listRulers ) {
 			RulerID id = s.getRulerID();
 			if ( id.isLowerPosition() ) {
 				Segment1D segment = s.getSpace();
@@ -45,7 +50,7 @@ public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 	@Override
 	public Segment1D getUpperRulersTotalSpace() {
 		Integer c1 = null, c2 = null;
-		for ( RulerSpace s : rulers ) {
+		for ( RulerSpace s : listRulers ) {
 			RulerID id = s.getRulerID();
 			if ( id.isUpperPosition() ) {
 				Segment1D segment = s.getSpace();
@@ -70,8 +75,8 @@ public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 	}
 
 	@Override
-	public List<RulerSpace> getRulers() {
-		return rulers;
+	public List<RulerSpace> getRulersToDisplay() {
+		return listRulers;
 	}
 	
 	@Override
@@ -85,16 +90,23 @@ public class ChartSpaceLayoutImpl implements ChartSpaceLayout {
 		ChartSpaceLayoutImpl o = (ChartSpaceLayoutImpl) other;
 		return new EqualsBuilder()
 				.append(o.dataSpace, dataSpace)
-				.append(o.rulers, rulers)
+				.append(o.listRulers, listRulers)
+				.append(o.listGridLinesSetup, listGridLinesSetup)
 				.isEquals();
 	}
 	
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("dataSpace", dataSpace)
-				.append("rulers", rulers)
+				.append("rulers", listRulers)
+				.append("gridLines", listGridLinesSetup)
 				.toString();
+	}
+
+	@Override
+	public List<GridLinesSetup> getGridLinesToDisplay() {
+		return listGridLinesSetup;
 	}
 
 }

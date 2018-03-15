@@ -17,6 +17,8 @@ import ru.prolib.aquila.utils.experimental.chart.ChartSpaceManagerImpl.Horizonta
 import ru.prolib.aquila.utils.experimental.chart.ChartSpaceManagerImpl.VerticalLabelSize;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDriver;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerRenderer;
@@ -54,12 +56,18 @@ public class ChartSpaceManagerImplTest {
 		public RulerSetup createRulerSetup(RulerID rulerID) {
 			return new RulerSetup(rulerID);
 		}
+
+		@Override
+		public GridLinesSetup createGridLinesSetup(RulerRendererID rendererID) {
+			return new GridLinesSetup(rendererID);
+		}
 		
 	}
 	
 	private IMocksControl control;
 	private LinkedHashMap<String, AxisDriver> drivers;
 	private HashMap<RulerID, RulerSetup> rulerSetups;
+	private HashMap<RulerRendererID, GridLinesSetup> gridLinesSetups;
 	private AxisDriver axisDriver1, axisDriver2, axisDriverMock;
 	private RulerRenderer rendererMock;
 	private ChartSpaceManagerImpl service;
@@ -72,13 +80,14 @@ public class ChartSpaceManagerImplTest {
 		rendererMock = control.createMock(RulerRenderer.class);
 		drivers = new LinkedHashMap<>();
 		rulerSetups = new HashMap<>();
+		gridLinesSetups = new HashMap<>();
 		axisDriver1 = new ValueAxisDriverImpl("foo", AxisDirection.UP);
 		axisDriver1.registerRenderer(new RendererStub("VALUE1", 30, -1));
 		axisDriver1.registerRenderer(new RendererStub("VALUE2", 40, -1));
 		axisDriver2 = new ValueAxisDriverImpl("bar", AxisDirection.UP);
 		axisDriver2.registerRenderer(new RendererStub("VALUE3", 25, -1));
 		axisDriver2.registerRenderer(new RendererStub("VALUE4", 35, -1));
-		service = new ChartSpaceManagerImpl(new HorizontalLabelSize(), drivers, rulerSetups);
+		service = new ChartSpaceManagerImpl(new HorizontalLabelSize(), drivers, rulerSetups, gridLinesSetups);
 	}
 	
 	@Test
@@ -256,7 +265,8 @@ public class ChartSpaceManagerImplTest {
 											   new Segment1D(120, 35)));
 		expectedRulers.add(new RulerSpace(new RulerID("bar", "VALUE4", true),
 											   new Segment1D(895, 35)));
-		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(dataSpace, expectedRulers);
+		List<GridLinesSetup> expectedGridLines = new ArrayList<>();
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(dataSpace, expectedRulers, expectedGridLines);
 		assertEquals(expected, actual);
 	}
 	
@@ -298,7 +308,29 @@ public class ChartSpaceManagerImplTest {
 				   							   new Segment1D(825, 35)));
 		expectedRulers.add(new RulerSpace(new RulerID("foo", "VALUE2", true),
 				   							   new Segment1D(860, 40)));
-		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(dataSpace, expectedRulers);
+		List<GridLinesSetup> expectedGridLines = new ArrayList<>();
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(dataSpace, expectedRulers, expectedGridLines);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testPrepareLayout3SSD_GridLines() {
+		service.registerAxis(axisDriver1);
+		service.registerAxis(axisDriver2);
+		service.getGridLinesSetup("foo", "VALUE1").setDisplayPriority(30).setVisible(true);
+		service.getGridLinesSetup("bar", "VALUE3").setDisplayPriority(10).setVisible(true);
+		service.getGridLinesSetup("foo", "VALUE2").setDisplayPriority(20).setVisible(false);
+		service.getGridLinesSetup("bar", "VALUE4").setDisplayPriority( 0).setVisible(true);
+		Segment1D displaySpace = new Segment1D(0, 500), dataSpace = new Segment1D(0, 500);
+		
+		ChartSpaceLayout actual = service.prepareLayout(displaySpace, dataSpace, deviceStub);
+		
+		List<RulerSpace> expectedRulers = new ArrayList<>();
+		List<GridLinesSetup> expectedGridLines = new ArrayList<>();
+		expectedGridLines.add(new GridLinesSetup(new RulerRendererID("bar", "VALUE4"), true,  0));
+		expectedGridLines.add(new GridLinesSetup(new RulerRendererID("bar", "VALUE3"), true, 10));
+		expectedGridLines.add(new GridLinesSetup(new RulerRendererID("foo", "VALUE1"), true, 30));
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(dataSpace, expectedRulers, expectedGridLines);
 		assertEquals(expected, actual);
 	}
 
@@ -335,7 +367,8 @@ public class ChartSpaceManagerImplTest {
 											   new Segment1D(  0, 35)));
 		expectedRulers.add(new RulerSpace(new RulerID("bar", "VALUE4", true),
 											   new Segment1D(965, 35)));
-		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(expectedDataSpace, expectedRulers);
+		List<GridLinesSetup> expectedGridLines = new ArrayList<>();
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(expectedDataSpace, expectedRulers, expectedGridLines);
 		assertEquals(expected, actual);
 	}
 	
@@ -358,7 +391,8 @@ public class ChartSpaceManagerImplTest {
 											   new Segment1D(935, 40)));
 		expectedRulers.add(new RulerSpace(new RulerID("bar", "VALUE4", true),
 											   new Segment1D(975, 35)));
-		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(expectedDataSpace, expectedRulers);
+		List<GridLinesSetup> expectedGridLines = new ArrayList<>();
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(expectedDataSpace, expectedRulers, expectedGridLines);
 		assertEquals(expected, actual);
 	}
 	
@@ -401,7 +435,27 @@ public class ChartSpaceManagerImplTest {
 											   new Segment1D(  0, 35)));
 		expectedRulers.add(new RulerSpace(new RulerID("bar", "VALUE3", true),
 											   new Segment1D(975, 25)));
-		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(expectedDataSpace, expectedRulers);
+		List<GridLinesSetup> expectedGridLines = new ArrayList<>();
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(expectedDataSpace, expectedRulers, expectedGridLines);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testPrepareLayout3SID_GridLines() {
+		service.registerAxis(axisDriver1);
+		service.registerAxis(axisDriver2);
+		service.getGridLinesSetup("foo", "VALUE1").setDisplayPriority(30).setVisible(true);
+		service.getGridLinesSetup("bar", "VALUE3").setDisplayPriority(10).setVisible(true);
+		service.getGridLinesSetup("foo", "VALUE2").setDisplayPriority(20).setVisible(false);
+		Segment1D displaySpace = new Segment1D(0, 500);
+		
+		ChartSpaceLayout actual = service.prepareLayout(displaySpace, 500, deviceStub);
+		
+		List<RulerSpace> expectedRulers = new ArrayList<>();
+		List<GridLinesSetup> expectedGridLines = new ArrayList<>();
+		expectedGridLines.add(new GridLinesSetup(new RulerRendererID("bar", "VALUE3"), true, 10));
+		expectedGridLines.add(new GridLinesSetup(new RulerRendererID("foo", "VALUE1"), true, 30));
+		ChartSpaceLayout expected = new ChartSpaceLayoutImpl(new Segment1D(0, 500), expectedRulers, expectedGridLines);
 		assertEquals(expected, actual);
 	}
 	
@@ -493,6 +547,66 @@ public class ChartSpaceManagerImplTest {
 		control.verify();
 		assertSame(expected, actual);
 		assertEquals(expected, rulerSetups.get(expectedRulerID));
+	}
+	
+	@Test
+	public void testGetGridLinesSetup1_NewSetupInstance() {
+		RulerRendererID expectedRendererID = new RulerRendererID("foo", "bar");
+		GridLinesSetup expected = new GridLinesSetup(expectedRendererID);
+		drivers.put("foo", axisDriverMock);
+		expect(axisDriverMock.getRenderer("bar")).andReturn(rendererMock);
+		expect(rendererMock.createGridLinesSetup(expectedRendererID)).andReturn(expected);
+		control.replay();
+		
+		GridLinesSetup actual = service.getGridLinesSetup(expectedRendererID);
+		
+		control.verify();
+		assertSame(expected, actual);
+		assertEquals(expected, gridLinesSetups.get(expectedRendererID));
+	}
+	
+	@Test
+	public void testGetGridLinesSetup2_NewSetupInstance() {
+		RulerRendererID expectedRendererID = new RulerRendererID("foo", "bar");
+		GridLinesSetup expected = new GridLinesSetup(expectedRendererID);
+		drivers.put("foo", axisDriverMock);
+		expect(axisDriverMock.getRenderer("bar")).andReturn(rendererMock);
+		expect(rendererMock.createGridLinesSetup(expectedRendererID)).andReturn(expected);
+		control.replay();
+		
+		GridLinesSetup actual = service.getGridLinesSetup("foo", "bar");
+		
+		control.verify();
+		assertSame(expected, actual);
+		assertEquals(expected, gridLinesSetups.get(expectedRendererID));
+	}
+
+	@Test
+	public void testGetGridLinesSetup1_ExistingSetupInstance() {
+		RulerRendererID expectedRendererID = new RulerRendererID("zoo", "buzz");
+		GridLinesSetup expected = new GridLinesSetup(expectedRendererID);
+		gridLinesSetups.put(expectedRendererID, expected);
+		control.replay();
+		
+		GridLinesSetup actual = service.getGridLinesSetup(expectedRendererID);
+		
+		control.verify();
+		assertSame(expected, actual);
+		assertEquals(expected, gridLinesSetups.get(expectedRendererID));
+	}
+
+	@Test
+	public void testGetGridLinesSetup2_ExistingSetupInstance() {
+		RulerRendererID expectedRendererID = new RulerRendererID("zoo", "buzz");
+		GridLinesSetup expected = new GridLinesSetup(expectedRendererID);
+		gridLinesSetups.put(expectedRendererID, expected);
+		control.replay();
+		
+		GridLinesSetup actual = service.getGridLinesSetup("zoo", "buzz");
+		
+		control.verify();
+		assertSame(expected, actual);
+		assertEquals(expected, gridLinesSetups.get(expectedRendererID));
 	}
 
 }

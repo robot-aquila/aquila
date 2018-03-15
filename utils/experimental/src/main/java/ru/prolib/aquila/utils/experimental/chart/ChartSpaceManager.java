@@ -1,6 +1,8 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDriver;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 
@@ -17,6 +19,8 @@ public interface ChartSpaceManager {
 	RulerSetup getRulerSetup(RulerID rulerID);
 	RulerSetup getUpperRulerSetup(String axisID, String rendererID);
 	RulerSetup getLowerRulerSetup(String axisID, String rendererID);
+	GridLinesSetup getGridLinesSetup(RulerRendererID rendererID);
+	GridLinesSetup getGridLinesSetup(String axisID, String rendererID);
 	ChartSpaceLayout prepareLayout(Segment1D displaySpace, Segment1D dataSpace, Object device);
 	ChartSpaceLayout prepareLayout(Segment1D displaySpace, int rulersMaxSpace, Object device);
 

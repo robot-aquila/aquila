@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
@@ -55,8 +56,8 @@ public class SWPreparedRulerVA implements PreparedRuler {
 	}
 
 	@Override
-	public void drawGridLines(Rectangle plot, Object device) {
-		renderer.drawGridLines(plot, (Graphics2D) device, mapper, labels);
+	public void drawGridLines(GridLinesSetup setup, Rectangle plot, Object device) {
+		renderer.drawGridLines(setup, plot, (Graphics2D) device, mapper, labels);
 	}
 	
 	@Override

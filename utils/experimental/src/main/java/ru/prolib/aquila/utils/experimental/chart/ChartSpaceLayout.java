@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart;
 
 import java.util.List;
 
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 
 /**
@@ -40,6 +41,13 @@ public interface ChartSpaceLayout {
 	 * <p>
 	 * @return параметры всех линеек, подлежащих отображению
 	 */
-	List<RulerSpace> getRulers();
+	List<RulerSpace> getRulersToDisplay();
+	
+	/**
+	 * Get sorted list of grid lines to display.
+	 * <p>
+	 * @return list of grid lines
+	 */
+	List<GridLinesSetup> getGridLinesToDisplay();
 
 }

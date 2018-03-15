@@ -341,6 +341,7 @@ public class SecuritySimulationTest implements Experiment {
 				.setHeight(600)
 				.addStaticOverlay(symbol + ", " + slice.getTimeFrame().toTFrame(), 0);
 		ChartSpaceManager vsm = chart.getVerticalSpaceManager();
+		vsm.getGridLinesSetup("CATEGORY", "TIME").setVisible(true);
 		// TODO: add date ruler to top
 		((SWTimeAxisRulerSetup) vsm.getLowerRulerSetup("CATEGORY", "TIME"))
 			.setVisible(true)
@@ -353,6 +354,7 @@ public class SecuritySimulationTest implements Experiment {
 		ValueAxisDriver vad = chart.getValueAxisDriver();
 		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(security.getTickSize());
 		ChartSpaceManager hsm = chart.getHorizontalSpaceManager();
+		hsm.getGridLinesSetup("VALUE", "LABEL").setVisible(true);
 		hsm.getUpperRulerSetup("VALUE", "LABEL").setVisible(true);
 		hsm.getLowerRulerSetup("VALUE", "LABEL").setVisible(true);
 		
@@ -381,13 +383,13 @@ public class SecuritySimulationTest implements Experiment {
 			.setDisplayPriority(10)
 			.setShowInnerLine(true)
 			.setShowOuterLine(false);
-		// TODO: add date ruler to borrom
+		// TODO: add date ruler to bottom
 		
 		vad = chart.getValueAxisDriver();
 		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(CDecimalBD.of(1L));
 		hsm = chart.getHorizontalSpaceManager();
-		hsm.setRulerVisibility(new RulerID("VALUE", "LABEL", false), true);
-		hsm.setRulerVisibility(new RulerID("VALUE", "LABEL",  true), true);
+		hsm.getLowerRulerSetup("VALUE", "LABEL").setVisible(true);
+		hsm.getUpperRulerSetup("VALUE", "LABEL").setVisible(true);
 
 		return chartPanel;
 	}

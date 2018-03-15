@@ -10,6 +10,7 @@ import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -77,6 +78,7 @@ public class SWCandlestickLayer extends SWAbstractLayer {
 			logger.warn("Axis direction now unsupported: " + cMapper.getAxisDirection());
 			return;
 		}
+		graphics.setStroke(new BasicStroke(2));
 		series.lock();
 		try {
 			int last = cMapper.getLastVisibleCategory();

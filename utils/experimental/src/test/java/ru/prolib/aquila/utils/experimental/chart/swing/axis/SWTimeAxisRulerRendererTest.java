@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.LABEL_FONT;
 import static org.easymock.EasyMock.*;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -30,7 +31,9 @@ import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabel;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabelMapper;
@@ -371,6 +374,7 @@ public class SWTimeAxisRulerRendererTest {
 		labels.add(new RLabel(9, "10h", 85));
 		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
 		graphicsMock.setFont(fontMock);
+		graphicsMock.setColor(Color.BLACK);
 		expect(graphicsMock.getFontMetrics()).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(12);
 		graphicsMock.drawLine(40, 100, 239, 100); // inner line
@@ -427,6 +431,7 @@ public class SWTimeAxisRulerRendererTest {
 		labels.add(new RLabel(9, "10h", 85));
 		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
 		graphicsMock.setFont(fontMock);
+		graphicsMock.setColor(Color.BLACK);
 		expect(graphicsMock.getFontMetrics()).andReturn(fontMetricsMock);
 		graphicsMock.drawLine(30,  0, 429,  0); // outer line
 		graphicsMock.drawLine(45,  0,  45, 24);
@@ -447,24 +452,27 @@ public class SWTimeAxisRulerRendererTest {
 
 	@Test
 	public void testDrawGridLines_HorizontalRuler() {
+		GridLinesSetup setup = new GridLinesSetup(new RulerRendererID("foo", "bar"));
 		Rectangle plot = new Rectangle(new Point2D(50, 15), 400, 250);
 		List<RLabel> labels = new ArrayList<>();
 		labels.add(new RLabel(5,  "9h", 45));
 		labels.add(new RLabel(7, ":55", 65));
 		labels.add(new RLabel(9, "10h", 85));
 		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
+		graphicsMock.setColor(Color.GRAY);
 		graphicsMock.drawLine(45, 15, 45, 264);
 		graphicsMock.drawLine(65, 15, 65, 264);
 		graphicsMock.drawLine(85, 15, 85, 264);
 		control.replay();
 		
-		service.drawGridLines(plot, graphicsMock, mapperMock, labels);
+		service.drawGridLines(setup, plot, graphicsMock, mapperMock, labels);
 		
 		control.verify();
 	}
 	
 	@Test (expected=UnsupportedOperationException.class)
 	public void testDrawGridLines_VerticalRuler_NotImplemented() {
+		GridLinesSetup setup = new GridLinesSetup(new RulerRendererID("foo", "bar"));
 		Rectangle plot = new Rectangle(new Point2D(50, 15), 400, 250);
 		List<RLabel> labels = new ArrayList<>();
 		labels.add(new RLabel(5,  "9h", 45));
@@ -473,7 +481,7 @@ public class SWTimeAxisRulerRendererTest {
 		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.UP);
 		control.replay();
 		
-		service.drawGridLines(plot, graphicsMock, mapperMock, labels);
+		service.drawGridLines(setup, plot, graphicsMock, mapperMock, labels);
 	}
 	
 	@Test
@@ -482,6 +490,14 @@ public class SWTimeAxisRulerRendererTest {
 		SWTimeAxisRulerSetup expected = new SWTimeAxisRulerSetup(rulerID);
 		
 		assertEquals(expected, service.createRulerSetup(rulerID));
+	}
+	
+	@Test
+	public void testCreateGridLinesSetup() {
+		RulerRendererID rendererID = new RulerRendererID("zulu", "charlie");
+		GridLinesSetup expected = new GridLinesSetup(rendererID);
+		
+		assertEquals(expected, service.createGridLinesSetup(rendererID));
 	}
 	
 }

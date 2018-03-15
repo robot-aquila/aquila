@@ -6,6 +6,7 @@ import java.util.List;
 
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
 
@@ -21,7 +22,8 @@ public interface SWRendererCallbackCA {
 					List<RLabel> labels,
 					Font labelFont);
 	
-	void drawGridLines(Rectangle plot,
+	void drawGridLines(GridLinesSetup setup,
+					Rectangle plot,
 					Graphics2D graphics,
 					CategoryAxisDisplayMapper mapper,
 					List<RLabel> labels);

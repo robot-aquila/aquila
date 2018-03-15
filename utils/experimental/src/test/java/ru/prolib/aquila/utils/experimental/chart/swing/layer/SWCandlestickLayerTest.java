@@ -4,6 +4,7 @@ import static org.easymock.EasyMock.createStrictControl;
 import static org.junit.Assert.*;
 import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.of;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.time.Instant;
@@ -130,6 +131,7 @@ public class SWCandlestickLayerTest {
 		series.add(new Candle(IM5("2018-02-25T00:05:00Z"), of(102L), of(107L), of( 96L), of(101L), of( 5L))); // bearish
 		series.add(null); // test null value
 		series.add(new Candle(IM5("2018-02-25T00:10:00Z"), of(103L), of(103L), of(101L), of(101L), of(10L))); // bearish
+		graphicsMock.setStroke(new BasicStroke(2));
 		// draw candle #2
 		graphicsMock.setColor(new Color(0, 80, 0));		// bullish shadow color
 		graphicsMock.drawLine(24, 94, 24, 101);			// H=200-105-1=94 L=200- 98-1=101
@@ -164,6 +166,7 @@ public class SWCandlestickLayerTest {
 		series.add(new Candle(IM5("2018-02-25T00:00:00Z"), of(100L), of(105L), of( 98L), of(102L), of( 1L))); // bullish
 		series.add(new Candle(IM5("2018-02-25T00:05:00Z"), of(102L), of(107L), of( 96L), of(101L), of( 5L))); // bearish
 		series.add(new Candle(IM5("2018-02-25T00:10:00Z"), of(103L), of(103L), of(101L), of(101L), of(10L))); // bearish
+		graphicsMock.setStroke(new BasicStroke(2));
 		// draw candle #0
 		graphicsMock.setColor(new Color(0, 80, 0));
 		graphicsMock.drawLine(0, 94, 0, 101);

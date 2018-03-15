@@ -14,5 +14,6 @@ public interface RulerRenderer {
 	int getMaxLabelHeight(Object device);
 	
 	RulerSetup createRulerSetup(RulerID rulerID);
+	GridLinesSetup createGridLinesSetup(RulerRendererID rendererID);
 
 }

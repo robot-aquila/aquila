@@ -16,7 +16,9 @@ import org.junit.Test;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.utils.experimental.chart.Point2D;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
@@ -69,11 +71,12 @@ public class SWPreparedRulerVATest {
 	
 	@Test
 	public void testDrawGridLines() {
+		GridLinesSetup setup = new GridLinesSetup(new RulerRendererID("foo", "bar"));
 		Rectangle plot = new Rectangle(new Point2D(40, 0), 100, 80);
-		rendererMock1.drawGridLines(plot, graphicsMock, mapperMock1, labels1);
+		rendererMock1.drawGridLines(setup, plot, graphicsMock, mapperMock1, labels1);
 		control.replay();
 		
-		ruler.drawGridLines(plot, graphicsMock);
+		ruler.drawGridLines(setup, plot, graphicsMock);
 		
 		control.verify();
 	}

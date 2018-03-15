@@ -2,6 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing.axis;
 
 import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.LABEL_FONT;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -18,7 +19,9 @@ import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisRulerRenderer;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabel;
@@ -190,6 +193,7 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 			throw new UnsupportedOperationException("Axis direction is not supported: " + dir); 
 		}
 		graphics.setFont(labelFont);
+		graphics.setColor(Color.BLACK);
 		FontMetrics fontMetrics = graphics.getFontMetrics();
 		int y, x;
 		if ( setup.getRulerID().isLowerPosition() ) {
@@ -223,7 +227,8 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 	}
 
 	@Override
-	public void drawGridLines(Rectangle plot,
+	public void drawGridLines(GridLinesSetup setup,
+						Rectangle plot,
 						Graphics2D graphics,
 						CategoryAxisDisplayMapper mapper,
 						List<RLabel> labels)
@@ -233,6 +238,7 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 			throw new UnsupportedOperationException("Axis direction is not supported: " + dir);
 		}
 		int y1 = plot.getUpperY(), y2 = plot.getLowerY();
+		graphics.setColor(Color.GRAY);
 		for ( RLabel label : labels ) {
 			int x = label.getCoord();
 			graphics.drawLine(x, y1, x, y2);
@@ -242,6 +248,11 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 	@Override
 	public RulerSetup createRulerSetup(RulerID rulerID) {
 		return new SWTimeAxisRulerSetup(rulerID);
+	}
+
+	@Override
+	public GridLinesSetup createGridLinesSetup(RulerRendererID rendererID) {
+		return new GridLinesSetup(rendererID);
 	}
 
 }

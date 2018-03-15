@@ -20,9 +20,15 @@ import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxy;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisRulerRenderer;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
+import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerFactoryCADProxy;
+import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerFactoryVAD;
+import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerRegistry;
+import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerRegistryImpl;
+import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriverImpl;
@@ -262,39 +268,29 @@ public class BarChartImpl implements BarChart, EventListener {
 		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, plot);
 
 		Rectangle rect;
-		// TODO: replace string to RendererID key
-		ValueAxisRulerRenderer var;
-		Map<String, PreparedRuler> preparedRulers = new HashMap<>();
-		for ( RulerSpace dummy : xLayout.getRulers() ) {
+		PreparedRulerRegistry prcache = new PreparedRulerRegistryImpl(new PreparedRulerFactoryVAD(vad, vam, graphics));
+		for ( RulerSpace dummy : xLayout.getRulersToDisplay() ) {
 			RulerID rulerID = dummy.getRulerID();
 			Segment1D rs = dummy.getSpace();
-			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
-			if ( preparedRuler == null ) {
-				var = (ValueAxisRulerRenderer) vad.getRenderer(rulerID.getRendererID());
-				preparedRuler = var.prepareRuler(vam, graphics);
-				preparedRulers.put(rulerID.getRendererID(), preparedRuler);
-			}
 			rect = new Rectangle(new Point2D(rs.getStart(), vam.getPlotStart()), rs.getLength(), vam.getPlotSize());
-			preparedRuler.drawRuler(horizontalSpaceManager.getRulerSetup(rulerID), rect, graphics);
+			prcache.getPreparedRuler(rulerID)
+				.drawRuler(horizontalSpaceManager.getRulerSetup(rulerID), rect, graphics);
+		}
+		for ( GridLinesSetup setup : xLayout.getGridLinesToDisplay() ) {
+			prcache.getPreparedRuler(setup.getRendererID()).drawGridLines(setup, plot, graphics);
 		}
 		
-		CategoryAxisRulerRenderer car;
-		preparedRulers.clear();
-		for ( RulerSpace dummy : yLayout.getRulers() ) {
+		prcache = new PreparedRulerRegistryImpl(new PreparedRulerFactoryCADProxy(cadProxy, cam, graphics));
+		for ( RulerSpace dummy : yLayout.getRulersToDisplay() ) {
 			RulerID rulerID = dummy.getRulerID();
 			Segment1D rs = dummy.getSpace();
-			PreparedRuler preparedRuler = preparedRulers.get(rulerID.getRendererID());
-			if ( preparedRuler == null ) {
-				 car = cadProxy.getRulerRenderer(rulerID.getRendererID());
-				 preparedRuler = car.prepareRuler(cam, graphics);
-				 preparedRulers.put(rulerID.getRendererID(), preparedRuler);
-			}
 			rect = new Rectangle(new Point2D(cam.getPlotStart(), rs.getStart()), cam.getPlotSize(), rs.getLength());
-			preparedRuler.drawRuler(verticalSpaceManager.getRulerSetup(rulerID), rect, graphics);
+			prcache.getPreparedRuler(rulerID)
+				.drawRuler(verticalSpaceManager.getRulerSetup(rulerID), rect, graphics);
 		}
-		
-		// TODO: draw grid lines
-		//valueAxisRuler.drawGrid(plot, graphics);
+		for ( GridLinesSetup setup : yLayout.getGridLinesToDisplay() ) {
+			prcache.getPreparedRuler(setup.getRendererID()).drawGridLines(setup, plot, graphics);
+		}
 
 		drawGridLines();
 		// TODO: set clip???

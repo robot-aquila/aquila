@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.util.List;
 
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
+import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
@@ -21,7 +22,8 @@ public interface SWRendererCallbackVA {
 				   	List<RLabel> labels,
 				   	Font labelFont);
 	
-	void drawGridLines(Rectangle plot,
+	void drawGridLines(GridLinesSetup setup,
+					Rectangle plot,
 					Graphics2D graphics,
 					ValueAxisDisplayMapper mapper,
 					List<RLabel> labels);
