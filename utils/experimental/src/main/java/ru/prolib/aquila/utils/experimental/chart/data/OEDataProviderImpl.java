@@ -70,12 +70,17 @@ public class OEDataProviderImpl implements EventListener {
 				OrderExecutionEvent e = (OrderExecutionEvent) event;
 				OrderExecution oe = e.getExecution();
 				if ( validator.isValid(oe) ) {
-					OEEntrySet eset = entries.get(oe.getTime());
-					if ( eset == null ) {
-						eset = new OEEntrySetImpl();
-						entries.set(oe.getTime(), eset);
+					entries.lock();
+					try {
+						OEEntrySet eset = entries.get(oe.getTime());
+						if ( eset == null ) {
+							eset = new OEEntrySetImpl();
+							entries.set(oe.getTime(), eset);
+						}
+						eset.addEntry(new OEEntryImpl(oe.getAction() == OrderAction.BUY, oe.getPricePerUnit()));
+					} finally {
+						entries.unlock();
 					}
-					eset.addEntry(new OEEntryImpl(oe.getAction() == OrderAction.BUY, oe.getPricePerUnit()));
 				}
 			}
 		}
