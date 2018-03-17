@@ -537,16 +537,18 @@ public class QFCalcUtilsTest {
 	}
 	
 	@Test
-	public void testMidClearing() {
+	public void testMidClearing_ForOpenPosition() {
 		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
 		p.consume(new DeltaUpdateBuilder()
-			.withToken(PositionField.CURRENT_PRICE, CDecimalBD.of("-245.10"))
+			// Current price can be any value. Settlement price will be used to
+			// refresh position current price and all linked values like margin
+			.withToken(PositionField.CURRENT_PRICE, CDecimalBD.of("-555.55")) 
 			.withToken(PositionField.OPEN_PRICE, CDecimalBD.of("-240.00"))
 			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("52.65"))
 			.withToken(PositionField.USED_MARGIN, CDecimalBD.ofRUB2("60"))
-			.withToken(QFPositionField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("-10.2"))
-			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("10.03"))
-			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("52.82"))
+			.withToken(QFPositionField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("-10.2"))		// must be reset
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("10.03")) // must be not lost
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("52.82")) // must be not lost
 			.withToken(PositionField.CURRENT_VOLUME, CDecimalBD.of(-5L))
 			.buildUpdate());
 		// Last price will not used
@@ -565,7 +567,7 @@ public class QFCalcUtilsTest {
 		QFPositionChangeUpdate expected = new QFPositionChangeUpdate(account, symbol)
 			.setChangeBalance(ZERO_MONEY2)
 			.setChangeVolume(ZERO)
-			.setInitialCurrentPrice(CDecimalBD.of("-245.10"))
+			.setInitialCurrentPrice(CDecimalBD.of("-555.55"))
 			.setInitialOpenPrice(CDecimalBD.of("-240.00"))
 			.setInitialProfitAndLoss(CDecimalBD.ofRUB2("52.65"))
 			.setInitialUsedMargin(CDecimalBD.ofRUB2("60"))
@@ -575,16 +577,53 @@ public class QFCalcUtilsTest {
 			.setInitialVolume(CDecimalBD.of(-5L))
 			.setFinalCurrentPrice(CDecimalBD.of("-245.40"))
 			.setFinalOpenPrice(CDecimalBD.of("-245.40"))
-			.setFinalProfitAndLoss(CDecimalBD.ofRUB2("-0.77"))
+			.setFinalProfitAndLoss(CDecimalBD.ofRUB2("52.05"))
 			.setFinalUsedMargin(CDecimalBD.ofRUB2("72.5"))
 			.setFinalVarMargin(ZERO_MONEY5)
 			.setFinalVarMarginClose(ZERO_MONEY5)
-			.setFinalVarMarginInter(CDecimalBD.ofRUB5("-0.77"));
+			.setFinalVarMarginInter(CDecimalBD.ofRUB5("52.05000"));
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testMidClearing_ForClosedPosition() {
+		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
+		p.consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_PRICE, 	ZERO_PRICE) // zero if position closed
+			.withToken(PositionField.OPEN_PRICE,		ZERO_PRICE) // zero if position closed
+			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("35.97")) // just sum of margin of all types
+			.withToken(PositionField.USED_MARGIN, 		ZERO_MONEY2) // zero if position closed
+			.withToken(QFPositionField.QF_VAR_MARGIN, 	ZERO_MONEY5) // zero if position closed
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("25.94")) // must be not lost
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("10.03")) // must be not lost
+			.withToken(PositionField.CURRENT_VOLUME, CDecimalBD.of(0L))
+			.buildUpdate());
+
+		QFPositionChangeUpdate actual = service.midClearing(p);
+		
+		QFPositionChangeUpdate expected = new QFPositionChangeUpdate(account, symbol)
+				.setChangeBalance(ZERO_MONEY2)
+				.setChangeVolume(ZERO)
+				.setInitialCurrentPrice(ZERO_PRICE)
+				.setInitialOpenPrice(ZERO_PRICE)
+				.setInitialProfitAndLoss(CDecimalBD.ofRUB2("35.97"))
+				.setInitialUsedMargin(ZERO_MONEY2)
+				.setInitialVarMargin(ZERO_MONEY5)
+				.setInitialVarMarginClose(CDecimalBD.ofRUB5("25.94"))
+				.setInitialVarMarginInter(CDecimalBD.ofRUB5("10.03"))
+				.setInitialVolume(ZERO)
+				.setFinalCurrentPrice(ZERO_PRICE)
+				.setFinalOpenPrice(ZERO_PRICE)
+				.setFinalProfitAndLoss(CDecimalBD.ofRUB2("35.97"))
+				.setFinalUsedMargin(ZERO_MONEY2)
+				.setFinalVarMargin(ZERO_MONEY5)
+				.setFinalVarMarginClose(ZERO_MONEY5)
+				.setFinalVarMarginInter(CDecimalBD.ofRUB5("35.97"));
+			assertEquals(expected, actual);
 	}
 
 	@Test
-	public void testClearing() {
+	public void testClearing_ForOpenPosition() {
 		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
 		p.consume(new DeltaUpdateBuilder()
 			.withToken(PositionField.CURRENT_PRICE, CDecimalBD.of("-245.10"))
@@ -624,6 +663,43 @@ public class QFCalcUtilsTest {
 			.setFinalOpenPrice(CDecimalBD.of("-245.40"))
 			.setFinalProfitAndLoss(ZERO_MONEY2)
 			.setFinalUsedMargin(CDecimalBD.ofRUB2("72.5"))
+			.setFinalVarMargin(ZERO_MONEY5)
+			.setFinalVarMarginClose(ZERO_MONEY5)
+			.setFinalVarMarginInter(ZERO_MONEY5);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testClearing_ForClosedPosition() {
+		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
+		p.consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_PRICE, ZERO_PRICE)
+			.withToken(PositionField.OPEN_PRICE, ZERO_PRICE)
+			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("62.85"))
+			.withToken(PositionField.USED_MARGIN, ZERO_MONEY2)
+			.withToken(QFPositionField.QF_VAR_MARGIN, ZERO_MONEY5)
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("10.03"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("52.82"))
+			.withToken(PositionField.CURRENT_VOLUME, ZERO)
+			.buildUpdate());
+		
+		QFPositionChangeUpdate actual = service.clearing(p);
+		
+		QFPositionChangeUpdate expected = new QFPositionChangeUpdate(account, symbol)
+			.setChangeBalance(CDecimalBD.ofRUB2("62.85"))
+			.setChangeVolume(ZERO)
+			.setInitialCurrentPrice(ZERO_PRICE)
+			.setInitialOpenPrice(ZERO_PRICE)
+			.setInitialProfitAndLoss(CDecimalBD.ofRUB2("62.85"))
+			.setInitialUsedMargin(ZERO_MONEY2)
+			.setInitialVarMargin(ZERO_MONEY5)
+			.setInitialVarMarginClose(CDecimalBD.ofRUB5("10.03"))
+			.setInitialVarMarginInter(CDecimalBD.ofRUB5("52.82"))
+			.setInitialVolume(ZERO)
+			.setFinalCurrentPrice(ZERO_PRICE)
+			.setFinalOpenPrice(ZERO_PRICE)
+			.setFinalProfitAndLoss(ZERO_MONEY2)
+			.setFinalUsedMargin(ZERO_MONEY2)
 			.setFinalVarMargin(ZERO_MONEY5)
 			.setFinalVarMarginClose(ZERO_MONEY5)
 			.setFinalVarMarginInter(ZERO_MONEY5);

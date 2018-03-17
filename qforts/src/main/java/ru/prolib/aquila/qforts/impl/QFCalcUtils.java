@@ -12,12 +12,11 @@ import ru.prolib.aquila.core.BusinessEntities.Tick;
 public class QFCalcUtils {
 	
 	private CDecimal getCurrentPrice(Security security) {
-		// TODO: Refactor me after Tick refactoring
 		Tick x = security.getLastTrade();
 		if ( x == null ) {
 			return security.getSettlementPrice();
 		}
-		return Tick.getPrice(x, security.getScale());
+		return x.getPrice();
 	}
 	
 	private CDecimal getCurrentPrice(Security security, CDecimal volume) {
@@ -223,9 +222,10 @@ public class QFCalcUtils {
 			.setInitialVolume(volume = position.getCDecimal(PositionField.CURRENT_VOLUME, zero));
 		CDecimal curPr = security.getSettlementPrice().multiply(volume);
 		CDecimal varMgn = getVarMargin(security, curPr, update.getInitialOpenPrice());
+		CDecimal varMgnInter = varMgn.add(update.getInitialVarMarginClose()).add(update.getInitialVarMarginInter());
 		update.setFinalCurrentPrice(curPr)
 			.setFinalOpenPrice(curPr)
-			.setFinalVarMarginInter(varMgn.add(update.getInitialVarMarginClose()))
+			.setFinalVarMarginInter(varMgnInter)
 			.setFinalVarMargin(zeroMoney5)
 			.setFinalVarMarginClose(zeroMoney5);
 		update.setFinalUsedMargin(getUsedMargin(security, volume));

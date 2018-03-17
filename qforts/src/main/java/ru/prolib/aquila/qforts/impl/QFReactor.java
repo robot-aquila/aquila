@@ -218,10 +218,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private void onSecurityTradeEvent(SecurityTickEvent event) {
 		Tick tick = event.getTick();
 		try {
-			// TODO: refactor me
-			facade.handleOrders(event.getSecurity(),
-					Tick.getSize(tick),
-					Tick.getPrice(tick, event.getSecurity().getScale()));
+			facade.handleOrders(event.getSecurity(), tick.getSize(), tick.getPrice());
 		} catch ( QFTransactionException e ) {
 			logger.error("Unexpected exception: ", e);
 		}

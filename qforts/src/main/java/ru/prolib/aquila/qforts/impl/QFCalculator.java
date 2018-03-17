@@ -152,40 +152,36 @@ public class QFCalculator {
 
 	public QFPortfolioChangeUpdate midClearing(Portfolio portfolio) {
 		QFPortfolioChangeUpdate update = new QFPortfolioChangeUpdate(portfolio.getAccount());
-		CDecimal cUsMgn = ZERO_MONEY2, fVarMgnI = ZERO_MONEY5, cPL = ZERO_MONEY2;
+		CDecimal finalUsedMargin = ZERO_MONEY2, finalVarMarginInt = ZERO_MONEY5, finalPL = ZERO_MONEY2;
 		for ( Position pos : portfolio.getPositions() ) {
-			if ( pos.getCDecimal(PositionField.CURRENT_VOLUME, ZERO).compareTo(ZERO) != 0 ) {
-				QFPositionChangeUpdate pu = utils.midClearing(pos);
-				update.setPositionUpdate(pu);
-				cUsMgn = cUsMgn.add(pu.getChangeUsedMargin());
-				fVarMgnI = fVarMgnI.add(pu.getChangeVarMarginInter());
-				cPL = cPL.add(pu.getChangeProfitAndLoss());
-			}
+			QFPositionChangeUpdate pu = utils.midClearing(pos);
+			update.setPositionUpdate(pu);
+			finalUsedMargin = finalUsedMargin.add(pu.getFinalUsedMargin());
+			finalVarMarginInt = finalVarMarginInt.add(pu.getFinalVarMarginInter());
+			finalPL = finalPL.add(pu.getFinalProfitAndLoss());
 		}
 		setInitialValues(portfolio, update)
 			.setChangeBalance(ZERO_MONEY2)
-			.setChangeProfitAndLoss(cPL)
-			.setChangeUsedMargin(cUsMgn)
+			.setFinalProfitAndLoss(finalPL)
+			.setFinalUsedMargin(finalUsedMargin)
 			.setFinalVarMargin(ZERO_MONEY5)
 			.setFinalVarMarginClose(ZERO_MONEY5)
-			.setFinalVarMarginInter(fVarMgnI);
+			.setFinalVarMarginInter(finalVarMarginInt);
 		return updateEquityAndFreeMargin(update);
 	}
 	
 	public QFPortfolioChangeUpdate clearing(Portfolio portfolio) {
 		QFPortfolioChangeUpdate update = new QFPortfolioChangeUpdate(portfolio.getAccount());
-		CDecimal cUsMgn = ZERO_MONEY2, cBal = ZERO_MONEY2;
+		CDecimal finalUsedMargin = ZERO_MONEY2, changeBalance = ZERO_MONEY2;
 		for ( Position pos : portfolio.getPositions() ) {
-			if ( pos.getCDecimal(PositionField.CURRENT_VOLUME, ZERO).compareTo(ZERO) != 0L ) {
-				QFPositionChangeUpdate pu = utils.clearing(pos);
-				update.setPositionUpdate(pu);
-				cUsMgn = cUsMgn.add(pu.getChangeUsedMargin());
-				cBal = cBal.add(pu.getChangeBalance());
-			}
+			QFPositionChangeUpdate pu = utils.clearing(pos);
+			update.setPositionUpdate(pu);
+			finalUsedMargin = finalUsedMargin.add(pu.getFinalUsedMargin());
+			changeBalance = changeBalance.add(pu.getChangeBalance());
 		}
 		setInitialValues(portfolio, update)
-			.setChangeBalance(cBal)
-			.setChangeUsedMargin(cUsMgn)
+			.setChangeBalance(changeBalance)
+			.setFinalUsedMargin(finalUsedMargin)
 			.setFinalProfitAndLoss(ZERO_MONEY2)
 			.setFinalVarMargin(ZERO_MONEY5)
 			.setFinalVarMarginClose(ZERO_MONEY5)
