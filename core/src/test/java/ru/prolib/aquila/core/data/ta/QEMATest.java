@@ -27,12 +27,12 @@ public class QEMATest {
 		sourceMock = control.createMock(Series.class);
 		source = new SeriesImpl<>();
 		series = new QEMA("foo", source, 4);
-		source.add(CDecimalBD.of("5.00000"));
-		source.add(CDecimalBD.of("2.00000"));
-		source.add(CDecimalBD.of("7.00000"));
-		source.add(CDecimalBD.of("3.00000"));
-		source.add(CDecimalBD.of("8.00000"));
-		source.add(CDecimalBD.of("1.00000"));
+		source.add(CDecimalBD.of("5"));
+		source.add(CDecimalBD.of("2"));
+		source.add(CDecimalBD.of("7"));
+		source.add(CDecimalBD.of("3"));
+		source.add(CDecimalBD.of("8"));
+		source.add(CDecimalBD.of("1"));
 	}
 	
 	@Test
@@ -42,7 +42,7 @@ public class QEMATest {
 	
 	@Test
 	public void testGet() throws Exception {
-		assertEquals(CDecimalBD.of("3.84928"), series.get());
+		assertEquals(CDecimalBD.of("3.8492800"), series.get());
 	}
 	
 	@Test
@@ -50,9 +50,9 @@ public class QEMATest {
 		assertEquals(null, series.get(0));
 		assertEquals(null, series.get(1));
 		assertEquals(null, series.get(2));
-		assertEquals(CDecimalBD.of("4.24800"), series.get(3));
-		assertEquals(CDecimalBD.of("5.74880"), series.get(4));
-		assertEquals(CDecimalBD.of("3.84928"), series.get(5));
+		assertEquals(CDecimalBD.of("4.2480000"), series.get(3));
+		assertEquals(CDecimalBD.of("5.7488000"), series.get(4));
+		assertEquals(CDecimalBD.of("3.8492800"), series.get(5));
 	}
 
 	@Test

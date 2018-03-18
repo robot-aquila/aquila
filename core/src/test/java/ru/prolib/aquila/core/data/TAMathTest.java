@@ -1,7 +1,13 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
+
+import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.*;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
@@ -41,145 +47,145 @@ public class TAMathTest {
 		 */
 		fix_vv_dpo3[] = {
 			// SPY (S & P 500 SPDR) daily from 1997-06-06
-			new FR("86.3800",  null),	// 1997-06-06
-			new FR("86.8100",  null),	// 1997-06-09
-			new FR("87.0800",  null),	// 1997-06-10
-			new FR("87.2800",  null),	// 1997-06-11
-			new FR("88.9700",  null),	// 1997-06-12
-			new FR("89.7200",  "2.9633"),	// 1997-06-13
-			new FR("89.7500",  "2.6933"),	// 1997-06-16
-			new FR("89.6300",  "1.8533"),	// 1997-06-17
-			new FR("89.3100",  "0.6533"),	// 1997-06-18
-			new FR("90.2300",  "0.7500"),	// 1997-06-19
-			new FR("89.5800", "-0.1200"),	// 1997-06-20
-			new FR("87.4100", "-2.1533"),	// 1997-06-23
-			new FR("89.6300", "-0.0933"),	// 1997-06-24
-			new FR("89.0000", "-0.7067"),	// 1997-06-25
-			new FR("88.5600", "-0.5133"),	// 1997-06-26
-			new FR("88.9100",  "0.0367"),	// 1997-06-27
-			new FR("88.3100", "-0.3700"),	// 1997-06-30
-			new FR("89.3400",  "0.2767"),	// 1997-07-01
-			new FR("90.8100",  "1.9867"),	// 1997-07-02
-			new FR("92.0600",  "3.4667"),	// 1997-07-03
-			new FR("91.1300",  "2.2767"),	// 1997-07-07
-			new FR("92.0800",  "2.5933"),	// 1997-07-08
-			new FR("91.0600",  "0.3233"),	// 1997-07-09
+			new FR("86.38",  null),	// 1997-06-06
+			new FR("86.81",  null),	// 1997-06-09
+			new FR("87.08",  null),	// 1997-06-10
+			new FR("87.28",  null),	// 1997-06-11
+			new FR("88.97",  null),	// 1997-06-12
+			new FR("89.72",  "2.963333333"),	// 1997-06-13
+			new FR("89.75",  "2.693333333"),	// 1997-06-16
+			new FR("89.63",  "1.853333333"),	// 1997-06-17
+			new FR("89.31",  "0.653333333"),	// 1997-06-18
+			new FR("90.23",  "0.750000000"),	// 1997-06-19
+			new FR("89.58", "-0.120000000"),	// 1997-06-20
+			new FR("87.41", "-2.153333333"),	// 1997-06-23
+			new FR("89.63", "-0.093333333"),	// 1997-06-24
+			new FR("89.00", "-0.706666667"),	// 1997-06-25
+			new FR("88.56", "-0.513333333"),	// 1997-06-26
+			new FR("88.91",  "0.036666667"),	// 1997-06-27
+			new FR("88.31", "-0.370000000"),	// 1997-06-30
+			new FR("89.34",  "0.276666667"),	// 1997-07-01
+			new FR("90.81",  "1.986666667"),	// 1997-07-02
+			new FR("92.06",  "3.466666667"),	// 1997-07-03
+			new FR("91.13",  "2.276666667"),	// 1997-07-07
+			new FR("92.08",  "2.593333333"),	// 1997-07-08
+			new FR("91.06",  "0.323333333"),	// 1997-07-09
 		},
 		/**
 		 * Фикстура теста VectorVest DPO(20)
 		 */
 		fix_vv_dpo20[] = {
-			// SPY (S & P 500 SPDR) minutes from 2013-09-03 09:30:00
-			new FR("165.3869",  null),	// 2013-09-03 09:30:00
-			new FR("165.4000",  null),	// 2013-09-03 09:31:00
-			new FR("165.4600",  null),	// 2013-09-03 09:32:00
-			new FR("165.5100",  null),	// 2013-09-03 09:33:00
-			new FR("165.4400",  null),	// 2013-09-03 09:34:00
-			new FR("165.5500",  null),	// 2013-09-03 09:35:00
-			new FR("165.4800",  null),	// 2013-09-03 09:36:00
-			new FR("165.5061",  null),	// 2013-09-03 09:37:00
-			new FR("165.4500",  null),	// 2013-09-03 09:38:00
-			new FR("165.4300",  null),	// 2013-09-03 09:39:00
-			new FR("165.4500",  null),	// 2013-09-03 09:40:00
-			new FR("165.3701",  null),	// 2013-09-03 09:41:00
-			new FR("165.3800",  null),	// 2013-09-03 09:42:00
-			new FR("165.3600",  null),	// 2013-09-03 09:43:00
-			new FR("165.3400",  null),	// 2013-09-03 09:44:00
-			new FR("165.3650",  null),	// 2013-09-03 09:45:00
-			new FR("165.3200",  null),	// 2013-09-03 09:46:00
-			new FR("165.3000",  null),	// 2013-09-03 09:47:00
-			new FR("165.3300",  null),	// 2013-09-03 09:48:00
-			new FR("165.3100",  null),	// 2013-09-03 09:49:00
-			new FR("165.3500",  null),	// 2013-09-03 09:50:00
-			new FR("165.2900",  null),	// 2013-09-03 09:51:00
-			new FR("165.3500",  null),	// 2013-09-03 09:52:00
-			new FR("165.3050",  null),	// 2013-09-03 09:53:00
-			new FR("165.2200",  null),	// 2013-09-03 09:54:00
-			new FR("165.3700",  null),	// 2013-09-03 09:55:00
-			new FR("165.3650",  null),	// 2013-09-03 09:56:00
-			new FR("165.3500",  null),	// 2013-09-03 09:57:00
-			new FR("165.1900",  null),	// 2013-09-03 09:58:00
-			new FR("165.2600",  null),	// 2013-09-03 09:59:00
-			new FR("165.1600", "-0.2469"),	// 2013-09-03 10:00:00
-			new FR("165.0950", "-0.3101"),	// 2013-09-03 10:01:00
-			new FR("165.1600", "-0.2396"),	// 2013-09-03 10:02:00
-			new FR("165.2300", "-0.1641"),	// 2013-09-03 10:03:00
-			new FR("165.2300", "-0.1538"),	// 2013-09-03 10:04:00
-			new FR("165.1800", "-0.1928"),	// 2013-09-03 10:05:00
-			new FR("165.2700", "-0.0938"),	// 2013-09-03 10:06:00
-			new FR("165.2400", "-0.1181"),	// 2013-09-03 10:07:00
-			new FR("165.2100", "-0.1403"),	// 2013-09-03 10:08:00
-			new FR("165.2300", "-0.1073"),	// 2013-09-03 10:09:00
-			new FR("165.3800",  "0.0512"),	// 2013-09-03 10:10:00
-			new FR("165.3400",  "0.0257"),	// 2013-09-03 10:11:00
-			new FR("165.4300",  "0.1295"),	// 2013-09-03 10:12:00
-			new FR("165.3700",  "0.0805"),	// 2013-09-03 10:13:00
-			new FR("165.3300",  "0.0470"),	// 2013-09-03 10:14:00
-			new FR("165.3000",  "0.0225"),	// 2013-09-03 10:15:00
-			new FR("165.1700", "-0.0983"),	// 2013-09-03 10:16:00
-			new FR("165.1800", "-0.0858"),	// 2013-09-03 10:17:00
-			new FR("165.1200", "-0.1428"),	// 2013-09-03 10:18:00
-			new FR("165.1200", "-0.1368"),	// 2013-09-03 10:19:00
-			new FR("165.0500", "-0.2028"),	// 2013-09-03 10:20:00
-			new FR("165.0800", "-0.1743"),	// 2013-09-03 10:21:00
-			new FR("165.0350", "-0.2218"),	// 2013-09-03 10:22:00
-			new FR("164.9900", "-0.2708"),	// 2013-09-03 10:23:00
-			new FR("165.0401", "-0.2239"),	// 2013-09-03 10:24:00
-			new FR("165.1000", "-0.1695"),	// 2013-09-03 10:25:00
-			new FR("165.1500", "-0.1160"),	// 2013-09-03 10:26:00
-			new FR("165.0700", "-0.1863"),	// 2013-09-03 10:27:00
-			new FR("165.0940", "-0.1538"),	// 2013-09-03 10:28:00
-			new FR("165.1300", "-0.1143"),	// 2013-09-03 10:29:00
-			new FR("165.0800", "-0.1573"),	// 2013-09-03 10:30:00
-			new FR("165.1500", "-0.0818"),	// 2013-09-03 10:31:00
-			new FR("165.2200", "-0.0110"),	// 2013-09-03 10:32:00
-			new FR("165.1900", "-0.0348"),	// 2013-09-03 10:33:00
-			new FR("165.1900", "-0.0228"),	// 2013-09-03 10:34:00
-			new FR("165.1700", "-0.0333"),	// 2013-09-03 10:35:00
-			new FR("165.1600", "-0.0393"),	// 2013-09-03 10:36:00
-			new FR("165.2345",  "0.0412"),	// 2013-09-03 10:37:00
-			new FR("165.2050",  "0.0202"),	// 2013-09-03 10:38:00
+			// SPY (S & P 500 SPDR) minutes from 2013-09-03 09:30:00, actually differs
+			new FR("165.38",  null),	// 2013-09-03 09:30:00
+			new FR("165.40",  null),	// 2013-09-03 09:31:00
+			new FR("165.46",  null),	// 2013-09-03 09:32:00
+			new FR("165.51",  null),	// 2013-09-03 09:33:00
+			new FR("165.44",  null),	// 2013-09-03 09:34:00
+			new FR("165.55",  null),	// 2013-09-03 09:35:00
+			new FR("165.48",  null),	// 2013-09-03 09:36:00
+			new FR("165.50",  null),	// 2013-09-03 09:37:00
+			new FR("165.45",  null),	// 2013-09-03 09:38:00
+			new FR("165.43",  null),	// 2013-09-03 09:39:00
+			new FR("165.45",  null),	// 2013-09-03 09:40:00
+			new FR("165.37",  null),	// 2013-09-03 09:41:00
+			new FR("165.38",  null),	// 2013-09-03 09:42:00
+			new FR("165.36",  null),	// 2013-09-03 09:43:00
+			new FR("165.34",  null),	// 2013-09-03 09:44:00
+			new FR("165.36",  null),	// 2013-09-03 09:45:00
+			new FR("165.32",  null),	// 2013-09-03 09:46:00
+			new FR("165.30",  null),	// 2013-09-03 09:47:00
+			new FR("165.33",  null),	// 2013-09-03 09:48:00
+			new FR("165.31",  null),	// 2013-09-03 09:49:00
+			new FR("165.35",  null),	// 2013-09-03 09:50:00
+			new FR("165.29",  null),	// 2013-09-03 09:51:00
+			new FR("165.35",  null),	// 2013-09-03 09:52:00
+			new FR("165.30",  null),	// 2013-09-03 09:53:00
+			new FR("165.22",  null),	// 2013-09-03 09:54:00
+			new FR("165.37",  null),	// 2013-09-03 09:55:00
+			new FR("165.36",  null),	// 2013-09-03 09:56:00
+			new FR("165.35",  null),	// 2013-09-03 09:57:00
+			new FR("165.19",  null),	// 2013-09-03 09:58:00
+			new FR("165.26",  null),	// 2013-09-03 09:59:00
+			new FR("165.16", "-0.246000000"),	// 2013-09-03 10:00:00
+			new FR("165.09", "-0.314500000"),	// 2013-09-03 10:01:00
+			new FR("165.16", "-0.239000000"),	// 2013-09-03 10:02:00
+			new FR("165.23", "-0.163500000"),	// 2013-09-03 10:03:00
+			new FR("165.23", "-0.153000000"),	// 2013-09-03 10:04:00
+			new FR("165.18", "-0.192000000"),	// 2013-09-03 10:05:00
+			new FR("165.27", "-0.093000000"),	// 2013-09-03 10:06:00
+			new FR("165.24", "-0.117000000"),	// 2013-09-03 10:07:00
+			new FR("165.21", "-0.139500000"),	// 2013-09-03 10:08:00
+			new FR("165.23", "-0.106500000"),	// 2013-09-03 10:09:00
+			new FR("165.38",  "0.052000000"),	// 2013-09-03 10:10:00
+			new FR("165.34",  "0.026500000"),	// 2013-09-03 10:11:00
+			new FR("165.43",  "0.130500000"),	// 2013-09-03 10:12:00
+			new FR("165.37",  "0.081500000"),	// 2013-09-03 10:13:00
+			new FR("165.33",  "0.048000000"),	// 2013-09-03 10:14:00
+			new FR("165.30",  "0.023500000"),	// 2013-09-03 10:15:00
+			new FR("165.17", "-0.097500000"),	// 2013-09-03 10:16:00
+			new FR("165.18", "-0.085000000"),	// 2013-09-03 10:17:00
+			new FR("165.12", "-0.142000000"),	// 2013-09-03 10:18:00
+			new FR("165.12", "-0.136000000"),	// 2013-09-03 10:19:00
+			new FR("165.05", "-0.202000000"),	// 2013-09-03 10:20:00
+			new FR("165.08", "-0.173500000"),	// 2013-09-03 10:21:00
+			new FR("165.03", "-0.226000000"),	// 2013-09-03 10:22:00
+			new FR("164.99", "-0.270000000"),	// 2013-09-03 10:23:00
+			new FR("165.04", "-0.223500000"),	// 2013-09-03 10:24:00
+			new FR("165.10", "-0.169000000"),	// 2013-09-03 10:25:00
+			new FR("165.15", "-0.115500000"),	// 2013-09-03 10:26:00
+			new FR("165.07", "-0.186000000"),	// 2013-09-03 10:27:00
+			new FR("165.09", "-0.157500000"),	// 2013-09-03 10:28:00
+			new FR("165.13", "-0.114000000"),	// 2013-09-03 10:29:00
+			new FR("165.08", "-0.157000000"),	// 2013-09-03 10:30:00
+			new FR("165.15", "-0.081500000"),	// 2013-09-03 10:31:00
+			new FR("165.22", "-0.011000000"),	// 2013-09-03 10:32:00
+			new FR("165.19", "-0.034500000"),	// 2013-09-03 10:33:00
+			new FR("165.19", "-0.022500000"),	// 2013-09-03 10:34:00
+			new FR("165.17", "-0.033000000"),	// 2013-09-03 10:35:00
+			new FR("165.16", "-0.039000000"),	// 2013-09-03 10:36:00
+			new FR("165.23",  "0.037000000"),	// 2013-09-03 10:37:00
+			new FR("165.20",  "0.015500000"),	// 2013-09-03 10:38:00
 		},
 		/**
 		 * Фикстура теста Quik EMA(5)
 		 */
 		fix_qema5[] = {
 			// RIU5, 2015-07-31, m15, close
-			new FR("85990.000000", null), //09:15
-			new FR("85190.000000", null), //10:00
-			new FR("85290.000000", null), //10:15
-			new FR("84980.000000", null), //10:30
-			new FR("85260.000000", "85339.506173"), //10:45
-			new FR("85120.000000", "85266.337449"),
-			new FR("84730.000000", "85087.558299"),
-			new FR("84890.000000", "85021.705533"),
-			new FR("84900.000000", "84981.137022"),
-			new FR("85120.000000", "85027.424681"),
-			new FR("85150.000000", "85068.283121"),
-			new FR("84950.000000", "85028.855414"),
-			new FR("85010.000000", "85022.570276"),
-			new FR("85150.000000", "85065.046851"),//13:00
-			new FR("85150.000000", "85093.364567"),//13:15
-			new FR("84940.000000", "85042.243045"),
-			new FR("84900.000000", "84994.828697"), // x!
-			new FR("84440.000000", "84809.885798"),
-			new FR("84200.000000", "84606.590532"),
-			new FR("84230.000000", "84481.060355"),
-			new FR("84180.000000", "84380.706903"),
-			new FR("84430.000000", "84397.137935"),
-			new FR("84230.000000", "84341.425290"),
-			new FR("84850.000000", "84510.950193"),
-			new FR("84740.000000", "84587.300129"),
-			new FR("85230.000000", "84801.533419"),
-			new FR("85770.000000", "85124.355613"),
-			new FR("85480.000000", "85242.903742"),
-			new FR("86130.000000", "85538.602495"),
-			new FR("85720.000000", "85599.068330"),
-			new FR("85840.000000", "85679.378887"), // x!
-			new FR("85830.000000", "85729.585925"), // x!
-			new FR("85690.000000", "85716.390617"),//17:45, x! + 0.000001
-			new FR("85670.000000", "85700.927078"),//18:00, x! + 0.000001
-			new FR("85850.000000", "85750.618052"),//18:15
+			new FR("85990", null), //09:15
+			new FR("85190", null), //10:00
+			new FR("85290", null), //10:15
+			new FR("84980", null), //10:30
+			new FR("85260", "85339.506173"), //10:45
+			new FR("85120", "85266.337449"),
+			new FR("84730", "85087.558299"),
+			new FR("84890", "85021.705533"),
+			new FR("84900", "84981.137022"),
+			new FR("85120", "85027.424681"),
+			new FR("85150", "85068.283121"),
+			new FR("84950", "85028.855414"),
+			new FR("85010", "85022.570276"),
+			new FR("85150", "85065.046851"),//13:00
+			new FR("85150", "85093.364567"),//13:15
+			new FR("84940", "85042.243045"),
+			new FR("84900", "84994.828697"),
+			new FR("84440", "84809.885798"),
+			new FR("84200", "84606.590532"),
+			new FR("84230", "84481.060355"),
+			new FR("84180", "84380.706903"),
+			new FR("84430", "84397.137935"),
+			new FR("84230", "84341.425290"),
+			new FR("84850", "84510.950194"),
+			new FR("84740", "84587.300129"),
+			new FR("85230", "84801.533419"),
+			new FR("85770", "85124.355613"),
+			new FR("85480", "85242.903742"),
+			new FR("86130", "85538.602495"),
+			new FR("85720", "85599.068330"),
+			new FR("85840", "85679.378887"),
+			new FR("85830", "85729.585924"),
+			new FR("85690", "85716.390616"),//17:45
+			new FR("85670", "85700.927078"),//18:00
+			new FR("85850", "85750.618052"),//18:15
 		};
 	
 	
@@ -283,13 +289,44 @@ public class TAMathTest {
 		assertNull(service.sma(series1, 1, 5));
 		
 		series1.add(CDecimalBD.of("50.00"));
-		assertEquals(CDecimalBD.of("30.00"), service.sma(series1, 5));
-		assertEquals(CDecimalBD.of("30.00"), service.sma(series1, 5, 5));
+		assertEquals(CDecimalBD.of("30.000000000"), service.sma(series1, 5));
+		assertEquals(CDecimalBD.of("30.000000000"), service.sma(series1, 5, 5));
 		
 		series1.add(null);
-		assertEquals(CDecimalBD.of("30.00"), service.sma(series1, -1, 5));
+		assertEquals(CDecimalBD.of("30.000000000"), service.sma(series1, -1, 5));
 		assertNull(service.sma(series1, 5));
 		assertNull(service.sma(series1, 6, 5));
+	}
+	
+	@Test
+	public void testSma_TestOfPrecision() throws Exception {
+		List<CDecimal> expected = new ArrayList<>();
+		// SiM8, M5, Exponential MA(close, 5), 2018-02-14 18:00
+		series1.add(of(58540L));	expected.add(null);
+		series1.add(of(58340L));	expected.add(null);
+		series1.add(of(58343L));	expected.add(null);
+		series1.add(of(58324L));	expected.add(null);
+		series1.add(of(58337L));	expected.add(of("58376.800000")); // 18:20
+		series1.add(of(58332L));	expected.add(of("58335.200000"));
+		series1.add(of(58207L));	expected.add(of("58308.600000")); // 18:30
+		series1.add(of(58138L));	expected.add(of("58267.600000"));
+		series1.add(of(58113L));	expected.add(of("58225.400000")); // 18:40
+		series1.add(of(58089L));	expected.add(of("58175.800000")); // 19:05
+		series1.add(of(58040L));	expected.add(of("58117.400000"));
+		series1.add(of(58042L));	expected.add(of("58084.400000")); // 19:15
+		series1.add(of(57970L));	expected.add(of("58050.800000"));
+		series1.add(of(57984L));	expected.add(of("58025.000000")); // 19:25
+		series1.add(of(58032L));	expected.add(of("58013.600000"));
+		
+		for ( int i = 0; i < expected.size(); i ++ ) {
+			String msg = "At #" + i;
+			CDecimal actualValue = service.sma(series1, i, 5);
+			if ( actualValue != null ) {
+				actualValue = actualValue.withScale(6, RoundingMode.HALF_UP);
+			}
+			CDecimal expectedValue = expected.get(i);
+			assertEquals(msg, expectedValue, actualValue);
+		}
 	}
 	
 	@Test
@@ -704,8 +741,39 @@ public class TAMathTest {
 				assertNull(msg, value);
 			} else {
 				assertNotNull(msg, value);
-				assertEquals(msg, fr.expected, value);
+				assertEquals(msg, fr.expected, value.withScale(6));
 			}
+		}
+	}
+	
+	@Test
+	public void testQema_TestOfPrecision() throws Exception {
+		List<CDecimal> expected = new ArrayList<>();
+		// SiM8, M5, Exponential MA(close, 5), 2018-02-14 18:00
+		series1.add(of(58540L));	expected.add(null);
+		series1.add(of(58340L));	expected.add(null);
+		series1.add(of(58343L));	expected.add(null);
+		series1.add(of(58324L));	expected.add(null);
+		series1.add(of(58337L));	expected.add(of("58375.395062")); // 18:20
+		series1.add(of(58332L));	expected.add(of("58360.930041"));
+		series1.add(of(58207L));	expected.add(of("58309.620027")); // 18:30
+		series1.add(of(58138L));	expected.add(of("58252.413352"));
+		series1.add(of(58113L));	expected.add(of("58205.942234")); // 18:40
+		series1.add(of(58089L));	expected.add(of("58166.961490")); // 19:05
+		series1.add(of(58040L));	expected.add(of("58124.640993"));
+		series1.add(of(58042L));	expected.add(of("58097.093995")); // 19:15
+		series1.add(of(57970L));	expected.add(of("58054.729330"));
+		series1.add(of(57984L));	expected.add(of("58031.152887")); // 19:25
+		series1.add(of(58032L));	expected.add(of("58031.435258"));
+		
+		for ( int i = 0; i < expected.size(); i ++ ) {
+			String msg = "At #" + i;
+			CDecimal actualValue = service.qema(series1, i, 5);
+			if ( actualValue != null ) {
+				actualValue = actualValue.withScale(6, RoundingMode.HALF_UP);
+			}
+			CDecimal expectedValue = expected.get(i);
+			assertEquals(msg, expectedValue, actualValue);
 		}
 	}
 	
@@ -723,7 +791,7 @@ public class TAMathTest {
 				assertNull(msg, value);
 			} else {
 				assertNotNull(msg, value);
-				assertEquals(msg, fr.expected, value);
+				assertEquals(msg, fr.expected, value.withScale(6));
 			}
 		}
 	}
@@ -762,8 +830,7 @@ public class TAMathTest {
 			new FR("52.18", "50.836015625"), // (49.49203125 * 2 + 2 * 52.18) / 4 = 50.836015625
 		};
 		for ( int i = 0; i < fixture.length; i ++ ) {
-			CDecimal x = fixture[i].value;
-			series1.add(x == null ? null : x.withScale(9));
+			series1.add(fixture[i].value);
 		}
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			String msg = "At #" + i;
@@ -805,31 +872,31 @@ public class TAMathTest {
 		{"82680","82830","82590","82710", "292.070060"},
 		{"82720","82780","82610","82700", "267.656048"},
 		{"82690","82760","82080","82190", "350.124838"},
-		{"82190","82250","81680","81860", "394.099870"}, //x! -0.000001
-		{"81830","81970","81630","81770", "383.279896"}, //x! -0.000001
+		{"82190","82250","81680","81860", "394.099871"}, //x! -0.000001 <- WTF?
+		{"81830","81970","81630","81770", "383.279897"}, //x! -0.000001
 		{"81790","82120","81760","82090", "378.623917"},
 		{"82060","82260","81830","82050", "388.899134"},
 		{"82020","82190","81770","81810", "395.119307"},
 	};
 	
-	private void fillCandlesQatr5(int scale) throws Exception {
+	private void fillCandlesQatr5() throws Exception {
 		String fixture[][] = fix_qatr5;
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			candles.add(new CandleBuilder()
 					.withTime(Instant.now())
 					.withTimeFrame(ZTFrame.M5)
-					.withOpenPrice(CDecimalBD.of(fixture[i][0]).withScale(scale))
-					.withHighPrice(CDecimalBD.of(fixture[i][1]).withScale(scale))
-					.withLowPrice(CDecimalBD.of(fixture[i][2]).withScale(scale))
-					.withClosePrice(CDecimalBD.of(fixture[i][3]).withScale(scale))
-					.withVolume(CDecimalBD.of(1L))
+					.withOpenPrice(of(fixture[i][0]))
+					.withHighPrice(of(fixture[i][1]))
+					.withLowPrice(of(fixture[i][2]))
+					.withClosePrice(of(fixture[i][3]))
+					.withVolume(of(1L))
 					.buildCandle());
 		}
 	}
 	
 	@Test
 	public void testQatr() throws Exception {
-		fillCandlesQatr5(6);
+		fillCandlesQatr5();
 		String fixture[][] = fix_qatr5;
 		CDecimal expected = null, actual = null;
 		for ( int i = 0; i < fixture.length; i ++ ) {
@@ -837,9 +904,12 @@ public class TAMathTest {
 			if ( fixture[i][4] == null ) {
 				expected = null;
 			} else {
-				expected = CDecimalBD.of(fixture[i][4]);
+				expected = of(fixture[i][4]);
 			}
 			actual = service.qatr(candles, i, 5);
+			if ( actual != null ) {
+				actual = actual.withScale(6);
+			}
 			if ( expected == null ) {
 				assertNull(msg, actual);
 			} else {
@@ -847,7 +917,7 @@ public class TAMathTest {
 				assertEquals(msg, expected, actual);
 			}
 		}
-		assertEquals(expected, service.qatr(candles, 5));
+		assertEquals(expected, service.qatr(candles, 5).withScale(6));
 	}
 	
 	@Test (expected=ValueOutOfRangeException.class)

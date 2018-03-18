@@ -237,7 +237,7 @@ public class TAMath {
 		for ( ; start <= index; start ++ ) {
 			sum = sum.add(value.get(start));
 		}
-		return sum.divide(CDecimalBD.of((long)period));
+		return sum.withScale(7 + sum.getScale()).divide((long) period);
 	}
 	
 	/**
@@ -678,9 +678,7 @@ public class TAMath {
 		// NOTE: Варианты типа Min(start, period * X) дают результат,
 		// который не соответствует результату рассчетов в QUIK.
 		int pos = index - start;
-		CDecimal prev = null, curr, result = null,
-				d_period_minus1 = CDecimalBD.of((long)(period - 1)),
-				d_period_plus1 = CDecimalBD.of((long)(period + 1));
+		CDecimal prev = null;
 		// Ожидаем последовательность длинной period, которая не содержит null
 		for ( ; pos < index; pos ++ ) {
 			prev = qemaFirst(value, pos, period);
@@ -691,7 +689,9 @@ public class TAMath {
 		if ( prev == null ) {
 			return null; // Couldn't obtain start EMA value
 		}
-		
+		CDecimal curr, result = null,
+			d_period_minus1 = CDecimalBD.of((long)(period - 1)),
+			d_period_plus1 = CDecimalBD.of((long)(period + 1));
 		for ( ++pos; pos <= index; pos ++ ) {
 			curr = value.get(pos);
 			if ( curr != null ) {
@@ -716,8 +716,9 @@ public class TAMath {
 		if ( prev == null ) {
 			return null;
 		}
-		CDecimal d_period_minus1 = CDecimalBD.of((long)(period - 1)),
-				d_period_plus1 = CDecimalBD.of((long)(period+ 1));
+		int scale = 7 + prev.getScale();
+		CDecimal d_period_minus1 = CDecimalBD.of((long)(period - 1)).withScale(scale),
+				d_period_plus1 = CDecimalBD.of((long)(period+ 1)).withScale(scale);
 		for ( int i = start + 1; i <= index; i ++ ) {
 			curr = value.get(i);
 			if ( curr == null ) {
@@ -759,7 +760,7 @@ public class TAMath {
 		for ( int i = 0; i < period; i ++ ) {
 			prev = prev.add(tr(candles, i));
 		}
-		prev = prev.divide(d_period);
+		prev = prev.withScale(7 + prev.getScale()).divide(d_period);
 		if ( index == period_minus1 ) {
 			return prev;
 		}
