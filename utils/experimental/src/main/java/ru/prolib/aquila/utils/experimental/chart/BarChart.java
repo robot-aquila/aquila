@@ -34,6 +34,7 @@ public interface BarChart {
 	
 	ChartSpaceManager getHorizontalSpaceManager();
 	ChartSpaceManager getVerticalSpaceManager();
+	@Deprecated
 	BarChart setZeroAtCenter(boolean zeroAtCenter);
 	
 }

@@ -64,7 +64,6 @@ import ru.prolib.aquila.utils.experimental.chart.BarChartPanel;
 import ru.prolib.aquila.utils.experimental.chart.ChartSpaceManager;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.data.ALODataProviderImpl;
 import ru.prolib.aquila.utils.experimental.chart.data.ALOValidatorImpl;
