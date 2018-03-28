@@ -4,7 +4,10 @@ import static org.junit.Assert.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +18,11 @@ import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 
 public class MoexContractSymbolUpdateConverterTest {
+	
+	static Instant TMSK(String timeString) {
+		return ZonedDateTime.of(LocalDateTime.parse(timeString), ZoneId.of("Europe/Moscow")).toInstant();
+	}
+	
 	private MoexContractSymbolUpdateConverter converter;
 
 	@Before
@@ -66,8 +74,9 @@ public class MoexContractSymbolUpdateConverterTest {
 			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("73406.00"))
 			.withToken(SecurityField.LOWER_PRICE_LIMIT, CDecimalBD.of("70469.00"))
 			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of("76343.00"))
+			.withToken(SecurityField.EXPIRATION_TIME, TMSK("2016-09-15T00:00:00"))
 			.buildUpdate();
-		assertEquals(4, SecurityField.getVersion());
+		assertEquals(5, SecurityField.getVersion());
 		assertEquals(expected, actual);
 	}
 	

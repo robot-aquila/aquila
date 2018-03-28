@@ -1,5 +1,9 @@
 package ru.prolib.aquila.web.utils.moex;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
@@ -15,6 +19,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityField;
  * to convert updates of different symbols.
  */
 public class MoexContractSymbolUpdateConverter {
+	private static final ZoneId TIME_ZONE = ZoneId.of("Europe/Moscow");
 	/**
 	 * Scale of price. Default: 0.
 	 */
@@ -96,6 +101,9 @@ public class MoexContractSymbolUpdateConverter {
 				builder.withToken(SecurityField.INITIAL_MARGIN,
 						((CDecimal) tokens.get(token)).withScale(initMarginScale));
 				break;
+			case MoexContractField.DELIVERY:
+				builder.withToken(SecurityField.EXPIRATION_TIME,
+					ZonedDateTime.of(((LocalDate) tokens.get(token)), LocalTime.MIDNIGHT, TIME_ZONE).toInstant());
 			}
 		}
 		return builder.buildUpdate();

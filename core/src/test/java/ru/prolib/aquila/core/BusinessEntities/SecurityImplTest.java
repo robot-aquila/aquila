@@ -253,6 +253,18 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	public void testGetExpirationTime() throws Exception {
+		getter = new Getter<Instant>() {
+			@Override
+			public Instant get() {
+				return security.getExpirationTime();
+			}
+		};
+		testGetter(SecurityField.EXPIRATION_TIME,
+				Instant.parse("2018-03-25T00:00:00Z"), Instant.parse("2018-03-26T07:01:00Z"));
+	}
+	
+	@Test
 	public void testClose() {
 		EventType type = new EventTypeImpl();
 		security.onAvailable().addListener(listenerStub);

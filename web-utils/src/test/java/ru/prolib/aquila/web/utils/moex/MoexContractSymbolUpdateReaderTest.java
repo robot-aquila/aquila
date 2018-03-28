@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +57,7 @@ public class MoexContractSymbolUpdateReaderTest {
 			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(76343L))
 			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(73406L))
 			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5874"))
+			.withToken(SecurityField.EXPIRATION_TIME, Instant.parse("2016-09-14T21:00:00Z"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)

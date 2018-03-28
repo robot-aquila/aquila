@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 public class SecurityField {
 	
 	public static int getVersion() {
-		return 4;
+		return 5;
 	}
 	
 	/**
@@ -77,5 +77,11 @@ public class SecurityField {
 	 * Type: {@link CDecimal}
 	 */
 	public static final int CLOSE_PRICE = 13;
+	
+	/**
+	 * Security expiration time.<br>
+	 * Type: nullable {@link java.time.Instant}
+	 */
+	public static final int EXPIRATION_TIME = 14;
 
 }

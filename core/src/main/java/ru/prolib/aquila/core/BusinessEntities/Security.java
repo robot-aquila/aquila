@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import ru.prolib.aquila.core.EventType;
 
 /**
@@ -131,5 +133,12 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 * @return initial margin
 	 */
 	public CDecimal getInitialMargin();
+	
+	/**
+	 * Get expiration time of the security.
+	 * <p>
+	 * @return time of expiration
+	 */
+	public Instant getExpirationTime();
 	
 }

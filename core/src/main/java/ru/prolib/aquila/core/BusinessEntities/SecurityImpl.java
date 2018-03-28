@@ -131,6 +131,11 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	public CDecimal getInitialMargin() {
 		return getCDecimal(SecurityField.INITIAL_MARGIN);
 	}
+	
+	@Override
+	public Instant getExpirationTime() {
+		return this.getInstant(SecurityField.EXPIRATION_TIME);
+	}
 
 	@Override
 	public EventType onSessionUpdate() {

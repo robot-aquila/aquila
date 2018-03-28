@@ -86,17 +86,17 @@ public class MoexContractFormIT {
 		expected.put(MoexContractField.LAST_TRADING_DAY, LocalDate.of(2017, 12, 21));
 		expected.put(MoexContractField.DELIVERY, LocalDate.of(2017, 12, 21));
 		// Some fields are not available for archived contracts
-		expected.put(MoexContractField.TICK_SIZE, CDecimalBD.of(10L));
-		expected.put(MoexContractField.TICK_VALUE, CDecimalBD.ofRUB5("11.67354"));
-		expected.put(MoexContractField.LOWER_PRICE_LIMIT, CDecimalBD.of("106710"));
-		expected.put(MoexContractField.UPPER_PRICE_LIMIT, CDecimalBD.of("116770"));
-		expected.put(MoexContractField.SETTLEMENT_PRICE, CDecimalBD.of("111740"));
-		expected.put(MoexContractField.FEE, CDecimalBD.ofRUB2("2.61"));
-		expected.put(MoexContractField.INTRADAY_FEE, CDecimalBD.of("1.305", "RUB"));
-		expected.put(MoexContractField.NEGOTIATION_FEE, CDecimalBD.ofRUB2("2.61"));
+		//expected.put(MoexContractField.TICK_SIZE, CDecimalBD.of(10L));
+		//expected.put(MoexContractField.TICK_VALUE, CDecimalBD.ofRUB5("11.67354"));
+		//expected.put(MoexContractField.LOWER_PRICE_LIMIT, CDecimalBD.of("106710"));
+		//expected.put(MoexContractField.UPPER_PRICE_LIMIT, CDecimalBD.of("116770"));
+		//expected.put(MoexContractField.SETTLEMENT_PRICE, CDecimalBD.of("111740"));
+		//expected.put(MoexContractField.FEE, CDecimalBD.ofRUB2("2.61"));
+		//expected.put(MoexContractField.INTRADAY_FEE, CDecimalBD.of("1.305", "RUB"));
+		//expected.put(MoexContractField.NEGOTIATION_FEE, CDecimalBD.ofRUB2("2.61"));
 		expected.put(MoexContractField.EXERCISE_FEE, CDecimalBD.of("2", "RUB"));
-		expected.put(MoexContractField.INITIAL_MARGIN, CDecimalBD.of("13153.5", "RUB"));
-		expected.put(MoexContractField.INITIAL_MARGIN_DATE, LocalDate.of(2017, 11, 2));
+		//expected.put(MoexContractField.INITIAL_MARGIN, CDecimalBD.of("13153.5", "RUB"));
+		//expected.put(MoexContractField.INITIAL_MARGIN_DATE, LocalDate.of(2017, 11, 2));
 		expected.put(MoexContractField.FX_INTRADAY_CLEARING, LocalTime.of(13, 45));
 		expected.put(MoexContractField.FX_EVENING_CLEARING, LocalTime.of(18, 30));
 		expected.put(MoexContractField.SETTLEMENT_PROC_DESCR, "Cash settlement. An average "

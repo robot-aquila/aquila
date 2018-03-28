@@ -51,6 +51,7 @@ public class MoexSymbolUpdateReaderFactoryTest {
 			.withToken(SecurityField.UPPER_PRICE_LIMIT, CDecimalBD.of(75721L))
 			.withToken(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of(72808L))
 			.withToken(SecurityField.INITIAL_MARGIN, CDecimalBD.ofRUB2("5826"))
+			.withToken(SecurityField.EXPIRATION_TIME, Instant.parse("2016-09-14T21:00:00Z"))
 			.buildUpdate());
 		expected.add(new DeltaUpdateBuilder()
 			.withSnapshot(false)
