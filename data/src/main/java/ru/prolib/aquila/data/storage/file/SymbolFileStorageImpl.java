@@ -100,9 +100,6 @@ public class SymbolFileStorageImpl implements SymbolFileStorage {
 		});
 		// 2) For each year scan for month folders
 		for ( final Integer year : yearToScan ) {
-			if ( result.size() >= maxCount ) {
-				break;
-			}
 			final List<Integer> monthToScan = new ArrayList<>();
 			new File(symbolRoot, formatYearDir(year)).list(new FilenameFilter() {
 				@Override
@@ -122,9 +119,6 @@ public class SymbolFileStorageImpl implements SymbolFileStorage {
 			});
 			// 2.2) Make subscan folder to search for data files
 			for ( Integer month : monthToScan ) {
-				if ( result.size() >= maxCount ) {
-					break;
-				}
 				File monthRoot = new File(symbolRoot, formatYearDir(year) + FS + formatMonthDir(month));
 				if ( monthRoot.isDirectory() ) {
 					monthRoot.list(new FilenameFilter() {
@@ -133,7 +127,7 @@ public class SymbolFileStorageImpl implements SymbolFileStorage {
 							LocalDate x = null;
 							try {
 								x = idUtils.parseSafeFilename3(name, symbol, config.getRegularSuffix());
-								if ( ! x.isBefore(from) && result.size() < maxCount ) {
+								if ( ! x.isBefore(from) ) {
 									result.add(x);
 								}
 							} catch ( DateTimeParseException e ) { }
@@ -144,7 +138,8 @@ public class SymbolFileStorageImpl implements SymbolFileStorage {
 			}
 		}
 		Collections.sort(result);
-		return result;
+		int count = result.size();
+		return count <= maxCount ? result : new ArrayList<>(result.subList(0, maxCount));
 	}
 
 	@Override
