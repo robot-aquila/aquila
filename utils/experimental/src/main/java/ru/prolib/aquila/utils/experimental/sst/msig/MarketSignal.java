@@ -10,12 +10,16 @@ import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 
-public class MarketSignal extends BreakSignal {
+public class MarketSignal {
+	public static final String DEFAULT_ID = "MARKET_SIGNAL";
+	protected final String id;
+	protected final EventQueue queue;
 	protected final EventType onBullish, onBearish;
 	private MarketSignalEvent lastEvent;
 
 	public MarketSignal(EventQueue queue, String id) {
-		super(queue, id);
+		this.id = id;
+		this.queue = queue;
 		this.onBullish = new EventTypeImpl(id + ".BULLISH");
 		this.onBearish = new EventTypeImpl(id + ".BEARISH");
 	}
@@ -28,6 +32,10 @@ public class MarketSignal extends BreakSignal {
 		return lastEvent;
 	}
 	
+	public String getID() {
+		return id;
+	}
+
 	public EventType onBullish() {
 		return onBullish;
 	}

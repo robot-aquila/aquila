@@ -10,17 +10,21 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.utils.experimental.sst.msig.BreakSignal;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
 
 public class RobotData {
 	private final EditableTerminal terminal;
 	private final RobotConfig config;
-	private final MarketSignal signal;
+	private final BreakSignal breakSignal;
+	private MarketSignal marketSignal;
+	private RobotDataSliceTracker dataSliceTracker;
+	private RobotStateListener stateListener;
 	
-	public RobotData(EditableTerminal terminal, RobotConfig config, MarketSignal signal) {
+	public RobotData(EditableTerminal terminal, RobotConfig config, BreakSignal breakSignal) {
 		this.terminal = terminal;
 		this.config = config;
-		this.signal = signal;
+		this.breakSignal = breakSignal;
 	}
 	
 	public Terminal getTerminal() {
@@ -63,8 +67,49 @@ public class RobotData {
 		return config.getAccount();
 	}
 	
-	public MarketSignal getSignal() {
-		return signal;
+	public BreakSignal getBreakSignal() {
+		return breakSignal;
+	}
+	
+	public synchronized MarketSignal getMarketSignal() {
+		if ( marketSignal == null ) {
+			throw new IllegalStateException("Market signal not defined");
+		}
+		return marketSignal;
+	}
+	
+	public synchronized void setMarketSignal(MarketSignal signal) {
+		if ( this.marketSignal != null ) {
+			throw new IllegalStateException("Market signal already defined");
+		}
+		this.marketSignal = signal;
+	}
+	
+	public synchronized RobotDataSliceTracker getDataSliceTracker() {
+		if ( dataSliceTracker == null ) {
+			throw new IllegalStateException("Data slice tracker is not defined");
+		}
+		return dataSliceTracker;
+	}
+	
+	public synchronized void setDataSliceTracker(RobotDataSliceTracker tracker) {
+		if ( this.dataSliceTracker != null ) {
+			throw new IllegalStateException("Data slice already defined");
+		}
+		this.dataSliceTracker = tracker;
+	}
+	
+	public synchronized void setStateListener(RobotStateListener stateListener) {
+		if ( this.stateListener != null ) {
+			throw new IllegalStateException("State listener already defined");
+		}
+		this.stateListener = stateListener;
 	}
 
+	public RobotStateListener getStateListener() {
+		if ( stateListener == null ) {
+			throw new IllegalStateException("State listener not defined");
+		}
+		return stateListener;
+	}
 }

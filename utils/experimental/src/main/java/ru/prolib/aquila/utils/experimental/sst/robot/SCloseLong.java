@@ -52,7 +52,7 @@ public class SCloseLong extends BasicState implements SMExitAction {
 		triggers.add(newExitOnEvent(order.onFailed(), EER));
 		triggers.add(newExitOnEvent(order.onFilled(), EOK));
 		triggers.add(newExitOnEvent(order.onCancelled(), EOK));
-		triggers.add(newExitOnEvent(data.getSignal().onBullish(), EOPN));
+		triggers.add(newExitOnEvent(data.getMarketSignal().onBullish(), EOPN));
 		try {
 			data.getTerminal().placeOrder(order);
 		} catch ( OrderException e ) {

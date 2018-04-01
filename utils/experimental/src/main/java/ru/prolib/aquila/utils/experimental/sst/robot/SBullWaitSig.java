@@ -36,8 +36,8 @@ public class SBullWaitSig extends BasicState implements SMExitAction, SMInputAct
 		super.enter(triggers);
 		//triggers.add(newExitOnEvent(data.getSignal().onBullish(), EOPN));
 		//triggers.add(newExitOnEvent(data.getSignal().onBearish(), ECLS));
-		triggers.add(new SMTriggerOnEvent(data.getSignal().onBullish(), in));
-		triggers.add(new SMTriggerOnEvent(data.getSignal().onBearish(), in));
+		triggers.add(new SMTriggerOnEvent(data.getMarketSignal().onBullish(), in));
+		triggers.add(new SMTriggerOnEvent(data.getMarketSignal().onBearish(), in));
 		return null;
 	}
 
@@ -50,10 +50,10 @@ public class SBullWaitSig extends BasicState implements SMExitAction, SMInputAct
 	public SMExit input(Object dummy) {
 		logger.debug("Input: {}", dummy);
 		Event e = (Event) dummy;
-		if ( e.isType(data.getSignal().onBullish()) ) {
+		if ( e.isType(data.getMarketSignal().onBullish()) ) {
 			return getExit(EOPN);
 		} else
-		if ( e.isType(data.getSignal().onBearish()) ) {
+		if ( e.isType(data.getMarketSignal().onBearish()) ) {
 			return getExit(ECLS);
 		}
 		return null;

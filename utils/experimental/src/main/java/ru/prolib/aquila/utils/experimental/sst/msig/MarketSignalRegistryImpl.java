@@ -69,5 +69,17 @@ public class MarketSignalRegistryImpl implements MarketSignalRegistry {
 			x.stop();
 		}
 	}
+	
+	@Override
+	public void remove(String id) {
+		MarketSignalProvider p = null;
+		synchronized ( this ) {
+			p = providers.remove(id);
+			if ( p == null ) {
+				throw new IllegalArgumentException("Signal not found: " + id);
+			}
+		}
+		p.stop();
+	}
 
 }

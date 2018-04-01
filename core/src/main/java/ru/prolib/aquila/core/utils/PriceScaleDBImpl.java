@@ -7,7 +7,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 /**
  * Simple implementation of the price scale DB.
- * It used as simple data cache: set a scale before its actual usage.
+ * It used as simple data cache: set scale before its actual usage.
  */
 public class PriceScaleDBImpl implements PriceScaleDB {
 	private final Map<Symbol, Integer> scaleMap;

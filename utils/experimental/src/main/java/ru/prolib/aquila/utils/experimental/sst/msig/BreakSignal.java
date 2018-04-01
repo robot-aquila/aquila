@@ -6,7 +6,7 @@ import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.SimpleEventFactory;
 
 public class BreakSignal {
-	public static final String DEFAULT_ID = "SIGNAL";
+	public static final String DEFAULT_ID = "BREAK_SIGNAL";
 	protected final String id;
 	protected final EventQueue queue;
 	protected final EventType onBreak;

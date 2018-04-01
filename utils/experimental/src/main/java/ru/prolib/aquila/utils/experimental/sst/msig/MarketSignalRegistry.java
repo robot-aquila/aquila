@@ -9,5 +9,7 @@ public interface MarketSignalRegistry {
 	MarketSignal getSignal(String id);
 	
 	void close();
+	
+	void remove(String signalID);
 
 }

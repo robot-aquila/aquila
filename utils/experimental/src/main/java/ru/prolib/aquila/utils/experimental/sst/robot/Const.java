@@ -38,5 +38,15 @@ public class Const {
 	 * Close position state ID.
 	 */
 	public static final String S_CLOSE = "CLOSE";
+	
+	/**
+	 * Initialize market signal state ID.
+	 */
+	public static final String S_INIT_MSIGNAL = "INIT_MSIG";
+	
+	/**
+	 * Drop market signal state ID.
+	 */
+	public static final String S_DROP_MSIGNAL = "REMOVE_MSIG";
 
 }

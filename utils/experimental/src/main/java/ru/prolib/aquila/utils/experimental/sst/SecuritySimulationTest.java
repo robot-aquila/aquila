@@ -1,6 +1,8 @@
 package ru.prolib.aquila.utils.experimental.sst;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -8,8 +10,9 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BorderFactory;
@@ -25,30 +28,23 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.data.*;
-import ru.prolib.aquila.core.data.tseries.CandleCloseTSeries;
-import ru.prolib.aquila.core.data.tseries.CandleVolumeTSeries;
-import ru.prolib.aquila.core.data.tseries.QEMATSeries;
-import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesByLastTrade;
+import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
+import ru.prolib.aquila.core.BusinessEntities.Scheduler;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.Terminal;
+import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.core.text.Messages;
-import ru.prolib.aquila.core.utils.PriceScaleDBImpl;
 import ru.prolib.aquila.data.storage.DataStorageException;
-import ru.prolib.aquila.data.storage.MDStorage;
 import ru.prolib.aquila.probe.SchedulerImpl;
-import ru.prolib.aquila.probe.datasim.L1UpdateSourceImpl;
-import ru.prolib.aquila.probe.datasim.L1UpdateSourceSATImpl;
-import ru.prolib.aquila.probe.datasim.SymbolUpdateSourceImpl;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerControlToolbar;
 import ru.prolib.aquila.probe.scheduler.ui.SchedulerTaskFilter;
 import ru.prolib.aquila.probe.scheduler.ui.SymbolUpdateTaskFilter;
 import ru.prolib.aquila.probe.scheduler.utils.EventQueueSynchronizer;
-import ru.prolib.aquila.qforts.impl.QFBuilder;
 import ru.prolib.aquila.qforts.impl.QFTransactionException;
-import ru.prolib.aquila.qforts.impl.QFortsEnv;
 import ru.prolib.aquila.qforts.ui.QFPortfolioListTableModel;
 import ru.prolib.aquila.qforts.ui.QFPositionListTableModel;
 import ru.prolib.aquila.ui.TableModelController;
@@ -60,186 +56,113 @@ import ru.prolib.aquila.utils.experimental.CmdLine;
 import ru.prolib.aquila.utils.experimental.Experiment;
 import ru.prolib.aquila.utils.experimental.chart.BarChart;
 import ru.prolib.aquila.utils.experimental.chart.BarChartOrientation;
-import ru.prolib.aquila.utils.experimental.chart.BarChartPanel;
 import ru.prolib.aquila.utils.experimental.chart.ChartSpaceManager;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
-import ru.prolib.aquila.utils.experimental.chart.data.ALODataProviderImpl;
-import ru.prolib.aquila.utils.experimental.chart.data.ALOValidatorImpl;
-import ru.prolib.aquila.utils.experimental.chart.data.OEDataProviderImpl;
-import ru.prolib.aquila.utils.experimental.chart.data.OEEntrySet;
-import ru.prolib.aquila.utils.experimental.chart.data.OEValidatorImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartPanelImpl;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWTimeAxisRulerSetup;
 import ru.prolib.aquila.utils.experimental.chart.swing.axis.SWValueAxisRulerRenderer;
+import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWALOLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWCandlestickLayer;
 import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWOELayer;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWALOLayer;
-import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
-import ru.prolib.aquila.utils.experimental.sst.sdp2.*;
-import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
-import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistry;
-import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistryImpl;
+import ru.prolib.aquila.utils.experimental.sst.msig.BreakSignal;
+import ru.prolib.aquila.utils.experimental.sst.robot.DataServiceLocator;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.web.utils.finam.data.FinamData;
-import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
-import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
-import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotData;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotDataSliceTracker;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotStateListener;
+import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataSlice;
+import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2Key;
 
-public class SecuritySimulationTest implements Experiment {
-	private static final Logger logger;
-
-	private static final String CANDLE_SERIES = "OHLC";
-	private static final String CANDLE_CLOSE_SERIES = "CLOSE";
-	private static final String QEMA7_CANDLE_CLOSE_SERIES = "QEMA(Close,7)";
-	private static final String QEMA14_CANDLE_CLOSE_SERIES = "QEMA(Close,14)";
-	private static final String CANDLE_VOLUME_SERIES = "Volume";
-	private static final String ORDER_EXECUTION_SERIES = "ORDER_EXECUTIONS";
+public class SecuritySimulationTest implements Experiment, RobotStateListener {
 	private static final ZoneId ZONE_ID = ZoneId.of("Europe/Moscow");
+	private static final Logger logger;
 	
 	static {
 		logger = LoggerFactory.getLogger(SecuritySimulationTest.class);
 	}
 	
 	private JTabbedPane tabPanel;
-	private EditableTerminal terminal;
-	private MarketSignal signal;
-	private SDP2DataProvider<SDP2Key> sdp2DataProvider;
-	private final MarketSignalRegistry msigRegistry = new MarketSignalRegistryImpl();
-	private final PriceScaleDBImpl priceScaleDB = new PriceScaleDBImpl();
+	private DataServiceLocator serviceLocator = new DataServiceLocator();
+	private BreakSignal breakSignal;
+	private Robot robot;
+	private BarChartPanelImpl chartPanel;
 
 	@Override
 	public void close() throws IOException {
-		if ( signal != null ) {
-			signal.fireBreak();
-			signal = null;
+		if ( breakSignal != null ) {
+			breakSignal.fireBreak();
+			breakSignal = null;
 		}
-		if ( sdp2DataProvider != null ) {
-//			sdp2DataProvider.stop();
-			sdp2DataProvider = null;
-		}
-		terminal.stop();
+		serviceLocator.getTerminal().stop();
 	}
 
 	@Override
 	public int run(Scheduler scheduler, CommandLine cmd, CountDownLatch exitSignal) {
-		final IMessages messages = new Messages();
-		final File root = new File(cmd.getOptionValue(CmdLine.LOPT_ROOT));
+		boolean isProbeScheduler = false;
+		// Prepare robot config
+		final RobotConfig rConfig = new RobotConfig(new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16")),
+				new Account("TEST-ACCOUNT"),
+				CmdLine.getTimeFrame(cmd, ZONE_ID),
+				0.5d);
+		logger.debug("Selected strategy symbol: {}", rConfig.getSymbol());
+		logger.debug("Selected timeframe: {}", rConfig.getTFrame());
 		
-		// Initialize terminal
-		QFBuilder qfBuilder = new QFBuilder();
-		terminal = new BasicTerminalBuilder()
-			.withTerminalID("SECURITY_SIMULATION")
-			.withScheduler(scheduler)
-			.withDataProvider(newDataProvider(scheduler, root, qfBuilder.buildDataProvider()))
-			.buildTerminal();
+		// Prepare service locator
+		serviceLocator.setDataRootDirectory(new File(cmd.getOptionValue(CmdLine.LOPT_ROOT)));
+		serviceLocator.setScheduler(scheduler);
 		if ( scheduler.getClass() == SchedulerImpl.class ) {
 			SchedulerImpl s = (SchedulerImpl) scheduler;
-			s.addSynchronizer(new EventQueueSynchronizer(terminal.getEventQueue()));
+			s.addSynchronizer(new EventQueueSynchronizer(serviceLocator.getTerminal().getEventQueue()));
+			isProbeScheduler = true;
 		}
-		QFortsEnv qfEnv = qfBuilder.buildEnvironment(terminal);
+		
+		// Initialize a test account
 		try {
-			qfEnv.createPortfolio(new Account("TEST-ACCOUNT"), CDecimalBD.ofRUB2("300000"));
+			serviceLocator.getQFortsEnv().createPortfolio(new Account("TEST-ACCOUNT"), CDecimalBD.ofRUB2("300000"));
 		} catch ( QFTransactionException e ) {
 			logger.error("Error creating test portfolio: ", e);
 			return 1;
 		}
-		Set<Symbol> symbols = null;
+		
+		// Make a break signal
+		breakSignal = new BreakSignal(serviceLocator.getTerminal().getEventQueue(), "GLOBAL");
+		
+		// Prepare symbol list
+		Collection<Symbol> symbols = null;
 		try {
-			symbols = new MoexContractFileStorage(root).getSymbols();
+			symbols = Collections.unmodifiableCollection(serviceLocator.getContractDataStorage().getSymbols());
 		} catch ( DataStorageException e ) {
 			logger.error("Error reading symbol list: ", e);
 			return 1;
 		}
-		//for ( Symbol symbol : symbols ) {
-		//	terminal.subscribe(symbol);
-		//}
-		final Set<Symbol> symbols_dup = symbols;
+		final Collection<Symbol> symbols_dup = symbols;
+
+		// Subscribe for all symbols
+		final Terminal terminal = serviceLocator.getTerminal();
 		terminal.onTerminalReady().addListener(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
 				Instant t = terminal.getCurrentTime();
 				logger.debug("Terminal ready at {}", t);
-				for ( Symbol s : symbols_dup ) {
-					terminal.subscribe(s);
+				for ( Symbol symbol : symbols_dup ) {
+					if ( rConfig.getSymbol().equals(symbol) ) {
+						terminal.subscribe(symbol);
+						logger.debug("Subscribed for: {}", symbol);
+					}
 				}
+				logger.debug("Total symbols: {}", symbols_dup.size());
 			}
 		});
 		terminal.start();
-		
-		sdp2DataProvider = new SDP2DataProviderImpl<SDP2Key>(new SDP2DataSliceFactoryImpl<>(terminal.getEventQueue()));
 
-		final List<SDP2DataSlice<SDP2Key>> slices = new ArrayList<>();
-
-		Symbol rSymbol = new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16"));
-		ZTFrame tf = CmdLine.getTimeFrame(cmd, ZONE_ID);
-		logger.debug("Selected strategy symbol: {}", rSymbol);
-		logger.debug("Selected timeframe: {}", tf);
-		final SDP2DataSlice<SDP2Key> slice = sdp2DataProvider.getSlice(new SDP2Key(tf, rSymbol));
-		String signalID = rSymbol + "_CMA(7, 14)";
-		int i = createSeriesBySlice(slice, root, scheduler);
-		if(i!=0){
-			return i;
-		}
-		slices.add(slice);
-
-		// Additional timeframes
-		/*
-		ZTFrame[] timeFrames = {
-				new ZTFMinutes(5, ZONE_ID),
-				new ZTFMinutes(15, ZONE_ID),
-				new ZTFHours(1, ZONE_ID),
-		};
-		for(ZTFrame timeFrame: timeFrames){
-			final SDP2DataSlice<SDP2Key> tempSlice = sdp2DataProvider.getSlice(new SDP2Key(timeFrame, rSymbol));
-			i = createSeriesBySlice(tempSlice, root, scheduler);
-			if(i!=0){
-				return i;
-			}
-			slices.add(tempSlice);
-		}
-		*/
-
-		terminal.onSecurityAvailable().listenOnce(new EventListener() {
-			@Override
-			public void onEvent(Event event) {
-				Security s = ((SecurityEvent) event).getSecurity();
-				priceScaleDB.setScale(s.getSymbol(), s.getScale());
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						//JPanel chartRoot = new JPanel(new GridLayout(2, 2));
-						JPanel chartRoot = new JPanel(new GridLayout(1, 1));
-						for(SDP2DataSlice<SDP2Key> slice : slices) {
-							ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();
-							BarChartPanelImpl chartPanel = (BarChartPanelImpl) createChartPanel(slice, s);
-							chartPanel.setCategories(categories);
-							chartRoot.add(chartPanel.getRootPanel());
-							CategoryAxisViewport viewport = chartPanel.getCategoryAxisViewport(); 
-							viewport.setPreferredNumberOfBars(100);
-							viewport.setCategoryRangeByFirstAndNumber(0, categories.getLength());
-						}
-						tabPanel.addTab("Strategy", chartRoot);
-					}
-				});
-			}
-		});
-
-		msigRegistry.register(new CMASignalProviderTS(
-				slice.getObservableSeries(CANDLE_SERIES),
-				slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES),
-				slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES),
-				terminal.getEventQueue(), signalID));
-
-
-		RobotConfig rConfig = new RobotConfig(rSymbol, new Account("TEST-ACCOUNT"), 0.5d, signalID);
-		Robot robot = new RobotBuilder(terminal, msigRegistry).buildBullDummy(rConfig);
+		robot = new RobotBuilder(serviceLocator, breakSignal).buildBullDummy(rConfig);
+		robot.getData().setStateListener(this);
 		robot.getAutomat().setDebug(true);
-		signal = robot.getData().getSignal();
 		try {
 			robot.getAutomat().start();
 		} catch ( Exception e ) {
@@ -247,6 +170,7 @@ public class SecuritySimulationTest implements Experiment {
 			return 2;
 		}
 
+		final IMessages messages = new Messages();
 		// Initialize the main frame
 		JFrame frame = new JFrame();
 		frame.addWindowListener(new WindowAdapter() {
@@ -265,7 +189,7 @@ public class SecuritySimulationTest implements Experiment {
 
         JPanel topPanel = new JPanel();
         mainPanel.add(topPanel, BorderLayout.PAGE_START);
-		if ( scheduler instanceof ru.prolib.aquila.probe.SchedulerImpl ) {
+		if ( isProbeScheduler ) {
 			List<SchedulerTaskFilter> filters = new ArrayList<>();
 			filters.add(new SymbolUpdateTaskFilter(messages));
 			topPanel.add(new SchedulerControlToolbar(messages, (SchedulerImpl) scheduler, ZONE_ID, filters));
@@ -317,21 +241,14 @@ public class SecuritySimulationTest implements Experiment {
 		return 0;
 	}
 
-	private DataProvider newDataProvider(Scheduler scheduler, File root, DataProvider parent) {
-		return new DataProviderImpl(
-			new SymbolUpdateSourceImpl(scheduler, new MoexSymbolUpdateReaderFactory(root)),
-			new L1UpdateSourceSATImpl(new L1UpdateSourceImpl(scheduler,
-					new FinamL1UpdateReaderFactory(root, priceScaleDB))),
-			parent);
-	}
-
-	private BarChartPanel createChartPanel(SDP2DataSlice<SDP2Key> slice,
-											   Security security)
-	{
+	private void createRobotUI() {
+		RobotData robotData = robot.getData();
+		RobotDataSliceTracker rdsTracker = robotData.getDataSliceTracker();
+		SDP2DataSlice<SDP2Key> slice = rdsTracker.getDataSlice();
 		ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();
 		Symbol symbol = slice.getSymbol();
 
-		BarChartPanel chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
+		chartPanel = new BarChartPanelImpl(BarChartOrientation.LEFT_TO_RIGHT);
 		// Setup category axis ruler renderers
 		CategoryAxisDriver cad = chartPanel.getCategoryAxisDriver();
 		cad.registerRenderer(new SWTimeAxisRulerRenderer("TIME", categories));
@@ -351,26 +268,24 @@ public class SecuritySimulationTest implements Experiment {
 		
 		// Setup value axis ruler renderers
 		ValueAxisDriver vad = chart.getValueAxisDriver();
-		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(security.getTickSize());
+		((SWValueAxisRulerRenderer) vad.getRenderer("LABEL")).setTickSize(robotData.getSecurity().getTickSize());
 		ChartSpaceManager hsm = chart.getHorizontalSpaceManager();
 		hsm.getGridLinesSetup("VALUE", "LABEL").setVisible(true);
 		hsm.getUpperRulerSetup("VALUE", "LABEL").setVisible(true);
 		hsm.getLowerRulerSetup("VALUE", "LABEL").setVisible(true);
 		
-		chart.addLayer(new SWCandlestickLayer(slice.getSeries(CANDLE_SERIES)));
-		chart.addSmoothLine(slice.getSeries(QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
-		chart.addSmoothLine(slice.getSeries(QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
+		chart.addLayer(new SWCandlestickLayer(slice.getSeries(RobotDataSliceTracker.CANDLE_SERIES)));
+		chart.addSmoothLine(slice.getSeries(RobotDataSliceTracker.QEMA7_CANDLE_CLOSE_SERIES)).setColor(Color.BLUE);
+		chart.addSmoothLine(slice.getSeries(RobotDataSliceTracker.QEMA14_CANDLE_CLOSE_SERIES)).setColor(Color.MAGENTA);
 		//chart.addLayer(new BarChartCurrentValueLayer(slice.getSeries(CANDLE_CLOSE_SERIES))); // TODO: fix me
-		// Add active orders layer
-		chart.addLayer(new SWALOLayer("ACTIVE_ORDERS",
-				new ALODataProviderImpl(new ALOValidatorImpl(symbol), security.getTerminal())));
-		chart.addLayer(new SWOELayer(slice.getSeries(ORDER_EXECUTION_SERIES)));
+		chart.addLayer(new SWALOLayer(RobotDataSliceTracker.ACTIVE_ORDERS, rdsTracker.getALODataProvider()));
+		chart.addLayer(new SWOELayer(slice.getSeries(RobotDataSliceTracker.ORDER_EXECUTION_SERIES)));
 		
 		chart = chartPanel.addChart("VOLUMES")
 				.setHeight(200)
 				//.setZeroAtCenter(true)
 				.addStaticOverlay("Volume", 0);
-		chart.addHistogram(slice.getSeries(CANDLE_VOLUME_SERIES));
+		chart.addHistogram(slice.getSeries(RobotDataSliceTracker.CANDLE_VOLUME_SERIES));
 		vsm = chart.getVerticalSpaceManager();
 		((SWTimeAxisRulerSetup) vsm.getLowerRulerSetup("CATEGORY", "TIME"))
 			.setVisible(true)
@@ -389,42 +304,59 @@ public class SecuritySimulationTest implements Experiment {
 		hsm = chart.getHorizontalSpaceManager();
 		hsm.getLowerRulerSetup("VALUE", "LABEL").setVisible(true);
 		hsm.getUpperRulerSetup("VALUE", "LABEL").setVisible(true);
-
-		return chartPanel;
+		
+		// Add chart to tab panel
+		chartPanel.setCategories(categories);
+		JPanel chartRoot = new JPanel(new GridLayout(1, 1));
+		chartRoot.add(chartPanel.getRootPanel());
+		CategoryAxisViewport viewport = chartPanel.getCategoryAxisViewport(); 
+		viewport.setPreferredNumberOfBars(100);
+		viewport.setCategoryRangeByFirstAndNumber(0, categories.getLength());
+		tabPanel.addTab("Strategy: " + robotData.getMarketSignal().getID(), chartRoot);
+	}
+	
+	private void destroyRobotUI() {
+		BarChart chart = chartPanel.getChart("CANDLES");
+		chart.dropLayer(RobotDataSliceTracker.CANDLE_SERIES);
+		chart.dropLayer(RobotDataSliceTracker.QEMA7_CANDLE_CLOSE_SERIES);
+		chart.dropLayer(RobotDataSliceTracker.QEMA14_CANDLE_CLOSE_SERIES);
+		chart.dropLayer(RobotDataSliceTracker.ACTIVE_ORDERS);
+		chart.dropLayer(RobotDataSliceTracker.ORDER_EXECUTION_SERIES);
+		// TODO: dropLayers
+		
+		chart = chartPanel.getChart("VOLUMES");
+		chart.dropLayer(RobotDataSliceTracker.CANDLE_VOLUME_SERIES);
+		// TODO: dropLayers
+		
+		chartPanel.paint(); // refresh chart
 	}
 
-	private int createSeriesBySlice(SDP2DataSlice<SDP2Key> slice, File root, Scheduler scheduler){
-		EditableTSeries<Candle> candleSeries = slice.createSeries(CANDLE_SERIES, true);
-		MDStorage<TFSymbol, Candle> mds = null;
-		try {
-			mds = new FinamData().createCachingOHLCV(root,
-					new File(System.getProperty("java.io.tmpdir") + File.separator + "aquila-ohlcv-cache"),
-					priceScaleDB);
-		} catch ( DataStorageException e ) {
-			logger.error("Creating storage of historical data failed: ", e);
-			return 1;
+	@Override
+	public void robotStarted() {
+		if ( ! SwingUtilities.isEventDispatchThread() ) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					robotStarted();
+				}
+			});
+		} else {
+			createRobotUI();
 		}
-
-		try ( CloseableIterator<Candle> it = mds.createReader(new TFSymbol(slice.getSymbol(), slice.getTimeFrame()), 15, scheduler.getCurrentTime()) ) {
-			while ( it.next() ) {
-				candleSeries.set(it.item().getStartTime(), it.item());
-			}
-		} catch ( Exception e ) {
-			logger.error("Error loading history: ", e);
-		}
-
-		TSeries<CDecimal> closeSeries = new CandleCloseTSeries(CANDLE_CLOSE_SERIES, candleSeries);
-		TSeries<CDecimal> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7);
-		TSeries<CDecimal> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14);
-		TSeries<CDecimal> volumeSeries = new CandleVolumeTSeries(CANDLE_VOLUME_SERIES, candleSeries);
-		slice.registerRawSeries(closeSeries);
-		slice.registerRawSeries(qema7Series);
-		slice.registerRawSeries(qema14Series);
-		slice.registerRawSeries(volumeSeries);
-		EditableTSeries<OEEntrySet> executions = slice.createSeries(ORDER_EXECUTION_SERIES, false);
-		new OEDataProviderImpl(executions, new OEValidatorImpl(slice.getSymbol()), terminal);
-
-		new CandleSeriesByLastTrade(candleSeries, terminal, slice.getSymbol()).start();
-		return 0;
 	}
+
+	@Override
+	public void robotStopped() {
+		if ( ! SwingUtilities.isEventDispatchThread() ) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					robotStopped();
+				}
+			});
+		} else {
+			destroyRobotUI();
+		}
+	}
+
 }

@@ -23,7 +23,7 @@ abstract public class BasicState extends SMState implements SMEnterAction {
 
 	@Override
 	public SMExit enter(SMTriggerRegistry triggers) {
-		triggers.add(newExitOnEvent(data.getSignal().onBreak(), EBR));
+		triggers.add(newExitOnEvent(data.getBreakSignal().onBreak(), EBR));
 		return null;
 	}
 	

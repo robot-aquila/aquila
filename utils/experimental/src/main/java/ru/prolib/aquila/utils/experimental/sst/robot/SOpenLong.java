@@ -59,7 +59,7 @@ public class SOpenLong extends BasicState implements SMExitAction {
 		triggers.add(newExitOnEvent(order.onFailed(), EER));
 		triggers.add(newExitOnEvent(order.onFilled(), EOK));
 		triggers.add(newExitOnEvent(order.onCancelled(), EOK));
-		triggers.add(newExitOnEvent(data.getSignal().onBearish(), ECLS));
+		triggers.add(newExitOnEvent(data.getMarketSignal().onBearish(), ECLS));
 		try {
 			data.getTerminal().placeOrder(order);
 		} catch ( OrderException e ) {
