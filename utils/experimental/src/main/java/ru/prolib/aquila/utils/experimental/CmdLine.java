@@ -20,7 +20,6 @@ public class CmdLine {
 	public static final String SOPT_SYMBOL = "s";
 	public static final String SOPT_LIST_EXPERIMENTS = "l";
 	public static final String SOPT_WITH_PROBE_SCHEDULER = "p";
-	public static final String SOPT_PROBE_SCHEDULER_START_TIME = "t";
 	
 	public static final String LOPT_ROOT = "root-directory";
 	public static final String LOPT_HELP = "help";
@@ -29,7 +28,11 @@ public class CmdLine {
 	public static final String LOPT_LIST_EXPERIMENTS = "list-experiments";
 	public static final String LOPT_WITH_PROBE_SCHEDULER = "with-probe-scheduler";
 	public static final String LOPT_PROBE_SCHEDULER_START_TIME = "probe-scheduler-start-time";
+	public static final String LOPT_PROBE_SCHEDULER_AUTOSTART = "probe-scheduler-autostart"; 
+	public static final String LOPT_PROBE_SCHEDULER_AUTOSHUTDOWN = "probe-scheduler-autoshutdown";
+	public static final String LOPT_PROBE_SCHEDULER_AUTOSTOP = "probe-scheduler-autostop";
 	public static final String LOPT_TIMEFRAME = "timeframe";
+	public static final String LOPT_HEADLESS = "headless";
 	
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -60,12 +63,30 @@ public class CmdLine {
 				.longOpt(LOPT_WITH_PROBE_SCHEDULER)
 				.desc("Use PROBE scheduler.")
 				.build());
-		options.addOption(Option.builder(SOPT_PROBE_SCHEDULER_START_TIME)
+		options.addOption(Option.builder()
 				.longOpt(LOPT_PROBE_SCHEDULER_START_TIME)
 				.hasArg()
 				.desc("Set start time of PROBE scheduler. If omitted then"
 					+ " current time will be used. This option has only effect"
 					+ " in combination with --" + LOPT_WITH_PROBE_SCHEDULER + " option.")
+				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_PROBE_SCHEDULER_AUTOSTART)
+				.desc("Run PROBE scheduler immediately after experiment initialization. "
+					+ "Works only in combination with --" + LOPT_WITH_PROBE_SCHEDULER + " option.")
+				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_PROBE_SCHEDULER_AUTOSHUTDOWN)
+				.hasArg()
+				.desc("Shutdown the program automatically when PROBE scheduler reaches the time specified. "
+					+ "Works only in combination with --" + LOPT_WITH_PROBE_SCHEDULER + " option.")
+				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_PROBE_SCHEDULER_AUTOSTOP)
+				.hasArg()
+				.desc("Stop simulation when PROBE scheduler reaches the time specified. "
+					+ "Works only in combination with --" + LOPT_WITH_PROBE_SCHEDULER + " option. "
+					+ "Has no effect if --" + LOPT_PROBE_SCHEDULER_AUTOSHUTDOWN + " options is specified.")
 				.build());
 		options.addOption(Option.builder()
 				.longOpt(LOPT_TIMEFRAME)
@@ -75,6 +96,13 @@ public class CmdLine {
 					+ " in chrono units. For example: M1 - 1 minute interval, H4 - 4"
 					+ " hours interval.")
 				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_HEADLESS)
+				.desc("Run in headless mode. Depends on experiment this option may have effect only in"
+					+ " combination with --" + LOPT_PROBE_SCHEDULER_AUTOSTART
+					+ " and --" + LOPT_PROBE_SCHEDULER_AUTOSHUTDOWN + " options.")
+				.build());
+		
 		return options;
 	}
 	

@@ -62,8 +62,8 @@ public class Main {
 			}
 			if ( cmd.hasOption(CmdLine.SOPT_WITH_PROBE_SCHEDULER)) {
 				Instant startTime = Instant.now();
-				if ( cmd.hasOption(CmdLine.SOPT_PROBE_SCHEDULER_START_TIME) ) {
-					startTime = Instant.parse(cmd.getOptionValue(CmdLine.SOPT_PROBE_SCHEDULER_START_TIME));
+				if ( cmd.hasOption(CmdLine.LOPT_PROBE_SCHEDULER_START_TIME) ) {
+					startTime = Instant.parse(cmd.getOptionValue(CmdLine.LOPT_PROBE_SCHEDULER_START_TIME));
 				}
 				scheduler = new SchedulerBuilder()
 					.setInitialTime(startTime)

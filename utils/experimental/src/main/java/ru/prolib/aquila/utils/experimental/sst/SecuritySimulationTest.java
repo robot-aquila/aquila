@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,9 +76,15 @@ import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotData;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotDataSliceTracker;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotStateListener;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotStateListenerStub;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataSlice;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2Key;
 
+/**
+ * TODO:
+ * 
+ * 2018-04-02 - Using global exit signal does not demonstrate how to do safe shutdown. 
+ */
 public class SecuritySimulationTest implements Experiment, RobotStateListener {
 	private static final ZoneId ZONE_ID = ZoneId.of("Europe/Moscow");
 	private static final Logger logger;
@@ -86,6 +93,7 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 		logger = LoggerFactory.getLogger(SecuritySimulationTest.class);
 	}
 	
+	private final long startTime = System.currentTimeMillis();
 	private JTabbedPane tabPanel;
 	private DataServiceLocator serviceLocator = new DataServiceLocator();
 	private BreakSignal breakSignal;
@@ -103,7 +111,6 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 
 	@Override
 	public int run(Scheduler scheduler, CommandLine cmd, CountDownLatch exitSignal) {
-		boolean isProbeScheduler = false;
 		// Prepare robot config
 		final RobotConfig rConfig = new RobotConfig(new Symbol(cmd.getOptionValue(CmdLine.LOPT_SYMBOL, "Si-9.16")),
 				new Account("TEST-ACCOUNT"),
@@ -115,11 +122,6 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 		// Prepare service locator
 		serviceLocator.setDataRootDirectory(new File(cmd.getOptionValue(CmdLine.LOPT_ROOT)));
 		serviceLocator.setScheduler(scheduler);
-		if ( scheduler.getClass() == SchedulerImpl.class ) {
-			SchedulerImpl s = (SchedulerImpl) scheduler;
-			s.addSynchronizer(new EventQueueSynchronizer(serviceLocator.getTerminal().getEventQueue()));
-			isProbeScheduler = true;
-		}
 		
 		// Initialize a test account
 		try {
@@ -144,7 +146,7 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 
 		// Subscribe for all symbols
 		final Terminal terminal = serviceLocator.getTerminal();
-		terminal.onTerminalReady().addListener(new EventListener() {
+		terminal.onTerminalReady().listenOnce(new EventListener() {
 			@Override
 			public void onEvent(Event event) {
 				Instant t = terminal.getCurrentTime();
@@ -158,10 +160,81 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 				logger.debug("Total symbols: {}", symbols_dup.size());
 			}
 		});
-		terminal.start();
 
+		// PROBE scheduler special options processing
+		boolean isAutoShutdown = false, isAutoStart = false;
+		if ( scheduler.getClass() == SchedulerImpl.class ) {
+			final SchedulerImpl s = (SchedulerImpl) scheduler;
+			s.addSynchronizer(new EventQueueSynchronizer(serviceLocator.getTerminal().getEventQueue()));
+			
+			if ( cmd.hasOption(CmdLine.LOPT_PROBE_SCHEDULER_AUTOSHUTDOWN) ) {
+				isAutoShutdown = true;
+				String astString = cmd.getOptionValue(CmdLine.LOPT_PROBE_SCHEDULER_AUTOSHUTDOWN);
+				Instant ast = null;
+				try {
+					ast = Instant.parse(astString);
+				} catch ( DateTimeParseException e ) {
+					logger.error("Invalid autoshutdown time: {}", astString);
+					return 1;
+				}
+				scheduler.schedule(new Runnable() {
+					@Override
+					public void run() {
+						exitSignal.countDown();
+					}
+				}, ast);
+			} else if ( cmd.hasOption(CmdLine.LOPT_PROBE_SCHEDULER_AUTOSTOP) ) {
+				String astString = cmd.getOptionValue(CmdLine.LOPT_PROBE_SCHEDULER_AUTOSTOP);
+				Instant ast = null;
+				try {
+					ast = Instant.parse(astString);
+				} catch ( DateTimeParseException e ) {
+					logger.error("Invalid autostop time: {}", astString);
+					return 1;
+				}
+				scheduler.schedule(new Runnable() {
+					@Override
+					public void run() {
+						s.setModeWait();
+					}
+				}, ast);
+				
+			}
+			
+			if ( cmd.hasOption(CmdLine.LOPT_PROBE_SCHEDULER_AUTOSTART) ) {
+				isAutoStart = true;
+				s.setExecutionSpeed(0);
+				terminal.onTerminalReady().listenOnce(new EventListener() {
+					@Override
+					public void onEvent(Event event) {
+						s.setModeRun();
+					}
+				});
+			}
+
+		}
+		
+		boolean isHeadless = false;
+		if ( cmd.hasOption(CmdLine.LOPT_HEADLESS) ) {
+			if ( ! isAutoShutdown || ! isAutoStart ) {
+				logger.error("This experiment can be run headless mode only in combination with autostart and autoshutdown options");
+				return 2;
+			}
+			isHeadless = true;
+		}
+		
+		if ( ! isHeadless ) {
+			// It is better to initialize main UI before starting terminal
+			// because terminal queue thread may be faster than this thread.
+			// But robot UI requires elements of main UI and if it is not created
+			// prior to running robot it may cause NPE exceptions.
+			createTerminalUI(exitSignal);
+		}
+		
+		terminal.start(); 
+		
 		robot = new RobotBuilder(serviceLocator, breakSignal).buildBullDummy(rConfig);
-		robot.getData().setStateListener(this);
+		robot.getData().setStateListener(isHeadless ? new RobotStateListenerStub() : this);
 		robot.getAutomat().setDebug(true);
 		try {
 			robot.getAutomat().start();
@@ -169,7 +242,18 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 			logger.error("Unexpected exception: ", e);
 			return 2;
 		}
-
+		
+		return 0;
+	}
+	
+	@Override
+	public int getExitCode() {
+		long timeUsed = System.currentTimeMillis() - startTime;
+		logger.debug("Time used: {} seconds", timeUsed / 1000);
+		return 0;
+	}
+	
+	private void createTerminalUI(CountDownLatch exitSignal) {
 		final IMessages messages = new Messages();
 		// Initialize the main frame
 		JFrame frame = new JFrame();
@@ -189,11 +273,13 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 
         JPanel topPanel = new JPanel();
         mainPanel.add(topPanel, BorderLayout.PAGE_START);
-		if ( isProbeScheduler ) {
+		if ( serviceLocator.getScheduler().getClass() == SchedulerImpl.class ) {
+			SchedulerImpl s = (SchedulerImpl) serviceLocator.getScheduler();
 			List<SchedulerTaskFilter> filters = new ArrayList<>();
 			filters.add(new SymbolUpdateTaskFilter(messages));
-			topPanel.add(new SchedulerControlToolbar(messages, (SchedulerImpl) scheduler, ZONE_ID, filters));
+			topPanel.add(new SchedulerControlToolbar(messages, s, ZONE_ID, filters));
 		}
+		Terminal terminal = serviceLocator.getTerminal();
 
 		tabPanel = new JTabbedPane();
         mainPanel.add(tabPanel, BorderLayout.CENTER);
@@ -232,13 +318,6 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 
         frame.getContentPane().add(mainPanel);
         frame.setVisible(true);
-
-		return 0;
-	}
-
-	@Override
-	public int getExitCode() {
-		return 0;
 	}
 
 	private void createRobotUI() {
