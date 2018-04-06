@@ -16,6 +16,9 @@ import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.tseries.CandleCloseTSeries;
 import ru.prolib.aquila.core.data.tseries.CandleVolumeTSeries;
 import ru.prolib.aquila.core.data.tseries.QEMATSeries;
+import ru.prolib.aquila.core.data.tseries.QEMATSeriesFast;
+import ru.prolib.aquila.core.data.tseries.TSeriesCache;
+import ru.prolib.aquila.core.data.tseries.TSeriesCacheControllerETS;
 import ru.prolib.aquila.core.data.tseries.filler.CandleSeriesByLastTrade;
 import ru.prolib.aquila.data.storage.MDStorage;
 import ru.prolib.aquila.utils.experimental.chart.data.ALODataProvider;
@@ -128,8 +131,12 @@ public class RobotDataSliceTracker {
 		TSeries<Candle> x = dataSlice.getSeries(CANDLE_SERIES);
 		EditableTSeries<Candle> candleSeries = (EditableTSeries<Candle>) x;
 		TSeries<CDecimal> closeSeries = new CandleCloseTSeries(CANDLE_CLOSE_SERIES, candleSeries);
-		TSeries<CDecimal> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7);
-		TSeries<CDecimal> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14);
+
+		//TSeries<CDecimal> qema7Series = new QEMATSeries(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7);
+		//TSeries<CDecimal> qema14Series = new QEMATSeries(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14);
+		TSeries<CDecimal> qema7Series = new QEMATSeriesFast(QEMA7_CANDLE_CLOSE_SERIES, closeSeries, 7, 7);
+		TSeries<CDecimal> qema14Series = new QEMATSeriesFast(QEMA14_CANDLE_CLOSE_SERIES, closeSeries, 14, 7);
+		
 		TSeries<CDecimal> volumeSeries = new CandleVolumeTSeries(CANDLE_VOLUME_SERIES, candleSeries);
 		dataSlice.registerRawSeries(closeSeries);
 		dataSlice.registerRawSeries(qema7Series);
@@ -150,6 +157,10 @@ public class RobotDataSliceTracker {
 		orderDataProvider = new ALODataProviderImpl(aloValidator);
 		
 		// Initialize candle series filler
+		TSeriesCacheControllerETS<Candle> cctrl = new TSeriesCacheControllerETS<>(candleSeries);
+		cctrl.addCache((TSeriesCache) qema7Series);
+		cctrl.addCache((TSeriesCache) qema14Series);
+		candleSeries = cctrl;
 		candleSeriesDataProvider = new CandleSeriesByLastTrade(candleSeries, terminal, dataSlice.getSymbol());
 	}
 	
