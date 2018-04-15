@@ -14,6 +14,7 @@ public class CmdLine {
 	public static final String LOPT_HELP = "help";
 	public static final String LOPT_SKIP_INTEGRITY_TEST = "skip-integrity-test";
 	public static final String LOPT_SHOW_SYMBOL_FILE = "show-symbol-file";
+	public static final String LOPT_JBROWSER_CONFIG = "jbrowser-config";
 
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -35,6 +36,14 @@ public class CmdLine {
 				.desc("Show path to file of symbol primary data obtained from "
 					+ "MOEX site then exit. The symbol must be provided as "
 					+ "option argument.")
+				.hasArg()
+				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_JBROWSER_CONFIG)
+				.desc("Use JBrowserDriver configuration file. This should be an "
+					+ "ini-file with jbrowser-driver section which contains redefinitions "
+					+ "of one or more configurable JBrowserDriver options. See package "
+					+ "ru.prolib.aquila.web.utils class WebDriverFactoryJBD for more details.")
 				.hasArg()
 				.build());
 		return options;

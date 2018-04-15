@@ -30,8 +30,10 @@ import ru.prolib.aquila.utils.finexp.futures.CmdLine;
 import ru.prolib.aquila.web.utils.WUException;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.finam.Fidexp;
+import ru.prolib.aquila.web.utils.finam.FidexpFactory;
 import ru.prolib.aquila.web.utils.moex.Moex;
 import ru.prolib.aquila.web.utils.moex.MoexContractField;
+import ru.prolib.aquila.web.utils.moex.MoexFactory;
 
 public class FinamWebTickDataTracker implements Runnable, Closeable {
 	private static final Logger logger;
@@ -55,22 +57,26 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 	private final CountDownLatch globalExit;
 	private final Scheduler scheduler;
 	private final CommandLine cmdLine;
+	private final MoexFactory moexFactory;
+	private final FidexpFactory finamFactory;
 	
 	public FinamWebTickDataTracker(SymbolFileStorage fileStorage,
 			CountDownLatch globalExit, Scheduler scheduler,
-			CommandLine cmdLine)
+			CommandLine cmdLine, MoexFactory moexFactory, FidexpFactory finamFactory)
 	{
 		this.fileStorage = fileStorage;
 		this.globalExit = globalExit;
 		this.scheduler = scheduler;
 		this.cmdLine = cmdLine;
+		this.moexFactory = moexFactory;
+		this.finamFactory = finamFactory;
 	}
 
 	@Override
 	public void run() {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
-		Fidexp facade = new Fidexp();
-		Moex moex = new Moex();
+		Fidexp facade = finamFactory.createInstance();
+		Moex moex = moexFactory.createInstance();
 		try {
 			logger.debug("Update started.");
 			if ( cmdLine.hasOption(CmdLine.LOPT_SKIP_INTEGRITY_TEST) ) {
@@ -215,8 +221,7 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 		File mainFile = fileStorage.getSegmentFile(descr);
 		finam.downloadTickData(MARKET_ID, finamQuoteID, descr.getDate(), tempFile);
 		fileStorage.commitTemporarySegmentFile(descr);
-		logger.debug("Download finished: {} (size: {})",
-				new Object[] { mainFile, mainFile.length() } ); 
+		logger.debug("Download finished: {} (size: {})", mainFile, mainFile.length()); 
 	}
 
 }

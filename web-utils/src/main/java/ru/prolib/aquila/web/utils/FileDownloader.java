@@ -6,6 +6,7 @@ import java.net.URI;
 /**
  * Interface of a file downloader.
  */
+@Deprecated
 public interface FileDownloader {
 
 	/**

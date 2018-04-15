@@ -13,32 +13,35 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.web.utils.HttpClientFactory;
 import ru.prolib.aquila.web.utils.WUException;
 import ru.prolib.aquila.web.utils.WUIOException;
-import ru.prolib.aquila.web.utils.WebDriverFactory;
-import ru.prolib.aquila.web.utils.httpclient.HttpClientFileDownloader;
+import ru.prolib.aquila.web.utils.WUUnexpectedException;
+import ru.prolib.aquila.web.utils.WUWebPageException;
+import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachment;
+import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentCriteriaBuilder;
+import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentException;
+import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentManager;
+import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentNotFoundException;
+import ru.prolib.aquila.web.utils.httpattachment.di.WebDriverGet;
 
 /**
  * The facade of FINAM data export system.
+ * <p>
+ * Note this class is not thread-safe.
  */
 public class Fidexp implements Closeable {
-	private static final int DEFAULT_TIMEOUT = 600000;
-	private static final String UNEXPECTED_EXCEPTION = "Unexpected exception: ";
 	@SuppressWarnings("unused")
 	private static final Logger logger;
 	
@@ -46,39 +49,59 @@ public class Fidexp implements Closeable {
 		logger = LoggerFactory.getLogger(Fidexp.class);
 	}
 	
-	private final Lock lock = new ReentrantLock();
-	private final CloseableHttpClient httpClient;
 	private final WebDriver webDriver;
+	private final HTTPAttachmentManager attachmentManager;
 	private final FidexpForm webForm;
-	private boolean closeResources = false;
+	private final boolean closeResources;
 	
-	public Fidexp(CloseableHttpClient httpClient, WebDriver webDriver) {
-		this.httpClient = httpClient;
+	public Fidexp(WebDriver webDriver, HTTPAttachmentManager attachmentManager, boolean closeResources) {
 		this.webDriver = webDriver;
+		this.attachmentManager = attachmentManager;
 		this.webForm = new FidexpForm(webDriver);
-		closeResources = false;
+		this.closeResources = closeResources;
 	}
 	
-	public Fidexp() {
-		this(HttpClientFactory.createDefaultClient(DEFAULT_TIMEOUT),
-				WebDriverFactory.createJBrowserDriver(DEFAULT_TIMEOUT));
-		closeResources = true;
+	public Fidexp(WebDriver webDriver, HTTPAttachmentManager attachmentManager) {
+		this(webDriver, attachmentManager, true);
+	}
+	
+	/**
+	 * Get web form.
+	 * <p>
+	 * Service method. For testing purposes only.
+	 * <p>
+	 * @return instance of web form
+	 */
+	FidexpForm getWebForm() {
+		return webForm;
+	}
+	
+	/**
+	 * Get WebDriver.
+	 * <p>
+	 * Service method. For testing purposes only.
+	 * <p>
+	 * @return instance of web driver
+	 */
+	WebDriver getWebDriver() {
+		return webDriver;
+	}
+	
+	/**
+	 * Get HTTP attachment manager.
+	 * <p>
+	 * Service method. For testing purposes only.
+	 * <p>
+	 * @return instance of HTTP attachment manager
+	 */
+	HTTPAttachmentManager getAttachmentManager() {
+		return attachmentManager;
 	}
 	
 	@Override
 	public void close() {
-		lock.lock();
-		try {
-			if ( closeResources ) {
-				IOUtils.closeQuietly(httpClient);
-				try {
-					webDriver.close();
-				} catch ( WebDriverException e ) {
-					// JBrowserDrive bug when closing
-				}
-			}
-		} finally {
-			lock.unlock();
+		if ( closeResources ) {
+			webDriver.close();
 		}
 	}
 	
@@ -94,9 +117,10 @@ public class Fidexp implements Closeable {
 	 * @throws WUException - an error occurred
 	 */
 	public void testFormIntegrity() throws WUException {
-		lock.lock();
 		try {
-			webForm.selectMarket(14)
+			checkFormIsReady(true);
+			webForm
+				.selectMarket(14)
 				.selectQuote(17455)
 				.selectDateFrom(LocalDate.now().minusDays(5))
 				.selectDateTo(LocalDate.now())
@@ -112,39 +136,75 @@ public class Fidexp implements Closeable {
 				.selectDigitSeparator(FidexpDigitSeparator.APOSTROPHE)
 				.selectDataFormat(FidexpDataFormat.TICKER_PER_DATE_TIME_CLOSE_VOL)
 				.useAddHeader(false)
-				.useFillEmptyPeriods(true)
-				.getFormActionURI();
+				.useFillEmptyPeriods(true);
+			// TODO: Add test for download by two methods: using direct and WebDriver execution
+			// Do not try to load tick data in such test because it silently fails with JBD
+			// Need enhancements to Attachment Manager interface 
 		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw new WUException(UNEXPECTED_EXCEPTION, e);
-		} finally {
-			lock.unlock();
+			throw new WUUnexpectedException(e);
 		}
 	}
 	
 	/**
-	 * Get form action URI.
+	 * Get an URL of data download using interaction with web form.
 	 * <p>
-	 * Note: The call of this method may use several minutes to execute and will
-	 * lock the facade until done.
-	 * <p>
-	 * @return form action URI currently specified in the web form
+	 * This method acts as customer which interacts with form via browser.
+	 * This means that the result must equals to result obtained by user
+	 * when he requested service via browser. In other words - it must work
+	 * if the  service works at all. As a drawback - it works very slow
+	 * because of browser simulation. As side effect -  the result may be
+	 * obtained only by pressing the form button and getting file
+	 * downloaded. This method  should be used to make integration tests
+	 * from time to time to be sure that the service still have the same
+	 * requirements to clients as before. The
+	 * {@link #paramsToURIUsingQueryBuilder(FidexpFormParams)} method with
+	 * direct downloading should be used as a regular approach to data
+	 * gathering. 
+	 * <p> 
+	 * @param params - set of parameters which describe what to download
+	 * @return URI of doenloaded file
 	 * @throws WUException - an error occurred
 	 */
-	public URI getFormActionURI() throws WUException {
-		lock.lock();
+	public URI paramsToURIUsingFormAction(FidexpFormParams params) throws WUException {
 		try {
-			return webForm.getFormActionURI();
+			checkFormIsReady(true);
+			webForm
+				.selectMarket(params.getMarketID())
+				.selectQuote(params.getQuoteID())
+				.selectDateFrom(params.getDateFrom())
+				.selectDateTo(params.getDateTo())
+				.selectPeriod(params.getPeriod())
+				.selectFileExt(params.getFileExt())
+				.selectContractName(params.getContractName())
+				.selectDateFormat(params.getDateFormat())
+				.selectTimeFormat(params.getTimeFormat())
+				.useCandleStartTime(params.getCandleTime() == FidexpCandleTime.START_OF_CANDLE)
+				.useMoscowTime(params.getUseMoscowTime())
+				.selectFieldSeparator(params.getFieldSeparator())
+				.selectDigitSeparator(params.getDigitSeparator())
+				.selectDataFormat(params.getDataFormat())
+				.useAddHeader(params.getAddHeader())
+				.useFillEmptyPeriods(params.getFillEmptyPeriods())
+				.selectFilename(params.getFileName()) // use it in the last turn
+				.send();
+			return new URI(webDriver.getCurrentUrl());
 		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw new WUException(UNEXPECTED_EXCEPTION, e);
-		} finally {
-			lock.unlock();
+			throw new WUUnexpectedException(e);
 		}
 	}
-
+	
+	public URI paramsToURIUsingQueryBuilder(FidexpFormParams params) throws WUException {
+		try {
+			return new FidexpFormQueryBuilder().buildQuery(new URI("http://export.finam.ru"), params);
+		} catch ( URISyntaxException e ) {
+			throw new WUUnexpectedException(e);
+		}
+	}
+	
 	/**
 	 * Get map of available market options.
 	 * <p>
@@ -156,15 +216,13 @@ public class Fidexp implements Closeable {
 	 */
 	public Map<Integer, String> getAvailableMarkets() throws WUException {
 		List<NameValuePair> pairs;
-		lock.lock();
 		try {
+			checkFormIsReady(true);
 			pairs = webForm.getMarketOptions();
 		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw new WUException(UNEXPECTED_EXCEPTION, e);
-		} finally {
-			lock.unlock();
+			throw new WUUnexpectedException(e);
 		}
 		return toMap(pairs);
 	}
@@ -181,15 +239,13 @@ public class Fidexp implements Closeable {
 	 */
 	public Map<Integer, String> getAvailableQuotes(int marketId) throws WUException {
 		List<NameValuePair> pairs;
-		lock.lock();
 		try {
+			checkFormIsReady(true);
 			pairs = webForm.selectMarket(marketId).getQuoteOptions();
 		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw new WUException(UNEXPECTED_EXCEPTION, e);
-		} finally {
-			lock.unlock();
+			throw new WUUnexpectedException(e);
 		}
 		return toMap(pairs);
 	}
@@ -216,15 +272,13 @@ public class Fidexp implements Closeable {
 			throws WUException
 	{
 		List<NameValuePair> pairs, result = new ArrayList<>();
-		lock.lock();
 		try {
+			checkFormIsReady(true);
 			pairs = webForm.selectMarket(14).getQuoteOptions();
 		} catch ( WUException e ) {
 			throw e;
 		} catch ( Exception e ) {
-			throw new WUException(UNEXPECTED_EXCEPTION, e);
-		} finally {
-			lock.unlock();
+			throw new WUUnexpectedException(e);
 		}
 		for ( NameValuePair pair : pairs ) {
 			NameValuePair dummy = splitFuturesCode(pair.getName());
@@ -274,14 +328,24 @@ public class Fidexp implements Closeable {
 	 * @param output - the output stream to store the downloaded data
 	 * @throws WUException - an error occurred
 	 */
+	@Deprecated
 	public void download(URI uri, OutputStream output) throws WUException {
+		HTTPAttachmentCriteriaBuilder builder = new HTTPAttachmentCriteriaBuilder()
+			.withURL(uri.toString())
+			.withContentType("finam/expotfile")
+			.withTimeOfStartDownloadCurrent();
 		try {
-			new HttpClientFileDownloader(httpClient, new FidexpResponseValidator())
-				.download(uri, output);
-		} catch ( WUException e ) {
-			throw e;
-		} catch ( Exception e ) {
-			throw new WUException(UNEXPECTED_EXCEPTION, e);
+			HTTPAttachment attachment = attachmentManager.getLast(builder.build(), new WebDriverGet(webDriver, uri));
+			FileUtils.copyFile(attachment.getFile(), output);
+			attachment.remove();
+		} catch ( IOException e ) {
+			throw new WUIOException(e);
+		} catch ( HTTPAttachmentNotFoundException e ) {	
+			throw new WUIOException(e);
+		} catch ( HTTPAttachmentException e ) {
+			throw new WUIOException(e);
+		} catch ( WebDriverException e ) {
+			throw new WUIOException(e);
 		}
 	}
 	
@@ -294,6 +358,7 @@ public class Fidexp implements Closeable {
 	 * @param output - the output stream to store the downloaded data
 	 * @throws WUException - an error occurred
 	 */
+	@Deprecated
 	public void download(URI baseUri, FidexpFormParams params, OutputStream output)
 			throws WUException
 	{
@@ -310,6 +375,7 @@ public class Fidexp implements Closeable {
 	 * then output will be gzipped.
 	 * @throws WUException - an error occurred
 	 */
+	@Deprecated
 	public void download(URI baseUri, FidexpFormParams params, File target)
 			throws WUException
 	{
@@ -329,10 +395,13 @@ public class Fidexp implements Closeable {
 		}
 	}
 	
+	public void download(FidexpFormParams params, OutputStream output) throws WUException {
+		download(paramsToURIUsingQueryBuilder(params), output);
+	}
+	
 	/**
 	 * Download a market data file from FINAM web site.
 	 * <p>
-	 * The method uses a FINAM web-form action URI to make a request.
 	 * Note: The call of this method may use several minutes to execute and will
 	 * lock the facade until done.
 	 * <p>
@@ -342,7 +411,20 @@ public class Fidexp implements Closeable {
 	 * @throws WUException - an error occurred
 	 */
 	public void download(FidexpFormParams params, File target) throws WUException {
-		download(getFormActionURI(), params, target);
+		OutputStream output;
+		try {
+			output = new BufferedOutputStream(new FileOutputStream(target));
+			if ( target.getName().endsWith(".gz") ) {
+				output = new GZIPOutputStream(output);
+			}
+		} catch ( IOException e ) {
+			throw new WUIOException("Error creating output stream", e);
+		}
+		try {
+			download(params, output);
+		} finally {
+			IOUtils.closeQuietly(output);
+		}
 	}
 	
 	/**
@@ -364,7 +446,7 @@ public class Fidexp implements Closeable {
 			.setDateFrom(date)
 			.setDateTo(date)
 			.setPeriod(FidexpPeriod.TICKS)
-			.setFileName("dummy-file")
+			.setFileName("dummy-file") // TODO: make better filename
 			.setFileExt(FidexpFileExt.CSV)
 			.setDateFormat(FidexpDateFormat.YYYYMMDD)
 			.setTimeFormat(FidexpTimeFormat.HHMMSS)
@@ -377,11 +459,12 @@ public class Fidexp implements Closeable {
 			.setFillEmptyPeriods(false), target);
 	}
 	
+	@Deprecated
 	private URI combine(URI baseUri, FidexpFormParams params) throws WUException {
 		try {
 			return new FidexpFormQueryBuilder().buildQuery(baseUri, params);
 		} catch ( URISyntaxException e ) {
-			throw new WUException("Error building a query", e);
+			throw new WUUnexpectedException("Error building a query", e);
 		}
 	}
 	
@@ -392,10 +475,30 @@ public class Fidexp implements Closeable {
 			try {
 				result.put(Integer.valueOf(id), text);
 			} catch ( NumberFormatException e ) {
-				throw new WUException("Invalid option [" + text + "] id: " + id);
+				throw new WUWebPageException("Invalid option [" + text + "] id: " + id);
 			}
 		}
 		return result;
+	}
+	
+	private void checkFormIsReady(boolean reload) throws WUException {
+		if ( reload ) {
+			webForm.open().ensurePageLoaded();
+		}
+		URI uri = null;
+		try {
+			uri = new URI(webDriver.getCurrentUrl());
+		} catch ( URISyntaxException e ) {
+			throw new WUUnexpectedException(e);
+		}
+		if ( (uri.getHost().equals("www.finam.ru") || uri.getHost().equals("finam.ru"))
+		  && (uri.getPath().startsWith("/profile/") && uri.getPath().endsWith("/export/")) )
+		{
+			// we're on the right page
+			// to do additional tests?
+		} else {
+			webForm.open();
+		}
 	}
 	
 }

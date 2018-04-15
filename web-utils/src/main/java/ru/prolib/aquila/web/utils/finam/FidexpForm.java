@@ -1,22 +1,36 @@
 package ru.prolib.aquila.web.utils.finam;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.web.utils.WUIOException;
 import ru.prolib.aquila.web.utils.WUWebPageException;
 import ru.prolib.aquila.web.utils.SearchWebElement;
 
+/**
+ * Wrapper of a web form of market data export provided by FINAM.
+ * <p>
+ * This class provides methods to interact with form of data export service using WebDriver.
+ * This is a set of small operations which do not control any complex conditions related to
+ * current WebDriver state (like if there is an properly opened page, etc). The class
+ * contains operations to open form of export service, chose form options using universal
+ * value representation (which is independent of specific data representation provided by
+ * data export service) and run form processing by clicking the button.
+ * <p>
+ * Keep in mind this class is a non thread-safe and uses WebDriver state between calls.
+ * This means that you cannot use shared instance of WebDriver for different purposes or in
+ * separate threads because it may cause WebDriver state change between calls.
+ */
 public class FidexpForm {
+	private static final long BASE_WAIT_TIMEOUT = 20L;
 	private static final String FINAM_UI_DROPDOWN_LIST = "finam-ui-dropdown-list";
 	@SuppressWarnings("unused")
 	private static final Logger logger;
@@ -27,37 +41,53 @@ public class FidexpForm {
 	
 	private final FidexpFormUtils formUtils = new FidexpFormUtils();
 	private final WebDriver driver;
-	private boolean initialRequestIsMade = false;
 
 	public FidexpForm(WebDriver driver) {
 		super();
 		this.driver = driver;
 	}
-	
-	public FidexpForm initialRequest() throws WUWebPageException {
+
+	/**
+	 * Open export form page.
+	 * <p>
+	 * This method should be called prior to all others
+	 * at least once to get the form to initial state.
+	 * <p>
+	 * @return this
+	 * @throws WUIOException - unable to open form. This error is not related to any page analysis
+	 * or manipulation. The error is related to transport or protocol level.
+	 */
+	public FidexpForm open() throws WUIOException {
 		try {
-			if ( initialRequestIsMade == false ) {
-				driver.get("http://www.finam.ru/profile/moex-akcii/gazprom/export/");
-				initialRequestIsMade = true;
-			}
+			driver.get("http://www.finam.ru/profile/moex-akcii/gazprom/export/");
 			return this;
 		} catch ( WebDriverException e ) {
-			throw new WUWebPageException("Initial request failed", e);
+			throw new WUIOException("Request failed: ", e);
 		}
 	}
 	
-	public WebElement getSubmitButton() throws WUWebPageException {
+	/**
+	 * Send form to a server.
+	 * <p>
+	 * @return this
+	 * @throws WUWebPageException
+	 */
+	public FidexpForm send() throws WUWebPageException {
+		checkDriverIsReady();
+		getSubmitButton().click();
+		return this;
+	}
+	
+	public FidexpForm ensurePageLoaded() throws WUWebPageException {
 		try {
-			return driver.findElement(By.xpath(getSubmitButtonXPath()));
-		} catch ( WebDriverException e ) {
-			throw new WUWebPageException("Error finding submit button", e);
+			new WebDriverWait(driver, BASE_WAIT_TIMEOUT)
+				.until(dummy -> ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete"));
+		} catch ( TimeoutException e ) {
+			throw new WUWebPageException("Page still not loaded");
 		}
+		return this;
 	}
-	
-	public String getSubmitButtonXPath() {
-		return "//div[@id=\"issuer-profile-export-button\"]/button";
-	}
-	
+
 	/**
 	 * Get list of options of the market selector.
 	 * <p>
@@ -68,6 +98,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public List<NameValuePair> getMarketOptions() throws WUWebPageException {
+		checkDriverIsReady();
 		openMarketSelector();
 		return getMarketSelectorSearch()
 			.transformAllAndClick(By.tagName("a"), new FidexpLinkToNameValueTransformer(), 0);
@@ -85,6 +116,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public List<NameValuePair> getQuoteOptions() throws WUWebPageException {
+		checkDriverIsReady();
 		openQuoteSelector();
 		return getQuoteSelectorSearch()
 			.transformAllAndClick(By.tagName("a"), new FidexpLinkToNameValueTransformer(), 0);
@@ -98,6 +130,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectQuote(String quoteName) throws WUWebPageException {
+		checkDriverIsReady();
 		openQuoteSelector();
 		getQuoteSelectorSearch()
 			.findWithText(By.tagName("a"), quoteName)
@@ -113,6 +146,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectQuote(int quoteId) throws WUWebPageException {
+		checkDriverIsReady();
 		openQuoteSelector();
 		getQuoteSelectorSearch()
 			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(quoteId))
@@ -128,10 +162,12 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectMarket(String marketName) throws WUWebPageException {
+		checkDriverIsReady();
 		openMarketSelector();
-		getMarketSelectorSearch()
-			.findWithText(By.tagName("a"), marketName)
-			.click();
+		finishMarketSelection(
+			getMarketSelectorSearch()
+				.findWithText(By.tagName("a"), marketName)
+		);
 		return this;
 	}
 	
@@ -143,11 +179,85 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectMarket(int marketId) throws WUWebPageException {
+		checkDriverIsReady();
 		openMarketSelector();
-		getMarketSelectorSearch()
-			.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(marketId))
-			.click();
+		finishMarketSelection(
+			getMarketSelectorSearch()
+				.findWithAttributeValue(By.tagName("a"), "value", formUtils.toString(marketId))
+		);
 		return this;
+	}
+	
+	private void finishMarketSelection(SearchWebElement clickToMe) throws WUWebPageException {
+		if ( "a".equals(clickToMe.get().getTagName()) == false ) {
+			throw new IllegalArgumentException("Expected tagName=a");
+		}
+		// После клика не всегда успевает подгрузить список инструментов.
+		// Элемент селектора инструментов сам по себе не меняется и его
+		// проверка ничего не дает. Но внутри него есть див, который
+		// содержит список UL, элементы которого содержат ссылки. Проверяем
+		// его на устаревание.
+		//
+		// Это работает, но иногда все равно выскакивает таймаут. В связи с этим
+		// добавим проверку второго элемента списка на изменение содержимого.
+		// Хотя эта проверка будет работать не для всех рынков. В некоторых
+		// рынках нет ни одного инструмента. Да и вероятность совпадения не
+		// нулевая.
+		//
+		// Здесь есть special case, когда рынок уже выбран. И если продолжать
+		// работу с учетом всех нижеследующих проверок, то гарантированно
+		// будет фейл. Так как в этом случае никаких перезагрузок страницы
+		// не будет.
+		if ( clickToMe.get().getText().equals(new SearchWebElement(driver)
+			.find(By.id("issuer-profile-header"))
+			.find(By.className("finam-ui-quote-selector-market"))
+			.find(By.className("finam-ui-quote-selector-title"))
+			.get()
+			.getText()))
+		{
+			return;
+		}
+
+		WebElement shouldBeStale = getQuoteSelectorSearch().find(By.tagName("ul")).get();
+		String shouldBeChanged = null;
+		try {
+			shouldBeChanged = new SearchWebElement(driver, shouldBeStale)
+				.find(By.tagName("a"), 1)
+				.get()
+				.getText();
+		} catch ( WUWebPageException e ) {
+			// Это нормально. Вероятно это рынок, у которого список инструментов пуст. 
+		}
+		
+		//logger.debug("FixexpForm FMS: click on market selector");
+		clickToMe.click();
+		//logger.debug("FixexpForm FMS: wait for indicator is in stale state");
+		
+		try {
+			waitCond(ExpectedConditions.stalenessOf(shouldBeStale), 2);
+		} catch ( WUWebPageException e ) {
+			if ( shouldBeChanged != null ) {
+				String x = null;
+				try {
+					x = getQuoteSelectorSearch()
+						.find(By.tagName("ul"))
+						.find(By.tagName("a"), 1)
+						.get()
+						.getText();
+				} catch ( WUWebPageException z ) {
+					// Вероятно, список все-таки обновился или устарел.
+					// Если он таки обновился, мы могли не найти значимый
+					// элемент потому, что новый список не содержит инструментов.
+					// Это уже не наша проблема, так что считаем что все ОК.
+				}
+				if ( x != null && x.equals(shouldBeChanged) ) {
+					// Значение элемента не изменилось. Значит
+					// список действительно не был обновлен.
+					throw new WUWebPageException("Quote list still not changed", e);
+				}
+			}
+		}
+		//logger.debug("FixexpForm FMS: done");
 	}
 	
 	/**
@@ -158,7 +268,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectDateFrom(LocalDate date) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		setDate("issuer-profile-export-from", date);
 		return this;
 	}
@@ -171,7 +281,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectDateTo(LocalDate date) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		setDate("issuer-profile-export-to", date);
 		return this;
 	}
@@ -184,6 +294,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectDate(LocalDate date) throws WUWebPageException {
+		checkDriverIsReady();
 		return selectDateFrom(date)
 				.selectDateTo(date);
 	}
@@ -196,7 +307,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectPeriod(FidexpPeriod period) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.xpath("//*[@id=\"issuer-profile-export-first-row\"]/td[3]/div"))
 			.click();
@@ -214,6 +325,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectFilename(String fileName) throws WUWebPageException {
+		checkDriverIsReady();
 		return fillTextbox(By.id("issuer-profile-export-file-name"), fileName);
 	}
 
@@ -225,7 +337,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectFileExt(FidexpFileExt format) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.xpath("//*[@id=\"issuer-profile-export-second-row\"]/td[3]/div"))
 			.click();
@@ -247,6 +359,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException 
 	 */
 	public FidexpForm selectContractName(String name) throws WUWebPageException {
+		checkDriverIsReady();
 		return fillTextbox(By.id("issuer-profile-export-contract"), name);
 	}
 
@@ -258,7 +371,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectDateFormat(FidexpDateFormat format) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-date-row"))
 			.find(By.className("finam-ui-controls-select"))
@@ -278,7 +391,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectTimeFormat(FidexpTimeFormat format) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.xpath("//*[@id=\"issuer-profile-export-date-row\"]/td[5]/div"))
 			.click();
@@ -296,7 +409,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm useCandleStartTime(boolean use) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("MSOR0"))
 			.setChecked(use);
@@ -314,7 +427,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm useMoscowTime(boolean use) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-mstime"))
 			.setChecked(use);
@@ -329,7 +442,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectFieldSeparator(FidexpFieldSeparator format) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-separator-row"))
 			.find(By.className("finam-ui-controls-select"))
@@ -349,7 +462,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectDigitSeparator(FidexpDigitSeparator format) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-separator-row"))
 			.find(By.className("finam-ui-controls-select"), 1)
@@ -372,7 +485,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm selectDataFormat(FidexpDataFormat format) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-export-fileformat-row"))
 			.find(By.className("finam-ui-controls-select"))
@@ -392,7 +505,7 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm useAddHeader(boolean use) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("at"))
 			.setChecked(use);
@@ -407,76 +520,54 @@ public class FidexpForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public FidexpForm useFillEmptyPeriods(boolean use) throws WUWebPageException {
-		initialRequest();
+		checkDriverIsReady();
 		new SearchWebElement(driver)
 			.find(By.id("fsp"))
 			.setChecked(use);
 		return this;
 	}
 	
-	/**
-	 * Get the form action URI.
-	 * <p>
-	 * @return the form action URI
-	 * @throws WUWebPageException - an error occurred
-	 */
-	public URI getFormActionURI() throws WUWebPageException {
-		initialRequest();
-		String action = new SearchWebElement(driver)
-			.find(By.id("chartform"))
-			.get()
-			.getAttribute("action");
-		if ( action == null ) {
-			throw new WUWebPageException("Form action not found");
-		}
-		try {
-			return new URI(action);
-		} catch ( URISyntaxException e ) {
-			throw new WUWebPageException("Malformed form action", e);
-		}
-	}
-	
-	protected SearchWebElement getMarketSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getMarketSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 0);
 	}
 		
-	protected SearchWebElement getQuoteSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getQuoteSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 1);
 	}
 	
-	protected SearchWebElement getPeriodSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getPeriodSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 2);
 	}
 	
-	protected SearchWebElement getFileExtSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getFileExtSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 3);
 	}
 	
-	protected SearchWebElement getDateFormatSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getDateFormatSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 4);
 	}
 	
-	protected SearchWebElement getTimeFormatSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getTimeFormatSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 5);
 	}
 
-	protected SearchWebElement getFieldSeparatorSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getFieldSeparatorSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 6);
 	}
 	
-	protected SearchWebElement getDigitSeparatorSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getDigitSeparatorSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 7);
 	}
 
-	protected SearchWebElement getFileFormatSelectorSearch() throws WUWebPageException {
+	private SearchWebElement getFileFormatSelectorSearch() throws WUWebPageException {
 		return new SearchWebElement(driver)
 			.find(By.className(FINAM_UI_DROPDOWN_LIST), 8);
 	}
@@ -492,11 +583,13 @@ public class FidexpForm {
 	 * @return this
 	 * @throws WUWebPageException - an error occurred
 	 */
-	protected FidexpForm openMarketSelector() throws WUWebPageException {
-		initialRequest();
+	private FidexpForm openMarketSelector() throws WUWebPageException {
+		By locMarketSelector = By.className("finam-ui-quote-selector-market");
+		waitElem(ExpectedConditions.presenceOfElementLocated(locMarketSelector));
+		waitElem(ExpectedConditions.visibilityOfElementLocated(locMarketSelector));
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-header"))
-			.find(By.className("finam-ui-quote-selector-market"))
+			.find(locMarketSelector)
 			.find(By.className("finam-ui-quote-selector-arrow"))
 			.get()
 			.click();
@@ -514,38 +607,34 @@ public class FidexpForm {
 	 * @return this
 	 * @throws WUWebPageException - an error occurred
 	 */
-	protected FidexpForm openQuoteSelector() throws WUWebPageException {
-		initialRequest();
+	private FidexpForm openQuoteSelector() throws WUWebPageException {
+		By locQuoteSelector = By.className("finam-ui-quote-selector-quote");
+		waitElem(ExpectedConditions.presenceOfElementLocated(locQuoteSelector));
+		waitElem(ExpectedConditions.visibilityOfElementLocated(locQuoteSelector));
 		new SearchWebElement(driver)
 			.find(By.id("issuer-profile-header"))
-			.find(By.className("finam-ui-quote-selector-quote"))
+			.find(locQuoteSelector)
 			.find(By.className("finam-ui-quote-selector-arrow"))
 			.click();
 		return this;
 	}
 	
-	protected FidexpForm fillTextbox(By by, String newText) throws WUWebPageException {
-		initialRequest();
+	private FidexpForm fillTextbox(By by, String newText) throws WUWebPageException {
 		WebElement element = new SearchWebElement(driver)
 			.find(by)
 			.get();
 		String oldText = element.getAttribute("value");
 		if ( oldText != null ) {
-			element.sendKeys(StringUtils.repeat('\b', oldText.length()));
+			element.clear();
 			element.sendKeys(newText);
 		} else {
 			throw new WUWebPageException("Element attribute [value] not found: " + by);
 		}
 		return this;
 	}
-
-	protected void setDate(String inputId, LocalDate date) throws WUWebPageException {
-		try {
-			WebDriverWait wait = new WebDriverWait(driver, 20);
-			wait.until(ExpectedConditions.elementToBeClickable(By.id(inputId))).click();
-		} catch ( TimeoutException e ) {
-			throw new WUWebPageException("Timeout exception: ", e);
-		}
+	
+	private void setDate(String inputId, LocalDate date) throws WUWebPageException {
+		waitElem(ExpectedConditions.elementToBeClickable(By.id(inputId))).click();
 		
 		int year = date.getYear();
 		int month = date.getMonth().getValue() - 1; // FINAM bugfix
@@ -573,6 +662,52 @@ public class FidexpForm {
 				.click();
 		} catch ( WUWebPageException e ) {
 			throw new WUWebPageException("Cannot set day of month of " + inputId, e);
+		}
+	}
+
+	private WebElement getSubmitButton() throws WUWebPageException {
+		try {
+			return driver.findElement(By.xpath(getSubmitButtonXPath()));
+		} catch ( WebDriverException e ) {
+			throw new WUWebPageException("Error finding submit button", e);
+		}
+	}
+	
+	private String getSubmitButtonXPath() {
+		return "//div[@id=\"issuer-profile-export-button\"]/button";
+	}
+
+	private WebElement waitElem(ExpectedCondition<WebElement> condition) throws WUWebPageException {
+		try {
+			return newWait().until(condition);
+		} catch ( TimeoutException e ) {
+			throw new WUWebPageException("Timeout exception: ", e);
+		}
+	}
+	
+	private boolean waitCond(ExpectedCondition<Boolean> condition, int multiplier) throws WUWebPageException {
+		try {
+			return newWait(multiplier).until(condition);
+		} catch ( TimeoutException e ) {
+			throw new WUWebPageException("Timeout exception: ", e);
+		}
+	}
+	
+	private WebDriverWait newWait() {
+		return newWait(1);
+	}
+	
+	private WebDriverWait newWait(int multiplier) {
+		if ( multiplier <= 0 ) {
+			throw new IllegalArgumentException("Expected multiplier > 0");
+		}
+		return new WebDriverWait(driver, BASE_WAIT_TIMEOUT * multiplier);
+	}
+	
+	private void checkDriverIsReady() throws WUWebPageException {
+		String url = driver.getCurrentUrl();
+		if ( url == null || ! url.startsWith("http") ) {
+			throw new WUWebPageException("Cannot proceed. Possible the form page is not loaded. Current URL: " + url);
 		}
 	}
 

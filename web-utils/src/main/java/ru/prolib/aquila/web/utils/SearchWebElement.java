@@ -5,16 +5,35 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Utility class to search WebElement using one or more subsequent queries.
  */
 public class SearchWebElement {
-	private WebDriver driver;
+	/**
+	 * Timeout for wait operations in seconds.
+	 */
+	private final long waitMaxTime = 10L;
+	private final WebDriver driver;
 	private WebElement currentElement;
+	
+	/**
+	 * Constructor with element as starting point.
+	 * <p>
+	 * @param driver - web driver 
+	 * @param element - web element
+	 */
+	public SearchWebElement(WebDriver driver, WebElement element) {
+		this.driver = driver;
+		this.currentElement = element;
+	}
 	
 	/**
 	 * Constructor with driver as starting point.
@@ -22,16 +41,7 @@ public class SearchWebElement {
 	 * @param driver - web driver
 	 */
 	public SearchWebElement(WebDriver driver) {
-		this.driver = driver;
-	}
-	
-	/**
-	 * Constructor with element as starting point.
-	 * <p>
-	 * @param element - web element
-	 */
-	public SearchWebElement(WebElement element) {
-		this.currentElement = element;
+		this(driver, null);
 	}
 	
 	/**
@@ -157,6 +167,7 @@ public class SearchWebElement {
 	 * @throws WUWebPageException - Web driver exception thrown
 	 */
 	public SearchWebElement click() throws WUWebPageException {
+		waitUntil(ExpectedConditions.elementToBeClickable(currentElement));
 		try {
 			currentElement.click();
 			return this;
@@ -221,8 +232,18 @@ public class SearchWebElement {
 		for ( WebElement element : elements ) {
 			list.add(transformer.transform(element));
 		}
-		elements.get(index).click();
+		WebElement element = elements.get(index);
+		waitUntil(ExpectedConditions.elementToBeClickable(element));
+		element.click();
 		return list;
+	}
+	
+	private WebElement waitUntil(ExpectedCondition<WebElement> condition) throws WUWebPageException {
+		try {
+			return new WebDriverWait(driver, waitMaxTime).until(condition);
+		} catch ( TimeoutException e ) {
+			throw new WUWebPageException("Timeout exception: ", e);
+		}
 	}
 
 }

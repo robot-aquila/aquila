@@ -1,6 +1,7 @@
 package ru.prolib.aquila.utils.finexp.futures;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
@@ -15,8 +16,12 @@ import ru.prolib.aquila.core.BusinessEntities.SchedulerLocal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.utils.finexp.futures.finam.FinamWebTickDataTracker;
 import ru.prolib.aquila.utils.finexp.futures.moex.MoexWebContractTracker;
+import ru.prolib.aquila.web.utils.finam.FidexpFactory;
+import ru.prolib.aquila.web.utils.finam.FidexpFactorySTD;
 import ru.prolib.aquila.web.utils.finam.FidexpFileStorage;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
+import ru.prolib.aquila.web.utils.moex.MoexFactory;
+import ru.prolib.aquila.web.utils.moex.MoexFactorySTD;
 
 public class Service {
 	private static final Logger logger;
@@ -49,6 +54,21 @@ public class Service {
 			System.exit(0);
 		}
 		
+		MoexFactory moexFactory = null;
+		FidexpFactory finamFactory = null;
+		if ( cmd.hasOption(CmdLine.LOPT_JBROWSER_CONFIG) ) {
+			File jbdConfig = new File(cmd.getOptionValue(CmdLine.LOPT_JBROWSER_CONFIG));
+			try {
+				moexFactory = MoexFactorySTD.newFactoryJBD(jbdConfig, true);
+				finamFactory = FidexpFactorySTD.newDefaultFactory(jbdConfig, true);
+			} catch ( IOException e ) {
+				CmdLine.printErrorAndExit("Cannot load JBrowserDriver/AHC configuration: " + jbdConfig + " " + e.getMessage());
+			}
+		} else {
+			moexFactory = MoexFactorySTD.newFactoryJBD();
+			finamFactory = FidexpFactorySTD.newDefaultFactory();
+		}
+		
 		final CountDownLatch globalExit = new CountDownLatch(1);
 		final Scheduler scheduler = new SchedulerLocal("SCHEDULER");
 		Runtime.getRuntime().addShutdownHook(new Thread("SHUTDOWN") {
@@ -57,8 +77,11 @@ public class Service {
 				globalExit.countDown();
 			}
 		});
-		FinamWebTickDataTracker finamService = new FinamWebTickDataTracker(FidexpFileStorage.createStorage(root), globalExit, scheduler, cmd);
-		MoexWebContractTracker moexService = new MoexWebContractTracker(globalExit, scheduler, moexStorage); 
+
+		
+		FinamWebTickDataTracker finamService = new FinamWebTickDataTracker(FidexpFileStorage.createStorage(root),
+				globalExit, scheduler, cmd, moexFactory, finamFactory);
+		MoexWebContractTracker moexService = new MoexWebContractTracker(globalExit, scheduler, moexStorage, moexFactory); 
 		try {
 			Instant firstRun = scheduler.getCurrentTime().plusSeconds(5);
 			finamService.reschedule(firstRun);

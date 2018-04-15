@@ -4,33 +4,21 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.Timezone;
+import ru.prolib.aquila.web.utils.jbd.JBDWebDriverFactory;
 
-public class WebDriverFactory {
-	private static final int DEFAULT_SOCKET_TIMEOUT = 30000;
+public interface WebDriverFactory {
 	
+	@Deprecated
 	public static WebDriver createJBrowserDriver(int socketTimeoutMs) {
-		return new JBrowserDriver(Settings.builder()
-				.timezone(Timezone.EUROPE_MOSCOW)
-				.ssl("compatible")
-				.blockAds(true)
-				.headless(true)
-				.quickRender(true)
-				.socketTimeout(socketTimeoutMs)
-				.connectionReqTimeout(socketTimeoutMs)
-				.connectTimeout(socketTimeoutMs)
-				.maxConnections(128)
-				.javascript(true)
-				.logJavascript(true)
-				.build());
+		return new JBDWebDriverFactory().withMoexTestedSettings(socketTimeoutMs).createWebDriver();
 	}
 	
+	@Deprecated
 	public static WebDriver createJBrowserDriver() {
-		return createJBrowserDriver(DEFAULT_SOCKET_TIMEOUT);
+		return new JBDWebDriverFactory().withMoexTestedSettings().createWebDriver();
 	}
 	
+	@Deprecated
 	public static WebDriver createFirefoxDriver() {
 		// Note: path to geckodriver executable must be in PATH
 		// Note: path to firefox executable must be in PATH
@@ -40,11 +28,14 @@ public class WebDriverFactory {
     	//File ffBinary = new File("D:/Program Files (x86)/Mozilla Firefox/firefox.exe");
     	//return new FirefoxDriver(new FirefoxBinary(ffBinary), profile);
 	}
-	
+
+	@Deprecated
 	public static WebDriver createHtmlUnitDriver() {
 		HtmlUnitDriver driver = new HtmlUnitDriver();
 		driver.setJavascriptEnabled(true);
 		return driver;
 	}
+	
+	WebDriver createWebDriver();
 
 }

@@ -16,8 +16,8 @@ import ru.prolib.aquila.utils.finexp.futures.moex.components.MoexAllFuturesUpdat
 import ru.prolib.aquila.utils.finexp.futures.moex.components.MoexContractTrackingSchedule;
 import ru.prolib.aquila.utils.finexp.futures.moex.components.UpdateHandler;
 import ru.prolib.aquila.web.utils.WUWebPageException;
-import ru.prolib.aquila.web.utils.moex.Moex;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
+import ru.prolib.aquila.web.utils.moex.MoexFactory;
 
 public class MoexWebContractTracker implements Runnable, Closeable {
 	private static final Logger logger;
@@ -31,6 +31,7 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 	private final MoexContractTrackingSchedule updateSchedule;
 	private final Scheduler scheduler;
 	private final MoexContractFileStorage storage;
+	private final MoexFactory moexFactory;
 	/**
 	 * If the handler is defined then we're in the update tracking mode.
 	 */
@@ -38,18 +39,20 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 
 	public MoexWebContractTracker(CountDownLatch globalExit,
 			Scheduler scheduler, MoexContractFileStorage storage,
-			MoexContractTrackingSchedule updateSchedule)
+			MoexContractTrackingSchedule updateSchedule,
+			MoexFactory moexFactory)
 	{
 		this.globalExit = globalExit;
 		this.updateSchedule = updateSchedule;
 		this.scheduler = scheduler;
 		this.storage = storage;
+		this.moexFactory = moexFactory;
 	}
 	
 	public MoexWebContractTracker(CountDownLatch globalExit,
-			Scheduler scheduler, MoexContractFileStorage storage)
+			Scheduler scheduler, MoexContractFileStorage storage, MoexFactory moexFactory)
 	{
-		this(globalExit, scheduler, storage, new MoexContractTrackingSchedule());
+		this(globalExit, scheduler, storage, new MoexContractTrackingSchedule(), moexFactory);
 	}
 
 	@Override
@@ -138,7 +141,7 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 	}
 	
 	private UpdateHandler createHandler(Instant updatePlannedTime) {
-		 return new MoexAllFuturesUpdateHandler(globalExit, new Moex(), storage, updatePlannedTime);
+		 return new MoexAllFuturesUpdateHandler(globalExit, moexFactory.createInstance(), storage, updatePlannedTime);
 	}
 
 }

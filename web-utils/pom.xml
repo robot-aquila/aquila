@@ -1,7 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>ru.prolib.aquila</groupId>
 	<artifactId>aquila-web-utils</artifactId>
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
@@ -24,12 +23,12 @@
 		<dependency>
 		    <groupId>org.seleniumhq.selenium</groupId>
 		    <artifactId>selenium-java</artifactId>
-		    <version>3.5.3</version>
+		    <version>3.8.1</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.seleniumhq.selenium</groupId>
 		    <artifactId>selenium-firefox-driver</artifactId>
-		    <version>3.5.3</version>
+		    <version>3.8.1</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.seleniumhq.selenium</groupId>
@@ -39,8 +38,13 @@
 		<dependency>
 		    <groupId>com.machinepublishers</groupId>
 		    <artifactId>jbrowserdriver</artifactId>
-		    <version>0.17.9</version>
-		</dependency>	
+		    <version>1.0.0-RC1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ini4j</groupId>
+			<artifactId>ini4j</artifactId>
+			<version>0.5.4</version>
+		</dependency>
 				
 	</dependencies>
 	

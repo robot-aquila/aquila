@@ -1,5 +1,6 @@
 package ru.prolib.aquila.utils.finexp.quotelist;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.NameValuePair;
 
 import ru.prolib.aquila.web.utils.finam.Fidexp;
+import ru.prolib.aquila.web.utils.finam.FidexpFactorySTD;
 
 /**
  * List of current futures.
@@ -17,8 +19,8 @@ import ru.prolib.aquila.web.utils.finam.Fidexp;
 public class CurrentFuturesList {
 	private static final String HEADER = "TICKER,CODE,FINAM_WEB_ID";
 	
-	public static void main(String[] args) {
-		Fidexp facade = new Fidexp();
+	public static void main(String[] args) throws Exception {
+		Fidexp facade = FidexpFactorySTD.newDefaultFactory(new File("dummy"), false).createInstance();
 		try {
 			Map<Integer, String> map = facade.getTrueFuturesQuotes(false);
 			System.out.println(HEADER);

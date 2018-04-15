@@ -20,6 +20,7 @@ import ru.prolib.aquila.web.utils.WUIOException;
 import ru.prolib.aquila.web.utils.WUInvalidResponseException;
 import ru.prolib.aquila.web.utils.WUProtocolException;
 
+@Deprecated
 public class HttpClientFileDownloader implements FileDownloader {
 	private static final Logger logger;
 	

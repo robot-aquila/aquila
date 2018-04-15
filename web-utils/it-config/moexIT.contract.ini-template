@@ -1,0 +1,51 @@
+; rev0.1
+;
+; This file contains data to test function of obtaining contract data from MOEX
+; site. Unfortunately this data cannot be obtained automatically because it
+; requires a complex web pages processing. Fortunately this data changes
+; only 2-3 times a day. To avoid data hardcoding and keep source code unchanged
+; the sample contract data was moved to dedicated file. If this file has
+; an extension equal to ini-template this is template file. Make a copy of it to
+; a new file named moexIT.contract.ini, open it for editing and get back to
+; this instruction.
+;
+; This file should contains a test data of contract details page. Contract
+; details page has a typical URL which looks like a:
+;
+; https://www.moex.com/en/contract.aspx?code=RTS-6.18
+;
+; where RTS-6.18 is contract code. The values associated with the keys described
+; below must reflect exact values of Instrument description section on contract
+; page. If there are one or more keys which are not reflected in this file (or
+; vice-versa) then this is outdated version. Check you have got a latest version
+; from repository, fix this file according to updated ini-template and try
+; again. Do not add or remove any lines to pass the test if they aren't in
+; ini-template file because it may break the test. Just update the values.
+;
+
+[test-contract]
+Contract Symbol=RTS-6.18
+Contract Trading Symbol=RIM8
+Contract Description=RTS Index Futures
+Type=Futures
+Settlement=Cash-Settled
+Сontract size (lot)=1
+Quotation=points
+First Trading Day=20.06.2016
+Last Trading Day=21.06.2018
+Delivery=21.06.2018
+Price tick=10.0000
+Value of price tick, RUB=12.63450
+Lower limit=93,490.0000
+Upper limit=118,490.0000
+Settlement price of last clearing session=105,990.0000
+Contract buy/sell fee, RUB=2.64
+Intraday (scalper) fee, RUB=1.32
+Negotiated trade fee, RUB=2.64
+Contract exercise fee, RUB=2.0000
+Initial Margin (IM, rub)=35,377.85
+IM value on=10.04.2018
+FX for intraday clearing=13:45 Moscow time
+FX for evening clearing=18:30 Moscow time
+Settlement procedure=Cash settlement. An average value of RTS Index calculated during the period from 15:00 to 16:00 Moscow time of the last trading day multiplied by 100 is taken as a settlement price. The tick value equals 20% of the USD/RUB exchange rate determined in accordance with the Methodology at 6:30 pm MSK on the last trading day.
+

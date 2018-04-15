@@ -4,6 +4,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 
 import ru.prolib.aquila.web.utils.WUInvalidResponseException;
 
+@Deprecated
 public class ResponseValidatorStub implements ResponseValidator {
 	private static final ResponseValidatorStub instance;
 	

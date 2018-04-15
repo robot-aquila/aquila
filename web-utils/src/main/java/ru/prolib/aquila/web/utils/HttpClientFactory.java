@@ -5,6 +5,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
+@Deprecated
 public class HttpClientFactory {
 	public static final int DEFAULT_TIMEOUT = 180000;
 

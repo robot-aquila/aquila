@@ -6,6 +6,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import ru.prolib.aquila.web.utils.WUInvalidResponseException;
 import ru.prolib.aquila.web.utils.httpclient.ResponseValidator;
 
+@Deprecated
 public class FidexpResponseValidator implements ResponseValidator {
 
 	@Override

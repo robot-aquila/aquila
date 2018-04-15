@@ -64,14 +64,14 @@ public class MoexContractForm {
 			throw new WUWebPageException("Timeout: ", e);
 		}
 		
-		List<WebElement> rows = new SearchWebElement(webDriver)
+		List<WebElement> rows = newSearch()
 			.find(By.className("tool_options_table_forts"))
 			.findAll(By.tagName("tr"));
 		Map<Integer, Object> tokens = new LinkedHashMap<>();
 		for ( int i = 0; i < rows.size(); i ++ ) {
 			WebElement row = rows.get(i);
 
-			List<WebElement> cols = new SearchWebElement(row)
+			List<WebElement> cols = newSearchStartingFrom(row)
 				.findAll(By.tagName("td"));
 			if ( cols.size() != 2 ) {
 				throw new WUWebPageException("Wrong number of elements of row #" + i + ":" + cols.size());
@@ -177,7 +177,7 @@ public class MoexContractForm {
 		}
 
 		// Additional test for the contract existence.
-		if ( ! contractCode.equals(new SearchWebElement(webDriver)
+		if ( ! contractCode.equals(newSearch()
 				.find(By.xpath("//*[@id='contract']/div[2]/div[1]/table/tbody/tr/td[1]/b"))
 				.get()
 				.getText()
@@ -200,7 +200,7 @@ public class MoexContractForm {
 			throw new WUWebPageException("Search page request failed.", e);
 		}
 		// Additional check that the page is open
-		WebElement x = new SearchWebElement(webDriver)
+		WebElement x = newSearch()
 			.findWithText(By.tagName("h1"), "Search by contracts")
 			.get();
 		if ( ! x.isDisplayed() ) {
@@ -218,12 +218,12 @@ public class MoexContractForm {
 		WebElement table = findFuturesTable();
 		List<String> list = new ArrayList<>();
 		boolean skipHeader = true;
-		for ( WebElement row : new SearchWebElement(table).findAll(By.tagName("tr")) ) {
+		for ( WebElement row : newSearchStartingFrom(table).findAll(By.tagName("tr")) ) {
 			if ( skipHeader ) {
 				skipHeader = false;
 			} else {
 				try {
-					list.add(new SearchWebElement(row)
+					list.add(newSearchStartingFrom(row)
 						.find(By.tagName("td"), 1)
 						.find(By.tagName("a"))
 						.get()
@@ -247,7 +247,7 @@ public class MoexContractForm {
 				ExpectedConditions.elementToBeClickable(By.xpath("//*[. = 'I Agree']")),
 				ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[normalize-space(.) = '" + searchText + "']"))
 			));
-			new SearchWebElement(webDriver)
+			newSearch()
 				.find(By.xpath("//*[. = 'I Agree']"))
 				.get()
 				.click();
@@ -280,11 +280,11 @@ public class MoexContractForm {
 	 */
 	private List<Paginator> findPaginators() throws WUWebPageException {
 		List<Paginator> paginators = new ArrayList<>();
-		for ( WebElement parent : new SearchWebElement(webDriver)
+		for ( WebElement parent : newSearch()
 				.findAll(By.xpath("//*[. = 'Pages:']/parent::*")) )
 		{
 			boolean containsNonNumericReference = false;
-			List<WebElement> children = new SearchWebElement(parent).findAll(By.xpath(".//*"));
+			List<WebElement> children = newSearchStartingFrom(parent).findAll(By.xpath(".//*"));
 			List<PageReference> pages = new ArrayList<>();
 			for ( int i = 1; i < children.size(); i ++ ) {
 				WebElement child = children.get(i);
@@ -334,6 +334,14 @@ public class MoexContractForm {
 		}
 		return paginators.get(0);
 	}
+	
+	private SearchWebElement newSearch() {
+		return new SearchWebElement(webDriver);
+	}
+	
+	private SearchWebElement newSearchStartingFrom(WebElement element) {
+		return new SearchWebElement(webDriver, element);
+	}
 
 	/**
 	 * Найти таблицу фьючерсов.
@@ -355,10 +363,10 @@ public class MoexContractForm {
 	 * @throws WUWebPageException - не удалось найти таблицу фьючерсов или другая ошибка
 	 */
 	private WebElement findFuturesTable() throws WUWebPageException {
-		for ( WebElement table : new SearchWebElement(webDriver).findAll(By.tagName("table")) ) {
+		for ( WebElement table : newSearch().findAll(By.tagName("table")) ) {
 			try {
-				WebElement row = new SearchWebElement(table).find(By.tagName("tr"), 0).get();
-				List<WebElement> cols = new SearchWebElement(row).findAll(By.tagName("th"));
+				WebElement row = newSearchStartingFrom(table).find(By.tagName("tr"), 0).get();
+				List<WebElement> cols = newSearchStartingFrom(row).findAll(By.tagName("th"));
 				if ( cols.size() == 6
 					&& "Symbol".equals(cols.get(1).getText())
 					&& "Description".equals(cols.get(2).getText())

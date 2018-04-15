@@ -4,6 +4,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 
 import ru.prolib.aquila.web.utils.WUInvalidResponseException;
 
+@Deprecated
 public interface ResponseValidator {
 	
 	/**

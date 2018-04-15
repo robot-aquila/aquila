@@ -1,0 +1,107 @@
+; rev0.3
+;
+; This file contains configuration of transport layer to use for integration
+; tests. If this file has an extension equal to ini-template then this is
+; a template file. Make a copy of it to a new file named jbd.ini and it will be
+; affected during integration tests.
+;
+
+; This section contains configuration properties of JBrowserDriver
+; Most keys just defines an argument for apropriate method of Settings.Builder
+; class. If there is no detailed explanation of possible values see the
+; following link to get more details
+;
+; http://machinepublishers.github.io/jBrowserDriver/com/machinepublishers/jbrowserdriver/Settings.Builder.html
+;
+; Note that not all Settings.Builder settings are supported by this file.
+; Only keys described in this file will have an effect.
+[jbrowser-driver]
+; Source of trusted certificate authorities.
+; Possible values:
+; string "compatible" - to accept standard browser certs,
+; string "trustanything" - to accept any SSL cert,
+; path to file or URL - something like that https://raw.githubusercontent.com/bagder/ca-bundle/master/ca-bundle.crt
+; empty line - use JRE's keystore
+;
+; For example if you're using a squid caching proxy with ssl-bump and do not
+; want to face any difficulties with certificates specify "trustanything". For
+; most common cases "compatible" is enought.
+; default: not specified
+;ssl=compatible
+
+; Logging level
+; Possible values: ALL, CONFIG, FINE, FINER, FINEST, INFO, OFF, SEVERE, WARNING
+; An empty value switches logging OFF.
+; See java.util.logging.Level for more details
+; default: ALL
+;loggerLevel=ALL
+
+; How long to wait in milliseconds before a page is considered to have been
+; loaded completely.
+; Empty value keeps this setting unchanged.
+; default: 150
+;ajaxWait=500
+
+; The time in milliseconds after which an AJAX request will be ignored when
+; considering whether all AJAX requests have completed.
+; Empty value keeps this setting unchanged.
+; default: 2000
+;ajaxResourceTimeout=5000
+
+; Log full requests and responses (without response body).
+; Possible values: true, false
+; Empty value keeps this setting unchanged.
+; default: false
+;logWire=false
+
+; Enable local caching
+; Possible values: true, false
+; default: false
+;cache=false
+
+; Cache root directory.
+; default: empty
+;cache.dir=
+
+; Maximum number of cached files.
+; default: 10000
+;cache.entries=10000
+
+; Maximum size in bytes of a file to be cached.
+; default: 1000000
+;cache.entrySize=1000000
+
+; Proxy type enables or disables proxy.
+; Possible values: HTTP, SOCKS
+; Empty value disables proxy.
+; default: not specified (disabled)
+;proxy.type=
+
+; Proxy host.
+;proxy.host=
+
+; Proxy port.
+;proxy.port=
+
+; Proxy username.
+; If not specified then authorization is not required.
+;proxy.user=
+
+; Proxy password.
+;proxy.pass=
+
+
+
+; This section contains configuration properties of Apache HTTP Client. Apache
+; HTTP Client used for most critical areas to provide enough stability and
+; reliability. You may want to make fine-tune the program's behaviour when
+; working in critical areas. 
+[apache-http-client]
+socketTimeout=
+connectTimeout=
+connectionRequestTimeout=
+defaultHeaders=
+proxy.type=
+proxy.host=
+proxy.port=
+
