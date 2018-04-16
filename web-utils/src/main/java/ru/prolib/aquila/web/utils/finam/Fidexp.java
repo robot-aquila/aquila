@@ -42,7 +42,11 @@ import ru.prolib.aquila.web.utils.httpattachment.di.WebDriverGet;
  * Note this class is not thread-safe.
  */
 public class Fidexp implements Closeable {
-	@SuppressWarnings("unused")
+	/**
+	 * How many attempts to perform the operation will be done before
+	 * the situation is found to be impracticable due to errors. 
+	 */
+	public static final int MAX_ATTEMPTS = 3;
 	private static final Logger logger;
 	
 	static {
@@ -271,15 +275,25 @@ public class Fidexp implements Closeable {
 	public Map<Integer, String> getTrueFuturesQuotes(boolean stripCodes)
 			throws WUException
 	{
-		List<NameValuePair> pairs, result = new ArrayList<>();
-		try {
-			checkFormIsReady(true);
-			pairs = webForm.selectMarket(14).getQuoteOptions();
-		} catch ( WUException e ) {
-			throw e;
-		} catch ( Exception e ) {
-			throw new WUUnexpectedException(e);
-		}
+		List<NameValuePair> pairs = null, result = new ArrayList<>();
+		int attempts = MAX_ATTEMPTS;
+		do {
+			attempts --;
+			try {
+				checkFormIsReady(true);
+				pairs = webForm.selectMarket(14).getQuoteOptions();
+				break;
+			} catch ( WUException e ) {
+				if ( attempts > 0 ) {
+					logger.debug("Ignore error and retry (number of attempts remained: {}): ", attempts, e);
+				} else {
+					throw e;
+				}
+			} catch ( Exception e ) {
+				throw new WUUnexpectedException(e);
+			}
+		} while ( attempts > 0 );
+		
 		for ( NameValuePair pair : pairs ) {
 			NameValuePair dummy = splitFuturesCode(pair.getName());
 			if ( dummy != null ) {
