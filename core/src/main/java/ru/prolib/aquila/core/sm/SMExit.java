@@ -9,9 +9,9 @@ final public class SMExit {
 	/**
 	 * Выход-заглушка.
 	 */
-	public static final SMExit STUB = new SMExit(SMState.FINAL, "stub");
+	public static final SMExit STUB = new SMExit(SMStateHandler.FINAL, "stub");
 	
-	private final SMState owner;
+	private final SMStateHandler owner;
 	private final String id;
 	
 	/**
@@ -20,7 +20,7 @@ final public class SMExit {
 	 * @param owner состояние-владелец
 	 * @param id символьный идентификатор
 	 */
-	public SMExit(SMState owner, String id) {
+	public SMExit(SMStateHandler owner, String id) {
 		super();
 		this.owner = owner;
 		this.id = id;
@@ -31,7 +31,7 @@ final public class SMExit {
 	 * <p>
 	 * @return состояние, которому относится данный выход
 	 */
-	public SMState getState() {
+	public SMStateHandler getState() {
 		return owner;
 	}
 	

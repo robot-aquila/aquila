@@ -21,9 +21,9 @@ public class SMStateMachine {
 	}
 
 	private String id;
-	private final Map<KW<SMExit>, SMState> transitions;
-	private final SMState initialState;
-	private SMState currentState;
+	private final Map<KW<SMExit>, SMStateHandler> transitions;
+	private final SMStateHandler initialState;
+	private SMStateHandler currentState;
 	private SMTriggerRegistry triggers;
 	
 	/**
@@ -32,8 +32,8 @@ public class SMStateMachine {
 	 * @param initialState начальное состояние
 	 * @param transitions список переходов
 	 */
-	public SMStateMachine(SMState initialState, Map<KW<SMExit>,
-			SMState> transitions)
+	public SMStateMachine(SMStateHandler initialState, Map<KW<SMExit>,
+			SMStateHandler> transitions)
 	{
 		super();
 		id = getNextId();
@@ -78,7 +78,7 @@ public class SMStateMachine {
 	 * <p>
 	 * @return текущее состояние автомата
 	 */
-	public synchronized SMState getCurrentState() {
+	public synchronized SMStateHandler getCurrentState() {
 		return currentState;
 	}
 	
@@ -197,7 +197,7 @@ public class SMStateMachine {
 	 * @return true - если автомат в финальном состоянии, false - если нет
 	 */
 	public synchronized boolean finished() {
-		return currentState == SMState.FINAL;
+		return currentState == SMStateHandler.FINAL;
 	}
 	
 	/**
@@ -225,7 +225,7 @@ public class SMStateMachine {
 				dbgExitAction();
 				exitAction.exit();
 			}
-			SMState pstate = currentState;
+			SMStateHandler pstate = currentState;
 			currentState = transitions.get(new KW<SMExit>(exit));
 			if ( debug && logger.isDebugEnabled() ) {
 				Object args[] = { id, pstate, exit, currentState };

@@ -4,12 +4,12 @@ import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.sm.SMEnterAction;
 import ru.prolib.aquila.core.sm.SMExit;
 import ru.prolib.aquila.core.sm.SMInputStub;
-import ru.prolib.aquila.core.sm.SMState;
+import ru.prolib.aquila.core.sm.SMStateHandler;
 import ru.prolib.aquila.core.sm.SMTrigger;
 import ru.prolib.aquila.core.sm.SMTriggerOnEvent;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-abstract public class BasicState extends SMState implements SMEnterAction {
+abstract public class BasicState extends SMStateHandler implements SMEnterAction {
 	public static final String EER = Const.E_ERROR;
 	public static final String EBR = Const.E_BREAK;
 	protected final RobotData data;

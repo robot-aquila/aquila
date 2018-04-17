@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class SMInputTest {
 	private IMocksControl control;
-	private SMState state;
+	private SMStateHandler state;
 	private SMExit exit;
 	private SMInputAction inputAction;
 	private SMInput input;
@@ -17,7 +17,7 @@ public class SMInputTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		state = new SMState();
+		state = new SMStateHandler();
 		exit = state.registerExit("zulu24");
 		inputAction = control.createMock(SMInputAction.class);
 		input = new SMInput(state, inputAction);

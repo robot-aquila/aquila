@@ -15,7 +15,7 @@ public class SMStateTest {
 	private SMInputAction inputAction1, inputAction2;
 	private SMEnterAction enterAction;
 	private SMExitAction exitAction;
-	private SMState state;
+	private SMStateHandler state;
 
 	@Before
 	public void setUp() throws Exception {
@@ -24,7 +24,7 @@ public class SMStateTest {
 		inputAction2 = control.createMock(SMInputAction.class);
 		enterAction = control.createMock(SMEnterAction.class);
 		exitAction = control.createMock(SMExitAction.class);
-		state = new SMState();
+		state = new SMStateHandler();
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class SMStateTest {
 	
 	@Test
 	public void testConstruct1EnterAction() throws Exception {
-		state = new SMState(enterAction);
+		state = new SMStateHandler(enterAction);
 		assertSame(enterAction, state.getEnterAction());
 		assertNull(state.getExitAction());
 		assertEquals(new Vector<SMExit>(), state.getExits());
@@ -46,7 +46,7 @@ public class SMStateTest {
 	
 	@Test
 	public void testConstruct1ExitAction() throws Exception {
-		state = new SMState(exitAction);
+		state = new SMStateHandler(exitAction);
 		assertNull(state.getEnterAction());
 		assertSame(exitAction, state.getExitAction());
 		assertEquals(new Vector<SMExit>(), state.getExits());
@@ -55,7 +55,7 @@ public class SMStateTest {
 
 	@Test
 	public void testConstruct2() throws Exception {
-		state = new SMState(enterAction, exitAction);
+		state = new SMStateHandler(enterAction, exitAction);
 		assertSame(enterAction, state.getEnterAction());
 		assertSame(exitAction, state.getExitAction());
 		assertEquals(new Vector<SMExit>(), state.getExits());

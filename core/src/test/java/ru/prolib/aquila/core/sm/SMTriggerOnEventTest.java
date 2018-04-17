@@ -11,7 +11,7 @@ public class SMTriggerOnEventTest {
 	private SMTriggerRegistry registry;
 	private EventType type;
 	private Event event;
-	private SMState state;
+	private SMStateHandler state;
 	private SMInput in1;
 	private SMTriggerOnEvent trigger;
 
@@ -21,7 +21,7 @@ public class SMTriggerOnEventTest {
 		registry = control.createMock(SMTriggerRegistry.class);
 		type = new EventTypeImpl();
 		event = new EventImpl(type);
-		state = new SMState();
+		state = new SMStateHandler();
 		in1 = state.registerInput(null);
 		trigger = new SMTriggerOnEvent(type, in1);
 	}

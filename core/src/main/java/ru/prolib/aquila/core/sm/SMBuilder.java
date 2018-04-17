@@ -6,8 +6,8 @@ import java.util.Map;
 import ru.prolib.aquila.core.utils.KW;
 
 public class SMBuilder {
-	private final Map<String, SMState> id2state;
-	private final Map<KW<SMExit>, SMState> transitions;
+	private final Map<String, SMStateHandler> id2state;
+	private final Map<KW<SMExit>, SMStateHandler> transitions;
 	private String initialStateID;
 	
 	public SMBuilder() {
@@ -22,7 +22,7 @@ public class SMBuilder {
 	 * @param id - string ID of the state
 	 * @return this
 	 */
-	public SMBuilder addState(SMState state, String id) {
+	public SMBuilder addState(SMStateHandler state, String id) {
 		if ( id2state.containsKey(id) ) {
 			throw new IllegalArgumentException("State already exists: " + id);
 		}
@@ -51,7 +51,7 @@ public class SMBuilder {
 	 * @return this
 	 */
 	public SMBuilder addFinal(String srcState, String srcExit) {
-		transitions.put(new KW<SMExit>(getState(srcState).getExit(srcExit)), SMState.FINAL);
+		transitions.put(new KW<SMExit>(getState(srcState).getExit(srcExit)), SMStateHandler.FINAL);
 		return this;
 	}
 
@@ -76,11 +76,11 @@ public class SMBuilder {
 		return new SMStateMachine(getState(initialStateID), transitions);
 	}
 	
-	private SMState getState(String id) {
+	private SMStateHandler getState(String id) {
 		if ( id == null ) {
 			throw new NullPointerException("State ID cannot be null");
 		}
-		SMState state = id2state.get(id);
+		SMStateHandler state = id2state.get(id);
 		if ( state == null ) {
 			throw new IllegalArgumentException("State not exists: " + id);
 		}

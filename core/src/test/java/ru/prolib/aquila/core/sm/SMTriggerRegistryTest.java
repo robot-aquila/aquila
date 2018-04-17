@@ -11,7 +11,7 @@ public class SMTriggerRegistryTest {
 	private IMocksControl control;
 	private SMTriggerRegistry registry;
 	private SMStateMachine machine;
-	private SMState s1, s2;
+	private SMStateHandler s1, s2;
 	private SMInput in1;
 	private SMTrigger t1, t2;
 
@@ -25,8 +25,8 @@ public class SMTriggerRegistryTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		machine = control.createMock(SMStateMachine.class);
-		s1 = new SMState();
-		s2 = new SMState();
+		s1 = new SMStateHandler();
+		s2 = new SMStateHandler();
 		in1 = s1.registerInput(null);
 		registry = new SMTriggerRegistry(machine, s1);
 		t1 = control.createMock(SMTrigger.class);

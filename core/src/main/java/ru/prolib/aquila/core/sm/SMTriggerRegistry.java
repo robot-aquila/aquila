@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.utils.KW;
  */
 public class SMTriggerRegistry {
 	private final SMStateMachine machine;
-	private final SMState state;
+	private final SMStateHandler state;
 	private final Set<KW<SMTrigger>> triggers;
 	
 	/**
@@ -18,7 +18,7 @@ public class SMTriggerRegistry {
 	 * @param machine конечный автомат
 	 * @param state состояние владелец-триггеров
 	 */
-	public SMTriggerRegistry(SMStateMachine machine, SMState state) {
+	public SMTriggerRegistry(SMStateMachine machine, SMStateHandler state) {
 		super();
 		triggers = new LinkedHashSet<KW<SMTrigger>>();
 		this.machine = machine;

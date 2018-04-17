@@ -6,7 +6,7 @@ package ru.prolib.aquila.core.sm;
  * Дескриптор приема данных.
  */
 final public class SMInput {
-	private final SMState owner;
+	private final SMStateHandler owner;
 	private final SMInputAction action;
 	
 	/**
@@ -15,7 +15,7 @@ final public class SMInput {
 	 * @param owner состояние-владелец
 	 * @param action функция
 	 */
-	public SMInput(SMState owner, SMInputAction action) {
+	public SMInput(SMStateHandler owner, SMInputAction action) {
 		super();
 		this.owner = owner;
 		this.action = action;
@@ -37,7 +37,7 @@ final public class SMInput {
 	 * <p>
 	 * @return состояние, которому принадлежит данный вход
 	 */
-	public SMState getState() {
+	public SMStateHandler getState() {
 		return owner;
 	}
 

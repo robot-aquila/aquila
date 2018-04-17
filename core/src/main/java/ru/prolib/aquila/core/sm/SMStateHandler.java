@@ -3,13 +3,13 @@ package ru.prolib.aquila.core.sm;
 import java.util.*;
 
 /**
- * Заготовка состояния.
+ * A state handler class.
  */
-public class SMState {
+public class SMStateHandler {
 	/**
 	 * Финальное состояние.
 	 */
-	public static final SMState FINAL = new SMState() {
+	public static final SMStateHandler FINAL = new SMStateHandler() {
 		@Override public String toString() { return "[FinalState]"; }
 	};
 	private final Map<String, SMExit> exits;
@@ -23,7 +23,7 @@ public class SMState {
 	 * @param enterAction входное действие
 	 * @param exitAction выходное действие
 	 */
-	public SMState(SMEnterAction enterAction, SMExitAction exitAction) {
+	public SMStateHandler(SMEnterAction enterAction, SMExitAction exitAction) {
 		super();
 		inputs = new Vector<SMInput>();
 		exits = new LinkedHashMap<String, SMExit>();
@@ -37,7 +37,7 @@ public class SMState {
 	 * Данный конструктор используется для инициации состояния, не
 	 * предусматривающего входное и выходное действия.
 	 */
-	public SMState() {
+	public SMStateHandler() {
 		this(null, null);
 	}
 	
@@ -48,7 +48,7 @@ public class SMState {
 	 * предусмотрено входное действие, но не предусмотрено выходного.
 	 * @param enterAction входное действие
 	 */
-	public SMState(SMEnterAction enterAction) {
+	public SMStateHandler(SMEnterAction enterAction) {
 		this(enterAction, null);
 	}
 	
@@ -59,7 +59,7 @@ public class SMState {
 	 * не предусмотрено входного действия, но предусмотрено выходное.
 	 * @param exitAction выходное действие
 	 */
-	public SMState(SMExitAction exitAction) {
+	public SMStateHandler(SMExitAction exitAction) {
 		this(null, exitAction);
 	}
 	

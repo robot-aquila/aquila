@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.utils.KW;
 public class SMStateMachine_TriggersExampleTest {
 	private EventSystem es;
 	private EventDispatcher dispatcher;
-	private Map<KW<SMExit>, SMState> transitions;
+	private Map<KW<SMExit>, SMStateHandler> transitions;
 	private List<Event> events;
 	private EventType s1exit, s1skip, s2back, s2exit;
 	private SMStateMachine automat;
@@ -29,7 +29,7 @@ public class SMStateMachine_TriggersExampleTest {
 	 * из состояния служит поступление события типа s1exit. События типа s1skip
 	 * просто сохраняются в стеке событий для последующей проверки. 
 	 */
-	class State1 extends SMState implements SMInputAction, SMEnterAction {
+	class State1 extends SMStateHandler implements SMInputAction, SMEnterAction {
 		public State1() {
 			super();
 			setEnterAction(this);
@@ -58,7 +58,7 @@ public class SMStateMachine_TriggersExampleTest {
 	 * сигналом на возврат в первое тестовое состояние. Все события сохраняются
 	 * в стеке событий для последующей проверки.
 	 */
-	class State2 extends SMState implements SMInputAction, SMEnterAction {
+	class State2 extends SMStateHandler implements SMInputAction, SMEnterAction {
 		private final SMInput in1;
 		public State2() {
 			super();
@@ -92,11 +92,11 @@ public class SMStateMachine_TriggersExampleTest {
 		s1skip = dispatcher.createType("s1skip");
 		s2back = dispatcher.createType("s2back");
 		s2exit = dispatcher.createType("s2exit");
-		SMState s1 = new State1(), s2 = new State2();
-		transitions = new HashMap<KW<SMExit>, SMState>();
+		SMStateHandler s1 = new State1(), s2 = new State2();
+		transitions = new HashMap<KW<SMExit>, SMStateHandler>();
 		transitions.put(new KW<SMExit>(s1.getExit("EXIT")), s2);
 		transitions.put(new KW<SMExit>(s2.getExit("BACK")), s1);
-		transitions.put(new KW<SMExit>(s2.getExit("EXIT")), SMState.FINAL);
+		transitions.put(new KW<SMExit>(s2.getExit("EXIT")), SMStateHandler.FINAL);
 		automat = new SMStateMachine(s1, transitions);
 		automat.setDebug(true);
 	}
@@ -126,7 +126,7 @@ public class SMStateMachine_TriggersExampleTest {
 		Thread.sleep(1000L);
 		assertTrue(automat.started());
 		assertTrue(automat.finished());
-		assertSame(SMState.FINAL, automat.getCurrentState());
+		assertSame(SMStateHandler.FINAL, automat.getCurrentState());
 		
 		EventType exp[] = {
 				s1skip,

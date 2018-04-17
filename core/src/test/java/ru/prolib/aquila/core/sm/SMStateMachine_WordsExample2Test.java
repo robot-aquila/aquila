@@ -55,7 +55,7 @@ public class SMStateMachine_WordsExample2Test {
 	/**
 	 * Состояние ожидания начала слова.
 	 */
-	static class StartingWord extends SMState implements SMEnterAction {
+	static class StartingWord extends SMStateHandler implements SMEnterAction {
 		private final SMExit onWordStarted, onDataEnd;
 		private final Data data;
 		StartingWord(final Data data) {
@@ -84,7 +84,7 @@ public class SMStateMachine_WordsExample2Test {
 	/**
 	 * Состояние накопления символов слова.
 	 */
-	static class Word extends SMState implements SMEnterAction {
+	static class Word extends SMStateHandler implements SMEnterAction {
 		private final SMExit onClauseEnd, onWordEnd, onDataEnd;
 		private final Data data;
 		Word(final Data data) {
@@ -115,20 +115,20 @@ public class SMStateMachine_WordsExample2Test {
 	}
 	
 	private Data data;
-	private Map<KW<SMExit>, SMState> transitions;
+	private Map<KW<SMExit>, SMStateHandler> transitions;
 	private SMStateMachine automat;
 	
 	@Before
 	public void setUp() throws Exception {
-		transitions = new HashMap<KW<SMExit>, SMState>();
+		transitions = new HashMap<KW<SMExit>, SMStateHandler>();
 		data = new Data();
 		StartingWord sStartingWord = new StartingWord(data);
 		Word sWord = new Word(data);
 		transitions.put(new KW<SMExit>(sStartingWord.onWordStarted), sWord);
-		transitions.put(new KW<SMExit>(sStartingWord.onDataEnd), SMState.FINAL);
+		transitions.put(new KW<SMExit>(sStartingWord.onDataEnd), SMStateHandler.FINAL);
 		transitions.put(new KW<SMExit>(sWord.onWordEnd), sStartingWord);
-		transitions.put(new KW<SMExit>(sWord.onClauseEnd), SMState.FINAL);
-		transitions.put(new KW<SMExit>(sWord.onDataEnd), SMState.FINAL);
+		transitions.put(new KW<SMExit>(sWord.onClauseEnd), SMStateHandler.FINAL);
+		transitions.put(new KW<SMExit>(sWord.onDataEnd), SMStateHandler.FINAL);
 		automat = new SMStateMachine(sStartingWord, transitions);
 	}
 
@@ -139,7 +139,7 @@ public class SMStateMachine_WordsExample2Test {
 		automat.start();
 		assertTrue(automat.started());
 		assertTrue(automat.finished());
-		assertSame(SMState.FINAL, automat.getCurrentState());
+		assertSame(SMStateHandler.FINAL, automat.getCurrentState());
 		
 		List<String> expected = new Vector<String>();
 		expected.add("Thus");

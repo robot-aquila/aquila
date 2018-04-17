@@ -34,7 +34,7 @@ public class SMStateMachine_WordsExample1Test {
 	/**
 	 * Состояние ожидания начала слова.
 	 */
-	static class StartingWord extends SMState {
+	static class StartingWord extends SMStateHandler {
 		private final SMExit onWordStarted;
 		StartingWord(final Words words) {
 			super();
@@ -56,7 +56,7 @@ public class SMStateMachine_WordsExample1Test {
 	/**
 	 * Состояние накопления символов слова.
 	 */
-	static class Word extends SMState {
+	static class Word extends SMStateHandler {
 		private final SMExit onClauseEnd, onWordEnd;
 		Word(final Words words) {
 			super(new SMExitAction() {
@@ -83,7 +83,7 @@ public class SMStateMachine_WordsExample1Test {
 	}
 	
 	private Words words;
-	private Map<KW<SMExit>, SMState> transitions;
+	private Map<KW<SMExit>, SMStateHandler> transitions;
 	private SMStateMachine automat;
 	
 	@Before
@@ -118,7 +118,7 @@ public class SMStateMachine_WordsExample1Test {
 		}
 		assertTrue(automat.started());
 		assertTrue(automat.finished());
-		assertSame(SMState.FINAL, automat.getCurrentState());
+		assertSame(SMStateHandler.FINAL, automat.getCurrentState());
 		
 		List<String> expected = new Vector<String>();
 		expected.add("Thus");

@@ -6,12 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class SMExitTest {
-	private SMState state;
+	private SMStateHandler state;
 	private SMExit exit;
 
 	@Before
 	public void setUp() throws Exception {
-		state = new SMState();
+		state = new SMStateHandler();
 		exit = new SMExit(state, "foobar");
 	}
 

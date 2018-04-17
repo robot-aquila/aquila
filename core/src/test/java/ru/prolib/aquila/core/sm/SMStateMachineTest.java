@@ -17,8 +17,8 @@ import ru.prolib.aquila.core.utils.KW;
  */
 public class SMStateMachineTest {
 	private IMocksControl control; 
-	private Map<KW<SMExit>, SMState> transitions;
-	private SMState initState, state2;
+	private Map<KW<SMExit>, SMStateHandler> transitions;
+	private SMStateHandler initState, state2;
 	private SMInput in1, in2;
 	private SMExit exit1, exit2;
 	private SMStateMachine automat;
@@ -34,9 +34,9 @@ public class SMStateMachineTest {
 		exit1 = exit2 = null;
 		in1 = in2 = null;
 		control = createStrictControl();
-		initState = new SMState();
-		state2 = new SMState();
-		transitions = new HashMap<KW<SMExit>, SMState>();
+		initState = new SMStateHandler();
+		state2 = new SMStateHandler();
+		transitions = new HashMap<KW<SMExit>, SMStateHandler>();
 		automat = new SMStateMachine(initState, transitions);
 		automat.setDebug(true);
 	}
