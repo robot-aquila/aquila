@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import ru.prolib.aquila.core.sm.SMExit;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-public class SHDropMarketSignal extends BasicState {
+public class SHDropMarketSignal extends BasicStateHandler {
 	public static final String EOK = Const.E_OK;
 	private static final Logger logger;
 	
@@ -16,7 +16,7 @@ public class SHDropMarketSignal extends BasicState {
 	
 	private final DataServiceLocator serviceLocator;
 
-	public SHDropMarketSignal(RobotData data, DataServiceLocator serviceLocator) {
+	public SHDropMarketSignal(RobotState data, DataServiceLocator serviceLocator) {
 		super(data);
 		this.serviceLocator = serviceLocator;
 		registerExit(EOK);

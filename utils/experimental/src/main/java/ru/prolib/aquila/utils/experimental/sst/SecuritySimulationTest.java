@@ -73,7 +73,7 @@ import ru.prolib.aquila.utils.experimental.sst.robot.DataServiceLocator;
 import ru.prolib.aquila.utils.experimental.sst.robot.Robot;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotBuilder;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotConfig;
-import ru.prolib.aquila.utils.experimental.sst.robot.RobotData;
+import ru.prolib.aquila.utils.experimental.sst.robot.RobotState;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotDataSliceTracker;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotStateListener;
 import ru.prolib.aquila.utils.experimental.sst.robot.RobotStateListenerStub;
@@ -321,7 +321,7 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 	}
 
 	private void createRobotUI() {
-		RobotData robotData = robot.getData();
+		RobotState robotData = robot.getData();
 		RobotDataSliceTracker rdsTracker = robotData.getDataSliceTracker();
 		SDP2DataSlice<SDP2Key> slice = rdsTracker.getDataSlice();
 		ObservableTSeries<Instant> categories = slice.getIntervalStartSeries();

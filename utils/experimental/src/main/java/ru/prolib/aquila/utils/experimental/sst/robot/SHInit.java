@@ -6,12 +6,12 @@ import ru.prolib.aquila.core.sm.SMInputAction;
 import ru.prolib.aquila.core.sm.SMTriggerOnEvent;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-public class SInit extends BasicState implements SMInputAction {
+public class SHInit extends BasicStateHandler implements SMInputAction {
 	public static final String EOK = Const.E_OK;
 	
 	private final SMInput in;
 	
-	public SInit(RobotData data) {
+	public SHInit(RobotState data) {
 		super(data);
 		registerExit(EOK);
 		in = registerInput(this);

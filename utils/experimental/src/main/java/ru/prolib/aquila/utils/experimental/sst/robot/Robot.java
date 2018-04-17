@@ -4,9 +4,9 @@ import ru.prolib.aquila.core.sm.SMStateMachine;
 
 public class Robot {
 	private final SMStateMachine automat;
-	private final RobotData data;
+	private final RobotState data;
 	
-	public Robot(SMStateMachine automat, RobotData data) {
+	public Robot(SMStateMachine automat, RobotState data) {
 		this.automat = automat;
 		this.data = data;
 	}
@@ -15,7 +15,7 @@ public class Robot {
 		return automat;
 	}
 	
-	public RobotData getData() {
+	public RobotState getData() {
 		return data;
 	}
 

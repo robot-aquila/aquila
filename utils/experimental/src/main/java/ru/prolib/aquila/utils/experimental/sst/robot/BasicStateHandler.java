@@ -9,12 +9,12 @@ import ru.prolib.aquila.core.sm.SMTrigger;
 import ru.prolib.aquila.core.sm.SMTriggerOnEvent;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-abstract public class BasicState extends SMStateHandler implements SMEnterAction {
+abstract public class BasicStateHandler extends SMStateHandler implements SMEnterAction {
 	public static final String EER = Const.E_ERROR;
 	public static final String EBR = Const.E_BREAK;
-	protected final RobotData data;
+	protected final RobotState data;
 	
-	public BasicState(RobotData data) {
+	public BasicStateHandler(RobotState data) {
 		this.data = data;
 		setEnterAction(this);
 		registerExit(EER);

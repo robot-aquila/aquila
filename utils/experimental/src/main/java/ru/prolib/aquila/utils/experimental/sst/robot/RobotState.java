@@ -13,7 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.utils.experimental.sst.msig.BreakSignal;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignal;
 
-public class RobotData {
+public class RobotState {
 	private final EditableTerminal terminal;
 	private final RobotConfig config;
 	private final BreakSignal breakSignal;
@@ -21,7 +21,7 @@ public class RobotData {
 	private RobotDataSliceTracker dataSliceTracker;
 	private RobotStateListener stateListener;
 	
-	public RobotData(EditableTerminal terminal, RobotConfig config, BreakSignal breakSignal) {
+	public RobotState(EditableTerminal terminal, RobotConfig config, BreakSignal breakSignal) {
 		this.terminal = terminal;
 		this.config = config;
 		this.breakSignal = breakSignal;

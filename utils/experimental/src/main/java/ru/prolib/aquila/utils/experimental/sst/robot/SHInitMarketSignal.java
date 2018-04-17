@@ -9,7 +9,7 @@ import ru.prolib.aquila.utils.experimental.sst.msig.sp.CMASignalProviderTS;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataSlice;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2Key;
 
-public class SHInitMarketSignal extends BasicState {
+public class SHInitMarketSignal extends BasicStateHandler {
 	public static final String EOK = Const.E_OK;
 	private static final Logger logger;
 	
@@ -19,7 +19,7 @@ public class SHInitMarketSignal extends BasicState {
 	
 	private final DataServiceLocator serviceLocator;
 
-	public SHInitMarketSignal(RobotData data, DataServiceLocator serviceLocator) {
+	public SHInitMarketSignal(RobotState data, DataServiceLocator serviceLocator) {
 		super(data);
 		this.serviceLocator = serviceLocator;
 		registerExit(EOK);

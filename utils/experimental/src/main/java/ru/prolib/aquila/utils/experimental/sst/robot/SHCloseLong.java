@@ -14,18 +14,18 @@ import ru.prolib.aquila.core.sm.SMExit;
 import ru.prolib.aquila.core.sm.SMExitAction;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-public class SCloseLong extends BasicState implements SMExitAction {
+public class SHCloseLong extends BasicStateHandler implements SMExitAction {
 	public static final String EOK = Const.E_OK;
 	public static final String EOPN = Const.E_OPEN;
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SCloseLong.class);
+		logger = LoggerFactory.getLogger(SHCloseLong.class);
 	}
 	
 	private Order order;
 
-	public SCloseLong(RobotData data) {
+	public SHCloseLong(RobotState data) {
 		super(data);
 		registerExit(EOK);
 		registerExit(EOPN);

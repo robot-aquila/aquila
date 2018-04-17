@@ -11,19 +11,19 @@ import ru.prolib.aquila.core.sm.SMInputAction;
 import ru.prolib.aquila.core.sm.SMTriggerOnEvent;
 import ru.prolib.aquila.core.sm.SMTriggerRegistry;
 
-public class SBullWaitSig extends BasicState implements SMExitAction, SMInputAction {
+public class SHBullWaitSig extends BasicStateHandler implements SMExitAction, SMInputAction {
 	public static final String EOPN = Const.S_OPEN;
 	public static final String ECLS = Const.S_CLOSE;
 	
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(SBullWaitSig.class);
+		logger = LoggerFactory.getLogger(SHBullWaitSig.class);
 	}
 	
 	private final SMInput in;
 
-	public SBullWaitSig(RobotData data) {
+	public SHBullWaitSig(RobotState data) {
 		super(data);
 		registerExit(EOPN);
 		registerExit(ECLS);
