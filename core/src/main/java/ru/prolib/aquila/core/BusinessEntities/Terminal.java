@@ -110,6 +110,13 @@ public interface Terminal extends Scheduler, BusinessEntity {
 	 * @param symbol - the symbol
 	 */
 	public void subscribe(Symbol symbol);
+	
+	/**
+	 * Remove subscription on the security data.
+	 * <p>
+	 * @param symbol - the symbol to unsubscribe
+	 */
+	public void unsubscribe(Symbol symbol);
 
 	/**
 	 * Test that order exists.

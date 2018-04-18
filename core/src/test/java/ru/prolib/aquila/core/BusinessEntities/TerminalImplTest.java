@@ -841,6 +841,15 @@ public class TerminalImplTest {
 	}
 	
 	@Test
+	public void testUnsubscribe() {
+		control.replay();
+
+		terminalWithMocks.unsubscribe(symbol1);
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testGetCurrentTime() {
 		Instant time = Instant.now();
 		expect(schedulerMock.getCurrentTime()).andReturn(time);

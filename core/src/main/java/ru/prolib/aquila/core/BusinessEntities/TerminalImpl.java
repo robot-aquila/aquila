@@ -454,6 +454,11 @@ public class TerminalImpl implements EditableTerminal {
 	}
 	
 	@Override
+	public void unsubscribe(Symbol symbol) {
+		// Just a stub method at the moment
+	}
+	
+	@Override
 	public Instant getCurrentTime() {
 		return scheduler.getCurrentTime();
 	}
