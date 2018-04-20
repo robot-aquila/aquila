@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.EditableTSeries;
@@ -21,15 +23,36 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	static class Entry {
 		private final TSeries<?> readable;
 		private final ObservableTSeries<?> observable;
+		private final EditableTSeries<?> editable;
+		private final boolean closeable;
 		
-		Entry(ObservableTSeriesImpl<?> series) {
+		Entry(ObservableTSeriesImpl<?> series, boolean closeable) {
 			this.readable = series;
 			this.observable = series;
+			this.editable = series;
+			this.closeable = closeable;
+		}
+		
+		Entry(ObservableTSeriesImpl<?> series) {
+			this(series, true);
+		}
+		
+		Entry(EditableTSeries<?> series, boolean closeable) {
+			this.readable = series;
+			this.observable = null;
+			this.editable = series;
+			this.closeable = closeable;
+		}
+		
+		Entry(EditableTSeries<?> series) {
+			this(series, true);
 		}
 		
 		Entry(TSeries<?> series) {
 			this.readable = series;
 			this.observable = null;
+			this.editable = null;
+			this.closeable = false;
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -42,8 +65,21 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 			return (ObservableTSeries<T>) observable;
 		}
 		
+		@SuppressWarnings("unchecked")
+		public <T> EditableTSeries<T> getEditableSeries() {
+			return (EditableTSeries<T>) editable;
+		}
+		
 		public boolean isObservable() {
 			return observable != null;
+		}
+		
+		public boolean isEditable() {
+			return editable != null;
+		}
+		
+		public boolean isCloseable() {
+			return closeable;
 		}
 		
 		@Override
@@ -55,7 +91,12 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 				return false;
 			}
 			Entry o = (Entry) other;
-			return o.readable == readable && o.observable == observable;
+			return new EqualsBuilder()
+				.append(o.readable, readable)
+				.append(o.observable, observable)
+				.append(o.editable, editable)
+				.append(o.closeable, closeable)
+				.isEquals();
 		}
 		
 	}
@@ -139,15 +180,30 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 	
 	@Override
 	public synchronized <T> void registerRawSeries(TSeries<T> series)
-			throws IllegalStateException
+			throws IllegalStateException, IllegalArgumentException
 	{
-		String seriesID = series.getId();
-		Entry entry = entries.get(seriesID);
-		if ( entry != null ) {
-			throw new IllegalStateException("Series already exists: " + seriesID);
-		}
-		entry = new Entry(series);
-		entries.put(seriesID, entry);
+		registerSeries(series);
+	}
+	
+	@Override
+	public synchronized <T> void registerRawSeries(TSeries<T> series, String seriesID)
+			throws IllegalStateException, IllegalArgumentException
+	{
+		registerSeries(series, seriesID);
+	}
+	
+	@Override
+	public synchronized <T> void registerRawSeries(EditableTSeries<T> series)
+			throws IllegalStateException, IllegalArgumentException
+	{
+		registerSeries(series);
+	}
+	
+	@Override
+	public synchronized <T> void registerRawSeries(EditableTSeries<T> series, String seriesID)
+			throws IllegalStateException, IllegalArgumentException
+	{
+		registerSeries(series, seriesID);
 	}
 	
 	@Override
@@ -188,6 +244,48 @@ public class SDP2DataSliceImpl<K extends SDP2Key> implements SDP2DataSlice<K> {
 			throw new IllegalStateException("Series not exists: " + seriesID);
 		}
 		return entry.isObservable();
+	}
+
+	@Override
+	public synchronized void close() {
+		for ( Entry x : entries.values() ) {
+			if ( x.isCloseable() ) {
+				x.getEditableSeries().clear();
+			}
+		}
+		entries.clear();
+	}
+	
+	private void registerSeries(TSeries<?> series) {
+		registerSeries(series, series.getId());
+	}
+	
+	private void registerSeries(TSeries<?> series, String seriesID) {
+		checkItCanBeAdded(series, seriesID);
+		Entry entry = new Entry((TSeries<?>) series);
+		entries.put(seriesID, entry);
+	}
+	
+	private void registerSeries(EditableTSeries<?> series) {
+		registerSeries(series, series.getId());
+	}
+	
+	private void registerSeries(EditableTSeries<?> series, String seriesID) {
+		checkItCanBeAdded(series, seriesID);
+		Entry entry = new Entry((EditableTSeries<?>) series);
+		entries.put(seriesID, entry);
+	}
+	
+	private void checkItCanBeAdded(TSeries<?> series, String seriesID) {
+		ZTFrame seriesTF = series.getTimeFrame(), thisTF = key.getTimeFrame();
+		if ( ! thisTF.equals(seriesTF) ) {
+			throw new IllegalArgumentException("Timeframe mismatch: SeriesID: " + seriesID
+					+ ", Expected: " + thisTF + ", Actual: " + seriesTF);
+		}
+		Entry entry = entries.get(seriesID);
+		if ( entry != null ) {
+			throw new IllegalStateException("Series already exists: " + seriesID);
+		}
 	}
 
 }

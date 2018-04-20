@@ -61,7 +61,7 @@ public class SDP2DataProviderImplTest {
 	}
 	
 	@Test
-	public void testGetSlice_ExistingSlice() {
+	public void testGetSlice() {
 		slicesStub.put(new SDP2Key(ZTFrame.M15, symbol1), sliceMock1);
 		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
 		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock3);
@@ -71,16 +71,62 @@ public class SDP2DataProviderImplTest {
 		assertSame(sliceMock3, provider.getSlice(new SDP2Key(ZTFrame.M1)));
 	}
 	
+	@Test (expected=IllegalArgumentException.class)
+	public void testGetSlice_ThrowsIfSliceNotExist() {
+		provider.getSlice(new SDP2Key(ZTFrame.M1));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCreateSlice_ThrowsIfSliceAlreadyExists() {
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock3);
+		
+		provider.createSlice(new SDP2Key(ZTFrame.M1));
+	}
+	
 	@Test
-	public void testGetSlice_NewSlice() {
+	public void testCreateSlice() {
 		SDP2Key key = new SDP2Key(ZTFrame.D1, symbol2);
 		expect(factoryMock1.produce(key)).andReturn(sliceMock1);
 		control.replay();
 		
-		assertSame(sliceMock1, provider.getSlice(key));
+		assertSame(sliceMock1, provider.createSlice(key));
 		
 		control.verify();
 		assertSame(sliceMock1, slicesStub.get(key));
+	}
+
+	@Test
+	public void testPurgeSlice_SkipIfSliceNotExists() {
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol1), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
+		control.replay();
+
+		provider.purgeSlice(new SDP2Key(ZTFrame.D1MSK));
+		
+		control.verify();
+		Map<SDP2Key, SDP2DataSlice<SDP2Key>> expected = new LinkedHashMap<>();
+		expected.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
+		expected.put(new SDP2Key(ZTFrame.M10, symbol1), sliceMock3);
+		expected.put(new SDP2Key(ZTFrame.M1), sliceMock4);
+		assertEquals(expected, slicesStub);
+	}
+	
+	@Test
+	public void testPurgeSlice() {
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
+		slicesStub.put(new SDP2Key(ZTFrame.M10, symbol1), sliceMock3);
+		slicesStub.put(new SDP2Key(ZTFrame.M1), sliceMock4);
+		sliceMock3.close();
+		control.replay();
+
+		provider.purgeSlice(new SDP2Key(ZTFrame.M10, symbol1));
+		
+		control.verify();
+		Map<SDP2Key, SDP2DataSlice<SDP2Key>> expected = new LinkedHashMap<>();
+		expected.put(new SDP2Key(ZTFrame.M10, symbol2), sliceMock2);
+		expected.put(new SDP2Key(ZTFrame.M1), sliceMock4);
+		assertEquals(expected, slicesStub);
 	}
 	
 	@Test

@@ -13,6 +13,8 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.ZTFrame;
 
 /**
+ * Experimental feature!
+ * <p>
  * Data provider organizes an access to series data using of data slices.
  * Data slice is a set of series associated with timeframe and symbol (optional).
  * This implementation is about managing the slices but not managing series.
@@ -53,13 +55,33 @@ public class SDP2DataProviderImpl<T extends SDP2Key> implements SDP2DataProvider
 	public SDP2DataSliceFactory<T> getFactory() {
 		return factory;
 	}
+	
+
+	@Override
+	public synchronized SDP2DataSlice<T> createSlice(T key) {
+		SDP2DataSlice<T> slice = slices.get(key);
+		if ( slice != null ) {
+			throw new IllegalArgumentException("Slice already exists: " + key);
+		}
+		slice = factory.produce(key);
+		slices.put(key, slice);
+		return slice;
+	}
+
+	@Override
+	public synchronized void purgeSlice(T key) {
+		SDP2DataSlice<T> slice = slices.remove(key);
+		if ( slice != null ) {
+			slice.close();
+		}
+	}
 
 	@Override
 	public synchronized SDP2DataSlice<T> getSlice(T key) {
 		SDP2DataSlice<T> slice = slices.get(key);
 		if ( slice == null ) {
-			slice = factory.produce(key);
-			slices.put(key, slice);
+			throw new IllegalArgumentException("Slice not exists: " + key);
+
 		}
 		return slice;
 	}

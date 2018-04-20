@@ -14,8 +14,28 @@ public interface SDP2DataProvider<T extends SDP2Key> {
 	 * <p>
 	 * @param key - key of slice
 	 * @return data slice
+	 * @throws IllegalArgumentException - if slice is not exists
 	 */
 	SDP2DataSlice<T> getSlice(T key);
+	
+	/**
+	 * Create a new slice.
+	 * <p>
+	 * @param key - key of slice
+	 * @return data slice
+	 * @throws IllegalArgumentException - if slice already exists
+	 */
+	SDP2DataSlice<T> createSlice(T key);
+	
+	/**
+	 * Remove existing slice.
+	 * <p>
+	 * This method has no effect if slice does not exists.  If it exists then purge will remove
+	 * the slice from the internal registry and call {@link SDP2DataSlice#close()} method.
+	 * <p>
+	 * @param key - key of slice to purge
+	 */
+	void purgeSlice(T key);
 	
 	/**
 	 * Get slices tied to the symbol.

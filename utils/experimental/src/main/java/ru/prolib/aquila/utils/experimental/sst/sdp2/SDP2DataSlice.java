@@ -86,9 +86,55 @@ public interface SDP2DataSlice<K extends SDP2Key> {
 	/**
 	 * Register series.
 	 * <p>
-	 * @param series - the series instance. This series may be not related to common storage.
-	 * @throws IllegalStateException if series already exists
+	 * Series registered with this method will not be closed on slice closing.
+	 * <p>
+	 * @param series - the series instance. This series may be not linked to shared storage.
+	 * @throws IllegalStateException - if series already exists
+	 * @throws IllegalArgumentException - the series is of different time frame
 	 */
 	<T> void registerRawSeries(TSeries<T> series);
+	
+	/**
+	 * Register series.
+	 * <p>
+	 * Works same as {@link #registerRawSeries(TSeries)} but allows to override series ID.
+	 * <p>
+	 * @param series - series instance
+	 * @param seriesID - series ID to use in scope of the data slice
+	 * @throws IllegalStateException - if series already exists
+	 * @throws IllegalArgumentException - the series is of different time frame
+	 */
+	<T> void registerRawSeries(TSeries<T> series, String seriesID);
+	
+	/**
+	 * Register series.
+	 * <p>
+	 * Series registered with this method will be marked as closeable and will be closed on slice closing.
+	 * <p>
+	 * @param series - the series instance. This series may be not linked to shared storage.
+	 * @throws IllegalStateException - if series already exists
+	 * @throws IllegalArgumentException - the series is of different time frame
+	 */
+	<T> void registerRawSeries(EditableTSeries<T> series);
+	
+	/**
+	 * Register series.
+	 * <p>
+	 * Works same as {@link #registerRawSeries(EditableTSeries)} but allows to override series ID.
+	 * <p>
+	 * @param series - series instance
+	 * @param seriesID - series ID to use in scope of the data slice
+	 * @throws IllegalStateException - if series already exists
+	 * @throws IllegalArgumentException - the series is of different time frame
+	 */
+	<T> void registerRawSeries(EditableTSeries<T> series, String seriesID);
+	
+	/**
+	 * Close this data slice.
+	 * <p>
+	 * Closing a slice removes all registered series from the slice internal registry.
+	 * All series which marked as "closeable" will be closed.
+	 */
+	void close();
 
 }
