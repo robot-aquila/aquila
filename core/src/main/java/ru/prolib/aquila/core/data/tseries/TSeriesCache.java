@@ -18,5 +18,10 @@ public interface TSeriesCache {
 	 * @param indexFrom - all values from this index (inclusive) will be marked as invalid.
 	 */
 	void invalidate(int indexFrom);
+	
+	/**
+	 * Shrink the cache to size which is actually utilized.
+	 */
+	void shrink();
 
 }

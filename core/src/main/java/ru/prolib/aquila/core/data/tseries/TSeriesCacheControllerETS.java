@@ -107,7 +107,7 @@ public class TSeriesCacheControllerETS<T> implements EditableTSeries<T> {
 		series.clear();
 		synchronized ( this ) {
 			for ( TSeriesCache cache : caches ) {
-				cache.invalidate(0);
+				cache.invalidate(0); // TODO: replace to cache#trim
 			}
 		}
 	}

@@ -161,6 +161,20 @@ public class QEMATSeriesFast implements TSeries<CDecimal>, TSeriesCache {
 			unlock();
 		}
 	}
+	
+	@Override
+	public void shrink() {
+		lock();
+		try {
+			if ( lastValidIndex < 0 ) {
+				cache.clear();
+			} else if ( lastValidIndex < cache.size() - 1 ) {
+				cache.subList(lastValidIndex + 1, cache.size()).clear();
+			}
+		} finally {
+			unlock();
+		}
+	}
 
 	public int getLastValidIndex() {
 		lock();

@@ -5,6 +5,7 @@ import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -318,6 +319,78 @@ public class QEMATSeriesFastTest {
 			String msg = "At#" + i;
 			assertEquals(msg, fr.expected, service.get(i));
 		}
+	}
+	
+	@Test
+	public void testShrink_ClearAllIfNoValidData() throws Exception {
+		for ( int i = 0; i < 10; i ++ ) {
+			FR fr = fix_qema5[i];
+			sourceStub.set(fr.time, fr.value);
+		}
+		service.get(); // force recalculate
+		service.invalidate(0);
+		
+		service.shrink();
+		
+		assertEquals(-1, service.getLastValidIndex());
+		assertEquals(new ArrayList<>(), cacheStub);
+	}
+	
+	@Test
+	public void testShrink_SkipIfNothingToDo() throws Exception {
+		for ( int i = 0; i < 10; i ++ ) {
+			FR fr = fix_qema5[i];
+			sourceStub.set(fr.time, fr.value);
+		}
+		service.get(); // force recalculate
+		service.invalidate(10);
+
+		service.shrink();
+		
+		assertEquals(9, service.getLastValidIndex());
+		List<CDecimal> expected = new ArrayList<>();
+		for ( int i = 0; i < 10; i ++ ) {
+			expected.add(fix_qema5[i].expected);
+		}
+		assertEquals(expected, cacheStub);
+	}
+
+	@Test
+	public void testShrink_PartiallyShrunkCase1() throws Exception {
+		for ( int i = 0; i < 10; i ++ ) {
+			FR fr = fix_qema5[i];
+			sourceStub.set(fr.time, fr.value);
+		}
+		service.get(); // force recalculate
+		service.invalidate(5);
+		
+		service.shrink();
+
+		assertEquals(4, service.getLastValidIndex());
+		List<CDecimal> expected = new ArrayList<>();
+		for ( int i = 0; i < 5; i ++ ) {
+			expected.add(fix_qema5[i].expected);
+		}
+		assertEquals(expected, cacheStub);
+	}
+	
+	@Test
+	public void testShrink_PartiallyShrunkCase2() throws Exception {
+		for ( int i = 0; i < 10; i ++ ) {
+			FR fr = fix_qema5[i];
+			sourceStub.set(fr.time, fr.value);
+		}
+		service.get(); // force recalculate
+		service.invalidate(1);
+		
+		service.shrink();
+
+		assertEquals(0, service.getLastValidIndex());
+		List<CDecimal> expected = new ArrayList<>();
+		for ( int i = 0; i < 1; i ++ ) {
+			expected.add(fix_qema5[i].expected);
+		}
+		assertEquals(expected, cacheStub);
 	}
 
 }
