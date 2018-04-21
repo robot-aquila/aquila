@@ -163,7 +163,9 @@ public class TSeriesCacheControllerETSTest {
 		cachesStub.add(cacheMock2);
 		seriesMock.clear();
 		cacheMock1.invalidate(0);
+		cacheMock1.shrink();
 		cacheMock2.invalidate(0);
+		cacheMock2.shrink();
 		control.replay();
 		
 		service.clear();
