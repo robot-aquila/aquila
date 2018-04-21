@@ -32,7 +32,7 @@ public class SHInitMarketSignal extends BasicStateHandler {
 		// Initialize data slice
 		RobotConfig config = data.getConfig();
 		SDP2Key sliceKey = new SDP2Key(config.getTFrame(), config.getSymbol());
-		SDP2DataSlice<SDP2Key> dataSlice = serviceLocator.getSliceDataRegistry().getSlice(sliceKey);
+		SDP2DataSlice<SDP2Key> dataSlice = serviceLocator.getSliceDataRegistry().createSlice(sliceKey);
 		RobotDataSliceTracker sliceTracker = new RobotDataSliceTracker(dataSlice, config.getAccount(), data.getTerminal());
 		sliceTracker.initialize(serviceLocator.getHistoricalDataStorage());
 		sliceTracker.startDataTracking();
