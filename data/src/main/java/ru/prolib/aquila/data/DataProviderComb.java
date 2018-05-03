@@ -1,4 +1,4 @@
-package ru.prolib.aquila.utils.experimental.sst;
+package ru.prolib.aquila.data;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
@@ -9,15 +9,17 @@ import ru.prolib.aquila.core.BusinessEntities.MDUpdatableStreamContainer;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.data.L1UpdateSource;
-import ru.prolib.aquila.data.SymbolUpdateSource;
 
-public class DataProviderImpl implements DataProvider {
+/**
+ * Combined data provider. This class combines three sources: symbol updates,
+ * L1 data updates and underlying data provider.
+ */
+public class DataProviderComb implements DataProvider {
 	private final SymbolUpdateSource symbolUpdateSource;
 	private final L1UpdateSource l1UpdateSource;
 	private final DataProvider parent;
 	
-	public DataProviderImpl(SymbolUpdateSource symbolUpdateSource,
+	public DataProviderComb(SymbolUpdateSource symbolUpdateSource,
 			L1UpdateSource l1UpdateSource, DataProvider parent)
 	{
 		this.symbolUpdateSource = symbolUpdateSource;
