@@ -11,12 +11,8 @@ import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.utils.PriceScaleDB;
 import ru.prolib.aquila.core.utils.PriceScaleDBLazy;
 import ru.prolib.aquila.core.utils.PriceScaleDBTB;
-import ru.prolib.aquila.data.DataProviderComb;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.MDStorage;
-import ru.prolib.aquila.probe.datasim.L1UpdateSourceImpl;
-import ru.prolib.aquila.probe.datasim.L1UpdateSourceSATImpl;
-import ru.prolib.aquila.probe.datasim.SymbolUpdateSourceImpl;
 import ru.prolib.aquila.qforts.impl.QFBuilder;
 import ru.prolib.aquila.qforts.impl.QFortsEnv;
 import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalRegistry;
@@ -25,10 +21,9 @@ import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataProvider;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataProviderImpl;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2DataSliceFactoryImpl;
 import ru.prolib.aquila.utils.experimental.sst.sdp2.SDP2Key;
+import ru.prolib.aquila.web.utils.WUDataFactory;
 import ru.prolib.aquila.web.utils.finam.data.FinamData;
-import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
-import ru.prolib.aquila.web.utils.moex.MoexSymbolUpdateReaderFactory;
 
 public class DataServiceLocator {
 	private final MarketSignalRegistry msigRegistry = new MarketSignalRegistryImpl();
@@ -127,11 +122,8 @@ public class DataServiceLocator {
 	}
 	
 	private DataProvider createDataProvider() {
-		File root = getDataRootDirectory();
-		return new DataProviderComb(
-				new SymbolUpdateSourceImpl(scheduler, new MoexSymbolUpdateReaderFactory(root)),
-				new L1UpdateSourceSATImpl(new L1UpdateSourceImpl(getScheduler(), new FinamL1UpdateReaderFactory(root, getPriceScaleDB()))),
-				qfBuilder.buildDataProvider());
+		return new WUDataFactory().decorateForSymbolAndL1DataReplayFM(qfBuilder.buildDataProvider(),
+				getScheduler(), getDataRootDirectory(), getPriceScaleDB());
 	}
 	
 	private EditableTerminal createTerminal() {
