@@ -1,5 +1,7 @@
 package ru.prolib.aquila.data;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
@@ -25,6 +27,18 @@ public class DataProviderComb implements DataProvider {
 		this.symbolUpdateSource = symbolUpdateSource;
 		this.l1UpdateSource = l1UpdateSource;
 		this.parent = parent;
+	}
+	
+	public SymbolUpdateSource getSymbolUpdateSource() {
+		return symbolUpdateSource;
+	}
+	
+	public L1UpdateSource getL1UpdateSource() {
+		return l1UpdateSource;
+	}
+	
+	public DataProvider getParentDataProvider() {
+		return parent;
 	}
 
 	@Override
@@ -72,6 +86,22 @@ public class DataProviderComb implements DataProvider {
 	@Override
 	public void cancelOrder(EditableOrder order) throws OrderException {
 		parent.cancelOrder(order);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != DataProviderComb.class ) {
+			return false;
+		}
+		DataProviderComb o = (DataProviderComb) other;
+		return new EqualsBuilder()
+			.append(o.symbolUpdateSource, symbolUpdateSource)
+			.append(o.l1UpdateSource, l1UpdateSource)
+			.append(o.parent, parent)
+			.isEquals();
 	}
 
 }
