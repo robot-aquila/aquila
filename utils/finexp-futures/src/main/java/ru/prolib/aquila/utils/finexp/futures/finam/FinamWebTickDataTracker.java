@@ -186,6 +186,8 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 			logger.error("The data storage exceptions should be investigated. Initiate global exit.", e);
 			globalExit.countDown();
 			return;
+		} catch ( Throwable e ) {
+			logger.error("Unhandled exception detected", e);
 		} finally {
 			IOUtils.closeQuietly(facade);
 			IOUtils.closeQuietly(moex);

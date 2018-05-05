@@ -93,6 +93,8 @@ public class MoexWebContractTracker implements Runnable, Closeable {
 			} catch ( DataStorageException e ) {
 				logErrorAndGlobalExit("The task stopped because of local storage error: ", e);
 				return;
+			} catch ( Throwable e ) {
+				logger.error("Unhandled exception detected", e);
 			}
 			
 			currentTime = scheduler.getCurrentTime();
