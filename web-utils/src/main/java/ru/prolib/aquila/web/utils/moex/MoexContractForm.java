@@ -100,6 +100,8 @@ public class MoexContractForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public List<String> getActiveFuturesList() throws WUWebPageException {
+		// TODO: Здесь бы оптимизировать, что бы сократить количество
+		// повторений в случае ошибок. Слишком медленно список составляет.
 		List<String> list = new ArrayList<>();
 		openDerivativesSearchPage();
 		list.addAll(dump(scanFuturesTableForSymbols()));
