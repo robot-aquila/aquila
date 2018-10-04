@@ -29,7 +29,7 @@ public class MoexContractFormUtils {
 		mapContract(MoexContractField.INTRADAY_FEE, "Intraday (scalper) fee, RUB");
 		mapContract(MoexContractField.NEGOTIATION_FEE, "Negotiated trade fee, RUB");
 		mapContract(MoexContractField.EXERCISE_FEE, "Contract exercise fee, RUB");
-		mapContract(MoexContractField.INITIAL_MARGIN, "Initial Margin (IM, rub)");
+		mapContract(MoexContractField.INITIAL_MARGIN, "First level of Initial margin concentration limit*");
 		mapContract(MoexContractField.INITIAL_MARGIN_DATE, "IM value on");
 		mapContract(MoexContractField.FX_INTRADAY_CLEARING, "FX for intraday clearing");
 		mapContract(MoexContractField.FX_EVENING_CLEARING, "FX for evening clearing");

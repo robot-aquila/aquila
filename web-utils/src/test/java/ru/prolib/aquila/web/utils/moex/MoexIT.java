@@ -103,7 +103,7 @@ public class MoexIT {
 		expectedKeys.add("Intraday (scalper) fee, RUB");
 		expectedKeys.add("Negotiated trade fee, RUB");
 		expectedKeys.add("Contract exercise fee, RUB");
-		expectedKeys.add("Initial Margin (IM, rub)");
+		expectedKeys.add("First level of Initial margin concentration limit*");
 		expectedKeys.add("IM value on");
 		expectedKeys.add("FX for intraday clearing");
 		expectedKeys.add("FX for evening clearing");
