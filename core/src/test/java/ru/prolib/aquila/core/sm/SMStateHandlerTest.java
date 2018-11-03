@@ -10,7 +10,7 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SMStateTest {
+public class SMStateHandlerTest {
 	private IMocksControl control;
 	private SMInputAction inputAction1, inputAction2;
 	private SMEnterAction enterAction;
@@ -118,6 +118,11 @@ public class SMStateTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testGetExit_ThrowsIfNotExists() throws Exception {
 		state.getExit("zulu42");
+	}
+	
+	@Test
+	public void testGetExit_ReturnsNullIfNullID() throws Exception {
+		assertNull(state.getExit(null));
 	}
 	
 }

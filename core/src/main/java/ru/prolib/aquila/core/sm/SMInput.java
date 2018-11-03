@@ -5,7 +5,7 @@ package ru.prolib.aquila.core.sm;
  * <p>
  * Дескриптор приема данных.
  */
-final public class SMInput {
+public class SMInput {
 	private final SMStateHandler owner;
 	private final SMInputAction action;
 	

@@ -1,5 +1,10 @@
 package ru.prolib.aquila.core.sm;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import ru.prolib.aquila.core.*;
 
 /**
@@ -29,7 +34,7 @@ public class SMTriggerOnEvent implements SMTrigger, EventListener {
 	/**
 	 * Конструктор.
 	 * <p>
-	 * Данный конструктор позволяет указать конерктный дескриптор входа,
+	 * Данный конструктор позволяет указать конкретный дескриптор входа,
 	 * на который будут перенаправляться события. 
 	 * <p>
 	 * @param eventType тип события
@@ -39,6 +44,18 @@ public class SMTriggerOnEvent implements SMTrigger, EventListener {
 		super();
 		this.eventType = eventType;
 		this.input = input;
+	}
+	
+	public EventType getEventType() {
+		return eventType;
+	}
+	
+	public SMInput getInput() {
+		return input;
+	}
+	
+	public synchronized SMTriggerRegistry getProxy() {
+		return proxy;
 	}
 
 	@Override
@@ -66,6 +83,49 @@ public class SMTriggerOnEvent implements SMTrigger, EventListener {
 			eventType.removeListener(this);
 			proxy = null;
 		}
+	}
+	
+	@Override
+	public synchronized int hashCode() {
+		return new HashCodeBuilder(113257, 891)
+				.append(eventType)
+				.append(input)
+				.append(proxy)
+				.build();
+	}
+	
+	@Override
+	public synchronized String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != SMTriggerOnEvent.class ) {
+			return false;
+		}
+		SMTriggerOnEvent o = (SMTriggerOnEvent) other;
+		EventType oEventType = null, tEventType = null;
+		SMInput oInput = null, tInput = null;
+		SMTriggerRegistry oProxy = null, tProxy = null;
+		synchronized ( o ) {
+			oEventType = o.eventType;
+			oInput = o.input;
+			oProxy = o.proxy;
+		}
+		synchronized ( this ) {
+			tEventType = this.eventType;
+			tInput = this.input;
+			tProxy = this.proxy;
+		}
+		return new EqualsBuilder()
+				.append(oEventType, tEventType)
+				.append(oInput, tInput)
+				.append(oProxy, tProxy)
+				.build();
 	}
 
 }

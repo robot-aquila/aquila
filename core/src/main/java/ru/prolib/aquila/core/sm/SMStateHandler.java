@@ -129,6 +129,9 @@ public class SMStateHandler {
 	 * не существует
 	 */
 	public synchronized SMExit getExit(String exitId) {
+		if ( exitId == null ) {
+			return null;
+		}
 		SMExit exit = exits.get(exitId);
 		if ( exit == null ) {
 			throw new IllegalArgumentException("ID not exists: " + exitId);
