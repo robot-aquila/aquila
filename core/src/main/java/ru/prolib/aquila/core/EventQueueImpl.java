@@ -2,6 +2,7 @@ package ru.prolib.aquila.core;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ public class EventQueueImpl implements EventQueue {
 	private final BlockingQueue<EventDispatchingRequest> queue;
 	private final String queueName;
 	private final Thread dispatcherThread;
+	private final AtomicLong totalEvents;
+	private final EventQueueStats stats;
 
 	/**
 	 * Constructor.
@@ -36,10 +39,12 @@ public class EventQueueImpl implements EventQueue {
 	 * @param numOfWorkerThreads - number of threads to event delivery
 	 */
 	public EventQueueImpl(String queueName, int numOfWorkerThreads) {
+		this.stats = new EventQueueStats();
 		this.queueName = queueName;
 		this.queue = new LinkedBlockingQueue<EventDispatchingRequest>();
-		this.dispatcherThread = new DispatcherThread(queueName, numOfWorkerThreads, queue);
+		this.dispatcherThread = new DispatcherThread(queueName, numOfWorkerThreads, queue, stats);
 		this.dispatcherThread.start();
+		this.totalEvents = new AtomicLong(0);
 	}
 	
 	public EventQueueImpl(String queueName) {
@@ -52,16 +57,26 @@ public class EventQueueImpl implements EventQueue {
 	public EventQueueImpl() {
 		this(getNextQueueName());
 	}
+	
+	public EventQueueStats getStats() {
+		return stats;
+	}
+	
+	@Override
+	public long getTotalEvents() {
+		return totalEvents.get();
+	}
 
 	@Override
 	public String getId() {
 		return queueName;
-	}		
+	}
 
 	@Override
 	public void enqueue(EventType type, EventFactory factory) {
 		try {
 			queue.put(new EventDispatchingRequest(type, factory));
+			totalEvents.incrementAndGet();
 		} catch ( InterruptedException e ) {
 			Thread.currentThread().interrupt();
 			logger.error("Interrupted: ", e);
@@ -99,17 +114,28 @@ public class EventQueueImpl implements EventQueue {
 	static class DeliveryEventTask implements Callable<Object> {
 		private final Event event;
 		private final EventListener listener;
+		private final EventQueueStats stats;
 		
-		public DeliveryEventTask(Event event, EventListener listener) {
+		public DeliveryEventTask(Event event,
+				EventListener listener,
+				EventQueueStats stats)
+		{
 			this.event = event;
 			this.listener = listener;
+			this.stats = stats;
 		}
 
 		@Override
-		public Object call() throws Exception {
+		public Object call() {
 			try {
 				//logger.debug("Dispatch event {} to listener {}", event, listener);
-				listener.onEvent(event);
+				if ( stats == null ) {
+					listener.onEvent(event);
+				} else {
+					long b1 = System.nanoTime();
+					listener.onEvent(event);
+					stats.addDeliveryTime(System.nanoTime() - b1);
+				}
 			} catch ( Throwable t ) {
 				logger.error("Unhandled exception: ", t);
 			}
@@ -121,24 +147,64 @@ public class EventQueueImpl implements EventQueue {
 	static class DispatcherThread extends Thread {
 		private final BlockingQueue<EventDispatchingRequest> queue;
 		private final ExecutorService deliveryService;
+		private final EventQueueStats stats;
 		
 		public DispatcherThread(String queueName, int numOfWorkerThreads,
-				BlockingQueue<EventDispatchingRequest> queue)
+				BlockingQueue<EventDispatchingRequest> queue,
+				EventQueueStats stats)
 		{
 			super(queueName + ".DISPATCHER");
 			setDaemon(true);
 			this.queue = queue;
 			this.deliveryService = Executors.newFixedThreadPool(numOfWorkerThreads,
 					new WorkerThreadFactory(queueName));
+			this.stats = stats;
 		}
 		
 		@Override
 		public void run() {
 			try {
 				EventDispatchingRequest request;
-				while ( (request = queue.take()) != null ) {
-					for ( Future<Object> x : deliveryService.invokeAll(buildTaskList(request)) ) {
-						x.get();
+				if ( stats == null ) {
+					while ( (request = queue.take()) != null ) {
+						List<DeliveryEventTask> tasks = buildTaskList(request);
+						for ( Future<Object> x : deliveryService.invokeAll(tasks) ) {
+							x.get();
+						}
+					}
+				} else {
+					while ( (request = queue.take()) != null ) {
+						long b1 = System.nanoTime();
+						List<DeliveryEventTask> tasks = buildTaskList(request);
+						long b2 = System.nanoTime();
+						stats.addBuildingTaskListTime(b2 - b1);
+						
+						// Original method
+						/*
+						for ( Future<Object> x : deliveryService.invokeAll(tasks) ) {
+							x.get();
+						}
+						*/
+						
+						// New, based on completable futures
+						int count = tasks.size();
+						CompletableFuture<?> fss[] = new CompletableFuture[count];
+						for ( int i = 0; i < count; i ++ ) {
+							DeliveryEventTask task = tasks.get(i);
+							fss[i] = CompletableFuture.supplyAsync(()-> {
+								return task.call();
+							}, deliveryService);
+						}
+						CompletableFuture.allOf(fss).join();
+
+						// Deliver here
+						/*
+						for ( DeliveryEventTask t : tasks ) {
+							t.call();
+						}
+						*/
+						
+						stats.addDispatchingTime(System.nanoTime() - b2);
 					}
 				}
 			} catch ( InterruptedException e ) {
@@ -155,7 +221,7 @@ public class EventQueueImpl implements EventQueue {
 			for ( EventType type : getAllUniqueTypes(allTypes, request.type) ) {
 				Event event = request.factory.produceEvent(type);
 				for ( EventListener listener : type.getListeners() ) {
-					list.add(new DeliveryEventTask(event, listener));
+					list.add(new DeliveryEventTask(event, listener, stats));
 				}
 			}
 			return list;

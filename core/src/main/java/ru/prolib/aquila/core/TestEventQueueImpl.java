@@ -90,5 +90,10 @@ public class TestEventQueueImpl implements EventQueue {
 			}
 		}
 	}
+
+	@Override
+	public long getTotalEvents() {
+		return 0;
+	}
 	
 }

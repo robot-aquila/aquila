@@ -1,14 +1,20 @@
 package ru.prolib.aquila.ui.form;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.*;
 import ru.prolib.aquila.core.Event;
@@ -19,8 +25,228 @@ import ru.prolib.aquila.ui.ITableModel;
 import ru.prolib.aquila.ui.msg.SecurityMsg;
 
 public class SecurityListTableModel extends AbstractTableModel
-	implements ITableModel, EventListener
+	implements ITableModel, EventListener, ActionListener
 {
+	
+	public static class UpdateRange {
+		private final int startIndex, endIndex;
+		private final boolean inserted;
+		
+		public UpdateRange(int startIndex, int endIndex, boolean inserted) {
+			this.startIndex = startIndex;
+			this.endIndex = endIndex;
+			this.inserted = inserted;
+		}
+		
+		public int getStartIndex() {
+			return startIndex;
+		}
+		
+		public int getEndIndex() {
+			return endIndex;
+		}
+		
+		public boolean isInserted() {
+			return inserted;
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != UpdateRange.class ) {
+				return false;
+			}
+			UpdateRange o = (UpdateRange) other;
+			return new EqualsBuilder()
+					.append(o.startIndex, startIndex)
+					.append(o.endIndex, endIndex)
+					.append(o.inserted, inserted)
+					.build();
+		}
+		
+		@Override
+		public String toString() {
+			return new StringBuilder()
+					.append("UpdateRange[startIndex=")
+					.append(startIndex)
+					.append(",endIndex=")
+					.append(endIndex)
+					.append(",inserted=")
+					.append(inserted)
+					.append("]")
+					.toString();
+		}
+
+	}
+	
+	public static class CacheEntry {
+		private final Security security;
+		private final AtomicInteger counter;
+		private final AtomicBoolean inserted;
+		
+		public CacheEntry(Security security,
+				AtomicInteger counter,
+				AtomicBoolean inserted)
+		{
+			this.security = security;
+			this.counter = counter;
+			this.inserted = inserted;
+		}
+		
+		public CacheEntry(Security security) {
+			this(security, new AtomicInteger(1), new AtomicBoolean(true));
+		}
+		
+		public CacheEntry(Security security, int counter, boolean inserted) {
+			this(security, new AtomicInteger(counter), new AtomicBoolean(inserted));
+		}
+		
+		public Security getSecurity() {
+			return security;
+		}
+		
+		public boolean isUpdated() {
+			return counter.get() > 0;
+		}
+		
+		public boolean isInserted() {
+			return inserted.get();
+		}
+		
+		public void reset() {
+			counter.set(0);
+			inserted.set(false);
+		}
+		
+		public void addUpdate() {
+			counter.incrementAndGet();
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if ( other == this ) {
+				return true;
+			}
+			if ( other == null || other.getClass() != CacheEntry.class ) {
+				return false;
+			}
+			CacheEntry o = (CacheEntry) other;
+			return new EqualsBuilder()
+					.append(o.security, security)
+					.append(o.counter.get(), counter.get())
+					.append(o.inserted.get(), inserted.get())
+					.build();
+		}
+		
+		@Override
+		public String toString() {
+			return new StringBuilder()
+					.append("CacheEntry[security=")
+					.append(security)
+					.append(",updateCount=")
+					.append(counter.get())
+					.append(",inserted=")
+					.append(inserted.get())
+					.append("]")
+					.toString();
+		}
+		
+	}
+	
+	public static class Cache {
+		private final List<CacheEntry> entries;
+		private final Map<Security, Integer> mapSecurityToIndex;
+		
+		public Cache(List<CacheEntry> entries,
+				Map<Security, Integer> mapSecurityToIndex)
+		{
+			this.entries = entries;
+			this.mapSecurityToIndex = mapSecurityToIndex;
+		}
+		
+		public Cache() {
+			this(new ArrayList<>(), new HashMap<>());
+		}
+		
+		public synchronized void clear() {
+			entries.clear();
+			mapSecurityToIndex.clear();
+		}
+		
+		public synchronized int getSecuritiesCount() {
+			return entries.size();
+		}
+		
+		public synchronized Security getSecurity(int index) {
+			return entries.get(index).getSecurity();
+		}
+		
+		public synchronized void addUpdate(Security security) {
+			Integer index = mapSecurityToIndex.get(security);
+			if ( index == null ) {
+				index = entries.size();
+				entries.add(new CacheEntry(security));
+				mapSecurityToIndex.put(security, index);
+			} else {
+				entries.get(index).addUpdate();
+			}
+		}
+		
+		public synchronized List<UpdateRange> getUpdatesAndReset() {
+			List<UpdateRange> result = new ArrayList<>();
+			int count = entries.size();
+			Integer firstInSeries = null;
+			Boolean inserted = null;
+			for ( int i = 0; i < count; i ++ ) {
+				CacheEntry entry = entries.get(i);
+				if ( entry.isUpdated() ) {
+					if ( firstInSeries == null ) {
+						// We aren't in active range.
+						// Should open new range.
+						firstInSeries = i;
+						inserted = entry.isInserted();
+					} else {
+						// We're in active range.
+						// There is possible that here's change
+						// updated to inserted and vice versa
+						if ( inserted != entry.isInserted() ) {
+							// Yep, there is change of inserted or
+							// updated mark. We have to close previously
+							// opened range and open a new one.
+							result.add(new UpdateRange(firstInSeries, i - 1, inserted));
+							firstInSeries = i;
+							inserted = entry.isInserted();
+						} else {
+							// No change of inserted or updated mark.
+							// Nothing to do, just continue with this range.
+						}
+					}
+				} else {
+					if ( firstInSeries == null ) {
+						// We aren't in active range.
+						// Just proceed to the next.
+					} else {
+						// We were in active range.
+						// But here we meet a first record which wasn't updated.
+						// We have to close previously opened range.
+						result.add(new UpdateRange(firstInSeries, i - 1, inserted));
+						firstInSeries = null;
+						inserted = null;
+					}
+				}
+				entry.reset();
+			}
+			// There is possible that the last range still open.
+			if ( firstInSeries != null ) {
+				result.add(new UpdateRange(firstInSeries, count - 1, inserted));
+			}
+			return result;
+		}
+
+	}
+	
 	private static final long serialVersionUID = 1L;
 	// primary attributes
 	public static final int CID_DISPLAY_NAME = 1;
@@ -402,6 +628,12 @@ public class SecurityListTableModel extends AbstractTableModel
 		terminal.onSecurityBestAsk().removeListener(this);
 		terminal.onSecurityBestBid().removeListener(this);
 		terminal.onSecurityLastTrade().removeListener(this);	
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

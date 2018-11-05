@@ -67,6 +67,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type2, SimpleEventFactory.getInstance());
 		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
+		assertEquals(2, queue.getTotalEvents());
 	}
 	
 	@Test
@@ -91,6 +92,7 @@ public class EventQueueImplTest {
 		});
 		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
+		assertEquals(11, queue.getTotalEvents());
 	}
 
 	@Test
@@ -125,6 +127,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type1, new SimpleEventFactory());
 
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
+		assertEquals(1, queue.getTotalEvents());
 	}
 	
 	@Test
@@ -156,6 +159,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type1, new SimpleEventFactory());
 
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
+		assertEquals(1, queue.getTotalEvents());
 	}
 	
 	@Test
@@ -179,6 +183,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type1, new SimpleEventFactory());
 
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
+		assertEquals(1, queue.getTotalEvents());
 	}
 	
 }

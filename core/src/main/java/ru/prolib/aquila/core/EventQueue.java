@@ -29,5 +29,7 @@ public interface EventQueue {
 	 * @return идентификатор очереди
 	 */
 	public String getId();
+	
+	long getTotalEvents();
 
 }
