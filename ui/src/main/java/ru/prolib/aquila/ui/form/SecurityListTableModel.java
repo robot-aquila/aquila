@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -280,8 +280,8 @@ public class SecurityListTableModel extends AbstractTableModel
 	private final List<Integer> columnIndexToColumnID;
 	private final Map<Integer, MsgID> columnIDToColumnHeader;
 	private final IMessages messages;
-	private final List<Security> securities;
-	private final Map<Security, Integer> securityMap;
+	private final Cache cache;
+	private final Timer timer;
 	private final Set<Terminal> terminalSet;
 	private boolean subscribed = false;
 	
@@ -290,9 +290,12 @@ public class SecurityListTableModel extends AbstractTableModel
 		columnIndexToColumnID = getColumnIDList();
 		columnIDToColumnHeader = getColumnIDToHeaderMap();
 		this.messages = messages;
-		this.securities = new ArrayList<Security>();
-		this.securityMap = new HashMap<Security, Integer>();
+		this.cache = new Cache();
 		this.terminalSet = new HashSet<Terminal>();
+		timer = new Timer(250, this);
+		timer.setInitialDelay(250);
+		timer.setRepeats(true);
+		timer.start();
 	}
 	
 	/**
@@ -368,15 +371,15 @@ public class SecurityListTableModel extends AbstractTableModel
 
 	@Override
 	public int getRowCount() {
-		return securities.size();
+		return cache.getSecuritiesCount();
 	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		if ( row > securities.size() ) {
+		if ( row > cache.getSecuritiesCount() ) {
 			return null;
 		}
-		return getColumnValue(securities.get(row), getColumnID(col));
+		return getColumnValue(cache.getSecurity(row), getColumnID(col));
 	}
 	
 	protected Object getColumnValue(Security security, int columnID) {
@@ -513,43 +516,15 @@ public class SecurityListTableModel extends AbstractTableModel
 				terminal.unlock();
 			}
 		}
-		securities.clear();
-		securityMap.clear();
+		cache.clear();
 		fireTableDataChanged();
 		subscribed = false;
 	}
 
 	@Override
 	public void onEvent(final Event event) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				processEvent(event);
-			}
-		});
-	}
-	
-	private void processEvent(Event event) {
-		if ( ! subscribed ) {
-			return;
-		}
-		for ( Terminal terminal : terminalSet ) {
-			if ( event.isType(terminal.onSecurityUpdate())
-			  || event.isType(terminal.onSecurityBestAsk())
-			  || event.isType(terminal.onSecurityBestBid())
-			  || event.isType(terminal.onSecurityLastTrade()))
-			{
-				int firstRow = securities.size();
-				Security security = ((SecurityEvent) event).getSecurity();
-				if ( securityMap.containsKey(security) ) {
-					Integer row = securityMap.get(security);
-					fireTableRowsUpdated(row, row);						
-				} else {
-					securities.add(security);
-					securityMap.put(security, firstRow);
-					fireTableRowsInserted(firstRow, firstRow);
-				}
-			}
+		if ( event instanceof SecurityEvent ) {
+			cache.addUpdate(((SecurityEvent) event).getSecurity());
 		}
 	}
 	
@@ -560,7 +535,7 @@ public class SecurityListTableModel extends AbstractTableModel
 	 * @return security
 	 */
 	public Security getSecurity(int rowIndex) {
-		return securities.get(rowIndex);
+		return cache.getSecurity(rowIndex);
 	}
 
 	@Override
@@ -600,16 +575,8 @@ public class SecurityListTableModel extends AbstractTableModel
 		terminal.lock();
 		try {
 			subscribe(terminal);
-			int countAdded = 0, firstRow = securities.size();
 			for ( Security security : terminal.getSecurities() ) {
-				if ( ! securityMap.containsKey(security) ) {
-					securities.add(security);
-					securityMap.put(security, firstRow + countAdded);
-					countAdded ++;
-				}
-			}
-			if ( countAdded > 0 ) {
-				fireTableRowsInserted(firstRow, firstRow + countAdded - 1);
+				cache.addUpdate(security);
 			}
 		} finally {
 			terminal.unlock();
@@ -632,8 +599,16 @@ public class SecurityListTableModel extends AbstractTableModel
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+		if ( ! subscribed ) {
+			return;
+		}
+		for ( UpdateRange x : cache.getUpdatesAndReset() ) {
+			if ( x.isInserted() ) {
+				fireTableRowsInserted(x.getStartIndex(), x.getEndIndex());
+			} else {
+				fireTableRowsUpdated(x.getStartIndex(), x.getEndIndex());
+			}
+		}
 	}
 
 }
