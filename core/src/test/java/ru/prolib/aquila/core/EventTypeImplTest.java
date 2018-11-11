@@ -7,14 +7,44 @@ import java.util.*;
 import org.easymock.IMocksControl;
 import org.junit.*;
 
+import ru.prolib.aquila.core.eque.HierarchyOfAlternatesListener;
+
 /**
  * 2012-04-09
  * $Id: EventTypeImplTest.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventTypeImplTest {
+	
+	protected static <T> List<T> SetToList(Set<T> unordered) {
+		List<T> ordered = new ArrayList<>();
+		for ( T x : unordered ) {
+			ordered.add(x);
+		}
+		return ordered;
+	}
+	
+	@SafeVarargs
+	protected static <T> List<T> HSetToList(T... objs) {
+		Set<T> unordered = new HashSet<>();
+		for ( T x : objs ) {
+			unordered.add(x);
+		}
+		return SetToList(unordered);
+	}
+	
+	@SafeVarargs
+	protected static <T> Set<T> HSet(T... objs) {
+		Set<T> unordered = new HashSet<>();
+		for ( T x : objs ) {
+			unordered.add(x);
+		}
+		return unordered;
+	}
+
 	private IMocksControl control;
-	private EventTypeImpl type, type1, type2;
+	private EventTypeImpl type0, type1, type2, type3, type4;
 	private EventListener listener1, listener2, listener3;
+	private HierarchyOfAlternatesListener hoaListenerMock1, hoaListenerMock2;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -22,28 +52,32 @@ public class EventTypeImplTest {
 		listener1 = control.createMock(EventListener.class);
 		listener2 = control.createMock(EventListener.class);
 		listener3 = control.createMock(EventListener.class);
-		type = new EventTypeImpl("MyType");
+		hoaListenerMock1 = control.createMock(HierarchyOfAlternatesListener.class);
+		hoaListenerMock2 = control.createMock(HierarchyOfAlternatesListener.class);
+		type0 = new EventTypeImpl("MyType");
 		type1 = new EventTypeImpl("Alternate1");
 		type2 = new EventTypeImpl("Alternate2");
+		type3 = new EventTypeImpl("Alternate3");
+		type4 = new EventTypeImpl("Alternate4");
 	}
 	
 	@Test
 	public void testConstruct0() throws Exception {
 		int autoId = EventTypeImpl.getAutoId();
-		type = new EventTypeImpl();
-		assertEquals("EvtType" + autoId, type.getId());
+		type0 = new EventTypeImpl();
+		assertEquals("EvtType" + autoId, type0.getId());
 		assertEquals(autoId + 1, EventTypeImpl.getAutoId());
 	}
 	
 	@Test
 	public void testConstruct1_S() throws Exception {
-		type = new EventTypeImpl("MyType");
-		assertEquals("MyType", type.getId());
+		type0 = new EventTypeImpl("MyType");
+		assertEquals("MyType", type0.getId());
 	}
 	
 	@Test
 	public void testToString() throws Exception {
-		assertEquals("MyType", type.toString());
+		assertEquals("MyType", type0.toString());
 	}
 	
 	@Test
@@ -53,94 +87,94 @@ public class EventTypeImplTest {
 		expected.add(listener2);
 		expected.add(listener3);
 		
-		type.addListener(listener1);
-		type.addListener(listener2);
-		type.addListener(listener3);
-		assertEquals(expected, type.getListeners());
+		type0.addListener(listener1);
+		type0.addListener(listener2);
+		type0.addListener(listener3);
+		assertEquals(expected, type0.getListeners());
 	}
 	
 	@Test
 	public void testRemoveListener() throws Exception {
-		type.addListener(listener1);
-		type.addListener(listener2);
-		type.addListener(listener3);
+		type0.addListener(listener1);
+		type0.addListener(listener2);
+		type0.addListener(listener3);
 		Set<EventListener> expected = new HashSet<>();
 		expected.add(listener3);
 		
-		type.removeListener(listener1);
-		type.removeListener(listener2);
+		type0.removeListener(listener1);
+		type0.removeListener(listener2);
 		
-		assertEquals(expected, type.getListeners());
+		assertEquals(expected, type0.getListeners());
 	}
 	
 	@Test
 	public void testIsListener() throws Exception {
-		type.addListener(listener1);
-		type.addListener(listener2);
-		type.addListener(listener3);
-		type.removeListener(listener3);
+		type0.addListener(listener1);
+		type0.addListener(listener2);
+		type0.addListener(listener3);
+		type0.removeListener(listener3);
 		
-		assertTrue(type.isListener(listener1));
-		assertTrue(type.isListener(listener2));
-		assertFalse(type.isListener(listener3));
+		assertTrue(type0.isListener(listener1));
+		assertTrue(type0.isListener(listener2));
+		assertFalse(type0.isListener(listener3));
 	}
 	
 	@Test
 	public void testListenOnce() throws Exception {
-		ListenOnce actual = (ListenOnce) type.listenOnce(listener1);
-		assertTrue(type.isListener(actual));
+		ListenOnce actual = (ListenOnce) type0.listenOnce(listener1);
+		assertTrue(type0.isListener(actual));
 		assertSame(listener1, actual.getListener());
-		assertSame(type, actual.getEventType());
+		assertSame(type0, actual.getEventType());
 	}
 	
 	@Test
 	public void testRemoveListeners() throws Exception {
-		type.addListener(listener1);
-		type.addListener(listener2);
+		type0.addListener(listener1);
+		type0.addListener(listener2);
 		
-		type.removeListeners();
+		type0.removeListeners();
 		
-		assertEquals(0, type.countListeners());
+		assertEquals(0, type0.countListeners());
 	}
 	
 	@Test
 	public void testCountListeners() throws Exception {
-		type.addListener(listener1);
-		assertEquals(1, type.countListeners());
-		type.addListener(listener2);
-		assertEquals(2, type.countListeners());
-		type.addListener(listener3);
-		assertEquals(3, type.countListeners());
+		type0.addListener(listener1);
+		assertEquals(1, type0.countListeners());
+		type0.addListener(listener2);
+		assertEquals(2, type0.countListeners());
+		type0.addListener(listener3);
+		assertEquals(3, type0.countListeners());
 	}
 	
 	@Test
 	public void testGetListeners() throws Exception {
-		type.addListener(listener1);
-		type.addListener(listener2);
+		type0.addListener(listener1);
+		type0.addListener(listener2);
 		Set<EventListener> expected = new HashSet<>();
 		expected.add(listener1);
 		expected.add(listener2);
 		
-		assertEquals(expected, type.getListeners());
+		assertEquals(expected, type0.getListeners());
 	}
 	
 	@Test
 	public void testListeners_SpecialCases() throws Exception {
 		testListeners_SpecialCases(new HelperProxy() {
 			@Override public void addListener(EventListener listener) {
-				type.addListener(listener);
+				type0.addListener(listener);
 			}
 
 			@Override public Set<EventListener> getListeners() {
-				return type.getListeners();
+				return type0.getListeners();
 			}
 
 			@Override public boolean isListener(EventListener listener) {
-				return type.isListener(listener);
+				return type0.isListener(listener);
 			}
 
 			@Override public void removeListener(EventListener listener) {
-				type.removeListener(listener);
+				type0.removeListener(listener);
 			}
 		});
 	}
@@ -211,98 +245,315 @@ public class EventTypeImplTest {
 	
 	@Test
 	public void testAddAlternateType() throws Exception {
-		type.addAlternateType(type1);
+		type0.addAlternateType(type1);
 		
 		Set<EventType> expected = new HashSet<EventType>();
 		expected.add(type1);
-		assertEquals(expected, type.getAlternateTypes());
+		assertEquals(expected, type0.getAlternateTypes());
 	}
 	
 	@Test (expected=NullPointerException.class)
 	public void testAddAlternateType_ThrowsNullPointer() throws Exception {
-		type.addAlternateType(null);
+		type0.addAlternateType(null);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testAddAlternateType_ThrowsIfThis() {
+		type0.addAlternateType(type0);
 	}
 	
 	@Test
 	public void testIsAlternateType() throws Exception {
-		type.addAlternateType(type1);
+		type0.addAlternateType(type1);
 		
-		assertTrue(type.isAlternateType(type1));
-		assertFalse(type.isAlternateType(type2));
+		assertTrue(type0.isAlternateType(type1));
+		assertFalse(type0.isAlternateType(type2));
 	}
 	
 	@Test
 	public void testRemoveAlternateType() throws Exception {
-		type.addAlternateType(type1);
-		type.addAlternateType(type2);
-		type.removeAlternateType(type1);
+		type0.addAlternateType(type1);
+		type0.addAlternateType(type2);
+		type0.removeAlternateType(type1);
 		
-		assertFalse(type.isAlternateType(type1));
-		assertTrue(type.isAlternateType(type2));
+		assertFalse(type0.isAlternateType(type1));
+		assertTrue(type0.isAlternateType(type2));
 	}
 	
 	@Test
 	public void testHasAlternates() throws Exception {
-		assertFalse(type.hasAlternates());
-		type.addAlternateType(type1);
-		assertTrue(type.hasAlternates());
+		assertFalse(type0.hasAlternates());
+		type0.addAlternateType(type1);
+		assertTrue(type0.hasAlternates());
 	}
 	
 	@Test
 	public void testHasListeners() throws Exception {
-		assertFalse(type.hasListeners());
+		assertFalse(type0.hasListeners());
 		
-		type.addListener(listener1);
+		type0.addListener(listener1);
 		
-		assertTrue(type.hasListeners());
+		assertTrue(type0.hasListeners());
 		
-		type.addListener(listener2);
-		type.removeListener(listener1);
+		type0.addListener(listener2);
+		type0.removeListener(listener1);
 		
-		assertTrue(type.hasListeners());
+		assertTrue(type0.hasListeners());
 		
-		type.removeListener(listener2);
+		type0.removeListener(listener2);
 		
-		assertFalse(type.hasListeners());
+		assertFalse(type0.hasListeners());
 	}
 	
 	@Test
 	public void testRemoveAlternates() {
-		type.addAlternateType(type1);
-		type.addAlternateType(type2);
+		type0.addAlternateType(type1);
+		type0.addAlternateType(type2);
 		
-		type.removeAlternates();
+		type0.removeAlternates();
 		
-		assertFalse(type.isAlternateType(type1));
-		assertFalse(type.isAlternateType(type2));
+		assertFalse(type0.isAlternateType(type1));
+		assertFalse(type0.isAlternateType(type2));
 	}
 	
 	@Test
 	public void testCountAlternates() {
-		assertEquals(0, type.countAlternates());
+		assertEquals(0, type0.countAlternates());
 		
-		type.addAlternateType(type1);
-		type.addAlternateType(type2);
+		type0.addAlternateType(type1);
+		type0.addAlternateType(type2);
 		
-		assertEquals(2, type.countAlternates());
+		assertEquals(2, type0.countAlternates());
 		
-		type.removeAlternateType(type2);
+		type0.removeAlternateType(type2);
 		
-		assertEquals(1, type.countAlternates());
+		assertEquals(1, type0.countAlternates());
 	}
 	
 	@Test
 	public void testRemoveAlternatesAndListeners() {
-		type.addAlternateType(type1);
-		type.addAlternateType(type2);
-		type.addListener(listener1);
-		type.addListener(listener2);
-		type.addListener(listener3);
+		type0.addAlternateType(type1);
+		type0.addAlternateType(type2);
+		type0.addListener(listener1);
+		type0.addListener(listener2);
+		type0.addListener(listener3);
 		
-		type.removeAlternatesAndListeners();
+		type0.removeAlternatesAndListeners();
 		
-		assertEquals(0, type.countAlternates());
-		assertEquals(0, type.countListeners());
+		assertEquals(0, type0.countAlternates());
+		assertEquals(0, type0.countListeners());
+	}
+
+	@Test
+	public void testHOA_AddAlternateType_CacheAllRelated() {
+		type1.addAlternateType(type2);
+		
+		type0.addAlternateType(type1);
+
+		assertTrue(type1.isListener(type0));
+		Set<EventType> expected = new HashSet<>();
+		expected.add(type0);
+		expected.add(type1);
+		expected.add(type2);
+		assertEquals(expected, type0.getFullListOfRelatedTypes());
+	}
+	
+	@Test
+	public void testHOA_AddAlternateType_NotifyHOAListeners() {
+		// Prepare hierarchy and objects
+		type1.addAlternateType(type2);
+		type0.addListener(hoaListenerMock1);
+		type0.addListener(hoaListenerMock2);
+		// Setup expectations
+		List<HierarchyOfAlternatesListener> hoals = HSetToList(hoaListenerMock1, hoaListenerMock2);
+		for ( HierarchyOfAlternatesListener hoal : hoals ) {
+			hoal.onHierarchyOfAlternatesChange(anyObject());
+		}
+		control.replay();
+		
+		type0.addAlternateType(type1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testHOA_AddAlternateType_CyclicReferences() {
+		type1.addAlternateType(type0);
+		control.replay();
+		
+		type0.addAlternateType(type1);
+
+		control.verify();
+	}
+	
+	@Test
+	public void testHOA_AddAlternateType_SubscribeToNotifications() {
+		EventType typeMock = control.createMock(EventType.class);
+		typeMock.addListener(type0);
+		expect(typeMock.getAlternateTypes()).andReturn(new HashSet<>());
+		control.replay();
+		
+		type0.addAlternateType(typeMock);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testHOA_RemoveAlternateType_RemoveCached() {
+		type1.addAlternateType(type2);
+		type0.addAlternateType(type1);
+		type0.addAlternateType(type3);
+		
+		type0.removeAlternateType(type1);
+		
+		Set<EventType> expected = new HashSet<>();
+		expected.add(type0);
+		expected.add(type3);
+		assertEquals(expected, type0.getFullListOfRelatedTypes());
+	}
+
+	@Test
+	public void testHOA_RemoveAlternateType_IfUsedMoreThanOnce1() {
+		type1.addAlternateType(type2);
+		type0.addAlternateType(type1);
+		type0.addAlternateType(type2);
+		
+		type0.removeAlternateType(type1);
+		
+		Set<EventType> expected = new HashSet<>();
+		expected.add(type0);
+		expected.add(type2);
+		assertEquals(expected, type0.getFullListOfRelatedTypes());
+	}
+	
+	@Test
+	public void testHOA_RemoveAlternateType_IfUsedMoreThanOnce2() {
+		type1.addAlternateType(type2);
+		type0.addAlternateType(type1);
+		type0.addAlternateType(type2);
+		
+		type0.removeAlternateType(type2);
+		
+		Set<EventType> expected = new HashSet<>();
+		expected.add(type0);
+		expected.add(type1);
+		expected.add(type2);
+		assertEquals(expected, type0.getFullListOfRelatedTypes());
+	}
+
+	@Test
+	public void testHOA_RemoveAlternateType_NotifyHOAListeners() {
+		type0.addAlternateType(type1);
+		type0.addListener(hoaListenerMock1);
+		hoaListenerMock1.onHierarchyOfAlternatesChange(anyObject());
+		control.replay();
+		
+		type0.removeAlternateType(type1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testHOA_RemoveAlternateType_UnsubscribeFromNotifications() {
+		EventType typeMock = control.createMock(EventType.class);
+		typeMock.addListener(type0);
+		expect(typeMock.getAlternateTypes()).andReturn(new HashSet<>());
+		control.replay();
+		type0.addAlternateType(typeMock);
+		control.resetToStrict();
+		typeMock.removeListener(type0);
+		control.replay();
+		
+		type0.removeAlternateType(typeMock);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testHOA_RemoveAlternates() {
+		type3.addAlternateType(type1);
+		type3.addAlternateType(type2);
+		type0.addAlternateType(type3);
+		type0.addAlternateType(type4);
+		
+		type3.removeAlternates();
+		
+		assertEquals(HSet(type0, type3, type4), type0.getFullListOfRelatedTypes());
+	}
+	
+	@Test
+	public void testHOA_RemoveAlternatesAndListeners() {
+		type3.addAlternateType(type1);
+		type3.addAlternateType(type2);
+		type0.addAlternateType(type3);
+		type0.addAlternateType(type4);
+		
+		type3.removeAlternatesAndListeners();
+		
+		assertEquals(HSet(type0, type3, type4), type0.getFullListOfRelatedTypes());
+	}
+	
+	@Test
+	public void testHOA_NotifyWithCyclicReferences() {
+		type2.addAlternateType(type3);
+		type3.addAlternateType(type0);
+		
+		type0.addAlternateType(type1);
+		
+		assertEquals(HSet(type0, type1), type0.getFullListOfRelatedTypes());
+		assertEquals(HSet(type1), type1.getFullListOfRelatedTypes());
+		assertEquals(HSet(type2, type3, type1, type0), type2.getFullListOfRelatedTypes());
+		assertEquals(HSet(type3, type1, type0), type3.getFullListOfRelatedTypes());
+		assertEquals(HSet(type4), type4.getFullListOfRelatedTypes());
+
+		type0.addAlternateType(type2);
+		
+		assertEquals(HSet(type0, type1, type2, type3), type0.getFullListOfRelatedTypes());
+		assertEquals(HSet(type1), type1.getFullListOfRelatedTypes());
+		assertEquals(HSet(type2, type3, type1, type0), type2.getFullListOfRelatedTypes());
+		assertEquals(HSet(type3, type2, type1, type0), type3.getFullListOfRelatedTypes());
+		assertEquals(HSet(type4), type4.getFullListOfRelatedTypes());
+
+		type3.addAlternateType(type4);
+		
+		assertEquals(HSet(type0, type1, type2, type3, type4), type0.getFullListOfRelatedTypes());
+		assertEquals(HSet(type1), type1.getFullListOfRelatedTypes());
+		assertEquals(HSet(type2, type4, type3, type1, type0), type2.getFullListOfRelatedTypes());
+		assertEquals(HSet(type3, type4, type2, type1, type0), type3.getFullListOfRelatedTypes());
+		assertEquals(HSet(type4), type4.getFullListOfRelatedTypes());
+
+		type0.addAlternateType(type3);
+		
+		assertEquals(HSet(type0, type1, type2, type3, type4), type0.getFullListOfRelatedTypes());
+		assertEquals(HSet(type1), type1.getFullListOfRelatedTypes());
+		assertEquals(HSet(type2, type4, type3, type1, type0), type2.getFullListOfRelatedTypes());
+		assertEquals(HSet(type3, type4, type2, type1, type0), type3.getFullListOfRelatedTypes());
+		assertEquals(HSet(type4), type4.getFullListOfRelatedTypes());
+		
+		type2.removeAlternateType(type3);
+		
+		assertEquals(HSet(type0, type1, type2, type3, type4), type0.getFullListOfRelatedTypes());
+		assertEquals(HSet(type1), type1.getFullListOfRelatedTypes());
+		assertEquals(HSet(type2), type2.getFullListOfRelatedTypes());
+		assertEquals(HSet(type3, type4, type2, type1, type0), type3.getFullListOfRelatedTypes());
+		assertEquals(HSet(type4), type4.getFullListOfRelatedTypes());
+		
+		type0.removeAlternateType(type3);
+
+		assertEquals(HSet(type0, type2, type1), type0.getFullListOfRelatedTypes());
+		assertEquals(HSet(type1), type1.getFullListOfRelatedTypes());
+		assertEquals(HSet(type2), type2.getFullListOfRelatedTypes());
+		assertEquals(HSet(type3, type4, type2, type1, type0), type3.getFullListOfRelatedTypes());
+		assertEquals(HSet(type4), type4.getFullListOfRelatedTypes());
+
+		type0.removeAlternateType(type2);
+		type0.removeAlternateType(type1);
+		
+		assertEquals(HSet(type0), type0.getFullListOfRelatedTypes());
+		assertEquals(HSet(type1), type1.getFullListOfRelatedTypes());
+		assertEquals(HSet(type2), type2.getFullListOfRelatedTypes());
+		assertEquals(HSet(type3, type4, type0), type3.getFullListOfRelatedTypes());
+		assertEquals(HSet(type4), type4.getFullListOfRelatedTypes());
 	}
 	
 }

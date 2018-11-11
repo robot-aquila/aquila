@@ -9,23 +9,28 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.*;
 
+import ru.prolib.aquila.core.eque.DispatchingType;
+
 /**
  * 2012-04-20<br>
  * $Id: EventQueueImplTest.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventQueueImplTest {
-	private EventSystem eSys;
-	private EventQueueImpl queue;
-	private EventDispatcher dispatcher;
-	private EventType type1,type2,type3;
+	static private EventQueue_FunctionalTest functionalTest; 
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.DEBUG);
+		functionalTest = new EventQueue_FunctionalTest();
 	}
 
+	private EventSystem eSys;
+	private EventQueueImpl queue;
+	private EventDispatcher dispatcher;
+	private EventType type1,type2,type3;
+	
 	@Before
 	public void setUp() throws Exception {
 		queue = new EventQueueImpl("EVNT");
@@ -38,7 +43,9 @@ public class EventQueueImplTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		
+		if ( queue != null ) {
+			queue.shutdown();
+		}
 	}
 	
 	@Test
@@ -96,10 +103,47 @@ public class EventQueueImplTest {
 	}
 
 	@Test
-	public void testFunctionalTest() throws Exception {
-		new EventQueue_FunctionalTest().testSchedulingSequence(queue);
+	public void testFunctionalTest_Default() throws Exception {
+		functionalTest.testSchedulingSequence(queue);
+		functionalTest.testSchedulingSequence2(queue);
 	}
-		
+	
+	@Test
+	public void testFunctionalTest_TypeOldOriginal() throws Exception {
+		queue = new EventQueueImpl(DispatchingType.OLD_ORIGINAL);
+		functionalTest.runAllTests(queue);
+	}
+	
+	@Test
+	public void testFunctionalTest_TypeOldComplFutures() throws Exception {
+		queue = new EventQueueImpl(DispatchingType.OLD_COMPL_FUTURES);
+		functionalTest.runAllTests(queue);
+	}
+	
+	@Test
+	public void testFunctionalTest_TypeOldRightHere() throws Exception {
+		queue = new EventQueueImpl(DispatchingType.OLD_RIGHT_HERE);
+		functionalTest.runAllTests(queue);
+	}
+	
+	@Test
+	public void testFunctionalTest_TypeNewQueue4Workers() throws Exception {
+		queue = new EventQueueImpl(DispatchingType.NEW_QUEUE_4WORKERS);
+		functionalTest.runAllTests(queue);
+	}
+
+	@Test
+	public void testFunctionalTest_TypeNewQueue6Workers() throws Exception {
+		queue = new EventQueueImpl(DispatchingType.NEW_QUEUE_6WORKERS);
+		functionalTest.runAllTests(queue);
+	}
+	
+	@Test
+	public void testFunctionalTest_TypeNewRightHereNoStats() throws Exception {
+		queue = new EventQueueImpl(DispatchingType.NEW_RIGHT_HERE_NO_TIME_STATS);
+		functionalTest.runAllTests(queue);
+	}
+
 	@Test
 	public void testEnqueue2_DispatchForAlternates() throws Exception {
 		final CountDownLatch finished = new CountDownLatch(3);

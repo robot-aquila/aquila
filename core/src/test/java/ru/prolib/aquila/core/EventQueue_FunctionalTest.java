@@ -75,10 +75,16 @@ public class EventQueue_FunctionalTest {
 
 		@Override
 		public void onEvent(Event event) {
-			events.add(event);
+			synchronized ( this ) {
+				events.add(event);
+			}
 			if ( event instanceof ActiveEvent ) {
 				((ActiveEvent) event).activate();
 			}
+		}
+		
+		public synchronized List<Event> getEvents() {
+			return events;
 		}
 		
 	}
@@ -102,6 +108,11 @@ public class EventQueue_FunctionalTest {
 			return new ActiveEvent(type, id, r, finished);
 		}
 		
+	}
+	
+	public void runAllTests(final EventQueue queue) throws Exception {
+		testSchedulingSequence(queue);
+		testSchedulingSequence2(queue);
 	}
 	
 	/**
@@ -165,7 +176,93 @@ public class EventQueue_FunctionalTest {
 		}
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
 		
-		assertEquals(expected, listener.events);
+		assertEquals(expected, listener.getEvents());
+	}
+	
+	/**
+	 * Проверить соответствие последовательности поступающих событий разных
+	 * типов последовательности их обработки. С учетом возможной задержки
+	 * в процессе отправки уведомления, события одного типа, отправленные ранее,
+	 * должны доставляться не позже, чем события другого типа, отправленные
+	 * позже.
+	 * <p>
+	 * @param queue
+	 * @throws Exception
+	 */
+	public void testSchedulingSequence2(final EventQueue queue) throws Exception {
+		final CountDownLatch finished = new CountDownLatch(6);
+		final EventDispatcher dispatcher = new EventDispatcherImpl(queue);
+		final EventType type1 = dispatcher.createType(),
+				type2 = dispatcher.createType(),
+				type3 = dispatcher.createType();
+		final List<String> cs = new ArrayList<>();
+		// Обработчик события первого типа - самый медленный.
+		EventListener listener1 = new EventListener() {
+			int c = 0;
+			@Override
+			public synchronized void onEvent(Event event) {
+				assertTrue(event.isType(type1));
+				try {
+					Thread.sleep(200);
+					c ++;
+				} catch ( InterruptedException e ) { }
+				synchronized ( cs ) {
+					cs.add("type1#" + c);
+				}
+				finished.countDown();
+			}
+		};
+		// Обработчик событий второго типа - медленный, но быстрее первого
+		EventListener listener2 = new EventListener() {
+			int c = 0;
+			@Override
+			public synchronized void onEvent(Event event) {
+				assertTrue(event.isType(type2));
+				try {
+					Thread.sleep(50);
+					c ++;
+				} catch ( InterruptedException e ) { }
+				synchronized ( cs ) {
+					cs.add("type2#" + c);
+				}
+				finished.countDown();
+			}
+		};
+		// Обработчик событий третьего типа - без задержек
+		EventListener listener3 = new EventListener() {
+			int c = 0;
+			@Override
+			public synchronized void onEvent(Event event) {
+				assertTrue(event.isType(type3));
+				c ++;
+				synchronized ( cs ) {
+					cs.add("type3#" + c);
+				}
+				finished.countDown();
+			}
+		};
+		type1.addListener(listener1);
+		type2.addListener(listener2);
+		type3.addListener(listener3);
+		
+		EventFactory factory = SimpleEventFactory.getInstance();
+		dispatcher.dispatch(type1, factory);
+		dispatcher.dispatch(type2, factory);
+		dispatcher.dispatch(type3, factory);
+		dispatcher.dispatch(type1, factory);
+		dispatcher.dispatch(type2, factory);
+		dispatcher.dispatch(type3, factory);
+		
+		assertTrue(finished.await(1, TimeUnit.SECONDS));
+		
+		List<String> expected = new ArrayList<>();
+		expected.add("type1#1");
+		expected.add("type2#1");
+		expected.add("type3#1");
+		expected.add("type1#2");
+		expected.add("type2#2");
+		expected.add("type3#2");
+		assertEquals(expected, cs);
 	}
 
 }

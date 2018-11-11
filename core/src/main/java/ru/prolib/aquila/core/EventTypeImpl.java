@@ -2,17 +2,43 @@ package ru.prolib.aquila.core;
 
 import java.util.*;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import ru.prolib.aquila.core.eque.ESUtils;
+import ru.prolib.aquila.core.eque.HierarchyOfAlternatesListener;
+import ru.prolib.aquila.core.eque.HierarchyOfAlternatesObservable;
+
 /**
  * Basic event type.
  * <p>
  * 2012-04-09<br>
  */
-public class EventTypeImpl implements EventType {
+public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable, HierarchyOfAlternatesListener {
 	public static final String AUTO_ID_PREFIX = "EvtType";
 	private static int autoId = 1;
 	private final String id;
 	private final Set<EventListener> listeners;
 	private final Set<EventType> alternates;
+	
+	// Hierarchy of Alternate Types
+	private final Set<HierarchyOfAlternatesListener> hoaListeners;
+	private final Set<EventType> hoaTypes;
+	
+	protected static Pair<Object, Object> getForLock(EventType one, EventType two) {
+		int oh = one.hashCode(), th = two.hashCode();
+		if ( oh < th ) {
+			return Pair.of(one, two);
+		} else if ( oh > th ) {
+			return Pair.of(two, one);
+		} else {
+			int r = one.getId().compareTo(two.getId());
+			if ( r < 0 ) {
+				return Pair.of(one, two);
+			} else {
+				return Pair.of(two, one);
+			}
+		}
+	}
 	
 	/**
 	 * Получить следующий идентификатор типа событий по-умолчанию.
@@ -51,6 +77,39 @@ public class EventTypeImpl implements EventType {
 		this.id = id;
 		listeners = new HashSet<>();
 		alternates = new HashSet<>();
+		hoaListeners = new HashSet<>();
+		hoaTypes = new HashSet<>();
+		hoaTypes.add(this);
+	}
+	
+	private void rebuildCache() {
+		Set<EventType> x = ESUtils.getAllUniqueTypes(this);
+		synchronized ( this ) {
+			hoaTypes.clear();
+			hoaTypes.addAll(x);
+		}
+	}
+	
+	private void notifyListeners(Set<HierarchyOfAlternatesListener> alreadyNotified) {
+		Set<HierarchyOfAlternatesListener> hoals = null;
+		synchronized ( this ) {
+			hoals = new HashSet<>(hoaListeners);
+		}
+		for ( HierarchyOfAlternatesListener hoal : hoals ) {
+			if ( ! alreadyNotified.contains(hoal) ) {
+				alreadyNotified.add(hoal);
+				hoal.onHierarchyOfAlternatesChange(alreadyNotified);
+			}
+		}
+	}
+	
+	private void rebuildCacheAndNotifyListeners(Set<HierarchyOfAlternatesListener> alreadyNotified) {
+		rebuildCache();
+		notifyListeners(alreadyNotified);
+	}
+	
+	private void rebuildCacheAndNotifyListeners() {
+		rebuildCacheAndNotifyListeners(new HashSet<>());
 	}
 	
 	@Override
@@ -101,16 +160,37 @@ public class EventTypeImpl implements EventType {
 	}
 
 	@Override
-	public synchronized void addAlternateType(EventType type) {
+	public void addAlternateType(EventType type) {
 		if ( type == null ) {
 			throw new NullPointerException();
 		}
-		alternates.add(type);
+		if ( type == this ) {
+			throw new IllegalArgumentException();
+		}
+		synchronized ( this ) {
+			if ( ! alternates.contains(type) ) {
+				alternates.add(type);
+				type.addListener(this);
+				// Do not call listeners here! It will cause deadlock!
+			}
+		}
+		rebuildCacheAndNotifyListeners();
 	}
 
 	@Override
 	public synchronized void removeAlternateType(EventType type) {
-		alternates.remove(type);
+		if ( type == null ) {
+			throw new NullPointerException();
+		}
+		synchronized ( this ) {
+			if ( alternates.contains(type) ) {
+				alternates.remove(type);
+				type.removeListener(this);
+				
+				// Do not call listeners here! It will cause deadlocks!
+			}
+		}
+		rebuildCacheAndNotifyListeners();
 	}
 
 	@Override
@@ -129,8 +209,16 @@ public class EventTypeImpl implements EventType {
 	}
 
 	@Override
-	public synchronized void removeAlternates() {
-		alternates.clear();
+	public void removeAlternates() {
+		Set<EventType> types = null;
+		synchronized ( this ) {
+			types = new HashSet<>(alternates);
+			alternates.clear();
+		}
+		for ( EventType t : types ) {
+			t.removeListener(this);
+		}
+		rebuildCacheAndNotifyListeners();
 	}
 
 	@Override
@@ -145,8 +233,32 @@ public class EventTypeImpl implements EventType {
 
 	@Override
 	public void removeAlternatesAndListeners() {
-		removeAlternates();
 		removeListeners();
+		removeAlternates();
+	}
+
+	@Override
+	public Set<EventType> getFullListOfRelatedTypes() {
+		return new HashSet<>(hoaTypes);
+	}
+	
+	public synchronized boolean isListener(HierarchyOfAlternatesListener listener) {
+		return hoaListeners.contains(listener);
+	}
+
+	@Override
+	public synchronized void addListener(HierarchyOfAlternatesListener listener) {
+		hoaListeners.add(listener);
+	}
+
+	@Override
+	public synchronized void removeListener(HierarchyOfAlternatesListener listener) {
+		hoaListeners.remove(listener);
+	}
+
+	@Override
+	public void onHierarchyOfAlternatesChange(Set<HierarchyOfAlternatesListener> alreadyNotified) {
+		rebuildCacheAndNotifyListeners(alreadyNotified);
 	}
 
 }

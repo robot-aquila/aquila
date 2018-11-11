@@ -2,13 +2,15 @@ package ru.prolib.aquila.core;
 
 import java.util.Set;
 
+import ru.prolib.aquila.core.eque.HierarchyOfAlternatesObservable;
+
 /**
  * Интерфейс типа события.
  * <p> 
  * 2012-04-09<br>
  * $Id: EventType.java 513 2013-02-11 01:17:18Z whirlwind $
  */
-public interface EventType {
+public interface EventType extends HierarchyOfAlternatesObservable {
 	
 	/**
 	 * Получить идентификатор типа события.

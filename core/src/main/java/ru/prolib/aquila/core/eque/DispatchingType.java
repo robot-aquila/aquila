@@ -1,0 +1,11 @@
+package ru.prolib.aquila.core.eque;
+
+public enum DispatchingType {
+	OLD_ORIGINAL,
+	OLD_COMPL_FUTURES,
+	OLD_RIGHT_HERE,
+	NEW_QUEUE_4WORKERS,
+	NEW_QUEUE_6WORKERS,
+	NEW_RIGHT_HERE_NO_TIME_STATS,
+	NEW_RIGHT_HERE_V3
+}
