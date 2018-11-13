@@ -13,7 +13,9 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.data.TSeries;
+import ru.prolib.aquila.core.data.TSeriesImpl;
 import ru.prolib.aquila.core.data.ValueException;
+import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.utils.experimental.chart.Rectangle;
 import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
@@ -81,13 +83,13 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 		this.labelFont = labelFont;
 	}
 	
-	public SWTimeAxisRulerRenderer(String id) {
+	public SWTimeAxisRulerRenderer(String id, TSeries<Instant> categories) {
 		this(id, SW2MTFAdapterImpl.getInstance(), LABEL_FONT);
+		this.categories = categories;
 	}
 	
-	public SWTimeAxisRulerRenderer(String id, TSeries<Instant> categories) {
-		this(id);
-		this.categories = categories;
+	public SWTimeAxisRulerRenderer(String id) {
+		this(id, new TSeriesImpl<Instant>(ZTFrame.M1));
 	}
 
 	@Override

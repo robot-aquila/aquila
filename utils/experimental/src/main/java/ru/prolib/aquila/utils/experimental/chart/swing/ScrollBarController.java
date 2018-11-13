@@ -164,7 +164,7 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 					adjustViewport();
 				}
 			});
-		} else {
+		} else if ( categories != null ) {
 			int number = categories.getLength();
 			synchronized ( viewport ) {
 				Integer pNumBars = viewport.getPreferredNumberOfBars();
