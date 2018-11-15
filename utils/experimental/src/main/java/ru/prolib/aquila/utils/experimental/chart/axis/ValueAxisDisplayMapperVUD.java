@@ -33,9 +33,10 @@ public class ValueAxisDisplayMapperVUD implements ValueAxisDisplayMapper {
 			throw new IllegalArgumentException("Display height " + height
 					+ " is too small for " + valueRange);
 		}
-		CDecimal ratioPerPixel = vr.divideExact(dh, BASE_SCALE + scale, RoundingMode.HALF_UP);
+		int fs = BASE_SCALE + scale;
+		CDecimal ratioPerPixel = vr.divideExact(dh, fs, RoundingMode.HALF_UP);
 		vr = vr.add(ratioPerPixel);
-		this.ratio = dh.divideExact(vr, BASE_SCALE + scale, RoundingMode.DOWN);
+		this.ratio = dh.divideExact(vr, fs, RoundingMode.DOWN);
 	}
 	
 	@Override

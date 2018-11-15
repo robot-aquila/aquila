@@ -17,7 +17,17 @@ import ru.prolib.aquila.core.data.TSeriesImpl;
 import ru.prolib.aquila.core.data.ValueException;
 import ru.prolib.aquila.core.data.ZTFrame;
 
-public class SuperTSeries implements ObservableTSeries<Instant> {
+/**
+ * Implementation of shared time series.
+ * <p>
+ * Shared time series is set of series with common timeline.
+ * Custom data series can be added and obtained from the set using that object.
+ * The most typical usage example of shared time series is a price and volume
+ * chart data which may contain several indicators based on price data of
+ * shares. All those series will have same number of elements and each index in
+ * those series will point to same time.
+ */
+public class STSeries implements ObservableTSeries<Instant> {
 	
 	static class Entry {
 		private final TSeries<?> readable;
@@ -104,7 +114,7 @@ public class SuperTSeries implements ObservableTSeries<Instant> {
 	private final Map<String, Entry> entries;
 	private final TSeriesNodeStorageKeys storage;
 	
-	SuperTSeries(EventQueue queue,
+	STSeries(EventQueue queue,
 			TSeriesNodeStorageKeys storage,
 			Map<String, Entry> entries)
 	{
@@ -113,13 +123,13 @@ public class SuperTSeries implements ObservableTSeries<Instant> {
 		this.entries = entries;
 	}
 	
-	public SuperTSeries(String seriesID, ZTFrame tframe, EventQueue queue) {
+	public STSeries(String seriesID, ZTFrame tframe, EventQueue queue) {
 		this(queue,
 			new TSeriesNodeStorageKeys(seriesID, queue, new TSeriesNodeStorageImpl(tframe)),
 			new HashMap<>());
 	}
 	
-	public SuperTSeries(ZTFrame tframe, EventQueue queue) {
+	public STSeries(ZTFrame tframe, EventQueue queue) {
 		this(queue,
 			new TSeriesNodeStorageKeys(queue, new TSeriesNodeStorageImpl(tframe)),
 			new HashMap<>());

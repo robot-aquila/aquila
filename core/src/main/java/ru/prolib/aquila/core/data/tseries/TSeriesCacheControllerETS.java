@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.data.ZTFrame;
  * updates instead of editable series which is basis for this class. This class may
  * control more than one instances of cache.
  */
-public class TSeriesCacheControllerETS<T> implements EditableTSeries<T> {
+public class TSeriesCacheControllerETS<T> implements EditableTSeries<T>, TSeriesCacheController<T> {
 	private final EditableTSeries<T> series;
 	private final List<TSeriesCache> caches;
 	
@@ -30,12 +30,20 @@ public class TSeriesCacheControllerETS<T> implements EditableTSeries<T> {
 		this(series, new ArrayList<>());
 	}
 	
-	public synchronized TSeriesCacheControllerETS<T> addCache(TSeriesCache cache) {
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.core.data.tseries.TSeriesCacheController#addCache(ru.prolib.aquila.core.data.tseries.TSeriesCache)
+	 */
+	@Override
+	public synchronized TSeriesCacheController<T> addCache(TSeriesCache cache) {
 		caches.add(cache);
 		return this;
 	}
 	
-	public synchronized TSeriesCacheControllerETS<T> removeCache(TSeriesCache cache) {
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.core.data.tseries.TSeriesCacheController#removeCache(ru.prolib.aquila.core.data.tseries.TSeriesCache)
+	 */
+	@Override
+	public synchronized TSeriesCacheController<T> removeCache(TSeriesCache cache) {
 		caches.remove(cache);
 		return this;
 	}

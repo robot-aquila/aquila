@@ -18,9 +18,9 @@ import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.ObservableTSeriesImpl;
 import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.ZTFrame;
-import ru.prolib.aquila.core.data.tseries.SuperTSeries.Entry;
+import ru.prolib.aquila.core.data.tseries.STSeries.Entry;
 
-public class SuperTSeriesTest {
+public class STSeriesTest {
 	
 	static Instant T(String timeString) {
 		return Instant.parse(timeString);
@@ -32,7 +32,7 @@ public class SuperTSeriesTest {
 	private EditableTSeries<?> seriesMock1, seriesMock2;
 	private ObservableTSeriesImpl<?> obsSeriesMock;
 	private Map<String, Entry> entriesStub;
-	private SuperTSeries service;
+	private STSeries service;
 
 	@Before
 	public void setUp() throws Exception {
@@ -43,7 +43,7 @@ public class SuperTSeriesTest {
 		seriesMock2 = control.createMock(EditableTSeries.class);
 		obsSeriesMock = control.createMock(ObservableTSeriesImpl.class);
 		entriesStub = new LinkedHashMap<>();
-		service = new SuperTSeries(queueMock, storageMock, entriesStub);
+		service = new STSeries(queueMock, storageMock, entriesStub);
 	}
 	
 	@Test
