@@ -72,6 +72,7 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 	@Override
 	public void setCategories(ObservableTSeries<?> categories) {
 		scrollBarController.setCategories(categories);
+		rootPanel.setPaintLockable(categories);
 	}
 
     @Override
@@ -134,6 +135,27 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 	public void paint() {
 		rootPanel.repaint();
 	}
+	
+	protected void onBeforePaintChildren(PaintEvent e) {
+		Graphics2D graphics = e.getGraphics();
+		Segment1D displaySpace = new Segment1D(0, e.getComponent().getWidth());
+		int rulersMaxSpace = displaySpace.getLength() / 2;
+		ChartSpaceLayout bestLayout = null;
+		for ( BarChart chart : charts.values() ) {
+			ChartSpaceLayout layout = chart.getHorizontalSpaceManager()
+					.prepareLayout(displaySpace, rulersMaxSpace, graphics);
+			// TODO: To make a better approach
+			if ( bestLayout == null
+			  || bestLayout.getDataSpace().getLength() > layout.getDataSpace().getLength() )
+			{
+				bestLayout = layout;
+			}
+		}
+		Segment1D dataSpace = bestLayout == null ? displaySpace : bestLayout.getDataSpace();
+		CategoryAxisDisplayMapper cam = cad.createMapper(dataSpace, cav);
+		cadProxy.setCurrentMapper(cam);
+		scrollBarController.setDisplayMapper(cam);		
+	}
 
 	@Override
 	public void onEvent(Event event) {
@@ -141,28 +163,8 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 			if ( cad.getAxisDirection().isVertical() ) {
 				throw new UnsupportedOperationException("Orientation not supported");
 			}
-			
-			PaintEvent e = (PaintEvent) event;
-			Graphics2D graphics = e.getGraphics();
-			Segment1D displaySpace = new Segment1D(0, e.getComponent().getWidth());
-			int rulersMaxSpace = displaySpace.getLength() / 2;
-			ChartSpaceLayout bestLayout = null;
-			for ( BarChart chart : charts.values() ) {
-				ChartSpaceLayout layout = chart.getHorizontalSpaceManager()
-						.prepareLayout(displaySpace, rulersMaxSpace, graphics);
-				// TODO: To make a better approach
-				if ( bestLayout == null
-				  || bestLayout.getDataSpace().getLength() > layout.getDataSpace().getLength() )
-				{
-					bestLayout = layout;
-				}
-			}
-			Segment1D dataSpace = bestLayout == null ? displaySpace : bestLayout.getDataSpace();
-			CategoryAxisDisplayMapper cam = cad.createMapper(dataSpace, cav);
-			cadProxy.setCurrentMapper(cam);
-			scrollBarController.setDisplayMapper(cam);
+			onBeforePaintChildren((PaintEvent) event);
 		}
-		
 	}
 
 	// TODO: refactor me

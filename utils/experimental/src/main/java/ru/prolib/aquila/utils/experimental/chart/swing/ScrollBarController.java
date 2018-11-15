@@ -99,6 +99,10 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 		adjustScrollBar();
 	}
 	
+	public synchronized ObservableTSeries<?> getCategories() {
+		return categories;
+	}
+	
 	public synchronized void setDisplayMapper(CategoryAxisDisplayMapper mapper) {
 		this.mapper = mapper;
 		adjustScrollBar();
@@ -140,12 +144,16 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 	 * Called when categories updated.
 	 */
 	@Override
-	public synchronized void onEvent(Event event) {
-		if ( viewport == null ) {
-			return;
+	public void onEvent(Event event) {
+		ObservableTSeries<?> c = null;
+		synchronized ( this ) {
+			if ( viewport == null ) {
+				return;
+			}
+			c = categories;
 		}
-		if ( event.isType(categories.onUpdate()) ) {
-			int number = categories.getLength();
+		int number = c.getLength();
+		synchronized ( this ) {
 			if ( number != lastNumberOfCategories ) {
 				lastNumberOfCategories = number;
 				adjustViewport();

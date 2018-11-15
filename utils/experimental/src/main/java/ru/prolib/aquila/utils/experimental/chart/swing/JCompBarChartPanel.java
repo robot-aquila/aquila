@@ -11,6 +11,7 @@ import javax.swing.JScrollBar;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.concurrency.Lockable;
 
 public class JCompBarChartPanel extends JPanel {
 	private static final long serialVersionUID = -1571529262095604481L;
@@ -23,6 +24,7 @@ public class JCompBarChartPanel extends JPanel {
 	private final JPanel scrollBarPanel;
 	private final JCompAutoScrollButton autoScrollButton;
 	private final JScrollBar scrollBar;
+	private Lockable paintLockable;
 	
 	public JCompBarChartPanel() {
 		super(new BorderLayout());
@@ -86,13 +88,40 @@ public class JCompBarChartPanel extends JPanel {
 		return onBeforePaintChildren;
 	}
 	
-	@Override
-	protected void paintChildren(Graphics g) {
+	private void notifyListenersOnBeforePaintChildren(Graphics g) {
 		PaintEvent event = new PaintEvent(onBeforePaintChildren, (Graphics2D) g, this);
 		for ( EventListener listener : onBeforePaintChildren.getListeners() ) {
 			listener.onEvent(event);
 		}
-		super.paintChildren(g);
+	}
+	
+	@Override
+	protected void paintChildren(Graphics g) {
+		Lockable l = null;
+		synchronized ( this ) {
+			l = paintLockable;
+		}
+		if ( l == null ) {
+			notifyListenersOnBeforePaintChildren(g);
+			super.paintChildren(g);
+		} else {
+			l.lock();
+			try {
+				notifyListenersOnBeforePaintChildren(g);
+				super.paintChildren(g);
+			} finally {
+				l.unlock();
+			}
+		}
+	}
+	
+	/**
+	 * Set lockable object to lock something during painting.
+	 * <p>
+	 * @param lockable - object to lock while painting. If null then no locking will made.
+	 */
+	public synchronized void setPaintLockable(Lockable lockable) {
+		this.paintLockable = lockable;
 	}
 
 }
