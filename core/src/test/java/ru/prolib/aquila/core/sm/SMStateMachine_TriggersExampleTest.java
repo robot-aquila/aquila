@@ -17,6 +17,7 @@ public class SMStateMachine_TriggersExampleTest {
 	private List<Event> events;
 	private EventType s1exit, s1skip, s2back, s2exit;
 	private SMStateMachine automat;
+	private EventListenerStub listenerStub = new EventListenerStub();
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -92,6 +93,13 @@ public class SMStateMachine_TriggersExampleTest {
 		s1skip = dispatcher.createType("s1skip");
 		s2back = dispatcher.createType("s2back");
 		s2exit = dispatcher.createType("s2exit");
+		// we have to add fake listener to make it possible
+		// to dispatch events consecutive
+		s1exit.addListener(listenerStub);
+		s1skip.addListener(listenerStub);
+		s2back.addListener(listenerStub);
+		s2exit.addListener(listenerStub);
+		
 		SMStateHandler s1 = new State1(), s2 = new State2();
 		transitions = new HashMap<KW<SMExit>, SMStateHandler>();
 		transitions.put(new KW<SMExit>(s1.getExit("EXIT")), s2);

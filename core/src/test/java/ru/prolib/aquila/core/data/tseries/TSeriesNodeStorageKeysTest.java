@@ -40,6 +40,7 @@ public class TSeriesNodeStorageKeysTest {
 		assertSame(queueMock, service.getEventQueue());
 		assertSame(storageMock, service.getStorage());
 		assertEquals("foobar.UPDATE", service.onUpdate().getId());
+		assertEquals("foobar.LENGTH_UPDATE", service.onLengthUpdate().getId());
 	}
 	
 	@Test
@@ -176,11 +177,13 @@ public class TSeriesNodeStorageKeysTest {
 				.setNewValue(256);
 		storageMock.lock();
 		expect(storageMock.setValue(T("2017-09-01T03:27:15Z"), 5, 256)).andReturn(expectedUpdate);
-		queueMock.enqueue(service.onUpdate(), new TSeriesUpdateEventFactory(new TSeriesUpdateImpl(interval)
+		TSeriesUpdate keyUpd = new TSeriesUpdateImpl(interval)
 				.setNewNode(true)
 				.setNodeIndex(12)
 				.setOldValue(null)
-				.setNewValue(T("2017-09-01T03:25:00Z"))));
+				.setNewValue(T("2017-09-01T03:25:00Z"));
+		queueMock.enqueue(service.onUpdate(), new TSeriesUpdateEventFactory(keyUpd));
+		queueMock.enqueue(service.onLengthUpdate(), new TSeriesUpdateEventFactory(keyUpd));
 		storageMock.unlock();
 		control.replay();
 		
@@ -200,11 +203,12 @@ public class TSeriesNodeStorageKeysTest {
 				.setNewValue(117);
 		storageMock.lock();
 		expect(storageMock.setValue(T("2017-09-01T03:27:15Z"), 56, 117)).andReturn(expectedUpdate);
-		queueMock.enqueue(service.onUpdate(), new TSeriesUpdateEventFactory(new TSeriesUpdateImpl(interval)
+		TSeriesUpdate keyUpd = new TSeriesUpdateImpl(interval)
 				.setNewNode(false)
 				.setNodeIndex(85)
 				.setOldValue(T("2017-09-01T03:25:00Z"))
-				.setNewValue(T("2017-09-01T03:25:00Z"))));
+				.setNewValue(T("2017-09-01T03:25:00Z"));
+		queueMock.enqueue(service.onUpdate(), new TSeriesUpdateEventFactory(keyUpd));
 		storageMock.unlock();
 		control.replay();
 		

@@ -5,6 +5,7 @@ import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.EventFactory;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
@@ -25,13 +26,14 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 	private final String id;
 	private final EventQueue queue;
 	private final TSeriesNodeStorage storage;
-	private final EventType onUpdate;
+	private final EventType onUpdate, onLengthUpdate;
 	
 	public TSeriesNodeStorageKeys(String id, EventQueue queue, TSeriesNodeStorage storage) {
 		this.id = id;
 		this.queue = queue;
 		this.storage = storage;
 		this.onUpdate = new EventTypeImpl(id + ".UPDATE");
+		this.onLengthUpdate = new EventTypeImpl(id + ".LENGTH_UPDATE");
 	}
 
 	public TSeriesNodeStorageKeys(EventQueue queue, TSeriesNodeStorage storage) {
@@ -121,13 +123,19 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 		lock();
 		try {
 			TSeriesUpdate update = storage.setValue(time, seriesID, value);
-			if ( update.isNewNode() || update.hasChanged() ) {
+			boolean newNode = update.isNewNode(), changed = update.hasChanged();
+			if ( newNode || changed ) {
+				Instant key = update.getInterval().getStart();
 				TSeriesUpdateImpl serviceUpdate = new TSeriesUpdateImpl(update.getInterval())
 					.setNodeIndex(update.getNodeIndex())
-					.setNewNode(update.isNewNode())
-					.setOldValue(update.isNewNode() ? null : update.getInterval().getStart())
-					.setNewValue(update.getInterval().getStart());
-				queue.enqueue(onUpdate, new TSeriesUpdateEventFactory(serviceUpdate));
+					.setNewNode(newNode)
+					.setOldValue(newNode ? null : key)
+					.setNewValue(key);
+				EventFactory factory = new TSeriesUpdateEventFactory(serviceUpdate);
+				queue.enqueue(onUpdate, factory);
+				if ( newNode ) {
+					queue.enqueue(onLengthUpdate, factory);
+				}
 			}
 			return update;
 		} finally {
@@ -158,6 +166,11 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 	@Override
 	public EventType onUpdate() {
 		return onUpdate;
+	}
+	
+	@Override
+	public EventType onLengthUpdate() {
+		return onLengthUpdate;
 	}
 
 	@Override

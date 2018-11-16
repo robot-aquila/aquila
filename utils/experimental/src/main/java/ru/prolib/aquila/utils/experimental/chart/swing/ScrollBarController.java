@@ -91,10 +91,10 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 
 	public synchronized void setCategories(ObservableTSeries<?> categories) {
 		if ( this.categories != null ) {
-			this.categories.onUpdate().removeListener(this);
+			this.categories.onLengthUpdate().removeListener(this);
 		}
 		this.categories = categories;
-		this.categories.onUpdate().addListener(this);
+		this.categories.onLengthUpdate().addListener(this);
 		this.lastNumberOfCategories = categories.getLength();
 		adjustScrollBar();
 	}
@@ -141,7 +141,7 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 	}
 
 	/**
-	 * Called when categories updated.
+	 * Called when categories length updated.
 	 */
 	@Override
 	public void onEvent(Event event) {
@@ -153,14 +153,18 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 			c = categories;
 		}
 		int number = c.getLength();
+		boolean adj = false;
 		synchronized ( this ) {
 			if ( number != lastNumberOfCategories ) {
 				lastNumberOfCategories = number;
-				adjustViewport();
+				adj = true;
 			}
 			if ( autoRepaintEnabled ) {
 				autoRepaintChange = true;
 			}
+		}
+		if ( adj ) {
+			adjustViewport();
 		}
 	}
 	

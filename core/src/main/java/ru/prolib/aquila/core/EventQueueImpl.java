@@ -116,8 +116,10 @@ public class EventQueueImpl implements EventQueue {
 	@Override
 	public void enqueue(EventType type, EventFactory factory) {
 		try {
-			queue.put(new EventDispatchingRequest(type, factory));
-			stats.addEventSent();
+			if ( type.countListeners() > 0 ) {
+				queue.put(new EventDispatchingRequest(type, factory));
+				stats.addEventSent();
+			}
 		} catch ( InterruptedException e ) {
 			Thread.currentThread().interrupt();
 			logger.error("Interrupted: ", e);

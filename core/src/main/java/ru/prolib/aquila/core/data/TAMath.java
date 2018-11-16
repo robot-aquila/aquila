@@ -336,16 +336,18 @@ public class TAMath {
 		if ( curr == null ) {
 			return null;
 		}
+		CDecimal currHeight = curr.getHeight();
 		if ( index == 0 ) {
-			return curr.getHeight();
+			return currHeight;
 		}
 		Candle prev = value.get(index - 1);
 		if ( prev == null ) {
-			return curr.getHeight();
+			return currHeight;
 		}
-		return max(curr.getHeight(),
-				abs(curr.getHigh().subtract(prev.getClose())),
-				abs(curr.getLow().subtract(prev.getClose())));
+		CDecimal prevClose = prev.getClose();
+		return max(currHeight,
+				curr.getHigh().subtract(prevClose).abs(),
+				curr.getLow().subtract(prevClose).abs());
 	}
 
 	/**

@@ -320,5 +320,30 @@ public class CDecimalBD extends CDecimalAbstract {
 		throw new IllegalArgumentException("Operand expected to be abstract but is in "
 				+ other.getUnit());
 	}
+	
+	@Override
+	public int compareTo(CDecimal other) {
+		if ( this == other ) {
+			return 0;
+		}
+		if ( other == null ) {
+			return 1;
+		}
+		CDecimalBD o = (CDecimalBD) other;
+		int r = value.compareTo(o.value);
+		if ( r != 0 ) {
+			return r;
+		}
+
+		if ( unit == null ) {
+			return o.unit == null ? 0 : -1;
+		}
+		
+		if ( o.unit == null ) {
+			return 1;
+		} else {
+			return unit.compareTo(o.unit);
+		}
+	}
 
 }

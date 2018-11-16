@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+import ru.prolib.aquila.core.EventFactory;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
@@ -13,12 +14,13 @@ import ru.prolib.aquila.core.data.tseries.TSeriesUpdateEventFactory;
 public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableTSeries<T> {
 	protected final EventQueue queue;
 	protected final EditableTSeries<T> series;
-	private final EventType onUpdate;
+	private final EventType onUpdate, onLengthUpdate;
 	
 	public ObservableTSeriesImpl(EventQueue queue, EditableTSeries<T> series) {
 		this.queue = queue;
 		this.series = series;
 		onUpdate = new EventTypeImpl(series.getId() + ".UPDATE");
+		onLengthUpdate = new EventTypeImpl(series.getId() + ".LENGTH_UPDATE");
 	}
 	
 	public EventQueue getEventQueue() {
@@ -78,12 +80,24 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 	public EventType onUpdate() {
 		return onUpdate;
 	}
+	
+	@Override
+	public EventType onLengthUpdate() {
+		return onLengthUpdate;
+	}
 
 	@Override
 	public TSeriesUpdate set(Instant time, T value) {
 		TSeriesUpdate update = series.set(time, value);
-		if ( update.hasChanged() ) {
-			queue.enqueue(onUpdate, new TSeriesUpdateEventFactory(update));
+		boolean updated = update.hasChanged(), lenUpdated = update.isNewNode();
+		if ( updated || lenUpdated ) {
+			EventFactory factory = new TSeriesUpdateEventFactory(update);
+			if ( updated ) {
+				queue.enqueue(onUpdate, factory);
+			}
+			if ( lenUpdated ) {
+				queue.enqueue(onLengthUpdate, factory);				
+			}
 		}
 		return update;
 	}

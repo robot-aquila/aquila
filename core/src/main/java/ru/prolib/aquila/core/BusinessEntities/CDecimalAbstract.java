@@ -29,6 +29,7 @@ abstract public class CDecimalAbstract implements CDecimal {
 
 	@Override
 	public int compareTo(CDecimal other) {
+		// Note: this is basic and very, very, very slow implementation
 		if ( other == null ) {
 			return 1;
 		}

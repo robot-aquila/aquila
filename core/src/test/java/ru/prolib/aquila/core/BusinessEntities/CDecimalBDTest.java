@@ -219,6 +219,11 @@ public class CDecimalBDTest {
 		assertEquals(-3, new CDecimalBD("12.34", "RUR").compareTo(new CDecimalBD(  "12.34", "USD")));
 		assertEquals(15, new CDecimalBD("12.34", "RUR").compareTo(new CDecimalBD(  "12.34", "CAD")));
 		assertEquals( 1, new CDecimalBD("12.34", "RUR").compareTo(new CDecimalBD(  "12.34")));
+		
+		assertEquals( 1, new CDecimalBD("12.34").compareTo(null));
+		assertEquals( 0, new CDecimalBD("12.34").compareTo(new CDecimalBD("12.34")));
+		assertEquals(-1, new CDecimalBD("12.34").compareTo(new CDecimalBD("12.34", "ANY")));
+		assertEquals( 1, new CDecimalBD("12.34").compareTo(new CDecimalBD("12.33")));
 	}
 	
 	@Test

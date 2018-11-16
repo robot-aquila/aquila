@@ -159,6 +159,17 @@ public class STSeriesTest {
 	}
 	
 	@Test
+	public void testOnLengthUpdate() {
+		EventType typeMock = control.createMock(EventType.class);
+		expect(storageMock.onLengthUpdate()).andReturn(typeMock);
+		control.replay();
+		
+		assertSame(typeMock, service.onLengthUpdate());
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testCreateSeries() {
 		EditableTSeries<Double> x = service.createSeries("foobar", false);
 		

@@ -48,6 +48,7 @@ public class ObservableTSeriesImplTest {
 		assertSame(queueMock1, series.getEventQueue());
 		assertSame(underlyingSeriesMock1, series.getUnderlyingSeries());
 		assertEquals("foo.UPDATE", series.onUpdate().getId());
+		assertEquals("foo.LENGTH_UPDATE", series.onLengthUpdate().getId());
 	}
 	
 	@Test
@@ -142,7 +143,7 @@ public class ObservableTSeriesImplTest {
 	}
 	
 	@Test
-	public void testSet2_TV_HasChanged() throws Exception {
+	public void testSet2_TV_HasChanged_NewNode() throws Exception {
 		Interval interval = Interval.of(Instant.EPOCH, Duration.ofMinutes(5));
 		TSeriesUpdate update = new TSeriesUpdateImpl(interval)
 				.setNewNode(true)
@@ -151,6 +152,7 @@ public class ObservableTSeriesImplTest {
 				.setNewValue(850);
 		expect(underlyingSeriesMock1.set(T("2017-08-28T00:00:00Z"), 850)).andReturn(update);
 		queueMock1.enqueue(series.onUpdate(), new TSeriesUpdateEventFactory(update));
+		queueMock1.enqueue(series.onLengthUpdate(), new TSeriesUpdateEventFactory(update));
 		control.replay();
 		
 		assertSame(update, series.set(T("2017-08-28T00:00:00Z"), 850));
@@ -159,10 +161,27 @@ public class ObservableTSeriesImplTest {
 	}
 	
 	@Test
+	public void testSet2_TV_HasChanged_OldNode() throws Exception {
+		Interval interval = Interval.of(Instant.EPOCH, Duration.ofMinutes(5));
+		TSeriesUpdate update = new TSeriesUpdateImpl(interval)
+				.setNewNode(false)
+				.setNodeIndex(112)
+				.setOldValue(256)
+				.setNewValue(302);
+		expect(underlyingSeriesMock1.set(T("2017-08-28T00:00:00Z"), 302)).andReturn(update);
+		queueMock1.enqueue(series.onUpdate(), new TSeriesUpdateEventFactory(update));
+		control.replay();
+		
+		assertSame(update, series.set(T("2017-08-28T00:00:00Z"), 302));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testSet2_TV_NoChanges() throws Exception {
 		Interval interval = Interval.of(Instant.EPOCH, Duration.ofMinutes(5));
 		TSeriesUpdate update = new TSeriesUpdateImpl(interval)
-				.setNewNode(true)
+				.setNewNode(false)
 				.setNodeIndex(10)
 				.setOldValue(850)
 				.setNewValue(850);
@@ -202,7 +221,7 @@ public class ObservableTSeriesImplTest {
 		ObservableTSeriesImpl<Integer> x, found = null;
 		do {
 			control.reset();
-			expect(vSer.get().getId()).andReturn("zulu");
+			expect(vSer.get().getId()).andStubReturn("zulu");
 			control.replay();
 			x = new ObservableTSeriesImpl<Integer>(vQue.get(), vSer.get());
 			if ( series.equals(x) ) {

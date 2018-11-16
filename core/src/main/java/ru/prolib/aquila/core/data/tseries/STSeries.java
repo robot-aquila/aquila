@@ -190,6 +190,11 @@ public class STSeries implements ObservableTSeries<Instant> {
 		return storage.onUpdate();
 	}
 	
+	@Override
+	public EventType onLengthUpdate() {
+		return storage.onLengthUpdate();
+	}
+	
 	/**
 	 * Get observable series by ID.
 	 * <p>
