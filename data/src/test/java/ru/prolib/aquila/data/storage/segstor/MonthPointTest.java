@@ -71,5 +71,21 @@ public class MonthPointTest {
 		assertTrue(point.compareTo(new MonthPoint(1996, Month.JANUARY)) > 0);
 		assertTrue(point.compareTo(new MonthPoint(1996, Month.DECEMBER)) < 0);
 	}
+	
+	@Test
+	public void testGetFirstDatePoint() {
+		assertEquals(new DatePoint(2016, 2, 1),
+			new MonthPoint(2016, Month.FEBRUARY).getFirstDatePoint());
+		assertEquals(new DatePoint(2000, 12, 1),
+			new MonthPoint(2000, Month.DECEMBER).getFirstDatePoint());
+	}
+	
+	@Test
+	public void testGetLastDatePoint() {
+		assertEquals(new DatePoint(2016, 2, 29),
+			new MonthPoint(2016, Month.FEBRUARY).getLastDatePoint());
+		assertEquals(new DatePoint(2000, 12, 31),
+			new MonthPoint(2000, Month.DECEMBER).getLastDatePoint());
+	}
 
 }

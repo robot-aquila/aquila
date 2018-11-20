@@ -12,14 +12,18 @@ import org.junit.Test;
 
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TFrame;
+import ru.prolib.aquila.core.data.timeframe.TFDays;
 import ru.prolib.aquila.core.data.timeframe.TFMinutes;
 import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
+import ru.prolib.aquila.data.storage.segstor.SymbolMonthlySegmentStorage;
 
 public class SegmentStorageRegistryImplTest {
 	private IMocksControl control;
 	private SymbolDailySegmentStorage<Candle> sdssMock1, sdssMock2;
-	private SegmentStorageFactory sdssFactoryMock;
+	private SymbolMonthlySegmentStorage<Candle> smssMock1;
+	private SegmentStorageFactory factoryMock;
 	private Map<TFrame, SymbolDailySegmentStorage<Candle>> sdssRegistryStub;
+	private Map<TFrame, SymbolMonthlySegmentStorage<Candle>> smssRegistryStub;
 	private SegmentStorageRegistryImpl registry;
 
 	@SuppressWarnings("unchecked")
@@ -28,9 +32,12 @@ public class SegmentStorageRegistryImplTest {
 		control = createStrictControl();
 		sdssMock1 = control.createMock(SymbolDailySegmentStorage.class);
 		sdssMock2 = control.createMock(SymbolDailySegmentStorage.class);
-		sdssFactoryMock = control.createMock(SegmentStorageFactory.class);
+		smssMock1 = control.createMock(SymbolMonthlySegmentStorage.class);
+		factoryMock = control.createMock(SegmentStorageFactory.class);
 		sdssRegistryStub = new HashMap<>();
-		registry = new SegmentStorageRegistryImpl(sdssFactoryMock, sdssRegistryStub);
+		smssRegistryStub = new HashMap<>();
+		registry = new SegmentStorageRegistryImpl(factoryMock,
+				sdssRegistryStub, smssRegistryStub);
 	}
 	
 	@Test
@@ -44,13 +51,31 @@ public class SegmentStorageRegistryImplTest {
 
 	@Test
 	public void testGetSDSS_NewStorage() throws Exception {
-		expect(sdssFactoryMock.createSDSS(new TFMinutes(10))).andReturn(sdssMock1);
+		expect(factoryMock.createSDSS(new TFMinutes(10))).andReturn(sdssMock1);
 		control.replay();
 		
 		SymbolDailySegmentStorage<Candle> actual = registry.getSDSS(new TFMinutes(10));
 		
 		assertSame(sdssMock1, actual);
 		assertSame(sdssMock1, sdssRegistryStub.get(new TFMinutes(10)));
+	}
+	
+	@Test
+	public void testGetSMSS_ExistingStorage() throws Exception {
+		smssRegistryStub.put(new TFDays(5), smssMock1);
+		
+		assertSame(smssMock1, registry.getSMSS(new TFDays(5)));
+	}
+	
+	@Test
+	public void testGetSMSS_NewStorage() throws Exception {
+		expect(factoryMock.createSMSS(new TFDays(1))).andReturn(smssMock1);
+		control.replay();
+		
+		SymbolMonthlySegmentStorage<Candle> actual = registry.getSMSS(new TFDays(1));
+		
+		assertSame(smssMock1, actual);
+		assertSame(smssMock1, smssRegistryStub.get(new TFDays(1)));
 	}
 
 }

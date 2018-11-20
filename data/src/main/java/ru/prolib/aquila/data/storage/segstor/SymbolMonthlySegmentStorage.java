@@ -16,7 +16,7 @@ import ru.prolib.aquila.data.storage.DataStorageException;
  */
 public interface SymbolMonthlySegmentStorage<T> extends SymbolSegmentStorageCommon {
 
-	boolean isExists(SymbolMonthly segment);
+	boolean isExists(SymbolMonthly segment) throws DataStorageException;
 
 	List<SymbolMonthly> listMonthlySegments(Symbol symbol) throws DataStorageException;
 	List<SymbolMonthly> listMonthlySegments(Symbol symbol, MonthPoint from, MonthPoint to)

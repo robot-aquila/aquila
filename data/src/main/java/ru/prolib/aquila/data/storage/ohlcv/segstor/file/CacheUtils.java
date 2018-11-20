@@ -232,14 +232,24 @@ public class CacheUtils {
 	}
 	
 	public <T> EditableTSeries<Candle>
-		buildUsingSourceData(CloseableIterator<T> source, ZTFrame tframe,
-			CandleSeriesAggregator<T> aggregator) throws Exception
+		buildUsingSourceData(CloseableIterator<T> source,
+				EditableTSeries<Candle> target,
+				CandleSeriesAggregator<T> aggregator)
+			throws Exception
 	{
-		TSeriesImpl<Candle> series = new TSeriesImpl<>(tframe);
 		while ( source.next() ) {
-			aggregator.aggregate(series, source.item());
+			aggregator.aggregate(target, source.item());
 		}
-		return series;
+		return target;
+	}
+	
+	public <T> EditableTSeries<Candle>
+		buildUsingSourceData(CloseableIterator<T> source,
+				ZTFrame tframe,
+				CandleSeriesAggregator<T> aggregator)
+			throws Exception
+	{
+		return buildUsingSourceData(source, new TSeriesImpl<>(tframe), aggregator);
 	}
 
 }

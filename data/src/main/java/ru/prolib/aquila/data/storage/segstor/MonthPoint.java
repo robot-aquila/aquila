@@ -1,5 +1,6 @@
 package ru.prolib.aquila.data.storage.segstor;
 
+import java.time.LocalDate;
 import java.time.Month;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -57,6 +58,15 @@ public class MonthPoint implements Comparable<MonthPoint> {
 				.append(getYear(), o.getYear())
 				.append(month, o.getMonth())
 				.isEquals();
+	}
+	
+	public DatePoint getFirstDatePoint() {
+		return new DatePoint(year, month.getValue(), 1);
+	}
+	
+	public DatePoint getLastDatePoint() {
+		LocalDate x = LocalDate.of(year, month.getValue(), 1).plusMonths(1).minusDays(1);
+		return new DatePoint(x.getYear(), x.getMonthValue(), x.getDayOfMonth());
 	}
 
 }

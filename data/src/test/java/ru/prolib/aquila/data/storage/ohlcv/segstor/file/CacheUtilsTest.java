@@ -549,9 +549,63 @@ public class CacheUtilsTest {
 			assertEquals("Bad volume format: foo", e.getMessage());
 		}
 	}
+	
+	@Test
+	public void testBuildUsingSourceData3_ISA() throws Exception {
+		L1UpdateBuilder builder = new L1UpdateBuilder(new Symbol("XXL")).withTrade();
+		List<L1Update> fixture = new ArrayList<>();
+		fixture.add(builder.withTime("2017-09-12T16:25:00Z").withPrice(105).withSize(100).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:25:45Z").withPrice(102).withSize(200).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:26:05Z").withPrice(103).withSize(110).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:31:19Z").withPrice(108).withSize(205).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:34:50Z").withPrice(110).withSize(400).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:34:59Z").withPrice(105).withSize(100).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:42:19Z").withPrice(102).withSize(520).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:43:00Z").withPrice(103).withSize(200).buildL1Update());
+		fixture.add(builder.withTime("2017-09-12T16:44:30Z").withPrice(101).withSize(100).buildL1Update());
+		CloseableIterator<L1Update> source = new CloseableIteratorStub<>(fixture);
+		TSeriesImpl<Candle> target = new TSeriesImpl<>(ZTFrame.M5);
+		
+		EditableTSeries<Candle> series = utils.buildUsingSourceData(source, target,
+				CandleSeriesL1UpdateAggregator.getInstance());
+		
+		assertNotNull(series);
+		List<Candle> expected = new ArrayList<>();
+		expected.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M5)
+				.withTime("2017-09-12T16:25:00Z")
+				.withOpenPrice(105L)
+				.withHighPrice(105L)
+				.withLowPrice(102L)
+				.withClosePrice(103L)
+				.withVolume(410L)
+				.buildCandle());
+		expected.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M5)
+				.withTime("2017-09-12T16:30:00Z")
+				.withOpenPrice(108L)
+				.withHighPrice(110L)
+				.withLowPrice(105L)
+				.withClosePrice(105L)
+				.withVolume(705L)
+				.buildCandle());
+		expected.add(new CandleBuilder()
+				.withTimeFrame(ZTFrame.M5)
+				.withTime("2017-09-12T16:40:00Z")
+				.withOpenPrice(102L)
+				.withHighPrice(103L)
+				.withLowPrice(101L)
+				.withClosePrice(101L)
+				.withVolume(820L)
+				.buildCandle());
+		assertEquals(expected.size(), series.getLength());
+		for ( int i = 0; i < expected.size(); i ++ ) {
+			assertEquals("At#" + i, expected.get(i), series.get(i));
+		}
+	}
 
 	@Test
-	public void testBuildUsingSourceData() throws Exception {
+	public void testBuildUsingSourceData3_ITA() throws Exception {
 		L1UpdateBuilder builder = new L1UpdateBuilder(new Symbol("XXL")).withTrade();
 		List<L1Update> fixture = new ArrayList<>();
 		fixture.add(builder.withTime("2017-09-12T16:25:00Z").withPrice(105).withSize(100).buildL1Update());

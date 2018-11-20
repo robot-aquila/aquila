@@ -71,7 +71,7 @@ public class DailySegmentsCombiner implements CloseableIterator<Candle> {
 				segmentReader = null;
 			}
 			closed = true;
-		}		
+		}
 	}
 
 	@Override

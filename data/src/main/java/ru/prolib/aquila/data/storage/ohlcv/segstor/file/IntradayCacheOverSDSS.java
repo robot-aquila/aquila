@@ -46,6 +46,7 @@ public class IntradayCacheOverSDSS<RecordType> implements SymbolDailySegmentStor
 	 * <p>
 	 * @param tframe - time frame of this OHLCV data storage
 	 * @param sourceSegments - source data segments (M1 for example)
+	 * @param aggregator - data converter and aggregator of source type
 	 * @param cacheManager - manager of cache files
 	 * @param utils - cache utilities
 	 */

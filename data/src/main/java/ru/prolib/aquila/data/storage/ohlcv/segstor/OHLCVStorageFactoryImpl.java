@@ -1,5 +1,7 @@
 package ru.prolib.aquila.data.storage.ohlcv.segstor;
 
+import java.time.temporal.ChronoUnit;
+
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.data.ZTFrame;
@@ -29,7 +31,15 @@ public class OHLCVStorageFactoryImpl implements OHLCVStorageFactory {
 			throws DataStorageException
 	{
 		if ( tframe.isIntraday() ) {
-			return new IntradayMDStorageOverSDSS(storageRegistry.getSDSS(tframe.toTFrame()), tframe);
+			return new IntradayMDStorageOverSDSS(
+					storageRegistry.getSDSS(tframe.toTFrame()),
+					tframe
+				);
+		} else if ( tframe.getUnit() == ChronoUnit.DAYS) {
+			return new InterdayMDStorageOverSMSS(
+					storageRegistry.getSMSS(tframe.toTFrame()),
+					tframe
+				);
 		}
 		throw new DataStorageException("Unsupported timeframe: " + tframe);
 	}

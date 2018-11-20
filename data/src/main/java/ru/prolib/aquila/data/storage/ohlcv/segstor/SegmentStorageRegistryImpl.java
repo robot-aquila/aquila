@@ -7,6 +7,7 @@ import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.TFrame;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
+import ru.prolib.aquila.data.storage.segstor.SymbolMonthlySegmentStorage;
 
 /**
  * Segment storage registry.
@@ -17,24 +18,28 @@ import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
  * be accessible through one object.
  */
 public class SegmentStorageRegistryImpl implements SegmentStorageRegistry {
-	private final SegmentStorageFactory sdssFactory;
+	private final SegmentStorageFactory factory;
 	private final Map<TFrame, SymbolDailySegmentStorage<Candle>> sdssRegistry;
+	private final Map<TFrame, SymbolMonthlySegmentStorage<Candle>> smssRegistry;
 	
 	/**
 	 * Constructor for testing purposes only.
 	 * <p>
-	 * @param sdssFactory - factory to produce daily segment storages of symbol data
+	 * @param factory - factory to produce segment storages of symbol data
 	 * @param sdssRegistry - registry to store daily segment storages
+	 * @param smssRegistry - registry to store monthly segment storages
 	 */
-	SegmentStorageRegistryImpl(SegmentStorageFactory sdssFactory,
-			Map<TFrame, SymbolDailySegmentStorage<Candle>> sdssRegistry)
+	SegmentStorageRegistryImpl(SegmentStorageFactory factory,
+			Map<TFrame, SymbolDailySegmentStorage<Candle>> sdssRegistry,
+			Map<TFrame, SymbolMonthlySegmentStorage<Candle>> smssRegistry)
 	{
-		this.sdssFactory = sdssFactory;
+		this.factory = factory;
 		this.sdssRegistry = sdssRegistry;
+		this.smssRegistry = smssRegistry;
 	}
 	
-	public SegmentStorageRegistryImpl(SegmentStorageFactory sdssFactory) {
-		this(sdssFactory, new HashMap<>());
+	public SegmentStorageRegistryImpl(SegmentStorageFactory factory) {
+		this(factory, new HashMap<>(), new HashMap<>());
 	}
 	
 	@Override
@@ -43,8 +48,20 @@ public class SegmentStorageRegistryImpl implements SegmentStorageRegistry {
 	{
 		SymbolDailySegmentStorage<Candle> x = sdssRegistry.get(tframe);
 		if ( x == null ) {
-			x = sdssFactory.createSDSS(tframe);
+			x = factory.createSDSS(tframe);
 			sdssRegistry.put(tframe, x);
+		}
+		return x;
+	}
+
+	@Override
+	public synchronized SymbolMonthlySegmentStorage<Candle> getSMSS(TFrame tframe)
+		throws DataStorageException
+	{
+		SymbolMonthlySegmentStorage<Candle> x = smssRegistry.get(tframe);
+		if ( x == null ) {
+			x = factory.createSMSS(tframe);
+			smssRegistry.put(tframe, x);
 		}
 		return x;
 	}
