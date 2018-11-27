@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,35 +27,105 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		logger = LoggerFactory.getLogger(L1UpdateHandler.class);
 	}
 	
+	static class TimeBlockReader {
+		private CloseableIterator<L1Update> reader;
+		private L1Update pending;
+		
+		public TimeBlockReader() {
+			
+		}
+		
+		public TimeBlockReader(CloseableIterator<L1Update> reader) {
+			this.reader = reader;
+		}
+		
+		public void setReader(CloseableIterator<L1Update> reader) {
+			this.reader = reader;
+			pending = null;
+		}
+		
+		public L1Update getPendingUpdate() {
+			return pending;
+		}
+		
+		public List<L1Update> readBlock()
+				throws NoSuchElementException, IOException
+		{
+			List<L1Update> result = new ArrayList<>();
+			L1Update prev = null, curr = null;
+			if ( pending != null ) {
+				result.add(pending);
+				prev = pending;
+				pending = null;
+			}
+			while ( reader.next() ) {
+				curr = reader.item();
+				if ( prev == null ) {
+					result.add(curr);
+					prev = curr;
+				} else {
+					if ( prev.getTime().equals(curr.getTime()) ) {
+						result.add(curr);
+						prev = curr;
+					} else {
+						pending = curr;
+						break;
+					}
+				}
+			}
+			return result.size() > 0 ? result : null;
+		}
+		
+	}
+	
 	private final Lock lock;
 	private final Symbol symbol;
 	private final Scheduler scheduler;
 	private final Set<L1UpdateConsumer> consumers;
 	private final L1UpdateReaderFactory readerFactory;
+	private final TimeBlockReader blockReader;
 	private int sequenceID = 1;
 	private CloseableIterator<L1Update> reader;
 	private Instant startTime;
 	
-	L1UpdateHandler(Symbol symbol, Scheduler scheduler,
-			L1UpdateReaderFactory readerFactory, Set<L1UpdateConsumer> consumers)
+	L1UpdateHandler(Symbol symbol,
+			Scheduler scheduler,
+			L1UpdateReaderFactory readerFactory,
+			Set<L1UpdateConsumer> consumers,
+			TimeBlockReader blockReader)
 	{
 		this.lock = new ReentrantLock();
 		this.symbol = symbol;
 		this.scheduler = scheduler;
 		this.readerFactory = readerFactory;
 		this.consumers = consumers;
+		this.blockReader = blockReader;
 	}
 	
 	public L1UpdateHandler(Symbol symbol, Scheduler scheduler,
 			L1UpdateReaderFactory readerFactory)
 	{
-		this(symbol, scheduler, readerFactory, new HashSet<>());
+		this(symbol, scheduler, readerFactory, new HashSet<>(), new TimeBlockReader());
 	}
 	
 	int getCurrentSequenceID() {
 		lock.lock();
 		try {
 			return sequenceID;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	/**
+	 * Set currently active update reader. For testing purposes only.
+	 * <p>
+	 * @param reader - reader to use
+	 */
+	void setCurrentReader(CloseableIterator<L1Update> reader) {
+		lock.lock();
+		try {
+			this.reader = reader;
 		} finally {
 			lock.unlock();
 		}
@@ -92,6 +163,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 			finishSequence();
 			if ( consumers.size() > 0 ) {
 				reader = readerFactory.createReader(symbol, getStartTime());
+				blockReader.setReader(reader);
 				scheduleUpdate();
 			}
 		} finally {
@@ -110,7 +182,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 	}
 	
 	@Override
-	public void consume(L1Update update, int sequenceID) {
+	public void consume(List<L1Update> updates, int sequenceID) {
 		List<L1UpdateConsumer> list = null;
 		lock.lock();
 		try {
@@ -121,8 +193,10 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		} finally {
 			lock.unlock();
 		}
-		for ( L1UpdateConsumer consumer : list ) {
-			consumer.consume(update);
+		for ( L1Update update : updates ) {
+			for ( L1UpdateConsumer consumer : list ) {
+				consumer.consume(update);
+			}
 		}
 		scheduleUpdate();
 	}
@@ -157,10 +231,12 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 	private void scheduleUpdate() {
 		lock.lock();
 		try {
-			if ( consumers.size() > 0 && reader.next() ) {
-				L1Update update = reader.item();
-				scheduler.schedule(new L1UpdateTask(update, sequenceID, this),
-						update.getTime());
+			List<L1Update> updates = null;
+			if ( consumers.size() > 0
+			  && (updates = blockReader.readBlock()) != null )
+			{
+				scheduler.schedule(new L1UpdateTask(updates, sequenceID, this),
+						updates.get(0).getTime());
 				return;
 			}
 		} catch ( IOException e ) {

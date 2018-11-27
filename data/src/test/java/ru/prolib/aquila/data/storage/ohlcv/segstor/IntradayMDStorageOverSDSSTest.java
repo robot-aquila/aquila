@@ -55,6 +55,14 @@ public class IntradayMDStorageOverSDSSTest {
 		return Interval.of(T(timeString), Duration.ofMinutes(5));
 	}
 	
+	static List<SymbolDaily> getTestSegments() {
+		List<SymbolDaily> segments = new ArrayList<>();
+		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
+		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
+		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
+		return segments;
+	}
+	
 	private IMocksControl control;
 	private SymbolDailySegmentStorage<Candle> segstorMock;
 	private ZoneId segstorZoneId;
@@ -134,15 +142,18 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test
 	public void testCreateReaderFrom_2KT() throws Exception {
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
-		List<SymbolDaily> segments = new ArrayList<>();
-		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
-		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
-		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
-		expect(segstorMock.listDailySegments(symbol1, new DatePoint(2017, 9, 15))).andReturn(segments);
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15)
+			)).andReturn(segments);
 		control.replay();
-		CloseableIterator<Candle> actual, expected = 
-				new PreciseTimeLimitsIterator(new DailySegmentsCombiner(segstorMock, segments),
-						T("2017-09-14T21:05:00Z"), null);
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+				new DailySegmentsCombiner(segstorMock, segments),
+				T("2017-09-14T21:05:00Z"),
+				null
+			);
 		
 		actual = storage.createReaderFrom(tsymbol1, T("2017-09-14T21:05:00Z"));
 		
@@ -153,8 +164,10 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test
 	public void testCreateReaderFrom_2KT_IfNoSegmentsFound() throws Exception {
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
-		expect(segstorMock.listDailySegments(symbol1, new DatePoint(2017, 9, 15)))
-			.andReturn(new ArrayList<>());
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15)
+			)).andReturn(new ArrayList<>());
 		control.replay();
 		CloseableIterator<Candle> actual, expected = new CloseableIteratorStub<>();
 		
@@ -170,17 +183,45 @@ public class IntradayMDStorageOverSDSSTest {
 	}
 	
 	@Test
-	public void testCreateReader_3KTI() throws Exception {
+	public void testCreateReaderFrom_2KT_StartTimeIsAlignedByTF() throws Exception {
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
 		List<SymbolDaily> segments = new ArrayList<>();
 		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
-		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
-		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
-		expect(segstorMock.listDailySegments(symbol1, new DatePoint(2017, 9, 15))).andReturn(segments);
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15)
+			)).andReturn(segments);
 		control.replay();
-		CloseableIterator<Candle> actual, expected = new LimitedAmountIterator(
-			new PreciseTimeLimitsIterator(new DailySegmentsCombiner(segstorMock, segments),
-						T("2017-09-14T21:05:00Z"), null), 25);
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+					new DailySegmentsCombiner(segstorMock, segments),
+					T("2017-09-14T21:05:00Z"),
+					null
+				);
+		
+		actual = storage.createReaderFrom(tsymbol1, T("2017-09-14T21:05:13.826Z"));
+		
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateReader_3KTI() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15)
+			)).andReturn(segments);
+		control.replay();
+		CloseableIterator<Candle> actual,
+			expected = new LimitedAmountIterator(
+				new PreciseTimeLimitsIterator(
+						new DailySegmentsCombiner(segstorMock, segments),
+						T("2017-09-14T21:05:00Z"),
+						null
+					),
+				25);
 		
 		actual = storage.createReader(tsymbol1, T("2017-09-14T21:05:00Z"), 25);
 		
@@ -191,7 +232,10 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test
 	public void testCreateReader_3KTI_IfNoSegmentsFound() throws Exception {
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
-		expect(segstorMock.listDailySegments(symbol1, new DatePoint(2017, 9, 14))).andReturn(new ArrayList<>());
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 14)
+			)).andReturn(new ArrayList<>());
 		control.replay();
 		CloseableIterator<Candle> actual, expected = new CloseableIteratorStub<>();
 		
@@ -204,6 +248,30 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test (expected=DataStorageException.class)
 	public void testCreateReader_3KTI_ThrowsIfTimeFrameUnsupported() throws Exception {
 		storage.createReader(new TFSymbol(symbol1, ZTFrame.D1), T("2017-09-14T20:00:00Z"), 25);
+	}
+	
+	@Test
+	public void testCreateReader_3KTI_StartTimeIsAlignedByTF() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15)
+			)).andReturn(segments);
+		control.replay();
+		CloseableIterator<Candle> actual,
+			expected = new LimitedAmountIterator(
+				new PreciseTimeLimitsIterator(
+						new DailySegmentsCombiner(segstorMock, segments),
+						T("2017-09-14T21:05:00Z"),
+						null
+					),
+				25);
+		
+		actual = storage.createReader(tsymbol1, T("2017-09-14T21:05:02.352Z"), 25);
+		
+		control.verify();
+		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -246,6 +314,81 @@ public class IntradayMDStorageOverSDSSTest {
 				T("2017-09-14T21:05:00Z"), T("2018-05-10T18:56:00Z"));
 	}
 	
+	@Test
+	public void testCreateReader_3KTT_EndTimeIsExclusive() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15),
+				new DatePoint(2018, 1,  1)
+			)).andReturn(segments);
+		control.replay();
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+				new DailySegmentsCombiner(segstorMock, segments),
+				T("2017-09-14T21:05:00Z"),
+				T("2017-12-31T23:30:00Z")
+			);
+		
+		actual = storage.createReader(tsymbol1,
+				T("2017-09-14T21:05:00Z"),
+				T("2017-12-31T23:30:00Z"));
+		
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateReader_3KTT_StartTimeIsAlignedByTF() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15),
+				new DatePoint(2018, 1,  1)
+			)).andReturn(segments);
+		control.replay();
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+				new DailySegmentsCombiner(segstorMock, segments),
+				T("2017-09-14T21:05:00Z"), // <-- !
+				T("2017-12-31T23:30:00Z")
+			);
+		
+		actual = storage.createReader(tsymbol1,
+				T("2017-09-14T21:05:12.903Z"), // <-- !
+				T("2017-12-31T23:30:00Z"));
+		
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateReader_3KTT_EndTimeIsAlignedByTF() throws Exception {
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(
+				symbol1,
+				new DatePoint(2017, 9, 15),
+				new DatePoint(2018, 1,  1)
+			)).andReturn(segments);
+		control.replay();
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+				new DailySegmentsCombiner(segstorMock, segments),
+				T("2017-09-14T21:05:00Z"),
+				T("2017-12-31T23:30:00Z") // <-- !
+			);
+		
+		actual = storage.createReader(tsymbol1,
+				T("2017-09-14T21:05:12.903Z"),
+				T("2017-12-31T23:30:56.102Z")); // <-- !
+		
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
 	private void testCreateReader_3KIT_FillStubIterators() {
 		CandleBuilder cb = new CandleBuilder().withTimeFrame(ZTFrame.M1);
 		fixture.add(cb.buildCandle("2017-09-15T18:01:00Z", 150, 156, 150, 155, 1700));
@@ -266,10 +409,7 @@ public class IntradayMDStorageOverSDSSTest {
 	public void testCreateReader_3KIT_IfNoSegmentsAfterSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
-		List<SymbolDaily> segments = new ArrayList<>();
-		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
-		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
-		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
+		List<SymbolDaily> segments = getTestSegments();
 		expect(segstorMock.listDailySegments(symbol1)).andReturn(segments);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017, 12, 31))).andReturn(iteratorStub3);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017, 10,  1))).andReturn(iteratorStub2);
@@ -291,10 +431,7 @@ public class IntradayMDStorageOverSDSSTest {
 	public void testCreateReader_3KIT_IfHasSegmentsAfterSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
-		List<SymbolDaily> segments = new ArrayList<>();
-		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
-		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
-		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
+		List<SymbolDaily> segments = getTestSegments();
 		expect(segstorMock.listDailySegments(symbol1)).andReturn(segments);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017, 10,  1))).andReturn(iteratorStub2);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017,  9, 15))).andReturn(iteratorStub1);
@@ -316,10 +453,7 @@ public class IntradayMDStorageOverSDSSTest {
 	public void testCreateReader_3KIT_IfLastAvailableSegmentBeforeSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
-		List<SymbolDaily> segments = new ArrayList<>();
-		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
-		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
-		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
+		List<SymbolDaily> segments = getTestSegments();
 		expect(segstorMock.listDailySegments(symbol1)).andReturn(segments);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017, 12, 31))).andReturn(iteratorStub3);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017, 10,  1))).andReturn(iteratorStub2);
@@ -340,10 +474,7 @@ public class IntradayMDStorageOverSDSSTest {
 	public void testCreateReader_3KIT_IfNotEnoughValuesBeforeSpecifiedTime() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
-		List<SymbolDaily> segments = new ArrayList<>();
-		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
-		segments.add(new SymbolDaily(symbol1, 2017, 10,  1));
-		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
+		List<SymbolDaily> segments = getTestSegments();
 		expect(segstorMock.listDailySegments(symbol1)).andReturn(segments);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017, 10,  1))).andReturn(iteratorStub2);
 		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017,  9, 15))).andReturn(iteratorStub1);
@@ -379,11 +510,34 @@ public class IntradayMDStorageOverSDSSTest {
 	}
 	
 	@Test
+	public void testCreateReader_3KIT_EndTimeIsExclusive() throws Exception {
+		testCreateReader_3KIT_IfNotEnoughValuesBeforeSpecifiedTime();
+	}
+	
+	@Test
+	public void testCreateReader_3KIT_EndTimeIsAlignedByTF() throws Exception {
+		testCreateReader_3KIT_FillStubIterators();
+		expect(segstorMock.getZoneID()).andStubReturn(segstorZoneId);
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(symbol1)).andReturn(segments);
+		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017, 10,  1))).andReturn(iteratorStub2);
+		expect(segstorMock.createReader(new SymbolDaily(symbol1, 2017,  9, 15))).andReturn(iteratorStub1);
+		control.replay();
+		List<Candle> actual = new ArrayList<>(), expected = new ArrayList<>();
+		
+		CloseableIterator<Candle> result = storage.createReader(tsymbol1, 5, T("2017-10-01T12:02:07.824Z"));
+
+		control.verify();
+		while ( result.next() ) {
+			actual.add(result.item());
+		}
+		expected.addAll(fixture.subList(0, 4));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
 	public void testCreateReaderTo_2KT() throws Exception {
-		List<SymbolDaily> segments = new ArrayList<>();
-		segments.add(new SymbolDaily(symbol1, 2017,  9, 15));
-		segments.add(new SymbolDaily(symbol1, 2017,  9,  1));
-		segments.add(new SymbolDaily(symbol1, 2017, 12, 31));
+		List<SymbolDaily> segments = getTestSegments();
 		expect(segstorMock.listDailySegments(symbol1)).andReturn(segments);
 		control.replay();
 		CloseableIterator<Candle> actual, expected = 
@@ -411,6 +565,29 @@ public class IntradayMDStorageOverSDSSTest {
 	@Test (expected=DataStorageException.class)
 	public void testCreateReaderTo_2KT_ThrowsIfTimeFrameUnsupported() throws Exception {
 		storage.createReaderTo(new TFSymbol(symbol1, ZTFrame.M30), T("2017-09-14T21:05:00Z"));
+	}
+	
+	@Test
+	public void testCreateReaderTo_2KT_EndTimeIsExclusive() throws Exception {
+		testCreateReaderTo_2KT();
+	}
+	
+	@Test
+	public void testCreateReaderTo_2KT_EndTimeIsAlignedByTF() throws Exception {
+		List<SymbolDaily> segments = getTestSegments();
+		expect(segstorMock.listDailySegments(symbol1)).andReturn(segments);
+		control.replay();
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+					new DailySegmentsCombiner(segstorMock, segments),
+					null,
+					T("2017-09-14T21:05:00Z")
+				);
+		
+		actual = storage.createReaderTo(tsymbol1, T("2017-09-14T21:05:47.123Z"));
+		
+		control.verify();
+		assertEquals(expected, actual);
 	}
 
 }

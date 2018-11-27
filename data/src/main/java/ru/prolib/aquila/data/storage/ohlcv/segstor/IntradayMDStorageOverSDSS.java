@@ -77,6 +77,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		from = tframe.getInterval(from).getStart();
 		LocalDate dateFrom = from.atZone(segstor.getZoneID()).toLocalDate();
 		List<SymbolDaily> segments = segstor.listDailySegments(key.getSymbol(),
 				new DatePoint(dateFrom.getYear(), dateFrom.getMonthValue(), dateFrom.getDayOfMonth()));
@@ -90,6 +91,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		from = tframe.getInterval(from).getStart();
 		LocalDate dateFrom = from.atZone(segstor.getZoneID()).toLocalDate();
 		List<SymbolDaily> segments = segstor.listDailySegments(key.getSymbol(),
 				new DatePoint(dateFrom.getYear(), dateFrom.getMonthValue(), dateFrom.getDayOfMonth()));
@@ -103,6 +105,8 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		from = tframe.getInterval(from).getStart();
+		to = tframe.getInterval(to).getStart();
 		LocalDate dateFrom = from.atZone(segstor.getZoneID()).toLocalDate();
 		LocalDate dateTo = to.atZone(segstor.getZoneID()).toLocalDate();
 		List<SymbolDaily> segments = segstor.listDailySegments(key.getSymbol(),
@@ -118,6 +122,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		to = tframe.getInterval(to).getStart();
 		LocalDate dateTo = to.atZone(segstor.getZoneID()).toLocalDate();
 		SymbolDaily lastSegment = new SymbolDaily(key.getSymbol(), dateTo.getYear(),
 				dateTo.getMonthValue(), dateTo.getDayOfMonth());
@@ -167,6 +172,7 @@ public class IntradayMDStorageOverSDSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		to = tframe.getInterval(to).getStart();
 		List<SymbolDaily> segments = segstor.listDailySegments(key.getSymbol());
 		return segments.size() > 0 ?
 			new PreciseTimeLimitsIterator(new DailySegmentsCombiner(segstor, segments), null, to) :

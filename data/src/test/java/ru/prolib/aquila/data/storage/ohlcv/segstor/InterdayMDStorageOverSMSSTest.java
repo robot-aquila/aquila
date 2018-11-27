@@ -38,9 +38,9 @@ public class InterdayMDStorageOverSMSSTest {
 		symbol2 = new Symbol("AAPL"),
 		symbol3 = new Symbol("GAZP");
 	private static final TFSymbol
-		tsymbol1 = new TFSymbol(symbol1, ZTFrame.D1),
-		tsymbol2 = new TFSymbol(symbol2, ZTFrame.D1),
-		tsymbol3 = new TFSymbol(symbol3, ZTFrame.D1);
+		tsymbol1 = new TFSymbol(symbol1, ZTFrame.D1MSK),
+		tsymbol2 = new TFSymbol(symbol2, ZTFrame.D1MSK),
+		tsymbol3 = new TFSymbol(symbol3, ZTFrame.D1MSK);
 	private static final ZoneId MSK = ZoneId.of("Europe/Moscow");
 	
 	static Instant T(String timeString) {
@@ -53,6 +53,14 @@ public class InterdayMDStorageOverSMSSTest {
 	
 	static Interval IM5(String timeString) {
 		return Interval.of(T(timeString), Duration.ofMinutes(5));
+	}
+	
+	static List<SymbolMonthly> getTestSegments() {
+		List<SymbolMonthly> segments = new ArrayList<>();
+		segments.add(new SymbolMonthly(symbol1, 2017,  9));
+		segments.add(new SymbolMonthly(symbol1, 2017, 10));
+		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		return segments;
 	}
 	
 	private IMocksControl control;
@@ -69,7 +77,7 @@ public class InterdayMDStorageOverSMSSTest {
 		iteratorStub2 = new CloseableIteratorStub<>();
 		iteratorStub3 = new CloseableIteratorStub<>();
 		fixture = new ArrayList<>();
-		service = new InterdayMDStorageOverSMSS(smssMock, ZTFrame.D1);
+		service = new InterdayMDStorageOverSMSS(smssMock, ZTFrame.D1MSK);
 	}
 	
 	@Test
@@ -126,10 +134,7 @@ public class InterdayMDStorageOverSMSSTest {
 	@Test
 	public void testCreateReaderFrom_2KT() throws Exception {
 		expect(smssMock.getZoneID()).andReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(2017, Month.SEPTEMBER)
 			)).andReturn(segments);
@@ -138,7 +143,7 @@ public class InterdayMDStorageOverSMSSTest {
 		CloseableIterator<Candle> actual, expected = 
 			new PreciseTimeLimitsIterator(
 				new MonthlySegmentsCombiner(smssMock, segments),
-				T("2017-08-31T21:05:00Z"),
+				T("2017-08-31T21:00:00Z"), // <-- aligned
 				null
 			);
 		
@@ -170,19 +175,44 @@ public class InterdayMDStorageOverSMSSTest {
 	}
 	
 	@Test
+	public void testCreateReaderFrom_2KT_StartTimeIsAlignedByTF() throws Exception {
+		expect(smssMock.getZoneID()).andReturn(MSK);
+		List<SymbolMonthly> segments = getTestSegments();
+		expect(smssMock.listMonthlySegments(
+				symbol1,
+				new MonthPoint(2017, Month.SEPTEMBER)
+			)).andReturn(segments);
+		control.replay();
+		
+		CloseableIterator<Candle> actual, expected = 
+			new PreciseTimeLimitsIterator(
+				new MonthlySegmentsCombiner(smssMock, segments),
+				T("2017-08-31T21:00:00Z"),
+				null
+			);
+		
+		actual = service.createReaderFrom(tsymbol1, T("2017-08-31T21:05:08.804Z"));
+
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
 	public void testCreateReader_3KTI() throws Exception {
 		expect(smssMock.getZoneID()).andReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(2017, Month.SEPTEMBER)
 			)).andReturn(segments);
 		control.replay();
-		CloseableIterator<Candle> actual, expected = new LimitedAmountIterator(
-			new PreciseTimeLimitsIterator(new MonthlySegmentsCombiner(smssMock, segments),
-				T("2017-08-31T21:05:00Z"), null), 25);
+		CloseableIterator<Candle> actual,
+			expected = new LimitedAmountIterator(
+					new PreciseTimeLimitsIterator(
+						new MonthlySegmentsCombiner(smssMock, segments),
+						T("2017-08-31T21:00:00Z"), // <-- aligned!
+						null
+					),
+				25);
 		
 		actual = service.createReader(tsymbol1, T("2017-08-31T21:05:00Z"), 25);
 		
@@ -211,25 +241,32 @@ public class InterdayMDStorageOverSMSSTest {
 	}
 	
 	@Test
+	public void testCreateReader_3KTI_StartTimeIsAlignedByTF() throws Exception {
+		testCreateReader_3KTI();
+	}
+	
+	@Test
 	public void testCreateReader_3KTT() throws Exception {
 		expect(smssMock.getZoneID()).andStubReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(2017, Month.SEPTEMBER),
 				new MonthPoint(2017, Month.DECEMBER)))
 			.andReturn(segments);
 		control.replay();
+		
 		CloseableIterator<Candle> actual,
 			expected = new PreciseTimeLimitsIterator(
 				new MonthlySegmentsCombiner(smssMock, segments),
-				T("2017-08-31T21:05:00Z"),
-				T("2017-12-10T18:56:00Z")
+				T("2017-08-31T21:00:00Z"),
+				T("2017-12-10T21:00:00Z")
 			);
 		
-		actual = service.createReader(tsymbol1, T("2017-08-31T21:05:00Z"), T("2017-12-10T18:56:00Z"));
+		actual = service.createReader(
+				tsymbol1,
+				T("2017-08-31T21:00:00Z"),
+				T("2017-12-10T21:00:00Z")
+			);
 		
 		control.verify();
 		assertEquals(expected, actual);
@@ -251,13 +288,78 @@ public class InterdayMDStorageOverSMSSTest {
 		assertEquals(expected, actual);
 	}
 	
+	@Test (expected=DataStorageException.class)
+	public void testCreateReader_3KTT_ThrowsIfTimeFrameUnsupported() throws Exception {
+		service.createReader(
+				new TFSymbol(symbol1, ZTFrame.M30),
+				T("2017-08-31T21:05:00Z"),
+				T("2017-12-10T18:56:00Z")
+			);
+	}
+	
+	@Test
+	public void testCreateReader_3KTT_EndTimeIsExclusive() throws Exception {
+		testCreateReader_3KTT();
+	}
+	
+	@Test
+	public void testCreateReader_3KTT_StartTimeIsAlignedByTF() throws Exception {
+		expect(smssMock.getZoneID()).andStubReturn(MSK);
+		List<SymbolMonthly> segments = getTestSegments();
+		expect(smssMock.listMonthlySegments(symbol1,
+				new MonthPoint(2017, Month.SEPTEMBER),
+				new MonthPoint(2017, Month.DECEMBER)))
+			.andReturn(segments);
+		control.replay();
+		
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+				new MonthlySegmentsCombiner(smssMock, segments),
+				T("2017-08-31T21:00:00Z"),
+				T("2017-12-10T21:00:00Z")
+			);
+		
+		actual = service.createReader(
+				tsymbol1,
+				T("2017-08-31T21:32:18.005Z"),
+				T("2017-12-10T21:00:00Z")
+			);
+		
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateReader_3KTT_EndTimeIsAlignedByTF() throws Exception {
+		expect(smssMock.getZoneID()).andStubReturn(MSK);
+		List<SymbolMonthly> segments = getTestSegments();
+		expect(smssMock.listMonthlySegments(symbol1,
+				new MonthPoint(2017, Month.SEPTEMBER),
+				new MonthPoint(2017, Month.DECEMBER)))
+			.andReturn(segments);
+		control.replay();
+		
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+				new MonthlySegmentsCombiner(smssMock, segments),
+				T("2017-08-31T21:00:00Z"),
+				T("2017-12-10T21:00:00Z")
+			);
+		
+		actual = service.createReader(
+				tsymbol1,
+				T("2017-08-31T21:00:00Z"),
+				T("2017-12-11T18:18:46.202Z")
+			);
+		
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
 	@Test
 	public void testCreateReaderTo_2KT() throws Exception {
 		expect(smssMock.getZoneID()).andStubReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(0, Month.JANUARY),
 				new MonthPoint(2017, Month.DECEMBER))
@@ -267,7 +369,7 @@ public class InterdayMDStorageOverSMSSTest {
 			expected = new PreciseTimeLimitsIterator(
 					new MonthlySegmentsCombiner(smssMock, segments),
 					null,
-					T("2017-12-14T21:05:00Z")
+					T("2017-12-14T21:00:00Z")
 				);
 		
 		actual = service.createReaderTo(tsymbol1, T("2017-12-14T21:05:00Z"));
@@ -297,8 +399,35 @@ public class InterdayMDStorageOverSMSSTest {
 		service.createReaderTo(new TFSymbol(symbol1, ZTFrame.M30), T("2017-09-14T21:05:00Z"));
 	}
 	
+	@Test
+	public void testCreateReaderTo_2KT_EndTimeIsExclusive() throws Exception {
+		testCreateReaderTo_2KT();
+	}
+	
+	@Test
+	public void testCreateReaderTo_2KT_EndTimeIsAlignedByTF() throws Exception {
+		expect(smssMock.getZoneID()).andStubReturn(MSK);
+		List<SymbolMonthly> segments = getTestSegments();
+		expect(smssMock.listMonthlySegments(symbol1,
+				new MonthPoint(0, Month.JANUARY),
+				new MonthPoint(2017, Month.DECEMBER))
+			).andReturn(segments);
+		control.replay();
+		CloseableIterator<Candle> actual,
+			expected = new PreciseTimeLimitsIterator(
+					new MonthlySegmentsCombiner(smssMock, segments),
+					null,
+					T("2017-12-14T21:00:00Z") // <-- aligned
+				);
+		
+		actual = service.createReaderTo(tsymbol1, T("2017-12-14T21:05:00Z"));
+
+		control.verify();
+		assertEquals(expected, actual);
+	}
+	
 	private void testCreateReader_3KIT_FillStubIterators() {
-		CandleBuilder cb = new CandleBuilder().withTimeFrame(ZTFrame.D1);
+		CandleBuilder cb = new CandleBuilder().withTimeFrame(ZTFrame.D1MSK);
 		fixture.add(cb.buildCandle("2017-09-11T21:00:00Z", 150, 156, 150, 155, 1700));
 		fixture.add(cb.buildCandle("2017-09-15T21:00:00Z", 155, 155, 149, 151, 1800));
 		fixture.add(cb.buildCandle("2017-09-22T21:00:00Z", 151, 152, 145, 148, 1900));
@@ -317,10 +446,7 @@ public class InterdayMDStorageOverSMSSTest {
 	public void testCreateReader_3KIT_AvailCountLtMaxCount() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(smssMock.getZoneID()).andStubReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(0, Month.JANUARY),
 				new MonthPoint(2020, Month.DECEMBER))
@@ -346,10 +472,7 @@ public class InterdayMDStorageOverSMSSTest {
 	public void testCreateReader_3KIT_LastSegmentPartiallyIncluded() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(smssMock.getZoneID()).andStubReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(0, Month.JANUARY),
 				new MonthPoint(2017, Month.DECEMBER))
@@ -361,7 +484,7 @@ public class InterdayMDStorageOverSMSSTest {
 		List<Candle> actual = new ArrayList<>(), expected = new ArrayList<>();
 
 		CloseableIterator<Candle> result =
-				service.createReader(tsymbol1, 15, T("2017-12-10T00:00:00Z"));
+				service.createReader(tsymbol1, 15, T("2017-12-11T21:00:00Z"));
 		
 		control.verify();
 		while ( result.next() ) {
@@ -375,10 +498,7 @@ public class InterdayMDStorageOverSMSSTest {
 	public void testCreateReader_3KIT_FirstIncludedSegmentPartiallyIncluded() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(smssMock.getZoneID()).andStubReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(0, Month.JANUARY),
 				new MonthPoint(2017, Month.DECEMBER))
@@ -404,10 +524,7 @@ public class InterdayMDStorageOverSMSSTest {
 	public void testCreateReader_3KIT_SkipHeadSegments() throws Exception {
 		testCreateReader_3KIT_FillStubIterators();
 		expect(smssMock.getZoneID()).andStubReturn(MSK);
-		List<SymbolMonthly> segments = new ArrayList<>();
-		segments.add(new SymbolMonthly(symbol1, 2017,  9));
-		segments.add(new SymbolMonthly(symbol1, 2017, 10));
-		segments.add(new SymbolMonthly(symbol1, 2017, 12));
+		List<SymbolMonthly> segments = getTestSegments();
 		expect(smssMock.listMonthlySegments(symbol1,
 				new MonthPoint(0, Month.JANUARY),
 				new MonthPoint(2017, Month.DECEMBER))
@@ -447,6 +564,58 @@ public class InterdayMDStorageOverSMSSTest {
 	@Test (expected=DataStorageException.class)
 	public void testCreateReader_3KIT_ThrowsIfTimeFrameUnsupported() throws Exception {
 		service.createReader(new TFSymbol(symbol1, ZTFrame.M2), 5, T("2017-10-01T12:02:00Z"));
+	}
+	
+	@Test
+	public void testCreateReader_3KIT_EndTimeIsExclusive() throws Exception {
+		testCreateReader_3KIT_FillStubIterators();
+		expect(smssMock.getZoneID()).andStubReturn(MSK);
+		List<SymbolMonthly> segments = getTestSegments();
+		expect(smssMock.listMonthlySegments(symbol1,
+				new MonthPoint(0, Month.JANUARY),
+				new MonthPoint(2017, Month.DECEMBER))
+			).andReturn(segments);
+		expect(smssMock.createReader(new SymbolMonthly(symbol1, 2017, 12))).andReturn(iteratorStub3);
+		expect(smssMock.createReader(new SymbolMonthly(symbol1, 2017, 10))).andReturn(iteratorStub2);
+		expect(smssMock.createReader(new SymbolMonthly(symbol1, 2017,  9))).andReturn(iteratorStub1);
+		control.replay();
+		List<Candle> actual = new ArrayList<>(), expected = new ArrayList<>();
+		
+		CloseableIterator<Candle> result =
+				service.createReader(tsymbol1, 100, T("2017-12-11T21:00:00Z"));
+		
+		control.verify();
+		while ( result.next() ) {
+			actual.add(result.item());
+		}
+		expected.addAll(fixture.subList(0, 7));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateReader_3KIT_EndTimeIsAlignedByTF() throws Exception {
+		testCreateReader_3KIT_FillStubIterators();
+		expect(smssMock.getZoneID()).andStubReturn(MSK);
+		List<SymbolMonthly> segments = getTestSegments();
+		expect(smssMock.listMonthlySegments(symbol1,
+				new MonthPoint(0, Month.JANUARY),
+				new MonthPoint(2017, Month.DECEMBER))
+			).andReturn(segments);
+		expect(smssMock.createReader(new SymbolMonthly(symbol1, 2017, 12))).andReturn(iteratorStub3);
+		expect(smssMock.createReader(new SymbolMonthly(symbol1, 2017, 10))).andReturn(iteratorStub2);
+		expect(smssMock.createReader(new SymbolMonthly(symbol1, 2017,  9))).andReturn(iteratorStub1);
+		control.replay();
+		List<Candle> actual = new ArrayList<>(), expected = new ArrayList<>();
+		
+		CloseableIterator<Candle> result =
+				service.createReader(tsymbol1, 100, T("2017-12-12T19:09:27.954Z"));
+		
+		control.verify();
+		while ( result.next() ) {
+			actual.add(result.item());
+		}
+		expected.addAll(fixture.subList(0, 7));
+		assertEquals(expected, actual);
 	}
 
 }

@@ -69,6 +69,7 @@ public class InterdayMDStorageOverSMSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		from = tframe.getInterval(from).getStart();
 		LocalDate dateFrom = from.atZone(smss.getZoneID()).toLocalDate();
 		List<SymbolMonthly> segments = smss.listMonthlySegments(
 				key.getSymbol(),
@@ -84,6 +85,7 @@ public class InterdayMDStorageOverSMSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		from = tframe.getInterval(from).getStart();
 		LocalDate dateFrom = from.atZone(smss.getZoneID()).toLocalDate();
 		List<SymbolMonthly> segments = smss.listMonthlySegments(
 				key.getSymbol(),
@@ -101,6 +103,12 @@ public class InterdayMDStorageOverSMSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		//System.out.println("from (before): " + from);
+		//System.out.println("  to (before): " + to);
+		from = tframe.getInterval(from).getStart();
+		to = tframe.getInterval(to).getStart();
+		//System.out.println("from ( after): " + from);
+		//System.out.println("  to ( after): " + to);
 		LocalDate dateFrom = from.atZone(smss.getZoneID()).toLocalDate();
 		LocalDate dateTo = to.atZone(smss.getZoneID()).toLocalDate();
 		List<SymbolMonthly> segments = smss.listMonthlySegments(
@@ -123,7 +131,11 @@ public class InterdayMDStorageOverSMSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		//System.out.println("to (before): " + to);
+		to = tframe.getInterval(to).getStart();
+		//System.out.println("to (after): " + to);
 		LocalDate dateTo = to.atZone(smss.getZoneID()).toLocalDate();
+		//System.out.println("dateTo: " + dateTo);
 		LinkedList<SymbolMonthly> segments =
 			new LinkedList<>(smss.listMonthlySegments(
 				key.getSymbol(),
@@ -139,11 +151,13 @@ public class InterdayMDStorageOverSMSS implements MDStorage<TFSymbol, Candle> {
 			CloseableIterator<Candle> iterator = smss.createReader(segment);
 			while ( iterator.next() ) {
 				Candle x = iterator.item();
-				Instant startTime = x.getStartTime();
-				if ( startTime.compareTo(to) > 0 ) {
+				Instant xTime = x.getStartTime();
+				//System.out.println("candle time: " + xTime);
+				if ( xTime.compareTo(to) >= 0 ) {
+					//System.out.println("last (exclude)");
 					break;
 				}
-				result.set(startTime, x);
+				result.set(xTime, x);
 			}
 			iterator.close();
 			while ( result.getLength() < count && segments.size() > 0 ) {
@@ -172,6 +186,7 @@ public class InterdayMDStorageOverSMSS implements MDStorage<TFSymbol, Candle> {
 			throws DataStorageException
 	{
 		validateTimeFrame(key);
+		to = tframe.getInterval(to).getStart();
 		LocalDate dateTo = to.atZone(smss.getZoneID()).toLocalDate();
 		List<SymbolMonthly> segments = smss.listMonthlySegments(
 				key.getSymbol(),

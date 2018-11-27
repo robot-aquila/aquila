@@ -1,27 +1,46 @@
 package ru.prolib.aquila.probe.datasim.l1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import ru.prolib.aquila.core.BusinessEntities.L1Update;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class L1UpdateTask implements Runnable {
-	private final L1Update update;
+	private final Symbol symbol;
+	private final List<L1Update> updates;
 	private final int sequenceID;
 	private final L1UpdateConsumerEx consumer;
 	
-	public L1UpdateTask(L1Update update, int sequenceID, L1UpdateConsumerEx consumer) {
-		this.update = update;
+	public L1UpdateTask(List<L1Update> updates,
+			int sequenceID,
+			L1UpdateConsumerEx consumer)
+	{
+		this.symbol = updates.get(0).getSymbol();
+		this.updates = updates;
 		this.sequenceID = sequenceID;
 		this.consumer = consumer;
 	}
 	
-	public Symbol getSymbol() {
-		return update.getSymbol();
+	public L1UpdateTask(L1Update update,
+			int sequenceID,
+			L1UpdateConsumerEx consumer) 
+	{
+		this.symbol = update.getSymbol();
+		this.sequenceID = sequenceID;
+		this.consumer = consumer;
+		this.updates = new ArrayList<>();
+		this.updates.add(update);
 	}
 	
-	public L1Update getUpdate() {
-		return update;
+	public Symbol getSymbol() {
+		return symbol;
+	}
+	
+	public List<L1Update> getUpdates() {
+		return updates;
 	}
 	
 	public int getSequenceID() {
@@ -34,7 +53,7 @@ public class L1UpdateTask implements Runnable {
 
 	@Override
 	public void run() {
-		consumer.consume(update, sequenceID);
+		consumer.consume(updates, sequenceID);
 	}
 	
 	@Override
@@ -49,8 +68,13 @@ public class L1UpdateTask implements Runnable {
 		return new EqualsBuilder()
 			.append(o.consumer, consumer)
 			.append(o.sequenceID, sequenceID)
-			.append(o.update, update)
+			.append(o.updates, updates)
 			.isEquals();
+	}
+	
+	@Override
+	public String toString() {
+		return "L1Update[symbol=" + symbol + " numUpdates=" + updates.size() + "]";
 	}
 
 }
