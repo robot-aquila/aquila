@@ -90,11 +90,13 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 	}
 
 	public synchronized void setCategories(ObservableTSeries<?> categories) {
+		// To provide an automatic repainting it should be subscribed on every
+		// update. Subscribing just for length update does not work this case.
 		if ( this.categories != null ) {
-			this.categories.onLengthUpdate().removeListener(this);
+			this.categories.onUpdate().removeListener(this);
 		}
 		this.categories = categories;
-		this.categories.onLengthUpdate().addListener(this);
+		this.categories.onUpdate().addListener(this);
 		this.lastNumberOfCategories = categories.getLength();
 		adjustScrollBar();
 	}
