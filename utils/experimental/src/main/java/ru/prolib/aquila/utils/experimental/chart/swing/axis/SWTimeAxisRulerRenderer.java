@@ -31,6 +31,14 @@ import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabelGenerator;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.MTFLabelMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.utils.RLabel;
 
+/**
+ * This implementation of ruler renderer isn't good enough. It shows labels
+ * without considering desired priority to display labels. For example it may
+ * display a label of last minute of hour instead of next hour label. It's just
+ * count in on label visibility according by its dimensions. Nothing more. Use
+ * another implementation instead.
+ */
+@Deprecated
 public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRendererCallbackCA {
 	
 	public static class LabelDimensions implements SWLabelDimensions {
@@ -189,43 +197,8 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 						List<RLabel> labels,
 						Font labelFont)
 	{
-		SWTimeAxisRulerSetup setup = (SWTimeAxisRulerSetup) s;
-		AxisDirection dir = mapper.getAxisDirection();
-		if ( dir.isVertical() ) {
-			throw new UnsupportedOperationException("Axis direction is not supported: " + dir); 
-		}
-		graphics.setFont(labelFont);
-		graphics.setColor(Color.BLACK);
-		FontMetrics fontMetrics = graphics.getFontMetrics();
-		int y, x;
-		if ( setup.getRulerID().isLowerPosition() ) {
-			y = target.getLowerY();
-			if ( setup.isShowInnerLine() ) {
-				graphics.drawLine(target.getLeftX(), y, target.getRightX(), y);
-			}
-			if ( setup.isShowOuterLine() ) {
-				graphics.drawLine(target.getLeftX(), target.getUpperY(), target.getRightX(), target.getUpperY());
-			}
-			for ( RLabel label : labels ) {
-				x = label.getCoord();
-				graphics.drawLine(x, target.getUpperY(), x, target.getLowerY());
-				graphics.drawString(label.getText(), x + 2, y - 2);
-			}
-		} else {
-			y = target.getUpperY();
-			int textY = fontMetrics.getAscent() + y;
-			if ( setup.isShowInnerLine() ) {
-				graphics.drawLine(target.getLeftX(), y, target.getRightX(), y);
-			}
-			if ( setup.isShowOuterLine() ) {
-				graphics.drawLine(target.getLeftX(), target.getLowerY(), target.getRightX(), target.getLowerY());
-			}
-			for ( RLabel label : labels ) {
-				x = label.getCoord();
-				graphics.drawLine(x, target.getUpperY(), x, target.getLowerY());
-				graphics.drawString(label.getText(), x + 2, textY);
-			}
-		}
+		SWTimeAxisRulerRendererCallback.getInstance()
+			.drawRuler(s, target, graphics, mapper, labels, labelFont);
 	}
 
 	@Override
@@ -235,16 +208,8 @@ public class SWTimeAxisRulerRenderer implements CategoryAxisRulerRenderer, SWRen
 						CategoryAxisDisplayMapper mapper,
 						List<RLabel> labels)
 	{
-		AxisDirection dir = mapper.getAxisDirection(); 
-		if ( dir.isVertical() ) {
-			throw new UnsupportedOperationException("Axis direction is not supported: " + dir);
-		}
-		int y1 = plot.getUpperY(), y2 = plot.getLowerY();
-		graphics.setColor(Color.GRAY);
-		for ( RLabel label : labels ) {
-			int x = label.getCoord();
-			graphics.drawLine(x, y1, x, y2);
-		}
+		SWTimeAxisRulerRendererCallback.getInstance()
+			.drawGridLines(setup, plot, graphics, mapper, labels);
 	}
 
 	@Override
