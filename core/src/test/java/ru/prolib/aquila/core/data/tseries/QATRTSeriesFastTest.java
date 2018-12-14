@@ -19,6 +19,7 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CandleBuilder;
+import ru.prolib.aquila.core.data.TAMath;
 import ru.prolib.aquila.core.data.TSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
 import ru.prolib.aquila.core.data.ValueOutOfRangeException;
@@ -27,7 +28,7 @@ import ru.prolib.aquila.core.data.ZTFrame;
 @SuppressWarnings("unchecked")
 public class QATRTSeriesFastTest {
 	
-	static final String _FIX_QATR5_RAW[][] = {
+	static final String _FIX_QATR5_RAW_1[][] = {
 			// RIU5, 2015-08-06, h1
 			// open, high, low, close, expected ATR
 			{"82960","82960","82960","82960", null},
@@ -52,7 +53,27 @@ public class QATRTSeriesFastTest {
 			{"82060","82260","81830","82050", "388.899134"},
 			{"82020","82190","81770","81810", "395.119307"},
 		};
-	static final List<FR> FIX_QATR5 = toRecords(_FIX_QATR5_RAW);
+	static final List<FR> FIX_QATR5_1 = toRecords(_FIX_QATR5_RAW_1);
+	
+	static final String _FIX_QATR10_RAW_2[][] = {
+			// RIZ8, 2018-12-13, m5, atr10
+			// open, high, low, close, expected ATR
+			{"112220","112640","112070","112370",null}, // 10:00
+			{"112370","112380","112060","112060",null},
+			{"112070","112200","111950","112180",null},
+			{"112180","112350","112150","112180",null},
+			{"112180","112400","112170","112380",null}, // 10:20 #4
+			{"112380","112520","112340","112420",null},
+			{"112430","112540","112380","112400",null},
+			{"112410","112430","112240","112280",null},
+			{"112280","112380","112110","112140",null}, // 10:40 #8
+			{"112130","112210","112060","112170","252"}, // 10:45
+			
+			{"112180","112250","112140","112160","206"}, // 10:50
+			{"112150","112430","111910","112430","216"},
+			
+	};
+	static final List<FR> FIX_QATR10_2 = toRecords(_FIX_QATR10_RAW_2, "2018-12-13T07:00:00Z", ZTFrame.M5MSK);
 	
 	public static class FR {
 		private final Candle candle;
@@ -77,13 +98,13 @@ public class QATRTSeriesFastTest {
 		
 	}
 	
-	static List<FR> toRecords(String[][] fixture) {
+	static List<FR> toRecords(String[][] fixture, String startTime, ZTFrame tframe) {
 		List<FR> result = new ArrayList<>();
-		Instant time = T("2018-06-01T10:00:00Z");
+		Instant currTime = T(startTime);
 		for ( int i = 0; i < fixture.length; i ++ ) {
 			Candle candle = new CandleBuilder()
-				.withTime(time)
-				.withTimeFrame(ZTFrame.M5)
+				.withTime(currTime)
+				.withTimeFrame(tframe)
 				.withOpenPrice(of(fixture[i][0]))
 				.withHighPrice(of(fixture[i][1]))
 				.withLowPrice(of(fixture[i][2]))
@@ -92,10 +113,14 @@ public class QATRTSeriesFastTest {
 				.buildCandle();
 			CDecimal expected = fixture[i][4] == null ? null : CDecimalBD.of(fixture[i][4]);
 			result.add(new FR(candle, expected));
-
-			time = time.plusSeconds(300);
+			
+			currTime = candle.getEndTime();
 		}
 		return result;
+	}
+	
+	static List<FR> toRecords(String[][] fixture) {
+		return toRecords(fixture, "2018-06-01T10:00:00Z", ZTFrame.M5);
 	}
 	
 	static Instant T(String timeString) {
@@ -113,11 +138,19 @@ public class QATRTSeriesFastTest {
 	private ArrayList<CDecimal> cacheStub;
 	private QATRTSeriesFast service, serviceWithMocks;
 	
-	private void fillQATR5() {
-		for ( int i = 0; i < FIX_QATR5.size(); i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+	private void fillSeries(List<FR> fixture) {
+		for ( int i = 0; i < fixture.size(); i ++ ) {
+			FR fr = fixture.get(i);
 			sourceStub.set(fr.getTime(), fr.getCandle());
 		}
+	}
+	
+	private void fillQATR5_1() {
+		fillSeries(FIX_QATR5_1);
+	}
+	
+	private void fillQATR10_2() {
+		fillSeries(FIX_QATR10_2);
 	}
 	
 	@Before
@@ -198,10 +231,10 @@ public class QATRTSeriesFastTest {
 	
 	@Test
 	public void testGet_1I() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		
-		for ( int i = 0; i < FIX_QATR5.size(); i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+		for ( int i = 0; i < FIX_QATR5_1.size(); i ++ ) {
+			FR fr = FIX_QATR5_1.get(i);
 			String msg = "At#" + i;
 			assertEquals(msg, fr.getExpected(), service.get(i));
 		}
@@ -209,11 +242,11 @@ public class QATRTSeriesFastTest {
 	
 	@Test
 	public void testGet_1I_NegativeIndex() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		
-		for ( int i = 0; i < FIX_QATR5.size() - 1; i ++ ) {
-			FR fr = FIX_QATR5.get(i);
-			int irev = -(FIX_QATR5.size() - 1 - i);
+		for ( int i = 0; i < FIX_QATR5_1.size() - 1; i ++ ) {
+			FR fr = FIX_QATR5_1.get(i);
+			int irev = -(FIX_QATR5_1.size() - 1 - i);
 			String msg = "At#" + irev;
 			assertEquals(msg, fr.getExpected(), service.get(irev));
 		}
@@ -221,22 +254,22 @@ public class QATRTSeriesFastTest {
 	
 	@Test (expected=ValueOutOfRangeException.class)
 	public void testGet_1I_ThrowsOutOfRange_PositiveIndex() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		
-		service.get(FIX_QATR5.size());
+		service.get(FIX_QATR5_1.size());
 	}
 	
 	@Test (expected=ValueOutOfRangeException.class)
 	public void testGet_1I_ThrowsOutOfRange_NegativeIndex() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		
-		service.get(-FIX_QATR5.size());
+		service.get(-FIX_QATR5_1.size());
 	}
 	
 	@Test
 	public void testGet_0() throws Exception {
-		for ( int i = 0; i < FIX_QATR5.size(); i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+		for ( int i = 0; i < FIX_QATR5_1.size(); i ++ ) {
+			FR fr = FIX_QATR5_1.get(i);
 			sourceStub.set(fr.getTime(), fr.getCandle());
 			String msg = "At#" + i;
 			assertEquals(msg, fr.getExpected(), service.get());
@@ -245,11 +278,11 @@ public class QATRTSeriesFastTest {
 	
 	@Test
 	public void testGet_1T() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		
-		FR fr = FIX_QATR5.get(10);
+		FR fr = FIX_QATR5_1.get(10);
 		assertEquals(fr.getExpected(), service.get(fr.getTime()));
-		fr = FIX_QATR5.get(0);
+		fr = FIX_QATR5_1.get(0);
 		assertNull(service.get(fr.getTime().minusSeconds(1)));
 	}
 	
@@ -261,7 +294,7 @@ public class QATRTSeriesFastTest {
 	
 	@Test
 	public void testSpecialCase_Invalidate1() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		
 		assertEquals(0, cacheStub.size());
 		
@@ -276,32 +309,32 @@ public class QATRTSeriesFastTest {
 			cacheStub.set(i, CDecimalBD.of((long)(Math.random() * 10000)));
 		}
 		
-		for ( int i = 0; i < FIX_QATR5.size(); i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+		for ( int i = 0; i < FIX_QATR5_1.size(); i ++ ) {
+			FR fr = FIX_QATR5_1.get(i);
 			String msg = "At#" + i;
 			assertEquals(msg, fr.getExpected(), service.get(i));
 		}
 		
 		service.invalidate(15);
 		assertEquals(14, service.getLastValidIndex());
-		for ( int i = 15; i < FIX_QATR5.size(); i ++ ) {
+		for ( int i = 15; i < FIX_QATR5_1.size(); i ++ ) {
 			cacheStub.set(i, CDecimalBD.of((long)(Math.random() * 10000)));
 		}
 		
-		for ( int i = 0; i < FIX_QATR5.size(); i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+		for ( int i = 0; i < FIX_QATR5_1.size(); i ++ ) {
+			FR fr = FIX_QATR5_1.get(i);
 			String msg = "At#" + i;
 			assertEquals(msg, fr.getExpected(), service.get(i));
 		}
 
 		service.invalidate(0);
 		assertEquals(-1, service.getLastValidIndex());
-		for ( int i = 0; i < FIX_QATR5.size(); i ++ ) {
+		for ( int i = 0; i < FIX_QATR5_1.size(); i ++ ) {
 			cacheStub.set(i, CDecimalBD.of((long)(Math.random() * 10000)));
 		}
 
-		for ( int i = 0; i < FIX_QATR5.size(); i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+		for ( int i = 0; i < FIX_QATR5_1.size(); i ++ ) {
+			FR fr = FIX_QATR5_1.get(i);
 			String msg = "At#" + i;
 			assertEquals(msg, fr.getExpected(), service.get(i));
 		}
@@ -309,7 +342,7 @@ public class QATRTSeriesFastTest {
 	
 	@Test
 	public void testShrink_ClearAllIfNoValidData() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		service.get(); // force recalculate
 		service.invalidate(0);
 		
@@ -321,7 +354,7 @@ public class QATRTSeriesFastTest {
 	
 	@Test
 	public void testShrink_SkipIfNothingToDo() throws Exception {
-		fillQATR5();
+		fillQATR5_1();
 		service.get(); // force recalculate
 		service.invalidate(10);
 
@@ -330,7 +363,7 @@ public class QATRTSeriesFastTest {
 		assertEquals(9, service.getLastValidIndex());
 		List<CDecimal> expected = new ArrayList<>();
 		for ( int i = 0; i < 10; i ++ ) {
-			expected.add(FIX_QATR5.get(i).getExpected());
+			expected.add(FIX_QATR5_1.get(i).getExpected());
 		}
 		assertEquals(expected, cacheStub);
 	}
@@ -338,7 +371,7 @@ public class QATRTSeriesFastTest {
 	@Test
 	public void testShrink_PartiallyShrunkCase1() throws Exception {
 		for ( int i = 0; i < 10; i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+			FR fr = FIX_QATR5_1.get(i);
 			sourceStub.set(fr.getTime(), fr.getCandle());
 		}
 		service.get(); // force recalculate
@@ -349,7 +382,7 @@ public class QATRTSeriesFastTest {
 		assertEquals(4, service.getLastValidIndex());
 		List<CDecimal> expected = new ArrayList<>();
 		for ( int i = 0; i < 5; i ++ ) {
-			expected.add(FIX_QATR5.get(i).getExpected());
+			expected.add(FIX_QATR5_1.get(i).getExpected());
 		}
 		assertEquals(expected, cacheStub);
 	}
@@ -357,7 +390,7 @@ public class QATRTSeriesFastTest {
 	@Test
 	public void testShrink_PartiallyShrunkCase2() throws Exception {
 		for ( int i = 0; i < 10; i ++ ) {
-			FR fr = FIX_QATR5.get(i);
+			FR fr = FIX_QATR5_1.get(i);
 			sourceStub.set(fr.getTime(), fr.getCandle());
 		}
 		service.get(); // force recalculate
@@ -368,9 +401,27 @@ public class QATRTSeriesFastTest {
 		assertEquals(0, service.getLastValidIndex());
 		List<CDecimal> expected = new ArrayList<>();
 		for ( int i = 0; i < 1; i ++ ) {
-			expected.add(FIX_QATR5.get(i).getExpected());
+			expected.add(FIX_QATR5_1.get(i).getExpected());
 		}
 		assertEquals(expected, cacheStub);
+	}
+	
+	@Test
+	@Ignore
+	public void testEnsureATR_IS_Correct_() throws Exception {
+		TAMath math = TAMath.getInstance();
+		service = new QATRTSeriesFast("zulu", sourceStub, 10, 0, cacheStub);
+		fillQATR10_2();
+		List<FR> fix = FIX_QATR10_2;
+		
+		for ( int i = 0; i < fix.size(); i ++ ) {
+			FR fr = fix.get(i);
+			CDecimal b = math.qatr(sourceStub, i, 10);
+			if ( b != null ) b = b.withScale(0);
+			String msg = "At#" + i;
+			assertEquals(msg + "[base]", fr.expected, b);
+			assertEquals(msg, fr.expected, service.get(i));
+		}
 	}
 
 }

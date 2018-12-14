@@ -53,8 +53,8 @@ public class DispatcherThreadV3 extends Thread {
 						try {
 							listener.onEvent(event);
 						} catch ( Throwable t ) {
-							Object args[] = { event, listener, t };
-							logger.error("Error dispatching event {} to {}: {}", args);
+							logger.error("Error dispatching event {} to {}", event, listener);
+							logger.error("Unhandled exception: ", t);
 						}
 					}
 				}
