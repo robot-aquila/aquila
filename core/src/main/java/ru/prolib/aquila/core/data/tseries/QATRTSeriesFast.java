@@ -225,5 +225,10 @@ public class QATRTSeriesFast implements TSeries<CDecimal>, TSeriesCache {
 		}
 		return lengthCache;
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return source.toKey(index);
+	}
 
 }

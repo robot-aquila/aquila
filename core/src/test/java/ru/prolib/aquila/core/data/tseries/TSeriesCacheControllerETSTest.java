@@ -70,6 +70,16 @@ public class TSeriesCacheControllerETSTest {
 	}
 	
 	@Test
+	public void testToKey() throws Exception {
+		expect(seriesMock.toKey(905)).andReturn(T("2018-12-15T12:24:34Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T12:24:34Z"), service.toKey(905));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testGetId() throws Exception {
 		expect(seriesMock.getId()).andReturn("zulu24");
 		control.replay();

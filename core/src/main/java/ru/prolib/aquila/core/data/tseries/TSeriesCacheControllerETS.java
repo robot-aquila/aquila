@@ -62,6 +62,11 @@ public class TSeriesCacheControllerETS<T> implements EditableTSeries<T>, TSeries
 	public int toIndex(Instant key) {
 		return series.toIndex(key);
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return series.toKey(index);
+	}
 
 	@Override
 	public String getId() {

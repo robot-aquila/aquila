@@ -243,5 +243,15 @@ public class ObservableTSeriesImplTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testToKey() throws Exception {
+		expect(underlyingSeriesMock1.toKey(490)).andReturn(T("2018-12-15T00:00:25Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T00:00:25Z"), series.toKey(490));
+		
+		control.verify();
+	}
 
 }

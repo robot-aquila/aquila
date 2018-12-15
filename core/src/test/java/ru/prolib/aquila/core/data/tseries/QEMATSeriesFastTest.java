@@ -392,5 +392,15 @@ public class QEMATSeriesFastTest {
 		}
 		assertEquals(expected, cacheStub);
 	}
+	
+	@Test
+	public void testToKey() throws Exception {
+		expect(sourceMock.toKey(302)).andReturn(T("2018-12-15T12:09:53Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T12:09:53Z"), serviceWithMocks.toKey(302));
+		
+		control.verify();
+	}
 
 }

@@ -187,5 +187,10 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 	public int toIndex(Instant time) {
 		return storage.getIntervalIndex(time);
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return getIntervalStart(index);
+	}
 
 }

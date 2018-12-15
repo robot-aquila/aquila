@@ -119,4 +119,9 @@ public class MAXLongTSeries implements TSeries<Long> {
 		return source.toIndex(time);
 	}
 	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return source.toKey(index);
+	}
+	
 }

@@ -173,5 +173,15 @@ public class QEMATSeriesTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testToKey() throws Exception {
+		expect(sourceMock.toKey(661)).andReturn(T("2018-12-15T12:20:31Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T12:20:31Z"), series.toKey(661));
+		
+		control.verify();
+	}
 
 }

@@ -119,5 +119,10 @@ public class QEMATSeries implements TSeries<CDecimal> {
 	public int toIndex(Instant time) {
 		return source.toIndex(time);
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return source.toKey(index);
+	}
 
 }

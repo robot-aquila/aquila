@@ -171,5 +171,15 @@ public class QATRTSeriesTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testToKey() throws Exception {
+		expect(sourceMock.toKey(804)).andReturn(T("2018-12-15T12:06:02Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T12:06:02Z"), service.toKey(804));
+		
+		control.verify();
+	}
 
 }

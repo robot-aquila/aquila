@@ -126,5 +126,10 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 	public int toIndex(Instant time) {
 		return series.toIndex(time);
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return series.toKey(index);
+	}
 
 }

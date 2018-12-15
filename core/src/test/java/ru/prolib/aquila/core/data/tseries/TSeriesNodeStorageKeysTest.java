@@ -307,4 +307,14 @@ public class TSeriesNodeStorageKeysTest {
 		control.verify();		
 	}
 	
+	@Test
+	public void testToKey() throws Exception {
+		expect(storageMock.getIntervalStart(445)).andReturn(T("2018-12-15T12:26:40Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T12:26:40Z"), service.toKey(445));
+		
+		control.verify();
+	}
+	
 }

@@ -77,6 +77,16 @@ public class STSeriesTest {
 	}
 	
 	@Test
+	public void testToKey() throws Exception {
+		expect(storageMock.toKey(734)).andReturn(T("2018-12-15T12:22:58Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T12:22:58Z"), service.toKey(734));
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testGetId() {
 		expect(storageMock.getId()).andReturn("foobar");
 		control.replay();

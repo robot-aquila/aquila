@@ -78,5 +78,10 @@ public class CandleVolumeTSeries implements TSeries<CDecimal> {
 	public int toIndex(Instant time) {
 		return candles.toIndex(time);
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return candles.toKey(index);
+	}
 
 }

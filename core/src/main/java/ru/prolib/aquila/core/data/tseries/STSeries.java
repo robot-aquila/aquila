@@ -149,6 +149,11 @@ public class STSeries implements ObservableTSeries<Instant> {
 	public int toIndex(Instant key) {
 		return storage.toIndex(key);
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return storage.toKey(index);
+	}
 
 	@Override
 	public String getId() {

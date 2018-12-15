@@ -169,5 +169,15 @@ public class MAXLongTSeriesTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testToKey() throws Exception {
+		expect(sourceMock.toKey(756)).andReturn(T("2018-12-15T03:31:00Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T03:31:00Z"), series.toKey(756));
+		
+		control.verify();
+	}
 
 }

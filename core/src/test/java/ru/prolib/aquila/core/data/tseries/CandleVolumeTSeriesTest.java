@@ -183,5 +183,16 @@ public class CandleVolumeTSeriesTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testToKey() throws Exception {
+		series = new CandleVolumeTSeries(candlesMock);
+		expect(candlesMock.toKey(396)).andReturn(T("2018-12-15T12:01:53Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T12:01:53Z"), series.toKey(396));
+		
+		control.verify();
+	}
 
 }

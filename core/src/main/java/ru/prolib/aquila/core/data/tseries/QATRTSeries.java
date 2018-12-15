@@ -120,5 +120,10 @@ public class QATRTSeries implements TSeries<CDecimal> {
 	public ZTFrame getTimeFrame() {
 		return source.getTimeFrame();
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return source.toKey(index);
+	}
 
 }

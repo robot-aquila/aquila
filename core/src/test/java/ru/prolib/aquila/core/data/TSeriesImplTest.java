@@ -280,5 +280,15 @@ public class TSeriesImplTest {
 		}
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testToKey() throws Exception {
+		expect(storageMock.getIntervalStart(829)).andReturn(T("2018-12-15T09:35:00Z"));
+		control.replay();
+		
+		assertEquals(T("2018-12-15T09:35:00Z"), series.toKey(829));
+		
+		control.verify();
+	}
 
 }

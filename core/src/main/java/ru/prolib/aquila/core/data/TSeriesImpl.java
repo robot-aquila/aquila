@@ -113,5 +113,10 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 	public int toIndex(Instant time) {
 		return storage.getIntervalIndex(time);
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return storage.getIntervalStart(index);
+	}
 
 }

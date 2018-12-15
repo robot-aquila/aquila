@@ -269,5 +269,10 @@ public class QEMATSeriesFast implements TSeries<CDecimal>, TSeriesCache {
 		}
 		return prev;
 	}
+	
+	@Override
+	public Instant toKey(int index) throws ValueException {
+		return source.toKey(index);
+	}
 
 }
