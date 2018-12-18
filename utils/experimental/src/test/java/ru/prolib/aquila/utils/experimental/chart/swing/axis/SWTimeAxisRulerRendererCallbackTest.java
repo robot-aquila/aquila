@@ -68,6 +68,7 @@ public class SWTimeAxisRulerRendererCallbackTest {
 		graphicsMock.drawLine(65, 100,  65, 119);
 		graphicsMock.drawString(":55",  67, 112);
 		graphicsMock.drawLine(85, 100,  85, 119);
+		expect(fontMetricsMock.stringWidth("10h")).andReturn(5);
 		graphicsMock.drawString("10h",  87, 112);
 		control.replay();
 		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", true))
@@ -75,6 +76,31 @@ public class SWTimeAxisRulerRendererCallbackTest {
 				.setShowOuterLine(false);
 		
 		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testDrawRuler_AtBottom_SkipTextOfLastLabelIfOutOfBounds() {
+		Rectangle plot = new Rectangle(new Point2D(0, 80), 200, 20);
+		List<RLabel> labels = new ArrayList<>();
+		labels.add(new RLabel(11, "8h", 146)); // this should be drawn normally
+		labels.add(new RLabel(12, "9h", 196)); // this text should be skipped 
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
+		graphicsMock.setFont(fontMock);
+		graphicsMock.setColor(Color.BLACK);
+		expect(graphicsMock.getFontMetrics()).andStubReturn(fontMetricsMock);
+		expect(fontMetricsMock.getAscent()).andReturn(12);
+		graphicsMock.drawLine(146, 80, 146, 99);
+		graphicsMock.drawString("8h",  148, 92);
+		graphicsMock.drawLine(196, 80, 196, 99);
+		expect(fontMetricsMock.stringWidth("9h")).andReturn(8);
+		control.replay();
+		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", true))
+				.setShowInnerLine(false)
+				.setShowOuterLine(false);
+		
+		service.drawRuler(setup, plot, graphicsMock, mapperMock, labels, fontMock);
 		
 		control.verify();
 	}
@@ -124,6 +150,7 @@ public class SWTimeAxisRulerRendererCallbackTest {
 		graphicsMock.drawLine(65,  0,  65, 24);
 		graphicsMock.drawString(":55", 67, 22);
 		graphicsMock.drawLine(85,  0,  85, 24);
+		expect(fontMetricsMock.stringWidth("10h")).andReturn(5);
 		graphicsMock.drawString("10h", 87, 22);
 		control.replay();
 		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", false))
@@ -131,6 +158,30 @@ public class SWTimeAxisRulerRendererCallbackTest {
 				.setShowOuterLine(true);
 		
 		service.drawRuler(setup, target, graphicsMock, mapperMock, labels, fontMock);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testDrawRules_AtTop_SkipTextOfLastLabelIfOutOfBounds() {
+		Rectangle plot = new Rectangle(new Point2D(0, 0), 200, 20);
+		List<RLabel> labels = new ArrayList<>();
+		labels.add(new RLabel(86, "3h", 146)); // this should be drawn normally
+		labels.add(new RLabel(87, "5h", 196)); // this text should be skipped 
+		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.RIGHT);
+		graphicsMock.setFont(fontMock);
+		graphicsMock.setColor(Color.BLACK);
+		expect(graphicsMock.getFontMetrics()).andStubReturn(fontMetricsMock);
+		graphicsMock.drawLine(146, 0, 146, 19);
+		graphicsMock.drawString("3h",  148, 17);
+		graphicsMock.drawLine(196, 0, 196, 19);
+		expect(fontMetricsMock.stringWidth("5h")).andReturn(8);
+		control.replay();
+		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", false))
+				.setShowInnerLine(false)
+				.setShowOuterLine(false);
+		
+		service.drawRuler(setup, plot, graphicsMock, mapperMock, labels, fontMock);
 		
 		control.verify();
 	}

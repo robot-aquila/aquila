@@ -591,12 +591,12 @@ public class SWTimeAxisRulerRendererV2 implements CategoryAxisRulerRenderer {
 			
 			return new SWPreparedRulerCA(callback, mapper, result, labelFont);
 		} catch ( Exception e ) {
-			System.out.println("DBG: n=" + n + " f=" + f);
-			System.out.println("DBG: plot=" + mapper.getPlot());
-			System.out.println("DBG: first visible category (mapper): " + mapper.getFirstVisibleCategory());
-			System.out.println("DBG: last visible category (mapper): " + mapper.getLastVisibleCategory());
-			System.out.println("DBG: num visible categories (mapper): " + mapper.getNumberOfVisibleCategories());
-			System.out.println("DBG: num visible bars (mapper): " + mapper.getNumberOfVisibleBars());
+			//System.out.println("DBG: n=" + n + " f=" + f);
+			//System.out.println("DBG: plot=" + mapper.getPlot());
+			//System.out.println("DBG: first visible category (mapper): " + mapper.getFirstVisibleCategory());
+			//System.out.println("DBG: last visible category (mapper): " + mapper.getLastVisibleCategory());
+			//System.out.println("DBG: num visible categories (mapper): " + mapper.getNumberOfVisibleCategories());
+			//System.out.println("DBG: num visible bars (mapper): " + mapper.getNumberOfVisibleBars());
 			throw new IllegalStateException("Unexpected exception: ", e);
 		} finally {
 			categories.unlock();

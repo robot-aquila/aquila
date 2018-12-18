@@ -40,7 +40,7 @@ public class SWTimeAxisRulerRendererCallback implements SWRendererCallbackCA {
 		graphics.setFont(labelFont);
 		graphics.setColor(Color.BLACK);
 		FontMetrics fontMetrics = graphics.getFontMetrics();
-		int y, x;
+		int y, x, label_count = labels.size(), last_label_index = label_count - 1;
 		if ( setup.getRulerID().isLowerPosition() ) {
 			y = target.getLowerY();
 			if ( setup.isShowInnerLine() ) {
@@ -49,10 +49,20 @@ public class SWTimeAxisRulerRendererCallback implements SWRendererCallbackCA {
 			if ( setup.isShowOuterLine() ) {
 				graphics.drawLine(target.getLeftX(), target.getUpperY(), target.getRightX(), target.getUpperY());
 			}
-			for ( RLabel label : labels ) {
+			for ( int i = 0; i < label_count; i ++ ) {
+				RLabel label = labels.get(i);
 				x = label.getCoord();
 				graphics.drawLine(x, target.getUpperY(), x, target.getLowerY());
-				graphics.drawString(label.getText(), x + 2, y - 2);
+				boolean show_text = true;
+				if ( i == last_label_index ) {
+					int w = fontMetrics.stringWidth(label.getText());
+					if ( x + 2 + w > target.getRightX() ) {
+						show_text = false;
+					}
+				}
+				if ( show_text ) {
+					graphics.drawString(label.getText(), x + 2, y - 2);
+				}
 			}
 		} else {
 			y = target.getUpperY();
@@ -63,10 +73,20 @@ public class SWTimeAxisRulerRendererCallback implements SWRendererCallbackCA {
 			if ( setup.isShowOuterLine() ) {
 				graphics.drawLine(target.getLeftX(), target.getLowerY(), target.getRightX(), target.getLowerY());
 			}
-			for ( RLabel label : labels ) {
+			for ( int i = 0; i < label_count; i ++ ) {
+				RLabel label = labels.get(i);
 				x = label.getCoord();
 				graphics.drawLine(x, target.getUpperY(), x, target.getLowerY());
-				graphics.drawString(label.getText(), x + 2, textY);
+				boolean show_text = true;
+				if ( i == last_label_index ) {
+					int w = fontMetrics.stringWidth(label.getText());
+					if ( x + 2 + w > target.getRightX() ) {
+						show_text = false;
+					}
+				}
+				if ( show_text ) {
+					graphics.drawString(label.getText(), x + 2, textY);
+				}
 			}
 		}
 	}

@@ -78,7 +78,7 @@ public class SWCandlestickLayer extends SWAbstractLayer {
 			logger.warn("Axis direction now unsupported: " + cMapper.getAxisDirection());
 			return;
 		}
-		graphics.setStroke(new BasicStroke(2));
+		graphics.setStroke(new BasicStroke(1));
 		series.lock();
 		try {
 			int last = cMapper.getLastVisibleCategory();
