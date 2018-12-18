@@ -6,15 +6,17 @@ import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 public class BCDisplayContextImpl implements BCDisplayContext {
 	private final CategoryAxisDisplayMapper categoryAxisMapper;
 	private final ValueAxisDisplayMapper valueAxisMapper;
-	private final Rectangle plot;
+	private final Rectangle plot, canvas;
 	
 	public BCDisplayContextImpl(CategoryAxisDisplayMapper categoryAxisMapper,
 								ValueAxisDisplayMapper valueAxisMapper,
-								Rectangle plot)
+								Rectangle plot,
+								Rectangle canvas)
 	{
 		this.categoryAxisMapper = categoryAxisMapper;
 		this.valueAxisMapper = valueAxisMapper;
 		this.plot = plot;
+		this.canvas = canvas;
 	}
 
 	@Override
@@ -30,6 +32,11 @@ public class BCDisplayContextImpl implements BCDisplayContext {
 	@Override
 	public Rectangle getPlotArea() {
 		return plot;
+	}
+
+	@Override
+	public Rectangle getCanvasArea() {
+		return canvas;
 	}
 
 }

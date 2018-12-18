@@ -44,7 +44,7 @@ public class SWALOLayerTest {
 		graphicsMock = control.createMock(Graphics2D.class);
 		vMapperMock = control.createMock(ValueAxisDisplayMapper.class);
 		plot = new Rectangle(Point2D.ZERO, 200, 100);
-		context = new BCDisplayContextImpl(null, vMapperMock, plot);
+		context = new BCDisplayContextImpl(null, vMapperMock, plot, plot);
 		service = new SWALOLayer("foo", dataProviderMock);
 	}
 	

@@ -115,7 +115,7 @@ public class SWOELayerTest {
 		graphicsMock.fillPolygon(poly);
 		control.replay();
 		Rectangle rootRect = new Rectangle(Point2D.ZERO, 200, 120);
-		BCDisplayContext context = new BCDisplayContextImpl(cMapperMock, vMapperMock, rootRect);
+		BCDisplayContext context = new BCDisplayContextImpl(cMapperMock, vMapperMock, rootRect, rootRect);
 		
 		service.paint(context, graphicsMock);
 		

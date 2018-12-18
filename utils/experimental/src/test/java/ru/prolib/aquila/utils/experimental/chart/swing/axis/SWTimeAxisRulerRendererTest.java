@@ -383,6 +383,7 @@ public class SWTimeAxisRulerRendererTest {
 		graphicsMock.drawLine(65, 100,  65, 119);
 		graphicsMock.drawString(":55",  67, 112);
 		graphicsMock.drawLine(85, 100,  85, 119);
+		expect(fontMetricsMock.stringWidth("10h")).andReturn(8);
 		graphicsMock.drawString("10h",  87, 112);
 		control.replay();
 		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", true))
@@ -439,6 +440,7 @@ public class SWTimeAxisRulerRendererTest {
 		graphicsMock.drawLine(65,  0,  65, 24);
 		graphicsMock.drawString(":55", 67, 22);
 		graphicsMock.drawLine(85,  0,  85, 24);
+		expect(fontMetricsMock.stringWidth("10h")).andReturn(8);
 		graphicsMock.drawString("10h", 87, 22);
 		control.replay();
 		SWTimeAxisRulerSetup setup = new SWTimeAxisRulerSetup(new RulerID("foo", "bar", false))

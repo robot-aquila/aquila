@@ -51,10 +51,10 @@ public class SWBarHighlighter extends SWAbstractLayer {
 			logger.warn("Axis direction now unsupported: " + cam.getAxisDirection());
 			return;
 		}
-		Rectangle plot = context.getPlotArea();
+		Rectangle rect = context.getCanvasArea();
 		Segment1D bar = cam.toDisplay(tracker.getAbsoluteIndex());
 		graphics.setColor(getColor(HIGHLIGHT_COLOR));
-		graphics.fillRect(bar.getStart(), plot.getUpperY(), bar.getLength(), plot.getHeight());
+		graphics.fillRect(bar.getStart(), rect.getUpperY(), bar.getLength(), rect.getHeight());
 	}
 
 }

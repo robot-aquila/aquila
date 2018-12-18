@@ -146,7 +146,7 @@ public class SWValueAxisRulerRendererTest {
 		List<RLabel> labels = new ArrayList<>();
 		labels.add(new RLabel(of("10.00"), "10.00", 119));
 		labels.add(new RLabel(of("15.00"), "15.00",  59));
-		labels.add(new RLabel(of("20.00"), "20.00",   0));
+		labels.add(new RLabel(of("20.00"), "20.00",   0)); // this text should be skipped due to overlap
 		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.UP);
 		expect(graphicsMock.getFontMetrics(fontMock)).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(19);
@@ -160,7 +160,7 @@ public class SWValueAxisRulerRendererTest {
 		graphicsMock.drawString("15.00", 12,  68);
 		graphicsMock.drawLine(37,   0, 39,   0);
 		expect(fontMetricsMock.stringWidth("20.00")).andReturn(22);
-		graphicsMock.drawString("20.00", 12,   9);
+		//graphicsMock.drawString("20.00", 12,   9);
 		control.replay();
 		RulerSetup setup = new RulerSetup(new RulerID("foo", "bar", false));
 		
@@ -175,7 +175,7 @@ public class SWValueAxisRulerRendererTest {
 		List<RLabel> labels = new ArrayList<>();
 		labels.add(new RLabel(of("10.00"), "10.00", 119));
 		labels.add(new RLabel(of("15.00"), "15.00",  59));
-		labels.add(new RLabel(of("20.00"), "20.00",   0));
+		labels.add(new RLabel(of("20.00"), "20.00",   0)); // this text should be skipped due to overlap
 		expect(mapperMock.getAxisDirection()).andReturn(AxisDirection.UP);
 		expect(graphicsMock.getFontMetrics(fontMock)).andStubReturn(fontMetricsMock);
 		expect(fontMetricsMock.getAscent()).andReturn(19);
@@ -186,7 +186,7 @@ public class SWValueAxisRulerRendererTest {
 		graphicsMock.drawLine(280,  59,  282,  59);
 		graphicsMock.drawString("15.00", 285,  68);
 		graphicsMock.drawLine(280,   0,  282,   0);
-		graphicsMock.drawString("20.00", 285,   9);
+		//graphicsMock.drawString("20.00", 285,   9);
 		control.replay();
 		RulerSetup setup = new RulerSetup(new RulerID("foo", "bar", true));
 		

@@ -14,7 +14,7 @@ public class BCDisplayContextImplTest {
 	private IMocksControl control;
 	private CategoryAxisDisplayMapper categoryAxisMapperMock;
 	private ValueAxisDisplayMapper valueAxisMapperMock;
-	private Rectangle plotMock;
+	private Rectangle plotMock, canvasMock;
 	private BCDisplayContextImpl context;
 
 	@Before
@@ -23,7 +23,12 @@ public class BCDisplayContextImplTest {
 		categoryAxisMapperMock = control.createMock(CategoryAxisDisplayMapper.class);
 		valueAxisMapperMock = control.createMock(ValueAxisDisplayMapper.class);
 		plotMock = control.createMock(Rectangle.class);
-		context = new BCDisplayContextImpl(categoryAxisMapperMock, valueAxisMapperMock, plotMock);
+		canvasMock = control.createMock(Rectangle.class);
+		context = new BCDisplayContextImpl(categoryAxisMapperMock,
+				valueAxisMapperMock,
+				plotMock,
+				canvasMock
+			);
 	}
 
 	@Test
@@ -31,6 +36,7 @@ public class BCDisplayContextImplTest {
 		assertSame(categoryAxisMapperMock, context.getCategoryAxisMapper());
 		assertSame(valueAxisMapperMock, context.getValueAxisMapper());
 		assertSame(plotMock, context.getPlotArea());
+		assertSame(canvasMock, context.getCanvasArea());
 	}
 
 }

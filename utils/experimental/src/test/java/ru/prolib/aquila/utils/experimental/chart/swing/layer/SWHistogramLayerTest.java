@@ -193,7 +193,7 @@ public class SWHistogramLayerTest {
 		caMapper = caDriver.createMapper(caSegment, caViewport);	// 50px per bar
 		vaViewport.setValueRange(new Range<>(of(0L), of(500L)));		
 		vaMapper = vaDriver.createMapper(vaSegment, vaViewport);	// 5 units per 1px
-		context = new BCDisplayContextImpl(caMapper, vaMapper, plot);
+		context = new BCDisplayContextImpl(caMapper, vaMapper, plot, plot);
 		series.add(of(  5L));
 		series.add(of(  1L));
 		series.add(of(250L));
@@ -218,7 +218,7 @@ public class SWHistogramLayerTest {
 		caMapper = caDriver.createMapper(caSegment, caViewport);	// 50px per bar
 		vaViewport.setValueRange(new Range<>(of(-500L), of(0L)));		
 		vaMapper = vaDriver.createMapper(vaSegment, vaViewport);	// 5 units per 1px
-		context = new BCDisplayContextImpl(caMapper, vaMapper, plot);
+		context = new BCDisplayContextImpl(caMapper, vaMapper, plot, plot);
 		series.add(of(  5L));
 		series.add(of(  1L));
 		series.add(of(250L));
@@ -244,7 +244,7 @@ public class SWHistogramLayerTest {
 		caMapper = caDriver.createMapper(new Segment1D(0, 4), caViewport);	// 1px per bar
 		vaViewport.setValueRange(new Range<>(of(0L), of(500L)));
 		vaMapper = vaDriver.createMapper(vaSegment, vaViewport);	// 5 units per 1px
-		context = new BCDisplayContextImpl(caMapper, vaMapper, plot);
+		context = new BCDisplayContextImpl(caMapper, vaMapper, plot, plot);
 		series.add(of(  5L));
 		series.add(of(  1L));
 		series.add(of(250L));

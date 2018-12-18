@@ -124,14 +124,14 @@ public class SWCandlestickLayerTest {
 		caMapper = caDriver.createMapper(caSegment, caViewport);	// 50px per bar
 		vaViewport.setValueRange(new Range<>(of(0L), of(200L)));		
 		vaMapper = vaDriver.createMapper(vaSegment, vaViewport);	// 1 unit per 1px
-		context = new BCDisplayContextImpl(caMapper, vaMapper, plot);
+		context = new BCDisplayContextImpl(caMapper, vaMapper, plot, plot);
 		series.add(new Candle(IM5("2018-02-24T23:55:00Z"), of( 90L), of(106L), of( 90L), of(105L), of(20L)));
 		series.add(null);
 		series.add(new Candle(IM5("2018-02-25T00:00:00Z"), of(100L), of(105L), of( 98L), of(102L), of( 1L))); // bullish
 		series.add(new Candle(IM5("2018-02-25T00:05:00Z"), of(102L), of(107L), of( 96L), of(101L), of( 5L))); // bearish
 		series.add(null); // test null value
 		series.add(new Candle(IM5("2018-02-25T00:10:00Z"), of(103L), of(103L), of(101L), of(101L), of(10L))); // bearish
-		graphicsMock.setStroke(new BasicStroke(2));
+		graphicsMock.setStroke(new BasicStroke(1));
 		// draw candle #2
 		graphicsMock.setColor(new Color(0, 80, 0));		// bullish shadow color
 		graphicsMock.drawLine(24, 94, 24, 101);			// H=200-105-1=94 L=200- 98-1=101
@@ -162,11 +162,11 @@ public class SWCandlestickLayerTest {
 		caMapper = caDriver.createMapper(new Segment1D(0, 3), caViewport);	// 1px per bar
 		vaViewport.setValueRange(new Range<>(of(0L), of(200L)));		
 		vaMapper = vaDriver.createMapper(vaSegment, vaViewport);	// 1 unit per 1px
-		context = new BCDisplayContextImpl(caMapper, vaMapper, plot);
+		context = new BCDisplayContextImpl(caMapper, vaMapper, plot, plot);
 		series.add(new Candle(IM5("2018-02-25T00:00:00Z"), of(100L), of(105L), of( 98L), of(102L), of( 1L))); // bullish
 		series.add(new Candle(IM5("2018-02-25T00:05:00Z"), of(102L), of(107L), of( 96L), of(101L), of( 5L))); // bearish
 		series.add(new Candle(IM5("2018-02-25T00:10:00Z"), of(103L), of(103L), of(101L), of(101L), of(10L))); // bearish
-		graphicsMock.setStroke(new BasicStroke(2));
+		graphicsMock.setStroke(new BasicStroke(1));
 		// draw candle #0
 		graphicsMock.setColor(new Color(0, 80, 0));
 		graphicsMock.drawLine(0, 94, 0, 101);

@@ -249,11 +249,12 @@ public class BarChartImpl implements BarChart, EventListener {
 		yLayout = verticalSpaceManager.prepareLayout(new Segment1D(0, dh), dh / 2, graphics);
 		Segment1D dsX = xLayout.getDataSpace(), dsY = yLayout.getDataSpace();
 		Rectangle plot = new Rectangle(new Point2D(dsX.getStart(), dsY.getStart()), dsX.getLength(), dsY.getLength());
+		Rectangle canvas = new Rectangle(Point2D.ZERO, dw, dh);
 
 		Range<CDecimal> vr = getValueRange(cam.getFirstVisibleCategory(), cam.getNumberOfVisibleCategories());
 		vav.setValueRange(vr);
 		ValueAxisDisplayMapper vam = vad.createMapper(dsY, vav);
-		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, plot);
+		BCDisplayContext context = new BCDisplayContextImpl(cam, vam, plot, canvas);
 
 		Rectangle rect;
 		PreparedRulerRegistry prcache = new PreparedRulerRegistryImpl(new PreparedRulerFactoryVAD(vad, vam, graphics));

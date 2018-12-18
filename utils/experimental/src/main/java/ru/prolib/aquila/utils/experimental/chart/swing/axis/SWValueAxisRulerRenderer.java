@@ -113,27 +113,47 @@ public class SWValueAxisRulerRenderer implements ValueAxisRulerRenderer, SWRende
 			throw new UnsupportedOperationException("Axis direction is not supported: " + dir);	
 		}
 		FontMetrics fontMetrics = graphics.getFontMetrics(labelFont);
-		int textHalfHeight = fontMetrics.getAscent() / 2;
+		int text_ascent = fontMetrics.getAscent();
+		int text_ascent_half = text_ascent / 2;
 		graphics.setFont(labelFont);
 		graphics.setColor(Color.BLACK);
+		int label_count = labels.size(), last_label_index = label_count - 1;
 		if ( setup.getRulerID().isLowerPosition() ) {
-			for ( RLabel label : labels ) {
+			for ( int i = 0; i < label_count; i ++ ) {
+				RLabel label = labels.get(i);
 				int x = target.getRightX();
 				int y = label.getCoord();
 				graphics.drawLine(x - 2, y, x, y);
 				int labelWidth = fontMetrics.stringWidth(label.getText());
 				x = x - 5 - labelWidth;
-				y += textHalfHeight;
-				graphics.drawString(label.getText(), x, y);
+				y += text_ascent_half;
+				boolean show_text = true;
+				if ( i == last_label_index ) {
+					if ( y - text_ascent < 0 ) {
+						show_text = false; 
+					}
+				}
+				if ( show_text ) {
+					graphics.drawString(label.getText(), x, y);
+				}
 			}
 		} else {
-			for ( RLabel label : labels ) {
+			for ( int i = 0; i < label_count; i ++ ) {
+				RLabel label = labels.get(i);
 				int x = target.getLeftX();
 				int y = label.getCoord();
 				graphics.drawLine(x, y, x + 2, y);
 				x += 5;
-				y += textHalfHeight;
-				graphics.drawString(label.getText(), x, y);
+				y += text_ascent_half;
+				boolean show_text = true;
+				if ( i == last_label_index ) {
+					if ( y - text_ascent < 0 ) {
+						show_text = false; 
+					}
+				}
+				if ( show_text ) {
+					graphics.drawString(label.getText(), x, y);
+				}
 			}
 		}
 	}

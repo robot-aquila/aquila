@@ -145,7 +145,7 @@ public class SWIndicatorLayerTest {
 		caMapper = caDriver.createMapper(caSegment, caViewport);	// 50px per bar
 		vaViewport.setValueRange(new Range<>(of(0L), of(100L)));		
 		vaMapper = vaDriver.createMapper(vaSegment, vaViewport);	// 1 unit per 1px
-		context = new BCDisplayContextImpl(caMapper, vaMapper, plot);
+		context = new BCDisplayContextImpl(caMapper, vaMapper, plot, plot);
 		series.add(of( 5L));
 		series.add(of(10L));
 		series.add(of(25L));
@@ -176,7 +176,7 @@ public class SWIndicatorLayerTest {
 		caMapper = caDriver.createMapper(caSegment, caViewport);	// 50px per bar
 		vaViewport.setValueRange(new Range<>(of(-100L), of(0L)));		
 		vaMapper = vaDriver.createMapper(vaSegment, vaViewport);	// 1 unit per 1px
-		context = new BCDisplayContextImpl(caMapper, vaMapper, plot);
+		context = new BCDisplayContextImpl(caMapper, vaMapper, plot, plot);
 		series.add(of( 5L));
 		series.add(of(10L));
 		series.add(of(25L));
