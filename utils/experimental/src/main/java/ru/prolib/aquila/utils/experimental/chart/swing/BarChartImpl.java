@@ -19,20 +19,16 @@ import ru.prolib.aquila.utils.experimental.chart.swing.layer.SWIndicatorLayer;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxy;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.axis.GridLinesSetup;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerID;
 import ru.prolib.aquila.utils.experimental.chart.axis.RulerSpace;
-import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRuler;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerFactoryCADProxy;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerFactoryVAD;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerRegistry;
 import ru.prolib.aquila.utils.experimental.chart.axis.PreparedRulerRegistryImpl;
-import ru.prolib.aquila.utils.experimental.chart.axis.RulerRendererID;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisDriverImpl;
-import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisRulerRenderer;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.ValueAxisViewportImpl;
 import ru.prolib.aquila.utils.experimental.chart.interpolator.PolyLineRenderer;
@@ -51,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by TiM on 09.09.2017.
@@ -68,7 +63,6 @@ public class BarChartImpl implements BarChart, EventListener {
 	private final List<BarChartLayer> layers = new Vector<>();
 	private List<ChartOverlay> overlays = new Vector<>();
 	private int height;
-	private AtomicInteger lastX, lastY, lastCategoryIdx;
 	private Map<String, List<String>> tooltips;
 	private Set<String> systemLayers = new HashSet<>();
 	private ChartSettingsButton chartSettingsButton;
@@ -228,12 +222,6 @@ public class BarChartImpl implements BarChart, EventListener {
 	public BarChart addOverlay(ChartOverlay overlay) {
 		overlays.add(overlay);
 		return this;
-	}
-	
-	public void setMouseVariables(AtomicInteger lastX, AtomicInteger lastY, AtomicInteger lastCategoryIdx) {
-		this.lastX = lastX;
-		this.lastY = lastY;
-		this.lastCategoryIdx = lastCategoryIdx;
 	}
 	
 	public void setTooltips(HashMap<String, List<String>> tooltips) {

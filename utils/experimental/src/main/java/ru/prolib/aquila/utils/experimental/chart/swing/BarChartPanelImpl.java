@@ -4,7 +4,6 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.data.ObservableTSeries;
 import ru.prolib.aquila.utils.experimental.chart.*;
-import ru.prolib.aquila.utils.experimental.chart.TooltipForm;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
@@ -12,7 +11,6 @@ import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxyImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
-import ru.prolib.aquila.utils.experimental.chart.swing.layer.BarChartCursorLayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,12 +31,17 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 	protected final CategoryAxisDriver cad;
 	protected final CategoryAxisDriverProxyImpl cadProxy;
 	private final ScrollBarController scrollBarController;
+	private final CursorControllerImpl cursorController;
 	private final JCompBarChartPanel rootPanel;
 	
+	@Deprecated
 	protected AtomicInteger lastX, lastY, lastCategoryIdx;
+	@Deprecated
 	protected Map<String, Map<String, List<String>>> tooltips;
+	@Deprecated
 	protected TooltipForm tooltipForm;
 	//private java.awt.Rectangle screen;
+	@Deprecated
 	private final HashMap<JPanel, BarChart> chartByPanel = new HashMap<>();
 	//private boolean showTooltipForm = false;
 
@@ -49,6 +52,7 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 		cad = new CategoryAxisDriverImpl("CATEGORY", AxisDirection.RIGHT);
 		cadProxy = new CategoryAxisDriverProxyImpl(cad);
 		scrollBarController = new ScrollBarController();
+		cursorController = new CursorControllerImpl(this);
 		
 		scrollBarController.setRootPanel(rootPanel);
 		scrollBarController.setScrollBar(rootPanel.getScrollBar());
@@ -69,6 +73,11 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
         return rootPanel;
     }
     
+    @Override
+    public SelectedCategoryTracker getCategoryTracker() {
+    	return cursorController.getCategoryTracker();
+    }
+    
 	@Override
 	public void setCategories(ObservableTSeries<?> categories) {
 		scrollBarController.setCategories(categories);
@@ -76,24 +85,26 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 	}
 
     @Override
-    public BarChart addChart(String id) {
-        if(charts.containsKey(id)){
-            throw new IllegalArgumentException("Chart with id='"+id+"' already added");
+    public BarChart addChart(String chartID) {
+        if ( charts.containsKey(chartID) ) {
+            throw new IllegalArgumentException("Chart already exists: " + chartID);
         }
         BarChartImpl chart = new BarChartImpl(cadProxy);
-        chart.setMouseVariables(lastX, lastY, lastCategoryIdx);
+		MouseAdapter tracker = new MouseAdapter(chartID, cursorController);
+		chart.getChartPanel().addMouseListener(tracker);
+		chart.getChartPanel().addMouseMotionListener(tracker);
         HashMap<String, List<String>> map = new HashMap<>();
-        tooltips.put(id, map);
+        tooltips.put(chartID, map);
         // TODO: fix me
         //chart.setTooltips(map);
-        if(charts.size()==0) {
+        if ( charts.size() == 0 ) {
             chart.setHeight(rootPanel.getHeight());
         } else {
             chart.setHeight(OTHER_CHARTS_HEIGHT);
         }
-        chart.addLayer(new BarChartCursorLayer(lastX), true);
+        //chart.addLayer(new SWBarHighlighter(lastX), true); // TODO: to remove
         rootPanel.getMainPanel().add(chart.getChartPanel());
-        charts.put(id, chart);
+        charts.put(chartID, chart);
         // TODO: fix me
         //chart.getRootPanel().addMouseWheelListener(this);
         //chart.getRootPanel().addMouseMotionListener(this);
@@ -144,7 +155,7 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 		for ( BarChart chart : charts.values() ) {
 			ChartSpaceLayout layout = chart.getHorizontalSpaceManager()
 					.prepareLayout(displaySpace, rulersMaxSpace, graphics);
-			// TODO: To make a better approach
+			// TODO: make it better
 			if ( bestLayout == null
 			  || bestLayout.getDataSpace().getLength() > layout.getDataSpace().getLength() )
 			{
@@ -154,7 +165,8 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 		Segment1D dataSpace = bestLayout == null ? displaySpace : bestLayout.getDataSpace();
 		CategoryAxisDisplayMapper cam = cad.createMapper(dataSpace, cav);
 		cadProxy.setCurrentMapper(cam);
-		scrollBarController.setDisplayMapper(cam);		
+		scrollBarController.setDisplayMapper(cam);
+		cursorController.update(cam);
 	}
 
 	@Override

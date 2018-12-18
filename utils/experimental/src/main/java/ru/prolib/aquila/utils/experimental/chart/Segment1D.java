@@ -60,6 +60,16 @@ public class Segment1D {
 		return oc1 >= c1 && oc1 <= c2 && oc2 >= c1 && oc2 <= c2;
 	}
 	
+	/**
+	 * Test that this segment contains the point.
+	 * <p>
+	 * @param c - coordinate of point
+	 * @return true if the point is a part of this segment, false otherwise
+	 */
+	public boolean contains(int point) {
+		return point >= getStart() && point <= getEnd();
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {

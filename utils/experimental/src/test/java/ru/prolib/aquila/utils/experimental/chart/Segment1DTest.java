@@ -63,7 +63,7 @@ public class Segment1DTest {
 	}
 	
 	@Test
-	public void testContains() {
+	public void testContains_Seg() {
 		assertTrue(segment.contains(segment));
 		assertTrue(segment.contains(new Segment1D(5, 1)));
 		assertTrue(segment.contains(new Segment1D(19, 1)));
@@ -71,6 +71,28 @@ public class Segment1DTest {
 		assertFalse(segment.contains(new Segment1D(0, 40)));
 		assertFalse(segment.contains(new Segment1D(5, 25)));
 		assertFalse(segment.contains(new Segment1D(1, 20)));
+	}
+	
+	@Test
+	public void testContains_Int() {
+		assertFalse(segment.contains(-200));
+		assertFalse(segment.contains(-10));
+		assertFalse(segment.contains(-1));
+		assertFalse(segment.contains(0));
+		assertFalse(segment.contains(1));
+		assertFalse(segment.contains(2));
+		assertFalse(segment.contains(3));
+		assertFalse(segment.contains(4));
+		assertTrue(segment.contains(5));
+		assertTrue(segment.contains(6));
+		assertTrue(segment.contains(7));
+		// ...
+		assertTrue(segment.contains(22));
+		assertTrue(segment.contains(23));
+		assertTrue(segment.contains(24));
+		assertFalse(segment.contains(25));
+		assertFalse(segment.contains(26));
+		assertFalse(segment.contains(27));
 	}
 
 }

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.axis;
 
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
+
 import java.math.RoundingMode;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -73,7 +75,23 @@ public class CategoryAxisDisplayMapperHR implements CategoryAxisDisplayMapper {
 
 	@Override
 	public int toCategory(int displayCoord) {
-		throw new UnsupportedOperationException("Not yet implemented");
+		int x1 = displayCoord - firstBarX;
+		int rel_index = of((long) x1).divideExact(barWidth, 0).toBigDecimal().intValue();
+		int abs_index = rel_index + firstBarCategory;
+		Segment1D seg = getSegmentOfBar(rel_index);
+		if ( displayCoord >= seg.getStart() && displayCoord <= seg.getEnd() ) {
+			return checkIndex(abs_index);
+		} else if ( displayCoord < seg.getStart() ) {
+			return checkIndex(abs_index - 1);
+		}
+		throw new IllegalStateException();
+	}
+	
+	private int checkIndex(int index) {
+		if ( index < firstBarCategory || index > getLastVisibleCategory() ) {
+			throw new IllegalArgumentException("Illegal index: " + index);
+		}
+		return index;
 	}
 
 	@Override

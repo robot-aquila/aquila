@@ -25,4 +25,6 @@ public interface BarChartPanel {
      * @param categories - any series to use as set of categories
      */
     void setCategories(ObservableTSeries<?> categories);
+    
+    SelectedCategoryTracker getCategoryTracker();
 }

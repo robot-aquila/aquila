@@ -53,11 +53,54 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(new Segment1D(40, 4), mapper.toDisplay(8));
 		assertEquals(new Segment1D(44, 5), mapper.toDisplay(9));
 		
-		// TODO: test toCategory method
+		assertEquals(0, mapper.toCategory( 5));
+		assertEquals(0, mapper.toCategory( 6));
+		assertEquals(0, mapper.toCategory( 7));
+		assertEquals(0, mapper.toCategory( 8));
+		assertEquals(1, mapper.toCategory( 9));
+		assertEquals(1, mapper.toCategory(10));
+		assertEquals(1, mapper.toCategory(11));
+		assertEquals(1, mapper.toCategory(12));
+		assertEquals(1, mapper.toCategory(13));
+		assertEquals(2, mapper.toCategory(14));
+		assertEquals(2, mapper.toCategory(15));
+		assertEquals(2, mapper.toCategory(16));
+		assertEquals(2, mapper.toCategory(17));
+		assertEquals(3, mapper.toCategory(18));
+		assertEquals(3, mapper.toCategory(19));
+		assertEquals(3, mapper.toCategory(20));
+		assertEquals(3, mapper.toCategory(21));
+		assertEquals(4, mapper.toCategory(22));
+		assertEquals(4, mapper.toCategory(23));
+		assertEquals(4, mapper.toCategory(24));
+		assertEquals(4, mapper.toCategory(25));
+		assertEquals(4, mapper.toCategory(26));
+		assertEquals(5, mapper.toCategory(27));
+		assertEquals(5, mapper.toCategory(28));
+		assertEquals(5, mapper.toCategory(29));
+		assertEquals(5, mapper.toCategory(30));
+		assertEquals(6, mapper.toCategory(31));
+		assertEquals(6, mapper.toCategory(32));
+		assertEquals(6, mapper.toCategory(33));
+		assertEquals(6, mapper.toCategory(34));
+		assertEquals(7, mapper.toCategory(35));
+		assertEquals(7, mapper.toCategory(36));
+		assertEquals(7, mapper.toCategory(37));
+		assertEquals(7, mapper.toCategory(38));
+		assertEquals(7, mapper.toCategory(39));
+		assertEquals(8, mapper.toCategory(40));
+		assertEquals(8, mapper.toCategory(41));
+		assertEquals(8, mapper.toCategory(42));
+		assertEquals(8, mapper.toCategory(43));
+		assertEquals(9, mapper.toCategory(44));
+		assertEquals(9, mapper.toCategory(45));
+		assertEquals(9, mapper.toCategory(46));
+		assertEquals(9, mapper.toCategory(47));
+		assertEquals(9, mapper.toCategory(48));
 	}
 	
 	@Test
-	public void testCaseWhenViewportShifterLeft() {
+	public void testCaseWhenViewportShiftedLeft() {
 		mapper = new CategoryAxisDisplayMapperHR(5, -2, 10, of("4.352"));
 		
 		assertEquals(AxisDirection.RIGHT, mapper.getAxisDirection());
@@ -78,7 +121,51 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(new Segment1D(40, 4), mapper.toDisplay(6));
 		assertEquals(new Segment1D(44, 5), mapper.toDisplay(7));
 		
-		// TODO: test toCategory method
+		// This should cover whole plot area
+		assertEquals(-2, mapper.toCategory( 5));
+		assertEquals(-2, mapper.toCategory( 6));
+		assertEquals(-2, mapper.toCategory( 7));
+		assertEquals(-2, mapper.toCategory( 8));
+		assertEquals(-1, mapper.toCategory( 9));
+		assertEquals(-1, mapper.toCategory(10));
+		assertEquals(-1, mapper.toCategory(11));
+		assertEquals(-1, mapper.toCategory(12));
+		assertEquals(-1, mapper.toCategory(13));
+		assertEquals(0, mapper.toCategory(14));
+		assertEquals(0, mapper.toCategory(15));
+		assertEquals(0, mapper.toCategory(16));
+		assertEquals(0, mapper.toCategory(17));
+		assertEquals(1, mapper.toCategory(18));
+		assertEquals(1, mapper.toCategory(19));
+		assertEquals(1, mapper.toCategory(20));
+		assertEquals(1, mapper.toCategory(21));
+		assertEquals(2, mapper.toCategory(22));
+		assertEquals(2, mapper.toCategory(23));
+		assertEquals(2, mapper.toCategory(24));
+		assertEquals(2, mapper.toCategory(25));
+		assertEquals(2, mapper.toCategory(26));
+		assertEquals(3, mapper.toCategory(27));
+		assertEquals(3, mapper.toCategory(28));
+		assertEquals(3, mapper.toCategory(29));
+		assertEquals(3, mapper.toCategory(30));
+		assertEquals(4, mapper.toCategory(31));
+		assertEquals(4, mapper.toCategory(32));
+		assertEquals(4, mapper.toCategory(33));
+		assertEquals(4, mapper.toCategory(34));
+		assertEquals(5, mapper.toCategory(35));
+		assertEquals(5, mapper.toCategory(36));
+		assertEquals(5, mapper.toCategory(37));
+		assertEquals(5, mapper.toCategory(38));
+		assertEquals(5, mapper.toCategory(39));
+		assertEquals(6, mapper.toCategory(40));
+		assertEquals(6, mapper.toCategory(41));
+		assertEquals(6, mapper.toCategory(42));
+		assertEquals(6, mapper.toCategory(43));
+		assertEquals(7, mapper.toCategory(44));
+		assertEquals(7, mapper.toCategory(45));
+		assertEquals(7, mapper.toCategory(46));
+		assertEquals(7, mapper.toCategory(47));
+		assertEquals(7, mapper.toCategory(48));
 	}
 	
 	@Test
@@ -105,7 +192,46 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(new Segment1D(45, 4), mapper.toDisplay(10));
 		assertEquals(new Segment1D(49, 5), mapper.toDisplay(11));
 
-		// TODO: test toCategory method
+		assertEquals( 2, mapper.toCategory(10));
+		assertEquals( 2, mapper.toCategory(11));
+		assertEquals( 2, mapper.toCategory(12));
+		assertEquals( 2, mapper.toCategory(13));
+		assertEquals( 3, mapper.toCategory(14));
+		assertEquals( 3, mapper.toCategory(15));
+		assertEquals( 3, mapper.toCategory(16));
+		assertEquals( 3, mapper.toCategory(17));
+		assertEquals( 3, mapper.toCategory(18));
+		assertEquals( 4, mapper.toCategory(19));
+		assertEquals( 4, mapper.toCategory(20));
+		assertEquals( 4, mapper.toCategory(21));
+		assertEquals( 4, mapper.toCategory(22));
+		assertEquals( 5, mapper.toCategory(23));
+		assertEquals( 5, mapper.toCategory(24));
+		assertEquals( 5, mapper.toCategory(25));
+		assertEquals( 5, mapper.toCategory(26));
+		assertEquals( 6, mapper.toCategory(27));
+		assertEquals( 6, mapper.toCategory(28));
+		assertEquals( 6, mapper.toCategory(29));
+		assertEquals( 6, mapper.toCategory(30));
+		assertEquals( 6, mapper.toCategory(31));
+		assertEquals( 7, mapper.toCategory(32));
+		assertEquals( 7, mapper.toCategory(33));
+		assertEquals( 7, mapper.toCategory(34));
+		assertEquals( 7, mapper.toCategory(35));
+		assertEquals( 8, mapper.toCategory(36));
+		assertEquals( 8, mapper.toCategory(37));
+		assertEquals( 8, mapper.toCategory(38));
+		assertEquals( 8, mapper.toCategory(39));
+		assertEquals( 9, mapper.toCategory(40));
+		assertEquals( 9, mapper.toCategory(41));
+		assertEquals( 9, mapper.toCategory(42));
+		assertEquals( 9, mapper.toCategory(43));
+		assertEquals( 9, mapper.toCategory(44));
+		assertEquals(10, mapper.toCategory(45));
+		assertEquals(10, mapper.toCategory(46));
+		assertEquals(10, mapper.toCategory(47));
+		assertEquals(10, mapper.toCategory(48));
+		// Can't test #11 because out of chart
 	}
 	
 	@Test
@@ -126,7 +252,27 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(new Segment1D(13, 1), mapper.toDisplay(8));
 		assertEquals(new Segment1D(14, 1), mapper.toDisplay(9));
 
-		// TODO: test toCategory method
+		assertEquals(0, mapper.toCategory( 5));
+		assertEquals(1, mapper.toCategory( 6));
+		assertEquals(2, mapper.toCategory( 7));
+		assertEquals(3, mapper.toCategory( 8));
+		assertEquals(4, mapper.toCategory( 9));
+		assertEquals(5, mapper.toCategory(10));
+		assertEquals(6, mapper.toCategory(11));
+		assertEquals(7, mapper.toCategory(12));
+		assertEquals(8, mapper.toCategory(13));
+		assertEquals(9, mapper.toCategory(14));
+	}
+	
+	@Test
+	public void testCase_WhenBarIndexIsLessThanFirstVisibleCategory() {
+		mapper = new CategoryAxisDisplayMapperHR(30, 500, 10, of("3.1547"));
+		
+		assertEquals(new Segment1D(39,  4), mapper.toDisplay(503));
+		assertEquals(503, mapper.toCategory(39));
+		assertEquals(503, mapper.toCategory(40));
+		assertEquals(503, mapper.toCategory(41));
+		assertEquals(503, mapper.toCategory(42));
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -139,6 +285,18 @@ public class CategoryAxisDisplayMapperHRTest {
 	public void testToDisplay_ThrowsIfCategoryGtLastVisible() {
 		mapper = new CategoryAxisDisplayMapperHR(10, 2, 10, of("4.352"));
 		mapper.toDisplay(12);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testToCategory_ThrowsIfCoordAtLeftOfDisplayArea() {
+		mapper = new CategoryAxisDisplayMapperHR(10, 2, 10, of("4.352"));
+		mapper.toCategory(7);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testToCategory_ThrowsIfCoordAtRightOfDisplayArea() {
+		mapper = new CategoryAxisDisplayMapperHR(10, 2, 10, of("4.352"));
+		mapper.toCategory(70);
 	}
 	
 	@Test

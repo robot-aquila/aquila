@@ -54,6 +54,8 @@ public interface CategoryAxisDisplayMapper extends AxisDisplayMapper {
 	/**
 	 * Convert display coordinate to index of category.
 	 * <p>
+	 * Note that the result could be less than zero in case if axis is tied to the end.
+	 * <p>
 	 * @param display - coordinate of screen to convert from
 	 * @return appropriate category index
 	 */
