@@ -3,7 +3,7 @@ package ru.prolib.aquila.ui;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import org.springframework.context.ApplicationContext;
+//import org.springframework.context.ApplicationContext;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.text.Messages;
@@ -20,7 +20,7 @@ public class ServiceLocator implements AquilaUI {
 	private final Messages texts;
 	private final Runnable exitAction;
 	private MainFrame frame;
-	private ApplicationContext appContext;
+	//private ApplicationContext appContext;
 	
 	public ServiceLocator(Messages texts, Runnable exitAction) {
 		super();
@@ -68,13 +68,13 @@ public class ServiceLocator implements AquilaUI {
 		this.frame = frame;
 	}
 
-	@Override
-	public ApplicationContext getApplicationContext() {
-		return appContext;
-	}
+	//@Override
+	//public ApplicationContext getApplicationContext() {
+	//	return appContext;
+	//}
 	
-	public void setApplicationContext(ApplicationContext context) {
-		this.appContext = context;
-	}
+	//public void setApplicationContext(ApplicationContext context) {
+	//	this.appContext = context;
+	//}
 
 }

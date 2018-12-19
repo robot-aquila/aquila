@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.utils.Range;
 import ru.prolib.aquila.core.utils.Variant;
 import ru.prolib.aquila.utils.experimental.chart.Segment1D;
@@ -282,6 +283,25 @@ public class ValueAxisDisplayMapperVUDTest {
 		assertEquals(of("0.05"), mapper.toValue(12));
 		assertEquals(of("0.05"), mapper.toValue(13));
 		assertEquals(of("0.05"), mapper.toValue(14));
+	}
+	
+	@Test
+	public void testConvertation_SpecialCase_ZeroRange() throws Exception {
+		mapper = new ValueAxisDisplayMapperVUD(5, 10, new Range<>(of("0.15"), of("0.15")));
+		assertEquals(CDecimalBD.ZERO, mapper.getRatio());
+		
+		assertEquals(14, mapper.toDisplay(of("0.15")));
+		// whole range is same value
+		assertEquals(of("0.15"), mapper.toValue( 5));
+		assertEquals(of("0.15"), mapper.toValue( 6));
+		assertEquals(of("0.15"), mapper.toValue( 7));
+		assertEquals(of("0.15"), mapper.toValue( 8));
+		assertEquals(of("0.15"), mapper.toValue( 9));
+		assertEquals(of("0.15"), mapper.toValue(10));
+		assertEquals(of("0.15"), mapper.toValue(11));
+		assertEquals(of("0.15"), mapper.toValue(12));
+		assertEquals(of("0.15"), mapper.toValue(13));
+		assertEquals(of("0.15"), mapper.toValue(14));
 	}
 
 }

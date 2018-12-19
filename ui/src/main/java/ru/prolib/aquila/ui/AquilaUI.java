@@ -2,7 +2,7 @@ package ru.prolib.aquila.ui;
 
 import javax.swing.*;
 
-import org.springframework.context.ApplicationContext;
+//import org.springframework.context.ApplicationContext;
 
 import ru.prolib.aquila.core.EventSystem;
 import ru.prolib.aquila.core.text.Messages;
@@ -54,6 +54,7 @@ public interface AquilaUI {
 	 * <p>
 	 * @return application context
 	 */
-	public ApplicationContext getApplicationContext();
+	//@Deprecated
+	//public ApplicationContext getApplicationContext();
 
 }

@@ -45,9 +45,9 @@ public class SecurityStoragePlugin implements AquilaPlugin, EventListener {
 			throws Exception
 	{
 		this.terminal = terminal;
-		this.securityStorageService = (SecurityStorageService)
-			locator.getApplicationContext().getBean("securityStorageService");
-
+		//this.securityStorageService = (SecurityStorageService)
+		//	locator.getApplicationContext().getBean("securityStorageService");
+		throw new UnsupportedOperationException("The program is outdated");
 	}
 
 	@Override

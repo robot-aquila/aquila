@@ -8,10 +8,10 @@
 	  	<version>0.1.50</version>
 	  	<relativePath>../pom.xml</relativePath>
 	</parent>
+	<!-- !!! DO NOT USE - PACKAGE OUTDATED !!! -->
 	<properties>
 		<hibernate.version>5.2.5.Final</hibernate.version>
 	</properties>
-	
 		
 	<dependencies>
 		<dependency>
@@ -64,6 +64,12 @@
 			<artifactId>javassist</artifactId>
 			<version>3.19.0-GA</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
+        </dependency>
 		
 	</dependencies>
 	
@@ -94,7 +100,6 @@
             	<configuration>
                 	<propertyFile>src/main/resources/liquibase/liquibase.properties</propertyFile>
                 	<changeLogFile>src/main/resources/liquibase/master.xml</changeLogFile>
-                	<!-- changeLogFile>src/test/resources/liquibase/test-data.xml</changeLogFile -->
             	</configuration>
         	</plugin>
 			

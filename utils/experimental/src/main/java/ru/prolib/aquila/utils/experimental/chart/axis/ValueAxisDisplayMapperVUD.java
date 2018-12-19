@@ -21,6 +21,7 @@ public class ValueAxisDisplayMapperVUD implements ValueAxisDisplayMapper {
 	private final Range<CDecimal> valueRange;
 	private final int y, height, scale;
 	private final CDecimal ratio;
+	private final boolean zero_range;
 	
 	public ValueAxisDisplayMapperVUD(int y, int height, Range<CDecimal> valueRange) {
 		this.valueRange = valueRange;
@@ -34,9 +35,15 @@ public class ValueAxisDisplayMapperVUD implements ValueAxisDisplayMapper {
 					+ " is too small for " + valueRange);
 		}
 		int fs = BASE_SCALE + scale;
-		CDecimal ratioPerPixel = vr.divideExact(dh, fs, RoundingMode.HALF_UP);
-		vr = vr.add(ratioPerPixel);
-		this.ratio = dh.divideExact(vr, fs, RoundingMode.DOWN);
+		if ( vr.compareTo(CDecimalBD.ZERO) == 0 ) {
+			zero_range = true;
+			this.ratio = CDecimalBD.ZERO;
+		} else {
+			zero_range = false;
+			CDecimal ratioPerPixel = vr.divideExact(dh, fs, RoundingMode.HALF_UP);
+			vr = vr.add(ratioPerPixel);
+			this.ratio = dh.divideExact(vr, fs, RoundingMode.DOWN);
+		}
 	}
 	
 	@Override
@@ -90,6 +97,9 @@ public class ValueAxisDisplayMapperVUD implements ValueAxisDisplayMapper {
 
 	@Override
 	public CDecimal toValue(int display) {
+		if ( zero_range ) {
+			return valueRange.getMin();
+		}
 		int offset = height - 1 - (display - y);
 		return CDecimalBD.of((long)offset)
 			.divideExact(ratio, scale + BASE_SCALE, RoundingMode.HALF_UP)

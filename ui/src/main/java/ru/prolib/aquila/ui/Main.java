@@ -13,8 +13,8 @@ import org.ini4j.Profile.Section;
 import org.ini4j.Wini;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+//import org.springframework.context.ApplicationContext;
+//import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
@@ -75,26 +75,27 @@ public class Main implements Runnable {
 	 * @param args
 	 */
 	public static void main(final String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override public void run() {
-				try {
-					new Main().run(args);
-				} catch ( Exception e ) {
-					System.err.println("Bootstrap exception: " + e.getMessage());
-					e.printStackTrace(System.err);
-					System.exit(1);
-				}
-			}
-		});
+		throw new UnsupportedOperationException("The program is outdated");
+		//SwingUtilities.invokeLater(new Runnable() {
+		//	@Override public void run() {
+		//		try {
+		//			new Main().run(args);
+		//		} catch ( Exception e ) {
+		//			System.err.println("Bootstrap exception: " + e.getMessage());
+		//			e.printStackTrace(System.err);
+		//			System.exit(1);
+		//		}
+		//	}
+		//});
 
 	}
 	
-	private ApplicationContext createAppContext() {
-		return new ClassPathXmlApplicationContext("/application-context.xml");
-	}
+	//private ApplicationContext createAppContext() {
+	//	return new ClassPathXmlApplicationContext("/application-context.xml");
+	//}
 	
 	private void run(String[] args) throws Exception {
-		locator.setApplicationContext(createAppContext());
+		//locator.setApplicationContext(createAppContext());
 		Wini ini = new Wini(new File(MAIN_INI));
 		DOMConfigurator.configure(ini.get(MAIN_SEC, LOGGER));
 

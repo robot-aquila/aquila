@@ -6,8 +6,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import org.springframework.util.StringUtils;
-
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.data.DataFormatException;
@@ -114,11 +112,12 @@ public class MoexContractPtmlConverter implements PtmlDeltaUpdateConverter {
 	}
 	
 	private BigDecimal toBigDecimal(String value) {
-		value = StringUtils.replace(value, ",", "");
+		value = value.replace(",", "");
 		value = new BigDecimal(value).toPlainString();
 		if ( value.contains(".") ) {
-			value = StringUtils.trimTrailingCharacter(value, '0');
-			value = StringUtils.trimTrailingCharacter(value, '.');
+			//value = StringUtils.trimTrailingCharacter(value, '0');
+			//value = StringUtils.trimTrailingCharacter(value, '.');
+			value = value.replaceAll("\\.?0+$", "");
 		}
 		return new BigDecimal(value);
 	}

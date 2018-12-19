@@ -161,6 +161,7 @@ public class MoexContractPtmlConverterTest {
 	public void testToObject_TickSizeAndValue_TrailingZeroes() throws Exception {
 		assertEquals(CDecimalBD.of("0.01"), converter.toObject(MoexContractField.TICK_SIZE, "0.01000"));
 		assertEquals(CDecimalBD.ofRUB2("0.15"), converter.toObject(MoexContractField.TICK_VALUE, "0.1500"));
+		assertEquals(CDecimalBD.of("10"), converter.toObject(MoexContractField.TICK_SIZE, "10.00000"));
 	}
 
 	@Test

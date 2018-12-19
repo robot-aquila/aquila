@@ -107,11 +107,12 @@ public class TickDatabasePlugin implements AquilaPlugin, EventListener, Runnable
 		lock.lock();
 		try {
 			this.terminal = terminal;
-			database = (TickDatabase)
-				locator.getApplicationContext().getBean("tickDatabase");
+			//database = (TickDatabase)
+			//	locator.getApplicationContext().getBean("tickDatabase");
 		} finally {
 			lock.unlock();
 		}
+		throw new UnsupportedOperationException("The program is outdated");
 	}
 
 	@Override

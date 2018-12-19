@@ -304,5 +304,10 @@ public class ValueAxisDisplayMapperVUVTest {
 		assertEquals(of(40L), mapper.toValue( 6));
 		assertEquals(of(45L), mapper.toValue( 5));
 	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testConvertation_SpecialCase_ZeroRangeIsRestricted() throws Exception {
+		new ValueAxisDisplayMapperVUV(5, 10, new Range<>(of("212.56"), of("212.56")));
+	}
 
 }
