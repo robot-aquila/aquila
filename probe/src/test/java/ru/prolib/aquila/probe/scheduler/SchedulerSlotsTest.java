@@ -169,6 +169,11 @@ public class SchedulerSlotsTest {
 	}
 	
 	@Test
+	public void testRemoveNextSlot_IfNoSlot() {
+		assertNull(slots.removeNextSlot());
+	}
+	
+	@Test
 	public void testClear() {
 		SchedulerTaskImpl task1 = new SchedulerTaskImpl(runnable1Mock);
 		SchedulerTaskImpl task2 = new SchedulerTaskImpl(runnable2Mock);

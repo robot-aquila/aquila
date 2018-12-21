@@ -133,6 +133,13 @@ public class SchedulerState extends Observable implements ThreadSynchronizer {
 		}
 	}
 	
+	/**
+	 * Test that there are tasks for execution before or exactly at current
+	 * time point. In other words is there task which must be executed prior
+	 * to traveling to the next time point. 
+	 * <p>
+	 * @return true if there is task to execute, false otherwise
+	 */
 	boolean hasSlotForExecution() {
 		lock.lock();
 		try {

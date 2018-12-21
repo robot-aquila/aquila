@@ -24,6 +24,7 @@ import ru.prolib.aquila.probe.scheduler.SchedulerMode;
 import ru.prolib.aquila.probe.scheduler.SchedulerState;
 
 public class SchedulerImplIT {
+	private static final double ERROR_THRESHOLD = 0.05d;
 	
 	static class WaitForModeChange implements Observer {
 		private final SchedulerMode expectedMode;
@@ -315,6 +316,100 @@ public class SchedulerImplIT {
 	}
 	
 	@Test
+	public void testExecutionSequence_Speed0_CutoffBeforeTasks() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T01:00:00Z"));
+		fixture.add(TT("2016-08-31T02:00:00Z"));
+		List<TestTask> expectedTaskSequence = new ArrayList<>();
+		scheduleAll(fixture);
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		SchedulerState state = scheduler.getState();
+		state.addObserver(wait);
+		
+		scheduler.setModeRun(T("2016-08-31T00:30:00Z"));
+		
+		assertTrue(wait.signal.await(100, TimeUnit.MILLISECONDS));
+		assertEquals(expectedTaskSequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T00:30:00Z"), scheduler.getCurrentTime());
+	}
+
+	@Test
+	public void testExecutionSequence_Speed0_CutoffAtTask() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T01:00:00Z"));
+		fixture.add(TT("2016-08-31T02:00:00Z")); // this shouldn't be executed
+		fixture.add(TT("2016-08-31T03:00:00Z"));
+		List<TestTask> expected_task_sequence = new ArrayList<>(fixture.subList(0, 1));
+		scheduleAll(fixture);
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		SchedulerState state = scheduler.getState();
+		state.addObserver(wait);
+		
+		scheduler.setModeRun(T("2016-08-31T02:00:00Z"));
+		
+		assertTrue(wait.signal.await(100, TimeUnit.MILLISECONDS));
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T02:00:00Z"), scheduler.getCurrentTime());
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed0_CutoffBtwTasks() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T01:00:00Z"));
+		fixture.add(TT("2016-08-31T02:00:00Z"));
+		fixture.add(TT("2016-08-31T03:00:00Z"));
+		List<TestTask> expected_task_sequence = new ArrayList<>(fixture.subList(0, 2));
+		scheduleAll(fixture);
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		SchedulerState state = scheduler.getState();
+		state.addObserver(wait);
+		
+		scheduler.setModeRun(T("2016-08-31T02:30:00Z"));
+		
+		assertTrue(wait.signal.await(100, TimeUnit.MILLISECONDS));
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T02:30:00Z"), scheduler.getCurrentTime());
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed0_CutoffAfterTasks() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T01:00:00Z"));
+		fixture.add(TT("2016-08-31T02:00:00Z"));
+		fixture.add(TT("2016-08-31T03:00:00Z"));
+		List<TestTask> expected_task_sequence = new ArrayList<>(fixture.subList(0, 3));
+		scheduleAll(fixture);
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		SchedulerState state = scheduler.getState();
+		state.addObserver(wait);
+		
+		scheduler.setModeRun(T("2016-08-31T03:30:00Z"));
+		
+		assertTrue(wait.signal.await(100, TimeUnit.MILLISECONDS));
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T03:30:00Z"), scheduler.getCurrentTime());
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed0_CutoffWoTasks() throws Exception {
+		List<TestTask> expected_task_sequence = new ArrayList<>();
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		SchedulerState state = scheduler.getState();
+		state.addObserver(wait);
+		
+		scheduler.setModeRun(T("2016-08-31T05:30:00Z"));
+		
+		assertTrue(wait.signal.await(100, TimeUnit.MILLISECONDS));
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T05:30:00Z"), scheduler.getCurrentTime());
+	}
+	
+	@Test
 	public void testExecutionSequence_Speed1() throws Exception {
 		List<TestTask> fixture = new ArrayList<>();
 		fixture.add(TT("2016-08-31T00:00:00.005Z"));
@@ -340,7 +435,12 @@ public class SchedulerImplIT {
 		expectedOffset.add( 750L);
 		expectedOffset.add(4000L);
 		expectedOffset.add(2000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.3d);
+		assertTimeCloseToOffset(
+				expectedBaseTime,
+				getRealTimeSeries(actualTaskSequence),
+				expectedOffset,
+				ERROR_THRESHOLD
+			);
 	}
 
 	@Test
@@ -369,7 +469,189 @@ public class SchedulerImplIT {
 		expectedOffset.add( 375L);
 		expectedOffset.add(2000L);
 		expectedOffset.add(1000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.3d);
+		assertTimeCloseToOffset(
+				expectedBaseTime,
+				getRealTimeSeries(actualTaskSequence),
+				expectedOffset,
+				ERROR_THRESHOLD
+			);
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed2_CutoffBeforeTasks() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T00:00:00.200Z"));
+		fixture.add(TT("2016-08-31T00:00:00.300Z"));
+		fixture.add(TT("2016-08-31T00:00:00.400Z"));
+		List<TestTask> expected_task_sequence = new ArrayList<>();
+		SchedulerState state = scheduler.getState();
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
+		
+		Instant start_time = Instant.now();
+		scheduler.setExecutionSpeed(2);
+		scheduler.setModeRun(T("2016-08-31T00:00:00.100Z"));
+		
+		assertTrue(wait.signal.await(100, TimeUnit.MILLISECONDS));
+		Instant end_time = Instant.now();
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T00:00:00.100Z"), scheduler.getCurrentTime());
+		List<Instant> actual_rt_series = new ArrayList<>();
+		actual_rt_series.add(end_time);
+		List<Long> expected_rt_offset = new ArrayList<>();
+		expected_rt_offset.add(50L);
+		assertTimeCloseToOffset(start_time, actual_rt_series, expected_rt_offset, ERROR_THRESHOLD);
+		//System.out.println("start_time: " + start_time + " end_time=" + end_time);
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed2_CutoffAtTask() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T00:00:00.200Z"));
+		fixture.add(TT("2016-08-31T00:00:00.300Z"));
+		fixture.add(TT("2016-08-31T00:00:00.400Z"));
+		List<TestTask> expected_task_sequence = new ArrayList<>(fixture.subList(0, 2));
+		scheduleAll(fixture);
+		SchedulerState state = scheduler.getState();
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
+		
+		Instant start_time = Instant.now();
+		scheduler.setExecutionSpeed(2);
+		scheduler.setModeRun(T("2016-08-31T00:00:00.400Z"));
+		
+		assertTrue(wait.signal.await(600, TimeUnit.MILLISECONDS));
+		Instant end_time = Instant.now();
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T00:00:00.400Z"), scheduler.getCurrentTime());
+		// How the simulation differs of expected simulation results
+		List<Instant> expected_st_series = getExpectedTimeSeries(actualTaskSequence);
+		expected_st_series.add(T("2016-08-31T00:00:00.400Z"));
+		List<Instant> actual_st_series = getActualTimeSeries(actualTaskSequence);
+		actual_st_series.add(scheduler.getCurrentTime());
+		assertEquals(expected_st_series, actual_st_series);
+		// How the simulation differs of expected realtime results
+		List<Instant> actual_rt_series = getRealTimeSeries(actualTaskSequence);
+		actual_rt_series.add(end_time);
+		List<Long> expected_rt_offset = new ArrayList<>();
+		expected_rt_offset.add(100L);
+		expected_rt_offset.add( 50L);
+		expected_rt_offset.add( 50L);
+		assertTimeCloseToOffset(start_time, actual_rt_series, expected_rt_offset, ERROR_THRESHOLD);
+		//System.out.println("start_time: " + start_time + " end_time=" + end_time);
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed2_CutoffBtwTasks() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T00:00:00.300Z"));
+		fixture.add(TT("2016-08-31T00:00:00.800Z"));
+		fixture.add(TT("2016-08-31T00:00:01.200Z")); // shouldn't be executed
+		List<TestTask> expected_task_sequence = new ArrayList<>(fixture.subList(0, 2));
+		scheduleAll(fixture);
+		SchedulerState state = scheduler.getState();
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
+		
+		Instant start_time = Instant.now();
+		scheduler.setExecutionSpeed(2);
+		scheduler.setModeRun(T("2016-08-31T00:00:01.000Z"));
+
+		assertTrue(wait.signal.await(600, TimeUnit.MILLISECONDS));
+		Instant end_time = Instant.now();
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T00:00:01.000Z"), scheduler.getCurrentTime());
+		// How the simulation differs of expected simulation results
+		List<Instant> expected_st_series = getExpectedTimeSeries(actualTaskSequence);
+		expected_st_series.add(T("2016-08-31T00:00:01.000Z"));
+		List<Instant> actual_st_series = getActualTimeSeries(actualTaskSequence);
+		actual_st_series.add(scheduler.getCurrentTime());
+		assertEquals(expected_st_series, actual_st_series);
+		// How the simulation differs of expected realtime results
+		List<Instant> actual_rt_series = getRealTimeSeries(actualTaskSequence);
+		actual_rt_series.add(end_time);
+		List<Long> expected_rt_offset = new ArrayList<>();
+		expected_rt_offset.add(150L);
+		expected_rt_offset.add(250L);
+		expected_rt_offset.add(100L);
+		//System.out.println("start_time: " + start_time + " end_time=" + end_time);
+		//System.out.println("actual_rt_series: " + actual_rt_series);
+		//System.out.println("expected_rt_offset: " + expected_rt_offset);
+		assertTimeCloseToOffset(start_time, actual_rt_series, expected_rt_offset, ERROR_THRESHOLD);
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed2_CutoffAfterTasks() throws Exception {
+		List<TestTask> fixture = new ArrayList<>();
+		fixture.add(TT("2016-08-31T00:00:00.100Z"));
+		fixture.add(TT("2016-08-31T00:00:00.250Z"));
+		fixture.add(TT("2016-08-31T00:00:00.300Z"));
+		List<TestTask> expected_task_sequence = new ArrayList<>(fixture);
+		scheduleAll(fixture);
+		SchedulerState state = scheduler.getState();
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
+		
+		Instant start_time = Instant.now();
+		scheduler.setExecutionSpeed(2);
+		scheduler.setModeRun(T("2016-08-31T00:00:01.000Z"));
+		
+		assertTrue(wait.signal.await(600, TimeUnit.MILLISECONDS));
+		Instant end_time = Instant.now();
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T00:00:01.000Z"), scheduler.getCurrentTime());
+		// How the simulation differs of expected simulation results
+		List<Instant> expected_st_series = getExpectedTimeSeries(actualTaskSequence);
+		expected_st_series.add(T("2016-08-31T00:00:01.000Z"));
+		List<Instant> actual_st_series = getActualTimeSeries(actualTaskSequence);
+		actual_st_series.add(scheduler.getCurrentTime());
+		assertEquals(expected_st_series, actual_st_series);
+		
+		// How the simulation differs of expected realtime results
+		List<Instant> actual_rt_series = getRealTimeSeries(actualTaskSequence);
+		actual_rt_series.add(end_time);
+		List<Long> expected_rt_offset = new ArrayList<>();
+		expected_rt_offset.add( 50L);
+		expected_rt_offset.add( 75L);
+		expected_rt_offset.add( 25L);
+		expected_rt_offset.add(350L);
+		assertTimeCloseToOffset(start_time, actual_rt_series, expected_rt_offset, ERROR_THRESHOLD);
+	}
+	
+	@Test
+	public void testExecutionSequence_Speed2_CutoffWoTasks() throws Exception {
+		List<TestTask> expected_task_sequence = new ArrayList<>();
+		SchedulerState state = scheduler.getState();
+		WaitForModeChange wait = new WaitForModeChange(SchedulerMode.WAIT);
+		state.addObserver(wait);
+		
+		Instant start_time = Instant.now();
+		scheduler.setExecutionSpeed(2);
+		scheduler.setModeRun(T("2016-08-31T00:00:01.000Z"));
+		
+		assertTrue(wait.signal.await(600, TimeUnit.MILLISECONDS));
+		Instant end_time = Instant.now();
+		assertEquals(expected_task_sequence, actualTaskSequence);
+		assertEquals(SchedulerMode.WAIT, state.getMode());
+		assertEquals(T("2016-08-31T00:00:01.000Z"), scheduler.getCurrentTime());
+		
+		// How the simulation differs of expected simulation results
+		List<Instant> expected_st_series = getExpectedTimeSeries(actualTaskSequence);
+		expected_st_series.add(T("2016-08-31T00:00:01.000Z"));
+		List<Instant> actual_st_series = getActualTimeSeries(actualTaskSequence);
+		actual_st_series.add(scheduler.getCurrentTime());
+		assertEquals(expected_st_series, actual_st_series);
+		
+		// How the simulation differs of expected realtime results
+		List<Instant> actual_rt_series = getRealTimeSeries(actualTaskSequence);
+		actual_rt_series.add(end_time);
+		List<Long> expected_rt_offset = new ArrayList<>();
+		expected_rt_offset.add(500L);
+		assertTimeCloseToOffset(start_time, actual_rt_series, expected_rt_offset, ERROR_THRESHOLD);
 	}
 	
 	@Test
@@ -406,7 +688,12 @@ public class SchedulerImplIT {
 		// pause 500 ms here
 		expectedOffset.add(4500L);
 		expectedOffset.add(2000L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.3d);
+		assertTimeCloseToOffset(
+				expectedBaseTime,
+				getRealTimeSeries(actualTaskSequence),
+				expectedOffset,
+				ERROR_THRESHOLD
+			);
 	}
 	
 	@Test
@@ -440,7 +727,12 @@ public class SchedulerImplIT {
 		expectedOffset.add(500L);
 		expectedOffset.add(500L);
 		expectedOffset.add(500L);
-		assertTimeCloseToOffset(expectedBaseTime, getRealTimeSeries(actualTaskSequence), expectedOffset, 0.2d);
+		assertTimeCloseToOffset(
+				expectedBaseTime,
+				getRealTimeSeries(actualTaskSequence),
+				expectedOffset,
+				ERROR_THRESHOLD
+			);
 	}
 	
 	@Test

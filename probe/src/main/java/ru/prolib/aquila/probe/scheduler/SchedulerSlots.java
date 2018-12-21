@@ -49,7 +49,7 @@ public class SchedulerSlots {
 	/**
 	 * Retrieves and removes the next slot scheduled for the execution.
 	 * <p>
-	 * @return the next slot
+	 * @return next slot or null if no more slots
 	 */
 	public SchedulerSlot removeNextSlot() {
 		if ( slotList.size() > 0 ) {
