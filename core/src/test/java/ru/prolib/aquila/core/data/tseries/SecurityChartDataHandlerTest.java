@@ -151,6 +151,7 @@ public class SecurityChartDataHandlerTest {
 		control.resetToStrict();
 		ohlcProducerMock.start();
 		expectLastCall().andReturn(ohlcProducerMock);
+		setupMock.onStart();
 		control.replay();
 		
 		service.startDataHandling();
@@ -163,6 +164,7 @@ public class SecurityChartDataHandlerTest {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
 		expectLastCall().andReturn(ohlcProducerMock);
+		setupMock.onStart();
 		control.replay();
 		service.initialize();
 		service.startDataHandling();
@@ -191,6 +193,8 @@ public class SecurityChartDataHandlerTest {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
 		expectLastCall().andReturn(ohlcProducerMock);
+		setupMock.onStart();
+		setupMock.onStop();
 		ohlcProducerMock.stop();
 		expectLastCall().andReturn(ohlcProducerMock);
 		control.replay();
@@ -213,10 +217,12 @@ public class SecurityChartDataHandlerTest {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
 		expectLastCall().andReturn(ohlcProducerMock);
+		setupMock.onStart();
 		control.replay();
 		service.initialize();
 		service.startDataHandling();
 		control.resetToStrict();
+		setupMock.onStop();
 		ohlcProducerMock.stop();
 		expectLastCall().andReturn(ohlcProducerMock);
 		control.replay();
@@ -231,6 +237,8 @@ public class SecurityChartDataHandlerTest {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
 		expectLastCall().andReturn(ohlcProducerMock);
+		setupMock.onStart();
+		setupMock.onStop();
 		ohlcProducerMock.stop();
 		expectLastCall().andReturn(ohlcProducerMock);
 		control.replay();
@@ -259,6 +267,7 @@ public class SecurityChartDataHandlerTest {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
 		expectLastCall().andReturn(ohlcProducerMock);
+		setupMock.onStart();
 		control.replay();
 		service.initialize();
 		service.startDataHandling();

@@ -47,6 +47,11 @@ public class STSeriesTest {
 	}
 	
 	@Test
+	public void testGetSharedStorage() {
+		assertSame(storageMock, service.getSharedStorage());
+	}
+	
+	@Test
 	public void testGetTimeFrame() {
 		expect(storageMock.getTimeFrame()).andReturn(ZTFrame.H1);
 		control.replay();

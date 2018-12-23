@@ -134,6 +134,20 @@ public class STSeries implements ObservableTSeries<Instant> {
 			new TSeriesNodeStorageKeys(queue, new TSeriesNodeStorageImpl(tframe)),
 			new HashMap<>());
 	}
+	
+	/**
+	 * Get shared storage of series data.
+	 * <p>
+	 * All series created by this facade use same storage to provide single and
+	 * same timeline of data across all series. The shared storage can be
+	 * obtained and used to join custom implementation of a series to this
+	 * timeline.  
+	 * <p>
+	 * @return shared storage of series data
+	 */
+	public TSeriesNodeStorage getSharedStorage() {
+		return storage;
+	}
 
 	@Override
 	public ZTFrame getTimeFrame() {

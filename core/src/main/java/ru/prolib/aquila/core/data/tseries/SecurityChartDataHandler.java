@@ -27,6 +27,8 @@ public class SecurityChartDataHandler implements STSeriesHandler {
 		void createDerivedSeries(STSeries source,
 				TSeriesCacheController<Candle> cache,
 				TSeries<Candle> ohlc);
+		void onStart();
+		void onStop();
 	}
 	
 	public interface Factory {
@@ -131,6 +133,7 @@ public class SecurityChartDataHandler implements STSeriesHandler {
 			throw new IllegalStateException("Handler is closed");
 		}
 		ohlcProducer.start();
+		setup.onStart();
 		
 		started = true;
 	}
@@ -138,6 +141,7 @@ public class SecurityChartDataHandler implements STSeriesHandler {
 	@Override
 	public synchronized void stopDataHandling() {
 		if ( started ) {
+			setup.onStop();
 			ohlcProducer.stop();
 			
 			started = false;
