@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.sm;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import ru.prolib.aquila.core.utils.KW;
@@ -73,6 +74,21 @@ public class SMBuilder {
 	 * @return state machine
 	 */
 	public SMStateMachine build() {
+		Iterator<Map.Entry<String, SMStateHandler>> it = id2state.entrySet().iterator();
+		while ( it.hasNext() ) {
+			Map.Entry<String, SMStateHandler> entry = it.next();
+			for ( SMExit exit : entry.getValue().getExits() ) {
+				if ( ! transitions.containsKey(new KW<SMExit>(exit)) ) {
+					throw new IllegalStateException(new StringBuilder()
+							.append("No transition defined: ")
+							.append(entry.getKey())
+							.append(".")
+							.append(exit.getId())
+							.toString());
+				}
+			}
+		}
+		
 		return new SMStateMachine(getState(initialStateID), transitions);
 	}
 	
