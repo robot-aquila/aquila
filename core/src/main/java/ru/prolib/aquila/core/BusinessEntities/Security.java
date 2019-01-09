@@ -141,4 +141,50 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	 */
 	public Instant getExpirationTime();
 	
+	/**
+	 * Make sure price rounded according to price tick size.
+	 * <p>
+	 * @param price - price to round
+	 * @return price after rounding
+	 */
+	CDecimal round(CDecimal price);
+	
+	/**
+	 * Convert price points to value.
+	 * <p>
+	 * @param price - price per unit
+	 * @param quantity - number of units
+	 * @return value
+	 * @throws ArithmeticException - odd price
+	 */
+	CDecimal priceToValue(CDecimal price, CDecimal quantity);
+	
+	/**
+	 * Convert price points to value.
+	 * <p>
+	 * @param price - price
+	 * @return value
+	 * @throws ArithmeticException - odd price
+	 */
+	CDecimal priceToValue(CDecimal price);
+	
+	/**
+	 * Convert price points to value with price rounding.
+	 * <p>
+	 * @param price - price per unit. Rounding will be applied to this value to
+	 * provide correct price according to security settings.
+	 * @param quantity - number of units
+	 * @return value
+	 */
+	CDecimal priceToValueWR(CDecimal price, CDecimal quantity);
+	
+	/**
+	 * Convert price points to value with price rounding.
+	 * <p>
+	 * @param price - price. Rounding will be applied to this value to provide
+	 * correct price according to security settings.
+	 * @return value
+	 */
+	CDecimal priceToValueWR(CDecimal price);
+	
 }

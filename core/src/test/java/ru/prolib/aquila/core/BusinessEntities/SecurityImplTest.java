@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -773,6 +774,148 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertEquals(2, listenerStub.getEventCount());
 		assertContainerEvent(listenerStub.getEvent(0), security.onUpdate(), security, time1, 12345);
 		assertContainerEvent(listenerStub.getEvent(1), security.onUpdate(), security, time2, 12345);
+	}
+	
+	@Test
+	public void testRound() {
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("10"))
+				.buildUpdate());
+		
+		assertEquals(of("156900"), security.round(of("156900.0000000")));
+		assertEquals(of("156900"), security.round(of("156901")));
+		assertEquals(of("156900"), security.round(of("156903.6281963")));
+		assertEquals(of("156900"), security.round(of("156904.6281963")));
+		assertEquals(of("156910"), security.round(of("156905.1123963")));
+		assertEquals(of("156910"), security.round(of("156908")));
+		assertEquals(of("156910"), security.round(of("156910")));
+		
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("1"))
+				.buildUpdate());
+		
+		assertEquals(of("156900"), security.round(of("156900.0000000")));
+		assertEquals(of("156901"), security.round(of("156901")));
+		assertEquals(of("156904"), security.round(of("156903.6281963")));
+		assertEquals(of("156905"), security.round(of("156904.6281963")));
+		assertEquals(of("156905"), security.round(of("156905.1123963")));
+		assertEquals(of("156908"), security.round(of("156908")));
+		assertEquals(of("156910"), security.round(of("156910")));
+		
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("0.05"))
+				.buildUpdate());
+		
+		assertEquals(of("156900.00"), security.round(of("156900.0000000")));
+		assertEquals(of("156901.00"), security.round(of("156901")));
+		assertEquals(of("156903.65"), security.round(of("156903.6281963")));
+		assertEquals(of("156904.65"), security.round(of("156904.6281963")));
+		assertEquals(of("156905.10"), security.round(of("156905.1123963")));
+		assertEquals(of("156908.00"), security.round(of("156908")));
+		assertEquals(of("156910.00"), security.round(of("156910")));
+		
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("0.01"))
+				.buildUpdate());
+		
+		assertEquals(of("156900.00"), security.round(of("156900.0000000")));
+		assertEquals(of("156901.00"), security.round(of("156901")));
+		assertEquals(of("156903.63"), security.round(of("156903.6281963")));
+		assertEquals(of("156904.63"), security.round(of("156904.6281963")));
+		assertEquals(of("156905.11"), security.round(of("156905.1123963")));
+		assertEquals(of("156908.00"), security.round(of("156908")));
+		assertEquals(of("156910.00"), security.round(of("156910")));
+	}
+	
+	@Test
+	public void testPriceToValue2() {
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("10"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.56362"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("760173.08290"), security.priceToValue(of("112090"), of("5")));
+		
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("0.01"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("0.67818"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("547942.99098"), security.priceToValue(of("1154.23"), of("7")));
+	}
+	
+	@Test (expected=ArithmeticException.class)
+	public void testPriceToValue2_ThrowsIfOddPrice() {
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("10"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.56362"))
+				.buildUpdate());
+		
+		security.priceToValue(of("112096"), of("5"));
+	}
+	
+	@Test
+	public void testPriceToValue1() {
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("10"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.56362"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("152034.61658"), security.priceToValue(of("112090")));
+		
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("0.01"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("0.67818"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("78277.57014"), security.priceToValue(of("1154.23")));
+	}
+	
+	@Test (expected=ArithmeticException.class)
+	public void testPriceToValue1_ThrowsIfOddPrice() {
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("10"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.56362"))
+				.buildUpdate());
+		
+		security.priceToValue(of("112096"));
+	}
+	
+	@Test
+	public void testPriceToValueWR2() {
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("10"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.56362"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("760173.08290"), security.priceToValueWR(of("112090"), of("5")));
+		assertEquals(ofRUB5("760173.08290"), security.priceToValueWR(of("112093"), of("5")));
+		assertEquals(ofRUB5("760173.08290"), security.priceToValueWR(of("112090.48991"), of("5")));
+		
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("0.01"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("0.67818"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("547942.99098"), security.priceToValueWR(of("1154.23"), of("7")));
+		assertEquals(ofRUB5("547942.99098"), security.priceToValueWR(of("1154.231762"), of("7")));
+	}
+	
+	@Test
+	public void testPriceToValueWR1() {
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("10"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.56362"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("152034.61658"), security.priceToValueWR(of("112090.123")));
+		
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.TICK_SIZE, of("0.01"))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("0.67818"))
+				.buildUpdate());
+		
+		assertEquals(ofRUB5("78277.57014"), security.priceToValueWR(of("1154.232294")));
 	}
 
 }

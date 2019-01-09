@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Set;
 
@@ -397,6 +398,34 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	@Override
 	public final boolean equals(Object other) {
 		return super.equals(other);
+	}
+
+	@Override
+	public CDecimal round(CDecimal price) {
+		CDecimal tick_size = getTickSize();
+		return price.divideExact(tick_size, 0).multiply(tick_size);
+	}
+
+	@Override
+	public CDecimal priceToValue(CDecimal price, CDecimal quantity) {
+		CDecimal tick_size = getTickSize(), tick_val = getTickValue();
+		CDecimal num_ticks = price.divideExact(tick_size, 0, RoundingMode.UNNECESSARY);
+		return tick_val.multiply(num_ticks).multiply(quantity);
+	}
+
+	@Override
+	public CDecimal priceToValue(CDecimal price) {
+		return priceToValue(price, CDecimalBD.of(1L));
+	}
+
+	@Override
+	public CDecimal priceToValueWR(CDecimal price, CDecimal quantity) {
+		return priceToValue(round(price), quantity);
+	}
+
+	@Override
+	public CDecimal priceToValueWR(CDecimal price) {
+		return priceToValueWR(price, CDecimalBD.of(1L));
 	}
 	
 }
