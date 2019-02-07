@@ -88,5 +88,18 @@ public class MessagesTest {
 		assertNotEquals("Resource string 2", messages.get(new MsgID("FirstTest", "ENT_TWO")));
 		assertNotEquals("Resource string 3", messages.get(new MsgID("FirstTest", "ENT_THREE")));
 	}
+	
+	static class TestMsg {
+		public static MsgID ID_ONE, ID_TWO, ID_THREE = new MsgID("foo", "bar");
+	}
+	
+	@Test
+	public void testSetDefaultMsgIDs() {
+		Messages.setDefaultMsgIDs("foo", TestMsg.class);
+		
+		assertEquals(new MsgID("foo", "ID_ONE"), TestMsg.ID_ONE);
+		assertEquals(new MsgID("foo", "ID_TWO"), TestMsg.ID_TWO);
+		assertEquals(new MsgID("foo", "bar"), TestMsg.ID_THREE);
+	}
 
 }

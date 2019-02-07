@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.text;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +57,28 @@ public class Messages implements IMessages {
 	 */
 	public synchronized static void removeLoaders() {
 		resourceLoaders.clear();
+	}
+
+	/**
+	 * Go thru all static fields of type {@link MsgID} which are undefined and assign message ID similar to field name.
+	 * <p>
+	 * @param sectionID - section ID
+	 * @param clazz - class instance
+	 */
+	public synchronized static void setDefaultMsgIDs(String sectionID, Class<?> clazz) {
+		synchronized ( clazz ) {
+			for ( Field field : clazz.getDeclaredFields() ) {
+				try {
+					if ( field.getType() == MsgID.class && (field.getModifiers() & Modifier.STATIC) != 0
+					  && field.get(null) == null )
+					{
+						field.set(null, new MsgID(sectionID, field.getName()));
+					}
+				} catch ( Exception e ) {
+					throw new Error(e);
+				}
+			}
+		}
 	}
 	
 	private synchronized static ClassLoader getLoader(String sectionId) {
