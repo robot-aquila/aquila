@@ -102,11 +102,9 @@ public class PositionListTableModel extends AbstractTableModel implements
 		return positions.size();
 	}
 	
-	
-	
 	@Override
 	public Object getValueAt(int row, int col) {
-		if ( row > positions.size() ) {
+		if ( row >= positions.size() ) {
 			return null;
 		}
 		return getColumnValue(positions.get(row), getColumnID(col));
