@@ -15,6 +15,7 @@ public class CmdLine {
 	public static final String LOPT_SKIP_INTEGRITY_TEST = "skip-integrity-test";
 	public static final String LOPT_SHOW_SYMBOL_FILE = "show-symbol-file";
 	public static final String LOPT_JBROWSER_CONFIG = "jbrowser-config";
+	public static final String LOPT_DRIVER = "driver";
 
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -46,6 +47,12 @@ public class CmdLine {
 					+ "ru.prolib.aquila.web.utils class WebDriverFactoryJBD for more details.")
 				.hasArg()
 				.build());
+		options.addOption(Option.builder()
+				.longOpt(LOPT_DRIVER)
+				.desc("Choose browser driver. Available options are jbd (default) and ff")
+				.hasArg()
+				.build());
+		
 		return options;
 	}
 	

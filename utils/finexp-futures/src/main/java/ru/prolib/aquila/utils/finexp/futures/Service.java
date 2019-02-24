@@ -54,19 +54,40 @@ public class Service {
 			System.exit(0);
 		}
 		
+		boolean use_jbd = false;
+		String driver_id = cmd.getOptionValue(CmdLine.LOPT_DRIVER, "jbd");
+		switch ( driver_id ) {
+		case "jbd":
+			use_jbd = true;
+			break;
+		case "ff":
+			use_jbd = false;
+			break;
+		default:
+			CmdLine.printErrorAndExit("Unsupported driver: " + driver_id);
+		}
+		
 		MoexFactory moexFactory = null;
 		FidexpFactory finamFactory = null;
 		if ( cmd.hasOption(CmdLine.LOPT_JBROWSER_CONFIG) ) {
 			File jbdConfig = new File(cmd.getOptionValue(CmdLine.LOPT_JBROWSER_CONFIG));
 			try {
-				moexFactory = MoexFactorySTD.newFactoryJBD(jbdConfig, true);
-				finamFactory = FidexpFactorySTD.newFactoryJBD(jbdConfig, true);
+				if ( use_jbd ) {
+					moexFactory = MoexFactorySTD.newFactoryJBD(jbdConfig, true);
+					finamFactory = FidexpFactorySTD.newFactoryJBD(jbdConfig, true);
+				} else {
+					moexFactory = MoexFactorySTD.newFactoryFF(jbdConfig, true);
+					finamFactory = FidexpFactorySTD.newFactoryFF(jbdConfig, true);
+				}
+				
 			} catch ( IOException e ) {
-				CmdLine.printErrorAndExit("Cannot load JBrowserDriver/AHC configuration: " + jbdConfig + " " + e.getMessage());
+				CmdLine.printErrorAndExit("Cannot load configuration: " + jbdConfig + " " + e.getMessage());
 			}
-		} else {
+		} else if ( use_jbd ) {
 			moexFactory = MoexFactorySTD.newFactoryJBD();
 			finamFactory = FidexpFactorySTD.newFactoryJBD();
+		} else {
+			CmdLine.printErrorAndExit("Configuration is required to use Firefox driver");
 		}
 		
 		final CountDownLatch globalExit = new CountDownLatch(1);

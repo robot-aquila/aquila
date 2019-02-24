@@ -9,7 +9,7 @@
 ### END INIT INFO
 
 PROG_PATH=/home/whirlwind/VirtualBox/shared/aquila
-SCRIPT="/usr/bin/java -jar finexp-futures-0.0.5.jar -r data/finexp-futures-data --skip-integrity-test"
+SCRIPT="/usr/bin/java -jar finexp-futures-0.0.13.jar -r data/finexp-futures-data --skip-integrity-test"
 RUNAS=whirlwind
 PIDFILE="${PROG_PATH}/finexp-futures.pid"
 LOGFILE="${PROG_PATH}/finexp-futures.log"
