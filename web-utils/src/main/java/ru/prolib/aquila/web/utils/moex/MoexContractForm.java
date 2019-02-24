@@ -100,7 +100,7 @@ public class MoexContractForm {
 	 * @throws WUWebPageException - an error occurred
 	 */
 	public List<String> getActiveFuturesList() throws WUWebPageException {
-		// TODO: Здесь бы оптимизировать, что бы сократить количество
+		// TODO: 1. Здесь бы оптимизировать, что бы сократить количество
 		// повторений в случае ошибок. Слишком медленно список составляет.
 		List<String> list = new ArrayList<>();
 		openDerivativesSearchPage();
@@ -108,7 +108,7 @@ public class MoexContractForm {
 		Paginator paginator = getFuturesTablePaginator();
 		int totalPages = paginator.getNumberOfPages();
 		for ( int i = 1; i < totalPages; i ++ ) {
-			openDerivativesSearchPage();
+			//openDerivativesSearchPage(); // TODO: 2. Из-за этого значительно тормозило.
 			paginator = getFuturesTablePaginator();
 			paginator.click(i);
 			paginator.waitForStale();

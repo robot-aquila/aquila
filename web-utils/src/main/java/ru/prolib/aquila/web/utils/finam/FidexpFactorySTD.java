@@ -9,6 +9,7 @@ import ru.prolib.aquila.web.utils.HTTPAttachmentManagerFactory;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.ahc.AHCAttachmentManagerFactory;
 import ru.prolib.aquila.web.utils.jbd.JBDWebDriverFactory;
+import ru.prolib.aquila.web.utils.swd.ff.FFWebDriverFactory;
 
 public class FidexpFactorySTD implements FidexpFactory {
 	private final WebDriverFactory driverFactory;
@@ -36,7 +37,7 @@ public class FidexpFactorySTD implements FidexpFactory {
 	 * @return new instance of FINAM facade factory
 	 * @throws IOException - error during accessing configuration file or file not exists
 	 */
-	public static FidexpFactory newDefaultFactory(File config, boolean configRequired) throws IOException {
+	public static FidexpFactory newFactoryJBD(File config, boolean configRequired) throws IOException {
 		JBDWebDriverFactory driverFactory = new JBDWebDriverFactory().withMoexTestedSettings();
 		AHCAttachmentManagerFactory attMgrFactory = new AHCAttachmentManagerFactory();
 		if ( configRequired || config.exists() ) {
@@ -46,9 +47,19 @@ public class FidexpFactorySTD implements FidexpFactory {
 		return new FidexpFactorySTD(driverFactory, attMgrFactory);
 	}
 	
-	public static FidexpFactory newDefaultFactory() {
+	public static FidexpFactory newFactoryJBD() {
 		JBDWebDriverFactory driverFactory = new JBDWebDriverFactory().withMoexTestedSettings();
 		AHCAttachmentManagerFactory attMgrFactory = new AHCAttachmentManagerFactory();
+		return new FidexpFactorySTD(driverFactory, attMgrFactory);
+	}
+	
+	public static FidexpFactory newFactoryFF(File config, boolean configRequired) throws IOException {
+		FFWebDriverFactory driverFactory = new FFWebDriverFactory();
+		AHCAttachmentManagerFactory attMgrFactory = new AHCAttachmentManagerFactory();
+		if ( configRequired || config.exists() ) {
+			driverFactory.loadIni(config);
+			attMgrFactory.loadIni(config);
+		}
 		return new FidexpFactorySTD(driverFactory, attMgrFactory);
 	}
 

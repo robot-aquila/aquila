@@ -1,4 +1,4 @@
-; rev0.3
+; rev0.4
 ;
 ; This file contains configuration of transport layer to use for integration
 ; tests. If this file has an extension equal to ini-template then this is
@@ -27,7 +27,7 @@
 ; want to face any difficulties with certificates specify "trustanything". For
 ; most common cases "compatible" is enought.
 ; default: not specified
-;ssl=compatible
+ssl=trustanything
 
 ; Logging level
 ; Possible values: ALL, CONFIG, FINE, FINER, FINEST, INFO, OFF, SEVERE, WARNING
@@ -40,13 +40,13 @@
 ; loaded completely.
 ; Empty value keeps this setting unchanged.
 ; default: 150
-;ajaxWait=500
+ajaxWait=500
 
 ; The time in milliseconds after which an AJAX request will be ignored when
 ; considering whether all AJAX requests have completed.
 ; Empty value keeps this setting unchanged.
 ; default: 2000
-;ajaxResourceTimeout=5000
+ajaxResourceTimeout=5000
 
 ; Log full requests and responses (without response body).
 ; Possible values: true, false
@@ -91,6 +91,12 @@
 ;proxy.pass=
 
 
+; This section contains configuration properties of Firefox Selenium Web Driver.
+[firefox-driver]
+headless=false
+firefox-binary=C:\\Program Files\\Mozilla Firefox\\firefox.exe
+geckodriver-binary=D:\\utils\\geckodriver\\geckodriver.exe
+
 
 ; This section contains configuration properties of Apache HTTP Client. Apache
 ; HTTP Client used for most critical areas to provide enough stability and
@@ -100,7 +106,7 @@
 socketTimeout=
 connectTimeout=
 connectionRequestTimeout=
-defaultHeaders=
+defaultHeaders=true
 proxy.type=
 proxy.host=
 proxy.port=

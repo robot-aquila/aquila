@@ -63,6 +63,7 @@ public class FidexpIT {
 		logger = LoggerFactory.getLogger(FidexpIT.class);
 	}
 	
+	private static final boolean firefox = true;
 	private static FidexpFactory facadeFactory;
 	
 	private FidexpFormParams params;
@@ -73,7 +74,9 @@ public class FidexpIT {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		facadeFactory = FidexpFactorySTD.newDefaultFactory(JBROWSER_CONF_FILE, false);
+		facadeFactory = firefox ?
+				FidexpFactorySTD.newFactoryFF(JBROWSER_CONF_FILE, false) :
+				FidexpFactorySTD.newFactoryJBD(JBROWSER_CONF_FILE, false);
 	}
 
 	@Before
@@ -176,7 +179,8 @@ public class FidexpIT {
 		expected.put(81757, "Башнефт ао");
 		expected.put(81954, "Варьеган");
 		expected.put(16842, "ГАЗПРОМ ао");
-		expected.put(18564, "ДИКСИ ао");
+		//expected.put(18564, "ДИКСИ ао"); // excluded from TOP
+		expected.put(825,   "Татнфт 3ао");
 		expected.put(20346, "МРСКСиб");
 		expected.put(18684, "ОГК-2 ао");
 		expected.put(20266, "РусГидро");
@@ -185,6 +189,7 @@ public class FidexpIT {
 		expected.put(81766, "Якутскэнрг");
 		
 		Map<Integer, String> actual = facade.getAvailableQuotes(1);
+		//System.out.println(actual);
 		
 		Iterator<Map.Entry<Integer, String>> it = expected.entrySet().iterator();
 		while ( it.hasNext() ) {

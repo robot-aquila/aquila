@@ -36,7 +36,7 @@ public class Moex implements Closeable {
 	public void close() throws IOException {
 		if ( closeResources ) {
 			try {
-				webDriver.close();
+				webDriver.quit();
 			} catch ( WebDriverException e ) {
 				// JBrowserDrive bug when closing
 			}

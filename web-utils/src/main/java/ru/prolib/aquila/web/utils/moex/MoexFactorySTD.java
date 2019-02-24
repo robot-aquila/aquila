@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.jbd.JBDWebDriverFactory;
+import ru.prolib.aquila.web.utils.swd.ff.FFWebDriverFactory;
 
 /**
  * Standard factory of MOEX service facade based on WebDriverFactory.
@@ -46,6 +47,23 @@ public class MoexFactorySTD implements MoexFactory {
 	 */
 	public static MoexFactory newFactoryJBD() {
 		return new MoexFactorySTD(new JBDWebDriverFactory().withMoexTestedSettings());
+	}
+	
+	/**
+	 * Create MOEX facade factory with Firefox transport.
+	 * <p>
+	 * @param config - path to configuration ini-file
+	 * @param configRequired - if true then configuration file is must be loaded or exception will be thrown.
+	 * If false then loading configuration is optional and may be skipped if the file does not exist.
+	 * @return new instance of MOEX facade factory 
+	 * @throws IOException - error during accessing configuration file or file not exists
+	 */
+	public static MoexFactory newFactoryFF(File config, boolean configRequired) throws IOException {
+		FFWebDriverFactory factory = new FFWebDriverFactory();
+		if ( configRequired || config.exists() ) {
+			factory.loadIni(config);
+		}
+		return new MoexFactorySTD(factory);
 	}
 
 }

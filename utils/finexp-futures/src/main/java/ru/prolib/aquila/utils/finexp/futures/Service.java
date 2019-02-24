@@ -60,13 +60,13 @@ public class Service {
 			File jbdConfig = new File(cmd.getOptionValue(CmdLine.LOPT_JBROWSER_CONFIG));
 			try {
 				moexFactory = MoexFactorySTD.newFactoryJBD(jbdConfig, true);
-				finamFactory = FidexpFactorySTD.newDefaultFactory(jbdConfig, true);
+				finamFactory = FidexpFactorySTD.newFactoryJBD(jbdConfig, true);
 			} catch ( IOException e ) {
 				CmdLine.printErrorAndExit("Cannot load JBrowserDriver/AHC configuration: " + jbdConfig + " " + e.getMessage());
 			}
 		} else {
 			moexFactory = MoexFactorySTD.newFactoryJBD();
-			finamFactory = FidexpFactorySTD.newDefaultFactory();
+			finamFactory = FidexpFactorySTD.newFactoryJBD();
 		}
 		
 		final CountDownLatch globalExit = new CountDownLatch(1);

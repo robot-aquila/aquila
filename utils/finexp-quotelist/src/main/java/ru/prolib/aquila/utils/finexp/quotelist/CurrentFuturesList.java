@@ -20,7 +20,7 @@ public class CurrentFuturesList {
 	private static final String HEADER = "TICKER,CODE,FINAM_WEB_ID";
 	
 	public static void main(String[] args) throws Exception {
-		Fidexp facade = FidexpFactorySTD.newDefaultFactory(new File("dummy"), false).createInstance();
+		Fidexp facade = FidexpFactorySTD.newFactoryJBD(new File("dummy"), false).createInstance();
 		try {
 			Map<Integer, String> map = facade.getTrueFuturesQuotes(false);
 			System.out.println(HEADER);

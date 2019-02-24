@@ -12,6 +12,7 @@ import ru.prolib.aquila.web.utils.WebDriverFactory;
 import com.machinepublishers.jbrowserdriver.ProxyConfig;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
+import com.machinepublishers.jbrowserdriver.UserAgent;
 
 /**
  * JBrowserDriver factory.
@@ -57,7 +58,15 @@ public class JBDWebDriverFactory implements WebDriverFactory {
 			.maxConnections(128)
 			.javascript(true)
 			.logJavascript(true)
-			.saveAttachments(true);
+			.saveAttachments(true)
+			.userAgent(new UserAgent(
+					UserAgent.Family.MOZILLA,
+					"Mozilla",
+					"Linux",
+					"i686",
+					"65.0",
+					"Mozilla/5.0 (X11; Linux i686; rv:65.0) Gecko/20100101 Firefox/65.0"
+				));
 		return this;
 	}
 	

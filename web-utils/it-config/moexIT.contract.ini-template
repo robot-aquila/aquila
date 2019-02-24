@@ -24,27 +24,27 @@
 ;
 
 [test-contract]
-Contract Symbol=RTS-6.18
-Contract Trading Symbol=RIM8
+Contract Symbol=RTS-3.19
+Contract Trading Symbol=RIH9
 Contract Description=RTS Index Futures
 Type=Futures
 Settlement=Cash-Settled
 Сontract size (lot)=1
 Quotation=points
-First Trading Day=20.06.2016
-Last Trading Day=21.06.2018
-Delivery=21.06.2018
+First Trading Day=10.03.2017
+Last Trading Day=21.03.2019
+Delivery=21.03.2019
 Price tick=10.0000
-Value of price tick, RUB=12.63450
-Lower limit=93,490.0000
-Upper limit=118,490.0000
-Settlement price of last clearing session=105,990.0000
-Contract buy/sell fee, RUB=2.64
-Intraday (scalper) fee, RUB=1.32
-Negotiated trade fee, RUB=2.64
+Value of price tick, RUB=13.09490
+Lower limit=113,620.0000
+Upper limit=126,040.0000
+Settlement price of last clearing session=119,830.0000
+Contract buy/sell fee, RUB=3.45
+Intraday (scalper) fee, RUB=1.725
+Negotiated trade fee, RUB=3.45
 Contract exercise fee, RUB=2.0000
-Initial Margin (IM, rub)=35,377.85
-IM value on=10.04.2018
+First level of Initial margin concentration limit*=18,311.11
+IM value on=22.02.2019
 FX for intraday clearing=13:45 Moscow time
 FX for evening clearing=18:30 Moscow time
 Settlement procedure=Cash settlement. An average value of RTS Index calculated during the period from 15:00 to 16:00 Moscow time of the last trading day multiplied by 100 is taken as a settlement price. The tick value equals 20% of the USD/RUB exchange rate determined in accordance with the Methodology at 6:30 pm MSK on the last trading day.
