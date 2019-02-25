@@ -243,13 +243,19 @@ public class MoexContractForm {
 	
 	private void closeUserAgreement() {
 		try {
-			String searchText = "BEFORE YOU START USING THE WEBSITE, PLEASE READ THIS AGREEMENT CAREFULLY";
-			new WebDriverWait(webDriver, WEB_DRIVER_WAIT_SECONDS).until(ExpectedConditions.and(
-				ExpectedConditions.elementToBeClickable(By.xpath("//*[. = 'I Do Not Agree']")),
-				ExpectedConditions.elementToBeClickable(By.xpath("//*[. = 'I Agree']")),
-				ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[normalize-space(.) = '" + searchText + "']"))
-			));
-			newSearch()
+			//String searchText = "BEFORE YOU START USING THE WEBSITE, PLEASE READ THIS AGREEMENT CAREFULLY";
+			List<WebElement> list_disclaimer_buttons = webDriver.findElements(By.className("disclaimer__buttons"));
+			if ( list_disclaimer_buttons.size() == 0 ) {
+				logger.debug("Disclaimer buttons not found");
+				return;
+			}
+			WebElement disclaimer_buttons = list_disclaimer_buttons.get(0);
+			if ( ! disclaimer_buttons.isDisplayed() ) {
+				logger.debug("Disclaimer buttons not visible");
+				return;
+			}
+			logger.debug("Closing disclaimer window...");
+			newSearchStartingFrom(disclaimer_buttons)
 				.find(By.xpath("//*[. = 'I Agree']"))
 				.get()
 				.click();
