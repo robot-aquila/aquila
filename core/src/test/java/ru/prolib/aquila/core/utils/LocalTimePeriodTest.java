@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.utils;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -10,6 +11,7 @@ import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.utils.LocalTimePeriod;
 
@@ -28,6 +30,10 @@ public class LocalTimePeriodTest {
 		to = LocalTime.of(14, 0);
 		zone = ZoneId.of("Europe/Moscow");
 		period = new LocalTimePeriod(from, to, zone);
+	}
+	
+	private Instant ZT(String timeString) {
+		return LocalDateTime.parse(timeString).atZone(zone).toInstant();
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -138,6 +144,29 @@ public class LocalTimePeriodTest {
 		assertEquals( 1, period.compareEndTo(dummy));
 		assertEquals( 1, period.compareStartTo(dummy));
 		assertFalse(period.contains(dummy));
+	}
+	
+	@Test
+	public void testOverlappedBy_TargetGeDay() {
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T19:41:00"), ZT("2019-01-03T23:05:13"))));
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T03:00:00"), ZT("2019-01-02T03:00:00"))));
+	}
+	
+	@Test
+	public void testOverlappedBy_TargetLtDay_SameDay() {
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T10:15:32"), ZT("2019-01-01T13:27:19")))); // inside
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T01:15:47"), ZT("2019-01-01T10:00:05")))); // overlaps start
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T13:26:53"), ZT("2019-01-01T16:55:02")))); // overlaps end
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T06:12:31"), ZT("2019-01-01T17:48:09")))); // around
+		assertFalse(period.overlappedBy(Interval.of(ZT("2019-01-01T06:12:31"), ZT("2019-01-01T10:00:00")))); // at left
+		assertFalse(period.overlappedBy(Interval.of(ZT("2019-01-01T14:00:00"), ZT("2019-01-01T14:01:00")))); // at right
+	}
+	
+	@Test
+	public void testOverlappedBy_TargetLtDay_TwoDays() {
+		assertFalse(period.overlappedBy(Interval.of(ZT("2019-01-01T14:59:12"), ZT("2019-01-02T09:13:27")))); // between
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T13:07:29"), ZT("2019-01-02T05:19:26")))); // overlaps start day
+		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T20:15:05"), ZT("2019-01-02T12:10:56")))); // overlaps end day
 	}
 
 }

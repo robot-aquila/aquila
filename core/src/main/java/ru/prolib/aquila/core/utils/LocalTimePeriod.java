@@ -1,11 +1,14 @@
 package ru.prolib.aquila.core.utils;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.threeten.extra.Interval;
 
 /**
  * An intraday time period.
@@ -99,6 +102,32 @@ public class LocalTimePeriod {
 	 */
 	public LocalTime toZT(Instant time) {
 		return toZDT(time).toLocalTime();
+	}
+	
+	public boolean overlappedBy(Interval target) {
+		Duration target_duration = target.toDuration();
+		if ( target_duration.compareTo(Duration.ofDays(1)) >= 0 ) {
+			return true;
+		}
+		ZonedDateTime zdt_target_start = toZDT(target.getStart());
+		ZonedDateTime zdt_target_end = toZDT(target.getEnd());
+		LocalDate ld_target_start = zdt_target_start.toLocalDate();
+		LocalDate ld_target_end = zdt_target_end.toLocalDate();
+		if ( Interval.of(
+				ZonedDateTime.of(ld_target_start, from, zone).toInstant(),
+				ZonedDateTime.of(ld_target_start, to, zone).toInstant()
+			).overlaps(target) )
+		{
+			return true;
+		}
+		if ( ! ld_target_start.equals(ld_target_end) ) {
+			return Interval.of(
+					ZonedDateTime.of(ld_target_end, from, zone).toInstant(),
+					ZonedDateTime.of(ld_target_end, to, zone).toInstant()
+				).overlaps(target);
+		} else {
+			return false;
+		}
 	}
 
 }
