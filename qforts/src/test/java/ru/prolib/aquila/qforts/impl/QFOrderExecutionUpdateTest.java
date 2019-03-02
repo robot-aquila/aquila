@@ -55,14 +55,14 @@ public class QFOrderExecutionUpdateTest {
 		assertSame(update, update.setInitialExecutedValue(CDecimalBD.of("215.01", RUB)));
 		assertSame(update, update.setFinalExecutedValue(CDecimalBD.of("415.09", RUB)));
 		
-		assertEquals(CDecimalBD.of("200.08", RUB), update.getChangeExecutedValue());
+		assertEquals(CDecimalBD.ofRUB5("200.08"), update.getChangeExecutedValue());
 	}
 	
 	@Test
 	public void testGetChangeExecutedValue_ByChangeValue() {
 		assertSame(update, update.setChangeExecutedValue(CDecimalBD.of("65.13", RUB)));
 		
-		assertEquals(CDecimalBD.of("65.13", RUB), update.getChangeExecutedValue());
+		assertEquals(CDecimalBD.ofRUB5("65.13"), update.getChangeExecutedValue());
 	}
 	
 	@Test
@@ -134,14 +134,14 @@ public class QFOrderExecutionUpdateTest {
 		assertSame(update, update.setInitialExecutedValue(CDecimalBD.of("100.05", RUB)));
 		assertSame(update, update.setChangeExecutedValue(CDecimalBD.of("0.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("100.20", RUB), update.getFinalExecutedValue());
+		assertEquals(CDecimalBD.ofRUB5("100.20"), update.getFinalExecutedValue());
 	}
 	
 	@Test
 	public void testGetFinalExecutedValue_ByFinalValue() {
 		assertSame(update, update.setFinalExecutedValue(CDecimalBD.of("245.00", RUB)));
 		
-		assertEquals(CDecimalBD.of("245.00", RUB), update.getFinalExecutedValue());
+		assertEquals(CDecimalBD.ofRUB5("245.00"), update.getFinalExecutedValue());
 	}
 	
 	@Test
@@ -178,14 +178,14 @@ public class QFOrderExecutionUpdateTest {
 		assertSame(update, update.setChangeExecutedValue(CDecimalBD.of("-256.01", RUB)));
 		assertSame(update, update.setFinalExecutedValue(CDecimalBD.of("26.12", RUB)));
 		
-		assertEquals(CDecimalBD.of("282.13", RUB), update.getInitialExecutedValue());
+		assertEquals(CDecimalBD.ofRUB5("282.13"), update.getInitialExecutedValue());
 	}
 	
 	@Test
 	public void testGetInitialExecutedValue_ByInitialValue() {
 		assertSame(update, update.setInitialExecutedValue(CDecimalBD.of("114.05", RUB)));
 		
-		assertEquals(CDecimalBD.of("114.05", RUB), update.getInitialExecutedValue());
+		assertEquals(CDecimalBD.ofRUB5("114.05"), update.getInitialExecutedValue());
 	}
 	
 	@Test
@@ -221,7 +221,7 @@ public class QFOrderExecutionUpdateTest {
 			+ "exVol=10 "
 			+ "exVal=48.26 RUB "
 			+ "currentVolume[i=5 c=null f=20] "
-			+ "executedValue[i=426.00 RUB c=null f=11.02 RUB] "
+			+ "executedValue[i=426.00000 RUB c=null f=11.02000 RUB] "
 			+ "finTime=1927-10-03T00:00:00Z "
 			+ "status[i=ACTIVE f=FILLED]]";
 		assertEquals(expected, update.toString());
@@ -292,7 +292,7 @@ public class QFOrderExecutionUpdateTest {
 		assertEquals(CDecimalBD.of("48.26", RUB), found.getExecutionValue());
 		assertEquals(CDecimalBD.of(10L), found.getExecutionVolume());
 		assertEquals(CDecimalBD.of(20L), found.getChangeCurrentVolume());
-		assertEquals(CDecimalBD.of("11.02", RUB), found.getChangeExecutedValue());
+		assertEquals(CDecimalBD.ofRUB5("11.02"), found.getChangeExecutedValue());
 		assertEquals(T("1927-10-03T00:00:00Z"), found.getFinalizationTime());
 		assertEquals(OrderStatus.FILLED, found.getFinalStatus());
 		assertEquals(OrderStatus.ACTIVE, found.getInitialStatus());

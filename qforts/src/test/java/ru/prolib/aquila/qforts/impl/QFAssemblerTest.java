@@ -75,7 +75,7 @@ public class QFAssemblerTest {
 				CDecimalBD.of("15.34"));
 		QFOrderExecutionUpdate update = new QFOrderExecutionUpdate()
 			.setFinalCurrentVolume(CDecimalBD.of(0L))
-			.setFinalExecutedValue(CDecimalBD.ofRUB2("30.68"))
+			.setFinalExecutedValue(CDecimalBD.ofRUB5("30.68"))
 			.setFinalizationTime(T("2017-04-18T08:33:00Z"))
 			.setFinalStatus(OrderStatus.FILLED)
 			.setExecutionAction(OrderAction.SELL)
@@ -83,14 +83,14 @@ public class QFAssemblerTest {
 			.setExecutionPrice(CDecimalBD.of("15.36"))
 			.setExecutionSymbol(symbol1)
 			.setExecutionTime(T("2017-04-18T08:33:00.001Z"))
-			.setExecutionValue(CDecimalBD.ofRUB2("30.70"))
+			.setExecutionValue(CDecimalBD.ofRUB5("30.70"))
 			.setExecutionVolume(CDecimalBD.of(10L));
 		OrderExecution expectedExec = new OrderExecutionImpl(terminal, 240L,
 				null, symbol1, OrderAction.SELL, 4429L,
 				T("2017-04-18T08:33:00.001Z"),
 				CDecimalBD.of("15.36"),
 				CDecimalBD.of(10L),
-				CDecimalBD.ofRUB2("30.70"));
+				CDecimalBD.ofRUB5("30.70"));
 		CountDownLatch testPassed = new CountDownLatch(1);
 		order.onExecution().addListener(new EventListener() {
 			@Override
@@ -99,7 +99,7 @@ public class QFAssemblerTest {
 				assertEquals(new DeltaUpdateBuilder()
 					.withToken(OrderField.ACTION, OrderAction.SELL)
 					.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(0L))
-					.withToken(OrderField.EXECUTED_VALUE, CDecimalBD.ofRUB2("30.68"))
+					.withToken(OrderField.EXECUTED_VALUE, CDecimalBD.ofRUB5("30.68"))
 					.withToken(OrderField.INITIAL_VOLUME, CDecimalBD.of(10L))
 					.withToken(OrderField.PRICE, CDecimalBD.of("15.34"))
 					.withToken(OrderField.STATUS, OrderStatus.FILLED)

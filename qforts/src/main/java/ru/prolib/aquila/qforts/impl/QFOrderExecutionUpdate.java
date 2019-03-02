@@ -23,7 +23,7 @@ public class QFOrderExecutionUpdate {
 	
 	public QFOrderExecutionUpdate() {
 		currentVolume = new CDValueTriplet(0);
-		executedValue = new CDValueTriplet(2, RUB);
+		executedValue = new CDValueTriplet(5, RUB);
 	}
 	
 	public QFOrderExecutionUpdate setChangeCurrentVolume(CDecimal value) {

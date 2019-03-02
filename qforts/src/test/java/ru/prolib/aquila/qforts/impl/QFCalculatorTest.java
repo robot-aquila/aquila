@@ -356,17 +356,17 @@ public class QFCalculatorTest {
 		control.verify();
 		QFOrderExecutionUpdate expected = new QFOrderExecutionUpdate()
 			.setInitialCurrentVolume(CDecimalBD.of(80L))
-			.setInitialExecutedValue(CDecimalBD.ofRUB2("127.15"))
+			.setInitialExecutedValue(CDecimalBD.ofRUB5("127.15"))
 			.setInitialStatus(OrderStatus.ACTIVE)
 			.setChangeCurrentVolume(CDecimalBD.of(-20L))
-			.setChangeExecutedValue(CDecimalBD.ofRUB2("128.19"))
+			.setChangeExecutedValue(CDecimalBD.ofRUB5("128.19"))
 			.setFinalStatus(OrderStatus.ACTIVE)
 			.setExecutionAction(OrderAction.SELL)
 			.setExecutionOrderID(order.getID())
 			.setExecutionPrice(CDecimalBD.of("49.20"))
 			.setExecutionSymbol(symbol1)
 			.setExecutionTime(T("2017-04-16T21:20:00Z"))
-			.setExecutionValue(CDecimalBD.ofRUB2("128.19"))
+			.setExecutionValue(CDecimalBD.ofRUB5("128.19"))
 			.setExecutionVolume(CDecimalBD.of(20L));
 		assertEquals(expected, actual);
 	}
@@ -395,10 +395,10 @@ public class QFCalculatorTest {
 		control.verify();
 		QFOrderExecutionUpdate expected = new QFOrderExecutionUpdate()
 			.setInitialCurrentVolume(CDecimalBD.of(15L))
-			.setInitialExecutedValue(CDecimalBD.ofRUB2("34.24"))
+			.setInitialExecutedValue(CDecimalBD.ofRUB5("34.24"))
 			.setInitialStatus(OrderStatus.ACTIVE)
 			.setChangeCurrentVolume(CDecimalBD.of(-15L))
-			.setChangeExecutedValue(CDecimalBD.ofRUB2("96.54"))
+			.setChangeExecutedValue(CDecimalBD.ofRUB5("96.54"))
 			.setFinalStatus(OrderStatus.FILLED)
 			.setFinalizationTime(T("2017-04-16T21:28:00Z"))
 			.setExecutionAction(OrderAction.BUY)
@@ -406,9 +406,54 @@ public class QFCalculatorTest {
 			.setExecutionPrice(CDecimalBD.of("46.20"))
 			.setExecutionSymbol(symbol1)
 			.setExecutionTime(T("2017-04-16T21:28:00Z"))
-			.setExecutionValue(CDecimalBD.ofRUB2("96.54"))
+			.setExecutionValue(CDecimalBD.ofRUB5("96.54"))
 			.setExecutionVolume(CDecimalBD.of(15L));
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testExecuteOrder_Bugfix_ScaleAndRound() throws Exception {
+		// Like for RTS-X.XX
+		service = new QFCalculator();
+		schedulerStub.setFixedTime("2017-04-16T21:28:00Z");
+		EditableOrder order = (EditableOrder) terminal.createOrder(account1,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(20L),
+				CDecimalBD.of("120750"));
+		order.consume(new DeltaUpdateBuilder()
+			.withToken(OrderField.STATUS, OrderStatus.ACTIVE)
+			.withToken(OrderField.CURRENT_VOLUME, CDecimalBD.of(5L))
+			// 15@120700=120700/10*13.14734*15=2380325.90700
+			.withToken(OrderField.EXECUTED_VALUE, CDecimalBD.ofRUB5("2380325.90700"))
+			.buildUpdate());
+		security1.consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, CDecimalBD.of(10L))
+			.withToken(SecurityField.TICK_VALUE, CDecimalBD.ofRUB5("13.14734"))
+			.buildUpdate());
+		control.replay();
+		
+		QFOrderExecutionUpdate actual = service.executeOrder(order,
+				CDecimalBD.of(5L),
+				CDecimalBD.of("120650")); // 5@120650=120650/10*13.14734*5=793113.28550
+		
+		control.verify();
+		QFOrderExecutionUpdate expected = new QFOrderExecutionUpdate()
+				.setInitialCurrentVolume(CDecimalBD.of(5L))
+				.setInitialExecutedValue(CDecimalBD.ofRUB5("2380325.90700"))
+				.setInitialStatus(OrderStatus.ACTIVE)
+				.setChangeCurrentVolume(CDecimalBD.of(-5L))
+				.setChangeExecutedValue(CDecimalBD.ofRUB5("793113.28550"))
+				.setFinalStatus(OrderStatus.FILLED)
+				.setFinalizationTime(T("2017-04-16T21:28:00Z"))
+				.setExecutionAction(OrderAction.BUY)
+				.setExecutionOrderID(order.getID())
+				.setExecutionPrice(CDecimalBD.of("120650"))
+				.setExecutionSymbol(symbol1)
+				.setExecutionTime(T("2017-04-16T21:28:00Z"))
+				.setExecutionValue(CDecimalBD.ofRUB5("793113.28550"))
+				.setExecutionVolume(CDecimalBD.of(5L));
+			assertEquals(expected, actual);
 	}
 	
 	@Test
