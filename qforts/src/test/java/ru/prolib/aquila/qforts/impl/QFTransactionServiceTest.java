@@ -13,12 +13,14 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
+import ru.prolib.aquila.core.BusinessEntities.OrderField;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.concurrency.Multilock;
@@ -120,8 +122,26 @@ public class QFTransactionServiceTest {
 	}
 	
 	@Test (expected=QFTransactionException.class)
-	public void testCancelOrder_ThrowsIfNotRegistered() throws Exception {
+	public void testCancelOrder_ThrowsIfNotRegisteredAndNotFinished() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
+		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
+			.andReturn(multilockMock);
+		multilockMock.lock();
+		expect(registryMock.isRegistered(order)).andReturn(false);
+		multilockMock.unlock();
+		control.replay();
+		
+		service.cancelOrder(order);
+		
+		control.verify();		
+	}
+	
+	@Test
+	public void testCacnelOrder_SkipsIfNotRegisteredButFinished() throws Exception {
+		EditableOrder order = terminal.createOrder(account, symbol1);
+		order.consume(new DeltaUpdateBuilder()
+				.withToken(OrderField.STATUS, OrderStatus.CANCELLED)
+				.buildUpdate());
 		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
 			.andReturn(multilockMock);
 		multilockMock.lock();

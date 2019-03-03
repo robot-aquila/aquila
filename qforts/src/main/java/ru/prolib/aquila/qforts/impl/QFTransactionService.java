@@ -52,7 +52,13 @@ public class QFTransactionService {
 		Lockable lock = assembler.createMultilock(new MultilockBuilderBE().add(order));
 		lock.lock();
 		try {
+			// If order not exists it may mean that it was cancelled
+			// by other thread or just executed while canceling.
+			// Just check it and throw only in case if it is unfinished.
 			if ( ! registry.isRegistered(order) ) {
+				if ( order.getStatus().isFinal() ) {
+					return;
+				}
 				throw new QFTransactionException("Order not registered: " + order.getID());
 			}
 			QFOrderStatusUpdate update = calculator.updateOrderStatus(order, OrderStatus.CANCELLED, null);
