@@ -165,13 +165,14 @@ public class SMTriggerOnEventTest {
 	public void testToString() {
 		String expected = new StringBuilder()
 				.append("SMTriggerOnEvent[eventType=TYPE1,input=")
-				.append(in1)
-				.append(",proxy=")
-				.append(registry)
+				.append(in1).append(",")
+				.append("proxy=").append(registry).append(",")
+				.append("activated=true,closed=false")
 				.append("]")
 				.toString();
 		
 		trigger.activate(registry);
+		
 		assertEquals(expected, trigger.toString());
 	}
 

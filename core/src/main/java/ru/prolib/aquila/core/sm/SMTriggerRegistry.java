@@ -11,6 +11,13 @@ public class SMTriggerRegistry {
 	private final SMStateMachine machine;
 	private final SMStateHandler state;
 	private final Set<KW<SMTrigger>> triggers;
+	private boolean closed = false;
+	
+	SMTriggerRegistry(SMStateMachine machine, SMStateHandler handler, Set<KW<SMTrigger>> triggers) {
+		this.triggers = triggers;
+		this.machine = machine;
+		this.state = handler;
+	}
 	
 	/**
 	 * Конструктор.
@@ -19,10 +26,11 @@ public class SMTriggerRegistry {
 	 * @param state состояние владелец-триггеров
 	 */
 	public SMTriggerRegistry(SMStateMachine machine, SMStateHandler state) {
-		super();
-		triggers = new LinkedHashSet<KW<SMTrigger>>();
-		this.machine = machine;
-		this.state = state;
+		this(machine, state, new LinkedHashSet<KW<SMTrigger>>());
+	}
+	
+	public synchronized boolean isClosed() {
+		return closed;
 	}
 	
 	/**
@@ -33,10 +41,19 @@ public class SMTriggerRegistry {
 	 * <p>
 	 * @param trigger триггер
 	 */
-	public synchronized void add(SMTrigger trigger) {
+	public void add(SMTrigger trigger) {
+		boolean added = false;
 		KW<SMTrigger> k = new KW<SMTrigger>(trigger);
-		if ( ! triggers.contains(k) ) {
-			triggers.add(k);
+		synchronized ( this ) {
+			if ( closed ) {
+				return;
+			}
+			if ( ! triggers.contains(k) ) {
+				triggers.add(k);
+				added = true;
+			}
+		}
+		if  ( added ) {
 			trigger.activate(this);
 		}
 	}
@@ -49,11 +66,14 @@ public class SMTriggerRegistry {
 	 * <p>
 	 * @param trigger триггер
 	 */
-	public synchronized void remove(SMTrigger trigger) {
+	public void remove(SMTrigger trigger) {
+		boolean removed = false;
 		KW<SMTrigger> k = new KW<SMTrigger>(trigger);
-		if ( triggers.contains(k) ) {
+		synchronized ( this ) {
+			removed = triggers.remove(k);
+		}
+		if ( removed ) {
 			trigger.deactivate();
-			triggers.remove(k);
 		}
 	}
 	
@@ -62,11 +82,15 @@ public class SMTriggerRegistry {
 	 * <p>
 	 * Деактивирует и удаляет все триггеры реестра.
 	 */
-	public synchronized void removeAll() {
-		for ( KW<SMTrigger> k : triggers ) {
+	public void removeAll() {
+		Set<KW<SMTrigger>> triggers_copy;
+		synchronized ( this ) {
+			triggers_copy = new LinkedHashSet<>(triggers);
+			triggers.clear();
+		}
+		for ( KW<SMTrigger> k : triggers_copy ) {
 			k.instance().deactivate();
 		}
-		triggers.clear();
 	}
 	
 	/**
@@ -76,18 +100,8 @@ public class SMTriggerRegistry {
 	 * @throws SMRuntimeException исключение автомата или несоответствующее
 	 * состояние автомата
 	 */
-	public synchronized void input(Object data) {
-		synchronized ( machine ) {
-			if ( machine.getCurrentState() == state ) {
-				try {
-					machine.input(data);
-				} catch ( SMException e ) {
-					throw new SMRuntimeException(e);
-				}
-			} else {
-				throw new SMRuntimeException("Input for different state");
-			}
-		}
+	public void input(Object data) {
+		dispatch(null, data);
 	}
 	
 	/**
@@ -98,18 +112,46 @@ public class SMTriggerRegistry {
 	 * @throws SMRuntimeException исключение автомата или несоответствующее
 	 * состояние автомата
 	 */
-	public synchronized void input(SMInput input, Object data) {
-		synchronized ( machine ) {
-			if ( machine.getCurrentState() == state ) {
-				try {
-					machine.input(input, data);
-				} catch ( SMException e ) {
-					throw new SMRuntimeException(e);
-				}
-			} else {
-				throw new SMRuntimeException("Input for different state");
+	public void input(SMInput input, Object data) {
+		dispatch(input, data);
+	}
+	
+	protected void dispatch(SMInput input, Object data) {
+		synchronized ( this ) {
+			if ( closed ) {
+				return;
 			}
 		}
+		synchronized ( machine ) {
+			if ( machine.getCurrentState() != state ) {
+				// This is possible to be happen because someone else
+				// can switch automat to another state. Just skip this case
+				return;
+			}
+			try {
+				if ( input == null ) {
+					machine.input(data);
+				} else {
+					machine.input(input, data);
+				}
+			} catch ( SMException e ) {
+				throw new SMRuntimeException(e);
+			}
+		}
+	}
+	
+	/**
+	 * Deactivate all triggers and make object unavailable for further usage.
+	 */
+	public void close() {
+		synchronized ( this ) {
+			if ( closed ) {
+				return;
+			} else {
+				closed = true;
+			}
+		}
+		removeAll();
 	}
 
 }

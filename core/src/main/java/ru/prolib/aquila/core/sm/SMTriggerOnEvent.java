@@ -15,10 +15,8 @@ import ru.prolib.aquila.core.*;
  * будут перенаправляться на соответствующий вход, если они получены в
  * промежутке между активацией и деактивацией триггера.
  */
-public class SMTriggerOnEvent implements SMTrigger, EventListener {
+public class SMTriggerOnEvent extends SMAbstractTrigger implements EventListener {
 	private final EventType eventType;
-	private final SMInput input;
-	private SMTriggerRegistry proxy;
 	
 	/**
 	 * Конструктор.
@@ -41,47 +39,30 @@ public class SMTriggerOnEvent implements SMTrigger, EventListener {
 	 * @param input дескриптор входа
 	 */
 	public SMTriggerOnEvent(EventType eventType, SMInput input) {
-		super();
+		super(input);
 		this.eventType = eventType;
-		this.input = input;
 	}
 	
 	public EventType getEventType() {
 		return eventType;
 	}
 	
-	public SMInput getInput() {
-		return input;
-	}
-	
-	public synchronized SMTriggerRegistry getProxy() {
-		return proxy;
+	@Override
+	public void onEvent(Event event) {
+		dispatch(event);
 	}
 
 	@Override
-	public synchronized void onEvent(Event event) {
-		if ( proxy != null ) {
-			if ( input == null ) {
-				proxy.input(event);
-			} else {
-				proxy.input(input, event);
-			}
-		}
-	}
-
-	@Override
-	public synchronized void activate(SMTriggerRegistry registry) {
-		if ( proxy == null ) {
-			proxy = registry;
+	public void activate(SMTriggerRegistry registry) {
+		if ( tryActivate(registry) ) {
 			eventType.addListener(this);
 		}
 	}
 
 	@Override
-	public synchronized void deactivate() {
-		if ( proxy != null ) {
+	public void deactivate() {
+		if ( tryDeactivate() ) {
 			eventType.removeListener(this);
-			proxy = null;
 		}
 	}
 	

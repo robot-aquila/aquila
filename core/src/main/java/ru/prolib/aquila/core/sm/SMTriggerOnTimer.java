@@ -18,11 +18,9 @@ import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
  * перенаправляться на соответствующий вход, если оно получено в промежутке
  * между активацией и деактивацией триггера.
  */
-public class SMTriggerOnTimer implements SMTrigger, Runnable {
+public class SMTriggerOnTimer extends SMAbstractTrigger implements Runnable {
 	private final Scheduler scheduler;
 	private final Instant time;
-	private final SMInput input;
-	private SMTriggerRegistry proxy;
 	private TaskHandler handler;
 	
 	/**
@@ -36,9 +34,9 @@ public class SMTriggerOnTimer implements SMTrigger, Runnable {
 	 * @param in дескриптор входа
 	 */
 	public SMTriggerOnTimer(Scheduler scheduler, Instant time, SMInput in) {
+		super(in);
 		this.scheduler = scheduler;
 		this.time = time;
-		this.input = in;
 	}
 	
 	/**
@@ -61,43 +59,27 @@ public class SMTriggerOnTimer implements SMTrigger, Runnable {
 		return time;
 	}
 	
-	public SMInput getInput() {
-		return input;
-	}
-	
-	public synchronized SMTriggerRegistry getProxy() {
-		return proxy;
-	}
-	
 	public synchronized TaskHandler getTaskHandler() {
 		return handler;
 	}
 
 	@Override
-	public synchronized void activate(SMTriggerRegistry registry) {
-		if ( proxy == null ) {
-			proxy = registry;
+	public void activate(SMTriggerRegistry registry) {
+		if ( tryActivate(registry) ) {
 			handler = scheduler.schedule(this, time);
 		}
 	}
 
 	@Override
-	public synchronized void deactivate() {
-		if ( proxy != null ) {
+	public void deactivate() {
+		if ( tryDeactivate() ) {
 			handler.cancel();
-			proxy = null;
 		}
 	}
 
 	@Override
-	public synchronized void run() {
-		if ( proxy != null ) {
-			if ( input != null ) {
-				proxy.input(input, time);
-			} else {
-				proxy.input(time);
-			}
-		}
+	public void run() {
+		dispatch(time);
 	}
 	
 	@Override

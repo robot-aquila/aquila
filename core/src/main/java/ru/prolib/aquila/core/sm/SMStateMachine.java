@@ -219,7 +219,7 @@ public class SMStateMachine {
 			return;
 		}
 		do {
-			triggers.removeAll();
+			triggers.close();
 			SMExitAction exitAction = currentState.getExitAction(); 
 			if ( exitAction != null ) {
 				dbgExitAction();

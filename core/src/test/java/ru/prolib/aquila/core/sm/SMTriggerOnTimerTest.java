@@ -201,16 +201,13 @@ public class SMTriggerOnTimerTest {
 		control.replay();
 		service.activate(registryMock1);
 		String expected = new StringBuilder()
-				.append("SMTriggerOnTimer[scheduler=")
-				.append(schedulerMock1)
-				.append(",time=")
-				.append(time1)
-				.append(",input=")
-				.append(inMock1)
-				.append(",proxy=")
-				.append(registryMock1)
-				.append(",handler=")
-				.append(thMock1)
+				.append("SMTriggerOnTimer[")
+				.append("scheduler=").append(schedulerMock1).append(",")
+				.append("time=").append(time1).append(",")
+				.append("handler=").append(thMock1).append(",")
+				.append("input=").append(inMock1).append(",")
+				.append("proxy=").append(registryMock1).append(",")
+				.append("activated=true,closed=false")
 				.append("]")
 				.toString();
 

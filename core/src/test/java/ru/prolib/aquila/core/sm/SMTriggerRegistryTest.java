@@ -1,10 +1,16 @@
 package ru.prolib.aquila.core.sm;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.*;
+
+import ru.prolib.aquila.core.utils.KW;
 
 public class SMTriggerRegistryTest {
 	private Object data = new Object();
@@ -14,6 +20,7 @@ public class SMTriggerRegistryTest {
 	private SMStateHandler s1, s2;
 	private SMInput in1;
 	private SMTrigger t1, t2;
+	private Set<KW<SMTrigger>> triggers;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -28,7 +35,8 @@ public class SMTriggerRegistryTest {
 		s1 = new SMStateHandler();
 		s2 = new SMStateHandler();
 		in1 = s1.registerInput(null);
-		registry = new SMTriggerRegistry(machine, s1);
+		triggers = new LinkedHashSet<>();
+		registry = new SMTriggerRegistry(machine, s1, triggers);
 		t1 = control.createMock(SMTrigger.class);
 		t2 = control.createMock(SMTrigger.class);
 	}
@@ -41,6 +49,21 @@ public class SMTriggerRegistryTest {
 		registry.add(t1);
 		
 		control.verify();
+		Set<KW<SMTrigger>> expected = new LinkedHashSet<>();
+		expected.add(new KW<>(t1));
+		assertEquals(expected, triggers);
+	}
+	
+	@Test
+	public void testAdd_SkipsIfClosed() throws Exception {
+		control.replay();
+		registry.close();
+		
+		registry.add(t1);
+		
+		control.verify();
+		Set<KW<SMTrigger>> expected = new LinkedHashSet<>();
+		assertEquals(expected, triggers);
 	}
 	
 	@Test
@@ -113,9 +136,19 @@ public class SMTriggerRegistryTest {
 		control.verify();
 	}
 
-	@Test (expected=SMRuntimeException.class)
-	public void testInput1_ThrowsIfDifferentState() throws Exception {
+	@Test
+	public void testInput1_SkipsIfDifferentState() throws Exception {
 		expect(machine.getCurrentState()).andReturn(s2);
+		control.replay();
+		
+		registry.input(data);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testInput1_SkipsIfClosed() throws Exception {
+		registry.close();
 		control.replay();
 		
 		registry.input(data);
@@ -146,14 +179,56 @@ public class SMTriggerRegistryTest {
 		control.verify();
 	}
 
-	@Test (expected=SMRuntimeException.class)
-	public void testInput2_ThrowsIfDifferentState() throws Exception {
+	@Test
+	public void testInput2_SkipsIfDifferentState() throws Exception {
 		expect(machine.getCurrentState()).andReturn(s2);
 		control.replay();
 		
 		registry.input(in1, data);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testInput2_SkipsIfClosed() throws Exception {
+		registry.close();
+		control.replay();
+		
+		registry.input(in1, data);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testClose() {
+		triggers.add(new KW<>(t1));
+		triggers.add(new KW<>(t2));
+		t1.deactivate();
+		t2.deactivate();
+		control.replay();
+		
+		registry.close();
+		
+		control.verify();
+		Set<KW<SMTrigger>> expected = new LinkedHashSet<>();
+		assertEquals(expected, triggers);
+		assertTrue(registry.isClosed());
+	}
+	
+	@Test
+	public void testClose_SkipsIfClosed() {
+		registry.close();
+		triggers.add(new KW<>(t1));
+		triggers.add(new KW<>(t2));
+		control.replay();
+		
+		registry.close();
+		
+		control.verify();
+		Set<KW<SMTrigger>> expected = new LinkedHashSet<>();
+		expected.add(new KW<>(t1));
+		expected.add(new KW<>(t2));
+		assertEquals(expected, triggers);
 	}
 
 }
