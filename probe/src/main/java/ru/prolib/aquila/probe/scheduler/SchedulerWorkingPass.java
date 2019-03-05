@@ -93,6 +93,7 @@ public class SchedulerWorkingPass {
 			SchedulerSlot slot = state.removeNextSlot();
 			state.beforeExecution(curr_time);
 			for ( SchedulerTaskImpl task : slot.getTasks() ) {
+				// DO NOT LOCK THE TASK! WILL CAUSE DEADLOCKS!
 				if ( task.isScheduled() ) {
 					task.execute();
 					if ( task.isScheduled() ) {

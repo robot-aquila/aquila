@@ -167,6 +167,12 @@ public class SchedulerTaskImpl implements SchedulerTask {
 	public void execute() {
 		lock();
 		try {
+			if ( state == SchedulerTaskState.CANCELLED ) {
+				// This is possible in case when task was cancelled between state
+				// check and calling this method. So actually nothing serious.
+				return;
+			}
+			
 			if ( state != SchedulerTaskState.SCHEDULED ) {
 				throw new IllegalStateException("Unexpected task state: " + state);
 			}

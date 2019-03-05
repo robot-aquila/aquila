@@ -206,11 +206,14 @@ public class SchedulerTaskImplTest {
 		task.execute();
 	}
 	
-	@Test (expected=IllegalStateException.class)
-	public void testExecute_ThrowsIfCancelled() {
+	@Test
+	public void testExecute_SkipIfCancelled() {
 		task.cancel();
+		control.replay();
 		
 		task.execute();
+		
+		control.verify();
 	}
 
 	@Test
