@@ -170,16 +170,29 @@ public class SchedulerTaskImpl implements SchedulerTask {
 			if ( state != SchedulerTaskState.SCHEDULED ) {
 				throw new IllegalStateException("Unexpected task state: " + state);
 			}
-			try {
-				runnable.run();
+			state = SchedulerTaskState.EXECUTING;
+		} finally {
+			unlock();
+		}
+		boolean error = false;
+		try {
+			runnable.run();
+		} catch ( Exception e ) {
+			logger.error(runnable + " threw an exception: {}", e);
+			error = true;
+		}
+		
+		lock();
+		try {
+			if ( error ) {
+				state = SchedulerTaskState.ERROR;
+			} else {
 				if ( period == 0 ) {
 					state = SchedulerTaskState.EXECUTED;
+				} else {
+					state = SchedulerTaskState.SCHEDULED;
 				}
-			} catch ( Exception e ) {
-				logger.error(runnable + " threw an exception: {}", e);
-				state = SchedulerTaskState.ERROR;
 			}
-			
 		} finally {
 			unlock();
 		}

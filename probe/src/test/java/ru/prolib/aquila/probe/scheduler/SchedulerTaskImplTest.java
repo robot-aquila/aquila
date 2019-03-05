@@ -4,12 +4,25 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SchedulerTaskImplTest {
+	
+	@BeforeClass
+	public static void setUpBeforeClass() {
+		BasicConfigurator.resetConfiguration();
+		BasicConfigurator.configure();
+	}
+	
 	private IMocksControl control;
 	private Runnable runnable1, runnable2;
 	private SchedulerTaskImpl task;
@@ -296,5 +309,71 @@ public class SchedulerTaskImplTest {
 		assertEquals("SchedulerTaskImpl[CANCELLED foobar]", task.toString());
 	}
 
+	@Test
+	public void testDeadlockTest_CombinationExecuteWithCancel() throws Exception {
+		// Two threads: one is execute task, the second wants to cancel task exactly at same time.
+		// The case: if the second thread locks shared object prior to cancel task and the task is
+		// executed it causes deadlock. The first thread wont release task object because waits
+		// for shared object. The second thread wont release lock on shared object because waits
+		// for task object.
+		// How to test: the second thread should enter and lock shared object, then wait until the
+		// task start execution inside the first thread. After that the second thread should proceed
+		// to cancel of task.
+		Lock shared_lock = new ReentrantLock();
+		CountDownLatch first_started = new CountDownLatch(1);
+		CountDownLatch second_started = new CountDownLatch(1);
+		CountDownLatch finished = new CountDownLatch(2);
+		task = new SchedulerTaskImpl(new Runnable() {
+			@Override
+			public void run() {
+				// Will be called in the first thread.
+				first_started.countDown();
+				try {
+					if ( ! second_started.await(500L, TimeUnit.MILLISECONDS) ) {
+						return;
+					}
+					if ( shared_lock.tryLock(100L, TimeUnit.MILLISECONDS) ) {
+						shared_lock.unlock();
+						finished.countDown();
+					}
+				} catch ( InterruptedException e ) {
+					e.printStackTrace();
+				}
+			}
+		});
+		task.scheduleForFirstExecution(Instant.parse("2019-03-05T16:19:00Z"));
+		Thread first_thread = new Thread() {
+			@Override
+			public void run() {
+				task.execute();
+			}
+		};
+		Thread second_thread = new Thread() {
+			@Override
+			public void run() {
+				shared_lock.lock();
+				try {
+					second_started.countDown();
+					if ( ! first_started.await(500L, TimeUnit.MILLISECONDS) ) {
+						return;
+					}
+					task.cancel();
+					finished.countDown();
+				} catch ( InterruptedException e ) {
+					e.printStackTrace();
+				} finally {
+					shared_lock.unlock();
+				}
+			}
+		};
+		first_thread.start();
+		second_thread.start();
+		
+		if ( ! finished.await(1L, TimeUnit.SECONDS) ) {
+			first_thread.interrupt();
+			second_thread.interrupt();
+			fail("Deadlock detected");
+		}
+	}
 
 }

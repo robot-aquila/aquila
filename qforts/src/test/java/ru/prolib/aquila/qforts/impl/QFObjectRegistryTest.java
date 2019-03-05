@@ -1,11 +1,15 @@
 package ru.prolib.aquila.qforts.impl;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
@@ -24,6 +28,15 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
 public class QFObjectRegistryTest {
+	
+	static void interruptAll(Thread ...threads) {
+		for ( Thread thread : threads ) {
+			if ( thread.isAlive() ) {
+				thread.interrupt();
+			}
+		}
+	}
+	
 	private LinkedHashSet<EditablePortfolio> portfolios;
 	private LinkedHashSet<EditableSecurity> securities;
 	private LinkedHashMap<Symbol, LinkedHashSet<EditableOrder>> orders;
@@ -119,12 +132,8 @@ public class QFObjectRegistryTest {
 		assertFalse(registry.isRegistered(o2));
 		assertFalse(registry.isRegistered(o3));
 		
-		LinkedHashSet<EditableOrder> dummy = new LinkedHashSet<>();
-		dummy.add(o1);
-		orders.put(symbol1, dummy);
-		dummy = new LinkedHashSet<>();
-		dummy.add(o3);
-		orders.put(symbol3, dummy);
+		registry.register(o1);
+		registry.register(o3);
 		
 		assertTrue(registry.isRegistered(o1));
 		assertFalse(registry.isRegistered(o2));
@@ -330,13 +339,11 @@ public class QFObjectRegistryTest {
 				OrderAction.BUY,
 				CDecimalBD.of(5L),
 				CDecimalBD.of("11.05"));
-		orders.put(symbol1, new LinkedHashSet<>());
-		orders.get(symbol1).add(s1o1);
-		orders.get(symbol1).add(s1o2);
-		orders.get(symbol1).add(s1o3);
-		orders.put(symbol2, new LinkedHashSet<>());
-		orders.get(symbol2).add(s2o1);
-		orders.get(symbol2).add(s2o2);
+		registry.register(s1o1);
+		registry.register(s1o2);
+		registry.register(s1o3);
+		registry.register(s2o1);
+		registry.register(s2o2);
 
 		registry.purgeOrder(s1o2);
 		registry.purgeOrder(s2o1);
@@ -348,6 +355,299 @@ public class QFObjectRegistryTest {
 		expected.put(symbol2, new LinkedHashSet<>());
 		expected.get(symbol2).add(s2o2);
 		assertEquals(expected, orders);
+	}
+	
+	static abstract class AccessorOT extends Thread {
+		protected final CountDownLatch goal = new CountDownLatch(1), lockerSignal, finished;
+		
+		public AccessorOT(CountDownLatch lockerSignal, CountDownLatch finished) {
+			this.lockerSignal = lockerSignal;
+			this.finished = finished;
+		}
+		
+		public AccessorOT(CountDownLatch finished) {
+			this(new CountDownLatch(1), finished);
+		}
+		
+		@Override
+		public void run() {
+			try {
+				lockerSignal.await(500L, TimeUnit.MILLISECONDS);
+				if ( goal() ) {
+					goal.countDown();
+				}
+			} catch ( InterruptedException e ) {
+				e.printStackTrace();
+			}
+			finished.countDown();
+		}
+		
+		protected abstract boolean goal();
+		
+		public void waitForFinish() throws InterruptedException, TimeoutException {
+			if ( ! finished.await(1L, TimeUnit.SECONDS) ) {
+				throw new TimeoutException();
+			}
+		}
+		
+		public boolean isGoalHit() {
+			return goal.getCount() == 0;
+		}
+		
+		public CountDownLatch getGoal() {
+			return goal;
+		}
+		
+		public CountDownLatch getFinished() {
+			return finished;
+		}
+		
+		public CountDownLatch getLocker() {
+			return lockerSignal;
+		}
+
+	}
+	
+	static abstract class LockerOT extends Thread {
+		protected final AccessorOT accessor;
+		protected final CountDownLatch goal = new CountDownLatch(1);
+		
+		public LockerOT(AccessorOT accessor) {
+			this.accessor = accessor;
+		}
+		
+		abstract protected void lock();
+		abstract protected void unlock();
+		
+		@Override
+		public void run() {
+			lock();
+			try {
+				accessor.getLocker().countDown();
+				if ( goal() ) {
+					goal.countDown();
+				}
+			} finally {
+				unlock();
+			}
+			accessor.getFinished().countDown();
+		}
+		
+		public boolean isGoalHit() {
+			return goal.getCount() == 0;
+		}
+		
+		protected abstract boolean goal();
+
+	}
+	
+	static abstract class OrderLockerOT extends LockerOT {
+		protected final EditableOrder order;
+
+		public OrderLockerOT(AccessorOT accessor, EditableOrder order) {
+			super(accessor);
+			this.order = order;
+		}
+
+		@Override
+		protected void lock() {
+			order.lock();
+		}
+
+		@Override
+		protected void unlock() {
+			order.unlock();
+		}
+		
+	}
+	
+	static class OrderLockerOT_LockAndWait extends OrderLockerOT {
+		protected final QFObjectRegistry registry;
+
+		public OrderLockerOT_LockAndWait(AccessorOT accessor,
+				EditableOrder order,
+				QFObjectRegistry registry)
+		{
+			super(accessor, order);
+			this.registry = registry;
+		}
+
+		@Override
+		protected boolean goal() {
+			synchronized ( registry ) {
+				try {
+					return accessor.getGoal().await(100L, TimeUnit.MILLISECONDS);
+				} catch ( InterruptedException e ) {
+					e.printStackTrace();
+					return false;
+				}
+			}
+		}
+		
+	}
+	
+	static class OrderLockerOT_WeakWaitAndEnter extends OrderLockerOT {
+		protected final QFObjectRegistry registry;
+
+		public OrderLockerOT_WeakWaitAndEnter(AccessorOT accessor,
+				EditableOrder order,
+				QFObjectRegistry registry)
+		{
+			super(accessor, order);
+			this.registry = registry;
+		}
+
+		@Override
+		protected boolean goal() {
+			try {
+				Thread.sleep(100L);
+				registry.getSecurityList();
+				return true;
+			} catch ( InterruptedException e ) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+		
+	}
+	
+	@Test
+	public void testIsRegistered_Order_DeadlockTest() throws Exception {
+		EditableOrder order = (EditableOrder) terminal.createOrder(account1,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04"));
+		registry.register(order);
+		CountDownLatch finished = new CountDownLatch(2);
+		AccessorOT concurrent_thread = new AccessorOT(finished) {
+			@Override
+			protected boolean goal() {
+				return registry.isRegistered(order);
+			}
+		};
+		OrderLockerOT locker_thread = new OrderLockerOT_LockAndWait(concurrent_thread, order, registry);
+		concurrent_thread.start();
+		locker_thread.start();
+		
+		if ( finished.await(1L, TimeUnit.SECONDS) ) {
+			assertTrue(locker_thread.isGoalHit());
+			assertTrue(concurrent_thread.isGoalHit());
+		} else {
+			interruptAll(concurrent_thread, locker_thread);
+			fail("Deadlock detected");
+		}
+	}
+	
+	@Test
+	public void testRegister_Order_DeadlockTest() throws Exception {
+		EditableOrder order = (EditableOrder) terminal.createOrder(account1,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04"));
+		CountDownLatch finished = new CountDownLatch(2);
+		AccessorOT concurrent_thread = new AccessorOT(finished) {
+			@Override
+			public boolean goal() {
+				registry.register(order);
+				return true;
+			}
+		};
+		// This only method which need an access to order properties.
+		// So the order locking is must.
+		OrderLockerOT locker_thread = new OrderLockerOT_WeakWaitAndEnter(concurrent_thread, order, registry);
+		concurrent_thread.start();
+		locker_thread.start();
+		
+		if ( finished.await(1L, TimeUnit.SECONDS) ) {
+			assertTrue(locker_thread.isGoalHit());
+			assertTrue(concurrent_thread.isGoalHit());
+		} else {
+			interruptAll(concurrent_thread, locker_thread);
+			fail("Deadlock detected");
+		}
+	}
+	
+	@Test
+	public void testPurgeOrder_DeadlockTest() throws Exception {
+		EditableOrder order = (EditableOrder) terminal.createOrder(account1,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04"));
+		registry.register(order);
+		CountDownLatch finished = new CountDownLatch(2);
+		AccessorOT concurrent_thread = new AccessorOT(finished) {
+			@Override
+			protected boolean goal() {
+				registry.purgeOrder(order);
+				return true;
+			}
+		};
+		OrderLockerOT locker_thread = new OrderLockerOT_LockAndWait(concurrent_thread, order, registry);
+		concurrent_thread.start();
+		locker_thread.start();
+		
+		if ( finished.await(1L, TimeUnit.SECONDS) ) {
+			assertTrue(locker_thread.isGoalHit());
+			assertTrue(concurrent_thread.isGoalHit());
+		} else {
+			interruptAll(concurrent_thread, locker_thread);
+			fail("Deadlock detected");
+		}
+	}
+	
+	@Test
+	public void testGetOrderList_DeadlockTest() throws Exception {
+		EditableOrder
+			order1 = (EditableOrder) terminal.createOrder(account1,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(1L),
+				CDecimalBD.of("115.04")),
+			order2 = (EditableOrder) terminal.createOrder(account2,
+				symbol1,
+				OrderAction.BUY,
+				CDecimalBD.of(100L),
+				CDecimalBD.of("86.19")),
+			order3 = (EditableOrder) terminal.createOrder(account3,
+				symbol1,
+				OrderAction.SELL,
+				CDecimalBD.of(10L),
+				CDecimalBD.of("70.56"));
+		registry.register(order1);
+		registry.register(order2);
+		registry.register(order3);
+		CountDownLatch finished = new CountDownLatch(4);
+		CountDownLatch locker_signal = new CountDownLatch(3);
+		AccessorOT concurrent_thread = new AccessorOT(locker_signal, finished) {
+			@Override
+			protected boolean goal() {
+				List<EditableOrder> actual = registry.getOrderList(symbol1, of("100.00"));
+				List<EditableOrder> expected = new ArrayList<>();
+				expected.add(order1);
+				expected.add(order3);
+				return expected.equals(actual);
+			}
+		};
+		OrderLockerOT locker_thread1 = new OrderLockerOT_LockAndWait(concurrent_thread, order1, registry);
+		OrderLockerOT locker_thread2 = new OrderLockerOT_LockAndWait(concurrent_thread, order2, registry);
+		OrderLockerOT locker_thread3 = new OrderLockerOT_LockAndWait(concurrent_thread, order3, registry);
+		concurrent_thread.start();
+		locker_thread1.start();
+		locker_thread2.start();
+		locker_thread3.start();
+		
+		if ( finished.await(1L, TimeUnit.SECONDS) ) {
+			assertTrue(locker_thread1.isGoalHit());
+			assertTrue(locker_thread2.isGoalHit());
+			assertTrue(locker_thread3.isGoalHit());
+			assertTrue(concurrent_thread.isGoalHit());
+		} else {
+			interruptAll(concurrent_thread, locker_thread1, locker_thread2, locker_thread3);
+			fail("Deadlock detected");
+		}
 	}
 
 }

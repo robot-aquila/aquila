@@ -5,5 +5,6 @@ public enum SchedulerTaskState {
 	ERROR,
 	SCHEDULED,
 	EXECUTED,
-	CANCELLED
+	CANCELLED,
+	EXECUTING
 }
