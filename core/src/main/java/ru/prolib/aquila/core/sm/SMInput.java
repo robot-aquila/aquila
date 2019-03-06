@@ -1,5 +1,8 @@
 package ru.prolib.aquila.core.sm;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * Вход (приемник данных).
  * <p>
@@ -39,6 +42,29 @@ public class SMInput {
 	 */
 	public SMStateHandler getState() {
 		return owner;
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(55689123, 65)
+				.append(owner)
+				.append(action)
+				.build();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if ( other == this ) {
+			return true;
+		}
+		if ( other == null || other.getClass() != SMInput.class ) {
+			return false;
+		}
+		SMInput o = (SMInput) other;
+		return new EqualsBuilder()
+				.append(o.owner, owner)
+				.append(o.action, action)
+				.build();
 	}
 
 }

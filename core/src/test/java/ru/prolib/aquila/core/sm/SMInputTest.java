@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.sm;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,30 @@ public class SMInputTest {
 		assertSame(exit, input.input(this));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testHashCode() {
+		int expected = new HashCodeBuilder(55689123, 65)
+				.append(state)
+				.append(inputAction)
+				.build();
+		
+		assertEquals(expected, input.hashCode());
+	}
+	
+	@Test
+	public void testEquals() {
+		SMStateHandler state2 = new SMStateHandler();
+		SMInputAction actionMock2 = control.createMock(SMInputAction.class);
+		
+		assertTrue(input.equals(input));
+		assertTrue(input.equals(new SMInput(state, inputAction)));
+		assertFalse(input.equals(new SMInput(state2, inputAction)));
+		assertFalse(input.equals(new SMInput(state, actionMock2)));
+		assertFalse(input.equals(new SMInput(state2, actionMock2)));
+		assertFalse(input.equals(null));
+		assertFalse(input.equals(this));
 	}
 
 }
