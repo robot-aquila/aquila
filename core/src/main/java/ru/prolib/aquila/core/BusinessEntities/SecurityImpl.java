@@ -137,6 +137,12 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	public Instant getExpirationTime() {
 		return this.getInstant(SecurityField.EXPIRATION_TIME);
 	}
+	
+	@Override
+	public CDecimal getLastPrice() {
+		Tick tick = getLastTrade();
+		return tick == null ? null : tick.getPrice();
+	}
 
 	@Override
 	public EventType onSessionUpdate() {

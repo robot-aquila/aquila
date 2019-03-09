@@ -475,6 +475,20 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 	}
 	
 	@Test
+	public void testGetLast_Price() {
+		
+		assertNull(security.getLastPrice());
+		
+		security.consume(toL1Update(
+				Tick.ofTrade(T("1978-02-01T05:12:15Z"),
+				CDecimalBD.of("272.15"),
+				CDecimalBD.of(105L)))
+			);
+		
+		assertEquals(of("272.15"), security.getLastPrice());
+	}
+	
+	@Test
 	public void testGetMarketDepth_DefaultValue() {
 		MarketDepth md = security.getMarketDepth();
 		

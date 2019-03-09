@@ -135,6 +135,13 @@ public interface Security extends ObservableStateContainer, L1StreamContainer, M
 	public CDecimal getInitialMargin();
 	
 	/**
+	 * Get price of the last known trade.
+	 * <p>
+	 * @return last trade price or null if no trades
+	 */
+	public CDecimal getLastPrice();
+	
+	/**
 	 * Get expiration time of the security.
 	 * <p>
 	 * @return time of expiration
