@@ -168,5 +168,36 @@ public class LocalTimePeriodTest {
 		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T13:07:29"), ZT("2019-01-02T05:19:26")))); // overlaps start day
 		assertTrue(period.overlappedBy(Interval.of(ZT("2019-01-01T20:15:05"), ZT("2019-01-02T12:10:56")))); // overlaps end day
 	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCompareTo_ThrowsIfZoneIdMismatch() {
+		period.compareTo(new LocalTimePeriod(from, to, ZoneId.of("Europe/London")));
+	}
+	
+	@Test
+	public void testCompareTo() {
+		assertEquals( 0, period.compareTo(new LocalTimePeriod(LocalTime.of(10,  0), LocalTime.of(14,  0), zone)));
+		assertEquals( 1, period.compareTo(new LocalTimePeriod(LocalTime.of( 1, 10), LocalTime.of( 2,  0), zone)));
+		assertEquals( 1, period.compareTo(new LocalTimePeriod(LocalTime.of(10,  0), LocalTime.of(10,  5), zone)));
+		assertEquals(-1, period.compareTo(new LocalTimePeriod(LocalTime.of(10,  5), LocalTime.of(10, 30), zone)));
+		assertEquals(-1, period.compareTo(new LocalTimePeriod(LocalTime.of(10,  5), LocalTime.of(14,  0), zone)));
+		assertEquals(-1, period.compareTo(new LocalTimePeriod(LocalTime.of(14,  0), LocalTime.of(14, 10), zone)));
+		assertEquals(-1, period.compareTo(new LocalTimePeriod(LocalTime.of(18,  0), LocalTime.of(19, 10), zone)));
+	}
+	
+	@Test
+	public void testOverlaps_LocalTimePeriod() {
+		assertFalse(period.overlaps(new LocalTimePeriod(LocalTime.of( 1,  0), LocalTime.of( 2, 15), zone)));//ooxx
+		assertFalse(period.overlaps(new LocalTimePeriod(LocalTime.of( 1,  0), LocalTime.of(10,  0), zone)));//o||x
+		assertTrue( period.overlaps(new LocalTimePeriod(LocalTime.of( 1,  0), LocalTime.of(12, 30), zone)));//oxox
+		assertTrue( period.overlaps(new LocalTimePeriod(LocalTime.of( 5,  0), LocalTime.of(14,  0), zone)));//ox||
+		assertTrue( period.overlaps(new LocalTimePeriod(LocalTime.of( 5,  0), LocalTime.of(18,  0), zone)));//oxxo
+		assertTrue( period.overlaps(new LocalTimePeriod(LocalTime.of(10, 30), LocalTime.of(12,  0), zone)));//xoox
+		assertTrue( period.overlaps(new LocalTimePeriod(LocalTime.of(10,  0), LocalTime.of(14,  0), zone)));//||||
+		assertTrue( period.overlaps(new LocalTimePeriod(LocalTime.of(10,  0), LocalTime.of(18,  0), zone)));//||xo
+		assertTrue( period.overlaps(new LocalTimePeriod(LocalTime.of(12,  0), LocalTime.of(18,  0), zone)));//xoxo
+		assertFalse(period.overlaps(new LocalTimePeriod(LocalTime.of(14,  0), LocalTime.of(18,  0), zone)));//x||o
+		assertFalse(period.overlaps(new LocalTimePeriod(LocalTime.of(16,  0), LocalTime.of(18,  0), zone)));//xxoo
+	}
 
 }

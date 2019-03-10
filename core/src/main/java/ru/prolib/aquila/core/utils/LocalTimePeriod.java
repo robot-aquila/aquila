@@ -13,7 +13,7 @@ import org.threeten.extra.Interval;
 /**
  * An intraday time period.
  */
-public class LocalTimePeriod {
+public class LocalTimePeriod implements Comparable<LocalTimePeriod> {
 	/**
 	 * End of day marker.
 	 */
@@ -128,6 +128,27 @@ public class LocalTimePeriod {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public int compareTo(LocalTimePeriod o) {
+		if ( ! zone.equals(o.zone) ) {
+			throw new IllegalArgumentException();
+		}
+		int r = from.compareTo(o.from);
+		if ( r != 0 ) {
+			return r;
+		}
+		return to.compareTo(o.to);
+	}
+	
+	public boolean overlaps(LocalTimePeriod other) {
+		if ( from.compareTo(other.to) >= 0
+		  || to.compareTo(other.from) <= 0 )
+		{
+			return false;
+		}
+		return true;
 	}
 
 }
