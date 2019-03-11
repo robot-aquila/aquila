@@ -77,5 +77,33 @@ public class LocalTimeTableTest {
 		assertEquals(expected, service.getActiveOrComing(ZT("2019-03-10T23:59:59.999")));
 		assertEquals(expected, service.getActiveOrComing(ZT("2019-03-11T01:59:59.999")));
 	}
+	
+	@Test
+	public void testGetComing() {
+		Interval expected;
+		service.addPeriod(LocalTime.of(10, 30), LocalTime.of(14,  0))
+			.addPeriod(LocalTime.of(19,  0), LocalTime.of(23, 50))
+			.addPeriod(LocalTime.of(14,  5), LocalTime.of(18, 45));
+		
+		expected = Interval.of(ZT("2019-03-10T10:30:00"), ZT("2019-03-10T14:00:00"));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T00:00:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T10:00:00")));
+		
+		expected = Interval.of(ZT("2019-03-10T14:05:00"), ZT("2019-03-10T18:45:00"));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T10:30:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T14:00:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T14:03:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T14:04:59.999")));
+		
+		expected = Interval.of(ZT("2019-03-10T19:00:00"), ZT("2019-03-10T23:50:00"));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T14:05:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T18:00:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T18:45:00")));
+		
+		expected = Interval.of(ZT("2019-03-11T10:30:00"), ZT("2019-03-11T14:00:00"));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T23:45:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-10T23:50:00")));
+		assertEquals(expected, service.getComing(ZT("2019-03-11T01:00:00")));
+	}
 
 }

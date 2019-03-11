@@ -44,6 +44,18 @@ public class LocalTimeTable {
 		return this;
 	}
 
+	/**
+	 * Get active or coming period relative to the time specified.
+	 * <p>
+	 * This method is intended to determine period to which the time belongs.
+	 * If the time is not inside any period then next period relative to
+	 * the time will be determined. This is useful to test for example is it
+	 * time to trade and when the trading should be finished and all positions
+	 * terminated.
+	 * <p>
+	 * @param time - time to determine period
+	 * @return period
+	 */
 	public Interval getActiveOrComing(Instant time) {
 		if ( periods.size() == 0 ) {
 			throw new IllegalStateException("No periods defined");
@@ -66,6 +78,23 @@ public class LocalTimeTable {
 				ZonedDateTime.of(ld, found.from(), zoneID).toInstant(),
 				ZonedDateTime.of(ld, found.to(), zoneID).toInstant()
 			);
+	}
+	
+	/**
+	 * Get next period relative to the time specified.
+	 * <p>
+	 * This method is intended to determine the next coming period.
+	 * This is useful for example to get a time of next trading period start.
+	 * <p>
+	 * @param time - time to determine period
+	 * @return period
+	 */
+	public Interval getComing(Instant time) {
+		Interval x = getActiveOrComing(time);
+		if ( time.compareTo(x.getStart()) >= 0 ) {
+			x = getActiveOrComing(x.getEnd());
+		}
+		return x;
 	}
 	
 }
