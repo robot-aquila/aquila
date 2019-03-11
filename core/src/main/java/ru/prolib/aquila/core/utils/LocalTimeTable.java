@@ -91,7 +91,7 @@ public class LocalTimeTable {
 	 */
 	public Interval getComing(Instant time) {
 		Interval x = getActiveOrComing(time);
-		if ( time.compareTo(x.getStart()) >= 0 ) {
+		if ( time.compareTo(x.getStart()) > 0 ) {
 			x = getActiveOrComing(x.getEnd());
 		}
 		return x;
