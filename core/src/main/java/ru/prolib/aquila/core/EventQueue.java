@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core;
 
+import ru.prolib.aquila.core.utils.FlushIndicator;
+
 /**
  * Интерфейс очереди событий.
  * <p>
@@ -31,5 +33,7 @@ public interface EventQueue {
 	public String getId();
 	
 	long getTotalEvents();
+	
+	FlushIndicator newFlushIndicator();
 
 }

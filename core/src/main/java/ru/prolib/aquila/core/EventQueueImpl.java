@@ -11,6 +11,8 @@ import ru.prolib.aquila.core.eque.DispatcherThreadV3;
 import ru.prolib.aquila.core.eque.DispatchingType;
 import ru.prolib.aquila.core.eque.EventDispatchingRequest;
 import ru.prolib.aquila.core.eque.EventQueueStats;
+import ru.prolib.aquila.core.utils.FlushControl;
+import ru.prolib.aquila.core.utils.FlushIndicator;
 
 /**
  * Event queue implementation.
@@ -41,6 +43,7 @@ public class EventQueueImpl implements EventQueue {
 	private final String queueName;
 	private final Thread dispatcherThread;
 	private final EventQueueStats stats;
+	private final FlushControl flushControl;
 
 	/**
 	 * Constructor.
@@ -53,7 +56,8 @@ public class EventQueueImpl implements EventQueue {
 			int numOfWorkerThreads,
 			DispatchingType dispatchingType)
 	{
-		this.stats = new EventQueueStats();
+		this.flushControl = new FlushControl();
+		this.stats = new EventQueueStats(flushControl);
 		this.queueName = queueName;
 		this.queue = new LinkedBlockingQueue<EventDispatchingRequest>();
 		switch ( dispatchingType ) {
@@ -104,6 +108,11 @@ public class EventQueueImpl implements EventQueue {
 	}
 	
 	@Override
+	public FlushIndicator newFlushIndicator() {
+		return flushControl.createIndicator();
+	}
+	
+	@Override
 	public long getTotalEvents() {
 		return stats.getTotalEventsSent();
 	}
@@ -118,11 +127,12 @@ public class EventQueueImpl implements EventQueue {
 		try {
 			// That makes no sense to test count of listeners
 			// It may be listeners of alternate types
-			//if ( type.countListeners() > 0 ) {
-				queue.put(new EventDispatchingRequest(type, factory));
-				stats.addEventSent();
-			//}
+			flushControl.countUp();
+			queue.put(new EventDispatchingRequest(type, factory));
+			stats.addEventSent();
 		} catch ( InterruptedException e ) {
+			// TODO: Event stats have to be fixed or inconsistency may occur.
+			// But it shouldn't be critical issue.
 			Thread.currentThread().interrupt();
 			logger.error("Interrupted: ", e);
 		}

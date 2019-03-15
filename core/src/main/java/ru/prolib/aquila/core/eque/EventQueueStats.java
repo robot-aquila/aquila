@@ -2,11 +2,15 @@ package ru.prolib.aquila.core.eque;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import ru.prolib.aquila.core.utils.FlushControl;
+
 public class EventQueueStats {
 	private final AtomicLong buildTaskListTime, dispatchTime, deliveryTime,
 		totalEventsSent, totalEventsDispatched;
+	private final FlushControl flushControl;
 	
-	public EventQueueStats() {
+	public EventQueueStats(FlushControl flushControl) {
+		this.flushControl = flushControl;
 		this.buildTaskListTime = new AtomicLong(0);
 		this.dispatchTime = new AtomicLong(0);
 		this.deliveryTime = new AtomicLong(0);
@@ -19,6 +23,7 @@ public class EventQueueStats {
 	}
 	
 	public void addEventDispatched() {
+		flushControl.countDown();
 		totalEventsDispatched.incrementAndGet();
 	}
 	
