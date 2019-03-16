@@ -27,7 +27,12 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		logger = LoggerFactory.getLogger(L1UpdateHandler.class);
 	}
 	
-	static class TimeBlockReader {
+	public interface IBlockReader {
+		void setReader(CloseableIterator<L1Update> reader);
+		List<L1Update> readBlock() throws NoSuchElementException, IOException;
+	}
+	
+	static class TimeBlockReader implements IBlockReader {
 		private CloseableIterator<L1Update> reader;
 		private L1Update pending;
 		
@@ -39,6 +44,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 			this.reader = reader;
 		}
 		
+		@Override
 		public void setReader(CloseableIterator<L1Update> reader) {
 			this.reader = reader;
 			pending = null;
@@ -48,6 +54,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 			return pending;
 		}
 		
+		@Override
 		public List<L1Update> readBlock()
 				throws NoSuchElementException, IOException
 		{
@@ -78,12 +85,44 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		
 	}
 	
+	static class TickByTickBlockReader implements IBlockReader {
+		private final IBlockReader reader;
+		private final List<L1Update> lastBlock;
+		
+		TickByTickBlockReader(IBlockReader reader, List<L1Update> lastBlock) {
+			this.reader = reader;
+			this.lastBlock = lastBlock;
+		}
+		
+		public TickByTickBlockReader() {
+			this(new TimeBlockReader(), new ArrayList<>());
+		}
+
+		@Override
+		public void setReader(CloseableIterator<L1Update> reader) {
+			this.reader.setReader(reader);
+		}
+
+		@Override
+		public List<L1Update> readBlock() throws NoSuchElementException, IOException {
+			List<L1Update> result = new ArrayList<>();
+			if ( lastBlock.size() == 0 ) {
+				lastBlock.addAll(reader.readBlock());
+			}
+			if ( lastBlock.size() > 0 ) {
+				result.add(lastBlock.remove(0));
+			}
+			return result;
+		}
+		
+	}
+	
 	private final Lock lock;
 	private final Symbol symbol;
 	private final Scheduler scheduler;
 	private final Set<L1UpdateConsumer> consumers;
 	private final L1UpdateReaderFactory readerFactory;
-	private final TimeBlockReader blockReader;
+	private final IBlockReader blockReader;
 	private int sequenceID = 1;
 	private CloseableIterator<L1Update> reader;
 	private Instant startTime;
@@ -92,7 +131,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 			Scheduler scheduler,
 			L1UpdateReaderFactory readerFactory,
 			Set<L1UpdateConsumer> consumers,
-			TimeBlockReader blockReader)
+			IBlockReader blockReader)
 	{
 		this.lock = new ReentrantLock();
 		this.symbol = symbol;
@@ -105,7 +144,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 	public L1UpdateHandler(Symbol symbol, Scheduler scheduler,
 			L1UpdateReaderFactory readerFactory)
 	{
-		this(symbol, scheduler, readerFactory, new HashSet<>(), new TimeBlockReader());
+		this(symbol, scheduler, readerFactory, new HashSet<>(), new TickByTickBlockReader());
 	}
 	
 	int getCurrentSequenceID() {
@@ -129,6 +168,10 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		} finally {
 			lock.unlock();
 		}
+	}
+	
+	public IBlockReader getBlockReader() {
+		return blockReader;
 	}
 	
 	public void subscribe(L1UpdateConsumer consumer) throws IOException {

@@ -57,7 +57,7 @@ public class L1UpdateHandlerTest {
 	private L1UpdateReaderFactory readerFactoryMock;
 	private UpdateReaderFactoryStub readerFactoryStub;
 	private L1UpdateConsumer consumerMock1, consumerMock2;
-	private TimeBlockReader brMock;
+	private IBlockReader brMock;
 	private CloseableIterator<L1Update> readerStub, readerMock, readerMock2;
 	private L1UpdateHandler handler;
 	private Set<L1UpdateConsumer> consumersStub;
@@ -68,7 +68,7 @@ public class L1UpdateHandlerTest {
 		consumerMock1 = control.createMock(L1UpdateConsumer.class);
 		consumerMock2 = control.createMock(L1UpdateConsumer.class);
 		readerFactoryMock = control.createMock(L1UpdateReaderFactory.class);
-		brMock = control.createMock(TimeBlockReader.class);
+		brMock = control.createMock(IBlockReader.class);
 		readerMock = control.createMock(CloseableIterator.class);
 		readerMock2 = control.createMock(CloseableIterator.class);
 		schedulerStub = new SchedulerStub();
@@ -193,6 +193,89 @@ public class L1UpdateHandlerTest {
 		
 		actual = service.readBlock();
 		assertNull(actual);
+	}
+
+	@Test
+	public void testTickByTickBlockReader_SetReader() throws Exception {
+		List<L1Update> updates_cache = new ArrayList<>();
+		IBlockReader service = new TickByTickBlockReader(brMock, updates_cache);
+		brMock.setReader(readerMock2);
+		control.replay();
+		
+		service.setReader(readerMock2);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testTickByTickBlockReader_ReadBlock_GetFromCache() throws Exception {
+		List<L1Update> updates_cache = new ArrayList<>();
+		IBlockReader service = new TickByTickBlockReader(brMock, updates_cache);
+		L1Update update1, update2, update3;
+		updates_cache.add(update1 = control.createMock(L1Update.class));
+		updates_cache.add(update2 = control.createMock(L1Update.class));
+		updates_cache.add(update3 = control.createMock(L1Update.class));
+		control.replay();
+		
+		List<L1Update> actual = service.readBlock();
+		
+		control.verify();
+		List<L1Update> expected = new ArrayList<>();
+		expected.add(update1);
+		assertEquals(expected, actual);
+		
+		expected.clear();
+		expected.add(update2);
+		expected.add(update3);
+		assertEquals(expected, updates_cache);
+	}
+	
+	@Test
+	public void testTickByTickBlockReader_ReadBlock_LoadToCache() throws Exception {
+		List<L1Update> base_reader_result = new ArrayList<>(), updates_cache = new ArrayList<>();
+		IBlockReader service = new TickByTickBlockReader(brMock, updates_cache);
+		L1Update update1, update2, update3;
+		base_reader_result.add(update1 = control.createMock(L1Update.class));
+		base_reader_result.add(update2 = control.createMock(L1Update.class));
+		base_reader_result.add(update3 = control.createMock(L1Update.class));
+		expect(brMock.readBlock()).andReturn(base_reader_result);
+		control.replay();
+		
+		List<L1Update> actual = service.readBlock();
+		
+		control.verify();
+		List<L1Update> expected = new ArrayList<>();
+		expected.add(update1);
+		assertEquals(expected, actual);
+		
+		expected.clear();
+		expected.add(update2);
+		expected.add(update3);
+		assertEquals(expected, updates_cache);
+	}
+	
+	@Test
+	public void testTickByTickBlockReader_ReadBlock_NoMoreEntries() throws Exception {
+		List<L1Update> updates_cache = new ArrayList<>();
+		IBlockReader service = new TickByTickBlockReader(brMock, updates_cache);
+		expect(brMock.readBlock()).andReturn(new ArrayList<>());
+		control.replay();
+		
+		List<L1Update> actual = service.readBlock();
+		
+		control.verify();
+		assertEquals(new ArrayList<>(), actual);
+		assertEquals(new ArrayList<>(), updates_cache);
+	}
+	
+	@Test
+	public void testCtor3() {
+		L1UpdateHandler service = new L1UpdateHandler(symbol, schedulerStub, readerFactoryStub);
+		
+		IBlockReader actual = service.getBlockReader();
+		
+		assertNotNull(actual);
+		assertEquals(TickByTickBlockReader.class, actual.getClass());
 	}
 	
 	@Test

@@ -14,6 +14,7 @@ import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.probe.ThreadSynchronizer;
 
+@Deprecated
 public class EventQueueSynchronizer implements ThreadSynchronizer, EventListener {
 	private final EventQueue queue;
 	private final EventType onSynchronize;
