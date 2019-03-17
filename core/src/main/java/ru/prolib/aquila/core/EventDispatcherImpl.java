@@ -90,10 +90,10 @@ public class EventDispatcherImpl implements EventDispatcher {
 		synchronized ( this ) {
 			if ( suppressCount > 0 ) {
 				cache.add(new CachedEvent(type, factory));
-				return;
+			} else {
+				queue.enqueue(type, factory);
 			}
 		}
-		queue.enqueue(type, factory);
 	}
 
 	@Override
@@ -132,9 +132,9 @@ public class EventDispatcherImpl implements EventDispatcher {
 				list = new ArrayList<>(cache);
 				cache.clear();
 			}
-		}
-		for ( CachedEvent x : list ) {
-			queue.enqueue(x.type, x.factory);
+			for ( CachedEvent x : list ) {
+				queue.enqueue(x.type, x.factory);
+			}
 		}
 	}
 	

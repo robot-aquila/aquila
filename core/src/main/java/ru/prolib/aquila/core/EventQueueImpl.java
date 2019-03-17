@@ -124,6 +124,8 @@ public class EventQueueImpl implements EventQueue {
 
 	@Override
 	public void enqueue(EventType type, EventFactory factory) {
+		// WARNING: Never do something which may cause deadlock while this call
+		// No limited queue length, no critical sections here, etc...
 		try {
 			// That makes no sense to test count of listeners
 			// It may be listeners of alternate types

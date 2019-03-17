@@ -150,9 +150,11 @@ public class ObservableTSeriesImplTest {
 				.setNodeIndex(215)
 				.setOldValue(null)
 				.setNewValue(850);
+		underlyingSeriesMock1.lock();
 		expect(underlyingSeriesMock1.set(T("2017-08-28T00:00:00Z"), 850)).andReturn(update);
 		queueMock1.enqueue(series.onUpdate(), new TSeriesUpdateEventFactory(update));
 		queueMock1.enqueue(series.onLengthUpdate(), new TSeriesUpdateEventFactory(update));
+		underlyingSeriesMock1.unlock();
 		control.replay();
 		
 		assertSame(update, series.set(T("2017-08-28T00:00:00Z"), 850));
@@ -168,8 +170,10 @@ public class ObservableTSeriesImplTest {
 				.setNodeIndex(112)
 				.setOldValue(256)
 				.setNewValue(302);
+		underlyingSeriesMock1.lock();
 		expect(underlyingSeriesMock1.set(T("2017-08-28T00:00:00Z"), 302)).andReturn(update);
 		queueMock1.enqueue(series.onUpdate(), new TSeriesUpdateEventFactory(update));
+		underlyingSeriesMock1.unlock();
 		control.replay();
 		
 		assertSame(update, series.set(T("2017-08-28T00:00:00Z"), 302));
@@ -185,7 +189,9 @@ public class ObservableTSeriesImplTest {
 				.setNodeIndex(10)
 				.setOldValue(850)
 				.setNewValue(850);
+		underlyingSeriesMock1.lock();
 		expect(underlyingSeriesMock1.set(T("2017-08-28T10:30:00Z"), 850)).andReturn(update);
+		underlyingSeriesMock1.unlock();
 		control.replay();
 		
 		assertSame(update, series.set(T("2017-08-28T10:30:00Z"), 850));

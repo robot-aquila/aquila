@@ -165,11 +165,11 @@ public class TStampedReplay implements Replay {
 			started = true;
 			sequenceID ++;
 			queued = 0;
+			eventQueue.enqueue(onStarted, SimpleEventFactory.getInstance());
 			logger.debug("{}: Service started.", serviceID);
 		} finally {
 			lock.unlock();
 		}
-		eventQueue.enqueue(onStarted, SimpleEventFactory.getInstance());
 		fillUpQueue();
 	}
 
@@ -184,11 +184,11 @@ public class TStampedReplay implements Replay {
 				wasStopped = true;
 				logger.debug("{}: Service stopped.", serviceID);
 			}
+			if ( wasStopped ) {
+				eventQueue.enqueue(onStopped, SimpleEventFactory.getInstance());
+			}
 		} finally {
 			lock.unlock();
-		}
-		if ( wasStopped ) {
-			eventQueue.enqueue(onStopped, SimpleEventFactory.getInstance());
 		}
 	}
 

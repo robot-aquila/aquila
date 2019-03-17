@@ -54,10 +54,10 @@ public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSer
 		try {
 			series.set(value);
 			index = getLength() - 1;
+			queue.enqueue(onSet, new SeriesEventFactory(index, value));
 		} finally {
 			unlock();
 		}
-		queue.enqueue(onSet, new SeriesEventFactory(index, value));
 	}
 
 	@Override
@@ -67,10 +67,10 @@ public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSer
 		try {
 			series.add(value);
 			index = getLength() - 1;
+			queue.enqueue(onAdd, new SeriesEventFactory(index, value));
 		} finally {
 			unlock();
 		}
-		queue.enqueue(onAdd, new SeriesEventFactory(index, value));
 	}
 
 	@Override

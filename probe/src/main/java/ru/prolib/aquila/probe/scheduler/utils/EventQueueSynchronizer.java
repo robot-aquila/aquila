@@ -81,10 +81,10 @@ public class EventQueueSynchronizer implements ThreadSynchronizer, EventListener
 				return;
 			}
 			x = ++lastSentID;
+			queue.enqueue(onSynchronize, new SynchronizeEventFactory(x));
 		} finally {
 			lock.unlock();
 		}
-		queue.enqueue(onSynchronize, new SynchronizeEventFactory(x));
 	}
 
 	@Override

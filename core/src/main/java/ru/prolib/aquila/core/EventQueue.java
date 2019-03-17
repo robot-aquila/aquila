@@ -18,7 +18,8 @@ public interface EventQueue {
 	 * Enqueue event created by factory.
 	 * <p>
 	 * This method is used to enqueue events created by factory for the
-	 * specified event type and all its alternate types.
+	 * specified event type and all its alternate types. This method is
+	 * thread safe and never causes deadlocks.
 	 * <p>
 	 * @param type - starting event type
 	 * @param factory - event factory

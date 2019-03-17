@@ -88,18 +88,23 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 
 	@Override
 	public TSeriesUpdate set(Instant time, T value) {
-		TSeriesUpdate update = series.set(time, value);
-		boolean updated = update.hasChanged(), lenUpdated = update.isNewNode();
-		if ( updated || lenUpdated ) {
-			EventFactory factory = new TSeriesUpdateEventFactory(update);
-			if ( updated ) {
-				queue.enqueue(onUpdate, factory);
+		lock();
+		try {
+			TSeriesUpdate update = series.set(time, value);
+			boolean updated = update.hasChanged(), lenUpdated = update.isNewNode();
+			if ( updated || lenUpdated ) {
+				EventFactory factory = new TSeriesUpdateEventFactory(update);
+				if ( updated ) {
+					queue.enqueue(onUpdate, factory);
+				}
+				if ( lenUpdated ) {
+					queue.enqueue(onLengthUpdate, factory);				
+				}
 			}
-			if ( lenUpdated ) {
-				queue.enqueue(onLengthUpdate, factory);				
-			}
+			return update;
+		} finally {
+			unlock();
 		}
-		return update;
 	}
 
 	@Override
