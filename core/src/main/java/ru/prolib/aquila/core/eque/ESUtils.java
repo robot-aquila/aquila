@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.eque;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import ru.prolib.aquila.core.EventType;
@@ -18,7 +18,7 @@ public class ESUtils {
 	}
 	
 	public static Set<EventType> getAllUniqueTypes(EventType startType) {
-		return getAllUniqueTypes(new HashSet<>(), startType);
+		return getAllUniqueTypes(new LinkedHashSet<>(), startType);
 	}
 
 }

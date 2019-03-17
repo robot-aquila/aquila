@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -44,7 +44,7 @@ public class TestEventQueueImpl implements EventQueue {
 	@Override
 	public void enqueue(EventType type, EventFactory factory) {
 		if ( type.hasAlternates() ) {
-			Set<EventType> alternates = new HashSet<EventType>();
+			Set<EventType> alternates = new LinkedHashSet<EventType>();
 			alternates.add(type);
 			fillUniqueAlternates(alternates, type);
 			for ( EventType alternate : alternates ) {

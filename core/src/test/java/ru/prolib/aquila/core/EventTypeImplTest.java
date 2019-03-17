@@ -25,7 +25,7 @@ public class EventTypeImplTest {
 	
 	@SafeVarargs
 	protected static <T> List<T> HSetToList(T... objs) {
-		Set<T> unordered = new HashSet<>();
+		Set<T> unordered = new LinkedHashSet<>();
 		for ( T x : objs ) {
 			unordered.add(x);
 		}
@@ -34,7 +34,7 @@ public class EventTypeImplTest {
 	
 	@SafeVarargs
 	protected static <T> Set<T> HSet(T... objs) {
-		Set<T> unordered = new HashSet<>();
+		Set<T> unordered = new LinkedHashSet<>();
 		for ( T x : objs ) {
 			unordered.add(x);
 		}
@@ -82,7 +82,7 @@ public class EventTypeImplTest {
 	
 	@Test
 	public void testAddListener() throws Exception {
-		Set<EventListener> expected = new HashSet<>();
+		Set<EventListener> expected = new LinkedHashSet<>();
 		expected.add(listener1);
 		expected.add(listener2);
 		expected.add(listener3);
@@ -98,7 +98,7 @@ public class EventTypeImplTest {
 		type0.addListener(listener1);
 		type0.addListener(listener2);
 		type0.addListener(listener3);
-		Set<EventListener> expected = new HashSet<>();
+		Set<EventListener> expected = new LinkedHashSet<>();
 		expected.add(listener3);
 		
 		type0.removeListener(listener1);
@@ -151,7 +151,7 @@ public class EventTypeImplTest {
 	public void testGetListeners() throws Exception {
 		type0.addListener(listener1);
 		type0.addListener(listener2);
-		Set<EventListener> expected = new HashSet<>();
+		Set<EventListener> expected = new LinkedHashSet<>();
 		expected.add(listener1);
 		expected.add(listener2);
 		
@@ -247,7 +247,7 @@ public class EventTypeImplTest {
 	public void testAddAlternateType() throws Exception {
 		type0.addAlternateType(type1);
 		
-		Set<EventType> expected = new HashSet<EventType>();
+		Set<EventType> expected = new LinkedHashSet<EventType>();
 		expected.add(type1);
 		assertEquals(expected, type0.getAlternateTypes());
 	}
@@ -351,7 +351,7 @@ public class EventTypeImplTest {
 		type0.addAlternateType(type1);
 
 		assertTrue(type1.isListener(type0));
-		Set<EventType> expected = new HashSet<>();
+		Set<EventType> expected = new LinkedHashSet<>();
 		expected.add(type0);
 		expected.add(type1);
 		expected.add(type2);
@@ -390,7 +390,7 @@ public class EventTypeImplTest {
 	public void testHOA_AddAlternateType_SubscribeToNotifications() {
 		EventType typeMock = control.createMock(EventType.class);
 		typeMock.addListener(type0);
-		expect(typeMock.getAlternateTypes()).andReturn(new HashSet<>());
+		expect(typeMock.getAlternateTypes()).andReturn(new LinkedHashSet<>());
 		control.replay();
 		
 		type0.addAlternateType(typeMock);
@@ -406,7 +406,7 @@ public class EventTypeImplTest {
 		
 		type0.removeAlternateType(type1);
 		
-		Set<EventType> expected = new HashSet<>();
+		Set<EventType> expected = new LinkedHashSet<>();
 		expected.add(type0);
 		expected.add(type3);
 		assertEquals(expected, type0.getFullListOfRelatedTypes());
@@ -420,7 +420,7 @@ public class EventTypeImplTest {
 		
 		type0.removeAlternateType(type1);
 		
-		Set<EventType> expected = new HashSet<>();
+		Set<EventType> expected = new LinkedHashSet<>();
 		expected.add(type0);
 		expected.add(type2);
 		assertEquals(expected, type0.getFullListOfRelatedTypes());
@@ -434,7 +434,7 @@ public class EventTypeImplTest {
 		
 		type0.removeAlternateType(type2);
 		
-		Set<EventType> expected = new HashSet<>();
+		Set<EventType> expected = new LinkedHashSet<>();
 		expected.add(type0);
 		expected.add(type1);
 		expected.add(type2);
@@ -457,7 +457,7 @@ public class EventTypeImplTest {
 	public void testHOA_RemoveAlternateType_UnsubscribeFromNotifications() {
 		EventType typeMock = control.createMock(EventType.class);
 		typeMock.addListener(type0);
-		expect(typeMock.getAlternateTypes()).andReturn(new HashSet<>());
+		expect(typeMock.getAlternateTypes()).andReturn(new LinkedHashSet<>());
 		control.replay();
 		type0.addAlternateType(typeMock);
 		control.resetToStrict();

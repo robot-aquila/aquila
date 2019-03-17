@@ -1,6 +1,6 @@
 package ru.prolib.aquila.core.eque;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -126,7 +126,7 @@ public class DispatcherThread extends Thread {
 	
 	private List<DeliveryEventTask> buildTaskList(EventDispatchingRequest request) {
 		List<DeliveryEventTask> list = new LinkedList<>();
-		Set<EventType> allTypes = new HashSet<>();
+		Set<EventType> allTypes = new LinkedHashSet<>();
 		for ( EventType type : ESUtils.getAllUniqueTypes(allTypes, request.type) ) {
 			Event event = request.factory.produceEvent(type);
 			for ( EventListener listener : type.getListeners() ) {

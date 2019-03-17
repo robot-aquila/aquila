@@ -75,10 +75,10 @@ public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable
 	 */
 	public EventTypeImpl(String id) {
 		this.id = id;
-		listeners = new HashSet<>();
-		alternates = new HashSet<>();
-		hoaListeners = new HashSet<>();
-		hoaTypes = new HashSet<>();
+		listeners = new LinkedHashSet<>();
+		alternates = new LinkedHashSet<>();
+		hoaListeners = new LinkedHashSet<>();
+		hoaTypes = new LinkedHashSet<>();
 		hoaTypes.add(this);
 	}
 	
@@ -93,7 +93,7 @@ public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable
 	private void notifyListeners(Set<HierarchyOfAlternatesListener> alreadyNotified) {
 		Set<HierarchyOfAlternatesListener> hoals = null;
 		synchronized ( this ) {
-			hoals = new HashSet<>(hoaListeners);
+			hoals = new LinkedHashSet<>(hoaListeners);
 		}
 		for ( HierarchyOfAlternatesListener hoal : hoals ) {
 			if ( ! alreadyNotified.contains(hoal) ) {
@@ -109,7 +109,7 @@ public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable
 	}
 	
 	private void rebuildCacheAndNotifyListeners() {
-		rebuildCacheAndNotifyListeners(new HashSet<>());
+		rebuildCacheAndNotifyListeners(new LinkedHashSet<>());
 	}
 	
 	@Override
@@ -156,7 +156,7 @@ public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable
 
 	@Override
 	public synchronized Set<EventListener> getListeners() {
-		return new HashSet<>(listeners);
+		return new LinkedHashSet<>(listeners);
 	}
 
 	@Override
@@ -200,7 +200,7 @@ public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable
 
 	@Override
 	public synchronized Set<EventType> getAlternateTypes() {
-		return new HashSet<>(alternates);
+		return new LinkedHashSet<>(alternates);
 	}
 
 	@Override
@@ -212,7 +212,7 @@ public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable
 	public void removeAlternates() {
 		Set<EventType> types = null;
 		synchronized ( this ) {
-			types = new HashSet<>(alternates);
+			types = new LinkedHashSet<>(alternates);
 			alternates.clear();
 		}
 		for ( EventType t : types ) {
@@ -239,7 +239,7 @@ public class EventTypeImpl implements EventType, HierarchyOfAlternatesObservable
 
 	@Override
 	public Set<EventType> getFullListOfRelatedTypes() {
-		return new HashSet<>(hoaTypes);
+		return new LinkedHashSet<>(hoaTypes);
 	}
 	
 	public synchronized boolean isListener(HierarchyOfAlternatesListener listener) {
