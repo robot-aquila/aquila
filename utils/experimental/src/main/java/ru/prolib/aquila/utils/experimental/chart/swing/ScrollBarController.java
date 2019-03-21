@@ -12,7 +12,7 @@ import javax.swing.Timer;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.data.ObservableTSeries;
+import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 
@@ -28,7 +28,7 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 	private JPanel rootPanel;
 	private JScrollBar scrollBar;
 	private JCompAutoScrollButton autoScrollButton;
-	private ObservableTSeries<?> categories;
+	private ObservableSeries<?> categories;
 	private CategoryAxisDisplayMapper mapper;
 	private CategoryAxisViewport viewport;
 	private boolean autoScrollEnabled = true, autoRepaintEnabled, autoRepaintChange;
@@ -89,7 +89,7 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 		adjustScrollBar();
 	}
 
-	public synchronized void setCategories(ObservableTSeries<?> categories) {
+	public synchronized void setCategories(ObservableSeries<?> categories) {
 		// To provide an automatic repainting it should be subscribed on every
 		// update. Subscribing just for length update does not work this case.
 		if ( this.categories != null ) {
@@ -101,7 +101,7 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 		adjustScrollBar();
 	}
 	
-	public synchronized ObservableTSeries<?> getCategories() {
+	public synchronized ObservableSeries<?> getCategories() {
 		return categories;
 	}
 	
@@ -147,7 +147,7 @@ public class ScrollBarController implements AdjustmentListener, ActionListener, 
 	 */
 	@Override
 	public void onEvent(Event event) {
-		ObservableTSeries<?> c = null;
+		ObservableSeries<?> c = null;
 		synchronized ( this ) {
 			if ( viewport == null ) {
 				return;

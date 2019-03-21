@@ -1,6 +1,6 @@
 package ru.prolib.aquila.utils.experimental.chart;
 
-import ru.prolib.aquila.core.data.ObservableTSeries;
+import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 
@@ -24,7 +24,7 @@ public interface BarChartPanel {
      * <p>
      * @param categories - any series to use as set of categories
      */
-    void setCategories(ObservableTSeries<?> categories);
+    void setCategories(ObservableSeries<?> categories);
     
     SelectedCategoryTracker getCategoryTracker();
 }

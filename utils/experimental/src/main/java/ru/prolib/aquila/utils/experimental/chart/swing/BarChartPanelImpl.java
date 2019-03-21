@@ -2,7 +2,7 @@ package ru.prolib.aquila.utils.experimental.chart.swing;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.data.ObservableTSeries;
+import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.utils.experimental.chart.*;
 import ru.prolib.aquila.utils.experimental.chart.axis.AxisDirection;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDisplayMapper;
@@ -79,7 +79,7 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
     }
     
 	@Override
-	public void setCategories(ObservableTSeries<?> categories) {
+	public void setCategories(ObservableSeries<?> categories) {
 		scrollBarController.setCategories(categories);
 		rootPanel.setPaintLockable(categories);
 	}
