@@ -2,7 +2,7 @@ package ru.prolib.aquila.core.data;
 
 import ru.prolib.aquila.core.EventType;
 
-public interface ObservableTSeries<T> extends TSeries<T>, ObservableSeries {
+public interface ObservableTSeries<T> extends TSeries<T>, ObservableSeries<T> {
 	
 	/**
 	 * Get event type: when the series value was updated.
