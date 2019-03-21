@@ -12,7 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.CSUtils;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CandleCloseSeries;
-import ru.prolib.aquila.core.data.ObservableSeries;
+import ru.prolib.aquila.core.data.ObservableSeriesOLD;
 import ru.prolib.aquila.core.data.ObservableSeriesImpl;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ZTFrame;
@@ -66,7 +66,7 @@ public class CSDataSliceImpl implements CSDataSlice {
 	 * @see ru.prolib.aquila.utils.experimental.sst.cs.CSDataSlice#getCandleSeries()
 	 */
 	@Override
-	public ObservableSeries<Candle> getCandleSeries() {
+	public ObservableSeriesOLD<Candle> getCandleSeries() {
 		return candleSeries;
 	}
 	

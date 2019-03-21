@@ -4,7 +4,7 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.ObservableSeries;
+import ru.prolib.aquila.core.data.ObservableSeriesOLD;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.SeriesEvent;
 import ru.prolib.aquila.core.data.TAMath;
@@ -16,12 +16,12 @@ import ru.prolib.aquila.utils.experimental.sst.msig.MarketSignalProvider;
  * Crossing moving averages.
  */
 public class CMASignalProvider implements EventListener, MarketSignalProvider {
-	private final ObservableSeries<Candle> candles;
+	private final ObservableSeriesOLD<Candle> candles;
 	private final Series<CDecimal> maShort, maLong;
 	private final MarketSignal signal;
 	private final TAMath math;
 	
-	public CMASignalProvider(ObservableSeries<Candle> candles,
+	public CMASignalProvider(ObservableSeriesOLD<Candle> candles,
 			Series<CDecimal> maShort, Series<CDecimal> maLong, 
 			MarketSignal signal, TAMath math)
 	{

@@ -10,7 +10,7 @@ public interface CSFiller {
 	 * <p>
 	 * @return series of candles
 	 */
-	public ObservableSeries<Candle> getSeries();
+	public ObservableSeriesOLD<Candle> getSeries();
 	
 	/**
 	 * Get selected time frame.

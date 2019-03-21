@@ -5,7 +5,7 @@ import java.util.Collection;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.ObservableSeries;
+import ru.prolib.aquila.core.data.ObservableSeriesOLD;
 import ru.prolib.aquila.core.data.Series;
 import ru.prolib.aquila.core.data.ZTFrame;
 
@@ -15,7 +15,7 @@ public interface CSDataSlice {
 
 	ZTFrame getTF();
 
-	ObservableSeries<Candle> getCandleSeries();
+	ObservableSeriesOLD<Candle> getCandleSeries();
 
 	Series<CDecimal> getCandleCloseSeries();
 

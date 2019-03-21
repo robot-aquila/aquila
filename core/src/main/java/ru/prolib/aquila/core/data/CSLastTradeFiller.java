@@ -40,7 +40,7 @@ public class CSLastTradeFiller implements CSFiller, EventListener {
 	}
 
 	@Override
-	public ObservableSeries<Candle> getSeries() {
+	public ObservableSeriesOLD<Candle> getSeries() {
 		return series;
 	}
 

@@ -7,7 +7,7 @@ import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
 import ru.prolib.aquila.core.concurrency.LID;
 
-public class ObservableSeriesImpl<T> implements ObservableSeries<T>, EditableSeries<T> {
+public class ObservableSeriesImpl<T> implements ObservableSeriesOLD<T>, EditableSeries<T> {
 	protected final EventQueue queue;
 	protected final EditableSeries<T> series;
 	private final EventType onSet, onAdd;
