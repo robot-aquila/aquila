@@ -6,21 +6,42 @@ import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 
 public class CategoryAxisDriverImpl extends AxisDriverImpl implements CategoryAxisDriver {
 	private static final int BASE_SCALE = 5;
+	private final boolean allowBarWidthLtOne;
 	
 	public CategoryAxisDriverImpl(String id,
 								  AxisDirection dir,
-								  RulerRendererRegistry rulerRegistry)
+								  RulerRendererRegistry rulerRegistry,
+								  boolean allowBarWidthLtOne)
 	{
 		super(id, dir, rulerRegistry);
 		if ( dir != AxisDirection.RIGHT ) {
 			throw new IllegalArgumentException("Unsupported axis direction: " + dir);
 		}
+		this.allowBarWidthLtOne = allowBarWidthLtOne;
+	}
+	
+	public CategoryAxisDriverImpl(String id,
+								  AxisDirection dir,
+								  RulerRendererRegistry rulerRegistry)
+	{
+		this(id, dir, rulerRegistry, false);
+	}
+	
+	public CategoryAxisDriverImpl(String id,
+								  AxisDirection dir,
+								  boolean allowBarWidthLtOne)
+	{
+		this(id, dir, new RulerRendererRegistryImpl(), allowBarWidthLtOne);
 	}
 	
 	public CategoryAxisDriverImpl(String id,
 								  AxisDirection dir)
 	{
 		this(id, dir, new RulerRendererRegistryImpl());
+	}
+	
+	public boolean isBarWidthLtOneAllowed() {
+		return allowBarWidthLtOne;
 	}
 
 	@Override
@@ -36,14 +57,15 @@ public class CategoryAxisDriverImpl extends AxisDriverImpl implements CategoryAx
 		}
 		CDecimal barWidth = CDecimalBD.of((long) segment.getLength())
 				.divideExact((long) numberOfBars, BASE_SCALE);
-		if ( barWidth.compareTo(CDecimalBD.of(1L)) < 0 ) {
+		if ( ! allowBarWidthLtOne && barWidth.compareTo(CDecimalBD.of(1L)) < 0 ) {
 			barWidth = CDecimalBD.of(1L).withScale(BASE_SCALE);
 			numberOfBars = segment.getLength();
 		}
 		return new CategoryAxisDisplayMapperHR(segment.getStart(),
 				viewport.getLastCategory() - numberOfBars + 1,
 				numberOfBars,
-				barWidth);
+				barWidth,
+				allowBarWidthLtOne);
 	}
 
 }

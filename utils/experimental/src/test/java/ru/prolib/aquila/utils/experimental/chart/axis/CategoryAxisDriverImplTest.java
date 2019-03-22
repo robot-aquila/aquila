@@ -33,16 +33,59 @@ public class CategoryAxisDriverImplTest {
 	}
 	
 	@Test
-	public void testCtor() {
+	public void testCtor4() {
+		driver = new CategoryAxisDriverImpl("TIME", AxisDirection.RIGHT, rulerRenderersMock, true);
+		
 		assertEquals("TIME", driver.getID());
 		assertEquals(AxisDirection.RIGHT, driver.getAxisDirection());
+		assertTrue(driver.isBarWidthLtOneAllowed());
+	}
+	
+	@Test
+	public void testCtor3_RRR() {
+		assertEquals("TIME", driver.getID());
+		assertEquals(AxisDirection.RIGHT, driver.getAxisDirection());
+		assertFalse(driver.isBarWidthLtOneAllowed());
+	}
+	
+	@Test
+	public void testCtor3_BW() {
+		driver = new CategoryAxisDriverImpl("TIME", AxisDirection.RIGHT, true);
+		
+		assertEquals("TIME", driver.getID());
+		assertEquals(AxisDirection.RIGHT, driver.getAxisDirection());
+		assertTrue(driver.isBarWidthLtOneAllowed());
+	}
+	
+	@Test
+	public void testCtor2() {
+		driver = new CategoryAxisDriverImpl("TIME", AxisDirection.RIGHT);
+		
+		assertEquals("TIME", driver.getID());
+		assertEquals(AxisDirection.RIGHT, driver.getAxisDirection());
+		assertFalse(driver.isBarWidthLtOneAllowed());		
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
-	public void testCtor_WhenDirectionIsUp() {
+	public void testCtor4_WhenDirectionIsUp() {
+		driver = new CategoryAxisDriverImpl("TIME", AxisDirection.UP, rulerRenderersMock, true);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor2_WhenDirectionIsUp() {
 		new CategoryAxisDriverImpl("TIME", AxisDirection.UP);
 	}
 	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor3_RRR_WhenDirectionIsUp() {
+		new CategoryAxisDriverImpl("TIME", AxisDirection.UP, rulerRenderersMock);
+	}
+
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor3_BW_WhenDirectionIsUp() {
+		new CategoryAxisDriverImpl("TIME", AxisDirection.UP, true);
+	}
+
 	@Test
 	public void testRegisterRenderer() {
 		rulerRenderersMock.registerRenderer(rendererMock1);
@@ -129,6 +172,21 @@ public class CategoryAxisDriverImplTest {
 
 		CategoryAxisDisplayMapper expected = new CategoryAxisDisplayMapperHR(0,
 				60, 20, CDecimalBD.of("1.00000"));
+		assertEquals(expected, actual);
+		assertEquals(79, expected.getLastVisibleCategory());
+	}
+	
+	@Test
+	public void testCreateMapper_Right_NumOfCategoriesGtNumOfPixels_BWlt1() {
+		// The case wants to show up to 30 bars but has space only for 20 bars
+		// BUT bar width < 1 allowed
+		driver = new CategoryAxisDriverImpl("TIME", AxisDirection.RIGHT, rulerRenderersMock, true);
+		viewport.setCategoryRangeByFirstAndNumber(50, 30);
+		
+		CategoryAxisDisplayMapper actual = driver.createMapper(new Segment1D(0, 20), viewport);
+		
+		CategoryAxisDisplayMapper expected = new CategoryAxisDisplayMapperHR(0,
+				50, 30, CDecimalBD.of("0.66667"), true);
 		assertEquals(expected, actual);
 		assertEquals(79, expected.getLastVisibleCategory());
 	}
