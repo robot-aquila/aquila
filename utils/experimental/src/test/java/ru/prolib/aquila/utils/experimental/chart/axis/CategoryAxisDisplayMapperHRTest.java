@@ -30,6 +30,27 @@ public class CategoryAxisDisplayMapperHRTest {
 	}
 	
 	@Test
+	public void testCtor4() {
+		mapper = new CategoryAxisDisplayMapperHR(5, 0, 10, of("5.35"));
+		
+		assertFalse(mapper.isBarWidthLtOneAllowed());
+		assertEquals(of("5.35"), mapper.getBarWidth());
+	}
+	
+	@Test
+	public void testCtor5() {
+		mapper = new CategoryAxisDisplayMapperHR(5, 0, 10, of("0.99"), true);
+		
+		assertTrue(mapper.isBarWidthLtOneAllowed());
+		assertEquals(of("0.99"), mapper.getBarWidth());
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCtor5_ThrowsIfWidthLtOneNotAllowed() {
+		new CategoryAxisDisplayMapperHR(5, 0, 10, of("0.99"), false);
+	}
+	
+	@Test
 	public void testCaseWhenViewportAtStart() {
 		mapper = new CategoryAxisDisplayMapperHR(5, 0, 10, of("4.352"));
 		

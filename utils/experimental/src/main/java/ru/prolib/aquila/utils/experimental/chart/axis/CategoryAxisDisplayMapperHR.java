@@ -17,6 +17,7 @@ import ru.prolib.aquila.utils.experimental.chart.Segment1D;
 public class CategoryAxisDisplayMapperHR implements CategoryAxisDisplayMapper {
 	private final int firstBarX, firstBarCategory, numberOfBars;
 	private final CDecimal barWidth;
+	private final boolean allowBarWidthLtOne;
 	
 	/**
 	 * Constructor.
@@ -33,19 +34,41 @@ public class CategoryAxisDisplayMapperHR implements CategoryAxisDisplayMapper {
 	 * @param barWidth - Using an integer as bar width will cause weird
 	 * results for most cases. To avoid glitches when displaying bars the
 	 * arbitrary precision number is used to represents width of bar.
+	 * @param allowBarWidthLtOne - if enabled then less than one pixel bar width
+	 * allowed. This may lead to bar overlapping and weird results. But this
+	 * guarantee that all desired data range will be visible independently of
+	 * plot size.
 	 */
 	public CategoryAxisDisplayMapperHR(int firstBarX,
 									  int firstBarCategory,
 									  int numberOfBars,
-									  CDecimal barWidth)
+									  CDecimal barWidth,
+									  boolean allowBarWidthLtOne)
 	{
-		if ( barWidth.compareTo(CDecimalBD.of(1L)) < 0 ) {
+		if ( ! allowBarWidthLtOne && barWidth.compareTo(CDecimalBD.of(1L)) < 0 ) {
 			throw new IllegalArgumentException("Bar width expected to be >= 1 but: " + barWidth);
 		}
 		this.firstBarX = firstBarX;
 		this.firstBarCategory = firstBarCategory;
 		this.numberOfBars = numberOfBars;
 		this.barWidth = barWidth;
+		this.allowBarWidthLtOne = allowBarWidthLtOne;
+	}
+	
+	public CategoryAxisDisplayMapperHR(int firstBarX,
+									   int firstBarCategory,
+									   int numberOfBars,
+									   CDecimal barWidth)
+	{
+		this(firstBarX, firstBarCategory, numberOfBars, barWidth, false);
+	}
+	
+	public boolean isBarWidthLtOneAllowed() {
+		return allowBarWidthLtOne;
+	}
+	
+	public CDecimal getBarWidth() {
+		return barWidth;
 	}
 
 	@Override
