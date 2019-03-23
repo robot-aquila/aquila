@@ -35,5 +35,7 @@ public interface EditableSeries<T> extends Series<T> {
 	 * Удалить все значения.
 	 */
 	public void clear();
+	
+	void truncate(int new_length);
 
 }

@@ -138,4 +138,64 @@ public class SeriesImplTest {
 		assertEquals(200, (int)val1.get(1));
 	}
 	
+	@Test
+	public void testTruncate_NotLim() throws Exception {
+		val1.truncate(2);
+		
+		assertEquals(2, val1.getLength());
+		assertEquals(2, (int)val1.get(0));
+		assertEquals(4, (int)val1.get(1));
+	}
+
+	@Test
+	public void testTruncate_NotLim_NewLengthIsBigger() throws Exception {
+		val1.truncate(10);
+		
+		assertEquals(4, val1.getLength());
+		assertEquals( 2, (int)val1.get(0));
+		assertEquals( 4, (int)val1.get(1));
+		assertEquals( 8, (int)val1.get(2));
+		assertEquals(16, (int)val1.get(3));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testTruncate_NotLim_ThrowsIfNewLengthNegative() throws Exception {
+		val1.truncate(-5);
+	}
+
+	@Test
+	public void testTruncate_Lim_Case1() throws Exception {
+		val2.truncate(10);
+		
+		assertEquals(10, val2.getLength());
+		assertEquals(0, (int)val2.get(8));
+		assertEquals(9, (int)val2.get(9));
+	}
+	
+	@Test
+	public void testTruncate_Lim_Case2() throws Exception {
+		val2.truncate(8);
+	}
+	
+	@Test
+	public void testTruncate_Lim_NewLengthIsBigger() throws Exception {
+		val2.truncate(567);
+		
+		assertEquals(12, val2.getLength());
+		assertEquals(0, (int)val2.get( 8));
+		assertEquals(9, (int)val2.get( 9));
+		assertEquals(8, (int)val2.get(10));
+		assertEquals(7, (int)val2.get(11));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testTruncate_Lim_ThrowsIfNewLengthNegative() throws Exception {
+		val2.truncate(-1);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testTruncate_Lim_ThrowsIfNewLengthBeforeOffset() throws Exception {
+		val2.truncate(7);
+	}
+	
 }

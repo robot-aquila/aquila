@@ -77,6 +77,11 @@ public class ObservableSeriesImpl<T> implements ObservableSeriesOLD<T>, Editable
 	public void clear() {
 		series.clear();
 	}
+	
+	@Override
+	public void truncate(int new_length) {
+		series.truncate(new_length);
+	}
 
 	@Override
 	public EventType onSet() {

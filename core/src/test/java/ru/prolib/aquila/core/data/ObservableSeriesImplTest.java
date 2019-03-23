@@ -152,5 +152,17 @@ public class ObservableSeriesImplTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testTruncate() {
+		expect(sourceMock.getId()).andStubReturn("buz");
+		sourceMock.truncate(515);
+		control.replay();
+		
+		series = new ObservableSeriesImpl<>(queue, sourceMock);
+		series.truncate(515);
+		
+		control.verify();
+	}
 
 }

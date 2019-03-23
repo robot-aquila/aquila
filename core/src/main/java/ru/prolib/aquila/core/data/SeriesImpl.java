@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.data;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -27,7 +26,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	
 	private final String id;
 	private final int limit;
-	private final List<T> history = new Vector<T>();
+	private final ArrayList<T> history = new ArrayList<T>();
 	private final LID lid;
 	private final Lock lock = new ReentrantLock();
 	
@@ -214,6 +213,27 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 	@Override
 	public void unlock() {
 		lock.unlock();
+	}
+	
+	@Override
+	public void truncate(int new_length) {
+		if ( new_length < 0 ) {
+			throw new IllegalArgumentException("Expected positive or zero but: " + new_length);
+		}
+		lock();
+		try {
+			int hlen = history.size();
+			if ( new_length > offset + hlen ) {
+				return;
+			}
+			int start = new_length - offset;
+			if ( start < 0 ) {
+				throw new IllegalArgumentException("Minimum possible length is " + offset + " but " + start);
+			}
+			history.subList(start, hlen).clear();
+		} finally {
+			unlock();
+		}
 	}
 
 }
