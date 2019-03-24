@@ -278,6 +278,16 @@ public class TSeriesNodeStorageKeysTest {
 	}
 	
 	@Test
+	public void testTruncate() {
+		storageMock.truncate(5220);
+		control.replay();
+		
+		service.truncate(5220);
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testGetIntervalStart() throws Exception {
 		expect(storageMock.getIntervalStart(100)).andReturn(T("2017-09-01T05:20:00Z"));
 		control.replay();

@@ -92,4 +92,11 @@ public interface TSeriesNodeStorage extends Lockable {
 	 */
 	int getIntervalIndex(Instant time);
 	
+	/**
+	 * Truncate series down to specified length.
+	 * <p>
+	 * @param length - new length. Zero or positive.
+	 */
+	void truncate(int length);
+	
 }

@@ -162,6 +162,11 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 	public void clear() {
 		storage.clear();
 	}
+	
+	@Override
+	public void truncate(int length) {
+		storage.truncate(length);
+	}
 
 	@Override
 	public EventType onUpdate() {

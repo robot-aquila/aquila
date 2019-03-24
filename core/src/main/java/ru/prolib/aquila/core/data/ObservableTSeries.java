@@ -17,8 +17,7 @@ public interface ObservableTSeries<T> extends TSeries<T>, ObservableSeries<T> {
 	/**
 	 * Get event type: when the number of elements changed.
 	 * <p>
-	 * Events of this type are instances of {@link TSeriesEvent} class.
-	 * Be careful processing index of element. It may change between sending and receiving.
+	 * Events of this type are instances of {@link LengthUpdateEvent} class.
 	 * <p>
 	 * @return event type
 	 */

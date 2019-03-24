@@ -151,9 +151,11 @@ public class ObservableTSeriesImplTest {
 				.setOldValue(null)
 				.setNewValue(850);
 		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(214);
 		expect(underlyingSeriesMock1.set(T("2017-08-28T00:00:00Z"), 850)).andReturn(update);
+		expect(underlyingSeriesMock1.getLength()).andReturn(215);
 		queueMock1.enqueue(series.onUpdate(), new TSeriesUpdateEventFactory(update));
-		queueMock1.enqueue(series.onLengthUpdate(), new TSeriesUpdateEventFactory(update));
+		queueMock1.enqueue(series.onLengthUpdate(), new LengthUpdateEventFactory(214, 215));
 		underlyingSeriesMock1.unlock();
 		control.replay();
 		
@@ -171,7 +173,9 @@ public class ObservableTSeriesImplTest {
 				.setOldValue(256)
 				.setNewValue(302);
 		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(112);
 		expect(underlyingSeriesMock1.set(T("2017-08-28T00:00:00Z"), 302)).andReturn(update);
+		expect(underlyingSeriesMock1.getLength()).andReturn(112);
 		queueMock1.enqueue(series.onUpdate(), new TSeriesUpdateEventFactory(update));
 		underlyingSeriesMock1.unlock();
 		control.replay();
@@ -190,7 +194,9 @@ public class ObservableTSeriesImplTest {
 				.setOldValue(850)
 				.setNewValue(850);
 		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(10);
 		expect(underlyingSeriesMock1.set(T("2017-08-28T10:30:00Z"), 850)).andReturn(update);
+		expect(underlyingSeriesMock1.getLength()).andReturn(10);
 		underlyingSeriesMock1.unlock();
 		control.replay();
 		
@@ -201,10 +207,65 @@ public class ObservableTSeriesImplTest {
 	
 	@Test
 	public void testClear() throws Exception {
+		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(112);
 		underlyingSeriesMock1.clear();
+		queueMock1.enqueue(series.onLengthUpdate(), new LengthUpdateEventFactory(112, 0));
+		underlyingSeriesMock1.unlock();
 		control.replay();
 		
 		series.clear();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testClear_NoEventIfWasEmpty() {
+		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(0);
+		underlyingSeriesMock1.unlock();
+		control.replay();
+		
+		series.clear();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTruncate() throws Exception {
+		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(500);
+		underlyingSeriesMock1.truncate(250);
+		expect(underlyingSeriesMock1.getLength()).andReturn(250);
+		queueMock1.enqueue(series.onLengthUpdate(), new LengthUpdateEventFactory(500, 250));
+		underlyingSeriesMock1.unlock();
+		control.replay();
+		
+		series.truncate(250);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTruncate_NoEventIfWasEmpty() {
+		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(0);
+		underlyingSeriesMock1.unlock();
+		control.replay();
+		
+		series.truncate(250);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testTruncate_NoEventIfNotTruncated() {
+		underlyingSeriesMock1.lock();
+		expect(underlyingSeriesMock1.getLength()).andReturn(250);
+		underlyingSeriesMock1.unlock();
+		control.replay();
+		
+		series.truncate(500);
 		
 		control.verify();
 	}

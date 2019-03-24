@@ -4,7 +4,6 @@ import java.time.Instant;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import ru.prolib.aquila.core.EventFactory;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
@@ -90,15 +89,16 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 	public TSeriesUpdate set(Instant time, T value) {
 		lock();
 		try {
+			int prev_length = series.getLength();
 			TSeriesUpdate update = series.set(time, value);
-			boolean updated = update.hasChanged(), lenUpdated = update.isNewNode();
-			if ( updated || lenUpdated ) {
-				EventFactory factory = new TSeriesUpdateEventFactory(update);
+			int curr_length = series.getLength();
+			boolean updated = update.hasChanged(), len_updated = prev_length != curr_length;
+			if ( updated || len_updated ) {
 				if ( updated ) {
-					queue.enqueue(onUpdate, factory);
+					queue.enqueue(onUpdate, new TSeriesUpdateEventFactory(update));
 				}
-				if ( lenUpdated ) {
-					queue.enqueue(onLengthUpdate, factory);				
+				if ( len_updated ) {
+					queue.enqueue(onLengthUpdate, new LengthUpdateEventFactory(prev_length, curr_length));				
 				}
 			}
 			return update;
@@ -109,7 +109,30 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 
 	@Override
 	public void clear() {
-		series.clear();
+		lock();
+		try {
+			int prev_length = series.getLength();
+			if ( prev_length != 0 ) {
+				series.clear();
+				queue.enqueue(onLengthUpdate, new LengthUpdateEventFactory(prev_length, 0));
+			}
+		} finally {
+			unlock();
+		}
+	}
+	
+	@Override
+	public void truncate(int length) {
+		lock();
+		try {
+			int prev_length = series.getLength();
+			if ( length < prev_length ) {
+				series.truncate(length);
+				queue.enqueue(onLengthUpdate, new LengthUpdateEventFactory(prev_length, series.getLength()));
+			}
+		} finally {
+			unlock();
+		}
 	}
 	
 	@Override

@@ -94,6 +94,11 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 	}
 	
 	@Override
+	public void truncate(int length) {
+		storage.truncate(length);
+	}
+	
+	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {
 			return true;

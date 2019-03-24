@@ -184,6 +184,25 @@ public class TSeriesCacheControllerETSTest {
 	}
 	
 	@Test
+	public void testTruncate() {
+		cachesStub.add(cacheMock1);
+		cachesStub.add(cacheMock2);
+		seriesMock.lock();
+		seriesMock.truncate(250);
+		expect(seriesMock.getLength()).andReturn(218);
+		seriesMock.unlock();
+		cacheMock1.invalidate(218);
+		cacheMock1.shrink();
+		cacheMock2.invalidate(218);
+		cacheMock2.shrink();
+		control.replay();
+		
+		service.truncate(250);
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testAddCache() {
 		assertSame(service, service.addCache(cacheMock2));
 		assertSame(service, service.addCache(cacheMock1));

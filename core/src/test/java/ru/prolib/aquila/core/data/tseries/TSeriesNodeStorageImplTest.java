@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -314,6 +315,35 @@ public class TSeriesNodeStorageImplTest {
 		assertEquals(0, nodeList.size());
 		assertEquals(0, nodeMap.size());
 		assertNull(storage.getLastNode());
+	}
+	
+	@Test
+	public void testTruncate() {
+		storage.setValue(T("2017-08-21T22:50:00Z"), 1,  50);
+		storage.setValue(T("2017-08-21T22:55:00Z"), 1,  70);
+		storage.setValue(T("2017-08-21T23:00:00Z"), 1,  90);
+		storage.setValue(T("2017-08-21T23:05:00Z"), 1, 110);
+		storage.setValue(T("2017-08-21T23:05:00Z"), 1, 130);
+		List<TSeriesNode> expected_node_list = new ArrayList<>();
+		expected_node_list.add(storage.getNode(0));
+		expected_node_list.add(storage.getNode(1));
+		expected_node_list.add(storage.getNode(2));
+		Map<Instant, TSeriesNode> expected_node_map = new HashMap<>();
+		expected_node_map.put(T("2017-08-21T22:50:00Z"), storage.getNode(0));
+		expected_node_map.put(T("2017-08-21T22:55:00Z"), storage.getNode(1));
+		expected_node_map.put(T("2017-08-21T23:00:00Z"), storage.getNode(2));
+		TSeriesNode expected_last_node = storage.getNode(2);
+		
+		storage.truncate(3);
+
+		assertEquals(expected_node_list, nodeList);
+		assertEquals(expected_node_map, nodeMap);
+		assertEquals(expected_last_node, storage.getLastNode());
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testTruncate_ThrowsIfNegativeLength() {
+		storage.truncate(-1);
 	}
 	
 	@Test

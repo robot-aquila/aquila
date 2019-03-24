@@ -25,8 +25,9 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 	private int lastSeriesID;
 	private TSeriesNode lastNode;
 	
-	TSeriesNodeStorageImpl(ZTFrame timeFrame, List<TSeriesNode> nodeList,
-			Map<Instant, TSeriesNode> nodeMap)
+	TSeriesNodeStorageImpl(ZTFrame timeFrame,
+						   List<TSeriesNode> nodeList,
+						   Map<Instant, TSeriesNode> nodeMap)
 	{
 		this.lid = LID.createInstance();
 		this.lock = new ReentrantLock();
@@ -170,6 +171,24 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 		}
 	}
 	
+	@Override
+	public void truncate(int length) {
+		if ( length < 0 ) {
+			throw new IllegalArgumentException("Expected length >= 0 but " + length);
+		}
+		lock();
+		try {
+			int curr_length = nodeList.size();
+			for ( TSeriesNode n : nodeList.subList(length, curr_length) ) {
+				nodeMap.remove(n.getIntervalStart());
+			}
+			nodeList.subList(length, curr_length).clear();
+			lastNode = nodeList.get(length - 1);
+		} finally {
+			unlock();
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage#getLength()
 	 */
@@ -236,6 +255,23 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 		lock();
 		try {
 			return lastNode;
+		} finally {
+			unlock();
+		}
+	}
+	
+	/**
+	 * Get node by index.
+	 * <p>
+	 * Note: for testing purposes only.
+	 * <p>
+	 * @param index - node index
+	 * @return node
+	 */
+	TSeriesNode getNode(int index) {
+		lock();
+		try {
+			return nodeList.get(index);
 		} finally {
 			unlock();
 		}

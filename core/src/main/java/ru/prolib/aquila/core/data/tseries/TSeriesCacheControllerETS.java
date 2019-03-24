@@ -125,5 +125,23 @@ public class TSeriesCacheControllerETS<T> implements EditableTSeries<T>, TSeries
 			}
 		}
 	}
+	
+	@Override
+	public void truncate(int length) {
+		series.lock();
+		int curr_length;
+		try {
+			series.truncate(length);
+			curr_length = series.getLength();
+		} finally {
+			series.unlock();
+		}
+		synchronized ( this ) {
+			for ( TSeriesCache cache : caches ) {
+				cache.invalidate(curr_length);
+				cache.shrink();
+			}
+		}
+	}
 
 }

@@ -153,6 +153,16 @@ public class TSeriesImplTest {
 	}
 	
 	@Test
+	public void testTruncate() {
+		storageMock.truncate(924);
+		control.replay();
+		
+		series.truncate(924);
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testEquals_SpecialCases() {
 		assertTrue(series.equals(series));
 		assertFalse(series.equals(null));
