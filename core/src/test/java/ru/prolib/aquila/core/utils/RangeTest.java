@@ -74,6 +74,6 @@ public class RangeTest {
 		assertEquals(expected, range.extend(new Range<>(of("308.92"), of("808.07"))));
 		expected = new Range<>(of("92.48"), of("942.56"));
 		assertEquals(expected, range.extend(new Range<>(of("92.48"), of("942.56"))));
-	}	
+	}
 
 }

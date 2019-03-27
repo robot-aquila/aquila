@@ -1,7 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.axis.utils;
 
 import static org.junit.Assert.*;
-import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.of;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,6 +161,58 @@ public class ValueAxisLabelGeneratorTest {
 		List<CDecimal> actual = generator.getLabelValues(mapper, of(10L), 12);
 		
 		List<CDecimal> expected = new ArrayList<>();
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetLabelValues_BugTest1_NonAbstractRange() {
+		viewport.setValueRange(new Range<>(ofRUB2("25.80"), ofRUB2("50.80")));
+		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
+		
+		List<CDecimal> actual = generator.getLabelValues(mapper, ofRUB2("1.00"), 12);
+		
+		List<CDecimal> expected = new ArrayList<>();
+		// I'm not sure. Should be 24 here?
+		expected.add(ofRUB2("26"));
+		expected.add(ofRUB2("28"));
+		expected.add(ofRUB2("30"));
+		expected.add(ofRUB2("32"));
+		expected.add(ofRUB2("34"));
+		expected.add(ofRUB2("36"));
+		expected.add(ofRUB2("38"));
+		expected.add(ofRUB2("40"));
+		expected.add(ofRUB2("42"));
+		expected.add(ofRUB2("44"));
+		expected.add(ofRUB2("46"));
+		expected.add(ofRUB2("48"));
+		expected.add(ofRUB2("50"));
+		// Not sure. Should be 52 here?
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetLabelValues_BugTest2_NonAbstractRangeAndUnitOfTickSizeDoesNotMatter() {
+		viewport.setValueRange(new Range<>(ofRUB2("25.80"), ofRUB2("50.80")));
+		ValueAxisDisplayMapper mapper = driver.createMapper(new Segment1D(0, 200), viewport);
+		
+		List<CDecimal> actual = generator.getLabelValues(mapper, of("1.00"), 12);
+
+		List<CDecimal> expected = new ArrayList<>();
+		// I'm not sure. Should be 24 here?
+		expected.add(ofRUB2("26"));
+		expected.add(ofRUB2("28"));
+		expected.add(ofRUB2("30"));
+		expected.add(ofRUB2("32"));
+		expected.add(ofRUB2("34"));
+		expected.add(ofRUB2("36"));
+		expected.add(ofRUB2("38"));
+		expected.add(ofRUB2("40"));
+		expected.add(ofRUB2("42"));
+		expected.add(ofRUB2("44"));
+		expected.add(ofRUB2("46"));
+		expected.add(ofRUB2("48"));
+		expected.add(ofRUB2("50"));
+		// Not sure. Should be 52 here?
 		assertEquals(expected, actual);
 	}
 

@@ -27,8 +27,8 @@ public class ValueAxisDisplayMapperVUV implements ValueAxisDisplayMapper {
 		this.y = y;
 		this.height = height;
 		this.scale = Math.max(valueRange.getMin().getScale(), valueRange.getMax().getScale());
-		CDecimal dh = of((long) height);
 		CDecimal vr = valueRange.getMax().subtract(valueRange.getMin());
+		CDecimal dh = of((long) height).withUnit(vr.getUnit());
 		this.ratio = vr.divideExact(dh, BASE_SCALE + scale, RoundingMode.CEILING);
 		if ( ratio.compareTo(CDecimalBD.of(1L)) < 0 ) {
 			throw new IllegalArgumentException("Range " + valueRange

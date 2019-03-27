@@ -24,35 +24,39 @@ public class ValueAxisLabelGenerator {
 
 	public List<CDecimal> getLabelValues(ValueAxisDisplayMapper mapper, CDecimal tickSize, int labelSize) {
 		CDecimal range = mapper.getMaxValue().subtract(mapper.getMinValue());
+		String unit = range.getUnit();
 		if ( range.compareTo(tickSize) < 0 ) {
 			throw new IllegalArgumentException("Value range expected to be greater or equals than tick size");
 		}
 		int scale = tickSize.getScale();
 		int numberOfSteps = mapper.getPlotSize() / labelSize;
 		CDecimal stepSize = null;
+		CDecimal one = CDecimalBD.of("1", unit);
+		CDecimal two = CDecimalBD.of("2", unit);
+		CDecimal five = CDecimalBD.of("5", unit);
+		CDecimal ten = CDecimalBD.of("10", unit);
 		while ( (stepSize == null || stepSize.compareTo(tickSize) < 0) && numberOfSteps > 0 ) {
 			stepSize = range.divideExact(CDecimalBD.of((long)numberOfSteps), 8 + scale, RoundingMode.HALF_UP);
 			CDecimal multiplier = getBestMultiplier(stepSize);
 			CDecimal c = stepSize.divide(multiplier);
-			 if ( c.compareTo(CDecimalBD.of(1L)) <= 0 ) {
-             	c = CDecimalBD.of(1L);
-             } else if ( c.compareTo(CDecimalBD.of(2L)) <= 0 ) {
-             	c = CDecimalBD.of(2L);
-             } else if ( c.compareTo(CDecimalBD.of(5L)) <= 0 ) {
-             	c = CDecimalBD.of(5L);
+			 if ( c.compareTo(one) <= 0 ) {
+             	c = one;
+             } else if ( c.compareTo(two) <= 0 ) {
+             	c = two;
+             } else if ( c.compareTo(five) <= 0 ) {
+             	c = five;
              } else {
-             	c = CDecimalBD.of(10L);
+             	c = ten;
              }
-			 stepSize = multiplier.multiply(c).withScale(scale);
+			 stepSize = c.multiply(multiplier).withScale(scale);
 			 if ( stepSize.compareTo(tickSize) < 0 ) {
 				 numberOfSteps --;
 			 }
 		}
 		List<CDecimal> result = new ArrayList<>();
 		if ( stepSize != null ) {
-			CDecimal currValue = mapper.getMinValue()
-					.divideExact(stepSize, 0, RoundingMode.CEILING)
-					.multiply(stepSize)
+			CDecimal currValue = stepSize.multiply(mapper.getMinValue()
+					.divideExact(stepSize, 0, RoundingMode.CEILING))
 					.withScale(scale);
 			while ( currValue.compareTo(mapper.getMaxValue()) <= 0 ) {
 				result.add(currValue);

@@ -309,5 +309,35 @@ public class ValueAxisDisplayMapperVUVTest {
 	public void testConvertation_SpecialCase_ZeroRangeIsRestricted() throws Exception {
 		new ValueAxisDisplayMapperVUV(5, 10, new Range<>(of("212.56"), of("212.56")));
 	}
+	
+	@Test
+	public void testCtor_NonZeroNonAbstractRange() {
+		mapper = new ValueAxisDisplayMapperVUV(2, 5, new Range<>(ofRUB2("0.00"), ofRUB2("15.00")));
+		
+		assertEquals(of("3.0000000"), mapper.getRatio());
+		
+		assertEquals(6, mapper.toDisplay(ofRUB2( "0.00")));
+		assertEquals(6, mapper.toDisplay(ofRUB2( "1.00")));
+		assertEquals(6, mapper.toDisplay(ofRUB2( "2.00")));
+		assertEquals(5, mapper.toDisplay(ofRUB2( "3.00")));
+		assertEquals(5, mapper.toDisplay(ofRUB2( "4.00")));
+		assertEquals(5, mapper.toDisplay(ofRUB2( "5.00")));
+		assertEquals(4, mapper.toDisplay(ofRUB2( "6.00")));
+		assertEquals(4, mapper.toDisplay(ofRUB2( "7.00")));
+		assertEquals(4, mapper.toDisplay(ofRUB2( "8.00")));
+		assertEquals(3, mapper.toDisplay(ofRUB2( "9.00")));
+		assertEquals(3, mapper.toDisplay(ofRUB2("10.00")));
+		assertEquals(3, mapper.toDisplay(ofRUB2("11.00")));
+		assertEquals(2, mapper.toDisplay(ofRUB2("12.00")));
+		assertEquals(2, mapper.toDisplay(ofRUB2("13.00")));
+		assertEquals(2, mapper.toDisplay(ofRUB2("14.00")));
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testToDisplay_NonAbstractRange_ThrowsIfValueOfDifferentUnits() {
+		mapper = new ValueAxisDisplayMapperVUV(2, 5, new Range<>(ofRUB2("0.00"), ofRUB2("15.00")));
+		
+		mapper.toDisplay(of(10L));
+	}
 
 }

@@ -1,7 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.axis;
 
 import static org.junit.Assert.*;
-import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.of;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -302,6 +302,42 @@ public class ValueAxisDisplayMapperVUDTest {
 		assertEquals(of("0.15"), mapper.toValue(12));
 		assertEquals(of("0.15"), mapper.toValue(13));
 		assertEquals(of("0.15"), mapper.toValue(14));
+	}
+
+	@Test
+	public void testCtor_NonZeroNonAbstractRange() {
+		mapper = new ValueAxisDisplayMapperVUD(2, 7, new Range<>(ofRUB2("0.00"), ofRUB2("2.00")));
+		
+		assertEquals(of("3.0624999"), mapper.getRatio()); // scale = BASE + 2
+		
+		assertEquals(2, mapper.toDisplay(ofRUB2("2.0")));
+		assertEquals(2, mapper.toDisplay(ofRUB2("1.9")));
+		assertEquals(2, mapper.toDisplay(ofRUB2("1.8")));
+		assertEquals(3, mapper.toDisplay(ofRUB2("1.7")));
+		assertEquals(3, mapper.toDisplay(ofRUB2("1.6")));
+		assertEquals(3, mapper.toDisplay(ofRUB2("1.5")));
+		assertEquals(4, mapper.toDisplay(ofRUB2("1.4")));
+		assertEquals(4, mapper.toDisplay(ofRUB2("1.3")));
+		assertEquals(4, mapper.toDisplay(ofRUB2("1.2")));
+		assertEquals(5, mapper.toDisplay(ofRUB2("1.1")));
+		assertEquals(5, mapper.toDisplay(ofRUB2("1.0")));
+		assertEquals(5, mapper.toDisplay(ofRUB2("0.9")));
+		assertEquals(6, mapper.toDisplay(ofRUB2("0.8")));
+		assertEquals(6, mapper.toDisplay(ofRUB2("0.7")));
+		assertEquals(6, mapper.toDisplay(ofRUB2("0.6")));
+		assertEquals(6, mapper.toDisplay(ofRUB2("0.5")));
+		assertEquals(7, mapper.toDisplay(ofRUB2("0.4")));
+		assertEquals(7, mapper.toDisplay(ofRUB2("0.3")));
+		assertEquals(7, mapper.toDisplay(ofRUB2("0.2")));
+		assertEquals(8, mapper.toDisplay(ofRUB2("0.1")));
+		assertEquals(8, mapper.toDisplay(ofRUB2("0.0")));
+	}
+	
+	@Test
+	public void testCtor_ZeroNonAbstractRange() {
+		mapper = new ValueAxisDisplayMapperVUD(2, 7, new Range<>(ofRUB2("5.76"), ofRUB2("5.76")));
+		
+		assertEquals(CDecimalBD.ZERO, mapper.getRatio());
 	}
 
 }

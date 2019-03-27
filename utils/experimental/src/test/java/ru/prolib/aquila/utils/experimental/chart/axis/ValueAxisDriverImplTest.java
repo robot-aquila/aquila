@@ -133,4 +133,40 @@ public class ValueAxisDriverImplTest {
 		assertEquals(expected, actual);
 	}
 	
+	@Test
+	public void testCreateMapper_BugTest4_NonAbstractRangeEqDisplayRange() {
+		viewport.setValueRange(new Range<>(ofRUB2("5.00"), ofRUB2("10.00")));
+		
+		ValueAxisDisplayMapper actual = driver.createMapper(new Segment1D(20, 5), viewport);
+		
+		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUV(
+				20, 5, new Range<>(ofRUB2("5.00"), ofRUB2("10.00"))
+			);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateMapper_BugTest5_NonAbstractRangeLtDisplayRange() {
+		viewport.setValueRange(new Range<>(ofRUB2("5.00"), ofRUB2("10.00")));
+		
+		ValueAxisDisplayMapper actual = driver.createMapper(new Segment1D(20, 100), viewport);
+		
+		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUD(
+				20, 100, new Range<>(ofRUB2("5.00"), ofRUB2("10.00"))
+			);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testCreateMapper_BugTest6_NonAbstractRangeGtDisplayRange() {
+		viewport.setValueRange(new Range<>(ofRUB2("500.00"), ofRUB2("1000.00")));
+		
+		ValueAxisDisplayMapper actual = driver.createMapper(new Segment1D(20, 100), viewport);
+		
+		ValueAxisDisplayMapper expected = new ValueAxisDisplayMapperVUV(
+				20, 100, new Range<>(ofRUB2("500.00"), ofRUB2("1000.00"))
+			);
+		assertEquals(expected, actual);
+	}
+	
 }
