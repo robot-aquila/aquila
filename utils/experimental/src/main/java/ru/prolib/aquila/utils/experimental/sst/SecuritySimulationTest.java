@@ -388,9 +388,7 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 		chartPanel.setCategories(categories);
 		JPanel chartRoot = new JPanel(new GridLayout(1, 1));
 		chartRoot.add(chartPanel.getRootPanel());
-		CategoryAxisViewport viewport = chartPanel.getCategoryAxisViewport(); 
-		viewport.setPreferredNumberOfBars(100);
-		viewport.setCategoryRangeByFirstAndNumber(0, categories.getLength());
+		chartPanel.setPreferredNumberOfBars(100);
 		tabPanel.addTab("Strategy: " + robotData.getMarketSignal().getID(), chartRoot);
 	}
 	

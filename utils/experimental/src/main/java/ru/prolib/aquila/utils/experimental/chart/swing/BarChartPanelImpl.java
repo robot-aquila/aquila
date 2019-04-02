@@ -10,7 +10,6 @@ import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriverProxyImpl;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewportImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,10 +26,9 @@ import static ru.prolib.aquila.utils.experimental.chart.ChartConstants.OTHER_CHA
  */
 public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseWheelListener, MouseMotionListener*/ {
 	protected Map<String, BarChart> charts = new LinkedHashMap<>();
-	protected final CategoryAxisViewport cav;
 	protected final CategoryAxisDriver cad;
 	protected final CategoryAxisDriverProxyImpl cadProxy;
-	private final ScrollBarController scrollBarController;
+	private final ScrollBarControllerV2 scrollBarController;
 	private final CursorControllerImpl cursorController;
 	private final JCompBarChartPanel rootPanel;
 	
@@ -48,16 +46,15 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
     public BarChartPanelImpl(BarChartOrientation orientation) {
 		rootPanel = new JCompBarChartPanel();
 		rootPanel.onBeforePaintChildren().addListener(this);
-		cav = new CategoryAxisViewportImpl();
 		cad = new CategoryAxisDriverImpl("CATEGORY", AxisDirection.RIGHT);
 		cadProxy = new CategoryAxisDriverProxyImpl(cad);
-		scrollBarController = new ScrollBarController();
 		cursorController = new CursorControllerImpl(this);
 		
+		scrollBarController = new ScrollBarControllerV2();
 		scrollBarController.setRootPanel(rootPanel);
 		scrollBarController.setScrollBar(rootPanel.getScrollBar());
 		scrollBarController.setAutoScrollButton(rootPanel.getAutoScrollButton());
-		scrollBarController.setViewport(cav);
+		scrollBarController.adjustAll();
 		
 		// TODO: to remove
 		lastX = new AtomicInteger();
@@ -133,8 +130,8 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
     }
 
     @Override
-    public CategoryAxisViewport getCategoryAxisViewport() {
-    	return cav;
+    public void setPreferredNumberOfBars(int number) {
+    	scrollBarController.setPreferredNumberOfBars(number);
     }
     
     @Override
@@ -163,9 +160,10 @@ public class BarChartPanelImpl implements BarChartPanel, EventListener/*, MouseW
 			}
 		}
 		Segment1D dataSpace = bestLayout == null ? displaySpace : bestLayout.getDataSpace();
+		CategoryAxisViewport cav = scrollBarController.getViewport();
 		CategoryAxisDisplayMapper cam = cad.createMapper(dataSpace, cav);
 		cadProxy.setCurrentMapper(cam);
-		scrollBarController.setDisplayMapper(cam);
+		scrollBarController.updateNumberOfVisibleBars(cam.getNumberOfVisibleBars());
 		cursorController.update(cam);
 	}
 

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.utils.experimental.chart.axis;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 public class CategoryAxisViewportImpl implements CategoryAxisViewport {
@@ -65,6 +67,11 @@ public class CategoryAxisViewportImpl implements CategoryAxisViewport {
 				.append(o.getLastCategory(), getLastCategory())
 				.append(o.getPreferredNumberOfBars(), getPreferredNumberOfBars())
 				.isEquals();
+	}
+	
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 
 }

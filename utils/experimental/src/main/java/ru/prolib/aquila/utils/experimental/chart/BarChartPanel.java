@@ -2,7 +2,6 @@ package ru.prolib.aquila.utils.experimental.chart;
 
 import ru.prolib.aquila.core.data.ObservableSeries;
 import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisDriver;
-import ru.prolib.aquila.utils.experimental.chart.axis.CategoryAxisViewport;
 
 /**
  * Created by TiM on 08.09.2017.
@@ -11,8 +10,8 @@ public interface BarChartPanel {
 	
     BarChart addChart(String id);
     BarChart getChart(String id);
-    
-    CategoryAxisViewport getCategoryAxisViewport();
+
+    void setPreferredNumberOfBars(int number);
     CategoryAxisDriver getCategoryAxisDriver();
 
     void paint();

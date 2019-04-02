@@ -105,7 +105,7 @@ public class MainChart {
 //        chartPanel.getChart("BID_ASK_VOLUME").getOverlays().add(new StaticOverlay("Max Ask Volume", -1));
 
         // TODO: use category data provider
-        chartPanel.getCategoryAxisViewport().setCategoryRangeByFirstAndNumber(0, categoriesSeries.getLength());
+        //chartPanel.getCategoryAxisViewport().setCategoryRangeByFirstAndNumber(0, categoriesSeries.getLength());
         // TODO: fixme
         //BarChartPanelHandler handler = new BarChartPanelHandler(candlesObs, chartPanel.getViewport());
         //handler.subscribe();
