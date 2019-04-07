@@ -3,6 +3,8 @@ package ru.prolib.aquila.qforts.impl;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
@@ -22,6 +24,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.OrderField;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
+import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.concurrency.Multilock;
 import ru.prolib.aquila.core.concurrency.MultilockBuilderBE;
@@ -273,33 +276,80 @@ public class QFTransactionServiceTest {
 		control.verify();
 	}
 	
-	@Test (expected=QFValidationException.class)
-	public void testExecuteOrder_InsufficientFunds() throws Exception {
-		seqExecutionID.set(1050L);
-		EditableOrder order = terminal.createOrder(account, symbol1);
-		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+	@Test
+	public void testExecuteOrder_Complete_InsufficientFunds() throws Exception {
+		QFObjectRegistry obj_reg = new QFObjectRegistry();
+		service = new QFTransactionService(obj_reg, seqExecutionID);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
-		expect(assemblerMock.createMultilock(new MultilockBuilderBE()
-				.add(order)
-				.add(order.getPortfolio())
-				.add(order.getPosition())
-				.add(order.getSecurity()))).andReturn(multilockMock);
-		multilockMock.lock();
-		expect(registryMock.isRegistered(order)).andReturn(true);
-		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
-				.setExecutionAction(OrderAction.SELL)
-				.setExecutionVolume(CDecimalBD.of(20L))
-				.setFinalStatus(OrderStatus.ACTIVE);
-		expect(calculatorMock.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14")))
-			.andReturn(oeuStub);
-		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
-		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(-20L), CDecimalBD.of("92.14")))
-			.andReturn(pcuMock);
-		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.INSUFFICIENT_FUNDS);
-		multilockMock.unlock();
-		control.replay();
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.SETTLEMENT_PRICE, of(110000L))
+				.withToken(SecurityField.INITIAL_MARGIN, ofRUB2("14937.51"))
+				.withToken(SecurityField.TICK_SIZE, of(10L))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.65512"))
+				.buildUpdate());
+		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		obj_reg.register(portfolio);
+		new QForts(obj_reg, service).changeBalance(portfolio, ofRUB2("100000.00"));
+		EditableOrder order = (EditableOrder) terminal.createOrder(
+				account, symbol1, OrderAction.BUY, of(20L), of(120000L)
+			);
+		obj_reg.register(order);
 		
-		service.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14"));
+		service.executeOrder(order, of(20L), of(105000L));
+
+		assertEquals(ZERO_RUB2, portfolio.getUsedMargin());
+		assertEquals(ZERO_RUB2, portfolio.getProfitAndLoss());
+		assertEquals(ofRUB2("100000"), portfolio.getEquity());
+		assertEquals(ofRUB2("100000"), portfolio.getFreeMargin());
+		assertEquals(of(20L), order.getCurrentVolume());
+		assertNull(order.getExecutedValue());
+		assertEquals(OrderStatus.CANCELLED, order.getStatus());
+		assertEquals("Execution rejected (code 1)", order.getSystemMessage());
+		assertFalse(obj_reg.isRegistered(order));
+	}
+	
+	@Test
+	public void testExecuteOrder_Partial_InsufficientFunds() throws Exception {
+		QFObjectRegistry obj_reg = new QFObjectRegistry();
+		service = new QFTransactionService(obj_reg, seqExecutionID);
+		EditableSecurity security = terminal.getEditableSecurity(symbol1);
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.SETTLEMENT_PRICE, of(110000L))
+				.withToken(SecurityField.INITIAL_MARGIN, ofRUB2("14937.51"))
+				.withToken(SecurityField.TICK_SIZE, of(10L))
+				.withToken(SecurityField.TICK_VALUE, ofRUB5("13.65512"))
+				.buildUpdate());
+		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		obj_reg.register(portfolio);
+		new QForts(obj_reg, service).changeBalance(portfolio, ofRUB2("100000.00"));
+		EditableOrder order = (EditableOrder) terminal.createOrder(
+				account, symbol1, OrderAction.BUY, of(20L), of(120000L)
+			);
+		obj_reg.register(order);
+		service.executeOrder(order, of(5L), of(105000L));
+		
+		assertEquals(ofRUB2( "74687.55"), portfolio.getUsedMargin());
+		assertEquals(ofRUB2( "34137.80"), portfolio.getProfitAndLoss());
+		assertEquals(ofRUB2("134137.80"), portfolio.getEquity());
+		assertEquals(ofRUB2( "59450.25"), portfolio.getFreeMargin());
+		assertEquals(of(15L), order.getCurrentVolume());
+		assertEquals(ofRUB5("716893.80"), order.getExecutedValue());
+		assertEquals(OrderStatus.PENDING, order.getStatus());
+		assertNull(order.getSystemMessage());
+		assertTrue(obj_reg.isRegistered(order));
+		
+		service.executeOrder(order, of(5L), of(112000L));
+		
+		// All properties unchanged, except order status and sys. message 
+		assertEquals(ofRUB2( "74687.55"), portfolio.getUsedMargin());
+		assertEquals(ofRUB2( "34137.80"), portfolio.getProfitAndLoss());
+		assertEquals(ofRUB2("134137.80"), portfolio.getEquity());
+		assertEquals(ofRUB2( "59450.25"), portfolio.getFreeMargin());
+		assertEquals(of(15L), order.getCurrentVolume());
+		assertEquals(ofRUB5("716893.80"), order.getExecutedValue());
+		assertEquals(OrderStatus.CANCELLED, order.getStatus());
+		assertEquals("Execution rejected (code 1)", order.getSystemMessage());
+		assertFalse(obj_reg.isRegistered(order));
 	}
 	
 	@Test

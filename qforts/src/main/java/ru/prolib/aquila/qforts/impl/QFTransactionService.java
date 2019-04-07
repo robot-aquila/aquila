@@ -115,7 +115,14 @@ public class QFTransactionService {
 			QFPortfolioChangeUpdate pcu = calculator.changePosition(portfolio, security,
 					oeu.getPositionVolumeChange(), price);
 			int r = validator.canChangePositon(pcu);
-			if ( r != QFResult.OK ) {
+			if ( r == QFResult.OK ) {
+				assembler.update(order, oeu, seqExecutionID.incrementAndGet());
+				assembler.update(portfolio, pcu);
+				if ( oeu.getFinalStatus().isFinal() ) {
+					registry.purgeOrder(order);
+				}
+			} else {
+				logger.debug("Order execution rejected (insufficient funds?)");
 				dumpPortfolioState(portfolio);
 				dumpPositionState(position);
 				dumpSecurityState(security);
@@ -124,12 +131,16 @@ public class QFTransactionService {
 				logger.debug("Exec. Price: {}", price);
 				logger.debug(" Exec. Vol.: {}", volume);
 				
-				// TODO: Convert result code to message
-				throw new QFValidationException("Insufficient funds", r);
-			}
-			assembler.update(order, oeu, seqExecutionID.incrementAndGet());
-			assembler.update(portfolio, pcu);
-			if ( oeu.getFinalStatus().isFinal() ) {
+				QFOrderStatusUpdate osu = calculator.updateOrderStatus(
+						order,
+						OrderStatus.CANCELLED,
+						new StringBuilder()
+							.append("Execution rejected (code ")
+							.append(r)
+							.append(")")
+							.toString()
+					);
+				assembler.update(order, osu);
 				registry.purgeOrder(order);
 			}
 		} finally {
@@ -239,8 +250,7 @@ public class QFTransactionService {
 	}
 
 	private void dumpPortfolioState(Portfolio portfolio) {
-		logger.debug("Order execution rejected ------------------------");
-		logger.debug("Portfolio state");
+		logger.debug("Portfolio state ---------------------------------");
 		logger.debug("    Account: {}", portfolio.getAccount());
 		logger.debug("     Equity: {}", portfolio.getEquity());
 		logger.debug("    Balance: {}", portfolio.getBalance());
