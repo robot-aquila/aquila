@@ -320,5 +320,25 @@ public class ObservableTSeriesImplTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testGetFirstBefore() throws Exception {
+		expect(underlyingSeriesMock1.getFirstBefore(T("2019-04-14T00:00:15Z"))).andReturn(215);
+		control.replay();
+		
+		assertEquals(Integer.valueOf(215), series.getFirstBefore(T("2019-04-14T00:00:15Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(underlyingSeriesMock1.getFirstIndexBefore(T("2025-02-12T20:18:47Z"))).andReturn(9721);
+		control.replay();
+		
+		assertEquals(9721, series.getFirstIndexBefore(T("2025-02-12T20:18:47Z")));
+		
+		control.verify();
+	}
 
 }

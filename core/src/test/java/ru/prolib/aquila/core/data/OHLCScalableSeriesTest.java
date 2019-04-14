@@ -743,5 +743,36 @@ public class OHLCScalableSeriesTest {
 		assertEquals(T("2019-03-25T18:59:00"), service.toKey(-1));
 		assertEquals(T("2019-03-25T18:58:00"), service.toKey(-2));
 	}
+	
+	@Test
+	public void testGetFirstBefore() throws Exception {
+		fillDataSet1();
+		ZTFrame tf = service.getTimeFrame();
+		
+		assertNull(service.getFirstBefore(T("2019-03-24T00:00:00")));
+		assertEquals(
+			OHLCV(tf, "2019-03-25T18:58:00", "12340.00", "13250.13", "10012.00", "10012.00", 4),
+			service.getFirstBefore(T("2019-03-25T18:59:00"))
+		);
+		assertEquals(
+			OHLCV(tf, "2019-03-25T18:59:00", "24930.07", "24930.07", "19508.34", "23750.98", 3),
+			service.getFirstBefore(T("2019-03-25T19:00:00"))
+		);
+		assertEquals(
+			OHLCV(tf, "2019-03-25T19:00:00", "13486.05", "13486.05", "10107.18", "12400.47", 5),
+			service.getFirstBefore(T("2019-03-25T20:00:00"))
+		);
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		fillDataSet1();
+		
+		assertEquals(-1, service.getFirstIndexBefore(T("2019-03-24T00:00:00")));
+		assertEquals( 0, service.getFirstIndexBefore(T("2019-03-25T18:59:00")));
+		assertEquals( 1, service.getFirstIndexBefore(T("2019-03-25T19:00:00")));
+		assertEquals( 2, service.getFirstIndexBefore(T("2019-03-25T19:01:00")));
+		assertEquals( 2, service.getFirstIndexBefore(T("2019-03-25T20:00:00")));
+	}
 
 }

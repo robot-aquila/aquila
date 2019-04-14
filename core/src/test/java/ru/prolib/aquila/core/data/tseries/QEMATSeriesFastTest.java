@@ -2,6 +2,7 @@ package ru.prolib.aquila.core.data.tseries;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -401,6 +402,34 @@ public class QEMATSeriesFastTest {
 		assertEquals(T("2018-12-15T12:09:53Z"), serviceWithMocks.toKey(302));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(sourceMock.getFirstIndexBefore(T("1997-02-01T13:45:01Z"))).andReturn(123);
+		control.replay();
+		
+		assertEquals(123, serviceWithMocks.getFirstIndexBefore(T("1997-02-01T13:45:01Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore() {
+		for ( int i = 0; i < fix_qema5.length; i ++ ) {
+			FR fr = fix_qema5[i];
+			sourceStub.set(fr.time, fr.value);
+		}
+		assertNull(service.getFirstBefore(T("2015-07-01T00:00:00Z")));
+		assertNull(service.getFirstBefore(T("2015-07-31T09:15:00Z")));
+		assertNull(service.getFirstBefore(T("2015-07-31T10:00:00Z")));
+		assertNull(service.getFirstBefore(T("2015-07-31T10:15:00Z")));
+		assertNull(service.getFirstBefore(T("2015-07-31T10:30:00Z")));
+		assertNull(service.getFirstBefore(T("2015-07-31T10:45:00Z")));
+		assertEquals(of("85339.506173"), service.getFirstBefore(T("2015-07-31T11:00:00Z")));
+		assertEquals(of("85093.364567"), service.getFirstBefore(T("2015-07-31T13:33:12Z")));
+		assertEquals(of("85716.390617"), service.getFirstBefore(T("2015-07-31T18:01:12Z")));
+		assertEquals(of("85750.618052"), service.getFirstBefore(T("2015-07-31T23:19:45Z")));
 	}
 
 }

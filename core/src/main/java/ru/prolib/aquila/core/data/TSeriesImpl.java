@@ -124,4 +124,15 @@ public class TSeriesImpl<T> implements EditableTSeries<T> {
 		return storage.getIntervalStart(index);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public T getFirstBefore(Instant time) {
+		return (T) storage.getFirstValueBefore(time, seriesID);
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return storage.getFirstIndexBefore(time);
+	}
+
 }

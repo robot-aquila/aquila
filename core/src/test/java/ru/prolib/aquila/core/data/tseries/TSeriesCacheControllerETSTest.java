@@ -227,5 +227,25 @@ public class TSeriesCacheControllerETSTest {
 		expected.clear();
 		assertEquals(expected, cachesStub);
 	}
+	
+	@Test
+	public void testGetFirstBefore() {
+		expect(seriesMock.getFirstBefore(T("2019-03-25T06:17:26Z"))).andReturn("choo");
+		control.replay();
+		
+		assertEquals("choo", service.getFirstBefore(T("2019-03-25T06:17:26Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(seriesMock.getFirstIndexBefore(T("2092-07-12T23:19:01Z"))).andReturn(26);
+		control.replay();
+		
+		assertEquals(26, service.getFirstIndexBefore(T("2092-07-12T23:19:01Z")));
+		
+		control.verify();
+	}
 
 }

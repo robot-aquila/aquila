@@ -179,5 +179,40 @@ public class MAXLongTSeriesTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(sourceMock.getFirstIndexBefore(T("2045-01-12T12:00:00Z"))).andReturn(1862);
+		control.replay();
+		
+		assertEquals(1862, series.getFirstIndexBefore(T("2045-01-12T12:00:00Z")));
+		
+		control.verify();
+	}
+
+	@Test
+	public void testGetFirstBefore() throws Exception {
+		sourceMock.lock();
+		expect(sourceMock.getFirstIndexBefore(T("2019-04-15T00:00:00Z"))).andReturn(115);
+		expect(mathMock.maxL(sourceMock, 115, 5)).andReturn(120772L);
+		sourceMock.unlock();
+		control.replay();
+		
+		assertEquals((Long) 120772L, series.getFirstBefore(T("2019-04-15T00:00:00Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore_NotFound() throws Exception {
+		sourceMock.lock();
+		expect(sourceMock.getFirstIndexBefore(T("2019-04-15T00:00:00Z"))).andReturn(-1);
+		sourceMock.unlock();
+		control.replay();
+		
+		assertNull(series.getFirstBefore(T("2019-04-15T00:00:00Z")));
+		
+		control.verify();
+	}
 
 }

@@ -242,5 +242,15 @@ public class OHLCScalableSeries implements ObservableTSeries<Candle> {
 	public EventType onLengthUpdate() {
 		return onLengthUpdate;
 	}
+	
+	@Override
+	public Candle getFirstBefore(Instant time) {
+		return currSeries.getFirstBefore(time);
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return currSeries.getFirstIndexBefore(time);
+	}
 
 }

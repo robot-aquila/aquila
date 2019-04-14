@@ -16,6 +16,7 @@ import java.time.Instant;
 import static org.easymock.EasyMock.createStrictControl;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 public class CandleVolumeTSeriesTest {
 	
@@ -27,7 +28,7 @@ public class CandleVolumeTSeriesTest {
 	private Candle candle1, candle2, candle3;
 	private TSeriesImpl<Candle> candles;
 	private TSeries<Candle> candlesMock;
-	private CandleVolumeTSeries series;
+	private CandleVolumeTSeries series, serviceWithMocks;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -63,6 +64,7 @@ public class CandleVolumeTSeriesTest {
 				.buildCandle();		
 		candles = new TSeriesImpl<>(ZTFrame.M5);
 		series = new CandleVolumeTSeries("VOLUME", candles);
+		serviceWithMocks = new CandleVolumeTSeries(candlesMock);
 	}
 	
 	@Test
@@ -191,6 +193,36 @@ public class CandleVolumeTSeriesTest {
 		control.replay();
 		
 		assertEquals(T("2018-12-15T12:01:53Z"), series.toKey(396));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore() {
+		expect(candlesMock.getFirstBefore(T("2019-04-06T10:00:00Z"))).andReturn(candle2);
+		control.replay();
+		
+		assertEquals(of(2000L), serviceWithMocks.getFirstBefore(T("2019-04-06T10:00:00Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore_NotFound() {
+		expect(candlesMock.getFirstBefore(T("2019-04-06T10:00:00Z"))).andReturn(null);
+		control.replay();
+		
+		assertNull(serviceWithMocks.getFirstBefore(T("2019-04-06T10:00:00Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(candlesMock.getFirstIndexBefore(T("2012-03-15T21:15:30Z"))).andReturn(2213);
+		control.replay();
+		
+		assertEquals(2213, serviceWithMocks.getFirstIndexBefore(T("2012-03-15T21:15:30Z")));
 		
 		control.verify();
 	}

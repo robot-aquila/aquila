@@ -123,5 +123,23 @@ public class MAXLongTSeries implements TSeries<Long> {
 	public Instant toKey(int index) throws ValueException {
 		return source.toKey(index);
 	}
-	
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return source.getFirstIndexBefore(time);
+	}
+
+	@Override
+	public Long getFirstBefore(Instant time) {
+		lock();
+		try {
+			int index = source.getFirstIndexBefore(time);
+			return index >= 0 ? math.maxL(source, index, period) : null;
+		} catch ( ValueException e ) {
+			throw new IllegalStateException("Unexpected exception: ", e);
+		} finally {
+			unlock();
+		}
+	}
+
 }

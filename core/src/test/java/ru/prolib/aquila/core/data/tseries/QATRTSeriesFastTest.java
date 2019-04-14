@@ -501,5 +501,50 @@ public class QATRTSeriesFastTest {
 			assertEquals(msg + "[Fast]", fr.expected, a);
 		}
 	}
+	
+	@Test
+	public void testGetFirstIndexBefore() throws Exception {
+		fillQATR5_1();
+		assertEquals(-1, service.getFirstIndexBefore(T("2018-05-01T00:00:00Z")));
+		assertEquals(-1, service.getFirstIndexBefore(T("2018-06-01T10:00:00Z")));
+		assertEquals( 0, service.getFirstIndexBefore(T("2018-06-01T10:05:00Z")));
+		assertEquals( 1, service.getFirstIndexBefore(T("2018-06-01T10:10:00Z")));
+		assertEquals( 2, service.getFirstIndexBefore(T("2018-06-01T10:15:00Z")));
+		assertEquals( 3, service.getFirstIndexBefore(T("2018-06-01T10:20:00Z")));
+		assertEquals( 4, service.getFirstIndexBefore(T("2018-06-01T10:25:00Z")));
+		assertEquals( 5, service.getFirstIndexBefore(T("2018-06-01T10:30:00Z")));
+		assertEquals( 6, service.getFirstIndexBefore(T("2018-06-01T10:35:00Z")));
+		assertEquals( 7, service.getFirstIndexBefore(T("2018-06-01T10:40:00Z")));
+		assertEquals( 8, service.getFirstIndexBefore(T("2018-06-01T10:45:00Z")));
+		assertEquals( 9, service.getFirstIndexBefore(T("2018-06-01T10:50:00Z")));
+		assertEquals(10, service.getFirstIndexBefore(T("2018-06-01T10:55:00Z")));
+		assertEquals(11, service.getFirstIndexBefore(T("2018-06-01T11:00:00Z")));
+		assertEquals(12, service.getFirstIndexBefore(T("2018-06-01T11:05:00Z")));
+		assertEquals(13, service.getFirstIndexBefore(T("2018-06-01T11:10:00Z")));
+		assertEquals(14, service.getFirstIndexBefore(T("2018-06-01T11:15:00Z")));
+		assertEquals(15, service.getFirstIndexBefore(T("2018-06-01T11:20:00Z")));
+		assertEquals(16, service.getFirstIndexBefore(T("2018-06-01T11:25:00Z")));
+		assertEquals(17, service.getFirstIndexBefore(T("2018-06-01T11:30:00Z")));
+		assertEquals(18, service.getFirstIndexBefore(T("2018-06-01T11:35:00Z")));
+		assertEquals(19, service.getFirstIndexBefore(T("2018-06-01T11:40:00Z")));
+		assertEquals(20, service.getFirstIndexBefore(T("2018-06-01T11:45:00Z")));
+		assertEquals(20, service.getFirstIndexBefore(T("2018-06-01T11:50:00Z")));
+	}
+	
+	@Test
+	public void testGetFirstBefore() throws Exception {
+		fillQATR5_1();
+		assertNull(service.getFirstBefore(T("2018-05-01T00:00:00Z")));
+		assertNull(service.getFirstBefore(T("2018-06-01T10:00:00Z")));
+		assertNull(service.getFirstBefore(T("2018-06-01T10:05:00Z")));
+		assertNull(service.getFirstBefore(T("2018-06-01T10:15:00Z")));
+		assertNull(service.getFirstBefore(T("2018-06-01T10:20:00Z")));
+		assertEquals(of("404.000000"), service.getFirstBefore(T("2018-06-01T10:25:00Z")));
+		assertEquals(of("445.200000"), service.getFirstBefore(T("2018-06-01T10:30:00Z")));
+		assertEquals(of("418.160000"), service.getFirstBefore(T("2018-06-01T10:35:00Z")));
+		assertEquals(of("358.574336"), service.getFirstBefore(T("2018-06-01T10:55:00Z")));
+		assertEquals(of("395.119307"), service.getFirstBefore(T("2018-06-01T11:45:00Z")));
+		assertEquals(of("395.119307"), service.getFirstBefore(T("2018-12-31T00:00:00Z")));
+	}
 
 }

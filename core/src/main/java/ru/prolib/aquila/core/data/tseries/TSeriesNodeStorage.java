@@ -99,4 +99,20 @@ public interface TSeriesNodeStorage extends Lockable {
 	 */
 	void truncate(int length);
 	
+	/**
+	 * Get first element earlier than specified time.
+	 * <p>
+	 * @param time - time to search element (exclusive) 
+	 * @return first element before the time or null if no elements before time 
+	 */
+	Object getFirstValueBefore(Instant time, int seriesID);
+	
+	/**
+	 * Get first index of node which has dated before specified time.
+	 * <p>
+	 * @param time - time to search index (exclusive)
+	 * @return first index before the time or -1 if no such index
+	 */
+	int getFirstIndexBefore(Instant time);
+	
 }

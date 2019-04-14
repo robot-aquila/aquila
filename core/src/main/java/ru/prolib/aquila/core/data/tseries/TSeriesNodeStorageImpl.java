@@ -322,4 +322,35 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 		return node;
 	}
 
+	@Override
+	public Object getFirstValueBefore(Instant time, int seriesID) {
+		lock();
+		try {
+			int index = getFirstIndexBefore(time);
+			if ( index >= 0 ) {
+				return nodeList.get(index).get(seriesID);
+			}
+		} finally {
+			unlock();
+		}
+		return null;
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		lock();
+		try {
+			for ( int i = nodeList.size() - 1; i >= 0; i -- ) {
+				TSeriesNode node = nodeList.get(i);
+				Interval node_int = node.getInterval();
+				if ( time.compareTo(node_int.getEnd()) >= 0 ) {
+					return i;
+				}
+			}
+		} finally {
+			unlock();
+		}
+		return -1;
+	}
+
 }

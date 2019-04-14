@@ -327,4 +327,49 @@ public class TSeriesNodeStorageKeysTest {
 		control.verify();
 	}
 	
+	@Test
+	public void testGetFirstBefore_NotFound() {
+		storageMock.lock();
+		expect(storageMock.getFirstIndexBefore(T("2019-04-14T00:00:00Z"))).andReturn(-1);
+		storageMock.unlock();
+		control.replay();
+		
+		assertNull(service.getFirstBefore(T("2019-04-14T00:00:00Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore_Found() throws Exception {
+		storageMock.lock();
+		expect(storageMock.getFirstIndexBefore(T("2019-04-14T00:00:00Z"))).andReturn(50);
+		expect(storageMock.getIntervalStart(50)).andReturn(T("2019-04-15T20:30:40Z"));
+		storageMock.unlock();
+		control.replay();
+		
+		assertEquals(T("2019-04-15T20:30:40Z"), service.getFirstBefore(T("2019-04-14T00:00:00Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstValueBefore() {
+		expect(storageMock.getFirstValueBefore(T("2019-04-15T15:30:01Z"), 19)).andReturn(509);
+		control.replay();
+		
+		assertEquals(509, service.getFirstValueBefore(T("2019-04-15T15:30:01Z"), 19));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(storageMock.getFirstIndexBefore(T("2019-04-06T12:01:15Z"))).andReturn(105);
+		control.replay();
+		
+		assertEquals(105, service.getFirstIndexBefore(T("2019-04-06T12:01:15Z")));
+		
+		control.verify();
+	}
+	
 }

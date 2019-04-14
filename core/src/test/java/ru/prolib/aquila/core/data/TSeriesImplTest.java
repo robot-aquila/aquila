@@ -1,9 +1,12 @@
 package ru.prolib.aquila.core.data;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,18 +17,24 @@ import org.junit.Before;
 import org.junit.Test;
 import org.threeten.extra.Interval;
 
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.concurrency.LID;
 import ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage;
 import ru.prolib.aquila.core.data.tseries.TSeriesUpdateImpl;
 import ru.prolib.aquila.core.utils.Variant;
 
 public class TSeriesImplTest {
+	private static ZoneId ZONE = ZoneId.of("Europe/Moscow");
 	
-	Instant T(String timeString) {
+	static Instant ZT(String timeString) {
+		return LocalDateTime.parse(timeString).atZone(ZONE).toInstant();
+	}
+	
+	static Instant T(String timeString) {
 		return Instant.parse(timeString);
 	}
 	
-	Interval IM1(String timeString) {
+	static Interval IM1(String timeString) {
 		return Interval.of(T(timeString), Duration.ofMinutes(1));
 	}
 	
@@ -297,6 +306,46 @@ public class TSeriesImplTest {
 		control.replay();
 		
 		assertEquals(T("2018-12-15T09:35:00Z"), series.toKey(829));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore() {
+		TSeriesImpl<CDecimal> service = new TSeriesImpl<>(ZTFrame.M5MSK);
+		
+		assertNull(service.getFirstBefore(ZT("2018-12-15T22:43:36")));
+		
+		service.set(ZT("2018-12-15T22:43:36"), of("42.924"));
+		
+		assertNull(service.getFirstBefore(ZT("2018-12-15T22:00:00")));
+		assertNull(service.getFirstBefore(ZT("2018-12-15T22:40:00")));
+		assertNull(service.getFirstBefore(ZT("2018-12-15T22:43:36")));
+		assertEquals(of("42.924"), service.getFirstBefore(ZT("2018-12-15T22:45:00")));
+		assertEquals(of("42.924"), service.getFirstBefore(ZT("2018-12-15T23:12:27")));
+		
+		service.set(ZT("2018-12-15T22:45:00"), of("49.360"));
+		service.set(ZT("2018-12-15T23:00:00"), of("51.014"));
+		
+		assertNull(service.getFirstBefore(ZT("2018-01-01T00:00:00")));
+		assertNull(service.getFirstBefore(ZT("2018-12-15T21:14:46")));
+		assertNull(service.getFirstBefore(ZT("2018-12-15T22:40:00")));
+		assertEquals(of("42.924"), service.getFirstBefore(ZT("2018-12-15T22:45:00")));
+		assertEquals(of("42.924"), service.getFirstBefore(ZT("2018-12-15T22:47:41")));
+		assertEquals(of("49.360"), service.getFirstBefore(ZT("2018-12-15T22:51:04")));
+		assertEquals(of("49.360"), service.getFirstBefore(ZT("2018-12-15T23:00:00")));
+		assertEquals(of("49.360"), service.getFirstBefore(ZT("2018-12-15T23:00:19")));
+		assertEquals(of("51.014"), service.getFirstBefore(ZT("2018-12-15T23:07:38")));
+		assertEquals(of("51.014"), service.getFirstBefore(ZT("2018-12-15T23:59:59")));
+		assertEquals(of("51.014"), service.getFirstBefore(ZT("2050-01-01T00:00:00")));
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(storageMock.getFirstIndexBefore(T("2019-09-03T00:00:00Z"))).andReturn(302);
+		control.replay();
+		
+		assertEquals(302, series.getFirstIndexBefore(T("2019-09-03T00:00:00Z")));
 		
 		control.verify();
 	}

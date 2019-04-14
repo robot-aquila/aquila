@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.data.tseries;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 
@@ -180,6 +181,41 @@ public class QEMATSeriesTest {
 		control.replay();
 		
 		assertEquals(T("2018-12-15T12:20:31Z"), series.toKey(661));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() throws Exception {
+		expect(sourceMock.getFirstIndexBefore(T("1917-10-11T13:45:00Z"))).andReturn(7265);
+		control.replay();
+		
+		assertEquals(7265, series.getFirstIndexBefore(T("1917-10-11T13:45:00Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore() throws Exception {
+		sourceMock.lock();
+		expect(sourceMock.getFirstIndexBefore(T("2015-01-01T00:00:00Z"))).andReturn(727);
+		expect(mathMock.qema(sourceMock, 727, 7)).andReturn(of("234.12"));
+		sourceMock.unlock();
+		control.replay();
+		
+		assertEquals(of("234.12"), series.getFirstBefore(T("2015-01-01T00:00:00Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore_NotFound() throws Exception {
+		sourceMock.lock();
+		expect(sourceMock.getFirstIndexBefore(T("2015-01-01T00:00:00Z"))).andReturn(-1);
+		sourceMock.unlock();
+		control.replay();
+		
+		assertNull(series.getFirstBefore(T("2015-01-01T00:00:00Z")));
 		
 		control.verify();
 	}

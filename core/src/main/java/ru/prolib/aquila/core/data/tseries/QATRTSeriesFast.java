@@ -231,4 +231,22 @@ public class QATRTSeriesFast implements TSeries<CDecimal>, TSeriesCache {
 		return source.toKey(index);
 	}
 
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return source.getFirstIndexBefore(time);
+	}
+
+	@Override
+	public CDecimal getFirstBefore(Instant time) {
+		lock();
+		try {
+			int index = source.getFirstIndexBefore(time);
+			return index >= 0 ? get(index) : null;
+		} catch ( ValueException e ) {
+			throw new IllegalStateException("Unexpected exception: ", e);
+		} finally {
+			unlock();
+		}
+	}
+
 }

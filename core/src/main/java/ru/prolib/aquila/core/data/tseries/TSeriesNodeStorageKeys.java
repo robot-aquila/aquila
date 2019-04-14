@@ -198,4 +198,27 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 		return getIntervalStart(index);
 	}
 
+	@Override
+	public Instant getFirstBefore(Instant time) {
+		lock();
+		try {
+			int index = storage.getFirstIndexBefore(time);
+			return index < 0 ? null : getIntervalStart(index);
+		} catch ( ValueException e ) {
+			return null;
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public Object getFirstValueBefore(Instant time, int seriesID) {
+		return storage.getFirstValueBefore(time, seriesID);
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return storage.getFirstIndexBefore(time);
+	}
+
 }

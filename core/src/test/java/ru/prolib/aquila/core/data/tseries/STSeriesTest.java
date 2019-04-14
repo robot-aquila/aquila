@@ -479,5 +479,25 @@ public class STSeriesTest {
 	public void testIsSeriesObservable_ThrowsIfNotExists() {
 		service.isSeriesObservable("foo");
 	}
+	
+	@Test
+	public void testGetFirstBefore() {
+		expect(storageMock.getFirstBefore(T("1224-11-08T12:55:04Z"))).andReturn(T("1998-01-01T00:00:00Z"));
+		control.replay();
+		
+		assertEquals(T("1998-01-01T00:00:00Z"), service.getFirstBefore(T("1224-11-08T12:55:04Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		expect(storageMock.getFirstIndexBefore(T("2001-10-10T10:10:10Z"))).andReturn(57821);
+		control.replay();
+		
+		assertEquals(57821, service.getFirstIndexBefore(T("2001-10-10T10:10:10Z")));
+		
+		control.verify();
+	}
 
 }

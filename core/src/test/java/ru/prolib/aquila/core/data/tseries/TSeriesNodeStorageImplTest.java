@@ -415,4 +415,35 @@ public class TSeriesNodeStorageImplTest {
 		assertEquals(-1, storage.getIntervalIndex(T("2017-08-21T23:05:00Z")));
 	}
 	
+	@Test
+	public void testGetFirstValueBefore() {
+		storage.setValue(T("2017-08-21T22:50:18Z"), 8, 12);
+		storage.setValue(T("2017-08-21T22:57:28Z"), 5, 24);
+		storage.setValue(T("2017-08-21T23:02:35Z"), 8, 19);
+		
+		assertNull(storage.getFirstValueBefore(T("2017-08-01T00:00:00Z"), 8));
+		assertNull(storage.getFirstValueBefore(T("2017-08-01T00:00:00Z"), 5));
+		assertEquals(Integer.valueOf(12), storage.getFirstValueBefore(T("2017-08-21T22:55:00Z"), 8));
+		assertEquals(null, storage.getFirstValueBefore(T("2017-08-21T22:55:00Z"), 5));
+		assertEquals(null, storage.getFirstValueBefore(T("2017-08-21T23:00:00Z"), 8));
+		assertEquals(Integer.valueOf(24), storage.getFirstValueBefore(T("2017-08-21T23:00:00Z"), 5));
+		assertEquals(Integer.valueOf(19), storage.getFirstValueBefore(T("2017-08-21T23:05:00Z"), 8));
+		assertEquals(null, storage.getFirstValueBefore(T("2017-08-21T23:05:00Z"), 5));
+		assertEquals(Integer.valueOf(19), storage.getFirstValueBefore(T("2017-08-21T23:10:00Z"), 8));
+		assertEquals(null, storage.getFirstValueBefore(T("2017-08-21T23:10:00Z"), 5));
+	}
+	
+	@Test
+	public void testGetFirstIndexBefore() {
+		storage.setValue(T("2017-08-21T22:50:18Z"), 8, 12);
+		storage.setValue(T("2017-08-21T22:57:28Z"), 5, 24);
+		storage.setValue(T("2017-08-21T23:02:35Z"), 8, 19);
+		
+		assertEquals(-1, storage.getFirstIndexBefore(T("2017-08-01T00:00:00Z")));
+		assertEquals( 0, storage.getFirstIndexBefore(T("2017-08-21T22:55:00Z")));
+		assertEquals( 1, storage.getFirstIndexBefore(T("2017-08-21T23:00:00Z")));
+		assertEquals( 2, storage.getFirstIndexBefore(T("2017-08-21T23:05:00Z")));
+		assertEquals( 2, storage.getFirstIndexBefore(T("2017-08-21T23:10:00Z")));
+	}
+	
 }

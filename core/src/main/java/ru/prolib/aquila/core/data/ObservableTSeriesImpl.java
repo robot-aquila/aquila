@@ -159,5 +159,15 @@ public class ObservableTSeriesImpl<T> implements ObservableTSeries<T>, EditableT
 	public Instant toKey(int index) throws ValueException {
 		return series.toKey(index);
 	}
+	
+	@Override
+	public T getFirstBefore(Instant time) {
+		return series.getFirstBefore(time);
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return series.getFirstIndexBefore(time);
+	}
 
 }

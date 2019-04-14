@@ -144,4 +144,14 @@ public class TSeriesCacheControllerETS<T> implements EditableTSeries<T>, TSeries
 		}
 	}
 
+	@Override
+	public T getFirstBefore(Instant time) {
+		return series.getFirstBefore(time);
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return series.getFirstIndexBefore(time);
+	}
+
 }

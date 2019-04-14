@@ -390,4 +390,14 @@ public class STSeries implements ObservableTSeries<Instant> {
 		}
 	}
 
+	@Override
+	public Instant getFirstBefore(Instant time) {
+		return storage.getFirstBefore(time);
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return storage.getFirstIndexBefore(time);
+	}
+
 }

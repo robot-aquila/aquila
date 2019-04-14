@@ -181,5 +181,40 @@ public class QATRTSeriesTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testGetFirstIndexBefore() throws Exception {
+		expect(sourceMock.getFirstIndexBefore(T("2015-01-01T12:25:45Z"))).andReturn(240);
+		control.replay();
+		
+		assertEquals(240, service.getFirstIndexBefore(T("2015-01-01T12:25:45Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore() throws Exception {
+		sourceMock.lock();
+		expect(sourceMock.getFirstIndexBefore(T("1996-08-12T20:19:32Z"))).andReturn(12);
+		expect(mathMock.qatr(sourceMock, 12, 5)).andReturn(of("112.63"));
+		sourceMock.unlock();
+		control.replay();
+		
+		assertEquals(of("112.63"), service.getFirstBefore(T("1996-08-12T20:19:32Z")));
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testGetFirstBefore_NotFound() throws Exception {
+		sourceMock.lock();
+		expect(sourceMock.getFirstIndexBefore(T("1996-08-12T20:19:32Z"))).andReturn(-1);
+		sourceMock.unlock();
+		control.replay();
+		
+		assertNull(service.getFirstBefore(T("1996-08-12T20:19:32Z")));
+		
+		control.verify();
+	}
 
 }

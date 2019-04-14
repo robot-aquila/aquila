@@ -84,4 +84,15 @@ public class CandleVolumeTSeries implements TSeries<CDecimal> {
 		return candles.toKey(index);
 	}
 
+	@Override
+	public CDecimal getFirstBefore(Instant time) {
+		Candle x = candles.getFirstBefore(time);
+		return x == null ? null : x.getVolume();
+	}
+
+	@Override
+	public int getFirstIndexBefore(Instant time) {
+		return candles.getFirstIndexBefore(time);
+	}
+
 }
