@@ -1,6 +1,10 @@
 package ru.prolib.aquila.core.data;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
@@ -956,18 +960,101 @@ public class TAMath {
 		return covxy.getSum().divideExact(sqrt_, scale);
 	}
 	
+	static class Triplet {
+		
+		static Triplet empty() {
+			return new Triplet(null, null, null);
+		}
+		
+		static Triplet get(Series<CDecimal> src, int index)
+			throws ValueException
+		{
+			src.lock();
+			try {
+				return new Triplet(
+						index >= 2 ? src.get(index - 2) : null,
+						index >= 1 ? src.get(index - 1) : null,
+						index >= 0 ? src.get(index) : null
+					);
+			} finally {
+				src.unlock();
+			}
+		}
+		
+		static Triplet get(TSeries<CDecimal> src, Instant time)
+			throws ValueException
+		{
+			src.lock();
+			try {
+				int index = src.getFirstIndexBefore(time);
+				if ( index < 0 ) {
+					return Triplet.empty();
+				}
+				return get(src, index);
+			} finally {
+				src.unlock();
+			}
+		}
+		
+		private final CDecimal v0, v1, v2;
+		
+		Triplet(CDecimal v0, CDecimal v1, CDecimal v2) {
+			this.v0 = v0;
+			this.v1 = v1;
+			this.v2 = v2;
+		}
+		
+		boolean isNullV1V2() {
+			return v1 == null || v2 == null;
+		}
+		
+		boolean isNullV0() {
+			return v0 == null;
+		}
+		
+		@Override
+		public String toString() {
+			return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		}
+		
+	}
+	
+	private int _cross(Triplet tx, Triplet ty) {
+		if ( tx.isNullV1V2() || ty.isNullV1V2() ) {
+			return 0;
+		}
+		
+		int d1 = tx.v1.compareTo(ty.v1), d2 = tx.v2.compareTo(ty.v2);
+		if ( d1 == d2 ) {
+			return 0;
+		} else
+		if ( d1 == 0 ) {
+			if ( tx.isNullV0() || ty.isNullV0() ) {
+				return d2;
+			}
+			int d0 = tx.v0.compareTo(ty.v0);
+			if ( d0 == 0 ) {
+				return d2;
+			}
+			if ( d0 == d2 * -1 ) {
+				return 0;
+			} else {
+				return d2;
+			}
+		} else
+		if ( d2 == 0 ) {
+			return d1 * -1;
+		} else {
+			return d2;
+		}
+	}
+	
 	private int _cross(Series<CDecimal> x, Series<CDecimal> y, int index) {
 		if ( x.getLength() < 2 ) {
 			return 0;
 		}
 		try {
-			CDecimal x1 = x.get(index - 1), x2 = x.get(index),
-				y1 = y.get(index - 1), y2 = y.get(index);
-			if ( x1 == null || x2 == null || y1 == null || y2 == null ) {
-				return 0;
-			}
-			int d1 = x1.compareTo(y1) > 0 ? 1 : -1, d2 = x2.compareTo(y2) > 0 ? 1 : -1;
-			return d1 == d2 ? 0 : d2;
+			return _cross(Triplet.get(x, index), Triplet.get(y, index));
 		} catch ( ValueException e ) {
 			throw new IllegalStateException("Unexpected exception", e);
 		}
@@ -995,6 +1082,39 @@ public class TAMath {
 	 */
 	public boolean crossOver(Series<CDecimal> x, Series<CDecimal> y, int index) {
 		return _cross(x, y, index) == 1;
+	}
+	
+	/**
+	 * Check that x crosses y at particular time.
+	 * <p>
+	 * This is time-based implementation of the check. Time is used to determine
+	 * position of elements to compare. The base time points at first element
+	 * exactly after checking point. Keep in mind it does not point exactly to
+	 * checking position because usually series contains a bit more data at time
+	 * of call than expected. For example, the check was initiated because
+	 * length of series was changed. This case the series will contain the tail
+	 * and unfinished element which should not affect the check result.
+	 * <p>
+	 * Base time used to determine index of check point. Check point index may
+	 * differ both series. But this isn't a problem as from concurrency as from
+	 * consistency point. Two consecutive elements which are required to pass
+	 * the check determined separately for each series. Thus, there is no
+	 * simultaneous locking of both series or expectation of same time series
+	 * required. This method is quite safe in case if there are no data
+	 * insertion to the past. 
+	 * <p>
+	 * @param x - first series (which expected to go under)
+	 * @param y - second series
+	 * @param time - base time (exclusive)
+	 * @return 1 if x cross over y, -1 if x cross under y, 0 if not crossed 
+	 */
+	public int cross(TSeries<CDecimal> x, TSeries<CDecimal> y, Instant time) {
+		try {
+			Triplet tx = Triplet.get(x, time), ty = Triplet.get(y, time);
+			return _cross(tx, ty);
+		} catch ( ValueException e ) {
+			throw new IllegalStateException("Unexpected exception", e);
+		}
 	}
 
 }

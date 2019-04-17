@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.*;
+import org.threeten.extra.Interval;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
@@ -1332,6 +1333,160 @@ public class TAMathTest {
 	}
 	
 	@Test
+	public void testCrossUnder_ForkCase() throws Exception {
+		// ___ series1
+		//  \_ series2
+		
+		series1.add(of(20L)); series1.add(of(20L)); series1.add(of(20L));
+		series2.add(of(20L)); series2.add(of(20L)); series2.add(of(10L));
+		
+		assertFalse(service.crossUnder(series1, series2, 1));
+		assertFalse(service.crossUnder(series2, series1, 1));
+		assertFalse(service.crossOver(series1, series2, 1));
+		assertFalse(service.crossOver(series2, series1, 1));
+		
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertTrue(service.crossUnder(series2, series1, 2));
+		assertTrue(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+	}
+	
+	@Test
+	public void testCrossUnder_JoinCase() throws Exception {
+		// _   series1
+		// _\_ series2
+		
+		series1.add(of(20L)); series1.add(of(10L)); series1.add(of(10L));
+		series2.add(of(10L)); series2.add(of(10L)); series2.add(of(10L));
+		
+		assertTrue(service.crossUnder(series1, series2, 1));
+		assertFalse(service.crossUnder(series2, series1, 1));
+		assertFalse(service.crossOver(series1, series2, 1));
+		assertTrue(service.crossOver(series2, series1, 1));
+		
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertFalse(service.crossUnder(series2, series1, 2));
+		assertFalse(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+	}
+	
+	@Test
+	public void testCrossUnder_SkipDouble() throws Exception {
+		// _    series1  
+		// _\__ series2  
+		//   \_ series1
+		
+		series1.add(of(30L)); series1.add(of(20L)); series1.add(of(10L));
+		series2.add(of(20L)); series2.add(of(20L)); series2.add(of(20L));
+		
+		assertTrue(service.crossUnder(series1, series2, 1));
+		assertFalse(service.crossUnder(series2, series1, 1));
+		assertFalse(service.crossOver(series1, series2, 1));
+		assertTrue(service.crossOver(series2, series1, 1));
+		
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertFalse(service.crossUnder(series2, series1, 2));
+		assertFalse(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+	}
+	
+	@Test
+	public void testCrossUnder_Bounce() throws Exception {
+		// _  _ series1
+		// _\/_ series2
+
+		series1.add(of(30L)); series1.add(of(20L)); series1.add(of(30L));
+		series2.add(of(20L)); series2.add(of(20L)); series2.add(of(20L));
+		
+		assertTrue(service.crossUnder(series1, series2, 1));
+		assertFalse(service.crossUnder(series2, series1, 1));
+		assertFalse(service.crossOver(series1, series2, 1));
+		assertTrue(service.crossOver(series2, series1, 1));
+		
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertTrue(service.crossUnder(series2, series1, 2));
+		assertTrue(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+	}
+	
+	@Test
+	public void testCrossOver_ForkCase() throws Exception {
+		//   _ series1
+		// _/_ series2
+		
+		series1.add(of(10L)); series1.add(of(20L)); series1.add(of(20L));
+		series2.add(of(10L)); series2.add(of(10L)); series2.add(of(10L));
+		
+		assertTrue(service.crossOver(series1, series2, 1));
+		assertFalse(service.crossOver(series2, series1, 1));
+		assertFalse(service.crossUnder(series1, series2, 1));
+		assertTrue(service.crossUnder(series2, series1, 1));
+		
+		assertFalse(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertFalse(service.crossUnder(series2, series1, 2));
+	}
+	
+	@Test
+	public void testCrossOver_JoinCase() throws Exception {
+		// ___ series2
+		// _/  series1
+
+		series1.add(of(10L)); series1.add(of(20L)); series1.add(of(20L));
+		series2.add(of(20L)); series2.add(of(20L)); series2.add(of(20L));
+		
+		assertTrue(service.crossOver(series1, series2, 1));
+		assertFalse(service.crossOver(series2, series1, 1));
+		assertFalse(service.crossUnder(series1, series2, 1));
+		assertTrue(service.crossUnder(series2, series1, 1));
+		
+		assertFalse(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertFalse(service.crossUnder(series2, series1, 2));
+	}
+	
+	@Test
+	public void testCrossOver_SkipDouble() throws Exception {
+		//    _ series1  
+		// __/_ series2  
+		// _/   series1
+
+		series1.add(of(10L)); series1.add(of(20L)); series1.add(of(30L));
+		series2.add(of(20L)); series2.add(of(20L)); series2.add(of(20L));
+		
+		assertTrue(service.crossOver(series1, series2, 1));
+		assertFalse(service.crossOver(series2, series1, 1));
+		assertFalse(service.crossUnder(series1, series2, 1));
+		assertTrue(service.crossUnder(series2, series1, 1));
+		
+		assertFalse(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertFalse(service.crossUnder(series2, series1, 2));
+	}
+	
+	@Test
+	public void testCrossOver_Bounce() throws Exception {
+		// _  _ series1
+		// _/\_ series2
+		
+		series1.add(of(20L)); series1.add(of(20L)); series1.add(of(20L));
+		series2.add(of(10L)); series2.add(of(20L)); series2.add(of(10L));
+		
+		assertFalse(service.crossOver(series1, series2, 1));
+		assertTrue(service.crossOver(series2, series1, 1));
+		assertTrue(service.crossUnder(series1, series2, 1));
+		assertFalse(service.crossUnder(series2, series1, 1));
+		
+		assertTrue(service.crossOver(series1, series2, 2));
+		assertFalse(service.crossOver(series2, series1, 2));
+		assertFalse(service.crossUnder(series1, series2, 2));
+		assertTrue(service.crossUnder(series2, series1, 2));
+	}
+	
+	@Test
 	public void testCrossOver() throws Exception {
 		FR2 fix[] = {
 			new FR2(20L, 45L, false),
@@ -1359,6 +1514,78 @@ public class TAMathTest {
 			series1.add(f.x);
 			series2.add(f.y);
 			assertEquals("At #" + i, f.expected, service.crossOver(series1, series2, i));
+		}
+	}
+	
+	static class FR2x {
+		private final CDecimal x, y;
+		private final int expected;
+		
+		public FR2x(Long x, Long y, int expected) {
+			this.x = x == null ? null : CDecimalBD.of(x);
+			this.y = y == null ? null : CDecimalBD.of(y);
+			this.expected = expected;
+		}
+		
+	}
+	
+	@Test
+	public void testCross() throws Exception {
+		Long nul = null;
+		FR2x fix[] = {
+			new FR2x(20L, nul,  0),
+			new FR2x(10L, 10L,  0),
+			new FR2x(nul, 20L,  0),
+			new FR2x(nul, nul,  0),
+			new FR2x(10L, 10L,  0),
+			new FR2x(10L, 10L,  0),
+			new FR2x(10L, 20L, -1), // #6 
+			new FR2x(10L, 20L,  0),
+			new FR2x(20L, 20L,  1),
+			new FR2x(20L, 20L,  0),
+			new FR2x(30L, 25L,  1),
+			new FR2x(25L, 25L, -1),
+			new FR2x(15L, 25L,  0),
+		};
+		Instant start_time = Instant.EPOCH;
+		ZTFrame tf = ZTFrame.M5;
+		TSeriesImpl<CDecimal> xs = new TSeriesImpl<>(tf), ys = new TSeriesImpl<>(tf);
+		Interval cur_int = tf.getInterval(start_time);
+		for ( FR2x fr : fix ) {
+			Instant cur_time = cur_int.getStart();
+			xs.set(cur_time, fr.x);
+			ys.set(cur_time, fr.y);
+			cur_int = tf.getInterval(cur_int.getEnd());
+		}
+		
+		cur_int = tf.getInterval(start_time);
+		for ( int i = 0; i < fix.length; i ++ ) {
+			Instant cur_time = cur_int.getEnd();
+			FR2x fr = fix[i];
+			String msg = "At#" + i;
+			switch ( fr.expected ) {
+			case -1:
+				//System.out.println(new StringBuilder()
+				//		.append("crossUnder: ")
+				//		.append("xs[").append(i).append("]=").append(xs.get(i))
+				//		.append("ys[").append(i).append("]=").append(ys.get(i))
+				//		.append(" is ").append(service.crossUnder(xs, ys, i))
+				//		.toString());
+				assertFalse(msg, service.crossOver(xs, ys, i));
+				assertTrue( msg, service.crossUnder(xs, ys, i));
+				break;
+			case  1:
+				assertTrue( msg, service.crossOver(xs, ys,  i));
+				assertFalse(msg, service.crossUnder(xs, ys, i));
+				break;
+			case  0:
+			default:
+				assertFalse(msg, service.crossOver(xs, ys, i));
+				assertFalse(msg, service.crossUnder(xs, ys, i));
+				break;
+			}
+			assertEquals(msg, fr.expected, service.cross(xs, ys, cur_time));
+			cur_int = tf.getInterval(cur_int.getEnd());
 		}
 	}
 	
