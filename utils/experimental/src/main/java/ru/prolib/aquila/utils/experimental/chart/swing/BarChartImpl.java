@@ -208,6 +208,11 @@ public class BarChartImpl implements BarChart, EventListener {
 	}
 	
 	@Override
+	public BarChart dropLayer(BarChartLayer layer) {
+		return dropLayer(layer.getId());
+	}
+	
+	@Override
 	public List<ChartOverlay> getOverlays() {
 		return overlays;
 	}

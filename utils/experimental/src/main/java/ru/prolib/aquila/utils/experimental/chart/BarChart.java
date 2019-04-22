@@ -27,6 +27,7 @@ public interface BarChart {
 	BarChartLayer addPolyLine(Series<CDecimal> series);
 	BarChartLayer addHistogram(Series<CDecimal> series);
 	BarChart dropLayer(String id);
+	BarChart dropLayer(BarChartLayer layer);
 	
 	List<ChartOverlay> getOverlays();
 	BarChart addStaticOverlay(String text, int y);
