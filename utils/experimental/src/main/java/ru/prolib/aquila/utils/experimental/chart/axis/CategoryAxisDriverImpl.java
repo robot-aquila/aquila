@@ -55,6 +55,18 @@ public class CategoryAxisDriverImpl extends AxisDriverImpl implements CategoryAx
 		if ( viewport.getPreferredNumberOfBars() != null ) {
 			numberOfBars = viewport.getPreferredNumberOfBars();
 		}
+		
+		// The special case: viewport length is zero
+		if ( numberOfBars == 0 ) {
+			return new CategoryAxisDisplayMapperHR(
+					segment.getStart(),
+					0,
+					0,
+					CDecimalBD.of((long) segment.getLength()),
+					allowBarWidthLtOne
+				);
+		}
+		
 		CDecimal barWidth = CDecimalBD.of((long) segment.getLength())
 				.divideExact((long) numberOfBars, BASE_SCALE);
 		if ( ! allowBarWidthLtOne && barWidth.compareTo(CDecimalBD.of(1L)) < 0 ) {

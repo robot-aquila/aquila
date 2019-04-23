@@ -224,4 +224,17 @@ public class CategoryAxisDriverImplTest {
 		assertEquals(new Segment1D(680, 12), actual.toDisplay(54));
 	}
 	
+	@Test
+	public void testCreateMapper_Right_ZeroBarsBugfix() {
+		viewport.setCategoryRangeByFirstAndNumber(0, 0);
+		viewport.setPreferredNumberOfBars(null);
+		
+		CategoryAxisDisplayMapper actual = driver.createMapper(new Segment1D(15, 200), viewport);
+		
+		assertEquals( 0, actual.getFirstVisibleCategory());
+		assertEquals(-1, actual.getLastVisibleCategory());
+		assertEquals( 0, actual.getNumberOfVisibleCategories());
+		assertEquals( 0, actual.getNumberOfVisibleBars());
+	}
+	
 }

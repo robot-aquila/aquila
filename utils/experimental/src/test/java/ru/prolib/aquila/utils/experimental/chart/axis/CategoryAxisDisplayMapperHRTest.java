@@ -356,5 +356,22 @@ public class CategoryAxisDisplayMapperHRTest {
 		assertEquals(8, found.getNumberOfVisibleCategories());
 		assertEquals(new Segment1D(14, 4), found.toDisplay(0));
 	}
+	
+	@Test
+	public void testGetPlotSize_SpecialCase_NoBars() {
+		mapper = new CategoryAxisDisplayMapperHR(15, 0, 0, of(150L), false);
+
+		assertEquals(150, mapper.getPlotSize());
+	}
+	
+	@Test
+	public void testGetPlot_SpecialCase_NoBars() {
+		mapper = new CategoryAxisDisplayMapperHR(15, 0, 0, of(150L), false);
+		
+		Segment1D actual = mapper.getPlot();
+		
+		Segment1D expected = new Segment1D(15, 150);
+		assertEquals(expected, actual);
+	}
 
 }

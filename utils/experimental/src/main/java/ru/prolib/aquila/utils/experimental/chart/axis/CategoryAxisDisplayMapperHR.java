@@ -160,6 +160,9 @@ public class CategoryAxisDisplayMapperHR implements CategoryAxisDisplayMapper {
 
 	@Override
 	public int getPlotSize() {
+		if ( numberOfBars <= 0 ) {
+			return barWidth.toBigDecimal().intValue();
+		}
 		return getSegmentOfBar(numberOfBars - 1).getEnd() - getPlotStart() + 1;
 	}
 	

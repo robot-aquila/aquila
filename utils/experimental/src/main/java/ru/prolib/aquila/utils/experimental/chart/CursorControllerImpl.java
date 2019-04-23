@@ -15,7 +15,7 @@ public class CursorControllerImpl implements CursorController {
 	private final BarChartPanel panel;
 	private final SelectedCategoryTrackerImpl sct;
 	private String currentChartID;
-	private int currentX, currentY;
+	protected int currentX, currentY;
 	
 	public CursorControllerImpl(BarChartPanel panel) {
 		this.panel = panel;
@@ -29,7 +29,9 @@ public class CursorControllerImpl implements CursorController {
 		}
 		Segment1D plot = cam.getPlot();
 		if ( cam.getAxisDirection().isHorizontal() ) {
-			if ( plot.contains(currentX) ) {
+			if ( plot.contains(currentX)
+			  && cam.getNumberOfVisibleCategories() > 0 )
+			{
 				try {
 					int absoluteIndex = cam.toCategory(currentX);
 					if ( absoluteIndex >= 0 ) {
