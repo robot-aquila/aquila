@@ -14,8 +14,6 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.probe.SchedulerImpl;
 import ru.prolib.aquila.probe.scheduler.Cmd;
-import ru.prolib.aquila.probe.scheduler.CmdSetExecutionSpeed;
-import ru.prolib.aquila.probe.scheduler.CmdShiftForward;
 import ru.prolib.aquila.probe.scheduler.SchedulerState;
 import ru.prolib.aquila.probe.scheduler.SchedulerWorker;
 
@@ -180,9 +178,9 @@ public class SchedulerBuilderTest {
 		builder.setWorkerThread(workerThreadMock)
 			.setCommandQueue(queueMock)
 			.setState(stateMock);
+		stateMock.setCurrentTime(T("1978-06-02T00:00:00Z"));
 		workerThreadMock.setDaemon(true);
 		workerThreadMock.start();
-		queueMock.put(new CmdShiftForward(T("1978-06-02T00:00:00Z")));
 		control.replay();
 
 		assertNotNull(builder.buildScheduler());
@@ -205,9 +203,9 @@ public class SchedulerBuilderTest {
 			.setWorkerThread(workerThreadMock)
 			.setCommandQueue(queueMock)
 			.setState(stateMock);
+		stateMock.setExecutionSpeed(2);
 		workerThreadMock.setDaemon(true);
 		workerThreadMock.start();
-		queueMock.put(new CmdSetExecutionSpeed(2));
 		control.replay();
 		
 		assertNotNull(builder.buildScheduler());

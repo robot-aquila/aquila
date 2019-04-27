@@ -133,6 +133,15 @@ public class SchedulerState extends Observable implements ThreadSynchronizer {
 		}
 	}
 	
+	public void setExecutionSpeed(int speed) {
+		lock.lock();
+		try {
+			executionSpeed = speed;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
 	/**
 	 * Test that there are tasks for execution before or exactly at current
 	 * time point. In other words is there task which must be executed prior
@@ -268,7 +277,7 @@ public class SchedulerState extends Observable implements ThreadSynchronizer {
 		}
 	}
 	
-	void setCurrentTime(Instant newTime) {
+	public void setCurrentTime(Instant newTime) {
 		lock.lock();
 		try {
 			this.currentTime = newTime;

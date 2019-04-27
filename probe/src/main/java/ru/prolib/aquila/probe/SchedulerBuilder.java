@@ -218,16 +218,17 @@ public class SchedulerBuilder {
 		if ( ! valid ) {
 			throw new IllegalStateException();
 		}
-		SchedulerImpl scheduler = new SchedulerImpl(getCommandQueue(), getState());
+		SchedulerState state = getState();
+		if ( initialTime != null ) {
+			state.setCurrentTime(initialTime);
+		}
+		if ( executionSpeed != null ) {
+			state.setExecutionSpeed(executionSpeed);
+		}
+		SchedulerImpl scheduler = new SchedulerImpl(getCommandQueue(), state);
 		Thread workerThread = getWorkerThread();
 		workerThread.setDaemon(true);
 		workerThread.start();
-		if ( initialTime != null ) {
-			scheduler.setCurrentTime(initialTime);
-		}
-		if ( executionSpeed != null ) {
-			scheduler.setExecutionSpeed(executionSpeed);
-		}
 		valid = false;
 		return scheduler;
 	}
