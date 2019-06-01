@@ -1,0 +1,22 @@
+<tutty secid="28334">
+    <secname>FOOBAR</secname>
+    <seccode>FOO-12.35</seccode>
+    <market>4</market>
+    <pname>pcs.</pname>
+    <mat_date>01.06.2019 06:26:15</mat_date>
+    <clearing_price>203.082</clearing_price>
+    <minprice>100.000</minprice>
+    <maxprice>300.000</maxprice>
+    <buy_deposit>278991.92</buy_deposit>
+    <sell_deposit>728001.10</sell_deposit>
+    <bgo_c>79.03</bgo_c>
+    <bgo_nc>86.12</bgo_nc>
+    <accruedint>0.02</accruedint>
+    <coupon_value>192.77</coupon_value>
+    <coupon_date>31.12.2019 00:00:00</coupon_date>
+    <coupon_period>12</coupon_period>
+    <facevalue>1000.00</facevalue>
+    <put_call>P</put_call>
+    <opt_type>M</opt_type>
+    <lot_volume>1</lot_volume>
+</tutty>

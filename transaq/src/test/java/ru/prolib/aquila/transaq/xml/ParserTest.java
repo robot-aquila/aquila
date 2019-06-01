@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +53,40 @@ public class ParserTest {
 	}
 	
 	@Test
+	public void testReadDate() throws Exception {
+		String xml = new StringBuilder()
+				.append("<foo>")
+					.append("<date1>01.06.2019 07:46:15.882</date1>")
+					.append("<date2>31.12.1978 14:20:12</date2>")
+					.append("<date3>11:37:15</date3>")
+				.append("</foo>")
+				.toString();
+		InputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		LocalDateTime actual1 = null, actual2 = null, actual3 = null;
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				switch ( sr.getLocalName() ) {
+				case "date1":
+					actual1 = service.readDate(sr);
+					break;
+				case "date2":
+					actual2 = service.readDate(sr);
+					break;
+				case "date3":
+					actual3 = service.readDate(sr);
+					break;
+				}
+				break;
+			}
+		}
+		assertEquals(LocalDateTime.of(2019,  6,  1,  7, 46, 15, 882000000), actual1);
+		assertEquals(LocalDateTime.of(1978, 12, 31, 14, 20, 12), actual2);
+		assertEquals(LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 37, 15)), actual3);
+	}
+	
+	@Test
 	public void testReadMarkets() throws Exception {
 		InputStream is = new FileInputStream(new File("fixture/markets.xml"));
 		XMLStreamReader sr = factory.createXMLStreamReader(is);
@@ -75,6 +112,19 @@ public class ParserTest {
 		expected.add(new Market(14, "MMA"));
 		expected.add(new Market(15, "ETS"));
 		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testReadMarkets_ThrowsUnexpectedTag() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/markets2.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				service.readMarkets(sr);
+				break;
+			}
+		}
 	}
 
 	@Test
@@ -104,6 +154,19 @@ public class ParserTest {
 		assertEquals(expected, actual);
 	}
 	
+	@Test (expected=IllegalStateException.class)
+	public void testReadBoards_ThrowsUnexpectedTags() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/boards2.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		while ( sr.hasNext() ) {
+        	switch ( sr.next() ) {
+        	case XMLStreamReader.START_ELEMENT:
+        		service.readBoards(sr);
+        		break;
+        	}
+		}
+	}
+	
 	@Test
 	public void testReadCandleKinds() throws Exception {
 		InputStream is = new FileInputStream(new File("fixture/candlekinds.xml"));
@@ -127,6 +190,19 @@ public class ParserTest {
 		expected.add(new CandleKind(5, 86400, "1 day"));
 		expected.add(new CandleKind(6, 604800, "1 week"));
 		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testReadCandleKinds_ThrowsUnexpectedTags() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/candlekinds2.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				service.readCandleKinds(sr);
+				break;
+			}
+		}
 	}
 	
 	@Test
@@ -199,8 +275,21 @@ public class ParserTest {
 		assertEquals(expected, actual);
 	}
 	
+	@Test (expected=IllegalStateException.class)
+	public void testReadSecurities_ThrowsUnexpectedTags() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/securities3.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				service.readSecurities(sr);
+				break;
+			}
+		}
+	}
+	
 	@Test
-	public void testReadSecurities_UnknownSecType() throws Exception {
+	public void testReadSecurities_UnknownSecTypeAndTags() throws Exception {
 		InputStream is = new FileInputStream(new File("fixture/securities1.xml"));
 		XMLStreamReader sr = factory.createXMLStreamReader(is);
 		List<DeltaUpdate> actual = null;
@@ -266,6 +355,104 @@ public class ParserTest {
 				.withToken(SecField.QUOTESTYPE, 1)
 				.buildUpdate());
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testReadSecInfo() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/sec_info.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		DeltaUpdate actual = null;
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_DOCUMENT:
+			case XMLStreamReader.START_ELEMENT:
+				if ( "sec_info".equals(sr.getLocalName()) ) {
+					actual = service.readSecInfo(sr);
+				}
+				break;
+			}
+		}
+		DeltaUpdate expected = new DeltaUpdateBuilder()
+				.withToken(SecField.SECID, 28334)
+				.withToken(SecField.SECNAME, "FOOBAR")
+				.withToken(SecField.SECCODE, "FOO-12.35")
+				.withToken(SecField.MARKETID, 4)
+				.withToken(SecField.PNAME, "pcs.")
+				.withToken(SecField.MAT_DATE, LocalDateTime.of(2019, 6, 1, 6, 26, 15))
+				.withToken(SecField.CLEARING_PRICE, of("203.082"))
+				.withToken(SecField.MINPRICE, of("100.000"))
+				.withToken(SecField.MAXPRICE, of("300.000"))
+				.withToken(SecField.BUY_DEPOSIT, of("278991.92"))
+				.withToken(SecField.SELL_DEPOSIT, of("728001.10"))
+				.withToken(SecField.BGO_C, of("79.03"))
+				.withToken(SecField.BGO_NC, of("86.12"))
+				.withToken(SecField.ACCRUED_INT, of("0.02"))
+				.withToken(SecField.COUPON_VALUE, of("192.77"))
+				.withToken(SecField.COUPON_DATE, LocalDateTime.of(2019, 12, 31, 0, 0, 0))
+				.withToken(SecField.COUPON_PERIOD, 12)
+				.withToken(SecField.FACE_VALUE, of("1000.00"))
+				.withToken(SecField.PUT_CALL, "P")
+				.withToken(SecField.OPT_TYPE, "M")
+				.withToken(SecField.LOT_VOLUME, 1)
+				.buildUpdate();
+		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testReadSecInfo_ThrowsUnexpectedTags() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/sec_info2.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				service.readSecInfo(sr);
+				break;
+			}
+		}
+	}
+	
+	@Test
+	public void testReadSecInfoUpd() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/sec_info_upd.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		DeltaUpdate actual = null;
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_DOCUMENT:
+			case XMLStreamReader.START_ELEMENT:
+				if ( "sec_info_upd".equals(sr.getLocalName()) ) {
+					actual = service.readSecInfoUpd(sr);
+				}
+				break;
+			}
+		}
+		DeltaUpdate expected = new DeltaUpdateBuilder()
+				.withToken(SecField.SECID, 66)
+				.withToken(SecField.SECCODE, "BRH0")
+				.withToken(SecField.MARKETID, 4)
+				.withToken(SecField.BUY_DEPOSIT, of("6132.61"))
+				.withToken(SecField.SELL_DEPOSIT, of("6467.30"))
+				.withToken(SecField.MINPRICE, of("61.97"))
+				.withToken(SecField.MAXPRICE, of("67.19"))
+				.withToken(SecField.POINT_COST, of("7625.71"))
+				.withToken(SecField.BGO_C, of("811.44"))
+				.withToken(SecField.BGO_NC, of("4640.88"))
+				.withToken(SecField.BGO_BUY, of("4605.53"))
+				.buildUpdate();
+		assertEquals(expected, actual);
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void testReadSecInfoUpd_ThrowsUnexpectedTag() throws Exception {
+		InputStream is = new FileInputStream(new File("fixture/sec_info_upd2.xml"));
+		XMLStreamReader sr = factory.createXMLStreamReader(is);
+		while ( sr.hasNext() ) {
+			switch ( sr.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				service.readSecInfoUpd(sr);
+				break;
+			}
+		}
 	}
 	
 	@Ignore

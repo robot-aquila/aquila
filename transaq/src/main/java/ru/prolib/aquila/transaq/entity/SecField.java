@@ -35,5 +35,6 @@ public class SecField {
 	public static final int PUT_CALL			= 5239; // string
 	public static final int OPT_TYPE			= 5240; // string
 	public static final int LOT_VOLUME			= 5241; // int
+	public static final int BGO_BUY				= 5242; // CDecimal
 
 }

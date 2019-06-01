@@ -3,6 +3,10 @@ package ru.prolib.aquila.transaq.xml;
 import static ru.prolib.aquila.transaq.entity.SecurityUpdate1.*;
 import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,6 +100,21 @@ public class Parser {
 		}
 	}
 	
+	public LocalDateTime readDate(XMLStreamReader reader) throws XMLStreamException {
+		String str_date = readCharacters(reader);
+		int len = str_date.length();
+		if ( len == 8 ) {
+			return LocalDateTime.of(
+					LocalDate.now(),
+					LocalTime.parse(str_date, DateTimeFormatter.ofPattern("HH:mm:ss"))
+				);
+		}
+		if ( len > 19 && ".".equals(str_date.substring(len - 4, len - 3)) ) {
+			return LocalDateTime.parse(str_date, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS"));
+		}
+		return LocalDateTime.parse(str_date,DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
+	}
+	
 	private Market readMarket(XMLStreamReader reader) throws XMLStreamException {
 		String str_id = reader.getAttributeValue(null, "id");
 		String str_name = readCharacters(reader).trim();
@@ -110,6 +129,9 @@ public class Parser {
 	}
 	
 	public List<Market> readMarkets(XMLStreamReader reader) throws XMLStreamException {
+		if ( ! "markets".equals(reader.getLocalName()) ) {
+			throw new IllegalStateException("Unexpected current element: " + reader.getLocalName());
+		}
 		List<Market> result = new ArrayList<>();
 		while ( reader.hasNext() ) {
         	switch ( reader.next() ) {
@@ -121,8 +143,11 @@ public class Parser {
         		}
         		break;
         	case XMLStreamReader.END_ELEMENT:
-        	case XMLStreamReader.END_DOCUMENT:
-        		return result;
+        		switch ( reader.getLocalName() ) {
+        		case "markets":
+        			return result;
+        		}
+        		break;
         	}
 		}
 		throw new XMLStreamException("Premature end of file");
@@ -148,16 +173,23 @@ public class Parser {
 				}
 				break;
 			case XMLStreamReader.END_ELEMENT:
-				if ( str_name == null || str_name.length() == 0 ) {
-					str_name = str_code + " [N/A]";
+				switch ( reader.getLocalName() ) {
+				case "board":
+					if ( str_name == null || str_name.length() == 0 ) {
+						str_name = str_code + " [N/A]";
+					}
+					return new Board(str_code, str_name, market, type);					
 				}
-				return new Board(str_code, str_name, market, type);
+				break;
 			}
 		}
 		throw new XMLStreamException("Premature end of file");
 	}
 	
 	public List<Board> readBoards(XMLStreamReader reader) throws XMLStreamException {
+		if ( ! "boards".equals(reader.getLocalName()) ) {
+			throw new IllegalStateException("Unexpected current element: " + reader.getLocalName());
+		}
 		List<Board> result = new ArrayList<>();
 		while ( reader.hasNext() ) {
         	switch ( reader.next() ) {
@@ -169,8 +201,11 @@ public class Parser {
         		}
         		break;
         	case XMLStreamReader.END_ELEMENT:
-        	case XMLStreamReader.END_DOCUMENT:
-        		return result;
+        		switch ( reader.getLocalName() ) {
+        		case "boards":
+        			return result;
+        		}
+        		break;
         	}
 		}
 		throw new XMLStreamException("Premature end of file");
@@ -195,16 +230,23 @@ public class Parser {
 				}
 				break;
 			case XMLStreamReader.END_ELEMENT:
-				if ( name == null || name.length() == 0 ) {
-					name = id + " [N/A]";
+				switch ( reader.getLocalName() ) {
+				case "kind":
+					if ( name == null || name.length() == 0 ) {
+						name = id + " [N/A]";
+					}
+					return new CandleKind(id, period, name);
 				}
-				return new CandleKind(id, period, name);
+				break;
 			}
 		}
 		throw new XMLStreamException("Premature end of file");
 	}
 	
 	public List<CandleKind> readCandleKinds(XMLStreamReader reader) throws XMLStreamException {
+		if ( ! "candlekinds".equals(reader.getLocalName()) ) {
+			throw new IllegalStateException("Unexpected current element: " + reader.getLocalName());
+		}
 		List<CandleKind> result = new ArrayList<>();
 		while ( reader.hasNext() ) {
 			switch ( reader.next() ) {
@@ -216,14 +258,19 @@ public class Parser {
 				}
 				break;
 			case XMLStreamReader.END_ELEMENT:
-			case XMLStreamReader.END_DOCUMENT:
-				return result;
+				switch ( reader.getLocalName() ) {
+				case "candlekinds":
+					return result;
+				}
+				break;
 			}
 		}
 		throw new XMLStreamException("Premature end of file");
 	}
 	
 	private DeltaUpdate readSecurity(XMLStreamReader reader) throws XMLStreamException {
+		Integer market_id = null;
+		String sec_code = null;
 		DeltaUpdateBuilder builder = new DeltaUpdateBuilder()
 				.withToken(SecField.SECID, getAttributeInt(reader, "secid"))
 				.withToken(SecField.ACTIVE, getAttributeBool(reader, "active"));
@@ -232,7 +279,7 @@ public class Parser {
 			case XMLStreamReader.START_ELEMENT:
 				switch ( reader.getLocalName() ) {
 				case "seccode":
-					builder.withToken(SecField.SECCODE, readCharacters(reader));
+					builder.withToken(SecField.SECCODE, sec_code = readCharacters(reader));
 					break;
 				case "instrclass":
 					builder.withToken(SecField.SECCLASS, readCharacters(reader));
@@ -241,7 +288,7 @@ public class Parser {
 					builder.withToken(SecField.DEFAULT_BOARDCODE, readCharacters(reader));
 					break;
 				case "market":
-					builder.withToken(SecField.MARKETID, readInt(reader));
+					builder.withToken(SecField.MARKETID, market_id = readInt(reader));
 					break;
 				case "shortname":
 					builder.withToken(SecField.SHORT_NAME, readCharacters(reader));
@@ -293,13 +340,22 @@ public class Parser {
 				}
 				break;
 			case XMLStreamReader.END_ELEMENT:
-				return builder.buildUpdate();
+				switch ( reader.getLocalName() ) {
+				case "security":
+					checkNotNull(sec_code, "seccode");
+					checkNotNull(market_id, "market");
+					return builder.buildUpdate();
+				}
+				break;
 			}
 		}
 		throw new XMLStreamException("Premature end of file");
 	}
 	
 	public List<DeltaUpdate> readSecurities(XMLStreamReader reader) throws XMLStreamException {
+		if ( ! "securities".equals(reader.getLocalName()) ) {
+			throw new IllegalStateException("Unexpected current element: " + reader.getLocalName());
+		}
 		List<DeltaUpdate> result = new ArrayList<>();
 		while ( reader.hasNext() ) {
 			switch ( reader.next() ) {
@@ -311,8 +367,159 @@ public class Parser {
 				}
 				break;
 			case XMLStreamReader.END_ELEMENT:
-			case XMLStreamReader.END_DOCUMENT:
-				return result;
+				switch ( reader.getLocalName() ) {
+				case "securities":
+					return result;
+				}
+				break;
+			}
+		}
+		throw new XMLStreamException("Premature end of file");
+	}
+	
+	public DeltaUpdate readSecInfo(XMLStreamReader reader) throws XMLStreamException {
+		if ( ! "sec_info".equals(reader.getLocalName()) ) {
+			throw new IllegalStateException("Unexpected current element: " + reader.getLocalName());
+		}
+		Integer market_id = null;
+		String sec_code = null;
+		DeltaUpdateBuilder builder = new DeltaUpdateBuilder()
+				.withToken(SecField.SECID, getAttributeInt(reader, "secid"));
+		while ( reader.hasNext() ) {
+			switch ( reader.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				switch ( reader.getLocalName() ) {
+				case "secname":
+					builder.withToken(SecField.SECNAME, readCharacters(reader));
+					break;
+				case "seccode":
+					builder.withToken(SecField.SECCODE, sec_code = readCharacters(reader));
+					break;
+				case "market":
+					builder.withToken(SecField.MARKETID,  market_id = readInt(reader));
+					break;
+				case "pname":
+					builder.withToken(SecField.PNAME, readCharacters(reader));
+					break;
+				case "mat_date":
+					builder.withToken(SecField.MAT_DATE, readDate(reader));
+					break;
+				case "clearing_price":
+					builder.withToken(SecField.CLEARING_PRICE, readDecimal(reader));
+					break;
+				case "minprice":
+					builder.withToken(SecField.MINPRICE, readDecimal(reader));
+					break;
+				case "maxprice":
+					builder.withToken(SecField.MAXPRICE, readDecimal(reader));
+					break;
+				case "buy_deposit":
+					builder.withToken(SecField.BUY_DEPOSIT, readDecimal(reader));
+					break;
+				case "sell_deposit":
+					builder.withToken(SecField.SELL_DEPOSIT, readDecimal(reader));
+					break;
+				case "bgo_c":
+					builder.withToken(SecField.BGO_C, readDecimal(reader));
+					break;
+				case "bgo_nc":
+					builder.withToken(SecField.BGO_NC, readDecimal(reader));
+					break;
+				case "accruedint":
+					builder.withToken(SecField.ACCRUED_INT, readDecimal(reader));
+					break;
+				case "coupon_value":
+					builder.withToken(SecField.COUPON_VALUE, readDecimal(reader));
+					break;
+				case "coupon_date":
+					builder.withToken(SecField.COUPON_DATE, readDate(reader));
+					break;
+				case "coupon_period":
+					builder.withToken(SecField.COUPON_PERIOD, readInt(reader));
+					break;
+				case "facevalue":
+					builder.withToken(SecField.FACE_VALUE, readDecimal(reader));
+					break;
+				case "put_call":
+					builder.withToken(SecField.PUT_CALL, readCharacters(reader));
+					break;
+				case "opt_type":
+					builder.withToken(SecField.OPT_TYPE, readCharacters(reader));
+					break;
+				case "lot_volume":
+					builder.withToken(SecField.LOT_VOLUME, readInt(reader));
+					break;
+				default:
+					break;
+				}
+				break;
+			case XMLStreamReader.END_ELEMENT:
+				switch ( reader.getLocalName() ) {
+				case "sec_info":
+					checkNotNull(sec_code, "seccode");
+					checkNotNull(market_id, "market");
+					return builder.buildUpdate();
+				}
+				break;
+			}
+		}
+		throw new XMLStreamException("Premature end of file");
+	}
+	
+	public DeltaUpdate readSecInfoUpd(XMLStreamReader reader) throws XMLStreamException {
+		if ( ! "sec_info_upd".equals(reader.getLocalName()) ) {
+			throw new IllegalStateException("Unexpected current element: " + reader.getLocalName());
+		}
+		Integer market_id = null;
+		String sec_code = null;
+		DeltaUpdateBuilder builder = new DeltaUpdateBuilder();
+		while ( reader.hasNext() ) {
+			switch ( reader.next() ) {
+			case XMLStreamReader.START_ELEMENT:
+				switch ( reader.getLocalName() ) {
+				case "secid":
+					builder.withToken(SecField.SECID, readInt(reader));
+					break;
+				case "market":
+					builder.withToken(SecField.MARKETID, market_id = readInt(reader));
+					break;
+				case "seccode":
+					builder.withToken(SecField.SECCODE, sec_code = readCharacters(reader));
+					break;
+				case "minprice":
+					builder.withToken(SecField.MINPRICE, readDecimal(reader));
+					break;
+				case "maxprice":
+					builder.withToken(SecField.MAXPRICE, readDecimal(reader));
+					break;
+				case "buy_deposit":
+					builder.withToken(SecField.BUY_DEPOSIT, readDecimal(reader));
+					break;
+				case "sell_deposit":
+					builder.withToken(SecField.SELL_DEPOSIT, readDecimal(reader));
+					break;
+				case "bgo_c":
+					builder.withToken(SecField.BGO_C, readDecimal(reader));
+					break;
+				case "bgo_nc":
+					builder.withToken(SecField.BGO_NC, readDecimal(reader));
+					break;
+				case "bgo_buy":
+					builder.withToken(SecField.BGO_BUY, readDecimal(reader));
+					break;
+				case "point_cost":
+					builder.withToken(SecField.POINT_COST, readDecimal(reader));
+					break;
+				}
+				break;
+			case XMLStreamReader.END_ELEMENT:
+				switch ( reader.getLocalName() ) {
+				case "sec_info_upd":
+					checkNotNull(sec_code, "seccode");
+					checkNotNull(market_id, "market");
+					return builder.buildUpdate();
+				}
+				break;
 			}
 		}
 		throw new XMLStreamException("Premature end of file");
