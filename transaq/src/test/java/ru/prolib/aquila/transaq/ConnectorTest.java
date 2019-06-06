@@ -7,6 +7,7 @@ import org.ini4j.Profile.Section;
 import org.ini4j.Wini;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.prolib.JTransaq.JTransaqHandler;
@@ -35,6 +36,7 @@ public class ConnectorTest {
 	}
 
 	@Test
+	@Ignore
 	public void testConnect() throws Exception {
 		XHandler handler = new XHandler();
 		Wini ini = new Wini(new File("fixture/transaq.ini"));

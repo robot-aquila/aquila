@@ -132,7 +132,7 @@ public class SecurityUpdate1Test {
 	@Test
 	public void testToString() {
 		String expected = new StringBuilder()
-				.append("Security[")
+				.append("SecurityUpdate1[")
 				.append("secID=41190,")
 				.append("active=true,")
 				.append("secCode=RIM9,")
