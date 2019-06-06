@@ -18,9 +18,7 @@
 		<module>probe</module>
 		<module>qforts</module>
 		<module>data</module>
-		<!-- module>datatools</module -->
 		<module>web-utils</module>
-		<module>transaq</module>
 		<module>utils/experimental</module>
 		<module>utils/finexp-quotelist</module>
 		<module>utils/finexp-futures</module>
