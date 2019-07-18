@@ -41,5 +41,23 @@ public class KVStoreHashTest {
 		assertEquals("charlie", service.get("zulu24"));
 		assertNull(service.get("bazooka"));
 	}
+	
+	@Test
+	public void testAdd() throws Exception {
+		assertSame(service, service.add("foo", "bar"));
+		assertSame(service, service.add("key", "val"));
+
+		Map<String, String> expected = new HashMap<>();
+		expected.put("foo", "bar");
+		expected.put("key", "val");
+		assertEquals(expected, data);
+	}
+	
+	@Test (expected=ConfigException.class)
+	public void testAdd_ThrowsIfAlreadyExists() throws Exception {
+		data.put("key", "value");
+		
+		service.add("key", "value");
+	}
 
 }
