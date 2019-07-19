@@ -12,6 +12,15 @@ public class OptionProviderKvs implements OptionProvider {
 	public OptionProviderKvs(KVStore store) {
 		this.store = store;
 	}
+	
+	/**
+	 * Get the underlying key-value store.
+	 * <p>
+	 * @return a key-store store instance
+	 */
+	public KVStore getStore() {
+		return store;
+	}
 
 	@Override
 	public boolean hasOption(String optionName) {

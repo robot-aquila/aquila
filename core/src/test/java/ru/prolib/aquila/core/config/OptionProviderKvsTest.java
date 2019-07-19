@@ -33,6 +33,14 @@ public class OptionProviderKvsTest {
 	}
 	
 	@Test
+	public void testGetStore() {
+		KVStoreHash store = new KVStoreHash();
+		service = new OptionProviderKvs(store);
+		
+		assertSame(store, service.getStore());
+	}
+	
+	@Test
 	public void testHasOption() throws Exception {
 		data.put("zulu24", "true");
 		data.put("foo", "bar");
