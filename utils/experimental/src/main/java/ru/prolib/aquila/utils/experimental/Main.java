@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		BasicConfigurator.configure();
 		System.exit(new Main().run(args));
 	}
 	

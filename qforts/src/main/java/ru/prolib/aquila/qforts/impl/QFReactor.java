@@ -1,6 +1,7 @@
 package ru.prolib.aquila.qforts.impl;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -8,12 +9,12 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.BusinessEntities.Account;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.L1UpdatableStreamContainer;
-import ru.prolib.aquila.core.BusinessEntities.MDUpdatableStreamContainer;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.SPRunnable;
 import ru.prolib.aquila.core.BusinessEntities.Security;
@@ -25,6 +26,7 @@ import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.data.DataSource;
 
 public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private static final Logger logger;
@@ -37,16 +39,24 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private final QFObjectRegistry registry;
 	private final AtomicLong seqOrderID;
 	private final QFSessionSchedule schedule;
-	private Terminal terminal;
+	private final DataSource dataSource;
+	private final Set<Symbol> subscribedSymbols;
+	private EditableTerminal terminal;
 	private TaskHandler taskHandler;
 	
-	public QFReactor(QForts facade, QFObjectRegistry registry,
-			QFSessionSchedule schedule, AtomicLong seqOrderID)
+	public QFReactor(QForts facade,
+					 QFObjectRegistry registry,
+					 QFSessionSchedule schedule,
+					 AtomicLong seqOrderID,
+					 DataSource dataSource,
+					 Set<Symbol> subscribed_symbols)
 	{
 		this.facade = facade;
 		this.registry = registry;
 		this.schedule = schedule;
 		this.seqOrderID = seqOrderID;
+		this.dataSource = dataSource;
+		this.subscribedSymbols = subscribed_symbols;
 	}
 	
 	/**
@@ -54,7 +64,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	 * <p>
 	 * @param terminal instance
 	 */
-	void setTerminal(Terminal terminal) {
+	void setTerminal(EditableTerminal terminal) {
 		this.terminal = terminal;
 	}
 	
@@ -63,7 +73,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	 * <p>
 	 * @return terminal instance
 	 */
-	Terminal getTerminal() {
+	EditableTerminal getTerminal() {
 		return terminal;
 	}
 	
@@ -87,13 +97,15 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 
 	@Override
 	public void run() {
-		Instant currentTime = null;
+		EditableTerminal terminal = null;
 		synchronized ( this ) {
-			if ( this.terminal == null ) {
-				return;
-			}
-			currentTime = terminal.getCurrentTime();
+			terminal = this.terminal;
 		}
+		if ( terminal == null ) {
+			return;
+		}
+		Instant currentTime = terminal.getCurrentTime();
+
 		try {
 			switch ( schedule.getCurrentProc(currentTime) ) {
 			case UPDATE_BY_MARKET:
@@ -121,28 +133,6 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	@Override
 	public boolean isLongTermTask() {
 		return false;
-	}
-
-	@Override
-	public void subscribeStateUpdates(EditableSecurity security) {
-		facade.registerSecurity(security);
-		//logger.debug("Security registered: {}", security.getSymbol());
-	}
-
-	@Override
-	public void subscribeLevel1Data(Symbol symbol, L1UpdatableStreamContainer container) {
-
-	}
-
-	@Override
-	public void subscribeLevel2Data(Symbol symbol, MDUpdatableStreamContainer container) {
-
-	}
-
-	@Override
-	public void subscribeStateUpdates(EditablePortfolio portfolio) {
-		facade.registerPortfolio(portfolio);
-		//logger.debug("Portfolio registered: {}", portfolio.getAccount());
 	}
 
 	@Override
@@ -240,6 +230,58 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 			}
 			break;
 		}
+	}
+
+	@Override
+	public void subscribe(Symbol symbol, EditableTerminal terminal) {
+		synchronized ( this ) {
+			if ( ! subscribedSymbols.add(symbol) ) {
+				return;
+			}
+		}
+		EditableSecurity security = terminal.getEditableSecurity(symbol);
+		facade.registerSecurity(security);
+		dataSource.subscribeL1(symbol, security);
+		dataSource.subscribeMD(symbol, security);
+		dataSource.subscribeSymbol(symbol, security);
+	}
+
+	@Override
+	public void unsubscribe(Symbol symbol, EditableTerminal terminal) {
+		synchronized ( this ) {
+			if ( ! subscribedSymbols.remove(symbol) ) {
+				return;
+			}
+		}
+		EditableSecurity security = terminal.getEditableSecurity(symbol);
+		dataSource.unsubscribeL1(symbol, security);
+		dataSource.unsubscribeMD(symbol, security);
+		dataSource.unsubscribeSymbol(symbol, security);
+	}
+
+	@Override
+	public void subscribe(Account account, EditableTerminal terminal) {
+		EditablePortfolio portfolio = null;
+		terminal.lock();
+		try {
+			if ( terminal.isPortfolioExists(account) ) {
+				return;
+			}
+			portfolio = terminal.getEditablePortfolio(account);
+		} finally {
+			terminal.unlock();
+		}
+		facade.registerPortfolio(portfolio);
+		try {
+			facade.changeBalance(portfolio, CDecimalBD.ofRUB2("1000000.00"));
+		} catch ( QFTransactionException e ) {
+			throw new IllegalStateException("Unable to change account balance: " + account, e);
+		}
+	}
+
+	@Override
+	public void unsubscribe(Account account, EditableTerminal terminal) {
+		
 	}
 
 }

@@ -11,6 +11,7 @@ import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.utils.PriceScaleDB;
 import ru.prolib.aquila.core.utils.PriceScaleDBLazy;
 import ru.prolib.aquila.core.utils.PriceScaleDBTB;
+import ru.prolib.aquila.data.DataSource;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.MDStorage;
 import ru.prolib.aquila.qforts.impl.QFBuilder;
@@ -122,8 +123,13 @@ public class DataServiceLocator {
 	}
 	
 	private DataProvider createDataProvider() {
-		return new WUDataFactory().decorateForSymbolAndL1DataReplayFM(qfBuilder.buildDataProvider(),
-				getScheduler(), getDataRootDirectory(), getPriceScaleDB());
+		DataSource data_dource = new WUDataFactory()
+				.createForSymbolAndL1DataReplayFM(
+						getScheduler(),
+						getDataRootDirectory(),
+						getPriceScaleDB()
+					);
+		return qfBuilder.withDataSource(data_dource).buildDataProvider();
 	}
 	
 	private EditableTerminal createTerminal() {

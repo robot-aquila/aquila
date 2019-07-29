@@ -18,6 +18,7 @@ public class QFortsEnv {
 	public Portfolio createPortfolio(Account account, CDecimal balance)
 			throws QFTransactionException
 	{
+		terminal.subscribe(account);
 		EditablePortfolio p = terminal.getEditablePortfolio(account);
 		facade.changeBalance(p, balance);
 		return p;

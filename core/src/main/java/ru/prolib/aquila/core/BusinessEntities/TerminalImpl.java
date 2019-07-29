@@ -252,7 +252,6 @@ public class TerminalImpl implements EditableTerminal {
 		} finally {
 			lock.unlock();
 		}
-		dataProvider.subscribeStateUpdates(portfolio);
 		return portfolio;
 	}
 	
@@ -437,25 +436,22 @@ public class TerminalImpl implements EditableTerminal {
 
 	@Override
 	public void subscribe(Symbol symbol) {
-		EditableSecurity security = null;
-		lock.lock();
-		try {
-			if ( ! isSecurityExists(symbol) ) {
-				security = getEditableSecurity(symbol);
-			}
-		} finally {
-			lock.unlock();
-		}
-		if ( security != null ) {
-			dataProvider.subscribeStateUpdates(security);
-			dataProvider.subscribeLevel1Data(symbol, security);
-			dataProvider.subscribeLevel2Data(symbol, security);
-		}
+		dataProvider.subscribe(symbol, this);
 	}
 	
 	@Override
 	public void unsubscribe(Symbol symbol) {
-		// Just a stub method at the moment
+		dataProvider.unsubscribe(symbol, this);
+	}
+	
+	@Override
+	public void subscribe(Account account) {
+		dataProvider.subscribe(account, this);
+	}
+	
+	@Override
+	public void unsubscribe(Account account) {
+		dataProvider.unsubscribe(account, this);
 	}
 	
 	@Override

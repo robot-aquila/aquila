@@ -29,7 +29,6 @@ import ru.prolib.aquila.core.TestEventQueueImpl;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParamsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParamsBuilder;
-import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParamsBuilder;
 import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
@@ -282,7 +281,6 @@ public class TerminalImplTest {
 				.withAccount(account1)
 				.buildParams());
 		expect(objectFactoryMock.createPortfolio(terminalWithMocks, account1)).andReturn(portfolioStub);
-		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		control.replay();
 		
 		EditablePortfolio actual = terminalWithMocks.getEditablePortfolio(account1);
@@ -605,7 +603,6 @@ public class TerminalImplTest {
 				.withOrderID(834L)
 				.buildParams());
 		expect(objectFactoryMock.createPortfolio(terminalWithMocks, account3)).andReturn(portfolioStub);
-		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		expect(dataProviderMock.getNextOrderID()).andReturn(834L);
 		expect(objectFactoryMock.createOrder(terminalWithMocks, account3, symbol3, 834L)).andReturn(orderStub);
 		expect(schedulerMock.getCurrentTime()).andStubReturn(T("2017-08-04T21:30:00Z"));
@@ -656,7 +653,6 @@ public class TerminalImplTest {
 				.withOrderID(1028L)
 				.buildParams());
 		expect(objectFactoryMock.createPortfolio(terminalWithMocks, account1)).andReturn(portfolioStub);
-		dataProviderMock.subscribeStateUpdates(portfolioStub);
 		expect(dataProviderMock.getNextOrderID()).andReturn(1028L);
 		expect(objectFactoryMock.createOrder(terminalWithMocks, account1, symbol1, 1028L)).andReturn(orderStub);
 		expect(schedulerMock.getCurrentTime()).andStubReturn(T("2017-08-04T21:40:00Z"));
@@ -822,29 +818,41 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testSubscribe() {
-		EditableSecurity securityStub =
-			new SecurityImpl(new SecurityParamsBuilder(terminalWithMocks.getEventQueue())
-				.withTerminal(terminalWithMocks)
-				.withSymbol(symbol1)
-				.buildParams());
-		expect(objectFactoryMock.createSecurity(terminalWithMocks, symbol1)).andReturn(securityStub);
-		dataProviderMock.subscribeStateUpdates(securityStub);
-		dataProviderMock.subscribeLevel1Data(symbol1, securityStub);
-		dataProviderMock.subscribeLevel2Data(symbol1, securityStub);
+	public void testSubscribe_Symbol() {
+		dataProviderMock.subscribe(symbol1, terminalWithMocks);
 		control.replay();
 		
 		terminalWithMocks.subscribe(symbol1);
-		terminalWithMocks.subscribe(symbol1); // shouldn't subscribe
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testUnsubscribe() {
+	public void testUnsubscribe_Symbol() {
+		dataProviderMock.unsubscribe(symbol1, terminalWithMocks);
 		control.replay();
 
 		terminalWithMocks.unsubscribe(symbol1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testSubscibe_Account() {
+		dataProviderMock.subscribe(account1, terminalWithMocks);
+		control.replay();
+		
+		terminalWithMocks.subscribe(account1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUnsubscribe_Account() {
+		dataProviderMock.unsubscribe(account2, terminalWithMocks);
+		control.replay();
+		
+		terminalWithMocks.unsubscribe(account2);
 		
 		control.verify();
 	}

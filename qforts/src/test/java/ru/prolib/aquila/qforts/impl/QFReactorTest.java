@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.BasicConfigurator;
+import org.easymock.Capture;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -31,6 +32,7 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.DataProviderStub;
+import ru.prolib.aquila.data.DataSource;
 
 public class QFReactorTest {
 	private static final Symbol symbol = new Symbol("MSFT");
@@ -38,11 +40,13 @@ public class QFReactorTest {
 	private QForts facadeMock;
 	private QFObjectRegistry registryMock;
 	private QFSessionSchedule scheduleMock;
+	private DataSource dsMock;
 	private AtomicLong seqOrderID;
 	private EditableTerminal terminal;
 	private EditableSecurity security;
 	private SchedulerStub schedulerStub;
 	private QFReactor reactor;
+	private Set<Symbol> subscribed_symbols;
 	
 	static Instant T(String timeString) {
 		return Instant.parse(timeString);
@@ -60,6 +64,7 @@ public class QFReactorTest {
 		facadeMock = control.createMock(QForts.class);
 		registryMock = control.createMock(QFObjectRegistry.class);
 		scheduleMock = control.createMock(QFSessionSchedule.class);
+		dsMock = control.createMock(DataSource.class);
 		seqOrderID = new AtomicLong(1000L);
 		schedulerStub = new SchedulerStub();
 		terminal = new BasicTerminalBuilder()
@@ -68,7 +73,15 @@ public class QFReactorTest {
 			.buildTerminal();
 		security = terminal.getEditableSecurity(symbol);
 		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"));
-		reactor = new QFReactor(facadeMock, registryMock, scheduleMock, seqOrderID);
+		subscribed_symbols = new HashSet<>();
+		reactor = new QFReactor(
+				facadeMock,
+				registryMock,
+				scheduleMock,
+				seqOrderID,
+				dsMock,
+				subscribed_symbols
+			);
 	}
 	
 	@Test
@@ -137,42 +150,88 @@ public class QFReactorTest {
 	public void testIsLongTermTask() {
 		assertFalse(reactor.isLongTermTask());
 	}
-	
+
 	@Test
-	public void testSubscribeStateUpdates_Security() {
+	public void testSubscribe_Symbol_IfAlreadySubscribed() {
+		subscribed_symbols.add(symbol);
+		control.replay();
+		
+		reactor.subscribe(symbol, terminal);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testSubscribe_Symbol_IfNotYetSubscribed() {
 		facadeMock.registerSecurity(security);
+		dsMock.subscribeL1(symbol, security);
+		dsMock.subscribeMD(symbol, security);
+		dsMock.subscribeSymbol(symbol, security);
 		control.replay();
 		
-		reactor.subscribeStateUpdates(security);
+		reactor.subscribe(symbol, terminal);
+		
+		control.verify();
+		assertTrue(subscribed_symbols.contains(symbol));
+	}
+	
+	@Test
+	public void testUnsubscribe_Symbol_IfNotSubscribed() {
+		control.replay();
+		
+		reactor.unsubscribe(symbol, terminal);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testSubscribeLevel1Data() {
+	public void testUnsubscribe_Symbol_IfSubscribed() {
+		subscribed_symbols.add(symbol);
+		dsMock.unsubscribeL1(symbol, security);
+		dsMock.unsubscribeMD(symbol, security);
+		dsMock.unsubscribeSymbol(symbol, security);
 		control.replay();
 		
-		reactor.subscribeLevel1Data(symbol, security);
+		reactor.unsubscribe(symbol, terminal);
+		
+		control.verify();
+		assertFalse(subscribed_symbols.contains(symbol));
+	}
+	
+	@Test
+	public void testSubscribe_Account_IfExists() {
+		Account account = new Account("FOO-237");
+		terminal.getEditablePortfolio(account);
+		control.replay();
+		
+		reactor.subscribe(account, terminal);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testSubscribeLevel2Data() {
+	public void testSubscribe_Account_IfNotExists() throws Exception {
+		Account account = new Account("FOO-237");
+		Capture<EditablePortfolio> cap1 = Capture.newInstance();
+		Capture<EditablePortfolio> cap2 = Capture.newInstance();
+		facadeMock.registerPortfolio(capture(cap1));
+		facadeMock.changeBalance(capture(cap2), eq(CDecimalBD.ofRUB2("1000000.00")));
 		control.replay();
 		
-		reactor.subscribeLevel2Data(symbol, security);
+		reactor.subscribe(account, terminal);
 		
 		control.verify();
+		assertTrue(terminal.isPortfolioExists(account));
+		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		assertSame(portfolio, cap1.getValue());
+		assertSame(portfolio, cap2.getValue());
 	}
 	
 	@Test
-	public void testSubscribeStateUpdates_Portfolio() {
-		EditablePortfolio portfolio = terminal.getEditablePortfolio(new Account("TEST"));
-		facadeMock.registerPortfolio(portfolio);
+	public void testUnsubscribe_Account() {
 		control.replay();
 		
-		reactor.subscribeStateUpdates(portfolio);
+		reactor.unsubscribe(new Account("ANY"), terminal);
 		
 		control.verify();
 	}

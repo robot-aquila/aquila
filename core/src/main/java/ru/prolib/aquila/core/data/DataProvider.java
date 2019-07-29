@@ -7,14 +7,6 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  */
 public interface DataProvider {
 	
-	public void subscribeStateUpdates(EditableSecurity security);
-	
-	public void subscribeLevel1Data(Symbol symbol, L1UpdatableStreamContainer container);
-	
-	public void subscribeLevel2Data(Symbol symbol, MDUpdatableStreamContainer container);
-	
-	public void subscribeStateUpdates(EditablePortfolio portfolio);
-	
 	public long getNextOrderID();
 	
 	public void subscribeRemoteObjects(EditableTerminal terminal);
@@ -24,5 +16,10 @@ public interface DataProvider {
 	public void registerNewOrder(EditableOrder order) throws OrderException;
 	
 	public void cancelOrder(EditableOrder order) throws OrderException;
+
+	void subscribe(Symbol symbol, EditableTerminal terminal);
+	void unsubscribe(Symbol symbol, EditableTerminal terminal);
+	void subscribe(Account account, EditableTerminal terminal);
+	void unsubscribe(Account account, EditableTerminal terminal);
 
 }

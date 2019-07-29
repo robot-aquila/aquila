@@ -117,6 +117,20 @@ public interface Terminal extends Scheduler, BusinessEntity {
 	 * @param symbol - the symbol to unsubscribe
 	 */
 	public void unsubscribe(Symbol symbol);
+	
+	/**
+	 * Subscribe for account updates.
+	 * <p>
+	 * @param account - full account identifier
+	 */
+	public void subscribe(Account account);
+	
+	/**
+	 * Stop subscription for account updates.
+	 * <p>
+	 * @param account - account identifier
+	 */
+	public void unsubscribe(Account account);
 
 	/**
 	 * Test that order exists.

@@ -1,9 +1,11 @@
 package ru.prolib.aquila.qforts.impl;
 
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.data.DataSource;
 
 public class QFBuilder {
 	private AtomicLong seqOrderID, seqExecutionID;
@@ -11,9 +13,17 @@ public class QFBuilder {
 	private QFObjectRegistry registry;
 	private QFTransactionService transactions;
 	private QFSessionSchedule schedule;
+	private DataSource dataSource;
 	
 	public DataProvider buildDataProvider() {
-		return new QFReactor(getFacade(), getRegistry(), getSchedule(), getOrderIDSequence());
+		return new QFReactor(
+				getFacade(),
+				getRegistry(),
+				getSchedule(),
+				getOrderIDSequence(),
+				getDataSource(),
+				new HashSet<>()
+			);
 	}
 	
 	public QFortsEnv buildEnvironment(EditableTerminal terminal) {
@@ -60,6 +70,18 @@ public class QFBuilder {
 			schedule = new QFSessionSchedule();
 		}
 		return schedule;
+	}
+	
+	private DataSource getDataSource() {
+		if ( dataSource == null ) {
+			throw new IllegalStateException("Data source was not specified");
+		}
+		return dataSource;
+	}
+	
+	public QFBuilder withDataSource(DataSource data_source) {
+		this.dataSource = data_source;
+		return this;
 	}
 
 }
