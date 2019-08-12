@@ -17,6 +17,7 @@
 		<module>ui</module>
 		<module>probe</module>
 		<module>qforts</module>
+		<module>exante</module>
 		<module>data</module>
 		<module>web-utils</module>
 		<module>utils/experimental</module>
