@@ -1,10 +1,6 @@
 package ru.prolib.aquila.exante;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +16,8 @@ import quickfix.SessionID;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.MsgSeqNum;
 import quickfix.field.MsgType;
-import quickfix.field.NoRelatedSym;
 import quickfix.field.Password;
-import quickfix.field.SecurityID;
-import quickfix.field.SecurityRequestResult;
-import quickfix.field.TotNoRelatedSym;
 import quickfix.fix44.BusinessMessageReject;
-import quickfix.fix44.MessageCracker;
 import quickfix.fix44.SecurityList;
 import quickfix.fix44.SecurityListRequest;
 
@@ -108,7 +99,7 @@ public class XApplication implements Application {
 		MsgSeqNum msg_seq_num = new MsgSeqNum();
 		message.getHeader().getField(msg_type);
 		message.getHeader().getField(msg_seq_num);
-		logger.debug("incoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
+		//logger.debug("incoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
 
 		switch ( msg_type.getValue() ) {
 		case MsgType.SECURITY_LIST:

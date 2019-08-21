@@ -2,6 +2,7 @@ package ru.prolib.aquila.exante;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +61,7 @@ public class XTest {
 		return result;
 	}
 	
-	@Ignore
+	//@Ignore
 	@Test
 	public void testConnection() throws Exception {
 		SessionSettings session_settings = new SessionSettings("fixture/fix_broker.ini");
@@ -83,7 +84,9 @@ public class XTest {
 
 		Thread.sleep(2000L);
 		
-		security_list_messages.list(new SecurityListTestHandler());
+		File report_file = new File("test-output.txt");
+		report_file.delete();
+		security_list_messages.list(new SecurityListTestHandler(report_file));
 
 		/*
 		SessionID session_id_trade = ;
