@@ -1,5 +1,7 @@
 package ru.prolib.aquila.exante;
 
+import quickfix.ConfigError;
+import quickfix.RuntimeError;
 import quickfix.SessionID;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
@@ -35,11 +37,16 @@ public class XDataProvider implements DataProvider {
 				return true;
 			}
 		});
+		try {
+			serviceLocator.getBrokerInitiator().start();
+		} catch ( RuntimeError|ConfigError e ) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
 	public void unsubscribeRemoteObjects(EditableTerminal terminal) {
-		// TODO Auto-generated method stub
+		serviceLocator.getBrokerInitiator().stop();
 	}
 
 	@Override
