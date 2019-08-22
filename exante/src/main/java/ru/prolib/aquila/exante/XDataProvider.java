@@ -1,13 +1,24 @@
 package ru.prolib.aquila.exante;
 
+import quickfix.SessionID;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
 public class XDataProvider implements DataProvider {
+	private final XServiceLocator serviceLocator;
+	
+	public XDataProvider(XServiceLocator service_locator) {
+		this.serviceLocator = service_locator;
+	}
+	
+	public XServiceLocator getServiceLocator() {
+		return serviceLocator;
+	}
 
 	@Override
 	public long getNextOrderID() {
@@ -16,14 +27,19 @@ public class XDataProvider implements DataProvider {
 
 	@Override
 	public void subscribeRemoteObjects(EditableTerminal terminal) {
-		// TODO Auto-generated method stub
-		
+		SessionID broker_session_id = serviceLocator.getBrokerSessionID();
+		serviceLocator.getSessionActions().addLogonAction(broker_session_id, new XLogonAction() {
+			@Override
+			public boolean onLogon(SessionID session_id) {
+				serviceLocator.getSecurityListMessages().list(new SecurityListHandler(terminal));
+				return true;
+			}
+		});
 	}
 
 	@Override
 	public void unsubscribeRemoteObjects(EditableTerminal terminal) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

@@ -8,7 +8,6 @@ import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
 import quickfix.SessionID;
-import quickfix.SessionNotFound;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.CFICode;
 import quickfix.field.SecurityListRequestType;
@@ -41,14 +40,14 @@ public class XSecurityListMessages {
 		this(new XMessageDispatcher(session_id));
 	}
 	
-	public void list(XResponseHandler handler) throws SessionNotFound {
+	public void list(XResponseHandler handler) {
 		SecurityListRequest request = newRequest(handler);
 		request.set(new SecurityListRequestType(SecurityListRequestType.ALL_SECURITIES));
 		dispatcher.send(request);
 		logger.debug("Request sent");
 	}
 	
-	public void list(CFICode code, XResponseHandler handler) throws SessionNotFound {
+	public void list(CFICode code, XResponseHandler handler) {
 		SecurityListRequest request = newRequest(handler);
 		request.set(new SecurityListRequestType(SecurityListRequestType.SECURITYTYPE_AND_OR_CFICODE));
 		request.set(code);
@@ -56,7 +55,7 @@ public class XSecurityListMessages {
 		logger.debug("Request sent (CFI code={})", code.getValue());
 	}
 	
-	public void list(Symbol symbol, XResponseHandler handler) throws SessionNotFound {
+	public void list(Symbol symbol, XResponseHandler handler) {
 		SecurityListRequest request = newRequest(handler);
 		request.set(new SecurityListRequestType(SecurityListRequestType.SYMBOL));
 		request.set(symbol);

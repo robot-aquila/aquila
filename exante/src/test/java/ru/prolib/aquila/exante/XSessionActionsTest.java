@@ -22,7 +22,7 @@ import org.junit.Test;
 import quickfix.SessionID;
 
 public class XSessionActionsTest {
-	private static final boolean dump_result_matrix = true;
+	private static final boolean dump_result_matrix = false;
 	
 	private IMocksControl control;
 	private SessionID sidMock1, sidMock2, sidMock3;

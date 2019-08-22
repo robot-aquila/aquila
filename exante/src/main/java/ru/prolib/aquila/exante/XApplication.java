@@ -29,31 +29,36 @@ public class XApplication implements Application {
 	}
 	
 	private final Map<SessionID, String> sessionPasswords;
+	private final XSessionActions sessionActions;
 	private final XSecurityListMessages securityListMessages;
 	
 	public XApplication(
 			Map<SessionID, String> session_passwords,
+			XSessionActions session_actions,
 			XSecurityListMessages security_list_messages)
 	{
 		this.sessionPasswords = session_passwords;
+		this.sessionActions = session_actions;
 		this.securityListMessages = security_list_messages;
 	}
 
 	@Override
 	public void onCreate(SessionID session_id) {
-		logger.debug("create {}", session_id);
+		//logger.debug("create {}", session_id);
 	}
 
 	@Override
 	public void onLogon(SessionID session_id) {
 		// when connection established
 		logger.debug("logon {}", session_id);
+		sessionActions.onLogon(session_id);
 	}
 
 	@Override
 	public void onLogout(SessionID session_id) {
 		// when connection closed
 		logger.debug("logout {}", session_id);
+		sessionActions.onLogout(session_id);
 	}
 	
 	@Override

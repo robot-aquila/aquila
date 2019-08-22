@@ -12,8 +12,12 @@ public class XMessageDispatcher {
 		this.sessionID = session_id;
 	}
 	
-	public void send(Message message) throws SessionNotFound {
-		Session.sendToTarget(message, sessionID);
+	public void send(Message message) {
+		try {
+			Session.sendToTarget(message, sessionID);
+		} catch ( SessionNotFound e ) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

@@ -89,7 +89,7 @@ public class SecurityListTestHandler implements XResponseHandler {
 			message.getGroup(i, symbol_group);
 			SecurityID exante_id = symbol_group.getSecurityID();
 			//logger.debug(exante_id.toString());
-			//symbols.add(exante_id.toString());
+			symbols.add(exante_id.toString());
 			CFICode cfi_code = symbol_group.getCFICode();
 			if ( ! cfi_code.getValue().equals("EXXXXX") ) {
 				continue;
@@ -112,7 +112,27 @@ public class SecurityListTestHandler implements XResponseHandler {
 			printer.print(" MaturityDate=" + (symbol_group.isSetMaturityDate() ?
 					symbol_group.getMaturityDate().getValue() : na));
 			
-			NoInstrAttrib no_attrs = symbol_group.getNoInstrAttrib();
+			//NoInstrAttrib no_attrs = symbol_group.getNoInstrAttrib();
+			if ( symbol_group.isSetNoInstrAttrib() ) {
+				int attr_count = symbol_group.getNoInstrAttrib().getValue();
+				SecurityList.NoRelatedSym.NoInstrAttrib attr_group = new SecurityList.NoRelatedSym.NoInstrAttrib();
+				for ( int k = 1; k <= attr_count; k ++ ) {
+					symbol_group.getGroup(k, attr_group);
+					int attr_type = attr_group.getInstrAttribType().getValue();
+					String attr_value = attr_group.getInstrAttribValue().getValue();
+					switch ( attr_type ) {
+					case 500:
+					case 501:
+					case 502:
+					case 503:
+					case 504:
+					case 505:
+					default:
+						printer.print(" Attr[" + attr_type + "]=[" + attr_value + "]");
+					}
+				}
+			}
+
 			
 			printer.println();
 		}
