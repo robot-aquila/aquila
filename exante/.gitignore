@@ -4,3 +4,9 @@
 target/
 *~
 test-output.txt
+fixture/fix_broker.ini
+fixture/fix/files/*
+fixture/fix/logs/*
+!fixture/fix/files/empty
+!fixture/fix/logs/empty
+
