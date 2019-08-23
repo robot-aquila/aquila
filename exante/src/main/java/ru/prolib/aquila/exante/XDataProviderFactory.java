@@ -48,6 +48,7 @@ public class XDataProviderFactory {
 				new DefaultMessageFactory()
 			);
 		XServiceLocator service_locator = new XServiceLocator(
+				new XSymbolRepository(),
 				broker_session_id,
 				session_actions,
 				security_list_messages,

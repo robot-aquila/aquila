@@ -22,6 +22,8 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.exante.XResponseHandler;
+import ru.prolib.aquila.exante.XSymbol;
+import ru.prolib.aquila.exante.XSymbolRepository;
 
 public class SecurityListHandler implements XResponseHandler {
 	private static final Logger logger;
@@ -31,11 +33,13 @@ public class SecurityListHandler implements XResponseHandler {
 	}
 	
 	private final EditableTerminal terminal;
+	private final XSymbolRepository symbols;
 	private boolean firstResponse;
 	private int expectedSymbols, receivedSymbols;
 	
-	public SecurityListHandler(EditableTerminal terminal) {
+	public SecurityListHandler(EditableTerminal terminal, XSymbolRepository symbols) {
 		this.terminal = terminal;
+		this.symbols = symbols;
 		this.firstResponse = true;
 		this.expectedSymbols = 0;
 		this.receivedSymbols = 0;
@@ -100,17 +104,26 @@ public class SecurityListHandler implements XResponseHandler {
 			x_currency = symbol_group.getCurrency().getValue();
 		}
 		
-		if ( x_exchange_id == null || x_currency == null ) {
-			return;
-		}
-		if ( ! x_security_id.equals(x_symbol + "." + x_exchange_id) ) {
-			return;
-		}
-		if ( ! x_cfi_code.equals("EXXXXX") ) {
-			return;
+		SymbolType a_type = null;
+		switch ( x_cfi_code ) {
+		case "EXXXXX":
+			if ( x_exchange_id == null
+			  || x_currency == null
+			  || ! x_security_id.equals(x_symbol + "." + x_exchange_id) )
+			{
+				return;
+			}
+			a_type = SymbolType.STOCK;
+			break;
+		case "MRCXXX":
+			// we need this (FOREX) to process positions
+			a_type = SymbolType.CURRENCY;
+			break;
+		default:
+			return;	
 		}
 		
-		Symbol a_symbol = new Symbol(x_symbol, x_exchange_id, x_currency, SymbolType.STOCK);
+		Symbol a_symbol = new Symbol(x_symbol, x_exchange_id, x_currency, a_type);
 		DeltaUpdateBuilder builder = new DeltaUpdateBuilder()
 				.withTime(current_time)
 				.withToken(SecurityField.DISPLAY_NAME, x_symbol)
@@ -142,6 +155,7 @@ public class SecurityListHandler implements XResponseHandler {
 				}
 			}
 		}
+		symbols.register(a_symbol, new XSymbol(x_symbol, x_security_id, x_exchange_id, x_cfi_code, x_currency));
 		EditableSecurity security = terminal.getEditableSecurity(a_symbol);
 		security.consume(builder.buildUpdate());
 	}

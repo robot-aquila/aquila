@@ -4,6 +4,7 @@ import quickfix.Initiator;
 import quickfix.SessionID;
 
 public class XServiceLocator {
+	private final XSymbolRepository symbolRepository;
 	private final SessionID brokerSessionID;
 	private final XSessionActions sessionActions;
 	private final XSecurityListMessages securityListMessages;
@@ -11,6 +12,7 @@ public class XServiceLocator {
 	private final Initiator brokerInitiator;
 	
 	public XServiceLocator(
+			XSymbolRepository symbol_repository,
 			SessionID broker_session_id,
 			XSessionActions session_actions,
 			XSecurityListMessages security_list_messages,
@@ -18,11 +20,16 @@ public class XServiceLocator {
 			Initiator broker_initiator
 		)
 	{
+		this.symbolRepository = symbol_repository;
 		this.brokerSessionID = broker_session_id;
 		this.sessionActions = session_actions;
 		this.securityListMessages = security_list_messages;
 		this.accountSummaryMessages = account_summary_messages;
 		this.brokerInitiator = broker_initiator;
+	}
+	
+	public XSymbolRepository getSymbolRepository() {
+		return symbolRepository;
 	}
 
 	public SessionID getBrokerSessionID() {

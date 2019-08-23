@@ -9,7 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.exante.rh.AccountSummaryTestHandler;
+import ru.prolib.aquila.exante.rh.AccountSummaryHandler;
 import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
 public class XDataProvider implements DataProvider {
@@ -31,12 +31,20 @@ public class XDataProvider implements DataProvider {
 	@Override
 	public void subscribeRemoteObjects(EditableTerminal terminal) {
 		SessionID broker_session_id = serviceLocator.getBrokerSessionID();
+		XSymbolRepository symbols = serviceLocator.getSymbolRepository();
 		serviceLocator.getSessionActions().addLogonAction(broker_session_id, new XLogonAction() {
 			@Override
 			public boolean onLogon(SessionID session_id) {
-				serviceLocator.getSecurityListMessages().list(new SecurityListHandler(terminal));
-				serviceLocator.getAccountSummaryMessages().query(new AccountSummaryTestHandler());
-				return true;
+				serviceLocator.getSecurityListMessages()
+					.list(new SecurityListHandler(terminal, symbols) {
+						@Override
+						public void close() {
+							super.close();
+							serviceLocator.getAccountSummaryMessages()
+								.query(new AccountSummaryHandler(terminal, symbols));
+						}
+					});
+				return false;
 			}
 		});
 		try {
