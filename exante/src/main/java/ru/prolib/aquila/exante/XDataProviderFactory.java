@@ -34,8 +34,14 @@ public class XDataProviderFactory {
 		session_passwords.put(broker_session_id, session_settings.getString(broker_session_id, "password"));
 		XSessionActions session_actions = new XSessionActions();
 		XSecurityListMessages security_list_messages = new XSecurityListMessages(broker_session_id);
+		XAccountSummaryMessages account_summary_messages = new XAccountSummaryMessages(broker_session_id);
 		Initiator broker_initiator = new SocketInitiator(
-				new XApplication(session_passwords, session_actions, security_list_messages),
+				new XApplication(
+						session_passwords,
+						session_actions,
+						security_list_messages,
+						account_summary_messages
+					),
 				new FileStoreFactory(session_settings),
 				session_settings,
 				new FileLogFactory(session_settings),
@@ -45,6 +51,7 @@ public class XDataProviderFactory {
 				broker_session_id,
 				session_actions,
 				security_list_messages,
+				account_summary_messages,
 				broker_initiator
 			);
 		return new XDataProvider(service_locator);

@@ -7,18 +7,21 @@ public class XServiceLocator {
 	private final SessionID brokerSessionID;
 	private final XSessionActions sessionActions;
 	private final XSecurityListMessages securityListMessages;
+	private final XAccountSummaryMessages accountSummaryMessages;
 	private final Initiator brokerInitiator;
 	
 	public XServiceLocator(
 			SessionID broker_session_id,
 			XSessionActions session_actions,
 			XSecurityListMessages security_list_messages,
+			XAccountSummaryMessages account_summary_messages,
 			Initiator broker_initiator
 		)
 	{
 		this.brokerSessionID = broker_session_id;
 		this.sessionActions = session_actions;
 		this.securityListMessages = security_list_messages;
+		this.accountSummaryMessages = account_summary_messages;
 		this.brokerInitiator = broker_initiator;
 	}
 
@@ -32,6 +35,10 @@ public class XServiceLocator {
 	
 	public XSecurityListMessages getSecurityListMessages() {
 		return securityListMessages;
+	}
+	
+	public XAccountSummaryMessages getAccountSummaryMessages() {
+		return accountSummaryMessages;
 	}
 	
 	public Initiator getBrokerInitiator() {

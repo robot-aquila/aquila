@@ -9,6 +9,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.exante.rh.AccountSummaryTestHandler;
 import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
 public class XDataProvider implements DataProvider {
@@ -34,6 +35,7 @@ public class XDataProvider implements DataProvider {
 			@Override
 			public boolean onLogon(SessionID session_id) {
 				serviceLocator.getSecurityListMessages().list(new SecurityListHandler(terminal));
+				serviceLocator.getAccountSummaryMessages().query(new AccountSummaryTestHandler());
 				return true;
 			}
 		});

@@ -31,15 +31,18 @@ public class XApplication implements Application {
 	private final Map<SessionID, String> sessionPasswords;
 	private final XSessionActions sessionActions;
 	private final XSecurityListMessages securityListMessages;
+	private final XAccountSummaryMessages accountSummaryMessages;
 	
 	public XApplication(
 			Map<SessionID, String> session_passwords,
 			XSessionActions session_actions,
-			XSecurityListMessages security_list_messages)
+			XSecurityListMessages security_list_messages,
+			XAccountSummaryMessages account_summary_messages)
 	{
 		this.sessionPasswords = session_passwords;
 		this.sessionActions = session_actions;
 		this.securityListMessages = security_list_messages;
+		this.accountSummaryMessages = account_summary_messages;
 	}
 
 	@Override
@@ -110,6 +113,10 @@ public class XApplication implements Application {
 		case MsgType.SECURITY_LIST:
 			securityListMessages.response((SecurityList) message);
 			break;
+		case XAccountSummaryMessages.MSGTYPE_SUMMARY_RESPONSE:
+		case XAccountSummaryMessages.MSGTYPE_SUMMARY_REJECT:
+			accountSummaryMessages.response((quickfix.fix44.Message) message);
+			break;
 		case MsgType.BUSINESS_MESSAGE_REJECT:
 			onBMR((BusinessMessageReject) message);
 			break;
@@ -127,6 +134,9 @@ public class XApplication implements Application {
 			switch ( msg_type.getValue() ) {
 			case MsgType.SECURITY_LIST_REQUEST:
 				securityListMessages.approve((SecurityListRequest) message);
+				break;
+			case XAccountSummaryMessages.MSGTYPE_SUMMARY_REQUEST:
+				accountSummaryMessages.approve((quickfix.fix44.Message) message);
 				break;
 			case MsgType.BUSINESS_MESSAGE_REJECT:
 			case MsgType.REJECT:
@@ -149,6 +159,9 @@ public class XApplication implements Application {
 		switch ( message.getRefMsgType().getValue() ) {
 		case MsgType.SECURITY_LIST_REQUEST:
 			securityListMessages.rejected(message);
+			break;
+		case XAccountSummaryMessages.MSGTYPE_SUMMARY_REQUEST:
+			accountSummaryMessages.rejected(message);
 			break;
 		}
 	}
