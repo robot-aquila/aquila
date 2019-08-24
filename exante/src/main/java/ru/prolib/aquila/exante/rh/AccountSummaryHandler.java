@@ -121,7 +121,14 @@ public class AccountSummaryHandler implements XResponseHandler {
 		if ( message.isSetField(XAccountSummaryMessages.TAG_VALUE) ) {
 			value = of(message.getString(XAccountSummaryMessages.TAG_VALUE));
 		}
-		CDecimal volume = of(message.getString(LongQty.FIELD)).add(of(message.getString(ShortQty.FIELD)));
+		CDecimal lv = of(message.getString(LongQty.FIELD));
+		CDecimal sv = of(message.getString(ShortQty.FIELD));
+		CDecimal volume = of(0L);
+		if ( lv.compareTo(ZERO) > 0 ) {
+			volume = lv;
+		} else if ( sv.compareTo(ZERO) > 0 ) {
+			volume = sv.multiply(-1L);
+		}
 		String security_id = message.getString(SecurityID.FIELD);
 		positions.put(security_id, new Entry(security_id, volume, pl, value));
 	}
