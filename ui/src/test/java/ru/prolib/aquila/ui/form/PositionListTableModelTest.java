@@ -56,7 +56,7 @@ public class PositionListTableModelTest {
 		portfolio.getEditablePosition(SYMBOL1);
 		portfolio.getEditablePosition(SYMBOL2);
 		portfolio.getEditablePosition(SYMBOL3);
-		service.add(portfolio);
+		service.add(terminal);
 		service.startListeningUpdates();
 		
 		assertNotNull(service.getValueAt(0, 1));

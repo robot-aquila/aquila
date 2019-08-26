@@ -38,7 +38,7 @@ public class PositionListTableModel extends AbstractTableModel implements
 	private final IMessages messages;
 	private final List<Position> positions;
 	private final Map<Position, Integer> positionMap;
-	private final Set<Portfolio> portfolioSet;
+	private final Set<Terminal> terminalSet;
 	private boolean subscribed = false;
 
 	public PositionListTableModel(IMessages messages) {
@@ -48,7 +48,7 @@ public class PositionListTableModel extends AbstractTableModel implements
 		this.messages = messages;
 		this.positions = new ArrayList<Position>();
 		this.positionMap = new HashMap<Position, Integer>();
-		this.portfolioSet = new HashSet<Portfolio>();
+		this.terminalSet = new HashSet<>();
 	}
 
 	/**
@@ -157,35 +157,24 @@ public class PositionListTableModel extends AbstractTableModel implements
 	 */
 	public void clear() {
 		stopListeningUpdates();
-		portfolioSet.clear();
+		terminalSet.clear();
 	}
 	
 	/**
-	 * Add portfolio to show its positions.
+	 * Add terminal to show all its positions.
 	 * <p>
-	 * @param portfolio - portfolio to add
-	 */
-	public void add(Portfolio portfolio) {
-		if ( portfolio == null ) {
-			throw new IllegalArgumentException("Portfolio cannot be null");
-		}
-		if ( portfolioSet.contains(portfolio) ) {
-			return;
-		}
-		portfolioSet.add(portfolio);
-		if ( subscribed ) {
-			cacheDataAndSubscribeEvents(portfolio);
-		}
-	}
-	
-	/**
-	 * Add all terminal portfolios to show their positions.
-	 * <p>
-	 * @param terminal - terminal to scan for portfolios
+	 * @param terminal - terminal to add
 	 */
 	public void add(Terminal terminal) {
-		for ( Portfolio p : terminal.getPortfolios() ) {
-			add(p);
+		if ( terminal == null ) {
+			throw new IllegalArgumentException("Terminal cannot be null");
+		}
+		if ( terminalSet.contains(terminal) ) {
+			return;
+		}
+		terminalSet.add(terminal);
+		if ( subscribed ) {
+			cacheDataAndSubscribeEvents(terminal);
 		}
 	}
 	
@@ -194,8 +183,8 @@ public class PositionListTableModel extends AbstractTableModel implements
 		if ( subscribed ) {
 			return;
 		}
-		for ( Portfolio portfolio : portfolioSet ) {
-			cacheDataAndSubscribeEvents(portfolio);
+		for ( Terminal terminal : terminalSet ) {
+			cacheDataAndSubscribeEvents(terminal);
 		}
 		subscribed = true;
 	}
@@ -205,12 +194,12 @@ public class PositionListTableModel extends AbstractTableModel implements
 		if ( ! subscribed ) {
 			return;
 		}
-		for ( Portfolio portfolio : portfolioSet ) {
-			portfolio.lock();
+		for ( Terminal terminal : terminalSet ) {
+			terminal.lock();
 			try {
-				unsubscribe(portfolio);
+				unsubscribe(terminal);
 			} finally {
-				portfolio.unlock();
+				terminal.unlock();
 			}
 		}
 		positions.clear();
@@ -233,8 +222,8 @@ public class PositionListTableModel extends AbstractTableModel implements
 		if ( ! subscribed ) {
 			return;
 		}
-		for ( Portfolio portfolio : portfolioSet ) {
-			if ( event.isType(portfolio.onPositionUpdate()) ) {
+		for ( Terminal terminal : terminalSet ) {
+			if ( event.isType(terminal.onPositionUpdate()) ) {
 				int firstRow = positions.size();
 				Position position = ((PositionEvent) event).getPosition();
 				if ( positionMap.containsKey(position) ) {
@@ -278,10 +267,16 @@ public class PositionListTableModel extends AbstractTableModel implements
 		}
 	}
 	
+	private void cacheDataAndSubscribeEvents(Terminal terminal) {
+		subscribe(terminal);
+		for ( Portfolio portfolio : terminal.getPortfolios() ) {
+			cacheDataAndSubscribeEvents(portfolio);
+		}
+	}
+	
 	private void cacheDataAndSubscribeEvents(Portfolio portfolio) {
 		portfolio.lock();
 		try {
-			subscribe(portfolio);
 			int countAdded = 0, firstRow = positions.size();
 			for ( Position position : portfolio.getPositions() ) {
 				if ( ! positionMap.containsKey(position) ) {
@@ -298,12 +293,12 @@ public class PositionListTableModel extends AbstractTableModel implements
 		}
 	}
 	
-	private void subscribe(Portfolio portfolio) {
-		portfolio.onPositionUpdate().addListener(this);
+	private void subscribe(Terminal terminal) {
+		terminal.onPositionUpdate().addListener(this);
 	}
 	
-	private void unsubscribe(Portfolio portfolio) {
-		portfolio.onPositionUpdate().removeListener(this);
+	private void unsubscribe(Terminal terminal) {
+		terminal.onPositionUpdate().removeListener(this);
 	}
 	
 }
