@@ -5,7 +5,6 @@ import static org.easymock.EasyMock.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
@@ -19,6 +18,7 @@ import quickfix.field.MsgSeqNum;
 import quickfix.field.RefSeqNum;
 import quickfix.fix44.BusinessMessageReject;
 import quickfix.fix44.Message;
+import ru.prolib.aquila.exante.XRepo.RequestIDSequence;
 
 public class XRepoTest {
 	
@@ -33,7 +33,7 @@ public class XRepoTest {
 	
 	private IMocksControl control;
 	private XResponseHandler rhMock1, rhMock2, rhMock3;
-	private AtomicLong request_id_seq;
+	private RequestIDSequence request_id_seqMock;
 	private Map<String, XResponseHandler> req_id_to_handler;
 	private Map<String, Integer> req_id_to_msg_seq_num;
 	private Map<Integer, String> msg_seq_num_to_req_id;
@@ -45,26 +45,27 @@ public class XRepoTest {
 		rhMock1 = control.createMock(XResponseHandler.class);
 		rhMock2 = control.createMock(XResponseHandler.class);
 		rhMock3 = control.createMock(XResponseHandler.class);
-		request_id_seq = new AtomicLong();
+		request_id_seqMock = control.createMock(RequestIDSequence.class);
 		req_id_to_handler = new HashMap<>();
 		req_id_to_msg_seq_num = new HashMap<>();
 		msg_seq_num_to_req_id = new HashMap<>();
-		service = new XRepo(request_id_seq, req_id_to_handler, req_id_to_msg_seq_num, msg_seq_num_to_req_id);
+		service = new XRepo(request_id_seqMock, req_id_to_handler, req_id_to_msg_seq_num, msg_seq_num_to_req_id);
 	}
 	
 	@Test
 	public void testNewRequest() {
-		request_id_seq.set(826L);
+		expect(request_id_seqMock.next()).andReturn("827");
+		control.replay();
 		
 		String actual = service.newRequest(rhMock1);
 
+		control.verify();
 		Map<String, XResponseHandler> expected_map = new HashMap<>();
 		expected_map.put("827", rhMock1);
 		assertEquals("827", actual);
 		assertEquals(expected_map, req_id_to_handler);
 		assertEquals(new HashMap<>(), req_id_to_msg_seq_num);
 		assertEquals(new HashMap<>(), msg_seq_num_to_req_id);
-		assertEquals(827L, request_id_seq.get());
 	}
 	
 	@Test
@@ -72,9 +73,11 @@ public class XRepoTest {
 		Message message = new Message();
 		message.getHeader().setField(new MsgSeqNum(215));
 		req_id_to_handler.put("886", rhMock2);
+		control.replay();
 		
 		service.approve("886", message);
 		
+		control.verify();
 		Map<Integer, String> expected_msg2req = new HashMap<>();
 		expected_msg2req.put(215, "886");
 		assertEquals(expected_msg2req, msg_seq_num_to_req_id);

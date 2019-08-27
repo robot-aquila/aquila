@@ -23,13 +23,35 @@ public class XRepo {
 		logger = LoggerFactory.getLogger(XRepo.class);
 	}
 	
+	public interface RequestIDSequence {
+		String next();
+	}
+	
+	public static class ALongRequestIDSequence implements RequestIDSequence {
+		private final AtomicLong along;
+		
+		public ALongRequestIDSequence(AtomicLong along) {
+			this.along = along;
+		}
+		
+		public ALongRequestIDSequence() {
+			this(new AtomicLong());
+		}
+
+		@Override
+		public String next() {
+			return Long.toUnsignedString(along.incrementAndGet());
+		}
+		
+	}
+	
 	private final Object monitor = new Object();
-	private final AtomicLong requestIdSeq;
+	private final RequestIDSequence requestIdSeq;
 	private final Map<String, XResponseHandler> reqIdToHandler;
 	private final Map<String, Integer> reqIdToMsgSeqNum;
 	private final Map<Integer, String>  msgSeqNumToReqID;
 
-	public XRepo(AtomicLong request_id_seq,
+	public XRepo(RequestIDSequence request_id_seq,
 			Map<String, XResponseHandler> req_id_to_handler,
 			Map<String, Integer> req_id_to_msg_seq_num,
 			Map<Integer, String> msg_seq_num_to_req_id)
@@ -41,11 +63,11 @@ public class XRepo {
 	}
 	
 	public XRepo() {
-		this(new AtomicLong(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+		this(new ALongRequestIDSequence(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 	}
 	
 	public String newRequest(XResponseHandler handler) {
-		String request_id = Long.toUnsignedString(requestIdSeq.incrementAndGet());
+		String request_id = requestIdSeq.next();
 		synchronized ( monitor ) {
 			reqIdToHandler.put(request_id, handler);
 		}
