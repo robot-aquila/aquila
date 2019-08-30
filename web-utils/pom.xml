@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
-	  	<version>0.1.50</version>
+	  	<version>0.1.51</version>
 	  	<relativePath>../pom.xml</relativePath>
 	</parent>
 	
@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-probe</artifactId>
-			<version>0.1.50</version>
+			<version>0.1.51</version>
 		</dependency>
 
 		<!--dependency> // 
