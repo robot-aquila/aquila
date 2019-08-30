@@ -333,7 +333,7 @@ public class TerminalImpl implements EditableTerminal {
 	 * @param account - portfolio to lock
 	 * @return lockable object
 	 */
-	private Lockable createLock(Account account) {
+	protected Lockable createLock(Account account) {
 		try {
 			return new Multilock(this, getPortfolio(account));
 		} catch ( PortfolioException e ) {
@@ -343,8 +343,7 @@ public class TerminalImpl implements EditableTerminal {
 	
 	@Override
 	public EditableOrder createOrder(long id, Account account, Symbol symbol) {
-		Lockable xLock = createLock(account);
-		xLock.lock();
+		lock.lock();
 		try {
 			if ( closed ) {
 				throw new IllegalStateException();
@@ -369,24 +368,13 @@ public class TerminalImpl implements EditableTerminal {
 			orders.put(id, order);
 			return order;
 		} finally {
-			xLock.unlock();
+			lock.unlock();
 		}
 	}
 	
 	@Override
 	public EditableOrder createOrder(Account account, Symbol symbol) {
-		long orderID = dataProvider.getNextOrderID();
-		Lockable xLock = createLock(account);
-		xLock.lock();
-		try {
-			EditableOrder order = createOrder(orderID, account, symbol);
-			order.suppressEvents();
-			order.update(OrderField.STATUS, OrderStatus.PENDING);
-			order.purgeEvents();
-			return order;
-		} finally {
-			xLock.unlock();
-		}
+		return createOrder(dataProvider.getNextOrderID(), account, symbol);
 	}
 	
 	@Override
@@ -419,19 +407,52 @@ public class TerminalImpl implements EditableTerminal {
 	public Order createOrder(Account account, Symbol symbol, OrderAction action,
 			CDecimal qty, CDecimal price)
 	{
-		return createOrder(account, symbol, action, OrderType.LMT, qty, price, null);
+		return createOrder(
+				account,
+				symbol,
+				action,
+				OrderType.LMT,
+				qty,
+				price,
+				null,
+				OrderStatus.PENDING,
+				getCurrentTime(),
+				false
+			);
 	}
 
 	@Override
 	public Order createOrder(Account account, Symbol symbol, OrderAction action, CDecimal qty) {
-		return createOrder(account, symbol, action, OrderType.MKT, qty, null, null);
+		return createOrder(
+				account,
+				symbol,
+				action,
+				OrderType.MKT,
+				qty,
+				null,
+				null,
+				OrderStatus.PENDING,
+				getCurrentTime(),
+				false
+			);
 	}
 	
 	@Override
 	public Order createOrder(Account account, Symbol symbol, OrderType type,
 			OrderAction action, CDecimal qty, CDecimal price, String comment)
 	{
-		return createOrder(account, symbol, action, type, qty, price, comment);
+		return createOrder(
+				account,
+				symbol,
+				action,
+				type,
+				qty,
+				price,
+				comment,
+				OrderStatus.PENDING,
+				getCurrentTime(),
+				false
+			);
 	}
 
 	@Override
@@ -771,14 +792,16 @@ public class TerminalImpl implements EditableTerminal {
 		
 	}
 	
+	// TODO: This method may be moved to public interface
 	private EditableOrder createOrder(Account account, Symbol symbol,
 			OrderAction action, OrderType type, CDecimal volume, CDecimal price,
-			String comment)
+			String comment, OrderStatus initial_status, Instant creation_time,
+			boolean suppress_events)
 	{
 		EditableOrder order = createOrder(account, symbol);
 		order.lock();
 		try {
-			order.suppressEvents();
+			if ( suppress_events ) order.suppressEvents();
 			order.consume(new DeltaUpdateBuilder()
 				.withToken(OrderField.TYPE, type)
 				.withToken(OrderField.ACTION, action)
@@ -786,9 +809,10 @@ public class TerminalImpl implements EditableTerminal {
 				.withToken(OrderField.CURRENT_VOLUME, volume)
 				.withToken(OrderField.PRICE, price)
 				.withToken(OrderField.COMMENT, comment)
-				.withToken(OrderField.TIME, scheduler.getCurrentTime())
+				.withToken(OrderField.TIME, creation_time)
+				.withToken(OrderField.STATUS, initial_status)
 				.buildUpdate());
-			order.purgeEvents();
+			if ( suppress_events ) order.purgeEvents();
 		} finally {
 			order.unlock();
 		}

@@ -127,6 +127,7 @@ public class QFTransactionServiceTest {
 	@Test (expected=QFTransactionException.class)
 	public void testCancelOrder_ThrowsIfNotRegisteredAndNotFinished() throws Exception {
 		EditableOrder order = terminal.createOrder(account, symbol1);
+		order.consume(new DeltaUpdateBuilder().withToken(OrderField.STATUS, OrderStatus.PENDING).buildUpdate());
 		expect(assemblerMock.createMultilock(new MultilockBuilderBE().add(order)))
 			.andReturn(multilockMock);
 		multilockMock.lock();

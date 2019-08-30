@@ -23,24 +23,24 @@ public class SecurityCombo extends JComboBox<Symbol> implements Starter, EventLi
 	
 	@Override
 	public void onEvent(Event event) {
-		//if ( event.isType(securities.OnSecurityAvailable()) ) {
-		//	addSecurity(((SecurityEvent) event).getSecurity());
-		//}
+		if ( event.isType(securities.onSecurityAvailable()) ) {
+			addSecurity(((SecurityEvent) event).getSecurity());
+		}
 	}
 
 	@Override
 	public void start() {
-		//securities.OnSecurityAvailable().addListener(this);
-		//list.clear();
-		//removeAllItems();
-		//for ( Security security : securities.getSecurities() ) {
-		//	addSecurity(security);
-		//}
+		securities.onSecurityAvailable().addListener(this);
+		list.clear();
+		removeAllItems();
+		for ( Security security : securities.getSecurities() ) {
+			addSecurity(security);
+		}
 	}
 
 	@Override
 	public void stop() {
-		//securities.OnSecurityAvailable().removeListener(this);
+		securities.onSecurityAvailable().removeListener(this);
 	}
 
 	/**

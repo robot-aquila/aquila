@@ -465,7 +465,7 @@ public class TerminalImplTest {
 		assertEquals(1000L, order.getID());
 		assertEquals(account3, order.getAccount());
 		assertEquals(symbol3, order.getSymbol());
-		assertEquals(OrderStatus.PENDING, order.getStatus());
+		assertNull(order.getStatus());
 		assertSame(order, terminal.getOrder(1000L));
 		assertOrderAlternateEventTypes(order);
 	}
@@ -717,18 +717,24 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCreateOrder5_NoEventsProduced() throws Exception {
+	public void testCreateOrder5_NowEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 934L;
 		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderUpdate().addListener(listenerStub);
 		
-		terminal.createOrder(account1,
+		Order order = terminal.createOrder(account1,
 				symbol1,
 				OrderAction.BUY,
 				CDecimalBD.of(20L),
 				CDecimalBD.of("431.15"));
 		
-		assertEquals(0, listenerStub.getEventCount());
+		assertEquals(2, listenerStub.getEventCount());
+		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(terminal.onOrderUpdate()));
+		assertSame(order, event.getOrder());
+		event = (OrderEvent) listenerStub.getEvent(1);
+		assertTrue(event.isType(terminal.onOrderAvailable()));
+		assertSame(order, event.getOrder());
 	}
 	
 	@Test
@@ -758,17 +764,23 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCreateOrder4_NoEventsProduced() throws Exception {
+	public void testCreateOrder4_NowEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 714L;
 		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderUpdate().addListener(listenerStub);
 		
-		terminal.createOrder(account3,
+		Order order = terminal.createOrder(account3,
 				symbol3,
 				OrderAction.SELL,
 				CDecimalBD.of(80L));
 		
-		assertEquals(0, listenerStub.getEventCount());
+		assertEquals(2, listenerStub.getEventCount());
+		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(terminal.onOrderUpdate()));
+		assertSame(order, event.getOrder());
+		event = (OrderEvent) listenerStub.getEvent(1);
+		assertTrue(event.isType(terminal.onOrderAvailable()));
+		assertSame(order, event.getOrder());
 	}
 	
 	@Test
@@ -801,12 +813,12 @@ public class TerminalImplTest {
 	}
 	
 	@Test
-	public void testCreateOrder7_NoEventsProduced() throws Exception {
+	public void testCreateOrder7_NowEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 555L;
 		terminal.onOrderAvailable().addListener(listenerStub);
 		terminal.onOrderUpdate().addListener(listenerStub);
 		
-		terminal.createOrder(account3,
+		Order order = terminal.createOrder(account3,
 				symbol2,
 				OrderType.MKT,
 				OrderAction.SELL,
@@ -814,7 +826,13 @@ public class TerminalImplTest {
 				CDecimalBD.of("224.13"),
 				"test order");
 
-		assertEquals(0, listenerStub.getEventCount());
+		assertEquals(2, listenerStub.getEventCount());
+		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
+		assertTrue(event.isType(terminal.onOrderUpdate()));
+		assertSame(order, event.getOrder());
+		event = (OrderEvent) listenerStub.getEvent(1);
+		assertTrue(event.isType(terminal.onOrderAvailable()));
+		assertSame(order, event.getOrder());
 	}
 	
 	@Test

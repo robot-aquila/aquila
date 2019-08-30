@@ -1,5 +1,8 @@
 package ru.prolib.aquila.exante;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import quickfix.ConfigError;
 import quickfix.RuntimeError;
 import quickfix.SessionID;
@@ -13,6 +16,12 @@ import ru.prolib.aquila.exante.rh.AccountSummaryHandler;
 import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
 public class XDataProvider implements DataProvider {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(XDataProvider.class);
+	}
+	
 	private final XServiceLocator serviceLocator;
 	
 	public XDataProvider(XServiceLocator service_locator) {
@@ -61,12 +70,12 @@ public class XDataProvider implements DataProvider {
 
 	@Override
 	public void registerNewOrder(EditableOrder order) throws OrderException {
-		throw new UnsupportedOperationException();
+		logger.debug("registerNewOrder not implemented yet");
 	}
 
 	@Override
 	public void cancelOrder(EditableOrder order) throws OrderException {
-		throw new UnsupportedOperationException();
+		logger.debug("cancelOrder not implemented yet");
 	}
 
 	@Override
