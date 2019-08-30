@@ -18,6 +18,7 @@ import quickfix.field.MsgSeqNum;
 import quickfix.field.MsgType;
 import quickfix.field.Password;
 import quickfix.fix44.BusinessMessageReject;
+import quickfix.fix44.NewOrderSingle;
 import quickfix.fix44.SecurityList;
 import quickfix.fix44.SecurityListRequest;
 
@@ -32,17 +33,20 @@ public class XApplication implements Application {
 	private final XSessionActions sessionActions;
 	private final XSecurityListMessages securityListMessages;
 	private final XAccountSummaryMessages accountSummaryMessages;
+	private final XOrdersMessages ordersMessages;
 	
 	public XApplication(
 			Map<SessionID, String> session_passwords,
 			XSessionActions session_actions,
 			XSecurityListMessages security_list_messages,
-			XAccountSummaryMessages account_summary_messages)
+			XAccountSummaryMessages account_summary_messages,
+			XOrdersMessages orders_messages)
 	{
 		this.sessionPasswords = session_passwords;
 		this.sessionActions = session_actions;
 		this.securityListMessages = security_list_messages;
 		this.accountSummaryMessages = account_summary_messages;
+		this.ordersMessages = orders_messages;
 	}
 
 	@Override
@@ -70,7 +74,7 @@ public class XApplication implements Application {
 	{
 		MsgType msg_type = new MsgType();
 		message.getHeader().getField(msg_type);
-		logger.debug("fromAdmin: {}", msg_type);
+		logger.debug("fromAdmin: {}", message);
 		
 	}
 	
@@ -79,7 +83,6 @@ public class XApplication implements Application {
 		try {
 			MsgType msg_type = new MsgType();
 			message.getHeader().getField(msg_type);
-			logger.debug("toAdmin: {}", msg_type);
 			switch ( msg_type.getValue() ) {
 			case MsgType.LOGON:
 				String password = sessionPasswords.get(session_id);
@@ -91,7 +94,7 @@ public class XApplication implements Application {
 				}
 				break;
 			default:
-				logger.debug("toAdmin: {}", msg_type.getValue());
+				logger.debug("toAdmin (not processed): {}", message);
 				break;
 			}
 		} catch ( FieldNotFound e ) {
@@ -107,11 +110,19 @@ public class XApplication implements Application {
 		MsgSeqNum msg_seq_num = new MsgSeqNum();
 		message.getHeader().getField(msg_type);
 		message.getHeader().getField(msg_seq_num);
-		//logger.debug("incoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
-
+		logger.debug("incoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
+		
 		switch ( msg_type.getValue() ) {
 		case MsgType.SECURITY_LIST:
 			securityListMessages.response((SecurityList) message);
+			break;
+		case MsgType.EXECUTION_REPORT:
+			try {
+				ordersMessages.response((quickfix.fix44.Message) message);
+			} catch ( Throwable e ) {
+				logger.error("Unexpected error: ", e);
+				logger.debug("Cause by message: {}", message);
+			}
 			break;
 		case XAccountSummaryMessages.MSGTYPE_SUMMARY_RESPONSE:
 		case XAccountSummaryMessages.MSGTYPE_SUMMARY_REJECT:
@@ -134,6 +145,9 @@ public class XApplication implements Application {
 			switch ( msg_type.getValue() ) {
 			case MsgType.SECURITY_LIST_REQUEST:
 				securityListMessages.approve((SecurityListRequest) message);
+				break;
+			case MsgType.ORDER_SINGLE:
+				ordersMessages.approve((NewOrderSingle) message);
 				break;
 			case XAccountSummaryMessages.MSGTYPE_SUMMARY_REQUEST:
 				accountSummaryMessages.approve((quickfix.fix44.Message) message);
@@ -159,6 +173,9 @@ public class XApplication implements Application {
 		switch ( message.getRefMsgType().getValue() ) {
 		case MsgType.SECURITY_LIST_REQUEST:
 			securityListMessages.rejected(message);
+			break;
+		case MsgType.ORDER_SINGLE:
+			ordersMessages.rejected(message);
 			break;
 		case XAccountSummaryMessages.MSGTYPE_SUMMARY_REQUEST:
 			accountSummaryMessages.rejected(message);

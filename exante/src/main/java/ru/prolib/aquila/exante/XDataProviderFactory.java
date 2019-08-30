@@ -33,15 +33,18 @@ public class XDataProviderFactory {
 		SessionID broker_session_id = session_ids.get(0);
 		Map<SessionID, String> session_passwords = new HashMap<>();
 		session_passwords.put(broker_session_id, session_settings.getString(broker_session_id, "password"));
+		XSymbolRepository symbols = new XSymbolRepository();
 		XSessionActions session_actions = new XSessionActions();
 		XSecurityListMessages security_list_messages = new XSecurityListMessages(broker_session_id);
 		XAccountSummaryMessages account_summary_messages = new XAccountSummaryMessages(broker_session_id);
+		XOrdersMessages orders_messages = new XOrdersMessages(symbols, broker_session_id);
 		Initiator broker_initiator = new SocketInitiator(
 				new XApplication(
 						session_passwords,
 						session_actions,
 						security_list_messages,
-						account_summary_messages
+						account_summary_messages,
+						orders_messages
 					),
 				new FileStoreFactory(session_settings),
 				session_settings,
@@ -50,11 +53,12 @@ public class XDataProviderFactory {
 			);
 		XServiceLocator service_locator = new XServiceLocator(
 				params,
-				new XSymbolRepository(),
+				symbols,
 				broker_session_id,
 				session_actions,
 				security_list_messages,
 				account_summary_messages,
+				orders_messages,
 				broker_initiator
 			);
 		return new XDataProvider(service_locator);

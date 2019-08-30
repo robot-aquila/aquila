@@ -13,6 +13,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.exante.rh.AccountSummaryHandler;
+import ru.prolib.aquila.exante.rh.OrderHandler;
 import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
 public class XDataProvider implements DataProvider {
@@ -70,7 +71,7 @@ public class XDataProvider implements DataProvider {
 
 	@Override
 	public void registerNewOrder(EditableOrder order) throws OrderException {
-		logger.debug("registerNewOrder not implemented yet");
+		serviceLocator.getOrdersMessages().newOrderSingle(order, new OrderHandler(order));
 	}
 
 	@Override

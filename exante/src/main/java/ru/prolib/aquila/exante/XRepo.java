@@ -80,12 +80,15 @@ public class XRepo {
 		return requestIdSeq;
 	}
 	
-	public String newRequest(XResponseHandler handler) {
-		String request_id = requestIdSeq.next();
+	public String newRequest(String request_id, XResponseHandler handler) {
 		synchronized ( monitor ) {
 			reqIdToHandler.put(request_id, handler);
 		}
-		return request_id;
+		return request_id;		
+	}
+	
+	public String newRequest(XResponseHandler handler) {
+		return newRequest(requestIdSeq.next(), handler);
 	}
 	
 	public void approve(String request_id, Message message) throws

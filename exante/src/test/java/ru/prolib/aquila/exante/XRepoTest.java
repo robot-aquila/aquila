@@ -55,7 +55,7 @@ public class XRepoTest {
 	}
 	
 	@Test
-	public void testNewRequest() {
+	public void testNewRequest1() {
 		expect(request_id_seqMock.next()).andReturn("827");
 		control.replay();
 		
@@ -65,6 +65,21 @@ public class XRepoTest {
 		Map<String, XResponseHandler> expected_map = new HashMap<>();
 		expected_map.put("827", rhMock1);
 		assertEquals("827", actual);
+		assertEquals(expected_map, req_id_to_handler);
+		assertEquals(new HashMap<>(), req_id_to_msg_seq_num);
+		assertEquals(new HashMap<>(), msg_seq_num_to_req_id);
+	}
+	
+	@Test
+	public void testNewRequest2() {
+		control.replay();
+		
+		String actual = service.newRequest("124-3he-4xa", rhMock1);
+		
+		control.verify();
+		Map<String, XResponseHandler> expected_map = new HashMap<>();
+		expected_map.put("124-3he-4xa", rhMock1);
+		assertEquals("124-3he-4xa", actual);
 		assertEquals(expected_map, req_id_to_handler);
 		assertEquals(new HashMap<>(), req_id_to_msg_seq_num);
 		assertEquals(new HashMap<>(), msg_seq_num_to_req_id);
