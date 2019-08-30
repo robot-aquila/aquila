@@ -26,7 +26,8 @@ public class XDataProviderFactory {
 		return result;
 	}
 	
-	public XDataProvider build(String settings_filename) throws ConfigError {
+	public XDataProvider build(XParams params) throws ConfigError {
+		String settings_filename = params.getSessionSettings().getAbsolutePath();
 		SessionSettings session_settings = new SessionSettings(settings_filename);
 		List<SessionID> session_ids = getSessionIDs(session_settings);
 		SessionID broker_session_id = session_ids.get(0);
@@ -48,6 +49,7 @@ public class XDataProviderFactory {
 				new DefaultMessageFactory()
 			);
 		XServiceLocator service_locator = new XServiceLocator(
+				params,
 				new XSymbolRepository(),
 				broker_session_id,
 				session_actions,

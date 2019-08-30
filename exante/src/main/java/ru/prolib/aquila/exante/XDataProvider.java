@@ -25,7 +25,7 @@ public class XDataProvider implements DataProvider {
 
 	@Override
 	public long getNextOrderID() {
-		throw new UnsupportedOperationException();
+		return serviceLocator.getOrderIDSequence().next();
 	}
 
 	@Override

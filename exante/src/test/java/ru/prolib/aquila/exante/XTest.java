@@ -39,7 +39,10 @@ public class XTest {
 	@Ignore
 	@Test
 	public void testConnection() throws Exception {
-		XDataProvider xdp = new XDataProviderFactory().build("fixture/fix_broker.ini");
+		XDataProvider xdp = new XDataProviderFactory().build(new XParams(
+				new File("fixture/fix_broker.ini"),
+				null
+			));
 		final XServiceLocator service_locator = xdp.getServiceLocator();
 		CountDownLatch finished = new CountDownLatch(1);
 		service_locator.getSessionActions().addLogonAction(service_locator.getBrokerSessionID(), new XLogonAction() {
