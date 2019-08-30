@@ -2,6 +2,7 @@ package ru.prolib.aquila.exante;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -45,6 +46,15 @@ public class XRepo {
 		
 	}
 	
+	public static class UUIDRequestIDSequence implements RequestIDSequence {
+
+		@Override
+		public String next() {
+			return UUID.randomUUID().toString();
+		}
+		
+	}
+	
 	private final Object monitor = new Object();
 	private final RequestIDSequence requestIdSeq;
 	private final Map<String, XResponseHandler> reqIdToHandler;
@@ -63,7 +73,11 @@ public class XRepo {
 	}
 	
 	public XRepo() {
-		this(new ALongRequestIDSequence(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+		this(new UUIDRequestIDSequence(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+	}
+	
+	public RequestIDSequence getRequestIDSequence() {
+		return requestIdSeq;
 	}
 	
 	public String newRequest(XResponseHandler handler) {

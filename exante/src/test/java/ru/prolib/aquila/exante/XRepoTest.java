@@ -5,6 +5,7 @@ import static org.easymock.EasyMock.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
@@ -19,6 +20,7 @@ import quickfix.field.RefSeqNum;
 import quickfix.fix44.BusinessMessageReject;
 import quickfix.fix44.Message;
 import ru.prolib.aquila.exante.XRepo.RequestIDSequence;
+import ru.prolib.aquila.exante.XRepo.UUIDRequestIDSequence;
 
 public class XRepoTest {
 	
@@ -189,6 +191,25 @@ public class XRepoTest {
 		eex.expectMessage("Handler not found: request_id=66812");
 		
 		service.response("66812", message);
+	}
+	
+	@Test
+	public void testCtor0() {
+		service = new XRepo();
+		
+		RequestIDSequence id_seq = service.getRequestIDSequence();
+		assertNotNull(id_seq);
+		assertEquals(UUIDRequestIDSequence.class, id_seq.getClass());
+	}
+	
+	@Test
+	public void testUUIDRequestIDSequence_next() throws Exception {
+		RequestIDSequence id_seq = new UUIDRequestIDSequence();
+		
+		String id1 = id_seq.next();
+		UUID.fromString(id1); // if parsed then valid UUID
+		String id2 = id_seq.next();
+		assertNotEquals(id1, id2);
 	}
 
 }
