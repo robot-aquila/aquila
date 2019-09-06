@@ -81,6 +81,7 @@ public class XAccountService {
 		lock.lock();
 		try {
 			if ( terminal != null ) {
+				logger.warn("Service already started");
 				throw new IllegalStateException("Service already started");
 			}
 			terminal = term;
@@ -114,7 +115,7 @@ public class XAccountService {
 					timerTask.cancel();
 				}
 				timerTask = terminal.schedule(new TimerTask(this), delay);
-				logger.debug("account query scheduled: {} ms.", delay);
+				//logger.debug("account query scheduled: {} ms.", delay);
 			}
 		} finally {
 			lock.unlock();
@@ -144,7 +145,7 @@ public class XAccountService {
 				@Override
 				public void close() {
 					super.close();
-					logger.debug("account query done");
+					//logger.debug("account query done");
 					lock.lock();
 					try {
 						requestInProgress = false;

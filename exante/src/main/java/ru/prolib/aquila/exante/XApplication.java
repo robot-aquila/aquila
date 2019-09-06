@@ -154,7 +154,7 @@ public class XApplication implements Application {
 		try {
 			message.getHeader().getField(msg_type);
 			message.getHeader().getField(msg_seq_num);
-			logger.debug("outcoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
+			//logger.debug("outcoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
 			switch ( msg_type.getValue() ) {
 			case MsgType.SECURITY_LIST_REQUEST:
 				securityListMessages.approve((SecurityListRequest) message);

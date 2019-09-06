@@ -99,7 +99,7 @@ public class XRepo {
 		MsgSeqNum msg_seq_num = new MsgSeqNum();
 		message.getHeader().getField(msg_seq_num);
 		link(request_id, msg_seq_num.getValue());
-		logger.debug("Request approved: request_id={} msg_seq_num={}", request_id, msg_seq_num.getValue());
+		//logger.debug("Request approved: request_id={} msg_seq_num={}", request_id, msg_seq_num.getValue());
 	}
 	
 	public void rejected(BusinessMessageReject message) throws
@@ -113,7 +113,7 @@ public class XRepo {
 		XResponseHandler handler = getHandler(request_id);
 		handler.onReject(message);
 		removeHandler(request_id);
-		logger.debug("Request rejected: {}", request_id);
+		logger.warn("Request rejected: {}", message);
 	}
 	
 	public void response(String request_id, Message message) throws

@@ -228,6 +228,26 @@ public class SecurityListTableModelTest {
 	}
 	
 	@Test
+	public void testCache_GetSecurityIndex() {
+		List<CacheEntry> entries = new ArrayList<>();
+		Map<Security, Integer> indices = new HashMap<>();
+		Cache service = new Cache(entries, indices);
+		entries.add(new CacheEntry(securityMock1));
+		entries.add(new CacheEntry(securityMock2));
+		entries.add(new CacheEntry(securityMock3));
+		indices.put(securityMock1, 0);
+		indices.put(securityMock2, 1);
+		indices.put(securityMock3, 2);
+
+		assertEquals( 0, service.getSecurityIndex(securityMock1));
+		assertEquals( 1, service.getSecurityIndex(securityMock2));
+		assertEquals( 2, service.getSecurityIndex(securityMock3));
+		assertEquals(-1, service.getSecurityIndex(securityMock4));
+		assertEquals(-1, service.getSecurityIndex(securityMock5));
+		assertEquals(-1, service.getSecurityIndex(securityMock6));
+	}
+	
+	@Test
 	public void testCache_AddUpdate_FirstTime() {
 		List<CacheEntry> entries = new ArrayList<>();
 		Map<Security, Integer> indices = new HashMap<>();

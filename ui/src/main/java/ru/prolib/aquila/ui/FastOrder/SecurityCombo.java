@@ -1,46 +1,46 @@
 package ru.prolib.aquila.ui.FastOrder;
 
-import java.util.*;
 import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 
 /**
  * Селектор инструмента.
  */
 public class SecurityCombo extends JComboBox<Symbol> implements Starter, EventListener {
 	private static final long serialVersionUID = -3328773972490353436L;
-	private final Terminal securities;
-	private final Vector<Security> list = new Vector<Security>();
+	private final Terminal terminal;
+	private final SortedComboBoxModel<Symbol> model;
 	
-	public SecurityCombo(Terminal securities) {
-		super();
-		this.securities = securities;
+	public SecurityCombo(Terminal terminal) {
+		super(new SortedComboBoxModel<Symbol>());
+		this.terminal = terminal;
+		this.model = (SortedComboBoxModel<Symbol>) getModel();
 	}
 	
 	@Override
 	public void onEvent(Event event) {
-		if ( event.isType(securities.onSecurityAvailable()) ) {
+		if ( event.isType(terminal.onSecurityAvailable()) ) {
 			addSecurity(((SecurityEvent) event).getSecurity());
 		}
 	}
 
 	@Override
 	public void start() {
-		securities.onSecurityAvailable().addListener(this);
-		list.clear();
+		terminal.onSecurityAvailable().addListener(this);
 		removeAllItems();
-		for ( Security security : securities.getSecurities() ) {
+		for ( Security security : terminal.getSecurities() ) {
 			addSecurity(security);
 		}
 	}
 
 	@Override
 	public void stop() {
-		securities.onSecurityAvailable().removeListener(this);
+		terminal.onSecurityAvailable().removeListener(this);
 	}
 
 	/**
@@ -49,17 +49,17 @@ public class SecurityCombo extends JComboBox<Symbol> implements Starter, EventLi
 	 * @param security инструмент
 	 */
 	private void addSecurity(final Security security) {
-		if ( ! list.contains(security) ) {
-			if ( SwingUtilities.isEventDispatchThread() ) {
-				list.add(security);
-				addItem(security.getSymbol());
-			} else {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override public void run() {
-						addSecurity(security);
-					}
-				});
+		if ( SwingUtilities.isEventDispatchThread() ) {
+			Symbol symbol = security.getSymbol();
+			if ( model.getIndexOf(symbol) == -1 ) {
+				addItem(symbol);
 			}
+		} else {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override public void run() {
+					addSecurity(security);
+				}
+			});
 		}
 	}
 	
@@ -69,8 +69,7 @@ public class SecurityCombo extends JComboBox<Symbol> implements Starter, EventLi
 	 * @return дескриптор инструмента или null, если инструмент не выбран
 	 */
 	public Symbol getSelectedSymbol() {
-		Security selected = getSelectedSecurity();
-		return selected != null ? selected.getSymbol() : null;
+		return (Symbol) getSelectedItem();
 	}
 	
 	/**
@@ -79,8 +78,12 @@ public class SecurityCombo extends JComboBox<Symbol> implements Starter, EventLi
 	 * @return инструмент или null, если инструмент не выбран
 	 */
 	public Security getSelectedSecurity() {
-		int index = getSelectedIndex();
-		return index >= 0 ? list.get(index) : null;		
+		Symbol symbol = (Symbol) getSelectedItem();
+		try {
+			return symbol == null ? null : terminal.getSecurity(symbol);
+		} catch ( SecurityException e ) {
+			throw new RuntimeException("Unexpected error: ", e);
+		}
 	}
 	
 	/**

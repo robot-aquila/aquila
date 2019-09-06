@@ -183,6 +183,11 @@ public class SecurityListTableModel extends AbstractTableModel
 			return entries.get(index).getSecurity();
 		}
 		
+		public synchronized int getSecurityIndex(Security security) {
+			Integer index = mapSecurityToIndex.get(security);
+			return index == null ? -1 : index;
+		}
+		
 		public synchronized void addUpdate(Security security) {
 			Integer index = mapSecurityToIndex.get(security);
 			if ( index == null ) {
@@ -536,6 +541,10 @@ public class SecurityListTableModel extends AbstractTableModel
 	 */
 	public Security getSecurity(int rowIndex) {
 		return cache.getSecurity(rowIndex);
+	}
+	
+	public int getSecurityIndex(Security security) {
+		return cache.getSecurityIndex(security);
 	}
 
 	@Override

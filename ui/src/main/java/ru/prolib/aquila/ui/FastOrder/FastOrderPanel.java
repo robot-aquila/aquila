@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.*;
+import ru.prolib.aquila.ui.form.SecurityListDialog;
 
 /**
  * Панель быстрого выставления заявок.
@@ -21,7 +22,6 @@ import ru.prolib.aquila.core.BusinessEntities.*;
  * <p>
  * NOTE: Untested!
  */
-@Deprecated
 public class FastOrderPanel extends JPanel implements Starter {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger;
@@ -31,20 +31,23 @@ public class FastOrderPanel extends JPanel implements Starter {
 	static {
 		logger = LoggerFactory.getLogger(FastOrderPanel.class);
 		ACCOUNT_PROTO = new Account("SPBFUT", "SPBFUTXXXXX", "SPBFUTXXXXX__");// "SPBFUT#SPBFUTXXXXX#SPBFUTXXXXX__";
-		SECURITY_PROTO = new Symbol("RIU3", "SPBFUT", ISO4217.USD, SymbolType.FUTURES);// "RIU3@SPBFUT(FUT/USD)__";
+		SECURITY_PROTO = new Symbol("EUR/USD", "SPBFUT", ISO4217.USD, SymbolType.FUTURES);
 	}
 	
 	private final Terminal terminal;
+	private final SecurityListDialog securityListDialog;
 	private final AccountCombo accountCombo;
 	private final SecurityCombo securityCombo;
 	private final TypeCombo typeCombo;
 	private final JFormattedTextField qtyField;
 	private final JFormattedTextField slippageField;
+	private boolean securityListDialogFirstTime = true;
 	
-	public FastOrderPanel(Terminal terminal) {
+	public FastOrderPanel(Terminal terminal, SecurityListDialog securityListDialog) {
 		super();
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		this.terminal = terminal;
+		this.securityListDialog = securityListDialog;
 		accountCombo = new AccountCombo(terminal);
 		accountCombo.setPrototypeDisplayValue(ACCOUNT_PROTO);
 		securityCombo = new SecurityCombo(terminal);
@@ -61,10 +64,19 @@ public class FastOrderPanel extends JPanel implements Starter {
 		slippageField.setColumns(8);
 		slippageField.setMinimumSize(new Dimension(50, 10));
 		
+		JButton button;
 		addLabel("  Account: ");
 		add(accountCombo);
 		addLabel("  Security: ");
 		add(securityCombo);
+		if ( securityListDialog != null ) {
+			add(button = new JButton("..."));
+			button.addActionListener(new ActionListener() {
+				@Override public void actionPerformed(ActionEvent arg0) {
+					showSecurityListDialog();
+				}
+			});
+		}
 		addLabel("  Type: ");
 		add(typeCombo);
 		addLabel("  Qty.: ");
@@ -72,7 +84,6 @@ public class FastOrderPanel extends JPanel implements Starter {
 		addLabel("  Slippage: ");
 		add(slippageField);
 		addLabel("   Place ");
-		JButton button;
 		add(button = new JButton("buy"));
 		button.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent arg0) {
@@ -88,6 +99,10 @@ public class FastOrderPanel extends JPanel implements Starter {
 		});
 		addLabel(" order");
 		add(Box.createHorizontalGlue());
+	}
+	
+	public FastOrderPanel(Terminal terminal) {
+		this(terminal, null);
 	}
 	
 	private void addLabel(String textId, int horizontalPosition) {
@@ -168,6 +183,31 @@ public class FastOrderPanel extends JPanel implements Starter {
 			terminal.placeOrder(order);
 		} catch ( OrderException e ) {
 			logger.error("Error place order: ", e);
+		}
+	}
+	
+	private void showSecurityListDialog() {
+		try {
+			if ( securityListDialogFirstTime ) {
+				securityListDialog.add(terminal);
+				securityListDialog.setSize(1024, 768);
+				securityListDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+			}
+			Symbol selected_symbol= securityCombo.getSelectedSymbol();
+			if ( selected_symbol != null ) {
+				logger.debug("Selected in combo: {}", selected_symbol);
+				securityListDialog.setSelectedSecurity(terminal.getSecurity(selected_symbol));
+			}
+			securityListDialog.setModal(true);
+			securityListDialog.setVisible(true);
+			Security security = securityListDialog.getSelectedSecurity();
+			if ( security != null ) {
+				selected_symbol = security.getSymbol();
+				logger.debug("Selected in table: {}", selected_symbol);
+				securityCombo.setSelectedItem(selected_symbol);
+			}
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
 		}
 	}
 

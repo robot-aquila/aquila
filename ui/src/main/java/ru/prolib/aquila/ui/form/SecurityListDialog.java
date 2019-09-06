@@ -3,8 +3,11 @@ package ru.prolib.aquila.ui.form;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -17,6 +20,10 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableRowSorter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
@@ -28,10 +35,10 @@ import ru.prolib.aquila.ui.msg.SecurityMsg;
 public class SecurityListDialog extends JDialog
 	implements ActionListener, ListSelectionListener
 {
-	//private static final Logger logger;
+	private static final Logger logger;
 	
 	static {
-		//logger = LoggerFactory.getLogger(SecurityListDialog.class);
+		logger = LoggerFactory.getLogger(SecurityListDialog.class);
 	}
 	
 	/**
@@ -68,9 +75,11 @@ public class SecurityListDialog extends JDialog
 		tableModel = new SecurityListTableModel(messages);
 		table = new JTable(tableModel);
 		table.setFillsViewportHeight(true);
-		setColumnWidth(SecurityListTableModel.CID_DISPLAY_NAME, 160);
-		setColumnWidth(SecurityListTableModel.CID_SYMBOL, 80);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+		table.setShowGrid(true);
+		table.setRowSorter(new TableRowSorter<>(tableModel));
+		//setColumnWidth(SecurityListTableModel.CID_DISPLAY_NAME, 160);
+		//setColumnWidth(SecurityListTableModel.CID_SYMBOL, 80);
+		//table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e){
@@ -114,9 +123,16 @@ public class SecurityListDialog extends JDialog
 				SecurityMsg.SELECT_SECURITY : SecurityMsg.SHOW_SECURITIES));
 		setPreferredSize(new Dimension(800, 600));
 		new TableModelController(tableModel, this);
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+				onShown();
+			}
+		});
+		pack();
 	}
 	
-	private void setColumnWidth(int columnId, int width) {
+	protected void setColumnWidth(int columnId, int width) {
 		table.getColumnModel().getColumn(tableModel.getColumnIndex(columnId))
 			.setPreferredWidth(width);
 	}
@@ -132,6 +148,7 @@ public class SecurityListDialog extends JDialog
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
+		//logger.debug("valueChanged called: {}", e);
 		if ( ! e.getValueIsAdjusting() && type == TYPE_SELECT ) {
 			buttonSelect.setEnabled(isSelected());
 		}
@@ -163,18 +180,40 @@ public class SecurityListDialog extends JDialog
 		return selectedSecurity;
 	}
 	
+	public void setSelectedSecurity(Security security) {
+		selectedSecurity = security;
+	}
+	
 	private boolean isSelected() {
 		return table.getSelectedRowCount() > 0;
 	}
 	
 	private void onSelect() {
-		selectedSecurity = tableModel.getSecurity(table.getSelectedRow());
+		int selected_index = table.getSelectedRow();
+		//logger.debug("onSelect: index={}", selected_index);
+		if ( selected_index != -1 ) {
+			selectedSecurity = tableModel.getSecurity(table.convertRowIndexToModel(selected_index));
+		}
 		dispose();
 	}
 	
 	private void onCancel() {
+		//logger.debug("onCancel: reset selected security");
 		selectedSecurity = null;
 		dispose();
+	}
+	
+	private void onShown() {
+		// TODO: this doesn't work
+		//if ( selectedSecurity != null ) {
+		//	int index = tableModel.getSecurityIndex(selectedSecurity);
+		//	logger.debug("Security {} index is {}", selectedSecurity.getSymbol(), index);
+		//	if ( index != -1 ) {
+		//		index = table.convertRowIndexToView(index);
+		//		table.getSelectionModel().setSelectionInterval(index, index);
+		//		table.scrollRectToVisible(new Rectangle(table.getCellRect(index, 0, true)));
+		//	}
+		//}
 	}
 
 }
