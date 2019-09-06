@@ -12,10 +12,12 @@ import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
 import quickfix.UnsupportedMessageType;
+import quickfix.field.CFICode;
 import quickfix.field.LongQty;
 import quickfix.field.MsgType;
 import quickfix.field.SecurityID;
 import quickfix.field.ShortQty;
+//import quickfix.field.Symbol;
 import quickfix.field.TotalNetValue;
 import quickfix.fix44.BusinessMessageReject;
 import quickfix.fix44.Message;
@@ -27,6 +29,8 @@ import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.BusinessEntities.PositionField;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.exante.XAccountSummaryMessages;
 import ru.prolib.aquila.exante.XResponseHandler;
 import ru.prolib.aquila.exante.XSymbolRepository;
@@ -41,11 +45,13 @@ public class AccountSummaryHandler implements XResponseHandler {
 	public static final String CURRENCY = "EUR";
 	
 	static class Entry {
-		private final String security_id;
+		private final String security_id, symbol, cfi;
 		private final CDecimal volume, pl, value;
 		
-		Entry(String security_id, CDecimal volume, CDecimal pl, CDecimal value) {
+		Entry(String security_id, String symbol, String cfi, CDecimal volume, CDecimal pl, CDecimal value) {
 			this.security_id = security_id;
+			this.symbol = symbol;
+			this.cfi = cfi;
 			this.volume = volume;
 			this.pl = pl;
 			this.value = value;
@@ -107,6 +113,9 @@ public class AccountSummaryHandler implements XResponseHandler {
 		}
 		receivedPositions ++;
 		
+		// TODO: Best place to check that this part is final and make it
+		// allowed sending next requests to refresh positions. Some day.
+		
 		if ( message.isSetField(TotalNetValue.FIELD) ) {
 			totalNetValue = of(message.getString(TotalNetValue.FIELD));
 		}
@@ -130,7 +139,9 @@ public class AccountSummaryHandler implements XResponseHandler {
 			volume = sv.multiply(-1L);
 		}
 		String security_id = message.getString(SecurityID.FIELD);
-		positions.put(security_id, new Entry(security_id, volume, pl, value));
+		String symbol = message.getString(quickfix.field.Symbol.FIELD);
+		String cfi = message.getString(CFICode.FIELD);
+		positions.put(security_id, new Entry(security_id, symbol, cfi, volume, pl, value));
 	}
 	
 	@Override
@@ -147,10 +158,23 @@ public class AccountSummaryHandler implements XResponseHandler {
 	public void close() {
 		Instant current_time = terminal.getCurrentTime();
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(new Account(account));
-		Entry main_entry = positions.remove(CURRENCY);
+		//Entry main_entry = positions.remove(CURRENCY);
+		Entry main_entry = positions.get(CURRENCY);
 		CDecimal profit_and_loss = of(0L);
+		Symbol symbol = null;
 		for ( Entry entry : positions.values() ) {
-			EditablePosition position = portfolio.getEditablePosition(symbols.getSymbol(entry.security_id));
+			if ( entry.security_id.equals(entry.symbol) && entry.cfi.equals("MRCXXX") ) {
+				symbol = new Symbol(entry.symbol, "EXANTE", entry.symbol, SymbolType.CURRENCY);
+				terminal.getEditableSecurity(symbol); // force create special security
+			} else {
+				try {
+					symbol = symbols.getSymbol(entry.security_id);
+				} catch ( IllegalArgumentException e ) {
+					logger.error("Error processing position entry: ", e);
+					continue;
+				}
+			}
+			EditablePosition position = portfolio.getEditablePosition(symbol);
 			position.consume(new DeltaUpdateBuilder()
 					.withTime(current_time)
 					.withToken(PositionField.CURRENT_VOLUME, entry.volume)
@@ -160,7 +184,7 @@ public class AccountSummaryHandler implements XResponseHandler {
 					.withToken(PositionField.USED_MARGIN, entry.value.withUnit(CURRENCY))
 					.buildUpdate());
 			profit_and_loss = profit_and_loss.add(entry.pl);
-			logger.debug("Position of {} updated: {}", entry.security_id, position.getContents());
+			//logger.debug("Position of {} updated: {}", entry.security_id, position.getContents());
 		}
 		if ( main_entry != null ) {
 			CDecimal balance = main_entry.value.withUnit(CURRENCY).withScale(2);

@@ -38,6 +38,7 @@ public class XDataProviderFactory {
 		XSecurityListMessages security_list_messages = new XSecurityListMessages(broker_session_id);
 		XAccountSummaryMessages account_summary_messages = new XAccountSummaryMessages(broker_session_id);
 		XOrdersMessages orders_messages = new XOrdersMessages(symbols, broker_session_id);
+		XAccountService account_service = new XAccountService(account_summary_messages, symbols);
 		Initiator broker_initiator = new SocketInitiator(
 				new XApplication(
 						session_passwords,
@@ -59,6 +60,7 @@ public class XDataProviderFactory {
 				security_list_messages,
 				account_summary_messages,
 				orders_messages,
+				account_service,
 				broker_initiator
 			);
 		return new XDataProvider(service_locator);

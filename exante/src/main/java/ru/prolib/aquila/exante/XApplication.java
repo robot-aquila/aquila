@@ -74,8 +74,14 @@ public class XApplication implements Application {
 	{
 		MsgType msg_type = new MsgType();
 		message.getHeader().getField(msg_type);
-		logger.debug("fromAdmin: {}", message);
-		
+		switch ( msg_type.getValue() ) {
+		case MsgType.HEARTBEAT:
+			break;
+		default:
+			logger.debug("fromAdmin (not processed): {}", message);
+			break;
+			
+		}
 	}
 	
 	@Override
@@ -92,6 +98,8 @@ public class XApplication implements Application {
 				} else {
 					logger.warn("Logon w/o pwd: {}", session_id);
 				}
+				break;
+			case MsgType.HEARTBEAT:
 				break;
 			default:
 				logger.debug("toAdmin (not processed): {}", message);
@@ -110,13 +118,14 @@ public class XApplication implements Application {
 		MsgSeqNum msg_seq_num = new MsgSeqNum();
 		message.getHeader().getField(msg_type);
 		message.getHeader().getField(msg_seq_num);
-		logger.debug("incoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
 		
 		switch ( msg_type.getValue() ) {
 		case MsgType.SECURITY_LIST:
+			//logger.debug("security list response");
 			securityListMessages.response((SecurityList) message);
 			break;
 		case MsgType.EXECUTION_REPORT:
+			logger.debug("execution report: {}", message);
 			try {
 				ordersMessages.response((quickfix.fix44.Message) message);
 			} catch ( Throwable e ) {
@@ -126,11 +135,15 @@ public class XApplication implements Application {
 			break;
 		case XAccountSummaryMessages.MSGTYPE_SUMMARY_RESPONSE:
 		case XAccountSummaryMessages.MSGTYPE_SUMMARY_REJECT:
+			//logger.debug("account summary response: {}", message);
 			accountSummaryMessages.response((quickfix.fix44.Message) message);
 			break;
 		case MsgType.BUSINESS_MESSAGE_REJECT:
+			logger.debug("BMR: {}", message);
 			onBMR((BusinessMessageReject) message);
 			break;
+		default:
+			logger.debug("incoming message (ignored): {}", message);
 		}
 	}
 
@@ -169,7 +182,6 @@ public class XApplication implements Application {
 		IncorrectTagValue,
 		UnsupportedMessageType
 	{
-		logger.error("BMR: {}", message);
 		switch ( message.getRefMsgType().getValue() ) {
 		case MsgType.SECURITY_LIST_REQUEST:
 			securityListMessages.rejected(message);

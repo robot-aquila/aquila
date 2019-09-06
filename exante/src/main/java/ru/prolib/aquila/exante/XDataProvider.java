@@ -12,7 +12,6 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.exante.rh.AccountSummaryHandler;
 import ru.prolib.aquila.exante.rh.OrderHandler;
 import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
@@ -50,8 +49,7 @@ public class XDataProvider implements DataProvider {
 						@Override
 						public void close() {
 							super.close();
-							serviceLocator.getAccountSummaryMessages()
-								.query(new AccountSummaryHandler(terminal, symbols));
+							serviceLocator.getAccountService().start(terminal);
 						}
 					});
 				return false;
@@ -66,12 +64,14 @@ public class XDataProvider implements DataProvider {
 
 	@Override
 	public void unsubscribeRemoteObjects(EditableTerminal terminal) {
+		serviceLocator.getAccountService().stop();
 		serviceLocator.getBrokerInitiator().stop();
 	}
 
 	@Override
 	public void registerNewOrder(EditableOrder order) throws OrderException {
-		serviceLocator.getOrdersMessages().newOrderSingle(order, new OrderHandler(order));
+		serviceLocator.getOrdersMessages()
+			.newOrderSingle(order, new OrderHandler(order, serviceLocator.getAccountService()));
 	}
 
 	@Override

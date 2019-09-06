@@ -116,8 +116,10 @@ public class SecurityListHandler implements XResponseHandler {
 			a_type = SymbolType.STOCK;
 			break;
 		case "MRCXXX":
-			// we need this (FOREX) to process positions
 			a_type = SymbolType.CURRENCY;
+			if ( x_symbol.equals(x_security_id) && x_exchange_id == null ) {
+				logger.info("Found special case security: {}", x_symbol);
+			}
 			break;
 		default:
 			return;	

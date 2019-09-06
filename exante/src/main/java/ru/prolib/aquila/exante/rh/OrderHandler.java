@@ -17,10 +17,13 @@ import quickfix.field.OrdRejReason;
 import quickfix.field.Text;
 import quickfix.fix44.BusinessMessageReject;
 import quickfix.fix44.Message;
+import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.OrderField;
 import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
+import ru.prolib.aquila.exante.XAccountService;
 import ru.prolib.aquila.exante.XResponseHandler;
 
 public class OrderHandler implements XResponseHandler {
@@ -31,9 +34,11 @@ public class OrderHandler implements XResponseHandler {
 	}
 	
 	private final EditableOrder order;
+	private final XAccountService accountService;
 	
-	public OrderHandler(EditableOrder order) {
+	public OrderHandler(EditableOrder order, XAccountService account_service) {
 		this.order = order;
+		this.accountService = account_service;
 	}
 
 	@Override
@@ -49,16 +54,25 @@ public class OrderHandler implements XResponseHandler {
 			return true;
 		}
 		
+		CDecimal cur_vol = of(message.getString(LeavesQty.FIELD));
 		DeltaUpdateBuilder builder = new DeltaUpdateBuilder()
-				.withToken(OrderField.CURRENT_VOLUME, of(message.getString(LeavesQty.FIELD)));
+				.withToken(OrderField.CURRENT_VOLUME, cur_vol);
 		switch ( message.getChar(ExecType.FIELD) ) {
 		case ExecType.ORDER_STATUS:
 		case ExecType.PENDING_NEW:
 		case ExecType.PENDING_CANCEL:
 			break;
 		case ExecType.NEW:
-		case ExecType.TRADE:
 			builder.withToken(OrderField.STATUS, OrderStatus.ACTIVE);
+			break;
+		case ExecType.TRADE:
+			if ( cur_vol.compareTo(CDecimalBD.ZERO) > 0 ) {
+				builder.withToken(OrderField.STATUS, OrderStatus.ACTIVE);
+			} else {
+				builder.withToken(OrderField.STATUS, OrderStatus.FILLED)
+					.withToken(OrderField.TIME_DONE, getCurrentTime());
+			}
+			accountService.rescheduleIfAllowed(1000L);
 			break;
 		case ExecType.CANCELED:
 			builder.withToken(OrderField.STATUS, OrderStatus.CANCELLED)
