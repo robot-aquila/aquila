@@ -3,6 +3,7 @@ package ru.prolib.aquila.exante;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -60,6 +61,7 @@ public class XRepo {
 	private final Map<String, XResponseHandler> reqIdToHandler;
 	private final Map<String, Integer> reqIdToMsgSeqNum;
 	private final Map<Integer, String>  msgSeqNumToReqID;
+	private final AtomicBoolean debug = new AtomicBoolean(false);
 
 	public XRepo(RequestIDSequence request_id_seq,
 			Map<String, XResponseHandler> req_id_to_handler,
@@ -74,6 +76,10 @@ public class XRepo {
 	
 	public XRepo() {
 		this(new UUIDRequestIDSequence(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+	}
+	
+	public void setDebug(boolean enabled) {
+		debug.set(enabled);
 	}
 	
 	public RequestIDSequence getRequestIDSequence() {
@@ -99,7 +105,9 @@ public class XRepo {
 		MsgSeqNum msg_seq_num = new MsgSeqNum();
 		message.getHeader().getField(msg_seq_num);
 		link(request_id, msg_seq_num.getValue());
-		//logger.debug("Request approved: request_id={} msg_seq_num={}", request_id, msg_seq_num.getValue());
+		if ( debug.get() ) {
+			logger.debug("Request approved: request_id={} msg_seq_num={}", request_id, msg_seq_num.getValue());
+		}
 	}
 	
 	public void rejected(BusinessMessageReject message) throws

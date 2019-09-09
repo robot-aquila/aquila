@@ -1,5 +1,7 @@
 package ru.prolib.aquila.ui.FastOrder;
 
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
+
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,6 +43,8 @@ public class FastOrderPanel extends JPanel implements Starter {
 	private final TypeCombo typeCombo;
 	private final JFormattedTextField qtyField;
 	private final JFormattedTextField slippageField;
+	private final JFormattedTextField priceField;
+	private final NumberFormat priceNumberFormat;
 	private boolean securityListDialogFirstTime = true;
 	
 	public FastOrderPanel(Terminal terminal, SecurityListDialog securityListDialog) {
@@ -63,7 +67,12 @@ public class FastOrderPanel extends JPanel implements Starter {
 		slippageField.setValue(new Double(0.0d));
 		slippageField.setColumns(8);
 		slippageField.setMinimumSize(new Dimension(50, 10));
-		
+		priceNumberFormat = NumberFormat.getInstance(Locale.ENGLISH);
+		priceNumberFormat.setMinimumFractionDigits(5);
+		priceField = new JFormattedTextField(priceNumberFormat);
+		priceField.setValue(new Double(0d));
+		priceField.setColumns(12);
+		priceField.setMinimumSize(new Dimension(50, 10));
 		JButton button;
 		addLabel("  Account: ");
 		add(accountCombo);
@@ -81,6 +90,8 @@ public class FastOrderPanel extends JPanel implements Starter {
 		add(typeCombo);
 		addLabel("  Qty.: ");
 		add(qtyField);
+		addLabel("  Price: ");
+		add(priceField);
 		addLabel("  Slippage: ");
 		add(slippageField);
 		addLabel("   Place ");
@@ -129,12 +140,62 @@ public class FastOrderPanel extends JPanel implements Starter {
 	}
 	
 	/**
+	 * Get selected security.
+	 * <p>
+	 * @return currently selected security instance
+	 */
+	private Security getSecurity() {
+		return securityCombo.getSelectedSecurity();
+	}
+	
+	/**
+	 * Get selected slippage.
+	 * <p>
+	 * @return currently selected slippage (in price points) or null if slippage not selected or invalid value
+	 */
+	private CDecimal getSlippage() {
+		Object value = null;
+		try {
+			value = slippageField.getValue();
+			return of(Double.toString(((Number) value).doubleValue())).withScale(getSecurity().getScale());
+		} catch ( Exception e ) {
+			Object args[] = { value, e };
+			logger.warn("Bad price slippage value: {}", args);
+			return null;
+		}
+	}
+	
+	private CDecimal getQty() {
+		Object value = null;
+		try {
+			value = qtyField.getValue();
+			return of(((Number) value).longValue());
+		} catch ( Exception e ) {
+			Object args[] = { value, e };
+			logger.warn("Bad qty value: {}", args);
+			return null;
+		}
+	}
+	
+	private CDecimal getPrice() {
+		Object value = null;
+		try {
+			value = priceField.getValue();
+			return of(Double.toString(((Number) value).doubleValue())).withScale(getSecurity().getScale());
+		} catch ( Exception e ) {
+			Object args[] = { value, e };
+			logger.warn("Bad price value: {}", args);
+			return null;
+		} 
+	}
+	
+	/**
 	 * Разместить заявку.
 	 * <p>
 	 * @param dir направление заявки
 	 */
 	private void placeOrder(OrderAction dir) {
-		Order order; CDecimal qty; CDecimal slippage; Object value = null;
+		Order order; CDecimal qty;
 		Account account = accountCombo.getSelectedAccount();
 		Security security = securityCombo.getSelectedSecurity();
 		if ( account == null ) {
@@ -145,31 +206,18 @@ public class FastOrderPanel extends JPanel implements Starter {
 			logger.warn("Security not selected");
 			return;
 		}
-		try {
-			value = qtyField.getValue();
-			qty = CDecimalBD.of(((Number) value).longValue());
-		} catch ( Exception e ) {
-			Object args[] = { value, e };
-			logger.warn("Bad order qty value: {}", args);
-			return;
-		}
-		try {
-			value = slippageField.getValue();
-			slippage = Tick.getPrice(((Number) value).doubleValue(), security.getScale());
-		} catch ( Exception e ) {
-			Object args[] = { value, e };
-			logger.warn("Bad order slippage value: {}", args);
-			return;
-		}
-
+		qty = getQty();
 		Symbol symbol = security.getSymbol();
 		if ( typeCombo.getSelectedType() == OrderType.LMT ) {
-			Tick last = security.getLastTrade();
-			if ( last == null ) {
-				logger.warn("Last trade not available");
-				return;
+			CDecimal price = getPrice();
+			CDecimal slippage = getSlippage();
+			if ( price == null ) {
+				price = security.getLastPrice();
+				if ( price == null ) {
+					logger.warn("Last trade not available. Cannot determine order price.");
+					return;					
+				}
 			}
-			CDecimal price = Tick.getPrice(last, security.getScale());
 			if ( dir == OrderAction.BUY ) {
 				price = price.add(slippage);
 			} else {

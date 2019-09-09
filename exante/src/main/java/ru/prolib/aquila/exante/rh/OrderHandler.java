@@ -102,9 +102,8 @@ public class OrderHandler implements XResponseHandler {
 		IncorrectTagValue,
 		UnsupportedMessageType
 	{
-		logger.debug("Order rejected: {}", message);
+		logger.error("Order rejected: {}", message);
 		reject("Reason unknown [FIXME]");
-
 	}
 
 	@Override

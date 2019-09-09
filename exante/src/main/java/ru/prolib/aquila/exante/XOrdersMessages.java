@@ -2,6 +2,7 @@ package ru.prolib.aquila.exante;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.concurrent.ThreadLocalRandom;
 
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
@@ -12,6 +13,7 @@ import quickfix.UnsupportedMessageType;
 import quickfix.field.ClOrdID;
 import quickfix.field.OrdType;
 import quickfix.field.OrderQty;
+import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
 import quickfix.field.SecurityID;
 import quickfix.field.SecurityIDSource;
@@ -22,6 +24,7 @@ import quickfix.field.TransactTime;
 import quickfix.fix44.BusinessMessageReject;
 import quickfix.fix44.Message;
 import quickfix.fix44.NewOrderSingle;
+import quickfix.fix44.OrderCancelRequest;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.Order;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
@@ -36,6 +39,8 @@ public class XOrdersMessages {
 		this.symbols = symbols;
 		this.dispatcher = dispatcher;
 		this.repo = repo;
+		
+		repo.setDebug(true);
 	}
 	
 	public XOrdersMessages(XSymbolRepository symbols, XMessageDispatcher dispatcher) {
@@ -66,6 +71,26 @@ public class XOrdersMessages {
 			throw new IllegalArgumentException("Unsupported order type: " + order.getType());
 		}
 		request.setField(new TimeInForce(TimeInForce.DAY));
+		request.setField(new OrderQty(toDouble(order.getInitialVolume())));
+		
+		XSymbol x_sym = symbols.getBySymbol(order.getSymbol());
+		request.setField(new SecurityIDSource("111"));
+		request.setField(new SecurityID(x_sym.getSecurityID()));
+		request.setField(new Symbol(x_sym.getSecurityID()));
+		dispatcher.send(request);
+	}
+	
+	public void cancelOrder(Order order, XResponseHandler handler) {
+		String str_order_id = Long.toUnsignedString(order.getID());
+		String request_id = repo.newRequest(
+				str_order_id + "-C-" + ThreadLocalRandom.current().nextInt(100, 1000),
+				handler
+			);
+		OrderCancelRequest request = new OrderCancelRequest();
+		request.setField(new ClOrdID(request_id));
+		request.setField(new OrigClOrdID(Long.toUnsignedString(order.getID())));
+		request.setField(new Side(order.getAction() == OrderAction.BUY ? Side.BUY : Side.SELL));
+		request.setField(new TransactTime(LocalDateTime.ofInstant(order.getTime(), ZoneOffset.UTC)));
 		request.setField(new OrderQty(toDouble(order.getInitialVolume())));
 		
 		XSymbol x_sym = symbols.getBySymbol(order.getSymbol());

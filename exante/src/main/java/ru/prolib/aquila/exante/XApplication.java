@@ -98,6 +98,7 @@ public class XApplication implements Application {
 				} else {
 					logger.warn("Logon w/o pwd: {}", session_id);
 				}
+				message.setChar(10001, 'Y'); // CancelOnDisconnect
 				break;
 			case MsgType.HEARTBEAT:
 				break;
@@ -125,6 +126,7 @@ public class XApplication implements Application {
 			securityListMessages.response((SecurityList) message);
 			break;
 		case MsgType.EXECUTION_REPORT:
+		case MsgType.ORDER_CANCEL_REJECT:
 			logger.debug("execution report: {}", message);
 			try {
 				ordersMessages.response((quickfix.fix44.Message) message);
@@ -160,6 +162,7 @@ public class XApplication implements Application {
 				securityListMessages.approve((SecurityListRequest) message);
 				break;
 			case MsgType.ORDER_SINGLE:
+			case MsgType.ORDER_CANCEL_REQUEST:
 				ordersMessages.approve((NewOrderSingle) message);
 				break;
 			case XAccountSummaryMessages.MSGTYPE_SUMMARY_REQUEST:

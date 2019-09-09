@@ -12,6 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
+import ru.prolib.aquila.exante.rh.OrderCancelHandler;
 import ru.prolib.aquila.exante.rh.OrderHandler;
 import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
@@ -76,7 +77,8 @@ public class XDataProvider implements DataProvider {
 
 	@Override
 	public void cancelOrder(EditableOrder order) throws OrderException {
-		logger.debug("cancelOrder not implemented yet");
+		serviceLocator.getOrdersMessages()
+			.cancelOrder(order, new OrderCancelHandler(order));
 	}
 
 	@Override
