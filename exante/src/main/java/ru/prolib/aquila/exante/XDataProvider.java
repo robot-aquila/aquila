@@ -1,8 +1,5 @@
 package ru.prolib.aquila.exante;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import quickfix.ConfigError;
 import quickfix.RuntimeError;
 import quickfix.SessionID;
@@ -17,13 +14,8 @@ import ru.prolib.aquila.exante.rh.OrderHandler;
 import ru.prolib.aquila.exante.rh.SecurityListHandler;
 
 public class XDataProvider implements DataProvider {
-	private static final Logger logger;
-	
-	static {
-		logger = LoggerFactory.getLogger(XDataProvider.class);
-	}
-	
 	private final XServiceLocator serviceLocator;
+	private boolean firstTimeCall = true;
 	
 	public XDataProvider(XServiceLocator service_locator) {
 		this.serviceLocator = service_locator;
@@ -42,20 +34,23 @@ public class XDataProvider implements DataProvider {
 	public void subscribeRemoteObjects(EditableTerminal terminal) {
 		SessionID broker_session_id = serviceLocator.getBrokerSessionID();
 		XSymbolRepository symbols = serviceLocator.getSymbolRepository();
-		serviceLocator.getSessionActions().addLogonAction(broker_session_id, new XLogonAction() {
-			@Override
-			public boolean onLogon(SessionID session_id) {
-				serviceLocator.getSecurityListMessages()
-					.list(new SecurityListHandler(terminal, symbols) {
-						@Override
-						public void close() {
-							super.close();
-							serviceLocator.getAccountService().start(terminal);
-						}
-					});
-				return false;
-			}
-		});
+		if ( firstTimeCall ) {
+			firstTimeCall = false;
+			serviceLocator.getSessionActions().addLogonAction(broker_session_id, new XLogonAction() {
+				@Override
+				public boolean onLogon(SessionID session_id) {
+					serviceLocator.getSecurityListMessages()
+						.list(new SecurityListHandler(terminal, symbols) {
+							@Override
+							public void close() {
+								super.close();
+								serviceLocator.getAccountService().start(terminal);
+							}
+						});
+					return false;
+				}
+			});
+		}
 		try {
 			serviceLocator.getBrokerInitiator().start();
 		} catch ( RuntimeError|ConfigError e ) {

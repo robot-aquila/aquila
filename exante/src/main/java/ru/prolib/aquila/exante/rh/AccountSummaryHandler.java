@@ -26,9 +26,13 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditablePosition;
+import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.BusinessEntities.PositionField;
+import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
+import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.SymbolType;
 import ru.prolib.aquila.exante.XAccountSummaryMessages;
@@ -42,19 +46,27 @@ public class AccountSummaryHandler implements XResponseHandler {
 		logger = LoggerFactory.getLogger(AccountSummaryHandler.class);
 	}
 	
-	public static final String CURRENCY = "EUR";
-	
 	static class Entry {
 		private final String security_id, symbol, cfi;
-		private final CDecimal volume, pl, value;
+		public final CDecimal volume, pl, value, conv_pl, conv_value;
 		
-		Entry(String security_id, String symbol, String cfi, CDecimal volume, CDecimal pl, CDecimal value) {
+		Entry(String security_id,
+			  String symbol,
+			  String cfi,
+			  CDecimal volume,
+			  CDecimal pl,
+			  CDecimal value,
+			  CDecimal conv_pl,
+			  CDecimal conv_value)
+		{
 			this.security_id = security_id;
 			this.symbol = symbol;
 			this.cfi = cfi;
 			this.volume = volume;
 			this.pl = pl;
 			this.value = value;
+			this.conv_pl = conv_pl;
+			this.conv_value = conv_value;
 		}
 
 	}
@@ -65,16 +77,19 @@ public class AccountSummaryHandler implements XResponseHandler {
 	private boolean firstResponse;
 	private int expectedPositions, receivedPositions;
 	private String account;
-	//private String currency;
+	private String currency;
 	private CDecimal totalNetValue, usedMargin;
 
-	public AccountSummaryHandler(EditableTerminal terminal, XSymbolRepository symbols) {
+	public AccountSummaryHandler(
+			EditableTerminal terminal,
+			XSymbolRepository symbols)
+	{
 		this.terminal = terminal;
 		this.symbols = symbols;
 		this.positions = new LinkedHashMap<>();
 		this.firstResponse = true;
-		this.totalNetValue = of("-1.00", CURRENCY);
-		this.usedMargin = of("0.00", CURRENCY);
+		this.totalNetValue = of("-1.00");
+		this.usedMargin = of("0.00");
 	}
 	
 	@Override
@@ -108,7 +123,7 @@ public class AccountSummaryHandler implements XResponseHandler {
 		if ( firstResponse ) {
 			expectedPositions = message.getInt(XAccountSummaryMessages.TAG_NUM_REPORTS);
 			account = message.getString(1);
-			//currency = message.getString(XAccountSummaryMessages.TAG_ACCOUNT_CURRENCY);
+			currency = message.getString(XAccountSummaryMessages.TAG_ACCOUNT_CURRENCY);
 			firstResponse = false;
 		}
 		receivedPositions ++;
@@ -123,16 +138,24 @@ public class AccountSummaryHandler implements XResponseHandler {
 			usedMargin = of(message.getString(XAccountSummaryMessages.TAG_USED_MARGIN));
 		}
 		
-		CDecimal pl = of(0L), value = of(0L);
+		CDecimal pl = ZERO, value = ZERO, c_pl = ZERO, c_value = ZERO;
 		if ( message.isSetField(XAccountSummaryMessages.TAG_PROFIT_AND_LOSS) ) {
 			pl = of(message.getString(XAccountSummaryMessages.TAG_PROFIT_AND_LOSS));
 		}
 		if ( message.isSetField(XAccountSummaryMessages.TAG_VALUE) ) {
 			value = of(message.getString(XAccountSummaryMessages.TAG_VALUE));
 		}
+		
+		if ( message.isSetField(XAccountSummaryMessages.TAG_CONVERTED_PROFIT_AND_LOSS) ) {
+			c_pl = of(message.getString(XAccountSummaryMessages.TAG_CONVERTED_PROFIT_AND_LOSS));
+		}
+		if ( message.isSetField(XAccountSummaryMessages.TAG_CONVERTED_VALUE) ) {
+			c_value = of(message.getString(XAccountSummaryMessages.TAG_CONVERTED_VALUE));
+		}
+		
 		CDecimal lv = of(message.getString(LongQty.FIELD));
 		CDecimal sv = of(message.getString(ShortQty.FIELD));
-		CDecimal volume = of(0L);
+		CDecimal volume = ZERO;
 		if ( lv.compareTo(ZERO) > 0 ) {
 			volume = lv;
 		} else if ( sv.compareTo(ZERO) > 0 ) {
@@ -141,7 +164,12 @@ public class AccountSummaryHandler implements XResponseHandler {
 		String security_id = message.getString(SecurityID.FIELD);
 		String symbol = message.getString(quickfix.field.Symbol.FIELD);
 		String cfi = message.getString(CFICode.FIELD);
-		positions.put(security_id, new Entry(security_id, symbol, cfi, volume, pl, value));
+		positions.put(security_id, new Entry(security_id, symbol, cfi, volume, pl, value, c_pl, c_value));
+		if ( logger.isDebugEnabled() ) {
+			Object args[] = { security_id, cfi, volume, pl, c_pl, value, c_value, totalNetValue, usedMargin };
+			logger.debug("Received: sec_id={} cfi={} vol={} pl={} cpl={} val={} cval={} net={} us.mgn={}", args);
+			logger.debug("From source message: {}", message);
+		}
 	}
 	
 	@Override
@@ -158,14 +186,11 @@ public class AccountSummaryHandler implements XResponseHandler {
 	public void close() {
 		Instant current_time = terminal.getCurrentTime();
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(new Account(account));
-		//Entry main_entry = positions.remove(CURRENCY);
-		Entry main_entry = positions.get(CURRENCY);
-		CDecimal profit_and_loss = of(0L);
+		CDecimal total_pl = of(0L);
 		Symbol symbol = null;
 		for ( Entry entry : positions.values() ) {
 			if ( entry.security_id.equals(entry.symbol) && entry.cfi.equals("MRCXXX") ) {
-				symbol = new Symbol(entry.symbol, "EXANTE", entry.symbol, SymbolType.CURRENCY);
-				terminal.getEditableSecurity(symbol); // force create special security
+				symbol = createCashSecurity(entry.symbol).getSymbol();
 			} else {
 				try {
 					symbol = symbols.getSymbol(entry.security_id);
@@ -178,31 +203,56 @@ public class AccountSummaryHandler implements XResponseHandler {
 			position.consume(new DeltaUpdateBuilder()
 					.withTime(current_time)
 					.withToken(PositionField.CURRENT_VOLUME, entry.volume)
-					.withToken(PositionField.CURRENT_PRICE, of("-1"))
-					.withToken(PositionField.OPEN_PRICE, of("-1"))
-					.withToken(PositionField.PROFIT_AND_LOSS, entry.pl.withUnit(CURRENCY))
-					.withToken(PositionField.USED_MARGIN, entry.value.withUnit(CURRENCY))
+					.withToken(PositionField.CURRENT_PRICE, entry.conv_value.withUnit(currency))
+					.withToken(PositionField.OPEN_PRICE, of("-1").withUnit(currency))
+					.withToken(PositionField.PROFIT_AND_LOSS, entry.conv_pl.withUnit(currency))
+					.withToken(PositionField.USED_MARGIN, of("-1").withUnit(currency))
 					.buildUpdate());
-			profit_and_loss = profit_and_loss.add(entry.pl);
+			total_pl = total_pl.add(entry.conv_pl);
 			//logger.debug("Position of {} updated: {}", entry.security_id, position.getContents());
 		}
-		if ( main_entry != null ) {
-			CDecimal balance = main_entry.value.withUnit(CURRENCY).withScale(2);
-			CDecimal equity = totalNetValue.withUnit(CURRENCY).withScale(2);
-			profit_and_loss = profit_and_loss.withUnit(CURRENCY).withScale(2);
-			CDecimal used_margin = usedMargin.withUnit(CURRENCY).withScale(2);
-			CDecimal free_margin = equity.subtract(used_margin);
-			portfolio.consume(new DeltaUpdateBuilder()
-				.withTime(current_time)
-				.withToken(PortfolioField.CURRENCY, CURRENCY)
-				.withToken(PortfolioField.BALANCE, balance)
-				.withToken(PortfolioField.EQUITY, equity)
-				.withToken(PortfolioField.PROFIT_AND_LOSS, profit_and_loss)
-				.withToken(PortfolioField.USED_MARGIN, used_margin)
-				.withToken(PortfolioField.FREE_MARGIN, free_margin)
-				.buildUpdate());
-		}
+
+		Security m_sec = getSecurity(getCashSymbol(currency));
+		int m_scale = m_sec.getScale();
+		total_pl = total_pl.withUnit(currency).withScale(m_scale);
+		CDecimal equity = totalNetValue.withUnit(currency).withScale(m_scale);
+		CDecimal balance = equity.subtract(total_pl).withScale(m_scale);
+		CDecimal used_margin = usedMargin.withUnit(currency).withScale(m_scale);
+		CDecimal free_margin = equity.subtract(used_margin).withScale(m_scale);
+
+		portfolio.consume(new DeltaUpdateBuilder()
+			.withTime(current_time)
+			.withToken(PortfolioField.CURRENCY, currency)
+			.withToken(PortfolioField.BALANCE, balance)
+			.withToken(PortfolioField.EQUITY, equity)
+			.withToken(PortfolioField.PROFIT_AND_LOSS, total_pl)
+			.withToken(PortfolioField.USED_MARGIN, used_margin)
+			.withToken(PortfolioField.FREE_MARGIN, free_margin)
+			.buildUpdate());
 		
+	}
+	
+	private Symbol getCashSymbol(String currency_code) {
+		return new Symbol(currency_code, null, currency_code, SymbolType.CURRENCY);
+	}
+	
+	private EditableSecurity createCashSecurity(String currency_code) {
+		Symbol symbol = getCashSymbol(currency_code);
+		// force create special security
+		EditableSecurity security = terminal.getEditableSecurity(symbol);
+		security.consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.DISPLAY_NAME, "CASH of " + currency_code)
+				.withToken(SecurityField.TICK_SIZE, of("0.0001"))
+				.buildUpdate()); 
+		return security;
+	}
+	
+	private Security getSecurity(Symbol symbol) {
+		try {
+			return terminal.getSecurity(symbol);
+		} catch ( SecurityException e ) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 }

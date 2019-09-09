@@ -24,21 +24,23 @@ public class XAccountSummaryMessages {
 	public static final int TAG_CONVERTED_PROFIT_AND_LOSS = 20031;
 	public static final int TAG_VALUE = 20032;
 	public static final int TAG_CONVERTED_VALUE = 20033;
-	
+
+	private final String currency;
 	private final XMessageDispatcher dispatcher;
 	private final XRepo repo;
 	
-	XAccountSummaryMessages(XMessageDispatcher dispatcher, XRepo repo) {
+	XAccountSummaryMessages(String default_currency, XMessageDispatcher dispatcher, XRepo repo) {
+		this.currency = default_currency;
 		this.dispatcher = dispatcher;
 		this.repo = repo;
 	}
 	
-	public XAccountSummaryMessages(XMessageDispatcher dispatcher) {
-		this(dispatcher, new XRepo());
+	public XAccountSummaryMessages(String default_currency, XMessageDispatcher dispatcher) {
+		this(default_currency, dispatcher, new XRepo());
 	}
 	
 	public XAccountSummaryMessages(SessionID session_id) {
-		this(new XMessageDispatcher(session_id));
+		this("USD", new XMessageDispatcher(session_id));
 	}
 	
 	public void query(XResponseHandler handler) {
@@ -79,7 +81,7 @@ public class XAccountSummaryMessages {
 		Message request = new Message();
 		request.getHeader().setField(new MsgType(MSGTYPE_SUMMARY_REQUEST));
 		request.setString(TAG_ACCOUNT_REQUEST_ID, request_id);
-		//request.setString(TAG_ACCOUNT_CURRENCY, "USD");
+		request.setString(TAG_ACCOUNT_CURRENCY, currency);
 		return request;
 	}
 	

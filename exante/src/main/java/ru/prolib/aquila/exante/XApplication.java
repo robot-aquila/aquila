@@ -56,39 +56,52 @@ public class XApplication implements Application {
 
 	@Override
 	public void onLogon(SessionID session_id) {
-		// when connection established
 		logger.debug("logon {}", session_id);
-		sessionActions.onLogon(session_id);
+		try {
+			sessionActions.onLogon(session_id);
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
+		}
 	}
 
 	@Override
 	public void onLogout(SessionID session_id) {
-		// when connection closed
-		logger.debug("logout {}", session_id);
-		sessionActions.onLogout(session_id);
+		try {
+			logger.debug("logout {}", session_id);
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
+		}
 	}
 	
 	@Override
 	public void fromAdmin(Message message, SessionID session_id)
 			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, RejectLogon
 	{
-		MsgType msg_type = new MsgType();
-		message.getHeader().getField(msg_type);
-		switch ( msg_type.getValue() ) {
-		case MsgType.HEARTBEAT:
-			break;
-		default:
-			logger.debug("fromAdmin (not processed): {}", message);
-			break;
-			
+		MsgType msg_type = (MsgType) message.getHeader().getField(new MsgType());
+		try {
+			switch ( msg_type.getValue() ) {
+			case MsgType.HEARTBEAT:
+				break;
+			default:
+				logger.debug("fromAdmin (not processed): {}", message);
+				break;
+			}
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
 		}
 	}
 	
 	@Override
 	public void toAdmin(Message message, SessionID session_id) {
+		MsgType msg_type = new MsgType();
 		try {
-			MsgType msg_type = new MsgType();
 			message.getHeader().getField(msg_type);
+		} catch ( FieldNotFound e ) {
+			logger.error("Malformed message (ours): ", e);
+			return;
+		}
+		
+		try {
 			switch ( msg_type.getValue() ) {
 			case MsgType.LOGON:
 				String password = sessionPasswords.get(session_id);
@@ -106,8 +119,8 @@ public class XApplication implements Application {
 				logger.debug("toAdmin (not processed): {}", message);
 				break;
 			}
-		} catch ( FieldNotFound e ) {
-			logger.error("toAdmin error: ", e);
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
 		}
 	}
 
@@ -115,37 +128,37 @@ public class XApplication implements Application {
 	public void fromApp(Message message, SessionID session_id)
 			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType
 	{
-		MsgType msg_type = new MsgType();
-		MsgSeqNum msg_seq_num = new MsgSeqNum();
-		message.getHeader().getField(msg_type);
-		message.getHeader().getField(msg_seq_num);
-		
-		switch ( msg_type.getValue() ) {
-		case MsgType.SECURITY_LIST:
-			//logger.debug("security list response");
-			securityListMessages.response((SecurityList) message);
-			break;
-		case MsgType.EXECUTION_REPORT:
-		case MsgType.ORDER_CANCEL_REJECT:
-			logger.debug("execution report: {}", message);
-			try {
-				ordersMessages.response((quickfix.fix44.Message) message);
-			} catch ( Throwable e ) {
-				logger.error("Unexpected error: ", e);
-				logger.debug("Cause by message: {}", message);
+		MsgType msg_type = (MsgType) message.getHeader().getField(new MsgType());
+		try {
+			switch ( msg_type.getValue() ) {
+			case MsgType.SECURITY_LIST:
+				//logger.debug("security list response");
+				securityListMessages.response((SecurityList) message);
+				break;
+			case MsgType.EXECUTION_REPORT:
+			case MsgType.ORDER_CANCEL_REJECT:
+				logger.debug("execution report: {}", message);
+				try {
+					ordersMessages.response((quickfix.fix44.Message) message);
+				} catch ( Throwable e ) {
+					logger.error("Unexpected error: ", e);
+					logger.debug("Cause by message: {}", message);
+				}
+				break;
+			case XAccountSummaryMessages.MSGTYPE_SUMMARY_RESPONSE:
+			case XAccountSummaryMessages.MSGTYPE_SUMMARY_REJECT:
+				//logger.debug("account summary response: {}", message);
+				accountSummaryMessages.response((quickfix.fix44.Message) message);
+				break;
+			case MsgType.BUSINESS_MESSAGE_REJECT:
+				logger.debug("BMR: {}", message);
+				onBMR((BusinessMessageReject) message);
+				break;
+			default:
+				logger.debug("incoming message (ignored): {}", message);
 			}
-			break;
-		case XAccountSummaryMessages.MSGTYPE_SUMMARY_RESPONSE:
-		case XAccountSummaryMessages.MSGTYPE_SUMMARY_REJECT:
-			//logger.debug("account summary response: {}", message);
-			accountSummaryMessages.response((quickfix.fix44.Message) message);
-			break;
-		case MsgType.BUSINESS_MESSAGE_REJECT:
-			logger.debug("BMR: {}", message);
-			onBMR((BusinessMessageReject) message);
-			break;
-		default:
-			logger.debug("incoming message (ignored): {}", message);
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
 		}
 	}
 
@@ -157,6 +170,12 @@ public class XApplication implements Application {
 			message.getHeader().getField(msg_type);
 			message.getHeader().getField(msg_seq_num);
 			//logger.debug("outcoming message: type={} seq_num={}", msg_type.getValue(), msg_seq_num.getValue());
+		} catch ( FieldNotFound e ) {
+			logger.error("Malformed message (ours): ", e);
+			return;
+		}
+		
+		try {
 			switch ( msg_type.getValue() ) {
 			case MsgType.SECURITY_LIST_REQUEST:
 				securityListMessages.approve((SecurityListRequest) message);
@@ -173,8 +192,8 @@ public class XApplication implements Application {
 				logger.debug("Rejected: {}", message);
 				break;
 			}
-		} catch ( FieldNotFound e ) {
-			logger.error("Malformed message: ", e);
+		} catch ( Exception e ) {
+			logger.error("Unexpected exception: ", e);
 		}
 	}
 	
