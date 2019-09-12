@@ -166,9 +166,9 @@ public class AccountSummaryHandler implements XResponseHandler {
 		String cfi = message.getString(CFICode.FIELD);
 		positions.put(security_id, new Entry(security_id, symbol, cfi, volume, pl, value, c_pl, c_value));
 		if ( logger.isDebugEnabled() ) {
-			Object args[] = { security_id, cfi, volume, pl, c_pl, value, c_value, totalNetValue, usedMargin };
-			logger.debug("Received: sec_id={} cfi={} vol={} pl={} cpl={} val={} cval={} net={} us.mgn={}", args);
-			logger.debug("From source message: {}", message);
+			//Object args[] = { security_id, cfi, volume, pl, c_pl, value, c_value, totalNetValue, usedMargin };
+			//logger.debug("Received: sec_id={} cfi={} vol={} pl={} cpl={} val={} cval={} net={} us.mgn={}", args);
+			//logger.debug("From source message: {}", message);
 		}
 	}
 	
@@ -190,7 +190,7 @@ public class AccountSummaryHandler implements XResponseHandler {
 		Symbol symbol = null;
 		for ( Entry entry : positions.values() ) {
 			if ( entry.security_id.equals(entry.symbol) && entry.cfi.equals("MRCXXX") ) {
-				symbol = createCashSecurity(entry.symbol).getSymbol();
+				symbol = getCashSecurity(entry.symbol).getSymbol();
 			} else {
 				try {
 					symbol = symbols.getSymbol(entry.security_id);
@@ -212,7 +212,7 @@ public class AccountSummaryHandler implements XResponseHandler {
 			//logger.debug("Position of {} updated: {}", entry.security_id, position.getContents());
 		}
 
-		Security m_sec = getSecurity(getCashSymbol(currency));
+		Security m_sec = getCashSecurity(currency);
 		int m_scale = m_sec.getScale();
 		total_pl = total_pl.withUnit(currency).withScale(m_scale);
 		CDecimal equity = totalNetValue.withUnit(currency).withScale(m_scale);
@@ -236,15 +236,27 @@ public class AccountSummaryHandler implements XResponseHandler {
 		return new Symbol(currency_code, null, currency_code, SymbolType.CURRENCY);
 	}
 	
-	private EditableSecurity createCashSecurity(String currency_code) {
+	private Security getCashSecurity(String currency_code) {
 		Symbol symbol = getCashSymbol(currency_code);
+		if ( ! terminal.isSecurityExists(symbol) ) {
+			return createCashSecurity(symbol);
+		} else {
+			return getSecurity(symbol);
+		}
+	}
+	
+	//private EditableSecurity createCashSecurity(String currency_code) {
+	//	return createCashSecurity(getCashSymbol(currency_code));
+	//}
+	
+	private EditableSecurity createCashSecurity(Symbol symbol) {
 		// force create special security
 		EditableSecurity security = terminal.getEditableSecurity(symbol);
 		security.consume(new DeltaUpdateBuilder()
-				.withToken(SecurityField.DISPLAY_NAME, "CASH of " + currency_code)
+				.withToken(SecurityField.DISPLAY_NAME, "CASH of " + symbol.getCurrencyCode())
 				.withToken(SecurityField.TICK_SIZE, of("0.0001"))
 				.buildUpdate()); 
-		return security;
+		return security;		
 	}
 	
 	private Security getSecurity(Symbol symbol) {

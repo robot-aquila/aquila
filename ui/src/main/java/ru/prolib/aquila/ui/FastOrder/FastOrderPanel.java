@@ -40,12 +40,14 @@ public class FastOrderPanel extends JPanel implements Starter {
 	private final SecurityListDialog securityListDialog;
 	private final AccountCombo accountCombo;
 	private final SecurityCombo securityCombo;
+	private final JTextField securityText;
 	private final TypeCombo typeCombo;
 	private final JFormattedTextField qtyField;
 	private final JFormattedTextField slippageField;
 	private final JFormattedTextField priceField;
 	private final NumberFormat priceNumberFormat;
 	private boolean securityListDialogFirstTime = true;
+	private Security selectedSecurity;
 	
 	public FastOrderPanel(Terminal terminal, SecurityListDialog securityListDialog) {
 		super();
@@ -54,8 +56,6 @@ public class FastOrderPanel extends JPanel implements Starter {
 		this.securityListDialog = securityListDialog;
 		accountCombo = new AccountCombo(terminal);
 		accountCombo.setPrototypeDisplayValue(ACCOUNT_PROTO);
-		securityCombo = new SecurityCombo(terminal);
-		securityCombo.setPrototypeDisplayValue(SECURITY_PROTO);
 		typeCombo = new TypeCombo();
 		qtyField = new JFormattedTextField();
 		qtyField.setValue(new Integer(1));
@@ -77,15 +77,23 @@ public class FastOrderPanel extends JPanel implements Starter {
 		addLabel("  Account: ");
 		add(accountCombo);
 		addLabel("  Security: ");
-		add(securityCombo);
 		if ( securityListDialog != null ) {
+			add(securityText = new JTextField("", SECURITY_PROTO.toString().length()));
 			add(button = new JButton("..."));
 			button.addActionListener(new ActionListener() {
 				@Override public void actionPerformed(ActionEvent arg0) {
 					showSecurityListDialog();
 				}
 			});
+			securityText.setEnabled(false);
+			securityCombo = null;
+		} else {
+			securityCombo = new SecurityCombo(terminal);
+			securityCombo.setPrototypeDisplayValue(SECURITY_PROTO);
+			securityText = null;
+			add(securityCombo);
 		}
+		
 		addLabel("  Type: ");
 		add(typeCombo);
 		addLabel("  Qty.: ");
@@ -130,12 +138,16 @@ public class FastOrderPanel extends JPanel implements Starter {
 	@Override
 	public void start() {
 		accountCombo.start();
-		securityCombo.start();
+		if ( securityCombo != null ) {
+			securityCombo.start();
+		}
 	}
 
 	@Override
 	public void stop() {
-		securityCombo.stop();
+		if ( securityCombo != null ) {
+			securityCombo.stop();
+		}
 		accountCombo.stop();
 	}
 	
@@ -145,7 +157,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 	 * @return currently selected security instance
 	 */
 	private Security getSecurity() {
-		return securityCombo.getSelectedSecurity();
+		return securityCombo == null ? selectedSecurity : securityCombo.getSelectedSecurity();
 	}
 	
 	/**
@@ -197,7 +209,7 @@ public class FastOrderPanel extends JPanel implements Starter {
 	private void placeOrder(OrderAction dir) {
 		Order order; CDecimal qty;
 		Account account = accountCombo.getSelectedAccount();
-		Security security = securityCombo.getSelectedSecurity();
+		Security security = getSecurity();
 		if ( account == null ) {
 			logger.warn("Account was not selected");
 			return;
@@ -241,19 +253,11 @@ public class FastOrderPanel extends JPanel implements Starter {
 				securityListDialog.setSize(1024, 768);
 				securityListDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 			}
-			Symbol selected_symbol= securityCombo.getSelectedSymbol();
-			if ( selected_symbol != null ) {
-				logger.debug("Selected in combo: {}", selected_symbol);
-				securityListDialog.setSelectedSecurity(terminal.getSecurity(selected_symbol));
-			}
+			securityListDialog.setSelectedSecurity(selectedSecurity);
 			securityListDialog.setModal(true);
 			securityListDialog.setVisible(true);
-			Security security = securityListDialog.getSelectedSecurity();
-			if ( security != null ) {
-				selected_symbol = security.getSymbol();
-				logger.debug("Selected in table: {}", selected_symbol);
-				securityCombo.setSelectedItem(selected_symbol);
-			}
+			selectedSecurity = securityListDialog.getSelectedSecurity();
+			securityText.setText(selectedSecurity == null ? "" : selectedSecurity.getSymbol().toString());
 		} catch ( Exception e ) {
 			logger.error("Unexpected exception: ", e);
 		}
