@@ -8,6 +8,7 @@ import ru.prolib.aquila.data.DataSource;
 import ru.prolib.aquila.data.DataSourceImpl;
 import ru.prolib.aquila.data.MDUpdateSourceStub;
 import ru.prolib.aquila.web.utils.finam.data.FinamData;
+import ru.prolib.aquila.web.utils.moex.MoexContractFileStorage;
 import ru.prolib.aquila.web.utils.moex.data.MoexData;
 
 public class WUDataFactory {
@@ -32,6 +33,16 @@ public class WUDataFactory {
 		data_source.setL1UpdateSource(new FinamData().createL1UpdateSource(dataRootDir, scheduler, scaleDB));
 		data_source.setMDUpdateSource(new MDUpdateSourceStub());
 		return data_source;
+	}
+	
+	/**
+	 * Create facade for accessing historical data of contracts of MOEX derivatives section.
+	 * <p>
+	 * @param root - path to a directory of MOEX data
+	 * @return facade of data storage
+	 */
+	public MoexContractFileStorage createContractDataStorage(File root) {
+		return new MoexContractFileStorage(root);
 	}
 
 }

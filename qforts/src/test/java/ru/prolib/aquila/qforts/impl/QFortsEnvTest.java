@@ -11,8 +11,10 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.PortfolioField;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
 public class QFortsEnvTest {
@@ -40,7 +42,10 @@ public class QFortsEnvTest {
 	@Test
 	public void testCreateAccount() throws Exception {
 		EditablePortfolio p = terminal.getEditablePortfolio(account);
-		facadeMock.changeBalance(p, CDecimalBD.ofRUB2("10000"));
+		p.consume(new DeltaUpdateBuilder()
+				.withToken(PortfolioField.BALANCE, CDecimalBD.ofRUB2("8249981"))
+				.buildUpdate());
+		facadeMock.changeBalance(p, CDecimalBD.ofRUB2("-8239981"));
 		control.replay();
 		
 		assertSame(p, service.createPortfolio(account, CDecimalBD.ofRUB2("10000")));
