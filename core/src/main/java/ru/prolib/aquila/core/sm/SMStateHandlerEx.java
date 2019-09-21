@@ -49,7 +49,21 @@ public class SMStateHandlerEx extends SMStateHandler implements
 		return newTriggerOnEvent(type, registerInput(new SMInputStub(getExit(exitID))));
 	}
 	
+	/**
+	 * This method has wrong name.
+	 * Use {@link #newTriggerOnTimer(Scheduler, Instant, SMInput)} instead.
+	 * <p>
+	 * @param scheduler - scheduler
+	 * @param time - time to run
+	 * @param input - input to pass data in
+	 * @return trigger instance
+	 */
+	@Deprecated
 	protected SMTrigger newExitOnTimer(Scheduler scheduler, Instant time, SMInput input) {
+		return newTriggerOnTimer(scheduler, time, input);
+	}
+	
+	protected SMTrigger newTriggerOnTimer(Scheduler scheduler, Instant time, SMInput input) {
 		return new SMTriggerOnTimer(scheduler, time, input);
 	}
 	
