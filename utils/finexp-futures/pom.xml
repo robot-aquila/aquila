@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.prolib.aquila.utils</groupId>
 	<artifactId>aquila-utils-finexp-futures</artifactId>
-	<version>0.14.0</version>
+	<version>0.14.1</version>
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
-	  	<version>0.1.51</version>
+	  	<version>0.1.52</version>
 	  	<relativePath>../../pom.xml</relativePath>
 	</parent>
   
@@ -19,12 +19,12 @@
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-core</artifactId>
-			<version>0.1.51</version>
+			<version>0.1.52</version>
 		</dependency>
 		<dependency>
 		    <groupId>ru.prolib.aquila</groupId>
 		    <artifactId>aquila-web-utils</artifactId>
-		    <version>0.1.51</version>
+		    <version>0.1.52</version>
 		</dependency>
 	</dependencies>
 	

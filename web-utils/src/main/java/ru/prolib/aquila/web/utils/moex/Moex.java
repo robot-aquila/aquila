@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.web.utils.WUWebPageException;
@@ -15,6 +17,12 @@ import ru.prolib.aquila.web.utils.WUWebPageException;
  * MOEX site service facade.
  */
 public class Moex implements Closeable {
+	private static final Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(Moex.class);
+	}
+	
 	private final WebDriver webDriver;
 	private final MoexContractForm webForm;
 	private final boolean closeResources;
@@ -36,9 +44,14 @@ public class Moex implements Closeable {
 	public void close() throws IOException {
 		if ( closeResources ) {
 			try {
+				webDriver.close();
+			} catch ( WebDriverException e ) {
+				logger.error("WebDriver close error: ", e);
+			}
+			try {
 				webDriver.quit();
 			} catch ( WebDriverException e ) {
-				// JBrowserDrive bug when closing
+				logger.error("WebDriver quit error: ", e);
 			}
 		}
 	}

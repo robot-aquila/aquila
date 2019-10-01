@@ -105,7 +105,16 @@ public class Fidexp implements Closeable {
 	@Override
 	public void close() {
 		if ( closeResources ) {
-			webDriver.quit();
+			try {
+				webDriver.close();
+			} catch ( WebDriverException e ) {
+				logger.error("WebDriver close error: ", e);
+			}
+			try {
+				webDriver.quit();
+			} catch ( WebDriverException e ) {
+				logger.error("WebDriver quit error: ", e);
+			}
 		}
 	}
 	
