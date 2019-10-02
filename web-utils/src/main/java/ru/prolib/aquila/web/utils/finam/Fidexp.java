@@ -57,6 +57,7 @@ public class Fidexp implements Closeable {
 	private final HTTPAttachmentManager attachmentManager;
 	private final FidexpForm webForm;
 	private final boolean closeResources;
+	private final String parkUrl = "https://www.finam.ru/robots.txt";
 	
 	public Fidexp(WebDriver webDriver, HTTPAttachmentManager attachmentManager, boolean closeResources) {
 		this.webDriver = webDriver;
@@ -342,6 +343,14 @@ public class Fidexp implements Closeable {
 			return null;
 		}
 		return new BasicNameValuePair(tokens[0], tokens[1].substring(0, tokens[1].length() - 1));
+	}
+	
+	public void park() {
+		try {
+			webDriver.get(parkUrl);
+		} catch ( WebDriverException e ) {
+			logger.error("Parking failed: ", e);
+		}
 	}
 	
 	/**

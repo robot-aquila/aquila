@@ -58,7 +58,9 @@ public class MoexAllFuturesUpdateHandler implements UpdateHandler {
 			return true;
 		}
 		if ( firstTime ) {
-			for ( String symbolString : moex.getActiveFuturesList() ) {
+			List<String> active_futures = moex.getActiveFuturesList();
+			moex.park();
+			for ( String symbolString : active_futures ) {
 				Symbol symbol = new Symbol(symbolString);
 				handlers.put(symbol, createHandler(symbol));
 			}
@@ -79,6 +81,7 @@ public class MoexAllFuturesUpdateHandler implements UpdateHandler {
 			handlers.remove(symbol);
 			logger.debug("Data updated: {}", symbol);
 		}
+		moex.park();
 		if ( handlers.size() == 0 ) {
 			done = true;
 		} else {

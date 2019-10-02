@@ -114,7 +114,7 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 					}
 					continue;
 				}
-				
+				park(facade, moex);
 				Symbol symbol = new Symbol(ticker);
 
 				// 1) Scan local database for existing data segments from LocalDate - X to LocalDate - 1
@@ -141,7 +141,7 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 							continue;
 						}
 
-						if ( ! isFirstDownload ) {
+						if ( ! isFirstDownload ) {							
 							long pause = random.nextLong(PAUSE_BETWEEN_DOWNLOAD_MIN, PAUSE_BETWEEN_DOWNLOAD_MAX + 1);
 							logger.debug("Waiting for {} seconds before going next download (remained {}).", pause, remainedDownloads);
 							if ( globalExit.await(pause, TimeUnit.SECONDS) ) {
@@ -224,6 +224,11 @@ public class FinamWebTickDataTracker implements Runnable, Closeable {
 		finam.downloadTickData(MARKET_ID, finamQuoteID, descr.getDate(), tempFile);
 		fileStorage.commitTemporarySegmentFile(descr);
 		logger.debug("Download finished: {} (size: {})", mainFile, mainFile.length()); 
+	}
+	
+	private void park(Fidexp finam, Moex moex) {
+		finam.park();
+		moex.park();
 	}
 
 }

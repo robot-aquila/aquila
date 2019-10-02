@@ -26,6 +26,7 @@ public class Moex implements Closeable {
 	private final WebDriver webDriver;
 	private final MoexContractForm webForm;
 	private final boolean closeResources;
+	private final String parkUrl = "https://www.moex.com/robots.txt";
 	
 	/**
 	 * Constructor.
@@ -64,6 +65,14 @@ public class Moex implements Closeable {
 	
 	public List<String> getActiveFuturesList() throws WUWebPageException {
 		return webForm.getActiveFuturesList();
+	}
+	
+	public void park() {
+		try {
+			webDriver.get(parkUrl);
+		} catch ( WebDriverException e ) {
+			logger.error("Parking failed: ", e);
+		}
 	}
 
 }

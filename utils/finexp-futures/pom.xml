@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.prolib.aquila.utils</groupId>
 	<artifactId>aquila-utils-finexp-futures</artifactId>
-	<version>0.14.1</version>
+	<version>0.14.2</version>
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
