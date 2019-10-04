@@ -75,6 +75,8 @@ public class CommonMsg {
 	public static final MsgID USER_DEFINED_LONG = newMsgID("ID_USER_DEFINED_LONG");
 	public static final MsgID USER_DEFINED_STRING = newMsgID("ID_USER_DEFINED_STRING");
 	public static final MsgID VMARGIN = newMsgID("ID_VMARGIN");
+	public static final MsgID NAME = newMsgID("ID_NAME");
+	public static final MsgID PERIOD = newMsgID("ID_PERIOD");
 	
 	// Time selection dialog
 	public static final MsgID TSD_DEFAULT_TITLE = newMsgID("TSD_DEFAULT_TITLE");

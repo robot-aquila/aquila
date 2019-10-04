@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.osc;
 
+import java.util.Collection;
+
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.BusinessEntities.ObservableStateContainer;
 import ru.prolib.aquila.core.concurrency.Lockable;
@@ -43,6 +45,13 @@ public interface OSCRepository<KeyType, EntityType extends ObservableStateContai
 	 * Close repository and remove all entities.
 	 */
 	void close();
+	
+	/**
+	 * Get collection of entities.
+	 * <p>
+	 * @return entities
+	 */
+	Collection<EntityType> getEntities();
 	
 	EventType onEntityUpdate();
 	EventType onEntityAvailable();

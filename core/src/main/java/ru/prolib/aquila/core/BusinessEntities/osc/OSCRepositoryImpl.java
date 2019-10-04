@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities.osc;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,16 @@ public class OSCRepositoryImpl<KeyType, EntityType extends ObservableStateContai
 				entityMap.put(key, entity);
 			}
 			return entity;	
+		} finally {
+			unlock();
+		}
+	}
+	
+	@Override
+	public Collection<EntityType> getEntities() {
+		lock();
+		try {
+			return new ArrayList<>(entityMap.values());
 		} finally {
 			unlock();
 		}

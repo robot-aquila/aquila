@@ -3,7 +3,10 @@ package ru.prolib.aquila.core.BusinessEntities.osc;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
@@ -231,6 +234,24 @@ public class OSCRepositoryImplTest {
 		service.close();
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testGetEntities() {
+		entityMap.put("foo", contMock1);
+		entityMap.put("bar", contMock2);
+		entityMap.put("boo", contMock3);
+		lockMock.lock();
+		lockMock.unlock();
+		control.replay();
+		
+		Collection<ObservableStateContainer> actual = service.getEntities();
+		
+		List<ObservableStateContainer> expected = new ArrayList<>();
+		expected.add(contMock1);
+		expected.add(contMock2);
+		expected.add(contMock3);
+		assertEquals(expected, actual);
 	}
 
 }
