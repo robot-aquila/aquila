@@ -421,5 +421,14 @@ public class QFReactorTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testClose() {
+		control.replay();
+		
+		reactor.close();
+		
+		control.verify();
+	}
 
 }

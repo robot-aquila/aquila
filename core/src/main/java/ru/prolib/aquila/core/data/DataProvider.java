@@ -21,5 +21,5 @@ public interface DataProvider {
 	void unsubscribe(Symbol symbol, EditableTerminal terminal);
 	void subscribe(Account account, EditableTerminal terminal);
 	void unsubscribe(Account account, EditableTerminal terminal);
-
+	void close();
 }

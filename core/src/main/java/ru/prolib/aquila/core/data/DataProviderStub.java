@@ -54,4 +54,9 @@ public class DataProviderStub implements DataProvider {
 		
 	}
 
+	@Override
+	public void close() {
+		
+	}
+
 }

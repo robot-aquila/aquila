@@ -1018,6 +1018,7 @@ public class TerminalImplTest {
 	@Test
 	public void testClose_SkipIfClosed() {
 		schedulerMock.close();
+		dataProviderMock.close();
 		control.replay();
 		
 		terminalWithMocks.close();
@@ -1029,6 +1030,7 @@ public class TerminalImplTest {
 	@Test
 	public void testClose() {
 		schedulerMock.close();
+		dataProviderMock.close();
 		control.replay();
 		
 		terminalWithMocks.close();

@@ -284,4 +284,9 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		
 	}
 
+	@Override
+	public void close() {
+		
+	}
+
 }

@@ -589,7 +589,7 @@ public class TerminalImpl implements EditableTerminal {
 			closed = true;
 			lock.unlock();
 		}
-		
+		dataProvider.close();
 		for ( EditableOrder order : orderToClose ) {
 			order.close();
 		}

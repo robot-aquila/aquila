@@ -96,4 +96,9 @@ public class XDataProvider implements DataProvider {
 		
 	}
 
+	@Override
+	public void close() {
+		
+	}
+
 }
