@@ -33,6 +33,7 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
@@ -153,7 +154,7 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 				logger.debug("Terminal ready at {}", t);
 				for ( Symbol symbol : symbols_dup ) {
 					if ( rConfig.getSymbol().equals(symbol) ) {
-						terminal.subscribe(symbol);
+						terminal.subscribe(symbol, MDLevel.L1);
 						logger.debug("Subscribed for: {}", symbol);
 					}
 				}

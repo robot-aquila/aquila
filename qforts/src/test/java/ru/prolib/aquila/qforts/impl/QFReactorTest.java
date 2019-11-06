@@ -23,6 +23,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
@@ -156,7 +157,7 @@ public class QFReactorTest {
 		subscribed_symbols.add(symbol);
 		control.replay();
 		
-		reactor.subscribe(symbol, terminal);
+		reactor.subscribe(symbol, MDLevel.L1, terminal);
 		
 		control.verify();
 	}
@@ -169,7 +170,7 @@ public class QFReactorTest {
 		dsMock.subscribeSymbol(symbol, security);
 		control.replay();
 		
-		reactor.subscribe(symbol, terminal);
+		reactor.subscribe(symbol, MDLevel.L0, terminal);
 		
 		control.verify();
 		assertTrue(subscribed_symbols.contains(symbol));
@@ -179,7 +180,7 @@ public class QFReactorTest {
 	public void testUnsubscribe_Symbol_IfNotSubscribed() {
 		control.replay();
 		
-		reactor.unsubscribe(symbol, terminal);
+		reactor.unsubscribe(symbol, MDLevel.L2, terminal);
 		
 		control.verify();
 	}
@@ -192,7 +193,7 @@ public class QFReactorTest {
 		dsMock.unsubscribeSymbol(symbol, security);
 		control.replay();
 		
-		reactor.unsubscribe(symbol, terminal);
+		reactor.unsubscribe(symbol, MDLevel.L1_BBO, terminal);
 		
 		control.verify();
 		assertFalse(subscribed_symbols.contains(symbol));

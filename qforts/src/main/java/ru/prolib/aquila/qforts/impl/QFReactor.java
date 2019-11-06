@@ -15,6 +15,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.SPRunnable;
 import ru.prolib.aquila.core.BusinessEntities.Security;
@@ -233,7 +234,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void subscribe(Symbol symbol, EditableTerminal terminal) {
+	public void subscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
 		synchronized ( this ) {
 			if ( ! subscribedSymbols.add(symbol) ) {
 				return;
@@ -247,7 +248,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void unsubscribe(Symbol symbol, EditableTerminal terminal) {
+	public void unsubscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
 		synchronized ( this ) {
 			if ( ! subscribedSymbols.remove(symbol) ) {
 				return;

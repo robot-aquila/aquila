@@ -6,6 +6,7 @@ import quickfix.SessionID;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.DataProvider;
@@ -77,12 +78,12 @@ public class XDataProvider implements DataProvider {
 	}
 
 	@Override
-	public void subscribe(Symbol symbol, EditableTerminal terminal) {
+	public void subscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
 		
 	}
 
 	@Override
-	public void unsubscribe(Symbol symbol, EditableTerminal terminal) {
+	public void unsubscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
 		
 	}
 

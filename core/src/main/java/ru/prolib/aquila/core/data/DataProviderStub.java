@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.data;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
@@ -35,12 +36,12 @@ public class DataProviderStub implements DataProvider {
 	}
 
 	@Override
-	public void subscribe(Symbol symbol, EditableTerminal terminal) {
+	public void subscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
 		
 	}
 
 	@Override
-	public void unsubscribe(Symbol symbol, EditableTerminal terminal) {
+	public void unsubscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
 		
 	}
 

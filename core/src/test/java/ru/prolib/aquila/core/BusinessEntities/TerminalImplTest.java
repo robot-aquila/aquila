@@ -837,20 +837,20 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testSubscribe_Symbol() {
-		dataProviderMock.subscribe(symbol1, terminalWithMocks);
+		dataProviderMock.subscribe(symbol1, MDLevel.L1, terminalWithMocks);
 		control.replay();
 		
-		terminalWithMocks.subscribe(symbol1);
+		terminalWithMocks.subscribe(symbol1, MDLevel.L1);
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testUnsubscribe_Symbol() {
-		dataProviderMock.unsubscribe(symbol1, terminalWithMocks);
+		dataProviderMock.unsubscribe(symbol1, MDLevel.L2, terminalWithMocks);
 		control.replay();
 
-		terminalWithMocks.unsubscribe(symbol1);
+		terminalWithMocks.unsubscribe(symbol1, MDLevel.L2);
 		
 		control.verify();
 	}
