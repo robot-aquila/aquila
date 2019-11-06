@@ -78,12 +78,12 @@ public class XDataProvider implements DataProvider {
 	}
 
 	@Override
-	public void subscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
+	public void subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
 		
 	}
 
 	@Override
-	public void unsubscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
+	public void unsubscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
 		
 	}
 

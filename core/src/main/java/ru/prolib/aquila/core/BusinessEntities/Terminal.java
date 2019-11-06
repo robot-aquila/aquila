@@ -108,17 +108,17 @@ public interface Terminal extends Scheduler, BusinessEntity {
 	 * program to get it available for work with every terminal implementation.
 	 * <p>
 	 * @param symbol - the symbol
-	 * @param type - level of market data to subscribe
+	 * @param level - level of market data to subscribe
 	 */
-	public void subscribe(Symbol symbol, MDLevel type);
+	public void subscribe(Symbol symbol, MDLevel level);
 	
 	/**
 	 * Remove subscription on the security data.
 	 * <p>
 	 * @param symbol - the symbol to unsubscribe
-	 * @param type - level of market data to unsubscribe
+	 * @param level - level of market data to unsubscribe
 	 */
-	public void unsubscribe(Symbol symbol, MDLevel type);
+	public void unsubscribe(Symbol symbol, MDLevel level);
 	
 	/**
 	 * Subscribe for account updates.

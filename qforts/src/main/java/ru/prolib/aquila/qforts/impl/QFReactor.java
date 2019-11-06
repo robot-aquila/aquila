@@ -234,7 +234,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void subscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
+	public void subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
 		synchronized ( this ) {
 			if ( ! subscribedSymbols.add(symbol) ) {
 				return;
@@ -248,7 +248,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void unsubscribe(Symbol symbol, MDLevel type, EditableTerminal terminal) {
+	public void unsubscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
 		synchronized ( this ) {
 			if ( ! subscribedSymbols.remove(symbol) ) {
 				return;
