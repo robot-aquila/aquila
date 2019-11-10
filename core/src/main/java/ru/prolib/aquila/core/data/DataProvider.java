@@ -17,9 +17,7 @@ public interface DataProvider {
 	
 	public void cancelOrder(EditableOrder order) throws OrderException;
 
-	void subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal);
-	void unsubscribe(Symbol symbol, MDLevel level, EditableTerminal terminal);
-	void subscribe(Account account, EditableTerminal terminal);
-	void unsubscribe(Account account, EditableTerminal terminal);
+	SubscrHandler subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal);
+	SubscrHandler subscribe(Account account, EditableTerminal terminal);
 	void close();
 }

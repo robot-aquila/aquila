@@ -837,40 +837,22 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testSubscribe_Symbol() {
-		dataProviderMock.subscribe(symbol1, MDLevel.L1, terminalWithMocks);
+		SubscrHandler handler = new SubscrHandlerStub();
+		expect(dataProviderMock.subscribe(symbol1, MDLevel.L1, terminalWithMocks)).andReturn(handler);
 		control.replay();
 		
-		terminalWithMocks.subscribe(symbol1, MDLevel.L1);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testUnsubscribe_Symbol() {
-		dataProviderMock.unsubscribe(symbol1, MDLevel.L2, terminalWithMocks);
-		control.replay();
-
-		terminalWithMocks.unsubscribe(symbol1, MDLevel.L2);
+		assertSame(handler, terminalWithMocks.subscribe(symbol1, MDLevel.L1));
 		
 		control.verify();
 	}
 	
 	@Test
 	public void testSubscibe_Account() {
-		dataProviderMock.subscribe(account1, terminalWithMocks);
+		SubscrHandler handler = new SubscrHandlerStub();
+		expect(dataProviderMock.subscribe(account1, terminalWithMocks)).andReturn(handler);
 		control.replay();
 		
-		terminalWithMocks.subscribe(account1);
-		
-		control.verify();
-	}
-	
-	@Test
-	public void testUnsubscribe_Account() {
-		dataProviderMock.unsubscribe(account2, terminalWithMocks);
-		control.replay();
-		
-		terminalWithMocks.unsubscribe(account2);
+		assertSame(handler, terminalWithMocks.subscribe(account1));
 		
 		control.verify();
 	}

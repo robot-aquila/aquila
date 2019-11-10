@@ -107,7 +107,11 @@ public class SecuritySimulationTest implements Experiment, RobotStateListener {
 			breakSignal.fireBreak();
 			breakSignal = null;
 		}
-		serviceLocator.getTerminal().stop();
+		try {
+			serviceLocator.getTerminal().stop();
+		} catch ( Exception e ) {
+			logger.error("Error closing terminal: ", e);
+		}
 	}
 
 	@Override

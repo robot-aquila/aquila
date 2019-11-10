@@ -106,33 +106,21 @@ public interface Terminal extends Scheduler, BusinessEntity {
 	 * This method is universal way to ask terminal to subscribe for the data.
 	 * This method should be used to each security which will be used in a
 	 * program to get it available for work with every terminal implementation.
+	 * When this security no more needed, then subscription handler should be closed.
 	 * <p>
 	 * @param symbol - the symbol
 	 * @param level - level of market data to subscribe
+	 * @return subscription handler
 	 */
-	public void subscribe(Symbol symbol, MDLevel level);
-	
-	/**
-	 * Remove subscription on the security data.
-	 * <p>
-	 * @param symbol - the symbol to unsubscribe
-	 * @param level - level of market data to unsubscribe
-	 */
-	public void unsubscribe(Symbol symbol, MDLevel level);
+	public SubscrHandler subscribe(Symbol symbol, MDLevel level);
 	
 	/**
 	 * Subscribe for account updates.
 	 * <p>
 	 * @param account - full account identifier
+	 * @return subscription handler
 	 */
-	public void subscribe(Account account);
-	
-	/**
-	 * Stop subscription for account updates.
-	 * <p>
-	 * @param account - account identifier
-	 */
-	public void unsubscribe(Account account);
+	public SubscrHandler subscribe(Account account);
 
 	/**
 	 * Test that order exists.

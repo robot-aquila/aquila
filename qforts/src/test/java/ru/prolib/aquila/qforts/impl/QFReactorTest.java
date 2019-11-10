@@ -19,6 +19,7 @@ import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
+import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
@@ -29,7 +30,12 @@ import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounter;
+import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounter.Field;
+import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounterFactory;
+import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrRepository;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.DataProviderStub;
@@ -42,12 +48,13 @@ public class QFReactorTest {
 	private QFObjectRegistry registryMock;
 	private QFSessionSchedule scheduleMock;
 	private DataSource dsMock;
+	private SymbolSubscrRepository symbolSubsMock;
 	private AtomicLong seqOrderID;
 	private EditableTerminal terminal;
 	private EditableSecurity security;
 	private SchedulerStub schedulerStub;
 	private QFReactor reactor;
-	private Set<Symbol> subscribed_symbols;
+	private SymbolSubscrCounterFactory symbolSubsFactory;
 	
 	static Instant T(String timeString) {
 		return Instant.parse(timeString);
@@ -66,22 +73,23 @@ public class QFReactorTest {
 		registryMock = control.createMock(QFObjectRegistry.class);
 		scheduleMock = control.createMock(QFSessionSchedule.class);
 		dsMock = control.createMock(DataSource.class);
+		symbolSubsMock = control.createMock(SymbolSubscrRepository.class);
 		seqOrderID = new AtomicLong(1000L);
 		schedulerStub = new SchedulerStub();
 		terminal = new BasicTerminalBuilder()
 			.withDataProvider(new DataProviderStub())
 			.withScheduler(schedulerStub)
 			.buildTerminal();
+		symbolSubsFactory = new SymbolSubscrCounterFactory(terminal.getEventQueue());
 		security = terminal.getEditableSecurity(symbol);
 		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"));
-		subscribed_symbols = new HashSet<>();
 		reactor = new QFReactor(
 				facadeMock,
 				registryMock,
 				scheduleMock,
 				seqOrderID,
 				dsMock,
-				subscribed_symbols
+				symbolSubsMock
 			);
 	}
 	
@@ -154,49 +162,93 @@ public class QFReactorTest {
 
 	@Test
 	public void testSubscribe_Symbol_IfAlreadySubscribed() {
-		subscribed_symbols.add(symbol);
+		SymbolSubscrCounter counter = symbolSubsFactory.produce(symbolSubsMock, symbol);
+		counter.consume(new DeltaUpdateBuilder()
+				.withToken(Field.NUM_L0, 2)
+				.withToken(Field.NUM_L1_BBO, 1)
+				.withToken(Field.NUM_L1, 1)
+				.withToken(Field.NUM_L2, 0)
+				.buildUpdate()
+			);
+		symbolSubsMock.lock();
+		expect(symbolSubsMock.subscribe(symbol, MDLevel.L1)).andReturn(counter);
+		symbolSubsMock.unlock();
 		control.replay();
 		
-		reactor.subscribe(symbol, MDLevel.L1, terminal);
+		SubscrHandler actual = reactor.subscribe(symbol, MDLevel.L1, terminal);
 		
 		control.verify();
+		SubscrHandler expected = new QFSymbolSubscrHandler(reactor, security, MDLevel.L1);
+		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void testSubscribe_Symbol_IfNotYetSubscribed() {
+		SymbolSubscrCounter counter = symbolSubsFactory.produce(symbolSubsMock, symbol);
+		counter.consume(new DeltaUpdateBuilder()
+				.withToken(Field.NUM_L0, 1)
+				.withToken(Field.NUM_L1_BBO, 1)
+				.withToken(Field.NUM_L1, 1)
+				.withToken(Field.NUM_L2, 0)
+				.buildUpdate()
+			);
+		symbolSubsMock.lock();
+		expect(symbolSubsMock.subscribe(symbol, MDLevel.L2)).andReturn(counter);
+		symbolSubsMock.unlock();
 		facadeMock.registerSecurity(security);
 		dsMock.subscribeL1(symbol, security);
 		dsMock.subscribeMD(symbol, security);
-		dsMock.subscribeSymbol(symbol, security);
+		dsMock.subscribeSymbol(symbol, security);		
 		control.replay();
 		
-		reactor.subscribe(symbol, MDLevel.L0, terminal);
+		SubscrHandler actual = reactor.subscribe(symbol, MDLevel.L2, terminal);
 		
 		control.verify();
-		assertTrue(subscribed_symbols.contains(symbol));
+		SubscrHandler expected = new QFSymbolSubscrHandler(reactor, security, MDLevel.L2);
+		assertEquals(expected, actual);
 	}
 	
 	@Test
-	public void testUnsubscribe_Symbol_IfNotSubscribed() {
+	public void testUnsubscribe_Symbol_NotReachedZeroListeners() {
+		SymbolSubscrCounter counter = symbolSubsFactory.produce(symbolSubsMock, symbol);
+		counter.consume(new DeltaUpdateBuilder()
+				.withToken(Field.NUM_L0, 5)
+				.withToken(Field.NUM_L1_BBO, 3)
+				.withToken(Field.NUM_L1, 1)
+				.withToken(Field.NUM_L2, 0)
+				.buildUpdate()
+			);
+		symbolSubsMock.lock();
+		expect(symbolSubsMock.unsubscribe(symbol, MDLevel.L1_BBO)).andReturn(counter);
+		symbolSubsMock.unlock();
 		control.replay();
 		
-		reactor.unsubscribe(symbol, MDLevel.L2, terminal);
+		reactor.unsubscribe(security, MDLevel.L1_BBO);
 		
 		control.verify();
 	}
 	
 	@Test
-	public void testUnsubscribe_Symbol_IfSubscribed() {
-		subscribed_symbols.add(symbol);
+	public void testUnsubscribe_Symbol_ReachedZeroListeners() {
+		SymbolSubscrCounter counter = symbolSubsFactory.produce(symbolSubsMock, symbol);
+		counter.consume(new DeltaUpdateBuilder()
+				.withToken(Field.NUM_L0, 0)
+				.withToken(Field.NUM_L1_BBO, 0)
+				.withToken(Field.NUM_L1, 0)
+				.withToken(Field.NUM_L2, 0)
+				.buildUpdate()
+			);
+		symbolSubsMock.lock();
+		expect(symbolSubsMock.unsubscribe(symbol, MDLevel.L2)).andReturn(counter);
+		symbolSubsMock.unlock();
 		dsMock.unsubscribeL1(symbol, security);
 		dsMock.unsubscribeMD(symbol, security);
 		dsMock.unsubscribeSymbol(symbol, security);
 		control.replay();
 		
-		reactor.unsubscribe(symbol, MDLevel.L1_BBO, terminal);
+		reactor.unsubscribe(security, MDLevel.L2);
 		
 		control.verify();
-		assertFalse(subscribed_symbols.contains(symbol));
 	}
 	
 	@Test
@@ -226,15 +278,6 @@ public class QFReactorTest {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
 		assertSame(portfolio, cap1.getValue());
 		assertSame(portfolio, cap2.getValue());
-	}
-	
-	@Test
-	public void testUnsubscribe_Account() {
-		control.replay();
-		
-		reactor.unsubscribe(new Account("ANY"), terminal);
-		
-		control.verify();
 	}
 	
 	@Test

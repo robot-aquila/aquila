@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 import ru.prolib.aquila.web.utils.HTTPAttachmentManagerFactory;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
@@ -53,14 +54,20 @@ public class FidexpFactorySTD implements FidexpFactory {
 		return new FidexpFactorySTD(driverFactory, attMgrFactory);
 	}
 	
-	public static FidexpFactory newFactoryFF(File config, boolean configRequired) throws IOException {
-		FFWebDriverFactory driverFactory = new FFWebDriverFactory();
+	public static FidexpFactory newFactoryFF(File config, boolean config_required, FirefoxOptions options)
+			throws IOException
+	{
+		FFWebDriverFactory driverFactory = new FFWebDriverFactory(options);
 		AHCAttachmentManagerFactory attMgrFactory = new AHCAttachmentManagerFactory();
-		if ( configRequired || config.exists() ) {
+		if ( config_required || config.exists() ) {
 			driverFactory.loadIni(config);
 			attMgrFactory.loadIni(config);
 		}
 		return new FidexpFactorySTD(driverFactory, attMgrFactory);
+	}
+	
+	public static FidexpFactory newFactoryFF(File config, boolean config_required) throws IOException {
+		return newFactoryFF(config, config_required, new FirefoxOptions());
 	}
 
 }

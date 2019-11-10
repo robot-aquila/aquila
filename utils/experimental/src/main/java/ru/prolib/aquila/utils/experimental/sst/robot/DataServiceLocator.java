@@ -37,6 +37,7 @@ public class DataServiceLocator {
 	private SDP2DataProvider<SDP2Key> sliceDataRegistry;
 	private MDStorage<TFSymbol, Candle> historicalDataStorage;
 	private MoexContractFileStorage contractDataStorage;
+	private final BasicTerminalBuilder btb = new BasicTerminalBuilder();
 	
 	public MarketSignalRegistry getMarketSignalRegistry() {
 		return msigRegistry;
@@ -129,12 +130,13 @@ public class DataServiceLocator {
 						getDataRootDirectory(),
 						getPriceScaleDB()
 					);
-		return qfBuilder.withDataSource(data_dource).buildDataProvider();
+		return qfBuilder.withDataSource(data_dource)
+				.withEventQueue(btb.getEventQueue())
+				.buildDataProvider();
 	}
 	
 	private EditableTerminal createTerminal() {
-		return new BasicTerminalBuilder()
-			.withTerminalID("SECURITY_SIMULATION")
+		return btb.withTerminalID("SECURITY_SIMULATION")
 			.withScheduler(getScheduler())
 			.withDataProvider(createDataProvider())
 			.buildTerminal();

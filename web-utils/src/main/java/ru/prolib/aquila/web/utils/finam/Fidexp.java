@@ -178,7 +178,7 @@ public class Fidexp implements Closeable {
 	 * gathering. 
 	 * <p> 
 	 * @param params - set of parameters which describe what to download
-	 * @return URI of doenloaded file
+	 * @return URI of downloaded file
 	 * @throws WUException - an error occurred
 	 */
 	public URI paramsToURIUsingFormAction(FidexpFormParams params) throws WUException {

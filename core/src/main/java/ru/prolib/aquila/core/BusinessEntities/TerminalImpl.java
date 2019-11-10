@@ -456,23 +456,13 @@ public class TerminalImpl implements EditableTerminal {
 	}
 
 	@Override
-	public void subscribe(Symbol symbol, MDLevel level) {
-		dataProvider.subscribe(symbol, level, this);
+	public SubscrHandler subscribe(Symbol symbol, MDLevel level) {
+		return dataProvider.subscribe(symbol, level, this);
 	}
 	
 	@Override
-	public void unsubscribe(Symbol symbol, MDLevel level) {
-		dataProvider.unsubscribe(symbol, level, this);
-	}
-	
-	@Override
-	public void subscribe(Account account) {
-		dataProvider.subscribe(account, this);
-	}
-	
-	@Override
-	public void unsubscribe(Account account) {
-		dataProvider.unsubscribe(account, this);
+	public SubscrHandler subscribe(Account account) {
+		return dataProvider.subscribe(account, this);
 	}
 	
 	@Override

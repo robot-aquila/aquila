@@ -1,7 +1,6 @@
 package ru.prolib.aquila.qforts.impl;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -22,7 +21,11 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandlerStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounter;
+import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrRepository;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
@@ -41,7 +44,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private final AtomicLong seqOrderID;
 	private final QFSessionSchedule schedule;
 	private final DataSource dataSource;
-	private final Set<Symbol> subscribedSymbols;
+	private final SymbolSubscrRepository symbolSubs;
 	private EditableTerminal terminal;
 	private TaskHandler taskHandler;
 	
@@ -50,14 +53,14 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 					 QFSessionSchedule schedule,
 					 AtomicLong seqOrderID,
 					 DataSource dataSource,
-					 Set<Symbol> subscribed_symbols)
+					 SymbolSubscrRepository symbolSubs)
 	{
 		this.facade = facade;
 		this.registry = registry;
 		this.schedule = schedule;
 		this.seqOrderID = seqOrderID;
 		this.dataSource = dataSource;
-		this.subscribedSymbols = subscribed_symbols;
+		this.symbolSubs = symbolSubs;
 	}
 	
 	/**
@@ -234,39 +237,65 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
-		synchronized ( this ) {
-			if ( ! subscribedSymbols.add(symbol) ) {
-				return;
-			}
-		}
+	public SubscrHandler subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
+		boolean doit = false;
+		SymbolSubscrCounter subs = null;
 		EditableSecurity security = terminal.getEditableSecurity(symbol);
-		facade.registerSecurity(security);
-		dataSource.subscribeL1(symbol, security);
-		dataSource.subscribeMD(symbol, security);
-		dataSource.subscribeSymbol(symbol, security);
+		symbolSubs.lock();
+		try {
+			subs = symbolSubs.subscribe(symbol, level);
+			subs.lock();
+		} finally {
+			symbolSubs.unlock();
+		}
+		try {
+			if ( subs.getNumL0() == 1 ) {
+				doit = true;
+			}
+		} finally {
+			subs.unlock();
+		}
+		if ( doit ) {
+			facade.registerSecurity(security);
+			dataSource.subscribeL1(symbol, security);
+			dataSource.subscribeMD(symbol, security);
+			dataSource.subscribeSymbol(symbol, security);
+		}
+		return new QFSymbolSubscrHandler(this, security, level);
+	}
+	
+	void unsubscribe(EditableSecurity security, MDLevel level) {
+		boolean doit = false;
+		SymbolSubscrCounter subs = null;
+		Symbol symbol = security.getSymbol();
+		symbolSubs.lock();
+		try {
+			subs = symbolSubs.unsubscribe(symbol, level);
+			subs.lock();
+		} finally {
+			symbolSubs.unlock();
+		}
+		try {
+			if ( subs.getNumL0() == 0 ) {
+				doit = true;
+			}
+		} finally {
+			subs.unlock();
+		}
+		if ( doit ) {
+			dataSource.unsubscribeL1(symbol, security);
+			dataSource.unsubscribeMD(symbol, security);
+			dataSource.unsubscribeSymbol(symbol, security);
+		}
 	}
 
 	@Override
-	public void unsubscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
-		synchronized ( this ) {
-			if ( ! subscribedSymbols.remove(symbol) ) {
-				return;
-			}
-		}
-		EditableSecurity security = terminal.getEditableSecurity(symbol);
-		dataSource.unsubscribeL1(symbol, security);
-		dataSource.unsubscribeMD(symbol, security);
-		dataSource.unsubscribeSymbol(symbol, security);
-	}
-
-	@Override
-	public void subscribe(Account account, EditableTerminal terminal) {
+	public SubscrHandler subscribe(Account account, EditableTerminal terminal) {
 		EditablePortfolio portfolio = null;
 		terminal.lock();
 		try {
 			if ( terminal.isPortfolioExists(account) ) {
-				return;
+				return new SubscrHandlerStub();
 			}
 			portfolio = terminal.getEditablePortfolio(account);
 		} finally {
@@ -278,11 +307,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		} catch ( QFTransactionException e ) {
 			throw new IllegalStateException("Unable to change account balance: " + account, e);
 		}
-	}
-
-	@Override
-	public void unsubscribe(Account account, EditableTerminal terminal) {
-		
+		return new SubscrHandlerStub();
 	}
 
 	@Override

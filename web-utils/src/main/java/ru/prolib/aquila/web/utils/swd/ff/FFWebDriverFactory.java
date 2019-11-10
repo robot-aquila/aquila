@@ -82,8 +82,8 @@ public class FFWebDriverFactory implements WebDriverFactory {
 	}
 	
 	public FFWebDriverFactory loadIni(File file) throws IOException {
-		FirefoxBinary ffb = new FirefoxBinary();
 		ffo = new FirefoxOptions();
+		FirefoxBinary ffb = new FirefoxBinary();
 		Ini ini = new Ini(file);
 		if ( ini.containsKey("firefox-driver") ) {
 			Section sec = ini.get("firefox-driver");

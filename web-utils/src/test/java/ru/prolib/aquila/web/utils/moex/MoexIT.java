@@ -31,6 +31,8 @@ import ru.prolib.aquila.web.utils.finam.FidexpFactory;
 import ru.prolib.aquila.web.utils.finam.FidexpFactorySTD;
 
 public class MoexIT {
+	private static final boolean STRICT_COMPLETE_TEST = false;
+	
 	private static final File	JBROWSER_CONF_FILE =			new File("it-config/jbd.ini"); 
 	private static final File	CONTRACT_DATA_FILE = 			new File("it-config/moexIT.contract.ini");
 	private static final File	CONTRACT_DATA_FILE_TEMPLATE =	new File("it-config/moexIT.contract.ini-template");
@@ -76,6 +78,54 @@ public class MoexIT {
 	}
 	
 	private static void loadTestContractDetails() throws Exception {
+		if ( STRICT_COMPLETE_TEST ) {
+			// This test checks all fields of active contract.
+			// Make sure that CONTRACT_DATA_FILE contain actual data to pass the test.
+			loadTestContractDetails_Full();
+		} else {
+			// This test checks archived contract. Unfortunately, some fields aren't
+			// available for such contracts. Drawback - we can test our code partially.
+			// Advantage - information of this contract not changed with time and we do
+			// not need actualize CONTRACT_DATA_FILE each time it run.
+			loadTestContractDetails_Part();
+		}
+	}
+	
+	private static void loadTestContractDetails_Part() throws Exception {
+		Map<String, String> expected = new LinkedHashMap<>();
+		expected.put("Contract Symbol", "RTS-3.19");
+		expected.put("Contract Trading Symbol", "RIH9");
+		expected.put("Contract Description", "RTS Index Futures");
+		expected.put("Type", "Futures");
+		expected.put("Settlement", "Cash-Settled");
+		expected.put("Сontract size (lot)", "1");
+		expected.put("Quotation", "points");
+		expected.put("First Trading Day", "10.03.2017");
+		expected.put("Last Trading Day", "21.03.2019");
+		expected.put("Delivery", "21.03.2019");
+		// expected.put("Price tick");	// N/A for archived contracts
+		// expected.put("Value of price tick, RUB");	// N/A for archived contracts
+		// expected.put("Lower limit");	// N/A for archived contracts
+		// expected.put("Upper limit");	// N/A for archived contracts
+		// expected.put("Settlement price of last clearing session");	// N/A for archived contracts
+		// expected.put("Contract buy/sell fee, RUB");	// N/A for archived contracts
+		// expected.put("Intraday (scalper) fee, RUB");	// N/A for archived contracts
+		// expected.put("Negotiated trade fee, RUB");	// N/A for archived contracts
+		expected.put("Contract exercise fee, RUB", "2.00");
+		// expected.put("First level of Initial margin concentration limit*"); // N/A for archived contracts
+		// expected.put("IM value on");	// N/A for archived contracts
+		expected.put("FX for intraday clearing", "13:45 Moscow time");
+		expected.put("FX for evening clearing", "18:30 Moscow time");
+		expected.put("Settlement procedure", "Cash settlement. An average value of RTS Index calculated during the period from 15:00 to 16:00 Moscow time of the last trading day multiplied by 100 is taken as a settlement price. The tick value equals 20% of the USD/RUB exchange rate determined in accordance with the Methodology at 6:30 pm MSK on the last trading day.");
+		MoexContractFormUtils mcfUtils = new MoexContractFormUtils();
+		MoexContractPtmlConverter ptmlConverter = new MoexContractPtmlConverter();
+		for ( Map.Entry<String, String> entry : expected.entrySet() ) {
+			int field_id = mcfUtils.toContractField(entry.getKey());
+			TEST_CONTRACT_DATA.put(field_id, ptmlConverter.toObject(field_id, entry.getValue()));
+		}
+	}
+	
+	private static void loadTestContractDetails_Full() throws Exception {
 		Ini ini = null;
 		try {
 			ini = new Ini(CONTRACT_DATA_FILE);
