@@ -10,15 +10,17 @@ import org.junit.Test;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCControllerStub;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCRepository;
 
-public class SymbolSubscrTest {
+public class SSDescTest {
 	private IMocksControl control;
-	private OSCRepository<Integer, SymbolSubscr> repoMock;
+	private OSCRepository<Integer, SSDesc> repoMock;
 	private EventQueue queueMock;
-	private SymbolSubscr service;
+	private SubscrHandler hdrMock;
+	private SSDesc service;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -26,16 +28,18 @@ public class SymbolSubscrTest {
 		control = createStrictControl();
 		repoMock = control.createMock(OSCRepository.class);
 		queueMock = control.createMock(EventQueue.class);
-		service = new SymbolSubscrFactory(queueMock).produce(repoMock, 76543);
+		hdrMock = control.createMock(SubscrHandler.class);
+		service = new SSDescFactory(queueMock).produce(repoMock, 76543);
 	}
 
 	@Test
 	public void testGetters() {
 		service.consume(new DeltaUpdateBuilder()
-				.withToken(SymbolSubscr.ID, 126)
-				.withToken(SymbolSubscr.TERM_ID, "TERM-ID")
-				.withToken(SymbolSubscr.SYMBOL, new Symbol("zulu"))
-				.withToken(SymbolSubscr.MD_LEVEL, MDLevel.L1)
+				.withToken(SSDesc.ID, 126)
+				.withToken(SSDesc.TERM_ID, "TERM-ID")
+				.withToken(SSDesc.SYMBOL, new Symbol("zulu"))
+				.withToken(SSDesc.MD_LEVEL, MDLevel.L1)
+				.withToken(SSDesc.HANDLER, hdrMock)
 				.buildUpdate()
 			);
 		
@@ -43,8 +47,9 @@ public class SymbolSubscrTest {
 		assertEquals("TERM-ID", service.getTerminalID());
 		assertEquals(new Symbol("zulu"), service.getSymbol());
 		assertEquals(MDLevel.L1, service.getLevel());
+		assertEquals(hdrMock, service.getHandler());
 		
-		assertEquals("SymbolSubscr#76543", service.getContainerID());
+		assertEquals("SSDesc#76543", service.getContainerID());
 		assertEquals(OSCControllerStub.class, service.getController().getClass());
 	}
 

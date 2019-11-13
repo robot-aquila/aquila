@@ -5,17 +5,17 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParamsBuilder;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCRepository;
 
-public class SymbolSubscrFactory implements OSCFactory<Integer, SymbolSubscr> {
+public class SSDescFactory implements OSCFactory<Integer, SSDesc> {
 	private final EventQueue queue;
 	
-	public SymbolSubscrFactory(EventQueue queue) {
+	public SSDescFactory(EventQueue queue) {
 		this.queue = queue;
 	}
 
 	@Override
-	public SymbolSubscr produce(OSCRepository<Integer, SymbolSubscr> owner, Integer key) {
-		return new SymbolSubscr(new OSCParamsBuilder(queue)
-				.withID("SymbolSubscr#" + key)
+	public SSDesc produce(OSCRepository<Integer, SSDesc> owner, Integer key) {
+		return new SSDesc(new OSCParamsBuilder(queue)
+				.withID("SSDesc#" + key)
 				.buildParams()
 			);
 	}

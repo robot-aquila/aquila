@@ -3,16 +3,24 @@ package ru.prolib.aquila.ui.subman;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.TerminalRegistry;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCRepository;
 import ru.prolib.aquila.core.text.IMessages;
+import ru.prolib.aquila.core.text.MsgID;
+import ru.prolib.aquila.ui.form.OSCRepositoryTableModel;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 
 public class SymbolSubscrDialog extends JDialog implements ActionListener {
@@ -45,6 +53,20 @@ public class SymbolSubscrDialog extends JDialog implements ActionListener {
 		setTitle(messages.get(CommonMsg.SUBSCRIBE_FOR_SYMBOL));
 		pack();
 	}
+	
+	private OSCRepositoryTableModel<SSDesc> createTableModel(OSCRepository<Integer, SSDesc> repository) {
+		List<Integer> column_id_list = new ArrayList<>();
+		column_id_list.add(SSDesc.ID);
+		column_id_list.add(SSDesc.TERM_ID);
+		column_id_list.add(SSDesc.SYMBOL);
+		column_id_list.add(SSDesc.MD_LEVEL);
+		Map<Integer, MsgID> column_id_to_header = new HashMap<>();
+		column_id_to_header.put(SSDesc.ID, CommonMsg.ID);
+		column_id_to_header.put(SSDesc.TERM_ID, CommonMsg.TERMINAL);
+		column_id_to_header.put(SSDesc.SYMBOL, CommonMsg.SYMBOL);
+		column_id_to_header.put(SSDesc.MD_LEVEL, CommonMsg.MD_LEVEL);
+		return new OSCRepositoryTableModel<>(messages, repository, column_id_list, column_id_to_header);
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
@@ -73,7 +95,7 @@ public class SymbolSubscrDialog extends JDialog implements ActionListener {
 			return;
 		}
 		Terminal term = registry.get(term_id);
-		term.subscribe(symbol, level); // TODO: register handler somewhere
+		SubscrHandler handler = term.subscribe(symbol, level); // TODO: register handler somewhere
 	}
 
 }
