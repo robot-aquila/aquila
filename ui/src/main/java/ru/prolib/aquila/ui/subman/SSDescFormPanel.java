@@ -11,13 +11,13 @@ import ru.prolib.aquila.core.BusinessEntities.TerminalRegistry;
 import ru.prolib.aquila.core.text.IMessages;
 import ru.prolib.aquila.ui.msg.CommonMsg;
 
-public class SymbolSubscrPanel extends JPanel {
+public class SSDescFormPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	protected final JComboBox<String> cmbTerminalList = new JComboBox<>();
 	protected final JTextField txtSymbol = new JTextField(16);
 	protected final JComboBox<MDLevel> cmbLevel = new JComboBox<>();
 	
-	public SymbolSubscrPanel(boolean horizontal, IMessages messages) {
+	public SSDescFormPanel(boolean horizontal, IMessages messages) {
 		JLabel lblTerminalList = new JLabel(messages.get(CommonMsg.TERMINAL));
 		JLabel lblSymbol = new JLabel(messages.get(CommonMsg.SYMBOL));
 		JLabel lblLevel = new JLabel(messages.get(CommonMsg.MD_LEVEL));

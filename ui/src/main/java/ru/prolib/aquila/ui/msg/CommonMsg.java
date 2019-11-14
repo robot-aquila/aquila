@@ -78,7 +78,7 @@ public class CommonMsg {
 	public static final MsgID NAME = newMsgID("ID_NAME");
 	public static final MsgID PERIOD = newMsgID("ID_PERIOD");
 	public static final MsgID SUBSCRIBE = newMsgID("ID_SUBSCRIBE");
-	public static final MsgID SUBSCRIBE_FOR_SYMBOL = newMsgID("ID_SUBSCRIBE_FOR_SYMBOL");
+	public static final MsgID MANUAL_SYMBOL_SUBSCRIPTIONS = newMsgID("ID_MANUAL_SYMBOL_SUBSCRIPTIONS");
 	public static final MsgID MD_LEVEL = newMsgID("ID_MD_LEVEL");
 	public static final MsgID MANAGE = newMsgID("ID_MANAGE");
 	

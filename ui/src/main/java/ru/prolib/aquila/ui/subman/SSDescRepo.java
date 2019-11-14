@@ -2,6 +2,7 @@ package ru.prolib.aquila.ui.subman;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.DeltaUpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
@@ -32,6 +33,10 @@ public class SSDescRepo extends OSCRepositoryImpl<Integer, SSDesc> {
 		super(factory, repoID);
 		this.registry = registry;
 		this.idSeq = id_seq;
+	}
+	
+	public SSDescRepo(TerminalRegistry registry, EventQueue queue) {
+		this(registry, new AtomicInteger(), new SSDescFactory(queue), "SSDES-REPO");
 	}
 	
 	/**
