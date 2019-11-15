@@ -165,9 +165,7 @@ public class OSCRepositoryImpl<KeyType, EntityType extends ObservableStateContai
 	
 	private void close(EntityType entity) {
 		entity.close();
-		entity.onUpdate().removeAlternatesAndListeners();
-		entity.onAvailable().removeAlternatesAndListeners();
-		entity.onClose().removeAlternatesAndListeners();		
+		// Do not remove alternates & listeners of entity here
 	}
 
 }

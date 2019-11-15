@@ -46,21 +46,6 @@ public class OSCRepositoryImplTest {
 		service = new OSCRepositoryImpl<>(entityMap, lidMock, lockMock, factoryMock, "repo-id");
 	}
 	
-	private void expectContainerClose(
-			ObservableStateContainer contMock,
-			EventType onUpdateMock,
-			EventType onAvailableMock,
-			EventType onCloseMock)
-	{
-		contMock.close();
-		expect(contMock.onUpdate()).andStubReturn(onUpdateMock);
-		expect(contMock.onAvailable()).andStubReturn(onAvailableMock);
-		expect(contMock.onClose()).andStubReturn(onCloseMock);
-		onUpdateMock.removeAlternatesAndListeners();
-		onAvailableMock.removeAlternatesAndListeners();
-		onCloseMock.removeAlternatesAndListeners();
-	}
-	
 	@Test
 	public void testEventTypes() {
 		assertEquals("repo-id.ENTITY_UPDATE", service.onEntityUpdate().getId());
@@ -177,13 +162,10 @@ public class OSCRepositoryImplTest {
 	
 	@Test
 	public void testRemove_Exists() {
-		EventType onUpdateMock = control.createMock(EventType.class),
-				  onAvailableMock = control.createMock(EventType.class),
-				  onCloseMock = control.createMock(EventType.class);
 		entityMap.put("foobar", contMock2);
 		lockMock.lock();
 		lockMock.unlock();
-		expectContainerClose(contMock2, onUpdateMock, onAvailableMock, onCloseMock);
+		contMock2.close();
 		control.replay();
 		
 		assertTrue(service.remove("foobar"));
@@ -208,15 +190,6 @@ public class OSCRepositoryImplTest {
 		entityMap.put("one", contMock1);
 		entityMap.put("two", contMock2);
 		entityMap.put("gap", contMock3);
-		EventType onUpdateMock1 = control.createMock(EventType.class),
-				  onAvailableMock1 = control.createMock(EventType.class),
-				  onCloseMock1 = control.createMock(EventType.class),
-				  onUpdateMock2 = control.createMock(EventType.class),
-				  onAvailableMock2 = control.createMock(EventType.class),
-				  onCloseMock2 = control.createMock(EventType.class),
-				  onUpdateMock3 = control.createMock(EventType.class),
-				  onAvailableMock3 = control.createMock(EventType.class),
-				  onCloseMock3 = control.createMock(EventType.class);
 		lockMock.lock();
 		lockMock.unlock();
 		expectLastCall().andAnswer(new IAnswer<Void>() {
@@ -226,9 +199,9 @@ public class OSCRepositoryImplTest {
 				return null;
 			}
 		});
-		expectContainerClose(contMock1, onUpdateMock1, onAvailableMock1, onCloseMock1);
-		expectContainerClose(contMock2, onUpdateMock2, onAvailableMock2, onCloseMock2);
-		expectContainerClose(contMock3, onUpdateMock3, onAvailableMock3, onCloseMock3);
+		contMock1.close();
+		contMock2.close();
+		contMock3.close();
 		control.replay();
 		
 		service.close();

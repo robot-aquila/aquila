@@ -233,7 +233,7 @@ public class OSCRepositoryTableModel<EntityType extends ObservableStateContainer
 	private Integer removeEntity(EntityType entity) {
 		Integer row = getIndexOfEntity(entity);
 		if ( row != null ) {
-			entities.remove(row);
+			entities.remove((int) row);
 			return row;
 		} else {
 			return null;
