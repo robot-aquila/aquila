@@ -25,11 +25,11 @@ public class MoexContractFormUtils {
 		mapContract(MoexContractField.LOWER_PRICE_LIMIT, "Lower limit");
 		mapContract(MoexContractField.UPPER_PRICE_LIMIT, "Upper limit");
 		mapContract(MoexContractField.SETTLEMENT_PRICE, "Settlement price of last clearing session");
-		mapContract(MoexContractField.FEE, "Contract buy/sell fee, RUB");
-		mapContract(MoexContractField.INTRADAY_FEE, "Intraday (scalper) fee, RUB");
-		mapContract(MoexContractField.NEGOTIATION_FEE, "Negotiated trade fee, RUB");
-		mapContract(MoexContractField.EXERCISE_FEE, "Contract exercise fee, RUB");
-		mapContract(MoexContractField.INITIAL_MARGIN, "First level of Initial margin concentration limit*");
+		mapContract(MoexContractField.FEE, "Contract buy/sell fee*, RUB");
+		mapContract(MoexContractField.INTRADAY_FEE, "Intraday (scalper) fee*, RUB");
+		mapContract(MoexContractField.NEGOTIATION_FEE, "Negotiated trade fee*, RUB");
+		mapContract(MoexContractField.EXERCISE_FEE, "Contract exercise Clearing fee, RUB");
+		mapContract(MoexContractField.INITIAL_MARGIN, "First level of Initial margin concentration limit**");
 		mapContract(MoexContractField.INITIAL_MARGIN_DATE, "IM value on");
 		mapContract(MoexContractField.FX_INTRADAY_CLEARING, "FX for intraday clearing");
 		mapContract(MoexContractField.FX_EVENING_CLEARING, "FX for evening clearing");

@@ -1,4 +1,4 @@
-; rev0.1
+; rev0.2
 ;
 ; This file contains data to test function of obtaining contract data from MOEX
 ; site. Unfortunately this data cannot be obtained automatically because it
@@ -24,27 +24,27 @@
 ;
 
 [test-contract]
-Contract Symbol=RTS-3.19
-Contract Trading Symbol=RIH9
+Contract Symbol=RTS-3.20
+Contract Trading Symbol=RIH0
 Contract Description=RTS Index Futures
 Type=Futures
 Settlement=Cash-Settled
 Сontract size (lot)=1
 Quotation=points
-First Trading Day=10.03.2017
-Last Trading Day=21.03.2019
-Delivery=21.03.2019
+First Trading Day=10.01.2018
+Last Trading Day=19.03.2020
+Delivery=19.03.2020
 Price tick=10.0000
-Value of price tick, RUB=13.09490
-Lower limit=113,620.0000
-Upper limit=126,040.0000
-Settlement price of last clearing session=119,830.0000
-Contract buy/sell fee, RUB=3.45
-Intraday (scalper) fee, RUB=1.725
-Negotiated trade fee, RUB=3.45
-Contract exercise fee, RUB=2.0000
-First level of Initial margin concentration limit*=18,311.11
-IM value on=22.02.2019
+Value of price tick, RUB=12.75700
+Lower limit=136,690.0000
+Upper limit=152,530.0000
+Settlement price of last clearing session=144,610.0000
+Contract buy/sell fee*, RUB=4.05
+Intraday (scalper) fee*, RUB=2.025
+Negotiated trade fee*, RUB=4.05
+Contract exercise Clearing fee, RUB=2.00
+First level of Initial margin concentration limit**=22,834.91
+IM value on=21.11.2019
 FX for intraday clearing=13:45 Moscow time
 FX for evening clearing=18:30 Moscow time
 Settlement procedure=Cash settlement. An average value of RTS Index calculated during the period from 15:00 to 16:00 Moscow time of the last trading day multiplied by 100 is taken as a settlement price. The tick value equals 20% of the USD/RUB exchange rate determined in accordance with the Methodology at 6:30 pm MSK on the last trading day.

@@ -111,7 +111,7 @@ public class MoexIT {
 		// expected.put("Contract buy/sell fee, RUB");	// N/A for archived contracts
 		// expected.put("Intraday (scalper) fee, RUB");	// N/A for archived contracts
 		// expected.put("Negotiated trade fee, RUB");	// N/A for archived contracts
-		expected.put("Contract exercise fee, RUB", "2.00");
+		expected.put("Contract exercise Clearing fee, RUB", "2.00");
 		// expected.put("First level of Initial margin concentration limit*"); // N/A for archived contracts
 		// expected.put("IM value on");	// N/A for archived contracts
 		expected.put("FX for intraday clearing", "13:45 Moscow time");
@@ -158,11 +158,11 @@ public class MoexIT {
 		expectedKeys.add("Lower limit");
 		expectedKeys.add("Upper limit");
 		expectedKeys.add("Settlement price of last clearing session");
-		expectedKeys.add("Contract buy/sell fee, RUB");
-		expectedKeys.add("Intraday (scalper) fee, RUB");
-		expectedKeys.add("Negotiated trade fee, RUB");
-		expectedKeys.add("Contract exercise fee, RUB");
-		expectedKeys.add("First level of Initial margin concentration limit*");
+		expectedKeys.add("Contract buy/sell fee*, RUB");
+		expectedKeys.add("Intraday (scalper) fee*, RUB");
+		expectedKeys.add("Negotiated trade fee*, RUB");
+		expectedKeys.add("Contract exercise Clearing fee, RUB");
+		expectedKeys.add("First level of Initial margin concentration limit**");
 		expectedKeys.add("IM value on");
 		expectedKeys.add("FX for intraday clearing");
 		expectedKeys.add("FX for evening clearing");
