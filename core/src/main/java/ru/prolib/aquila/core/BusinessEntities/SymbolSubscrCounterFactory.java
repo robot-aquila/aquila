@@ -11,6 +11,10 @@ public class SymbolSubscrCounterFactory implements OSCFactory<Symbol, SymbolSubs
 	public SymbolSubscrCounterFactory(EventQueue queue) {
 		this.queue = queue;
 	}
+	
+	public EventQueue getEventQueue() {
+		return queue;
+	}
 
 	@Override
 	public SymbolSubscrCounter produce(OSCRepository<Symbol, SymbolSubscrCounter> owner, Symbol key) {

@@ -34,6 +34,16 @@ public class SymbolSubscrRepositoryTest {
 	}
 	
 	@Test
+	public void testCtor2_Q() {
+		service = new SymbolSubscrRepository(queue, "BEST");
+		
+		SymbolSubscrCounterFactory factory = (SymbolSubscrCounterFactory) service.getFactory();
+		assertNotNull(factory);
+		assertSame(queue, factory.getEventQueue());
+		assertEquals("BEST", service.getRepoID());
+	}
+	
+	@Test
 	public void testGetOrCreate_Throws_Exists() {
 		service.subscribe(symbol1, MDLevel.L0);
 		service.subscribe(symbol2, MDLevel.L2);

@@ -1,5 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounter.Field;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCRepositoryImpl;
@@ -11,6 +12,10 @@ public class SymbolSubscrRepository extends OSCRepositoryImpl<Symbol, SymbolSubs
 
 	public SymbolSubscrRepository(OSCFactory<Symbol, SymbolSubscrCounter> factory, String repoID) {
 		super(factory, repoID);
+	}
+	
+	public SymbolSubscrRepository(EventQueue queue, String repoID) {
+		this(new SymbolSubscrCounterFactory(queue), repoID);
 	}
 	
 	private SymbolSubscrCounter update(Symbol symbol, MDLevel level, int n) {

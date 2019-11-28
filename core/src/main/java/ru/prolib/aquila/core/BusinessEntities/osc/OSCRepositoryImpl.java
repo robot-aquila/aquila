@@ -49,6 +49,14 @@ public class OSCRepositoryImpl<KeyType, EntityType extends ObservableStateContai
 		this(new LinkedHashMap<>(), LID.createInstance(), new ReentrantLock(), factory, repoID);
 	}
 	
+	public OSCFactory<KeyType, EntityType> getFactory() {
+		return factory;
+	}
+	
+	public String getRepoID() {
+		return repoID;
+	}
+	
 	@Override
 	public LID getLID() {
 		return lid;

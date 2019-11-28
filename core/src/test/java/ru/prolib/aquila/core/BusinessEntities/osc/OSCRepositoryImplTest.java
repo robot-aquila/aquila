@@ -47,6 +47,12 @@ public class OSCRepositoryImplTest {
 	}
 	
 	@Test
+	public void testGetters() {
+		assertSame(factoryMock, service.getFactory());
+		assertEquals("repo-id", service.getRepoID());
+	}
+	
+	@Test
 	public void testEventTypes() {
 		assertEquals("repo-id.ENTITY_UPDATE", service.onEntityUpdate().getId());
 		assertEquals("repo-id.ENTITY_AVAILABLE", service.onEntityAvailable().getId());
