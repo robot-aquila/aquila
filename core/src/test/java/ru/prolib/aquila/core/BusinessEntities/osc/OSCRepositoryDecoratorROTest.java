@@ -39,6 +39,11 @@ public class OSCRepositoryDecoratorROTest {
 	}
 	
 	@Test
+	public void testGetters() {
+		assertSame(repoMock, service.getDecoratedRepository());
+	}
+	
+	@Test
 	public void testGetLID() {
 		LID lidMock = control.createMock(LID.class);
 		expect(repoMock.getLID()).andReturn(lidMock);

@@ -20,6 +20,10 @@ public class OSCRepositoryDecoratorRO<KeyType, EntityType extends ObservableStat
 	public OSCRepositoryDecoratorRO(OSCRepository<KeyType, EntityType> repository) {
 		this.repository = repository;
 	}
+	
+	public OSCRepository<KeyType, EntityType> getDecoratedRepository() {
+		return repository;
+	}
 
 	@Override
 	public LID getLID() {
