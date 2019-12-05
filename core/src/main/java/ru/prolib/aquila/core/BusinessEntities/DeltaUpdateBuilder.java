@@ -38,6 +38,10 @@ public class DeltaUpdateBuilder {
 		return this;
 	}
 	
+	public boolean hasTokens() {
+		return contents.size() > 0;
+	}
+	
 	public DeltaUpdate buildUpdate() {
 		return new DeltaUpdate(time, isSnapshot, contents);
 	}
