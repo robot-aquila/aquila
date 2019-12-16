@@ -130,44 +130,11 @@ public class SymbolTest {
 	}
 	
 	@Test
-	public void testIsValid() throws Exception {
-		assertTrue(new Symbol("AAPL").isValid());
-	}
-	
-	@Test
 	public void testToString() throws Exception {
-		assertEquals("S:SBER@EQBR:USD", symbol.toString());
-		symbol.setTypeCode(null);
-		assertEquals("SBER@EQBR:USD", symbol.toString());
-		symbol.setCurrencyCode(null);
-		assertEquals("SBER@EQBR", symbol.toString());
-		symbol.setExchangeID(null);
-		assertEquals("SBER", symbol.toString());
-	}
-	
-	@Test (expected=NullPointerException.class)
-	public void testSetCode_ThrowsIfNullCode() throws Exception {
-		symbol.setCode(null);
-	}
-
-	@Test (expected=IllegalArgumentException.class)
-	public void testSetCode_ThrowsIfEmptyCode() throws Exception {
-		symbol.setCode("");
-	}
-	
-	@Test (expected=IllegalArgumentException.class)
-	public void testSetExchangeID_ThrowsIfEmptyCode() throws Exception {
-		symbol.setExchangeID("");
-	}
-	
-	@Test (expected=IllegalArgumentException.class)
-	public void testSetTypeCode_ThrowsIfEmptyCode() throws Exception {
-		symbol.setTypeCode("");
-	}
-	
-	@Test (expected=IllegalArgumentException.class)
-	public void testSetCurrencyCode_ThrowsIfEmptyCode() throws Exception {
-		symbol.setCurrencyCode("");
+		assertEquals("S:SBER@EQBR:USD", new Symbol("SBER", "EQBR", "USD", "S").toString());
+		assertEquals("SBER@EQBR:USD", new Symbol("SBER", "EQBR", "USD", (String)null).toString());
+		assertEquals("SBER@EQBR", new Symbol("SBER", "EQBR", (String)null, (String)null).toString());
+		assertEquals("SBER", new Symbol("SBER", (String)null, (String)null, (String)null).toString());
 	}
 	
 }

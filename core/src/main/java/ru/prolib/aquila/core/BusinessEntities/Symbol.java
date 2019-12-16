@@ -48,10 +48,10 @@ import org.apache.commons.lang3.builder.*;
  */
 public class Symbol implements Serializable, Comparable<Symbol> {
 	private static final long serialVersionUID = 1L;
-	private String code;
-	private String exchangeID;
-	private String currencyCode;
-	private String typeCode;
+	private final String code;
+	private final String exchangeID;
+	private final String currencyCode;
+	private final String typeCode;
 	
 	/**
 	 * Constructor.
@@ -110,40 +110,42 @@ public class Symbol implements Serializable, Comparable<Symbol> {
 	 * <p>
 	 * @param symbol - string representation of symbol
 	 */
-	public Symbol(String symbol) {
-		super();
-		boolean valid = false;
+	public Symbol(String symbol) { 
 		String tokens[] = StringUtils.splitByWholeSeparatorPreserveAllTokens(symbol, "@");
 		if ( tokens.length == 1 ) {
 			if ( symbol.indexOf(':') >= 0 ) {
 				throw new IllegalArgumentException("Ambiguous token: " + symbol);
 			}
-			setCode(symbol);
-			valid = true;
+			this.code = symbol;
+			this.exchangeID = null;
+			this.currencyCode = null;
+			this.typeCode = null;
+			return;
 		} else if ( tokens.length == 2 ) {
 			String left[] = StringUtils.splitByWholeSeparatorPreserveAllTokens(tokens[0], ":");
 			String right[] = StringUtils.splitByWholeSeparatorPreserveAllTokens(tokens[1], ":");
 			if ( (left.length == 1 || left.length == 2) && (right.length == 1 || right.length == 2) ) {
 				if ( left.length == 1 ) {
-					setCode(left[0]);
+					this.code = left[0];
+					this.typeCode = null;
 				} else {
-					if ( left[0].length() > 0 ) {
-						setTypeCode(left[0]);
-					}
-					setCode(left[1]);
+					this.typeCode = (left[0].length() > 0 ? left[0] : null);
+					this.code = left[1];
 				}
 				if ( right[0].length() > 0 ) {
-					setExchangeID(right[0]);
+					this.exchangeID = right[0];
+				} else {
+					this.exchangeID = null;
 				}
 				if ( right.length == 2 && right[1].length() > 0 ) {
-					setCurrencyCode(right[1]);
+					this.currencyCode = right[1];
+				} else {
+					this.currencyCode = null;
 				}
-				valid = true;
+				return;
 			}
 		}
-		if ( !valid ) {
-			throw new IllegalArgumentException("Invalid symbol format: " + symbol);
-		}
+		throw new IllegalArgumentException("Invalid symbol format: " + symbol);
 	}
 	
 	/**
@@ -155,11 +157,25 @@ public class Symbol implements Serializable, Comparable<Symbol> {
 	 * @param typeCode - type code
 	 */
 	public Symbol(String code, String exchangeID, String currencyCode, String typeCode) {
-		super();
-		setCode(code);
-		setExchangeID(exchangeID);
-		setCurrencyCode(currencyCode);
-		setTypeCode(typeCode);
+		if ( code == null ) {
+			throw new NullPointerException();
+		}
+		if ( code.length() == 0 ) {
+			throw new IllegalArgumentException("The symbol code cannot be empty");
+		}
+		if ( exchangeID != null && exchangeID.length() == 0 ) {
+			throw new IllegalArgumentException("Exchange ID cannot be empty");
+		}
+		if ( currencyCode != null && currencyCode.length() == 0 ) {
+			throw new IllegalArgumentException("Currency code cannot be empty");
+		}
+		if ( typeCode != null && typeCode.length() == 0 ) {
+			throw new IllegalArgumentException("Type code cannot be empty");
+		}
+		this.code = code;
+		this.exchangeID = exchangeID;
+		this.currencyCode = currencyCode;
+		this.typeCode = typeCode;
 	}
 	
 	/**
@@ -218,18 +234,8 @@ public class Symbol implements Serializable, Comparable<Symbol> {
 		return typeCode;
 	}
 	
-	/**
-	 * Validate symbol.
-	 * <p>
-	 * @return true if valid, false otherwise
-	 */
-	@Deprecated
-	public boolean isValid() {
-		return true;
-	}
-	
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		if ( other == null ) {
 			return false;
 		}
@@ -249,13 +255,13 @@ public class Symbol implements Serializable, Comparable<Symbol> {
 	}
 	
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return new HashCodeBuilder()
 			.append(code)
 			.append(exchangeID)
 			.append(currencyCode)
 			.append(typeCode)
-			.hashCode();
+			.build();
 	}
 	
 	@Override
@@ -263,37 +269,6 @@ public class Symbol implements Serializable, Comparable<Symbol> {
 		return (typeCode == null ? "" : typeCode + ":") + code +
 				(exchangeID == null ? "" : "@" + exchangeID) +
 				(currencyCode == null ? "" : ":" + currencyCode);
-	}
-	
-	public void setCode(String code) {
-		if ( code == null ) {
-			throw new NullPointerException();
-		}
-		if ( code.length() == 0 ) {
-			throw new IllegalArgumentException("The symbol code cannot be empty");
-		}
-		this.code = code;
-	}
-	
-	public void setExchangeID(String exchangeID) {
-		if ( exchangeID != null && exchangeID.length() == 0 ) {
-			throw new IllegalArgumentException("Exchange ID cannot be empty");
-		}
-		this.exchangeID = exchangeID;
-	}
-	
-	public void setTypeCode(String typeCode) {
-		if ( typeCode != null && typeCode.length() == 0 ) {
-			throw new IllegalArgumentException("Type code cannot be empty");
-		}
-		this.typeCode = typeCode;
-	}
-	
-	public void setCurrencyCode(String currencyCode) {
-		if ( currencyCode != null && currencyCode.length() == 0 ) {
-			throw new IllegalArgumentException("Currency code cannot be empty");
-		}
-		this.currencyCode = currencyCode;
 	}
 
 	@Override
