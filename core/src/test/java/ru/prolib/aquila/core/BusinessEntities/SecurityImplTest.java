@@ -314,7 +314,6 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.LOT_SIZE, CDecimalBD.of(100L));
 		data.put(SecurityField.TICK_SIZE, CDecimalBD.of("5.00"));
 		data.put(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("2.37"));
-		data.put(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("200.01"));
 		security.update(data);
 		
 		assertTrue(controller.hasMinimalData(security, null));
@@ -327,28 +326,36 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.TICK_SIZE, CDecimalBD.of("0.05"));
 		data.put(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("0.01"));
 		data.put(SecurityField.INITIAL_MARGIN, CDecimalBD.of("2034.17"));
-		data.put(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("80.93"));
 		data.put(SecurityField.OPEN_PRICE, CDecimalBD.of("79.19"));
 		data.put(SecurityField.HIGH_PRICE, CDecimalBD.of("83.64"));
 		data.put(SecurityField.LOW_PRICE, CDecimalBD.of("79.19"));
 		data.put(SecurityField.CLOSE_PRICE, CDecimalBD.of("79.18"));
 		security.update(data);
-		EventListenerStub listener = new EventListenerStub();
-		security.onSessionUpdate().addListener(listener);
+		security.onSessionUpdate().addListener(listenerStub);
 		
 		controller.processUpdate(security, time);
 		
-		assertEquals(1, listener.getEventCount());
-		assertContainerEvent((SecurityEvent) listener.getEvent(0), security.onSessionUpdate(), security, time,
+		assertEquals(1, listenerStub.getEventCount());
+		assertContainerEvent((SecurityEvent) listenerStub.getEvent(0), security.onSessionUpdate(), security, time,
 				SecurityField.LOT_SIZE,
 				SecurityField.TICK_SIZE,
 				SecurityField.TICK_VALUE,
 				SecurityField.INITIAL_MARGIN,
-				SecurityField.SETTLEMENT_PRICE,
 				SecurityField.OPEN_PRICE,
 				SecurityField.HIGH_PRICE,
 				SecurityField.LOW_PRICE,
 				SecurityField.CLOSE_PRICE);
+	}
+	
+	@Test
+	public void testSecurityController_ProcessUpdate_SessionUpdate_FixSettlementPriceHasRemoved() {
+		Instant time = T("2017-08-04T19:51:00Z");
+		security.update(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("80.93"));
+		security.onSessionUpdate().addListener(listenerStub);
+		
+		controller.processUpdate(security, time);
+		
+		assertEquals(0, listenerStub.getEventCount());
 	}
 
 	@Test
@@ -358,7 +365,6 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		data.put(SecurityField.TICK_SIZE, CDecimalBD.of("0.05"));
 		data.put(SecurityField.TICK_VALUE, CDecimalBD.ofRUB2("0.01"));
 		data.put(SecurityField.INITIAL_MARGIN, CDecimalBD.of("2034.17"));
-		data.put(SecurityField.SETTLEMENT_PRICE, CDecimalBD.of("80.93"));
 		data.put(SecurityField.OPEN_PRICE, CDecimalBD.of("79.19"));
 		data.put(SecurityField.HIGH_PRICE, CDecimalBD.of("83.64"));
 		data.put(SecurityField.LOW_PRICE, CDecimalBD.of("79.19"));
@@ -370,7 +376,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		controller.processAvailable(security, time);
 		
 		assertEquals(0, listener.getEventCount());
-	}
+	}	
 	
 	@Test
 	public void testUpdate_Tick_BestAsk() {

@@ -12,20 +12,18 @@ import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParams;
  * Security implementation.
  */
 public class SecurityImpl extends ObservableStateContainerImpl implements EditableSecurity {
-	private static final int[] TOKENS_FOR_AVAILABILITY = {
+	static final int[] TOKENS_FOR_AVAILABILITY = {
 		SecurityField.DISPLAY_NAME,
 		SecurityField.LOT_SIZE,
 		SecurityField.TICK_SIZE,
 		SecurityField.TICK_VALUE,
-		SecurityField.SETTLEMENT_PRICE
 	};
 	
-	private static final int[] TOKENS_FOR_SESSION_UPDATE = {
+	static final int[] TOKENS_FOR_SESSION_UPDATE = {
 		SecurityField.LOT_SIZE,
 		SecurityField.TICK_SIZE,
 		SecurityField.TICK_VALUE,
 		SecurityField.INITIAL_MARGIN,
-		SecurityField.SETTLEMENT_PRICE,
 		SecurityField.OPEN_PRICE,
 		SecurityField.HIGH_PRICE,
 		SecurityField.LOW_PRICE,
