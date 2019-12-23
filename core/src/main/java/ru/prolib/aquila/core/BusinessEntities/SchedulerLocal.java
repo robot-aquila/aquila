@@ -168,7 +168,6 @@ public class SchedulerLocal implements Scheduler {
 		if ( ! closed ) {
 			timer.cancel();
 			closed = true;
-			logger.debug("{}: scheduler closed.", timerID);
 		}
 	}
 	
