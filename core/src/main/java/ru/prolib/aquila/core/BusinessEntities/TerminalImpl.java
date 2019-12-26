@@ -46,6 +46,7 @@ public class TerminalImpl implements EditableTerminal {
 		onOrderClose, onPositionClose, onPortfolioClose;
 	private boolean closed = false;
 	private boolean started = false;
+	private boolean closing = false;
 	
 	private static String getID(TerminalImpl terminal, String suffix) {
 		return String.format("%s.%s", terminal.terminalID, suffix);
@@ -529,13 +530,20 @@ public class TerminalImpl implements EditableTerminal {
 		List<EditableOrder> orderToClose = new LinkedList<>();
 		List<EditableSecurity> securityToClose = new LinkedList<>();
 		List<EditablePortfolio> portfolioToClose = new LinkedList<>();
-		stop();
-		lock.lock();
+		lock();
 		try {
-			if ( closed ) {
+			if ( closed || closing ) {
 				return;
 			}
-			scheduler.close();
+			closing = true;
+		} finally {
+			unlock();
+		}
+		stop();
+		dataProvider.close();
+		scheduler.close(); // TODO: Is this call really needed here? Same time it actually can be used by others.
+		lock.lock();
+		try {
 			for ( EditableOrder order : orders.values() ) {
 				orderToClose.add(order);
 			}
@@ -579,7 +587,6 @@ public class TerminalImpl implements EditableTerminal {
 			closed = true;
 			lock.unlock();
 		}
-		dataProvider.close();
 		for ( EditableOrder order : orderToClose ) {
 			order.close();
 		}

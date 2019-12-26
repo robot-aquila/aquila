@@ -999,8 +999,8 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testClose_SkipIfClosed() {
-		schedulerMock.close();
 		dataProviderMock.close();
+		schedulerMock.close();
 		control.replay();
 		
 		terminalWithMocks.close();
@@ -1011,8 +1011,8 @@ public class TerminalImplTest {
 	
 	@Test
 	public void testClose() {
-		schedulerMock.close();
 		dataProviderMock.close();
+		schedulerMock.close();
 		control.replay();
 		
 		terminalWithMocks.close();
@@ -1315,6 +1315,41 @@ public class TerminalImplTest {
 		control.replay();
 		
 		terminal.purgeEvents();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testClose_Concurrency() throws Exception {
+		dataProviderMock.close();
+		schedulerMock.close();
+		control.replay();
+		int competitors = 10;
+		CountDownLatch started = new CountDownLatch(competitors),
+				finished = new CountDownLatch(competitors),
+				race = new CountDownLatch(1);
+		List<Thread> workers = new ArrayList<>();
+		for ( int i = 0; i < competitors; i ++ ) {
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					started.countDown();
+					try {
+						assertTrue(race.await(1, TimeUnit.SECONDS));
+					} catch ( InterruptedException e ) {
+						throw new IllegalStateException(e);
+					}
+					terminalWithMocks.close();
+					finished.countDown();
+				}
+			};
+			thread.start();
+			workers.add(thread);
+		}
+
+		assertTrue(started.await(1, TimeUnit.SECONDS));
+		race.countDown();
+		assertTrue(finished.await(1, TimeUnit.SECONDS));
 		
 		control.verify();
 	}
