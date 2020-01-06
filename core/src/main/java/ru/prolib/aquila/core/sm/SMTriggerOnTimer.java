@@ -3,7 +3,6 @@ package ru.prolib.aquila.core.sm;
 import java.time.Instant;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -17,6 +16,8 @@ import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
  * по-умолчанию (в зависимости от сигнатуры инстанцирования). Срабатывание будет
  * перенаправляться на соответствующий вход, если оно получено в промежутке
  * между активацией и деактивацией триггера.
+ * <p>
+ * Overriding hashCode and equals methods of the class may cause performance loss.
  */
 public class SMTriggerOnTimer extends SMAbstractTrigger implements Runnable {
 	private final Scheduler scheduler;
@@ -82,51 +83,27 @@ public class SMTriggerOnTimer extends SMAbstractTrigger implements Runnable {
 		dispatch(time);
 	}
 	
-	@Override
-	public synchronized int hashCode() {
-		return new HashCodeBuilder(10086521, 11)
-				.append(scheduler)
-				.append(time)
-				.append(input)
-				.append(proxy)
-				.append(handler)
-				.build();
-	}
-	
-	@Override
-	public boolean equals(Object other) {
+	/**
+	 * Method to compare internal structure.
+	 * For testing purposes only!
+	 * Not a thread-safe!
+	 * <p>
+	 * @param other - other trigger instance to compare
+	 * @return true if both triggers are in same state
+	 */
+	public boolean isEqualTo(SMTriggerOnTimer other) {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != SMTriggerOnTimer.class ) {
+		if ( other == null ) {
 			return false;
 		}
-		SMTriggerOnTimer o = (SMTriggerOnTimer) other;
-		Scheduler oScheduler = null, tScheduler = null;
-		Instant oTime = null, tTime = null;
-		SMInput oInput = null, tInput = null;
-		SMTriggerRegistry oProxy = null, tProxy = null;
-		TaskHandler oHandler = null, tHandler = null;
-		synchronized ( o ) {
-			oScheduler = o.scheduler;
-			oTime = o.time;
-			oInput = o.input;
-			oProxy = o.proxy;
-			oHandler = o.handler;
-		}
-		synchronized ( this ) {
-			tScheduler = this.scheduler;
-			tTime = this.time;
-			tInput = this.input;
-			tProxy = this.proxy;
-			tHandler = this.handler;
-		}
 		return new EqualsBuilder()
-				.append(oScheduler, tScheduler)
-				.append(oTime, tTime)
-				.append(oInput, tInput)
-				.append(oProxy, tProxy)
-				.append(oHandler, tHandler)
+				.append(scheduler, other.scheduler)
+				.append(time, other.time)
+				.append(input, other.input)
+				.append(proxy, other.proxy)
+				.append(handler, other.handler)
 				.build();
 	}
 	

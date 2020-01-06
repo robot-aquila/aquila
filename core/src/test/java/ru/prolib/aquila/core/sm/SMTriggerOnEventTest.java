@@ -3,7 +3,6 @@ package ru.prolib.aquila.core.sm;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 import org.junit.*;
 import ru.prolib.aquila.core.*;
@@ -114,32 +113,7 @@ public class SMTriggerOnEventTest {
 	}
 	
 	@Test
-	public void testHashCode() {
-		int expected1 = new HashCodeBuilder(113257, 891)
-				.append(type)
-				.append(in1)
-				.append((SMTriggerRegistry)null)
-				.build();
-		int expected2 = new HashCodeBuilder(113257, 891)
-				.append(type)
-				.append(in1)
-				.append(registry)
-				.build();
-		
-		assertEquals(expected1, trigger.hashCode());
-		trigger.activate(registry);
-		assertEquals(expected2, trigger.hashCode());
-	}
-	
-	@Test
-	public void testEquals_SpecialCases() {
-		assertTrue(trigger.equals(trigger));
-		assertFalse(trigger.equals(null));
-		assertFalse(trigger.equals(this));
-	}
-	
-	@Test
-	public void testEquals() {
+	public void testIsEqualTo() {
 		Variant<EventType> vET = new Variant<>(type, type2);
 		Variant<SMInput> vIN = new Variant<>(vET, in1, inMock2);
 		Variant<SMTriggerRegistry> vTR = new Variant<>(vIN, registry, registryMock2);
@@ -150,7 +124,7 @@ public class SMTriggerOnEventTest {
 		do {
 			x = new SMTriggerOnEvent(vET.get(), vIN.get());
 			x.activate(vTR.get());
-			if ( trigger.equals(x) ) {
+			if ( trigger.isEqualTo(x) ) {
 				foundCnt ++;
 				found = x;
 			}

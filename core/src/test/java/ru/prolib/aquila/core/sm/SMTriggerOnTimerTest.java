@@ -2,7 +2,6 @@ package ru.prolib.aquila.core.sm;
 
 import java.time.Instant;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.easymock.IMocksControl;
 
 import static org.easymock.EasyMock.*;
@@ -135,39 +134,7 @@ public class SMTriggerOnTimerTest {
 	}
 	
 	@Test
-	public void testHashCode() {
-		int expected1 = new HashCodeBuilder(10086521, 11)
-				.append(schedulerMock1)
-				.append(time1)
-				.append(inMock1)
-				.append((SMTriggerRegistry) null)
-				.append((TaskHandler) null)
-				.build();
-		int expected2 = new HashCodeBuilder(10086521, 11)
-				.append(schedulerMock1)
-				.append(time1)
-				.append(inMock1)
-				.append((SMTriggerRegistry) registryMock1)
-				.append((TaskHandler) thMock1)
-				.build();
-		
-		assertEquals(expected1, service.hashCode());
-		
-		expect(schedulerMock1.schedule(service, time1)).andReturn(thMock1);
-		control.replay();
-		service.activate(registryMock1);
-		assertEquals(expected2, service.hashCode());
-	}
-	
-	@Test
-	public void testEquals_SpecialCases() {
-		assertTrue(service.equals(service));
-		assertFalse(service.equals(null));
-		assertFalse(service.equals(this));
-	}
-	
-	@Test
-	public void testEquals() {
+	public void testIsEqualTo() {
 		Variant<Scheduler> vSCH = new Variant<>(schedulerMock1, schedulerMock2);
 		Variant<Instant> vTM = new Variant<>(vSCH, time1, time2);
 		Variant<SMInput> vIN = new Variant<>(vTM, inMock1, inMock2);
@@ -182,7 +149,7 @@ public class SMTriggerOnTimerTest {
 		do {
 			x = new SMTriggerOnTimer(vSCH.get(), vTM.get(), vIN.get());
 			x.activate(vREG.get());
-			if ( service.equals(x) ) {
+			if ( service.isEqualTo(x) ) {
 				foundCnt ++;
 				found = x;
 			}

@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.sm;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -14,6 +13,8 @@ import ru.prolib.aquila.core.*;
  * или вход по-умолчанию (в зависимости от сигнатуры инстанцирования). События
  * будут перенаправляться на соответствующий вход, если они получены в
  * промежутке между активацией и деактивацией триггера.
+ * <p>
+ * Overriding hashCode and equals methods of the class may cause performance loss.
  */
 public class SMTriggerOnEvent extends SMAbstractTrigger implements EventListener {
 	private final EventType eventType;
@@ -67,45 +68,29 @@ public class SMTriggerOnEvent extends SMAbstractTrigger implements EventListener
 	}
 	
 	@Override
-	public synchronized int hashCode() {
-		return new HashCodeBuilder(113257, 891)
-				.append(eventType)
-				.append(input)
-				.append(proxy)
-				.build();
-	}
-	
-	@Override
 	public synchronized String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
-	
-	@Override
-	public boolean equals(Object other) {
+
+	/**
+	 * Method to compare internal structure.
+	 * For testing purposes only!
+	 * Not a thread-safe!
+	 * <p>
+	 * @param other - other trigger instance to compare
+	 * @return true if both triggers are in same state
+	 */
+	public boolean isEqualTo(SMTriggerOnEvent other) {
 		if ( other == this ) {
 			return true;
 		}
-		if ( other == null || other.getClass() != SMTriggerOnEvent.class ) {
+		if ( other == null ) {
 			return false;
 		}
-		SMTriggerOnEvent o = (SMTriggerOnEvent) other;
-		EventType oEventType = null, tEventType = null;
-		SMInput oInput = null, tInput = null;
-		SMTriggerRegistry oProxy = null, tProxy = null;
-		synchronized ( o ) {
-			oEventType = o.eventType;
-			oInput = o.input;
-			oProxy = o.proxy;
-		}
-		synchronized ( this ) {
-			tEventType = this.eventType;
-			tInput = this.input;
-			tProxy = this.proxy;
-		}
 		return new EqualsBuilder()
-				.append(oEventType, tEventType)
-				.append(oInput, tInput)
-				.append(oProxy, tProxy)
+				.append(eventType, other.eventType)
+				.append(input, other.input)
+				.append(proxy, other.proxy)
 				.build();
 	}
 
