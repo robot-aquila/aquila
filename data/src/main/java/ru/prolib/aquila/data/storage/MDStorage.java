@@ -74,13 +74,25 @@ public interface MDStorage<KeyType, DataType> {
 	 * <p>
 	 * @param key - the key
 	 * @param count - maximum amount of values to load.
-	 * @param to - stop reading when this time is reached (excluding this time)
+	 * @param to - base (end) time - from which is going to the past on specified number of elements
 	 * @return the reader which allow read values sorted by time of occurrence
 	 * @throws DataStorageException an error occurred
 	 */
 	CloseableIterator<DataType> createReader(KeyType key, int count, Instant to)
 		throws DataStorageException;
 
+	/**
+	 * Warming up a reader for future requests.
+	 * <p>
+	 * This method is intended to optimize data loading. It is optionally can be implemented by storages.
+	 * If a storage does not support warming up then calling this method has no effect. 
+	 * <p>
+	 * @param key - the key
+	 * @param count - maximum amount of values to load
+	 * @param to - base (end) time - from which is going to the past on specified number of elements
+	 */
+	void warmingUpReader(KeyType key, int count, Instant to);
+	
 	/**
 	 * Get reader of all available values from start to specified time to.
 	 * <p>

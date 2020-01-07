@@ -69,4 +69,9 @@ public class OHLCVStorageImpl implements MDStorage<TFSymbol, Candle> {
 		return registry.getStorage(key.getTimeFrame()).createReaderTo(key, to);
 	}
 
+	@Override
+	public void warmingUpReader(TFSymbol key, int count, Instant to) {
+		
+	}
+
 }

@@ -9,6 +9,14 @@ public class CandleBuilder {
 	private ZTFrame timeFrame;
 	private Instant time;
 	private CDecimal open, high, low, close, volume;
+
+	public CandleBuilder() {
+		
+	}
+	
+	public CandleBuilder(ZTFrame tf) {
+		this.timeFrame = tf;
+	}
 	
 	public CandleBuilder withTimeFrame(ZTFrame timeFrame) {
 		this.timeFrame = timeFrame;

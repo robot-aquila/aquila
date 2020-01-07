@@ -589,5 +589,14 @@ public class IntradayMDStorageOverSDSSTest {
 		control.verify();
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testWarmingUpReader_3KIT() {
+		control.replay();
+		
+		storage.warmingUpReader(tsymbol1, 15, T("2020-01-07T02:50:00Z"));
+		
+		control.verify();
+	}
 
 }

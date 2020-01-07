@@ -143,5 +143,14 @@ public class OHLCVStorageImplTest {
 		control.verify();
 		assertSame(iteratorMock, actual);
 	}
+	
+	@Test
+	public void testWarmingUpReader_3KIT() {
+		control.replay();
+		
+		storage.warmingUpReader(key1, 10, T("2020-10-20T02:46:00Z"));
+		
+		control.verify();
+	}
 
 }

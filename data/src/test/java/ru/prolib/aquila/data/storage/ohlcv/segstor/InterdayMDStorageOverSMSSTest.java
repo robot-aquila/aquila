@@ -617,5 +617,14 @@ public class InterdayMDStorageOverSMSSTest {
 		expected.addAll(fixture.subList(0, 7));
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testWarmingUpReader_3KIT() {
+		control.replay();
+		
+		service.warmingUpReader(tsymbol1, 500, T("2020-01-07T02:48:00Z"));
+		
+		control.verify();
+	}
 
 }

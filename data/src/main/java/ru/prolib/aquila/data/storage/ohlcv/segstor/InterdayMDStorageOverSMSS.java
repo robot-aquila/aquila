@@ -210,4 +210,9 @@ public class InterdayMDStorageOverSMSS implements MDStorage<TFSymbol, Candle> {
 		}
 	}
 
+	@Override
+	public void warmingUpReader(TFSymbol key, int count, Instant to) {
+		
+	}
+
 }
