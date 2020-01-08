@@ -20,20 +20,22 @@ public class DispatcherThreadV3 extends Thread {
 	public static DispatcherThreadV3
 		createV3(BlockingQueue<EventDispatchingRequest> queue,
 				String queueName,
-				EventQueueStats stats)
+				EventQueueService service)
 	{
-		DispatcherThreadV3 t = new DispatcherThreadV3(queue, stats);
+		DispatcherThreadV3 t = new DispatcherThreadV3(queue, service);
 		t.setName(queueName + ".DISPATCHER");
 		t.setDaemon(true);
 		return t;
 	}
 	
 	private final BlockingQueue<EventDispatchingRequest> queue;
-	private final EventQueueStats stats;
+	private final EventQueueService service;
 	
-	public DispatcherThreadV3(BlockingQueue<EventDispatchingRequest> queue, EventQueueStats stats) {
+	public DispatcherThreadV3(BlockingQueue<EventDispatchingRequest> queue,
+			EventQueueService service)
+	{
 		this.queue = queue;
-		this.stats = stats;
+		this.service = service;
 	}
 
 	@Override
@@ -58,9 +60,9 @@ public class DispatcherThreadV3 extends Thread {
 						}
 					}
 				}
-				//stats.addDispatchingTime(System.nanoTime() - b2);
-				//stats.addBuildingTaskListTime(b2 - b1);
-				stats.addEventDispatched();
+				//service.addDispatchingTime(System.nanoTime() - b2);
+				//service.addPreparingTime(b2 - b1);
+				service.eventDispatched();
 			}
 		} catch ( InterruptedException e ) {
 			logger.error("Interrupted: ", e);

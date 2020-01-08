@@ -24,15 +24,15 @@ public class DispatcherThread extends Thread {
 	
 	private final BlockingQueue<EventDispatchingRequest> queue;
 	private final DispatchingMethod dispatchingMethod;
-	private final EventQueueStats stats;
+	private final EventQueueService service;
 	
 	public DispatcherThread(BlockingQueue<EventDispatchingRequest> queue,
 			DispatchingMethod dispatchingMethod,
-			EventQueueStats stats)
+			EventQueueService service)
 	{
 		this.queue = queue;
 		this.dispatchingMethod = dispatchingMethod;
-		this.stats = stats;
+		this.service = service;
 	}
 	
 	private static ExecutorService
@@ -46,11 +46,11 @@ public class DispatcherThread extends Thread {
 		createOriginal(BlockingQueue<EventDispatchingRequest> queue,
 				String queueName,
 				int numOfWorkerThreads,
-				EventQueueStats stats)
+				EventQueueService service)
 	{
 		DispatcherThread t = new DispatcherThread(queue,
 			new DispatchingMethodOriginal(createExecutor(queueName, numOfWorkerThreads)),
-			stats);
+			service);
 		t.setName(queueName + ".DISPATCHER");
 		t.setDaemon(true);
 		return t;
@@ -60,11 +60,11 @@ public class DispatcherThread extends Thread {
 		createComplFutures(BlockingQueue<EventDispatchingRequest> queue,
 				String queueName,
 				int numOfWorkerThreads,
-				EventQueueStats stats)
+				EventQueueService service)
 	{
 		DispatcherThread t = new DispatcherThread(queue,
 			new DispatchingMethodComplFutures(createExecutor(queueName, numOfWorkerThreads)),
-			stats);
+			service);
 		t.setName(queueName + ".DISPATCHER");
 		t.setDaemon(true);
 		return t;
@@ -73,11 +73,11 @@ public class DispatcherThread extends Thread {
 	public static DispatcherThread
 		createRightHere(BlockingQueue<EventDispatchingRequest> queue,
 				String queueName,
-				EventQueueStats stats)
+				EventQueueService service)
 	{
 		DispatcherThread t = new DispatcherThread(queue,
 			new DispatchingMethodRightHere(),
-			stats);
+			service);
 		t.setName(queueName + ".DISPATCHER");
 		return t;
 	}
@@ -86,11 +86,11 @@ public class DispatcherThread extends Thread {
 		createQueueWorkers(BlockingQueue<EventDispatchingRequest> queue,
 				String queueName,
 				int numOfWorkerThreads,
-				EventQueueStats stats)
+				EventQueueService service)
 	{
 		DispatcherThread t = new DispatcherThread(queue,
 			new DispatchingMethodQueueWorkers(queueName, numOfWorkerThreads),
-			stats);
+			service);
 		t.setName(queueName + ".DISPATCHER");
 		t.setDaemon(true);
 		return t;
@@ -111,9 +111,9 @@ public class DispatcherThread extends Thread {
 				List<DeliveryEventTask> tasks = buildTaskList(request);
 				long b2 = System.nanoTime();
 				dispatchingMethod.dispatch(tasks);
-				stats.addDispatchingTime(System.nanoTime() - b2);
-				stats.addBuildingTaskListTime(b2 - b1);
-				stats.addEventDispatched();
+				service.addDispatchingTime(System.nanoTime() - b2);
+				service.addPreparingTime(b2 - b1);
+				service.eventDispatched();
 			}
 		} catch ( InterruptedException e ) {
 			logger.error("Interrupted: ", e);
@@ -130,7 +130,7 @@ public class DispatcherThread extends Thread {
 		for ( EventType type : ESUtils.getAllUniqueTypes(allTypes, request.type) ) {
 			Event event = request.factory.produceEvent(type);
 			for ( EventListener listener : type.getListeners() ) {
-				list.add(new DeliveryEventTask(event, listener, stats));
+				list.add(new DeliveryEventTask(event, listener, service));
 			}
 		}
 		return list;

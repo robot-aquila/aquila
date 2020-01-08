@@ -19,27 +19,27 @@ public class DeliveryEventTask implements Callable<Object> {
 	
 	private final Event event;
 	private final EventListener listener;
-	private final EventQueueStats stats;
+	private final EventQueueService service;
 	
 	public DeliveryEventTask(Event event,
 			EventListener listener,
-			EventQueueStats stats)
+			EventQueueService service)
 	{
 		this.event = event;
 		this.listener = listener;
-		this.stats = stats;
+		this.service = service;
 	}
 
 	@Override
 	public Object call() {
 		try {
 			//logger.debug("Dispatch event {} to listener {}", event, listener);
-			if ( stats == null ) {
+			if ( service == null ) {
 				listener.onEvent(event);
 			} else {
 				long b1 = System.nanoTime();
 				listener.onEvent(event);
-				stats.addDeliveryTime(System.nanoTime() - b1);
+				service.addDeliveryTime(System.nanoTime() - b1);
 			}
 		} catch ( Throwable t ) {
 			logger.error("Unhandled exception: ", t);

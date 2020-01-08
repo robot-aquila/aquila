@@ -10,6 +10,8 @@ import ru.prolib.aquila.core.eque.DispatcherThreadV2;
 import ru.prolib.aquila.core.eque.DispatcherThreadV3;
 import ru.prolib.aquila.core.eque.DispatchingType;
 import ru.prolib.aquila.core.eque.EventDispatchingRequest;
+import ru.prolib.aquila.core.eque.EventQueueService;
+import ru.prolib.aquila.core.eque.EventQueueServiceImpl;
 import ru.prolib.aquila.core.eque.EventQueueStats;
 import ru.prolib.aquila.core.utils.FlushControl;
 import ru.prolib.aquila.core.utils.FlushIndicator;
@@ -42,8 +44,7 @@ public class EventQueueImpl implements EventQueue {
 	private final BlockingQueue<EventDispatchingRequest> queue;
 	private final String queueName;
 	private final Thread dispatcherThread;
-	private final EventQueueStats stats;
-	private final FlushControl flushControl;
+	private final EventQueueService service;
 
 	/**
 	 * Constructor.
@@ -56,31 +57,33 @@ public class EventQueueImpl implements EventQueue {
 			int numOfWorkerThreads,
 			DispatchingType dispatchingType)
 	{
-		this.flushControl = new FlushControl();
-		this.stats = new EventQueueStats(flushControl);
+		FlushControl fc = new FlushControl();
+		this.service = new EventQueueServiceImpl(fc, new EventQueueStats(fc));
 		this.queueName = queueName;
 		this.queue = new LinkedBlockingQueue<EventDispatchingRequest>();
 		switch ( dispatchingType ) {
 		case OLD_ORIGINAL:
-			dispatcherThread = DispatcherThread.createOriginal(queue, queueName, numOfWorkerThreads, stats);
+			dispatcherThread = DispatcherThread.createOriginal(queue,
+					queueName, numOfWorkerThreads, service);
 			break;
 		case OLD_COMPL_FUTURES:
-			dispatcherThread = DispatcherThread.createComplFutures(queue, queueName, numOfWorkerThreads, stats);
+			dispatcherThread = DispatcherThread.createComplFutures(queue,
+					queueName, numOfWorkerThreads, service);
 			break;
 		case OLD_RIGHT_HERE:
-			dispatcherThread = DispatcherThread.createRightHere(queue, queueName, stats);
+			dispatcherThread = DispatcherThread.createRightHere(queue, queueName, service);
 			break;
 		case NEW_QUEUE_4WORKERS:
-			dispatcherThread = DispatcherThread.createQueueWorkers(queue, queueName, 4, stats);
+			dispatcherThread = DispatcherThread.createQueueWorkers(queue, queueName, 4, service);
 			break;
 		case NEW_QUEUE_6WORKERS:
-			dispatcherThread = DispatcherThread.createQueueWorkers(queue, queueName, 6, stats);
+			dispatcherThread = DispatcherThread.createQueueWorkers(queue, queueName, 6, service);
 			break;
 		case NEW_RIGHT_HERE_NO_TIME_STATS:
-			dispatcherThread = DispatcherThreadV2.createNoTimeStats(queue, queueName, stats);
+			dispatcherThread = DispatcherThreadV2.createNoTimeStats(queue, queueName, service);
 			break;
 		case NEW_RIGHT_HERE_V3:
-			dispatcherThread = DispatcherThreadV3.createV3(queue, queueName, stats);
+			dispatcherThread = DispatcherThreadV3.createV3(queue, queueName, service);
 			break;
 		default:
 			throw new IllegalArgumentException("Unsupported dispatching type: " + dispatchingType);
@@ -104,17 +107,17 @@ public class EventQueueImpl implements EventQueue {
 	}
 	
 	public EventQueueStats getStats() {
-		return stats;
+		return service.getStats();
 	}
 	
 	@Override
 	public FlushIndicator newFlushIndicator() {
-		return flushControl.createIndicator();
+		return service.createIndicator();
 	}
 	
 	@Override
 	public long getTotalEvents() {
-		return stats.getTotalEventsSent();
+		return getStats().getTotalEventsSent();
 	}
 
 	@Override
@@ -129,9 +132,9 @@ public class EventQueueImpl implements EventQueue {
 		try {
 			// That makes no sense to test count of listeners
 			// It may be listeners of alternate types
-			flushControl.countUp();
+			service.eventEnqueued();
 			queue.put(new EventDispatchingRequest(type, factory));
-			stats.addEventSent();
+			service.eventSent();
 		} catch ( InterruptedException e ) {
 			// TODO: Event stats have to be fixed or inconsistency may occur.
 			// But it shouldn't be critical issue.

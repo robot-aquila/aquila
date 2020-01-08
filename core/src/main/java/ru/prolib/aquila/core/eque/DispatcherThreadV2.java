@@ -19,20 +19,22 @@ public class DispatcherThreadV2 extends Thread {
 	public static DispatcherThreadV2
 		createNoTimeStats(BlockingQueue<EventDispatchingRequest> queue,
 				String queueName,
-				EventQueueStats stats)
+				EventQueueService service)
 	{
-		DispatcherThreadV2 t = new DispatcherThreadV2(queue, stats);
+		DispatcherThreadV2 t = new DispatcherThreadV2(queue, service);
 		t.setName(queueName + ".DISPATCHER");
 		t.setDaemon(true);
 		return t;
 	}
 	
 	private final BlockingQueue<EventDispatchingRequest> queue;
-	private final EventQueueStats stats;
+	private final EventQueueService service;
 	
-	public DispatcherThreadV2(BlockingQueue<EventDispatchingRequest> queue, EventQueueStats stats) {
+	public DispatcherThreadV2(BlockingQueue<EventDispatchingRequest> queue,
+			EventQueueService service)
+	{
 		this.queue = queue;
-		this.stats = stats;
+		this.service = service;
 	}
 	
 	@Override
@@ -54,7 +56,7 @@ public class DispatcherThreadV2 extends Thread {
 						}
 					}
 				}
-				stats.addEventDispatched();
+				service.eventDispatched();
 			}
 		} catch ( InterruptedException e ) {
 			logger.error("Interrupted: ", e);
