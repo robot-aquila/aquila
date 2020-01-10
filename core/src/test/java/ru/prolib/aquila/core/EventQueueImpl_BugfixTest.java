@@ -27,11 +27,11 @@ public class EventQueueImpl_BugfixTest {
 		BasicConfigurator.configure();
 	}
 	
-	private EventQueueImpl queue;
+	private EventQueue queue;
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new EventQueueImpl("TEST");
+		queue = new EventQueueFactory().createDefault("TEST");
 	}
 
 	/**

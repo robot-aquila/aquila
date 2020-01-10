@@ -1,15 +1,20 @@
-package ru.prolib.aquila.core.eque;
+package ru.prolib.aquila.core.eqs.legacy;
 
-import ru.prolib.aquila.core.utils.FlushControl;
-import ru.prolib.aquila.core.utils.FlushIndicator;
+import ru.prolib.aquila.core.FlushIndicator;
+import ru.prolib.aquila.core.eque.EventQueueService;
 
-public class EventQueueServiceImpl implements EventQueueService {
+@Deprecated
+public class EventQueueServiceLegacy implements EventQueueService {
 	private final FlushControl flushControl;
-	private final EventQueueStats queueStats;
+	private final EventQueueStatsLegacy queueStats;
 	
-	public EventQueueServiceImpl(FlushControl flush_control, EventQueueStats queue_stats) {
+	public EventQueueServiceLegacy(FlushControl flush_control, EventQueueStatsLegacy queue_stats) {
 		this.flushControl = flush_control;
 		this.queueStats = queue_stats;
+	}
+	
+	public EventQueueServiceLegacy() {
+		this(new FlushControl(), new EventQueueStatsLegacy());
 	}
 
 	@Override
@@ -29,6 +34,7 @@ public class EventQueueServiceImpl implements EventQueueService {
 
 	@Override
 	public void eventDispatched() {
+		flushControl.countDown();
 		queueStats.addEventDispatched();
 	}
 
@@ -48,8 +54,13 @@ public class EventQueueServiceImpl implements EventQueueService {
 	}
 
 	@Override
-	public EventQueueStats getStats() {
+	public EventQueueStatsLegacy getStats() {
 		return queueStats;
+	}
+
+	@Override
+	public void shutdown() {
+		queueStats.dumpSecondaryStats();
 	}
 
 }

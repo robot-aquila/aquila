@@ -120,6 +120,8 @@ public class DispatcherThread extends Thread {
 			Thread.currentThread().interrupt();
 		} catch ( Throwable e ) {
 			logger.error("Unexpected exception: ", e);
+		} finally {
+			service.shutdown();
 		}
 		//logger.debug("Dispatcher terminated");
 	}

@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.utils;
+package ru.prolib.aquila.core.eqs.legacy;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -9,6 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.prolib.aquila.core.FlushIndicator;
+
+@Deprecated
 public class FlushController implements FlushIndicator {
 	protected static final Logger logger;
 	
@@ -152,19 +155,21 @@ public class FlushController implements FlushIndicator {
 			case TRACK:
 				status = WAIT;
 			case WAIT:
-				if ( counter == 0L ) {
+				if ( counter <= 0L ) {
 					// Special case: if we started at zero then it highly possible
 					// that none have been counted up between start and wait. In other
 					// words - nothing happened to track. If we'll wait it will
 					// be always timeout. So just skip this case.
 					status = DONE;
 				} else {
+					long start_counter = counter;
 					while ( status != DONE ) {
 						if ( ! condition.await(duration, unit) ) {
 							throw new TimeoutException(
 									"counter=" + counter +
 									" status=" + status +
-									" start_status=" + start_status
+									" start_status=" + start_status +
+									" start_counter=" + start_counter
 								);
 						}
 					}

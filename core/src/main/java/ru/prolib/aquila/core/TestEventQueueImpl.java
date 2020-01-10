@@ -7,8 +7,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.utils.FlushIndicator;
-
 /**
  * This event queue implementation for testing purposes only and shouldn't be used for production code.
  */
@@ -94,12 +92,17 @@ public class TestEventQueueImpl implements EventQueue {
 	}
 
 	@Override
-	public long getTotalEvents() {
-		return 0;
+	public FlushIndicator newFlushIndicator() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public FlushIndicator newFlushIndicator() {
+	public void shutdown() {
+		
+	}
+
+	@Override
+	public EventQueueStats getStats() {
 		throw new UnsupportedOperationException();
 	}
 	

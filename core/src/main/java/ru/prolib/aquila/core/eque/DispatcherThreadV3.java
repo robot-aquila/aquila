@@ -24,7 +24,7 @@ public class DispatcherThreadV3 extends Thread {
 	{
 		DispatcherThreadV3 t = new DispatcherThreadV3(queue, service);
 		t.setName(queueName + ".DISPATCHER");
-		t.setDaemon(true);
+		t.setDaemon(true);		
 		return t;
 	}
 	
@@ -67,6 +67,8 @@ public class DispatcherThreadV3 extends Thread {
 		} catch ( InterruptedException e ) {
 			logger.error("Interrupted: ", e);
 			Thread.currentThread().interrupt();
+		} finally {
+			service.shutdown();
 		}
 	}
 	

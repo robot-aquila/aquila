@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.eque;
 
-import ru.prolib.aquila.core.utils.FlushIndicator;
+import ru.prolib.aquila.core.EventQueueStats;
+import ru.prolib.aquila.core.FlushIndicator;
 
 public interface EventQueueService {
 	
@@ -10,6 +11,13 @@ public interface EventQueueService {
 	 * @return new indicator
 	 */
 	FlushIndicator createIndicator();
+
+	/**
+	 * Get event queue statistics.
+	 * <p>
+	 * @return queue statistics
+	 */
+	EventQueueStats getStats();
 	
 	/**
 	 * Indicates that event has been passed to event queue for processing.
@@ -35,7 +43,7 @@ public interface EventQueueService {
 	void addDispatchingTime(long nanos);
 	
 	void addDeliveryTime(long nanos);
-	
-	EventQueueStats getStats();
-	
+
+	void shutdown();
+
 }

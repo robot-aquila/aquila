@@ -24,7 +24,7 @@ public class ServiceLocator implements AquilaUI {
 	
 	public ServiceLocator(Messages texts, Runnable exitAction) {
 		super();
-		es = new EventSystemImpl(new EventQueueImpl("AQUILA-UI"));
+		es = new EventSystemImpl("AQUILA-UI");
 		this.texts = texts;
 		this.exitAction = exitAction;
 	}

@@ -16,7 +16,8 @@ import ru.prolib.aquila.core.eque.DispatchingType;
  * $Id: EventQueueImplTest.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventQueueImplTest {
-	static private EventQueue_FunctionalTest functionalTest; 
+	private static EventQueue_FunctionalTest functionalTest; 
+	private static EventQueueFactory factory;
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
@@ -24,16 +25,17 @@ public class EventQueueImplTest {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.DEBUG);
 		functionalTest = new EventQueue_FunctionalTest();
+		factory = new EventQueueFactory();
 	}
 
 	private EventSystem eSys;
-	private EventQueueImpl queue;
+	private EventQueue queue;
 	private EventDispatcher dispatcher;
 	private EventType type1,type2,type3;
 	
 	@Before
 	public void setUp() throws Exception {
-		queue = new EventQueueImpl("EVNT");
+		queue = new EventQueueFactory().createDefault("EVNT");
 		eSys = new EventSystemImpl(queue);
 		dispatcher = eSys.createEventDispatcher();
 		type1 = dispatcher.createType();
@@ -74,7 +76,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type2, SimpleEventFactory.getInstance());
 		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(100, TimeUnit.MILLISECONDS));
-		assertEquals(2, queue.getTotalEvents());
+		assertEquals(2, queue.getStats().getTotalEventsSent());
 	}
 	
 	@Test
@@ -99,7 +101,7 @@ public class EventQueueImplTest {
 		});
 		queue.enqueue(type1, SimpleEventFactory.getInstance());
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
-		assertEquals(11, queue.getTotalEvents());
+		assertEquals(11, queue.getStats().getTotalEventsSent());
 	}
 
 	@Test
@@ -110,37 +112,37 @@ public class EventQueueImplTest {
 	
 	@Test
 	public void testFunctionalTest_TypeOldOriginal() throws Exception {
-		queue = new EventQueueImpl(DispatchingType.OLD_ORIGINAL);
+		queue = factory.createLegacy(DispatchingType.OLD_ORIGINAL);
 		functionalTest.runAllTests(queue);
 	}
 	
 	@Test
 	public void testFunctionalTest_TypeOldComplFutures() throws Exception {
-		queue = new EventQueueImpl(DispatchingType.OLD_COMPL_FUTURES);
+		queue = factory.createLegacy(DispatchingType.OLD_COMPL_FUTURES);
 		functionalTest.runAllTests(queue);
 	}
 	
 	@Test
 	public void testFunctionalTest_TypeOldRightHere() throws Exception {
-		queue = new EventQueueImpl(DispatchingType.OLD_RIGHT_HERE);
+		queue = factory.createLegacy(DispatchingType.OLD_RIGHT_HERE);
 		functionalTest.runAllTests(queue);
 	}
 	
 	@Test
 	public void testFunctionalTest_TypeNewQueue4Workers() throws Exception {
-		queue = new EventQueueImpl(DispatchingType.NEW_QUEUE_4WORKERS);
+		queue = factory.createLegacy(DispatchingType.NEW_QUEUE_4WORKERS);
 		functionalTest.runAllTests(queue);
 	}
 
 	@Test
 	public void testFunctionalTest_TypeNewQueue6Workers() throws Exception {
-		queue = new EventQueueImpl(DispatchingType.NEW_QUEUE_6WORKERS);
+		queue = factory.createLegacy(DispatchingType.NEW_QUEUE_6WORKERS);
 		functionalTest.runAllTests(queue);
 	}
 	
 	@Test
 	public void testFunctionalTest_TypeNewRightHereNoStats() throws Exception {
-		queue = new EventQueueImpl(DispatchingType.NEW_RIGHT_HERE_NO_TIME_STATS);
+		queue = factory.createLegacy(DispatchingType.NEW_RIGHT_HERE_NO_TIME_STATS);
 		functionalTest.runAllTests(queue);
 	}
 
@@ -171,7 +173,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type1, new SimpleEventFactory());
 
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
-		assertEquals(1, queue.getTotalEvents());
+		assertEquals(1, queue.getStats().getTotalEventsSent());
 	}
 	
 	@Test
@@ -203,7 +205,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type1, new SimpleEventFactory());
 
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
-		assertEquals(1, queue.getTotalEvents());
+		assertEquals(1, queue.getStats().getTotalEventsSent());
 	}
 	
 	@Test
@@ -227,7 +229,7 @@ public class EventQueueImplTest {
 		queue.enqueue(type1, new SimpleEventFactory());
 
 		assertTrue(finished.await(1, TimeUnit.SECONDS));
-		assertEquals(1, queue.getTotalEvents());
+		assertEquals(1, queue.getStats().getTotalEventsSent());
 	}
 	
 }

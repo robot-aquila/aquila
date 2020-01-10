@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.utils.FlushIndicator;
+import ru.prolib.aquila.core.FlushIndicator;
 import ru.prolib.aquila.probe.ThreadSynchronizer;
 
 public class EventQueueSynchronizerV2 implements ThreadSynchronizer {

@@ -19,16 +19,16 @@ import org.junit.Test;
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.EventQueueFactory;
 import ru.prolib.aquila.core.EventType;
 import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.FlushIndicator;
 import ru.prolib.aquila.core.SimpleEventFactory;
 import ru.prolib.aquila.core.data.timeframe.ZTFDays;
 import ru.prolib.aquila.core.data.timeframe.ZTFHours;
 import ru.prolib.aquila.core.data.timeframe.ZTFMinutes;
 import ru.prolib.aquila.core.data.tseries.TSeriesEventImpl;
 import ru.prolib.aquila.core.data.tseries.TSeriesUpdateImpl;
-import ru.prolib.aquila.core.utils.FlushIndicator;
 
 public class OHLCScalableSeriesTest {
 	private static final ZoneId ZONE_ID = ZoneId.of("Europe/Moscow");
@@ -173,12 +173,12 @@ public class OHLCScalableSeriesTest {
 		return OHLCV(tf, timeString, price_all, 1);
 	}
 	
-	private EventQueueImpl queue;
+	private EventQueue queue;
 	private OHLCScalableSeries service;
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new EventQueueImpl();
+		queue = new EventQueueFactory().createDefault();
 		service = new OHLCScalableSeries(queue, "foobar", 5, ZONE_ID);
 	}
 	

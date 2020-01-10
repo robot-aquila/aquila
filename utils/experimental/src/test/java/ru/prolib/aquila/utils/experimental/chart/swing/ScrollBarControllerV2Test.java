@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.ObservableTSeriesImpl;
 import ru.prolib.aquila.core.data.TSeriesImpl;
 import ru.prolib.aquila.core.data.TSeriesUpdate;
@@ -38,7 +38,7 @@ import ru.prolib.aquila.utils.experimental.chart.swing.ScrollBarControllerV2.Vie
 public class ScrollBarControllerV2Test {
 	@Rule
 	public ExpectedException eex = ExpectedException.none();
-	private EventQueueImpl queue;
+	private EventQueue queue;
 	private IMocksControl control;
 	private Timer timerMock;
 	private JCompAutoScrollButton autoScrollButtonMock;
@@ -50,7 +50,7 @@ public class ScrollBarControllerV2Test {
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new EventQueueImpl();
+		queue = new EventQueueFactory().createDefault();
 		control = createStrictControl();
 		timerMock = control.createMock(Timer.class);
 		autoScrollButtonMock = control.createMock(JCompAutoScrollButton.class);

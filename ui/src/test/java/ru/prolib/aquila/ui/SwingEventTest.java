@@ -11,23 +11,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.prolib.aquila.core.Event;
-import ru.prolib.aquila.core.EventImpl;
-import ru.prolib.aquila.core.EventListener;
-import ru.prolib.aquila.core.EventListenerStub;
-import ru.prolib.aquila.core.EventQueueImpl;
-import ru.prolib.aquila.core.EventTypeImpl;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.SimpleEventFactory;
 
 public class SwingEventTest {
-	private EventQueueImpl queue;
+	private EventQueue queue;
 	private EventTypeImpl type;
 	private SwingEvent service;
 	private EventListener listenerStub1, listenerStub2;
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new EventQueueImpl();
+		queue = new EventQueueFactory().createDefault();
 		type = new EventTypeImpl();
 		listenerStub1 = new EventListenerStub();
 		listenerStub2 = new EventListenerStub();

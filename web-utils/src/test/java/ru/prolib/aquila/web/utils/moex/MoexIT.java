@@ -1,6 +1,7 @@
 package ru.prolib.aquila.web.utils.moex;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,7 +49,12 @@ public class MoexIT {
 			+ ERMSG_POSSIBLE_OUTDATED + "\n"
 			+ ERMSG_REFER_TO_DATA_FILE;
 	
-	private static final double EXPECTED_AVAILABILITY = 85;
+	/**
+	 * This limit shouldn't be great because some FINAM records aren't
+	 * real (like glued futures) and some MOEX records could disappear
+	 * due to expiration
+	 */
+	private static final double EXPECTED_AVAILABILITY = 72;
 	private static final org.slf4j.Logger logger;
 	private static final Map<Integer, Object> TEST_CONTRACT_DATA = new LinkedHashMap<>();
 	private static final boolean firefox = true;
@@ -290,8 +296,7 @@ public class MoexIT {
 			logger.debug("Not available via MOEX: {}", dummy);
 		}
 		double availability = moex_list.size() * 100 / finam_list.size();
-		logger.debug("Current availability {}% of minimum {}%", availability, EXPECTED_AVAILABILITY);
-		assertTrue("Availability is less than expected", availability >= EXPECTED_AVAILABILITY);
+		assertThat("Availability limit breached", availability, is(greaterThanOrEqualTo(EXPECTED_AVAILABILITY)));
 	}
 
 }

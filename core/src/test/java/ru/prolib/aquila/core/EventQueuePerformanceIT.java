@@ -16,15 +16,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.eque.DispatchingType;
-import ru.prolib.aquila.core.eque.EventQueueStats;
 
 public class EventQueuePerformanceIT {
+	private static EventQueueFactory factory;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.DEBUG);
+		factory = new EventQueueFactory();
 	}
 	
 	private EventType typeSpecial;
@@ -62,7 +63,7 @@ public class EventQueuePerformanceIT {
 		listeners.clear();
 	}
 	
-	private void runTest(EventQueueImpl queue, long MAX_SENT_EVENTS) throws Exception {
+	private void runTest(EventQueue queue, long MAX_SENT_EVENTS) throws Exception {
 		long MAX_TIME = 30000; // seconds
 		float MAX_RATIO = 2;
 		long st = System.currentTimeMillis(), est = 0;
@@ -105,7 +106,7 @@ public class EventQueuePerformanceIT {
 	private EventQueueStats runTest(DispatchingType dispatchingType, int pass, long MAX_SENT_EVENTS)
 		throws Exception
 	{
-		EventQueueImpl queue = new EventQueueImpl(dispatchingType);
+		EventQueue queue = factory.createLegacy(dispatchingType);
 		System.out.println("---------------------------------");
 		System.out.println("Starting test: " + dispatchingType + " (pass " + pass + ")");
 		long st = System.currentTimeMillis();
@@ -116,8 +117,8 @@ public class EventQueuePerformanceIT {
 		System.out.println("Test finished: " + dispatchingType + " (" + dt + " ms used)");
 		System.out.println("       Events sent: " + stats.getTotalEventsSent());
 		System.out.println(" Events dispatched: " + stats.getTotalEventsDispatched());
+		System.out.println("    Preparing time: " + stats.getPreparingTime());
 		System.out.println("  Dispatching time: " + stats.getDispatchingTime());
-		System.out.println("Building list time: " + stats.getBuildingTaskListTime());
 		System.out.println("   Delivering time: " + stats.getDeliveryTime());
 		return stats;
 	}

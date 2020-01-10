@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.EventQueueFactory;
 import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounter.Field;
 
 public class SymbolSubscrRepositoryTest {
@@ -18,7 +18,7 @@ public class SymbolSubscrRepositoryTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		queue = new EventQueueImpl();
+		queue = new EventQueueFactory().createDefault();
 		symbol1 = new Symbol("S:foo@EX1:USD");
 		symbol2 = new Symbol("B:bar@EX2:RUR");
 		symbol3 = new Symbol("F:buz@EX3:EUR");

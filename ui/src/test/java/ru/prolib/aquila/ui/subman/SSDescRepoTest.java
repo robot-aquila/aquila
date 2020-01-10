@@ -16,8 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -30,7 +29,7 @@ public class SSDescRepoTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		queue = new EventQueueImpl();
+		queue = new EventQueueFactory().createDefault();
 		symbol1 = new Symbol("S:foo@EX1:USD");
 		symbol2 = new Symbol("B:bar@EX2:RUR");
 	}

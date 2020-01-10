@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.utils;
+package ru.prolib.aquila.core.eqs.legacy;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import ru.prolib.aquila.core.FlushIndicator;
+
+@Deprecated
 public class FlushControl {
 	private final Lock lock;
 	private final List<FlushController> controllers;

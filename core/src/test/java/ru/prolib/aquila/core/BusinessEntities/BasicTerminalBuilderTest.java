@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.DataProvider;
 
 public class BasicTerminalBuilderTest {
@@ -31,7 +30,7 @@ public class BasicTerminalBuilderTest {
 	
 	@Test
 	public void testWithEventQueue() {
-		EventQueue queue = new EventQueueImpl();
+		EventQueue queue = control.createMock(EventQueue.class);
 		terminal = (TerminalImpl) builder.withEventQueue(queue).buildTerminal();
 		
 		assertSame(queue, terminal.getEventQueue());

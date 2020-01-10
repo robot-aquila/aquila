@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.EventQueueFactory;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
 public class ObjectFactoryImplTest {
@@ -19,7 +19,7 @@ public class ObjectFactoryImplTest {
 	@Before
 	public void setUp() throws Exception {
 		factory = new ObjectFactoryImpl();
-		queue = new EventQueueImpl();
+		queue = new EventQueueFactory().createDefault();
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())
 				.withEventQueue(queue)

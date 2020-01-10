@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.utils;
+package ru.prolib.aquila.core.eqs.legacy;
 
 import static org.junit.Assert.*;
 
@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import ru.prolib.aquila.core.eqs.legacy.FlushController;
 
 public class FlushControllerTest {
 	private static Runnable EXIT = new Runnable() { @Override public void run() { } };

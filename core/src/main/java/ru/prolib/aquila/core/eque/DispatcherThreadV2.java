@@ -61,6 +61,8 @@ public class DispatcherThreadV2 extends Thread {
 		} catch ( InterruptedException e ) {
 			logger.error("Interrupted: ", e);
 			Thread.currentThread().interrupt();
+		} finally {
+			service.shutdown();
 		}
 	}
 

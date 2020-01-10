@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.utils;
+package ru.prolib.aquila.core;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;

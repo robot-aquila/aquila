@@ -3,7 +3,7 @@ package ru.prolib.aquila.core.BusinessEntities;
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
+import ru.prolib.aquila.core.EventQueueFactory;
 import ru.prolib.aquila.core.data.DataProvider;
 
 /**
@@ -43,7 +43,7 @@ public class TerminalParams {
 	
 	public EventQueue getEventQueue() {
 		if ( eventQueue == null ) {
-			eventQueue = new EventQueueImpl(getTerminalID());
+			eventQueue = new EventQueueFactory().createDefault(getTerminalID());
 		}
 		return eventQueue;
 	}

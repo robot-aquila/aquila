@@ -51,7 +51,7 @@ public class EventQueueStatePanel extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		lblTotalEvents.setText(Long.toString(queue.getTotalEvents()));
+		lblTotalEvents.setText(Long.toString(queue.getStats().getTotalEventsSent()));
 	}
 	
 }

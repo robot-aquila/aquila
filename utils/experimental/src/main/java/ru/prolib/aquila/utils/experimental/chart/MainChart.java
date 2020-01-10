@@ -4,8 +4,8 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.OrderAction;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
+import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.EventQueue;
-import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.*;
 import ru.prolib.aquila.core.data.tseries.*;
 import ru.prolib.aquila.utils.experimental.chart.swing.BarChartImpl;
@@ -180,7 +180,7 @@ public class MainChart {
     }
 
     private static void createTestSeries(){
-        eventQueue = new EventQueueImpl();
+        eventQueue = new EventQueueFactory().createDefault();
         TSeriesNodeStorage storage = new TSeriesNodeStorageImpl(ZTFrame.M1);
         categoriesSeries = new TSeriesNodeStorageKeys(eventQueue, storage);
         candles = new TSeriesImpl<>("CANDLES", storage);

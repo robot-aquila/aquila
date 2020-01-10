@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.eque;
+package ru.prolib.aquila.core.eqs.legacy;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,22 +9,21 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.prolib.aquila.core.utils.FlushControl;
+import ru.prolib.aquila.core.EventQueueStats;
 
-public class EventQueueStats {
+@Deprecated
+public class EventQueueStatsLegacy implements EventQueueStats {
 	private static final Logger logger;
 	
 	static {
-		logger = LoggerFactory.getLogger(EventQueueStats.class);
+		logger = LoggerFactory.getLogger(EventQueueStatsLegacy.class);
 	}
 	
 	private final AtomicLong buildTaskListTime, dispatchTime, deliveryTime,
 		totalEventsSent, totalEventsDispatched;
-	private final FlushControl flushControl;
 	private final Map<String, Long> eventsPerThread;
 	
-	public EventQueueStats(FlushControl flushControl) {
-		this.flushControl = flushControl;
+	public EventQueueStatsLegacy() {
 		this.buildTaskListTime = new AtomicLong(0);
 		this.dispatchTime = new AtomicLong(0);
 		this.deliveryTime = new AtomicLong(0);
@@ -47,7 +46,6 @@ public class EventQueueStats {
 	}
 	
 	public void addEventDispatched() {
-		flushControl.countDown();
 		totalEventsDispatched.incrementAndGet();
 	}
 	
@@ -63,22 +61,42 @@ public class EventQueueStats {
 		deliveryTime.addAndGet(time);
 	}
 	
-	public long getBuildingTaskListTime() {
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.core.eque.EventQueueStats#getBuildingTaskListTime()
+	 */
+	@Override
+	public long getPreparingTime() {
 		return buildTaskListTime.get();
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.core.eque.EventQueueStats#getDispatchingTime()
+	 */
+	@Override
 	public long getDispatchingTime() {
 		return dispatchTime.get();
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.core.eque.EventQueueStats#getDeliveryTime()
+	 */
+	@Override
 	public long getDeliveryTime() {
 		return deliveryTime.get();
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.core.eque.EventQueueStats#getTotalEventsSent()
+	 */
+	@Override
 	public long getTotalEventsSent() {
 		return totalEventsSent.get();
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.core.eque.EventQueueStats#getTotalEventsDispatched()
+	 */
+	@Override
 	public long getTotalEventsDispatched() {
 		return totalEventsDispatched.get();
 	}

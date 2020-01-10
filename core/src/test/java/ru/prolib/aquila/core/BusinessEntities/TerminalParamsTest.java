@@ -10,6 +10,7 @@ import org.junit.Test;
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.EventQueueFactory;
 import ru.prolib.aquila.core.EventQueueImpl;
 import ru.prolib.aquila.core.data.DataProvider;
 
@@ -29,7 +30,7 @@ public class TerminalParamsTest {
 		dataProvider = control.createMock(DataProvider.class);
 		objectFactory = control.createMock(ObjectFactory.class);
 		dispatcherMock = control.createMock(EventDispatcher.class);
-		queue = new EventQueueImpl();
+		queue = new EventQueueFactory().createDefault();
 		params = new TerminalParams();
 	}
 

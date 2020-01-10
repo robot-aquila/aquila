@@ -33,7 +33,7 @@ public class EventSystemImpl implements EventSystem {
 	 * типа {@link EventQueueImpl}.
 	 */
 	public EventSystemImpl() {
-		this(new EventQueueImpl());
+		this(new EventQueueFactory().createDefault());
 	}
 	
 	/**
@@ -42,7 +42,7 @@ public class EventSystemImpl implements EventSystem {
 	 * @param queueId идентификатор потока очереди событий
 	 */
 	public EventSystemImpl(String queueId) {
-		this(new EventQueueImpl(queueId));
+		this(new EventQueueFactory().createDefault(queueId));
 	}
 
 	@Override

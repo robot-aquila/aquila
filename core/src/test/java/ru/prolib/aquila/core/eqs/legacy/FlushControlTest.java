@@ -1,4 +1,4 @@
-package ru.prolib.aquila.core.utils;
+package ru.prolib.aquila.core.eqs.legacy;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
@@ -9,6 +9,10 @@ import java.util.List;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
+
+import ru.prolib.aquila.core.FlushIndicator;
+import ru.prolib.aquila.core.eqs.legacy.FlushControl;
+import ru.prolib.aquila.core.eqs.legacy.FlushController;
 
 public class FlushControlTest {
 	private IMocksControl control;
