@@ -10,4 +10,5 @@ RUN chmod a+x /usr/bin/xvfb_run
 
 ENV DISPLAY :99
 
-RUN apt-get install -y openjdk-8-jdk openjdk-8-jre maven
+RUN apt-get install -y openjdk-8-jdk openjdk-8-jre
+RUN apt-get install -y maven
