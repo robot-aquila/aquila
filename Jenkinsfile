@@ -8,7 +8,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'xvfb_run mvn test'
+                sh 'xvfb-run mvn -B test'
             }
             post {
                 always {
@@ -16,10 +16,20 @@ pipeline {
                 }
             }
         }
-        stage('Deliver') { 
+        stage('IT') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
+                sh 'xvfb-run mvn -B -DskipTests -DskipITs=false'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
             }
         }
+//        stage('Deliver') { 
+//            steps {
+//                sh 'build-scripts/deliver.sh' 
+//            }
+//        }
     }
 }
