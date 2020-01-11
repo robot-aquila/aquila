@@ -121,7 +121,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 		lock();
 		try {
 			return history.get(history.size() - 1);
-		} catch ( ArrayIndexOutOfBoundsException e ) {
+		} catch ( IndexOutOfBoundsException e ) {
 			throw new ValueNotExistsException();
 		} finally {
 			unlock();
@@ -156,7 +156,7 @@ public class SeriesImpl<T> implements EditableSeries<T> {
 		try {
 			int index = history.size() - 1;
 			history.set(index, value);
-		} catch ( ArrayIndexOutOfBoundsException e ) {
+		} catch ( IndexOutOfBoundsException e ) {
 			throw new ValueNotExistsException();
 		} finally {
 			unlock();

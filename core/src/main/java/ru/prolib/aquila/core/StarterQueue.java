@@ -51,7 +51,7 @@ public class StarterQueue implements Starter {
 	{
 		try {
 			return queue.get(index);
-		} catch ( ArrayIndexOutOfBoundsException e ) {
+		} catch ( IndexOutOfBoundsException e ) {
 			throw new IndexOutOfBoundsException(e.getMessage());
 		}
 	}
