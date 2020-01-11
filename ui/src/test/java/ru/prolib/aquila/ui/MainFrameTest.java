@@ -7,6 +7,7 @@ import static org.easymock.EasyMock.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowListener;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JTabbedPane;
 
@@ -53,11 +54,13 @@ public class MainFrameTest {
 		facade = new ServiceLocator(texts, exitAction);
 		main = new MainFrame();
 	}
-
+	
 	@After
 	public void tearDown() throws Exception {
-		main.dispose();
-		main = null;
+		if ( main != null ) {
+			main.dispose();
+			main = null;
+		}
 	}
 	
 	@Test
