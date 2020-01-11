@@ -1,5 +1,9 @@
 pipeline {
-    agent { dockerfile true }
+    agent {
+        dockerfile {
+            args '-v /root/.m2:/root/.m2'
+        }
+    }
     stages {
         stage('Build') { 
             steps {
@@ -26,10 +30,5 @@ pipeline {
                 }
             }
         }
-//        stage('Deliver') { 
-//            steps {
-//                sh 'build-scripts/deliver.sh' 
-//            }
-//        }
     }
 }
