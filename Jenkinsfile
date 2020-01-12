@@ -23,7 +23,7 @@ pipeline {
         stage('IT') {
             steps {
                 sh 'cp -u web-utils/it-config/jbd.ini-docker web-utils/it-config/jbd.ini'
-                sh 'xvfb-run mvn -B verify -DskipTests -DskipITs=false'
+                sh 'xvfb-run -s -screen 0 1024x768x24 mvn -B verify -DskipTests -DskipITs=false'
             }
             post {
                 always {
