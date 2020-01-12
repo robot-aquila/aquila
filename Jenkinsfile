@@ -22,7 +22,7 @@ pipeline {
         }
         stage('IT') {
             steps {
-                sh 'xvfb-run mvn -B integration-test -DskipTests -DskipITs=false'
+                sh 'xvfb-run mvn -B verify -DskipTests -DskipITs=false'
             }
             post {
                 always {
