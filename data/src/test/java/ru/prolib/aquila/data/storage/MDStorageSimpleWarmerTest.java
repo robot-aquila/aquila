@@ -144,12 +144,12 @@ public class MDStorageSimpleWarmerTest {
 		control.replay();
 		
 		service2.warmingUpReader(85, 50, time1);
-		service2.warmingUpReader(85, 50, time1);
-		service2.warmingUpReader(30, 19, time2);
-		service2.warmingUpReader(15, 20, time3);
-		service2.getCrKITEntry(85, 50, time1).result.get(1, TimeUnit.SECONDS);
-		service2.getCrKITEntry(30, 19, time2).result.get(1, TimeUnit.SECONDS);
-		service2.getCrKITEntry(15, 20, time3).result.get(1, TimeUnit.SECONDS);
+		// Entries are exists but createReader will be called in different thread.
+		// Thus, exact sequence still unpredictable. We have to do job step-by-step
+		// until all data warmed up.
+		service2.warmingUpReader(85, 50, time1); service2.getCrKITEntry(85, 50, time1).result.get(1, TimeUnit.SECONDS);
+		service2.warmingUpReader(30, 19, time2); service2.getCrKITEntry(30, 19, time2).result.get(1, TimeUnit.SECONDS);
+		service2.warmingUpReader(15, 20, time3); service2.getCrKITEntry(15, 20, time3).result.get(1, TimeUnit.SECONDS);
 		
 		CountDownLatch phase1 = new CountDownLatch(6);
 		List<Thread> threads = new ArrayList<>();
