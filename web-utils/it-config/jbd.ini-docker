@@ -1,0 +1,8 @@
+[apache-http-client]
+socketTimeout=
+connectTimeout=
+connectionRequestTimeout=
+defaultHeaders=true
+proxy.type=
+proxy.host=
+proxy.port=

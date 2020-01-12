@@ -22,7 +22,7 @@ pipeline {
         }
         stage('IT') {
             steps {
-                sh 'cp -u web-utils/it-config/jbd.ini-template web-utils/it-config/jbd.ini'
+                sh 'cp -u web-utils/it-config/jbd.ini-docker web-utils/it-config/jbd.ini'
                 sh 'xvfb-run mvn -B verify -DskipTests -DskipITs=false'
             }
             post {
