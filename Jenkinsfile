@@ -22,6 +22,7 @@ pipeline {
         }
         stage('IT') {
             steps {
+                sh 'cp -u web-utils/it-config/jbd.ini-template jbd.ini'
                 sh 'xvfb-run mvn -B verify -DskipTests -DskipITs=false'
             }
             post {
