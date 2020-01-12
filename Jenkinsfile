@@ -10,16 +10,16 @@ pipeline {
                 sh 'mvn -B -DskipTests clean package' 
             }
         }
-        stage('Test') {
-            steps {
-                sh 'xvfb-run mvn -B test'
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
-                }
-            }
-        }
+        //stage('Test') {
+        //    steps {
+        //        sh 'xvfb-run mvn -B test'
+        //    }
+        //    post {
+        //        always {
+        //            junit '**/target/surefire-reports/*.xml'
+        //        }
+        //    }
+        //}
         stage('IT') {
             steps {
                 sh 'xvfb-run mvn -B verify -DskipTests -DskipITs=false'
