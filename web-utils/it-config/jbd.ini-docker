@@ -1,3 +1,6 @@
+[firefox-driver]
+headless=true
+
 [apache-http-client]
 socketTimeout=
 connectTimeout=
