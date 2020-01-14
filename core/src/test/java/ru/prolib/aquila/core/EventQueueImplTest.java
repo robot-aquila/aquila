@@ -144,6 +144,14 @@ public class EventQueueImplTest {
 	public void testFunctionalTest_TypeNewRightHereNoStats() throws Exception {
 		queue = factory.createLegacy(DispatchingType.NEW_RIGHT_HERE_NO_TIME_STATS);
 		functionalTest.runAllTests(queue);
+		//functionalTest.testFlushIndicator(queue); // don't test, it doesn't works
+	}
+	
+	@Test
+	public void testFunctionalTest_V4() throws Exception {
+		queue = factory.createV4("V4", 1000L, false);
+		functionalTest.runAllTests(queue);
+		functionalTest.testFlushIndicator(queue);
 	}
 
 	@Test

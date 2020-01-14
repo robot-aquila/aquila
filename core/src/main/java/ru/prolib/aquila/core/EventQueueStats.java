@@ -7,6 +7,8 @@ public interface EventQueueStats {
 	long getDispatchingTime();
 
 	long getDeliveryTime();
+	
+	long getTotalEventsEnqueued();
 
 	long getTotalEventsSent();
 

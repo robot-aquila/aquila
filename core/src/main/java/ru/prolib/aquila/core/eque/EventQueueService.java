@@ -45,5 +45,7 @@ public interface EventQueueService {
 	void addDeliveryTime(long nanos);
 
 	void shutdown();
+	
+	void eventDispatched(long preparing_time, long dispatching_time);
 
 }

@@ -114,5 +114,10 @@ public class EventQueueStatsLegacy implements EventQueueStats {
 		}
 		logger.debug(sb.toString());
 	}
+
+	@Override
+	public long getTotalEventsEnqueued() {
+		return 0;
+	}
 	
 }

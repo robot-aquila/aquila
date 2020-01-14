@@ -4,10 +4,11 @@ import ru.prolib.aquila.core.EventFactory;
 import ru.prolib.aquila.core.EventType;
 
 public class EventDispatchingRequest {
-	public static final EventDispatchingRequest EXIT;
+	public static final EventDispatchingRequest EXIT, FLUSH;
 	
 	static {
 		EXIT = new EventDispatchingRequest(null, null);
+		FLUSH = new EventDispatchingRequest(null, null);
 	}
 	
 	public final EventType type;

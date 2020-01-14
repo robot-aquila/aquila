@@ -85,6 +85,12 @@ public class CmdSenderService implements EventQueueService {
 	}
 
 	@Override
+	public void eventDispatched(long preparing_time, long dispatching_time) {
+		send(new CmdAddCount(null, null, 1L));
+		send(new CmdAddTime(preparing_time, dispatching_time, null));
+	}
+
+	@Override
 	public void shutdown() {
 		send(new CmdShutdown());
 	}

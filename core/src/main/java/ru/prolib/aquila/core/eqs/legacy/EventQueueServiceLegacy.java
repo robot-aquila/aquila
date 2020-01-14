@@ -63,4 +63,11 @@ public class EventQueueServiceLegacy implements EventQueueService {
 		queueStats.dumpSecondaryStats();
 	}
 
+	@Override
+	public void eventDispatched(long preparing_time, long dispatching_time) {
+		eventDispatched();
+		addPreparingTime(preparing_time);
+		addDispatchingTime(dispatching_time);
+	}
+
 }

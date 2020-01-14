@@ -175,5 +175,16 @@ public class CmdSenderServiceTest {
 		
 		control.verify();
 	}
+	
+	@Test
+	public void testEventDispatched2() throws Exception {
+		cmdQueueMock.put(new CmdAddCount(null, null, 1L));
+		cmdQueueMock.put(new CmdAddTime(225L, 831L, null));
+		control.replay();
+		
+		service_wm.eventDispatched(225L, 831L);
+		
+		control.verify();
+	}
 
 }
