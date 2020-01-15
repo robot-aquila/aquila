@@ -47,6 +47,7 @@ public class EventQueueImplTest {
 	public void tearDown() throws Exception {
 		if ( queue != null ) {
 			queue.shutdown();
+			queue = null;
 		}
 	}
 	
@@ -147,10 +148,19 @@ public class EventQueueImplTest {
 		//functionalTest.testFlushIndicator(queue); // don't test, it doesn't works
 	}
 	
+	private EventQueue createV4Queue() {
+		return factory.createV4("V4", EventQueue_FunctionalTest.DEFAULT_TIMEOUT_SECS * 1000L, false);
+	}
+	
 	@Test
 	public void testFunctionalTest_V4() throws Exception {
-		queue = factory.createV4("V4", EventQueue_FunctionalTest.DEFAULT_TIMEOUT_SECS * 1000L, false);
+		queue = createV4Queue();
 		functionalTest.runAllTests(queue);
+	}
+	
+	@Test
+	public void testFunctionalTest_V4_TestFlushIndicator() throws Exception {
+		queue = createV4Queue();
 		functionalTest.testFlushIndicator(queue);
 	}
 
