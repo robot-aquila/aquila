@@ -8,6 +8,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.*;
+import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.eque.DispatchingType;
 
@@ -16,6 +17,12 @@ import ru.prolib.aquila.core.eque.DispatchingType;
  * $Id: EventQueueImplTest.java 513 2013-02-11 01:17:18Z whirlwind $
  */
 public class EventQueueImplTest {
+	private static final org.slf4j.Logger logger;
+	
+	static {
+		logger = LoggerFactory.getLogger(EventQueueImplTest.class);
+	}
+	
 	private static EventQueue_FunctionalTest functionalTest; 
 	private static EventQueueFactory factory;
 
@@ -46,8 +53,13 @@ public class EventQueueImplTest {
 	@After
 	public void tearDown() throws Exception {
 		if ( queue != null ) {
-			queue.shutdown();
-			queue = null;
+			try {
+				queue.shutdown();
+			} catch ( Exception e ) {
+				logger.warn("Error shutdown queue");
+			} finally {
+				queue = null;
+			}
 		}
 	}
 	
