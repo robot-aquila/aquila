@@ -334,14 +334,15 @@ public class EventQueue_FunctionalTest {
 	
 		abstract static class AbstractThread extends Thread {
 			final EventQueue queue;
-			final CountDownLatch start, phase1_finished, finished;
+			final CountDownLatch started, start_race, phase1_finished, finished;
 			final EventType phase1_type, phase2_type;
 			final int phase1_count, phase2_count;
 			final EventFactory factory;
 			final long timeout_seconds;
 			
 			AbstractThread(EventQueue queue,
-					CountDownLatch start,
+					CountDownLatch started,
+					CountDownLatch start_race,
 					CountDownLatch phase1_finished,
 					CountDownLatch finished,
 					int phase1_count,
@@ -351,7 +352,8 @@ public class EventQueue_FunctionalTest {
 					long timeout_seconds)
 			{
 				this.queue = queue;
-				this.start = start;
+				this.started = started;
+				this.start_race = start_race;
 				this.phase1_finished = phase1_finished;
 				this.finished = finished;
 				this.phase1_count = phase1_count;
@@ -365,7 +367,8 @@ public class EventQueue_FunctionalTest {
 			@Override
 			public void run() {
 				try {
-					assertTrue(start.await(timeout_seconds, TimeUnit.SECONDS));
+					started.countDown();
+					assertTrue(start_race.await(timeout_seconds, TimeUnit.SECONDS));
 					for ( int i = 0; i < phase1_count; i ++ ) {
 						queue.enqueue(phase1_type, factory);
 					}
@@ -388,7 +391,8 @@ public class EventQueue_FunctionalTest {
 			final CountDownLatch phase2_start;
 			
 			SlaveThread(EventQueue queue,
-					CountDownLatch start,
+					CountDownLatch started,
+					CountDownLatch start_race,
 					CountDownLatch phase1_finished,
 					CountDownLatch finished,
 					int phase1_count,
@@ -398,8 +402,8 @@ public class EventQueue_FunctionalTest {
 					long timeout_seconds,
 					CountDownLatch phase2_start)
 			{
-				super(queue, start, phase1_finished, finished, phase1_count, phase1_type, phase2_count, phase2_type,
-						timeout_seconds);
+				super(queue, started, start_race, phase1_finished, finished, phase1_count, phase1_type,
+						phase2_count, phase2_type, timeout_seconds);
 				this.phase2_start = phase2_start;
 			}
 			
@@ -417,7 +421,8 @@ public class EventQueue_FunctionalTest {
 		static class MasterThread extends AbstractThread {
 
 			MasterThread(EventQueue queue,
-					CountDownLatch start,
+					CountDownLatch started,
+					CountDownLatch start_race,
 					CountDownLatch phase1_finished,
 					CountDownLatch finished,
 					int phase1_count,
@@ -426,8 +431,8 @@ public class EventQueue_FunctionalTest {
 					EventType phase2_type,
 					long timeout_seconds)
 			{
-				super(queue, start, phase1_finished, finished, phase1_count, phase1_type, phase2_count, phase2_type,
-						timeout_seconds);
+				super(queue, started, start_race, phase1_finished, finished, phase1_count, phase1_type,
+						phase2_count, phase2_type, timeout_seconds);
 			}
 
 			@Override
@@ -470,7 +475,8 @@ public class EventQueue_FunctionalTest {
 				type2 = dispatcher.createType(),
 				type3 = dispatcher.createType();
 		EventListenerStub listenerStub = new EventListenerStub();
-		CountDownLatch start = new CountDownLatch(1); // Это сигнал на старт потоков
+		CountDownLatch started = new CountDownLatch(num_threads); // Индикатор старта всех конкурентов
+		CountDownLatch start_race = new CountDownLatch(1); // Это сигнал на старт потоков
 		CountDownLatch blocker = new CountDownLatch(1); // Этот сигнал блокирует поток диспетчера событий
 		CountDownLatch phase1_finished = new CountDownLatch(num_threads);
 		CountDownLatch phase2_start = new CountDownLatch(1); // Это сигнал уведомляет о начале второй фазы
@@ -484,11 +490,11 @@ public class EventQueue_FunctionalTest {
 		for ( int i = 0; i < num_threads; i ++ ) {
 			Thread thread = null;
 			if ( i == 0 ) {
-				thread = new FIT.MasterThread(queue, start, phase1_finished, finished,
+				thread = new FIT.MasterThread(queue, started, start_race, phase1_finished, finished,
 						phase1_count, type1, phase2_count, type3, timeout_seconds);
 				thread.setName("MASTER");
 			} else {
-				thread = new FIT.SlaveThread(queue, start, phase1_finished, finished,
+				thread = new FIT.SlaveThread(queue, started, start_race, phase1_finished, finished,
 						phase1_count, type1, phase2_count, type3, timeout_seconds, phase2_start);
 				thread.setName("SLAVE#" + i);
 			}
@@ -498,8 +504,10 @@ public class EventQueue_FunctionalTest {
 		Collections.shuffle(threads);
 		for ( Thread thread : threads ) thread.start();
 		
+		//Thread.sleep(timeout_seconds * 1000L);
+		assertTrue(started.await(timeout_seconds, TimeUnit.SECONDS));
 		queue.enqueue(type0, SimpleEventFactory.getInstance()); // block queue
-		start.countDown();
+		start_race.countDown();
 		assertTrue(phase1_finished.await(timeout_seconds, TimeUnit.SECONDS));
 		Thread.sleep(200L); // ensure a flush indicator is cocked
 		blocker.countDown(); // unblock queue
