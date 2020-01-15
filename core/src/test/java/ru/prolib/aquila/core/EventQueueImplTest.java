@@ -149,7 +149,7 @@ public class EventQueueImplTest {
 	
 	@Test
 	public void testFunctionalTest_V4() throws Exception {
-		queue = factory.createV4("V4", 1000L, false);
+		queue = factory.createV4("V4", EventQueue_FunctionalTest.DEFAULT_TIMEOUT_SECS * 1000L, false);
 		functionalTest.runAllTests(queue);
 		functionalTest.testFlushIndicator(queue);
 	}
