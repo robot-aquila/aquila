@@ -382,7 +382,7 @@ public class EventQueue_FunctionalTest {
 						}
 						finished.countDown();
 					}
-				} catch ( Exception e ) {
+				} catch ( Exception|AssertionError e ) {
 					logger.error("Unexpected exception: ", e);
 				}
 			}
@@ -421,7 +421,7 @@ public class EventQueue_FunctionalTest {
 				try {
 					assertTrue(phase2_start.await(timeout_seconds, TimeUnit.SECONDS));
 					return true;
-				} catch ( Exception e ) {
+				} catch ( Exception|AssertionError e ) {
 					logger.error("Unexpected exception: ", e);
 					return false;
 				}
@@ -517,16 +517,26 @@ public class EventQueue_FunctionalTest {
 		for ( Thread thread : threads ) thread.start();
 		
 		//Thread.sleep(timeout_seconds * 1000L);
+		logger.debug("[1] Begin test sequence");
 		queue.enqueue(type0, SimpleEventFactory.getInstance()); // block queue
+		logger.debug("[2] Wait all threads ({}) started", started.getCount());
 		assertTrue(started.await(timeout_seconds, TimeUnit.SECONDS));
+		logger.debug("[3] Starting race");
 		start_race.countDown();
+		logger.debug("[4] Wait for phase 1 finish");
 		assertTrue(phase1_finished.await(timeout_seconds, TimeUnit.SECONDS));
+		logger.debug("[5] Wait a bit");
 		Thread.sleep(200L); // ensure a flush indicator is cocked
+		logger.debug("[6] Release blocker");
 		blocker.countDown(); // unblock queue
+		logger.debug("[7] Wait all finished");
 		assertTrue(finished.await(timeout_seconds, TimeUnit.SECONDS));
+		logger.debug("[8] Starting flush indicator");
 		FlushIndicator all_flush = queue.newFlushIndicator();
 		all_flush.start();
+		logger.debug("[9] Wait for flushing");
 		all_flush.waitForFlushing(timeout_seconds, TimeUnit.SECONDS);
+		logger.debug("[!] Done");
 		
 		// head is type1 and type2 events
 		// head length is num_threads * phase1_count * 2
