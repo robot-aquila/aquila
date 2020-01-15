@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
  * Тест выполняет проверку общих требований к реализациям очереди событий.
  */
 public class EventQueue_FunctionalTest {
+	private static final long DEFAULT_TIMEOUT_SECS = 3L;
 	private static final Logger logger;
 	
 	static {
@@ -277,17 +278,19 @@ public class EventQueue_FunctionalTest {
 		
 		static class ListenerBlocker implements EventListener {
 			final CountDownLatch blocker, proceed;
+			final long timeout_seconds;
 			
-			ListenerBlocker(CountDownLatch blocker, CountDownLatch proceed) {
+			ListenerBlocker(CountDownLatch blocker, CountDownLatch proceed, long timeout_seconds) {
 				this.blocker = blocker;
 				this.proceed = proceed;
+				this.timeout_seconds = timeout_seconds;
 			}
 	
 			@Override
 			public void onEvent(Event event) {
 				event.getType().removeListener(this);
 				try {
-					assertTrue(blocker.await(1, TimeUnit.SECONDS));
+					assertTrue(blocker.await(timeout_seconds, TimeUnit.SECONDS));
 					proceed.countDown();
 				} catch ( InterruptedException e ) {
 					logger.error("Unexpected exception: ", e);
@@ -335,6 +338,7 @@ public class EventQueue_FunctionalTest {
 			final EventType phase1_type, phase2_type;
 			final int phase1_count, phase2_count;
 			final EventFactory factory;
+			final long timeout_seconds;
 			
 			AbstractThread(EventQueue queue,
 					CountDownLatch start,
@@ -343,7 +347,8 @@ public class EventQueue_FunctionalTest {
 					int phase1_count,
 					EventType phase1_type,
 					int phase2_count,
-					EventType phase2_type)
+					EventType phase2_type,
+					long timeout_seconds)
 			{
 				this.queue = queue;
 				this.start = start;
@@ -354,12 +359,13 @@ public class EventQueue_FunctionalTest {
 				this.phase1_type = phase1_type;
 				this.phase2_type = phase2_type;
 				this.factory = SimpleEventFactory.getInstance();
+				this.timeout_seconds = timeout_seconds;
 			}
-
+			
 			@Override
 			public void run() {
 				try {
-					assertTrue(start.await(1, TimeUnit.SECONDS));
+					assertTrue(start.await(timeout_seconds, TimeUnit.SECONDS));
 					for ( int i = 0; i < phase1_count; i ++ ) {
 						queue.enqueue(phase1_type, factory);
 					}
@@ -389,16 +395,18 @@ public class EventQueue_FunctionalTest {
 					EventType phase1_type,
 					int phase2_count,
 					EventType phase2_type,
+					long timeout_seconds,
 					CountDownLatch phase2_start)
 			{
-				super(queue, start, phase1_finished, finished, phase1_count, phase1_type, phase2_count, phase2_type);
+				super(queue, start, phase1_finished, finished, phase1_count, phase1_type, phase2_count, phase2_type,
+						timeout_seconds);
 				this.phase2_start = phase2_start;
 			}
-
+			
 			@Override
 			protected void afterPhase1() {
 				try {
-					assertTrue(phase2_start.await(1, TimeUnit.SECONDS));
+					assertTrue(phase2_start.await(timeout_seconds, TimeUnit.SECONDS));
 				} catch ( InterruptedException e ) {
 					logger.error("Unexpected exception: ", e);
 				}
@@ -415,9 +423,11 @@ public class EventQueue_FunctionalTest {
 					int phase1_count,
 					EventType phase1_type,
 					int phase2_count,
-					EventType phase2_type)
+					EventType phase2_type,
+					long timeout_seconds)
 			{
-				super(queue, start, phase1_finished, finished, phase1_count, phase1_type, phase2_count, phase2_type);
+				super(queue, start, phase1_finished, finished, phase1_count, phase1_type, phase2_count, phase2_type,
+						timeout_seconds);
 			}
 
 			@Override
@@ -425,7 +435,7 @@ public class EventQueue_FunctionalTest {
 				try {
 					FlushIndicator indicator = queue.newFlushIndicator();
 					indicator.start();
-					indicator.waitForFlushing(1, TimeUnit.SECONDS);
+					indicator.waitForFlushing(timeout_seconds, TimeUnit.SECONDS);
 				} catch ( TimeoutException|InterruptedException e ) {
 					logger.error("Unexpected exception: ", e);
 					throw new IllegalStateException(e);
@@ -450,6 +460,7 @@ public class EventQueue_FunctionalTest {
 		// 7. После завершения работы все три потока сигнализируют
 		// 8. В результате работы должна образоваться последовательность событий, в начале которой
 		// сдержатся события первого и второго типов, а в конце - события третьего типа
+		long timeout_seconds = DEFAULT_TIMEOUT_SECS;
 		int num_threads = 3;
 		int phase1_count = 50;
 		int phase2_count = 50;
@@ -464,7 +475,7 @@ public class EventQueue_FunctionalTest {
 		CountDownLatch phase1_finished = new CountDownLatch(num_threads);
 		CountDownLatch phase2_start = new CountDownLatch(1); // Это сигнал уведомляет о начале второй фазы
 		CountDownLatch finished = new CountDownLatch(num_threads); // Это сигнал о завершении потоков
-		type0.addListener(new FIT.ListenerBlocker(blocker, phase2_start));
+		type0.addListener(new FIT.ListenerBlocker(blocker, phase2_start, timeout_seconds));
 		type1.addListener(new FIT.ListenerProducer(queue, type2));
 		type1.addListener(listenerStub);
 		type2.addListener(listenerStub);
@@ -474,11 +485,11 @@ public class EventQueue_FunctionalTest {
 			Thread thread = null;
 			if ( i == 0 ) {
 				thread = new FIT.MasterThread(queue, start, phase1_finished, finished,
-						phase1_count, type1, phase2_count, type3);
+						phase1_count, type1, phase2_count, type3, timeout_seconds);
 				thread.setName("MASTER");
 			} else {
 				thread = new FIT.SlaveThread(queue, start, phase1_finished, finished,
-						phase1_count, type1, phase2_count, type3, phase2_start);
+						phase1_count, type1, phase2_count, type3, timeout_seconds, phase2_start);
 				thread.setName("SLAVE#" + i);
 			}
 			thread.setDaemon(true);
@@ -489,13 +500,13 @@ public class EventQueue_FunctionalTest {
 		
 		queue.enqueue(type0, SimpleEventFactory.getInstance()); // block queue
 		start.countDown();
-		assertTrue(phase1_finished.await(1, TimeUnit.SECONDS));
+		assertTrue(phase1_finished.await(timeout_seconds, TimeUnit.SECONDS));
 		Thread.sleep(200L); // ensure a flush indicator is cocked
 		blocker.countDown(); // unblock queue
-		assertTrue(finished.await(1, TimeUnit.SECONDS));
+		assertTrue(finished.await(timeout_seconds, TimeUnit.SECONDS));
 		FlushIndicator all_flush = queue.newFlushIndicator();
 		all_flush.start();
-		all_flush.waitForFlushing(1, TimeUnit.SECONDS);
+		all_flush.waitForFlushing(timeout_seconds, TimeUnit.SECONDS);
 		
 		// head is type1 and type2 events
 		// head length is num_threads * phase1_count * 2
