@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * Тест выполняет проверку общих требований к реализациям очереди событий.
  */
 public class EventQueue_FunctionalTest {
-	public static final long DEFAULT_TIMEOUT_SECS = 5L;
+	public static final long DEFAULT_TIMEOUT_SECS = 2L;
 	private static final Logger logger;
 	
 	static {
@@ -508,7 +508,7 @@ public class EventQueue_FunctionalTest {
 			if ( i == 0 ) {
 				thread = new FIT.MasterThread(queue, started, start_race, phase1_finished, finished,
 						phase1_count, type1, phase2_count, type3, timeout_seconds);
-				thread.setName("MASTER");
+				thread.setName("@MASTER");
 			} else {
 				thread = new FIT.SlaveThread(queue, started, start_race, phase1_finished, finished,
 						phase1_count, type1, phase2_count, type3, timeout_seconds, phase2_start);
@@ -525,7 +525,6 @@ public class EventQueue_FunctionalTest {
 		queue.enqueue(type0, SimpleEventFactory.getInstance()); // block queue
 		logger.debug("[2] Wait all threads ({}) started", started.getCount());
 		assertTrue(started.await(timeout_seconds, TimeUnit.SECONDS));
-		logger.debug("started count {}", started.getCount());
 		logger.debug("[3] Starting race");
 		start_race.countDown();
 		logger.debug("[4] Wait for phase 1 finish");
