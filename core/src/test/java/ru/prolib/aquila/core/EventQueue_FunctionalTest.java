@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * Тест выполняет проверку общих требований к реализациям очереди событий.
  */
 public class EventQueue_FunctionalTest {
-	public static final long DEFAULT_TIMEOUT_SECS = 3L;
+	public static final long DEFAULT_TIMEOUT_SECS = 5L;
 	private static final Logger logger;
 	
 	static {
