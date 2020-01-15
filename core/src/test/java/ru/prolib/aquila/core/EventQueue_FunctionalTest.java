@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
@@ -292,7 +291,7 @@ public class EventQueue_FunctionalTest {
 				try {
 					assertTrue(blocker.await(timeout_seconds, TimeUnit.SECONDS));
 					proceed.countDown();
-				} catch ( InterruptedException e ) {
+				} catch ( Exception e ) {
 					logger.error("Unexpected exception: ", e);
 				}
 			}
@@ -373,17 +372,23 @@ public class EventQueue_FunctionalTest {
 						queue.enqueue(phase1_type, factory);
 					}
 					phase1_finished.countDown();
-					afterPhase1();
-					for ( int i = 0; i < phase2_count; i ++ ) {
-						queue.enqueue(phase2_type, factory);
+					if ( afterPhase1() ) {
+						for ( int i = 0; i < phase2_count; i ++ ) {
+							queue.enqueue(phase2_type, factory);
+						}
+						finished.countDown();
 					}
-					finished.countDown();
-				} catch ( InterruptedException e ) {
+				} catch ( Exception e ) {
 					logger.error("Unexpected exception: ", e);
 				}
 			}
 			
-			abstract protected void afterPhase1();
+			/**
+			 * Called after phase 1 finished.
+			 * <p>
+			 * @return true if should proceed, false - break the test
+			 */
+			abstract protected boolean afterPhase1();
 			
 		}
 		
@@ -408,11 +413,13 @@ public class EventQueue_FunctionalTest {
 			}
 			
 			@Override
-			protected void afterPhase1() {
+			protected boolean afterPhase1() {
 				try {
 					assertTrue(phase2_start.await(timeout_seconds, TimeUnit.SECONDS));
-				} catch ( InterruptedException e ) {
+					return true;
+				} catch ( Exception e ) {
 					logger.error("Unexpected exception: ", e);
+					return false;
 				}
 			}
 			
@@ -436,14 +443,15 @@ public class EventQueue_FunctionalTest {
 			}
 
 			@Override
-			protected void afterPhase1() {
+			protected boolean afterPhase1() {
 				try {
 					FlushIndicator indicator = queue.newFlushIndicator();
 					indicator.start();
 					indicator.waitForFlushing(timeout_seconds, TimeUnit.SECONDS);
-				} catch ( TimeoutException|InterruptedException e ) {
+					return true;
+				} catch ( Exception e ) {
 					logger.error("Unexpected exception: ", e);
-					throw new IllegalStateException(e);
+					return false;
 				}
 			}
 			
