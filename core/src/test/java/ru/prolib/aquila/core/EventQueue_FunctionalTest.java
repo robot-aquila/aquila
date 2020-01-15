@@ -276,10 +276,13 @@ public class EventQueue_FunctionalTest {
 	static class FIT {
 		
 		static class ListenerBlocker implements EventListener {
-			final CountDownLatch blocker, proceed;
+			final CountDownLatch started, blocker, proceed;
 			final long timeout_seconds;
 			
-			ListenerBlocker(CountDownLatch blocker, CountDownLatch proceed, long timeout_seconds) {
+			ListenerBlocker(CountDownLatch started, CountDownLatch blocker, CountDownLatch proceed,
+					long timeout_seconds)
+			{
+				this.started = started;
 				this.blocker = blocker;
 				this.proceed = proceed;
 				this.timeout_seconds = timeout_seconds;
@@ -289,9 +292,10 @@ public class EventQueue_FunctionalTest {
 			public void onEvent(Event event) {
 				event.getType().removeListener(this);
 				try {
+					started.countDown();
 					assertTrue(blocker.await(timeout_seconds, TimeUnit.SECONDS));
 					proceed.countDown();
-				} catch ( Exception e ) {
+				} catch ( Exception|AssertionError e ) {
 					logger.error("Unexpected exception: ", e);
 				}
 			}
@@ -483,13 +487,13 @@ public class EventQueue_FunctionalTest {
 				type2 = dispatcher.createType(),
 				type3 = dispatcher.createType();
 		EventListenerStub listenerStub = new EventListenerStub();
-		CountDownLatch started = new CountDownLatch(num_threads); // Индикатор старта всех конкурентов
+		CountDownLatch started = new CountDownLatch(num_threads + 1); // Индикатор старта конкурентов (+1 blocker)
 		CountDownLatch start_race = new CountDownLatch(1); // Это сигнал на старт потоков
 		CountDownLatch blocker = new CountDownLatch(1); // Этот сигнал блокирует поток диспетчера событий
 		CountDownLatch phase1_finished = new CountDownLatch(num_threads);
 		CountDownLatch phase2_start = new CountDownLatch(1); // Это сигнал уведомляет о начале второй фазы
 		CountDownLatch finished = new CountDownLatch(num_threads); // Это сигнал о завершении потоков
-		type0.addListener(new FIT.ListenerBlocker(blocker, phase2_start, timeout_seconds));
+		type0.addListener(new FIT.ListenerBlocker(started, blocker, phase2_start, timeout_seconds));
 		type1.addListener(new FIT.ListenerProducer(queue, type2));
 		type1.addListener(listenerStub);
 		type2.addListener(listenerStub);
@@ -513,8 +517,8 @@ public class EventQueue_FunctionalTest {
 		for ( Thread thread : threads ) thread.start();
 		
 		//Thread.sleep(timeout_seconds * 1000L);
-		assertTrue(started.await(timeout_seconds, TimeUnit.SECONDS));
 		queue.enqueue(type0, SimpleEventFactory.getInstance()); // block queue
+		assertTrue(started.await(timeout_seconds, TimeUnit.SECONDS));
 		start_race.countDown();
 		assertTrue(phase1_finished.await(timeout_seconds, TimeUnit.SECONDS));
 		Thread.sleep(200L); // ensure a flush indicator is cocked
