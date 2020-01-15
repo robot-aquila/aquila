@@ -293,6 +293,7 @@ public class EventQueue_FunctionalTest {
 				event.getType().removeListener(this);
 				try {
 					started.countDown();
+					logger.debug("Blocker started");
 					assertTrue(blocker.await(timeout_seconds, TimeUnit.SECONDS));
 					proceed.countDown();
 				} catch ( Exception|AssertionError e ) {
@@ -371,6 +372,7 @@ public class EventQueue_FunctionalTest {
 			public void run() {
 				try {
 					started.countDown();
+					logger.debug("Thread started");
 					assertTrue(start_race.await(timeout_seconds, TimeUnit.SECONDS));
 					for ( int i = 0; i < phase1_count; i ++ ) {
 						queue.enqueue(phase1_type, factory);
@@ -449,6 +451,8 @@ public class EventQueue_FunctionalTest {
 			@Override
 			protected boolean afterPhase1() {
 				try {
+					// CRITICAL: Wait until all threads finished phase 1
+					assertTrue(phase1_finished.await(timeout_seconds, TimeUnit.SECONDS));
 					FlushIndicator indicator = queue.newFlushIndicator();
 					indicator.start();
 					indicator.waitForFlushing(timeout_seconds, TimeUnit.SECONDS);
@@ -521,6 +525,7 @@ public class EventQueue_FunctionalTest {
 		queue.enqueue(type0, SimpleEventFactory.getInstance()); // block queue
 		logger.debug("[2] Wait all threads ({}) started", started.getCount());
 		assertTrue(started.await(timeout_seconds, TimeUnit.SECONDS));
+		logger.debug("started count {}", started.getCount());
 		logger.debug("[3] Starting race");
 		start_race.countDown();
 		logger.debug("[4] Wait for phase 1 finish");
