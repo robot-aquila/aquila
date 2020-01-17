@@ -297,9 +297,11 @@ public class Fidexp implements Closeable {
 				if ( attempts > 0 ) {
 					logger.debug("Ignore error and retry (number of attempts remained: {}): ", attempts, e);
 				} else {
+					logger.error("Exception [1]: ", e);
 					throw e;
 				}
 			} catch ( Exception e ) {
+				logger.error("Exception [2]: ", e);
 				throw new WUUnexpectedException(e);
 			}
 		} while ( attempts > 0 );
