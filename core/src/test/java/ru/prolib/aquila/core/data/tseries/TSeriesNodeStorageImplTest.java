@@ -56,8 +56,11 @@ public class TSeriesNodeStorageImplTest {
 	public void testCtor() {
 		assertSame(ZTFrame.M5, storage.getTimeFrame());
 		assertTrue(LID.isLastCreatedLID(storage.getLID()));
+		assertEquals(-1, storage.getLastSeriesID());
 		assertEquals(0, storage.registerSeries());
+		assertEquals(0, storage.getLastSeriesID());
 		assertEquals(1, storage.registerSeries());
+		assertEquals(1, storage.getLastSeriesID());
 	}
 	
 	@Test

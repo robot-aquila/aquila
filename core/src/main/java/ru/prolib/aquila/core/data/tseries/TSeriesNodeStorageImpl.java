@@ -86,6 +86,16 @@ public class TSeriesNodeStorageImpl implements TSeriesNodeStorage {
 		}
 	}
 	
+	@Override
+	public int getLastSeriesID() {
+		lock();
+		try {
+			return lastSeriesID;
+		} finally {
+			unlock();
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see ru.prolib.aquila.core.data.tseries.TSeriesNodeStorage#set(java.time.Instant, int, java.lang.Object)
 	 */

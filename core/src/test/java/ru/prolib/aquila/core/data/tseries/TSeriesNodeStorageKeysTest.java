@@ -168,6 +168,16 @@ public class TSeriesNodeStorageKeysTest {
 	}
 	
 	@Test
+	public void testGetLastSeriesID() {
+		expect(storageMock.getLastSeriesID()).andReturn(12);
+		control.replay();
+		
+		assertEquals(12, service.getLastSeriesID());
+		
+		control.verify();
+	}
+	
+	@Test
 	public void testSetValue3_NewInterval() {
 		Interval interval = Interval.of(T("2017-09-01T03:25:00Z"), T("2017-09-01T03:30:00Z"));
 		TSeriesUpdate expectedUpdate = new TSeriesUpdateImpl(interval)

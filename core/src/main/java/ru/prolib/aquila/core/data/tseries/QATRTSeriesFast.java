@@ -190,17 +190,28 @@ public class QATRTSeriesFast implements TSeries<CDecimal>, TSeriesCache {
 			if ( index < periodMinus1 ) {
 				curr = null;
 			} else {
-				if ( index == periodMinus1 ) {
+				curr = cache.get(index - 1);
+				if ( curr != null ) {
+					CDecimal tr = math.tr(source, index);
+					if ( tr == null ) {
+						curr = null;
+					} else {
+						curr = curr.multiply(d_periodMinus1).add(tr).divide(d_period);
+					}
+				} else {
 					curr = CDecimalBD.ZERO;
 					for ( int i = 0; i < period; i ++ ) {
-						curr = curr.add(math.tr(source, i));
+						CDecimal tr = math.tr(source, index - i);
+						if ( tr == null ) {
+							curr = null;
+							break;
+						} else {
+							curr = curr.add(tr);
+						}
 					}
-					curr = curr.divide(d_period);
-				} else {
-					curr = cache.get(index - 1)
-						.multiply(d_periodMinus1)
-						.add(math.tr(source, index))
-						.divide(d_period);
+					if ( curr != null ) {
+						curr = curr.divide(d_period);
+					}
 				}
 			}
 			lengthCache = updateCache(index, curr, lengthCache);

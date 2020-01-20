@@ -117,6 +117,11 @@ public class TSeriesNodeStorageKeys implements ObservableTSeries<Instant>, TSeri
 	public int registerSeries() {
 		return storage.registerSeries();
 	}
+	
+	@Override
+	public int getLastSeriesID() {
+		return storage.getLastSeriesID();
+	}
 
 	@Override
 	public TSeriesUpdate setValue(Instant time, int seriesID, Object value) {

@@ -551,7 +551,7 @@ public class QATRTSeriesFastTest {
 	}
 
 	@Test
-	public void testBugFix_SpecialCase_IndexOutOfRange() throws Exception {
+	public void testBugFix1_SpecialCase_IndexOutOfRange() throws Exception {
 		eex.expect(ValueOutOfRangeException.class);
 		eex.expectMessage("For index: 0");
 		
@@ -559,7 +559,7 @@ public class QATRTSeriesFastTest {
 	}
 	
 	@Test
-	public void testBugFix_SpecialCase_SourceEmptyAndRefreshRangeEqPeriodMinus1() throws Exception {
+	public void testBugFix1_SpecialCase_SourceEmptyAndRefreshRangeEqPeriodMinus1() throws Exception {
 		eex.expect(ValueOutOfRangeException.class);
 		eex.expectMessage("For index: 4");
 
@@ -567,11 +567,64 @@ public class QATRTSeriesFastTest {
 	}
 
 	@Test
-	public void testBugFix_SpecialCase_SourceEmptyAndRefreshRangeGtPeriodMinus1() throws Exception {
+	public void testBugFix1_SpecialCase_SourceEmptyAndRefreshRangeGtPeriodMinus1() throws Exception {
 		eex.expect(ValueOutOfRangeException.class);
 		eex.expectMessage("For index: 10");
 
 		service.get(10);
 	}
+	
+	@Test
+	public void testBugFix1_ControlCase_NullValueInTheTailOfSource() throws Exception {
+		fillQATR5_1();
+		Candle last = sourceStub.get();
+		int len = sourceStub.getLength();
+		sourceStub.set(last.getEndTime(), null);
+		
+		assertNull(service.get(len));
+	}
+	
+	@Test
+	public void testBugFix1_SpecialCase_NullValuesInTheHeadOfSource() throws Exception {
+		// period is 5
+		// period minus 1 is 4
+		// so the first TR calculation at index 4 (starting from index 0)
+		fillQATR5_1();
+		sourceStub.set(sourceStub.get(0).getStartTime(), null);
+		sourceStub.set(sourceStub.get(1).getStartTime(), null);
+		sourceStub.set(sourceStub.get(2).getStartTime(), null);
+		sourceStub.set(sourceStub.get(3).getStartTime(), null);
 
+		//for ( int i = 0; i < sourceStub.getLength(); i ++ ) {
+		//	System.out.println("At#" + i + " TR=" + TAMath.getInstance().tr(sourceStub, i) + " " + sourceStub.get(i));
+		//}
+		
+		List<CDecimal> expected = new ArrayList<>();
+		expected.add(null); // #0
+		expected.add(null);
+		expected.add(null);
+		expected.add(null); // #3
+		expected.add(null);
+		expected.add(null);
+		expected.add(null);
+		expected.add(null); // #7
+		expected.add(of("458.000000")); // # 8  sum(tr(5)/period)
+		expected.add(of("416.400000")); // # 9 (prev * 4 + tr) / 5
+		expected.add(of("393.120000"));
+		expected.add(of("356.496000")); // #11
+		expected.add(of("327.196800"));
+		expected.add(of("309.757440"));
+		expected.add(of("281.805952"));
+		expected.add(of("361.444762")); // #15
+		expected.add(of("403.155810"));
+		expected.add(of("390.524648"));
+		expected.add(of("384.419718"));
+		expected.add(of("393.535774"));
+		expected.add(of("398.828619")); // #20
+		for ( int i = 0; i < expected.size(); i ++ ) {
+			assertEquals("At#" + i, expected.get(i), service.get(i));
+		}
+		assertEquals(expected.size(), service.getLength());
+	}
+	
 }

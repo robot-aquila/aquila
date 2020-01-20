@@ -23,6 +23,13 @@ public interface TSeriesNodeStorage extends Lockable {
 	 * @return new series ID
 	 */
 	int registerSeries();
+	
+	/**
+	 * Return ID of recently registered series.
+	 * 
+	 * @return last series ID
+	 */
+	int getLastSeriesID();
 
 	/**
 	 * Set value.
